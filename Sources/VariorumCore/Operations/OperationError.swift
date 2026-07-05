@@ -43,4 +43,7 @@ public enum OperationError: Error, Equatable, Sendable {
 
     // Tags.
     case duplicateTagPath(path: String)
+    case invalidTagName(name: String)
+    case alreadyTagged(tagID: String, targetID: String)
+    case tagNotApplied(tagID: String, targetID: String)
 }
