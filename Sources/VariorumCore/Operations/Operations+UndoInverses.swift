@@ -14,14 +14,15 @@ extension Operations {
     /// from the public `restoreBlock` tray gesture, which re-places fresh at
     /// the end. The placement stays dead if its container has since died;
     /// a since-locked container refuses (resolve, then retry the undo).
+    /// A block already alive (restored from the tray meanwhile) makes this
+    /// entry obsolete — a quiet no-op success, so the pop happens and the
+    /// stack never wedges on an unresolvable refusal.
     func revertDeleteBlock(_ blockID: String) throws {
         try database.write { db in
             guard var block = try Block.fetchOne(db, key: blockID) else {
                 throw OperationError.blockNotFound(id: blockID)
             }
-            guard let deletedAt = block.deletedAt else {
-                throw OperationError.blockNotDeleted(id: blockID)
-            }
+            guard let deletedAt = block.deletedAt else { return }
             let stamp = DateFormatter.variorumISO8601.string(from: deletedAt)
             let now = date.now
 

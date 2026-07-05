@@ -214,6 +214,28 @@ struct UndoStackTests {
         }
     }
 
+    @Test func aStaleDeleteBlockEntryPopsAsAQuietNoOpInsteadOfWedgingTheStack() throws {
+        // Self-review finding 2026-07-05: deleteBlock → restoreBlock (tray)
+        // makes the undo entry obsolete. It must pop cleanly — an
+        // unresolvable refusal would block every undo beneath it forever.
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let earlier = try ops.newBlock(in: post.id, text: "reachable again")
+            try ops.reorder(earlier.block.id, to: .end) // an older entry beneath
+            let made = try ops.newBlock(in: post.id, text: "x")
+            try ops.deleteBlock(made.block.id)
+            try ops.restoreBlock(made.block.id)
+
+            let snapshot = try db.snapshotRow("block", made.block.id)
+            #expect(try stack.undo(with: ops) == "Delete Block")
+            #expect(try db.snapshotRow("block", made.block.id) == snapshot)
+            // The stack is not wedged: the older entry beneath still runs.
+            #expect(try stack.undo(with: ops) == "Reorder")
+        }
+    }
+
     @Test func undoDeleteVariantRefusesWhenTheBlockHasSinceDied() throws {
         // Review finding 2026-07-05 (bug 1): deleteContainer is not undo-
         // registered, so LIFO can't order-protect this — the inverse itself
