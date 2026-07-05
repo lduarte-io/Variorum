@@ -1,6 +1,6 @@
 # Phase 1 — Schema & Migrations (Execution Plan)
 
-**Status:** ready to start
+**Status:** ✅ complete (closed 2026-07-04) — see Closeout at the bottom
 
 ## Kickoff message (for a fresh session)
 
@@ -66,5 +66,29 @@ Operations of any kind (even `newBlock`), churn logic, `FractionalIndex.between`
 ## Risks / things to watch
 - GRDB 7 + Swift 6.1 strict-concurrency friction (Sendable records) — resolve per GRDB's Swift Concurrency guide, don't fight the library.
 - Partial-index uniqueness is SQLite-enforced, not GRDB-conflict-handled — test against raw SQL behavior.
-- Temp-table flag visibility (`_sync_applying`) is per-connection — verify the outbox-suppression test uses the same connection the flag was set on (pool!).
+- Temp-table flag visibility (`_sync_applying`) is per-connection — verify the outbox-suppression test uses the same connection the flag was set on (pool!). *(Closeout note: overtaken by events — the flag ended up a permanent table; see below.)*
 - Triggers must stay simple, single-transition, idempotent — they run during remote apply too (SyncSpec §5).
+
+---
+
+## Closeout (2026-07-04)
+
+**Result: complete. `swift test` green on the Air — 37 tests, 0 failures** (5 stack, 7 migration, 8 constraint, 11 trigger, 6 record). This is the Phase 2 baseline.
+
+**Commits:** `60e5752` (Step 1, stack), `95d2aef` (Steps 2–4, migration + triggers + spec correction), `b3871b7` (Step 5, records). Tests landed alongside each step per convention.
+
+**What shipped, step by step:**
+1. `AppDatabase` (WAL `DatabasePool` on disk / in-memory `DatabaseQueue` for tests; `foreign_keys` ON; busy timeout; sync + async `read`/`write`; no raw connection exposed) with `applyingRemote { }` echo-suppression writes; registered as `@Dependency(\.database)` (liveValue on disk, deliberately no testValue so unoverridden access fails tests).
+2. `v1_core` migration: all 13 synced tables exactly per AppSpec §7 with `sync_version` on each, `sync_outbox`/`sync_state`/`_sync_applying` local-only, every live-unique index partial (`WHERE deleted_at IS NULL`), positions as `TEXT`, `tag.updated_at` present, the three setting seeds.
+3. Constraint tests: I2 ownership + tombstone-recreate; RESTRICT documented as guarding only the physical-purge/GC path (the live guard is Phase 2's ops-layer check); recreate-after-tombstone for `tag.path` / `edge` / `reading_post` / `post_tag` / `block_tag`; CHECKs; FK probes on all 19 FK columns; lexicographic `(position, id)` ordering incl. tie stability.
+4. Cascade triggers (block / container-chain / reading / tag), transition-guarded NULL→value, children stamped with the parent's exact `deleted_at` (restoreBlock's cascade-victim identification); outbox capture on INSERT+UPDATE of every synced table with `INSERT OR REPLACE` coalescing and `_sync_applying` suppression — cascades verified to still fire during apply.
+5. 13 record types (pure values — IDs/timestamps minted by the Phase 2 ops layer via `@Dependency(\.uuid)`/`(\.date)`, never by records), shared `VariorumRecord` protocol (snake_case mapping; canonical ISO-8601 millisecond timestamps, byte-identical to the triggers' `strftime('%Y-%m-%dT%H:%M:%fZ')`), associations per plan.
+
+**Finding (spec corrected, load-bearing):** `_sync_applying` cannot be a temp table — SQLite resolves unqualified names inside a main-schema trigger *in the trigger's own schema*, so the outbox triggers' `WHEN NOT EXISTS (SELECT 1 FROM _sync_applying)` can never see `temp._sync_applying`. It shipped as a **permanent local-only table, normally empty**, with the flag row written inside the apply transaction (rollback unwinds it). SyncSpec §3 and AppSpec §7 updated in commit `95d2aef`; author should skim that diff.
+
+**Small deltas from the plan (all noted in code):**
+- Enums additionally include `ReadingKind` and `SortDirection` (typed columns need them); `reading.profile` and `edge.origin_op` deliberately stay strings (un-CHECKed vocabularies).
+- Records conform to `PersistableRecord` (which refines the plan's `MutablePersistableRecord`) — value types with string PKs need no post-insert mutation.
+- `sync_outbox.queued_at` is written by trigger with SQLite's clock: the one timestamp not from `@Dependency(\.date)` — local-only bookkeeping, never domain or ordering data (documented in Triggers.swift).
+
+**Deferred/notes for Phase 2 (nothing new for KnownIssues):** tag *subtree* deletion is an operations-layer loop (triggers only tombstone a tag's applications); the deleteVariant/chosen-variant live guard is ops-layer (RESTRICT never fires under soft-delete); GRDB 7 date strategies are per-column *functions* (`databaseDateEncodingStrategy(for:)`) — the static-var form silently no-ops.
