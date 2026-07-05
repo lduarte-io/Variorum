@@ -284,17 +284,21 @@ extension Operations {
             // Defaults and chosen: the rendered variant's halves when it is
             // marked; otherwise the first marked variant's halves, chosen NULL.
             let renderedIndex = marked.firstIndex { $0.id == context.rendered.id }
-            let first = try mintFanBlock(
-                db, texts: halves.map(\.first), in: containerID, position: positionB,
-                defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
-                ancestor: blockID, originOp: "divide", now: now)
-            let second = try mintFanBlock(
-                db, texts: halves.map(\.second), in: containerID, position: positionC,
-                defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
-                ancestor: blockID, originOp: "divide", now: now)
+            var successors: [FanHalf] = []
+            for texts in [halves.map(\.first), halves.map(\.second)] {
+                let minted = try mintFanBlock(
+                    db, texts: texts, in: containerID,
+                    position: successors.isEmpty ? positionB : positionC,
+                    defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex, now: now)
+                let edge = try insertLineageEdge(
+                    db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
+                successors.append(FanHalf(
+                    block: minted.block, variants: minted.variants,
+                    placement: minted.placement, edge: edge))
+            }
 
             return DivideWResult(
-                first: first, second: second,
+                first: successors[0], second: successors[1],
                 markedSourceIDs: marked.map(\.id),
                 releasedPlacementID: context.placement.id)
         }
@@ -303,6 +307,98 @@ extension Operations {
                 restoringTexts: [],
                 tombstoningBlocks: [result.first.block.id, result.second.block.id],
                 revivingPlacementRows: [result.releasedPlacementID])
+        }
+        return result
+    }
+
+    // MARK: - Merge (mirrors W)
+
+    public struct MergeResult: Equatable, Sendable {
+        /// A' — the fresh block whose single variant is the concatenation.
+        public let block: Block
+        public let variant: Variant
+        public let placement: ContainerBlock
+        /// A' derived_from the first (earlier-placed) source.
+        public let firstEdge: Edge
+        /// A' derived_from the second source.
+        public let secondEdge: Edge
+        /// The released placement rows (pre-images undo flips back).
+        public let releasedFirstPlacementID: String
+        public let releasedSecondPlacementID: String
+    }
+
+    /// AppSpec §9: combining two adjacent blocks mints a fresh block A'
+    /// whose one variant is `rendered(first) + rendered(second)` — the exact
+    /// concatenation, no separator invented (the spec says "chosen(B) +
+    /// chosen(C)"; the author sees the raw join in the editor and adjusts).
+    /// Fans are NOT cartesian-producted: A' gets exactly one variant. Both
+    /// sources release their placements and remain live as lineage
+    /// (reversible by re-pointing, like W). The blocks must be placed
+    /// adjacently in one container, `first` immediately before `second`.
+    /// Rendered variants are copied, never edited — locks don't refuse.
+    @discardableResult
+    public func merge(_ firstBlockID: String, _ secondBlockID: String) throws -> MergeResult {
+        let result: MergeResult = try database.write { db in
+            let first = try placedContext(db, blockID: firstBlockID)
+            let second = try placedContext(db, blockID: secondBlockID)
+            let containerID = first.container.id
+            let neighborID = try String.fetchOne(
+                db,
+                sql: """
+                    SELECT block_id FROM container_block
+                    WHERE container_id = ? AND deleted_at IS NULL AND position > ?
+                    ORDER BY position, id LIMIT 1
+                    """,
+                arguments: [containerID, first.placement.position])
+            guard second.container.id == containerID, neighborID == secondBlockID else {
+                throw OperationError.blocksNotAdjacent(first: firstBlockID, second: secondBlockID)
+            }
+
+            let now = date.now
+
+            // Release both placements; the blocks stay live as lineage.
+            for var released in [first.placement, second.placement] {
+                released.deletedAt = now
+                released.updatedAt = now
+                try released.update(db)
+            }
+
+            // A' stands exactly where the pair stood.
+            func outerNeighbor(_ aggregate: String, _ comparison: String, _ anchor: String) throws -> String? {
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT \(aggregate)(position) FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL AND position \(comparison) ?
+                        """,
+                    arguments: [containerID, anchor])
+            }
+            let position = FractionalIndex.between(
+                try outerNeighbor("MAX", "<", first.placement.position),
+                try outerNeighbor("MIN", ">", second.placement.position))
+
+            let minted = try mintFanBlock(
+                db, texts: [first.rendered.workingText + second.rendered.workingText],
+                in: containerID, position: position,
+                defaultIndex: 0, chosenIndex: 0, now: now)
+            let firstEdge = try insertLineageEdge(
+                db, from: minted.block.id, to: firstBlockID, originOp: "merge", now: now)
+            let secondEdge = try insertLineageEdge(
+                db, from: minted.block.id, to: secondBlockID, originOp: "merge", now: now)
+
+            return MergeResult(
+                block: minted.block, variant: minted.variants[0], placement: minted.placement,
+                firstEdge: firstEdge, secondEdge: secondEdge,
+                releasedFirstPlacementID: first.placement.id,
+                releasedSecondPlacementID: second.placement.id)
+        }
+        undoStack?.register(label: "Merge") {
+            try $0.revertStructural(
+                restoringTexts: [],
+                tombstoningBlocks: [result.block.id],
+                revivingPlacementRows: [
+                    result.releasedFirstPlacementID, result.releasedSecondPlacementID,
+                ])
         }
         return result
     }
@@ -378,14 +474,22 @@ extension Operations {
         return MintedBlock(block: block, variant: variant, placement: placement)
     }
 
-    /// A fresh block carrying a whole half-fan (divide-W's successors): one
-    /// variant per text, fresh fan positions preserving the given order,
-    /// parentless (block-level edges carry the lineage; the variant parent
-    /// tree never crosses blocks), placed at an exact position with edge.
+    struct MintedFanBlock {
+        let block: Block
+        let variants: [Variant]
+        let placement: ContainerBlock
+    }
+
+    /// A fresh block carrying a whole fan (divide-W's successors, merge's
+    /// single-variant result): one variant per text, fresh fan positions
+    /// preserving the given order, parentless (block-level edges carry the
+    /// lineage; the variant parent tree never crosses blocks), placed at an
+    /// exact position. Lineage edges are the caller's — their count and
+    /// ancestors differ per operation.
     private func mintFanBlock(
         _ db: Database, texts: [String], in containerID: String, position: String,
-        defaultIndex: Int, chosenIndex: Int?, ancestor: String, originOp: String, now: Date
-    ) throws -> FanHalf {
+        defaultIndex: Int, chosenIndex: Int?, now: Date
+    ) throws -> MintedFanBlock {
         var block = Block(id: newID(), createdAt: now, updatedAt: now)
         try block.insert(db)
 
@@ -411,9 +515,7 @@ extension Operations {
             createdAt: now, updatedAt: now)
         try placement.insert(db)
 
-        let edge = try insertLineageEdge(
-            db, from: block.id, to: ancestor, originOp: originOp, now: now)
-        return FanHalf(block: block, variants: variants, placement: placement, edge: edge)
+        return MintedFanBlock(block: block, variants: variants, placement: placement)
     }
 
     /// The coarse lineage record: `(descendant derived_from ancestor)`,
