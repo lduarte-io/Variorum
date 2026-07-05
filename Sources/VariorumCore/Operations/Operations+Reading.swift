@@ -30,10 +30,19 @@ extension Operations {
         try updateLiveReading(id) { $0.name = name }
     }
 
+    /// For non-manual readings the sort field IS the order, so a locked
+    /// reading ("declared done" — order frozen) refuses this too (review
+    /// finding 2026-07-05).
     public func setReadingSort(_ id: String, field: SortField, direction: SortDirection) throws {
-        try updateLiveReading(id) {
-            $0.sortField = field
-            $0.sortDir = direction
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: id)
+            }
+            reading.sortField = field
+            reading.sortDir = direction
+            reading.updatedAt = date.now
+            try reading.update(db)
         }
     }
 

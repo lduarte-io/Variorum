@@ -123,7 +123,7 @@ Extract/divide/merge and boundary snapping (Phase 3). Queries/ValueObservation (
 - `unarchiveVariant` — archive's reverse (spec calls archive "kept"; a keep you can't retrieve isn't a keep).
 - `setProfile`, `setReadingQuerySpec`, `unlockReading` — trivial setters for schema fields that had no owner.
 
-**Interpretations — author-reviewed 2026-07-05, ratified with one amendment:** post-lock scope ✓ (the seal refuses everything under the post; variant-lock *toggles* added to the refusal set as a consequence); restore-into-locked-throws ✓; archive-chosen-allowed ✓ (confirmed after walking the default-reassignment lifecycle). **Amendment: `lockVariant` now auto-commits a dirty buffer before freezing** (kind='auto', the third quiet auto-commit occasion, mirroring lockPost) — the original default-refuse left the guarded text uninsured against unlock-then-edit; commit of a locked variant stays refused. Specs updated (AppSpec §9 + §14, OverallModel §3). **145 tests green after the amendment — this supersedes 143 as the Phase 3 baseline.** Original list as presented:
+**Interpretations — author-reviewed 2026-07-05, ratified with one amendment:** post-lock scope ✓ (the seal refuses everything under the post; variant-lock *toggles* added to the refusal set as a consequence); restore-into-locked-throws ✓; archive-chosen-allowed ✓ (confirmed after walking the default-reassignment lifecycle). **Amendment: `lockVariant` now auto-commits a dirty buffer before freezing** (kind='auto', the third quiet auto-commit occasion, mirroring lockPost) — the original default-refuse left the guarded text uninsured against unlock-then-edit; commit of a locked variant stays refused. Specs updated (AppSpec §9 + §14, OverallModel §3). **145 tests green after the amendment; see the post-phase review addendum below — **152** is the final Phase 3 baseline.** Original list as presented:
 - **Post-lock scope:** the seal refuses *everything under the post* — edits, commits, structure, chosen variants, **and fan growth (branch/blank take)** — while library metadata (title, entry date, profile) stays editable and floating notes count as content (refused). The spec enumerates "no edits, no new commits, pointer order + chosen variants frozen"; fan growth under a sealed post felt contrary to its calm.
 - **Commit of a locked variant: refused** (plan default) — for both manual commits and auto-commit sweeps (idleAutoCommit and lockPost skip locked variants).
 - **`idleAutoCommit` on a locked post: refused** ("no new commits"); the app-phase timer should filter sealed posts.
@@ -131,3 +131,32 @@ Extract/divide/merge and boundary snapping (Phase 3). Queries/ValueObservation (
 - **restoreBlock into a since-locked container throws** (unlock and retry) rather than silently leaving the block unplaced; into a *dead* container it restores live-but-unplaced (the unplaced-blocks utility view's population).
 
 **Deferred/notes for Phase 3:** structural ops get the scaffold as-is (`liveX` helpers, `ensurePlacementUnlocked`, `containerPosition`, `registerTextChange`, `flipBlockCascadeTombstones`, `insertPlacement` via `placeBlock`); undo inverses follow the Step 8 pattern (pre-images at do-time, internal revert ops, register after the transaction succeeds); `poolDragCopy` lands in Phase 3 with the other lineage-minting ops. One KnownIssues entry added (sentence-mode crystallization semantics, owner Phase 7). The restoreCommit-predates-split documented-behavior test is Phase 3's (needs divide).
+
+---
+
+## Post-phase adversarial review — findings & resolutions (2026-07-05)
+
+An author-run adversarial review confirmed two undo-inverse bugs; fixing them surfaced a third of the same class, and extending the sweep surfaced a fourth and fifth in the new `restoreContainer`. All fixed with named regression tests. The class has a name now: **stamp-based restores must check the *present*, not just the stamp** — between delete and restore, a row's parents can die, its block can be re-homed, its story can diverge. Phase 3's inverses inherit this rule (its plan's Risks updated).
+
+**Fixed (each probe-verified failing before, regression-tested after):**
+1. `revertDeleteVariant` resurrected a live variant under a block tombstoned in the meantime (deleteContainer is not undo-registered, so LIFO cannot order-protect it). Now requires a live block; refusal leaves the entry for retry.
+2. `revertDeleteVariant`/`revertArchiveVariant` bypassed the post seal — the one place the centralized guard was skipped, exactly the drift the plan's risk note predicted. Both now call `ensurePlacementUnlocked`.
+3. Same class, pre-existing: `restoreBlock`/`flipBlockCascadeTombstones` revived a `block_tag` whose tag died *after* the block (the application carries the block's stamp). Tag applications now revive only under live tags.
+4. + 5. In the new `restoreContainer` (below), caught by the extended sweep as a raw UNIQUE violation and a dangling live placement: a block independently revived and re-placed elsewhere must keep its new home (I2), and one revived-then-re-deleted (newer stamp) must stay dead. The placement flip now checks both.
+6. `UndoStack.undo` popped blindly after running the inverse outside the lock; removal is now by entry id, so a racing registration can never lose someone else's entry.
+
+**Author-directed:**
+- **`restoreContainer` added** (deleted posts must be recoverable): full-cascade stamp-based restore — placements, blocks + their children, memberships, tags, references — with the divergence rules above. AppSpec §9 updated.
+- **Commit of archived variants stays allowed**, now ratified + documented in code: commit reads without editing, and restoring the take means unarchiving first anyway.
+
+**Judgment calls (made, documented):**
+- `setReadingSort` now refuses on a locked reading — for non-manual readings the sort field IS the order the lock froze.
+- The post seal is **content-level**: a sealed post may be archived/deleted/retitled/tagged without unsealing (deletion now recoverable). Documented in AppSpec §9.
+- `reading.grouping_tag_id` may dangle at a tombstoned tag; read-time rule (treat as NULL/ungrouped) added to AppSpec §7 — Phase 4 must honor it.
+- `idleAutoCommit` accepts pools deliberately (renamed param, documented): a scrap's buffer deserves the same insurance.
+- Tray semantics for container-cascade victims (stale `last_container_id`) → KnownIssues, owner Phase 4.
+- Cleanups: the triplicated position resolvers collapsed into one `listPosition` core; `FractionalIndex.between` dead statements removed.
+
+**Sweep hardened:** `restoreContainer` + two more seeds added (now 7×250). The extension caught bugs 4–5 before any human did — the "any SQLite error is a failure" stance paying rent.
+
+**Baseline is now 152 tests green** (supersedes 145/143 above).

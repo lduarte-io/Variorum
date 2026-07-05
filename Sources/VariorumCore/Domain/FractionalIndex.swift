@@ -54,13 +54,10 @@ public enum FractionalIndex {
     public static func between(
         _ a: String?, _ b: String?, using rng: inout any RandomNumberGenerator & Sendable
     ) -> String {
-        let lower = a.map(digits(of:))
-        let upper = b.map(digits(of:))
-        if let lower, let upper {
-            precondition(a! < b!, "FractionalIndex.between requires a < b, got \(a!) ≥ \(b!)")
-            _ = lower; _ = upper
+        if let a, let b {
+            precondition(a < b, "FractionalIndex.between requires a < b, got \(a) ≥ \(b)")
         }
-        let result = midpoint(lower ?? [], upper, using: &rng)
+        let result = midpoint(a.map(digits(of:)) ?? [], b.map(digits(of:)), using: &rng)
         return String(result.map { digitCharacters[$0] })
     }
 

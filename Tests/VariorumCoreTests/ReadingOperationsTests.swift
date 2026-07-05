@@ -150,8 +150,14 @@ struct ReadingOperationsTests {
                 try ops.reorderReadingPost(post.id, in: reading.id, to: .start)
             }
 
+            // For non-manual readings the sort field IS the order — frozen.
+            #expect(throws: OperationError.lockedReading(id: reading.id)) {
+                try ops.setReadingSort(reading.id, field: .entryDate, direction: .desc)
+            }
+
             // Reversible: unlock and the same ops succeed.
             try ops.unlockReading(reading.id)
+            try ops.setReadingSort(reading.id, field: .entryDate, direction: .desc)
             try ops.reorderReadingPost(post.id, in: reading.id, to: .start)
             try ops.removePostFromReading(post.id, from: reading.id)
         }

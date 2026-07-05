@@ -214,6 +214,62 @@ struct UndoStackTests {
         }
     }
 
+    @Test func undoDeleteVariantRefusesWhenTheBlockHasSinceDied() throws {
+        // Review finding 2026-07-05 (bug 1): deleteContainer is not undo-
+        // registered, so LIFO can't order-protect this — the inverse itself
+        // must check block liveness or it strands a live variant under a
+        // dead block.
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "v1")
+            _ = try ops.branchVariant(made.block.id, from: made.variant.id)
+            let spare = try ops.branchVariant(made.block.id, from: made.variant.id)
+            try ops.deleteVariant(spare.id)
+            try ops.deleteContainer(post.id)
+
+            #expect(throws: OperationError.blockNotFound(id: made.block.id)) {
+                try stack.undo(with: ops)
+            }
+            #expect(stack.depth == 1)
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM variant v JOIN block b ON b.id = v.block_id
+                WHERE v.deleted_at IS NULL AND b.deleted_at IS NOT NULL
+                """) == 0)
+
+            // Restoring the post unblocks the retry.
+            try ops.restoreContainer(post.id)
+            #expect(try stack.undo(with: ops) == "Delete Variant")
+        }
+    }
+
+    @Test func variantUndoInversesRespectThePostSeal() throws {
+        // Review finding 2026-07-05 (bug 2): the seal refuses everything
+        // under the post — including undo's revert operations.
+        try withOperations { _, _ in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "v1")
+            let deleted = try ops.branchVariant(made.block.id, from: made.variant.id)
+            let archived = try ops.branchVariant(made.block.id, from: made.variant.id)
+            try ops.deleteVariant(deleted.id)
+            try ops.archiveVariant(archived.id)
+            try ops.lockPost(post.id)
+
+            #expect(throws: OperationError.lockedPost(id: post.id)) {
+                try stack.undo(with: ops) // archiveVariant's inverse
+            }
+            #expect(stack.depth == 2)
+
+            try ops.unlockPost(post.id)
+            #expect(try stack.undo(with: ops) == "Archive Variant")
+            #expect(try stack.undo(with: ops) == "Delete Variant")
+        }
+    }
+
     @Test func aFailedUndoStaysOnTheStackForRetry() throws {
         try withOperations { _, _ in
             let stack = UndoStack()

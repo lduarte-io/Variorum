@@ -48,12 +48,18 @@ extension Operations {
     }
 
     /// Inverse of `deleteVariant`: flip the tombstone and, when the variant
-    /// had been the block default, point the default back at it.
+    /// had been the block default, point the default back at it. The block
+    /// must still be live (its own deletion supersedes this entry — undoing
+    /// would strand a live variant under a dead block) and its post unsealed
+    /// (the seal refuses everything under the post, undo included); either
+    /// refusal leaves the entry on the stack for retry.
     func revertDeleteVariant(_ variantID: String, wasDefault: Bool) throws {
         try database.write { db in
             guard var variant = try Variant.fetchOne(db, key: variantID) else {
                 throw OperationError.variantNotFound(id: variantID)
             }
+            _ = try liveBlock(db, variant.blockId)
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
             let now = date.now
             if variant.deletedAt != nil {
                 variant.deletedAt = nil
@@ -66,10 +72,12 @@ extension Operations {
         }
     }
 
-    /// Inverse of `archiveVariant`: back to active, default pointer restored.
+    /// Inverse of `archiveVariant`: back to active, default pointer
+    /// restored. Same seal guard as every other write under a post.
     func revertArchiveVariant(_ variantID: String, wasDefault: Bool) throws {
         try database.write { db in
             var variant = try liveVariant(db, variantID)
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
             let now = date.now
             if variant.status == .archived {
                 variant.status = .active

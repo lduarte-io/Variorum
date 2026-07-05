@@ -14,6 +14,10 @@ import Foundation
 /// other, so sync never knows undo exists.
 public final class UndoStack: @unchecked Sendable {
     public struct Entry {
+        /// Registration-order token so a completed undo removes exactly the
+        /// entry it ran, even if a registration landed while the inverse was
+        /// executing outside the lock.
+        let id: Int
         /// Human-readable operation name ("Delete Block") — Phase 7 wires
         /// "Undo Divide"-style menu labeling from this.
         public let label: String
@@ -22,6 +26,7 @@ public final class UndoStack: @unchecked Sendable {
 
     private let lock = NSLock()
     private var entries: [Entry] = []
+    private var nextID = 0
 
     public init() {}
 
@@ -34,18 +39,23 @@ public final class UndoStack: @unchecked Sendable {
     }
 
     func register(label: String, inverse: @escaping (Operations) throws -> Void) {
-        lock.withLock { entries.append(Entry(label: label, inverse: inverse)) }
+        lock.withLock {
+            nextID += 1
+            entries.append(Entry(id: nextID, label: label, inverse: inverse))
+        }
     }
 
-    /// Runs the newest inverse (LIFO) and pops it on success; a failed
+    /// Runs the newest inverse (LIFO) and removes it on success; a failed
     /// inverse (e.g. the post was locked after the fact) stays on the stack
     /// so the user can resolve and retry. Returns the undone entry's label,
-    /// or nil when there is nothing to undo.
+    /// or nil when there is nothing to undo. The inverse runs outside the
+    /// lock (it is a DB write); removal is by entry id, so a registration
+    /// racing the inverse can never make undo pop someone else's entry.
     @discardableResult
     public func undo(with operations: Operations) throws -> String? {
         guard let entry = lock.withLock({ entries.last }) else { return nil }
         try entry.inverse(operations)
-        lock.withLock { _ = entries.popLast() }
+        lock.withLock { entries.removeAll { $0.id == entry.id } }
         return entry.label
     }
 

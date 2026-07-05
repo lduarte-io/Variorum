@@ -31,6 +31,9 @@ extension Operations {
     /// Appends an immutable savepoint of the variant's current buffer.
     /// A *manual* commit counts as a major revision (AppSpec §10); auto
     /// commits are quiet insurance and never reshuffle the library.
+    /// Archived variants may commit (author-ratified 2026-07-05): commit
+    /// reads the buffer without editing it, and restoring the take means
+    /// unarchiving it first anyway — the snapshot is pure upside.
     @discardableResult
     public func commit(
         _ variantID: String, kind: CommitKind = .manual, message: String? = nil
@@ -81,19 +84,21 @@ extension Operations {
         }
     }
 
-    /// One `kind='auto'` commit per dirty live variant under the post — the
-    /// long-idle insurance (author-approved). "Dirty" = the buffer differs
-    /// from the variant's latest commit, or has never been committed and is
-    /// non-empty. Idempotent: a second call finds nothing dirty. Idle
+    /// One `kind='auto'` commit per dirty live variant under the container —
+    /// the long-idle insurance (author-approved). "Dirty" = the buffer
+    /// differs from the variant's latest commit, or has never been committed
+    /// and is non-empty. Idempotent: a second call finds nothing dirty. Idle
     /// *detection* (the 24h clock) is the caller's job at the app phase.
-    /// Locked variants are skipped (their buffers cannot have changed since
-    /// locking mattered); a locked post refuses — lock forbids new commits.
+    /// Locked variants are skipped (lockVariant already insured them); a
+    /// locked post refuses — lock forbids new commits. Pools are accepted
+    /// deliberately (the spec names posts as the case that matters, but a
+    /// pool scrap's buffer deserves the same insurance).
     @discardableResult
-    public func idleAutoCommit(_ postID: String) throws -> [CommitPoint] {
+    public func idleAutoCommit(_ containerID: String) throws -> [CommitPoint] {
         try database.write { db in
-            let post = try liveContainer(db, postID)
-            try ensureUnlocked(post)
-            return try autoCommitDirtyVariants(db, containerID: postID, now: date.now)
+            let container = try liveContainer(db, containerID)
+            try ensureUnlocked(container)
+            return try autoCommitDirtyVariants(db, containerID: containerID, now: date.now)
         }
     }
 

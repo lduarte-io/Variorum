@@ -10,7 +10,7 @@ import Testing
 /// means an invariant survived only by luck; the test fails on it.
 @Suite("Randomized invariant sweep (Phase 2, Step 9)")
 struct InvariantSweepTests {
-    @Test(arguments: [1, 7, 42, 99, 20_260_705] as [UInt64])
+    @Test(arguments: [1, 7, 42, 99, 512, 8_191, 20_260_705] as [UInt64])
     func randomOpSequencesPreserveTheInvariants(seed: UInt64) throws {
         try withOperations(seed: seed) { _, db in
             let stack = UndoStack()
@@ -156,10 +156,17 @@ private struct Sweep {
         case 0:
             _ = try ops.createPost(title: text(), profile: Bool.random(using: &rng) ? .journal : nil)
         case 1:
-            if Bool.random(using: &rng) {
+            switch Int.random(in: 0..<3, using: &rng) {
+            case 0:
                 _ = try ops.createPool(title: text())
-            } else if let container = try random("SELECT id FROM container WHERE deleted_at IS NULL") {
-                try ops.deleteContainer(container)
+            case 1:
+                if let container = try random("SELECT id FROM container WHERE deleted_at IS NULL") {
+                    try ops.deleteContainer(container)
+                }
+            default:
+                if let container = try random("SELECT id FROM container WHERE deleted_at IS NOT NULL") {
+                    try ops.restoreContainer(container)
+                }
             }
         case 2, 3:
             if let container = try random("SELECT id FROM container WHERE deleted_at IS NULL") {

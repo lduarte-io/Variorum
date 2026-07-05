@@ -143,8 +143,15 @@ extension Operations {
                 WHERE (source_block_id = ? OR target_block_id = ?) AND deleted_at = ?
                 """,
             arguments: [blockID, blockID, stamp])
+        // A tag application only revives if its tag is still live — a tag
+        // deleted AFTER the block left this row carrying the block's stamp,
+        // and resurrecting it would put a live application under a dead tag.
         try db.execute(
-            sql: "UPDATE block_tag SET deleted_at = NULL WHERE block_id = ? AND deleted_at = ?",
+            sql: """
+                UPDATE block_tag SET deleted_at = NULL
+                WHERE block_id = ? AND deleted_at = ?
+                  AND tag_id IN (SELECT id FROM tag WHERE deleted_at IS NULL)
+                """,
             arguments: [blockID, stamp])
     }
 

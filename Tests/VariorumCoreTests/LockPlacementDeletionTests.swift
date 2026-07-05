@@ -291,6 +291,26 @@ struct LockPlacementDeletionTests {
         }
     }
 
+    @Test func restoreBlockLeavesTagApplicationsOfDeadTagsDead() throws {
+        // Review finding 2026-07-05 (same class as the undo bugs): a tag
+        // deleted AFTER the block leaves the application carrying the
+        // block's stamp; a stamp-only flip would resurrect it under a dead
+        // tag.
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "b")
+            let tag = try ops.createTag(name: "t")
+            let application = try ops.applyTag(tag.id, toBlock: made.block.id)
+            try ops.deleteBlock(made.block.id)
+            try ops.deleteTag(tag.id)
+
+            try ops.restoreBlock(made.block.id)
+
+            #expect(try db.deletedAt("block", made.block.id) == nil)
+            #expect(try db.deletedAt("block_tag", application.id) != nil)
+        }
+    }
+
     @Test func restoreBlockGuards() throws {
         try withOperations { ops, _ in
             let post = try ops.createPost()

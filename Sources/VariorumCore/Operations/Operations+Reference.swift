@@ -72,51 +72,11 @@ extension Operations {
     private func referencePosition(
         _ db: Database, containerID: String, at insert: InsertPosition
     ) throws -> String {
-        func positionOfReference(_ referenceID: String) throws -> String {
-            guard let position = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT position FROM reference
-                    WHERE container_id = ? AND id = ? AND deleted_at IS NULL
-                    """,
-                arguments: [containerID, referenceID])
-            else { throw OperationError.referenceNotFound(id: referenceID) }
-            return position
-        }
-        func edgePosition(_ aggregate: String) throws -> String? {
-            try String.fetchOne(
-                db,
-                sql: """
-                    SELECT \(aggregate)(position) FROM reference
-                    WHERE container_id = ? AND deleted_at IS NULL
-                    """,
-                arguments: [containerID])
-        }
-        switch insert {
-        case .start:
-            return FractionalIndex.between(nil, try edgePosition("MIN"))
-        case .end:
-            return FractionalIndex.between(try edgePosition("MAX"), nil)
-        case .after(let referenceID):
-            let anchor = try positionOfReference(referenceID)
-            let next = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT MIN(position) FROM reference
-                    WHERE container_id = ? AND deleted_at IS NULL AND position > ?
-                    """,
-                arguments: [containerID, anchor])
-            return FractionalIndex.between(anchor, next)
-        case .before(let referenceID):
-            let anchor = try positionOfReference(referenceID)
-            let previous = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT MAX(position) FROM reference
-                    WHERE container_id = ? AND deleted_at IS NULL AND position < ?
-                    """,
-                arguments: [containerID, anchor])
-            return FractionalIndex.between(previous, anchor)
-        }
+        try listPosition(
+            db,
+            in: OrderedList(
+                table: "reference", scopeColumn: "container_id", anchorColumn: "id",
+                missingAnchor: { OperationError.referenceNotFound(id: $0) }),
+            scopeID: containerID, at: insert)
     }
 }

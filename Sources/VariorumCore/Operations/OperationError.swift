@@ -6,6 +6,7 @@ import Foundation
 public enum OperationError: Error, Equatable, Sendable {
     // Missing or tombstoned targets.
     case containerNotFound(id: String)
+    case containerNotDeleted(id: String)
     case blockNotFound(id: String)
     case variantNotFound(id: String)
     case commitNotFound(id: String)

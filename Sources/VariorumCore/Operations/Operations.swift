@@ -127,109 +127,90 @@ extension Operations {
 
     // MARK: - Position resolution
 
-    /// Mints a `container_block.position` at the requested spot in a
-    /// container's live pointer list.
-    func containerPosition(
-        _ db: Database, containerID: String, at insert: InsertPosition
+    /// One ordered pointer list, for the shared resolver below. Table and
+    /// column names are compile-time constants, never user data.
+    struct OrderedList {
+        let table: String
+        let scopeColumn: String
+        /// The column an `InsertPosition` anchor names — the pointed-at
+        /// entity (block, post), or the row's own id for references.
+        let anchorColumn: String
+        /// Typed refusal when an anchor has no live row in this scope.
+        let missingAnchor: (String) -> OperationError
+    }
+
+    /// Mints a position at the requested spot in a live ordered list — the
+    /// one implementation behind container placements, reading memberships,
+    /// and the reference panel.
+    func listPosition(
+        _ db: Database, in list: OrderedList, scopeID: String, at insert: InsertPosition
     ) throws -> String {
-        func positionOfBlock(_ blockID: String) throws -> String {
+        func anchorPosition(_ anchorID: String) throws -> String {
             guard let position = try String.fetchOne(
                 db,
                 sql: """
-                    SELECT position FROM container_block
-                    WHERE container_id = ? AND block_id = ? AND deleted_at IS NULL
+                    SELECT position FROM \(list.table)
+                    WHERE \(list.scopeColumn) = ? AND \(list.anchorColumn) = ? AND deleted_at IS NULL
                     """,
-                arguments: [containerID, blockID])
-            else { throw OperationError.blockNotPlaced(id: blockID) }
+                arguments: [scopeID, anchorID])
+            else { throw list.missingAnchor(anchorID) }
             return position
         }
-        func edgePosition(_ aggregate: String) throws -> String? {
+        func listEdge(_ aggregate: String) throws -> String? {
             try String.fetchOne(
                 db,
                 sql: """
-                    SELECT \(aggregate)(position) FROM container_block
-                    WHERE container_id = ? AND deleted_at IS NULL
+                    SELECT \(aggregate)(position) FROM \(list.table)
+                    WHERE \(list.scopeColumn) = ? AND deleted_at IS NULL
                     """,
-                arguments: [containerID])
+                arguments: [scopeID])
+        }
+        func neighbor(_ aggregate: String, _ comparison: String, of anchor: String) throws -> String? {
+            try String.fetchOne(
+                db,
+                sql: """
+                    SELECT \(aggregate)(position) FROM \(list.table)
+                    WHERE \(list.scopeColumn) = ? AND deleted_at IS NULL AND position \(comparison) ?
+                    """,
+                arguments: [scopeID, anchor])
         }
         switch insert {
         case .start:
-            return FractionalIndex.between(nil, try edgePosition("MIN"))
+            return FractionalIndex.between(nil, try listEdge("MIN"))
         case .end:
-            return FractionalIndex.between(try edgePosition("MAX"), nil)
-        case .after(let blockID):
-            let anchor = try positionOfBlock(blockID)
-            let next = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT MIN(position) FROM container_block
-                    WHERE container_id = ? AND deleted_at IS NULL AND position > ?
-                    """,
-                arguments: [containerID, anchor])
-            return FractionalIndex.between(anchor, next)
-        case .before(let blockID):
-            let anchor = try positionOfBlock(blockID)
-            let previous = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT MAX(position) FROM container_block
-                    WHERE container_id = ? AND deleted_at IS NULL AND position < ?
-                    """,
-                arguments: [containerID, anchor])
-            return FractionalIndex.between(previous, anchor)
+            return FractionalIndex.between(try listEdge("MAX"), nil)
+        case .after(let anchorID):
+            let anchor = try anchorPosition(anchorID)
+            return FractionalIndex.between(anchor, try neighbor("MIN", ">", of: anchor))
+        case .before(let anchorID):
+            let anchor = try anchorPosition(anchorID)
+            return FractionalIndex.between(try neighbor("MAX", "<", of: anchor), anchor)
         }
     }
 
-    /// Mints a `reading_post.position` at the requested spot in a reading's
-    /// live membership list.
+    /// A `container_block.position` in a container's live pointer list.
+    func containerPosition(
+        _ db: Database, containerID: String, at insert: InsertPosition
+    ) throws -> String {
+        try listPosition(
+            db,
+            in: OrderedList(
+                table: "container_block", scopeColumn: "container_id",
+                anchorColumn: "block_id",
+                missingAnchor: { OperationError.blockNotPlaced(id: $0) }),
+            scopeID: containerID, at: insert)
+    }
+
+    /// A `reading_post.position` in a reading's live membership list.
     func readingPosition(
         _ db: Database, readingID: String, at insert: InsertPosition
     ) throws -> String {
-        func positionOfPost(_ postID: String) throws -> String {
-            guard let position = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT position FROM reading_post
-                    WHERE reading_id = ? AND post_id = ? AND deleted_at IS NULL
-                    """,
-                arguments: [readingID, postID])
-            else { throw OperationError.postNotInReading(postID: postID, readingID: readingID) }
-            return position
-        }
-        func edgePosition(_ aggregate: String) throws -> String? {
-            try String.fetchOne(
-                db,
-                sql: """
-                    SELECT \(aggregate)(position) FROM reading_post
-                    WHERE reading_id = ? AND deleted_at IS NULL
-                    """,
-                arguments: [readingID])
-        }
-        switch insert {
-        case .start:
-            return FractionalIndex.between(nil, try edgePosition("MIN"))
-        case .end:
-            return FractionalIndex.between(try edgePosition("MAX"), nil)
-        case .after(let postID):
-            let anchor = try positionOfPost(postID)
-            let next = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT MIN(position) FROM reading_post
-                    WHERE reading_id = ? AND deleted_at IS NULL AND position > ?
-                    """,
-                arguments: [readingID, anchor])
-            return FractionalIndex.between(anchor, next)
-        case .before(let postID):
-            let anchor = try positionOfPost(postID)
-            let previous = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT MAX(position) FROM reading_post
-                    WHERE reading_id = ? AND deleted_at IS NULL AND position < ?
-                    """,
-                arguments: [readingID, anchor])
-            return FractionalIndex.between(previous, anchor)
-        }
+        try listPosition(
+            db,
+            in: OrderedList(
+                table: "reading_post", scopeColumn: "reading_id",
+                anchorColumn: "post_id",
+                missingAnchor: { OperationError.postNotInReading(postID: $0, readingID: readingID) }),
+            scopeID: readingID, at: insert)
     }
 }
