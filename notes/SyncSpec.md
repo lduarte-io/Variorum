@@ -42,6 +42,8 @@ SQLite (Mac) ──┐                        ┌── SQLite (iPhone)
 
 Debounced/periodic: read outbox → load current rows → send `{table, row, base_sync_version}` batches. Server, per row, in one transaction: `base == current sync_version` → apply, bump version, stamp `server_seq`, clear ok; mismatch → **reject with the current server row** (no server merging). Client on reject: merge per §6, write the merged row locally (re-enqueues), push again. Convergence is guaranteed because rejects always carry the newer server state and merges are deterministic.
 
+**On accept, the client's local `sync_version` bump MUST run in apply mode** (outbox triggers suppressed, same as §5's pull path) — a bare UPDATE re-enqueues the row it just pushed and the engine pushes forever. Trap confirmed by test in Phase 1 (`TriggerTests`); the Phase 5 engine suite must assert a full push cycle ends with an empty outbox.
+
 ## 5. Pull (download)
 
 `pull(sinceSeq)` → rows ordered by `server_seq`, applied in **one local transaction** with `PRAGMA defer_foreign_keys = ON` (multi-row operations — divide, merge, lock-post — arrive as row sets that may cross batch boundaries; deferred FKs make each batch atomic-consistent at commit) and `_sync_applying` set. Per row: locally clean → write it + its `sync_version`; locally dirty (in outbox) → merge per §6 into the local row, keep it enqueued. Advance the cursor only on commit. Read-side code must tolerate referenced-but-not-yet-arrived rows across batches (render gaps, never crash) — rare, but designed-for.

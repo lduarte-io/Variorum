@@ -117,6 +117,46 @@ struct TriggerTests {
         #expect(try deletedAt(db, "variant", "v2") == earlier, "cascade overwrote an independent tombstone")
     }
 
+    /// The container cascade's `id IN (SELECT block_id FROM container_block …)`
+    /// scans rows that the block trigger (fired mid-statement) is itself
+    /// tombstoning. Guards the subquery against a "simplification" that would
+    /// expose it to update-while-scanning effects.
+    @Test func containerCascadeReachesManyBlocks() throws {
+        let db = try AppDatabase.inMemory()
+        try db.write { db in
+            try Fixture.container(db, id: "c1")
+            for i in 1...8 {
+                try Fixture.block(db, id: "b\(i)")
+                try Fixture.variant(db, id: "v\(i)", blockId: "b\(i)")
+                try Fixture.containerBlock(db, id: "cb\(i)", containerId: "c1", blockId: "b\(i)", position: String(format: "%02d", i))
+            }
+            try Fixture.tombstone(db, table: "container", id: "c1", at: stamp)
+        }
+        let (liveBlocks, liveVariants, liveCBs) = try db.read { db in
+            (try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM block WHERE deleted_at IS NULL")!,
+             try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM variant WHERE deleted_at IS NULL")!,
+             try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container_block WHERE deleted_at IS NULL")!)
+        }
+        #expect(liveBlocks == 0)
+        #expect(liveVariants == 0)
+        #expect(liveCBs == 0)
+    }
+
+    /// Re-tombstoning an already-dead block (deleted_at value→value — the
+    /// `UPDATE OF deleted_at` clause DOES fire) must not re-cascade onto a
+    /// child revived in the meantime: only the NULL→value transition cascades.
+    /// This is exactly the world a partial `restoreBlock` (Phase 2) creates.
+    @Test func reTombstoningADeadBlockDoesNotReCascade() throws {
+        let db = try AppDatabase.inMemory()
+        try db.write { db in
+            try Fixture.placedBlock(db, container: "c1", block: "b1", variant: "v1", cb: "cb1")
+            try Fixture.tombstone(db, table: "block", id: "b1", at: "2026-07-01T00:00:00.000Z")
+            try db.execute(sql: "UPDATE variant SET deleted_at = NULL WHERE id = 'v1'")
+            try db.execute(sql: "UPDATE block SET deleted_at = '2026-07-02T00:00:00.000Z' WHERE id = 'b1'")
+        }
+        #expect(try deletedAt(db, "variant", "v1") == nil, "value→value tombstone re-fired the cascade")
+    }
+
     @Test func cascadeIsTransitionGuardedNotRetriggeredByOtherUpdates() throws {
         let db = try AppDatabase.inMemory()
         try db.write { db in
@@ -150,6 +190,14 @@ struct TriggerTests {
         try clearOutbox(db)  // drop the seed rows' entries
         try db.write { db in try Fixture.container(db, id: "c1") }
         #expect(try outboxRows(db) == ["container:c1"])
+
+        // queued_at is trigger-written with SQLite's clock: local-only
+        // bookkeeping, but it should stay in the canonical timestamp shape.
+        let queuedAt = try db.read { db in
+            try String.fetchOne(db, sql: "SELECT queued_at FROM sync_outbox")!
+        }
+        #expect(queuedAt.wholeMatch(of: /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/) != nil,
+                "queued_at drifted from the canonical format: \(queuedAt)")
 
         try db.write { db in
             try db.execute(sql: "UPDATE container SET title = 'hello' WHERE id = 'c1'")
@@ -219,5 +267,29 @@ struct TriggerTests {
             try db.execute(sql: "UPDATE container SET title = 'back' WHERE id = 'c2'")
         }
         #expect(try outboxRows(db) == ["container:c2"])
+    }
+
+    /// The Phase 5 trap (SyncSpec §4): after a successful push, the engine
+    /// records the new `sync_version` locally. Done as a bare UPDATE, that
+    /// write re-enqueues the row it just pushed — an infinite push loop. The
+    /// bump must run in apply mode. This test documents both halves so the
+    /// engine phase inherits the fact, not the outage.
+    @Test func syncVersionBumpMustRunSuppressedOrItReEnqueues() throws {
+        let db = try AppDatabase.inMemory()
+        try db.write { db in try Fixture.container(db, id: "c1") }
+        try clearOutbox(db)
+
+        // The naive engine write: re-enqueues (the trap exists).
+        try db.write { db in
+            try db.execute(sql: "UPDATE container SET sync_version = 7 WHERE id = 'c1'")
+        }
+        #expect(try outboxRows(db) == ["container:c1"])
+
+        // The correct engine write: suppressed, outbox stays empty.
+        try clearOutbox(db)
+        try db.applyingRemote { db in
+            try db.execute(sql: "UPDATE container SET sync_version = 8 WHERE id = 'c1'")
+        }
+        #expect(try outboxRows(db).isEmpty)
     }
 }

@@ -13,7 +13,10 @@ public struct Container: VariorumRecord {
     public var kind: ContainerKind
     public var title: String?
     public var profile: Profile?
-    /// Posts (esp. journals): the ordering key.
+    /// Posts (esp. journals): the ordering key. A calendar day as
+    /// `"YYYY-MM-DD"` — deliberately a string, not a `Date`: an entry date has
+    /// no time-of-day or timezone semantics, and the format sorts correctly
+    /// as TEXT.
     public var entryDate: String?
     /// The post-level seal / "complete" — reversible (I6 applies here too).
     public var locked: Bool

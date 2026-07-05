@@ -97,3 +97,4 @@ Block size: floor is the sentence, default is the paragraph, ceiling-less upward
 - Anything tracking word-level change → out of scope by definition.
 - Any UI that must be heavy while unfocused → violates P3; restructure so only the focused unit is live.
 - A view that's painful to query is *information*: it's stress-testing an edge of the schema — surface it, don't work around it.
+- A trigger that wants domain knowledge (dirtiness, default-variant choice, lock rules, churn) → semantics are leaking into the database. Triggers own exactly two things — tombstone propagation and outbox capture (a closed set since Phase 1) — and anything more means an operation or the schema is mis-shaped, never that the trigger should grow. Stop and run the re-assessment protocol in the Phase 2 plan (Risks) before writing a line of it.
