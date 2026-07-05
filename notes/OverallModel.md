@@ -1,0 +1,95 @@
+# Variorum — Overall Model (System Mental Model)
+
+Internalize this before touching tables or code. This is the **how it hangs together** — the conceptual objects, the invariants, and the reasoning that keeps them honest. Concrete DDL, operations, and build detail live in `AppSpec.md`.
+
+---
+
+## 1. The one-sentence model
+
+**The store is a directed graph of text blocks with typed edges.** Blocks are nodes holding alternative texts (variants). Posts and pools are *ordered pointer collections* over blocks; readings are *ordered pointer collections* over posts. Every view is a traversal of this graph — never a bespoke subsystem.
+
+Three framing principles carry the whole design:
+
+- **Rich substrate, lean surface.** The data model is always fully capable; any UI exposes only a chosen subset and lets the rest stay latent. Complexity lives in the store (cheap — rows and edges); restraint lives in the UI. This is how "crisp and usable" and "maximally flexible" coexist without choosing.
+- **Pointer religion / non-destructive.** Nothing owns blocks; everything points at them. Mutation never reaches anything the author has decided to keep — including structural operations (split/merge are reversible pointer moves, not destructive rewrites).
+- **Coarse, not forensic.** The system preserves *choices and lineage*, never a word-by-word reconstruction of edits. Edges are `(fromBlock, toBlock, type)` — two IDs and a label. If a design ever needs to track *which words moved*, it is out of scope by definition.
+
+## 2. The stored objects (concepts)
+
+- **Block** — permanent identity; holds identity + its variants, nothing else.
+- **Variant** — one alternative text for a block's slot. The "fan" is the set of a block's active variants. Variants are **opt-in and rare, not ambient** — most blocks live their whole life with exactly one. Each variant has a single mutable **working buffer** (`working_text`) — the only mutable text in the entire system.
+- **Commit** — an append-only savepoint *inside* one variant (variant A can have commits 1, 2, 3). The block's version history.
+- **Edge** — a typed block-to-block link: `derived_from` (lineage: divide/merge/extract/pool-copy, outline→draft mapping) and `version_of` (compare relationships, usable between posts).
+- **Post** — the entry / blog post / chapter. Does **not contain** blocks — it is an *ordered list of pointers* to them; has entry date, lock, free-floating notes.
+- **Pool** — the inspiration holding area; the same container type as a post, so single ownership is enforced uniformly and "scrap" and "finished prose" are one object type.
+- **Reading** — a book/chapter: curated (manual ordered list) or smart (tag/query). Sections come from grouping rules, not container objects. Supports extent constraints (fixed-length journals) and locking. A post may appear in many readings at once — this asymmetry with blocks is deliberate and is what makes on-demand books work.
+- **Tag** — hierarchical (path-style, e.g. `life/goals/2024`), applied to posts and (cheaply) to blocks. Block tags primarily serve the pool.
+
+## 3. The mutability rule (one rule under everything)
+
+**Mutation is local and ephemeral; permanence is explicit and append-only.**
+
+- Each variant's working buffer is mutable, continuously autosaved, with ordinary undo. Nothing else in the system is mutable text.
+- **Commit** appends an immutable savepoint. Restoring a commit loads its text into the buffer; committing again appends — never truncates.
+- **Lock is fully orthogonal to commit** — a reversible guard, not a snapshot. Lock a variant (freeze its buffer; edit by branching or unlocking) or a post (freeze pointer order + chosen variants + forbid new commits). Locking a post auto-commits its live buffers — a consequence, not an equivalence.
+- Rejected variants are **hard-deleted** (tombstoned) or **archived** into the block's history view. Deleting whole blocks is cheap; a per-post "deleted blocks" tray is the soft net.
+- Branching a variant **inherits** the current buffer's text; a blank/new take is a *different gesture*.
+
+## 4. Data invariants (never break; enforce in Domain/Operations, DB-backed where possible)
+
+- **I1 — Variants never span blocks.** A variant is exactly one block's text. This is *the* invariant rendering rests on: render = concatenate each slot's chosen variant in order. All cross-block relationships are edges, never variants.
+- **I2 — Single ownership.** A block is referenced by at most one container (one post or one pool). DB-enforced (unique live `container_block.block_id`).
+- **I3 — The chosen variant lives on the pointer, not the block** (`container_block.chosen_variant_id`). The same block can show version A in one reading and version B in another.
+- **I4 — Internal newlines are content, not structure.** Pressing return edits a block's text; it is not a split. Block boundaries change only via the explicit structural operations. Different variants of one block may have different internal paragraph structure.
+- **I5 — Commits are append-only per variant.**
+- **I6 — Lock is orthogonal to commit** — a reversible guard, zero commits.
+- **I7 — No nesting.** A multi-paragraph block's variants are whole-span alternatives for the entire block; no sub-fans inside a block.
+- **I8 — Posts are edges-only across versions.** No post-level variant resolution, ever. Two article versions = two posts + a `version_of` edge; comparison is a view.
+- **I9 — Cross-block relationships are edges, never variants.**
+
+## 5. Performance invariants (as load-bearing as the data ones)
+
+> **P1 — No operation's cost may scale with total document or corpus size — only with viewport + edit size.** (The Apple Notes failure mode, banned.)
+
+- **P2** — All DB I/O is off the main thread; reads never block writes (WAL + reader pool).
+- **P3** — Long views are virtualized; only on-screen units render; **only the focused unit is a live editor** (everything else is lightweight read-only text).
+
+P3 and the UX principle "calm default, one block blooms at a time" are the *same architecture* — build "only the focused thing is heavy" once and get both snappiness and calm.
+
+## 6. Sync invariants (architecture settled in `SyncSpec.md`; sync arrives early so mobile journaling works)
+
+- **S1** — All mutations are tiny, append-friendly writes through the operations API — never large-blob overwrites.
+- **S2** — Deletes are tombstones (`deleted_at`), not row removal.
+- **S3** — IDs are stable random UUIDs; convergence is the sync protocol's job, never the ID scheme's (SyncSpec §9).
+- **S4** — Top-level entities carry nullable `owner_id` for future multi-tenant RLS.
+- **S5** — The one mutable field (`variant.working_text`) resolves sync conflicts as a **new variant** (conflict-as-variant), never by clobbering.
+
+## 7. The split taxonomy (the hard core, conceptually)
+
+Two distinct operations, not one overloaded "split" — plus the inverse:
+
+- **EXTRACT — source survives.** A boundary-adjacent prefix/suffix leaves the *active variant* to become a new adjacent block with a `derived_from` edge. The source keeps its identity and its entire fan untouched (the other variants never contained that span — nothing to mark). Zero ceremony. This is how a sub-paragraph fan is born (extract the conclusion sentence, fan *that*). A middle span cannot Extract — that's a Divide.
+- **DIVIDE — source consumed into ordered successors.**
+  - *Single-variant (~95% case):* trivial in-place cut — the source keeps identity as the first half; only the second half is minted. No ceremony.
+  - *Multi-variant (rare; the only ceremony in the system):* the cut is placed into each variant to carry through; B's fan = first-halves, C's fan = second-halves (enabling first-half-of-attempt-1 with second-half-of-attempt-3). Unmarked variants aren't cut. **W resolution:** the original block A is preserved whole and referenceable; unmarked variants stay on A as lineage; B and C are minted fresh. Reversible by re-pointing at A. Nobody's five editors disappear.
+- **MERGE — mirrors Divide-W.** Combining adjacent blocks mints a fresh block whose active variant is "active-of-B + active-of-C," with `derived_from` edges back to both. B and C remain as lineage; fans are **not** cartesian-producted.
+
+Block size: floor is the sentence, default is the paragraph, ceiling-less upward; boundaries snap to sentence/paragraph marks. Default segmentation of fresh text is a **document/global setting** (never bound to a UI profile), with journal posts defaulting to one-block-per-entry.
+
+## 8. Why the stack is what it is (settled; do not reopen)
+
+- **SQLite, rows-as-truth**, via GRDB: full SQL (recursive lineage CTEs, tag subtrees, the 80%-sort), real constraints (single ownership in the DB), local-first speed, a plain exportable file.
+- **Operations-as-API:** every mutation is a defined transactional operation — never ad-hoc row edits.
+- **History is native to the domain, not bolted on** — commits, fans, and edges are append-only by design; event-sourcing's benefits without its tax. An optional audit log may exist later but is a derived artifact, never truth.
+- **Why not op-log-as-truth:** full event-sourcing tax to buy back history the domain already owns; fights P1 and row-sync engines.
+- **Why not CloudKit / Core Data / SwiftData+CloudKit:** wrong shape for multi-tenant commercial; the integration forbids unique constraints, ordered relationships, restrict-deletes, recursive queries — exactly what this model needs.
+- **Why not Rust:** snappiness lives on the client; SQLite is already optimal; SQLite-as-shared-substrate delivers cross-platform reuse without an FFI seam. Only real-time collaboration would justify it — and that's out of scope.
+- **TextKit 2 `NSTextView`** editor core (viewport lazy layout = P1's mechanism), SwiftUI chrome. TextKit 2 is also the project's largest external risk — see `notes/TEXTKIT2_NOTES.md`, which is a first-class build companion.
+
+## 9. How to smell a wrong design
+
+- A feature that needs a bespoke subsystem instead of a traversal → the model has a weak spot; fix the model.
+- An operation that feels tortured to express → the schema is wrong, not the operation.
+- Anything tracking word-level change → out of scope by definition.
+- Any UI that must be heavy while unfocused → violates P3; restructure so only the focused unit is live.
+- A view that's painful to query is *information*: it's stress-testing an edge of the schema — surface it, don't work around it.

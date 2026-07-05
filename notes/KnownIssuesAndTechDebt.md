@@ -1,0 +1,15 @@
+# Variorum — Known Issues & Tech Debt
+
+Deliberately-deferred work only. **Rule: no entry without naming the phase that resolves it** — if nothing owns it, fix it now instead of parking it. Remove entries when resolved (the closing phase's closeout notes the resolution).
+
+| Item | What & why deferred | Owning phase |
+|------|--------------------|--------------|
+| TK2 viewport viability decision | Whether book-scrub/infinite-scroll can trust live TK2 geometry on Tahoe, or must use stored per-block length estimates, or STTextView. Facts unknowable until tried on the M3. | 6 (TK2 spike) |
+| Xcode 26 install (both Macs) | Chosen: install on the Intel Air + M3; required before any 26-SDK editor work. Author action (Apple ID / download). | 6 (TK2 spike) — hard prerequisite |
+| Supabase project setup | Server project, mirrored schema, seq/CAS functions, auth token. Author assists (account, dashboard). | 5 (Sync core) |
+| Sync auth hardening | Phase 5 ships a single-user token; real auth/key rotation arrives with accounts. | 14 (Accounts) |
+| Cross-block re-bracketing | Selecting a span across existing block boundaries → "make this a block" requires splitting touched blocks (each possibly fanned) and reconciling. v1 ships clean-inside-one-block / whole-block cases; messy cross-fan re-bracketing deferred. | 9 (Structural ops in editor) — partial; re-own at 9's closeout if still deferred |
+| Markdown export | Planned so the store is never a black box; needs the read layer to exist first. | 11 (Remaining views) — or re-own at 11's closeout |
+| Within-post virtualization escape hatch | Only if a real 100k+-word single post appears; block decomposition keeps the door open (AppSpec §4). | 12 (Hardening) — assess, likely re-defer with evidence |
+| Optional audit/operation log | Derived artifact for global undo/debugging; never truth. Revisit once the operations layer is real — note: global undo of structural ops currently relies on W-reversibility (re-point at A), not an undo stack. | 4 (Read layer) — assess at closeout |
+| Tombstone GC | Soft-delete is the only delete; purge needs a sync-aware horizon (all devices past the seq). | 12 (Hardening) |

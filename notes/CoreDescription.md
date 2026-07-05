@@ -1,0 +1,55 @@
+# Variorum — Core Description (Vision)
+
+*A variorum is an edition of a text that preserves its variant readings. That is this app.*
+
+This document is the **why** — the product vision and the author's requirements, in her terms. It should change rarely. The technical shape lives in `OverallModel.md`; the buildable detail lives in `AppSpec.md`.
+
+---
+
+## What it is
+
+A native, premium Apple writing tool. The primary user is the author ("and whoever else has a brain just like mine"). It must serve three modes over **one** model:
+
+- **Daily journaling** — simple; typically one entry = one block; ordering usually by the day written.
+- **Blog posts** — many ideas; pull sources and notes to the side; try out alternate paragraphs.
+- **Books** — chapter/scale ordering matters most; same paragraph/word/sentence-level editing as blog posts.
+
+The design identity: **find the atomic unit, then build around it.** The unit is the **block**. Nothing owns blocks; everything points at them; every view is a different traversal of the same store. Same non-destructive, pointer-based religion as ClipFarm (video), applied to prose.
+
+## The core feeling
+
+- **Free and dynamic to work with — ideas are never stifled.** Not forensic reconstruction; just keeping choices open as long as wanted.
+- **Snappy, always.** Apple Notes lags for seconds past ~10k words in a note; this app must never have that failure mode. Performance is a hard constraint, not a nice-to-have (see AppSpec §4).
+- If it's beautiful, bug-free, fast, interesting, and flexible, complexity is acceptable. **This is NOT Pages.**
+- Calm default, depth on demand: at rest a document is seamless minimalist prose; the variant machinery is summoned per-block, on request. Complexity lives in the store; restraint lives in the UI.
+
+## What it is not
+
+- **Not a knowledge base.** No transclusion, no shared blocks across posts — that brings management problems the author explicitly rejects. Reuse is copy + lineage edge.
+- **Not Pages / not Apple Notes.** Not a generic word processor, not a thousand-notes-click-each-one app.
+- **Not collaborative.** No real-time collaborative editing, ever envisioned.
+- **Not forensic.** No word-level change tracking anywhere. The system preserves choices and lineage — a family tree, not a court record.
+
+## The pillars (requirements essence)
+
+1. **Blocks with variants ("the fan").** A block is a stored node with permanent identity. It's cheap to fan out many parallel candidate texts for a block — ten versions of a paragraph if wanted — held open side by side, not auto-closed. Each variant has its own little commit history. The floor is a sentence, the default a paragraph, the ceiling unbounded (multi-paragraph blocks are important).
+
+2. **Autosave + deliberate commits, lock orthogonal to both.** Always autosaving; a deliberate "save this version" shortcut appends an immutable savepoint. Lock is a reversible guard, never a snapshot. Posts can be marked complete (and un-marked).
+
+3. **Structure via pointers and tags, never containment.** Posts are ordered pointer lists over blocks. Books/chapters are "readings" — curated or automatic collections of posts; a chapter is effectively a tag section. Hierarchical tags, applied to posts and (cheaply) to blocks.
+
+4. **The split taxonomy.** Extract (source survives; chop a boundary span off painlessly), Divide (source consumed; single-variant is the trivial everyday case; multi-variant is the one deliberate ceremony, with W resolution: the original is preserved whole), Merge (mints fresh, mirrors Divide-W). All reversible pointer moves, never destructive rewrites.
+
+5. **Many views over one store.** Continuous book view, book-scrub (page = a post; 50 entries = 50 pages even if one is 10k words), infinite scroll, timeline, side-by-side (`text | v1 | v2 | text`), swap-and-reread, outline-left/draft-right with derived-from mapping, diff (whitespace optional), folder, canvas/sticky-notes, expand-all-fans. Multiple views is *the point* — each stress-tests a different edge of the model.
+
+6. **The inspiration pool.** A holding area of scattered notes and loose sentences; drag pieces into a draft (copy + lineage, never shared ownership).
+
+7. **Sane sorting.** Sort by when 80%+ of something was edited. Fixing one typo must never reshuffle the library.
+
+8. **Mobile as a smaller surface.** Add journal entries and edit existing blocks' active text from iOS; no variant/fan gestures there. Journal restrictions are a UI profile, never a separate data model — an entry can graduate to a full post with zero migration.
+
+9. **Commercial someday.** Architecture must stay fast as complexity scales, and the schema is shaped now for a future row-based sync engine and multi-tenant accounts — designed-for now, built later.
+
+## Source material
+
+The full authoritative history lives in `notes/source/`: `REQUIREMENTS.md` (the author's wishes verbatim), `TECHNICAL_DECISIONS.md` (settled commitments with the why-nots), `SPEC.md` (the original holistic spec this project's AppSpec evolved from), `HANDOFF(1).md` (design rationale), and the original chat transcript PDF.
