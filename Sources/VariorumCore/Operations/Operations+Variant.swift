@@ -182,7 +182,7 @@ extension Operations {
         return variant
     }
 
-    private func insertCommit(
+    func insertCommit(
         _ db: Database, variant: Variant, kind: CommitKind, message: String?, now: Date
     ) throws -> CommitPoint {
         let commitPoint = CommitPoint(
@@ -192,7 +192,7 @@ extension Operations {
         return commitPoint
     }
 
-    private func isDirty(_ db: Database, _ variant: Variant) throws -> Bool {
+    func isDirty(_ db: Database, _ variant: Variant) throws -> Bool {
         let lastCommitText = try String.fetchOne(
             db,
             sql: """

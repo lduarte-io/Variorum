@@ -77,6 +77,48 @@ struct LockPlacementDeletionTests {
         }
     }
 
+    @Test func lockVariantInsuresADirtyBufferWithOneQuietAutoCommit() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "protect this")
+
+            // Dirty (never committed, non-empty) → locking commits it first.
+            try ops.lockVariant(made.variant.id)
+            let kinds = try db.read { db in
+                try String.fetchAll(
+                    db, sql: "SELECT kind FROM commit_point WHERE variant_id = ?",
+                    arguments: [made.variant.id])
+            }
+            #expect(kinds == ["auto"])
+
+            // Re-locking is a no-op; unlock+lock of a clean buffer adds none.
+            try ops.lockVariant(made.variant.id)
+            try ops.unlockVariant(made.variant.id)
+            try ops.lockVariant(made.variant.id)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM commit_point WHERE variant_id = ?", [made.variant.id]) == 1)
+        }
+    }
+
+    @Test func variantLockTogglesRefusedUnderASealedPost() throws {
+        try withOperations { ops, _ in
+            let post = try ops.createPost()
+            let unlocked = try ops.newBlock(in: post.id, text: "sealed in")
+            let locked = try ops.newBlock(in: post.id, text: "sealed locked")
+            try ops.lockVariant(locked.variant.id)
+            try ops.lockPost(post.id)
+
+            #expect(throws: OperationError.lockedPost(id: post.id)) {
+                try ops.lockVariant(unlocked.variant.id)
+            }
+            #expect(throws: OperationError.lockedPost(id: post.id)) {
+                try ops.unlockVariant(locked.variant.id)
+            }
+            // No-op toggles stay quiet no-ops even under the seal.
+            try ops.unlockVariant(unlocked.variant.id)
+        }
+    }
+
     // MARK: Archive / delete variant
 
     @Test func archiveRemovesFromFanAndReassignsTheDefault() throws {

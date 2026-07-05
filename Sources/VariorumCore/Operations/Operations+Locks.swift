@@ -6,7 +6,11 @@ import GRDB
 // spec'd consequence, not equivalence: sealing a post auto-commits its dirty
 // buffers first.
 extension Operations {
-    /// Freeze a variant's buffer: to edit, branch or unlock.
+    /// Freeze a variant's buffer: to edit, branch or unlock. A dirty buffer
+    /// is insured with one quiet auto commit first (author decision
+    /// 2026-07-05, mirroring lockPost) — so unlock-then-edit can never
+    /// destroy the exact text the lock was protecting, and idleAutoCommit
+    /// stays correct in skipping locked variants.
     public func lockVariant(_ id: String) throws {
         try setVariantLock(id, locked: true)
     }
@@ -49,8 +53,17 @@ extension Operations {
         try database.write { db in
             var variant = try liveVariant(db, id)
             guard variant.locked != locked else { return }
+            // The post seal refuses everything under the post (author-
+            // ratified 2026-07-05) — including lock toggles, which would
+            // otherwise let a dirty variant's insurance commit slip into a
+            // sealed post.
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
+            let now = date.now
+            if locked, try isDirty(db, variant) {
+                _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now)
+            }
             variant.locked = locked
-            variant.updatedAt = date.now
+            variant.updatedAt = now
             try variant.update(db)
         }
     }
