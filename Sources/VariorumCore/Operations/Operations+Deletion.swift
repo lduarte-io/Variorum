@@ -11,16 +11,24 @@ extension Operations {
     /// archived — the read-time rule renders the block default in its place
     /// (AppSpec §7); deletion, by contrast, demands re-pointing first.
     public func archiveVariant(_ id: String) throws {
-        try database.write { db in
+        // nil = no-op (already archived); nothing to undo then.
+        let wasDefault: Bool? = try database.write { db in
             var variant = try liveVariant(db, id)
-            guard variant.status != .archived else { return }
+            guard variant.status != .archived else { return nil }
             try ensurePlacementUnlocked(db, blockID: variant.blockId)
             try ensureNotLastActive(db, variant)
             let now = date.now
+            let wasDefault = try liveBlock(db, variant.blockId).defaultVariantId == id
             variant.status = .archived
             variant.updatedAt = now
             try variant.update(db)
             try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
+            return wasDefault
+        }
+        if let wasDefault {
+            undoStack?.register(label: "Archive Variant") {
+                try $0.revertArchiveVariant(id, wasDefault: wasDefault)
+            }
         }
     }
 
@@ -40,7 +48,7 @@ extension Operations {
     /// first), while it is its block's last live active variant (I10 — that
     /// is `deleteBlock`), and while locked (the guard means something).
     public func deleteVariant(_ id: String) throws {
-        try database.write { db in
+        let wasDefault: Bool = try database.write { db in
             var variant = try liveVariant(db, id)
             guard !variant.locked else {
                 throw OperationError.lockedVariant(id: id)
@@ -55,10 +63,15 @@ extension Operations {
             }
             try ensureNotLastActive(db, variant)
             let now = date.now
+            let wasDefault = try liveBlock(db, variant.blockId).defaultVariantId == id
             variant.deletedAt = now
             variant.updatedAt = now
             try variant.update(db)
             try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
+            return wasDefault
+        }
+        undoStack?.register(label: "Delete Variant") {
+            try $0.revertDeleteVariant(id, wasDefault: wasDefault)
         }
     }
 
@@ -78,6 +91,9 @@ extension Operations {
             block.deletedAt = now
             block.updatedAt = now
             try block.update(db)
+        }
+        undoStack?.register(label: "Delete Block") {
+            try $0.revertDeleteBlock(id)
         }
     }
 

@@ -17,7 +17,15 @@ public struct Operations: Sendable {
     @Dependency(\.date) var date
     @Dependency(\.uuid) var uuid
 
-    public init() {}
+    /// The session's structural-undo stack (AppSpec §9). When present,
+    /// structural ops register their inverses here; inverses run internal
+    /// revert operations that never re-register, so undoing cannot pollute
+    /// the stack.
+    public let undoStack: UndoStack?
+
+    public init(undoStack: UndoStack? = nil) {
+        self.undoStack = undoStack
+    }
 
     // MARK: - Minting
 

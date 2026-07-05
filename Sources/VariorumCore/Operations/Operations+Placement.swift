@@ -57,27 +57,11 @@ extension Operations {
             }
             let stamp = DateFormatter.variorumISO8601.string(from: deletedAt)
             let now = date.now
-            let nowStamp = DateFormatter.variorumISO8601.string(from: now)
 
             block.deletedAt = nil
             block.updatedAt = now
             try block.update(db)
-
-            try db.execute(
-                sql: """
-                    UPDATE variant SET deleted_at = NULL, updated_at = ?
-                    WHERE block_id = ? AND deleted_at = ?
-                    """,
-                arguments: [nowStamp, blockID, stamp])
-            try db.execute(
-                sql: """
-                    UPDATE edge SET deleted_at = NULL
-                    WHERE (source_block_id = ? OR target_block_id = ?) AND deleted_at = ?
-                    """,
-                arguments: [blockID, blockID, stamp])
-            try db.execute(
-                sql: "UPDATE block_tag SET deleted_at = NULL WHERE block_id = ? AND deleted_at = ?",
-                arguments: [blockID, stamp])
+            try flipBlockCascadeTombstones(db, blockID: blockID, stamp: stamp, now: now)
 
             if let lastContainerID = block.lastContainerId,
                let container = try Container.fetchOne(db, key: lastContainerID),
@@ -93,7 +77,9 @@ extension Operations {
     public func moveBlock(
         _ blockID: String, to containerID: String, at insert: InsertPosition = .end
     ) throws {
-        try database.write { db in
+        // Pre-image captured at do-time: the undo inverse restores the exact
+        // prior container and position string, never re-derives them.
+        let previous: (container: String, position: String) = try database.write { db in
             _ = try liveBlock(db, blockID)
             guard var placement = try livePlacement(db, blockID: blockID) else {
                 throw OperationError.blockNotPlaced(id: blockID)
@@ -101,29 +87,66 @@ extension Operations {
             try ensureUnlocked(try liveContainer(db, placement.containerId))
             let target = try liveContainer(db, containerID)
             try ensureUnlocked(target)
+            let previous = (placement.containerId, placement.position)
             placement.containerId = containerID
             placement.position = try containerPosition(db, containerID: containerID, at: insert)
             placement.updatedAt = date.now
             try placement.update(db)
+            return previous
+        }
+        undoStack?.register(label: "Move Block") {
+            try $0.restorePlacementLocation(
+                blockID, containerID: previous.container, position: previous.position)
         }
     }
 
     /// Reposition within the current container.
     public func reorder(_ blockID: String, to insert: InsertPosition) throws {
-        try database.write { db in
+        let previous: (container: String, position: String) = try database.write { db in
             _ = try liveBlock(db, blockID)
             guard var placement = try livePlacement(db, blockID: blockID) else {
                 throw OperationError.blockNotPlaced(id: blockID)
             }
             try ensureUnlocked(try liveContainer(db, placement.containerId))
+            let previous = (placement.containerId, placement.position)
             placement.position = try containerPosition(
                 db, containerID: placement.containerId, at: insert)
             placement.updatedAt = date.now
             try placement.update(db)
+            return previous
+        }
+        undoStack?.register(label: "Reorder") {
+            try $0.restorePlacementLocation(
+                blockID, containerID: previous.container, position: previous.position)
         }
     }
 
     // MARK: - Shared internals
+
+    /// Un-tombstones the block-cascade children (variants, edges, block
+    /// tags) that carry the block's exact deletion stamp. The placement row
+    /// is deliberately the caller's decision: `restoreBlock` re-places
+    /// fresh; undo's `revertDeleteBlock` flips the original row.
+    func flipBlockCascadeTombstones(
+        _ db: Database, blockID: String, stamp: String, now: Date
+    ) throws {
+        let nowStamp = DateFormatter.variorumISO8601.string(from: now)
+        try db.execute(
+            sql: """
+                UPDATE variant SET deleted_at = NULL, updated_at = ?
+                WHERE block_id = ? AND deleted_at = ?
+                """,
+            arguments: [nowStamp, blockID, stamp])
+        try db.execute(
+            sql: """
+                UPDATE edge SET deleted_at = NULL
+                WHERE (source_block_id = ? OR target_block_id = ?) AND deleted_at = ?
+                """,
+            arguments: [blockID, blockID, stamp])
+        try db.execute(
+            sql: "UPDATE block_tag SET deleted_at = NULL WHERE block_id = ? AND deleted_at = ?",
+            arguments: [blockID, stamp])
+    }
 
     @discardableResult
     private func insertPlacement(

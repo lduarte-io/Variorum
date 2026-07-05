@@ -59,4 +59,21 @@ extension AppDatabase {
     func clearOutbox() throws {
         try write { db in try db.execute(sql: "DELETE FROM sync_outbox") }
     }
+
+    /// Full row snapshot for exact-inverse assertions, minus the columns
+    /// undo is allowed to disturb (`updated_at` by default).
+    func snapshotRow(
+        _ table: String, _ id: String, excluding: Set<String> = ["updated_at"]
+    ) throws -> [String: DatabaseValue]? {
+        try read { db in
+            guard let row = try Row.fetchOne(
+                db, sql: "SELECT * FROM \(table) WHERE id = ?", arguments: [id])
+            else { return nil }
+            var snapshot: [String: DatabaseValue] = [:]
+            for (column, value) in row where !excluding.contains(column) {
+                snapshot[column] = value
+            }
+            return snapshot
+        }
+    }
 }
