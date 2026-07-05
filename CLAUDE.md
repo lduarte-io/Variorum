@@ -114,10 +114,9 @@ variorum/
 ## Commands
 
 ```bash
-# IMPORTANT on this machine: the active developer dir is the (old) CommandLineTools,
-# whose SDK can't compile this manifest. Prefix swift/xcodebuild commands with:
+# Note: xcode-select must point at Xcode.app (fixed 2026-07-04; was CommandLineTools,
+# whose SDK can't compile this manifest). If builds fail that way again:
 #   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-# (or ask the author to run: sudo xcode-select -s /Applications/Xcode.app)
 
 # Core package — the fast inner loop (no Xcode project needed)
 swift build
