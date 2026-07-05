@@ -42,6 +42,24 @@ public enum OperationError: Error, Equatable, Sendable {
     case alreadyInReading(postID: String, readingID: String)
     case readingAtCapacity(id: String)
 
+    // Structural operations (Phase 3).
+    /// Extract's span is not a boundary-adjacent prefix/suffix of the
+    /// rendered variant's text (a middle span is a divide), or it is blank,
+    /// out of bounds, grapheme-splitting, or the whole text.
+    case spanNotExtractable(blockID: String)
+    /// A cut offset that is out of bounds, splits a grapheme cluster, or
+    /// leaves an empty half after seam trimming.
+    case invalidCut(variantID: String, cut: Int)
+    /// Single-variant divide addressed a block with more than one live
+    /// active variant — that is the multi-variant W ceremony (`divideW`).
+    case fannedBlock(id: String)
+    /// divideW needs at least one marked variant to carry the cut through.
+    case noMarkedVariants(blockID: String)
+    /// Merge requires its two blocks placed adjacently in one container.
+    case blocksNotAdjacent(first: String, second: String)
+    /// poolDragCopy's source must live in a pool.
+    case blockNotInPool(id: String)
+
     // Tags.
     case duplicateTagPath(path: String)
     case invalidTagName(name: String)

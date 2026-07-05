@@ -22,27 +22,9 @@ extension Operations {
             let container = try liveContainer(db, containerID)
             try ensureUnlocked(container)
 
-            let now = date.now
-            var block = Block(id: newID(), createdAt: now, updatedAt: now)
-            try block.insert(db)
-
-            let variant = Variant(
-                id: newID(), blockId: block.id, workingText: text,
-                fanPosition: FractionalIndex.initial(),
-                createdAt: now, updatedAt: now)
-            try variant.insert(db)
-
-            block.defaultVariantId = variant.id
-            try block.update(db)
-
-            let placement = ContainerBlock(
-                id: newID(), containerId: containerID, blockId: block.id,
-                position: try containerPosition(db, containerID: containerID, at: insert),
-                chosenVariantId: variant.id,
-                createdAt: now, updatedAt: now)
-            try placement.insert(db)
-
-            return NewBlockResult(block: block, variant: variant, placement: placement)
+            let minted = try mintBlock(db, text: text, in: containerID, at: insert, now: date.now)
+            return NewBlockResult(
+                block: minted.block, variant: minted.variant, placement: minted.placement)
         }
     }
 }

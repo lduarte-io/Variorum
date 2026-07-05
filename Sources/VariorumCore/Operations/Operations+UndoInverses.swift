@@ -111,6 +111,76 @@ extension Operations {
         }
     }
 
+    /// One buffer's do-time pre-image, for `revertStructural`.
+    struct TextPreImage: Sendable {
+        let variantID: String
+        let text: String
+    }
+
+    /// Inverse of the block-minting structural ops (extract, divide,
+    /// divide-W, merge, poolDragCopy): restore edited buffers to their
+    /// pre-image text, tombstone the freshly minted blocks (the trigger
+    /// chain cascades to their variants, placements, and edges — fresh rows
+    /// by construction, so nothing else carries their stamp), and flip
+    /// released placement rows back live, exact position and chosen variant
+    /// intact.
+    ///
+    /// Refusal buckets per the Phase 2 rule: **resolvable refusals throw**
+    /// and keep the entry — a sealed container (unlock, retry), a dead,
+    /// archived, or locked buffer-restore target (restore/unarchive/unlock,
+    /// retry). **Divergence is left alone quietly** — a minted block already
+    /// deleted stays deleted; a released block re-homed meanwhile keeps its
+    /// new placement (I2) and one whose block or container died stays
+    /// released. `lastContainerId` is deliberately not stamped on the minted
+    /// blocks: an undone mint vanishes as if never made, and must not haunt
+    /// the deleted-blocks tray.
+    func revertStructural(
+        restoringTexts: [TextPreImage],
+        tombstoningBlocks: [String],
+        revivingPlacementRows: [String]
+    ) throws {
+        try database.write { db in
+            let now = date.now
+
+            for preImage in restoringTexts {
+                var variant = try liveVariant(db, preImage.variantID)
+                _ = try liveBlock(db, variant.blockId)
+                try ensurePlacementUnlocked(db, blockID: variant.blockId)
+                try ensureEditable(variant)
+                guard variant.workingText != preImage.text else { continue }
+                variant.workingText = preImage.text
+                variant.updatedAt = now
+                try variant.update(db)
+            }
+
+            for blockID in tombstoningBlocks {
+                guard var block = try Block.fetchOne(db, key: blockID),
+                      block.deletedAt == nil
+                else { continue }  // already gone — the world moved past this
+                try ensurePlacementUnlocked(db, blockID: blockID)
+                block.deletedAt = now
+                block.updatedAt = now
+                try block.update(db)
+            }
+
+            for rowID in revivingPlacementRows {
+                guard let row = try ContainerBlock.fetchOne(db, key: rowID),
+                      row.deletedAt != nil,
+                      let block = try Block.fetchOne(db, key: row.blockId),
+                      block.deletedAt == nil,
+                      let container = try Container.fetchOne(db, key: row.containerId),
+                      container.deletedAt == nil
+                else { continue }
+                try ensureUnlocked(container)
+                guard try livePlacement(db, blockID: row.blockId) == nil else { continue }
+                var revived = row
+                revived.deletedAt = nil
+                revived.updatedAt = now
+                try revived.update(db)
+            }
+        }
+    }
+
     private func restoreDefaultVariant(
         _ db: Database, blockID: String, to variantID: String, now: Date
     ) throws {
