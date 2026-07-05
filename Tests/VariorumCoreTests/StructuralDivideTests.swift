@@ -3,6 +3,32 @@ import GRDB
 import Testing
 @testable import VariorumCore
 
+/// The shared W stage: A placed between two neighbors, carrying a
+/// three-take fan — V1 (default + chosen), V2, V3 in fan order.
+struct WWorld {
+    let post: Container
+    let before: Operations.NewBlockResult
+    let a: Operations.NewBlockResult
+    let after: Operations.NewBlockResult
+    let v1: String
+    let v2: String
+    let v3: String
+
+    init(_ ops: Operations) throws {
+        post = try ops.createPost()
+        before = try ops.newBlock(in: post.id, text: "before")
+        a = try ops.newBlock(in: post.id, text: "One alpha. One omega.")
+        after = try ops.newBlock(in: post.id, text: "after")
+        v1 = a.variant.id
+        let take2 = try ops.branchVariant(a.block.id, from: v1)
+        try ops.autosave(take2.id, text: "Two intact.", charDelta: 0)
+        let take3 = try ops.branchVariant(a.block.id, from: take2.id)
+        try ops.autosave(take3.id, text: "Three start.\nThree end.", charDelta: 0)
+        v2 = take2.id
+        v3 = take3.id
+    }
+}
+
 @Suite("Divide, single-variant (Phase 3, Step 3)")
 struct StructuralDivideTests {
     @Test func divideExactRows() throws {
@@ -144,6 +170,208 @@ struct StructuralDivideTests {
                 "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) != nil)
             #expect(try db.fetchString(
                 "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id]) != nil)
+        }
+    }
+
+    @Test func divideWWorkedExampleExactRows() throws {
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 11,  // "One alpha. | One omega."
+                world.v3: 13,  // "Three start.\n | Three end."
+            ])
+
+            // A is preserved whole: live, unplaced, fan + default untouched.
+            #expect(try db.deletedAt("block", world.a.block.id) == nil)
+            #expect(try db.read { try ops.livePlacement($0, blockID: world.a.block.id) } == nil)
+            #expect(try db.deletedAt("container_block", result.releasedPlacementID) != nil)
+            for (variant, text) in [
+                (world.v1, "One alpha. One omega."),
+                (world.v2, "Two intact."),
+                (world.v3, "Three start.\nThree end."),
+            ] {
+                #expect(try db.fetchString(
+                    "SELECT working_text FROM variant WHERE id = ?", [variant]) == text)
+                #expect(try db.deletedAt("variant", variant) == nil)
+            }
+            #expect(try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [world.a.block.id]) == world.v1)
+
+            // B carries the first halves, C the second, marked order preserved.
+            #expect(result.markedSourceIDs == [world.v1, world.v3])
+            #expect(result.first.variants.map(\.workingText) == ["One alpha.", "Three start."])
+            #expect(result.second.variants.map(\.workingText) == ["One omega.", "Three end."])
+            #expect(result.first.variants[0].fanPosition < result.first.variants[1].fanPosition)
+            #expect(result.second.variants[0].fanPosition < result.second.variants[1].fanPosition)
+
+            // Rendered (V1) was marked: its halves are default AND chosen.
+            #expect(result.first.block.defaultVariantId == result.first.variants[0].id)
+            #expect(result.second.block.defaultVariantId == result.second.variants[0].id)
+            #expect(result.first.placement.chosenVariantId == result.first.variants[0].id)
+            #expect(result.second.placement.chosenVariantId == result.second.variants[0].id)
+
+            // B then C stand exactly where A stood.
+            #expect(try liveBlockOrder(db, in: world.post.id) == [
+                world.before.block.id, result.first.block.id,
+                result.second.block.id, world.after.block.id,
+            ])
+
+            // Lineage: both successors derive from A via divide.
+            for half in [result.first, result.second] {
+                #expect(half.edge.sourceBlockId == half.block.id)
+                #expect(half.edge.targetBlockId == world.a.block.id)
+                #expect(half.edge.type == .derivedFrom)
+                #expect(half.edge.originOp == "divide")
+            }
+        }
+    }
+
+    @Test func divideWMixAndMatch() throws {
+        // The W payoff: first-half-of-attempt-1 with second-half-of-attempt-3.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [world.v1: 11, world.v3: 13])
+
+            try ops.chooseVariant(result.second.block.id, variantID: result.second.variants[1].id)
+
+            #expect(try db.read { try ops.renderedVariant($0, blockID: result.first.block.id) }
+                .workingText == "One alpha.")
+            #expect(try db.read { try ops.renderedVariant($0, blockID: result.second.block.id) }
+                .workingText == "Three end.")
+        }
+    }
+
+    @Test func divideWWithRenderedUnmarkedUsesFirstMarkedDefaults() throws {
+        try withOperations { ops, db in
+            let world = try WWorld(ops)  // rendered = chosen = V1
+            let result = try ops.divideW(world.a.block.id, cuts: [world.v3: 13])
+
+            #expect(result.first.variants.map(\.workingText) == ["Three start."])
+            #expect(result.first.block.defaultVariantId == result.first.variants[0].id)
+            // Chosen stays NULL: the slot renders the default by fallback.
+            #expect(result.first.placement.chosenVariantId == nil)
+            #expect(result.second.placement.chosenVariantId == nil)
+            #expect(try db.read { try ops.renderedVariant($0, blockID: result.second.block.id) }
+                .workingText == "Three end.")
+        }
+    }
+
+    @Test func divideWReversibleByRePointingAtA() throws {
+        // The W promise made real: release the successors, placeBlock(A),
+        // and the reading is back — nobody's five editors disappeared.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [world.v1: 11, world.v3: 13])
+
+            try ops.deleteBlock(result.first.block.id)
+            try ops.deleteBlock(result.second.block.id)
+            try ops.placeBlock(world.a.block.id, in: world.post.id, at: .before(world.after.block.id))
+
+            #expect(try liveBlockOrder(db, in: world.post.id)
+                == [world.before.block.id, world.a.block.id, world.after.block.id])
+            #expect(try db.read { try ops.renderedVariant($0, blockID: world.a.block.id) }
+                .workingText == "One alpha. One omega.")
+        }
+    }
+
+    @Test func divideWLockedMarkedVariantCarriesThrough() throws {
+        // A locked variant's buffer is copied, never edited — the guard
+        // protects the original, which W leaves untouched on A.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            try ops.lockVariant(world.v3)
+            let result = try ops.divideW(world.a.block.id, cuts: [world.v3: 13])
+            #expect(result.first.variants[0].workingText == "Three start.")
+            #expect(try db.fetchInt(
+                "SELECT locked FROM variant WHERE id = ?", [world.v3]) == 1)
+            // The copies are not born locked.
+            #expect(result.first.variants[0].locked == false)
+        }
+    }
+
+    @Test func divideWRefusals() throws {
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let world = try WWorld(ops)
+            let a = world.a.block.id
+
+            #expect(throws: OperationError.noMarkedVariants(blockID: a)) {
+                try ops.divideW(a, cuts: [:])
+            }
+            #expect(throws: OperationError.invalidCut(variantID: world.v1, cut: 0)) {
+                try ops.divideW(a, cuts: [world.v1: 0])
+            }
+            #expect(throws: OperationError.variantNotFound(id: "stranger")) {
+                try ops.divideW(a, cuts: ["stranger": 5])
+            }
+            // A variant of some other block is a foreign mark too.
+            #expect(throws: OperationError.variantNotFound(id: world.before.variant.id)) {
+                try ops.divideW(a, cuts: [world.before.variant.id: 3])
+            }
+            try ops.archiveVariant(world.v2)
+            #expect(throws: OperationError.archivedVariant(id: world.v2)) {
+                try ops.divideW(a, cuts: [world.v2: 5])
+            }
+            try ops.lockPost(world.post.id)
+            #expect(throws: OperationError.lockedPost(id: world.post.id)) {
+                try ops.divideW(a, cuts: [world.v1: 11])
+            }
+            try ops.unlockPost(world.post.id)
+
+            // Nothing minted, nothing released, undo stack clean of divides.
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM edge") == 0)
+            #expect(try db.deletedAt("container_block", world.a.placement.id) == nil)
+            #expect(stack.topLabel != "Divide")
+        }
+    }
+
+    @Test func divideWUndoFlipsThePlacementAndTombstonesTheSuccessors() throws {
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let world = try WWorld(ops)
+            let placementBefore = try db.snapshotRow("container_block", world.a.placement.id)
+
+            let result = try ops.divideW(world.a.block.id, cuts: [world.v1: 11, world.v3: 13])
+            #expect(stack.topLabel == "Divide")
+
+            try stack.undo(with: ops)
+
+            // A's exact placement row is back — position and chosen intact.
+            #expect(try db.snapshotRow("container_block", world.a.placement.id) == placementBefore)
+            #expect(try liveBlockOrder(db, in: world.post.id)
+                == [world.before.block.id, world.a.block.id, world.after.block.id])
+            for half in [result.first, result.second] {
+                #expect(try db.deletedAt("block", half.block.id) != nil)
+                #expect(try db.deletedAt("container_block", half.placement.id) != nil)
+                #expect(try db.deletedAt("edge", half.edge.id) != nil)
+                for variant in half.variants {
+                    #expect(try db.deletedAt("variant", variant.id) != nil)
+                }
+            }
+            #expect(stack.depth == 0)
+        }
+    }
+
+    @Test func divideWUndoLeavesARePlacedBlockAlone() throws {
+        // Divergence rule: if A found a new home between do and undo, I2
+        // wins — the undo still clears the successors but never dual-places A.
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [world.v1: 11])
+
+            let elsewhere = try ops.createPost()
+            try ops.placeBlock(world.a.block.id, in: elsewhere.id)
+
+            try stack.undo(with: ops)
+
+            #expect(try db.deletedAt("block", result.first.block.id) != nil)
+            #expect(try db.deletedAt("container_block", world.a.placement.id) != nil)  // stays released
+            let home = try db.read { try ops.livePlacement($0, blockID: world.a.block.id) }
+            #expect(home?.containerId == elsewhere.id)
         }
     }
 

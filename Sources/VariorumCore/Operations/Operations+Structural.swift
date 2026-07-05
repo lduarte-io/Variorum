@@ -187,6 +187,126 @@ extension Operations {
         return result
     }
 
+    // MARK: - Divide, multi-variant (W — the one ceremony)
+
+    /// One successor block of a W divide: its half-fan in marked order.
+    public struct FanHalf: Equatable, Sendable {
+        public let block: Block
+        /// One variant per marked source variant, in fan order.
+        public let variants: [Variant]
+        public let placement: ContainerBlock
+        public let edge: Edge
+    }
+
+    public struct DivideWResult: Equatable, Sendable {
+        /// B — the first halves.
+        public let first: FanHalf
+        /// C — the second halves.
+        public let second: FanHalf
+        /// The marked source variants in fan order — `first.variants[i]` and
+        /// `second.variants[i]` are the halves of `markedSourceIDs[i]`.
+        public let markedSourceIDs: [String]
+        /// A's released placement row (the pre-image undo flips back live).
+        public let releasedPlacementID: String
+    }
+
+    /// AppSpec §9, W resolution: marked variants carry the cut through —
+    /// B's fan is their first halves, C's fan their second halves, relative
+    /// order preserved (enabling first-half-of-attempt-1 with
+    /// second-half-of-attempt-3 via `chooseVariant`). The source block A is
+    /// **preserved whole**: its placement is released (tombstoned — A stays
+    /// live and unplaced, the unplaced-blocks population), every variant and
+    /// commit untouched, unmarked variants staying on A as lineage.
+    /// Reversible by re-pointing at A (`placeBlock`). B/C defaults are the
+    /// halves of A's rendered variant when it is marked (also the new
+    /// placements' chosen), else the halves of the first marked variant
+    /// (chosen left NULL). Cuts are per-variant UTF-16 offsets, seam-trimmed.
+    /// Marked variants may be locked — their buffers are copied, not edited.
+    @discardableResult
+    public func divideW(_ blockID: String, cuts: [String: Int]) throws -> DivideWResult {
+        let result: DivideWResult = try database.write { db in
+            let context = try placedContext(db, blockID: blockID)
+            guard !cuts.isEmpty else {
+                throw OperationError.noMarkedVariants(blockID: blockID)
+            }
+            for variantID in cuts.keys.sorted() {
+                let variant = try liveVariant(db, variantID)
+                guard variant.blockId == blockID else {
+                    throw OperationError.variantNotFound(id: variantID)
+                }
+                guard variant.status == .active else {
+                    throw OperationError.archivedVariant(id: variantID)
+                }
+            }
+
+            let fan = try Variant.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM variant
+                    WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                    ORDER BY fan_position, id
+                    """,
+                arguments: [blockID])
+            let marked = fan.filter { cuts.keys.contains($0.id) }
+            var halves: [(first: String, second: String)] = []
+            for variant in marked {
+                let cut = cuts[variant.id] ?? 0
+                guard let pair = BoundarySnapping.seamTrimmedHalves(
+                        variant.workingText, cutAtUTF16: cut),
+                      !pair.first.isEmpty, !pair.second.isEmpty
+                else { throw OperationError.invalidCut(variantID: variant.id, cut: cut) }
+                halves.append(pair)
+            }
+
+            let now = date.now
+
+            // Release A's placement; A itself is preserved whole.
+            var released = context.placement
+            released.deletedAt = now
+            released.updatedAt = now
+            try released.update(db)
+
+            // B then C stand exactly where A stood.
+            let containerID = context.container.id
+            func neighbor(_ aggregate: String, _ comparison: String) throws -> String? {
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT \(aggregate)(position) FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL AND position \(comparison) ?
+                        """,
+                    arguments: [containerID, context.placement.position])
+            }
+            let follower = try neighbor("MIN", ">")
+            let positionB = FractionalIndex.between(try neighbor("MAX", "<"), follower)
+            let positionC = FractionalIndex.between(positionB, follower)
+
+            // Defaults and chosen: the rendered variant's halves when it is
+            // marked; otherwise the first marked variant's halves, chosen NULL.
+            let renderedIndex = marked.firstIndex { $0.id == context.rendered.id }
+            let first = try mintFanBlock(
+                db, texts: halves.map(\.first), in: containerID, position: positionB,
+                defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
+                ancestor: blockID, originOp: "divide", now: now)
+            let second = try mintFanBlock(
+                db, texts: halves.map(\.second), in: containerID, position: positionC,
+                defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
+                ancestor: blockID, originOp: "divide", now: now)
+
+            return DivideWResult(
+                first: first, second: second,
+                markedSourceIDs: marked.map(\.id),
+                releasedPlacementID: context.placement.id)
+        }
+        undoStack?.register(label: "Divide") {
+            try $0.revertStructural(
+                restoringTexts: [],
+                tombstoningBlocks: [result.first.block.id, result.second.block.id],
+                revivingPlacementRows: [result.releasedPlacementID])
+        }
+        return result
+    }
+
     // MARK: - Shared internals
 
     struct PlacedContext {
@@ -256,6 +376,44 @@ extension Operations {
         try placement.insert(db)
 
         return MintedBlock(block: block, variant: variant, placement: placement)
+    }
+
+    /// A fresh block carrying a whole half-fan (divide-W's successors): one
+    /// variant per text, fresh fan positions preserving the given order,
+    /// parentless (block-level edges carry the lineage; the variant parent
+    /// tree never crosses blocks), placed at an exact position with edge.
+    private func mintFanBlock(
+        _ db: Database, texts: [String], in containerID: String, position: String,
+        defaultIndex: Int, chosenIndex: Int?, ancestor: String, originOp: String, now: Date
+    ) throws -> FanHalf {
+        var block = Block(id: newID(), createdAt: now, updatedAt: now)
+        try block.insert(db)
+
+        var variants: [Variant] = []
+        var lastFanPosition: String?
+        for text in texts {
+            let fanPosition = lastFanPosition.map { FractionalIndex.between($0, nil) }
+                ?? FractionalIndex.initial()
+            let variant = Variant(
+                id: newID(), blockId: block.id, workingText: text,
+                fanPosition: fanPosition, createdAt: now, updatedAt: now)
+            try variant.insert(db)
+            variants.append(variant)
+            lastFanPosition = fanPosition
+        }
+
+        block.defaultVariantId = variants[defaultIndex].id
+        try block.update(db)
+
+        let placement = ContainerBlock(
+            id: newID(), containerId: containerID, blockId: block.id,
+            position: position, chosenVariantId: chosenIndex.map { variants[$0].id },
+            createdAt: now, updatedAt: now)
+        try placement.insert(db)
+
+        let edge = try insertLineageEdge(
+            db, from: block.id, to: ancestor, originOp: originOp, now: now)
+        return FanHalf(block: block, variants: variants, placement: placement, edge: edge)
     }
 
     /// The coarse lineage record: `(descendant derived_from ancestor)`,
