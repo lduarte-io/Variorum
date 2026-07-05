@@ -3,12 +3,14 @@ import GRDB
 import Testing
 @testable import VariorumCore
 
-/// Phase 2, Step 9: seeded-random sequences over the whole non-structural op
-/// set, with DB-wide invariant predicates checked along the way. Typed
-/// refusals (`OperationError`) count as no-ops — the guards ARE the product.
-/// Anything else escaping an operation (a SQLite constraint error above all)
-/// means an invariant survived only by luck; the test fails on it.
-@Suite("Randomized invariant sweep (Phase 2, Step 9)")
+/// Phase 2, Step 9 (extended Phase 3, Step 7): seeded-random sequences over
+/// the whole op set — lifecycle AND structural (extract, divide, divide-W,
+/// merge, poolDragCopy, their undos) — with DB-wide invariant predicates
+/// checked along the way. Typed refusals (`OperationError`) count as no-ops —
+/// the guards ARE the product. Anything else escaping an operation (a SQLite
+/// constraint error above all) means an invariant survived only by luck; the
+/// test fails on it.
+@Suite("Randomized invariant sweep (Phases 2+3)")
 struct InvariantSweepTests {
     @Test(arguments: [1, 7, 42, 99, 512, 8_191, 20_260_705] as [UInt64])
     func randomOpSequencesPreserveTheInvariants(seed: UInt64) throws {
@@ -40,7 +42,8 @@ struct InvariantSweepTests {
     private func assertInvariants(_ db: AppDatabase, at step: Int) throws {
         // I10 + default lifecycle: every live block has ≥1 live active
         // variant, and its default_variant_id names one of its own live
-        // active variants.
+        // active variants. Covers released blocks too (live + unplaced —
+        // divide-W/merge lineage): release never weakens I10.
         #expect(try db.fetchInt(
             """
             SELECT COUNT(*) FROM block b
@@ -112,6 +115,16 @@ struct InvariantSweepTests {
             #expect(try db.fetchInt(sql) == 0, "\(label) dangling at step \(step)")
         }
 
+        // Lineage vocabulary: every derived_from edge this op set can mint
+        // carries the operation that minted it.
+        #expect(try db.fetchInt(
+            """
+            SELECT COUNT(*) FROM edge
+            WHERE type = 'derived_from'
+              AND (origin_op IS NULL
+                   OR origin_op NOT IN ('divide', 'merge', 'extract', 'pool_copy'))
+            """) == 0, "unknown derived_from origin_op at step \(step)")
+
         // Position hygiene: every live ordering key is a valid fractional
         // index (base-62, non-empty, no trailing minimum digit) — so every
         // (position, id) sort is stable and every gap remains bisectable.
@@ -152,7 +165,7 @@ private struct Sweep {
     }
 
     private mutating func performOne() throws {
-        switch Int.random(in: 0..<26, using: &rng) {
+        switch Int.random(in: 0..<31, using: &rng) {
         case 0:
             _ = try ops.createPost(title: text(), profile: Bool.random(using: &rng) ? .journal : nil)
         case 1:
@@ -299,6 +312,76 @@ private struct Sweep {
             } else if let reference = try random("SELECT id FROM reference WHERE deleted_at IS NULL") {
                 try ops.removeReference(reference)
             }
+        case 25:
+            // Extract: a snapped-boundary prefix/suffix when one exists,
+            // otherwise an arbitrary span (the refusal path is product too).
+            if let block = try randomPlacedBlock(), let text = try renderedText(of: block) {
+                let boundaries = BoundarySnapping.boundaries(in: text, granularity: .sentence)
+                let span: Range<Int>
+                if boundaries.count > 2, Bool.random(using: &rng) {
+                    let cut = boundaries[Int.random(in: 1..<(boundaries.count - 1), using: &rng)]
+                    span = Bool.random(using: &rng) ? 0..<cut : cut..<text.utf16.count
+                } else {
+                    let end = max(text.utf16.count, 1)
+                    let a = Int.random(in: 0..<end, using: &rng)
+                    let b = Int.random(in: a...end, using: &rng)
+                    span = a..<b
+                }
+                _ = try ops.extract(block, span: span)
+            }
+        case 26:
+            if let block = try randomPlacedBlock(), let text = try renderedText(of: block) {
+                _ = try ops.divide(block, cut: randomCut(in: text))
+            }
+        case 27:
+            // Divide-W: mark a random subset of the fan, cut each somewhere.
+            if let block = try randomPlacedBlock() {
+                let fan = try db.read { db in
+                    try Row.fetchAll(
+                        db,
+                        sql: """
+                            SELECT id, working_text FROM variant
+                            WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                            """,
+                        arguments: [block])
+                }
+                var cuts: [String: Int] = [:]
+                for row in fan where Bool.random(using: &rng) {
+                    cuts[row["id"]] = randomCut(in: row["working_text"])
+                }
+                _ = try ops.divideW(block, cuts: cuts)
+            }
+        case 28:
+            // Merge a random adjacent pair (or a random non-pair — refusal).
+            if let container = try random(
+                "SELECT DISTINCT container_id FROM container_block WHERE deleted_at IS NULL") {
+                let order = try db.read { db in
+                    try String.fetchAll(
+                        db,
+                        sql: """
+                            SELECT block_id FROM container_block
+                            WHERE container_id = ? AND deleted_at IS NULL
+                            ORDER BY position, id
+                            """,
+                        arguments: [container])
+                }
+                if order.count >= 2 {
+                    let index = Int.random(in: 0..<(order.count - 1), using: &rng)
+                    _ = try ops.merge(order[index], order[index + 1])
+                }
+            }
+        case 29:
+            if let block = try random(
+                """
+                SELECT cb.block_id FROM container_block cb
+                JOIN container c ON c.id = cb.container_id AND c.kind = 'pool'
+                WHERE cb.deleted_at IS NULL AND c.deleted_at IS NULL
+                """),
+               let post = try random(
+                "SELECT id FROM container WHERE deleted_at IS NULL AND kind = 'post'") {
+                _ = try ops.poolDragCopy(
+                    block, to: post, at: position(), includeFan: Bool.random(using: &rng))
+            }
         default:
             _ = try stack.undo(with: ops)
         }
@@ -319,6 +402,30 @@ private struct Sweep {
         guard !rows.isEmpty else { return nil }
         let row = rows[Int.random(in: 0..<rows.count, using: &rng)]
         return (row["id"], row["block_id"])
+    }
+
+    private mutating func randomPlacedBlock() throws -> String? {
+        try random(
+            """
+            SELECT b.id FROM block b
+            JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
+            WHERE b.deleted_at IS NULL
+            """)
+    }
+
+    private func renderedText(of blockID: String) throws -> String? {
+        try? db.read { try ops.renderedVariant($0, blockID: blockID).workingText }
+    }
+
+    /// A snapped sentence boundary when one exists (mostly the success
+    /// path), else an arbitrary offset (bounds/grapheme refusals are
+    /// product too).
+    private mutating func randomCut(in text: String) -> Int {
+        let boundaries = BoundarySnapping.boundaries(in: text, granularity: .sentence)
+        if boundaries.count > 2, Bool.random(using: &rng) {
+            return boundaries[Int.random(in: 1..<(boundaries.count - 1), using: &rng)]
+        }
+        return Int.random(in: 0...(text.utf16.count + 1), using: &rng)
     }
 
     private mutating func text() -> String {
