@@ -26,6 +26,7 @@ SQLite (Mac) ──┐                        ┌── SQLite (iPhone)
                      + server_seq changefeed
 ```
 - Server: one Postgres table per synced client table, same columns, plus `server_seq BIGINT` (global monotonic, stamped by trigger from one sequence on every insert/update) and `sync_version INTEGER` (incremented on every server-accepted change).
+- **The mirror tables carry NO uniqueness constraints beyond the PK and NO foreign keys.** This is load-bearing, not laziness: the whole repair design (§7) requires the server to dumbly accept both sides of a race (two live placements for one block, dangling references mid-batch) so clients can repair deterministically. Mirroring the client's live-unique indexes or FKs onto Postgres breaks convergence. (Review finding #5, 2026-07-04.)
 - Two endpoints (Supabase RPC / edge functions): **push(batch)** and **pull(sinceSeq)**. No server domain logic beyond compare-and-set.
 - Auth: single-user token now; accounts phase adds `owner_id` population + RLS partitioning of the same endpoints.
 
@@ -62,7 +63,13 @@ Concurrent offline writes can produce two *live* rows that violate a partial uni
 
 - **`container_block.block_id` (I2, move/move race):** the row with the higher `server_seq` wins (later intent); the other placement is tombstoned locally (and the repair pushes).
 - **`tag.path` (duplicate creation):** keep the row with the lexically smaller `id`; re-point the duplicate's `post_tag`/`block_tag` rows to the keeper; tombstone the duplicate.
-- **`edge` triple / `reading_post` pair / `post_tag`·`block_tag` pairs:** pure duplicates — keep smaller `id`, tombstone the other.
+- **`edge` triple / `reading_post` pair / `post_tag`·`block_tag` pairs:** pure duplicates — keep smaller `id`, tombstone the other. For undirected `version_of` edges the operations layer stores the pair canonically as `(min(id), max(id))`, and this repair treats a reversed pair as a duplicate (review finding #8).
+- **I10 double-tombstone race (review finding #1):** device A deletes variant V1 (V2 survives), device B concurrently deletes V2 (V1 survives) — both legal locally; tombstones-win converges to a live block with zero live variants, violating I10 without either device breaking a rule. Repair: if applying variant tombstones would leave a live block with no live active variant, **resurrect the tombstoned variant with the highest `server_seq`** (deterministic on every device), status `active`, label `'rescued'`. Resurrection over block-deletion because both devices wanted the block alive with *some* text — deleting it matches neither intent, and the pointer religion says rescue, never lose.
+- **Dangling chosen variant (review finding #2):** device A re-points a slot away from V1 and tombstones V1; device B concurrently sets the same slot's `chosen_variant_id = V1`. Different tables, both CAS-accepted; RESTRICT never fires (tombstones are UPDATEs). Two-layer fix: **read-time, the fallback rule covers it** (a tombstoned or archived chosen variant renders as `default_variant_id`, same as NULL — AppSpec §7); **apply-time, the repair NULLs the dangling pointer** so the converged state is explicit and pushes. Same repair reassigns a `default_variant_id` that arrives dead.
+
+**Repairs and echo suppression (review finding #4):** repairs run inside the apply transaction, where the `_sync_applying` flag has muted the outbox triggers — so **repair writes enqueue their outbox rows explicitly** (direct `INSERT OR REPLACE INTO sync_outbox`). Without this, repairs would be applied locally but never pushed, and the two devices would never converge. Every repair test must assert the outbox row exists.
+
+**Documented convergence behavior, not a bug (review finding #6):** two devices structurally dividing the *same block* offline converge to duplicated content (both tombstone A's placement; both insert their own fresh-UUID successors; no index is violated, so no repair fires; the post reads B₁C₁B₂C₂). Accepted: structural editing is desktop-only by product design, making the race author-vs-herself-on-one-machine rare to impossible in practice. The Phase 5 suite includes a test *documenting* this outcome so it is never a surprise.
 
 These repairs are ordinary domain operations (tested like any operation), run inside the apply transaction.
 

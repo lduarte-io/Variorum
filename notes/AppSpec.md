@@ -137,7 +137,7 @@ CREATE UNIQUE INDEX uq_edge_live ON edge(source_block_id, target_block_id, type)
 CREATE INDEX idx_edge_source ON edge(source_block_id, type);
 CREATE INDEX idx_edge_target ON edge(target_block_id, type);
 ```
-> `derived_from (source, target)` reads "source is derived from target" (target = ancestor). `version_of` is undirected (store one row; treat symmetrically in queries). This one coarse table carries split/merge/extract/pool lineage **and** outline→draft mapping **and** "two versions of an article" links.
+> `derived_from (source, target)` reads "source is derived from target" (target = ancestor). `version_of` is undirected — the operations layer stores it **canonically as `(min(id), max(id))`** so two devices creating the same relationship converge to one row (SyncSpec §7 treats a reversed pair as a duplicate). This one coarse table carries split/merge/extract/pool lineage **and** outline→draft mapping **and** "two versions of an article" links.
 
 ### container — posts and pools (unified for single-ownership enforcement)
 ```sql
@@ -175,7 +175,7 @@ CREATE TABLE container_block (
   container_id      TEXT NOT NULL,
   block_id          TEXT NOT NULL,
   position          TEXT NOT NULL,             -- fractional-index key (§6)
-  chosen_variant_id TEXT,             -- which variant renders here (I3); NULL ⇒ fall back to block.default_variant_id
+  chosen_variant_id TEXT,             -- which variant renders here (I3); NULL **or tombstoned/archived** ⇒ fall back to block.default_variant_id (read-time rule; sync races can leave it dangling — SyncSpec §7 repairs it)
   created_at        TEXT NOT NULL,
   updated_at        TEXT NOT NULL,
   deleted_at        TEXT,
@@ -235,8 +235,11 @@ CREATE TABLE tag (
   owner_id   TEXT,
   parent_id  TEXT,
   name       TEXT NOT NULL,
-  path       TEXT NOT NULL,                    -- materialized: 'life/goals/2024'
+  path       TEXT NOT NULL,                    -- materialized: 'life/goals/2024' — the ONE deliberate
+                                               -- denormalization (parent names copied downward);
+                                               -- renameTag rewrites the subtree's paths (§9)
   created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
   deleted_at TEXT,
   FOREIGN KEY (parent_id) REFERENCES tag(id)
 );
@@ -274,12 +277,35 @@ CREATE INDEX idx_block_tag_block ON block_tag(block_id);
 ```
 > **Delta from source SPEC** (which had one polymorphic `tagging` table): two tables restore real DB-enforced foreign keys and drop the app-enforced discriminator — DB-enforced integrity was a stated reason for choosing SQLite, so the model should collect on it. Post-level tags drive the main UI; block-level tags primarily serve the pool. "Everything tagged X" queries UNION the two tables — acceptable, and rare outside the pool.
 
+### reference — external source material attached to a post (a viewing aid, NOT a knowledge base)
+```sql
+CREATE TABLE reference (
+  id            TEXT PRIMARY KEY,
+  owner_id      TEXT,
+  container_id  TEXT NOT NULL,
+  kind          TEXT NOT NULL CHECK (kind IN ('file','url')),
+  name          TEXT,
+  url           TEXT,               -- kind='url'
+  file_bookmark BLOB,               -- kind='file': security-scoped bookmark — LOCAL-ONLY, excluded from sync payloads
+  view_state    TEXT,               -- remembered page/scroll position (JSON)
+  position      TEXT NOT NULL,      -- fractional-index key (§6)
+  created_at    TEXT NOT NULL,
+  updated_at    TEXT NOT NULL,
+  deleted_at    TEXT,
+  FOREIGN KEY (container_id) REFERENCES container(id)
+);
+CREATE INDEX idx_reference_container ON reference(container_id, position);
+```
+> Author-approved 2026-07-04 (resolves the "sources to the side" interpretation): per-post references rendered in a side panel — Quick Look previews generally, PDFKit for PDFs/books (page memory + **text selection dragged into the draft lands as a pool-drag-style copy**), URLs shown via a read-only `WKWebView` pane or opened externally. **Out of scope permanently:** EPUB rendering, annotation/highlight sync, citation management — that way lies the knowledge base this app refuses to be. The row syncs; `file_bookmark` does not (files are per-machine; re-link on another device if wanted).
+
 ### setting — global/document key-values
 ```sql
 CREATE TABLE setting (key TEXT PRIMARY KEY, value TEXT NOT NULL);
--- seeds: ('default_segmentation','paragraph'), ('major_revision_threshold','0.8')
+-- seeds: ('default_segmentation','paragraph'), ('major_revision_threshold','0.8'), ('idle_commit_hours','24')
 ```
-> Default segmentation is a document/global setting decoupled from UI/mode; `container.segmentation_default` overrides per-post; `profile='journal'` seeds `one_block`.
+> Default segmentation is a document/global setting decoupled from UI/mode; `container.segmentation_default` overrides per-post; `profile='journal'` seeds `one_block`. Settings are **synced** (they're document semantics — segmentation must match on iOS capture): they carry `sync_version` per §6, are upsert-only, and never tombstone.
+>
+> **Segmentation trigger (author decision 2026-07-04, review item #11):** fresh-text segmentation is **type-time crystallization** — while typing brand-new text at the end of a post, each completed paragraph silently becomes a block as you type past it; the trailing paragraph still being typed is an *open tail*, not yet a block. Bulk entry (paste, import, pool-drop, mobile capture) segments on entry. Once a block exists, Enter inside it is pure content forever — I4 is never violated because crystallization only ever applies to text that has not yet become a block. The boundary-detection logic is a pure Domain function (Phase 2).
 
 ### local-only sync machinery (never synced; SyncSpec §3)
 ```sql
@@ -313,23 +339,30 @@ Every mutation is one of these; each is a single transaction through the operati
 - **newBlock(container, text, at)** — INSERT block; INSERT variant(working_text=text); set block.default_variant_id; INSERT container_block(chosen=variant, position at insertion point).
 - **autosave(variant, text, charDelta)** — UPDATE working_text, updated_at; accumulate churn; threshold-cross ⇒ stamp major revision, reset, rebaseline (§10).
 - **commit(variant, kind=manual, message?)** — INSERT commit_point(text=working_text). Counts as a major revision.
-- **restoreCommit(variant, commit)** — UPDATE working_text = commit.text (old commits remain; I5).
+- **idleAutoCommit(post)** *(author-approved 2026-07-04)* — when a post with uncommitted buffer changes goes untouched for `idle_commit_hours` (setting, default 24): one commit_point per dirty variant, kind='auto', at most one per idle period, only if the text changed since that variant's last commit. Visually quiet, prunable. Insurance for "I rewrote it over weeks and never committed."
+- **restoreCommit(variant, commit)** — UPDATE working_text = commit.text (old commits remain; I5). **Known behavior (review #9):** a commit may predate a structural op — after a single-variant divide or extract, A's old commits still hold the full pre-split text, so restoring one resurrects both halves into A's buffer while the successor block still sits next door. Coherent under "coarse, not forensic"; the editor should warn ("this commit predates a split of this block") — documented Phase 3 test, UI warning at the editor phase.
 - **branchVariant(block, fromVariant)** — INSERT variant(parent=fromVariant, working_text=**copied**, fan_position=next). *The default gesture.*
 - **newBlankVariant(block)** — branch with working_text=''. *The "genuinely different take" gesture.*
-- **extract(blockA, span)** — *source survives.* Span must be a boundary-adjacent prefix/suffix of A's active variant. INSERT block B + variant(text=span); UPDATE A's active variant = remainder (other variants untouched); INSERT container_block(B) adjacent; edge(B derived_from A, 'extract'). Zero ceremony. A middle span cannot extract — that's a divide.
+- **extract(blockA, span)** — *source survives.* Span must be a boundary-adjacent prefix/suffix of A's active variant. INSERT block B + variant(text=span); UPDATE A's active variant = remainder (other variants untouched); INSERT container_block(B) adjacent; edge(B derived_from A, 'extract'). Zero ceremony. A middle span cannot extract — that's a divide. **Known behavior (review #10):** extracting from a *fanned* block edits only the chosen variant — the other variants keep their own versions of that span, so switching the slot's chosen variant later shows the extracted content twice. Accepted (the model-level "fix" would be per-variant marking, i.e. turning extract into divide); the editor may hint when extracting from a fanned block.
 - **divide(blockA, cut)** — *source consumed into ordered successors.*
   - **single-variant (everyday, in-place):** INSERT block C + variant(text=A[cut:]); UPDATE A's variant = A[:cut] (A keeps identity as first half — lossless, no fan to desync); INSERT container_block(C) after A; edge(C derived_from A, 'divide').
   - **multi-variant (rare; the only ceremony; W resolution):** A is **preserved whole** — its placement is released (container_block tombstoned), unmarked variants stay on A as lineage. For each marked variant Vi: INSERT first-half variant on new block B, second-half on new block C → B's fan = first-halves, C's fan = second-halves. INSERT placements B then C where A stood; edges (B derived_from A), (C derived_from A, 'divide'). Reversible by re-pointing at A.
 - **merge(B, C)** — *mirrors W.* INSERT block A' + variant(text = chosen(B) + chosen(C)); replace both placements with A'; edges (A' derived_from B), (A' derived_from C, 'merge'). B, C released to lineage; fans are **not** cartesian-producted.
 - **poolDragCopy(poolBlock P → post, at, includeFan=false)** — INSERT block B + variant(s): active text by default, the whole fan if `includeFan`; INSERT container_block(B) at drop; edge(B derived_from P, 'pool_copy'). P stays in its pool.
 - **moveBlock(block → container, at)** — UPDATE container_block.container_id + position. Single ownership preserved by the live-unique index.
+- **placeBlock(block, container, at)** *(review #7 — the op W-reversibility depends on)* — INSERT container_block for a live block with **no live placement** (a released-to-lineage block after divide-W/merge, or a tray restoree). This is the primitive that makes "reversible by re-pointing at A" a real operation instead of a promise, and it's what structural undo emits.
+- **restoreBlock(block)** — undo a deleteBlock from the tray: clear the block's tombstone and those of children whose `deleted_at` equals the block's (cascade-stamped with the same value, so cascade-victims are identifiable and independently-deleted rows stay dead); then placeBlock into `last_container_id`.
+- **renameTag(tag, newName)** *(review D1)* — rewrite `name` + the materialized `path` of the tag and its entire subtree in one transaction. Bounded by subtree size (fine locally); under sync it's plain metadata CAS per row — converges, worst case a lost rename, never corruption.
 - **reorder(block, between A and B)** — UPDATE container_block.position = `FractionalIndex.between(A.position, B.position)` (jittered; §6). No rebalance operation exists — fractional-index strings have unlimited depth.
 - **lockVariant / unlockVariant** — UPDATE variant.locked. Locked ⇒ to edit, branch or unlock.
 - **lockPost / unlockPost** — auto-commit (kind='auto') dirty live buffers under the post, then UPDATE container.locked/locked_at. While locked: no edits, no new commits, pointer order + chosen variants frozen. Reversible.
-- **archiveVariant / deleteVariant** — archive: status='archived' (out of fan, kept in history); delete: tombstone (must not be any slot's chosen variant — re-point first; RESTRICT backs this up). Either way, if it was the block's last live *active* variant → refuse (I10; caller should delete the block instead). If it was `default_variant_id` → reassign to the most recently updated active variant.
+- **archiveVariant / deleteVariant** — archive: status='archived' (out of fan, kept in history); delete: tombstone (must not be any slot's chosen variant — re-point first). **Precision (review #3): the operations-layer check is the *only* live enforcement** — under soft-delete-everywhere, tombstones are UPDATEs, so the FK RESTRICT never fires; RESTRICT guards only the physical-purge/GC path. Tests target the ops layer. Either way, if it was the block's last live *active* variant → refuse (I10; caller should delete the block instead — and note the sync-race variant of this, repaired per SyncSpec §7). If it was `default_variant_id` → reassign to the most recently updated active variant.
 - **deleteBlock(block)** — tombstone block + its container_block row; set last_container_id (feeds the deleted-blocks tray). Trigger-cascade tombstones variants (and their commit_points) and edges. Soft by default; true purge is a rare, explicit GC.
 - **applyTag / removeTag (post or block)** — INSERT into post_tag/block_tag or tombstone; operations layer enforces post_tag targets kind='post'.
+- **addReference / removeReference / updateReferenceViewState (post)** — INSERT/tombstone/UPDATE `reference` rows (§7).
 - **resolveSyncConflict(variant, losingText)** *(sync phase, S5)* — INSERT variant(working_text=losingText, label='conflict') on the same block. The losing edit becomes a card in the fan; nothing clobbered.
+
+**Structural undo (author-approved 2026-07-04; resolves the global-undo question):** a **session-scoped, in-memory undo stack for structural operations only** — divide, merge, extract, deleteBlock, deleteVariant, archiveVariant, moveBlock, reorder, poolDragCopy. Each of these registers its inverse when it runs (mostly tombstone-flips + placeBlock — cheap precisely because the model destroys nothing). **Undo emits ordinary operations**, so sync never knows undo exists and the merge rules already cover it. Explicitly excluded: text editing (command-Z remains NSTextView's ordinary per-buffer undo, never interleaved with structural undo), commits (append-only; restore *is* the feature), locks and tags (trivially re-toggled). No persistence across sessions — the deliberate cheap/nightmare line. Inverses are specified per-op in Phases 2–3 (they double as the reversibility tests); UI wiring at the editor phases.
 
 **`default_variant_id` lifecycle (resolves source-SPEC open question #9):** set at `newBlock`; on delete/archive of the variant it names, reassign to the most recently updated active variant; never NULL while the block is live (guaranteed jointly by I10 + reassignment). It is the pointer-free representative (pool display, lineage views); `container_block.chosen_variant_id` always wins where a pointer exists.
 
@@ -345,7 +378,7 @@ Two stamps per post: `last_touched_at` (every keystroke) and `last_major_revisio
 
 **The desire for many views is firm and central** — each view is a different traversal that stress-tests a different edge of the model (folder → tags/membership; book-scrub → ordering + post-as-page; timeline → timestamps; outline → derived_from). A view that's tortured to build reveals a weak spot in the model before everything is built on it.
 
-The views (all over one store): continuous/book view (each note scrolls internally; not paginated), book-scrub (page = a post; 50 entries = 50 pages), infinite scroll, timeline, side-by-side (`text | v1 | v2 | text`; also two posts in columns), swap-and-reread, outline-left/draft-right (independent or tracked scroll; outline items map via `derived_from` to the blocks they became), diff (whitespace normalization optional), expand-all-fans (fans stay open once expanded; close-all-fans button), folder, canvas/sticky-notes, and the badge behavior (boundaries invisible at rest; on focus/hover a block reveals bounds; a corner badge appears **only** on blocks with a fan).
+The views (all over one store): continuous/book view (each note scrolls internally; not paginated), book-scrub (page = a post; 50 entries = 50 pages), infinite scroll, timeline, side-by-side (`text | v1 | v2 | text`; also two posts in columns), swap-and-reread, outline-left/draft-right (independent or tracked scroll; outline items map via `derived_from` to the blocks they became), diff (whitespace normalization optional), expand-all-fans (fans stay open once expanded; close-all-fans button), folder, canvas/sticky-notes, the **reference panel** (per-post sources beside the draft: Quick Look / PDFKit with drag-selection-into-draft, read-only WKWebView for URLs — §7 `reference`), and the badge behavior (boundaries invisible at rest; on focus/hover a block reveals bounds; a corner badge appears **only** on blocks with a fan). A low-priority **unplaced-blocks utility view** (live blocks with no placement — divide-W/merge lineage leftovers) is a cheap query worth having as a safety net; owned by the remaining-views phase.
 
 **The visual UI is deliberately an open concept.** In the technical phase: treat the view list as *capabilities the model must support*; build the simplest functional unstyled rendering of each; invest zero effort in polish/theming/layout systems. UI design happens later, iteratively, with the author. The one load-bearing UI-shaped thing now is the read-cheap/edit-focused split (P3) — it's a performance constraint, not an aesthetic.
 
@@ -373,6 +406,10 @@ Additional deltas: live-row partial unique indexes everywhere (§6 — correctne
 
 **Sync-sweep deltas (2026-07-04, author-directed):** positions REAL→TEXT fractional keys, rebalance op removed; `sync_version` on every synced table; `sync_outbox` + `sync_state` local tables + outbox triggers in schema v1; UUIDv5 clause dropped (random v4 only); per-unique-index repair rules defined (SyncSpec §7); tombstone-vs-edit rescue rule (SyncSpec §6); pull cursors moved off `updated_at` onto `server_seq` (clock-skew-proof); sync phase moved early in the master plan.
 
+**Review-session deltas (2026-07-04 — independent Phase 0 review; all findings accepted):** I10 double-tombstone repair = deterministic resurrection (SyncSpec §7); dangling `chosen_variant_id` handled read-time (fallback) + apply-time (NULL repair); repairs enqueue outbox rows explicitly past echo suppression; server mirror carries no unique constraints/FKs (stated, load-bearing); concurrent same-block structural ops documented as converging-with-duplication; `placeBlock` + `restoreBlock` ops added (W-reversibility now has its operation); `version_of` stored canonically (min,max); RESTRICT precisely scoped to the GC path (ops-layer check is the live enforcement); restoreCommit-predates-split and fanned-extract behaviors documented with owned tests; **segmentation trigger defined: type-time crystallization (author decision)**; `renameTag` op + `tag.updated_at` added, `path` marked as the one deliberate denormalization; settings are synced, upsert-only; **idle auto-commit approved (author decision)** with `idle_commit_hours` setting.
+
+**Author-decision deltas (2026-07-04):** structural undo — session-scoped, in-memory, structural-ops-only, inverses specified per-op in Phases 2–3 (§9); `reference` table + reference panel (Quick Look/PDFKit/WKWebView; drag-selection-into-draft; EPUB and annotation/citation permanently out of scope; `file_bookmark` local-only under sync).
+
 ## 15. Risk register (why these are risks, so future sessions don't rediscover them)
 
 Ordered by severity. Deferred *work* lives in `KnownIssuesAndTechDebt.md`; this section is standing *risks and their reasoning*.
@@ -380,9 +417,9 @@ Ordered by severity. Deferred *work* lives in `KnownIssuesAndTechDebt.md`; this 
 1. **Live block-identity maintenance over `NSTextStorage` — the single riskiest thing in the project, and it is independent of the storage model.** The whole design rests on identity being maintained *during* editing (block IDs riding ranges as text attributes, edits reported as exact changed ranges) rather than recovered by diffing (OverallModel §8). Getting split/merge/attribute-drift edge cases right in a live editor is real engineering, historically underestimated. This is why the operations layer is proven headless first (Phases 2–3), why the editor gets its own phases (7, 9), and why boundary-snapping is a pure Domain function testable without AppKit. If an editor bug ever corrupts identity, the store is still safe — operations validate against the DB, not the text view.
 2. **TextKit 2 viewport/height/scroll-to-location is the least reliable subsystem of the chosen editor stack** — simultaneously the reason TK2 was chosen (viewport lazy layout is P1's mechanism) and its weakest part; behavior is OS-version- and SDK-gated and regresses between releases. Full detail + defensive practices: `notes/TEXTKIT2_NOTES.md`. Mitigations: the Phase 6 throwaway spike on Tahoe *before* the editor is built; scrubber fallback = stored per-block length estimates, not live geometry; last-resort fallback = STTextView. **Corollary: the Intel Air can never be the final word on editor correctness** — Sequoia-correct ≠ Tahoe-correct, and acceptance builds must use the 26 SDK (behaviors like the `.layoutManager` TK1 downgrade are SDK-gated).
 3. **Hand-rolled sync is a risk we chose with eyes open.** The default industry advice is "never roll your own sync." We overrode it because the engines fail this schema harder (SyncSpec §1: PowerSync's JSON views delete the DB-enforced invariants) and because this domain minimizes the danger by construction: one mutable field, insert/tombstone everything else, narrow mobile surface, dumb CAS server, deterministic client merges. The protection is the Phase 5 test harness (two in-memory clients vs in-process fake server, race suites) — treat any sync change that isn't covered by a convergence test as unreviewed.
-4. **Requirement interpretations to confirm with the author, not silently assume:**
-   - **Global undo:** command-Z is per-buffer text undo; structural ops are reversible via W (re-point at A); there is **no cross-operation undo stack**. If the author expects app-wide undo, that's the audit-log item (KnownIssues, assessed at Phase 4 closeout).
-   - **"Pull up sources and notes to the side" (blog use case):** served by pool + floating notes + side-by-side views; no dedicated "reference panel" is spec'd. Interpretation, flagged 2026-07-04.
+4. **Formerly-open interpretations — both resolved by the author 2026-07-04:**
+   - **Global undo → structural undo** (§9): session-scoped, in-memory, structural-ops-only; command-Z stays pure text undo. Chosen because the pointer religion makes structural inverses cheap (tombstone-flips + placeBlock) while full persistent/interleaved undo is the nightmare corner. The audit-log tech-debt item is superseded by this decision.
+   - **"Sources to the side" → the reference panel** (§7 `reference`, §12): files + URLs beside the draft, native rendering only (Quick Look/PDFKit/WKWebView), EPUB and annotation/citation machinery permanently out of scope, file bookmarks local-only under sync.
 5. **Deterministic-looking decisions that must not silently regress:** positions must remain jittered fractional-index strings (reverting to REAL midpoints reintroduces the offline-collision + mass-renumber sync bomb, SyncSpec §8); uniqueness must remain live-row partial indexes (bare UNIQUE + tombstones permanently pins re-creation, §6); outbox capture must remain trigger-fed (app-level capture silently misses cascade writes, SyncSpec §3); sync ordering authority must remain `server_seq`, never wall clocks (§SyncSpec 9).
 6. **Toolchain skew:** dev Air on Xcode 16.4/Swift 6.1 until Xcode 26 is installed (universal binary, runs on Intel + Sequoia 15.6 — verified 2026-07-04); keep `swift-tools-version: 6.1` and 6.1-compatible code until both machines run Xcode 26, then revisit.
 

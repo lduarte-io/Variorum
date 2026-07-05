@@ -24,13 +24,15 @@ Three framing principles carry the whole design:
 - **Pool** — the inspiration holding area; the same container type as a post, so single ownership is enforced uniformly and "scrap" and "finished prose" are one object type.
 - **Reading** — a book/chapter: curated (manual ordered list) or smart (tag/query). Sections come from grouping rules, not container objects. Supports extent constraints (fixed-length journals) and locking. A post may appear in many readings at once — this asymmetry with blocks is deliberate and is what makes on-demand books work.
 - **Tag** — hierarchical (path-style, e.g. `life/goals/2024`), applied to posts and (cheaply) to blocks. Block tags primarily serve the pool.
+- **Reference** — external source material (a file or URL) attached to a post as a *viewing aid* beside the draft. Deliberately not a knowledge object: no transclusion, no annotation sync, no citations — it renders next to your writing, and selected text dragged out of it lands as an ordinary lineage copy.
 
 ## 3. The mutability rule (one rule under everything)
 
 **Mutation is local and ephemeral; permanence is explicit and append-only.**
 
 - Each variant's working buffer is mutable, continuously autosaved, with ordinary undo. Nothing else in the system is mutable text.
-- **Commit** appends an immutable savepoint. Restoring a commit loads its text into the buffer; committing again appends — never truncates.
+- **Commit** appends an immutable savepoint. Restoring a commit loads its text into the buffer; committing again appends — never truncates. Commits are deliberate, with two quiet automatic exceptions (kind='auto', visually muted): sealing a post, and a long-idle dirty buffer (`idle_commit_hours`).
+- **Structural undo** (session-scoped, in-memory) covers structural operations only — inverses are cheap pointer restores because nothing destroys. Command-Z inside a buffer is ordinary text undo; the two stacks never interleave. (AppSpec §9.)
 - **Lock is fully orthogonal to commit** — a reversible guard, not a snapshot. Lock a variant (freeze its buffer; edit by branching or unlocking) or a post (freeze pointer order + chosen variants + forbid new commits). Locking a post auto-commits its live buffers — a consequence, not an equivalence.
 - Rejected variants are **hard-deleted** (tombstoned) or **archived** into the block's history view. Deleting whole blocks is cheap; a per-post "deleted blocks" tray is the soft net.
 - Branching a variant **inherits** the current buffer's text; a blank/new take is a *different gesture*.
@@ -74,7 +76,7 @@ Two distinct operations, not one overloaded "split" — plus the inverse:
   - *Multi-variant (rare; the only ceremony in the system):* the cut is placed into each variant to carry through; B's fan = first-halves, C's fan = second-halves (enabling first-half-of-attempt-1 with second-half-of-attempt-3). Unmarked variants aren't cut. **W resolution:** the original block A is preserved whole and referenceable; unmarked variants stay on A as lineage; B and C are minted fresh. Reversible by re-pointing at A. Nobody's five editors disappear.
 - **MERGE — mirrors Divide-W.** Combining adjacent blocks mints a fresh block whose active variant is "active-of-B + active-of-C," with `derived_from` edges back to both. B and C remain as lineage; fans are **not** cartesian-producted.
 
-Block size: floor is the sentence, default is the paragraph, ceiling-less upward; boundaries snap to sentence/paragraph marks. Default segmentation of fresh text is a **document/global setting** (never bound to a UI profile), with journal posts defaulting to one-block-per-entry.
+Block size: floor is the sentence, default is the paragraph, ceiling-less upward; boundaries snap to sentence/paragraph marks. Default segmentation of fresh text is a **document/global setting** (never bound to a UI profile), with journal posts defaulting to one-block-per-entry. **When segmentation fires (author decision):** *type-time crystallization* — brand-new text at the end of a post crystallizes into blocks paragraph-by-paragraph as you type past them (the paragraph still being typed is an open tail, not yet a block); bulk entry (paste, pool-drop, capture) segments on entry. Once a block exists, Enter inside it is pure content forever — crystallization never touches existing blocks, so I4 holds unconditionally.
 
 ## 8. Why the stack is what it is (settled; do not reopen)
 
