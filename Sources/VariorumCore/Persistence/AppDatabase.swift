@@ -36,14 +36,6 @@ public struct AppDatabase: Sendable {
         // invariant backstop (AppSpec §6), never an accident of configuration.
         config.foreignKeysEnabled = true
         config.busyMode = .timeout(5)
-        config.prepareDatabase { db in
-            // The `_sync_applying` flag table (SyncSpec §3): outbox triggers
-            // skip enqueueing while it holds a row. Triggers reference it, so
-            // it must exist on every connection — created here, empty, at
-            // connect time. `applyingRemote` populates it for the span of one
-            // apply transaction; the Phase 5 sync engine is its only client.
-            try db.execute(sql: "CREATE TEMP TABLE IF NOT EXISTS _sync_applying (applying INTEGER NOT NULL)")
-        }
         return config
     }
 
@@ -68,9 +60,13 @@ public struct AppDatabase: Sendable {
     /// A write transaction with outbox echo suppression (SyncSpec §3): rows the
     /// sync engine applies from the server must not re-enqueue into
     /// `sync_outbox` — the originating device already shipped them. Cascade
-    /// triggers stay active during apply. The flag lives only for this
-    /// transaction; a rollback unwinds the flag row too (temp tables are
-    /// transactional).
+    /// triggers stay active during apply.
+    ///
+    /// `_sync_applying` is a permanent local-only table (schema v1), normally
+    /// empty — NOT the temp table SyncSpec §3 originally sketched, because a
+    /// main-schema trigger resolves unqualified names in its own schema and can
+    /// never see a temp table. The flag row lives only inside this transaction;
+    /// a rollback unwinds it too.
     public func applyingRemote<T>(_ updates: (Database) throws -> T) throws -> T {
         try writer.write { db in
             try db.execute(sql: "INSERT INTO _sync_applying (applying) VALUES (1)")

@@ -317,6 +317,10 @@ CREATE TABLE sync_outbox (
 );
 CREATE TABLE sync_state (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 -- keys: 'last_server_seq', 'device_id'
+CREATE TABLE _sync_applying (applying INTEGER NOT NULL);
+-- apply-mode flag; permanent and normally empty (a temp table is invisible to
+-- main-schema triggers — Phase 1 finding, SyncSpec §3); row exists only inside
+-- an apply transaction
 ```
 
 ## 8. Cardinality summary
