@@ -113,6 +113,80 @@ extension Operations {
         return result
     }
 
+    // MARK: - Divide, single-variant (the everyday in-place cut)
+
+    public struct DivideResult: Equatable, Sendable {
+        /// The freshly minted second half; the source keeps its identity as
+        /// the first half.
+        public let block: Block
+        public let variant: Variant
+        public let placement: ContainerBlock
+        public let edge: Edge
+    }
+
+    /// AppSpec §9, the ~95% case: the source is consumed in place — it keeps
+    /// its identity as the first half (lossless, no fan to desync) and a
+    /// fresh block C is minted for the second half, placed immediately
+    /// after, with a `derived_from`/'divide' edge. Requires exactly one live
+    /// active variant — a fanned block refuses toward the W ceremony
+    /// (`divideW`). `cut` is a UTF-16 offset into the rendered text; the
+    /// halves are whitespace-trimmed at the seam. Note the documented
+    /// restoreCommit behavior: a commit predating this cut still holds the
+    /// full text, and restoring it resurrects both halves into the source's
+    /// buffer while C sits next door (AppSpec §9; the editor warns, Phase 7).
+    @discardableResult
+    public func divide(_ blockID: String, cut: Int) throws -> DivideResult {
+        let (result, sourcePreImage): (DivideResult, (id: String, text: String)) =
+            try database.write { db in
+                let context = try placedContext(db, blockID: blockID)
+                let activeVariants = try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM variant
+                        WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                        """,
+                    arguments: [blockID]) ?? 0
+                guard activeVariants == 1 else {
+                    throw OperationError.fannedBlock(id: blockID)
+                }
+                try ensureEditable(context.rendered)
+
+                let text = context.rendered.workingText
+                guard let halves = BoundarySnapping.seamTrimmedHalves(text, cutAtUTF16: cut),
+                      !halves.first.isEmpty, !halves.second.isEmpty
+                else { throw OperationError.invalidCut(variantID: context.rendered.id, cut: cut) }
+
+                let now = date.now
+                var source = context.rendered
+                source.workingText = halves.first
+                source.updatedAt = now
+                try source.update(db)
+
+                let minted = try mintBlock(
+                    db, text: halves.second, in: context.container.id,
+                    at: .after(blockID), now: now)
+                let edge = try insertLineageEdge(
+                    db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
+                try registerTextChange(
+                    db, blockID: blockID, charDelta: text.count - halves.first.count,
+                    forceMajorRevision: false, now: now)
+
+                return (
+                    DivideResult(
+                        block: minted.block, variant: minted.variant,
+                        placement: minted.placement, edge: edge),
+                    (context.rendered.id, text)
+                )
+            }
+        undoStack?.register(label: "Divide") {
+            try $0.revertStructural(
+                restoringTexts: [.init(variantID: sourcePreImage.id, text: sourcePreImage.text)],
+                tombstoningBlocks: [result.block.id],
+                revivingPlacementRows: [])
+        }
+        return result
+    }
+
     // MARK: - Shared internals
 
     struct PlacedContext {
