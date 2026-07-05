@@ -111,10 +111,13 @@ extension Operations {
         }
     }
 
-    /// One buffer's do-time pre-image, for `revertStructural`.
+    /// One buffer's do-time images, for `revertStructural`: the text before
+    /// the structural op (what undo restores) and the text the op wrote
+    /// (how undo recognizes a buffer that diverged afterwards).
     struct TextPreImage: Sendable {
         let variantID: String
         let text: String
+        let postOpText: String
     }
 
     /// Inverse of the block-minting structural ops (extract, divide,
@@ -148,6 +151,16 @@ extension Operations {
                 try ensurePlacementUnlocked(db, blockID: variant.blockId)
                 try ensureEditable(variant)
                 guard variant.workingText != preImage.text else { continue }
+                if variant.workingText != preImage.postOpText, try isDirty(db, variant) {
+                    // The buffer diverged after the structural op and the
+                    // restore is about to overwrite it: insure first — the
+                    // fourth quiet auto-commit occasion, mirroring
+                    // lockVariant/lockPost/long-idle (the ratified doctrine:
+                    // a quiet commit insures exactly what an operation is
+                    // about to make unreachable). Phase 3 review finding;
+                    // on the closeout ratify list.
+                    _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now)
+                }
                 variant.workingText = preImage.text
                 variant.updatedAt = now
                 try variant.update(db)

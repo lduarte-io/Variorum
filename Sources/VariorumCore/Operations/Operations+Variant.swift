@@ -271,7 +271,7 @@ extension Operations {
             sql: """
                 SELECT COALESCE(SUM(LENGTH(COALESCE(
                     (SELECT v.working_text FROM variant v
-                     WHERE v.id = cb.chosen_variant_id
+                     WHERE v.id = cb.chosen_variant_id AND v.block_id = cb.block_id
                        AND v.deleted_at IS NULL AND v.status = 'active'),
                     (SELECT v.working_text FROM variant v
                      JOIN block b ON b.default_variant_id = v.id

@@ -429,9 +429,13 @@ private struct Sweep {
     }
 
     private mutating func text() -> String {
-        let words = (0..<Int.random(in: 1...8, using: &rng)).map { _ in
+        var words = (0..<Int.random(in: 1...8, using: &rng)).map { _ in
             String("abcdefghij".shuffled(using: &rng).prefix(Int.random(in: 1...6, using: &rng)))
         }
+        // Occasional multi-scalar graphemes so the UTF-16 cut paths run
+        // under randomized interleaving, and occasional terminators so
+        // sentence boundaries exist for the structural ops to snap to.
+        if Int.random(in: 0..<5, using: &rng) == 0 { words.append("caf\u{65}\u{301} 👩‍👩‍👧‍👦.") }
         // Occasional newlines so multi-paragraph buffers exist.
         return words.joined(separator: Int.random(in: 0..<8, using: &rng) == 0 ? "\n" : " ")
     }

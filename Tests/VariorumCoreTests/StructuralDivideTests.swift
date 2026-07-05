@@ -196,6 +196,10 @@ struct StructuralDivideTests {
             }
             #expect(try db.fetchString(
                 "SELECT default_variant_id FROM block WHERE id = ?", [world.a.block.id]) == world.v1)
+            // The release stamps A's last home, so a later deleteBlock on
+            // the released block still trays and restores correctly.
+            #expect(try db.fetchString(
+                "SELECT last_container_id FROM block WHERE id = ?", [world.a.block.id]) == world.post.id)
 
             // B carries the first halves, C the second, marked order preserved.
             #expect(result.markedSourceIDs == [world.v1, world.v3])
@@ -253,6 +257,19 @@ struct StructuralDivideTests {
             #expect(result.second.placement.chosenVariantId == nil)
             #expect(try db.read { try ops.renderedVariant($0, blockID: result.second.block.id) }
                 .workingText == "Three end.")
+        }
+    }
+
+    @Test func aReleasedBlockDeletedLaterStillRestoresHome() throws {
+        // The last_container_id stamped at release feeds the tray path:
+        // delete the released A, restore it, and it lands back in its post.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            _ = try ops.divideW(world.a.block.id, cuts: [world.v1: 11])
+            try ops.deleteBlock(world.a.block.id)
+            try ops.restoreBlock(world.a.block.id)
+            let home = try db.read { try ops.livePlacement($0, blockID: world.a.block.id) }
+            #expect(home?.containerId == world.post.id)
         }
     }
 

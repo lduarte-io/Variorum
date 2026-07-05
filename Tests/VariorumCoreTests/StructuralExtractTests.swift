@@ -60,6 +60,24 @@ struct RenderedVariantTests {
         }
     }
 
+    @Test func foreignChosenFallsBackToDefault() throws {
+        // Defense-in-depth: a chosen pointer at another block's variant
+        // (unreachable through the ops layer; conceivable under corruption)
+        // must never let a structural op rewrite that other block's text.
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "mine")
+            let b = try ops.newBlock(in: post.id, text: "someone else's")
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE container_block SET chosen_variant_id = ? WHERE id = ?",
+                    arguments: [b.variant.id, a.placement.id])
+            }
+            let rendered = try db.read { try ops.renderedVariant($0, blockID: a.block.id) }
+            #expect(rendered.id == a.variant.id)
+        }
+    }
+
     @Test func nullChosenAndUnplacedBlocksRenderTheDefault() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
@@ -274,6 +292,48 @@ struct StructuralExtractTests {
             // An undone mint must not haunt the deleted-blocks tray.
             #expect(try db.fetchString(
                 "SELECT last_container_id FROM block WHERE id = ?", [result.block.id]) == nil)
+        }
+    }
+
+    @Test func extractUndoInsuresADivergedBufferBeforeRestoring() throws {
+        // The inverse restores the do-time pre-image — but a buffer edited
+        // AFTER the extract is about to be overwritten, so undo appends one
+        // quiet auto commit first (the fourth insurance occasion, mirroring
+        // lockVariant/lockPost/long-idle; Phase 3 review finding, on the
+        // closeout ratify list). Nothing the author typed is unreachable.
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            _ = try ops.extract(a.block.id, span: 16..<32)
+            try ops.autosave(a.variant.id, text: "Rewritten first.", charDelta: 0)
+
+            try stack.undo(with: ops)
+
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [a.variant.id])
+                == "First sentence. Second sentence.")
+            #expect(try db.fetchString(
+                """
+                SELECT text FROM commit_point WHERE variant_id = ? AND kind = 'auto'
+                ORDER BY created_at DESC, id DESC LIMIT 1
+                """, [a.variant.id]) == "Rewritten first.")
+        }
+    }
+
+    @Test func extractUndoWithAnUntouchedBufferCommitsNothing() throws {
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            _ = try ops.extract(a.block.id, span: 16..<32)
+
+            try stack.undo(with: ops)
+
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM commit_point WHERE variant_id = ?", [a.variant.id]) == 0)
         }
     }
 

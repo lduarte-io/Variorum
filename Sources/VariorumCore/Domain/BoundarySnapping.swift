@@ -119,6 +119,12 @@ public enum BoundarySnapping {
 
     // MARK: - Seam trimming
 
+    /// Full trim, both edges — extract's span text uses this so span and
+    /// remainder trim by one implementation.
+    static func trimmed(_ text: Substring) -> String {
+        trimTrailing(Substring(trimLeading(text)))
+    }
+
     static func trimTrailing(_ text: Substring) -> String {
         var text = text
         while let last = text.last, last.isWhitespace { text.removeLast() }

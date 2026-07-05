@@ -34,6 +34,9 @@ struct StructuralMergeTests {
                 #expect(try db.deletedAt("block", source.block.id) == nil)
                 #expect(try db.read { try ops.livePlacement($0, blockID: source.block.id) } == nil)
                 #expect(try db.deletedAt("variant", source.variant.id) == nil)
+                // Release stamps the last home (tray/restore semantics).
+                #expect(try db.fetchString(
+                    "SELECT last_container_id FROM block WHERE id = ?", [source.block.id]) == post.id)
             }
             #expect(try db.fetchString(
                 "SELECT text FROM commit_point WHERE id = ?", [savepoint.id]) == "First half.")

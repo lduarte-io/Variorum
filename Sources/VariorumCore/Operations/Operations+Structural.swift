@@ -25,6 +25,7 @@ extension Operations {
     ) throws -> Variant {
         if let chosenID = placement?.chosenVariantId,
            let chosen = try Variant.fetchOne(db, key: chosenID),
+           chosen.blockId == block.id,  // a foreign chosen must never let an op rewrite another block's text
            chosen.deletedAt == nil, chosen.status == .active {
             return chosen
         }
@@ -59,10 +60,12 @@ extension Operations {
     /// extracting from a *fanned* block edits only the rendered variant, and
     /// the other variants keep their own copy of the span (documented
     /// behavior, review #10; the editor may hint). A middle span refuses:
-    /// that's a divide. `span` is UTF-16 offsets into the rendered text.
+    /// that's a divide. `span` is UTF-16 offsets into the rendered text and
+    /// arrives pre-snapped — the editor owns `BoundarySnapping.snap`; the
+    /// operation validates, never snaps.
     @discardableResult
     public func extract(_ blockID: String, span: Range<Int>) throws -> ExtractResult {
-        let (result, sourcePreImage): (ExtractResult, (id: String, text: String)) =
+        let (result, sourcePreImage): (ExtractResult, TextPreImage) =
             try database.write { db in
                 let context = try placedContext(db, blockID: blockID)
                 try ensureEditable(context.rendered)
@@ -71,7 +74,7 @@ extension Operations {
                       let indices = BoundarySnapping.graphemeRange(span, in: text)
                 else { throw OperationError.spanNotExtractable(blockID: blockID) }
 
-                let spanText = String(text[indices]).trimmingCharacters(in: .whitespacesAndNewlines)
+                let spanText = BoundarySnapping.trimmed(text[indices])
                 let remainder: String
                 let insertAt: InsertPosition
                 switch kind {
@@ -101,12 +104,12 @@ extension Operations {
                     ExtractResult(
                         block: minted.block, variant: minted.variant,
                         placement: minted.placement, edge: edge),
-                    (context.rendered.id, text)
+                    TextPreImage(variantID: context.rendered.id, text: text, postOpText: remainder)
                 )
             }
         undoStack?.register(label: "Extract") {
             try $0.revertStructural(
-                restoringTexts: [.init(variantID: sourcePreImage.id, text: sourcePreImage.text)],
+                restoringTexts: [sourcePreImage],
                 tombstoningBlocks: [result.block.id],
                 revivingPlacementRows: [])
         }
@@ -129,14 +132,16 @@ extension Operations {
     /// fresh block C is minted for the second half, placed immediately
     /// after, with a `derived_from`/'divide' edge. Requires exactly one live
     /// active variant — a fanned block refuses toward the W ceremony
-    /// (`divideW`). `cut` is a UTF-16 offset into the rendered text; the
-    /// halves are whitespace-trimmed at the seam. Note the documented
+    /// (`divideW`). `cut` is a UTF-16 offset into the rendered text and
+    /// arrives pre-snapped (the editor owns `BoundarySnapping.snap`; the
+    /// operation validates, never snaps); the halves are whitespace-trimmed
+    /// at the seam. Note the documented
     /// restoreCommit behavior: a commit predating this cut still holds the
     /// full text, and restoring it resurrects both halves into the source's
     /// buffer while C sits next door (AppSpec §9; the editor warns, Phase 7).
     @discardableResult
     public func divide(_ blockID: String, cut: Int) throws -> DivideResult {
-        let (result, sourcePreImage): (DivideResult, (id: String, text: String)) =
+        let (result, sourcePreImage): (DivideResult, TextPreImage) =
             try database.write { db in
                 let context = try placedContext(db, blockID: blockID)
                 let activeVariants = try Int.fetchOne(
@@ -175,12 +180,13 @@ extension Operations {
                     DivideResult(
                         block: minted.block, variant: minted.variant,
                         placement: minted.placement, edge: edge),
-                    (context.rendered.id, text)
+                    TextPreImage(
+                        variantID: context.rendered.id, text: text, postOpText: halves.first)
                 )
             }
         undoStack?.register(label: "Divide") {
             try $0.revertStructural(
-                restoringTexts: [.init(variantID: sourcePreImage.id, text: sourcePreImage.text)],
+                restoringTexts: [sourcePreImage],
                 tombstoningBlocks: [result.block.id],
                 revivingPlacementRows: [])
         }
@@ -260,11 +266,18 @@ extension Operations {
 
             let now = date.now
 
-            // Release A's placement; A itself is preserved whole.
+            // Release A's placement; A itself is preserved whole. The
+            // release stamps last_container_id like deleteBlock does — a
+            // released block deleted later must still know its last home
+            // (tray + restoreBlock semantics; Phase 3 review finding).
             var released = context.placement
             released.deletedAt = now
             released.updatedAt = now
             try released.update(db)
+            var sourceBlock = context.block
+            sourceBlock.lastContainerId = context.container.id
+            sourceBlock.updatedAt = now
+            try sourceBlock.update(db)
 
             // B then C stand exactly where A stood.
             let containerID = context.container.id
@@ -356,11 +369,17 @@ extension Operations {
 
             let now = date.now
 
-            // Release both placements; the blocks stay live as lineage.
-            for var released in [first.placement, second.placement] {
+            // Release both placements; the blocks stay live as lineage,
+            // stamped with their last home (same rule as divideW's release).
+            for context in [first, second] {
+                var released = context.placement
                 released.deletedAt = now
                 released.updatedAt = now
                 try released.update(db)
+                var sourceBlock = context.block
+                sourceBlock.lastContainerId = containerID
+                sourceBlock.updatedAt = now
+                try sourceBlock.update(db)
             }
 
             // A' stands exactly where the pair stood.
