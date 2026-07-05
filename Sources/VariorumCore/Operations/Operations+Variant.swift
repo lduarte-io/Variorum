@@ -93,29 +93,35 @@ extension Operations {
         try database.write { db in
             let post = try liveContainer(db, postID)
             try ensureUnlocked(post)
-
-            let variants = try Variant.fetchAll(
-                db,
-                sql: """
-                    SELECT v.* FROM variant v
-                    JOIN container_block cb
-                      ON cb.block_id = v.block_id
-                     AND cb.container_id = ?
-                     AND cb.deleted_at IS NULL
-                    WHERE v.deleted_at IS NULL AND v.locked = 0
-                    ORDER BY v.id
-                    """,
-                arguments: [postID])
-
-            let now = date.now
-            var committed: [CommitPoint] = []
-            for variant in variants {
-                guard try isDirty(db, variant) else { continue }
-                committed.append(
-                    try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now))
-            }
-            return committed
+            return try autoCommitDirtyVariants(db, containerID: postID, now: date.now)
         }
+    }
+
+    /// Shared by `idleAutoCommit` and `lockPost` (which seals only after
+    /// insuring its dirty buffers).
+    func autoCommitDirtyVariants(
+        _ db: Database, containerID: String, now: Date
+    ) throws -> [CommitPoint] {
+        let variants = try Variant.fetchAll(
+            db,
+            sql: """
+                SELECT v.* FROM variant v
+                JOIN container_block cb
+                  ON cb.block_id = v.block_id
+                 AND cb.container_id = ?
+                 AND cb.deleted_at IS NULL
+                WHERE v.deleted_at IS NULL AND v.locked = 0
+                ORDER BY v.id
+                """,
+            arguments: [containerID])
+
+        var committed: [CommitPoint] = []
+        for variant in variants {
+            guard try isDirty(db, variant) else { continue }
+            committed.append(
+                try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now))
+        }
+        return committed
     }
 
     // MARK: - Fan growth

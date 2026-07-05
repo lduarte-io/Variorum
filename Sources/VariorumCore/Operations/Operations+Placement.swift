@@ -1,0 +1,146 @@
+import Dependencies
+import Foundation
+import GRDB
+
+// Placement: where a block's single live pointer lives (I2) and which variant
+// it shows (I3). `placeBlock` is the W-reversibility primitive — the op that
+// makes "re-point at A" a real operation instead of a promise.
+extension Operations {
+    /// Point the block's live slot at a different variant (I3: the choice
+    /// lives on the pointer, never the block).
+    public func chooseVariant(_ blockID: String, variantID: String) throws {
+        try database.write { db in
+            _ = try liveBlock(db, blockID)
+            guard var placement = try livePlacement(db, blockID: blockID) else {
+                throw OperationError.blockNotPlaced(id: blockID)
+            }
+            try ensureUnlocked(try liveContainer(db, placement.containerId))
+            let variant = try liveVariant(db, variantID)
+            guard variant.blockId == blockID else {
+                throw OperationError.variantNotFound(id: variantID)
+            }
+            guard variant.status == .active else {
+                throw OperationError.archivedVariant(id: variantID)
+            }
+            placement.chosenVariantId = variantID
+            placement.updatedAt = date.now
+            try placement.update(db)
+        }
+    }
+
+    /// Insert a placement for a live block with NO live placement — a
+    /// released-to-lineage block after divide-W/merge, or a tray restoree.
+    /// Structural undo emits this. The chosen variant starts NULL: the slot
+    /// renders the block's default until a choice is made.
+    @discardableResult
+    public func placeBlock(
+        _ blockID: String, in containerID: String, at insert: InsertPosition = .end
+    ) throws -> ContainerBlock {
+        try database.write { db in
+            try insertPlacement(db, blockID: blockID, containerID: containerID, at: insert)
+        }
+    }
+
+    /// Undo a `deleteBlock` from the tray: clear the block's tombstone and
+    /// those of children stamped with the block's exact `deleted_at`
+    /// (cascade victims) — independently-deleted rows keep their different
+    /// stamps and stay dead. The old placement row stays tombstoned; a fresh
+    /// placement lands at the end of `last_container_id`, when that container
+    /// still lives (otherwise the block returns live but unplaced).
+    public func restoreBlock(_ blockID: String) throws {
+        try database.write { db in
+            guard var block = try Block.fetchOne(db, key: blockID) else {
+                throw OperationError.blockNotFound(id: blockID)
+            }
+            guard let deletedAt = block.deletedAt else {
+                throw OperationError.blockNotDeleted(id: blockID)
+            }
+            let stamp = DateFormatter.variorumISO8601.string(from: deletedAt)
+            let now = date.now
+            let nowStamp = DateFormatter.variorumISO8601.string(from: now)
+
+            block.deletedAt = nil
+            block.updatedAt = now
+            try block.update(db)
+
+            try db.execute(
+                sql: """
+                    UPDATE variant SET deleted_at = NULL, updated_at = ?
+                    WHERE block_id = ? AND deleted_at = ?
+                    """,
+                arguments: [nowStamp, blockID, stamp])
+            try db.execute(
+                sql: """
+                    UPDATE edge SET deleted_at = NULL
+                    WHERE (source_block_id = ? OR target_block_id = ?) AND deleted_at = ?
+                    """,
+                arguments: [blockID, blockID, stamp])
+            try db.execute(
+                sql: "UPDATE block_tag SET deleted_at = NULL WHERE block_id = ? AND deleted_at = ?",
+                arguments: [blockID, stamp])
+
+            if let lastContainerID = block.lastContainerId,
+               let container = try Container.fetchOne(db, key: lastContainerID),
+               container.deletedAt == nil {
+                _ = try insertPlacement(db, blockID: blockID, containerID: lastContainerID, at: .end)
+            }
+        }
+    }
+
+    /// Move the block's single live placement to another container (or spot).
+    /// Both the source and target posts must be unsealed; ownership stays
+    /// single because the one pointer row moves (I2).
+    public func moveBlock(
+        _ blockID: String, to containerID: String, at insert: InsertPosition = .end
+    ) throws {
+        try database.write { db in
+            _ = try liveBlock(db, blockID)
+            guard var placement = try livePlacement(db, blockID: blockID) else {
+                throw OperationError.blockNotPlaced(id: blockID)
+            }
+            try ensureUnlocked(try liveContainer(db, placement.containerId))
+            let target = try liveContainer(db, containerID)
+            try ensureUnlocked(target)
+            placement.containerId = containerID
+            placement.position = try containerPosition(db, containerID: containerID, at: insert)
+            placement.updatedAt = date.now
+            try placement.update(db)
+        }
+    }
+
+    /// Reposition within the current container.
+    public func reorder(_ blockID: String, to insert: InsertPosition) throws {
+        try database.write { db in
+            _ = try liveBlock(db, blockID)
+            guard var placement = try livePlacement(db, blockID: blockID) else {
+                throw OperationError.blockNotPlaced(id: blockID)
+            }
+            try ensureUnlocked(try liveContainer(db, placement.containerId))
+            placement.position = try containerPosition(
+                db, containerID: placement.containerId, at: insert)
+            placement.updatedAt = date.now
+            try placement.update(db)
+        }
+    }
+
+    // MARK: - Shared internals
+
+    @discardableResult
+    private func insertPlacement(
+        _ db: Database, blockID: String, containerID: String, at insert: InsertPosition
+    ) throws -> ContainerBlock {
+        _ = try liveBlock(db, blockID)
+        let container = try liveContainer(db, containerID)
+        try ensureUnlocked(container)
+        guard try livePlacement(db, blockID: blockID) == nil else {
+            throw OperationError.blockAlreadyPlaced(id: blockID)
+        }
+        let now = date.now
+        let placement = ContainerBlock(
+            id: newID(), containerId: containerID, blockId: blockID,
+            position: try containerPosition(db, containerID: containerID, at: insert),
+            chosenVariantId: nil, createdAt: now, updatedAt: now)
+        try placement.insert(db)
+        return placement
+    }
+}
