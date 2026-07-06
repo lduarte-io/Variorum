@@ -13,6 +13,7 @@ struct MigrationTests {
     ]
 
     static let expectedIndexes: Set<String> = [
+        "idx_block_last_container",
         "idx_variant_block", "idx_variant_parent",
         "idx_commit_variant",
         "uq_edge_live", "idx_edge_source", "idx_edge_target",

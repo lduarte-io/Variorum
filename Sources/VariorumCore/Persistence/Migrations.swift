@@ -291,6 +291,8 @@ private func createV1Tables(_ db: Database) throws {
 /// legitimate re-creation forever (AppSpec §6).
 private func createV1Indexes(_ db: Database) throws {
     try db.execute(sql: """
+        CREATE INDEX idx_block_last_container ON block(last_container_id);
+
         CREATE INDEX idx_variant_block  ON variant(block_id, status);
         CREATE INDEX idx_variant_parent ON variant(parent_variant_id);
 
