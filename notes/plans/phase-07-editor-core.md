@@ -1,14 +1,13 @@
 # Phase 7 — App shell & editor core v1
 
-> ## ⚠️ CONTINGENT PLAN — DO NOT START UNTIL THE PHASE 6 GATE CLOSES
-> This plan was written 2026-07-06 at Phase 6's closeout, **based on the Phase 6 decision
-> memo that is still PENDING AUTHOR ACCEPTANCE** (`notes/plans/phase-06-tk2-spike.md`,
-> "Decision memo" section; open items in `notes/QUESTIONS.md`). If the author accepts the
-> memo as written, this plan stands. If she amends it (different scrub strategy, different
-> canary posture, STTextView after all, findings from her manual feel pass), **amend this
-> plan to match before any Phase 7 work begins.** Her acceptance also triggers the two
-> deferred doc updates that Phase 6 sequenced after the gate: AppSpec §15 (risk 2's
-> resolution state) and the KnownIssues "TK2 viewport viability decision" entry.
+> ## ✅ GATE CLOSED 2026-07-06 — this plan stands as written
+> The Phase 6 decision memo was **accepted by the author as written** at the 2026-07-06
+> checkpoint, after her manual feel pass (PASS — notes in the gate-closure round of
+> `notes/plans/phase-06-tk2-spike.md`). The post-acceptance doc updates landed the same
+> day: AppSpec §14 delta + §15 risk 2 resolution + §16, KnownIssues entry resolved,
+> QUESTIONS cleared. The three flagged interpretations in the ground rules below were
+> **confirmed by the author at the same walk** — all three as the provisional readings:
+> post-level live view, single-`"\n"` separator, refuse/clamp. Phase 7 may start.
 
 ## Kickoff message (for a fresh session)
 
@@ -50,10 +49,10 @@
 - **Scroll discipline from the memo:** restore and navigate by *text location* via the bounded hybrid jump primitive; never px-anchor across reflow or relaunch; never `relocateViewport(to:)`; `scrollRangeToVisible` for caret reveal only; **no `ensureLayout` beyond a single target fragment, ever** (P1).
 - **Domain rules stay pure and tested** (crystallization via `SegmentationRules`, boundary math, range bookkeeping). UI-only glue may go untested early; anything with logic may not.
 - **Re-verify after any macOS point update mid-phase:** re-run the spike (`Spikes/TK2Spike`, all scenarios) and the §5 matrix checks before trusting results gathered pre-update.
-- **Interpretations to confirm at kickoff (flagged for the author with the memo — NONE are settled product behavior; per CLAUDE.md, propose options rather than implement assumptions):**
-  1. **One live NSTextView per focused post:** editor v1 renders the focused post as **one live TK2 NSTextView** whose paragraph ranges carry block-ID attributes (AppSpec §4 "block IDs ride block ranges"; the spike measured exactly this shape flat to 200k words). AppSpec §4's read-cheap tier ("only the focused block/post upgrades") is satisfied at this phase's scale by the *post* being the focused unit; the per-block/per-post read-only tier becomes load-bearing at Phase 10's multi-post views. If she prefers the stricter per-block-live reading now, Step 3's design absorbs it (the range index is the same either way).
-  2. **Editor-surface block separator (cold review, MINOR 4):** what character(s) sit between blocks *in the live editor's text storage* is a new interpretation — Phase 4 ratified `"\n\n"` only for the `renderedText` *projection* (export/diff), a different surface. Options: (a) single `"\n"` (visually adjacent paragraphs; block chrome/spacing via paragraph styles or overlays), (b) `"\n\n"` (matches the projection's look but puts a stored-nothing blank line inside the editable surface), (c) `"\n"` + paragraph-spacing styling to *look* like `"\n\n"`. Step 2 provisionally assumes (a) as the minimal-separator reading (every separator char in the editable surface is a char the range index must police); the author confirms or redirects at kickoff.
-  3. **Multi-block edit gestures in v1 (cold review, MINOR 4 — everyday action, spec-undefined):** what happens when a selection spans a block boundary and the author types/deletes. Options: (a) refuse/clamp cross-block destructive edits until Phase 9's real gestures (safest for identity; mildly annoying), (b) treat boundary-erasing deletion as an implicit `Operations.merge` (spec-shaped but it *is* a structural op firing from a plain keystroke — against the "one deliberate ceremony" spirit), (c) allow whole-block deletion only via an explicit block gesture (`deleteBlock` + tray). Step 3 provisionally assumes (a); this is a product call the author makes at kickoff, and the Step 3 tests target whichever she picks.
+- **Interpretations — all three CONFIRMED by the author 2026-07-06 at the Phase 6 gate walk** (recorded in AppSpec §14; the options are kept below for the record)**:**
+  1. **One live NSTextView per focused post:** editor v1 renders the focused post as **one live TK2 NSTextView** whose paragraph ranges carry block-ID attributes (AppSpec §4 "block IDs ride block ranges"; the spike measured exactly this shape flat to 200k words). AppSpec §4's read-cheap tier ("only the focused block/post upgrades") is satisfied at this phase's scale by the *post* being the focused unit; the per-block/per-post read-only tier becomes load-bearing at Phase 10's multi-post views. If she prefers the stricter per-block-live reading now, Step 3's design absorbs it (the range index is the same either way). **Confirmed 2026-07-06: post-level live view.**
+  2. **Editor-surface block separator (cold review, MINOR 4):** what character(s) sit between blocks *in the live editor's text storage* is a new interpretation — Phase 4 ratified `"\n\n"` only for the `renderedText` *projection* (export/diff), a different surface. Options: (a) single `"\n"` (visually adjacent paragraphs; block chrome/spacing via paragraph styles or overlays), (b) `"\n\n"` (matches the projection's look but puts a stored-nothing blank line inside the editable surface), (c) `"\n"` + paragraph-spacing styling to *look* like `"\n\n"`. Step 2 provisionally assumes (a) as the minimal-separator reading (every separator char in the editable surface is a char the range index must police). **Confirmed 2026-07-06: option (a), a single `"\n"`.**
+  3. **Multi-block edit gestures in v1 (cold review, MINOR 4 — everyday action, spec-undefined):** what happens when a selection spans a block boundary and the author types/deletes. Options: (a) refuse/clamp cross-block destructive edits until Phase 9's real gestures (safest for identity; mildly annoying), (b) treat boundary-erasing deletion as an implicit `Operations.merge` (spec-shaped but it *is* a structural op firing from a plain keystroke — against the "one deliberate ceremony" spirit), (c) allow whole-block deletion only via an explicit block gesture (`deleteBlock` + tray). Step 3 provisionally assumes (a). **Confirmed 2026-07-06: option (a), refuse/clamp — the Step 3 tests target it.**
 
 ## Steps
 

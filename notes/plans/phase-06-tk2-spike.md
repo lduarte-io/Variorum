@@ -113,9 +113,9 @@ Strategy × position table, every sample on a **cold, fresh view** (5 positions 
 
 ---
 
-## Decision memo — **PENDING AUTHOR ACCEPTANCE** (the Phase 6 gate)
+## Decision memo — **ACCEPTED by the author, as written (2026-07-06)** — the Phase 6 gate, closed
 
-*Per the phase plan this memo is the author's to accept, amend, or send back for a re-run. Until she accepts: AppSpec §15 is not updated, the KnownIssues "TK2 viewport viability decision" entry stays open, and Phase 7 must not start.*
+*Accepted at the 2026-07-06 checkpoint after her manual feel pass (see the gate-closure round at the end of this file). The post-acceptance recordings landed the same day: AppSpec §14 delta + §15 risk 2 resolution + §16 bullet removed; the KnownIssues "TK2 viewport viability decision" entry resolved; QUESTIONS.md cleared; master plan row 6 fully done. Phase 7 is unblocked.*
 
 **Per surface:**
 
@@ -138,7 +138,7 @@ Strategy × position table, every sample on a **cold, fresh view** (5 positions 
 
 ---
 
-## Closeout (2026-07-06) — implementation complete; **author gate OPEN**
+## Closeout (2026-07-06) — implementation complete; **author gate CLOSED same day — see the gate-closure round below**
 
 **What shipped:** the Step 1 harness (`Spikes/TK2Spike/`, commit `717d01c`, review-round fixes in a follow-up commit — standalone SPM executable, deterministic 50k-word attributed corpus, canary, measurement recorder, seven re-runnable scenarios + a `manual` feel-pass mode), the definitive Tahoe 26.4.1 measurement run (archived in-repo as `Spikes/TK2Spike/results-2026-07-06-macos26.4.1.log`, regenerated post-review), the findings above (Facts A–D, all with numbers), the §5 matrix row for 26.4.1, and the decision memo — **PENDING AUTHOR ACCEPTANCE**. `Sources/VariorumCore` and `Tests/` untouched; baseline remains **373 green in 37 suites** (per the ground rule, not re-run this phase — no core code changed).
 
@@ -170,3 +170,14 @@ All fixes landed **before** author acceptance (the memo remains PENDING AUTHOR A
 6. **[NIT] Toolchain not auto-stamped into results — AGREED, fixed.** The harness now records Xcode (`xcodebuild -version`), macOS SDK (`xcrun --show-sdk-version`), and Swift (`swift --version`) into `0.env` alongside the macOS build; the regenerated archived log carries all four. A point-release re-run can no longer silently omit the toolchain.
 7. **[NIT] Table row "done" while the phase's own definition ends at acceptance — NOTED, no change (convention).** As the reviewer states: Phase 5 precedent, loudly flagged in the pointer, this closeout, and QUESTIONS.md; the row's verification column completes at acceptance. The "(memo gate open)" suffix on the status cell is the guard against misreading.
 8. **[NIT] Corpus separator newline: attribute ownership ≠ offset ownership — AGREED (documentation), spike code unchanged.** Harmless for layout measurement (which block's ID rides the separator does not affect geometry), so the throwaway corpus stays as-is; the real lesson is now a written warning in Phase 7 Step 2: separator/boundary-char membership is a deliberate `BlockRangeIndex` decision where attribute ownership and range math must agree — never an inherited accident. Related micro-nits, documented with no change: `runFallback` reuses pre-edit corpus offsets after ~90 chars of typed drift (those actions are trigger-exercisers, not position-precise probes); `stats()` p95 on n=3 is the nearest-rank median (max is always printed beside it; the n=15/n=120 aggregates are the load-bearing tails).
+
+---
+
+## Gate-closure round (2026-07-06) — the memo ACCEPTED as written; Phase 6 fully closed
+
+Walked with the author at the checkpoint, after both review rounds:
+
+1. **Manual feel pass (author item 2) — run by the author, PASS.** Her notes, recorded: typing "looks great"; overall "working great." Scroller behavior observed (hold-and-drag scrubs; clicking the track doesn't jump) and endorsed as the right feel — noted here for accuracy that this is the macOS system default ("Click in the scroll bar to: jump to the next page"), not spike code, and the book-scrub UI is its own deliberate control regardless. Margins are tight ("not much whitespace around the edges … a little hard on the eyes, like TextEdit") — recorded as a legibility note for the UI design pass (Phase 13); the spike is deliberately unstyled, and a basic `textContainerInset` is a one-line Phase 7 request if it bothers daily use before then. No canary output reported.
+2. **Decision memo (author item 1) — ACCEPTED AS WRITTEN.** She independently affirmed two of its points before reading it: no STTextView (her stated ground was commercial licensing; corrected for the record — STTextView is MIT-licensed and commercially usable, so the last-resort escape hatch remains genuinely open; the memo's operative ground stands: zero measured justification) and the resize hazard must be handled (confirmed already a Phase 7 obligation three ways: the "never px-anchor" ground rule, Step 7's content-anchored restore, and Step 7's manual resize test).
+3. **The three flagged Phase 7 interpretations — confirmed at the same walk**, all three as the provisional/recommended readings (recorded in the Phase 7 plan and AppSpec §14): (1) **one live NSTextView per focused post** (the per-block read-only tier becomes load-bearing at Phase 10's multi-post views); (2) **single-`"\n"` editor-surface separator** (option a — distinct from Phase 4's `"\n\n"` ratification, which covers the `renderedText` projection only); (3) **cross-block destructive edits refuse/clamp in v1** (option a — real structural gestures are Phase 9's).
+4. **Post-acceptance recordings landed (this commit):** AppSpec §14 author-decision delta, §15 risk 2 resolution, §16 "TK2 viewport viability" bullet removed; KnownIssues entry resolved and removed; QUESTIONS.md cleared; master plan pointer's GATE OPEN flag removed, row 6 **done**, Phase 6 closeout paragraph updated; the Phase 7 plan's contingency banner replaced with the gate-closed record and its interpretations marked confirmed.

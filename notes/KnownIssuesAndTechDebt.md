@@ -4,7 +4,6 @@ Deliberately-deferred work only. **Rule: no entry without naming the phase that 
 
 | Item | What & why deferred | Owning phase |
 |------|--------------------|--------------|
-| TK2 viewport viability decision | Whether book-scrub/infinite-scroll can trust live TK2 geometry on Tahoe, or must use stored per-block length estimates, or STTextView. Facts unknowable until tried on the M3. | 6 (TK2 spike) |
 | Sync auth hardening | Phase 5 ships a single-user token; real auth/key rotation arrives with accounts. | 14 (Accounts) |
 | Cross-block re-bracketing | Selecting a span across existing block boundaries → "make this a block" requires splitting touched blocks (each possibly fanned) and reconciling. v1 ships clean-inside-one-block / whole-block cases; messy cross-fan re-bracketing deferred. | 9 (Structural ops in editor) — partial; re-own at 9's closeout if still deferred |
 | Markdown + PDF export | Author-confirmed 2026-07-06: posts/books must export — `.md` at minimum, PDF wanted. Cheap by design (exports are read-side projections of the rendered text; headings are already Markdown in block text per AppSpec §14.8). `.md` + basic PDF (attributed-string print/PDF path) land together; *typographic* PDF polish is visual design and waits for the author. Exports are one-way projections, never a second source of truth. | 11 (Remaining views); PDF typography — 13 (UI design) |
