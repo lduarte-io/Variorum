@@ -57,6 +57,29 @@ public struct AppDatabase: Sendable {
         try await writer.write(updates)
     }
 
+    // MARK: - Observation
+
+    /// A live projection (Phase 4): re-fetches when the observed database
+    /// region changes and delivers *distinct* values as an async sequence.
+    /// Fetches run on GRDB's reader queues and fresh values are dispatched
+    /// on the cooperative thread pool — never the main thread (P2).
+    ///
+    /// Region tracking is table-grained for raw-SQL projections (TEXT
+    /// primary keys can't rowid-narrow), so an unrelated write to the same
+    /// tables may re-run the fetch; `removeDuplicates` guarantees consumers
+    /// only ever *see* real changes to their projection. The re-fetch cost
+    /// itself stays viewport-shaped because every Queries fetch is (P1) —
+    /// UI layers should hold observations for on-screen projections only
+    /// (P3), which Phase 7+ view models own.
+    public func observe<Value: Equatable & Sendable>(
+        _ fetch: @escaping @Sendable (Database) throws -> Value
+    ) -> AsyncValueObservation<Value> {
+        ValueObservation
+            .tracking(fetch)
+            .removeDuplicates()
+            .values(in: writer)
+    }
+
     /// A write transaction with outbox echo suppression (SyncSpec §3): rows the
     /// sync engine applies from the server must not re-enqueue into
     /// `sync_outbox` — the originating device already shipped them. Cascade

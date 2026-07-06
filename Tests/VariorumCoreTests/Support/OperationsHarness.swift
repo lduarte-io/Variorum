@@ -31,6 +31,31 @@ func withOperations<T>(
     }
 }
 
+/// The async twin of `withOperations`, for observation tests that await
+/// emissions between operations. Same deterministic world.
+func withOperationsAsync<T>(
+    seed: UInt64 = 1,
+    _ body: (Operations, AppDatabase) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: seed))
+    } operation: {
+        try await body(Operations(), db)
+    }
+}
+
 // MARK: - Row-level assertions
 
 extension AppDatabase {
