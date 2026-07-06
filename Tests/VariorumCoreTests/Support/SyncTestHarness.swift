@@ -76,16 +76,17 @@ final class SyncClient {
 
     // MARK: Engine
 
-    func engine(batchSize: Int = 200) -> SyncEngine {
-        SyncEngine(transport: transport, batchSize: batchSize)
+    func engine(batchSize: Int = 200, maxPushIterations: Int = 5) -> SyncEngine {
+        SyncEngine(
+            transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations)
     }
 
     @discardableResult
-    func push(batchSize: Int = 200) async throws -> SyncEngine.PushReport {
+    func push(batchSize: Int = 200, maxIterations: Int = 5) async throws -> SyncEngine.PushReport {
         try await withDependencies { deps in
             bind(&deps)
         } operation: {
-            try await engine(batchSize: batchSize).push()
+            try await engine(batchSize: batchSize, maxPushIterations: maxIterations).push()
         }
     }
 
