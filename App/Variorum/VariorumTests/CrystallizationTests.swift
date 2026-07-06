@@ -141,4 +141,30 @@ struct CrystallizationReconcilerTests {
             kind: .bulk(.paragraph))
         #expect(outcome.needsFullRerender)
     }
+
+    @Test func partialBulkApplyCarriesTheUnappliedSegments() {
+        // Review round 2: a second bulk-class event lands during a bulk
+        // mint's flight. The beyond-prefix segments are the author's text —
+        // they survive as the open tail (the chained crystallize pass mints
+        // them next), never vanish with the closed-tail nil.
+        let outcome = CrystallizationReconciler.reconcile(
+            minted: minted([("v0", "a"), ("v1", "b")]),
+            currentTail: "a\nb\nc\nd",
+            kind: .bulk(.paragraph))
+        #expect(outcome.applied.map(\.text) == ["a", "b"])
+        #expect(outcome.deletions.isEmpty)
+        #expect(outcome.newTail == "c\nd")
+        #expect(outcome.needsFullRerender)
+    }
+
+    @Test func enterDuringAnIdleMintFlightKeepsTheNewParagraph() {
+        // The idle-mint's paragraph-bulk plan covered "alpha beta"; the
+        // author typed Enter + "gamma" inside the flight window.
+        let outcome = CrystallizationReconciler.reconcile(
+            minted: minted([("v0", "alpha beta")]),
+            currentTail: "alpha beta\ngamma",
+            kind: .bulk(.paragraph))
+        #expect(outcome.applied.map(\.text) == ["alpha beta"])
+        #expect(outcome.newTail == "gamma")
+    }
 }

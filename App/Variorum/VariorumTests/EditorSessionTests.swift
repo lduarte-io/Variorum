@@ -308,6 +308,30 @@ struct ReviewRoundFixTests {
         }
     }
 
+    // Review round 2: idle-mint never fires under an active input-method
+    // composition — marked text is not yet the author's text, and minting
+    // would rewrite the region mid-composition.
+    @Test func idleMintSkipsAnActiveIMEComposition() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)
+            h.type("composing ")
+            h.textView.setMarkedText(
+                "げ", selectedRange: NSRange(location: 0, length: 1),
+                replacementRange: h.textView.selectedRange())
+            #expect(h.textView.hasMarkedText())
+            h.model.idleMintTail()                  // quiet gap elapses mid-composition
+            await h.settle()
+            #expect(try h.storeSlots().count == 1)  // nothing minted
+            #expect(h.model.hasOpenTail)            // tail still open
+            h.textView.unmarkText()                 // composition commits
+            h.model.idleMintTail()
+            await h.settle()
+            #expect(try h.storeSlots().count == 2)  // now it mints
+            #expect(!h.model.hasOpenTail)
+            try expectStoreMatchesView(h)
+        }
+    }
+
     // MINOR 5: teardown finalization waits out an in-flight mint and mints
     // the residual tail; a sealed-post refusal is surfaced, never silent.
     @Test func finalizeWorkMintsTheResidualTailEvenMidMint() async throws {

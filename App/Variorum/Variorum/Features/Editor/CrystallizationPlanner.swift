@@ -68,10 +68,19 @@ nonisolated enum CrystallizationPlanner {
         /// closed.
         func tailAfter(applyingFirst count: Int) -> String? {
             if count >= mints.count { return remainingTail }
-            guard case .typing = kind, count > 0, count <= remaindersAfter.count else {
-                return remainingTail
+            if case .typing = kind {
+                guard count > 0, count <= remaindersAfter.count else { return remainingTail }
+                return remaindersAfter[count - 1]
             }
-            return remaindersAfter[count - 1]
+            // Partial non-typing apply (review round 2): the un-applied
+            // segments are the author's text — they survive as the open
+            // tail (the chained crystallize pass mints them next) instead
+            // of vanishing with the closed-tail remainder.
+            var carried = mints[count...].joined(separator: EditorDocument.separator)
+            if let open = remainingTail, !open.isEmpty {
+                carried += EditorDocument.separator + open
+            }
+            return carried
         }
     }
 

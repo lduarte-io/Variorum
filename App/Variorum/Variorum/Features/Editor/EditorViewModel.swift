@@ -503,6 +503,13 @@ final class EditorViewModel {
     /// whole tail mints, trailing partial paragraph included, tail closes.
     func idleMintTail() {
         guard hasOpenTail, !tailText.allSatisfy(\.isWhitespace) else { return }
+        // Marked text is an in-progress input-method composition, not yet
+        // the author's text (review round 2): minting under it would rewrite
+        // the region mid-composition. Skip this tick and re-arm the clock.
+        if textView?.hasMarkedText() == true {
+            armTailIdleMint()
+            return
+        }
         let mode = header?.effectiveSegmentation ?? .paragraph
         crystallizeIfNeeded(forcedKind: mode == .oneBlock ? .oneBlock : .bulk(.paragraph))
     }
