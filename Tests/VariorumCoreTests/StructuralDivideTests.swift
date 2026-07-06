@@ -260,6 +260,28 @@ struct StructuralDivideTests {
         }
     }
 
+    @Test func divideWTouchesThePostWithoutReshuffling() throws {
+        // Structural work counts as touching (author decision 2026-07-06) —
+        // but never as a major revision: restructuring must not reshuffle
+        // the library's meaningful sort.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            let touchedBefore = try db.fetchString(
+                "SELECT last_touched_at FROM container WHERE id = ?", [world.post.id])
+            let majorBefore = try db.fetchString(
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [world.post.id])
+
+            _ = try ops.divideW(world.a.block.id, cuts: [world.v1: 11])
+
+            let touchedAfter = try db.fetchString(
+                "SELECT last_touched_at FROM container WHERE id = ?", [world.post.id])
+            #expect(touchedAfter != nil && touchedAfter != touchedBefore)
+            #expect(try db.fetchString(
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [world.post.id])
+                == majorBefore)
+        }
+    }
+
     @Test func aReleasedBlockDeletedLaterStillRestoresHome() throws {
         // The last_container_id stamped at release feeds the tray path:
         // delete the released A, restore it, and it lands back in its post.

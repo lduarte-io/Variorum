@@ -318,6 +318,8 @@ extension Operations {
                     placement: minted.placement, edge: edge))
             }
 
+            try touchContainer(db, containerID, now: now)
+
             return DivideWResult(
                 first: successors[0], second: successors[1],
                 markedSourceIDs: marked.map(\.id),
@@ -422,6 +424,7 @@ extension Operations {
                 db, from: minted.block.id, to: firstBlockID, originOp: "merge", now: now)
             let secondEdge = try insertLineageEdge(
                 db, from: minted.block.id, to: secondBlockID, originOp: "merge", now: now)
+            try touchContainer(db, containerID, now: now)
 
             return MergeResult(
                 block: minted.block, variant: minted.variants[0], placement: minted.placement,

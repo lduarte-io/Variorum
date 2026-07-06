@@ -261,6 +261,19 @@ extension Operations {
         try container.update(db)
     }
 
+    /// Structural work counts as touching the post (author decision
+    /// 2026-07-06): `last_touched_at` stamps, churn stays untouched —
+    /// restructuring must never reshuffle the library's meaningful sort.
+    /// Used by the structural ops that copy rather than edit text
+    /// (divide-W, merge, poolDragCopy); extract and single divide stamp
+    /// through `registerTextChange` since they also churn.
+    func touchContainer(_ db: Database, _ containerID: String, now: Date) throws {
+        let stamp = DateFormatter.variorumISO8601.string(from: now)
+        try db.execute(
+            sql: "UPDATE container SET last_touched_at = ?, updated_at = ? WHERE id = ?",
+            arguments: [stamp, stamp, containerID])
+    }
+
     /// The container's current rendered length: per live placement, the
     /// chosen variant's buffer (falling back to the block default when the
     /// choice is NULL, tombstoned, or archived — the read-time rule). Runs

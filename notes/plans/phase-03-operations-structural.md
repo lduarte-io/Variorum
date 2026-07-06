@@ -126,6 +126,6 @@ Reviewed and accepted as-is (documented, no code change): neighbor SQL uses stri
 
 **Smaller items:** `version_of`-edge operation got its owned KnownIssues row (Phase 11); the undo-serialization caveat extended the Phase 7 wiring row; terminator/closer sets are now shared constants (`SegmentationRules` owns them, `BoundarySnapping` references — can't drift); `renderedVariant`'s unreachable refusal got its own `noRenderableVariant` case (Phase 5 diagnostics); the sweep now exercises `.before`/`.after` anchored inserts under interleaving. Accepted as-is: the double grapheme validation in extract (cosmetic, block-bounded); `UndoStack` concurrent-undo race deferred to the Phase 7 wiring row.
 
-**Open author question (carried, not implemented):** should divideW/merge/poolDragCopy stamp `last_touched_at`? Currently only the text-editing ops (extract, single divide) touch the stamps, so a post restructured today still sorts as untouched — and the family is inconsistent (divide touches, divideW doesn't). Recommendation: stamp `last_touched_at` (not churn) on all structural ops. Awaiting the author's call; one-line change whenever decided.
+**Resolved (author decision 2026-07-06):** all structural ops stamp `last_touched_at` — divideW/merge/poolDragCopy now call `touchContainer` (touch only, never churn: restructuring must not reshuffle the meaningful sort); extract and single divide already stamped through `registerTextChange`. Tests assert touched-moves + major-revision-unchanged per op. AppSpec §9 + §14 updated.
 
-**`swift test`: 221 green (supersedes 219). This is the Phase 4 baseline.**
+**`swift test`: 224 green (supersedes 221/219). This is the Phase 4 baseline.** No open author questions remain from Phase 3.

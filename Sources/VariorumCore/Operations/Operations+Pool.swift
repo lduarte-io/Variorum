@@ -91,6 +91,7 @@ extension Operations {
 
             let edge = try insertLineageEdge(
                 db, from: copy.id, to: poolBlockID, originOp: "pool_copy", now: now)
+            try touchContainer(db, postID, now: now)
             return PoolDragCopyResult(
                 block: copy, variants: variants, placement: placement, edge: edge)
         }
