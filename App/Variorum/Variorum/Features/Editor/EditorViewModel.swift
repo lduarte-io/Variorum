@@ -91,10 +91,25 @@ final class EditorViewModel {
     @ObservationIgnored private var pendingVerdict: BlockRangeIndex.Verdict?
     @ObservationIgnored private var suppressEditProcessing = false
     @ObservationIgnored private(set) var mintInFlight = false
+    @ObservationIgnored private var mintTask: Task<Void, Never>?
     @ObservationIgnored private var bulkPending = false
     @ObservationIgnored private var pendingProjection: [Queries.RenderedBlock]?
     @ObservationIgnored private var forceFullRender = false
     @ObservationIgnored private var loaded = false
+    /// The variant a loaded commit history belongs to — restore targets
+    /// THIS, never the caret's current position (review round 1, NIT 12).
+    @ObservationIgnored private var commitListVariantID: String?
+
+    // Idle-mint (author decision 2026-07-06, review round — QUESTIONS item
+    // 2 answered): a short quiet gap crystallizes the open tail, including
+    // the trailing partial paragraph, bounding crash loss to seconds like
+    // every other edit; teardown stays the backstop. Granularity is
+    // paragraph in EVERY mode (author ruling on QUESTIONS item 3).
+    @ObservationIgnored var tailIdleDebounce: Duration = .seconds(2)
+    /// Injectable for deterministic tests (default: the real clock).
+    @ObservationIgnored var tailIdleSleep: @Sendable (Duration) async throws -> Void =
+        { try await Task.sleep(for: $0) }
+    @ObservationIgnored private var tailIdleTask: Task<Void, Never>?
 
     var hasOpenTail: Bool { index.tailLength != nil }
 
@@ -122,9 +137,9 @@ final class EditorViewModel {
     }
 
     /// Teardown: persist what only the editor knows (open tail, scroll
-    /// anchor), then let go. The open tail crystallizes on teardown so
-    /// nothing typed is ever lost to a post switch or window close
-    /// (PROVISIONAL timing — see phase plan closeout).
+    /// anchor), then let go. The open tail crystallizes on idle (author
+    /// decision 2026-07-06) and again here as the backstop, so nothing
+    /// typed is ever lost to a post switch or window close.
     func teardown() {
         if let anchor = topVisibleOffset() {
             session.editorRouter.scrollAnchors[postID] = anchor
@@ -133,28 +148,56 @@ final class EditorViewModel {
             session.editorRouter.active = nil
         }
         canary.disarm()
-        let vmTask = finalizeWork()
-        if vmTask != nil { /* runs detached from the view's lifetime */ }
+        finalizeWork()
     }
 
-    /// Flushes the buffer and crystallizes a non-blank open tail. Returns
-    /// the task so quit-time callers can await it.
+    /// Flushes the buffer, waits out any in-flight mint (so its
+    /// reconciliation runs — review round 1, MINOR 5), then crystallizes
+    /// whatever open tail remains. Holds `self` strongly: the view model
+    /// stays alive until its text is safe, even across a post switch.
+    /// A refusal (a post sealed remotely while a tail was open) is
+    /// surfaced, never silently dropped; the text stays in the buffer for
+    /// the session (see QUESTIONS — anything more inventive is a product
+    /// call). Returns the task so quit-time callers can await it.
     @discardableResult
     func finalizeWork() -> Task<Void, Never>? {
-        let tail = hasOpenTail ? tailText : ""
-        let needsMint = !tail.allSatisfy(\.isWhitespace) && !mintInFlight
-        guard autosave.isDirty || needsMint || mintInFlight else { return nil }
-        let mode = header?.effectiveSegmentation ?? .paragraph
-        let post = postID
-        return Task { [session] in
-            await autosave.flushNow()
-            if needsMint, let plan = CrystallizationPlanner.plan(
-                mode == .oneBlock ? .oneBlock : .bulk(mode), tail: tail) {
-                _ = try? await session.runner.run { ops in
-                    for text in plan.mints {
-                        _ = try ops.newBlock(in: post, text: text, at: .end)
+        tailIdleTask?.cancel()
+        let hasTailText = hasOpenTail && !tailText.allSatisfy(\.isWhitespace)
+        guard autosave.isDirty || mintInFlight || hasTailText else { return nil }
+        return Task { // strong self, deliberately
+            await self.autosave.flushNow()
+            // Let the in-flight mint (and any round it chains) reconcile.
+            while self.mintInFlight {
+                if let mint = self.mintTask {
+                    await mint.value
+                } else {
+                    await Task.yield()
+                }
+            }
+            // Mint the residual tail with TYPING granularity (paragraph in
+            // every mode — author ruling; the trailing partial included).
+            let tail = self.hasOpenTail ? self.tailText : ""
+            guard !tail.allSatisfy(\.isWhitespace) else { return }
+            let mode = self.header?.effectiveSegmentation ?? .paragraph
+            let kind: CrystallizationPlanner.Kind =
+                mode == .oneBlock ? .oneBlock : .bulk(.paragraph)
+            guard let plan = CrystallizationPlanner.plan(kind, tail: tail) else { return }
+            let post = self.postID
+            do {
+                let minted = try await self.session.runner.run { ops in
+                    try plan.mints.map { text -> CrystallizationReconciler.MintedBlock in
+                        let result = try ops.newBlock(in: post, text: text, at: .end)
+                        return .init(
+                            blockID: result.block.id,
+                            variantID: result.variant.id,
+                            text: text)
                     }
                 }
+                // Keeps index/view/bookkeeping consistent when the editor
+                // is still alive (quit path); harmless after a post switch.
+                self.finishMint(minted, kind: kind)
+            } catch {
+                self.showOperationError(error)
             }
         }
     }
@@ -191,7 +234,7 @@ final class EditorViewModel {
 
     /// Internal so tests can drive projections without the observation.
     func applyProjection(_ new: [Queries.RenderedBlock]) {
-        guard let textView else {
+        guard textView != nil else {
             pendingProjection = new
             return
         }
@@ -224,11 +267,17 @@ final class EditorViewModel {
         } else {
             renderFull(new, preserveTail: true)
         }
-        _ = textView // silence unused warning paths
     }
 
     /// True when the projection and the live surface agree on every slot:
     /// same blocks, same rendered variants, same texts, same editability.
+    ///
+    /// Cost note (review round 1, MINOR 8): the cheap fields short-circuit
+    /// first, but a genuine echo compares every slot's text — O(post
+    /// length) on the main thread, rate-bounded by the autosave debounce.
+    /// Measured fine at 10k words; flagged in KnownIssues so Phase 10's
+    /// multi-post views don't inherit it (direction: track last-flushed
+    /// texts per variant and compare only candidates).
     private func surfaceMatches(_ new: [Queries.RenderedBlock]) -> Bool {
         guard new.count == index.entries.count else { return false }
         for (i, slot) in new.enumerated() {
@@ -303,9 +352,24 @@ final class EditorViewModel {
     }
 
     private func applyPendingIfClean() {
-        guard !autosave.isDirty, !mintInFlight, let pending = pendingProjection else { return }
+        guard !autosave.isDirty, !mintInFlight, pendingProjection != nil else { return }
         pendingProjection = nil
-        applyProjection(pending)
+        // The deferred value was fetched BEFORE the flush that just landed —
+        // applying it as-is would transiently revert the actively edited
+        // block to its pre-flush text (review round 1, MAJOR 2). Re-fetch:
+        // the fresh projection includes our flush, so the echo check passes
+        // and only genuinely external changes touch the view.
+        Task { [weak self] in
+            guard let self else { return }
+            guard let fresh = try? await session.database.read({ [postID] in
+                try Queries.renderPost($0, containerID: postID)
+            }) else { return }
+            guard !autosave.isDirty, !mintInFlight else {
+                pendingProjection = fresh
+                return
+            }
+            applyProjection(fresh)
+        }
     }
 
     // MARK: - Edit routing (the delegate entry points)
@@ -317,17 +381,28 @@ final class EditorViewModel {
             return false
         }
         guard let replacement else { return true } // attribute-only
-        if textView?.isPasting == true { bulkPending = true }
         let verdict = index.verdict(
             replacing: range,
             replacementIsSingleNewline: replacement == "\n",
             segmentation: header?.effectiveSegmentation ?? .paragraph)
         switch verdict {
+        case .refuse(.indexDesync):
+            // The index no longer describes the storage: recover from the
+            // store instead of crashing (review round 1, MINOR 7).
+            pendingVerdict = nil
+            desyncRecovery()
+            return false
         case .refuse(let refusal):
             pendingVerdict = nil
             refuseFeedback(message(for: refusal))
             return false
         default:
+            // Bulk entry is a TAIL concept only: a paste routed into an
+            // existing block is a content edit of that block, and a refused
+            // paste must not arm anything (review round 1, MAJOR 3).
+            if case .tail = verdict, textView?.isPasting == true {
+                bulkPending = true
+            }
             pendingVerdict = verdict
             return true
         }
@@ -350,6 +425,7 @@ final class EditorViewModel {
             setBlockAttribute(nil, over: editedRange)
             syncTailText()
             crystallizeIfNeeded()
+            armTailIdleMint()
         case .openTail:
             index.openTail()
             setBlockAttribute(nil, over: editedRange)
@@ -357,6 +433,7 @@ final class EditorViewModel {
         case .closeTail:
             index.closeTail()
             tailText = ""
+            tailIdleTask?.cancel()
         case .refuse:
             // An edit reached the storage without a routable verdict (an
             // AppKit path outside the policed ones). The store is truth:
@@ -408,16 +485,52 @@ final class EditorViewModel {
 
     // MARK: - Crystallization (AppSpec §7 segmentation trigger)
 
-    private func crystallizeIfNeeded() {
-        guard !mintInFlight, hasOpenTail else { bulkPending = false; return }
+    /// Re-arms the idle-mint clock after tail activity (author decision
+    /// 2026-07-06: the open tail crystallizes after a short quiet gap, so
+    /// crash loss is bounded to seconds; teardown remains the backstop).
+    private func armTailIdleMint() {
+        tailIdleTask?.cancel()
+        guard hasOpenTail, !tailText.allSatisfy(\.isWhitespace) else { return }
+        tailIdleTask = Task { [weak self, tailIdleSleep, tailIdleDebounce] in
+            guard (try? await tailIdleSleep(tailIdleDebounce)) != nil else { return }
+            guard !Task.isCancelled else { return }
+            self?.idleMintTail()
+        }
+    }
+
+    /// The idle-mint itself — internal so tests can fire it deterministically.
+    /// Typing granularity is paragraph in EVERY mode (author ruling): the
+    /// whole tail mints, trailing partial paragraph included, tail closes.
+    func idleMintTail() {
+        guard hasOpenTail, !tailText.allSatisfy(\.isWhitespace) else { return }
         let mode = header?.effectiveSegmentation ?? .paragraph
-        let kind: CrystallizationPlanner.Kind =
-            bulkPending ? .bulk(mode) : (mode == .oneBlock ? .oneBlock : .typing)
+        crystallizeIfNeeded(forcedKind: mode == .oneBlock ? .oneBlock : .bulk(.paragraph))
+    }
+
+    private func crystallizeIfNeeded(forcedKind: CrystallizationPlanner.Kind? = nil) {
+        // While a mint is in flight, keep `bulkPending` ARMED (review round
+        // 1, MAJOR 3): finishMint re-runs this and the paste-during-mint
+        // still gets bulk semantics.
+        guard !mintInFlight else { return }
+        guard hasOpenTail else {
+            bulkPending = false
+            return
+        }
+        let mode = header?.effectiveSegmentation ?? .paragraph
+        let kind: CrystallizationPlanner.Kind = forcedKind
+            ?? (bulkPending ? .bulk(mode) : (mode == .oneBlock ? .oneBlock : .typing))
+        guard let plan = CrystallizationPlanner.plan(kind, tail: tailText) else {
+            if forcedKind == nil { bulkPending = false } // consumed: nothing to mint
+            return
+        }
+        // Any plan covers the whole current tail — the flag is consumed.
         bulkPending = false
-        guard let plan = CrystallizationPlanner.plan(kind, tail: tailText) else { return }
         mintInFlight = true
         let post = postID
-        Task { [weak self, session] in
+        // Strong self (review round 1, MINOR 5): the reconciliation must run
+        // even if the view goes away mid-flight — the task completes in
+        // milliseconds and the VM is freed after.
+        mintTask = Task { [session] in
             do {
                 let minted = try await session.runner.run { ops in
                     try plan.mints.map { text -> CrystallizationReconciler.MintedBlock in
@@ -428,11 +541,11 @@ final class EditorViewModel {
                             text: text)
                     }
                 }
-                self?.finishMint(minted, kind: kind)
+                self.finishMint(minted, kind: kind)
             } catch {
-                self?.mintInFlight = false
-                self?.showOperationError(error)
-                self?.applyPendingIfClean()
+                self.mintInFlight = false
+                self.showOperationError(error)
+                self.applyPendingIfClean()
             }
         }
     }
@@ -442,21 +555,30 @@ final class EditorViewModel {
         let outcome = CrystallizationReconciler.reconcile(
             minted: minted, currentTail: tailText, kind: kind)
 
-        // Store follow-ups: corrections and deletions are ordinary
-        // operations; the FIFO runner keeps them ordered after the mints.
-        if !outcome.corrections.isEmpty || !outcome.deletions.isEmpty {
-            let corrections = outcome.corrections
+        // Store follow-ups (review round 1, MINOR 6):
+        // - Corrections go through the autosave coordinator, so `isDirty`
+        //   covers the window until they land (no clobber-then-heal gap)
+        //   and a refusal rides the coordinator's keep-pending posture.
+        // - Compensating deletions are internal bookkeeping, not an author
+        //   gesture: they run through an undo-stack-FREE Operations so
+        //   ⌥⌘Z never offers an inverse for something she never did.
+        for correction in outcome.corrections {
+            autosave.record(
+                variantID: correction.variantID,
+                text: correction.text,
+                charDelta: correction.text.utf16.count)
+        }
+        if !outcome.corrections.isEmpty {
+            Task { await self.autosave.flushNow() }
+        }
+        if !outcome.deletions.isEmpty {
             let deletions = outcome.deletions
             Task { [session] in
                 do {
-                    try await session.runner.run { ops in
-                        for correction in corrections {
-                            try ops.autosave(
-                                correction.variantID, text: correction.text,
-                                charDelta: correction.text.utf16.count)
-                        }
+                    try await session.runner.run { _ in
+                        let quiet = Operations() // no undo stack, same store
                         for blockID in deletions {
-                            try ops.deleteBlock(blockID)
+                            try quiet.deleteBlock(blockID)
                         }
                     }
                 } catch {
@@ -498,8 +620,11 @@ final class EditorViewModel {
             }
         }
         updateCaretContext()
-        // New paragraphs may have completed during the flight.
+        // New paragraphs may have completed during the flight — and a
+        // paste-during-mint's still-armed bulk flag is honored here.
         crystallizeIfNeeded()
+        // Whatever tail remains restarts the idle-mint clock.
+        armTailIdleMint()
         applyPendingIfClean()
     }
 
@@ -529,6 +654,7 @@ final class EditorViewModel {
     func toggleCommitHistory() {
         if commitList != nil {
             commitList = nil
+            commitListVariantID = nil
         } else {
             Task { await loadCommitHistory() }
         }
@@ -549,6 +675,7 @@ final class EditorViewModel {
                     commit: $0,
                     predatesSplit: CommitRules.predatesSplit(commitDate: $0.createdAt, splitDates: splits))
             }
+            commitListVariantID = variantID
         } catch {
             statusMessage = "Could not load history: \(error)"
         }
@@ -556,14 +683,16 @@ final class EditorViewModel {
 
     /// Restore honors the documented pre-split warning (AppSpec §9,
     /// KnownIssues entry): a commit older than the newest divide/extract on
-    /// this block resurrects pre-split text — confirm first.
+    /// this block resurrects pre-split text — confirm first. The target is
+    /// the variant whose history is OPEN, not the caret's current position
+    /// (the caret may have moved since — review round 1, NIT 12).
     func restore(_ item: CommitListItem, confirmed: Bool = false) {
         if item.predatesSplit && !confirmed {
             pendingRestore = item
             return
         }
         pendingRestore = nil
-        guard let variantID = caretVariantID else { return }
+        guard let variantID = commitListVariantID else { return }
         Task {
             await autosave.flushNow()
             do {
@@ -782,6 +911,8 @@ final class EditorViewModel {
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:
             "This take is locked — branch it or unlock it to edit."
+        case .indexDesync:
+            "The editor lost track of block boundaries — reloading from the store."
         }
     }
 

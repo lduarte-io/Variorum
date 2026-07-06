@@ -207,6 +207,192 @@ struct EditorSessionTests {
 }
 
 @MainActor
+@Suite("Review-round fixes (round 1)")
+struct ReviewRoundFixTests {
+    // MAJOR 1: a refused flush must never drop typed text nor let an older
+    // projection overwrite the surface.
+    @Test func aRemoteLockMidTypingNeverLosesTheBuffer() async throws {
+        try await withEditor(seedBlocks: ["guarded text", "other"]) { h in
+            h.type(" plus typing", at: 12)          // dirty (debounce pending)
+            let slots = try h.storeSlots()
+            // The lock lands remotely while the debounce window is open.
+            try h.session.operations.lockVariant(slots[0].variantID!)
+            try h.reload()                          // deferred: buffer is dirty
+            await h.model.autosave.flushNow()       // the flush refuses
+            // The surface keeps the typed text; the store kept the old text;
+            // nothing clobbered either way.
+            #expect(h.documentText == "guarded text plus typing\nother")
+            #expect(h.model.autosave.isDirty)       // still pending, visibly
+            #expect(h.model.statusMessage != nil)
+            let storeText = try h.storeSlots()[0].text
+            #expect(storeText == "guarded text")
+            // The user unlocks; the retry lands the buffer exactly.
+            try h.session.operations.unlockVariant(slots[0].variantID!)
+            await h.flush()
+            let retried = try h.storeSlots()[0].text
+            #expect(retried == "guarded text plus typing")
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    // MAJOR 2: the deferred projection is stale by construction — settle
+    // must re-fetch, so the just-flushed block is never transiently
+    // reverted and external changes still arrive.
+    @Test func deferredProjectionsReFetchAtSettle() async throws {
+        try await withEditor(seedBlocks: ["mine", "theirs"]) { h in
+            h.type("!", at: 4)                      // dirty
+            let slots = try h.storeSlots()
+            // An external write lands while we are dirty; its projection
+            // (fetched pre-flush) arrives and defers.
+            try h.session.operations.autosave(
+                slots[1].variantID!, text: "theirs, rewritten", charDelta: 10)
+            try h.reload()                          // deferred (stale value)
+            await h.model.autosave.flushNow()       // clean; settle re-fetches
+            for _ in 0..<2000 {
+                if h.documentText.contains("theirs, rewritten") { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            // Both survive: our typed text was never reverted, theirs shows.
+            #expect(h.documentText == "mine!\ntheirs, rewritten")
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    // MAJOR 3: paste into an existing BLOCK is a content edit and must not
+    // poison the next tail keystroke into bulk crystallization.
+    @Test func pasteIntoABlockDoesNotArmBulkEntry() async throws {
+        try await withEditor(seedBlocks: ["target block"]) { h in
+            h.textView.withPasteFlag {
+                h.type("A\nB", at: 6)               // paste INSIDE the block
+            }
+            await h.flush()
+            var slots = try h.storeSlots()
+            #expect(slots.count == 1)               // content edit, no mints
+            #expect(slots[0].text == "targetA\nB block")
+            // Now open the tail and TYPE one character: typing semantics —
+            // the partial paragraph must NOT mint (with the old bug the
+            // armed bulk flag minted it instantly and closed the tail).
+            h.type("\n", at: (h.documentText as NSString).length)
+            h.type("x")
+            await h.settle()
+            slots = try h.storeSlots()
+            #expect(slots.count == 1)               // still just the block
+            #expect(h.model.hasOpenTail)            // tail open, unminted
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    // Author ruling (QUESTIONS 2): idle-mint — a quiet gap crystallizes the
+    // open tail including the trailing partial paragraph.
+    @Test func idleMintCrystallizesTheQuietTail() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)
+            h.type("half a paragraph")
+            await h.settle()
+            let beforeIdle = try h.storeSlots()
+            #expect(beforeIdle.count == 1)          // typing alone: no mint
+            h.model.idleMintTail()                  // the quiet gap elapses
+            await h.settle()
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["existing", "half a paragraph"])
+            #expect(!h.model.hasOpenTail)           // tail closed
+            #expect(h.documentText == "existing\nhalf a paragraph")
+            try expectStoreMatchesView(h)
+            // Resumed typing extends the idle-minted block — the final
+            // structure matches what typing-past would have produced.
+            h.type(" continues", at: (h.documentText as NSString).length)
+            await h.flush()
+            let extended = try h.storeSlots()[1].text
+            #expect(extended == "half a paragraph continues")
+        }
+    }
+
+    // MINOR 5: teardown finalization waits out an in-flight mint and mints
+    // the residual tail; a sealed-post refusal is surfaced, never silent.
+    @Test func finalizeWorkMintsTheResidualTailEvenMidMint() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)
+            h.type("typed past\nstill open")        // mint of "typed past" goes in flight
+            let task = try #require(h.model.finalizeWork())
+            await task.value
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["existing", "typed past", "still open"])
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func finalizeWorkSurfacesASealedRefusal() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)
+            h.type("tail text")
+            await h.settle()
+            // Sealed remotely while the tail is open (ops-level: the editor
+            // header hasn't refreshed, so the mint is attempted and refused).
+            try h.session.operations.lockPost(h.postID)
+            let task = try #require(h.model.finalizeWork())
+            await task.value
+            #expect(h.model.statusMessage?.contains("sealed") == true)
+            // The tail text is still in the buffer, not silently dropped.
+            #expect(h.documentText == "existing\ntail text")
+            let unminted = try h.storeSlots()
+            #expect(unminted.count == 1)
+        }
+    }
+
+    // MINOR 6: a reconciler compensating deletion is internal bookkeeping —
+    // it must NOT land on the structural undo stack.
+    @Test func compensatingDeletionsRegisterNoUndo() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)
+            h.type("para\n")                        // plans a mint of "para"
+            // Before the mint task runs, un-type the paragraph entirely:
+            // the reconciler must delete the minted block quietly.
+            h.replace(NSRange(location: 9, length: 5), with: "")
+            await h.settle()
+            for _ in 0..<2000 {
+                if (try? h.storeSlots())?.count == 1 { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["existing"])   // block deleted again
+            #expect(h.session.undoStack.depth == 0)       // and NO undo entry
+            #expect(h.model.hasOpenTail)
+        }
+    }
+
+    // NIT 12: restore targets the variant whose history is open, even if
+    // the caret moved after loading it.
+    @Test func restoreTargetsTheLoadedHistoryNotTheCaret() async throws {
+        try await withEditor(seedBlocks: ["committed once", "elsewhere"]) { h in
+            let slots = try h.storeSlots()
+            _ = try h.session.operations.commit(slots[0].variantID!)
+            try h.session.operations.autosave(
+                slots[0].variantID!, text: "changed since", charDelta: 5)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
+            h.model.updateCaretContext()
+            await h.model.loadCommitHistory()
+            let item = try #require(h.model.commitList?.first)
+            // The caret wanders to the OTHER block before confirming.
+            h.textView.setSelectedRange(NSRange(location: 15, length: 0))
+            h.model.updateCaretContext()
+            h.model.restore(item)
+            await h.settle()
+            for _ in 0..<2000 {
+                if (try? h.storeSlots())?[0].text == "committed once" { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            let restored = try h.storeSlots()
+            #expect(restored[0].text == "committed once")
+            #expect(restored[1].text == "elsewhere")               // untouched
+        }
+    }
+}
+
+@MainActor
 @Suite("Commit flow (Step 5)")
 struct CommitFlowTests {
     @Test func commitFlushesTheBufferFirst() async throws {

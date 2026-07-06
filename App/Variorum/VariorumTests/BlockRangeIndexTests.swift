@@ -150,6 +150,16 @@ struct BlockRangeIndexTests {
         #expect(verdict(index, 0, 0, newline: true) == .tail)
     }
 
+    // MARK: - Desync posture (review round 1, MINOR 7)
+
+    @Test func outOfRangeEditsRefuseAsDesyncNeverCrash() {
+        // If the index ever stops describing the storage, the verdict is a
+        // refusal that triggers store-truth recovery — not a release crash.
+        let index = threeBlocks()
+        #expect(verdict(index, 18, 0) == .refuse(.indexDesync))   // doc is 17
+        #expect(verdict(index, 10, 20) == .refuse(.indexDesync))
+    }
+
     // MARK: - Graphemes (UTF-16 discipline)
 
     @Test func utf16OffsetsCarrySurrogatePairsAndCombiningMarks() {

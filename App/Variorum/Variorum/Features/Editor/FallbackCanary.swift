@@ -60,8 +60,10 @@ final class FallbackCanary {
     }
 
     deinit {
-        // Tokens are removed by disarm(); the editor view's dismantle calls
-        // it. NotificationCenter also auto-unregisters block observers on
-        // dealloc in modern AppKit, so leaking here is defensive-only.
+        // Tokens are removed by disarm(), which the editor view's dismantle
+        // calls. Note: block-based observer tokens are NOT auto-unregistered
+        // by NotificationCenter (only selector-based observers are) — a
+        // canary leaked without disarm() would leak its observation blocks.
+        // Acceptable for a diagnostic; the teardown path always disarms.
     }
 }

@@ -173,6 +173,82 @@ struct AutosaveCoordinatorTests {
             coordinator.record(variantID: minted.variant.id, text: "clobbered", charDelta: 9)
             await coordinator.flushNow()
             #expect(seen.value as? OperationError == .lockedVariant(id: minted.variant.id))
+
+            // Review round 1, MAJOR 1: the refused entry is NOT dropped — it
+            // stays pending, so the buffer remains authoritative (isDirty)
+            // and the text survives to a later retry.
+            #expect(coordinator.isDirty)
+            #expect(coordinator.pending[minted.variant.id]?.text == "clobbered")
+
+            // The user resolves (unlock) and the next flush lands the text.
+            try ops.unlockVariant(minted.variant.id)
+            await coordinator.flushNow()
+            #expect(!coordinator.isDirty)
+            let saved = try await db.read {
+                try String.fetchOne(
+                    $0, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.variant.id])
+            }
+            #expect(saved == "clobbered")
+        }
+    }
+
+    @Test func oneRefusalNeverDropsASiblingsSave() async throws {
+        // Review round 1, MAJOR 1 (secondary): variants save independently.
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let ops = Operations()
+            let runner = OperationsRunner(operations: ops)
+            let post = try ops.createPost()
+            let locked = try ops.newBlock(in: post.id, text: "frozen")
+            let free = try ops.newBlock(in: post.id, text: "free")
+            try ops.lockVariant(locked.variant.id)
+
+            let coordinator = AutosaveCoordinator(runner: runner, sleep: { _ in })
+            coordinator.record(variantID: locked.variant.id, text: "frozen edit", charDelta: 5)
+            coordinator.record(variantID: free.variant.id, text: "free edit", charDelta: 5)
+            await coordinator.flushNow()
+
+            let freeText = try await db.read {
+                try String.fetchOne(
+                    $0, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [free.variant.id])
+            }
+            #expect(freeText == "free edit")                       // sibling saved
+            #expect(coordinator.pending[free.variant.id] == nil)   // and cleared
+            #expect(coordinator.pending[locked.variant.id]?.text == "frozen edit")
+        }
+    }
+
+    @Test func newerTypingSupersedesAFailedEntry() async throws {
+        // Review round 1, MAJOR 1: if the user typed again while the failed
+        // flush was in flight, the newer whole-buffer text wins and only the
+        // churn cost merges.
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let ops = Operations()
+            let runner = OperationsRunner(operations: ops)
+            let post = try ops.createPost()
+            let minted = try ops.newBlock(in: post.id, text: "guarded")
+            try ops.lockVariant(minted.variant.id)
+            let coordinator = AutosaveCoordinator(runner: runner, sleep: { _ in })
+            coordinator.record(variantID: minted.variant.id, text: "old", charDelta: 3)
+            // Simulate mid-flight typing by re-recording between flushes:
+            // flush 1 fails and re-inserts; the fresher record must win.
+            await coordinator.flushNow()
+            coordinator.record(variantID: minted.variant.id, text: "old plus new", charDelta: 9)
+            #expect(coordinator.pending[minted.variant.id]?.text == "old plus new")
+            #expect(coordinator.pending[minted.variant.id]?.charDelta == 3 + 9)
         }
     }
 

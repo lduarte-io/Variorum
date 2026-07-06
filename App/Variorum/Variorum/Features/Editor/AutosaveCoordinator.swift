@@ -68,12 +68,6 @@ final class AutosaveCoordinator {
         schedule()
     }
 
-    /// Drops a variant's pending edit without saving (used when a store
-    /// re-render is about to overwrite the buffer anyway).
-    func discard(variantID: String) {
-        pending.removeValue(forKey: variantID)
-    }
-
     private func schedule() {
         flushTask?.cancel()
         flushTask = Task { [sleep, debounce] in
@@ -85,6 +79,19 @@ final class AutosaveCoordinator {
 
     /// Flushes everything pending immediately (commit and teardown call this
     /// before acting — the commit must snapshot exactly the buffer).
+    ///
+    /// Failure posture (review round 1, MAJOR 1): each variant saves
+    /// INDEPENDENTLY — one refusal never drops a sibling's save — and a
+    /// refused entry goes BACK into `pending`, so the typed text is never
+    /// dropped and `isDirty` stays true, which keeps projections deferred:
+    /// the surface remains authoritative and an older store state can never
+    /// clobber it. There is no automatic retry loop — a refused entry
+    /// retries on the next flush trigger (further typing, a commit,
+    /// teardown); a permanent refusal (a seal or lock that landed remotely
+    /// mid-typing) sits visibly behind `onError`'s message until the user
+    /// acts. If newer typing superseded the failed entry meanwhile, the
+    /// newer text wins (the text is always the whole buffer) and only the
+    /// churn cost merges.
     func flushNow() async {
         flushTask?.cancel()
         flushTask = nil
@@ -96,14 +103,24 @@ final class AutosaveCoordinator {
         }
         flushesInFlight += 1
         flushCount += 1
-        do {
-            try await runner.run { ops in
-                for (variantID, entry) in batch.sorted(by: { $0.key < $1.key }) {
+        var firstError: Error?
+        for (variantID, entry) in batch.sorted(by: { $0.key < $1.key }) {
+            do {
+                try await runner.run { ops in
                     try ops.autosave(variantID, text: entry.text, charDelta: entry.charDelta)
                 }
+            } catch {
+                if var newer = pending[variantID] {
+                    newer.charDelta += entry.charDelta
+                    pending[variantID] = newer
+                } else {
+                    pending[variantID] = entry
+                }
+                if firstError == nil { firstError = error }
             }
-        } catch {
-            onError?(error)
+        }
+        if let firstError {
+            onError?(firstError)
         }
         flushesInFlight -= 1
         onSettled?()

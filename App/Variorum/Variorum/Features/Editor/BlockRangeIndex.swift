@@ -119,6 +119,11 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         case readOnlySlot
         /// The rendered variant is locked: branch or unlock to edit.
         case lockedVariant
+        /// The proposed range lies outside the document this index
+        /// describes — the index has desynced from the storage. Never a
+        /// crash (review round 1, MINOR 7): the view model's recovery
+        /// re-renders from the store, which is truth.
+        case indexDesync
     }
 
     /// Routes a proposed replacement. `replacementIsSingleNewline` and
@@ -129,8 +134,12 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         replacementIsSingleNewline: Bool,
         segmentation: Segmentation
     ) -> Verdict {
-        precondition(range.location >= 0 && range.upperBound <= documentLength,
-                     "edit range outside the document")
+        // A range outside the tiling means the index no longer describes
+        // the storage. The posture is recover-not-crash: refuse the edit
+        // and let the caller re-render from the store (`desyncRecovery`).
+        guard range.location >= 0, range.upperBound <= documentLength else {
+            return .refuse(.indexDesync)
+        }
 
         // The open-tail gesture: a typed newline at the exact document end
         // while no tail region exists. One-block posts never open a tail

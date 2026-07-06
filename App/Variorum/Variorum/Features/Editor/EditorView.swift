@@ -269,15 +269,19 @@ final class ScrollAnchorController {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.boundsChanged() }
         })
+        // Only a Sendable window identity crosses into the isolated region
+        // (Notification itself is not Sendable — Swift 6 mode).
         tokens.append(NotificationCenter.default.addObserver(
             forName: NSWindow.willStartLiveResizeNotification, object: nil, queue: .main
         ) { [weak self] note in
-            MainActor.assumeIsolated { self?.liveResizeStarted(note) }
+            let windowID = (note.object as? NSWindow).map(ObjectIdentifier.init)
+            MainActor.assumeIsolated { self?.liveResizeStarted(windowID: windowID) }
         })
         tokens.append(NotificationCenter.default.addObserver(
             forName: NSWindow.didEndLiveResizeNotification, object: nil, queue: .main
         ) { [weak self] note in
-            MainActor.assumeIsolated { self?.liveResizeEnded(note) }
+            let windowID = (note.object as? NSWindow).map(ObjectIdentifier.init)
+            MainActor.assumeIsolated { self?.liveResizeEnded(windowID: windowID) }
         })
     }
 
@@ -305,14 +309,14 @@ final class ScrollAnchorController {
         model.refreshBadges()
     }
 
-    private func liveResizeStarted(_ note: Notification) {
-        guard (note.object as? NSWindow) === window else { return }
+    private func liveResizeStarted(windowID: ObjectIdentifier?) {
+        guard let window, windowID == ObjectIdentifier(window) else { return }
         stableAnchor = model.topVisibleOffset() ?? stableAnchor
         inLiveResize = true
     }
 
-    private func liveResizeEnded(_ note: Notification) {
-        guard (note.object as? NSWindow) === window else { return }
+    private func liveResizeEnded(windowID: ObjectIdentifier?) {
+        guard let window, windowID == ObjectIdentifier(window) else { return }
         inLiveResize = false
         lastWidth = scrollView?.contentView.bounds.width ?? lastWidth
         if let anchor = stableAnchor {

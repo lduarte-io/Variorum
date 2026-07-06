@@ -102,10 +102,7 @@ extension AppDatabase {
     public func observeContainerHeader(_ containerID: String) -> AsyncValueObservation<Queries.ContainerHeader?> {
         observe { try Queries.containerHeader($0, containerID: containerID) }
     }
-
-    /// One block's fan, live — what the fan panel holds while open. Cost ∝
-    /// the fan, and the panel is on-screen state (P3): stop when it closes.
-    public func observeBlockFan(_ blockID: String) -> AsyncValueObservation<[Variant]> {
-        observe { try Queries.blockFan($0, blockID: blockID) }
-    }
 }
+// (An observeBlockFan wrapper was dropped in the Phase 7 review round —
+// the fan panel refreshes via one-shot blockFan reads; ship the live
+// wrapper when a view actually holds it.)

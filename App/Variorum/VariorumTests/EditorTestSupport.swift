@@ -129,6 +129,9 @@ func withEditor<T>(
             _ = try session.operations.newBlock(in: post.id, text: text)
         }
         let model = EditorViewModel(session: session, postID: post.id)
+        // Deterministic tests: the idle-mint clock never fires on its own —
+        // tests drive `idleMintTail()` explicitly.
+        model.tailIdleSleep = { _ in throw CancellationError() }
         let (scrollView, textView) = EditorTextView.makeEditor()
         let surfaceDelegate = EditorSurfaceDelegate(model: model)
         surfaceDelegate.wire(to: textView)
