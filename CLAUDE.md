@@ -144,6 +144,7 @@ xcodebuild clean -scheme Variorum
 
 ## Environment notes
 
+- **The repo lives at `~/dev/variorum` — outside iCloud sync, permanently** (2026-07-06 emergency move: iCloud Desktop sync choking on `.build`'s tiny files froze the whole machine). `~/Desktop/variorum` is only a convenience symlink. Never relocate the repo, or write build artifacts, into an iCloud-synced folder (Desktop/Documents).
 - **Dev machine (this one): the author's M3 Mac on macOS Tahoe 26.x with Xcode 26 — development and acceptance are one machine.** The Intel Air era ended 2026-07-06 (transition executed ahead of the planned before-Phase-6 date); all Air-era constraints (dev/acceptance machine split, Air-motivated deployment target, Xcode-26-on-Intel) are permanently moot.
 - **Deployment targets: macOS 26 / iOS 26** (author decision 2026-07-06: no older-OS support). Build SDK and runtime OS now match, so no availability-gating for Tahoe APIs.
 - TextKit 2 behavior remains version- and point-release-gated: re-verify editor milestones after each macOS point update per the matrix in @notes/TEXTKIT2_NOTES.md §5.

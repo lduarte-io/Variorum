@@ -10,7 +10,7 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 **→ Phase 4 — Read layer & perf harness** *(Phase 3 closed 2026-07-05; kickoff message at the top of `notes/plans/phase-04-read-layer.md`)*
 
-*(Out-of-band, 2026-07-06: the dev-machine transition planned for "before Phase 6" happened early — the repo now lives on the author's M3/Tahoe Mac with Xcode 26, and the Intel Air era is over for good. The KnownIssues "Xcode 26 install + dev-machine transition" entry is resolved; deployment targets bumped to macOS 26 / iOS 26 and `swift-tools-version` to 6.2 (author: no older-OS support); CLAUDE.md, AppSpec §1/§15, and TEXTKIT2_NOTES §0/§4/§5 re-baselined.)*
+*(Out-of-band, 2026-07-06: the dev-machine transition planned for "before Phase 6" happened early — the repo now lives on the author's M3/Tahoe Mac with Xcode 26, and the Intel Air era is over for good. The KnownIssues "Xcode 26 install + dev-machine transition" entry is resolved; deployment targets bumped to macOS 26 / iOS 26 and `swift-tools-version` to 6.2 (author: no older-OS support); CLAUDE.md, AppSpec §1/§15, and TEXTKIT2_NOTES §0/§4/§5 re-baselined. Same day: the repo moved to `~/dev/variorum`, out of iCloud sync, after iCloud's syncing of `.build` froze the machine — Desktop keeps a symlink only; first M3 validation run after the move: `swift test` 224 green in 21 suites, matching the Phase 3 baseline exactly.)*
 
 ---
 
