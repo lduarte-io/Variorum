@@ -284,6 +284,29 @@ struct ReadingAssemblyQueryTests {
         }
     }
 
+    @Test func smartReadingGroupsToo() throws {
+        // Grouping + smart predicate together: the section subquery's
+        // parameter precedes every predicate parameter in the SQL — this
+        // pins the argument ordering.
+        try withOperations { ops, db in
+            let book = try ops.createTag(name: "book")
+            let ch1 = try ops.createTag(parent: book.id, name: "ch1")
+            let inSection = try ops.createPost(profile: .journal, entryDate: "2026-06-10")
+            let outside = try ops.createPost(profile: .journal, entryDate: "2026-06-11")
+            _ = try ops.createPost(profile: .blog, entryDate: "2026-06-12")
+            try ops.applyTag(ch1.id, toPost: inSection.id)
+            let spec = try Queries.SmartQuerySpec(
+                profile: "journal", entryDateFrom: "2026-06-01", entryDateTo: "2026-06-30"
+            ).encodedJSON()
+            let reading = try ops.createReading(
+                name: "smart grouped", kind: .smart, sortField: .entryDate,
+                groupingTagId: book.id, querySpec: spec)
+            let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
+            #expect(entries.map(\.postID) == [inSection.id, outside.id])
+            #expect(entries.map(\.sectionPath) == ["book/ch1", nil])
+        }
+    }
+
     @Test func danglingGroupingTagMeansUngrouped() throws {
         // The AppSpec §7 read-time rule: grouping_tag_id may dangle at a
         // tombstoned tag under soft delete — treat as NULL/ungrouped.

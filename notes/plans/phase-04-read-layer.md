@@ -66,7 +66,7 @@ Any UI (views arrive Phases 10–11). Sync engine (5). Markdown export (11, need
 
 ## Closeout (2026-07-06)
 
-**Result: complete. `swift test` green on the M3 — 296 tests in 28 suites, 0 failures** (224 baseline + 72 new: 19 post render, 17 reading assembly, 9 lineage/diff, 9 tag/timeline, 8 pool/tray/unplaced, 5 observation, 5 P1 benchmarks). **This is the Phase 5 baseline — do not re-run at session start.**
+**Result: complete. `swift test` green on the M3 — 297 tests in 28 suites, 0 failures** (224 baseline + 73 new: 19 post render, 18 reading assembly, 9 lineage/diff, 9 tag/timeline, 8 pool/tray/unplaced, 5 observation, 5 P1 benchmarks). **This is the Phase 5 baseline — do not re-run at session start.**
 
 **Commits:** `7ce15fe` (Step 1 post render), `a02db98` (Step 2 reading assembly), `0d96c6d` (Step 3 lineage/diff), `0954273` (schema: `idx_block_last_container` — own commit per convention), `83658aa` (Step 4 tags/timeline/pool/tray/unplaced), `e5a1a61` (Step 5 observations), `b342542` (Step 6 corpus + benchmarks), plus this closeout commit.
 
