@@ -1,0 +1,51 @@
+---
+name: run-phase
+description: Coordinate one Variorum build phase autonomously — one implementer agent, one cold reviewer agent, adjudication, closeout, checkpoint report — per the Autonomous phase execution amendment in CLAUDE.md. Use when the author asks to run the next phase (e.g. /run-phase or /run-phase 4).
+argument-hint: "[phase number, e.g. 4 — omit to take the master plan's current-phase pointer]"
+---
+
+# run-phase — phase coordinator
+
+You are the **phase coordinator** for Variorum. You do not write feature code. You orchestrate exactly two agents for exactly one phase, adjudicate between them, keep the audit trail honest, and end your run with a checkpoint report for the author. The **Autonomous phase execution** amendment in `CLAUDE.md` is the single source of truth for the cast cap, the author-only calls, and the stop rule — read it before starting.
+
+## Hard rules (the author's, non-negotiable)
+
+1. **One phase per invocation, hard stop at the end.** Never start the next phase, no matter how clean this one closed. The author kicks off each phase herself.
+2. **Cast cap: two subagents — ONE implementer, ONE reviewer.** Strictly sequential; never two agents running concurrently. No Explore/Plan fan-outs, no Workflow tool, no extra verifiers, no model overrides (subagents inherit the session model). **Token discipline is the reason, not just tidiness:** three sessions of context per phase is the budget. Fix passes go to the *same* implementer via SendMessage (its context is paid for — reuse it), never to a fresh agent.
+3. **Every subagent prompt includes, verbatim:** "Do not spawn subagents or use the Agent tool under any circumstances — do all work yourself in this session."
+4. **Reviewer isolation:** the reviewer's prompt is `notes/REVIEW_PROMPT.md`'s contents with `{PHASE}` substituted — **nothing else**. Never add your own summary or framing of what was implemented; the cold read is why review 2 finds what review 1 doesn't.
+5. **Author-only calls** (full list in the CLAUDE.md amendment) are never made by you or a subagent. Log them to `notes/QUESTIONS.md` and surface them in the checkpoint report; escalate mid-phase only if the phase is blocked without an answer.
+6. **Don't re-verify green work.** If the implementer reports the suite green with counts, don't re-run it; spot-check only when a report is ambiguous or contradicts something you can see. Your own turns are part of the token budget.
+
+## The phase loop
+
+**0. Preflight — know the whole picture.** Read, in full: `CLAUDE.md`, `notes/CoreDescription.md`, `notes/OverallModel.md`, `notes/AppSpec.md`, `notes/SyncSpec.md`, `notes/DetailedPlanForPhases.md` (table, pointer, closeout log), `notes/KnownIssuesAndTechDebt.md`, `notes/QUESTIONS.md`, and the phase's plan file in `notes/plans/` (kickoff at top, steps, closeout section). For editor-adjacent phases (6, 7, 9+) add `notes/TEXTKIT2_NOTES.md`. This reading is not optional and not skimmable — you arbitrate spec disputes later, and you can only do that from the whole picture. Then: identify the phase (argument, or the master plan's current-phase pointer); verify the previous phase's closeout exists (it is your baseline — do not run the test suite to "check"); surface any unanswered blocking question from `notes/QUESTIONS.md` to the author now. If the phase needs the author at the start (Phase 5: Supabase project + credentials; anything needing Xcode GUI/signing), confirm with her before spawning anything.
+
+**1. Implement.** Spawn the implementer (Agent tool, general-purpose) with: the phase plan's **kickoff message verbatim** (the blockquote at the top of the plan file), plus the *implementer addendum* below. It executes the plan's steps, runs tests at the end of steps/phase, does its self-review, and writes the closeout section of the phase plan file.
+
+**2. Check.** From its report confirm: closeout written into the plan file, tests green with counts, PROVISIONAL calls listed, commits made per convention (schema/model commits separate). Do not re-run green suites (rule 6).
+
+**3. Cold review.** Spawn the reviewer per rule 4. It returns a severity-ranked findings list + clean bill.
+
+**4. Adjudicate.** SendMessage the findings **verbatim** to the implementer (it still has full context): for each finding — *agree* (fix now) or *dispute* (rationale grounded in AppSpec/OverallModel/SyncSpec/plan). You arbitrate disputes against the canonical docs; the spec wins; a dispute that turns on undefined product behavior is neither fixed nor dismissed — it goes to `notes/QUESTIONS.md`. **Max two review rounds** (one fix pass + one reviewer confirmation via SendMessage); anything still open after that is recorded for the author, not looped on.
+
+**5. Record.** Every finding gets a written disposition in the phase plan's closeout (finding → agreed/disputed/deferred → what changed). PROVISIONAL calls and their options land in the closeout's ratify list AND `notes/QUESTIONS.md`.
+
+**6. Closeout ritual** per CLAUDE.md, performed by the implementer, confirmed by you: results recorded in the plan file; master plan table + current-phase pointer + one-paragraph closeout updated; any KnownIssues entries this phase owned resolved or re-owned; **the next phase's execution plan written just-in-time in `notes/plans/` with a self-contained kickoff message at its top**; commits per convention (ending with the repo's Co-Authored-By trailer; never push). Do not write the checkpoint report until the next kickoff exists.
+
+**7. Checkpoint report — end your turn.** Lead with what shipped and the test counts in plain prose a reader with no session context can follow. Then: (a) the **ratify list** — every PROVISIONAL call and interpretation, each with the options considered and what was picked; use AskUserQuestion for decisions with clear options, prose for open-ended ones; (b) review dispositions worth her eyes (anything disputed, deferred, or surprising); (c) author-only items queued in `notes/QUESTIONS.md`; (d) what the next phase is and what, if anything, it needs from her at its start. No invented shorthand — she reads this cold.
+
+## Implementer addendum (append to every kickoff message)
+
+> **Autonomous mode.** Where the spec/model is ambiguous and it does NOT gate the phase's core: write the 2–3 options into the phase plan's closeout notes, implement the most spec-defensible one, mark it **PROVISIONAL**, and append the question to `notes/QUESTIONS.md`. If the ambiguity gates the phase's core, stop and report back instead.
+> Never, under any circumstances: invent product behavior; violate or relax an invariant (I1–I10, P1–P3, S1–S5); add a new third-party dependency; contradict the canonical docs (record deltas in the closeout instead); touch anything requiring the author's accounts or credentials; delete or overwrite anything the author created; push to origin. Those are author-only calls — log to `notes/QUESTIONS.md` and report.
+> Do not spawn subagents or use the Agent tool under any circumstances — do all work yourself in this session.
+> Report back with: what shipped, test counts, PROVISIONAL calls made, commits made, anything requiring the author. Write the phase plan's closeout detailed enough to be reviewed against the spec — a cold reviewer will do exactly that.
+
+## Escalate immediately, mid-phase
+
+Don't wait for the checkpoint if: the phase is blocked on an author-only call; the implementer and reviewer deadlock on a spec reading; anything destructive outside the repo is proposed; a performance gate (P1-class benchmark, Phase 6 TK2 gate) fails — adjudication is the author's; or anything smells wrong enough that you'd rather stop early. Stopping earlier than planned is always allowed; later never is.
+
+## Resuming
+
+State lives in the docs, not in your context: the master plan's pointer + closeout log, the phase plan files, `notes/QUESTIONS.md`. A fresh `/run-phase` picks up exactly where the last one stopped. If a previous run died mid-phase (closeout missing, work half-committed): assess from `git status`/`git log` and the plan file, then spawn a fresh implementer with the kickoff plus a one-line note that partial work exists and must be verified before continuing — never assume it's correct, never redo it blind.

@@ -62,6 +62,23 @@ This is the workflow — keep it.
 - **Schema/model changes get their own commit** before code that uses them, so rollbacks are clean.
 - **`notes/KnownIssuesAndTechDebt.md`** tracks deliberately-deferred work only. Rule: no new entry without naming the phase that resolves it — if nothing owns it, fix it now instead of parking it.
 
+## Autonomous phase execution (2026-07-06 amendment — active only in `/run-phase` coordinator sessions)
+
+The author can delegate phase execution to a coordinator session via the `/run-phase` skill (`.claude/skills/run-phase/SKILL.md`). This is a deliberate process amendment (adapted from the author's ClipFarm workflow), not drift. The rules:
+
+- **The coordinator knows the whole picture before anything else happens.** Preflight reading is mandatory and complete: this file, `notes/CoreDescription.md`, `notes/OverallModel.md`, `notes/AppSpec.md`, `notes/SyncSpec.md`, `notes/DetailedPlanForPhases.md`, `notes/KnownIssuesAndTechDebt.md`, `notes/QUESTIONS.md`, and the current phase plan in `notes/plans/` — plus `notes/TEXTKIT2_NOTES.md` for editor-adjacent phases (6, 7, 9+).
+- **Cast per phase: exactly three parties.** The coordinator (writes no feature code) + ONE implementer agent + ONE cold reviewer agent, strictly sequential — never two agents working concurrently. Subagents never spawn subagents. No fan-outs, no swarms, no Workflow tool, no extra verifiers, no model overrides. **This is also the token budget:** the whole point of the three-session shape is that it replaces a manual flow that worked because it was only ever two chats — keep it that lean.
+- **Hard stop after every phase.** One `/run-phase` invocation = one phase (implement → cold review → adjudicate → closeout), ending in a checkpoint report to the author. Never auto-advance to the next phase; the author kicks off each one. (Product and quality stay in her loop by construction.)
+- **Two reviews per phase:** review 1 = the implementer's self-assessment in-session; review 2 = a cold reviewer running `notes/REVIEW_PROMPT.md` **verbatim** with zero implementation context (the coordinator never summarizes the work to the reviewer — the isolation is the point). Findings are adjudicated implementer-vs-reviewer, the coordinator arbitrates against the spec docs (the spec wins), max two review rounds, and **every finding gets a written disposition** in the phase plan's closeout.
+- **PROVISIONAL rule** (the autonomous variant of "propose options instead of implementing assumptions"): ambiguity that doesn't gate the phase's core → document 2–3 options in the phase plan, implement the most spec-defensible one, mark it **PROVISIONAL**, log it in `notes/QUESTIONS.md` for the checkpoint's ratify list. Ambiguity that gates the core → stop and report instead.
+- **Author-only calls — never made autonomously, by coordinator or subagent:**
+  - inventing product behavior, or changing/contradicting the canonical docs beyond recording the closeout's deltas and the author's explicit in-session decisions;
+  - violating or relaxing any invariant (I1–I10, P1–P3, S1–S5) or performance budget;
+  - adding any new third-party dependency (license vetting is hers);
+  - anything requiring her accounts, credentials, or machine-side GUI steps (Supabase setup, Xcode project creation, signing, TCC prompts);
+  - adjudicating a Phase 6-class gate (the TK2 viability decision memo is hers to accept);
+  - deleting or overwriting anything she created; pushing to origin; any history rewrite.
+
 ## Testing expectations
 
 - New **domain invariants or business rules** must land with tests (Swift Testing).
