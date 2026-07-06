@@ -362,6 +362,28 @@ struct PostRenderQueryTests {
         }
     }
 
+    @Test func renderedTextSkipsBlankTakes() throws {
+        // Author decision 2026-07-06 (ratify item 1): a chosen-but-empty
+        // variant contributes nothing to the whole-document projection —
+        // never "a\n\n\n\nb" — while the editor's renderPost still shows
+        // the blank slot.
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            _ = try ops.newBlock(in: post.id, text: "a")
+            let blank = try ops.newBlock(in: post.id, text: "placeholder")
+            let blankTake = try ops.newBlankVariant(blank.block.id)
+            try ops.chooseVariant(blank.block.id, variantID: blankTake.id)
+            _ = try ops.newBlock(in: post.id, text: "b")
+
+            let text = try db.read { try Queries.renderedText($0, containerID: post.id) }
+            #expect(text == "a\n\nb")
+            let rendered = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(rendered.count == 3)
+            #expect(rendered[1].text == "")   // the editor still sees the blank slot
+            #expect(!rendered[1].isGap)
+        }
+    }
+
     @Test func renderedTextSkipsGaps() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()

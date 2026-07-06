@@ -100,12 +100,17 @@ extension Queries {
 
     /// The container's full rendered prose, for export and diff callers:
     /// each slot's rendered text joined by `blockJoinSeparator`. Gaps
-    /// contribute nothing (render gaps, never crash — SyncSpec §5). Cost is
-    /// inherently ∝ the container's own length — this is the whole-document
-    /// projection, for read-side consumers that need exactly that.
+    /// contribute nothing (render gaps, never crash — SyncSpec §5), and
+    /// **blank takes skip like gaps** (author decision 2026-07-06: a
+    /// chosen-but-empty variant contributes nothing — export reads
+    /// `"a\n\nb"`, never `"a\n\n\n\nb"`; the blank take still renders as an
+    /// empty slot in `renderPost` for the editor). Cost is inherently ∝ the
+    /// container's own length — this is the whole-document projection, for
+    /// read-side consumers that need exactly that.
     public static func renderedText(_ db: Database, containerID: String) throws -> String {
         try renderPost(db, containerID: containerID)
             .compactMap(\.text)
+            .filter { !$0.isEmpty }
             .joined(separator: blockJoinSeparator)
     }
 }
