@@ -132,5 +132,6 @@ xcodebuild clean -scheme Variorum
 ## Environment notes
 
 - **Dev machine (this one): Intel MacBook Air, macOS Sequoia 15.6 — cannot run Tahoe.** Acceptance testing happens on the author's M3 (Tahoe), which shares this repo. Ask the author to run/report anything Tahoe-specific.
+- **Author decision 2026-07-06: development transitions to the M3/Tahoe Mac before Phase 6.** From then on the Air-era constraints (dev/acceptance split, Air-motivated deployment target, Xcode-26-on-Intel) are moot; the Phase 6 plan re-baselines these notes.
 - Editor-phase builds must use the **macOS 26 SDK** (Xcode 26 — runs on this Intel Air; universal binary). Deployment target stays **macOS 15** so the app runs on this machine.
 - If the author's help is needed (Xcode project creation, signing, a Tahoe test run, an error readout), pause and ask rather than working around it.

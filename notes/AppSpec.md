@@ -8,7 +8,7 @@
 
 ## 1. Development context (machines, toolchain)
 
-- **Dev machine:** Intel MacBook Air, macOS Sequoia 15.6 — cannot run Tahoe. Fast inner loop: logic, storage, operations, `swift test` from CLI.
+- **Dev machine:** Intel MacBook Air, macOS Sequoia 15.6 — cannot run Tahoe. Fast inner loop: logic, storage, operations, `swift test` from CLI. **Author decision 2026-07-06: development moves to the M3/Tahoe Mac before Phase 6** — the dev/acceptance split below and the Air-motivated deployment-target rationale end then (re-baselined in the Phase 6 plan; deployment target becomes revisitable).
 - **Acceptance machine:** M3 Mac on Tahoe (26.x), connected to the same repo. Every editor milestone gets re-verified there (TextKit 2 behavior is version- and SDK-gated; see `notes/TEXTKIT2_NOTES.md`).
 - **Toolchain:** Xcode 26 on both machines (universal binary; runs on Intel + Sequoia 15.6). Editor-phase builds **must** use the macOS 26 SDK — Tahoe behaviors like the `.layoutManager` TK2→TK1 downgrade are SDK-gated, so a 15.x-SDK build on Tahoe does not test what a shipping build does.
 - **Deployment target: macOS 15 (Sequoia)** — the app must launch on the dev Air; Tahoe-only APIs are availability-gated.
@@ -438,6 +438,6 @@ Ordered by severity. Deferred *work* lives in `KnownIssuesAndTechDebt.md`; this 
 ## 16. Still genuinely open (tracked, not blocking)
 
 - **TK2 viewport viability on Tahoe** — the editor-phase spike decides live-geometry vs stored-estimate scrubber (vs STTextView).
-- **Markdown export shape** — planned so the store is never a black box; design when the read layer exists.
+- **Export shape** — author-confirmed 2026-07-06: posts/books export as `.md` at minimum, PDF wanted. Pure read-side projections (never a second source of truth); `.md` + basic PDF at Phase 11, typographic PDF with the design phase. Design the file shape when the read layer exists.
 - **Audit/operation log** — optional derived artifact; revisit after the operations layer is real.
 - **Visual/interaction design** — deliberately open until the substrate is proven, then iterative with the author.
