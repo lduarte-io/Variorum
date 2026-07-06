@@ -16,6 +16,11 @@ final class SyncClient {
     private let tickCounter = LockIsolated(0)
     private let devicePrefix: String
     private let clockOffset: TimeInterval
+    /// The integration pass (real Supabase) opts in: the server is stateful
+    /// across runs, so the deterministic prefixed counter UUIDs below would
+    /// CAS-collide with rows a previous run pushed. Random v4 IDs make every
+    /// run's rows fresh; convergence assertions never depend on ID values.
+    private let mintsRandomUUIDs: Bool
     /// One generator per device, created once: its state advances across
     /// calls (WithRandomNumberGenerator locks internally), so jitter never
     /// repeats within a device but stays deterministic per seed.
@@ -25,12 +30,13 @@ final class SyncClient {
     /// leads every UUID the device mints, so two devices can never collide.
     init(
         name: String, prefix: String, transport: any SyncTransport,
-        clockOffset: TimeInterval = 0, seed: UInt64 = 1
+        clockOffset: TimeInterval = 0, seed: UInt64 = 1, mintsRandomUUIDs: Bool = false
     ) throws {
         precondition(prefix.count == 2 && prefix.allSatisfy(\.isHexDigit))
         self.db = try AppDatabase.inMemory()
         self.name = name
         self.devicePrefix = prefix
+        self.mintsRandomUUIDs = mintsRandomUUIDs
         self.transport = transport
         self.clockOffset = clockOffset
         self.randomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: seed))
@@ -55,14 +61,16 @@ final class SyncClient {
 
     private func bind(_ deps: inout DependencyValues) {
         deps.database = db
-        deps.uuid = UUIDGenerator { [devicePrefix, uuidCounter] in
-            let count = uuidCounter.withValue { value -> Int in
-                defer { value += 1 }
-                return value
+        deps.uuid = mintsRandomUUIDs
+            ? UUIDGenerator { UUID() }
+            : UUIDGenerator { [devicePrefix, uuidCounter] in
+                let count = uuidCounter.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return UUID(uuidString: String(
+                    format: "\(devicePrefix)000000-0000-4000-8000-%012d", count))!
             }
-            return UUID(uuidString: String(
-                format: "\(devicePrefix)000000-0000-4000-8000-%012d", count))!
-        }
         // 2026-07-01T00:00:00Z + device offset, ticking one second per read.
         deps.date = DateGenerator { [clockOffset, tickCounter] in
             let seconds = tickCounter.withValue { value -> Int in

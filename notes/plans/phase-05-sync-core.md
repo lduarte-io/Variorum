@@ -103,7 +103,7 @@ Accounts/RLS/multi-tenant (14). GC/tombstone horizon (12). Sync UI (7+). Retry/b
 - **PROVISIONAL — the archive/archive race rescues by un-archiving:** each device archiving a different last-active variant converges to a live block with zero live *active* variants — the same I10 hole as the double-tombstone race, by a different door; §7 defines only the tombstone case. Same doctrine applied: un-archive the highest-seq archived take, label `'rescued'`. → QUESTIONS 2.
 - **Engine-writes discipline, generalized:** every engine-initiated write (accept bookkeeping, merges, repairs, cursor) runs inside `applyingRemote`; the only unsuppressed writes the engine ever makes are `sync_state`/`sync_row_seq` bookkeeping (no triggers watch local-only tables) and `ensureDeviceID`'s one-time mint.
 
-**Step 8 — the author-assist gate (OPEN):** no network call, account access, or Supabase setup was attempted (per the coordinator's gate decision). Everything author-independent is ready and tested at the wire-shape level. With the author, in order: create the Supabase project; run `Server/supabase/01_mirror_schema.sql` then `02_sync_rpc.sql` in the SQL editor; mint the API key + single-user token; construct `SupabaseTransport(configuration:)` and run the Step 7 basic offline-edit scenario against the real server (two local stores, real transport). The KnownIssues "Supabase project setup" entry stays, still owned by Phase 5; its resolution is recorded here when the pass runs.
+**Step 8 — the author-assist gate (CLOSED 2026-07-06 — see the gate-closure round at the end of this file):** no network call, account access, or Supabase setup was attempted (per the coordinator's gate decision). Everything author-independent is ready and tested at the wire-shape level. With the author, in order: create the Supabase project; run `Server/supabase/01_mirror_schema.sql` then `02_sync_rpc.sql` in the SQL editor; mint the API key + single-user token; construct `SupabaseTransport(configuration:)` and run the Step 7 basic offline-edit scenario against the real server (two local stores, real transport). The KnownIssues "Supabase project setup" entry stays, still owned by Phase 5; its resolution is recorded here when the pass runs.
 
 **KnownIssues:** no new deferrals. "Supabase project setup" remains (see gate above), reworded to reflect that only the author-assisted half is left.
 
@@ -147,3 +147,19 @@ The author walked the 6-item `notes/QUESTIONS.md` list at the checkpoint and **r
 6. **Symmetric tombstone rescue.** → SyncSpec §6.
 
 The two review-blocker behaviors (reject-path merge against the re-fetched current row; own-echo/stale-replay never merged into a dirty row) were also recorded into SyncSpec §4/§5 so the spec's letter matches the proven engine. `notes/QUESTIONS.md` cleared — no open items remain. **The one remaining Phase 5 item is the author-assist Supabase gate above (Step 8's real-server integration pass).** Baseline unchanged: **372 green in 36 suites**.
+
+---
+
+## Gate closure — the real-server integration pass (2026-07-06)
+
+**PASSED, first try, zero code changes. Phase 5 is fully closed.**
+
+Author-assisted session, same day as the ratification round. What ran, in order: the author created the Supabase project in her dashboard (Data API on; auto-expose-new-tables off; automatic RLS on — irrelevant to the RPC path, which runs as the tables' owner), ran `Server/supabase/01_mirror_schema.sql` then `02_sync_rpc.sql` in the SQL editor, and verified the result (13 mirror tables, 13 `stamp_seq_*` triggers, 4 functions — exactly the shipped DDL). Credentials went into the untracked `.env.supabase.local` (gitignore entry added *before* the file existed); the single-user "token" is the project secret key serving as both `apikey` and bearer — no separate token exists this phase (SyncSpec §2 auth note), and the author rotates the key herself post-session.
+
+**The pass:** `SupabaseIntegrationTests.basicOfflineEditsConvergeOverTheRealServer` — the Step 7 basic offline-edit scenario verbatim over `SupabaseTransport(configuration:)`: two in-memory local stores, disjoint offline edits (a blog post on "the Mac", a journal entry on "the phone"), push/pull rounds to quiescence against the real project, then the phase's convergence bar — **byte-identical synced dumps, both outboxes empty, each device holding the other's edit.** Green in 1.9s; **`SupabaseTransport.swift` and both `.sql` files needed no changes** — the wire-shape pinning tests did their job.
+
+Two test-side artifacts landed with the pass (nothing under `Sources/` changed):
+- The env-gated integration test itself (`Tests/VariorumCoreTests/SupabaseIntegrationTests.swift`): skips unless `VARIORUM_SUPABASE_URL`/`_API_KEY`/`_TOKEN` are set, so plain `swift test` stays self-contained and network-free. Quiescence against the real server is observed from the outside (empty outboxes, a round where neither pull applies/merges anything, no stall, matching cursors) since only the fake exposes `headSeq`.
+- An opt-in `mintsRandomUUIDs` mode on the `SyncClient` harness: the deterministic device-prefixed counter UUIDs would CAS-collide with a previous run's rows on the stateful real server; random v4 IDs keep the pass re-runnable, and prior runs' rows pull into both stores equally so the byte-equality surface stays valid.
+
+**Post-pass full suite: 373 green in 37 suites on the M3** (372 + the new integration test, which skips without credentials — **this supersedes 372/36 as the Phase 6 baseline**). The KnownIssues "Supabase project setup" entry is resolved and removed; the master plan's Phase 5 row is plain **done**.
