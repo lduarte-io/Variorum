@@ -169,6 +169,37 @@ struct TagTimelineQueryTests {
 
             let byCreation = try db.read { try Queries.library($0, sort: .createdAt, direction: .asc) }
             #expect(byCreation.map(\.postID) == [touched.id, untouched.id])
+
+            // The bounded page (what a held observation fetches) is the
+            // same listing, truncated.
+            let page = try db.read { try Queries.library($0, sort: .lastTouched, limit: 1) }
+            #expect(page.map(\.postID) == [touched.id])
+        }
+    }
+
+    @Test func archivedPostsListingIsTheRecoverySurface() throws {
+        // Without this listing, unarchiveContainer would be unreachable
+        // through the read layer (review finding): every ambient surface
+        // excludes archived posts, and direct render needs the ID.
+        try withOperations { ops, db in
+            let active = try ops.createPost(title: "active")
+            let first = try ops.createPost(title: "shelved first")
+            let second = try ops.createPost(title: "shelved second")
+            try ops.archiveContainer(first.id)
+            try ops.archiveContainer(second.id)
+            let deleted = try ops.createPost(title: "gone")
+            try ops.archiveContainer(deleted.id)
+            try ops.deleteContainer(deleted.id)
+
+            let shelf = try db.read { try Queries.archivedPosts($0) }
+            #expect(shelf.map(\.postID) == [second.id, first.id])  // newest archive first
+            #expect(!shelf.map(\.postID).contains(active.id))
+
+            try ops.unarchiveContainer(first.id)
+            let after = try db.read { try Queries.archivedPosts($0) }
+            #expect(after.map(\.postID) == [second.id])
+            let library = try db.read { try Queries.library($0) }
+            #expect(library.map(\.postID).contains(first.id))  // back in view
         }
     }
 }

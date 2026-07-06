@@ -71,9 +71,10 @@ extension Queries {
                  AND b.deleted_at IS NULL
                 WHERE e.type = 'version_of' AND e.deleted_at IS NULL
                   AND (e.source_block_id = ? OR e.target_block_id = ?)
+                  AND b.id <> ?
                 ORDER BY b.id
                 """,
-            arguments: [blockID, blockID, blockID])
+            arguments: [blockID, blockID, blockID, blockID])
     }
 
     /// The diff view's inputs: the two buffers, verbatim. Whitespace

@@ -19,11 +19,18 @@ extension AppDatabase {
         observe { try Queries.assembleReading($0, readingID: readingID) }
     }
 
-    /// The library listing (folder view), live.
+    /// The library listing (folder view), live. `limit` is deliberately
+    /// required: this observation re-fetches on every `container` write
+    /// (autosave stamps touch/churn there), so the standing fetch must be
+    /// bounded — a top-N over the container table, cost ∝ post count and
+    /// flat in corpus text size (benchmarked). Deeper listing = a larger
+    /// limit or one-shot `Queries.library(limit: nil)` pages on demand.
     public func observeLibrary(
-        sort: Queries.LibrarySort = .lastTouched, direction: SortDirection = .desc
+        sort: Queries.LibrarySort = .lastTouched,
+        direction: SortDirection = .desc,
+        limit: Int
     ) -> AsyncValueObservation<[Queries.TimelineItem]> {
-        observe { try Queries.library($0, sort: sort, direction: direction) }
+        observe { try Queries.library($0, sort: sort, direction: direction, limit: limit) }
     }
 
     /// A pool's contents with block tags, live.

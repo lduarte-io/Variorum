@@ -213,6 +213,10 @@ struct PostRenderQueryTests {
             try Fixture.container(db, id: "post")
             try Fixture.containerBlock(
                 db, id: "cb-ghost", containerId: "post", blockId: "not-arrived", position: "A")
+            // The ghost block's variants arrived first (same sync order,
+            // one row deeper): they must not badge the gap slot.
+            try Fixture.variant(db, id: "ghost-v1", blockId: "not-arrived")
+            try Fixture.variant(db, id: "ghost-v2", blockId: "not-arrived")
             try Fixture.placedBlock(db, container: "other", block: "b", variant: "v", cb: "cb-real")
             try db.execute(sql: "UPDATE block SET default_variant_id = 'v' WHERE id = 'b'")
             try db.execute(
@@ -222,8 +226,41 @@ struct PostRenderQueryTests {
         #expect(rendered.count == 2)
         #expect(rendered[0].isGap)
         #expect(rendered[0].blockID == "not-arrived")
+        #expect(rendered[0].activeVariantCount == 0)  // no live block, no badge
+        #expect(!rendered[0].hasFan)
         #expect(rendered[1].blockID == "b")
         #expect(!rendered[1].isGap)
+    }
+
+    @Test func deadBlockDivergenceFromChurnCounterIsDocumented() throws {
+        // The documented, harmless divergence (review finding): the render
+        // gaps a live placement over a tombstoned block, while Operations'
+        // by-ID resolver refuses it and the churn counter's renderedLength
+        // (approximate by design, SyncSpec §6 counters class) may still
+        // count its text. Pin the read side of that line: gap here, typed
+        // refusal there.
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "raced away")
+            try db.write { db in
+                try Fixture.tombstone(db, table: "block", id: a.block.id)
+                try db.execute(
+                    sql: "UPDATE container_block SET deleted_at = NULL WHERE block_id = ?",
+                    arguments: [a.block.id])
+                // The variant survives the race too — text exists, block dead.
+                try db.execute(
+                    sql: "UPDATE variant SET deleted_at = NULL WHERE id = ?",
+                    arguments: [a.variant.id])
+            }
+            let rendered = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(rendered.count == 1)
+            #expect(rendered[0].isGap)
+            try db.read { db in
+                #expect(throws: OperationError.self) {
+                    _ = try ops.renderedVariant(db, blockID: a.block.id)
+                }
+            }
+        }
     }
 
     @Test func chosenPointingAtNothingFallsBackThenGaps() throws {

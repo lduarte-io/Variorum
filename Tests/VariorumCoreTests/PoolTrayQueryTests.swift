@@ -115,6 +115,29 @@ struct PoolTrayQueryTests {
         }
     }
 
+    @Test func trayPreviewShowsOnlyWhatRestoreWouldRevive() throws {
+        // restoreBlock revives children by exact-stamp match; a default
+        // variant that died independently under a different stamp stays
+        // dead, so it must not preview either (review finding).
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let block = try ops.newBlock(in: post.id, text: "cascade text")
+            try ops.deleteBlock(block.block.id)
+            let cascade = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            #expect(cascade[0].text == "cascade text")  // same-stamp victim previews
+
+            // Re-stamp the default variant as an independent deletion.
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE variant SET deleted_at = '2026-07-06T23:59:59.000Z' WHERE id = ?",
+                    arguments: [block.variant.id])
+            }
+            let foreign = try db.read { try Queries.trayBlocks($0, postID: post.id) }
+            #expect(foreign[0].blockID == block.block.id)
+            #expect(foreign[0].text == nil)  // restore wouldn't bring it back
+        }
+    }
+
     // MARK: - Unplaced blocks (the safety net)
 
     @Test func unplacedPopulatesAfterDivideWAndMerge() throws {

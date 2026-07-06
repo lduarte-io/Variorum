@@ -85,22 +85,52 @@ extension Queries {
         }
     }
 
-    /// The whole library (folder view, post pickers): every live,
-    /// non-archived post, totally ordered. Cost ∝ the number of posts —
-    /// the listing surface, not a per-keystroke path; virtualized rendering
-    /// is the view's job (P3).
+    /// The library (folder view, post pickers): live, non-archived posts,
+    /// totally ordered. `limit: nil` fetches the whole listing — legal for
+    /// one-shot callers (pickers, export) and inherently ∝ the number of
+    /// posts. **A held observation must pass a limit** (see
+    /// `AppDatabase.observe` — a standing fetch re-runs at write rate, so
+    /// its own cost must be viewport-shaped, P1/P3). Even limited, the sort
+    /// expression is a COALESCE (un-indexable), so SQLite runs a top-N scan
+    /// over the *container* table: cost ∝ post count, never corpus text
+    /// size — asserted by benchmark.
     public static func library(
-        _ db: Database, sort: LibrarySort = .lastTouched, direction: SortDirection = .desc
+        _ db: Database,
+        sort: LibrarySort = .lastTouched,
+        direction: SortDirection = .desc,
+        limit: Int? = nil
     ) throws -> [TimelineItem] {
         let dir = direction == .desc ? "DESC" : "ASC"
-        return try Row.fetchAll(
+        var sql = """
+            SELECT id AS post_id, title AS title, entry_date AS entry_date,
+                   \(sort.expression) AS stamp
+            FROM container
+            WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
+            ORDER BY \(sort.expression) \(dir), id \(dir)
+            """
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        if let limit {
+            sql += " LIMIT ?"
+            arguments.append(limit)
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
+            .map(timelineItem)
+    }
+
+    /// Where "kept, out of view" things are found again (review finding —
+    /// without this listing, `unarchiveContainer` would be unreachable
+    /// through the read layer): live but archived posts, most recently
+    /// archived first. The recovery surface behind ratify item 7; its view
+    /// arrives with Phases 10–11.
+    public static func archivedPosts(_ db: Database) throws -> [TimelineItem] {
+        try Row.fetchAll(
             db,
             sql: """
                 SELECT id AS post_id, title AS title, entry_date AS entry_date,
-                       \(sort.expression) AS stamp
+                       archived_at AS stamp
                 FROM container
-                WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
-                ORDER BY \(sort.expression) \(dir), id \(dir)
+                WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL
+                ORDER BY archived_at DESC, id DESC
                 """)
             .map(timelineItem)
     }

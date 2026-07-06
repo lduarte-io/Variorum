@@ -65,12 +65,18 @@ public struct AppDatabase: Sendable {
     /// on the cooperative thread pool — never the main thread (P2).
     ///
     /// Region tracking is table-grained for raw-SQL projections (TEXT
-    /// primary keys can't rowid-narrow), so an unrelated write to the same
-    /// tables may re-run the fetch; `removeDuplicates` guarantees consumers
-    /// only ever *see* real changes to their projection. The re-fetch cost
-    /// itself stays viewport-shaped because every Queries fetch is (P1) —
-    /// UI layers should hold observations for on-screen projections only
-    /// (P3), which Phase 7+ view models own.
+    /// primary keys can't rowid-narrow), so *any* write to a tracked table
+    /// re-runs the fetch — in the worst case at autosave rate (`autosave`
+    /// stamps the `container` row per edit). `removeDuplicates` bounds what
+    /// consumers *see*, not the re-fetch work. Two consequences, owned here
+    /// (Phase 4 review finding):
+    /// - **A held observation's fetch must itself be viewport-shaped** —
+    ///   one container, a bounded LIMIT, a keyset page. Observing an
+    ///   unbounded projection is a P1 violation waiting for a keystroke;
+    ///   the `Observations.swift` wrappers are bounded accordingly
+    ///   (`observeLibrary` requires a limit).
+    /// - UI layers hold observations for on-screen projections only (P3) —
+    ///   Phase 7+ view models own start/stop with visibility.
     public func observe<Value: Equatable & Sendable>(
         _ fetch: @escaping @Sendable (Database) throws -> Value
     ) -> AsyncValueObservation<Value> {

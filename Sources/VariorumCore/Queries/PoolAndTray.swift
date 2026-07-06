@@ -41,9 +41,11 @@ extension Queries {
         public let blockID: String
         /// The tombstone stamp (canonical ISO-8601 text), newest first.
         public let deletedAt: String
-        /// Preview text: the default variant's buffer, read through its own
-        /// tombstone (the cascade took it with the block; the tray exists
-        /// to show what a restore would bring back).
+        /// Preview text: the default variant's buffer — read through its
+        /// tombstone only when that tombstone is the block's own stamp (the
+        /// cascade victim `restoreBlock` would revive). A default variant
+        /// that died independently under a different stamp stays dead on
+        /// restore, so it doesn't preview either (review finding).
         public let text: String?
     }
 
@@ -61,7 +63,9 @@ extension Queries {
                 SELECT b.id AS block_id, b.deleted_at AS deleted_at,
                        dv.working_text AS text
                 FROM block b
-                LEFT JOIN variant dv ON dv.id = b.default_variant_id
+                LEFT JOIN variant dv
+                  ON dv.id = b.default_variant_id
+                 AND (dv.deleted_at IS NULL OR dv.deleted_at = b.deleted_at)
                 WHERE b.last_container_id = ? AND b.deleted_at IS NOT NULL
                   AND NOT EXISTS (
                     SELECT 1 FROM container_block cb

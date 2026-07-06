@@ -29,7 +29,9 @@ extension Queries {
         public let variantID: String?
         public let text: String?
         /// Live *active* variants on the block; the fan badge shows only
-        /// when > 1 (AppSpec §12 badge behavior).
+        /// when > 1 (AppSpec §12 badge behavior). Counted through the live
+        /// block row, so a gap slot never badges — variants that arrived
+        /// before their block (sync order) count 0 until the block lands.
         public let activeVariantCount: Int
         /// The rendered variant's lock (frozen buffer, edit by branch/unlock).
         public let variantLocked: Bool
@@ -61,7 +63,7 @@ extension Queries {
                   COALESCE(chosen.working_text, dflt.working_text) AS text,
                   COALESCE(chosen.locked, dflt.locked, 0)          AS variant_locked,
                   (SELECT COUNT(*) FROM variant v
-                    WHERE v.block_id = cb.block_id
+                    WHERE v.block_id = b.id
                       AND v.deleted_at IS NULL
                       AND v.status = 'active')                     AS active_variant_count
                 FROM container_block cb

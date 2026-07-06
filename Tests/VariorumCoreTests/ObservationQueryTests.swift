@@ -81,7 +81,7 @@ struct ObservationQueryTests {
         try await withOperationsAsync { ops, db in
             let existing = try ops.createPost()
 
-            var values = db.observeLibrary(sort: .createdAt, direction: .asc).makeAsyncIterator()
+            var values = db.observeLibrary(sort: .createdAt, direction: .asc, limit: 50).makeAsyncIterator()
             let initial = try await values.next()
             #expect(initial?.map(\.postID) == [existing.id])
 

@@ -278,6 +278,14 @@ extension Operations {
     /// chosen variant's buffer (falling back to the block default when the
     /// choice is NULL, tombstoned, or archived — the read-time rule). Runs
     /// only on threshold crossings, never per keystroke.
+    ///
+    /// Approximate by design — this feeds the churn *counters* (SyncSpec §6
+    /// class), so it deliberately diverges from `Queries.renderPost` in two
+    /// documented, harmless ways (Phase 4 review): the subselects don't gate
+    /// on block liveness, so the doubly-raced live-placement-over-dead-block
+    /// state counts text the render gaps; and the `"\n\n"` separators
+    /// `renderedText` re-creates aren't counted. Drift here only nudges the
+    /// 80% threshold's baseline, never a rendered view.
     private func renderedLength(_ db: Database, containerID: String) throws -> Int {
         try Int.fetchOne(
             db,

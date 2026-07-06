@@ -141,8 +141,14 @@ struct LineageQueryTests {
                 try Fixture.edge(db, id: "v1", source: s1, target: t1, type: "version_of")
                 try Fixture.edge(db, id: "v2", source: s2, target: t2, type: "version_of")
             }
+            // A degenerate self-edge (sync debris; ops can't mint it) must
+            // not report the block as its own peer (review finding).
+            try db.write { db in
+                try Fixture.edge(db, id: "self", source: a.block.id, target: a.block.id, type: "version_of")
+            }
             let peersOfA = try db.read { try Queries.versionPeers($0, of: a.block.id) }
             #expect(Set(peersOfA) == [b.block.id, c.block.id])
+            #expect(!peersOfA.contains(a.block.id))
             let peersOfB = try db.read { try Queries.versionPeers($0, of: b.block.id) }
             #expect(peersOfB == [a.block.id])
 
