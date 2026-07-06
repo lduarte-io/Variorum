@@ -1,12 +1,12 @@
-// swift-tools-version: 6.1
-// Keep buildable under both Xcode 16.4 (Swift 6.1) and Xcode 26 — see CLAUDE.md environment notes.
+// swift-tools-version: 6.2
+// Single dev machine (M3, Xcode 26) as of 2026-07-06; no older-OS support — see CLAUDE.md environment notes.
 import PackageDescription
 
 let package = Package(
     name: "VariorumCore",
     platforms: [
-        .macOS(.v15),
-        .iOS(.v17),
+        .macOS(.v26),
+        .iOS(.v26),
     ],
     products: [
         .library(name: "VariorumCore", targets: ["VariorumCore"]),
