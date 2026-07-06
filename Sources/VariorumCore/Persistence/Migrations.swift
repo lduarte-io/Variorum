@@ -14,6 +14,17 @@ extension AppDatabase {
             try createV1Triggers(db)
             try seedV1Settings(db)
         }
+        // Migrations are append-only from here on (GRDB runs each once, by
+        // name — editing a shipped migration silently skips any store that
+        // already ran it; Phase 4 cold-review finding).
+        migrator.registerMigration("v1_1_tray_index") { db in
+            // The tray query's access path (Phase 4): the per-post tray
+            // resolves tombstoned blocks by `last_container_id`; without
+            // this index every tray render is a corpus-sized block scan,
+            // which P1 forbids.
+            try db.execute(
+                sql: "CREATE INDEX idx_block_last_container ON block(last_container_id)")
+        }
         return migrator
     }
 }
@@ -291,8 +302,6 @@ private func createV1Tables(_ db: Database) throws {
 /// legitimate re-creation forever (AppSpec §6).
 private func createV1Indexes(_ db: Database) throws {
     try db.execute(sql: """
-        CREATE INDEX idx_block_last_container ON block(last_container_id);
-
         CREATE INDEX idx_variant_block  ON variant(block_id, status);
         CREATE INDEX idx_variant_parent ON variant(parent_variant_id);
 
