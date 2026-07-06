@@ -109,6 +109,20 @@ enum Fixture {
     }
 }
 
+/// A full-schema in-memory database with FK enforcement OFF — the only way a
+/// test can materialize the sync-order states SyncSpec §5 requires the read
+/// side to tolerate (child rows whose parents haven't arrived, e.g. a
+/// placement before its block). Production stores always run with FKs ON;
+/// how such states arise locally is the Phase 5 apply path's business — the
+/// read layer's contract is just: render gaps, never crash.
+func unenforcedDatabase() throws -> DatabaseQueue {
+    var config = Configuration()
+    config.foreignKeysEnabled = false
+    let queue = try DatabaseQueue(configuration: config)
+    try AppDatabase.migrator.migrate(queue)
+    return queue
+}
+
 extension DatabaseError {
     var isConstraintViolation: Bool { resultCode == .SQLITE_CONSTRAINT }
 }
