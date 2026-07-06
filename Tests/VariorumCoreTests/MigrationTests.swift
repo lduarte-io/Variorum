@@ -9,7 +9,7 @@ struct MigrationTests {
         "container", "block", "variant", "commit_point", "edge",
         "container_block", "reading", "reading_post", "tag",
         "post_tag", "block_tag", "reference", "setting",
-        "sync_outbox", "sync_state", "_sync_applying",
+        "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -95,7 +95,7 @@ struct MigrationTests {
                 #expect(syncVersion?["notnull"] == 1, "\(table).sync_version is nullable")
             }
             // The local-only tables must NOT carry it.
-            for table in ["sync_outbox", "sync_state", "_sync_applying"] {
+            for table in ["sync_outbox", "sync_state", "sync_row_seq", "_sync_applying"] {
                 let columns = try Row.fetchAll(db, sql: "PRAGMA table_info(\(table))")
                 #expect(!columns.contains { $0["name"] == "sync_version" }, "\(table) must not carry sync_version")
             }

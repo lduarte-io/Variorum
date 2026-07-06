@@ -42,6 +42,27 @@ extension AppDatabase {
                 CREATE INDEX idx_container_touched    ON container(last_touched_at, id) WHERE deleted_at IS NULL;
                 """)
         }
+        // Phase 5 (sync core): per-row server_seq bookkeeping, local-only.
+        // SyncSpec §7's deterministic repairs rank rows by server_seq
+        // ("the placement with the higher server_seq wins", "resurrect the
+        // tombstoned variant with the highest server_seq") — which requires
+        // the client to KNOW each row's last server-accepted seq. Neither
+        // §3's client-machinery list nor the v1 schema enumerated a home for
+        // that knowledge (a Phase 5 finding, same class as Phase 1's
+        // `_sync_applying` correction): the engine records it here on every
+        // push-accept and pull-apply. Never synced; absent rows rank as seq
+        // 0 (a row the server has never accepted carries no later-intent
+        // authority).
+        migrator.registerMigration("v1_3_sync_row_seq") { db in
+            try db.execute(sql: """
+                CREATE TABLE sync_row_seq (
+                  table_name TEXT NOT NULL,
+                  row_id     TEXT NOT NULL,
+                  server_seq INTEGER NOT NULL,
+                  PRIMARY KEY (table_name, row_id)
+                );
+                """)
+        }
         return migrator
     }
 }
