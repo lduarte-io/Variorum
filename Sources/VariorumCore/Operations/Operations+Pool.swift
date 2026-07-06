@@ -97,7 +97,7 @@ extension Operations {
         undoStack?.register(label: "Pool Copy") {
             try $0.revertStructural(
                 restoringTexts: [],
-                tombstoningBlocks: [result.block.id],
+                tombstoningBlocks: [.init(result.block.id, result.variants)],
                 revivingPlacementRows: [])
         }
         return result

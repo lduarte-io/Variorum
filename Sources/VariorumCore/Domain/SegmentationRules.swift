@@ -78,11 +78,12 @@ public enum SegmentationRules {
 
     // MARK: - Sentence scanning
 
-    /// Characters that end a sentence.
-    private static let terminators: Set<Character> = [".", "!", "?"]
+    /// Characters that end a sentence. Internal: `BoundarySnapping` shares
+    /// these exact sets so the two scanners can never drift apart.
+    static let terminators: Set<Character> = [".", "!", "?"]
     /// Closing punctuation that may trail a terminator and still belong to
     /// the sentence: `He said "Stop!" and left.`
-    private static let closers: Set<Character> = ["\"", "'", "\u{201D}", "\u{2019}", ")", "]"]
+    static let closers: Set<Character> = ["\"", "'", "\u{201D}", "\u{2019}", ")", "]"]
 
     /// Coarse sentence splitting: a terminator run (plus trailing closers)
     /// followed by whitespace ends a sentence; a newline always does.

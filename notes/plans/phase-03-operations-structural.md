@@ -105,3 +105,27 @@ Reviewed and accepted as-is (documented, no code change): neighbor SQL uses stri
 7. **UTF-16 as the offset unit** everywhere in the structural API (decided per plan; matters to Phase 7/9 editor code).
 
 **Deferred/notes for Phase 4:** nothing new in KnownIssues (the tray-semantics entry there is *narrowed* by the release-stamping fix: container-cascade victims remain the only stale-`last_container_id` population). Phase 4 must reuse the rendered-variant COALESCE semantics (now guarded, see `renderedVariant`) rather than re-derive them; the unplaced-blocks population (released A/B/C) now exists for real and has a cheap query; the sweep's "any SQLite error is a failure" stance carries forward.
+
+---
+
+## Ratification & second review round (2026-07-06)
+
+**Author decisions on the ratify list** (specs updated: AppSpec §9 + §14, OverallModel §3):
+1. **Seam trimming — explained, stands** (the boundary sits after the separator run; without trimming the first half would *store* the separator, which the rendering join then duplicates).
+2. **Merge joins with a single space** (author: raw no-space join "more annoying than helpful") — implemented: `head + " " + tail` unless either edge already carries whitespace. Consequence surfaced by the reviewer and accepted: divide→merge round-trips a *sentence* cut exactly (the trimmed seam space comes back), while a *paragraph* cut returns as a space.
+3. **Undo divergence insurance — ratified** (the fourth quiet auto-commit occasion).
+4. **`includeFan` copies archived takes — ratified** (statuses preserved).
+5. **Structural ops in pools — ratified.**
+6. **Extract prefix-before/suffix-after — explained** (reading order preserved), stands.
+7. **UTF-16 — ratified.**
+
+**Second review session (author-run) — all three substantive findings actioned:**
+1. **Minted-block divergence gap — fixed** (the one code change the reviewer asked for): undo now compares each minted block's live fan against its birth texts; a diverged mint (buffer edited or take branched since) gets `last_container_id` stamped before tombstoning, so the tray reaches it and `restoreBlock` brings the polished text back. An untouched mint still vanishes as if never made. Regression test: `extractUndoTraysAMintedBlockTheAuthorWorkedOn`.
+2. **Boundary discipline — made an explicit decision, documentation path**: the op doc comments no longer imply snappedness is validated; they state plainly that operations check *well-formedness* only (bounds, grapheme alignment, non-empty parts) and boundary snapping is the **editor's contract** (`BoundarySnapping.snap`). Rationale for not enforcing in-op: the coarse scanner would refuse legitimate deliberate cuts (after a colon, an em-dash, inside dialogue) that aren't scanner boundaries — enforcement would make the Domain scanner the arbiter of where the author may cut, which is exactly backwards. Recorded in AppSpec §14.
+3. **Divide→merge composition — resolved by decision 2** above (the space join); consequence documented in AppSpec §9.
+
+**Smaller items:** `version_of`-edge operation got its owned KnownIssues row (Phase 11); the undo-serialization caveat extended the Phase 7 wiring row; terminator/closer sets are now shared constants (`SegmentationRules` owns them, `BoundarySnapping` references — can't drift); `renderedVariant`'s unreachable refusal got its own `noRenderableVariant` case (Phase 5 diagnostics); the sweep now exercises `.before`/`.after` anchored inserts under interleaving. Accepted as-is: the double grapheme validation in extract (cosmetic, block-bounded); `UndoStack` concurrent-undo race deferred to the Phase 7 wiring row.
+
+**Open author question (carried, not implemented):** should divideW/merge/poolDragCopy stamp `last_touched_at`? Currently only the text-editing ops (extract, single divide) touch the stamps, so a post restructured today still sorts as untouched — and the family is inconsistent (divide touches, divideW doesn't). Recommendation: stamp `last_touched_at` (not churn) on all structural ops. Awaiting the author's call; one-line change whenever decided.
+
+**`swift test`: 221 green (supersedes 219). This is the Phase 4 baseline.**

@@ -159,11 +159,10 @@ public enum BoundarySnapping {
         return result
     }
 
-    /// Characters that end a sentence — mirrors `SegmentationRules`.
-    private static let terminators: Set<Character> = [".", "!", "?"]
-    /// Closing punctuation that may trail a terminator and still belong to
-    /// the sentence — mirrors `SegmentationRules`.
-    private static let closers: Set<Character> = ["\"", "'", "\u{201D}", "\u{2019}", ")", "]"]
+    /// The sentence-mark vocabulary is `SegmentationRules`' — shared, not
+    /// mirrored, so the two scanners cannot drift apart.
+    private static let terminators = SegmentationRules.terminators
+    private static let closers = SegmentationRules.closers
 
     /// Offsets where a sentence starts: after a terminator run (plus trailing
     /// closers) followed by whitespace, skipping that whitespace. Newline-only

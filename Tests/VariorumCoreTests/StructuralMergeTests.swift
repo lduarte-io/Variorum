@@ -16,9 +16,9 @@ struct StructuralMergeTests {
 
             let result = try ops.merge(b.block.id, c.block.id)
 
-            // A': one variant, the exact concatenation — no separator
-            // invented (documented; the author sees the raw join and adjusts).
-            #expect(result.variant.workingText == "First half.Second half.")
+            // A': one variant, joined with a single space (author decision
+            // 2026-07-06 — a raw no-space join was more annoying than helpful).
+            #expect(result.variant.workingText == "First half. Second half.")
             #expect(try db.fetchInt(
                 "SELECT COUNT(*) FROM variant WHERE block_id = ?", [result.block.id]) == 1)
             #expect(result.block.defaultVariantId == result.variant.id)
@@ -64,10 +64,28 @@ struct StructuralMergeTests {
 
             let result = try ops.merge(b.block.id, c.block.id)
 
-            #expect(result.variant.workingText == "Alt first.Second half.")
+            #expect(result.variant.workingText == "Alt first. Second half.")
             #expect(try db.fetchInt(
                 "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL",
                 [b.block.id]) == 2)
+        }
+    }
+
+    @Test func mergeNeverDoublesExistingEdgeWhitespace() throws {
+        // The joining space appears only when neither side's edge already
+        // carries whitespace — and a divide→merge round trip restores the
+        // sentence exactly (the seam space divide trimmed comes back).
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "One alpha. One omega.")
+            let divided = try ops.divide(a.block.id, cut: 11)
+            let restored = try ops.merge(a.block.id, divided.block.id)
+            #expect(restored.variant.workingText == "One alpha. One omega.")
+
+            let b = try ops.newBlock(in: post.id, text: "Trailing space ")
+            let c = try ops.newBlock(in: post.id, text: "already separated")
+            let joined = try ops.merge(b.block.id, c.block.id)
+            #expect(joined.variant.workingText == "Trailing space already separated")
         }
     }
 

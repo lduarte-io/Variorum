@@ -120,6 +120,21 @@ extension Operations {
         let postOpText: String
     }
 
+    /// A freshly minted block as the structural op made it, for
+    /// `revertStructural`: variantID → working_text at mint time, so undo
+    /// can tell an untouched mint (vanishes as if never made) from one the
+    /// author worked on since (lands in the tray).
+    struct MintedPreImage: Sendable {
+        let blockID: String
+        let birthTexts: [String: String]
+
+        init(_ blockID: String, _ variants: [Variant]) {
+            self.blockID = blockID
+            self.birthTexts = Dictionary(
+                uniqueKeysWithValues: variants.map { ($0.id, $0.workingText) })
+        }
+    }
+
     /// Inverse of the block-minting structural ops (extract, divide,
     /// divide-W, merge, poolDragCopy): restore edited buffers to their
     /// pre-image text, tombstone the freshly minted blocks (the trigger
@@ -134,12 +149,16 @@ extension Operations {
     /// retry). **Divergence is left alone quietly** — a minted block already
     /// deleted stays deleted; a released block re-homed meanwhile keeps its
     /// new placement (I2) and one whose block or container died stays
-    /// released. `lastContainerId` is deliberately not stamped on the minted
-    /// blocks: an undone mint vanishes as if never made, and must not haunt
-    /// the deleted-blocks tray.
+    /// released. An *untouched* mint vanishes as if never made — no
+    /// `lastContainerId`, so it never haunts the deleted-blocks tray. But a
+    /// mint whose fan diverged since do-time (a buffer edited, a take
+    /// branched) carries author work: its tombstone is stamped with its
+    /// current home so the tray can reach it (the insurance doctrine's
+    /// mirror case — nothing typed becomes unreachable; Phase 3 review
+    /// finding, on the ratify list).
     func revertStructural(
         restoringTexts: [TextPreImage],
-        tombstoningBlocks: [String],
+        tombstoningBlocks: [MintedPreImage],
         revivingPlacementRows: [String]
     ) throws {
         try database.write { db in
@@ -166,11 +185,21 @@ extension Operations {
                 try variant.update(db)
             }
 
-            for blockID in tombstoningBlocks {
-                guard var block = try Block.fetchOne(db, key: blockID),
+            for minted in tombstoningBlocks {
+                guard var block = try Block.fetchOne(db, key: minted.blockID),
                       block.deletedAt == nil
                 else { continue }  // already gone — the world moved past this
-                try ensurePlacementUnlocked(db, blockID: blockID)
+                try ensurePlacementUnlocked(db, blockID: minted.blockID)
+                let liveVariants = try Variant.fetchAll(
+                    db,
+                    sql: "SELECT * FROM variant WHERE block_id = ? AND deleted_at IS NULL",
+                    arguments: [minted.blockID])
+                let diverged = liveVariants.contains {
+                    minted.birthTexts[$0.id] != $0.workingText
+                }
+                if diverged, let placement = try livePlacement(db, blockID: minted.blockID) {
+                    block.lastContainerId = placement.containerId
+                }
                 block.deletedAt = now
                 block.updatedAt = now
                 try block.update(db)

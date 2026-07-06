@@ -183,7 +183,7 @@ private struct Sweep {
             }
         case 2, 3:
             if let container = try random("SELECT id FROM container WHERE deleted_at IS NULL") {
-                _ = try ops.newBlock(in: container, text: text(), at: position())
+                _ = try ops.newBlock(in: container, text: text(), at: position(in: container))
             }
         case 4, 5:
             if let variant = try random("SELECT id FROM variant WHERE deleted_at IS NULL") {
@@ -259,7 +259,7 @@ private struct Sweep {
                     WHERE cb.block_id = b.id AND cb.deleted_at IS NULL)
                 """),
                let container = try random("SELECT id FROM container WHERE deleted_at IS NULL") {
-                _ = try ops.placeBlock(block, in: container, at: position())
+                _ = try ops.placeBlock(block, in: container, at: position(in: container))
             }
         case 21:
             switch Int.random(in: 0..<3, using: &rng) {
@@ -389,8 +389,12 @@ private struct Sweep {
 
     // MARK: Candidates
 
-    private mutating func random(_ sql: String) throws -> String? {
-        let ids = try db.read { db in try String.fetchAll(db, sql: sql) }
+    private mutating func random(
+        _ sql: String, _ arguments: [String] = []
+    ) throws -> String? {
+        let ids = try db.read { db in
+            try String.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
+        }
         guard !ids.isEmpty else { return nil }
         return ids[Int.random(in: 0..<ids.count, using: &rng)]
     }
@@ -442,5 +446,17 @@ private struct Sweep {
 
     private mutating func position() -> Operations.InsertPosition {
         Bool.random(using: &rng) ? .end : .start
+    }
+
+    /// Sometimes a neighbor-anchored insert, so `.before`/`.after`
+    /// resolution runs under randomized interleaving too.
+    private mutating func position(in container: String) throws -> Operations.InsertPosition {
+        if Int.random(in: 0..<3, using: &rng) == 0,
+           let anchor = try random(
+                "SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
+                [container]) {
+            return Bool.random(using: &rng) ? .before(anchor) : .after(anchor)
+        }
+        return position()
     }
 }

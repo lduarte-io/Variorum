@@ -36,7 +36,7 @@ extension Operations {
         }
         // Unreachable for a live block (I10 + default reassignment), kept as
         // a typed refusal rather than a crash for sync-race tolerance.
-        throw OperationError.variantNotFound(id: block.defaultVariantId ?? block.id)
+        throw OperationError.noRenderableVariant(blockID: block.id)
     }
 
     func renderedVariant(_ db: Database, blockID: String) throws -> Variant {
@@ -60,9 +60,11 @@ extension Operations {
     /// extracting from a *fanned* block edits only the rendered variant, and
     /// the other variants keep their own copy of the span (documented
     /// behavior, review #10; the editor may hint). A middle span refuses:
-    /// that's a divide. `span` is UTF-16 offsets into the rendered text and
-    /// arrives pre-snapped — the editor owns `BoundarySnapping.snap`; the
-    /// operation validates, never snaps.
+    /// that's a divide. `span` is UTF-16 offsets into the rendered text.
+    /// Boundary discipline (sentence/paragraph snapping, OverallModel §7) is
+    /// deliberately the editor's contract — the operation checks
+    /// well-formedness only (bounds, grapheme alignment, edge adjacency,
+    /// surviving remainder), never that the span sits on a sentence mark.
     @discardableResult
     public func extract(_ blockID: String, span: Range<Int>) throws -> ExtractResult {
         let (result, sourcePreImage): (ExtractResult, TextPreImage) =
@@ -110,7 +112,7 @@ extension Operations {
         undoStack?.register(label: "Extract") {
             try $0.revertStructural(
                 restoringTexts: [sourcePreImage],
-                tombstoningBlocks: [result.block.id],
+                tombstoningBlocks: [.init(result.block.id, [result.variant])],
                 revivingPlacementRows: [])
         }
         return result
@@ -132,10 +134,12 @@ extension Operations {
     /// fresh block C is minted for the second half, placed immediately
     /// after, with a `derived_from`/'divide' edge. Requires exactly one live
     /// active variant — a fanned block refuses toward the W ceremony
-    /// (`divideW`). `cut` is a UTF-16 offset into the rendered text and
-    /// arrives pre-snapped (the editor owns `BoundarySnapping.snap`; the
-    /// operation validates, never snaps); the halves are whitespace-trimmed
-    /// at the seam. Note the documented
+    /// (`divideW`). `cut` is a UTF-16 offset into the rendered text; the
+    /// halves are whitespace-trimmed at the seam. Boundary discipline is
+    /// deliberately the editor's contract (`BoundarySnapping.snap`) — the
+    /// operation checks well-formedness only (bounds, grapheme alignment,
+    /// non-empty halves), never that the cut sits on a sentence mark.
+    /// Note the documented
     /// restoreCommit behavior: a commit predating this cut still holds the
     /// full text, and restoring it resurrects both halves into the source's
     /// buffer while C sits next door (AppSpec §9; the editor warns, Phase 7).
@@ -187,7 +191,7 @@ extension Operations {
         undoStack?.register(label: "Divide") {
             try $0.revertStructural(
                 restoringTexts: [sourcePreImage],
-                tombstoningBlocks: [result.block.id],
+                tombstoningBlocks: [.init(result.block.id, [result.variant])],
                 revivingPlacementRows: [])
         }
         return result
@@ -226,8 +230,12 @@ extension Operations {
     /// Reversible by re-pointing at A (`placeBlock`). B/C defaults are the
     /// halves of A's rendered variant when it is marked (also the new
     /// placements' chosen), else the halves of the first marked variant
-    /// (chosen left NULL). Cuts are per-variant UTF-16 offsets, seam-trimmed.
-    /// Marked variants may be locked — their buffers are copied, not edited.
+    /// (chosen left NULL). Cuts are per-variant UTF-16 offsets, seam-trimmed
+    /// (well-formedness checked; boundary snapping is the editor's, as in
+    /// `divide`). Marked variants may be locked — their buffers are copied,
+    /// not edited. An unfanned block is accepted too, deliberately: W on a
+    /// single variant is a divide with release-A semantics instead of
+    /// in-place — the editor picks the gesture, the op doesn't second-guess.
     @discardableResult
     public func divideW(_ blockID: String, cuts: [String: Int]) throws -> DivideWResult {
         let result: DivideWResult = try database.write { db in
@@ -318,7 +326,10 @@ extension Operations {
         undoStack?.register(label: "Divide") {
             try $0.revertStructural(
                 restoringTexts: [],
-                tombstoningBlocks: [result.first.block.id, result.second.block.id],
+                tombstoningBlocks: [
+                    .init(result.first.block.id, result.first.variants),
+                    .init(result.second.block.id, result.second.variants),
+                ],
                 revivingPlacementRows: [result.releasedPlacementID])
         }
         return result
@@ -341,9 +352,12 @@ extension Operations {
     }
 
     /// AppSpec §9: combining two adjacent blocks mints a fresh block A'
-    /// whose one variant is `rendered(first) + rendered(second)` — the exact
-    /// concatenation, no separator invented (the spec says "chosen(B) +
-    /// chosen(C)"; the author sees the raw join in the editor and adjusts).
+    /// whose one variant is `rendered(first) + " " + rendered(second)` — a
+    /// single space at the join unless either side's edge already carries
+    /// whitespace (author decision 2026-07-06: a raw no-space join was more
+    /// annoying than helpful). Note the space is the join even for
+    /// paragraph-shaped halves — dividing at a paragraph break and merging
+    /// back turns the break into a space; the author adjusts in the editor.
     /// Fans are NOT cartesian-producted: A' gets exactly one variant. Both
     /// sources release their placements and remain live as lineage
     /// (reversible by re-pointing, like W). The blocks must be placed
@@ -396,8 +410,12 @@ extension Operations {
                 try outerNeighbor("MAX", "<", first.placement.position),
                 try outerNeighbor("MIN", ">", second.placement.position))
 
+            let head = first.rendered.workingText
+            let tail = second.rendered.workingText
+            let needsSpace = !head.isEmpty && !tail.isEmpty
+                && head.last?.isWhitespace != true && tail.first?.isWhitespace != true
             let minted = try mintFanBlock(
-                db, texts: [first.rendered.workingText + second.rendered.workingText],
+                db, texts: [needsSpace ? head + " " + tail : head + tail],
                 in: containerID, position: position,
                 defaultIndex: 0, chosenIndex: 0, now: now)
             let firstEdge = try insertLineageEdge(
@@ -414,7 +432,7 @@ extension Operations {
         undoStack?.register(label: "Merge") {
             try $0.revertStructural(
                 restoringTexts: [],
-                tombstoningBlocks: [result.block.id],
+                tombstoningBlocks: [.init(result.block.id, [result.variant])],
                 revivingPlacementRows: [
                     result.releasedFirstPlacementID, result.releasedSecondPlacementID,
                 ])

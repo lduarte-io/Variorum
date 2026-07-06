@@ -322,6 +322,35 @@ struct StructuralExtractTests {
         }
     }
 
+    @Test func extractUndoTraysAMintedBlockTheAuthorWorkedOn() throws {
+        // The insurance doctrine's mirror case (Phase 3 review finding): an
+        // UNTOUCHED mint vanishes as if never made, but one whose buffer
+        // diverged since the op carries author work — its undo-tombstone is
+        // stamped with its home, so the tray reaches it and restoreBlock
+        // brings the polished text back.
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let result = try ops.extract(a.block.id, span: 16..<32)
+            try ops.autosave(result.variant.id, text: "Polished for twenty minutes.", charDelta: 0)
+
+            try stack.undo(with: ops)
+
+            #expect(try db.deletedAt("block", result.block.id) != nil)
+            #expect(try db.fetchString(
+                "SELECT last_container_id FROM block WHERE id = ?", [result.block.id]) == post.id)
+
+            try ops.restoreBlock(result.block.id)
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [result.variant.id])
+                == "Polished for twenty minutes.")
+            let home = try db.read { try ops.livePlacement($0, blockID: result.block.id) }
+            #expect(home?.containerId == post.id)
+        }
+    }
+
     @Test func extractUndoWithAnUntouchedBufferCommitsNothing() throws {
         let stack = UndoStack()
         try withOperations { _, db in
