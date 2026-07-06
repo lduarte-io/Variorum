@@ -119,3 +119,19 @@ An independent cold reviewer ran `notes/REVIEW_PROMPT.md` against the phase diff
 **Commits:** `78fe215` (schema: append-only `v1_1_tray_index` — own commit per convention), `637e064` (all other fixes + tests), plus this docs commit.
 
 **`swift test`: 301 green in 28 suites (supersedes 297; +4 tests: archived listing, tray preview stamp rule, dead-block divergence pin, library-vs-text benchmark). This is the Phase 5 baseline.** Benchmarks after the round, all passing: renderPost 0.43→0.45ms, assembleReading 0.43→0.41, timelinePage 0.47→0.75, library(limit 50) 0.26→0.25 (flat in corpus text), tagSubtree 0.62→0.62, autosave 1.26 vs 1.24 (flat in post length).
+
+---
+
+## Ratification round (2026-07-06)
+
+The author walked the full 7-item QUESTIONS list from this phase (including the cold-review addenda folded into items 1, 2, and 7). Every item resolved; the answered entries are removed from `notes/QUESTIONS.md` and the decisions recorded as an author-decision delta block in AppSpec §14 ("2026-07-06, Phase 4 closeout review").
+
+1. **`"\n\n"` rendering join — ratified**, with one decision on the addendum: **blank takes skip like gaps** — a chosen-but-empty variant contributes nothing to `renderedText` (export reads `"a\n\nb"`, never `"a\n\n\n\nb"`), while `renderPost` still shows the blank slot for the editor. Implemented + tested (commit `a7cc86a`).
+2. **Tray index — ratified**; `idx_block_last_container` folded into AppSpec §7's block DDL. **Addendum — composite stamp indexes, now:** the author overruled the wait-for-Phase-12 deferral ("why would we not do this now? we don't have sync yet so i don't see why it's bad to change the schema yet") — the three container stamp indexes upgraded to `(column, id) WHERE deleted_at IS NULL` as append-only migration `v1_2_composite_stamp_indexes`, AppSpec §7 DDL updated, index shape pinned by test (commit `8e35aad`, own schema commit).
+3. **SmartQuerySpec v1 vocabulary — ratified as implemented** (NULL spec = all posts, ANY-of + subtree tags, malformed fails closed, unknown keys ignored).
+4. **Smart + `sort_field='manual'` → `created_at ASC` fallback — ratified.**
+5. **Grouping semantics — ratified** (immediate-child sections, smallest-path tiebreak, root-only ungrouped, clustering left to views).
+6. **Strict-stamp timelines / `library` COALESCE to `created_at` — ratified.**
+7. **Archived semantics — ratified** (out of ambient view; direct address renders; tag lookups find them; `archivedPosts` is the recovery surface).
+
+**`swift test`: 303 green in 28 suites (supersedes 301; +2: blank-take skip, composite-index shape). This is the Phase 5 baseline. No open author questions remain from Phase 4.**
