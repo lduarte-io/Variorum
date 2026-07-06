@@ -107,7 +107,7 @@ Structural op gestures and cross-block selection re-bracketing (Phase 9); multi-
 
 ---
 
-## Closeout (2026-07-06) — implementation complete; PENDING COLD REVIEW + author checkpoint
+## Closeout (2026-07-06) — implementation complete; cold review closed (two rounds, see below); author checkpoint items in `notes/QUESTIONS.md`
 
 **Environment:** macOS 26.4.1 (25E253) · Xcode 26.3 / SDK 26.2 · the M3 — unchanged from the Phase 6 definitive run, so the spike's numbers remained this phase's valid performance contract (no point update landed mid-phase; no spike re-run required).
 
@@ -184,3 +184,17 @@ Two author rulings arrived mid-phase with the findings and were implemented in t
 **NIT 12 (restore re-reads the caret; drag-drop-into-tail unclassified) — AGREED, both parts.** Restore now targets `commitListVariantID`, captured when the history loads — the caret can wander before confirming and the restore still lands on the variant whose history is open (test: `restoreTargetsTheLoadedHistoryNotTheCaret`; the raw `commitNotFound` surface is unreachable by that path now). Drag-drop into the tail is logged as QUESTIONS item 2 (PROVISIONAL: the typing reading stands; revisit with Phase 9's drag gestures).
 
 **Post-fix verification:** core `swift test` = **383 green in 39 suites** (unchanged — the only core change was dropping the unused `observeBlockFan` wrapper); app `xcodebuild test` = **83 green in 12 suites** (was 72/11; the additions are this round's regression tests), now under Swift 6 strict concurrency; TK1 grep audit clean; release-config build unaffected (Swift 6 flip applies to both configurations).
+
+---
+
+## Review round 2 (2026-07-06) — confirmation pass on `aac543d`: 12/12 CONFIRMED; 2 new MINORs, both fixed
+
+The reviewer re-verified every round-1 fix against the commit (re-running both suites itself: core 383/39, app 83/12 under Swift 6) and confirmed all 12 **CONFIRMED FIXED / confirmed-as-dispositioned**, including: retries don't double-count churn; the settle re-fetch self-corrects even when the fetched value is itself superseded; the finalize-loop terminates (the tail is monotonically consumed); the bulk flag is consumed exactly once; the author rulings are properly recorded (AppSpec §14 delta, KnownIssues, QUESTIONS). Its probe of the new moving parts surfaced **two new MINORs**, adjudicated by the coordinator as fix-now with **no third reviewer pass** (the two-round cap is the process rule; the second finding is the forbidden text-loss class and sits under the author's standing mid-phase ruling).
+
+**Process note (recorded deviation):** the implementer session was terminated by an API session limit before landing these two fixes; the author explicitly authorized the coordinator to finish the phase. The coordinator — which otherwise writes no feature code — implemented both fixes and their regression tests and performed this closeout ritual. Both fixes follow the reviewer's prescribed fix directions exactly.
+
+**Round-2 MINOR A (idle-mint can fire mid-IME-composition) — AGREED, fixed.** `idleMintTail` now skips and re-arms the quiet-gap clock while `textView.hasMarkedText()` is true — marked text is an in-progress input-method composition, not yet the author's text, and minting under it would rewrite the region mid-composition (caret yank + undo clear). Test: `idleMintSkipsAnActiveIMEComposition` (real `setMarkedText` through the pipeline: no mint while composing; the post-`unmarkText` fire mints normally, store == surface).
+
+**Round-2 MINOR B (partial-bulk reconcile drops beyond-prefix tail text — the forbidden class) — AGREED, fixed.** When a second bulk-class event lands during a bulk-kind mint flight (second paste, paste+Enter, or an Enter inside an idle-mint's flight), the reconciler's re-plan has more segments than were minted; `Plan.tailAfter(applyingFirst:)` returned the bulk plan's `remainingTail` (always nil), so `finishMint` replaced the whole tail region with prefix-only text and closed the tail — the beyond-prefix paragraphs left the surface un-persisted, and the follow-up full re-render rendered a store that never had them. Fixed at the shared source of truth: for a partial **non-typing** apply, `tailAfter` now **carries the un-applied segments (+ any open remainder) as the surviving open tail** — `finishMint`'s region rewrite keeps them visible, the index keeps the tail open, and the chained `crystallizeIfNeeded` mints them next round; nothing ever leaves the surface. The conservative `needsFullRerender` posture stands (re-renders preserve an open tail via `preserveTail:`). Tests: `partialBulkApplyCarriesTheUnappliedSegments`, `enterDuringAnIdleMintFlightKeepsTheNewParagraph` (+ the pre-existing `partialBulkApplicationFallsBackToRerender` still green — the rerender flag is unchanged).
+
+**Final phase verification (post round-2 fixes):** core `swift test` = **383 green in 39 suites**; app `xcodebuild test` = **86 green in 12 suites** (was 83; the additions are the three round-2 regression tests) — `TEST SUCCEEDED` under Swift 6 strict concurrency. These are the Phase 8 baselines.
