@@ -183,6 +183,9 @@ public struct SyncEngine: Sendable {
             }
 
             var touched = TouchedRows()
+            for item in pulled where item.row.isTombstoned {
+                touched.arrivingDeadIDs[item.row.table, default: []].insert(item.row.rowID)
+            }
             for item in pulled[..<stopIndex] {
                 if try isEnqueued(db, table: item.row.table, rowID: item.row.rowID),
                    let table = SyncSchema.table(named: item.row.table),

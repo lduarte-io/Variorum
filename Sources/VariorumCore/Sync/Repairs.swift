@@ -12,6 +12,14 @@ struct TouchedRows {
     var blockIDs: Set<String> = []
     /// Applied container_block rows.
     var placementIDs: Set<String> = []
+    /// Cascade parents (container/block/reading/tag) whose applied row
+    /// transitioned live→dead in THIS batch: their local cascade fired with
+    /// the outbox triggers muted, so the victims must be enqueued explicitly
+    /// (the orphan repair, direction 1).
+    var tombstonedParents: [(table: String, rowID: String, stamp: String)] = []
+    /// Rows arriving in this batch already tombstoned — their tombstones are
+    /// server-known, so direction 1 need not re-push them.
+    var arrivingDeadIDs: [String: Set<String>] = [:]
     /// Inline (write-time) repair count, for reporting.
     var inlineRepairs = 0
 }
@@ -63,8 +71,61 @@ extension SyncEngine {
                 break
             }
         }
+        // Orphan repair, direction 2: a live child arriving under a
+        // locally-dead parent joins the parent's cascade — same stamp, so
+        // every device converges byte-identically, and `restoreContainer`/
+        // `restoreBlock` still recognize it as a cascade victim.
+        if !resolved.isTombstoned,
+           let orphanStamp = try deadParentStamp(db, row: resolved) {
+            resolved.columns["deleted_at"] = .text(orphanStamp)
+            try enqueueExplicitly(db, table: resolved.table, rowID: resolved.rowID)
+            touched.inlineRepairs += 1
+        }
+        // Orphan repair, direction 1 (detection): a cascade parent
+        // transitioning live→dead right now fires the local cascade with
+        // the triggers muted — its victims are collected post-batch.
+        if resolved.isTombstoned,
+           ["container", "block", "reading", "tag"].contains(resolved.table),
+           case .text(let stamp) = resolved.columns["deleted_at"] {
+            let wasLive = try Bool.fetchOne(
+                db,
+                sql: "SELECT EXISTS (SELECT 1 FROM \(resolved.table) WHERE id = ? AND deleted_at IS NULL)",
+                arguments: [resolved.rowID]) ?? false
+            if wasLive {
+                touched.tombstonedParents.append((resolved.table, resolved.rowID, stamp))
+            }
+        }
         try resolved.apply(db)
         noteApplied(resolved, touched: &touched)
+    }
+
+    /// The nearest locally-dead cascade parent's stamp for a live incoming
+    /// row, or nil. Missing parents are stragglers, not orphans (SyncSpec
+    /// §5 tolerance); `commit_point`/`setting` have no tombstones and the
+    /// top-level tables have no cascade parent (a live unplaced block is a
+    /// LEGAL state — released to lineage).
+    private func deadParentStamp(_ db: Database, row: SyncRow) throws -> String? {
+        let parents: [(column: String, table: String)]
+        switch row.table {
+        case "container_block": parents = [("container_id", "container"), ("block_id", "block")]
+        case "variant": parents = [("block_id", "block")]
+        case "reading_post": parents = [("reading_id", "reading"), ("post_id", "container")]
+        case "post_tag": parents = [("tag_id", "tag"), ("post_id", "container")]
+        case "block_tag": parents = [("tag_id", "tag"), ("block_id", "block")]
+        case "reference": parents = [("container_id", "container")]
+        case "edge": parents = [("source_block_id", "block"), ("target_block_id", "block")]
+        default: return nil
+        }
+        for parent in parents {
+            guard case .text(let parentID) = row.columns[parent.column] else { continue }
+            if let stamp = try String.fetchOne(
+                db,
+                sql: "SELECT deleted_at FROM \(parent.table) WHERE id = ? AND deleted_at IS NOT NULL",
+                arguments: [parentID]) {
+                return stamp
+            }
+        }
+        return nil
     }
 
     private func noteApplied(_ row: SyncRow, touched: inout TouchedRows) {
@@ -244,6 +305,18 @@ extension SyncEngine {
         var repairs = 0
         let candidateBlocks = touched.blocksWithVariantChanges.union(touched.blockIDs).sorted()
 
+        // Orphan repair, direction 1: a parent tombstone applied in this
+        // batch fired the LOCAL cascade with the outbox triggers muted. Any
+        // victim whose tombstone the batch itself is not delivering is a
+        // local-only original (rows this device created and pushed after the
+        // deleting device last saw the parent) — enqueue it explicitly or
+        // the other devices never learn it died. Victims are identified by
+        // the cascade's own contract: deleted_at == the parent's exact stamp.
+        for parent in touched.tombstonedParents {
+            repairs += try enqueueSuppressedCascadeVictims(
+                db, parent: parent, arrivingDead: touched.arrivingDeadIDs)
+        }
+
         // I10 double-tombstone race: a live block left with zero live active
         // variants. Resurrect the tombstoned variant with the highest
         // server_seq — deterministic on every device — status active, label
@@ -387,5 +460,68 @@ extension SyncEngine {
     private func jsonArray(_ values: Set<String>) -> String {
         let data = try? JSONEncoder().encode(values.sorted())
         return data.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+    }
+
+    // MARK: - Orphan repair, direction 1
+
+    /// Enqueues the local cascade's victims for one freshly-applied parent
+    /// tombstone: every child row carrying the parent's exact stamp whose
+    /// own tombstone did not arrive in this batch. Mirrors Triggers.swift's
+    /// cascade graph exactly; a container's stamped blocks recurse one level
+    /// into the block cascade (same stamp throughout).
+    private func enqueueSuppressedCascadeVictims(
+        _ db: Database,
+        parent: (table: String, rowID: String, stamp: String),
+        arrivingDead: [String: Set<String>]
+    ) throws -> Int {
+        var enqueued = 0
+        func enqueueMatching(_ childTable: String, _ whereClause: String, _ arguments: [String]) throws -> [String] {
+            let ids = try String.fetchAll(
+                db,
+                sql: "SELECT id FROM \(childTable) WHERE \(whereClause) AND deleted_at = ?",
+                arguments: StatementArguments(arguments + [parent.stamp]))
+            for id in ids where arrivingDead[childTable]?.contains(id) != true {
+                try enqueueExplicitly(db, table: childTable, rowID: id)
+                enqueued += 1
+            }
+            return ids
+        }
+        switch parent.table {
+        case "container":
+            let placements = try enqueueMatching("container_block", "container_id = ?", [parent.rowID])
+            _ = try enqueueMatching("reading_post", "post_id = ?", [parent.rowID])
+            _ = try enqueueMatching("post_tag", "post_id = ?", [parent.rowID])
+            _ = try enqueueMatching("reference", "container_id = ?", [parent.rowID])
+            // The container cascade tombstoned its singly-owned blocks first
+            // (same stamp); each of those fired the block cascade in turn.
+            for placementID in placements {
+                if let blockID = try String.fetchOne(
+                    db,
+                    sql: "SELECT block_id FROM container_block WHERE id = ? AND EXISTS (SELECT 1 FROM block WHERE id = block_id AND deleted_at = ?)",
+                    arguments: [placementID, parent.stamp]) {
+                    if arrivingDead["block"]?.contains(blockID) != true {
+                        try enqueueExplicitly(db, table: "block", rowID: blockID)
+                        enqueued += 1
+                    }
+                    enqueued += try enqueueSuppressedCascadeVictims(
+                        db, parent: ("block", blockID, parent.stamp), arrivingDead: arrivingDead)
+                }
+            }
+        case "block":
+            _ = try enqueueMatching("variant", "block_id = ?", [parent.rowID])
+            _ = try enqueueMatching("container_block", "block_id = ?", [parent.rowID])
+            _ = try enqueueMatching(
+                "edge", "(source_block_id = ? OR target_block_id = ?)",
+                [parent.rowID, parent.rowID])
+            _ = try enqueueMatching("block_tag", "block_id = ?", [parent.rowID])
+        case "reading":
+            _ = try enqueueMatching("reading_post", "reading_id = ?", [parent.rowID])
+        case "tag":
+            _ = try enqueueMatching("post_tag", "tag_id = ?", [parent.rowID])
+            _ = try enqueueMatching("block_tag", "tag_id = ?", [parent.rowID])
+        default:
+            break
+        }
+        return enqueued
     }
 }

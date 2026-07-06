@@ -197,8 +197,15 @@ struct SyncPullTests {
         // The local cascade fired with the block's exact stamp…
         #expect(try b.db.deletedAt("variant", made.variant) == stamp)
         #expect(try b.db.deletedAt("container_block", made.placement) == stamp)
-        // …suppressed: nothing enqueued.
-        #expect(try b.outboxCount() == 0)
+        // …its writes suppressed by apply mode — and because THIS batch did
+        // not deliver the victims' own tombstones, the orphan repair
+        // (direction 1) enqueued them explicitly: as far as this device can
+        // know they are local-only originals the other devices have never
+        // seen die. (Without this, a child created-and-pushed by this device
+        // after the deleter last saw the parent would die silently here and
+        // the stores would diverge.)
+        #expect(try b.outboxContains("variant", made.variant))
+        #expect(try b.outboxContains("container_block", made.placement))
 
         // The children's own tombstone rows now arrive (same stamp, as the
         // originating device's cascade produced them) and apply over ours.
@@ -218,6 +225,8 @@ struct SyncPullTests {
 
         #expect(try b.db.deletedAt("variant", made.variant) == stamp)
         #expect(try b.db.fetchInt("SELECT sync_version FROM variant WHERE id = ?", [made.variant]) == 2)
+        // The children's tombstones proved server-known after all: the merge
+        // accepted them wholesale and cleared the direction-1 entries.
         #expect(try b.outboxCount() == 0)
     }
 
