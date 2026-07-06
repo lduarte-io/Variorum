@@ -132,3 +132,18 @@ An independent cold reviewer ran `notes/REVIEW_PROMPT.md` against the phase with
 | 13 (NIT) | Public `resolveSyncConflict` lacked the block-liveness guard the engine's rescue path has — a live conflict variant could land under a tombstoned block. | **Agreed** | `liveBlock` guard added (the public op refuses loudly where the engine skips silently); test `resolveSyncConflictRefusesADeadBlock`. |
 
 **`swift test`: 372 green in 36 suites (supersedes 367; +5: reject-path mid-push rescue, echo guard, fixpoint stall, column-name injection refusal, dead-block conflict refusal). This is the Phase 6 baseline.**
+
+---
+
+## Ratification round (2026-07-06)
+
+The author walked the 6-item `notes/QUESTIONS.md` list at the checkpoint and **ratified all six as shipped**. Resolutions recorded as author-decision deltas (AppSpec §14; SyncSpec updated in place):
+
+1. **Sealed-post conflict/rescue variants land** — S5 outranks the seal; a sync conflict is not authoring. → AppSpec §9 (`resolveSyncConflict`) + §14.
+2. **Archive/archive race** — un-archive the highest-`server_seq` archived variant, status active, label `'rescued'` (the I10 doctrine extended to archives). → SyncSpec §7.
+3. **`sync_row_seq`** (migration `v1_3`) + the never-accepted-rows-rank-0 rule. → SyncSpec §3; DDL folded into AppSpec §7's local-only block.
+4. **The orphan repair**, both directions, exact-stamp semantics. → SyncSpec §7.
+5. **Merged-equals-server clears the outbox entry.** → SyncSpec §5 amended.
+6. **Symmetric tombstone rescue.** → SyncSpec §6.
+
+The two review-blocker behaviors (reject-path merge against the re-fetched current row; own-echo/stale-replay never merged into a dirty row) were also recorded into SyncSpec §4/§5 so the spec's letter matches the proven engine. `notes/QUESTIONS.md` cleared — no open items remain. **The one remaining Phase 5 item is the author-assist Supabase gate above (Step 8's real-server integration pass).** Baseline unchanged: **372 green in 36 suites**.

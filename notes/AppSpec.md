@@ -329,6 +329,15 @@ CREATE TABLE _sync_applying (applying INTEGER NOT NULL);
 -- apply-mode flag; permanent and normally empty (a temp table is invisible to
 -- main-schema triggers — Phase 1 finding, SyncSpec §3); row exists only inside
 -- an apply transaction
+CREATE TABLE sync_row_seq (
+  table_name TEXT NOT NULL,
+  row_id     TEXT NOT NULL,
+  server_seq INTEGER NOT NULL,
+  PRIMARY KEY (table_name, row_id)
+);
+-- per-row server_seq bookkeeping (migration v1_3, ratified 2026-07-06):
+-- written on push-accept and pull-apply; read by SyncSpec §7's seq-ranked
+-- repairs; a row the server never accepted ranks as seq 0
 ```
 
 ## 8. Cardinality summary
@@ -373,7 +382,7 @@ Every mutation is one of these; each is a single transaction through the operati
 - **deleteBlock(block)** — tombstone block + its container_block row; set last_container_id (feeds the deleted-blocks tray). Trigger-cascade tombstones variants (and their commit_points) and edges. Soft by default; true purge is a rare, explicit GC.
 - **applyTag / removeTag (post or block)** — INSERT into post_tag/block_tag or tombstone; operations layer enforces post_tag targets kind='post'.
 - **addReference / removeReference / updateReferenceViewState (post)** — INSERT/tombstone/UPDATE `reference` rows (§7).
-- **resolveSyncConflict(variant, losingText)** *(sync phase, S5)* — INSERT variant(working_text=losingText, label='conflict') on the same block. The losing edit becomes a card in the fan; nothing clobbered.
+- **resolveSyncConflict(variant, losingText)** *(sync phase, S5)* — INSERT variant(working_text=losingText, label='conflict') on the same block (same parent, fan's end). The losing edit becomes a card in the fan; nothing clobbered. **Lands even under a sealed post** (author-ratified 2026-07-06: S5 outranks the seal — the seal freezes *authoring*, and a sync conflict is not authoring). Refuses a dead block; the engine's in-apply rescue path skips one silently instead.
 
 **Structural undo (author-approved 2026-07-04; resolves the global-undo question):** a **session-scoped, in-memory undo stack for structural operations only** — divide, merge, extract, deleteBlock, deleteVariant, archiveVariant, moveBlock, reorder, poolDragCopy. Each of these registers its inverse when it runs (mostly tombstone-flips + placeBlock — cheap precisely because the model destroys nothing). **Undo emits ordinary operations**, so sync never knows undo exists and the merge rules already cover it. Explicitly excluded: text editing (command-Z remains NSTextView's ordinary per-buffer undo, never interleaved with structural undo), commits (append-only; restore *is* the feature), locks and tags (trivially re-toggled). No persistence across sessions — the deliberate cheap/nightmare line. Inverses are specified per-op in Phases 2–3 (they double as the reversibility tests); UI wiring at the editor phases.
 
@@ -428,6 +437,8 @@ Additional deltas: live-row partial unique indexes everywhere (§6 — correctne
 **Author-decision deltas (2026-07-05, Phase 2 closeout review):** the post seal refuses *everything* under the post (including fan growth and variant-lock toggles); `lockVariant` auto-commits a dirty buffer before freezing (the third quiet auto-commit occasion, joining post-seal and long-idle) while commit of a locked variant stays refused; `restoreBlock` into a since-locked container throws rather than silently leaving the block unplaced; archiving a chosen variant confirmed allowed (read-time fallback + default reassignment cover it).
 
 **Author-decision deltas (2026-07-06, Phase 4 closeout review — the read layer's ratifications):** the whole-document projection (`Queries.renderedText`, feeding export/diff) joins blocks with **`"\n\n"`** (the rendering join re-creates stored-nothing separators), and **blank takes skip like gaps** — a chosen-but-empty variant contributes nothing to the projection while still rendering as an empty slot in the editor; **schema:** `idx_block_last_container` ratified into §7's block DDL (the tray's access path), and the three container stamp indexes upgraded to **composite live-row form** `(column, id) WHERE deleted_at IS NULL` (migration `v1_2` — the keyset sort key matched exactly; author: "why would we not do this now? we don't have sync yet"), §7 DDL updated; **smart readings:** the v1 `query_spec` vocabulary ratified as shipped — `{tags, profile, entryDateFrom, entryDateTo}`, AND across fields, ANY-of tags with subtree semantics, NULL spec = all posts, malformed = assembles empty, unknown keys ignored — and `sort_field='manual'` on a smart reading falls back to `created_at ASC`; **grouping** ratified: a post's section is the *immediate child* of the grouping tag root whose subtree contains a tag applied to the post (lexically-smallest tiebreak; root-only tags ungrouped; clustering is the view's presentation call); **timelines** ratified strict-stamp (a timeline keyed on a stamp lists only rows carrying it) with the `library` listing as the total surface, COALESCE-ing missing stamps to `created_at`; **archived containers** ratified out of *ambient* view (reading assembly, timelines, library) while direct address still renders and tag lookups still find them, with `Queries.archivedPosts` as the recovery surface behind `unarchiveContainer`.
+
+**Author-decision deltas (2026-07-06, Phase 5 closeout review — the sync engine's ratifications):** conflict/rescue variants **land under sealed posts** (S5's "nothing is ever clobbered" outranks the seal — the seal freezes authoring, and a sync conflict is not authoring; §9 `resolveSyncConflict` updated); the **archive/archive race** repairs by un-archiving the highest-`server_seq` archived variant, status active, label `'rescued'` (the I10 resurrection doctrine extended to archives — SyncSpec §7); the local-only **`sync_row_seq`** table joins the client machinery (migration `v1_3`, own commit — SyncSpec §3, §7 DDL above; **rows the server never accepted rank as seq 0**); the **orphan repair** joins SyncSpec §7 (cascades cannot cross devices: parent-tombstone application explicitly enqueues its stamp-matched cascade victims, and a live child arriving under a locally-dead parent joins the cascade with the parent's exact stamp so `restoreContainer`/`restoreBlock` still revive it); the **tombstone rescue is symmetric** (either side's `working_text` edit racing a tombstone on a still-live block is rescued as a conflict variant — SyncSpec §6); and a **merged row equal to the server row clears its outbox entry** (SyncSpec §5 amended — no no-op pushes, no gratuitous echoes).
 
 ## 15. Risk register (why these are risks, so future sessions don't rediscover them)
 
