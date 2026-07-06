@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E1C271B42FFC2FB40084BEA6 /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1C271B32FFC2FB40084BEA6 /* VariorumCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E1C271962FFC2F440084BEA6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -22,10 +26,6 @@
 			remoteInfo = Variorum;
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXBuildFile section */
-		E1C271B42FFC2FB40084BEA6 /* VariorumCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1C271B32FFC2FB40084BEA6 /* VariorumCore */; };
-/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		E1C271882FFC2F420084BEA6 /* Variorum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Variorum.app; sourceTree = BUILT_PRODUCTS_DIR; };
