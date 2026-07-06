@@ -65,6 +65,35 @@ public enum SyncSchema {
         byName[name]
     }
 
+    // MARK: Column catalog (the payload-to-SQL injection guard)
+
+    private static let catalogLock = NSLock()
+    /// Table → its live column names, introspected once per process. The
+    /// schema is fixed after migration and identical across every
+    /// `AppDatabase` in a process, so a process-wide cache is sound.
+    nonisolated(unsafe) private static var columnCatalog: [String: Set<String>] = [:]
+
+    /// The actual columns of a registered table. Callers validate payload
+    /// column names against this before interpolating them into SQL —
+    /// payloads cross the network, and Phase 14's auth hardening has not
+    /// closed that trust boundary yet.
+    static func liveColumns(of tableName: String, _ db: Database) throws -> Set<String> {
+        catalogLock.lock()
+        if let cached = columnCatalog[tableName] {
+            catalogLock.unlock()
+            return cached
+        }
+        catalogLock.unlock()
+        // `tableName` is registry-validated by every caller before this.
+        let names = Set(
+            try Row.fetchAll(db, sql: "PRAGMA table_info(\(tableName))")
+                .map { $0["name"] as String })
+        catalogLock.lock()
+        columnCatalog[tableName] = names
+        catalogLock.unlock()
+        return names
+    }
+
     /// Batch order for a mixed set of dirty rows: registry order, then PK —
     /// deterministic, FK-friendly.
     public static func applyOrderIndex(of tableName: String) -> Int {
@@ -142,6 +171,12 @@ public enum SyncError: Error, Equatable, Sendable {
     case unknownTable(String)
     /// A payload's columns are missing its own primary key.
     case missingPrimaryKey(table: String)
+    /// A payload carried a column the local schema doesn't have. Column
+    /// names are interpolated into SQL, so this is the injection guard for
+    /// the server-to-client trust boundary (Phase 5 review; auth hardening
+    /// is Phase 14) — and it gives cross-schema-version payloads a defined
+    /// failure instead of silent SQL drift.
+    case unknownColumn(table: String, column: String)
 }
 
 // MARK: - Rows
@@ -230,6 +265,13 @@ public struct SyncRow: Equatable, Sendable, Codable {
         }
         guard columns[table.primaryKey] != nil else {
             throw SyncError.missingPrimaryKey(table: table.name)
+        }
+        // Column names came off the wire and are interpolated below —
+        // validate every one against the introspected schema (Phase 5
+        // review MAJOR: the server-to-client injection surface).
+        let allowed = try SyncSchema.liveColumns(of: table.name, db)
+        for name in columns.keys where !allowed.contains(name) {
+            throw SyncError.unknownColumn(table: table.name, column: name)
         }
         let names = columns.keys.sorted()
         let updateAssignments = names

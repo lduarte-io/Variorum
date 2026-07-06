@@ -111,8 +111,9 @@ final class SyncClient {
 
     /// A canonical dump of every synced table — the byte-equality surface
     /// two converged devices are compared on. Local-only tables (outbox,
-    /// cursors, seq bookkeeping) are deliberately absent: they are
-    /// per-device machinery, not synced state.
+    /// cursors, seq bookkeeping) AND local-only columns
+    /// (`reference.file_bookmark`) are deliberately absent: per-device
+    /// machinery and per-machine data are not synced state.
     func syncedDump() throws -> String {
         try db.read { db in
             var lines: [String] = []
@@ -120,7 +121,10 @@ final class SyncClient {
                 let rows = try Row.fetchAll(
                     db, sql: "SELECT * FROM \(table.name) ORDER BY \(table.primaryKey)")
                 for row in rows {
-                    let columns = row.map { "\($0)=\(String(describing: $1))" }.sorted()
+                    let columns = row.compactMap { name, value in
+                        table.excludedColumns.contains(name)
+                            ? nil : "\(name)=\(String(describing: value))"
+                    }.sorted()
                     lines.append("\(table.name)|\(columns.joined(separator: "|"))")
                 }
             }

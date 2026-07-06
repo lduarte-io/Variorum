@@ -228,6 +228,40 @@ struct SyncSchemaTests {
         #expect(try db.fetchInt("SELECT COUNT(*) FROM container WHERE id = 'c-remote'") == 1)
     }
 
+    /// Column names cross the network and are interpolated into SQL — a
+    /// payload naming a column the schema doesn't have must refuse, never
+    /// execute (Phase 5 review MAJOR: the server→client injection surface;
+    /// also the defined failure for cross-schema-version payloads).
+    @Test func applyRefusesUnknownOrMaliciousColumnNames() throws {
+        let db = try AppDatabase.inMemory()
+        let malicious = SyncRow(
+            table: "container", rowID: "c-evil",
+            columns: [
+                "id": .text("c-evil"), "kind": .text("post"),
+                "created_at": .text(Fixture.now), "updated_at": .text(Fixture.now),
+                "title = 'x', deleted_at = NULL WHERE 1=1; --": .text("payload"),
+            ],
+            syncVersion: 1)
+        #expect(throws: SyncError.unknownColumn(
+            table: "container", column: "title = 'x', deleted_at = NULL WHERE 1=1; --")) {
+            try db.write { try malicious.apply($0) }
+        }
+        // A benign-but-unknown column (a future schema version) refuses the
+        // same way rather than drifting silently.
+        let futuristic = SyncRow(
+            table: "container", rowID: "c-future",
+            columns: [
+                "id": .text("c-future"), "kind": .text("post"),
+                "created_at": .text(Fixture.now), "updated_at": .text(Fixture.now),
+                "mood": .text("optimistic"),
+            ],
+            syncVersion: 1)
+        #expect(throws: SyncError.unknownColumn(table: "container", column: "mood")) {
+            try db.write { try futuristic.apply($0) }
+        }
+        #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == 0)
+    }
+
     /// SQLite's flexible typing could smuggle a BLOB into any column; the
     /// payload layer refuses rather than inventing an encoding for a value
     /// class the schema says cannot sync.

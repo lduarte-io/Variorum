@@ -385,15 +385,24 @@ extension SyncEngine {
         // and pushes). Scoped precisely: only a pointer at a variant row
         // that EXISTS and is TOMBSTONED is dangling — a missing variant row
         // is a straggler the next batch may legitimize, and an archived
-        // chosen is a legal domain state the fallback covers.
+        // chosen is a legal domain state the fallback covers. Both legs are
+        // indexed lookups (the PK; uq_cblock_ownership on live block_id) so
+        // the pass stays batch-proportional (Phase 5 review — the previous
+        // chosen_variant_id leg had no index and scanned live placements).
+        // A chosen pointer parked on a FOREIGN block's placement is outside
+        // this scope by design: the operations layer forbids minting one and
+        // the read side gaps it (Operations.renderedVariant's same-block
+        // guard).
         let placementScope = try Row.fetchAll(
             db,
             sql: """
                 SELECT cb.id, cb.chosen_variant_id FROM container_block cb
-                WHERE cb.deleted_at IS NULL AND cb.chosen_variant_id IS NOT NULL
-                  AND (cb.id IN (SELECT value FROM json_each(?))
-                       OR cb.chosen_variant_id IN (
-                            SELECT id FROM variant WHERE block_id IN (SELECT value FROM json_each(?))))
+                WHERE cb.id IN (SELECT value FROM json_each(?))
+                  AND cb.deleted_at IS NULL AND cb.chosen_variant_id IS NOT NULL
+                UNION
+                SELECT cb.id, cb.chosen_variant_id FROM container_block cb
+                WHERE cb.block_id IN (SELECT value FROM json_each(?))
+                  AND cb.deleted_at IS NULL AND cb.chosen_variant_id IS NOT NULL
                 """,
             arguments: [
                 jsonArray(touched.placementIDs), jsonArray(touched.blocksWithVariantChanges),

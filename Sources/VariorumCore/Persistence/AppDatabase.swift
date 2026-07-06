@@ -112,4 +112,23 @@ public struct AppDatabase: Sendable {
             }
         }
     }
+
+    /// The async twin: the sync engine's apply transactions run through this
+    /// so a large pull never parks a cooperative-pool thread on a blocking
+    /// write (Phase 5 review). Same flag discipline as the synchronous form.
+    public func applyingRemote<T: Sendable>(
+        _ updates: @escaping @Sendable (Database) throws -> T
+    ) async throws -> T {
+        try await writer.write { db in
+            try db.execute(sql: "INSERT INTO _sync_applying (applying) VALUES (1)")
+            do {
+                let result = try updates(db)
+                try db.execute(sql: "DELETE FROM _sync_applying")
+                return result
+            } catch {
+                try? db.execute(sql: "DELETE FROM _sync_applying")
+                throw error
+            }
+        }
+    }
 }

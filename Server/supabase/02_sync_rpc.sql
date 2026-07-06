@@ -20,8 +20,17 @@ language sql immutable as $$
   select case when tbl = 'setting' then 'key' else 'id' end;
 $$;
 
+-- SECURITY NOTE (deliberate, Phase 5): these functions perform NO auth
+-- check beyond Supabase's own API-key/JWT gate — the single-user-token
+-- phase trusts any bearer of the token with the whole store. Phase 14
+-- (accounts) adds owner_id scoping + RLS on these same endpoints.
+-- `set search_path` pins name resolution for SECURITY DEFINER (the
+-- standard Postgres hijack hazard Supabase's linter flags).
+
 create or replace function sync_push(batch jsonb) returns jsonb
-language plpgsql security definer as $$
+language plpgsql security definer
+set search_path = public
+as $$
 declare
   allowed constant text[] := array[
     'container', 'block', 'variant', 'commit_point', 'edge',
@@ -98,7 +107,9 @@ $$;
 
 create or replace function sync_pull(since_seq bigint, max_rows int default 500)
 returns jsonb
-language plpgsql security definer as $$
+language plpgsql security definer
+set search_path = public
+as $$
 declare
   allowed constant text[] := array[
     'container', 'block', 'variant', 'commit_point', 'edge',

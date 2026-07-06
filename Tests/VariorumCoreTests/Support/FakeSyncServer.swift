@@ -21,8 +21,8 @@ actor FakeSyncServer: SyncTransport {
 
     // MARK: SyncTransport
 
-    func push(_ batch: [SyncRow]) -> [SyncPushOutcome] {
-        batch.map { incoming in
+    func push(_ batch: [SyncRow]) throws -> [SyncPushOutcome] {
+        try batch.map { incoming in
             let current = tables[incoming.table]?[incoming.rowID]
             let currentVersion = current?.row.syncVersion ?? 0
             guard incoming.syncVersion == currentVersion else {
@@ -33,8 +33,15 @@ actor FakeSyncServer: SyncTransport {
             seq += 1
             var accepted = incoming
             accepted.syncVersion = currentVersion + 1
+            // Wire fidelity (the plan's fake-server-drift risk): real
+            // payloads cross jsonb, which normalizes scalar types
+            // (`.real(0.0)` → `.integer(0)`). Round-trip every accepted row
+            // through JSON so engine flows see the same normalization the
+            // real mirror would produce.
+            let normalized = try JSONDecoder().decode(
+                SyncRow.self, from: JSONEncoder().encode(accepted))
             tables[incoming.table, default: [:]][incoming.rowID] =
-                StoredRow(row: accepted, serverSeq: seq)
+                StoredRow(row: normalized, serverSeq: seq)
             return .accepted(newVersion: accepted.syncVersion, serverSeq: seq)
         }
     }

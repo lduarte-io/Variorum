@@ -82,45 +82,71 @@ public struct SyncEngine: Sendable {
                 Array(batch[$0..<min($0 + batchSize, batch.count)])
             }) {
                 let outcomes = try await transport.push(chunk)
-                try applyingRemoteWithDeferredFKs { db in
+                let processed: ChunkResult = try await applyingRemoteWithDeferredFKs { db in
+                    var result = ChunkResult()
+                    var touched = TouchedRows()
                     for (pushed, outcome) in zip(chunk, outcomes) {
                         switch outcome {
                         case .accepted(let newVersion, let serverSeq):
                             try recordAccepted(
                                 db, pushed: pushed, newVersion: newVersion, serverSeq: serverSeq)
-                            report.accepted += 1
-                            madeProgress = true
+                            result.accepted += 1
                         case .rejected(let current):
                             guard let current else {
                                 // The server has no row for a non-zero base
                                 // (mirror reset): rebase to 0; the next
                                 // iteration re-pushes it as an insert.
                                 try setLocalSyncVersion(db, table: pushed.table, rowID: pushed.rowID, to: 0)
-                                report.rejected += 1
-                                madeProgress = true
+                                result.rejected += 1
+                                continue
+                            }
+                            // Merge against the CURRENT local row, never the
+                            // pre-transport snapshot: an edit landing during
+                            // the network await must be rescued, not
+                            // clobbered-and-unenqueued (Phase 5 review
+                            // BLOCKER — the reject-path twin of
+                            // recordAccepted's content comparison).
+                            guard let table = SyncSchema.table(named: pushed.table),
+                                  let local = try SyncRow.fetch(db, table: table, rowID: pushed.rowID)
+                            else {
+                                // An outbox entry with no row cannot arise in
+                                // production (rows are never physically
+                                // deleted); leave it for the next drain.
+                                result.deferred += 1
                                 continue
                             }
                             if try foreignKeysSatisfiable(db, row: current.row, arriving: [:]) {
-                                var touched = TouchedRows()
                                 try merge(
-                                    db, local: pushed, server: current.row,
+                                    db, local: local, server: current.row,
                                     serverSeq: current.serverSeq, touched: &touched)
-                                try runPostApplyRepairs(db, touched: touched)
-                                report.rejected += 1
-                                madeProgress = true
+                                result.rejected += 1
                             } else {
                                 // Merged row would reference rows this store
                                 // has never seen (straggler): leave the row
                                 // enqueued and untouched; pull first.
-                                report.deferred += 1
+                                result.deferred += 1
                             }
                         }
                     }
+                    // One repair pass per chunk transaction — batch-scoped
+                    // like the pull path.
+                    try runPostApplyRepairs(db, touched: touched)
+                    return result
                 }
+                report.accepted += processed.accepted
+                report.rejected += processed.rejected
+                report.deferred += processed.deferred
+                madeProgress = madeProgress || processed.accepted > 0 || processed.rejected > 0
             }
             guard madeProgress else { break }
         }
         return report
+    }
+
+    private struct ChunkResult: Sendable {
+        var accepted = 0
+        var rejected = 0
+        var deferred = 0
     }
 
     // MARK: - Pull (SyncSpec §5)
@@ -163,33 +189,56 @@ public struct SyncEngine: Sendable {
             pulled.append(contentsOf: window)
             fetchCursor = window.last!.serverSeq
         }
-        var report = PullReport()
-        report.newCursor = since
-        guard !pulled.isEmpty else { return report }
+        var emptyReport = PullReport()
+        emptyReport.newCursor = since
+        guard !pulled.isEmpty else { return emptyReport }
 
-        try applyingRemoteWithDeferredFKs { db in
-            // Straggler guard: rows apply in seq order up to the first row
-            // whose FK closure is satisfiable neither locally nor by any row
-            // in this batch (deferred FKs resolve in-batch forward references
-            // at commit; a truly absent referent would fail the commit and
-            // wedge the pull forever).
-            let arriving = arrivingRowIDs(pulled)
-            var stopIndex = pulled.count
-            for (index, item) in pulled.enumerated() {
-                guard try foreignKeysSatisfiable(db, row: item.row, arriving: arriving) else {
-                    stopIndex = index
-                    break
+        let batch = pulled
+        return try await applyingRemoteWithDeferredFKs { db in
+            var report = PullReport()
+            // Straggler guard, to a FIXPOINT: rows apply in seq order up to
+            // the first row whose FK closure is satisfiable neither locally
+            // nor by a row in the APPLIED PREFIX. Satisfiability against the
+            // full fetched set would let a prefix row lean on a referent
+            // that itself stalls past the stop point — turning the designed
+            // graceful stall into a deferred-FK commit failure and a
+            // whole-batch rollback on every retry (Phase 5 review MAJOR).
+            // The index strictly decreases, so the loop terminates.
+            var stopIndex = batch.count
+            while true {
+                let prefixArriving = arrivingRowIDs(Array(batch[..<stopIndex]))
+                var shrunk = stopIndex
+                for (index, item) in batch[..<stopIndex].enumerated() {
+                    guard try foreignKeysSatisfiable(db, row: item.row, arriving: prefixArriving) else {
+                        shrunk = index
+                        break
+                    }
                 }
+                if shrunk == stopIndex { break }
+                stopIndex = shrunk
             }
 
             var touched = TouchedRows()
-            for item in pulled where item.row.isTombstoned {
+            for item in batch[..<stopIndex] where item.row.isTombstoned {
                 touched.arrivingDeadIDs[item.row.table, default: []].insert(item.row.rowID)
             }
-            for item in pulled[..<stopIndex] {
+            for item in batch[..<stopIndex] {
                 if try isEnqueued(db, table: item.row.table, rowID: item.row.rowID),
                    let table = SyncSchema.table(named: item.row.table),
                    let local = try SyncRow.fetch(db, table: table, rowID: item.row.rowID) {
+                    // Echo/stale guard (Phase 5 review BLOCKER): the
+                    // changefeed replays this device's own accepted rows. A
+                    // dirty local row with `local.syncVersion >=` the
+                    // incoming version holds a PENDING CAS WIN — the next
+                    // push lands it cleanly on top of that very version.
+                    // Merging here would revert the buffer under the
+                    // author's cursor and demote her newer text to a
+                    // spurious 'conflict' card. Same version ⇒ same
+                    // server state we already integrated; nothing to merge.
+                    guard item.row.syncVersion > local.syncVersion else {
+                        try recordSeq(db, table: item.row.table, rowID: item.row.rowID, seq: item.serverSeq)
+                        continue  // stays enqueued; push ships the local intent
+                    }
                     try merge(db, local: local, server: item.row,
                               serverSeq: item.serverSeq, touched: &touched)
                     report.merged += 1
@@ -202,12 +251,12 @@ public struct SyncEngine: Sendable {
                 }
             }
             report.repairs = try runPostApplyRepairs(db, touched: touched) + touched.inlineRepairs
-            let newCursor = stopIndex > 0 ? pulled[stopIndex - 1].serverSeq : since
+            let newCursor = stopIndex > 0 ? batch[stopIndex - 1].serverSeq : since
             try setCursor(db, newCursor)
             report.newCursor = newCursor
-            report.stalled = stopIndex < pulled.count
+            report.stalled = stopIndex < batch.count
+            return report
         }
-        return report
     }
 
     // MARK: - Accept bookkeeping
@@ -245,6 +294,17 @@ public struct SyncEngine: Sendable {
     /// SyncSpec §5, Phase 5 plan risk list).
     func applyingRemoteWithDeferredFKs<T>(_ body: (Database) throws -> T) throws -> T {
         try database.applyingRemote { db in
+            try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+            return try body(db)
+        }
+    }
+
+    /// The async twin the engine's own paths use, so an apply transaction
+    /// never blocks a cooperative-pool thread (Phase 5 review).
+    func applyingRemoteWithDeferredFKs<T: Sendable>(
+        _ body: @escaping @Sendable (Database) throws -> T
+    ) async throws -> T {
+        try await database.applyingRemote { db in
             try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
             return try body(db)
         }

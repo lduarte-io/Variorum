@@ -116,7 +116,7 @@ struct SyncPushTests {
         // Another writer moves the row on the server (base 1 → version 2).
         var competing = await server.currentRow(table: "container", rowID: postID)!
         competing.columns["title"] = .text("competing title")
-        _ = await server.push([competing])
+        _ = try await server.push([competing])
 
         // Local intent: a metadata edit (loses, CAS rebase)…
         try a.with { ops, _ in
@@ -132,7 +132,7 @@ struct SyncPushTests {
         // …and a tombstone (wins over the edit, and pushes through).
         var competing2 = await server.currentRow(table: "container", rowID: postID)!
         competing2.columns["title"] = .text("edited again remotely")
-        _ = await server.push([competing2])
+        _ = try await server.push([competing2])
         try a.with { ops, _ in
             try ops.deleteContainer(postID)
         }
@@ -143,6 +143,51 @@ struct SyncPushTests {
         #expect(serverRow?.isTombstoned == true, "the tombstone overlay re-pushed and stuck")
         #expect(serverRow?.columns["title"] == .text("edited again remotely"),
                 "the server edit's metadata survived under the tombstone")
+    }
+
+    /// The reject-path twin of the clear-vs-re-dirty race (Phase 5 review
+    /// BLOCKER): an edit landing during the network await of a push that
+    /// gets REJECTED must be merged from the CURRENT row — merging the
+    /// stale pre-transport snapshot would overwrite the newer text with the
+    /// server baseline, rescue only the stale text, and clear the outbox
+    /// entry: real, silent text loss.
+    @Test func rejectMidPushEditIsRescuedNotClobbered() async throws {
+        let server = FakeSyncServer()
+        let interfering = InterferingTransport(inner: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: interfering)
+        let variantID: String = try a.with { ops, _ in
+            let post = try ops.createPost(title: "p", profile: nil)
+            return try ops.newBlock(in: post.id, text: "base text", at: .end).variant.id
+        }
+        try await a.push()
+
+        // A competing writer moves the variant on the server…
+        var competing = await server.currentRow(table: "variant", rowID: variantID)!
+        competing.columns["working_text"] = .text("competing text")
+        _ = try await server.push([competing])
+        // …the author edits locally (base is now stale — the push will
+        // reject)…
+        try a.with { ops, _ in
+            try ops.autosave(variantID, text: "local edit before push", charDelta: 5)
+        }
+        // …and edits AGAIN in the reject's network window.
+        await interfering.arm { [db = a.db] in
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE variant SET working_text = 'edit landed mid-push' WHERE id = ?",
+                    arguments: [variantID])
+            }
+        }
+
+        try await a.push()
+        // The server text won the row (S5), and the text rescued into the
+        // conflict card is the MID-PUSH edit — the buffer state that
+        // actually existed at merge time — not the stale snapshot.
+        #expect(try a.db.fetchString(
+            "SELECT working_text FROM variant WHERE id = ?", [variantID]) == "competing text")
+        let rescued = try a.db.fetchString(
+            "SELECT working_text FROM variant WHERE label = 'conflict'")
+        #expect(rescued == "edit landed mid-push", "the mid-push edit must be what survives")
     }
 
     /// A reject whose server row is absent (mirror reset): rebase to 0 and

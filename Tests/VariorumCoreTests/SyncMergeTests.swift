@@ -329,6 +329,23 @@ struct SyncMergeTests {
         }
     }
 
+    @Test func resolveSyncConflictRefusesADeadBlock() throws {
+        // Aligned with the engine's rescue guard (Phase 5 review): a dead
+        // block's fan takes no new cards; the public op refuses loudly.
+        try world { ops, db, blockID, _, v2 in
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE block SET deleted_at = '2026-07-06T09:00:00.000Z' WHERE id = ?",
+                    arguments: [blockID])
+                try db.execute(
+                    sql: "UPDATE variant SET deleted_at = NULL WHERE id = ?", arguments: [v2])
+            }
+            #expect(throws: OperationError.blockNotFound(id: blockID)) {
+                try ops.resolveSyncConflict(v2, losingText: "x")
+            }
+        }
+    }
+
     @Test func resolveSyncConflictRefusesAMissingVariant() throws {
         try world { ops, _, _, _, _ in
             #expect(throws: OperationError.variantNotFound(id: "ghost")) {

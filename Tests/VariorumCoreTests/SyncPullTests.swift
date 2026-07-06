@@ -107,6 +107,76 @@ struct SyncPullTests {
                 "the conflict card must push, or the devices diverge")
     }
 
+    /// The echo guard (Phase 5 review BLOCKER): pulling this device's own
+    /// accepted row while the author has typed past it must NOT merge — the
+    /// incoming version is not newer than what was already integrated, so
+    /// the local edit is a pending CAS win. Merging would revert the buffer
+    /// under her cursor and demote the newer text to a spurious 'conflict'
+    /// card on every push→type→pull cycle.
+    @Test func pullingYourOwnEchoWhileTypingNeitherRevertsNorForksTheBuffer() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let variantID: String = try a.with { ops, _ in
+            let post = try ops.createPost(title: "p", profile: .journal)
+            return try ops.newBlock(in: post.id, text: "pushed text", at: .end).variant.id
+        }
+        try await a.push()
+
+        // The author keeps typing after the push…
+        try a.with { ops, _ in
+            try ops.autosave(variantID, text: "newer text, still typing", charDelta: 8)
+        }
+        // …then a periodic pull replays the device's own accepted rows.
+        try await a.pull()
+
+        #expect(try a.db.fetchString(
+            "SELECT working_text FROM variant WHERE id = ?", [variantID])
+            == "newer text, still typing", "the buffer must not revert under the cursor")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM variant WHERE label = 'conflict'") == 0,
+            "no conflict existed — no card")
+        #expect(try a.outboxContains("variant", variantID), "the edit still ships")
+
+        // And the next push lands it cleanly on top of the same version.
+        try await a.push()
+        #expect(try a.outboxCount() == 0)
+        let serverText = await server.currentRow(table: "variant", rowID: variantID)?.workingText
+        #expect(serverText == "newer text, still typing")
+    }
+
+    /// The straggler guard runs to a FIXPOINT (Phase 5 review MAJOR): a
+    /// prefix row whose referent arrives at/after the stop point must ALSO
+    /// stall — otherwise the deferred-FK commit fails and every retry
+    /// rolls the whole batch back instead of stalling gracefully.
+    @Test func prefixRowLeaningOnAPostStopReferentStallsInsteadOfFailing() async throws {
+        let scripted = ScriptedTransport(rows: [
+            // b1 leans on v1, which arrives AFTER b2 — and b2 leans on a
+            // variant the server has never seen.
+            SyncPulledRow(row: TestRows.block(id: "b1", defaultVariant: "v1"), serverSeq: 1),
+            SyncPulledRow(row: TestRows.block(id: "b2", defaultVariant: "v-never-pushed"), serverSeq: 2),
+            SyncPulledRow(row: TestRows.variant(id: "v1", block: "b1", text: "hi"), serverSeq: 3),
+        ])
+        let b = try SyncClient(name: "B", prefix: "BB", transport: scripted)
+        let first = try await b.pull()  // must not throw
+        #expect(first.stalled == true)
+        #expect(first.applied == 0, "b1's referent sits past the stop — the whole prefix shrinks")
+        let heldCursor = try b.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'last_server_seq'")
+        #expect(heldCursor == nil || heldCursor == "0", "cursor holds at its origin")
+
+        // The owing device finally ships the missing variant: everything
+        // applies in one healed batch.
+        await scripted.append([
+            SyncPulledRow(row: TestRows.variant(id: "v-never-pushed", block: "b2", text: "late"), serverSeq: 4)
+        ])
+        let second = try await b.pull()
+        #expect(second.stalled == false)
+        #expect(second.applied == 4)
+        #expect(try b.db.fetchInt("SELECT COUNT(*) FROM block") == 2)
+        #expect(try b.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'last_server_seq'") == "4")
+    }
+
     // MARK: - Atomicity: one transaction, cursor inside it
 
     @Test func aFailingRowRollsBackTheWholeBatchAndTheCursor() async throws {

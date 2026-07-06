@@ -20,6 +20,13 @@ extension Operations {
     public func resolveSyncConflict(_ variantID: String, losingText: String) throws -> Variant {
         try database.write { db in
             let conflicted = try liveVariant(db, variantID)
+            // Align with the engine's rescue path (Merge.rescueLosingText):
+            // a dead block's fan takes no new cards — a live variant under a
+            // tombstoned block is a transitional sync state, and a live
+            // conflict variant there would dangle (Phase 5 review). The
+            // public operation refuses loudly where the engine skips
+            // silently.
+            _ = try liveBlock(db, conflicted.blockId)
             return try Operations.insertConflictVariant(
                 db,
                 blockID: conflicted.blockId,
