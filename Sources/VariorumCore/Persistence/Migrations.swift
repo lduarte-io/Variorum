@@ -25,6 +25,23 @@ extension AppDatabase {
             try db.execute(
                 sql: "CREATE INDEX idx_block_last_container ON block(last_container_id)")
         }
+        // Author decision 2026-07-06 (Phase 4 ratification review): the
+        // three container stamp indexes upgrade to composite live-row form.
+        // The timeline's keyset seek is a row-value comparison on
+        // `(stamp, id)`; the single-column originals made the id tiebreak
+        // and the tombstone filter residual work that grew with
+        // duplicate-stamp runs. Same index count, same write cost, precise
+        // seeks. ("Why would we not do this now? we don't have sync yet.")
+        migrator.registerMigration("v1_2_composite_stamp_indexes") { db in
+            try db.execute(sql: """
+                DROP INDEX idx_container_entry_date;
+                DROP INDEX idx_container_major_rev;
+                DROP INDEX idx_container_touched;
+                CREATE INDEX idx_container_entry_date ON container(entry_date, id) WHERE deleted_at IS NULL;
+                CREATE INDEX idx_container_major_rev  ON container(last_major_revision_at, id) WHERE deleted_at IS NULL;
+                CREATE INDEX idx_container_touched    ON container(last_touched_at, id) WHERE deleted_at IS NULL;
+                """)
+        }
         return migrator
     }
 }

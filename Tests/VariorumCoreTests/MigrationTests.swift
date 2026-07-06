@@ -51,6 +51,27 @@ struct MigrationTests {
         #expect(indexes == Self.expectedIndexes)
     }
 
+    @Test func stampIndexesAreCompositeLiveRow() throws {
+        // v1_2 (author decision 2026-07-06): the keyset sort key is
+        // `(stamp, id)` over live rows — the indexes must match it exactly.
+        let db = try AppDatabase.inMemory()
+        let expected: [(name: String, column: String)] = [
+            ("idx_container_entry_date", "entry_date"),
+            ("idx_container_major_rev", "last_major_revision_at"),
+            ("idx_container_touched", "last_touched_at"),
+        ]
+        try db.read { db in
+            for (name, column) in expected {
+                let sql = try String.fetchOne(
+                    db,
+                    sql: "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = ?",
+                    arguments: [name]) ?? ""
+                #expect(sql.contains("(\(column), id)"), "\(name) is not composite on (\(column), id)")
+                #expect(sql.contains("WHERE deleted_at IS NULL"), "\(name) is not live-row partial")
+            }
+        }
+    }
+
     @Test func liveUniqueIndexesArePartial() throws {
         let db = try AppDatabase.inMemory()
         let partialUniques = try db.read { db in

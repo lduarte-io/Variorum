@@ -81,6 +81,7 @@ CREATE TABLE block (
   FOREIGN KEY (default_variant_id) REFERENCES variant(id) ON DELETE SET NULL,
   FOREIGN KEY (last_container_id)  REFERENCES container(id) ON DELETE SET NULL
 );
+CREATE INDEX idx_block_last_container ON block(last_container_id);  -- the tray's access path (ratified 2026-07-06)
 ```
 
 ### variant — the fan
@@ -162,9 +163,13 @@ CREATE TABLE container (
   deleted_at             TEXT
 );
 CREATE INDEX idx_container_kind       ON container(kind);
-CREATE INDEX idx_container_entry_date ON container(entry_date);
-CREATE INDEX idx_container_major_rev  ON container(last_major_revision_at);
-CREATE INDEX idx_container_touched    ON container(last_touched_at);
+-- Stamp indexes are composite live-row (author decision 2026-07-06, Phase 4
+-- ratification): the timeline's keyset sort key is (stamp, id) over live
+-- rows, and the indexes match it exactly — precise row-value seeks, no
+-- residual work on duplicate-stamp runs.
+CREATE INDEX idx_container_entry_date ON container(entry_date, id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_container_major_rev  ON container(last_major_revision_at, id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_container_touched    ON container(last_touched_at, id) WHERE deleted_at IS NULL;
 ```
 > Posts and pools share one table so one live-unique index on `container_block.block_id` enforces single ownership (I2) uniformly, and "scrap" and "finished prose" are one object type. Pool rows leave post-specific columns NULL.
 
