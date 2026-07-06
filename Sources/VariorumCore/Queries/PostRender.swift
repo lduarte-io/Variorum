@@ -38,6 +38,22 @@ extension Queries {
 
         public var isGap: Bool { variantID == nil }
         public var hasFan: Bool { activeVariantCount > 1 }
+
+        /// Public so view layers and tests can build projections directly
+        /// (the editor's pure mapping functions take these as input).
+        public init(
+            blockID: String, placementID: String, position: String,
+            variantID: String?, text: String?,
+            activeVariantCount: Int, variantLocked: Bool
+        ) {
+            self.blockID = blockID
+            self.placementID = placementID
+            self.position = position
+            self.variantID = variantID
+            self.text = text
+            self.activeVariantCount = activeVariantCount
+            self.variantLocked = variantLocked
+        }
     }
 
     /// Renders a container: walk the live pointer list by `(position, id)`,

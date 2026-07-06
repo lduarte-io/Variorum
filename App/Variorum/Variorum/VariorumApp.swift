@@ -13,6 +13,7 @@ import VariorumCore
 
 @main
 struct VariorumApp: App {
+    @NSApplicationDelegateAdaptor(VariorumAppDelegate.self) private var appDelegate
     @State private var bootstrap = AppBootstrap()
 
     var body: some Scene {
@@ -20,9 +21,13 @@ struct VariorumApp: App {
             switch bootstrap.state {
             case .ready(let session):
                 RootView(session: session)
+                    .onAppear { appDelegate.session = session }
             case .failed(let error):
                 StoreFailureView(error: error) { bootstrap.retry() }
             }
+        }
+        .commands {
+            EditorCommands(bootstrap: bootstrap)
         }
     }
 }
