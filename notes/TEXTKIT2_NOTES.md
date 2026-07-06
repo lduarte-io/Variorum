@@ -4,9 +4,11 @@ A build-companion reference for the native writing app. Organized around *this* 
 architecture (per-block editor, viewport perf invariant, variant/diff highlighting),
 not as a generic bug dump. The goal: hit each of these already knowing it's coming.
 
-**Dev context this doc assumes:** building against the macOS 26 SDK (Xcode 26) on the
-Intel Air running Sequoia, with final acceptance testing on the M3 running Tahoe. The
-gap between "runs on Sequoia" and "runs on Tahoe" is the whole reason this file exists.
+**Dev context (re-baselined 2026-07-06):** development and acceptance are one machine —
+the author's M3 running Tahoe, building against the macOS 26 SDK (Xcode 26). The original
+Sequoia-vs-Tahoe two-machine gap is gone; the gap that remains is **point releases** —
+TK2 behavior shifts between Tahoe updates, so everything below about per-version
+verification still stands, applied to macOS updates on this one machine.
 
 ---
 
@@ -157,9 +159,10 @@ mostly documented in the STTextView Apple-bug list — reword/re-verify per OS v
    marks (already your plan) so you never need a custom `NSTextElement`.
 5. **Keep decorations off the live editor** where you can: highlight/diff on the read-only
    render tier; the live `NSTextView` should carry as little custom rendering as possible.
-6. **Guard the deployment target**: keep it at Sequoia-or-lower so the app still launches on
-   the Intel Air, but understand the SDK you *build* against (26) changes runtime behavior —
-   so the Air can never be your final word on editor correctness.
+6. **Deployment target is macOS 26** (author decision 2026-07-06, no older-OS support):
+   build SDK, deployment target, and the machine you run on all match, so SDK-gated
+   behaviors (like the `.layoutManager` downgrade) are always live in what you test —
+   nothing hides until a customer's OS reveals it.
 
 ---
 
@@ -169,11 +172,10 @@ Because behavior is version-gated, validate the editor core against, at minimum:
 
 | OS | Where | What it proves |
 |----|-------|----------------|
-| Sequoia 15.x (Air, dev) | build + iterate | logic, storage, operations; fast inner loop |
-| Tahoe 26.x (M3, acceptance) | run the real app | fallback behavior, viewport perf, Liquid Glass |
-| Tahoe latest point release | M3 | catches regressions introduced mid-cycle |
+| Tahoe, current install (M3 — dev = acceptance) | build + iterate + run the real app | everything: logic, fallback behavior, viewport perf, Liquid Glass |
+| Tahoe, after each point-release update | same M3, re-run the milestone checks | catches TK2 regressions introduced mid-cycle — never trust a pre-update result |
 
-For each editor milestone, re-run on Tahoe specifically: (a) does it ever silently drop to
+For each editor milestone (and after each macOS update), re-run: (a) does it ever silently drop to
 TK1 (canary), (b) does scroll-to-location + height stay stable on a 50k-word post, (c) do
 live highlights draw and update, (d) do split/merge selections resolve correctly at boundaries.
 

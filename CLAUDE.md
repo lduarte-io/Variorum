@@ -68,7 +68,7 @@ This is the workflow — keep it.
 - Operations get exact state-transition tests (rows read/written); view models get focused coverage for core flows and edge cases.
 - UI-only changes may be untested early; domain logic may not.
 - Tests run at the **END** of a step/phase — **never run the full suite at the start of a session.** The previous phase's recorded closeout result is the baseline.
-- Editor milestones additionally re-verify on the M3/Tahoe machine per the matrix in @notes/TEXTKIT2_NOTES.md §5.
+- Editor milestones additionally re-verify against the current Tahoe point release per the matrix in @notes/TEXTKIT2_NOTES.md §5 (TK2 behavior shifts between point releases).
 
 ## Product behavior guardrails
 
@@ -114,12 +114,6 @@ variorum/
 ## Commands
 
 ```bash
-# Note (SPECIFIC TO THE INTEL AIR — does not apply on the M3): xcode-select there
-# must point at Xcode.app (fixed 2026-07-04; was CommandLineTools, whose SDK can't
-# compile this manifest). If builds fail that way again on the Air:
-#   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-# On the M3, if swift build works out of the box, ignore this entirely.
-
 # Core package — the fast inner loop (no Xcode project needed)
 swift build
 swift test
@@ -133,7 +127,7 @@ xcodebuild clean -scheme Variorum
 
 ## Environment notes
 
-- **Dev machine (this one): Intel MacBook Air, macOS Sequoia 15.6 — cannot run Tahoe.** Acceptance testing happens on the author's M3 (Tahoe), which shares this repo. Ask the author to run/report anything Tahoe-specific.
-- **Author decision 2026-07-06: development transitions to the M3/Tahoe Mac before Phase 6.** From then on the Air-era constraints (dev/acceptance split, Air-motivated deployment target, Xcode-26-on-Intel) are moot; the Phase 6 plan re-baselines these notes.
-- Editor-phase builds must use the **macOS 26 SDK** (Xcode 26 — runs on this Intel Air; universal binary). Deployment target stays **macOS 15** so the app runs on this machine.
-- If the author's help is needed (Xcode project creation, signing, a Tahoe test run, an error readout), pause and ask rather than working around it.
+- **Dev machine (this one): the author's M3 Mac on macOS Tahoe 26.x with Xcode 26 — development and acceptance are one machine.** The Intel Air era ended 2026-07-06 (transition executed ahead of the planned before-Phase-6 date); all Air-era constraints (dev/acceptance machine split, Air-motivated deployment target, Xcode-26-on-Intel) are permanently moot.
+- **Deployment targets: macOS 26 / iOS 26** (author decision 2026-07-06: no older-OS support). Build SDK and runtime OS now match, so no availability-gating for Tahoe APIs.
+- TextKit 2 behavior remains version- and point-release-gated: re-verify editor milestones after each macOS point update per the matrix in @notes/TEXTKIT2_NOTES.md §5.
+- If the author's help is needed (Xcode GUI steps, signing, Supabase setup, a device test, an adjudication call), pause and ask rather than working around it.

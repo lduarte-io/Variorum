@@ -5,7 +5,6 @@ Deliberately-deferred work only. **Rule: no entry without naming the phase that 
 | Item | What & why deferred | Owning phase |
 |------|--------------------|--------------|
 | TK2 viewport viability decision | Whether book-scrub/infinite-scroll can trust live TK2 geometry on Tahoe, or must use stored per-block length estimates, or STTextView. Facts unknowable until tried on the M3. | 6 (TK2 spike) |
-| Xcode 26 install + dev-machine transition | **Author decision 2026-07-06: development moves to the M3/Tahoe Mac before Phase 6** — Xcode 26 is then needed on the M3 only, and the Air-era assumptions (dev/acceptance machine split, Air-motivated macOS 15 deployment target, TEXTKIT2_NOTES §0 dev context, AppSpec §1, CLAUDE.md environment notes) must be re-baselined in the Phase 6 plan. Author action (Apple ID / download). | 6 (TK2 spike) — hard prerequisite |
 | Supabase project setup | Server project, mirrored schema, seq/CAS functions, auth token. Author assists (account, dashboard). | 5 (Sync core) |
 | Sync auth hardening | Phase 5 ships a single-user token; real auth/key rotation arrives with accounts. | 14 (Accounts) |
 | Cross-block re-bracketing | Selecting a span across existing block boundaries → "make this a block" requires splitting touched blocks (each possibly fanned) and reconciling. v1 ships clean-inside-one-block / whole-block cases; messy cross-fan re-bracketing deferred. | 9 (Structural ops in editor) — partial; re-own at 9's closeout if still deferred |
