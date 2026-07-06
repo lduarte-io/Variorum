@@ -114,9 +114,11 @@ variorum/
 ## Commands
 
 ```bash
-# Note: xcode-select must point at Xcode.app (fixed 2026-07-04; was CommandLineTools,
-# whose SDK can't compile this manifest). If builds fail that way again:
+# Note (SPECIFIC TO THE INTEL AIR — does not apply on the M3): xcode-select there
+# must point at Xcode.app (fixed 2026-07-04; was CommandLineTools, whose SDK can't
+# compile this manifest). If builds fail that way again on the Air:
 #   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+# On the M3, if swift build works out of the box, ignore this entirely.
 
 # Core package — the fast inner loop (no Xcode project needed)
 swift build
