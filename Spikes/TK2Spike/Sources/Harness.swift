@@ -12,15 +12,21 @@ final class Harness {
     let textView: NSTextView
     private(set) var loadMS: Double = 0
 
-    var tlm: NSTextLayoutManager { textView.textLayoutManager! }
-    var contentManager: NSTextContentManager { tlm.textContentManager! }
-    var viewport: NSTextViewportLayoutController { tlm.textViewportLayoutController }
+    // Geometry accessors are tk2Alive-guarded (cold review 2026-07-06, MINOR 1): after a
+    // real TK1 fallback `textLayoutManager` goes nil, and the record-and-continue canary
+    // posture only holds if geometry probes degrade (skip/sentinel) instead of crashing —
+    // a future point-release re-run must still produce a COMPLETE trigger inventory.
+    var tlm: NSTextLayoutManager? { textView.textLayoutManager }
+    var contentManager: NSTextContentManager? { tlm?.textContentManager }
+    var viewport: NSTextViewportLayoutController? { tlm?.textViewportLayoutController }
 
     var tk2Alive: Bool { textView.textLayoutManager != nil }
     var clipTop: CGFloat { scrollView.contentView.bounds.origin.y }
     var viewportHeight: CGFloat { scrollView.contentView.bounds.height }
     var docHeight: CGFloat { textView.frame.height }
-    var usageHeight: CGFloat { tlm.usageBoundsForTextContainer.height }
+    /// -1 sentinel when TK2 is dead (a fallback run's numbers are headline-invalid anyway;
+    /// the job is completing the inventory without crashing).
+    var usageHeight: CGFloat { tlm?.usageBoundsForTextContainer.height ?? -1 }
     var maxScroll: CGFloat { max(0, docHeight - viewportHeight) }
 
     init(corpus: NSAttributedString, size: NSSize = NSSize(width: 900, height: 600), title: String) {
@@ -86,9 +92,9 @@ final class Harness {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
 
-    /// Explicit viewport layout pass (idempotent when already laid out).
+    /// Explicit viewport layout pass (idempotent when already laid out; no-op if TK2 died).
     func layoutViewport() {
-        viewport.layoutViewport()
+        viewport?.layoutViewport()
     }
 
     /// Pump until the height estimate + scroll position go quiet (or timeout).
@@ -138,17 +144,21 @@ final class Harness {
     // MARK: - Locations / fragments
 
     func location(atOffset offset: Int) -> NSTextLocation? {
-        contentManager.location(contentManager.documentRange.location, offsetBy: offset)
+        guard let cm = contentManager else { return nil }
+        return cm.location(cm.documentRange.location, offsetBy: offset)
     }
 
+    /// -1 sentinel when TK2 is dead.
     func offset(of location: NSTextLocation) -> Int {
-        contentManager.offset(from: contentManager.documentRange.location, to: location)
+        guard let cm = contentManager else { return -1 }
+        return cm.offset(from: cm.documentRange.location, to: location)
     }
 
     /// First layout fragment at/after the given character offset.
     /// `ensuringLayout` forces layout of just that fragment (bounded work).
+    /// nil if TK2 died — callers record a skip, never crash.
     func firstFragment(fromOffset offset: Int, ensuringLayout: Bool) -> NSTextLayoutFragment? {
-        guard let loc = location(atOffset: offset) else { return nil }
+        guard let tlm, let loc = location(atOffset: offset) else { return nil }
         var found: NSTextLayoutFragment?
         let options: NSTextLayoutFragment.EnumerationOptions = ensuringLayout ? [.ensuresLayout] : []
         tlm.enumerateTextLayoutFragments(from: loc, options: options) { fragment in
@@ -158,10 +168,11 @@ final class Harness {
         return found
     }
 
-    /// Character offset of the fragment at the top edge of the viewport (nil if no layout there).
+    /// Character offset of the fragment at the top edge of the viewport
+    /// (nil if no layout there or TK2 dead).
     func offsetAtViewportTop() -> Int? {
         let point = CGPoint(x: 4, y: clipTop + 1)
-        guard let fragment = tlm.textLayoutFragment(for: point) else { return nil }
+        guard let fragment = tlm?.textLayoutFragment(for: point) else { return nil }
         return offset(of: fragment.rangeInElement.location)
     }
 

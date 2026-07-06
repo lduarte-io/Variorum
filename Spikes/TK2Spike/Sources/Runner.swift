@@ -121,7 +121,7 @@ final class Runner {
         var firstLayoutMS: Double = -1
         while nowMS() - t0 < 2_000 {
             h.pump(0.01)
-            if h.viewport.viewportRange != nil { firstLayoutMS = nowMS() - t0; break }
+            if h.viewport?.viewportRange != nil { firstLayoutMS = nowMS() - t0; break }
         }
         rec2(S, "timeToFirstViewportLayout", fmt(firstLayoutMS), "ms")
         rec2(S, "initialUsageHeightEstimate", fmt(Double(h.usageHeight)), "px")
@@ -142,7 +142,10 @@ final class Runner {
         defer { h.close() }
         h.settle(timeout: 1.0)
         var exercised: [String] = []
-        let ts = h.textView.textContentStorage!.textStorage!
+        guard let ts = h.textView.textContentStorage?.textStorage else {
+            rec2(S, "SKIPPED", "textContentStorage unavailable", note: "TK2 DEAD at scenario start")
+            return
+        }
 
         func check(_ label: String, _ body: () -> Void) {
             withAction(S, label, body)
@@ -185,12 +188,16 @@ final class Runner {
 
         // 3. Rendering attributes on visible ranges (the §3 fragile path).
         check("attributeUpdate.rendering") {
+            guard let tlm = h.tlm else {
+                self.rec2(S, "attributeUpdate.rendering", "SKIPPED", note: "TK2 DEAD — geometry probes skipped")
+                return
+            }
             let base = h.offsetAtViewportTop() ?? 0
             for i in 0..<3 {
                 guard let range = h.textRange(offset: base + i * 120, length: 80) else { continue }
-                h.tlm.setRenderingAttributes([.foregroundColor: NSColor.systemRed], for: range)
+                tlm.setRenderingAttributes([.foregroundColor: NSColor.systemRed], for: range)
                 h.pump(0.02)
-                h.tlm.invalidateRenderingAttributes(for: range)
+                tlm.invalidateRenderingAttributes(for: range)
                 h.pump(0.02)
             }
         }
@@ -404,16 +411,20 @@ final class Runner {
                 autoreleasepool {
                     let h = Harness(corpus: corpus.attributed, title: "B \(Int(fraction * 100))%")
                     h.settle(timeout: 0.5)
-                    guard let loc = h.location(atOffset: targetStart) else { return }
+                    guard let vp = h.viewport, let loc = h.location(atOffset: targetStart) else {
+                        bNotes.append("SKIPPED — TK2 DEAD, geometry probes skipped")
+                        h.close()
+                        return
+                    }
                     let clipBefore = h.clipTop
                     let t0 = nowMS()
-                    h.viewport.relocateViewport(to: loc)
+                    vp.relocateViewport(to: loc)
                     let callMS = nowMS() - t0
-                    let vpImmediate = h.viewport.viewportRange.map { corpus.paragraphIndex(forOffset: h.offset(of: $0.location)) }
+                    let vpImmediate = vp.viewportRange.map { corpus.paragraphIndex(forOffset: h.offset(of: $0.location)) }
                     let clipMoved = Double(h.clipTop - clipBefore)
                     h.pump(0.15)
                     h.layoutViewport()
-                    let vpAfterPump = h.viewport.viewportRange.map { corpus.paragraphIndex(forOffset: h.offset(of: $0.location)) }
+                    let vpAfterPump = vp.viewportRange.map { corpus.paragraphIndex(forOffset: h.offset(of: $0.location)) }
                     let topByPoint = h.offsetAtViewportTop().map { corpus.paragraphIndex(forOffset: $0) }
                     bNotes.append(
                         "call=\(fmt(callMS))ms vpTop(immediate)=\(vpImmediate.map(String.init) ?? "nil") "
@@ -499,7 +510,11 @@ final class Runner {
             [("start", corpus.paragraphStarts[1] + 10), ("middle", length / 2), ("end", length - 2)]
         }
 
-        let len0 = h.textView.textContentStorage!.textStorage!.length
+        guard let ts = h.textView.textContentStorage?.textStorage else {
+            rec2(S, "SKIPPED", "textContentStorage unavailable", note: "TK2 DEAD at scenario start")
+            return
+        }
+        let len0 = ts.length
         for (name, off) in positions(len0) {
             let scrollMS = placeCaret(h, at: off)
             rec2(S, "caretPlacement@\(name) (scrollRangeToVisible+settle)", fmt(scrollMS), "ms")
@@ -509,7 +524,7 @@ final class Runner {
 
         // Large paste mid-document, then re-measure.
         let chunk = Corpus.build(seed: 0xBEEF_CAFE, targetWords: 5_000)
-        let lenBefore = h.textView.textContentStorage!.textStorage!.length
+        let lenBefore = ts.length
         _ = placeCaret(h, at: lenBefore / 2)
         let t0 = nowMS()
         h.textView.insertText(chunk.attributed, replacementRange: NSRange(location: NSNotFound, length: 0))
@@ -517,7 +532,7 @@ final class Runner {
         let s = h.settle(timeout: 2.0)
         rec2(S, "paste.settle", "\(fmt(s.ms)) ms, \(s.revisions) revisions")
 
-        let len1 = h.textView.textContentStorage!.textStorage!.length
+        let len1 = ts.length
         for (name, off) in positions(len1) {
             _ = placeCaret(h, at: off)
             let times = typeBurst(h, count: 120)
@@ -555,8 +570,13 @@ final class Runner {
         autoreleasepool {
             let h = Harness(corpus: big.attributed, title: "scale ensureLayout")
             h.settle(timeout: 0.5)
+            guard let tlm = h.tlm, let cm = h.contentManager else {
+                rec2(S, "ensureLayout(documentRange) 200k", "SKIPPED", note: "TK2 DEAD — geometry probes skipped")
+                h.close()
+                return
+            }
             let t0 = nowMS()
-            h.tlm.ensureLayout(for: h.contentManager.documentRange)
+            tlm.ensureLayout(for: cm.documentRange)
             rec2(S, "ensureLayout(documentRange) 200k", fmt(nowMS() - t0), "ms",
                  note: "grows with document size — the path P1 bans")
             rec2(S, "trueHeight 200k", fmt(Double(h.usageHeight)), "px")
@@ -572,8 +592,12 @@ final class Runner {
         defer { h.close() }
         h.settle(timeout: 0.5)
         rec2(S, "estimateBeforeEnsure", fmt(Double(h.usageHeight)), "px")
+        guard let tlm = h.tlm, let cm = h.contentManager else {
+            rec2(S, "ensureLayout(documentRange)", "SKIPPED", note: "TK2 DEAD — geometry probes skipped")
+            return
+        }
         let t0 = nowMS()
-        h.tlm.ensureLayout(for: h.contentManager.documentRange)
+        tlm.ensureLayout(for: cm.documentRange)
         let ms = nowMS() - t0
         rec2(S, "ensureLayout(documentRange)", fmt(ms), "ms",
              note: "the cost P1 bans from ever being on a user path")
