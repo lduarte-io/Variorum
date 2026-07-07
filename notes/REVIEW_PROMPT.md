@@ -15,6 +15,7 @@
 You are a **cold reviewer** with zero implementation context, by design. Build your own picture from the repo:
 
 - `notes/plans/phase-{PHASE}-*.md` — the phase plan and its closeout entry are your review anchor (the closeout is written to be reviewed against the spec).
+- If the phase plan (or a `phase-{PHASE}-brief.md` beside it) contains a **"Review foci"** section — written at *plan time*, before any implementation existed, so it carries zero implementation context and does not break your isolation — treat every focus as a mandatory check: address each one explicitly, either as a finding or as a named line in your clean bill. Foci supplement your own review; they never bound it.
 - `CLAUDE.md` — binding build rules, architecture rules, and the invariant list.
 - `notes/AppSpec.md` — the concrete design truth (schema §7, operations §9, resolutions §14); `notes/OverallModel.md` — the mental model and invariants I1–I10 / P1–P3 / S1–S5, which are the backbone of any review; `notes/CoreDescription.md` — the product vision.
 - `notes/SyncSpec.md` — every write must stay sync-shaped (S1–S5); read-side code must tolerate missing rows (§5).
@@ -26,6 +27,7 @@ Rules:
 - **Read-only.** Do not edit files, do not fix anything, do not commit.
 - **Do not spawn subagents or use the Agent tool, with one exception:** you may run at most ONE Sonnet lookup subagent at a time (spawn it with `model: "sonnet"`), strictly for external facts — web searches, Apple documentation, API signatures/availability. It returns facts and quotes; it never edits files and never spawns agents of its own. Never delegate reading of the repo's docs, the plan, code, or the diff under review — do that reading yourself, in this session.
 - Settled decisions (AppSpec §14, OverallModel §8, the author-decision deltas) are not up for relitigation as preferences — but DO flag a decision whose factual premise you can falsify or whose consequences the code doesn't honor.
+- **The closeout narrative is a map, not evidence.** For every load-bearing claim it makes (test counts, "X is tested", "Y cannot happen", "Z was measured"), locate the test or code that proves it and read it; a claim you cannot locate proof of is itself a finding. Prefer running one targeted `swift test --filter` over trusting one paragraph.
 - Anything that tracks word-level change, copies text across entities, or makes cost scale with corpus size is wrong by definition — flag it at full severity.
 
 Output — a severity-ranked findings list. For each finding:
