@@ -337,18 +337,26 @@ performance contract.
 
 **Test results (the Phase 9b/10 baselines once the review ladder closes):**
 core `swift test` = **430 green in 51 suites** (baseline 423/50; the 51st suite is the
-structural-session sync convergence); Mac app `xcodebuild test` = **196 green in 32
+structural-session sync convergence); Mac app `xcodebuild test` = **199 green in 33
 suites** (baseline 101/17 — the additions are the 48-test planner suite, the gesture/door
 suites, CutPropagation, the W ceremony suite, drops + refusal sweep, the windowed
-structural smoke, and the 3-seed soak); iOS `VariorumMobile` = **11 green in 4 suites**
-on the iOS 26.2 simulator (unchanged; the shared-shell addition `UndoMenuState` compiles
-into both targets). Release-configuration build green. TK1 grep audit clean before every
-commit (hits remain the known `textLayoutManager` locals and comments).
+structural smoke, the 3-seed soak, and the differential-apply pins + dual-path latency
+measurements); iOS `VariorumMobile` = **11 green in 4 suites** on the iOS 26.2 simulator
+(unchanged; the shared-shell addition `UndoMenuState` compiles into both targets).
+Release-configuration build green. TK1 grep audit clean before every commit (hits remain
+the known `textLayoutManager` locals and comments).
 
-**Process note:** the coordinator installed a mid-phase gate after Steps 1–3
+**Process notes:** (1) the coordinator installed a mid-phase gate after Steps 1–3
 (implement → report → gate review → release). The gate PASSED with two non-blocking
 observations, both taken: QUESTIONS.md re-ordered chronologically, and merge's
-selection-touch semantics refined + pinned (see the merge reading below).
+selection-touch semantics refined + pinned (see the merge reading below). (2) A
+mid-phase author QUESTIONS walk (2026-07-07, with the coordinator) ANSWERED #8 by
+directive — the full-re-render PROVISIONAL was superseded and the **differential
+structural rewrite** was built this phase (scope in the banner note above); the walk also
+ratified Phase 8's #3 (Keychain paste-in) and closed #6 (the A5 SQL, deployed by the
+author), ratified the 9b graduated-entry policy in its brief, and bundled the pending
+Phase 7 §5 feel pass with this phase's gesture feel pass into ONE sitting at the
+checkpoint (the eventual handoff carries the combined checklist).
 
 **Commits (in order):** `55ea067` (Step 1 op wiring: newBlock stamps + churns — QUESTIONS
 #5(a)), `53c48f4` (Step 1: StructuralGesturePlanner + 48-test suite), `8d383e7` (core:
@@ -357,8 +365,10 @@ rewrite door + divide/extract gestures + labels), `2e6d1cb` (QUESTIONS #8 logged
 `22b0edf` (Step 4 core: compound undo entries), `57473b9` (Steps 4–5 app: Make Block +
 Merge + the pinned merge semantics), the Step 6 commit (W ceremony: CutPropagation +
 DivideWSheet + ceremony flow), `b4971f8` (Step 7: drops + refusal sweep), the Step 8
-commit (soak + sync convergence + windowed checks), and the self-review hardening commit
-(soak non-vacuity). Nothing pushed.
+commit (soak + sync convergence + windowed checks), the self-review hardening commit
+(soak non-vacuity), the mid-phase recordings commit (QUESTIONS #3/#6/#8, the 9b brief
+stamp, the handoff ticks, the banner note), and the differential-rewrite commit (below).
+Nothing pushed.
 
 **What shipped, per step:**
 
@@ -476,7 +486,37 @@ commit (soak + sync convergence + windowed checks), and the self-review hardenin
   ratified specifics (cross-block names divide-then-merge; fanned-middle points at the
   W's door; extract's middle-span refusal points at Make Block; merge names the binary
   rule).
-- **Step 8 — verification.** (i) Full suites, three targets, counts above; Release build
+- **The differential structural rewrite (author directive, mid-phase — supersedes the
+  full-re-render PROVISIONAL; see the banner note).** `applyStructuralResult` now holds
+  TWO strategies behind the same one door: every everyday gesture (divide, extract,
+  makeBlock, merge) applies **differentially** — the op's `StructuralOutcome` carries a
+  `StructuralSeam` (which entry changed and which fresh block IDs must appear there,
+  taken from the op's returned rows — never from diffing, OverallModel §8), and the
+  applier derives ONE minimal storage edit from the seam + the fresh store texts,
+  leaning on the ops' proven seam semantics (a divide's first half is a strict PREFIX of
+  the old text, an extract's remainder a strict prefix/suffix, a merge's halves
+  verbatim): divide/extract/makeBlock replace only the seam region (separator + the
+  minted text), merge's text edit is the ONE separator character (the join), plus
+  attribute re-bracketing where identity changed (merge re-brackets the merged range to
+  A'; makeBlock re-brackets the untouched suffix text to the fresh suffix block). The
+  index/slots adopt the fresh store projection (a value rebuild, no surface cost — the
+  store leads); untouched text never moves and NO scroll-restore step exists on this
+  path. **W-ceremony confirm keeps `seam: nil` → full re-render — the permanent shape
+  for ceremonial acts** (structural undo reaches the surface via the observation →
+  `renderFull`, full by construction). Text-undo clears on BOTH strategies (the
+  directive: stale-offset replays don't care which strategy rewrote). A **shape guard**
+  precedes every differential apply (the fresh projection must match the seam's expected
+  block IDs and arithmetic — a concurrent sync apply between op and fetch falls back to
+  the full path, which is truth). The **DEBUG oracle** (`verifyDifferentialOracle`)
+  compares the surface against the fresh projection after every differential apply —
+  counts misses (test-visible `differentialOracleMisses`), asserts in debug, heals via
+  `renderFull`; the soak asserts ZERO misses across every seed/action. Pins: the
+  spy-on-storage-edits test proves everyday gestures edit ONLY the seam region (< ¼ of
+  the document on a 30-block post) while the SAME spy sees the W confirm's full rewrite
+  at document scale — so a regression to full re-render on the everyday gestures cannot
+  hide (the discriminator makes the minimality assertion non-hollow).
+- **Step 8 — verification (re-run in full against the final rewrite path, per the
+  directive).** (i) Full suites, three targets, counts above; Release build
   green. (ii) The automatable §5 slices on the 10k-word windowed post: canary silent
   through gesture-heavy sessions; scroll anchor resolves through structural rewrites;
   fans born by the W feed the badge predicate and a merged block starts fanless; seam
@@ -485,8 +525,9 @@ commit (soak + sync convergence + windowed checks), and the self-review hardenin
   deletions, tail opening, typing-past mints, idle-mints, bulk pastes, all four gestures
   (including W ceremony confirm/cancel), fan branching, and structural undo — after
   every settled action **store == BlockRangeIndex == surface per block**, the tiling
-  invariant holds, **`desyncRecovery` fired ZERO times** (a real counter on the VM,
-  asserted per action), the canary stayed silent, and the final store proves
+  invariant holds, **`desyncRecovery` fired ZERO times AND the differential oracle
+  fired ZERO times** (real counters on the VM, asserted per action — the author-directed
+  proof the differential lands safely), the canary stayed silent, and the final store proves
   **non-vacuity** (lineage edges > 0 — a hollow soak of pure refusals fails loudly).
   Unsettled stretches between assertions are deliberate: gestures land while mints and
   autosaves are in flight (the plan's demanded interleaving; the door waits them out).
@@ -498,18 +539,24 @@ commit (soak + sync convergence + windowed checks), and the self-review hardenin
   compound make-block; two undos) with engine rounds MID-session and a phone editing a
   Mac-authored take concurrently → byte-identical synced dumps, empty outboxes,
   identical `renderedText`, and the racing edit alive somewhere (S5) — plus `newBlock`'s
-  new touch/churn stamps riding every mint through CAS. (v) **Full-gesture latency at
-  10k words: ~16.6 ms** (divide op + full re-render + caret-by-identity, measured on a
-  real window) — the number QUESTIONS #8's ratification asks for; comfortably a
-  deliberate-act cost, bounded < 100 ms by test. (vi) The author's manual feel pass —
-  **pending at the checkpoint** (snap feel, the W sheet, refusal copy, gesture latency
-  by hand; notes to be recorded here).
+  new touch/churn stamps riding every mint through CAS. (v) **Both rewrite strategies
+  measured on real windows (debug builds): DIFFERENTIAL divide ≈ 8.6 ms at 10k words /
+  ≈ 28.4 ms at 50k; FULL W-confirm ≈ 11.9 ms at 10k / ≈ 29.5 ms at 50k** (each = op +
+  rewrite + caret; the pre-directive full-path figure of ~16.6 ms at 10k stands as
+  history). Honest reading of the 50k differential number: the seam EDIT itself is
+  block-scale (the spy pin proves it), but the measured window includes two O(post)
+  costs — the fresh `renderPost` fetch (a DB read, the same class the Phase 7
+  observation already performs at debounce rate) and the DEBUG-only oracle's full-text
+  compare, which does not ship. Narrowing the fetch to affected slots is a recorded
+  direction if real corpora ever care; the surface work — the part the directive
+  targeted — no longer scales with the document. (vi) The author's manual feel pass —
+  **pending at the checkpoint**, now ONE combined sitting with Phase 7's §5 pass
+  (author, 2026-07-07): canary check, scroll/height on a long post, typing feel, snap
+  feel, the W sheet, refusal copy, differential rewrite feel.
 
-**PROVISIONAL calls (in `notes/QUESTIONS.md`):**
-- **#8 — structural rewrites are full re-renders** (the plan's pre-decided reading,
-  logged per its ground rule): options recorded (full re-render shipped; extending the
-  differential path is the designed fallback); ratify with the 16.6 ms Step 8 number
-  beside it.
+**PROVISIONAL calls:** none remain open. #8 (full re-render) was logged per the plan's
+ground rule, then **ANSWERED mid-phase by the author (2026-07-07): the differential path
+was built this phase** — history and scope preserved in QUESTIONS #8 and the banner note.
 
 **Interpretations & readings for the record (planner-internal calls within the ratified
 contract — not PROVISIONALs; flag any the review finds product-shaped):**
@@ -569,10 +616,11 @@ contract — not PROVISIONALs; flag any the review finds product-shaped):**
   posture — recorded here as the disposition rather than parked again.
 - (The 9b-owned `setEntryDate` row stands untouched.)
 
-**Still open for the author at the checkpoint:** QUESTIONS #8 (full-re-render reading,
-with the 16.6 ms number); the manual feel pass (vi); whether the messy cross-fan
-re-bracketing case gets re-owned; and the still-pending Phase 7 manual §5 feel pass plus
-the Phase 8 handoff checklist items (#3, #6, device rounds) — unchanged by this phase.
+**Still open for the author at the checkpoint:** the combined manual feel pass (vi —
+Phase 7's §5 items + this phase's gesture items, one sitting per her 2026-07-07 call);
+whether the messy cross-fan re-bracketing case gets re-owned; and the Phase 8 device
+rounds (the handoff's items #3 and #6 closed at the mid-phase walk — Keychain ratified,
+A5 deployed).
 
 *(Master-plan pointer/table update, the Phase 9b plan authoring from its brief, and the
 author handoff are deliberately NOT done yet — the coordinator holds them until the

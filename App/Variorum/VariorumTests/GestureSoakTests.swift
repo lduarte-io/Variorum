@@ -53,6 +53,8 @@ struct GestureSoakTests {
                 await h.flush()
                 #expect(h.model.desyncRecoveryCount == 0,
                         "desyncRecovery fired (seed \(seed), action \(i): \(action))")
+                #expect(h.model.differentialOracleMisses == 0,
+                        "the differential oracle fired (seed \(seed), action \(i): \(action))")
                 #expect(h.model.canaryMessage == nil,
                         "canary fired (seed \(seed), action \(i): \(action))")
                 let surfaceLength = (h.documentText as NSString).length

@@ -9,6 +9,7 @@
 //
 
 import AppKit
+import Dependencies
 import Foundation
 import GRDB
 import Testing
@@ -724,5 +725,114 @@ struct DropAndRefusalCopyTests {
                 "extract's middle-span refusal points at the composed gesture")
         #expect(RefusalCopy.message(for: .tooManyBlocksForMerge).contains("two"),
                 "the binary rule is named")
+    }
+}
+
+
+@MainActor
+@Suite("Differential structural apply (Phase 9 — author decision 2026-07-07)")
+struct DifferentialApplyTests {
+    /// The differential path's defining property, pinned with a spy on the
+    /// storage's edit notifications: a gesture edits ONLY the seam region.
+    /// The same spy proves it can DETECT a full rewrite (the W confirm's
+    /// full-path edit covers the document) — so a regression to full
+    /// re-render on the everyday gestures fails this test, red-on-old style.
+    @Test func everydayGesturesEditOnlyTheSeamRegion() async throws {
+        let blocks = (0..<30).map { "Block \($0) first sentence. Block \($0) second one." }
+        try await withEditor(seedBlocks: blocks) { h in
+            let storage = try #require(h.textView.textStorage)
+            let docLength = (h.documentText as NSString).length
+            let edited = LockIsolated<[Int]>([])
+            let token = NotificationCenter.default.addObserver(
+                forName: NSTextStorage.didProcessEditingNotification,
+                object: storage, queue: nil
+            ) { note in
+                guard let s = note.object as? NSTextStorage else { return }
+                edited.withValue { $0.append(s.editedRange.length) }
+            }
+            defer { NotificationCenter.default.removeObserver(token) }
+
+            // Differential divide mid-document: the edit stays block-scale.
+            let mid = h.model.index.range(ofEntryAt: 15).location + 30
+            h.textView.setSelectedRange(NSRange(location: mid, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)
+            let divideMax = edited.value.max() ?? 0
+            #expect(divideMax > 0, "the spy must have seen the edit")
+            #expect(divideMax < docLength / 4,
+                    "differential divide edited \(divideMax) of \(docLength) — must never rewrite the document")
+            try expectStoreMatchesView(h)
+            #expect(h.model.differentialOracleMisses == 0)
+
+            // Merge at a seam: a 1-char text edit + block-scale re-bracket.
+            edited.setValue([])
+            let seam = h.model.index.range(ofEntryAt: 5).upperBound
+            h.textView.setSelectedRange(NSRange(location: seam, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.mergeBlocks)
+            let mergeMax = edited.value.max() ?? 0
+            #expect(mergeMax > 0)
+            #expect(mergeMax < docLength / 4,
+                    "differential merge edited \(mergeMax) of \(docLength)")
+            try expectStoreMatchesView(h)
+
+            // The discriminator: the W confirm is the FULL path by design —
+            // the same spy sees a document-scale rewrite, proving a
+            // full-render regression on the everyday gestures could not
+            // hide from the assertions above.
+            let slots = try h.storeSlots()
+            _ = try h.session.operations.branchVariant(
+                slots[20].blockID, from: slots[20].variantID!)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(
+                location: h.model.index.range(ofEntryAt: 20).location + 30, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)   // fanned -> ceremony
+            edited.setValue([])
+            await h.model.confirmDivideWCeremony()
+            let fullMax = edited.value.max() ?? 0
+            let freshLength = (h.documentText as NSString).length
+            #expect(fullMax >= freshLength * 3 / 4,
+                    "the W confirm rebuilds from the store (full path): saw \(fullMax) of \(freshLength)")
+            try expectStoreMatchesView(h)
+            #expect(h.model.differentialOracleMisses == 0)
+        }
+    }
+
+    @Test func extractAndMakeBlockApplyDifferentiallyToo() async throws {
+        let blocks = (0..<20).map { "Extract \($0) alpha piece. Extract \($0) beta piece. Extract \($0) tail." }
+        try await withEditor(seedBlocks: blocks) { h in
+            let storage = try #require(h.textView.textStorage)
+            let docLength = (h.documentText as NSString).length
+            let edited = LockIsolated<[Int]>([])
+            let token = NotificationCenter.default.addObserver(
+                forName: NSTextStorage.didProcessEditingNotification,
+                object: storage, queue: nil
+            ) { note in
+                guard let s = note.object as? NSTextStorage else { return }
+                edited.withValue { $0.append(s.editedRange.length) }
+            }
+            defer { NotificationCenter.default.removeObserver(token) }
+
+            // Suffix extract on block 10.
+            let r10 = h.model.index.range(ofEntryAt: 10)
+            h.textView.setSelectedRange(NSRange(
+                location: r10.location + r10.length - 10, length: 10))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.extractSelection)
+            #expect((edited.value.max() ?? 0) < docLength / 4)
+            try expectStoreMatchesView(h)
+
+            // Make Block (middle span) on block 3.
+            edited.setValue([])
+            let r3 = h.model.index.range(ofEntryAt: 3)
+            h.textView.setSelectedRange(NSRange(location: r3.location + 25, length: 20))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.makeBlockFromSelection)
+            #expect((edited.value.max() ?? 0) < docLength / 4)
+            try expectStoreMatchesView(h)
+            #expect(h.model.differentialOracleMisses == 0)
+            #expect(h.model.desyncRecoveryCount == 0)
+        }
     }
 }

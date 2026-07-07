@@ -185,8 +185,80 @@ struct EditorWindowSmokeTests {
             #expect(h.model.topVisibleOffset() != nil)
             #expect(h.model.canaryMessage == nil)
             #expect(h.model.desyncRecoveryCount == 0)
+            #expect(h.model.differentialOracleMisses == 0)
             await h.flush()
             try expectStoreMatchesView(h)
+        }
+    }
+
+    /// Phase 9 Step 8(v), re-run per the author's mid-phase differential
+    /// directive: BOTH rewrite strategies measured at 10k AND 50k words —
+    /// the differential per-gesture cost (must stay flat: it edits the
+    /// seam, never the document) and the full path's cost (the W ceremony /
+    /// undo shape; document-proportional by design, recorded for the
+    /// record). Numbers print for the closeout.
+    @Test(arguments: [50, 250]) func rewriteStrategyLatencies(paragraphs: Int) async throws {
+        let corpus = (0..<paragraphs).map { p in
+            (0..<200).map { "word\(($0 &+ p) % 977)" }.joined(separator: " ") + " ¶\(p)"
+        }
+        try await withEditor(seedBlocks: corpus) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 600),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let scrollView = try #require(h.textView.enclosingScrollView)
+            window.contentView = scrollView
+            window.orderFrontRegardless()
+            pump()
+            let words = paragraphs * 200
+
+            func ms(_ elapsed: Duration) -> Double {
+                Double(elapsed.components.seconds) * 1000
+                    + Double(elapsed.components.attoseconds) / 1e15
+            }
+
+            // Differential divide, mid-document (mint a legal cut first).
+            let target = paragraphs / 2
+            JumpPrimitive.jump(
+                toOffset: h.model.index.range(ofEntryAt: target).location,
+                textView: h.textView, scrollView: scrollView)
+            pump()
+            h.type("Insert. ", at: h.model.index.range(ofEntryAt: target).location)
+            await h.flush()
+            h.textView.setSelectedRange(NSRange(
+                location: h.model.index.range(ofEntryAt: target).location + 4, length: 0))
+            h.model.updateCaretContext()
+            var t0 = ContinuousClock.now
+            await h.model.invokeGesture(.divideAtCursor)
+            let differential = ms(t0.duration(to: .now))
+            print("Phase 9 Step 8(v) [\(words)w]: DIFFERENTIAL divide (op + seam edit + caret): \(differential) ms")
+            #expect(differential < 50,
+                    "the differential gesture must stay flat in document size: \(differential) ms at \(words) words")
+            try expectStoreMatchesView(h)
+
+            // The full path (the W ceremony's confirm), same document.
+            let slots = try h.storeSlots()
+            let fanned = slots[target + 2]
+            h.type("Insert. ", at: h.model.index.range(ofEntryAt: target + 2).location)
+            await h.flush()
+            _ = try h.session.operations.branchVariant(fanned.blockID, from: fanned.variantID!)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(
+                location: h.model.index.range(ofEntryAt: target + 2).location + 4, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)  // fanned → ceremony
+            #expect(h.model.divideWCeremony != nil)
+            t0 = ContinuousClock.now
+            await h.model.confirmDivideWCeremony()
+            let full = ms(t0.duration(to: .now))
+            print("Phase 9 Step 8(v) [\(words)w]: FULL W-confirm (op + full re-render + caret): \(full) ms")
+            try expectStoreMatchesView(h)
+            #expect(h.model.differentialOracleMisses == 0)
+            #expect(h.model.canaryMessage == nil)
         }
     }
 }

@@ -41,6 +41,19 @@
      are ratified.
    - Exports are **one-way projections** (never re-imported as truth), built on
      `Queries.renderedText` semantics: `"\n\n"` joins, blank takes skip.
+4. **Block names + the collapsible block-TOC view (author-adopted 2026-07-07, mid-Phase-9 —
+   AppSpec §14's delta of that date; joins the 11a views cut).** Sketch (finalize in the
+   plan): a nullable **`block.name`** column — additive, **own schema commit**, deployed in
+   the **same migration-lockstep event as `canvas_layout`** (one SyncSpec §12 choreography,
+   two additive changes); plain metadata under sync (CAS, no uniqueness, no repair rule);
+   a small `setBlockName` operation (+ outbox trigger coverage via the existing block-table
+   triggers — verify, don't assume). The view: one row per block in post order — explicit
+   name where set, else the **first sentence derived at read time** (`BoundarySnapping`
+   sentence rules; never stored — the no-denormalization rule); rows expand into the
+   read-cheap tier with exactly one live editor on demand (P3's split, reused); collapse
+   state session-only in v1; **no in-place text folding inside the live editor** (TK2 §3 —
+   the TOC is a pane/view; jump-to-block uses the Phase 6 hybrid primitive). Names are
+   block-identity-level and deliberately distinct from headings-in-text (§14.8).
 
 ## Standing definitions already settled elsewhere (the plan cites, never re-decides)
 
@@ -95,3 +108,8 @@ blocks utility view: the Phase 4 query, listed plainly.
    bespoke view-side data machinery at full severity.
 6. Swap-and-reread does not mutate `chosen_variant_id` unless the author's explicit
    commit-choice gesture runs (I3 discipline).
+7. Block-TOC: first-sentence display is derived at read time, never stored anywhere (flag
+   any persisted derivation at full severity — it's the no-denormalization rule); collapse
+   state persists nowhere in v1; `block.name` is sync-shaped like any metadata column and
+   rode the same lockstep event as `canvas_layout` (verify the choreography order held for
+   BOTH changes).
