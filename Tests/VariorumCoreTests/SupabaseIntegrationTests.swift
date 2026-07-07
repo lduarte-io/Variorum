@@ -59,6 +59,11 @@ struct SupabaseIntegrationTests {
         // server's head seq directly; against the real server quiescence is
         // observed from the outside: empty outboxes, a round in which neither
         // pull applies or merges anything, no stall, and matching cursors.
+        //
+        // Rounds are PACED: since A5 (03_visibility_horizon.sql) the
+        // changefeed serves nothing younger than ~2 s, so back-to-back
+        // rounds would see an empty (not-yet-quiesced) head and burn the
+        // budget before the pushes become visible.
         var quiesced = false
         for _ in 1...12 {
             try await a.push()
@@ -68,11 +73,15 @@ struct SupabaseIntegrationTests {
             if try a.outboxCount() == 0, try b.outboxCount() == 0,
                 reportA.applied == 0, reportA.merged == 0, !reportA.stalled,
                 reportB.applied == 0, reportB.merged == 0, !reportB.stalled,
-                reportA.newCursor == reportB.newCursor
+                reportA.newCursor == reportB.newCursor,
+                // A quiet round while this run's pushes are still inside the
+                // horizon is NOT quiescence — the dumps say so.
+                try a.syncedDump() == b.syncedDump()
             {
                 quiesced = true
                 break
             }
+            try await Task.sleep(for: .milliseconds(900))
         }
         #expect(quiesced, "the pair failed to quiesce against the real server within 12 rounds")
 
