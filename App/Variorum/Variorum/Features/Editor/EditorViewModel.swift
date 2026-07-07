@@ -319,8 +319,13 @@ final class EditorViewModel {
             loaded = true
             return
         }
-        // The buffer is authoritative while dirty; defer until clean.
-        if autosave.isDirty || mintInFlight {
+        // The buffer is authoritative while dirty; defer until clean. A
+        // structural flight defers too (round 3 NIT): a delivery rewriting
+        // the surface mid-flight is geometry-safe post-round-2 (the seam
+        // guards fall back to full render on any mismatch) but would clear
+        // text-undo and double-rewrite under the gesture — the flight's
+        // exit applies the deferred value through the settle machinery.
+        if autosave.isDirty || mintInFlight || structuralInFlight {
             pendingProjection = new
             return
         }
@@ -426,7 +431,8 @@ final class EditorViewModel {
     }
 
     private func applyPendingIfClean() {
-        guard !autosave.isDirty, !mintInFlight, pendingProjection != nil else { return }
+        guard !autosave.isDirty, !mintInFlight, !structuralInFlight,
+              pendingProjection != nil else { return }
         pendingProjection = nil
         // The deferred value was fetched BEFORE the flush that just landed —
         // applying it as-is would transiently revert the actively edited
@@ -438,7 +444,7 @@ final class EditorViewModel {
             guard let fresh = try? await session.database.read({ [postID] in
                 try Queries.renderPost($0, containerID: postID)
             }) else { return }
-            guard !autosave.isDirty, !mintInFlight else {
+            guard !autosave.isDirty, !mintInFlight, !structuralInFlight else {
                 pendingProjection = fresh
                 return
             }
@@ -870,9 +876,21 @@ final class EditorViewModel {
     /// keystroke can slip between the flush and the operation (a stale
     /// whole-buffer autosave after a divide would resurrect the moved half —
     /// the forbidden text-duplication class).
+    ///
+    /// SELF-guarding (review round 3, MINOR): one flight at a time is
+    /// enforced HERE, at the door itself, so every entrance — gestures via
+    /// `applyStructural` AND the W ceremony's confirm — refuses while a
+    /// flight is up. Overlapping flights would share the one
+    /// `structuralInFlight` flag: the first finisher's defer would clear it
+    /// and re-enable editing while the other was still between its op and
+    /// its rewrite — reopening the keystroke window this fence closes.
     private func runStructural(
         _ body: @escaping @Sendable (Operations) throws -> StructuralOutcome
     ) async -> Bool {
+        guard !structuralInFlight else {
+            refuseFeedback("Another structural change is still landing.")
+            return false
+        }
         structuralInFlight = true
         // The idle-mint clock is held for the flight (review round 1,
         // MAJOR): a mint must never be born between the pre-op mint wait
@@ -885,6 +903,9 @@ final class EditorViewModel {
             // Any surviving tail gets its clock back (arming is a no-op
             // when no non-blank tail exists).
             armTailIdleMint()
+            // A projection deferred during the flight applies now (round 3
+            // NIT: deliveries defer while a flight is up).
+            applyPendingIfClean()
         }
         await autosave.flushNow()
         guard !autosave.isDirty else {
@@ -1112,6 +1133,16 @@ final class EditorViewModel {
 
     func confirmDivideWCeremony() async {
         guard let state = divideWCeremony, state.canConfirm else { return }
+        // The one-flight door, checked synchronously BEFORE the drift
+        // check's await (review round 3, MINOR): a gesture can be mid-
+        // flight while the sheet is up (menu key equivalents stay live
+        // under a window-modal sheet) — refuse visibly and KEEP the
+        // ceremony and its cuts; `runStructural`'s own self-guard is the
+        // belt behind this.
+        guard !structuralInFlight else {
+            refuseFeedback("Another structural change is still landing.")
+            return
+        }
         let cuts = state.markedCuts
         let blockID = state.blockID
         // The sheet may have sat open while a sync round landed edits to
@@ -1138,13 +1169,25 @@ final class EditorViewModel {
             showOperationError(error)
             return
         }
-        divideWCeremony = nil
-        _ = await runStructural { ops in
+        // Accepted residual (review round 3, NIT — same class as the
+        // ceremony-open flush→fetch window): the drift check above is
+        // check-then-act — a sync apply committing in the ms between that
+        // read and the op below still lands a stale-offset cut. A true fix
+        // needs op-level expected-text preconditions (a core change this
+        // phase has no cause to make); the cut stays well-formed,
+        // recoverable by undo, and the window is delivery-cadence narrow.
+        // Recorded in the closeout's residuals.
+        let landed = await runStructural { ops in
             let result = try ops.divideW(blockID, cuts: cuts)
             // seam nil: the W confirm re-renders fully from the store —
             // the permanent shape for ceremonial acts (author, 2026-07-07).
             return StructuralOutcome(
                 caretBlockID: result.first.block.id, caretOffset: 0, seam: nil)
+        }
+        // The sheet dismisses only when the cut LANDED — a refusal (busy
+        // door, op error) keeps the ceremony and its cuts for the author.
+        if landed {
+            divideWCeremony = nil
         }
     }
 
@@ -1549,7 +1592,7 @@ final class EditorViewModel {
     private func message(for refusal: BlockRangeIndex.Refusal) -> String {
         switch refusal {
         case .crossesBlockBoundary:
-            "Edits can't cross block boundaries yet — structural gestures arrive later."
+            "Edits can't cross block boundaries — to join these blocks, use Merge Blocks (⌘⇧M)."
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:

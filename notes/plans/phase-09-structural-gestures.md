@@ -335,16 +335,17 @@ the Phase 6 definitive spike run (verified at phase start via the reconciliation
 and re-verified at Step 8), so no spike re-run was owed and the memo's numbers remain the
 performance contract.
 
-**Test results (the Phase 9b/10 baselines once the review ladder closes):**
-core `swift test` = **430 green in 51 suites** (baseline 423/50; the 51st suite is the
-structural-session sync convergence); Mac app `xcodebuild test` = **199 green in 33
-suites** (baseline 101/17 — the additions are the 48-test planner suite, the gesture/door
-suites, CutPropagation, the W ceremony suite, drops + refusal sweep, the windowed
-structural smoke, the 3-seed soak, and the differential-apply pins + dual-path latency
-measurements); iOS `VariorumMobile` = **11 green in 4 suites** on the iOS 26.2 simulator
-(unchanged; the shared-shell addition `UndoMenuState` compiles into both targets).
-Release-configuration build green. TK1 grep audit clean before every commit (hits remain
-the known `textLayoutManager` locals and comments).
+**FINAL test results, post-review-ladder (the Phase 9b baselines):**
+core `swift test` = **430 green in 51 suites** (baseline 423/50); Mac app
+`xcodebuild test` = **222 green in 40 suites** (baseline 101/17 — the additions across
+the phase + three review rounds: the 48-test planner suite, the gesture/door suites,
+CutPropagation, the W ceremony suite, drops + refusal sweep, the windowed structural
+smoke, the 3-seed soak, the differential-apply pins + dual-path latency measurements,
+the pure StructuralSeamEdit suites with all three guard layers pinned, and the
+review-round fix pins); iOS `VariorumMobile` = **11 green in 4 suites** on the iOS 26.2
+simulator. Release-configuration build green. TK1 grep audit clean before every commit
+(hits remain the known `textLayoutManager` locals and comments). (Implementation-time
+interim counts appear in the per-step notes and round sections below as history.)
 
 **Process notes:** (1) the coordinator installed a mid-phase gate after Steps 1–3
 (implement → report → gate review → release). The gate PASSED with two non-blocking
@@ -809,3 +810,65 @@ phone); it was sitting in the working tree and was swept into the `3afd9dc` reco
 commit by `git add -A`. It stands (it implements a ratified decision); noted so the
 attribution is accurate. TestAction remains Debug, so the oracle-bearing tests run
 in Debug.
+
+---
+
+## Review round 3 (2026-07-07) — 0 BLOCKER / 0 MAJOR / 1 MINOR / 3 NIT; the ladder
+## CLOSED at the hard cap (these fixes land post-cap WITHOUT a further cold review —
+## the ladder's rule, not a shortcut; recorded honestly)
+
+The round-3 reviewer confirmed all round-2 fixes sound (it traced the pins red-on-old
+itself and ran all three suites). Final counts after this round's fixes: **core 430/51 ·
+Mac app 222/40 · mobile 11/4**; TK1 audit clean.
+
+**MINOR (the W confirm bypasses the one-gesture-at-a-time door) — AGREED, fixed,
+red-on-old pin.** Mechanism re-traced and confirmed: `applyStructural` guarded only its
+own entrance; `confirmDivideWCeremony` called `runStructural` directly, and macOS menu
+key equivalents stay live under a window-modal sheet — so a shortcut gesture (flight A)
+could overlap a Confirm (flight B), two flights sharing ONE `structuralInFlight` flag,
+the first finisher's defer clearing it and re-enabling editing while the other was still
+between op and rewrite (the forbidden duplication window, one door over from round-1
+MINOR 2). Fix, both layers: **`runStructural` is now self-guarding** (`guard
+!structuralInFlight` → visible refusal → false) so EVERY entrance is covered;
+`confirmDivideWCeremony` additionally checks synchronously before its drift-check await
+(refuses visibly and KEEPS the ceremony + cuts) and now dismisses the sheet **only when
+the cut landed** (a refused confirm — busy door or op error — keeps the author's cuts).
+Pin `aConfirmDuringAnotherFlightRefusesAndKeepsTheCeremony`: flight A provably suspended
+mid-flight → Confirm refuses, ceremony survives, flight A's divide lands alone, the W
+does NOT run, and the kept ceremony confirms cleanly afterwards. **Verified red on the
+pre-fix code** (both operations ran to completion regardless of interleaving: the W
+executed and the ceremony dismissed).
+
+**NIT (stale `crossesBlockBoundary` copy: "structural gestures arrive later") — AGREED,
+copy fixed.** Now: "Edits can't cross block boundaries — to join these blocks, use
+Merge Blocks (⌘⇧M)." (Step 7's sweep covered the planner's RefusalCopy vocabulary; the
+VM's edit-refusal strings predate this phase — this was the one that aged.) Copy-only,
+no pin owed.
+
+**NIT (the confirm's drift check is check-then-act) — AGREED, documented as the accepted
+residual (the reviewer's own proposed disposition).** A sync apply committing in the ms
+between the drift-check read and the op still lands a stale-offset cut; a true fix needs
+op-level expected-text preconditions — a core change this phase has no cause to make.
+Same acceptance class as the ceremony-open flush→fetch window; the cut stays
+well-formed and undo-recoverable; the window is delivery-cadence narrow. Recorded here
+and as a code comment at the confirm site. Effectively unpinnable from outside (no seam
+between the read and the op) — labeled honestly, per the reviewer.
+
+**NIT (external deliveries not deferred during a structural flight) — TAKEN as the code
+change, with its pin (my call, rationale recorded).** The reviewer traced it
+geometry-safe post-round-2 (the seam guards fall back to full render on any mismatch),
+leaving cut staleness — the SyncSpec §7-accepted concurrent-structural class. Taken
+anyway because the fix is three predicate additions that align the flight with the
+existing buffer-authoritative doctrine (dirty ⇒ defer): a mid-flight delivery would
+clear text-undo and double-rewrite under the gesture even when safe. `applyProjection`,
+`applyPendingIfClean`, and the settle re-fetch now also defer on `structuralInFlight`;
+the flight's defer drains the deferred value through the existing settle machinery. Pin
+`externalDeliveriesDeferDuringAStructuralFlight`: a doctored delivery mid-flight leaves
+the surface untouched, then everything reconciles at flight end — **verified red on the
+pre-fix code** (the mid-flight delivery rewrote the surface immediately).
+
+**Still pending at the checkpoint (unchanged by the ladder):** the author's COMBINED
+manual feel pass — Phase 7's §5 items (canary silent-fallback check, scroll/height on a
+long post, typing feel) + this phase's gesture items (snap feel, the W sheet, refusal
+copy, differential rewrite feel) in ONE sitting (her 2026-07-07 bundling call) — record
+the result here when she runs it.

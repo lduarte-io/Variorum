@@ -983,3 +983,107 @@ struct ReviewRound2FixTests {
         }
     }
 }
+
+
+@MainActor
+@Suite("Review round 3 fixes (Phase 9)")
+struct ReviewRound3FixTests {
+    // MINOR: the one-gesture-at-a-time door must be self-guarding from
+    // EVERY entrance — the W confirm called runStructural directly, so a
+    // shortcut-invoked gesture (key equivalents stay live under a window-
+    // modal sheet) could overlap a Confirm: two flights sharing one flag,
+    // the first finisher's defer reopening the keystroke fence while the
+    // other was still between op and rewrite (the forbidden duplication
+    // class). Deterministic pin: with flight A provably suspended
+    // mid-flight, a Confirm must refuse and KEEP the ceremony — on the old
+    // code both operations ran to completion regardless of interleaving.
+    @Test func aConfirmDuringAnotherFlightRefusesAndKeepsTheCeremony() async throws {
+        try await withEditor(seedBlocks: [
+            "First alpha. First omega.", "Second block. More here.",
+        ]) { h in
+            // A fanned block 0 with an open ceremony.
+            let slots = try h.storeSlots()
+            let v2 = try h.session.operations.branchVariant(
+                slots[0].blockID, from: slots[0].variantID!)
+            try h.session.operations.autosave(
+                v2.id, text: "Intro pad. First alpha. First omega.", charDelta: 0)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(location: 15, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)
+            #expect(h.model.divideWCeremony != nil)
+
+            // Flight A: a shortcut divide on block 1, suspended mid-flight.
+            let block1 = h.model.index.range(ofEntryAt: 1)
+            h.textView.setSelectedRange(NSRange(location: block1.location + 15, length: 0))
+            h.model.updateCaretContext()
+            let flightA = Task { await h.model.invokeGesture(.divideAtCursor) }
+            for _ in 0..<200 {
+                if h.model.structuralInFlight { break }
+                await Task.yield()
+            }
+            #expect(h.model.structuralInFlight, "staging must reach the window")
+
+            // The Confirm lands mid-flight: it must refuse — visibly — and
+            // keep the ceremony (cuts preserved), never fly a second flight.
+            await h.model.confirmDivideWCeremony()
+            #expect(h.model.divideWCeremony != nil,
+                    "a busy refusal keeps the ceremony and its cuts")
+
+            await flightA.value
+            await h.settle()
+            let texts = try h.storeSlots().map(\.text)
+            // Flight A's divide landed; the W did NOT (block 0 intact).
+            #expect(texts == [
+                "First alpha. First omega.", "Second block.", "More here.",
+            ], "the W must not have run mid-flight")
+            try expectStoreMatchesView(h)
+
+            // The refused ceremony still confirms cleanly afterwards.
+            await h.model.confirmDivideWCeremony()
+            let after = try h.storeSlots().map(\.text)
+            #expect(after == ["First alpha.", "First omega.", "Second block.", "More here."])
+            #expect(h.model.divideWCeremony == nil)
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    // NIT (round 3, taken with its pin): external projection deliveries are
+    // DEFERRED during a structural flight — the flight's surface must never
+    // be rewritten under it mid-flight (geometry-safe post-round-2, but a
+    // mid-flight full render clears text-undo and double-rewrites); the
+    // deferred value applies through the existing settle machinery at
+    // flight end. Red on the old code: applyProjection mid-flight rewrote
+    // the surface immediately.
+    @Test func externalDeliveriesDeferDuringAStructuralFlight() async throws {
+        try await withEditor(seedBlocks: ["First sentence. Second one.", "Anchor."]) { h in
+            let slots = try h.storeSlots()
+            h.textView.setSelectedRange(NSRange(location: 19, length: 0))
+            h.model.updateCaretContext()
+            let gesture = Task { await h.model.invokeGesture(.divideAtCursor) }
+            for _ in 0..<200 {
+                if h.model.structuralInFlight { break }
+                await Task.yield()
+            }
+            #expect(h.model.structuralInFlight, "staging must reach the window")
+
+            // An external delivery lands mid-flight (its projection carries
+            // a remote rewrite of the OTHER block).
+            var doctored = try h.storeSlots()
+            doctored[1] = slot(doctored[1].blockID, variant: doctored[1].variantID,
+                               text: "Anchor, rewritten remotely.")
+            let before = h.documentText
+            h.model.applyProjection(doctored)
+            #expect(h.documentText == before,
+                    "a mid-flight delivery must defer, never rewrite the flight's surface")
+
+            await gesture.value
+            await h.settle()
+            // The flight landed its divide; the deferred delivery then
+            // applied through the settle re-fetch (which reads the STORE —
+            // the doctored text isn't in it, so the store's truth shows).
+            try expectStoreMatchesView(h)
+            #expect(h.model.desyncRecoveryCount == 0)
+        }
+    }
+}
