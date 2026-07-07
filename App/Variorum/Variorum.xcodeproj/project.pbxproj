@@ -82,6 +82,11 @@
 			path = VariorumMobileUITests;
 			sourceTree = "<group>";
 		};
+		E1F8A8012FFD00010000AA01 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +140,7 @@
 		E1C2717F2FFC2F420084BEA6 = {
 			isa = PBXGroup;
 			children = (
+				E1F8A8012FFD00010000AA01 /* Shared */,
 				E1C2718A2FFC2F420084BEA6 /* Variorum */,
 				E1C271982FFC2F440084BEA6 /* VariorumTests */,
 				E1C271A22FFC2F440084BEA6 /* VariorumUITests */,
@@ -175,6 +181,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				E1C2718A2FFC2F420084BEA6 /* Variorum */,
+				E1F8A8012FFD00010000AA01 /* Shared */,
 			);
 			name = Variorum;
 			packageProductDependencies = (
@@ -244,6 +251,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				E1D2175D2FFCE2C500886CFC /* VariorumMobile */,
+				E1F8A8012FFD00010000AA01 /* Shared */,
 			);
 			name = VariorumMobile;
 			packageProductDependencies = (

@@ -12,11 +12,15 @@ import VariorumCore
 
 struct RootView: View {
     let session: AppSession
+    /// Session services (Phase 8) — nil for the first frames until the root
+    /// `.task` starts them; the footer appears when ready.
+    let services: AppServices?
     @State private var library: LibraryViewModel
     @State private var selectedPostID: String?
 
-    init(session: AppSession) {
+    init(session: AppSession, services: AppServices? = nil) {
         self.session = session
+        self.services = services
         _library = State(initialValue: LibraryViewModel(session: session))
     }
 
@@ -24,6 +28,11 @@ struct RootView: View {
         NavigationSplitView {
             LibraryView(model: library, selection: $selectedPostID)
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220)
+                .safeAreaInset(edge: .bottom) {
+                    if let services {
+                        SyncStatusRow(sync: services.sync)
+                    }
+                }
         } detail: {
             if let postID = selectedPostID {
                 EditorView(session: session, postID: postID)
