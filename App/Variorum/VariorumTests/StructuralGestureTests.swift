@@ -131,10 +131,13 @@ struct StructuralRewriteDoorTests {
             h.model.updateCaretContext()
             await h.model.invokeGesture(.divideAtCursor)
 
-            let request = try #require(h.model.divideWRequest)
-            #expect(request.blockID == slots[0].blockID)
-            #expect(request.activeCut == 16)  // the active take's snapped cut
-            // Routing only: the live editor and the store are untouched.
+            let ceremony = try #require(h.model.divideWCeremony)
+            #expect(ceremony.blockID == slots[0].blockID)
+            // The active (rendered) take is pre-marked with the snapped cut.
+            let active = try #require(ceremony.takes.first { $0.id == slots[0].variantID })
+            #expect(active.marked)
+            #expect(active.cut == 16)
+            // Opening the ceremony touches no rows.
             let untouched = try h.storeSlots().map(\.text)
             #expect(untouched == ["First sentence. Second one."])
             #expect(h.session.undoStack.depth == 0)
@@ -508,6 +511,141 @@ struct MergeGestureTests {
             await h.model.invokeGesture(.mergeBlocks)
             let slots = try h.storeSlots()
             #expect(slots.map(\.text) == ["One two. Three four.", "Five six."])
+        }
+    }
+}
+
+
+@MainActor
+@Suite("The W ceremony (Phase 9, Step 6)")
+struct DivideWCeremonyTests {
+    /// v1 (rendered): cut snaps to 13. v2 shares the cut's string context,
+    /// shifted by an 11-unit prefix — the unique match proposes 24.
+    private func openCeremony(
+        _ h: EditorHarness, v2Text: String = "Intro pad. First alpha. First omega."
+    ) async throws -> (v1: String, v2: String) {
+        let slots = try h.storeSlots()
+        let v2 = try h.session.operations.branchVariant(
+            slots[0].blockID, from: slots[0].variantID!)
+        try h.session.operations.autosave(v2.id, text: v2Text, charDelta: 0)
+        try h.reload()
+        h.textView.setSelectedRange(NSRange(location: 15, length: 0))
+        h.model.updateCaretContext()
+        await h.model.invokeGesture(.divideAtCursor)
+        return (slots[0].variantID!, v2.id)
+    }
+
+    @Test func theCeremonyPreMarksTheActiveTakeAndSeedsProposals() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let (v1, v2) = try await openCeremony(h)
+            let state = try #require(h.model.divideWCeremony)
+
+            let activeTake = try #require(state.takes.first { $0.id == v1 })
+            #expect(activeTake.marked)
+            #expect(activeTake.cut == 13)  // the gesture's snapped cut
+
+            let otherTake = try #require(state.takes.first { $0.id == v2 })
+            #expect(!otherTake.marked, "only the active take is pre-marked")
+            #expect(otherTake.cut == 24, "string-context match, snapped to a legal boundary")
+            #expect(otherTake.boundaries.contains(24))
+        }
+    }
+
+    @Test func noUniqueMatchLeavesTheTakeUnseededAndGatesConfirm() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            // v2 shares no context with the active cut: no proposal.
+            let (v1, v2) = try await openCeremony(
+                h, v2Text: "Wholly different words. Nothing shared.")
+            var state = try #require(h.model.divideWCeremony)
+            let otherTake = try #require(state.takes.first { $0.id == v2 })
+            #expect(otherTake.cut == nil, "zero matches: unseeded, never a guess")
+
+            // Marking the unseeded take gates Confirm until a cut is placed.
+            #expect(state.canConfirm)  // active take alone, cut in place
+            h.model.toggleWTake(v2)
+            state = try #require(h.model.divideWCeremony)
+            #expect(!state.canConfirm, "a marked take without a cut blocks Confirm")
+            h.model.placeWCut(takeID: v2, cut: 24)  // after "Wholly different words. "
+            state = try #require(h.model.divideWCeremony)
+            #expect(state.canConfirm)
+            _ = v1
+        }
+    }
+
+    @Test func confirmPassesExactlyTheMarkedCutsToTheOp() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let (v1, v2) = try await openCeremony(h)
+            h.model.toggleWTake(v2)  // mark the second take; its cut is the proposal (24)
+            await h.model.confirmDivideWCeremony()
+
+            // The op received {v1: 13, v2: 24}: B's fan = first halves in
+            // fan order, C's fan = second halves; A released to lineage.
+            let slots = try h.storeSlots()
+            #expect(slots.count == 2)
+            #expect(slots.map(\.text) == ["First alpha.", "First omega."])  // rendered = v1's halves
+            try expectStoreMatchesView(h)
+            let fanTexts = try await h.database.read { db in
+                try slots.map { slot in
+                    try String.fetchAll(
+                        db,
+                        sql: """
+                            SELECT working_text FROM variant
+                            WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                            ORDER BY fan_position, id
+                            """,
+                        arguments: [slot.blockID])
+                }
+            }
+            // v1's cut (13) and v2's proposed cut (24) both carried through:
+            // first halves on B in fan order, second halves on C.
+            #expect(fanTexts[0] == ["First alpha.", "Intro pad. First alpha."])
+            #expect(fanTexts[1] == ["First omega.", "First omega."])
+            // Caret by identity: B's start.
+            #expect(h.textView.selectedRange() == NSRange(location: 0, length: 0))
+            #expect(h.session.undoStack.topLabel == "Divide into Variants")
+            #expect(h.model.divideWCeremony == nil)
+            _ = v1
+        }
+    }
+
+    @Test func cancelTouchesNothing() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            _ = try await openCeremony(h)
+            #expect(h.model.divideWCeremony != nil)
+            h.model.cancelDivideW()
+            #expect(h.model.divideWCeremony == nil)
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["First alpha. First omega."])
+            #expect(h.session.undoStack.depth == 0)
+            #expect(h.documentText == "First alpha. First omega.")
+        }
+    }
+
+    @Test func undoAfterConfirmRestoresTheOriginalReading() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            _ = try await openCeremony(h)
+            await h.model.confirmDivideWCeremony()  // active take only
+            let divided = try h.storeSlots().count
+            #expect(divided == 2)
+
+            let stack = h.session.undoStack
+            let label = try await h.session.runner.run { ops in try stack.undo(with: ops) }
+            #expect(label == "Divide into Variants")
+            try h.reload()
+
+            let restored = try h.storeSlots().map(\.text)
+            #expect(restored == ["First alpha. First omega."])
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func placeWCutRefusesIllegalPositions() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let (v1, _) = try await openCeremony(h)
+            h.model.placeWCut(takeID: v1, cut: 7)  // not a legal boundary
+            let state = try #require(h.model.divideWCeremony)
+            let active = try #require(state.takes.first { $0.id == v1 })
+            #expect(active.cut == 13, "only click-to-place onto LEGAL boundaries")
         }
     }
 }

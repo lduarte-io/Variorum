@@ -58,10 +58,11 @@ final class EditorViewModel {
     /// selection change from THE planner, so the menu bar, context menu, and
     /// shortcuts all read one brain's verdicts.
     private(set) var gestureAvailability = GestureAvailability()
-    /// A divide invoked on a fanned block routes here: the W ceremony's
-    /// one-sheet request (Step 6 renders it; cancel = set back to nil,
-    /// no rows touched).
-    var divideWRequest: DivideWRequest?
+    /// A divide invoked on a fanned block routes here: the W ceremony's ONE
+    /// sheet (contract item 3). Non-nil = the sheet is up; the live editor
+    /// is untouched for the ceremony's whole duration; cancel sets nil with
+    /// no rows touched; confirm funnels back through the structural door.
+    var divideWCeremony: DivideWCeremonyState?
 
     struct GestureAvailability: Equatable {
         var divide = false
@@ -70,12 +71,40 @@ final class EditorViewModel {
         var merge = false
     }
 
-    struct DivideWRequest: Equatable, Identifiable {
+    struct DivideWCeremonyState: Equatable, Identifiable {
         let blockID: String
-        /// The active (rendered) variant's snapped cut — the ceremony's
-        /// pre-seeded proposal source.
-        let activeCut: Int
+        /// The rendered variant at invoke time — pre-marked, its cut
+        /// pre-placed at the gesture's snapped position.
+        let activeVariantID: String?
+        var takes: [WTake]
         var id: String { blockID }
+
+        /// Every marked take needs a legal cut before the mint (the op's
+        /// own requirement, mirrored so Confirm can gate).
+        var canConfirm: Bool {
+            let marked = takes.filter(\.marked)
+            return !marked.isEmpty && marked.allSatisfy { $0.cut != nil }
+        }
+
+        var markedCuts: [String: Int] {
+            Dictionary(uniqueKeysWithValues: takes.compactMap { take in
+                guard take.marked, let cut = take.cut else { return nil }
+                return (take.variant.id, cut)
+            })
+        }
+    }
+
+    struct WTake: Equatable, Identifiable {
+        let variant: Variant
+        var marked: Bool
+        /// The cut carried through this take (UTF-16, interior boundary of
+        /// its text) — pre-seeded by string-context matching, freely
+        /// adjusted; nil = unseeded (no unique match) until placed.
+        var cut: Int?
+        /// The legal cut positions in this take's text (interior
+        /// sentence/paragraph boundaries) — the click-to-place targets.
+        let boundaries: [Int]
+        var id: String { variant.id }
     }
 
     struct BlockBadge: Equatable, Identifiable {
@@ -720,10 +749,9 @@ final class EditorViewModel {
 
         case .divideW(_, let blockID, let activeCut):
             // Contract item 3: the W ceremony is ONE sheet; the live editor
-            // is untouched for its whole duration. Routing only — confirm
-            // funnels back through this door (Step 6).
-            divideWRequest = DivideWRequest(blockID: blockID, activeCut: activeCut)
-            showStatus("The divide-into-takes ceremony sheet arrives in Step 6.")
+            // is untouched for its whole duration. Opening touches no rows —
+            // confirm funnels back through this door.
+            await openDivideWCeremony(blockID: blockID, activeCut: activeCut)
 
         case .divide(let i, let blockID, let cut):
             // Snap-and-proceed, visibly (contract item 2): the caret lands
@@ -852,6 +880,93 @@ final class EditorViewModel {
     private func visiblySnap(_ range: NSRange) {
         textView?.setSelectedRange(range)
         updateCaretContext()
+    }
+
+    // MARK: - The W ceremony (Step 6, contract item 3)
+
+    /// Builds the one-sheet ceremony state: the block's live ACTIVE fan as
+    /// a checklist (the rendered take pre-marked with the gesture's snapped
+    /// cut), per-take cut proposals by string-context matching, per-take
+    /// legal cut positions. The buffer flushes first so every take's stored
+    /// text — what the sheet shows and the op will cut — matches the
+    /// surface. No rows are touched by opening.
+    private func openDivideWCeremony(blockID: String, activeCut: Int) async {
+        await autosave.flushNow()
+        guard !autosave.isDirty else {
+            showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        let activeVariantID = index.entries.first { $0.blockID == blockID }?.variantID
+        do {
+            let fan = try await session.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
+            }
+            let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
+            guard liveActive.count > 1,
+                  let activeTake = liveActive.first(where: { $0.id == activeVariantID })
+            else {
+                // The fan changed under us (sync race): re-plan next invoke.
+                showStatus("This block's takes changed — try the divide again.")
+                return
+            }
+            let takes = liveActive.map { variant in
+                WTake(
+                    variant: variant,
+                    marked: variant.id == activeTake.id,
+                    cut: variant.id == activeTake.id
+                        ? activeCut
+                        : CutPropagation.propose(
+                            activeCut: activeCut,
+                            activeText: activeTake.workingText,
+                            targetText: variant.workingText),
+                    boundaries: interiorBoundaries(of: variant.workingText))
+            }
+            divideWCeremony = DivideWCeremonyState(
+                blockID: blockID, activeVariantID: activeTake.id, takes: takes)
+        } catch {
+            showOperationError(error)
+        }
+    }
+
+    private func interiorBoundaries(of text: String) -> [Int] {
+        let end = text.utf16.count
+        return BoundarySnapping.boundaries(in: text, granularity: .sentence)
+            .filter { $0 != 0 && $0 != end }
+    }
+
+    func toggleWTake(_ takeID: String) {
+        guard var state = divideWCeremony,
+              let i = state.takes.firstIndex(where: { $0.id == takeID }) else { return }
+        state.takes[i].marked.toggle()
+        divideWCeremony = state
+    }
+
+    func placeWCut(takeID: String, cut: Int) {
+        guard var state = divideWCeremony,
+              let i = state.takes.firstIndex(where: { $0.id == takeID }),
+              state.takes[i].boundaries.contains(cut) else { return }
+        state.takes[i].cut = cut
+        divideWCeremony = state
+    }
+
+    /// Cancel does nothing — no rows were touched by the ceremony.
+    func cancelDivideW() {
+        divideWCeremony = nil
+    }
+
+    func confirmDivideW() {
+        Task { await confirmDivideWCeremony() }
+    }
+
+    func confirmDivideWCeremony() async {
+        guard let state = divideWCeremony, state.canConfirm else { return }
+        let cuts = state.markedCuts
+        let blockID = state.blockID
+        divideWCeremony = nil
+        _ = await runStructural { ops in
+            let result = try ops.divideW(blockID, cuts: cuts)
+            return (result.first.block.id, 0)  // caret: B's start (first halves)
+        }
     }
 
     /// Context-menu items for the text view — the second door, same brain:

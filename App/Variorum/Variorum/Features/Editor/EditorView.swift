@@ -50,6 +50,11 @@ struct EditorView: View {
         .sheet(item: $model.fanPanel) { panel in
             FanPanel(model: model, state: panel)
         }
+        .sheet(item: $model.divideWCeremony) { state in
+            // The W ceremony (Phase 9, contract item 3): one sheet; any
+            // dismissal other than Confirm is a cancel — no rows touched.
+            DivideWSheet(model: model, presented: state)
+        }
         .alert(
             "This commit predates a split of this block",
             isPresented: Binding(

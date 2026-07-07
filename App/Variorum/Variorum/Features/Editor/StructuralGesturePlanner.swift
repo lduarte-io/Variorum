@@ -163,8 +163,10 @@ nonisolated enum StructuralGesturePlanner {
     /// boundaries but not cuts (the op refuses empty halves), so the nearest
     /// LEGAL boundary is the nearest interior one. The legal set is
     /// sentence ∪ paragraph marks (contract item 2 names both;
-    /// `.sentence` granularity is exactly that superset).
-    private static func snapToInteriorBoundary(_ cut: Int, in text: String) -> Int? {
+    /// `.sentence` granularity is exactly that superset). Internal:
+    /// CutPropagation snaps its W-ceremony proposals through this same
+    /// function (one implementation of "legal cut").
+    static func snapToInteriorBoundary(_ cut: Int, in text: String) -> Int? {
         let end = text.utf16.count
         let interior = BoundarySnapping.boundaries(in: text, granularity: .sentence)
             .filter { $0 != 0 && $0 != end }
