@@ -78,7 +78,7 @@
 
 ### Step 7 — Phase verification
 **Work:** (i) both suites + the new mobile tests green (`swift test`, Mac app suite, iOS simulator suite); (ii) **the two-store convergence scenario run at editor-rate from the *mobile* op stream** (create entries offline, edit a Mac-authored block, sync, byte-identical tables, empty outboxes — the Phase 5 harness with this phase's write pattern); (iii) **real-device round-trip with the author**: she journals on the iPhone, it appears on the Mac; she edits the same entry's text on both sides across an offline window and the conflict lands as a variant on the Mac fan (S5 — verify the phone shows the winner and *nothing is lost*); (iv) offline capture on the phone (airplane mode), then sync. Record counts + the real-device observations in the closeout.
-**Author calls due at this checkpoint:** ratify the capture-control interpretation; anything Step 6 surfaced about credential handling.
+**Author calls due at this checkpoint:** ratify the capture-control interpretation; anything Step 6 surfaced about credential handling; the A4 daily-drive mechanism (Release build vs blessed debug opt-in); and the **journal day-boundary reading** — an entry created at 12:30 am gets which `entry_date`? (Provisional: the local calendar date at creation, plainly; a "day starts at N am" preference is a feel call only she can make once she's journaling at odd hours.)
 
 ## Explicitly out of scope
 Fan/variant gestures, structural ops, readings/views beyond the entry list, the pool, references, and export on iOS (Phase 15 revisits the mobile surface); sync auth hardening (Phase 14, KnownIssues); any styling (Phase 13); widgets/share-sheet capture (nice ideas — QUESTIONS if the author wants them owned).
@@ -88,6 +88,7 @@ Fan/variant gestures, structural ops, readings/views beyond the entry list, the 
 - **Two app targets sharing sources** is where builds rot: shared files must belong to both targets deliberately (folder-level membership), and the Mac suite must stay green after every share.
 - **Don't let capture grow an editor.** The moment a mobile view wants block boundaries, fan chrome, or structural gestures, stop — that is Phase 15 (or the author's explicit call), not this phase.
 - **Background execution on iOS is deliberately not solved here** — foreground-triggered sync is enough for journaling; a background-task scheduler is complexity the phase doesn't need (revisit with real usage evidence).
+- **iOS file protection can race the background-transition push (Step 6):** once the device locks, data protection may make the store unreadable mid-round. The engine must treat a protection/access error exactly like being offline — skip the round, keep the outbox, retry on next foreground — never as corruption or a reason to touch state. Check the container's default protection class at Step 2 and pick deliberately.
 - **The `sync_state.device_id` already distinguishes clients** — verify the phone mints its own on first launch (Phase 5's machinery; a shared/cloned store would poison per-row seq bookkeeping).
 
 ---
