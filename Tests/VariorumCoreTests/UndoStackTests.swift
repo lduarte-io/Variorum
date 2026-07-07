@@ -1,3 +1,4 @@
+import Dependencies
 import Foundation
 import GRDB
 import Testing
@@ -313,6 +314,46 @@ struct UndoStackTests {
             try ops.unlockPost(post.id)
             #expect(try stack.undo(with: ops) == "Move Block")
             #expect(stack.depth == 0)
+        }
+    }
+
+    // MARK: Change observer (Phase 9 — per-op undo menu labels)
+
+    @Test func theChangeObserverFiresOnEveryStackMutation() throws {
+        try withOperations { _, _ in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let seen = LockIsolated<[String?]>([])
+            // Strong capture: a deliberate test-lifetime cycle (the app
+            // wires this observer at composition with the same lifetime).
+            stack.setChangeObserver {
+                seen.withValue { $0.append(stack.topLabel) }
+            }
+
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "x")
+            try ops.deleteBlock(made.block.id)          // register → fires
+            #expect(seen.value.last == "Delete Block")
+
+            try stack.undo(with: ops)                    // completed undo → fires
+            #expect(seen.value.last == nil as String?)
+            #expect(seen.value.count == 2)
+
+            try ops.deleteBlock(made.block.id)
+            stack.removeAll()                            // removeAll → fires
+            #expect(seen.value.count == 4)
+            #expect(seen.value.last == nil as String?)
+
+            // A FAILED undo mutates nothing and fires nothing.
+            try ops.restoreBlock(made.block.id)
+            try ops.deleteBlock(made.block.id)
+            let countBefore = seen.value.count
+            try ops.lockPost(post.id)
+            #expect(throws: OperationError.lockedPost(id: post.id)) {
+                try stack.undo(with: ops)
+            }
+            #expect(seen.value.count == countBefore)
+            #expect(stack.depth == 1)
         }
     }
 }

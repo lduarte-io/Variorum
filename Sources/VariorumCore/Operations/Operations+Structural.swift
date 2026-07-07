@@ -325,7 +325,7 @@ extension Operations {
                 markedSourceIDs: marked.map(\.id),
                 releasedPlacementID: context.placement.id)
         }
-        undoStack?.register(label: "Divide") {
+        undoStack?.register(label: "Divide into Variants") {
             try $0.revertStructural(
                 restoringTexts: [],
                 tombstoningBlocks: [

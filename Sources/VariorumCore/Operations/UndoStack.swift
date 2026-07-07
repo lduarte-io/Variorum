@@ -27,6 +27,7 @@ public final class UndoStack: @unchecked Sendable {
     private let lock = NSLock()
     private var entries: [Entry] = []
     private var nextID = 0
+    private var changeObserver: (@Sendable () -> Void)?
 
     public init() {}
 
@@ -38,11 +39,25 @@ public final class UndoStack: @unchecked Sendable {
         lock.withLock { entries.last?.label }
     }
 
+    /// Fires after every stack mutation (a registration, a completed undo,
+    /// a removeAll) — outside the lock, on the mutating thread. The app
+    /// wires menu invalidation here so the Edit menu can show per-op
+    /// "Undo Divide"-style labels (Phase 9; the KnownIssues labels entry).
+    public func setChangeObserver(_ observer: (@Sendable () -> Void)?) {
+        lock.withLock { changeObserver = observer }
+    }
+
+    private func notifyChange() {
+        let observer = lock.withLock { changeObserver }
+        observer?()
+    }
+
     func register(label: String, inverse: @escaping (Operations) throws -> Void) {
         lock.withLock {
             nextID += 1
             entries.append(Entry(id: nextID, label: label, inverse: inverse))
         }
+        notifyChange()
     }
 
     /// Runs the newest inverse (LIFO) and removes it on success; a failed
@@ -56,10 +71,12 @@ public final class UndoStack: @unchecked Sendable {
         guard let entry = lock.withLock({ entries.last }) else { return nil }
         try entry.inverse(operations)
         lock.withLock { entries.removeAll { $0.id == entry.id } }
+        notifyChange()
         return entry.label
     }
 
     public func removeAll() {
         lock.withLock { entries.removeAll() }
+        notifyChange()
     }
 }
