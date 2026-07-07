@@ -25,7 +25,9 @@
 > never redo blind). **Step 6 is a second author-assist point** (her Supabase credentials on
 > the phone). Views are functional and unstyled — zero polish until Phase 13. Deployment
 > target iOS 26; `SWIFT_VERSION = 6.0` from day one (Phase 7's review caught the template
-> defaulting to 5 — check it at Step 1 verification).
+> defaulting to 5 — check it at Step 1 verification). **The "Plan amendments" section at the
+> bottom of this file is binding** — three additions from the author's 2026-07-06
+> forward-planning session (store backup; transport fault-injection; engine re-entrancy).
 
 **Goal:** the author creates a journal entry on her iPhone in seconds, edits any existing block's active text, scrolls her past entries — offline-tolerant, converging with the Mac through the Phase 5 engine, with the long-idle auto-commit insurance finally scheduled (the app is becoming daily-usable, which is exactly when it matters).
 
@@ -87,3 +89,27 @@ Fan/variant gestures, structural ops, readings/views beyond the entry list, the 
 - **Don't let capture grow an editor.** The moment a mobile view wants block boundaries, fan chrome, or structural gestures, stop — that is Phase 15 (or the author's explicit call), not this phase.
 - **Background execution on iOS is deliberately not solved here** — foreground-triggered sync is enough for journaling; a background-task scheduler is complexity the phase doesn't need (revisit with real usage evidence).
 - **The `sync_state.device_id` already distinguishes clients** — verify the phone mints its own on first launch (Phase 5's machinery; a shared/cloned store would poison per-row seq bookkeeping).
+
+---
+
+## Plan amendments (2026-07-06, author forward-planning session — binding additions)
+
+*Decided by the author with the coordinator the same day this plan was written; recorded in AppSpec §14's forward-planning delta. They join the phase because Phase 8 is where real networks, real scheduling, and real daily data arrive.*
+
+### A1 — Store backup (Mac app; author decision)
+**Files:** `App/…/Shared/StoreBackup.swift` (or Mac-only if sharing buys nothing).
+**Work:** rotating cold copies of the store via SQLite's backup API (safe under WAL): on a schedule (launch + daily while running; injectable clock), write a copy under Application Support (`Backups/`), keep ~14, prune older. Off the main thread. Mac-only is acceptable (the phone's store is re-derivable from the mirror). Restore stays manual for now — point the recoverable-open path at a copy; the restore *drill* is Phase 12's. **Why:** pre-8, the author's writing lives in one file on one machine; post-8, Supabase is a live **mirror, not a backup** — a destructive bug replicates faithfully. Rotating cold copies are the missing net.
+**Tests:** a backup copy opens via `openStore(at:)` and matches the source's row counts at snapshot time; rotation prunes to the cap; backup of an in-use WAL store is consistent; no main-thread I/O.
+
+### A2 — Transport fault-injection suite (core; joins the Step 7 verification)
+**Work:** a fault-injecting wrapper around the Phase 5 fake server/transport that can (a) drop the response AFTER the server applied a push (the client must re-push; the CAS reject + merge path must converge with no duplicate application and no text loss), (b) deliver a batch twice, (c) fail mid-drain across a multi-row push. Assertions per scenario: convergence (byte-identical synced tables, empty outboxes), no `working_text` loss, bounded push cycles (no echo/retry storm). **Why:** the Phase 5 correctness suite proved the merge/repair logic but never exercised interrupted-network conditions; "safe by CAS design" becomes "safe by regression test" the same phase real networks arrive.
+
+### A3 — Engine re-entrancy guard + test (joins Step 6)
+**Work:** Step 6's triggers (foreground, post-write debounce, background transition) can fire concurrently; engine rounds must serialize — one round at a time, a trigger arriving mid-round coalesces into at most one follow-up round. Make the guarantee explicit in the engine-lifecycle layer (an actor or equivalent), don't rely on accidental timing.
+**Tests:** two simultaneous triggers produce strictly sequential rounds and one outbox drain; the cursor advances monotonically; a trigger storm (N rapid triggers) coalesces to ≤2 rounds.
+
+### A4 — Dev-store separation (2026-07-07, premortem round 2)
+**Work:** once real journaling starts, the author's store must be unreachable *by accident* from development activity: from Phase 8 she daily-uses the app on the same machine where Phases 9–11 are developed, and a dev-build editor bug must not be able to touch her real writing (A1's backups are the net, not the fence). Debug builds default to a **separate dev store** (e.g. a `Variorum-dev/` directory under Application Support); opening the real store from a debug build requires an explicit opt-in (launch argument or env var), so implementer agents' manual smoke launches can never land in her corpus. How she daily-drives (a Release build, or a blessed debug run via the opt-in) is **her call at this phase's checkpoint** — the fence is the requirement; the mechanism is PROVISIONAL.
+**Tests:** debug default resolves to the dev path; the opt-in resolves to the real path; release default unchanged; both paths flow through the same recoverable-open API.
+
+*Also in force from this session: SyncSpec §12 (migration lockstep) — no schema change is expected in this phase, but if one becomes necessary, §12's choreography is binding. And the CLAUDE.md model-policy rider (2026-07-07): any fix inside `Sources/VariorumCore/Sync/` exposed by A2/A3 is sync-engine surgery — stop and report; it lands only under Fable eyes.*

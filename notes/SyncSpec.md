@@ -100,3 +100,13 @@ Not yet: accounts/RLS/multi-tenant (accounts phase), GC (with sync horizon), any
 ## 11. Invariant restated
 
 Everything above preserves the load-bearing rule: **mutation is local and ephemeral; permanence is explicit and append-only** — a sync conflict is just one more way a variant gets born.
+
+## 12. Schema evolution under sync — the migration-lockstep rule (author-decided 2026-07-06, forward-planning session)
+
+The protocol deliberately has no version negotiation (the server is dumb), so schema safety is **procedural**, and the procedure is binding from the moment two devices sync for real (Phase 8 onward):
+
+- **Choreography, always in this order:** (1) the Postgres mirror gains the new table/column (still dumb — no constraints beyond PK, per §2); (2) **every client** updates and runs its local migration; (3) only then may any client write rows the new schema shapes. A client must never push a column the mirror lacks, and never receive a table/column it has no local home for.
+- **Prefer additive changes** (new tables, new nullable columns). A change that alters the meaning of an existing synced column is a redesign-level event, not a migration — stop and design it here first.
+- **Disagreement means refusal, never improvisation:** a client that detects it is behind (or ahead of) the deployed schema **refuses to sync** — outbox intact, cursor unmoved, a visible status message — until the lockstep completes. Stalling is safe by design (offline is free); guessing is the only forbidden move.
+- **The version-check mechanism ships with the first post-sync migration that needs it** (currently Phase 11's `canvas_layout` — see that phase's brief): a server-readable schema-version marker checked at engine-session start against the client's migration set. Until then, the single-author two-device reality is guarded by the choreography alone — which is why it is written down here and not merely remembered.
+
