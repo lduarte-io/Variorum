@@ -34,8 +34,8 @@ struct VariorumApp: App {
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             backupEnabled: true)
-                        fresh.start()
                         services = fresh
+                        await fresh.start()
                     }
                     .onReceive(NotificationCenter.default.publisher(
                         for: NSApplication.didBecomeActiveNotification)) { _ in

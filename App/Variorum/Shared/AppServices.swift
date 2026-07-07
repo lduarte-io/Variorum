@@ -20,8 +20,18 @@ final class AppServices {
     let backup: StoreBackup?
 
     init(session: AppSession, storeVariant: AppDatabase.StoreVariant, backupEnabled: Bool) {
-        sync = SyncSession(database: session.database)
-        idleCommits = IdleCommitScheduler(database: session.database, runner: session.runner)
+        // THE A4 FENCE, SYNC SEAM (review round 1, BLOCKER): only the REAL
+        // store may pair with the one production mirror. Debug and release
+        // builds share a bundle identity and Keychain, so a dev-store
+        // session must never adopt (or accept) the pasted credentials — a
+        // dev bug's writes would push to the mirror and replicate to her
+        // real devices.
+        sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
+        // The sweep's low-water mark is per-store bookkeeping: scoped by
+        // variant so a dev-store sweep can never advance the real store's
+        // mark (review round 1, MINOR).
+        idleCommits = IdleCommitScheduler(
+            database: session.database, runner: session.runner, storeVariant: storeVariant)
         if backupEnabled,
            let storeURL = try? AppDatabase.defaultStoreURL(variant: storeVariant) {
             // Backups live beside the store they copy — a dev store backs
@@ -35,10 +45,11 @@ final class AppServices {
         }
     }
 
-    /// Launch: credentials from the Keychain (if pasted before), a first
-    /// sync round, the sweep, the backup clock.
-    func start() {
-        if sync.loadPersistedCredentials() {
+    /// Launch: credentials from the Keychain (if pasted before; refused
+    /// wholesale for dev-store sessions), a first sync round, the sweep,
+    /// the backup clock.
+    func start() async {
+        if await sync.loadPersistedCredentials() {
             sync.triggerSync()
         }
         idleCommits.start()

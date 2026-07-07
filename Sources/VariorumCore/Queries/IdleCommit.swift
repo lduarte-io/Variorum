@@ -28,10 +28,20 @@ extension Queries {
     /// **Cost shape (P1):** the window rides `idx_container_touched`
     /// (`(last_touched_at, id) WHERE deleted_at IS NULL`), so a sweep costs
     /// ∝ containers edited since the previous sweep — never the corpus. The
-    /// second branch covers mint-only containers (`newBlock` alone never
-    /// stamps `last_touched_at` — e.g. a one-burst entry or a teardown-
-    /// minted tail with no subsequent autosave): those rows sit in the
-    /// index's NULL run, rare by construction, windowed by `created_at`.
+    /// second branch covers **never-touched** containers only (`newBlock`
+    /// alone never stamps `last_touched_at`, so a fresh one-burst entry has
+    /// a NULL stamp): those rows sit in the index's NULL run, rare by
+    /// construction, windowed by `created_at`.
+    ///
+    /// **Known residual gap (review round 1, honest scope):** a mint into a
+    /// PREVIOUSLY-touched post whose stamp is already behind the mark — an
+    /// idle-/teardown-minted tail on an old post, left alone afterwards —
+    /// matches NEITHER branch: its container stamp is outside the window
+    /// and not NULL. Such a block gets no idle insurance until the post's
+    /// next real edit. The full close is `newBlock` stamping
+    /// `last_touched_at` (QUESTIONS #5, options a/b — the author's call);
+    /// the gap is pinned by the documented-behavior test
+    /// `aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap`.
     public static func idleCommitCandidates(
         _ db: Database, afterMark: String, cutoff: String
     ) throws -> [String] {

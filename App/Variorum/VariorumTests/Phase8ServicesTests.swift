@@ -331,3 +331,233 @@ struct IdleCommitSchedulerTests {
         }
     }
 }
+
+// MARK: - Review round 1: the A4 fence's sync seam (BLOCKER) and the
+// session-layer serialization guarantee (MINOR)
+
+/// A transport that parks the round at a gate — proves the old round is
+/// mid-flight while the session is asked to re-configure.
+private actor RoundGateTransport: SyncTransport {
+    private var gated = true
+    private var gateWaiters: [CheckedContinuation<Void, Never>] = []
+    private var arrivalWaiters: [CheckedContinuation<Void, Never>] = []
+    private var parked = false
+
+    func awaitParked() async {
+        if parked { return }
+        await withCheckedContinuation { arrivalWaiters.append($0) }
+    }
+
+    func open() {
+        gated = false
+        let waiters = gateWaiters
+        gateWaiters.removeAll()
+        for waiter in waiters { waiter.resume() }
+    }
+
+    private func pass() async {
+        guard gated else { return }
+        parked = true
+        await withCheckedContinuation { continuation in
+            gateWaiters.append(continuation)
+            let arrivals = arrivalWaiters
+            arrivalWaiters.removeAll()
+            for arrival in arrivals { arrival.resume() }
+        }
+        parked = false
+    }
+
+    func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
+        await pass()
+        return batch.map { _ in .rejected(current: nil) }
+    }
+
+    func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
+        await pass()
+        return []
+    }
+}
+
+private actor RecordingTransport: SyncTransport {
+    private(set) var calls = 0
+    func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
+        calls += 1
+        return batch.map { _ in .rejected(current: nil) }
+    }
+    func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
+        calls += 1
+        return []
+    }
+}
+
+@MainActor
+@Suite("Sync session fences (Phase 8, review round 1)")
+struct SyncSessionFenceTests {
+    /// THE BLOCKER PIN: debug and release builds share a Keychain, so once
+    /// the author pastes credentials, an ungated dev-store session would
+    /// auto-configure sync and pair the dev store with the ONE production
+    /// mirror — pulling her corpus into the dev store and pushing dev-bug
+    /// writes to her real devices. A dev-store session must stay
+    /// unconfigured no matter what credentials are present.
+    @Test func devStoreSessionsNeverConfigureSyncEvenWithCredentialsPresent() async throws {
+        let db = try AppDatabase.inMemory()
+        let pasted = SyncCredentials(
+            projectURL: URL(string: "https://example.supabase.co")!,
+            apiKey: "anon-key", authToken: "anon-key")
+
+        // The dev-store session, in the exact post-checkpoint state a debug
+        // smoke launch would find (persisted credentials readable).
+        let dev = SyncSession(database: db, allowsSync: false, loadCredentials: { pasted })
+        let loaded = await dev.loadPersistedCredentials()
+        #expect(!loaded)
+        #expect(!dev.isConfigured,
+                "a dev-store session must never pair with the production mirror")
+        // Even the explicit setup door refuses.
+        await dev.configure(with: pasted, persist: false)
+        #expect(!dev.isConfigured)
+        dev.stop()
+
+        // The real-store session still auto-configures from the same state.
+        let real = SyncSession(database: db, allowsSync: true, loadCredentials: { pasted })
+        #expect(await real.loadPersistedCredentials())
+        #expect(real.isConfigured)
+        real.stop()
+    }
+
+    /// THE RE-CONFIGURE PIN (MINOR): a key-rotation re-paste while a round
+    /// is mid-flight must drain the old scheduler before a new chain can
+    /// run — A3's one-round-at-a-time is per-scheduler, so the session owns
+    /// the cross-scheduler guarantee.
+    @Test func reconfigureDrainsTheInFlightRoundBeforeTheNewChainRuns() async throws {
+        let db = try AppDatabase.inMemory()
+        let session = SyncSession(database: db, allowsSync: true, loadCredentials: { nil })
+        let gate = RoundGateTransport()
+        let spy = RecordingTransport()
+
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            await session.configure(transport: gate)
+            session.triggerSync()
+            await gate.awaitParked()  // the old round is provably mid-flight
+
+            let reconfigure = Task { await session.configure(transport: spy) }
+            // A trigger landing mid-reconfigure must not start a round on
+            // any chain while the old round is still in flight.
+            try await Task.sleep(for: .milliseconds(50))
+            session.triggerSync()
+            try await Task.sleep(for: .milliseconds(50))
+            #expect(!session.isConfigured,
+                    "the new chain must not exist until the old round drained")
+            #expect(await spy.calls == 0,
+                    "no round may run on the new transport while the old round is mid-flight")
+
+            await gate.open()
+            await reconfigure.value
+            #expect(session.isConfigured)
+
+            // The new chain works once the old one drained.
+            session.triggerSync()
+            for _ in 0..<2000 {
+                if await spy.calls > 0 { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(await spy.calls > 0)
+            session.stop()
+        }
+    }
+}
+
+// MARK: - Review round 1: the sweep mark's variant scoping + error posture
+// (MINOR)
+
+@MainActor
+@Suite("Idle sweep mark scoping & error posture (Phase 8, review round 1)")
+struct IdleSweepMarkTests {
+    @Test func aDevStoreSweepNeverAdvancesTheRealStoresMark() async throws {
+        let devKey = IdleCommitScheduler.markDefaultsKey(for: .dev)
+        let realKey = IdleCommitScheduler.markDefaultsKey(for: .real)
+        UserDefaults.standard.removeObject(forKey: devKey)
+        UserDefaults.standard.removeObject(forKey: realKey)
+        defer {
+            UserDefaults.standard.removeObject(forKey: devKey)
+            UserDefaults.standard.removeObject(forKey: realKey)
+        }
+
+        let db = try AppDatabase.inMemory()
+        let session = try withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 9))
+        } operation: { @MainActor in
+            AppSession(database: db)
+        }
+        // Default (UserDefaults-backed) persistence, DEV variant.
+        let devScheduler = IdleCommitScheduler(
+            database: db, runner: session.runner, storeVariant: .dev,
+            now: { Date(timeIntervalSince1970: 1_782_864_000 + 48 * 3600) })
+        await devScheduler.sweepNow()
+
+        #expect(UserDefaults.standard.string(forKey: devKey) != nil,
+                "the dev sweep records its own mark")
+        #expect(UserDefaults.standard.string(forKey: realKey) == nil,
+                "a dev-store sweep must never advance the real store's mark — real edits in the skipped window would lose idle insurance")
+    }
+
+    @Test func aFailingAskHoldsTheMarkSoTheNextSweepRetries() async throws {
+        struct AskFailure: Error {}
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 10))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "journal", profile: .journal)
+            let minted = try session.operations.newBlock(in: post.id, text: "draft")
+            try session.operations.autosave(minted.variant.id, text: "draft, grown", charDelta: 7)
+
+            let marks = LockIsolated<[String]>([])
+            let failing = LockIsolated(true)
+            let runner = session.runner
+            let scheduler = IdleCommitScheduler(
+                database: db,
+                runner: runner,
+                now: { start.addingTimeInterval(30 * 3600) },
+                loadMark: { marks.value.last },
+                saveMark: { mark in marks.withValue { $0.append(mark) } },
+                ask: { containerID in
+                    if failing.value { throw AskFailure() }
+                    return try await runner.run { ops in
+                        try ops.idleAutoCommit(containerID).count
+                    }
+                })
+
+            // The transient failure: the mark must NOT advance — the next
+            // sweep re-asks instead of skipping the window forever.
+            await scheduler.sweepNow()
+            #expect(scheduler.lastError != nil)
+            #expect(marks.value.isEmpty,
+                    "a failed ask holds the mark for retry — never swept past")
+
+            // Healed: the retry commits and the mark advances.
+            failing.setValue(false)
+            await scheduler.sweepNow()
+            #expect(scheduler.lastSweepCommitCount == 1)
+            #expect(marks.value.count == 1)
+        }
+    }
+}

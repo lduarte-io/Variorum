@@ -14,11 +14,23 @@
 //    the same one-block journal semantics the Mac ships;
 //  - edits flow through the SHARED AutosaveCoordinator (debounced,
 //    churn-fed, keep-pending on refusal — the Phase 7 posture comes along
-//    by sharing the code); the buffer is authoritative while dirty and
-//    projections defer to a clean re-fetch (the Phase 7 review posture);
+//    by sharing the code);
 //  - blocks with fans render the chosen/default take's text and edit
 //    exactly that variant — the fan itself is invisible here;
 //  - a sealed post renders read-only with the refusal surfaced.
+//
+//  PROJECTION DISCIPLINE (review round 1, MAJOR): a delivered observation
+//  value is a photograph of some PAST commit — it can arrive on the
+//  MainActor after a newer flush has landed and the buffer looks clean, and
+//  adopting it would reset the draft and edit-cost base to stale text; the
+//  next keystroke would then overwrite the flushed text in the store (the
+//  forbidden text-loss class; sub-case: a stale empty delivery would drop
+//  focus and double-mint the "first" block). So delivered values are NEVER
+//  adopted. Every delivery is only a signal; the authoritative application
+//  is a FRESH read stamped with `readGeneration` — any local write landing
+//  after the read began bumps the generation and the fetched value is
+//  discarded and re-fetched. Adoption happens only when the buffer is clean
+//  AND the value is provably current.
 //
 
 import Foundation
@@ -43,10 +55,15 @@ final class EntryEditorViewModel {
     /// The draft as last handed to the autosave pipeline (edit-cost base).
     private var flushedDraft: String = ""
     private(set) var mintInFlight = false
-    /// A projection that arrived while the buffer was authoritative — its
-    /// arrival is remembered; the value is re-fetched fresh at settle
-    /// (never applied stale).
+    /// A projection signal that arrived while the buffer was authoritative —
+    /// remembered; a fresh read runs at settle (never a stale value).
     private var projectionDeferred = false
+    /// Bumped whenever a local write lands (flush settle, mint completion):
+    /// any in-flight read that began before the bump is stale by definition
+    /// and is discarded on arrival.
+    private var readGeneration = 0
+    /// Authoritative reads in flight (test settling).
+    private(set) var refreshesInFlight = 0
 
     var isSealed: Bool { header?.locked ?? false }
     var isJournal: Bool { header?.entryDate != nil }
@@ -65,7 +82,14 @@ final class EntryEditorViewModel {
             self?.lastError = String(describing: error)
         }
         autosave.onSettled = { [weak self] in
-            self?.applyDeferredProjectionIfClean()
+            guard let self else { return }
+            // A flush just landed (or failed back into pending): every read
+            // begun before this instant is stale.
+            self.readGeneration += 1
+            if self.projectionDeferred {
+                self.projectionDeferred = false
+                self.scheduleAuthoritativeRefresh()
+            }
         }
     }
 
@@ -79,25 +103,25 @@ final class EntryEditorViewModel {
         }
     }
 
-    /// One direct load (tests, and re-fetch-at-settle).
+    /// One authoritative load, settled (first paint + tests).
     func loadOnce() async {
-        do {
-            let postID = postID
-            let (slots, header) = try await session.database.read { db in
-                (try Queries.renderPost(db, containerID: postID),
-                 try Queries.containerHeader(db, containerID: postID))
-            }
-            adopt(header: header)
-            adopt(slots: slots)
-        } catch {
-            lastError = String(describing: error)
+        scheduleAuthoritativeRefresh()
+        await settleProjection()
+    }
+
+    /// Bounded wait until no authoritative read is in flight (tests +
+    /// first paint).
+    func settleProjection() async {
+        for _ in 0..<2000 where refreshesInFlight > 0 {
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(1))
         }
     }
 
     private func observeSlots() async {
         do {
             for try await slots in session.database.observePost(postID) {
-                adopt(slots: slots)
+                projectionDelivered(slots)
             }
         } catch is CancellationError {
         } catch {
@@ -107,8 +131,10 @@ final class EntryEditorViewModel {
 
     private func observeHeader() async {
         do {
-            for try await header in session.database.observeContainerHeader(postID) {
-                adopt(header: header)
+            for try await _ in session.database.observeContainerHeader(postID) {
+                // Header changes (a remote seal, a re-date) ride the same
+                // authoritative-read path as slots.
+                scheduleAuthoritativeRefresh()
             }
         } catch is CancellationError {
         } catch {
@@ -116,18 +142,58 @@ final class EntryEditorViewModel {
         }
     }
 
-    private func adopt(header: Queries.ContainerHeader?) {
-        self.header = header
+    /// The observation hand-off. The DELIVERED VALUE IS DELIBERATELY
+    /// UNUSED: it may predate local writes that landed while it was in
+    /// transit (see the projection-discipline note above). Internal, not
+    /// private, so the review pin can drive the exact race.
+    func projectionDelivered(_ slots: [Queries.RenderedBlock]) {
+        _ = slots
+        scheduleAuthoritativeRefresh()
     }
 
-    private func adopt(slots: [Queries.RenderedBlock]) {
+    /// A fresh, generation-stamped read of post + header.
+    private func scheduleAuthoritativeRefresh() {
+        let generation = readGeneration
+        refreshesInFlight += 1
+        let postID = postID
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.refreshesInFlight -= 1 }
+            do {
+                let value = try await self.session.database.read { db in
+                    (slots: try Queries.renderPost(db, containerID: postID),
+                     header: try Queries.containerHeader(db, containerID: postID))
+                }
+                self.applyFetched(slots: value.slots, header: value.header, generation: generation)
+            } catch {
+                self.lastError = String(describing: error)
+            }
+        }
+    }
+
+    private func applyFetched(
+        slots: [Queries.RenderedBlock],
+        header: Queries.ContainerHeader?,
+        generation: Int
+    ) {
         // Buffer-authoritative while anything is unpersisted (the Phase 7
-        // posture): remember that a projection arrived; re-fetch fresh at
-        // settle instead of applying a stale value (review MAJOR 2's rule).
+        // posture): the settle handler re-fetches.
         guard !autosave.isDirty, !mintInFlight else {
             projectionDeferred = true
             return
         }
+        // A local write landed after this read began: the value is a stale
+        // photograph — discard it and read again.
+        guard generation == readGeneration else {
+            scheduleAuthoritativeRefresh()
+            return
+        }
+        adopt(slots: slots, header: header)
+    }
+
+    /// Reached ONLY with a clean buffer and a provably current value.
+    private func adopt(slots: [Queries.RenderedBlock], header: Queries.ContainerHeader?) {
+        self.header = header
         self.slots = slots
         // Auto-focus the single block of a one-block entry (the journal's
         // everyday shape); multi-block posts focus by tap.
@@ -135,27 +201,21 @@ final class EntryEditorViewModel {
            !only.isGap, !only.variantLocked, !isSealed {
             focus(only)
         }
-        // The focused slot's store text — adopt it when the buffer is clean
-        // (our own flush echoing back, or a genuinely external change; both
-        // are safe to show when nothing local is pending).
+        // The focused slot's store text: our own flush echoing back, or a
+        // genuinely external change — both safe to show when nothing local
+        // is pending and the value is current.
         if let focusedVariantID,
            let focused = slots.first(where: { $0.variantID == focusedVariantID }) {
             draftText = focused.text ?? ""
             flushedDraft = draftText
         } else if focusedVariantID != nil {
-            // The focused variant left the projection (re-pointed slot,
-            // remote structural change): drop focus rather than edit a
-            // variant no slot shows.
+            // The focused variant genuinely left the store's projection
+            // (re-pointed slot, remote structural change): drop focus rather
+            // than edit a variant no slot shows.
             focusedVariantID = nil
             draftText = ""
             flushedDraft = ""
         }
-    }
-
-    private func applyDeferredProjectionIfClean() {
-        guard projectionDeferred, !autosave.isDirty, !mintInFlight else { return }
-        projectionDeferred = false
-        Task { await loadOnce() }
     }
 
     // MARK: - Focus & editing
@@ -220,7 +280,12 @@ final class EntryEditorViewModel {
                     flushedDraft = draftText
                 }
                 mintInFlight = false
-                applyDeferredProjectionIfClean()
+                // The mint is a local write: stale in-flight reads die here.
+                readGeneration += 1
+                if projectionDeferred {
+                    projectionDeferred = false
+                }
+                scheduleAuthoritativeRefresh()
             } catch {
                 lastError = String(describing: error)
                 mintInFlight = false
@@ -267,7 +332,8 @@ final class EntryEditorViewModel {
 /// The churn feed's edit cost (AppSpec §10): inserted + deleted, equal
 /// weight, UTF-16 units (the Phase 3 offset decision). A whole-buffer diff
 /// by common prefix/suffix — exact for any single contiguous edit, which is
-/// what a text view hands us per change.
+/// what a text view hands us per change. O(buffer) per keystroke — fine at
+/// capture scale; folded into QUESTIONS #2's Phase 15 revisit (review NIT).
 enum EditCost {
     nonisolated static func utf16Cost(from old: String, to new: String) -> Int {
         let oldUnits = Array(old.utf16)

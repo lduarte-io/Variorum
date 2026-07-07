@@ -169,3 +169,40 @@ struct IdleCommitSweepTests {
         }
     }
 }
+
+// MARK: - Review round 1 (MINOR): the honest coverage boundary
+
+@Suite("Idle sweep coverage boundary (Phase 8, review round 1)")
+struct IdleSweepCoverageBoundaryTests {
+    /// DOCUMENTED GAP, pinned so it can never be overclaimed again: a mint
+    /// into a PREVIOUSLY-touched post whose stamp is already behind the
+    /// mark matches neither branch — the block gets no idle insurance until
+    /// the post's next real edit. The full close is `newBlock` stamping
+    /// `last_touched_at` (QUESTIONS #5, the author's call); if she picks it,
+    /// this test flips into that fix's red-on-old pin.
+    @Test func aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap() throws {
+        try withOperations { ops, db in
+            // A post with real edit history…
+            let post = try ops.createPost(title: "old post", profile: .blog)
+            let first = try ops.newBlock(in: post.id, text: "Edited once.", at: .end)
+            try ops.autosave(first.variant.id, text: "Edited once, truly.", charDelta: 7)
+            _ = try ops.commit(first.variant.id)
+            let touched = try db.fetchString(
+                "SELECT last_touched_at FROM container WHERE id = ?", [post.id])!
+
+            // …a sweep has advanced the mark past its stamp…
+            let mark = touched  // the previous sweep's cutoff covered it
+
+            // …then a tail block is MINTED (newBlock stamps nothing) and
+            // the post is left alone.
+            _ = try ops.newBlock(in: post.id, text: "Teardown-minted tail, never edited again.", at: .end)
+
+            let candidates = try db.read {
+                try Queries.idleCommitCandidates(
+                    $0, afterMark: mark, cutoff: "2026-07-01T23:59:59.999Z")
+            }
+            #expect(candidates.isEmpty,
+                    "documented: neither branch sees a mint into a previously-touched, already-swept post — QUESTIONS #5 owns the close")
+        }
+    }
+}

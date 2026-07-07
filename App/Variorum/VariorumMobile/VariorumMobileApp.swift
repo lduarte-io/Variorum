@@ -31,13 +31,12 @@ struct VariorumMobileApp: App {
                 MobileRootView(session: session, services: services)
                     .task {
                         guard services == nil else { return }
-                        applyStoreFileProtection()
                         let fresh = AppServices(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             backupEnabled: false)
-                        fresh.start()
                         services = fresh
+                        await fresh.start()
                     }
             case .failed(let error):
                 MobileStoreFailureView(error: error) { bootstrap.retry() }
@@ -60,16 +59,8 @@ struct VariorumMobileApp: App {
         }
     }
 
-    /// The deliberate protection-class pick (plan risk note): the store
-    /// stays readable after the FIRST unlock, so the background-transition
-    /// round can usually finish; a complete-lock race still lands on the
-    /// scheduler's offline posture.
-    private func applyStoreFileProtection() {
-        guard let url = try? AppDatabase.defaultStoreURL(variant: bootstrap.storeVariant)
-        else { return }
-        let directory = url.deletingLastPathComponent().path
-        try? FileManager.default.setAttributes(
-            [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
-            ofItemAtPath: directory)
-    }
+    // (The protection-class pick moved into AppBootstrap.open() — review
+    // round 1: iOS data protection is inherited AT CREATION, so setting it
+    // after the store was opened protected nothing; it must precede the
+    // first open.)
 }

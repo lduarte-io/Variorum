@@ -20,7 +20,12 @@ struct SyncStatusRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            if !sync.isConfigured {
+            if !sync.allowsSync {
+                // The A4 fence: a dev-store session never syncs — no setup
+                // door either (the one mirror belongs to the real store).
+                Text("Sync off (dev store)")
+                    .foregroundStyle(.secondary)
+            } else if !sync.isConfigured {
                 Text("Sync is off")
                     .foregroundStyle(.secondary)
                 Button("Set up…") { showingSetup = true }
@@ -106,10 +111,14 @@ struct SyncSetupView: View {
             return
         }
         let token = authToken.isEmpty ? apiKey : authToken
-        sync.configure(
-            with: SyncCredentials(projectURL: url, apiKey: apiKey, authToken: token),
-            persist: true)
-        sync.triggerSync()
+        let credentials = SyncCredentials(projectURL: url, apiKey: apiKey, authToken: token)
+        let sync = sync
+        Task {
+            // Async: configure drains a mid-round predecessor first (A3 at
+            // the session layer).
+            await sync.configure(with: credentials, persist: true)
+            sync.triggerSync()
+        }
         dismiss()
     }
 }

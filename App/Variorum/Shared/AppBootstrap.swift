@@ -49,6 +49,9 @@ final class AppBootstrap {
     private func open() -> State {
         do {
             let url = try AppDatabase.defaultStoreURL(variant: storeVariant)
+            #if os(iOS)
+            prepareStoreDirectoryProtection(url)
+            #endif
             let database = try AppDatabase.openStore(at: url)
             if !installed {
                 AppDatabase.install(database)
@@ -64,4 +67,30 @@ final class AppBootstrap {
                 storePath: "", reason: String(describing: error)))
         }
     }
+
+    #if os(iOS)
+    /// The deliberate protection-class pick (Phase 8 plan risk note),
+    /// applied BEFORE the first open — iOS data protection is inherited at
+    /// CREATION time, so the directory's class must be set while the store
+    /// files don't exist yet (review round 1: a post-open attribute set
+    /// protected nothing; files created earlier keep their class).
+    ///
+    /// `.completeUntilFirstUserAuthentication` — the same value as the
+    /// platform default for third-party app data, chosen EXPLICITLY (not
+    /// relied on): the store stays readable after the first unlock, so the
+    /// background-transition sync round can usually finish; a complete-lock
+    /// race still lands on the scheduler's offline posture. Recording the
+    /// choice here means a future entitlement or OS-default change cannot
+    /// silently unmake it.
+    private func prepareStoreDirectoryProtection(_ storeURL: URL) {
+        let directory = storeURL.deletingLastPathComponent()
+        let protection: [FileAttributeKey: Any] =
+            [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
+        try? FileManager.default.createDirectory(
+            at: directory, withIntermediateDirectories: true, attributes: protection)
+        // Existing directory (later launches): keep the class asserted so
+        // files created from now on (-wal/-shm rebuilds, backups) inherit it.
+        try? FileManager.default.setAttributes(protection, ofItemAtPath: directory.path)
+    }
+    #endif
 }

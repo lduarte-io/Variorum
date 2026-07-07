@@ -25,11 +25,15 @@ extension Operations {
     /// converges to two visible entries on that day's page, hand-merged,
     /// with the Fragments bridge pausing that day's push until resolved.
     ///
-    /// When more than one live entry carries the date (that converged race),
-    /// the earliest-created (`created_at`, `id` tiebreak) opens —
-    /// deterministic on every device. An ARCHIVED entry still opens
-    /// (archive is kept-out-of-view, not gone — opening it beats minting a
-    /// same-day duplicate the notebook rule exists to prevent).
+    /// When more than one entry carries the date (that converged race),
+    /// preference is **unarchived first, then earliest `(created_at, id)`**
+    /// — deterministic on every device (`archived_at` is converged metadata).
+    /// The live-first tier matters when the author archived one half of a
+    /// converged double-create: "Today" must open the entry the day's page
+    /// shows, never a list-invisible archived sibling (review round 1). An
+    /// archived entry still opens when it is ALL the day has — archive is
+    /// kept-out-of-view, not gone, and opening it beats minting the
+    /// same-day duplicate the notebook rule exists to prevent.
     public struct JournalEntryResult: Equatable, Sendable {
         public let container: Container
         /// False when the notebook rule opened an existing entry.
@@ -45,7 +49,7 @@ extension Operations {
                     SELECT * FROM container
                     WHERE kind = 'post' AND profile = 'journal'
                       AND entry_date = ? AND deleted_at IS NULL
-                    ORDER BY created_at ASC, id ASC
+                    ORDER BY (archived_at IS NOT NULL) ASC, created_at ASC, id ASC
                     LIMIT 1
                     """,
                 arguments: [entryDate]) {

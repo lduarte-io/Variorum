@@ -310,3 +310,97 @@ struct EntryListTests {
         }
     }
 }
+
+// MARK: - Review round 1 (MAJOR): stale projections must never reset the
+// edit base, lose flushed text, or double-mint
+
+@MainActor
+@Suite("Stale projection races (Phase 8, review round 1)")
+struct StaleProjectionTests {
+    /// THE TEXT-LOSS PIN: an observation value is a photograph of a PAST
+    /// commit; delivered at a clean instant after a newer flush, adopting
+    /// it resets `draftText` + the edit base to stale text and the next
+    /// keystroke overwrites the flushed text in the store — the forbidden
+    /// class. The model must treat deliveries as signals only and adopt
+    /// exclusively from generation-checked fresh reads.
+    @Test func aStaleDeliveryAfterAFlushNeverResetsTheDraftOrLosesText() async throws {
+        try await withMobileWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "raced", profile: .journal, entryDate: "2026-07-07")
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base text.", at: .end)
+            }
+            let model = makeEditorModel(session, postID: post.id)
+            await model.loadOnce()
+            #expect(model.focusedVariantID == minted.variant.id)
+
+            // The stale photograph: fetched BEFORE the edit below — exactly
+            // what GRDB can deliver late, after the flush has settled.
+            let staleSlots = model.slots
+
+            model.setDraft("Base text. Typed and flushed.")
+            await model.autosave.flushNow()
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.variant.id])
+            } == "Base text. Typed and flushed.")
+
+            // The stale delivery lands at a CLEAN instant (post-settle).
+            model.projectionDelivered(staleSlots)
+            await model.settleProjection()
+
+            // The surface keeps the flushed text (pre-fix: reset to stale)…
+            #expect(model.draftText == "Base text. Typed and flushed.",
+                    "a stale delivery must never reset the draft")
+
+            // …so the next keystroke builds on what the user sees, and
+            // nothing typed is ever lost (pre-fix: the store loses
+            // ' Typed and flushed.').
+            model.setDraft(model.draftText + " More.")
+            await model.autosave.flushNow()
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.variant.id])
+            } == "Base text. Typed and flushed. More.")
+        }
+    }
+
+    /// THE DOUBLE-MINT PIN: a stale EMPTY delivery landing after the first
+    /// block minted would drop focus and empty `slots`; the next keystroke
+    /// would take the `slots.isEmpty` branch and mint a SECOND "first"
+    /// block.
+    @Test func aStaleEmptyDeliveryAfterTheMintNeverDoubleMints() async throws {
+        try await withMobileWorld { session, db in
+            let entry = try await session.runner.run { ops in
+                try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            }
+            let model = makeEditorModel(session, postID: entry.container.id)
+            await model.loadOnce()
+            let staleEmpty = model.slots
+            #expect(staleEmpty.isEmpty, "precondition: the pre-mint photograph is blockless")
+
+            model.setDraft("First words.")
+            await model.waitForMint()
+            await model.settleProjection()
+            #expect(model.focusedVariantID != nil)
+
+            // The pre-mint photograph arrives late, at a clean instant.
+            model.projectionDelivered(staleEmpty)
+            await model.settleProjection()
+
+            // Typing continues: exactly ONE block, ever.
+            model.setDraft("First words. And more.")
+            await model.waitForMint()
+            await model.autosave.flushNow()
+            #expect(try await db.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM block") ?? -1
+            } == 1, "a stale empty delivery must never cause a second first-block mint")
+            #expect(try await db.read {
+                try String.fetchOne($0, sql: "SELECT working_text FROM variant") ?? ""
+            } == "First words. And more.")
+        }
+    }
+}

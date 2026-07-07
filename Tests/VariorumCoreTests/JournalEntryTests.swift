@@ -142,3 +142,35 @@ struct JournalEntryTests {
         }
     }
 }
+
+// MARK: - Review round 1 (MINOR): live entries outrank archived siblings
+
+@Suite("Notebook rule: live-over-archived (Phase 8, review round 1)")
+struct JournalEntryArchivedSiblingTests {
+    /// THE PIN: after a converged double-create where the author archived
+    /// the EARLIER entry, "Today" must open the entry the day's page shows
+    /// — never the list-invisible archived sibling (pre-fix: plain
+    /// `(created_at, id)` order returned the archived one).
+    @Test func aLiveEntryOutranksAnEarlierArchivedSibling() throws {
+        try withOperations { ops, _ in
+            let earlier = try ops.createPost(
+                title: "phone half", profile: .journal, entryDate: "2026-07-07")
+            let later = try ops.createPost(
+                title: "desk half", profile: .journal, entryDate: "2026-07-07")
+            try ops.archiveContainer(earlier.id)
+
+            let opened = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(!opened.created)
+            #expect(opened.container.id == later.id,
+                    "the live sibling opens — the archived one is out of view")
+
+            // Archived-only days still open their archived entry (the
+            // original interpretation, unchanged).
+            try ops.archiveContainer(later.id)
+            let bothArchived = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(!bothArchived.created)
+            #expect(bothArchived.container.id == earlier.id,
+                    "all-archived falls back to earliest — deterministic everywhere")
+        }
+    }
+}
