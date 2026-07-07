@@ -1,10 +1,12 @@
-# Phase 8b — The Fragments journal bridge — DESIGN BRIEF
+# Phase 9b — The Fragments journal bridge — DESIGN BRIEF
 
 > **This is a BRIEF, not the execution plan.** Written 2026-07-07 at the author's direction
-> (she decided the bridge the same day: **two-way, now-ish, not deferred** — she wants to
-> journal in Fragments as well as in Variorum's own iOS capture). The just-in-time plan is
-> written at **Phase 8's closeout** (8b follows 8 — it reuses 8's transport patterns and her
-> credential flow). Ratified decisions below are binding.
+> (she decided the bridge the same day: **two-way, not deferred** — she wants to journal in
+> Fragments as well as in Variorum's own iOS capture). **Slotted after Phase 9 (author,
+> 2026-07-07):** she won't heavily use the app until Phases 9–11 land, and the Fable budget
+> goes to Phase 9 first; the bridge still precedes the views phases. The just-in-time plan
+> is written at **Phase 9's closeout** (the bridge reuses Phase 8's transport patterns and
+> her credential flow, both settled by then). Ratified decisions below are binding.
 >
 > **HARD RULE (author, 2026-07-07): this repo's coordinator and agents NEVER work in, read
 > from, or write to `~/dev/fragments`.** Everything Variorum needs from the Fragments side is

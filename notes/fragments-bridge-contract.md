@@ -4,7 +4,7 @@
 written 2026-07-07. **Audience: the author, and her Fragments agents** (she carries this to
 the Fragments repo herself — Variorum's coordinator and agents never work in
 `~/dev/fragments`, and Fragments' agents never work here). Variorum's side is specced in
-`notes/plans/phase-08b-fragments-bridge-brief.md`. If either side needs the contract to
+`notes/plans/phase-09b-fragments-bridge-brief.md` (built after Variorum's Phase 9). If either side needs the contract to
 change, the author is the channel.
 
 ## The arrangement (author-decided 2026-07-07)

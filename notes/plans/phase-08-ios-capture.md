@@ -23,7 +23,11 @@
 > "shared". **Step 1 is an author-assist gate** (iOS target creation + signing is a
 > machine-side GUI step, hers; mirror Phase 7's flow — she creates, you verify + fix + commit,
 > never redo blind). **Step 6 is a second author-assist point** (her Supabase credentials on
-> the phone). Views are functional and unstyled — zero polish until Phase 13. Deployment
+> the phone — though a server-side PAT already exists untracked; see Step 6). **If the author
+> is not present at session start, proceed HEADLESS-FIRST** (2026-07-07 — this phase may be
+> kicked off on a timer while she sleeps): amendments A1–A3, A5, A6 and Step 5 are Mac/core
+> work needing no iOS target — do them while waiting; never fabricate the target, and never
+> idle while headless work remains. Views are functional and unstyled — zero polish until Phase 13. Deployment
 > target iOS 26; `SWIFT_VERSION = 6.0` from day one (Phase 7's review caught the template
 > defaulting to 5 — check it at Step 1 verification). **The "Plan amendments" section at the
 > bottom of this file is binding** — amendments A1–A6 (2026-07-06/07: store backup;
