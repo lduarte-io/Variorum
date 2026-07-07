@@ -934,3 +934,52 @@ struct ReviewRound1FixTests {
         }
     }
 }
+
+@MainActor
+@Suite("Review round 2 fixes (Phase 9)")
+struct ReviewRound2FixTests {
+    // MINOR: cuts placed against text that drifted while the sheet sat open
+    // (a sync round editing a marked take) must not reach the op — the
+    // ceremony refreshes (marks kept, cuts re-seeded) instead of cutting at
+    // stale offsets. Red on the old code: confirm cut the CURRENT store
+    // text at the stale offset (a well-formed wrong-position cut, silent).
+    @Test func aStaleCeremonyRefreshesInsteadOfCutting() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let slots = try h.storeSlots()
+            let v1 = slots[0].variantID!
+            let v2 = try h.session.operations.branchVariant(slots[0].blockID, from: v1)
+            try h.session.operations.autosave(
+                v2.id, text: "Intro pad. First alpha. First omega.", charDelta: 0)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(location: 15, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)
+            #expect(h.model.divideWCeremony != nil)
+
+            // A sync round lands an edit to the ACTIVE (marked) take while
+            // the sheet is open — same shape, different words.
+            try h.session.operations.autosave(
+                v1, text: "XXXXX alpha. XXXXX omega.", charDelta: 0)
+
+            await h.model.confirmDivideWCeremony()
+
+            // No cut ran; the ceremony refreshed with a visible status.
+            let untouched = try h.storeSlots().count
+            #expect(untouched == 1, "a stale ceremony must never cut")
+            let refreshed = try #require(h.model.divideWCeremony)
+            #expect(h.model.statusMessage?.contains("changed") == true)
+            // The refreshed active take carries the CURRENT text and a
+            // re-seeded legal cut, marks preserved.
+            let active = try #require(refreshed.takes.first { $0.id == v1 })
+            #expect(active.marked)
+            #expect(active.variant.workingText == "XXXXX alpha. XXXXX omega.")
+            #expect(active.cut == 13)  // re-snapped into the current text
+
+            // Confirming the REFRESHED ceremony cuts for real.
+            await h.model.confirmDivideWCeremony()
+            let divided = try h.storeSlots().map(\.text)
+            #expect(divided == ["XXXXX alpha.", "XXXXX omega."])
+            try expectStoreMatchesView(h)
+        }
+    }
+}

@@ -665,17 +665,17 @@ the pre-fix code (`isEditable → true`), and asserts editability returns after 
 `structuralInFlight` became `private(set)` for both pins' staging.
 
 **MINOR 3 (oracle comment claims a release heal that is compiled out) — AGREED, doc-only
-fix; the optional release tripwire CONSIDERED AND DECLINED.** The comment now states the
-truth: nothing in `verifyDifferentialOracle` ships in release; a divergence that slips
-the shape guard there stands until the next projection delivery — and that delivery is
-already in flight by construction, because the same sync apply that caused the divergence
-fired the observation. Tripwire declination rationale (recorded per the coordinator's
-instruction): its release-only branch is untestable by the debug-only test rig — in
-debug the deep oracle strictly subsumes the O(1) length check, and staging ANY oracle
-firing crashes the test host via the debug `assertionFailure` — so the tripwire would be
-a behavior change that cannot carry its red-on-old pin; the DEBUG oracle + the soak are
-exactly the assurance the author's directive prescribed, and the self-heal path
-(observation delivery) already exists.
+fix; the optional release tripwire CONSIDERED AND DECLINED, then SUPERSEDED by an
+author-directed source-level fix (2026-07-07, folded into round 2).** The comment now
+states the truth: nothing in `verifyDifferentialOracle` ships in release. The tripwire
+was declined as unpinnable (its release-only branch is untestable by the debug-only rig
+— the deep oracle strictly subsumes the O(1) length check in debug, and staging any
+oracle firing crashes the test host via the debug `assertionFailure`) and WEAK (length
+checks miss same-length byte divergence — the very release scenario the reviewer
+traced). The author reviewed the disposition and directed the replacement that CAN carry
+its pin, enabled by MINOR 5's extraction: **retained-byte verification inside
+`StructuralSeamEdit.derive`** — guard-level prevention in EVERY build, not detection.
+Disposition and pins recorded under Review round 2 below.
 
 **MINOR 4 (convergence test's "compound … exactly as the editor runs it" ran ONE divide)
 — AGREED, test-scope fix.** The compound now runs TWO divides (cut 15, then the
@@ -715,3 +715,97 @@ tail TEXT makes a selection tail-side. Pin:
 → suffix extract; one unit further → still `openTailTarget`, preserving the pinned
 crossing-into-tail behavior) — verified red on the old threshold by behavioral revert
 (the reverted line answered `openTailTarget`).
+
+---
+
+## Review round 2 (2026-07-07) — 1 NEW MAJOR / 1 MINOR / 1 NIT (all AGREED, all fixed)
+## + the author-directed retained-byte fix, folded into the same batch
+
+Fresh counts after the round: **core 430/51 · Mac app 220/39 · mobile 11/4** — all green;
+TK1 audit clean; Release build green. The round-2 reviewer also re-verified all six
+round-1 fixes in code with their pins (its clean bill).
+
+**MAJOR (differential guard validates the seam but not the rest of the projection) —
+AGREED, fixed, red-on-old pins for every seam kind.** Mechanism re-traced and confirmed:
+`derive`'s guards never referenced a fresh slot outside the seam, so a concurrent write
+(a sync pull apply can commit between the op's transaction and the fetch — GRDB
+serializes writes) changing a NON-seam slot's length passed every guard; the rebuilt
+index then adopts the remote slot's new length while the surface shows its old text —
+index geometry ≠ surface geometry. In RELEASE (the author's ratified daily-drive
+configuration) nothing checks: the next keystroke's `recordAutosave` reads `viewText` at
+wrong offsets and writes scrambled text into `working_text` (the forbidden store-level
+class), and the assumed healing delivery instead hits `applyDifferential` at misaligned
+ranges — `programmaticReplace` had no bounds guard, so past-end ranges raise an
+uncatchable NSRangeException. Fix: `derive` now requires every non-seam fresh slot to
+correspond to its old entry under the seam's index mapping (same blockID, same UTF-16
+length; O(#entries) value comparisons — the same class as the index rebuild the caller
+already performs). Pins (`SeamEditNonSeamGeometryTests`): length drift on either side of
+the seam, identity drift, and every seam kind (divide/extract/makeBlock/merge) — plus an
+aligned-neighbors control proving the guard is correspondence, not paranoia. **Verified
+red by behavioral revert** (guard short-circuited to `true` → all six refusal
+assertions failed across all four seam kinds), restored, green.
+
+**Author-directed fix (round-1 MINOR 3 follow-up): retained-byte verification —
+IMPLEMENTED, red-on-old pins for every seam kind's retained region.** Mechanism traced
+per the directive and confirmed for all four seams: the old guards used LENGTH
+arithmetic for the regions the differential edit deliberately does not rewrite, so a
+same-length remote rewrite of a seam entry's text (a sync apply between op and fetch)
+passed the guard and left the surface's retained bytes silently disagreeing with the
+store until the delivery healed — with typing in that window autosaving stale bytes over
+the merged text. Fix: `derive` gained an `oldTextAt` input (the pre-edit surface text,
+consulted for SEAM entries only — O(seam), never O(document)) and now byte-verifies
+every retained region: divide's kept first half IS the old prefix; extract's kept
+remainder IS the old suffix/prefix; makeBlock's kept prefix AND suffix ARE the old
+edges; merge's two halves appear VERBATIM around the join (byte equality now decides the
+join kind, subsuming the old length arithmetic). Any mismatch → nil → full render from
+fresh, in EVERY build; the DEBUG deep oracle stays as-is (this is prevention, not
+detection). A surface/index length-disagreement guard on `oldTextAt` rides along,
+pinned. Pins (`SeamEditRetainedByteTests`): same-length different-byte doctored
+projections for divide (kept half), extract (both edges' retained remainders), makeBlock
+(both kept edges), merge (both halves) — **verified red by behavioral revert** (byte
+checks bypassed, merge reverted to length arithmetic → all seven refusal assertions
+failed), restored, green.
+
+**The honestly-documented residual after BOTH guards (per the coordinator/author):** a
+same-length BYTE change to a NON-seam slot still passes — deliberately: geometry stays
+aligned (the index is safe; autosave offsets are correct), the stale surface text heals
+through the ordinary projection delivery already in flight (the concurrent apply that
+caused it fired the observation), and checking it would be O(document) per gesture
+(P1: the differential's economy stands). This is the same delivery-window semantics
+every Phase 7 projection lives under. Recorded here and in the code doc
+(`StructuralSeamEdit.swift` header).
+
+**MINOR (W ceremony cut fidelity unguarded against remote edits during the sheet's open
+lifetime) — AGREED, fixed, red-on-old pin.** Mechanism confirmed: the ceremony state
+snapshots the fan at open and was never re-verified; a sync round editing a marked
+take's `working_text` while the sheet sat open meant confirm sent `{variantID:
+staleCut}` and `divideW` cut the CURRENT store text at that offset — a well-formed but
+wrong-position cut, silently. Fix: `confirmDivideWCeremony` re-reads the fan and
+compares every MARKED take's current text against its snapshot (a vanished marked take
+counts as drift); on any drift it refreshes the ceremony instead of cutting — marks
+survive by identity, unchanged takes keep their placed cuts, the active take's cut
+re-snaps into its new text via the planner's own `snapToInteriorBoundary`, other changed
+takes re-seed via `CutPropagation`, and a status line says the takes changed; if the fan
+itself dissolved the ceremony closes with a message. Pin
+(`aStaleCeremonyRefreshesInsteadOfCutting`): drift a marked take mid-ceremony → confirm
+→ no divide ran, ceremony refreshed with the current text and a re-snapped legal cut,
+marks kept → confirming the REFRESHED ceremony cuts for real. **Verified red on the
+pre-fix code** (the stale confirm divided: 2 blocks where 1 was asserted).
+
+**NIT (`programmaticReplace` has no bounds guard) — AGREED, taken as defense-in-depth
+(no pin, per the reviewer's own honest framing).** Traced mechanism: the one storage-
+MUTATING path lacked the clamp its read-side siblings (`viewText`,
+`setBlockAttribute`) have; an out-of-tiling range raises an NSRangeException Swift
+cannot catch — a crash, against the file's recover-not-crash doctrine (Phase 7 MINOR 7).
+Its only live route was the round-2 MAJOR's geometry breach, now closed — hence no
+independent red-on-old pin is possible (hardening, not a bug fix; justification recorded
+here per the guard). The fix: bounds guard → `desyncRecovery()` (assert-in-debug,
+re-render-from-store), consistent with the posture everywhere else.
+
+**Process note (recorded for honesty):** the round-2 clean bill observed the
+`VariorumMobile` scheme's LaunchAction Debug→Release in Phase 9's diff. That change is
+the AUTHOR's Xcode GUI edit implementing her ratified #4 (Release-install on the
+phone); it was sitting in the working tree and was swept into the `3afd9dc` recordings
+commit by `git add -A`. It stands (it implements a ratified decision); noted so the
+attribution is accurate. TestAction remains Debug, so the oracle-bearing tests run
+in Debug.

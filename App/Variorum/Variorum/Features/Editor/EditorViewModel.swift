@@ -944,17 +944,24 @@ final class EditorViewModel {
     /// Applies the pure derivation's minimal edit to the storage (the
     /// derivation itself lives in `StructuralSeamEdit.derive` — review
     /// round 1, MINOR 5: pure computation out of the view model, so its
-    /// shape-guard fallbacks are directly testable). Returns false when the
-    /// derivation refuses (the fresh projection doesn't match the seam's
-    /// expected shape — a concurrent sync apply landed between the op and
-    /// the fetch); the caller then re-renders fully from the store, truth.
+    /// guard fallbacks are directly testable). Returns false when the
+    /// derivation refuses — the fresh projection doesn't match what the
+    /// edit would assume (seam shape, non-seam geometry, or the retained
+    /// bytes; a concurrent sync apply landed between the op and the fetch)
+    /// — and the caller then re-renders fully from the store, truth, in
+    /// EVERY build.
     private func applyDifferentialStructural(
         _ seam: StructuralSeam, fresh: [Queries.RenderedBlock]
     ) -> Bool {
         guard let textView, let storage = textView.textStorage else { return false }
-        guard let edit = StructuralSeamEdit.derive(seam, oldIndex: index, fresh: fresh) else {
-            return false
-        }
+        let edit = StructuralSeamEdit.derive(
+            seam, oldIndex: index,
+            oldTextAt: { [weak self] i in
+                guard let self, i >= 0, i < index.entries.count else { return "" }
+                return viewText(index.range(ofEntryAt: i))
+            },
+            fresh: fresh)
+        guard let edit else { return false }
 
         // Apply: one storage edit, then the attribute re-bracketing.
         suppressEditProcessing = true
@@ -1107,6 +1114,30 @@ final class EditorViewModel {
         guard let state = divideWCeremony, state.canConfirm else { return }
         let cuts = state.markedCuts
         let blockID = state.blockID
+        // The sheet may have sat open while a sync round landed edits to
+        // the takes (review round 2, MINOR): cuts were placed against the
+        // SNAPSHOT texts, and cutting the current store at those offsets
+        // would land a well-formed but wrong-position cut, silently. Verify
+        // every marked take against the CURRENT store first; on any drift,
+        // refresh the ceremony (marks kept, cuts re-seeded) instead.
+        do {
+            let fan = try await session.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
+            }
+            let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
+            let drifted = state.takes.filter(\.marked).contains { snapshot in
+                guard let current = liveActive.first(where: { $0.id == snapshot.id })
+                else { return true }  // a marked take vanished (deleted/archived remotely)
+                return current.workingText != snapshot.variant.workingText
+            }
+            if drifted {
+                refreshDivideWCeremony(from: state, liveActive: liveActive)
+                return
+            }
+        } catch {
+            showOperationError(error)
+            return
+        }
         divideWCeremony = nil
         _ = await runStructural { ops in
             let result = try ops.divideW(blockID, cuts: cuts)
@@ -1115,6 +1146,57 @@ final class EditorViewModel {
             return StructuralOutcome(
                 caretBlockID: result.first.block.id, caretOffset: 0, seam: nil)
         }
+    }
+
+    /// Rebuilds the ceremony over the CURRENT fan: marks survive by take
+    /// identity, unchanged takes keep their placed cuts, changed takes get
+    /// re-seeded cuts (the active take's cut re-snapped into its new text;
+    /// others re-proposed from it via string-context matching). The author
+    /// reviews and confirms again — nothing is cut on a drifted snapshot.
+    private func refreshDivideWCeremony(
+        from state: DivideWCeremonyState, liveActive: [Variant]
+    ) {
+        guard liveActive.count > 1,
+              let activeCurrent = liveActive.first(where: { $0.id == state.activeVariantID })
+        else {
+            // The fan itself dissolved (a single take remains, or the
+            // rendered take died): the ceremony no longer applies.
+            divideWCeremony = nil
+            showStatus("This block's takes changed — try the divide again.")
+            return
+        }
+        let previous = Dictionary(uniqueKeysWithValues: state.takes.map { ($0.id, $0) })
+        let previousActive = previous[activeCurrent.id]
+        let activeCut: Int? = {
+            guard let cut = previousActive?.cut else { return nil }
+            if previousActive?.variant.workingText == activeCurrent.workingText { return cut }
+            return StructuralGesturePlanner.snapToInteriorBoundary(
+                cut, in: activeCurrent.workingText)
+        }()
+        let takes = liveActive.map { variant -> WTake in
+            let old = previous[variant.id]
+            let cut: Int?
+            if variant.id == activeCurrent.id {
+                cut = activeCut
+            } else if old?.variant.workingText == variant.workingText, let kept = old?.cut {
+                cut = kept
+            } else if let activeCut {
+                cut = CutPropagation.propose(
+                    activeCut: activeCut,
+                    activeText: activeCurrent.workingText,
+                    targetText: variant.workingText)
+            } else {
+                cut = nil
+            }
+            return WTake(
+                variant: variant,
+                marked: old?.marked ?? false,
+                cut: cut,
+                boundaries: interiorBoundaries(of: variant.workingText))
+        }
+        divideWCeremony = DivideWCeremonyState(
+            blockID: state.blockID, activeVariantID: activeCurrent.id, takes: takes)
+        showStatus("This block's takes changed while the sheet was open — the cuts were re-proposed; review before dividing.")
     }
 
     /// Context-menu items for the text view — the second door, same brain:
@@ -1393,6 +1475,17 @@ final class EditorViewModel {
         caretToEndIfWasAtEnd: Bool = false
     ) {
         guard let textView, let storage = textView.textStorage else { return }
+        // Recover-not-crash (round 2 NIT, defense-in-depth): the read-side
+        // siblings (`viewText`, `setBlockAttribute`) clamp against
+        // `storage.length`, but this is the one path that MUTATES — an
+        // out-of-tiling range raises an NSRangeException Swift cannot
+        // catch. The live route here was a geometry desync (closed by the
+        // round-2 non-seam guard); should any future path regress, heal
+        // from the store instead of crashing.
+        guard range.location >= 0, range.upperBound <= storage.length else {
+            desyncRecovery()
+            return
+        }
         let caretWasAtEnd = textView.selectedRange().location >= storage.length
         suppressEditProcessing = true
         storage.beginEditing()
