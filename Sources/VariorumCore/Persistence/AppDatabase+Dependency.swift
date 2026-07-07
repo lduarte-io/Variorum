@@ -40,14 +40,25 @@ extension AppDatabase {
         }
     }
 
-    /// The canonical on-disk location: `Application Support/Variorum/
+    /// Which on-disk store a build opens (Phase 8, A4 — dev-store
+    /// separation): the author's real corpus lives under `Variorum/`; debug
+    /// builds default to a separate `Variorum-dev/` home so development
+    /// activity can never land in her writing by accident. The resolution
+    /// POLICY (debug default + explicit opt-in) lives in the app layer
+    /// (`StoreLocation`); this type only knows the two homes.
+    public enum StoreVariant: String, CaseIterable, Sendable {
+        case real = "Variorum"
+        case dev = "Variorum-dev"
+    }
+
+    /// The canonical on-disk location: `Application Support/<variant>/
     /// variorum.sqlite` (inside the app container when sandboxed).
-    public static func defaultStoreURL() throws -> URL {
+    public static func defaultStoreURL(variant: StoreVariant = .real) throws -> URL {
         do {
             return try FileManager.default
                 .url(for: .applicationSupportDirectory, in: .userDomainMask,
                      appropriateFor: nil, create: true)
-                .appendingPathComponent("Variorum", isDirectory: true)
+                .appendingPathComponent(variant.rawValue, isDirectory: true)
                 .appendingPathComponent("variorum.sqlite")
         } catch {
             throw StoreOpenError(

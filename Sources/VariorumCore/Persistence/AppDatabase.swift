@@ -57,6 +57,20 @@ public struct AppDatabase: Sendable {
         try await writer.write(updates)
     }
 
+    // MARK: - Backup (Phase 8, A1)
+
+    /// One consistent cold copy of the store at `url`, via SQLite's backup
+    /// API — safe against an in-use WAL store (the copy is a single-point
+    /// snapshot; writers proceed). The destination is a plain, self-contained
+    /// database file the recoverable-open path (`openStore(at:)`) can open
+    /// directly. Blocking — callers keep it off the main thread (P2).
+    public func backup(to url: URL) throws {
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let destination = try DatabaseQueue(path: url.path)
+        try writer.backup(to: destination)
+    }
+
     // MARK: - Observation
 
     /// A live projection (Phase 4): re-fetches when the observed database
