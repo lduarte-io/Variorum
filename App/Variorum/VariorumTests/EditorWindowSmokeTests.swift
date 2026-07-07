@@ -92,4 +92,101 @@ struct EditorWindowSmokeTests {
             #expect(h.model.canaryMessage == nil)
         }
     }
+
+    /// Phase 9 Step 8(ii)+(v): the structural slice of the §5 matrix on the
+    /// same 10k-word windowed post — scroll/height stability THROUGH a
+    /// structural rewrite, decorations (fan data) updating as fans are born
+    /// by the W and die by merge, boundary selections resolving through the
+    /// planner, and the full-re-render latency number for the PROVISIONAL
+    /// full-re-render reading (QUESTIONS #8).
+    @Test func structuralGesturesOnTheTenThousandWordWindowedPost() async throws {
+        try await withEditor(seedBlocks: corpus) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 600),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let scrollView = try #require(h.textView.enclosingScrollView)
+            window.contentView = scrollView
+            window.orderFrontRegardless()
+            pump()
+
+            // Jump deep into the document, then divide mid-viewport: the
+            // full-re-render latency is the PROVISIONAL reading's number.
+            let block25 = h.model.index.range(ofEntryAt: 25)
+            JumpPrimitive.jump(
+                toOffset: block25.location, textView: h.textView, scrollView: scrollView)
+            pump()
+            // A legal mid-block sentence cut exists: each corpus paragraph
+            // is one long sentence, so mint one first by typing a terminator.
+            h.type("Insert. ", at: block25.location + 0)
+            await h.flush()
+            h.textView.setSelectedRange(NSRange(location: block25.location + 4, length: 0))
+            h.model.updateCaretContext()
+            let t0 = ContinuousClock.now
+            await h.model.invokeGesture(.divideAtCursor)
+            let elapsed = t0.duration(to: .now)
+            let ms = Double(elapsed.components.seconds) * 1000
+                + Double(elapsed.components.attoseconds) / 1e15
+            print("Phase 9 Step 8(v): full gesture (divide op + full re-render + caret) on 10k words: \(ms) ms")
+            #expect(ms < 100, "gesture-time full re-render must stay deliberate-act cheap: \(ms) ms")
+            try expectStoreMatchesView(h)
+            pump()
+
+            // (c) decorations: a fan born by the W ceremony badges its
+            // blocks; a merge's fresh block carries none. The corpus
+            // paragraphs are single run-on sentences, so give the target a
+            // legal interior cut first (a divide with no legal cut refuses
+            // BEFORE the W routing — the ceremony needs an active cut seed).
+            h.type("Insert. ", at: h.model.index.range(ofEntryAt: 10).location)
+            await h.flush()
+            let slots = try h.storeSlots()
+            let target = slots[10]
+            _ = try h.session.operations.branchVariant(target.blockID, from: target.variantID!)
+            try h.reload()
+            #expect(try h.storeSlots()[10].hasFan, "fan data feeds the badge predicate")
+            h.textView.setSelectedRange(NSRange(
+                location: h.model.index.range(ofEntryAt: 10).location + 4, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)      // fanned → ceremony
+            #expect(h.model.divideWCeremony != nil)
+            await h.model.confirmDivideWCeremony()            // active take marked → single-take fans
+            let afterW = try h.storeSlots()
+            #expect(afterW[10].blockID != target.blockID, "the W released the source")
+            // Merge two plain neighbors: the fresh block has NO fan.
+            h.textView.setSelectedRange(NSRange(
+                location: h.model.index.range(ofEntryAt: 30).upperBound, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.mergeBlocks)
+            let merged = try h.storeSlots()
+            #expect(!merged[30].hasFan, "a merged block starts with one take")
+            pump()
+
+            // (d) boundary selection resolves through the planner: the seam
+            // caret between blocks 5 and 6 plans a merge of exactly (5, 6).
+            let seam = h.model.index.range(ofEntryAt: 5).upperBound
+            h.textView.setSelectedRange(NSRange(location: seam, length: 0))
+            h.model.updateCaretContext()
+            #expect(h.model.gestureAvailability.merge)
+            let plan = StructuralGesturePlanner.plan(
+                .mergeBlocks, selection: NSRange(location: seam, length: 0),
+                world: h.model.gestureWorld())
+            guard case .merge(let leading, let trailing, _, _) = plan else {
+                Issue.record("expected a merge plan at the seam, got \(plan)")
+                return
+            }
+            #expect(leading == 5 && trailing == 6)
+
+            // (b) scroll/height stayed sane through the rewrites: the
+            // content anchor still resolves and the canary never fired.
+            #expect(h.model.topVisibleOffset() != nil)
+            #expect(h.model.canaryMessage == nil)
+            #expect(h.model.desyncRecoveryCount == 0)
+            await h.flush()
+            try expectStoreMatchesView(h)
+        }
+    }
 }

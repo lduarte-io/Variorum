@@ -154,6 +154,9 @@ final class EditorViewModel {
     /// One structural gesture lands at a time (Phase 9): the door is busy
     /// from invoke to rewrite, and a second invoke refuses visibly.
     @ObservationIgnored private var structuralInFlight = false
+    /// Times `desyncRecovery` has fired this session — the Step 8 soak
+    /// asserts ZERO (store == index == surface through every interleaving).
+    @ObservationIgnored private(set) var desyncRecoveryCount = 0
     /// Clears a transient hint (the fanned-extract hint) after a beat.
     @ObservationIgnored private var hintClearTask: Task<Void, Never>?
 
@@ -527,6 +530,7 @@ final class EditorViewModel {
     }
 
     private func desyncRecovery() {
+        desyncRecoveryCount += 1  // the Step 8 soak asserts this stays 0
         assertionFailure("editor surface desynced from the block index")
         forceFullRender = true
         pendingVerdict = nil
