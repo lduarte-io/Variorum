@@ -625,3 +625,93 @@ A5 deployed).
 *(Master-plan pointer/table update, the Phase 9b plan authoring from its brief, and the
 author handoff are deliberately NOT done yet — the coordinator holds them until the
 review ladder closes.)*
+
+---
+
+## Review round 1 (2026-07-07) — 1 MAJOR / 4 MINOR / 2 NIT; all AGREED; every fix below
+
+Fresh counts after the round: **core 430/51 · Mac app 211/36 · mobile 11/4** — all green;
+TK1 audit clean. Same-model flow: no disputes went to arbitration.
+
+**MAJOR (idle-mint born mid-structural-flight) — AGREED, fixed, red-on-old pin.**
+Mechanism re-traced independently and confirmed: `idleMintTail` never consulted
+`structuralInFlight`, and `runStructural` neither cancelled nor held `tailIdleTask`, so
+the 2 s clock could birth a mint during the door's op/fetch suspensions; in the broken
+ordering (the mint's committed row reaching the gesture's fresh fetch) the +1 shape guard
+fails → `renderFull` materializes the minted block AND the still-unconsumed `tailText`
+(the author's words visibly duplicated) → the late `finishMint` crystallizes a duplicate
+index entry (index ≠ store; nothing heals it headless). Fix, both doors: `runStructural`
+cancels `tailIdleTask` at entry and re-arms in its defer; `idleMintTail` re-arms-and-
+returns while `structuralInFlight`. **Pin honesty note:** the first pin attempt targeted
+the traced CONSEQUENCE (duplication) and passed on both sides — not because the finding
+was hollow (a mint verifiably WAS born mid-flight; `mintInFlight` flipped true) but
+because the corrupting ordering is a fetch-vs-commit race the harness consistently
+loses (the reader snapshot beats the mint's write transaction). The shipped pin targets
+the MECHANISM deterministically: with the gesture provably suspended mid-flight, the
+clock fires and `mintInFlight` must stay false (`anIdleMintIsNeverBornMidStructuralFlight`
+— verified red on the pre-fix code: `mintInFlight → true`); the post-settle consistency
+checks and the held-tail-still-mints-afterwards check ride along as the belt.
+
+**MINOR 2 (mid-flight header delivery reopens the keystroke fence) — AGREED, fixed,
+red-on-old pin.** Mechanism confirmed: `adoptHeader` set `isEditable` unconditionally,
+and the structural op's own `last_touched_at` stamp fires the very header observation
+that could deliver mid-flight — reopening the flush→op window whose stale whole-buffer
+autosave is the forbidden duplication class. Fix: `adoptHeader` skips the `isEditable`
+write while `structuralInFlight` (the flight's defer re-derives editability from the
+freshest header, so a mid-flight seal still lands at flight end). Pin:
+`aMidFlightHeaderDeliveryCannotReopenTheKeystrokeFence` — deterministic staging (the
+gesture task suspended mid-flight while the test holds the main actor), verified red on
+the pre-fix code (`isEditable → true`), and asserts editability returns after the flight.
+`structuralInFlight` became `private(set)` for both pins' staging.
+
+**MINOR 3 (oracle comment claims a release heal that is compiled out) — AGREED, doc-only
+fix; the optional release tripwire CONSIDERED AND DECLINED.** The comment now states the
+truth: nothing in `verifyDifferentialOracle` ships in release; a divergence that slips
+the shape guard there stands until the next projection delivery — and that delivery is
+already in flight by construction, because the same sync apply that caused the divergence
+fired the observation. Tripwire declination rationale (recorded per the coordinator's
+instruction): its release-only branch is untestable by the debug-only test rig — in
+debug the deep oracle strictly subsumes the O(1) length check, and staging ANY oracle
+firing crashes the test host via the debug `assertionFailure` — so the tripwire would be
+a behavior change that cannot carry its red-on-old pin; the DEBUG oracle + the soak are
+exactly the assurance the author's directive prescribed, and the self-heal path
+(observation delivery) already exists.
+
+**MINOR 4 (convergence test's "compound … exactly as the editor runs it" ran ONE divide)
+— AGREED, test-scope fix.** The compound now runs TWO divides (cut 15, then the
+successor at 12 — the editor's successor-cut shape); the byte-identical-dump assertion
+after the compound's ONE undo is the pin (an inverse missing the second mint would
+diverge the stores). No product-code change, so no red-on-old owed; the claim and the
+code now match.
+
+**MINOR 5 (seam→edit derivation embedded in the VM; fallback branches untested) —
+AGREED, extraction done + the payoff pins landed.** Traced degradation (recorded per the
+hallucination guard): the shape-guard `return false` branches protect text integrity on
+the one path that rewrites the author's surface, yet were reachable only through
+unstageable pipeline states — an untested safety net — and the growing VM mixed a pure
+computation with AppKit application (CLAUDE.md hygiene). The derivation moved
+behavior-neutrally to `StructuralSeamEdit.derive(seam:oldIndex:fresh:) -> Edit?` (new
+file, with `StructuralSeam` beside it); the VM's `applyDifferentialStructural` now only
+applies the derived edit. The payoff: `StructuralSeamEditTests` — exact-edit equality on
+every happy path (including document-coordinate placement for later entries and both
+merge join kinds) and a DIRECT pin on **every** fallback branch (divide: count/source-ID/
+successor-ID/overlong-prefix/out-of-range; extract: swapped order both edges, wrong
+source, overlong remainder, count; makeBlock: count, middle-ID, suffix-ID, overlong
+halves; merge: count, wrong ID, impossible join, missing trailing neighbor). No
+red-on-old pin owed (behavior-neutral by design; the whole gesture suite + soak + spy
+pins re-ran green unchanged as the neutrality evidence).
+
+**NIT 6 (text-undo clearing asserted nowhere) — AGREED, fixed.** The windowed structural
+smoke — the one place with a real `undoManager` — now pins it: typing registers entries
+(`canUndo == true`, guarding vacuity), the gesture clears them (`canUndo == false`).
+Closes the assertion gap recorded against the resolved KnownIssues row.
+
+**NIT 7 (a suffix selection swallowing only the tail separator refuses as
+`openTailTarget`) — AGREED, fixed, red-on-old pin.** The tail test now excludes a
+non-empty selection whose only overshoot is the tail SEPARATOR itself (`upperBound >
+separator + 1`): the same overhang tolerance interior seams already get — only selected
+tail TEXT makes a selection tail-side. Pin:
+`aSuffixSelectionSwallowingOnlyTheTailSeparatorStaysBlockSide` (separator-only overshoot
+→ suffix extract; one unit further → still `openTailTarget`, preserving the pinned
+crossing-into-tail behavior) — verified red on the old threshold by behavioral revert
+(the reverted line answered `openTailTarget`).

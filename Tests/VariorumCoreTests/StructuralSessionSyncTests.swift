@@ -69,13 +69,20 @@ struct StructuralSessionSyncTests {
             _ = try ops.merge(world.b2, divided.block.id)
         }
 
-        // Gesture 4: the composed make-block on block 3 — two divides as
-        // ONE compound undo entry, exactly as the editor runs it.
+        // Gesture 4: the composed make-block on block 3 — TWO divides as
+        // ONE compound undo entry, exactly as the editor runs it (review
+        // round 1, MINOR 4: one divide was a narrower pattern than the
+        // claim). "Closing block. Final words here." → divide at 15
+        // ("Closing block." | "Final words here."), then divide the
+        // successor at 12 ("Final words" | "here.") — the editor's
+        // successor-cut shape. The byte-identical dump after the compound's
+        // ONE undo below is the pin: an inverse missing the second mint
+        // would diverge the stores.
         try mac.with { _, _ in
             let ops = Operations(undoStack: stack)
             _ = try stack.withCompound(label: "Make Block", operations: ops) {
                 let first = try ops.divide(world.b3, cut: 15)
-                _ = first
+                _ = try ops.divide(first.block.id, cut: 12)
             }
         }
         _ = try await mac.push()

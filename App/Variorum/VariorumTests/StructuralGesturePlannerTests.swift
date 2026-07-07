@@ -444,6 +444,22 @@ struct PlannerPrecedenceTests {
         }
     }
 
+    @Test func aSuffixSelectionSwallowingOnlyTheTailSeparatorStaysBlockSide() {
+        // Review round 1, NIT 7 (red on the old threshold): the overshoot
+        // covers the tail SEPARATOR but zero tail text — everything the
+        // author selected with characters is block text, so the verdict is
+        // the block-side suffix extract, not a misleading tail refusal.
+        let world = makeWorld([B(threeSentences)], tail: "typing")
+        let plan = Planner.plan(
+            .extractSelection, selection: NSRange(location: 35, length: 13), world: world)
+        #expect(plan == .extract(
+            entryIndex: 0, blockID: "b0", snappedSpan: 33..<47, edge: .suffix, otherTakes: 0))
+        // One unit further — actual tail text selected — still refuses.
+        #expect(Planner.plan(
+            .extractSelection, selection: NSRange(location: 35, length: 14), world: world)
+            == .refusal(.openTailTarget))
+    }
+
     @Test func theCaretAtTheLastBlocksEndIsBlockSideNotTailSide() {
         // With a tail open, the last block's exact end (== the tail
         // separator offset) still belongs to the block: divide there is a

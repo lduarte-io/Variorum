@@ -126,6 +126,11 @@ struct EditorWindowSmokeTests {
             await h.flush()
             h.textView.setSelectedRange(NSRange(location: block25.location + 4, length: 0))
             h.model.updateCaretContext()
+            // NIT 6 (review round 1): the window has what headless tests
+            // lack — a real undoManager — so pin the text-undo clearing on
+            // structural rewrites here (the KnownIssues row's part 2).
+            #expect(h.textView.undoManager?.canUndo == true,
+                    "typing above must have registered text-undo entries")
             let t0 = ContinuousClock.now
             await h.model.invokeGesture(.divideAtCursor)
             let elapsed = t0.duration(to: .now)
@@ -133,6 +138,8 @@ struct EditorWindowSmokeTests {
                 + Double(elapsed.components.attoseconds) / 1e15
             print("Phase 9 Step 8(v): full gesture (divide op + full re-render + caret) on 10k words: \(ms) ms")
             #expect(ms < 100, "gesture-time full re-render must stay deliberate-act cheap: \(ms) ms")
+            #expect(h.textView.undoManager?.canUndo == false,
+                    "structural rewrites clear text-undo — stale-offset replays are the corruption class")
             try expectStoreMatchesView(h)
             pump()
 

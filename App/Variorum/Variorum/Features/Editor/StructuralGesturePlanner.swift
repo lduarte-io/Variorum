@@ -314,9 +314,12 @@ nonisolated enum StructuralGesturePlanner {
 
     // MARK: - Tiling geometry (all consultation of the index lives here)
 
-    /// True when the selection touches the open-tail region (the tail text
-    /// or its separator). A caret at the last block's exact end is
-    /// block-side, not tail-side.
+    /// True when the selection touches the open-tail TEXT. A caret at the
+    /// last block's exact end is block-side; so is a non-empty selection
+    /// whose only overshoot is the tail SEPARATOR itself (review round 1,
+    /// NIT 7: a shift-selection swallowing the one dangling separator means
+    /// the block suffix — the same overhang tolerance interior seams get;
+    /// only selected tail text makes a selection tail-side).
     private static func touchesTailRegion(_ selection: NSRange, index: BlockRangeIndex) -> Bool {
         guard let tail = index.tailRange else { return false }
         guard !index.entries.isEmpty else { return true }  // a fresh post is all tail
@@ -324,7 +327,7 @@ nonisolated enum StructuralGesturePlanner {
         if selection.length == 0 {
             return selection.location >= tail.location
         }
-        return selection.upperBound > separator
+        return selection.upperBound > separator + 1
     }
 
     /// The entry whose closed range [start, end] contains the caret, with

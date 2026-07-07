@@ -153,7 +153,8 @@ final class EditorViewModel {
     @ObservationIgnored private var commitListVariantID: String?
     /// One structural gesture lands at a time (Phase 9): the door is busy
     /// from invoke to rewrite, and a second invoke refuses visibly.
-    @ObservationIgnored private var structuralInFlight = false
+    /// Readable so the review-round pins can stage mid-flight interleavings.
+    @ObservationIgnored private(set) var structuralInFlight = false
     /// Times `desyncRecovery` has fired this session — the Step 8 soak
     /// asserts ZERO (store == index == surface through every interleaving).
     @ObservationIgnored private(set) var desyncRecoveryCount = 0
@@ -281,7 +282,15 @@ final class EditorViewModel {
     /// Internal so tests can drive the header without the observation.
     func adoptHeader(_ value: Queries.ContainerHeader?) {
         header = value
-        textView?.isEditable = value.map { !$0.locked } ?? false
+        // The structural flight's non-editable fence must hold for the
+        // WHOLE flight (review round 1, MINOR 2): the op's own touch stamp
+        // triggers a header delivery, and letting it re-enable editing
+        // reopens the flush→op keystroke window the fence exists to close.
+        // The flight's defer re-derives editability from the freshest
+        // header at flight end.
+        if !structuralInFlight {
+            textView?.isEditable = value.map { !$0.locked } ?? false
+        }
     }
 
     private func observeSlots() async {
@@ -569,6 +578,16 @@ final class EditorViewModel {
     /// whole tail mints, trailing partial paragraph included, tail closes.
     func idleMintTail() {
         guard hasOpenTail, !tailText.allSatisfy(\.isWhitespace) else { return }
+        // A structural gesture is mid-flight (Phase 9 review round 1,
+        // MAJOR): a mint born now races the gesture's fetch/rewrite — the
+        // mint's row failing the seam shape guard would materialize the
+        // minted block AND the unconsumed tail (visible duplication), and
+        // the late finishMint would crystallize a duplicate index entry.
+        // Skip this tick and re-arm; the flight's defer re-arms too.
+        if structuralInFlight {
+            armTailIdleMint()
+            return
+        }
         // Marked text is an in-progress input-method composition, not yet
         // the author's text (review round 2): minting under it would rewrite
         // the region mid-composition. Skip this tick and re-arm the clock.
@@ -839,24 +858,8 @@ final class EditorViewModel {
         let seam: StructuralSeam?
     }
 
-    /// The operation result's seam, in PRE-edit entry coordinates — what
-    /// changed and which fresh block IDs must appear there. Derived from
-    /// the op's returned rows, never from diffing (OverallModel §8: the
-    /// rejected model recovers structure by diffing; this one is TOLD).
-    enum StructuralSeam: Equatable, Sendable {
-        /// Entry i split in place: i keeps `sourceID` (a prefix of its old
-        /// text), a fresh `successorID` follows.
-        case divide(entryIndex: Int, sourceID: String, successorID: String)
-        /// A boundary span left entry i: `.prefix` ⇒ the extracted block
-        /// lands BEFORE the source, `.suffix` ⇒ after.
-        case extract(entryIndex: Int, edge: BoundarySnapping.ExtractableSpan,
-                     sourceID: String, extractedID: String)
-        /// Entry i became three: prefix keeps `sourceID`, then `middleID`,
-        /// then `suffixID`.
-        case makeBlock(entryIndex: Int, sourceID: String, middleID: String, suffixID: String)
-        /// Entries i and i+1 became one fresh `mergedID`.
-        case merge(leadingIndex: Int, mergedID: String)
-    }
+    // `StructuralSeam` lives beside its pure consumer in
+    // StructuralSeamEdit.swift (review round 1, MINOR 5).
 
     /// Runs one structural operation through the runner and applies its
     /// outcome to the surface. Returns true when the operation landed.
@@ -871,10 +874,17 @@ final class EditorViewModel {
         _ body: @escaping @Sendable (Operations) throws -> StructuralOutcome
     ) async -> Bool {
         structuralInFlight = true
+        // The idle-mint clock is held for the flight (review round 1,
+        // MAJOR): a mint must never be born between the pre-op mint wait
+        // and the rewrite. idleMintTail's own guard is the second door.
+        tailIdleTask?.cancel()
         textView?.isEditable = false
         defer {
             structuralInFlight = false
             textView?.isEditable = header.map { !$0.locked } ?? false
+            // Any surviving tail gets its clock back (arming is a no-op
+            // when no non-blank tail exists).
+            armTailIdleMint()
         }
         await autosave.flushNow()
         guard !autosave.isDirty else {
@@ -931,148 +941,31 @@ final class EditorViewModel {
 
     // MARK: - The differential structural apply (author decision 2026-07-07)
 
-    /// One minimal storage edit + attribute re-bracketing, derived from the
-    /// operation's known seam and the fresh store texts — never from
-    /// diffing (the op TELLS us what changed; recovering it by comparison
-    /// is the rejected model, OverallModel §8). The derivations lean on the
-    /// ops' proven seam semantics: a divide's first half is a strict PREFIX
-    /// of the old text (trim only strips at the cut), an extract's
-    /// remainder a strict prefix/suffix, a merge's halves verbatim — so the
-    /// minimal changed region is exactly computable. Returns false when the
-    /// fresh projection doesn't match the seam's expected shape (a
-    /// concurrent sync apply landed between the op and the fetch — rare);
-    /// the caller then re-renders fully from the store, which is truth.
+    /// Applies the pure derivation's minimal edit to the storage (the
+    /// derivation itself lives in `StructuralSeamEdit.derive` — review
+    /// round 1, MINOR 5: pure computation out of the view model, so its
+    /// shape-guard fallbacks are directly testable). Returns false when the
+    /// derivation refuses (the fresh projection doesn't match the seam's
+    /// expected shape — a concurrent sync apply landed between the op and
+    /// the fetch); the caller then re-renders fully from the store, truth.
     private func applyDifferentialStructural(
         _ seam: StructuralSeam, fresh: [Queries.RenderedBlock]
     ) -> Bool {
         guard let textView, let storage = textView.textStorage else { return false }
-        let old = index
-
-        /// A post-edit attribute run: `blockID == nil` clears (separator).
-        struct Run {
-            let range: NSRange
-            let blockID: String?
-        }
-        let replaceRange: NSRange
-        let replacement: String
-        var runs: [Run] = []
-
-        switch seam {
-        case .divide(let i, let sourceID, let successorID):
-            guard fresh.count == old.entries.count + 1,
-                  i + 1 < fresh.count, i < old.entries.count,
-                  old.entries[i].blockID == sourceID,
-                  fresh[i].blockID == sourceID,
-                  fresh[i + 1].blockID == successorID
-            else { return false }
-            let oldRange = old.range(ofEntryAt: i)
-            let prefixLength = (fresh[i].text ?? "").utf16.count
-            let successor = fresh[i + 1].text ?? ""
-            guard prefixLength <= oldRange.length else { return false }
-            // The old text beyond the (seam-trimmed) first half becomes a
-            // separator + the trimmed successor.
-            replaceRange = NSRange(
-                location: oldRange.location + prefixLength,
-                length: oldRange.length - prefixLength)
-            replacement = EditorDocument.separator + successor
-            runs = [Run(
-                range: NSRange(location: replaceRange.location + 1, length: successor.utf16.count),
-                blockID: successorID)]
-
-        case .extract(let i, let edge, let sourceID, let extractedID):
-            guard fresh.count == old.entries.count + 1,
-                  i + 1 < fresh.count, i < old.entries.count,
-                  old.entries[i].blockID == sourceID
-            else { return false }
-            let oldRange = old.range(ofEntryAt: i)
-            switch edge {
-            case .prefix:
-                // The extracted block lands BEFORE the source; the source's
-                // remainder is a strict suffix of its old text.
-                guard fresh[i].blockID == extractedID, fresh[i + 1].blockID == sourceID
-                else { return false }
-                let extracted = fresh[i].text ?? ""
-                let remainderLength = (fresh[i + 1].text ?? "").utf16.count
-                guard remainderLength <= oldRange.length else { return false }
-                replaceRange = NSRange(
-                    location: oldRange.location,
-                    length: oldRange.length - remainderLength)
-                replacement = extracted + EditorDocument.separator
-                runs = [Run(
-                    range: NSRange(location: oldRange.location, length: extracted.utf16.count),
-                    blockID: extractedID)]
-            case .suffix:
-                guard fresh[i].blockID == sourceID, fresh[i + 1].blockID == extractedID
-                else { return false }
-                let remainderLength = (fresh[i].text ?? "").utf16.count
-                let extracted = fresh[i + 1].text ?? ""
-                guard remainderLength <= oldRange.length else { return false }
-                replaceRange = NSRange(
-                    location: oldRange.location + remainderLength,
-                    length: oldRange.length - remainderLength)
-                replacement = EditorDocument.separator + extracted
-                runs = [Run(
-                    range: NSRange(location: replaceRange.location + 1, length: extracted.utf16.count),
-                    blockID: extractedID)]
-            }
-
-        case .makeBlock(let i, let sourceID, let middleID, let suffixID):
-            guard fresh.count == old.entries.count + 2,
-                  i + 2 < fresh.count, i < old.entries.count,
-                  old.entries[i].blockID == sourceID,
-                  fresh[i].blockID == sourceID,
-                  fresh[i + 1].blockID == middleID,
-                  fresh[i + 2].blockID == suffixID
-            else { return false }
-            let oldRange = old.range(ofEntryAt: i)
-            let prefixLength = (fresh[i].text ?? "").utf16.count
-            let middle = fresh[i + 1].text ?? ""
-            let suffixLength = (fresh[i + 2].text ?? "").utf16.count
-            guard prefixLength + suffixLength <= oldRange.length else { return false }
-            replaceRange = NSRange(
-                location: oldRange.location + prefixLength,
-                length: oldRange.length - prefixLength - suffixLength)
-            replacement = EditorDocument.separator + middle + EditorDocument.separator
-            runs = [
-                Run(range: NSRange(location: replaceRange.location + 1, length: middle.utf16.count),
-                    blockID: middleID),
-                // The untouched suffix TEXT stays put but changes identity:
-                // it belongs to the freshly minted suffix block now.
-                Run(range: NSRange(
-                        location: replaceRange.location + 1 + middle.utf16.count + 1,
-                        length: suffixLength),
-                    blockID: suffixID),
-            ]
-
-        case .merge(let i, let mergedID):
-            guard fresh.count == old.entries.count - 1,
-                  i < fresh.count, i + 1 < old.entries.count,
-                  fresh[i].blockID == mergedID
-            else { return false }
-            let lead = old.range(ofEntryAt: i)
-            let trail = old.range(ofEntryAt: i + 1)
-            let mergedLength = (fresh[i].text ?? "").utf16.count
-            let join = mergedLength - lead.length - trail.length
-            guard join == 0 || join == 1 else { return false }
-            // The 1-char separator becomes the join (a space, or nothing);
-            // both halves' text stays put but changes identity to A'.
-            replaceRange = NSRange(location: lead.upperBound, length: 1)
-            replacement = join == 1 ? " " : ""
-            runs = [Run(
-                range: NSRange(location: lead.location, length: mergedLength),
-                blockID: mergedID)]
+        guard let edit = StructuralSeamEdit.derive(seam, oldIndex: index, fresh: fresh) else {
+            return false
         }
 
         // Apply: one storage edit, then the attribute re-bracketing.
         suppressEditProcessing = true
         storage.beginEditing()
-        storage.replaceCharacters(in: replaceRange, with: replacement)
+        storage.replaceCharacters(in: edit.replaceRange, with: edit.replacement)
         storage.setAttributes(
             [.font: EditorDocument.baseFont],
             range: NSRange(
-                location: replaceRange.location,
-                length: (replacement as NSString).length))
-        for run in runs where run.range.length > 0 {
+                location: edit.replaceRange.location,
+                length: (edit.replacement as NSString).length))
+        for run in edit.attributeRuns where run.range.length > 0 {
             if let blockID = run.blockID {
                 storage.addAttribute(
                     EditorDocument.blockIDAttribute, value: blockID, range: run.range)
@@ -1096,11 +989,18 @@ final class EditorViewModel {
         return true
     }
 
-    /// The DEBUG oracle (author-directed): after every differential apply,
-    /// the surface must equal the store's fresh projection — the soak
-    /// exercising this with zero firings is the proof the differential
-    /// lands safely. On a miss: count (test-visible), assert in debug, and
-    /// heal from the store (which is truth) in any build.
+    /// The DEBUG-ONLY oracle (author-directed posture): after every
+    /// differential apply, the surface must equal the store's fresh
+    /// projection — the soak exercising this with zero firings is the proof
+    /// the differential lands safely. On a miss: count (test-visible),
+    /// assert, heal via `renderFull`. NOTHING here compiles into release —
+    /// there, a divergence that slipped the shape guard (a remote race
+    /// changing the seam entry's text without changing shape) stands until
+    /// the next projection delivery heals it, and that delivery is already
+    /// in flight by construction: the same sync apply that caused the
+    /// divergence fired the observation (review round 1, MINOR 3 — the
+    /// release tripwire was considered and declined; disposition in the
+    /// closeout).
     private func verifyDifferentialOracle(_ fresh: [Queries.RenderedBlock]) {
         #if DEBUG
         var matches = index.documentLength == (textView?.textStorage?.length ?? -1)

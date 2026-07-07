@@ -836,3 +836,101 @@ struct DifferentialApplyTests {
         }
     }
 }
+
+
+@MainActor
+@Suite("Review round 1 fixes (Phase 9)")
+struct ReviewRound1FixTests {
+    /// Stages the mid-flight window deterministically: the gesture task is
+    /// suspended inside the door (structuralInFlight true) and cannot
+    /// advance while the test holds the main actor synchronously.
+    private func stageMidFlight(
+        _ h: EditorHarness
+    ) async -> Task<Void, Never> {
+        h.textView.setSelectedRange(NSRange(location: 19, length: 0))
+        h.model.updateCaretContext()
+        let gesture = Task { await h.model.invokeGesture(.divideAtCursor) }
+        for _ in 0..<200 {
+            if h.model.structuralInFlight { break }
+            await Task.yield()
+        }
+        return gesture
+    }
+
+    // MAJOR: the idle-mint clock must not birth a NEW mint mid-structural-
+    // flight. Traced consequence on the old code: the mint's row can reach
+    // the gesture's fresh fetch (+2 fails the +1 shape guard → renderFull
+    // materializes the minted block AND the still-unconsumed tail = the
+    // author's words visibly duplicated), and the late finishMint
+    // crystallizes a DUPLICATE index entry (index != store; nothing heals
+    // it headless). The corrupting ordering is a fetch-vs-commit race, so
+    // THE PIN targets the mechanism, deterministically: with the gesture
+    // provably mid-flight (structuralInFlight true, gesture suspended), the
+    // idle clock fires — a mint must NOT be born. Red on the old code
+    // (idleMintTail started one unconditionally); green with the flight
+    // holding the clock. The post-settle consistency checks stay as the
+    // belt for the traced consequence.
+    @Test func anIdleMintIsNeverBornMidStructuralFlight() async throws {
+        try await withEditor(seedBlocks: ["First sentence. Second one.", "Anchor."]) { h in
+            let end = (h.documentText as NSString).length
+            h.type("\n", at: end)
+            h.type("tail paragraph waiting")
+            await h.flush()
+
+            let gesture = await stageMidFlight(h)
+            #expect(h.model.structuralInFlight, "staging must reach the window")
+            h.model.idleMintTail()  // the 2 s clock fires mid-flight
+            #expect(!h.model.mintInFlight,
+                    "a mint must not be born while a structural gesture is in flight")
+            await gesture.value
+            await h.settle()
+            for _ in 0..<200 {
+                if !h.model.mintInFlight { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            await h.settle()
+
+            // The consequence belt: no duplicate identity, three-way agreement.
+            let ids = h.model.index.entries.map(\.blockID)
+            #expect(Set(ids).count == ids.count)
+            try expectStoreMatchesView(h)
+            #expect(h.model.desyncRecoveryCount == 0)
+            #expect(h.model.differentialOracleMisses == 0)
+
+            // The held tail still mints once the flight is over (the fix
+            // re-arms the clock; nothing typed is ever lost).
+            h.model.idleMintTail()
+            await h.settle()
+            let texts = try h.storeSlots().map(\.text)
+            #expect(texts.contains("tail paragraph waiting"))
+        }
+    }
+
+    // MINOR 2: the non-editable fence must hold for the WHOLE flight — a
+    // header observation delivering mid-flight (the op's own touch stamp
+    // triggers one) must not re-enable editing, or a keystroke in the
+    // window records an autosave against pre-rewrite geometry (the
+    // forbidden duplication class the fence exists for). Red on the old
+    // code (adoptHeader set isEditable unconditionally).
+    @Test func aMidFlightHeaderDeliveryCannotReopenTheKeystrokeFence() async throws {
+        try await withEditor(seedBlocks: ["First sentence. Second one.", "Anchor."]) { h in
+            let gesture = await stageMidFlight(h)
+            #expect(h.model.structuralInFlight, "staging must reach the window")
+            #expect(h.textView.isEditable == false, "the fence is up mid-flight")
+
+            // The header observation delivers mid-flight, post unsealed.
+            let header = try await h.database.read { [postID = h.postID] in
+                try Queries.containerHeader($0, containerID: postID)
+            }
+            h.model.adoptHeader(header)
+            #expect(h.textView.isEditable == false,
+                    "a mid-flight header delivery must not reopen the fence")
+
+            await gesture.value
+            // After the flight the freshest header applies: editable again.
+            #expect(h.textView.isEditable == true)
+            try expectStoreMatchesView(h)
+        }
+    }
+}
