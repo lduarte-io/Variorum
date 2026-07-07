@@ -21,6 +21,7 @@
 
 import AppKit
 import Foundation
+import GRDB
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -151,7 +152,15 @@ struct GestureSoakTests {
             let before = h.documentText
             try h.reload()
             #expect(h.documentText == before, "the final projection is a pure echo")
-            #expect(h.session.undoStack.depth >= 0)  // (reachable; no wedge)
+
+            // Non-vacuity: the soak must have LANDED structural work, not
+            // merely refused everything — every divide/extract/merge/W
+            // mints a lineage edge (a hollow soak of refusals fails here).
+            let structuralEdges = try await h.database.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM edge") ?? 0
+            }
+            #expect(structuralEdges > 0,
+                    "seed \(seed) exercised no structural op — the soak went hollow")
         }
     }
 }
