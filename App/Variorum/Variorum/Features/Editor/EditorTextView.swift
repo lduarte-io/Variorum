@@ -20,6 +20,35 @@ final class EditorTextView: NSTextView {
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
 
+    /// The context-menu door for structural gestures (Phase 9): the view
+    /// model supplies items whose enablement came from THE planner — the
+    /// same brain as the menu bar and shortcuts.
+    struct StructuralMenuItem {
+        let title: String
+        let enabled: Bool
+        let action: () -> Void
+    }
+
+    var structuralMenuItems: (() -> [StructuralMenuItem])?
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        let inherited = super.menu(for: event)
+        guard let items = structuralMenuItems?(), !items.isEmpty else { return inherited }
+        let menu = inherited ?? NSMenu()
+        for (i, item) in items.enumerated() {
+            let menuItem = NSMenuItem(
+                title: item.title,
+                action: #selector(StructuralMenuTrampoline.fire(_:)),
+                keyEquivalent: "")
+            let trampoline = StructuralMenuTrampoline(enabled: item.enabled, action: item.action)
+            menuItem.target = trampoline
+            menuItem.representedObject = trampoline  // retains it for the menu's life
+            menu.insertItem(menuItem, at: i)
+        }
+        menu.insertItem(NSMenuItem.separator(), at: items.count)
+        return menu
+    }
+
     override func paste(_ sender: Any?) {
         withPasteFlag { pasteAsPlainText(sender) } // plain text: never import foreign styling
     }
@@ -80,5 +109,28 @@ final class EditorTextView: NSTextView {
         scrollView.hasVerticalScroller = true
         scrollView.documentView = textView
         return (scrollView, textView)
+    }
+}
+
+/// Target for the structural context-menu items: carries the action closure
+/// and answers menu validation with the planner's verdict (NSMenu
+/// auto-enablement asks the target, so the standard items keep their own
+/// validation untouched).
+@MainActor
+private final class StructuralMenuTrampoline: NSObject, NSMenuItemValidation {
+    private let enabled: Bool
+    private let action: () -> Void
+
+    init(enabled: Bool, action: @escaping () -> Void) {
+        self.enabled = enabled
+        self.action = action
+    }
+
+    @objc func fire(_ sender: Any?) {
+        action()
+    }
+
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        enabled
     }
 }

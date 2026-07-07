@@ -54,6 +54,29 @@ final class EditorViewModel {
     var commitList: [CommitListItem]?
     /// A restore that needs the pre-split warning confirmed first.
     var pendingRestore: CommitListItem?
+    /// Per-command gesture enablement (Phase 9) — recomputed on every caret/
+    /// selection change from THE planner, so the menu bar, context menu, and
+    /// shortcuts all read one brain's verdicts.
+    private(set) var gestureAvailability = GestureAvailability()
+    /// A divide invoked on a fanned block routes here: the W ceremony's
+    /// one-sheet request (Step 6 renders it; cancel = set back to nil,
+    /// no rows touched).
+    var divideWRequest: DivideWRequest?
+
+    struct GestureAvailability: Equatable {
+        var divide = false
+        var extract = false
+        var makeBlock = false
+        var merge = false
+    }
+
+    struct DivideWRequest: Equatable, Identifiable {
+        let blockID: String
+        /// The active (rendered) variant's snapped cut — the ceremony's
+        /// pre-seeded proposal source.
+        let activeCut: Int
+        var id: String { blockID }
+    }
 
     struct BlockBadge: Equatable, Identifiable {
         let blockID: String
@@ -99,6 +122,11 @@ final class EditorViewModel {
     /// The variant a loaded commit history belongs to — restore targets
     /// THIS, never the caret's current position (review round 1, NIT 12).
     @ObservationIgnored private var commitListVariantID: String?
+    /// One structural gesture lands at a time (Phase 9): the door is busy
+    /// from invoke to rewrite, and a second invoke refuses visibly.
+    @ObservationIgnored private var structuralInFlight = false
+    /// Clears a transient hint (the fanned-extract hint) after a beat.
+    @ObservationIgnored private var hintClearTask: Task<Void, Never>?
 
     // Idle-mint (author decision 2026-07-06, review round — QUESTIONS item
     // 2 answered): a short quiet gap crystallizes the open tail, including
@@ -121,6 +149,7 @@ final class EditorViewModel {
         canary.onFire = { [weak self] message in self?.canaryMessage = message }
         canary.arm(for: textView)
         textView.onCommitShortcut = { [weak self] in self?.commitCaretVariant() }
+        textView.structuralMenuItems = { [weak self] in self?.contextMenuItems() ?? [] }
         session.editorRouter.active = self
         if let pending = pendingProjection {
             pendingProjection = nil
@@ -635,6 +664,234 @@ final class EditorViewModel {
         applyPendingIfClean()
     }
 
+    // MARK: - Structural gestures (Phase 9)
+
+    /// The planner's snapshot of the live surface. `textAt` reads the view
+    /// (the buffer is authoritative while dirty), lazily — enablement costs
+    /// one block's text per recompute, never the document (P1). `slots` may
+    /// briefly lag `index.entries` during a mint window; the planner reads
+    /// missing arities as 1, which is exactly what a fresh mint is.
+    func gestureWorld() -> StructuralGesturePlanner.World {
+        StructuralGesturePlanner.World(
+            index: index,
+            fanArities: slots.map(\.activeVariantCount),
+            sealed: header?.locked == true,
+            textAt: { [weak self] i in
+                guard let self, i >= 0, i < index.entries.count else { return "" }
+                return viewText(index.range(ofEntryAt: i))
+            })
+    }
+
+    // The three doors' entry points (menu bar, context menu, shortcut all
+    // land here; enablement used the same planner call).
+    func divideAtCursor() { performGesture(.divideAtCursor) }
+    func extractSelection() { performGesture(.extractSelection) }
+    func makeBlockFromSelection() { performGesture(.makeBlockFromSelection) }
+    func mergeBlocks() { performGesture(.mergeBlocks) }
+
+    private func performGesture(_ command: StructuralGesturePlanner.Command) {
+        Task { await invokeGesture(command) }
+    }
+
+    /// Plans against the CURRENT selection and applies — the invoke re-plans
+    /// even when a menu's enablement said yes (enablement can go stale under
+    /// a remote seal/lock; the refusal then surfaces here, never silently).
+    func invokeGesture(_ command: StructuralGesturePlanner.Command) async {
+        guard let textView else { return }
+        let plan = StructuralGesturePlanner.plan(
+            command, selection: textView.selectedRange(), world: gestureWorld())
+        await applyStructural(plan)
+    }
+
+    /// THE one door for structural changes to the surface (plan ground
+    /// rule): every gesture funnels through here; nothing else rewrites the
+    /// editor for a structural result. The store leads — the surface is
+    /// never pre-written optimistically; the rewrite renders the operation's
+    /// known outcome, and the observation's later arrival is our own echo
+    /// (`surfaceMatches` skips it).
+    func applyStructural(_ plan: StructuralGesturePlanner.Plan) async {
+        guard !structuralInFlight else {
+            refuseFeedback("Another structural change is still landing.")
+            return
+        }
+        switch plan {
+        case .refusal(let refusal):
+            refuseFeedback(RefusalCopy.message(for: refusal))
+
+        case .divideW(_, let blockID, let activeCut):
+            // Contract item 3: the W ceremony is ONE sheet; the live editor
+            // is untouched for its whole duration. Routing only — confirm
+            // funnels back through this door (Step 6).
+            divideWRequest = DivideWRequest(blockID: blockID, activeCut: activeCut)
+            showStatus("The divide-into-takes ceremony sheet arrives in Step 6.")
+
+        case .divide(let i, let blockID, let cut):
+            // Snap-and-proceed, visibly (contract item 2): the caret lands
+            // on the snapped cut as part of the one invoke.
+            visiblySnap(NSRange(location: index.range(ofEntryAt: i).location + cut, length: 0))
+            _ = await runStructural { ops in
+                let result = try ops.divide(blockID, cut: cut)
+                return (result.block.id, 0)  // caret: the successor's start
+            }
+
+        case .extract(let i, let blockID, let span, _, let otherTakes):
+            let base = index.range(ofEntryAt: i).location
+            visiblySnap(NSRange(location: base + span.lowerBound, length: span.count))
+            let landed = await runStructural { ops in
+                let result = try ops.extract(blockID, span: span)
+                return (result.block.id, 0)  // caret: the extracted block's start
+            }
+            if landed, otherTakes > 0 {
+                // Contract item 8: passive, self-dismissing, never modal.
+                showTransientStatus(
+                    otherTakes == 1
+                        ? "This block has 1 other take — it keeps this span."
+                        : "This block has \(otherTakes) other takes — they keep this span.")
+            }
+
+        case .makeBlock:
+            // Step 4 wires the composed gesture (it needs the compound undo
+            // entry); until then the command has no door.
+            showStatus("Make Block from Selection arrives in a later step.")
+
+        case .merge(_, let trailingIndex, let leadingID, let trailingID):
+            let trailingLength = index.entries[trailingIndex].length
+            _ = await runStructural { ops in
+                let result = try ops.merge(leadingID, trailingID)
+                // Caret at the join: right where the trailing half begins.
+                let join = max(0, result.variant.workingText.utf16.count - trailingLength)
+                return (result.block.id, join)
+            }
+        }
+    }
+
+    /// Runs one structural operation through the runner and applies its
+    /// outcome to the surface. Returns true when the operation landed.
+    ///
+    /// Discipline: the buffer flushes FIRST, so the store text the operation
+    /// validates against equals the surface text the planner snapped
+    /// against; the view is non-editable for the few-ms flight so no
+    /// keystroke can slip between the flush and the operation (a stale
+    /// whole-buffer autosave after a divide would resurrect the moved half —
+    /// the forbidden text-duplication class).
+    private func runStructural(
+        _ body: @escaping @Sendable (Operations) throws -> (blockID: String, intraOffset: Int)
+    ) async -> Bool {
+        structuralInFlight = true
+        textView?.isEditable = false
+        defer {
+            structuralInFlight = false
+            textView?.isEditable = header.map { !$0.locked } ?? false
+        }
+        await autosave.flushNow()
+        guard !autosave.isDirty else {
+            // A refused flush keeps its text pending (Phase 7 MAJOR 1); a
+            // structural op against a store that disagrees with the surface
+            // must not run.
+            showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return false
+        }
+        // An in-flight crystallization mint reconciles before the rewrite
+        // (its tail bookkeeping must not land on a rewritten surface).
+        while mintInFlight {
+            if let mint = mintTask { await mint.value } else { await Task.yield() }
+        }
+        do {
+            let caret = try await session.runner.run(body)
+            let fresh = try await session.database.read { [postID] in
+                try Queries.renderPost($0, containerID: postID)
+            }
+            applyStructuralResult(fresh, caret: caret)
+            return true
+        } catch {
+            showOperationError(error)
+            return false
+        }
+    }
+
+    /// The single structural rewrite path (plan ground rule, PROVISIONAL
+    /// reading logged in the closeout): structural results always change the
+    /// slot sequence, so v1 re-renders fully — with Phase 7's content-
+    /// anchored scroll restore and text-undo clearing riding `renderFull` —
+    /// then places the caret BY IDENTITY (blockID + intra-block offset
+    /// mapped through the op's known seams).
+    private func applyStructuralResult(
+        _ fresh: [Queries.RenderedBlock], caret: (blockID: String, intraOffset: Int)
+    ) {
+        renderFull(fresh, preserveTail: true)
+        if let textView,
+           let i = index.entries.firstIndex(where: { $0.blockID == caret.blockID }) {
+            let range = index.range(ofEntryAt: i)
+            let offset = range.location + min(max(0, caret.intraOffset), range.length)
+            textView.setSelectedRange(NSRange(location: offset, length: 0))
+            updateCaretContext()
+        }
+        applyPendingIfClean()
+    }
+
+    /// The visible snap (contract item 2): the selection moves to the
+    /// snapped cut/span as part of the invoke — never silently, never as a
+    /// separate confirm step.
+    private func visiblySnap(_ range: NSRange) {
+        textView?.setSelectedRange(range)
+        updateCaretContext()
+    }
+
+    /// Context-menu items for the text view — the second door, same brain:
+    /// each item's enablement is a fresh planner verdict at menu-build time.
+    func contextMenuItems() -> [EditorTextView.StructuralMenuItem] {
+        guard let textView else { return [] }
+        let selection = textView.selectedRange()
+        let world = gestureWorld()
+        func item(
+            _ title: String, _ command: StructuralGesturePlanner.Command
+        ) -> EditorTextView.StructuralMenuItem {
+            let verdict = StructuralGesturePlanner.plan(command, selection: selection, world: world)
+            let enabled = if case .refusal = verdict { false } else { true }
+            return .init(title: title, enabled: enabled) { [weak self] in
+                self?.performGesture(command)
+            }
+        }
+        return [
+            item("Divide Block at Cursor", .divideAtCursor),
+            item("Extract Selection", .extractSelection),
+        ]
+    }
+
+    private func refreshGestureAvailability() {
+        guard let textView, loaded else {
+            if gestureAvailability != GestureAvailability() {
+                gestureAvailability = GestureAvailability()
+            }
+            return
+        }
+        let selection = textView.selectedRange()
+        let world = gestureWorld()
+        func enabled(_ command: StructuralGesturePlanner.Command) -> Bool {
+            if case .refusal = StructuralGesturePlanner.plan(
+                command, selection: selection, world: world) { return false }
+            return true
+        }
+        let fresh = GestureAvailability(
+            divide: enabled(.divideAtCursor),
+            extract: enabled(.extractSelection),
+            makeBlock: enabled(.makeBlockFromSelection),
+            merge: enabled(.mergeBlocks))
+        if fresh != gestureAvailability {
+            gestureAvailability = fresh
+        }
+    }
+
+    private func showTransientStatus(_ message: String) {
+        statusMessage = message
+        hintClearTask?.cancel()
+        hintClearTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(6))
+            guard !Task.isCancelled else { return }
+            if self?.statusMessage == message { self?.statusMessage = nil }
+        }
+    }
+
     // MARK: - Commit + history (Step 5)
 
     func commitCaretVariant() {
@@ -786,10 +1043,14 @@ final class EditorViewModel {
             if caret >= location, caret <= location + entry.length {
                 caretBlockID = entry.blockID
                 caretVariantID = entry.variantID
-                return
+                break
             }
             location += entry.length + 1
         }
+        // Gesture enablement rides every caret/selection change — the menu
+        // bar, context menu, and shortcuts read these planner verdicts
+        // (one brain, three doors). Cost: the caret block's boundary scan.
+        refreshGestureAvailability()
     }
 
     /// Badges for fanned blocks currently laid out near the viewport.

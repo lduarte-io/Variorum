@@ -15,6 +15,19 @@
 import Observation
 import VariorumCore
 
+/// The undo stack's menu-facing mirror (Phase 9 — per-op undo labels): a
+/// tiny observable the Edit menu reads, refreshed by the stack's change
+/// observer. The stack stays the truth; this is a projection.
+@MainActor
+@Observable
+final class UndoMenuState {
+    private(set) var topLabel: String?
+
+    func refresh(from stack: UndoStack) {
+        topLabel = stack.topLabel
+    }
+}
+
 @MainActor
 final class AppSession {
     let database: AppDatabase
@@ -26,6 +39,8 @@ final class AppSession {
     /// Serial off-main executor for every operations-layer write (P2), and
     /// the serialization guard `undo()` requires.
     let runner: OperationsRunner
+    /// The Edit menu's window onto the undo stack (top label, live).
+    let undoMenuState = UndoMenuState()
 
     #if os(macOS)
     /// The focused editor + per-post scroll anchors (text locations, never
@@ -41,5 +56,12 @@ final class AppSession {
         let ops = Operations(undoStack: undo)
         self.operations = ops
         self.runner = OperationsRunner(operations: ops)
+        // The stack mutates on the runner's executor; the menu mirror
+        // refreshes on main. (Captures the state object and the stack, never
+        // self — no cycle through the session.)
+        let menuState = undoMenuState
+        undo.setChangeObserver {
+            Task { @MainActor in menuState.refresh(from: undo) }
+        }
     }
 }
