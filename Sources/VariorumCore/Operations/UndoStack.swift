@@ -28,6 +28,10 @@ public final class UndoStack: @unchecked Sendable {
     private var entries: [Entry] = []
     private var nextID = 0
     private var changeObserver: (@Sendable () -> Void)?
+    /// Non-nil while a compound registration is collecting (Phase 9's
+    /// composed Make Block gesture): registrations land here instead of the
+    /// stack, then fold into ONE entry.
+    private var compoundCollector: [Entry]?
 
     public init() {}
 
@@ -53,11 +57,74 @@ public final class UndoStack: @unchecked Sendable {
     }
 
     func register(label: String, inverse: @escaping (Operations) throws -> Void) {
-        lock.withLock {
+        let collected: Bool = lock.withLock {
             nextID += 1
-            entries.append(Entry(id: nextID, label: label, inverse: inverse))
+            let entry = Entry(id: nextID, label: label, inverse: inverse)
+            if compoundCollector != nil {
+                compoundCollector?.append(entry)
+                return true
+            }
+            entries.append(entry)
+            return false
         }
-        notifyChange()
+        if !collected { notifyChange() }
+    }
+
+    /// Runs `body` with registrations COLLECTED into one compound entry
+    /// (Phase 9, the composed middle-span gesture — AppSpec §14's ratified
+    /// "two divides as ONE undoable action"). Composition only: the
+    /// compound's inverse runs the collected inverses newest-first, exactly
+    /// as separate undos would; no new inverse logic exists. Compounds
+    /// don't nest (nothing needs to; debug asserts via precondition).
+    ///
+    /// If `body` throws after some of its operations landed, the compound
+    /// stays atomic: the already-collected inverses run immediately
+    /// (newest-first) to un-apply the partial work, and the original error
+    /// rethrows. Should an un-apply itself fail (e.g. a seal landing
+    /// mid-gesture from a sync apply), the not-yet-run inverses are pushed
+    /// as ordinary entries so the partial work stays reachable by undo —
+    /// never stranded.
+    ///
+    /// A compound entry whose inverse fails partway stays on the stack for
+    /// retry like any entry; the inverses it already ran are idempotent
+    /// (revert operations skip already-reverted rows), so a retry is safe.
+    public func withCompound<T>(
+        label: String, operations: Operations, _ body: () throws -> T
+    ) throws -> T {
+        lock.withLock {
+            precondition(compoundCollector == nil, "compound undo entries don't nest")
+            compoundCollector = []
+        }
+        func drainCollector() -> [Entry] {
+            lock.withLock {
+                let collected = compoundCollector ?? []
+                compoundCollector = nil
+                return collected
+            }
+        }
+        do {
+            let result = try body()
+            let collected = drainCollector()
+            if !collected.isEmpty {
+                register(label: label) { ops in
+                    for entry in collected.reversed() {
+                        try entry.inverse(ops)
+                    }
+                }
+            }
+            return result
+        } catch {
+            var remaining = drainCollector()
+            while let entry = remaining.last {
+                if (try? entry.inverse(operations)) == nil { break }
+                remaining.removeLast()
+            }
+            if !remaining.isEmpty {
+                lock.withLock { entries.append(contentsOf: remaining) }
+                notifyChange()
+            }
+            throw error
+        }
     }
 
     /// Runs the newest inverse (LIFO) and removes it on success; a failed

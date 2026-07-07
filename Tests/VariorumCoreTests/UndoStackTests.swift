@@ -317,6 +317,82 @@ struct UndoStackTests {
         }
     }
 
+    // MARK: Compound entries (Phase 9 — the composed Make Block gesture)
+
+    @Test func compoundEntryRoundTripsAsOneUndo() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
+            let sourceBefore = try db.snapshotRow("variant", a.variant.id)
+
+            // Two divides as ONE undoable action (the ratified contract).
+            let minted: (middle: String, suffix: String) = try stack.withCompound(
+                label: "Make Block", operations: ops
+            ) {
+                let first = try ops.divide(a.block.id, cut: 14)
+                let second = try ops.divide(first.block.id, cut: 19)
+                return (first.block.id, second.block.id)
+            }
+
+            #expect(stack.depth == 1, "two registrations folded into ONE entry")
+            #expect(stack.topLabel == "Make Block")
+            #expect(try liveBlockOrder(db, in: post.id)
+                == [a.block.id, minted.middle, minted.suffix])
+
+            // ONE undo un-applies both divides, newest first.
+            #expect(try stack.undo(with: ops) == "Make Block")
+            #expect(stack.depth == 0)
+            #expect(try db.snapshotRow("variant", a.variant.id) == sourceBefore)
+            #expect(try db.deletedAt("block", minted.middle) != nil)
+            #expect(try db.deletedAt("block", minted.suffix) != nil)
+            #expect(try liveBlockOrder(db, in: post.id) == [a.block.id])
+        }
+    }
+
+    @Test func compoundPartialFailureRollsBackAtomically() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
+            let sourceBefore = try db.snapshotRow("variant", a.variant.id)
+
+            // The second divide fails (cut 0 is invalid): the compound is
+            // atomic — the first divide un-applies, the error rethrows.
+            #expect(throws: (any Error).self) {
+                try stack.withCompound(label: "Make Block", operations: ops) {
+                    let first = try ops.divide(a.block.id, cut: 14)
+                    _ = try ops.divide(first.block.id, cut: 0)
+                }
+            }
+
+            #expect(stack.depth == 0, "nothing to undo — the action never happened")
+            #expect(try db.snapshotRow("variant", a.variant.id) == sourceBefore)
+            #expect(try liveBlockOrder(db, in: post.id) == [a.block.id])
+        }
+    }
+
+    @Test func compoundRegistrationNotifiesTheObserverExactlyOnce() throws {
+        try withOperations { _, _ in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
+
+            let fired = LockIsolated(0)
+            stack.setChangeObserver { fired.withValue { $0 += 1 } }
+
+            _ = try stack.withCompound(label: "Make Block", operations: ops) {
+                let first = try ops.divide(a.block.id, cut: 14)
+                _ = try ops.divide(first.block.id, cut: 19)
+            }
+            #expect(fired.value == 1, "sub-registrations are silent; the fold notifies once")
+            #expect(stack.depth == 1)
+        }
+    }
+
     // MARK: Change observer (Phase 9 — per-op undo menu labels)
 
     @Test func theChangeObserverFiresOnEveryStackMutation() throws {
