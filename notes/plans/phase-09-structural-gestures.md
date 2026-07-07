@@ -307,7 +307,252 @@ structural ops in pools are legal per Phase 3 but have no surface until then); a
 7. TK1 grep audit clean; canary armed; no new `ensureLayout` beyond the jump primitive's
    single fragment.
 
-## Closeout
-*(Written by the implementer at phase end: what shipped, test counts, PROVISIONAL calls,
-review dispositions, KnownIssues reconciliation — both rows owned by 9 must be resolved or
-explicitly re-owned — deltas, and the author's feel-pass notes.)*
+## Closeout (2026-07-07) — implementation complete; awaiting the review ladder
+
+**Environment:** macOS 26.4.1 (25E253) · Xcode 26.3 / SDK 26.2 · the M3 — unchanged from
+the Phase 6 definitive spike run (verified at phase start via the reconciliation checklist
+and re-verified at Step 8), so no spike re-run was owed and the memo's numbers remain the
+performance contract.
+
+**Test results (the Phase 9b/10 baselines once the review ladder closes):**
+core `swift test` = **430 green in 51 suites** (baseline 423/50; the 51st suite is the
+structural-session sync convergence); Mac app `xcodebuild test` = **196 green in 32
+suites** (baseline 101/17 — the additions are the 48-test planner suite, the gesture/door
+suites, CutPropagation, the W ceremony suite, drops + refusal sweep, the windowed
+structural smoke, and the 3-seed soak); iOS `VariorumMobile` = **11 green in 4 suites**
+on the iOS 26.2 simulator (unchanged; the shared-shell addition `UndoMenuState` compiles
+into both targets). Release-configuration build green. TK1 grep audit clean before every
+commit (hits remain the known `textLayoutManager` locals and comments).
+
+**Process note:** the coordinator installed a mid-phase gate after Steps 1–3
+(implement → report → gate review → release). The gate PASSED with two non-blocking
+observations, both taken: QUESTIONS.md re-ordered chronologically, and merge's
+selection-touch semantics refined + pinned (see the merge reading below).
+
+**Commits (in order):** `55ea067` (Step 1 op wiring: newBlock stamps + churns — QUESTIONS
+#5(a)), `53c48f4` (Step 1: StructuralGesturePlanner + 48-test suite), `8d383e7` (core:
+UndoStack change observer + "Divide into Variants" label), `42568d2` (Steps 2–3: the
+rewrite door + divide/extract gestures + labels), `2e6d1cb` (QUESTIONS #8 logged),
+`22b0edf` (Step 4 core: compound undo entries), `57473b9` (Steps 4–5 app: Make Block +
+Merge + the pinned merge semantics), the Step 6 commit (W ceremony: CutPropagation +
+DivideWSheet + ceremony flow), `b4971f8` (Step 7: drops + refusal sweep), the Step 8
+commit (soak + sync convergence + windowed checks), and the self-review hardening commit
+(soak non-vacuity). Nothing pushed.
+
+**What shipped, per step:**
+
+- **Step 1a — `newBlock` stamps `last_touched_at` + feeds churn (QUESTIONS #5, ratified
+  option (a); the reconciliation checklist's owned hand-back).** `Operations.newBlock`
+  calls `registerTextChange` with the minted text's length (grapheme `count` — the same
+  unit convention as extract/divide/restoreCommit's in-core deltas; churn is approximate
+  by design). **Red-on-old proven procedurally:** the flipped pin
+  `aMintIntoAPreviouslyTouchedAndSweptPostIsNowInsured` (Phase 8's documented-gap test,
+  now asserting the swept-past post IS a candidate and that `idleAutoCommit` lands one
+  auto commit on the minted block) was run against the pre-change op FIRST — 7 issues red
+  — then the fix landed and all suites went green. Both Phase 8 residual sweep gaps close;
+  `IdleCommit.swift`'s coverage doc rewritten; the `created_at` branch **kept** with a new
+  legacy-row test (stamp-less rows genuinely exist: containers minted by pre-Phase-9
+  builds on the author's devices). Six ripple tests reworked with intent preserved —
+  notably extract/divide churn tests now assert **visible accumulation** against the
+  mint's baseline (stronger than the old trivially-crossed-at-first-autosave shape).
+- **Step 1b — `StructuralGesturePlanner`** (pure, no AppKit/store): `plan(command,
+  selection, World)` where `World` = BlockRangeIndex snapshot + per-entry fan arities +
+  seal + **lazy** per-entry text (enablement costs the caret block's boundary scan, never
+  the document — P1). Verdicts per the ratified contract: divide snaps to the nearest
+  **interior** sentence-or-paragraph boundary (0/end are boundaries but not cuts —
+  contract item 2's "legal sentence/paragraph boundary" read as the union set, constant
+  across segmentation modes); fanned divide → `.divideW` seeded with the active take's
+  snapped cut (locked takes don't refuse W — it copies); extract snaps both span ends,
+  classifies prefix/suffix whitespace-tolerantly (mirroring the op's own classification),
+  carries `otherTakes` for the hint; makeBlock = single-variant middle spans,
+  **degrading to extract** when the snapped span touches a boundary (one op beats two;
+  degradation precedes the fan check, so a fanned edge-span is a legal hinted extract);
+  merge = seam caret (either side of the separator) or a characters-decide selection (the
+  pinned reading below). Closed 12-case `Refusal` enum, **every case pinned reachable**;
+  precedence pinned sealed > tail > shape; raw AppKit selections normalized through the
+  tiling (separator-overhang shrink — TEXTKIT2_NOTES §3's discipline made mechanical);
+  only grapheme-aligned pre-snapped offsets leave the planner (ops check well-formedness
+  only — the Phase 3 ratification); the pure layer never asserts (out-of-tiling →
+  `invalidSelection`, recover-not-crash — Phase 7 MINOR-7's lesson).
+- **Step 2 — the one rewrite door.** `applyStructural(plan)` is the only path a
+  structural result reaches the surface: refusal → `RefusalCopy` + beep (visible, never
+  silent, never beep-only); actionable → **visible snap** (the selection moves to the
+  snapped cut/span as part of the one invoke) → `runStructural`: **flush first** (store
+  text == the text the planner snapped against), **abort if the flush left anything
+  pending** (Phase 7's keep-pending refusals must not let an op run against a
+  disagreeing store), the view non-editable for the few-ms flight (closes the
+  flush→op keystroke window whose stale whole-buffer autosave would resurrect a
+  divided-away half — the forbidden duplication class), wait out any in-flight
+  crystallization mint, run **exactly one Phase 3 op** through `OperationsRunner`, fetch
+  a fresh `renderPost`, apply the single rewrite: `renderFull` (Phase 7's
+  content-anchored scroll restore + text-undo clearing ride along) + **caret by
+  identity** (divide → successor's start; extract → extracted block's start; merge → the
+  join = the trailing half's start; W → B's start; makeBlock → the middle block's
+  start). The observation's later arrival is our own echo (`surfaceMatches` skips it —
+  pinned). One gesture lands at a time (`structuralInFlight`; a second invoke refuses
+  visibly).
+- **Step 3 — divide/extract gestures, three doors, per-op labels.** A **Block** menu
+  (Divide Block at Cursor ⌘⇧D, Extract Selection ⌘⇧E, later + Make Block ⌘⇧K and Merge
+  ⌘⇧M — implementer's shortcut picks), NSTextView context-menu items via an
+  `NSMenuItemValidation` trampoline (standard items' auto-validation untouched), and the
+  menu shortcuts. Enablement everywhere = `gestureAvailability`, recomputed per
+  caret/selection change from planner calls; **invocation re-plans**, so stale enablement
+  (a remote seal/lock) surfaces the op-consistent refusal — pinned. Fanned-extract
+  passive hint (contract 8): transient status line in the CommitBar, self-dismissing
+  (~6 s), never modal, only when `otherTakes > 0`. Per-op undo labels (the KnownIssues
+  row's part 1): core `UndoStack.setChangeObserver` (fires on register/completed-undo/
+  removeAll; a failed undo fires nothing — pinned) → shared `UndoMenuState` mirror →
+  Edit menu shows "Undo Divide"/"Undo Extract"/"Undo Make Block"/"Undo Divide into
+  Variants", disabled when empty, generic-title derivation tested pure.
+- **Step 4 — Make Block from Selection.** Core: `UndoStack.withCompound(label:operations:)`
+  — composition only: registrations during the body collect and fold into ONE entry whose
+  inverse runs them newest-first; **atomic on partial failure** (a body throw un-applies
+  the collected work via its own inverses and rethrows; if an un-apply itself fails — a
+  seal landing mid-gesture via sync apply — the not-yet-run inverses push as ordinary
+  entries so nothing is stranded); compound retry after a failed undo is safe (revert ops
+  are idempotent — documented on the API). Sub-registrations don't fire the change
+  observer; the fold notifies once (pinned). App: the gesture runs two divides inside one
+  serialized runner body under the compound; the second cut maps into the successor from
+  the op's **actual output** (`span.count` minus the seam-trimmed leading whitespace,
+  derived — never re-guessed). Round-trip pinned to row equality; atomic rollback pinned.
+- **Step 5 — Merge.** Menu + context items; the door case landed in Step 2. **The
+  merge-selection reading (gate observation 2, decided + pinned):** selected CHARACTERS
+  decide the pair — zero-width endpoint grazes and swallowed edge separators don't count
+  (a selection ending exactly at a third block's start merges the two blocks whose text
+  is selected — pinned at planner AND end-to-end); a separator selected ALONE is the
+  pure-seam gesture and names its pair; last-char+separator is notASeam (the consistent
+  line: separators name a pair only when selected alone; otherwise characters decide);
+  an empty block between two selected blocks refuses on the binary rule
+  (`tooManyBlocksForMerge` — three blocks are involved). Undo restores both placements
+  and the surface through the projection (pinned).
+- **Step 6 — the W ceremony.** `CutPropagation` (pure): a grapheme-clamped 2N-unit
+  context window around the active take's cut, located in the target take — a UNIQUE
+  match proposes the corresponding position snapped through the planner's own
+  `snapToInteriorBoundary` (one implementation of "legal cut"); zero or multiple matches,
+  blank windows, misaligned cuts, or targets without an interior boundary propose
+  NOTHING (a proposal is a seed, never a guess). The ceremony: divide-on-fanned opens
+  `DivideWCeremonyState` after a flush (sheet text == surface == what the op will cut) —
+  the live ACTIVE fan as a checklist, the rendered take pre-marked with the gesture's
+  snapped cut, per-take proposals pre-seeded, per-take legal cut positions as
+  click-to-place targets (`placeWCut` refuses illegal positions); Confirm gates until
+  every marked take has a cut, then funnels `{variantID: cut}` through the SAME
+  structural door; Cancel and any other dismissal touch no rows (pinned). `DivideWSheet`
+  is functional-unstyled: checklist + full text with a visible ✂ marker at the cut +
+  one button per legal boundary (the click-to-place reading of the contract — the
+  placeable positions ARE the legal cuts); it renders the LIVE observable state
+  (`.sheet(item:)` presentation snapshots pinned around). Undo label "Divide into
+  Variants" (the core label change, own commit with the observer).
+- **Step 7 — drops + the refusal sweep.** `performDragOperation` wraps super in the same
+  bulk-entry flag as paste (3 lines of AppKit plumbing; the ROUTING is the flag + the
+  verdict — Phase 7 MAJOR-3's arm-only-on-tail-verdict — tested through the seam paste
+  shares): a drop into the open tail — at ANY tail position, drops aren't caret-bound —
+  segments on entry and closes the tail; a drop into a block is a content edit at the
+  drop point with newlines as content (I4); a boundary-adjacent drop at the exact seam
+  extends the leading block (pinned). This implements the author's 2026-07-06 resolution
+  of Phase 7's deferred drag-drop item (already recorded in QUESTIONS; nothing left to
+  remove there). Refusal sweep: `RefusalCopy`'s switch is compile-time exhaustive (a new
+  `Refusal` case fails the build) and the sweep test pins every case non-empty plus the
+  ratified specifics (cross-block names divide-then-merge; fanned-middle points at the
+  W's door; extract's middle-span refusal points at Make Block; merge names the binary
+  rule).
+- **Step 8 — verification.** (i) Full suites, three targets, counts above; Release build
+  green. (ii) The automatable §5 slices on the 10k-word windowed post: canary silent
+  through gesture-heavy sessions; scroll anchor resolves through structural rewrites;
+  fans born by the W feed the badge predicate and a merged block starts fanless; seam
+  selections resolve through the planner. (iii) **The randomized gesture soak** (the
+  centerpiece): 3 seeds × 250 scripted actions interleaving typing at random positions,
+  deletions, tail opening, typing-past mints, idle-mints, bulk pastes, all four gestures
+  (including W ceremony confirm/cancel), fan branching, and structural undo — after
+  every settled action **store == BlockRangeIndex == surface per block**, the tiling
+  invariant holds, **`desyncRecovery` fired ZERO times** (a real counter on the VM,
+  asserted per action), the canary stayed silent, and the final store proves
+  **non-vacuity** (lineage edges > 0 — a hollow soak of pure refusals fails loudly).
+  Unsettled stretches between assertions are deliberate: gestures land while mints and
+  autosaves are in flight (the plan's demanded interleaving; the door waits them out).
+  External writes (branch, undo) get a reload as the observation's stand-in; editor-path
+  actions must reconcile incrementally with no re-render crutch. Runs in ~2.3 s
+  (assertions flush rather than wait out the real 500 ms debounce). (iv) **Sync
+  convergence under the structural write pattern:** a scripted gesture session (divide;
+  branch → divideW with both takes marked — the ceremony's exact op call; merge; the
+  compound make-block; two undos) with engine rounds MID-session and a phone editing a
+  Mac-authored take concurrently → byte-identical synced dumps, empty outboxes,
+  identical `renderedText`, and the racing edit alive somewhere (S5) — plus `newBlock`'s
+  new touch/churn stamps riding every mint through CAS. (v) **Full-gesture latency at
+  10k words: ~16.6 ms** (divide op + full re-render + caret-by-identity, measured on a
+  real window) — the number QUESTIONS #8's ratification asks for; comfortably a
+  deliberate-act cost, bounded < 100 ms by test. (vi) The author's manual feel pass —
+  **pending at the checkpoint** (snap feel, the W sheet, refusal copy, gesture latency
+  by hand; notes to be recorded here).
+
+**PROVISIONAL calls (in `notes/QUESTIONS.md`):**
+- **#8 — structural rewrites are full re-renders** (the plan's pre-decided reading,
+  logged per its ground rule): options recorded (full re-render shipped; extending the
+  differential path is the designed fallback); ratify with the 16.6 ms Step 8 number
+  beside it.
+
+**Interpretations & readings for the record (planner-internal calls within the ratified
+contract — not PROVISIONALs; flag any the review finds product-shaped):**
+1. **Divide with a non-empty selection divides at the selection's start** (the
+  caret-position reading of "at Cursor"; the visible snap collapses the selection).
+2. **The planner takes no segmentation-mode parameter** — a deviation from the plan's
+  Step 1 signature: the verdicts proved mode-independent (the legal-cut set is
+  sentence ∪ paragraph per contract item 2 in every mode; segmentation stays a
+  crystallization concern). A parameter the brain ignores would be noise.
+3. **Merge's "caret at the join" = the trailing half's start** (after the space when one
+  was added).
+4. **The merge-selection characters-decide rule** (Step 5 above) — chosen over
+  closed-range endpoint contact at the gate's prompting; both directions pinned.
+5. **`invalidSelection` refuses with copy but does NOT trigger `desyncRecovery`'s
+  debug-assert** — the planner is pure and the next projection heals; the recovery path
+  (with its assert) remains the storage-edit path's.
+6. **Divide on a fanned block with no legal interior cut refuses `nothingToDo` without
+  opening the ceremony** — the ceremony needs an active-cut seed; an uncuttable rendered
+  take means the gesture has nothing to propose (surfaced by the windowed smoke, which
+  had to mint a sentence boundary first).
+7. **The sheet's click-to-place = one button per legal boundary** (the functional-
+  unstyled reading of "click-to-place cut marker": the placeable positions are exactly
+  the legal cuts; free-form clicking would only ever snap to them anyway).
+8. **`newBlock`'s churn delta is grapheme `count`** — consistent with extract/divide/
+  restoreCommit's in-core convention (the editor's autosave deltas remain UTF-16;
+  churn is approximate by design, AppSpec §10).
+
+**Deltas / residual notes (for the cold review's eyes):**
+- Text-undo clearing on structural rewrites rides `renderFull` (Phase 7's tested path);
+  headless tests cannot observe `NSTextView.undoManager` (nil without a window), so the
+  clearing is not directly asserted in the gesture tests — it is the same line
+  `renderFull` has always executed.
+- `openDivideWCeremony` has a ms-scale window between its flush and the fan fetch;
+  the sheet is window-modal once up, so no typing can land mid-ceremony — the window is
+  before presentation and closes with the fetch. Accepted.
+- Availability recompute costs 4 planner calls per caret/selection change (each a
+  boundary scan of the caret block — block-bounded, P1-compatible); the windowed smoke's
+  keystroke budget (< 16.7 ms per keystroke at 10k words) passes WITH this recompute in
+  the pipeline, so the cost is measured, not assumed.
+- `interiorBoundaries(of:)` in the VM duplicates the planner's one-line interior filter
+  (the snap function itself is shared); noted as cosmetic.
+- The soak runs the paragraph segmentation mode only (one-block journal posts never
+  crystallize and their single block takes gestures like any other; the capture surface
+  has no gesture doors by design — CoreDescription pillar 8).
+
+**KnownIssues reconciliation (both rows owned by 9):**
+- **"Cross-block re-bracketing" — resolved, removed.** The ratified v1 line shipped
+  exactly: in-one-block spans (composed middle-span gesture, single-variant; extract for
+  edge spans) and cross-boundary spans refuse with the workaround named in the copy.
+  The messy cross-fan case was to be re-owned "only if daily use demands it" — her daily
+  use hasn't started on gestures yet; the checkpoint can re-own it if wanted.
+- **"Undo menu labels + text-undo across identity rewrites" — resolved, removed.**
+  Part 1 (labels) shipped: observable `UndoStack` → `UndoMenuState` → per-op Edit-menu
+  titles, disabled-when-empty. Part 2 (text-undo cleared on programmatic rewrites; a ⌘Z
+  crossing a boundary refuses): the clearing is this plan's own mandated hygiene rule
+  ("text-undo is cleared on every structural rewrite") and stands as the designed
+  posture — recorded here as the disposition rather than parked again.
+- (The 9b-owned `setEntryDate` row stands untouched.)
+
+**Still open for the author at the checkpoint:** QUESTIONS #8 (full-re-render reading,
+with the 16.6 ms number); the manual feel pass (vi); whether the messy cross-fan
+re-bracketing case gets re-owned; and the still-pending Phase 7 manual §5 feel pass plus
+the Phase 8 handoff checklist items (#3, #6, device rounds) — unchanged by this phase.
+
+*(Master-plan pointer/table update, the Phase 9b plan authoring from its brief, and the
+author handoff are deliberately NOT done yet — the coordinator holds them until the
+review ladder closes.)*
