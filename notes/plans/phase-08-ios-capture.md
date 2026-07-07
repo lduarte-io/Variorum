@@ -20,9 +20,10 @@
 > green in 39 suites; Mac app target = 86 green in 12 suites (Swift 6 mode). Do not re-run
 > either at session start.** The Mac editor is Phase 7's finished surface — this phase does
 > not touch `App/Variorum/Variorum/Features/Editor/` except where a step explicitly says
-> "shared". **Step 1 is an author-assist gate** (iOS target creation + signing is a
-> machine-side GUI step, hers; mirror Phase 7's flow — she creates, you verify + fix + commit,
-> never redo blind). **Step 6 is a second author-assist point** (her Supabase credentials on
+> "shared". **Step 1 is an author-assist gate — PRE-SATISFIED 2026-07-07** (she pre-created
+> `VariorumMobile`, staged UNCOMMITTED; product link + shared scheme added and build-verified
+> the same night — see Step 1: your duty is verify + fix template settings + commit as your
+> first act, never redo blind; nothing needs the author at session start). **Step 6 is a second author-assist point** (her Supabase credentials on
 > the phone — though a server-side PAT already exists untracked; see Step 6). **If the author
 > is not present at session start, proceed HEADLESS-FIRST** (2026-07-07 — this phase may be
 > kicked off on a timer while she sleeps): amendments A1–A3, A5, A6 and Step 5 are Mac/core
@@ -53,7 +54,7 @@
 
 ### Step 1 — iOS app target (AUTHOR-ASSIST GATE)
 **Files:** the Xcode project gains an iOS app target (`VariorumMobile` or the author's preferred name) wrapping the `VariorumCore` package; `App/Variorum/VariorumMobile/` sources.
-**Work:** the author creates the target in Xcode (GUI + signing, hers): iOS app, SwiftUI lifecycle, storage None, local package dependency on the repo root, automatic signing with her team, deployment target iOS 26. **Verification duties (yours, before the first commit — Phase 7's lesson list):** `IPHONEOS_DEPLOYMENT_TARGET = 26.0` in every configuration; `SWIFT_VERSION = 6.0` in every configuration (the template still writes 5.0); the VariorumCore *product link* actually present (her Phase 7 target had the package reference but no product dependency); a shared scheme so `xcodebuild` works without her xcuserdata; unit-test bundle included. Commit the verified target as its own first act.
+**Work:** **PRE-DONE by the author 2026-07-07, left staged but UNCOMMITTED — Step 1 must verify it and COMMIT it as its own first act (the Phase 7 ritual: verify, fix, never redo blind). The author-assist gate is therefore PRE-SATISFIED — nothing needs the author at session start.** What exists: target `VariorumMobile` (+ `VariorumMobileTests` unit bundle and a UITests bundle) created in the GUI with her team/automatic signing; the **VariorumCore product link** and the **shared scheme** were added post-create in the same session (pbxproj: `PBXBuildFile E1D21791…`/`XCSwiftPackageProductDependency E1D21790…` on the target's Frameworks phase; `xcshareddata/xcschemes/VariorumMobile.xcscheme` — unit-test bundle in the test action, UITests deliberately excluded, the Phase 7 posture); **verified: `xcodebuild -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` SUCCEEDED 2026-07-07** (VariorumCore compiles for iOS). The original spec for the record — the author creates the target in Xcode (GUI + signing, hers): iOS app, SwiftUI lifecycle, storage None, local package dependency on the repo root, automatic signing with her team, deployment target iOS 26. **Verification duties (yours, before the first commit — Phase 7's lesson list):** `IPHONEOS_DEPLOYMENT_TARGET = 26.0` in every configuration; `SWIFT_VERSION = 6.0` in every configuration (the template still writes 5.0); the VariorumCore *product link* actually present (her Phase 7 target had the package reference but no product dependency); a shared scheme so `xcodebuild` works without her xcuserdata; unit-test bundle included. Commit the verified target as its own first act.
 **Tests:** `xcodebuild -project App/Variorum/Variorum.xcodeproj -scheme <MobileScheme> -destination 'generic/platform=iOS Simulator' build` green; the core suite untouched.
 
 ### Step 2 — Bootstrap + store on iOS
