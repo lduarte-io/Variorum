@@ -749,10 +749,27 @@ final class EditorViewModel {
                         : "This block has \(otherTakes) other takes — they keep this span.")
             }
 
-        case .makeBlock:
-            // Step 4 wires the composed gesture (it needs the compound undo
-            // entry); until then the command has no door.
-            showStatus("Make Block from Selection arrives in a later step.")
+        case .makeBlock(let i, let blockID, let span):
+            // Contract item 5: two divides as ONE undoable action —
+            // UndoStack.withCompound folds their inverses into one entry
+            // (atomic on partial failure), inside one serialized runner body.
+            let entryRange = index.range(ofEntryAt: i)
+            visiblySnap(NSRange(location: entryRange.location + span.lowerBound, length: span.count))
+            let entryLength = entryRange.length
+            let stack = session.undoStack
+            _ = await runStructural { ops in
+                try stack.withCompound(label: "Make Block", operations: ops) {
+                    let first = try ops.divide(blockID, cut: span.lowerBound)
+                    // The span's end, mapped into the successor: the
+                    // successor lost `span.lowerBound` units plus whatever
+                    // leading whitespace the seam trim dropped — derived
+                    // from the op's actual output, never re-guessed.
+                    let dropped = (entryLength - span.lowerBound)
+                        - first.variant.workingText.utf16.count
+                    _ = try ops.divide(first.block.id, cut: span.count - dropped)
+                    return (first.block.id, 0)  // caret: the new middle block's start
+                }
+            }
 
         case .merge(_, let trailingIndex, let leadingID, let trailingID):
             let trailingLength = index.entries[trailingIndex].length
@@ -855,6 +872,8 @@ final class EditorViewModel {
         return [
             item("Divide Block at Cursor", .divideAtCursor),
             item("Extract Selection", .extractSelection),
+            item("Make Block from Selection", .makeBlockFromSelection),
+            item("Merge Blocks", .mergeBlocks),
         ]
     }
 

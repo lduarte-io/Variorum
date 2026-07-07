@@ -324,10 +324,12 @@ struct DivideExtractGestureTests {
             h.textView.setSelectedRange(NSRange(location: 19, length: 0))
             h.model.updateCaretContext()
             let items = h.model.contextMenuItems()
-            #expect(items.map(\.title)
-                == ["Divide Block at Cursor", "Extract Selection"])
-            #expect(items.map(\.enabled)
-                == [h.model.gestureAvailability.divide, h.model.gestureAvailability.extract])
+            #expect(items.map(\.title) == [
+                "Divide Block at Cursor", "Extract Selection",
+                "Make Block from Selection", "Merge Blocks",
+            ])
+            let a = h.model.gestureAvailability
+            #expect(items.map(\.enabled) == [a.divide, a.extract, a.makeBlock, a.merge])
         }
     }
 
@@ -347,6 +349,165 @@ struct DivideExtractGestureTests {
             #expect(restored == ["First sentence. Second one."])
             #expect(h.documentText == "First sentence. Second one.")
             try expectStoreMatchesView(h)
+        }
+    }
+}
+
+
+@MainActor
+@Suite("Make Block from Selection (Phase 9, Step 4)")
+struct MakeBlockGestureTests {
+    @Test func aMiddleSpanYieldsThreeBlocksWithLineageAndOneUndoEntry() async throws {
+        try await withEditor(seedBlocks: ["Intro clause. Middle stays here. Tail sentence."]) { h in
+            let sourceID = try h.storeSlots()[0].blockID
+            h.textView.setSelectedRange(NSRange(location: 15, length: 15))  // sloppy middle
+            h.model.updateCaretContext()
+            #expect(h.model.gestureAvailability.makeBlock)
+            await h.model.invokeGesture(.makeBlockFromSelection)
+
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text)
+                == ["Intro clause.", "Middle stays here.", "Tail sentence."])
+            try expectStoreMatchesView(h)
+            // Caret by identity: the new middle block's start.
+            let middleRange = h.model.index.range(ofEntryAt: 1)
+            #expect(h.textView.selectedRange() == NSRange(location: middleRange.location, length: 0))
+            // ONE compound entry, labeled for the menu.
+            #expect(h.session.undoStack.depth == 1)
+            #expect(h.session.undoStack.topLabel == "Make Block")
+            // Two divide edges: middle from source, suffix from middle.
+            let edges = try await h.database.read {
+                try Row.fetchAll(
+                    $0,
+                    sql: """
+                        SELECT source_block_id, target_block_id, origin_op
+                        FROM edge WHERE deleted_at IS NULL ORDER BY created_at, id
+                        """)
+            }
+            #expect(edges.count == 2)
+            #expect(edges.allSatisfy { $0["origin_op"] == "divide" })
+            #expect(edges[0]["target_block_id"] == sourceID)
+            #expect(edges[0]["source_block_id"] == slots[1].blockID)
+            #expect(edges[1]["target_block_id"] == slots[1].blockID)
+            #expect(edges[1]["source_block_id"] == slots[2].blockID)
+        }
+    }
+
+    @Test func oneUndoRestoresTheSourceExactly() async throws {
+        try await withEditor(seedBlocks: ["Intro clause. Middle stays here. Tail sentence."]) { h in
+            h.textView.setSelectedRange(NSRange(location: 15, length: 15))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.makeBlockFromSelection)
+            let made = try h.storeSlots().count
+            #expect(made == 3)
+
+            let stack = h.session.undoStack
+            let label = try await h.session.runner.run { ops in try stack.undo(with: ops) }
+            #expect(label == "Make Block")
+            try h.reload()
+
+            let restored = try h.storeSlots().map(\.text)
+            #expect(restored == ["Intro clause. Middle stays here. Tail sentence."])
+            #expect(h.documentText == "Intro clause. Middle stays here. Tail sentence.")
+            #expect(stack.depth == 0)
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func aFannedBlockRefusesTowardTheWCeremony() async throws {
+        try await withEditor(seedBlocks: ["Intro clause. Middle stays here. Tail sentence."]) { h in
+            let slots = try h.storeSlots()
+            _ = try h.session.operations.branchVariant(
+                slots[0].blockID, from: slots[0].variantID!)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(location: 15, length: 15))
+            h.model.updateCaretContext()
+
+            #expect(!h.model.gestureAvailability.makeBlock)
+            await h.model.invokeGesture(.makeBlockFromSelection)
+            #expect(h.model.statusMessage == RefusalCopy.message(for: .fannedMiddleSpan))
+            let untouched = try h.storeSlots().count
+            #expect(untouched == 1)
+        }
+    }
+
+    @Test func aBoundaryTouchingSpanRunsOneExtractInstead() async throws {
+        try await withEditor(seedBlocks: ["Intro clause. Middle stays here. Tail sentence."]) { h in
+            // The planner degrades the edge-touching span to extract (one op
+            // beats two): ONE op, ONE "Extract" entry, one lineage edge.
+            h.textView.setSelectedRange(NSRange(location: 2, length: 8))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.makeBlockFromSelection)
+
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text)
+                == ["Intro clause.", "Middle stays here. Tail sentence."])
+            #expect(h.session.undoStack.depth == 1)
+            #expect(h.session.undoStack.topLabel == "Extract")
+            let ops = try await h.database.read {
+                try String.fetchAll($0, sql: "SELECT origin_op FROM edge WHERE deleted_at IS NULL")
+            }
+            #expect(ops == ["extract"])
+        }
+    }
+}
+
+@MainActor
+@Suite("Merge gesture (Phase 9, Step 5)")
+struct MergeGestureTests {
+    @Test func aTwoBlockSelectionMergesAndAThreeBlockOneRefuses() async throws {
+        try await withEditor(seedBlocks: ["One two.", "Three four.", "Five six."]) { h in
+            // Three blocks selected ("One two." | "Three four." | "Five
+            // six." — C's chars start at 21): the binary rule refuses.
+            h.textView.setSelectedRange(NSRange(location: 2, length: 20))
+            h.model.updateCaretContext()
+            #expect(!h.model.gestureAvailability.merge)
+            await h.model.invokeGesture(.mergeBlocks)
+            #expect(h.model.statusMessage == RefusalCopy.message(for: .tooManyBlocksForMerge))
+            let untouched = try h.storeSlots().count
+            #expect(untouched == 3)
+
+            // Exactly two: merges.
+            h.textView.setSelectedRange(NSRange(location: 2, length: 9))
+            h.model.updateCaretContext()
+            #expect(h.model.gestureAvailability.merge)
+            await h.model.invokeGesture(.mergeBlocks)
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["One two. Three four.", "Five six."])
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func undoRestoresBothPlacementsAndTheSurface() async throws {
+        try await withEditor(seedBlocks: ["One two.", "Three four."]) { h in
+            h.textView.setSelectedRange(NSRange(location: 8, length: 0))  // the seam
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.mergeBlocks)
+            let merged = try h.storeSlots().count
+            #expect(merged == 1)
+
+            let stack = h.session.undoStack
+            _ = try await h.session.runner.run { ops in try stack.undo(with: ops) }
+            try h.reload()
+
+            let restored = try h.storeSlots().map(\.text)
+            #expect(restored == ["One two.", "Three four."])
+            #expect(h.documentText == "One two.\nThree four.")
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func anEndpointGrazeStillMergesTheTwoSelectedBlocks() async throws {
+        // The gate-review case, end to end: the selection ends exactly at
+        // the third block's start — the two blocks with selected text merge.
+        try await withEditor(seedBlocks: ["One two.", "Three four.", "Five six."]) { h in
+            let thirdStart = h.model.index.range(ofEntryAt: 2).location
+            h.textView.setSelectedRange(NSRange(location: 2, length: thirdStart - 2))
+            h.model.updateCaretContext()
+            #expect(h.model.gestureAvailability.merge)
+            await h.model.invokeGesture(.mergeBlocks)
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["One two. Three four.", "Five six."])
         }
     }
 }

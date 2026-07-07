@@ -54,6 +54,20 @@ struct EditorCommands: Commands {
             }
             .keyboardShortcut("e", modifiers: [.command, .shift])
             .disabled(!(session?.editorRouter.active?.gestureAvailability.extract ?? false))
+
+            Button("Make Block from Selection") {
+                session?.editorRouter.active?.makeBlockFromSelection()
+            }
+            .keyboardShortcut("k", modifiers: [.command, .shift])
+            .disabled(!(session?.editorRouter.active?.gestureAvailability.makeBlock ?? false))
+
+            Divider()
+
+            Button("Merge Blocks") {
+                session?.editorRouter.active?.mergeBlocks()
+            }
+            .keyboardShortcut("m", modifiers: [.command, .shift])
+            .disabled(!(session?.editorRouter.active?.gestureAvailability.merge ?? false))
         }
     }
 

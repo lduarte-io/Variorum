@@ -247,12 +247,30 @@ nonisolated enum StructuralGesturePlanner {
             }
             pair = seam
         } else {
-            // Boundary touch counts here: selecting the separator character
-            // (or from a block's exact end into its neighbor) names the pair.
-            let touched = entriesTouching(selection, index: world.index)
-            guard touched.count <= 2 else { return .refusal(.tooManyBlocksForMerge) }
-            guard touched.count == 2 else { return .refusal(.notASeam) }
-            pair = (touched[0], touched[1])
+            // Selected CHARACTERS decide which blocks the author means —
+            // zero-width endpoint grazes and swallowed edge separators do
+            // not (a shift-selection routinely ends exactly at a third
+            // block's start having selected nothing of it — gate-review
+            // observation, pinned). The one exception: a selection of
+            // exactly one separator character is the pure-seam gesture and
+            // names that separator's pair.
+            let normalized = shrinkSeparatorOverhang(selection, index: world.index)
+            if normalized.length == 0 {
+                guard let seam = separatorPair(coveredBy: selection, index: world.index) else {
+                    return .refusal(.notASeam)
+                }
+                pair = seam
+            } else {
+                let touched = entriesIntersecting(normalized, index: world.index)
+                guard touched.count <= 2 else { return .refusal(.tooManyBlocksForMerge) }
+                guard touched.count == 2 else { return .refusal(.notASeam) }
+                guard touched[1] == touched[0] + 1 else {
+                    // An (empty) block sits between the two: three blocks
+                    // are involved — the binary rule refuses.
+                    return .refusal(.tooManyBlocksForMerge)
+                }
+                pair = (touched[0], touched[1])
+            }
         }
         for k in [pair.0, pair.1] {
             guard entries[k].variantID != nil else { return .refusal(.gapSlot) }
@@ -263,6 +281,20 @@ nonisolated enum StructuralGesturePlanner {
             leadingIndex: pair.0, trailingIndex: pair.1,
             leadingBlockID: entries[pair.0].blockID,
             trailingBlockID: entries[pair.1].blockID)
+    }
+
+    /// The pair named by a selection covering exactly ONE separator
+    /// character (the pure-seam merge gesture).
+    private static func separatorPair(
+        coveredBy selection: NSRange, index: BlockRangeIndex
+    ) -> (Int, Int)? {
+        guard selection.length == 1 else { return nil }
+        for i in 0..<max(0, index.entries.count - 1) {
+            if selection.location == index.range(ofEntryAt: i).upperBound {
+                return (i, i + 1)
+            }
+        }
+        return nil
     }
 
     /// A caret sits at the seam between entries i and i+1 when it is at the
@@ -316,21 +348,6 @@ nonisolated enum StructuralGesturePlanner {
             let overlapStart = max(range.location, location)
             let overlapEnd = min(range.upperBound, location + entry.length)
             if overlapStart < overlapEnd { result.append(i) }
-            location += entry.length + 1
-        }
-        return result
-    }
-
-    /// Entries the CLOSED range [start, end] touches — endpoint contact
-    /// counts, so a selection covering just a separator touches both of its
-    /// neighbors. Merge's pair-naming logic.
-    private static func entriesTouching(_ range: NSRange, index: BlockRangeIndex) -> [Int] {
-        var result: [Int] = []
-        var location = 0
-        for (i, entry) in index.entries.enumerated() {
-            if range.location <= location + entry.length, range.upperBound >= location {
-                result.append(i)
-            }
             location += entry.length + 1
         }
         return result

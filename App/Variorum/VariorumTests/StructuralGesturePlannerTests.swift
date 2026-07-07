@@ -367,6 +367,34 @@ struct PlannerMergeTests {
             == .refusal(.notASeam))
     }
 
+    @Test func anEndpointGrazeOfAThirdBlockDoesNotCountIt() {
+        // Gate-review observation, pinned: a selection ending EXACTLY at the
+        // third block's start (zero of its characters selected) means the
+        // two blocks whose text is selected — selected characters decide.
+        let plan = Planner.plan(
+            .mergeBlocks, selection: NSRange(location: 1, length: 7), world: world)
+        #expect(plan == .merge(leadingIndex: 0, trailingIndex: 1,
+                               leadingBlockID: "b0", trailingBlockID: "b1"))
+    }
+
+    @Test func lastCharPlusTheSeparatorIsNotASeamSelection() {
+        // The consistent line (recorded in the closeout): a separator names
+        // a pair only when it is selected ALONE; with block characters in
+        // the selection, the characters decide — here only b0's are.
+        #expect(Planner.plan(
+            .mergeBlocks, selection: NSRange(location: 2, length: 2), world: world)
+            == .refusal(.notASeam))
+    }
+
+    @Test func anEmptyBlockBetweenRefusesTheBinaryRule() {
+        // ["Aa.", "", "Cc."]: the empty middle block has no characters to
+        // select, but three blocks are involved — the binary rule refuses.
+        let gapped = makeWorld([B("Aa."), B(""), B("Cc.")])
+        #expect(Planner.plan(
+            .mergeBlocks, selection: NSRange(location: 1, length: 5), world: gapped)
+            == .refusal(.tooManyBlocksForMerge))
+    }
+
     @Test func aGapNeighborRefuses() {
         let gappy = makeWorld([B("Aa."), B("Bb.", gap: true)])
         #expect(Planner.plan(.mergeBlocks, selection: caret(3), world: gappy)
