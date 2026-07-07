@@ -174,3 +174,30 @@ struct JournalEntryArchivedSiblingTests {
         }
     }
 }
+
+// MARK: - Review round 2 (MINOR): the day-key boundary
+
+@Suite("Notebook rule: day-key well-formedness (Phase 8, review round 2)")
+struct JournalEntryDayKeyTests {
+    /// THE PIN: a malformed day key ("2026-7-7") must refuse at the
+    /// operations boundary — accepted, it would mint a live entry invisible
+    /// to the canonical "2026-07-07" (two irreconcilable same-day pages,
+    /// broken lexicographic ordering), and this op is the door the Phase 9b
+    /// Fragments bridge feeds with EXTERNAL day keys.
+    @Test func aMalformedDayKeyRefusesAtTheOperationsBoundary() throws {
+        try withOperations { ops, db in
+            for bad in ["2026-7-7", "07-07-2026", "2026/07/07", "2026-02-30", "today", ""] {
+                #expect(throws: OperationError.invalidEntryDate(bad)) {
+                    try ops.createOrOpenJournalEntry(entryDate: bad)
+                }
+            }
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == 0,
+                    "nothing minted for any malformed key")
+
+            // The canonical key still works, and the malformed near-miss
+            // could never have shadowed it.
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(entry.created)
+        }
+    }
+}

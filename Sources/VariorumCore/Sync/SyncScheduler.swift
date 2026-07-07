@@ -44,6 +44,8 @@ public actor SyncScheduler {
     private let engine: SyncEngine
     private var running = false
     private var followUpRequested = false
+    /// Set once by `retire()`; a retired scheduler never starts a round.
+    private var retired = false
     private var idleWaiters: [CheckedContinuation<Void, Never>] = []
     private var statusContinuations: [Int: AsyncStream<Status>.Continuation] = [:]
     private var nextContinuationKey = 0
@@ -58,14 +60,26 @@ public actor SyncScheduler {
 
     /// Requests a sync round. Serialized and coalescing: if a round is
     /// already running, at most one follow-up round is scheduled no matter
-    /// how many triggers arrive.
+    /// how many triggers arrive. A retired scheduler refuses.
     public func trigger() {
+        guard !retired else { return }
         guard !running else {
             followUpRequested = true
             return
         }
         running = true
         Task { await self.runLoop() }
+    }
+
+    /// Retires this scheduler permanently: no NEW round can ever start
+    /// (the current one, if any, finishes and `awaitIdle` observes it).
+    /// The session layer retires a chain BEFORE draining and replacing it —
+    /// a trigger Task that captured the old scheduler before the swap must
+    /// not be able to revive the retired chain after the drain (Phase 8
+    /// review round 2; the follow-up flag is cleared for the same reason).
+    public func retire() {
+        retired = true
+        followUpRequested = false
     }
 
     /// Suspends until no round is running and no follow-up is pending —

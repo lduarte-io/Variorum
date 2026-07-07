@@ -98,6 +98,12 @@ final class SyncSession {
         stopObservations()
         scheduler = nil
         if let old {
+            // Retire FIRST, then drain: a `triggerSync` Task that captured
+            // the old scheduler before this swap must not revive the
+            // retired chain after the drain (review round 2) — a retired
+            // scheduler refuses all new rounds; awaitIdle covers the one
+            // already in flight.
+            await old.retire()
             await old.awaitIdle()
         }
 
@@ -143,9 +149,14 @@ final class SyncSession {
 
     /// Teardown only (no new chain follows; an in-flight round finishes on
     /// its own). Chain REPLACEMENT goes through `configure`, which drains.
+    /// Retiring closes the stale-trigger door here too.
     func stop() {
         stopObservations()
+        let old = scheduler
         scheduler = nil
+        if let old {
+            Task { await old.retire() }
+        }
     }
 
     private func stopObservations() {

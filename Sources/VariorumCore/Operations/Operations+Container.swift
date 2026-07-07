@@ -42,7 +42,15 @@ extension Operations {
 
     @discardableResult
     public func createOrOpenJournalEntry(entryDate: String) throws -> JournalEntryResult {
-        try database.write { db in
+        // Well-formedness at the operations boundary (review round 2): a
+        // malformed key ("2026-7-7") would create a live entry invisible to
+        // the canonical "2026-07-07" — two irreconcilable "same-day" pages
+        // and broken lexicographic ordering. This op is the door the
+        // Fragments bridge (Phase 9b) feeds with EXTERNAL day keys.
+        guard JournalDay.isValid(entryDate) else {
+            throw OperationError.invalidEntryDate(entryDate)
+        }
+        return try database.write { db in
             if let existing = try Container.fetchOne(
                 db,
                 sql: """

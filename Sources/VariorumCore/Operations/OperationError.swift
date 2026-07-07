@@ -17,6 +17,11 @@ public enum OperationError: Error, Equatable, Sendable {
     // Wrong target shape.
     case wrongContainerKind(id: String, expected: ContainerKind)
     case wrongReadingKind(id: String, expected: ReadingKind)
+    /// The journal's day key must be canonical "yyyy-MM-dd" (Phase 8; the
+    /// notebook rule + the Phase 9b bridge join both key on it — a
+    /// malformed key would mint a day-page the canonical key can never
+    /// find again).
+    case invalidEntryDate(String)
 
     // Locks (reversible guards, I6).
     case lockedPost(id: String)

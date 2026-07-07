@@ -13,8 +13,13 @@ import VariorumCore
 
 struct EntryEditorView: View {
     @State private var model: EntryEditorViewModel
+    /// The background-flush registry (review round 2): the app-level
+    /// scene-phase handler flushes the active editor before sync, because
+    /// `onDisappear` never fires when the whole app backgrounds.
+    let router: CaptureRouter?
 
-    init(session: AppSession, postID: String) {
+    init(session: AppSession, postID: String, router: CaptureRouter? = nil) {
+        self.router = router
         _model = State(initialValue: EntryEditorViewModel(session: session, postID: postID))
     }
 
@@ -40,7 +45,11 @@ struct EntryEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await model.loadOnce() }
         .task { await model.start() }
+        .onAppear { router?.activeEditor = model }
         .onDisappear {
+            if router?.activeEditor === model {
+                router?.activeEditor = nil
+            }
             let model = model
             Task { await model.finish() }
         }

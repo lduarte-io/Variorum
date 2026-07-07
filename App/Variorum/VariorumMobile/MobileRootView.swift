@@ -13,12 +13,15 @@ import VariorumCore
 struct MobileRootView: View {
     let session: AppSession
     let services: AppServices?
+    /// The app's background-flush registry (review round 2).
+    let captureRouter: CaptureRouter
     @State private var model: EntryListViewModel
     @State private var path = NavigationPath()
 
-    init(session: AppSession, services: AppServices?) {
+    init(session: AppSession, services: AppServices?, captureRouter: CaptureRouter) {
         self.session = session
         self.services = services
+        self.captureRouter = captureRouter
         _model = State(initialValue: EntryListViewModel(session: session))
     }
 
@@ -29,7 +32,7 @@ struct MobileRootView: View {
             }
             .navigationTitle(model.scope == .journal ? "Journal" : "All posts")
             .navigationDestination(for: String.self) { postID in
-                EntryEditorView(session: session, postID: postID)
+                EntryEditorView(session: session, postID: postID, router: captureRouter)
             }
             .safeAreaInset(edge: .bottom) {
                 if let services {

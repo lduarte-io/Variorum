@@ -404,3 +404,45 @@ struct StaleProjectionTests {
         }
     }
 }
+
+// MARK: - Review round 2 (MINOR): the background transition lands pending
+// text in the store
+
+@MainActor
+@Suite("Background flush (Phase 8, review round 2)")
+struct BackgroundFlushTests {
+    /// THE PIN: `onDisappear` never fires when the whole app backgrounds,
+    /// so up to one debounce of typed text sat in `pending` when the scene
+    /// suspended — a background kill lost it silently. The scene-phase
+    /// handler must land the active editor's pending text in the STORE
+    /// (before the sync round, so the push carries it).
+    @Test func theBackgroundTransitionLandsPendingTextInTheStore() async throws {
+        try await withMobileWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "mid-typing", profile: .journal, entryDate: "2026-07-07")
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Quick entry", at: .end)
+            }
+            let model = makeEditorModel(session, postID: post.id)
+            await model.loadOnce()
+            #expect(model.focusedVariantID == minted.variant.id)
+
+            // Typed, debounce not yet fired (the harness clock never fires
+            // it) — exactly the state at a home-button press.
+            model.setDraft("Quick entry, typed right before backgrounding")
+            #expect(model.autosave.isDirty)
+
+            // The app-level background handler's exact routine.
+            await performBackgroundFlush(editor: model, sync: nil)
+
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.variant.id])
+            } == "Quick entry, typed right before backgrounding",
+                "the pending burst survives a background kill because it reached the store")
+            #expect(!model.autosave.isDirty)
+        }
+    }
+}

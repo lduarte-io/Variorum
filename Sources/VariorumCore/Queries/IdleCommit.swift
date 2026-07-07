@@ -33,14 +33,18 @@ extension Queries {
     /// a NULL stamp): those rows sit in the index's NULL run, rare by
     /// construction, windowed by `created_at`.
     ///
-    /// **Known residual gap (review round 1, honest scope):** a mint into a
-    /// PREVIOUSLY-touched post whose stamp is already behind the mark — an
-    /// idle-/teardown-minted tail on an old post, left alone afterwards —
-    /// matches NEITHER branch: its container stamp is outside the window
-    /// and not NULL. Such a block gets no idle insurance until the post's
-    /// next real edit. The full close is `newBlock` stamping
-    /// `last_touched_at` (QUESTIONS #5, options a/b — the author's call);
-    /// the gap is pinned by the documented-behavior test
+    /// **Known residual gaps (review rounds 1–2, honest scope):** a mint
+    /// whose container stamp is already behind the mark matches NEITHER
+    /// branch — concretely: (1) a mint into a PREVIOUSLY-touched post (an
+    /// idle-/teardown-minted tail on an old post, left alone afterwards),
+    /// and (2) a never-touched post CREATED before the mark whose first
+    /// block is minted later (a "Today" page opened blockless, swept past,
+    /// then filled days later with one un-followed burst — the created_at
+    /// branch windows on creation, not the mint). Either block gets no
+    /// idle insurance until the post's next real edit. The full close for
+    /// both is `newBlock` stamping `last_touched_at` (QUESTIONS #5,
+    /// options a/b — the author's call); gap (1) is pinned by the
+    /// documented-behavior test
     /// `aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap`.
     public static func idleCommitCandidates(
         _ db: Database, afterMark: String, cutoff: String

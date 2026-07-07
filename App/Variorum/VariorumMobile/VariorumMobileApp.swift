@@ -23,12 +23,15 @@ struct VariorumMobileApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var bootstrap = AppBootstrap()
     @State private var services: AppServices?
+    /// The active capture editor, for the background flush (review round 2).
+    @State private var captureRouter = CaptureRouter()
 
     var body: some Scene {
         WindowGroup {
             switch bootstrap.state {
             case .ready(let session):
-                MobileRootView(session: session, services: services)
+                MobileRootView(
+                    session: session, services: services, captureRouter: captureRouter)
                     .task {
                         guard services == nil else { return }
                         let fresh = AppServices(
@@ -47,12 +50,16 @@ struct VariorumMobileApp: App {
             case .active:
                 services?.sync.triggerSync()
             case .background:
-                // One flush before suspension. If the device locks mid-round,
-                // file protection may cut the store off — the scheduler
-                // treats that exactly like being offline (round skipped,
-                // outbox intact, retry on next foreground).
+                // The active editor's pending autosave lands in the STORE
+                // first (`onDisappear` never fires on whole-app
+                // backgrounding — review round 2), then one sync round
+                // pushes it. If the device locks mid-round, file protection
+                // may cut the store off — the scheduler treats that exactly
+                // like being offline (round skipped, outbox intact, retry
+                // on next foreground).
+                let editor = captureRouter.activeEditor
                 let sync = services?.sync
-                Task { await sync?.flush() }
+                Task { await performBackgroundFlush(editor: editor, sync: sync) }
             default:
                 break
             }

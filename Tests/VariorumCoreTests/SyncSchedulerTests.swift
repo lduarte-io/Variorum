@@ -195,3 +195,60 @@ struct SyncSchedulerTests {
         #expect(final?.lastError == nil)
     }
 }
+
+// MARK: - Review round 2: retirement closes the stale-trigger door
+
+@Suite("Scheduler retirement (Phase 8, review round 2)")
+struct SchedulerRetirementTests {
+    /// THE PIN: a `triggerSync` Task that captured the old scheduler before
+    /// a re-configure can execute AFTER the drain — the retired scheduler
+    /// must refuse to start a round on the retired chain (stale engine,
+    /// possibly pre-rotation credentials).
+    @Test func aRetiredSchedulerRefusesNewRounds() async throws {
+        let server = FakeSyncServer()
+        let spy = GatedSpyTransport(server: server)
+        let client = try SyncClient(name: "A", prefix: "AA", transport: spy)
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy))
+        try client.with { ops, _ in
+            _ = try ops.createPost(title: "content a stale trigger would push", profile: .journal)
+        }
+
+        await scheduler.retire()
+        try await client.withAsync { _ in
+            await scheduler.trigger()  // the stale Task's revival attempt
+        }
+        await scheduler.awaitIdle()
+
+        let status = await scheduler.status
+        #expect(status.roundsCompleted == 0, "a retired scheduler never starts a round")
+        #expect(await spy.calls.isEmpty, "the retired chain's transport is never touched")
+        #expect(try client.outboxCount() > 0, "the outbox is the NEW chain's to drain")
+    }
+
+    /// Retirement mid-round: the in-flight round finishes (awaitIdle
+    /// observes it) but the coalesced follow-up is cancelled — no new round
+    /// starts on a retired chain.
+    @Test func retirementCancelsTheCoalescedFollowUp() async throws {
+        let server = FakeSyncServer()
+        let spy = GatedSpyTransport(server: server)
+        let client = try SyncClient(name: "A", prefix: "AA", transport: spy)
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: spy))
+        try client.with { ops, _ in
+            _ = try ops.createPost(title: "gated content", profile: .journal)
+        }
+
+        await spy.closeGate()
+        try await client.withAsync { _ in
+            await scheduler.trigger()
+            await spy.awaitCallAtGate()   // round 1 provably mid-flight
+            await scheduler.trigger()     // would coalesce into a follow-up
+            await scheduler.retire()      // the session swaps chains here
+        }
+        await spy.openGate()
+        await scheduler.awaitIdle()
+
+        let status = await scheduler.status
+        #expect(status.roundsCompleted == 1,
+                "the in-flight round finishes; the follow-up dies with retirement")
+    }
+}
