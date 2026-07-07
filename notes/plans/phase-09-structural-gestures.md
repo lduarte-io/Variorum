@@ -48,12 +48,43 @@ risk 1; TEXTKIT2_NOTES §3–§5; Phase 3 + Phase 7 plan closeouts; KnownIssues 
 
 ## Reconciliation checklist (Phase 8's closeout fills this in)
 
-- [ ] Shared shell code this plan names (`OperationsRunner`, `AutosaveCoordinator`,
-      `EditorViewModel`, `BlockRangeIndex`) — unchanged by Phase 8, or deltas noted here.
-- [ ] Baseline test counts updated in the kickoff (core + Mac app + iOS).
-- [ ] macOS point release unchanged since the Phase 6 spike run — if not, the spike re-runs
-      before this phase starts (TEXTKIT2_NOTES §5).
-- [ ] No new KnownIssues rows owned by 9 without a step here that resolves them.
+> **RECONCILED 2026-07-07 (Phase 8 closeout).** Phase 8's outcomes against this plan's
+> assumptions — deltas below; nothing invalidates a step of this plan.
+
+- [x] Shared shell code this plan names — **two files MOVED, none behaviorally changed for
+      the editor's purposes**: `OperationsRunner` and `AutosaveCoordinator` now live in
+      `App/Variorum/Shared/` (compiled into BOTH app targets; same module for the Mac app,
+      so no import/code changes — the editor pipeline is untouched). `EditorViewModel` and
+      `BlockRangeIndex` are byte-unchanged (`Features/Editor/` was fenced all phase).
+      `AppSession` gained `#if os(macOS)` around `editorRouter` (Mac behavior identical) —
+      and `EditorRouter` moved to its own file `App/Variorum/Variorum/EditorRouter.swift`.
+      New shell residents this plan may see but does not touch: `AppServices` (sync
+      lifecycle + idle sweeps + backups), `SyncSession`/`SyncScheduler`, `StoreLocation`
+      (**A4: debug builds open the DEV store** — a Phase 9 implementer's manual smoke
+      launches land in `Variorum-dev/`, by design; the dev store never syncs).
+- [x] Baseline test counts — **core `swift test` 423 green / 50 suites · Mac app 101 green
+      / 17 suites · iOS (VariorumMobile) 11 green / 4 suites** (the kickoff says to take
+      baselines from the master plan's Phase 8 closeout paragraph, which now records these
+      same numbers).
+- [x] macOS point release **unchanged** since the Phase 6 spike run: 26.4.1 (25E253)
+      verified 2026-07-07 — no spike re-run needed.
+- [x] No new KnownIssues rows owned by 9. (Phase 8 resolved three rows and re-owned the
+      backup restore drill to 12; its one new row is owned by 9b — bridge-side
+      `setEntryDate` day-key validation. The two rows this plan already owns stand
+      unchanged. Conditional note: QUESTIONS #5 — `newBlock` touch-stamping — names Phase 9
+      as the suggested owner ONLY if the author picks option (a)/(b) at the Phase 8
+      checkpoint; if so, fold it into Step 1's op-wiring work with its red-on-old pin
+      (`aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap` flips into the pin).)
+
+**Phase 8 deltas under this banner (2026-07-07):** the notebook rule now exists as
+`Operations.createOrOpenJournalEntry` (live-first, earliest-deterministic; day keys
+validated) — irrelevant to this phase's gestures but present in the ops surface; the sync
+engine gained `SyncScheduler` (+ `retire()`) in `Sources/VariorumCore/Sync/` — remember the
+standing rider: from Phase 10 onward that directory is Fable-only surgery, and THIS phase's
+implementer is already Fable per the model policy; sync now runs in the Mac app at real
+schedules (launch/became-active/post-write-settle), so editor-rate writes sync in the
+background during manual testing — convergence noise in a dev session is expected behavior,
+and the dev store's sync is fenced OFF entirely.
 
 ## Ground rules
 
