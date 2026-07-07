@@ -1,0 +1,144 @@
+import Dependencies
+import Foundation
+import GRDB
+import Testing
+@testable import VariorumCore
+
+/// Phase 8, Step 3's core half: the user-set calendar day (`JournalDay`),
+/// the notebook rule (`createOrOpenJournalEntry`), and the journal-profile
+/// library listing the entry list rides.
+@Suite("Journal day & the notebook rule (Phase 8, Step 3)")
+struct JournalEntryTests {
+    // MARK: - JournalDay (pure Domain)
+
+    @Test func dayStringIsZeroPaddedInTheGivenCalendar() throws {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC")!
+        // 2026-07-07T23:30:00Z
+        let lateEvening = Date(timeIntervalSince1970: 1_783_467_000)
+        #expect(JournalDay.dayString(from: lateEvening, calendar: utc) == "2026-07-07")
+
+        // The same instant is already the 8th in Tokyo — the USER'S calendar
+        // decides the day, not UTC.
+        var tokyo = Calendar(identifier: .gregorian)
+        tokyo.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        #expect(JournalDay.dayString(from: lateEvening, calendar: tokyo) == "2026-07-08")
+
+        // Zero padding keeps lexicographic == chronological.
+        // 2026-01-05T12:00:00Z
+        let january = Date(timeIntervalSince1970: 1_767_614_400)
+        #expect(JournalDay.dayString(from: january, calendar: utc) == "2026-01-05")
+    }
+
+    @Test func isValidAcceptsRealDaysAndRefusesTheRest() {
+        #expect(JournalDay.isValid("2026-07-07"))
+        #expect(JournalDay.isValid("1999-12-31"))
+        #expect(JournalDay.isValid("2028-02-29"))   // leap day
+        #expect(!JournalDay.isValid("2026-02-30"))  // not a real day
+        #expect(!JournalDay.isValid("2026-13-01"))  // no month 13
+        #expect(!JournalDay.isValid("2026-7-7"))    // unpadded
+        #expect(!JournalDay.isValid("07-07-2026"))  // wrong order
+        #expect(!JournalDay.isValid("2026/07/07"))  // wrong separator
+        #expect(!JournalDay.isValid("tomorrow"))
+        #expect(!JournalDay.isValid(""))
+        #expect(!JournalDay.isValid("2026-07-07T00:00:00Z"))  // a timestamp, not a day
+    }
+
+    // MARK: - createOrOpenJournalEntry (the notebook rule)
+
+    @Test func createsAJournalEntryWithTheExactRowSet() throws {
+        try withOperations { ops, db in
+            let result = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(result.created)
+            let entry = result.container
+            #expect(entry.kind == .post)
+            #expect(entry.profile == .journal)
+            #expect(entry.entryDate == "2026-07-07")
+            #expect(entry.segmentationDefault == .oneBlock,
+                    "the journal profile seeds one-block segmentation (AppSpec §7)")
+            // Exactly one container row, nothing else minted.
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == 1)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM block") == 0)
+        }
+    }
+
+    @Test func opensTheExistingLiveEntryForThatDay() throws {
+        try withOperations { ops, db in
+            let first = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            let second = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(!second.created, "the notebook rule: one entry per calendar day")
+            #expect(second.container.id == first.container.id)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == 1)
+
+            // A different day is a different page.
+            let other = try ops.createOrOpenJournalEntry(entryDate: "2026-07-08")
+            #expect(other.created)
+        }
+    }
+
+    @Test func aConvergedDoubleCreateOpensTheEarliestDeterministically() throws {
+        try withOperations { ops, db in
+            // Two live same-day entries (the offline double-create after
+            // convergence — legal by design; no unique index exists).
+            let earlier = try ops.createPost(title: "phone", profile: .journal, entryDate: "2026-07-07")
+            _ = try ops.createPost(title: "mac", profile: .journal, entryDate: "2026-07-07")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM container WHERE entry_date = '2026-07-07'") == 2)
+
+            let opened = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(!opened.created)
+            #expect(opened.container.id == earlier.id,
+                    "earliest (created_at, id) opens — deterministic on every device")
+        }
+    }
+
+    @Test func tombstonedAndForeignProfileRowsNeverSatisfyTheRule() throws {
+        try withOperations { ops, _ in
+            // A deleted journal entry on the date does not block a fresh one.
+            let dead = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07").container
+            try ops.deleteContainer(dead.id)
+            let fresh = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(fresh.created, "a tombstoned entry is gone; the day page is blank again")
+            #expect(fresh.container.id != dead.id)
+
+            // A same-day BLOG post is not a journal page.
+            _ = try ops.createPost(title: "essay", profile: .blog, entryDate: "2026-07-08")
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-08")
+            #expect(entry.created)
+        }
+    }
+
+    @Test func anArchivedEntryOpensRatherThanMintingADuplicate() throws {
+        try withOperations { ops, _ in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07").container
+            try ops.archiveContainer(entry.id)
+            let reopened = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            #expect(!reopened.created,
+                    "archive is kept-out-of-view, not gone — opening beats a same-day duplicate")
+            #expect(reopened.container.id == entry.id)
+        }
+    }
+
+    // MARK: - The journal-profile library listing (Step 4's query)
+
+    @Test func libraryFiltersByProfileAndSortsByEntryDate() throws {
+        try withOperations { ops, db in
+            _ = try ops.createPost(title: "an essay", profile: .blog, entryDate: "2026-07-09")
+            _ = try ops.createOrOpenJournalEntry(entryDate: "2026-07-06")
+            _ = try ops.createOrOpenJournalEntry(entryDate: "2026-07-08")
+            _ = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+
+            let journal = try db.read {
+                try Queries.library(
+                    $0, sort: .entryDate, direction: .desc, limit: 50, profile: .journal)
+            }
+            #expect(journal.map(\.entryDate) == ["2026-07-08", "2026-07-07", "2026-07-06"],
+                    "journal entries only, newest day first")
+
+            let everything = try db.read {
+                try Queries.library($0, sort: .entryDate, direction: .desc, limit: 50)
+            }
+            #expect(everything.count == 4, "no profile filter = the whole library")
+        }
+    }
+}

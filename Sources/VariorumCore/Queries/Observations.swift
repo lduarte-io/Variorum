@@ -28,9 +28,13 @@ extension AppDatabase {
     public func observeLibrary(
         sort: Queries.LibrarySort = .lastTouched,
         direction: SortDirection = .desc,
-        limit: Int
+        limit: Int,
+        profile: Profile? = nil
     ) -> AsyncValueObservation<[Queries.TimelineItem]> {
-        observe { try Queries.library($0, sort: sort, direction: direction, limit: limit) }
+        observe {
+            try Queries.library(
+                $0, sort: sort, direction: direction, limit: limit, profile: profile)
+        }
     }
 
     /// A pool's contents with block tags, live.

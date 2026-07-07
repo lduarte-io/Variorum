@@ -12,6 +12,55 @@ extension Operations {
         profile: Profile? = nil,
         entryDate: String? = nil
     ) throws -> Container {
+        try database.write { db in
+            try insertPost(db, title: title, profile: profile, entryDate: entryDate)
+        }
+    }
+
+    /// The notebook rule (author, 2026-07-07; Phase 8): the dedicated
+    /// journal holds ONE entry per calendar day — "new entry" for a date
+    /// that already has a live journal entry OPENS it instead. Enforced
+    /// here, at the operations level, deliberately NOT as a DB unique index
+    /// (no new sync-repair class): an offline same-day double-create
+    /// converges to two visible entries on that day's page, hand-merged,
+    /// with the Fragments bridge pausing that day's push until resolved.
+    ///
+    /// When more than one live entry carries the date (that converged race),
+    /// the earliest-created (`created_at`, `id` tiebreak) opens —
+    /// deterministic on every device. An ARCHIVED entry still opens
+    /// (archive is kept-out-of-view, not gone — opening it beats minting a
+    /// same-day duplicate the notebook rule exists to prevent).
+    public struct JournalEntryResult: Equatable, Sendable {
+        public let container: Container
+        /// False when the notebook rule opened an existing entry.
+        public let created: Bool
+    }
+
+    @discardableResult
+    public func createOrOpenJournalEntry(entryDate: String) throws -> JournalEntryResult {
+        try database.write { db in
+            if let existing = try Container.fetchOne(
+                db,
+                sql: """
+                    SELECT * FROM container
+                    WHERE kind = 'post' AND profile = 'journal'
+                      AND entry_date = ? AND deleted_at IS NULL
+                    ORDER BY created_at ASC, id ASC
+                    LIMIT 1
+                    """,
+                arguments: [entryDate]) {
+                return JournalEntryResult(container: existing, created: false)
+            }
+            let created = try insertPost(
+                db, title: nil, profile: .journal, entryDate: entryDate)
+            return JournalEntryResult(container: created, created: true)
+        }
+    }
+
+    /// The shared mint behind `createPost` and `createOrOpenJournalEntry`.
+    private func insertPost(
+        _ db: Database, title: String?, profile: Profile?, entryDate: String?
+    ) throws -> Container {
         let now = date.now
         var post = Container(
             id: newID(), kind: .post, title: title, profile: profile,
@@ -21,7 +70,7 @@ extension Operations {
         if profile == .journal {
             post.segmentationDefault = .oneBlock
         }
-        try database.write { db in try post.insert(db) }
+        try post.insert(db)
         return post
     }
 

@@ -98,17 +98,26 @@ extension Queries {
         _ db: Database,
         sort: LibrarySort = .lastTouched,
         direction: SortDirection = .desc,
-        limit: Int? = nil
+        limit: Int? = nil,
+        profile: Profile? = nil
     ) throws -> [TimelineItem] {
         let dir = direction == .desc ? "DESC" : "ASC"
+        var arguments: [(any DatabaseValueConvertible)?] = []
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
                    \(sort.expression) AS stamp
             FROM container
             WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
-            ORDER BY \(sort.expression) \(dir), id \(dir)
             """
-        var arguments: [(any DatabaseValueConvertible)?] = []
+        // Profile-scoped listing (Phase 8: the journal surface lists
+        // journal-profile entries). The profile is a UI lens over one
+        // container table — never a separate data model (CoreDescription
+        // pillar 8).
+        if let profile {
+            sql += " AND profile = ?"
+            arguments.append(profile.rawValue)
+        }
+        sql += " ORDER BY \(sort.expression) \(dir), id \(dir)"
         if let limit {
             sql += " LIMIT ?"
             arguments.append(limit)
