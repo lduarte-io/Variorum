@@ -1,0 +1,143 @@
+import Dependencies
+import Foundation
+
+/// Phase 8, amendment A3 — the engine-lifecycle layer.
+///
+/// The app's triggers (foreground, post-write debounce, background
+/// transition) can fire concurrently; engine rounds must serialize. This
+/// actor makes the guarantee explicit rather than relying on accidental
+/// timing:
+///
+///  - **one round at a time** — a round is pull → push, pinned in that
+///    order (reconcile before draining: the order that materializes
+///    conflicts before acks can hide them);
+///  - **coalescing** — any number of triggers arriving mid-round collapse
+///    into AT MOST ONE follow-up round;
+///  - **offline is free** — any error (network down, an iOS
+///    file-protection window after device lock) skips the round, keeps the
+///    outbox intact, surfaces a status message, and waits for the next
+///    trigger. An error is never corruption and never touches state.
+///
+/// Rounds run in a `Task` inheriting the trigger's task-local dependency
+/// context — in the app that is the installed live `\.database`; tests bind
+/// their own world around `trigger()`.
+public actor SyncScheduler {
+    /// The one-row functional sync status surface (SyncSpec §10's "sync
+    /// status indicator" scope, nothing more).
+    public struct Status: Equatable, Sendable {
+        public var isSyncing = false
+        /// Wall-clock stamp of the last round that completed without error
+        /// (display data only — never sync ordering, SyncSpec §9).
+        public var lastSuccessAt: Date?
+        /// The last round's failure, verbatim; nil after a clean round.
+        public var lastError: String?
+        /// Outbox rows still owed to the server after the last round.
+        public var pendingPushCount = 0
+        /// Rounds finished (clean or failed) — test observability.
+        public var roundsCompleted = 0
+        public init() {}
+    }
+
+    @Dependency(\.database) private var database
+    @Dependency(\.date) private var date
+
+    private let engine: SyncEngine
+    private var running = false
+    private var followUpRequested = false
+    private var idleWaiters: [CheckedContinuation<Void, Never>] = []
+    private var statusContinuations: [Int: AsyncStream<Status>.Continuation] = [:]
+    private var nextContinuationKey = 0
+
+    public private(set) var status = Status()
+
+    public init(engine: SyncEngine) {
+        self.engine = engine
+    }
+
+    // MARK: - Triggering
+
+    /// Requests a sync round. Serialized and coalescing: if a round is
+    /// already running, at most one follow-up round is scheduled no matter
+    /// how many triggers arrive.
+    public func trigger() {
+        guard !running else {
+            followUpRequested = true
+            return
+        }
+        running = true
+        Task { await self.runLoop() }
+    }
+
+    /// Suspends until no round is running and no follow-up is pending —
+    /// teardown flushes and deterministic tests.
+    public func awaitIdle() async {
+        guard running else { return }
+        await withCheckedContinuation { idleWaiters.append($0) }
+    }
+
+    // MARK: - The serialized loop
+
+    private func runLoop() async {
+        repeat {
+            followUpRequested = false
+            await runOneRound()
+        } while followUpRequested
+        running = false
+        let waiters = idleWaiters
+        idleWaiters.removeAll()
+        for waiter in waiters { waiter.resume() }
+    }
+
+    private func runOneRound() async {
+        status.isSyncing = true
+        publishStatus()
+        do {
+            // Pinned: pull → push (A3).
+            _ = try await engine.pull()
+            _ = try await engine.push()
+            status.lastError = nil
+            status.lastSuccessAt = date.now
+        } catch {
+            // Offline / protected-data / server hiccup: the round is
+            // skipped, the outbox keeps everything, the next trigger
+            // retries. Never a reason to touch state.
+            status.lastError = String(describing: error)
+        }
+        status.pendingPushCount = (try? await outboxCount()) ?? status.pendingPushCount
+        status.isSyncing = false
+        status.roundsCompleted += 1
+        publishStatus()
+    }
+
+    private func outboxCount() async throws -> Int {
+        try await database.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0
+        }
+    }
+
+    // MARK: - Status observation
+
+    /// A live status feed for the status row; yields the current value
+    /// immediately, then every change.
+    public func statusUpdates() -> AsyncStream<Status> {
+        let key = nextContinuationKey
+        nextContinuationKey += 1
+        return AsyncStream { continuation in
+            statusContinuations[key] = continuation
+            continuation.yield(status)
+            continuation.onTermination = { [weak self] _ in
+                Task { await self?.removeStatusContinuation(key) }
+            }
+        }
+    }
+
+    private func removeStatusContinuation(_ key: Int) {
+        statusContinuations[key] = nil
+    }
+
+    private func publishStatus() {
+        for continuation in statusContinuations.values {
+            continuation.yield(status)
+        }
+    }
+}
