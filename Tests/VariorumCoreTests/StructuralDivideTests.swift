@@ -165,11 +165,19 @@ struct StructuralDivideTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let a = try ops.newBlock(in: post.id, text: "Para one.\n\nPara two.")
+            // The mint crossed (QUESTIONS #5 (a)): baseline 20, accumulator 0.
+            let touchedAtMint = try db.fetchString(
+                "SELECT last_touched_at FROM container WHERE id = ?", [post.id])
+            #expect(touchedAtMint != nil)
+
             _ = try ops.divide(a.block.id, cut: 11)
+            // The seam-trimmed first half drops 11 chars (20 → 9): churn
+            // accumulates 11 against the 20-char baseline (11/20 < 0.8) —
+            // divide visibly feeds churn without restamping.
             #expect(try db.fetchString(
-                "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) != nil)
-            #expect(try db.fetchString(
-                "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id]) != nil)
+                "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) != touchedAtMint)
+            #expect(try db.fetchInt(
+                "SELECT churn_accumulator FROM container WHERE id = ?", [post.id]) == 11)
         }
     }
 

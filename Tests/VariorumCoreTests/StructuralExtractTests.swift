@@ -248,23 +248,28 @@ struct StructuralExtractTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            // The mint crossed the fresh-baseline threshold (QUESTIONS #5
+            // (a)): baseline is now the rendered length (32), accumulator 0.
             let before = try db.fetchString(
                 "SELECT last_touched_at FROM container WHERE id = ?", [post.id])
+            let majorAtMint = try db.fetchString(
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id])
+            #expect(majorAtMint != nil)
 
             _ = try ops.extract(a.block.id, span: 16..<32)
 
             let touched = try db.fetchString(
                 "SELECT last_touched_at FROM container WHERE id = ?", [post.id])
             #expect(touched != nil && touched != before)
-            // 17 removed chars against the fresh baseline (0) crosses the
-            // 0.8 threshold: major revision stamped, accumulator reset,
-            // baseline = rendered length (15 + 16 across the two blocks).
+            // 17 removed chars against the 32-char baseline (17/32 < 0.8):
+            // the churn ACCUMULATES — visible proof extract feeds it — and
+            // the meaningful stamp doesn't move.
             #expect(try db.fetchString(
-                "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id]) != nil)
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id]) == majorAtMint)
             #expect(try db.fetchInt(
-                "SELECT churn_accumulator FROM container WHERE id = ?", [post.id]) == 0)
+                "SELECT churn_accumulator FROM container WHERE id = ?", [post.id]) == 17)
             #expect(try db.fetchInt(
-                "SELECT baseline_length FROM container WHERE id = ?", [post.id]) == 31)
+                "SELECT baseline_length FROM container WHERE id = ?", [post.id]) == 32)
         }
     }
 

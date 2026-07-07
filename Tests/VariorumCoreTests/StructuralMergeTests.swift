@@ -94,11 +94,19 @@ struct StructuralMergeTests {
             let post = try ops.createPost()
             let b = try ops.newBlock(in: post.id, text: "b")
             let c = try ops.newBlock(in: post.id, text: "c")
+            // The mints stamped both (QUESTIONS #5 (a)); the point under
+            // test is that the MERGE touches without reshuffling.
+            let touchedBefore = try db.fetchString(
+                "SELECT last_touched_at FROM container WHERE id = ?", [post.id])
+            let majorBefore = try db.fetchString(
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id])
+
             _ = try ops.merge(b.block.id, c.block.id)
+
             #expect(try db.fetchString(
-                "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) != nil)
+                "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) != touchedBefore)
             #expect(try db.fetchString(
-                "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id]) == nil)
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [post.id]) == majorBefore)
         }
     }
 

@@ -101,17 +101,39 @@ struct IdleCommitSweepTests {
         }
     }
 
-    /// `newBlock` alone never stamps `last_touched_at` — a one-burst entry
-    /// (mint, then closed) or a teardown-minted tail would be invisible to
-    /// the touch window forever. The created_at branch catches exactly
-    /// those.
-    @Test func aMintOnlyPostIsCaughtByTheCreatedAtBranch() throws {
+    /// `newBlock` stamps `last_touched_at` since Phase 9 (author decision
+    /// 2026-07-07, QUESTIONS #5 option (a)): a one-burst entry (mint, then
+    /// closed) or a teardown-minted tail is an ordinary touch-branch
+    /// candidate — no special branch needed.
+    @Test func aMintOnlyPostIsCaughtByTheTouchBranch() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "one burst", profile: .journal)
             _ = try ops.newBlock(in: post.id, text: "typed once, never edited again", at: .end)
             #expect(try db.fetchString(
-                "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) == nil,
-                "precondition: a mint-only post carries no touch stamp")
+                "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) != nil,
+                "the mint stamps the touch — QUESTIONS #5 (a)")
+
+            let candidates = try db.read {
+                try Queries.idleCommitCandidates(
+                    $0, afterMark: self.openMark, cutoff: self.afterEverything)
+            }
+            #expect(candidates == [post.id])
+        }
+    }
+
+    /// The created_at branch stays as the net for STAMP-LESS rows — real
+    /// ones exist: containers written by pre-Phase-9 builds (the author's
+    /// devices ran Phase 8 code) whose mints never stamped. Simulated here
+    /// by clearing the stamp the mint wrote.
+    @Test func aLegacyStamplessMintOnlyPostIsStillCaughtByTheCreatedAtBranch() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "phase-8 era row", profile: .journal)
+            _ = try ops.newBlock(in: post.id, text: "minted by an old build", at: .end)
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE container SET last_touched_at = NULL WHERE id = ?",
+                    arguments: [post.id])
+            }
 
             let candidates = try db.read {
                 try Queries.idleCommitCandidates(
@@ -170,17 +192,19 @@ struct IdleCommitSweepTests {
     }
 }
 
-// MARK: - Review round 1 (MINOR): the honest coverage boundary
+// MARK: - The QUESTIONS #5 pin (Phase 9; was Phase 8's documented gap)
 
-@Suite("Idle sweep coverage boundary (Phase 8, review round 1)")
-struct IdleSweepCoverageBoundaryTests {
-    /// DOCUMENTED GAP, pinned so it can never be overclaimed again: a mint
-    /// into a PREVIOUSLY-touched post whose stamp is already behind the
-    /// mark matches neither branch — the block gets no idle insurance until
-    /// the post's next real edit. The full close is `newBlock` stamping
-    /// `last_touched_at` (QUESTIONS #5, the author's call); if she picks it,
-    /// this test flips into that fix's red-on-old pin.
-    @Test func aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap() throws {
+@Suite("Idle sweep mint coverage (Phase 9 — QUESTIONS #5 red-on-old pin)")
+struct IdleSweepMintCoverageTests {
+    /// THE RED-ON-OLD PIN for the `newBlock` stamp+churn change (author
+    /// decision 2026-07-07, QUESTIONS #5 option (a), implementation owned by
+    /// Phase 9). This is Phase 8's documented-gap test FLIPPED: a mint into
+    /// a previously-touched post whose stamp was already behind the sweep
+    /// mark used to match neither branch (asserted `.isEmpty` — no idle
+    /// insurance until the next real edit). With `newBlock` stamping
+    /// `last_touched_at`, the mint re-enters the touch window and the block
+    /// gets idle insurance like any other edit. Fails on the pre-fix code.
+    @Test func aMintIntoAPreviouslyTouchedAndSweptPostIsNowInsured() throws {
         try withOperations { ops, db in
             // A post with real edit history…
             let post = try ops.createPost(title: "old post", profile: .blog)
@@ -193,16 +217,22 @@ struct IdleSweepCoverageBoundaryTests {
             // …a sweep has advanced the mark past its stamp…
             let mark = touched  // the previous sweep's cutoff covered it
 
-            // …then a tail block is MINTED (newBlock stamps nothing) and
-            // the post is left alone.
+            // …then a tail block is MINTED (an idle-/teardown-minted tail)
+            // and the post is left alone. The mint stamps the touch, so the
+            // post re-enters the window and the sweep sees it.
             _ = try ops.newBlock(in: post.id, text: "Teardown-minted tail, never edited again.", at: .end)
 
             let candidates = try db.read {
                 try Queries.idleCommitCandidates(
                     $0, afterMark: mark, cutoff: "2026-07-01T23:59:59.999Z")
             }
-            #expect(candidates.isEmpty,
-                    "documented: neither branch sees a mint into a previously-touched, already-swept post — QUESTIONS #5 owns the close")
+            #expect(candidates == [post.id],
+                    "the mint stamps last_touched_at — the swept-past post is a candidate again (QUESTIONS #5 (a))")
+
+            // And the insurance actually lands on the minted block.
+            let committed = try ops.idleAutoCommit(post.id)
+            #expect(committed.count == 1)
+            #expect(committed.first?.kind == .auto)
         }
     }
 }

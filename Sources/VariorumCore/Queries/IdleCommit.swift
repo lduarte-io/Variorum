@@ -27,25 +27,18 @@ extension Queries {
     ///
     /// **Cost shape (P1):** the window rides `idx_container_touched`
     /// (`(last_touched_at, id) WHERE deleted_at IS NULL`), so a sweep costs
-    /// ∝ containers edited since the previous sweep — never the corpus. The
-    /// second branch covers **never-touched** containers only (`newBlock`
-    /// alone never stamps `last_touched_at`, so a fresh one-burst entry has
-    /// a NULL stamp): those rows sit in the index's NULL run, rare by
-    /// construction, windowed by `created_at`.
+    /// ∝ containers edited since the previous sweep — never the corpus.
     ///
-    /// **Known residual gaps (review rounds 1–2, honest scope):** a mint
-    /// whose container stamp is already behind the mark matches NEITHER
-    /// branch — concretely: (1) a mint into a PREVIOUSLY-touched post (an
-    /// idle-/teardown-minted tail on an old post, left alone afterwards),
-    /// and (2) a never-touched post CREATED before the mark whose first
-    /// block is minted later (a "Today" page opened blockless, swept past,
-    /// then filled days later with one un-followed burst — the created_at
-    /// branch windows on creation, not the mint). Either block gets no
-    /// idle insurance until the post's next real edit. The full close for
-    /// both is `newBlock` stamping `last_touched_at` (QUESTIONS #5,
-    /// options a/b — the author's call); gap (1) is pinned by the
-    /// documented-behavior test
-    /// `aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap`.
+    /// **Coverage (Phase 9 — QUESTIONS #5 resolved by the author, option
+    /// (a)):** `newBlock` stamps `last_touched_at` since Phase 9, so every
+    /// mint (one-burst entries, idle-/teardown-minted tails, mints into
+    /// long-swept posts) re-enters the touch window like any other edit —
+    /// Phase 8's two documented residual gaps are CLOSED, pinned by
+    /// `aMintIntoAPreviouslyTouchedAndSweptPostIsNowInsured` (the flipped
+    /// documented-gap test, red on the pre-Phase-9 op). The second branch
+    /// (never-touched containers windowed by `created_at`) is retained as
+    /// the net for stamp-less rows that genuinely exist: containers whose
+    /// mints were written by pre-Phase-9 builds.
     public static func idleCommitCandidates(
         _ db: Database, afterMark: String, cutoff: String
     ) throws -> [String] {

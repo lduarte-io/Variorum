@@ -88,11 +88,19 @@ struct PoolDragCopyTests {
     @Test func poolDragCopyTouchesTheTargetPostWithoutReshuffling() throws {
         try withOperations { ops, db in
             let world = try PoolWorld(ops)
+            // The anchor mint stamped both (QUESTIONS #5 (a)); the point
+            // under test is that the COPY touches without reshuffling.
+            let touchedBefore = try db.fetchString(
+                "SELECT last_touched_at FROM container WHERE id = ?", [world.post.id])
+            let majorBefore = try db.fetchString(
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [world.post.id])
+
             _ = try ops.poolDragCopy(world.p.block.id, to: world.post.id)
+
             #expect(try db.fetchString(
-                "SELECT last_touched_at FROM container WHERE id = ?", [world.post.id]) != nil)
+                "SELECT last_touched_at FROM container WHERE id = ?", [world.post.id]) != touchedBefore)
             #expect(try db.fetchString(
-                "SELECT last_major_revision_at FROM container WHERE id = ?", [world.post.id]) == nil)
+                "SELECT last_major_revision_at FROM container WHERE id = ?", [world.post.id]) == majorBefore)
         }
     }
 

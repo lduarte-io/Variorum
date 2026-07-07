@@ -82,6 +82,37 @@ struct BlockVariantOperationsTests {
         }
     }
 
+    /// Author decision 2026-07-07 (QUESTIONS #5 option (a), Phase 8
+    /// checkpoint; implementation owned by Phase 9): minting text IS working
+    /// on the post — `newBlock` stamps `last_touched_at` and feeds churn
+    /// with the minted text's length, exactly like the text-changing ops
+    /// (AppSpec §10 a fortiori). Red-on-old: the pre-Phase-9 `newBlock`
+    /// wrote no stamp and no churn.
+    @Test func newBlockStampsTouchAndFeedsChurn() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            _ = try ops.newBlock(in: post.id, text: "A fresh paragraph.")
+
+            let after = try container(db, post.id)
+            #expect(after.lastTouchedAt != nil, "the mint stamps the touch")
+            // 18 minted chars against the fresh baseline (0) cross the 0.8
+            // threshold: major revision stamped, accumulator reset,
+            // baseline = the post's rendered length.
+            #expect(after.lastMajorRevisionAt != nil)
+            #expect(after.churnAccumulator == 0)
+            #expect(after.baselineLength == 18)
+
+            // A second mint against the now-real baseline accumulates
+            // without restamping (6 / 18 < 0.8).
+            let majorBefore = after.lastMajorRevisionAt
+            _ = try ops.newBlock(in: post.id, text: "Short.")
+            let second = try container(db, post.id)
+            #expect(second.lastMajorRevisionAt == majorBefore)
+            #expect(second.churnAccumulator == 6)
+            #expect(second.lastTouchedAt != after.lastTouchedAt, "each mint touches")
+        }
+    }
+
     @Test func newBlockRefusedOnLockedOrMissingContainer() throws {
         try withOperations { ops, db in
             #expect(throws: OperationError.containerNotFound(id: "ghost")) {
@@ -117,18 +148,16 @@ struct BlockVariantOperationsTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let text = String(repeating: "x", count: 500)
+            // The mint itself crosses (500 against the fresh baseline 0 —
+            // QUESTIONS #5 (a)): stamped, reset, rebaselined to 500.
             let made = try ops.newBlock(in: post.id, text: text)
-
-            // baseline starts at 0, so the very first autosave trivially
-            // crosses and rebaselines to the rendered length (~500).
-            try ops.autosave(made.variant.id, text: text + "y", charDelta: 1)
-            let afterFirst = try container(db, post.id)
-            let firstStamp = afterFirst.lastMajorRevisionAt
+            let afterMint = try container(db, post.id)
+            let firstStamp = afterMint.lastMajorRevisionAt
             #expect(firstStamp != nil)
-            #expect(afterFirst.baselineLength == 501)
-            #expect(afterFirst.churnAccumulator == 0)
+            #expect(afterMint.baselineLength == 500)
+            #expect(afterMint.churnAccumulator == 0)
 
-            // A typo against a 501-char baseline: touched, not restamped.
+            // A typo against a 500-char baseline: touched, not restamped.
             try ops.autosave(made.variant.id, text: text + "z", charDelta: 2)
             let afterTypo = try container(db, post.id)
             #expect(afterTypo.lastMajorRevisionAt == firstStamp)
@@ -158,6 +187,8 @@ struct BlockVariantOperationsTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let made = try ops.newBlock(in: post.id, text: "loose")
+            let stampAtMint = try container(db, post.id).lastTouchedAt
+            #expect(stampAtMint != nil)  // the mint stamped (QUESTIONS #5 (a))
             // Release the placement (divide-W leftovers look like this).
             try db.write { db in
                 try Fixture.tombstone(db, table: "container_block", id: made.placement.id)
@@ -165,7 +196,8 @@ struct BlockVariantOperationsTests {
             try ops.autosave(made.variant.id, text: "loose+", charDelta: 1)
             let variant = try db.read { db in try Variant.fetchOne(db, key: made.variant.id) }
             #expect(variant?.workingText == "loose+")
-            #expect(try container(db, post.id).lastTouchedAt == nil)
+            // No live placement ⇒ no container to stamp: unchanged since the mint.
+            #expect(try container(db, post.id).lastTouchedAt == stampAtMint)
         }
     }
 
@@ -232,13 +264,19 @@ struct BlockVariantOperationsTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let made = try ops.newBlock(in: post.id, text: "text")
+            // The mint crossed the fresh-baseline threshold (QUESTIONS #5
+            // (a)); the point under test is what the COMMITS do to it.
+            let stampAtMint = try container(db, post.id).lastMajorRevisionAt
+            #expect(stampAtMint != nil)
 
             try ops.commit(made.variant.id, kind: .auto)
-            #expect(try container(db, post.id).lastMajorRevisionAt == nil)
+            #expect(try container(db, post.id).lastMajorRevisionAt == stampAtMint,
+                    "auto commits are quiet insurance — never a major revision")
 
             try ops.commit(made.variant.id)
             let after = try container(db, post.id)
-            #expect(after.lastMajorRevisionAt != nil)
+            #expect(after.lastMajorRevisionAt! > stampAtMint!,
+                    "a manual commit stamps")
             #expect(after.churnAccumulator == 0)
             #expect(after.baselineLength == 4)
         }
