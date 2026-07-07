@@ -55,7 +55,14 @@ credential — NOT the Supabase personal access token, which is server-admin too
   documented offline race), that day's push pauses, visibly, until she hand-merges.
 - **Pull + landing:** keyset-pull `journal_entries`; land through ordinary ops — no Variorum
   entry for the date → `createPost(journal, entry_date) + newBlock(body)`; entry exists and
-  only Fragments changed since the last push → plain `autosave` on the entry's variant;
+  only Fragments changed since the last push → **auto-commit first, then `autosave`**
+  (author decision 2026-07-07 — **the fifth quiet auto-commit occasion**): before the landing
+  overwrites the entry's text, if that text differs from the variant's last commit, append
+  one `commit_point(kind: 'auto')` — Fragments has no history surface, so a deletion made
+  there must remain one restore away in Variorum's commit view ("it's the more dedicated,
+  powerful software"); the idleAutoCommit guard applies (no commit when the last commit
+  already equals the current text — landings are pull-cadence snapshots, so this stays
+  bounded, never keystroke-rate);
   **both sides changed** (current rendered text ≠ last-pushed hash AND incoming ≠ either) →
   land the Fragments body as a **conflict variant labeled `'fragments'`** on the entry's
   block — the S5 doctrine, extended to the second writer. Never write under a dirty open
@@ -79,7 +86,10 @@ surface is allowed to be momentarily behind.
 Round-trip suites against a **fake Fragments server pinned to the contract** (never the real
 project in automated tests; one manual real-project pass with the author at the end):
 create-in-Fragments → lands as a Variorum journal post; create-in-Variorum → appears in
-Fragments; both-changed → conflict variant, projection converges on the LWW winner;
+Fragments; a Fragments-side edit/deletion landing over uncommitted Variorum text
+auto-commits first (the pre-edit text is restorable from the commit view) while an
+already-committed-identical text takes no double commit; both-changed → conflict variant,
+projection converges on the LWW winner;
 duplicate-day pauses; graduated entry goes push-only and rescues incoming edits as variants;
 unchanged text never pushes (idempotence); the deterministic-id derivation matches the
 contract's worked examples; visibility-horizon behavior honored on pull.
