@@ -71,10 +71,11 @@ risk 1; TEXTKIT2_NOTES §3–§5; Phase 3 + Phase 7 plan closeouts; KnownIssues 
 - [x] No new KnownIssues rows owned by 9. (Phase 8 resolved three rows and re-owned the
       backup restore drill to 12; its one new row is owned by 9b — bridge-side
       `setEntryDate` day-key validation. The two rows this plan already owns stand
-      unchanged. Conditional note: QUESTIONS #5 — `newBlock` touch-stamping — names Phase 9
-      as the suggested owner ONLY if the author picks option (a)/(b) at the Phase 8
-      checkpoint; if so, fold it into Step 1's op-wiring work with its red-on-old pin
-      (`aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap` flips into the pin).)
+      unchanged. CONFIRMED at the Phase 8 checkpoint (2026-07-07): the author picked
+      option (a) — `newBlock` stamps `last_touched_at` AND feeds churn. Phase 9 OWNS the
+      change: fold it into Step 1's op-wiring work with its red-on-old pin
+      (`aMintIntoAPreviouslyTouchedAndSweptPostIsMissed_documentedGap` flips into the pin);
+      the decision is recorded in AppSpec §14's Phase 8 checkpoint delta.)
 
 **Phase 8 deltas under this banner (2026-07-07):** the notebook rule now exists as
 `Operations.createOrOpenJournalEntry` (live-first, earliest-deterministic; day keys
