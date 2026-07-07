@@ -34,4 +34,6 @@ Output — a severity-ranked findings list. For each finding:
 
 `[severity] · file:line (or doc + section) · what's wrong or risky · evidence · proposed fix`
 
+Evidence means a **traceable concrete mechanism** (these inputs/state → this wrong outcome), not pattern-matched suspicion — mark a finding whose mechanism you cannot trace as `SPECULATIVE`. Know the fix protocol your findings enter (CLAUDE.md): bug-class fixes require a red-on-old pin, so a finding no failing-on-old test could ever pin will be dismissed as hollow — better you label it honestly than the ladder does.
+
 Severities: `BLOCKER` (wrong behavior / invariant violation / spec drift) · `MAJOR` (bug or architectural problem worth fixing before the next phase) · `MINOR` (cleanliness, clarity, small hazards) · `NIT`. End with a short **clean bill** list: load-bearing things you specifically checked and found solid. Your final message is consumed by the coordinator — findings and clean bill only, no preamble.

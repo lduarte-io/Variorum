@@ -30,6 +30,13 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
    clock-ahead clamp; **`sync_pull`'s ~2 s visibility horizon** (the commit-visibility fix).
 5. The Day-screen **clobber guard**: unchanged text never re-saves (no pointless
    `updated_at` bumps). Load-bearing with two writers — Variorum mirrors it on its side.
+6. **One-per-day is DB-enforced on the Fragments side** (confirmed by the Fragments agents
+   2026-07-07): `UNIQUE (user_id, date)` plus the deterministic id — even if Variorum's
+   UI-level create-or-open ever slips, the server cannot hold two rows for one day; a
+   duplicate push under the same derived id would LWW-**overwrite** rather than duplicate.
+   Which is exactly why Variorum's rule is **pause-the-day's-push, never newest-wins**:
+   nothing is pushed for a duplicated day until the author hand-merges — an overwrite the
+   author didn't choose is the one forbidden outcome.
 
 ## Asks of the Fragments side (for the author's Fragments agents)
 

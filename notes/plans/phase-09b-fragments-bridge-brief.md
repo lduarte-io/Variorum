@@ -52,7 +52,11 @@ credential — NOT the Supabase personal access token, which is server-admin too
   change (debounced), upsert `renderedText` under the derived deterministic id. Unchanged
   text never pushes (mirror their clobber guard — a pointless `updated_at` bump would LWW-win
   over a Fragments edit). **Duplicate-day pause:** if a date has two live entries (the
-  documented offline race), that day's push pauses, visibly, until she hand-merges.
+  documented offline race), that day's push pauses, visibly, until she hand-merges — and
+  pause (never newest-wins) is deliberate: Fragments' side is DB-unique per (user, date)
+  with a deterministic id (confirmed 2026-07-07), so a slipped duplicate push would
+  LWW-overwrite one text with the other there; an overwrite the author didn't choose is
+  the forbidden outcome, so the bridge holds the day instead.
 - **Pull + landing:** keyset-pull `journal_entries`; land through ordinary ops — no Variorum
   entry for the date → `createPost(journal, entry_date) + newBlock(body)`; entry exists and
   only Fragments changed since the last push → **auto-commit first, then `autosave`**
