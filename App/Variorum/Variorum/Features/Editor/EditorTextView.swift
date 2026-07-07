@@ -13,12 +13,24 @@ import AppKit
 
 @MainActor
 final class EditorTextView: NSTextView {
-    /// Set while a clipboard paste is being applied — the tail treats paste
-    /// as bulk entry (segments on entry) rather than typing.
+    /// Set while a bulk-entry-classed insertion is being applied — a
+    /// clipboard PASTE or a text DROP (author-ratified contract item 7,
+    /// Phase 9: a drop into the open tail is bulk entry exactly like paste —
+    /// segments on entry, closes the tail; a drop into an existing block is
+    /// a content edit at the drop point, I4 — the flag arms nothing when the
+    /// verdict isn't the tail, per Phase 7's MAJOR-3 fix).
     private(set) var isPasting = false
 
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
+
+    /// Text drops route through the same bulk-entry flag as paste
+    /// (contract item 7 — resolves Phase 7's deferred PROVISIONAL as the
+    /// author decided 2026-07-06). AppKit plumbing only: the routing lives
+    /// in the flag + the verdict, tested through the seam paste shares.
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        withPasteFlag { super.performDragOperation(sender) }
+    }
 
     /// The context-menu door for structural gestures (Phase 9): the view
     /// model supplies items whose enablement came from THE planner — the

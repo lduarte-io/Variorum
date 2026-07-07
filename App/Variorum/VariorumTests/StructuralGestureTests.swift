@@ -649,3 +649,80 @@ struct DivideWCeremonyTests {
         }
     }
 }
+
+
+@MainActor
+@Suite("Drops & refusal copy (Phase 9, Step 7)")
+struct DropAndRefusalCopyTests {
+    // Drops ride the same bulk-entry flag as paste (performDragOperation
+    // wraps super in withPasteFlag — AppKit plumbing; the ROUTING is the
+    // flag + verdict, driven here through the shared seam).
+
+    @Test func aDropIntoTheOpenTailIsBulkEntry_segmentsAndClosesTheTail() async throws {
+        try await withEditor(seedBlocks: ["Existing block."]) { h in
+            h.type("\n", at: 15)                    // open the tail
+            h.type("already typed ")                 // tail has typed text
+            // The drop lands MID-tail (drops aren't caret-bound).
+            let tailStart = h.model.index.tailRange!.location
+            h.textView.withPasteFlag {
+                h.type("Alpha para.\nBeta para.\nGamma tail", at: tailStart + 8)
+            }
+            await h.settle()
+            let slots = try h.storeSlots()
+            #expect(slots.count > 1, "the drop segmented on entry")
+            #expect(!h.model.hasOpenTail, "bulk entry closes the tail")
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func aDropIntoABlockIsAContentEditAtTheDropPoint() async throws {
+        try await withEditor(seedBlocks: ["Target block.", "Anchor."]) { h in
+            h.textView.withPasteFlag {
+                h.type("dropped\ntext ", at: 7)      // mid-block, with a newline
+            }
+            await h.flush()
+            let slots = try h.storeSlots()
+            #expect(slots.count == 2, "no mints: a drop into a block is a content edit")
+            #expect(slots[0].text == "Target dropped\ntext block.",
+                    "the newline stays content (I4)")
+            try expectStoreMatchesView(h)
+            // And the flag armed nothing: a later tail keystroke is typing.
+            let end = (h.documentText as NSString).length
+            h.type("\n", at: end)
+            h.type("x")
+            await h.settle()
+            #expect(h.model.hasOpenTail, "typing semantics — no bulk mint")
+        }
+    }
+
+    @Test func aDropAtTheExactSeamExtendsTheLeadingBlock() async throws {
+        try await withEditor(seedBlocks: ["Lead.", "Trail."]) { h in
+            // Boundary-adjacent drop: offset 5 is the leading block's exact
+            // end (the separator's position) — content lands in that block.
+            h.textView.withPasteFlag {
+                h.type(" dropped", at: 5)
+            }
+            await h.flush()
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["Lead. dropped", "Trail."])
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func everyRefusalReasonHasHonestCopy() {
+        for reason in StructuralGesturePlanner.Refusal.allCases {
+            let message = RefusalCopy.message(for: reason)
+            #expect(!message.isEmpty, "\(reason) must have visible copy")
+        }
+        // The ratified specifics: the workaround, the pointers, the rule.
+        let crossBlock = RefusalCopy.message(for: .crossBlockSpan)
+        #expect(crossBlock.contains("Divide") && crossBlock.contains("merge"),
+                "cross-block names the divide-then-merge workaround")
+        #expect(RefusalCopy.message(for: .fannedMiddleSpan).contains("Divide Block at Cursor"),
+                "fanned middle span points at the W ceremony's door")
+        #expect(RefusalCopy.message(for: .middleSpanNeedsMakeBlock).contains("Make Block"),
+                "extract's middle-span refusal points at the composed gesture")
+        #expect(RefusalCopy.message(for: .tooManyBlocksForMerge).contains("two"),
+                "the binary rule is named")
+    }
+}
