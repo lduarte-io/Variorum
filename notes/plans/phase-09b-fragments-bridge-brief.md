@@ -71,7 +71,7 @@ credential — NOT the Supabase personal access token, which is server-admin too
   land the Fragments body as a **conflict variant labeled `'fragments'`** on the entry's
   block — the S5 doctrine, extended to the second writer. Never write under a dirty open
   editor buffer except via that conflict path (the sync engine's exact discipline).
-- **The graduated-entry policy (PROVISIONAL — for the author):** two-way while the entry is
+- **The graduated-entry policy (RATIFIED by the author 2026-07-07, mid-Phase-9 QUESTIONS walk — binding for the 9b plan):** two-way while the entry is
   a single unfanned block (the overwhelmingly common journal shape). Once an entry *graduates*
   (multi-block, or fanned), it turns **push-only**, and a Fragments-side edit against such a
   day lands as a `'fragments'`-labeled variant on the entry's first block — never lost,

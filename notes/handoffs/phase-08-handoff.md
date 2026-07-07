@@ -8,7 +8,9 @@ sessions are cold; never wake them.
 
 ## Your checklist (in this order)
 
-1. **Deploy the sync-server fix (one paste).** Open the Supabase SQL editor (Variorum
+1. ~~**Deploy the sync-server fix (one paste).**~~ **DONE (author, 2026-07-07 — deployed
+   in the Supabase SQL editor; QUESTIONS #6 resolved). The env-gated integration test stays
+   optional at the device round (step 4).** Open the Supabase SQL editor (Variorum
    project) and run **`Server/supabase/03_visibility_horizon.sql`** — same flow as Phase 5's
    setup. It closes the changefeed visibility-skew race from the Fragments post-mortem
    (SyncSpec §5). Clients need no change; sync simply sees a ~2 s-delayed head. *(I wrote
@@ -47,9 +49,9 @@ sessions are cold; never wake them.
    not a workaround) · **#5** `newBlock` will stamp `last_touched_at` + churn (your call:
    option (a); **Phase 9 implements it**) · **#7** re-dating onto an occupied day stays
    silently allowed. Recorded in the phase plan's checkpoint ratification round + AppSpec
-   §14. **Still open:** **#3** (credential mechanism — Keychain paste-in on both platforms,
-   shipped as flagged; say if you want a different shape) and **#6** (= checklist item 1,
-   the A5 paste). Also recorded for your eyes (closeout "Interpretations"): Mac-side sync
+   §14. **The remaining two closed 2026-07-07 (mid-Phase-9 QUESTIONS walk): #3 RATIFIED
+   as shipped (Keychain paste-in on both platforms) and #6 DONE (the A5 paste deployed —
+   checklist item 1). All six are settled.** Also recorded for your eyes (closeout "Interpretations"): Mac-side sync
    wiring; the "All posts" scope on the phone; archived-entry-opens (live sibling now
    outranks it).
 6. **Skim the review dispositions** (two rounds, every finding + what changed):

@@ -87,6 +87,27 @@ schedules (launch/became-active/post-write-settle), so editor-rate writes sync i
 background during manual testing — convergence noise in a dev session is expected behavior,
 and the dev store's sync is fenced OFF entirely.
 
+> **AUTHOR DECISION, MID-PHASE (2026-07-07, QUESTIONS walk with the coordinator) — the
+> ground rules' pre-decided full-re-render reading is SUPERSEDED.** The "One rewrite path"
+> ground rule below shipped as written through Step 8's first pass (PROVISIONAL logged as
+> QUESTIONS #8; full-path latency measured ~16.6 ms at 10k words). At the walk the author
+> directed: **build the differential structural rewrite THIS phase** — it is the gold
+> standard for the everyday gestures (untouched text never moves; no restore step at all
+> beats a correct restore step; full re-render is O(document) per gesture where the
+> differential conforms to P1 as written), and this phase uniquely holds the verification
+> net (the Step 8 soak) and the models. Her accepted scope: **differential apply for
+> divide, extract, makeBlock, merge** — minimal text edits + attribute re-bracketing +
+> incremental index update, derived from the OPERATION RESULT's known seams (never from
+> diffing — categorically distinct from the rejected diff-recovered-blob model,
+> OverallModel §8); **behind the SAME one door** (an internal strategy of
+> `applyStructuralResult`, never a second path); **W-ceremony confirm and structural undo
+> stay full re-render permanently** (rare ceremonial acts; rebuild-from-store is the sane
+> answer); **text-undo clearing stays on every structural rewrite, differential
+> included**; a **DEBUG oracle** asserts surface == the store's fresh projection after
+> every differential apply, exercised by the soak; **Step 8 re-runs against the final
+> path** and measures both strategies at 10k AND 50k words. QUESTIONS #8: ANSWERED
+> (history preserved there). The closeout's Step 8 section records the re-run.
+
 ## Ground rules
 
 - **The author-ratified gesture contract (2026-07-06 — implement, don't reinterpret):**
