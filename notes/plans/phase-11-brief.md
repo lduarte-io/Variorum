@@ -34,6 +34,11 @@
    - **Two-tier sharing ratified:** `.md`/PDF here for humans without the app; the
      full-fidelity "variorum edition" bundle stays at Phase 14; the SQLite file remains the
      lossless whole-library archive; sync remains the author's own multi-device transfer.
+   - **Bulk export (author 2026-07-07 — the no-lock-in principle made concrete: "their work
+     is always theirs to download"):** the whole library exports as a folder of plain `.md`
+     in ONE gesture. Layout leaning: one file per post (dated/titled filenames), readings as
+     optional folder views; details are the plan's to settle — the gesture and its totality
+     are ratified.
    - Exports are **one-way projections** (never re-imported as truth), built on
      `Queries.renderedText` semantics: `"\n\n"` joins, blank takes skip.
 
