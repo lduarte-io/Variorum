@@ -1,6 +1,6 @@
 # Phase 9d — Editor visibility & QoL fixes
 
-**Status:** in progress (2026-07-09).
+**Status:** COMPLETE (2026-07-09, same session it was authored in).
 **Origin:** out-of-band, author-directed 2026-07-09 — her first hands-on session with the
 Phase 7–9 editor, before the formal feel pass. Decisions recorded in AppSpec §14's
 2026-07-09 delta; open items in QUESTIONS #10/#11; scope handoffs in the Phase 10/11
@@ -103,6 +103,63 @@ thin SwiftUI faces over tested ops may land UI-only (per the testing expectation
   says why; Show Blocks makes the paragraph-per-block structure visible; N-way merge on a
   pasted multi-paragraph selection produces one block, one ⌥⌘Z undo.
 
-## Closeout
+## Closeout (2026-07-09)
 
-*(filled at completion)*
+**All eight scope items shipped; Mac app suite 231 green in 42 suites (was 222/40 —
++9 tests, +2 suites). Core and mobile untouched (no `Sources/VariorumCore` or Shared/
+changes — nothing near the sync rider), so their Phase 9 baselines (430/51, 11/4) stand
+per the tests-at-END rule.**
+
+What landed, by file:
+
+- **Fan door:** `EditorViewModel.openCaretFan()` + the awaitable `loadFan` core (split so
+  the test is deterministic); doors in the Block menu ("Show Takes", ⌘⇧T), the context
+  menu, and the button bar. Pin: `theFanDoorOpensOnAnUnfannedBlock` (an arity-1 block
+  reaches its FanPanel — on the old code the door functions don't exist).
+- **Doors fire and speak:** `EditorCommands` items enabled whenever an editor is focused
+  (was: planner-verdict `.disabled`, which silently swallowed refused shortcuts);
+  `contextMenuItems()` likewise. The planner verdict now drives *dimming* only. Test:
+  `contextMenuItemsFireAndSpeak` (all items enabled; a refused invocation surfaces its
+  RefusalCopy). One deliberate consequence pinned in `aSealedPostDisablesEverything…`:
+  the fan door stays available on a sealed post — viewing takes is not authoring.
+- **Gesture button bar + ordinal + word counts:** `CommitBar` gains Divide/Extract/Make
+  Block/Merge/Takes (dimmed by verdict, always clickable), "block 6/23 · <id>", and
+  "N words · M selected" (`TextMetrics.wordCount`, tested; costs ∝ caret block/selection).
+- **"Show Blocks" tint:** `BlockTint` (pure, tested: FNV-1a stable hash — NOT process-
+  seeded `hashValue` — never-adjacent bump, insertion never recolors the prefix — the
+  author's no-zebra rule) + `EditorViewModel.refreshTint()` (viewport-pruned fragment
+  geometry, riding every badge refresh) + `BlockTintOverlayController` (passthrough
+  overlay views UNDER the badges; decorations never on the text storage — TEXTKIT2 §3).
+  Toggle in the Block menu (⌘⇧B), shared via AppStorage.
+- **Post rename:** `LibraryViewModel.rename` → `renameContainer` (Phase 2 op, first UI
+  face); context-menu "Rename…" + alert in `LibraryView`. Thin face over a tested op
+  (UI-only, per the testing-expectations rule).
+- **N-way merge:** planner `.mergeChain` over the contiguous closure `[first…last]`
+  (empty blocks the selection spans join; endpoint grazes still don't; caret-at-seam and
+  two-adjacent-block selections stay the binary gesture with its differential seam);
+  `tooManyBlocksForMerge` retired from the closed refusal vocabulary. Apply: left-to-right
+  chain of binary merges inside ONE `withCompound` undo entry, full-render door
+  (`seam: nil`) — a deliberate multi-block act, not keystroke-rate. Pins:
+  `threeBlocksMergeAsAChain`, `anEmptyBlockBetweenJoinsTheChain`,
+  `aGapSlotInsideTheChainRefuses` (planner) and
+  `aThreeBlockSelectionMergesAsAChainUnderOneUndoEntry` (end-to-end incl. single-undo
+  restore). **Red-on-old by construction:** the superseded tests at these exact sites
+  asserted the refusal this change removes.
+
+**Environment findings (worth remembering):**
+1. `xcodebuild … | tail` masks the exit code — the first "green" build had actually
+   failed (a `#expect(items.allSatisfy(\.enabled))` — rethrows inside the macro needs
+   hoisting). Later commands carried `exit ${PIPESTATUS…}`.
+2. The test runner failed to launch twice (`Runningboard error 5`): first the author's
+   live Variorum instance from her hands-on session (graceful `quit` via AppleScript —
+   teardown persists everything), then a **stale, unsigned `Variorum.app` in
+   DerivedData** ("code object is not signed at all" — incremental builds considered
+   signing up-to-date). Fix: delete the product, rebuild; codesign then verifies.
+
+**Deliberately untested surfaces (author feel pass, next):** the tint overlay's visuals,
+the menu Toggle wiring, and the rename alert — thin SwiftUI faces; everything with logic
+is pinned. No cold reviewer ran (author call, recorded in CLAUDE.md's model policy); she
+may request one later.
+
+**Nothing deferred; no KnownIssues changes.** The boundary-fluidity package and the open
+questions (QUESTIONS #10/#11) were recorded at phase start, owned by Phase 11.
