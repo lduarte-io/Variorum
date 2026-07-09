@@ -8,6 +8,15 @@ sessions are cold; never wake them.
 
 ## Your checklist (in this order)
 
+> **2026-07-09 update:** your first hands-on session happened before the formal feel pass
+> and changed this list. It found two gaps (no door to a block's first branch; refusals
+> silent behind disabled doors) → **Phase 9d** (editor visibility & QoL, runs before 9b)
+> fixes them, plus your batched decisions — all recorded in AppSpec §14's 2026-07-09 delta,
+> QUESTIONS #10/#11, the Phase 10/11 briefs, and the master plan. **Item 1 below now runs
+> AFTER 9d lands** (the fan door, visible refusals, and the Show Blocks tint are
+> prerequisites for a meaningful pass). **Item 2 is ANSWERED** (see its update). Daily use
+> waits until 9d + 9b + 9c are all done (your call, same session).
+
 1. **The COMBINED manual feel pass — one sitting (your 2026-07-07 bundling call).** Open a
    real post (10k words is the proven scale) and walk BOTH lists:
    - *Phase 7 §5 items (still pending from that phase):* the canary stays silent through a
@@ -29,6 +38,11 @@ sessions are cold; never wake them.
    and reconciling) gets re-owned "only if daily use demands it." Your call at this
    checkpoint: leave it dead (recommended until real use complains), or name an owning
    phase to re-add it.
+   **→ ANSWERED 2026-07-09: re-owned at Phase 11, not dead.** Your first re-bracketing
+   attempt met the "daily use demands it" condition immediately. The shape: a guided flow
+   (confirm → adjust edges → compound divide/divide/merge, one undo), with
+   auto-proceed-when-all-takes-match as a design input and the fanned cases deliberately
+   OPEN — Phase 11 brief item 7, QUESTIONS #10/#11, AppSpec §14 (2026-07-09).
 
 3. **Reminder — device rounds and credentials now WAIT for 9c (your 2026-07-07 call).**
    You deferred all sync/device testing until 9b AND 9c are complete: the Phase 8 device

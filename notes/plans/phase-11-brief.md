@@ -55,6 +55,34 @@
    the TOC is a pane/view; jump-to-block uses the Phase 6 hybrid primitive). Names are
    block-identity-level and deliberately distinct from headings-in-text (§14.8).
 
+## Author-directed additions & design inputs (2026-07-09 — AppSpec §14's delta of that date; QUESTIONS #10/#11)
+
+From the author's first hands-on session with the Phase 9 editor. Items 5–6 are scope;
+item 7 is a **design package with deliberately-open parts** — the plan must preserve her
+uncertainty (her instruction: "don't add more certainty than I have"), and she has floated
+**both-ways testing via distinct commands** as the way to settle the open parts in real use.
+
+5. **Block-management affordances:** delete block (the tray exists since Phase 4 — it gets
+   its door here too), drag-to-reorder, move block to pool. Natural home: the block-TOC view
+   (item 4) — whose rows also gain the **ordinal display** ("block 6", derived from current
+   order at read time, never stored; introduced in the editor's status bar at 9d) and may
+   support **naming and reordering directly in the TOC**.
+6. **N-way merge shipped early (9d):** the planner's merge chain supersedes the binary
+   ratification — this phase inherits it as settled behavior, not scope.
+7. **The "boundary fluidity" package (design round + build; the cross-fan re-own answer):**
+   the Phase 9 cross-block refusal evolves into a **guided flow** — confirm → adjust the
+   neighbor edges → compound divide/divide/merge under one undo entry. **Ratified as a
+   direction:** single-variant×single-variant cross-block *edits* become merge-then-edit
+   compounds (a cross-seam delete just works). **Design input, principled but not ratified:**
+   auto-proceed when the span matches uniquely in EVERY take (CutPropagation's unique-match
+   condition — identical middle mints single-variant, differing outer pieces keep per-take
+   fans, W-style). **OPEN (QUESTIONS #10):** whether the W must always be a full ceremony —
+   she's conflicted; her undo argument and the difficulty-dependence are recorded there.
+   **OPEN (QUESTIONS #11):** fanned cross-block edit semantics — per-variant deletion
+   without merging is on the table, not decided. Her governing principle for the whole
+   package: *"if your text looks like basic text with no variants, it should behave like
+   basic text"* — the machinery is power, never daily friction.
+
 ## Standing definitions already settled elsewhere (the plan cites, never re-decides)
 
 Book-scrub is **model-driven** (Phase 6 memo: post list is the scrubber's domain; hybrid

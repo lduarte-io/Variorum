@@ -23,6 +23,23 @@ pool-side structural ops surface — stays in 11).
 2. **The read tier allows select + copy** (scoped to one post at a time), and clicking into
    an unfocused post upgrades exactly it to the live editor. Read-only never means inert.
 
+## Author-directed scope additions (2026-07-09 — recorded in AppSpec §14's delta of that date)
+
+From the author's first hands-on session: the library-affordance faces whose core ops have
+existed since Phases 2–4 but which no phase had ever explicitly owned. They land here,
+where the library grows — a folder view over an empty tag taxonomy tests nothing:
+
+3. **Tag management + application UI** — create/rename/delete hierarchical tags, apply/remove
+   on posts (block tagging may ride the pool work at 11 if it fits better there — the plan
+   decides). The full ops + queries exist (Phases 2/4); this is faces, not machinery.
+4. **Post lifecycle UI** — archive/unarchive, delete/restore (`restoreContainer` + the
+   `archivedPosts` recovery surface get doors), and the **seal toggle** (`lockPost`).
+5. **Mac-side entry-date editing** (`setEntryDate` — mobile has the picker; the Mac has
+   nothing).
+
+*(Post rename was in this family too but ships early in Phase 9d — the author hits its
+absence daily.)*
+
 ## The phase's center of gravity
 
 **P3 stops being satisfied for free.** Phase 7's "one live NSTextView per focused post" was
