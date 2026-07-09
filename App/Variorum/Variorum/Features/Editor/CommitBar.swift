@@ -25,7 +25,30 @@ struct CommitBar: View {
                     model.toggleCommitHistory()
                 }
                 .disabled(model.caretVariantID == nil && model.commitList == nil)
+
+                Divider().frame(height: 14)
+
+                // The gesture button bar (9d — the fourth door): dimmed by
+                // the planner's verdict but ALWAYS clickable — a refused
+                // click speaks its refusal instead of going silent.
+                gestureButton("Divide", available: model.gestureAvailability.divide,
+                              action: model.divideAtCursor)
+                gestureButton("Extract", available: model.gestureAvailability.extract,
+                              action: model.extractSelection)
+                gestureButton("Make Block", available: model.gestureAvailability.makeBlock,
+                              action: model.makeBlockFromSelection)
+                gestureButton("Merge", available: model.gestureAvailability.merge,
+                              action: model.mergeBlocks)
+                gestureButton("Takes", available: model.gestureAvailability.takes,
+                              action: model.openCaretFan)
+
                 Spacer()
+                if let words = wordCountLabel {
+                    Text(words)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize()
+                }
                 if let status = model.statusMessage {
                     Text(status)
                         .font(.caption)
@@ -42,10 +65,30 @@ struct CommitBar: View {
         }
     }
 
+    private func gestureButton(
+        _ title: String, available: Bool, action: @escaping () -> Void
+    ) -> some View {
+        Button(title, action: action)
+            .controlSize(.small)
+            .opacity(available ? 1 : 0.45)
+    }
+
     private var caretLabel: String {
-        if model.caretBlockID != nil { return "block \(shortID(model.caretBlockID))" }
+        if model.caretBlockID != nil {
+            // "block 6/23" (9d): the user-facing number is the current
+            // order, derived at read time; the stable ID stays the identity.
+            let ordinal = model.caretOrdinal.map { "\($0)/\(model.blockCount)" } ?? "—"
+            return "block \(ordinal) · \(shortID(model.caretBlockID))"
+        }
         if model.hasOpenTail { return "open tail" }
         return "—"
+    }
+
+    private var wordCountLabel: String? {
+        var parts: [String] = []
+        if let block = model.caretBlockWordCount { parts.append("\(block) words") }
+        if let selected = model.selectionWordCount { parts.append("\(selected) selected") }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     private func shortID(_ id: String?) -> String {

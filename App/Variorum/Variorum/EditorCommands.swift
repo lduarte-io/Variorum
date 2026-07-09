@@ -15,6 +15,9 @@ import VariorumCore
 
 struct EditorCommands: Commands {
     let bootstrap: AppBootstrap
+    /// The "Show Blocks" tint toggle (9d) — shared with `EditorView` via
+    /// AppStorage so the menu state and every editor's overlay agree.
+    @AppStorage("showBlockBoundaries") private var showBlocks = false
 
     private var session: AppSession? {
         if case .ready(let session) = bootstrap.state { return session }
@@ -38,28 +41,30 @@ struct EditorCommands: Commands {
             .disabled(session?.undoMenuState.topLabel == nil)
         }
         // The structural gestures' menu-bar door (Phase 9, contract item 1:
-        // two named commands — Steps 4–5 add theirs here). Enablement is the
-        // planner's verdict, read from the focused editor; invocation
-        // re-plans, so a stale enablement surfaces the refusal instead of
-        // acting (never silent).
+        // two named commands). Doors fire and speak (author 2026-07-09,
+        // superseding the disabled-door posture): items are enabled whenever
+        // an editor is focused, invocation plans against the CURRENT
+        // selection, and a refusal surfaces its copy in the status bar —
+        // a refused shortcut was previously a silently dead key. The planner
+        // verdict still dims the button bar (`gestureAvailability`).
         CommandMenu("Block") {
             Button("Divide Block at Cursor") {
                 session?.editorRouter.active?.divideAtCursor()
             }
             .keyboardShortcut("d", modifiers: [.command, .shift])
-            .disabled(!(session?.editorRouter.active?.gestureAvailability.divide ?? false))
+            .disabled(session?.editorRouter.active == nil)
 
             Button("Extract Selection") {
                 session?.editorRouter.active?.extractSelection()
             }
             .keyboardShortcut("e", modifiers: [.command, .shift])
-            .disabled(!(session?.editorRouter.active?.gestureAvailability.extract ?? false))
+            .disabled(session?.editorRouter.active == nil)
 
             Button("Make Block from Selection") {
                 session?.editorRouter.active?.makeBlockFromSelection()
             }
             .keyboardShortcut("k", modifiers: [.command, .shift])
-            .disabled(!(session?.editorRouter.active?.gestureAvailability.makeBlock ?? false))
+            .disabled(session?.editorRouter.active == nil)
 
             Divider()
 
@@ -67,7 +72,22 @@ struct EditorCommands: Commands {
                 session?.editorRouter.active?.mergeBlocks()
             }
             .keyboardShortcut("m", modifiers: [.command, .shift])
-            .disabled(!(session?.editorRouter.active?.gestureAvailability.merge ?? false))
+            .disabled(session?.editorRouter.active == nil)
+
+            Divider()
+
+            // The fan door (9d): ANY block, any arity — the badge stays
+            // fan-only, the door does not.
+            Button("Show Takes") {
+                session?.editorRouter.active?.openCaretFan()
+            }
+            .keyboardShortcut("t", modifiers: [.command, .shift])
+            .disabled(session?.editorRouter.active == nil)
+
+            // The "Show Blocks" tint mode (9d): stable soft-pastel block
+            // backgrounds, same color never adjacent (BlockTint).
+            Toggle("Show Blocks", isOn: $showBlocks)
+                .keyboardShortcut("b", modifiers: [.command, .shift])
         }
     }
 

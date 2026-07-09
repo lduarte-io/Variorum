@@ -17,6 +17,9 @@ struct EditorView: View {
     let session: AppSession
     let postID: String
     @State private var model: EditorViewModel
+    /// The "Show Blocks" tint mode (9d) — shared with the Block menu's
+    /// toggle via AppStorage.
+    @AppStorage("showBlockBoundaries") private var showBlocks = false
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -46,6 +49,8 @@ struct EditorView: View {
             CommitBar(model: model)
         }
         .task { await model.start() }
+        .onAppear { model.blockTintEnabled = showBlocks }
+        .onChange(of: showBlocks) { _, enabled in model.blockTintEnabled = enabled }
         .onDisappear { model.teardown() }
         .sheet(item: $model.fanPanel) { panel in
             FanPanel(model: model, state: panel)
@@ -103,6 +108,7 @@ private struct EditorSurface: NSViewRepresentable {
         let model: EditorViewModel
         let surfaceDelegate: EditorSurfaceDelegate
         private var badges: BadgeOverlayController?
+        private var tint: BlockTintOverlayController?
         private var anchor: ScrollAnchorController?
 
         init(model: EditorViewModel) {
@@ -112,11 +118,13 @@ private struct EditorSurface: NSViewRepresentable {
 
         func install(scrollView: NSScrollView, textView: EditorTextView) {
             badges = BadgeOverlayController(model: model, textView: textView)
+            tint = BlockTintOverlayController(model: model, textView: textView)
             anchor = ScrollAnchorController(model: model, scrollView: scrollView)
         }
 
         func uninstall() {
             badges?.uninstall()
+            tint?.uninstall()
             anchor?.uninstall()
         }
     }
@@ -245,6 +253,71 @@ final class BadgeOverlayController {
         guard let blockID = sender.identifier?.rawValue else { return }
         model.openFan(blockID: blockID)
     }
+}
+
+// MARK: - Block tint overlay (9d "Show Blocks" — overlay views, not text attributes)
+
+/// Renders the tint spans the view model computes (`refreshTint`) as
+/// translucent passthrough views UNDER the other overlays. Same doctrine as
+/// the badges: geometry from fragment frames, decorations never on the text
+/// storage (TEXTKIT2 §3 — rendering attributes are the flaky path).
+@MainActor
+final class BlockTintOverlayController {
+    /// Soft pastels at low alpha — functional, unstyled (Phase 13 owns the
+    /// pretty version). Order pairs with `BlockTint`'s palette indices.
+    private static let palette: [NSColor] = [
+        .systemBlue.withAlphaComponent(0.09),
+        .systemGreen.withAlphaComponent(0.09),
+        .systemOrange.withAlphaComponent(0.09),
+        .systemPurple.withAlphaComponent(0.09),
+        .systemTeal.withAlphaComponent(0.09),
+    ]
+
+    private let model: EditorViewModel
+    private weak var textView: EditorTextView?
+    private var views: [PassthroughTintView] = []
+
+    init(model: EditorViewModel, textView: EditorTextView) {
+        self.model = model
+        self.textView = textView
+        model.tintSink = { [weak self] spans in self?.render(spans) }
+    }
+
+    func uninstall() {
+        model.tintSink = nil
+        for view in views { view.removeFromSuperview() }
+        views.removeAll()
+    }
+
+    private func render(_ spans: [EditorViewModel.BlockTintSpan]) {
+        guard let textView else { return }
+        while views.count < spans.count {
+            let view = PassthroughTintView(frame: .zero)
+            textView.addSubview(view, positioned: .below, relativeTo: nil)
+            views.append(view)
+        }
+        while views.count > spans.count {
+            views.removeLast().removeFromSuperview()
+        }
+        for (view, span) in zip(views, spans) {
+            view.frame = span.frame
+            view.layer?.backgroundColor =
+                Self.palette[span.colorIndex % Self.palette.count].cgColor
+        }
+    }
+}
+
+/// A colored rectangle that never intercepts the mouse — the editor
+/// underneath keeps every click and drag.
+private final class PassthroughTintView: NSView {
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        wantsLayer = true
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 // MARK: - Content-anchored scroll restore (the memo's resize obligation)

@@ -76,10 +76,8 @@ nonisolated enum StructuralGesturePlanner {
         /// Make Block on a fanned block: the other takes have no cut marks —
         /// that decision is the W ceremony's.
         case fannedMiddleSpan
-        /// Merge is binary (the ratified contract): exactly two blocks.
-        case tooManyBlocksForMerge
         /// Merge needs a caret at a block seam or a selection spanning
-        /// exactly two adjacent blocks.
+        /// two or more blocks.
         case notASeam
         /// Nothing for this gesture here: no selection where one is needed,
         /// no legal interior cut, a blank span, a snap that collapsed.
@@ -106,6 +104,12 @@ nonisolated enum StructuralGesturePlanner {
         /// Exactly two adjacent blocks, leading then trailing.
         case merge(leadingIndex: Int, trailingIndex: Int,
                    leadingBlockID: String, trailingBlockID: String)
+        /// Three or more blocks (author 2026-07-09, superseding the binary
+        /// rule): the contiguous run the selection touches — INCLUDING empty
+        /// blocks it spans (no characters to select, but the author selected
+        /// across them) — merges as a left-to-right chain of binary merges
+        /// under one undo entry. Caret-at-seam stays the binary gesture.
+        case mergeChain(entryIndices: ClosedRange<Int>, blockIDs: [String])
         case refusal(Refusal)
     }
 
@@ -264,14 +268,24 @@ nonisolated enum StructuralGesturePlanner {
                 pair = seam
             } else {
                 let touched = entriesIntersecting(normalized, index: world.index)
-                guard touched.count <= 2 else { return .refusal(.tooManyBlocksForMerge) }
-                guard touched.count == 2 else { return .refusal(.notASeam) }
-                guard touched[1] == touched[0] + 1 else {
-                    // An (empty) block sits between the two: three blocks
-                    // are involved — the binary rule refuses.
-                    return .refusal(.tooManyBlocksForMerge)
+                guard let first = touched.first, let last = touched.last,
+                      first < last
+                else { return .refusal(.notASeam) }
+                if touched.count == 2, last == first + 1 {
+                    pair = (first, last)
+                } else {
+                    // N-way (author 2026-07-09): the contiguous closure
+                    // [first...last] — empty blocks the selection spans have
+                    // no characters to intersect but join the chain.
+                    for k in first...last {
+                        guard entries[k].variantID != nil else {
+                            return .refusal(.gapSlot)
+                        }
+                    }
+                    return .mergeChain(
+                        entryIndices: first...last,
+                        blockIDs: (first...last).map { entries[$0].blockID })
                 }
-                pair = (touched[0], touched[1])
             }
         }
         for k in [pair.0, pair.1] {

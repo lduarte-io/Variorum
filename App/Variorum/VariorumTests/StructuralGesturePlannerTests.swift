@@ -355,10 +355,19 @@ struct PlannerMergeTests {
                                leadingBlockID: "b1", trailingBlockID: "b2"))
     }
 
-    @Test func threeBlocksRefuseWithTheBinaryRule() {
+    @Test func threeBlocksMergeAsAChain() {
+        // Author 2026-07-09 (supersedes the binary rule): the contiguous
+        // run the selection touches merges left-to-right.
         #expect(Planner.plan(
             .mergeBlocks, selection: NSRange(location: 1, length: 9), world: world)
-            == .refusal(.tooManyBlocksForMerge))
+            == .mergeChain(entryIndices: 0...2, blockIDs: ["b0", "b1", "b2"]))
+    }
+
+    @Test func aGapSlotInsideTheChainRefuses() {
+        let gapped = makeWorld([B("Aa."), B("Bb.", gap: true), B("Cc.")])
+        #expect(Planner.plan(
+            .mergeBlocks, selection: NSRange(location: 1, length: 9), world: gapped)
+            == .refusal(.gapSlot))
     }
 
     @Test func aSelectionInsideOneBlockIsNotASeam() {
@@ -386,13 +395,14 @@ struct PlannerMergeTests {
             == .refusal(.notASeam))
     }
 
-    @Test func anEmptyBlockBetweenRefusesTheBinaryRule() {
+    @Test func anEmptyBlockBetweenJoinsTheChain() {
         // ["Aa.", "", "Cc."]: the empty middle block has no characters to
-        // select, but three blocks are involved — the binary rule refuses.
-        let gapped = makeWorld([B("Aa."), B(""), B("Cc.")])
+        // intersect, but the author selected across it — it joins the chain
+        // (contiguous closure; author 2026-07-09).
+        let spanned = makeWorld([B("Aa."), B(""), B("Cc.")])
         #expect(Planner.plan(
-            .mergeBlocks, selection: NSRange(location: 1, length: 5), world: gapped)
-            == .refusal(.tooManyBlocksForMerge))
+            .mergeBlocks, selection: NSRange(location: 1, length: 5), world: spanned)
+            == .mergeChain(entryIndices: 0...2, blockIDs: ["b0", "b1", "b2"]))
     }
 
     @Test func aGapNeighborRefuses() {
@@ -517,8 +527,6 @@ struct PlannerPrecedenceTests {
         note(Planner.plan(.makeBlockFromSelection,
                           selection: NSRange(location: 15, length: 15),
                           world: makeWorld([B(threeSentences, arity: 2)])))          // fannedMiddleSpan
-        note(Planner.plan(.mergeBlocks, selection: NSRange(location: 1, length: 9),
-                          world: makeWorld([B("Aa."), B("Bb."), B("Cc.")])))         // tooManyBlocks
         note(Planner.plan(.mergeBlocks, selection: caret(1),
                           world: makeWorld([B("Aa."), B("Bb.")])))                   // notASeam
         note(Planner.plan(.divideAtCursor, selection: caret(5),

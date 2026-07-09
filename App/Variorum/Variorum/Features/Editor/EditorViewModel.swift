@@ -46,6 +46,14 @@ final class EditorViewModel {
     private(set) var statusMessage: String?
     private(set) var caretBlockID: String?
     private(set) var caretVariantID: String?
+    /// 9d — the caret block's user-facing number (1-based, current order,
+    /// derived at read time, never stored) and the post's block count.
+    private(set) var caretOrdinal: Int?
+    private(set) var blockCount = 0
+    /// 9d — word counts for the status bar: the caret block's, and the
+    /// selection's when one exists.
+    private(set) var caretBlockWordCount: Int?
+    private(set) var selectionWordCount: Int?
     /// Fan badges for on-screen fanned blocks (document coordinates).
     private(set) var badges: [BlockBadge] = []
     /// The block whose fan panel is open (nil = closed).
@@ -69,6 +77,9 @@ final class EditorViewModel {
         var extract = false
         var makeBlock = false
         var merge = false
+        /// The fan door (9d): available wherever the caret is in a block —
+        /// ANY arity (the badge stays fan-only; the door must not be).
+        var takes = false
     }
 
     struct DivideWCeremonyState: Equatable, Identifiable {
@@ -117,6 +128,22 @@ final class EditorViewModel {
     /// The AppKit badge overlay renders through this (overlay views, never
     /// rendering attributes — memo obligation).
     @ObservationIgnored var badgeSink: (([BlockBadge]) -> Void)?
+
+    /// 9d — the "Show Blocks" tint mode: one span per visible block, its
+    /// stable palette index and document-coordinate frame. Same overlay
+    /// doctrine as the badges: views over the text, NEVER rendering
+    /// attributes (TEXTKIT2 §3 — the flaky path).
+    struct BlockTintSpan: Equatable {
+        let entryIndex: Int
+        let colorIndex: Int
+        let frame: CGRect
+    }
+    @ObservationIgnored var tintSink: (([BlockTintSpan]) -> Void)?
+    private var tintSpans: [BlockTintSpan] = []
+    /// Set by the view from its AppStorage toggle.
+    var blockTintEnabled = false {
+        didSet { if oldValue != blockTintEnabled { refreshTint() } }
+    }
 
     struct FanPanelState: Equatable, Identifiable {
         let blockID: String
@@ -850,6 +877,32 @@ final class EditorViewModel {
                     caretBlockID: result.block.id, caretOffset: join,
                     seam: .merge(leadingIndex: leadingIndex, mergedID: result.block.id))
             }
+
+        case .mergeChain(let indices, let blockIDs):
+            // N-way merge (author 2026-07-09, supersedes the binary rule):
+            // a left-to-right chain of the existing binary merges under ONE
+            // undo entry (withCompound, the Make Block pattern). A deliberate
+            // multi-block act takes the full-render door (seam: nil) — the
+            // differential seam edit stays the binary merge's.
+            let leadingLength = index.entries[indices.lowerBound].length
+            let stack = session.undoStack
+            _ = await runStructural { ops in
+                try stack.withCompound(label: "Merge Blocks", operations: ops) {
+                    var mergedID = blockIDs[0]
+                    var mergedLength = 0
+                    for nextID in blockIDs.dropFirst() {
+                        let result = try ops.merge(mergedID, nextID)
+                        mergedID = result.block.id
+                        mergedLength = result.variant.workingText.utf16.count
+                    }
+                    // Caret at the FIRST join (merge keeps the leading text
+                    // verbatim, so the leading length still addresses it).
+                    return StructuralOutcome(
+                        caretBlockID: mergedID,
+                        caretOffset: min(leadingLength, mergedLength),
+                        seam: nil)
+                }
+            }
         }
     }
 
@@ -1245,15 +1298,16 @@ final class EditorViewModel {
     /// Context-menu items for the text view — the second door, same brain:
     /// each item's enablement is a fresh planner verdict at menu-build time.
     func contextMenuItems() -> [EditorTextView.StructuralMenuItem] {
-        guard let textView else { return [] }
-        let selection = textView.selectedRange()
-        let world = gestureWorld()
+        guard textView != nil else { return [] }
+        // Doors fire and speak (author 2026-07-09, superseding the
+        // disabled-door posture): items stay enabled; a refused invocation
+        // surfaces its RefusalCopy through the one planning door instead of
+        // being silently swallowed. The planner verdict still drives the
+        // button bar's dimming (`gestureAvailability`).
         func item(
             _ title: String, _ command: StructuralGesturePlanner.Command
         ) -> EditorTextView.StructuralMenuItem {
-            let verdict = StructuralGesturePlanner.plan(command, selection: selection, world: world)
-            let enabled = if case .refusal = verdict { false } else { true }
-            return .init(title: title, enabled: enabled) { [weak self] in
+            .init(title: title, enabled: true) { [weak self] in
                 self?.performGesture(command)
             }
         }
@@ -1262,6 +1316,9 @@ final class EditorViewModel {
             item("Extract Selection", .extractSelection),
             item("Make Block from Selection", .makeBlockFromSelection),
             item("Merge Blocks", .mergeBlocks),
+            .init(title: "Show Takes", enabled: true) { [weak self] in
+                self?.openCaretFan()
+            },
         ]
     }
 
@@ -1283,7 +1340,8 @@ final class EditorViewModel {
             divide: enabled(.divideAtCursor),
             extract: enabled(.extractSelection),
             makeBlock: enabled(.makeBlockFromSelection),
-            merge: enabled(.mergeBlocks))
+            merge: enabled(.mergeBlocks),
+            takes: caretBlockID != nil)
         if fresh != gestureAvailability {
             gestureAvailability = fresh
         }
@@ -1379,18 +1437,33 @@ final class EditorViewModel {
 
     // MARK: - Fan (Step 6)
 
+    /// The fan door for ANY block (9d — closes the first-branch
+    /// chicken-and-egg: the badge opens fans, but only fanned blocks have a
+    /// badge, so a block's FIRST branch had no door at all).
+    func openCaretFan() {
+        guard let blockID = caretBlockID else {
+            showStatus("Place the caret in a block to see its takes.")
+            return
+        }
+        openFan(blockID: blockID)
+    }
+
     func openFan(blockID: String) {
-        Task {
-            do {
-                let variants = try await session.database.read { db in
-                    try Queries.blockFan(db, blockID: blockID)
-                }
-                let chosen = index.entries.first { $0.blockID == blockID }?.variantID
-                fanPanel = FanPanelState(
-                    blockID: blockID, variants: variants, chosenVariantID: chosen)
-            } catch {
-                statusMessage = "Could not load the fan: \(error)"
+        Task { await loadFan(blockID: blockID) }
+    }
+
+    /// The awaitable core of the fan door (split out in 9d so tests can
+    /// await the panel deterministically).
+    func loadFan(blockID: String) async {
+        do {
+            let variants = try await session.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
             }
+            let chosen = index.entries.first { $0.blockID == blockID }?.variantID
+            fanPanel = FanPanelState(
+                blockID: blockID, variants: variants, chosenVariantID: chosen)
+        } catch {
+            statusMessage = "Could not load the fan: \(error)"
         }
     }
 
@@ -1442,18 +1515,33 @@ final class EditorViewModel {
 
     func updateCaretContext() {
         guard let textView else { return }
-        let caret = textView.selectedRange().location
+        let selection = textView.selectedRange()
+        let caret = selection.location
         var location = 0
         caretBlockID = nil
         caretVariantID = nil
-        for entry in index.entries {
+        caretOrdinal = nil
+        caretBlockWordCount = nil
+        blockCount = index.entries.count
+        for (i, entry) in index.entries.enumerated() {
             if caret >= location, caret <= location + entry.length {
                 caretBlockID = entry.blockID
                 caretVariantID = entry.variantID
+                // 9d: the user-facing block number — derived from current
+                // order at read time, never stored (the stable ID remains
+                // the identity; this is a handle for a human).
+                caretOrdinal = i + 1
+                caretBlockWordCount = TextMetrics.wordCount(
+                    viewText(NSRange(location: location, length: entry.length)))
                 break
             }
             location += entry.length + 1
         }
+        // Selection word count: cost ∝ selection (P1's unit); the block
+        // count above costs ∝ the caret block.
+        selectionWordCount = selection.length > 0
+            ? TextMetrics.wordCount(viewText(selection))
+            : nil
         // Gesture enablement rides every caret/selection change — the menu
         // bar, context menu, and shortcuts read these planner verdicts
         // (one brain, three doors). Cost: the caret block's boundary scan.
@@ -1464,6 +1552,8 @@ final class EditorViewModel {
     /// Cost ∝ fanned blocks (fans are opt-in and rare) — no ensureLayout,
     /// unlaid-out blocks simply have no badge until scrolled to (P1).
     func refreshBadges() {
+        defer { refreshTint() }  // 9d: the tint rides every badge refresh
+                                 // trigger (scroll, layout, projection).
         guard let textView, let scrollView,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager
@@ -1495,6 +1585,72 @@ final class EditorViewModel {
             badges = result
             badgeSink?(result)
         }
+    }
+
+    /// 9d — "Show Blocks": per-block tint spans for the visible region.
+    /// Viewport-proportional: the visible character window (the
+    /// `topVisibleOffset` fragment idiom, both edges) prunes the entry walk
+    /// to on-screen entries; each visible entry costs two single-fragment
+    /// lookups (first and last fragment frames). Colors are stable per
+    /// block ID with the never-adjacent rule (`BlockTint`).
+    func refreshTint() {
+        func send(_ spans: [BlockTintSpan]) {
+            if spans != tintSpans {
+                tintSpans = spans
+                tintSink?(spans)
+            }
+        }
+        guard blockTintEnabled, let textView, let scrollView, loaded,
+              let layoutManager = textView.textLayoutManager,
+              let contentManager = layoutManager.textContentManager,
+              !index.entries.isEmpty
+        else {
+            send([])
+            return
+        }
+        let visible = scrollView.contentView.bounds
+        let docStart = contentManager.documentRange.location
+
+        func offsetAt(y: CGFloat) -> Int? {
+            guard let fragment = layoutManager.textLayoutFragment(
+                for: CGPoint(x: 4, y: y)) else { return nil }
+            return contentManager.offset(from: docStart, to: fragment.rangeInElement.location)
+        }
+        // Visible character window; generous fallbacks keep this correct
+        // when a fragment lookup misses (blank area past the last line).
+        let windowStart = offsetAt(y: visible.minY + 1) ?? 0
+        let windowEnd = offsetAt(y: visible.maxY - 1)
+            .map { min($0 + 1024, index.documentLength) } ?? index.documentLength
+
+        func fragmentFrame(atOffset offset: Int) -> CGRect? {
+            guard let location = contentManager.location(docStart, offsetBy: offset)
+            else { return nil }
+            var frame: CGRect?
+            layoutManager.enumerateTextLayoutFragments(from: location, options: []) {
+                frame = $0.layoutFragmentFrame
+                return false
+            }
+            return frame
+        }
+
+        let colors = BlockTint.indices(for: index.entries.map(\.blockID))
+        var spans: [BlockTintSpan] = []
+        var location = 0
+        for (i, entry) in index.entries.enumerated() {
+            defer { location += entry.length + 1 }
+            guard location + entry.length >= windowStart else { continue }
+            guard location <= windowEnd else { break }
+            guard let first = fragmentFrame(atOffset: location),
+                  let last = fragmentFrame(atOffset: max(location, location + entry.length - 1))
+            else { continue }
+            let top = min(first.minY, last.minY)
+            let bottom = max(first.maxY, last.maxY)
+            let frame = CGRect(
+                x: 0, y: top, width: textView.bounds.width, height: bottom - top)
+            guard frame.intersects(visible) else { continue }
+            spans.append(BlockTintSpan(entryIndex: i, colorIndex: colors[i], frame: frame))
+        }
+        send(spans)
     }
 
     // MARK: - Surface plumbing

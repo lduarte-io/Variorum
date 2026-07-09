@@ -232,7 +232,11 @@ struct DivideExtractGestureTests {
             h.textView.setSelectedRange(NSRange(location: 19, length: 0))
             h.model.updateCaretContext()
 
-            #expect(h.model.gestureAvailability == .init())  // all false
+            // All gestures unavailable; the fan door stays open (9d) —
+            // VIEWING takes is not authoring, and the seal freezes
+            // authoring only (every FanPanel action still refuses at the
+            // ops layer with visible copy).
+            #expect(h.model.gestureAvailability == .init(takes: true))
             // The shortcut path re-plans and surfaces the refusal.
             await h.model.invokeGesture(.divideAtCursor)
             #expect(h.model.statusMessage == RefusalCopy.message(for: .sealed))
@@ -323,17 +327,39 @@ struct DivideExtractGestureTests {
         }
     }
 
-    @Test func contextMenuItemsCarryTheSameBrainsVerdicts() async throws {
+    @Test func contextMenuItemsFireAndSpeak() async throws {
+        // 9d posture (author 2026-07-09): items stay enabled — a refused
+        // invocation surfaces its copy instead of being silently swallowed
+        // behind a disabled item.
         try await withEditor(seedBlocks: ["First sentence. Second one."]) { h in
             h.textView.setSelectedRange(NSRange(location: 19, length: 0))
             h.model.updateCaretContext()
             let items = h.model.contextMenuItems()
             #expect(items.map(\.title) == [
                 "Divide Block at Cursor", "Extract Selection",
-                "Make Block from Selection", "Merge Blocks",
+                "Make Block from Selection", "Merge Blocks", "Show Takes",
             ])
-            let a = h.model.gestureAvailability
-            #expect(items.map(\.enabled) == [a.divide, a.extract, a.makeBlock, a.merge])
+            let allEnabled = items.allSatisfy(\.enabled)
+            #expect(allEnabled)
+            // The refused door speaks: extract with a bare caret (no
+            // selection) refuses with copy, never silently.
+            await h.model.invokeGesture(.extractSelection)
+            #expect(h.model.statusMessage == RefusalCopy.message(for: .nothingToDo))
+        }
+    }
+
+    @Test func theFanDoorOpensOnAnUnfannedBlock() async throws {
+        // 9d red-on-old pin for the first-branch chicken-and-egg: before
+        // the fan door, an arity-1 block had NO path to its FanPanel (the
+        // badge renders only on fanned blocks).
+        try await withEditor(seedBlocks: ["First sentence. Second one."]) { h in
+            h.textView.setSelectedRange(NSRange(location: 5, length: 0))
+            h.model.updateCaretContext()
+            #expect(h.model.gestureAvailability.takes)
+            let blockID = try #require(h.model.caretBlockID)
+            await h.model.loadFan(blockID: blockID)
+            let panel = try #require(h.model.fanPanel)
+            #expect(panel.variants.count == 1)
         }
     }
 
@@ -459,25 +485,45 @@ struct MakeBlockGestureTests {
 @MainActor
 @Suite("Merge gesture (Phase 9, Step 5)")
 struct MergeGestureTests {
-    @Test func aTwoBlockSelectionMergesAndAThreeBlockOneRefuses() async throws {
+    @Test func aTwoBlockSelectionMergesBinary() async throws {
         try await withEditor(seedBlocks: ["One two.", "Three four.", "Five six."]) { h in
-            // Three blocks selected ("One two." | "Three four." | "Five
-            // six." — C's chars start at 21): the binary rule refuses.
-            h.textView.setSelectedRange(NSRange(location: 2, length: 20))
-            h.model.updateCaretContext()
-            #expect(!h.model.gestureAvailability.merge)
-            await h.model.invokeGesture(.mergeBlocks)
-            #expect(h.model.statusMessage == RefusalCopy.message(for: .tooManyBlocksForMerge))
-            let untouched = try h.storeSlots().count
-            #expect(untouched == 3)
-
-            // Exactly two: merges.
+            // Exactly two: the binary gesture, differential seam and all.
             h.textView.setSelectedRange(NSRange(location: 2, length: 9))
             h.model.updateCaretContext()
             #expect(h.model.gestureAvailability.merge)
             await h.model.invokeGesture(.mergeBlocks)
             let slots = try h.storeSlots()
             #expect(slots.map(\.text) == ["One two. Three four.", "Five six."])
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    /// N-way merge (author 2026-07-09, supersedes the binary rule) — the
+    /// red-on-old pin: the pre-9d planner REFUSED a three-block selection
+    /// (`tooManyBlocksForMerge`), so this test fails on the old code.
+    @Test func aThreeBlockSelectionMergesAsAChainUnderOneUndoEntry() async throws {
+        try await withEditor(seedBlocks: ["One two.", "Three four.", "Five six."]) { h in
+            // Three blocks selected ("One two." | "Three four." | "Five
+            // six." — C's chars start at 21).
+            h.textView.setSelectedRange(NSRange(location: 2, length: 20))
+            h.model.updateCaretContext()
+            #expect(h.model.gestureAvailability.merge)
+            await h.model.invokeGesture(.mergeBlocks)
+
+            let merged = try h.storeSlots()
+            #expect(merged.map(\.text) == ["One two. Three four. Five six."])
+            try expectStoreMatchesView(h)
+
+            // ONE compound entry: a single structural undo restores all
+            // three placements and the surface.
+            #expect(h.session.undoStack.depth == 1)
+            #expect(h.session.undoStack.topLabel == "Merge Blocks")
+            let stack = h.session.undoStack
+            _ = try await h.session.runner.run { ops in try stack.undo(with: ops) }
+            try h.reload()
+            let restored = try h.storeSlots()
+            #expect(restored.map(\.text) == ["One two.", "Three four.", "Five six."])
+            #expect(h.documentText == "One two.\nThree four.\nFive six.")
             try expectStoreMatchesView(h)
         }
     }
@@ -723,8 +769,6 @@ struct DropAndRefusalCopyTests {
                 "fanned middle span points at the W ceremony's door")
         #expect(RefusalCopy.message(for: .middleSpanNeedsMakeBlock).contains("Make Block"),
                 "extract's middle-span refusal points at the composed gesture")
-        #expect(RefusalCopy.message(for: .tooManyBlocksForMerge).contains("two"),
-                "the binary rule is named")
     }
 }
 

@@ -56,4 +56,17 @@ final class LibraryViewModel {
             return nil
         }
     }
+
+    /// Renames a post (9d — `renameContainer`'s first UI face; the op
+    /// shipped in Phase 2). A blank title stores NULL, rendering "Untitled".
+    func rename(postID: String, title: String) async {
+        do {
+            let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            try await session.runner.run { ops in
+                try ops.renameContainer(postID, title: trimmed.isEmpty ? nil : trimmed)
+            }
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
 }
