@@ -40,6 +40,20 @@ where the library grows — a folder view over an empty tag taxonomy tests nothi
 *(Post rename was in this family too but ships early in Phase 9d — the author hits its
 absence daily.)*
 
+**Second batch — the evening on-device pass (2026-07-09, recorded at the 9b kickoff;
+AppSpec §14's evening delta; KnownIssues rows for both):**
+
+6. **"Show Blocks" tint registration fix** — the 9d tint stripes don't line up with the
+   blocks' actual text ("the show block colors don't map up properly to lines of text").
+   Trace the fragment-geometry→block-range mapping in the `BlockTint` overlay path before
+   fixing; the never-adjacent/stable-color rules stand unchanged.
+7. **Paste spacing preservation** — pasted multi-paragraph text must keep the spacing and
+   newlines between the pasted pieces (author decision at direction level; the mechanism is
+   deliberately open — QUESTIONS #12). Whatever mechanism is chosen must reconcile with the
+   single-`"\n"` editor separator and the `"\n\n"` renderedText ratifications — **ask the
+   author live** before implementing a reading; do not PROVISIONAL this one, she asked to
+   be asked.
+
 ## The phase's center of gravity
 
 **P3 stops being satisfied for free.** Phase 7's "one live NSTextView per focused post" was

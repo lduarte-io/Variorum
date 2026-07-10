@@ -82,6 +82,21 @@ uncertainty (her instruction: "don't add more certainty than I have"), and she h
    without merging is on the table, not decided. Her governing principle for the whole
    package: *"if your text looks like basic text with no variants, it should behave like
    basic text"* — the machinery is power, never daily friction.
+   **Upgraded 2026-07-09 (evening, on-device pass — AppSpec §14's evening delta): COMMITTED
+   build scope, not just a design round.** Her instruction: cross-fan bracketing is actually
+   built at this phase, and the deliberately-open parts (#10/#11) are settled by **asking
+   her at the time of implementation** — she expects live questions during the phase;
+   both-ways-testing-via-distinct-commands stays her suggested method where a live answer
+   doesn't settle it.
+8. **The multi-variant editing view elevated (2026-07-09 evening — AppSpec §14's evening
+   delta):** her device pass found no way to open a fan's takes side by side; recorded as
+   her decision, in her terms: *"a view where multiple variants are editable is very
+   important to the overall app and approach"* (suggested shape: side-by-side takes,
+   "maybe with a horizontal scroll when there's many of them"). The §12 side-by-side +
+   expand-all-fans views in this phase's set are the home — treat this as a first-class
+   deliverable, not a tail item. How simultaneous *editability* reconciles with P3 (one
+   live editor; focus migrates between panes is the natural reading, not pre-decided) is
+   the design round's to answer **with her**.
 
 ## Standing definitions already settled elsewhere (the plan cites, never re-decides)
 

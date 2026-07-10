@@ -29,8 +29,10 @@
 > clean seam it can absorb, and do NOT couple it to the Phase 8 paste-in, which retires
 > at 9c), QUESTIONS #9 (the auth decision's record), AppSpec §14's 2026-07-07 deltas
 > (user-set `entry_date`; the notebook rule; the fifth auto-commit occasion), and this
-> plan in full. **Baselines — do not re-run at session start:** core `swift test` = 430
-> green in 51 suites; Mac app = 222 green in 40 suites; mobile = 11 green in 4 suites.
+> plan in full. **Baselines — do not re-run at session start** *(corrected 2026-07-09 by
+> the 9b coordinator: Phase 9d ran out-of-band after this plan was authored)*: core
+> `swift test` = 430 green in 51 suites; Mac app = **231 green in 42 suites** (was 222/40
+> pre-9d); mobile = 11 green in 4 suites.
 > **Author-availability note (her 2026-07-07 call): she defers ALL sync/device testing
 > until 9b AND 9c are BOTH complete** — the bridge's manual real-project pass and the
 > Phase 8 device rounds execute post-9c with the new sign-in, NOT with the paste-in; this
