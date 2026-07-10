@@ -15,14 +15,19 @@ this phase from this document + the phase plan's closeout
    until asks 8–12 are answered.** This is the phase's one finding: the contract pinned
    the recipes and semantics but not these facts; nothing was guessed — they ride
    injectable configuration and PROVISIONAL wire DTOs (QUESTIONS #13).
-2. **Walk QUESTIONS #13 and #14 at the checkpoint** — #13 ratifies the contract-gap
-   handling; #14 ratifies five landing/projection readings: (a) Variorum-side journal
+2. **Walk QUESTIONS #13, #14, and #15 at the checkpoint** — #13 ratifies the
+   contract-gap handling; #15 ratifies the push sweep's P1 relaxation (+ the 60 s
+   cadence throttle, added at the round-1 review — an author-only invariant call);
+   #14 ratifies five landing/projection readings: (a) Variorum-side journal
    deletion does NOT propagate to Fragments; (b) a Fragments deletion racing a Variorum
    edit loses to the edit (truth re-projects); (c) sealed/locked entries land incoming
    bodies as `'fragments'` variants despite the seal (sealed-EMPTY corner recorded);
    (d) after a both-changed conflict, the next push re-projects Variorum's truth over
-   the Fragments row (its text is momentarily behind, preserved as a card here);
-   (e) archived entries still push. Each option set + traced mechanism is in the
+   the Fragments row (its text is momentarily behind, preserved as a card here) —
+   and the conflict card fans the block, flipping the day into the push-only
+   graduated regime until the card is pruned; (e) archived entries still push, and
+   they also COUNT toward the duplicate-day pause (archiving does not release it;
+   delete or re-date does). Each option set + traced mechanism is in the
    closeout's PROVISIONAL section.
 3. **Kick off Phase 9c** (`/run-phase 9c`) — the plan is authored and self-contained:
    `notes/plans/phase-09c-auth-alignment.md`. Note its **Step 0 is an author-assist
@@ -79,8 +84,15 @@ nothing typed in either app can be lost where truth lives.
 
 ## Verification (headless — the real pass is deferred, deliberately)
 
-- **Core `swift test`: 493 green in 59 suites** (was 430/51). **Mac app: 234 in 43**
-  (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines.
+- **Core `swift test`: 497 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
+  (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines
+  (post-round-1-review counts — the cold review round ran 2026-07-09: 2 MAJOR /
+  3 MINOR / 3 NIT, all agreed, all fixed or recorded with red-on-old pins; every
+  disposition in the phase plan's round-1 section. The MAJORs: the landed Fragments
+  body now gets its own quiet auto-commit inside a one-transaction landing — it can
+  no longer be destroyed on both surfaces by the editor's keep-pending flush — and
+  the push sweep's P1 relaxation went to your ratify list as #15 with a 60 s cadence
+  throttle shipped).
 - Every scenario in the brief's verification skeleton has a named test: both-direction
   round trips, echo/replay idempotence, the auto-commit-then-autosave landing (and its
   no-double-commit twin), conflict variants with LWW convergence, insured deletions,

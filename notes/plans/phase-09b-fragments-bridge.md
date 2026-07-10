@@ -275,7 +275,8 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   SyncSpec §12 exempt (nothing on the mirror changed).
 
 - **Steps 3+4 — the engine** (`Bridge/BridgeEngine.swift`; `BridgePushTests` 9 tests,
-  `BridgeLandingTests` 15 tests). Rounds pinned **pull → push** (reconcile before
+  `BridgeLandingTests` — 16 tests at phase close, 19 after the round-1 pins).
+  Rounds pinned **pull → push** (reconcile before
   projecting — also what makes FIRST CONTACT safe: a pre-existing Fragments journal is
   fully landed and state-recorded before any push decision, so initial sync can never
   blind-overwrite). **Push:** eligibility = ALL live journal-profile posts with a valid
@@ -350,10 +351,11 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   call); carried forward in the handoff as a post-9c gate item, now additionally
   gated on the contract asks 8–12.
 
-### Test counts (the Phase 9c baselines)
+### Test counts (the Phase 9c baselines — POST-round-1 fixes; pre-review counts were 493/59, 234/43, 11/4)
 
-- Core `swift test`: **493 green in 59 suites** (was 430/51 — +63 tests, +8 suites).
-- Mac app: **234 green in 43 suites** (was 231/42 — +3, the bridge wiring suite).
+- Core `swift test`: **497 green in 59 suites** (was 430/51 at phase start — +67
+  tests, +8 suites; the round-1 fix pass added 4 pins).
+- Mac app: **235 green in 43 suites** (was 231/42 — +4 incl. the throttle test).
 - Mobile: **11 green in 4 suites** (unchanged; the mobile target compiles the shared
   bridge files but constructs the session fenced).
 
@@ -411,15 +413,24 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   first. Same class as SyncSpec §7's documented concurrent-divide duplication.
   Contract ask 13 (return the replaced body) would close it to zero; revisit at the
   real pass.
-- **The check-then-act ms-window** between a landing's classification read and its
-  ops calls (separate transactions — ops cannot nest in one write): a keystroke
-  landing in that window is committed by the fifth-occasion guard before the
-  overwrite (writes serialize at the store), so the worst case is
-  one-restore-away — the same class Phase 9 round 3 adjudicated as documented-not-
-  fixed (op-level expected-text preconditions are a core change without cause).
+- **The check-then-act window** between a landing's classification read and its
+  operation call (separate transactions — ops cannot nest in one write): a local
+  edit landing in that window can shift the true classification (an
+  only-Fragments-changed read that was really both-changed). *(Corrected in review
+  round 1 — the original wording here overclaimed: pre-fix, an edit landing between
+  the insurance and the overwrite transactions was NOT committed first, and the
+  landed body itself had no insurance at all against the editor's later flush.
+  Post-fix, `applyBridgeLanding` composes insurance + overwrite + landed-body
+  commit in ONE transaction, so everything the store holds at landing time — and
+  the landed body — is one restore away; the residual is only the mis-CLASSIFIED
+  overwrite-instead-of-conflict-card, fully insured. The Phase 9 round-3 class:
+  op-level expected-text preconditions remain a core change without cause.)*
 - **The push sweep's corpus growth** — KnownIssues, owner Phase 12 (remedy sketch
-  recorded there).
-- **Sealed-empty-entry landings** — PROVISIONAL 4 above.
+  recorded there); the P1 relaxation is on the author's ratify list (QUESTIONS
+  #15, round-1 MAJOR 2) and cadence triggers are interval-throttled since the
+  fix round.
+- **Sealed-empty-entry landings** — PROVISIONAL 4 above (pinned by test since the
+  round-1 fixes, NIT 8).
 
 ### KnownIssues reconciliation
 
@@ -442,5 +453,118 @@ instruction — findings recorded there).
 
 ### Review rounds
 
-*(To be appended by the coordinator/reviewer — this phase ran as a single Fable
-implementer session per the staffing note; the cold review follows.)*
+## Review round 1 (2026-07-09) — 2 MAJOR / 3 MINOR / 3 NIT; ALL AGREED; every
+## bug-class fix red-on-old-pinned (pins verified red by behavioral revert);
+## dispositions below anchor round 2
+
+**MAJOR 1 — the landed Fragments body had no insurance of its own (AGREED; fixed;
+pin verified red-on-old).** Mechanism, traced: with the day's entry open in the Mac
+editor holding un-flushed keystrokes B over store text T (agreed = hash(T)), the
+classifier reads the STORE (T == agreed → only-Fragments-changed), insures the
+pre-image T, and autosaves F — then the editor's keep-pending flush (Phase 7) writes
+B over F, and the next push (rendered B ≠ agreed hash(F)) LWW-replaces F on the
+Fragments side with an outranking stamp: **F gone everywhere**, violating the
+doctrine's bar and review focus 2, in a seconds-wide (autosave-debounce) window on
+exactly the co-written day. The closeout's original residual claim ("committed by
+the fifth-occasion guard before the overwrite") was additionally FALSE for the
+sub-window between the two separate write transactions — corrected in the residuals
+section above. **Fix:** the new operation `Operations.applyBridgeLanding` (the
+`lockPost` compose-in-one-transaction precedent): insure-pre-image → overwrite →
+**commit the landed body itself** (`kind:'auto'`; skipped for empty bodies — a
+landed deletion is not losable text), all in ONE transaction; the engine's
+only-Fragments-changed path now calls it instead of `idleAutoCommit`+`autosave`.
+Pin: `theLandedBodyItselfSurvivesTheEditorsKeepPendingFlush` (land F → simulate the
+flush with `autosave(B)` → push → F still one restore away) — verified RED on the
+pre-fix code by behavioral revert, green after; the two existing landing tests'
+commit expectations updated ([pre-image] → [pre-image, landed-body], and the
+no-double-commit test still proves no duplicate of the identical pre-image).
+
+**MAJOR 2 — the O(journal-corpus) hash sweep at edit-settle cadence, and the P1
+relaxation never reached the author (AGREED, both halves; architectural — traced
+mechanism, no pin owed).** Mechanism confirmed: bridge rounds fire after every sync
+round; sync rounds fire post-write-settle; each round renders + hashes every live
+journal day — recurring corpus-proportional work on the editing path (of ANY post),
+P1's letter, growing with years of journals. The hash-over-stamp rationale stands
+(the reviewer concurred), but per CLAUDE.md relaxing a performance invariant is an
+**author-only call** — it was parked in KnownIssues without a ratify entry.
+**Fix (both offered paths taken):** (1) **QUESTIONS #15** filed for the checkpoint
+walk (options incl. pulling the dirty-day remedy forward; PROVISIONAL (a) =
+hash-sweep + throttle, Phase 12 owns the remedy); (2) cadence triggers are now
+**interval-throttled in `BridgeSession`** (default 60 s — an engineering default of
+the `settleDebounce` class, named in #15 for adjustment): a settle burst forwards
+one immediate round plus at most ONE trailing round (the last trigger is never
+lost); manual "Bridge now"/"Retry" bypass. Tested:
+`cadenceTriggersAreThrottledToTheMinimumInterval` (Mac wiring suite).
+
+**MINOR 3 — the stamp-only bookkeeping no-opped on virgin days, re-opening the
+`.stale` wedge (AGREED; fixed; pin verified red-on-old).** Mechanism confirmed:
+the deletion-raced-an-edit branch records `(hash: nil, remoteStamp: R)`;
+`recordDay`'s hash-nil arm was `UPDATE … WHERE day_key = ?` — a no-op with no
+`bridge_day` row (first contact), losing R; the re-projection then pushed with
+`now` and wedged `.stale` until the wall clock passed the tombstone's ahead stamp —
+exactly the class the `last_remote_stamp` amendment closed elsewhere. **Fix:**
+`bridge_day.last_synced_hash` made NULLABLE (second in-place v1_4 amendment, same
+no-persistent-store-ran-it safety, recorded in the migration comment) and the
+stamp-only record now UPSERTS a hash-NULL row; `dayRow`/`dayState`/the push scan
+treat a stamp-only row as "no agreed body" (including the never-first-push-of-
+emptiness guard). Pin: `aTombstoneRacingAnEditOnAVirginDayStillGetsOutranked`
+(virgin day + ahead-stamped tombstone + local edit → the SAME round's push APPLIES,
+never `.stale`) — verified RED on pre-fix code (pushed 0 / stale 1), green after.
+
+**MINOR 4 — permanent per-day failures and stalls were invisible (AGREED; fixed;
+pin verified red on the unwired status).** Mechanism confirmed: the scheduler
+discarded `report.rejected`/`stalled`/`deferred`/all notes — a live Fragments row
+under a NON-derived id (the legacy/drift class asks 8–10 exist to catch) lands by
+date but rejects every push of that day forever, with the round reporting success
+and `lastError` nil: a silently frozen projection, against "record, don't guess."
+**Fix:** `BridgeScheduler.Status` gains `stalled` + `issueNotes` (landing notes +
+push notes — per-day rejections recur every round and stay visible); the status row
+shows "needs attention (n)" with the verbatim notes on hover. Pin:
+`aPermanentPushRejectionSurfacesInTheStatus` — verified red with the wiring
+reverted (notes empty), green wired. **The reviewer's optional adopt-the-foreign-id
+alternative was NOT taken**, with rationale: contract fact 2 makes the derived id
+the convergence key both apps must share; silently adopting a drifted id would
+perpetuate exactly the divergence the asks exist to surface — visibility + the
+(deferred) real-pass reconciliation is the record-don't-guess posture.
+
+**MINOR 5 — "never interleaved" was one-directional and the UI buttons bypass it
+(AGREED as a wording/mechanism gap; documented, no gate built).** Traced: bridge
+landings grow the outbox; the settle observation can trigger a sync round while the
+bridge is still landing — and consequences collapse into the documented
+check-then-act class (both engines' writes are per-transaction atomic; the sync
+engine treats bridge-written rows as ordinary dirty rows). Building a cross-session
+sync-idle gate would couple the sessions for no correctness gain. **Disposition:**
+the guarantee is now stated honestly at the wiring site (`BridgeSession.trigger`
+doc), in the closeout Step 5 paragraph, and here: cadence bridge rounds START only
+after a completed sync round; the reverse overlap is possible and benign; manual
+triggers are deliberate off-cadence escape hatches, same as "Sync now."
+
+**NIT 6 — archived entries count toward the duplicate-day pause (AGREED; recorded,
+no behavior change).** Deliberate and conservative: an archived sibling is still
+the day's text (createOrOpen can open it when it is all the day has), and pushing
+the survivor would silently drop the archived text from the projection. But the
+author's natural hand-merge gesture may be archiving — so the consequence is now in
+the QUESTIONS #14(e) walk verbatim and the status-row copy says "delete or re-date
+one to resume."
+
+**NIT 7 — a both-changed conflict landing graduates the day (AGREED; recorded, no
+behavior change).** The `'fragments'` card fans the block → the ratified graduated
+policy flips the day push-only: subsequent Fragments edits land as further rescue
+cards, not text updates, until the card is pruned/archived. Policy applied as
+written; the regime flip is now flagged in the QUESTIONS #14(d) walk so it never
+surprises.
+
+**NIT 8 — the sealed-EMPTY branch was untested + a count typo (AGREED; fixed).**
+New pin `sealedEmptyEntryConsumesTheRowWithoutStateOrBlanking` (sealed blockless
+entry + incoming body → consumed with the note, NO day state, no block minted, and
+the push half never blanks the Fragments body; next round quiet). This pins
+existing behavior — a coverage pin, not a bug-class pin, so passing pre-fix is
+expected and correct. The closeout's "15 tests" corrected (16 at phase close; 19
+after this round's pins).
+
+**Round-1 fix-pass counts: core `swift test` 497 green in 59 suites; Mac app 235
+green in 43 suites; mobile 11 green in 4 suites — the corrected Phase 9c
+baselines.** Fix commits: the `applyBridgeLanding` + engine/scheduler/session/test
+changes and the schema amendment (nullable hash, own commit) — see git log; every
+pin's red state verified by stashing the source fixes (batch A: MAJOR 1 + MINOR 3
+pins red) and reverting the status wiring (batch B: MINOR 4 pin red).
