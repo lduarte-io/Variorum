@@ -100,6 +100,13 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
     *(Related, from the same review: Variorum's re-projection stamps may sit only 1 s
     above the row they answer rather than at wall-clock time — confirm your `updated_at`
     semantics tolerate content-newer-than-stamp rows; it is pure LWW ordering to us.)*
+14. **The clock-ahead clamp's threshold and semantics** (fact 4 names the clamp but not
+    its bound or verdict shape): what offset trips it, and does a clamped push get a
+    distinguishable rejection? Context: re-projecting over a clock-ahead save requires
+    stamping just above it (+1 s over a stamp your server itself accepted) — under a
+    strict clamp that re-projection is rejected until wall clock catches up, which
+    Variorum surfaces visibly and tolerates (nothing lost), but the bound decides how
+    long the visible hold lasts.
 
 ## What each side promises operationally
 

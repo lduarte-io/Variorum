@@ -21,7 +21,11 @@ this phase from this document + the phase plan's closeout
    #14 ratifies five landing/projection readings: (a) Variorum-side journal
    deletion does NOT propagate to Fragments; (b) a Fragments deletion racing a Variorum
    edit loses to the edit (truth re-projects); (c) sealed/locked entries land incoming
-   bodies as `'fragments'` variants despite the seal (sealed-EMPTY corner recorded);
+   bodies as `'fragments'` variants despite the seal — the sealed-EMPTY corner was
+   RE-SHAPED at round 3 (its MAJOR: the old consume-the-row reading destroyed the
+   body after unseal-and-type; now the feed visibly HOLDS until you unseal, then the
+   body lands — shape (a) PROVISIONAL, alternative (b) day-scoped hold recorded,
+   ratify the shape with this item);
    (d) after a both-changed conflict, the next push re-projects Variorum's truth over
    the Fragments row (its text is momentarily behind, preserved as a card here) —
    and the conflict card fans the block, flipping the day into the push-only
@@ -84,19 +88,25 @@ nothing typed in either app can be lost where truth lives.
 
 ## Verification (headless — the real pass is deferred, deliberately)
 
-- **Core `swift test`: 503 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
-  (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines,
-  post-review (the ladder ran rounds 1 and 2 on 2026-07-09; round 2's new MAJOR
-  means round 3 follows per the ladder). Round 1: 2 MAJOR / 3 MINOR / 3 NIT — the
-  landed Fragments body now gets its own quiet auto-commit inside a one-transaction
-  landing, and the push sweep's P1 relaxation went to your ratify list as #15 with a
-  60 s cadence throttle. Round 2: 1 MAJOR / 3 MINOR / 4 NIT — pushes now stamp
-  minimally above the last SEEN remote stamp (compare-and-set style), closing the
-  steady-state unseen-save loss window this handoff previously mis-scoped as
-  first-contact-only; `createPost` gained the day-key guard; `applyBridgeLanding`
-  binds variant to container; OverallModel §3 + AppSpec §9 record the shipped
-  landing mechanism (**bless these two doc deltas at the checkpoint**). Every
-  disposition in the phase plan's round sections.
+- **Core `swift test`: 506 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
+  (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines, after
+  the FULL review ladder (three rounds, 2026-07-09, fresh reviewer each; closed at
+  the hard cap). Round 1: 2 MAJOR / 3 MINOR / 3 NIT — the landed Fragments body now
+  gets its own quiet auto-commit inside a one-transaction landing, and the push
+  sweep's P1 relaxation went to your ratify list as #15 with a 60 s cadence
+  throttle. Round 2: 1 MAJOR / 3 MINOR / 4 NIT — pushes now stamp minimally above
+  the last SEEN remote stamp (compare-and-set style), closing the steady-state
+  unseen-save loss window this handoff previously mis-scoped; `createPost` gained
+  the day-key guard; `applyBridgeLanding` binds variant to container; OverallModel
+  §3 + AppSpec §9 record the shipped landing mechanism (**bless these two doc
+  deltas at the checkpoint**). Round 3 (final; fixes post-cap per the ladder):
+  1 MAJOR / 2 MINOR / 2 NIT — the sealed-empty landing now DEFERS with the cursor
+  held instead of consuming the row (the consumed body was destroyed by the first
+  post-unseal push; **the shape is PROVISIONAL — ratify it with #14(c)**); gap-slot
+  days never push a partial rendering; the two stale stamp-formula carriers
+  corrected; the clamp interaction pinned + contract ask 14. Every disposition in
+  the phase plan's three round sections; round 3 also judged the round-2 stamp fix
+  SOUND and accepted the flagged error-case-reuse call.
 - Every scenario in the brief's verification skeleton has a named test: both-direction
   round trips, echo/replay idempotence, the auto-commit-then-autosave landing (and its
   no-double-commit twin), conflict variants with LWW convergence, insured deletions,
@@ -120,10 +130,14 @@ nothing typed in either app can be lost where truth lives.
    namespace, worked examples, canonical-user form, and wire shapes. Judged
    non-core-gating (only the deferred real pass consumes them); handled as injectable
    config + RFC-pinned algorithm + stand-in golden vectors + asks 8–13. Never guessed.
-2. **The LWW stamp wedge (found by the deterministic clock, fixed):** a re-projection
-   push must outrank the row it answers, or a clock ahead of ours (your phone) leaves
-   truth's re-projection permanently stale — pushes now stamp
-   `max(now, landed-stamp + 1s)`; `bridge_day` carries the landed stamp.
+2. **The LWW push-stamp discipline (round 1 found the clock-ahead wedge; round 2
+   replaced the formula):** pushes stamp `last_remote_stamp + 1s` — minimally above
+   the newest server-row stamp the bridge has SEEN or WRITTEN (`bridge_day` records
+   landed stamps AND accepted pushes' own stamps), never the wall clock when a stamp
+   is known. This both outranks a clock-ahead landed row (round 1's wedge) and goes
+   `.stale` against an unseen Fragments save (round 2's loss window) — the push is a
+   compare-and-set against what the bridge knows. `now` only on first contact or an
+   unparseable stamp.
 3. **The unseen-save overwrite window (round-2 MAJOR — was mis-scoped here as
    first-contact-only):** pre-fix, a Fragments save the same round's pull couldn't
    see (saved after it, or inside their ~2 s horizon) was overwritten by the push's

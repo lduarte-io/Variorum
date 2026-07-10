@@ -351,10 +351,10 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   call); carried forward in the handoff as a post-9c gate item, now additionally
   gated on the contract asks 8–12.
 
-### Test counts (the Phase 9c baselines — POST-round-2 fixes; pre-review 493/59 · 234/43 · 11/4, post-round-1 497/59 · 235/43 · 11/4)
+### Test counts (the Phase 9c baselines — FINAL, post-round-3; pre-review 493/59 · 234/43 · 11/4, post-round-1 497/59 · 235/43, post-round-2 503/59)
 
-- Core `swift test`: **503 green in 59 suites** (was 430/51 at phase start — +73
-  tests, +8 suites; round 1 added 4 pins, round 2 added 6).
+- Core `swift test`: **506 green in 59 suites** (was 430/51 at phase start — +76
+  tests, +8 suites; round 1 added 4 pins, round 2 added 6, round 3 added 3).
 - Mac app: **235 green in 43 suites** (was 231/42 — +4 incl. the throttle test).
 - Mobile: **11 green in 4 suites** (unchanged; the mobile target compiles the shared
   bridge files but constructs the session fenced).
@@ -384,11 +384,14 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
    seal** — extends the ratified S5-outranks-the-seal posture (AppSpec §14,
    2026-07-06) to the second writer: the seal freezes authoring; a bridge landing is
    not authoring, and refusing would strand the body. The sealed text itself is never
-   overwritten. The one residual corner: a **sealed EMPTY entry** has no block to
-   carry a card and the seal refuses the mint — the row is consumed with a note, no
-   state recorded (so no push can blank the surface); the body stays safe in
-   Fragments but un-landed. Corner-of-corner (a deliberately sealed blockless entry);
-   recorded, not solved. QUESTIONS #14(c).
+   overwritten. The sealed-EMPTY corner — **CORRECTED at round 3 (that round's
+   MAJOR):** the original reading here (consume the row with a note; "the body stays
+   safe in Fragments") was FALSE — safe only while sealed; the consumed row left the
+   body behind the cursor with no state, and the first post-unseal push (`now`
+   fallback) LWW-destroyed it everywhere. Now the landing **DEFERS** (cursor holds,
+   visibly stalled) until unseal, whereupon the held row re-serves and lands
+   normally — PROVISIONAL shape (a) of two, both recorded in the round-3 section;
+   the shape rides the #14(c) walk. QUESTIONS #14(c).
 5. **Edit-war convergence: truth re-projects.** After a both-changed conflict landing,
    the incoming hash is recorded as the agreed state, so the NEXT push projects
    Variorum's rendered text back over the Fragments row (with an LWW stamp that
@@ -437,8 +440,9 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   recorded there); the P1 relaxation is on the author's ratify list (QUESTIONS
   #15, round-1 MAJOR 2) and cadence triggers are interval-throttled since the
   fix round.
-- **Sealed-empty-entry landings** — PROVISIONAL 4 above (pinned by test since the
-  round-1 fixes, NIT 8).
+- **Sealed-empty-entry landings** — PROVISIONAL 4 above; re-shaped at round 3 into
+  a visible cursor-hold (the consumed-row reading destroyed the body post-unseal —
+  that round's MAJOR; red-on-old pinned; shape (a) PROVISIONAL, on the #14(c) walk).
 
 ### KnownIssues reconciliation
 
@@ -688,3 +692,96 @@ in 4 suites — the Phase 9c baselines.** Every
 round-2 pin's red state verified by stashing the three round-2 source fixes
 (BridgeEngine / Operations+Container / Operations+Sync) and re-running the pins:
 all red with exactly the traced failure shapes.
+
+## Review round 3 (2026-07-09, fresh cold reviewer — the ladder's final pass;
+## fixes land POST-CAP per the ladder's rule, recorded honestly; there is no
+## fourth review) — 1 MAJOR / 2 MINOR / 2 NIT; ALL AGREED; plus the round's
+## verdicts: the round-2 push-stamp compare-and-set re-traced and judged
+## SOUND, and the flagged `blockNotPlaced`-reuse call ACCEPTED as shipped.
+
+**MAJOR — the consumed-unlanded sealed-empty body was destroyed by the first
+post-unseal push; the recorded safety claim was false ON THE RATIFY LIST
+(AGREED; fixed post-cap; pin verified red-on-old).** Mechanism, self-traced and
+confirmed: the sealed-empty landing returned `.skipped(record: nil)` — and the
+pull loop advances the cursor even on nil bookkeeping, so the body's row was
+consumed with NOTHING recorded; after unseal-and-type, the day had no agreed
+hash (the empty-first-push guard didn't apply — rendered was now non-empty) and
+no known remote stamp (`pushStamp` fell back to `now`), so the push LWW-replaced
+the body under sane clocks and the state-based feed never served it again: no
+live row, no variant, no commit, no server row — the forbidden class, through
+the one landing path that ended in none of the doctrine's three homes. The
+rounds-1/2 claim "the body stays safe in Fragments" was true only WHILE sealed.
+Since the no-permanent-loss bar is ratified doctrine, a fix was owed; the SHAPE
+is implementation and rides the #14(c) walk per the PROVISIONAL rule.
+**Shapes considered (both recorded for the author):** (a) DEFER — return
+`.deferred`, cursor holds, visibly stalled until unseal, whereupon the held row
+re-serves and lands normally; whole-feed hold while sealed. (b) day-scoped push
+hold — record the row's stamp + an "unlanded body" marker suppressing that day's
+pushes; other days flow, but the consumed body can never re-serve (state-based
+feed), stranding it in Fragments until the author edits that day THERE again,
+and the marker is new state with a subtle interaction with the deletion-race
+stamp-only rows (which REQUIRE the push to proceed). **Shipped: (a),
+PROVISIONAL** — it reuses the tested straggler machinery (a two-line change,
+right-sized post-cap), it is the written doctrine's posture (SyncSpec §12:
+stalling is safe by design, guessing is the forbidden move), and it recovers
+COMPLETELY on unseal with no Fragments-side action; the stall is author-caused,
+author-visible (stalled + a note naming the sealed entry), and author-endable in
+one click. **Pins:** the round-1 NIT-8 test REWRITTEN to the new shape
+(`sealedEmptyEntryDefersUntilUnsealThenLands` — deferred/stalled/cursor-held/no
+state, then unseal → the held row lands as THE block) and the destruction pin
+`aSealedEmptyDaysBodySurvivesUnsealAndType` (realistic save stamp + burned
+ticks — the exact destruction condition; unseal → type → the held row re-serves,
+the save lands as a `'fragments'` card, truth re-projects), verified RED on the
+pre-fix engine (no card, the body nowhere). **The false claim corrected at all
+four carriers:** closeout PROVISIONAL 4 (in place), QUESTIONS #14(c) (correction
++ both shapes + the PROVISIONAL, for the author to ratify the shape),
+the handoff's item (c), and the test doc-comment (rewritten with the test).
+
+**MINOR 1 — the push half projected gap-slot days the landing half refuses to
+classify (AGREED; fixed post-cap; pin verified red-on-old).** Confirmed: gap
+slots render as nothing (`renderedText` skips them), so a gap day pushed a
+PARTIAL body — in the pinned case, an EMPTY one, blanking the Fragments row —
+and could compound the 1 s residual against a same-round unseen save. Fix: the
+push scan renders each candidate's slots once (`renderPost`; the rendered text
+composed via the same public compactMap/filter/join as `Queries.renderedText`)
+and skips any day containing a gap slot, with a note on the MINOR-4 surface —
+the landing and push halves now agree that store state is too transient to act
+on; self-heals when the gap fills. Pin: `aGapSlotDayIsNeverPartiallyProjected`
+(agreed day; the slot's variants tombstoned raw, the partial-pull shape; push
+must skip and the Fragments body survive) — verified RED pre-fix (pushed 1, the
+Fragments row blanked).
+
+**MINOR 2 — two stale carriers of the superseded `max(now, …)` stamp formula
+(AGREED; doc-only, fixed).** The v1_4 migration comment (the column's own
+documentation) and the handoff's finding 2 both restated to the round-2 rule:
+`last_remote_stamp + 1s`, never `now` when a stamp is known (first contact and
+unparseable stamps excepted) — the exact stale-safety-narrative class this
+phase paid for twice; both carriers now match `pushStamp`.
+
+**NIT 1 — the clamp × outranking interaction was untested and the clamp's
+threshold unpinned (AGREED; coverage pin + ask added).** Coverage pin
+`aClampedReprojectionIsVisibleNeverSilentNothingLost` (green both sides by
+design, stated as such): a clamped re-projection is `.rejected` visibly on the
+MINOR-4 surface, the save is already a card, nothing lost, self-heals when wall
+clock catches up. Contract **ask 14** added (the clamp's threshold and verdict
+shape — it decides how long the visible hold lasts).
+
+**NIT 2 — mixed-epoch `Status` on a failed round (AGREED; comment).**
+Keep-last chosen deliberately: a failed round learned nothing about
+pauses/stalls, the last-known truths usually still hold, and the shipped row's
+error branch short-circuits the fields; the scheduler comment now states the
+as-of-`lastSuccessAt` semantics for programmatic consumers.
+
+**Round-3 verdicts on prior work, recorded:** the round-2 minimal-stamp fix
+re-traced end to end and judged SOUND; the `blockNotPlaced`-reuse judgment call
+accepted as shipped (no new error case owed).
+
+**Round-3 fix-pass counts (FINAL — the Phase 9c baselines): core `swift test`
+506 green in 59 suites; Mac app 235 green in 43 suites; mobile 11 green in 4
+suites.** Red-on-old verification: the round-3 engine fixes stashed and both
+bug-class pins re-run — red with exactly the traced failure shapes (the gap day
+pushed its blanking partial; the sealed-empty body destroyed with no card); the
+clamp coverage pin green on both sides as designed. Anything still open after
+this round is recorded for the author (the #14(c) SHAPE ratification; the #15
+P1 ratification; the contract asks 8–14), never looped on — the ladder is
+closed at its cap.
