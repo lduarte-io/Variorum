@@ -121,6 +121,59 @@ gate, plus the Phase 8 device rounds the author deferred until "9b AND 9c are do
 - **(C) One merged project — rejected-leaning, unchanged** (revisit only if A and B
   both fail; it strains the hands-off-Fragments boundary).
 
+### Step 0 field notes — the author's dashboard round 1 (2026-07-10, coordinator-recorded; the implementer folds these into the Step 0 memo)
+
+- **Tiers:** both projects Free (the author is willing to upgrade to Pro at any time if
+  needed — Free's 3 custom providers suffice for route A, so no upgrade is required for
+  this phase's core).
+- **JWT keys:** BOTH projects are **migrated to JWT Signing Keys** — current key type
+  **ECC (P-256)**; the legacy JWT secret is verify-only and rotation-locked ("can only be
+  changed by rotating to a standby key and then revoking it"). Consequence, per lookup
+  fact 3: **fallback B's legacy shared-HS256 form is DEAD**; only the modernized form
+  (importing the same asymmetric key into both projects) remains as B.
+*[removed for publication]*
+  author ENABLED it.** Published endpoints (dashboard + confirmed by the coordinator's
+  *[removed for publication]*
+  authorize `…/auth/v1/oauth/authorize`, token `…/auth/v1/oauth/token`, JWKS
+  `…/auth/v1/.well-known/jwks.json`, discovery `…/auth/v1/.well-known/openid-configuration`.
+  Discovery says: `response_types=[code]`, PKCE S256, grant types authorization_code +
+  refresh_token, token-endpoint auth `client_secret_basic/post/none` (public clients
+  possible), id-token algs RS256/HS256/ES256, userinfo endpoint present, claims include
+  `sub`/`email`. **NO `registration_endpoint` is advertised** (consistent with "Allow
+  Dynamic OAuth Apps" being OFF).
+- **The client-registration GAP (blocks author steps 5–6):** the Fragments OAuth Server
+  page shows Site URL / Authorization Path / the "Allow Dynamic OAuth Apps" toggle and
+  the endpoints — but **no manual "register a client app" UI the author could find**.
+  Likely doors: (i) Dynamic OAuth App registration (RFC 7591 — toggle ON, then a
+  registration endpoint should appear; register Variorum with one curl, optionally
+  toggle back OFF), (ii) the Supabase Management API (her PAT exists, untracked), or
+  (iii) a dashboard "OAuth Apps" list somewhere she didn't find. **UNRESOLVED —
+  the implementer's Sonnet lookup targets exactly this before the author acts.**
+- **The consent-UI WRINKLE (now route A's central open question, ahead of
+  registration):** Supabase's OAuth server delegates the authorize-time login/consent UI
+  to the project's OWN web application — "Authorization Path: path where you'll
+  implement the OAuth authorization UI (consent screens). Make sure this path is
+  implemented in your application"; the Fragments project's Site URL is the default
+  `http://localhost:3000` placeholder (preview authorization URL
+  `http://localhost:3000/oauth/consent`). **Fragments is iOS-only — no web app exists to
+  serve login or consent.** The spike must determine what serves that UI (a hosted
+  Supabase page? a throwaway LOCAL page at localhost:3000 for the spike, since Site URL
+  already points there? what would production need permanently?) — this is the
+  make-or-break question for the pairing, and a real route-A cost to weigh against
+  fallback B if it demands a permanently-hosted page.
+*[removed for publication]*
+  "Create Custom Auth Provider": provider identifier slug (`custom:<name>`), display
+  name, auto-discovery (recommended) from an Issuer URL or manual endpoints, client
+  ID + client secret fields, scopes (default suggestion `openid, email, profile`),
+  "allow users without email" toggle, and the fixed callback URL
+  *[removed for publication]*
+  yet** — blocked on client registration above. When created, the Issuer URL is exactly
+  *[removed for publication]*
+  Discovery URL empty).
+- **Author actions remaining (blocked on the implementer's registration + consent
+  findings):** register the Variorum client on the Fragments OAuth server, create the
+  custom provider on Variorum, run one delegated sign-in via the scratch harness.
+
 **`owner_id` keying (brief open interpretation 2):** under (A), `owner_id` = the
 **Variorum project's `auth.uid()`** (its native `sub`). Rationale, recorded: it is
 project-local and stable regardless of how the identity was proven (delegated

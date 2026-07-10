@@ -90,7 +90,12 @@ final class SyncSession {
         if persist {
             SyncCredentialsStore.save(credentials)
         }
-        let transport = SupabaseTransport(configuration: credentials.transportConfiguration)
+        // The pasted static token rides the 9c per-call session seam as a
+        // fixed session (StaticSessionProvider) until Step 5 retires the
+        // paste-in into the real sign-in.
+        let transport = SupabaseTransport(
+            configuration: credentials.transportConfiguration,
+            sessionProvider: credentials.staticSessionProvider)
         await configure(transport: transport)
     }
 

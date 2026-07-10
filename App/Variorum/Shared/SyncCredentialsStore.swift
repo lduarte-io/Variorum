@@ -23,7 +23,15 @@ struct SyncCredentials: Equatable, Codable, Sendable {
     var authToken: String
 
     var transportConfiguration: SupabaseTransport.Configuration {
-        .init(projectURL: projectURL, apiKey: apiKey, authToken: authToken)
+        .init(projectURL: projectURL, apiKey: apiKey)
+    }
+
+    /// The interim session shape (Phase 9c, Step 2): the pasted static
+    /// token rides the new per-call seam as a fixed session until Step 5
+    /// retires the paste-in into the real sign-in. No user id — nothing on
+    /// the pre-RLS mirror consumes one.
+    var staticSessionProvider: StaticSessionProvider {
+        StaticSessionProvider(session: UserSession(accessToken: authToken, userID: ""))
     }
 }
 

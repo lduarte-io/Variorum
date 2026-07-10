@@ -21,7 +21,16 @@ import Testing
 /// byte-equality surface stays valid.
 @Suite("Supabase integration pass (Phase 5, Step 8 — REAL server)")
 struct SupabaseIntegrationTests {
-    private static var configuration: SupabaseTransport.Configuration? {
+    private struct EnvCredentials {
+        let configuration: SupabaseTransport.Configuration
+        /// Pre-9c-flip: the API key itself (or any bearer) worked. Post-flip
+        /// (04_auth_rls.sql deployed) this must be a REAL user access token —
+        /// the bare key is refused by the mirror, which Step 6's gate
+        /// verifies deliberately.
+        let bearerToken: String
+    }
+
+    private static var credentials: EnvCredentials? {
         let env = ProcessInfo.processInfo.environment
         guard
             let urlString = env["VARIORUM_SUPABASE_URL"], !urlString.isEmpty,
@@ -29,15 +38,21 @@ struct SupabaseIntegrationTests {
             let apiKey = env["VARIORUM_SUPABASE_API_KEY"], !apiKey.isEmpty,
             let token = env["VARIORUM_SUPABASE_TOKEN"], !token.isEmpty
         else { return nil }
-        return .init(projectURL: url, apiKey: apiKey, authToken: token)
+        return EnvCredentials(
+            configuration: .init(projectURL: url, apiKey: apiKey),
+            bearerToken: token)
     }
 
     @Test(
         .enabled(
-            if: configuration != nil,
+            if: credentials != nil,
             "Set VARIORUM_SUPABASE_URL / _API_KEY / _TOKEN (see .env.supabase.local) to run the real-server pass"))
     func basicOfflineEditsConvergeOverTheRealServer() async throws {
-        let transport = SupabaseTransport(configuration: try #require(Self.configuration))
+        let env = try #require(Self.credentials)
+        let transport = SupabaseTransport(
+            configuration: env.configuration,
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: env.bearerToken, userID: "")))
         let a = try SyncClient(
             name: "A", prefix: "AA", transport: transport, mintsRandomUUIDs: true)
         let b = try SyncClient(
