@@ -382,51 +382,64 @@ actor AuthSession: UserSessionProviding {
 
     private func refresh() async throws -> AuthTokens {
         if let inFlight = refreshTask {
-            return try await inFlight.value
+            // Review round 2 (NIT): waiters run the same post-await
+            // re-check as the leader — a sign-out landing mid-refresh must
+            // not hand a signed-out caller a session. Adoption happens
+            // INSIDE the shared task (below), so a waiter always observes
+            // post-adoption state; returning the LIVE tokens also covers a
+            // superseding sign-in (whatever is current wins).
+            _ = try await inFlight.value
+            guard let live = tokens else { throw UserSessionError.notSignedIn }
+            return live
         }
         guard let current = tokens else { throw UserSessionError.notSignedIn }
-        let task = Task { [configuration, http, now] () throws -> AuthTokens in
-            let response = try await Self.tokenRequest(
-                configuration: configuration, http: http,
-                grantType: "refresh_token",
-                body: ["refresh_token": current.refreshToken])
-            var next = current
-            next.accessToken = response.accessToken
-            next.refreshToken = response.refreshToken
-            next.expiresAt = response.expiryDate(now: now())
-            if let user = response.user {
-                next.userID = user.id
-                next.email = user.email ?? next.email
-            }
-            // THE PRESERVATION RULE (Step 0 memo): refresh responses never
-            // carry provider tokens — the captured pair survives verbatim.
-            return next
-        }
+        let task = Task { try await self.performRefresh(from: current) }
         refreshTask = task
         defer { refreshTask = nil }
-        let refreshed = try await task.value
-        // Review round 1 (MINOR): the await above releases the actor, so a
-        // sign-out (or a whole new sign-in) can interleave before the
-        // result lands. Adopting it unconditionally would RESURRECT a
-        // signed-out session — UI and sync torn down while the Keychain
-        // holds live tokens and the next launch comes up signed in, an
-        // explicit sign-out silently undone ("only signOut clears" is this
-        // type's contract, and its inverse — sign-out is terminal — must
-        // hold too).
+        return try await task.value
+    }
+
+    /// The leader's whole refresh — HTTP hop, then the post-await adoption
+    /// guards, all inside the single-flight task so every awaiter observes
+    /// a settled outcome.
+    ///
+    /// Review round 1 (MINOR): the HTTP await releases the actor, so a
+    /// sign-out (or a whole new sign-in) can interleave before the result
+    /// lands. Adopting it unconditionally would RESURRECT a signed-out
+    /// session — UI and sync torn down while the Keychain holds live
+    /// tokens and the next launch comes up signed in, an explicit sign-out
+    /// silently undone ("only signOut clears" is this type's contract, and
+    /// its inverse — sign-out is terminal — must hold too).
+    private func performRefresh(from current: AuthTokens) async throws -> AuthTokens {
+        let response = try await Self.tokenRequest(
+            configuration: configuration, http: http,
+            grantType: "refresh_token",
+            body: ["refresh_token": current.refreshToken])
+        var next = current
+        next.accessToken = response.accessToken
+        next.refreshToken = response.refreshToken
+        next.expiresAt = response.expiryDate(now: now())
+        if let user = response.user {
+            next.userID = user.id
+            next.email = user.email ?? next.email
+        }
+        // THE PRESERVATION RULE (Step 0 memo): refresh responses never
+        // carry provider tokens — the captured pair survives verbatim
+        // (`next` starts as a copy of `current`).
         guard let live = tokens else {
             // Signed out mid-refresh: discard the result; the caller's
             // round refuses like any signed-out round.
             throw UserSessionError.notSignedIn
         }
         guard live.refreshToken == current.refreshToken else {
-            // Superseded mid-refresh (a new sign-in, or a sibling
-            // single-flight waiter already adopted the rotation): the LIVE
-            // session wins; nothing is saved from the stale result.
+            // Superseded mid-refresh (a new sign-in adopted a different
+            // session): the LIVE session wins; nothing is saved from the
+            // stale result.
             return live
         }
-        tokens = refreshed
-        store.save(refreshed)
-        return refreshed
+        tokens = next
+        store.save(next)
+        return next
     }
 
     // MARK: REST plumbing

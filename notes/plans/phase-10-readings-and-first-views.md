@@ -1,0 +1,269 @@
+# Phase 10 — Readings & first views (execution plan)
+
+> Authored 2026-07-10 at Phase 9c's closeout per the front-loaded-planning rule, FROM
+> `notes/plans/phase-10-brief.md` — the brief's author-ratified decisions are
+> **binding** (minimal pool ships here; the read tier allows select+copy per post
+> with click-to-focus; the 2026-07-09 scope additions 3–7). Its leanings are starting
+> points verified below; its open interpretations are answered in §"The brief's open
+> interpretations, answered". **Staffing (CLAUDE.md model policy): coordinator Opus ·
+> implementer Opus · cold reviewer Fable — the CROSS-MODEL REVIEW FLOW applies**
+> (findings go to the implementer verbatim; agree/dispute responses return to the
+> REVIEWER, which makes the final call and implements its confirmed fixes itself in
+> its own session; the implementer gets one sanity pass over the reviewer's diff).
+> **The standing rider (author, 2026-07-07):** any change inside
+> `Sources/VariorumCore/Sync/` is sync-engine surgery and is Fable work in every
+> phase — the coordinator STOPS AND REPORTS rather than letting the Opus implementer
+> touch it. Prudence extension: treat `Sources/VariorumCore/Bridge/` the same way
+> (it was Fable-implemented under the rider's logic in 9b/9c). Phase 10 should need
+> neither.
+
+## Kickoff message (for a fresh session)
+
+> You are starting **Phase 10 of Variorum** — readings & first views: the model's
+> first multi-post traversals (continuous book view, folder, timeline, reading CRUD)
+> plus the minimal pool and the 2026-07-09 library-affordance faces. **First, verify
+> Phase 9c is fully closed** — the master plan's pointer says Phase 10 and the 9c
+> closeout records the Step 6 gate results (the sitting: cutover probes, device
+> rounds, the 9b real-Fragments pass). If the pointer still says 9c, STOP and
+> report: the gates have not run, and this phase must not start over an un-cutover
+> mirror. Read, in order: `CLAUDE.md` (note the cross-model review flow and the
+> Sync/ rider — you are the first Opus implementer), `notes/plans/phase-10-brief.md`
+> IN FULL (ratified decisions binding), this plan IN FULL,
+> `notes/OverallModel.md` (P1–P3 are this phase's center of gravity),
+> `notes/AppSpec.md` §4 + §12 + §14's Phase 4 ratification delta (the read
+> semantics this phase renders: `"\n\n"` joins, blank takes skip, gaps, grouping,
+> strict-stamp timelines, archived-out-of-ambient-view),
+> `notes/TEXTKIT2_NOTES.md` (editor-adjacent phase — §2/§3 directly constrain the
+> read-tier candidates), the Phase 7 editor files under
+> `App/Variorum/Variorum/Features/Editor/` (the live-editor machinery you will
+> migrate between posts — READ the flush/teardown/crystallization paths before
+> designing focus handoff), `Sources/VariorumCore/Queries/` (every view is a
+> traversal of these — the views re-decide NOTHING), and the three owned KnownIssues
+> rows (echo detection O(post length); the "Show Blocks" tint mis-registration; paste
+> spacing — QUESTIONS #12, ASK THE AUTHOR LIVE, never PROVISIONAL).
+> **Baselines — do not re-run at session start:** the Phase 9c closeout's FINAL
+> counts in `notes/plans/phase-09c-auth-alignment.md` (as of the ladder's close:
+> core 540/62 · Mac app 254/45 · mobile 11/4 — re-read the closeout in case the
+> gate sitting added fixes). Remember the two 9d environment traps (piped
+> xcodebuild masks exit codes; a live app instance or stale unsigned DerivedData
+> product blocks the Mac test runner). The author is a DAILY USER from this phase
+> on — she signed in at the 9c sitting and both devices sync under real auth; treat
+> the real store and mirror as live production at all times (the A4 fence keeps dev
+> work off them; never weaken it).
+
+**Goal:** every Phase-10 view renders from the store only, through the Phase 4
+queries, with P3 held by construction (exactly ONE live editor, ever); the read
+tier is provably cheap and correctly interactive (per-post select+copy, badges,
+gaps); focus handoff never loses a keystroke or a tail; the library affordances
+(tags, lifecycle, seal, entry date) get their faces; the pool's drag lands as
+exactly the Phase 3 op; and the two 2026-07-09 defects are fixed — one traced
+(tint), one designed live with the author (spacing).
+
+---
+
+## The brief's open interpretations, answered (ride the checkpoint ratify list)
+
+1. **Badge interaction on unfocused posts: focus first** (the brief's leaning,
+   adopted). Clicking a read-tier fan badge focuses the post (the one live editor
+   migrates there), THEN opens the fan panel — one live surface, calm default,
+   and the fan panel's actions (choose/branch/archive) already assume the focused
+   editor's projection machinery. A read-only fan panel would be a second fan
+   surface to maintain. PROVISIONAL; QUESTIONS entry at implementation.
+2. **Timeline/folder item affordances: open-in-editor only** (leaning adopted).
+   Previews are Phase 13 material; the timeline and folder are traversal proofs,
+   not reading surfaces. PROVISIONAL; same entry.
+3. **The minimal pool lives in the shell as a sidebar section** (below the
+   library list; a separate window multiplies focus-handoff surface for zero
+   Phase-10 value — drag-into-draft wants the pool and the draft VISIBLE
+   TOGETHER, which the sidebar gives for free). PROVISIONAL; same entry.
+4. **The echo-detection KnownIssues row is owned by Step 1, FIRST** — before any
+   multi-post observation exists (the brief's own sequencing demand).
+
+## Ground rules
+
+- Views render state and send actions; **no business rules in view models, no
+  re-decided semantics** — reading assembly, grouping, stamp sorts, archived
+  visibility are Phase 4 ratifications the UI merely displays (review focus 3).
+- Every observation bounded (`observeLibrary(limit:)` pattern); every benchmark
+  ratio-asserted against a baseline, never eyeballed.
+- The tint fix (Step 8) is TRACE-FIRST per the KnownIssues row: understand the
+  fragment-geometry→block-range mapping error before writing the fix.
+- QUESTIONS #12 (paste/newline spacing) is a **hard author gate**: present the
+  mechanism options live (I4 whitespace-as-content vs render-time rule, and the
+  broader newline-entry treatment), implement her answer. No PROVISIONAL.
+- Tests run at the END of steps; the 9c closeout is the baseline.
+
+## Steps
+
+### Step 0 — The read-tier measurement (the brief's decision protocol; half-day box)
+**Work:** the throwaway measurement the brief mandates — ~50 seeded posts (reuse
+`CorpusFactory`) in the virtualized container; BOTH candidates: (a) SwiftUI
+`Text`/`AttributedString` + `.textSelection(.enabled)`, (b) non-editable TK2
+`NSTextView` per visible post. Measure: scroll cost, memory at a dozen visible
+posts, cross-block per-post selection, badge anchoring, selection survival across
+a projection refresh. **Decision rule (binding, from the brief):** (a) wins ONLY
+if it delivers cross-block per-post selection AND badge anchoring; otherwise (b)
+wins unless its per-view cost measurably breaks P3 at a dozen visible posts — in
+which case STOP and bring the numbers to the author (ratified selection behavior
+vs the P3 budget would be genuinely in tension; that is her call, not the
+plan's). Record the decision memo + numbers in this plan's closeout.
+**Tests:** none (throwaway; the memo is the artifact). Keep the harness in
+`Spikes/` if it earns keeping.
+
+### Step 1 — The echo-detection fix (KnownIssues row; EARLY by design)
+**Files:** `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` (the
+`surfaceMatches` path).
+**Work:** the recorded fix direction: track last-flushed text per variant;
+compare only candidate slots on clean projection arrival — O(edited slot), not
+O(post). Must land BEFORE multi-post views multiply held observations.
+**Tests:** red-on-old pin for the bug class (a projection echo on a long post
+must not full-text-compare every slot — pin via a counting seam or a
+size-proportionality assertion); the existing editor echo tests stay green.
+
+### Step 2 — The read-cheap tier (the P3 workhorse)
+**Files:** new `Features/ReadTier/` module (name per convention).
+**Work:** per the Step 0 decision: a read-only post view rendering
+`Queries.renderPost` projections with Phase 4 semantics (blank takes skip, gaps
+render as gaps and never crash — SyncSpec §5), per-post select+copy (ratified),
+fan badges on fanned blocks only (AppSpec §12), zero instantiation off-viewport.
+If (b) won: deliberate `NSViewRepresentable` recycling (leaked text views are
+the classic rot) and the fallback canary on every instance.
+**Tests:** projection fidelity (fixture posts incl. fanned/blank/gap states);
+badge presence exactly on fanned blocks; a cost assertion (per-post render flat
+and trivial); selection-survival across a projection refresh (the Step 0
+verified behavior, pinned).
+
+### Step 3 — Focus handoff (ONE live editor, migrating)
+**Files:** `Features/Editor/` + the new multi-post container.
+**Work:** click-to-focus upgrades exactly one post to the live `NSTextView`;
+focus-leave runs the Phase 7 teardown contract for that post (flush dirty
+buffer, crystallize the open tail incl. idle-mint semantics, detach); attach to
+the new post; scroll continuity content-anchored (never pixel offsets — the
+Phase 6 reflow hazard). All serialized through the runner.
+**Tests (the brief's three mid-states, integration):** switch focus
+mid-dirty-buffer (the keystroke lands in the store, nothing lost), mid-open-tail
+(the tail mints to the OLD post), mid-crystallization-flight (the in-flight mint
+reconciles; no duplicate or dropped block). Plus: exactly-one-live-editor
+asserted across a randomized focus walk.
+
+### Step 4 — Continuous book view (virtualized)
+**Files:** `Features/BookView/`.
+**Work:** the reading's post list in one continuous scroll (each post scrolls as
+part of the whole; NOT paginated — AppSpec §12), read-tier posts + the focus
+handoff; assembly via `Queries.assembleReading` (curated + smart + grouping —
+rendered, not re-decided); bounded observation window.
+**Tests:** view-model assembly matches `assembleReading` exactly (grouping,
+NULLs-last, extent, archived-out); virtualization benchmark ratio-asserted (cost
+flat as reading size grows — Phase 4's discipline at the view layer); gap
+tolerance.
+
+### Step 5 — Folder view + tag management/application UI (brief items 3 + folder)
+**Files:** `Features/Folder/`, `Features/Tags/`.
+**Work:** folder view = the tag-subtree traversal over posts (Phase 4's
+`everythingTagged`/subtree queries); tag management (create/rename/delete
+hierarchical tags — `renameTag`'s subtree rewrite gets its face) + apply/remove
+on posts. Block tagging may defer to 11's pool work — decide in-phase, record.
+**Tests:** view models emit exactly the query results; tag ops through the UI
+path emit exactly the Phase 2 ops (state-transition assertions); refusal copy
+surfaces (duplicate path, invalid name).
+
+### Step 6 — Timeline view + reading CRUD UI
+**Files:** `Features/Timeline/`, `Features/Readings/`.
+**Work:** timeline = the Phase 4 keyset-paginated queries (strict-stamp
+semantics + the `library` total surface), open-in-editor affordance only;
+reading CRUD — create/rename/delete curated + smart, the v1 `SmartQuerySpec`
+vocabulary surfaced plainly, sort-field/dir pickers, curated membership
+add/remove/reorder (fractional positions via the existing op).
+**Tests:** pagination behavior (bounded, keyset-stable under inserts); CRUD
+state transitions; a smart reading's UI-built spec round-trips through
+`SmartQuerySpec` unchanged.
+
+### Step 7 — The minimal pool (ratified scope: listing + drag-into-draft)
+**Files:** `Features/Pool/` (sidebar section per interpretation 3).
+**Work:** pool listing via `Queries.poolListing` (default-variant
+representative); drag into the draft lands as EXACTLY `poolDragCopy` (lineage
+edge `pool_copy`, `includeFan` available from day one — surface it as a
+modifier or drop-menu, plan's call at build time); P stays in its pool.
+**Tests:** the drag path emits exactly the Phase 3 op (row-level assertions:
+fresh block, copied variant(s), edge, placement; commits never copied); review
+focus 6's no-text-copy-outside-the-op check.
+
+### Step 8 — Library-affordance faces + the tint fix (brief items 4–6)
+**Files:** `Features/Library/` + `BlockTint` path in the editor.
+**Work:** post lifecycle UI (archive/unarchive; delete + restore via
+`restoreContainer` with `archivedPosts`/tray recovery surfaces); the seal
+toggle (`lockPost`/`unlockPost` — the seal's refusals already speak, 9d);
+Mac-side entry-date editing (`setEntryDate` — the 9b day-key guard already
+enforces canon); **the tint registration fix** — trace the
+fragment-geometry→block-range mapping in the `BlockTint` overlay first, record
+the mechanism in the closeout, then fix; never-adjacent/stable-color rules
+stand.
+**Tests:** lifecycle ops through the UI emit the Phase 2 ops; sealed-post UI
+state renders every refusal; entry-date editing round-trips the picker through
+`JournalDay` validation; the tint fix gets a red-on-old pin at the mapping
+layer (pure function — the mis-mapped geometry case).
+
+### Step 9 — Paste/newline spacing (QUESTIONS #12 — the author-gate step)
+**Work:** STOP-AND-ASK step, by her explicit instruction. Prepare the options
+concretely first (a small demo of each): (a) inter-item whitespace as block
+CONTENT (I4-clean; changes renderedText/export composition for pasted posts),
+(b) a render-time rule (needs a stored home for variable separators — smells
+like denormalization; must reconcile with the single-`"\n"` editor separator
+and `"\n\n"` renderedText ratifications). The conversation is BROADER than
+paste per her follow-up: cover newline ENTRY handling too. Implement her
+answer; record the ruling as an AppSpec §14 delta at the checkpoint.
+**Tests:** per the chosen mechanism — bulk-entry round-trips preserving
+spacing; renderedText/export composition pinned to the ruling.
+
+### Step 10 — Verification + closeout
+**Work:** (i) full suites, three targets. (ii) The multi-post benchmarks
+(ratio-asserted; the P1/P3 numbers in the closeout). (iii) The sync convergence
+spot suite re-run under a multi-post editing session (editor-rate writes while
+views observe — the Phase 7 Step 8 pattern at Phase 10 scale). (iv) The
+TEXTKIT2_NOTES §5 ritual (canary silent; jump/height stable; selections at
+boundaries). **Closeout ritual:** results + memo + dispositions in this plan;
+master plan row + pointer → 11; KnownIssues reconciliation (echo row resolved;
+tint row resolved; paste row resolved-or-re-owned per the ruling); the author
+handoff; **the Phase 11 execution plan authored from
+`notes/plans/phase-11-brief.md`** (the chain's next link — note 11's committed
+cross-fan bracketing scope and its ask-her-live items, QUESTIONS #10/#11/#12
+history).
+
+## Explicitly out of scope
+The fuller pool (block-tag filtering, pool-side structural ops — Phase 11);
+side-by-side/diff/scrub/canvas/TOC and the whole §12 remainder (Phase 11);
+`version_of` gestures (11); export/import (11); visual polish (13); any change
+to sync/bridge engines (and if one seems needed — the rider: stop, report).
+
+## Risks
+- **A tortured view is information** (OverallModel §9) — surface model findings,
+  never work around them quietly.
+- **Focus handoff is where identity bugs would leak between posts** — the three
+  mid-state tests are the fence; serialize through the runner.
+- **P1/P3 regressions arrive silently with held observations** — bounded
+  observations everywhere; benchmark deltas asserted against Phase 4's numbers.
+- **The read tier multiplies the canary surface if (b) wins** — every instance
+  armed; the §5 ritual closes the phase.
+- **First cross-model phase:** the implementer must not touch `Sync/`/`Bridge/`
+  (rider); disputes route back to the Fable reviewer for the final call; every
+  finding still gets a written disposition here.
+
+## Review foci (for the cold reviewer — from the brief, verbatim intent)
+1. P3: exactly one live editor ever exists; unfocused posts provably cheap
+   (measured, not asserted).
+2. Focus handoff: dirty-buffer + open-tail correctness across switches (the
+   three mid-state tests exist and pass).
+3. Views contain no business rules; reading assembly matches Phase 4's ratified
+   semantics exactly (grouping, NULLs-last, extent, archived-out).
+4. The echo-detection KnownIssues row is resolved, not re-deferred.
+5. Benchmarks ratio-asserted at multi-post scale; bounded observations
+   everywhere.
+6. Pool drag-copy through the UI emits exactly the Phase 3 op (lineage edge, no
+   text copy outside the deliberate op).
+7. The Step 0 decision memo's numbers support the shipped read-tier choice; the
+   decision rule was followed, not rationalized after the fact.
+
+## Closeout
+*(Written at phase end: the Step 0 memo, results per step, test counts, the
+QUESTIONS #12 ruling, PROVISIONALs, review dispositions under the cross-model
+flow, the Phase 11 plan authored, the handoff.)*

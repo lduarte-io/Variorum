@@ -40,7 +40,9 @@ device rounds → the bridge + real-Fragments pass.
 ## Gate 0 — Preconditions (author, ~10 min)
 
 1. **Disable signups on the Variorum project** (review round 1, BLOCKER — the
-   load-bearing precondition): dashboard → Authentication → turn **"Allow new
+   load-bearing precondition; requested of the author at the round-1 sitting,
+   2026-07-10 — CONFIRM here regardless, and Gate 4's probes prove it):
+   dashboard → Authentication → turn **"Allow new
    users to sign up" OFF**. Why: the eight non-owner mirror tables (including
    `variant` and `commit_point` — the entire prose corpus) are served to ANY
    authenticated user in the single-user phase, and on a default project the
@@ -57,10 +59,10 @@ device rounds → the bridge + real-Fragments pass.
    committable; commit at the closeout. Build after editing. *(Until filled, the
    sign-in button is disabled with a visible hint — that is the designed dormant
    state.)*
-3. **Variorum dashboard → Authentication → URL Configuration:** add
-   `variorum://auth-callback` to the Redirect URLs. (The spike's
-   `http://localhost:3000/callback.html` entry can be REMOVED at the same visit —
-   its purpose is served.)
+3. ~~**Variorum dashboard → Authentication → URL Configuration:** add
+   `variorum://auth-callback` to the Redirect URLs; remove the spike's
+   `http://localhost:3000/callback.html` entry.~~ **DONE EARLY (author,
+   2026-07-10, at the review-round sitting): both halves completed — skip.**
 4. **The consent page must be reachable** at Fragments' Site URL + Authorization
    Path. Either: the production stargazing.tech page is live and the Fragments
    OAuth Server page points at it (REMEMBER the page's save trap — it silently
@@ -218,8 +220,17 @@ session is refused (both devices show a persistent sync error naming
 - **Data is safe by construction** — a refused round leaves the outbox and cursor
   intact on both devices; nothing needs restoring. Diagnose first: the error text
   rides the status row's tooltip verbatim.
-- `owner_id mismatch …` → a row escaped the backfill: re-run Gate 2 step 4/5's
-  checks, relaunch signed-in (idempotent adoption), sync, re-probe.
+- `owner_id mismatch …` (the INCOMING-half guard: the pushed row's owner is
+  NULL/foreign — e.g. a locally-unowned row pulled from a pre-update device) →
+  local adoption fixes it: relaunch signed-in (idempotent adoption), sync,
+  re-probe.
+- `not yet backfilled — complete the owner adoption` (the STORED-half guard: a
+  MIRROR row escaped the backfill) → **server-side repair only** (review
+  round 2: local adoption stamps local rows; the pull's owner filter hides the
+  NULL mirror row; every push touching it RAISEs — the loop never self-heals).
+  `update <table> set owner_id = '<her uid>' where id = '<row-id>';` via
+  PAT/SQL editor (table + id ride the error text), then Sync now — or the full
+  rollback below and redo from Gate 2.
 - `sync requires an authenticated user` / 401s → the session: sign out, sign back
   in; check the provider + redirect URL config from Gate 0.
 - **Full rollback** (returns the mirror to the pre-cutover key-auth posture; run
@@ -313,7 +324,7 @@ sqlite3 "$STORE" "SELECT c.entry_date, v.working_text FROM container c
 | `callbackWithoutCode` error after browser sheet | Consent denied/cancelled, or redirect URL not allow-listed | Gate 0.2; retry |
 | Sync error `permission denied for function` post-cutover with HER session | Grants drifted — should be impossible if 04 ran verbatim | Rollback path, Gate 4 |
 | Sync error `owner_id mismatch` | A row escaped the backfill | Relaunch signed-in (idempotent re-adoption), sync, re-probe |
-| Sync error `not yet backfilled — complete the owner adoption` | A STORED mirror row escaped the backfill (the §12 refuse-until-backfilled case) | Same recovery: relaunch signed-in, sync, re-run the Gate 2 totality queries |
+*[removed for publication]*
 | Signup probe returns a session instead of 403 | "Allow new users to sign up" is still ON (the dashboard save trap) | Delete the probe user, re-save the toggle, re-probe (Gate 4.2) |
 | Bridge note "canonical user … has not synced" | Fragments `user_settings` empty — fail-closed gate | Open the Fragments app, let it sync, retry |
 | Bridge pauses a day, "two live entries" | The designed duplicate-day pause | Hand-merge/delete/re-date the extra entry |

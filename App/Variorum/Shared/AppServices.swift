@@ -167,6 +167,14 @@ final class AppServices {
 
     // MARK: - The Variorum sign-in (route A — the identity)
 
+    /// ONE stored flow (review round 2, MINOR): the round-1 disposition
+    /// claimed SignInFlow's activeSession "doubles as a one-flight guard",
+    /// but a per-invocation `SignInFlow()` made that guard unreachable —
+    /// hoisting the instance is what makes it real. Two rapid taps now
+    /// land on the same instance: the second throws `alreadyRunning`
+    /// instead of minting a second browser sheet.
+    private let signInFlow = SignInFlow()
+
     /// The full delegated sign-in (Step 0 memo): PKCE against the Variorum
     /// project's `custom:fragments` provider via the system browser sheet.
     /// Mac + iOS; the testable machinery lives in AuthSession — this method
@@ -176,13 +184,16 @@ final class AppServices {
             account.lastError = "Project keys not configured (ProjectConfig.swift)"
             return
         }
+        // Belt to the flow's own guard (round 2): the button disables on
+        // busy, but two taps can both enqueue before the first sets it.
+        guard !account.busy else { return }
         account.busy = true
         account.lastError = nil
         defer { account.busy = false }
         let verifier = PKCE.generateVerifier()
         let url = auth.authorizeURL(verifier: verifier)
         do {
-            let callback = try await SignInFlow().run(
+            let callback = try await signInFlow.run(
                 authorizeURL: url, callbackScheme: "variorum")
             try await auth.handleCallback(callback, verifier: verifier)
         } catch {
@@ -249,6 +260,7 @@ final class AppServices {
             account.lastError = "Project keys not configured (ProjectConfig.swift)"
             return
         }
+        guard !account.busy else { return }  // the round-2 double-tap belt
         account.busy = true
         account.lastError = nil
         defer { account.busy = false }

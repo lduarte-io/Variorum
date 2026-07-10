@@ -12,13 +12,15 @@
 //  store only — a dev-store session must never land dev writes into the
 //  author's live Fragments journal, nor push dev-store text there.
 //
-//  CONFIGURATION IS DELIBERATELY ABSENT THIS PHASE: the bridge needs the
-//  author's Fragments user session + the id-derivation facts (namespace,
-//  canonical user — contract asks), and the credential story is Phase 9c's
-//  real sign-in (the Phase 8 paste-in retires there; the bridge must not
-//  couple to it). Until 9c wires `configure(engine:)`, the session stays
-//  unconfigured and the status row says so. Headless suites exercise the
-//  full engine against the fake server.
+//  CONFIGURATION (wired at Phase 9c, Step 5 — this header originally said
+//  "deliberately absent this phase" while the credential story was 9c's
+//  future; 9c delivered it): the production caller is
+//  `AppServices.connectBridgeIfAllowed`, which composes the engine over
+//  the author's Fragments-project session (QUESTIONS #16, ratified (c))
+//  when that session signs in, and stops the chain on disconnect. Until a
+//  Fragments session exists the session stays unconfigured and the status
+//  row says so. Headless suites exercise the full engine against the fake
+//  server.
 //
 
 import Foundation

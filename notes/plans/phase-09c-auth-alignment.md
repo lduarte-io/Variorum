@@ -489,10 +489,130 @@ dependencies (the auth REST surface is hand-rolled like the transports).
 7. The 9b bridge seam absorbed without weakening it (per-call sessions, user-auth,
    never the PAT; unconfigured-and-reported when the contract asks are unanswered).
 
-## Closeout
-*(Written at phase end: what shipped, test counts, the Step 0 memo + author call,
-gate results incl. the folded-in Phase 8 device rounds and the 9b real-Fragments
-pass, PROVISIONALs, review dispositions, the Phase 10 plan authored, the handoff.)*
+## Closeout (2026-07-10 — implementer: Fable, single session; the review ladder
+## CLOSED at round 2 with zero new HIGH findings. **THE PHASE IS NOT CLOSED**:
+## Step 6's author-assist gates are PENDING THE SITTING — the runbook
+## `notes/handoffs/phase-09c-step6-runbook.md` is the sitting's script, and the
+## master plan's pointer stays at 9c until the gates pass.)
+
+### What shipped, by step
+
+- **Step 0 — the pairing spike + inventory (author-assist; CLOSED):** route A
+  CONFIRMED by running it end to end with her real account — the decision memo
+  below is the gate's artifact; the throwaway harness lives in
+  `Spikes/AuthPairingSpike/` (consent page + session inspector, zero
+  dependencies); five field-note rounds in the plan body carry the full record
+  (registration doors, the consent-UI mechanics, provider-token behavior, the
+  toggle-off confirmation, the dashboard save trap).
+- **Step 1 — the sign-in core** (`App/Variorum/Shared/AuthSession.swift`,
+  `SignInFlow.swift`; 13 Mac tests): plain-REST Supabase Auth over the Variorum
+  project (no SDK — the hand-rolled doctrine); PKCE code flow against
+  `custom:fragments` (RFC 7636 vector-pinned); Keychain persistence under NEW
+  keys; single-flight refresh with THE PRESERVATION RULE (the provider token
+  pair — delivered ONLY at the sign-in exchange, never re-delivered — survives
+  every refresh, pinned); fail-visible-never-fail-destructive refresh failures
+  (only signOut clears — and sign-out is TERMINAL, the round-1 pin);
+  `UserSessionProviding` conformance so the same object drives the transport;
+  the password door (`signInWithPassword`) for the bridge's Fragments session;
+  ASWebAuthenticationSession as the browser face (retained, start-checked,
+  real-window-anchored after round 1).
+- **Step 2 — the transport session seam + token refresh (sync-engine surgery;
+  7 core tests):** the 9b seam GENERALIZED into `Auth/UserSession.swift` (one
+  shape, two backends; the Fragments names became typealiases — zero bridge
+  churn); `SupabaseTransport` authenticates per call via the provider —
+  signed-out refuses before any request composes; a 401 gets exactly ONE
+  refresh-and-retry; a refused round leaves outbox/cursor/row-seqs byte-intact
+  (engine-level pin); a FULL convergence scenario runs through the transport's
+  real wire mapping against the auth-agnostic fake (byte-identical dumps, every
+  request carrying the session bearer). Round 1 extended the same 401 door to
+  the BRIDGE transport (`FragmentsRPCTransport`), red-on-old-pinned.
+- **Step 3 — the mirror's auth/RLS rework as the committed artifact**
+  (`Server/supabase/04_auth_rls.sql`; 10 DDL pins): RLS on all 13 mirrors (no
+  policies — the SECURITY DEFINER RPCs stay the only doors), anon/public
+  execute revoked (the key demotion), both RPCs re-created on 03's bodies
+  (horizon preserved, pinned) with `auth.uid()` gates, the two-half owner guard
+  on pushes to the five owner tables (incoming rows must carry the caller's
+  owner_id, NULL rejected; stored foreign/NULL rows never overwritten nor
+  echoed — distinct error texts after round 1's NIT), and owner-filtered pulls.
+  Guard failures RAISE (whole-call refusal — never a CAS-merge invitation).
+  **The round-1 BLOCKER's load-bearing precondition rides the header, pinned:
+  the single-user premise guards the eight non-owner tables ONLY with the
+  Variorum project's signup door OFF** — Gate 0 disables it, Gate 4 probes it
+  (403 + the OIDC-first-sign-in door probed live). NOT deployed — the paste is
+  Gate 4 of the sitting, after the backfill converges (§12 choreography in the
+  header, both execution hands recorded).
+- **Step 4 — owner_id through Operations + the backfill (own commit; 7 core
+  tests):** `@Dependency(\.ownerIdentity)` (live/test default signed-out; the
+  app installs a per-call Keychain-reading closure at bootstrap —
+  `OwnerIdentity.install`, the `AppDatabase.install` twin, no mutable global);
+  all EIGHT top-level mint sites stamp; `adoptOwnerID()` — introspected owner
+  tables, NULL-only, live AND tombstoned, outbox-riding (the backfill PUSHES),
+  `updated_at`/`sync_version` untouched, idempotent, refuses signed-out — with
+  the §12 choreography proven end-to-end on the sync harness (two devices
+  converge byte-identical, fully owned). `owner_id` = the Variorum project's
+  `auth.uid()` (the keying decision; the spike verified the exact value).
+- **Step 5 — the sign-in era wired; the paste-in RETIRED (6 Mac wiring
+  tests):** AppServices owns both sessions; sign-in → adoption FIRST → the
+  sync chain over the auth provider → trigger; the Fragments session (ratified
+  (c)) composes the bridge engine; sign-out tears down; the A4 fence holds
+  even for a session that LAUNCHES signed in (sync + bridge + adoption all
+  fenced, pinned); transport composition is factory-injectable (round 1 — the
+  wiring tests are no-network composition truths); `SyncCredentialsStore` +
+  `SyncSetupView` DELETED, the legacy Keychain item cleared on first sign-in,
+  and the RETIREMENT WALK is a test (the old service string survives only in
+  the cleanup). `ProjectConfig.swift` carries the projects' public coordinates
+  (keys author-filled at Gate 0; committable BY DESIGN under the signups-off
+  precondition). UI: `AccountView` (both doors, functional/unstyled);
+  `SyncStatusRow`'s door is "Sign in…".
+- **Step 6 — PENDING THE AUTHOR SITTING.** The runbook
+  (`notes/handoffs/phase-09c-step6-runbook.md`, a first-class deliverable at
+  her request) scripts all seven gates with expected outputs and
+  failure→recovery paths (incl. the full RLS-lockout rollback and the round-2
+  corrected server-side backfill repair). Folded in: the Phase 8 device
+  rounds and the 9b real-Fragments pass (its ask-13 conditional stays held on
+  Fragments' 15.7 deploy ping). Gate 0.3 (redirect URLs) was completed early
+  by the author; the signups toggle was requested at round 1 and is confirmed
+  at the sitting by Gate 4's probes either way.
+- **Also this phase:** the 2026-07-10 contract item (the FOURTH `conflicts[]`
+  producer pinned); the consent-page spec for the author's site agent
+  (`notes/fragments-consent-page-spec.md`, session-persistence recommendation
+  included); 02's SECURITY NOTE re-pointed at 04 (debt paid).
+
+### Test counts (FINAL, post-ladder — the Phase 10 baselines once the gates pass)
+
+- Core `swift test`: **540 green in 62 suites** (was 514/59 at phase start —
+  +26 tests, +3 suites).
+- Mac app: **254 green in 45 suites** (was 235/43 — +19, +2).
+- Mobile: **11 green in 4 suites** (unchanged in count; rebuilt + re-run — the
+  shared auth files compile into it).
+
+### PROVISIONALs + ratifications
+
+- **QUESTIONS #16 (the bridge's Fragments-session mechanism): RATIFIED EARLY
+  by the author in-session 2026-07-10** — shape (c), direct sign-in ("if it
+  can't be helped, direct fragments sign in is fine"); shipped as ratified;
+  the captured provider pair stays persisted-but-unconsumed as the upgrade
+  evidence. The checkpoint walk records the pre-answer.
+- **No other PROVISIONALs are open from this phase.** The Step 0 memo's author
+  call (route A) and the plan's owner-keying decision are recorded above; the
+  runbook's Gate 4.3 carries the one live verification with a STOP arm (the
+  OIDC-door/toggle interaction) rather than an assumption.
+
+### Documented residuals (recorded, deliberately not solved here)
+
+- **The single-user premise is procedural, not structural:** the eight
+  non-owner tables are open to any authenticated Variorum-project user; the
+  signups-off toggle is the guard until Phase 14's multi-tenant isolation
+  (parent-join RLS). Carried in 04's header, ProjectConfig, and the runbook.
+- **Fragments' PostgREST acceptance of OAuth-server-issued tokens stays
+  unverified** — moot for the shipped bridge session (shape (c) uses the
+  ordinary session class) but recorded for any future (a1)/(b) upgrade.
+- **The 15.7 `replaced`-receipt consumption** stays a named follow-up on
+  Fragments' deploy ping (Gate 6.5's conditional; the three discrimination
+  rules recorded in contract ask 13).
+- **The env-gated `SupabaseIntegrationTests` token semantics changed
+  post-flip:** `VARIORUM_SUPABASE_TOKEN` must now be a real user access token
+  (recorded at the test; the bare key is refused by design).
 
 ### Step 0 decision memo (2026-07-10 — the gate's artifact; field evidence in the
 ### Step 0 field notes rounds 1–3 above)
@@ -720,3 +840,57 @@ by the coordinator with the instruction to build on it as ratified. Step 5 shipp
 in 45 suites (was 253 — +1 sign-out-race pin); mobile 11 green in 4 suites
 (rebuilt + re-run — the shared AuthSession/SignInFlow/AppServices changes
 compile into it).**
+
+## Review round 2 (2026-07-10, fresh cold reviewer) — ZERO new BLOCKER/MAJOR
+## (2 MINOR / 2 NIT) + a clean bill on every round-1 fix (04 diffed line-by-line
+## vs 03; the stamping sweep; both 401 doors; the retirement walk; counts
+## verified by execution). Per the ladder, the ladder CLOSES here — no round 3.
+## ALL FOUR AGREED; dispositions below.
+
+1. **MINOR — the runbook's failure-table recovery for the `not yet backfilled`
+   error could not work post-cutover.** AGREED — mechanism re-traced: that error
+   is 04's STORED-half guard firing on a NULL-owner MIRROR row; post-flip the
+   local adoption stamps LOCAL rows only, the pull's owner filter hides the NULL
+   mirror row (it can never re-serve), and every push touching it RAISEs — the
+   prescribed relaunch loop never self-heals. (Pre-flip, Gate 2.5's "Sync now and
+   re-check" stays correct — 03's un-guarded bodies accept the overwrite.)
+   **Fixed (doc class):** the failure-table row now prescribes the SERVER-side
+   repair (`update <table> set owner_id = '<her uid>' where id = '<row-id>'` via
+   PAT/SQL editor — table + id ride the error text — with the Gate 2 mirror
+   totality query for enumeration and the Gate 4 full rollback as the wide-spread
+   arm); the Gate 4 recovery list gains the matching bullet AND splits the
+   `owner_id mismatch` bullet honestly (the INCOMING-half guard, where local
+   adoption DOES fix a locally-unowned pulled row) from the stored-half case.
+   The runbook answers this gate question correctly now.
+2. **MINOR — the round-1 "doubles as a one-flight guard" claim was falsified by
+   composition** (a per-invocation `SignInFlow()` made `alreadyRunning`
+   unreachable; the busy button-disable has a real two-rapid-taps window because
+   nothing guarded the method entries). AGREED — **fixed both ways:** the flow is
+   hoisted to a stored `let signInFlow` on AppServices (the shipped guard is now
+   real: a second tap lands on the same instance and throws `alreadyRunning`),
+   AND `signInWithFragments`/`connectFragmentsJournal` gained `guard
+   !account.busy` entry belts (two enqueued Tasks can both pass the button's
+   disable). Thin-face class per the round-1 disposition — no pin owed;
+   mechanism traced above.
+3. **NIT — single-flight sibling waiters bypassed the post-await sign-out
+   guard** (a waiter returned the raw task value; after a sign-out mid-refresh
+   its caller issued one authenticated request post-sign-out — no save, no
+   resurrection, equivalent to a request already in flight). AGREED — took the
+   route-through-the-guards arm, restructured for determinism: the leader's
+   whole refresh (HTTP + the post-await guards + adoption) now lives INSIDE the
+   single-flight task (`performRefresh`), so every awaiter observes a SETTLED
+   outcome (the naive waiter-side guard alone had an ordering hole: a waiter
+   resuming before the leader adopted would have returned the stale pre-refresh
+   tokens); waiters then re-check sign-in state and return the LIVE tokens
+   (covers the superseding-sign-in arm too). The round-1 pin and the
+   single-flight pin both still green — the round-1 red-on-old property
+   (sign-out is terminal, Keychain included) is unchanged.
+4. **NIT — BridgeSession's stale "CONFIGURATION IS DELIBERATELY ABSENT THIS
+   PHASE" header.** AGREED — rewritten: the production caller is
+   `AppServices.connectBridgeIfAllowed` (9c Step 5), composing over the
+   Fragments session per QUESTIONS #16 (c), stopping on disconnect; the
+   original wording is quoted as history so the correction is visible.
+
+**Counts after the round-2 fix pass (the ladder's FINAL): core `swift test`
+540 green in 62 suites; Mac app 254 green in 45 suites; mobile 11 green in 4
+suites — all three targets re-run green.**
