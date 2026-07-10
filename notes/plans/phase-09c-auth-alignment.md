@@ -174,6 +174,23 @@ gate, plus the Phase 8 device rounds the author deferred until "9b AND 9c are do
   findings):** register the Variorum client on the Fragments OAuth server, create the
   custom provider on Variorum, run one delegated sign-in via the scratch harness.
 
+**Round 2 (same day, the author — two material updates):** (1) **The consent-UI wrinkle
+has a production answer:** the author owns hosted websites — **stargazing.tech** is
+"where my apps will have their websites" (separate repo `~/dev/stargazing-tech` with its
+own Claude agent; the AUTHOR is the channel — she tasks that agent for whatever page
+route A needs; planetlillian.com also exists). A permanent home for the login/consent
+page therefore exists at zero Variorum-repo web cost — this removes the
+"permanently-hosted page" penalty from the route-A vs fallback-B calculus; the spike can
+still use a throwaway local page at the placeholder `localhost:3000` Site URL first.
+(2) **The author authorized the Dynamic OAuth Apps registration path:** she can toggle
+it on/off at will and asked the coordinator to perform the client registration
+programmatically once it's on. Coordinator re-check after round 1: discovery still
+advertises NO `registration_endpoint` (toggle off at check time; whether discovery
+advertises it when ON is established empirically at flip time — if not advertised, the
+implementer's lookup supplies the path). Client credentials, when issued, go in an
+untracked gitignored `.env.fragments-oauth.local` — never chat, never tracked files;
+the author copies them into the Variorum provider form from there.
+
 **`owner_id` keying (brief open interpretation 2):** under (A), `owner_id` = the
 **Variorum project's `auth.uid()`** (its native `sub`). Rationale, recorded: it is
 project-local and stable regardless of how the identity was proven (delegated
