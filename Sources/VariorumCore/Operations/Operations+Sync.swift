@@ -16,8 +16,14 @@ extension Operations {
     /// refusing here would throw the losing text away, which is the one
     /// outcome the sync design forbids. (PROVISIONAL — logged for the
     /// author; the alternative wedges sync on sealed posts.)
+    ///
+    /// `label` (Phase 9b): the Fragments bridge lands its rescued bodies
+    /// through this same door labeled `'fragments'` — the S5 doctrine
+    /// extended to the second writer (the 9b brief). Default unchanged.
     @discardableResult
-    public func resolveSyncConflict(_ variantID: String, losingText: String) throws -> Variant {
+    public func resolveSyncConflict(
+        _ variantID: String, losingText: String, label: String = "conflict"
+    ) throws -> Variant {
         try database.write { db in
             let conflicted = try liveVariant(db, variantID)
             // Align with the engine's rescue path (Merge.rescueLosingText):
@@ -32,6 +38,7 @@ extension Operations {
                 blockID: conflicted.blockId,
                 parentVariantID: conflicted.parentVariantId,
                 losingText: losingText,
+                label: label,
                 id: newID(),
                 now: date.now)
         }
