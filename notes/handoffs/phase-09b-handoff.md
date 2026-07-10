@@ -6,16 +6,22 @@ this phase from this document + the phase plan's closeout
 
 ## What you need to do next — the checklist
 
-1. **Carry the contract asks to your Fragments agents** — `notes/fragments-bridge-contract.md`
-   asks **8–13** (new, Phase 9b): the UUIDv5 **namespace**, one **worked id example**,
-   the **canonical-user string's exact form** (and whether it equals `auth.uid()`), the
-   **RPC wire shapes** (+ `updated_at` stamp format), `created_at`-on-update behavior,
-   and the optional return-replaced-body improvement (ask 13 — it would close the one
-   documented loss window). **The bridge cannot be configured against the real project
-   until asks 8–12 are answered.** This is the phase's one finding: the contract pinned
-   the recipes and semantics but not these facts; nothing was guessed — they ride
-   injectable configuration and PROVISIONAL wire DTOs (QUESTIONS #13).
-2. **Walk QUESTIONS #13, #14, and #15 at the checkpoint** — #13 ratifies the
+1. ~~Carry the contract asks to your Fragments agents~~ — **DONE (you carried them
+   2026-07-09 evening; the answers are back and reconciled).** Asks 8–12 and 14
+   ANSWERED (recorded verbatim-in-substance under the asks in
+   `notes/fragments-bridge-contract.md`; the derivation layer confirmed end to end,
+   several wire/semantics facts corrected and reconciled into code the same night —
+   the phase plan's "Checkpoint reconciliation round" has the full
+   confirmed-vs-corrected ledger). **The only open item from the asks is 13** (return
+   the replaced body): their agents confirmed it feasible; it is NOT built and NOT
+   promised — **your own pending call on the Fragments side**; the bridge assumes
+   nothing. **The real-project pass is now gated on 9c's sign-in ONLY.**
+2. ~~Walk QUESTIONS #13, #14, and #15 at the checkpoint~~ — **DONE (2026-07-09
+   checkpoint): you RATIFIED all of it** — #13's handling (c); #14 (a)–(e) as shipped
+   with both consequences acknowledged and the sealed-empty DEFER shape ratified;
+   #15's hash sweep + 60 s throttle (the dirty-day remedy stays Phase 12's); and the
+   two canonical-doc deltas blessed (statuses in QUESTIONS + AppSpec §14's checkpoint
+   delta). Kept below for the record — originally: walk QUESTIONS #13, #14, and #15 — #13 ratifies the
    contract-gap handling; #15 ratifies the push sweep's P1 relaxation (+ the 60 s
    cadence throttle, added at the round-1 review — an author-only invariant call);
    #14 ratifies five landing/projection readings: (a) Variorum-side journal
@@ -88,10 +94,13 @@ nothing typed in either app can be lost where truth lives.
 
 ## Verification (headless — the real pass is deferred, deliberately)
 
-- **Core `swift test`: 506 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
+- **Core `swift test`: 513 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
   (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines, after
   the FULL review ladder (three rounds, 2026-07-09, fresh reviewer each; closed at
-  the hard cap). Round 1: 2 MAJOR / 3 MINOR / 3 NIT — the landed Fragments body now
+  the hard cap) AND the same-evening checkpoint reconciliation of the Fragments
+  agents' answers (asks 8–12/14 — derivation confirmed, wire shapes + tie semantics +
+  created_at model corrected, the fail-closed canonical-user gate and the
+  derivation-bug poison added; the 9c reviewer is directed to that diff). Round 1: 2 MAJOR / 3 MINOR / 3 NIT — the landed Fragments body now
   gets its own quiet auto-commit inside a one-transaction landing, and the push
   sweep's P1 relaxation went to your ratify list as #15 with a 60 s cadence
   throttle. Round 2: 1 MAJOR / 3 MINOR / 4 NIT — pushes now stamp minimally above
@@ -145,8 +154,11 @@ nothing typed in either app can be lost where truth lives.
    above the last remote stamp the bridge has SEEN (compare-and-set style), so an
    unseen save wins LWW, survives, and lands as a conflict card next round
    (red-on-old pinned). What remains: first contact (no stamp known yet), 1 s stamp
-   granularity, unparseable stamps — ask 13 (return the replaced body) closes all of
-   it; same documented-race class as SyncSpec §7's concurrent-divide duplication.
+   granularity (sharpened at reconciliation: their ties go to the PUSHER, so an
+   exact-tie unseen save is overwritten, not staled), unparseable stamps — ask 13
+   (return the replaced body) closes all of it; **their agents confirmed ask 13
+   feasible but it is NOT built — your own pending call on the Fragments side**;
+   same documented-race class as SyncSpec §7's concurrent-divide duplication.
 4. **Landing readings (a)–(e)** — QUESTIONS #14, above.
 5. **KnownIssues:** `setEntryDate` row resolved and removed; one row added (the push
    sweep's O(journal-days) cost, owner Phase 12, remedy sketch recorded).

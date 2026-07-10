@@ -351,10 +351,10 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   call); carried forward in the handoff as a post-9c gate item, now additionally
   gated on the contract asks 8–12.
 
-### Test counts (the Phase 9c baselines — FINAL, post-round-3; pre-review 493/59 · 234/43 · 11/4, post-round-1 497/59 · 235/43, post-round-2 503/59)
+### Test counts (the Phase 9c baselines — FINAL, post-reconciliation; pre-review 493/59 · 234/43 · 11/4, post-round-1 497/59 · 235/43, post-round-2 503/59, post-round-3 506/59)
 
-- Core `swift test`: **506 green in 59 suites** (was 430/51 at phase start — +76
-  tests, +8 suites; round 1 added 4 pins, round 2 added 6, round 3 added 3).
+- Core `swift test`: **513 green in 59 suites** (was 430/51 at phase start — +83
+  tests, +8 suites; rounds 1–3 added 13 pins, the checkpoint reconciliation 7 more).
 - Mac app: **235 green in 43 suites** (was 231/42 — +4 incl. the throttle test).
 - Mobile: **11 green in 4 suites** (unchanged; the mobile target compiles the shared
   bridge files but constructs the session fenced).
@@ -420,10 +420,14 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   a day with no known remote stamp falls back to a `now` stamp, so the original
   first-ever-push window stands (bounded: never-bridged day + same-seconds
   two-surface authoring inside one round's pull→push gap); (2) sub-second stamp
-  granularity (+1s quantization); (3) unparseable remote stamps fall back to `now`
-  (contract ask 11). Same documented-race class as SyncSpec §7's concurrent-divide
-  duplication. Contract ask 13 (return the replaced body on LWW overwrite) would
-  close all residue to zero; revisit at the real pass.
+  granularity (+1s quantization) — *sharpened at the checkpoint reconciliation:
+  migration 7's ties go to the PUSHER (`>=`), so an unseen save stamped EXACTLY at
+  our minimal stamp is overwritten, not staled*; (3) unparseable remote stamps fall
+  back to `now` (their format is confirmed timestamptz-parseable, ask 11 ANSWERED).
+  Same documented-race class as SyncSpec §7's concurrent-divide duplication.
+  Contract ask 13 (return the replaced body on LWW overwrite) would close all
+  residue to zero — **confirmed feasible by the Fragments agents, NOT built; the
+  author's own pending call on the Fragments side; the bridge assumes nothing.**
 - **The check-then-act window** between a landing's classification read and its
   operation call (separate transactions — ops cannot nest in one write): a local
   edit landing in that window can shift the true classification (an
@@ -785,3 +789,90 @@ clamp coverage pin green on both sides as designed. Anything still open after
 this round is recorded for the author (the #14(c) SHAPE ratification; the #15
 P1 ratification; the contract asks 8–14), never looped on — the ladder is
 closed at its cap.
+
+## Checkpoint ratifications + contract reconciliation round (2026-07-09,
+## evening — post-ladder; new-facts incorporation, NOT a review round; the
+## 9c cold reviewer is directed to this diff)
+
+**The author RATIFIED everything at the checkpoint** (statuses recorded in
+QUESTIONS + AppSpec §14's checkpoint delta, coordinator commit ec161f1):
+QUESTIONS #13 — handling (c) as shipped; #14 (a)–(e) as shipped, both
+recorded consequences acknowledged, the sealed-empty DEFER shape (round 3's
+PROVISIONAL (a)) ratified; #15 — the hash sweep + 60 s throttle stand, the
+dirty-day remedy stays owned by Phase 12; and the two canonical-doc deltas
+(OverallModel §3's completed fifth occasion; AppSpec §9's `applyBridgeLanding`
++ `label`) blessed.
+
+**The same evening the author carried contract asks 8–14 and returned the
+Fragments agents' answers** (their repo read by THEIR agents; this repo's
+boundary held — the response text is the whole interface, recorded under the
+asks in `notes/fragments-bridge-contract.md`). Reconciliation, same night:
+
+**CONFIRMED (no change needed):** the derivation layer end to end — the RFC
+4122 §4.3 algorithm (their Swift == their Postgres == ours, parity vector
+verified), the recipe composition, lowercase id emission; the two-value
+canonical-user design; un-tombstone strictly-newer (our fake was pinned to
+the contract, which matched their SQL — their spec PROSE says
+stale-can-resurrect and is wrong); the keyset cursor on **raw, verbatim
+`server_updated_at` strings** (shipped correctly from round 0 — never parsed
+or reformatted; their µs precision would corrupt under a ms round-trip); the
+horizon inside the RPC; tombstones riding the pull stream; any-date
+tolerance; ask 13 (return-the-replaced-body) **feasible but NOT BUILT — the
+author's own pending Fragments-side call; the bridge assumes nothing.**
+
+**CORRECTED (reconciled into code the same night):**
+1. **The namespace is now a KNOWN constant** (`7B69C1E4-9C72-4D2F-9B3A-2A41F0F4C0DE`,
+   "fixed forever") — `FragmentsContract.fragmentsNamespace`; their three
+   journal vectors are the pinned goldens; **case handling pinned** (`entryID`
+   lowercases the name, mirroring their `bcased()`; the uppercased-user name
+   derives their documented WRONG id — negative vector pinned).
+2. **Canonical-user sourcing became engine behavior:** `canonicalUserKey`
+   REMOVED from configuration; the push half resolves
+   `user_settings.local_user_id` from the server each round (one deliberate
+   read outside `journal_entries` — an amended contract fact) and **FAILS
+   CLOSED while no row exists** (the account hasn't synced from Fragments;
+   pushing would claim canon with a Variorum-invented id) — new engine
+   behavior, tested (`pushesFailClosedUntilTheCanonicalUserExists`).
+3. **Wire shapes corrected** (transport + fake re-pinned to migration 7):
+   `p_`-prefixed params; `sync_push` → aggregate `{applied, skipped,
+   conflicts:[{id,error}]}` — the engine now pushes **ONE row per call (per
+   day)** so `applied == 1` is unambiguous; `sync_pull` → bare array, page
+   while `count == p_limit` (500); `sync_delete(p_table, p_ids)` →
+   `{tombstoned}`.
+4. **Ties go to the PUSHER (`>=`) on live rows** (fake corrected from strict
+   `>`): re-pushing unchanged re-applies and bumps `server_updated_at`,
+   churning every device — the never-push-unchanged guard is load-bearing,
+   not politeness (pinned: a tie applies and bumps). **Residual sharpened:**
+   the 1 s-quantization residue now DESTROYS on an exact tie rather than
+   staling (corrected at the pushStamp comment, the residuals section above,
+   and the handoff).
+5. **`created_at` follows the winning push** (their SET list includes it;
+   the round-0 fake preserved it — wrong, corrected): the bridge now ECHOES
+   the pulled `created_at` (own instant only for never-seen rows) —
+   `bridge_day.remote_created_at` added (v1_4 amended in place, same
+   never-deployed safety) and pinned (`pushesEchoThePulledCreatedAt`).
+   All six NOT NULL columns always sent (an omitted one aborts the whole
+   call — structurally guaranteed by the typed entry).
+6. **`conflicts[]` handling split** (was: uniform visible-but-retryable):
+   `clock_ahead:` prefix (the clamp = **>10 min**, ask 14 ANSWERED) ⇒ park +
+   surface, retried as the clock catches up; `unique_violation` ⇒ a
+   DERIVATION BUG — the day is **poisoned** (`bridge_state` marker): visible
+   every round, **never re-pushed** (pinned).
+7. **Whitespace/empty caveats recorded:** Fragments TRIMS on their next edit
+   (whitespace is insignificant at the join; a trimmed body lands back and
+   converges; commits insure) — no pre-trimming added (pushing verbatim is
+   honest). Their UI never saves empty and has NO journal-delete path — the
+   bridge owns the empty-body semantic alone, and today a journal tombstone
+   could only be bridge-made; the tombstone-landing paths stand as
+   defensive machinery (recorded, unchanged).
+
+**Test deltas:** `FakeFragmentsServerTests` and `FragmentsTransportTests`
+rewritten to migration-7 semantics; `FragmentsContractTests` re-pinned to
+the real namespace + journal goldens + case vectors; two new engine tests
+(fail-closed; created_at echo); poison-never-retries added to the MINOR-4
+pin; all bridge suites swept to the new seams. **Counts: core `swift test`
+513 green in 59 suites; Mac app 235 green in 43 suites; mobile 11 green in
+4 suites — the FINAL Phase 9c baselines.** **The real-project pass is now
+gated on 9c's sign-in ONLY** (the contract asks are answered; nothing
+remaining is verifiable headless — the real pass verifies credentials, RLS,
+and live-project behavior, not shapes).

@@ -31,8 +31,13 @@
 > `Server/supabase/02_sync_rpc.sql` (the SECURITY-DEFINER surface being locked down),
 > and `notes/sync-postmortem-fragments.md` (read before touching
 > `Sources/VariorumCore/Sync/`). **Baselines — do not re-run at session start:** core
-> `swift test` = 506 green in 59 suites; Mac app = 235 green in 43 suites; mobile = 11
-> green in 4 suites (the 9b closeout's FINAL post-ladder counts). **This phase transitions the author's
+> `swift test` = 513 green in 59 suites; Mac app = 235 green in 43 suites; mobile = 11
+> green in 4 suites (the 9b closeout's FINAL counts, post-ladder AND post the
+> checkpoint contract-reconciliation — the Fragments agents' answers landed 2026-07-09
+> evening and were reconciled the same night; **your cold review should give that
+> reconciliation diff a real pass** — it re-pinned the fake server/transport to their
+> migration-7 SQL and added the fail-closed canonical-user gate; the ladder had closed
+> before it, so it has had no cold review). **This phase transitions the author's
 > LIVE sync** — take the manual pre-cutover backup (A1 exists; make one anyway),
 > follow SyncSpec §12 to the letter (mirror first, then every client; a half-migrated
 > state refuses, never guesses), and remember the two 9d environment traps (piped
@@ -187,9 +192,9 @@ replacing `SyncSetupView`), `BridgeSession.configure` wiring (the 9b seam:
 `FragmentsSessionProviding` gets its real implementation — route A's
 `provider_token` if Step 0 confirmed it rides along, else a direct
 Fragments-project sign-in owned by the same UI; either way the bridge's
-`FragmentsBridgeConfiguration` needs 9b's contract asks 8/10 answered — namespace +
-canonical-user; **if the asks are still unanswered, the bridge stays unconfigured
-and this phase reports that, never guesses**), deletion of `SyncCredentialsStore`
+configuration facts are settled (asks 8/10 ANSWERED at 9b's reconciliation: the
+namespace is the pinned constant; the canonical user is resolved from
+`user_settings.local_user_id` at round time with the fail-closed gate)), deletion of `SyncCredentialsStore`
 + `SyncSetupView` (review focus 4: no dead credential path in either target; the
 old Keychain item is cleared on first sign-in).
 **Tests:** sign-in state drives both sessions (sync + bridge); signed-out shows the
@@ -202,8 +207,11 @@ against the REAL mirror under auth: bare publishable key alone refused; her sess
 syncs; expired → refresh → round completes (the brief's verification sketch, real
 server — the fake proves none of this). (iii) Both devices sign in and sync
 end-to-end (the Phase 8 device rounds the author deferred to post-9c fold in HERE).
-(iv) **The 9b bridge's deferred real-Fragments pass** — gated on contract asks 8–12
-answered; one manual two-way day with her real journal, dump-compared. (v) The
+(iv) **The 9b bridge's deferred real-Fragments pass** — the contract asks are
+ANSWERED and reconciled (9b's checkpoint reconciliation round; headless-complete);
+the pass is gated on THIS PHASE'S SIGN-IN ONLY — one manual two-way day with her
+real journal, dump-compared, verifying credentials/RLS/live behavior (the shapes
+are already pinned to their migration-7 SQL). (v) The
 week-one dump-compare ritual begins (2026-07-07 note) once she daily-drives.
 **Closeout:** results per gate; the master plan's 9c row + pointer → 10; the Phase
 10 plan authored from `notes/plans/phase-10-brief.md` per the front-loaded rule;
