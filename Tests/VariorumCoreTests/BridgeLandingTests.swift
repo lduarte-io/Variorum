@@ -85,12 +85,18 @@ struct BridgeLandingTests {
             #expect(report.updated == 1)
             // The overwrite landed…
             #expect(try bridge.rendered(day: "2026-07-09") == "Rewritten in Fragments.")
-            // …and the pre-edit text is ONE RESTORE AWAY (the auto commit).
+            // …the pre-edit text is ONE RESTORE AWAY, and (review round 1,
+            // MAJOR 1) so is the LANDED body itself — both quiet auto
+            // commits, ONE landing transaction.
             let commits = try bridge.commitTexts(variantID: variantID)
-            #expect(commits == ["Uncommitted Variorum text."])
-            let kind = try bridge.db.fetchString(
-                "SELECT kind FROM commit_point WHERE variant_id = ?", [variantID])
-            #expect(kind == "auto")
+            #expect(commits == ["Uncommitted Variorum text.", "Rewritten in Fragments."])
+            let kinds = try await bridge.db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: "SELECT kind FROM commit_point WHERE variant_id = ? ORDER BY created_at, id",
+                    arguments: [variantID])
+            }
+            #expect(kinds == ["auto", "auto"])
         }
     }
 
@@ -104,8 +110,44 @@ struct BridgeLandingTests {
                 body: "Fragments follow-up.", updatedAt: bridge.fragmentsStamp(0))
             let report = try await bridge.engine.pullAndLand()
             #expect(report.updated == 1)
-            // The buffer equalled its last commit — the guard adds nothing.
-            #expect(try bridge.commitTexts(variantID: variantID) == ["Committed text."])
+            // The buffer equalled its last commit — the pre-image guard adds
+            // NOTHING (no duplicate of "Committed text."); the landed body's
+            // own insurance commit still lands (review round 1, MAJOR 1).
+            #expect(try bridge.commitTexts(variantID: variantID)
+                    == ["Committed text.", "Fragments follow-up."])
+        }
+    }
+
+    /// THE MAJOR-1 PIN (review round 1; red on pre-fix code): the realistic
+    /// daily-use collision — the day's entry is open in the Mac editor with
+    /// pending keystrokes when a Fragments edit lands. The editor's
+    /// keep-pending flush (Phase 7) then writes the typed text over the
+    /// landed body, and the next push replaces it on the Fragments side
+    /// too. Pre-fix, the landed body ended in NO commit and NO variant —
+    /// gone everywhere, the forbidden outcome. Now the landing transaction
+    /// commits the landed body itself: one restore away, no matter what the
+    /// editor does next.
+    @Test func theLandedBodyItselfSurvivesTheEditorsKeepPendingFlush() async throws {
+        try await withBridge { bridge in
+            let (_, variantID) = try bridge.makeEntry(day: "2026-07-09", text: "Agreed text.")
+            _ = try await bridge.engine.run()  // agreed state
+            _ = try await bridge.server.fragmentsAppWrites(
+                configuration: bridge.config, day: "2026-07-09",
+                body: "Typed on the phone.", updatedAt: bridge.fragmentsStamp(0))
+            _ = try await bridge.engine.pullAndLand()  // lands the body
+
+            // The editor's keep-pending flush: keystrokes typed before the
+            // landing, unflushed then, now written over the landed body.
+            try bridge.ops.autosave(
+                variantID, text: "Typed in the Mac editor.", charDelta: 24)
+            // …and the next push projects the editor text to Fragments.
+            _ = try await bridge.engine.push()
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Typed in the Mac editor.")
+
+            // The phone-typed body must still be ONE RESTORE AWAY.
+            #expect(try bridge.commitTexts(variantID: variantID)
+                    .contains("Typed on the phone."),
+                    "the landed Fragments body must never be lost on both surfaces")
         }
     }
 
@@ -186,6 +228,37 @@ struct BridgeLandingTests {
         }
     }
 
+    /// THE MINOR-3 PIN (review round 1; red on pre-fix code): the same race
+    /// on a VIRGIN day (no bridge_day row — first contact). The stamp-only
+    /// bookkeeping was an UPDATE that no-opped with no row, losing the
+    /// tombstone's ahead LWW stamp — the re-projection then pushed with
+    /// `now` and wedged `.stale` until the wall clock caught up (exactly
+    /// the wedge `last_remote_stamp` exists to close). Now the stamp-only
+    /// record upserts, and the push outranks the tombstone immediately.
+    @Test func aTombstoneRacingAnEditOnAVirginDayStillGetsOutranked() async throws {
+        try await withBridge { bridge in
+            // Fragments authored the day, then deleted it — both with
+            // ahead (2027) stamps; the feed serves only the current state
+            // (the tombstone).
+            _ = try await bridge.server.fragmentsAppWrites(
+                configuration: bridge.config, day: "2026-07-09",
+                body: "Phone text, later deleted there.", updatedAt: bridge.fragmentsStamp(0))
+            _ = try await bridge.server.fragmentsAppDeletes(
+                configuration: bridge.config, day: "2026-07-09",
+                deletedAt: bridge.fragmentsStamp(1))
+            // Variorum wrote its own entry for the day, never bridged.
+            try bridge.makeEntry(day: "2026-07-09", text: "Local Variorum text.")
+
+            let round = try await bridge.engine.run()
+            #expect(round.landing.skipped == 1)  // the edit outranks the deletion
+            // The re-projection must APPLY (outranking the tombstone's
+            // ahead stamp), not wedge .stale.
+            #expect(round.push.pushed == 1)
+            #expect(round.push.stale == 0)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Local Variorum text.")
+        }
+    }
+
     // MARK: The graduated-entry policy (RATIFIED)
 
     @Test func graduatedEntryRescuesIncomingEditsOnTheFirstBlock() async throws {
@@ -252,6 +325,40 @@ struct BridgeLandingTests {
             let block = try bridge.firstBlockID(day: "2026-07-09")!
             #expect(try bridge.liveVariants(blockID: block).map(\.label)
                     == [nil, "fragments"])
+        }
+    }
+
+    /// The sealed-EMPTY corner (review round 1, NIT 8 — the one landing
+    /// path that had no test): a deliberately sealed, blockless entry has
+    /// no block to carry a rescue card and the seal refuses the mint. The
+    /// row is consumed with a note, NO day state is recorded, and the push
+    /// half can never blank the Fragments body (the empty-first-push
+    /// guard) — the body stays safe, un-landed, exactly as documented.
+    @Test func sealedEmptyEntryConsumesTheRowWithoutStateOrBlanking() async throws {
+        try await withBridge { bridge in
+            let entry = try bridge.ops.createOrOpenJournalEntry(entryDate: "2026-07-09").container
+            try bridge.ops.lockPost(entry.id)  // sealed while still blockless
+            _ = try await bridge.server.fragmentsAppWrites(
+                configuration: bridge.config, day: "2026-07-09",
+                body: "Phone text against a sealed empty day.",
+                updatedAt: bridge.fragmentsStamp(0))
+
+            let round = try await bridge.engine.run()
+            #expect(round.landing.skipped == 1)
+            #expect(round.landing.notes.contains { $0.contains("sealed empty") })
+            // No agreement invented…
+            #expect(try bridge.dayState("2026-07-09") == nil)
+            // …no card, no block minted under the seal…
+            #expect(try bridge.db.fetchInt(
+                "SELECT COUNT(*) FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
+                [entry.id]) == 0)
+            // …and the push half never blanks the Fragments body.
+            #expect(round.push.pushed == 0)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09")
+                    == "Phone text against a sealed empty day.")
+            // Consumed: the next round does not re-see the row.
+            let quiet = try await bridge.engine.pullAndLand()
+            #expect(quiet.skipped == 0)
         }
     }
 

@@ -322,16 +322,17 @@ public struct BridgeEngine: Sendable {
         let onlyFragmentsChanged = BridgeHash.body(rendered) == context.state
 
         if onlyFragmentsChanged {
-            // The fifth quiet auto-commit occasion (author, 2026-07-07):
-            // insure the current text if it differs from the variant's last
-            // commit, THEN overwrite. `idleAutoCommit` is exactly that
-            // guard (dirtiness-checked, so an already-committed-identical
-            // buffer takes no double commit); landings are pull-cadence,
-            // so this stays bounded.
-            _ = try ops.idleAutoCommit(target.id)
-            try ops.autosave(
-                firstVariantID, text: effectiveBody,
-                charDelta: rendered.count + effectiveBody.count)
+            // The fifth quiet auto-commit occasion (author, 2026-07-07) +
+            // insurance of the LANDED BODY itself, composed in ONE
+            // transaction (review round 1, MAJOR 1): the pre-image is
+            // committed if dirty (already-committed-identical takes no
+            // double commit), the body overwrites, and the non-empty body
+            // is then committed too — so even the open editor's
+            // keep-pending flush (seconds later) cannot make the Fragments
+            // text unreachable while the next push replaces it server-side.
+            // Landings are pull-cadence, so both commits stay bounded.
+            _ = try ops.applyBridgeLanding(
+                firstVariantID, in: target.id, body: effectiveBody)
             return .updated(agreed)
         }
 
@@ -414,8 +415,9 @@ public struct BridgeEngine: Sendable {
                     let rendered = try Queries.renderedText(db, containerID: entryIDs[0])
                     let hash = BridgeHash.body(rendered)
                     let state = try Self.dayRow(db, dayKey: day)
-                    if hash == state?.hash { continue }  // unchanged never pushes
-                    if rendered.isEmpty && state == nil {
+                    let agreedHash = state?.hash ?? nil  // nil row OR stamp-only row
+                    if hash == agreedHash { continue }  // unchanged never pushes
+                    if rendered.isEmpty && agreedHash == nil {
                         // Never a FIRST push of emptiness: it could only
                         // LWW-blank a Fragments body the bridge has not
                         // landed (the pull, run first, normally prevents
@@ -425,7 +427,7 @@ public struct BridgeEngine: Sendable {
                     }
                     candidates.append(Candidate(
                         day: day, body: rendered, hash: hash,
-                        remoteStamp: state?.remoteStamp))
+                        remoteStamp: state?.remoteStamp ?? nil))
                 }
                 return (candidates, paused, notes)
             }
@@ -556,12 +558,12 @@ public struct BridgeEngine: Sendable {
     }
 
     static func dayState(_ db: Database, dayKey: String) throws -> String? {
-        try dayRow(db, dayKey: dayKey)?.hash
+        try dayRow(db, dayKey: dayKey)?.hash ?? nil
     }
 
     static func dayRow(
         _ db: Database, dayKey: String
-    ) throws -> (hash: String, remoteStamp: String?)? {
+    ) throws -> (hash: String?, remoteStamp: String?)? {
         guard let row = try Row.fetchOne(
             db,
             sql: "SELECT last_synced_hash, last_remote_stamp FROM bridge_day WHERE day_key = ?",
@@ -570,10 +572,12 @@ public struct BridgeEngine: Sendable {
         return (row["last_synced_hash"], row["last_remote_stamp"])
     }
 
-    /// `hash == nil` updates only the remote stamp of an EXISTING row (no
-    /// agreement to record; a missing row stays missing). A nil
-    /// `remoteStamp` never clobbers a recorded one (push-accepts know no
-    /// remote stamp).
+    /// `hash == nil` records the remote stamp WITHOUT an agreement — the
+    /// hash column stays whatever it was (NULL for a virgin day: review
+    /// round 1, MINOR 3 — the old UPDATE-only form silently no-opped on
+    /// days with no row, losing the stamp and re-opening the `.stale`
+    /// wedge). A nil `remoteStamp` never clobbers a recorded one
+    /// (push-accepts know no remote stamp).
     static func recordDay(
         _ db: Database, dayKey: String, hash: String?, remoteStamp: String?
     ) throws {
@@ -589,8 +593,13 @@ public struct BridgeEngine: Sendable {
                 arguments: [dayKey, hash, remoteStamp])
         } else if let remoteStamp {
             try db.execute(
-                sql: "UPDATE bridge_day SET last_remote_stamp = ? WHERE day_key = ?",
-                arguments: [remoteStamp, dayKey])
+                sql: """
+                    INSERT INTO bridge_day (day_key, last_synced_hash, last_remote_stamp)
+                    VALUES (?, NULL, ?)
+                    ON CONFLICT(day_key) DO UPDATE SET
+                      last_remote_stamp = excluded.last_remote_stamp
+                    """,
+                arguments: [dayKey, remoteStamp])
         }
     }
 

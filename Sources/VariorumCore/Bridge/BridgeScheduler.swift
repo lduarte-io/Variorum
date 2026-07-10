@@ -22,6 +22,16 @@ public actor BridgeScheduler {
         /// Days currently holding the duplicate-day push pause — shown
         /// until the author hand-merges (never newest-wins).
         public var pausedDays: [String] = []
+        /// The landing cursor stalled this round (a row it could not land
+        /// yet — retried next round). Persistent truth means a jammed feed;
+        /// it must be VISIBLE (review round 1, MINOR 4: "record, don't
+        /// guess" — a silent stall is a silently frozen bridge).
+        public var stalled = false
+        /// The last round's attention notes: rejected pushes (a per-day
+        /// rejection recurs every round and would otherwise freeze that
+        /// day's projection invisibly), deferred/stalled landings, and
+        /// consumed-with-note rows. Empty after a fully clean round.
+        public var issueNotes: [String] = []
         /// Rounds finished (clean or failed) — test observability.
         public var roundsCompleted = 0
         public init() {}
@@ -91,6 +101,8 @@ public actor BridgeScheduler {
             status.lastError = nil
             status.lastSuccessAt = date.now
             status.pausedDays = report.push.pausedDays
+            status.stalled = report.landing.stalled
+            status.issueNotes = report.landing.notes + report.push.notes
         } catch {
             // Offline / signed-out / server hiccup: the round is skipped,
             // the cursor and day hashes keep everything, the next trigger

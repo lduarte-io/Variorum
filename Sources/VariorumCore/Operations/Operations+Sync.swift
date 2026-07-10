@@ -44,6 +44,61 @@ extension Operations {
         }
     }
 
+    /// The Fragments bridge's landing overwrite (Phase 9b review round 1,
+    /// MAJOR 1) — ONE transaction composing the fifth-occasion insurance,
+    /// the overwrite, and insurance OF THE LANDED BODY ITSELF:
+    ///
+    /// 1. auto-commit every dirty buffer under the entry (the pre-image —
+    ///    including any edit that landed after the bridge's classification
+    ///    read: composing in one transaction is what makes "insured before
+    ///    the overwrite" structurally true; the `lockPost` precedent);
+    /// 2. write `body` into the variant's buffer (churn per the
+    ///    whole-buffer-replace convention);
+    /// 3. append one `commit_point(kind:'auto')` of the landed body — the
+    ///    landed text is Fragments-typed writing with no history surface of
+    ///    its own, and WITHOUT this commit the open editor's keep-pending
+    ///    flush (Phase 7) can overwrite it seconds later while the next
+    ///    push LWW-replaces it on the Fragments side too: gone everywhere,
+    ///    the forbidden outcome. An empty body (a landed deletion) takes no
+    ///    commit — emptiness is not losable text, and step 1's pre-image
+    ///    commit is the insurance that matters there.
+    ///
+    /// Refuses under a sealed post / locked variant exactly like `autosave`
+    /// (the engine classifies those into the conflict-variant path first; a
+    /// lock RACING the landing surfaces as a failed round and re-lands next
+    /// round).
+    @discardableResult
+    public func applyBridgeLanding(
+        _ variantID: String, in containerID: String, body: String
+    ) throws -> Variant {
+        try database.write { db in
+            let container = try liveContainer(db, containerID)
+            try ensureUnlocked(container)
+            var variant = try liveVariant(db, variantID)
+            guard variant.status != .archived else {
+                throw OperationError.archivedVariant(id: variantID)
+            }
+            guard !variant.locked else {
+                throw OperationError.lockedVariant(id: variantID)
+            }
+            let now = date.now
+            _ = try autoCommitDirtyVariants(db, containerID: containerID, now: now)
+            let oldText = variant.workingText
+            guard oldText != body else { return variant }
+            variant.workingText = body
+            variant.updatedAt = now
+            try variant.update(db)
+            try registerTextChange(
+                db, blockID: variant.blockId,
+                charDelta: oldText.count + body.count,
+                forceMajorRevision: false, now: now)
+            if !body.isEmpty {
+                _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now)
+            }
+            return variant
+        }
+    }
+
     /// The shared core: also called by the sync engine's merge path, which
     /// runs inside an apply transaction (outbox triggers muted) and
     /// therefore enqueues the new row explicitly, repair-style (SyncSpec §7).

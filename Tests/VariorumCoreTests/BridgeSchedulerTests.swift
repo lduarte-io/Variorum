@@ -141,6 +141,35 @@ struct BridgeSchedulerTests {
         }
     }
 
+    /// THE MINOR-4 PIN (review round 1): a permanent per-day failure — a
+    /// live Fragments row for our (user, date) under a NON-derived id
+    /// (legacy data / derivation drift; the class asks 8–10 exist to
+    /// catch) — lands fine by date, but every push of that day rejects with
+    /// the unique violation, forever. Pre-fix the round reported "success"
+    /// and nothing surfaced (the day's projection silently frozen). Now the
+    /// rejection reaches `Status.issueNotes` every round, visibly.
+    @Test func aPermanentPushRejectionSurfacesInTheStatus() async throws {
+        try await withBridge { bridge in
+            // A foreign-id live row occupies the day on the server.
+            _ = try await bridge.server.push([FragmentsEntry(
+                id: "11111111-1111-4111-8111-111111111111",
+                userID: bridge.config.userID, date: "2026-07-09",
+                body: "row under a wrong id",
+                createdAt: bridge.fragmentsStamp(0), updatedAt: bridge.fragmentsStamp(0))])
+            // Variorum's entry for the same day diverges from it.
+            try bridge.makeEntry(day: "2026-07-09", text: "Local text to project.")
+
+            let scheduler = BridgeScheduler(engine: bridge.engine)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            let status = await scheduler.status
+            #expect(status.lastError == nil, "the round itself succeeds — that is the trap")
+            #expect(!status.issueNotes.isEmpty,
+                    "a recurring per-day rejection must be visible, not a healthy 'Bridged at …'")
+            #expect(status.issueNotes.contains { $0.contains("rejected") })
+        }
+    }
+
     @Test func statusSurfacesTheDuplicateDayPause() async throws {
         try await withBridge { bridge in
             let dupA = try bridge.ops.createPost(profile: .journal, entryDate: "2026-07-09")
