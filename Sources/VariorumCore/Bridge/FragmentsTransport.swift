@@ -92,10 +92,17 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
         /// The Fragments project's publishable API key (`apikey` header —
         /// grants nothing by itself; their RLS is the guard).
         public let apiKey: String
+        /// When set, every call cross-checks the session's authenticated
+        /// user against this id and refuses on mismatch (review round 2,
+        /// NIT 8): a 9c wiring bug composing rows as one user while
+        /// authenticated as another would otherwise leave their RLS as the
+        /// only guard. 9c passes the bridge configuration's `userID`.
+        public let expectedUserID: String?
 
-        public init(projectURL: URL, apiKey: String) {
+        public init(projectURL: URL, apiKey: String, expectedUserID: String? = nil) {
             self.projectURL = projectURL
             self.apiKey = apiKey
+            self.expectedUserID = expectedUserID
         }
     }
 
@@ -158,6 +165,10 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
 
     private func rpc<Body: Encodable>(_ function: String, body: Body) async throws -> Data {
         let session = try await sessionProvider.currentSession()
+        if let expected = configuration.expectedUserID, session.userID != expected {
+            throw FragmentsTransportError.sessionUserMismatch(
+                expected: expected, actual: session.userID)
+        }
         var request = URLRequest(
             url: configuration.projectURL
                 .appendingPathComponent("rest/v1/rpc")
@@ -183,6 +194,10 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
 
 public enum FragmentsTransportError: Error, Equatable, Sendable {
     case notHTTP
+    /// The authenticated session's user is not the user the bridge is
+    /// configured to compose rows for (round 2, NIT 8 — a wiring bug,
+    /// refused before any request composes).
+    case sessionUserMismatch(expected: String, actual: String)
     case httpFailure(status: Int, body: String)
     case mismatchedResultCount(pushed: Int, returned: Int)
     case malformedResult(String)

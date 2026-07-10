@@ -6,13 +6,22 @@ import GRDB
 // here — the trigger chain owns the cascade (placements → blocks → variants,
 // edges, tags, references, memberships).
 extension Operations {
+    /// Day keys are canonical "yyyy-MM-dd" or nothing (Phase 9b review
+    /// round 2, MINOR 2 — this op was the REMAINING permissive door after
+    /// Step 6 closed `setEntryDate`): a malformed key mints a live entry
+    /// invisible to its own day (`createOrOpenJournalEntry` never finds it;
+    /// the bridge notes it every round, forever). The ops boundary is the
+    /// enforcement line (Phase 8 round 2's rationale).
     @discardableResult
     public func createPost(
         title: String? = nil,
         profile: Profile? = nil,
         entryDate: String? = nil
     ) throws -> Container {
-        try database.write { db in
+        if let entryDate, !JournalDay.isValid(entryDate) {
+            throw OperationError.invalidEntryDate(entryDate)
+        }
+        return try database.write { db in
             try insertPost(db, title: title, profile: profile, entryDate: entryDate)
         }
     }
@@ -51,16 +60,9 @@ extension Operations {
             throw OperationError.invalidEntryDate(entryDate)
         }
         return try database.write { db in
-            if let existing = try Container.fetchOne(
-                db,
-                sql: """
-                    SELECT * FROM container
-                    WHERE kind = 'post' AND profile = 'journal'
-                      AND entry_date = ? AND deleted_at IS NULL
-                    ORDER BY (archived_at IS NOT NULL) ASC, created_at ASC, id ASC
-                    LIMIT 1
-                    """,
-                arguments: [entryDate]) {
+            // ONE preference implementation, shared with the bridge's
+            // duplicate-day landing target (round 2, NIT 5).
+            if let existing = try Queries.canonicalJournalEntry(db, day: entryDate) {
                 return JournalEntryResult(container: existing, created: false)
             }
             let created = try insertPost(

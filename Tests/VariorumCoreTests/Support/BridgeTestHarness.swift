@@ -25,21 +25,12 @@ struct BridgeHarness {
         return (entry, minted.variant.id)
     }
 
-    /// The rendered text of the day's canonical entry.
+    /// The rendered text of the day's canonical entry (the shared query).
     func rendered(day: String) throws -> String? {
         try db.read { db in
-            guard let id = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT id FROM container
-                    WHERE kind = 'post' AND profile = 'journal'
-                      AND entry_date = ? AND deleted_at IS NULL
-                    ORDER BY (archived_at IS NOT NULL) ASC, created_at ASC, id ASC
-                    LIMIT 1
-                    """,
-                arguments: [day])
+            guard let entry = try Queries.canonicalJournalEntry(db, day: day)
             else { return nil }
-            return try Queries.renderedText(db, containerID: id)
+            return try Queries.renderedText(db, containerID: entry.id)
         }
     }
 

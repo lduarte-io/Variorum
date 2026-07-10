@@ -454,11 +454,17 @@ public struct BridgeEngine: Sendable {
                 throw FragmentsTransportError.mismatchedResultCount(
                     pushed: chunk.count, returned: outcomes.count)
             }
-            var accepted: [(day: String, hash: String)] = []
-            for (candidate, outcome) in zip(chunk, outcomes) {
+            var accepted: [(day: String, hash: String, stamp: String)] = []
+            for ((candidate, entry), outcome) in zip(zip(chunk, entries), outcomes) {
                 switch outcome {
                 case .applied:
-                    accepted.append((candidate.day, candidate.hash))
+                    // Record the ACCEPTED PUSH'S OWN STAMP as the day's
+                    // last known remote stamp (review round 2 — the MAJOR's
+                    // companion fix): `last_remote_stamp` must always track
+                    // the newest server-row stamp this bridge has SEEN or
+                    // WRITTEN, or minimal stamping wedges consecutive
+                    // pushes and the loss window re-opens.
+                    accepted.append((candidate.day, candidate.hash, entry.updatedAt))
                     report.pushed += 1
                 case .stale:
                     // The server row is newer (a Fragments edit won LWW):
@@ -475,7 +481,8 @@ public struct BridgeEngine: Sendable {
                 try await database.write { db in
                     for record in records {
                         try Self.recordDay(
-                            db, dayKey: record.day, hash: record.hash, remoteStamp: nil)
+                            db, dayKey: record.day, hash: record.hash,
+                            remoteStamp: record.stamp)
                     }
                 }
             }
@@ -496,19 +503,11 @@ public struct BridgeEngine: Sendable {
     private func readDayContext(day: String) async throws -> DayContext {
         try await database.read { db in
             let state = try Self.dayState(db, dayKey: day)
-            // The notebook rule's preference order — the same entry
-            // `createOrOpenJournalEntry` would open (duplicate-day landings
-            // go to the day's canonical entry while push pauses).
-            guard let target = try Container.fetchOne(
-                db,
-                sql: """
-                    SELECT * FROM container
-                    WHERE kind = 'post' AND profile = 'journal'
-                      AND entry_date = ? AND deleted_at IS NULL
-                    ORDER BY (archived_at IS NOT NULL) ASC, created_at ASC, id ASC
-                    LIMIT 1
-                    """,
-                arguments: [day])
+            // The notebook rule's canonical entry — STRUCTURALLY the same
+            // entry `createOrOpenJournalEntry` opens (one shared query,
+            // round 2 NIT 5): duplicate-day landings go to the day's
+            // canonical entry while push pauses.
+            guard let target = try Queries.canonicalJournalEntry(db, day: day)
             else {
                 return DayContext(
                     state: state, target: nil, slots: [], renderedText: "",
@@ -605,18 +604,27 @@ public struct BridgeEngine: Sendable {
 
     // MARK: - Push stamps (client LWW)
 
-    /// The push's client-LWW `updated_at`: now, bumped past the last landed
-    /// remote stamp when that stamp is ahead of us — a re-projection is a
-    /// LATER editorial event than the row it answers, and without the bump
-    /// a clock ahead of ours (her phone) leaves truth's re-projection
-    /// permanently `.stale` under strict row-LWW. Unparseable remote stamps
-    /// fall back to now (the wedge then self-heals with real clocks; ask
-    /// filed for their exact stamp format).
+    /// The push's client-LWW `updated_at`: **minimally above the last known
+    /// remote stamp** — `last_remote_stamp + 1s`, NEVER `now` when a stamp
+    /// is known (review round 2, MAJOR — supersedes round 1's
+    /// `max(now, …)`). The traced mechanism: `last_remote_stamp` is the
+    /// newest server-row stamp this bridge has seen (landed) or written
+    /// (accepted push), so stamping just above it makes the push a
+    /// poor-man's compare-and-set — it outranks exactly what we KNOW and
+    /// goes `.stale` against anything we haven't seen yet. Stamping `now`
+    /// instead let a same-round race destroy Fragments text on a
+    /// steady-state day: a save landing between the pull and the push (or
+    /// inside their ~2 s visibility horizon) was LWW-replaced by our
+    /// fresher wall-clock stamp and, the feed being state-based, never
+    /// served again — lost everywhere. With minimal stamping the race
+    /// resolves `.stale` → the next pull lands the save as a conflict card
+    /// → truth re-projects: the overwrite becomes a rescue. The round-1
+    /// clock-ahead requirement is preserved (a landed 2027 stamp still gets
+    /// outranked by +1s). Residuals: first contact (no stamp known — falls
+    /// back to `now`) and sub-second stamp granularity; unparseable stamps
+    /// fall back to `now` (ask filed for their exact format).
     static func pushStamp(now: String, outranking remoteStamp: String?) -> String {
-        guard let remoteStamp,
-              let remote = parseStamp(remoteStamp),
-              let local = parseStamp(now),
-              remote >= local
+        guard let remoteStamp, let remote = parseStamp(remoteStamp)
         else { return now }
         return DateFormatter.variorumISO8601.string(from: remote.addingTimeInterval(1))
     }

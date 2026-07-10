@@ -66,7 +66,12 @@ extension Operations {
     /// Refuses under a sealed post / locked variant exactly like `autosave`
     /// (the engine classifies those into the conflict-variant path first; a
     /// lock RACING the landing surfaces as a failed round and re-lands next
-    /// round).
+    /// round — as does any transient sync-race state a projection renders
+    /// but this op refuses, e.g. an archived default variant behind a
+    /// dangling chosen pointer mid-pull: the round fails, the store heals
+    /// on the next sync round, the landing retries. Round-2 SPECULATIVE
+    /// note — no persistent wedge is constructible; same self-healing
+    /// class).
     @discardableResult
     public func applyBridgeLanding(
         _ variantID: String, in containerID: String, body: String
@@ -75,6 +80,18 @@ extension Operations {
             let container = try liveContainer(db, containerID)
             try ensureUnlocked(container)
             var variant = try liveVariant(db, variantID)
+            // Bind the variant to the container whose buffers step 1
+            // insures (review round 2, MINOR 3): a mismatched pair would
+            // overwrite a variant whose dirty pre-image the auto-commit
+            // sweep never touched — the round-1 loss class, one caller bug
+            // away, inside the very op built to make it impossible.
+            // Enforcement lives at the ops boundary, not in callers (the
+            // `branchVariant` source-block guard's precedent).
+            guard let placement = try livePlacement(db, blockID: variant.blockId),
+                  placement.containerId == containerID
+            else {
+                throw OperationError.blockNotPlaced(id: variant.blockId)
+            }
             guard variant.status != .archived else {
                 throw OperationError.archivedVariant(id: variantID)
             }

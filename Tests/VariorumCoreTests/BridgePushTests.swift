@@ -126,13 +126,58 @@ struct BridgePushTests {
 
     @Test func malformedEntryDateIsNotedNeverBridged() async throws {
         try await withBridge { bridge in
-            // Legacy rows predating Step 6's setEntryDate guard.
-            let post = try bridge.ops.createPost(profile: .journal, entryDate: "2026-7-9")
+            // A GENUINE legacy row: created before the ops-boundary guards
+            // (Step 6 closed setEntryDate; round 2 closed createPost), so it
+            // can only exist via pre-guard history — injected as raw SQL
+            // because the operations API now correctly refuses to mint it.
+            let post = try bridge.ops.createPost(profile: .journal)
             try bridge.ops.newBlock(in: post.id, text: "orphan text", at: .end)
+            try await bridge.db.write { db in
+                try db.execute(
+                    sql: "UPDATE container SET entry_date = '2026-7-9' WHERE id = ?",
+                    arguments: [post.id])
+            }
             let report = try await bridge.engine.push()
             #expect(report.pushed == 0)
             #expect(report.notes.count == 1)
             #expect(await bridge.server.entryCount == 0)
+        }
+    }
+
+    /// Round-2 coverage pins (NIT 6 — both behaviors sit on the author's
+    /// ratify list, QUESTIONS #14(e); they pass on both sides by design):
+    /// archived entries stay push-eligible…
+    @Test func anArchivedEntryStillPushes() async throws {
+        try await withBridge { bridge in
+            let (entry, variantID) = try bridge.makeEntry(day: "2026-07-09", text: "Archived text.")
+            _ = try await bridge.engine.push()
+            try bridge.ops.archiveContainer(entry.id)
+            try bridge.ops.autosave(variantID, text: "Edited while archived.", charDelta: 6)
+            let report = try await bridge.engine.push()
+            #expect(report.pushed == 1, "archive is kept-out-of-view, not a projection freeze")
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Edited while archived.")
+        }
+    }
+
+    /// …and an archived sibling keeps the duplicate-day pause — archiving
+    /// is NOT the hand-merge gesture; delete or re-date releases.
+    @Test func anArchivedSiblingKeepsTheDuplicateDayPause() async throws {
+        try await withBridge { bridge in
+            let dupA = try bridge.ops.createPost(profile: .journal, entryDate: "2026-07-09")
+            try bridge.ops.newBlock(in: dupA.id, text: "Kept.", at: .end)
+            let dupB = try bridge.ops.createPost(profile: .journal, entryDate: "2026-07-09")
+            try bridge.ops.newBlock(in: dupB.id, text: "Archived away.", at: .end)
+            try bridge.ops.archiveContainer(dupB.id)
+
+            let stillPaused = try await bridge.engine.push()
+            #expect(stillPaused.pausedDays == ["2026-07-09"],
+                    "an archived sibling is still the day's text — the pause holds")
+            #expect(stillPaused.pushed == 0)
+
+            try bridge.ops.deleteContainer(dupB.id)
+            let released = try await bridge.engine.push()
+            #expect(released.pausedDays.isEmpty)
+            #expect(released.pushed == 1)
         }
     }
 

@@ -126,6 +126,28 @@ extension Queries {
             .map(timelineItem)
     }
 
+    /// THE notebook rule's canonical entry for a calendar day (Phase 9b
+    /// review round 2, NIT 5 — one implementation, shared): the live
+    /// journal-profile entry the day opens to, preferring **unarchived
+    /// first, then earliest `(created_at, id)`** — deterministic on every
+    /// device. `createOrOpenJournalEntry` opens through this; the bridge's
+    /// duplicate-day landings target it; anything else that must agree on
+    /// "the day's entry" uses this, never a re-typed ORDER BY.
+    public static func canonicalJournalEntry(
+        _ db: Database, day: String
+    ) throws -> Container? {
+        try Container.fetchOne(
+            db,
+            sql: """
+                SELECT * FROM container
+                WHERE kind = 'post' AND profile = 'journal'
+                  AND entry_date = ? AND deleted_at IS NULL
+                ORDER BY (archived_at IS NOT NULL) ASC, created_at ASC, id ASC
+                LIMIT 1
+                """,
+            arguments: [day])
+    }
+
     /// Where "kept, out of view" things are found again (review finding —
     /// without this listing, `unarchiveContainer` would be unreachable
     /// through the read layer): live but archived posts, most recently

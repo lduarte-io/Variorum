@@ -64,6 +64,10 @@ final class BridgeSession {
     /// per-scheduler).
     func configure(engine: BridgeEngine) async {
         guard allowsBridge else { return }
+        // A pending trailing cadence round must not survive reconfiguration
+        // and fire into the NEW scheduler (review round 2, NIT 8).
+        trailingTask?.cancel()
+        trailingTask = nil
         let old = scheduler
         stopObservations()
         scheduler = nil

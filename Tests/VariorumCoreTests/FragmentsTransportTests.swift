@@ -109,6 +109,23 @@ struct FragmentsTransportTests {
     /// with a USER session from the seam — the Authorization header carries
     /// the session's access token per call (so 9c's refresh slots in), and
     /// nothing in the bridge ever holds the Supabase personal access token.
+    /// Round 2, NIT 8: a session authenticated as a DIFFERENT user than the
+    /// one the bridge composes rows for is a wiring bug — refused before any
+    /// request composes (their RLS must never be the only guard).
+    @Test func transportRefusesASessionUserMismatch() async throws {
+        let transport = FragmentsRPCTransport(
+            configuration: .init(
+                projectURL: URL(string: "https://example.supabase.co")!,
+                apiKey: "publishable-key",
+                expectedUserID: "user-author"),
+            sessionProvider: StaticFragmentsSessionProvider(
+                session: FragmentsUserSession(accessToken: "t", userID: "someone-else")))
+        await #expect(throws: FragmentsTransportError.sessionUserMismatch(
+            expected: "user-author", actual: "someone-else")) {
+            _ = try await transport.pull(after: nil, limit: 1)
+        }
+    }
+
     @Test func transportAsksTheSessionSeamPerCall() async throws {
         struct CountingProvider: FragmentsSessionProviding {
             let counter: LockIsolatedBox

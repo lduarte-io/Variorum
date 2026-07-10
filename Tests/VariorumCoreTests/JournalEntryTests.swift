@@ -61,6 +61,24 @@ struct JournalEntryTests {
         }
     }
 
+    /// Round-2 pin (MINOR 2; red on pre-fix code): `createPost` was the
+    /// REMAINING permissive door after Step 6 — a malformed key minted a
+    /// live entry invisible to its own day.
+    @Test func createPostRefusesMalformedDayKeysToo() throws {
+        try withOperations { ops, db in
+            for bad in ["2026-7-9", "2026/07/09", "2026-02-30", "yesterday", ""] {
+                #expect(throws: OperationError.invalidEntryDate(bad)) {
+                    try ops.createPost(profile: .journal, entryDate: bad)
+                }
+            }
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == 0)
+            // Canonical and nil stay legitimate (nil = an undated post).
+            _ = try ops.createPost(profile: .journal, entryDate: "2026-07-09")
+            _ = try ops.createPost(title: "undated")
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == 2)
+        }
+    }
+
     @Test func setEntryDateAllowsCanonicalKeysAndNil() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "p", profile: .journal, entryDate: "2026-07-09")

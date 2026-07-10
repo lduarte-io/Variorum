@@ -151,6 +151,85 @@ struct BridgeLandingTests {
         }
     }
 
+    /// THE ROUND-2 MAJOR PIN (red on pre-fix code): the steady-state loss
+    /// window. A Fragments save that this round's pull cannot see (saved
+    /// after the pull, or inside their ~2 s visibility horizon) while the
+    /// same round's push fires — pre-fix, the push stamped `now`, outranked
+    /// the unseen save under sane clocks, and LWW-replaced it server-side;
+    /// the state-based feed then only ever served our own echo: the save
+    /// ended in no live row, no variant, no commit, no server row — lost
+    /// everywhere, on a day WITH bridge state (the round-0 docs wrongly
+    /// scoped this to first contact). Post-fix the push stamps minimally
+    /// above the last KNOWN remote stamp, so the unseen save wins LWW
+    /// (`.stale`), survives, and lands as a conflict card next round — the
+    /// overwrite becomes a rescue.
+    @Test func aFragmentsSaveHiddenFromTheSameRoundsPullSurvivesItsPush() async throws {
+        try await withBridge(visibilityHorizon: 2) { bridge in
+            // Steady state: agreed on T0; our echo consumed.
+            let (entry, variantID) = try bridge.makeEntry(day: "2026-07-09", text: "T0 agreed text.")
+            _ = try await bridge.engine.run()
+            await bridge.server.advanceClock(by: 2)
+            _ = try await bridge.engine.run()
+
+            // The author edits Variorum…
+            try bridge.ops.autosave(variantID, text: "T1 Variorum edit.", charDelta: 6)
+            // …and saves F in Fragments with a REALISTIC stamp — barely
+            // newer than the server row (their strict LWW), NOT the
+            // harness's always-wins 2027 stamps that hid this window.
+            let serverRowStamp = await bridge.server.currentEntry(
+                id: bridge.config.entryID(dayKey: "2026-07-09")!)!.updatedAt
+            let saveStamp = DateFormatter.variorumISO8601.string(
+                from: BridgeEngine.parseStamp(serverRowStamp)!.addingTimeInterval(2))
+            _ = try await bridge.server.fragmentsAppWrites(
+                configuration: bridge.config, day: "2026-07-09",
+                body: "F typed on the phone.", updatedAt: saveStamp)
+            // Burn local clock ticks so `now` is safely PAST the save's
+            // stamp — exactly the condition under which the old now-stamped
+            // push destroyed it.
+            for _ in 0..<10 {
+                try bridge.ops.renameContainer(entry.id, title: "tick")
+            }
+
+            // The race round: the pull cannot see F (horizon); the push
+            // fires anyway and must LOSE.
+            let raceRound = try await bridge.engine.run()
+            #expect(raceRound.landing.created == 0 && raceRound.landing.updated == 0)
+            #expect(raceRound.push.pushed == 0, "an unseen save must never be overwritten")
+            #expect(raceRound.push.stale == 1)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "F typed on the phone.")
+
+            // The save ages past the horizon: it lands as a conflict card
+            // and truth re-projects — the overwrite became a rescue.
+            await bridge.server.advanceClock(by: 2)
+            let rescueRound = try await bridge.engine.run()
+            #expect(rescueRound.landing.conflictVariants == 1)
+            let block = try bridge.firstBlockID(day: "2026-07-09")!
+            #expect(try bridge.liveVariants(blockID: block).map(\.text)
+                    .contains("F typed on the phone."))
+            #expect(rescueRound.push.pushed == 1)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "T1 Variorum edit.")
+        }
+    }
+
+    /// Round-2 MINOR-3 pin (red on pre-fix code): `applyBridgeLanding` must
+    /// bind the variant to the container whose buffers it insures — a
+    /// mismatched pair pre-fix overwrote the foreign variant with its dirty
+    /// pre-image UNCOMMITTED (the round-1 loss class, one caller bug away,
+    /// inside the op built to make it impossible).
+    @Test func applyBridgeLandingRefusesAVariantOutsideTheContainer() async throws {
+        try await withBridge { bridge in
+            let (_, variantA) = try bridge.makeEntry(day: "2026-07-09", text: "Day A dirty text.")
+            let (entryB, _) = try bridge.makeEntry(day: "2026-07-10", text: "Day B.")
+            let blockA = try bridge.firstBlockID(day: "2026-07-09")!
+            #expect(throws: OperationError.blockNotPlaced(id: blockA)) {
+                try bridge.ops.applyBridgeLanding(variantA, in: entryB.id, body: "misdirected")
+            }
+            // Nothing was written: A's text intact, no phantom commits.
+            #expect(try bridge.rendered(day: "2026-07-09") == "Day A dirty text.")
+            #expect(try bridge.commitTexts(variantID: variantA).isEmpty)
+        }
+    }
+
     // MARK: Both changed — conflict-as-variant, second writer
 
     @Test func bothChangedLandsAFragmentsVariantAndTruthReprojects() async throws {
