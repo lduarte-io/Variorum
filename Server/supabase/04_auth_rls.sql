@@ -4,13 +4,15 @@
 -- converged on the mirror and every client (SyncSpec §12 lockstep, exactly:
 -- (1) Step 4's `adoptOwnerID` backfill runs and PUSHES from the Mac, the
 -- phone pulls/converges — no live or tombstoned row on any owner-carrying
--- table still has NULL owner_id anywhere; (2) THEN the author pastes this
--- file in the SQL editor; (3) only then do clients sync under auth. A
--- half-done state is safe by construction: until this file runs, the mirror
--- keeps the pre-existing key-auth posture; after it runs, an unauthenticated
--- or wrongly-owned call FAILS the whole RPC — the client's round fails
--- visibly, outbox intact, cursor unmoved. Stalling is free; guessing is
--- forbidden.)
+-- table still has NULL owner_id anywhere; (2) THEN this file is executed
+-- against the mirror — the author's SQL-editor paste, or the coordinator
+-- via her PAT (author-authorized 2026-07-10; either hand runs EXACTLY this
+-- committed file, the single executable truth); (3) only then do clients
+-- sync under auth. A half-done state is safe by construction: until this
+-- file runs, the mirror keeps the pre-existing key-auth posture; after it
+-- runs, an unauthenticated or wrongly-owned call FAILS the whole RPC — the
+-- client's round fails visibly, outbox intact, cursor unmoved. Stalling is
+-- free; guessing is forbidden.)
 --
 -- WHAT THIS CLOSES (the 02_sync_rpc.sql SECURITY NOTE's debt): the RPCs
 -- performed no auth check beyond the API-key gate, so ANY bearer of the key
