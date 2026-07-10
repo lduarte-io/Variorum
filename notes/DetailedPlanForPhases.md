@@ -13,8 +13,12 @@ This is the master build plan. It holds: the phase table, the **current phase po
 fake Fragments server — now reconciled to the Fragments agents' ANSWERED asks (8–12/14;
 2026-07-09 evening, same-night incorporation) — and its manual real-project pass is
 DEFERRED to 9c's Step 6, gated on the new sign-in ONLY (the author's 2026-07-07 call;
-QUESTIONS #13/#14/#15 all RATIFIED at the checkpoint; ask 13 stays her own pending
-Fragments-side call). The 9c execution
+QUESTIONS #13/#14/#15 all RATIFIED at the checkpoint; ask 13 decided YES → Fragments'
+Phase 15.7, shape drafted-not-final; their FINAL reply arrived 2026-07-10 and was
+re-reconciled at the 9c kickoff — zero shipped-SQL corrections, one addition (the fourth
+`conflicts[]` producer) and the genuine-OVERWRITE-only re-pin with consumer-side
+discrimination, all in the contract's asks 11/13 + the 9c plan's kickoff addendum; only
+their deploy ping remains pending). The 9c execution
 plan is authored and self-contained: `notes/plans/phase-09c-auth-alignment.md` — its
 trust-mechanism lookup ran at plan time: the brief's issuer-trust option is NOT possible
 as imagined (Supabase Third-Party Auth is a closed provider allowlist), the primary

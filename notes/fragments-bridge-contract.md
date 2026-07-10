@@ -62,8 +62,11 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
    wants them; what Fragments syncs is exactly this satellite").
 
 ### Phase 9b build asks — ANSWERED 2026-07-09 (the author carried them the same evening;
-### ⚠️ their session's FINAL message is still pending — if it revises any shipped-SQL fact
-### pinned below, the author pastes it here and we re-reconcile;
+### ✅ their FINAL message arrived 2026-07-10 (pasted by the author at the 9c kickoff) and is
+### re-reconciled below — ZERO corrections to the pinned shipped-SQL facts, ONE addition (the
+### fourth `conflicts[]` producer, ask 11), ONE semantic re-pin on ask 13 (genuine-OVERWRITE-
+### only + the consumer-side discrimination rules); the one remaining pending event is the
+### 15.7 DEPLOY PING (they state the final `replaced` shape + emission table then);
 ### the Fragments agents' full response is preserved in the Variorum coordinator's record;
 ### the answers below are the extracted contract facts, reconciled into the bridge the same
 ### night — see the phase plan's "Checkpoint reconciliation round." Source-of-truth note
@@ -108,7 +111,16 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
     STRICTLY-newer (the SQL; their prose wrongly says stale-can-resurrect). Omitted NOT
     NULL columns abort the ENTIRE call — all six always sent. Stamps: any
     Postgres-parseable timestamptz with an explicit UTC zone; Fragments emits ms, the
-    server stores µs (ms and µs stamps are never tied).
+    server stores µs (ms and µs stamps are never tied). **Addition (their 2026-07-10
+    reply — an omission in their earlier message, found in their own review):
+    `conflicts[]` has a FOURTH producer, `"row carries no writable columns"` — emitted
+    when a pushed row carries no recognized writable column for the table. Unreachable
+    for a bridge sending all six journal columns, but the error-string pins should cover
+    all four: missing-`updated_at`, the `clock_ahead:` prefix, the `unique_violation`
+    text, and this one. The same reply independently re-verified every other pinned fact
+    (all seven UUID vectors recomputed; their migrations 2/3/6/7 re-read; the applier
+    gate and the `server_updated_at` trigger confirmed) — zero corrections: the
+    reconciliation stands.**
 12. **`created_at` on upsert-update — ANSWERED: NOT preserved** (their SET list includes
     it — a winning push overwrites it; the round-0 fake was wrong and is corrected). The
     bridge now ECHOES the pulled `created_at` on every push (own creation instant only for
@@ -125,9 +137,32 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
     their deploy ping. **The draft, recorded as the to-be-pinned-on-deploy shape:**
     `sync_push`'s response gains `replaced: [{id, previous_body, previous_updated_at}]`
     (`previous_updated_at` an opaque µs timestamptz string, the `server_updated_at`
-    class); scope = notes + `journal_entries` only; emitted ONLY on genuine loss — upsert
-    applied AND a prior LIVE row existed AND the prior body differs; NOT on plain insert,
-    identical body, skipped push, resurrect-over-tombstone, or any other table. Bootstrap
+    class; shape re-confirmed unchanged in their 2026-07-10 reply); scope = notes +
+    `journal_entries` only; emitted when the upsert applied AND a prior LIVE row existed
+    AND the prior body differs and is non-empty; NOT on plain insert, identical body,
+    skipped push, resurrect-over-tombstone, or any other table. **Semantics RE-PINNED per
+    their 2026-07-10 reply: genuine-OVERWRITE-only, NOT genuine-loss-only** (our earlier
+    gloss overstated the rules; the emission table above is right) — a receipt fires
+    whenever a differing live body was replaced, INCLUDING when the pusher had already
+    seen the body it replaced: every ordinary edit of an existing entry replaces the
+    pusher's own previous push and draws a receipt. **Loss classification is the
+    CONSUMER's job** (the server cannot know what the pusher had seen); their own
+    same-tier review caught that their drafted consumption missed this and would have
+    self-conflicted on ordinary edits. **The bridge's consumption discrimination (their
+    recommendation — cheap for the bridge, which holds per-day state):** (i) the
+    receipt's `previous_body` equals the body the bridge last pulled or pushed for that
+    day → the bridge knowingly replaced text it had seen and already holds → no variant,
+    no-op; (ii) `previous_body` is contained in the body just pushed → a superset/merge
+    push → no-op (this WILL occur: a Fragments device that appends an inline conflicted
+    copy and re-pushes draws a receipt for the body it merged — their earlier "the merged
+    body carries no further receipt" statement was imprecise: the receipt IS emitted;
+    consumers no-op it); (iii) otherwise → text the bridge never saw → rescue as a
+    variant — the loss case, and the only one. **Emission is unconditional and
+    server-side** (their 2026-07-10 answer to our question): ANY authenticated
+    `sync_push` caller gets the receipt on the two scoped tables — no client opt-in
+    flag, no header, no parameter (RLS means a pusher only ever overwrites its own rows,
+    so a receipt can never leak anyone else's text). **Timing:** 15.7 runs after their
+    current batch (15.6) and before their TestFlight track. Bootstrap
     exemption, their side: Fragments devices won't consume receipts during a bootstrap
     full-store push (a deliberate coverage gap on their side; the server still emits; the
     bridge never bootstraps — no impact). **The bridge's PERMANENT posture (their explicit
@@ -148,7 +183,10 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
     overwrote bridge-written text). It arrives as ordinary plain text and lands through
     the normal doors — no action needed. Future AUTHOR question (not a task): whether
     Variorum ever parses that marker into a variant — default is leave-inline (coupling
-    to their marker string is not owed).
+    to their marker string is not owed). **Their side confirmed 2026-07-10: leave-inline
+    is the right default and matches their intent — the marker text is part of the
+    user's editable body (ruled wording), and its stability as a parse target is NOT
+    promised.**
 14. **The clock-ahead clamp — ANSWERED: >10 minutes ahead** (migration 7), refused as a
     `conflicts[]` entry whose `error` carries the **`clock_ahead:` prefix** (match on the
     prefix). Reconciled: the bridge parks and surfaces clamped days visibly and retries as

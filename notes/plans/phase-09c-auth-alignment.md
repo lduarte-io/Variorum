@@ -46,6 +46,22 @@
 > (dashboard configuration, SQL pastes, sign-in on her devices, the 9b bridge's
 > deferred real-Fragments pass at the end) — pause and ask at each, never work around.
 
+> **2026-07-10 re-reconcile addendum (recorded by the 9c coordinator at kickoff):** the
+> Fragments side's FINAL reply arrived (the author pasted it with the 9c invocation) and
+> is reconciled into `notes/fragments-bridge-contract.md` (asks 11 + 13): **zero
+> corrections** to the pinned shipped-SQL facts; **one addition** — `conflicts[]` has a
+> FOURTH producer, `"row carries no writable columns"` (unreachable for a bridge sending
+> all six columns, but the fake-server/transport error-string pins should cover all
+> four — a SMALL code item for this phase, fold into any Step 2/5 test work); and **one
+> semantic re-pin** on the 15.7 receipt — emission is **genuine-OVERWRITE-only** (every
+> ordinary edit push draws a receipt for the pusher's own previous body; loss
+> classification is the CONSUMER's job), so Step 6(iv)'s conditional consumption item
+> now carries three discrimination rules — unconditional consumption would self-conflict
+> on every ordinary push (exactly the trap their own review caught in their drafted
+> consumer). Also answered: emission is unconditional server-side (no opt-in flag,
+> header, or parameter); leave-inline confirmed for their conflicted-copy marker. The
+> ONE remaining pending Fragments event is their 15.7 deploy ping.
+
 **Goal:** both devices sync under real user auth end-to-end; the bare publishable key
 alone is refused by the mirror; an absent/expired session refuses cleanly (outbox
 intact, cursor unmoved, visible status); the author signs into Variorum with her
@@ -214,8 +230,14 @@ real journal, dump-compared, verifying credentials/RLS/live behavior (the shapes
 are already pinned to their migration-7 SQL). **CONDITIONAL sub-item (ask 13 —
 Fragments' 15.7 replaced-body receipt, shape DRAFTED not final):** if `replaced`
 is live AND final on hosted by the time of this pass, pin the fake server to the
-final shape and add the consumption path — a received `previous_body` lands as a
-`'fragments'` conflict variant through the ordinary landing door; otherwise it
+final shape and add the consumption path — **with the 2026-07-10 discrimination
+rules (contract ask 13), NEVER unconditionally:** a receipt whose `previous_body`
+equals the day's last pulled-or-pushed body is a no-op (the bridge knowingly
+replaced text it already holds); one contained in the just-pushed body is a no-op
+(a superset/merge push — the Fragments conflicted-copy re-push case); ONLY
+otherwise — text the bridge never saw — does `previous_body` land as a
+`'fragments'` conflict variant through the ordinary landing door. If `replaced`
+is not live-and-final, this
 becomes a named follow-up triggered by their deploy ping — never assumed (the
 bridge's permanent posture: ignore unknown response keys, consume only if
 present). (v) The
