@@ -353,8 +353,8 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
 
 ### Test counts (the Phase 9c baselines — FINAL, post-reconciliation; pre-review 493/59 · 234/43 · 11/4, post-round-1 497/59 · 235/43, post-round-2 503/59, post-round-3 506/59)
 
-- Core `swift test`: **513 green in 59 suites** (was 430/51 at phase start — +83
-  tests, +8 suites; rounds 1–3 added 13 pins, the checkpoint reconciliation 7 more).
+- Core `swift test`: **514 green in 59 suites** (was 430/51 at phase start — +84
+  tests, +8 suites; rounds 1–3 added 13 pins, the checkpoint reconciliation 8 more incl. the ask-13 addendum's posture + resurrect-predicate pins).
 - Mac app: **235 green in 43 suites** (was 231/42 — +4 incl. the throttle test).
 - Mobile: **11 green in 4 suites** (unchanged; the mobile target compiles the shared
   bridge files but constructs the session fenced).
@@ -425,9 +425,15 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   our minimal stamp is overwritten, not staled*; (3) unparseable remote stamps fall
   back to `now` (their format is confirmed timestamptz-parseable, ask 11 ANSWERED).
   Same documented-race class as SyncSpec §7's concurrent-divide duplication.
-  Contract ask 13 (return the replaced body on LWW overwrite) would close all
-  residue to zero — **confirmed feasible by the Fragments agents, NOT built; the
-  author's own pending call on the Fragments side; the bridge assumes nothing.**
+  Contract ask 13 (the replaced-body receipt) closes the bridge-side residue —
+  **the author decided YES (her addendum): Fragments builds it as their 15.7;
+  shape DRAFTED, NOT FINAL, NOT DEPLOYED — the bridge assumes nothing until
+  their deploy ping** (permanent posture: ignore unknown response keys, consume
+  only if present). Framing kept honest: the receipt covers already-on-server
+  losses at push time; a Fragments device's never-pushed local text losing at
+  pull time is THEIR pull-side conflict-copy rule's half — post-15.7, no path
+  remains by which typed text vanishes, via two complementary mechanisms,
+  neither sufficient alone.
 - **The check-then-act window** between a landing's classification read and its
   operation call (separate transactions — ops cannot nest in one write): a local
   edit landing in that window can shift the true classification (an
@@ -817,8 +823,18 @@ stale-can-resurrect and is wrong); the keyset cursor on **raw, verbatim
 `server_updated_at` strings** (shipped correctly from round 0 — never parsed
 or reformatted; their µs precision would corrupt under a ms round-trip); the
 horizon inside the RPC; tombstones riding the pull stream; any-date
-tolerance; ask 13 (return-the-replaced-body) **feasible but NOT BUILT — the
-author's own pending Fragments-side call; the bridge assumes nothing.**
+tolerance; ask 13 (return-the-replaced-body) — **UPGRADED by the author's addendum: she
+decided YES; Fragments builds it as their Phase 15.7** (their investigation of
+our ask surfaced a live silent-loss bug in their OWN notes sync — the receipt
+fixes both paths); **shape DRAFTED, NOT FINAL, NOT DEPLOYED — nothing pinned
+into the fake until their deploy ping**; the bridge's permanent posture is
+ignore-unknown-response-keys / consume-only-if-present (pinned by test), and
+their final message may still revise pinned facts (re-reconcile expectation in
+the contract header). Recorded consequence: post-15.7 Fragments merges
+destroyed bodies back under an inline "— conflicted copy from this device —"
+marker, so pulled journal bodies may CONTAIN it — ordinary plain text through
+the normal landing doors, no action; whether Variorum ever parses the marker
+into a variant is a future AUTHOR question (default leave-inline).**
 
 **CORRECTED (reconciled into code the same night):**
 1. **The namespace is now a KNOWN constant** (`7B69C1E4-9C72-4D2F-9B3A-2A41F0F4C0DE`,
@@ -871,8 +887,8 @@ rewritten to migration-7 semantics; `FragmentsContractTests` re-pinned to
 the real namespace + journal goldens + case vectors; two new engine tests
 (fail-closed; created_at echo); poison-never-retries added to the MINOR-4
 pin; all bridge suites swept to the new seams. **Counts: core `swift test`
-513 green in 59 suites; Mac app 235 green in 43 suites; mobile 11 green in
-4 suites — the FINAL Phase 9c baselines.** **The real-project pass is now
+514 green in 59 suites; Mac app 235 green in 43 suites; mobile 11 green in
+4 suites — the FINAL Phase 9c baselines (post the ask-13 addendum below).** **The real-project pass is now
 gated on 9c's sign-in ONLY** (the contract asks are answered; nothing
 remaining is verifiable headless — the real pass verifies credentials, RLS,
 and live-project behavior, not shapes).

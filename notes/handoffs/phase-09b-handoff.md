@@ -12,10 +12,13 @@ this phase from this document + the phase plan's closeout
    `notes/fragments-bridge-contract.md`; the derivation layer confirmed end to end,
    several wire/semantics facts corrected and reconciled into code the same night —
    the phase plan's "Checkpoint reconciliation round" has the full
-   confirmed-vs-corrected ledger). **The only open item from the asks is 13** (return
-   the replaced body): their agents confirmed it feasible; it is NOT built and NOT
-   promised — **your own pending call on the Fragments side**; the bridge assumes
-   nothing. **The real-project pass is now gated on 9c's sign-in ONLY.**
+   confirmed-vs-corrected ledger). **Ask 13 is decided (your addendum): Fragments
+   builds the replaced-body receipt as their Phase 15.7** — shape drafted, NOT
+   final, NOT deployed; the bridge assumes nothing until their deploy ping (9c
+   Step 6 carries the conditional pin-and-consume item; post-15.7, pulled journal
+   bodies may contain their inline "— conflicted copy from this device —" marker —
+   ordinary plain text through the normal doors). **The real-project pass is now
+   gated on 9c's sign-in ONLY.**
 2. ~~Walk QUESTIONS #13, #14, and #15 at the checkpoint~~ — **DONE (2026-07-09
    checkpoint): you RATIFIED all of it** — #13's handling (c); #14 (a)–(e) as shipped
    with both consequences acknowledged and the sealed-empty DEFER shape ratified;
@@ -94,7 +97,7 @@ nothing typed in either app can be lost where truth lives.
 
 ## Verification (headless — the real pass is deferred, deliberately)
 
-- **Core `swift test`: 513 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
+- **Core `swift test`: 514 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
   (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines, after
   the FULL review ladder (three rounds, 2026-07-09, fresh reviewer each; closed at
   the hard cap) AND the same-evening checkpoint reconciliation of the Fragments
@@ -156,8 +159,12 @@ nothing typed in either app can be lost where truth lives.
    (red-on-old pinned). What remains: first contact (no stamp known yet), 1 s stamp
    granularity (sharpened at reconciliation: their ties go to the PUSHER, so an
    exact-tie unseen save is overwritten, not staled), unparseable stamps — ask 13
-   (return the replaced body) closes all of it; **their agents confirmed ask 13
-   feasible but it is NOT built — your own pending call on the Fragments side**;
+   (the replaced-body receipt) closes the bridge-side residue; **you decided YES —
+   Fragments builds it as their 15.7; shape drafted, NOT final, NOT deployed; the
+   bridge assumes nothing until their deploy ping**. Framing kept honest: the
+   receipt cannot rescue never-pushed text — that half is THEIR pull-side
+   conflict-copy rule; post-15.7 the two complementary mechanisms together leave
+   no path by which typed text vanishes (neither sufficient alone);
    same documented-race class as SyncSpec §7's concurrent-divide duplication.
 4. **Landing readings (a)–(e)** — QUESTIONS #14, above.
 5. **KnownIssues:** `setEntryDate` row resolved and removed; one row added (the push

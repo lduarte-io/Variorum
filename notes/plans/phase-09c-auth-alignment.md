@@ -31,7 +31,7 @@
 > `Server/supabase/02_sync_rpc.sql` (the SECURITY-DEFINER surface being locked down),
 > and `notes/sync-postmortem-fragments.md` (read before touching
 > `Sources/VariorumCore/Sync/`). **Baselines — do not re-run at session start:** core
-> `swift test` = 513 green in 59 suites; Mac app = 235 green in 43 suites; mobile = 11
+> `swift test` = 514 green in 59 suites; Mac app = 235 green in 43 suites; mobile = 11
 > green in 4 suites (the 9b closeout's FINAL counts, post-ladder AND post the
 > checkpoint contract-reconciliation — the Fragments agents' answers landed 2026-07-09
 > evening and were reconciled the same night; **your cold review should give that
@@ -211,7 +211,14 @@ end-to-end (the Phase 8 device rounds the author deferred to post-9c fold in HER
 ANSWERED and reconciled (9b's checkpoint reconciliation round; headless-complete);
 the pass is gated on THIS PHASE'S SIGN-IN ONLY — one manual two-way day with her
 real journal, dump-compared, verifying credentials/RLS/live behavior (the shapes
-are already pinned to their migration-7 SQL). (v) The
+are already pinned to their migration-7 SQL). **CONDITIONAL sub-item (ask 13 —
+Fragments' 15.7 replaced-body receipt, shape DRAFTED not final):** if `replaced`
+is live AND final on hosted by the time of this pass, pin the fake server to the
+final shape and add the consumption path — a received `previous_body` lands as a
+`'fragments'` conflict variant through the ordinary landing door; otherwise it
+becomes a named follow-up triggered by their deploy ping — never assumed (the
+bridge's permanent posture: ignore unknown response keys, consume only if
+present). (v) The
 week-one dump-compare ritual begins (2026-07-07 note) once she daily-drives.
 **Closeout:** results per gate; the master plan's 9c row + pointer → 10; the Phase
 10 plan authored from `notes/plans/phase-10-brief.md` per the front-loaded rule;

@@ -62,6 +62,8 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
    wants them; what Fragments syncs is exactly this satellite").
 
 ### Phase 9b build asks — ANSWERED 2026-07-09 (the author carried them the same evening;
+### ⚠️ their session's FINAL message is still pending — if it revises any shipped-SQL fact
+### pinned below, the author pastes it here and we re-reconcile;
 ### the Fragments agents' full response is preserved in the Variorum coordinator's record;
 ### the answers below are the extracted contract facts, reconciled into the bridge the same
 ### night — see the phase plan's "Checkpoint reconciliation round." Source-of-truth note
@@ -112,22 +114,41 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
     bridge now ECHOES the pulled `created_at` on every push (own creation instant only for
     a never-seen row); never omitted (the NOT-NULL abort). Modelling correction only —
     nothing keys on it.
-13. **Return-the-replaced-body — CONFIRMED COHERENT AND FEASIBLE; NOT BUILT, NOT
-    PROMISED** (routed to the author as her own Fragments-side call: new server migration
-    + their SyncSpec amendment + db push; their design notes recorded — gate on
-    `p_table='journal_entries'`, return `{id, previous_updated_at, previous_body}` only on
-    genuine loss; it cannot rescue text saved locally but never pushed). **The bridge
-    assumes nothing.** Original ask, for the record: when `sync_push` LWW-overwrites a live
-    row, consider returning the REPLACED body in the response. Variorum's pushes stamp
-    minimally above the last server-row stamp the bridge has seen (a compare-and-set
-    discipline added at its Phase 9b review), so an unseen Fragments save now survives as
-    `.stale`-then-rescued — but three residues remain: a day's FIRST-EVER push carries no
-    known stamp (falls back to wall clock), stamps quantize at 1 s, and an unparseable
-    stamp falls back to wall clock (ask 11). With the previous body returned on overwrite,
-    the bridge would land it as a variant → zero loss in every case.
-    *(Related, from the same review: Variorum's re-projection stamps may sit only 1 s
-    above the row they answer rather than at wall-clock time — confirm your `updated_at`
-    semantics tolerate content-newer-than-stamp rows; it is pure LWW ordering to us.)*
+13. **Return-the-replaced-body — ANSWERED: the author decided YES; Fragments is BUILDING
+    it as their Phase 15.7** (a sync-correctness phase after their current UI batch,
+    before their TestFlight). Their investigation of this ask surfaced a live silent-loss
+    bug in their OWN notes sync (their pull-side conflict-copy gate fires only on pending
+    local changes — an already-acked-then-overwritten body was unrescuable), so the
+    receipt fixes their path and ours together. **The shape is DRAFTED, NOT FINAL, NOT
+    DEPLOYED — the author was explicitly warned the draft may not be the final answer;
+    their final message is pending.** Nothing is pinned into Variorum's fake server until
+    their deploy ping. **The draft, recorded as the to-be-pinned-on-deploy shape:**
+    `sync_push`'s response gains `replaced: [{id, previous_body, previous_updated_at}]`
+    (`previous_updated_at` an opaque µs timestamptz string, the `server_updated_at`
+    class); scope = notes + `journal_entries` only; emitted ONLY on genuine loss — upsert
+    applied AND a prior LIVE row existed AND the prior body differs; NOT on plain insert,
+    identical body, skipped push, resurrect-over-tombstone, or any other table. Bootstrap
+    exemption, their side: Fragments devices won't consume receipts during a bootstrap
+    full-store push (a deliberate coverage gap on their side; the server still emits; the
+    bridge never bootstraps — no impact). **The bridge's PERMANENT posture (their explicit
+    recommendation): ignore unknown response keys; consume `replaced` only if present** —
+    already structurally true (Codable ignores unknown keys; pinned by test) and never to
+    be tightened. **Framing, corrected:** the receipt covers already-on-server losses at
+    push time; it CANNOT rescue text that never reached the server — a Fragments device's
+    unpushed local text losing LWW at pull time is covered by THEIR pull-side
+    conflict-copy rule. Post-15.7, the honest statement: no path remains by which typed
+    text vanishes — via two complementary mechanisms, neither sufficient alone.
+    *(Related, answered with the asks: Variorum's re-projection stamps may sit only 1 s
+    above the row they answer rather than at wall-clock time — pure LWW ordering to them;
+    content-newer-than-stamp rows are tolerable.)*
+    **Recorded consequence (15.7's other half):** Fragments will consume its own receipts —
+    the winning device appends the destroyed body under an inline plain-text marker
+    ("— conflicted copy from this device —") and re-pushes the merge. Post-15.7 the
+    bridge may therefore pull a journal body CONTAINING that marker (a Fragments device
+    overwrote bridge-written text). It arrives as ordinary plain text and lands through
+    the normal doors — no action needed. Future AUTHOR question (not a task): whether
+    Variorum ever parses that marker into a variant — default is leave-inline (coupling
+    to their marker string is not owed).
 14. **The clock-ahead clamp — ANSWERED: >10 minutes ahead** (migration 7), refused as a
     `conflicts[]` entry whose `error` carries the **`clock_ahead:` prefix** (match on the
     prefix). Reconciled: the bridge parks and surfaces clamped days visibly and retries as
