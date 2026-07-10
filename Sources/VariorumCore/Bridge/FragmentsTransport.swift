@@ -72,6 +72,15 @@ public struct FragmentsPushResponse: Equatable, Sendable, Codable {
     }
 }
 
+/// One `conflicts[]` refusal. Their shipped SQL has exactly FOUR producers
+/// (ask 11, completed by their 2026-07-10 FINAL reply): (1) a row missing
+/// `updated_at`, (2) the `clock_ahead:` clamp, (3) `unique_violation` on
+/// `(user_id, date)`, and (4) `"row carries no writable columns"` — a pushed
+/// row carrying no recognized writable column for the table (their 2026-07-10
+/// addition; unreachable for this bridge, which always sends all six journal
+/// columns). Only (2) and (3) get special handling; (1) and (4) fall to the
+/// engine's generic refused-and-surfaced branch (visible every round, never
+/// destructive) — pinned in `FragmentsTransportTests`.
 public struct FragmentsPushConflict: Equatable, Sendable, Codable {
     public var id: String
     public var error: String

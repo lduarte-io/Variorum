@@ -56,6 +56,51 @@ struct FragmentsTransportTests {
         #expect(!violation.isClockAhead)
     }
 
+    /// The four `conflicts[]` producers in their shipped SQL (ask 11,
+    /// completed by the 2026-07-10 FINAL reply — the fourth was an omission
+    /// in their earlier message, found by their own review). The two special
+    /// classes fire exactly on their own strings; the other two producers —
+    /// missing `updated_at`, and `"row carries no writable columns"`
+    /// (verbatim; unreachable for a bridge sending all six columns) — must
+    /// classify as NEITHER, so they land in the engine's generic
+    /// refused-and-surfaced branch (visible every round, never parked as
+    /// clock skew, never poisoned as a derivation bug).
+    @Test func conflictErrorStringsCoverAllFourProducers() throws {
+        let clockAhead = FragmentsPushConflict(
+            id: "a", error: "clock_ahead: updated_at is more than 10 min ahead")
+        #expect(clockAhead.isClockAhead && !clockAhead.isUniqueViolation)
+
+        let uniqueViolation = FragmentsPushConflict(
+            id: "b", error: "unique_violation: duplicate key value violates unique index journal_user_date")
+        #expect(uniqueViolation.isUniqueViolation && !uniqueViolation.isClockAhead)
+
+        // Producer 4, verbatim from their 2026-07-10 reply (shipped SQL).
+        let noWritableColumns = FragmentsPushConflict(
+            id: "c", error: "row carries no writable columns")
+        #expect(!noWritableColumns.isClockAhead && !noWritableColumns.isUniqueViolation)
+
+        // Producer 1 — missing `updated_at`. The exact server string is
+        // theirs (not quoted verbatim in the contract); classification is
+        // prefix/contains-based, so ANY string outside the two special
+        // classes lands generic — that property is what this pins.
+        let missingUpdatedAt = FragmentsPushConflict(
+            id: "d", error: "row missing updated_at")
+        #expect(!missingUpdatedAt.isClockAhead && !missingUpdatedAt.isUniqueViolation)
+
+        // And all four decode cleanly inside a real aggregate response.
+        let wire = """
+            {"applied": 0, "skipped": 0, "conflicts": [
+              {"id": "a", "error": "clock_ahead: updated_at is more than 10 min ahead"},
+              {"id": "b", "error": "unique_violation: duplicate key value violates unique index journal_user_date"},
+              {"id": "c", "error": "row carries no writable columns"},
+              {"id": "d", "error": "row missing updated_at"}]}
+            """.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(FragmentsPushResponse.self, from: wire)
+        #expect(decoded.conflicts.count == 4)
+        #expect(decoded.conflicts.filter(\.isClockAhead).map(\.id) == ["a"])
+        #expect(decoded.conflicts.filter(\.isUniqueViolation).map(\.id) == ["b"])
+    }
+
     /// THE PERMANENT POSTURE (ask 13's hedged upgrade — Fragments' 15.7
     /// replaced-body receipt is DRAFTED, not final, not deployed): ignore
     /// unknown response keys; consume `replaced` only if present. Until

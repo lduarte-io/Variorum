@@ -36,7 +36,12 @@ import Foundation
 ///
 /// NOT modeled: the omitted-NOT-NULL whole-call abort — the typed
 /// `FragmentsEntry` carries all six NOT NULL columns non-optionally, so the
-/// engine structurally cannot omit one (documented at the transport).
+/// engine structurally cannot omit one (documented at the transport). Same
+/// class, same reason: the `conflicts[]` producers for a missing
+/// `updated_at` and for `"row carries no writable columns"` (the FOURTH
+/// producer, their 2026-07-10 reply) are structurally unproducible through
+/// the typed interface; their strings are pinned at the transport
+/// (`conflictErrorStringsCoverAllFourProducers`) as generic refusals.
 actor FakeFragmentsServer: FragmentsBridgeTransport {
     private struct StoredEntry {
         var entry: FragmentsEntry  // serverUpdatedAt always set once stored
