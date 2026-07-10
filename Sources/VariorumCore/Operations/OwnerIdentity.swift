@@ -43,6 +43,17 @@ extension DependencyValues {
     }
 }
 
+extension OwnerIdentity {
+    /// Wires the app's real identity closure as the live `\.ownerIdentity`
+    /// dependency — the `AppDatabase.install` twin, called exactly once by
+    /// root composition (AppBootstrap), before anything constructs
+    /// `Operations`. The closure is read per call, so sign-in/out never
+    /// needs re-installation.
+    public static func install(_ identity: OwnerIdentity) {
+        prepareDependencies { $0.ownerIdentity = identity }
+    }
+}
+
 // MARK: - The backfill (Phase 9c, Step 4; brief interpretation 3)
 
 extension Operations {

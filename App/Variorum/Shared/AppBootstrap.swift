@@ -55,6 +55,15 @@ final class AppBootstrap {
             let database = try AppDatabase.openStore(at: url)
             if !installed {
                 AppDatabase.install(database)
+                // Phase 9c, Step 4/5: the live owner identity reads the
+                // persisted Variorum session per call — the Keychain is the
+                // truth AuthSession.adopt/signOut writes, so sign-in state
+                // reaches Operations' owner_id stamping with no mutable
+                // global and no re-installation.
+                OwnerIdentity.install(OwnerIdentity {
+                    KeychainAuthStorage.load(
+                        service: KeychainAuthStorage.variorumService)?.userID
+                })
                 installed = true
             }
             return .ready(AppSession(database: database))

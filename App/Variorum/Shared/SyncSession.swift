@@ -6,18 +6,21 @@
 //  wiring, not building (SyncSpec §10). One SyncScheduler (A3: serialized,
 //  coalescing, pull→push) over SupabaseTransport with a foreground-simple
 //  schedule; offline is free — the outbox queues, capture never blocks on
-//  the network.
+//  the network. Phase 9c, Step 5: the Phase 8 paste-in retired — the
+//  transport is composed by AppServices' sign-in wiring over the
+//  AuthSession session provider; this type no longer knows credentials
+//  exist.
 //
-//  THE A4 FENCE, SYNC SEAM (review round 1, BLOCKER): there is exactly ONE
-//  production mirror, and it pairs with the REAL store only. Debug and
-//  release builds share a bundle identity and therefore a Keychain, so
-//  once the author pastes credentials, an ungated dev-store session would
-//  auto-configure sync, pull her whole corpus into the dev store, and push
-//  every dev-session write — a dev bug's destructive writes included —
-//  into the mirror that replicates to her real devices. `allowsSync` is
-//  therefore derived from the store variant (AppServices): a dev-store
-//  session NEVER configures sync — not from persisted credentials, not
-//  from the setup form.
+//  THE A4 FENCE, SYNC SEAM (Phase 8 review round 1, BLOCKER): there is
+//  exactly ONE production mirror, and it pairs with the REAL store only.
+//  Debug and release builds share a bundle identity and therefore a
+//  Keychain, so once the author signs in, an ungated dev-store session
+//  would auto-configure sync, pull her whole corpus into the dev store,
+//  and push every dev-session write — a dev bug's destructive writes
+//  included — into the mirror that replicates to her real devices.
+//  `allowsSync` is therefore derived from the store variant (AppServices):
+//  a dev-store session NEVER configures sync, whatever transport a caller
+//  composes.
 //
 //  Triggers wired HERE (both platforms): after local writes settle (the
 //  outbox observation, debounced). Platform files add their own: foreground/
@@ -34,7 +37,6 @@ import VariorumCore
 final class SyncSession {
     /// The one-row functional status surface (SyncSpec §10 scope).
     private(set) var status = SyncScheduler.Status()
-    private(set) var credentials: SyncCredentials?
     var isConfigured: Bool { scheduler != nil }
     /// False for dev-store sessions (the A4 fence's sync seam, above).
     let allowsSync: Bool
@@ -48,8 +50,6 @@ final class SyncSession {
     /// before a round runs (keystroke-rate autosaves coalesce; S1's outbox
     /// absorbs the rest).
     private let settleDebounce: Duration
-    /// Injectable credentials source (tests never touch the real Keychain).
-    private let loadCredentials: () -> SyncCredentials?
     private var scheduler: SyncScheduler?
     private var observationTasks: [Task<Void, Never>] = []
     private var settleTask: Task<Void, Never>?
@@ -57,50 +57,25 @@ final class SyncSession {
     init(
         database: AppDatabase,
         allowsSync: Bool = true,
-        settleDebounce: Duration = .seconds(3),
-        loadCredentials: @escaping () -> SyncCredentials? = { SyncCredentialsStore.load() }
+        settleDebounce: Duration = .seconds(3)
     ) {
         self.database = database
         self.allowsSync = allowsSync
         self.settleDebounce = settleDebounce
-        self.loadCredentials = loadCredentials
-    }
-
-    /// Loads persisted credentials (Keychain) and configures if present —
-    /// refused wholesale for dev-store sessions (the fence). Returns whether
-    /// sync is now configured.
-    @discardableResult
-    func loadPersistedCredentials() async -> Bool {
-        guard allowsSync else { return false }
-        if let stored = loadCredentials() {
-            await configure(with: stored, persist: false)
-        }
-        return isConfigured
     }
 
     /// Builds the transport → engine → scheduler chain and starts the
-    /// write-settle + status observations. Re-configuring (a key rotation
-    /// re-paste) replaces the chain — after DRAINING the old one: the old
-    /// scheduler may be mid-round, and A3's one-round-at-a-time guarantee
-    /// is per-scheduler, so the session must never let a new chain run
-    /// while the old round is in flight (review round 1, MINOR).
-    func configure(with credentials: SyncCredentials, persist: Bool) async {
-        guard allowsSync else { return }
-        self.credentials = credentials
-        if persist {
-            SyncCredentialsStore.save(credentials)
-        }
-        // The pasted static token rides the 9c per-call session seam as a
-        // fixed session (StaticSessionProvider) until Step 5 retires the
-        // paste-in into the real sign-in.
-        let transport = SupabaseTransport(
-            configuration: credentials.transportConfiguration,
-            sessionProvider: credentials.staticSessionProvider)
-        await configure(transport: transport)
-    }
-
-    /// The transport-level tail (internal seam — tests inject fakes here;
-    /// production funnels through `configure(with:persist:)`).
+    /// write-settle + status observations. The production caller is
+    /// AppServices' sign-in wiring (Phase 9c, Step 5 — the transport rides
+    /// the AuthSession session provider; the Phase 8 paste-in and its
+    /// credential paths are retired); tests inject fakes here.
+    /// Re-configuring replaces the chain — after DRAINING the old one: the
+    /// old scheduler may be mid-round, and A3's one-round-at-a-time
+    /// guarantee is per-scheduler, so the session must never let a new
+    /// chain run while the old round is in flight (Phase 8 review round 1,
+    /// MINOR). Refused wholesale for dev-store sessions (the fence): the
+    /// one production mirror pairs with the real store only, whatever
+    /// transport a caller composes.
     func configure(transport: any SyncTransport) async {
         guard allowsSync else { return }
         let old = scheduler

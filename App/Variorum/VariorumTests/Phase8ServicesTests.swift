@@ -393,33 +393,28 @@ private actor RecordingTransport: SyncTransport {
 @MainActor
 @Suite("Sync session fences (Phase 8, review round 1)")
 struct SyncSessionFenceTests {
-    /// THE BLOCKER PIN: debug and release builds share a Keychain, so once
-    /// the author pastes credentials, an ungated dev-store session would
-    /// auto-configure sync and pair the dev store with the ONE production
-    /// mirror — pulling her corpus into the dev store and pushing dev-bug
-    /// writes to her real devices. A dev-store session must stay
-    /// unconfigured no matter what credentials are present.
-    @Test func devStoreSessionsNeverConfigureSyncEvenWithCredentialsPresent() async throws {
+    /// THE BLOCKER PIN (re-shaped at Phase 9c, Step 5 — the paste-in is
+    /// retired, but the fence's mechanism is unchanged): debug and release
+    /// builds share a Keychain, so once the author signs in, an ungated
+    /// dev-store session would auto-configure sync and pair the dev store
+    /// with the ONE production mirror — pulling her corpus into the dev
+    /// store and pushing dev-bug writes to her real devices. A dev-store
+    /// session must refuse EVERY transport composition (the sign-in wiring
+    /// funnels through `configure(transport:)` now).
+    @Test func devStoreSessionsNeverConfigureSyncWhateverTransportIsComposed() async throws {
         let db = try AppDatabase.inMemory()
-        let pasted = SyncCredentials(
-            projectURL: URL(string: "https://example.supabase.co")!,
-            apiKey: "anon-key", authToken: "anon-key")
 
-        // The dev-store session, in the exact post-checkpoint state a debug
-        // smoke launch would find (persisted credentials readable).
-        let dev = SyncSession(database: db, allowsSync: false, loadCredentials: { pasted })
-        let loaded = await dev.loadPersistedCredentials()
-        #expect(!loaded)
+        // The dev-store session, in the exact post-sign-in state a debug
+        // smoke launch would find (the signed-in wiring composing a chain).
+        let dev = SyncSession(database: db, allowsSync: false)
+        await dev.configure(transport: RecordingTransport())
         #expect(!dev.isConfigured,
                 "a dev-store session must never pair with the production mirror")
-        // Even the explicit setup door refuses.
-        await dev.configure(with: pasted, persist: false)
-        #expect(!dev.isConfigured)
         dev.stop()
 
-        // The real-store session still auto-configures from the same state.
-        let real = SyncSession(database: db, allowsSync: true, loadCredentials: { pasted })
-        #expect(await real.loadPersistedCredentials())
+        // The real-store session configures from the same composition.
+        let real = SyncSession(database: db, allowsSync: true)
+        await real.configure(transport: RecordingTransport())
         #expect(real.isConfigured)
         real.stop()
     }
@@ -430,7 +425,7 @@ struct SyncSessionFenceTests {
     /// the cross-scheduler guarantee.
     @Test func reconfigureDrainsTheInFlightRoundBeforeTheNewChainRuns() async throws {
         let db = try AppDatabase.inMemory()
-        let session = SyncSession(database: db, allowsSync: true, loadCredentials: { nil })
+        let session = SyncSession(database: db, allowsSync: true)
         let gate = RoundGateTransport()
         let spy = RecordingTransport()
 

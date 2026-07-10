@@ -120,7 +120,7 @@ struct Phase9bBridgeWiringTests {
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
         } operation: { @MainActor in
             let syncGate = GatedSyncTransport()
-            let syncSession = SyncSession(database: db, allowsSync: true, loadCredentials: { nil })
+            let syncSession = SyncSession(database: db, allowsSync: true)
             await syncSession.configure(transport: syncGate)
 
             let bridgeTransport = RecordingBridgeTransport()

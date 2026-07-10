@@ -31,7 +31,7 @@ struct RootView: View {
                 .safeAreaInset(edge: .bottom) {
                     if let services {
                         VStack(alignment: .leading, spacing: 0) {
-                            SyncStatusRow(sync: services.sync)
+                            SyncStatusRow(services: services)
                             BridgeStatusRow(bridge: services.bridge)
                         }
                     }

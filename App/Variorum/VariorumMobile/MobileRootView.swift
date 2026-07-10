@@ -36,7 +36,7 @@ struct MobileRootView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 if let services {
-                    SyncStatusRow(sync: services.sync)
+                    SyncStatusRow(services: services)
                 }
             }
         }

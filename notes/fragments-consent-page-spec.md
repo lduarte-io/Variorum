@@ -42,6 +42,17 @@ is the same logic, hosted and styled.
   approval, later sign-ins for the same user+client+scope go straight through —
   in steady state this page is nearly never seen. It still must exist: first
   approvals, new scopes, and new clients land on it.
+- **Persist the page's Fragments session (recommended — added 2026-07-10 with
+  Variorum's Step 5):** the consent flow still requires a SIGNED-IN Fragments user
+  before the approve/deny call, so if the page keeps no session (the spike page
+  holds its token in page JS only), every arrival re-prompts for the password even
+  when the server would auto-approve. Persisting the session (supabase-js does this
+  by default via localStorage; hand-rolled = store/refresh the session yourself)
+  makes repeat authorizations password-free: arrive → already signed in →
+  auto-approved → redirect, no interaction. Variorum opens this page inside an
+  `ASWebAuthenticationSession` browser context (cookies/localStorage persist across
+  runs since it is non-ephemeral) — sign-ins are rare (about once per device), so
+  this is a nicety, not a requirement.
 - Keep it minimal: no session persistence beyond the flow, no analytics on the
   tokens, never log the bearer. Style is the site agent's call.
 - Expired/consumed `authorization_id`s return an error from step 3 — render it

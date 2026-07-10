@@ -82,11 +82,14 @@ nonisolated struct AuthTokensStore: Sendable {
     var save: @Sendable (AuthTokens) -> Void
     var clear: @Sendable () -> Void
 
-    static func keychain() -> AuthTokensStore {
+    /// One Keychain item per session home: the Variorum session and the
+    /// bridge's Fragments session (QUESTIONS #16 shape (c)) live under
+    /// distinct services so neither sign-out disturbs the other.
+    static func keychain(service: String = KeychainAuthStorage.variorumService) -> AuthTokensStore {
         AuthTokensStore(
-            load: { KeychainAuthStorage.load() },
-            save: { KeychainAuthStorage.save($0) },
-            clear: { KeychainAuthStorage.clear() })
+            load: { KeychainAuthStorage.load(service: service) },
+            save: { KeychainAuthStorage.save($0, service: service) },
+            clear: { KeychainAuthStorage.clear(service: service) })
     }
 
     static func inMemory(initial: AuthTokens? = nil) -> AuthTokensStore {
@@ -113,11 +116,14 @@ nonisolated struct AuthTokensStore: Sendable {
 /// touching this one. `AfterFirstUnlock` for the same background-round
 /// reason as Phase 8.
 nonisolated enum KeychainAuthStorage {
-    private static let service = "io.lduarte.Variorum.auth"
+    /// The Variorum-project session's home.
+    static let variorumService = "io.lduarte.Variorum.auth"
+    /// The bridge's Fragments-project session (QUESTIONS #16 shape (c)).
+    static let fragmentsService = "io.lduarte.Variorum.fragments-auth"
     private static let account = "session"
 
-    static func load() -> AuthTokens? {
-        var query = baseQuery()
+    static func load(service: String) -> AuthTokens? {
+        var query = baseQuery(service: service)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -128,31 +134,48 @@ nonisolated enum KeychainAuthStorage {
     }
 
     @discardableResult
-    static func save(_ tokens: AuthTokens) -> Bool {
+    static func save(_ tokens: AuthTokens, service: String) -> Bool {
         guard let data = try? JSONEncoder().encode(tokens) else { return false }
-        var attributes = baseQuery()
+        var attributes = baseQuery(service: service)
         attributes[kSecValueData as String] = data
         attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
         let status = SecItemAdd(attributes as CFDictionary, nil)
         if status == errSecDuplicateItem {
             let update: [String: Any] = [kSecValueData as String: data]
-            return SecItemUpdate(baseQuery() as CFDictionary, update as CFDictionary)
+            return SecItemUpdate(baseQuery(service: service) as CFDictionary, update as CFDictionary)
                 == errSecSuccess
         }
         return status == errSecSuccess
     }
 
     @discardableResult
-    static func clear() -> Bool {
-        SecItemDelete(baseQuery() as CFDictionary) == errSecSuccess
+    static func clear(service: String) -> Bool {
+        SecItemDelete(baseQuery(service: service) as CFDictionary) == errSecSuccess
     }
 
-    private static func baseQuery() -> [String: Any] {
+    private static func baseQuery(service: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
+    }
+}
+
+/// The Phase 8 paste-in's Keychain item (its store type was deleted at
+/// Phase 9c Step 5): cleared on the first real sign-in. This is the ONE
+/// remaining reference to the old service string — pinned by the
+/// retirement walk in `Phase9cAuthWiringTests`.
+nonisolated enum LegacyPasteInCleanup {
+    static let retiredService = "io.lduarte.Variorum.sync"
+
+    static func clear() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: retiredService,
+            kSecAttrAccount as String: "supabase",
+        ]
+        SecItemDelete(query as CFDictionary)
     }
 }
 
@@ -276,6 +299,29 @@ actor AuthSession: UserSessionProviding {
         let response = try await tokenRequest(
             grantType: "pkce",
             body: ["auth_code": code, "code_verifier": verifier])
+        let adopted = AuthTokens(
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresAt: response.expiryDate(now: now()),
+            userID: response.user?.id ?? "",
+            email: response.user?.email,
+            providerToken: response.providerToken,
+            providerRefreshToken: response.providerRefreshToken)
+        guard !adopted.userID.isEmpty else {
+            throw AuthSessionError.malformedResponse("token response carried no user id")
+        }
+        adopt(adopted)
+    }
+
+    /// The password door (`grant_type=password`) — the bridge's direct
+    /// Fragments-project sign-in (QUESTIONS #16, PROVISIONAL (c)): her
+    /// Fragments email+password once; only the resulting session persists,
+    /// never the password. Not used for the Variorum session (route A's
+    /// PKCE flow is that door).
+    func signInWithPassword(email: String, password: String) async throws {
+        let response = try await tokenRequest(
+            grantType: "password",
+            body: ["email": email, "password": password])
         let adopted = AuthTokens(
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
