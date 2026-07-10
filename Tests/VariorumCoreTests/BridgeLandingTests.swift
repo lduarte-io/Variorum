@@ -407,13 +407,12 @@ struct BridgeLandingTests {
         }
     }
 
-    /// The sealed-EMPTY corner (review round 1, NIT 8 — the one landing
-    /// path that had no test): a deliberately sealed, blockless entry has
-    /// no block to carry a rescue card and the seal refuses the mint. The
-    /// row is consumed with a note, NO day state is recorded, and the push
-    /// half can never blank the Fragments body (the empty-first-push
-    /// guard) — the body stays safe, un-landed, exactly as documented.
-    @Test func sealedEmptyEntryConsumesTheRowWithoutStateOrBlanking() async throws {
+    /// The sealed-EMPTY corner, round-3 shape (supersedes the rounds-1/2
+    /// consumed-with-a-note reading — the round-3 MAJOR proved "the body
+    /// stays safe in Fragments" false once the author unseals and types):
+    /// the landing now DEFERS — the cursor holds, the stall is visible —
+    /// and the held row lands normally the moment the seal lifts.
+    @Test func sealedEmptyEntryDefersUntilUnsealThenLands() async throws {
         try await withBridge { bridge in
             let entry = try bridge.ops.createOrOpenJournalEntry(entryDate: "2026-07-09").container
             try bridge.ops.lockPost(entry.id)  // sealed while still blockless
@@ -423,21 +422,67 @@ struct BridgeLandingTests {
                 updatedAt: bridge.fragmentsStamp(0))
 
             let round = try await bridge.engine.run()
-            #expect(round.landing.skipped == 1)
+            #expect(round.landing.deferred == 1)
+            #expect(round.landing.stalled)
             #expect(round.landing.notes.contains { $0.contains("sealed empty") })
-            // No agreement invented…
+            // No agreement invented, no block minted under the seal, the
+            // cursor HELD (the row must re-serve after unseal)…
             #expect(try bridge.dayState("2026-07-09") == nil)
-            // …no card, no block minted under the seal…
-            #expect(try bridge.db.fetchInt(
-                "SELECT COUNT(*) FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
-                [entry.id]) == 0)
+            #expect(try await bridge.db.read { try BridgeEngine.cursor($0) } == nil)
             // …and the push half never blanks the Fragments body.
             #expect(round.push.pushed == 0)
             #expect(await bridge.fragmentsBody(day: "2026-07-09")
                     == "Phone text against a sealed empty day.")
-            // Consumed: the next round does not re-see the row.
-            let quiet = try await bridge.engine.pullAndLand()
-            #expect(quiet.skipped == 0)
+
+            // Unseal → the held row re-serves and lands as THE block.
+            try bridge.ops.unlockPost(entry.id)
+            let landed = try await bridge.engine.run()
+            #expect(landed.landing.created == 1)
+            #expect(try bridge.rendered(day: "2026-07-09")
+                    == "Phone text against a sealed empty day.")
+            #expect(landed.push.pushed == 0, "converged — nothing to project")
+        }
+    }
+
+    /// THE ROUND-3 MAJOR PIN (red on pre-fix code): the unseal-and-type
+    /// continuation. Pre-fix, the sealed-empty landing CONSUMED the row
+    /// (cursor advanced, nothing recorded); after unseal + typing, the day
+    /// had no agreed hash and no remote stamp, so the push stamped `now`,
+    /// outranked the phone save under sane clocks, and LWW-destroyed it —
+    /// no live row, no variant, no commit, no server row. Post-fix the
+    /// held row re-serves after unseal and the save survives as a
+    /// `'fragments'` card while truth re-projects.
+    @Test func aSealedEmptyDaysBodySurvivesUnsealAndType() async throws {
+        try await withBridge { bridge in
+            let entry = try bridge.ops.createOrOpenJournalEntry(entryDate: "2026-07-09").container
+            try bridge.ops.lockPost(entry.id)
+            // A REALISTIC save stamp (barely above the test's clock base) —
+            // the destruction condition needs `now` to outrank it.
+            _ = try await bridge.server.fragmentsAppWrites(
+                configuration: bridge.config, day: "2026-07-09",
+                body: "Phone text typed while sealed.",
+                updatedAt: "2026-07-01T00:00:05.000Z")
+            _ = try await bridge.engine.run()  // pre-fix: consumed; post-fix: deferred
+
+            // The author unseals and types.
+            try bridge.ops.unlockPost(entry.id)
+            try bridge.ops.newBlock(in: entry.id, text: "Typed after unsealing.", at: .end)
+            // Burn local clock ticks safely past the save stamp (pre-fix
+            // pushes stamped `now`).
+            for _ in 0..<10 {
+                try bridge.ops.renameContainer(entry.id, title: "tick")
+            }
+
+            let round = try await bridge.engine.run()
+            // The held row re-serves: the save lands as a conflict card…
+            #expect(round.landing.conflictVariants == 1)
+            let block = try bridge.firstBlockID(day: "2026-07-09")!
+            #expect(try bridge.liveVariants(blockID: block).map(\.text)
+                    .contains("Phone text typed while sealed."),
+                    "the phone save must never be lost everywhere")
+            // …and truth re-projects over it.
+            #expect(round.push.pushed == 1)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Typed after unsealing.")
         }
     }
 

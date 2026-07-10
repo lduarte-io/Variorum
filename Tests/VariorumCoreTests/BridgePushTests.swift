@@ -181,6 +181,68 @@ struct BridgePushTests {
         }
     }
 
+    /// ROUND-3 MINOR-1 PIN (red on pre-fix code): a day rendering with a
+    /// GAP slot (referenced-but-missing rows mid-sync, SyncSpec §5) must
+    /// never push — its rendered text is PARTIAL (gaps contribute nothing),
+    /// and pre-fix the partial body pushed and could even BLANK the
+    /// Fragments row. The landing half already deferred on this store
+    /// state; the push half now agrees.
+    @Test func aGapSlotDayIsNeverPartiallyProjected() async throws {
+        try await withBridge { bridge in
+            try bridge.makeEntry(day: "2026-07-09", text: "Full agreed text.")
+            _ = try await bridge.engine.run()  // agreed; Fragments holds it
+            // A transient sync-race state: the slot resolves NO renderable
+            // variant (chosen and default both dead) — constructed raw, the
+            // way a partial pull application would leave it.
+            try await bridge.db.write { db in
+                try db.execute(sql: """
+                    UPDATE variant SET deleted_at = '2026-07-09T00:00:00.000Z'
+                    WHERE block_id IN (
+                      SELECT block_id FROM container_block cb
+                      JOIN container c ON c.id = cb.container_id
+                      WHERE c.entry_date = '2026-07-09' AND cb.deleted_at IS NULL
+                    )
+                    """)
+            }
+            let report = try await bridge.engine.push()
+            #expect(report.pushed == 0, "a partial rendering must never project")
+            #expect(report.notes.contains { $0.contains("gap") })
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Full agreed text.",
+                    "pre-fix the gap day pushed its PARTIAL (here: empty) rendering")
+        }
+    }
+
+    /// Round-3 NIT-1 coverage pin (green both sides by design): the
+    /// clock-ahead clamp × outranking-stamp interaction. Re-projecting over
+    /// a landed clock-ahead save requires stamping above it; a strict clamp
+    /// REJECTS that push — visibly (MINOR-4 surface), never silently, and
+    /// nothing is lost (the save is already a card in Variorum; Fragments
+    /// keeps its row). Bounded: minimal stamping only ever goes 1 s above a
+    /// stamp the server itself accepted. Clamp threshold/semantics: contract
+    /// ask 14.
+    @Test func aClampedReprojectionIsVisibleNeverSilentNothingLost() async throws {
+        try await withBridge { bridge in
+            let (_, variantID) = try bridge.makeEntry(day: "2026-07-09", text: "Original.")
+            _ = try await bridge.engine.run()  // agreed
+            // Both sides edit; the Fragments save carries a far-ahead stamp.
+            try bridge.ops.autosave(variantID, text: "Variorum rewrite.", charDelta: 8)
+            _ = try await bridge.server.fragmentsAppWrites(
+                configuration: bridge.config, day: "2026-07-09",
+                body: "Phone-ahead save.", updatedAt: bridge.fragmentsStamp(0))
+            // The server clamps stamps beyond the save's own time.
+            await bridge.server.setClockAheadLimit(bridge.fragmentsStamp(0))
+
+            let round = try await bridge.engine.run()
+            // The save landed as a card (nothing lost)…
+            #expect(round.landing.conflictVariants == 1)
+            // …and the re-projection (stamped save+1s, past the clamp) is
+            // REJECTED — visibly, in the round's notes.
+            #expect(round.push.rejected == 1)
+            #expect(round.push.notes.contains { $0.contains("clock_ahead") })
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Phone-ahead save.")
+        }
+    }
+
     @Test func staleOutcomeRecordsNothingSoThePullReconciles() async throws {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "Variorum text.")

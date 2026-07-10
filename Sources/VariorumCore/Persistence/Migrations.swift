@@ -78,11 +78,16 @@ extension AppDatabase {
         // `last_remote_stamp` (amended in place before any on-disk store
         // ran v1_4 — safe because migrations only skip stores that already
         // ran them, and none had): the incoming row's client-LWW
-        // `updated_at`, recorded at landing time. A push of that day stamps
-        // `max(now, last_remote_stamp + 1s)` — a re-projection is a LATER
-        // editorial event than the row it answers, and without the bump a
-        // clock ahead of ours (her phone) would leave truth's re-projection
-        // permanently `.stale` under their strict row-LWW.
+        // `updated_at`, recorded at landing time AND on every accepted push
+        // (the push's own sent stamp). A push of that day stamps
+        // `last_remote_stamp + 1s` — minimally above the newest server-row
+        // stamp the bridge has SEEN or WRITTEN, never the wall clock when a
+        // stamp is known (review round 2 MAJOR; supersedes round 1's
+        // `max(now, …)`): the push is a compare-and-set that outranks
+        // exactly what the bridge knows and goes `.stale` against an unseen
+        // Fragments save, which then lands as a conflict card instead of
+        // being LWW-destroyed. `now` only on first contact or an
+        // unparseable stamp.
         // `last_synced_hash` is NULLABLE (second in-place amendment, same
         // safety; review round 1, MINOR 3): a day can carry a remote LWW
         // stamp with NO agreed body — the first-contact tombstone-races-an-

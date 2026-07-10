@@ -252,13 +252,20 @@ public struct BridgeEngine: Sendable {
                 return .created(agreed)
             } catch OperationError.lockedPost {
                 // Sealed EMPTY entry: no block exists to carry a rescue
-                // variant, and the seal refuses the mint. Documented
-                // residual (closeout): the row is consumed with a note —
-                // the body stays safe in Fragments; no state is recorded,
-                // so no push can overwrite it with emptiness.
-                return .skipped(
-                    note: "sealed empty entry \(day): landing refused by the seal; body remains in Fragments",
-                    record: nil)
+                // variant, and the seal refuses the mint. DEFER — the
+                // cursor holds and the round is visibly stalled until the
+                // author unseals, whereupon the held row re-serves and
+                // lands normally (review round 3, MAJOR; supersedes the
+                // rounds-1/2 consumed-with-a-note reading, whose "the body
+                // stays safe in Fragments" was true only WHILE sealed:
+                // consuming the row left the body behind the cursor with
+                // no state, and the first post-unseal push — no agreed
+                // hash, no remote stamp, `now` fallback — LWW-destroyed it
+                // everywhere. Stalling is safe by design; guessing is the
+                // forbidden move. PROVISIONAL shape (a) of two — see the
+                // closeout's round-3 section and QUESTIONS #14(c)).
+                return .deferred(
+                    note: "sealed empty entry \(day): landing refused by the seal; the feed holds until it is unsealed")
             }
         }
 
@@ -412,7 +419,22 @@ public struct BridgeEngine: Sendable {
                         paused.append(day)
                         continue
                     }
-                    let rendered = try Queries.renderedText(db, containerID: entryIDs[0])
+                    let slots = try Queries.renderPost(db, containerID: entryIDs[0])
+                    if slots.contains(where: \.isGap) {
+                        // A gap slot (referenced-but-missing rows mid-sync)
+                        // renders as nothing, so the day's rendered text is
+                        // PARTIAL — projecting it would push a body missing
+                        // a block's text (and could overwrite an unseen
+                        // save the landing half just deferred on). The
+                        // landing half already refuses to classify this
+                        // store state; the push half now agrees (review
+                        // round 3, MINOR 1). Self-heals when the gap fills.
+                        notes.append("day \(day) has a gap slot (sync race); push skipped until it heals")
+                        continue
+                    }
+                    let rendered = slots.compactMap(\.text)
+                        .filter { !$0.isEmpty }
+                        .joined(separator: Queries.blockJoinSeparator)
                     let hash = BridgeHash.body(rendered)
                     let state = try Self.dayRow(db, dayKey: day)
                     let agreedHash = state?.hash ?? nil  // nil row OR stamp-only row

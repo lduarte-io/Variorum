@@ -106,7 +106,14 @@ public actor BridgeScheduler {
         } catch {
             // Offline / signed-out / server hiccup: the round is skipped,
             // the cursor and day hashes keep everything, the next trigger
-            // retries. Never a reason to touch state.
+            // retries. Never a reason to touch state. `pausedDays`/
+            // `stalled`/`issueNotes` deliberately KEEP the previous clean
+            // round's values (round 3, NIT 2): a failed round learned
+            // nothing about them, the last-known truths usually still hold
+            // (a paused day stays paused), and the shipped row's error
+            // branch short-circuits them anyway — programmatic consumers
+            // should treat them as as-of `lastSuccessAt` when `lastError`
+            // is set.
             status.lastError = String(describing: error)
         }
         status.isBridging = false
