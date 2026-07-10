@@ -56,6 +56,23 @@ struct FragmentsTransportTests {
         #expect(!violation.isClockAhead)
     }
 
+    /// THE PERMANENT POSTURE (ask 13's hedged upgrade — Fragments' 15.7
+    /// replaced-body receipt is DRAFTED, not final, not deployed): ignore
+    /// unknown response keys; consume `replaced` only if present. Until
+    /// their deploy ping finalizes the shape, a response CARRYING a
+    /// `replaced` key must decode cleanly and be ignored — nothing pinned,
+    /// nothing broken.
+    @Test func pushResponseTolerantlyIgnoresUnknownKeysIncludingReplaced() throws {
+        let withReceipt = """
+            {"applied": 1, "skipped": 0, "conflicts": [],
+             "replaced": [{"id": "7ab43871-10ad-5597-a0d7-d721fcd3ecf9",
+                           "previous_body": "the destroyed text",
+                           "previous_updated_at": "2026-07-09T10:00:00.692012+00:00"}]}
+            """.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(FragmentsPushResponse.self, from: withReceipt)
+        #expect(decoded == FragmentsPushResponse(applied: 1, skipped: 0, conflicts: []))
+    }
+
     @Test func pullParamsEncodeThePPrefixedKeyset() throws {
         let data = try JSONEncoder().encode(SyncPullParams(
             pTable: "journal_entries",

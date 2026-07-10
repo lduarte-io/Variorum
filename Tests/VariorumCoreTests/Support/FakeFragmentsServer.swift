@@ -118,15 +118,18 @@ actor FakeFragmentsServer: FragmentsBridgeTransport {
                 }
             }
             if let current {
-                if current.entry.deletedAt == nil {
-                    // Live row: TIES GO TO THE PUSHER (>=, migration 7).
-                    guard incoming.updatedAt >= current.entry.updatedAt else {
+                if let tombstone = current.entry.deletedAt {
+                    // Tombstoned row: migration 7's exact predicate —
+                    // resurrect only when STRICTLY newer than the
+                    // TOMBSTONE's deleted_at (not updated_at; addendum
+                    // precision on the truncated line).
+                    guard incoming.updatedAt > tombstone else {
                         response.skipped += 1
                         continue
                     }
                 } else {
-                    // Tombstoned row: resurrect only on STRICTLY newer.
-                    guard incoming.updatedAt > current.entry.updatedAt else {
+                    // Live row: TIES GO TO THE PUSHER (>=, migration 7).
+                    guard incoming.updatedAt >= current.entry.updatedAt else {
                         response.skipped += 1
                         continue
                     }
@@ -162,13 +165,15 @@ actor FakeFragmentsServer: FragmentsBridgeTransport {
     }
 
     func delete(ids: [String]) throws -> Int {
-        // sync_delete: server-stamped soft delete; unknown ids ignored.
+        // sync_delete: server-stamped soft delete (deleted_at =
+        // clock_timestamp(); updated_at UNTOUCHED — the resurrect bar is
+        // deleted_at); unknown ids ignored; no LWW guard on the delete
+        // itself (the guard is on resurrection).
         var tombstoned = 0
         let stamp = nextServerStamp()
         for id in ids {
             guard var stored = entries[id], stored.entry.deletedAt == nil else { continue }
             stored.entry.deletedAt = stamp
-            stored.entry.updatedAt = stamp
             stored.entry.serverUpdatedAt = nextServerStamp()
             stored.writtenAtTick = clock
             entries[id] = stored
@@ -230,9 +235,9 @@ actor FakeFragmentsServer: FragmentsBridgeTransport {
     @discardableResult
     func fragmentsAppDeletes(day: String, deletedAt: String) throws -> Bool {
         guard let id = entryID(day: day), var stored = entries[id] else { return false }
-        guard deletedAt > stored.entry.updatedAt else { return false }
+        // Deletes are unguarded (sync_delete just stamps); updated_at is
+        // untouched — resurrection compares strictly against deleted_at.
         stored.entry.deletedAt = deletedAt
-        stored.entry.updatedAt = deletedAt
         stored.entry.serverUpdatedAt = nextServerStamp()
         stored.writtenAtTick = clock
         entries[id] = stored

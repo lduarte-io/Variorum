@@ -93,20 +93,35 @@ struct FakeFragmentsServerTests {
     // MARK: Un-tombstone only on STRICTLY-newer edits (confirmed — the
     // SQL's resurrect guard; their spec prose wrongly says stale-can-resurrect)
 
-    @Test func unTombstoneRequiresStrictlyNewer() async throws {
+    /// Migration 7's EXACT resurrect predicate (addendum precision on the
+    /// truncated line): `t.deleted_at IS NOT NULL AND excluded.updated_at
+    /// > t.deleted_at` — strictly newer than the TOMBSTONE's deleted_at,
+    /// NOT its updated_at. The distinguishing case: sync_delete stamps
+    /// deleted_at without touching updated_at, so a push newer than the
+    /// row's last edit but older than its tombstone must STAY DEAD (an
+    /// updated_at comparison would wrongly resurrect it).
+    @Test func unTombstoneComparesStrictlyAgainstTheTombstoneStamp() async throws {
         let server = makeServer()
         let day = "2026-07-09"
         _ = try await server.push([entry(day: day, body: "alive", updatedAt: "2026-07-09T10:00:00.000Z")])
+        // Deleted LATER; updated_at stays at 10:00 (sync_delete semantics).
         _ = try await server.fragmentsAppDeletes(day: day, deletedAt: "2026-07-09T11:00:00.000Z")
-        // Re-push stamped AT the tombstone: skipped, stays dead (ties do
-        // NOT resurrect — the tombstone branch is strict).
-        let atTombstone = try await server.push([entry(day: day, body: "revive?", updatedAt: "2026-07-09T11:00:00.000Z")])
-        #expect(atTombstone.skipped == 1)
         let id = FragmentsContract.entryID(
             namespace: FragmentsContract.fragmentsNamespace,
             canonicalUser: canonical, dayKey: day)!
+        #expect(await server.currentEntry(id: id)?.updatedAt == "2026-07-09T10:00:00.000Z",
+                "the delete must not touch updated_at")
+        // THE PREDICATE DISTINGUISHER: newer than updated_at, older than
+        // the tombstone — must be skipped (updated_at-comparison would
+        // resurrect).
+        let between = try await server.push([entry(day: day, body: "between?", updatedAt: "2026-07-09T10:30:00.000Z")])
+        #expect(between.skipped == 1)
         #expect(await server.currentEntry(id: id)?.deletedAt != nil)
-        // Strictly newer revives.
+        // AT the tombstone: skipped (strict).
+        let atTombstone = try await server.push([entry(day: day, body: "revive?", updatedAt: "2026-07-09T11:00:00.000Z")])
+        #expect(atTombstone.skipped == 1)
+        #expect(await server.currentEntry(id: id)?.deletedAt != nil)
+        // Strictly newer than the tombstone revives.
         let newer = try await server.push([entry(day: day, body: "revived", updatedAt: "2026-07-09T11:00:01.000Z")])
         #expect(newer.applied == 1)
         let current = await server.currentEntry(id: id)

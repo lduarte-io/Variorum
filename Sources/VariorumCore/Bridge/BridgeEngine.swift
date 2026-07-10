@@ -220,8 +220,13 @@ public struct BridgeEngine: Sendable {
         }
         let effectiveBody = entry.isTombstoned ? "" : entry.body
         let incomingHash = BridgeHash.body(effectiveBody)
+        // The row's LWW bar: updated_at for live rows; for tombstones the
+        // resurrect bar is the TOMBSTONE's deleted_at (migration 7's exact
+        // predicate — addendum precision), so the re-projection must
+        // outrank THAT.
+        let remoteLWWStamp = entry.deletedAt ?? entry.updatedAt
         let agreed = DayBookkeeping(
-            day: day, hash: incomingHash, remoteStamp: entry.updatedAt,
+            day: day, hash: incomingHash, remoteStamp: remoteLWWStamp,
             remoteCreatedAt: entry.createdAt)
 
         var context = try await readDayContext(day: day)
@@ -361,7 +366,7 @@ public struct BridgeEngine: Sendable {
             return .skipped(
                 note: "Fragments deletion of \(day) raced a Variorum edit: the edit survives, truth re-projects",
                 record: DayBookkeeping(
-                    day: day, hash: nil, remoteStamp: entry.updatedAt,
+                    day: day, hash: nil, remoteStamp: remoteLWWStamp,
                     remoteCreatedAt: entry.createdAt))
         }
         if try await hasLiveVariant(blockID: firstSlot.blockID, text: entry.body) {
