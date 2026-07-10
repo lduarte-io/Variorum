@@ -63,6 +63,30 @@ extension AppDatabase {
                 );
                 """)
         }
+        // Phase 9b (Fragments bridge): the bridge's LOCAL-ONLY state —
+        // never synced, no sync_version, no outbox triggers, exempt from
+        // SyncSpec §12's lockstep (nothing on the mirror changes). Two
+        // tables where the plan sketched one, because the two lifetimes
+        // differ: `bridge_day` is per-calendar-day protocol state (the
+        // hash of the last body BOTH surfaces agreed on — recorded on
+        // push-accept AND on every pull-landing, which is what makes
+        // echoes/replays skip and gives push its change detection), while
+        // `bridge_state` is per-bridge bookkeeping (the Fragments keyset
+        // pull cursor), which has no day to live on. Both join
+        // SyncSchema.localOnlyTables so the registry/completeness walks
+        // KNOW they are deliberately unsynced.
+        migrator.registerMigration("v1_4_bridge_state") { db in
+            try db.execute(sql: """
+                CREATE TABLE bridge_state (
+                  key   TEXT PRIMARY KEY,
+                  value TEXT NOT NULL
+                );
+                CREATE TABLE bridge_day (
+                  day_key          TEXT PRIMARY KEY,
+                  last_synced_hash TEXT NOT NULL
+                );
+                """)
+        }
         return migrator
     }
 }

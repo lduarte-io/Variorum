@@ -10,6 +10,8 @@ struct MigrationTests {
         "container_block", "reading", "reading_post", "tag",
         "post_tag", "block_tag", "reference", "setting",
         "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying",
+        // Phase 9b (v1_4): the Fragments bridge's local-only state.
+        "bridge_state", "bridge_day",
     ]
 
     static let expectedIndexes: Set<String> = [
