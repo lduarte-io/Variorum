@@ -238,6 +238,31 @@ kickoff's "transitions the author's LIVE sync" caution overstates today's stakes
 seconds-cheap manual pre-cutover backup stays in the choreography anyway (it costs
 nothing and rehearses the path), but the cutover's risk posture is recorded as LOW.
 
+**Round 5 (same day — two author process amendments):** (1) **The Step 3 SQL paste is
+re-gated from author-paste to coordinator-executes-with-standing-authorization:** the
+author explicitly authorized the coordinator to run `04_auth_rls.sql` against the
+Variorum project via her PAT (untracked `.env.supabase.local`, Management API) at the
+cutover moment — "I think you should be able to do it yourself with the PAT"; she
+remains on standby for the same sitting's sign-ins and the backfill trigger. Conditions
+the coordinator holds itself to: announce before executing, the committed in-repo file
+is the exact artifact run, §12 ordering unchanged (backup → backfill converged on both
+devices → THEN the paste), post-paste verification probes (bare-key refusal; her
+session syncs). Supersedes the "author pastes in the SQL editor" wording in Step 3 and
+the kickoff. (2) **Step 6 gets a self-contained RUNBOOK as a first-class deliverable**
+(author ask, same message — this coordinator session is at 400k+ tokens and she wants
+the option of running Step 6's walkthroughs/checks with a FRESH agent): the implementer
+writes `notes/handoffs/phase-09c-step6-runbook.md` — every gate as an executable
+checklist a fresh session (or the author alone) can conduct without ANY prior-session
+context: the backup command, the backfill trigger + totality verification, the cutover
+execution + exact post-paste probes with expected outputs, Release-install steps for
+the phone (and WHY release — the A4 fence), both device sign-ins, the device-round
+script (offline capture, two-way edits, the same-entry conflict check), the
+real-Fragments pass script + dump-compare commands, the bridge configuration checks,
+and per-gate failure→recovery paths (RLS-lockout rollback included). The ordinary
+phase handoff still gets written per the closeout ritual; the runbook is its Step 6
+arm, held to the same bar: if a gate question needs this session's context, the
+runbook is incomplete.
+
 **Round 3-precursor (2026-07-10, the implementer's Sonnet lookup — ran BEFORE the
 spike above, which consumed these findings; each fact tagged DOCUMENTED /
 CODE-DERIVED / INFERRED):**
