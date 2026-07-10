@@ -1,0 +1,182 @@
+import Foundation
+import Testing
+@testable import VariorumCore
+
+/// Phase 9b, Step 5 — the bridge lifecycle: serialized, coalescing rounds
+/// (the SyncScheduler contract, per the plan's "scheduler-level tests");
+/// a failed round keeps ALL bridge state (cursor + day hashes) intact for
+/// retry; a retired scheduler never rounds again. The after-sync ORDERING
+/// lives in the app layer (AppServices triggers the bridge from sync
+/// round-completions) — thin wiring documented there; the serialization
+/// guarantees live here.
+@Suite("Bridge scheduler (Phase 9b, Step 5)")
+struct BridgeSchedulerTests {
+    /// A transport wrapper that can hold calls at a gate and fail on
+    /// demand — the GatedSpyTransport pattern for the Fragments dialect.
+    actor GatedBridgeTransport: FragmentsBridgeTransport {
+        enum Call: Equatable { case pull, push(count: Int), delete }
+        private let server: FakeFragmentsServer
+        private(set) var calls: [Call] = []
+        private var gated = false
+        private var gateWaiters: [CheckedContinuation<Void, Never>] = []
+        private var arrivalWaiters: [CheckedContinuation<Void, Never>] = []
+        private var failing = false
+
+        init(server: FakeFragmentsServer) {
+            self.server = server
+        }
+
+        func closeGate() { gated = true }
+        func openGate() {
+            gated = false
+            let waiters = gateWaiters
+            gateWaiters.removeAll()
+            for waiter in waiters { waiter.resume() }
+        }
+        func setFailing(_ failing: Bool) { self.failing = failing }
+        func awaitCallAtGate() async {
+            if !gateWaiters.isEmpty { return }
+            await withCheckedContinuation { arrivalWaiters.append($0) }
+        }
+
+        private func passGate() async throws {
+            for waiter in arrivalWaiters { waiter.resume() }
+            arrivalWaiters.removeAll()
+            if gated {
+                await withCheckedContinuation { gateWaiters.append($0) }
+            }
+            if failing { throw FragmentsTransportError.notHTTP }
+        }
+
+        func push(_ entries: [FragmentsEntry]) async throws -> [FragmentsPushOutcome] {
+            calls.append(.push(count: entries.count))
+            try await passGate()
+            return try await server.push(entries)
+        }
+
+        func pull(after cursor: FragmentsPullCursor?, limit: Int) async throws -> [FragmentsEntry] {
+            calls.append(.pull)
+            try await passGate()
+            return try await server.pull(after: cursor, limit: limit)
+        }
+
+        func delete(ids: [String], deletedAt: String) async throws -> [FragmentsPushOutcome] {
+            calls.append(.delete)
+            try await passGate()
+            return try await server.delete(ids: ids, deletedAt: deletedAt)
+        }
+    }
+
+    @Test func triggersMidRoundCoalesceIntoOneFollowUp() async throws {
+        try await withBridge { bridge in
+            try bridge.makeEntry(day: "2026-07-09", text: "text")
+            let gate = GatedBridgeTransport(server: bridge.server)
+            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let scheduler = BridgeScheduler(engine: engine)
+
+            await gate.closeGate()
+            await scheduler.trigger()
+            await gate.awaitCallAtGate()  // round 1 is genuinely mid-flight
+            // A burst of triggers while the round runs…
+            for _ in 0..<5 { await scheduler.trigger() }
+            await gate.openGate()
+            await scheduler.awaitIdle()
+
+            // …collapses into exactly ONE follow-up round: 2 rounds total.
+            let status = await scheduler.status
+            #expect(status.roundsCompleted == 2)
+            #expect(status.lastError == nil)
+        }
+    }
+
+    @Test func aFailedRoundKeepsCursorAndDayStateIntact() async throws {
+        try await withBridge { bridge in
+            // A healthy first round lands one Fragments entry and records
+            // state.
+            _ = try await bridge.server.fragmentsAppWrites(
+                configuration: bridge.config, day: "2026-07-09",
+                body: "Landed.", updatedAt: bridge.fragmentsStamp(0))
+            let gate = GatedBridgeTransport(server: bridge.server)
+            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let scheduler = BridgeScheduler(engine: engine)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            let cursorBefore = try await bridge.db.read { try BridgeEngine.cursor($0) }
+            let stateBefore = try bridge.dayState("2026-07-09")
+            #expect(cursorBefore != nil)
+            #expect(stateBefore != nil)
+
+            // The next round fails at the transport (offline).
+            await gate.setFailing(true)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            let status = await scheduler.status
+            #expect(status.lastError != nil)
+            #expect(status.roundsCompleted == 2)
+            // Nothing moved: cursor and day hashes intact for retry.
+            #expect(try await bridge.db.read { try BridgeEngine.cursor($0) } == cursorBefore)
+            #expect(try bridge.dayState("2026-07-09") == stateBefore)
+
+            // Healed: the retry succeeds and clears the error.
+            await gate.setFailing(false)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            #expect(await scheduler.status.lastError == nil)
+        }
+    }
+
+    @Test func aRetiredSchedulerNeverRoundsAgain() async throws {
+        try await withBridge { bridge in
+            let gate = GatedBridgeTransport(server: bridge.server)
+            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let scheduler = BridgeScheduler(engine: engine)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            #expect(await scheduler.status.roundsCompleted == 1)
+
+            await scheduler.retire()
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            #expect(await scheduler.status.roundsCompleted == 1, "retired refuses new rounds")
+        }
+    }
+
+    @Test func statusSurfacesTheDuplicateDayPause() async throws {
+        try await withBridge { bridge in
+            let dupA = try bridge.ops.createPost(profile: .journal, entryDate: "2026-07-09")
+            try bridge.ops.newBlock(in: dupA.id, text: "A", at: .end)
+            let dupB = try bridge.ops.createPost(profile: .journal, entryDate: "2026-07-09")
+            try bridge.ops.newBlock(in: dupB.id, text: "B", at: .end)
+
+            let scheduler = BridgeScheduler(engine: bridge.engine)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            #expect(await scheduler.status.pausedDays == ["2026-07-09"])
+
+            // Hand-merge → the pause clears from the surface.
+            try bridge.ops.deleteContainer(dupB.id)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            #expect(await scheduler.status.pausedDays.isEmpty)
+        }
+    }
+
+    /// The round is pull → push, pinned (reconcile before projecting —
+    /// what makes first contact safe).
+    @Test func aRoundPullsBeforeItPushes() async throws {
+        try await withBridge { bridge in
+            try bridge.makeEntry(day: "2026-07-09", text: "to push")
+            let gate = GatedBridgeTransport(server: bridge.server)
+            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let scheduler = BridgeScheduler(engine: engine)
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            let calls = await gate.calls
+            #expect(calls.first == .pull)
+            #expect(calls.contains { if case .push = $0 { return true }; return false })
+            let firstPushIndex = calls.firstIndex { if case .push = $0 { return true }; return false }
+            let lastPullIndex = calls.lastIndex(of: .pull)
+            #expect(lastPullIndex! < firstPushIndex!, "every pull precedes the push half")
+        }
+    }
+}

@@ -30,7 +30,10 @@ struct RootView: View {
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220)
                 .safeAreaInset(edge: .bottom) {
                     if let services {
-                        SyncStatusRow(sync: services.sync)
+                        VStack(alignment: .leading, spacing: 0) {
+                            SyncStatusRow(sync: services.sync)
+                            BridgeStatusRow(bridge: services.bridge)
+                        }
                     }
                 }
         } detail: {

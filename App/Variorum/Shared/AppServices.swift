@@ -14,12 +14,20 @@ import VariorumCore
 @MainActor
 final class AppServices {
     let sync: SyncSession
+    /// The Fragments journal bridge (Phase 9b). Mac-side only this phase;
+    /// stays UNCONFIGURED until Phase 9c's sign-in wires an engine — the
+    /// wiring below (fence, after-sync triggering, status row) is the
+    /// shape 9c drops into.
+    let bridge: BridgeSession
     let idleCommits: IdleCommitScheduler
     /// Rotating cold copies (A1). Wired on the Mac; nil on iOS — the
     /// phone's store is re-derivable from the mirror.
     let backup: StoreBackup?
 
-    init(session: AppSession, storeVariant: AppDatabase.StoreVariant, backupEnabled: Bool) {
+    init(
+        session: AppSession, storeVariant: AppDatabase.StoreVariant,
+        backupEnabled: Bool, bridgeEnabled: Bool = false
+    ) {
         // THE A4 FENCE, SYNC SEAM (review round 1, BLOCKER): only the REAL
         // store may pair with the one production mirror. Debug and release
         // builds share a bundle identity and Keychain, so a dev-store
@@ -27,6 +35,16 @@ final class AppServices {
         // dev bug's writes would push to the mirror and replicate to her
         // real devices.
         sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
+        // THE A4 FENCE EXTENDS TO THE BRIDGE (Phase 9b): the author's live
+        // Fragments journal pairs with the REAL store only — a dev-store
+        // session must never land or push against it.
+        bridge = BridgeSession(allowsBridge: bridgeEnabled && storeVariant == .real)
+        // Bridge rounds ride the sync cadence: AFTER each sync round, never
+        // interleaved with one (a landing sees the store the mirror sync
+        // just settled). Unconfigured sessions no-op.
+        sync.onRoundCompleted = { [weak bridge = bridge] in
+            bridge?.trigger()
+        }
         // The sweep's low-water mark is per-store bookkeeping: scoped by
         // variant so a dev-store sweep can never advance the real store's
         // mark (review round 1, MINOR).
@@ -51,6 +69,10 @@ final class AppServices {
     func start() async {
         if await sync.loadPersistedCredentials() {
             sync.triggerSync()
+        } else {
+            // No sync round will complete to carry the bridge trigger —
+            // give a (configured) bridge its launch round directly.
+            bridge.trigger()
         }
         idleCommits.start()
         backup?.start()
@@ -58,6 +80,7 @@ final class AppServices {
 
     func stop() {
         sync.stop()
+        bridge.stop()
         idleCommits.stop()
         backup?.stop()
     }

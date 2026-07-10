@@ -38,6 +38,10 @@ final class SyncSession {
     var isConfigured: Bool { scheduler != nil }
     /// False for dev-store sessions (the A4 fence's sync seam, above).
     let allowsSync: Bool
+    /// Fired on the main actor each time a sync round FINISHES (clean or
+    /// failed). Phase 9b: AppServices triggers the Fragments bridge here,
+    /// so bridge rounds follow sync rounds and never interleave with one.
+    var onRoundCompleted: (() -> Void)?
 
     private let database: AppDatabase
     /// Post-write settle debounce: outbox growth quiets down for this long
@@ -110,10 +114,17 @@ final class SyncSession {
         let scheduler = SyncScheduler(engine: SyncEngine(transport: transport))
         self.scheduler = scheduler
 
-        // Status → the observable surface.
+        // Status → the observable surface (+ the round-completion hook:
+        // roundsCompleted increments exactly once per finished round).
         observationTasks.append(Task { [weak self] in
+            var seenRounds = 0
             for await status in await scheduler.statusUpdates() {
-                self?.status = status
+                guard let self else { break }
+                self.status = status
+                if status.roundsCompleted > seenRounds {
+                    seenRounds = status.roundsCompleted
+                    self.onRoundCompleted?()
+                }
             }
         })
         // Local writes settle → one round. The outbox observation fires at

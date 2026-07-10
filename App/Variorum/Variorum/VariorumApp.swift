@@ -33,7 +33,8 @@ struct VariorumApp: App {
                         let fresh = AppServices(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
-                            backupEnabled: true)
+                            backupEnabled: true,
+                            bridgeEnabled: true)  // Mac-side (Phase 9b scope)
                         services = fresh
                         await fresh.start()
                     }
