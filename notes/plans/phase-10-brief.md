@@ -52,7 +52,10 @@ AppSpec §14's evening delta; KnownIssues rows for both):**
    deliberately open — QUESTIONS #12). Whatever mechanism is chosen must reconcile with the
    single-`"\n"` editor separator and the `"\n\n"` renderedText ratifications — **ask the
    author live** before implementing a reading; do not PROVISIONAL this one, she asked to
-   be asked.
+   be asked. **Her same-evening follow-up: the live conversation is broader than paste** —
+   cover the various spacing use cases *including how newline entry is handled*; her words:
+   "the editor is so ugly as is, and we'll have to fix it." The functional spacing/newline
+   treatment belongs to this item; pure visual polish stays Phase 13.
 
 ## The phase's center of gravity
 

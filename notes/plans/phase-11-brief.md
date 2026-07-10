@@ -94,9 +94,9 @@ uncertainty (her instruction: "don't add more certainty than I have"), and she h
    important to the overall app and approach"* (suggested shape: side-by-side takes,
    "maybe with a horizontal scroll when there's many of them"). The §12 side-by-side +
    expand-all-fans views in this phase's set are the home — treat this as a first-class
-   deliverable, not a tail item. How simultaneous *editability* reconciles with P3 (one
-   live editor; focus migrates between panes is the natural reading, not pre-decided) is
-   the design round's to answer **with her**.
+   deliverable, not a tail item. P3 reconciliation **ratified by the author the same
+   evening: the live editor migrates between panes as you click** — one live editor holds
+   unchanged; the design round inherits this as settled, not a question.
 
 ## Standing definitions already settled elsewhere (the plan cites, never re-decides)
 
