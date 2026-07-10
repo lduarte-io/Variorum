@@ -75,6 +75,14 @@ extension AppDatabase {
         // pull cursor), which has no day to live on. Both join
         // SyncSchema.localOnlyTables so the registry/completeness walks
         // KNOW they are deliberately unsynced.
+        // `last_remote_stamp` (amended in place before any on-disk store
+        // ran v1_4 — safe because migrations only skip stores that already
+        // ran them, and none had): the incoming row's client-LWW
+        // `updated_at`, recorded at landing time. A push of that day stamps
+        // `max(now, last_remote_stamp + 1s)` — a re-projection is a LATER
+        // editorial event than the row it answers, and without the bump a
+        // clock ahead of ours (her phone) would leave truth's re-projection
+        // permanently `.stale` under their strict row-LWW.
         migrator.registerMigration("v1_4_bridge_state") { db in
             try db.execute(sql: """
                 CREATE TABLE bridge_state (
@@ -82,8 +90,9 @@ extension AppDatabase {
                   value TEXT NOT NULL
                 );
                 CREATE TABLE bridge_day (
-                  day_key          TEXT PRIMARY KEY,
-                  last_synced_hash TEXT NOT NULL
+                  day_key           TEXT PRIMARY KEY,
+                  last_synced_hash  TEXT NOT NULL,
+                  last_remote_stamp TEXT
                 );
                 """)
         }
