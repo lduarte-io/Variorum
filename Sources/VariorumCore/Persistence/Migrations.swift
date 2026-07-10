@@ -83,6 +83,12 @@ extension AppDatabase {
         // editorial event than the row it answers, and without the bump a
         // clock ahead of ours (her phone) would leave truth's re-projection
         // permanently `.stale` under their strict row-LWW.
+        // `last_synced_hash` is NULLABLE (second in-place amendment, same
+        // safety; review round 1, MINOR 3): a day can carry a remote LWW
+        // stamp with NO agreed body — the first-contact tombstone-races-an-
+        // edit case records the stamp only, and a NOT NULL hash forced that
+        // record into a no-op UPDATE, silently re-opening the `.stale`
+        // wedge the stamp exists to close.
         migrator.registerMigration("v1_4_bridge_state") { db in
             try db.execute(sql: """
                 CREATE TABLE bridge_state (
@@ -91,7 +97,7 @@ extension AppDatabase {
                 );
                 CREATE TABLE bridge_day (
                   day_key           TEXT PRIMARY KEY,
-                  last_synced_hash  TEXT NOT NULL,
+                  last_synced_hash  TEXT,
                   last_remote_stamp TEXT
                 );
                 """)
