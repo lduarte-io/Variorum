@@ -191,8 +191,40 @@ implementer's lookup supplies the path). Client credentials, when issued, go in 
 untracked gitignored `.env.fragments-oauth.local` — never chat, never tracked files;
 the author copies them into the Variorum provider form from there.
 
-**Round 3 (2026-07-10, the implementer's Sonnet lookup — answers the round-1/2
-directives; each fact tagged DOCUMENTED / CODE-DERIVED / INFERRED):**
+**Round 3 (same day — the spike RAN; ROUTE A CONFIRMED by the author):** registration
+succeeded through the dynamic door once the toggle actually saved (client_id
+*[removed for publication]*
+the untracked `.env.fragments-oauth.local`); the custom provider was created (slug
+`fragments`, auto-discovery, the pinned issuer). TWO dashboard didn't-save incidents
+(first the toggle, then the Authorization Path — the OAuth Server page's save step is
+easy to miss); the stale path surfaced as a localhost 404, diagnosed by the
+coordinator's hop trace (hop 1 Variorum→Fragments authorize PROVEN — client recognized,
+PKCE + state + callback correct; hop 2 still redirecting to the old `/oauth/consent`).
+After the re-save, the full delegated sign-in succeeded END TO END: consent page
+(email+password against the Fragments project) → approve → callback with the REDACTED
+summary. **The evidence (the Step 0 memo's substance):** a Variorum-minted session —
+*[removed for publication]*
+on), `iss` = Variorum `/auth/v1`, `role`/`aud` authenticated, `amr` oauth, provider
+`custom:fragments` — and **`provider_token` + `provider_refresh_token` BOTH PRESENT**,
+the provider token being a genuine Fragments-project user JWT (`sub
+*[removed for publication]*
+Fragments `/auth/v1`, `role` authenticated, exp 3600 s). The inner V↔F token exchange —
+the chain's flagged biggest unknown — ran live with her real account. Observed flow
+`implicit-fragment` (the harness's redirect_to shape; the real Step 1 sign-in uses the
+PKCE code flow). **ROUTE A CONFIRMED (author, 2026-07-10, at the coordinator's
+checkpoint question); fallback B stands down to documented-unused.** Spike tail
+remaining: the toggle-OFF verification (registered clients must survive "Allow Dynamic
+OAuth Apps" going off — coordinator hop-traces on her flip), then cleanup (remove the
+localhost redirect URL from Variorum's URL configuration; the Authorization Path stays
+`/consent.html` until the production page on stargazing.tech replaces it). Still
+unverified, owned by Steps 5/6: Fragments' PostgREST accepting the provider token for
+RLS (claims look right — verified only at the real-Fragments pass), and the
+provider-token refresh strategy (Supabase does not persist/refresh provider tokens —
+Step 5 designs the renewal or a direct-sign-in alternative).
+
+**Round 3-precursor (2026-07-10, the implementer's Sonnet lookup — ran BEFORE the
+spike above, which consumed these findings; each fact tagged DOCUMENTED /
+CODE-DERIVED / INFERRED):**
 
 - **(a) Client registration — three doors, best first.**
   1. *Dashboard (DOCUMENTED, un-reconciled with round 1):* the getting-started docs
@@ -417,3 +449,94 @@ dependencies (the auth REST surface is hand-rolled like the transports).
 *(Written at phase end: what shipped, test counts, the Step 0 memo + author call,
 gate results incl. the folded-in Phase 8 device rounds and the 9b real-Fragments
 pass, PROVISIONALs, review dispositions, the Phase 10 plan authored, the handoff.)*
+
+### Step 0 decision memo (2026-07-10 — the gate's artifact; field evidence in the
+### Step 0 field notes rounds 1–3 above)
+
+**DECISION: Route A — Fragments-as-custom-OIDC-provider — CONFIRMED (the author's
+explicit call at the coordinator's checkpoint question). Fallback B (shared
+asymmetric signing-key material) stands down to documented-unused; C stays
+rejected.** The plan-time lookup's one structural unknown — whether two Supabase
+projects can actually complete the OAuth 2.1 Server ↔ Custom-OIDC-Provider pairing —
+was answered by RUNNING it: one delegated sign-in with the author's real Fragments
+account succeeded end to end on 2026-07-10.
+
+*[removed for publication]*
+  Server enabled; Variorum registered as a client via the dynamic RFC 7591 door
+  *[removed for publication]*
+  `client_secret_post`; secret in the untracked `.env.fragments-oauth.local`);
+  *[removed for publication]*
+  (`custom:fragments`), auto-discovery from issuer
+  *[removed for publication]*
+  profile`. Consent UI: Supabase hosts none (verified); the spike served the
+  throwaway `Spikes/AuthPairingSpike/consent.html` at the Fragments Site URL
+  (`localhost:3000`, Authorization Path `/consent.html`); the production page lands
+  on the author's stargazing.tech (spec: `notes/fragments-consent-page-spec.md`).
+- **The evidence (redacted spike summary, verbatim values):** a Variorum-minted
+  *[removed for publication]*
+  the author's rows; the Step 4 keying decision collects on it), `iss` = Variorum
+  `/auth/v1`, role/aud `authenticated`, amr `oauth`, provider `custom:fragments`,
+  `expires_in` 3600, refresh token present — **plus `provider_token` AND
+  `provider_refresh_token` both riding the initial response**, the provider token a
+  *[removed for publication]*
+  the `journal_entries.user_id` class, `iss` = Fragments `/auth/v1`, role
+  `authenticated`). The one-account goal is DEMONSTRATED, not asserted: she signed
+  in once, with her Fragments identity, and Variorum minted her Variorum session.
+- **Operational notes for repetition:** the Fragments OAuth Server dashboard page
+  has an easy-to-miss save step — it silently discarded the toggle once and the
+  Authorization Path once (the stale path surfaced as a localhost 404; the
+  coordinator's hop trace isolated it). The spike observed the harness's
+  implicit-fragment flow; **the app's real sign-in (Step 1) uses the PKCE code
+  flow** — and MUST capture the provider token pair at exchange time, because
+  Supabase never persists or re-delivers provider tokens.
+- **Still open, with owners:** (i) toggle-OFF survival of the registered client —
+  the author flips "Allow Dynamic OAuth Apps" off, the coordinator hop-traces;
+  treated as unconfirmed until relayed (spike's localhost redirect-URL cleanup
+  waits on it too). (ii) Fragments' PostgREST accepting the provider token for RLS —
+  claims look exactly right; verified only at Step 6(iv)'s real-Fragments pass.
+  (iii) The provider-token refresh strategy for the bridge — options + PROVISIONAL
+  in the Step 5 design note below. (iv) Consent auto-skip on repeat client+scope —
+  code-derived expectation, not yet observed (single run).
+
+### Step 5 design note — the bridge's Fragments session (options weighed 2026-07-10;
+### PROVISIONAL per the addendum rules; QUESTIONS #16 carries it to the checkpoint)
+
+Step 0 proved `provider_token` + `provider_refresh_token` ride the initial Variorum
+sign-in — but Supabase never persists or refreshes them, provider tokens expire in
+~1 h, and the bridge needs an indefinite Fragments-project session. Four shapes:
+
+- **(a1) Refresh the provider pair as the registered confidential client.** The app
+  holds the client_id + client_secret (Keychain, author-pasted from her untracked
+  env — never bundled/committed) and renews against Fragments'
+  `/auth/v1/oauth/token`. Costs: a client SECRET living on-device inside the app
+  whose whole phase exists to stop shipping bearer secrets; rests on the unverified
+  semantics of a third party refreshing tokens minted through Variorum's GoTrue
+  exchange; and rests on (ii) above.
+- **(a2) Refresh the provider pair as a second PUBLIC client** (`token_endpoint_
+  auth_method: none` — supported). No secret on-device — but almost certainly
+  unworkable: OAuth refresh tokens are bound to the client they were issued to
+  (Variorum's confidential client), and a refresh_token grant from a different
+  client_id is standardly rejected. Recorded so nobody re-derives it.
+- **(b) The app registers as its OWN public client on the Fragments OAuth server**
+  and runs a second delegated PKCE flow for a first-class Fragments session (one
+  extra consent hop, once). No secrets; standards-clean; but stacks on BOTH
+  unverified semantics (OAuth-server-issued tokens against their PostgREST/RLS,
+  (ii) above) and adds a second client registration to maintain.
+- **(c) A direct Fragments-project sign-in for the bridge** (her Fragments
+  email+password, entered once in Variorum's sign-in surface; only the resulting
+  GoTrue session persists — the password is never stored). This is EXACTLY the
+  session class Fragments' own app uses, so their PostgREST/RLS acceptance is
+  guaranteed by construction (no (ii) dependency); ordinary GoTrue refresh; zero
+  client secrets; and it is the shape 9b's contract line already promises ("the
+  bridge uses a user-auth session for the author's Fragments account, stored
+  untracked on her machines"). Cost: one extra credential entry at setup — the same
+  password she typed into the spike's consent page; the IDENTITY stays one account
+  (the mechanism is a second session, never a second account).
+
+**PROVISIONAL: (c).** Rationale: the only shape with zero unverified semantics and
+zero on-device client secrets; the bridge's correctness must not stack on OAuth-
+server token-acceptance bets that can only be tested at 6(iv). The captured
+provider token pair stays persisted-but-unconsumed as evidence — if the author
+prefers strict one-touch (no second password entry, ever), (a1)/(b) are the
+upgrade paths and 6(iv) is where either would be proven. The Step 2 seam makes the
+mechanism swappable behind `FragmentsSessionProviding` without touching the bridge.
