@@ -25,6 +25,10 @@ final class SyncClient {
     /// calls (WithRandomNumberGenerator locks internally), so jitter never
     /// repeats within a device but stays deterministic per seed.
     private let randomNumberGenerator: WithRandomNumberGenerator
+    /// The device's signed-in owner (Phase 9c): nil = signed out (the
+    /// default, matching every pre-9c scenario). Mutable so a scenario can
+    /// sign a device in mid-life — the next `with`/engine call binds it.
+    var ownerID: String?
 
     /// `prefix` must be exactly two hex characters (e.g. "AA", "BB") — it
     /// leads every UUID the device mints, so two devices can never collide.
@@ -80,6 +84,7 @@ final class SyncClient {
             return Date(timeIntervalSince1970: 1_782_864_000 + clockOffset + Double(seconds))
         }
         deps.withRandomNumberGenerator = randomNumberGenerator
+        deps.ownerIdentity = OwnerIdentity { [owner = ownerID] in owner }
     }
 
     // MARK: Engine

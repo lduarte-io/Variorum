@@ -19,8 +19,8 @@ extension Operations {
             _ = try livePost(db, postID)
             let now = date.now
             let reference = Reference(
-                id: newID(), containerId: postID, kind: kind, name: name,
-                url: url, fileBookmark: fileBookmark,
+                id: newID(), ownerId: currentOwnerID(), containerId: postID,
+                kind: kind, name: name, url: url, fileBookmark: fileBookmark,
                 position: try referencePosition(db, containerID: postID, at: insert),
                 createdAt: now, updatedAt: now)
             try reference.insert(db)

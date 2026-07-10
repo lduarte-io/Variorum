@@ -16,6 +16,7 @@ public struct Operations: Sendable {
     @Dependency(\.database) var database
     @Dependency(\.date) var date
     @Dependency(\.uuid) var uuid
+    @Dependency(\.ownerIdentity) var ownerIdentity
 
     /// The session's structural-undo stack (AppSpec §9). When present,
     /// structural ops register their inverses here; inverses run internal
@@ -30,6 +31,11 @@ public struct Operations: Sendable {
     // MARK: - Minting
 
     func newID() -> String { uuid().uuidString }
+
+    /// The signed-in owner for `owner_id` stamping on top-level mints
+    /// (Phase 9c, Step 4 — S4). `nil` while signed out: rows are born
+    /// unowned and the next `adoptOwnerID` pass claims them.
+    func currentOwnerID() -> String? { ownerIdentity.current() }
 
     // MARK: - Where an insertion lands
 

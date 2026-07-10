@@ -18,9 +18,9 @@ extension Operations {
     ) throws -> Reading {
         let now = date.now
         let reading = Reading(
-            id: newID(), name: name, kind: kind, profile: profile,
-            sortField: sortField, sortDir: sortDir, groupingTagId: groupingTagId,
-            querySpec: querySpec, maxPosts: maxPosts,
+            id: newID(), ownerId: currentOwnerID(), name: name, kind: kind,
+            profile: profile, sortField: sortField, sortDir: sortDir,
+            groupingTagId: groupingTagId, querySpec: querySpec, maxPosts: maxPosts,
             createdAt: now, updatedAt: now)
         try database.write { db in try reading.insert(db) }
         return reading

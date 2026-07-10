@@ -22,8 +22,8 @@ extension Operations {
             try ensureNoLiveTagPath(db, path)
             let now = date.now
             let tag = Tag(
-                id: newID(), parentId: parentID, name: name, path: path,
-                createdAt: now, updatedAt: now)
+                id: newID(), ownerId: currentOwnerID(), parentId: parentID,
+                name: name, path: path, createdAt: now, updatedAt: now)
             try tag.insert(db)
             return tag
         }

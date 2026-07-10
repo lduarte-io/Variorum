@@ -74,4 +74,9 @@ public enum OperationError: Error, Equatable, Sendable {
     case invalidTagName(name: String)
     case alreadyTagged(tagID: String, targetID: String)
     case tagNotApplied(tagID: String, targetID: String)
+
+    // Owner identity (Phase 9c).
+    /// `adoptOwnerID` was called while signed out — an adoption pass has
+    /// nothing to stamp without an identity.
+    case noOwnerIdentity
 }

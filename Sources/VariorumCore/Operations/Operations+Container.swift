@@ -77,8 +77,8 @@ extension Operations {
     ) throws -> Container {
         let now = date.now
         var post = Container(
-            id: newID(), kind: .post, title: title, profile: profile,
-            entryDate: entryDate, createdAt: now, updatedAt: now)
+            id: newID(), ownerId: currentOwnerID(), kind: .post, title: title,
+            profile: profile, entryDate: entryDate, createdAt: now, updatedAt: now)
         // A journal post defaults to one-block-per-entry (AppSpec §7): the
         // journal restriction is a profile seed, never a data-model split.
         if profile == .journal {
@@ -92,8 +92,8 @@ extension Operations {
     public func createPool(title: String? = nil) throws -> Container {
         let now = date.now
         let pool = Container(
-            id: newID(), kind: .pool, title: title, profile: .pool,
-            createdAt: now, updatedAt: now)
+            id: newID(), ownerId: currentOwnerID(), kind: .pool, title: title,
+            profile: .pool, createdAt: now, updatedAt: now)
         try database.write { db in try pool.insert(db) }
         return pool
     }

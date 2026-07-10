@@ -492,7 +492,8 @@ extension Operations {
         _ db: Database, text: String, in containerID: String,
         at insert: InsertPosition, now: Date
     ) throws -> MintedBlock {
-        var block = Block(id: newID(), createdAt: now, updatedAt: now)
+        var block = Block(
+            id: newID(), ownerId: currentOwnerID(), createdAt: now, updatedAt: now)
         try block.insert(db)
 
         let variant = Variant(
@@ -530,7 +531,8 @@ extension Operations {
         _ db: Database, texts: [String], in containerID: String, position: String,
         defaultIndex: Int, chosenIndex: Int?, now: Date
     ) throws -> MintedFanBlock {
-        var block = Block(id: newID(), createdAt: now, updatedAt: now)
+        var block = Block(
+            id: newID(), ownerId: currentOwnerID(), createdAt: now, updatedAt: now)
         try block.insert(db)
 
         var variants: [Variant] = []

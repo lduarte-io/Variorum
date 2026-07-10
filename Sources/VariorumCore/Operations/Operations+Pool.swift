@@ -39,7 +39,8 @@ extension Operations {
             let rendered = try renderedVariant(db, block: source, placement: sourcePlacement)
 
             let now = date.now
-            var copy = Block(id: newID(), createdAt: now, updatedAt: now)
+            var copy = Block(
+                id: newID(), ownerId: currentOwnerID(), createdAt: now, updatedAt: now)
             try copy.insert(db)
 
             var variants: [Variant] = []
