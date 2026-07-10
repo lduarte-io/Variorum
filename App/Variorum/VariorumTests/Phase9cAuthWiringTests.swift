@@ -35,14 +35,49 @@ struct Phase9cAuthWiringTests {
         throw AuthSessionError.malformedResponse("no network in this test")
     }
 
+    /// Recording sync transport (no network — review round 1, MINOR: the
+    /// original tests composed the PRODUCTION transport and fired real
+    /// requests at the project URL; the factory seam + these fakes restore
+    /// the repo-wide no-network discipline and make the assertions
+    /// composition-truths).
+    private actor RecordingSyncTransport: SyncTransport {
+        private(set) var calls = 0
+        func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
+            calls += 1
+            return batch.map { _ in .rejected(current: nil) }
+        }
+        func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
+            calls += 1
+            return []
+        }
+    }
+
+    private actor RecordingBridgeTransport: FragmentsBridgeTransport {
+        private(set) var calls = 0
+        func push(_ entries: [FragmentsEntry]) async throws -> FragmentsPushResponse {
+            calls += 1
+            return FragmentsPushResponse(applied: entries.count, skipped: 0)
+        }
+        func pull(after cursor: FragmentsPullCursor?, limit: Int) async throws -> [FragmentsEntry] {
+            calls += 1
+            return []
+        }
+        func delete(ids: [String]) async throws -> Int { 0 }
+        func fetchLocalUserID() async throws -> String? {
+            calls += 1
+            return nil  // the fail-closed gate holds pushes; pulls still run
+        }
+    }
+
     /// One composed world: in-memory store, real AppSession/AppServices,
-    /// injected auth sessions over in-memory stores, and — mirroring the
-    /// production install in AppBootstrap — an ownerIdentity closure
-    /// reading the SAME persisted-session store AuthSession writes.
+    /// injected auth sessions over in-memory stores, recording transports
+    /// through the factory seam, and — mirroring the production install in
+    /// AppBootstrap — an ownerIdentity closure reading the SAME
+    /// persisted-session store AuthSession writes.
     private func withWiredServices(
         storeVariant: AppDatabase.StoreVariant = .real,
         bridgeEnabled: Bool = true,
-        _ body: @MainActor (AppServices, AuthSession, AuthSession, AppDatabase) async throws -> Void
+        _ body: @MainActor (AppServices, AuthSession, AuthSession, AppDatabase, RecordingSyncTransport, RecordingBridgeTransport) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
         let authStore = AuthTokensStore.inMemory()
@@ -53,6 +88,8 @@ struct Phase9cAuthWiringTests {
         let fragmentsAuth = AuthSession(
             configuration: Self.testAuthConfiguration, store: fragmentsStore,
             http: Self.noNetwork)
+        let syncTransport = RecordingSyncTransport()
+        let bridgeTransport = RecordingBridgeTransport()
         try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
@@ -66,9 +103,11 @@ struct Phase9cAuthWiringTests {
             let services = AppServices(
                 session: session, storeVariant: storeVariant,
                 backupEnabled: false, bridgeEnabled: bridgeEnabled,
-                auth: auth, fragmentsAuth: fragmentsAuth)
+                auth: auth, fragmentsAuth: fragmentsAuth,
+                makeSyncTransport: { _ in syncTransport },
+                makeBridgeTransport: { _, _ in bridgeTransport })
             await services.start()
-            try await body(services, auth, fragmentsAuth, db)
+            try await body(services, auth, fragmentsAuth, db, syncTransport, bridgeTransport)
             services.stop()
         }
     }
@@ -86,7 +125,7 @@ struct Phase9cAuthWiringTests {
     // MARK: Sign-in drives sync + adoption
 
     @Test func signInConfiguresSyncRunsTheAdoptionAndUpdatesTheAccount() async throws {
-        try await withWiredServices { services, auth, _, db in
+        try await withWiredServices { services, auth, _, db, syncTransport, _ in
             #expect(!services.sync.isConfigured, "signed out ⇒ no sync chain")
             #expect(services.account.variorum == nil)
 
@@ -104,11 +143,15 @@ struct Phase9cAuthWiringTests {
             // The Step 4 backfill ran (idempotent, before the first push).
             #expect(try db.fetchString(
                 "SELECT owner_id FROM container WHERE id = ?", [postID]) == "owner-9c")
+            // And a round actually ran — on the INJECTED transport (the
+            // factory seam: composition proven, zero real network).
+            await settle { await syncTransport.calls > 0 }
+            #expect(await syncTransport.calls > 0)
         }
     }
 
     @Test func signOutTearsTheChainDownAndKeepsTheStore() async throws {
-        try await withWiredServices { services, auth, _, db in
+        try await withWiredServices { services, auth, _, db, _, _ in
             await auth.adopt(Self.tokens(userID: "owner-9c"))
             await settle { services.sync.isConfigured }
             let postID = try await services.runnerPostID(title: "kept")
@@ -130,7 +173,7 @@ struct Phase9cAuthWiringTests {
     /// must still never compose the sync chain, run the adoption against
     /// the dev store, or touch the bridge.
     @Test func devStoreSessionsStayFencedEvenWhenSignedIn() async throws {
-        try await withWiredServices(storeVariant: .dev) { services, auth, fragmentsAuth, db in
+        try await withWiredServices(storeVariant: .dev) { services, auth, fragmentsAuth, db, syncTransport, bridgeTransport in
             let postID = try await services.runnerPostID(title: "dev row")
 
             await auth.adopt(Self.tokens(userID: "owner-9c"))
@@ -144,13 +187,15 @@ struct Phase9cAuthWiringTests {
             #expect(try db.fetchString(
                 "SELECT owner_id FROM container WHERE id = ?", [postID]) == nil,
                 "the fence precedes adoption — dev rows stay untouched")
+            #expect(await syncTransport.calls == 0)
+            #expect(await bridgeTransport.calls == 0)
         }
     }
 
     // MARK: The Fragments session drives the bridge (QUESTIONS #16, ratified (c))
 
     @Test func fragmentsSignInConfiguresTheBridgeAndDisconnectStopsIt() async throws {
-        try await withWiredServices { services, _, fragmentsAuth, _ in
+        try await withWiredServices { services, _, fragmentsAuth, _, _, bridgeTransport in
             #expect(!services.bridge.isConfigured)
 
             await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
@@ -158,6 +203,9 @@ struct Phase9cAuthWiringTests {
             #expect(services.bridge.isConfigured,
                     "the Fragments session must compose the bridge engine")
             #expect(services.account.fragments?.userID == "frag-user")
+            await settle { await bridgeTransport.calls > 0 }
+            #expect(await bridgeTransport.calls > 0,
+                    "the launch bridge round must ride the INJECTED transport")
 
             await fragmentsAuth.signOut()
             await settle { !services.bridge.isConfigured }
@@ -168,10 +216,11 @@ struct Phase9cAuthWiringTests {
 
     @Test func theBridgeStaysDownWhereItIsNotEnabled() async throws {
         // The mobile composition (bridgeEnabled: false — Mac-only scope).
-        try await withWiredServices(bridgeEnabled: false) { services, _, fragmentsAuth, _ in
+        try await withWiredServices(bridgeEnabled: false) { services, _, fragmentsAuth, _, _, bridgeTransport in
             await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
             try await Task.sleep(for: .milliseconds(150))
             #expect(!services.bridge.isConfigured)
+            #expect(await bridgeTransport.calls == 0)
         }
     }
 

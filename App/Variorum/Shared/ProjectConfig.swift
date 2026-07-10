@@ -10,10 +10,19 @@
 //  (their RLS is the guard). This is the paste-in's retirement: no
 //  credential entry ever again — the session is the identity.
 //
+//  PRECONDITION FOR THE "GRANTS NOTHING" CLAIM (review round 1, BLOCKER):
+//  the Variorum project's "Allow new users to sign up" toggle must be OFF
+//  (the runbook's Gate 0). On a default project the bare key can MINT an
+//  authenticated session via /auth/v1/signup — and every authenticated
+//  user reads/writes the non-owner tables (the whole prose corpus) in the
+//  single-user phase. Signups off closes both that door and first-time
+//  delegated OIDC sign-ins; existing users (the author) are unaffected.
+//
 //  THE AUTHOR FILLS THE TWO KEY CONSTANTS at the Step 6 gate (from her
 //  untracked env files; they are publishable and committable by design —
-//  the phase's whole point). Until filled, the sign-in surface shows the
-//  unconfigured hint and nothing attempts a request.
+//  the phase's whole point, UNDER the precondition above). Until filled,
+//  the sign-in surface shows the unconfigured hint and nothing attempts a
+//  request.
 //
 
 import Foundation

@@ -405,6 +405,25 @@ actor AuthSession: UserSessionProviding {
         refreshTask = task
         defer { refreshTask = nil }
         let refreshed = try await task.value
+        // Review round 1 (MINOR): the await above releases the actor, so a
+        // sign-out (or a whole new sign-in) can interleave before the
+        // result lands. Adopting it unconditionally would RESURRECT a
+        // signed-out session — UI and sync torn down while the Keychain
+        // holds live tokens and the next launch comes up signed in, an
+        // explicit sign-out silently undone ("only signOut clears" is this
+        // type's contract, and its inverse — sign-out is terminal — must
+        // hold too).
+        guard let live = tokens else {
+            // Signed out mid-refresh: discard the result; the caller's
+            // round refuses like any signed-out round.
+            throw UserSessionError.notSignedIn
+        }
+        guard live.refreshToken == current.refreshToken else {
+            // Superseded mid-refresh (a new sign-in, or a sibling
+            // single-flight waiter already adopted the rotation): the LIVE
+            // session wins; nothing is saved from the stale result.
+            return live
+        }
         tokens = refreshed
         store.save(refreshed)
         return refreshed

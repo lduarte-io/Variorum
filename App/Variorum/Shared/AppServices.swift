@@ -60,12 +60,37 @@ final class AppServices {
     /// internal so the wiring tests can drive the production runner path.
     let session: AppSession
 
+    /// Injectable transport composition (review round 1, MINOR: without
+    /// the seam, the wiring tests fired real network requests at the
+    /// production project URL — breaking the repo-wide no-network test
+    /// discipline). Defaults compose the ProjectConfig production
+    /// transports; tests inject recording fakes, which also turns the
+    /// fence/wiring assertions into COMPOSITION checks, not network luck.
+    private let makeSyncTransport: (any UserSessionProviding) -> any SyncTransport
+    private let makeBridgeTransport:
+        (any UserSessionProviding, _ expectedUserID: String) -> any FragmentsBridgeTransport
+
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
         backupEnabled: Bool, bridgeEnabled: Bool = false,
-        auth: AuthSession? = nil, fragmentsAuth: AuthSession? = nil
+        auth: AuthSession? = nil, fragmentsAuth: AuthSession? = nil,
+        makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
+        makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil
     ) {
         self.session = session
+        self.makeSyncTransport = makeSyncTransport ?? { provider in
+            SupabaseTransport(
+                configuration: ProjectConfig.variorumTransport,
+                sessionProvider: provider)
+        }
+        self.makeBridgeTransport = makeBridgeTransport ?? { provider, expectedUserID in
+            FragmentsRPCTransport(
+                configuration: FragmentsRPCTransport.Configuration(
+                    projectURL: ProjectConfig.fragmentsProjectURL,
+                    apiKey: ProjectConfig.fragmentsPublishableKey,
+                    expectedUserID: expectedUserID),
+                sessionProvider: provider)
+        }
         // THE A4 FENCE, SYNC SEAM (Phase 8 review round 1, BLOCKER): only
         // the REAL store may pair with the one production mirror. Debug and
         // release builds share a bundle identity and Keychain, so a
@@ -187,27 +212,31 @@ final class AppServices {
     /// session) and runs the Step 4 adoption first — idempotent, and the
     /// order matters: post-04-flip the mirror refuses unowned rows, so the
     /// backfill must precede the first push of any locally-minted rows.
+    /// A FAILED adoption gates composition (review round 1, NIT):
+    /// composing anyway would guarantee failing rounds post-flip until a
+    /// relaunch — refusing with a visible message is the same §12 posture
+    /// the engine itself takes (stall, never guess).
     private func connectSyncIfAllowed() async {
         guard sync.allowsSync else { return }
-        await runOwnerAdoption()
-        let transport = SupabaseTransport(
-            configuration: ProjectConfig.variorumTransport,
-            sessionProvider: auth)
-        await sync.configure(transport: transport)
+        guard await runOwnerAdoption() else { return }
+        await sync.configure(transport: makeSyncTransport(auth))
         sync.triggerSync()
     }
 
     /// Step 4's backfill, at sign-in and at every signed-in launch:
     /// idempotent (NULL owners only), and self-healing for rows that
     /// arrived unowned from a not-yet-updated device. Failure surfaces on
-    /// the account state; the next launch retries.
-    private func runOwnerAdoption() async {
+    /// the account state; sign-out/in or a relaunch retries.
+    private func runOwnerAdoption() async -> Bool {
         do {
             try await session.runner.run { ops in
                 _ = try ops.adoptOwnerID()
             }
+            return true
         } catch {
-            account.lastError = "Owner adoption failed: \(error)"
+            account.lastError =
+                "Owner adoption failed: \(error) — sync held; sign out and back in (or relaunch) to retry"
+            return false
         }
     }
 
@@ -252,14 +281,8 @@ final class AppServices {
     /// reconciled contract — nothing here guesses identity).
     private func connectBridgeIfAllowed(fragmentsUserID: String) async {
         guard bridge.allowsBridge else { return }
-        let transport = FragmentsRPCTransport(
-            configuration: FragmentsRPCTransport.Configuration(
-                projectURL: ProjectConfig.fragmentsProjectURL,
-                apiKey: ProjectConfig.fragmentsPublishableKey,
-                expectedUserID: fragmentsUserID),
-            sessionProvider: fragmentsAuth)
         let engine = BridgeEngine(
-            transport: transport,
+            transport: makeBridgeTransport(fragmentsAuth, fragmentsUserID),
             configuration: FragmentsBridgeConfiguration(userID: fragmentsUserID))
         await bridge.configure(engine: engine)
         bridge.trigger(manual: true)

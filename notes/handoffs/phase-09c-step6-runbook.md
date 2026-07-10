@@ -39,23 +39,36 @@ device rounds → the bridge + real-Fragments pass.
 
 ## Gate 0 — Preconditions (author, ~10 min)
 
-1. **Fill the two publishable keys** in `App/Variorum/Shared/ProjectConfig.swift`
+1. **Disable signups on the Variorum project** (review round 1, BLOCKER — the
+   load-bearing precondition): dashboard → Authentication → turn **"Allow new
+   users to sign up" OFF**. Why: the eight non-owner mirror tables (including
+   `variant` and `commit_point` — the entire prose corpus) are served to ANY
+   authenticated user in the single-user phase, and on a default project the
+   publishable key alone can mint a brand-new authenticated session via
+   `POST /auth/v1/signup`; the same toggle gates a FIRST delegated OIDC sign-in
+   (relevant soon: Fragments' TestFlight means other Fragments users will exist).
+   With it off, **existing users keep signing in** — the author's user already
+   exists from the 2026-07-10 spike, so route A is unaffected — and nobody new
+   enters by either door until Phase 14 provisions accounts deliberately. One
+   click, reversible; Gate 4 probes the closure.
+2. **Fill the two publishable keys** in `App/Variorum/Shared/ProjectConfig.swift`
    (`variorumPublishableKey`, `fragmentsPublishableKey` — from her untracked env
-   files). They are publishable by design post-cutover and committable; commit at
-   the closeout. Build after editing. *(Until filled, the sign-in button is
-   disabled with a visible hint — that is the designed dormant state.)*
-2. **Variorum dashboard → Authentication → URL Configuration:** add
+   files). They are publishable by design post-cutover — WITH item 1 done — and
+   committable; commit at the closeout. Build after editing. *(Until filled, the
+   sign-in button is disabled with a visible hint — that is the designed dormant
+   state.)*
+3. **Variorum dashboard → Authentication → URL Configuration:** add
    `variorum://auth-callback` to the Redirect URLs. (The spike's
    `http://localhost:3000/callback.html` entry can be REMOVED at the same visit —
    its purpose is served.)
-3. **The consent page must be reachable** at Fragments' Site URL + Authorization
+4. **The consent page must be reachable** at Fragments' Site URL + Authorization
    Path. Either: the production stargazing.tech page is live and the Fragments
    OAuth Server page points at it (REMEMBER the page's save trap — it silently
    discarded values twice on 2026-07-10; reload the page to verify the values
    stuck), or, for this sitting only, keep the spike's local page:
    `cd Spikes/AuthPairingSpike && python3 -m http.server 3000` (Site URL
    `http://localhost:3000`, Authorization Path `/consent.html`).
-4. **Both apps installed as RELEASE builds** (see Gate 4 for the phone; on the Mac
+5. **Both apps installed as RELEASE builds** (see Gate 4 for the phone; on the Mac
    either a Release build or a debug launch with the `-VariorumRealStore` opt-in —
    plain debug opens the fenced dev store where sync/sign-in surfaces are absent
    by design).
@@ -163,12 +176,39 @@ curl -s -w "\nHTTP %{http_code}\n" "$VURL/rest/v1/container?select=id&limit=1" \
 **Expected:** permission denied (RLS + revoked table privileges — the Data API is
 dead as a door).
 
-2. **Her session still syncs:** on the Mac, click **Sync now**. **Expected:** the
-   row returns to "Synced HH:MM" with no error. (That request rode her real
-   session token through the new auth gates — the positive probe.) Repeat on the
-   phone.
+2. **The signup door is closed** (review round 1, BLOCKER — without this probe
+   the demotion claim is hollow: an open signup door lets the bare key MINT an
+   authenticated session and walk through the gates above):
 
-3. **Cross-device round-trip under auth:** create a journal entry on the phone →
+```bash
+curl -s -w "\nHTTP %{http_code}\n" -X POST "$VURL/auth/v1/signup" \
+  -H "apikey: $KEY" -H "Content-Type: application/json" \
+  -d '{"email": "probe-nobody@example.com", "password": "probe-password-123"}'
+```
+
+**Expected:** HTTP **403** with `"Signups not allowed for this instance"` (the
+Gate 0 toggle, proven). If instead a user/session JSON comes back: STOP — the
+toggle is not off (the dashboard save trap again); delete the probe user
+(dashboard → Authentication → Users), fix the toggle, re-probe.
+
+3. **The OIDC first-sign-in door is closed too** (same toggle, per the lookup's
+   shared create-account path — first-party docs never state it for custom
+   providers, so ONE live probe settles it): in the Fragments dashboard create a
+   throwaway SECOND Fragments user (Authentication → Users → Add user), then in a
+   fresh private browser window run the spike's authorize URL and sign the
+   throwaway user in at the consent page. **Expected:** the flow REFUSES at the
+   Variorum callback (a signups-not-allowed error surfaces in the redirect —
+   no Variorum session minted). Delete the throwaway user after. *(If it is NOT
+   refused, record the exact outcome verbatim and STOP — the single-user premise
+   needs a different guard before the sitting continues; report to the
+   coordinator.)*
+
+4. **Her session still syncs:** on the Mac, click **Sync now**. **Expected:** the
+   row returns to "Synced HH:MM" with no error. (That request rode her real
+   session token through the new auth gates — the positive probe, and the proof
+   that signups-off leaves EXISTING users untouched.) Repeat on the phone.
+
+5. **Cross-device round-trip under auth:** create a journal entry on the phone →
    "Sync now" on both → it appears on the Mac (and vice versa with a Mac edit).
 
 **FAILURE → RECOVERY (the RLS-lockout rollback):** if after the cutover her
@@ -273,6 +313,8 @@ sqlite3 "$STORE" "SELECT c.entry_date, v.working_text FROM container c
 | `callbackWithoutCode` error after browser sheet | Consent denied/cancelled, or redirect URL not allow-listed | Gate 0.2; retry |
 | Sync error `permission denied for function` post-cutover with HER session | Grants drifted — should be impossible if 04 ran verbatim | Rollback path, Gate 4 |
 | Sync error `owner_id mismatch` | A row escaped the backfill | Relaunch signed-in (idempotent re-adoption), sync, re-probe |
+| Sync error `not yet backfilled — complete the owner adoption` | A STORED mirror row escaped the backfill (the §12 refuse-until-backfilled case) | Same recovery: relaunch signed-in, sync, re-run the Gate 2 totality queries |
+| Signup probe returns a session instead of 403 | "Allow new users to sign up" is still ON (the dashboard save trap) | Delete the probe user, re-save the toggle, re-probe (Gate 4.2) |
 | Bridge note "canonical user … has not synced" | Fragments `user_settings` empty — fail-closed gate | Open the Fragments app, let it sync, retry |
 | Bridge pauses a day, "two live entries" | The designed duplicate-day pause | Hand-merge/delete/re-date the extra entry |
 | Phone shows no sign-in door | Debug build from home screen = fenced dev store | Gate 3.1 (Release install) |

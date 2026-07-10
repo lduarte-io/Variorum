@@ -383,7 +383,10 @@ per the brief's interpretation 5 — the fake server models CAS + seq, never aut
 
 ### Step 3 — The mirror's RLS + RPC rework (SQL artifact + author paste; SyncSpec §12 lockstep)
 **Files:** `Server/supabase/04_auth_rls.sql` (new, in-repo like 01–03): `owner_id`
-checks in `sync_push`/`sync_pull`/`sync_delete` (SECURITY DEFINER retained but
+checks in `sync_push`/`sync_pull` *(correction, review round 1 NIT: this line
+originally also named `sync_delete` — Variorum's dialect has no such RPC; that is
+Fragments' migration-7 surface. The shipped artifact correctly reworks exactly the
+two that exist)* (SECURITY DEFINER retained but
 per-user-guarded: every row read/written must carry `owner_id = auth.uid()`; pushes
 of rows without it are rejected), RLS enabled on all 13 mirror tables, anon/bare-key
 access revoked.
@@ -588,3 +591,132 @@ provider token pair stays persisted-but-unconsumed as evidence — if the author
 prefers strict one-touch (no second password entry, ever), (a1)/(b) are the
 upgrade paths and 6(iv) is where either would be proven. The Step 2 seam makes the
 mechanism swappable behind `FragmentsSessionProviding` without touching the bridge.
+
+*(QUESTIONS #16 note: the author RATIFIED shape (c) in-session on 2026-07-10, before
+the checkpoint — "if it can't be helped, direct fragments sign in is fine", relayed
+by the coordinator with the instruction to build on it as ratified. Step 5 shipped
+(c); the ratify walk records the pre-answer.)*
+
+## Review round 1 (2026-07-10, cold reviewer — same-model flow) — 1 BLOCKER /
+## 1 MAJOR / 3 MINOR / 4 NIT; ALL AGREED; every bug-class fix red-on-old-pinned
+## (both pins verified red by behavioral revert); the reviewer also gave the 9b
+## reconciliation diff a no-findings pass and a clean bill on the seven review
+## foci. Dispositions below anchor round 2.
+
+1. **BLOCKER — the demotion claim was falsified by the Variorum project's
+   default-open signup door; the runbook's probes would have green-lit the false
+   claim.** AGREED — mechanism re-traced and confirmed end to end: 04 guards the
+   five owner tables per-user but serves/accepts the EIGHT non-owner tables
+   (`variant` + `commit_point` = the whole prose corpus) for ANY authenticated
+   user — the single-user premise IS their guard — while a default project mints
+   authenticated sessions for any bearer of the (deliberately hardcoded,
+   committable) publishable key via `POST /auth/v1/signup`; the same toggle gates
+   first-time delegated OIDC sign-ins through the shared create-account path
+   (soon relevant: Fragments' TestFlight users). Nothing in the phase mentioned
+   the toggle, and Gate 4's probes all pass in the vulnerable state. **Fixed
+   (operational + doc class, per the coordinator's routing; the author was asked
+   to flip the toggle immediately):** runbook Gate 0 gains item 1 (disable
+   "Allow new users to sign up" BEFORE everything else; existing users — hers,
+   minted at the spike — keep signing in, so route A is unaffected); Gate 4 gains
+   probe 2 (signup → expected 403 "Signups not allowed for this instance"; a
+   session coming back = STOP, the dashboard save trap) and probe 3 (the
+   OIDC-first-sign-in door verified closed by ONE live probe with a throwaway
+   second Fragments user, since first-party docs never state the toggle covers
+   custom providers — with a STOP-and-report arm if it is not refused); the
+   failure table gains the signup row; `04_auth_rls.sql`'s header gains the
+   LOAD-BEARING PRECONDITION block (pinned by the new
+   `theHeaderCarriesTheSignupsOffPrecondition` — doc-class red-on-old: the
+   pre-fix header lacked it); `ProjectConfig.swift`'s "committable by design"
+   claim now carries the precondition explicitly. Self-caught alongside: 04's
+   non-owner-table list wrongly included `reading` (an owner table) — corrected
+   to the eight. The phase's goal statement ("the bare key grants nothing") is
+   understood everywhere as conditional on signups-off until Phase 14.
+2. **MAJOR — SignInFlow's three stacked lifecycle hazards** (unretained session;
+   ignored `start() == false` leaking the continuation and wedging the sign-in
+   surface busy forever; a scene-less `ASPresentationAnchor()` on iOS). AGREED —
+   all three mechanisms verified against the ASWebAuthenticationSession contract
+   (retention documented required; a false `start()` provably never invokes the
+   completion; the bare anchor is the known iOS failure-to-present shape).
+   **Fixed:** the session is retained in an instance property for the flow's
+   duration (doubling as a one-flight guard, `FlowError.alreadyRunning`);
+   `start() == false` resumes the continuation with `FlowError.couldNotPresent`;
+   the anchor is the real key/main window (macOS) or the foreground-active
+   scene's key window (iOS), with the bare anchor only as the last-resort
+   fallback. No pin owed (the thin-face convention; Gate 2/3 exercises it for
+   real) — mechanism trace above is the justification.
+3. **MINOR — sign-out racing an in-flight refresh resurrected the signed-out
+   session, Keychain included.** AGREED — traced: the actor releases at
+   `try await task.value`; a completed-HTTP refresh resumed after `signOut()`
+   and adopted+saved unconditionally, so the UI/sync said signed out while the
+   Keychain held live tokens, the ownerIdentity closure resumed stamping, and
+   the next launch came up signed in — the file's own "only signOut clears"
+   contract inverted. **Fixed:** after the await, a nil `tokens` discards the
+   result (throws `notSignedIn`); a CHANGED refresh token (a new sign-in
+   superseded the in-flight refresh — the same mechanism's other arm, found
+   while fixing) returns the live session without saving the stale result.
+   **Red-on-old pin:** `signOutDuringAnInFlightRefreshDoesNotResurrectTheSession`
+   (endpoint-routed loader: slow refresh, instant logout; sign-out mid-flight;
+   asserts the discarded result, the empty store, and signed-out state) —
+   verified RED by behavioral revert (all three assertions failed with the
+   resurrected Keychain visible in the failure output), green restored.
+4. **MINOR — the bridge transport lacked the 401 refresh door the mirror
+   transport got at Step 2**, though both now ride the same refreshable
+   AuthSession. AGREED — traced: `FragmentsRPCTransport` only ever called
+   `currentSession()` (which refreshes within 60 s of LOCAL expiry), so a
+   server-side-stale token failed every bridge round — visibly and
+   state-intact, but wedged — for up to ~59 minutes. **Fixed:** the rpc gained
+   the identical ONE-refresh-and-retry branch (via the protocol's
+   `refreshedSession()` door, built for exactly this sharing), the expectedUser
+   cross-check re-applied to the refreshed session, and the HTTP hop gained the
+   same internal `load` seam as the mirror transport. **Red-on-old pin:**
+   `a401RefreshesOnceAndRetriesWithTheNewBearer` (bridge twin of the Step 2
+   pin: 401 then 200; two requests; second bearer fresh; identical payload) —
+   verified RED by behavioral revert (surfaced `httpFailure(401)` after one
+   request), green restored.
+5. **MINOR — the wiring tests fired real network requests at the production
+   project URL** (the AppServices sign-in wiring composed the ProjectConfig
+   production transports; assertions didn't depend on the outcome, so the
+   suites stayed green while breaking the repo-wide no-network discipline —
+   and post-Gate-0 key-fill every CI run would have probed the real project).
+   AGREED. **Fixed:** AppServices gained injectable `makeSyncTransport` /
+   `makeBridgeTransport` factories (defaults compose the production
+   ProjectConfig transports); the wiring tests inject recording fakes and now
+   additionally assert rounds RAN on the injected transports (sign-in test:
+   sync calls > 0; bridge test: bridge calls > 0; dev-fence test: BOTH zero;
+   bridge-disabled test: zero) — the fence/wiring claims are now composition
+   truths, not network luck. Test-infrastructure class: the strengthened
+   assertions are the pin (they fail without the seam by construction — the
+   factory parameter cannot be injected on the pre-fix init).
+6. **NIT — a failed adoption didn't gate sync composition** (post-flip every
+   round would fail until relaunch). AGREED — fixed the lighter-but-honest way:
+   `runOwnerAdoption()` returns success and `connectSyncIfAllowed` composes
+   NOTHING on failure, surfacing "sync held; sign out and back in (or relaunch)
+   to retry" on the account state — the same §12 stall-never-guess posture as
+   the engine, and no chain that is guaranteed to fail. Architectural class:
+   mechanism traced (adoption throws only on store-level write failure), no pin
+   owed; the happy-path wiring tests cover the composed side.
+7. **NIT — the stored-half guard's message misled for NULL-owner stored rows**
+   ("belongs to another owner" for a row that merely escaped the backfill,
+   while the runbook keys recovery off error text). AGREED — 04 branches the
+   NULL case into "row … is not yet backfilled — complete the owner adoption
+   before the flip"; the runbook's failure table gains the matching row; the
+   `pushCarriesBothOwnerGuards` pin still passes (both original strings
+   remain).
+8. **NIT — 02_sync_rpc.sql's SECURITY NOTE still forward-pointed the auth debt
+   at Phase 14.** AGREED — the note now records the debt as PAID by 04 in this
+   phase (read 04 before reasoning from 02's superseded bodies); Phase 14 keeps
+   only multi-tenant isolation.
+9. **NIT — the plan's Step 3 named `sync_delete` among the RPCs to rework**
+   (Fragments' dialect, not Variorum's). AGREED — corrected in place with a
+   bracketed review-round note; the shipped artifact was already correct.
+10. **NIT — the consent-page spec contradicted itself on session persistence**
+    (the 2026-07-10 recommendation vs the older "no session persistence"
+    minimalism bullet). AGREED — reconciled to the recommendation: the
+    persisted Fragments session is the ONE sanctioned piece of state; the
+    reconciliation is noted inline so the site agent sees one instruction.
+
+**Counts after the fix round: core `swift test` 540 green in 62 suites (was
+538 — +1 bridge-401 pin, +1 signup-precondition header pin); Mac app 254 green
+in 45 suites (was 253 — +1 sign-out-race pin); mobile 11 green in 4 suites
+(rebuilt + re-run — the shared AuthSession/SignInFlow/AppServices changes
+compile into it).**

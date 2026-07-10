@@ -20,10 +20,14 @@ language sql immutable as $$
   select case when tbl = 'setting' then 'key' else 'id' end;
 $$;
 
--- SECURITY NOTE (deliberate, Phase 5): these functions perform NO auth
--- check beyond Supabase's own API-key/JWT gate — the single-user-token
--- phase trusts any bearer of the token with the whole store. Phase 14
--- (accounts) adds owner_id scoping + RLS on these same endpoints.
+-- SECURITY NOTE (deliberate, Phase 5; debt PAID at Phase 9c): as written
+-- here these functions perform NO auth check beyond Supabase's own
+-- API-key/JWT gate — the single-user-token phase trusted any bearer of
+-- the token with the whole store. 04_auth_rls.sql (Phase 9c, run AFTER
+-- this file and 03) re-creates BOTH functions with auth.uid() gates +
+-- owner_id guards, enables RLS, and revokes anon execute — read it before
+-- reasoning from the bodies below, which are superseded on a deployed
+-- mirror. Phase 14 adds multi-tenant isolation on the same endpoints.
 -- `set search_path` pins name resolution for SECURITY DEFINER (the
 -- standard Postgres hijack hazard Supabase's linter flags).
 

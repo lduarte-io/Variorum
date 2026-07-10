@@ -159,19 +159,36 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
     }
 
     public let configuration: Configuration
-    /// The user-auth seam (9c absorbs): a bearer session per call, so token
-    /// refresh lives behind the provider, never here.
+    /// The user-auth seam (9c absorbed): a bearer session per call;
+    /// proactive refresh lives behind the provider, and a server-side 401
+    /// gets ONE refresh-and-retry here (9c review round 1 — the mirror
+    /// transport's door, mirrored: a token the SERVER judges stale despite
+    /// looking locally fresh must not wedge bridge rounds until the local
+    /// expiry margin trips, up to ~59 visible-but-failed minutes).
     public let sessionProvider: any FragmentsSessionProviding
-    private let urlSession: URLSession
+    /// The HTTP hop, seam-injectable for the no-network suites (the same
+    /// discipline as the mirror transport).
+    private let load: @Sendable (URLRequest) async throws -> (Data, URLResponse)
 
     public init(
         configuration: Configuration,
         sessionProvider: any FragmentsSessionProviding,
         urlSession: URLSession = .shared
     ) {
+        self.init(
+            configuration: configuration,
+            sessionProvider: sessionProvider,
+            load: { try await urlSession.data(for: $0) })
+    }
+
+    init(
+        configuration: Configuration,
+        sessionProvider: any FragmentsSessionProviding,
+        load: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)
+    ) {
         self.configuration = configuration
         self.sessionProvider = sessionProvider
-        self.urlSession = urlSession
+        self.load = load
     }
 
     // MARK: FragmentsBridgeTransport
@@ -224,10 +241,47 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
 
     private func rpc<Body: Encodable>(_ function: String, body: Body) async throws -> Data {
         let session = try await sessionProvider.currentSession()
+        try checkExpectedUser(session)
+        let payload = try JSONEncoder().encode(body)
+
+        let (data, status) = try await send(function, payload: payload, bearer: session.accessToken)
+        if status == 401 {
+            // ONE refresh-and-retry (9c review round 1 — mirrors the sync
+            // transport): the server judged the token stale despite the
+            // provider considering it current. A refresh failure
+            // propagates; a second 401 surfaces below — never a loop.
+            let refreshed = try await sessionProvider.refreshedSession()
+            try checkExpectedUser(refreshed)
+            let (retryData, retryStatus) = try await send(
+                function, payload: payload, bearer: refreshed.accessToken)
+            guard (200..<300).contains(retryStatus) else {
+                throw FragmentsTransportError.httpFailure(
+                    status: retryStatus,
+                    body: String(data: retryData, encoding: .utf8) ?? "")
+            }
+            return retryData
+        }
+        guard (200..<300).contains(status) else {
+            throw FragmentsTransportError.httpFailure(
+                status: status,
+                body: String(data: data, encoding: .utf8) ?? "")
+        }
+        return data
+    }
+
+    /// Round 2, NIT 8 (9b): a session authenticated as a different user
+    /// than the bridge composes rows for is a wiring bug — refused before
+    /// any request, and re-checked after a refresh.
+    private func checkExpectedUser(_ session: FragmentsUserSession) throws {
         if let expected = configuration.expectedUserID, session.userID != expected {
             throw FragmentsTransportError.sessionUserMismatch(
                 expected: expected, actual: session.userID)
         }
+    }
+
+    private func send(
+        _ function: String, payload: Data, bearer: String
+    ) async throws -> (Data, Int) {
         var request = URLRequest(
             url: configuration.projectURL
                 .appendingPathComponent("rest/v1/rpc")
@@ -235,19 +289,14 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(configuration.apiKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try JSONEncoder().encode(body)
+        request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization")
+        request.httpBody = payload
 
-        let (data, response) = try await urlSession.data(for: request)
+        let (data, response) = try await load(request)
         guard let http = response as? HTTPURLResponse else {
             throw FragmentsTransportError.notHTTP
         }
-        guard (200..<300).contains(http.statusCode) else {
-            throw FragmentsTransportError.httpFailure(
-                status: http.statusCode,
-                body: String(data: data, encoding: .utf8) ?? "")
-        }
-        return data
+        return (data, http.statusCode)
     }
 }
 

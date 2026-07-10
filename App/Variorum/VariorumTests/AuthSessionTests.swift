@@ -260,6 +260,48 @@ struct AuthSessionTests {
         #expect(endpoint.requests.count == 1)
     }
 
+    /// Review round 1 (MINOR) — THE RED-ON-OLD PIN: a sign-out completing
+    /// while a refresh's HTTP hop is in flight must be TERMINAL. Pre-fix,
+    /// the refresh continuation adopted + saved its result unconditionally
+    /// after the await, resurrecting the signed-out session in memory AND
+    /// the Keychain — the next launch came up signed in, the explicit
+    /// sign-out silently undone.
+    @Test func signOutDuringAnInFlightRefreshDoesNotResurrectTheSession() async throws {
+        // Route by endpoint: the refresh hop is SLOW (in flight while the
+        // sign-out runs); the sign-out's best-effort logout is immediate.
+        let routed: @Sendable (URLRequest) async throws -> (Data, URLResponse) = { request in
+            if request.url!.absoluteString.contains("grant_type=refresh_token") {
+                try? await Task.sleep(for: .milliseconds(200))
+                return (Data("""
+                    {"access_token": "v-access-2", "refresh_token": "v-refresh-2",
+                     "expires_in": 3600,
+                     *[removed for publication]*
+                    """.utf8),
+                    HTTPURLResponse(url: request.url!, statusCode: 200,
+                                    httpVersion: nil, headerFields: nil)!)
+            }
+            return (Data(),
+                    HTTPURLResponse(url: request.url!, statusCode: 204,
+                                    httpVersion: nil, headerFields: nil)!)
+        }
+        let store = AuthTokensStore.inMemory(initial: Self.tokens(expiresAt: Date()))
+        let session = AuthSession(
+            configuration: Self.configuration, store: store, http: routed)
+
+        let refreshing = Task { try await session.currentSession() }
+        try await Task.sleep(for: .milliseconds(60))  // the refresh hop is in flight
+        await session.signOut()
+        #expect(store.load() == nil)
+
+        // The in-flight refresh resolves AFTER the sign-out: it must be
+        // discarded, not adopted.
+        await #expect(throws: UserSessionError.notSignedIn) {
+            _ = try await refreshing.value
+        }
+        #expect(store.load() == nil, "an explicit sign-out must be terminal")
+        #expect(await session.isSignedIn == false)
+    }
+
     // MARK: Persistence + sign-out
 
     @Test func persistenceRoundTripsAcrossSessionInstances() async throws {

@@ -148,4 +148,18 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("ONLY after the owner_id backfill has"))
         #expect(sql.contains("SyncSpec §12"))
     }
+
+    /// Review round 1, BLOCKER: the single-user premise ("every
+    /// authenticated user is the author") is what guards the eight
+    /// non-owner tables — and it only holds with the Variorum project's
+    /// signup door CLOSED (a default project mints sessions for any bearer
+    /// of the publishable key via /auth/v1/signup, and the same toggle
+    /// gates first delegated OIDC sign-ins). The header must carry the
+    /// precondition so no future deployment reads this file without it.
+    @Test func theHeaderCarriesTheSignupsOffPrecondition() throws {
+        let sql = try Self.authSQL()
+        #expect(sql.contains("LOAD-BEARING PRECONDITION"))
+        #expect(sql.contains("Allow new users to sign up"))
+        #expect(sql.contains("/auth/v1/signup"))
+    }
 }

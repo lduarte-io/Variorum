@@ -53,8 +53,11 @@ is the same logic, hosted and styled.
   `ASWebAuthenticationSession` browser context (cookies/localStorage persist across
   runs since it is non-ephemeral) — sign-ins are rare (about once per device), so
   this is a nicety, not a requirement.
-- Keep it minimal: no session persistence beyond the flow, no analytics on the
-  tokens, never log the bearer. Style is the site agent's call.
+- Keep it minimal: the persisted Fragments session (previous bullet) is the ONE
+  recommended piece of state — beyond it, nothing: no analytics on the tokens,
+  never log the bearer. Style is the site agent's call. *(Reconciled 2026-07-10,
+  review round 1: an earlier version of this bullet said "no session persistence",
+  contradicting the recommendation above — persistence wins.)*
 - Expired/consumed `authorization_id`s return an error from step 3 — render it
   plainly with a "start over from the app" hint.
 

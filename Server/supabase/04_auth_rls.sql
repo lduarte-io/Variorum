@@ -29,12 +29,25 @@
 --     bind them; their own guards do).
 --
 -- WHAT THIS DOES NOT DO (Phase 14's, deliberately): per-user isolation of
--- the NON-owner tables (variant, commit_point, edge, container_block,
--- reading, reading_post, post_tag, block_tag, setting rows have no owner
--- column; isolating them needs parent joins). In the single-user phase every
+-- the EIGHT non-owner tables (variant, commit_point, edge, container_block,
+-- reading_post, post_tag, block_tag, setting have no owner column;
+-- isolating them needs parent joins). In the single-user phase every
 -- authenticated user is the author; commercial multi-tenancy hardens this
 -- at the accounts phase. This file changes WHO may call the endpoints,
 -- never what the server stores (no E2EE front-running).
+--
+-- LOAD-BEARING PRECONDITION (review round 1, BLOCKER): the Variorum
+-- project's "Allow new users to sign up" toggle must be OFF before this
+-- file's claims hold. The non-owner tables above — variant and
+-- commit_point INCLUDE THE ENTIRE PROSE CORPUS — are served and accepted
+-- for ANY authenticated user, so "every authenticated user is the author"
+-- IS their guard; and on a default project the publishable key alone can
+-- mint a brand-new authenticated session via POST /auth/v1/signup (the
+-- same toggle also gates a FIRST delegated OIDC sign-in through the shared
+-- create-account path). With signups off, existing users — the author —
+-- keep signing in; nobody new can, by either door, until Phase 14
+-- provisions accounts deliberately. The Step 6 runbook's Gate 0 disables
+-- the toggle BEFORE this file runs; Gate 4 probes the signup 403.
 --
 -- Future mirror tables (e.g. Phase 11's canvas_layout) must repeat the
 -- per-table pattern below in their own lockstep migration.
@@ -134,10 +147,17 @@ begin
       using row_id;
 
     -- Owner guard, stored half: a stored row owned by someone else is
-    -- never overwritten and never echoed back in a reject.
-    if tbl = any (owner_tables) and current_jsonb is not null
-       and (current_jsonb->>'owner_id') is distinct from caller then
-      raise exception 'row % on % belongs to another owner', row_id, tbl;
+    -- never overwritten and never echoed back in a reject. A NULL-owner
+    -- stored row is its own story (review round 1, NIT): a row that
+    -- escaped the backfill — the §12 refuse-until-backfilled case, named
+    -- as such because the runbook's recovery table keys off error text.
+    if tbl = any (owner_tables) and current_jsonb is not null then
+      if (current_jsonb->>'owner_id') is null then
+        raise exception 'row % on % is not yet backfilled — complete the owner adoption before the flip',
+          row_id, tbl;
+      elsif (current_jsonb->>'owner_id') is distinct from caller then
+        raise exception 'row % on % belongs to another owner', row_id, tbl;
+      end if;
     end if;
 
     if current_version is null then

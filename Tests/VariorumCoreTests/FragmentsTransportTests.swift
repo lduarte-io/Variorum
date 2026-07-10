@@ -223,6 +223,73 @@ struct FragmentsTransportTests {
             _ = try await transport.pull(after: nil, limit: 1)
         }
     }
+
+    /// 9c review round 1 (MINOR) — THE RED-ON-OLD PIN: a Fragments token
+    /// the SERVER judges stale (revocation, key rotation) gets ONE
+    /// refresh-and-retry, mirroring the mirror transport's door. Pre-fix
+    /// the transport surfaced the 401 without ever consulting
+    /// `refreshedSession()`, wedging bridge rounds — visibly, state-intact,
+    /// but wedged — until the local expiry margin tripped (up to ~59 min).
+    @Test func a401RefreshesOnceAndRetriesWithTheNewBearer() async throws {
+        final class RefreshingProvider: FragmentsSessionProviding, @unchecked Sendable {
+            private let lock = NSLock()
+            private var refreshes = 0
+            var refreshCalls: Int {
+                lock.lock(); defer { lock.unlock() }
+                return refreshes
+            }
+            private func takeRefreshed() -> FragmentsUserSession {
+                lock.lock(); defer { lock.unlock() }
+                refreshes += 1
+                return FragmentsUserSession(accessToken: "fresh", userID: "u1")
+            }
+            func currentSession() async throws -> FragmentsUserSession {
+                FragmentsUserSession(accessToken: "stale", userID: "u1")
+            }
+            func refreshedSession() async throws -> FragmentsUserSession {
+                takeRefreshed()
+            }
+        }
+        final class ScriptedHTTP: @unchecked Sendable {
+            private let lock = NSLock()
+            private var script: [(Int, String)]
+            private var recorded: [URLRequest] = []
+            init(_ script: [(Int, String)]) { self.script = script }
+            var requests: [URLRequest] {
+                lock.lock(); defer { lock.unlock() }
+                return recorded
+            }
+            func serve(_ request: URLRequest) throws -> (Data, URLResponse) {
+                lock.lock(); defer { lock.unlock() }
+                recorded.append(request)
+                guard !script.isEmpty else {
+                    throw FragmentsTransportError.malformedResult("script exhausted")
+                }
+                let (status, body) = script.removeFirst()
+                return (Data(body.utf8), HTTPURLResponse(
+                    url: request.url!, statusCode: status,
+                    httpVersion: nil, headerFields: nil)!)
+            }
+        }
+
+        let http = ScriptedHTTP([(401, "expired"), (200, "[]")])
+        let provider = RefreshingProvider()
+        let transport = FragmentsRPCTransport(
+            configuration: .init(
+                projectURL: URL(string: "https://example.supabase.co")!,
+                apiKey: "publishable-key"),
+            sessionProvider: provider,
+            load: { try http.serve($0) })
+
+        let rows = try await transport.pull(after: nil, limit: 1)
+        #expect(rows.isEmpty)
+        #expect(provider.refreshCalls == 1)
+        #expect(http.requests.map { $0.value(forHTTPHeaderField: "Authorization") }
+                == ["Bearer stale", "Bearer fresh"],
+                "the retry must carry the REFRESHED bearer")
+        // Same payload both times — the retry re-sends, never re-shapes.
+        #expect(http.requests[0].httpBody == http.requests[1].httpBody)
+    }
 }
 
 /// Tiny thread-safe counter for the seam test.
