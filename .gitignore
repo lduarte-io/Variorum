@@ -8,3 +8,4 @@ DerivedData/
 *.xcuserstate
 .netrc
 .env.supabase.local
+.env.fragments-oauth.local

@@ -191,6 +191,71 @@ implementer's lookup supplies the path). Client credentials, when issued, go in 
 untracked gitignored `.env.fragments-oauth.local` — never chat, never tracked files;
 the author copies them into the Variorum provider form from there.
 
+**Round 3 (2026-07-10, the implementer's Sonnet lookup — answers the round-1/2
+directives; each fact tagged DOCUMENTED / CODE-DERIVED / INFERRED):**
+
+- **(a) Client registration — three doors, best first.**
+  1. *Dashboard (DOCUMENTED, un-reconciled with round 1):* the getting-started docs
+     describe **"Authentication → OAuth Apps" → "Add a new client"** (name, redirect
+     URIs, client type Public/Confidential) — a page DISTINCT from the "OAuth Server"
+     page the author inventoried. Check for that literal sidebar tab first; the
+     round-1 absence may be a rollout gap (unresolved).
+  2. *Project-admin GoTrue endpoint (DOCUMENTED + CODE-DERIVED — the recommended
+     programmatic door):* `POST https://<fragments-ref>.supabase.co/auth/v1/admin/oauth/clients`
+     with `Authorization: Bearer <the FRAGMENTS project's SECRET key>` (a project key,
+     NOT the Management-API PAT — round 2's "Management API" premise is corrected: no
+     `api.supabase.com` route exists for OAuth-server clients; that domain's OAuth is
+     the unrelated manage-organizations integration). Body `{name, redirect_uris,
+     client_type: "public"|"confidential", token_endpoint_auth_method}`; returns
+     `client_id` + `client_secret` **shown once**; GET on the same path lists.
+     Avoids the dynamic toggle entirely — no open-registration window.
+  3. *Dynamic RFC 7591 (CODE-DERIVED path):* `POST /auth/v1/oauth/clients/register` —
+     path confirmed from the auth router + a live repro (supabase/auth #2285); gated
+     ONLY on the toggle; **open/unauthenticated while ON** (rate-limited). Discovery
+     advertising `registration_endpoint` when ON: INFERRED. Toggle-back-OFF keeping
+     registered clients alive: INFERRED (the flag is checked only in the register
+     handler) — verify empirically before relying. Redirect URIs: HTTPS required
+     (localhost HTTP allowed; custom schemes rejected, open bug) — Variorum's HTTPS
+     callback qualifies. Registering V as a **confidential** client with
+     `client_secret_post` is the standard-practice call; the inner V↔F token-exchange
+     mechanics are NOWHERE documented (the chain's biggest unverified assumption —
+     the spike settles it live).
+- **(b) Consent UI (DOCUMENTED, decisive):** **no Supabase-hosted login/consent page
+  exists** — hosted projects 302 to `{site_url}{authorization_path}?authorization_id=…`
+  and nothing serves it unless the project's own app does (open supabase/auth issue
+  #2408 confirms the hosted-project gap). The page's whole job (CODE-DERIVED routes +
+  the docs' worked example): sign the user in against the FRAGMENTS project
+  (ordinary auth), `GET /auth/v1/oauth/authorizations/{id}` with the user bearer,
+  `POST …/consent {action: approve|deny}`, then redirect to the returned
+  `redirect_url`. **Consent auto-skips on repeat client+scope** (CODE-DERIVED), so the
+  page is hit ~once per user+client+scope; no permanent first-party-skip flag exists.
+  Spike: a throwaway LOCAL page at the placeholder Site URL suffices (INFERRED from
+  the flow — nothing restricts Site URL); production: the ~20-line page on
+  stargazing.tech (round 2's answer).
+- **(c) provider_token (Step 5's question) — PARTIALLY VERIFIED:** Supabase returns
+  `provider_token`/`provider_refresh_token` **only in the initial sign-in response**,
+  never persists and **never refreshes** them (DOCUMENTED for social providers;
+  applicability to `custom:<slug>` providers INFERRED — same code path, not stated in
+  the custom-provider docs). Pre-recorded Step 5 consequence: even when present, a
+  long-lived bridge session cannot ride provider_token alone — the app must hold the
+  provider REFRESH token and renew against Fragments' `/auth/v1/oauth/token` as a
+  registered client (a PUBLIC client, `token_endpoint_auth_method: none`, needs no
+  secret on-device), or the bridge gets its own direct Fragments-project sign-in.
+  Whether an F-OAuth-server-issued access token is accepted by Fragments'
+  PostgREST/RLS as an ordinary user JWT is UNVERIFIED — the spike's decoded
+  provider-token claims (iss/sub/role) inform it.
+- **Userinfo scope needs:** not Supabase-documented; OIDC convention (`openid` → `sub`,
+  `email` scope → the email claim) assumed — the planned scopes `openid, email,
+  profile` cover it.
+- **The spike harness SHIPPED** (implementer): `Spikes/AuthPairingSpike/` — README +
+  `consent.html` (the throwaway F-side consent page: hand-rolled fetch, password
+  sign-in, get-authorization, approve/deny, redirect) + `callback.html` (the session
+  inspector: decodes the Variorum session's `sub`/`iss`/`email`/`amr`, reports
+  provider-token presence + the provider token's decoded claims; REDACTED summary
+  only — raw tokens never leave the browser). Zero dependencies, author-executed.
+  The provider slug the sign-in code will default to is **`fragments`**
+  (`custom:fragments`) — injectable configuration in Step 1's entry seam regardless.
+
 **`owner_id` keying (brief open interpretation 2):** under (A), `owner_id` = the
 **Variorum project's `auth.uid()`** (its native `sub`). Rationale, recorded: it is
 project-local and stable regardless of how the identity was proven (delegated

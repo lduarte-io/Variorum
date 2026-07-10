@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!-- Phase 9c Step 0 spike — the delegated sign-in landing page (THROWAWAY).
+
+     The spike's authorize URL sends the browser through:
+       Variorum /auth/v1/authorize?provider=custom:<slug>
+         → Fragments /auth/v1/oauth/authorize  (Variorum is the client)
+         → consent.html (sign in + approve)
+         → back through both projects
+         → HERE, with the VARIORUM session in the URL fragment
+           (implicit flow — no code_challenge was supplied).
+
+     This page answers Step 0(c): the session's `sub` (the Variorum-project
+     auth.uid() — the owner_id value class), `iss`, `email`, and whether the
+     PROVIDER's tokens (Fragments-project access/refresh) ride along as
+     provider_token / provider_refresh_token. It renders a REDACTED summary
+     safe to copy into the decision memo — raw tokens never leave the page. -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Variorum sign-in spike — session inspector</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; max-width: 640px; margin: 3rem auto; padding: 0 1rem; }
+  pre { background: #f4f4f4; padding: 10px; overflow-x: auto; white-space: pre-wrap; }
+  button { font: inherit; padding: 6px 18px; cursor: pointer; }
+  .err { color: #b00; }
+</style>
+</head>
+<body>
+<h2>Variorum delegated sign-in — session inspector</h2>
+<div id="out"></div>
+<button onclick="copySummary()">Copy redacted summary</button>
+
+<script>
+function decodeJWTPayload(token) {
+  try {
+    const payload = token.split(".")[1]
+      .replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(payload));
+  } catch (e) { return { decodeError: String(e) }; }
+}
+
+const params = new URLSearchParams(location.hash.replace(/^#/, ""));
+const query = new URLSearchParams(location.search);
+let summary = {};
+
+if (query.get("code")) {
+  document.getElementById("out").innerHTML =
+    `<p class="err">A PKCE <code>?code=…</code> came back instead of fragment
+     tokens (unexpected for a bare authorize URL). Record this in the memo —
+     the flow works, but inspection needs a code exchange.</p>`;
+  summary = { flow: "pkce-code", code_present: true };
+} else if (!params.get("access_token")) {
+  document.getElementById("out").innerHTML =
+    `<p class="err">No tokens in the URL fragment. If an error came back it
+     is shown below:</p><pre>${decodeURIComponent(location.hash || location.search)}</pre>`;
+  summary = { flow: "error", raw: (location.hash || location.search).slice(0, 400) };
+} else {
+  const access = params.get("access_token");
+  const claims = decodeJWTPayload(access);
+  summary = {
+    flow: "implicit-fragment",
+    // The Variorum-project identity (Step 0(c) + the owner_id keying):
+    sub: claims.sub,
+    iss: claims.iss,
+    email: claims.email,
+    role: claims.role,
+    aud: claims.aud,
+    amr: claims.amr,
+    app_metadata_provider: claims.app_metadata && claims.app_metadata.provider,
+    exp: claims.exp,
+    // Step 5's question — do the PROVIDER's (Fragments-project) tokens ride?
+    provider_token_present: params.has("provider_token"),
+    provider_refresh_token_present: params.has("provider_refresh_token"),
+    refresh_token_present: params.has("refresh_token"),
+    expires_in: params.get("expires_in"),
+    token_type: params.get("token_type"),
+  };
+  // If the provider token rides along, decode ITS claims too (is it a
+  // Fragments-project user JWT usable against their RLS? — Step 5's
+  // bridge-session question).
+  if (params.has("provider_token")) {
+    const provider = decodeJWTPayload(params.get("provider_token"));
+    summary.provider_token_claims = {
+      sub: provider.sub, iss: provider.iss, email: provider.email,
+      role: provider.role, exp: provider.exp, decodeError: provider.decodeError,
+    };
+  }
+  document.getElementById("out").innerHTML =
+    `<p>Signed in. Redacted summary (raw tokens stay in this page):</p>
+     <pre>${JSON.stringify(summary, null, 2)}</pre>`;
+}
+
+function copySummary() {
+  navigator.clipboard.writeText(JSON.stringify(summary, null, 2));
+}
+</script>
+</body>
+</html>

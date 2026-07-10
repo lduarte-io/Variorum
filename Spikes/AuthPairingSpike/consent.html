@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!-- Phase 9c Step 0 spike — the Fragments-side OAuth consent page (THROWAWAY).
+
+     Supabase's OAuth 2.1 Server has NO hosted login/consent UI (confirmed,
+     github.com/supabase/auth issue #2408): the project's Site URL app must
+     implement it. For the spike, Fragments' Site URL is already the default
+     http://localhost:3000 — serve this file there and set the OAuth Server
+     page's "Authorization Path" to /consent.html.
+
+     Flow implemented (all plain fetch, no SDK):
+       1. read ?authorization_id=… (Fragments' /oauth/authorize redirected here)
+       2. sign the user in against the FRAGMENTS project
+          (POST /auth/v1/token?grant_type=password)
+       3. GET /auth/v1/oauth/authorizations/{id}   (user bearer + apikey)
+       4. POST /auth/v1/oauth/authorizations/{id}/consent {action:"approve"}
+       5. redirect the browser to the returned redirect_url (carries the code
+          back to the Variorum project's /auth/v1/callback)
+
+     Production replacement: the same ~20 lines, hosted on the author's site
+     (stargazing.tech) — her call, outside this repo. -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fragments — authorize Variorum (spike)</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; max-width: 520px; margin: 3rem auto; padding: 0 1rem; }
+  input, button { font: inherit; padding: 6px 10px; margin: 4px 0; width: 100%; box-sizing: border-box; }
+  button { cursor: pointer; width: auto; padding: 6px 18px; }
+  pre { background: #f4f4f4; padding: 10px; overflow-x: auto; white-space: pre-wrap; }
+  .err { color: #b00; }
+  .ok { color: #070; }
+</style>
+</head>
+<body>
+<h2>Fragments — authorize Variorum <small>(spike consent page)</small></h2>
+
+<!-- ===== CONFIG — fill in before serving (PUBLIC values only: the
+     Fragments project URL and its PUBLISHABLE/anon API key. Never put a
+     secret key or PAT in this file). ===== -->
+<script>
+const FRAGMENTS_URL = "https://<supabase-project-ref>.supabase.co";
+const FRAGMENTS_PUBLISHABLE_KEY = "PASTE-FRAGMENTS-PUBLISHABLE-KEY-HERE";
+</script>
+
+<div id="status"></div>
+<div id="signin" style="display:none">
+  <p>Sign in with your <strong>Fragments</strong> account to continue:</p>
+  <input id="email" type="email" placeholder="email" autocomplete="username">
+  <input id="password" type="password" placeholder="password" autocomplete="current-password">
+  <button onclick="signIn()">Sign in</button>
+  <p><small>If your Fragments account does not use email+password, stop here
+  and report — the page needs adapting to your provider.</small></p>
+</div>
+<div id="consent" style="display:none">
+  <p>A client is asking for access:</p>
+  <pre id="details"></pre>
+  <button onclick="decide('approve')">Approve</button>
+  <button onclick="decide('deny')">Deny</button>
+</div>
+
+<script>
+const qs = new URLSearchParams(location.search);
+const authorizationID = qs.get("authorization_id");
+let userToken = null;
+
+function show(id) { document.getElementById(id).style.display = "block"; }
+function hide(id) { document.getElementById(id).style.display = "none"; }
+function status(msg, cls) {
+  document.getElementById("status").innerHTML =
+    `<p class="${cls || ""}">${msg}</p>`;
+}
+
+async function api(path, options = {}) {
+  const headers = Object.assign({
+    "apikey": FRAGMENTS_PUBLISHABLE_KEY,
+    "Content-Type": "application/json",
+  }, options.headers || {});
+  if (userToken) headers["Authorization"] = "Bearer " + userToken;
+  const response = await fetch(FRAGMENTS_URL + path, Object.assign({}, options, { headers }));
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`${response.status} ${JSON.stringify(body)}`);
+  return body;
+}
+
+async function signIn() {
+  try {
+    status("Signing in…");
+    const session = await api("/auth/v1/token?grant_type=password", {
+      method: "POST",
+      body: JSON.stringify({
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+      }),
+    });
+    userToken = session.access_token;
+    hide("signin");
+    status("Signed in as " + (session.user && session.user.email), "ok");
+    await loadAuthorization();
+  } catch (e) { status("Sign-in failed: " + e.message, "err"); }
+}
+
+async function loadAuthorization() {
+  try {
+    const details = await api(`/auth/v1/oauth/authorizations/${authorizationID}`);
+    document.getElementById("details").textContent = JSON.stringify(details, null, 2);
+    show("consent");
+  } catch (e) { status("Could not load the authorization: " + e.message, "err"); }
+}
+
+async function decide(action) {
+  try {
+    status("Submitting " + action + "…");
+    const result = await api(`/auth/v1/oauth/authorizations/${authorizationID}/consent`, {
+      method: "POST",
+      body: JSON.stringify({ action }),
+    });
+    const target = result.redirect_url || result.redirect_uri;
+    if (target) {
+      status("Redirecting back to the client…", "ok");
+      location.href = target;
+    } else {
+      status("No redirect_url in the response: " + JSON.stringify(result), "err");
+    }
+  } catch (e) { status("Consent failed: " + e.message, "err"); }
+}
+
+if (!authorizationID) {
+  status("Missing ?authorization_id — this page must be reached via the " +
+         "Fragments project's /auth/v1/oauth/authorize redirect.", "err");
+} else if (FRAGMENTS_PUBLISHABLE_KEY.startsWith("PASTE-")) {
+  status("Fill in FRAGMENTS_PUBLISHABLE_KEY at the top of this file first.", "err");
+} else {
+  show("signin");
+}
+</script>
+</body>
+</html>
