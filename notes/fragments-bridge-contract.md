@@ -89,12 +89,17 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
 12. **`created_at` on upsert-update:** Variorum's pushes include `created_at`; please
     confirm your guarded upsert preserves the existing row's `created_at` on UPDATE (the
     fake server assumes so).
-13. **Optional, closes a documented loss window:** when `sync_push` LWW-overwrites a live
-    row, consider returning the REPLACED body in the response. Today a Fragments-side save
-    landing in the seconds between the bridge's pull and its first-ever push of that day
-    can be overwritten server-side before any pull sees it — the one acknowledged window
-    where Fragments-typed text can be lost (documented in Variorum's Phase 9b closeout).
-    With the previous body returned, the bridge would land it as a variant → zero loss.
+13. **Optional, closes the residual loss windows:** when `sync_push` LWW-overwrites a live
+    row, consider returning the REPLACED body in the response. Variorum's pushes stamp
+    minimally above the last server-row stamp the bridge has seen (a compare-and-set
+    discipline added at its Phase 9b review), so an unseen Fragments save now survives as
+    `.stale`-then-rescued — but three residues remain: a day's FIRST-EVER push carries no
+    known stamp (falls back to wall clock), stamps quantize at 1 s, and an unparseable
+    stamp falls back to wall clock (ask 11). With the previous body returned on overwrite,
+    the bridge would land it as a variant → zero loss in every case.
+    *(Related, from the same review: Variorum's re-projection stamps may sit only 1 s
+    above the row they answer rather than at wall-clock time — confirm your `updated_at`
+    semantics tolerate content-newer-than-stamp rows; it is pure LWW ordering to us.)*
 
 ## What each side promises operationally
 

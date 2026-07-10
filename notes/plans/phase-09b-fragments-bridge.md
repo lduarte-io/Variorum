@@ -351,10 +351,10 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
   call); carried forward in the handoff as a post-9c gate item, now additionally
   gated on the contract asks 8–12.
 
-### Test counts (the Phase 9c baselines — POST-round-1 fixes; pre-review counts were 493/59, 234/43, 11/4)
+### Test counts (the Phase 9c baselines — POST-round-2 fixes; pre-review 493/59 · 234/43 · 11/4, post-round-1 497/59 · 235/43 · 11/4)
 
-- Core `swift test`: **497 green in 59 suites** (was 430/51 at phase start — +67
-  tests, +8 suites; the round-1 fix pass added 4 pins).
+- Core `swift test`: **503 green in 59 suites** (was 430/51 at phase start — +73
+  tests, +8 suites; round 1 added 4 pins, round 2 added 6).
 - Mac app: **235 green in 43 suites** (was 231/42 — +4 incl. the throttle test).
 - Mobile: **11 green in 4 suites** (unchanged; the mobile target compiles the shared
   bridge files but constructs the session fenced).
@@ -404,15 +404,23 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
 
 ### Documented residuals (recorded, deliberately not solved here)
 
-- **The first-push overwrite window:** a Fragments-side save landing in the seconds
-  between the bridge's pull and its FIRST-EVER push of that day (no bridge state)
-  can be LWW-overwritten server-side before any pull serves it — the one acknowledged
-  window where Fragments-typed text can be lost (their state-based feed serves current
-  rows only). Bounded: requires same-day two-surface authoring inside one round's
-  pull→push gap on a never-bridged day; steady-state days always have state and land
-  first. Same class as SyncSpec §7's documented concurrent-divide duplication.
-  Contract ask 13 (return the replaced body) would close it to zero; revisit at the
-  real pass.
+- **The unseen-save overwrite window — RE-SCOPED at review round 2 (the round's
+  MAJOR; the original wording here falsely claimed "steady-state days always have
+  state and land first"):** pre-round-2, ANY day's push stamped `now`, so a
+  Fragments save the same round's pull could not see (saved after the pull, or
+  inside their ~2 s visibility horizon) was LWW-overwritten and — the feed being
+  state-based — lost everywhere, steady state included. **Fixed:** pushes now stamp
+  minimally above the last KNOWN remote stamp (`last_remote_stamp + 1s`; push-accepts
+  record their own stamp), making the push a compare-and-set against what the bridge
+  has seen — an unseen save wins LWW (`.stale`), survives, and lands as a conflict
+  card next round (pinned red-on-old). **What actually remains:** (1) FIRST CONTACT —
+  a day with no known remote stamp falls back to a `now` stamp, so the original
+  first-ever-push window stands (bounded: never-bridged day + same-seconds
+  two-surface authoring inside one round's pull→push gap); (2) sub-second stamp
+  granularity (+1s quantization); (3) unparseable remote stamps fall back to `now`
+  (contract ask 11). Same documented-race class as SyncSpec §7's concurrent-divide
+  duplication. Contract ask 13 (return the replaced body on LWW overwrite) would
+  close all residue to zero; revisit at the real pass.
 - **The check-then-act window** between a landing's classification read and its
   operation call (separate transactions — ops cannot nest in one write): a local
   edit landing in that window can shift the true classification (an
@@ -568,3 +576,115 @@ baselines.** Fix commits: the `applyBridgeLanding` + engine/scheduler/session/te
 changes and the schema amendment (nullable hash, own commit) — see git log; every
 pin's red state verified by stashing the source fixes (batch A: MAJOR 1 + MINOR 3
 pins red) and reverting the status wiring (batch B: MINOR 4 pin red).
+
+## Review round 2 (2026-07-09, fresh cold reviewer) — 1 NEW MAJOR / 3 MINOR /
+## 4 NIT (one SPECULATIVE) + a clean bill on all round-1 fixes; ALL AGREED;
+## bug-class pins verified red-on-old by stashing the round-2 source fixes.
+## Per the ladder, the new MAJOR's fixes receive round 3 — this section is
+## that reviewer's anchor.
+
+**MAJOR — the Fragments-loss window was NOT confined to first contact; the
+round-0 docs carried a false safety claim (AGREED, both halves; fixed; pin
+verified red-on-old).** Mechanism, self-traced and confirmed: on a steady-state
+day (bridge state present), a Variorum edit plus a Fragments save that the same
+round's pull cannot see (saved after the pull, or inside their ~2 s visibility
+horizon — the fake models exactly this) met a push stamped `now`; under sane
+clocks `now` outranked the fresh save, the server row-LWW-replaced it, and the
+state-based feed thereafter served only our own echo: the save ended in **no live
+row, no variant, no commit, no server row**. The docs ("steady-state days always
+have state and land first"; "the one acknowledged window"; #14(d)'s "both texts
+always survive") were wrong — and the suites structurally could not see it (the
+harness's 2027 stamps made every tested race resolve `.stale`; the soak wrote only
+between rounds). **Code fix (the reviewer's proposal, adopted):** `pushStamp` now
+stamps **minimally above the last known remote stamp** (`last_remote_stamp + 1s`,
+never `now` when a stamp is known), and push-accepts record their own sent stamp
+into `last_remote_stamp` (the companion fix, without which consecutive pushes
+wedge — this also resolves NIT 7). The push thereby becomes a compare-and-set
+against what the bridge has SEEN: an unseen save wins LWW → `.stale` → next round
+lands it as a conflict card → truth re-projects — the overwrite becomes a rescue.
+The round-1 clock-ahead outranking requirement is preserved (+1s over a landed
+2027 stamp), so all round-1 pins stand. **Pin:**
+`aFragmentsSaveHiddenFromTheSameRoundsPullSurvivesItsPush` — stages the save with
+a REALISTIC stamp (read from the server row, +2 s) inside the horizon between pull
+and push, burns local clock ticks so `now` is safely past it (the exact
+destruction condition), and asserts `.stale`-then-rescue; verified RED on pre-fix
+code (pushed 1 / stale 0 / F destroyed, no rescue ever). **Docs fix:** the
+closeout residual paragraph re-scoped (above, in place), contract ask 13 re-framed
+(+ a new related note asking them to confirm content-newer-than-stamp rows are
+tolerable), the handoff's finding 3 corrected, QUESTIONS #14(d)'s survival claim
+corrected. What actually remains: first contact (no stamp known → `now`
+fallback), 1 s stamp quantization, unparseable stamps → `now` (ask 11); ask 13
+closes all residue.
+
+**MINOR 2 — `createPost(entryDate:)` was still a permissive door; the Step-6
+"one permissive door" claim was false (AGREED; fixed; pin verified red-on-old).**
+Confirmed: `createPost(profile:.journal, entryDate:"2026-7-9")` succeeded —
+BridgePushTests' own fixture minted such a row through present-tense code while
+calling it "legacy." Fix: `createPost` validates non-nil `entryDate` with the same
+`JournalDay.isValid` guard (nil stays legitimate — undated posts); the fixture
+rewritten to inject a GENUINE legacy row via raw SQL (the ops API now correctly
+refuses to mint it; the engine's malformed-day note guard stays as
+defense-in-depth). Pin: `createPostRefusesMalformedDayKeysToo`, verified red
+pre-fix (all five malformed keys minted rows). All other callers already used
+valid keys (call-site sweep in the fix commit).
+
+**MINOR 3 — `applyBridgeLanding` never bound the variant to the container whose
+buffers it insures (AGREED; fixed; pin verified red-on-old).** Confirmed: a
+mismatched pair skipped the auto-commit sweep for the overwritten variant's
+container — the round-1 loss class one caller bug away, inside the op built to
+make it structurally impossible. Fix: the op now requires the variant's live
+placement's `container_id == containerID`, throwing
+`OperationError.blockNotPlaced(id: block)` otherwise (case REUSED rather than
+minted: the semantic is "this block has no live placement [in this container]",
+and a new public error case for an ops-hardening guard no production caller can
+reach felt like surface without value — flagged here for round 3's judgment).
+Pin: `applyBridgeLandingRefusesAVariantOutsideTheContainer`, verified red pre-fix
+(the foreign variant was overwritten, uncommitted).
+
+**MINOR 4 — canonical-doc drift from the round-1 MAJOR-1 fix (AGREED; doc-only,
+coordinator-sanctioned; no pin owed).** OverallModel §3's fifth quiet occasion now
+describes the COMPLETE mechanism (one transaction insuring both sides — the dirty
+pre-image and the landed body itself; empty bodies take no commit) — the count
+stays five occasions, one of which makes two commits. AppSpec §9 gains the
+`applyBridgeLanding` catalog entry and the `label` parameter on
+`resolveSyncConflict` (with the bridge's `'fragments'` use). **Both deltas are on
+the author's checkpoint ratify list** (recording shipped mechanism, not inventing
+behavior — the handoff names them).
+
+**NIT 5 — the notebook-rule preference SQL was duplicated ×3 (AGREED; fixed).**
+`Queries.canonicalJournalEntry(_:day:)` is now the ONE implementation;
+`createOrOpenJournalEntry`, the engine's `readDayContext`, and the test harness
+all call it — the "same entry" comment is now structural fact, not aspiration.
+
+**NIT 6 — the ratify-listed archived behaviors had no coverage pins (AGREED;
+fixed).** Two coverage pins (green both sides by design, the round-1 NIT-8
+precedent): `anArchivedEntryStillPushes` and
+`anArchivedSiblingKeepsTheDuplicateDayPause` (archiving is NOT the hand-merge
+gesture; delete/re-date releases) — the #14(e) walk now has executable
+documentation.
+
+**NIT 7 — push-accept never recorded its own stamp (AGREED; subsumed).** Fixed as
+the MAJOR's companion fix (accepted pushes record their sent stamp); the
+two-pushes-in-one-echo-window `.stale` hiccup is gone with it.
+
+**NIT 8 — reconfigure leaked the trailing cadence round; the transport never
+cross-checked the session user (AGREED; both fixed).** `configure(engine:)` now
+cancels `trailingTask` (a pending cadence round can no longer fire into a NEW
+scheduler); `FragmentsRPCTransport.Configuration` gains optional `expectedUserID`
+checked per call against the session (refusing with `sessionUserMismatch` before
+any request composes — 9c passes the bridge configuration's `userID`; their RLS is
+never the only guard). Tested: `transportRefusesASessionUserMismatch`.
+
+**NIT (SPECULATIVE) — a transient sync state renderPost renders could make the
+only-Fragments-changed path throw `archivedVariant` (AGREED as doc-only; no
+mechanism to pin).** The reviewer could not construct a persistent wedge and
+neither could this pass: the failure is a failed round; the store heals on the
+next sync round and the landing retries — the same self-healing class as the lock
+race the op's comment already named. The comment now names this class too.
+
+**Round-2 fix-pass counts: core `swift test` 503 green in 59 suites; Mac app 235
+green in 43 suites (unchanged — every round-2 test is core-side); mobile 11 green
+in 4 suites — the Phase 9c baselines.** Every
+round-2 pin's red state verified by stashing the three round-2 source fixes
+(BridgeEngine / Operations+Container / Operations+Sync) and re-running the pins:
+all red with exactly the traced failure shapes.

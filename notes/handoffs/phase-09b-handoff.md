@@ -84,15 +84,19 @@ nothing typed in either app can be lost where truth lives.
 
 ## Verification (headless — the real pass is deferred, deliberately)
 
-- **Core `swift test`: 497 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
-  (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines
-  (post-round-1-review counts — the cold review round ran 2026-07-09: 2 MAJOR /
-  3 MINOR / 3 NIT, all agreed, all fixed or recorded with red-on-old pins; every
-  disposition in the phase plan's round-1 section. The MAJORs: the landed Fragments
-  body now gets its own quiet auto-commit inside a one-transaction landing — it can
-  no longer be destroyed on both surfaces by the editor's keep-pending flush — and
-  the push sweep's P1 relaxation went to your ratify list as #15 with a 60 s cadence
-  throttle shipped).
+- **Core `swift test`: 503 green in 59 suites** (was 430/51). **Mac app: 235 in 43**
+  (was 231/42). **Mobile: 11 in 4** (unchanged). These are the 9c baselines,
+  post-review (the ladder ran rounds 1 and 2 on 2026-07-09; round 2's new MAJOR
+  means round 3 follows per the ladder). Round 1: 2 MAJOR / 3 MINOR / 3 NIT — the
+  landed Fragments body now gets its own quiet auto-commit inside a one-transaction
+  landing, and the push sweep's P1 relaxation went to your ratify list as #15 with a
+  60 s cadence throttle. Round 2: 1 MAJOR / 3 MINOR / 4 NIT — pushes now stamp
+  minimally above the last SEEN remote stamp (compare-and-set style), closing the
+  steady-state unseen-save loss window this handoff previously mis-scoped as
+  first-contact-only; `createPost` gained the day-key guard; `applyBridgeLanding`
+  binds variant to container; OverallModel §3 + AppSpec §9 record the shipped
+  landing mechanism (**bless these two doc deltas at the checkpoint**). Every
+  disposition in the phase plan's round sections.
 - Every scenario in the brief's verification skeleton has a named test: both-direction
   round trips, echo/replay idempotence, the auto-commit-then-autosave landing (and its
   no-double-commit twin), conflict variants with LWW convergence, insured deletions,
@@ -120,12 +124,15 @@ nothing typed in either app can be lost where truth lives.
    push must outrank the row it answers, or a clock ahead of ours (your phone) leaves
    truth's re-projection permanently stale — pushes now stamp
    `max(now, landed-stamp + 1s)`; `bridge_day` carries the landed stamp.
-3. **The first-push overwrite window (documented residual):** a Fragments save landing
-   in the seconds between a round's pull and its FIRST-EVER push of that day can be
-   overwritten server-side unseen — the one acknowledged window where Fragments-typed
-   text can be lost. Bounded to never-bridged days + same-seconds two-surface
-   authoring; ask 13 would close it to zero. Same documented-race class as SyncSpec
-   §7's concurrent-divide duplication.
+3. **The unseen-save overwrite window (round-2 MAJOR — was mis-scoped here as
+   first-contact-only):** pre-fix, a Fragments save the same round's pull couldn't
+   see (saved after it, or inside their ~2 s horizon) was overwritten by the push's
+   wall-clock stamp on ANY day and lost everywhere. Fixed: pushes now stamp minimally
+   above the last remote stamp the bridge has SEEN (compare-and-set style), so an
+   unseen save wins LWW, survives, and lands as a conflict card next round
+   (red-on-old pinned). What remains: first contact (no stamp known yet), 1 s stamp
+   granularity, unparseable stamps — ask 13 (return the replaced body) closes all of
+   it; same documented-race class as SyncSpec §7's concurrent-divide duplication.
 4. **Landing readings (a)–(e)** — QUESTIONS #14, above.
 5. **KnownIssues:** `setEntryDate` row resolved and removed; one row added (the push
    sweep's O(journal-days) cost, owner Phase 12, remedy sketch recorded).

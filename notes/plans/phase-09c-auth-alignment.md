@@ -31,8 +31,8 @@
 > `Server/supabase/02_sync_rpc.sql` (the SECURITY-DEFINER surface being locked down),
 > and `notes/sync-postmortem-fragments.md` (read before touching
 > `Sources/VariorumCore/Sync/`). **Baselines — do not re-run at session start:** core
-> `swift test` = 497 green in 59 suites; Mac app = 235 green in 43 suites; mobile = 11
-> green in 4 suites (the 9b closeout's post-round-1-review counts). **This phase transitions the author's
+> `swift test` = 503 green in 59 suites; Mac app = 235 green in 43 suites; mobile = 11
+> green in 4 suites (the 9b closeout's post-round-2-review counts). **This phase transitions the author's
 > LIVE sync** — take the manual pre-cutover backup (A1 exists; make one anyway),
 > follow SyncSpec §12 to the letter (mirror first, then every client; a half-migrated
 > state refuses, never guesses), and remember the two 9d environment traps (piped
