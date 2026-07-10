@@ -88,6 +88,11 @@ extension AppDatabase {
         // Fragments save, which then lands as a conflict card instead of
         // being LWW-destroyed. `now` only on first contact or an
         // unparseable stamp.
+        // `remote_created_at` (reconciliation amendment, same in-place
+        // safety): the row's created_at as last pulled or pushed — their
+        // upsert's SET list includes created_at, so a winning push
+        // OVERWRITES it; the bridge echoes the pulled value to preserve the
+        // original instant (own instant only for rows never seen).
         // `last_synced_hash` is NULLABLE (second in-place amendment, same
         // safety; review round 1, MINOR 3): a day can carry a remote LWW
         // stamp with NO agreed body — the first-contact tombstone-races-an-
@@ -103,7 +108,8 @@ extension AppDatabase {
                 CREATE TABLE bridge_day (
                   day_key           TEXT PRIMARY KEY,
                   last_synced_hash  TEXT,
-                  last_remote_stamp TEXT
+                  last_remote_stamp TEXT,
+                  remote_created_at TEXT
                 );
                 """)
         }
