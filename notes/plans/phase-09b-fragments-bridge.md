@@ -221,9 +221,226 @@ session SEAM is built here to be absorbed); E2EE (14); graduated-entry diff-mapp
    first-block variant rescue after graduation.
 8. `bridge_state` is provably local-only (registry, walks, outbox all agree).
 
-## Closeout
-*(Written by the implementer at phase end: what shipped, test counts, PROVISIONAL calls
-— including the deletion-landing reading if it proved product-shaped — review
-dispositions, KnownIssues reconciliation (the `setEntryDate` row must be resolved), the
-deferred real-project pass carried forward, and the 9c plan authored from its brief per
-the front-loaded-planning rule.)*
+## Closeout (2026-07-09 — implementer: Fable, single session; awaiting the cold review)
+
+### What shipped, by step
+
+- **Step 1 — the contract layer** (`Sources/VariorumCore/Bridge/FragmentsContract.swift`,
+  `FragmentsSession.swift`, `FragmentsTransport.swift`;
+  `Tests/.../Support/FakeFragmentsServer.swift` + 3 suites, 23 tests).
+  **THE CONTRACT FINDING (the phase's one gap, judged non-core-gating — mechanism below):**
+  `notes/fragments-bridge-contract.md` pins the id RECIPE
+  (`UUIDv5("journal|<canonical-user>|<dayKey>")`) but NOT the namespace UUID, NOT the
+  worked examples this plan's Step 1 tests presumed ("matches the contract's worked
+  examples EXACTLY"), NOT the canonical-user string's exact form, and NOT the RPC wire
+  shapes. Stop-and-report vs proceed was weighed explicitly: the missing facts are
+  consumable ONLY at the real-project pass, which the author had already deferred
+  post-9c; the engine's correctness (hash guards, pause, landings, auto-commit occasion,
+  graduated policy) is independent of the leaf constants; and the plan's own risk list
+  anticipates contract-vs-reality drift as "a 9c-era finding; record, don't guess." So:
+  the UUIDv5 **algorithm** is pinned against the RFC lineage vector (DNS ns +
+  "python.org"), the composition against the recipe string, golden vectors frozen under
+  a STAND-IN namespace (RFC URL ns), and the namespace/canonical-user/user-id ride
+  `FragmentsBridgeConfiguration` as author-supplied facts — nothing guessed into code.
+  The wire DTOs are **PROVISIONAL** (snake_case column-named keys, Supabase
+  `rest/v1/rpc` POST convention), pinned by no-network tests. **Asks 8–13 appended to
+  the contract file** (namespace; worked example; canonical-user form; wire shapes;
+  created_at-on-update; and an optional return-replaced-body that would close the loss
+  window below). The session seam is `FragmentsSessionProviding` (bearer session per
+  call → 9c's refresh slots in behind it) + `StaticFragmentsSessionProvider`; zero
+  coupling to the Phase 8 paste-in (no Keychain, no shared keys; pinned: a signed-out
+  session refuses before any request composes). The fake server pins every contract
+  fact by test: strict row-LWW on client `updated_at`, live-unique `(user_id, date)`
+  rejecting foreign-id day forks, un-tombstone only strictly-newer, LWW-guarded
+  deletes, created_at preserved on update, clock-ahead clamp, keyset
+  `(server_updated_at, id)` pulls, logical-clock visibility horizon.
+
+- **Step 2 — bridge state** (migration `v1_4_bridge_state`, own commits). **Delta from
+  the plan's sketch: TWO tables, not one** — `bridge_day(day_key PK, last_synced_hash,
+  last_remote_stamp)` (per-day protocol state) and `bridge_state(key, value)` (the
+  keyset cursor — a per-bridge value has no day row to live on). `last_synced_hash` is
+  the **agreed hash** (recorded on push-accept AND on every landing), deliberately more
+  than the sketch's "last-pushed": recording agreement at landing time is what makes
+  push echoes and replays skip and prevents the landing→push echo loop.
+  `last_remote_stamp` was added mid-phase (v1_4 amended in place BEFORE any persistent
+  store ran it — recorded in the commit): it carries the landed row's client-LWW
+  `updated_at`, and pushes stamp `max(now, last_remote_stamp + 1s)` — traced mechanism:
+  a re-projection push answering a landed row is a LATER editorial event, and without
+  the bump any clock ahead of ours (her phone's) leaves truth's re-projection
+  permanently `.stale` under strict row-LWW. Both tables joined
+  `SyncSchema.localOnlyTables`; the standing walks (registry⇄schema identity,
+  mirror-DDL coverage, local-only-never-mirrored) now KNOW they are deliberately
+  unsynced, and `BridgeStateTests` additionally proves a WRONGLY-registered bridge
+  table fails both walk predicates. Bridge writes provably never touch the outbox.
+  SyncSpec §12 exempt (nothing on the mirror changed).
+
+- **Steps 3+4 — the engine** (`Bridge/BridgeEngine.swift`; `BridgePushTests` 9 tests,
+  `BridgeLandingTests` 15 tests). Rounds pinned **pull → push** (reconcile before
+  projecting — also what makes FIRST CONTACT safe: a pre-existing Fragments journal is
+  fully landed and state-recorded before any push decision, so initial sync can never
+  blind-overwrite). **Push:** eligibility = ALL live journal-profile posts with a valid
+  `entry_date` (archived included — archive is a view concept; a stale projection
+  would be silent divergence); duplicate days push NOTHING (day-scoped, visible,
+  releasable — pinned including the release); unchanged never pushes (pinned to the
+  fake server's write counter and untouched LWW stamp); `.stale` records nothing (the
+  pull reconciles); emptiness is never a FIRST push (it could only LWW-blank an
+  unlanded Fragments body); malformed legacy `entry_date`s are noted, never bridged.
+  **Change detection is a full per-day hash sweep, deliberately** — traced:
+  `chooseVariant`, `deleteBlock`, and `deleteVariant` change rendered text WITHOUT
+  stamping the container, so every stamp-based dirty filter silently misses whole
+  classes (a moveBlock out of a day is worse still); a silent stale projection is this
+  bridge's worst failure shape, so correctness rides the hash. Cost is ∝ live journal
+  days per round at round cadence, off-main — the P1 tension is recorded in
+  KnownIssues (owner: Phase 12) with the remedy sketch. **Landing:** the brief's
+  classifier verbatim — create-or-open + `newBlock` for unknown days; echo/replay skip
+  on the agreed hash; only-Fragments-changed ⇒ **the fifth quiet auto-commit occasion**
+  (`idleAutoCommit`'s dirtiness guard IS the spec'd guard — already-committed-identical
+  takes no double commit, pinned) then `autosave`; both-changed ⇒ conflict-as-variant
+  labeled `'fragments'` (via `resolveSyncConflict`, which gained a label parameter,
+  default unchanged); graduated (multi-block or fanned) ⇒ push-only + first-block
+  variant rescue, never diff-mapped; gap slots defer with the cursor HELD (the
+  straggler posture — advancing would strand a Fragments body forever, traced in the
+  design notes); foreign-user/malformed-day rows consumed with notes; replay dedupe by
+  existing-live-variant check (crash-between-ops-and-state windows mint no duplicate
+  cards); lost-ack reconciles through the pull's converged branch with zero
+  gratuitous re-push (postmortem lesson 2's bridge twin, pinned). Every landing path
+  ends in a live row, a labeled variant, or a commit.
+
+- **Step 5 — scheduling + status** (`Bridge/BridgeScheduler.swift` + 5 core tests;
+  `App/Variorum/Shared/BridgeSession.swift`, `BridgeStatusViews.swift`,
+  `AppServices`/`SyncSession`/`RootView`/`VariorumApp` wiring + 3 Mac-app tests).
+  `BridgeScheduler` = the A3 contract (serialized, coalescing, retire-able, offline is
+  free — a failed round keeps cursor and hashes byte-intact, pinned). App-side:
+  `BridgeSession` mirrors `SyncSession`; **the A4 fence extends to the bridge** (real
+  store only — a dev-store session must never touch her live Fragments journal;
+  `bridgeEnabled` is Mac-only this phase per the brief's scope, the mobile target
+  constructs it fenced); bridge rounds ride `SyncSession.onRoundCompleted` (new hook)
+  so they follow sync rounds and never interleave with one (pinned with a gated sync
+  transport: zero bridge calls mid-sync-round, exactly one after). The status row
+  shows last-bridged time, errors with retry, and the duplicate-day pause verbatim.
+  **The bridge ships UNCONFIGURED in the app** — deliberately no setup door: the
+  credential story is 9c's sign-in (the row says so), and configuration additionally
+  needs the ask-8/10 facts. `BridgeSession.configure(engine:)` is the seam 9c wires.
+
+- **Step 6 — `setEntryDate` validation** (Operations+Container + 3 tests in
+  `JournalEntryTests`). Canonical `yyyy-MM-dd` or `OperationError.invalidEntryDate`;
+  nil stays allowed (un-dating is legitimate). Red-on-old: the refusal tests fail on
+  the pre-9b op (it accepted any string). The mobile picker verified by TEST, not
+  assumption: it formats exclusively through `JournalDay.dayString`
+  (EntryEditorView/EntryListViewModel), and every `dayString` output across calendars,
+  paddings, year edges, and leap days passes the validation gate. **KnownIssues row
+  resolved and removed.**
+
+- **Step 7 — verification** (`BridgeSoakTests`): (i) full suites — counts below;
+  (ii) the deterministic both-directions round-trip + the randomized soak (3 seeds ×
+  60 actions: Variorum creates/edits/graduations-by-block-and-fan/duplicate-days/
+  hand-merges interleaved with Fragments writes and deletions and engine rounds) —
+  per-round, `pausedDays` is exactly the duplicated-day set; at quiescence, every
+  day's surfaces agree byte-equal, the agreed hash matches the converged text, a
+  quiescent round makes ZERO server writes, and **nothing is invented**: every
+  `'fragments'`-labeled variant's text is a member of the ledger of bodies Fragments
+  actually wrote; non-vacuity asserted per seed (pushes > 0, landings > 0,
+  conflict/rescue variants > 0); (iii) the bridge and the MIRROR sync engine together
+  (two `SyncClient` devices + the fake Fragments server): Mac-authored,
+  phone-authored-via-mirror, and Fragments-authored days all reach all three
+  surfaces; the two Variorum stores end **byte-identical** with empty outboxes
+  (bridge landings ride the outbox like any operation); a final bridge round is
+  quiescent. (iv) **The manual real-Fragments pass is deliberately NOT run** — the
+  author defers all sync/device testing until 9c's sign-in exists (her 2026-07-07
+  call); carried forward in the handoff as a post-9c gate item, now additionally
+  gated on the contract asks 8–12.
+
+### Test counts (the Phase 9c baselines)
+
+- Core `swift test`: **493 green in 59 suites** (was 430/51 — +63 tests, +8 suites).
+- Mac app: **234 green in 43 suites** (was 231/42 — +3, the bridge wiring suite).
+- Mobile: **11 green in 4 suites** (unchanged; the mobile target compiles the shared
+  bridge files but constructs the session fenced).
+
+### PROVISIONAL calls + readings (QUESTIONS #13/#14; walk at the checkpoint)
+
+1. **The contract-gap handling** (above) — namespace/canonical-user/user-id as
+   injectable configuration; wire DTOs PROVISIONAL; asks 8–13 filed. QUESTIONS #13.
+2. **Variorum-side journal deletion does NOT propagate to Fragments** — `sync_delete`
+   is implemented in the transport (the dialect is complete) but the engine never
+   calls it: options were (a) don't propagate — the day just stops pushing (shipped);
+   (b) push a tombstone via sync_delete; (c) push an empty body. (a) is the only
+   option that can never destroy Fragments-side text the author didn't choose to
+   lose, and deleting a Variorum entry while Fragments holds newer text would
+   otherwise race. Consequence, recorded honestly: deleting a journal entry in
+   Variorum leaves the day's body visible in Fragments until she edits it there
+   (whereupon it re-lands in Variorum as a fresh entry — nothing typed is ever lost).
+   QUESTIONS #14(a).
+3. **The deletion-landing reading** (the plan's own flag): insure-then-empty when
+   only Fragments changed (shipped exactly as the plan sketched — entry survives,
+   text one restore away); when the deletion RACES a Variorum edit, the edit wins and
+   truth re-projects (the SyncSpec §6 tombstone-rescue shape — a projection-side
+   deletion of stale text must not destroy newer truth-side text); graduated/sealed
+   deletions skip with truth re-projecting (a blank `'fragments'` card is noise).
+   QUESTIONS #14(b).
+4. **Sealed/locked entries land incoming bodies as `'fragments'` variants DESPITE the
+   seal** — extends the ratified S5-outranks-the-seal posture (AppSpec §14,
+   2026-07-06) to the second writer: the seal freezes authoring; a bridge landing is
+   not authoring, and refusing would strand the body. The sealed text itself is never
+   overwritten. The one residual corner: a **sealed EMPTY entry** has no block to
+   carry a card and the seal refuses the mint — the row is consumed with a note, no
+   state recorded (so no push can blank the surface); the body stays safe in
+   Fragments but un-landed. Corner-of-corner (a deliberately sealed blockless entry);
+   recorded, not solved. QUESTIONS #14(c).
+5. **Edit-war convergence: truth re-projects.** After a both-changed conflict landing,
+   the incoming hash is recorded as the agreed state, so the NEXT push projects
+   Variorum's rendered text back over the Fragments row (with an LWW stamp that
+   outranks the landed row's). Reading of the brief's "Fragments keeps its row-LWW
+   winner… allowed to be momentarily behind": the LWW winner stands on their server
+   during the race; the bridge then converges the projection to truth without
+   fighting the CAS — and the war terminates because their clobber guard never
+   re-pushes an unchanged body. Both texts always survive in Variorum.
+   QUESTIONS #14(d).
+6. **Archived entries stay push-eligible** (archive is kept-out-of-view, not gone;
+   a silent projection freeze on archive would be invisible divergence).
+   QUESTIONS #14(e).
+
+### Documented residuals (recorded, deliberately not solved here)
+
+- **The first-push overwrite window:** a Fragments-side save landing in the seconds
+  between the bridge's pull and its FIRST-EVER push of that day (no bridge state)
+  can be LWW-overwritten server-side before any pull serves it — the one acknowledged
+  window where Fragments-typed text can be lost (their state-based feed serves current
+  rows only). Bounded: requires same-day two-surface authoring inside one round's
+  pull→push gap on a never-bridged day; steady-state days always have state and land
+  first. Same class as SyncSpec §7's documented concurrent-divide duplication.
+  Contract ask 13 (return the replaced body) would close it to zero; revisit at the
+  real pass.
+- **The check-then-act ms-window** between a landing's classification read and its
+  ops calls (separate transactions — ops cannot nest in one write): a keystroke
+  landing in that window is committed by the fifth-occasion guard before the
+  overwrite (writes serialize at the store), so the worst case is
+  one-restore-away — the same class Phase 9 round 3 adjudicated as documented-not-
+  fixed (op-level expected-text preconditions are a core change without cause).
+- **The push sweep's corpus growth** — KnownIssues, owner Phase 12 (remedy sketch
+  recorded there).
+- **Sealed-empty-entry landings** — PROVISIONAL 4 above.
+
+### KnownIssues reconciliation
+
+- REMOVED: "Bridge-side `setEntryDate` day-key validation" (Step 6 shipped the guard).
+- ADDED: "Bridge push sweep is O(journal-days) per round" — owner Phase 12.
+
+### Deferred, carried forward
+
+- **The manual real-Fragments pass** (author-assist, post-9c with the real sign-in) —
+  in the handoff checklist, gated on contract asks 8–12 landing first.
+- Bridge-on-iOS (the brief's "later nicety") — unowned by design; the Mac bridge is
+  the phase's whole scope.
+
+### The 9c plan
+
+Authored from `notes/plans/phase-09c-auth-brief.md` per the front-loaded-planning rule:
+`notes/plans/phase-09c-auth-alignment.md` (kickoff at top; the brief's ratified
+decisions binding; the trust-mechanism lookup ran at plan time per the brief's
+instruction — findings recorded there).
+
+### Review rounds
+
+*(To be appended by the coordinator/reviewer — this phase ran as a single Fable
+implementer session per the staffing note; the cold review follows.)*

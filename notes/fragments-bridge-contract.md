@@ -61,6 +61,41 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
    text, exactly as your spec intended ("the journal app owns richer journal tables if it
    wants them; what Fragments syncs is exactly this satellite").
 
+### Phase 9b build asks (2026-07-09 — facts the contract turned out not to pin; the bridge
+### shipped with these as injectable configuration / PROVISIONAL readings, to be confirmed
+### or corrected BEFORE the post-9c real-project pass)
+
+8. **The UUIDv5 namespace.** Fact 2 gives the recipe (`UUIDv5("journal|<canonical-user>|<dayKey>")`)
+   but not the namespace UUID it runs in. Please state it verbatim. Variorum carries it as
+   configuration (`FragmentsBridgeConfiguration.idNamespace`) — nothing was guessed.
+9. **One worked id example.** Given a concrete canonical user string and dayKey, the exact
+   resulting `journal_entries.id` — so both implementations can pin the same vector. For
+   cross-checking your derivation style, Variorum's implementation (RFC 4122 §4.3, name =
+   the recipe string UTF-8, id emitted lowercase) produces, under the RFC **URL namespace
+   `6ba7b811-9dad-11d1-80b4-00c04fd430c8` as a stand-in**:
+   `journal|alice|2026-07-09` → `efd1b644-d604-5272-860d-ab4061668e96`. If your uuid5 of the
+   same name under that namespace differs, the derivations diverge and the real namespace
+   will not save us — say so.
+10. **The canonical-user string's exact form** (fact 2's `<canonical-user>`): is it
+    `user_settings.local_user_id` verbatim, the auth user id, lowercase/uppercase UUID text,
+    or something else? And is it the same value as `journal_entries.user_id` (`auth.uid()`)
+    or distinct? Variorum carries both as separate config fields.
+11. **The RPC wire shapes** for `sync_push` / `sync_pull` / `sync_delete` as a third-party
+    client speaks them: parameter names, request/response JSON, and the `updated_at` stamp
+    format you emit/compare. Variorum shipped PROVISIONAL DTOs (snake_case column-named
+    keys; push → per-row `{status: applied|stale|rejected, server_updated_at, reason}`;
+    pull request `{table, after_updated_at, after_id, limit}` returning row objects) pinned
+    by tests — corrections are cheap now, expensive at the real pass.
+12. **`created_at` on upsert-update:** Variorum's pushes include `created_at`; please
+    confirm your guarded upsert preserves the existing row's `created_at` on UPDATE (the
+    fake server assumes so).
+13. **Optional, closes a documented loss window:** when `sync_push` LWW-overwrites a live
+    row, consider returning the REPLACED body in the response. Today a Fragments-side save
+    landing in the seconds between the bridge's pull and its first-ever push of that day
+    can be overwritten server-side before any pull sees it — the one acknowledged window
+    where Fragments-typed text can be lost (documented in Variorum's Phase 9b closeout).
+    With the previous body returned, the bridge would land it as a variant → zero loss.
+
 ## What each side promises operationally
 
 - Variorum pushes only when its rendered text actually changed; pauses a day's push while
