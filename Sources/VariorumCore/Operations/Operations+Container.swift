@@ -100,7 +100,16 @@ extension Operations {
         try updateLiveContainer(id) { $0.title = title }
     }
 
+    /// Day keys are canonical "yyyy-MM-dd" or nothing (Phase 9b, Step 6 —
+    /// closing the KnownIssues row): this op was the one permissive door to
+    /// a malformed key, which the notebook rule's open-by-date and the
+    /// Fragments bridge's join would then never find — a live entry
+    /// invisible to its own day. `nil` stays allowed (un-dating a post is
+    /// legitimate); the same boundary `createOrOpenJournalEntry` enforces.
     public func setEntryDate(_ id: String, entryDate: String?) throws {
+        if let entryDate, !JournalDay.isValid(entryDate) {
+            throw OperationError.invalidEntryDate(entryDate)
+        }
         try updateLiveContainer(id) { $0.entryDate = entryDate }
     }
 

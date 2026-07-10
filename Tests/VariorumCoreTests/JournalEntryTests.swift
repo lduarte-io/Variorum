@@ -44,6 +44,61 @@ struct JournalEntryTests {
         #expect(!JournalDay.isValid("2026-07-07T00:00:00Z"))  // a timestamp, not a day
     }
 
+    // MARK: - setEntryDate day-key validation (Phase 9b, Step 6 — closes
+    // the KnownIssues row; red-on-old: the pre-9b op accepted any string)
+
+    @Test func setEntryDateRefusesMalformedDayKeys() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "p", profile: .journal, entryDate: "2026-07-09")
+            for bad in ["2026-7-9", "2026/07/09", "2026-02-30", "tomorrow", ""] {
+                #expect(throws: OperationError.invalidEntryDate(bad)) {
+                    try ops.setEntryDate(post.id, entryDate: bad)
+                }
+            }
+            // Nothing moved: the entry keeps its canonical day.
+            #expect(try db.fetchString(
+                "SELECT entry_date FROM container WHERE id = ?", [post.id]) == "2026-07-09")
+        }
+    }
+
+    @Test func setEntryDateAllowsCanonicalKeysAndNil() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "p", profile: .journal, entryDate: "2026-07-09")
+            try ops.setEntryDate(post.id, entryDate: "2027-01-31")
+            #expect(try db.fetchString(
+                "SELECT entry_date FROM container WHERE id = ?", [post.id]) == "2027-01-31")
+            // Un-dating stays legitimate (generic post metadata).
+            try ops.setEntryDate(post.id, entryDate: nil)
+            #expect(try db.fetchString(
+                "SELECT entry_date FROM container WHERE id = ?", [post.id]) == nil)
+        }
+    }
+
+    /// The mobile date picker formats through `JournalDay.dayString`
+    /// (EntryEditorView / EntryListViewModel) — verified by TEST, not
+    /// assumption (the plan's Step 6): every dayString output passes the
+    /// validation gate, across paddings, year edges, leap days, and
+    /// non-UTC calendars.
+    @Test func dayStringOutputAlwaysPassesTheValidationGate() {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC")!
+        var tokyo = Calendar(identifier: .gregorian)
+        tokyo.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        let moments: [TimeInterval] = [
+            1_782_864_000,  // 2026-07-01
+            1_767_614_400,  // 2026-01-05 (padded month/day)
+            1_735_689_540,  // 2024-12-31 23:59 UTC (year edge)
+            1_836_518_400,  // 2028-02-29 (leap day)
+            0,              // 1970-01-01
+        ]
+        for calendar in [utc, tokyo] {
+            for moment in moments {
+                let day = JournalDay.dayString(from: Date(timeIntervalSince1970: moment), calendar: calendar)
+                #expect(JournalDay.isValid(day), "\(day) must pass the ops boundary")
+            }
+        }
+    }
+
     // MARK: - createOrOpenJournalEntry (the notebook rule)
 
     @Test func createsAJournalEntryWithTheExactRowSet() throws {
