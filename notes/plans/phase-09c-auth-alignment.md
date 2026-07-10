@@ -222,6 +222,22 @@ RLS (claims look right — verified only at the real-Fragments pass), and the
 provider-token refresh strategy (Supabase does not persist/refresh provider tokens —
 Step 5 designs the renewal or a direct-sign-in alternative).
 
+**Round 4 (same day — toggle-off VERIFIED; risk calibration):** the author flipped
+"Allow Dynamic OAuth Apps" OFF (saved, confirmed); coordinator probes: (1) the
+registration endpoint refuses again (403 `oauth_dynamic_client_registration_disabled` —
+the open-registration window is closed; the probe was refused outright, no side
+effect); (2) the full authorize chain STILL WORKS — Fragments recognized the registered
+client and minted a fresh `authorization_id`, redirecting to `/consent.html`. The
+implementer's flagged inference ("toggle gates only the register handler") is now
+EMPIRICALLY CONFIRMED. Spike-cleanup remainder (the localhost redirect URL in
+Variorum's URL configuration) deliberately deferred to the phase-end cleanup — the
+harness may serve one more verification during Steps 1/5. **Risk calibration (author,
+same message):** she notes neither app holds important content yet — daily use is
+deliberately deferred until after 9c, so the store is effectively pre-live and the
+kickoff's "transitions the author's LIVE sync" caution overstates today's stakes. The
+seconds-cheap manual pre-cutover backup stays in the choreography anyway (it costs
+nothing and rehearses the path), but the cutover's risk posture is recorded as LOW.
+
 **Round 3-precursor (2026-07-10, the implementer's Sonnet lookup — ran BEFORE the
 spike above, which consumed these findings; each fact tagged DOCUMENTED /
 CODE-DERIVED / INFERRED):**
@@ -489,14 +505,21 @@ account succeeded end to end on 2026-07-10.
   implicit-fragment flow; **the app's real sign-in (Step 1) uses the PKCE code
   flow** — and MUST capture the provider token pair at exchange time, because
   Supabase never persists or re-delivers provider tokens.
-- **Still open, with owners:** (i) toggle-OFF survival of the registered client —
-  the author flips "Allow Dynamic OAuth Apps" off, the coordinator hop-traces;
-  treated as unconfirmed until relayed (spike's localhost redirect-URL cleanup
-  waits on it too). (ii) Fragments' PostgREST accepting the provider token for RLS —
+- **Still open, with owners:** (i) ~~toggle-OFF survival of the registered client~~ —
+  **RESOLVED 2026-07-10 (field notes Round 4): empirically CONFIRMED** — with the
+  toggle off, registration 403s (`oauth_dynamic_client_registration_disabled`) while
+  *[removed for publication]*
+  redirect-URL cleanup deferred to phase-end in case the harness serves Steps 1/5).
+  (ii) Fragments' PostgREST accepting the provider token for RLS —
   claims look exactly right; verified only at Step 6(iv)'s real-Fragments pass.
   (iii) The provider-token refresh strategy for the bridge — options + PROVISIONAL
   in the Step 5 design note below. (iv) Consent auto-skip on repeat client+scope —
   code-derived expectation, not yet observed (single run).
+- **Risk calibration (coordinator relay, 2026-07-10 — for the Step 6 gate
+  narrative):** neither app holds important content yet (daily use deliberately
+  deferred until post-9c), so the store is effectively pre-live. The manual
+  pre-cutover backup STAYS (seconds-cheap, rehearses the path); the cutover's risk
+  posture is LOW — correctness discipline unchanged, no drama owed.
 
 ### Step 5 design note — the bridge's Fragments session (options weighed 2026-07-10;
 ### PROVISIONAL per the addendum rules; QUESTIONS #16 carries it to the checkpoint)
