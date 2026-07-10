@@ -32,17 +32,28 @@ struct BridgeStatusRow: View {
                 Text("Bridge error")
                     .foregroundStyle(.red)
                     .help(error)
-                Button("Retry") { bridge.trigger() }
+                Button("Retry") { bridge.trigger(manual: true) }
             } else {
                 Text(lastBridgedLabel)
                     .foregroundStyle(.secondary)
                 if !bridge.status.pausedDays.isEmpty {
                     // The duplicate-day pause, visibly: these days push
-                    // nothing until the author hand-merges.
-                    Text("· \(bridge.status.pausedDays.joined(separator: ", ")) paused (two entries — merge to resume)")
+                    // nothing until the author hand-merges. Archived
+                    // entries still count as the day's entries (archive is
+                    // kept-out-of-view, not gone — QUESTIONS #14e), so the
+                    // pause releases on delete or re-date, not archive.
+                    Text("· \(bridge.status.pausedDays.joined(separator: ", ")) paused (two entries — delete or re-date one to resume)")
                         .foregroundStyle(.orange)
                 }
-                Button("Bridge now") { bridge.trigger() }
+                if bridge.status.stalled || !bridge.status.issueNotes.isEmpty {
+                    // Stalls and per-day push rejections recur silently
+                    // otherwise (review round 1, MINOR 4) — surface them;
+                    // hover for the verbatim notes.
+                    Text("· needs attention (\(max(bridge.status.issueNotes.count, 1)))")
+                        .foregroundStyle(.orange)
+                        .help(bridge.status.issueNotes.joined(separator: "\n"))
+                }
+                Button("Bridge now") { bridge.trigger(manual: true) }
             }
         }
         .font(.caption)

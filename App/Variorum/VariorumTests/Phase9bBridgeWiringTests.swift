@@ -161,6 +161,49 @@ struct Phase9bBridgeWiringTests {
         }
     }
 
+    /// Review round 1, MAJOR 2 (the cadence half): cadence triggers are
+    /// throttled to the minimum round interval — a settle-rate burst
+    /// forwards ONE immediate round plus at most ONE trailing round (so the
+    /// last trigger is never lost), instead of a corpus hash sweep per
+    /// burst member. Manual triggers bypass the throttle.
+    @Test func cadenceTriggersAreThrottledToTheMinimumInterval() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            let transport = RecordingBridgeTransport()
+            let bridge = BridgeSession(
+                allowsBridge: true, minimumRoundInterval: .milliseconds(150))
+            await bridge.configure(
+                engine: BridgeEngine(transport: transport, configuration: testConfiguration()))
+
+            // A settle-rate burst.
+            for _ in 0..<6 { bridge.trigger() }
+            try await Task.sleep(for: .milliseconds(60))
+            #expect(await transport.pullCalls == 1,
+                    "inside the interval only the first cadence trigger forwards")
+
+            // The trailing round fires once the interval elapses.
+            for _ in 0..<400 {
+                if await transport.pullCalls >= 2 { break }
+                try await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(await transport.pullCalls == 2,
+                    "the burst coalesces into exactly one trailing round")
+
+            // A manual trigger bypasses the throttle immediately.
+            bridge.trigger(manual: true)
+            for _ in 0..<400 {
+                if await transport.pullCalls >= 3 { break }
+                try await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(await transport.pullCalls == 3)
+            bridge.stop()
+        }
+    }
+
     /// The paused-day surface reaches the app layer (the status row renders
     /// `status.pausedDays` — the visible half of the duplicate-day pause).
     @Test func pausedDaysReachTheSessionStatus() async throws {
