@@ -16,7 +16,8 @@ struct BridgeStateTests {
             }
             let dayColumns = try Row.fetchAll(db, sql: "PRAGMA table_info(bridge_day)")
                 .map { $0["name"] as String }
-            #expect(Set(dayColumns) == ["day_key", "last_synced_hash", "last_remote_stamp"])
+            #expect(Set(dayColumns)
+                    == ["day_key", "last_synced_hash", "last_remote_stamp", "remote_created_at"])
             // Local-only by construction: no sync_version column (the
             // registry test derives "synced" from exactly that marker).
             #expect(!dayColumns.contains("sync_version"))

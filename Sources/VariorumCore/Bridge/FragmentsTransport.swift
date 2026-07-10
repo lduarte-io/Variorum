@@ -1,11 +1,16 @@
 import Foundation
 
-/// One `journal_entries` row as it travels (contract fact 1):
-/// `journal_entries(id uuid PK, user_id, date, body text, created_at,
-/// updated_at, deleted_at, server_updated_at)`. `updated_at` is
-/// CLIENT-stamped and is the row-LWW authority on the Fragments side;
-/// `server_updated_at` is server-stamped and is the pull keyset's ordering
-/// key — nil on client-composed pushes.
+/// One `journal_entries` row as it travels (contract fact 1, full DDL
+/// confirmed 2026-07-09 under their ID FREEZE): `journal_entries(id uuid
+/// PK, user_id, date, body, created_at, updated_at, deleted_at,
+/// server_updated_at)` — the first six are NOT NULL with no defaults, and
+/// an omitted NOT NULL column on an inserting push aborts the ENTIRE call
+/// (`not_null_violation`, nothing written), so pushes always send all six.
+/// `updated_at` is CLIENT-stamped and is the row-LWW authority;
+/// `server_updated_at` is server-stamped, µs-precision, and **opaque** —
+/// the pull keyset's ordering key, stored verbatim, never
+/// parsed-and-reformatted (a ms round-trip would move the cursor backwards
+/// and re-deliver rows forever).
 public struct FragmentsEntry: Equatable, Sendable {
     public var id: String
     public var userID: String
@@ -34,8 +39,10 @@ public struct FragmentsEntry: Equatable, Sendable {
     public var isTombstoned: Bool { deletedAt != nil }
 }
 
-/// Keyset cursor over `(server_updated_at, id)` — the pull ordering the
-/// Fragments post-mortem records for their `sync_pull`.
+/// Keyset cursor over `(server_updated_at, id)` — confirmed 2026-07-09:
+/// server-stamped, immune to device clocks (a cursor on `updated_at` would
+/// skip rows permanently). Both components stored as the RAW server
+/// strings.
 public struct FragmentsPullCursor: Equatable, Sendable, Codable {
     public var serverUpdatedAt: String
     public var id: String
@@ -46,45 +53,81 @@ public struct FragmentsPullCursor: Equatable, Sendable, Codable {
     }
 }
 
-/// Per-entry push verdict. Fragments' `sync_push` is a guarded upsert under
-/// row-LWW: `.applied` means the row was written; `.stale` means the server
-/// row's `updated_at` is not older — nothing was written, and the pull
-/// reconciles; `.rejected` is their guard machinery (clock-ahead clamp,
-/// constraint violation) — the bridge records nothing and retries later.
-public enum FragmentsPushOutcome: Equatable, Sendable {
-    case applied(serverUpdatedAt: String)
-    case stale
-    case rejected(reason: String)
+/// `sync_push`'s AGGREGATE response (migration 7; corrected 2026-07-09 —
+/// the per-row status/server_updated_at DTO this phase originally guessed
+/// does not exist): `applied` = rows the guarded upsert wrote; `skipped` =
+/// rows that lost LWW silently (or failed the resurrect guard);
+/// `conflicts` = per-row refusals. You cannot tell WHICH of N rows applied
+/// — so the engine pushes ONE row per call, making `applied == 1`
+/// unambiguous.
+public struct FragmentsPushResponse: Equatable, Sendable, Codable {
+    public var applied: Int
+    public var skipped: Int
+    public var conflicts: [FragmentsPushConflict]
+
+    public init(applied: Int, skipped: Int, conflicts: [FragmentsPushConflict] = []) {
+        self.applied = applied
+        self.skipped = skipped
+        self.conflicts = conflicts
+    }
 }
 
-/// The transport seam for Fragments' RPC dialect (`sync_push` guarded upsert
-/// / `sync_pull` keyset / `sync_delete`), `journal_entries` only. The fake
-/// test server and the real RPC client are the two implementations; the
-/// engine never knows which it holds.
+public struct FragmentsPushConflict: Equatable, Sendable, Codable {
+    public var id: String
+    public var error: String
+
+    public init(id: String, error: String) {
+        self.id = id
+        self.error = error
+    }
+
+    /// The clock clamp (migration 7; `updated_at` >10 min ahead — ask 14
+    /// ANSWERED): matched on the prefix. Parked and surfaced; self-heals
+    /// as the wall clock catches up.
+    public var isClockAhead: Bool { error.hasPrefix("clock_ahead:") }
+    /// The `(user_id, date)` unique index tripped — the safety net for a
+    /// MIS-DERIVED id. A derivation BUG: surfaced permanently, never
+    /// retried (confirmed treatment, ask (c)).
+    public var isUniqueViolation: Bool { error.contains("unique_violation") }
+}
+
+/// The transport seam for Fragments' RPC dialect (`sync_push` guarded
+/// upsert / `sync_pull` keyset / `sync_delete`), reconciled 2026-07-09 to
+/// their migration-7 semantics (the shipped SQL — their spec prose lags
+/// it). Scope: `journal_entries`, plus ONE deliberate read of
+/// `user_settings.local_user_id` (the canonical-user key — an amended
+/// contract fact; never guessed).
 public protocol FragmentsBridgeTransport: Sendable {
-    /// Guarded upsert; results index-aligned with the batch.
-    func push(_ entries: [FragmentsEntry]) async throws -> [FragmentsPushOutcome]
+    /// Guarded upsert. The engine calls this with ONE entry per call (per
+    /// day) so the aggregate counters are unambiguous.
+    func push(_ entries: [FragmentsEntry]) async throws -> FragmentsPushResponse
     /// Rows strictly after the cursor in `(server_updated_at, id)` order,
-    /// at most `limit`, honoring the server-side ~2 s visibility horizon.
+    /// at most `limit`; the ~2 s visibility horizon lives INSIDE the RPC.
+    /// Tombstones ride the same stream.
     func pull(after cursor: FragmentsPullCursor?, limit: Int) async throws -> [FragmentsEntry]
-    /// LWW-guarded tombstone. Part of the pinned dialect; the Phase 9b
-    /// engine never calls it (Variorum-side deletions deliberately do not
-    /// propagate — QUESTIONS record).
-    func delete(ids: [String], deletedAt: String) async throws -> [FragmentsPushOutcome]
+    /// LWW-guarded soft delete (server-stamped); returns the tombstoned
+    /// count. Part of the pinned dialect; the engine never calls it
+    /// (QUESTIONS #14(a), ratified).
+    func delete(ids: [String]) async throws -> Int
+    /// `user_settings.local_user_id` — the canonical-user key for id
+    /// derivation, minted by Fragments' first device, distinct from the
+    /// auth uid by design. `nil` = the account has not synced from
+    /// Fragments yet; the engine FAILS CLOSED on pushes until it exists.
+    func fetchLocalUserID() async throws -> String?
 }
 
-// MARK: - The real RPC client (wire shapes PROVISIONAL)
+// MARK: - The real RPC client (reconciled wire shapes)
 
 /// URLSession implementation of the dialect against Fragments' Supabase
-/// project.
-///
-/// **PROVISIONAL (Phase 9b):** the contract pins the RPC NAMES and semantics
-/// but not their JSON shapes; the DTOs below are this plan's documented
-/// reading (snake_case keys mirroring the table's column names, Supabase
-/// `rest/v1/rpc/<fn>` POST convention), pinned by no-network tests and
-/// carried as a contract ask for the author's Fragments agents to confirm or
-/// correct. The (deferred, post-9c) real-project pass is the reconciliation
-/// point — nothing automated ever touches the real project.
+/// project. Wire shapes were CORRECTED 2026-07-09 by the Fragments agents
+/// (asks 11/12/14 ANSWERED — no longer PROVISIONAL): PostgREST RPC `POST
+/// /rest/v1/rpc/<fn>` with `p_`-prefixed parameter objects; `sync_push` →
+/// the aggregate `{applied, skipped, conflicts}` response; `sync_pull` →
+/// a BARE array of row objects ordered `(server_updated_at, id)`;
+/// `sync_delete(p_table, p_ids)` → `{tombstoned}`. All three RPCs are
+/// SECURITY INVOKER (their RLS applies) — the user-auth session seam is
+/// the identity, never the PAT. The real pass (9c Step 6) needs
+/// credentials only.
 public struct FragmentsRPCTransport: FragmentsBridgeTransport {
     public struct Configuration: Sendable {
         /// `https://<fragments-project>.supabase.co`
@@ -124,41 +167,48 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
 
     // MARK: FragmentsBridgeTransport
 
-    public func push(_ entries: [FragmentsEntry]) async throws -> [FragmentsPushOutcome] {
+    public func push(_ entries: [FragmentsEntry]) async throws -> FragmentsPushResponse {
         let data = try await rpc(
             "sync_push",
-            body: FragmentsPushRequest(table: "journal_entries", entries: entries.map(WireEntry.init)))
-        let results = try JSONDecoder().decode([WirePushResult].self, from: data)
-        guard results.count == entries.count else {
-            throw FragmentsTransportError.mismatchedResultCount(
-                pushed: entries.count, returned: results.count)
-        }
-        return try results.map { try $0.outcome() }
+            body: SyncPushParams(pTable: "journal_entries", pRows: entries.map(WireEntry.init)))
+        return try JSONDecoder().decode(FragmentsPushResponse.self, from: data)
     }
 
     public func pull(
         after cursor: FragmentsPullCursor?, limit: Int
     ) async throws -> [FragmentsEntry] {
+        // First pull: epoch + zero UUID (their documented convention).
         let data = try await rpc(
             "sync_pull",
-            body: FragmentsPullRequest(
-                table: "journal_entries",
-                afterUpdatedAt: cursor?.serverUpdatedAt,
-                afterID: cursor?.id,
-                limit: limit))
+            body: SyncPullParams(
+                pTable: "journal_entries",
+                pAfterTs: cursor?.serverUpdatedAt ?? "1970-01-01T00:00:00Z",
+                pAfterId: cursor?.id ?? "00000000-0000-0000-0000-000000000000",
+                pLimit: limit))
+        // A BARE JSON array of row objects — no envelope.
         return try JSONDecoder().decode([WireEntry].self, from: data).map(\.entry)
     }
 
-    public func delete(ids: [String], deletedAt: String) async throws -> [FragmentsPushOutcome] {
+    public func delete(ids: [String]) async throws -> Int {
         let data = try await rpc(
             "sync_delete",
-            body: FragmentsDeleteRequest(table: "journal_entries", ids: ids, deletedAt: deletedAt))
-        let results = try JSONDecoder().decode([WirePushResult].self, from: data)
-        guard results.count == ids.count else {
-            throw FragmentsTransportError.mismatchedResultCount(
-                pushed: ids.count, returned: results.count)
-        }
-        return try results.map { try $0.outcome() }
+            body: SyncDeleteParams(pTable: "journal_entries", pIds: ids))
+        return try JSONDecoder().decode(SyncDeleteResponse.self, from: data).tombstoned
+    }
+
+    public func fetchLocalUserID() async throws -> String? {
+        // The one deliberate read outside journal_entries (amended contract
+        // fact): user_settings.local_user_id, via the same keyset RPC.
+        let data = try await rpc(
+            "sync_pull",
+            body: SyncPullParams(
+                pTable: "user_settings",
+                pAfterTs: "1970-01-01T00:00:00Z",
+                pAfterId: "00000000-0000-0000-0000-000000000000",
+                pLimit: 10))
+        let rows = try JSONDecoder().decode([UserSettingsRow].self, from: data)
+        // Lowercased UUID text by their convention; defensively lowercased.
+        return rows.compactMap(\.localUserId).first?.lowercased()
     }
 
     // MARK: HTTP plumbing
@@ -194,16 +244,15 @@ public struct FragmentsRPCTransport: FragmentsBridgeTransport {
 
 public enum FragmentsTransportError: Error, Equatable, Sendable {
     case notHTTP
+    case httpFailure(status: Int, body: String)
     /// The authenticated session's user is not the user the bridge is
     /// configured to compose rows for (round 2, NIT 8 — a wiring bug,
     /// refused before any request composes).
     case sessionUserMismatch(expected: String, actual: String)
-    case httpFailure(status: Int, body: String)
-    case mismatchedResultCount(pushed: Int, returned: Int)
     case malformedResult(String)
 }
 
-// MARK: - Wire DTOs (PROVISIONAL shapes; contract ask filed)
+// MARK: - Wire DTOs (reconciled to migration 7 — no longer PROVISIONAL)
 
 struct WireEntry: Codable {
     let id: String
@@ -245,61 +294,50 @@ struct WireEntry: Codable {
     }
 }
 
-struct FragmentsPushRequest: Encodable {
-    let table: String
-    let entries: [WireEntry]
-}
-
-struct FragmentsPullRequest: Encodable {
-    let table: String
-    let afterUpdatedAt: String?
-    let afterID: String?
-    let limit: Int
+/// Their `user_settings` row, decoded minimally: the bridge reads exactly
+/// one column and ignores everything else.
+struct UserSettingsRow: Codable {
+    let localUserId: String?
 
     enum CodingKeys: String, CodingKey {
-        case table
-        case afterUpdatedAt = "after_updated_at"
-        case afterID = "after_id"
-        case limit
+        case localUserId = "local_user_id"
     }
 }
 
-struct FragmentsDeleteRequest: Encodable {
-    let table: String
-    let ids: [String]
-    let deletedAt: String
+struct SyncPushParams: Encodable {
+    let pTable: String
+    let pRows: [WireEntry]
 
     enum CodingKeys: String, CodingKey {
-        case table
-        case ids
-        case deletedAt = "deleted_at"
+        case pTable = "p_table"
+        case pRows = "p_rows"
     }
 }
 
-struct WirePushResult: Codable {
-    let status: String
-    let serverUpdatedAt: String?
-    let reason: String?
+struct SyncPullParams: Encodable {
+    let pTable: String
+    let pAfterTs: String
+    let pAfterId: String
+    let pLimit: Int
 
     enum CodingKeys: String, CodingKey {
-        case status
-        case serverUpdatedAt = "server_updated_at"
-        case reason
+        case pTable = "p_table"
+        case pAfterTs = "p_after_ts"
+        case pAfterId = "p_after_id"
+        case pLimit = "p_limit"
     }
+}
 
-    func outcome() throws -> FragmentsPushOutcome {
-        switch status {
-        case "applied":
-            guard let serverUpdatedAt else {
-                throw FragmentsTransportError.malformedResult("applied without server_updated_at")
-            }
-            return .applied(serverUpdatedAt: serverUpdatedAt)
-        case "stale":
-            return .stale
-        case "rejected":
-            return .rejected(reason: reason ?? "unspecified")
-        default:
-            throw FragmentsTransportError.malformedResult("unknown status '\(status)'")
-        }
+struct SyncDeleteParams: Encodable {
+    let pTable: String
+    let pIds: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case pTable = "p_table"
+        case pIds = "p_ids"
     }
+}
+
+struct SyncDeleteResponse: Codable {
+    let tombstoned: Int
 }

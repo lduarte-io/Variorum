@@ -14,6 +14,18 @@ struct BridgeHarness {
     let server: FakeFragmentsServer
     let engine: BridgeEngine
     let config: FragmentsBridgeConfiguration
+    /// The server-side canonical user (`user_settings.local_user_id`) the
+    /// harness seeds — one of the Fragments agents' confirmed test-vector
+    /// users, lowercased UUID text per their convention.
+    let canonicalUserID: String
+
+    /// The deterministic id both apps derive for a day (the REAL namespace,
+    /// the server's canonical user — the join key's whole trick).
+    func entryID(day: String) -> String {
+        FragmentsContract.entryID(
+            namespace: config.idNamespace,
+            canonicalUser: canonicalUserID, dayKey: day)!
+    }
 
     // MARK: Variorum-side conveniences
 
@@ -95,16 +107,19 @@ struct BridgeHarness {
 func withBridge(
     seed: UInt64 = 1,
     visibilityHorizon: Int64 = 0,
+    localUserID: String? = "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8",
     _ body: (BridgeHarness) async throws -> Void
 ) async throws {
     try await withOperationsAsync(seed: seed) { ops, db in
-        let config = FragmentsBridgeConfiguration(
-            idNamespace: UUID(uuidString: "6ba7b811-9dad-11d1-80b4-00c04fd430c8")!,
-            canonicalUserKey: "author",
-            userID: "user-author")
-        let server = FakeFragmentsServer(visibilityHorizon: visibilityHorizon)
+        // The REAL namespace (confirmed 2026-07-09) and a confirmed
+        // test-vector canonical user; `localUserID: nil` models the
+        // account-not-yet-synced state (the fail-closed gate).
+        let config = FragmentsBridgeConfiguration(userID: "user-author")
+        let server = FakeFragmentsServer(
+            visibilityHorizon: visibilityHorizon, localUserID: localUserID)
         let engine = BridgeEngine(transport: server, configuration: config)
         try await body(BridgeHarness(
-            ops: ops, db: db, server: server, engine: engine, config: config))
+            ops: ops, db: db, server: server, engine: engine, config: config,
+            canonicalUserID: localUserID ?? "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8"))
     }
 }

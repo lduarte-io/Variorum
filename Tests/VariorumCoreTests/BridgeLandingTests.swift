@@ -13,7 +13,7 @@ struct BridgeLandingTests {
     @Test func createInFragmentsLandsAsAJournalPost() async throws {
         try await withBridge { bridge in
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Written on the phone, in Fragments.",
                 updatedAt: bridge.fragmentsStamp(0))
             let report = try await bridge.engine.pullAndLand()
@@ -34,7 +34,7 @@ struct BridgeLandingTests {
         try await withBridge { bridge in
             let existing = try bridge.ops.createOrOpenJournalEntry(entryDate: "2026-07-09").container
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Body for the already-open day.", updatedAt: bridge.fragmentsStamp(0))
             let report = try await bridge.engine.pullAndLand()
             #expect(report.created == 1)
@@ -79,7 +79,7 @@ struct BridgeLandingTests {
             _ = try await bridge.engine.run()  // agree on the current body
             // Fragments edits the day (only Fragments changed since).
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Rewritten in Fragments.", updatedAt: bridge.fragmentsStamp(0))
             let report = try await bridge.engine.pullAndLand()
             #expect(report.updated == 1)
@@ -106,7 +106,7 @@ struct BridgeLandingTests {
             _ = try bridge.ops.commit(variantID, kind: .manual, message: nil)
             _ = try await bridge.engine.run()
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Fragments follow-up.", updatedAt: bridge.fragmentsStamp(0))
             let report = try await bridge.engine.pullAndLand()
             #expect(report.updated == 1)
@@ -132,7 +132,7 @@ struct BridgeLandingTests {
             let (_, variantID) = try bridge.makeEntry(day: "2026-07-09", text: "Agreed text.")
             _ = try await bridge.engine.run()  // agreed state
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Typed on the phone.", updatedAt: bridge.fragmentsStamp(0))
             _ = try await bridge.engine.pullAndLand()  // lands the body
 
@@ -177,11 +177,11 @@ struct BridgeLandingTests {
             // newer than the server row (their strict LWW), NOT the
             // harness's always-wins 2027 stamps that hid this window.
             let serverRowStamp = await bridge.server.currentEntry(
-                id: bridge.config.entryID(dayKey: "2026-07-09")!)!.updatedAt
+                id: bridge.entryID(day: "2026-07-09"))!.updatedAt
             let saveStamp = DateFormatter.variorumISO8601.string(
                 from: BridgeEngine.parseStamp(serverRowStamp)!.addingTimeInterval(2))
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "F typed on the phone.", updatedAt: saveStamp)
             // Burn local clock ticks so `now` is safely PAST the save's
             // stamp — exactly the condition under which the old now-stamped
@@ -239,7 +239,7 @@ struct BridgeLandingTests {
             // BOTH surfaces edit.
             try bridge.ops.autosave(variantID, text: "Variorum rewrite.", charDelta: 10)
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Fragments rewrite.", updatedAt: bridge.fragmentsStamp(0))
 
             let landing = try await bridge.engine.pullAndLand()
@@ -269,7 +269,7 @@ struct BridgeLandingTests {
                 day: "2026-07-09", text: "Text she deletes from her phone.")
             _ = try await bridge.engine.run()  // agreed
             _ = try await bridge.server.fragmentsAppDeletes(
-                configuration: bridge.config, day: "2026-07-09",
+                day: "2026-07-09",
                 deletedAt: bridge.fragmentsStamp(0))
 
             let report = try await bridge.engine.pullAndLand()
@@ -293,7 +293,7 @@ struct BridgeLandingTests {
             // Variorum edits; Fragments deletes (of the stale text).
             try bridge.ops.autosave(variantID, text: "Newer Variorum edit.", charDelta: 5)
             _ = try await bridge.server.fragmentsAppDeletes(
-                configuration: bridge.config, day: "2026-07-09",
+                day: "2026-07-09",
                 deletedAt: bridge.fragmentsStamp(0))
 
             let landing = try await bridge.engine.pullAndLand()
@@ -320,10 +320,10 @@ struct BridgeLandingTests {
             // ahead (2027) stamps; the feed serves only the current state
             // (the tombstone).
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Phone text, later deleted there.", updatedAt: bridge.fragmentsStamp(0))
             _ = try await bridge.server.fragmentsAppDeletes(
-                configuration: bridge.config, day: "2026-07-09",
+                day: "2026-07-09",
                 deletedAt: bridge.fragmentsStamp(1))
             // Variorum wrote its own entry for the day, never bridged.
             try bridge.makeEntry(day: "2026-07-09", text: "Local Variorum text.")
@@ -346,7 +346,7 @@ struct BridgeLandingTests {
             try bridge.ops.newBlock(in: entry.id, text: "Second paragraph.", at: .end)
             _ = try await bridge.engine.run()  // pushes the rendered join
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Phone-side rewrite of the whole day.",
                 updatedAt: bridge.fragmentsStamp(0))
 
@@ -376,7 +376,7 @@ struct BridgeLandingTests {
                 try bridge.firstBlockID(day: "2026-07-09")!, from: variantID)
             _ = try await bridge.engine.run()
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Phone edit against a fanned day.", updatedAt: bridge.fragmentsStamp(0))
             let landing = try await bridge.engine.pullAndLand()
             #expect(landing.rescuedVariants == 1)
@@ -393,7 +393,7 @@ struct BridgeLandingTests {
             _ = try await bridge.engine.run()
             try bridge.ops.lockPost(entry.id)
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Typed in Fragments while sealed.", updatedAt: bridge.fragmentsStamp(0))
             let landing = try await bridge.engine.pullAndLand()
             // The S5 posture: the seal freezes authoring; a bridge landing
@@ -417,7 +417,7 @@ struct BridgeLandingTests {
             let entry = try bridge.ops.createOrOpenJournalEntry(entryDate: "2026-07-09").container
             try bridge.ops.lockPost(entry.id)  // sealed while still blockless
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Phone text against a sealed empty day.",
                 updatedAt: bridge.fragmentsStamp(0))
 
@@ -459,7 +459,7 @@ struct BridgeLandingTests {
             // A REALISTIC save stamp (barely above the test's clock base) —
             // the destruction condition needs `now` to outrank it.
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Phone text typed while sealed.",
                 updatedAt: "2026-07-01T00:00:05.000Z")
             _ = try await bridge.engine.run()  // pre-fix: consumed; post-fix: deferred
@@ -496,7 +496,7 @@ struct BridgeLandingTests {
             let dupB = try bridge.ops.createPost(profile: .journal, entryDate: "2026-07-09")
             try bridge.ops.newBlock(in: dupB.id, text: "Entry B.", at: .end)
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Phone text for the doubled day.", updatedAt: bridge.fragmentsStamp(0))
 
             let round = try await bridge.engine.run()
@@ -521,7 +521,7 @@ struct BridgeLandingTests {
     @Test func visibilityHorizonNeverSkipsARowForever() async throws {
         try await withBridge(visibilityHorizon: 2) { bridge in
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Young row.", updatedAt: bridge.fragmentsStamp(0))
             // Too young: the feed withholds it; the cursor must NOT jump
             // past it.
@@ -537,7 +537,7 @@ struct BridgeLandingTests {
     @Test func replayedWindowLandsNothingTwice() async throws {
         try await withBridge { bridge in
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Landed once.", updatedAt: bridge.fragmentsStamp(0))
             _ = try await bridge.engine.pullAndLand()
             // A crash-before-cursor-advance replay: reset the cursor and

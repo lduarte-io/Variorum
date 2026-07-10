@@ -20,15 +20,18 @@ import VariorumCore
 
 private actor RecordingBridgeTransport: FragmentsBridgeTransport {
     private(set) var pullCalls = 0
-    func push(_ entries: [FragmentsEntry]) async throws -> [FragmentsPushOutcome] {
-        entries.map { _ in .applied(serverUpdatedAt: "0") }
+    func push(_ entries: [FragmentsEntry]) async throws -> FragmentsPushResponse {
+        FragmentsPushResponse(applied: entries.count, skipped: 0)
     }
     func pull(after cursor: FragmentsPullCursor?, limit: Int) async throws -> [FragmentsEntry] {
         pullCalls += 1
         return []
     }
-    func delete(ids: [String], deletedAt: String) async throws -> [FragmentsPushOutcome] {
-        ids.map { _ in .applied(serverUpdatedAt: "0") }
+    func delete(ids: [String]) async throws -> Int {
+        ids.count
+    }
+    func fetchLocalUserID() async throws -> String? {
+        "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8"
     }
 }
 
@@ -74,10 +77,7 @@ private actor GatedSyncTransport: SyncTransport {
 @Suite("Fragments bridge wiring (Phase 9b, Step 5)")
 struct Phase9bBridgeWiringTests {
     private func testConfiguration() -> FragmentsBridgeConfiguration {
-        FragmentsBridgeConfiguration(
-            idNamespace: UUID(uuidString: "6ba7b811-9dad-11d1-80b4-00c04fd430c8")!,
-            canonicalUserKey: "author",
-            userID: "user-author")
+        FragmentsBridgeConfiguration(userID: "user-author")
     }
 
     /// THE FENCE PIN: a session that must not bridge (dev store; the phone

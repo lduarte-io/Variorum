@@ -25,7 +25,7 @@ struct BridgeSoakTests {
             // Variorum-authored day; Fragments-authored day.
             try bridge.makeEntry(day: "2026-07-01", text: "Mac-side entry.")
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-02",
+                userID: bridge.config.userID, day: "2026-07-02",
                 body: "Phone-side entry.", updatedAt: bridge.fragmentsStamp(0))
 
             _ = try await bridge.engine.run()
@@ -140,11 +140,11 @@ struct BridgeSoakTests {
                     let body = "F\(step) phone text for \(day)."
                     fragmentsLedger.insert(body)
                     _ = try await bridge.server.fragmentsAppWrites(
-                        configuration: bridge.config, day: day,
+                        userID: bridge.config.userID, day: day,
                         body: body, updatedAt: nextFragmentsStamp())
                 default:  // Fragments: the app deletes the day
                     _ = try await bridge.server.fragmentsAppDeletes(
-                        configuration: bridge.config, day: day,
+                day: day,
                         deletedAt: nextFragmentsStamp())
                 }
 
@@ -243,11 +243,9 @@ struct BridgeSoakTests {
         let mac = try SyncClient(name: "mac", prefix: "AA", transport: syncServer)
         let phone = try SyncClient(name: "phone", prefix: "BB", transport: syncServer, clockOffset: 7)
 
-        let config = FragmentsBridgeConfiguration(
-            idNamespace: UUID(uuidString: "6ba7b811-9dad-11d1-80b4-00c04fd430c8")!,
-            canonicalUserKey: "author",
-            userID: "user-author")
-        let fragmentsServer = FakeFragmentsServer()
+        let config = FragmentsBridgeConfiguration(userID: "user-author")
+        let fragmentsServer = FakeFragmentsServer(
+            localUserID: "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8")
         let bridgeEngine = BridgeEngine(transport: fragmentsServer, configuration: config)
 
         // Mac authors one journal day; the phone captures another (through
@@ -261,7 +259,7 @@ struct BridgeSoakTests {
             _ = try ops.newBlock(in: entry.id, text: "Phone capture entry.", at: .end)
         }
         _ = try await fragmentsServer.fragmentsAppWrites(
-            configuration: config, day: "2026-07-03",
+            userID: config.userID, day: "2026-07-03",
             body: "Fragments journal entry.", updatedAt: "2027-01-01T00:00:00.000Z")
 
         // Mirror sync first (the app's cadence), then the bridge on the Mac,

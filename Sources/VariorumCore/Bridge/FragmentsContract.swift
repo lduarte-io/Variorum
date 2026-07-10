@@ -20,23 +20,36 @@ import Foundation
 /// as author-supplied facts; the wire shapes are PROVISIONAL in
 /// `FragmentsRPCTransport`.
 public enum FragmentsContract {
+    /// Fragments' UUIDv5 namespace — CONFIRMED by their agents 2026-07-09
+    /// (ask 8 ANSWERED; `DeterministicID.swift` / their SyncSpec §2.1,
+    /// "fixed forever" under their ID FREEZE). No longer a guessed value:
+    /// configuration defaults to it; tests pin the journal vectors under it.
+    public static let fragmentsNamespace = UUID(
+        uuidString: "7B69C1E4-9C72-4D2F-9B3A-2A41F0F4C0DE")!
+
     /// The deterministic-id name string, exactly the contract's recipe:
-    /// `journal|<canonical-user>|<dayKey>`.
+    /// `journal|<canonical-user>|<dayKey>` — no trailing newline, no
+    /// padding, UTF-8.
     public static func entryName(canonicalUser: String, dayKey: String) -> String {
         "journal|\(canonicalUser)|\(dayKey)"
     }
 
     /// The `journal_entries.id` for a calendar day: UUIDv5 of the recipe
-    /// string in the configured namespace, emitted lowercase (Postgres
-    /// `uuid` canonical text form). `nil` for a malformed day key — a
-    /// malformed key can never join, so no id may exist for it.
+    /// string in the namespace, emitted lowercase (Postgres `uuid`
+    /// canonical text form). **The name is lowercased before hashing** —
+    /// mirroring Fragments' `bcased()` (ask 9/10 ANSWERED: case is
+    /// load-bearing at the hash level; their pipeline lowercases, and the
+    /// canonical user is lowercased UUID text — a mis-cased input must
+    /// still derive the ONE true id, pinned by the case vectors). `nil`
+    /// for a malformed day key — a malformed key can never join, so no id
+    /// may exist for it.
     public static func entryID(
         namespace: UUID, canonicalUser: String, dayKey: String
     ) -> String? {
         guard JournalDay.isValid(dayKey) else { return nil }
         return UUIDv5.derive(
             namespace: namespace,
-            name: entryName(canonicalUser: canonicalUser, dayKey: dayKey)
+            name: entryName(canonicalUser: canonicalUser, dayKey: dayKey).lowercased()
         ).uuidString.lowercased()
     }
 }
@@ -72,30 +85,30 @@ public enum BridgeHash {
     }
 }
 
-/// The author-supplied facts the bridge cannot derive (see the contract file's
-/// asks): which namespace the UUIDv5 derivation runs in, the canonical-user
-/// string the recipe interpolates, and the `user_id` value her rows carry
-/// (`auth.uid()` under Fragments' RLS). The canonical user and the auth user
-/// may or may not be the same string — Fragments derives canonical users via
-/// its own `user_settings.local_user_id` machinery — so they are two fields.
+/// Bridge configuration (reconciled 2026-07-09 against the Fragments
+/// agents' answers). The namespace is now a KNOWN constant (default);
+/// `userID` is the auth uid from the session (the `journal_entries.user_id`
+/// column — the server forces it to `auth.uid()` anyway, but all six NOT
+/// NULL columns must be sent). **The canonical-user key is deliberately NOT
+/// here** (asks 9/10 ANSWERED): it is `user_settings.local_user_id` —
+/// minted by Fragments' first device, distinct from the auth uid by
+/// design — and the engine RESOLVES it from the server each round, never
+/// guesses it, and FAILS CLOSED while no row exists (the account has not
+/// synced from Fragments yet; pushing then would claim canon with a
+/// Variorum-invented id).
 public struct FragmentsBridgeConfiguration: Equatable, Sendable {
-    /// Fragments' UUIDv5 namespace (contract ask #A1 — supplied at
-    /// configuration time, alongside the credential).
+    /// Fragments' UUIDv5 namespace. Defaults to the confirmed constant;
+    /// injectable for tests only.
     public var idNamespace: UUID
-    /// The `<canonical-user>` interpolated into the id recipe.
-    public var canonicalUserKey: String
-    /// The `journal_entries.user_id` value (the author's Fragments user).
+    /// The `journal_entries.user_id` value: the authenticated Fragments
+    /// user (`auth.uid()`).
     public var userID: String
 
-    public init(idNamespace: UUID, canonicalUserKey: String, userID: String) {
+    public init(
+        idNamespace: UUID = FragmentsContract.fragmentsNamespace,
+        userID: String
+    ) {
         self.idNamespace = idNamespace
-        self.canonicalUserKey = canonicalUserKey
         self.userID = userID
-    }
-
-    /// The derived `journal_entries.id` for a day under this configuration.
-    public func entryID(dayKey: String) -> String? {
-        FragmentsContract.entryID(
-            namespace: idNamespace, canonicalUser: canonicalUserKey, dayKey: dayKey)
     }
 }

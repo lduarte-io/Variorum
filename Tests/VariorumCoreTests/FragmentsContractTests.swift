@@ -6,25 +6,25 @@ import Testing
 /// trick: both apps must derive the SAME id for the same user + day, or
 /// same-day creates can never converge to one row).
 ///
-/// **Contract finding, recorded honestly:** the plan expected these tests to
-/// pin "the contract's worked examples", but `notes/fragments-bridge-contract.md`
-/// pins the RECIPE (`UUIDv5("journal|<canonical-user>|<dayKey>")`) without
-/// the namespace UUID or any worked example. So these tests pin what IS
-/// pinnable today: (1) the RFC 4122 §4.3 algorithm against the standard's
-/// lineage vector, (2) the recipe's exact composition, and (3) frozen golden
-/// vectors computed under a stand-in namespace — listed verbatim in the
-/// contract file's asks for the Fragments agents to confirm against their
-/// implementation (with their real namespace) before the post-9c real pass.
+/// RECONCILED 2026-07-09: the Fragments agents answered asks 8–10 — the
+/// REAL namespace is pinned, derivation parity is CONFIRMED (their Swift ==
+/// their Postgres == python == this implementation, via the URL-namespace
+/// cross-check vector), and their three journal test vectors are the
+/// goldens below. Case is LOAD-BEARING: their pipeline `bcased()`s the name
+/// (lowercase) — `entryID` mirrors that, pinned by the case vectors.
 @Suite("Fragments contract: deterministic id derivation (Phase 9b, Step 1)")
 struct FragmentsContractTests {
     /// The RFC 4122 DNS namespace — the standard's own constant, used here
     /// only to verify the ALGORITHM against the universally-published
     /// vector (python's `uuid.uuid5(NAMESPACE_DNS, "python.org")`).
     private static let dnsNamespace = UUID(uuidString: "6ba7b810-9dad-11d1-80b4-00c04fd430c8")!
-    /// Stand-in namespace for the golden vectors below (the RFC URL
-    /// namespace). The REAL namespace is Fragments' — author-supplied
-    /// configuration; contract ask #A1.
-    private static let standInNamespace = UUID(uuidString: "6ba7b811-9dad-11d1-80b4-00c04fd430c8")!
+    /// The RFC URL namespace — the parity cross-check the Fragments agents
+    /// verified against THEIR implementation (their §2.1 vectors): same
+    /// input, same id, on both sides of the bridge.
+    private static let urlNamespace = UUID(uuidString: "6ba7b811-9dad-11d1-80b4-00c04fd430c8")!
+    /// A confirmed test-vector canonical user (lowercased UUID text, their
+    /// convention).
+    private static let vectorUser = "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8"
 
     @Test func uuidV5AlgorithmMatchesTheRFCVector() {
         let derived = UUIDv5.derive(namespace: Self.dnsNamespace, name: "python.org")
@@ -32,7 +32,7 @@ struct FragmentsContractTests {
     }
 
     @Test func versionAndVariantBitsAreV5() {
-        let derived = UUIDv5.derive(namespace: Self.standInNamespace, name: "anything at all")
+        let derived = UUIDv5.derive(namespace: Self.urlNamespace, name: "anything at all")
         let bytes = withUnsafeBytes(of: derived.uuid) { Array($0) }
         #expect(bytes[6] >> 4 == 0x5, "version nibble must be 5")
         #expect(bytes[8] & 0xC0 == 0x80, "variant must be RFC 4122")
@@ -43,26 +43,57 @@ struct FragmentsContractTests {
                 == "journal|alice|2026-07-09")
     }
 
-    /// Golden vectors frozen 2026-07-09 (computed independently with
-    /// python3 `uuid.uuid5` under the stand-in namespace) — listed in the
-    /// contract file for Fragments-side confirmation. Distinct users and
-    /// distinct days must yield distinct ids; the same inputs the same id,
-    /// on every device, forever.
-    @Test func goldenVectorsUnderTheStandInNamespace() {
+    /// The PARITY cross-check (their agents verified this exact vector
+    /// against their Swift and Postgres implementations): same recipe, same
+    /// URL namespace, same id on both sides of the bridge.
+    @Test func parityVectorMatchesTheFragmentsImplementation() {
+        #expect(FragmentsContract.entryID(
+            namespace: Self.urlNamespace, canonicalUser: "alice", dayKey: "2026-07-09")
+                == "efd1b644-d604-5272-860d-ab4061668e96")
+    }
+
+    /// THE journal goldens — the Fragments agents' own test vectors under
+    /// the REAL namespace (ask 9 ANSWERED). Same inputs, same id, on every
+    /// device, in both apps, forever (their ID FREEZE).
+    @Test func journalVectorsUnderTheRealNamespace() {
         func derive(_ user: String, _ day: String) -> String? {
             FragmentsContract.entryID(
-                namespace: Self.standInNamespace, canonicalUser: user, dayKey: day)
+                namespace: FragmentsContract.fragmentsNamespace,
+                canonicalUser: user, dayKey: day)
         }
-        #expect(derive("alice", "2026-07-09") == "efd1b644-d604-5272-860d-ab4061668e96")
-        #expect(derive("alice", "2026-07-10") == "e0c414b0-cf5f-5893-b20c-ee5525cd60e4")
-        #expect(derive("bob", "2026-07-09") == "40b446b4-5dfe-501c-ba06-a96a0bb3630c")
-        // Non-ASCII canonical users hash their UTF-8 bytes.
-        #expect(derive("áuser", "2026-01-01") == "3404e4fe-fbc8-50d6-ae96-231aca90551c")
+        #expect(FragmentsContract.fragmentsNamespace
+                == UUID(uuidString: "7B69C1E4-9C72-4D2F-9B3A-2A41F0F4C0DE"))
+        #expect(derive(Self.vectorUser, "2026-07-09")
+                == "7ab43871-10ad-5597-a0d7-d721fcd3ecf9")
+        #expect(derive(Self.vectorUser, "2026-01-05")
+                == "25cf2660-aa22-5057-97a9-e34fc11e5198")
+        #expect(derive("11111111-1111-1111-1111-111111111111", "2026-07-09")
+                == "317235d4-855b-53e9-8e2b-fc6cfd9be899")
+    }
+
+    /// Case is LOAD-BEARING at the hash level (ask 10): the raw UUIDv5 of
+    /// the UPPERCASED name is a DIFFERENT (wrong) id — their vector — while
+    /// `entryID` lowercases the name (mirroring their `bcased()`), so a
+    /// mis-cased canonical user still derives the ONE true id.
+    @Test func caseHandlingMirrorsBcased() {
+        let uppercasedName = "journal|9F1C2B3A-4D5E-6F70-8192-A3B4C5D6E7F8|2026-07-09"
+        #expect(UUIDv5.derive(
+            namespace: FragmentsContract.fragmentsNamespace, name: uppercasedName)
+            .uuidString.lowercased()
+                == "a1f076a6-26b1-5ded-bb42-2521ecaaa2d3",
+                "raw case-sensitivity — the WRONG id their vector demonstrates")
+        #expect(FragmentsContract.entryID(
+            namespace: FragmentsContract.fragmentsNamespace,
+            canonicalUser: "9F1C2B3A-4D5E-6F70-8192-A3B4C5D6E7F8",
+            dayKey: "2026-07-09")
+                == "7ab43871-10ad-5597-a0d7-d721fcd3ecf9",
+                "entryID lowercases the name — a mis-cased input derives the true id")
     }
 
     @Test func idsAreEmittedLowercase() throws {
         let id = try #require(FragmentsContract.entryID(
-            namespace: Self.standInNamespace, canonicalUser: "alice", dayKey: "2026-07-09"))
+            namespace: FragmentsContract.fragmentsNamespace,
+            canonicalUser: Self.vectorUser, dayKey: "2026-07-09"))
         #expect(id == id.lowercased(), "Postgres uuid canonical text form is lowercase")
     }
 
@@ -72,16 +103,15 @@ struct FragmentsContractTests {
     @Test func malformedDayKeysDeriveNothing() {
         for bad in ["2026-7-9", "2026/07/09", "20260709", "2026-02-30", "", "today"] {
             #expect(FragmentsContract.entryID(
-                namespace: Self.standInNamespace, canonicalUser: "alice", dayKey: bad) == nil,
+                namespace: FragmentsContract.fragmentsNamespace,
+                canonicalUser: Self.vectorUser, dayKey: bad) == nil,
                     "\(bad) must not derive an id")
         }
     }
 
-    @Test func configurationDerivesThroughTheSameDoor() {
-        let config = FragmentsBridgeConfiguration(
-            idNamespace: Self.standInNamespace, canonicalUserKey: "alice", userID: "user-1")
-        #expect(config.entryID(dayKey: "2026-07-09") == "efd1b644-d604-5272-860d-ab4061668e96")
-        #expect(config.entryID(dayKey: "not-a-day") == nil)
+    @Test func configurationDefaultsToTheRealNamespace() {
+        let config = FragmentsBridgeConfiguration(userID: "user-1")
+        #expect(config.idNamespace == FragmentsContract.fragmentsNamespace)
     }
 
     @Test func bodyHashIsStableSHA256Hex() {

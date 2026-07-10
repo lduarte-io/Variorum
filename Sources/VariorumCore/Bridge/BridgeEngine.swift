@@ -44,21 +44,18 @@ public struct BridgeEngine: Sendable {
 
     public let transport: any FragmentsBridgeTransport
     public let configuration: FragmentsBridgeConfiguration
-    /// Pull window size (keyset pages).
+    /// Pull window size (keyset pages; Fragments' own convention is 500,
+    /// paging while a page comes back full).
     public var pullLimit: Int
-    /// Push batch size per transport call.
-    public var pushBatchSize: Int
 
     public init(
         transport: any FragmentsBridgeTransport,
         configuration: FragmentsBridgeConfiguration,
-        pullLimit: Int = 200,
-        pushBatchSize: Int = 100
+        pullLimit: Int = 500
     ) {
         self.transport = transport
         self.configuration = configuration
         self.pullLimit = pullLimit
-        self.pushBatchSize = pushBatchSize
     }
 
     // MARK: - Reports
@@ -86,8 +83,12 @@ public struct BridgeEngine: Sendable {
 
     public struct PushReport: Equatable, Sendable {
         public var pushed = 0
-        /// LWW-stale outcomes: the server row is newer; the pull reconciles.
+        /// LWW-skipped outcomes (their aggregate `skipped`): the server row
+        /// is newer; the pull reconciles. (Ties go to the PUSHER under
+        /// migration 7's `>=` — a skip means strictly older.)
         public var stale = 0
+        /// Conflict refusals (`clock_ahead:` parks — retried as the clock
+        /// catches up; `unique_violation` poisons the day permanently).
         public var rejected = 0
         /// Days holding two or more live entries — pushed NOTHING, visibly,
         /// until the author hand-merges (never newest-wins).
@@ -120,6 +121,7 @@ public struct BridgeEngine: Sendable {
             let cursor = try await database.read { try Self.cursor($0) }
             let window = try await transport.pull(after: cursor, limit: pullLimit)
             guard !window.isEmpty else { break }
+            let fullPage = window.count == pullLimit
             for entry in window {
                 guard let serverStamp = entry.serverUpdatedAt else {
                     // A pulled row without a keyset stamp cannot advance the
@@ -140,7 +142,8 @@ public struct BridgeEngine: Sendable {
                     if let record = outcome.bookkeeping {
                         try Self.recordDay(
                             db, dayKey: record.day, hash: record.hash,
-                            remoteStamp: record.remoteStamp)
+                            remoteStamp: record.remoteStamp,
+                            remoteCreatedAt: record.remoteCreatedAt)
                     }
                     try Self.setCursor(
                         db, FragmentsPullCursor(serverUpdatedAt: serverStamp, id: entry.id))
@@ -156,6 +159,9 @@ public struct BridgeEngine: Sendable {
                 case .deferred: break  // handled above
                 }
             }
+            // Their paging convention: a short page is the head — stop
+            // (one fewer RPC per round than loop-until-empty).
+            if !fullPage { break }
         }
         return report
     }
@@ -168,6 +174,7 @@ public struct BridgeEngine: Sendable {
         let day: String
         let hash: String?
         let remoteStamp: String?
+        let remoteCreatedAt: String?
     }
 
     /// One incoming entry's disposition.
@@ -214,7 +221,8 @@ public struct BridgeEngine: Sendable {
         let effectiveBody = entry.isTombstoned ? "" : entry.body
         let incomingHash = BridgeHash.body(effectiveBody)
         let agreed = DayBookkeeping(
-            day: day, hash: incomingHash, remoteStamp: entry.updatedAt)
+            day: day, hash: incomingHash, remoteStamp: entry.updatedAt,
+            remoteCreatedAt: entry.createdAt)
 
         var context = try await readDayContext(day: day)
 
@@ -352,7 +360,9 @@ public struct BridgeEngine: Sendable {
             // stamp is, so the re-projection outranks it.
             return .skipped(
                 note: "Fragments deletion of \(day) raced a Variorum edit: the edit survives, truth re-projects",
-                record: DayBookkeeping(day: day, hash: nil, remoteStamp: entry.updatedAt))
+                record: DayBookkeeping(
+                    day: day, hash: nil, remoteStamp: entry.updatedAt,
+                    remoteCreatedAt: entry.createdAt))
         }
         if try await hasLiveVariant(blockID: firstSlot.blockID, text: entry.body) {
             return .skipped(note: nil, record: agreed)  // replay dedupe
@@ -382,6 +392,9 @@ public struct BridgeEngine: Sendable {
             /// push must outrank it or truth's re-projection is forever
             /// `.stale` under a clock ahead of ours.
             let remoteStamp: String?
+            /// The row's created_at as last pulled/pushed — echoed on every
+            /// push (created_at follows the WINNING push server-side).
+            let remoteCreatedAt: String?
         }
         let scan: (candidates: [Candidate], paused: [String], notes: [String]) =
             try await database.read { db in
@@ -449,64 +462,97 @@ public struct BridgeEngine: Sendable {
                     }
                     candidates.append(Candidate(
                         day: day, body: rendered, hash: hash,
-                        remoteStamp: state?.remoteStamp ?? nil))
+                        remoteStamp: state?.remoteStamp ?? nil,
+                        remoteCreatedAt: state?.remoteCreatedAt ?? nil))
                 }
                 return (candidates, paused, notes)
             }
         report.pausedDays = scan.paused
         report.notes = scan.notes
 
-        var index = 0
-        while index < scan.candidates.count {
-            let chunk = Array(scan.candidates[index..<min(index + pushBatchSize, scan.candidates.count)])
-            index += chunk.count
-            let entries = chunk.map { candidate in
-                let stamp = Self.pushStamp(now: now, outranking: candidate.remoteStamp)
-                return FragmentsEntry(
-                    id: configuration.entryID(dayKey: candidate.day)!,  // validity checked in the scan
-                    userID: configuration.userID,
-                    date: candidate.day,
-                    body: candidate.body,
-                    createdAt: stamp,
-                    updatedAt: stamp,
-                    deletedAt: nil)
+        guard !scan.candidates.isEmpty else { return report }
+
+        // THE FAIL-CLOSED GATE (reconciliation, asks 9/10 ANSWERED): the
+        // canonical-user key for id derivation is
+        // `user_settings.local_user_id` — minted by Fragments' first
+        // device, distinct from the auth uid by design, read from the
+        // server, NEVER guessed. No row yet ⇒ the account has not synced
+        // from Fragments ⇒ pushing would claim canon with a
+        // Variorum-invented id: hold ALL pushes, visibly, until it exists.
+        // (Re-resolved per round — their ID FREEZE makes it immutable once
+        // minted, so this is one cheap RPC.)
+        guard let canonicalUser = try await transport.fetchLocalUserID() else {
+            report.notes.append(
+                "Fragments account not yet synced (no user_settings.local_user_id) — pushes held, fail-closed")
+            return report
+        }
+
+        // ONE push call PER DAY (reconciliation, ask 11 ANSWERED): the
+        // response is aggregate counters — with one row per call,
+        // `applied == 1` is unambiguous.
+        for candidate in scan.candidates {
+            if let poison = try await database.read({ try Self.poisonNote($0, dayKey: candidate.day) }) {
+                // unique_violation = a mis-derived id, a DERIVATION BUG:
+                // surfaced permanently, never retried (their confirmed
+                // treatment — the unique index is the safety net).
+                report.rejected += 1
+                report.notes.append("day \(candidate.day) held (derivation bug, never retried): \(poison)")
+                continue
             }
-            let outcomes = try await transport.push(entries)
-            guard outcomes.count == chunk.count else {
-                throw FragmentsTransportError.mismatchedResultCount(
-                    pushed: chunk.count, returned: outcomes.count)
-            }
-            var accepted: [(day: String, hash: String, stamp: String)] = []
-            for ((candidate, entry), outcome) in zip(zip(chunk, entries), outcomes) {
-                switch outcome {
-                case .applied:
-                    // Record the ACCEPTED PUSH'S OWN STAMP as the day's
-                    // last known remote stamp (review round 2 — the MAJOR's
-                    // companion fix): `last_remote_stamp` must always track
-                    // the newest server-row stamp this bridge has SEEN or
-                    // WRITTEN, or minimal stamping wedges consecutive
-                    // pushes and the loss window re-opens.
-                    accepted.append((candidate.day, candidate.hash, entry.updatedAt))
-                    report.pushed += 1
-                case .stale:
-                    // The server row is newer (a Fragments edit won LWW):
-                    // record nothing; the next pull lands their text and
-                    // re-classifies.
-                    report.stale += 1
-                case .rejected(let reason):
-                    report.rejected += 1
-                    report.notes.append("push of \(candidate.day) rejected: \(reason)")
-                }
-            }
-            if !accepted.isEmpty {
-                let records = accepted
+            let stamp = Self.pushStamp(now: now, outranking: candidate.remoteStamp)
+            let entry = FragmentsEntry(
+                id: FragmentsContract.entryID(
+                    namespace: configuration.idNamespace,
+                    canonicalUser: canonicalUser,
+                    dayKey: candidate.day)!,  // day validity checked in the scan
+                userID: configuration.userID,
+                date: candidate.day,
+                body: candidate.body,
+                // Echo the pulled created_at; our own creation instant only
+                // for a row we have never seen (ask 12 ANSWERED —
+                // created_at follows the WINNING push, so echoing is what
+                // preserves the original instant).
+                createdAt: candidate.remoteCreatedAt ?? stamp,
+                updatedAt: stamp,
+                deletedAt: nil)
+            let response = try await transport.push([entry])
+            if response.applied == 1 {
+                // Record the accepted push's own stamps (round 2's
+                // companion fix + the created_at echo source).
+                let record = (day: candidate.day, hash: candidate.hash,
+                              stamp: entry.updatedAt, createdAt: entry.createdAt)
                 try await database.write { db in
-                    for record in records {
-                        try Self.recordDay(
-                            db, dayKey: record.day, hash: record.hash,
-                            remoteStamp: record.stamp)
-                    }
+                    try Self.recordDay(
+                        db, dayKey: record.day, hash: record.hash,
+                        remoteStamp: record.stamp, remoteCreatedAt: record.createdAt)
                 }
+                report.pushed += 1
+            } else if let conflict = response.conflicts.first {
+                report.rejected += 1
+                if conflict.isUniqueViolation {
+                    // Poison the day: visible every round, never re-pushed.
+                    let day = candidate.day
+                    let note = conflict.error
+                    try await database.write { db in
+                        try Self.setPoisonNote(db, dayKey: day, note: note)
+                    }
+                    report.notes.append(
+                        "push of \(candidate.day) refused (derivation bug — day held permanently): \(conflict.error)")
+                } else if conflict.isClockAhead {
+                    // Parked: the clamp self-heals as the wall clock
+                    // catches up; surfaced every round meanwhile.
+                    report.notes.append(
+                        "push of \(candidate.day) parked (clock ahead — retried as the clock catches up): \(conflict.error)")
+                } else {
+                    report.notes.append("push of \(candidate.day) refused: \(conflict.error)")
+                }
+            } else {
+                // skipped == 1: the server row is newer (an unseen
+                // Fragments save won LWW — ties go to the PUSHER under
+                // migration 7's >=, so a skip means strictly older):
+                // record nothing; the next pull lands their text and
+                // re-classifies.
+                report.stale += 1
             }
         }
         return report
@@ -584,13 +630,13 @@ public struct BridgeEngine: Sendable {
 
     static func dayRow(
         _ db: Database, dayKey: String
-    ) throws -> (hash: String?, remoteStamp: String?)? {
+    ) throws -> (hash: String?, remoteStamp: String?, remoteCreatedAt: String?)? {
         guard let row = try Row.fetchOne(
             db,
-            sql: "SELECT last_synced_hash, last_remote_stamp FROM bridge_day WHERE day_key = ?",
+            sql: "SELECT last_synced_hash, last_remote_stamp, remote_created_at FROM bridge_day WHERE day_key = ?",
             arguments: [dayKey])
         else { return nil }
-        return (row["last_synced_hash"], row["last_remote_stamp"])
+        return (row["last_synced_hash"], row["last_remote_stamp"], row["remote_created_at"])
     }
 
     /// `hash == nil` records the remote stamp WITHOUT an agreement — the
@@ -600,28 +646,47 @@ public struct BridgeEngine: Sendable {
     /// wedge). A nil `remoteStamp` never clobbers a recorded one
     /// (push-accepts know no remote stamp).
     static func recordDay(
-        _ db: Database, dayKey: String, hash: String?, remoteStamp: String?
+        _ db: Database, dayKey: String, hash: String?, remoteStamp: String?,
+        remoteCreatedAt: String? = nil
     ) throws {
         if let hash {
             try db.execute(
                 sql: """
-                    INSERT INTO bridge_day (day_key, last_synced_hash, last_remote_stamp)
-                    VALUES (?, ?, ?)
+                    INSERT INTO bridge_day (day_key, last_synced_hash, last_remote_stamp, remote_created_at)
+                    VALUES (?, ?, ?, ?)
                     ON CONFLICT(day_key) DO UPDATE SET
                       last_synced_hash = excluded.last_synced_hash,
-                      last_remote_stamp = COALESCE(excluded.last_remote_stamp, bridge_day.last_remote_stamp)
+                      last_remote_stamp = COALESCE(excluded.last_remote_stamp, bridge_day.last_remote_stamp),
+                      remote_created_at = COALESCE(excluded.remote_created_at, bridge_day.remote_created_at)
                     """,
-                arguments: [dayKey, hash, remoteStamp])
+                arguments: [dayKey, hash, remoteStamp, remoteCreatedAt])
         } else if let remoteStamp {
             try db.execute(
                 sql: """
-                    INSERT INTO bridge_day (day_key, last_synced_hash, last_remote_stamp)
-                    VALUES (?, NULL, ?)
+                    INSERT INTO bridge_day (day_key, last_synced_hash, last_remote_stamp, remote_created_at)
+                    VALUES (?, NULL, ?, ?)
                     ON CONFLICT(day_key) DO UPDATE SET
-                      last_remote_stamp = excluded.last_remote_stamp
+                      last_remote_stamp = excluded.last_remote_stamp,
+                      remote_created_at = COALESCE(excluded.remote_created_at, bridge_day.remote_created_at)
                     """,
-                arguments: [dayKey, remoteStamp])
+                arguments: [dayKey, remoteStamp, remoteCreatedAt])
         }
+    }
+
+    // MARK: - Derivation-bug poison markers (reconciliation: a
+    // unique_violation is a mis-derived id — surfaced permanently, never
+    // retried; cleared only with the fix that ends the bug class)
+
+    static func poisonNote(_ db: Database, dayKey: String) throws -> String? {
+        try String.fetchOne(
+            db, sql: "SELECT value FROM bridge_state WHERE key = ?",
+            arguments: ["poisoned:\(dayKey)"])
+    }
+
+    static func setPoisonNote(_ db: Database, dayKey: String, note: String) throws {
+        try db.execute(
+            sql: "INSERT OR REPLACE INTO bridge_state (key, value) VALUES (?, ?)",
+            arguments: ["poisoned:\(dayKey)", note])
     }
 
     // MARK: - Push stamps (client LWW)
@@ -633,7 +698,11 @@ public struct BridgeEngine: Sendable {
     /// newest server-row stamp this bridge has seen (landed) or written
     /// (accepted push), so stamping just above it makes the push a
     /// poor-man's compare-and-set — it outranks exactly what we KNOW and
-    /// goes `.stale` against anything we haven't seen yet. Stamping `now`
+    /// loses LWW against anything newer we haven't seen. (Reconciliation
+    /// nuance: migration 7's ties go to the PUSHER (`>=`), so an unseen
+    /// save stamped EXACTLY at our minimal stamp is overwritten — the 1 s
+    /// quantization residual destroys on exact ties rather than staling;
+    /// ask 13 remains the full closure.) Stamping `now`
     /// instead let a same-round race destroy Fragments text on a
     /// steady-state day: a save landing between the pull and the push (or
     /// inside their ~2 s visibility horizon) was LWW-replaced by our

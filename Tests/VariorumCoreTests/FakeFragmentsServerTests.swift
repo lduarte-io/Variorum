@@ -2,158 +2,220 @@ import Foundation
 import Testing
 @testable import VariorumCore
 
-/// Phase 9b, Step 1 — the fake Fragments server's pinned behaviors, each
-/// tied to a contract fact, so every bridge suite stands on verified ground
-/// (the same discipline as Phase 5's `FakeSyncServerTests`).
-@Suite("Fake Fragments server pins the contract (Phase 9b, Step 1)")
+/// Phase 9b — the fake Fragments server's pinned behaviors, RE-PINNED at
+/// the checkpoint reconciliation (2026-07-09) to the Fragments agents'
+/// answers: their migration 7's shipped SQL, not their spec prose. Every
+/// bridge suite stands on this verified ground.
+@Suite("Fake Fragments server pins migration 7 (Phase 9b, reconciled)")
 struct FakeFragmentsServerTests {
-    private let config = FragmentsBridgeConfiguration(
-        idNamespace: UUID(uuidString: "6ba7b811-9dad-11d1-80b4-00c04fd430c8")!,
-        canonicalUserKey: "author",
-        userID: "user-author")
+    private let user = "user-author"
+    private let canonical = "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8"
+
+    private func makeServer(visibilityHorizon: Int64 = 0) -> FakeFragmentsServer {
+        FakeFragmentsServer(visibilityHorizon: visibilityHorizon, localUserID: canonical)
+    }
 
     private func entry(
         day: String, body: String, updatedAt: String,
-        id: String? = nil, deletedAt: String? = nil
+        id: String? = nil, createdAt: String? = nil
     ) -> FragmentsEntry {
         FragmentsEntry(
-            id: id ?? config.entryID(dayKey: day)!,
-            userID: config.userID, date: day, body: body,
-            createdAt: updatedAt, updatedAt: updatedAt, deletedAt: deletedAt)
+            id: id ?? FragmentsContract.entryID(
+                namespace: FragmentsContract.fragmentsNamespace,
+                canonicalUser: canonical, dayKey: day)!,
+            userID: user, date: day, body: body,
+            createdAt: createdAt ?? updatedAt, updatedAt: updatedAt)
     }
 
-    // MARK: Row-LWW on client-stamped updated_at (contract fact 4)
+    // MARK: The aggregate push response (corrected wire shape)
 
-    @Test func lwwStrictlyNewerWinsOlderIsStale() async throws {
-        let server = FakeFragmentsServer()
+    @Test func pushRespondsWithAggregateCounters() async throws {
+        let server = makeServer()
+        let first = try await server.push([entry(day: "2026-07-09", body: "b",
+                                                 updatedAt: "2026-07-09T10:00:00.000Z")])
+        #expect(first == FragmentsPushResponse(applied: 1, skipped: 0, conflicts: []))
+        // An older push is SKIPPED silently — no reason, no stamp.
+        let older = try await server.push([entry(day: "2026-07-09", body: "old",
+                                                 updatedAt: "2026-07-09T09:00:00.000Z")])
+        #expect(older == FragmentsPushResponse(applied: 0, skipped: 1, conflicts: []))
+    }
+
+    // MARK: Row-LWW: TIES GO TO THE PUSHER (>=, migration 7 — corrected
+    // from the strict > this fake shipped with)
+
+    @Test func lwwTiesGoToThePusherOnLiveRows() async throws {
+        let server = makeServer()
         let day = "2026-07-09"
-        #expect(try await server.push([entry(day: day, body: "first", updatedAt: "2026-07-09T10:00:00.000Z")])
-                == [.applied(serverUpdatedAt: "00000000000000000001")])
-        // Strictly newer applies.
-        #expect(try await server.push([entry(day: day, body: "second", updatedAt: "2026-07-09T10:00:01.000Z")]).first
-                == .applied(serverUpdatedAt: "00000000000000000002"))
-        // Equal stamp is stale (strict LWW).
-        #expect(try await server.push([entry(day: day, body: "tie", updatedAt: "2026-07-09T10:00:01.000Z")])
-                == [.stale])
-        // Older is stale; the stored body is untouched.
-        #expect(try await server.push([entry(day: day, body: "old", updatedAt: "2026-07-09T09:00:00.000Z")])
-                == [.stale])
-        let current = await server.currentEntry(id: config.entryID(dayKey: day)!)
-        #expect(current?.body == "second")
-        #expect(await server.acceptedWriteCount == 2)
+        _ = try await server.push([entry(day: day, body: "first", updatedAt: "2026-07-09T10:00:00.000Z")])
+        let stampAfterFirst = await server.currentEntry(
+            id: FragmentsContract.entryID(
+                namespace: FragmentsContract.fragmentsNamespace,
+                canonicalUser: canonical, dayKey: day)!)!.serverUpdatedAt
+        // The EXACT same stamp re-applies (>=) — and bumps
+        // server_updated_at, churning every device's pull: this is why the
+        // bridge's never-push-unchanged guard is load-bearing.
+        let tie = try await server.push([entry(day: day, body: "tie wins", updatedAt: "2026-07-09T10:00:00.000Z")])
+        #expect(tie.applied == 1)
+        let current = await server.currentEntry(
+            id: FragmentsContract.entryID(
+                namespace: FragmentsContract.fragmentsNamespace,
+                canonicalUser: canonical, dayKey: day)!)
+        #expect(current?.body == "tie wins")
+        #expect(current?.serverUpdatedAt != stampAfterFirst,
+                "a winning re-push bumps server_updated_at")
+        // Strictly older is skipped; the stored body untouched.
+        let older = try await server.push([entry(day: day, body: "old", updatedAt: "2026-07-09T09:59:59.000Z")])
+        #expect(older.skipped == 1)
+        #expect(await server.currentEntry(
+            id: FragmentsContract.entryID(
+                namespace: FragmentsContract.fragmentsNamespace,
+                canonicalUser: canonical, dayKey: day)!)?.body == "tie wins")
     }
 
-    // MARK: Live-unique (user_id, date) — the DB-enforced one-per-day
-    // (contract fact 6: a WRONG id derivation fails loudly, never forks a day)
+    // MARK: Live-unique (user_id, date) — a mis-derived id lands in
+    // conflicts[] as unique_violation (never retryable)
 
-    @Test func aForeignIDForAnOccupiedDayIsAUniqueViolation() async throws {
-        let server = FakeFragmentsServer()
+    @Test func aForeignIDForAnOccupiedDayIsAUniqueViolationConflict() async throws {
+        let server = makeServer()
         let day = "2026-07-09"
         _ = try await server.push([entry(day: day, body: "body", updatedAt: "2026-07-09T10:00:00.000Z")])
         let rogue = entry(
             day: day, body: "fork", updatedAt: "2026-07-09T11:00:00.000Z",
             id: "11111111-1111-4111-8111-111111111111")
-        #expect(try await server.push([rogue])
-                == [.rejected(reason: "unique_violation(user_id,date)")])
+        let response = try await server.push([rogue])
+        #expect(response.applied == 0)
+        #expect(response.conflicts.count == 1)
+        #expect(response.conflicts[0].isUniqueViolation)
+        #expect(response.conflicts[0].id == rogue.id)
         #expect(await server.entryCount == 1)
     }
 
-    // MARK: Un-tombstone only on strictly-newer edits (contract fact 4)
+    // MARK: Un-tombstone only on STRICTLY-newer edits (confirmed — the
+    // SQL's resurrect guard; their spec prose wrongly says stale-can-resurrect)
 
     @Test func unTombstoneRequiresStrictlyNewer() async throws {
-        let server = FakeFragmentsServer()
+        let server = makeServer()
         let day = "2026-07-09"
         _ = try await server.push([entry(day: day, body: "alive", updatedAt: "2026-07-09T10:00:00.000Z")])
-        _ = try await server.delete(
-            ids: [config.entryID(dayKey: day)!], deletedAt: "2026-07-09T11:00:00.000Z")
-        // Re-push stamped at (or before) the tombstone: stale, stays dead.
-        #expect(try await server.push([entry(day: day, body: "revive?", updatedAt: "2026-07-09T11:00:00.000Z")])
-                == [.stale])
-        #expect(await server.currentEntry(id: config.entryID(dayKey: day)!)?.deletedAt != nil)
+        _ = try await server.fragmentsAppDeletes(day: day, deletedAt: "2026-07-09T11:00:00.000Z")
+        // Re-push stamped AT the tombstone: skipped, stays dead (ties do
+        // NOT resurrect — the tombstone branch is strict).
+        let atTombstone = try await server.push([entry(day: day, body: "revive?", updatedAt: "2026-07-09T11:00:00.000Z")])
+        #expect(atTombstone.skipped == 1)
+        let id = FragmentsContract.entryID(
+            namespace: FragmentsContract.fragmentsNamespace,
+            canonicalUser: canonical, dayKey: day)!
+        #expect(await server.currentEntry(id: id)?.deletedAt != nil)
         // Strictly newer revives.
-        let outcome = try await server.push(
-            [entry(day: day, body: "revived", updatedAt: "2026-07-09T11:00:01.000Z")])
-        if case .applied = outcome[0] {} else { Issue.record("strictly-newer edit must un-tombstone") }
-        let current = await server.currentEntry(id: config.entryID(dayKey: day)!)
+        let newer = try await server.push([entry(day: day, body: "revived", updatedAt: "2026-07-09T11:00:01.000Z")])
+        #expect(newer.applied == 1)
+        let current = await server.currentEntry(id: id)
         #expect(current?.deletedAt == nil)
         #expect(current?.body == "revived")
     }
 
-    @Test func deleteIsLWWGuardedToo() async throws {
-        let server = FakeFragmentsServer()
+    // MARK: created_at follows the WINNING push (corrected — the SET list
+    // includes it; round 0's preserve-on-update was wrong)
+
+    @Test func createdAtFollowsTheWinningPush() async throws {
+        let server = makeServer()
         let day = "2026-07-09"
-        _ = try await server.push([entry(day: day, body: "newer", updatedAt: "2026-07-09T12:00:00.000Z")])
-        // A delete stamped before the row's edit is stale — the edit wins.
-        #expect(try await server.delete(
-            ids: [config.entryID(dayKey: day)!], deletedAt: "2026-07-09T11:00:00.000Z")
-                == [.stale])
-        #expect(await server.currentEntry(id: config.entryID(dayKey: day)!)?.deletedAt == nil)
+        _ = try await server.push([entry(day: day, body: "v1",
+                                         updatedAt: "2026-07-09T10:00:00.000Z",
+                                         createdAt: "2026-07-09T10:00:00.000Z")])
+        _ = try await server.push([entry(day: day, body: "v2",
+                                         updatedAt: "2026-07-09T11:00:00.000Z",
+                                         createdAt: "2026-07-09T11:00:00.000Z")])
+        let id = FragmentsContract.entryID(
+            namespace: FragmentsContract.fragmentsNamespace,
+            canonicalUser: canonical, dayKey: day)!
+        #expect(await server.currentEntry(id: id)?.createdAt == "2026-07-09T11:00:00.000Z",
+                "the winner's created_at replaces the row's — echo the pulled value to preserve it")
     }
 
-    // MARK: created_at preserved on update (documented reading; ask filed)
+    // MARK: The clock-ahead clamp (>10 min; conflicts[] with the prefix)
 
-    @Test func createdAtSurvivesUpdates() async throws {
-        let server = FakeFragmentsServer()
-        let day = "2026-07-09"
-        _ = try await server.push([entry(day: day, body: "v1", updatedAt: "2026-07-09T10:00:00.000Z")])
-        _ = try await server.push([entry(day: day, body: "v2", updatedAt: "2026-07-09T11:00:00.000Z")])
-        #expect(await server.currentEntry(id: config.entryID(dayKey: day)!)?.createdAt
-                == "2026-07-09T10:00:00.000Z")
-    }
-
-    // MARK: Clock-ahead clamp (contract fact 4)
-
-    @Test func clockAheadPushesAreRejected() async throws {
-        let server = FakeFragmentsServer()
+    @Test func clockAheadPushesLandInConflictsWithThePrefix() async throws {
+        let server = makeServer()
         await server.setClockAheadLimit("2026-07-09T12:00:00.000Z")
-        #expect(try await server.push([entry(day: "2026-07-09", body: "from the future",
-                                             updatedAt: "2026-07-09T12:10:00.000Z")])
-                == [.rejected(reason: "clock_ahead")])
+        let response = try await server.push([entry(day: "2026-07-09", body: "from the future",
+                                                    updatedAt: "2026-07-09T12:10:00.001Z")])
+        #expect(response.applied == 0)
+        #expect(response.conflicts.count == 1)
+        #expect(response.conflicts[0].isClockAhead)
         #expect(await server.entryCount == 0)
     }
 
-    // MARK: Keyset pull + the visibility horizon (contract facts 2/4 + ask 1)
+    // MARK: Keyset pull: bare ordered array over OPAQUE µs-style stamps
+    // + the visibility horizon inside the RPC
 
     @Test func pullIsKeysetOrderedAndCursorExclusive() async throws {
-        let server = FakeFragmentsServer()
+        let server = makeServer()
         for (index, day) in ["2026-07-01", "2026-07-02", "2026-07-03"].enumerated() {
             _ = try await server.push([entry(day: day, body: "b\(index)",
                                              updatedAt: "2026-07-09T10:00:0\(index).000Z")])
         }
         let all = try await server.pull(after: nil, limit: 10)
         #expect(all.map(\.date) == ["2026-07-01", "2026-07-02", "2026-07-03"])
-        // Strictly after the first row's (server_updated_at, id).
+        // Server stamps are µs-precision opaque strings — the raw-storage
+        // rule's substrate (a ms round-trip would corrupt them).
+        #expect(all[0].serverUpdatedAt!.contains("."))
         let cursor = FragmentsPullCursor(
             serverUpdatedAt: all[0].serverUpdatedAt!, id: all[0].id)
         let rest = try await server.pull(after: cursor, limit: 10)
         #expect(rest.map(\.date) == ["2026-07-02", "2026-07-03"])
-        // Limit truncates in order.
         #expect(try await server.pull(after: nil, limit: 2).map(\.date)
                 == ["2026-07-01", "2026-07-02"])
     }
 
     @Test func visibilityHorizonWithholdsYoungRowsThenServesThem() async throws {
-        let server = FakeFragmentsServer(visibilityHorizon: 2)
+        let server = makeServer(visibilityHorizon: 2)
         _ = try await server.push([entry(day: "2026-07-09", body: "young",
                                          updatedAt: "2026-07-09T10:00:00.000Z")])
-        // Younger than the horizon: invisible.
         #expect(try await server.pull(after: nil, limit: 10).isEmpty)
         await server.advanceClock(by: 1)
         #expect(try await server.pull(after: nil, limit: 10).isEmpty)
-        // Old enough: served, at its ORIGINAL keyset position.
         await server.advanceClock(by: 1)
         let served = try await server.pull(after: nil, limit: 10)
         #expect(served.map(\.body) == ["young"])
     }
 
     @Test func aReplacedRowIsServedOnceAtItsNewestState() async throws {
-        let server = FakeFragmentsServer()
+        let server = makeServer()
         let day = "2026-07-09"
         _ = try await server.push([entry(day: day, body: "v1", updatedAt: "2026-07-09T10:00:00.000Z")])
         _ = try await server.push([entry(day: day, body: "v2", updatedAt: "2026-07-09T11:00:00.000Z")])
-        // State-based, not an op log: one row, current state, newest stamp.
         let pulled = try await server.pull(after: nil, limit: 10)
         #expect(pulled.count == 1)
         #expect(pulled[0].body == "v2")
+    }
+
+    // MARK: sync_delete: server-stamped soft delete → {tombstoned: n}
+
+    @Test func deleteTombstonesAndReportsTheCount() async throws {
+        let server = makeServer()
+        _ = try await server.push([entry(day: "2026-07-09", body: "b", updatedAt: "2026-07-09T10:00:00.000Z")])
+        let id = FragmentsContract.entryID(
+            namespace: FragmentsContract.fragmentsNamespace,
+            canonicalUser: canonical, dayKey: "2026-07-09")!
+        let count = try await server.delete(ids: [id, "00000000-0000-4000-8000-000000000099"])
+        #expect(count == 1, "unknown ids are ignored")
+        #expect(await server.currentEntry(id: id)?.deletedAt != nil)
+        // The tombstone rides the pull stream.
+        let pulled = try await server.pull(after: nil, limit: 10)
+        #expect(pulled.count == 1)
+        #expect(pulled[0].isTombstoned)
+    }
+
+    // MARK: user_settings.local_user_id (the canonical-user source)
+
+    @Test func localUserIDIsReadableAndNilBeforeFirstSync() async throws {
+        let unsynced = FakeFragmentsServer()
+        #expect(try await unsynced.fetchLocalUserID() == nil)
+        let synced = makeServer()
+        #expect(try await synced.fetchLocalUserID() == canonical)
+        // Lowercased by convention, defensively.
+        await synced.setLocalUserID("9F1C2B3A-4D5E-6F70-8192-A3B4C5D6E7F8")
+        #expect(try await synced.fetchLocalUserID() == canonical)
     }
 }

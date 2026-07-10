@@ -16,7 +16,7 @@ struct BridgePushTests {
             #expect(report.pushed == 1)
             #expect(report.pausedDays.isEmpty)
             let entry = await bridge.server.currentEntry(
-                id: bridge.config.entryID(dayKey: "2026-07-09")!)
+                id: bridge.entryID(day: "2026-07-09"))
             #expect(entry?.body == "Dear diary, day one.")
             #expect(entry?.date == "2026-07-09")
             #expect(entry?.userID == "user-author")
@@ -31,7 +31,7 @@ struct BridgePushTests {
             try bridge.makeEntry(day: "2026-07-09", text: "Same text.")
             _ = try await bridge.engine.push()
             let stampAfterFirst = await bridge.server
-                .currentEntry(id: bridge.config.entryID(dayKey: "2026-07-09")!)?.updatedAt
+                .currentEntry(id: bridge.entryID(day: "2026-07-09"))?.updatedAt
             let writesAfterFirst = await bridge.server.acceptedWriteCount
 
             // Second round, nothing changed: zero pushes, zero server
@@ -40,7 +40,7 @@ struct BridgePushTests {
             #expect(second.pushed == 0)
             #expect(await bridge.server.acceptedWriteCount == writesAfterFirst)
             #expect(await bridge.server
-                .currentEntry(id: bridge.config.entryID(dayKey: "2026-07-09")!)?.updatedAt
+                .currentEntry(id: bridge.entryID(day: "2026-07-09"))?.updatedAt
                     == stampAfterFirst)
         }
     }
@@ -227,7 +227,7 @@ struct BridgePushTests {
             // Both sides edit; the Fragments save carries a far-ahead stamp.
             try bridge.ops.autosave(variantID, text: "Variorum rewrite.", charDelta: 8)
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Phone-ahead save.", updatedAt: bridge.fragmentsStamp(0))
             // The server clamps stamps beyond the save's own time.
             await bridge.server.setClockAheadLimit(bridge.fragmentsStamp(0))
@@ -243,13 +243,64 @@ struct BridgePushTests {
         }
     }
 
+    /// RECONCILIATION (asks 9/10): the fail-closed gate. Before Fragments'
+    /// first device has synced, `user_settings.local_user_id` does not
+    /// exist — the canonical id is undecided, and a push would claim canon
+    /// with a Variorum-invented id. ALL pushes hold, visibly, until the
+    /// row appears.
+    @Test func pushesFailClosedUntilTheCanonicalUserExists() async throws {
+        try await withBridge(localUserID: nil) { bridge in
+            try bridge.makeEntry(day: "2026-07-09", text: "Waiting to project.")
+            let held = try await bridge.engine.push()
+            #expect(held.pushed == 0)
+            #expect(await bridge.server.entryCount == 0, "nothing may be written fail-closed")
+            #expect(held.notes.contains { $0.contains("fail-closed") })
+
+            // Fragments' first sync mints the canonical id → pushes flow.
+            await bridge.server.setLocalUserID("9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8")
+            let flowing = try await bridge.engine.push()
+            #expect(flowing.pushed == 1)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Waiting to project.")
+            // Under the DERIVED id for the server's own canonical user —
+            // the id Fragments itself would derive (the join key's trick).
+            #expect(await bridge.server.currentEntry(id: bridge.entryID(day: "2026-07-09"))?.body
+                    == "Waiting to project.")
+        }
+    }
+
+    /// RECONCILIATION (ask 12): created_at follows the WINNING push
+    /// server-side, so the bridge ECHOES the pulled created_at — the
+    /// original creation instant survives our re-projections.
+    @Test func pushesEchoThePulledCreatedAt() async throws {
+        try await withBridge { bridge in
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: bridge.config.userID, day: "2026-07-09",
+                body: "Phone original.", updatedAt: bridge.fragmentsStamp(0))
+            let original = await bridge.server.currentEntry(
+                id: bridge.entryID(day: "2026-07-09"))!.createdAt
+            _ = try await bridge.engine.run()  // lands; records created_at
+
+            // Variorum edits; the re-projection must not replace created_at.
+            let variantID = try await bridge.db.read { db in
+                try String.fetchOne(db, sql: "SELECT id FROM variant LIMIT 1")
+            }!
+            try bridge.ops.autosave(variantID, text: "Edited on the Mac.", charDelta: 6)
+            let report = try await bridge.engine.push()
+            #expect(report.pushed == 1)
+            let after = await bridge.server.currentEntry(id: bridge.entryID(day: "2026-07-09"))
+            #expect(after?.body == "Edited on the Mac.")
+            #expect(after?.createdAt == original,
+                    "the winning push carries created_at — echoing preserves the original instant")
+        }
+    }
+
     @Test func staleOutcomeRecordsNothingSoThePullReconciles() async throws {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "Variorum text.")
             // Fragments already holds a much-newer row (2027 stamp beats
             // the deterministic 2026 clock).
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Fragments text, newer.", updatedAt: bridge.fragmentsStamp(0))
             let report = try await bridge.engine.push()
             #expect(report.pushed == 0)

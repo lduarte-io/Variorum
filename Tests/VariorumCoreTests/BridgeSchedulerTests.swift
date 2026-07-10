@@ -48,7 +48,7 @@ struct BridgeSchedulerTests {
             if failing { throw FragmentsTransportError.notHTTP }
         }
 
-        func push(_ entries: [FragmentsEntry]) async throws -> [FragmentsPushOutcome] {
+        func push(_ entries: [FragmentsEntry]) async throws -> FragmentsPushResponse {
             calls.append(.push(count: entries.count))
             try await passGate()
             return try await server.push(entries)
@@ -60,10 +60,15 @@ struct BridgeSchedulerTests {
             return try await server.pull(after: cursor, limit: limit)
         }
 
-        func delete(ids: [String], deletedAt: String) async throws -> [FragmentsPushOutcome] {
+        func delete(ids: [String]) async throws -> Int {
             calls.append(.delete)
             try await passGate()
-            return try await server.delete(ids: ids, deletedAt: deletedAt)
+            return try await server.delete(ids: ids)
+        }
+
+        func fetchLocalUserID() async throws -> String? {
+            try await passGate()
+            return try await server.fetchLocalUserID()
         }
     }
 
@@ -94,7 +99,7 @@ struct BridgeSchedulerTests {
             // A healthy first round lands one Fragments entry and records
             // state.
             _ = try await bridge.server.fragmentsAppWrites(
-                configuration: bridge.config, day: "2026-07-09",
+                userID: bridge.config.userID, day: "2026-07-09",
                 body: "Landed.", updatedAt: bridge.fragmentsStamp(0))
             let gate = GatedBridgeTransport(server: bridge.server)
             let engine = BridgeEngine(transport: gate, configuration: bridge.config)
@@ -166,7 +171,17 @@ struct BridgeSchedulerTests {
             #expect(status.lastError == nil, "the round itself succeeds — that is the trap")
             #expect(!status.issueNotes.isEmpty,
                     "a recurring per-day rejection must be visible, not a healthy 'Bridged at …'")
-            #expect(status.issueNotes.contains { $0.contains("rejected") })
+            #expect(status.issueNotes.contains { $0.contains("derivation bug") })
+
+            // Reconciliation: unique_violation = a mis-derived id — the day
+            // is POISONED: held on every later round (visible), never
+            // re-pushed (their confirmed never-retry treatment).
+            let writesBefore = await bridge.server.acceptedWriteCount
+            await scheduler.trigger()
+            await scheduler.awaitIdle()
+            #expect(await scheduler.status.issueNotes.contains { $0.contains("derivation bug") })
+            #expect(await bridge.server.acceptedWriteCount == writesBefore,
+                    "a poisoned day is never re-pushed")
         }
     }
 
