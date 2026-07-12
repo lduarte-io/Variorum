@@ -170,6 +170,26 @@ struct BridgePushTests {
         }
     }
 
+    @Test func unrescuedBodyRecordsAppendNeverReplace() async throws {
+        try await withBridge { bridge in
+            // Load-bearing in the round-2 disposition ("each is someone's
+            // only copy") — a future simplification to a bare REPLACE would
+            // silently destroy an earlier only-copy with nothing going red
+            // (review round 3, NIT). Unit-level on the helper, honestly:
+            // the two-notes-one-day engine state is convoluted to construct.
+            try await bridge.db.write { db in
+                try BridgeEngine.recordUnrescuedBody(
+                    db, dayKey: "2026-07-09", note: "the first only-copy")
+                try BridgeEngine.recordUnrescuedBody(
+                    db, dayKey: "2026-07-09", note: "the second only-copy")
+            }
+            let notes = try await bridge.db.read { try BridgeEngine.unrescuedBodyNotes($0) }
+            #expect(notes.count == 1)
+            #expect(notes[0].contains("the first only-copy"))
+            #expect(notes[0].contains("the second only-copy"))
+        }
+    }
+
     @Test func changedEntryPushesOnceUnderTheDerivedID() async throws {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "Dear diary, day one.")

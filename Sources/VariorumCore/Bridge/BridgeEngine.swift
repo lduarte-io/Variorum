@@ -557,8 +557,13 @@ public struct BridgeEngine: Sendable {
                 // surfaced with its body, never silently dropped (review NIT).
                 for receipt in response.replaced ?? [] {
                     guard receipt.id == entry.id else {
-                        report.notes.append(
-                            "push of \(candidate.day): the server returned a receipt for a row we did not push (\(receipt.id)) — not consumed (server drift?); its body, preserved: \(receipt.previousBody)")
+                        // Durably, like every only-copy arm (review round 3,
+                        // NIT — this belt was the one arm round 2's fix
+                        // missed; in the drifting-server world it exists
+                        // for, this body may be someone's only copy too).
+                        report.notes.append(await preserveUnrescuedBody(
+                            day: candidate.day,
+                            note: "push of \(candidate.day): the server returned a receipt for a row we did not push (\(receipt.id)) — not consumed (server drift?); its body, preserved: \(receipt.previousBody)"))
                         continue
                     }
                     let outcome = await consumeReplacedReceipt(

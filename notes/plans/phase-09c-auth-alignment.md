@@ -1028,15 +1028,16 @@ walked and stands (nothing new queued).
    final shape and the consumption path shipped under ask 13's three discrimination
    rules, closing the 9b "first-push overwrite window" residual for every
    in-process path (the recorded remainder: a process death before — or a
-   failure of — the rescue/durable-preservation write). Core 545/62, then
-   547/62 and 548/62 across the same-day Fable cold-review LADDER (round 1:
-   2 MAJOR / 1 MINOR / 3 NIT; round 2: 1 NEW MAJOR / 2 NIT — all agreed +
-   fixed, both MAJOR pins red-on-old revert-verified; round 3 per the ladder's
-   new-MAJOR rule). Record: the contract's "Ask 13 CLOSED" addendum.
+   failure of — the rescue/durable-preservation write). Core 545→547→548→549
+   across the same-day Fable cold-review LADDER, closed at the round-3 cap
+   (round 1: 2 MAJOR / 1 MINOR / 3 NIT; round 2: 1 NEW MAJOR / 2 NIT; round 3:
+   fix SOUND, zero new HIGH, 1 MINOR / 2 NIT post-cap — all agreed + fixed,
+   both MAJOR pins red-on-old revert-verified). Record: the contract's
+   "Ask 13 CLOSED" addendum.
 4. The Phase 7/9 combined feel pass remains owed whenever the author wants it.
 
-**THE PHASE IS CLOSED (2026-07-11).** Phase 10 baselines: **core 548/62 ·
+**THE PHASE IS CLOSED (2026-07-11).** Phase 10 baselines: **core 549/62 ·
 Mac 254/45 · mobile 11/4** (Mac + mobile re-run green after the sitting's fixes;
-core moved 540→545→547→548 the same day — the ask-13 receipt consumption, then
-its two Fable cold-review rounds — record: the contract's "Ask 13 CLOSED"
-addendum).
+core moved 540→545→547→548→549 the same day — the ask-13 receipt consumption,
+then its full three-round Fable cold-review ladder, closed at the round-3 cap —
+record: the contract's "Ask 13 CLOSED" addendum).

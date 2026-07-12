@@ -45,7 +45,7 @@ the phase plan's closeout (`notes/plans/phase-09c-auth-alignment.md`).
    day the phase closed; the deployed SQL was verified (author-authorized read-only
    look at their repo), the fake server pinned, and the consumption path shipped
    under the three rules, then hardened by a same-day Fable cold-review ladder
-   (core 548/62). Full record: the contract's "Ask 13 CLOSED" addendum.**
+   (ladder closed at the round-3 cap; core 549/62). Full record: the contract's "Ask 13 CLOSED" addendum.**
 7. **[x] After the sitting passes:** daily use is unblocked (your 2026-07-07
    deferral condition — "9b AND 9c done" — is met), the week-one dump-compare ritual
    begins, and the Phase 7/9 **combined feel pass** is still owed whenever you want
@@ -113,7 +113,7 @@ the phase plan's closeout (`notes/plans/phase-09c-auth-alignment.md`).
 
 ## Test counts (the Phase 10 baselines once your gates pass)
 
-Core `swift test` **548 green in 62 suites** · Mac app **254 green in 45 suites** ·
+Core `swift test` **549 green in 62 suites** · Mac app **254 green in 45 suites** ·
 mobile **11 green in 4 suites**. *(Core was 540 at the ladder's close; the ask-13
 receipt consumption and its same-day cold-review rounds added the rest — 2026-07-11.)*
 

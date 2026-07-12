@@ -353,3 +353,24 @@ now covers the note-survival property that ordering serves. NIT 2:
 the server applying a push and the rescue-or-preservation write — or that write
 itself failing — loses the one-shot receipt; sub-second, unfixable client-side.
 Core suite: **548 green in 62 suites** (the Phase 10 baseline).
+
+**Cold review ROUND 3 (same day — the ladder's FINAL round, focused on round 2's
+fix): the fix judged SOUND against its disposition, ZERO new HIGH findings —
+1 MINOR / 2 NIT, all landed post-cap per the ladder's rule; THE LADDER CLOSES.**
+The round independently verified both traced mechanisms closed (the preservation
+write commits its own transaction at consumption time; every round re-loads the
+`unrescued:%` rows), re-derived the red-on-old claims from the actual pre-fix
+source (no `unrescued:%` reader existed), and confirmed 548/62 by running the
+suite. MINOR (fixed here, doc): "cleared by hand" had no documented hand — THE
+RECIPE, recorded: to extract a preserved body, run against the local store
+(`~/Library/Containers/io.lduarte.Variorum/Data/Library/Application Support/Variorum/variorum.sqlite`)
+`SELECT key, value FROM bridge_state WHERE key LIKE 'unrescued:%';`
+and to clear one after saving it
+`DELETE FROM bridge_state WHERE key = 'unrescued:<day>';`
+(an in-app face for this is the author's optional call — Phase 10/13 territory;
+the corner is vanishingly rare). NIT (fixed): the id-mismatch drift-belt arm —
+the one only-copy arm round 2's fix missed — now routes through the same durable
+preservation. NIT (fixed): the append-never-replace property gained its unit pin
+(`unrescuedBodyRecordsAppendNeverReplace` — a future bare-REPLACE simplification
+now goes red). Post-cap suite: **549 green in 62 suites — THE Phase 10 core
+baseline, final.**

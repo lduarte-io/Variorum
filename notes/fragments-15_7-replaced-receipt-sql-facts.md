@@ -116,4 +116,4 @@ before the day-state write, never throws, and an unrescuable body is preserved
 DURABLY (a keyed `bridge_state` row, poison-note style, re-surfaced every round
 until cleared — hardened across two same-day cold-review rounds; see the contract
 addendum); the recorded remainder is a process death before — or a failure of —
-the preservation write itself. Core suite after the review ladder: 548/62.
+the preservation write itself. Core suite after the review ladder (three rounds, closed at the cap): 549/62.
