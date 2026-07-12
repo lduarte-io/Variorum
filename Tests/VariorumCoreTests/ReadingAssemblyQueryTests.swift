@@ -46,6 +46,40 @@ struct ReadingAssemblyQueryTests {
         }
     }
 
+    @Test func callerLimitWindowsTheAssemblyAndMaxPostsStillWins() throws {
+        // Phase 10 (additive): a held observation windows its standing
+        // fetch (the observeLibrary discipline — the book view's bound).
+        try withOperations { ops, db in
+            let reading = try ops.createReading(name: "windowed", kind: .curated)
+            var ids: [String] = []
+            for i in 0..<5 {
+                let post = try ops.createPost(title: "p\(i)")
+                try ops.addPostToReading(post.id, to: reading.id)
+                ids.append(post.id)
+            }
+            let windowed = try db.read {
+                try Queries.assembleReading($0, readingID: reading.id, limit: 3)
+            }
+            #expect(windowed.map(\.postID) == Array(ids.prefix(3)))
+            // The window and the extent cap combine as min(maxPosts, limit).
+            let capped = try ops.createReading(name: "capped", kind: .curated, maxPosts: 2)
+            for id in ids.prefix(2) { try ops.addPostToReading(id, to: capped.id) }
+            let wideWindow = try db.read {
+                try Queries.assembleReading($0, readingID: capped.id, limit: 5)
+            }
+            #expect(wideWindow.count == 2)  // maxPosts wins
+            let narrowWindow = try db.read {
+                try Queries.assembleReading($0, readingID: capped.id, limit: 1)
+            }
+            #expect(narrowWindow.count == 1)  // the window wins
+            // And nil limit preserves the Phase 4 behavior exactly.
+            let whole = try db.read {
+                try Queries.assembleReading($0, readingID: reading.id)
+            }
+            #expect(whole.count == 5)
+        }
+    }
+
     @Test func tombstonedPostsAndMembershipsAreExcluded() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(name: "r", kind: .curated)

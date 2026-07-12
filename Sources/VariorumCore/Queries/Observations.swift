@@ -14,9 +14,15 @@ extension AppDatabase {
     }
 
     /// An assembled reading, live: membership, member metadata (titles,
-    /// entry dates), sort-stamp movement, sectioning.
-    public func observeReading(_ readingID: String) -> AsyncValueObservation<[Queries.ReadingEntry]> {
-        observe { try Queries.assembleReading($0, readingID: readingID) }
+    /// entry dates), sort-stamp movement, sectioning. `limit` (Phase 10,
+    /// additive): a held observation re-fetches on container writes
+    /// (autosave stamps land there), so a standing assembly should be
+    /// windowed like `observeLibrary` — the book view passes its window;
+    /// nil preserves the whole-reading fetch for extent-bounded readings.
+    public func observeReading(
+        _ readingID: String, limit: Int? = nil
+    ) -> AsyncValueObservation<[Queries.ReadingEntry]> {
+        observe { try Queries.assembleReading($0, readingID: readingID, limit: limit) }
     }
 
     /// The library listing (folder view), live. `limit` is deliberately

@@ -53,7 +53,10 @@ struct ReadPostView: View {
             ReadPostSurface(model: model, onFocusRequest: onFocusRequest, onBadgeTap: onBadgeTap)
                 .frame(height: model.contentHeight)
         }
-        .task { await model.start() }
+        // The observation is started by the surface's coordinator (its
+        // lifetime IS the surface's — makeNSView starts it, dismantle
+        // cancels it), not by `.task`: the projection feeds the text view,
+        // so they must live and die together.
     }
 }
 
@@ -100,12 +103,15 @@ private struct ReadPostSurface: NSViewRepresentable {
         var onBadgeTap: ((String) -> Void)?
         private var badges: ReadBadgeOverlay?
         private var frameToken: NSObjectProtocol?
+        private var observation: Task<Void, Never>?
 
         init(model: ReadPostViewModel) {
             self.model = model
         }
 
         func install(textView: ReadPostTextView) {
+            // The live projection, for exactly the surface's lifetime.
+            observation = Task { [model] in await model.start() }
             let overlay = ReadBadgeOverlay(textView: textView) { [weak self] blockID in
                 self?.onBadgeTap?(blockID)
             }
@@ -121,6 +127,8 @@ private struct ReadPostSurface: NSViewRepresentable {
         }
 
         func uninstall() {
+            observation?.cancel()
+            observation = nil
             if let frameToken { NotificationCenter.default.removeObserver(frameToken) }
             frameToken = nil
             badges?.uninstall()

@@ -41,8 +41,11 @@ final class ReadPostViewModel {
     // MARK: - Observable UI state
 
     /// Drives the SwiftUI `.frame(height:)` — the view is sized to content
-    /// (it lives inside the container's scroll, never its own).
-    private(set) var contentHeight: CGFloat = 1
+    /// (it lives inside the container's scroll, never its own). The
+    /// pre-measurement placeholder is row-sized on purpose: near-zero
+    /// heights would let a lazy container realize hundreds of rows into
+    /// one viewport before the first measurements land.
+    private(set) var contentHeight: CGFloat = 40
     /// The TK2→TK1 canary banner (every read-tier instance is armed — the
     /// Step 0 memo's multiplied-canary-surface obligation).
     private(set) var canaryMessage: String?

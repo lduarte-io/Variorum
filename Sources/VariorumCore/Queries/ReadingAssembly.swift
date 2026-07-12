@@ -18,6 +18,15 @@ extension Queries {
         /// ungrouped: no grouping tag, a dangling/tombstoned grouping tag
         /// (the AppSpec §7 read-time rule), or a post outside every section.
         public let sectionPath: String?
+
+        /// Public so view layers and tests can build projections directly
+        /// (the RenderedBlock precedent).
+        public init(postID: String, title: String?, entryDate: String?, sectionPath: String?) {
+            self.postID = postID
+            self.title = title
+            self.entryDate = entryDate
+            self.sectionPath = sectionPath
+        }
     }
 
     /// The v1 smart-reading predicate vocabulary (PROVISIONAL, Phase 4) —
@@ -64,7 +73,15 @@ extension Queries {
     /// kept-but-out-of-view, AppSpec §6 — PROVISIONAL, see phase closeout).
     /// Cost ∝ the reading's own extent, never the corpus (P1): membership
     /// and grouping resolve through indexed per-post probes.
-    public static func assembleReading(_ db: Database, readingID: String) throws -> [ReadingEntry] {
+    ///
+    /// `limit` (Phase 10, additive): a caller-side window over the ordered
+    /// assembly — a HELD observation must bound its standing fetch (the
+    /// `observeLibrary` discipline; the book view passes its window). The
+    /// effective cap is the smaller of `limit` and the reading's own
+    /// `max_posts`. One-shot callers omit it.
+    public static func assembleReading(
+        _ db: Database, readingID: String, limit: Int? = nil
+    ) throws -> [ReadingEntry] {
         guard let reading = try Reading.fetchOne(db, key: readingID),
               reading.deletedAt == nil
         else { return [] }
@@ -163,9 +180,15 @@ extension Queries {
         }
 
         var limited = sql
-        if let maxPosts = reading.maxPosts {
+        let cap: Int? = switch (reading.maxPosts, limit) {
+        case let (max?, window?): Swift.min(max, window)
+        case let (max?, nil): max
+        case let (nil, window?): window
+        case (nil, nil): nil
+        }
+        if let cap {
             limited += " LIMIT ?"
-            arguments.append(maxPosts)
+            arguments.append(cap)
         }
 
         return try Row.fetchAll(db, sql: limited, arguments: StatementArguments(arguments))
