@@ -34,14 +34,14 @@ nonisolated enum ProjectConfig {
     static let variorumProjectURL = URL(string: "https://qpzmroxogeufzizcuunl.supabase.co")!
     /// The Variorum project's PUBLISHABLE API key — author-filled at the
     /// Step 6 gate; empty = the sign-in surface stays dormant.
-    static let variorumPublishableKey = ""
+    static let variorumPublishableKey = "sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp"
 
     // MARK: Fragments (the 9b bridge's backend; QUESTIONS #16 shape (c))
 
     static let fragmentsProjectURL = URL(string: "https://sqpaqelorlxgmraynyam.supabase.co")!
     /// The Fragments project's PUBLISHABLE API key (their key has always
     /// been publishable — their RLS is the guard) — author-filled.
-    static let fragmentsPublishableKey = ""
+    static let fragmentsPublishableKey = "sb_publishable_3grqdR6KQSE0uYlul0kzGA_oray8M9s"
 
     static var variorumConfigured: Bool { !variorumPublishableKey.isEmpty }
     static var fragmentsConfigured: Bool { !fragmentsPublishableKey.isEmpty }

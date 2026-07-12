@@ -5,17 +5,16 @@
 > **binding** (minimal pool ships here; the read tier allows select+copy per post
 > with click-to-focus; the 2026-07-09 scope additions 3–7). Its leanings are starting
 > points verified below; its open interpretations are answered in §"The brief's open
-> interpretations, answered". **Staffing (CLAUDE.md model policy): coordinator Opus ·
-> implementer Opus · cold reviewer Fable — the CROSS-MODEL REVIEW FLOW applies**
-> (findings go to the implementer verbatim; agree/dispute responses return to the
-> REVIEWER, which makes the final call and implements its confirmed fixes itself in
-> its own session; the implementer gets one sanity pass over the reviewer's diff).
+> interpretations, answered". **Staffing (CLAUDE.md model policy, AMENDED 2026-07-11
+> at the 9c gate sitting — supersedes this header's original cross-model
+> prescription): coordinator Opus · implementer FABLE · cold reviewer FABLE** — the
+> author enlarged the Fable allocation after the budget reset; the SAME-MODEL review
+> flow applies (findings adjudicated implementer-vs-reviewer, the coordinator
+> arbitrates against the spec, the implementer applies fixes).
 > **The standing rider (author, 2026-07-07):** any change inside
 > `Sources/VariorumCore/Sync/` is sync-engine surgery and is Fable work in every
-> phase — the coordinator STOPS AND REPORTS rather than letting the Opus implementer
-> touch it. Prudence extension: treat `Sources/VariorumCore/Bridge/` the same way
-> (it was Fable-implemented under the rider's logic in 9b/9c). Phase 10 should need
-> neither.
+> phase — satisfied trivially by this phase's assignment (prudence extension:
+> `Sources/VariorumCore/Bridge/` treated the same). Phase 10 should need neither.
 
 ## Kickoff message (for a fresh session)
 
@@ -26,8 +25,10 @@
 > closeout records the Step 6 gate results (the sitting: cutover probes, device
 > rounds, the 9b real-Fragments pass). If the pointer still says 9c, STOP and
 > report: the gates have not run, and this phase must not start over an un-cutover
-> mirror. Read, in order: `CLAUDE.md` (note the cross-model review flow and the
-> Sync/ rider — you are the first Opus implementer), `notes/plans/phase-10-brief.md`
+> mirror. Read, in order: `CLAUDE.md` (note the model policy as amended 2026-07-11 —
+> FABLE implements this phase under the same-model review flow; the cross-model flow
+> does NOT apply here, and the Sync/ rider is satisfied by the assignment),
+> `notes/plans/phase-10-brief.md`
 > IN FULL (ratified decisions binding), this plan IN FULL,
 > `notes/OverallModel.md` (P1–P3 are this phase's center of gravity),
 > `notes/AppSpec.md` §4 + §12 + §14's Phase 4 ratification delta (the read
@@ -50,6 +51,19 @@
 > on — she signed in at the 9c sitting and both devices sync under real auth; treat
 > the real store and mirror as live production at all times (the A4 fence keeps dev
 > work off them; never weaken it).
+
+**Author input from the 9c Step 6 sitting (2026-07-11) — binding context for this
+phase's view work:** her first bridge-landed journal entry appeared in the Mac
+shell as an **untitled row in the flat library** — no date shown, no journal
+grouping, "not part of the journaling book" (her words). The STORE was correct
+(`profile='journal'`, `entry_date` set, body landed); what's missing is exactly
+this phase's deliverable — the shell has no journal-shaped surface yet. Treat
+"journal entries have an obvious dated home" as an author expectation the
+timeline/library/readings work must visibly satisfy (dated rows at minimum; a
+journal section/reading as the natural shape), and walk the section design with
+her at the checkpoint — she explicitly asked whether the app's final sections
+need more definition, so bring the proposal to her rather than leaving it
+implicit.
 
 **Goal:** every Phase-10 view renders from the store only, through the Phase 4
 queries, with P3 held by construction (exactly ONE live editor, ever); the read

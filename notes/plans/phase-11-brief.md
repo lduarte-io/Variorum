@@ -10,6 +10,16 @@
 > schema commit can open whichever sub-phase builds the canvas). One phase of this breadth
 > invites a rushed tail.
 
+> **Kickoff addendum (author decision, 2026-07-11 — at the 9c Step 6 sitting):** this
+> phase's kickoff includes a **targeted HTML mockup spike** — an author-attended session
+> (9d-style, not a /run-phase cast) producing throwaway HTML mockups of the **fan-out
+> appearances and the side-by-side multi-variant editing view** for her to choose between
+> BEFORE implementation builds them. Rationale: 11 builds these as committed scope with
+> open design (the side-by-side view is core-identity per her 2026-07-09 ruling), so
+> mockups here feed a real build immediately; the full editor look remains Phase 13's
+> iterative work. The mockups inform, never bind — the store/traversal architecture is
+> not up for reinterpretation in HTML.
+
 ## Author-ratified decisions this phase implements (2026-07-06 — not reopenable)
 
 1. **Canvas layout persists in a small synced table**, designed at this phase, **own schema

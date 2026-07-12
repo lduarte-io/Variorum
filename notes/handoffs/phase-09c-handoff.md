@@ -1,5 +1,12 @@
 # Phase 9c handoff — auth alignment (implementation complete; YOUR gates pending)
 
+> **SAT AND PASSED 2026-07-11 — THE PHASE IS CLOSED.** All seven gates green; the
+> per-gate record, the sitting's seven findings, and four residuals live in the
+> phase plan's sitting section. Still live from this checklist: item 4 (the
+> stargazing consent page — now also the sitting's RESIDUAL 1: sign-ins ride an
+> interim LAN-served page until it ships), item 6 (the 15.7 deploy ping), and the
+> combined feel pass in item 7.
+
 **Status in one line:** everything buildable is built, reviewed (two cold rounds,
 ladder closed), and green — but **the phase is NOT closed until you run the Step 6
 sitting**, whose complete script is **`notes/handoffs/phase-09c-step6-runbook.md`**
@@ -9,14 +16,14 @@ the phase plan's closeout (`notes/plans/phase-09c-auth-alignment.md`).
 
 ## What you must do next (the checklist)
 
-1. **[ ] Confirm "Allow new users to sign up" is OFF** on the Variorum project
+1. **[x] Confirm "Allow new users to sign up" is OFF** on the Variorum project
    (asked of you at review round 1 — one click; the WHY is the review's BLOCKER,
    explained below; the runbook's Gate 4 proves it either way).
-2. **[ ] Fill the two publishable keys** in `App/Variorum/Shared/ProjectConfig.swift`
+2. **[x] Fill the two publishable keys** in `App/Variorum/Shared/ProjectConfig.swift`
    (from your untracked env files), build, commit — runbook Gate 0.2. They are
    committable BY DESIGN once item 1 holds; the sign-in surface stays dormant until
    filled.
-3. **[ ] Run the Step 6 sitting** with the coordinator — the runbook end to end:
+3. **[x] Run the Step 6 sitting** with the coordinator — the runbook end to end:
    backup → Mac sign-in (backfill runs itself) → totality checks → phone sign-in →
    the `04_auth_rls.sql` cutover + probes → device rounds → the Fragments-journal
    connection + the 9b real-Fragments pass. Budget ~an hour; every gate has expected
@@ -28,14 +35,14 @@ the phase plan's closeout (`notes/plans/phase-09c-auth-alignment.md`).
    spike's localhost page works for the sitting meanwhile). After it ships, point the
    Fragments OAuth Server page's Site URL/Authorization Path at it — and remember
    that page's save button (it silently discarded values twice on 2026-07-10).
-5. **[ ] The ratify walk at the checkpoint** is tiny this time: QUESTIONS #16 (the
+5. **[x] The ratify walk at the checkpoint** is tiny this time: QUESTIONS #16 (the
    bridge's Fragments session = your direct email+password sign-in) — you already
    ratified it in-session on 2026-07-10; the walk just records it.
 6. **[ ] When Fragments' 15.7 deploy ping arrives** (their replaced-body receipt),
    bring it back here: a named follow-up pins the fake server to the final shape and
    adds the consumption path under the three discrimination rules (contract ask 13).
    Nothing is assumed until the ping.
-7. **[ ] After the sitting passes:** daily use is unblocked (your 2026-07-07
+7. **[x] After the sitting passes:** daily use is unblocked (your 2026-07-07
    deferral condition — "9b AND 9c done" — is met), the week-one dump-compare ritual
    begins, and the Phase 7/9 **combined feel pass** is still owed whenever you want
    to run it.

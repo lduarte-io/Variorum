@@ -25,7 +25,18 @@ is the same logic, hosted and styled.
      Every REST call carries the `apikey` header; authenticated calls add
      `Authorization: Bearer <user access token>`.
   3. `GET /auth/v1/oauth/authorizations/{authorization_id}` (user bearer) —
-     returns the requesting client + scopes; render them.
+     **check the response for `redirect_url` FIRST**: for a previously-granted
+     user+client+scope the server auto-approves at this fetch and the response
+     IS the final redirect — send the browser there immediately and stop (a
+     consent POST at this point 400s with "authorization request is no longer
+     pending"). Only when no `redirect_url` is present is the authorization
+     still pending: render the requesting client + scopes.
+     **TRAP (cost a live failure 2026-07-11): the PENDING response also carries
+     a field named `redirect_uri` — the client's REGISTERED callback base, no
+     code/state. It is metadata, never a navigation target: following it lands
+     at the requesting project's callback as `bad_oauth_callback / OAuth state
+     parameter missing`. Match the key `redirect_url` exactly; never fall back
+     to `redirect_uri`.**
   4. Approve/Deny buttons →
      `POST /auth/v1/oauth/authorizations/{authorization_id}/consent` with body
      `{"action": "approve"}` (or `"deny"`).
@@ -38,10 +49,16 @@ is the same logic, hosted and styled.
 
 ## Behavior notes
 
-- **Consent auto-skips on repeat client+scope** (server-side): after the first
-  approval, later sign-ins for the same user+client+scope go straight through —
-  in steady state this page is nearly never seen. It still must exist: first
-  approvals, new scopes, and new clients land on it.
+- **Consent auto-skips on repeat client+scope — but THROUGH this page, not
+  around it** (corrected 2026-07-11, observed live at the 9c Step 6 sitting):
+  the browser always lands here, and the auto-approval surfaces as the
+  `redirect_url` on the step-3 details fetch (the authorize endpoint cannot
+  know the user — the page holds the session). So in steady state the page is
+  seen but shows no prompt: arrive → (already signed in) → details fetch
+  auto-approves → redirect. A page that unconditionally renders Approve/Deny
+  hits the step-3 note's 400 — the spike page shipped with exactly this bug
+  and was fixed the same day (its `loadAuthorization` now follows the
+  redirect; mirror that).
 - **Persist the page's Fragments session (recommended — added 2026-07-10 with
   Variorum's Step 5):** the consent flow still requires a SIGNED-IN Fragments user
   before the approve/deny call, so if the page keeps no session (the spike page

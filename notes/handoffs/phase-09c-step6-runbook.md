@@ -1,5 +1,15 @@
 # Phase 9c — Step 6 runbook (the gate sitting, executable end to end)
 
+> **EXECUTED 2026-07-11 — ALL SEVEN GATES PASSED; the phase is closed.** Per-gate
+> results, the sitting's seven findings, deviations (the signup probe's 422-vs-403
+> platform drift; the S5 race run as the simultaneous-edit variant; Gate 6 largely
+> proven organically pre-cutover), and residuals: the phase plan's sitting section
+> (`notes/plans/phase-09c-auth-alignment.md`). This file stays as the reference for
+> future re-runs — a NEW device's sign-in follows Gates 0.4 + 3, and note RESIDUAL 1:
+> until the stargazing.tech consent page ships, the page must be served by hand
+> (`cd Spikes/AuthPairingSpike && python3 -m http.server 3000`) at whatever host
+> Fragments' Site URL points to (the sitting left it at the Mac's LAN IP).
+
 **What this is:** the self-contained checklist for Phase 9c's batched author-assist
 gates — a FRESH session (or the author alone) can conduct every walkthrough and check
 below with zero prior-session context. Written 2026-07-10 by the 9c implementer at

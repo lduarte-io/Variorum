@@ -45,10 +45,16 @@ final class SignInFlow: NSObject, ASWebAuthenticationPresentationContextProvidin
         guard activeSession == nil else { throw FlowError.alreadyRunning }
         defer { activeSession = nil }
         return try await withCheckedThrowingContinuation { continuation in
+            // The completion handler MUST be nonisolated (@Sendable): the
+            // framework delivers it on a background XPC reply queue (observed
+            // live at the Step 6 sitting, 2026-07-11 — a @MainActor-inherited
+            // closure traps Swift 6's isolation check there, SIGTRAP in
+            // dispatch_assert_queue). Resuming a continuation is thread-safe;
+            // nothing else may be touched in here.
             let session = ASWebAuthenticationSession(
                 url: authorizeURL,
                 callbackURLScheme: callbackScheme
-            ) { callbackURL, error in
+            ) { @Sendable callbackURL, error in
                 if let callbackURL {
                     continuation.resume(returning: callbackURL)
                 } else if let authError = error as? ASWebAuthenticationSessionError,

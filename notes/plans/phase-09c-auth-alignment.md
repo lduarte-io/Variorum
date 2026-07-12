@@ -894,3 +894,135 @@ compile into it).**
 **Counts after the round-2 fix pass (the ladder's FINAL): core `swift test`
 540 green in 62 suites; Mac app 254 green in 45 suites; mobile 11 green in 4
 suites — all three targets re-run green.**
+
+---
+
+## Step 6 — THE GATE SITTING (2026-07-11; the author + a fresh Fable session driving — the runbook's fresh-session design used as intended). ALL SEVEN GATES PASSED; THE PHASE CLOSES HERE.
+
+**Gate 0 (preconditions):** signups confirmed OFF pre-sitting (proven at Gate 4).
+Both publishable keys filled in `ProjectConfig.swift`, Release build green.
+Redirect URLs done early (runbook 0.3). Consent page served from the spike
+(localhost, then the Gate 3 LAN arm). Mac Release install lands at
+`/Applications/Variorum.app` (new standing arrangement — CLAUDE.md workflow
+addition this sitting: the installed copy is the ONLY thing the author launches;
+sessions refresh it after Mac-app changes).
+**Gate 1 (backup):** taken app-quit; `integrity_check` = `ok`
+(`~/Desktop/variorum-pre-9c-cutover.sqlite`).
+**Gate 2 (Mac sign-in + backfill):** PASSED — after the sitting's findings 1–3
+below were fixed (the first real end-to-end `SignInFlow` run was THIS sitting,
+exactly as the thin-face convention predicted). Adoption stamped everything;
+*[removed for publication]*
+Wrinkle observed working as designed: the two Phase 5 integration fixtures
+("from the Mac/phone DD380EAF") pulled down unowned AFTER sign-in's adoption
+pass; the every-signed-in-launch idempotent adoption stamped them at relaunch —
+the self-heal, observed live.
+**Gate 3 (phone):** Release install + sign-in PASSED via the LAN arm: the phone
+cannot reach localhost, so Fragments' OAuth Site URL was pointed at the Mac's
+LAN IP (`http://<lan-ip>:3000`) serving the spike page — RESIDUAL 1 below.
+**Gate 4 (cutover + probes):** `04_auth_rls.sql` executed VERBATIM via the
+author's PAT (Management API, HTTP 201, no errors). Bare-key `sync_pull` →
+401/`42501` with AND without the Authorization header; direct table read →
+401/`42501` (the Data API door is dead); signup → refused `signup_disabled`
+"Signups not allowed for this instance" — **recorded deviation: HTTP 422, not
+the runbook's expected 403** (platform drift; same gate, same meaning, no
+session minted). **The OIDC first-sign-in door: proven closed at the actual
+decision point** — after finding 7 unblocked the flow, a scripted hop-by-hop
+probe walked the throwaway Fragments user's full delegated flow; Variorum's
+callback received code+state and refused `access_denied / signup_disabled`;
+`auth.users` stayed at exactly one (her). Throwaway user deleted; the temporary
+localhost redirect re-add removed (author-confirmed). Positive probes: both
+devices Sync-now green post-flip.
+**Gate 5 (device rounds — Phase 8's deferred, folded in):** PASSED with
+findings. (1) Offline capture: outbox kept, drained clean on reconnect, the Mac
+pulled both changes — but the status row read "SyncError" while offline
+(finding 6). (2) Two-way distinct-block edits: both edits on both devices, zero
+conflict variants — but the iOS editor sometimes grows trailing blank lines
+(finding 6). (3) The S5 race: **run as the simultaneous-edit variant** (the
+author kept one device online — other work running; deviation recorded), several
+repetitions: exactly one `conflict`-labeled take per race, both devices converge
+on the winner, nothing lost. The both-offline arm was not run as scripted; the
+CAS-reject/merge machinery exercised is the same S5 class.
+**Gate 6 (the bridge / 9b's real-Fragments pass):** PASSED — largely proven
+ORGANICALLY mid-sitting, before the cutover: a Fragments-written entry landed in
+Variorum with the correct store shape (journal profile, `entry_date` set), and a
+Variorum edit re-projected to the Fragments Day screen. The fail-closed
+canonical-user gate never tripped (`user_settings` present). Dump-compare:
+byte-identical. NOT run live: the simultaneous both-app edit-war (headless-
+pinned in 9b; insured by S5 + the fifth occasion; week one exercises it
+organically). Ask-13: NO deploy ping as of the sitting — nothing consumed, the
+conditional stays a named follow-up.
+**Gate 7 (close):** final totality five zeros local AND mirror; post-fix suites
+re-run green — Mac 254/45, mobile 11/4 (core untouched by the sitting: 540/62
+stands); the localhost redirect confirmed gone; the consent serving documented
+as LAN-interim (RESIDUAL 1).
+
+### The sitting's findings (seven; each mechanism traced live)
+
+1. **The consent page didn't handle auto-approval** — a previously-granted
+   client+scope auto-approves at the details GET (the response IS the completion
+   `redirect_url`); the spike page rendered it as a pending request and its
+   consent POST 400'd ("authorization request is no longer pending"), stalling
+   the author's first sign-in attempt. FIXED in the page; the production spec
+   corrected (the auto-skip runs THROUGH the page, not around it).
+2. **`SignInFlow`'s completion handler trapped off-main** — SIGTRAP in
+   `dispatch_assert_queue`: ASWebAuthenticationSession delivered its completion
+   on a background XPC reply queue; the closure had inherited @MainActor
+   isolation and Swift 6's runtime check killed the app mid-sign-in. FIXED: the
+   closure is explicitly `@Sendable`/nonisolated (it only resumes a
+   continuation — thread-safe by construction). Thin-face class; the crash
+   report is the trace.
+3. **The Mac target lacked the outgoing-network entitlement** — sandbox on,
+   network client off (the Xcode template default): every app-side URLSession
+   call failed as DNS `-1003` while the browser sheet (a separate system
+   process) worked; never caught before because the GUI app had never made a
+   network request until this sitting (Phase 5/8 real-server passes ran via
+   `swift test`). FIXED: `ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES`, both
+   configs.
+4. **The Account sheet's two Fragments doors conflate** — the author signed into
+   the BRIDGE form believing it was the identity sign-in, and everything
+   appeared to work because bridge traffic needs only the Fragments session
+   (diagnosed from the store: `sync_state` empty, adoption never run). UX
+   finding for the feel-pass/Phase 13 territory; recorded, not restyled now.
+5. **Return was a silent no-op in the bridge credential fields** — FIXED:
+   email's Return advances focus, password's Return submits through the same
+   door as Connect (`connectBridge()`).
+6. **Offline reads as "SyncError" / iOS trailing blank lines** — both recorded
+   as KnownIssues rows (owners: Phase 10 and Phase 15 respectively; the iOS one
+   proven STORED content by store query — one live variant carries a 3-newline
+   trailing run).
+7. **The `redirect_uri` trap** (this sitting's own fix-of-a-fix, owned
+   honestly): finding 1's patch followed `details.redirect_uri` — the client's
+   REGISTERED callback base, no code/state — on the pending path, sending every
+   fresh-consent browser flow to Variorum's callback as "OAuth state parameter
+   missing" (both of the author's throwaway browser probes hit it). FIXED
+   (`redirect_url` ONLY, both paths) + the trap spelled out in the production
+   spec; the scripted probe transcript is the trace.
+
+Also recorded where they live: the "Show Blocks" tint row gained the
+per-wrapped-line evidence (KnownIssues, owner 10 unchanged); the Phase 10 plan
+gained the author's journal-home expectation as binding input (her first
+bridge-landed entry rendered as an untitled row in the flat library); the Phase
+11 brief gained the HTML-mockup-spike kickoff addendum (author decision); the
+Phase 14 brief gained her encryption leaning + the bridge-plaintext constraint;
+CLAUDE.md gained the /Applications install rule AND the amended model policy
+(author, 2026-07-11: Fable implements 10 and 11 same-model; 13 = author-attended
+Fable sessions; 14 = Fable end-to-end); QUESTIONS #16's early ratification was
+walked and stands (nothing new queued).
+
+### Residuals (operational, named)
+
+1. **Sign-in currently depends on interim consent serving:** Fragments' OAuth
+   Site URL points at the Mac's LAN IP (`<lan-ip>:3000`), served by a
+   session-bound `python3 -m http.server 3000` in `Spikes/AuthPairingSpike/` —
+   which DIES with the sitting session. Sign-ins are rare (once per device;
+   tokens self-refresh, so daily use is unaffected), but any FUTURE sign-in
+   needs that server re-run — until the stargazing.tech consent page ships
+   (handoff item 4) and Site URL/Authorization Path point there permanently.
+2. The two DD380EAF fixture posts remain in the library (owned) — delete via
+   Phase 10's lifecycle UI.
+3. Fragments' 15.7 deploy ping still pending (ask-13 consumption stays the
+   named follow-up; nothing assumed).
+4. The Phase 7/9 combined feel pass remains owed whenever the author wants it.
+
+**THE PHASE IS CLOSED (2026-07-11).** Phase 10 baselines: core 540/62 ·
+Mac 254/45 · mobile 11/4 (Mac + mobile re-run green after the sitting's fixes).

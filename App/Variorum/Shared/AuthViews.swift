@@ -21,6 +21,25 @@ struct AccountView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var fragmentsEmail = ""
     @State private var fragmentsPassword = ""
+    @FocusState private var bridgeFocus: BridgeField?
+
+    private enum BridgeField { case email, password }
+
+    private var canConnectBridge: Bool {
+        ProjectConfig.fragmentsConfigured && !services.account.busy
+            && !fragmentsEmail.isEmpty && !fragmentsPassword.isEmpty
+    }
+
+    /// One door for the button AND the fields' Return key (the sitting,
+    /// 2026-07-11: Return in these fields was a silent no-op — the form
+    /// only worked via the Connect button).
+    private func connectBridge() {
+        guard canConnectBridge else { return }
+        let email = fragmentsEmail
+        let password = fragmentsPassword
+        fragmentsPassword = ""
+        Task { await services.connectFragmentsJournal(email: email, password: password) }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -69,15 +88,13 @@ struct AccountView: View {
                 Text("Connect the Fragments journal (two-way bridge):")
                 TextField("Fragments email", text: $fragmentsEmail)
                     .autocorrectionDisabled()
+                    .focused($bridgeFocus, equals: .email)
+                    .onSubmit { bridgeFocus = .password }
                 SecureField("Fragments password", text: $fragmentsPassword)
-                Button("Connect") {
-                    let email = fragmentsEmail
-                    let password = fragmentsPassword
-                    fragmentsPassword = ""
-                    Task { await services.connectFragmentsJournal(email: email, password: password) }
-                }
-                .disabled(!ProjectConfig.fragmentsConfigured || services.account.busy
-                          || fragmentsEmail.isEmpty || fragmentsPassword.isEmpty)
+                    .focused($bridgeFocus, equals: .password)
+                    .onSubmit { connectBridge() }
+                Button("Connect") { connectBridge() }
+                    .disabled(!canConnectBridge)
                 Text("Signs in directly to the Fragments project; only the session is kept, never the password.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

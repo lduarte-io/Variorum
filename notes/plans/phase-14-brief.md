@@ -6,7 +6,16 @@
 > is only what it cites from the spec; the just-in-time plan (at Phase 13's closeout) treats
 > the rest as a head start.
 
-## The substrate is already shaped for this (why the phase is tractable)
+> **Author input (2026-07-11, at the 9c Step 6 sitting):** she leans toward **offering
+> encryption** ("I do think that offering encryption would be good") — and spotted the
+> load-bearing constraint herself: **the Fragments bridge projects the journal as plaintext
+> into Fragments' own server** (their contract has no encryption), so E2EE on Variorum's
+> mirror cannot cover the one surface the bridge exports — arguably the most intimate
+> content. The E2EE decision round must design around this explicitly (options sketched
+> then: encrypt everything Variorum-side anyway with the journal's exposure named; make the
+> bridge opt-out/off under E2EE; or condition on Fragments gaining encryption). Also note
+> 9c already shipped much of cluster 1 (auth core, refresh, sign-in) — this phase's auth
+> work is the COMMERCIAL half only (see the KnownIssues row as narrowed 2026-07-10).
 
 `owner_id TEXT` (nullable) sits on every top-level entity since schema v1 (S4); the sync
 protocol was designed to reuse unchanged under RLS partitioning (SyncSpec §2: "accounts

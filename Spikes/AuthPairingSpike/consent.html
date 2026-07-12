@@ -102,6 +102,20 @@ async function signIn() {
 async function loadAuthorization() {
   try {
     const details = await api(`/auth/v1/oauth/authorizations/${authorizationID}`);
+    // ONLY redirect_url signals auto-approval (the full completion URL,
+    // code+state aboard). The PENDING shape also carries `redirect_uri` —
+    // the client's REGISTERED callback base, no code/state — and following
+    // that lands at the Variorum callback as "OAuth state parameter
+    // missing" (observed 2026-07-11; the || fallback here was the bug).
+    const target = details.redirect_url;
+    if (target) {
+      // Previously-granted client+scope: Fragments auto-approves on the
+      // details fetch and returns the final redirect — the authorization
+      // is no longer pending, so a consent POST would 400. Just follow it.
+      status("Already approved — redirecting back to the client…", "ok");
+      location.href = target;
+      return;
+    }
     document.getElementById("details").textContent = JSON.stringify(details, null, 2);
     show("consent");
   } catch (e) { status("Could not load the authorization: " + e.message, "err"); }
@@ -114,7 +128,7 @@ async function decide(action) {
       method: "POST",
       body: JSON.stringify({ action }),
     });
-    const target = result.redirect_url || result.redirect_uri;
+    const target = result.redirect_url;  // never redirect_uri — see above
     if (target) {
       status("Redirecting back to the client…", "ok");
       location.href = target;
