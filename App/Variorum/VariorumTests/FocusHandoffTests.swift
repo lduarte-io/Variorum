@@ -1,0 +1,214 @@
+//
+//  FocusHandoffTests.swift
+//  VariorumTests
+//
+//  Phase 10 Step 3 — ONE live editor, migrating: the brief's three
+//  mid-state integration tests (focus switch mid-dirty-buffer,
+//  mid-open-tail, mid-crystallization-flight — the states where a careless
+//  handoff loses text), the exactly-one-live-editor walk, and the focus
+//  seeds (caret from the read-tier click; focus-then-fan from a badge tap).
+//
+//  The harness performs the switch EXACTLY as the container does: tear the
+//  leaving editor down (SwiftUI's onDisappear → teardown), then attach a
+//  fresh editor for the newly focused post — in the INLINE shape (bare
+//  content-sized text view, scrollView nil), which is the book view's.
+//
+
+import AppKit
+import Dependencies
+import Foundation
+import Testing
+import VariorumCore
+@testable import Variorum
+
+@MainActor
+final class EditorWorldHarness {
+    let session: AppSession
+    let database: AppDatabase
+    let postIDs: [String]
+    private(set) var active: EditorHarness?
+
+    init(session: AppSession, database: AppDatabase, postIDs: [String]) {
+        self.session = session
+        self.database = database
+        self.postIDs = postIDs
+    }
+
+    /// The container's focus switch: teardown (returns the finalize task,
+    /// awaited so the test observes the settled store — the app doesn't
+    /// await it, but the store lands identically either way; the await is
+    /// determinism, not a behavior difference), then a fresh inline editor
+    /// attaches to the new post.
+    @discardableResult
+    func focus(
+        _ postID: String?, caretSeed: Int? = nil, fanSeed: String? = nil
+    ) async throws -> EditorHarness? {
+        if let leaving = active {
+            let finalize = leaving.model.teardown()
+            active = nil
+            await finalize?.value
+            await leaving.settle()
+        }
+        guard let postID else { return nil }
+        let model = EditorViewModel(session: session, postID: postID)
+        model.tailIdleSleep = { _ in throw CancellationError() }
+        model.pendingCaretSeed = caretSeed
+        model.pendingFanSeed = fanSeed
+        let textView = EditorTextView.makeInlineEditor()
+        textView.frame = NSRect(x: 0, y: 0, width: 600, height: 100)
+        let surfaceDelegate = EditorSurfaceDelegate(model: model)
+        surfaceDelegate.wire(to: textView)
+        model.attach(textView: textView, scrollView: nil)
+        session.editorRouter.active = model
+        let harness = EditorHarness(
+            session: session, database: database, model: model,
+            textView: textView, surfaceDelegate: surfaceDelegate, postID: postID)
+        try harness.reload()
+        active = harness
+        return harness
+    }
+
+    func storeText(_ postID: String) throws -> [String] {
+        try database.read { db in
+            try Queries.renderPost(db, containerID: postID).map { $0.text ?? "" }
+        }
+    }
+}
+
+@MainActor
+func withEditorWorld<T>(
+    posts: [[String]],
+    _ body: @MainActor (EditorWorldHarness) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+    } operation: { @MainActor in
+        let session = AppSession(database: db)
+        var postIDs: [String] = []
+        for (i, blocks) in posts.enumerated() {
+            let post = try session.operations.createPost(title: "P\(i)")
+            for text in blocks {
+                _ = try session.operations.newBlock(in: post.id, text: text)
+            }
+            postIDs.append(post.id)
+        }
+        return try await body(
+            EditorWorldHarness(session: session, database: db, postIDs: postIDs))
+    }
+}
+
+@Suite("Focus handoff (Phase 10 Step 3)")
+struct FocusHandoffTests {
+    @Test func switchingFocusMidDirtyBufferLandsTheKeystrokes() async throws {
+        try await withEditorWorld(posts: [["alpha"], ["bravo"]]) { w in
+            let a = try await w.focus(w.postIDs[0])!
+            a.type("!!", at: 5)  // dirty buffer — debounce hasn't fired
+            #expect(a.model.autosave.isDirty)
+            let b = try await w.focus(w.postIDs[1])!
+            // The keystrokes landed in A's store through the teardown flush.
+            #expect(try w.storeText(w.postIDs[0]) == ["alpha!!"])
+            // B renders B — nothing leaked across the handoff.
+            #expect(b.documentText == "bravo")
+            #expect(w.session.editorRouter.active === b.model)
+        }
+    }
+
+    @Test func switchingFocusMidOpenTailMintsToTheOldPost() async throws {
+        try await withEditorWorld(posts: [["alpha"], ["bravo"]]) { w in
+            let a = try await w.focus(w.postIDs[0])!
+            a.type("\n", at: 5)      // Enter at the document end opens the tail
+            a.type("fresh tail text")
+            #expect(a.model.hasOpenTail)
+            _ = try await w.focus(w.postIDs[1])
+            // The tail minted into the OLD post, exactly once.
+            #expect(try w.storeText(w.postIDs[0]) == ["alpha", "fresh tail text"])
+            #expect(try w.storeText(w.postIDs[1]) == ["bravo"])
+        }
+    }
+
+    @Test func switchingFocusMidCrystallizationFlightReconciles() async throws {
+        try await withEditorWorld(posts: [["alpha"], ["bravo"]]) { w in
+            let a = try await w.focus(w.postIDs[0])!
+            a.type("\n", at: 5)  // open the tail
+            // Typing past a completed paragraph launches the mint flight…
+            a.type("First fresh paragraph.\n\nSecond still typing")
+            // …and the switch happens while it is (or may be) in flight:
+            // the handoff must wait it out, reconcile, and mint the residue.
+            _ = try await w.focus(w.postIDs[1])
+            #expect(try w.storeText(w.postIDs[0]) == [
+                "alpha", "First fresh paragraph.", "Second still typing",
+            ])
+            // No duplicate block, no dropped text — exactly three slots.
+        }
+    }
+
+    @Test func exactlyOneLiveEditorAcrossARandomizedFocusWalk() async throws {
+        try await withEditorWorld(posts: [["p0"], ["p1"], ["p2"]]) { w in
+            var rng = SeededGenerator(seed: 42)
+            var typed: [String: Int] = [:]  // postID -> marker count
+            for step in 0..<12 {
+                let postID = w.postIDs[Int(rng.next() % 3)]
+                let h = try await w.focus(postID)!
+                // The router knows exactly ONE live editor — the focused one.
+                #expect(w.session.editorRouter.active === h.model)
+                // Type a marker at the block's start; every marker must
+                // survive every subsequent handoff.
+                h.type("m", at: 0)
+                typed[postID, default: 0] += 1
+                if step % 3 == 2 { await h.flush() }
+            }
+            _ = try await w.focus(nil)
+            #expect(w.session.editorRouter.active == nil)
+            for postID in w.postIDs {
+                let expected = String(repeating: "m", count: typed[postID] ?? 0)
+                    + "p\(w.postIDs.firstIndex(of: postID)!)"
+                #expect(try w.storeText(postID) == [expected])
+            }
+        }
+    }
+
+    @Test func caretAndFanSeedsApplyAtTheFirstRender() async throws {
+        try await withEditorWorld(posts: [["alpha", "fanned block"]]) { w in
+            // Fan the second block so the fan seed has a fan to open.
+            let slots = try await w.database.read { [postID = w.postIDs[0]] in
+                try Queries.renderPost($0, containerID: postID)
+            }
+            _ = try w.session.operations.branchVariant(
+                slots[1].blockID, from: slots[1].variantID!)
+
+            // A read-tier click at offset 8 ("fanned…" starts at 6) focuses
+            // with the caret seeded; a badge tap also seeds the fan panel.
+            let h = try await w.focus(
+                w.postIDs[0], caretSeed: 8, fanSeed: slots[1].blockID)!
+            #expect(h.textView.selectedRange() == NSRange(location: 8, length: 0))
+            #expect(h.model.caretBlockID == slots[1].blockID)
+            // The fan panel opens on the ONE live surface (interpretation 1).
+            var spins = 0
+            while h.model.fanPanel == nil, spins < 200 {
+                spins += 1
+                await Task.yield()
+            }
+            #expect(h.model.fanPanel?.blockID == slots[1].blockID)
+            #expect(h.model.fanPanel?.variants.count == 2)
+        }
+    }
+
+    @Test func aSeedBeyondTheDocumentClampsInsteadOfCrashing() async throws {
+        try await withEditorWorld(posts: [["tiny"]]) { w in
+            let h = try await w.focus(w.postIDs[0], caretSeed: 9999)!
+            #expect(h.textView.selectedRange().location == 4)
+        }
+    }
+}

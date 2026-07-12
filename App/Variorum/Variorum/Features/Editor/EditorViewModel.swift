@@ -203,6 +203,14 @@ final class EditorViewModel {
     @ObservationIgnored private(set) var differentialOracleMisses = 0
     /// Clears a transient hint (the fanned-extract hint) after a beat.
     @ObservationIgnored private var hintClearTask: Task<Void, Never>?
+    /// One-shot seeds applied at the first render after attach (Phase 10
+    /// Step 3 — focus handoff): the read-tier click's caret offset (the
+    /// read surface and the editor render the SAME materialization, so the
+    /// offset transfers), and the badge tap's focus-then-fan block
+    /// (interpretation 1: focus FIRST, then the fan panel opens on the one
+    /// live surface).
+    @ObservationIgnored var pendingCaretSeed: Int?
+    @ObservationIgnored var pendingFanSeed: String?
 
     // Idle-mint (author decision 2026-07-06, review round — QUESTIONS item
     // 2 answered): a short quiet gap crystallizes the open tail, including
@@ -219,7 +227,12 @@ final class EditorViewModel {
 
     // MARK: - Lifecycle
 
-    func attach(textView: EditorTextView, scrollView: NSScrollView) {
+    /// `scrollView` is the editor's OWN scroll view (the detail editor) —
+    /// nil for the inline book-view editor, which lives inside the
+    /// container's scroll (Phase 10 Step 3): viewport reads then come from
+    /// the view's `visibleRect`, and per-editor scroll anchoring/jumping
+    /// stands down (the container owns scroll position).
+    func attach(textView: EditorTextView, scrollView: NSScrollView?) {
         self.textView = textView
         self.scrollView = scrollView
         canary.onFire = { [weak self] message in self?.canaryMessage = message }
@@ -244,8 +257,11 @@ final class EditorViewModel {
     /// Teardown: persist what only the editor knows (open tail, scroll
     /// anchor), then let go. The open tail crystallizes on idle (author
     /// decision 2026-07-06) and again here as the backstop, so nothing
-    /// typed is ever lost to a post switch or window close.
-    func teardown() {
+    /// typed is ever lost to a post switch or window close. Returns the
+    /// finalize task (nil when nothing was pending) so handoff callers and
+    /// tests can await text safety deterministically (Phase 10 Step 3).
+    @discardableResult
+    func teardown() -> Task<Void, Never>? {
         if let anchor = topVisibleOffset() {
             session.editorRouter.scrollAnchors[postID] = anchor
         }
@@ -253,7 +269,7 @@ final class EditorViewModel {
             session.editorRouter.active = nil
         }
         canary.disarm()
-        finalizeWork()
+        return finalizeWork()
     }
 
     /// Flushes the buffer, waits out any in-flight mint (so its
@@ -356,6 +372,7 @@ final class EditorViewModel {
             // is a placeholder, never a tail to preserve.
             renderFull(new, preserveTail: false)
             loaded = true
+            applyFocusSeeds()
             return
         }
         // The buffer is authoritative while dirty; defer until clean. A
@@ -1143,6 +1160,23 @@ final class EditorViewModel {
         #endif
     }
 
+    /// Applies the one-shot focus-handoff seeds after the first render
+    /// (Step 3): caret placement from the read-tier click, then the
+    /// focus-then-fan panel where a badge tap drove the focus.
+    private func applyFocusSeeds() {
+        if let seed = pendingCaretSeed, let textView {
+            pendingCaretSeed = nil
+            let clamped = min(max(0, seed), max(0, index.documentLength))
+            textView.setSelectedRange(NSRange(location: clamped, length: 0))
+            textView.window?.makeFirstResponder(textView)
+            updateCaretContext()
+        }
+        if let fanBlock = pendingFanSeed {
+            pendingFanSeed = nil
+            openFan(blockID: fanBlock)
+        }
+    }
+
     /// The visible snap (contract item 2): the selection moves to the
     /// snapped cut/span as part of the invoke — never silently, never as a
     /// separate confirm step.
@@ -1597,14 +1631,14 @@ final class EditorViewModel {
     func refreshBadges() {
         defer { refreshTint() }  // 9d: the tint rides every badge refresh
                                  // trigger (scroll, layout, projection).
-        guard let textView, let scrollView,
+        guard let textView,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager
         else {
             badges = []
             return
         }
-        let visible = scrollView.contentView.bounds
+        let visible = viewportBounds(of: textView)
         var result: [BlockBadge] = []
         for (i, slot) in slots.enumerated() where slot.hasFan {
             guard i < index.entries.count else { break }
@@ -1643,7 +1677,7 @@ final class EditorViewModel {
                 tintSink?(spans)
             }
         }
-        guard blockTintEnabled, let textView, let scrollView, loaded,
+        guard blockTintEnabled, let textView, loaded,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager,
               !index.entries.isEmpty
@@ -1651,7 +1685,7 @@ final class EditorViewModel {
             send([])
             return
         }
-        let visible = scrollView.contentView.bounds
+        let visible = viewportBounds(of: textView)
         let docStart = contentManager.documentRange.location
 
         func offsetAt(y: CGFloat) -> Int? {
@@ -1697,6 +1731,18 @@ final class EditorViewModel {
     }
 
     // MARK: - Surface plumbing
+
+    /// The visible region of the editor surface, in text-view coordinates:
+    /// the owned scroll view's clip bounds (the detail editor), else the
+    /// portion the CONTAINER's clipping exposes (the inline book-view
+    /// editor — `visibleRect` reads ancestor clipping; an unclipped or
+    /// unparented view reads as fully visible, which for an inline editor
+    /// bounds overlay work by the focused post, P1's unit).
+    private func viewportBounds(of textView: EditorTextView) -> CGRect {
+        if let scrollView { return scrollView.contentView.bounds }
+        let visible = textView.visibleRect
+        return visible.isEmpty ? textView.bounds : visible
+    }
 
     private func viewText(_ range: NSRange) -> String {
         surfaceTextReads += 1  // the Step 1 echo pin counts these

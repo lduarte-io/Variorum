@@ -122,6 +122,34 @@ final class EditorTextView: NSTextView {
         scrollView.documentView = textView
         return (scrollView, textView)
     }
+
+    /// The INLINE editor variant (Phase 10 Step 3): the same spike-proven
+    /// configuration with NO scroll view of its own — it lives inside the
+    /// multi-post container's scroll, sized to content by its SwiftUI
+    /// wrapper (the coordinator publishes layout height).
+    static func makeInlineEditor() -> EditorTextView {
+        let textView = EditorTextView(usingTextLayoutManager: true)
+        precondition(textView.textLayoutManager != nil, "TK2 opt-in failed at construction")
+
+        textView.textContainerInset = NSSize(width: 8, height: 8)
+        textView.isEditable = true
+        textView.isSelectable = true
+        textView.isRichText = false
+        textView.allowsUndo = true
+        textView.isVerticallyResizable = false  // the wrapper sizes the frame
+        textView.isHorizontallyResizable = false
+        textView.autoresizingMask = [.width]
+        textView.textContainer?.widthTracksTextView = true
+        textView.textContainer?.size = NSSize(
+            width: 0, height: CGFloat.greatestFiniteMagnitude)
+        textView.font = EditorDocument.baseFont
+        textView.isAutomaticQuoteSubstitutionEnabled = false
+        textView.isAutomaticDashSubstitutionEnabled = false
+        textView.isAutomaticTextReplacementEnabled = false
+        textView.isAutomaticSpellingCorrectionEnabled = false
+        textView.isContinuousSpellCheckingEnabled = false
+        return textView
+    }
 }
 
 /// Target for the structural context-menu items: carries the action closure

@@ -16,15 +16,29 @@ import VariorumCore
 struct EditorView: View {
     let session: AppSession
     let postID: String
+    /// Inline mode (Phase 10 Step 3): the editor lives inside a multi-post
+    /// container's scroll — a bare, content-sized TK2 surface instead of
+    /// the detail editor's own scroll view. Exactly one EditorView exists
+    /// per container by construction (one focused post), which is P3's
+    /// one-live-editor rule.
+    var inline = false
     @State private var model: EditorViewModel
+    @State private var inlineHeight: CGFloat = 24
     /// The "Show Blocks" tint mode (9d) — shared with the Block menu's
     /// toggle via AppStorage.
     @AppStorage("showBlockBoundaries") private var showBlocks = false
 
-    init(session: AppSession, postID: String) {
+    init(
+        session: AppSession, postID: String, inline: Bool = false,
+        caretSeed: Int? = nil, fanSeed: String? = nil
+    ) {
         self.session = session
         self.postID = postID
-        _model = State(initialValue: EditorViewModel(session: session, postID: postID))
+        self.inline = inline
+        let model = EditorViewModel(session: session, postID: postID)
+        model.pendingCaretSeed = caretSeed
+        model.pendingFanSeed = fanSeed
+        _model = State(initialValue: model)
     }
 
     var body: some View {
@@ -45,7 +59,12 @@ struct EditorView: View {
                     .frame(maxWidth: .infinity)
                     .background(.quaternary)
             }
-            EditorSurface(model: model)
+            if inline {
+                InlineEditorSurface(model: model, height: $inlineHeight)
+                    .frame(height: inlineHeight)
+            } else {
+                EditorSurface(model: model)
+            }
             CommitBar(model: model)
         }
         .task { await model.start() }
@@ -126,6 +145,97 @@ private struct EditorSurface: NSViewRepresentable {
             badges?.uninstall()
             tint?.uninstall()
             anchor?.uninstall()
+        }
+    }
+}
+
+// MARK: - The inline TK2 surface (Phase 10 Step 3 — the book-view editor)
+
+/// The same editor machinery over a BARE, content-sized text view: no own
+/// scroll view (the multi-post container scrolls), no ScrollAnchorController
+/// (the container owns scroll position), height published to SwiftUI after
+/// every storage change so the row grows with typing. Everything else —
+/// delegate pipeline, badges, tint, model — is the one editor brain.
+private struct InlineEditorSurface: NSViewRepresentable {
+    let model: EditorViewModel
+    @Binding var height: CGFloat
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(model: model)
+    }
+
+    func makeNSView(context: Context) -> EditorTextView {
+        let textView = EditorTextView.makeInlineEditor()
+        context.coordinator.surfaceDelegate.wire(to: textView)
+        model.attach(textView: textView, scrollView: nil)
+        context.coordinator.install(textView: textView) { [self] newHeight in
+            if abs(height - newHeight) > 0.5 { height = newHeight }
+        }
+        return textView
+    }
+
+    func updateNSView(_ nsView: EditorTextView, context: Context) {
+        // Projection-driven through the model; the width is SwiftUI's.
+        context.coordinator.remeasure()
+    }
+
+    static func dismantleNSView(_ nsView: EditorTextView, coordinator: Coordinator) {
+        coordinator.uninstall()
+    }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        let model: EditorViewModel
+        let surfaceDelegate: EditorSurfaceDelegate
+        private var badges: BadgeOverlayController?
+        private var tint: BlockTintOverlayController?
+        private weak var textView: EditorTextView?
+        private var storageToken: NSObjectProtocol?
+        private var reportHeight: ((CGFloat) -> Void)?
+
+        init(model: EditorViewModel) {
+            self.model = model
+            self.surfaceDelegate = EditorSurfaceDelegate(model: model)
+        }
+
+        func install(textView: EditorTextView, reportHeight: @escaping (CGFloat) -> Void) {
+            self.textView = textView
+            self.reportHeight = reportHeight
+            badges = BadgeOverlayController(model: model, textView: textView)
+            tint = BlockTintOverlayController(model: model, textView: textView)
+            // Every storage change (typing, projections, structural
+            // rewrites) can change the content height; re-measure after
+            // the edit settles. Cost: layout validation over a warm
+            // document — ∝ the edit, the focused post bounds the walk.
+            if let storage = textView.textStorage {
+                storageToken = NotificationCenter.default.addObserver(
+                    forName: NSTextStorage.didProcessEditingNotification,
+                    object: storage, queue: nil
+                ) { [weak self] _ in
+                    // didProcessEditing fires INSIDE the edit transaction;
+                    // geometry reads must wait for it to close.
+                    DispatchQueue.main.async {
+                        self?.remeasure()
+                    }
+                }
+            }
+            remeasure()
+        }
+
+        func remeasure() {
+            guard let textView, let layoutManager = textView.textLayoutManager else { return }
+            layoutManager.ensureLayout(for: layoutManager.documentRange)
+            let height = layoutManager.usageBoundsForTextContainer.height
+                + textView.textContainerInset.height * 2
+            reportHeight?(max(height, 24))
+        }
+
+        func uninstall() {
+            if let storageToken { NotificationCenter.default.removeObserver(storageToken) }
+            storageToken = nil
+            badges?.uninstall()
+            tint?.uninstall()
+            reportHeight = nil
         }
     }
 }
