@@ -370,3 +370,235 @@ OUR surface text), so it re-renders — pinned
 exactly 40 surface reads on the reverted old path (`surfaceTextReads`
 counter), 0 on the fix. Mac suite after Step 1: **256/45 green** (was
 254/45).
+
+### Step 2 — the read-cheap tier (2026-07-12)
+
+`Features/ReadTier/` per decision (b): `ReadPostViewModel` +
+`ReadPostView`/`ReadPostTextView` — non-editable TK2 view sized to
+content, the SAME `EditorDocument` materialization as the live editor (one
+rendering brain). Phase 4 semantics displayed, never re-decided: blank
+takes render as empty slots; gaps render as gaps, never crash (pinned).
+Differential updates when the block sequence is unchanged — replaced units
+== the changed slot's, never the document (cost seam pinned) — which is
+what preserves an active selection (pinned; a sequence change re-renders
+fully, selection reset accepted + recorded). Badges exactly on fanned
+blocks, overlay views (never rendering attributes); every instance arms
+`FallbackCanary`; dismantle disarms + clears sinks (deliberate recycling).
+The read-tier contract as ratified, reconciled: a PLAIN click (no
+selection created) requests focus with its UTF-16 offset; a drag-selection
+stays a selection — select+copy and click-to-focus coexist.
+`ReadTierTests` 7 green.
+
+### Step 3 — focus handoff (2026-07-12)
+
+ONE live editor, migrating. `EditorView(inline:)` — the same
+EditorViewModel/EditorTextView/delegate machinery over a bare
+content-sized surface (no own scroll view; height published after every
+storage change); `attach(textView:scrollView:)` takes an optional scroll
+view; viewport reads route through one `viewportBounds` helper (owned clip
+bounds for the detail editor, `visibleRect` inline); per-editor scroll
+anchoring/jumping stands down inline (the container owns scroll —
+JumpPrimitive already no-ops on nil). Focus seeds (one-shot at first
+render): the read-tier click's caret offset transfers directly (both tiers
+render the SAME materialization); a badge tap seeds focus-then-fan
+(interpretation 1). `teardown()` now returns its finalize task (awaitable
+text safety). `FocusHandoffTests` 6 green: the brief's THREE mid-states —
+mid-dirty-buffer (keystrokes land in the old post), mid-open-tail (the
+tail mints to the OLD post; the new post untouched),
+mid-crystallization-flight (the in-flight mint reconciles; exactly the
+expected slots, no duplicate/dropped block) — plus the
+exactly-one-live-editor randomized focus walk (12 switches / 3 posts;
+every typed marker survives every handoff; the router always names the
+one focused editor), seed application, seed clamping. The harness
+switches focus exactly as the container does (teardown → fresh inline
+attach). Mac 269/47 green.
+
+### Step 4 — the continuous book view (2026-07-12)
+
+`Features/BookView/`: one continuous scroll, NOT paginated; LazyVStack
+virtualization over read-tier posts; the focused post swaps to the inline
+editor (`BookFocusState` — one focused id, P3 by construction). Assembly
+is `assembleReading` RENDERED VERBATIM (`BookViewModel.adopt` pinned —
+grouping, NULLs-last, extent, archived-out are the query's calls); section
+headers = pure presentation of `sectionPath` boundaries (the ratified
+clustering-is-the-view's-call). **Core (additive; Phase 4 API
+preserved):** `assembleReading`/`observeReading` gain a caller `limit`
+window (the `observeLibrary` discipline for held fetches; effective cap =
+min(maxPosts, limit), pinned; nil = Phase 4 behavior exactly);
+`ReadingEntry` gains the public init (RenderedBlock precedent).
+**Design note:** the read surface's observation starts from the surface
+coordinator's lifecycle (makeNSView starts it, dismantle cancels — the
+projection and the text view live and die together); this also makes
+hosted tests drivable, since the test host never fires SwiftUI `.task`
+appearance callbacks (verified by a minimal probe: representable
+lifecycles fire, `.task` does not — production `.task`s are unaffected).
+`BookViewTests` 5 green: verbatim adoption; section boundaries;
+off-viewport posts NEVER instantiate (counted live surfaces, 60-post
+reading, with content-delivery proof); realization ratio-asserted flat
+(**14.2 ms @ 20 posts vs 13.1 ms @ 200**); a SyncSpec §5 gap slot inside a
+member post renders without crashing. Core 550/62 · Mac 274/48 green.
+
+### Step 5 — folder view + tags + the sectioned sidebar (2026-07-12)
+
+`Features/Tags/` + `Features/Folder/`; core gains `Queries.allTags`,
+`Queries.taggedPostItems` (**archived posts INCLUDED** — the Phase 4
+ratification: tag lookups still find them; recorded reading, tombstoned
+never; ordering is presentation), `Queries.postTags`, + observations
+(`observeTags` unbounded on purpose — author-scale metadata, the
+pool/tray precedent). TagsViewModel CRUD through the runner
+(`renameTag`'s subtree rewrite gets its first face; duplicate-path and
+invalid-name refusals SPEAK — pinned); TagAssignmentSheet: every toggle
+exactly one apply/remove op (tombstone-not-removal pinned); FolderView:
+the subtree traversal rendered verbatim, open-in-editor only
+(interpretation 2 PROVISIONAL). **The shell grew its sectioned sidebar**
+(`SidebarView` + `SidebarSelection` routing in RootView — cross-feature
+routing in composition): **the JOURNAL section lands the binding
+9c-sitting author input** — dated rows newest-first via the profile lens,
+and "Today's Entry" = `createOrOpenJournalEntry`'s first Mac face (the
+notebook rule pinned: create-then-open same id; malformed-day refusal
+speaks). The fuller section design is the checkpoint walk with the author
+(her explicit ask). **In-phase decision, recorded:** block tagging
+DEFERRED to Phase 11's pool work (block tags primarily serve the pool —
+AppSpec §7; the plan left it to the phase to decide).
+`TagAndFolderTests` 6 green; core 553/62 · Mac 280/49 green.
+
+### Step 6 — timeline + reading CRUD (2026-07-12)
+
+`Features/Timeline/` + `Features/Readings/`; core gains
+`Queries.readings` + `observeReadings` (additive). Timeline: the Phase 4
+keyset pages under the RATIFIED strict-stamp semantics (an undated post is
+NOT on the entry-date timeline — pinned) + the `library` total-surface
+lens; keyset pagination pinned bounded and stable under inserts (no
+duplicates; loaded rows never reshuffle); open-in-editor only. Readings:
+create/rename/delete curated + smart; sort-field/dir menu; the v1
+`SmartQuerySpec` vocabulary surfaced plainly (profile, date range, ANY-of
+tags w/ subtree semantics) — a UI-built spec round-trips through
+`SmartQuerySpec` UNCHANGED and the assembly applies it (pinned); curated
+membership add/remove/reorder (up/down = one `reorderReadingPost` each
+over the existing fractional-index op; boundary moves no-op; duplicate-add
+refusal speaks). Sidebar gains Views (Timeline) + Readings sections;
+reading → BookView (which loads its name), timeline → TimelineView.
+`TimelineAndReadingsTests` 5 green; core 554/62 · Mac 285/50 green.
+
+### Step 7 — the minimal pool (2026-07-12)
+
+`Features/Pool/` (sidebar section — interpretation 3 PROVISIONAL). The
+drag payload is the pool block's ID under a custom pasteboard type and
+NOTHING else — the text copy happens inside `poolDragCopy`, the one
+deliberate operation (review focus 6, pinned). The drop lands through the
+EDITOR door on both surfaces: EditorTextView accepts the custom type
+additively, maps the drop point to the nearer block boundary
+(`insertPosition`, pinned per offset), **⌥ carries the whole fan** (the
+plan's at-build-time `includeFan` call: a modifier), a sealed post refuses
+visibly and consumes the drop. Row-level pins: fresh copy block +
+`pool_copy` edge, commits never copied, fan-vs-rendered-take per the
+modifier, P stays in its pool. **Build-time call, recorded:** opening the
+pool shows it in the detail EDITOR — a pool is a container and
+renders/edits like one (one traversal, zero new machinery; structural ops
+are legal in pools — Phase 3), which is also how scraps get typed until
+Phase 11's fuller pool. Core gains `Queries.pools` + `observePools`.
+`PoolDragTests` 5 green; core 555/62 · Mac 290/51 green.
+
+### Step 8 — lifecycle faces + THE TINT FIX (2026-07-12)
+
+**The tint registration fix (KnownIssues row) — TRACE FIRST, mechanism
+confirmed empirically before any fix:** a windowed diagnostic compared the
+emitted tint spans against TK2 ground-truth fragment geometry — every span
+missed its text by exactly **8.0 points**. TK2 fragment frames are
+TEXT-CONTAINER-relative; the overlay views live in the TEXT VIEW, whose
+container sits at `textContainerOrigin` (the 8 px inset) — the 9d tint
+emitted container coordinates unconverted, so every stripe sat half a
+16 px line ABOVE its text and block boundaries crossed lines mid-way:
+exactly the author's "colors change where no block boundary is / every
+line its own pastel". Fix at the ONE pure mapping (`BlockTint.viewRect`)
+plus the view-y→container-y conversion in the windowing probes; the badge
+overlays (editor AND read tier) carried the IDENTICAL unconverted offset
+(invisible for floating buttons — fixed, same mechanism).
+Never-adjacent/stable-color rules untouched. **Pins:** the pure mapping +
+`everyStripeRegistersWithItsBlocksText` against real TK2 geometry in a
+window — **red verified by behavioral revert** (all spans off by exactly
+8.0 on the old path). *(Adjacent, recorded not fixed: `JumpPrimitive`
+lands scroll targets on container-space minY — a constant ≈8 px residual
+inside the spike's measured "within 6 px" tolerance band; deliberately
+left alone this phase to keep the blast radius at the traced row.)*
+**Lifecycle faces (brief items 4–5):** archive/unarchive + delete/restore
+through LibraryViewModel (row-level pins) with the new **Archived &
+Deleted** detail surface (`RecoveryView` — `archivedPosts` finally gets
+the face the Phase 4 closeout promised; core gains `Queries.deletedPosts`
++ two observations, additive, pinned); the **seal toggle** in the
+CommitBar (flushes the buffer first so `lockPost`'s quiet auto-commit
+insures exactly what the surface shows — pinned: the text + ONE
+kind='auto' commit; sealed typing refuses and speaks; unseal
+round-trips); **Mac entry-date editing** (CommitBar popover DatePicker →
+`setEntryDate`; the ops-boundary day-key guard pinned refusing malformed
+keys; picker↔day conversion round-trips incl. leap day — and is
+`nonisolated`, because an isolated View static traps off-main: the 9c
+SignInFlow lesson, caught by this suite's own crash). Sidebar post rows
+gain Archive/Delete. `LifecycleFacesTests` 5 + `TintRegistration` 3
+green; core 556/62 · Mac 298/54 green.
+
+### Step 9 — the QUESTIONS #12 author gate: OPTIONS PREPARED (2026-07-12)
+
+**Stopped here by design** — no PROVISIONAL permitted; the options below
+went to the coordinator for the author's live ruling. The demo suite
+`Tests/VariorumCoreTests/Step9SpacingDemoTests.swift` (7 green) documents
+today's behavior exactly and prototypes option (a) test-locally — it
+ships NO behavior and is superseded by the real pins after the ruling.
+
+**Today's exact behavior (demonstrated):** bulk entry splits on every
+newline and trims — `"A\nB"` (no blank line) → two blocks, surface
+faithful; `"A\n\nB"` and `"A\n\n\nB"` → the SAME two blocks — every blank
+line vanishes from the surface. Export (`renderedText`) joins everything
+with `"\n\n"`, so it NORMALIZES every boundary to one blank line: a k=2
+paste round-trips by coincidence, k=1 GAINS a blank line, k=3 LOSES one.
+Typing: Enter inside a block is content (I4 — blank lines typed inside a
+block already persist); Enter at the document end opens the tail, and
+crystallization consumes blank tail lines the same way bulk entry does —
+so neither pasting NOR typing can put visible space between blocks today,
+which is the "editor is so ugly" half of her follow-up.
+
+**Option (a) — inter-piece whitespace becomes BLOCK CONTENT** (trailing
+newlines on the preceding block; k newlines between pieces store k−1, the
+editor's single-"\n" separator re-creates the last). Demonstrated: the
+surface reproduces any paste byte-for-byte; unspaced text segments
+identically to today (the mechanism only activates where spacing exists).
+I4-clean, syncs for free, zero schema change, and the SAME k−1 rule
+applied at crystallization makes TYPED blank lines between paragraphs
+persist too — typing and pasting both become WYSIWYG, which answers the
+broadened newline-ENTRY half in the same stroke. Companion export rule
+(demonstrated): join with `"\n\n"` UNLESS the left block already ends in a
+newline, then complete with `"\n"` — exactly the ratified merge-join
+precedent ("a single space at the join unless either side's edge already
+carries whitespace"); exports then reproduce the paste too, and
+unspaced-block exports are byte-identical to today. Consequences to weigh,
+plainly: block texts gain semantically-meaningful trailing newlines
+(word counts unaffected; diffs/exports change only for spaced posts); the
+Fragments bridge re-projects spaced journal days with their spacing
+(arguably the point); the iOS trailing-blank-lines defect (KnownIssues,
+owner 15) starts overlapping with MEANINGFUL trailing content — its fix
+must then distinguish accidental accrual from stored spacing.
+
+**Option (b) — a render-time rule with a stored separator width** (e.g. a
+`separator_width` column on `container_block`). Blocks stay clean (no
+trailing whitespace in `working_text`); but it is a SCHEMA CHANGE on a
+synced table (migration + SyncSpec §12 lockstep + CAS/repair story — the
+stop-and-report class this phase was told to expect none of), a second
+home for what "\n" already expresses (the denormalization smell the brief
+named), it must be threaded through renderedText/export/bridge separately,
+and it covers ONLY block boundaries (intra-block blank lines are already
+content — two mechanisms for one visual concept).
+
+**Complement (c) — presentation-only paragraph spacing** (visual gap at
+every block separator via paragraph styles; no data change). Makes the
+editor look like a normal editor UNIFORMLY but preserves nothing (all
+boundaries render alike, k is lost) — it cannot satisfy the decided
+direction alone, and is listed because the broadened conversation ("how
+newline entry is handled", "the editor is so ugly") may want it ON TOP of
+(a) or (b) as the default look for UNSPACED boundaries, or explicitly
+not at all (Phase 13 visual-polish territory).
+
+**The implementer's recommendation (for the walk, not a decision):** (a),
+with the merge-precedent export join and the same rule at
+crystallization; (b) declined as a schema-and-sync cost for a second
+representation of expressible content; (c) deferred to Phase 13 unless
+she wants the uniform look now.
