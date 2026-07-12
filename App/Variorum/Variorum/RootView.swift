@@ -70,6 +70,10 @@ struct RootView: View {
                 // in pools — Phase 3 ratification).
                 EditorView(session: session, postID: poolID)
                     .id(poolID)
+            case .recovery:
+                RecoveryView(session: session, library: library) { postID in
+                    selection = .post(postID)
+                }
             case nil:
                 Text("Select or create a post")
                     .foregroundStyle(.secondary)

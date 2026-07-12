@@ -11,6 +11,8 @@ import VariorumCore
 
 struct CommitBar: View {
     let model: EditorViewModel
+    @State private var datePickerShown = false
+    @State private var pickedDate = Date()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,6 +27,44 @@ struct CommitBar: View {
                     model.toggleCommitHistory()
                 }
                 .disabled(model.caretVariantID == nil && model.commitList == nil)
+
+                Divider().frame(height: 14)
+
+                // The post lifecycle faces (Phase 10 Step 8): the seal
+                // toggle and Mac-side entry-date editing live with the open
+                // post — the editor knows the header state.
+                Button(model.header?.locked == true ? "Unseal" : "Seal") {
+                    model.toggleSeal()
+                }
+                .controlSize(.small)
+                Button(model.header?.entryDate.map { "Date: \($0)" } ?? "Set Date…") {
+                    pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
+                    datePickerShown = true
+                }
+                .controlSize(.small)
+                .popover(isPresented: $datePickerShown) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Entry date").font(.headline)
+                        DatePicker(
+                            "Entry date", selection: $pickedDate, displayedComponents: .date)
+                            .datePickerStyle(.graphical)
+                            .labelsHidden()
+                        HStack {
+                            Button("Clear Date") {
+                                datePickerShown = false
+                                Task { await model.updateEntryDate(nil) }
+                            }
+                            Spacer()
+                            Button("Set") {
+                                datePickerShown = false
+                                let day = JournalDay.dayString(from: pickedDate)
+                                Task { await model.updateEntryDate(day) }
+                            }
+                            .keyboardShortcut(.defaultAction)
+                        }
+                    }
+                    .padding(12)
+                }
 
                 Divider().frame(height: 14)
 
@@ -93,6 +133,21 @@ struct CommitBar: View {
 
     private func shortID(_ id: String?) -> String {
         String((id ?? "").prefix(8))
+    }
+
+    /// "yyyy-MM-dd" → a local-calendar Date (the picker's seed). Pure and
+    /// nonisolated: the View conformance makes CommitBar MainActor-isolated,
+    /// and an isolated static traps when called off-main (the 9c
+    /// SignInFlow lesson).
+    nonisolated static func date(fromDay day: String?) -> Date? {
+        guard let day, JournalDay.isValid(day) else { return nil }
+        let parts = day.split(separator: "-").compactMap { Int($0) }
+        var components = DateComponents()
+        components.year = parts[0]
+        components.month = parts[1]
+        components.day = parts[2]
+        components.hour = 12
+        return Calendar.current.date(from: components)
     }
 }
 

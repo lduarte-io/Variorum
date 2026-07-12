@@ -166,6 +166,24 @@ extension Queries {
             .map(timelineItem)
     }
 
+    /// The deleted-posts recovery surface (Phase 10, additive —
+    /// `restoreContainer`'s listing; the author decision 2026-07-05 that
+    /// deleted posts must be recoverable finally gets its read side):
+    /// tombstoned posts, newest deletion first. Soft-delete is the only
+    /// delete (S2), so everything here is one restore away until GC.
+    public static func deletedPosts(_ db: Database) throws -> [TimelineItem] {
+        try Row.fetchAll(
+            db,
+            sql: """
+                SELECT id AS post_id, title AS title, entry_date AS entry_date,
+                       deleted_at AS stamp
+                FROM container
+                WHERE kind = 'post' AND deleted_at IS NOT NULL
+                ORDER BY deleted_at DESC, id DESC
+                """)
+            .map(timelineItem)
+    }
+
     private static func timelineItem(_ row: Row) -> TimelineItem {
         TimelineItem(
             postID: row["post_id"],

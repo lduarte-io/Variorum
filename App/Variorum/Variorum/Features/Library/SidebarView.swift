@@ -21,6 +21,8 @@ enum SidebarSelection: Hashable {
     /// A pool container, opened in the detail editor (a pool renders and
     /// edits like a post — one container table, one traversal).
     case pool(String)
+    /// The archived + deleted recovery surfaces.
+    case recovery
 }
 
 struct SidebarView: View {
@@ -48,6 +50,8 @@ struct SidebarView: View {
             Section("Views") {
                 Label("Timeline", systemImage: "calendar.day.timeline.left")
                     .tag(SidebarSelection.timeline)
+                Label("Archived & Deleted", systemImage: "archivebox")
+                    .tag(SidebarSelection.recovery)
             }
             Section("Journal") {
                 ForEach(model.journal, id: \.postID) { item in
@@ -134,6 +138,21 @@ struct SidebarView: View {
         }
         Button("Tags…") {
             tagSheetTarget = TagSheetTarget(id: item.postID, title: item.title)
+        }
+        Divider()
+        // The lifecycle faces (Step 8): archive is kept-out-of-view; delete
+        // is a tombstone — both recoverable in Archived & Deleted.
+        Button("Archive") {
+            Task {
+                await model.archive(postID: item.postID)
+                if selection == .post(item.postID) { selection = nil }
+            }
+        }
+        Button("Delete", role: .destructive) {
+            Task {
+                await model.delete(postID: item.postID)
+                if selection == .post(item.postID) { selection = nil }
+            }
         }
     }
 }

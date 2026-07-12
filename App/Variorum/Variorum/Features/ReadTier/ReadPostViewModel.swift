@@ -210,6 +210,10 @@ final class ReadPostViewModel {
             badgeSink?([])
             return
         }
+        // Container→view conversion (the Step 8 traced mechanism, shared
+        // with the editor's overlays): fragment frames are
+        // container-relative; the badge buttons live in the view.
+        let origin = textView.textContainerOrigin
         var result: [ReadBadge] = []
         for (i, slot) in slots.enumerated() where slot.hasFan {
             guard i < index.entries.count else { break }
@@ -226,7 +230,7 @@ final class ReadPostViewModel {
                 result.append(ReadBadge(
                     blockID: slot.blockID,
                     variantCount: slot.activeVariantCount,
-                    frame: frame))
+                    frame: frame.offsetBy(dx: origin.x, dy: origin.y)))
             }
         }
         if result != badges {

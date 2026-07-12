@@ -53,6 +53,18 @@ extension AppDatabase {
         observe { try Queries.pools($0) }
     }
 
+    /// The archived-posts recovery surface, live (Phase 10 — the face the
+    /// Phase 4 closeout promised `unarchiveContainer`).
+    public func observeArchivedPosts() -> AsyncValueObservation<[Queries.TimelineItem]> {
+        observe { try Queries.archivedPosts($0) }
+    }
+
+    /// The deleted-posts recovery surface, live (Phase 10 —
+    /// `restoreContainer`'s listing).
+    public func observeDeletedPosts() -> AsyncValueObservation<[Queries.TimelineItem]> {
+        observe { try Queries.deletedPosts($0) }
+    }
+
     /// The live readings, live (Phase 10 — the readings-management face).
     /// Unbounded on purpose: author-scale metadata (the taxonomy precedent).
     public func observeReadings() -> AsyncValueObservation<[Reading]> {

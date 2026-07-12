@@ -108,4 +108,33 @@ final class LibraryViewModel {
             lastError = String(describing: error)
         }
     }
+
+    // MARK: - Post lifecycle (Phase 10 Step 8 — brief item 4)
+
+    /// Archive: kept, out of ambient view; the recovery surface lists it.
+    func archive(postID: String) async {
+        await run { ops in try ops.archiveContainer(postID) }
+    }
+
+    func unarchive(postID: String) async {
+        await run { ops in try ops.unarchiveContainer(postID) }
+    }
+
+    /// Delete: a tombstone, recoverable via `restore` until GC (S2).
+    func delete(postID: String) async {
+        await run { ops in try ops.deleteContainer(postID) }
+    }
+
+    func restore(postID: String) async {
+        await run { ops in try ops.restoreContainer(postID) }
+    }
+
+    private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
+        do {
+            try await session.runner.run(body)
+            lastError = nil
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
 }

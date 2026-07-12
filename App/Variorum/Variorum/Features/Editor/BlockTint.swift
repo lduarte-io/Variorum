@@ -11,10 +11,32 @@
 //  only if its own bump condition changed (bounded, rare).
 //
 
+import CoreGraphics
 import Foundation
 
 nonisolated enum BlockTint {
     static let paletteCount = 5
+
+    /// The container→view geometry mapping (Phase 10 Step 8 — the traced
+    /// KnownIssues mis-registration): TK2 fragment frames are relative to
+    /// the TEXT CONTAINER; the tint overlay views live in the TEXT VIEW,
+    /// whose container sits at `textContainerOrigin` (the inset). The 9d
+    /// tint emitted container coordinates unconverted, so every stripe sat
+    /// one inset (8 px ≈ half a line) ABOVE its text — block boundaries
+    /// crossed lines mid-way, which is exactly the author's "colors change
+    /// where no block boundary is / every line its own pastel". A block's
+    /// stripe spans its first fragment's top to its last fragment's
+    /// bottom, converted.
+    static func viewRect(
+        containerTop: CGFloat, containerBottom: CGFloat,
+        containerOrigin: CGPoint, viewWidth: CGFloat
+    ) -> CGRect {
+        CGRect(
+            x: 0,
+            y: containerTop + containerOrigin.y,
+            width: viewWidth,
+            height: max(containerBottom - containerTop, 0))
+    }
 
     /// FNV-1a 64 over UTF-8 — deliberately NOT `String.hashValue`, which is
     /// per-process seeded: a block's color must be stable across launches.

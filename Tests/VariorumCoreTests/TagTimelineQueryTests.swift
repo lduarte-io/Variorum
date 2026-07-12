@@ -19,6 +19,25 @@ struct TagTimelineQueryTests {
         }
     }
 
+    @Test func deletedPostsListsTombstonesNewestFirst() throws {
+        // Phase 10 (additive): restoreContainer's recovery listing.
+        try withOperations { ops, db in
+            let a = try ops.createPost(title: "first deleted")
+            let b = try ops.createPost(title: "second deleted")
+            _ = try ops.createPost(title: "alive")
+            let pool = try ops.createPool()
+            try ops.deleteContainer(a.id)
+            try ops.deleteContainer(b.id)
+            try ops.deleteContainer(pool.id)  // pools are not posts
+            let deleted = try db.read { try Queries.deletedPosts($0) }
+            #expect(deleted.map(\.postID) == [b.id, a.id])
+            // And restore drops the row from the listing.
+            try ops.restoreContainer(a.id)
+            let after = try db.read { try Queries.deletedPosts($0) }
+            #expect(after.map(\.postID) == [b.id])
+        }
+    }
+
     // MARK: - Phase 10 additions (the tag-management + folder faces)
 
     @Test func allTagsListsTheLiveTaxonomyByPath() throws {

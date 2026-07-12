@@ -1434,6 +1434,46 @@ final class EditorViewModel {
         }
     }
 
+    // MARK: - Post lifecycle faces (Phase 10 Step 8)
+
+    /// The seal toggle (`lockPost`/`unlockPost` — brief item 4): sealing
+    /// flushes the buffer first so the op's own auto-commit insures exactly
+    /// what the surface shows; the header observation re-renders the
+    /// banner and editability.
+    func toggleSeal() {
+        Task {
+            do {
+                if header?.locked == true {
+                    try await session.runner.run { [postID] ops in
+                        try ops.unlockPost(postID)
+                    }
+                    showStatus("Unsealed.")
+                } else {
+                    await autosave.flushNow()
+                    try await session.runner.run { [postID] ops in
+                        try ops.lockPost(postID)
+                    }
+                    showStatus("Sealed — the post is read-only until unsealed.")
+                }
+            } catch {
+                showOperationError(error)
+            }
+        }
+    }
+
+    /// Mac-side entry-date editing (brief item 5 — `setEntryDate`'s first
+    /// Mac face; the ops-boundary day-key guard enforces canon).
+    func updateEntryDate(_ day: String?) async {
+        do {
+            try await session.runner.run { [postID] ops in
+                try ops.setEntryDate(postID, entryDate: day)
+            }
+            showStatus(day.map { "Entry date set to \($0)." } ?? "Entry date cleared.")
+        } catch {
+            showOperationError(error)
+        }
+    }
+
     // MARK: - Pool drops (Phase 10 Step 7)
 
     /// A pool block dropped onto this editor: EXACTLY `poolDragCopy` —
@@ -1685,6 +1725,10 @@ final class EditorViewModel {
             return
         }
         let visible = viewportBounds(of: textView)
+        // Same container→view conversion as the tint (the Step 8 traced
+        // mechanism): fragment frames are container-relative; the badge
+        // buttons live in the view.
+        let origin = textView.textContainerOrigin
         var result: [BlockBadge] = []
         for (i, slot) in slots.enumerated() where slot.hasFan {
             guard i < index.entries.count else { break }
@@ -1697,11 +1741,14 @@ final class EditorViewModel {
                 frame = fragment.layoutFragmentFrame
                 return false
             }
-            if let frame, frame.intersects(visible) {
-                result.append(BlockBadge(
-                    blockID: slot.blockID,
-                    variantCount: slot.activeVariantCount,
-                    frame: frame))
+            if let frame {
+                let viewFrame = frame.offsetBy(dx: origin.x, dy: origin.y)
+                if viewFrame.intersects(visible) {
+                    result.append(BlockBadge(
+                        blockID: slot.blockID,
+                        variantCount: slot.activeVariantCount,
+                        frame: viewFrame))
+                }
             }
         }
         if result != badges {
@@ -1733,10 +1780,15 @@ final class EditorViewModel {
         }
         let visible = viewportBounds(of: textView)
         let docStart = contentManager.documentRange.location
+        // TK2 fragment geometry is CONTAINER-relative; the viewport and the
+        // overlay views are VIEW-relative — the container sits at the inset
+        // origin (the traced Step 8 mis-registration: this conversion was
+        // missing in both directions).
+        let origin = textView.textContainerOrigin
 
-        func offsetAt(y: CGFloat) -> Int? {
+        func offsetAt(y viewY: CGFloat) -> Int? {
             guard let fragment = layoutManager.textLayoutFragment(
-                for: CGPoint(x: 4, y: y)) else { return nil }
+                for: CGPoint(x: 4, y: max(0, viewY - origin.y))) else { return nil }
             return contentManager.offset(from: docStart, to: fragment.rangeInElement.location)
         }
         // Visible character window; generous fallbacks keep this correct
@@ -1766,10 +1818,13 @@ final class EditorViewModel {
             guard let first = fragmentFrame(atOffset: location),
                   let last = fragmentFrame(atOffset: max(location, location + entry.length - 1))
             else { continue }
-            let top = min(first.minY, last.minY)
-            let bottom = max(first.maxY, last.maxY)
-            let frame = CGRect(
-                x: 0, y: top, width: textView.bounds.width, height: bottom - top)
+            // Container→view conversion at the ONE pure mapping (the
+            // Step 8 fix; red-on-old pinned).
+            let frame = BlockTint.viewRect(
+                containerTop: min(first.minY, last.minY),
+                containerBottom: max(first.maxY, last.maxY),
+                containerOrigin: origin,
+                viewWidth: textView.bounds.width)
             guard frame.intersects(visible) else { continue }
             spans.append(BlockTintSpan(entryIndex: i, colorIndex: colors[i], frame: frame))
         }
