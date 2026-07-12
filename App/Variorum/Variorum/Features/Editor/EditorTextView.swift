@@ -141,6 +141,11 @@ final class EditorTextView: NSTextView {
         textView.textContainer?.size = NSSize(
             width: 0, height: CGFloat.greatestFiniteMagnitude)
         textView.font = EditorDocument.baseFont
+        // The uniform paragraph gap (2026-07-12 ruling, presentation
+        // half): typed text carries the same style every surface write
+        // applies — one look, stored nowhere.
+        textView.defaultParagraphStyle = EditorDocument.baseParagraphStyle
+        textView.typingAttributes = EditorDocument.baseAttributes
         // Substitutions rewrite text behind the caret; keep the surface
         // literal (they would also route through the edit pipeline, but the
         // author's prose should not be silently rewritten). Spell checking
@@ -184,6 +189,11 @@ final class EditorTextView: NSTextView {
         textView.textContainer?.size = NSSize(
             width: 0, height: CGFloat.greatestFiniteMagnitude)
         textView.font = EditorDocument.baseFont
+        // The uniform paragraph gap (2026-07-12 ruling, presentation
+        // half): typed text carries the same style every surface write
+        // applies — one look, stored nowhere.
+        textView.defaultParagraphStyle = EditorDocument.baseParagraphStyle
+        textView.typingAttributes = EditorDocument.baseAttributes
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.isAutomaticTextReplacementEnabled = false

@@ -1101,7 +1101,7 @@ final class EditorViewModel {
         storage.beginEditing()
         storage.replaceCharacters(in: edit.replaceRange, with: edit.replacement)
         storage.setAttributes(
-            [.font: EditorDocument.baseFont],
+            EditorDocument.baseAttributes,
             range: NSRange(
                 location: edit.replaceRange.location,
                 length: (edit.replacement as NSString).length))
@@ -1880,7 +1880,7 @@ final class EditorViewModel {
         suppressEditProcessing = true
         storage.beginEditing()
         storage.replaceCharacters(in: range, with: newText)
-        var attributes: [NSAttributedString.Key: Any] = [.font: EditorDocument.baseFont]
+        var attributes = EditorDocument.baseAttributes
         if let blockID { attributes[EditorDocument.blockIDAttribute] = blockID }
         storage.setAttributes(
             attributes,

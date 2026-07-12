@@ -84,4 +84,129 @@ struct EditorRateSyncTests {
         }
         #expect(phoneCommits == 1)                                 // the manual commit arrived
     }
+
+    /// Phase 10 Step 10(iii): the same convergence bar at MULTI-POST scale —
+    /// a book-view-shaped session (edits hopping across three posts, the
+    /// focus-handoff write pattern) with held observations (library +
+    /// reading + post — what the Phase 10 views hold) delivering THROUGHOUT
+    /// the rounds, plus the 2026-07-12 spacing ruling's content shape
+    /// (trailing-newline blocks) crossing the wire as ordinary content.
+    @Test func aMultiPostEditingSessionConvergesWhileViewsObserve() async throws {
+        let server = FakeSyncServer()
+        let mac = try SyncClient(name: "Mac", prefix: "AA", transport: server)
+        let phone = try SyncClient(name: "Phone", prefix: "BB", transport: server, clockOffset: 977, seed: 2)
+
+        // Three posts in a curated reading — the book view's world. Post 1
+        // carries the spacing ruling's shape (a stored trailing newline).
+        var postIDs: [String] = []
+        var variantIDs: [String] = []
+        let readingID: String = try mac.with { ops, _ in
+            let reading = try ops.createReading(name: "book", kind: .curated)
+            for i in 0..<3 {
+                let post = try ops.createPost(title: "post \(i)")
+                let minted = try ops.newBlock(
+                    in: post.id,
+                    text: i == 1 ? "Spaced paragraph.\n" : "Body of post \(i).",
+                    at: .end)
+                postIDs.append(post.id)
+                variantIDs.append(minted.variant.id)
+                try ops.addPostToReading(post.id, to: reading.id)
+            }
+            return reading.id
+        }
+        _ = try await syncToQuiescence(mac, phone, server: server)
+
+        // The observations a Phase 10 shell holds, iterated concurrently
+        // for the session's duration (the phone side).
+        let libraryFeed = phone.db.observeLibrary(sort: .lastTouched, direction: .desc, limit: 50)
+        let readingFeed = phone.db.observeReading(readingID, limit: 300)
+        let postFeed = phone.db.observePost(postIDs[1])
+        let deliveries = LockIsolated((library: 0, reading: 0, post: 0))
+        let observers = Task {
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    var iterator = libraryFeed.makeAsyncIterator()
+                    while (try? await iterator.next()) != nil {
+                        deliveries.withValue { $0.library += 1 }
+                    }
+                }
+                group.addTask {
+                    var iterator = readingFeed.makeAsyncIterator()
+                    while (try? await iterator.next()) != nil {
+                        deliveries.withValue { $0.reading += 1 }
+                    }
+                }
+                group.addTask {
+                    var iterator = postFeed.makeAsyncIterator()
+                    while (try? await iterator.next()) != nil {
+                        deliveries.withValue { $0.post += 1 }
+                    }
+                }
+                await group.waitForAll()
+            }
+        }
+
+        // The focus-handoff write pattern: bursts land in ONE post, the
+        // switch flushes, the next post gets the live editor — while the
+        // phone edits a DIFFERENT post and engine rounds interleave.
+        var buffers = ["Body of post 0.", "Spaced paragraph.\n", "Body of post 2."]
+        for round in 1...4 {
+            let focused = round % 3
+            try mac.with { ops, _ in
+                for _ in 1...10 {
+                    buffers[focused].append("m")
+                    try ops.autosave(variantIDs[focused], text: buffers[focused], charDelta: 1)
+                }
+            }
+            try phone.with { ops, _ in
+                let other = (focused + 1) % 3
+                buffers[other].append("p")
+                try ops.autosave(variantIDs[other], text: buffers[other], charDelta: 1)
+            }
+            _ = try await mac.push()
+            _ = try await phone.push()
+            _ = try await mac.pull()
+            _ = try await phone.pull()
+        }
+        // A reorder (the readings face) and a fresh member mid-session.
+        try mac.with { ops, _ in
+            try ops.reorderReadingPost(postIDs[2], in: readingID, to: .start)
+            let fresh = try ops.createPost(title: "late arrival")
+            try ops.addPostToReading(fresh.id, to: readingID)
+        }
+
+        _ = try await syncToQuiescence(mac, phone, server: server)
+        #expect(try mac.syncedDump() == phone.syncedDump())
+        #expect(try mac.outboxCount() == 0)
+        #expect(try phone.outboxCount() == 0)
+
+        // The held observations delivered during the session and their
+        // final values equal the converged store (UI state is a projection,
+        // never a source of truth).
+        try await Task.sleep(for: .milliseconds(100))
+        observers.cancel()
+        let counts = deliveries.value
+        #expect(counts.library > 1 && counts.reading > 1 && counts.post > 1,
+                "held observations deliver throughout the session: \(counts)")
+        let macAssembly = try await mac.db.read { [readingID] in
+            try Queries.assembleReading($0, readingID: readingID)
+        }
+        let phoneAssembly = try await phone.db.read { [readingID] in
+            try Queries.assembleReading($0, readingID: readingID)
+        }
+        #expect(macAssembly == phoneAssembly)
+        #expect(macAssembly.count == 4)
+        #expect(macAssembly.first?.title == "post 2")
+
+        // The spaced block's trailing newline crossed the wire as content;
+        // the rendered projection completes it identically on both sides.
+        let macText = try await mac.db.read { [post = postIDs[1]] in
+            try Queries.renderedText($0, containerID: post)
+        }
+        let phoneText = try await phone.db.read { [post = postIDs[1]] in
+            try Queries.renderedText($0, containerID: post)
+        }
+        #expect(macText == phoneText)
+        #expect(macText.contains("Spaced paragraph.\n"))
+    }
 }

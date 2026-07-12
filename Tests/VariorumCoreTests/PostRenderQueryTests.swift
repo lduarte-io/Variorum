@@ -362,6 +362,35 @@ struct PostRenderQueryTests {
         }
     }
 
+    @Test func renderedTextCompletesStoredSpacingInsteadOfStacking() throws {
+        // Author ruling 2026-07-12 (QUESTIONS #12, the export half): a
+        // block whose text ends in stored newlines (option (a)'s trailing
+        // spacing) joins with ONE "\n" — the paste's k newlines export as
+        // k again; unspaced blocks keep the "\n\n" join byte-identical to
+        // before (the merge-join precedent's shape).
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            _ = try ops.newBlock(in: post.id, text: "A\n")      // k=2 paste
+            _ = try ops.newBlock(in: post.id, text: "B\n\n")    // k=3 paste
+            _ = try ops.newBlock(in: post.id, text: "C")        // unspaced
+            _ = try ops.newBlock(in: post.id, text: "D")
+            let text = try db.read { try Queries.renderedText($0, containerID: post.id) }
+            #expect(text == "A\n\nB\n\n\nC\n\nD")
+        }
+    }
+
+    @Test func joinRenderedTextsIsTheOneJoinBrain() {
+        // The pure join the bridge's per-day projection shares with
+        // renderedText — pinned directly so the two can never diverge in
+        // shape (the pushed body always equals the export).
+        #expect(Queries.joinRenderedTexts([]) == "")
+        #expect(Queries.joinRenderedTexts(["A"]) == "A")
+        #expect(Queries.joinRenderedTexts(["A", "B"]) == "A\n\nB")
+        #expect(Queries.joinRenderedTexts(["A\n", "B"]) == "A\n\nB")
+        #expect(Queries.joinRenderedTexts(["A\n\n", "B"]) == "A\n\n\nB")
+        #expect(Queries.joinRenderedTexts(["A\n", "B\n", "C"]) == "A\n\nB\n\nC")
+    }
+
     @Test func renderedTextSkipsBlankTakes() throws {
         // Author decision 2026-07-06 (ratify item 1): a chosen-but-empty
         // variant contributes nothing to the whole-document projection —

@@ -16,11 +16,26 @@ import VariorumCore
 @Suite("CrystallizationPlanner (Step 3)")
 struct CrystallizationPlannerTests {
     @Test func typingPastOneParagraphPlansExactlyOneMint() {
-        let plan = CrystallizationPlanner.plan(.typing, tail: "First paragraph.\n")
+        // Author ruling 2026-07-12: the newline alone no longer completes
+        // the paragraph — the NEXT paragraph's first character does (until
+        // then the trailing run is still growing; its width is the spacing
+        // the ruling preserves).
+        #expect(CrystallizationPlanner.plan(.typing, tail: "First paragraph.\n") == nil)
+        let plan = CrystallizationPlanner.plan(.typing, tail: "First paragraph.\nN")
         #expect(plan?.mints == ["First paragraph."])
-        #expect(plan?.remainingTail == "")
+        #expect(plan?.remainingTail == "N")
         // Nothing trimmed: the view needs no programmatic edit.
-        #expect(plan?.normalizedRegionText(applyingFirst: 1) == "First paragraph.\n")
+        #expect(plan?.normalizedRegionText(applyingFirst: 1) == "First paragraph.\nN")
+    }
+
+    @Test func typedBlankLinesRideTheMintAsTrailingContent() {
+        // The k−1 rule at crystallization (2026-07-12 ruling): two
+        // newlines between the pieces ⇒ one stored; the region text is
+        // byte-identical to the tail, so the view needs no edit.
+        let plan = CrystallizationPlanner.plan(.typing, tail: "Alpha.\n\nBeta going")
+        #expect(plan?.mints == ["Alpha.\n"])
+        #expect(plan?.remainingTail == "Beta going")
+        #expect(plan?.normalizedRegionText(applyingFirst: 1) == "Alpha.\n\nBeta going")
     }
 
     @Test func theOpenTailStaysUnminted() {
@@ -48,18 +63,23 @@ struct CrystallizationPlannerTests {
     }
 
     @Test func blankLinesBeforeAParagraphAreExcised() {
-        let plan = CrystallizationPlanner.plan(.typing, tail: "\n\npara\n")
+        // A leading blank run has no preceding piece — it is consumed with
+        // the excision, as before the ruling.
+        let plan = CrystallizationPlanner.plan(.typing, tail: "\n\npara\nnext going")
         #expect(plan?.mints == ["para"])
-        #expect(plan?.remainingTail == "")
-        #expect(plan?.normalizedRegionText(applyingFirst: 1) == "para\n")
+        #expect(plan?.remainingTail == "next going")
+        #expect(plan?.normalizedRegionText(applyingFirst: 1) == "para\nnext going")
     }
 
     @Test func bulkPlansSegmentEverythingAndCloseTheTail() {
         let plan = CrystallizationPlanner.plan(
             .bulk(.paragraph), tail: "One.\nTwo.\n\nThree unfinished")
-        #expect(plan?.mints == ["One.", "Two.", "Three unfinished"])
+        // 2026-07-12 ruling: the blank line between Two. and Three stores
+        // as Two.'s trailing newline — and the normalized region is now
+        // byte-identical to the pasted tail (no visible collapse at mint).
+        #expect(plan?.mints == ["One.", "Two.\n", "Three unfinished"])
         #expect(plan?.remainingTail == nil)
-        #expect(plan?.normalizedRegionText(applyingFirst: 3) == "One.\nTwo.\nThree unfinished")
+        #expect(plan?.normalizedRegionText(applyingFirst: 3) == "One.\nTwo.\n\nThree unfinished")
     }
 
     @Test func bulkSentenceModeSegmentsBySentence() {
@@ -87,12 +107,12 @@ struct CrystallizationReconcilerTests {
     @Test func cleanPathAppliesEverythingUntouched() {
         let outcome = CrystallizationReconciler.reconcile(
             minted: minted([("v0", "para")]),
-            currentTail: "para\n",
+            currentTail: "para\nnext",  // the successor's start completed it (2026-07-12 timing)
             kind: .typing)
         #expect(outcome.corrections.isEmpty)
         #expect(outcome.deletions.isEmpty)
         #expect(outcome.applied.map(\.text) == ["para"])
-        #expect(outcome.newTail == "")
+        #expect(outcome.newTail == "next")
         #expect(!outcome.needsFullRerender)
     }
 

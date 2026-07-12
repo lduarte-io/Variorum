@@ -33,6 +33,29 @@ struct EditorDocumentTests {
         #expect(EditorDocument.blockID(at: 25, in: text) == "b")
     }
 
+    @Test func theParagraphGapIsUniformPresentationStoredNowhere() {
+        // Author ruling 2026-07-12 (the presentation half): a pure-style
+        // paragraph gap after EVERY paragraph — uniform across intra-block
+        // newlines and block seams alike, because AppSpec §12 keeps block
+        // boundaries invisible at rest (a seam-only gap would out them).
+        let (text, index) = EditorDocument.materialize(
+            [slot("a", text: "one\ntwo"), slot("b", text: "three")],
+            tail: "typing")
+        // Stored nowhere: the characters are exactly the slots + separators.
+        #expect(text.string == "one\ntwo\nthree\ntyping")
+        #expect(index.documentLength == text.length)
+        // The style covers every character — block text, separators, tail —
+        // with one spacing value (no seam is distinguishable by style).
+        var spacings = Set<CGFloat>()
+        for offset in 0..<text.length {
+            let style = text.attribute(
+                .paragraphStyle, at: offset, effectiveRange: nil) as? NSParagraphStyle
+            spacings.insert(style?.paragraphSpacing ?? -1)
+        }
+        #expect(spacings.count == 1)
+        #expect(spacings.first ?? 0 > 0)
+    }
+
     @Test func theSeparatorIsOwnedByNeitherBlock() {
         let (text, _) = EditorDocument.materialize([
             slot("a", text: "one"),

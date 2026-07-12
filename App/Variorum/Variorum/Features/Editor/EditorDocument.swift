@@ -34,6 +34,27 @@ nonisolated enum EditorDocument {
     /// The one base font of the unstyled technical-phase editor.
     static var baseFont: NSFont { .preferredFont(forTextStyle: .body) }
 
+    /// The uniform paragraph gap (author ruling 2026-07-12, QUESTIONS #12's
+    /// presentation half): a PURE-STYLE spacing after every paragraph —
+    /// stored nowhere; stored blank lines add on top, like any normal
+    /// editor. Deliberately per-PARAGRAPH, not per-block-seam: AppSpec §12
+    /// keeps block boundaries INVISIBLE at rest, and a gap applied only at
+    /// seams would make every boundary inferable — a uniform gap after
+    /// every paragraph (intra-block newlines and seams alike) reveals
+    /// nothing. The size rides the font (visual polish is Phase 13's).
+    static var baseParagraphStyle: NSParagraphStyle {
+        let style = NSMutableParagraphStyle()
+        style.paragraphSpacing = (baseFont.pointSize * 0.5).rounded()
+        return style
+    }
+
+    /// The base attributes EVERY surface write uses — materialization,
+    /// programmatic replaces, differential structural applies, and the
+    /// read tier. One source so no path can drop the paragraph style.
+    static var baseAttributes: [NSAttributedString.Key: Any] {
+        [.font: baseFont, .paragraphStyle: baseParagraphStyle]
+    }
+
     /// Materializes the editable surface: blocks in position order joined by
     /// the separator, block-ID attributes over each block's range, an
     /// optional open tail (local-only fresh text) after a trailing separator.
@@ -45,7 +66,7 @@ nonisolated enum EditorDocument {
     ) -> (text: NSAttributedString, index: BlockRangeIndex) {
         let index = BlockRangeIndex(slots: slots, tail: tail)
         let result = NSMutableAttributedString()
-        let base: [NSAttributedString.Key: Any] = [.font: baseFont]
+        let base = baseAttributes
         for (i, slot) in slots.enumerated() {
             if i > 0 {
                 // The separator: base attributes only — owned by no block.

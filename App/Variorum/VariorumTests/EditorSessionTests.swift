@@ -82,18 +82,20 @@ struct EditorSessionTests {
             // Still an open tail: nothing typed past yet.
             let midway = try h.storeSlots()
             #expect(midway.count == 1)
-            h.type("\n")                    // typed past → crystallize
+            h.type("\n")
+            await h.settle()
+            // Author ruling 2026-07-12: the newline alone no longer
+            // completes the paragraph — its trailing run is still growing
+            // (the spacing the ruling preserves); the idle-mint/teardown
+            // backstops still bound durability.
+            #expect(try h.storeSlots().count == 1)
+            h.type("next line")             // the NEXT paragraph begins → typed past
             await h.settle()
             let slots = try h.storeSlots()
             try #require(slots.count == 2)
             #expect(slots[1].text == "fresh paragraph")
-            #expect(h.model.hasOpenTail)    // the (empty) tail stays open
+            #expect(h.model.hasOpenTail)    // "next line" accumulates in the tail
             try expectStoreMatchesView(h)
-            // Keep typing: the next paragraph accumulates in the tail.
-            h.type("next line")
-            await h.settle()
-            let after = try h.storeSlots()
-            #expect(after.count == 2)
             #expect(h.documentText == "existing\nfresh paragraph\nnext line")
         }
     }
@@ -107,8 +109,59 @@ struct EditorSessionTests {
             #expect(beforeEnter.isEmpty)   // open tail only
             h.type("\n")
             await h.settle()
+            // Deferred completion (2026-07-12 ruling): the idle-mint is
+            // the durability backstop for a paragraph awaiting its
+            // successor — drive it as the clock would.
+            #expect(try h.storeSlots().isEmpty)
+            h.model.idleMintTail()
+            await h.settle()
             let slots = try h.storeSlots()
             #expect(slots.map(\.text) == ["first entry line"])
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    /// Author ruling 2026-07-12 (QUESTIONS #12, the newline-ENTRY half):
+    /// blank lines TYPED between paragraphs persist as trailing content —
+    /// the surface stays exactly what was typed, and the store carries the
+    /// k−1 rule's newlines.
+    @Test func typedBlankLinesBetweenParagraphsPersist() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)             // open the tail
+            h.type("Alpha para.\n\nBeta going")
+            await h.settle()
+            let slots = try h.storeSlots()
+            try #require(slots.count == 2)
+            #expect(slots[1].text == "Alpha para.\n", "k=2 newlines ⇒ one trailing stored")
+            #expect(h.documentText == "existing\nAlpha para.\n\nBeta going",
+                    "the surface is exactly what was typed")
+            try expectStoreMatchesView(h)
+            // And the rendered projection completes the stored spacing
+            // instead of stacking (the export half of the ruling) — the
+            // still-open tail is not a block yet, so mint it first (the
+            // teardown backstop).
+            await h.model.finalizeWork()?.value
+            await h.settle()
+            let rendered = try await h.database.read { [postID = h.postID] db in
+                try Queries.renderedText(db, containerID: postID)
+            }
+            #expect(rendered == "existing\n\nAlpha para.\n\nBeta going")
+        }
+    }
+
+    /// The paste half of the same ruling, end to end through the editor.
+    @Test func pastedBlankLinesPersistOnSurfaceAndStore() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)             // open the tail
+            h.textView.withPasteFlag {
+                h.type("One.\n\nTwo.\n\n\nThree tail")
+            }
+            await h.settle()
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["existing", "One.\n", "Two.\n\n", "Three tail"])
+            #expect(h.documentText == "existing\nOne.\n\nTwo.\n\n\nThree tail",
+                    "the paste reproduces byte-for-byte")
+            #expect(!h.model.hasOpenTail)
             try expectStoreMatchesView(h)
         }
     }

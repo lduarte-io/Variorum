@@ -148,9 +148,11 @@ struct FocusHandoffTests {
             // the handoff must wait it out, reconcile, and mint the residue.
             _ = try await w.focus(w.postIDs[1])
             #expect(try w.storeText(w.postIDs[0]) == [
-                "alpha", "First fresh paragraph.", "Second still typing",
+                "alpha", "First fresh paragraph.\n", "Second still typing",
             ])
-            // No duplicate block, no dropped text — exactly three slots.
+            // No duplicate block, no dropped text — exactly three slots,
+            // and the typed blank line persists as trailing content (the
+            // 2026-07-12 spacing ruling).
         }
     }
 

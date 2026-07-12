@@ -168,6 +168,11 @@ final class ReadPostTextView: NSTextView {
         textView.autoresizingMask = [.width]
         textView.textContainer?.widthTracksTextView = true
         textView.font = EditorDocument.baseFont
+        // The uniform paragraph gap (2026-07-12 ruling, presentation
+        // half): typed text carries the same style every surface write
+        // applies — one look, stored nowhere.
+        textView.defaultParagraphStyle = EditorDocument.baseParagraphStyle
+        textView.typingAttributes = EditorDocument.baseAttributes
         return textView
     }
 }

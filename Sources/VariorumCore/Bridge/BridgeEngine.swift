@@ -464,9 +464,18 @@ public struct BridgeEngine: Sendable {
                         notes.append("day \(day) has a gap slot (sync race); push skipped until it heals")
                         continue
                     }
-                    let rendered = slots.compactMap(\.text)
-                        .filter { !$0.isEmpty }
-                        .joined(separator: Queries.blockJoinSeparator)
+                    // The ONE join brain (Phase 10, author ruling
+                    // 2026-07-12 — spacing preservation): the pushed body
+                    // must equal `Queries.renderedText` for the same slots,
+                    // so this projects through the same conditional join
+                    // (the previous inline `"\n\n"` join was a byte-level
+                    // duplicate of the old renderedText; a divergence here
+                    // would silently push a different body than the export
+                    // and the landing half compare against). No engine
+                    // logic changes — the join expression is swapped for
+                    // the canonical helper it duplicated.
+                    let rendered = Queries.joinRenderedTexts(
+                        slots.compactMap(\.text).filter { !$0.isEmpty })
                     let hash = BridgeHash.body(rendered)
                     let state = try Self.dayRow(db, dayKey: day)
                     let agreedHash = state?.hash ?? nil  // nil row OR stamp-only row

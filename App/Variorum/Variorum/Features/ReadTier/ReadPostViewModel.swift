@@ -150,7 +150,7 @@ final class ReadPostViewModel {
             }
             storage.beginEditing()
             storage.replaceCharacters(in: range, with: newText)
-            var attributes: [NSAttributedString.Key: Any] = [.font: EditorDocument.baseFont]
+            var attributes = EditorDocument.baseAttributes
             attributes[EditorDocument.blockIDAttribute] = new[i].blockID
             storage.setAttributes(
                 attributes,

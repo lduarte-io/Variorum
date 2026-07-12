@@ -39,41 +39,88 @@ public enum SegmentationRules {
     // MARK: - Bulk entry
 
     /// Splits bulk-entered text into block texts. Whitespace-only segments
-    /// never become blocks; segment texts are trimmed (the separators they
-    /// lose are re-created by the rendering join, never stored — AppSpec
-    /// denormalization rule). `one_block` passes the text through verbatim.
+    /// never become blocks on their own; `one_block` passes the text
+    /// through verbatim.
+    ///
+    /// **Spacing preservation (author ruling 2026-07-12, QUESTIONS #12,
+    /// option (a)):** the newline run BETWEEN pieces becomes block CONTENT —
+    /// k newlines between two pieces store k−1 trailing newlines on the
+    /// preceding piece, and the editor's single-`"\n"` separator re-creates
+    /// the last, so the surface reproduces the paste exactly. Newlines are
+    /// content (I4); this stores the ones the author pasted, nothing
+    /// invented. Edge runs (leading/trailing whitespace-only lines of the
+    /// whole text) drop as before — there is no adjacent piece for them to
+    /// separate. Unspaced text segments identically to the pre-ruling
+    /// behavior.
     public static func bulkSegments(_ text: String, mode: Segmentation) -> [String] {
         guard !isBlank(text) else { return [] }
         switch mode {
         case .oneBlock:
             return [text]
-        case .paragraph:
-            return text
-                .split(separator: "\n", omittingEmptySubsequences: true)
-                .map { $0.trimmingCharacters(in: .whitespaces) }
-                .filter { !$0.isEmpty }
-        case .sentence:
-            return sentences(in: text)
+        case .paragraph, .sentence:
+            var blocks: [String] = []
+            var blankRun = 0
+            for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+                if isBlank(String(line)) {
+                    // A blank line counts only between pieces (a leading
+                    // run has no preceding piece; a trailing run never
+                    // meets a following one).
+                    if !blocks.isEmpty { blankRun += 1 }
+                    continue
+                }
+                if blankRun > 0, !blocks.isEmpty {
+                    // k newlines between the pieces = blankRun + 1; the
+                    // preceding piece keeps k−1 = blankRun as content.
+                    blocks[blocks.count - 1] += String(repeating: "\n", count: blankRun)
+                }
+                blankRun = 0
+                switch mode {
+                case .sentence:
+                    blocks.append(contentsOf: sentences(in: String(line)))
+                default:
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    if !trimmed.isEmpty { blocks.append(trimmed) }
+                }
+            }
+            return blocks
         }
     }
 
     // MARK: - Type-time crystallization
 
-    /// Reports the first completed paragraph in the open tail, if any: text
-    /// followed by a typed newline is "typed past". Blank line-segments are
-    /// skipped (they crystallize into nothing) but remain accounted for —
-    /// `remainingTail` is always an exact suffix of `openTail`, so the editor
-    /// can excise `blockText` + separator without guessing.
+    /// Reports the first completed paragraph in the open tail, if any.
+    ///
+    /// **Timing (author ruling 2026-07-12, the newline-ENTRY half of
+    /// QUESTIONS #12):** a paragraph completes when the NEXT non-blank
+    /// segment exists — you have "typed past" it when the next paragraph
+    /// begins, not at its own terminating newline. Until then the trailing
+    /// newline run is still growing, and its width is what the spacing
+    /// ruling preserves: k newlines between the pieces → the completed
+    /// paragraph carries k−1 trailing newlines as content (the editor
+    /// separator re-creates the last), so typed blank lines persist
+    /// exactly like pasted ones. Durability is unchanged — the idle-mint
+    /// (2 s) and teardown backstops mint pending text regardless.
+    /// `remainingTail` is always an exact suffix of `openTail`, so the
+    /// editor can excise the consumed prefix without guessing; a leading
+    /// blank run before the first piece is consumed with it (as before).
     public static func crystallizedBoundary(openTail: String) -> Crystallization? {
         let segments = openTail.split(separator: "\n", omittingEmptySubsequences: false)
-        // The last segment is the paragraph still being typed — never a block.
         guard segments.count > 1 else { return nil }
-        for (index, segment) in segments.dropLast().enumerated() where !isBlank(String(segment)) {
-            return Crystallization(
-                blockText: segment.trimmingCharacters(in: .whitespaces),
-                remainingTail: segments[(index + 1)...].joined(separator: "\n"))
-        }
-        return nil
+        // The candidate: the first non-blank segment (never the last — the
+        // last is the paragraph still being typed).
+        guard let first = segments.dropLast().enumerated()
+            .first(where: { !isBlank(String($0.element)) })?.offset
+        else { return nil }
+        // Completion: a LATER non-blank segment exists (it may be the
+        // still-being-typed last one — its existence fixes the run width).
+        guard let next = segments.indices.dropFirst(first + 1)
+            .first(where: { !isBlank(String(segments[$0])) })
+        else { return nil }
+        let trailingRun = next - first - 1  // blank segments between = k−1 newlines
+        return Crystallization(
+            blockText: segments[first].trimmingCharacters(in: .whitespaces)
+                + String(repeating: "\n", count: trailingRun),
+            remainingTail: segments[next...].joined(separator: "\n"))
     }
 
     // MARK: - Sentence scanning

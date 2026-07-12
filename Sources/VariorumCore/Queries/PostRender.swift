@@ -109,13 +109,37 @@ extension Queries {
         }
     }
 
-    /// The blocks-joined-by-`"\n\n"` separator used by `renderedText` — the
+    /// The default blocks-join separator used by `renderedText` — the
     /// rendering join that re-creates stored-nothing separators (block text
     /// never stores its trailing separator; SegmentationRules doctrine).
+    /// See `joinRenderedTexts` for the one conditional (author ruling
+    /// 2026-07-12).
     public static let blockJoinSeparator = "\n\n"
 
+    /// THE rendered-text join (author ruling 2026-07-12, QUESTIONS #12 —
+    /// the export half of spacing preservation, shaped on the ratified
+    /// merge-join precedent "a single space at the join unless either
+    /// side's edge already carries whitespace"): blocks join with
+    /// `"\n\n"` UNLESS the left side already ends in a newline (stored
+    /// spacing — option (a)'s trailing-newline content), in which case the
+    /// join completes it with a single `"\n"` — so a k-newline paste
+    /// exports as k newlines again, and unspaced posts join byte-identical
+    /// to the pre-ruling `"\n\n"`. One join brain: `renderedText` AND the
+    /// bridge's per-day projection both call this — the pushed body always
+    /// equals the export.
+    public static func joinRenderedTexts(_ texts: [String]) -> String {
+        var result = ""
+        for (i, text) in texts.enumerated() {
+            if i > 0 {
+                result += result.hasSuffix("\n") ? "\n" : blockJoinSeparator
+            }
+            result += text
+        }
+        return result
+    }
+
     /// The container's full rendered prose, for export and diff callers:
-    /// each slot's rendered text joined by `blockJoinSeparator`. Gaps
+    /// each slot's rendered text joined by `joinRenderedTexts`. Gaps
     /// contribute nothing (render gaps, never crash — SyncSpec §5), and
     /// **blank takes skip like gaps** (author decision 2026-07-06: a
     /// chosen-but-empty variant contributes nothing — export reads
@@ -124,9 +148,9 @@ extension Queries {
     /// container's own length — this is the whole-document projection, for
     /// read-side consumers that need exactly that.
     public static func renderedText(_ db: Database, containerID: String) throws -> String {
-        try renderPost(db, containerID: containerID)
-            .compactMap(\.text)
-            .filter { !$0.isEmpty }
-            .joined(separator: blockJoinSeparator)
+        joinRenderedTexts(
+            try renderPost(db, containerID: containerID)
+                .compactMap(\.text)
+                .filter { !$0.isEmpty })
     }
 }
