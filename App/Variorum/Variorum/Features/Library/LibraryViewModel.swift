@@ -2,13 +2,17 @@
 //  LibraryViewModel.swift
 //  Variorum
 //
-//  Minimal library sidebar model (Phase 7 Step 1): a bounded live listing
-//  plus post creation. Chrome only — no business rules; the operations layer
-//  enforces everything.
+//  The sidebar's model (Phase 7 Step 1; grown at Phase 10 Step 5): bounded
+//  live listings — the flat library and the JOURNAL lens (the author's
+//  binding 9c-sitting input: journal entries need an obvious dated home;
+//  the profile is a UI lens over one container table, never a separate
+//  model — CoreDescription pillar 8) — plus post creation and the
+//  notebook-rule door (`createOrOpenJournalEntry`'s first Mac face).
+//  Chrome only — no business rules; the operations layer enforces.
 //
 
 import Foundation
-import GRDB // AsyncValueObservation iteration (member import visibility)
+import GRDB // AsyncValueObservation iteration
 import Observation
 import VariorumCore
 
@@ -18,11 +22,13 @@ final class LibraryViewModel {
     private let session: AppSession
 
     private(set) var posts: [Queries.TimelineItem] = []
+    private(set) var journal: [Queries.TimelineItem] = []
     private(set) var lastError: String?
 
     /// Bounded on purpose: a held observation's fetch must be viewport-shaped
     /// (P1) — `observeLibrary` requires a limit for exactly this reason.
     private let listingLimit = 200
+    private let journalLimit = 120
 
     init(session: AppSession) {
         self.session = session
@@ -44,6 +50,23 @@ final class LibraryViewModel {
         }
     }
 
+    /// The journal lens: entries by their user-set day, newest first —
+    /// the dated home (strict semantics are the query's: journal-profile,
+    /// live, non-archived).
+    func startJournal() async {
+        do {
+            for try await items in session.database.observeLibrary(
+                sort: .entryDate, direction: .desc, limit: journalLimit,
+                profile: .journal
+            ) {
+                journal = items
+            }
+        } catch is CancellationError {
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
     /// Creates a post and returns its id so the view can select it.
     func createPost() async -> String? {
         do {
@@ -51,6 +74,22 @@ final class LibraryViewModel {
                 try ops.createPost(title: "Untitled")
             }
             return post.id
+        } catch {
+            lastError = String(describing: error)
+            return nil
+        }
+    }
+
+    /// The notebook rule's Mac door: "today's entry" creates OR opens (the
+    /// operations layer decides — one entry per calendar day). `day` is
+    /// injectable for tests; the default is the local calendar date.
+    func openJournalEntry(day: String? = nil) async -> String? {
+        let entryDay = day ?? JournalDay.dayString(from: Date())
+        do {
+            let result = try await session.runner.run { ops in
+                try ops.createOrOpenJournalEntry(entryDate: entryDay)
+            }
+            return result.container.id
         } catch {
             lastError = String(describing: error)
             return nil

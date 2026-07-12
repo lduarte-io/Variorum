@@ -19,6 +19,71 @@ struct TagTimelineQueryTests {
         }
     }
 
+    // MARK: - Phase 10 additions (the tag-management + folder faces)
+
+    @Test func allTagsListsTheLiveTaxonomyByPath() throws {
+        try withOperations { ops, db in
+            let life = try ops.createTag(name: "life")
+            _ = try ops.createTag(parent: life.id, name: "goals")
+            let art = try ops.createTag(name: "art")
+            let dead = try ops.createTag(name: "dead")
+            try ops.deleteTag(dead.id)
+            let tags = try db.read { try Queries.allTags($0) }
+            #expect(tags.map(\.path) == ["art", "life", "life/goals"])
+            _ = art
+        }
+    }
+
+    @Test func taggedPostItemsUseSubtreeSemanticsAndFindArchived() throws {
+        try withOperations { ops, db in
+            let life = try ops.createTag(name: "life")
+            let goals = try ops.createTag(parent: life.id, name: "goals")
+            let tagged = try ops.createPost(title: "tagged at root")
+            let subtreeTagged = try ops.createPost(title: "tagged below")
+            let archived = try ops.createPost(title: "archived but tagged")
+            let untagged = try ops.createPost(title: "untagged")
+            let deleted = try ops.createPost(title: "deleted")
+            try ops.applyTag(life.id, toPost: tagged.id)
+            try ops.applyTag(goals.id, toPost: subtreeTagged.id)
+            try ops.applyTag(life.id, toPost: archived.id)
+            try ops.applyTag(life.id, toPost: deleted.id)
+            try ops.archiveContainer(archived.id)
+            try ops.deleteContainer(deleted.id)
+
+            let items = try db.read { try Queries.taggedPostItems($0, tagID: life.id) }
+            // Archived posts appear (tag lookups still find them — Phase 4
+            // ratification); tombstoned never; untagged never.
+            #expect(Set(items.map(\.postID)) == [tagged.id, subtreeTagged.id, archived.id])
+            #expect(!items.map(\.postID).contains(untagged.id))
+
+            // Without subtree: only the exact tag's applications.
+            let exact = try db.read {
+                try Queries.taggedPostItems($0, tagID: life.id, includeSubtree: false)
+            }
+            #expect(Set(exact.map(\.postID)) == [tagged.id, archived.id])
+
+            // A dead root lists empty (tolerant read).
+            try ops.deleteTag(life.id)
+            let gone = try db.read { try Queries.taggedPostItems($0, tagID: life.id) }
+            #expect(gone.isEmpty)
+        }
+    }
+
+    @Test func postTagsListsOnePostsLiveApplicationsByPath() throws {
+        try withOperations { ops, db in
+            let life = try ops.createTag(name: "life")
+            let art = try ops.createTag(name: "art")
+            let removed = try ops.createTag(name: "removed")
+            let post = try ops.createPost(title: "p")
+            try ops.applyTag(life.id, toPost: post.id)
+            try ops.applyTag(art.id, toPost: post.id)
+            try ops.applyTag(removed.id, toPost: post.id)
+            try ops.removeTag(removed.id, fromPost: post.id)
+            let tags = try db.read { try Queries.postTags($0, postID: post.id) }
+            #expect(tags.map(\.path) == ["art", "life"])
+        }
+    }
+
     @Test func subtreeStaysCorrectAfterRenameTag() throws {
         try withOperations { ops, db in
             let life = try ops.createTag(name: "life")

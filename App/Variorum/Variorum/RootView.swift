@@ -2,9 +2,11 @@
 //  RootView.swift
 //  Variorum
 //
-//  Root chrome: library sidebar + the focused post's editor. Functional and
-//  unstyled by design (Phase 13 owns beauty). Views render state and send
-//  actions only; the view models own projections and operations.
+//  Root chrome: the sectioned sidebar (journal, library, tags — Phase 10)
+//  + the selected traversal in the detail pane. Functional and unstyled by
+//  design (Phase 13 owns beauty). Views render state and send actions
+//  only; the view models own projections and operations; cross-feature
+//  routing lives HERE, in composition.
 //
 
 import SwiftUI
@@ -16,18 +18,20 @@ struct RootView: View {
     /// `.task` starts them; the footer appears when ready.
     let services: AppServices?
     @State private var library: LibraryViewModel
-    @State private var selectedPostID: String?
+    @State private var tags: TagsViewModel
+    @State private var selection: SidebarSelection?
 
     init(session: AppSession, services: AppServices? = nil) {
         self.session = session
         self.services = services
         _library = State(initialValue: LibraryViewModel(session: session))
+        _tags = State(initialValue: TagsViewModel(session: session))
     }
 
     var body: some View {
         NavigationSplitView {
-            LibraryView(model: library, selection: $selectedPostID)
-                .navigationSplitViewColumnWidth(min: 180, ideal: 220)
+            SidebarView(session: session, model: library, tags: tags, selection: $selection)
+                .navigationSplitViewColumnWidth(min: 200, ideal: 240)
                 .safeAreaInset(edge: .bottom) {
                     if let services {
                         VStack(alignment: .leading, spacing: 0) {
@@ -37,14 +41,23 @@ struct RootView: View {
                     }
                 }
         } detail: {
-            if let postID = selectedPostID {
+            switch selection {
+            case .post(let postID):
                 EditorView(session: session, postID: postID)
                     .id(postID) // a different post is a different editor
-            } else {
+            case .tag(let tagID):
+                FolderView(session: session, tagID: tagID) { postID in
+                    // Open-in-editor only (interpretation 2, PROVISIONAL).
+                    selection = .post(postID)
+                }
+                .id(tagID)
+            case nil:
                 Text("Select or create a post")
                     .foregroundStyle(.secondary)
             }
         }
         .task { await library.start() }
+        .task { await library.startJournal() }
+        .task { await tags.start() }
     }
 }

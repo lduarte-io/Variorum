@@ -48,6 +48,28 @@ extension AppDatabase {
         observe { try Queries.poolListing($0, poolID: poolID) }
     }
 
+    /// The whole live taxonomy, live (Phase 10 — the tag-management face).
+    /// Unbounded on purpose: the tag tree is author-scale metadata, cost
+    /// ∝ tag count, never corpus text (the pool/tray precedent).
+    public func observeTags() -> AsyncValueObservation<[Tag]> {
+        observe { try Queries.allTags($0) }
+    }
+
+    /// The folder view's listing, live: posts tagged at or under a tag
+    /// (archived included — tag lookups still find them, Phase 4).
+    public func observeTaggedPosts(
+        _ tagID: String, includeSubtree: Bool = true
+    ) -> AsyncValueObservation<[Queries.TimelineItem]> {
+        observe {
+            try Queries.taggedPostItems($0, tagID: tagID, includeSubtree: includeSubtree)
+        }
+    }
+
+    /// One post's applied tags, live (the per-post tag editor).
+    public func observePostTags(_ postID: String) -> AsyncValueObservation<[Tag]> {
+        observe { try Queries.postTags($0, postID: postID) }
+    }
+
     /// A post's deleted-blocks tray, live.
     public func observeTray(_ postID: String) -> AsyncValueObservation<[Queries.TrayItem]> {
         observe { try Queries.trayBlocks($0, postID: postID) }

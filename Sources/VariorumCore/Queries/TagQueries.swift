@@ -23,6 +23,16 @@ extension Queries {
             arguments: [rootID, root.path, root.path])
     }
 
+    /// The whole live taxonomy, ordered by `path` (parents sort before
+    /// children by construction of the materialized path). The tag tree is
+    /// author-scale metadata — cost ∝ tag count, never the corpus.
+    /// Phase 10 (additive): the tag-management face lists through this.
+    public static func allTags(_ db: Database) throws -> [Tag] {
+        try Tag.fetchAll(
+            db,
+            sql: "SELECT * FROM tag WHERE deleted_at IS NULL ORDER BY path")
+    }
+
     /// "Everything tagged X" — the two application tables, resolved
     /// together (AppSpec §7: the UNION query; acceptable, and rare outside
     /// the pool). Distinct live targets only; `includeSubtree` widens the
@@ -30,6 +40,65 @@ extension Queries {
     public struct TaggedItems: Equatable, Sendable {
         public let postIDs: [String]
         public let blockIDs: [String]
+    }
+
+    /// The folder view's listing (Phase 10, additive): posts tagged at or
+    /// under a tag, with display metadata, most recently touched first (a
+    /// presentation ordering; the membership semantics are
+    /// `everythingTagged`'s). **Archived posts are INCLUDED** — the Phase 4
+    /// ratification keeps archived containers out of *ambient* view while
+    /// tag lookups still find them; the folder view is a tag lookup.
+    /// Tombstoned rows never appear.
+    public static func taggedPostItems(
+        _ db: Database, tagID: String, includeSubtree: Bool = true
+    ) throws -> [TimelineItem] {
+        let tagCondition: String
+        var arguments: [(any DatabaseValueConvertible)?]
+        if includeSubtree {
+            guard let root = try Tag.fetchOne(db, key: tagID), root.deletedAt == nil else {
+                return []
+            }
+            tagCondition = """
+                app.tag_id IN (SELECT id FROM tag
+                                WHERE deleted_at IS NULL
+                                  AND (id = ? OR substr(path, 1, length(?) + 1) = ? || '/'))
+                """
+            arguments = [tagID, root.path, root.path]
+        } else {
+            tagCondition = "app.tag_id = ?"
+            arguments = [tagID]
+        }
+        return try Row.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT c.id AS post_id, c.title AS title,
+                       c.entry_date AS entry_date,
+                       COALESCE(c.last_touched_at, c.created_at) AS stamp
+                FROM post_tag app
+                JOIN container c ON c.id = app.post_id AND c.deleted_at IS NULL
+                WHERE app.deleted_at IS NULL AND \(tagCondition)
+                ORDER BY stamp DESC, c.id DESC
+                """,
+            arguments: StatementArguments(arguments))
+            .map { row in
+                TimelineItem(
+                    postID: row["post_id"], title: row["title"],
+                    entryDate: row["entry_date"], stamp: row["stamp"])
+            }
+    }
+
+    /// The live tags applied to one post, by path — the per-post tag
+    /// editor's listing (Phase 10, additive). Cost ∝ the post's own tags.
+    public static func postTags(_ db: Database, postID: String) throws -> [Tag] {
+        try Tag.fetchAll(
+            db,
+            sql: """
+                SELECT t.* FROM tag t
+                JOIN post_tag pt ON pt.tag_id = t.id AND pt.deleted_at IS NULL
+                WHERE pt.post_id = ? AND t.deleted_at IS NULL
+                ORDER BY t.path
+                """,
+            arguments: [postID])
     }
 
     public static func everythingTagged(
