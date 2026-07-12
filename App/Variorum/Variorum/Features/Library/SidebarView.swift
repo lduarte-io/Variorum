@@ -16,12 +16,15 @@ import VariorumCore
 enum SidebarSelection: Hashable {
     case post(String)
     case tag(String)
+    case reading(String)
+    case timeline
 }
 
 struct SidebarView: View {
     let session: AppSession
     let model: LibraryViewModel
     let tags: TagsViewModel
+    let readings: ReadingsViewModel
     @Binding var selection: SidebarSelection?
     @State private var renameTarget: RenameTarget?
     @State private var renameTitle = ""
@@ -38,6 +41,10 @@ struct SidebarView: View {
 
     var body: some View {
         List(selection: $selection) {
+            Section("Views") {
+                Label("Timeline", systemImage: "calendar.day.timeline.left")
+                    .tag(SidebarSelection.timeline)
+            }
             Section("Journal") {
                 ForEach(model.journal, id: \.postID) { item in
                     HStack(spacing: 6) {
@@ -68,6 +75,7 @@ struct SidebarView: View {
                         .contextMenu { postMenu(item) }
                 }
             }
+            ReadingsSection(session: session, model: readings)
             TagListSection(model: tags)
         }
         .alert(

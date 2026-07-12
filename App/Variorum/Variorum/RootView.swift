@@ -19,6 +19,7 @@ struct RootView: View {
     let services: AppServices?
     @State private var library: LibraryViewModel
     @State private var tags: TagsViewModel
+    @State private var readings: ReadingsViewModel
     @State private var selection: SidebarSelection?
 
     init(session: AppSession, services: AppServices? = nil) {
@@ -26,11 +27,14 @@ struct RootView: View {
         self.services = services
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
+        _readings = State(initialValue: ReadingsViewModel(session: session))
     }
 
     var body: some View {
         NavigationSplitView {
-            SidebarView(session: session, model: library, tags: tags, selection: $selection)
+            SidebarView(
+                session: session, model: library, tags: tags,
+                readings: readings, selection: $selection)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240)
                 .safeAreaInset(edge: .bottom) {
                     if let services {
@@ -51,6 +55,13 @@ struct RootView: View {
                     selection = .post(postID)
                 }
                 .id(tagID)
+            case .reading(let readingID):
+                BookView(session: session, readingID: readingID)
+                    .id(readingID)
+            case .timeline:
+                TimelineView(session: session) { postID in
+                    selection = .post(postID)
+                }
             case nil:
                 Text("Select or create a post")
                     .foregroundStyle(.secondary)
@@ -59,5 +70,6 @@ struct RootView: View {
         .task { await library.start() }
         .task { await library.startJournal() }
         .task { await tags.start() }
+        .task { await readings.start() }
     }
 }

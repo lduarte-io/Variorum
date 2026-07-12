@@ -48,6 +48,12 @@ extension AppDatabase {
         observe { try Queries.poolListing($0, poolID: poolID) }
     }
 
+    /// The live readings, live (Phase 10 — the readings-management face).
+    /// Unbounded on purpose: author-scale metadata (the taxonomy precedent).
+    public func observeReadings() -> AsyncValueObservation<[Reading]> {
+        observe { try Queries.readings($0) }
+    }
+
     /// The whole live taxonomy, live (Phase 10 — the tag-management face).
     /// Unbounded on purpose: the tag tree is author-scale metadata, cost
     /// ∝ tag count, never corpus text (the pool/tray precedent).

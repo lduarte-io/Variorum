@@ -27,6 +27,7 @@ final class BookViewModel {
     static let entryWindow = 300
 
     private(set) var entries: [Queries.ReadingEntry] = []
+    private(set) var readingName: String?
     private(set) var lastError: String?
 
     init(session: AppSession, readingID: String) {
@@ -37,6 +38,9 @@ final class BookViewModel {
     /// Runs for the view's lifetime.
     func start() async {
         do {
+            readingName = try await session.database.read { [readingID] db in
+                try Queries.readings(db).first { $0.id == readingID }?.name
+            }
             for try await value in session.database.observeReading(
                 readingID, limit: Self.entryWindow
             ) {

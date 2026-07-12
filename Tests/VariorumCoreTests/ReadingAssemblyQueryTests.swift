@@ -46,6 +46,18 @@ struct ReadingAssemblyQueryTests {
         }
     }
 
+    @Test func readingsListsLiveRowsByName() throws {
+        // Phase 10 (additive): the readings-management face's listing.
+        try withOperations { ops, db in
+            _ = try ops.createReading(name: "zeta", kind: .curated)
+            _ = try ops.createReading(name: "alpha", kind: .smart)
+            let dead = try ops.createReading(name: "dead", kind: .curated)
+            try ops.deleteReading(dead.id)
+            let readings = try db.read { try Queries.readings($0) }
+            #expect(readings.map(\.name) == ["alpha", "zeta"])
+        }
+    }
+
     @Test func callerLimitWindowsTheAssemblyAndMaxPostsStillWins() throws {
         // Phase 10 (additive): a held observation windows its standing
         // fetch (the observeLibrary discipline — the book view's bound).

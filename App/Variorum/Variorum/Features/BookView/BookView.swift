@@ -36,7 +36,7 @@ struct BookView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 4) {
-                if let name = readingName {
+                if let name = readingName ?? model.readingName {
                     Text(name).font(.title2).padding(.bottom, 8)
                 }
                 if model.entries.isEmpty {

@@ -65,6 +65,15 @@ extension Queries {
         }
     }
 
+    /// The live readings, by name then id (a presentation order — readings
+    /// are author-scale metadata, cost ∝ reading count). Phase 10
+    /// (additive): the readings-management face lists through this.
+    public static func readings(_ db: Database) throws -> [Reading] {
+        try Reading.fetchAll(
+            db,
+            sql: "SELECT * FROM reading WHERE deleted_at IS NULL ORDER BY name, id")
+    }
+
     /// Assembles a reading: curated memberships by `(position, id)` or the
     /// smart predicate, ordered by `sort_field`/`sort_dir`, capped by
     /// `max_posts`, sectioned by the grouping tag. A missing or tombstoned
