@@ -126,7 +126,12 @@ since the Phase 6 spike, so no re-run owed).
 
 ## Install note
 
-The closeout refreshed `/Applications/Variorum.app` (Release). If the copy
-was blocked by your running instance, the fresh build sits in Xcode's
-DerivedData Release products and the checklist's step 1 becomes: quit the
-app, re-run the copy (the coordinator's report says which applied).
+**Your Variorum.app was RUNNING at closeout (PID 40430), so the bundle was
+deliberately NOT swapped under your live session** (replacing a running
+app's bundle can destabilize it — and nothing force-quits your app, ever).
+The fresh Release build succeeded and waits at:
+`~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Release/Variorum.app`
+Checklist step 1 therefore is: **quit Variorum, then run**
+`cp -R ~/Library/Developer/Xcode/DerivedData/Variorum-*/Build/Products/Release/Variorum.app /Applications/`
+**and relaunch** (or ask any session to do the copy once your app is
+closed).
