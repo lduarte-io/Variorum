@@ -93,6 +93,10 @@ public struct BridgeEngine: Sendable {
         /// Days holding two or more live entries — pushed NOTHING, visibly,
         /// until the author hand-merges (never newest-wins).
         public var pausedDays: [String] = []
+        /// Unseen Fragments bodies destroyed by our own winning pushes and
+        /// rescued as 'fragments' takes — 15.7 `replaced` receipts that
+        /// survived the three discrimination rules (contract ask 13).
+        public var rescuedReceipts = 0
         public var notes: [String] = []
         public init() {}
     }
@@ -393,6 +397,10 @@ public struct BridgeEngine: Sendable {
             let day: String
             let body: String
             let hash: String
+            /// The day's agreed hash BEFORE this push — the body the bridge
+            /// last pulled or pushed; discrimination rule (i)'s input for a
+            /// 15.7 `replaced` receipt riding the response.
+            let agreedHash: String?
             /// The last landed row's client-LWW stamp for this day: the
             /// push must outrank it or truth's re-projection is forever
             /// `.stale` under a clock ahead of ours.
@@ -467,6 +475,7 @@ public struct BridgeEngine: Sendable {
                     }
                     candidates.append(Candidate(
                         day: day, body: rendered, hash: hash,
+                        agreedHash: agreedHash,
                         remoteStamp: state?.remoteStamp ?? nil,
                         remoteCreatedAt: state?.remoteCreatedAt ?? nil))
                 }
@@ -532,6 +541,17 @@ public struct BridgeEngine: Sendable {
                         remoteStamp: record.stamp, remoteCreatedAt: record.createdAt)
                 }
                 report.pushed += 1
+                // The 15.7 `replaced` receipt (contract ask 13 — LIVE per
+                // their 2026-07-11 deploy ping): consume-if-present, and a
+                // receipt means "this push replaced a differing live body",
+                // NOT "loss" — classification is OURS, never unconditional.
+                if let receipt = response.replaced?.first(where: { $0.id == entry.id }) {
+                    let outcome = try await consumeReplacedReceipt(
+                        receipt, day: candidate.day, pushedBody: candidate.body,
+                        agreedHashBeforePush: candidate.agreedHash)
+                    if outcome.rescued { report.rescuedReceipts += 1 }
+                    if let note = outcome.note { report.notes.append(note) }
+                }
             } else if let conflict = response.conflicts.first {
                 report.rejected += 1
                 if conflict.isUniqueViolation {
@@ -561,6 +581,58 @@ public struct BridgeEngine: Sendable {
             }
         }
         return report
+    }
+
+    /// Contract ask 13's consumption path (Fragments 15.7, deployed —
+    /// their 2026-07-11 ping; SQL verified in their repo the same day).
+    /// The receipt is genuine-OVERWRITE-only, so consuming it
+    /// unconditionally would self-conflict on every ordinary edit; the
+    /// THREE DISCRIMINATION RULES (their recommendation, recorded in the
+    /// contract) classify instead:
+    ///  (i)   the destroyed body is the one the bridge last pulled/pushed
+    ///        for this day → our own knowing replacement — no-op;
+    ///  (ii)  it is contained in the body just pushed → a superset/merge
+    ///        push (e.g. a Fragments-side inline conflicted copy we
+    ///        re-projected) — no-op;
+    ///  (iii) otherwise it is text the bridge NEVER SAW, destroyed
+    ///        server-side by our winning push — the loss case, the only
+    ///        one: rescued as a 'fragments' take through the same
+    ///        conflict-as-variant door as the landing half (replay-deduped
+    ///        the same way). This closes the 9b closeout's "first-push
+    ///        overwrite window" residual.
+    private func consumeReplacedReceipt(
+        _ receipt: FragmentsReplacedReceipt, day: String,
+        pushedBody: String, agreedHashBeforePush: String?
+    ) async throws -> (rescued: Bool, note: String?) {
+        // Never emitted for an empty prior body (their SQL: prev_body <> '');
+        // belt against a server that drifts.
+        guard !receipt.previousBody.isEmpty else { return (false, nil) }
+        // (i) — a knowing replacement of the body we already hold.
+        if BridgeHash.body(receipt.previousBody) == agreedHashBeforePush {
+            return (false, nil)
+        }
+        // (ii) — the destroyed body rode along inside what we pushed.
+        if pushedBody.contains(receipt.previousBody) {
+            return (false, nil)
+        }
+        // (iii) — rescue. The push scan guarantees this day had a live,
+        // gap-free entry moments ago; the guards below are defensive
+        // against the store changing underneath, and they surface LOUDLY
+        // rather than silently dropping the only copy of the body.
+        let context = try await readDayContext(day: day)
+        guard let firstSlot = context.slots.first, !firstSlot.isGap,
+              let firstVariantID = firstSlot.variantID else {
+            return (false,
+                "push of \(day) replaced an unseen Fragments body but no landable block exists — NOT rescued (report this); body begins: \(String(receipt.previousBody.prefix(80)))")
+        }
+        if try await hasLiveVariant(blockID: firstSlot.blockID, text: receipt.previousBody) {
+            return (false, nil)  // replay dedupe — a prior round already rescued it
+        }
+        let ops = Operations()
+        _ = try ops.resolveSyncConflict(
+            firstVariantID, losingText: receipt.previousBody, label: "fragments")
+        return (true,
+            "push of \(day) replaced an unseen Fragments body — rescued as a 'fragments' take")
     }
 
     // MARK: - Day context (classification reads)

@@ -32,7 +32,21 @@ import Foundation
 ///    `{tombstoned}`; unknown ids ignored;
 ///  - **`user_settings.local_user_id`** readable (the canonical-user key;
 ///    nil until "Fragments' first device has synced" — the engine fails
-///    closed on pushes until it exists).
+///    closed on pushes until it exists);
+///  - **15.7 `replaced` receipts (migration `20260707000013`, LIVE on
+///    hosted per their 2026-07-11 deploy ping; SQL verified in their repo
+///    the same day):** the response's fourth key, ALWAYS present
+///    (initialized `[]` in their SQL), one entry
+///    `{id, previous_body, previous_updated_at}` per APPLIED row whose
+///    prior LIVE row (`deleted_at is null`) held a NON-EMPTY body that
+///    DIFFERS from the pushed one; `previous_updated_at` = the prior row's
+///    client-stamped `updated_at`. Never on plain inserts, identical
+///    bodies, LWW-skipped pushes, or resurrect-over-tombstone (the
+///    snapshot query itself excludes tombstones). Emission is
+///    unconditional server-side — no opt-in flag. (Their undeployed
+///    migration 15 will later add a fifth `skipped_rows` key — the
+///    bridge's ignore-unknown-keys posture covers it; NOT modeled here
+///    until it deploys.)
 ///
 /// NOT modeled: the omitted-NOT-NULL whole-call abort — the typed
 /// `FragmentsEntry` carries all six NOT NULL columns non-optionally, so the
@@ -97,7 +111,9 @@ actor FakeFragmentsServer: FragmentsBridgeTransport {
     // MARK: FragmentsBridgeTransport
 
     func push(_ batch: [FragmentsEntry]) throws -> FragmentsPushResponse {
-        var response = FragmentsPushResponse(applied: 0, skipped: 0)
+        // `replaced` is ALWAYS present in migration 13's response
+        // (initialized '[]'::jsonb) — mirror the deployed shape exactly.
+        var response = FragmentsPushResponse(applied: 0, skipped: 0, replaced: [])
         for incoming in batch {
             if let limit = clockAheadLimit, incoming.updatedAt > limit {
                 response.conflicts.append(FragmentsPushConflict(
@@ -148,6 +164,16 @@ actor FakeFragmentsServer: FragmentsBridgeTransport {
             entries[incoming.id] = StoredEntry(entry: stored, writtenAtTick: clock)
             acceptedWriteCount += 1
             response.applied += 1
+            // 15.7 receipt: an APPLIED push over a prior LIVE row whose
+            // non-empty body differs (migration 13's exact predicate — the
+            // snapshot excludes tombstones, so a resurrect emits nothing).
+            if let prior = current?.entry, prior.deletedAt == nil,
+               !prior.body.isEmpty, prior.body != incoming.body {
+                response.replaced?.append(FragmentsReplacedReceipt(
+                    id: incoming.id,
+                    previousBody: prior.body,
+                    previousUpdatedAt: prior.updatedAt))
+            }
         }
         return response
     }

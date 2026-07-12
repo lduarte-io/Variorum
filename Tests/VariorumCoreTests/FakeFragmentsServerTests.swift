@@ -33,11 +33,68 @@ struct FakeFragmentsServerTests {
         let server = makeServer()
         let first = try await server.push([entry(day: "2026-07-09", body: "b",
                                                  updatedAt: "2026-07-09T10:00:00.000Z")])
-        #expect(first == FragmentsPushResponse(applied: 1, skipped: 0, conflicts: []))
+        // `replaced: []` — the fourth key is ALWAYS present post-15.7
+        // (migration 13 initializes it '[]'::jsonb).
+        #expect(first == FragmentsPushResponse(
+            applied: 1, skipped: 0, conflicts: [], replaced: []))
         // An older push is SKIPPED silently — no reason, no stamp.
         let older = try await server.push([entry(day: "2026-07-09", body: "old",
                                                  updatedAt: "2026-07-09T09:00:00.000Z")])
-        #expect(older == FragmentsPushResponse(applied: 0, skipped: 1, conflicts: []))
+        #expect(older == FragmentsPushResponse(
+            applied: 0, skipped: 1, conflicts: [], replaced: []))
+    }
+
+    // MARK: 15.7 `replaced` receipts (migration 20260707000013 — LIVE on
+    // hosted per the 2026-07-11 deploy ping; emission predicates below are
+    // quoted against their deployed SQL, read the same day)
+
+    @Test func appliedOverwriteOfADifferingLiveBodyEmitsAReceipt() async throws {
+        let server = makeServer()
+        let day = "2026-07-09"
+        let id = FragmentsContract.entryID(
+            namespace: FragmentsContract.fragmentsNamespace,
+            canonicalUser: canonical, dayKey: day)!
+        _ = try await server.push([entry(day: day, body: "first body",
+                                         updatedAt: "2026-07-09T10:00:00.000Z")])
+        let response = try await server.push([entry(day: day, body: "second body",
+                                                    updatedAt: "2026-07-09T11:00:00.000Z")])
+        #expect(response.applied == 1)
+        // The receipt carries the DESTROYED body and its own client-stamped
+        // updated_at (their SQL: `select body, updated_at … deleted_at is null`).
+        #expect(response.replaced == [FragmentsReplacedReceipt(
+            id: id, previousBody: "first body",
+            previousUpdatedAt: "2026-07-09T10:00:00.000Z")])
+    }
+
+    @Test func noReceiptOnInsertIdenticalSkipEmptyPriorOrResurrect() async throws {
+        let server = makeServer()
+        let day = "2026-07-09"
+        // Plain insert — no prior row.
+        let insert = try await server.push([entry(day: day, body: "body",
+                                                  updatedAt: "2026-07-09T10:00:00.000Z")])
+        #expect(insert.applied == 1 && insert.replaced == [])
+        // Identical body (a ties-to-the-pusher re-apply) — the differs
+        // predicate (`is distinct from`) emits nothing.
+        let identical = try await server.push([entry(day: day, body: "body",
+                                                     updatedAt: "2026-07-09T10:00:00.000Z")])
+        #expect(identical.applied == 1 && identical.replaced == [])
+        // LWW-skipped — destroyed nothing.
+        let skipped = try await server.push([entry(day: day, body: "older",
+                                                   updatedAt: "2026-07-09T09:00:00.000Z")])
+        #expect(skipped.skipped == 1 && skipped.replaced == [])
+        // An EMPTY prior body emits nothing (`prev_body <> ''`).
+        _ = try await server.push([entry(day: day, body: "",
+                                         updatedAt: "2026-07-09T11:00:00.000Z")])
+        let overEmpty = try await server.push([entry(day: day, body: "new text",
+                                                     updatedAt: "2026-07-09T12:00:00.000Z")])
+        #expect(overEmpty.applied == 1 && overEmpty.replaced == [])
+        // Resurrect-over-tombstone — the snapshot query itself excludes
+        // tombstones (`deleted_at is null`), so nothing is captured.
+        _ = try await server.fragmentsAppDeletes(
+            day: day, deletedAt: "2026-07-09T13:00:00.000Z")
+        let resurrect = try await server.push([entry(day: day, body: "back again",
+                                                     updatedAt: "2026-07-09T14:00:00.000Z")])
+        #expect(resurrect.applied == 1 && resurrect.replaced == [])
     }
 
     // MARK: Row-LWW: TIES GO TO THE PUSHER (>=, migration 7 — corrected

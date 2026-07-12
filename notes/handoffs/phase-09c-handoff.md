@@ -38,10 +38,14 @@ the phase plan's closeout (`notes/plans/phase-09c-auth-alignment.md`).
 5. **[x] The ratify walk at the checkpoint** is tiny this time: QUESTIONS #16 (the
    bridge's Fragments session = your direct email+password sign-in) — you already
    ratified it in-session on 2026-07-10; the walk just records it.
-6. **[ ] When Fragments' 15.7 deploy ping arrives** (their replaced-body receipt),
+6. **[x] When Fragments' 15.7 deploy ping arrives** (their replaced-body receipt),
    bring it back here: a named follow-up pins the fake server to the final shape and
    adds the consumption path under the three discrimination rules (contract ask 13).
-   Nothing is assumed until the ping.
+   Nothing is assumed until the ping. **DONE 2026-07-11 — the ping arrived the same
+   day the phase closed; the deployed SQL was verified (author-authorized read-only
+   look at their repo), the fake server pinned, and the consumption path shipped
+   under the three rules (core 545/62). Full record: the contract's "Ask 13 CLOSED"
+   addendum.**
 7. **[x] After the sitting passes:** daily use is unblocked (your 2026-07-07
    deferral condition — "9b AND 9c done" — is met), the week-one dump-compare ritual
    begins, and the Phase 7/9 **combined feel pass** is still owed whenever you want

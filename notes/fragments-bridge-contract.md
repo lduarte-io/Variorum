@@ -226,3 +226,48 @@ allowed), so both apps simply agree the user's chosen day IS the identity.
 - Credentials: the bridge uses a user-auth session for the author's Fragments account,
   stored untracked on her machines; the Supabase *personal access token* (server tooling)
   is never used as the bridge's identity.
+
+---
+
+## Ask 13 CLOSED — the 15.7 deploy ping arrived and the consumption path SHIPPED (2026-07-11)
+
+The author relayed Fragments' Phase 15.7 closeout addendum: **`replaced` receipts are
+LIVE on hosted** (their migration `20260707000013`, verified remote). Per the recorded
+protocol, their **deployed SQL was read the same day** (author-authorized one-time
+read-only look at their repo — the migration file, quoted verbatim by the extraction
+agent) before anything was pinned. Verified facts, superseding their prose where they
+disagree:
+
+- **The final shape is the drafted shape:** `replaced: [{id, previous_body,
+  previous_updated_at}]`, a FOURTH key beside `applied`/`skipped`/`conflicts`, ALWAYS
+  present (initialized `'[]'::jsonb`). `previous_updated_at` = the prior LIVE row's
+  own client-stamped **`updated_at`** (their snapshot query: `select body, updated_at
+  … where … deleted_at is null`) — not a server stamp.
+- **Emission predicates exactly as recorded above** (applied-only; `notes`/
+  `journal_entries`; live prior row — resurrects snapshot nothing; prior body
+  non-empty and `is distinct from` the pushed body; unconditional for any
+  authenticated caller, no opt-in).
+- **Their announcement's `"conflicts": {}` example is WRONG per their own SQL** —
+  `conflicts` remains a JSON ARRAY (`'[]'::jsonb`, array-append). The prose-lags-SQL
+  trap, again; the SQL was trusted.
+- **Heads-up, not deployed:** their migration 15 (`20260711000015`) will later add a
+  fifth `skipped_rows: [{table, id}]` key — hosted remains at 14/14 without it. The
+  bridge's ignore-unknown-keys posture covers it structurally (now pinned with that
+  exact key); nothing is consumed until any future need is decided.
+
+**What shipped in Variorum (same day):** the typed `FragmentsReplacedReceipt` decode
+(consume-if-present — a keyless response still decodes, pinned); the fake server
+emits per the verified predicates (pinned by `FakeFragmentsServerTests`); and
+`BridgeEngine.push()` consumes receipts on applied pushes under **the three
+discrimination rules exactly as recorded in ask 13** — (i) hash-equals the day's
+last pulled/pushed body → knowing replacement, no-op; (ii) contained in the
+just-pushed body → superset/merge, no-op; (iii) otherwise → rescued as a
+`'fragments'` take through the same conflict-as-variant door as the landing half,
+replay-deduped, surfaced in the round report (`rescuedReceipts` + a note). **This
+closes the 9b closeout's "first-push overwrite window" residual** — the one loss
+path the receipt existed to cover. Their round-2 caution (an LWW-skipped bridge push
+followed by a pull must not discard local text) was re-verified as already-defended:
+the landing half's both-changed path keeps Variorum's text and cards the pulled body;
+nothing discards. Engine tests: rule (i) on an ordinary edit (no self-conflict),
+rule (ii) containment, rule (iii) end-to-end rescue (`BridgePushTests`). Core suite
+after: **545/62** (was 540/62).

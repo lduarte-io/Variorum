@@ -9,6 +9,74 @@ import Testing
 /// day-scoped, releasable.
 @Suite("Bridge push half (Phase 9b, Step 3)")
 struct BridgePushTests {
+    // MARK: 15.7 `replaced` receipt consumption (contract ask 13, deployed
+    // 2026-07-10, ping 2026-07-11 — the THREE DISCRIMINATION RULES; a
+    // receipt means "replaced a differing live body", NEVER "loss", so
+    // unconditional consumption would self-conflict on every ordinary edit)
+
+    @Test func ordinaryEditReceiptIsAKnowingReplacement_noVariantMinted() async throws {
+        try await withBridge { bridge in
+            let (_, variantID) = try bridge.makeEntry(day: "2026-07-09", text: "Draft one.")
+            _ = try await bridge.engine.push()
+            try bridge.ops.autosave(variantID, text: "Draft two.", charDelta: 2)
+            let report = try await bridge.engine.push()
+            // The server emitted a receipt for OUR OWN previous push
+            // ("Draft one." — genuine-overwrite-only); rule (i) classifies
+            // it as a knowing replacement: no rescue, no note, no fan.
+            #expect(report.pushed == 1)
+            #expect(report.rescuedReceipts == 0)
+            #expect(report.notes.isEmpty)
+            let blockID = try bridge.firstBlockID(day: "2026-07-09")!
+            #expect(try bridge.liveVariants(blockID: blockID).count == 1)
+        }
+    }
+
+    @Test func unseenBodyReceiptRescuesAFragmentsTake() async throws {
+        try await withBridge { bridge in
+            // Fragments holds a body the bridge NEVER PULLED — the 9b
+            // closeout's "first-push overwrite window", closed here. The
+            // old stamp loses LWW to the bridge's push, which destroys the
+            // body server-side; the receipt is the only copy coming back.
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: "user-author", day: "2026-07-09",
+                body: "Written in Fragments, never pulled.",
+                updatedAt: "2020-01-01T00:00:00.000Z")
+            try bridge.makeEntry(day: "2026-07-09", text: "Written in Variorum.")
+            let report = try await bridge.engine.push()
+            #expect(report.pushed == 1)
+            // Rule (iii): unseen — rescued as a 'fragments' take; the
+            // entry's own text stays the live truth on both surfaces.
+            #expect(report.rescuedReceipts == 1)
+            let blockID = try bridge.firstBlockID(day: "2026-07-09")!
+            let variants = try bridge.liveVariants(blockID: blockID)
+            #expect(variants.map(\.text)
+                    == ["Written in Variorum.", "Written in Fragments, never pulled."])
+            #expect(variants.map(\.label) == [nil, "fragments"])
+            #expect(try bridge.rendered(day: "2026-07-09") == "Written in Variorum.")
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Written in Variorum.")
+        }
+    }
+
+    @Test func receiptContainedInThePushedBodyIsNotRescued() async throws {
+        try await withBridge { bridge in
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: "user-author", day: "2026-07-09",
+                body: "shared paragraph",
+                updatedAt: "2020-01-01T00:00:00.000Z")
+            // The pushed body CONTAINS the destroyed one (the author pasted
+            // the same text and continued; or a Fragments-side inline
+            // conflicted copy re-projected): rule (ii) — nothing was lost,
+            // rescuing would duplicate. No variant.
+            try bridge.makeEntry(
+                day: "2026-07-09", text: "shared paragraph\nplus more written here.")
+            let report = try await bridge.engine.push()
+            #expect(report.pushed == 1)
+            #expect(report.rescuedReceipts == 0)
+            let blockID = try bridge.firstBlockID(day: "2026-07-09")!
+            #expect(try bridge.liveVariants(blockID: blockID).count == 1)
+        }
+    }
+
     @Test func changedEntryPushesOnceUnderTheDerivedID() async throws {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "Dear diary, day one.")

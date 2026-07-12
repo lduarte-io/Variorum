@@ -101,21 +101,35 @@ struct FragmentsTransportTests {
         #expect(decoded.conflicts.filter(\.isUniqueViolation).map(\.id) == ["b"])
     }
 
-    /// THE PERMANENT POSTURE (ask 13's hedged upgrade — Fragments' 15.7
-    /// replaced-body receipt is DRAFTED, not final, not deployed): ignore
-    /// unknown response keys; consume `replaced` only if present. Until
-    /// their deploy ping finalizes the shape, a response CARRYING a
-    /// `replaced` key must decode cleanly and be ignored — nothing pinned,
-    /// nothing broken.
-    @Test func pushResponseTolerantlyIgnoresUnknownKeysIncludingReplaced() throws {
+    /// Ask 13, DEPLOYED (the 2026-07-11 ping — migration `20260707000013`
+    /// live on hosted; SQL verified in their repo the same day): `replaced`
+    /// now decodes TYPED (superseding this test's hedged predecessor, which
+    /// pinned the key as ignored while the shape was a draft). The
+    /// permanent ignore-unknown posture still holds for keys we don't
+    /// consume — pinned here with `skipped_rows`, the fifth key their
+    /// UNDEPLOYED migration 15 will add later.
+    @Test func pushResponseDecodesReplacedReceiptsAndIgnoresUnknownKeys() throws {
         let withReceipt = """
             {"applied": 1, "skipped": 0, "conflicts": [],
              "replaced": [{"id": "7ab43871-10ad-5597-a0d7-d721fcd3ecf9",
                            "previous_body": "the destroyed text",
-                           "previous_updated_at": "2026-07-09T10:00:00.692012+00:00"}]}
+                           "previous_updated_at": "2026-07-09T10:00:00.692012+00:00"}],
+             "skipped_rows": [{"table": "journal_entries", "id": "x"}]}
             """.data(using: .utf8)!
         let decoded = try JSONDecoder().decode(FragmentsPushResponse.self, from: withReceipt)
-        #expect(decoded == FragmentsPushResponse(applied: 1, skipped: 0, conflicts: []))
+        #expect(decoded.replaced == [FragmentsReplacedReceipt(
+            id: "7ab43871-10ad-5597-a0d7-d721fcd3ecf9",
+            previousBody: "the destroyed text",
+            previousUpdatedAt: "2026-07-09T10:00:00.692012+00:00")])
+        #expect(decoded.applied == 1)
+
+        // A pre-15.7 response (no key at all) decodes as nil —
+        // consume-if-present is structural, never required.
+        let without = """
+            {"applied": 1, "skipped": 0, "conflicts": []}
+            """.data(using: .utf8)!
+        #expect(try JSONDecoder().decode(
+            FragmentsPushResponse.self, from: without).replaced == nil)
     }
 
     @Test func pullParamsEncodeThePPrefixedKeyset() throws {

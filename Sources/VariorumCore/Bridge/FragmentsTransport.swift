@@ -64,11 +64,55 @@ public struct FragmentsPushResponse: Equatable, Sendable, Codable {
     public var applied: Int
     public var skipped: Int
     public var conflicts: [FragmentsPushConflict]
+    /// Fragments 15.7's `replaced` receipts (contract ask 13 — LIVE on
+    /// hosted per their 2026-07-11 deploy ping, migration `20260707000013`).
+    /// OPTIONAL by the permanent posture: consume-if-present, never
+    /// required — a server without the key (or the pre-15.7 fake) decodes
+    /// as nil and nothing changes.
+    public var replaced: [FragmentsReplacedReceipt]?
 
-    public init(applied: Int, skipped: Int, conflicts: [FragmentsPushConflict] = []) {
+    public init(
+        applied: Int, skipped: Int,
+        conflicts: [FragmentsPushConflict] = [],
+        replaced: [FragmentsReplacedReceipt]? = nil
+    ) {
         self.applied = applied
         self.skipped = skipped
         self.conflicts = conflicts
+        self.replaced = replaced
+    }
+}
+
+/// One 15.7 `replaced` receipt: "this APPLIED push replaced a differing
+/// LIVE non-empty body" — genuine-OVERWRITE-only, deliberately NOT
+/// genuine-loss-only (their 2026-07-10 re-pin: every ordinary edit of an
+/// already-synced entry draws one for the pusher's own previous body).
+/// LOSS CLASSIFICATION IS THE CONSUMER'S JOB — the engine's three
+/// discrimination rules (contract ask 13), never unconditional. Emitted
+/// only for `notes`/`journal_entries`; never on plain inserts, identical
+/// bodies, LWW-skipped pushes, or resurrect-over-tombstone.
+public struct FragmentsReplacedReceipt: Equatable, Sendable, Codable {
+    public var id: String
+    /// The body the push destroyed server-side — the ONLY copy that
+    /// crosses the wire; dropping it un-discriminated is the loss the
+    /// receipt exists to prevent.
+    public var previousBody: String
+    /// The destroyed body's own `updated_at` — the prior row's
+    /// CLIENT-stamped LWW key (verified in their deployed SQL: `select
+    /// body, updated_at from … where deleted_at is null`), NOT a server
+    /// stamp. Opaque; the engine's discrimination never reads it.
+    public var previousUpdatedAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case previousBody = "previous_body"
+        case previousUpdatedAt = "previous_updated_at"
+    }
+
+    public init(id: String, previousBody: String, previousUpdatedAt: String) {
+        self.id = id
+        self.previousBody = previousBody
+        self.previousUpdatedAt = previousUpdatedAt
     }
 }
 

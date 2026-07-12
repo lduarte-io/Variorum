@@ -1020,8 +1020,14 @@ walked and stands (nothing new queued).
    (handoff item 4) and Site URL/Authorization Path point there permanently.
 2. The two DD380EAF fixture posts remain in the library (owned) — delete via
    Phase 10's lifecycle UI.
-3. Fragments' 15.7 deploy ping still pending (ask-13 consumption stays the
-   named follow-up; nothing assumed).
+3. ~~Fragments' 15.7 deploy ping still pending (ask-13 consumption stays the
+   named follow-up; nothing assumed).~~ **RESOLVED 2026-07-11, hours after the
+   sitting:** the ping arrived; the deployed SQL was verified against their repo
+   (author-authorized read-only look — their prose's `"conflicts": {}` example was
+   wrong per their own SQL, the recorded trap); the fake server is pinned to the
+   final shape and the consumption path shipped under ask 13's three discrimination
+   rules, closing the 9b "first-push overwrite window" residual. Core 545/62.
+   Record: the contract's "Ask 13 CLOSED" addendum.
 4. The Phase 7/9 combined feel pass remains owed whenever the author wants it.
 
 **THE PHASE IS CLOSED (2026-07-11).** Phase 10 baselines: core 540/62 ·
