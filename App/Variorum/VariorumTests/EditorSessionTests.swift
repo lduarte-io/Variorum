@@ -204,6 +204,41 @@ struct EditorSessionTests {
             #expect(h.textView.selectedRange() == selection)
         }
     }
+
+    /// Phase 10 Step 1 — the KnownIssues echo-detection pin (red on old):
+    /// detecting our own autosave echo must not read the surface at all.
+    /// The old path extracted `attributedSubstring` for EVERY slot on each
+    /// clean projection arrival — O(post length) main-thread work at
+    /// debounce rate, 40 reads for this post; the map-based check performs
+    /// zero.
+    @Test func anEchoProjectionPerformsZeroSurfaceReads() async throws {
+        let blocks = (0..<40).map { "block \($0) text with some words in it" }
+        try await withEditor(seedBlocks: blocks) { h in
+            h.type("!", at: 5)
+            await h.flush()
+            let echo = try h.storeSlots()
+            let surface = h.documentText
+            let reads = h.model.surfaceTextReads
+            h.model.applyProjection(echo)  // the echo of our own autosave
+            #expect(h.model.surfaceTextReads - reads == 0)
+            #expect(h.documentText == surface)  // and it stayed an echo: untouched
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    /// The soundness half of the Step 1 fix: the map must never claim an
+    /// EXTERNAL same-length change is our echo — the surface re-renders.
+    @Test func aSameLengthExternalChangeIsNotMistakenForAnEcho() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
+            let slots = try h.storeSlots()
+            // Same length as "alpha", different text (sync, another window).
+            try h.session.operations.autosave(
+                slots[0].variantID!, text: "ALPHA", charDelta: 5)
+            try h.reload()
+            #expect(h.documentText == "ALPHA\nbeta")
+            try expectStoreMatchesView(h)
+        }
+    }
 }
 
 @MainActor

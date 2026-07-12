@@ -185,6 +185,18 @@ final class EditorViewModel {
     /// Times `desyncRecovery` has fired this session — the Step 8 soak
     /// asserts ZERO (store == index == surface through every interleaving).
     @ObservationIgnored private(set) var desyncRecoveryCount = 0
+    /// The text the surface currently holds per variant — maintained at
+    /// every adoption point (full render, differential, structural apply)
+    /// and every edit record, so `surfaceMatches` detects our own autosave
+    /// echo WITHOUT reading the surface (Phase 10 Step 1 — the KnownIssues
+    /// O(post-length) echo-compare fix: the old path extracted
+    /// `attributedSubstring` for every slot on every clean projection
+    /// arrival, document-proportional main-thread work at debounce rate).
+    @ObservationIgnored private var surfaceTextByVariant: [String: String] = [:]
+    /// Surface text extractions (`viewText` calls), test-visible: the echo
+    /// pin asserts a projection echo performs ZERO of these (red on the old
+    /// per-slot-extraction path).
+    @ObservationIgnored private(set) var surfaceTextReads = 0
     /// Times the differential-apply DEBUG oracle found the surface diverged
     /// from the store projection — the soak asserts ZERO (the author-
     /// directed proof that the differential path lands safely).
@@ -365,6 +377,7 @@ final class EditorViewModel {
             // Our own autosave echo (or metadata-only movement): adopt the
             // projection for badge/fan data, touch nothing in the view.
             slots = new
+            adoptSurfaceTextMap(new)
             refreshBadges()
             return
         }
@@ -378,12 +391,15 @@ final class EditorViewModel {
     /// True when the projection and the live surface agree on every slot:
     /// same blocks, same rendered variants, same texts, same editability.
     ///
-    /// Cost note (review round 1, MINOR 8): the cheap fields short-circuit
-    /// first, but a genuine echo compares every slot's text — O(post
-    /// length) on the main thread, rate-bounded by the autosave debounce.
-    /// Measured fine at 10k words; flagged in KnownIssues so Phase 10's
-    /// multi-post views don't inherit it (direction: track last-flushed
-    /// texts per variant and compare only candidates).
+    /// Cost (Phase 10 Step 1 — resolves the KnownIssues echo-detection row):
+    /// the surface is NEVER read here. `surfaceTextByVariant` carries the
+    /// text the surface is known to hold per variant — written at every
+    /// adoption point and every edit record — so the echo check is an
+    /// in-memory comparison (no `attributedSubstring` extraction, no
+    /// allocation; the old path extracted every slot's text from the
+    /// storage on each clean projection arrival, O(post length) of
+    /// main-thread surface reads at autosave-debounce rate). The pin
+    /// asserts `surfaceTextReads` stays flat through an echo.
     private func surfaceMatches(_ new: [Queries.RenderedBlock]) -> Bool {
         guard new.count == index.entries.count else { return false }
         for (i, slot) in new.enumerated() {
@@ -394,11 +410,27 @@ final class EditorViewModel {
                   editable == entry.editable
             else { return false }
             let text = slot.text ?? ""
-            guard text.utf16.count == entry.length,
-                  text == viewText(index.range(ofEntryAt: i))
-            else { return false }
+            guard text.utf16.count == entry.length else { return false }
+            guard let variantID = slot.variantID else {
+                // A gap slot renders as an empty read-only range; the length
+                // check above (0 == 0) is the whole comparison.
+                continue
+            }
+            guard text == surfaceTextByVariant[variantID] else { return false }
         }
         return true
+    }
+
+    /// Adopts `new` as the known surface text per variant — called wherever
+    /// the surface is (re)written from a projection, so the map always
+    /// describes what the view actually shows.
+    private func adoptSurfaceTextMap(_ new: [Queries.RenderedBlock]) {
+        var map: [String: String] = [:]
+        map.reserveCapacity(new.count)
+        for slot in new {
+            if let variantID = slot.variantID { map[variantID] = slot.text ?? "" }
+        }
+        surfaceTextByVariant = map
     }
 
     /// Same block sequence, different content (choose-variant, an external
@@ -416,6 +448,7 @@ final class EditorViewModel {
         }
         index = BlockRangeIndex(slots: new, tail: hasOpenTail ? tailText : nil)
         slots = new
+        adoptSurfaceTextMap(new)
         if edited {
             // Undo entries recorded against the old surface would replay at
             // stale offsets — across-block corruption risk; drop them.
@@ -442,6 +475,7 @@ final class EditorViewModel {
         suppressEditProcessing = false
         index = newIndex
         slots = new
+        adoptSurfaceTextMap(new)
         tailText = tail ?? ""
         textView.undoManager?.removeAllActions()
         if let anchor {
@@ -569,6 +603,10 @@ final class EditorViewModel {
             return
         }
         let text = viewText(index.range(ofEntryAt: entryIndex))
+        // The edited block's surface truth, for echo detection (Step 1):
+        // this extraction is O(the edited block) and already paid for the
+        // autosave itself.
+        surfaceTextByVariant[variantID] = text
         let oldLength = editedRange.length - delta
         autosave.record(
             variantID: variantID, text: text,
@@ -688,6 +726,7 @@ final class EditorViewModel {
         //   gesture: they run through an undo-stack-FREE Operations so
         //   ⌥⌘Z never offers an inverse for something she never did.
         for correction in outcome.corrections {
+            surfaceTextByVariant[correction.variantID] = correction.text
             autosave.record(
                 variantID: correction.variantID,
                 text: correction.text,
@@ -732,6 +771,9 @@ final class EditorViewModel {
         if normalized != tailText {
             programmaticReplace(region, with: normalized, blockID: nil, caretToEndIfWasAtEnd: true)
             textView?.undoManager?.removeAllActions()
+        }
+        for block in outcome.applied {
+            surfaceTextByVariant[block.variantID] = block.text
         }
         index.crystallize(
             minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },
@@ -1061,6 +1103,7 @@ final class EditorViewModel {
         // no surface cost — the store leads; nothing here was diffed).
         index = BlockRangeIndex(slots: fresh, tail: hasOpenTail ? tailText : nil)
         slots = fresh
+        adoptSurfaceTextMap(fresh)
         // The directive: text-undo clears on EVERY structural rewrite —
         // offsets after the seam shifted; a stale replay is the corruption
         // class regardless of rewrite strategy.
@@ -1656,6 +1699,7 @@ final class EditorViewModel {
     // MARK: - Surface plumbing
 
     private func viewText(_ range: NSRange) -> String {
+        surfaceTextReads += 1  // the Step 1 echo pin counts these
         guard let storage = textView?.textStorage else { return "" }
         guard range.upperBound <= storage.length else { return "" }
         return storage.attributedSubstring(from: range).string
