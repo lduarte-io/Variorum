@@ -22,9 +22,14 @@ final class FolderViewModel {
     @ObservationIgnored private let session: AppSession
     let tagID: String
 
+    /// The bounded window (the library's 200 — review round 1, MINOR 3);
+    /// +1 probe so the marker never false-positives (round 2 NIT).
+    static let window = 200
+
     private(set) var posts: [Queries.TimelineItem] = []
     private(set) var tagPath: String?
     private(set) var lastError: String?
+    private(set) var truncated = false
 
     init(session: AppSession, tagID: String) {
         self.session = session
@@ -38,7 +43,9 @@ final class FolderViewModel {
             }
             // Bounded like the library (review round 1): the folder
             // listing is corpus-shaped; the standing fetch stays viewport-shaped.
-            for try await value in session.database.observeTaggedPosts(tagID, limit: 200) {
+            for try await value in session.database.observeTaggedPosts(
+                tagID, limit: Self.window + 1
+            ) {
                 adopt(value)
             }
         } catch is CancellationError {
@@ -47,9 +54,12 @@ final class FolderViewModel {
         }
     }
 
-    /// Verbatim adoption — the query's membership and order ARE the view's.
+    /// Verbatim adoption up to the window; the +1 probe row becomes the
+    /// truncation marker (round 2 NIT: never a silent cut, the book-view
+    /// parity).
     func adopt(_ new: [Queries.TimelineItem]) {
-        posts = new
+        truncated = new.count > Self.window
+        posts = truncated ? Array(new.prefix(Self.window)) : new
     }
 }
 
@@ -78,20 +88,27 @@ struct FolderView: View {
                     .padding(8)
                 Spacer()
             } else {
-                List(model.posts, id: \.postID) { item in
-                    Button {
-                        openPost(item.postID)
-                    } label: {
-                        HStack {
-                            Text(item.title?.isEmpty == false ? item.title! : "Untitled")
-                            if let date = item.entryDate {
-                                Text(date).font(.caption).foregroundStyle(.secondary)
+                List {
+                    ForEach(model.posts, id: \.postID) { item in
+                        Button {
+                            openPost(item.postID)
+                        } label: {
+                            HStack {
+                                Text(item.title?.isEmpty == false ? item.title! : "Untitled")
+                                if let date = item.entryDate {
+                                    Text(date).font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
                             }
-                            Spacer()
+                            .contentShape(Rectangle())
                         }
-                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+                    if model.truncated {
+                        Text("Showing the \(FolderViewModel.window) most recently touched posts with this tag — older ones aren't listed.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             if let error = model.lastError {

@@ -198,6 +198,26 @@ struct EditorSessionTests {
         }
     }
 
+    /// Round 2, MINOR (red-on-current): the QUIT door must land the
+    /// leading-run attachment's record inside the awaited finalize task —
+    /// the delegate replies terminateNow right after `await task.value`,
+    /// so a record left in the 500 ms autosave debounce dies with the
+    /// process and the typed gap collapses on relaunch.
+    @Test func quitTimeFinalizeLandsTheAttachedGapBeforeReturning() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            h.type("\n", at: 5)   // open the tail
+            h.type("A")
+            h.type("\n")
+            h.type("\n")           // the typed gap… then ⌘Q inside the idle window
+            await h.model.finalizeWork()?.value  // the delegate awaits ONLY this
+            let texts = try await h.database.read { [postID = h.postID] db in
+                try Queries.renderPost(db, containerID: postID).map { $0.text ?? "" }
+            }
+            #expect(texts == ["alpha", "A\n"],
+                    "the typed gap survives ⌘Q — the attachment lands inside the awaited task")
+        }
+    }
+
     /// The paste half of the same ruling, end to end through the editor.
     @Test func pastedBlankLinesPersistOnSurfaceAndStore() async throws {
         try await withEditor(seedBlocks: ["existing"]) { h in

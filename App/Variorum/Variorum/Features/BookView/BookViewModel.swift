@@ -29,6 +29,10 @@ final class BookViewModel {
     private(set) var entries: [Queries.ReadingEntry] = []
     private(set) var readingName: String?
     private(set) var lastError: String?
+    /// True when the window really is hiding later entries (round 2 NIT:
+    /// observing window+1 and capping in `adopt` means a reading of
+    /// EXACTLY the window size never false-positives the marker).
+    private(set) var truncated = false
 
     init(session: AppSession, readingID: String) {
         self.session = session
@@ -45,7 +49,7 @@ final class BookViewModel {
                 try Queries.reading(db, id: readingID)?.name
             }
             for try await value in session.database.observeReading(
-                readingID, limit: Self.entryWindow
+                readingID, limit: Self.entryWindow + 1  // +1: the truncation probe
             ) {
                 adopt(value)
             }
@@ -55,16 +59,13 @@ final class BookViewModel {
         }
     }
 
-    /// Adoption is verbatim — the query's order and content ARE the view's
-    /// (internal so tests pin exactly that).
+    /// Adoption is verbatim up to the window — the query's order and
+    /// content ARE the view's (internal so tests pin exactly that); the
+    /// +1 probe row is consumed into `truncated`, never rendered.
     func adopt(_ new: [Queries.ReadingEntry]) {
-        entries = new
+        truncated = new.count > Self.entryWindow
+        entries = truncated ? Array(new.prefix(Self.entryWindow)) : new
     }
-
-    /// True when the bounded window may be hiding later entries (round 1
-    /// NIT: the journaling book must never truncate SILENTLY — the view
-    /// shows a marker; real windowing is Phase 12's).
-    var truncated: Bool { entries.count >= Self.entryWindow }
 
     /// The section header to show ABOVE entry `i`, if any: grouping is
     /// Phase 4's (`sectionPath` per entry); clustering into headers is the

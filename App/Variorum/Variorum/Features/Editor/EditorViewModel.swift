@@ -317,6 +317,14 @@ final class EditorViewModel {
                 // Keeps index/view/bookkeeping consistent when the editor
                 // is still alive (quit path); harmless after a post switch.
                 self.finishMint(minted, kind: kind)
+                // The quit belt (round 2, MINOR): finishMint's leading-run
+                // attachment records into the 500 ms autosave debounce, and
+                // the app delegate replies terminateNow right after this
+                // task — a record left pending dies with the process and
+                // the typed gap collapses on relaunch. Land it HERE, inside
+                // the awaited task (this also makes toggleSeal's trailing
+                // flush a redundant belt rather than load-bearing).
+                await self.autosave.flushNow()
             } catch {
                 self.showOperationError(error)
             }

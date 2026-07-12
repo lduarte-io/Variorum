@@ -46,9 +46,11 @@ public enum SegmentationRules {
     /// option (a)):** the newline run BETWEEN pieces becomes block CONTENT —
     /// k newlines between two pieces store k−1 trailing newlines on the
     /// preceding piece, and the editor's single-`"\n"` separator re-creates
-    /// the last, so the surface reproduces the paste exactly. Newlines are
-    /// content (I4); this stores the ones the author pasted, nothing
-    /// invented. Edge runs (leading/trailing whitespace-only lines of the
+    /// the last, so the surface reproduces the paste's newline structure
+    /// exactly (pure-newline runs are the preserved class: a blank line
+    /// carrying stray horizontal whitespace normalizes to a pure newline —
+    /// `"A\n \nB"` renders back as `"A\n\nB"`). Newlines are content (I4);
+    /// this stores the ones the author pasted, nothing invented. Edge runs (leading/trailing whitespace-only lines of the
     /// whole text) drop as before — there is no adjacent piece for them to
     /// separate. Unspaced text segments identically to the pre-ruling
     /// behavior.

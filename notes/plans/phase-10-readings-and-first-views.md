@@ -707,8 +707,10 @@ so it holds by construction and by test). Size rides the font
   same point release as the Phase 6 spike baseline; no macOS update
   occurred mid-phase, so no spike re-run owed.
 
-**Final counts: core 562/62 · Mac 302/54 · mobile 11/4** (baselines were
-549/62 · 254/45 · 11/4).
+**Step-10 counts: core 562/62 · Mac 302/54 · mobile 11/4** (baselines
+were 549/62 · 254/45 · 11/4). *(Superseded by the post-ladder FINAL
+counts at the end of the round-2 dispositions: core 562/62 · Mac 311/55 ·
+mobile 11/4.)*
 
 **PROVISIONALs (QUESTIONS #17, bundled):** badge-tap = focus-first;
 timeline/folder = open-in-editor only; pool = sidebar section — plus the
@@ -718,11 +720,10 @@ satisfaction). **In-phase decisions recorded:** block tagging deferred to
 Phase 11's pool work; the folder view shows archived posts (the Phase 4
 tag-lookup ratification followed).
 
-**Residuals recorded for the reviewer/author:** the interrupted-gap
-corner — a >2 s pause right after typing blank lines (before the next
-paragraph starts) idle-mints the piece and the pending gap drops (edge
-runs drop at mint; recovery is ordinary typing — with the ruling,
-Enter at a block's end appends trailing-newline content); JumpPrimitive's
+**Residuals recorded for the reviewer/author:** ~~the interrupted-gap
+corner~~ (RETRACTED at review round 1 — the gap-drop was MAJOR 2, fixed:
+the `.idle` mint + leading-run attachment make typed gaps durable the
+moment they exist; see the round-1 dispositions); JumpPrimitive's
 constant ≈8 px container-space scroll-target residual (the tint trace's
 family, left untouched deliberately); the SwiftUI-`.task`-under-test-host
 quirk (representable lifecycles fire, `.task` doesn't; production
@@ -855,3 +856,58 @@ the ratified default `"\n\n"` join.
 **Post-round counts: core 562/62 · Mac 309/55 · mobile 11/4 — all
 green** (Mac +7: the two MAJOR pins, the planner pin, the detach pin, the
 two inline window tests, and the eager-attachment pin).
+
+### Review round 2 — dispositions (2026-07-12; ZERO new BLOCKER/MAJOR — the ladder CLOSES; all findings AGREED)
+
+**MINOR (the quit door strands the leading-run attachment's record) —
+AGREED, fixed, RED-ON-CURRENT verified.** Mechanism confirmed by my own
+trace and by the pin failing BEFORE the fix: `finalizeWork`'s `.idle`
+mint parks the run, `finishMint`'s trailing pass attaches it — into the
+autosave coordinator's 500 ms DEBOUNCE — and the task returns; the app
+delegate replies `terminateNow` right after `await task.value`, so the
+record dies with the process and the typed gap collapses on relaunch
+(exposure: a gap typed < ~2 s before ⌘Q; payload spacing bytes, never
+prose). The `toggleSeal` asymmetry was the tell — it got the trailing
+flush belt, the quit door didn't. **Fix:** `finalizeWork`'s task ends
+with `await self.autosave.flushNow()` after `finishMint` (toggleSeal's
+second flush is now a redundant belt, not load-bearing). **Pin
+`quitTimeFinalizeLandsTheAttachedGapBeforeReturning`, verified red on
+the PRE-fix code** (store read `["alpha","A"]` — the gap stranded).
+
+**NIT (truncation marker false-positives at exactly the window) —
+AGREED, fixed:** the book view observes `entryWindow + 1` as a probe;
+`adopt` consumes the probe row into `truncated` and renders exactly the
+window — a reading of exactly 300 posts shows no marker (pinned:
+`theTruncationMarkerNeverFalsePositivesAtExactlyTheWindow`).
+
+**NIT (silent-cut parity: folder + recovery) — AGREED, fixed:** the same
+probe-and-marker treatment — FolderView (window 200, "most recently
+touched posts with this tag") and RecoveryView (window 500, per-section
+markers). No listing in the phase cuts silently now.
+
+**NIT (`bulkSegments` doc overclaims exact reproduction) — AGREED, doc
+fixed:** the API doc now states the preserved class precisely — pure-
+newline runs; a blank line carrying stray horizontal whitespace
+normalizes (`"A\n \nB"` renders back `"A\n\nB"`), matching what the
+closeout already recorded.
+
+**NIT (typed gap after a LOCKED last block collapses at idle) — AGREED,
+recorded (record-not-fix, as the reviewer framed):** the attachment
+guard skips a non-editable last entry deliberately — writing the run
+into a locked variant would violate the lock, so the run has no legal
+home and the `.idle` mint's edge-drop collapses it visibly. The only
+lock-respecting outcome; recorded HERE beside the trailing-spaces junk
+edge as the second boundary of the preserved class.
+
+**NIT (`toggleSeal` vs `finishMint`'s compensating deletions — an
+unordered race on the serial runner) — AGREED, recorded (the reviewer's
+own framing: an observation, not a fix demand; not deterministically
+pinnable without a runner-ordering seam):** if an edit lands mid-seal-
+flight, a compensating `deleteBlock` can reach the runner after
+`lockPost` and refuse under the seal — superseded minted content stays
+frozen with a visible error; unseal recovers; nothing is lost. ms-window,
+edit-during-await class (the Phase 9b round-3 residual family).
+
+**FINAL counts after round 2: core 562/62 · Mac 311/55 · mobile 11/4 —
+all green** (Mac +2: the quit-door pin, the truncation-probe pin). These
+are the Phase 11 baselines.

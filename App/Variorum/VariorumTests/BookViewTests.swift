@@ -112,6 +112,24 @@ struct BookViewTests {
         }
     }
 
+    @Test func theTruncationMarkerNeverFalsePositivesAtExactlyTheWindow() async throws {
+        // Round 2 NIT: the +1 probe — a reading of EXACTLY the window size
+        // shows no marker; one past it caps the render and marks.
+        try await withBookWorld(posts: 1) { session, _, readingID, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            func entry(_ i: Int) -> Queries.ReadingEntry {
+                Queries.ReadingEntry(postID: "p\(i)", title: nil, entryDate: nil, sectionPath: nil)
+            }
+            model.adopt((0..<BookViewModel.entryWindow).map(entry))
+            #expect(!model.truncated)
+            #expect(model.entries.count == BookViewModel.entryWindow)
+            model.adopt((0..<(BookViewModel.entryWindow + 1)).map(entry))
+            #expect(model.truncated)
+            #expect(model.entries.count == BookViewModel.entryWindow,
+                    "the probe row is consumed into the flag, never rendered")
+        }
+    }
+
     @Test func sectionHeadersRenderExactlyAtSectionBoundaries() async throws {
         try await withBookWorld(posts: 1) { session, _, readingID, _ in
             let model = BookViewModel(session: session, readingID: readingID)

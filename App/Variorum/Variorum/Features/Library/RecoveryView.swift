@@ -20,8 +20,14 @@ import VariorumCore
 final class RecoveryViewModel {
     @ObservationIgnored private let session: AppSession
 
+    /// The bounded window (review round 1, MINOR 3); +1 probe so the
+    /// truncation markers never false-positive (round 2 NIT).
+    static let window = 500
+
     private(set) var archived: [Queries.TimelineItem] = []
     private(set) var deleted: [Queries.TimelineItem] = []
+    private(set) var archivedTruncated = false
+    private(set) var deletedTruncated = false
     private(set) var lastError: String?
 
     init(session: AppSession) {
@@ -30,8 +36,11 @@ final class RecoveryViewModel {
 
     func startArchived() async {
         do {
-            for try await value in session.database.observeArchivedPosts(limit: 500) {
-                archived = value
+            for try await value in session.database.observeArchivedPosts(
+                limit: Self.window + 1
+            ) {
+                archivedTruncated = value.count > Self.window
+                archived = archivedTruncated ? Array(value.prefix(Self.window)) : value
             }
         } catch is CancellationError {
         } catch {
@@ -41,8 +50,11 @@ final class RecoveryViewModel {
 
     func startDeleted() async {
         do {
-            for try await value in session.database.observeDeletedPosts(limit: 500) {
-                deleted = value
+            for try await value in session.database.observeDeletedPosts(
+                limit: Self.window + 1
+            ) {
+                deletedTruncated = value.count > Self.window
+                deleted = deletedTruncated ? Array(value.prefix(Self.window)) : value
             }
         } catch is CancellationError {
         } catch {
@@ -89,6 +101,11 @@ struct RecoveryView: View {
                         }
                     }
                 }
+                if model.archivedTruncated {
+                    Text("Showing the \(RecoveryViewModel.window) most recently archived — older ones aren't listed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             Section("Recently Deleted") {
                 if model.deleted.isEmpty {
@@ -105,6 +122,11 @@ struct RecoveryView: View {
                             Task { await library.restore(postID: item.postID) }
                         }
                     }
+                }
+                if model.deletedTruncated {
+                    Text("Showing the \(RecoveryViewModel.window) most recently deleted — older ones aren't listed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
