@@ -77,6 +77,72 @@ struct BridgePushTests {
         }
     }
 
+    @Test func aReceiptForTheLastPulledBodyIsAKnowingReplacement() async throws {
+        try await withBridge { bridge in
+            // Fragments writes first; a full round PULLS and lands it — the
+            // agreed hash is now the last PULLED body (cold review NIT:
+            // rule (i)'s "last pulled" half, previously tested only via a
+            // prior push-accept).
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: "user-author", day: "2026-07-09",
+                body: "Written in Fragments first.",
+                updatedAt: "2026-07-02T00:00:00.000Z")
+            _ = try await bridge.engine.run()
+            #expect(try bridge.rendered(day: "2026-07-09") == "Written in Fragments first.")
+            // A local edit re-projects; the receipt names the PULLED body —
+            // a knowing replacement: no card, no self-conflict.
+            let blockID = try bridge.firstBlockID(day: "2026-07-09")!
+            let variantID = try await bridge.db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COALESCE(cb.chosen_variant_id, b.default_variant_id)
+                        FROM container_block cb JOIN block b ON b.id = cb.block_id
+                        WHERE cb.block_id = ? AND cb.deleted_at IS NULL
+                        """,
+                    arguments: [blockID])!
+            }
+            try bridge.ops.autosave(variantID, text: "Edited in Variorum after.", charDelta: 5)
+            let report = try await bridge.engine.push()
+            #expect(report.pushed == 1)
+            #expect(report.rescuedReceipts == 0)
+            #expect(try bridge.liveVariants(blockID: blockID).count == 1)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Edited in Variorum after.")
+        }
+    }
+
+    @Test func anEmptiedDayReprojectionPreservesTheDestroyedUnseenBody() async throws {
+        try await withBridge { bridge in
+            try bridge.makeEntry(day: "2026-07-09", text: "Full draft.")
+            _ = try await bridge.engine.push()
+            // An unseen Fragments save lands INSIDE the stamp tie window
+            // (ties go to the pusher, so an equal stamp overwrites our
+            // row); our next push — strictly above the recorded stamp —
+            // wins it back without ever having pulled it.
+            let stampAfterFirst = await bridge.server
+                .currentEntry(id: bridge.entryID(day: "2026-07-09"))!.updatedAt
+            let unseen = String(
+                repeating: "the only copy of this fragments save. ", count: 4)
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: "user-author", day: "2026-07-09",
+                body: unseen, updatedAt: stampAfterFirst)
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == unseen)
+            // The author empties the day: the empty re-projection is
+            // DESIGNED behavior — and it destroys the unseen save with NO
+            // slot left to carry a rescue take (cold review, MAJOR 2: this
+            // route falsified the "defensively unreachable" claim). The
+            // note must preserve the FULL body — the only remaining copy
+            // (red on the shipped 80-char excerpt).
+            let blockID = try bridge.firstBlockID(day: "2026-07-09")!
+            try bridge.ops.deleteBlock(blockID)
+            let report = try await bridge.engine.push()
+            #expect(report.pushed == 1)
+            #expect(report.rescuedReceipts == 0)
+            #expect(report.notes.contains { $0.contains(unseen) })
+            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "")
+        }
+    }
+
     @Test func changedEntryPushesOnceUnderTheDerivedID() async throws {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "Dear diary, day one.")

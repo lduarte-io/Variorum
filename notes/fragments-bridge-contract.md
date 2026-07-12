@@ -271,3 +271,36 @@ the landing half's both-changed path keeps Variorum's text and cards the pulled 
 nothing discards. Engine tests: rule (i) on an ordinary edit (no self-conflict),
 rule (ii) containment, rule (iii) end-to-end rescue (`BridgePushTests`). Core suite
 after: **545/62** (was 540/62).
+
+**Cold review of the consumption diff (same day, author-requested — a fresh Fable
+reviewer over commit `09b4444`, the canonical REVIEW_PROMPT verbatim): 2 MAJOR /
+1 MINOR / 3 NIT — ALL AGREED; all fixed same-day except one recorded-only NIT.**
+MAJOR 1 (the one-shot receipt was unprotected): a throw anywhere in the rescue path
+after `recordDay` dropped the only copy of the destroyed body — the scheduler's
+"the day hashes keep everything, the next trigger retries" premise is FALSE for
+receipts (the recorded hash already matches, nothing re-pushes, and an identical
+re-push draws no receipt by the identical-body predicate). Fixed structurally:
+consumption MOVED BEFORE `recordDay`, and `consumeReplacedReceipt` no longer
+throws — every failure arm returns a visible note carrying the FULL body
+(`recordDay` throwing after a successful rescue is safe by the same predicate: the
+stale hash re-pushes the identical body, no new receipt, records then). MAJOR 2
+(the "no landable block" arm was REACHABLE, not defensive): the author empties a
+day → the designed empty re-projection destroys an unseen save that won inside the
+stamp-quantization tie window → no slot exists for a take — and the shipped arm
+truncated the only copy to 80 characters. Fixed: the arm preserves the full body in
+the note; the reviewer's option (b) — minting a block to carry the take, which
+would resurrect content the author just emptied — is deliberately NOT built (a
+product call, the author's if ever wanted). **The red-on-old pin was verified by
+behavioral revert** (the emptied-day test fails on the pre-fix engine exactly at
+the full-body assertion). MINOR: three stale Phase-10-baseline carriers updated.
+NITs: an id-mismatched receipt (impossible per the verified SQL — pure drift belt,
+no pin constructible against the real contract) is now surfaced with its body,
+never silently dropped; rule (i)'s "last PULLED" half gained its own pin (only the
+pushed half was tested); the Fragments-trim noise-card interaction recorded as
+bounded, doctrine-consistent noise — no action, the reviewer's own call. **THE
+HONEST RESIDUAL (supersedes this addendum's earlier unqualified "closes the
+residual"):** the receipt is delivered exactly once, so a PROCESS DEATH between the
+server applying a push and the rescue landing loses it — sub-second, same-process,
+unfixable client-side, and now the only remaining sliver of the first-push
+overwrite window. Final core suite: **547 green in 62 suites** (the Phase 10
+baseline; was 540 at the 9c ladder's close).

@@ -531,8 +531,40 @@ public struct BridgeEngine: Sendable {
                 deletedAt: nil)
             let response = try await transport.push([entry])
             if response.applied == 1 {
+                // The 15.7 `replaced` receipts FIRST (contract ask 13 — LIVE
+                // per their 2026-07-11 deploy ping): a receipt is delivered
+                // EXACTLY ONCE — an identical re-push draws no second one —
+                // so it is consumed BEFORE anything else that can throw
+                // (cold review, MAJOR 1: consuming after recordDay let a
+                // rescue-path error drop the only copy, and the scheduler's
+                // "the day hashes keep everything, the next trigger retries"
+                // premise is FALSE for receipts — the recorded hash already
+                // matches, so nothing re-pushes). consumeReplacedReceipt
+                // never throws; every failure arm preserves the full body
+                // visibly. A receipt means "this push replaced a differing
+                // live body", NOT "loss" — classification is OURS, never
+                // unconditional. A receipt for an id we did not push is a
+                // drifting server (impossible per the verified SQL) —
+                // surfaced with its body, never silently dropped (review NIT).
+                for receipt in response.replaced ?? [] {
+                    guard receipt.id == entry.id else {
+                        report.notes.append(
+                            "push of \(candidate.day): the server returned a receipt for a row we did not push (\(receipt.id)) — not consumed (server drift?); its body, preserved: \(receipt.previousBody)")
+                        continue
+                    }
+                    let outcome = await consumeReplacedReceipt(
+                        receipt, day: candidate.day, pushedBody: candidate.body,
+                        agreedHashBeforePush: candidate.agreedHash)
+                    if outcome.rescued { report.rescuedReceipts += 1 }
+                    if let note = outcome.note { report.notes.append(note) }
+                }
                 // Record the accepted push's own stamps (round 2's
-                // companion fix + the created_at echo source).
+                // companion fix + the created_at echo source). AFTER the
+                // consumption above, deliberately: if THIS write throws,
+                // the rescue already landed, the agreed hash stays stale,
+                // and the next round re-pushes the identical body — which
+                // the server applies with NO new receipt (identical-body
+                // predicate) — and records then; nothing is lost either way.
                 let record = (day: candidate.day, hash: candidate.hash,
                               stamp: entry.updatedAt, createdAt: entry.createdAt)
                 try await database.write { db in
@@ -541,17 +573,6 @@ public struct BridgeEngine: Sendable {
                         remoteStamp: record.stamp, remoteCreatedAt: record.createdAt)
                 }
                 report.pushed += 1
-                // The 15.7 `replaced` receipt (contract ask 13 — LIVE per
-                // their 2026-07-11 deploy ping): consume-if-present, and a
-                // receipt means "this push replaced a differing live body",
-                // NOT "loss" — classification is OURS, never unconditional.
-                if let receipt = response.replaced?.first(where: { $0.id == entry.id }) {
-                    let outcome = try await consumeReplacedReceipt(
-                        receipt, day: candidate.day, pushedBody: candidate.body,
-                        agreedHashBeforePush: candidate.agreedHash)
-                    if outcome.rescued { report.rescuedReceipts += 1 }
-                    if let note = outcome.note { report.notes.append(note) }
-                }
             } else if let conflict = response.conflicts.first {
                 report.rejected += 1
                 if conflict.isUniqueViolation {
@@ -599,11 +620,20 @@ public struct BridgeEngine: Sendable {
     ///        one: rescued as a 'fragments' take through the same
     ///        conflict-as-variant door as the landing half (replay-deduped
     ///        the same way). This closes the 9b closeout's "first-push
-    ///        overwrite window" residual.
+    ///        overwrite window" residual for every in-process path (the
+    ///        honest remainder: a process death between the server applying
+    ///        the push and the rescue landing loses the one-shot receipt —
+    ///        vanishingly narrow, recorded in the contract addendum).
+    ///
+    /// NEVER THROWS (cold review, MAJOR 1): the receipt is delivered
+    /// exactly once, so a propagated error here would drop the only copy of
+    /// the destroyed body — the scheduler's retry cannot recover it (the
+    /// day hash already matches; an identical re-push draws no receipt).
+    /// Every failure arm returns a note carrying the FULL body instead.
     private func consumeReplacedReceipt(
         _ receipt: FragmentsReplacedReceipt, day: String,
         pushedBody: String, agreedHashBeforePush: String?
-    ) async throws -> (rescued: Bool, note: String?) {
+    ) async -> (rescued: Bool, note: String?) {
         // Never emitted for an empty prior body (their SQL: prev_body <> '');
         // belt against a server that drifts.
         guard !receipt.previousBody.isEmpty else { return (false, nil) }
@@ -615,24 +645,46 @@ public struct BridgeEngine: Sendable {
         if pushedBody.contains(receipt.previousBody) {
             return (false, nil)
         }
-        // (iii) — rescue. The push scan guarantees this day had a live,
-        // gap-free entry moments ago; the guards below are defensive
-        // against the store changing underneath, and they surface LOUDLY
-        // rather than silently dropping the only copy of the body.
-        let context = try await readDayContext(day: day)
-        guard let firstSlot = context.slots.first, !firstSlot.isGap,
-              let firstVariantID = firstSlot.variantID else {
-            return (false,
-                "push of \(day) replaced an unseen Fragments body but no landable block exists — NOT rescued (report this); body begins: \(String(receipt.previousBody.prefix(80)))")
+        // (iii) — rescue.
+        do {
+            let context = try await readDayContext(day: day)
+            guard let firstSlot = context.slots.first, !firstSlot.isGap,
+                  let firstVariantID = firstSlot.variantID else {
+                // REACHABLE, not defensive (cold review, MAJOR 2 — the
+                // shipped "defensively unreachable" claim was falsified):
+                // the author empties a day and the empty re-projection —
+                // designed behavior — destroys an unseen save that had won
+                // inside the stamp-quantization tie window; no slot exists
+                // to carry a take. Minting a block here would resurrect
+                // content she just emptied — a product call deliberately
+                // NOT made (option (b) in the review; hers if ever wanted).
+                // The body is preserved in the visible note instead.
+                return (false, Self.unrescuedBodyNote(day: day, body: receipt.previousBody))
+            }
+            if try await hasLiveVariant(blockID: firstSlot.blockID, text: receipt.previousBody) {
+                return (false, nil)  // replay dedupe — a prior round already rescued it
+            }
+            let ops = Operations()
+            _ = try ops.resolveSyncConflict(
+                firstVariantID, losingText: receipt.previousBody, label: "fragments")
+            return (true,
+                "push of \(day) replaced an unseen Fragments body — rescued as a 'fragments' take")
+        } catch {
+            // The check-then-act window (a concurrent structural edit
+            // between the context read and the ops call) or any DB error:
+            // same posture — the body outlives the failure, visibly.
+            return (false, Self.unrescuedBodyNote(
+                day: day, body: receipt.previousBody, error: error))
         }
-        if try await hasLiveVariant(blockID: firstSlot.blockID, text: receipt.previousBody) {
-            return (false, nil)  // replay dedupe — a prior round already rescued it
-        }
-        let ops = Operations()
-        _ = try ops.resolveSyncConflict(
-            firstVariantID, losingText: receipt.previousBody, label: "fragments")
-        return (true,
-            "push of \(day) replaced an unseen Fragments body — rescued as a 'fragments' take")
+    }
+
+    /// The not-rescued arm's note: carries the FULL destroyed body — it is
+    /// the last copy anywhere, and 80 chars of it is not a rescue.
+    static func unrescuedBodyNote(day: String, body: String, error: Error? = nil) -> String {
+        let cause = error.map { " (\($0))" } ?? " (no landable block)"
+        return "push of \(day) replaced an unseen Fragments body that could NOT be"
+            + " rescued as a take\(cause) — what follows is the only remaining copy;"
+            + " save it if wanted:\n\(body)"
     }
 
     // MARK: - Day context (classification reads)

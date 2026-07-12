@@ -111,4 +111,8 @@ rules — (i) hash-equals the day's last pulled/pushed body → no-op, (ii) cont
 the just-pushed body → no-op, (iii) otherwise rescued as a `'fragments'` take via
 the landing half's conflict-as-variant door, replay-deduped, surfaced as
 `PushReport.rescuedReceipts` + a note. Closes the 9b "first-push overwrite window"
-residual. Core suite after: 545/62.
+residual for every in-process path — the receipt is ONE-SHOT, so consumption runs
+before the day-state write and never throws (every failure arm preserves the full
+body in a visible note; hardened by the same-day cold review — see the contract
+addendum); the recorded remainder is a process death mid-round. Core suite after
+the review round: 547/62.

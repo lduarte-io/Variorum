@@ -43,9 +43,10 @@
 > rows (echo detection O(post length); the "Show Blocks" tint mis-registration; paste
 > spacing — QUESTIONS #12, ASK THE AUTHOR LIVE, never PROVISIONAL).
 > **Baselines — do not re-run at session start:** the Phase 9c closeout's FINAL
-> counts in `notes/plans/phase-09c-auth-alignment.md` (as of the ladder's close:
-> core 540/62 · Mac app 254/45 · mobile 11/4 — re-read the closeout in case the
-> gate sitting added fixes). Remember the two 9d environment traps (piped
+> counts in `notes/plans/phase-09c-auth-alignment.md`: **core 547/62 · Mac app
+> 254/45 · mobile 11/4** (core moved twice post-sitting on 2026-07-11 — the ask-13
+> receipt consumption + its cold-review round; the contract's "Ask 13 CLOSED"
+> addendum is the record). Remember the two 9d environment traps (piped
 > xcodebuild masks exit codes; a live app instance or stale unsigned DerivedData
 > product blocks the Mac test runner). The author is a DAILY USER from this phase
 > on — she signed in at the 9c sitting and both devices sync under real auth; treat

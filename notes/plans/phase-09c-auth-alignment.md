@@ -1026,9 +1026,15 @@ walked and stands (nothing new queued).
    (author-authorized read-only look — their prose's `"conflicts": {}` example was
    wrong per their own SQL, the recorded trap); the fake server is pinned to the
    final shape and the consumption path shipped under ask 13's three discrimination
-   rules, closing the 9b "first-push overwrite window" residual. Core 545/62.
+   rules, closing the 9b "first-push overwrite window" residual for every
+   in-process path (the one-shot-delivery process-death sliver is the recorded
+   remainder). Core 545/62, then 547/62 after the same-day Fable cold review of
+   the diff (2 MAJOR / 1 MINOR / 3 NIT, all agreed + fixed, red-on-old pinned).
    Record: the contract's "Ask 13 CLOSED" addendum.
 4. The Phase 7/9 combined feel pass remains owed whenever the author wants it.
 
-**THE PHASE IS CLOSED (2026-07-11).** Phase 10 baselines: core 540/62 ·
-Mac 254/45 · mobile 11/4 (Mac + mobile re-run green after the sitting's fixes).
+**THE PHASE IS CLOSED (2026-07-11).** Phase 10 baselines: **core 547/62 ·
+Mac 254/45 · mobile 11/4** (Mac + mobile re-run green after the sitting's fixes;
+core superseded twice the same day — 540→545 by the ask-13 receipt consumption,
+545→547 by its Fable cold-review round — record: the contract's "Ask 13 CLOSED"
+addendum).
