@@ -125,6 +125,36 @@ struct LifecycleFacesTests {
         }
     }
 
+    /// Review round 1, MAJOR 1 (red-on-old): sealing from the CommitBar
+    /// runs the FULL teardown contract first — "type the last line, click
+    /// Seal" must never leave the open tail surface-only and permanently
+    /// unmintable under the seal (the lock doctrine: the guard insures
+    /// exactly what it protects).
+    @Test func sealingMintsTheOpenTailBeforeTheFreeze() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            h.type("\n", at: 5)   // open the tail
+            h.type("last line before sealing")
+            #expect(h.model.hasOpenTail)
+            h.model.toggleSeal()
+            await h.settle()
+            var locked = false
+            for _ in 0..<400 {
+                locked = (try? await h.database.read { [postID = h.postID] db in
+                    try Container.fetchOne(db, key: postID)?.locked
+                }) == true
+                if locked { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(2))
+            }
+            #expect(locked, "the seal landed")
+            let texts = try await h.database.read { [postID = h.postID] db in
+                try Queries.renderPost(db, containerID: postID).map { $0.text ?? "" }
+            }
+            #expect(texts == ["alpha", "last line before sealing"],
+                    "the tail minted BEFORE the freeze — nothing is surface-only under the seal")
+        }
+    }
+
     @Test func entryDateEditingRoundTripsThroughJournalDayValidation() async throws {
         try await withEditor(seedBlocks: ["alpha"]) { h in
             await h.model.updateEntryDate("2026-07-12")

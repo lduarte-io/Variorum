@@ -123,8 +123,10 @@ extension Queries {
     /// `"\n\n"` UNLESS the left side already ends in a newline (stored
     /// spacing — option (a)'s trailing-newline content), in which case the
     /// join completes it with a single `"\n"` — so a k-newline paste
-    /// exports as k newlines again, and unspaced posts join byte-identical
-    /// to the pre-ruling `"\n\n"`. One join brain: `renderedText` AND the
+    /// (k ≥ 2) exports as k newlines again, while a SINGLE-newline paste
+    /// stores no trailing content and exports through the default
+    /// `"\n\n"` join (the ratified rendering separator); unspaced posts
+    /// join byte-identical to the pre-ruling `"\n\n"`. One join brain: `renderedText` AND the
     /// bridge's per-day projection both call this — the pushed body always
     /// equals the export.
     public static func joinRenderedTexts(_ texts: [String]) -> String {

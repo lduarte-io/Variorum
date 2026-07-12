@@ -30,7 +30,7 @@ final class RecoveryViewModel {
 
     func startArchived() async {
         do {
-            for try await value in session.database.observeArchivedPosts() {
+            for try await value in session.database.observeArchivedPosts(limit: 500) {
                 archived = value
             }
         } catch is CancellationError {
@@ -41,7 +41,7 @@ final class RecoveryViewModel {
 
     func startDeleted() async {
         do {
-            for try await value in session.database.observeDeletedPosts() {
+            for try await value in session.database.observeDeletedPosts(limit: 500) {
                 deleted = value
             }
         } catch is CancellationError {

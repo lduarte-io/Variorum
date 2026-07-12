@@ -734,3 +734,124 @@ see the app target).
 table/pointer; KnownIssues reconciliation (echo row resolved; tint row
 resolved; paste row resolved per the ruling; the Phase-15 iOS row's
 accidental-vs-meaningful note); the author handoff; the Phase 11 plan.
+
+### Review round 1 — dispositions (2026-07-12; ALL findings AGREED, all fixed; the round-2 anchor)
+
+**MAJOR 1 (toggleSeal loses the open tail) — AGREED, fixed, red-verified.**
+Mechanism self-traced: the sealing branch ran flush-only; an open tail at
+seal time became surface-only and permanently unmintable (every later
+mint path hits the locked-container refusal). The Phase 7 "surface-only
+at quit" ratification presumed a seal arriving from ELSEWHERE
+("seconds-wide-rare"); a same-surface Seal button broke that premise, and
+the lock doctrine everywhere else is "the guard insures exactly what it
+protects." **Fix:** the sealing branch runs the FULL teardown contract —
+`await finalizeWork()?.value` (flush → await mint flight → mint the
+residual tail) + a final `flushNow` for finishMint's corrections — before
+`lockPost`. **Pin `sealingMintsTheOpenTailBeforeTheFreeze`, RED verified
+by behavioral revert** (the reverted code sealed with the tail text
+nowhere in the store: `texts == ["alpha"]`).
+
+**MAJOR 2 (the idle/teardown mint collapses the typed pending gap; the
+recorded recovery was false) — AGREED, fixed, red-verified.** Mechanism
+self-traced end to end, including the reviewer's recovery falsification
+(Enter at the last block's end routes to the `.openTail` verdict — a
+separator, never content — so the collapsed gap could not be re-typed;
+the "interrupted-gap corner" residual was wrong on frequency AND
+recovery, and is retracted). The spec side was already decided (the §14
+delta), so the fix ships: **(1) the `.idle` mint kind**
+(CrystallizationPlanner; used by `idleMintTail` and `finalizeWork`) —
+like bulk, but a trailing typed newline RUN survives: the pieces mint and
+the run minus one separator stays as the still-open tail, making the mint
+region byte-identical (no visible collapse, ever); **(2) the leading-run
+attachment** (`attachLeadingTailRunIfNeeded` + BlockRangeIndex.
+`transferTailPrefixToLastEntry`) — a tail that STARTS with newlines sits
+after a preceding block, and under the ruling those newlines are that
+block's trailing CONTENT (the k−1 rule; the separator is the +1): the
+block's range grows over the run (surface bytes unchanged; the block-ID
+attribute extends; the store follows through an ordinary autosave read
+from the Step-1 surface-text map, so it works even view-less at
+teardown). Composition: the idle mint parks the run; the attachment
+(fired from `crystallizeIfNeeded`, incl. finishMint's trailing pass)
+immediately folds it into content — so a typed gap is durable THE MOMENT
+IT EXISTS, successor or not (the "like any normal editor" behavior the
+author named; typed trailing newlines now persist even at post end, and
+Fragments' own trim covers the bridge's cosmetic side). Reopened-tail
+Enters attach eagerly one by one — same rule, same result as typing
+straight through. **Pins, RED verified by behavioral revert** (kinds
+reverted to `.bulk` + attachment no-op'd):
+`aPauseAfterTypedBlankLinesNeverCollapsesThem` (the dominant rhythm —
+paragraph, ⏎⏎, think >2 s, next paragraph — store `["A\n","B"]`, surface
+`"A\n\nB"`; the revert showed the collapse exactly),
+`entersAfterAMintedBlockPersistAsItsTrailingContent`, and the planner pin
+`idlePlansKeepThePendingTrailingRunOpen`. Recorded reading rider: a
+tail-leading run attaches regardless of HOW the newlines arrived (typed
+or pasted into the tail) — one rule, surface-faithful; the pure
+`bulkSegments` edge-drop still governs the entered text's own edges.
+Junk edge (trailing SPACES inside a blank line at idle time) still
+collapses — pure-newline runs are the preserved class, recorded.
+
+**MINOR 3 (unbounded held observations) — AGREED, fixed (architectural;
+mechanism traced, no pin owed).** The folder listing is corpus-shaped
+(one broad tag approaches the library) and its standing fetch re-runs at
+container-write rate; archives/tombstones accumulate forever under S2 —
+exactly the class Phase 4 bounded `observeLibrary` for.
+`taggedPostItems`/`archivedPosts`/`deletedPosts` gain optional `limit`s
+(one-shot callers unchanged); the three OBSERVATIONS take a REQUIRED
+`limit` (the library discipline); FolderView passes 200 (the library's
+bound), RecoveryView 500 each.
+
+**MINOR 4 (detach keeps `loaded`/`slots` — remade surface permanently
+blank) — AGREED, fixed, red-verified.** Traced: the remade text view's
+EMPTY storage is never written because the differential compares the
+incoming projection against the stale in-memory `slots` (equal ⇒ no
+replacement; the out-of-bounds heal lives inside the changed-slot loop).
+Fix: `detach()` resets `loaded`/`slots`/`index`, so the next attach
+renders fully. **Pin `aDetachReattachCycleRendersTheFreshSurface`, RED
+verified** (`fresh.string == ""` on the revert).
+
+**MINOR 5 (inline overlays never refresh on container scroll) — AGREED,
+fixed, red-verified.** Traced: the inline coordinator observes only
+storage edits; `visibleRect`-pruned badge/tint spans go stale as the book
+view scrolls (nothing re-fires the overlays). Fix REMOVES the staleness
+class instead of racing it: the inline editor's `viewportBounds` is the
+whole surface (`textView.bounds`) — overlay work bounded by the focused
+post (the accepted inline cost model: the surface is laid out to content
+already, fans are rare, tint is an explicit mode), no observers on
+SwiftUI's internal clip view. The detail editor keeps its scroll-driven
+pruning unchanged. **Pin
+`inlineBadgesCoverTheWholePostNotJustTheClippedViewport` (a real clipped
+window; the fanned block outside the visible slice), RED verified**
+(badges `[]` on the revert).
+
+**MINOR 6 (per-keystroke `ensureLayout(documentRange)` — asserted, not
+measured) — AGREED; MEASURED, assertion vindicated and now pinned.** New
+`InlineEditorWindowTests.inlineHeightMaintenanceStaysInsideTheFrameBudgetAtTenThousandWords`
+through the REAL coordinator (`InlineEditorSurface` made internal for
+it): **warm remeasure 0.043 ms; keystroke + remeasure 2.8 ms** at 10k
+words (debug build) — TK2's warm validation walk is trivially cheap; the
+Phase 6 105 ms figure was the COLD pass. Both asserted < 16.7 ms
+(frame-budget bound, the smoke-test pattern); numbers print for the
+record. No height-maintenance redesign needed.
+
+**NIT 7 (↑/↓ on non-manual readings) — AGREED, fixed:** the reorder
+buttons render only under Manual order; other sorts show a caption naming
+why (reorder writes `position`, which a stamp-sorted assembly doesn't
+display — a silent visual no-op otherwise).
+
+**NIT 8 (readingName scans the listing; stale on rename) — AGREED,
+fixed:** new one-liner `Queries.reading(_:id:)` (tolerant by-key fetch);
+BookViewModel uses it. The rename-while-open staleness stays (one-shot;
+cosmetic at author scale — recorded).
+
+**NIT 9 (silent 300-entry truncation of the journaling book) — AGREED,
+fixed:** `BookViewModel.truncated` + a visible marker row ("Showing the
+first 300 posts — the rest of this reading isn't loaded yet; windowing
+arrives with Phase 12"). Never a silent cut on the dated home's surface.
+
+**NIT 10 (joinRenderedTexts doc overclaims k=1) — AGREED, fixed:** the
+doc now says k ≥ 2, and states the single-newline paste exports through
+the ratified default `"\n\n"` join.
+
+**Post-round counts: core 562/62 · Mac 309/55 · mobile 11/4 — all
+green** (Mac +7: the two MAJOR pins, the planner pin, the detach pin, the
+two inline window tests, and the eager-attachment pin).

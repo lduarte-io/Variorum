@@ -136,14 +136,24 @@ struct ManageReadingPostsSheet: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Posts in “\(reading.name)”").font(.headline)
             List {
+                if reading.sortField != .manual {
+                    // Round 1, NIT: reorder writes `position`, which a
+                    // stamp-sorted assembly doesn't display — hide the
+                    // silent no-op instead of offering it.
+                    Text("Ordered by the reading's sort — manual reorder applies in Manual order.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 ForEach(Array(members.enumerated()), id: \.element.postID) { i, entry in
                     HStack {
                         Text(entry.title?.isEmpty == false ? entry.title! : "Untitled")
                         Spacer()
-                        Button("↑") { move(entry.postID, up: true) }
-                            .disabled(i == 0)
-                        Button("↓") { move(entry.postID, up: false) }
-                            .disabled(i == members.count - 1)
+                        if reading.sortField == .manual {
+                            Button("↑") { move(entry.postID, up: true) }
+                                .disabled(i == 0)
+                            Button("↓") { move(entry.postID, up: false) }
+                                .disabled(i == members.count - 1)
+                        }
                         Button("Remove") {
                             Task {
                                 await model.removePost(entry.postID, from: reading.id)

@@ -31,6 +31,14 @@ nonisolated enum CrystallizationPlanner {
         /// Bulk entry (paste): the whole tail segments by the effective
         /// mode and the tail region closes.
         case bulk(Segmentation)
+        /// The idle/teardown durability mint (author ruling 2026-07-12;
+        /// review round 1, MAJOR 2): like bulk, but a trailing typed
+        /// newline RUN survives — the pieces mint, and the run minus the
+        /// separator the last piece gains stays as the still-open tail
+        /// (byte-identical region, no visible collapse); the editor's
+        /// leading-run attachment then folds it into the preceding block
+        /// as the k−1 rule's content.
+        case idle(Segmentation)
         /// One-block posts: the first fresh text mints THE block verbatim.
         case oneBlock
     }
@@ -104,6 +112,21 @@ nonisolated enum CrystallizationPlanner {
             return Plan(kind: kind, mints: segments,
                         remaindersAfter: Array(repeating: "", count: segments.count),
                         remainingTail: nil)
+        case .idle(let mode):
+            let segments = SegmentationRules.bulkSegments(tail, mode: mode)
+            guard !segments.isEmpty else { return nil }
+            // The pending gap: r trailing newlines keep r−1 as the open
+            // tail (the last piece gains the separator), so the region
+            // text stays byte-identical and the run survives the mint.
+            var trailingRun = 0
+            for character in tail.reversed() {
+                if character == "\n" { trailingRun += 1 } else { break }
+            }
+            return Plan(kind: kind, mints: segments,
+                        remaindersAfter: Array(repeating: "", count: segments.count),
+                        remainingTail: trailingRun > 0
+                            ? String(repeating: "\n", count: trailingRun - 1)
+                            : nil)
         case .oneBlock:
             guard !tail.allSatisfy(\.isWhitespace) else { return nil }
             return Plan(kind: kind, mints: [tail], remaindersAfter: [""], remainingTail: nil)

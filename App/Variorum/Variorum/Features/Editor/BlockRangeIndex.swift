@@ -200,6 +200,19 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         tailLength = nil
     }
 
+    /// The leading-run attachment's bookkeeping (Phase 10, the 2026-07-12
+    /// spacing ruling): the tail's first `units` characters become the
+    /// last entry's trailing content — the entry grows, the tail shrinks,
+    /// the document's bytes and total length are unchanged (the separator
+    /// conceptually slides to the transferred run's end).
+    mutating func transferTailPrefixToLastEntry(_ units: Int) {
+        precondition(units > 0, "transfer needs at least one unit")
+        precondition(!entries.isEmpty, "no entry to attach to")
+        precondition((tailLength ?? -1) >= units, "the tail must contain the run")
+        entries[entries.count - 1].length += units
+        tailLength = (tailLength ?? 0) - units
+    }
+
     /// Crystallization bookkeeping (the view edit is the caller's job): the
     /// tail's completed paragraphs became real blocks; the remainder stays
     /// open. `remainingTailLength` nil ⇒ the tail region closed entirely

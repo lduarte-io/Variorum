@@ -174,6 +174,29 @@ struct ReadTierTests {
         }
     }
 
+    /// Review round 1, MINOR 4 (red-on-old): a dismantle→remake cycle on
+    /// the same model must render the fresh surface — the stale
+    /// `loaded`/`slots` made the differential see nothing to replace and
+    /// left the remade view permanently blank.
+    @Test func aDetachReattachCycleRendersTheFreshSurface() async throws {
+        try await withReadTier(seedBlocks: ["alpha", "beta"]) { h in
+            #expect(h.model.documentText == "alpha\nbeta")
+            // SwiftUI dismantles the representable (container move)…
+            h.model.detach()
+            // …and remakes it: a NEW text view, the SAME @State model,
+            // the observation restarts and delivers the SAME projection.
+            let fresh = ReadPostTextView.makeReadSurface()
+            fresh.frame = NSRect(x: 0, y: 0, width: 600, height: 100)
+            h.model.attach(textView: fresh)
+            h.model.applyProjection(
+                try h.database.read { [postID = h.postID] db in
+                    try Queries.renderPost(db, containerID: postID)
+                })
+            #expect(fresh.string == "alpha\nbeta",
+                    "the remade surface renders — never permanently blank")
+        }
+    }
+
     @Test func aPlainClickReportsItsOffsetWhileASelectionDoesNot() async throws {
         try await withReadTier(seedBlocks: ["alpha", "beta"]) { h in
             var reported: [Int] = []

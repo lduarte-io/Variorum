@@ -54,15 +54,17 @@ extension AppDatabase {
     }
 
     /// The archived-posts recovery surface, live (Phase 10 — the face the
-    /// Phase 4 closeout promised `unarchiveContainer`).
-    public func observeArchivedPosts() -> AsyncValueObservation<[Queries.TimelineItem]> {
-        observe { try Queries.archivedPosts($0) }
+    /// Phase 4 closeout promised `unarchiveContainer`). `limit` REQUIRED —
+    /// archives accumulate over years (review round 1).
+    public func observeArchivedPosts(limit: Int) -> AsyncValueObservation<[Queries.TimelineItem]> {
+        observe { try Queries.archivedPosts($0, limit: limit) }
     }
 
     /// The deleted-posts recovery surface, live (Phase 10 —
-    /// `restoreContainer`'s listing).
-    public func observeDeletedPosts() -> AsyncValueObservation<[Queries.TimelineItem]> {
-        observe { try Queries.deletedPosts($0) }
+    /// `restoreContainer`'s listing). `limit` REQUIRED — tombstones are
+    /// forever under S2 (review round 1).
+    public func observeDeletedPosts(limit: Int) -> AsyncValueObservation<[Queries.TimelineItem]> {
+        observe { try Queries.deletedPosts($0, limit: limit) }
     }
 
     /// The live readings, live (Phase 10 — the readings-management face).
@@ -79,12 +81,16 @@ extension AppDatabase {
     }
 
     /// The folder view's listing, live: posts tagged at or under a tag
-    /// (archived included — tag lookups still find them, Phase 4).
+    /// (archived included — tag lookups still find them, Phase 4). `limit`
+    /// is REQUIRED (review round 1 — the observeLibrary discipline): the
+    /// listing is corpus-shaped and the standing fetch re-runs at
+    /// container-write rate.
     public func observeTaggedPosts(
-        _ tagID: String, includeSubtree: Bool = true
+        _ tagID: String, includeSubtree: Bool = true, limit: Int
     ) -> AsyncValueObservation<[Queries.TimelineItem]> {
         observe {
-            try Queries.taggedPostItems($0, tagID: tagID, includeSubtree: includeSubtree)
+            try Queries.taggedPostItems(
+                $0, tagID: tagID, includeSubtree: includeSubtree, limit: limit)
         }
     }
 

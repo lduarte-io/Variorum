@@ -160,7 +160,10 @@ private struct EditorSurface: NSViewRepresentable {
 /// (the container owns scroll position), height published to SwiftUI after
 /// every storage change so the row grows with typing. Everything else —
 /// delegate pipeline, badges, tint, model — is the one editor brain.
-private struct InlineEditorSurface: NSViewRepresentable {
+// Internal (not private): the inline window tests drive the REAL
+// coordinator path — its per-edit remeasure is the measured cost
+// (review round 1, MINOR 6).
+struct InlineEditorSurface: NSViewRepresentable {
     let model: EditorViewModel
     @Binding var height: CGFloat
 

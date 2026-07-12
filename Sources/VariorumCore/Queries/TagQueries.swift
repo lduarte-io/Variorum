@@ -49,8 +49,12 @@ extension Queries {
     /// ratification keeps archived containers out of *ambient* view while
     /// tag lookups still find them; the folder view is a tag lookup.
     /// Tombstoned rows never appear.
+    /// `limit` (review round 1): a HELD observation over this listing must
+    /// bound its standing fetch — the folder listing is corpus-shaped (one
+    /// broad tag approaches the library) and re-fetches at container-write
+    /// rate; the `observeLibrary` discipline applies. One-shot callers omit.
     public static func taggedPostItems(
-        _ db: Database, tagID: String, includeSubtree: Bool = true
+        _ db: Database, tagID: String, includeSubtree: Bool = true, limit: Int? = nil
     ) throws -> [TimelineItem] {
         let tagCondition: String
         var arguments: [(any DatabaseValueConvertible)?]
@@ -68,18 +72,20 @@ extension Queries {
             tagCondition = "app.tag_id = ?"
             arguments = [tagID]
         }
-        return try Row.fetchAll(
-            db,
-            sql: """
-                SELECT DISTINCT c.id AS post_id, c.title AS title,
-                       c.entry_date AS entry_date,
-                       COALESCE(c.last_touched_at, c.created_at) AS stamp
-                FROM post_tag app
-                JOIN container c ON c.id = app.post_id AND c.deleted_at IS NULL
-                WHERE app.deleted_at IS NULL AND \(tagCondition)
-                ORDER BY stamp DESC, c.id DESC
-                """,
-            arguments: StatementArguments(arguments))
+        var sql = """
+            SELECT DISTINCT c.id AS post_id, c.title AS title,
+                   c.entry_date AS entry_date,
+                   COALESCE(c.last_touched_at, c.created_at) AS stamp
+            FROM post_tag app
+            JOIN container c ON c.id = app.post_id AND c.deleted_at IS NULL
+            WHERE app.deleted_at IS NULL AND \(tagCondition)
+            ORDER BY stamp DESC, c.id DESC
+            """
+        if let limit {
+            sql += " LIMIT ?"
+            arguments.append(limit)
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
             .map { row in
                 TimelineItem(
                     postID: row["post_id"], title: row["title"],

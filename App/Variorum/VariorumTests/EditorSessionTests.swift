@@ -149,6 +149,55 @@ struct EditorSessionTests {
         }
     }
 
+    /// Review round 1, MAJOR 2 (red-on-old): the durability backstop must
+    /// never collapse a typed pending gap — the dominant writing rhythm is
+    /// "paragraph, Enter, Enter, THINK (>2 s), next paragraph", and the
+    /// old idle mint dropped the trailing run and visibly collapsed the
+    /// blank lines (the exact pre-ruling behavior the author ruled
+    /// against). The .idle kind keeps the run; the attachment makes it
+    /// durable content immediately.
+    @Test func aPauseAfterTypedBlankLinesNeverCollapsesThem() async throws {
+        try await withEditor(seedBlocks: ["existing"]) { h in
+            h.type("\n", at: 8)  // open the tail
+            h.type("A")
+            h.type("\n")
+            h.type("\n")          // the gap… then the author pauses to think
+            await h.settle()
+            #expect(h.documentText == "existing\nA\n\n")
+            h.model.idleMintTail()  // the 2 s durability backstop fires
+            await h.settle()
+            #expect(h.documentText == "existing\nA\n\n",
+                    "the pause never collapses the typed gap")
+            #expect(try h.storeSlots().map(\.text) == ["existing", "A\n"],
+                    "the piece minted AND the gap is already durable content")
+            // The successor arrives after the pause: structure and spacing
+            // both match typing straight through.
+            h.type("B", at: (h.documentText as NSString).length)
+            await h.settle()
+            h.model.idleMintTail()
+            await h.settle()
+            #expect(try h.storeSlots().map(\.text) == ["existing", "A\n", "B"])
+            #expect(h.documentText == "existing\nA\n\nB")
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    /// The reopened-tail half of the same fix: Enter after a minted block
+    /// opens the tail (the separator gesture); FURTHER Enters are typed
+    /// blank lines and attach eagerly as the block's trailing content —
+    /// durable the moment they exist, successor or not.
+    @Test func entersAfterAMintedBlockPersistAsItsTrailingContent() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            h.type("\n", at: 5)   // opens the tail — this one IS the separator
+            #expect(h.model.hasOpenTail)
+            h.type("\n")           // a typed blank line: content, attached
+            await h.settle()
+            #expect(h.documentText == "alpha\n\n")
+            #expect(try h.storeSlots().map(\.text) == ["alpha\n"])
+            try expectStoreMatchesView(h)
+        }
+    }
+
     /// The paste half of the same ruling, end to end through the editor.
     @Test func pastedBlankLinesPersistOnSurfaceAndStore() async throws {
         try await withEditor(seedBlocks: ["existing"]) { h in

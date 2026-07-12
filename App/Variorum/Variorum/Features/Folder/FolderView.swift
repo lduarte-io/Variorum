@@ -36,7 +36,9 @@ final class FolderViewModel {
             tagPath = try await session.database.read { [tagID] db in
                 try Queries.allTags(db).first { $0.id == tagID }?.path
             }
-            for try await value in session.database.observeTaggedPosts(tagID) {
+            // Bounded like the library (review round 1): the folder
+            // listing is corpus-shaped; the standing fetch stays viewport-shaped.
+            for try await value in session.database.observeTaggedPosts(tagID, limit: 200) {
                 adopt(value)
             }
         } catch is CancellationError {

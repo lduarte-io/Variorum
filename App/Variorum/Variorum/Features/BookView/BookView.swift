@@ -53,6 +53,16 @@ struct BookView: View {
                     postBody(entry)
                         .padding(.bottom, 16)
                 }
+                if model.truncated {
+                    // Never a SILENT cut (round 1 NIT) — the dated home's
+                    // surface says what it isn't showing.
+                    Text("Showing the first \(BookViewModel.entryWindow) posts — "
+                        + "the rest of this reading isn't loaded yet "
+                        + "(windowing arrives with Phase 12).")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.vertical, 8)
+                }
             }
             .padding(12)
         }

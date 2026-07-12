@@ -97,6 +97,15 @@ final class ReadPostViewModel {
         canary.disarm()
         badgeSink = nil
         textView = nil
+        // A dismantle→remake cycle on the SAME model (SwiftUI recreates
+        // representables on container moves) must re-render the fresh,
+        // EMPTY surface: with `loaded`/`slots` kept, the next projection
+        // equals the stale slots, the differential finds nothing to
+        // replace, and the view stays permanently blank (review round 1,
+        // MINOR 4). Reset so the next attach renders fully.
+        loaded = false
+        slots = []
+        index = BlockRangeIndex(entries: [], tailLength: nil)
     }
 
     /// Runs for the view's lifetime: the post's rendered slots, live.

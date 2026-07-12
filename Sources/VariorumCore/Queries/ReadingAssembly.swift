@@ -74,6 +74,14 @@ extension Queries {
             sql: "SELECT * FROM reading WHERE deleted_at IS NULL ORDER BY name, id")
     }
 
+    /// One reading's row, tolerant (nil when missing or tombstoned) —
+    /// review round 1 NIT: headers fetch ONE reading, never the listing.
+    public static func reading(_ db: Database, id: String) throws -> Reading? {
+        guard let reading = try Reading.fetchOne(db, key: id),
+              reading.deletedAt == nil else { return nil }
+        return reading
+    }
+
     /// Assembles a reading: curated memberships by `(position, id)` or the
     /// smart predicate, ordered by `sort_field`/`sort_dir`, capped by
     /// `max_posts`, sectioned by the grouping tag. A missing or tombstoned

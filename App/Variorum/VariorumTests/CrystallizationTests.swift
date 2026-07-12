@@ -82,6 +82,29 @@ struct CrystallizationPlannerTests {
         #expect(plan?.normalizedRegionText(applyingFirst: 3) == "One.\nTwo.\n\nThree unfinished")
     }
 
+    @Test func idlePlansKeepThePendingTrailingRunOpen() {
+        // Round 1, MAJOR 2: the idle/teardown kind never collapses a typed
+        // pending gap — r trailing newlines keep r−1 as the open tail and
+        // the region text is byte-identical (no visible collapse at mint).
+        let plan = CrystallizationPlanner.plan(.idle(.paragraph), tail: "A\n\n")
+        #expect(plan?.mints == ["A"])
+        #expect(plan?.remainingTail == "\n")
+        #expect(plan?.normalizedRegionText(applyingFirst: 1) == "A\n\n")
+        // r=1: the run IS the separator; the tail stays open and empty.
+        let single = CrystallizationPlanner.plan(.idle(.paragraph), tail: "A\n")
+        #expect(single?.mints == ["A"])
+        #expect(single?.remainingTail == "")
+        #expect(single?.normalizedRegionText(applyingFirst: 1) == "A\n")
+        // No trailing run: closes exactly like bulk.
+        let closed = CrystallizationPlanner.plan(.idle(.paragraph), tail: "A\nB going")
+        #expect(closed?.mints == ["A", "B going"])
+        #expect(closed?.remainingTail == nil)
+        // Between-piece spacing rides the pieces (the k−1 rule) either way.
+        let spaced = CrystallizationPlanner.plan(.idle(.paragraph), tail: "A\n\nB\n\n")
+        #expect(spaced?.mints == ["A\n", "B"])
+        #expect(spaced?.remainingTail == "\n")
+    }
+
     @Test func bulkSentenceModeSegmentsBySentence() {
         let plan = CrystallizationPlanner.plan(.bulk(.sentence), tail: "One. Two! Three")
         #expect(plan?.mints == ["One.", "Two!", "Three"])

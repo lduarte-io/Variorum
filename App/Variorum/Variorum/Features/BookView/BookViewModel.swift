@@ -38,8 +38,11 @@ final class BookViewModel {
     /// Runs for the view's lifetime.
     func start() async {
         do {
+            // One-shot by-key fetch (round 1 NIT); a rename while the book
+            // is open goes stale until reopen — cosmetic at author scale,
+            // recorded.
             readingName = try await session.database.read { [readingID] db in
-                try Queries.readings(db).first { $0.id == readingID }?.name
+                try Queries.reading(db, id: readingID)?.name
             }
             for try await value in session.database.observeReading(
                 readingID, limit: Self.entryWindow
@@ -57,6 +60,11 @@ final class BookViewModel {
     func adopt(_ new: [Queries.ReadingEntry]) {
         entries = new
     }
+
+    /// True when the bounded window may be hiding later entries (round 1
+    /// NIT: the journaling book must never truncate SILENTLY — the view
+    /// shows a marker; real windowing is Phase 12's).
+    var truncated: Bool { entries.count >= Self.entryWindow }
 
     /// The section header to show ABOVE entry `i`, if any: grouping is
     /// Phase 4's (`sectionPath` per entry); clustering into headers is the

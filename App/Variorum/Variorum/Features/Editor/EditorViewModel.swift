@@ -301,7 +301,7 @@ final class EditorViewModel {
             guard !tail.allSatisfy(\.isWhitespace) else { return }
             let mode = self.header?.effectiveSegmentation ?? .paragraph
             let kind: CrystallizationPlanner.Kind =
-                mode == .oneBlock ? .oneBlock : .bulk(.paragraph)
+                mode == .oneBlock ? .oneBlock : .idle(.paragraph)
             guard let plan = CrystallizationPlanner.plan(kind, tail: tail) else { return }
             let post = self.postID
             do {
@@ -684,7 +684,43 @@ final class EditorViewModel {
             return
         }
         let mode = header?.effectiveSegmentation ?? .paragraph
-        crystallizeIfNeeded(forcedKind: mode == .oneBlock ? .oneBlock : .bulk(.paragraph))
+        // The .idle kind (round 1, MAJOR 2): the durability mint must never
+        // collapse a pending typed gap — the trailing run survives.
+        crystallizeIfNeeded(forcedKind: mode == .oneBlock ? .oneBlock : .idle(.paragraph))
+    }
+
+    /// The leading-run attachment (author ruling 2026-07-12; Phase 10
+    /// review round 1, MAJOR 2's fix): a tail that STARTS with newlines
+    /// sits after a preceding block — under the ruling those newlines are
+    /// that block's trailing CONTENT (the k−1 rule; the tail separator is
+    /// the +1). The surface BYTES never change: the block's range grows
+    /// over the run, the separator conceptually slides to the run's end,
+    /// and the store follows through an ordinary autosave (read from the
+    /// Step-1 surface-text map, so this works even when the view is
+    /// already gone at teardown). Fires when the .idle mint leaves its
+    /// kept-open run behind AND when Enters land in a reopened tail — a
+    /// typed gap is durable content the moment it exists, successor or
+    /// not (the "like any normal editor" behavior the author named).
+    private func attachLeadingTailRunIfNeeded() {
+        guard !structuralInFlight, !mintInFlight, hasOpenTail else { return }
+        guard let last = index.entries.indices.last,
+              index.entries[last].editable,
+              let variantID = index.entries[last].variantID,
+              let knownText = surfaceTextByVariant[variantID]
+        else { return }
+        let run = tailText.prefix(while: { $0 == "\n" }).count
+        guard run > 0 else { return }
+        let oldRange = index.range(ofEntryAt: last)
+        index.transferTailPrefixToLastEntry(run)
+        // Ownership moves; bytes don't: the block-ID attribute grows over
+        // the old separator position + run−1 tail newlines.
+        setBlockAttribute(
+            index.entries[last].blockID,
+            over: NSRange(location: oldRange.upperBound, length: run))
+        tailText = String(tailText.dropFirst(run))
+        let newText = knownText + String(repeating: "\n", count: run)
+        surfaceTextByVariant[variantID] = newText
+        autosave.record(variantID: variantID, text: newText, charDelta: run)
     }
 
     private func crystallizeIfNeeded(forcedKind: CrystallizationPlanner.Kind? = nil) {
@@ -692,6 +728,7 @@ final class EditorViewModel {
         // 1, MAJOR 3): finishMint re-runs this and the paste-during-mint
         // still gets bulk semantics.
         guard !mintInFlight else { return }
+        attachLeadingTailRunIfNeeded()
         guard hasOpenTail else {
             bulkPending = false
             return
@@ -1437,9 +1474,16 @@ final class EditorViewModel {
     // MARK: - Post lifecycle faces (Phase 10 Step 8)
 
     /// The seal toggle (`lockPost`/`unlockPost` — brief item 4): sealing
-    /// flushes the buffer first so the op's own auto-commit insures exactly
-    /// what the surface shows; the header observation re-renders the
-    /// banner and editability.
+    /// runs the FULL teardown contract first — flush, await any mint in
+    /// flight, mint the residual open tail (`finalizeWork`) — so the seal
+    /// freezes exactly what the surface shows (review round 1, MAJOR 1:
+    /// the flush-only version left an open tail permanently unmintable
+    /// under the seal — every later mint path hits the locked-container
+    /// refusal, and the text existed nowhere in the store; "type the last
+    /// line, click Seal" is the natural gesture, so the Phase 7
+    /// "seconds-wide-rare" premise did not cover a same-surface seal
+    /// button. The lock doctrine everywhere else is "the guard insures
+    /// exactly what it protects").
     func toggleSeal() {
         Task {
             do {
@@ -1449,6 +1493,9 @@ final class EditorViewModel {
                     }
                     showStatus("Unsealed.")
                 } else {
+                    await finalizeWork()?.value
+                    // finishMint's corrections/attachments ride the
+                    // autosave coordinator — land them before the freeze.
                     await autosave.flushNow()
                     try await session.runner.run { [postID] ops in
                         try ops.lockPost(postID)
@@ -1833,16 +1880,21 @@ final class EditorViewModel {
 
     // MARK: - Surface plumbing
 
-    /// The visible region of the editor surface, in text-view coordinates:
-    /// the owned scroll view's clip bounds (the detail editor), else the
-    /// portion the CONTAINER's clipping exposes (the inline book-view
-    /// editor — `visibleRect` reads ancestor clipping; an unclipped or
-    /// unparented view reads as fully visible, which for an inline editor
-    /// bounds overlay work by the focused post, P1's unit).
+    /// The overlay pruning region, in text-view coordinates: the owned
+    /// scroll view's clip bounds for the detail editor (whose
+    /// ScrollAnchorController re-runs the overlays on every scroll), else
+    /// the WHOLE surface for the inline book-view editor. Inline
+    /// deliberately does NOT prune to `visibleRect` (review round 1,
+    /// MINOR 5): nothing re-fires the overlays when the CONTAINER scrolls,
+    /// so viewport-pruned spans went stale — a fanned block scrolled into
+    /// view showed no badge and tint stripes stopped at the attach-time
+    /// viewport. Whole-post overlay work is the accepted inline cost model
+    /// (the inline surface is laid out to content already; fans are rare;
+    /// tint is an explicit mode) and makes staleness impossible instead of
+    /// adding observers on SwiftUI's internal clip view.
     private func viewportBounds(of textView: EditorTextView) -> CGRect {
         if let scrollView { return scrollView.contentView.bounds }
-        let visible = textView.visibleRect
-        return visible.isEmpty ? textView.bounds : visible
+        return textView.bounds
     }
 
     private func viewText(_ range: NSRange) -> String {

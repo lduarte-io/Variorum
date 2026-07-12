@@ -153,16 +153,22 @@ extension Queries {
     /// through the read layer): live but archived posts, most recently
     /// archived first. The recovery surface behind ratify item 7; its view
     /// arrives with Phases 10–11.
-    public static func archivedPosts(_ db: Database) throws -> [TimelineItem] {
-        try Row.fetchAll(
-            db,
-            sql: """
-                SELECT id AS post_id, title AS title, entry_date AS entry_date,
-                       archived_at AS stamp
-                FROM container
-                WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL
-                ORDER BY archived_at DESC, id DESC
-                """)
+    /// `limit` (review round 1): a held observation must bound its
+    /// standing fetch — archives accumulate over years. One-shot callers omit.
+    public static func archivedPosts(_ db: Database, limit: Int? = nil) throws -> [TimelineItem] {
+        var sql = """
+            SELECT id AS post_id, title AS title, entry_date AS entry_date,
+                   archived_at AS stamp
+            FROM container
+            WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL
+            ORDER BY archived_at DESC, id DESC
+            """
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        if let limit {
+            sql += " LIMIT ?"
+            arguments.append(limit)
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
             .map(timelineItem)
     }
 
@@ -171,16 +177,22 @@ extension Queries {
     /// deleted posts must be recoverable finally gets its read side):
     /// tombstoned posts, newest deletion first. Soft-delete is the only
     /// delete (S2), so everything here is one restore away until GC.
-    public static func deletedPosts(_ db: Database) throws -> [TimelineItem] {
-        try Row.fetchAll(
-            db,
-            sql: """
-                SELECT id AS post_id, title AS title, entry_date AS entry_date,
-                       deleted_at AS stamp
-                FROM container
-                WHERE kind = 'post' AND deleted_at IS NOT NULL
-                ORDER BY deleted_at DESC, id DESC
-                """)
+    /// `limit` (review round 1): the tombstone listing grows forever under
+    /// S2 — a held observation bounds it. One-shot callers omit.
+    public static func deletedPosts(_ db: Database, limit: Int? = nil) throws -> [TimelineItem] {
+        var sql = """
+            SELECT id AS post_id, title AS title, entry_date AS entry_date,
+                   deleted_at AS stamp
+            FROM container
+            WHERE kind = 'post' AND deleted_at IS NOT NULL
+            ORDER BY deleted_at DESC, id DESC
+            """
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        if let limit {
+            sql += " LIMIT ?"
+            arguments.append(limit)
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
             .map(timelineItem)
     }
 
