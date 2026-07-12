@@ -304,3 +304,52 @@ server applying a push and the rescue landing loses it — sub-second, same-proc
 unfixable client-side, and now the only remaining sliver of the first-push
 overwrite window. Final core suite: **547 green in 62 suites** (the Phase 10
 baseline; was 540 at the 9c ladder's close).
+
+## Outbound courtesy note to Fragments (2026-07-11, carried by the author — informational; no answers owed)
+
+1. **Ask 13's loop is closed bridge-side.** The deployed receipts are consumed
+   under the three discrimination rules (plus a same-day cold-review hardening of
+   the one-shot delivery path). Nothing further is needed from Fragments; the
+   receipt + the bridge's keep-everything landing together now cover both halves
+   as designed.
+2. **Doc correction for your side:** your consumer-facing §7 announcement shows
+   `"conflicts": {}` in its example — your DEPLOYED SQL builds an ARRAY
+   (`conflicts jsonb := '[]'::jsonb`, array-append). Worth correcting before it
+   misleads a future consumer; we pinned against the SQL.
+3. **`skipped_rows` (your undeployed migration 15): no bridge action needed when
+   it deploys** — unknown response keys are ignored by permanent posture (already
+   pinned with that exact key). Standing request going forward: a ping is only
+   needed if a future migration CHANGES the shape or semantics of the keys the
+   bridge consumes (`applied` / `skipped` / `conflicts` / `replaced`).
+
+**Cold review ROUND 2 (same day — the ladder's re-review of round 1's fixes; a
+fresh Fable reviewer anchored on the record above): 1 NEW MAJOR / 2 NIT; every
+round-1 fix judged SOUND against its disposition — with MAJOR 1's disposition
+called OVERSTATED, which is the new MAJOR — the emptied-day pin's red-on-old
+independently verified, and the recordDay-after-consumption convergence argument
+re-derived against the SQL facts.** THE NEW MAJOR — "preservation" wasn't: the
+full-body note lived only in the round's in-memory report (a later in-round
+throw — a second candidate's dropped connection is ordinary — discarded it with
+the round, and the scheduler's catch keeps only the error string), and even a
+delivered note lasted one round in a non-copyable hover tooltip before the next
+round replaced it. Both mechanisms traced; AGREED. FIXED durable-first, the
+poison-note precedent: the failure arms persist the note (full body) to a keyed
+`bridge_state` row BEFORE it rides the report — appending, never replacing, if a
+day ever accrues more than one — and every push round re-surfaces all preserved
+notes until cleared by hand; if even the preservation write fails, the note says
+so and that corner honestly merges into the process-death residual. RED-ON-OLD
+PIN verified by behavioral revert (`anUnrescuedBodySurvivesItsRoundAndResurfaces
+EveryRound` — the pre-fix engine's next round carried no trace of the body). The
+pin's first run also caught the fix's own composition slip (the scan's
+`report.notes =` assignment clobbered the re-surfaced notes — corrected to
+append). NIT 1 (the hallucination-guard rationale round 1 owed for MAJOR 1's
+structural no-pin, now recorded): the non-throwing signature is
+COMPILER-ENFORCED — no test can construct a throw out of a non-throwing
+function — and pinning the consume-before-recordDay ordering alone would need a
+DB fault-injection seam the harness deliberately lacks; round 2's durability pin
+now covers the note-survival property that ordering serves. NIT 2:
+`unrescuedBodyNote` made private. THE RESIDUAL, restated at every carrier
+(superseding round 1's "only remaining sliver" wording): a process death between
+the server applying a push and the rescue-or-preservation write — or that write
+itself failing — loses the one-shot receipt; sub-second, unfixable client-side.
+Core suite: **548 green in 62 suites** (the Phase 10 baseline).

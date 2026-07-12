@@ -391,6 +391,12 @@ public struct BridgeEngine: Sendable {
     @discardableResult
     public func push() async throws -> PushReport {
         var report = PushReport()
+        // Durably-preserved unrescued bodies re-surface EVERY round until
+        // cleared by hand (review round 2, MAJOR — the poison-note posture:
+        // the producing receipt was one-shot, so the persistence does the
+        // recurring; a single ephemeral note in a replaceable tooltip was
+        // not preservation).
+        report.notes = try await database.read { try Self.unrescuedBodyNotes($0) }
         let now = DateFormatter.variorumISO8601.string(from: date.now)
 
         struct Candidate: Sendable {
@@ -482,7 +488,10 @@ public struct BridgeEngine: Sendable {
                 return (candidates, paused, notes)
             }
         report.pausedDays = scan.paused
-        report.notes = scan.notes
+        // APPEND — the report already carries the re-surfaced unrescued
+        // bodies loaded above; assignment here silently dropped them
+        // (caught by the round-2 pin on first run).
+        report.notes.append(contentsOf: scan.notes)
 
         guard !scan.candidates.isEmpty else { return report }
 
@@ -622,8 +631,9 @@ public struct BridgeEngine: Sendable {
     ///        the same way). This closes the 9b closeout's "first-push
     ///        overwrite window" residual for every in-process path (the
     ///        honest remainder: a process death between the server applying
-    ///        the push and the rescue landing loses the one-shot receipt —
-    ///        vanishingly narrow, recorded in the contract addendum).
+    ///        the push and the rescue/durable-preservation write — or that
+    ///        write itself failing — loses the one-shot receipt; vanishingly
+    ///        narrow, recorded in the contract addendum).
     ///
     /// NEVER THROWS (cold review, MAJOR 1): the receipt is delivered
     /// exactly once, so a propagated error here would drop the only copy of
@@ -658,8 +668,9 @@ public struct BridgeEngine: Sendable {
                 // to carry a take. Minting a block here would resurrect
                 // content she just emptied — a product call deliberately
                 // NOT made (option (b) in the review; hers if ever wanted).
-                // The body is preserved in the visible note instead.
-                return (false, Self.unrescuedBodyNote(day: day, body: receipt.previousBody))
+                // The body is durably preserved instead (round 2, MAJOR).
+                return (false, await preserveUnrescuedBody(
+                    day: day, note: Self.unrescuedBodyNote(day: day, body: receipt.previousBody)))
             }
             if try await hasLiveVariant(blockID: firstSlot.blockID, text: receipt.previousBody) {
                 return (false, nil)  // replay dedupe — a prior round already rescued it
@@ -672,15 +683,36 @@ public struct BridgeEngine: Sendable {
         } catch {
             // The check-then-act window (a concurrent structural edit
             // between the context read and the ops call) or any DB error:
-            // same posture — the body outlives the failure, visibly.
-            return (false, Self.unrescuedBodyNote(
-                day: day, body: receipt.previousBody, error: error))
+            // same posture — the body outlives the failure, durably.
+            return (false, await preserveUnrescuedBody(
+                day: day,
+                note: Self.unrescuedBodyNote(day: day, body: receipt.previousBody, error: error)))
+        }
+    }
+
+    /// Durability FIRST (review round 2, MAJOR): the in-memory report note
+    /// was ephemeral — a later in-round throw discarded it with the round,
+    /// and a delivered one lived a single round in a tooltip. The note is
+    /// persisted to `bridge_state` before it rides the report; if even that
+    /// write fails, the ephemeral note is all there is — that corner
+    /// honestly merges into the recorded process-death residual, and the
+    /// note says so.
+    private func preserveUnrescuedBody(day: String, note: String) async -> String {
+        do {
+            try await database.write { db in
+                try Self.recordUnrescuedBody(db, dayKey: day, note: note)
+            }
+            return note
+        } catch {
+            return note
+                + "\n(WARNING: durable preservation ALSO failed (\(error)) — this"
+                + " note is the only copy and will NOT re-surface; save it now)"
         }
     }
 
     /// The not-rescued arm's note: carries the FULL destroyed body — it is
     /// the last copy anywhere, and 80 chars of it is not a rescue.
-    static func unrescuedBodyNote(day: String, body: String, error: Error? = nil) -> String {
+    private static func unrescuedBodyNote(day: String, body: String, error: Error? = nil) -> String {
         let cause = error.map { " (\($0))" } ?? " (no landable block)"
         return "push of \(day) replaced an unseen Fragments body that could NOT be"
             + " rescued as a take\(cause) — what follows is the only remaining copy;"
@@ -816,6 +848,34 @@ public struct BridgeEngine: Sendable {
         try db.execute(
             sql: "INSERT OR REPLACE INTO bridge_state (key, value) VALUES (?, ?)",
             arguments: ["poisoned:\(dayKey)", note])
+    }
+
+    // MARK: - Unrescued-body preservation (review round 2, MAJOR: the
+    // one-shot receipt's failure-arm note was EPHEMERAL — it lived only in
+    // the round's in-memory report, so a later in-round throw discarded the
+    // only copy of the destroyed body, and even a delivered note lasted one
+    // round in a hover tooltip. The body now persists here, poison-note
+    // style, at consumption time — durable FIRST, note second — and
+    // re-surfaces every round until cleared by hand, exactly the poison
+    // posture: the producing event is one-shot, so persistence does the
+    // recurring.)
+
+    static func unrescuedBodyNotes(_ db: Database) throws -> [String] {
+        try String.fetchAll(
+            db,
+            sql: "SELECT value FROM bridge_state WHERE key LIKE 'unrescued:%' ORDER BY key")
+    }
+
+    static func recordUnrescuedBody(_ db: Database, dayKey: String, note: String) throws {
+        // APPEND, never replace: a later unrescued body for the same day
+        // must not overwrite an earlier one — each is someone's only copy.
+        let key = "unrescued:\(dayKey)"
+        let existing = try String.fetchOne(
+            db, sql: "SELECT value FROM bridge_state WHERE key = ?", arguments: [key])
+        let value = existing.map { $0 + "\n\n———\n\n" + note } ?? note
+        try db.execute(
+            sql: "INSERT OR REPLACE INTO bridge_state (key, value) VALUES (?, ?)",
+            arguments: [key, value])
     }
 
     // MARK: - Push stamps (client LWW)

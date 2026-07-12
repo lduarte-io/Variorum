@@ -112,7 +112,8 @@ the just-pushed body → no-op, (iii) otherwise rescued as a `'fragments'` take 
 the landing half's conflict-as-variant door, replay-deduped, surfaced as
 `PushReport.rescuedReceipts` + a note. Closes the 9b "first-push overwrite window"
 residual for every in-process path — the receipt is ONE-SHOT, so consumption runs
-before the day-state write and never throws (every failure arm preserves the full
-body in a visible note; hardened by the same-day cold review — see the contract
-addendum); the recorded remainder is a process death mid-round. Core suite after
-the review round: 547/62.
+before the day-state write, never throws, and an unrescuable body is preserved
+DURABLY (a keyed `bridge_state` row, poison-note style, re-surfaced every round
+until cleared — hardened across two same-day cold-review rounds; see the contract
+addendum); the recorded remainder is a process death before — or a failure of —
+the preservation write itself. Core suite after the review ladder: 548/62.

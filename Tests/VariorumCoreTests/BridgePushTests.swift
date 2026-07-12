@@ -143,6 +143,33 @@ struct BridgePushTests {
         }
     }
 
+    @Test func anUnrescuedBodySurvivesItsRoundAndResurfacesEveryRound() async throws {
+        try await withBridge { bridge in
+            // The emptied-day route again — the proven unrescued-body
+            // producer (see the test above).
+            try bridge.makeEntry(day: "2026-07-09", text: "Full draft.")
+            _ = try await bridge.engine.push()
+            let stampAfterFirst = await bridge.server
+                .currentEntry(id: bridge.entryID(day: "2026-07-09"))!.updatedAt
+            let unseen = String(
+                repeating: "the durably preserved fragments body. ", count: 4)
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: "user-author", day: "2026-07-09",
+                body: unseen, updatedAt: stampAfterFirst)
+            let blockID = try bridge.firstBlockID(day: "2026-07-09")!
+            try bridge.ops.deleteBlock(blockID)
+            _ = try await bridge.engine.push()
+            // The preserved body must SURVIVE its producing round: a later,
+            // otherwise-quiet round still surfaces the FULL body from the
+            // durable bridge_state row (cold review round 2, MAJOR — red on
+            // the ephemeral-note code, whose next round carried no trace:
+            // the report holding the only copy died with its round).
+            let later = try await bridge.engine.push()
+            #expect(later.pushed == 0)
+            #expect(later.notes.contains { $0.contains(unseen) })
+        }
+    }
+
     @Test func changedEntryPushesOnceUnderTheDerivedID() async throws {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "Dear diary, day one.")
