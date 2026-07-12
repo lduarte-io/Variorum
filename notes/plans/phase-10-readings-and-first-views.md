@@ -602,3 +602,135 @@ with the merge-precedent export join and the same rule at
 crystallization; (b) declined as a schema-and-sync cost for a second
 representation of expressible content; (c) deferred to Phase 13 unless
 she wants the uniform look now.
+
+### Step 9 — THE RULING AND ITS IMPLEMENTATION (2026-07-12, asked live via the coordinator)
+
+**The author ruled: option (a) exactly as demoed, PLUS the presentation
+half added now.** Both consequences acknowledged by her (the bridge
+re-projects spaced days with their spacing; the iOS trailing-blank-lines
+defect must later distinguish accidental accrual from stored spacing —
+noted for the Phase-15 KnownIssues row at the reconciliation pass).
+Recorded as AppSpec §14's 2026-07-12 delta; QUESTIONS #12 marked ANSWERED.
+
+**Half 1 — the mechanism, shipped:**
+- `SegmentationRules.bulkSegments` (paragraph AND sentence modes): the
+  newline run between pieces stores k−1 trailing newlines on the
+  preceding piece; edge runs (leading/trailing of the entered text) drop
+  as before; unspaced text segments identically to before (pinned:
+  round-trip through the editor separator reproduces any paste
+  byte-for-byte).
+- `SegmentationRules.crystallizedBoundary` — the TIMING refinement the
+  ruling's typed half required: a paragraph completes when the NEXT
+  non-blank segment begins ("typed past" = the successor started), not at
+  its own newline — until then the trailing run is still growing.
+  Durability unchanged (idle-mint 2 s + teardown backstops); the
+  planner's normalized region text is now byte-identical to the typed
+  tail in the spaced cases, so mints need NO programmatic surface edit
+  (the mint-time visual collapse is gone with the collapse itself).
+- `Queries.joinRenderedTexts` — THE one join brain (the merge-join
+  precedent's shape): `"\n\n"` unless the left block already ends in a
+  newline, then a single completing `"\n"`. `renderedText` and **the
+  bridge's per-day projection** both call it. **FLAG FOR THE REVIEWER —
+  the one `Sources/VariorumCore/Bridge/` touch of the phase:**
+  BridgeEngine's push sweep had an INLINE duplicate of the old join
+  (compactMap/filter/`joined(separator: blockJoinSeparator)`); leaving it
+  would have silently pushed a different body than the export and the
+  landing half compare against. The edit swaps the duplicated expression
+  for the canonical helper — no engine logic changes; the rider is
+  satisfied by this phase's Fable assignment and the ruling explicitly
+  acknowledged the bridge consequence. Corpus impact: unspaced days hash
+  identically (zero re-pushes); spaced days re-push once when they first
+  exist.
+- Superseded tests updated with dated comments (three core segmentation
+  tests, four planner/reconciler tests, two editor-session tests, one
+  handoff expectation — each now pins the ruling's behavior); the Step 9
+  demo suite deleted per its own header, superseded by the real pins:
+  bulk round-trips (`bulkSpacingRoundTripsThroughTheEditorSeparator`),
+  the k−1 crystallization case (`typedBlankLinesRideTheMintAsTrailingContent`,
+  `typedBlankLinesBetweenParagraphsPersist` end-to-end through the real
+  editor incl. renderedText), the paste half end-to-end
+  (`pastedBlankLinesPersistOnSurfaceAndStore`), and the join
+  (`renderedTextCompletesStoredSpacingInsteadOfStacking`,
+  `joinRenderedTextsIsTheOneJoinBrain`).
+
+**Half 2 — the presentation gap, shipped:** `EditorDocument.baseParagraphStyle`
+(+ `baseAttributes`, ONE source applied at every surface write:
+materialization, programmatic replaces, differential structural applies,
+the read tier, and both text views' typing attributes). **The §12 trace,
+as directed:** a gap applied only at block SEAMS would make every
+boundary inferable at rest — violating §12's "boundaries invisible at
+rest" — so the gap is per-PARAGRAPH, uniform across intra-block newlines
+and block seams alike (no seam is distinguishable by style; pinned:
+`theParagraphGapIsUniformPresentationStoredNowhere`). Judged a
+spec-forced reading, not a product fork — §12 leaves exactly one option
+standing — so NOT PROVISIONAL'd; recorded here and in the §14 delta.
+Stored blank lines add on top (the "like any normal editor" behavior she
+named). Geometry verified: the tint-registration and badge pins ride the
+same fragment frames the gap changes, and both re-ran green with the
+style live (the registration pin compares spans against the SAME frames,
+so it holds by construction and by test). Size rides the font
+(pointSize/2 ≈ 8 pt); the pretty version is Phase 13's. Mobile capture
+(SwiftUI TextEditor) untouched — presentation is per-surface.
+
+### Step 10 — verification (2026-07-12)
+
+- **(i) Full suites, three targets: core `swift test` 562 green in 62
+  suites · Mac app 302 green in 54 suites · mobile 11 green in 4 suites
+  (iPhone 17 simulator).** These are the Phase 11 baselines.
+- **(ii) Multi-post benchmarks, ratio-asserted:** book-view first
+  realization 16.2 ms @ 20 posts vs 16.5 ms @ 200 posts (flat; asserted
+  <5×+50 in `realizationCostStaysFlatAsTheReadingGrows`); off-viewport
+  instantiation counted (< 30 live surfaces on a 60-post reading); the
+  read tier's differential cost seam (one slot's units, never the
+  document) and the Step 1 zero-surface-read echo pin both green. The
+  Step 0 memo's numbers stand behind the shipped choice.
+- **(iii) The sync convergence spot suite at Phase 10 scale:**
+  `aMultiPostEditingSessionConvergesWhileViewsObserve` (new, core) — the
+  Phase 7 Step 8 pattern over a book-view-shaped session: two clients,
+  three posts in a curated reading, the focus-handoff write pattern
+  (bursts hop posts) racing phone edits with engine rounds interleaved,
+  a mid-session reorder + membership add, and the spacing ruling's
+  trailing-newline content crossing the wire — byte-identical synced
+  dumps, empty outboxes, assemblies equal, and the HELD observations
+  (library + reading + post — what the Phase 10 views hold) delivered
+  throughout and finished equal to the converged store. The original
+  Phase 7 scenario also green unchanged.
+- **(iv) The TEXTKIT2_NOTES §5 ritual (executable form, all green in the
+  Mac suite):** (a) canary silent through every windowed session (editor
+  smokes + every read-tier instance armed); (b) 10k-word jump/height
+  stable (`tenThousandWordPostStaysSnappyAndAnchored` — pixel-exact jump,
+  content-anchored reflow restore, keystrokes < 16.7 ms); (c) live
+  decorations draw and update (the tint-registration window pin against
+  real TK2 geometry, now WITH the paragraph gap live); (d) boundary
+  selections resolve through the planner
+  (`structuralGesturesOnTheTenThousandWordWindowedPost`). macOS 26.4.1 —
+  same point release as the Phase 6 spike baseline; no macOS update
+  occurred mid-phase, so no spike re-run owed.
+
+**Final counts: core 562/62 · Mac 302/54 · mobile 11/4** (baselines were
+549/62 · 254/45 · 11/4).
+
+**PROVISIONALs (QUESTIONS #17, bundled):** badge-tap = focus-first;
+timeline/folder = open-in-editor only; pool = sidebar section — plus the
+recorded build-time calls (⌥ = includeFan; pool-opens-in-editor; the
+Journal section + Today's Entry as the 9c binding input's minimal
+satisfaction). **In-phase decisions recorded:** block tagging deferred to
+Phase 11's pool work; the folder view shows archived posts (the Phase 4
+tag-lookup ratification followed).
+
+**Residuals recorded for the reviewer/author:** the interrupted-gap
+corner — a >2 s pause right after typing blank lines (before the next
+paragraph starts) idle-mints the piece and the pending gap drops (edge
+runs drop at mint; recovery is ordinary typing — with the ruling,
+Enter at a block's end appends trailing-newline content); JumpPrimitive's
+constant ≈8 px container-space scroll-target residual (the tint trace's
+family, left untouched deliberately); the SwiftUI-`.task`-under-test-host
+quirk (representable lifecycles fire, `.task` doesn't; production
+unaffected — probe-verified); `EditorRateSyncTests`' new scenario holds
+observations via GRDB directly (view-model-free by design — core cannot
+see the app target).
+
+**HELD per the coordinator (post-review-ladder ripples):** master plan
+table/pointer; KnownIssues reconciliation (echo row resolved; tint row
+resolved; paste row resolved per the ruling; the Phase-15 iOS row's
+accidental-vs-meaningful note); the author handoff; the Phase 11 plan.
