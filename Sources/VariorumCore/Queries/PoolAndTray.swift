@@ -12,6 +12,19 @@ extension Queries {
         public let tagPaths: [String]
     }
 
+    /// The live pools, oldest first (Phase 10, additive — the shell's pool
+    /// section finds THE inspiration pool through this; CoreDescription
+    /// speaks of one pool, the schema deliberately allows several).
+    public static func pools(_ db: Database) throws -> [Container] {
+        try Container.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM container
+                WHERE kind = 'pool' AND deleted_at IS NULL
+                ORDER BY created_at, id
+                """)
+    }
+
     /// The pool's contents in pointer order — exactly `renderPost` (a pool
     /// is a container; one traversal, never a bespoke subsystem) joined
     /// with each block's live tags.

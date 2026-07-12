@@ -18,6 +18,9 @@ enum SidebarSelection: Hashable {
     case tag(String)
     case reading(String)
     case timeline
+    /// A pool container, opened in the detail editor (a pool renders and
+    /// edits like a post — one container table, one traversal).
+    case pool(String)
 }
 
 struct SidebarView: View {
@@ -25,6 +28,7 @@ struct SidebarView: View {
     let model: LibraryViewModel
     let tags: TagsViewModel
     let readings: ReadingsViewModel
+    let pool: PoolViewModel
     @Binding var selection: SidebarSelection?
     @State private var renameTarget: RenameTarget?
     @State private var renameTitle = ""
@@ -77,6 +81,9 @@ struct SidebarView: View {
             }
             ReadingsSection(session: session, model: readings)
             TagListSection(model: tags)
+            PoolSection(model: pool) { poolID in
+                selection = .pool(poolID)
+            }
         }
         .alert(
             "Rename Post",

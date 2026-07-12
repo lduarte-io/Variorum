@@ -48,6 +48,11 @@ extension AppDatabase {
         observe { try Queries.poolListing($0, poolID: poolID) }
     }
 
+    /// The live pools, live (Phase 10 — the shell's pool section).
+    public func observePools() -> AsyncValueObservation<[Container]> {
+        observe { try Queries.pools($0) }
+    }
+
     /// The live readings, live (Phase 10 — the readings-management face).
     /// Unbounded on purpose: author-scale metadata (the taxonomy precedent).
     public func observeReadings() -> AsyncValueObservation<[Reading]> {

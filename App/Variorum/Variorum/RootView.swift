@@ -20,6 +20,7 @@ struct RootView: View {
     @State private var library: LibraryViewModel
     @State private var tags: TagsViewModel
     @State private var readings: ReadingsViewModel
+    @State private var pool: PoolViewModel
     @State private var selection: SidebarSelection?
 
     init(session: AppSession, services: AppServices? = nil) {
@@ -28,13 +29,14 @@ struct RootView: View {
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
         _readings = State(initialValue: ReadingsViewModel(session: session))
+        _pool = State(initialValue: PoolViewModel(session: session))
     }
 
     var body: some View {
         NavigationSplitView {
             SidebarView(
                 session: session, model: library, tags: tags,
-                readings: readings, selection: $selection)
+                readings: readings, pool: pool, selection: $selection)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240)
                 .safeAreaInset(edge: .bottom) {
                     if let services {
@@ -62,6 +64,12 @@ struct RootView: View {
                 TimelineView(session: session) { postID in
                     selection = .post(postID)
                 }
+            case .pool(let poolID):
+                // A pool is a container: the ordinary editor over it IS the
+                // minimal pool's capture surface (structural ops are legal
+                // in pools — Phase 3 ratification).
+                EditorView(session: session, postID: poolID)
+                    .id(poolID)
             case nil:
                 Text("Select or create a post")
                     .foregroundStyle(.secondary)
@@ -71,5 +79,6 @@ struct RootView: View {
         .task { await library.startJournal() }
         .task { await tags.start() }
         .task { await readings.start() }
+        .task { await pool.start() }
     }
 }

@@ -24,12 +24,48 @@ final class EditorTextView: NSTextView {
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
 
+    /// The pool-drag pasteboard type (Phase 10 Step 7): the payload is the
+    /// pool block's ID and NOTHING else — the text copy happens inside
+    /// `poolDragCopy`, the one deliberate operation (review focus 6: no
+    /// text copy outside the op).
+    nonisolated static let poolBlockType = NSPasteboard.PasteboardType("io.lduarte.variorum.poolblock")
+
+    /// A pool drop: (blockID, insertion offset UTF-16, includeFan). Returns
+    /// whether the drop was consumed.
+    var onPoolDrop: ((String, Int, Bool) -> Bool)?
+
+    private func poolBlockID(on pasteboard: NSPasteboard) -> String? {
+        guard pasteboard.availableType(from: [Self.poolBlockType]) != nil,
+              let data = pasteboard.data(forType: Self.poolBlockType)
+        else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if poolBlockID(on: sender.draggingPasteboard) != nil { return .copy }
+        return super.draggingEntered(sender)
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if poolBlockID(on: sender.draggingPasteboard) != nil { return .copy }
+        return super.draggingUpdated(sender)
+    }
+
     /// Text drops route through the same bulk-entry flag as paste
     /// (contract item 7 — resolves Phase 7's deferred PROVISIONAL as the
     /// author decided 2026-07-06). AppKit plumbing only: the routing lives
     /// in the flag + the verdict, tested through the seam paste shares.
+    /// A POOL drop (Phase 10 Step 7) routes to `onPoolDrop` instead — the
+    /// insertion offset comes from the drop point; holding ⌥ carries the
+    /// whole fan (`includeFan` — the plan's at-build-time call: a modifier).
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        withPasteFlag { super.performDragOperation(sender) }
+        if let blockID = poolBlockID(on: sender.draggingPasteboard), let onPoolDrop {
+            let point = convert(sender.draggingLocation, from: nil)
+            let offset = characterIndexForInsertion(at: point)
+            let includeFan = NSEvent.modifierFlags.contains(.option)
+            return onPoolDrop(blockID, offset, includeFan)
+        }
+        return withPasteFlag { super.performDragOperation(sender) }
     }
 
     /// The context-menu door for structural gestures (Phase 9): the view
@@ -117,6 +153,11 @@ final class EditorTextView: NSTextView {
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.isContinuousSpellCheckingEnabled = false
 
+        // Pool drags land here too (Phase 10 Step 7) — additive, never
+        // replacing the text types NSTextView registers for itself.
+        textView.registerForDraggedTypes(
+            textView.registeredDraggedTypes + [poolBlockType])
+
         let scrollView = NSScrollView()
         scrollView.hasVerticalScroller = true
         scrollView.documentView = textView
@@ -148,6 +189,8 @@ final class EditorTextView: NSTextView {
         textView.isAutomaticTextReplacementEnabled = false
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.isContinuousSpellCheckingEnabled = false
+        textView.registerForDraggedTypes(
+            textView.registeredDraggedTypes + [poolBlockType])
         return textView
     }
 }

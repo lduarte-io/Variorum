@@ -110,6 +110,10 @@ private struct EditorSurface: NSViewRepresentable {
         let (scrollView, textView) = EditorTextView.makeEditor()
         context.coordinator.surfaceDelegate.wire(to: textView)
         model.attach(textView: textView, scrollView: scrollView)
+        let model = model
+        textView.onPoolDrop = { [weak model] blockID, offset, includeFan in
+            model?.poolDrop(blockID: blockID, atOffset: offset, includeFan: includeFan) ?? false
+        }
         context.coordinator.install(scrollView: scrollView, textView: textView)
         return scrollView
     }
@@ -168,6 +172,10 @@ private struct InlineEditorSurface: NSViewRepresentable {
         let textView = EditorTextView.makeInlineEditor()
         context.coordinator.surfaceDelegate.wire(to: textView)
         model.attach(textView: textView, scrollView: nil)
+        let model = model
+        textView.onPoolDrop = { [weak model] blockID, offset, includeFan in
+            model?.poolDrop(blockID: blockID, atOffset: offset, includeFan: includeFan) ?? false
+        }
         context.coordinator.install(textView: textView) { [self] newHeight in
             if abs(height - newHeight) > 0.5 { height = newHeight }
         }

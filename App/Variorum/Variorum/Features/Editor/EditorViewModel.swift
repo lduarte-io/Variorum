@@ -1434,6 +1434,52 @@ final class EditorViewModel {
         }
     }
 
+    // MARK: - Pool drops (Phase 10 Step 7)
+
+    /// A pool block dropped onto this editor: EXACTLY `poolDragCopy` —
+    /// copy + lineage, never shared ownership (the pool's one export
+    /// gesture; P stays in its pool). Returns whether the drop was
+    /// consumed (a sealed post refuses visibly).
+    func poolDrop(blockID: String, atOffset offset: Int, includeFan: Bool) -> Bool {
+        guard header?.locked != true else {
+            refuseFeedback("This post is sealed — unlock it to add to it.")
+            return true  // consumed: never fall through to a text insert
+        }
+        let insert = insertPosition(forOffset: offset)
+        let post = postID
+        Task { [session] in
+            do {
+                _ = try await session.runner.run { ops in
+                    try ops.poolDragCopy(
+                        blockID, to: post, at: insert, includeFan: includeFan)
+                }
+                self.showStatus(includeFan
+                    ? "Copied from the pool with its takes."
+                    : "Copied from the pool.")
+            } catch {
+                self.showOperationError(error)
+            }
+        }
+        return true
+    }
+
+    /// Maps a drop offset to a block-boundary insertion (drops land BETWEEN
+    /// blocks — the nearer boundary of the block under the point; past the
+    /// last block or into the tail region is the end).
+    func insertPosition(forOffset offset: Int) -> Operations.InsertPosition {
+        guard !index.entries.isEmpty else { return .end }
+        var location = 0
+        for entry in index.entries {
+            let end = location + entry.length
+            if offset <= end {
+                let midpoint = location + entry.length / 2
+                return offset <= midpoint ? .before(entry.blockID) : .after(entry.blockID)
+            }
+            location = end + 1
+        }
+        return .end
+    }
+
     // MARK: - Commit + history (Step 5)
 
     func commitCaretVariant() {

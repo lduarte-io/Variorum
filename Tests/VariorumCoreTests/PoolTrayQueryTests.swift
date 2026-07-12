@@ -7,6 +7,19 @@ import Testing
 struct PoolTrayQueryTests {
     // MARK: - Pool listing
 
+    @Test func poolsListsLivePoolsOldestFirst() throws {
+        // Phase 10 (additive): the shell's pool section finds THE pool.
+        try withOperations { ops, db in
+            let first = try ops.createPool(title: "inspiration")
+            let second = try ops.createPool(title: "later")
+            let dead = try ops.createPool(title: "gone")
+            try ops.deleteContainer(dead.id)
+            _ = try ops.createPost(title: "not a pool")
+            let pools = try db.read { try Queries.pools($0) }
+            #expect(pools.map(\.id) == [first.id, second.id])
+        }
+    }
+
     @Test func poolListingRendersScrapsWithTheirTags() throws {
         try withOperations { ops, db in
             let pool = try ops.createPool()
