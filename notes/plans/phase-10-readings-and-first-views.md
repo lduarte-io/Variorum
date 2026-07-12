@@ -279,6 +279,94 @@ to sync/bridge engines (and if one seems needed — the rider: stop, report).
    decision rule was followed, not rationalized after the fact.
 
 ## Closeout
-*(Written at phase end: the Step 0 memo, results per step, test counts, the
-QUESTIONS #12 ruling, PROVISIONALs, review dispositions under the cross-model
-flow, the Phase 11 plan authored, the handoff.)*
+*(Accumulating per step; finalized at phase end: results per step, test
+counts, the QUESTIONS #12 ruling, PROVISIONALs, review dispositions under the
+same-model flow, the Phase 11 plan authored, the handoff.)*
+
+### Step 0 — the read-tier decision memo (2026-07-12)
+
+**DECISION: candidate (b) — a non-editable TK2 `NSTextView` per visible
+post, sized to content.** The brief's decision rule applied literally, not
+rationalized: (a) fails to DELIVER its two required axes, and (b)'s measured
+per-view cost is nowhere near breaking P3 at a dozen visible posts.
+
+**The harness:** `Spikes/ReadTierSpike/` (throwaway, kept as this memo's
+evidence; `swift run` from its directory). 50 corpus-shaped posts (the
+CorpusFactory block shape: ~120 ASCII chars/block; 45 posts × 5 blocks + 5
+posts × 50 blocks), materialization mirroring `EditorDocument` (single-`"\n"`
+separator, block-ID attributes, body font), width 600. Run on macOS 26.4.1
+(25E253), M3, debug build — numbers are upper bounds.
+
+**Candidate (b) measurements:**
+- Setup + full layout per view, 12 views (11 typical + 1 big): **median
+  0.35 ms**, max 20.08 ms (the max is the FIRST view — one-time TK/font
+  warm-up; the 50-block view itself costs **2.61 ms**).
+- Memory: **Δ 1.7 MB for 12 live views**; Δ 6.2 MB at 62 live views
+  (~100 KB/view).
+- Projection refresh on the 50-block view: full `setAttributedString`
+  2.65 ms; **differential one-block replace 0.27 ms**.
+- Selection: cross-block per-post **true** (one view spans the post);
+  **survives a differential refresh true** (NSTextView shifts it); a full
+  re-set resets it (⇒ the shipped tier applies differential updates —
+  Step 2's selection-survival pin rides this).
+- Badge anchoring: fragment frame available for **every** block start
+  (the editor's exact Phase 7 technique — one rendering brain).
+- Scroll-through of 50 stacked views: median 0.04 ms/200 px step.
+
+**Candidate (a) measurements + capability facts:** first layout of the
+50-post LazyVStack ≈ 84 ms net; one-post refresh ≈ 10 ms net; Δ ≈ 10 MB
+with window backing — all fine, and all beside the point, because the
+decisive axes are API facts (Sonnet lookup, 2026-07-12, recorded here):
+- **Cross-`Text` selection is documented-impossible** ("the selection is
+  limited to within individual Text views" — Apple docs /
+  nilcoalescing.com). One `Text` per post keeps per-post selection, but:
+- **Badge anchoring inside one `Text` has no delivered mechanism.** The one
+  lead is `Text.LayoutKey` (a PreferenceKey exposing line/run typographic
+  bounds outside the draw callback) — third-party-documented only, with
+  unverified coordinate-space semantics and no official Apple guidance; a
+  run→block identity mapping would additionally need `TextAttribute`
+  plumbing, creating a SECOND rendering brain beside `EditorDocument`.
+  A speculative mechanism is not delivery under the rule.
+- **No programmatic selection API on `Text`**; selection survival across a
+  content refresh is unverifiable (and analogous documented APIs reset).
+- macOS 26's `TextEditor` + `AttributedString` has no geometry API and no
+  native read-only mode (`.constant` binding still shows cursor/keyboard).
+
+**Rule application:** (a) wins ONLY if it delivers cross-block per-post
+selection AND badge anchoring → badge anchoring not delivered → (b) wins
+unless it measurably breaks P3 at a dozen visible posts → 0.35 ms median /
+1.7 MB does not → **(b)**. The multiplied canary surface is accepted with
+the plan's discipline: every read-tier instance arms `FallbackCanary`, and
+deliberate `NSViewRepresentable` recycling is a Step 2 obligation.
+
+**Known cost model accepted with (b), recorded honestly:** a read-tier view
+sized to content inside an outer scroll lays out its WHOLE post when
+instantiated (TK2 viewport layout follows the visible rect of the text
+view, which is fully "visible" to its own geometry) — cost ∝ that post's
+own size, never the corpus; LazyVStack instantiates near-viewport posts
+only (P3's letter). A pathological 100k-word post inside a book view would
+pay its own layout on entry — that is exactly AppSpec §4's within-post
+virtualization escape-hatch territory (KnownIssues, owner 12), not this
+phase's.
+
+### Step 1 — echo detection is O(edited slot), zero surface reads (2026-07-12)
+
+**Mechanism traced:** `EditorViewModel.surfaceMatches` extracted
+`attributedSubstring` for EVERY slot on EVERY clean projection arrival
+(main thread, autosave-debounce rate) — the KnownIssues row's cost.
+**Fix (the row's recorded direction, sharpened):** a
+`surfaceTextByVariant` map carries the text the surface is known to hold
+per variant — written at every adoption point (`renderFull`,
+`applyDifferential`, the differential-structural adopt, the echo-adopt
+branch) and every edit record (`recordAutosave`, crystallization
+corrections + applied mints) — so the echo check is a pure in-memory
+comparison: **zero surface reads** (the remaining per-slot string equality
+is allocation-free memcmp, and only differing slots reach it). Soundness
+half: a same-length EXTERNAL change never matches the map (the map holds
+OUR surface text), so it re-renders — pinned
+(`aSameLengthExternalChangeIsNotMistakenForAnEcho`).
+**Pin (red on old, verified by behavioral revert):**
+`anEchoProjectionPerformsZeroSurfaceReads` — a 40-block echo performed
+exactly 40 surface reads on the reverted old path (`surfaceTextReads`
+counter), 0 on the fix. Mac suite after Step 1: **256/45 green** (was
+254/45).
