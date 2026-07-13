@@ -77,6 +77,36 @@ extension Queries {
             arguments: [blockID, blockID, blockID, blockID])
     }
 
+    /// The POST-level version peers (Phase 11, A2 — I8: posts are
+    /// edges-only across versions, and edges are block-to-block, so the
+    /// post relationship RIDES the blocks: two posts are version peers iff
+    /// some live `version_of` edge joins a block placed in one to a block
+    /// placed in the other). Live posts only; stable order.
+    public static func versionPeerPosts(
+        _ db: Database, of containerID: String
+    ) throws -> [String] {
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT c.id
+                FROM edge e
+                JOIN container_block mine
+                  ON mine.block_id IN (e.source_block_id, e.target_block_id)
+                 AND mine.container_id = :post AND mine.deleted_at IS NULL
+                JOIN container_block theirs
+                  ON theirs.block_id IN (e.source_block_id, e.target_block_id)
+                 AND theirs.block_id <> mine.block_id
+                 AND theirs.deleted_at IS NULL
+                JOIN container c
+                  ON c.id = theirs.container_id
+                 AND c.deleted_at IS NULL AND c.kind = 'post'
+                WHERE e.type = 'version_of' AND e.deleted_at IS NULL
+                  AND c.id <> :post
+                ORDER BY c.id
+                """,
+            arguments: ["post": containerID])
+    }
+
     /// The diff view's inputs: the two buffers, verbatim. Whitespace
     /// normalization is a view-side toggle (Phase 11), not a query concern.
     /// `nil` when either variant is missing or tombstoned (tolerant read).

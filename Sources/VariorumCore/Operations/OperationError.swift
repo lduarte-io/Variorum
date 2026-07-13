@@ -80,6 +80,18 @@ public enum OperationError: Error, Equatable, Sendable {
     /// nothing to stamp without an identity.
     case noOwnerIdentity
 
+    // version_of + the copy operations (Phase 11, Step A2).
+    /// A version link needs two distinct blocks.
+    case cannotVersionLinkBlockToItself(id: String)
+    /// The live version_of pair already exists (either orientation — the
+    /// canonical (min,max) storage makes them one relationship).
+    case versionLinkExists(a: String, b: String)
+    /// The post-level door needs an anchor block; a blockless post has none.
+    case postHasNoBlocks(id: String)
+    /// The two posts are already version-linked (some live version_of edge
+    /// joins their placed blocks).
+    case postsAlreadyVersionLinked(a: String, b: String)
+
     // Lenses (Phase 11, Step A1 — v1_7).
     case lensNotFound(id: String)
     case invalidLensName(name: String)
