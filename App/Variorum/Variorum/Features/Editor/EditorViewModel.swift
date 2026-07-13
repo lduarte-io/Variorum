@@ -558,6 +558,20 @@ final class EditorViewModel {
             pendingVerdict = nil
             desyncRecovery()
             return false
+        case .refuse(.crossesBlockBoundary):
+            // Phase 11, A9 (ratified 2026-07-09): a single×single
+            // cross-block destructive edit becomes a MERGE-THEN-EDIT
+            // compound — the keystroke is refused HERE (the storage must
+            // not half-apply it) and the compound reproduces its exact
+            // intent through the structural door. Fanned/locked/gap/tail
+            // cases stay the speaking refusal (#11 is deliberately OPEN).
+            pendingVerdict = nil
+            if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
+                Task { await self.runCrossBlockEdit(compound) }
+            } else {
+                refuseFeedback(message(for: .crossesBlockBoundary))
+            }
+            return false
         case .refuse(let refusal):
             pendingVerdict = nil
             refuseFeedback(message(for: refusal))
@@ -982,6 +996,14 @@ final class EditorViewModel {
                     seam: .merge(leadingIndex: leadingIndex, mergedID: result.block.id))
             }
 
+        case .makeBlockAcrossBlocks(let indices, let blockIDs, let startCut, let endCut):
+            // Phase 11, A9 (the guided flow — the v1 refusal becomes a
+            // CONFIRM, never a silent act): opening touches no rows; the
+            // confirm funnels into `confirmCrossBlockMakeBlock`.
+            crossBlockMakeConfirm = CrossBlockMakeState(
+                entryIndices: indices, blockIDs: blockIDs,
+                startCut: startCut, endCut: endCut)
+
         case .mergeChain(let indices, let blockIDs):
             // N-way merge (author 2026-07-09, supersedes the binary rule):
             // a left-to-right chain of the existing binary merges under ONE
@@ -1019,6 +1041,161 @@ final class EditorViewModel {
         let caretBlockID: String
         let caretOffset: Int
         let seam: StructuralSeam?
+    }
+
+    // MARK: - Phase 11, A9: the boundary-fluidity package (committed scope)
+
+    /// The guided cross-block Make Block's confirm state (the ratified
+    /// flow: confirm → adjust the neighbor edges → compound divide/divide/
+    /// merge under ONE undo entry).
+    struct CrossBlockMakeState: Identifiable, Equatable {
+        let entryIndices: ClosedRange<Int>
+        let blockIDs: [String]
+        let startCut: Int
+        let endCut: Int
+        var id: String { blockIDs.joined(separator: "+") }
+        var blockCount: Int { blockIDs.count }
+    }
+
+    var crossBlockMakeConfirm: CrossBlockMakeState?
+
+    /// The confirm's executor: divide the FIRST block at the snapped start
+    /// (its head stays out), divide the LAST at the snapped end (its tail
+    /// stays out), merge every in-span piece left-to-right — ONE compound
+    /// undo entry (the Make Block pattern), atomic on partial failure,
+    /// through the one structural door (full re-render — a deliberate
+    /// multi-block act, the mergeChain precedent).
+    func confirmCrossBlockMakeBlock(_ state: CrossBlockMakeState) async {
+        crossBlockMakeConfirm = nil
+        guard state.entryIndices.upperBound < index.entries.count else {
+            refuseFeedback(RefusalCopy.message(for: .invalidSelection))
+            return
+        }
+        let firstLength = index.entries[state.entryIndices.lowerBound].length
+        let lastLength = index.entries[state.entryIndices.upperBound].length
+        let stack = session.undoStack
+        _ = await runStructural { ops in
+            try stack.withCompound(label: "Make Block", operations: ops) {
+                var pieces: [String] = []
+                if state.startCut > 0, state.startCut < firstLength {
+                    // The successor carries the in-span head; the first
+                    // block keeps its out-of-span text and identity.
+                    pieces.append(try ops.divide(state.blockIDs[0], cut: state.startCut).block.id)
+                } else if state.startCut == 0 {
+                    pieces.append(state.blockIDs[0])
+                }  // startCut == firstLength: the first block stays out entirely
+                pieces.append(contentsOf: state.blockIDs.dropFirst().dropLast())
+                if state.blockIDs.count > 1 {
+                    let lastID = state.blockIDs[state.blockIDs.count - 1]
+                    if state.endCut > 0, state.endCut < lastLength {
+                        // The last block keeps its in-span head; the minted
+                        // successor carries the out-of-span tail.
+                        _ = try ops.divide(lastID, cut: state.endCut)
+                        pieces.append(lastID)
+                    } else if state.endCut >= lastLength {
+                        pieces.append(lastID)
+                    }  // endCut == 0: the last block stays out entirely
+                }
+                var mergedID = pieces[0]
+                for next in pieces.dropFirst() {
+                    mergedID = try ops.merge(mergedID, next).block.id
+                }
+                return StructuralOutcome(caretBlockID: mergedID, caretOffset: 0, seam: nil)
+            }
+        }
+    }
+
+    /// A cross-block DESTRUCTIVE EDIT on single-variant blocks (the
+    /// author's ratified 2026-07-09 direction — "a cross-seam delete just
+    /// works"): the refused keystroke becomes a MERGE-THEN-EDIT compound.
+    /// Nil = not eligible (a fanned/locked/gap block, or the tail) — the
+    /// standing refusal speaks instead (#11's OPEN fanned case).
+    struct CrossBlockEdit: Sendable, Equatable {
+        let blockIDs: [String]
+        /// The edit's start, intra the FIRST block (merge preserves the
+        /// leading text verbatim, so this addresses the merged text too).
+        let intraStart: Int
+        /// The edit's end, intra the LAST block.
+        let intraEndInLast: Int
+        /// The last block's surface length at plan time (locates the tail
+        /// suffix in the merged text — derived from op output, never
+        /// re-guessed).
+        let lastPieceLength: Int
+        let replacement: String
+    }
+
+    func planCrossBlockEdit(range: NSRange, replacement: String) -> CrossBlockEdit? {
+        let entries = index.entries
+        var touched: [Int] = []
+        for i in entries.indices {
+            let entryRange = index.range(ofEntryAt: i)
+            if NSIntersectionRange(range, entryRange).length > 0
+                || (range.length == 0 && range.location >= entryRange.location
+                    && range.location <= entryRange.upperBound) {
+                touched.append(i)
+            }
+        }
+        guard touched.count >= 2, let first = touched.first, let last = touched.last else {
+            return nil
+        }
+        // Contiguity + no tail: the range must sit inside the touched run.
+        guard range.location >= index.range(ofEntryAt: first).location,
+              range.upperBound <= index.range(ofEntryAt: last).upperBound
+        else { return nil }
+        for i in touched {
+            guard entries[i].variantID != nil, entries[i].editable else { return nil }
+            // The fanned case is deliberately OPEN (#11): not eligible.
+            guard i < slots.count, slots[i].activeVariantCount == 1 else { return nil }
+        }
+        let firstRange = index.range(ofEntryAt: first)
+        let lastRange = index.range(ofEntryAt: last)
+        return CrossBlockEdit(
+            blockIDs: touched.map { entries[$0].blockID },
+            intraStart: max(0, range.location - firstRange.location),
+            intraEndInLast: min(lastRange.length, max(0, range.upperBound - lastRange.location)),
+            lastPieceLength: lastRange.length,
+            replacement: replacement)
+    }
+
+    /// The compound itself: merge the touched run left-to-right, then apply
+    /// the intended edit to the merged buffer — ONE undo compound, one
+    /// serialized runner body, through the one structural door. The mapped
+    /// range's ends live in the verbatim-preserved leading/trailing pieces,
+    /// so the join characters merge minted die with the deleted span — the
+    /// surface reads exactly "the selection vanished" (her principle: text
+    /// that looks like basic text behaves like basic text).
+    func runCrossBlockEdit(_ edit: CrossBlockEdit) async {
+        let stack = session.undoStack
+        _ = await runStructural { ops in
+            try stack.withCompound(label: "Merge & Edit", operations: ops) {
+                var mergedID = edit.blockIDs[0]
+                var mergedVariantID: String?
+                var mergedText = ""
+                for next in edit.blockIDs.dropFirst() {
+                    let result = try ops.merge(mergedID, next)
+                    mergedID = result.block.id
+                    mergedVariantID = result.variant.id
+                    mergedText = result.variant.workingText
+                }
+                guard let variantID = mergedVariantID else {
+                    throw OperationError.blockNotFound(id: mergedID)
+                }
+                let merged = mergedText as NSString
+                let start = edit.intraStart
+                let end = merged.length - (edit.lastPieceLength - edit.intraEndInLast)
+                guard start >= 0, end >= start, end <= merged.length else {
+                    throw OperationError.invalidCut(variantID: variantID, cut: start)
+                }
+                let replaced = NSRange(location: start, length: end - start)
+                let newText = merged.replacingCharacters(in: replaced, with: edit.replacement)
+                let cost = replaced.length + (edit.replacement as NSString).length
+                try ops.autosave(variantID, text: newText, charDelta: cost)
+                return StructuralOutcome(
+                    caretBlockID: mergedID,
+                    caretOffset: start + (edit.replacement as NSString).length,
+                    seam: nil)
+            }
+        }
     }
 
     // `StructuralSeam` lives beside its pure consumer in
@@ -1999,7 +2176,10 @@ final class EditorViewModel {
     private func message(for refusal: BlockRangeIndex.Refusal) -> String {
         switch refusal {
         case .crossesBlockBoundary:
-            "Edits can't cross block boundaries — to join these blocks, use Merge Blocks (⌘⇧M)."
+            // Reached only when the merge-then-edit compound is NOT
+            // eligible (Phase 11, A9): a fanned block in the span (the
+            // OPEN #11 question), a locked take, a gap, or the tail.
+            "This edit crosses into a block that can't join it (other takes, a lock, or unsynced text) — cross-take behavior is an open design call; merge deliberately (⌘⇧M) or edit within one block."
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:

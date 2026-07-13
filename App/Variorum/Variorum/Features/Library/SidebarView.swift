@@ -23,6 +23,9 @@ enum SidebarSelection: Hashable {
     case pool(String)
     /// The archived + deleted recovery surfaces.
     case recovery
+    /// The modes tutorial (Phase 11, A10 — the author's spike-round-6
+    /// instruction): a seeded, deletable demo walkthrough.
+    case tutorial
 }
 
 struct SidebarView: View {
@@ -52,6 +55,8 @@ struct SidebarView: View {
                     .tag(SidebarSelection.timeline)
                 Label("Archived & Deleted", systemImage: "archivebox")
                     .tag(SidebarSelection.recovery)
+                Label("Modes Tutorial", systemImage: "graduationcap")
+                    .tag(SidebarSelection.tutorial)
             }
             Section("Journal") {
                 ForEach(model.journal, id: \.postID) { item in

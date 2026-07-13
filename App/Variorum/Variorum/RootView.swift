@@ -76,6 +76,10 @@ struct RootView: View {
                 RecoveryView(session: session, library: library) { postID in
                     selection = .post(postID)
                 }
+            case .tutorial:
+                ModesTutorialView(session: session) { postID in
+                    selection = .post(postID)
+                }
             case nil:
                 Text("Select or create a post")
                     .foregroundStyle(.secondary)

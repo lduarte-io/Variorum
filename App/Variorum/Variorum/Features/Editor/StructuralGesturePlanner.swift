@@ -76,6 +76,11 @@ nonisolated enum StructuralGesturePlanner {
         /// Make Block on a fanned block: the other takes have no cut marks —
         /// that decision is the W ceremony's.
         case fannedMiddleSpan
+        /// A cross-block gesture touching a FANNED block: deliberately OPEN
+        /// design (QUESTIONS #10/#11 — the author settles it live at the
+        /// checkpoint; her uncertainty is recorded, never guessed at). The
+        /// copy names the open question and today's doors.
+        case fannedCrossBlockSpan
         /// Merge needs a caret at a block seam or a selection spanning
         /// two or more blocks.
         case notASeam
@@ -110,6 +115,18 @@ nonisolated enum StructuralGesturePlanner {
         /// across them) — merges as a left-to-right chain of binary merges
         /// under one undo entry. Caret-at-seam stays the binary gesture.
         case mergeChain(entryIndices: ClosedRange<Int>, blockIDs: [String])
+        /// Phase 11, A9 (the boundary-fluidity package — COMMITTED scope):
+        /// Make Block across block boundaries, single-variant×single-variant
+        /// only (fanned → `.fannedCrossBlockSpan`, the OPEN #10/#11
+        /// territory). The v1 refusal becomes a CONFIRM → adjust the
+        /// neighbor edges (divide first/last at the snapped cuts) → merge
+        /// the in-span pieces, ONE undo compound. `startCut`/`endCut` are
+        /// intra-block UTF-16 in the first/last touched entries (0 = the
+        /// whole first block rides; endCut == last length = the whole last
+        /// block rides; a snapped-off edge drops that block from the span).
+        case makeBlockAcrossBlocks(
+            entryIndices: ClosedRange<Int>, blockIDs: [String],
+            startCut: Int, endCut: Int)
         case refusal(Refusal)
     }
 
@@ -193,7 +210,13 @@ nonisolated enum StructuralGesturePlanner {
         guard normalized.length > 0 else { return .refusal(.nothingToDo) }
 
         let touched = entriesIntersecting(normalized, index: world.index)
-        guard touched.count <= 1 else { return .refusal(.crossBlockSpan) }
+        if touched.count > 1 {
+            // Phase 11, A9: the composed gesture crosses boundaries through
+            // the GUIDED flow (author-committed scope); extract keeps the
+            // v1 refusal (its op is single-source by definition).
+            guard composed else { return .refusal(.crossBlockSpan) }
+            return crossBlockMakeBlock(normalized, touched: touched, world: world)
+        }
         guard let i = touched.first else { return .refusal(.nothingToDo) }
         let entry = world.index.entries[i]
         guard entry.variantID != nil else { return .refusal(.gapSlot) }
@@ -232,6 +255,56 @@ nonisolated enum StructuralGesturePlanner {
             guard entry.editable else { return .refusal(.lockedVariant) }
             return .makeBlock(entryIndex: i, blockID: entry.blockID, snappedSpan: snapped)
         }
+    }
+
+    /// Phase 11, A9 — the guided cross-block Make Block's plan (the
+    /// boundary-fluidity package; single×single ratified 2026-07-09). The
+    /// classification is deliberate: gaps first (nothing local to cut),
+    /// then FANNED blocks (the OPEN #10/#11 question — refuse and SPEAK,
+    /// never guess), then the edge blocks' editability (only they get
+    /// divided; middles are merge-COPIED, so their locks don't refuse —
+    /// the merge doctrine).
+    private static func crossBlockMakeBlock(
+        _ selection: NSRange, touched: [Int], world: World
+    ) -> Plan {
+        let entries = world.index.entries
+        for i in touched {
+            guard entries[i].variantID != nil else { return .refusal(.gapSlot) }
+        }
+        if touched.contains(where: { fanArity(world, $0) > 1 }) {
+            return .refusal(.fannedCrossBlockSpan)
+        }
+        guard let first = touched.first, let last = touched.last else {
+            return .refusal(.nothingToDo)
+        }
+        let firstText = world.textAt(first)
+        let lastText = world.textAt(last)
+        let firstRange = world.index.range(ofEntryAt: first)
+        let lastRange = world.index.range(ofEntryAt: last)
+        let startCut = BoundarySnapping.snap(
+            max(0, selection.location - firstRange.location),
+            in: firstText, granularity: .sentence)
+        let endCut = BoundarySnapping.snap(
+            min(lastRange.length, selection.upperBound - lastRange.location),
+            in: lastText, granularity: .sentence)
+        // The pieces that actually ride the span (a snapped-off edge drops
+        // its block): fewer than two pieces means the "cross-block" span
+        // collapsed to nothing worth a compound.
+        var pieceCount = touched.count - 2
+        if startCut < firstRange.length { pieceCount += 1 }
+        if endCut > 0 { pieceCount += 1 }
+        guard pieceCount >= 2 else { return .refusal(.nothingToDo) }
+        // Only the DIVIDED edges edit a buffer; a locked edge refuses.
+        if startCut > 0, startCut < firstRange.length, !entries[first].editable {
+            return .refusal(.lockedVariant)
+        }
+        if endCut > 0, endCut < lastRange.length, !entries[last].editable {
+            return .refusal(.lockedVariant)
+        }
+        return .makeBlockAcrossBlocks(
+            entryIndices: first...last,
+            blockIDs: touched.map { entries[$0].blockID },
+            startCut: startCut, endCut: endCut)
     }
 
     /// Both span ends snap to the nearest legal boundary (full set — 0 and

@@ -80,6 +80,24 @@ struct EditorView: View {
             DivideWSheet(model: model, presented: state)
         }
         .alert(
+            "Make one block across boundaries?",
+            isPresented: Binding(
+                get: { model.crossBlockMakeConfirm != nil },
+                set: { if !$0 { model.crossBlockMakeConfirm = nil } }),
+            presenting: model.crossBlockMakeConfirm
+        ) { state in
+            // Phase 11, A9 — the guided flow's CONFIRM (the v1 refusal's
+            // replacement; cancel touches no rows).
+            Button("Make Block") {
+                Task { await model.confirmCrossBlockMakeBlock(state) }
+            }
+            Button("Cancel", role: .cancel) { model.crossBlockMakeConfirm = nil }
+        } message: { state in
+            Text("The selection crosses \(state.blockCount) blocks. Variorum will "
+                + "cut the first and last blocks at the snapped edges and merge "
+                + "everything inside into ONE block — undo (⌥⌘Z) restores it all.")
+        }
+        .alert(
             "This commit predates a split of this block",
             isPresented: Binding(
                 get: { model.pendingRestore != nil },

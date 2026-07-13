@@ -293,9 +293,19 @@ struct PlannerMakeBlockTests {
     }
 
     @Test func crossBlockWholeBlockLockedAndEmptyRefuse() {
+        // 2026-07-13 (Phase 11, A9 — the COMMITTED boundary-fluidity
+        // package): Make Block across boundaries is no longer the v1
+        // refusal — single×single plans the GUIDED flow; EXTRACT keeps
+        // .crossBlockSpan (its op is single-source by definition).
         let world = makeWorld([B(twoSentences), B(oneSentence)])
-        #expect(Planner.plan(
+        let guided = Planner.plan(
             .makeBlockFromSelection, selection: NSRange(location: 20, length: 12), world: world)
+        guard case .makeBlockAcrossBlocks = guided else {
+            Issue.record("cross-block Make Block now plans the guided flow, got \(guided)")
+            return
+        }
+        #expect(Planner.plan(
+            .extractSelection, selection: NSRange(location: 20, length: 12), world: world)
             == .refusal(.crossBlockSpan))
         #expect(Planner.plan(
             .makeBlockFromSelection, selection: NSRange(location: 0, length: 27), world: world)
@@ -527,6 +537,9 @@ struct PlannerPrecedenceTests {
         note(Planner.plan(.makeBlockFromSelection,
                           selection: NSRange(location: 15, length: 15),
                           world: makeWorld([B(threeSentences, arity: 2)])))          // fannedMiddleSpan
+        note(Planner.plan(.makeBlockFromSelection,
+                          selection: NSRange(location: 40, length: 10),
+                          world: makeWorld([B(threeSentences), B(oneSentence, arity: 2)]))) // fannedCrossBlockSpan (Phase 11, A9)
         note(Planner.plan(.mergeBlocks, selection: caret(1),
                           world: makeWorld([B("Aa."), B("Bb.")])))                   // notASeam
         note(Planner.plan(.divideAtCursor, selection: caret(5),
