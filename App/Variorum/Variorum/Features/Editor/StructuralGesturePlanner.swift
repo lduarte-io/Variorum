@@ -76,11 +76,11 @@ nonisolated enum StructuralGesturePlanner {
         /// Make Block on a fanned block: the other takes have no cut marks —
         /// that decision is the W ceremony's.
         case fannedMiddleSpan
-        /// A cross-block gesture touching a FANNED block: deliberately OPEN
-        /// design (QUESTIONS #10/#11 — the author settles it live at the
-        /// checkpoint; her uncertainty is recorded, never guessed at). The
-        /// copy names the open question and today's doors.
-        case fannedCrossBlockSpan
+        // `.fannedCrossBlockSpan` RETIRED 2026-07-13 (the #10 sitting
+        // ruling): the guided flow's fanned path now AUTO-PROCEEDS when
+        // every take's cut maps uniquely (CutPropagation), and opens the
+        // W ceremony exactly where one doesn't — never a refusal. The
+        // refusal vocabulary shrinks accordingly.
         /// Merge needs a caret at a block seam or a selection spanning
         /// two or more blocks.
         case notASeam
@@ -258,21 +258,23 @@ nonisolated enum StructuralGesturePlanner {
     }
 
     /// Phase 11, A9 — the guided cross-block Make Block's plan (the
-    /// boundary-fluidity package; single×single ratified 2026-07-09). The
-    /// classification is deliberate: gaps first (nothing local to cut),
-    /// then FANNED blocks (the OPEN #10/#11 question — refuse and SPEAK,
-    /// never guess), then the edge blocks' editability (only they get
-    /// divided; middles are merge-COPIED, so their locks don't refuse —
-    /// the merge doctrine).
+    /// boundary-fluidity package; single×single ratified 2026-07-09;
+    /// FANNED edges join per the #10 sitting ruling of 2026-07-13: the
+    /// EXECUTOR auto-proceeds when every take's cut maps uniquely by
+    /// CutPropagation, and opens the W ceremony exactly where one doesn't —
+    /// the planner is pure over the rendered surface and cannot see other
+    /// takes' texts, so the per-take evaluation lives at the door).
+    /// Classification: gaps first (nothing local to cut), then the edge
+    /// blocks' editability — ONLY for single-variant divided edges (a
+    /// fanned edge divides through the W machinery, which COPIES takes:
+    /// locked takes don't refuse, the Phase 3 op semantics; middles are
+    /// merge-COPIED, so their locks never refuse either).
     private static func crossBlockMakeBlock(
         _ selection: NSRange, touched: [Int], world: World
     ) -> Plan {
         let entries = world.index.entries
         for i in touched {
             guard entries[i].variantID != nil else { return .refusal(.gapSlot) }
-        }
-        if touched.contains(where: { fanArity(world, $0) > 1 }) {
-            return .refusal(.fannedCrossBlockSpan)
         }
         guard let first = touched.first, let last = touched.last else {
             return .refusal(.nothingToDo)
@@ -294,11 +296,15 @@ nonisolated enum StructuralGesturePlanner {
         if startCut < firstRange.length { pieceCount += 1 }
         if endCut > 0 { pieceCount += 1 }
         guard pieceCount >= 2 else { return .refusal(.nothingToDo) }
-        // Only the DIVIDED edges edit a buffer; a locked edge refuses.
-        if startCut > 0, startCut < firstRange.length, !entries[first].editable {
+        // Only SINGLE-VARIANT divided edges edit a buffer in place; a
+        // locked edge refuses there. Fanned edges divide via the W
+        // machinery (copies — locked legal).
+        if startCut > 0, startCut < firstRange.length,
+           fanArity(world, first) == 1, !entries[first].editable {
             return .refusal(.lockedVariant)
         }
-        if endCut > 0, endCut < lastRange.length, !entries[last].editable {
+        if endCut > 0, endCut < lastRange.length,
+           fanArity(world, last) == 1, !entries[last].editable {
             return .refusal(.lockedVariant)
         }
         return .makeBlockAcrossBlocks(

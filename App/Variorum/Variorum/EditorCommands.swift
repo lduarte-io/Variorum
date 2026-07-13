@@ -74,6 +74,15 @@ struct EditorCommands: Commands {
             .keyboardShortcut("m", modifiers: [.command, .shift])
             .disabled(session?.editorRouter.active == nil)
 
+            // #11b (author, 2026-07-13): the deliberate, NAMED command —
+            // deletes the selected span from EVERY take that contains it
+            // uniquely, and reports the takes it couldn't match.
+            Button("Delete in Every Take") {
+                let editor = session?.editorRouter.active
+                Task { await editor?.deleteInEveryTake() }
+            }
+            .disabled(session?.editorRouter.active == nil)
+
             Divider()
 
             // The fan door (9d): ANY block, any arity — the badge stays

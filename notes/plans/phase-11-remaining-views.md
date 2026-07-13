@@ -171,11 +171,32 @@
 > prepared at the A9 stop regardless (the standing documentation bar —
 > any fresh session can host the sitting from it), with this coordinator
 > session hosting by default if still warm; answers recorded in her
-> words in QUESTIONS.md + this plan either way. (3) Master plan
-> keeps a SINGLE Phase 11 row (the Stage A/B gates are internal); 11a/11b rows
-> only if the phase runs long. (4) The `/Applications` install was refreshed to
-> the Phase 10 closeout build at kickoff (handoff step 1 done; author relaunch
-> pending).
+> words in QUESTIONS.md + this plan either way. (3) *(superseded at spike
+> close, author-authorized: master-plan rows 11a/11b WERE formalized —
+> this run is 11a, hard stop at the Stage A gate.)* (4) The
+> `/Applications` install was refreshed to the Phase 10 closeout build at
+> kickoff (handoff step 1 done; author relaunch pending).
+>
+> **The A9 sitting (2026-07-13, hosted live in the warm coordinator
+> session, demos in hand):** **#10 ANSWERED — auto-proceed on unique
+> match** (the ceremony sheet appears only where some take doesn't match
+> uniquely — exactly where a genuine per-take decision exists). **#11
+> ANSWERED, three parts:** the PLAIN delete gesture on a fanned
+> cross-block span = **visible-take delete** (remove exactly the selected
+> text from the take being read + the neighbor's piece; fan, seam, and
+> structure survive; never guesses — the two-paragraphs-not-joined
+> deviation accepted on a badged block); **"Delete in every take"** as a
+> deliberate named command (unique-match per take — the #10 discipline;
+> APPLY to matching takes + REPORT the skipped, her call over
+> all-or-nothing; one undo); **merge stays the explicit gesture** for
+> when the seam should go, speaking about the fan. En-route
+> clarifications: empty takes legal (`newBlankVariant` + ratified
+> blank-take skip-rendering); "read without this block" = choose/lens a
+> blank take (per-thread, non-destructive); a one-click "mute block"
+> sugar noted as cheap-if-wanted, deliberately NOT built this phase.
+> Full resolutions recorded in QUESTIONS #10/#11. The mirror DEPLOY
+> continues to HOLD until the review ladder closes (coordinator judgment
+> under her "when it is time" delegation).
 
 ## Kickoff message (for a fresh session)
 

@@ -175,7 +175,7 @@ extension Operations {
     /// A variant whose buffer may be edited right now: live, active,
     /// unlocked, and not under a locked post. (Archived variants live in
     /// history — an edit reaching one signals a caller bug, so it refuses.)
-    private func editableVariant(_ db: Database, _ id: String) throws -> Variant {
+    func editableVariant(_ db: Database, _ id: String) throws -> Variant {
         let variant = try liveVariant(db, id)
         guard variant.status != .archived else {
             throw OperationError.archivedVariant(id: id)

@@ -335,9 +335,12 @@ struct DivideExtractGestureTests {
             h.textView.setSelectedRange(NSRange(location: 19, length: 0))
             h.model.updateCaretContext()
             let items = h.model.contextMenuItems()
+            // 2026-07-13 (#11b): "Delete in Every Take" joins the menu —
+            // the deliberate NAMED command of the sitting ruling.
             #expect(items.map(\.title) == [
                 "Divide Block at Cursor", "Extract Selection",
-                "Make Block from Selection", "Merge Blocks", "Show Takes",
+                "Make Block from Selection", "Merge Blocks",
+                "Delete in Every Take", "Show Takes",
             ])
             let allEnabled = items.allSatisfy(\.enabled)
             #expect(allEnabled)

@@ -559,15 +559,24 @@ final class EditorViewModel {
             desyncRecovery()
             return false
         case .refuse(.crossesBlockBoundary):
-            // Phase 11, A9 (ratified 2026-07-09): a single×single
-            // cross-block destructive edit becomes a MERGE-THEN-EDIT
-            // compound — the keystroke is refused HERE (the storage must
-            // not half-apply it) and the compound reproduces its exact
-            // intent through the structural door. Fanned/locked/gap/tail
-            // cases stay the speaking refusal (#11 is deliberately OPEN).
+            // Phase 11, A9: the keystroke is refused HERE (the storage must
+            // not half-apply it) and a compound reproduces its exact intent
+            // through the structural door. Single×single → MERGE-THEN-EDIT
+            // (ratified 2026-07-09: a cross-seam delete just works — the
+            // halves join). A FANNED span → the VISIBLE-TAKE edit (the #11a
+            // sitting ruling, 2026-07-13: each touched block's visible take
+            // loses its piece; fan, seam, and structure untouched — the
+            // ruled deviation: two blocks, NOT a join). Locked/gap/tail
+            // spans keep the speaking refusal.
             pendingVerdict = nil
             if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
-                Task { await self.runCrossBlockEdit(compound) }
+                scheduleCrossBlockCompound { [weak self] in
+                    await self?.runCrossBlockEdit(compound)
+                }
+            } else if let visible = planVisibleTakeEdit(range: range, replacement: replacement) {
+                scheduleCrossBlockCompound { [weak self] in
+                    await self?.runVisibleTakeEdit(visible)
+                }
             } else {
                 refuseFeedback(message(for: .crossesBlockBoundary))
             }
@@ -987,7 +996,10 @@ final class EditorViewModel {
 
         case .merge(let leadingIndex, let trailingIndex, let leadingID, let trailingID):
             let trailingLength = index.entries[trailingIndex].length
-            _ = await runStructural { ops in
+            // #11c (the sitting ruling, 2026-07-13): merge on fanned blocks
+            // SPEAKS about what it does to the fan.
+            let otherTakes = mergedAwayTakes([leadingIndex, trailingIndex])
+            let landed = await runStructural { ops in
                 let result = try ops.merge(leadingID, trailingID)
                 // Caret at the join: right where the trailing half begins.
                 let join = max(0, result.variant.workingText.utf16.count - trailingLength)
@@ -995,6 +1007,7 @@ final class EditorViewModel {
                     caretBlockID: result.block.id, caretOffset: join,
                     seam: .merge(leadingIndex: leadingIndex, mergedID: result.block.id))
             }
+            if landed { speakAboutMergedFans(otherTakes) }
 
         case .makeBlockAcrossBlocks(let indices, let blockIDs, let startCut, let endCut):
             // Phase 11, A9 (the guided flow — the v1 refusal becomes a
@@ -1011,8 +1024,9 @@ final class EditorViewModel {
             // multi-block act takes the full-render door (seam: nil) — the
             // differential seam edit stays the binary merge's.
             let leadingLength = index.entries[indices.lowerBound].length
+            let chainOtherTakes = mergedAwayTakes(Array(indices))
             let stack = session.undoStack
-            _ = await runStructural { ops in
+            let chainLanded = await runStructural { ops in
                 try stack.withCompound(label: "Merge Blocks", operations: ops) {
                     var mergedID = blockIDs[0]
                     var mergedLength = 0
@@ -1029,7 +1043,26 @@ final class EditorViewModel {
                         seam: nil)
                 }
             }
+            if chainLanded { speakAboutMergedFans(chainOtherTakes) }
         }
+    }
+
+    /// #11c: how many OTHER takes the merged sources carry — they stay
+    /// with the released blocks in lineage (merge's standing semantics),
+    /// and the gesture says so instead of silently folding a fan away.
+    private func mergedAwayTakes(_ entryIndices: [Int]) -> Int {
+        entryIndices.reduce(0) { total, i in
+            guard i < slots.count else { return total }
+            return total + max(0, slots[i].activeVariantCount - 1)
+        }
+    }
+
+    private func speakAboutMergedFans(_ otherTakes: Int) {
+        guard otherTakes > 0 else { return }
+        showTransientStatus(
+            otherTakes == 1
+                ? "Merged the visible takes — 1 other take stays with the released block in lineage (undo brings it back here)."
+                : "Merged the visible takes — \(otherTakes) other takes stay with the released blocks in lineage (undo brings them back here).")
     }
 
     /// What a structural operation reports back to the rewrite path: where
@@ -1059,28 +1092,94 @@ final class EditorViewModel {
 
     var crossBlockMakeConfirm: CrossBlockMakeState?
 
+    /// The deferred keystroke-compound's handle (#11a/merge-then-edit):
+    /// the keystroke is refused synchronously and the compound runs as the
+    /// next main-actor turn — this seam CHAINS overlapping schedules and
+    /// lets teardown/tests await quiescence. Execution is compare-and-set
+    /// against the plan-time texts (`editTakesAtomically`'s expectedText /
+    /// the merge compound's verification pass), so a keystroke landing in
+    /// the scheduling window makes the compound REFUSE VISIBLY instead of
+    /// clobbering newer text — the edit-during-await class, closed at the
+    /// op boundary.
+    @ObservationIgnored private(set) var pendingCrossBlockTask: Task<Void, Never>?
+
+    private func scheduleCrossBlockCompound(_ body: @escaping @MainActor () async -> Void) {
+        let previous = pendingCrossBlockTask
+        pendingCrossBlockTask = Task { @MainActor in
+            if let previous { await previous.value }
+            await body()
+        }
+    }
+
     /// The confirm's executor: divide the FIRST block at the snapped start
     /// (its head stays out), divide the LAST at the snapped end (its tail
     /// stays out), merge every in-span piece left-to-right — ONE compound
     /// undo entry (the Make Block pattern), atomic on partial failure,
     /// through the one structural door (full re-render — a deliberate
     /// multi-block act, the mergeChain precedent).
+    ///
+    /// FANNED divided edges (the #10 sitting ruling, 2026-07-13):
+    /// AUTO-PROCEED when the edge's cut maps UNIQUELY into every active
+    /// take (CutPropagation — the same seeds the W ceremony uses); the
+    /// edge divides through `divideW` with the mapped cuts, so the
+    /// out-of-span half keeps its per-take fan while the in-span half
+    /// joins the (single-variant) middle by merge's standing semantics.
+    /// Where ANY take doesn't map uniquely, the W CEREMONY OPENS for that
+    /// block instead — the sheet survives exactly where a genuine per-take
+    /// decision exists; never a refusal, never a guess.
     func confirmCrossBlockMakeBlock(_ state: CrossBlockMakeState) async {
         crossBlockMakeConfirm = nil
         guard state.entryIndices.upperBound < index.entries.count else {
             refuseFeedback(RefusalCopy.message(for: .invalidSelection))
             return
         }
-        let firstLength = index.entries[state.entryIndices.lowerBound].length
-        let lastLength = index.entries[state.entryIndices.upperBound].length
+        let firstIndex = state.entryIndices.lowerBound
+        let lastIndex = state.entryIndices.upperBound
+        let firstLength = index.entries[firstIndex].length
+        let lastLength = index.entries[lastIndex].length
+        let firstArity = firstIndex < slots.count ? slots[firstIndex].activeVariantCount : 1
+        let lastArity = lastIndex < slots.count ? slots[lastIndex].activeVariantCount : 1
+
+        // The mapping reads STORE texts, so the buffer lands first (the
+        // runStructural discipline, pulled ahead of the read — runStructural
+        // flushes again, harmlessly).
+        await autosave.flushNow()
+        guard !autosave.isDirty else {
+            showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        var firstCuts: [String: Int]?
+        if state.startCut > 0, state.startCut < firstLength, firstArity > 1 {
+            guard let cuts = await propagatedCuts(
+                blockID: state.blockIDs[0], activeCut: state.startCut)
+            else { return }  // the ceremony opened, or the error surfaced
+            firstCuts = cuts
+        }
+        var lastCuts: [String: Int]?
+        if state.blockIDs.count > 1, state.endCut > 0, state.endCut < lastLength, lastArity > 1 {
+            guard let cuts = await propagatedCuts(
+                blockID: state.blockIDs[state.blockIDs.count - 1], activeCut: state.endCut)
+            else { return }
+            lastCuts = cuts
+        }
+
         let stack = session.undoStack
+        let frozenFirstCuts = firstCuts
+        let frozenLastCuts = lastCuts
         _ = await runStructural { ops in
             try stack.withCompound(label: "Make Block", operations: ops) {
                 var pieces: [String] = []
                 if state.startCut > 0, state.startCut < firstLength {
-                    // The successor carries the in-span head; the first
-                    // block keeps its out-of-span text and identity.
-                    pieces.append(try ops.divide(state.blockIDs[0], cut: state.startCut).block.id)
+                    if let firstCuts = frozenFirstCuts {
+                        // Fanned edge, unique matches everywhere: W-divide —
+                        // B stays out with the first-half fan; C (the
+                        // second halves) is the in-span piece.
+                        pieces.append(try ops.divideW(state.blockIDs[0], cuts: firstCuts).second.block.id)
+                    } else {
+                        // The successor carries the in-span head; the first
+                        // block keeps its out-of-span text and identity.
+                        pieces.append(try ops.divide(state.blockIDs[0], cut: state.startCut).block.id)
+                    }
                 } else if state.startCut == 0 {
                     pieces.append(state.blockIDs[0])
                 }  // startCut == firstLength: the first block stays out entirely
@@ -1088,10 +1187,16 @@ final class EditorViewModel {
                 if state.blockIDs.count > 1 {
                     let lastID = state.blockIDs[state.blockIDs.count - 1]
                     if state.endCut > 0, state.endCut < lastLength {
-                        // The last block keeps its in-span head; the minted
-                        // successor carries the out-of-span tail.
-                        _ = try ops.divide(lastID, cut: state.endCut)
-                        pieces.append(lastID)
+                        if let lastCuts = frozenLastCuts {
+                            // Fanned edge: B (the first halves) is the
+                            // in-span piece; C stays out with its fan.
+                            pieces.append(try ops.divideW(lastID, cuts: lastCuts).first.block.id)
+                        } else {
+                            // The last block keeps its in-span head; the
+                            // minted successor carries the out-of-span tail.
+                            _ = try ops.divide(lastID, cut: state.endCut)
+                            pieces.append(lastID)
+                        }
                     } else if state.endCut >= lastLength {
                         pieces.append(lastID)
                     }  // endCut == 0: the last block stays out entirely
@@ -1105,18 +1210,71 @@ final class EditorViewModel {
         }
     }
 
+    /// The #10 auto-proceed's mapping: the active take's cut carried into
+    /// EVERY other active take by CutPropagation's unique-match (the same
+    /// discipline that pre-seeds the W ceremony). Returns nil after either
+    /// OPENING THE CEREMONY (some take didn't map — the per-take decision
+    /// is genuinely a human's; guidance shown) or surfacing a read error.
+    private func propagatedCuts(blockID: String, activeCut: Int) async -> [String: Int]? {
+        do {
+            let fan = try await session.database.read { db in
+                try Queries.blockFan(db, blockID: blockID)
+            }
+            let active = fan.filter { $0.status == .active }
+            guard let renderedID = index.entries.first(where: { $0.blockID == blockID })?.variantID,
+                  let rendered = active.first(where: { $0.id == renderedID })
+            else {
+                refuseFeedback(RefusalCopy.message(for: .invalidSelection))
+                return nil
+            }
+            var cuts: [String: Int] = [renderedID: activeCut]
+            for take in active where take.id != renderedID {
+                guard let mapped = CutPropagation.propose(
+                    activeCut: activeCut,
+                    activeText: rendered.workingText,
+                    targetText: take.workingText)
+                else {
+                    await openDivideWCeremony(blockID: blockID, activeCut: activeCut)
+                    showTransientStatus(
+                        "One of this block's takes needs its cut placed by hand — "
+                        + "finish the take ceremony, then run Make Block from Selection again.")
+                    return nil
+                }
+                cuts[take.id] = mapped
+            }
+            return cuts
+        } catch {
+            showOperationError(error)
+            return nil
+        }
+    }
+
     /// A cross-block DESTRUCTIVE EDIT on single-variant blocks (the
     /// author's ratified 2026-07-09 direction — "a cross-seam delete just
     /// works"): the refused keystroke becomes a MERGE-THEN-EDIT compound.
-    /// Nil = not eligible (a fanned/locked/gap block, or the tail) — the
-    /// standing refusal speaks instead (#11's OPEN fanned case).
+    /// Nil = not eligible — a FANNED span takes the VISIBLE-TAKE edit
+    /// instead (the #11a sitting ruling, 2026-07-13); locked/gap/tail
+    /// spans keep the speaking refusal.
     struct CrossBlockEdit: Sendable, Equatable {
         let blockIDs: [String]
+        /// The touched blocks' rendered variants + their PLAN-TIME surface
+        /// texts — the compound's compare-and-set inputs (a buffer that
+        /// moved since planning refuses the whole compound, visibly).
+        let pieces: [(variantID: String, text: String)]
         /// The edit's start, intra the FIRST block (merge preserves the
         /// leading text verbatim, so this addresses the merged text too).
         let intraStart: Int
         /// The edit's end, intra the LAST block.
         let intraEndInLast: Int
+
+        static func == (lhs: CrossBlockEdit, rhs: CrossBlockEdit) -> Bool {
+            lhs.blockIDs == rhs.blockIDs
+                && lhs.pieces.elementsEqual(rhs.pieces, by: ==)
+                && lhs.intraStart == rhs.intraStart
+                && lhs.intraEndInLast == rhs.intraEndInLast
+                && lhs.lastPieceLength == rhs.lastPieceLength
+                && lhs.replacement == rhs.replacement
+        }
         /// The last block's surface length at plan time (locates the tail
         /// suffix in the merged text — derived from op output, never
         /// re-guessed).
@@ -1151,6 +1309,9 @@ final class EditorViewModel {
         let lastRange = index.range(ofEntryAt: last)
         return CrossBlockEdit(
             blockIDs: touched.map { entries[$0].blockID },
+            pieces: touched.map {
+                (entries[$0].variantID!, viewText(index.range(ofEntryAt: $0)))
+            },
             intraStart: max(0, range.location - firstRange.location),
             intraEndInLast: min(lastRange.length, max(0, range.upperBound - lastRange.location)),
             lastPieceLength: lastRange.length,
@@ -1168,6 +1329,20 @@ final class EditorViewModel {
         let stack = session.undoStack
         _ = await runStructural { ops in
             try stack.withCompound(label: "Merge & Edit", operations: ops) {
+                // COMPARE-AND-SET first (the edit-during-await guard): a
+                // no-op TakeEdit with expectedText is a pure verification —
+                // any buffer that moved since planning refuses the whole
+                // compound before a single row changes. (The remaining
+                // verify→merge gap inside this ONE serialized runner body
+                // is the recorded ms-window sync-apply residual, the W
+                // drift check's class.)
+                _ = try ops.editTakesAtomically(
+                    edit.pieces.map {
+                        Operations.TakeEdit(
+                            variantID: $0.variantID, newText: $0.text,
+                            charDelta: 0, expectedText: $0.text)
+                    },
+                    undoLabel: "Merge & Edit")
                 var mergedID = edit.blockIDs[0]
                 var mergedVariantID: String?
                 var mergedText = ""
@@ -1196,6 +1371,227 @@ final class EditorViewModel {
                     seam: nil)
             }
         }
+    }
+
+    // MARK: - Phase 11, A9 — the #11 sitting rulings (2026-07-13)
+
+    /// #11a — the VISIBLE-TAKE cross-block edit: the plain gesture's
+    /// everyday behavior on a FANNED span (supersedes the shipped refusal).
+    /// Each touched block's VISIBLE take loses exactly its piece of the
+    /// selection (the replacement, if any, lands where typing started —
+    /// the first block's cut point); fan, seam, and block structure stay
+    /// UNTOUCHED — the ruled deviation from basic text: the result is two
+    /// blocks, NOT a join; the fan hangs on the seam. Never guesses:
+    /// nothing is touched in unseen takes.
+    struct VisibleTakeEdit: Sendable, Equatable {
+        struct Piece: Sendable, Equatable {
+            let variantID: String
+            /// The piece's intra-take range in the take's CURRENT text.
+            let intraRange: NSRange
+            /// The take's surface text at plan time (flushed = store text).
+            let text: String
+        }
+        let pieces: [Piece]
+        let replacement: String
+        /// Caret identity after the compound.
+        let caretBlockID: String
+        let caretOffset: Int
+    }
+
+    /// Nil = not eligible (gap/locked visible take, tail overlap, or a
+    /// single-block range) — the remaining refusal speaks.
+    func planVisibleTakeEdit(range: NSRange, replacement: String) -> VisibleTakeEdit? {
+        let entries = index.entries
+        var touched: [Int] = []
+        for i in entries.indices {
+            let entryRange = index.range(ofEntryAt: i)
+            if NSIntersectionRange(range, entryRange).length > 0 {
+                touched.append(i)
+            }
+        }
+        guard touched.count >= 2, let first = touched.first, let last = touched.last else {
+            return nil
+        }
+        guard range.location >= index.range(ofEntryAt: first).location,
+              range.upperBound <= index.range(ofEntryAt: last).upperBound
+        else { return nil }
+        var pieces: [VisibleTakeEdit.Piece] = []
+        for (position, i) in touched.enumerated() {
+            guard let variantID = entries[i].variantID, entries[i].editable else { return nil }
+            let entryRange = index.range(ofEntryAt: i)
+            let intersection = NSIntersectionRange(range, entryRange)
+            let intraRange = NSRange(
+                location: intersection.location - entryRange.location,
+                length: intersection.length)
+            // The replacement (if any) rides the FIRST piece.
+            _ = position
+            pieces.append(VisibleTakeEdit.Piece(
+                variantID: variantID,
+                intraRange: intraRange,
+                text: viewText(entryRange)))
+        }
+        return VisibleTakeEdit(
+            pieces: pieces,
+            replacement: replacement,
+            caretBlockID: entries[first].blockID,
+            caretOffset: max(0, range.location - index.range(ofEntryAt: first).location)
+                + (replacement as NSString).length)
+    }
+
+    /// The compound: ONE `editTakesAtomically` (one transaction, one undo
+    /// entry, dirty targets insurance-committed) through the structural
+    /// door — the flush-first fence keeps a pending autosave of the
+    /// pre-delete surface from resurrecting the deleted span.
+    func runVisibleTakeEdit(_ edit: VisibleTakeEdit) async {
+        _ = await runStructural { ops in
+            var edits: [Operations.TakeEdit] = []
+            for (i, piece) in edit.pieces.enumerated() {
+                let text = piece.text as NSString
+                guard piece.intraRange.upperBound <= text.length else {
+                    throw OperationError.invalidCut(
+                        variantID: piece.variantID, cut: piece.intraRange.location)
+                }
+                let replacement = i == 0 ? edit.replacement : ""
+                let newText = text.replacingCharacters(in: piece.intraRange, with: replacement)
+                edits.append(Operations.TakeEdit(
+                    variantID: piece.variantID,
+                    newText: newText,
+                    charDelta: piece.intraRange.length + (replacement as NSString).length,
+                    expectedText: piece.text))
+            }
+            _ = try ops.editTakesAtomically(edits, undoLabel: "Delete Across Blocks")
+            return StructuralOutcome(
+                caretBlockID: edit.caretBlockID, caretOffset: edit.caretOffset, seam: nil)
+        }
+    }
+
+    /// #11b — "Delete in Every Take": the deliberate, NAMED command. The
+    /// selection's per-block piece (the visible take's text) is located in
+    /// every OTHER active take by UNIQUE match (the #10 discipline — one
+    /// occurrence or nothing); matching takes are edited, non-matching
+    /// takes are SKIPPED AND REPORTED (her explicit call over
+    /// refuse-unless-all-match); locked takes skip with their own reason.
+    /// One transaction, one undo compound, insurance-committed.
+    func deleteInEveryTake() async {
+        guard header?.locked != true else {
+            refuseFeedback("This post is sealed — unlock it to edit.")
+            return
+        }
+        guard let selection = textView?.selectedRange(), selection.length > 0 else {
+            refuseFeedback("Select the text to delete in every take first.")
+            return
+        }
+        // No tail: the open tail is not a block yet.
+        let entries = index.entries
+        var touched: [Int] = []
+        for i in entries.indices {
+            let entryRange = index.range(ofEntryAt: i)
+            if NSIntersectionRange(selection, entryRange).length > 0 { touched.append(i) }
+        }
+        guard let first = touched.first, let last = touched.last,
+              selection.location >= index.range(ofEntryAt: first).location,
+              selection.upperBound <= index.range(ofEntryAt: last).upperBound
+        else {
+            refuseFeedback(RefusalCopy.message(for: .openTailTarget))
+            return
+        }
+        struct Target {
+            let blockID: String
+            let renderedID: String
+            let intraRange: NSRange
+            let renderedText: String
+        }
+        var targets: [Target] = []
+        for i in touched {
+            guard let variantID = entries[i].variantID, entries[i].editable else {
+                refuseFeedback(message(for: .crossesBlockBoundary))
+                return
+            }
+            let entryRange = index.range(ofEntryAt: i)
+            let intersection = NSIntersectionRange(selection, entryRange)
+            targets.append(Target(
+                blockID: entries[i].blockID,
+                renderedID: variantID,
+                intraRange: NSRange(
+                    location: intersection.location - entryRange.location,
+                    length: intersection.length),
+                renderedText: viewText(entryRange)))
+        }
+
+        await autosave.flushNow()
+        guard !autosave.isDirty else {
+            showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        // The per-take locate happens against STORE texts (== the flushed
+        // surface); skips collect for the visible report.
+        var edits: [Operations.TakeEdit] = []
+        var applied = 0
+        var skipped: [String] = []
+        do {
+            for target in targets {
+                let fan = try await session.database.read { db in
+                    try Queries.blockFan(db, blockID: target.blockID)
+                }
+                let needle = (target.renderedText as NSString)
+                    .substring(with: target.intraRange)
+                for take in fan where take.deletedAt == nil && take.status == .active {
+                    if take.id == target.renderedID {
+                        let text = target.renderedText as NSString
+                        edits.append(Operations.TakeEdit(
+                            variantID: take.id,
+                            newText: text.replacingCharacters(in: target.intraRange, with: ""),
+                            charDelta: target.intraRange.length,
+                            expectedText: target.renderedText))
+                        applied += 1
+                        continue
+                    }
+                    if take.locked {
+                        skipped.append(takeName(take) + " (locked)")
+                        continue
+                    }
+                    if let range = TakeSpanMatch.uniqueRange(of: needle, in: take.workingText) {
+                        let text = take.workingText as NSString
+                        edits.append(Operations.TakeEdit(
+                            variantID: take.id,
+                            newText: text.replacingCharacters(in: range, with: ""),
+                            charDelta: range.length,
+                            expectedText: take.workingText))
+                        applied += 1
+                    } else {
+                        skipped.append(takeName(take) + " (no unique match)")
+                    }
+                }
+            }
+        } catch {
+            showOperationError(error)
+            return
+        }
+        let allEdits = edits
+        let caretBlockID = targets[0].blockID
+        let caretOffset = targets[0].intraRange.location
+        let landed = await runStructural { ops in
+            _ = try ops.editTakesAtomically(allEdits, undoLabel: "Delete in Every Take")
+            return StructuralOutcome(
+                caretBlockID: caretBlockID,
+                caretOffset: caretOffset,
+                seam: nil)
+        }
+        if landed {
+            // The REPORT is part of the ruling: visible, naming what was
+            // skipped — applied-and-reported over refuse-unless-all-match.
+            var message = "Deleted in \(applied) take\(applied == 1 ? "" : "s")."
+            if !skipped.isEmpty {
+                message += " Skipped \(skipped.count): \(skipped.joined(separator: ", "))."
+            }
+            showStatus(message)
+        }
+    }
+
+    private func takeName(_ take: Variant) -> String {
+        if let label = take.label, !label.isEmpty { return "“\(label)”" }
+        let preview = take.workingText.prefix(20)
+        return preview.isEmpty ? "an empty take" : "“\(preview)…”"
     }
 
     // `StructuralSeam` lives beside its pure consumer in
@@ -1615,6 +2011,12 @@ final class EditorViewModel {
             item("Extract Selection", .extractSelection),
             item("Make Block from Selection", .makeBlockFromSelection),
             item("Merge Blocks", .mergeBlocks),
+            // #11b (the sitting ruling, 2026-07-13): the deliberate, NAMED
+            // command — not a planner gesture (it edits takes, not
+            // structure); fire-and-speak like every door.
+            .init(title: "Delete in Every Take", enabled: true) { [weak self] in
+                Task { await self?.deleteInEveryTake() }
+            },
             .init(title: "Show Takes", enabled: true) { [weak self] in
                 self?.openCaretFan()
             },
@@ -2176,10 +2578,10 @@ final class EditorViewModel {
     private func message(for refusal: BlockRangeIndex.Refusal) -> String {
         switch refusal {
         case .crossesBlockBoundary:
-            // Reached only when the merge-then-edit compound is NOT
-            // eligible (Phase 11, A9): a fanned block in the span (the
-            // OPEN #11 question), a locked take, a gap, or the tail.
-            "This edit crosses into a block that can't join it (other takes, a lock, or unsynced text) — cross-take behavior is an open design call; merge deliberately (⌘⇧M) or edit within one block."
+            // Reached only when NEITHER compound is eligible (Phase 11,
+            // A9 + the #11a ruling): a locked take, a gap slot, or the
+            // open tail inside the span.
+            "This edit reaches a block that can’t take it right now (a locked take, unsynced text, or text that isn’t a block yet) — resolve that, or edit within one block."
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:
@@ -2205,6 +2607,8 @@ final class EditorViewModel {
         case .variantIsChosen:
             return "This take is shown in the post — choose another take first."
         case .archivedVariant: return "This take is archived — unarchive it first."
+        case .bufferChangedSinceGesture:
+            return "The text changed while that gesture was landing — nothing was altered; try it again on the current text."
         default: return "The operation was refused: \(opError)"
         }
     }

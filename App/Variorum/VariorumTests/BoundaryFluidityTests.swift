@@ -144,33 +144,273 @@ struct BoundaryFluidityTests {
         }
     }
 
-    @Test func fannedCrossBlockMakeBlockRefusesAndSpeaks() async throws {
-        try await withEditor(seedBlocks: ["Aa one. Aa two.", "Zz one. Zz two."]) { harness in
-            // Fan the second block: the cross-block gesture must refuse
-            // with the OPEN-question copy (#10/#11 — never guessed).
-            let second = try await harness.database.read { [postID = harness.postID] db in
-                try Queries.renderPost(db, containerID: postID)[1]
+    // `fannedCrossBlockMakeBlockRefusesAndSpeaks` SUPERSEDED 2026-07-13
+    // (the #10/#11 sitting rulings): the gesture path now auto-proceeds on
+    // unique matches or opens the W ceremony; the edit path performs the
+    // VISIBLE-TAKE delete. The tests below pin the ruled behaviors.
+
+    /// #10: a fanned edge whose cut maps UNIQUELY into every take
+    /// auto-proceeds — NO ceremony sheet; the out-of-span half keeps its
+    /// per-take fan; the middle mints single-variant; ONE undo restores.
+    @Test func aFannedEdgeWithUniqueMatchesAutoProceedsWithNoCeremony() async throws {
+        let visible = "One prefix here. COMMON MIDDLE IS LONG. COMMON END HERE."
+        let other = "Two other start. COMMON MIDDLE IS LONG. COMMON END HERE."
+        try await withEditor(seedBlocks: [visible, "Second block text goes on."]) { harness in
+            let firstSlot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[0]
             }
             try await harness.session.runner.run { ops in
-                _ = try ops.branchVariant(second.blockID, from: second.variantID!)
+                let take = try ops.branchVariant(firstSlot.blockID, from: firstSlot.variantID!)
+                try ops.autosave(take.id, text: other, charDelta: 6)
+            }
+            try harness.reload()
+
+            // Select from inside the shared region of block 1 to the end
+            // of block 2: startCut snaps to 40 (inside COMMON text — both
+            // context windows shared), endCut = the whole second block.
+            let selection = NSRange(location: 42, length: 41)
+            let plan = StructuralGesturePlanner.plan(
+                .makeBlockFromSelection, selection: selection,
+                world: harness.model.gestureWorld())
+            guard case .makeBlockAcrossBlocks(_, _, let startCut, let endCut) = plan else {
+                Issue.record("fanned cross-block Make Block plans the guided flow, got \(plan)")
+                return
+            }
+            #expect(startCut == 40)
+            #expect(endCut == 26)
+
+            await harness.model.applyStructural(plan)
+            let state = try #require(harness.model.crossBlockMakeConfirm)
+            await harness.model.confirmCrossBlockMakeBlock(state)
+
+            #expect(harness.model.divideWCeremony == nil,
+                    "unique matches everywhere — the ceremony never appears")
+            let slots = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+            #expect(slots.count == 2)
+            #expect(slots[0].activeVariantCount == 2,
+                    "the out-of-span half keeps its per-take fan (W-style)")
+            #expect(slots[0].text == "One prefix here. COMMON MIDDLE IS LONG.")
+            #expect(slots[1].activeVariantCount == 1,
+                    "the middle mints single-variant (merge's standing semantics)")
+            #expect(slots[1].text == "COMMON END HERE. Second block text goes on.")
+            // The other take's out-of-span half rode the fan too.
+            let outFan = try await harness.database.read { db in
+                try Queries.blockFan(db, blockID: slots[0].blockID)
+            }
+            #expect(outFan.map(\.workingText).contains("Two other start. COMMON MIDDLE IS LONG."))
+
+            // ONE undo restores the original world byte-identically.
+            let stack = harness.session.undoStack
+            try await harness.session.runner.run { ops in
+                _ = try stack.undo(with: ops)
+            }
+            let restored = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+            #expect(restored.compactMap(\.text) == [visible, "Second block text goes on."])
+            #expect(restored[0].activeVariantCount == 2)
+        }
+    }
+
+    /// #10's other half: a take that does NOT map uniquely opens the W
+    /// ceremony — the sheet survives exactly where a genuine per-take
+    /// decision exists; the store is untouched until it confirms.
+    @Test func aNonMatchingTakeOpensTheCeremonyInstead() async throws {
+        let visible = "One prefix here. COMMON MIDDLE IS LONG. COMMON END HERE."
+        try await withEditor(seedBlocks: [visible, "Second block text goes on."]) { harness in
+            let firstSlot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[0]
+            }
+            try await harness.session.runner.run { ops in
+                let take = try ops.branchVariant(firstSlot.blockID, from: firstSlot.variantID!)
+                try ops.autosave(
+                    take.id, text: "Entirely different words with nothing shared at all.",
+                    charDelta: 6)
             }
             try harness.reload()
 
             let plan = StructuralGesturePlanner.plan(
-                .makeBlockFromSelection, selection: NSRange(location: 10, length: 14),
+                .makeBlockFromSelection, selection: NSRange(location: 42, length: 41),
                 world: harness.model.gestureWorld())
-            #expect(plan == .refusal(.fannedCrossBlockSpan))
-            #expect(RefusalCopy.message(for: .fannedCrossBlockSpan).contains("open design"),
-                    "the refusal names the open call instead of guessing")
+            await harness.model.applyStructural(plan)
+            let state = try #require(harness.model.crossBlockMakeConfirm)
+            await harness.model.confirmCrossBlockMakeBlock(state)
 
-            // And the raw EDIT path is equally ineligible: the refusal
-            // speaks; the store stays untouched.
-            harness.replace(NSRange(location: 10, length: 14), with: "")
-            #expect(harness.model.statusMessage?.contains("open design") == true)
-            let texts = try await harness.database.read { db in
-                try Queries.renderPost(db, containerID: harness.postID).compactMap(\.text)
+            #expect(harness.model.divideWCeremony != nil,
+                    "the ceremony OPENS for the non-matching take — never a guess, never a refusal")
+            let slots = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)
             }
-            #expect(texts == ["Aa one. Aa two.", "Zz one. Zz two."])
+            #expect(slots.count == 2, "opening the ceremony touched no rows")
+            #expect(slots.compactMap(\.text)[0] == visible)
+        }
+    }
+
+    /// #11a: the plain cross-block delete on a FANNED span edits the
+    /// VISIBLE takes only — fan, seam, and block structure untouched; the
+    /// result is two blocks, NOT a join (the ruled deviation); unseen
+    /// takes never change; one undo compound restores.
+    @Test func aFannedCrossBlockDeleteEditsTheVisibleTakesOnly() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two.", "Beta words here."]) { harness in
+            let firstSlot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[0]
+            }
+            let otherText = "A different take entirely."
+            let otherTakeID = try await harness.session.runner.run { ops -> String in
+                let take = try ops.branchVariant(firstSlot.blockID, from: firstSlot.variantID!)
+                try ops.autosave(take.id, text: otherText, charDelta: 6)
+                return take.id
+            }
+            try harness.reload()
+
+            // Surface: "Alpha one. Alpha two.\nBeta words here." — select
+            // "Alpha two.\nBeta " (11..27) and delete via the keystroke path.
+            harness.replace(NSRange(location: 11, length: 16), with: "")
+            for _ in 0..<200 {
+                let text = try await harness.database.read { [postID = harness.postID] db in
+                    try Queries.renderedText(db, containerID: postID)
+                }
+                if text != "Alpha one. Alpha two.\n\nBeta words here." { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+
+            let slots = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+            #expect(slots.count == 2, "NOT a join — the fan hangs on the seam (the ruled deviation)")
+            #expect(slots[0].text == "Alpha one. ", "the visible take lost exactly its piece")
+            #expect(slots[1].text == "words here.")
+            #expect(slots[0].activeVariantCount == 2, "the fan is untouched")
+            let unseen = try await harness.database.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [otherTakeID])
+            }
+            #expect(unseen == otherText, "the unseen take NEVER changes — no guessing")
+
+            // ONE undo compound restores both visible takes.
+            let stack = harness.session.undoStack
+            try await harness.session.runner.run { ops in
+                _ = try stack.undo(with: ops)
+            }
+            let restored = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID).compactMap(\.text)
+            }
+            #expect(restored == ["Alpha one. Alpha two.", "Beta words here."])
+        }
+    }
+
+    /// #11b: "Delete in Every Take" applies where the span matches
+    /// UNIQUELY, skips-and-REPORTS where it doesn't, and undoes as one
+    /// compound.
+    @Test func deleteInEveryTakeAppliesWhereUniqueAndReportsSkips() async throws {
+        let visible = "Keep this. REMOVE EXACTLY THIS. Keep that."
+        try await withEditor(seedBlocks: [visible]) { harness in
+            let slot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[0]
+            }
+            let (matchID, noMatchID) = try await harness.session.runner.run { ops -> (String, String) in
+                let match = try ops.branchVariant(slot.blockID, from: slot.variantID!)
+                try ops.autosave(
+                    match.id, text: "Other opening. REMOVE EXACTLY THIS. Other closing.",
+                    charDelta: 6)
+                let noMatch = try ops.branchVariant(slot.blockID, from: slot.variantID!)
+                try ops.autosave(
+                    noMatch.id, text: "This take shares none of the doomed text.", charDelta: 6)
+                return (match.id, noMatch.id)
+            }
+            try harness.reload()
+
+            // Select " REMOVE EXACTLY THIS." (10..31) in the visible take.
+            harness.textView.setSelectedRange(NSRange(location: 10, length: 21))
+            await harness.model.deleteInEveryTake()
+
+            let texts = try await harness.database.read { db -> [String: String] in
+                let fan = try Queries.blockFan(db, blockID: slot.blockID)
+                return Dictionary(uniqueKeysWithValues: fan.map { ($0.id, $0.workingText) })
+            }
+            #expect(texts[slot.variantID!] == "Keep this. Keep that.")
+            #expect(texts[matchID] == "Other opening. Other closing.",
+                    "the unique match applied — located per take, never by offset")
+            #expect(texts[noMatchID] == "This take shares none of the doomed text.",
+                    "no unique match ⇒ untouched")
+            let report = try #require(harness.model.statusMessage)
+            #expect(report.contains("Deleted in 2 takes"), "the report: \(report)")
+            #expect(report.contains("Skipped 1"), "skips are REPORTED, visibly — her explicit call")
+
+            // ONE undo compound restores every edited take.
+            let stack = harness.session.undoStack
+            try await harness.session.runner.run { ops in
+                _ = try stack.undo(with: ops)
+            }
+            let restored = try await harness.database.read { db -> [String: String] in
+                let fan = try Queries.blockFan(db, blockID: slot.blockID)
+                return Dictionary(uniqueKeysWithValues: fan.map { ($0.id, $0.workingText) })
+            }
+            #expect(restored[slot.variantID!] == visible)
+            #expect(restored[matchID] == "Other opening. REMOVE EXACTLY THIS. Other closing.")
+        }
+    }
+
+    /// #11c: merge stays the explicit seam-removal gesture — and on fanned
+    /// blocks it SPEAKS about what it does to the fan.
+    @Test func mergeOnFannedBlocksSpeaksAboutTheFan() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { harness in
+            let secondSlot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[1]
+            }
+            try await harness.session.runner.run { ops in
+                _ = try ops.branchVariant(secondSlot.blockID, from: secondSlot.variantID!)
+            }
+            try harness.reload()
+
+            harness.textView.setSelectedRange(NSRange(location: 4, length: 10))
+            await harness.model.invokeGesture(.mergeBlocks)
+
+            let slots = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+            #expect(slots.count == 1, "merge merged")
+            let status = try #require(harness.model.statusMessage)
+            #expect(status.contains("other take"),
+                    "the gesture SPEAKS about the fan it folded away: \(status)")
+        }
+    }
+
+    /// THE CAS FENCE's direct pin (red-on-old: without expectedText the
+    /// stale compound clobbers the newer typing — the soak surfaced this
+    /// class with 102 issues on the pre-fix code): a compound planned
+    /// against one surface REFUSES, visibly and wholly, when any target
+    /// buffer moved before it landed. Nothing is altered; the gesture is
+    /// simply re-tryable on the current text.
+    @Test func aCompoundPlannedAgainstAStaleBufferRefusesInsteadOfClobbering() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two.", "Beta words here."]) { harness in
+            let firstSlot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[0]
+            }
+            try await harness.session.runner.run { ops in
+                _ = try ops.branchVariant(firstSlot.blockID, from: firstSlot.variantID!)
+            }
+            try harness.reload()
+
+            let visible = try #require(harness.model.planVisibleTakeEdit(
+                range: NSRange(location: 11, length: 16), replacement: ""))
+            // The world moves inside the scheduling window (the soak's
+            // exact interleaving, made deterministic).
+            harness.type("INTERLOPER ", at: 0)
+            await harness.model.autosave.flushNow()
+
+            await harness.model.runVisibleTakeEdit(visible)
+
+            #expect(harness.model.statusMessage?.contains("changed while") == true,
+                    "the refusal speaks: \(harness.model.statusMessage ?? "nil")")
+            let texts = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID).compactMap(\.text)
+            }
+            #expect(texts == ["INTERLOPER Alpha one. Alpha two.", "Beta words here."],
+                    "NOTHING was altered — the newer typing survives whole")
         }
     }
 

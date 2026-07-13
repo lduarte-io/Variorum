@@ -56,3 +56,24 @@ nonisolated enum CutPropagation {
             matchStart + intoNeedle, in: targetText)
     }
 }
+
+
+/// Phase 11, A9 (#11b — the sitting ruling, 2026-07-13): the named
+/// "Delete in Every Take" command's locator. UNIQUE match or nothing —
+/// the #10 discipline: exactly one occurrence of the visible take's piece
+/// in the target take applies; zero or several SKIP (and the command
+/// reports the skip — her explicit applied-and-reported call).
+nonisolated enum TakeSpanMatch {
+    static func uniqueRange(of needle: String, in text: String) -> NSRange? {
+        guard !needle.isEmpty else { return nil }
+        let haystack = text as NSString
+        let first = haystack.range(of: needle)
+        guard first.location != NSNotFound else { return nil }
+        let after = NSRange(
+            location: first.upperBound,
+            length: haystack.length - first.upperBound)
+        let second = haystack.range(of: needle, options: [], range: after)
+        guard second.location == NSNotFound else { return nil }  // ambiguous
+        return first
+    }
+}

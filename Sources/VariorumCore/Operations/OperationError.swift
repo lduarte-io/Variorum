@@ -92,6 +92,12 @@ public enum OperationError: Error, Equatable, Sendable {
     /// joins their placed blocks).
     case postsAlreadyVersionLinked(a: String, b: String)
 
+    // Deferred editor compounds (Phase 11, A9 — the #11 rulings).
+    /// A compound planned against one surface found a newer buffer at
+    /// execution (the edit-during-await class): the whole batch refuses —
+    /// visibly, never a clobber. Retry the gesture on the current text.
+    case bufferChangedSinceGesture(variantID: String)
+
     // Lenses (Phase 11, Step A1 — v1_7).
     case lensNotFound(id: String)
     case invalidLensName(name: String)

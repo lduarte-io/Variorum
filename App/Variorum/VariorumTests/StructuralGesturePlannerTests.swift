@@ -547,9 +547,6 @@ struct PlannerPrecedenceTests {
         note(Planner.plan(.makeBlockFromSelection,
                           selection: NSRange(location: 15, length: 15),
                           world: makeWorld([B(threeSentences, arity: 2)])))          // fannedMiddleSpan
-        note(Planner.plan(.makeBlockFromSelection,
-                          selection: NSRange(location: 40, length: 10),
-                          world: makeWorld([B(threeSentences), B(oneSentence, arity: 2)]))) // fannedCrossBlockSpan (Phase 11, A9)
         note(Planner.plan(.mergeBlocks, selection: caret(1),
                           world: makeWorld([B("Aa."), B("Bb.")])))                   // notASeam
         note(Planner.plan(.divideAtCursor, selection: caret(5),

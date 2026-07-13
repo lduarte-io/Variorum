@@ -29,8 +29,6 @@ nonisolated enum RefusalCopy {
             "Extract takes a span at the block's start or end. For a middle span, use Make Block from Selection."
         case .fannedMiddleSpan:
             "This block has other takes, and they carry no cut marks — use Divide Block at Cursor to open the take ceremony instead."
-        case .fannedCrossBlockSpan:
-            "A block in this selection has other takes — how a cross-block gesture should treat them is still an open design call (yours, at the checkpoint). For now: divide the fanned block through its take ceremony first, or work within one block."
         case .notASeam:
             "To merge, put the caret at a block seam or select across the blocks to join."
         case .nothingToDo:

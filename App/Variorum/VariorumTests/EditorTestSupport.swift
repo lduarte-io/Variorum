@@ -90,6 +90,14 @@ struct EditorHarness {
 
     /// Flushes pending autosaves immediately.
     func flush() async {
+        // A deferred cross-block compound (#11a / merge-then-edit) lands
+        // first — its own flush + rewrite ride inside it.
+        while let pending = model.pendingCrossBlockTask {
+            await pending.value
+            if model.pendingCrossBlockTask == nil { break }
+            // A chained schedule replaced the handle; loop once more.
+            if pending == model.pendingCrossBlockTask { break }
+        }
         await model.autosave.flushNow()
         await settle()
     }

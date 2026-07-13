@@ -59,17 +59,43 @@ struct EditorSessionTests {
         }
     }
 
-    @Test func crossBlockDestructiveEditsRefuse() async throws {
+    // `crossBlockDestructiveEditsRefuse` SUPERSEDED (Phase 11 A9,
+    // ratified 2026-07-09 + the 2026-07-13 sitting): the Phase 6/7
+    // refuse/clamp posture was editor v1's — cross-block destructive edits
+    // now land as COMPOUNDS (single×single merge-then-edit; fanned
+    // visible-take), pinned in BoundaryFluidityTests. What ENDURES here:
+    // the storage never HALF-applies the raw keystroke (it is refused
+    // synchronously; the compound reproduces the intent atomically), and
+    // spans no compound can take — the open tail — still refuse and speak.
+    @Test func crossBlockKeystrokesNeverHalfApplyToTheStorage() async throws {
         try await withEditor(seedBlocks: ["one", "two"]) { h in
             let before = h.documentText
             h.replace(NSRange(location: 2, length: 3), with: "")   // spans the separator
-            h.replace(NSRange(location: 3, length: 1), with: "")   // the separator itself
-            h.replace(NSRange(location: 0, length: 7), with: "Z")  // select-all overtype
+            // The RAW keystroke never reached the storage — the compound
+            // lands as its own atomic act.
             #expect(h.documentText == before)
-            #expect(h.model.statusMessage != nil)
             await h.flush()
             let slots = try h.storeSlots()
-            #expect(slots.map(\.text) == ["one", "two"])
+            #expect(slots.map(\.text) == ["onwo"],
+                    "the ratified compound landed whole: merge-then-edit, never a half-edit")
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    @Test func editsIntoTheOpenTailStillRefuseAndSpeak() async throws {
+        try await withEditor(seedBlocks: ["one"]) { h in
+            h.type("\n", at: 3)   // opens the tail
+            h.type("tail words")
+            let before = h.documentText
+            // A destructive edit spanning block → tail: no compound can
+            // take it (the tail is not a block yet) — refuse, speak, and
+            // leave everything untouched.
+            h.replace(NSRange(location: 2, length: 4), with: "")
+            #expect(h.documentText == before)
+            #expect(h.model.statusMessage != nil, "the remaining refusal speaks")
+            await h.flush()
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["one"])
         }
     }
 
