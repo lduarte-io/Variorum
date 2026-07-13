@@ -47,6 +47,11 @@ struct VersionOperationsTests {
             }
             try ops.removeVersionOf(low, high)
             #expect(try db.deletedAt("edge", edge.id) != nil)
+            // Round 1 NIT: un-marking a link that does NOT exist says so —
+            // never the inverted "already exists".
+            #expect(throws: OperationError.versionLinkNotFound(a: low, b: high)) {
+                try ops.removeVersionOf(low, high)
+            }
             let fresh = try ops.markVersionOf(low, high)
             #expect(fresh.id != edge.id)
         }
@@ -315,6 +320,51 @@ struct VersionOperationsTests {
             #expect(throws: OperationError.lockedPost(id: w.postID)) {
                 _ = try ops.branchAllFans(post: w.postID, lensName: "too late")
             }
+        }
+    }
+}
+
+// MARK: - Review round 1, MINOR 4: no physical deletes, no phantom outbox
+// rows. Red-on-old: the pre-fix copyPost inserted the block (outbox
+// capture fired) then hard-DELETEd it (no capture) — a permanent phantom
+// entry the push drain could never clear.
+
+@Suite("copyPost never strands a phantom outbox row (Phase 11, round 1 MINOR 4)")
+struct CopyPostPhantomOutboxTests {
+    @Test func aGapSlotCopiesAsNothingWithoutMintingOrDeleting() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "p", profile: .generic)
+            let healthy = try ops.newBlock(in: post.id, text: "Healthy slot.", at: .end)
+            let doomed = try ops.newBlock(in: post.id, text: "Loses its takes.", at: .end)
+            // Force the SyncSpec §5 gap state (a live block with zero live
+            // variants) BELOW the ops layer — the sync-race window the
+            // surrounding code explicitly tolerates.
+            try db.write { database in
+                try database.execute(
+                    sql: "UPDATE variant SET deleted_at = '2026-01-01T00:00:00.000Z' WHERE block_id = ?",
+                    arguments: [doomed.block.id])
+            }
+            try db.clearOutbox()
+
+            let copy = try ops.duplicateAsVersion(post.id)
+
+            #expect(copy.blockCopies.map(\.source) == [healthy.block.id],
+                    "the gap slot copied as nothing")
+            // EVERY outbox block row references a block that exists — no
+            // phantom from an insert-then-delete.
+            let phantoms = try db.read { database in
+                try Int.fetchOne(database, sql: """
+                    SELECT COUNT(*) FROM sync_outbox o
+                    WHERE o.table_name = 'block'
+                      AND NOT EXISTS (SELECT 1 FROM block b WHERE b.id = o.row_id)
+                    """)
+            }
+            #expect(phantoms == 0,
+                    "no outbox entry for a nonexistent block (S2: the ops layer never physically deletes)")
+            // And the ops layer's standing invariant directly: every block
+            // row ever minted still exists.
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM block") == 3,
+                    "source pair + the one healthy copy — nothing inserted-and-deleted")
         }
     }
 }

@@ -370,3 +370,68 @@ struct TakesBoardTests {
         }
     }
 }
+
+// MARK: - Review round 1, MINOR 2: the quit door awaits EVERY live
+// editing surface's debounced buffer (the Phase 10 quit-door class,
+// reintroduced by the new surfaces). Red-on-old verified by behavioral
+// revert (registration commented ⇒ the typed text is absent post-quit).
+
+@Suite("Quit-time finalize covers the new surfaces (Phase 11, round 1 MINOR 2)")
+@MainActor
+struct QuitFinalizeSurfacesTests {
+    @Test func aTakesPaneEditInsideTheDebounceSurvivesTheQuitPath() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID, defaults: freshDefaults("quit"))
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+
+            let take = world.extraTakes[world.blocks[0]]![0]
+            model.focus(TakesViewModel.PaneKey(
+                columnID: model.columns[0].id, blockID: world.blocks[0], variantID: take))
+            model.paneEdited(variantID: take, newText: "typed, then ⌘Q inside the debounce")
+
+            // The delegate's composed quit path: finalize EVERY registered
+            // surface (no editor is focused in Takes mode).
+            await session.quitFinalize.finalizeAll()
+
+            let stored = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?", arguments: [take])
+            }
+            #expect(stored == "typed, then ⌘Q inside the debounce",
+                    "nothing typed is ever lost to ⌘Q — the takes pane included")
+        }
+    }
+
+    @Test func aTOCPaneEditInsideTheDebounceSurvivesTheQuitPath() async throws {
+        try await withWorld { session, db in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "post", profile: .blog)
+                _ = try ops.newBlock(in: post.id, text: "Original text.", at: .end)
+                return post.id
+            }
+            let model = BlockTOCViewModel(session: session, postID: postID)
+            let row = try await db.read { try Queries.blockTOC($0, post: postID) }[0]
+            model.makeLive(row.blockID)
+            model.paneEdited(
+                variantID: row.variantID!, oldText: row.text ?? "",
+                newText: "TOC-typed, then ⌘Q")
+
+            await session.quitFinalize.finalizeAll()
+
+            let stored = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [row.variantID!])
+            }
+            #expect(stored == "TOC-typed, then ⌘Q")
+
+            // Teardown unregisters — a closed surface never lingers in
+            // the quit path (this session's registry is now empty: the
+            // takes test's model above lives in a DIFFERENT session).
+            model.teardown()
+            #expect(session.quitFinalize.isEmpty)
+        }
+    }
+}

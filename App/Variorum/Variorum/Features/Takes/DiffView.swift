@@ -46,7 +46,12 @@ nonisolated enum LineDiff {
         let aKeys = aLines.map(key)
         let bKeys = bLines.map(key)
 
-        // LCS table (post/block scale — bounded by the inputs' own sizes).
+        // LCS table (post/block scale — bounded by the inputs' own
+        // sizes, never the corpus, so not a P1 violation as written —
+        // review round 1 NIT). NOTE for Phase 12's scale checks: the
+        // table is O(n×m) Ints — two multi-thousand-line texts reach
+        // hundreds of MB; a two-row LCS or Myers diff bounds it if the
+        // hardening benchmarks ever show it.
         let n = aKeys.count, m = bKeys.count
         var table = Array(repeating: Array(repeating: 0, count: m + 1), count: n + 1)
         for i in stride(from: n - 1, through: 0, by: -1) {

@@ -84,12 +84,10 @@ final class OutlineDraftViewModel {
                             db, fromOutlineBlock: slot.blockID, inContainer: draftID)
                             .map(\.blockID)
                     }
-                    let title = try String.fetchOne(
-                        db, sql: "SELECT title FROM container WHERE id = ?",
-                        arguments: [outlineID])
                     return OutlineDraftProjection(
                         outlineSlots: outlineSlots, draftSlots: draftSlots,
-                        mapping: mapping, outlineTitle: title)
+                        mapping: mapping,
+                        outlineTitle: try Queries.containerTitle(db, id: outlineID))
                 }) {
                     self.projection = value
                 }

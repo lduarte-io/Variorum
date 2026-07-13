@@ -86,6 +86,9 @@ public enum OperationError: Error, Equatable, Sendable {
     /// The live version_of pair already exists (either orientation — the
     /// canonical (min,max) storage makes them one relationship).
     case versionLinkExists(a: String, b: String)
+    /// `removeVersionOf` found no live link between the pair (round 1
+    /// NIT: the un-mark's refusal must say the truth, not its opposite).
+    case versionLinkNotFound(a: String, b: String)
     /// The post-level door needs an anchor block; a blockless post has none.
     case postHasNoBlocks(id: String)
     /// The two posts are already version-linked (some live version_of edge

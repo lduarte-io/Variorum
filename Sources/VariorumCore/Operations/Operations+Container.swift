@@ -189,6 +189,20 @@ extension Operations {
             container.updatedAt = now
             try container.update(db)
 
+            // Phase 11 (review round 1, MAJOR): the container's LENSES
+            // revive by the exact-stamp contract — BEFORE the block flips
+            // below, so each block's cascade flip sees live lenses when it
+            // revives that block's picks (the lens-live guard). A lens
+            // deleted independently (different stamp) stays dead, and so
+            // do its picks. Canvas rows revive per-block through the same
+            // shared flip (their container — this one — is live again).
+            try db.execute(
+                sql: """
+                    UPDATE lens SET deleted_at = NULL, updated_at = ?
+                    WHERE container_id = ? AND deleted_at = ?
+                    """,
+                arguments: [nowStamp, id, stamp])
+
             // A placement revives only when its block will be live after
             // this restore (dying with us, or independently restored) AND
             // has no live placement meanwhile — a block that was restored

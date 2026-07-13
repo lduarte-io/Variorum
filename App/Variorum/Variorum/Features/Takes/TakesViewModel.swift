@@ -49,7 +49,14 @@ final class TakesViewModel {
             self.deferredProjection = nil
             self.adopt(deferred)
         }
+        // The quit door awaits this surface's debounced buffers too
+        // (review round 1, MINOR 2 — the Phase 10 quit-door class).
+        quitToken = session.quitFinalize.register { [weak autosave = self.autosave] in
+            await autosave?.flushNow()
+        }
     }
+
+    @ObservationIgnored private var quitToken: UUID?
 
     // MARK: - Observable state
 
@@ -118,6 +125,10 @@ final class TakesViewModel {
     }
 
     func teardown() {
+        if let quitToken {
+            session.quitFinalize.unregister(quitToken)
+            self.quitToken = nil
+        }
         Task { await autosave.flushNow() }
     }
 

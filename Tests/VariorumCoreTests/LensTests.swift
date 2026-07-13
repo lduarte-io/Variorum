@@ -249,3 +249,90 @@ struct LensTests {
         }
     }
 }
+
+// MARK: - Review round 1, MAJOR: the restore/undo doors revive the new
+// cascade children (AppSpec §9's letter: "every cascade victim carrying
+// its exact stamp"). Red-on-old pins: on the pre-fix code the lens/choice
+// rows stayed tombstoned through every restore door.
+
+@Suite("Restore doors revive lens rows (Phase 11, review round 1 MAJOR)")
+struct LensRestoreTests {
+    @Test func restoreBlockRevivesItsLensPick() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "p", profile: .generic)
+            let m = try ops.newBlock(in: post.id, text: "Chosen.", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "Keeps the post alive.", at: .end)
+            let alt = try ops.branchVariant(m.block.id, from: m.variant.id)
+            let lens = try ops.createLens(post: post.id, name: "thread")
+            let choice = try ops.setLensChoice(lens: lens.id, block: m.block.id, variant: alt.id)
+
+            try ops.deleteBlock(m.block.id)
+            #expect(try db.deletedAt("lens_choice", choice.id) != nil, "the cascade took the pick")
+
+            try ops.restoreBlock(m.block.id)
+            #expect(try db.deletedAt("lens_choice", choice.id) == nil,
+                    "the exact-stamp cascade victim revives with its block (AppSpec §9)")
+            #expect(try db.read { try Queries.effectiveLensSelection($0, lens: lens.id) }
+                    == [m.block.id: alt.id], "the lens sees its pick again")
+        }
+    }
+
+    @Test func undoOfDeleteBlockRevivesTheLensPickToo() throws {
+        let undoStack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: undoStack)
+            let post = try ops.createPost(title: "p", profile: .generic)
+            let m = try ops.newBlock(in: post.id, text: "Chosen.", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "Keeps the post alive.", at: .end)
+            let alt = try ops.branchVariant(m.block.id, from: m.variant.id)
+            let lens = try ops.createLens(post: post.id, name: "thread")
+            let choice = try ops.setLensChoice(lens: lens.id, block: m.block.id, variant: alt.id)
+
+            try ops.deleteBlock(m.block.id)
+            try undoStack.undo(with: ops)
+
+            #expect(try db.deletedAt("lens_choice", choice.id) == nil,
+                    "structural undo's exact-pre-image contract covers the pick")
+        }
+    }
+
+    @Test func restoreContainerRevivesLensesAndTheirChoices() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "days of work", profile: .generic)
+            let m = try ops.newBlock(in: post.id, text: "Chosen.", at: .end)
+            let alt = try ops.branchVariant(m.block.id, from: m.variant.id)
+            let lens = try ops.createLens(post: post.id, name: "the days-long thread")
+            let choice = try ops.setLensChoice(lens: lens.id, block: m.block.id, variant: alt.id)
+
+            try ops.deleteContainer(post.id)
+            #expect(try db.deletedAt("lens", lens.id) != nil)
+
+            try ops.restoreContainer(post.id)
+            #expect(try db.deletedAt("lens", lens.id) == nil,
+                    "a lens is days-long work — the recoverable-post door brings it back")
+            #expect(try db.deletedAt("lens_choice", choice.id) == nil)
+            #expect(try db.read { try Queries.effectiveLensSelection($0, lens: lens.id) }
+                    == [m.block.id: alt.id])
+        }
+    }
+
+    @Test func aPickWhoseLensDiedIndependentlyStaysDead() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "p", profile: .generic)
+            let m = try ops.newBlock(in: post.id, text: "Chosen.", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "Keeps the post alive.", at: .end)
+            let alt = try ops.branchVariant(m.block.id, from: m.variant.id)
+            let lens = try ops.createLens(post: post.id, name: "thread")
+            let choice = try ops.setLensChoice(lens: lens.id, block: m.block.id, variant: alt.id)
+
+            // The lens dies FIRST (its own cascade stamps the choice with
+            // the LENS's stamp); the block dies after.
+            try ops.deleteLens(lens.id)
+            try ops.deleteBlock(m.block.id)
+            try ops.restoreBlock(m.block.id)
+
+            #expect(try db.deletedAt("lens_choice", choice.id) != nil,
+                    "a pick under a dead lens stays dead — the tag-application guard's twin")
+        }
+    }
+}

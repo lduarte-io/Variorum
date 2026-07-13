@@ -28,7 +28,7 @@ final class RecoveryViewModel {
 
     /// The bounded window (review round 1, MINOR 3); +1 probe so the
     /// truncation markers never false-positive (round 2 NIT).
-    static let window = 500
+    nonisolated static let window = 500
 
     private(set) var archived: [Queries.TimelineItem] = []
     private(set) var deleted: [Queries.TimelineItem] = []
@@ -36,6 +36,7 @@ final class RecoveryViewModel {
     /// with NO live placement — divide-W/merge lineage leftovers. Listed
     /// plainly; the door back is placeBlock into a pool.
     private(set) var unplaced: [Queries.UnplacedBlock] = []
+    private(set) var unplacedTruncated = false
     private(set) var pools: [Container] = []
     private(set) var archivedTruncated = false
     private(set) var deletedTruncated = false
@@ -81,12 +82,16 @@ final class RecoveryViewModel {
 
     func startUnplaced() async {
         do {
+            // Bounded + the probe row (review round 1, MINOR 3 — the same
+            // window+1 discipline as the two sections above it).
             for try await value in session.database.observe({ db in
                 UnplacedListing(
-                    blocks: try Queries.unplacedBlocks(db),
+                    blocks: try Queries.unplacedBlocks(db, limit: Self.window + 1),
                     pools: try Queries.pools(db))
             }) {
-                unplaced = value.blocks
+                unplacedTruncated = value.blocks.count > Self.window
+                unplaced = unplacedTruncated
+                    ? Array(value.blocks.prefix(Self.window)) : value.blocks
                 pools = value.pools
             }
         } catch is CancellationError {
@@ -169,6 +174,11 @@ struct RecoveryView: View {
                         }
                         .fixedSize()
                     }
+                }
+                if model.unplacedTruncated {
+                    Text("Showing the \(RecoveryViewModel.window) most recently touched unplaced blocks — older ones aren't listed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             Section("Recently Deleted") {

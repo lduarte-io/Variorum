@@ -953,6 +953,101 @@ Built exactly as ruled:
   integration test remains expected-failing against the un-deployed
   mirror; no production write has occurred.
 
+### Review round 1 — dispositions (2026-07-13; 1 MAJOR / 5 MINOR / 3 NIT — ALL AGREED, all fixed; the round-2 anchor)
+
+**MAJOR (the restore/undo doors don't revive the three NEW cascade
+children) — AGREED, fixed, RED-verified (6 pins red on the pre-fix
+code).** Mechanism self-traced and confirmed: v1_5/v1_7's cascade triggers
+stamp `canvas_layout`/`lens`/`lens_choice` with the parent's exact
+`deleted_at`, and the SYNC side kept the exact-stamp discipline from A1
+(Repairs.swift's own comment says why: "so restoreContainer/restoreBlock
+still recognize it as a cascade victim") — but `restoreContainer` and the
+shared `flipBlockCascadeTombstones` (restoreBlock + undo's
+revertDeleteBlock) were never extended: a restored post lost its lenses
+(days-long work, her round-3 rationale), a restored block silently lost
+its picks and canvas position — AppSpec §9's letter and structural undo's
+exact-pre-image contract both broken. **Fix:** `flipBlockCascadeTombstones`
+gains the canvas_layout + lens_choice flips with the SAME live-parent
+guards as the tag flip (a row under a dead container/lens stays dead);
+`restoreContainer` revives the container's exact-stamp lenses BEFORE the
+block loop (so each block's flip sees live lenses). **Pins (all red
+pre-fix):** `LensRestoreTests` (restoreBlock revives the pick; UNDO
+revives it too; restoreContainer revives lenses + choices; the negative —
+a pick whose lens died independently stays dead) + `CanvasRestoreTests`
+(both doors revive positions, byte-exact x/y).
+
+**MINOR 2 (the quit door awaits only the focused editor — takes/TOC pane
+text lost to ⌘Q) — AGREED, fixed, RED-verified by behavioral revert**
+(registration commented ⇒ the typed text absent post-quit; the Phase 10
+quit-door class, reintroduced by the new surfaces). **Fix:** AppSession
+gains `QuitFinalizeRegistry` (Mac-side, beside the editorRouter);
+TakesViewModel and BlockTOCViewModel register their coordinators' flushes
+at init and unregister at teardown (BlockTOCView gains the missing
+`.onDisappear` teardown); the delegate awaits the focused editor's
+finalize AND `finalizeAll()` before replying. Pins:
+`QuitFinalizeSurfacesTests` (a takes-pane and a TOC-pane edit inside the
+debounce both survive the composed quit path; teardown unregisters).
+
+**MINOR 3 (unbounded unplaced-blocks observation) — AGREED, fixed
+(architectural; mechanism traced — the unplaced set is corpus-history-
+shaped by construction since every merge/divide-W releases lineage blocks;
+no pin owed, the Phase 10 MINOR-3 precedent).** `Queries.unplacedBlocks`
+gains an optional `limit` (nil = the one-shot full fetch); RecoveryView
+observes `window + 1` with the probe-and-marker parity of its two sibling
+sections.
+
+**MINOR 4 (copyPost's hard DELETE strands a phantom outbox entry; the ops
+layer's only physical delete) — AGREED, fixed, RED-verified by behavioral
+revert** (the reverted insert-then-delete left exactly 1 phantom row —
+`sync_outbox` naming a block that doesn't exist, undrainable forever
+because push's snapshot compactMap drops-without-clearing). **Fix:** the
+variant set is computed FIRST and the block row minted only when it is
+non-empty — the DELETE is gone; S2's letter holds (the ops layer performs
+no physical deletes). Pin: `CopyPostPhantomOutboxTests` (a forced
+SyncSpec-§5 gap slot copies as nothing; zero phantoms; no
+inserted-then-deleted rows).
+
+**MINOR 5 (the guided confirm executes plan-time cuts across the
+human-scale alert window with no drift check) — AGREED, fixed,
+RED-verified by behavioral revert** (the reverted code produced the exact
+silent wrong-position split the reviewer predicted: "Rewritte" /
+"n remotely…" — the stale offset landed in-bounds in the rewritten text).
+**Fix:** the sibling compounds' CAS, as the finding offered:
+`CrossBlockMakeState` snapshots the edge blocks' rendered variants+texts
+at plan time; the confirm's compound opens with a no-op
+`editTakesAtomically` verification of the DIVIDED edges (middles merge by
+id — their text drift is harmless); a moved buffer refuses the whole
+compound visibly. Pin: `aBufferMovedUnderTheOpenConfirmRefusesTheCompound`.
+
+**MINOR 6 (two load-bearing comments state the pre-sitting world) —
+AGREED, fixed (cleanliness; the traced mechanism is misdirection of the
+fresh sessions that build their refusal-vocabulary model there; no pin).**
+The `.makeBlockAcrossBlocks` case doc now states the any-arity guided flow
+with the executor's auto-proceed/ceremony call; `planCrossBlockEdit`'s
+eligibility comment now states the ANSWERED #11a routing.
+
+**NIT 7 (removeVersionOf's inverted refusal) — AGREED, fixed:** new
+`versionLinkNotFound` case thrown where the link does NOT exist; the
+not-found path now pinned in `VersionOperationsTests`.
+
+**NIT 8 (LCS table memory at multi-thousand-line scale) — AGREED,
+recorded:** bounded by the compared inputs (not P1 as written, the
+finding's own framing); the code comment now carries the Phase 12
+scale-check note (two-row LCS / Myers bounds it if the hardening
+benchmarks show it).
+
+**NIT 9 (inline GRDB/SQL in view-model observation closures) — AGREED,
+fixed (architectural — review focus 5's letter: home, not shape):** the
+per-block active-fan fetch and the title SELECTs move to tested Queries
+homes — `Queries.activeFans(blockIDs:)` (which `takesProjection` itself
+now reads through: one brain, pinned equal) and
+`Queries.containerTitle(id:)` (tolerant, pinned); AlignedPostsViewModel
+and OutlineDraftViewModel compose exclusively Queries traversals.
+
+**Post-round counts: core 626 green in 74 suites · Mac 352 green in 63
+suites · mobile 11 green in 4 suites — all green** (pre-round: 618/71 ·
+349/62 · 11/4; +8 core pins across 3 new suites, +3 Mac pins).
+
 #### Step A10 — the modes tutorial (her round-6 instruction)
 `Features/Tutorial/ModesTutorialView`: POLISH IN PLACE / THREAD ONE
 PIECE / FORK THE PIECE — captioned sections with LIVE examples over a

@@ -44,7 +44,7 @@ extension Operations {
                     """,
                 arguments: [low, high, high, low])
             else {
-                throw OperationError.versionLinkExists(a: blockAID, b: blockBID)
+                throw OperationError.versionLinkNotFound(a: blockAID, b: blockBID)
             }
             try db.execute(
                 sql: "UPDATE edge SET deleted_at = ? WHERE id = ?",
@@ -297,11 +297,6 @@ extension Operations {
                   block.deletedAt == nil
             else { continue }  // gap slots (SyncSpec §5) copy as nothing
 
-            var blockCopy = Block(
-                id: newID(), ownerId: currentOwnerID(), name: block.name,
-                createdAt: now, updatedAt: now)
-            try blockCopy.insert(db)
-
             // Which variant each slot of the copy CHOOSES: the source
             // slot's own chosen (duplicate), or the lens's effective pick
             // where one exists (promote) — the ONE difference between the
@@ -325,8 +320,6 @@ extension Operations {
             }
             let shownVariant = lensShown ?? resolved
 
-            var copyIDs: [String: String] = [:]
-            var copiedVariants: [Variant] = []
             let toCopy: [Variant]
             if carryFans {
                 toCopy = fan
@@ -335,6 +328,21 @@ extension Operations {
             } else {
                 toCopy = []
             }
+            // A slot with no live variants (the SyncSpec §5 gap window)
+            // copies as NOTHING — and the block row is minted only now
+            // that the variant set is known non-empty (review round 1,
+            // MINOR 4: the ops layer performs no physical deletes, S2's
+            // letter; a compensating DELETE fired no outbox capture and
+            // stranded a phantom entry the drain could never clear).
+            guard !toCopy.isEmpty else { continue }
+
+            var blockCopy = Block(
+                id: newID(), ownerId: currentOwnerID(), name: block.name,
+                createdAt: now, updatedAt: now)
+            try blockCopy.insert(db)
+
+            var copyIDs: [String: String] = [:]
+            var copiedVariants: [Variant] = []
             for take in toCopy { copyIDs[take.id] = newID() }
             for take in toCopy {
                 let variant = Variant(
@@ -346,13 +354,6 @@ extension Operations {
                     createdAt: now, updatedAt: now)
                 try variant.insert(db)
                 copiedVariants.append(variant)
-            }
-            guard !copiedVariants.isEmpty else {
-                // A slot with no live variants at all — mirror the gap:
-                // no block copy would satisfy I10, so drop the minted
-                // block row again (nothing referenced it yet).
-                try db.execute(sql: "DELETE FROM block WHERE id = ?", arguments: [blockCopy.id])
-                continue
             }
 
             // chosen: the copy of the slot's pick (nil or unhealthy source

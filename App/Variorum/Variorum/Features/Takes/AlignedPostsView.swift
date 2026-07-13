@@ -100,21 +100,13 @@ final class AlignedPostsViewModel {
         observation = Task { [session] in
             do {
                 for try await value in session.database.observe({ db -> AlignedProjection in
+                    // Composed exclusively of tested Queries traversals
+                    // (round 1 NIT 9 — review focus 5's letter).
                     let anchorSlots = try Queries.renderPost(db, containerID: anchorID)
                     let otherSlots = try Queries.renderPost(db, containerID: otherID)
-                    var fans: [String: [Variant]] = [:]
-                    for slot in anchorSlots + otherSlots where !slot.isGap {
-                        fans[slot.blockID] = try Variant
-                            .filter(Column("block_id") == slot.blockID
-                                    && Column("deleted_at") == nil
-                                    && Column("status") == VariantStatus.active.rawValue)
-                            .order(Column("fan_position"), Column("id"))
-                            .fetchAll(db)
-                    }
-                    func title(_ id: String) throws -> String? {
-                        try String.fetchOne(
-                            db, sql: "SELECT title FROM container WHERE id = ?", arguments: [id])
-                    }
+                    let fans = try Queries.activeFans(
+                        db,
+                        blockIDs: (anchorSlots + otherSlots).filter { !$0.isGap }.map(\.blockID))
                     return AlignedProjection(
                         anchorSlots: anchorSlots,
                         otherSlots: otherSlots,
@@ -123,8 +115,8 @@ final class AlignedPostsViewModel {
                             .contains(otherID),
                         fans: fans,
                         fanStyle: try Queries.fanStyle(db),
-                        anchorTitle: try title(anchorID),
-                        otherTitle: try title(otherID))
+                        anchorTitle: try Queries.containerTitle(db, id: anchorID),
+                        otherTitle: try Queries.containerTitle(db, id: otherID))
                 }) {
                     self.projection = value
                 }

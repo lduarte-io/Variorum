@@ -40,15 +40,7 @@ extension Queries {
         _ db: Database, post containerID: String
     ) throws -> TakesProjection {
         let slots = try renderPost(db, containerID: containerID)
-        var fans: [String: [Variant]] = [:]
-        for slot in slots where !slot.isGap {
-            fans[slot.blockID] = try Variant
-                .filter(Column("block_id") == slot.blockID
-                        && Column("deleted_at") == nil
-                        && Column("status") == VariantStatus.active.rawValue)
-                .order(Column("fan_position"), Column("id"))
-                .fetchAll(db)
-        }
+        let fans = try activeFans(db, blockIDs: slots.filter { !$0.isGap }.map(\.blockID))
         let lenses = try Queries.lenses(db, post: containerID)
         var selections: [String: [String: String]] = [:]
         for lens in lenses {
@@ -60,6 +52,32 @@ extension Queries {
         return TakesProjection(
             slots: slots, fans: fans, lenses: lenses, lensSelections: selections,
             fanStyle: try fanStyle(db), sealed: sealed)
+    }
+
+    /// blockID → the block's live ACTIVE fan in fan order, for a set of
+    /// blocks (round 1 NIT 9: ONE tested home for the per-block fan fetch —
+    /// `takesProjection` and the aligned/outline view models all read
+    /// through this, never re-typed SQL).
+    public static func activeFans(
+        _ db: Database, blockIDs: [String]
+    ) throws -> [String: [Variant]] {
+        var fans: [String: [Variant]] = [:]
+        for blockID in blockIDs {
+            fans[blockID] = try Variant
+                .filter(Column("block_id") == blockID
+                        && Column("deleted_at") == nil
+                        && Column("status") == VariantStatus.active.rawValue)
+                .order(Column("fan_position"), Column("id"))
+                .fetchAll(db)
+        }
+        return fans
+    }
+
+    /// A container's title, tolerant (nil when missing/tombstoned-title) —
+    /// the view models' one-line header fetch (round 1 NIT 9).
+    public static func containerTitle(_ db: Database, id: String) throws -> String? {
+        try String.fetchOne(
+            db, sql: "SELECT title FROM container WHERE id = ?", arguments: [id])
     }
 
     /// The fan-style setting ('fan_style'; default .stack — the recorded

@@ -1012,10 +1012,19 @@ final class EditorViewModel {
         case .makeBlockAcrossBlocks(let indices, let blockIDs, let startCut, let endCut):
             // Phase 11, A9 (the guided flow — the v1 refusal becomes a
             // CONFIRM, never a silent act): opening touches no rows; the
-            // confirm funnels into `confirmCrossBlockMakeBlock`.
+            // confirm funnels into `confirmCrossBlockMakeBlock`. The edge
+            // blocks' rendered texts are snapshotted NOW — the confirm
+            // CASes the divided edges against them (round 1, MINOR 5).
+            func edgeSnapshot(_ i: Int) -> CrossBlockMakeState.EdgeSnapshot? {
+                guard i < index.entries.count,
+                      let variantID = index.entries[i].variantID else { return nil }
+                return .init(variantID: variantID, text: viewText(index.range(ofEntryAt: i)))
+            }
             crossBlockMakeConfirm = CrossBlockMakeState(
                 entryIndices: indices, blockIDs: blockIDs,
-                startCut: startCut, endCut: endCut)
+                startCut: startCut, endCut: endCut,
+                firstEdge: edgeSnapshot(indices.lowerBound),
+                lastEdge: edgeSnapshot(indices.upperBound))
 
         case .mergeChain(let indices, let blockIDs):
             // N-way merge (author 2026-07-09, supersedes the binary rule):
@@ -1082,10 +1091,22 @@ final class EditorViewModel {
     /// flow: confirm → adjust the neighbor edges → compound divide/divide/
     /// merge under ONE undo entry).
     struct CrossBlockMakeState: Identifiable, Equatable {
+        /// One divided edge's plan-time snapshot — the CONFIRM's
+        /// compare-and-set input (review round 1, MINOR 5: the alert is a
+        /// human-scale window; plan-time cuts must never land on a buffer
+        /// that moved under it — the W ceremony's drift class, closed with
+        /// the sibling compounds' CAS instead of a re-derive).
+        struct EdgeSnapshot: Equatable {
+            let variantID: String
+            let text: String
+        }
+
         let entryIndices: ClosedRange<Int>
         let blockIDs: [String]
         let startCut: Int
         let endCut: Int
+        let firstEdge: EdgeSnapshot?
+        let lastEdge: EdgeSnapshot?
         var id: String { blockIDs.joined(separator: "+") }
         var blockCount: Int { blockIDs.count }
     }
@@ -1166,8 +1187,29 @@ final class EditorViewModel {
         let stack = session.undoStack
         let frozenFirstCuts = firstCuts
         let frozenLastCuts = lastCuts
+        // The divided edges' plan-time snapshots — CAS inputs. Middles
+        // merge BY ID (their text drift is harmless: the user named the
+        // blocks, not offsets).
+        var edgeChecks: [Operations.TakeEdit] = []
+        if state.startCut > 0, state.startCut < firstLength, let edge = state.firstEdge {
+            edgeChecks.append(Operations.TakeEdit(
+                variantID: edge.variantID, newText: edge.text,
+                charDelta: 0, expectedText: edge.text))
+        }
+        if state.blockIDs.count > 1, state.endCut > 0, state.endCut < lastLength,
+           let edge = state.lastEdge {
+            edgeChecks.append(Operations.TakeEdit(
+                variantID: edge.variantID, newText: edge.text,
+                charDelta: 0, expectedText: edge.text))
+        }
+        let frozenEdgeChecks = edgeChecks
         _ = await runStructural { ops in
             try stack.withCompound(label: "Make Block", operations: ops) {
+                // COMPARE-AND-SET across the alert's human-scale window
+                // (round 1, MINOR 5): an edge buffer that moved since the
+                // plan refuses the WHOLE compound before any row changes —
+                // never a silently wrong-position split.
+                _ = try ops.editTakesAtomically(frozenEdgeChecks, undoLabel: "Make Block")
                 var pieces: [String] = []
                 if state.startCut > 0, state.startCut < firstLength {
                     if let firstCuts = frozenFirstCuts {
@@ -1302,7 +1344,10 @@ final class EditorViewModel {
         else { return nil }
         for i in touched {
             guard entries[i].variantID != nil, entries[i].editable else { return nil }
-            // The fanned case is deliberately OPEN (#11): not eligible.
+            // A fanned block routes to the VISIBLE-TAKE edit instead (the
+            // #11a sitting ruling, 2026-07-13 — merge-then-edit stays the
+            // single×single behavior: the halves JOIN only where no fan
+            // hangs on the seam).
             guard i < slots.count, slots[i].activeVariantCount == 1 else { return nil }
         }
         let firstRange = index.range(ofEntryAt: first)

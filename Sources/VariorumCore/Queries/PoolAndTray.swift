@@ -102,20 +102,31 @@ extension Queries {
     /// live placement. Deliberately unfiltered by archive — a safety net
     /// must not hide things. Cost ∝ the block count (an anti-join over the
     /// ownership index); a rare utility view, never a per-keystroke path.
-    public static func unplacedBlocks(_ db: Database) throws -> [UnplacedBlock] {
-        try Row.fetchAll(
-            db,
-            sql: """
-                SELECT b.id AS block_id, dv.working_text AS text
-                FROM block b
-                LEFT JOIN variant dv
-                  ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
-                WHERE b.deleted_at IS NULL
-                  AND NOT EXISTS (
-                    SELECT 1 FROM container_block cb
-                    WHERE cb.block_id = b.id AND cb.deleted_at IS NULL)
-                ORDER BY b.updated_at DESC, b.id
-                """)
+    /// `limit` (Phase 11, review round 1, MINOR 3): the unplaced set is
+    /// corpus-history-shaped by construction (every merge releases both
+    /// sources; every divide-W releases A), so a HELD observation must be
+    /// bounded like every corpus-shaped listing (the observeLibrary
+    /// discipline); nil preserves the one-shot full fetch.
+    public static func unplacedBlocks(
+        _ db: Database, limit: Int? = nil
+    ) throws -> [UnplacedBlock] {
+        var sql = """
+            SELECT b.id AS block_id, dv.working_text AS text
+            FROM block b
+            LEFT JOIN variant dv
+              ON dv.id = b.default_variant_id AND dv.deleted_at IS NULL
+            WHERE b.deleted_at IS NULL
+              AND NOT EXISTS (
+                SELECT 1 FROM container_block cb
+                WHERE cb.block_id = b.id AND cb.deleted_at IS NULL)
+            ORDER BY b.updated_at DESC, b.id
+            """
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        if let limit {
+            sql += " LIMIT ?"
+            arguments.append(limit)
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
             .map { UnplacedBlock(blockID: $0["block_id"], text: $0["text"]) }
     }
 }

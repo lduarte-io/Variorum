@@ -14,11 +14,18 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     weak var session: AppSession?
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard let active = session?.editorRouter.active,
-              let pending = active.finalizeWork()
-        else { return .terminateNow }
+        // Phase 11 (review round 1, MINOR 2): the focused editor is no
+        // longer the only surface holding a debounced buffer — the takes
+        // board's panes and the TOC's expanded block register their
+        // flushes with the session; the quit door awaits them ALL.
+        let pendingEditor = session?.editorRouter.active?.finalizeWork()
+        let registry = session?.quitFinalize
+        if pendingEditor == nil, registry?.isEmpty != false {
+            return .terminateNow
+        }
         Task { @MainActor in
-            await pending.value
+            if let pendingEditor { await pendingEditor.value }
+            if let registry { await registry.finalizeAll() }
             sender.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

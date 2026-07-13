@@ -115,15 +115,17 @@ nonisolated enum StructuralGesturePlanner {
         /// across them) — merges as a left-to-right chain of binary merges
         /// under one undo entry. Caret-at-seam stays the binary gesture.
         case mergeChain(entryIndices: ClosedRange<Int>, blockIDs: [String])
-        /// Phase 11, A9 (the boundary-fluidity package — COMMITTED scope):
-        /// Make Block across block boundaries, single-variant×single-variant
-        /// only (fanned → `.fannedCrossBlockSpan`, the OPEN #10/#11
-        /// territory). The v1 refusal becomes a CONFIRM → adjust the
-        /// neighbor edges (divide first/last at the snapped cuts) → merge
-        /// the in-span pieces, ONE undo compound. `startCut`/`endCut` are
-        /// intra-block UTF-16 in the first/last touched entries (0 = the
-        /// whole first block rides; endCut == last length = the whole last
-        /// block rides; a snapped-off edge drops that block from the span).
+        /// Phase 11, A9 (the boundary-fluidity package — COMMITTED scope;
+        /// fanned edges joined per the #10 sitting ruling, 2026-07-13):
+        /// Make Block across block boundaries, ANY arity. The v1 refusal
+        /// becomes a CONFIRM → adjust the neighbor edges (divide first/last
+        /// at the snapped cuts; a FANNED edge auto-proceeds via divideW
+        /// when every take's cut maps uniquely, else the W ceremony opens —
+        /// the executor's call) → merge the in-span pieces, ONE undo
+        /// compound. `startCut`/`endCut` are intra-block UTF-16 in the
+        /// first/last touched entries (0 = the whole first block rides;
+        /// endCut == last length = the whole last block rides; a
+        /// snapped-off edge drops that block from the span).
         case makeBlockAcrossBlocks(
             entryIndices: ClosedRange<Int>, blockIDs: [String],
             startCut: Int, endCut: Int)

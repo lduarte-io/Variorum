@@ -13,6 +13,7 @@
 //
 
 import Observation
+import Foundation
 import VariorumCore
 
 /// The undo stack's menu-facing mirror (Phase 9 — per-op undo labels): a
@@ -47,6 +48,12 @@ final class AppSession {
     /// pixel offsets — the memo's restore rule). Menu commands route here.
     /// Mac-only: the TK2 editor is the Mac's surface (AppSpec §4).
     let editorRouter = EditorRouter()
+    /// Phase 11 (review round 1, MINOR 2): every LIVE editing surface with
+    /// its own autosave debounce — the takes board's panes, the TOC's
+    /// expanded block — registers a flush here; the quit door awaits them
+    /// ALL, not just the focused editor (the Phase 10 quit-door class,
+    /// reintroduced by the new surfaces, closed the same way).
+    let quitFinalize = QuitFinalizeRegistry()
     #endif
 
     init(database: AppDatabase) {
@@ -65,3 +72,33 @@ final class AppSession {
         }
     }
 }
+
+
+#if os(macOS)
+/// The quit door's finalize registry (Phase 11, review round 1, MINOR 2):
+/// weak-closure entries so a dead surface no-ops; surfaces unregister at
+/// teardown. `finalizeAll` runs every entry — the delegate awaits it
+/// beside the focused editor's own finalize before replying to ⌘Q.
+@MainActor
+final class QuitFinalizeRegistry {
+    private var entries: [UUID: @MainActor () async -> Void] = [:]
+
+    var isEmpty: Bool { entries.isEmpty }
+
+    func register(_ flush: @escaping @MainActor () async -> Void) -> UUID {
+        let token = UUID()
+        entries[token] = flush
+        return token
+    }
+
+    func unregister(_ token: UUID) {
+        entries[token] = nil
+    }
+
+    func finalizeAll() async {
+        for flush in entries.values {
+            await flush()
+        }
+    }
+}
+#endif

@@ -34,6 +34,21 @@ final class BlockTOCViewModel {
         autosave.onError = { [weak self] error in
             self?.statusMessage = TakesViewModel.message(for: error)
         }
+        // The quit door awaits the expanded block's debounced buffer too
+        // (review round 1, MINOR 2).
+        quitToken = session.quitFinalize.register { [weak autosave = self.autosave] in
+            await autosave?.flushNow()
+        }
+    }
+
+    @ObservationIgnored private var quitToken: UUID?
+
+    func teardown() {
+        if let quitToken {
+            session.quitFinalize.unregister(quitToken)
+            self.quitToken = nil
+        }
+        Task { await autosave.flushNow() }
     }
 
     private(set) var rows: [Queries.TOCRow] = []
@@ -194,6 +209,7 @@ struct BlockTOCView: View {
         .task { await model.start() }
         .task { await model.startTray() }
         .task { await model.startPools() }
+        .onDisappear { model.teardown() }
         .alert(
             "Name this block",
             isPresented: Binding(

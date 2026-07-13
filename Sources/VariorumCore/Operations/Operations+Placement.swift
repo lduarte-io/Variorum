@@ -153,6 +153,26 @@ extension Operations {
                   AND tag_id IN (SELECT id FROM tag WHERE deleted_at IS NULL)
                 """,
             arguments: [blockID, stamp])
+        // Phase 11 (review round 1, MAJOR): the v1_5/v1_7 cascade children
+        // revive by the same exact-stamp contract (AppSpec §9's letter —
+        // the SYNC side kept this discipline from day one, per
+        // Repairs.swift's own comment; the local doors were never
+        // extended). Same live-parent guards as the tag flip: a canvas row
+        // under a dead container, or a pick under a dead lens, stays dead.
+        try db.execute(
+            sql: """
+                UPDATE canvas_layout SET deleted_at = NULL, updated_at = ?
+                WHERE block_id = ? AND deleted_at = ?
+                  AND container_id IN (SELECT id FROM container WHERE deleted_at IS NULL)
+                """,
+            arguments: [nowStamp, blockID, stamp])
+        try db.execute(
+            sql: """
+                UPDATE lens_choice SET deleted_at = NULL, updated_at = ?
+                WHERE block_id = ? AND deleted_at = ?
+                  AND lens_id IN (SELECT id FROM lens WHERE deleted_at IS NULL)
+                """,
+            arguments: [nowStamp, blockID, stamp])
     }
 
     @discardableResult

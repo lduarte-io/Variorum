@@ -473,3 +473,47 @@ struct BoundaryFluidityTests {
         }
     }
 }
+
+// MARK: - Review round 1, MINOR 5: the guided confirm's alert window gets
+// the sibling compounds' CAS — a plan-time cut never lands on a buffer
+// that moved under the open alert. Red-on-old verified by behavioral
+// revert (verification removed ⇒ the divide applies at a stale in-bounds
+// offset — a silently wrong split).
+
+extension BoundaryFluidityTests {
+    @Test func aBufferMovedUnderTheOpenConfirmRefusesTheCompound() async throws {
+        try await withEditor(seedBlocks: [
+            "Aa one. Aa two.", "Middle block.", "Zz one. Zz two.",
+        ]) { harness in
+            let plan = StructuralGesturePlanner.plan(
+                .makeBlockFromSelection, selection: NSRange(location: 10, length: 28),
+                world: harness.model.gestureWorld())
+            await harness.model.applyStructural(plan)
+            let state = try #require(harness.model.crossBlockMakeConfirm)
+
+            // The alert sits open; a sync apply (simulated: an ops write
+            // below the editor) rewrites the FIRST edge block.
+            let firstSlot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[0]
+            }
+            try await harness.session.runner.run { ops in
+                try ops.autosave(
+                    firstSlot.variantID!,
+                    text: "Rewritten remotely while the alert was open. Entirely.",
+                    charDelta: 20)
+            }
+
+            await harness.model.confirmCrossBlockMakeBlock(state)
+
+            #expect(harness.model.statusMessage?.contains("changed while") == true,
+                    "the confirm refuses, visibly: \(harness.model.statusMessage ?? "nil")")
+            let texts = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID).compactMap(\.text)
+            }
+            #expect(texts == [
+                "Rewritten remotely while the alert was open. Entirely.",
+                "Middle block.", "Zz one. Zz two.",
+            ], "NOTHING was divided or merged — never a silently wrong-position split")
+        }
+    }
+}

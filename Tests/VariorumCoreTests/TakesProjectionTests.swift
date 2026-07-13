@@ -21,6 +21,29 @@ struct TakesProjectionTests {
         }
     }
 
+    @Test func activeFansAndContainerTitleAreTheOneTestedHomes() throws {
+        // Round 1 NIT 9: the view models read these through Queries, never
+        // re-typed SQL — pinned equal to takesProjection's own fan view.
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "the title", profile: .blog)
+            let m = try ops.newBlock(in: post.id, text: "One.", at: .end)
+            let alt = try ops.branchVariant(m.block.id, from: m.variant.id)
+            let archived = try ops.branchVariant(m.block.id, from: m.variant.id)
+            try ops.archiveVariant(archived.id)
+
+            try db.read { database in
+                let fans = try Queries.activeFans(database, blockIDs: [m.block.id])
+                #expect(fans[m.block.id]?.map(\.id) == [m.variant.id, alt.id],
+                        "live ACTIVE takes in fan order — archived stays out")
+                let projection = try Queries.takesProjection(database, post: post.id)
+                #expect(projection.fans == fans, "one brain — takesProjection reads through it")
+                #expect(try Queries.containerTitle(database, id: post.id) == "the title")
+                #expect(try Queries.containerTitle(database, id: "missing") == nil,
+                        "tolerant read")
+            }
+        }
+    }
+
     @Test func takesProjectionCarriesSlotsFansLensesAndSeal() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "p", profile: .blog)

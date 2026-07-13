@@ -165,3 +165,43 @@ struct CanvasLayoutTests {
         }
     }
 }
+
+// MARK: - Review round 1, MAJOR (the canvas half): restore doors revive
+// exact-stamp canvas rows. Red-on-old.
+
+@Suite("Restore doors revive canvas rows (Phase 11, review round 1 MAJOR)")
+struct CanvasRestoreTests {
+    @Test func restoreBlockRevivesItsCanvasPosition() throws {
+        try withOperations { ops, db in
+            let pool = try ops.createPool(title: "board")
+            let block = try ops.newBlock(in: pool.id, text: "card", at: .end).block
+            _ = try ops.newBlock(in: pool.id, text: "keeps the pool alive", at: .end)
+            let layout = try ops.setCanvasPosition(container: pool.id, block: block.id, x: 44, y: 55)
+
+            try ops.deleteBlock(block.id)
+            #expect(try db.deletedAt("canvas_layout", layout.id) != nil)
+
+            try ops.restoreBlock(block.id)
+            #expect(try db.deletedAt("canvas_layout", layout.id) == nil,
+                    "the exact-stamp victim revives with its block")
+            let positions = try db.read { try Queries.canvasLayouts($0, container: pool.id) }
+            #expect(positions[block.id] == Queries.CanvasPosition(x: 44, y: 55),
+                    "the card lands back where the author placed it")
+        }
+    }
+
+    @Test func restoreContainerRevivesItsCanvasRows() throws {
+        try withOperations { ops, db in
+            let pool = try ops.createPool(title: "board")
+            let block = try ops.newBlock(in: pool.id, text: "card", at: .end).block
+            let layout = try ops.setCanvasPosition(container: pool.id, block: block.id, x: 7, y: 9)
+
+            try ops.deleteContainer(pool.id)
+            try ops.restoreContainer(pool.id)
+
+            #expect(try db.deletedAt("canvas_layout", layout.id) == nil)
+            let positions = try db.read { try Queries.canvasLayouts($0, container: pool.id) }
+            #expect(positions[block.id] == Queries.CanvasPosition(x: 7, y: 9))
+        }
+    }
+}
