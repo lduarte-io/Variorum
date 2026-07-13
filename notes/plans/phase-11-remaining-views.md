@@ -1256,3 +1256,22 @@ The SyncSpec §12 choreography, as run:
    / block names until the phone is updated** — those are all deliberate
    gestures, so ordinary journaling and editing are unaffected in the
    window; the checkpoint report says this to her explicitly.
+
+### Checkpoint ratification round (2026-07-13, the author via the coordinator)
+
+- **QUESTIONS #18 RATIFIED AS SHIPPED, all three surfaces:** block names
+  REFUSE under seal; canvas positions ALLOW; lens edits ALLOW (✓ / adopt /
+  diverge-here keep refusing under seal through their own ops' guards).
+- **QUESTIONS #19 RATIFIED AS SHIPPED (option (a))** after the label-vs-map
+  tradeoff walk: `version_of` is the one coarse findability LABEL (anchored
+  on the first-block pair — plumbing, not meaning); the per-block MAP is
+  `derived_from` lineage, minted automatically wherever real history exists
+  (copies/promotes/outline-derived drafts) and deliberately ABSENT between
+  independently-written posts (invented correspondence = fake history).
+  The re-mark-after-anchor-restructuring cost accepted; a post-level link
+  table only if re-marking annoys in real use.
+- Both entries marked ANSWERED in QUESTIONS.md. The checkpoint report was
+  delivered in the coordinator session the same day; the deploy stands
+  two-thirds complete (mirror v2 + Mac installed; the PHONE install is the
+  author's one open action — no lens/canvas/name writes until it lands).
+  THE PHASE IS CLOSED; Phase 11b awaits her kickoff.
