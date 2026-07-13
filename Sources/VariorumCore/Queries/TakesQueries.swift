@@ -73,6 +73,22 @@ extension Queries {
         return fans
     }
 
+    /// An id-keyed container liveness probe (round 2 NIT 6 — the tested
+    /// home for the tutorial's seeding/reset checks; the SyncSession
+    /// outbox-count class).
+    public static func containerIsLive(
+        _ db: Database, id: String, includingArchived: Bool = true
+    ) throws -> Bool {
+        let archiveClause = includingArchived ? "" : " AND archived_at IS NULL"
+        return try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (SELECT 1 FROM container
+                WHERE id = ? AND deleted_at IS NULL\(archiveClause))
+                """,
+            arguments: [id]) ?? false
+    }
+
     /// A container's title, tolerant (nil when missing/tombstoned-title) —
     /// the view models' one-line header fetch (round 1 NIT 9).
     public static func containerTitle(_ db: Database, id: String) throws -> String? {

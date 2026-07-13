@@ -194,8 +194,7 @@ extension Operations {
             // below, so each block's cascade flip sees live lenses when it
             // revives that block's picks (the lens-live guard). A lens
             // deleted independently (different stamp) stays dead, and so
-            // do its picks. Canvas rows revive per-block through the same
-            // shared flip (their container — this one — is live again).
+            // do its picks.
             try db.execute(
                 sql: """
                     UPDATE lens SET deleted_at = NULL, updated_at = ?
@@ -246,6 +245,31 @@ extension Operations {
                     WHERE container_id = ? AND deleted_at = ?
                     """,
                 arguments: [nowStamp, id, stamp])
+            // Round 2, MINOR 2 (the departed-block corner of the round-1
+            // MAJOR): the container cascade stamps canvas rows and lens
+            // picks for blocks that DEPARTED before the delete too (their
+            // rows stay live by design — the remembered position; the
+            // inert pick), and those blocks are never in the per-block
+            // loop above (nothing tombstoned them). Flip every exact-stamp
+            // victim whose block is LIVE — revived in this restore or
+            // living elsewhere; a block that died independently keeps its
+            // rows dead (the standing live-parent guard shape).
+            try db.execute(
+                sql: """
+                    UPDATE canvas_layout SET deleted_at = NULL, updated_at = ?
+                    WHERE container_id = ? AND deleted_at = ?
+                      AND block_id IN (SELECT id FROM block WHERE deleted_at IS NULL)
+                    """,
+                arguments: [nowStamp, id, stamp])
+            try db.execute(
+                sql: """
+                    UPDATE lens_choice SET deleted_at = NULL, updated_at = ?
+                    WHERE deleted_at = ?
+                      AND lens_id IN
+                          (SELECT id FROM lens WHERE container_id = ? AND deleted_at IS NULL)
+                      AND block_id IN (SELECT id FROM block WHERE deleted_at IS NULL)
+                    """,
+                arguments: [nowStamp, stamp, id])
         }
     }
 

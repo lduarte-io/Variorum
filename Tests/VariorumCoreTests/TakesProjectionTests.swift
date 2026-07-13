@@ -40,6 +40,8 @@ struct TakesProjectionTests {
                 #expect(try Queries.containerTitle(database, id: post.id) == "the title")
                 #expect(try Queries.containerTitle(database, id: "missing") == nil,
                         "tolerant read")
+                #expect(try Queries.containerIsLive(database, id: post.id))
+                #expect(try Queries.containerIsLive(database, id: "missing") == false)
             }
         }
     }
@@ -67,6 +69,14 @@ struct TakesProjectionTests {
             try ops.lockPost(post.id)
             projection = try db.read { try Queries.takesProjection($0, post: post.id) }
             #expect(projection.sealed == true)
+            try ops.archiveContainer(post.id)
+            let (liveIncl, liveExcl) = try db.read { database in
+                (try Queries.containerIsLive(database, id: post.id),
+                 try Queries.containerIsLive(database, id: post.id, includingArchived: false))
+            }
+            #expect(liveIncl)
+            #expect(liveExcl == false,
+                    "the archive-excluding flavor (the tutorial's re-seed check)")
         }
     }
 }

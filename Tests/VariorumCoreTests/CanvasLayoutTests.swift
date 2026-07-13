@@ -205,3 +205,40 @@ struct CanvasRestoreTests {
         }
     }
 }
+
+// MARK: - Review round 2, MINOR 2 (the departed-block corner of the
+// round-1 MAJOR): the container cascade stamps a DEPARTED block's inert
+// canvas row too (WHERE container_id = NEW.id), but restoreContainer only
+// revived rows through the per-block loop — an exact-stamp victim whose
+// block lives elsewhere stayed dead, and the remembered position was
+// silently gone when the block returned. Red-on-current.
+
+extension CanvasRestoreTests {
+    @Test func restoreContainerRevivesADepartedBlocksRememberedPosition() throws {
+        try withOperations { ops, db in
+            let pool = try ops.createPool(title: "board")
+            let other = try ops.createPool(title: "elsewhere")
+            let block = try ops.newBlock(in: pool.id, text: "roams", at: .end).block
+            _ = try ops.newBlock(in: pool.id, text: "keeps the pool non-empty", at: .end)
+            let layout = try ops.setCanvasPosition(container: pool.id, block: block.id, x: 21, y: 34)
+
+            // The block departs; its layout row stays live BY DESIGN (the
+            // A7-pinned remembered position).
+            try ops.moveBlock(block.id, to: other.id, at: .end)
+            #expect(try db.deletedAt("canvas_layout", layout.id) == nil)
+
+            try ops.deleteContainer(pool.id)
+            #expect(try db.deletedAt("canvas_layout", layout.id) != nil,
+                    "the container cascade stamps the inert row too")
+
+            try ops.restoreContainer(pool.id)
+            #expect(try db.deletedAt("canvas_layout", layout.id) == nil,
+                    "an exact-stamp cascade victim revives even when its block lives elsewhere")
+
+            // The remembered position is intact when the block returns.
+            try ops.moveBlock(block.id, to: pool.id, at: .end)
+            let positions = try db.read { try Queries.canvasLayouts($0, container: pool.id) }
+            #expect(positions[block.id] == Queries.CanvasPosition(x: 21, y: 34))
+        }
+    }
+}

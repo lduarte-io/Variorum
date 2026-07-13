@@ -57,10 +57,7 @@ final class ModesTutorialModel {
     func ensureDemo() async {
         if let existing = defaults.string(forKey: Self.demoDefaultsKey) {
             let alive = try? await session.database.read { db in
-                try Bool.fetchOne(
-                    db,
-                    sql: "SELECT EXISTS (SELECT 1 FROM container WHERE id = ? AND deleted_at IS NULL AND archived_at IS NULL)",
-                    arguments: [existing]) ?? false
+                try Queries.containerIsLive(db, id: existing, includingArchived: false)
             }
             if alive == true {
                 demoPostID = existing
@@ -175,12 +172,7 @@ final class ModesTutorialModel {
         let doomed = [defaults.string(forKey: Self.demoDefaultsKey)].compactMap { $0 }
             + (defaults.stringArray(forKey: Self.forkedCopiesKey) ?? [])
         let alive: [String] = (try? await session.database.read { db in
-            try doomed.filter { id in
-                try Bool.fetchOne(
-                    db,
-                    sql: "SELECT EXISTS (SELECT 1 FROM container WHERE id = ? AND deleted_at IS NULL)",
-                    arguments: [id]) ?? false
-            }
+            try doomed.filter { try Queries.containerIsLive(db, id: $0) }
         }) ?? []
         do {
             try await session.runner.run { ops in

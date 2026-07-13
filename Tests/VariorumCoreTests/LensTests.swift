@@ -336,3 +336,32 @@ struct LensRestoreTests {
         }
     }
 }
+
+// MARK: - Review round 2, MINOR 2 (the lens_choice twin of the departed-
+// block corner). Red-on-current.
+
+extension LensRestoreTests {
+    @Test func restoreContainerRevivesAPickWhoseBlockDepartedThePost() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "p", profile: .generic)
+            let other = try ops.createPool(title: "elsewhere")
+            let m = try ops.newBlock(in: post.id, text: "Roaming block.", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "Keeps the post non-empty.", at: .end)
+            let alt = try ops.branchVariant(m.block.id, from: m.variant.id)
+            let lens = try ops.createLens(post: post.id, name: "thread")
+            let choice = try ops.setLensChoice(lens: lens.id, block: m.block.id, variant: alt.id)
+
+            // The pick's block departs AFTER the pick was set (legal — the
+            // placement guard binds at write time); the pick stays live,
+            // inert at read time.
+            try ops.moveBlock(m.block.id, to: other.id, at: .end)
+            #expect(try db.deletedAt("lens_choice", choice.id) == nil)
+
+            try ops.deleteContainer(post.id)
+            try ops.restoreContainer(post.id)
+
+            #expect(try db.deletedAt("lens_choice", choice.id) == nil,
+                    "the exact-stamp pick revives even though its block lives elsewhere")
+        }
+    }
+}

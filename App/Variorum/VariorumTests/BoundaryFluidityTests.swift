@@ -517,3 +517,71 @@ extension BoundaryFluidityTests {
         }
     }
 }
+
+// MARK: - Review round 2, MINOR 3: index drift under the open alert —
+// the round-1 CAS covers TEXT drift, but a remote structural change
+// shifting entry INDICES re-addressed the plan's positional state (and
+// the misclassification path skipped the CAS entirely). Red-on-current:
+// the pre-fix confirm proceeded against the WRONG blocks.
+
+extension BoundaryFluidityTests {
+    @Test func anIndexShiftUnderTheOpenConfirmRefusesByIdentity() async throws {
+        try await withEditor(seedBlocks: [
+            "Aa one. Aa two.", "Middle block.", "Zz one. Zz two.",
+        ]) { harness in
+            let plan = StructuralGesturePlanner.plan(
+                .makeBlockFromSelection, selection: NSRange(location: 10, length: 28),
+                world: harness.model.gestureWorld())
+            await harness.model.applyStructural(plan)
+            let state = try #require(harness.model.crossBlockMakeConfirm)
+
+            // A remote structural change lands while the alert sits open:
+            // a NEW block above shifts every entry index (mobile capture
+            // does mint blocks — the daily-drive reality).
+            try await harness.session.runner.run { [postID = harness.postID] ops in
+                _ = try ops.newBlock(in: postID, text: "Inserted above, remotely.", at: .start)
+            }
+            try harness.reload()
+
+            await harness.model.confirmCrossBlockMakeBlock(state)
+
+            #expect(harness.model.statusMessage != nil,
+                    "a shifted world refuses VISIBLY, never a wrong-block compound")
+            let texts = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID).compactMap(\.text)
+            }
+            #expect(texts == [
+                "Inserted above, remotely.",
+                "Aa one. Aa two.", "Middle block.", "Zz one. Zz two.",
+            ], "NOTHING was divided or merged against the shifted indices")
+        }
+    }
+}
+
+// MARK: - Review round 2, MINOR 4: the quit/teardown door awaits a
+// scheduled cross-block compound (its triggering keystroke was REFUSED,
+// so the dirty flags see nothing — the quit-door class in gesture form).
+// Red-on-current: finalizeWork returned nil and ⌘Q could reply
+// terminateNow with the compound unexecuted.
+
+extension BoundaryFluidityTests {
+    @Test func quitTimeFinalizeLandsAScheduledCrossBlockCompound() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { harness in
+            // The cross-seam delete through the keystroke path — the
+            // compound is SCHEDULED, not yet executed.
+            harness.replace(NSRange(location: 6, length: 10), with: "")
+
+            // The delegate's composition, WITHOUT the harness pump: the
+            // finalize must see and await the pending compound.
+            let pending = harness.model.finalizeWork()
+            #expect(pending != nil, "a scheduled compound IS pending work")
+            await pending?.value
+
+            let texts = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID).compactMap(\.text)
+            }
+            #expect(texts == ["Alpha two."],
+                    "the gesture landed before the quit reply — never silently un-applied")
+        }
+    }
+}

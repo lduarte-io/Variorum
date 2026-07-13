@@ -1048,6 +1048,95 @@ and OutlineDraftViewModel compose exclusively Queries traversals.
 suites · mobile 11 green in 4 suites — all green** (pre-round: 618/71 ·
 349/62 · 11/4; +8 core pins across 3 new suites, +3 Mac pins).
 
+### Review round 2 — dispositions (2026-07-13; round 1's nine fixes ALL verified by the fresh reviewer; 1 NEW MAJOR / 3 MINOR / 2 NIT — ALL AGREED, all fixed; the round-3 anchor)
+
+**MAJOR (the takes board's `liveBuffers` never clears —
+`projectionCaughtUp` had ZERO callers; the display could go permanently
+stale, then resumed typing clobbered newer store text with NO conflict
+variant) — AGREED, fixed, RED-ON-CURRENT verified.** Mechanism confirmed
+by my own trace AND by the pin failing before the fix: `paneEdited`
+inserted entries; nothing ever removed them (the seam's own doc recorded
+the unwired intent); `resolvedTake` and the blooms preferred the frozen
+buffer forever, so an external edit — a phone edit landing via sync, an
+engine repair, a sibling surface — never reached the display, Sameness
+computed on stale bytes, and a resumed edit sent a stale-based full text
+through autosave (an ordinary local write AFTER the remote landed cleanly
+— S5 never fires; the stale-surface-clobber class). Broke the sitting's
+governing vocabulary on the flagship surface. **Fix (the designed seam,
+wired):** `adopt(_:)` — which only runs clean or at settle — now calls
+`projectionCaughtUp` for every buffer with NO pending autosave record;
+pending entries stay authoritative (the dirty half, separately pinned).
+Accepted residual, recorded in the code: a stale pre-flush emission
+racing settle can flicker one observation cycle before the post-commit
+emission converges it. **Pins:**
+`aSettledAdoptionDropsTheBufferAndShowsExternalEdits` (RED on current:
+returned "local typing" where "remote edit landed" was truth) +
+`aDirtyBufferStaysAuthoritativeUntilSettle` (the discipline's other half,
+green both sides BY DESIGN — a guard pin, not a bug pin).
+
+**MINOR 2 (restoreContainer still loses cascade-stamped canvas/lens_choice
+rows whose block DEPARTED before the delete — a residual corner BESIDE
+the round-1 fix; the in-code comment overclaimed) — AGREED, fixed,
+RED-ON-CURRENT verified (both pins).** Traced: the container cascade
+stamps ALL rows by container_id — including a departed block's inert row
+(the A7-pinned remembered position; the write-time placement guard binds
+at write, `moveBlock` later is legal) — but restore revived only through
+the per-block loop, and a departed block is never in `blockIDs`. **Fix:**
+`restoreContainer` adds direct exact-stamp flips after the block loop —
+`canvas_layout` by container + `lens_choice` through the just-revived
+lens chain — guarded on the BLOCK being live (revived here or living
+elsewhere; independently-dead blocks keep their rows dead — the standing
+guard shape); the overclaiming comment corrected. **Pins:**
+`restoreContainerRevivesADepartedBlocksRememberedPosition` (the position
+is byte-intact when the block returns) +
+`restoreContainerRevivesAPickWhoseBlockDepartedThePost`.
+
+**MINOR 3 (the guided confirm executes against possibly-shifted entry
+INDICES — text CAS didn't cover index drift, and the misclassification
+path skipped the CAS entirely) — AGREED, fixed, RED-ON-CURRENT verified.**
+Traced: plan-time positional indices re-read after the human-scale alert;
+a remote structural insert above re-addresses every position (mobile
+capture mints blocks — the daily-drive reality); the
+`startCut == firstLength` misclassification silently drops an edge AND
+its CAS check. **Fix (the finding's one-guard shape):** the confirm
+verifies IDENTITY — `entries[firstIndex].blockID == state.blockIDs.first`
+and the last twin — and refuses visibly on mismatch ("the blocks moved
+while the confirm was open"). **Pin:**
+`anIndexShiftUnderTheOpenConfirmRefusesByIdentity` (RED on current: the
+pre-fix confirm proceeded against the shifted world).
+
+**MINOR 4 (production quit/teardown never awaits `pendingCrossBlockTask` —
+the closeout's "teardown/tests await quiescence" held only for tests) —
+AGREED, fixed, RED verified by behavioral revert** (the reverted guard
+left the compound silently un-applied at quit: both pin expectations
+failed). Traced: the triggering keystroke was REFUSED, so
+`finalizeWork`'s dirty guards see nothing; ⌘Q could reply terminateNow
+with the gesture unexecuted (bounded harm — the surface never showed the
+deletion — but the quit-door class in gesture form, and a falsified
+recorded guarantee). **Fix (the finding's two lines):** `finalizeWork`
+guards on `pendingCrossBlockTask != nil` and its task awaits the pending
+compound before the flush. **Pin:**
+`quitTimeFinalizeLandsAScheduledCrossBlockCompound`.
+
+**NIT 5 (the TOC pane has no live-buffer map — a sub-second post-blur
+flicker window; charDelta from a possibly-stale projection) — AGREED,
+RECORDED (the finding's offered alternative):** the flush is forced at
+`makeLive`, so the window is one flush+observe cycle and self-healing;
+the takes board carries the full discipline because its panes are the
+flagship editing surface, the TOC's expand-to-edit is a convenience. The
+acceptance is now written AT the mechanism (`makeLive`'s comment);
+revisit with Phase 13's polish if it ever shows. The charDelta staleness
+is cosmetic by design (churn approximate — SyncSpec §6's counter class).
+
+**NIT 6 (two inline EXISTS probes left in the tutorial view file) —
+AGREED, fixed:** `Queries.containerIsLive(id:includingArchived:)` is the
+tested home (pinned, both flavors); the tutorial's seeding/reset checks
+read through it.
+
+**Post-round counts: core 628 green in 74 suites · Mac 356 green in 64
+suites · mobile 11 green in 4 suites — all green** (pre-round: 626/74 ·
+352/63 · 11/4).
+
 #### Step A10 — the modes tutorial (her round-6 instruction)
 `Features/Tutorial/ModesTutorialView`: POLISH IN PLACE / THREAD ONE
 PIECE / FORK THE PIECE — captioned sections with LIVE examples over a

@@ -109,6 +109,20 @@ final class TakesViewModel {
     /// never fires `.task`).
     func adopt(_ new: Queries.TakesProjection) {
         projection = new
+        // THE CONVERGENCE HALF of the buffer-authoritative discipline
+        // (review round 2, MAJOR): adoption only runs clean or at settle
+        // (the observation loop defers while dirty), so any buffer with NO
+        // pending autosave record has fully landed — the projection is the
+        // truth and the buffer must clear, or external edits (a phone edit
+        // via sync, an engine repair, a sibling surface) would never reach
+        // the display and resumed typing would clobber them with no
+        // conflict variant. Entries still pending stay authoritative (the
+        // dirty half). Accepted residual, recorded: a stale pre-flush
+        // emission racing settle can flicker one observation cycle before
+        // the post-commit emission converges it.
+        for variantID in liveBuffers.keys where autosave.pending[variantID] == nil {
+            projectionCaughtUp(variantID: variantID)
+        }
         // Columns referencing lenses that died drop back to scratch with
         // the lens's last-known picks LOST deliberately (the lens was the
         // durable home; a deleted lens's thread is gone — its takes remain
@@ -201,8 +215,10 @@ final class TakesViewModel {
         return projection.slots.first { $0.variantID == variantID }?.text
     }
 
-    /// Settled buffers converge back to the store's text; the map clears as
-    /// projections catch up.
+    /// Settled buffers converge back to the store's text — called by
+    /// `adopt` for every entry with no pending autosave record (round 2
+    /// MAJOR: the seam existed unwired; the display could go permanently
+    /// stale and clobber newer store text on resumed typing).
     func projectionCaughtUp(variantID: String) {
         liveBuffers.removeValue(forKey: variantID)
     }

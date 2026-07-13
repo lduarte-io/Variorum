@@ -435,3 +435,67 @@ struct QuitFinalizeSurfacesTests {
         }
     }
 }
+
+// MARK: - Review round 2, MAJOR: liveBuffers must CONVERGE at settle-time
+// adoption — the buffer-authoritative discipline's other half. Red-on-
+// current: before the fix, resolvedTake returned the frozen local buffer
+// forever, hiding external (sync/repair/sibling-surface) edits and letting
+// resumed typing clobber them with no conflict variant.
+
+@Suite("Takes buffers converge at adoption (Phase 11, round 2 MAJOR)")
+@MainActor
+struct TakesBufferConvergenceTests {
+    @Test func aSettledAdoptionDropsTheBufferAndShowsExternalEdits() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID, defaults: freshDefaults("converge"))
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+
+            let take = world.extraTakes[world.blocks[0]]![0]
+            let key = TakesViewModel.PaneKey(
+                columnID: model.columns[0].id, blockID: world.blocks[0], variantID: take)
+            model.focus(key)
+            model.paneEdited(variantID: take, newText: "local typing")
+            await model.autosave.flushNow()
+
+            // An EXTERNAL edit lands (a phone edit via sync, an engine
+            // repair, a sibling surface) and its projection arrives clean.
+            try await session.runner.run { ops in
+                try ops.autosave(take, text: "remote edit landed", charDelta: 8)
+            }
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+
+            // Pick the take into a scratch column so resolvedTake reads it.
+            model.addScratchColumn()
+            await model.pick(columnID: model.columns[1].id, blockID: world.blocks[0], variantID: take)
+            let slot = model.projection.slots.first { $0.blockID == world.blocks[0] }!
+            let shown = model.resolvedTake(column: model.columns[1], slot: slot)
+            #expect(shown?.text == "remote edit landed",
+                    "visible IS what the take is — a settled adoption converges the pane")
+            #expect(model.liveBuffers[take] == nil,
+                    "the buffer cleared once the projection caught up")
+        }
+    }
+
+    @Test func aDirtyBufferStaysAuthoritativeUntilSettle() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID, defaults: freshDefaults("dirty"))
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+
+            let take = world.extraTakes[world.blocks[0]]![0]
+            model.focus(TakesViewModel.PaneKey(
+                columnID: model.columns[0].id, blockID: world.blocks[0], variantID: take))
+            model.paneEdited(variantID: take, newText: "unsaved typing")
+
+            // A projection adopted WHILE the edit is pending must not
+            // clobber the buffer (the dirty half of the discipline).
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            #expect(model.liveBuffers[take] == "unsaved typing",
+                    "the buffer stays authoritative while its autosave is pending")
+            await model.autosave.flushNow()
+        }
+    }
+}

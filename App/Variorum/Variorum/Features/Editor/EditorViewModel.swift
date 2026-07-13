@@ -284,8 +284,17 @@ final class EditorViewModel {
     func finalizeWork() -> Task<Void, Never>? {
         tailIdleTask?.cancel()
         let hasTailText = hasOpenTail && !tailText.allSatisfy(\.isWhitespace)
-        guard autosave.isDirty || mintInFlight || hasTailText else { return nil }
+        // Round 2, MINOR 4: a scheduled cross-block compound is pending
+        // WORK the dirty flags cannot see (its triggering keystroke was
+        // REFUSED, so nothing is dirty) — quit/teardown must let it land
+        // or the gesture is silently un-applied.
+        guard autosave.isDirty || mintInFlight || hasTailText
+            || pendingCrossBlockTask != nil
+        else { return nil }
         return Task { // strong self, deliberately
+            if let pending = self.pendingCrossBlockTask {
+                await pending.value
+            }
             await self.autosave.flushNow()
             // Let the in-flight mint (and any round it chains) reconcile.
             while self.mintInFlight {
@@ -1150,12 +1159,24 @@ final class EditorViewModel {
     /// decision exists; never a refusal, never a guess.
     func confirmCrossBlockMakeBlock(_ state: CrossBlockMakeState) async {
         crossBlockMakeConfirm = nil
-        guard state.entryIndices.upperBound < index.entries.count else {
-            refuseFeedback(RefusalCopy.message(for: .invalidSelection))
-            return
-        }
         let firstIndex = state.entryIndices.lowerBound
         let lastIndex = state.entryIndices.upperBound
+        // IDENTITY guard (round 2, MINOR 3): the alert is a human-scale
+        // window and nothing suppresses projection adoption under it — a
+        // remote structural change can SHIFT entry indices, re-addressing
+        // every plan-time position (and the shifted-length
+        // misclassification path would skip the text CAS entirely).
+        // The plan named BLOCKS; the confirm verifies the indices still
+        // address exactly those blocks, or refuses visibly.
+        guard state.entryIndices.upperBound < index.entries.count,
+              index.entries[firstIndex].blockID == state.blockIDs.first,
+              index.entries[lastIndex].blockID == state.blockIDs.last
+        else {
+            refuseFeedback(
+                "The blocks moved while the confirm was open — nothing was changed; "
+                + "reselect and try again.")
+            return
+        }
         let firstLength = index.entries[firstIndex].length
         let lastLength = index.entries[lastIndex].length
         let firstArity = firstIndex < slots.count ? slots[firstIndex].activeVariantCount : 1

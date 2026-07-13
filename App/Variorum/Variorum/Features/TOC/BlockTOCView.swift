@@ -113,6 +113,13 @@ final class BlockTOCViewModel {
     func makeLive(_ blockID: String) {
         guard liveBlockID != blockID else { return }
         liveBlockID = blockID
+        // ACCEPTED (round 2, NIT 5 — recorded): the TOC keeps NO live-
+        // buffer map, so the just-blurred pane can show the pre-flush
+        // projection text for one flush+observe cycle (the flush is forced
+        // right here, so the window is sub-second and self-healing). The
+        // takes board carries the full buffer discipline because its panes
+        // are the flagship editing surface; the TOC's expand-to-edit is a
+        // convenience — revisit with Phase 13's polish if it ever shows.
         Task { await autosave.flushNow() }
     }
 
