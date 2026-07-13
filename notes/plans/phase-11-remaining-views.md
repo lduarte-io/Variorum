@@ -859,10 +859,99 @@ CutPropagation's unique-match condition mapping a span's BOTH edges into
 every take (cuts inside a shared region) + the divideW it would
 auto-mint, shown with the real op. Two Phase 9 planner pins updated with
 dated comments (the supersession class Phase 10 established).
-`BoundaryFluidityTests` 5. **STOPPED HERE: QUESTIONS #10 (must the W
-always be a ceremony?) and #11 (fanned cross-block semantics) are OPEN —
-ask-her-live, demos ready; her both-ways-testing method stands where a
-live answer doesn't settle. NOTHING was built past them.**
+`BoundaryFluidityTests` 5. **STOPPED HERE at the two ask-her-live gates,
+as required; the sitting then answered both, and the builds landed the
+same session (next section).**
+
+#### Step A9, second half — the #10/#11 SITTING RULINGS BUILT (2026-07-13; gate 2 closed)
+The author answered both questions live (demos presented; her rulings in
+QUESTIONS #10/#11's resolutions and the kickoff-notes sitting record).
+Built exactly as ruled:
+- **#10 — auto-proceed on unique match.** The guided cross-block Make
+  Block's fanned edges no longer refuse: the planner plans the guided
+  flow for ANY arity (`.fannedCrossBlockSpan` RETIRED — the refusal
+  vocabulary shrinks; locked-edge checks now bind only single-variant
+  divided edges, since W-divides COPY takes — the Phase 3 semantics); the
+  EXECUTOR maps the edge's cut into every active take by CutPropagation
+  (the ceremony's own seeding discipline). All unique ⇒ NO sheet: the
+  fanned edge W-divides inside the one compound — the out-of-span half
+  keeps its per-take fan, the in-span half joins the single-variant
+  middle by merge's standing semantics; ONE undo restores byte-
+  identically (pinned). ANY non-matching take ⇒ the W CEREMONY OPENS for
+  that block, store untouched (pinned) — "the ceremony survives exactly
+  where a genuine per-take decision exists." (Recorded shape: after the
+  ceremony's confirm the author re-invokes Make Block — a two-act
+  completion in the rare mixed case; a one-shot continuation is a
+  possible refinement, deliberately not invented.)
+- **#11a — VISIBLE-TAKE DELETE** (supersedes the shipped refusal as the
+  fanned span's everyday behavior): the plain cross-block delete/edit
+  removes exactly the selected text from each touched block's VISIBLE
+  take (a typed replacement rides the first block — recorded reading);
+  fan, seam, and block structure untouched — the ruled deviation: two
+  blocks, NOT a join, the fan hangs on the seam; unseen takes NEVER
+  change (pinned); one undo compound restores. Locked/gap/tail spans
+  keep a speaking refusal (copy updated to name exactly those).
+- **#11b — "Delete in Every Take"**, the deliberate NAMED command
+  (editor context menu + Block menu; fire-and-speak): locates the span
+  per take by UNIQUE match (`TakeSpanMatch` — one occurrence or nothing),
+  APPLIES to matching takes and REPORTS the skipped ones visibly (her
+  applied-and-reported call; locked takes skip with their reason); one
+  transaction, one undo compound (pinned end to end incl. the report).
+- **#11c — merge stays the explicit seam-removal gesture and SPEAKS on
+  fanned blocks** ("N other takes stay with the released blocks in
+  lineage — undo brings them back"), binary and chain alike.
+- **NOT built, on the record (her call):** the "mute block" one-click
+  sugar — choosing/lensing a blank take remains the manual path.
+- **The supporting core op:** `Operations.editTakesAtomically` — ONE
+  transaction; per-target `autosave` guards; DIRTY targets are
+  insurance-committed first (the quiet-auto-commit doctrine — text
+  removed from an unseen take stays one restore away beyond the
+  session); ONE registered undo entry (`revertStructural`
+  restoringTexts); COMPARE-AND-SET via `TakeEdit.expectedText`.
+- **The session's one surprise — a REAL race the soak caught (red-on-old
+  evidence: 102 soak issues on the pre-fix code, in the transcript):**
+  the deferred keystroke compounds (merge-then-edit / visible-take)
+  executed a main-actor turn after the refused keystroke, so later
+  keystrokes could land first and the compound applied PLAN-TIME offsets
+  over newer text. Closed at the OP boundary: every deferred compound is
+  now a CAS against its plan-time texts — a moved buffer refuses the
+  WHOLE compound, visibly ("nothing was altered; try it again"), never a
+  clobber — and compounds chain through one awaitable
+  `pendingCrossBlockTask` (teardown/tests await quiescence). Direct pin:
+  `aCompoundPlannedAgainstAStaleBufferRefusesInsteadOfClobbering` (the
+  interloper text survives whole). Recorded residual (the standing W
+  drift-check class): the verify→act gap inside one serialized runner
+  body remains open to a sync apply's ms-window; the CAS moves the whole
+  race from silent clobber to visible refusal.
+- **Superseded pins updated with dated comments:** the Phase 7 v1
+  refuse/clamp pin (`crossBlockDestructiveEditsRefuse`) — which had been
+  passing VACUOUSLY once the compound went async — split into its two
+  enduring truths (`crossBlockKeystrokesNeverHalfApplyToTheStorage`;
+  `editsIntoTheOpenTailStillRefuseAndSpeak`); the context-menu inventory
+  gains the named command; the reachability sweep drops the retired
+  refusal.
+`BoundaryFluidityTests` 10.
+
+#### THE FORMAL STAGE A VERIFICATION GATE (2026-07-13 — GREEN)
+- **Core `swift test`: 618 green in 71 suites** (baseline 562/62).
+- **Mac app: 349 green in 62 suites** (baseline 311/55) — including the
+  randomized gesture soak over the CHANGED planner/compound paths
+  (non-vacuous by its own earlier 102-issue failure) and the tint/badge/
+  window smokes (TEXTKIT2 §5's executable items: canary silent, 10k-word
+  jump/height stable, decorations live, boundary selections through the
+  planner; macOS 26.4.1 — unchanged since the Phase 6 baseline, no spike
+  re-run owed).
+- **Mobile: 11 green in 4 suites** (baseline matched).
+- Sync convergence spot suite incl. canvas + lens + block.name rows
+  crossing the wire (`Phase11SyncConvergenceTests`): byte-identical
+  dumps, empty outboxes.
+- P1/P3 spot checks hold as recorded in the pre-gate section (the takes
+  board's one post-bounded observation; one live editor across every new
+  pane family — pinned; the TOC's row-cheap/expand-on-demand shape).
+- **Still open: GATE 1** — the mirror deploy (05_phase11_lockstep.sql),
+  HELD until the review ladder closes per the coordinator; the env-gated
+  integration test remains expected-failing against the un-deployed
+  mirror; no production write has occurred.
 
 #### Step A10 — the modes tutorial (her round-6 instruction)
 `Features/Tutorial/ModesTutorialView`: POLISH IN PLACE / THREAD ONE
