@@ -113,6 +113,60 @@ extension AppDatabase {
                 );
                 """)
         }
+        // Phase 11, Step A1 (author-ratified 2026-07-06, brief item 1): the
+        // canvas view's persisted spatial positions — a small SYNCED table,
+        // every §6 convention honored (UUID TEXT PK, owner_id, ISO
+        // timestamps, tombstone, sync_version, live-row partial unique
+        // index, cascades-as-triggers, outbox triggers). Position updates
+        // are plain metadata CAS (SyncSpec §6 — races harmless); the
+        // live-unique (container_id, block_id) gets the pure-duplicate
+        // repair (keep smaller id, SyncSpec §7 pattern). Part of the ONE
+        // SyncSpec §12 lockstep event with v1_6 + v1_7 (mirror DDL:
+        // Server/supabase/05_phase11_lockstep.sql — mirror first, then every
+        // client, before any new-schema write).
+        migrator.registerMigration("v1_5_canvas_layout") { db in
+            try db.execute(sql: """
+                CREATE TABLE canvas_layout (
+                  id           TEXT PRIMARY KEY,
+                  owner_id     TEXT,
+                  container_id TEXT NOT NULL,
+                  block_id     TEXT NOT NULL,
+                  x            REAL NOT NULL DEFAULT 0,
+                  y            REAL NOT NULL DEFAULT 0,
+                  created_at   TEXT NOT NULL,
+                  updated_at   TEXT NOT NULL,
+                  deleted_at   TEXT,
+                  sync_version INTEGER NOT NULL DEFAULT 0,
+                  FOREIGN KEY (container_id) REFERENCES container(id),
+                  FOREIGN KEY (block_id)     REFERENCES block(id)
+                );
+                CREATE UNIQUE INDEX uq_canvas_layout_live ON canvas_layout(container_id, block_id) WHERE deleted_at IS NULL;
+                CREATE INDEX idx_canvas_layout_block ON canvas_layout(block_id);
+                """)
+            // Cascade-by-trigger from BOTH parents (the brief's letter).
+            // Both may fire for one pool deletion (container→blocks→canvas
+            // and container→canvas directly); the live-row guard makes them
+            // idempotent and the stamp identical (Triggers.swift doctrine).
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_container_tombstone_canvas
+                AFTER UPDATE OF deleted_at ON container
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE canvas_layout SET deleted_at = NEW.deleted_at
+                    WHERE container_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_block_tombstone_canvas
+                AFTER UPDATE OF deleted_at ON block
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE canvas_layout SET deleted_at = NEW.deleted_at
+                    WHERE block_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try createOutboxCaptureTriggers(db, table: "canvas_layout", pk: "id")
+        }
         return migrator
     }
 }

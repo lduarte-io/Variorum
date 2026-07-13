@@ -50,6 +50,10 @@ public enum SyncSchema {
         SyncTable("post_tag"),
         SyncTable("block_tag"),
         SyncTable("reference", excludedColumns: ["file_bookmark"]),
+        // Phase 11, Step A1 (the one lockstep event, SyncSpec §12):
+        // canvas positions — metadata CAS, pure-duplicate repair on the
+        // live-unique (container_id, block_id).
+        SyncTable("canvas_layout"),
         SyncTable("setting", primaryKey: "key", hasTombstone: false),
     ]
 

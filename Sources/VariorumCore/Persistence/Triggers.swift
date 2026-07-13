@@ -121,16 +121,24 @@ private func createOutboxCapture(_ db: Database) throws {
         ("setting", "key"),
     ]
     for (table, pk) in syncedTables {
-        for event in ["INSERT", "UPDATE"] {
-            try db.execute(sql: """
-                CREATE TRIGGER outbox_\(table)_\(event.lowercased())
-                AFTER \(event) ON \(table)
-                WHEN NOT EXISTS (SELECT 1 FROM _sync_applying)
-                BEGIN
-                  INSERT OR REPLACE INTO sync_outbox (table_name, row_id, queued_at)
-                  VALUES ('\(table)', NEW.\(pk), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
-                END;
-                """)
-        }
+        try createOutboxCaptureTriggers(db, table: table, pk: pk)
+    }
+}
+
+/// One synced table's outbox-capture pair (AFTER INSERT + AFTER UPDATE,
+/// apply-mode suppressed). Extracted at Phase 11 so later migrations that
+/// add synced tables (v1_5 `canvas_layout`, v1_7 `lens`/`lens_choice`)
+/// emit byte-identical trigger SQL to v1_core's — one shape, no drift.
+func createOutboxCaptureTriggers(_ db: Database, table: String, pk: String) throws {
+    for event in ["INSERT", "UPDATE"] {
+        try db.execute(sql: """
+            CREATE TRIGGER outbox_\(table)_\(event.lowercased())
+            AFTER \(event) ON \(table)
+            WHEN NOT EXISTS (SELECT 1 FROM _sync_applying)
+            BEGIN
+              INSERT OR REPLACE INTO sync_outbox (table_name, row_id, queued_at)
+              VALUES ('\(table)', NEW.\(pk), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+            END;
+            """)
     }
 }

@@ -79,4 +79,12 @@ public enum OperationError: Error, Equatable, Sendable {
     /// `adoptOwnerID` was called while signed out — an adoption pass has
     /// nothing to stamp without an identity.
     case noOwnerIdentity
+
+    // Canvas layout (Phase 11, Step A1).
+    /// A canvas position addresses a block whose live placement is not the
+    /// named container — the canvas shows exactly the container's own
+    /// blocks (I2 gives at most one placement to check).
+    case blockNotInContainer(blockID: String, containerID: String)
+    /// `removeCanvasPosition` found no live layout row for the pair.
+    case canvasPositionNotFound(blockID: String, containerID: String)
 }
