@@ -167,6 +167,17 @@ extension AppDatabase {
                 """)
             try createOutboxCaptureTriggers(db, table: "canvas_layout", pk: "id")
         }
+        // Phase 11, Step A1 (author-adopted 2026-07-07, AppSpec §14's
+        // block-TOC delta): the optional per-block NAME — a handle on a
+        // prose block, block-identity-level (I2 makes that unambiguous),
+        // deliberately distinct from headings-in-text (§14.8). Additive
+        // nullable column; plain metadata under sync (CAS, no uniqueness,
+        // no repair rule); an unnamed block's TOC row derives its first
+        // sentence AT READ TIME (never stored — the no-denormalization
+        // rule). Rides the SAME §12 lockstep event as v1_5/v1_7.
+        migrator.registerMigration("v1_6_block_name") { db in
+            try db.execute(sql: "ALTER TABLE block ADD COLUMN name TEXT")
+        }
         return migrator
     }
 }

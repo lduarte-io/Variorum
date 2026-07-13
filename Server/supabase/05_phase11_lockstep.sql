@@ -57,3 +57,10 @@ create index idx_seq_canvas_layout on canvas_layout (server_seq);
 
 alter table canvas_layout enable row level security;
 revoke all on canvas_layout from anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 2. block.name (client migration v1_6) — the optional per-block name.
+--    Additive nullable column; plain metadata CAS, no uniqueness, no repair.
+-- ---------------------------------------------------------------------------
+
+alter table block add column if not exists name text;

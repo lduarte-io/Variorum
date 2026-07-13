@@ -40,4 +40,29 @@ extension Operations {
                 block: minted.block, variant: minted.variant, placement: minted.placement)
         }
     }
+
+    /// Sets (or clears) the block's optional name (Phase 11, v1_6 — the
+    /// block-TOC's explicit handle; AppSpec §14's 2026-07-07 delta).
+    /// Whitespace-only names normalize to NIL — clearing, so the TOC row
+    /// falls back to the read-time first sentence. Plain metadata: no
+    /// touch stamp, no churn (naming is a handle, not working on the text).
+    ///
+    /// SEAL POSTURE (PROVISIONAL, Phase 11 — the QUESTIONS bundle): refused
+    /// under a sealed post, per the ratified everything-UNDER-the-post
+    /// letter (2026-07-05) — a block is under the post, unlike the post's
+    /// own title (which stays retitle-able under seal because it lives ON
+    /// the container row). The retitle-parallel alternative (allow — a name
+    /// is identity metadata, not content) is recorded for the author.
+    public func setBlockName(_ blockID: String, name: String?) throws {
+        try database.write { db in
+            var block = try liveBlock(db, blockID)
+            try ensurePlacementUnlocked(db, blockID: blockID)
+            let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
+            guard block.name != normalized else { return }
+            block.name = normalized
+            block.updatedAt = date.now
+            try block.update(db)
+        }
+    }
 }

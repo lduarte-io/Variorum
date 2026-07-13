@@ -14,6 +14,11 @@ public struct Block: VariorumRecord {
     /// Powers the per-post "deleted blocks" tray; maintained by the operations
     /// layer, not by triggers.
     public var lastContainerId: String?
+    /// The optional per-block name (Phase 11, v1_6 — the block-TOC's
+    /// explicit handle; AppSpec §14's 2026-07-07 delta). Block-identity-
+    /// level, plain metadata under sync; an unnamed block's display handle
+    /// is DERIVED at read time (first sentence), never stored here.
+    public var name: String?
     public var createdAt: Date
     public var updatedAt: Date
     /// Domain archive (kept, out of view) — distinct from the sync tombstone.
@@ -26,6 +31,7 @@ public struct Block: VariorumRecord {
         ownerId: String? = nil,
         defaultVariantId: String? = nil,
         lastContainerId: String? = nil,
+        name: String? = nil,
         createdAt: Date,
         updatedAt: Date,
         archivedAt: Date? = nil,
@@ -36,6 +42,7 @@ public struct Block: VariorumRecord {
         self.ownerId = ownerId
         self.defaultVariantId = defaultVariantId
         self.lastContainerId = lastContainerId
+        self.name = name
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.archivedAt = archivedAt
