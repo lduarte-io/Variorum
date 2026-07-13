@@ -64,3 +64,52 @@ revoke all on canvas_layout from anon, authenticated;
 -- ---------------------------------------------------------------------------
 
 alter table block add column if not exists name text;
+
+-- ---------------------------------------------------------------------------
+-- 3. lens + lens_choice (client migration v1_7) — saved lenses: durable
+--    named selection profiles, SPARSE overrides over chosen. Never
+--    rendering truth (the client's ✓/adopt ops are the only lens→chosen
+--    doors). lens carries owner_id (joins the owner guards below);
+--    lens_choice is a child table. Live-unique (lens_id, block_id) repairs
+--    client-side as a pure duplicate.
+-- ---------------------------------------------------------------------------
+
+create table lens (
+  id                text primary key,
+  owner_id          text,
+  container_id      text,
+  name              text,
+  created_at        text,
+  updated_at        text,
+  deleted_at        text,
+  sync_version      bigint not null default 0,
+  server_seq        bigint not null default 0,
+  server_written_at timestamptz not null default clock_timestamp()
+);
+
+create trigger stamp_seq_lens before insert or update on lens
+  for each row execute function stamp_server_seq();
+create index idx_seq_lens on lens (server_seq);
+
+alter table lens enable row level security;
+revoke all on lens from anon, authenticated;
+
+create table lens_choice (
+  id                text primary key,
+  lens_id           text,
+  block_id          text,
+  variant_id        text,
+  created_at        text,
+  updated_at        text,
+  deleted_at        text,
+  sync_version      bigint not null default 0,
+  server_seq        bigint not null default 0,
+  server_written_at timestamptz not null default clock_timestamp()
+);
+
+create trigger stamp_seq_lens_choice before insert or update on lens_choice
+  for each row execute function stamp_server_seq();
+create index idx_seq_lens_choice on lens_choice (server_seq);
+
+alter table lens_choice enable row level security;
+revoke all on lens_choice from anon, authenticated;

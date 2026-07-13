@@ -12,6 +12,9 @@ struct MigrationTests {
         "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying",
         // Phase 9b (v1_4): the Fragments bridge's local-only state.
         "bridge_state", "bridge_day",
+        // Phase 11 (v1_5/v1_7, the one §12 lockstep event): canvas card
+        // positions + saved lenses.
+        "canvas_layout", "lens", "lens_choice",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -26,6 +29,10 @@ struct MigrationTests {
         "uq_post_tag_live", "idx_post_tag_tag", "idx_post_tag_post",
         "uq_block_tag_live", "idx_block_tag_tag", "idx_block_tag_block",
         "idx_reference_container",
+        // Phase 11 (v1_5/v1_7).
+        "uq_canvas_layout_live", "idx_canvas_layout_block",
+        "idx_lens_container",
+        "uq_lens_choice_live", "idx_lens_choice_block",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -33,6 +40,7 @@ struct MigrationTests {
         "container", "block", "variant", "commit_point", "edge",
         "container_block", "reading", "reading_post", "tag",
         "post_tag", "block_tag", "reference", "setting",
+        "canvas_layout", "lens", "lens_choice",
     ]
 
     @Test func allTablesExist() throws {
@@ -83,7 +91,8 @@ struct MigrationTests {
                 """))
         }
         #expect(partialUniques == ["uq_edge_live", "uq_cblock_ownership", "uq_reading_post_live",
-                                   "uq_tag_path_live", "uq_post_tag_live", "uq_block_tag_live"])
+                                   "uq_tag_path_live", "uq_post_tag_live", "uq_block_tag_live",
+                                   "uq_canvas_layout_live", "uq_lens_choice_live"])
     }
 
     @Test func everySyncedTableCarriesSyncVersionDefaultZero() throws {

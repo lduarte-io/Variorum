@@ -178,6 +178,84 @@ extension AppDatabase {
         migrator.registerMigration("v1_6_block_name") { db in
             try db.execute(sql: "ALTER TABLE block ADD COLUMN name TEXT")
         }
+        // Phase 11, Step A1 (the kickoff spike's ruling, author-confirmed
+        // 2026-07-13 — SAVED LENSES, synced): a lens is a durable NAMED
+        // selection profile over one post — "the same structure with
+        // different choices" (her ratified boundary sentence). A lens is
+        // NEVER rendering truth: exports, the bridge, and every view read
+        // chosen pointers; ✓/adopt are the only lens→chosen doors (I3/I8
+        // untouched). Choices are SPARSE overrides — only divergences
+        // stored; un-overridden slots follow the post's chosen; the empty
+        // lens is the legal transparent new-thread default. `variant_id`
+        // is a CAS metadata pointer; a dangling pick (variant tombstoned/
+        // archived) falls through to chosen at read time — the existing
+        // fallback class, deliberately no cascade from variant. Live-unique
+        // (lens_id, block_id) repairs as a pure duplicate (SyncSpec §7).
+        // Rides the SAME §12 lockstep event as v1_5/v1_6.
+        migrator.registerMigration("v1_7_lenses") { db in
+            try db.execute(sql: """
+                CREATE TABLE lens (
+                  id           TEXT PRIMARY KEY,
+                  owner_id     TEXT,
+                  container_id TEXT NOT NULL,
+                  name         TEXT NOT NULL,
+                  created_at   TEXT NOT NULL,
+                  updated_at   TEXT NOT NULL,
+                  deleted_at   TEXT,
+                  sync_version INTEGER NOT NULL DEFAULT 0,
+                  FOREIGN KEY (container_id) REFERENCES container(id)
+                );
+                CREATE INDEX idx_lens_container ON lens(container_id);
+                CREATE TABLE lens_choice (
+                  id           TEXT PRIMARY KEY,
+                  lens_id      TEXT NOT NULL,
+                  block_id     TEXT NOT NULL,
+                  variant_id   TEXT NOT NULL,
+                  created_at   TEXT NOT NULL,
+                  updated_at   TEXT NOT NULL,
+                  deleted_at   TEXT,
+                  sync_version INTEGER NOT NULL DEFAULT 0,
+                  FOREIGN KEY (lens_id)    REFERENCES lens(id),
+                  FOREIGN KEY (block_id)   REFERENCES block(id),
+                  FOREIGN KEY (variant_id) REFERENCES variant(id)
+                );
+                CREATE UNIQUE INDEX uq_lens_choice_live ON lens_choice(lens_id, block_id) WHERE deleted_at IS NULL;
+                CREATE INDEX idx_lens_choice_block ON lens_choice(block_id);
+                """)
+            // Cascades: container → its lenses (each lens's own trigger
+            // then cascades its choices — the v1_core cross-table chain
+            // pattern); block → the choices that override it. Deliberately
+            // NO variant → lens_choice cascade (fall-through class).
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_container_tombstone_lens
+                AFTER UPDATE OF deleted_at ON container
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE lens SET deleted_at = NEW.deleted_at
+                    WHERE container_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_lens_tombstone
+                AFTER UPDATE OF deleted_at ON lens
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE lens_choice SET deleted_at = NEW.deleted_at
+                    WHERE lens_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_block_tombstone_lens_choice
+                AFTER UPDATE OF deleted_at ON block
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE lens_choice SET deleted_at = NEW.deleted_at
+                    WHERE block_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try createOutboxCaptureTriggers(db, table: "lens", pk: "id")
+            try createOutboxCaptureTriggers(db, table: "lens_choice", pk: "id")
+        }
         return migrator
     }
 }

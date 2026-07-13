@@ -52,8 +52,13 @@ public enum SyncSchema {
         SyncTable("reference", excludedColumns: ["file_bookmark"]),
         // Phase 11, Step A1 (the one lockstep event, SyncSpec §12):
         // canvas positions — metadata CAS, pure-duplicate repair on the
-        // live-unique (container_id, block_id).
+        // live-unique (container_id, block_id) — and saved lenses (sparse
+        // selection profiles; lens_choice repairs as a pure duplicate on
+        // the live-unique (lens_id, block_id); a lens itself has no
+        // natural key — duplicate names are legal, no repair class).
         SyncTable("canvas_layout"),
+        SyncTable("lens"),
+        SyncTable("lens_choice"),
         SyncTable("setting", primaryKey: "key", hasTombstone: false),
     ]
 

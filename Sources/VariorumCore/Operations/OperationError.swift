@@ -80,6 +80,12 @@ public enum OperationError: Error, Equatable, Sendable {
     /// nothing to stamp without an identity.
     case noOwnerIdentity
 
+    // Lenses (Phase 11, Step A1 — v1_7).
+    case lensNotFound(id: String)
+    case invalidLensName(name: String)
+    /// `clearLensChoice` found no live override for the (lens, block) pair.
+    case lensChoiceNotFound(lensID: String, blockID: String)
+
     // Canvas layout (Phase 11, Step A1).
     /// A canvas position addresses a block whose live placement is not the
     /// named container — the canvas shows exactly the container's own
