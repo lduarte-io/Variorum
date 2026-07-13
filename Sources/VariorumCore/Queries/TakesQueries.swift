@@ -129,6 +129,86 @@ extension Queries {
     }
 }
 
+// MARK: - The block-TOC (Phase 11, Step A6 — AppSpec §14's 2026-07-07 delta)
+
+extension Queries {
+    /// One TOC row: the slot's identity + the stored NAME (v1_6) + the
+    /// rendered take. The display handle for unnamed blocks is DERIVED at
+    /// read time (`tocHandle`) — never stored anywhere (the
+    /// no-denormalization rule; review focus 7).
+    public struct TOCRow: Equatable, Sendable {
+        public let blockID: String
+        public let placementID: String
+        public let name: String?
+        public let variantID: String?
+        public let text: String?
+        public let hasFan: Bool
+        public let variantLocked: Bool
+
+        public init(
+            blockID: String, placementID: String, name: String?,
+            variantID: String?, text: String?, hasFan: Bool, variantLocked: Bool
+        ) {
+            self.blockID = blockID
+            self.placementID = placementID
+            self.name = name
+            self.variantID = variantID
+            self.text = text
+            self.hasFan = hasFan
+            self.variantLocked = variantLocked
+        }
+    }
+
+    /// The post's TOC rows in reading order — `renderPost` joined with the
+    /// blocks' names. Cost ∝ the post (P1); the TOC is the natural face of
+    /// §4's within-post virtualization door (rows are cheap; text upgrades
+    /// on expand).
+    public static func blockTOC(_ db: Database, post containerID: String) throws -> [TOCRow] {
+        let slots = try renderPost(db, containerID: containerID)
+        guard !slots.isEmpty else { return [] }
+        let names: [String: String] = Dictionary(
+            uniqueKeysWithValues: try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT b.id AS id, b.name AS name
+                    FROM block b
+                    JOIN container_block cb ON cb.block_id = b.id
+                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                      AND b.deleted_at IS NULL AND b.name IS NOT NULL
+                    """,
+                arguments: [containerID]
+            ).map { ($0["id"], $0["name"]) })
+        return slots.map { slot in
+            TOCRow(
+                blockID: slot.blockID, placementID: slot.placementID,
+                name: names[slot.blockID],
+                variantID: slot.variantID, text: slot.text,
+                hasFan: slot.hasFan, variantLocked: slot.variantLocked)
+        }
+    }
+
+    /// The TOC row's display handle, derived AT READ TIME (the 2026-07-07
+    /// delta's letter): the explicit name where set, else the rendered
+    /// take's FIRST SENTENCE via the existing BoundarySnapping sentence
+    /// rules — never stored, never copied. Pure.
+    public static func tocHandle(name: String?, text: String?) -> String {
+        if let name, !name.isEmpty { return name }
+        guard let text, !text.isEmpty else { return "(empty block)" }
+        let sentenceEnd = BoundarySnapping
+            .boundaries(in: text, granularity: .sentence)
+            .first { $0 > 0 }
+        let handle: String
+        if let sentenceEnd,
+           let index = BoundarySnapping.graphemeIndex(atUTF16: sentenceEnd, in: text) {
+            handle = String(text[..<index])
+        } else {
+            handle = text
+        }
+        let trimmed = handle.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "(empty block)" : trimmed
+    }
+}
+
 extension AppDatabase {
     /// The takes board's standing observation (Phase 11, A3). One post's
     /// combined projection — bounded by construction (cost ∝ this post).
@@ -136,5 +216,12 @@ extension AppDatabase {
         _ containerID: String
     ) -> AsyncValueObservation<Queries.TakesProjection> {
         observe { try Queries.takesProjection($0, post: containerID) }
+    }
+
+    /// The block-TOC's standing observation (Phase 11, A6).
+    public func observeBlockTOC(
+        _ containerID: String
+    ) -> AsyncValueObservation<[Queries.TOCRow]> {
+        observe { try Queries.blockTOC($0, post: containerID) }
     }
 }
