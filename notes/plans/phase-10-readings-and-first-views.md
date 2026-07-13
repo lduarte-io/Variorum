@@ -911,3 +911,18 @@ edit-during-await class (the Phase 9b round-3 residual family).
 **FINAL counts after round 2: core 562/62 · Mac 311/55 · mobile 11/4 —
 all green** (Mac +2: the quit-door pin, the truncation-probe pin). These
 are the Phase 11 baselines.
+
+### Checkpoint ratification round (2026-07-12, the author via the coordinator)
+
+**QUESTIONS #17 RATIFIED IN FULL AS SHIPPED** — the three PROVISIONAL
+interpretations (badge focus-first-then-fan; timeline/folder
+open-in-editor only; pool as a sidebar section) AND the recorded
+build-time calls (⌥-drag carries the fan; the pool opens in the ordinary
+editor; the Journal section / "Today's Entry" dated-home shape). Recorded
+as AppSpec §14's Phase 10 checkpoint delta; #17 marked ANSWERED.
+**The offline-label row's re-owning to Phase 11 Step A0: APPROVED by the
+author** (noted on the KnownIssues row — the Phase 11 session inherits it
+settled). Remaining with the author, no doc changes owed: the
+app-sections/journal-home design conversation, the install relaunch, and
+the spacing-ruling shakedown (the handoff checklist carries all three).
+**THE PHASE IS CLOSED.**
