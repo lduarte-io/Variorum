@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variorum — Phase 11 mockup spike (throwaway)</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #29241c;
+    --muted: #8d8578;
+    --faint: #b5ad9e;
+    --card: #ffffff;
+    --card-edge: #e4ddd0;
+    --accent: #3d6b8e;
+    --accent-soft: #3d6b8e22;
+    --chosen: #5a7d46;
+    --chosen-soft: #5a7d4622;
+    --live: #b0713a;
+    --dim: #a49c8d;
+    --rule: #ded6c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1815;
+      --ink: #e8e3d8;
+      --muted: #948c7c;
+      --faint: #6b6456;
+      --card: #23201b;
+      --card-edge: #38342c;
+      --accent: #82abcc;
+      --accent-soft: #82abcc26;
+      --chosen: #93b57e;
+      --chosen-soft: #93b57e22;
+      --live: #d29a64;
+      --dim: #7a7365;
+      --rule: #3b372f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Iowan Old Style', 'Palatino', Charter, Georgia, serif;
+    line-height: 1.62; font-size: 17px;
+  }
+  .ui { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif; }
+
+  header {
+    padding: 1.4rem 2rem 0.9rem; border-bottom: 1px solid var(--rule);
+    position: sticky; top: 0; background: var(--bg); z-index: 5;
+  }
+  header h1 { font-size: 1.05rem; margin: 0 0 .2rem; font-weight: 600; }
+  header p.note { margin: 0 0 .9rem; color: var(--muted); font-size: .85rem; font-style: italic; }
+  .tabs { display: flex; gap: .5rem; }
+  .tabs button {
+    all: unset; cursor: pointer; padding: .4rem .9rem; border-radius: 7px 7px 0 0;
+    font: 600 .85rem/1 -apple-system, sans-serif; color: var(--muted);
+  }
+  .tabs button[aria-pressed="true"] { color: var(--ink); background: var(--accent-soft); box-shadow: inset 0 -2px 0 var(--accent); }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem 6rem; }
+  section.part { display: none; }
+  section.part.active { display: block; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0.7rem 0 1.4rem; }
+  .pills button {
+    all: unset; cursor: pointer; padding: .45rem .85rem; border-radius: 999px;
+    border: 1px solid var(--card-edge); font: 500 .85rem/1.3 -apple-system, sans-serif; color: var(--muted);
+    background: var(--card);
+  }
+  .pills button[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+
+  .cand { display: none; }
+  .cand.active { display: block; }
+  .caption {
+    max-width: 72ch; margin: 0 0 2rem; padding: .8rem 1rem; border-left: 3px solid var(--accent);
+    background: var(--accent-soft); border-radius: 0 8px 8px 0;
+    font: .86rem/1.5 -apple-system, sans-serif; color: var(--ink);
+  }
+  .caption b { font-weight: 650; }
+
+  /* ---------- the mock document ---------- */
+  .doc { max-width: 68ch; margin: 0 auto; }
+  .doc p.block { margin: 0 0 1.15em; position: relative; }
+  .doc p.block.dimmed { color: var(--dim); }
+  .badge {
+    position: absolute; top: -.35em; right: -1.9rem; font-size: .78rem; color: var(--accent);
+    cursor: default; user-select: none;
+  }
+  .post-title { font-size: 1.35rem; font-weight: 650; margin: 1.2rem auto 1.6rem; max-width: 68ch; }
+
+  /* chips + small ui */
+  .chip {
+    display: inline-block; font: 600 .68rem/1 -apple-system, sans-serif; letter-spacing: .02em;
+    padding: .28em .6em; border-radius: 999px; color: var(--muted);
+    border: 1px solid var(--card-edge); background: var(--card); vertical-align: middle;
+  }
+  .chip.chosen-chip { color: var(--chosen); border-color: var(--chosen); background: var(--chosen-soft); }
+  .chip.live-chip { color: var(--live); border-color: var(--live); }
+
+  /* ---------- A1: inline stack ---------- */
+  .stack { margin: -0.4em 0 1.4em 1.4rem; display: flex; flex-direction: column; gap: .6rem; }
+  .take-card {
+    border: 1px solid var(--card-edge); border-left: 3px solid var(--card-edge);
+    background: var(--card); border-radius: 8px; padding: .7rem .95rem; cursor: pointer;
+    transition: border-color .12s ease;
+  }
+  .take-card:hover { border-color: var(--accent); }
+  .take-card.chosen { border-left-color: var(--chosen); }
+  .take-card .take-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; }
+  .take-body { font-size: .95em; line-height: 1.55; }
+  .ghost {
+    border: 1px dashed var(--faint); background: none; color: var(--muted); border-radius: 8px;
+    padding: .55rem .95rem; font: 500 .8rem/1.3 -apple-system, sans-serif; cursor: pointer;
+  }
+  .close-takes {
+    all: unset; cursor: pointer; font: 500 .75rem/1 -apple-system, sans-serif; color: var(--muted);
+    margin-left: .3rem;
+  }
+
+  /* ---------- A2: horizontal strip ---------- */
+  .strip-wrap { margin: .2em 0 1.4em; }
+  .strip {
+    display: flex; gap: .8rem; overflow-x: auto; padding: .3rem 0 .8rem;
+    scroll-snap-type: x proximity;
+  }
+  .strip .take-card { flex: 0 0 34ch; scroll-snap-align: start; max-height: 16em; overflow-y: auto; }
+  .strip .take-card.chosen { border-color: var(--chosen); border-left-width: 1px; box-shadow: 0 0 0 1px var(--chosen); }
+  .strip-note { font: .72rem/1.3 -apple-system, sans-serif; color: var(--faint); margin-top: .1rem; }
+
+  /* ---------- A3: margin rail ---------- */
+  .rail-row { display: grid; grid-template-columns: minmax(0, 68ch) 250px; gap: 2.2rem; justify-content: center; }
+  .rail { display: flex; flex-direction: column; gap: .55rem; align-self: start; }
+  .rail .take-card { padding: .55rem .75rem; }
+  .rail .take-body { font-size: .8em; line-height: 1.45; }
+  .rail-head { font: 600 .7rem/1 -apple-system, sans-serif; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-bottom: .15rem; }
+  .doc-narrow { max-width: 68ch; margin: 0 auto; }
+
+  /* ---------- B1: in-flow columns ---------- */
+  .inflow { margin: .4em 0 1.4em; }
+  .inflow .cols { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 1rem; }
+  .pane {
+    border: 1px solid var(--card-edge); border-radius: 8px; background: var(--card);
+    padding: .75rem .9rem; cursor: pointer; position: relative;
+  }
+  .pane .take-head { display: flex; align-items: center; gap: .45rem; margin-bottom: .4rem; }
+  .pane .take-body { font-size: .93em; }
+  .pane.live { border-color: var(--live); box-shadow: 0 0 0 1px var(--live); cursor: text; }
+  .pane .caret { display: none; }
+  .pane.live .caret {
+    display: inline-block; width: 1.5px; height: 1.05em; background: var(--live);
+    vertical-align: text-bottom; margin-left: 1px; animation: blink 1.05s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .choose-pill {
+    all: unset; cursor: pointer; margin-left: auto; font: 600 .68rem/1 -apple-system, sans-serif;
+    color: var(--muted); border: 1px solid var(--card-edge); border-radius: 999px; padding: .28em .6em;
+  }
+  .choose-pill:hover { color: var(--chosen); border-color: var(--chosen); }
+  .pane.is-chosen .choose-pill { color: var(--chosen); border-color: var(--chosen); background: var(--chosen-soft); }
+
+  /* ---------- B2: full-height spread ---------- */
+  .spread-frame { border: 1px solid var(--card-edge); border-radius: 12px; background: color-mix(in srgb, var(--card) 55%, var(--bg)); padding: 1rem 1rem .4rem; }
+  .spread-title { font: 600 .8rem/1 -apple-system, sans-serif; color: var(--muted); margin: 0 0 .8rem .2rem; }
+  .spread { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .8rem; }
+  .spread .pane { flex: 0 0 44ch; display: flex; flex-direction: column; }
+  .context { color: var(--dim); font-size: .82em; line-height: 1.5; }
+  .context.top { margin-bottom: .6rem; padding-bottom: .6rem; border-bottom: 1px dashed var(--rule); }
+  .context.bottom { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--rule); }
+
+  /* ---------- B3: two posts ---------- */
+  .twopost { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+  .postcol { border: 1px solid var(--card-edge); border-radius: 12px; background: var(--card); padding: 1.1rem 1.4rem; max-height: 34rem; overflow-y: auto; }
+  .postcol h3 { font-size: 1.05rem; margin: .2rem 0 1rem; }
+  .postcol p { font-size: .93em; margin: 0 0 1em; }
+  .linkbar {
+    display: flex; align-items: center; gap: .7rem; margin: 0 0 1rem;
+    font: 500 .82rem/1.4 -apple-system, sans-serif; color: var(--muted);
+  }
+  .linkbar button {
+    all: unset; cursor: pointer; padding: .4rem .8rem; border-radius: 7px; border: 1px solid var(--accent);
+    color: var(--accent); font: 600 .8rem/1 -apple-system, sans-serif;
+  }
+  .footnote { max-width: 72ch; margin: 2.2rem auto 0; color: var(--faint); font: .78rem/1.5 -apple-system, sans-serif; }
+</style>
+</head>
+<body>
+
+<header class="ui">
+  <h1>Phase 11 mockup spike — fan-out appearance &amp; the side-by-side view</h1>
+  <p class="note">Throwaway (2026-07-12). These inform, never bind — the store and traversals are not up for reinterpretation here. Chrome is placeholder; the real look is Phase 13's. One live editor always (P3, your ruling): panes are read-cheap until clicked.</p>
+  <div class="tabs">
+    <button data-tab="part1" aria-pressed="true">1 · Fan-out appearance (one block's takes, in the editor)</button>
+    <button data-tab="part2" aria-pressed="false">2 · Side-by-side multi-variant editing view</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ======================= PART 1 ======================= -->
+<section class="part active" id="part1">
+  <div class="pills ui">
+    <button data-cand="a1" aria-pressed="true">A1 · Inline stack</button>
+    <button data-cand="a2" aria-pressed="false">A2 · Horizontal strip</button>
+    <button data-cand="a3" aria-pressed="false">A3 · Margin rail</button>
+  </div>
+
+  <!-- A1 -->
+  <div class="cand active" id="a1">
+    <div class="caption">
+      <b>A1 — Inline stack.</b> "Show Takes" blooms the takes as cards directly beneath the block, inside the document flow; the paragraph above always reads as the chosen take. Click a card to choose it (the paragraph swaps). <b>Reads vertically like the document itself</b>; the prose below is pushed down while the fan is open; comparing takes means reading down, not across. This is the closest evolution of today's list-shaped panel, moved into the page.
+    </div>
+    <div class="doc">
+      <div class="post-title">The Keeper's Hand</div>
+      <p class="block">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. <em>Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.</em></p>
+      <p class="block">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+      <p class="block" id="a1-blocktext">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.<span class="badge ui" title="this block has takes">⑂ 3 <button class="close-takes">✕ close</button></span></p>
+      <div class="stack" data-swap-target="a1-blocktext">
+        <div class="take-card chosen" data-group="a1">
+          <div class="take-head ui"><span class="chip chosen-chip">chosen</span><span class="chip">first pass</span></div>
+          <div class="take-body">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.</div>
+        </div>
+        <div class="take-card" data-group="a1">
+          <div class="take-head ui"><span class="chip">tighter</span></div>
+          <div class="take-body">I used to read this restraint as numbness. I no longer do. The log was where he set the sea down each night — and the setting down was the point.</div>
+        </div>
+        <div class="take-card" data-group="a1">
+          <div class="take-head ui"><span class="chip">take 3</span></div>
+          <div class="take-body">It would be easy to call the restraint numbness, the flat hand of a man alone too long with weather. But keepers were replaced when they went strange, and he kept forty years. The plainness was a discipline, the way a rope is coiled the same whether or not anyone drowned that day.</div>
+        </div>
+        <button class="ghost ui">＋ new take (branch) · ＋ blank take</button>
+      </div>
+      <p class="block">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+      <p class="block">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+    </div>
+  </div>
+
+  <!-- A2 -->
+  <div class="cand" id="a2">
+    <div class="caption">
+      <b>A2 — Horizontal strip.</b> The block's slot itself becomes a row of take cards, side by side, scrolling horizontally when there are many (your suggested shape). The chosen card is the block. <b>Direct side-by-side comparison in place, compact vertically</b>; long takes scroll inside their cards; the strip runs wider than the prose column on purpose. This is also the appearance that scales most naturally into Part 2's B1.
+    </div>
+    <div class="doc">
+      <div class="post-title">The Keeper's Hand</div>
+      <p class="block">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. <em>Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.</em></p>
+      <p class="block">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.<span class="badge ui">⑂ 3 <button class="close-takes">✕ close</button></span></p>
+    </div>
+    <div class="strip-wrap">
+      <div class="strip">
+        <div class="take-card chosen" data-group="a2">
+          <div class="take-head ui"><span class="chip chosen-chip">chosen</span><span class="chip">first pass</span></div>
+          <div class="take-body">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.</div>
+        </div>
+        <div class="take-card" data-group="a2">
+          <div class="take-head ui"><span class="chip">tighter</span></div>
+          <div class="take-body">I used to read this restraint as numbness. I no longer do. The log was where he set the sea down each night — and the setting down was the point.</div>
+        </div>
+        <div class="take-card" data-group="a2">
+          <div class="take-head ui"><span class="chip">take 3</span></div>
+          <div class="take-body">It would be easy to call the restraint numbness, the flat hand of a man alone too long with weather. But keepers were replaced when they went strange, and he kept forty years. The plainness was a discipline, the way a rope is coiled the same whether or not anyone drowned that day.</div>
+        </div>
+        <div class="take-card ghost ui" style="flex:0 0 12ch; display:flex; align-items:center; justify-content:center;">＋ new take</div>
+      </div>
+      <div class="strip-note ui">⇠ scrolls horizontally when the fan is wide</div>
+    </div>
+    <div class="doc">
+      <p class="block">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+      <p class="block">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+    </div>
+  </div>
+
+  <!-- A3 -->
+  <div class="cand" id="a3">
+    <div class="caption">
+      <b>A3 — Margin rail.</b> The document never reflows: the block stays exactly where it is (reading as the chosen take), and the other takes appear as compact cards in the right margin beside it, like marginalia. Click one to choose. <b>Calmest option — the page doesn't move at all</b>; the cost is cramped takes (margin width), so it favors glancing and choosing over reading long alternates. Expand-all-fans under this shape = a document with a populated margin.
+    </div>
+    <div class="rail-row">
+      <div class="doc-narrow">
+        <div class="post-title">The Keeper's Hand</div>
+        <p class="block">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. <em>Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.</em></p>
+        <p class="block">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+        <p class="block" id="a3-blocktext">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.<span class="badge ui">⑂ 3</span></p>
+        <p class="block">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+        <p class="block">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+      </div>
+      <div class="rail" data-swap-target="a3-blocktext" style="margin-top: 11.5rem;">
+        <div class="rail-head ui">Takes · block 3 <button class="close-takes">✕</button></div>
+        <div class="take-card chosen" data-group="a3">
+          <div class="take-head ui"><span class="chip chosen-chip">chosen</span><span class="chip">first pass</span></div>
+          <div class="take-body">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb… Now I think the log was the only place he could put the sea down and leave it there.</div>
+        </div>
+        <div class="take-card" data-group="a3">
+          <div class="take-head ui"><span class="chip">tighter</span></div>
+          <div class="take-body">I used to read this restraint as numbness. I no longer do. The log was where he set the sea down each night — and the setting down was the point.</div>
+        </div>
+        <div class="take-card" data-group="a3">
+          <div class="take-head ui"><span class="chip">take 3</span></div>
+          <div class="take-body">It would be easy to call the restraint numbness… The plainness was a discipline, the way a rope is coiled the same whether or not anyone drowned that day.</div>
+        </div>
+        <button class="ghost ui">＋ new take</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">Whichever appearance you pick is also what <b>expand-all-fans</b> opens document-wide (fans stay open once expanded; a close-all button rides the toolbar). Choosing here is <code>chooseVariant</code> — the pointer moves, nothing is destroyed.</div>
+</section>
+
+<!-- ======================= PART 2 ======================= -->
+<section class="part" id="part2">
+  <div class="pills ui">
+    <button data-cand="b1" aria-pressed="true">B1 · In-flow columns (text | v1 | v2 | text)</button>
+    <button data-cand="b2" aria-pressed="false">B2 · Full-height spread</button>
+    <button data-cand="b3" aria-pressed="false">B3 · Two posts in columns (version_of)</button>
+  </div>
+
+  <!-- B1 -->
+  <div class="cand active" id="b1">
+    <div class="caption">
+      <b>B1 — In-flow columns.</b> The §12 shape read literally: the document flows normally, and at the fanned block the flow splits into editable columns — one per take — then rejoins. Context stays exactly where it lives. <b>Click a pane and the one live editor migrates there</b> (orange ring + caret; everything else stays read-cheap); the ✓ pill sets the chosen take. Columns narrow as takes multiply — at many takes this wants B2's scroll.
+    </div>
+    <div class="doc">
+      <div class="post-title">The Keeper's Hand</div>
+      <p class="block">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. <em>Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.</em></p>
+      <p class="block">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+    </div>
+    <div class="inflow">
+      <div class="cols spread-panes">
+        <div class="pane live is-chosen">
+          <div class="take-head ui"><span class="chip chosen-chip">chosen</span><span class="chip">first pass</span><button class="choose-pill">✓ choose</button></div>
+          <div class="take-body">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.<span class="caret"></span></div>
+        </div>
+        <div class="pane">
+          <div class="take-head ui"><span class="chip">tighter</span><button class="choose-pill">✓ choose</button></div>
+          <div class="take-body">I used to read this restraint as numbness. I no longer do. The log was where he set the sea down each night — and the setting down was the point.<span class="caret"></span></div>
+        </div>
+        <div class="pane">
+          <div class="take-head ui"><span class="chip">take 3</span><button class="choose-pill">✓ choose</button></div>
+          <div class="take-body">It would be easy to call the restraint numbness, the flat hand of a man alone too long with weather. But keepers were replaced when they went strange, and he kept forty years. The plainness was a discipline, the way a rope is coiled the same whether or not anyone drowned that day.<span class="caret"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="doc">
+      <p class="block">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+      <p class="block">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+    </div>
+  </div>
+
+  <!-- B2 -->
+  <div class="cand" id="b2">
+    <div class="caption">
+      <b>B2 — Full-height spread.</b> A dedicated surface for one block's fan: each take is a tall column, like drafts laid out on a desk, with the neighboring prose repeated dimmed above and below so every take reads <i>in situ</i>. Horizontal scroll when there are many takes. <b>Maximum comparison room</b> — the cost is that it's a mode you enter and leave, not the document itself. Click a pane to migrate the live editor; ✓ chooses.
+    </div>
+    <div class="spread-frame">
+      <div class="spread-title ui">Takes · block 3 of 5 · "The Keeper's Hand" &nbsp;·&nbsp; esc returns to the editor</div>
+      <div class="spread spread-panes">
+        <div class="pane is-chosen">
+          <div class="take-head ui"><span class="chip chosen-chip">chosen</span><span class="chip">first pass</span><button class="choose-pill">✓ choose</button></div>
+          <div class="context top">…the sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</div>
+          <div class="take-body">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.<span class="caret"></span></div>
+          <div class="context bottom">My own journal does the opposite of everything his did. It dramatizes the fog…</div>
+        </div>
+        <div class="pane live">
+          <div class="take-head ui"><span class="chip">tighter</span><span class="chip live-chip">live editor</span><button class="choose-pill">✓ choose</button></div>
+          <div class="context top">…the sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</div>
+          <div class="take-body">I used to read this restraint as numbness. I no longer do. The log was where he set the sea down each night — and the setting down was the point.<span class="caret"></span></div>
+          <div class="context bottom">My own journal does the opposite of everything his did. It dramatizes the fog…</div>
+        </div>
+        <div class="pane">
+          <div class="take-head ui"><span class="chip">take 3</span><button class="choose-pill">✓ choose</button></div>
+          <div class="context top">…the sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</div>
+          <div class="take-body">It would be easy to call the restraint numbness, the flat hand of a man alone too long with weather. But keepers were replaced when they went strange, and he kept forty years. The plainness was a discipline, the way a rope is coiled the same whether or not anyone drowned that day.<span class="caret"></span></div>
+          <div class="context bottom">My own journal does the opposite of everything his did. It dramatizes the fog…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B3 -->
+  <div class="cand" id="b3">
+    <div class="caption">
+      <b>B3 — Two posts in columns.</b> The same view family composed over whole posts (the <code>version_of</code> comparison): two posts side by side, each scrolling independently. Unlinked posts get the "Mark as Versions" door here (the brief's door 2). Included mostly so the chrome stays one family across all three compositions — this is not an either/or with B1/B2.
+    </div>
+    <div class="linkbar ui">
+      These posts are not linked. <button>⛓ Mark as Versions</button> <span>· creates one <code>version_of</code> edge — undirected, no text copied</span>
+    </div>
+    <div class="twopost">
+      <div class="postcol">
+        <h3>The Keeper's Hand <span class="chip">this draft</span></h3>
+        <p>The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. <em>Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.</em></p>
+        <p>What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+        <p>I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.</p>
+        <p>My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+        <p>Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+      </div>
+      <div class="postcol">
+        <h3>Logbooks <span class="chip">older version</span></h3>
+        <p>At the maritime museum there is a glass case of logbooks, and I keep going back to it. Forty years of one man's weather. The handwriting never speeds up.</p>
+        <p>Nine men drowned within sight of his lamp in 1911 and the entry runs three lines. I copied it into my notebook and my copy is longer than his original, because I couldn't stop myself from commenting.</p>
+        <p>That is the whole difference between us, I think. He wrote to put the day down. I write to keep the day going.</p>
+        <p>I would like to learn the other thing. Not the plainness itself — the being able to afford it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">Ratified constraints these mockups sit inside: exactly ONE live NSTextView, migrating between panes on click (P3 unchanged); every pane otherwise renders through the Phase 10 read-cheap tier; choosing = <code>chooseVariant</code> on the pointer (I3); take edits land in that take's <code>working_text</code> and nowhere else.</div>
+</section>
+
+</main>
+
+<script>
+  // tabs
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+      document.querySelectorAll('section.part').forEach(s => s.classList.toggle('active', s.id === btn.dataset.tab));
+    });
+  });
+  // candidate pills (scoped per part)
+  document.querySelectorAll('.pills').forEach(pills => {
+    pills.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pills.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+        const part = pills.closest('section');
+        part.querySelectorAll('.cand').forEach(c => c.classList.toggle('active', c.id === btn.dataset.cand));
+      });
+    });
+  });
+  // Part 1: click a take card -> it becomes chosen; swap the block paragraph text if linked
+  document.querySelectorAll('.take-card[data-group]').forEach(card => {
+    card.addEventListener('click', () => {
+      const group = card.dataset.group;
+      document.querySelectorAll(`.take-card[data-group="${group}"]`).forEach(c => c.classList.toggle('chosen', c === card));
+      // move the "chosen" chip
+      document.querySelectorAll(`.take-card[data-group="${group}"] .chip.chosen-chip`).forEach(ch => ch.remove());
+      const head = card.querySelector('.take-head');
+      const chip = document.createElement('span');
+      chip.className = 'chip chosen-chip'; chip.textContent = 'chosen';
+      head.prepend(chip);
+      // swap linked block paragraph
+      const wrap = card.closest('[data-swap-target]');
+      if (wrap) {
+        const target = document.getElementById(wrap.dataset.swapTarget);
+        if (target) {
+          const badge = target.querySelector('.badge');
+          target.textContent = card.querySelector('.take-body').textContent;
+          if (badge) target.appendChild(badge);
+        }
+      }
+    });
+  });
+  // Part 2: click a pane -> live editor migrates; ✓ chooses
+  document.querySelectorAll('.spread-panes').forEach(panes => {
+    panes.querySelectorAll('.pane').forEach(pane => {
+      pane.addEventListener('click', () => {
+        panes.querySelectorAll('.pane').forEach(p => {
+          p.classList.toggle('live', p === pane);
+          const liveChip = p.querySelector('.chip.live-chip');
+          if (liveChip) liveChip.remove();
+        });
+        const head = pane.querySelector('.take-head');
+        const chip = document.createElement('span');
+        chip.className = 'chip live-chip'; chip.textContent = 'live editor';
+        head.insertBefore(chip, head.querySelector('.choose-pill'));
+      });
+      const choose = pane.querySelector('.choose-pill');
+      if (choose) choose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panes.querySelectorAll('.pane').forEach(p => {
+          p.classList.toggle('is-chosen', p === pane);
+          const cc = p.querySelector('.chip.chosen-chip'); if (cc) cc.remove();
+        });
+        const head = pane.querySelector('.take-head');
+        const chip = document.createElement('span');
+        chip.className = 'chip chosen-chip'; chip.textContent = 'chosen';
+        head.prepend(chip);
+      });
+    });
+  });
+</script>
+</body>
+</html>

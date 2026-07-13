@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variorum — Phase 11 mockups v2 (throwaway)</title>
+<style>
+  :root {
+    --bg: #faf8f3; --ink: #29241c; --muted: #8d8578; --faint: #b5ad9e;
+    --card: #ffffff; --card-edge: #e4ddd0;
+    --accent: #3d6b8e; --accent-soft: #3d6b8e1e;
+    --chosen: #5a7d46; --chosen-soft: #5a7d4622;
+    --live: #b0713a; --dim: #a49c8d; --rule: #ded6c7;
+    --lin1: #c0696b; --lin2: #b3893f; --lin3: #4f9188; --lin4: #8078b8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1815; --ink: #e8e3d8; --muted: #948c7c; --faint: #6b6456;
+      --card: #23201b; --card-edge: #38342c;
+      --accent: #82abcc; --accent-soft: #82abcc22;
+      --chosen: #93b57e; --chosen-soft: #93b57e22;
+      --live: #d29a64; --dim: #7a7365; --rule: #3b372f;
+      --lin1: #d8898b; --lin2: #cfa55c; --lin3: #6fb1a7; --lin4: #9f98d6;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Iowan Old Style', 'Palatino', Charter, Georgia, serif;
+    line-height: 1.6; font-size: 17px; }
+  .ui { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif; }
+
+  header { padding: 1.3rem 2rem .8rem; border-bottom: 1px solid var(--rule);
+    position: sticky; top: 0; background: var(--bg); z-index: 5; }
+  header h1 { font-size: 1.02rem; margin: 0 0 .2rem; font-weight: 600; }
+  header p.note { margin: 0 0 .8rem; color: var(--muted); font-size: .84rem; font-style: italic; }
+  .tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .tabs button { all: unset; cursor: pointer; padding: .4rem .8rem; border-radius: 7px 7px 0 0;
+    font: 600 .84rem/1.2 -apple-system, sans-serif; color: var(--muted); }
+  .tabs button[aria-pressed="true"] { color: var(--ink); background: var(--accent-soft); box-shadow: inset 0 -2px 0 var(--accent); }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 1.4rem 2rem 6rem; }
+  section.part { display: none; } section.part.active { display: block; }
+  .pills { display: flex; flex-wrap: wrap; gap: .5rem; margin: .7rem 0 1.2rem; }
+  .pills button { all: unset; cursor: pointer; padding: .45rem .85rem; border-radius: 999px;
+    border: 1px solid var(--card-edge); font: 500 .84rem/1.3 -apple-system, sans-serif;
+    color: var(--muted); background: var(--card); }
+  .pills button[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+  .cand { display: none; } .cand.active { display: block; }
+  .caption { max-width: 76ch; margin: 0 0 1.6rem; padding: .75rem 1rem; border-left: 3px solid var(--accent);
+    background: var(--accent-soft); border-radius: 0 8px 8px 0;
+    font: .85rem/1.5 -apple-system, sans-serif; }
+  .caption b { font-weight: 650; }
+
+  .doc { max-width: 68ch; margin: 0 auto; }
+  .doc p.block { margin: 0 0 1.12em; position: relative; }
+  .doc p.block.marked { background: var(--accent-soft); border-radius: 6px;
+    padding: .12em .4em; margin-left: -.4em; margin-right: -.4em; }
+  .badge { position: absolute; top: -.35em; right: -2rem; font-size: .76rem; color: var(--accent); user-select: none; }
+  .post-title { font-size: 1.3rem; font-weight: 650; margin: 1rem auto 1.4rem; max-width: 68ch; }
+
+  .chip { display: inline-block; font: 600 .66rem/1 -apple-system, sans-serif;
+    padding: .28em .6em; border-radius: 999px; color: var(--muted);
+    border: 1px solid var(--card-edge); background: var(--card); }
+  .chip.chosen-chip { display: none; color: var(--chosen); border-color: var(--chosen); background: var(--chosen-soft); }
+  .chip.live-chip { display: none; color: var(--live); border-color: var(--live); }
+  .takepane.is-chosen .chosen-chip { display: inline-block; }
+  .takepane.live .live-chip { display: inline-block; }
+
+  .takepane { border: 1px solid var(--card-edge); border-left: 3px solid var(--card-edge);
+    background: var(--card); border-radius: 8px; padding: .65rem .9rem; }
+  .takepane:hover { border-color: var(--accent); }
+  .takepane.is-chosen { border-left-color: var(--chosen); }
+  .takepane.live { border-color: var(--live); box-shadow: 0 0 0 1px var(--live); }
+  .take-head { display: flex; align-items: center; gap: .45rem; margin-bottom: .35rem; flex-wrap: wrap; }
+  .take-body { font-size: .94em; line-height: 1.55; outline: none; }
+  .choose-pill { all: unset; cursor: pointer; margin-left: auto; font: 600 .66rem/1 -apple-system, sans-serif;
+    color: var(--muted); border: 1px solid var(--card-edge); border-radius: 999px; padding: .28em .6em; }
+  .choose-pill:hover { color: var(--chosen); border-color: var(--chosen); }
+  .ghost { border: 1px dashed var(--faint); background: none; color: var(--muted); border-radius: 8px;
+    padding: .55rem .9rem; font: 500 .78rem/1.3 -apple-system, sans-serif; cursor: default; }
+
+  .toolbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 0 0 1.1rem;
+    font: 500 .82rem/1.4 -apple-system, sans-serif; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid var(--card-edge); border-radius: 8px; overflow: hidden; }
+  .seg button { all: unset; cursor: pointer; padding: .35rem .7rem; font: 600 .8rem/1 -apple-system, sans-serif; color: var(--muted); }
+  .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); }
+  .arrows button { all: unset; cursor: pointer; border: 1px solid var(--card-edge); border-radius: 7px;
+    padding: .3rem .65rem; font: 700 .85rem/1 -apple-system, sans-serif; color: var(--ink); }
+  .arrows button:disabled { opacity: .35; cursor: default; }
+  label.tog { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; color: var(--ink); }
+
+  /* A1 stack */
+  .stack { margin: -.3em 0 1.3em 1.4rem; display: flex; flex-direction: column; gap: .55rem; }
+
+  /* A2 carousel */
+  .car { max-width: 68ch; margin: -.2em auto 1.3em; }
+  .car-viewport { overflow: hidden; }
+  .car-track { display: flex; gap: 16px; transition: transform .28s ease; }
+  .car-track .takepane { max-height: 15em; overflow-y: auto; }
+  .car-nav { display: flex; align-items: center; gap: .7rem; justify-content: center; margin-top: .55rem;
+    font: 500 .76rem/1 -apple-system, sans-serif; color: var(--muted); }
+
+  /* A3 margin grid */
+  .rail-row { display: grid; grid-template-columns: minmax(0, 68ch) minmax(260px, 560px); gap: 2.2rem; justify-content: center; }
+  .rail-head { font: 600 .7rem/1.4 -apple-system, sans-serif; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-bottom: .4rem; }
+  .rail-grid { display: grid; grid-template-rows: repeat(3, min-content); grid-auto-flow: column;
+    grid-auto-columns: 250px; gap: .55rem; overflow-x: auto; padding-bottom: .6rem; align-self: start; }
+  .rail-grid .takepane { padding: .5rem .7rem; }
+  .rail-grid .take-body { font-size: .8em; line-height: 1.45; max-height: 9.5em; overflow-y: auto; }
+
+  /* A4 slot split (composition B) */
+  .slotgrid { display: grid; gap: .8rem; margin: .2em 0 1.2em; }
+  .slotgrid .take-body { max-height: 17em; overflow-y: auto; }
+
+  /* Tab 2 full-text columns (composition A) */
+  .colwrap { overflow-x: auto; }
+  .fullcols-locked { display: grid; gap: 0 2.2rem; }
+  .fullcols-locked .cell { border-top: 1px dashed var(--rule); padding: .8em .1em .9em; min-width: 0; }
+  .fullcols-locked .cell.first { border-top: none; }
+  .fullcols-free { display: flex; gap: 2.2rem; align-items: flex-start; }
+  .fullcols-free .col { flex: 1 1 0; min-width: 0; }
+  .fullcols-free .col p { margin: 0 0 1.05em; }
+  .takecell { padding: 0; }
+  .takecell .take-head { margin-bottom: .3rem; }
+  .diff { background: var(--accent-soft); border-radius: 6px; padding: .08em .35em; margin: -.08em -.35em; }
+  .resizable { resize: horizontal; overflow: auto; border: 1px dashed var(--card-edge); border-radius: 12px;
+    padding: 1rem 1.4rem .6rem; min-width: 360px; width: min(80ch, 100%); margin: 0 auto; }
+  .resizable .doc { max-width: none; margin: 0; }
+  .resizable .car { max-width: none; }
+  .colctl { display: flex; align-items: center; gap: .4rem; margin: .3rem 0 .6rem; flex-wrap: wrap; }
+  .cyc { all: unset; cursor: pointer; border: 1px solid var(--card-edge); border-radius: 6px;
+    padding: .2rem .5rem; font: 700 .78rem/1 -apple-system, sans-serif; color: var(--ink); }
+  .ghost.promote { padding: .22rem .5rem; font-size: .66rem; border-radius: 999px; }
+  .collapsebtn { all: unset; cursor: pointer; border: 1px solid var(--card-edge); border-radius: 7px;
+    padding: .3rem .65rem; font: 600 .78rem/1 -apple-system, sans-serif; color: var(--ink); }
+  .minifan { margin-top: .55rem; display: flex; flex-direction: column; gap: .45rem; }
+  .minifan .takepane { padding: .45rem .6rem; }
+  .minifan .take-body { font-size: .85em; line-height: 1.45; }
+  .fanbtn { all: unset; cursor: pointer; color: var(--accent); font: 600 .7rem/1 -apple-system, sans-serif;
+    border: 1px solid var(--card-edge); border-radius: 999px; padding: .28em .6em; margin-top: .5rem; display: inline-block; }
+  .fanbtn:hover { border-color: var(--accent); }
+  .cellbody { outline: none; }
+  .colhead { font: 600 .72rem/1.4 -apple-system, sans-serif; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
+  /* Tab 3 aligned posts */
+  .agrid { display: grid; gap: 12px 26px; align-items: start; max-width: 1120px; }
+  .agrid.versions { grid-template-columns: 1fr 1fr; }
+  .agrid.outline { grid-template-columns: minmax(220px, .5fr) 1fr; }
+  .acell { background: var(--card); border: 1px solid var(--card-edge); border-left: 4px solid var(--lin, var(--faint));
+    border-radius: 8px; padding: .6rem .85rem; font-size: .92em; line-height: 1.5; }
+  .acell .cellbody { outline: none; }
+  .acell.l1 { --lin: var(--lin1); } .acell.l2 { --lin: var(--lin2); }
+  .acell.l3 { --lin: var(--lin3); } .acell.l4 { --lin: var(--lin4); }
+  .acell.orphan { border-left-style: dashed; }
+  .ahead { font: 600 .8rem/1.4 -apple-system, sans-serif; color: var(--muted); }
+  .acell .mini { font: 600 .62rem/1 -apple-system, sans-serif; color: var(--muted); border: 1px solid var(--card-edge);
+    border-radius: 999px; padding: .25em .55em; margin-left: .4em; vertical-align: middle; }
+  .fanchip { color: var(--accent); font-size: .78rem; }
+
+  .footnote { max-width: 78ch; margin: 2rem auto 0; color: var(--faint); font: .77rem/1.55 -apple-system, sans-serif; }
+</style>
+</head>
+<body>
+
+<header class="ui">
+  <h1>Phase 11 mockups — v2, per your redirects (v1 kept beside for the record)</h1>
+  <p class="note">Throwaway; informs, never binds. Everything with a body is an <b>editing surface — type in any take or paragraph</b>. Clicking into a pane migrates the live-editor ring (P3: one live editor); <b>✓ choose</b> is the explicit gesture that sets the chosen take (I3 — reading/editing never silently re-points). "＋ new take" and friends are inert by design.</p>
+  <div class="tabs">
+    <button data-tab="t1" aria-pressed="true">1 · Fan-out styles — one block, in the flow (a setting)</button>
+    <button data-tab="t2" aria-pressed="false">2 · Full-text columns — the whole post, 1–4 ways</button>
+    <button data-tab="t3" aria-pressed="false">3 · Aligned posts — versions &amp; outline ↔ draft</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ TAB 1 — the four styles, as a SETTING ============ -->
+<section class="part active" id="t1">
+  <div class="pills ui" id="stylepills">
+    <button data-cand="a1" aria-pressed="true">Stack</button>
+    <button data-cand="a2" aria-pressed="false">Carousel</button>
+    <button data-cand="a3" aria-pressed="false">Margin grid</button>
+    <button data-cand="a4" aria-pressed="false">Slot split (in-column)</button>
+  </div>
+
+  <div class="cand active" id="a1">
+    <div class="caption"><b>Stack</b> (v1's shape, now editable — and per your note, <b>quick collapse</b>: the ▾ button folds the whole stack away and back). Takes bloom beneath the block, in the flow. Click into a card to edit it; ✓ makes it the chosen take (the paragraph above swaps to it, carrying any edits).</div>
+    <div class="doc">
+      <div class="post-title">The Keeper's Hand</div>
+      <p class="block" contenteditable="true" spellcheck="false">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. <em>Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.</em></p>
+      <p class="block" contenteditable="true" spellcheck="false">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+      <p class="block" id="doc-a1">…<span class="badge ui">⑂ 5</span></p>
+      <div class="toolbar ui" style="margin:.1rem 0 .6rem;"><button class="collapsebtn" id="a1toggle">▾ takes (5) — collapse</button></div>
+      <div class="stack" data-fan="a1" data-swap-target="doc-a1"></div>
+      <p class="block" contenteditable="true" spellcheck="false">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+      <p class="block" contenteditable="true" spellcheck="false">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+    </div>
+  </div>
+
+  <div class="cand" id="a2">
+    <div class="caption"><b>Carousel</b> — chosen take in the document as the main option; equal, centered cards beneath; arrows move a whole card at a time — never halfway between options. Per your note: the count beneath is an <b>explicit control</b> (you pick for your screen), and the <b>editor itself is resizable</b> — drag the dashed panel's bottom-right corner ↘ and the cards re-split the new width into equal shares.</div>
+    <div class="toolbar ui"><span>Beneath the main option:</span>
+      <span class="seg" id="a2seg"><button data-n="1">1</button><button data-n="2" aria-pressed="true">2</button><button data-n="3">3</button><button data-n="4">4</button></span>
+      <span>· drag the dashed corner ↘ to resize the editor</span>
+    </div>
+    <div class="resizable" id="a2wrap">
+      <div class="doc">
+        <div class="post-title">The Keeper's Hand</div>
+        <p class="block" contenteditable="true" spellcheck="false">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+        <p class="block marked" id="doc-a2">…<span class="badge ui">⑂ 5</span></p>
+      </div>
+      <div class="car" data-fan="a2" data-swap-target="doc-a2">
+        <div class="car-viewport"><div class="car-track"></div></div>
+        <div class="car-nav ui arrows">
+          <button class="car-prev">‹</button>
+          <span class="car-count"></span>
+          <button class="car-next">›</button>
+        </div>
+      </div>
+      <div class="doc">
+        <p class="block" contenteditable="true" spellcheck="false">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cand" id="a3">
+    <div class="caption"><b>Margin grid</b> — the document never reflows. The grid stays ~3 cards tall and grows <b>rightward</b> (scrolls horizontally) past that — 5 takes = two columns. Cards are editable in place. The toggle below is my reading of your on/off: <b>mark the changing block</b> in the text, or turn marking off to read the chosen take seamlessly, zero formatting, exactly as it flows.</div>
+    <div class="toolbar ui">
+      <label class="tog"><input type="checkbox" id="a3mark" checked> Mark the changing block in the text</label>
+    </div>
+    <div class="rail-row">
+      <div class="doc" style="margin:0;">
+        <div class="post-title">The Keeper's Hand</div>
+        <p class="block" contenteditable="true" spellcheck="false">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. <em>Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.</em></p>
+        <p class="block" contenteditable="true" spellcheck="false">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+        <p class="block marked" id="doc-a3">…<span class="badge ui">⑂ 5</span></p>
+        <p class="block" contenteditable="true" spellcheck="false">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+        <p class="block" contenteditable="true" spellcheck="false">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+      </div>
+      <div>
+        <div class="rail-head ui">Takes · block 3 · edit in place, ✓ to choose ⇢ scrolls right</div>
+        <div class="rail-grid" data-fan="a3" data-swap-target="doc-a3"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cand" id="a4">
+    <div class="caption"><b>Slot split (in-column)</b> — your composition (B): the article stays ONE column, and the fanned block's slot divides into a <b>1–4-wide equal mathematical split</b> of that same column width. The rest of the article is normal full-width prose above and below. Arrows page further takes in, whole panes at a time.</div>
+    <div class="toolbar ui">
+      <span>Panes:</span>
+      <span class="seg" id="a4seg"><button data-n="1">1</button><button data-n="2">2</button><button data-n="3" aria-pressed="true">3</button><button data-n="4">4</button></span>
+      <span class="arrows"><button id="a4prev">‹</button> <button id="a4next">›</button></span>
+      <span id="a4count"></span>
+    </div>
+    <div class="doc">
+      <div class="post-title">The Keeper's Hand</div>
+      <p class="block" contenteditable="true" spellcheck="false">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</p>
+      <div class="slotgrid" data-fan="a4" id="a4grid"></div>
+      <p class="block" contenteditable="true" spellcheck="false">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</p>
+      <p class="block" contenteditable="true" spellcheck="false">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</p>
+    </div>
+  </div>
+
+  <div class="footnote">All four are one surface with one setting — "different styles of use." Whichever style is set is also what <b>expand-all-fans</b> opens document-wide, and every pane everywhere is the same machinery: read-cheap until clicked, the ONE live editor migrating in, ✓ = <code>chooseVariant</code>.</div>
+</section>
+
+<!-- ============ TAB 2 — full-text columns (composition A) ============ -->
+<section class="part" id="t2">
+  <div class="caption"><b>Full-text columns</b> — your composition (A), now with <b>each column carrying its own take selection</b>: the ‹ › in a column's header cycles what THAT column shows (this is the answer to "what's in column 1–4" — columns are selection profiles, not a fixed window, so you're never stuck varying one take at a time). <b>Sameness at a glance:</b> a row that's byte-identical across columns stays quiet; where columns diverge, the differing cells tint — try cycling two columns to the same take, or editing a quiet paragraph in one column, and watch the signal. In this composition every column is a lens on ONE post, so a quiet row is <i>literally the same block</i>. The ⧉ pill (inert) is where a lens would become durable and independent: a duplicate <b>version-post</b> of that column. <b>Lock block starts</b> = registered rows (the whitespace cost visible); unlocked = each column flows as its own complete read.</div>
+  <div class="toolbar ui">
+    <span>Columns:</span>
+    <span class="seg" id="t2seg"><button data-n="1">1</button><button data-n="2">2</button><button data-n="3" aria-pressed="true">3</button><button data-n="4">4</button></span>
+    <label class="tog"><input type="checkbox" id="t2lock" checked> Lock block starts (align rows)</label>
+    <span>quiet = identical across columns · tinted = diverges</span>
+  </div>
+  <div class="colwrap"><div id="t2area" data-fan="cols"></div></div>
+  <div class="footnote">Registration rule: blocks align if they're takes of the same block (trivially one row) or lineage-corresponding across posts (tab 3). Row height = the tallest cell; unlocking trades registration for density. With several fanned blocks, a column's profile holds one choice per fan and its header can summarize divergence ("differs at blocks 3, 7"). The takes themselves always persist in their fans; the column's combination is a LENS. 💾 (your call this sitting) saves the lens itself — a named profile that survives closing the app, so a days-long thread reopens exactly as you left it; the post's chosen pointers stay untouched until you ✓. ⧉ goes further: the lens becomes its own version-post — durable AND independent (upstream edits stay local to it).</div>
+</section>
+
+<!-- ============ TAB 3 — aligned posts ============ -->
+<section class="part" id="t3">
+  <div class="pills ui" id="t3pills">
+    <button data-cand="t3v" aria-pressed="true">Two posts (versions)</button>
+    <button data-cand="t3o" aria-pressed="false">Outline ↔ draft</button>
+  </div>
+
+  <div class="cand active" id="t3v">
+    <div class="caption"><b>Two posts, block-aligned by lineage — now WITH takes.</b> The two mechanisms never mix, which is what keeps this simple: <b>rows</b> are cross-post correspondence (the colored rails = lineage; the ochre block was divided — one bar flowing into two segments); <b>cells</b> are slots, and a slot's fan blooms <i>inside its own cell</i> — click a <b>⑂ button</b> (both columns have one; stack style shown, it would follow your fan-style setting). <b>Quiet vs tinted compares what each cell currently displays</b> — the opening row carried over unchanged, so it sits quiet; edit it on either side and watch it tint. The ⑂ badge marks latent depth even when a row is quiet. One deliberate line, per the app's coarse-not-forensic rule: <b>take-to-take kinship across posts is not tracked</b> — correspondence stops at the block; each side shows whatever its lens picks. And this pairing is exactly what <b>Mark as Versions</b> records (one undirected pointer, no text copied, reversible) — it's how the view finds the counterpart at all. Dashed = added later, no ancestor.</div>
+    <div class="agrid versions">
+      <div class="ahead ui" style="grid-row:1; grid-column:1;">Logbooks — older version</div>
+      <div class="ahead ui" style="grid-row:1; grid-column:2;">The Keeper's Hand — this draft</div>
+
+      <div class="acell l1" style="grid-row:2; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false" data-vrow="1">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries.</div></div>
+      <div class="acell l1" style="grid-row:2; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false" data-vrow="1">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries.</div></div>
+
+      <div class="acell l2" style="grid-row:3 / span 2; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false">Nine men drowned within sight of his lamp in 1911 and the entry runs three lines. I copied it into my notebook and my copy is longer than his original, because I couldn't stop myself from commenting.</div><span class="mini ui">divided → 2 blocks</span></div>
+      <div class="acell l2" style="grid-row:3; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</div></div>
+      <div class="acell l2" style="grid-row:4; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false" id="v-r2b">I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.</div><button class="fanbtn ui" data-fanbtn="v1">⑂ 3 takes — bloom here</button><div class="minifan" data-fan="v1" data-swap-target="v-r2b" style="display:none;"></div></div>
+
+      <div class="acell l3" style="grid-row:5; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false" id="v-l3" data-vrow="3">That is the whole difference between us, I think. He wrote to put the day down. I write to keep the day going.</div><button class="fanbtn ui" data-fanbtn="v2">⑂ 2 takes — the old draft has its own fan</button><div class="minifan" data-fan="v2" data-swap-target="v-l3" style="display:none;"></div></div>
+      <div class="acell l3" style="grid-row:5; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false" data-vrow="3">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.</div></div>
+
+      <div class="acell l4" style="grid-row:6; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false" data-vrow="4">I would like to learn the other thing. Not the plainness itself — the being able to afford it.</div></div>
+      <div class="acell l4" style="grid-row:6; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false" data-vrow="4">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</div></div>
+
+      <div class="acell orphan" style="grid-row:7; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false">(He would have written: <em>fair, wind light, nothing to report.</em>)</div><span class="mini ui">added later — no counterpart</span></div>
+    </div>
+  </div>
+
+  <div class="cand" id="t3o">
+    <div class="caption"><b>Outline ↔ draft, same mechanism.</b> The outline is just a post; each item's row aligns with the draft block(s) <b>derived from</b> it — so "outline left, writing right" falls out of the same lineage traversal for free. The teal item's draft block carries a fan: a detailed outline where every expanded section is one fanned-out block, exactly as you said. The violet item was drafted as two blocks — the same flow-through as a divide.</div>
+    <div class="agrid outline">
+      <div class="ahead ui" style="grid-row:1; grid-column:1;">Outline</div>
+      <div class="ahead ui" style="grid-row:1; grid-column:2;">Draft</div>
+
+      <div class="acell l1" style="grid-row:2; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false">— the museum case: forty years of logs</div></div>
+      <div class="acell l1" style="grid-row:2; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false">The lighthouse keeper's logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries.</div></div>
+
+      <div class="acell l2" style="grid-row:3; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false">— what he refused to record (the 1911 wreck)</div></div>
+      <div class="acell l2" style="grid-row:3; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false">What strikes you first is not what he recorded but what he refused to. No storm is dramatized. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.</div></div>
+
+      <div class="acell l3" style="grid-row:4; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false">— restraint ≠ numbness: the log as where you put the sea down</div></div>
+      <div class="acell l3" style="grid-row:4; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false">I used to think this restraint was a failure of feeling. Now I think the log was the only place he could put the sea down and leave it there.</div><span class="mini ui fanchip">⑂ 5 takes</span></div>
+
+      <div class="acell l4" style="grid-row:5 / span 2; grid-column:1;"><div class="cellbody" contenteditable="true" spellcheck="false">— my journal vs his; what keeping a log is for</div><span class="mini ui">drafted as 2 blocks</span></div>
+      <div class="acell l4" style="grid-row:5; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false">My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday.</div></div>
+      <div class="acell l4" style="grid-row:6; grid-column:2;"><div class="cellbody" contenteditable="true" spellcheck="false">Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.</div></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const TAKES = [
+  { label: 'first pass', text: 'I used to think this restraint was a failure of feeling — that a man who could watch a schooner break apart and write four lines had gone numb from the isolation. Now I think the log was the only place he could put the sea down and leave it there.' },
+  { label: 'tighter', text: 'I used to read this restraint as numbness. I no longer do. The log was where he set the sea down each night — and the setting down was the point.' },
+  { label: 'take 3', text: 'It would be easy to call the restraint numbness, the flat hand of a man alone too long with weather. But keepers were replaced when they went strange, and he kept forty years. The plainness was a discipline, the way a rope is coiled the same whether or not anyone drowned that day.' },
+  { label: 'take 4', text: 'Numbness is one theory. Here is another: the log is an instrument reading, and he did not confuse himself with the instrument. The grief went somewhere; it did not go into the log, and that is why the log outlived him.' },
+  { label: 'take 5', text: 'Forty years, and the entry for the worst night of his life runs four lines. I have stopped reading that as coldness. A lamp must be trimmed at dusk whatever the sea did at noon — and the sentence that says so is the same size every day.' },
+];
+const BLOCKS = [
+  'The lighthouse keeper’s logs survive in a glass case at the maritime museum, forty years of weather in a hand that never hurries. Wind NNE, moderate. Glass falling. The lamp trimmed at dusk.',
+  'What strikes you first is not what he recorded but what he refused to. No storm is dramatized. No shipwreck gets more than its coordinates and a time. The sea that took nine men in October 1911 receives the same margin as a Tuesday of fog.',
+  null, // slot for the fanned block
+  'My own journal does the opposite of everything his did. It dramatizes the fog. It editorializes the Tuesday. And it would not survive forty days of rereading, let alone forty years.',
+  'Maybe that is the real use of keeping any log at all: not to remember the weather, but to practice the hand that can hold it.',
+];
+const chosen = { a1: 0, a2: 0, a3: 0, a4: 0, cols: 0 };
+
+function paneHTML(i, take) {
+  return `<div class="take-head ui">
+      <span class="chip chosen-chip">chosen</span>
+      <span class="chip">${take.label}</span>
+      <span class="chip live-chip">live editor</span>
+      <button class="choose-pill">✓ choose</button>
+    </div>
+    <div class="take-body" contenteditable="true" spellcheck="false">${take.text}</div>`;
+}
+function makePane(i, take) {
+  const d = document.createElement('div');
+  d.className = 'takepane'; d.dataset.idx = i;
+  d.innerHTML = paneHTML(i, take);
+  return d;
+}
+function markGroup(container) {
+  const g = container.dataset.fan;
+  container.querySelectorAll('.takepane').forEach(p => p.classList.toggle('is-chosen', +p.dataset.idx === chosen[g]));
+}
+function swapDoc(container) {
+  const id = container.dataset.swapTarget;
+  if (!id) return;
+  const target = document.getElementById(id);
+  const pane = container.querySelector(`.takepane[data-idx="${chosen[container.dataset.fan]}"]`);
+  const text = pane ? pane.querySelector('.take-body').textContent : TAKES[chosen[container.dataset.fan]].text;
+  const badge = target.querySelector('.badge');
+  target.textContent = text;
+  if (badge) target.appendChild(badge);
+}
+function wireGroup(container) {
+  container.addEventListener('click', e => {
+    const pane = e.target.closest('.takepane'); if (!pane) return;
+    if (e.target.closest('.choose-pill')) {
+      chosen[container.dataset.fan] = +pane.dataset.idx;
+      markGroup(container); swapDoc(container);
+      return;
+    }
+    container.querySelectorAll('.takepane').forEach(p => p.classList.toggle('live', p === pane));
+  });
+  container.addEventListener('focusin', e => {
+    const pane = e.target.closest('.takepane'); if (!pane) return;
+    container.querySelectorAll('.takepane').forEach(p => p.classList.toggle('live', p === pane));
+  });
+}
+
+/* tabs + pills */
+document.querySelectorAll('.tabs button').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+  document.querySelectorAll('section.part').forEach(s => s.classList.toggle('active', s.id === btn.dataset.tab));
+}));
+document.querySelectorAll('.pills').forEach(pills => pills.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    pills.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    pills.closest('section').querySelectorAll('.cand').forEach(c => c.classList.toggle('active', c.id === btn.dataset.cand));
+  });
+}));
+
+/* A1 stack */
+const a1 = document.querySelector('[data-fan="a1"]');
+TAKES.forEach((t, i) => a1.appendChild(makePane(i, t)));
+const ghost = document.createElement('div'); ghost.className = 'ghost ui'; ghost.title = 'inert in mockup';
+ghost.textContent = '＋ new take (branch) · ＋ blank take';
+a1.appendChild(ghost);
+wireGroup(a1); markGroup(a1); swapDoc(a1);
+document.getElementById('a1toggle').addEventListener('click', () => {
+  const s = document.querySelector('[data-fan="a1"]');
+  const hidden = s.style.display === 'none';
+  s.style.display = hidden ? '' : 'none';
+  document.getElementById('a1toggle').textContent = hidden ? '▾ takes (5) — collapse' : '▸ takes (5) — expand';
+});
+
+/* A2 carousel */
+const a2 = document.querySelector('[data-fan="a2"]');
+const track = a2.querySelector('.car-track');
+TAKES.forEach((t, i) => track.appendChild(makePane(i, t)));
+wireGroup(a2); markGroup(a2); swapDoc(a2);
+let a2idx = 0, a2n = 2;
+function a2layout() {
+  const v = Math.min(a2n, TAKES.length), gap = 16;
+  const vw = a2.querySelector('.car-viewport').clientWidth;
+  const w = (vw - gap * (v - 1)) / v;
+  track.querySelectorAll('.takepane').forEach(c => c.style.flex = `0 0 ${w}px`);
+  a2idx = Math.max(0, Math.min(a2idx, TAKES.length - v));
+  track.style.transform = `translateX(${-a2idx * (w + gap)}px)`;
+  a2.querySelector('.car-prev').disabled = a2idx === 0;
+  a2.querySelector('.car-next').disabled = a2idx >= TAKES.length - v;
+  a2.querySelector('.car-count').textContent = `takes ${a2idx + 1}–${a2idx + v} of ${TAKES.length}`;
+}
+a2.querySelector('.car-prev').addEventListener('click', () => { a2idx--; a2layout(); });
+a2.querySelector('.car-next').addEventListener('click', () => { a2idx++; a2layout(); });
+document.querySelectorAll('#a2seg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#a2seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  a2n = +b.dataset.n; a2layout();
+}));
+new ResizeObserver(a2layout).observe(document.getElementById('a2wrap'));
+window.addEventListener('resize', a2layout);
+
+/* A3 margin grid */
+const a3 = document.querySelector('[data-fan="a3"]');
+TAKES.forEach((t, i) => a3.appendChild(makePane(i, t)));
+wireGroup(a3); markGroup(a3); swapDoc(a3);
+document.getElementById('a3mark').addEventListener('change', e =>
+  document.getElementById('doc-a3').classList.toggle('marked', e.target.checked));
+
+/* A4 slot split */
+const a4 = document.getElementById('a4grid');
+let a4n = 3, a4page = 0;
+function a4render() {
+  a4page = Math.max(0, Math.min(a4page, TAKES.length - a4n));
+  a4.style.gridTemplateColumns = `repeat(${a4n}, 1fr)`;
+  a4.innerHTML = '';
+  for (let c = 0; c < a4n; c++) {
+    const i = a4page + c; if (i >= TAKES.length) break;
+    a4.appendChild(makePane(i, TAKES[i]));
+  }
+  markGroup(a4);
+  document.getElementById('a4prev').disabled = a4page === 0;
+  document.getElementById('a4next').disabled = a4page >= TAKES.length - a4n;
+  document.getElementById('a4count').textContent = `takes ${a4page + 1}–${Math.min(a4page + a4n, TAKES.length)} of ${TAKES.length} · equal split of the column`;
+}
+wireGroup(a4);
+document.querySelectorAll('#a4seg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#a4seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  a4n = +b.dataset.n; a4render();
+}));
+document.getElementById('a4prev').addEventListener('click', () => { a4page--; a4render(); });
+document.getElementById('a4next').addEventListener('click', () => { a4page++; a4render(); });
+a4render();
+
+/* Tab 2 — full-text columns as SELECTION PROFILES (each column picks its own take) */
+const t2area = document.getElementById('t2area');
+let t2n = 3, t2locked = true;
+const t2sel = [0, 1, 2, 3];
+function t2colHeadHTML(c) {
+  const t = TAKES[t2sel[c]];
+  return `<div class="colhead ui">column ${c + 1}</div>
+    <div class="colctl ui">
+      <button class="cyc" data-col="${c}" data-dir="-1">‹</button>
+      <span class="chip">${t.label}</span>
+      <button class="cyc" data-col="${c}" data-dir="1">›</button>
+      <span class="ghost promote" title="inert in mockup">💾 save lens</span>
+      <span class="ghost promote" title="inert in mockup">⧉ version-post</span>
+    </div>`;
+}
+function t2render() {
+  t2area.innerHTML = '';
+  if (t2locked) {
+    t2area.className = 'fullcols-locked';
+    t2area.style.gridTemplateColumns = `repeat(${t2n}, 1fr)`;
+    for (let c = 0; c < t2n; c++) {
+      const h = document.createElement('div');
+      h.className = 'cell first'; h.innerHTML = t2colHeadHTML(c);
+      t2area.appendChild(h);
+    }
+    for (let r = 0; r < BLOCKS.length; r++) {
+      for (let c = 0; c < t2n; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (r === 2) {
+          const i = t2sel[c];
+          cell.innerHTML = `<div class="takepane takecell" data-idx="${i}" style="border:none; box-shadow:none;">${paneHTML(i, TAKES[i])}</div>`;
+          cell.querySelector('.take-body').dataset.row = r;
+        } else {
+          cell.innerHTML = `<div class="cellbody" contenteditable="true" spellcheck="false" data-row="${r}">${BLOCKS[r]}</div>`;
+        }
+        t2area.appendChild(cell);
+      }
+    }
+  } else {
+    t2area.className = 'fullcols-free';
+    t2area.style.gridTemplateColumns = '';
+    for (let c = 0; c < t2n; c++) {
+      const col = document.createElement('div'); col.className = 'col';
+      const h = document.createElement('div');
+      h.innerHTML = t2colHeadHTML(c); h.style.marginBottom = '.5em';
+      col.appendChild(h);
+      for (let r = 0; r < BLOCKS.length; r++) {
+        if (r === 2) {
+          const i = t2sel[c];
+          const w = document.createElement('div');
+          w.className = 'takepane takecell'; w.dataset.idx = i;
+          w.style.margin = '0 0 1.05em';
+          w.innerHTML = paneHTML(i, TAKES[i]);
+          w.querySelector('.take-body').dataset.row = r;
+          col.appendChild(w);
+        } else {
+          const p = document.createElement('p');
+          p.setAttribute('contenteditable', 'true'); p.setAttribute('spellcheck', 'false');
+          p.dataset.row = r;
+          p.textContent = BLOCKS[r];
+          col.appendChild(p);
+        }
+      }
+      t2area.appendChild(col);
+    }
+  }
+  markGroup(t2area);
+  t2same();
+}
+function t2same() {
+  for (let r = 0; r < BLOCKS.length; r++) {
+    const els = [...t2area.querySelectorAll(`[data-row="${r}"]`)];
+    if (!els.length) continue;
+    const texts = els.map(e => e.textContent.trim());
+    const uniform = texts.every(t => t === texts[0]);
+    const counts = {};
+    texts.forEach(t => counts[t] = (counts[t] || 0) + 1);
+    const modal = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
+    els.forEach((e, i) => e.classList.toggle('diff', !uniform && (texts[i] !== modal || counts[modal] === 1)));
+  }
+}
+wireGroup(t2area);
+t2area.addEventListener('click', e => {
+  const cyc = e.target.closest('.cyc');
+  if (!cyc) return;
+  const c = +cyc.dataset.col;
+  t2sel[c] = (t2sel[c] + +cyc.dataset.dir + TAKES.length) % TAKES.length;
+  t2render();
+});
+t2area.addEventListener('input', t2same);
+document.querySelectorAll('#t2seg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#t2seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  t2n = +b.dataset.n; t2render();
+}));
+document.getElementById('t2lock').addEventListener('change', e => { t2locked = e.target.checked; t2render(); });
+t2render();
+
+/* Tab 3 — fans blooming inside aligned cells + live sameness on 1:1 rows */
+const V1 = TAKES.slice(0, 3);
+const V2 = [
+  { label: 'as written', text: 'That is the whole difference between us, I think. He wrote to put the day down. I write to keep the day going.' },
+  { label: 'blunter', text: 'He wrote to be done with the day. I write to keep it. I don’t know yet which of us the practice serves better.' },
+];
+chosen.v1 = 0; chosen.v2 = 0;
+[['v1', V1], ['v2', V2]].forEach(([g, takes]) => {
+  const fan = document.querySelector(`[data-fan="${g}"]`);
+  takes.forEach((t, i) => fan.appendChild(makePane(i, t)));
+  wireGroup(fan); markGroup(fan);
+});
+document.querySelectorAll('[data-fanbtn]').forEach(btn => btn.addEventListener('click', () => {
+  const fan = document.querySelector(`[data-fan="${btn.dataset.fanbtn}"]`);
+  fan.style.display = fan.style.display === 'none' ? '' : 'none';
+}));
+const t3v = document.getElementById('t3v');
+function vSame() {
+  ['1', '3', '4'].forEach(r => {
+    const els = [...t3v.querySelectorAll(`[data-vrow="${r}"]`)];
+    if (els.length < 2) return;
+    const same = els.every(e => e.textContent.trim() === els[0].textContent.trim());
+    els.forEach(e => e.classList.toggle('diff', !same));
+  });
+}
+t3v.addEventListener('input', vSame);
+t3v.addEventListener('click', () => setTimeout(vSame, 0));
+vSame();
+window.addEventListener('load', a2layout);
+</script>
+</body>
+</html>

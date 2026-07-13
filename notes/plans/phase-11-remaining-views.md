@@ -18,6 +18,149 @@
 > 11a/11b master-plan rows at kickoff (the table "gains rows rather than
 > rewriting history"); the plan works either way. One phase of this breadth
 > invites a rushed tail — Stage B is never a footnote.
+>
+> **Kickoff notes (coordinator, 2026-07-12):** (1) **Coordinator seat redirected
+> to FABLE by the author at kickoff** (her call, resolving the CLAUDE.md Opus
+> assignment when asked: the phase's WORK was already moved to Fable on
+> 2026-07-11 as the most interpretation-/UI-heavy remaining — the Opus
+> coordinator seat was budget economy, not suitability, and she chose Fable
+> when the tradeoff was put to her). Implementer/reviewer stay FABLE per the
+> table; same-model flow — **the author confirmed Fable for ALL of Phase 11
+> at the sitting, "just to be clear."** (2) The **kickoff-addendum HTML mockup
+> spike is running in the coordinator's author-attended session** (2026-07-12,
+> 9d-style; throwaway artifacts in `Spikes/Phase11Mockups/`); her choices will
+> be recorded here when made — Step A3 stays blocked until then. **Spike round
+> 1 feedback (author, same sitting — binding once the v2 mockup is approved):**
+> ALL of the fan-out appearances ship, as a user SETTING (stack / carousel /
+> margin-grid / spread — "different styles of use that are super defensible");
+> A2 re-shaped as a centered TWO-UP discrete carousel under the in-flow chosen
+> take (one-up on narrow windows; paging moves whole cards, never half-way);
+> A3 re-shaped as a ~3-tall margin GRID overflowing into horizontally-scrolled
+> columns, with the changing block HIGHLIGHTED in the document and a toggle to
+> read it seamlessly (no formatting); B2's spread JOINS the same family as a
+> fourth style ("the editing and showing can be the same") with equal
+> mathematical column splits (user-set visible count) and the same discrete
+> paging; EVERY style is an editing surface (the one live editor migrates on
+> click; choosing stays an explicit ✓ = `chooseVariant`, I3); and whole-post
+> side-by-side compositions must be BLOCK-ALIGNED columns — variant/fan rows
+> vertically registered, lineage flowing through divides "like a color bar"
+> (left block ↔ its divided descendants' span), which is how outline↔draft
+> side-by-side falls out of `derived_from` for free. **Her mid-sitting
+> clarification, verbatim intent:** the side-by-side family is exactly TWO
+> compositions — **(A) 1–4 SEPARATE FULL-TEXT columns** (each column the whole
+> post, differing at the fanned block; a block-start alignment LOCK toggle:
+> locked = registered comparison rows, whitespace accepted — "lonely to read"
+> acknowledged; unlocked = each column flows as its own whole variant of the
+> post) and **(B) ONE article column whose fanned slot splits into a 1–4-wide
+> equal-share pane space in place** (the rest of the article normal, full
+> width). Carousel paging brings further takes into either composition; splits
+> are always equal mathematical shares. Her B3 question (what is version_of /
+> Mark as Versions for) answered at the sitting. **Spike round 2 (same
+> sitting):** the A3 mark-toggle reading CONFIRMED; the Stack gains a quick
+> expand/collapse; the Carousel gains an EXPLICIT beneath-count control (1–4,
+> user-chosen for their screen width) plus a RESIZABLE main editor;
+> composition (A) columns gain SAMENESS signals (a byte-identical row stays
+> quiet; divergent cells tint; stable lineage-color as the same-ORIGIN signal,
+> the 9d stable-color family) and per-column take selection (columns =
+> view-local SELECTION PROFILES — the N-up form of swap-and-reread,
+> session-only, I3-clean, ✓ = the explicit chooseVariant). **Duplicate-post-
+> as-version APPROVED into Stage A scope** (one gesture: block copies +
+> derived_from edges + version_of — the aligned view's automatic door).
+> **OPEN, her uncertainty preserved verbatim ("i think we may have to
+> reconsider that invariant. … I'm open to thoughts"):** whether cross-block
+> take-coordination ("linked takes" / "posts have takes") needs DURABLE
+> state — the coordinator offered three tiers, I8 untouched in all of them
+> (session lens, free; SAVED lens as a small canvas_layout-class table — no
+> invariant change, rendering truth/chosen pointers untouched; version-POST
+> for full independence) plus a "diverge here" gesture (branch a take, the
+> column adopts it) and promote-column-to-version-post. She has NOT decided.
+> **Spike round 3 (same sitting):** **SAVED LENSES — her strong leaning,
+> explicitly open to advice** ("if session lens is useful, it's a disservice
+> to not allow it" — a lens/thread is days-long work and must survive
+> app-close): a durable NAMED selection profile per post; coordinator concurs
+> — a small canvas_layout-class view-state table riding the SAME A1 lockstep
+> event (three additive changes in one choreography), with the semantic line
+> held: **a lens is never rendering truth** (exports/bridge/book views read
+> chosen pointers; ✓/adopt gestures are the only doors from lens to chosen —
+> I3/I8 untouched). **Branch-all-fans APPROVED** (coordinator offered the
+> lazier default: a fresh thread/lens starts as a transparent overlay and
+> "diverge here" mints takes only where actually edited; eager branch-all
+> stays an explicit command). **Two-posts-WITH-takes composition settled in
+> the mock:** rows = block-level lineage correspondence; cells = slots whose
+> fans bloom IN-CELL in the set fan style; quiet/tint compares displayed
+> bytes; take-to-take kinship ACROSS posts deliberately NOT tracked (coarse,
+> not forensic). Still open with her: saved-lens final confirm (+ synced vs
+> local); the adopt-lens gesture; the duplicate/promote fan-copy defaults
+> (recommendation: duplicate carries whole fans, promote materializes
+> chosen-only per its lens).
+> **Spike round 4 (2026-07-13):** adopt-this-lens APPROVED; SAVED LENSES
+> CONFIRMED (synced, riding A1's lockstep event); lazy new-thread APPROVED;
+> the teachable boundary RATIFIED in her words as the design's governing
+> frame — **"a lens is the same structure with different choices; a version
+> is a different structure; promote is the bridge"** ("this is exactly
+> right"); cross-post take kinship confirmed NOT tracked. **Fan-copy
+> ruling:** a version copy carries WHOLE fans AND the currently-viewed
+> selection becomes the copy's chosen (the other options ride, kept open) —
+> supersedes the coordinator's chosen-only-promote recommendation, one
+> uniform rule. **Coordinator advice on her particulars (pending her go):**
+> (1) UNIFY the two ops — promote(lens) ≡ duplicate-while-viewing: ONE
+> operation, duplicateAsVersion(post, selection), where the selection
+> parameter is whatever the view is looking through (main chosen text /
+> a scratch column / a named lens); "Promote" is merely the button's label
+> when that happens to be a lens. (2) A lens is SPARSE overrides over
+> chosen — only divergences stored; un-overridden slots follow the post's
+> chosen (the transparent new-thread lens = the empty lens; edits to
+> un-overridden blocks show through every lens). (3) NO auto-minted named
+> lenses: scratch column arrangements persist as VIEW MEMORY (automatic,
+> local, scroll-position class — the view reopens as you left it), while
+> NAMED lenses are deliberate (💾 + a name; synced canvas_layout-class
+> tables `lens` + `lens_choice`, live-unique (lens_id, block_id), CAS
+> variant pointer, dangling-variant falls through to chosen — the existing
+> fallback class). (4) Promote/duplicate leaves the original post, its
+> chosen pointers, and the lens untouched; lenses do NOT ride the copy
+> (their (block, variant) references are the original's — the copy starts
+> lens-clean with its selection as chosen).
+> **Spike round 5 (2026-07-13):** the round-4 unification RETRACTED — she
+> wanted the two ops DIFFERENT (the coordinator misread her; her
+> four-columns-open case shows why she was right: "duplicate what I'm
+> viewing" is ambiguous with N columns). Final shape: **duplicateAsVersion
+> (post)** copies the post EXACTLY AS IT IS — its own chosen + whole fans,
+> no lens/view involvement, unambiguous from anywhere; **promoteLens(lens)**
+> materializes one lens — chosen := the lens's picks, fans ride (coordinator
+> one-rule recommendation, pending her go), original + lens untouched, ⧉ is
+> per-COLUMN. The ops differ in exactly one thing: where the copy's chosen
+> comes from. **Vocabulary settled** (glossary in the sitting reply;
+> governing sentence: "visible is what you're looking at; chosen is what
+> the post is; a lens is a saved way of looking; a version is a different
+> post"). Visible-not-chosen is real and editable — edits land in that
+> take's working_text, durable and synced; rendering truth (chosen) moves
+> only via ✓/adopt. **Named-lens edit model — coordinator recommendation
+> (pending her go): LIVE autosave** (the canvas_layout arrangement
+> precedent; no explicit re-save; a lens-bound column edits its lens, a
+> main-text or scratch column touches no lens; "duplicate lens" covers
+> riff-without-touching). View memory + named lenses both CONFIRMED. She
+> authorized folding the sitting scope into the step plan explicitly and
+> adding a sub-phase if needed — the coordinator will formalize 11a/11b
+> master-plan rows at spike close.
+> **Spike round 6 — CLOSED (2026-07-13, her go):** all three calls confirmed —
+> the two operations as defined; fans ride Promote WITH a choose-at-promote
+> option (her call: carry-all default, chosen-only offered at the gesture);
+> live lens editing. Her final clarifying question (is the aligned view
+> reliant on same block order?) answered at the sitting: kinship comes from
+> lineage edges, never order — divides/merges/adds/deletes align via spans
+> and blanks regardless of counts; a cross-version REORDER is the one case
+> locked registration can't fully honor (anchor the opened post's order,
+> mark moved kin; unlocked mode + lineage colors stay truthful under any
+> order; the view is still offered, degrading honestly, never guessing).
+> The MODES TUTORIAL added to scope mid-sitting (her instruction: an in-app
+> walkthrough styled like the spike pages, live examples per mode). The
+> consolidated BINDING record is the "## Kickoff spike record" section
+> below; Steps A1/A2/A3/A4 amended, A10 added; master-plan rows 11a/11b
+> formalized — THIS /run-phase invocation covers 11a (Stage A) only. (3) Master plan
+> keeps a SINGLE Phase 11 row (the Stage A/B gates are internal); 11a/11b rows
+> only if the phase runs long. (4) The `/Applications` install was refreshed to
+> the Phase 10 closeout build at kickoff (handoff step 1 done; author relaunch
+> pending).
 
 ## Kickoff message (for a fresh session)
 
@@ -93,6 +236,85 @@
 5. **PDF: the attributed-string print/PDF path** over `renderedText`
    semantics; typographic polish is explicitly Phase 13's.
 
+## Kickoff spike record (2026-07-12/13 — BINDING design input for Stage A)
+
+The author-attended HTML mockup spike ran across six rounds (throwaway
+artifacts: `Spikes/Phase11Mockups/`; the round-by-round record is in the
+kickoff notes above). This section is the consolidated result — binding,
+in her rulings.
+
+**Vocabulary (the governing frame):** VISIBLE is what you're looking at;
+CHOSEN is what the post is; a LENS is a saved way of looking; a VERSION is
+a different post. Her boundary sentence, ratified: *"a lens is the same
+structure with different choices; a version is a different structure;
+promote is the bridge."* Visible-not-chosen takes are real, editable,
+durable (ordinary `working_text`); rendering truth moves only via ✓/adopt.
+
+1. **Fan-out styles are a user SETTING — all four ship** ("different styles
+   of use that are super defensible"): **Stack** (with quick expand/
+   collapse); **Carousel** (chosen take in-flow as the main option; an
+   explicit 1–4 beneath-count control — never auto-only; discrete
+   whole-card paging, never halfway; resizable main editor); **Margin
+   grid** (~3 cards tall, overflows RIGHTWARD with horizontal scroll; the
+   changing block HIGHLIGHTED in the text with a toggle for seamless
+   zero-formatting reading; edit-in-place); **Slot split** (the fanned slot
+   divides into a 1–4-wide equal mathematical split inside the one article
+   column). Whichever style is set is what expand-all-fans opens
+   document-wide. EVERY pane everywhere is an editing surface: the ONE live
+   editor migrates on click (P3 unchanged); ✓ = `chooseVariant` (I3 —
+   clicking/editing never re-points).
+2. **Side-by-side has exactly TWO compositions:** (A) 1–4 separate
+   FULL-TEXT columns — the whole post per column, differing at fanned
+   blocks — with a block-start alignment LOCK toggle (locked = registered
+   rows, honest whitespace; unlocked = each column flows as its own
+   complete read); (B) ONE article column whose fanned slot splits 1–4 wide
+   in place. Equal mathematical splits always; discrete paging in both.
+3. **Columns are selection profiles; lenses make them durable.** A lens =
+   SPARSE overrides over chosen — only divergences stored; un-overridden
+   slots follow the post's chosen (the transparent new-thread lens is the
+   EMPTY lens — the lazy default; takes mint only on divergence). Scratch
+   columns persist via VIEW MEMORY (automatic, local, scroll-position
+   class — the view reopens as you left it). NAMED lenses are deliberate
+   (💾 + a name), synced, and LIVE-edited (no explicit re-save — a
+   lens-bound column edits its lens; main-text/scratch columns touch no
+   lens; "duplicate lens" covers riff-without-touching).
+4. **Sameness signals, two independent channels:** stable lineage-COLOR
+   marks same-origin (the 9d stable-color family); QUIET vs TINTED marks
+   same-bytes-right-now (byte-identical row across columns = quiet;
+   divergent cells tint; computed at read time, never stored).
+5. **Gestures:** ✓ choose · ADOPT LENS (every pick → chosen, one compound) ·
+   DIVERGE HERE (edit-as-this-thread mints a take; the column adopts it —
+   visible, not chosen) · BRANCH-ALL-FANS (explicit compound command; the
+   transparent lens is the default for new threads) · DUPLICATE AS VERSION
+   (the post EXACTLY as it is — its chosen + whole fans; ignores columns
+   and lenses; unambiguous from anywhere) · PROMOTE LENS (per-column ⧉ —
+   new version-post with chosen := the lens's picks; fans ride by DEFAULT,
+   chosen-only offered at the gesture; original and lens untouched; lenses
+   never ride any copy). The two copy operations differ in exactly one
+   thing: where the new post's chosen comes from.
+6. **Aligned posts (versions & outline↔draft):** rows keyed by BLOCK-LEVEL
+   lineage (`derived_from` closure), never by order — divides/merges/adds/
+   deletes align via spans and blanks; a cross-version REORDER is the one
+   case locked registration can't fully honor (anchor the opened post's
+   order, mark moved kin; unlocked + lineage colors stay truthful under any
+   order). Take-to-take kinship ACROSS posts is deliberately NOT tracked
+   (coarse, not forensic). In-cell fan blooms follow the fan-style setting.
+7. **Modes tutorial (her instruction, 2026-07-13):** an in-app walkthrough
+   of the three modes — POLISH IN PLACE / THREAD ONE PIECE / FORK THE
+   PIECE — styled like the spike's mockup pages (captioned sections, live
+   examples per mode) over a seeded demo post. Functional at 11a; the
+   pretty pass is Phase 13's. (Step A10.)
+8. **Schema consequences (JOIN Step A1's one lockstep event):** `lens` +
+   `lens_choice` — sparse overrides; live-unique `(lens_id, block_id)`;
+   CAS variant pointer; a dangling lens variant falls through to chosen
+   (the existing fallback class); cascades from lens/post/block/variant;
+   own schema commit.
+9. **New operations (JOIN Step A2):** `duplicateAsVersion`, `promoteLens`
+   (+ carry-fans option), `adoptLens`, lens CRUD (`createLens` /
+   `setLensChoice` / `clearLensChoice` / `renameLens` / `duplicateLens` /
+   `deleteLens`), `branchAllFans`. Undo inverses per the structural-undo
+   pattern where applicable.
+
 ## Ground rules
 
 - **Every view is a traversal** (OverallModel §9): the moment side-by-side or
@@ -140,42 +362,66 @@ keep smaller id (SyncSpec §7 pattern); (vi) `setBlockName` +
 `setCanvasPosition`/`removeCanvasPosition` operations; (vii) **the deploy is
 an author-assist gate** — mirror first, then BOTH devices update, only then
 any new-schema write; the choreography is recorded step-by-step in this
-plan's closeout (review focus 1 audits it against §12, not the summary).
+plan's closeout (review focus 1 audits it against §12, not the summary);
+(viii) **spike addition (2026-07-13):** migration `v1_7` — the `lens` +
+`lens_choice` tables (spike record item 8), own commit, JOINING THE SAME
+lockstep event — one choreography, now FOUR additive changes; items
+(iii)–(v) apply to them identically (registry, serializer, mirror DDL +
+RLS posture, pure-duplicate repair on `(lens_id, block_id)`).
 **Tests:** migration + trigger + serializer-completeness walks (the A6
-pattern — the in-repo mirror-DDL coverage check must swallow the new table);
-repair test with the outbox-row assertion; version-check refusal test
-(behind ⇒ refuses, outbox intact, cursor unmoved); ops state-transition
-tests; convergence scenario over canvas rows (move/move race = metadata CAS).
+pattern — the in-repo mirror-DDL coverage check must swallow the new
+tables); repair tests with the outbox-row assertion; version-check refusal
+test (behind ⇒ refuses, outbox intact, cursor unmoved); ops
+state-transition tests; convergence scenarios over canvas AND lens rows
+(move/move + choice/choice races = metadata CAS); a dangling lens variant
+falls through to chosen at read time.
 
-### Step A2 — `version_of` (the KnownIssues op) + two doors
+### Step A2 — `version_of` (the KnownIssues op) + two doors + the version/lens operations
 **Work:** the minting operation (canonical `(min,max)` storage,
 `origin_op='manual'`, undirected — AppSpec §7; refuse self-link and dupes at
 the ops boundary) + undo inverse; door 1: select two posts in library/folder
 → "Mark as Versions"; door 2: the side-by-side view offers the link on
-unlinked posts (lands with A3).
+unlinked posts (lands with A3). **Spike additions (record items 5/9):**
+`duplicateAsVersion(post)` — exact copy, chosen as-is + WHOLE fans, per-block
+`derived_from` edges + `version_of` minted, lenses never ride;
+`promoteLens(lens, carryFans: true default)` — chosen := the lens's
+effective picks, chosen-only offered at the gesture, original + lens
+untouched; `adoptLens(lens)` — one compound of `chooseVariant`s;
+lens CRUD (`createLens`/`setLensChoice`/`clearLensChoice`/`renameLens`/
+`duplicateLens`/`deleteLens`); `branchAllFans(post)` — one compound.
 **Tests:** op state transitions (canonical order pinned both input orders);
-both doors emit the SAME op; the Phase 5 dedupe repair still green.
+both doors emit the SAME op; the Phase 5 dedupe repair still green; the two
+copy ops pinned to differ in EXACTLY one thing (where the copy's chosen
+comes from); adopt is atomic; compounds undo as one entry.
 
-### Step A3 — side-by-side multi-variant editing + expand-all-fans (FIRST-CLASS)
-**Blocked on the kickoff addendum's mockup choice.**
-**Work:** the core-identity view (author, 2026-07-09): a fanned block's takes
-side by side (horizontal scroll when many), **every pane rendered read-cheap,
-the ONE live editor migrating between panes on click** (ratified — P3
-unchanged; the Phase 10 focus-handoff machinery is the reuse surface: seeds,
-teardown contract, read-tier panes). Expand-all-fans: fans stay open once
-expanded + close-all (§12); side-by-side also composes `text | v1 | v2 |
-text` and two-posts-in-columns (the §12 shapes), with the version_of door on
-unlinked posts.
+### Step A3 — the takes/lens view family (FIRST-CLASS; the spike record is BINDING)
+**The kickoff spike RAN and CLOSED (2026-07-12/13)** — build items 1–6 of
+the "## Kickoff spike record" section: the four fan-out styles as a SETTING;
+the TWO side-by-side compositions (full-text columns with the block-start
+lock; in-column slot split); view memory + named lenses (live-edited);
+the sameness/lineage signals; the gesture faces (✓ / adopt / diverge-here /
+branch-all / 💾 save lens / ⧉ promote / duplicate-as-version); the aligned
+versions & outline↔draft views with in-cell fan blooms. Throughout: **every
+pane rendered read-cheap, the ONE live editor migrating between panes on
+click** (ratified — P3 unchanged; the Phase 10 focus-handoff machinery is
+the reuse surface: seeds, teardown contract, read-tier panes).
+Expand-all-fans: fans stay open once expanded + close-all (§12), opening in
+the set style; the version_of door rides the two-post composition.
 **Tests:** exactly-one-live-editor across a randomized pane walk (the Phase
 10 pattern); pane handoff mid-dirty-buffer; take edits land in the RIGHT
-variant (row-level); fan expansion state is session-only.
+variant (row-level); ✓/adopt are the ONLY writers of `chosen_variant_id`
+from this family (I3 pin); lens round-trip (set choices, close, reopen —
+named survives, scratch survives via view memory); sameness signal
+correctness (quiet ⇔ byte-identical); alignment rows keyed by lineage incl.
+a divide's span and an orphan's blank; fan expansion state session-only.
 
-### Step A4 — diff + swap-and-reread
+### Step A4 — diff (+ swap-and-reread ABSORBED by the lens machinery)
 **Work:** diff over `Queries.diffPair` inputs (line-granularity, whitespace
-toggle); swap-and-reread as a view-local projection swap with an explicit
-commit-choice gesture emitting `chooseVariant`.
-**Tests:** diff pure-function tests; the I3 pin — swapping NEVER writes
-`chosen_variant_id`; the commit gesture writes exactly it.
+toggle). Swap-and-reread needs no separate build: a scratch column IS the
+swap (visible, not chosen), and ✓/adopt are the commit gestures — record
+the absorption in the closeout so §12's view list stays accounted for.
+**Tests:** diff pure-function tests; the I3 pin — viewing through any
+lens/scratch NEVER writes `chosen_variant_id`; ✓/adopt write exactly it.
 
 ### Step A5 — book-scrub + outline↔draft
 **Work:** book-scrub model-driven (the Phase 6 memo: the post list is the
@@ -227,12 +473,24 @@ and record that the decision moves to use-evidence.
 withCompound pattern); the soak extended over the new gestures; refusals
 that remain still speak.
 
+### Step A10 — the modes tutorial (spike addition, author instruction 2026-07-13)
+**Work:** an in-app walkthrough of the three modes — POLISH IN PLACE /
+THREAD ONE PIECE / FORK THE PIECE — styled like the spike's mockup pages
+(captioned sections, live interactive examples per mode) over a SEEDED demo
+post (the spike's example content may be reused; seeding never touches the
+user's real posts — a dedicated, clearly-labeled, deletable demo post).
+Functional at 11a; the pretty pass is Phase 13's.
+**Tests:** seeding idempotent + isolated (never mutates existing user
+rows); the tutorial's examples drive REAL ops on the demo post only;
+deleting the demo leaves no orphans.
+
 ### Stage A verification gate
 Full suites; the randomized gesture soak green over the new surface; sync
-convergence spot suite incl. canvas rows + block names crossing the wire;
-P1/P3 spot checks (side-by-side pane cost, TOC at 100+ blocks — the TOC is
-the within-post-virtualization escape hatch's natural face, measure it);
-TEXTKIT2 §5 ritual.
+convergence spot suite incl. canvas rows, block names, AND lens rows
+crossing the wire; P1/P3 spot checks (side-by-side pane cost, TOC at 100+
+blocks — the TOC is the within-post-virtualization escape hatch's natural
+face, measure it); TEXTKIT2 §5 ritual. **This gate ends the 11a run** —
+Stage B is master-plan row 11b, its own `/run-phase` invocation.
 
 ## Stage B — export/import + reference panel
 
@@ -307,6 +565,12 @@ presentation and A1's prescribed choreography (anything more: stop, report).
    SAME lockstep event as canvas_layout (verify the order held for BOTH).
 8. *(added at plan time)* The ask-her-live gates actually stopped: #10/#11
    answers are recorded in her words before the dependent code exists.
+9. *(added at spike close)* **Lenses are never rendering truth:** exports,
+   the bridge, the book view, and every other surface read chosen pointers
+   only; ✓/adopt are the only lens→chosen doors; view memory is local;
+   named lenses are synced, sparse, live-edited; the two copy operations
+   differ in exactly one thing (where the copy's chosen comes from) and
+   lenses never ride a copy.
 
 ## Closeout
 *(Written at phase end.)*
