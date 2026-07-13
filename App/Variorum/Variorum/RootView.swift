@@ -67,10 +67,10 @@ struct RootView: View {
                     selection = .post(postID)
                 }
             case .pool(let poolID):
-                // A pool is a container: the ordinary editor over it IS the
-                // minimal pool's capture surface (structural ops are legal
-                // in pools — Phase 3 ratification).
-                EditorView(session: session, postID: poolID)
+                // A pool is a container: the ordinary editor stays its
+                // capture surface (the ratified Phase 10 shape); Phase 11
+                // adds the canvas as its second face (A7).
+                PoolDetailView(session: session, poolID: poolID)
                     .id(poolID)
             case .recovery:
                 RecoveryView(session: session, library: library) { postID in

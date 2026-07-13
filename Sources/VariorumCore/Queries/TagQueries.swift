@@ -107,6 +107,20 @@ extension Queries {
             arguments: [postID])
     }
 
+    /// One block's live applied tags (Phase 11, A8 — `postTags`' block
+    /// twin; block tags primarily serve the pool, AppSpec §7).
+    public static func blockTags(_ db: Database, blockID: String) throws -> [Tag] {
+        try Tag.fetchAll(
+            db,
+            sql: """
+                SELECT t.* FROM tag t
+                JOIN block_tag bt ON bt.tag_id = t.id AND bt.deleted_at IS NULL
+                WHERE bt.block_id = ? AND t.deleted_at IS NULL
+                ORDER BY t.path
+                """,
+            arguments: [blockID])
+    }
+
     public static func everythingTagged(
         _ db: Database, tagID: String, includeSubtree: Bool = false
     ) throws -> TaggedItems {
