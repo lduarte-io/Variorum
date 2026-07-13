@@ -1232,3 +1232,27 @@ brief's standing definition): a RecoveryView section listing
   ONE live editor (pinned); the TOC at 100+ blocks is row-cheap with
   text upgrading on expand (the within-post-virtualization face) —
   formal measurements at the gate re-run.
+
+### The A1 lockstep deploy — EXECUTED (2026-07-13, coordinator, under the author's standing delegation)
+
+The SyncSpec §12 choreography, as run:
+
+1. **Mirror first:** `Server/supabase/05_phase11_lockstep.sql` executed
+   verbatim on the production mirror via the author's PAT (Management API;
+   HTTP 201). Verified in the same sitting: `sync_schema_version()` = 2;
+   `canvas_layout` / `lens` / `lens_choice` present with ZERO rows; RLS
+   enabled on all four new objects (incl. `sync_meta`); `block.name` column
+   present. The env-gated integration test was deliberately NOT run — it
+   writes rows and the mirror fronts the author's live corpus; end-to-end
+   proof arrives with the updated devices' first real rounds.
+2. **Mac client:** the post-ladder Release build (`8d82b5f`) installed to
+   `/Applications/Variorum.app` with the app confirmed quit (never
+   hot-swapped). Awaits her relaunch.
+3. **Phone — PENDING, hers:** the one-time updated Release install (handoff
+   checklist). Until it lands, the old phone build keeps syncing normally
+   (no marker check; the new tables serve it zero rows). §12's letter
+   ("every client updates before any new-schema write") therefore becomes
+   the checklist's practical rule: **don't create lenses / canvas positions
+   / block names until the phone is updated** — those are all deliberate
+   gestures, so ordinary journaling and editing are unaffected in the
+   window; the checkpoint report says this to her explicitly.
