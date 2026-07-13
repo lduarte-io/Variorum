@@ -1137,6 +1137,54 @@ read through it.
 suites · mobile 11 green in 4 suites — all green** (pre-round: 626/74 ·
 352/63 · 11/4).
 
+### Review round 3 — dispositions (2026-07-13; 1 MINOR / 1 NIT, ZERO new BLOCKER/MAJOR — THE LADDER CLOSES at the hard cap; fixes landed POST-CAP per the ladder's rule, recorded for the author)
+
+Round 3 independently verified every round-2 fix clean (buffer-convergence
+premise re-checked at commit level; both restore flips' SQL re-read; all
+three suites re-run green by the reviewer itself).
+
+**MINOR (the confirm's boundary-vs-interior cut classification re-derived
+from CONFIRM-TIME lengths — text drift crossing the cut length under the
+open alert skipped both the CAS and the divide: the residual corner of
+round-1 MINOR 5 + round-2 MINOR 3) — AGREED, fixed post-cap,
+RED-ON-CURRENT verified.** Traced end to end and confirmed by the pin
+failing pre-fix (the compound proceeded and silently EXCLUDED the first
+block's selected span — the reviewer's exact outcome; the last-edge dual
+would silently INCLUDE a remotely-rewritten block). **Fix (the finding's
+one-guard shape, no new state):** `firstLength`/`lastLength` now derive
+from the PLAN-TIME snapshots the state already carries — a drifted edge
+always enters the interior branch, where the existing CAS refuses the
+whole compound before any row changes, exactly as the prior guards were
+built to do. **Pin:**
+`aTextDriftCrossingTheCutLengthRefusesInsteadOfReclassifying` (RED on
+current; green on the fix). Bounded-harm framing per the finding: one
+undo restores, the window needs a remote edit crossing the cut length
+during a human-scale alert.
+
+**NIT (`pendingCrossBlockTask` assigned and chained but never cleared —
+"pending" stopped meaning pending after the session's first compound; the
+quit fast-path permanently disabled, harmlessly) — AGREED, fixed post-cap
+(cleanliness; no observable misbehavior, no pin owed per the guard's
+architectural clause).** `scheduleCrossBlockCompound`'s task body now
+nils the handle after `body()` when a UUID token confirms it still owns
+the slot (a chained schedule keeps its own).
+
+**FINAL 11a counts after round 3: core 628 green in 74 suites · Mac 357
+green in 64 suites · mobile 11 green in 4 suites — all green.** These are
+the 11b baselines.
+
+### 11a CLOSED (2026-07-13)
+
+Stage A is complete: A0–A10 shipped, the two author gates passed (#10/#11
+answered live and built; gate 1 — the mirror deploy — executes at the
+coordinator's post-ladder gate), the review ladder ran all three rounds
+and closed at the cap with zero HIGH findings after round 2. **Stage B
+(export/import + the reference panel) is master-plan row 11b — its own
+`/run-phase` invocation; this plan file's Stage B section + this closeout
+are its anchors; no new plan document is owed (the front-loaded rule is
+satisfied by this file), and Phase 12's plan is authored at 11B's
+closeout, not now.**
+
 #### Step A10 — the modes tutorial (her round-6 instruction)
 `Features/Tutorial/ModesTutorialView`: POLISH IN PLACE / THREAD ONE
 PIECE / FORK THE PIECE — captioned sections with LIVE examples over a

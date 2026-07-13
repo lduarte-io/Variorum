@@ -585,3 +585,45 @@ extension BoundaryFluidityTests {
         }
     }
 }
+
+// MARK: - Review round 3, MINOR (post-cap fix per the ladder's rule): the
+// boundary-vs-interior classification must come from PLAN-TIME lengths —
+// confirm-time lengths let a text drift crossing the cut length skip both
+// the CAS and the divide (a silently wrong-SHAPE compound). Red-on-
+// current: the pre-fix confirm excluded the first block's selected span.
+
+extension BoundaryFluidityTests {
+    @Test func aTextDriftCrossingTheCutLengthRefusesInsteadOfReclassifying() async throws {
+        try await withEditor(seedBlocks: [
+            "Aa one. Aa two.", "Middle block.", "Zz one. Zz two.",
+        ]) { harness in
+            let plan = StructuralGesturePlanner.plan(
+                .makeBlockFromSelection, selection: NSRange(location: 10, length: 28),
+                world: harness.model.gestureWorld())
+            await harness.model.applyStructural(plan)
+            let state = try #require(harness.model.crossBlockMakeConfirm)
+            #expect(state.startCut == 8, "an INTERIOR plan-time cut")
+
+            // A remote edit SHORTENS the first block below the cut while
+            // the alert sits open: same blocks, same indices — the
+            // identity guard passes; only the classification would flip.
+            let firstSlot = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID)[0]
+            }
+            try await harness.session.runner.run { ops in
+                try ops.autosave(firstSlot.variantID!, text: "Short.", charDelta: 10)
+            }
+            try harness.reload()
+
+            await harness.model.confirmCrossBlockMakeBlock(state)
+
+            #expect(harness.model.statusMessage?.contains("changed while") == true,
+                    "the drifted edge enters the interior branch and the CAS refuses: \(harness.model.statusMessage ?? "nil")")
+            let texts = try await harness.database.read { [postID = harness.postID] db in
+                try Queries.renderPost(db, containerID: postID).compactMap(\.text)
+            }
+            #expect(texts == ["Short.", "Middle block.", "Zz one. Zz two."],
+                    "NOTHING was divided or merged — never a silently wrong-shape compound")
+        }
+    }
+}

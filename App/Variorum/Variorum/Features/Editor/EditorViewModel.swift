@@ -1133,11 +1133,22 @@ final class EditorViewModel {
     /// op boundary.
     @ObservationIgnored private(set) var pendingCrossBlockTask: Task<Void, Never>?
 
+    @ObservationIgnored private var pendingCrossBlockToken = UUID()
+
     private func scheduleCrossBlockCompound(_ body: @escaping @MainActor () async -> Void) {
         let previous = pendingCrossBlockTask
-        pendingCrossBlockTask = Task { @MainActor in
+        let token = UUID()
+        pendingCrossBlockToken = token
+        pendingCrossBlockTask = Task { @MainActor [weak self] in
             if let previous { await previous.value }
             await body()
+            // Round 3, NIT (post-cap): "pending" means pending — the
+            // completed handle clears (unless a chained schedule replaced
+            // it), so finalizeWork's guard and the quit fast-path read
+            // true state instead of a stale completed Task.
+            if let self, self.pendingCrossBlockToken == token {
+                self.pendingCrossBlockTask = nil
+            }
         }
     }
 
@@ -1177,8 +1188,19 @@ final class EditorViewModel {
                 + "reselect and try again.")
             return
         }
-        let firstLength = index.entries[firstIndex].length
-        let lastLength = index.entries[lastIndex].length
+        // PLAN-TIME lengths (round 3, MINOR — post-cap fix): the
+        // boundary-vs-interior cut classification must come from the
+        // snapshots the plan froze, never from confirm-time lengths — a
+        // remote edit crossing the cut length under the open alert would
+        // otherwise RECLASSIFY the edge (skipping both its CAS and its
+        // divide: a silently wrong-SHAPE compound; the round-1/round-2
+        // guards' residual corner). With plan-time lengths a drifted edge
+        // always enters the interior branch, where the existing CAS
+        // refuses the whole compound before any row changes.
+        let firstLength = state.firstEdge.map { ($0.text as NSString).length }
+            ?? index.entries[firstIndex].length
+        let lastLength = state.lastEdge.map { ($0.text as NSString).length }
+            ?? index.entries[lastIndex].length
         let firstArity = firstIndex < slots.count ? slots[firstIndex].activeVariantCount : 1
         let lastArity = lastIndex < slots.count ? slots[lastIndex].activeVariantCount : 1
 
