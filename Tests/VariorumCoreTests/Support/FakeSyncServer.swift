@@ -43,8 +43,17 @@ actor FakeSyncServer: SyncTransport {
     /// transaction later transactions commit around.
     private var holdingNextPush = false
 
+    /// The mirror's deployed lockstep marker (SyncSpec §12). Defaults to
+    /// the client's current version — a fake models an in-lockstep server
+    /// unless a test deliberately deploys it behind/ahead.
+    private var deployedLockstepVersion = SyncSchema.lockstepVersion
+
     init(visibilityHorizon: Int64 = 0) {
         self.visibilityHorizon = visibilityHorizon
+    }
+
+    func setDeployedLockstepVersion(_ version: Int) {
+        deployedLockstepVersion = version
     }
 
     func advanceClock(by ticks: Int64) {
@@ -96,6 +105,10 @@ actor FakeSyncServer: SyncTransport {
                           writtenAt: clock, committed: !heldTransaction)
             return .accepted(newVersion: accepted.syncVersion, serverSeq: seq)
         }
+    }
+
+    func schemaVersion() -> Int {
+        deployedLockstepVersion
     }
 
     func pull(since: Int64, limit: Int) -> [SyncPulledRow] {

@@ -94,20 +94,28 @@ struct SupabaseTransportTests {
     /// (String-level pinning — the real schema check is the author-assisted
     /// integration pass.)
     @Test func serverSQLFilesCoverExactlyTheRegistry() throws {
+        // Phase 11 (A1): the mirror's tables now come from TWO deploy files
+        // (01 = the original 13; 05 = the lockstep event's additions), so
+        // the pins run over the deployed composition. The exact-allowlist
+        // pins live in AuthRLSDDLTests (final-body parsing); here the
+        // check is presence + the load-bearing dumbness.
         let root = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // Tests/VariorumCoreTests
             .deletingLastPathComponent()  // Tests
             .deletingLastPathComponent()  // repo root
             .appendingPathComponent("Server/supabase")
-        let schema = try strippingComments(String(
-            contentsOf: root.appendingPathComponent("01_mirror_schema.sql"), encoding: .utf8))
+        let schema = try strippingComments(
+            String(contentsOf: root.appendingPathComponent("01_mirror_schema.sql"), encoding: .utf8)
+            + "\n"
+            + String(contentsOf: root.appendingPathComponent("05_phase11_lockstep.sql"), encoding: .utf8))
         let rpc = try strippingComments(String(
-            contentsOf: root.appendingPathComponent("02_sync_rpc.sql"), encoding: .utf8))
+            contentsOf: root.appendingPathComponent("05_phase11_lockstep.sql"), encoding: .utf8))
 
         for table in SyncSchema.tables {
             #expect(schema.contains("create table \(table.name) ("),
                     "mirror DDL missing \(table.name)")
-            #expect(rpc.contains("'\(table.name)'"), "RPC allowlist missing \(table.name)")
+            #expect(rpc.contains("'\(table.name)'"),
+                    "the deployed RPC allowlists are missing \(table.name)")
         }
         for local in SyncSchema.localOnlyTables {
             #expect(!schema.contains("create table \(local) "),
@@ -375,7 +383,10 @@ struct SupabaseTransportSessionTests {
             bearers.withValue { $0.append(request.value(forHTTPHeaderField: "Authorization")) }
             let body = request.httpBody ?? Data()
             let responseBody: Data
-            if request.url!.lastPathComponent == "sync_push" {
+            if request.url!.lastPathComponent == "sync_schema_version" {
+                // Phase 11 (A1): the §12 version-check RPC — a bare bigint.
+                responseBody = Data(String(await server.schemaVersion()).utf8)
+            } else if request.url!.lastPathComponent == "sync_push" {
                 struct PushWire: Decodable { let batch: [PushItem] }
                 let batch = try JSONDecoder().decode(PushWire.self, from: body).batch.map {
                     SyncRow(table: $0.table, rowID: $0.rowID,

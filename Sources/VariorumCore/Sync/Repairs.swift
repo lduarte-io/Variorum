@@ -67,6 +67,17 @@ extension SyncEngine {
             case "block_tag":
                 resolved = try repairDuplicateCollision(
                     db, row, naturalKey: ["tag_id", "block_id"], touched: &touched)
+            case "canvas_layout":
+                // Phase 11 (A1): two devices positioning the same card
+                // offline mint two live rows for one (container, block) —
+                // pure duplicate, keep the smaller id (the surviving row's
+                // x/y then converges by ordinary metadata CAS).
+                resolved = try repairDuplicateCollision(
+                    db, row, naturalKey: ["container_id", "block_id"], touched: &touched)
+            case "lens_choice":
+                // Phase 11 (A1): same class for a lens's per-block pick.
+                resolved = try repairDuplicateCollision(
+                    db, row, naturalKey: ["lens_id", "block_id"], touched: &touched)
             default:
                 break
             }
@@ -85,7 +96,7 @@ extension SyncEngine {
         // transitioning live→dead right now fires the local cascade with
         // the triggers muted — its victims are collected post-batch.
         if resolved.isTombstoned,
-           ["container", "block", "reading", "tag"].contains(resolved.table),
+           ["container", "block", "reading", "tag", "lens"].contains(resolved.table),
            case .text(let stamp) = resolved.columns["deleted_at"] {
             let wasLive = try Bool.fetchOne(
                 db,
@@ -114,6 +125,11 @@ extension SyncEngine {
         case "block_tag": parents = [("tag_id", "tag"), ("block_id", "block")]
         case "reference": parents = [("container_id", "container")]
         case "edge": parents = [("source_block_id", "block"), ("target_block_id", "block")]
+        case "canvas_layout": parents = [("container_id", "container"), ("block_id", "block")]
+        case "lens": parents = [("container_id", "container")]
+        // A lens_choice's variant parent is deliberately absent: a dead
+        // variant is the read-time fall-through class, never a cascade.
+        case "lens_choice": parents = [("lens_id", "lens"), ("block_id", "block")]
         default: return nil
         }
         for parent in parents {
@@ -501,6 +517,14 @@ extension SyncEngine {
             _ = try enqueueMatching("reading_post", "post_id = ?", [parent.rowID])
             _ = try enqueueMatching("post_tag", "post_id = ?", [parent.rowID])
             _ = try enqueueMatching("reference", "container_id = ?", [parent.rowID])
+            _ = try enqueueMatching("canvas_layout", "container_id = ?", [parent.rowID])
+            // The container cascade tombstoned its lenses (same stamp);
+            // each lens's own trigger cascaded its choices in turn.
+            let lenses = try enqueueMatching("lens", "container_id = ?", [parent.rowID])
+            for lensID in lenses {
+                enqueued += try enqueueSuppressedCascadeVictims(
+                    db, parent: ("lens", lensID, parent.stamp), arrivingDead: arrivingDead)
+            }
             // The container cascade tombstoned its singly-owned blocks first
             // (same stamp); each of those fired the block cascade in turn.
             for placementID in placements {
@@ -523,11 +547,15 @@ extension SyncEngine {
                 "edge", "(source_block_id = ? OR target_block_id = ?)",
                 [parent.rowID, parent.rowID])
             _ = try enqueueMatching("block_tag", "block_id = ?", [parent.rowID])
+            _ = try enqueueMatching("canvas_layout", "block_id = ?", [parent.rowID])
+            _ = try enqueueMatching("lens_choice", "block_id = ?", [parent.rowID])
         case "reading":
             _ = try enqueueMatching("reading_post", "reading_id = ?", [parent.rowID])
         case "tag":
             _ = try enqueueMatching("post_tag", "tag_id = ?", [parent.rowID])
             _ = try enqueueMatching("block_tag", "tag_id = ?", [parent.rowID])
+        case "lens":
+            _ = try enqueueMatching("lens_choice", "lens_id = ?", [parent.rowID])
         default:
             break
         }

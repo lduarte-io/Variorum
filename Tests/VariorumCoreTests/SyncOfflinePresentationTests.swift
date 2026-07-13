@@ -136,4 +136,9 @@ actor OfflineOrForwardingTransport: SyncTransport {
         if let error { throw error }
         return try await server.pull(since: since, limit: limit)
     }
+
+    func schemaVersion() async throws -> Int {
+        if let error { throw error }
+        return await server.schemaVersion()
+    }
 }

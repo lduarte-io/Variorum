@@ -58,6 +58,7 @@ public struct SyncEngine: Sendable {
     @discardableResult
     public func push() async throws -> PushReport {
         try ensureDeviceID()
+        try await verifySchemaLockstep()
         var report = PushReport()
         for _ in 0..<maxPushIterations {
             let batch: [SyncRow] = try await database.read { db in
@@ -180,6 +181,7 @@ public struct SyncEngine: Sendable {
     @discardableResult
     public func pull() async throws -> PullReport {
         try ensureDeviceID()
+        try await verifySchemaLockstep()
         let since = try await database.read { try cursor($0) }
         var pulled: [SyncPulledRow] = []
         var fetchCursor = since
@@ -256,6 +258,25 @@ public struct SyncEngine: Sendable {
             report.newCursor = newCursor
             report.stalled = stopIndex < batch.count
             return report
+        }
+    }
+
+    // MARK: - The §12 version check (Phase 11, Step A1)
+
+    /// SyncSpec §12's version-check mechanism, shipped with the first
+    /// post-sync migration that needs it (the Phase 11 lockstep event):
+    /// every round half opens by comparing the mirror's deployed schema
+    /// marker against this client's `SyncSchema.lockstepVersion`. ANY
+    /// mismatch — behind OR ahead — refuses the round with a visible,
+    /// self-explaining error; the outbox keeps everything and the cursor
+    /// never moves. Stalling is free (offline is free); a client that
+    /// guessed would push columns `jsonb_populate_record` silently drops,
+    /// or pull tables it has no home for.
+    public func verifySchemaLockstep() async throws {
+        let server = try await transport.schemaVersion()
+        guard server == SyncSchema.lockstepVersion else {
+            throw SyncError.schemaLockstepMismatch(
+                client: SyncSchema.lockstepVersion, server: server)
         }
     }
 

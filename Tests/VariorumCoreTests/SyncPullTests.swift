@@ -359,6 +359,10 @@ actor ScriptedTransport: SyncTransport {
     func pull(since: Int64, limit: Int) -> [SyncPulledRow] {
         Array(rows.filter { $0.serverSeq > since }.prefix(limit))
     }
+
+    func schemaVersion() -> Int {
+        SyncSchema.lockstepVersion  // scripted batches model an in-lockstep server
+    }
 }
 
 enum TestRows {

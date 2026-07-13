@@ -376,6 +376,10 @@ private actor RoundGateTransport: SyncTransport {
         await pass()
         return []
     }
+
+    /// Round plumbing (SyncSpec §12) — never parks; the gate models the
+    /// round's DATA calls.
+    func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
 }
 
 private actor RecordingTransport: SyncTransport {
@@ -388,6 +392,8 @@ private actor RecordingTransport: SyncTransport {
         calls += 1
         return []
     }
+    /// Uncounted round plumbing (the pins count data calls).
+    func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
 }
 
 @MainActor

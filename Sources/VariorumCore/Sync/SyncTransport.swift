@@ -38,4 +38,15 @@ public protocol SyncTransport: Sendable {
     /// State-based: each row appears once, in its current state, stamped
     /// with its latest seq — never an op log.
     func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow]
+
+    /// The mirror's deployed schema-version marker (SyncSpec §12's
+    /// version-check mechanism — shipped with the Phase 11 lockstep event,
+    /// the first post-sync migration to need it). The engine compares this
+    /// against `SyncSchema.lockstepVersion` at the start of every round
+    /// half and REFUSES on any mismatch (outbox intact, cursor unmoved).
+    /// A pre-marker deployment (the 9c-era mirror, no `sync_meta` table)
+    /// reports version 1. A hard protocol requirement, deliberately no
+    /// default: wrappers forward, fakes declare — a transport that cannot
+    /// answer must not sync.
+    func schemaVersion() async throws -> Int
 }

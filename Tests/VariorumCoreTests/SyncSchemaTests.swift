@@ -85,7 +85,16 @@ struct SyncSchemaTests {
             _ = try ops.branchVariant(b1.id, from: v1)
             _ = try ops.merge(b1.id, b2.id)  // mints edges + releases blocks
             let pool = try ops.createPool(title: "scraps")
-            _ = try ops.newBlock(in: pool.id, text: "loose idea", at: .end)
+            let scrap = try ops.newBlock(in: pool.id, text: "loose idea", at: .end).block
+            // Phase 11 (A1): fixture rows for the lockstep event's tables.
+            _ = try ops.setCanvasPosition(container: pool.id, block: scrap.id, x: 120, y: 64)
+            let mergedBlock = try db.fetchString(
+                "SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL LIMIT 1",
+                [post.id])!
+            let mergedVariant = try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [mergedBlock])!
+            let lens = try ops.createLens(post: post.id, name: "thread")
+            _ = try ops.setLensChoice(lens: lens.id, block: mergedBlock, variant: mergedVariant)
             let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             let tag = try ops.createTag(parent: nil, name: "life")

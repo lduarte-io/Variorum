@@ -52,6 +52,10 @@ actor FaultInjectingTransport: SyncTransport {
 
     // MARK: SyncTransport
 
+    func schemaVersion() async -> Int {
+        await server.schemaVersion()
+    }
+
     func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
         pushCalls += 1
 

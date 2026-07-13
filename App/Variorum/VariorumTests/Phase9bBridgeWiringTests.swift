@@ -71,6 +71,9 @@ private actor GatedSyncTransport: SyncTransport {
         await pass()
         return []
     }
+
+    /// Round plumbing (SyncSpec §12) — never parks at the gate.
+    func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
 }
 
 @MainActor

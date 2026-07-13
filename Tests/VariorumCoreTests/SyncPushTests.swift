@@ -58,6 +58,17 @@ struct SyncPushTests {
                 "SELECT block_id FROM container_block WHERE deleted_at IS NULL LIMIT 1")!
             _ = try ops.applyTag(tag.id, toBlock: anyBlock)
             _ = try ops.addReference(to: post.id, kind: .url, url: "https://example.org")
+            // Phase 11 (A1): the lockstep event's tables.
+            let pool = try ops.createPool(title: "board")
+            let scrap = try ops.newBlock(in: pool.id, text: "card", at: .end).block
+            _ = try ops.setCanvasPosition(container: pool.id, block: scrap.id, x: 8, y: 9)
+            let postBlock = try db.fetchString(
+                "SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL LIMIT 1",
+                [post.id])!
+            let postVariant = try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [postBlock])!
+            let lens = try ops.createLens(post: post.id, name: "thread")
+            _ = try ops.setLensChoice(lens: lens.id, block: postBlock, variant: postVariant)
         }
 
         try await a.push()
@@ -247,5 +258,9 @@ actor InterferingTransport: SyncTransport {
 
     func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
         try await inner.pull(since: since, limit: limit)
+    }
+
+    func schemaVersion() async -> Int {
+        await inner.schemaVersion()
     }
 }

@@ -82,6 +82,38 @@ public struct SupabaseTransport: SyncTransport {
         return try JSONDecoder().decode([PulledItem].self, from: data).map(\.pulledRow)
     }
 
+    /// The mirror's deployed lockstep marker (SyncSpec §12; Phase 11, Step
+    /// A1). `sync_schema_version()` is a zero-arg RPC returning a bare
+    /// bigint; a 404 means the function does not exist — the pre-marker
+    /// (9c-era) deployment, DEFINED as version 1, so a Phase-11 client
+    /// against an un-migrated mirror refuses with a self-explaining
+    /// mismatch instead of a raw HTTP error. Same auth posture as the
+    /// other RPCs (signed-out refuses before composing; ONE 401
+    /// refresh-and-retry).
+    public func schemaVersion() async throws -> Int {
+        let session = try await sessionProvider.currentSession()
+        let payload = Data("{}".utf8)
+        var (data, status) = try await send(
+            "sync_schema_version", payload: payload, bearer: session.accessToken)
+        if status == 401 {
+            let refreshed = try await sessionProvider.refreshedSession()
+            (data, status) = try await send(
+                "sync_schema_version", payload: payload, bearer: refreshed.accessToken)
+        }
+        if status == 404 { return 1 }
+        guard (200..<300).contains(status) else {
+            throw SupabaseTransportError.httpFailure(
+                status: status, body: String(data: data, encoding: .utf8) ?? "")
+        }
+        let body = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard let version = Int(body) else {
+            throw SupabaseTransportError.malformedResult(
+                "sync_schema_version returned '\(body)', not an integer")
+        }
+        return version
+    }
+
     // MARK: - HTTP plumbing
 
     private func rpc<Body: Encodable>(_ function: String, body: Body) async throws -> Data {

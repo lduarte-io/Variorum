@@ -31,6 +31,14 @@ public struct SyncTable: Equatable, Sendable {
 }
 
 public enum SyncSchema {
+    /// The client's schema-lockstep version (SyncSpec §12). Version 1 = the
+    /// 9c-era 13-table deployment (defined retroactively: a mirror with no
+    /// `sync_meta` marker reports 1); version 2 = the Phase 11 lockstep
+    /// event (v1_5 canvas_layout + v1_6 block.name + v1_7 lens/lens_choice;
+    /// mirror DDL 05_phase11_lockstep.sql). **Bump this constant together
+    /// with the mirror file's marker in every future lockstep event** — the
+    /// DDL pin (`AuthRLSDDLTests`) fails the build if they drift.
+    public static let lockstepVersion = 2
     /// The 13 synced tables in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -191,6 +199,31 @@ public enum SyncError: Error, Equatable, Sendable {
     /// is Phase 14) — and it gives cross-schema-version payloads a defined
     /// failure instead of silent SQL drift.
     case unknownColumn(table: String, column: String)
+    /// SyncSpec §12: the mirror's deployed schema marker disagrees with
+    /// this client's migration set. The round refuses — outbox intact,
+    /// cursor unmoved — until the lockstep completes (mirror first, then
+    /// every client). Stalling is safe by design; guessing is the one
+    /// forbidden move.
+    case schemaLockstepMismatch(client: Int, server: Int)
+}
+
+extension SyncError: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .blobInPayload:
+            return "a BLOB column reached a sync payload (schema/registry drift)"
+        case .unknownTable(let table):
+            return "sync payload names an unregistered table '\(table)'"
+        case .missingPrimaryKey(let table):
+            return "sync payload for '\(table)' is missing its primary key"
+        case .unknownColumn(let table, let column):
+            return "sync payload for '\(table)' carries unknown column '\(column)'"
+        case .schemaLockstepMismatch(let client, let server):
+            return "Sync paused: the app and the server are on different schema versions "
+                + "(app \(client), server \(server)). Finish the schema update on the lagging "
+                + "side; nothing is lost while paused (SyncSpec §12)."
+        }
+    }
 }
 
 // MARK: - Rows

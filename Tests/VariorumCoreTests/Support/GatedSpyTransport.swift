@@ -85,4 +85,14 @@ actor GatedSpyTransport: SyncTransport {
         await passGate()
         return try await server.pull(since: since, limit: limit)
     }
+
+    /// Forwards to the fake server. Deliberately unrecorded and ungated:
+    /// the A3 pins assert pull/push ordering and gate arrival on the
+    /// round's DATA calls; the version check is round plumbing. The
+    /// failing flag still applies (offline fails the check first, which is
+    /// the same skipped-round outcome the posture pins).
+    func schemaVersion() async throws -> Int {
+        if failing { throw InjectedNetworkFault() }
+        return await server.schemaVersion()
+    }
 }

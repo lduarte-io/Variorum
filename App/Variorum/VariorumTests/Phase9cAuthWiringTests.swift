@@ -50,6 +50,8 @@ struct Phase9cAuthWiringTests {
             calls += 1
             return []
         }
+        /// Uncounted round plumbing (the pins count data calls).
+        func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
     }
 
     private actor RecordingBridgeTransport: FragmentsBridgeTransport {

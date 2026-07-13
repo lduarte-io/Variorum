@@ -52,7 +52,16 @@ struct SerializerCompletenessTests {
             _ = try ops.branchVariant(b1.id, from: v1)
             _ = try ops.merge(b1.id, b2.id)
             let pool = try ops.createPool(title: "scraps")
-            _ = try ops.newBlock(in: pool.id, text: "loose idea", at: .end)
+            let scrap = try ops.newBlock(in: pool.id, text: "loose idea", at: .end).block
+            // Phase 11 (A1): fixture rows for the lockstep event's tables.
+            _ = try ops.setCanvasPosition(container: pool.id, block: scrap.id, x: 120, y: 64)
+            let mergedBlock = try db.fetchString(
+                "SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL LIMIT 1",
+                [post.id])!
+            let mergedVariant = try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [mergedBlock])!
+            let lens = try ops.createLens(post: post.id, name: "thread")
+            _ = try ops.setLensChoice(lens: lens.id, block: mergedBlock, variant: mergedVariant)
             let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             let tag = try ops.createTag(parent: nil, name: "life")
@@ -128,6 +137,11 @@ struct SerializerCompletenessTests {
     /// visibility-horizon migration lands, `server_written_at`.
     private static let serverOnlyColumns: Set<String> = ["server_seq", "server_written_at"]
 
+    /// TABLES that exist only on the server (never a mirror of a client
+    /// table, never in a payload): `sync_meta` carries the SyncSpec §12
+    /// lockstep marker (05_phase11_lockstep.sql), read via its own RPC.
+    private static let serverOnlyTables: Set<String> = ["sync_meta"]
+
     @Test func mirrorDDLCoversEverySyncedColumn() throws {
         let mirror = try Self.mirrorColumnsFromDDL()
         let db = try AppDatabase.inMemory()
@@ -150,7 +164,8 @@ struct SerializerCompletenessTests {
                 #expect(unexpected.isEmpty,
                         "mirror \(table.name) carries column(s) the client cannot receive: \(unexpected.sorted())")
             }
-            #expect(Set(mirror.keys) == Set(SyncSchema.tables.map(\.name)),
+            #expect(Set(mirror.keys).subtracting(Self.serverOnlyTables)
+                        == Set(SyncSchema.tables.map(\.name)),
                     "mirror DDL table set drifted from the registry")
         }
     }
@@ -179,7 +194,10 @@ struct SerializerCompletenessTests {
                 let line = rawLine.trimmingCharacters(in: .whitespaces).lowercased()
                 if line.hasPrefix("--") || line.isEmpty { continue }
                 if let range = line.range(of: "create table ") {
-                    let rest = line[range.upperBound...]
+                    var rest = String(line[range.upperBound...])
+                    if rest.hasPrefix("if not exists ") {
+                        rest = String(rest.dropFirst("if not exists ".count))
+                    }
                     currentTable = rest.split(separator: " ").first.map(String.init)?
                         .replacingOccurrences(of: "(", with: "")
                     if let table = currentTable { tables[table, default: []] = tables[table] ?? [] }
