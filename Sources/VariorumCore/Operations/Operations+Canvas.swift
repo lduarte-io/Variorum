@@ -78,3 +78,28 @@ extension Operations {
             .fetchOne(db)
     }
 }
+
+// MARK: - The fan-style setting (Phase 11, Step A3)
+
+extension Operations {
+    /// The fan-out appearance (spike record item 1 — a user SETTING; all
+    /// four styles ship). Settings are synced document semantics: upsert-
+    /// only, never tombstoned (AppSpec §7) — the same fan opens the same
+    /// way on every device.
+    public func setFanStyle(_ style: FanStyle) throws {
+        try database.write { db in
+            // UPDATE-then-INSERT, never an upsert: an outer ON CONFLICT
+            // clause overrides the conflict handling INSIDE trigger bodies
+            // (SQLite semantics), which would break the outbox trigger's
+            // INSERT OR REPLACE coalescing — the SyncRow.apply pattern.
+            try db.execute(
+                sql: "UPDATE setting SET value = ? WHERE key = 'fan_style'",
+                arguments: [style.rawValue])
+            if db.changesCount == 0 {
+                try db.execute(
+                    sql: "INSERT INTO setting (key, value) VALUES ('fan_style', ?)",
+                    arguments: [style.rawValue])
+            }
+        }
+    }
+}

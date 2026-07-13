@@ -49,7 +49,9 @@ struct RootView: View {
         } detail: {
             switch selection {
             case .post(let postID):
-                EditorView(session: session, postID: postID)
+                // Phase 11 (A3): the mode switcher — Write / Takes /
+                // Compare over one post, one store.
+                PostDetailView(session: session, postID: postID)
                     .id(postID) // a different post is a different editor
             case .tag(let tagID):
                 FolderView(session: session, tagID: tagID) { postID in

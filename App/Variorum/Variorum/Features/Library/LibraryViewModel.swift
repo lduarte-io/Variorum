@@ -129,6 +129,20 @@ final class LibraryViewModel {
         await run { ops in try ops.restoreContainer(postID) }
     }
 
+    // MARK: - Versions (Phase 11, A2 — door 1)
+
+    /// "Mark as Versions" from the library — emits the SAME operation the
+    /// side-by-side door emits (both doors, one op — pinned).
+    func markAsVersions(_ postAID: String, _ postBID: String) async {
+        await run { ops in _ = try ops.markPostsAsVersions(postAID, postBID) }
+    }
+
+    /// Duplicate-as-version from anywhere (the spike's ruling: the post
+    /// exactly as it is — unambiguous from any surface).
+    func duplicateAsVersion(postID: String) async {
+        await run { ops in _ = try ops.duplicateAsVersion(postID) }
+    }
+
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
         do {
             try await session.runner.run(body)

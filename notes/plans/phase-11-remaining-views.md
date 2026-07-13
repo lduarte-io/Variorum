@@ -156,7 +156,22 @@
 > walkthrough styled like the spike pages, live examples per mode). The
 > consolidated BINDING record is the "## Kickoff spike record" section
 > below; Steps A1/A2/A3/A4 amended, A10 added; master-plan rows 11a/11b
-> formalized — THIS /run-phase invocation covers 11a (Stage A) only. (3) Master plan
+> formalized — THIS /run-phase invocation covers 11a (Stage A) only.
+> **Post-kickoff authorizations (2026-07-13, the author):** (1) the A1
+> schema DEPLOY is delegated to the coordinator ("go ahead and do the
+> schema deploy when it is time") — mirror DDL via her PAT (the 9c
+> precedent; untracked `.env.supabase.local`), then the Mac
+> `/Applications` refresh at her next app-quit; the PHONE's one-time
+> updated install remains hers (an Xcode-to-device step), and the A1
+> version-check holds an un-updated client safely refused (visible,
+> outbox intact, cursor unmoved) until it updates — the deploy is not
+> complete, and new-schema writes must not begin, until BOTH devices
+> carry the migrations. (2) #10/#11 sitting logistics, her "either way"
+> resolved by the coordinator: a SELF-CONTAINED sitting document is
+> prepared at the A9 stop regardless (the standing documentation bar —
+> any fresh session can host the sitting from it), with this coordinator
+> session hosting by default if still warm; answers recorded in her
+> words in QUESTIONS.md + this plan either way. (3) Master plan
 > keeps a SINGLE Phase 11 row (the Stage A/B gates are internal); 11a/11b rows
 > only if the phase runs long. (4) The `/Applications` install was refreshed to
 > the Phase 10 closeout build at kickoff (handoff step 1 done; author relaunch

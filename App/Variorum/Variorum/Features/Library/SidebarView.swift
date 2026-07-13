@@ -140,6 +140,21 @@ struct SidebarView: View {
             tagSheetTarget = TagSheetTarget(id: item.postID, title: item.title)
         }
         Divider()
+        // version_of DOOR 1 (Phase 11, A2 — brief item 2): pick the pair in
+        // the library; the submenu is the "select two posts" gesture's
+        // shape here (one shared context menu; the same operation door 2
+        // emits — pinned).
+        Menu("Mark as Versions with") {
+            ForEach(model.posts.filter { $0.postID != item.postID }, id: \.postID) { other in
+                Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
+                    Task { await model.markAsVersions(item.postID, other.postID) }
+                }
+            }
+        }
+        Button("Duplicate as Version") {
+            Task { await model.duplicateAsVersion(postID: item.postID) }
+        }
+        Divider()
         // The lifecycle faces (Step 8): archive is kept-out-of-view; delete
         // is a tombstone — both recoverable in Archived & Deleted.
         Button("Archive") {

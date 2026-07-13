@@ -51,3 +51,17 @@ public enum Segmentation: String, Codable, Sendable, DatabaseValueConvertible {
 public enum ReferenceKind: String, Codable, Sendable, DatabaseValueConvertible {
     case file, url
 }
+
+/// The fan-out appearance (Phase 11 kickoff spike, record item 1 — ALL
+/// FOUR ship as a user SETTING: "different styles of use that are super
+/// defensible"). Stored in the synced `setting` table under 'fan_style'
+/// (document semantics, like segmentation — the same fan opens the same
+/// way on every device); whichever style is set is what expand-all-fans
+/// opens document-wide. Default 'stack' (build-time call, recorded in the
+/// Phase 11 closeout — the closest kin of the shipped FanPanel).
+public enum FanStyle: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
+    case stack
+    case carousel
+    case marginGrid = "margin_grid"
+    case slotSplit = "slot_split"
+}
