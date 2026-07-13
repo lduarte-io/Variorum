@@ -192,6 +192,7 @@ struct AlignedPostsView: View {
     let session: AppSession
     let anchorPostID: String
     @State private var model: AlignedPostsViewModel
+    @State private var showingDiff = false
 
     init(session: AppSession, anchorPostID: String, model: AlignedPostsViewModel? = nil) {
         self.session = session
@@ -218,6 +219,17 @@ struct AlignedPostsView: View {
         }
         .task { await model.start() }
         .onDisappear { model.teardown() }
+        .sheet(isPresented: $showingDiff) {
+            // The one join brain: the diffed texts are exactly what export
+            // and the bridge would emit (joinRenderedTexts semantics).
+            DiffView(
+                leftTitle: model.projection.anchorTitle ?? "this post",
+                rightTitle: model.projection.otherTitle ?? "other post",
+                leftText: Queries.joinRenderedTexts(
+                    model.projection.anchorSlots.compactMap(\.text).filter { !$0.isEmpty }),
+                rightText: Queries.joinRenderedTexts(
+                    model.projection.otherSlots.compactMap(\.text).filter { !$0.isEmpty }))
+        }
     }
 
     private var header: some View {
@@ -249,6 +261,9 @@ struct AlignedPostsView: View {
             }
             if model.projection.isVersionPeer {
                 Text("versions").font(.caption).foregroundStyle(.blue)
+            }
+            if model.otherPostID != nil {
+                Button("Diff") { showingDiff = true }
             }
             Spacer()
         }

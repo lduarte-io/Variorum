@@ -28,6 +28,15 @@ struct TakesBoardView: View {
     /// Discrete paging offsets per block (whole cards, never halfway).
     @State private var pageOffsets: [String: Int] = [:]
     @State private var lensNamePrompt: LensNamePrompt?
+    @State private var diffPresentation: DiffPresentation?
+
+    struct DiffPresentation: Identifiable {
+        let leftTitle: String
+        let rightTitle: String
+        let left: String
+        let right: String
+        let id = UUID()
+    }
 
     struct LensNamePrompt: Identifiable {
         enum Purpose { case saveScratch(columnID: String), branchAll }
@@ -67,6 +76,11 @@ struct TakesBoardView: View {
         }
         .task { await model.start() }
         .onDisappear { model.teardown() }
+        .sheet(item: $diffPresentation) { diff in
+            DiffView(
+                leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
+                leftText: diff.left, rightText: diff.right)
+        }
         .sheet(item: $lensNamePrompt) { prompt in
             LensNameSheet { name in
                 switch prompt.purpose {
@@ -334,6 +348,13 @@ struct TakesBoardView: View {
                 await model.divergeHere(
                     columnID: column.id, blockID: slot.blockID,
                     fromVariantID: resolved.variantID)
+            }
+        }
+        if slot.variantID != resolved.variantID, let chosenText = slot.text {
+            Button("Diff against chosen") {
+                diffPresentation = DiffPresentation(
+                    leftTitle: "chosen", rightTitle: "this take",
+                    left: chosenText, right: resolved.text)
             }
         }
         if let fan = model.projection.fans[slot.blockID], fan.count > 1 {
