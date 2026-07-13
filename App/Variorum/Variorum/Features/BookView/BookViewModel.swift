@@ -76,6 +76,26 @@ final class BookViewModel {
         if i == 0 || entries[i - 1].sectionPath != section { return section }
         return nil
     }
+
+    // MARK: - Book-scrub (Phase 11, A5 — the Phase 6 memo's decision)
+
+    /// The scrubber's PURE mapping: a fraction of the scrub track → the
+    /// page (a POST — 50 entries are 50 pages even if one is 10k words;
+    /// the post list is the scrubber's domain, never live text geometry —
+    /// the memo's model-driven ruling). Clamped; empty reading → nil.
+    nonisolated static func scrubIndex(fraction: Double, count: Int) -> Int? {
+        guard count > 0 else { return nil }
+        let clamped = min(max(fraction, 0), 1)
+        return min(Int(clamped * Double(count)), count - 1)
+    }
+
+    /// The page the scrubber lands on for a track fraction.
+    func scrubTarget(fraction: Double) -> Queries.ReadingEntry? {
+        guard let index = Self.scrubIndex(fraction: fraction, count: entries.count) else {
+            return nil
+        }
+        return entries[index]
+    }
 }
 
 /// The book view's focus state (Phase 10 Step 3/4): exactly ONE focused

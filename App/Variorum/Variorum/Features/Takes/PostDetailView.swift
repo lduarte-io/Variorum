@@ -5,7 +5,8 @@
 //  Phase 11, Step A3 — the post detail's mode switcher: WRITE (the ordinary
 //  Phase 7 editor), TAKES (the takes/lens board — the multi-variant editing
 //  view the author elevated to core identity), COMPARE (the two-post
-//  aligned composition — versions & outline↔draft; version_of's door 2).
+//  aligned composition — versions & outline↔draft; version_of's door 2),
+//  OUTLINE (outline-left/draft-right over derivedBlocks — A5).
 //  Mode is session UI state; every mode reads the same store.
 //
 
@@ -20,6 +21,7 @@ struct PostDetailView: View {
         case write = "Write"
         case takes = "Takes"
         case compare = "Compare"
+        case outline = "Outline"
     }
 
     @State private var mode: Mode = .write
@@ -33,7 +35,7 @@ struct PostDetailView: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            .frame(maxWidth: 320)
+            .frame(maxWidth: 420)
             .padding(6)
             Divider()
             switch mode {
@@ -46,6 +48,9 @@ struct PostDetailView: View {
             case .compare:
                 AlignedPostsView(session: session, anchorPostID: postID)
                     .id("compare-\(postID)")
+            case .outline:
+                OutlineDraftView(session: session, draftPostID: postID)
+                    .id("outline-\(postID)")
             }
         }
     }

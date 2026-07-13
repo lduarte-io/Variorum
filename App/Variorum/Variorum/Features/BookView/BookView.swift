@@ -33,38 +33,73 @@ struct BookView: View {
         _model = State(initialValue: model ?? BookViewModel(session: session, readingID: readingID))
     }
 
+    @State private var scrubFraction: Double = 0
+    @State private var scrubLabel: String?
+
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 4) {
-                if let name = readingName ?? model.readingName {
-                    Text(name).font(.title2).padding(.bottom, 8)
-                }
-                if model.entries.isEmpty {
-                    Text("This reading has no posts yet.")
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(Array(model.entries.enumerated()), id: \.element.postID) { i, entry in
-                    if let section = model.sectionHeader(at: i) {
-                        Text(section)
-                            .font(.headline)
-                            .padding(.top, 12)
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 4) {
+                    if let name = readingName ?? model.readingName {
+                        Text(name).font(.title2).padding(.bottom, 8)
                     }
-                    postHeader(entry)
-                    postBody(entry)
-                        .padding(.bottom, 16)
+                    if model.entries.isEmpty {
+                        Text("This reading has no posts yet.")
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(Array(model.entries.enumerated()), id: \.element.postID) { i, entry in
+                        if let section = model.sectionHeader(at: i) {
+                            Text(section)
+                                .font(.headline)
+                                .padding(.top, 12)
+                        }
+                        postHeader(entry)
+                        postBody(entry)
+                            .padding(.bottom, 16)
+                    }
+                    if model.truncated {
+                        // Never a SILENT cut (round 1 NIT) — the dated home's
+                        // surface says what it isn't showing.
+                        Text("Showing the first \(BookViewModel.entryWindow) posts — "
+                            + "the rest of this reading isn't loaded yet "
+                            + "(windowing arrives with Phase 12).")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.vertical, 8)
+                    }
                 }
-                if model.truncated {
-                    // Never a SILENT cut (round 1 NIT) — the dated home's
-                    // surface says what it isn't showing.
-                    Text("Showing the first \(BookViewModel.entryWindow) posts — "
-                        + "the rest of this reading isn't loaded yet "
-                        + "(windowing arrives with Phase 12).")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.vertical, 8)
+                .padding(12)
+            }
+            .safeAreaInset(edge: .bottom) {
+                // BOOK-SCRUB (Phase 11, A5 — the Phase 6 memo's ruling):
+                // MODEL-DRIVEN — the post list is the scrubber's domain
+                // (page = a post; 50 entries = 50 pages even if one is 10k
+                // words), never live text geometry. Landing is an anchor
+                // scroll over the model; the hybrid jump remains the
+                // WITHIN-post primitive (caret reveals after focus) —
+                // reconciliation recorded in the closeout.
+                if model.entries.count > 1 {
+                    VStack(spacing: 2) {
+                        Slider(value: Binding(
+                            get: { scrubFraction },
+                            set: { fraction in
+                                scrubFraction = fraction
+                                if let target = model.scrubTarget(fraction: fraction) {
+                                    scrubLabel = scrubTitle(target)
+                                    proxy.scrollTo("page-\(target.postID)", anchor: .top)
+                                }
+                            }), in: 0...1)
+                        if let scrubLabel {
+                            Text(scrubLabel)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .background(.bar)
                 }
             }
-            .padding(12)
         }
         .task { await model.start() }
         .overlay(alignment: .bottom) {
@@ -78,6 +113,12 @@ struct BookView: View {
         }
     }
 
+    private func scrubTitle(_ entry: Queries.ReadingEntry) -> String {
+        let index = model.entries.firstIndex { $0.postID == entry.postID } ?? 0
+        let title = entry.title?.isEmpty == false ? entry.title! : "Untitled"
+        return "Page \(index + 1) of \(model.entries.count) — \(title)"
+    }
+
     private func postHeader(_ entry: Queries.ReadingEntry) -> some View {
         HStack(spacing: 6) {
             Text(entry.title?.isEmpty == false ? entry.title! : "Untitled")
@@ -89,6 +130,7 @@ struct BookView: View {
             }
         }
         .padding(.top, 4)
+        .id("page-\(entry.postID)")  // the scrubber's landing anchor
     }
 
     @ViewBuilder
