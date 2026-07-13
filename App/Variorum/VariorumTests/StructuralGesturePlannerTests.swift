@@ -298,12 +298,22 @@ struct PlannerMakeBlockTests {
         // refusal — single×single plans the GUIDED flow; EXTRACT keeps
         // .crossBlockSpan (its op is single-source by definition).
         let world = makeWorld([B(twoSentences), B(oneSentence)])
+        // (Selection 20..40: the start snaps to block 1's boundary at 16;
+        // the end — 12 units into the boundary-less second block — snaps
+        // to its END, so the whole block rides. A shorter selection whose
+        // end snaps back to 0 correctly plans .nothingToDo instead.)
         let guided = Planner.plan(
-            .makeBlockFromSelection, selection: NSRange(location: 20, length: 12), world: world)
-        guard case .makeBlockAcrossBlocks = guided else {
+            .makeBlockFromSelection, selection: NSRange(location: 20, length: 20), world: world)
+        guard case .makeBlockAcrossBlocks(_, _, let startCut, let endCut) = guided else {
             Issue.record("cross-block Make Block now plans the guided flow, got \(guided)")
             return
         }
+        #expect(startCut == 16)
+        #expect(endCut == 23, "the whole boundary-less last block rides")
+        #expect(Planner.plan(
+            .makeBlockFromSelection, selection: NSRange(location: 20, length: 12), world: world)
+            == .refusal(.nothingToDo),
+            "an end that snaps off its block leaves fewer than two pieces")
         #expect(Planner.plan(
             .extractSelection, selection: NSRange(location: 20, length: 12), world: world)
             == .refusal(.crossBlockSpan))

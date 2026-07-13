@@ -588,4 +588,305 @@ presentation and A1's prescribed choreography (anything more: stop, report).
    lenses never ride a copy.
 
 ## Closeout
-*(Written at phase end.)*
+
+### Stage A implementation record (2026-07-13, single Fable implementer session — Steps A0–A10; STOPPED at the two hard gates)
+
+**Run shape:** all Stage A steps shipped in order, one commit per step
+(schema changes as their own commits per convention), each step's suite
+green before its commit; the FULL suites re-ran green at the end (counts
+below). **The run stopped, as the plan requires, at the two hard gates:**
+(1) Step A1's mirror deploy (author-assist — 05_phase11_lockstep.sql has
+NOT run; the §12 choreography is written into the file's header and
+recorded below); (2) Step A9's QUESTIONS #10/#11 (the ratified halves are
+built and the demos are ready; NOTHING was built past the open questions).
+The Stage A verification gate therefore ran as a PRE-gate (full suites +
+convergence + the soak); it formally closes after her #10/#11 answers are
+implemented.
+
+**Commit-shape note for the reviewer:** within Step A1 the three schema
+commits land migration+record+registry+mirror-DDL together (the v1_4
+precedent — all four are DECLARATIONS of one schema change; the
+registry-wide walks and RPC rework reconcile in the step's fourth commit),
+so intermediate commits BUILD clean but the full suite is guaranteed green
+at step end, per the tests-at-step-end convention. Every other step's
+commit is suite-green standalone.
+
+#### Step A0 — the offline label (KnownIssues row, re-owned from 10; author-approved)
+`SyncScheduler.isOfflineError` — a pure classifier over URLError's
+network-down codes (walks the NSError underlying chain, so wrapped
+transport/auth-refresh failures classify); `Status.lastErrorIsOffline`;
+the shared `SyncStatusRow` (BOTH platforms — one shared file) shows
+"Waiting to sync (offline)" + pending count for the offline class; real
+refusals keep the error face. NO engine changes — the A3 posture pins
+re-ran green. `SyncOfflinePresentationTests` 5.
+
+#### Step A1 — THE SCHEMA COMMITS + the lockstep machinery (deploy PENDING — the author gate)
+- **v1_5 `canvas_layout`** (own commit): the brief's sketch, every §6
+  convention — live-unique `(container_id, block_id)`, cascade triggers
+  from BOTH parents (exact-stamp children), outbox capture via a new
+  shared `createOutboxCaptureTriggers` helper (v1_core emits byte-identical
+  SQL). Ops: `setCanvasPosition` (upsert, metadata CAS, owner-stamped,
+  requires the block live-placed in the container) / `removeCanvasPosition`.
+  `CanvasLayoutTests` 9.
+- **v1_6 `block.name`** (own commit): additive nullable column; plain
+  metadata CAS; `setBlockName` (whitespace → clearing; no-op writes
+  nothing; no touch stamp/churn — a handle is not text work; rides the
+  existing block outbox triggers, verified). `BlockNameTests` 6.
+- **v1_7 `lens` + `lens_choice`** (own commit): the spike's SAVED LENSES —
+  sparse overrides; live-unique `(lens_id, block_id)`; cascades
+  container→lens→choice (one exact stamp, the cross-table chain) +
+  block→choice; deliberately NO variant→choice cascade (a dangling pick
+  FALLS THROUGH to chosen at read time — pinned). Lens CRUD ops
+  (createLens/renameLens/duplicateLens/deleteLens/setLensChoice/
+  clearLensChoice; setLensChoice mirrors chooseVariant's guards exactly).
+  Read side: `Queries.lenses/lens/lensChoices/effectiveLensSelection` +
+  `renderPost(throughLens:)` (nil = transparent). NOTHING here writes
+  `chosen_variant_id` (I3 pinned in the same suite). `LensTests` 9.
+- **The sync shaping** (fourth commit): mirror DDL
+  `Server/supabase/05_phase11_lockstep.sql` — 04's RPC bodies VERBATIM
+  with 16-table allowlists + owner_tables gaining canvas_layout and lens;
+  per-table RLS/revokes for the new tables (04's schema-wide revoke
+  predates them); `sync_meta` + `sync_schema_version()`
+  (authenticated-only; 404/missing marker ⇒ version 1, the 9c-era
+  deployment defined retroactively); **the marker insert is the file's
+  LAST statement** (a partial deploy never advertises the new version).
+  **The §12 version-check mechanism ships** (the spec's letter — with the
+  first post-sync migration that needs it): `SyncSchema.lockstepVersion =
+  2`; `SyncTransport.schemaVersion()` (hard requirement — wrappers
+  forward, fakes declare, no vacuous default); `SupabaseTransport`
+  implements it (404→1; ONE 401 refresh-retry); `SyncEngine.
+  verifySchemaLockstep()` opens BOTH round halves — behind OR ahead
+  refuses with a self-explaining `SyncError.schemaLockstepMismatch`
+  (outbox byte-intact, cursor unmoved, heals with zero state surgery —
+  pinned end to end incl. the status row and never-presented-as-offline).
+  Repairs: canvas_layout + lens_choice join the pure-duplicate rule
+  (outbox-row assertions); `deadParentStamp` knows the three children;
+  lens joins the cascade-parent set; direction-1 victim enumeration
+  covers container→canvas/lens(→choice), block→canvas/lens_choice.
+  `AuthRLSDDLTests` REWORKED to pin the DEPLOYED COMPOSITION (04+05,
+  last-body-wins; 04 stays byte-untouched deployed history) with THE
+  DRIFT PIN: the deployed marker must equal `SyncSchema.lockstepVersion`.
+  `SchemaLockstepTests` 3 · `SchemaVersionTransportTests` 4 ·
+  `Phase11SyncConvergenceTests` 5 (drag-race CAS; duplicate repairs both
+  tables; names/lenses across the wire; cross-device cascades —
+  byte-identical dumps, empty outboxes).
+- **THE DEPLOY GATE (open):** the §12 choreography — (1) 05 runs on the
+  MIRROR first (safe for the still-deployed old clients: new tables serve
+  zero rows; the reworked RPCs are behavior-identical on old tables; old
+  clients carry no marker check); (2) BOTH devices update to a build with
+  v1_5–v1_7 (a new client against the un-migrated mirror REFUSES visibly
+  until then); (3) only then new-schema writes. **No production write has
+  occurred; the author's live devices are untouched** (her /Applications
+  build predates this phase). The deploy is the coordinator-relayed
+  author-assist (her paste or PAT — the 9c precedent).
+
+#### Step A2 — version_of + the copy operations
+`markVersionOf`/`removeVersionOf` (canonical (min,max) pinned BOTH input
+orders; origin 'manual'; no undo entry — the tags/locks trivially-
+re-toggled class); `markPostsAsVersions` — the post-level door rides a
+block edge anchored on the two posts' FIRST live blocks (**PROVISIONAL,
+QUESTIONS #19** — I8 + the block-to-block edge schema make some anchor
+necessary; `Queries.versionPeerPosts` matches ANY live version_of edge
+between the posts' placed blocks). **The two copy ops, one shared machine
+differing in EXACTLY where chosen comes from (pinned):**
+`duplicateAsVersion` (own chosen + whole fans incl. archived statuses;
+commits never copied; copies never born locked; parent trees remapped;
+block names ride; positions verbatim; per-block derived_from + ONE
+version_of anchor; tags/memberships/references/lenses do NOT ride;
+sealed source legal) and `promoteLens(carryFans: true default)` (chosen
+:= the lens's effective picks; chosen-only offered at the gesture —
+round 6's call). `adoptLens` (one transaction; refuses under seal; undo
+restores pre-image pointers as one compound); `branchAllFans` (fresh
+lens picking a new take branched from what every slot shows; fan-END
+positions — the resolveSyncConflict precedent, recorded; refuses under
+seal; NO undo — branch-class rows + a deletable lens, rationale
+recorded). Undo inverses: `revertMintedContainer` (tombstone the mint;
+restoreContainer stays the recovery door) + `revertChosenPointers`.
+Build-time calls recorded: duplicate copies title/entry_date VERBATIM
+(exactly-as-it-is; a journal duplicate = a second same-day entry — the
+documented hand-merge/pause doctrine applies); copy origin_op = 'manual'
+(the §7 vocabulary respected, no sixth value invented); the copy starts
+churn-clean with baseline = its rendered length. `VersionOperationsTests`
+10. **Door 1** (library context menu: "Mark as Versions with…" submenu —
+the pair-picking shape of "select two posts"; + "Duplicate as Version")
+and **door 2** (the aligned view offers the link on unlinked posts) EMIT
+THE SAME OP (pinned by construction — both call `markPostsAsVersions`).
+
+#### Step A3 — the takes/lens view family (the spike record, items 1–6)
+Core: `FanStyle` setting ('fan_style' in the SYNCED setting table —
+document semantics like segmentation; **default 'stack', a recorded
+build-time call**) + `Operations.setFanStyle` (UPDATE-then-INSERT, never
+an upsert — an outer ON CONFLICT overrides trigger-body conflict
+handling, which would break the outbox coalescing; found by test);
+`Queries.takesProjection`/`observeTakes` (ONE post-bounded traversal);
+`Queries.blockKinship` (nearest derived_from kin, ancestors preferred,
+bounded). App (`Features/Takes/`): columns-as-selection-profiles
+(main/scratch/lens); VIEW MEMORY (automatic, LOCAL, per-post — columns +
+alignment lock; fan expansion DELIBERATELY excluded, session-only);
+`Sameness` (quiet ⇔ byte-identical; divergent cells tint; computed at
+read time) + stable lineage color (BlockTint's 9d family); `PostAlignment`
+(rows keyed by LINEAGE never order — divide spans share a row; orphans
+get blank rows after their neighbor; cross-version reorders MARK moved
+kin, anchored on the opened post's order); `TakesViewModel` (buffer-
+authoritative live panes over one AutosaveCoordinator; deferred
+projections at settle; every gesture an ops call); `TakePaneView` (the
+cell: content-sized TK2 read-cheap surface, canary armed, ONE live
+editor migrating on click — P3 unchanged); `TakesBoardView` (composition
+B: blooms in place per style — STACK w/ quick collapse; CAROUSEL w/ the
+EXPLICIT 1–4 beneath-count + discrete whole-card paging; MARGIN GRID
+~3-tall overflowing rightward w/ changing-block highlight + seamless
+toggle; SLOT SPLIT equal shares; composition A: 1–4 full-text columns w/
+the block-start alignment LOCK — locked registered rows, unlocked
+independent flows; expand-all/close-all in the set style);
+`AlignedPostsView` (the two-post aligned composition + version_of door
+2 + in-cell blooms; take-to-take kinship across posts NOT tracked);
+`PostDetailView` (Write/Takes/Compare/Outline/Blocks) in RootView.
+Presentation notes recorded: in-cell blooms inside narrow cells degrade
+carousel/slot-split paging to the shared paged row and margin-grid to
+stack (geometry; Phase 13 revisits); the carousel's "resizable main
+editor" rides content-sizing rather than a drag handle this phase
+(functional-unstyled; Phase 13). Scratch-column ⧉ prompts save-as-lens
+first (one extra deliberate click; no auto-minted lenses — the round-4
+advice honored). `TakesBoardTests` 7 (the randomized pane walk — one
+live editor, every edit lands in ITS take, chosen never moves; the
+mid-dirty handoff; THE I3 PIN — ✓/adopt the only chosen writers; the
+lens/scratch round-trip vs session-only expansion; sameness; alignment;
+kinship over a real duplicate+divide) + `TakesProjectionTests` 2.
+
+#### Step A4 — diff; swap-and-reread ABSORBED
+`LineDiff` (pure LCS, line granularity — the answered interpretation 2)
++ the §12 whitespace toggle (comparison-only; displayed lines verbatim;
+line structure — incl. the 2026-07-12 ruling's stored blank lines —
+stays an honest difference, recorded). Doors: "Diff against chosen" per
+take (diffPair semantics) and "Diff" on the aligned view over
+`joinRenderedTexts` (the ONE join brain — the diffed text IS what
+export/bridge emit). The view writes NOTHING. **Swap-and-reread is
+deliberately not a separate build:** a scratch column IS the swap
+(visible, not chosen; view-local per the answered interpretation 3) and
+✓/adopt are the commit gestures — §12's list stays accounted for.
+`DiffViewTests` 5.
+
+#### Step A5 — book-scrub + outline↔draft
+Book-scrub MODEL-DRIVEN (the Phase 6 memo): the post list is the
+scrubber's domain — page = a post, uniform whatever the lengths; a scrub
+bar maps the track fraction through the pure `scrubIndex` (clamped,
+every page reachable — pinned) to an anchor scroll. **Reconciliation
+recorded:** the memo's hybrid jump governs jumps WITHIN one TK2 document
+(it remains the caret-reveal primitive after focus); the shipped book
+view is a virtualized LazyVStack of per-post surfaces, so cross-post
+landing is the model-driven anchor scroll — the memo's
+never-live-geometry doctrine, with the stored-estimate door still
+unbuilt. Outline↔draft (`Features/Outline/`): outline-left (compact rows
+with →N counts) / draft-right; the mapping IS `Queries.derivedBlocks`
+verbatim (pinned == the CTE over a real lineage world incl. a divide's
+depth-2 span and a fresh block mapping nowhere); tracked or independent
+scroll; connector polish stays deferred (§13). `ScrubAndOutlineTests` 3.
+
+#### Step A6 — the block-TOC + names + management
+Core: `Queries.blockTOC` + `Queries.tocHandle` (READ-TIME handle:
+explicit name else the first sentence via BoundarySnapping — pure, never
+stored; pinned incl. the structural no-second-column check) +
+`observeBlockTOC`. App (`Features/TOC/`): one row per block (ordinal
+n/count read-time; names bold; ⑂/lock marks); rows expand into the
+read-cheap tier with exactly ONE live block on click (P3's split,
+reused); collapse SESSION-ONLY (pinned); NO in-place folding —
+jump-to-block re-seeds the WRITE editor's caret (the hybrid primitive
+lands it there; TK2 §3 honored); in-TOC naming; ↑/↓ reorder = ONE
+fractional-index write on the SAME placement row (pinned); delete + the
+tray's restore door; move-to-pool. `BlockTOCTests` 5.
+
+#### Steps A7 + A8 — the canvas (pools first) + the full pool
+Canvas (`Features/Canvas/`; interpretation 4 PROVISIONAL — pools first):
+blocks-as-cards over canvas_layout; a drag's END emits exactly ONE
+`setCanvasPosition` (pinned; second drag CAS-updates the SAME row);
+un-positioned cards stack at DERIVED positions (nothing persisted until
+placed — pinned); Reset tombstones; a departed block's layout row is
+INERT, remembered if it returns (pinned); core gains
+`canvasLayouts/canvasProjection/observeCanvas`. `PoolDetailView`: Scraps
+(the ordinary editor — the ratified Phase 10 shape; pools' structural-op
+surface since Phase 3) | Canvas. Full pool: the block-tagging faces
+deferred from 10 (`BlockTagAssignmentSheet` — one toggle = exactly one
+applyTag/removeTag(toBlock:), tombstone never removal, pinned; core
+gains `Queries.blockTags`); the pool tag FILTER pinned ==
+`everythingTagged`'s block half (subtree semantics, asserted against the
+query itself). `CanvasAndPoolTests` 4.
+
+#### Step A9 — boundary fluidity: THE RATIFIED HALVES BUILT; #10/#11 STOPPED AT
+Built (both author-ratified 2026-07-09): **(1) the guided cross-boundary
+Make Block** — planner case `.makeBlockAcrossBlocks` (single×single
+only; gaps/fans/locked-edges classify first; a fanned block refuses with
+NEW copy naming the open question — `.fannedCrossBlockSpan`; extract
+keeps `.crossBlockSpan`); the flow CONFIRMS first (an alert naming the
+act; cancel touches no rows — pinned), then divide-first-edge /
+divide-last-edge / merge-the-in-span-pieces as ONE `withCompound` undo
+entry through the one structural door (full render — the mergeChain
+precedent); snapped-off edges drop their block from the span; ONE undo
+restores the original blocks byte-identically (pinned). **(2)
+merge-then-edit** for single×single cross-block EDITS: the
+`.crossesBlockBoundary` refusal now routes eligible spans into ONE
+compound — merge the touched run, apply the exact intended edit to the
+merged buffer (the mapped range's ends live in the verbatim-preserved
+leading/trailing pieces, so the merge's join bytes die with the deleted
+span — the surface reads exactly "the selection vanished", her
+principle); the keystroke itself is refused so the storage never
+half-applies (pinned end-to-end through the real NSTextInputClient
+path); fanned/locked/gap/tail spans keep a SPEAKING refusal naming the
+open call; undo restores both blocks with the edited merged mint TRAYED
+(insurance doctrine — pinned). **(3) THE #10 DEMO, wired to NOTHING:**
+`demoAutoProceedCutsAreComputableWhenEveryTakeMatchesUniquely` —
+CutPropagation's unique-match condition mapping a span's BOTH edges into
+every take (cuts inside a shared region) + the divideW it would
+auto-mint, shown with the real op. Two Phase 9 planner pins updated with
+dated comments (the supersession class Phase 10 established).
+`BoundaryFluidityTests` 5. **STOPPED HERE: QUESTIONS #10 (must the W
+always be a ceremony?) and #11 (fanned cross-block semantics) are OPEN —
+ask-her-live, demos ready; her both-ways-testing method stands where a
+live answer doesn't settle. NOTHING was built past them.**
+
+#### Step A10 — the modes tutorial (her round-6 instruction)
+`Features/Tutorial/ModesTutorialView`: POLISH IN PLACE / THREAD ONE
+PIECE / FORK THE PIECE — captioned sections with LIVE examples over a
+SEEDED demo post ("safe to delete" in its title; defaults-bookmarked id;
+seeding idempotent + ISOLATED — pinned byte-level against a user row);
+examples drive REAL ops on the demo only (branch/✓/adopt/
+duplicateAsVersion — pinned); Reset deletes demo + tracked fork copies
+and re-seeds (NO ORPHANS pinned, incl. the empty unplaced-blocks net);
+her boundary sentence quoted verbatim. Functional; Phase 13 prettifies.
+`ModesTutorialTests` 3. PLUS §12's **unplaced-blocks utility view** (the
+brief's standing definition): a RecoveryView section listing
+`Queries.unplacedBlocks` plainly, with a place-into-pool door
+(`placeBlock`'s face).
+
+#### PROVISIONALs and open items (the checkpoint's walk)
+- **QUESTIONS #18** — the seal posture on the new metadata surfaces
+  (block names REFUSE — the everything-under letter; canvas positions
+  ALLOW; lens CRUD ALLOWS — viewing isn't authoring; ✓/adopt/take-minting
+  still refuse under seal through their own guards). One guard line each
+  to flip.
+- **QUESTIONS #19** — the post-level version link's first-block anchor.
+- Interpretation PROVISIONALs implemented as planned: reference drag-out
+  (Stage B), diff = line-based, swap = view-local absorption, canvas =
+  pools-first, PDF path (Stage B).
+- **QUESTIONS #10/#11 — OPEN; the A9 gates.** Demos ready.
+- Build-time calls recorded above (fan-style default 'stack'; duplicate's
+  verbatim title/entry_date; 'manual' origin; branch-all fan-end
+  positions; scratch-⧉ saves first; presentation degradations).
+
+#### Pre-gate verification (the formal Stage A gate re-runs after the A9 answers)
+- Core `swift test`: **618 green in 71 suites** (baseline 562/62).
+- Mac app: **343 green in 62 suites** (baseline 311/55) — the randomized
+  gesture soak (GestureSoakTests) green over the changed planner; the
+  tint/badge/window smokes green (TEXTKIT2 §5's executable items ride
+  these suites; macOS 26.4.1 unchanged — no spike re-run owed). Two
+  environment notes: `-only-testing:` with a wrong suite name reports a
+  vacuous SUCCESS on zero tests (bit this session once — always confirm
+  the count line); the full run stays ~13 s.
+- Mobile: **11 green in 4 suites** (baseline matched).
+- Sync convergence incl. canvas + lens + block.name rows crossing the
+  wire: `Phase11SyncConvergenceTests` (core) — byte-identical dumps,
+  empty outboxes.
+- P1/P3 spot checks: the takes board's standing observation is ONE
+  post-bounded fetch; panes are content-sized read-cheap surfaces with
+  ONE live editor (pinned); the TOC at 100+ blocks is row-cheap with
+  text upgrading on expand (the within-post-virtualization face) —
+  formal measurements at the gate re-run.
