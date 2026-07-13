@@ -31,11 +31,49 @@ public actor SyncScheduler {
         public var lastSuccessAt: Date?
         /// The last round's failure, verbatim; nil after a clean round.
         public var lastError: String?
+        /// True when `lastError` is an offline/unreachable-network class
+        /// (Phase 11, Step A0 — the KnownIssues row re-owned from 10):
+        /// offline is FREE by design (this scheduler's own posture — outbox
+        /// kept, next trigger retries), so the status surface presents it
+        /// as waiting/pending, never as a failure. Presentation-only
+        /// classification; round behavior is untouched.
+        public var lastErrorIsOffline = false
         /// Outbox rows still owed to the server after the last round.
         public var pendingPushCount = 0
         /// Rounds finished (clean or failed) — test observability.
         public var roundsCompleted = 0
         public init() {}
+    }
+
+    /// The offline/unreachable classification (Phase 11, Step A0) — a pure
+    /// function from a round's error to "is this the designed-for offline
+    /// state?". True exactly for URLError's network-down/unreachable codes
+    /// (directly or anywhere in the NSError underlying chain, so a wrapped
+    /// transport/auth-refresh failure classifies too). Everything else —
+    /// HTTP refusals, CAS/schema errors, signed-out — keeps the error face.
+    public static func isOfflineError(_ error: any Error) -> Bool {
+        // URLError bridges to NSURLErrorDomain, so the NSError walk covers
+        // both the typed and the bridged form.
+        let offlineCodes: Set<Int> = [
+            URLError.notConnectedToInternet.rawValue,
+            URLError.networkConnectionLost.rawValue,
+            URLError.cannotConnectToHost.rawValue,
+            URLError.cannotFindHost.rawValue,
+            URLError.dnsLookupFailed.rawValue,
+            URLError.timedOut.rawValue,
+            URLError.dataNotAllowed.rawValue,
+            URLError.internationalRoamingOff.rawValue,
+        ]
+        var current: NSError? = error as NSError
+        var depth = 0
+        while let nsError = current, depth < 8 {
+            if nsError.domain == NSURLErrorDomain, offlineCodes.contains(nsError.code) {
+                return true
+            }
+            current = nsError.userInfo[NSUnderlyingErrorKey] as? NSError
+            depth += 1
+        }
+        return false
     }
 
     @Dependency(\.database) private var database
@@ -110,12 +148,14 @@ public actor SyncScheduler {
             _ = try await engine.pull()
             _ = try await engine.push()
             status.lastError = nil
+            status.lastErrorIsOffline = false
             status.lastSuccessAt = date.now
         } catch {
             // Offline / protected-data / server hiccup: the round is
             // skipped, the outbox keeps everything, the next trigger
             // retries. Never a reason to touch state.
             status.lastError = String(describing: error)
+            status.lastErrorIsOffline = Self.isOfflineError(error)
         }
         status.pendingPushCount = (try? await outboxCount()) ?? status.pendingPushCount
         status.isSyncing = false

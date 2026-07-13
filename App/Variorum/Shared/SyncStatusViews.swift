@@ -37,11 +37,27 @@ struct SyncStatusRow: View {
                 ProgressView().controlSize(.small)
                 Text("Syncing…")
             } else if let error = sync.status.lastError {
-                Text("Sync error")
-                    .foregroundStyle(.red)
-                    .help(error)
-                Button("Retry") { sync.triggerSync() }
-                Button("Account…") { showingAccount = true }
+                // Phase 11, Step A0 (KnownIssues row, re-owned from 10 with
+                // author approval 2026-07-12): offline is a designed-for
+                // state (A3 — outbox kept, next trigger retries), so it
+                // presents as waiting/pending, never as "Sync error". Real
+                // refusals keep the error face.
+                if sync.status.lastErrorIsOffline {
+                    Text(Self.offlineLabel)
+                        .foregroundStyle(.secondary)
+                        .help(error)
+                    if sync.status.pendingPushCount > 0 {
+                        Text("· \(sync.status.pendingPushCount) pending")
+                            .foregroundStyle(.secondary)
+                    }
+                    Button("Sync now") { sync.triggerSync() }
+                } else {
+                    Text("Sync error")
+                        .foregroundStyle(.red)
+                        .help(error)
+                    Button("Retry") { sync.triggerSync() }
+                    Button("Account…") { showingAccount = true }
+                }
             } else {
                 Text(lastSyncLabel)
                     .foregroundStyle(.secondary)
@@ -64,4 +80,8 @@ struct SyncStatusRow: View {
         guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }
         return "Synced \(last.formatted(date: .omitted, time: .shortened))"
     }
+
+    /// The offline presentation's one string (Step A0's row letter),
+    /// exposed for the presented-state pin.
+    static let offlineLabel = "Waiting to sync (offline)"
 }
