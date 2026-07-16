@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Phase 11b review round 1, MAJOR 1: app-SCOPED security bookmarks —
+	     the reference panel's cross-launch file access (AppSpec §7:
+	     `file_bookmark`, local-only under sync). Everything else the app
+	     needs (sandbox, outgoing network, user-selected read-write) stays
+	     synthesized from the target's ENABLE_* build settings; this file
+	     MERGES with them at signing (verified by the codesign dump in the
+	     Phase 11b closeout — the EntitlementsTests pin guards the merge). -->
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
+</dict>
+</plist>
