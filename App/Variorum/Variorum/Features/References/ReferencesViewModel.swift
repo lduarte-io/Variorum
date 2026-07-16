@@ -43,10 +43,20 @@ final class ReferencesViewModel {
 
     private(set) var references: [Reference] = []
     private(set) var lastError: String?
-    /// URLs whose security scope this panel is holding open (previews);
-    /// released per-reference on selection change and wholesale at
-    /// teardown.
-    @ObservationIgnored private var accessedURLs: [URL] = []
+    /// URLs holding an OPEN security scope. Bounded by construction
+    /// (review round 1, MAJOR 2): `preparePreview` claims at most one URL
+    /// per preview and RELEASES the previous claim when the selection
+    /// moves; `claimAccess` is claim-once per URL; `stopAllAccess` sweeps
+    /// at panel teardown. Internal get so the pins can count claims.
+    @ObservationIgnored private(set) var accessedURLs: [URL] = []
+    /// The selected reference's prepared preview — resolved OUTSIDE any
+    /// view body (the panel's `.task(id:)` drives `preparePreview`; the
+    /// preview views render this state and perform no side effects).
+    private(set) var preview: PreparedPreview?
+    /// The bookmark mint, injectable so the degraded (unscoped) path is
+    /// testable; the default mints app-scoped read-only bookmarks.
+    @ObservationIgnored var mintBookmark: (URL) throws -> BookmarkMint
+        = ReferencesViewModel.defaultMintBookmark
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -96,17 +106,28 @@ final class ReferencesViewModel {
         }
     }
 
-    /// A file reference: the row stores a security-scoped bookmark so the
-    /// sandbox re-grants access across launches (LOCAL-ONLY under sync).
-    /// Falls back to a plain bookmark where security scoping is
-    /// unavailable (non-sandboxed contexts mint plain bookmarks).
+    /// A file reference: the row stores an APP-SCOPED, READ-ONLY security
+    /// bookmark so the sandbox re-grants access across launches (LOCAL-ONLY
+    /// under sync; read-only because a reference is a §7 VIEWING AID —
+    /// never written; page memory lives in `view_state` rows, never the
+    /// file. Build-time call, coordinator-approved: if a future phase ever
+    /// wants to annotate reference files, the mint option is the line to
+    /// revisit — a product-call moment anyway). When scoping is refused
+    /// the plain-bookmark fallback is VISIBLY degraded (review round 1,
+    /// MAJOR 1): a plain bookmark grants zero sandbox access after
+    /// relaunch, so silence here would be a delayed silent failure.
     func addFile(_ url: URL) async {
         do {
-            let bookmark = try Self.makeBookmark(url)
+            let mint = try mintBookmark(url)
             await run { ops in
                 _ = try ops.addReference(
                     to: self.postID, kind: .file,
-                    name: url.lastPathComponent, fileBookmark: bookmark)
+                    name: url.lastPathComponent, fileBookmark: mint.data)
+            }
+            if !mint.scoped, lastError == nil {
+                lastError = "“\(url.lastPathComponent)” was added without cross-launch access "
+                    + "(the sandbox refused a security-scoped bookmark) — its preview may stop "
+                    + "working after the app relaunches; re-add it if so."
             }
         } catch {
             lastError = String(describing: error)
@@ -145,23 +166,67 @@ final class ReferencesViewModel {
 
     // MARK: - Bookmarks & security scope
 
-    nonisolated static func makeBookmark(_ url: URL) throws -> Data {
+    /// What a mint produced: the bookmark bytes and whether the security
+    /// scope rode along. An unscoped (plain) bookmark is DEAD across
+    /// relaunch in a sandboxed app — documented sandbox design — so
+    /// `scoped: false` is surfaced by `addFile`, never silent.
+    struct BookmarkMint {
+        let data: Data
+        let scoped: Bool
+    }
+
+    nonisolated static func defaultMintBookmark(_ url: URL) throws -> BookmarkMint {
         do {
-            return try url.bookmarkData(
-                options: [.withSecurityScope],
-                includingResourceValuesForKeys: nil, relativeTo: nil)
+            return BookmarkMint(
+                data: try url.bookmarkData(
+                    options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess],
+                    includingResourceValuesForKeys: nil, relativeTo: nil),
+                scoped: true)
         } catch {
-            // Outside a sandbox grant, security scoping refuses — a plain
-            // bookmark still tracks the file across renames/moves.
-            return try url.bookmarkData(
-                options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+            return BookmarkMint(
+                data: try url.bookmarkData(
+                    options: [], includingResourceValuesForKeys: nil, relativeTo: nil),
+                scoped: false)
         }
     }
 
-    /// Resolves a file reference for preview, opening its security scope;
-    /// the panel releases everything at teardown (`stopAllAccess`).
-    func resolveFileURL(_ reference: Reference) -> URL? {
-        guard let data = reference.fileBookmark else { return nil }
+    // MARK: - The prepared preview (review round 1, MAJOR 2)
+
+    /// The selected reference's resolved preview state. Pure data — the
+    /// preview views render it; resolution/claiming happened here, in a
+    /// lifecycle context, never in a view body.
+    struct PreparedPreview: Equatable {
+        let referenceID: String
+        /// Resolved, scope-claimed file URL (file kind; URL-kind rows
+        /// render straight from their `url` column).
+        let fileURL: URL?
+        let failure: String?
+    }
+
+    /// Resolves and scope-claims the selection's file, releasing the
+    /// PREVIOUS preview's claim first — outstanding claims are bounded by
+    /// one preview regardless of session length or render count. Driven by
+    /// the panel's `.task(id:)` on selection change; failures land here as
+    /// preview state (never as a mutation inside a view body).
+    func preparePreview(for reference: Reference?) {
+        if let previous = preview?.fileURL {
+            releaseClaim(previous)
+        }
+        guard let reference else {
+            preview = nil
+            return
+        }
+        guard reference.kind == .file else {
+            preview = PreparedPreview(referenceID: reference.id, fileURL: nil, failure: nil)
+            return
+        }
+        let display = reference.name ?? "reference"
+        guard let data = reference.fileBookmark else {
+            preview = PreparedPreview(
+                referenceID: reference.id, fileURL: nil,
+                failure: "“\(display)” has no file bookmark — remove and re-add it.")
+            return
+        }
         var stale = false
         let url = (try? URL(
             resolvingBookmarkData: data, options: [.withSecurityScope],
@@ -170,13 +235,28 @@ final class ReferencesViewModel {
                 resolvingBookmarkData: data, options: [],
                 relativeTo: nil, bookmarkDataIsStale: &stale))
         guard let url else {
-            lastError = "The file for “\(reference.name ?? "reference")” can't be found."
-            return nil
+            preview = PreparedPreview(
+                referenceID: reference.id, fileURL: nil,
+                failure: "The file for “\(display)” can't be found — it may have moved.")
+            return
         }
+        claimAccess(url)
+        preview = PreparedPreview(referenceID: reference.id, fileURL: url, failure: nil)
+    }
+
+    /// Claim-once per URL: a re-prepare of the same reference never stacks
+    /// a second kernel claim (the accrual half of MAJOR 2).
+    private func claimAccess(_ url: URL) {
+        guard !accessedURLs.contains(url) else { return }
         if url.startAccessingSecurityScopedResource() {
             accessedURLs.append(url)
         }
-        return url
+    }
+
+    private func releaseClaim(_ url: URL) {
+        guard let index = accessedURLs.firstIndex(of: url) else { return }
+        url.stopAccessingSecurityScopedResource()
+        accessedURLs.remove(at: index)
     }
 
     func stopAllAccess() {
@@ -184,6 +264,7 @@ final class ReferencesViewModel {
             url.stopAccessingSecurityScopedResource()
         }
         accessedURLs.removeAll()
+        preview = nil
     }
 
     // MARK: - Internals

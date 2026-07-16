@@ -60,6 +60,9 @@ struct ReferencePanel: View {
             }
         }
         .task { await model.start() }
+        // Resolution + scope claiming happen HERE, on selection change —
+        // a lifecycle context, never a view body (review round 1, MAJOR 2).
+        .task(id: selected?.id) { model.preparePreview(for: selected) }
         .onDisappear { model.stopAllAccess() }
     }
 
@@ -123,6 +126,9 @@ struct ReferencePanel: View {
 
 // MARK: - Previews per kind
 
+/// Pure renderer of the model's prepared preview state — no I/O, no scope
+/// claims, no model mutation happens in this body (review round 1, MAJOR
+/// 2: the panel's `.task(id:)` prepared everything before we render).
 private struct ReferencePreview: View {
     let model: ReferencesViewModel
     let reference: Reference
@@ -136,20 +142,28 @@ private struct ReferencePreview: View {
                 unavailable("This URL can't be loaded.")
             }
         case .file:
-            if let url = model.resolveFileURL(reference) {
-                if url.pathExtension.lowercased() == "pdf" {
-                    PDFPane(
-                        url: url,
-                        initialPage: model.viewState(reference).pdfPage
-                    ) { page in
-                        Task { await model.saveViewState(
-                            reference.id, ReferenceViewState(pdfPage: page)) }
+            if let preview = model.preview, preview.referenceID == reference.id {
+                if let failure = preview.failure {
+                    unavailable(failure)
+                } else if let url = preview.fileURL {
+                    if url.pathExtension.lowercased() == "pdf" {
+                        PDFPane(
+                            url: url,
+                            initialPage: model.viewState(reference).pdfPage
+                        ) { page in
+                            Task { await model.saveViewState(
+                                reference.id, ReferenceViewState(pdfPage: page)) }
+                        }
+                    } else {
+                        QuickLookPane(url: url)
                     }
                 } else {
-                    QuickLookPane(url: url)
+                    unavailable("This file has no preview.")
                 }
             } else {
-                unavailable("The file can't be found — it may have moved.")
+                // The selection's task hasn't prepared this one yet.
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }

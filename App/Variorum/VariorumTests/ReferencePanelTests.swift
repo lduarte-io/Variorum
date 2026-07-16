@@ -86,9 +86,89 @@ struct ReferencePanelTests {
             #expect(reference.fileBookmark != nil)
 
             // The panel's resolution path finds the same file again.
-            let resolved = try #require(model.resolveFileURL(reference))
+            model.preparePreview(for: reference)
+            let preview = try #require(model.preview)
+            #expect(preview.failure == nil)
+            let resolved = try #require(preview.fileURL)
             #expect(resolved.standardizedFileURL.path == url.standardizedFileURL.path)
             model.stopAllAccess()
+        }
+    }
+
+    // MARK: - Review round 1, MAJOR 2 (scope-claim lifecycle)
+
+    @Test func preparingTheSameReferenceTwiceClaimsOnce() async throws {
+        try await withReferences { _, model, _ in
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("variorum-ref-\(UUID().uuidString).pdf")
+            try Data("pdf-ish".utf8).write(to: url)
+            defer { try? FileManager.default.removeItem(at: url) }
+            await model.addFile(url)
+            let reference = try #require(model.references.first)
+
+            // The pre-fix panel resolved + claimed on EVERY body render;
+            // the lifecycle shape claims once per URL no matter how often
+            // the preview re-prepares.
+            model.preparePreview(for: reference)
+            model.preparePreview(for: reference)
+            model.preparePreview(for: reference)
+            #expect(model.accessedURLs.count <= 1)
+            #expect(model.preview?.fileURL != nil)
+            model.stopAllAccess()
+        }
+    }
+
+    @Test func movingTheSelectionReleasesThePreviousClaim() async throws {
+        try await withReferences { _, model, _ in
+            let first = FileManager.default.temporaryDirectory
+                .appendingPathComponent("variorum-ref-a-\(UUID().uuidString).pdf")
+            let second = FileManager.default.temporaryDirectory
+                .appendingPathComponent("variorum-ref-b-\(UUID().uuidString).pdf")
+            try Data("a".utf8).write(to: first)
+            try Data("b".utf8).write(to: second)
+            defer {
+                try? FileManager.default.removeItem(at: first)
+                try? FileManager.default.removeItem(at: second)
+            }
+            await model.addFile(first)
+            await model.addFile(second)
+            let refA = try #require(model.references.first { $0.name == first.lastPathComponent })
+            let refB = try #require(model.references.first { $0.name == second.lastPathComponent })
+
+            model.preparePreview(for: refA)
+            model.preparePreview(for: refB)
+            // Outstanding claims are bounded by ONE preview: A's claim was
+            // released when the selection moved to B.
+            #expect(model.accessedURLs.count <= 1)
+            #expect(!model.accessedURLs.contains {
+                $0.standardizedFileURL.path == first.standardizedFileURL.path
+            })
+            model.stopAllAccess()
+            #expect(model.accessedURLs.isEmpty)
+        }
+    }
+
+    // MARK: - Review round 1, MAJOR 1 (the degraded fallback is visible)
+
+    @Test func anUnscopedMintIsVisiblyDegraded() async throws {
+        try await withReferences { _, model, _ in
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("variorum-ref-\(UUID().uuidString).pdf")
+            try Data("pdf-ish".utf8).write(to: url)
+            defer { try? FileManager.default.removeItem(at: url) }
+
+            // Force the degraded path: the sandbox refused scoping, the
+            // mint fell back to a PLAIN bookmark (dead across relaunch).
+            model.mintBookmark = { url in
+                ReferencesViewModel.BookmarkMint(
+                    data: try url.bookmarkData(
+                        options: [], includingResourceValuesForKeys: nil, relativeTo: nil),
+                    scoped: false)
+            }
+            await model.addFile(url)
+            // The reference still lands — but NEVER silently.
+            #expect(model.references.count == 1)
+            #expect(model.lastError?.contains("without cross-launch access") == true)
         }
     }
 
