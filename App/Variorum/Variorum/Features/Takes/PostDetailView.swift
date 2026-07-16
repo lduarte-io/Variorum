@@ -31,17 +31,27 @@ struct PostDetailView: View {
     /// A TOC jump's landing: the Write editor re-seeds at this caret (the
     /// hybrid primitive fires in the editor — TK2 §3: no folding here).
     @State private var pendingCaret: Int?
+    /// Phase 11b (B3): the reference panel — per-post sources beside the
+    /// draft (§7/§12; a viewing aid, session UI state).
+    @State private var referencesShown = false
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("Mode", selection: $mode) {
-                ForEach(Mode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
+            HStack {
+                Picker("Mode", selection: $mode) {
+                    ForEach(Mode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
                 }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(maxWidth: 420)
+                Button("References", systemImage: "books.vertical") {
+                    referencesShown.toggle()
+                }
+                .labelStyle(.iconOnly)
+                .help("Show the post's references (sources beside the draft)")
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: 420)
             .padding(6)
             Divider()
             switch mode {
@@ -63,6 +73,10 @@ struct PostDetailView: View {
                 })
                 .id("toc-\(postID)")
             }
+        }
+        .inspector(isPresented: $referencesShown) {
+            ReferencePanel(session: session, postID: postID)
+                .inspectorColumnWidth(min: 240, ideal: 340)
         }
     }
 
