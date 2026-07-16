@@ -150,6 +150,34 @@ struct ReferencePanelTests {
 
     // MARK: - Review round 1, MAJOR 1 (the degraded fallback is visible)
 
+    @Test func aBatchAddKeepsEveryDegradedNote() async throws {
+        try await withReferences { _, model, _ in
+            let first = FileManager.default.temporaryDirectory
+                .appendingPathComponent("variorum-ref-a-\(UUID().uuidString).pdf")
+            let second = FileManager.default.temporaryDirectory
+                .appendingPathComponent("variorum-ref-b-\(UUID().uuidString).pdf")
+            try Data("a".utf8).write(to: first)
+            try Data("b".utf8).write(to: second)
+            defer {
+                try? FileManager.default.removeItem(at: first)
+                try? FileManager.default.removeItem(at: second)
+            }
+            // Mixed batch: the FIRST file's mint degrades, the second is
+            // clean — the second's success must not erase the warning
+            // (round 2: last-writer-wins broke the never-silent guarantee).
+            model.mintBookmark = { url in
+                ReferencesViewModel.BookmarkMint(
+                    data: try url.bookmarkData(
+                        options: [], includingResourceValuesForKeys: nil, relativeTo: nil),
+                    scoped: url.lastPathComponent == first.lastPathComponent ? false : true)
+            }
+            await model.addFiles([first, second])
+            #expect(model.references.count == 2)
+            #expect(model.lastError?.contains("without cross-launch access") == true)
+            #expect(model.lastError?.contains(first.lastPathComponent) == true)
+        }
+    }
+
     @Test func anUnscopedMintIsVisiblyDegraded() async throws {
         try await withReferences { _, model, _ in
             let url = FileManager.default.temporaryDirectory

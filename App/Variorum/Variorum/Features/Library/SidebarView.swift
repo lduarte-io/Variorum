@@ -39,9 +39,13 @@ struct SidebarView: View {
     @State private var renameTarget: RenameTarget?
     @State private var renameTitle = ""
     @State private var tagSheetTarget: TagSheetTarget?
-    /// Phase 11b (B1): the last export gesture's report or error — the
-    /// export model itself is per-gesture (one-shot projections).
+    /// Phase 11b (B1): the last export gesture's outcome — the export
+    /// model itself is per-gesture (one-shot projections). Errors and
+    /// reports ride separate fields so an export FAILURE renders in the
+    /// red error branch, not the gray status line (round 2); both clear
+    /// when the next gesture starts.
     @State private var exportStatus: String?
+    @State private var exportError: String?
     /// Phase 11b (B2): the drop-in import model, created on first drop
     /// (its async provider loads need a live owner; observable status).
     @State private var importer: ImportModel?
@@ -139,7 +143,7 @@ struct SidebarView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? tags.lastError ?? importer?.lastError {
+            if let error = model.lastError ?? tags.lastError ?? importer?.lastError ?? exportError {
                 Text(error)
                     .font(.caption)
                     .foregroundStyle(.red)
@@ -164,13 +168,16 @@ struct SidebarView: View {
         let name = defaultFileName(item)
         guard let url = ExportPanels.saveFile(
             defaultName: "\(name).md", type: .markdownFile) else { return }
+        exportError = nil
+        exportStatus = nil
         Task {
             let exporter = ExportModel(session: session)
             if let markdown = await exporter.markdown(
                 forPost: item.postID, includeVariants: includeVariants) {
                 exporter.writeMarkdown(markdown, to: url)
             }
-            exportStatus = exporter.lastError ?? exporter.lastReport
+            exportError = exporter.lastError
+            exportStatus = exporter.lastError == nil ? exporter.lastReport : nil
         }
     }
 
@@ -178,12 +185,15 @@ struct SidebarView: View {
         let name = defaultFileName(item)
         guard let url = ExportPanels.saveFile(
             defaultName: "\(name).pdf", type: .pdf) else { return }
+        exportError = nil
+        exportStatus = nil
         Task {
             let exporter = ExportModel(session: session)
             if let data = await exporter.pdfData(forPost: item.postID) {
                 exporter.writePDF(data, to: url)
             }
-            exportStatus = exporter.lastError ?? exporter.lastReport
+            exportError = exporter.lastError
+            exportStatus = exporter.lastError == nil ? exporter.lastReport : nil
         }
     }
 

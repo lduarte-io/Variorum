@@ -116,11 +116,9 @@ struct ReferencePanel: View {
         panel.prompt = "Add Reference"
         guard panel.runModal() == .OK else { return }
         let urls = panel.urls
-        Task {
-            for url in urls {
-                await model.addFile(url)
-            }
-        }
+        // ONE batch: degraded-mint notes accumulate across the multi-select
+        // (round 2 — never last-writer-wins within a gesture).
+        Task { await model.addFiles(urls) }
     }
 }
 

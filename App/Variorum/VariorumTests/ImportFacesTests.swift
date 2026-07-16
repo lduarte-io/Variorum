@@ -8,10 +8,12 @@
 //  source — bytes and mtime untouched, pinned here.
 //
 
+import AppKit
 import Dependencies
 import Foundation
 import GRDB
 import Testing
+import UniformTypeIdentifiers
 import VariorumCore
 @testable import Variorum
 
@@ -140,6 +142,66 @@ struct ImportFacesTests {
                     sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL")
             }
             #expect(live == 0)
+            let second = try await session.runner.run { ops in
+                try stack.undo(with: ops)
+            }
+            #expect(second == nil)
+        }
+    }
+
+    // Round 2, MINOR: the pin must drive the DROP DOOR itself — a Finder
+    // drag delivers one NSItemProvider per file, and round 1's fix only
+    // batched the array path the File-menu door uses.
+    @Test func aMultiProviderDropRegistersOneCompoundAndOneReport() async throws {
+        try await withImportSession { session, importer in
+            let urls = try (1...3).map { index in
+                try tempFile("Drop \(index).md", "Body \(index).")
+            }
+            defer {
+                for url in urls { try? FileManager.default.removeItem(at: url) }
+            }
+            // One provider per file, carrying public.file-url exactly as a
+            // Finder drag does (the same registration shape the pool's own
+            // drag provider uses).
+            let providers = urls.map { url in
+                let provider = NSItemProvider()
+                provider.registerDataRepresentation(
+                    forTypeIdentifier: UTType.fileURL.identifier, visibility: .all
+                ) { completion in
+                    completion(url.dataRepresentation, nil)
+                    return nil
+                }
+                return provider
+            }
+            #expect(importer.handleDrop(providers, into: .library))
+
+            // Quiescence: all three posts landed (bounded wait — the
+            // provider loads complete async).
+            var live = 0
+            for _ in 0..<2000 {
+                live = try await session.database.read {
+                    try Int.fetchOne(
+                        $0,
+                        sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL")
+                } ?? 0
+                if live == 3 { break }
+                try? await Task.sleep(for: .milliseconds(2))
+            }
+            #expect(live == 3)
+
+            // ONE drop = ONE aggregated report and ONE undo entry.
+            #expect(importer.lastReport == "Imported 3 posts.")
+            let stack = session.undoStack
+            let label = try await session.runner.run { ops in
+                try stack.undo(with: ops)
+            }
+            #expect(label == "Import")
+            let after = try await session.database.read {
+                try Int.fetchOne(
+                    $0,
+                    sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL")
+            }
+            #expect(after == 0)
             let second = try await session.runner.run { ops in
                 try stack.undo(with: ops)
             }

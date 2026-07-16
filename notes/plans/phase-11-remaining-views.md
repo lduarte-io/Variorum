@@ -1574,6 +1574,13 @@ files first, then registers the whole batch under ONE
 per-file failures caught INSIDE the compound body (one bad file never
 unwinds its siblings; skip reporting preserved). `importText` unchanged
 (one gesture, one entry already).
+***CORRECTION (round 2, MINOR):* this disposition (and commit
+`8b79d10`'s message, which cannot be rewritten) OVERCLAIMED** — the fix
+batched `importFiles(urls)`, the array path only the File-menu door
+uses; the actual DROP door (`handleDrop`) still spawned one task per
+provider, so a real Finder multi-file drop remained N gestures. The
+round-2 MINOR below closed the door itself; this entry's claim is true
+only as of that fix.
 
 **Post-round counts (full suites, count lines confirmed): core 650
 green in 77 suites · Mac app 378 green in 68 suites · mobile 11 green
@@ -1581,6 +1588,76 @@ in 4 suites** (pre-round: 650/77 · 371/67 · 11/4 — +7 Mac pins across
 1 new suite: EntitlementsTests 2; ReferencePanelTests +3;
 ImportFacesTests +1; ExportFacesTests +1).
 
+### Stage B review round 2 — dispositions (2026-07-16, fresh reviewer; 1 MINOR / 5 NIT, ZERO new BLOCKER/MAJOR — THE LADDER CLOSES at round 2; all round-1 fixes independently verified green by run)
+
+**MINOR (the round-1 NIT 4 fix didn't cover the door the finding named:
+`handleDrop` still made an N-file Finder drop N gestures — N compounds,
+N overwritten reports — and the round-1 disposition overclaimed) —
+AGREED, fixed, pin RED-ON-CURRENT confirmed by run (pin written FIRST,
+driving the DROP DOOR itself).** Mechanism self-traced: both drop
+targets route through `handleDrop`; its per-provider `loadItem`
+completions each spawned `Task { importFiles([url]) }` — the compound
+and the aggregated report only exist per `importFiles` CALL, and my
+round-1 pin drove the batched-array path that only the File-menu door
+uses (the wrong door). **Fix:** `handleDrop` COLLECTS every provider
+load first (checked continuations awaited inside ONE task created in
+the caller's context — task-locals ride, which also cured an incidental
+escaped-dependency artifact the red run surfaced), then calls
+`importFiles(allURLs)` once. **Pin:**
+`aMultiProviderDropRegistersOneCompoundAndOneReport` — ≥2 real
+`public.file-url` NSItemProviders (the pool drag provider's own
+registration shape) through `handleDrop`, quiescence awaited; RED on
+the pre-fix code by run, all three predicted failures transcripted
+(report "Imported 1 post."; one undo left 2 of 3 posts; a second
+"Import" entry remained); green after. **The round-1 NIT 4 disposition
+is CORRECTED in place above** (the commit-message overclaim in
+`8b79d10` noted there — history not rewritten).
+
+**NIT (export errors rendered gray, `exportStatus` never cleared) —
+AGREED, fixed:** the sidebar's export outcome rides two fields —
+`exportError` joins the RED overlay branch beside the other models'
+errors; `exportStatus` carries reports only; both clear when the next
+export gesture starts.
+
+**NIT (N synchronous `Data(contentsOf:)` reads on the MainActor in
+`importFiles`) — AGREED, fixed (the round-1 NIT 3 class; architectural
+clause, trace stated):** the model is MainActor-isolated, so the read
+loop — extension filter, scoped access, full-file reads — executed on
+the main thread per drop and would hitch the run loop on a large file;
+the loop moved to a `nonisolated static readFiles` awaited via
+`Task.detached`, ops unchanged.
+
+**NIT (the ratified "readings as OPTIONAL folder views" has no
+user-reachable option) — AGREED, recorded (the coordinator's
+adjudication: no UI invented):** `bulkExportManifest(includeReadings:)`
+is built and pinned both ways; the one face calls the default
+(always-on). **Recorded as the build-time call for the checkpoint walk,
+both options named:** (a) always-on as shipped (readings are cheap
+one-file views over the same posts; the folder is self-explanatory), or
+(b) an accessory checkbox on the folder chooser — a product-surface
+choice, hers. Comment at the call site carries the record.
+
+**NIT (a multi-select Add File batch let a later clean add erase an
+earlier file's degraded-mint warning — last-writer-wins inside one
+gesture against MAJOR 1's never-silent guarantee) — AGREED, fixed, pin
+RED-verified by behavioral revert:** `addFiles(_:)` is the batch door
+(the panel's multi-select calls it once); per-file failures and
+degraded notes ACCUMULATE and land as one message. Pin
+`aBatchAddKeepsEveryDegradedNote` (mixed batch: file 1 degraded, file 2
+clean — the warning must survive); the accumulation reverted ⇒ the pin
+failed (warning erased, transcripted), restored ⇒ green.
+
+**NIT (`describeImportError` spoke only for `emptyImport`; a sealed
+destination skipped as a raw enum dump) — AGREED, fixed:** the seal
+case now reads "the destination is sealed — unseal it first"
+(fire-and-speak); everything else keeps the diagnosable raw description.
+
+**Post-round counts (full suites, count lines confirmed): core 650
+green in 77 suites · Mac app 380 green in 68 suites · mobile 11 green
+in 4 suites** (pre-round: 650/77 · 378/68 · 11/4 — +2 Mac pins:
+ImportFacesTests +1, ReferencePanelTests +1). **The ladder closes at
+round 2 with zero new HIGH findings.**
+
 *(B4's closeout ritual — master-plan row + pointer, KnownIssues
-reconciliation, the Phase 12 plan, the author handoff — runs AFTER the
-review ladder closes, per the coordinator's sequencing.)*
+reconciliation, the Phase 12 plan, the author handoff — runs on the
+coordinator's go now that the ladder is closed.)*

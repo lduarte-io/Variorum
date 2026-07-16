@@ -151,6 +151,11 @@ struct EditorCommands: Commands {
         guard let folder = ExportPanels.chooseFolder(prompt: "Export Library") else { return }
         Task { @MainActor in
             let exporter = ExportModel(session: session)
+            // Readings ride ALWAYS-ON at this face (round 2, recorded
+            // build-time call for the checkpoint walk: the ratified
+            // "optional folder views" is the manifest's includeReadings
+            // parameter — built and pinned; a user-facing toggle (accessory
+            // checkbox on the chooser) is a product-surface choice, hers).
             await exporter.writeBulkExport(to: folder)
             let message = exporter.lastError.map { "Export failed: \($0)" }
                 ?? exporter.lastReport ?? "Export finished."

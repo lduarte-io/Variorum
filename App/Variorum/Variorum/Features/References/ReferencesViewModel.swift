@@ -117,21 +117,37 @@ final class ReferencesViewModel {
     /// MAJOR 1): a plain bookmark grants zero sandbox access after
     /// relaunch, so silence here would be a delayed silent failure.
     func addFile(_ url: URL) async {
-        do {
-            let mint = try mintBookmark(url)
-            await run { ops in
-                _ = try ops.addReference(
-                    to: self.postID, kind: .file,
-                    name: url.lastPathComponent, fileBookmark: mint.data)
+        await addFiles([url])
+    }
+
+    /// A multi-select add is ONE batch: per-file degraded-mint notes and
+    /// failures ACCUMULATE (round 2 — `run()` clears `lastError` on each
+    /// success, so a later clean add would have erased an earlier file's
+    /// "without cross-launch access" warning: last-writer-wins inside one
+    /// gesture broke MAJOR 1's never-silent guarantee for mixed batches).
+    func addFiles(_ urls: [URL]) async {
+        var notes: [String] = []
+        for url in urls {
+            do {
+                let mint = try mintBookmark(url)
+                await run { ops in
+                    _ = try ops.addReference(
+                        to: self.postID, kind: .file,
+                        name: url.lastPathComponent, fileBookmark: mint.data)
+                }
+                if let failure = lastError {
+                    notes.append(failure)
+                } else if !mint.scoped {
+                    notes.append(
+                        "“\(url.lastPathComponent)” was added without cross-launch access "
+                        + "(the sandbox refused a security-scoped bookmark) — its preview may "
+                        + "stop working after the app relaunches; re-add it if so.")
+                }
+            } catch {
+                notes.append("\(url.lastPathComponent): \(String(describing: error))")
             }
-            if !mint.scoped, lastError == nil {
-                lastError = "“\(url.lastPathComponent)” was added without cross-launch access "
-                    + "(the sandbox refused a security-scoped bookmark) — its preview may stop "
-                    + "working after the app relaunches; re-add it if so."
-            }
-        } catch {
-            lastError = String(describing: error)
         }
+        lastError = notes.isEmpty ? nil : notes.joined(separator: " ")
     }
 
     func remove(_ id: String) async {

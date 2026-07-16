@@ -36,7 +36,8 @@ final class ImportModel {
     /// Plain-prose files only — the pipeline treats contents verbatim
     /// (headings stay Markdown in block text, AppSpec §14.8; nothing is
     /// parsed). Anything else is skipped with a visible note.
-    static let importableExtensions: Set<String> = ["md", "markdown", "txt", "text"]
+    /// Nonisolated: the detached file reader filters by it.
+    nonisolated static let importableExtensions: Set<String> = ["md", "markdown", "txt", "text"]
 
     init(session: AppSession) {
         self.session = session
@@ -51,26 +52,13 @@ final class ImportModel {
     /// single `withCompound`, with per-file failures caught INSIDE the
     /// compound body so one bad file never unwinds its siblings.
     func importFiles(_ urls: [URL], into destination: Destination) async {
-        var readable: [(name: String, title: String, text: String)] = []
-        var skipped: [String] = []
-        for url in urls {
-            guard Self.importableExtensions.contains(url.pathExtension.lowercased()) else {
-                skipped.append("\(url.lastPathComponent) (not plain text)")
-                continue
-            }
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            guard let data = try? Data(contentsOf: url) else {
-                skipped.append("\(url.lastPathComponent) (unreadable)")
-                continue
-            }
-            // Forgiving decode: UTF-8, else lossy (an import should not die
-            // on one stray byte; the author sees the result immediately).
-            let text = String(data: data, encoding: .utf8)
-                ?? String(decoding: data, as: UTF8.self)
-            readable.append(
-                (url.lastPathComponent, url.deletingPathExtension().lastPathComponent, text))
-        }
+        // The reads run DETACHED (review round 2 — the same class as the
+        // export writer's round-1 fix: the model is MainActor-isolated, so
+        // N synchronous Data(contentsOf:) reads would hitch the run loop
+        // for a large drop).
+        let loaded = await Task.detached { Self.readFiles(urls) }.value
+        let readable = loaded.readable
+        var skipped = loaded.skipped
 
         var imported = 0
         if !readable.isEmpty {
@@ -118,31 +106,88 @@ final class ImportModel {
 
     /// The drop entry point: file URLs and plain text, the declared types.
     /// Returns whether anything was accepted; the loads complete async and
-    /// the report lands on this observable.
+    /// the report lands on this observable. **All provider loads are
+    /// COLLECTED FIRST, then imported as one batch** (review round 2,
+    /// MINOR — a Finder drag delivers one provider per file, and the
+    /// round-1 per-provider tasks made an N-file drop N gestures: N undo
+    /// entries, N overwritten reports; the compound and the aggregated
+    /// report only exist per `importFiles` CALL, so the door must call it
+    /// once).
     func handleDrop(_ providers: [NSItemProvider], into destination: Destination) -> Bool {
-        var urls: [NSItemProvider] = []
-        var texts: [NSItemProvider] = []
+        var urlProviders: [NSItemProvider] = []
+        var textProviders: [NSItemProvider] = []
         for provider in providers {
             if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
-                urls.append(provider)
+                urlProviders.append(provider)
             } else if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
-                texts.append(provider)
+                textProviders.append(provider)
             }
         }
-        guard !urls.isEmpty || !texts.isEmpty else { return false }
+        guard !urlProviders.isEmpty || !textProviders.isEmpty else { return false }
 
-        for provider in urls {
+        // One task (created HERE, so the caller's task-locals ride along),
+        // awaiting every load before the single batched import call.
+        Task { @MainActor in
+            var urls: [URL] = []
+            for provider in urlProviders {
+                if let url = await Self.loadFileURL(provider) {
+                    urls.append(url)
+                }
+            }
+            if !urls.isEmpty {
+                await importFiles(urls, into: destination)
+            }
+            for provider in textProviders {
+                if let text = await Self.loadPlainText(provider) {
+                    await importText(text, into: destination)
+                }
+            }
+        }
+        return true
+    }
+
+    /// The file-reading half, off-main: extension filter, security-scoped
+    /// read, forgiving decode (UTF-8, else lossy — an import should not
+    /// die on one stray byte; the author sees the result immediately).
+    nonisolated private static func readFiles(
+        _ urls: [URL]
+    ) -> (readable: [(name: String, title: String, text: String)], skipped: [String]) {
+        var readable: [(name: String, title: String, text: String)] = []
+        var skipped: [String] = []
+        for url in urls {
+            guard importableExtensions.contains(url.pathExtension.lowercased()) else {
+                skipped.append("\(url.lastPathComponent) (not plain text)")
+                continue
+            }
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            guard let data = try? Data(contentsOf: url) else {
+                skipped.append("\(url.lastPathComponent) (unreadable)")
+                continue
+            }
+            let text = String(data: data, encoding: .utf8)
+                ?? String(decoding: data, as: UTF8.self)
+            readable.append(
+                (url.lastPathComponent, url.deletingPathExtension().lastPathComponent, text))
+        }
+        return (readable, skipped)
+    }
+
+    nonisolated private static func loadFileURL(_ provider: NSItemProvider) async -> URL? {
+        await withCheckedContinuation { continuation in
             provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier) { item, _ in
                 let url: URL? = switch item {
                 case let data as Data: URL(dataRepresentation: data, relativeTo: nil)
                 case let url as URL: url
                 default: nil
                 }
-                guard let url else { return }
-                Task { @MainActor in await self.importFiles([url], into: destination) }
+                continuation.resume(returning: url)
             }
         }
-        for provider in texts {
+    }
+
+    nonisolated private static func loadPlainText(_ provider: NSItemProvider) async -> String? {
+        await withCheckedContinuation { continuation in
             provider.loadItem(forTypeIdentifier: UTType.plainText.identifier) { item, _ in
                 let text: String? = switch item {
                 case let data as Data: String(data: data, encoding: .utf8)
@@ -150,11 +195,9 @@ final class ImportModel {
                 case let string as NSString: string as String
                 default: nil
                 }
-                guard let text else { return }
-                Task { @MainActor in await self.importText(text, into: destination) }
+                continuation.resume(returning: text)
             }
         }
-        return true
     }
 
     // MARK: - Internals
@@ -179,11 +222,18 @@ final class ImportModel {
         }
     }
 
+    /// Speaking refusal copy (round 2 — fire-and-speak wants words, not
+    /// enum cases): the two refusals a drop can actually hit get prose;
+    /// anything else falls back to the raw description (diagnosable).
     nonisolated private static func describeImportError(_ error: any Error) -> String {
-        if let operationError = error as? OperationError, operationError == .emptyImport {
+        switch error {
+        case OperationError.emptyImport:
             return "nothing to import"
+        case OperationError.lockedPost:
+            return "the destination is sealed — unseal it first"
+        default:
+            return String(describing: error)
         }
-        return String(describing: error)
     }
 
     private func report(imported: Int, skipped: [String], into destination: Destination) {
