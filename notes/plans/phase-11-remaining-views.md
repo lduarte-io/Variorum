@@ -1706,3 +1706,41 @@ reference reopen (the cross-launch bookmark proof on a real user file).
 Phase 12's execution plan is authored from `phase-12-brief.md` at this
 closeout (`notes/plans/phase-12-hardening.md`); the master plan's row
 11b is done and the pointer moves to Phase 12.
+
+### Checkpoint ratification round (2026-07-16, the author via the coordinator)
+
+- **QUESTIONS #22c ANSWERED — INCLUDE POOLS in bulk export** (her pick
+  of the round-1 reviewer's first shape), **BUILT at the checkpoint**
+  per the 11a A9 precedent (her ruling built the same session, kept
+  surgical): `bulkExportManifest` gains one `Pools/<sanitized title>.md`
+  per live pool — scraps rendered in the pool's own listing order
+  (`Queries.pools`, the one listing brain) through the same
+  `joinRenderedTexts` semantics (a pool is a container; no bespoke
+  shape); collision handling and totality reasoning identical to posts
+  (untitled → "Untitled"; id-suffix on case-insensitive collision;
+  tombstoned pools absent). Pools ride TOTALITY, not the
+  `includeReadings` toggle. **Pins:** the totality pin extended (every
+  live pool exactly once; the deleted pool nowhere) + the new
+  `poolExportsRenderScrapsInPoolOrderWithCollisionHandling` (the Pools/
+  shape incl. stored spacing and disambiguation). NO other behavior
+  changed.
+- **QUESTIONS #20 RATIFIED AS SHIPPED** — reference drag-out is a
+  gesture-style copy, NO lineage edge (provenance would be a schema
+  event, hers if ever wanted).
+- **QUESTIONS #21 RATIFIED AS SHIPPED** — the attributed-string →
+  CTFramesetter PDF path; Phase 13 owns typography.
+- **QUESTIONS #22a RATIFIED AS SHIPPED** — a pool drop lands as scraps
+  in that pool.
+- **QUESTIONS #22b RATIFIED AS SHIPPED** — bulk export includes archived
+  posts under `Archived/`; deleted posts never export.
+- **Build-time calls RATIFIED:** includeReadings ALWAYS-ON at the bulk
+  face (she was offered the accessory checkbox and ratified always-on);
+  READ-ONLY bookmark scope at mint; the block export filename derived
+  from the read-time handle. The remaining recorded calls (alternates
+  placement/markers, reading heading levels, bulk filename scheme,
+  block-export-.md-only, the File-menu import twin, `importBlocks`
+  door-agnosticism) stand unobjected with the bundle.
+- All three QUESTIONS entries marked ANSWERED. **Post-ratification
+  counts: core 651 green in 77 suites · Mac 380 green in 68 suites ·
+  mobile 11 green in 4 suites.** THE PHASE REMAINS CLOSED; these counts
+  supersede the closeout's as the Phase 12 baselines.

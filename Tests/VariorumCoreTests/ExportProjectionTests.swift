@@ -251,6 +251,14 @@ struct ExportProjectionTests {
             try ops.deleteContainer(deleted.id)
             let reading = try ops.createReading(name: "Shelf", kind: .curated)
             try ops.addPostToReading(live.id, to: reading.id)
+            // Pools join the totality (author ruling 2026-07-16, #22c):
+            // every live pool exactly once; a tombstoned pool absent.
+            let pool = try ops.createPool(title: "Scraps")
+            try ops.newBlock(in: pool.id, text: "Scrap one.")
+            try ops.newBlock(in: pool.id, text: "Scrap two.")
+            let deadPool = try ops.createPool(title: "Old Pool")
+            try ops.newBlock(in: deadPool.id, text: "Dead scrap.")
+            try ops.deleteContainer(deadPool.id)
 
             let manifest = try db.read { try Queries.bulkExportManifest($0) }
             let paths = manifest.map(\.relativePath)
@@ -258,17 +266,20 @@ struct ExportProjectionTests {
                 "2026-07-10 Kept.md",
                 "2026-07-11.md",
                 "Archived/2026-07-12 Shelved.md",
+                "Pools/Scraps.md",
                 "Readings/Shelf.md",
             ])
             #expect(manifest[0].contents == "Kept body.")
             #expect(manifest[1].contents == "Dated body.")
             #expect(manifest[2].contents == "Shelved body.")
-            #expect(manifest[3].contents.contains("# Shelf"))
-            #expect(manifest[3].contents.contains("Kept body."))
-            // Totality: the deleted post is nowhere.
+            #expect(manifest[3].contents == "Scrap one.\n\nScrap two.")
+            #expect(manifest[4].contents.contains("# Shelf"))
+            #expect(manifest[4].contents.contains("Kept body."))
+            // Totality: the deleted post and the deleted pool are nowhere.
             #expect(!manifest.contains { $0.contents.contains("Gone body.") })
+            #expect(!manifest.contains { $0.contents.contains("Dead scrap.") })
 
-            // Readings are the optional folder view.
+            // Readings are the optional folder view; pools ride totality.
             let bare = try db.read {
                 try Queries.bulkExportManifest($0, includeReadings: false)
             }
@@ -276,7 +287,34 @@ struct ExportProjectionTests {
                 "2026-07-10 Kept.md",
                 "2026-07-11.md",
                 "Archived/2026-07-12 Shelved.md",
+                "Pools/Scraps.md",
             ])
+        }
+    }
+
+    @Test func poolExportsRenderScrapsInPoolOrderWithCollisionHandling() throws {
+        try withOperations { ops, db in
+            // The Pools/ shape (author ruling 2026-07-16, #22c): the pool's
+            // blocks through the one join brain — stored spacing included.
+            let pool = try ops.createPool(title: "Ideas")
+            try ops.newBlock(in: pool.id, text: "First scrap.\n")
+            try ops.newBlock(in: pool.id, text: "Second scrap.")
+            // An untitled pool and a same-named pool disambiguate like posts.
+            let untitled = try ops.createPool(title: nil)
+            try ops.newBlock(in: untitled.id, text: "Loose thought.")
+            let twin = try ops.createPool(title: "ideas")
+            try ops.newBlock(in: twin.id, text: "Twin scrap.")
+
+            let manifest = try db.read { try Queries.bulkExportManifest($0) }
+            let poolFiles = manifest.filter { $0.relativePath.hasPrefix("Pools/") }
+            #expect(poolFiles.map(\.relativePath) == [
+                "Pools/Ideas.md",
+                "Pools/Untitled.md",
+                "Pools/ideas \(twin.id.prefix(8)).md",
+            ])
+            #expect(poolFiles[0].contents == "First scrap.\n\nSecond scrap.")
+            #expect(poolFiles[1].contents == "Loose thought.")
+            #expect(poolFiles[2].contents == "Twin scrap.")
         }
     }
 

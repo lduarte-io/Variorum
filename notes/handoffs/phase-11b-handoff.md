@@ -48,10 +48,11 @@ self-contained: a fresh session can answer your questions from it alone.
    ordinary journaling and editing are unaffected. (The mirror is
    already at lockstep v2; the un-updated phone keeps syncing normally.)
 
-4. **☐ The ratify walk (QUESTIONS #20–#22 + build-time calls)** — five
-   minutes with any session; details below. Only **#22c needs a real
-   decision** (pool scraps in bulk export); the rest are
-   confirm-or-redirect.
+4. **☑ The ratify walk — DONE (2026-07-16, via the coordinator).** You
+   ratified #20/#21/#22a–b and the build-time calls as shipped, and
+   answered **#22c: INCLUDE POOLS** — bulk export now writes
+   `Pools/<title>.md` per live pool (built + pinned the same session).
+   Nothing left to walk; the resolutions section below is the record.
 
 5. **☐ Kick off Phase 12 when ready** — hardening & perf validation
    (what it is, below). You start it; nothing auto-advances. Note its
@@ -72,7 +73,8 @@ in the document flow and the other takes under a labeled
 `--- Alternates for this block ---` section (your labels quoted;
 unlabeled takes numbered). **Bulk export** is the no-lock-in principle
 made real: File ▸ Export Library… writes every live post exactly once —
-archived posts included under `Archived/` — plus per-reading view files.
+archived posts included under `Archived/`, **pool scraps under `Pools/`
+(your #22c ruling at the checkpoint)** — plus per-reading view files.
 Nothing in any export path ever writes to your store (pinned by test).
 
 **Import (B2).** Drop `.md`/plain text on the sidebar → a new post,
@@ -131,38 +133,30 @@ landed with a test that provably failed on the pre-fix code.
 11 / 4 — all green.** No schema change this phase (nothing new to
 deploy; the lockstep state is untouched).
 
-## The ratify walk (QUESTIONS #20–#22)
+## The ratify walk — RESOLVED (2026-07-16, your rulings via the coordinator)
 
-- **#20 — PDF drag-out has no lineage edge.** The spec says dragged
-  reference text "lands as a pool-drag-style copy," but a reference
-  isn't a block — there's nothing for a `derived_from` edge to point
-  from. Shipped: the gesture works, the text is ordinary text, no
-  provenance row. If you ever want "where did this quote come from,"
-  that's a schema addition (your call, a lockstep event).
-- **#21 — the PDF export path.** Plain text set in the system font,
-  paginated onto US-Letter pages. Deliberately basic; Phase 13 owns
-  typography.
-- **#22a — a drop on the pool lands IN the pool** (as scraps), not as a
-  new post. The written letter said "new post" for both doors; a pool
-  drop minting a post elsewhere seemed senseless. Confirm or redirect.
-- **#22b — bulk export includes archived posts** (under `Archived/`).
-  Archive means kept-out-of-view, not gone — and "their work is always
-  theirs to download" seemed to demand totality. Deleted posts do NOT
-  export.
-- **#22c — OPEN, needs your call: pool scraps are NOT in bulk export.**
-  The ratified words were "every live post" — pools aren't posts — but
-  the review pointed out your scraps are your work too, and today no
-  export door reaches them at all. Options: `Pools/<title>.md` joins the
-  bulk manifest, or the exclusion is recorded as deliberate. One small
-  change + one test either way.
-- **Build-time calls (confirm-or-redirect list):** alternates sections
-  sit inline right after their block; reading exports use
-  `# reading / ## section / ### post` headings; bulk filenames are
-  "`<date> <title>.md`" with an id suffix on collisions; block export is
-  .md-only (no one-block PDF); reference bookmarks are READ-ONLY scope
-  (references are viewing aids — if a future phase ever annotates files,
-  this is the line to revisit); bulk export always includes the
-  `Readings/` folder (a toggle would be a UI choice — yours if wanted).
+- **#20 — RATIFIED AS SHIPPED.** PDF drag-out is a gesture-style copy
+  with no lineage edge (a reference isn't a block, so there's nothing
+  for `derived_from` to point from). If you ever want "where did this
+  quote come from," that's a schema addition — your call, a lockstep
+  event.
+- **#21 — RATIFIED AS SHIPPED.** The basic PDF path (system font,
+  US-Letter pagination); Phase 13 owns typography.
+- **#22a — RATIFIED AS SHIPPED.** A drop on the pool lands IN the pool
+  as scraps; the library drop mints the post.
+- **#22b — RATIFIED AS SHIPPED.** Bulk export includes archived posts
+  under `Archived/`; deleted posts never export.
+- **#22c — ANSWERED: INCLUDE POOLS (built at the checkpoint).** Bulk
+  export now writes one `Pools/<title>.md` per live pool — your scraps
+  in pool order, same join rules, same collision handling; tombstoned
+  pools excluded. Pinned by test the same session.
+- **Build-time calls — RATIFIED:** includeReadings always-on at the
+  bulk face (you were offered a checkbox and kept always-on); read-only
+  bookmark scope (references are viewing aids — if a future phase ever
+  annotates files, that's the line to revisit); block export's filename
+  from the block's handle; the rest (alternates placement/markers,
+  reading heading levels, bulk filename scheme, block-export-.md-only,
+  the File-menu import twin) stand with the bundle.
 
 ## What Phase 12 is (you kick it off)
 

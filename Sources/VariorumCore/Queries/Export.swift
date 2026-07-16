@@ -188,6 +188,13 @@ extension Queries {
     ///   archived-entries-stay-push-eligible doctrine). Tombstoned posts do
     ///   not export (deleted is deleted; the SQLite file stays the lossless
     ///   archive).
+    /// - **Pool scraps are included**, under `Pools/` (author ruling
+    ///   2026-07-16, QUESTIONS #22c — scraps are her work; the round-1
+    ///   MINOR's first shape): one `Pools/<title>.md` per live pool, its
+    ///   scraps rendered in the pool's own listing order through the same
+    ///   join semantics (a pool is a container — one traversal, no bespoke
+    ///   shape). Every live pool lands exactly once; tombstoned pools do
+    ///   not export.
     /// - **Readings as optional folder views** (`includeReadings`): one
     ///   `Readings/<name>.md` per live reading — the reading projection
     ///   above, a VIEW over the same posts (never a second copy of truth).
@@ -226,6 +233,19 @@ extension Queries {
             files.append(ExportFile(
                 relativePath: path,
                 contents: try renderedText(db, containerID: id)))
+        }
+
+        // Pools (author ruling 2026-07-16, #22c): through the ONE pools
+        // listing (`Queries.pools`, created_at order); contents are the
+        // ordinary container projection — scraps in pool order.
+        for pool in try pools(db) {
+            let base = sanitizedFilename(pool.title ?? "")
+            let path = uniquePath(
+                base: "Pools/\(base.isEmpty ? "Untitled" : base)",
+                id: pool.id, used: &usedPaths)
+            files.append(ExportFile(
+                relativePath: path,
+                contents: try renderedText(db, containerID: pool.id)))
         }
 
         if includeReadings {
