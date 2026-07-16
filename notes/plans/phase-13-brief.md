@@ -20,6 +20,16 @@
 - TK1 ban, canary, spike re-run per point release — all unchanged. No new third-party
   dependencies without the author (design-system/UI packages included).
 
+## Author design-reference note (2026-07-16, at the 11b kickoff)
+
+The Phase 11 kickoff mockups (`Spikes/Phase11Mockups/mockups.html` + `mockups-v2.html`,
+committed at `924f591`) are a liked visual reference: the author's words at the 11b
+kickoff — she "quite liked their appearance," and "they still look nicer than the app,"
+acknowledging the UI stage hasn't arrived yet. When this phase's design sessions start,
+open those pages beside the app: they are the one existing artifact of her visual taste
+for this product (captioned sections, the takes/lens presentation). Reference, not
+contract — the just-in-time plan weighs them like everything else in this sketch.
+
 ## Process shape (leaning — differs from /run-phase deliberately)
 
 The implement→cold-review→adjudicate loop fits poorly here: design is *iterative with the
