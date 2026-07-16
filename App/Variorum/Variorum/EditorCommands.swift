@@ -10,6 +10,7 @@
 //  serialization note).
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -30,6 +31,16 @@ struct EditorCommands: Commands {
                 session?.editorRouter.active?.commitCaretVariant()
             }
             .keyboardShortcut("s", modifiers: .command)
+        }
+        // Phase 11b (B1): the File-menu export doors — the bulk gesture
+        // (the whole library, ONE gesture — the no-lock-in principle) and
+        // the caret block's single-block export. Projections and shapes
+        // live in Queries; panels are the author-visible moments.
+        CommandGroup(after: .importExport) {
+            Button("Export Library…") { exportLibrary() }
+                .disabled(session == nil)
+            Button("Export Block as Markdown…") { exportCaretBlock() }
+                .disabled(session?.editorRouter.active?.caretBlockID == nil)
         }
         CommandGroup(after: .undoRedo) {
             // Per-op labels (Phase 9, KnownIssues entry): the stack's change
@@ -104,6 +115,43 @@ struct EditorCommands: Commands {
     /// Extract", … — generic when the stack is empty).
     static func undoMenuTitle(for topLabel: String?) -> String {
         topLabel.map { "Undo \($0)" } ?? "Undo Structural Change"
+    }
+
+    // MARK: - Export doors (Phase 11b, B1)
+
+    private func exportLibrary() {
+        guard let session else { return }
+        guard let folder = ExportPanels.chooseFolder(prompt: "Export Library") else { return }
+        Task { @MainActor in
+            let exporter = ExportModel(session: session)
+            await exporter.writeBulkExport(to: folder)
+            let message = exporter.lastError.map { "Export failed: \($0)" }
+                ?? exporter.lastReport ?? "Export finished."
+            if let editor = session.editorRouter.active {
+                editor.showStatus(message)
+            } else {
+                let alert = NSAlert()
+                alert.messageText = "Export Library"
+                alert.informativeText = message
+                alert.runModal()
+            }
+        }
+    }
+
+    private func exportCaretBlock() {
+        guard let session, let editor = session.editorRouter.active,
+              let blockID = editor.caretBlockID else { return }
+        guard let url = ExportPanels.saveFile(
+            defaultName: "Block.md", type: .markdownFile) else { return }
+        Task { @MainActor in
+            let exporter = ExportModel(session: session)
+            if let markdown = await exporter.markdown(forBlock: blockID) {
+                exporter.writeMarkdown(markdown, to: url)
+            }
+            editor.showStatus(
+                exporter.lastError.map { "Export failed: \($0)" }
+                    ?? exporter.lastReport ?? "Export finished.")
+        }
     }
 
     private func structuralUndo() {

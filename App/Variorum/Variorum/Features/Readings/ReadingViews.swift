@@ -8,6 +8,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 import VariorumCore
 
 /// The sidebar's Readings section; selecting a reading opens the book view.
@@ -102,8 +103,31 @@ struct ReadingsSection: View {
             }
         }
         Divider()
+        // Export doors (Phase 11b, B1): a reading exports as ONE document —
+        // the shape lives in Queries.exportReading, never here.
+        Button("Export Markdown…") { exportReading(reading, asPDF: false) }
+        Button("Export PDF…") { exportReading(reading, asPDF: true) }
+        Divider()
         Button("Delete Reading", role: .destructive) {
             Task { await model.delete(reading.id) }
+        }
+    }
+
+    private func exportReading(_ reading: Reading, asPDF: Bool) {
+        let name = Queries.sanitizedFilename(reading.name)
+        let base = name.isEmpty ? "Untitled" : name
+        guard let url = ExportPanels.saveFile(
+            defaultName: "\(base).\(asPDF ? "pdf" : "md")",
+            type: asPDF ? .pdf : .markdownFile) else { return }
+        Task {
+            let exporter = ExportModel(session: session)
+            if asPDF {
+                if let data = await exporter.pdfData(forReading: reading.id) {
+                    exporter.writePDF(data, to: url)
+                }
+            } else if let markdown = await exporter.markdown(forReading: reading.id) {
+                exporter.writeMarkdown(markdown, to: url)
+            }
         }
     }
 

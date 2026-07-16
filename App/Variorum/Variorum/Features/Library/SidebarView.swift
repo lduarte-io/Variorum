@@ -10,6 +10,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 import VariorumCore
 
 /// What the sidebar can select; the detail pane switches on it.
@@ -38,6 +39,9 @@ struct SidebarView: View {
     @State private var renameTarget: RenameTarget?
     @State private var renameTitle = ""
     @State private var tagSheetTarget: TagSheetTarget?
+    /// Phase 11b (B1): the last export gesture's report or error — the
+    /// export model itself is per-gesture (one-shot projections).
+    @State private var exportStatus: String?
 
     private struct RenameTarget: Identifiable {
         let id: String
@@ -129,8 +133,53 @@ struct SidebarView: View {
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
                     .padding(4)
+            } else if let status = exportStatus {
+                Text(status)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                    .padding(4)
             }
         }
+    }
+
+    // MARK: - Export doors (Phase 11b, B1 — one-way projections)
+
+    /// Post export: save panel first (the author-visible moment), then the
+    /// projection reads and writes. All shapes live in Queries — no join or
+    /// section is decided here.
+    private func exportPost(_ item: Queries.TimelineItem, includeVariants: Bool) {
+        let name = defaultFileName(item)
+        guard let url = ExportPanels.saveFile(
+            defaultName: "\(name).md", type: .markdownFile) else { return }
+        Task {
+            let exporter = ExportModel(session: session)
+            if let markdown = await exporter.markdown(
+                forPost: item.postID, includeVariants: includeVariants) {
+                exporter.writeMarkdown(markdown, to: url)
+            }
+            exportStatus = exporter.lastError ?? exporter.lastReport
+        }
+    }
+
+    private func exportPostPDF(_ item: Queries.TimelineItem) {
+        let name = defaultFileName(item)
+        guard let url = ExportPanels.saveFile(
+            defaultName: "\(name).pdf", type: .pdf) else { return }
+        Task {
+            let exporter = ExportModel(session: session)
+            if let data = await exporter.pdfData(forPost: item.postID) {
+                exporter.writePDF(data, to: url)
+            }
+            exportStatus = exporter.lastError ?? exporter.lastReport
+        }
+    }
+
+    private func defaultFileName(_ item: Queries.TimelineItem) -> String {
+        let title = Queries.sanitizedFilename(item.title ?? "")
+        if !title.isEmpty { return title }
+        if let day = item.entryDate, !day.isEmpty { return day }
+        return "Untitled"
     }
 
     /// The shared per-post context menu (journal and library rows alike —
@@ -158,6 +207,14 @@ struct SidebarView: View {
         }
         Button("Duplicate as Version") {
             Task { await model.duplicateAsVersion(postID: item.postID) }
+        }
+        Divider()
+        // Export doors (Phase 11b, B1 — the ratified shapes; one-way
+        // projections, the save panel is the author-visible moment).
+        Menu("Export") {
+            Button("Markdown…") { exportPost(item, includeVariants: false) }
+            Button("Markdown with Takes…") { exportPost(item, includeVariants: true) }
+            Button("PDF…") { exportPostPDF(item) }
         }
         Divider()
         // The lifecycle faces (Step 8): archive is kept-out-of-view; delete
