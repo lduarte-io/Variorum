@@ -1658,6 +1658,51 @@ in 4 suites** (pre-round: 650/77 · 378/68 · 11/4 — +2 Mac pins:
 ImportFacesTests +1, ReferencePanelTests +1). **The ladder closes at
 round 2 with zero new HIGH findings.**
 
-*(B4's closeout ritual — master-plan row + pointer, KnownIssues
-reconciliation, the Phase 12 plan, the author handoff — runs on the
-coordinator's go now that the ladder is closed.)*
+### 11b CLOSED — PHASE 11 CLOSED (2026-07-16)
+
+**Stage B is complete: B1–B3 shipped, the review ladder ran two rounds
+and CLOSED at round 2** (round 1: 1 BLOCKER / 2 MAJOR / 1 MINOR / 3 NIT
+— all agreed, all fixed with red-verified pins; round 2: 1 MINOR /
+5 NIT, ZERO new BLOCKER/MAJOR — the ladder rule's clean close; every
+disposition above, every bug-class fix red-verified by run or
+behavioral revert). **Final Stage B verification state — the Phase 12
+baselines: core `swift test` 650 green in 77 suites · Mac app 380 green
+in 68 suites · mobile 11 green in 4 suites.** The import/export
+round-trip pins hold (import→export byte-exact; export→import→export
+byte-stable with the recorded moduli); export purity, the conditional
+join, import one-way-ness, and the bookmark exclusion were each
+independently re-verified by both reviewers.
+
+The round-1 BLOCKER deserves its one-line moral for future phases: a
+capability's FIRST use (here: the app's first user-selected writes and
+first app-scoped bookmarks) is where its missing entitlement surfaces,
+and container-internal tests cannot see it — the 9c-finding-3 class,
+now guarded permanently by `EntitlementsTests` reading the signed
+host's real entitlement set.
+
+**PROVISIONALs for the checkpoint walk (QUESTIONS #20–#22 + build-time
+calls):**
+- **#20** — reference drag-out = gesture-style copy, NO lineage edge.
+- **#21** — the PDF path (attributed-string → CTFramesetter).
+- **#22a** — a pool drop lands as scraps in that pool.
+- **#22b** — bulk export includes archived posts under `Archived/`.
+- **#22c** — pool scraps in bulk export: manifest inclusion vs recorded
+  exclusion (OPEN product call — the round-1 MINOR).
+- Build-time calls recorded in the Stage B sections above: inline
+  alternates placement + the section marker text; reading heading
+  levels; bulk filename scheme + id-suffix collisions;
+  block-export-.md-only; the File-menu import twin; `importBlocks`
+  door-agnosticism; **read-only bookmark scope at mint**
+  (coordinator-approved); **includeReadings ALWAYS-ON at the bulk face**
+  (round 2 — the accessory-checkbox alternative named, hers).
+
+**Deploy state unchanged by 11b** (no schema change): the mirror stays
+at lockstep v2; the PHONE's one-time updated install remains the
+author's open action from 11a — no lens/canvas/name writes until it
+lands. The author handoff (`notes/handoffs/phase-11b-handoff.md`)
+carries the real-file/TCC walk INCLUDING the quit-and-relaunch
+reference reopen (the cross-launch bookmark proof on a real user file).
+
+Phase 12's execution plan is authored from `phase-12-brief.md` at this
+closeout (`notes/plans/phase-12-hardening.md`); the master plan's row
+11b is done and the pointer moves to Phase 12.
