@@ -1275,3 +1275,184 @@ The SyncSpec §12 choreography, as run:
   two-thirds complete (mirror v2 + Mac installed; the PHONE install is the
   author's one open action — no lens/canvas/name writes until it lands).
   THE PHASE IS CLOSED; Phase 11b awaits her kickoff.
+
+### Stage B implementation record (2026-07-16, single Fable implementer session — Steps B1–B3 + the verification gate; the review ladder's anchor)
+
+**Run shape:** B1 → B2 → B3 in order, one commit per step, each step's
+suites green before its commit; the FULL three suites re-ran green at the
+gate (counts below). **NO schema change** (the coordinator's scoping note
+confirmed at the letter: the `reference` table and its operations have
+existed since v1/Phase 2; nothing Stage B needed a new column — no §12
+lockstep event, nothing gated on the author's pending phone install).
+Baselines inherited from 11a: core 628/74 · Mac 357/64 · mobile 11/4.
+
+#### Step B1 — export, the ratified shapes (commit `68b165b`)
+- **Core `Queries/Export.swift`** — pure read-side projections, ALL through
+  `joinRenderedTexts` (review focus 2's letter: `exportPost` without
+  variants IS `renderedText` — the same call, pinned equal — so the
+  2026-07-12 conditional join and blank-take skip are inherited, never
+  re-implemented; stored spacing exports byte-exact).
+  - `exportPost(includeVariants:)` — chosen takes in place; with variants,
+    each fanned block's **"Alternates for this block" section follows the
+    block IN PLACE** (build-time call: the literal "renders in place;
+    alternates follow" reading — the single-block shape repeated, one
+    brain; an appendix-at-end alternative was considered and rejected as
+    needing invented block identifiers). Section markers, exact:
+    `--- Alternates for this block ---` … `--- end alternates ---`;
+    labeled takes as `take: "<label>"`, unlabeled numbered by 1-based
+    ordinal among the block's alternates in fan order. Alternates = live
+    ACTIVE takes minus the rendered one, **blank takes skipped** (the
+    blank-take doctrine applied to the section — build-time call) and
+    **archived takes excluded** (out of the fan; the Phase 14 variorum
+    edition is the full-fidelity tier). A fanned block whose CHOSEN take
+    is blank still emits its section under includeVariants (the takes are
+    the author's work; the blank chosen skips as ever) — build-time call.
+  - `exportBlock` — the read-time rule block-scoped (live placement's
+    chosen else live default; an unplaced lineage block renders its
+    default — pinned via a merge-released block); fanned → the same
+    section; dead/missing → empty (tolerant read).
+  - `exportReading` — ONE document: `# <name>`; posts under `## <title>`
+    (title else entry_date else "Untitled"); when the reading groups by a
+    tag root, section headings `## <sectionPath>` (nil-section posts under
+    `## Ungrouped`) with posts dropping to `###` — build-time call on the
+    heading levels; pieces joined through the one join brain; missing
+    reading → empty.
+  - `bulkExportManifest(includeReadings:)` — the ONE-gesture totality as
+    pure data (`ExportFile` = relative path + contents; the app face only
+    writes): every live post exactly once, filenames
+    `<date> <sanitized title>.md` (entry_date else the created day; date
+    alone when untitled — journal-friendly), **deterministic id-prefix-8
+    collision suffix** (case-insensitive tracking — APFS default);
+    **archived posts INCLUDED under `Archived/`** (QUESTIONS #22b — the
+    no-lock-in totality + the 9b archived-stays-projected doctrine;
+    tombstoned posts do NOT export — the SQLite file stays the lossless
+    archive); readings as the optional folder view (`Readings/<name>.md`,
+    the reading projection — a VIEW over the same posts, never a second
+    copy); bodies are the PLAIN projection ("folder of plain .md" — no
+    variants in bulk). `sanitizedFilename` public (the app's default
+    save-panel names derive from the same rule).
+- **App `Features/Export/`** — `PDFExporter` (QUESTIONS #21: the pure
+  attributed-string → CTFramesetter → CGPDFContext path; US Letter, 1-in
+  margins, system fonts — functional-unstyled, Phase 13 owns typography;
+  bold title line on post PDFs; ≥1 page always, pagination terminates by
+  construction); `ExportWriter` (manifest → files, intermediate dirs,
+  atomic writes); `ExportModel` (projections read off-main via the reader
+  pool; write-where-pointed; report/error surfaced); `ExportPanels`
+  (NSSavePanel/NSOpenPanel — thin, author-visible moments).
+- **Doors:** library/journal post context menu → Export ▸ Markdown… /
+  Markdown with Takes… / PDF…; reading context menu → Export Markdown… /
+  Export PDF…; File menu (CommandGroup after `.importExport`) → **Export
+  Library…** (folder chooser → bulk) and **Export Block as Markdown…**
+  (the caret block; block export is .md-only — a one-block PDF earns
+  nothing, recorded). Reports land in the sidebar status line / editor
+  status / an alert when no editor is focused.
+- **Tests:** `ExportProjectionTests` 11 (shape pins incl. exact fan
+  sections both labeled and numbered; the == renderedText pin; stored
+  spacing byte-exact; blank-chosen section; unplaced-block default;
+  grouped + ungrouped reading shapes; bulk totality/layout/collisions;
+  sanitizer; **NO export path writes rows** — row counts + sync_version
+  sum + empty outbox after every export path). Mac `ExportFacesTests` 5
+  (PDF is a real document carrying the text; long bodies paginate >1
+  page, empty = 1; bulk writer creates subfolders + exact contents;
+  ExportModel delivers core bytes unchanged and writes where pointed).
+
+#### Step B2 — import, drop-in (commit `3ebf942`)
+- **Core `Operations+Import.swift`** — TWO doors, one pipeline
+  (`SegmentationRules.bulkSegments` — the same class as paste/drop/
+  capture, so the 2026-07-12 spacing ruling rides for free), each ONE
+  transaction:
+  - `importPost(title:text:)` — the library door: a NEW post, segmented
+    by the global `default_segmentation` (a fresh post has no override);
+    shares `insertPost` with `createPost` (made internal — one mint
+    shape). Undo: `revertMintedContainer`, label "Import" (the copy-op
+    pattern; `restoreContainer` stays the recovery door — pinned
+    round-trip).
+  - `importBlocks(into:text:)` — the pool door: scraps appended at the
+    end of the EXISTING container per ITS effective segmentation
+    (override else setting else paragraph — the containerHeader chain);
+    sealed refuses (`ensureUnlocked`). Deliberately door-agnostic: any
+    live unsealed container is accepted at the ops boundary (the UI
+    decides which doors exist) — recorded. Undo:
+    `revertImportedBlocks` — exactly the minted blocks tombstoned,
+    `last_container_id` stamped (tray-reachable — pinned).
+  - Whitespace-only text refuses (`OperationError.emptyImport`, new
+    case) — nothing minted (pinned). Mints stamp touch + churn per the
+    ratified `newBlock` rule (one `registerTextChange` per minted block —
+    byte-identical semantics to N `newBlock` calls).
+  - **Round-trip pins:** import→export reproduces dropped bytes
+    (`"Alpha.\n\nBeta.\n\n\nGamma."` exact); export→import→export
+    byte-STABLE, with the recorded moduli — edge runs (leading/trailing
+    blank lines) drop; a single newline between paragraphs promotes to
+    the `"\n\n"` join on FIRST export (no stored trailing content) and is
+    stable thereafter. Sentence-mode global default honored (pinned).
+- **App `Features/Import/`** — `ImportModel`: `handleDrop` (file URLs +
+  plain text via NSItemProvider), `importFiles` (extension allowlist
+  md/markdown/txt/text — anything else skips VISIBLY; UTF-8 with lossy
+  fallback; title = filename sans extension; per-file skip reporting
+  never fails the whole drop; reads under the drag's security scope),
+  `importText`. **The dropped file is a ONE-WAY source: the model only
+  ever READS the URL** — pinned by bytes+mtime-unchanged (review focus
+  4). Doors: the sidebar List is the LIBRARY drop target; the pool's
+  rows/empty-hint/button carry DEEPER pool targets (deepest target wins —
+  drop ON the pool lands as scraps: QUESTIONS #22a, the letter's "new
+  post" read as the library case); File menu **Import Files…** (the
+  drop's keyboard-reachable twin, same operation — build-time call).
+- **Tests:** `ImportOperationTests` 8 (segmentation per global +
+  per-container defaults incl. one_block; spacing round-trips; empty
+  refuses both doors with zero mints; sealed refuses; touch stamped;
+  both undo shapes). Mac `ImportFacesTests` 4 (file→post with source
+  untouched — bytes + mtime; multi-file + non-text visible skip;
+  text→pool scraps; empty drop reports, zero mints).
+
+#### Step B3 — the reference panel (commit `e55ca03`)
+- **Core** — `Queries.references` (live rows by `(position, id)`) +
+  `AppDatabase.observeReferences`; NO new operations (add/remove/
+  reorder/view-state shipped Phase 2 — verified, reused).
+  **The `file_bookmark` exclusion RE-PINNED from the panel's own write
+  path** (`ReferencePanelQueryTests`): a reference created exactly as the
+  panel creates it (real bookmark bytes) reaches the outbox but its
+  `SyncRow` payload carries NO `file_bookmark` key while the local row
+  keeps the bytes — the plan's "verify, don't assume", verified.
+- **App `Features/References/`** — `ReferencesViewModel` (every gesture
+  one Phase 2 op; URL adds scheme-normalized https + host-named; file
+  adds mint a security-scoped bookmark at the author's open panel, with
+  a plain-bookmark fallback where scoping is unavailable; reorder = one
+  fractional move against the sibling anchor; `ReferenceViewState` —
+  extensible JSON page memory, unknown keys tolerated);
+  `ReferencePanel` in `PostDetailView`'s inspector (toggle beside the
+  mode picker; session UI state): **PDFKit** pane for PDFs (page memory
+  restored at load + persisted on `PDFViewPageChanged`; **selected text
+  drags OUT through the editor's existing drop path — gesture-style bulk
+  copy, NO lineage edge: PROVISIONAL, QUESTIONS #20**), **Quick Look**
+  for other files, **read-only WKWebView** + "Open in Browser" for URLs;
+  security scopes held per preview and released at panel teardown;
+  stale/unresolvable bookmarks degrade to a visible "can't be found"
+  state. EPUB/annotation/citation untouched (permanently out of scope).
+- **Tests:** core `ReferencePanelQueryTests` 3 (listing order/liveness/
+  scoping; the serializer pin; view-state round-trip through the op).
+  Mac `ReferencePanelTests` 5 (view-state JSON incl. tolerant + unknown
+  keys; URL normalization + refusal; bookmark mint→resolve round-trip on
+  a real temp file; remove/reorder through the UI path with tombstone
+  asserted; page memory persistence). The REAL-file/TCC moments (save
+  panels, a real PDF's grant + drag-out feel) are author-assist — the
+  handoff checklist carries them.
+
+#### Stage B verification gate (2026-07-16 — GREEN)
+- **Core `swift test`: 650 green in 77 suites** (11a baseline 628/74).
+- **Mac app: 371 green in 67 suites** (baseline 357/64) — full suite,
+  count line confirmed non-vacuous.
+- **Mobile: 11 green in 4 suites** (baseline matched; Stage B is
+  Mac-only surface + core, mobile untouched by design).
+- Import/export round-trip pinned in core (byte-stability + moduli).
+- No engine, bridge, or schema files touched beyond `Queries/` additions
+  and the two `Operations` files named above (the Sync/ rider never
+  engaged; `Bridge/` untouched — the bridge's projection already called
+  `joinRenderedTexts` and still does).
+- PROVISIONALs awaiting the checkpoint walk: QUESTIONS #20 (drag-out
+  lineage), #21 (PDF path), #22 (pool-drop destination; archived posts
+  in bulk export under `Archived/`).
+
+*(B4's closeout ritual — master-plan row + pointer, KnownIssues
+reconciliation, the Phase 12 plan, the author handoff — runs AFTER the
+review ladder closes, per the coordinator's sequencing; the rounds'
+dispositions land here first.)*
