@@ -168,9 +168,20 @@ struct EditorCommands: Commands {
     private func exportCaretBlock() {
         guard let session, let editor = session.editorRouter.active,
               let blockID = editor.caretBlockID else { return }
-        guard let url = ExportPanels.saveFile(
-            defaultName: "Block.md", type: .markdownFile) else { return }
+        let postID = editor.postID
         Task { @MainActor in
+            // Default filename from the block's read-time HANDLE (name else
+            // first sentence — the A6 tocHandle, one brain), through the
+            // same sanitize rule as every other export door (review round
+            // 1, NIT 2 — the literal "Block.md" was the odd one out).
+            let handle: String? = try? await session.database.read { db in
+                try Queries.blockTOC(db, post: postID)
+                    .first { $0.blockID == blockID }
+                    .map { Queries.tocHandle(name: $0.name, text: $0.text) }
+            }
+            guard let url = ExportPanels.saveFile(
+                defaultName: ExportModel.blockExportFileName(handle: handle),
+                type: .markdownFile) else { return }
             let exporter = ExportModel(session: session)
             if let markdown = await exporter.markdown(forBlock: blockID) {
                 exporter.writeMarkdown(markdown, to: url)

@@ -90,6 +90,16 @@ struct ExportFacesTests {
         }
     }
 
+    // MARK: - The block door's default filename (review round 1, NIT 2)
+
+    @Test func blockExportFileNameDerivesFromTheHandle() {
+        #expect(ExportModel.blockExportFileName(handle: "The first sentence.")
+            == "The first sentence.md")
+        #expect(ExportModel.blockExportFileName(handle: "a/b:c") == "a-b-c.md")
+        #expect(ExportModel.blockExportFileName(handle: nil) == "Block.md")
+        #expect(ExportModel.blockExportFileName(handle: "  ") == "Block.md")
+    }
+
     // MARK: - The model delivers the core projections unchanged
 
     @Test func exportModelDeliversTheCoreProjectionsAndWritesFiles() async throws {

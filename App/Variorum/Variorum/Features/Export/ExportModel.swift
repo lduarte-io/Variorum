@@ -20,8 +20,11 @@ import VariorumCore
 /// subfolders the relative paths name, one file each, atomically. Pure
 /// file I/O over pure data; tested directly.
 enum ExportWriter {
+    /// Nonisolated: the bulk gesture runs this DETACHED (round 1, NIT 3 —
+    /// file I/O never on the MainActor; the target defaults to MainActor
+    /// isolation).
     @discardableResult
-    static func write(_ files: [Queries.ExportFile], to root: URL) throws -> Int {
+    nonisolated static func write(_ files: [Queries.ExportFile], to root: URL) throws -> Int {
         for file in files {
             let destination = root.appendingPathComponent(file.relativePath)
             try FileManager.default.createDirectory(
@@ -90,18 +93,30 @@ final class ExportModel {
     }
 
     /// The ONE-gesture bulk export: the whole library as a folder of plain
-    /// `.md` (totality is the core projection's, pinned there).
+    /// `.md` (totality is the core projection's, pinned there). The file
+    /// I/O runs DETACHED (review round 1, NIT 3): the projection already
+    /// read off-main via the reader pool, but N file writes on the
+    /// MainActor would hitch the UI for the gesture's duration.
     func writeBulkExport(to root: URL, includeReadings: Bool = true) async {
         do {
             let manifest = try await session.database.read { db in
                 try Queries.bulkExportManifest(db, includeReadings: includeReadings)
             }
-            let count = try ExportWriter.write(manifest, to: root)
+            let count = try await Task.detached {
+                try ExportWriter.write(manifest, to: root)
+            }.value
             lastReport = "Exported \(count) file\(count == 1 ? "" : "s")."
             lastError = nil
         } catch {
             lastError = String(describing: error)
         }
+    }
+
+    /// The caret-block door's default filename: the block's read-time
+    /// handle through the one sanitize rule, "Block" when empty.
+    nonisolated static func blockExportFileName(handle: String?) -> String {
+        let base = Queries.sanitizedFilename(handle ?? "")
+        return "\(base.isEmpty ? "Block" : base).md"
     }
 
     // MARK: - Internals

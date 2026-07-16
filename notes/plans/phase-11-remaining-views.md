@@ -1452,7 +1452,135 @@ Baselines inherited from 11a: core 628/74 · Mac 357/64 · mobile 11/4.
   lineage), #21 (PDF path), #22 (pool-drop destination; archived posts
   in bulk export under `Archived/`).
 
+### Stage B review round 1 — dispositions (2026-07-16; 1 BLOCKER / 2 MAJOR / 1 MINOR / 3 NIT + a clean bill on export purity, the conditional join, import one-way-ness, and the bookmark exclusion — ALL EIGHT AGREED, all fixed-or-filed; the round-2 anchor)
+
+**BLOCKER (every save-panel export door dead in the sandboxed install —
+`ENABLE_USER_SELECTED_FILES = readonly`, and Stage B added the app's
+first-ever user-selected writes) — AGREED, fixed, RED-verified by run
+(commit `7e7948f`).** Mechanism self-verified: both app configs carried
+`readonly` (pbxproj 618/651); the documented powerbox rule refuses
+NSSavePanel display entirely without read-write, `ExportPanels.saveFile`
+maps any non-`.OK` to nil, and every caller treats nil as user-cancel —
+all six save doors silent no-ops, and bulk export's folder grant was
+read-only so `ExportWriter` writes denied. The Mac tests wrote only to
+`temporaryDirectory` (container-internal) and never crossed the powerbox
+— the 9c-finding-3 class (a capability's first use is where its missing
+entitlement surfaces), and the fix is the established Phase 7/8/9c
+target-defect class (the 9c network setting sits two lines above in the
+same blocks). **Fix:** `readwrite` in both configs. **Pin, RED state
+confirmed by run on the pre-fix settings:** `EntitlementsTests.
+userSelectedFilesAreReadWrite` reads the test host's REAL signed
+entitlements via `SecTaskCopyValueForEntitlement` — failed on `readonly`
+(transcripted), green after. No signing identity/provisioning surface
+(synthesized entitlement, automatic local signing).
+
+**MAJOR 1 (bookmark persistence unpinned — no `bookmarks.app-scope`
+entitlement; the plain fallback documented-dead across relaunch and
+silent) — AGREED, fixed, both pins verified (commits `7e7948f` +
+`a5e514e`).** (i) `Variorum.entitlements` created (outside the
+synchronized group, beside the xcodeproj) declaring
+`com.apple.security.files.bookmarks.app-scope`, wired via
+`CODE_SIGN_ENTITLEMENTS` in both configs — the established target-defect
+class; nothing touched signing identity/provisioning. **The merge
+verification the coordinator required — `codesign -d --entitlements` on
+the RELEASE build:** `app-sandbox` ✓ · `files.bookmarks.app-scope` ✓ ·
+`files.user-selected.read-write` ✓ · `network.client` (the 9c
+entitlement, survived) ✓ · `get-task-allow` (local dev automatic
+signing, expected) — the file MERGES with the synthesized ENABLE_*
+settings, replaces nothing. Pin `appScopedBookmarksAreDeclaredAndThe
+SandboxHolds` (RED on the pre-fix settings by run — transcripted) also
+guards the merge: sandbox + network must stay present. (ii) Bookmarks
+now mint `[.withSecurityScope, .securityScopeAllowOnlyReadAccess]` —
+**read-only scope, the coordinator-approved build-time call:** a
+reference is a §7 VIEWING AID, never written; page memory lives in
+`view_state` rows, never the file. Consequence recorded: if a future
+phase ever wants to annotate/write reference files, the mint option is
+the line to revisit (a product-call moment anyway). (iii) The
+plain-bookmark fallback is **visibly degraded** (the reference adds; the
+panel says "added without cross-launch access… re-add it if so" — a
+plain bookmark grants zero sandbox access after relaunch, documented,
+so silence was a delayed silent failure), via an injectable mint seam.
+**Pin RED-verified by behavioral revert** (`anUnscopedMintIsVisibly
+Degraded`: visibility line disabled ⇒ `lastError` nil ⇒ FAILED;
+restored ⇒ green). (iv) The handoff's real-file walk gains an explicit
+RELAUNCH step (re-open a PDF reference after quitting — the cross-launch
+grant proven on a real user file).
+
+**MAJOR 2 (`resolveFileURL` ran I/O + scope claims + observed-state
+mutation inside a View body; claims accrued unboundedly with no
+per-selection release; the comment claimed a release path that didn't
+exist) — AGREED, fixed, RED-verified by behavioral revert (commit
+`a5e514e`).** All three halves self-traced as plain code facts (my own
+code and my own overclaiming comment). **Fix (the finding's shape):**
+resolution + claiming moved to the panel's `.task(id: selection)` →
+`preparePreview` (release-previous → resolve → claim-once → failure
+recorded as `PreparedPreview` state, never a mutation during view
+update); `ReferencePreview` is now a PURE renderer; outstanding claims
+bounded by ONE preview by construction; `claimAccess` is claim-once per
+URL; the `accessedURLs` comment corrected to describe the real
+lifecycle. **Pins, RED states confirmed by behavioral revert (both
+reverts run and transcripted):** `preparingTheSameReferenceTwiceClaims
+Once` — unconditional-claim revert read count 3 (the pre-fix
+per-render accrual), green restored; `movingTheSelectionReleasesThe
+PreviousClaim` — no-release revert read count 2 with the stale claim
+retained, green restored. The failure-loop half stands as the reviewer
+framed it (plausible, not empirically confirmed) — moot under the fix:
+nothing resolves in body anymore.
+
+**MINOR (bulk export silently excludes every pool scrap; no pool export
+door exists) — AGREED, filed as directed, NO behavior change.** The
+shipped manifest matches the ratified letter ("every live post exactly
+once"), but the reviewer is right that this bundle's own #22b reasoning
+(no-lock-in totality surfaced archived posts) was not applied to pool
+scraps, which are equally her work. Per the coordinator's adjudication:
+QUESTIONS **#22 gains sub-item (c)** with the finding's two shapes
+verbatim ("`Pools/<title>.md` in the manifest, or an explicit recorded
+exclusion — one manifest addition + one test either way") — a product
+call for the checkpoint walk, deliberately not defaulted.
+
+**NIT 1 (QUESTIONS #16 stranded under the new 11b header) — AGREED,
+fixed (docs):** #16 moved into numeric position under its own "Phase
+9c (2026-07-10)" section between #15 and #17; the 11b walk list now
+scopes cleanly to #20–#22.
+
+**NIT 2 (block export's literal "Block.md" default) — AGREED, fixed:**
+the default now derives from the block's read-time HANDLE — the A6
+`Queries.tocHandle` (explicit name else first sentence; one brain,
+already pinned) through `sanitizedFilename` via
+`ExportModel.blockExportFileName` (pinned:
+`blockExportFileNameDerivesFromTheHandle`); the door fetches the handle
+through `Queries.blockTOC` (no inline SQL — the 11a review-focus-5
+discipline).
+
+**NIT 3 (bulk export wrote N files synchronously on the MainActor) —
+AGREED, fixed (traced-mechanism cleanliness; no pin owed per the
+architectural clause).** The trace, as required: `ExportModel` is
+`@MainActor` and the target defaults to MainActor isolation, so
+`ExportWriter.write`'s `createDirectory` + `Data.write(options:
+.atomic)` loop — N synchronous filesystem calls — executed on the main
+thread inside `writeBulkExport`, hitching the run loop for the write's
+duration on a large library (the projection half was already off-main
+via the reader pool — P2 clean; the I/O half wasn't). **Fix:**
+`ExportWriter.write` is `nonisolated` and the gesture awaits it
+`Task.detached` — the MainActor never runs file I/O.
+
+**NIT 4 (a multi-file drop registered one undo entry per file) —
+AGREED, fixed, pin RED on current confirmed by run (pin written FIRST):**
+`aMultiFileDropUnwindsWithOneUndo` failed on the pre-fix code exactly as
+predicted (one undo left 2 of 3 posts live; a second "Import" entry
+remained — transcripted), green after. **Fix:** `importFiles` reads all
+files first, then registers the whole batch under ONE
+`UndoStack.withCompound(label: "Import")` inside one runner call, with
+per-file failures caught INSIDE the compound body (one bad file never
+unwinds its siblings; skip reporting preserved). `importText` unchanged
+(one gesture, one entry already).
+
+**Post-round counts (full suites, count lines confirmed): core 650
+green in 77 suites · Mac app 378 green in 68 suites · mobile 11 green
+in 4 suites** (pre-round: 650/77 · 371/67 · 11/4 — +7 Mac pins across
+1 new suite: EntitlementsTests 2; ReferencePanelTests +3;
+ImportFacesTests +1; ExportFacesTests +1).
+
 *(B4's closeout ritual — master-plan row + pointer, KnownIssues
 reconciliation, the Phase 12 plan, the author handoff — runs AFTER the
-review ladder closes, per the coordinator's sequencing; the rounds'
-dispositions land here first.)*
+review ladder closes, per the coordinator's sequencing.)*

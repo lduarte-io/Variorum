@@ -46,9 +46,12 @@ final class ImportModel {
 
     /// One new post per readable file (library) or one scrap batch per file
     /// (pool). Reads under the drag's security scope; reports per-file
-    /// skips instead of failing the whole drop.
+    /// skips instead of failing the whole drop. **One gesture = ONE undo
+    /// entry** (review round 1, NIT 4): the whole batch registers under a
+    /// single `withCompound`, with per-file failures caught INSIDE the
+    /// compound body so one bad file never unwinds its siblings.
     func importFiles(_ urls: [URL], into destination: Destination) async {
-        var imported = 0
+        var readable: [(name: String, title: String, text: String)] = []
         var skipped: [String] = []
         for url in urls {
             guard Self.importableExtensions.contains(url.pathExtension.lowercased()) else {
@@ -65,11 +68,42 @@ final class ImportModel {
             // on one stray byte; the author sees the result immediately).
             let text = String(data: data, encoding: .utf8)
                 ?? String(decoding: data, as: UTF8.self)
-            let title = url.deletingPathExtension().lastPathComponent
-            if await run(text: text, title: title, into: destination) {
-                imported += 1
-            } else {
-                skipped.append("\(url.lastPathComponent) (\(lastError ?? "empty"))")
+            readable.append(
+                (url.lastPathComponent, url.deletingPathExtension().lastPathComponent, text))
+        }
+
+        var imported = 0
+        if !readable.isEmpty {
+            let stack = session.undoStack
+            let files = readable
+            do {
+                let outcome: (imported: Int, skipped: [String]) =
+                    try await session.runner.run { ops in
+                        var count = 0
+                        var skips: [String] = []
+                        try stack.withCompound(label: "Import", operations: ops) {
+                            for file in files {
+                                do {
+                                    switch destination {
+                                    case .library:
+                                        _ = try ops.importPost(title: file.title, text: file.text)
+                                    case .pool(let poolID):
+                                        _ = try ops.importBlocks(into: poolID, text: file.text)
+                                    }
+                                    count += 1
+                                } catch {
+                                    skips.append(
+                                        "\(file.name) (\(Self.describeImportError(error)))")
+                                }
+                            }
+                        }
+                        return (count, skips)
+                    }
+                imported = outcome.imported
+                skipped.append(contentsOf: outcome.skipped)
+                lastError = nil
+            } catch {
+                lastError = String(describing: error)
             }
         }
         report(imported: imported, skipped: skipped, into: destination)
@@ -140,12 +174,12 @@ final class ImportModel {
             lastError = nil
             return true
         } catch {
-            lastError = describeImportError(error)
+            lastError = Self.describeImportError(error)
             return false
         }
     }
 
-    private func describeImportError(_ error: any Error) -> String {
+    nonisolated private static func describeImportError(_ error: any Error) -> String {
         if let operationError = error as? OperationError, operationError == .emptyImport {
             return "nothing to import"
         }

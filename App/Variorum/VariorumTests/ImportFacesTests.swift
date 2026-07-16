@@ -114,6 +114,39 @@ struct ImportFacesTests {
         }
     }
 
+    // MARK: - Review round 1, NIT 4 (one gesture, one undo entry)
+
+    @Test func aMultiFileDropUnwindsWithOneUndo() async throws {
+        try await withImportSession { session, importer in
+            let urls = try (1...3).map { index in
+                try tempFile("File \(index).md", "Body \(index).")
+            }
+            defer {
+                for url in urls { try? FileManager.default.removeItem(at: url) }
+            }
+            await importer.importFiles(urls, into: .library)
+            #expect(importer.lastReport == "Imported 3 posts.")
+
+            // ONE drop gesture = ONE compound entry: a single undo unwinds
+            // every imported post, and nothing is left on the stack.
+            let stack = session.undoStack
+            let label = try await session.runner.run { ops in
+                try stack.undo(with: ops)
+            }
+            #expect(label == "Import")
+            let live = try await session.database.read {
+                try Int.fetchOne(
+                    $0,
+                    sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL")
+            }
+            #expect(live == 0)
+            let second = try await session.runner.run { ops in
+                try stack.undo(with: ops)
+            }
+            #expect(second == nil)
+        }
+    }
+
     @Test func anEmptyDropReportsInsteadOfMinting() async throws {
         try await withImportSession { session, importer in
             let blank = try tempFile("Blank.md", " \n \n")
