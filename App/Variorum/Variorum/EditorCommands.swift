@@ -37,6 +37,11 @@ struct EditorCommands: Commands {
         // the caret block's single-block export. Projections and shapes
         // live in Queries; panels are the author-visible moments.
         CommandGroup(after: .importExport) {
+            // B2's panel door (the drop's keyboard-reachable twin): each
+            // picked file becomes a post via the same import operation.
+            Button("Import Files…") { importFiles() }
+                .disabled(session == nil)
+            Divider()
             Button("Export Library…") { exportLibrary() }
                 .disabled(session == nil)
             Button("Export Block as Markdown…") { exportCaretBlock() }
@@ -115,6 +120,28 @@ struct EditorCommands: Commands {
     /// Extract", … — generic when the stack is empty).
     static func undoMenuTitle(for topLabel: String?) -> String {
         topLabel.map { "Undo \($0)" } ?? "Undo Structural Change"
+    }
+
+    // MARK: - Import door (Phase 11b, B2)
+
+    private func importFiles() {
+        guard let session else { return }
+        let urls = ImportPanels.chooseFiles()
+        guard !urls.isEmpty else { return }
+        Task { @MainActor in
+            let importer = ImportModel(session: session)
+            await importer.importFiles(urls, into: .library)
+            let message = importer.lastError.map { "Import failed: \($0)" }
+                ?? importer.lastReport ?? "Import finished."
+            if let editor = session.editorRouter.active {
+                editor.showStatus(message)
+            } else {
+                let alert = NSAlert()
+                alert.messageText = "Import Files"
+                alert.informativeText = message
+                alert.runModal()
+            }
+        }
     }
 
     // MARK: - Export doors (Phase 11b, B1)

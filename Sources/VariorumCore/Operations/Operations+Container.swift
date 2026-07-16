@@ -71,8 +71,9 @@ extension Operations {
         }
     }
 
-    /// The shared mint behind `createPost` and `createOrOpenJournalEntry`.
-    private func insertPost(
+    /// The shared mint behind `createPost`, `createOrOpenJournalEntry`,
+    /// and `importPost` (internal, one shape — Phase 11b).
+    func insertPost(
         _ db: Database, title: String?, profile: Profile?, entryDate: String?
     ) throws -> Container {
         let now = date.now

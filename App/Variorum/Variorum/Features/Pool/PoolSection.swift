@@ -109,9 +109,14 @@ final class PoolViewModel {
 }
 
 struct PoolSection: View {
+    let session: AppSession
     let model: PoolViewModel
     /// Opens the pool container in the detail editor.
     var openPool: (String) -> Void
+    /// Phase 11b (B2): the pool's own drop-in import model (drop text or a
+    /// plain-text file on the pool → scraps in that pool; a deeper drop
+    /// target than the sidebar's library door, so it wins on its rows).
+    @State private var importer: ImportModel?
 
     var body: some View {
         Section("Pool") {
@@ -127,15 +132,24 @@ struct PoolSection: View {
                         }
                     }
                     .onDrag { PoolViewModel.dragProvider(blockID: item.block.blockID) }
+                    .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+                        poolDrop(providers, poolID: pool.id)
+                    }
                 }
                 if model.items.isEmpty {
-                    Text("No scraps yet — open the pool and type some.")
+                    Text("No scraps yet — open the pool and type some (or drop text here).")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+                            poolDrop(providers, poolID: pool.id)
+                        }
                 }
                 Button("Open Pool") { openPool(pool.id) }
                     .buttonStyle(.borderless)
                     .font(.caption)
+                    .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+                        poolDrop(providers, poolID: pool.id)
+                    }
             } else {
                 Button("Create Pool") {
                     Task {
@@ -151,5 +165,11 @@ struct PoolSection: View {
     private func preview(_ item: Queries.PoolItem) -> String {
         let text = item.block.text ?? ""
         return text.isEmpty ? "(empty scrap)" : text
+    }
+
+    private func poolDrop(_ providers: [NSItemProvider], poolID: String) -> Bool {
+        let model = importer ?? ImportModel(session: session)
+        importer = model
+        return model.handleDrop(providers, into: .pool(poolID))
     }
 }

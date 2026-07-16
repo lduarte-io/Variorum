@@ -42,6 +42,9 @@ struct SidebarView: View {
     /// Phase 11b (B1): the last export gesture's report or error — the
     /// export model itself is per-gesture (one-shot projections).
     @State private var exportStatus: String?
+    /// Phase 11b (B2): the drop-in import model, created on first drop
+    /// (its async provider loads need a live owner; observable status).
+    @State private var importer: ImportModel?
 
     private struct RenameTarget: Identifiable {
         let id: String
@@ -94,9 +97,18 @@ struct SidebarView: View {
             }
             ReadingsSection(session: session, model: readings)
             TagListSection(model: tags)
-            PoolSection(model: pool) { poolID in
+            PoolSection(session: session, model: pool) { poolID in
                 selection = .pool(poolID)
             }
+        }
+        // The library import door (Phase 11b, B2): drop `.md`/plain text
+        // anywhere on the sidebar → new post(s). The pool's rows carry
+        // their own, deeper drop target (deepest target wins), so a drop
+        // ON the pool lands as scraps instead.
+        .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+            let model = importer ?? ImportModel(session: session)
+            importer = model
+            return model.handleDrop(providers, into: .library)
         }
         .alert(
             "Rename Post",
@@ -127,13 +139,13 @@ struct SidebarView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? tags.lastError {
+            if let error = model.lastError ?? tags.lastError ?? importer?.lastError {
                 Text(error)
                     .font(.caption)
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
                     .padding(4)
-            } else if let status = exportStatus {
+            } else if let status = exportStatus ?? importer?.lastReport {
                 Text(status)
                     .font(.caption)
                     .foregroundStyle(.secondary)

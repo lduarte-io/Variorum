@@ -1,0 +1,129 @@
+//
+//  ImportFacesTests.swift
+//  VariorumTests
+//
+//  Phase 11b, Step B2 — the drop-in import faces: files/text through
+//  ImportModel land via the import OPERATIONS (segmentation and undo are
+//  core-pinned in ImportOperationTests); the dropped file is a ONE-WAY
+//  source — bytes and mtime untouched, pinned here.
+//
+
+import Dependencies
+import Foundation
+import GRDB
+import Testing
+import VariorumCore
+@testable import Variorum
+
+@MainActor
+private func withImportSession<T>(
+    _ body: @MainActor (AppSession, ImportModel) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
+    } operation: { @MainActor in
+        let session = AppSession(database: db)
+        return try await body(session, ImportModel(session: session))
+    }
+}
+
+@MainActor
+@Suite("Import faces (Phase 11b, B2)")
+struct ImportFacesTests {
+    private func tempFile(_ name: String, _ contents: String) throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-import-\(UUID().uuidString)-\(name)")
+        try Data(contents.utf8).write(to: url)
+        return url
+    }
+
+    @Test func aDroppedFileBecomesAPostAndTheSourceIsUntouched() async throws {
+        try await withImportSession { session, importer in
+            let url = try tempFile("My Note.md", "Alpha.\n\nBeta.")
+            defer { try? FileManager.default.removeItem(at: url) }
+            let bytesBefore = try Data(contentsOf: url)
+            let mtimeBefore = try FileManager.default
+                .attributesOfItem(atPath: url.path)[.modificationDate] as? Date
+
+            await importer.importFiles([url], into: .library)
+            #expect(importer.lastError == nil)
+            #expect(importer.lastReport == "Imported 1 post.")
+
+            let posts = try await session.database.read { try Queries.library($0) }
+            #expect(posts.count == 1)
+            // Title from the filename (extension stripped); contents
+            // segmented by the effective default and re-exportable.
+            #expect(posts[0].title?.hasSuffix("My Note") == true)
+            let exported = try await session.database.read {
+                [postID = posts[0].postID] db in
+                try Queries.exportPost(db, postID: postID)
+            }
+            #expect(exported == "Alpha.\n\nBeta.")
+
+            // ONE-WAY source: bytes and mtime byte-identical after import.
+            #expect(try Data(contentsOf: url) == bytesBefore)
+            let mtimeAfter = try FileManager.default
+                .attributesOfItem(atPath: url.path)[.modificationDate] as? Date
+            #expect(mtimeAfter == mtimeBefore)
+        }
+    }
+
+    @Test func multipleFilesMintOnePostEachAndNonTextSkipsVisibly() async throws {
+        try await withImportSession { session, importer in
+            let first = try tempFile("One.md", "First body.")
+            let second = try tempFile("Two.txt", "Second body.")
+            let binary = try tempFile("Photo.png", "not really text")
+            defer {
+                for url in [first, second, binary] {
+                    try? FileManager.default.removeItem(at: url)
+                }
+            }
+            await importer.importFiles([first, second, binary], into: .library)
+            let report = importer.lastReport ?? ""
+            #expect(report.contains("Imported 2 posts."))
+            #expect(report.contains("(not plain text)"))
+            let count = try await session.database.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post'")
+            }
+            #expect(count == 2)
+        }
+    }
+
+    @Test func droppedTextLandsInThePoolAsScraps() async throws {
+        try await withImportSession { session, importer in
+            let pool = try session.operations.createPool(title: "Pool")
+            await importer.importText("Scrap one.\n\nScrap two.", into: .pool(pool.id))
+            #expect(importer.lastError == nil)
+            #expect(importer.lastReport == "Added to the pool.")
+            let texts = try await session.database.read { [poolID = pool.id] db in
+                try Queries.renderPost(db, containerID: poolID).map { $0.text ?? "" }
+            }
+            #expect(texts == ["Scrap one.\n", "Scrap two."])
+        }
+    }
+
+    @Test func anEmptyDropReportsInsteadOfMinting() async throws {
+        try await withImportSession { session, importer in
+            let blank = try tempFile("Blank.md", " \n \n")
+            defer { try? FileManager.default.removeItem(at: blank) }
+            await importer.importFiles([blank], into: .library)
+            #expect(importer.lastReport?.contains("Skipped") == true)
+            let count = try await session.database.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post'")
+            }
+            #expect(count == 0)
+        }
+    }
+}

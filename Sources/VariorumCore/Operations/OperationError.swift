@@ -114,4 +114,10 @@ public enum OperationError: Error, Equatable, Sendable {
     case blockNotInContainer(blockID: String, containerID: String)
     /// `removeCanvasPosition` found no live layout row for the pair.
     case canvasPositionNotFound(blockID: String, containerID: String)
+
+    // Import (Phase 11b, Step B2).
+    /// The dropped text held nothing to import (whitespace-only —
+    /// `bulkSegments` mints no block from it, so the gesture refuses
+    /// instead of minting an empty post).
+    case emptyImport
 }
