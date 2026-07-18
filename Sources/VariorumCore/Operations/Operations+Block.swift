@@ -65,4 +65,34 @@ extension Operations {
             try block.update(db)
         }
     }
+
+    /// Sets (or clears, with nil) the block's presentation frame (Phase 13,
+    /// v1_9 — the callout, R16/R27). Stored as canonical JSON; a no-op set
+    /// writes nothing. Plain metadata like `setBlockName`: no touch stamp,
+    /// no churn (framing the prose is not working on the prose). An empty
+    /// `kind` refuses — a frame must name its family.
+    ///
+    /// SEAL POSTURE (PROVISIONAL, Phase 13 — the QUESTIONS bundle): refused
+    /// under a sealed post, per the everything-UNDER-the-post letter and
+    /// the v1_6 block-name precedent (identity-level metadata on a block
+    /// under the post). The viewing-isn't-authoring alternative is recorded
+    /// for the author — but a callout frame CHANGES what the page shows,
+    /// which reads closer to authoring than a lens does.
+    public func setBlockPresentation(
+        _ blockID: String, _ presentation: BlockPresentation?
+    ) throws {
+        try database.write { db in
+            var block = try liveBlock(db, blockID)
+            try ensurePlacementUnlocked(db, blockID: blockID)
+            if let presentation,
+               presentation.kind.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                throw OperationError.invalidPresentationKind
+            }
+            let encoded = try presentation?.encodedJSON()
+            guard block.presentation != encoded else { return }
+            block.presentation = encoded
+            block.updatedAt = date.now
+            try block.update(db)
+        }
+    }
 }

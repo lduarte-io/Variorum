@@ -19,6 +19,11 @@ public struct Block: VariorumRecord {
     /// level, plain metadata under sync; an unnamed block's display handle
     /// is DERIVED at read time (first sentence), never stored here.
     public var name: String?
+    /// The optional presentation frame (Phase 13, v1_9 — the callout,
+    /// R16/R27): canonical `BlockPresentation` JSON, nil = plain block.
+    /// Identity-level like `name`; takes share the frame (presentation is
+    /// the block's, never the take's).
+    public var presentation: String?
     public var createdAt: Date
     public var updatedAt: Date
     /// Domain archive (kept, out of view) — distinct from the sync tombstone.
@@ -32,6 +37,7 @@ public struct Block: VariorumRecord {
         defaultVariantId: String? = nil,
         lastContainerId: String? = nil,
         name: String? = nil,
+        presentation: String? = nil,
         createdAt: Date,
         updatedAt: Date,
         archivedAt: Date? = nil,
@@ -43,6 +49,7 @@ public struct Block: VariorumRecord {
         self.defaultVariantId = defaultVariantId
         self.lastContainerId = lastContainerId
         self.name = name
+        self.presentation = presentation
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.archivedAt = archivedAt

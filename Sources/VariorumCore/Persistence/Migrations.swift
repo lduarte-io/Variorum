@@ -298,6 +298,21 @@ extension AppDatabase {
                 """)
             try createOutboxCaptureTriggers(db, table: "block_comment", pk: "id")
         }
+        // Phase 13, Step A1 (sitting rulings R16/R27 — callout blocks
+        // WANTED, "the callout frame makes sense at a block level"): the
+        // optional block-level PRESENTATION — a separated, background-
+        // colored text frame within the writing (the Notes/Notion class).
+        // Identity-level like block.name (v1_6), additive nullable TEXT
+        // holding canonical JSON (kind/color/emoji — BlockPresentation.swift
+        // owns the shape); plain metadata under sync (CAS, no uniqueness,
+        // no repair rule). Takes share the frame: presentation is the
+        // BLOCK's, never the take's (R16's letter). The white-gap rule
+        // (R17) and the export-as-blockquote mapping are the view/export
+        // layers' — nothing here stores rendering. Rides the SAME §12
+        // lockstep event as v1_8/v1_10/v1_11.
+        migrator.registerMigration("v1_9_block_presentation") { db in
+            try db.execute(sql: "ALTER TABLE block ADD COLUMN presentation TEXT")
+        }
         return migrator
     }
 }

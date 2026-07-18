@@ -121,6 +121,10 @@ public enum OperationError: Error, Equatable, Sendable {
     /// instead of minting an empty post).
     case emptyImport
 
+    // Block presentation (Phase 13, Step A1 — v1_9).
+    /// A presentation frame must name a non-empty kind.
+    case invalidPresentationKind
+
     // Block comments (Phase 13, Step A1 — v1_8).
     case commentNotFound(id: String)
     /// A comment must say something — whitespace-only text refuses (an

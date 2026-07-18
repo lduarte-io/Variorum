@@ -58,3 +58,12 @@ create index idx_seq_block_comment on block_comment (server_seq);
 alter table block_comment enable row level security;
 revoke all on block_comment from anon, authenticated;
 
+
+-- ---------------------------------------------------------------------------
+-- 2. block.presentation (client migration v1_9) — the callout frame
+--    (sitting rulings R16/R27): block-level presentation metadata,
+--    identity-level like block.name. Additive nullable column; plain
+--    metadata CAS, no uniqueness, no repair.
+-- ---------------------------------------------------------------------------
+
+alter table block add column if not exists presentation text;
