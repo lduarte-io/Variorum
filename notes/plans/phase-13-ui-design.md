@@ -1,6 +1,8 @@
 # Phase 13 — UI design passes (plan-in-progress · design sittings record)
 
-> **STATUS: SITTINGS IN PROGRESS (begun 2026-07-17). NOT an executable plan yet.**
+> **STATUS: DRAFT PLAN READY FOR THE AUTHOR'S REVIEW (2026-07-17, after five
+> sittings).** The execution plan is drafted at the bottom of this file; the author
+> reviews it (plus open questions 17/19/20), then invokes `/run-phase 13`.
 > Per the two-stage process (CLAUDE.md model policy, author 2026-07-17): this file
 > accumulates the author-attended design sittings' record — the 11a "kickoff spike
 > record" precedent: what's recorded here from her own words is BINDING input — and
@@ -454,6 +456,89 @@ Notion refs — saved to `sitting-refs/`; captures removed for publication):**
   answer to "which books hold this post" is showing the reverse lookup as a
   metadata chip on the post. Pending her yes/no.
 
+### Sitting 5 (2026-07-17, late night) — the closing round: IA collapses inward, canvas demoted, the last confirms
+
+**Her message VERBATIM (standing instruction):**
+
+> so - the smallest block size is still a sentence and that's still fine. or a single
+> word, which is also fine, it's just on its own paragraph, right? also - good to know,
+> the blocks have one home but you can edit it only where it actually lives. and yeah,
+> that resolves it, i think it should be clear that duplicate as version is how you
+> separate the post you're seeing in your current book from the post that shows
+> elsewhere. i think we need clear UI on that when you edit it (this post also appears
+> in 4 different books, or something of the sort). i do think knowing which books hold
+> it is important btu one source of truth is fine. and yes, i do think promoting a tag
+> to a book is a good gesture to have and it should still leave the tag on those items.
+> i think that journal can just be within shelf - we can maybe just pin it within
+> shelf. i think having a pinned shelf in general would be useful. and then when you're
+> in the journal area, you should be able to see your books (i do think that we should
+> be able to see what book each journal belongs to, i want mutliple books within
+> journal). and i also think that maybe we don't need tags on the sidebar? not even
+> really sure what that would show, our tags don't have hierarchy as far as i'm aware
+> and i want to keep them that way. what does tags even offer as a tab? i also don't
+> know if canvas needs to be an item on the side bar. it seems like the point of canvas
+> is to arrange ool scraps or post blocks - that seems more like it should be a view
+> that you can open of a post (or a particular view of a post with all its selected
+> takes) (let's say no takes in canvas or only the minimum view of takes that mobile
+> might inherit where when you click on a block and can switch that block to another
+> one of its own takes, one at a time, via a "see takes" button and small selection,
+> very minimal). I don't think it makes sense to have canvas on the left right now?
+> what would it even show? and yeah, command N should be new post. i couldn't find
+> canvas in the existing app so it was hard to judge. the seam visibility toggle home:
+> i think that this should be a global setting for now. i think that the terminal idiom
+> should bring you to the overall book view (chapters - with their names), a top level
+> outline, settings. and then if you click on the post, that shouldn't really move you
+> from your current editor. so i guess terminal idioms could bring you to the book. i
+> don't know if it makes sense to have a "chapter" view, unless that's where you
+> reorder posts in a chapter? i don't think we need a chapter view though tbh.
+
+**Rulings:**
+
+- **R33 — Block floor confirmed as-is:** smallest block = a sentence, or even a single
+  word — fine, "it's just on its own paragraph" (correct: every block is its own
+  surface paragraph).
+- **R34 — Block one-home confirmed:** a block renders and edits only in the one
+  container it lives in.
+- **R35 — Edit-home CONFIRMED RESOLVED (Q16 closed) + a UI REQUIREMENT:** when
+  editing a post that appears in multiple books, the editor must SAY so ("this post
+  also appears in 4 books" or similar), with **duplicate-as-version presented as THE
+  way to separate this book's copy from what shows elsewhere** — the divergence door
+  made discoverable at the moment it matters.
+- **R36 — Ownership tags: NO** (Q15 closed) — "one source of truth is fine"; book
+  membership shown via the reverse-lookup chip (R35's requirement is its natural
+  home).
+- **R37 — Promote-tag-to-book RULED**, and the promotion **leaves the tag on the
+  items** (the tag keeps existing; the book is a saved way of collecting it).
+- **R38 — The Journal folds INTO the Shelf as a PINNED notebook** (supersedes the
+  sitting-2 sidebar list half): **pinning is a general shelf mechanism**; the journal
+  area shows **which book each journal entry belongs to**, and she wants **multiple
+  journal books** (the dream-journal thread realized: journal notebooks are books).
+  Model detail (which reading/membership shape binds an entry to its journal book;
+  how the one-entry-per-day rule scopes per book) = early-phase ask-her design item.
+- **R39 — The Tags tab is DROPPED from the sidebar** ("what does tags even offer as
+  a tab?"); tag browsing folds into Library filters; tag management lives where tags
+  are used. **FABLE FLAG (surfaced, not silently resolved):** she said "our tags
+  don't have hierarchy as far as i'm aware and i want to keep them that way" — the
+  MODEL has shipped hierarchical path tags (subtree semantics, the Phase 10
+  taxonomy UI) since v1; she has evidently never needed the hierarchy. Ruling
+  honored as: **tags present FLAT at the surface** (hierarchy machinery goes
+  dormant, is NOT removed — removal would be a model change nothing requires);
+  chapters no longer need tag-grouping (reading_section supersedes it, R28).
+- **R40 — Canvas leaves the sidebar** (Q3 closed): it is a VIEW you open on a post
+  (or the scraps area) to arrange blocks spatially. **In canvas, no fan machinery**
+  beyond at most the MINIMAL takes switcher — click a block → "see takes" → a small
+  selector switches that block's displayed take one at a time — explicitly the
+  minimal shape "mobile might inherit" (the phone-takes rethink and canvas share
+  one pattern). ("i couldn't find canvas in the existing app" — the legibility
+  finding, again.)
+- **R41 — ⌘N = New Post RULED** (Q18 closed).
+- **R42 — Seam-visibility toggle = a GLOBAL setting for now** (Q10 closed).
+- **R43 — Terminal idioms' reach (Q8 closed at direction level):** the terminal
+  navigator serves the BOOK — the overall book view (chapters with their names), a
+  top-level outline, settings; **clicking a post opens it in your current editor**
+  (no context jump). **NO separate chapter view** — reordering posts within a
+  chapter happens in the book view itself.
+
 ## Emerging direction (running synthesis — updated after sitting 2)
 
 - **Two voices, one structure:** the Terminal voice leads (her default); the Study
@@ -483,8 +568,8 @@ Notion refs — saved to `sitting-refs/`; captures removed for publication):**
    the sidebar door stays.
 2. ~~Timeline folded into Library as a view mode~~ — leaning confirmed sitting 2
    (Library = all posts; timeline one of its views).
-3. Canvas: stays a sidebar word (sitting 2). Its v1 design investment level still
-   open (functional-as-is vs restyled this phase).
+3. ~~Canvas~~ — RULED sitting 5 (R40): off the sidebar; a view opened on a
+   post/scraps; minimal takes switcher only (the mobile-inheritable shape).
 4. ~~Pool naming~~ — RESOLVED sitting 4 (R29): scraps area = "Blocks"; "Pool" =
    the bookless-posts surface (name loose). Residual: does Pool earn a top-level
    sidebar word or live as a Library filter (the R32 consolidation note)?
@@ -494,12 +579,12 @@ Notion refs — saved to `sitting-refs/`; captures removed for publication):**
    setting.
 7. ~~Which direction leads~~ — RULED sitting 2 (R1) + confirmed sitting 3 (R12):
    Terminal leads; Study second (its editing surface = mockups-v2); hold at two.
-8. How far do terminal idioms extend into navigation? Per-surface vs global voice
-   switching?
+8. ~~Terminal idiom reach~~ — RULED sitting 5 (R43): the book navigator
+   (chapters/outline/settings; post-click opens in the current editor; no chapter
+   view).
 9. ~~⌘K~~ — RATIFIED sitting 3 (R15). Remaining: ⌘N = New Post (proposed,
    her confirm owed — currently unassigned).
-10. Seam-visibility default: invisible at rest (§12) with a toggle — the toggle's
-    home (menu? per-post? global setting?).
+10. ~~Seam-visibility toggle~~ — RULED sitting 5 (R42): a global setting for now.
 11. ~~The editing-indicator scheme~~ — RATIFIED sitting 4 (R22).
 12. ~~THE PARAGRAPH FLOOR~~ — DISSOLVED sitting 4 (R26): the feared sub-paragraph
     take machinery never existed; multi-paragraph ceiling survives; make-block
@@ -509,9 +594,175 @@ Notion refs — saved to `sitting-refs/`; captures removed for publication):**
     detail remains plan-drafting work.
 14. ~~Expand-all-fans per-style~~ — RATIFIED sitting 4 and GENERALIZED (R25):
     follow-the-scroll becomes a takes-viewing OPTION in all modes.
-15. Ownership tags on manual book-add — Fable recommends NO (two truths for one
-    fact; show membership as a reverse-lookup chip instead) — her yes/no owed.
-16. The R31 edit-home clarification (posts have no home; versions are the
-    deliberate divergence door) — her confirmation owed.
-17. Pool's IA slot: top-level sidebar word vs Library saved-filter (R32's note).
-18. ⌘N = New Post — proposed sitting 3, not yet confirmed.
+15. ~~Ownership tags~~ — RULED NO sitting 5 (R36); membership chip instead.
+16. ~~Edit-home~~ — CONFIRMED sitting 5 (R35) + the multi-book indicator UI
+    requirement.
+17. Pool's IA slot — the plan DRAFT proposes: a pinned Library filter ("No book"),
+    not a top-level word (the sidebar collapsed to Shelf · Library · Blocks after
+    R38–R40). Her ratify at plan review.
+18. ~~⌘N~~ — RULED sitting 5 (R41): New Post.
+19. Tags-flat surface + Tags tab dropped (R39) — her confirm at plan review that
+    dormant-not-removed hierarchy is the right reading of "keep them that way."
+20. Journal-books binding model (which membership shape ties an entry to its
+    journal book; the per-book day rule) — an early-phase ask-her design item
+    (plan step B3).
+
+---
+
+# THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
+
+## Kickoff message (for the coordinator session)
+
+> You are starting **Phase 13 of Variorum** — the UI design build: two voices over
+> one structure, the books/shelf IA, and the small model additions the design
+> sittings ruled (comments, callouts, chapters, word targets). **The five design
+> sittings above are BINDING INPUT** — the author's verbatim words and rulings
+> R1–R43 outrank taste; where this plan says PROPOSED, ask her at the checkpoint,
+> never decide. Read, in order: `CLAUDE.md`; this file IN FULL (sittings first);
+> `notes/plans/phase-13-brief.md`; `notes/OverallModel.md`; `notes/AppSpec.md`
+> (§12, §14's 2026-07-17 delta); `notes/SyncSpec.md` §12; `notes/TEXTKIT2_NOTES.md`
+> (§3 rendering-attribute fragility governs every editor decoration);
+> `Spikes/Phase11Mockups/mockups.html` + `mockups-v2.html` (the Study voice's
+> CANON — R12) and `Spikes/Phase13Mockups/` round 1 + 2 (the Terminal voice + the
+> merged shape). **Baselines — do not re-run at session start: core 651/77 · Mac
+> 380/68 · mobile 11/4.** Staffing: decided at this kickoff by the author
+> (CLAUDE.md model policy — the sittings were author-attended Fable; execution is
+> an ordinary cast; the Sync/ rider stands regardless). Environment traps: piped
+> xcodebuild masks exit codes; a live app instance blocks the Mac test runner
+> (NEVER kill her running Variorum.app); wrong `-only-testing:` names report
+> vacuous success; SwiftUI `.task` doesn't fire under the test host. **Hard
+> author gates:** the lockstep deploy (Step A4); every per-milestone taste
+> checkpoint (she reacts to RUNNING increments, not screenshots, wherever
+> possible); anything marked ask-her.
+
+## Ground rules (binding)
+
+- **P1–P3 re-verified after every milestone** — a beautiful editor that regressed
+  keystroke cost failed the phase (the brief's binding list).
+- **Decorations stay off the live editor** (TEXTKIT2 §3): seams, rings, washes,
+  handles, comment margins render as overlay views / read-tier styling — the
+  Phase 7 badge pattern — never TK2 rendering attributes on the live NSTextView.
+- **Calm default, one block blooms** is architecture; the design expresses it.
+  Boundaries invisible at rest (seam toggle = global setting, R42); the white-gap
+  rule (R17) governs every colored block.
+- **A voice = tokens + idioms** (R1): the Terminal voice's `›`/slashes/`~/`/cursor
+  and the Study voice's sepia/paper/serif are load-bearing; no flattening into a
+  palette swap. Hold at exactly two voices (R12). Light designed first; dark =
+  thought-through grey (Gemini-class, never black).
+- **Margins are sacred** (R9). **Everything visible in an editing surface is
+  editable** (R8/R23). **No per-block background colors except callouts** (R6).
+- No new third-party dependencies (design systems included) without the author.
+- Tests per the standing expectations: schema/ops changes land with exact tests;
+  view models get focused coverage; pure-visual SwiftUI faces may be untested but
+  every behavioral seam (settings, toggles, membership chips, travel rules) is
+  pinned.
+
+## Stage A — substrate (the one lockstep event + the pulled-forward Phase-12 items)
+
+**A0 — kickoff measurements + design corpus + restore drill** (the deferred-12
+pull-forwards): (i) the three prerequisite numbers — rendering/decoration budget
+on the live editor, read-tier per-view cost at scale, keystroke headroom under
+decorations — measured against (ii) a seeded DESIGN CORPUS in the dev store
+(A4-fenced; realistic shelf: several books incl. journals, hundreds of posts,
+fans, scraps) that also serves every design checkpoint; (iii) the backup restore
+drill executed and its runbook recorded (KnownIssues row closes). *Tests: the
+measurement harness records numbers in this plan's closeout; the drill's
+automated half per the 12 plan's Step 5 wording.*
+
+**A1 — schema, own commits, ONE SyncSpec §12 lockstep event** (all additive):
+- `block_comment` (id, block_id, text, created_at, updated_at, deleted_at,
+  sync_version, owner_id) — multiple per block; NO uniqueness; cascade: block
+  tombstone → comments (exact-stamp, restoreBlock-compatible); outbox triggers;
+  registry + serializer walks.
+- `block.presentation` (nullable TEXT/JSON: kind/color/emoji) — the callout
+  frame (R16/R27), identity-level like `block.name`, CAS metadata.
+- `reading_section` (id, reading_id, name, position, created_at, updated_at,
+  deleted_at, sync_version) + `reading_post.section_id` (nullable) — chapters
+  (R28); dangling section_id reads as unsectioned (the chosen-variant fallback
+  class); reading cascade extends to sections.
+- `reading.word_target` (nullable INTEGER) — bounded-length notebooks (R38's
+  bounded thread; extendable at the boundary).
+- SmartQuerySpec gains `tagsAll` (AND-of-tags, R30) — JSON vocabulary only, no
+  migration; old clients ignore unknown keys by the ratified v1 rule.
+- `06_phase13_lockstep.sql` (mirror tables + lockstep marker bump); **the client
+  refuses to sync until the deploy — the deploy is an author gate, and her
+  pending PHONE install folds into this event's every-client step.**
+*Tests: migration walks, cascade/tombstone pins, serializer completeness, the
+lockstep-refusal pin — the full Phase 11a A1 discipline.*
+
+**A2 — comment/callout/section operations + travel rules:** comment CRUD with
+tombstoned-comments recovery (visible, resurrectable — R: never skimpy);
+**comments DUPLICATE onto structural successors** (extract/divide keep A's and
+copy to the minted half; divide-W copies to B and C; merge carries both onto A′;
+pool-copy/promote/duplicate carry them) — each with a state-transition test;
+`setBlockPresentation`; section CRUD + reorder + membership-assignment ops;
+`word_target` setter. *Tests: per-op transitions incl. every travel rule; undo
+inverses where structural.*
+
+## Stage B — the structure (IA + shelf + books), Terminal voice first
+
+**B1 — the token/voice layer as its own module:** tokens (type, color, surface,
+spacing) + IDIOM SLOTS (selection marker, path grammar, label voice, cursor,
+comment presentation); the two voices; the global settings (voice, seam
+visibility, editing indicator off/outline/background, inline-comments,
+follow-the-scroll). Light first; grey dark for both voices.
+
+**B2 — the sidebar + Shelf + Library:** sidebar collapses to **Shelf · Library ·
+Blocks** (R38–R40: Journal pinned INTO the shelf; Tags tab dropped — flat surface,
+hierarchy dormant (R39); Canvas demoted to a post view). The shelf: terminal LIST
+style with TAGS column (R4), pinning (R38), finish + word-target faces
+(`reading.locked` / `max_posts` / `word_target` finally visible), the **bottom
+quick-entry bar** (blinking cursor; Enter → whole post; list scrolls under a max
+height — R3); ⌘N = New Post (R41); **⌘K palette** (posts, books, commands —
+every buried capability typeable, R15). Library = EVERYTHING (books, posts,
+blocks; sortable, searchable; timeline as a view mode; **PROPOSED: "No book" as
+a pinned filter = the Pool**, open Q17 — her ratify).
+
+**B3 — books:** the book view with **real chapters** (reading_section rows,
+movable with drag handles + the Notion insertion bar — R19), drag-posts-in,
+promote-tag(s)-to-book with AND/OR (R30/R37 — the tag stays), the **multi-book
+membership indicator + duplicate-as-version door** (R35 — the editor states
+"also appears in N books"), journal books (**ask-her design item, Q20:** the
+entry↔journal-book binding + per-book day rule — resolved live, then built),
+the terminal **book navigator** (chapters/outline/settings; post-click opens in
+the current editor; no chapter view — R43), and the reading-flow view mode
+(direction C) with finished books opening into it.
+
+## Stage C — the editor surfaces
+
+**C1 — the writing surface:** margins (R9), dotted seams on the global toggle
+(R42) with the 9d tint mode's look RETIRED, the editing-indicator setting
+(off/outline/background, off default; the always-on marginalia wash+ring rule —
+R22), word-count prominence (R11), block drag handles + insertion bar (R19),
+callout rendering with white gaps (R17; export maps to blockquote), **comments:
+margin default, inline-tinted setting (R7), deleted-comments surface**.
+
+**C2 — takes presentations:** the v2-canon active view as an editor view option
+(R12); marginalia incl. the short-block one-card-high HORIZONTAL strip (R24);
+the inline stack; **follow-the-scroll as a takes-viewing option in all modes**
+(R25); expand-all only where meaningful (not offered in columns/slot-split);
+every take editable in place, live editor migrating (R23; P3 holds).
+
+**C3 — canvas as a post view** (R40): reachable from a post/scraps, spatial
+arrange, the MINIMAL takes switcher only ("see takes" → one-at-a-time) — built
+as the mobile-inheritable pattern.
+
+## Milestone gates (every stage boundary)
+
+Full suites green at baseline+; the A0 numbers re-checked (no decoration
+regression); TEXTKIT2 §5 on the current point release; canary silent; **a taste
+checkpoint with the author on the RUNNING app over the design corpus** — her
+reactions recorded in this file as further sitting entries; a cold review over
+the accumulated diff per the ladder rules. `/Applications` refresh after each
+Mac-app milestone.
+
+## Closeout ritual (adapted)
+
+Results + dispositions here; the canonical-doc ratification batch (CoreDescription
+pillar 3's chapter line → reading_section; the tags-flat surface note; the
+block-is-its-own-paragraph clarifying line; §12's view-list updates incl.
+canvas-as-view; §14 delta pointing at this file's sittings; SyncSpec §12 event
+record); master plan row 13 → done, pointer → **Phase 12** (now with real-use
+evidence accumulating); KnownIssues reconciliation (restore-drill row closes;
+typographic PDF row disposition); the author handoff LAST, checklist at top (the
+deferred 11b walk items fold into her first real session with the new UI).
