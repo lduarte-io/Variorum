@@ -1130,6 +1130,106 @@ curated-only · locked-reading postures · word_target-never-enforces · the
 added `setReadingMaxPosts` · (e) the chapter delete/restore shape). Zero
 stop-and-ask items arose; nothing gated the core.
 
+# STAGE B CLOSEOUT (2026-07-18, same Fable implementer session — the review ladder's anchor)
+
+**Run shape:** B1 → B2 → B3, one commit per step (`3b4ef50` · `300aac0` ·
+`4099ae6`), Mac build green per step, the FULL three suites at the gate.
+**Gate counts: core 717 green in 87 suites · Mac app 396 green in 73
+suites · mobile 11 green in 4 suites.** A0 baseline re-check: the hardened
+spike re-ran during the review round and matched the recorded numbers
+within noise (decorated keystroke p95 0.76 vs the recorded 0.79 ms); no
+macOS update landed — the TEXTKIT2 §5 posture is unchanged; canary silent
+(Mac suite's standing tests green). **`/Applications/Variorum.app`
+REFRESHED from the Release build — the R53 lockstep is COMPLETE end to
+end: mirror at marker 3 + the updated Mac client installed; her real-store
+app syncs again on next launch.**
+
+## B1 — the token/voice layer (its own module)
+
+`App/Variorum/Variorum/Theme/`: **VoiceTokens** — four resolved sets
+(terminal light/dark, study light/dark) carrying tokens AND IDIOM SLOTS
+(`› ` selection marker, `~/` path grammar with slashes, `# ` comment
+prefix, the blinking block cursor, lowercased chrome — R1's "special
+little ways" as first-class slots; the Study voice's sepia/paper/serif
+from the mockups' canon); **dark = FULLY BLACK room in BOTH voices**
+(R51, pinned); every font macOS-shipped (R49 — SF Mono, Iowan Old Style,
+New York; zero dependencies); **ReadingPageTokens** = direction C's
+paper/serif page (a VIEW MODE's identity, voice-independent — R2).
+**ThemeStore** (@Observable, bounded observation over the tiny setting
+table; setters through the runner) is environment-fed; the new views take
+it OPTIONALLY with a terminal-light fallback (test hosts lack the
+environment — BookViewTests hosts BookView). Core: `ThemeVoice` +
+`EditingIndicatorStyle` enums; `Operations+Appearance` (voice, seams R42,
+editing indicator R14/R22, inline comments R7, follow-the-scroll R25,
+shelf pins R38, daily-book designation) through ONE upsert shape;
+`Queries.themeSettings`/`shelfPins`/`dailyJournalBookID` with
+sitting-letter defaults (pinned). Voices apply to the B-stage CHROME;
+the editor surfaces get theirs in Stage C.
+
+## B2 — the IA (sidebar final · Shelf · Library · Pool · ⌘N/⌘J/⌘K · Settings)
+
+- **Sidebar FINAL (R44): Shelf · Library · Pool · Blocks.** Journal folded
+  INTO the shelf (R38); Tags tab dropped (R39/R45 — hierarchy surfaced in
+  context + Settings); Canvas off the sidebar (R40); Timeline a Library
+  view mode. The Blocks scrap rows stay in the sidebar (QUESTIONS #26(c)).
+- **THE SHELF** (`Features/Shelf/`): terminal list style + TAGS column
+  (R4), the `~/shelf · N books · M finished` ls-line, pinning (R38;
+  ordering pinned: pins → journal books → rest by name), finish +
+  Length&Extent faces (`locked`/`max_posts`/`word_target` — visible at
+  last; refusals surface), drag-a-post-onto-a-book (idempotent, pinned),
+  the **bottom quick-entry bar** (R3: pinned at bottom, list scrolls
+  above, blinking-cursor idiom, Enter → a whole SEGMENTED post through
+  the import pipeline — pinned), the ⌘K/⌘J/⌘N hint bar. Cost tiers:
+  books+pins observed; word counts + tags one-shot (P1; #26(g)).
+- **LIBRARY** (`LibraryCatalogView`): R32's everything — catalog search
+  (books/posts/blocks), scope picker, TIMELINE as a view mode, the R46
+  addable tags column (per-row +tag; multi-select batch tagging), the
+  post context menu relocated here; Recovery/Tutorial in the toolbar
+  menu + ⌘K (#26(d)).
+- **POOL** (`PoolPostsView`): the bookless-posts surface (R29/R44), a
+  QUERY over membership (pinned: removing a membership returns the post);
+  every row offers Add-to-Book + tags — the drainage purpose built in.
+- **⌘K** (R15): `CommandPalette` — commands + catalog hits, Enter
+  executes; vocabulary lives in RootView composition. **⌘N = New Post**
+  (R41), **⌘J = Today's Entry**; `ShellRouter` carries menu commands.
+- **SETTINGS** (R52): Appearance pane (all six B1 settings) + the TAG
+  MANAGER's real home (create/child/rename/delete-with-subtree,
+  hierarchy indented) + **Promote to Book…** (R30/R37: one or several
+  tags, AND/OR → a smart book; the tags stay; spec construction pinned
+  as exactly the A2 vocabulary).
+
+## B3 — books (chapters · navigator · membership · journal books · reading flow)
+
+- **Real chapters** in the book view for curated books: grouped by
+  `(position, id)` with entries in reading order, unfiled trailing
+  (#26(b)); chapter CRUD + Move Up/Down (movable chapters — the polished
+  R19 drag bar is Stage C's); **Restore Last Deleted Chapter** faces the
+  round-1 `restoreSection`; posts file via Chapter ▸.
+- **The navigator** (R43's letter): chapters · top-level outline ·
+  settings in a leading rail; **post-click opens in the CURRENT editor**
+  (inline focus — no context jump); NO chapter view; the settings leg =
+  BookSettingsSheet (rename/finish/extents).
+- **The reading flow** (R2/R56 — direction C as a VIEW MODE): continuous
+  page column on the C page tokens, typographic chapter breaks, posts
+  flowing, lazy per-post text (P3); **a finished book OPENS into it**
+  (pinned); click wakes the post in the book view (in-place waking =
+  Stage C's v2-canon surface).
+- **The membership indicator** (R35's requirement): the PostDetailView
+  chip — "in N books" → the book list + THE DIVERGENCE DOOR
+  (duplicate-as-version with the R31 explainer).
+- **Journal books** (R50, resolved INSIDE the untouchable constraint):
+  `JournalBooks.openToday` = create-or-open + ensure the designated daily
+  book (created/pinned/designated on first use — #26(a)), shared by the
+  shelf button, ⌘J, and the palette; other journal books' "+ new entry"
+  mints freely into THAT book (both halves pinned).
+
+**PROVISIONALs:** QUESTIONS #26 (a)–(g). **Retired surfaces:** the old
+sidebar post pile/Journal/Readings/Tags/Views sections (ReadingViews'
+sheets live on under the shelf); `SidebarSelection.timeline` (Library
+absorbs it). Nothing requiring the author arose; the deferred pieces are
+Stage C's by plan (v2-canon takes surfaces, seams/ring/wash, comments UI,
+callout rendering, canvas-as-view).
+
 ## Stage A cold review, round 1 (2026-07-18) — findings + dispositions
 
 **0 BLOCKER / 0 MAJOR / 3 MINOR / 2 NIT; all five AGREED, all five fixed
