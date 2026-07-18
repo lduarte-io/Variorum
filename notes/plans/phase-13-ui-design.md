@@ -1481,6 +1481,164 @@ degradation, gutter emoji placement, the ⌘⇧B button-not-toggle face, the
 spaced-callout export byte-shift, visible-frames-only drop targets, the
 status line's "commits N" not built.
 
+# STAGE C CLOSEOUT (2026-07-18 — C1 by the prior session, C2+C3 by the continuation session; THE ROUND-3 COLD REVIEWER'S ANCHOR, with the two prior round sections and the continuation section above)
+
+**Run shape:** C1 shipped in the prior session at the author's context
+seam (commits `bd0b866` + `5cfbfbe`; its complete where-everything-lives
+map is the STAGE C CONTINUATION section's "C1 — DONE" — folded into this
+closeout by that pointer, not duplicated); the continuation session built
+C2 (`8d777ed`) and C3 (`6d993e5`) to the continuation section's recorded
+design decisions, then ran the stage gate. **Gate counts (full suites,
+green): core `swift test` 729 in 88 suites (seam baseline 728/88 — +1,
+the C3 fans-feed pin) · Mac app 417 in 78 suites (seam 411/76 — +6: four
+C2 pins, two C3 pins) · mobile 11 in 4 suites (untouched).** Round 3
+reviews Stage C PLUS the Stage B round-2 fixes.
+
+**The gate's other checks:**
+- **A0 re-check (Spikes/Phase13DecorationSpike, RELEASE, macOS 26.4.1/
+  25E253 — `sw_vers` confirmed, same build as Phase 6 and Stage A, so the
+  TEXTKIT2 §5 matrix stands unchanged):** decorated keystroke p95 0.89 ms
+  vs bare p95 0.89 ms — **decoration cost at p95 −0.00 ms** (the recorded
+  baseline pair was 0.79/0.75; this run sits ~0.1 ms warmer across ALL
+  conditions uniformly, the load-bearing delta is unchanged: decorations
+  as overlays cost nothing); overlay reposition 0.02 ms (exact match);
+  read-tier 0.51 ms median / 4.31 ms p95 at 200 views (recorded
+  0.44/3.69 — within noise), memory Δ1.4 MB at a dozen / 26.2 MB at 200
+  (recorded 1.4/25.8). **No decoration regression.** One recorded
+  sentence per the continuation's note: the spike is self-contained and
+  never reads `EditorTypography`, so these numbers measure the decoration
+  MECHANISM — the real surfaces now run SF Mono 14 (terminal default)
+  rather than the spike's system font; the mechanism cost, not the font,
+  is what the gate re-checks.
+- **Canary:** silent — the Mac suite's standing `willSwitchToNSLayout
+  Manager` tests are green in the full run; the spike's TK2-opt-in
+  preconditions ran without a crash.
+- **`/Applications/Variorum.app` refreshed from the Release build** at
+  the gate (the stage owed C1's refresh too — this covers C1+C2+C3).
+
+## C2 — takes presentations (what shipped, where)
+
+- **The v2-canon restyle (R12; anchors: mockups-v2 tab 1 + round-2 §3).**
+  `TakesBoardView` gains the optional ThemeStore environment (terminal
+  fallback — the established pattern) and renders on VoiceTokens
+  throughout: the board on `tokens.surface`; take cards in the new
+  **`TakeCardFrame`** (card paper + `takeLine` 1px border + the **3pt
+  `tokens.chosen` leading bar** + **"✓ chosen"** mark — v2's grammar) used
+  by `takeMiniPane` AND the stack's `CollapsibleTakeCard` (tokens param);
+  sameness divergence tints moved off the unstyled yellow onto
+  `tokens.accent.opacity(0.12)`; gap dots and secondary text on
+  muted/faint tokens. **`TakePaneView` gains an optional `tokens` param
+  (default nil = the pre-13 look — BlockTOC/tutorial call sites compile
+  unchanged):** with tokens, the pane is TRANSPARENT (the card or article
+  behind provides the paper), inked from the voice, and strokes ONLY the
+  live ring (`tokens.ring`, 1.5) — R22's rule: among many editable
+  surfaces the ring finds the one live editor. `updateNSView` also
+  live-adopts a voice switch's `EditorDocument.baseFont` (full-range
+  base-attribute refresh, the C1 applyVoiceChrome pattern — an ordinary
+  storage write, never §3 rendering attributes).
+- **The changing-block WASH (R13/R22):** the bloomed block's in-flow cell
+  wears `tokens.wash` behind **"Mark changing block", default ON**
+  (`@AppStorage("markChangingBlock")`), in every in-flow style (stack,
+  carousel, margin grid; slot-split replaces the flow cell so there is
+  nothing to wash). **The old marginGrid-only "Seamless" toggle is
+  FOLDED into it** (build-time call, recorded at QUESTIONS #28a): v2's
+  letter has the toggle remove the wash ONLY — the cards stay; the old
+  Seamless hid the grid too, which would have fought follow-the-scroll.
+- **R9's measure:** the single-column article caps at 680pt, centered,
+  horizontal padding 24. **The margin grid reserves a FIXED 340pt rail
+  on every row** (empty until the row blooms) so the article column
+  stays a straight measure whether or not takes are open (v2's rail-row;
+  a presentation build-time call, QUESTIONS #28f).
+- **R24 — the short-block strip (her design, sitting 4):** in the margin
+  grid, a SHORT fanned block's cards render as a **ONE-CARD-HIGH
+  horizontally-scrolling strip** (cards 220×110, clipped; the row grows
+  vertically to the card even when the block is one sentence); LONGER
+  blocks keep the ~3-tall grid growing rightward. The short/long rule is
+  the pure static `TakesViewModel.usesHorizontalStrip(text:)` on a
+  **200-character threshold** (~under three lines at the 68ch measure —
+  build-time call, QUESTIONS #28b). Recorded cost: a long take ON a short
+  block clips at the card height in strip form (the one-card-high rule's
+  letter); the take is whole in every other presentation and opens fully
+  the moment it is edited elsewhere.
+- **R25 — follow-the-scroll, generalized:** `TakesViewModel` gains
+  `followTheScroll` (pushed by the View from the theme settings — models
+  never read environments), **REF-COUNTED row visibility** (`rowAppeared/
+  rowDisappeared` from `.onAppear/.onDisappear` in ALL compositions —
+  multi-column repeats of one block's row can't blind each other), and
+  the ONE bloom rule **`isBloomed(slot)`** = explicitly expanded OR
+  (option on ∧ fanned ∧ near-viewport). The visibility dictionary is
+  deliberately observation-tracked ONLY while the option is on (the `&&`
+  short-circuit means `isBloomed` never reads it when off — the calm
+  default costs nothing). Blooming applies wherever blooming exists:
+  the single-column article in all four styles and the locked columns'
+  in-cell blooms; **unlocked columns have no bloom surface (the pre-13
+  shape, unchanged)** — recorded at QUESTIONS #28d with the
+  ⑂-can't-close-a-mode-bloom consequence (#28c).
+- **Expand-all gating (R25's agreed half):** the Expand All/Close All
+  buttons render only when `model.offersExpandAll` — single column and
+  not slot-split (columns/slot-split ARE whole-post fan presentations).
+- **The fan-growth doors (v2's dashed footer):** "＋ new take (branch)"
+  (= `branchVariant` from the slot's rendered take) and "＋ blank take"
+  (= `newBlankVariant`) close every bloom — the stack, the paged row
+  (carousel/slot-split/in-cell), and both margin-rail forms — model
+  methods awaited through the runner (trap 2), refusals speaking under a
+  seal (the 9d fire-and-speak posture).
+- **Tests (`TakesPresentationTests`, 4):** the strip threshold's edges;
+  follow-the-scroll blooming (visibility alone blooms a fanned row with
+  `expandedBlocks` empty; single-take rows never; refcount across
+  columns; option-off means visibility means nothing; explicit expansion
+  regardless); the expand-all gate across style × column count; the
+  doors growing the fan through ops with chosen UNMOVED (I3 rides).
+
+## C3 — canvas as a post view (what shipped, where)
+
+- **`PostDetailView.Mode` gains `.canvas`** → the existing `CanvasView`
+  over the POST's container (canvasProjection works over any container —
+  one traversal, never a bespoke subsystem); `PoolDetailView`'s canvas
+  face stands. The sidebar door stayed gone (R40 — removed in B2).
+- **Core (additive):** `Queries.CanvasProjection` gains **`fans`** —
+  blockID → live ACTIVE takes in fan order, **fanned blocks only**,
+  fetched through the tested `activeFans` home (cost ∝ container, P1) —
+  so the switcher needs no second fetch. Default `[:]`; every existing
+  init/call site compiles unchanged.
+- **The MINIMAL takes switcher (R40's letter; R58's mobile-inheritable
+  seed):** fanned cards show "⑂ see takes (n)" → a one-line **‹ take k
+  of n · label ›** selector; ONE switcher open at a time (view state);
+  **‹ › = `chooseVariant` to the prev/next active take** — the
+  PROVISIONAL reading of R40's "switch that block to another one of its
+  own takes" (an explicit, deliberate per-block gesture — I3's doctrine;
+  the alternative, a view-local display pick that never touches chosen,
+  is the recorded option — QUESTIONS #28e). Ends CLAMP; a rendered take
+  that fell out of the active fan (fallback display) enters the fan at
+  its front on ›; a sealed post refuses through the existing speaking
+  message path. No other fan machinery reaches the canvas.
+- **Styling:** cards move off the unstyled yellow onto `tokens.card` +
+  `takeLine` border over the voice's `room`; ink/muted/small from tokens
+  (the optional-environment pattern).
+- **Tests:** core — `canvasProjectionCarriesActiveFansForFannedBlocksOnly`
+  (fanned-only, fan order, active-only, no cross-container leak); Mac —
+  `CanvasTakesSwitcherTests` (2): the switcher steps chosen EXACTLY one
+  take with clamped ends and offers nothing on single-take blocks (run
+  over a POST's canvas — the C3 door itself), and the sealed refusal
+  speaks with chosen unmoved.
+
+## Stage C PROVISIONAL dispositions (R55: noted-and-continued)
+
+C1's bundle is QUESTIONS #27 (a)–(h) (unchanged). The continuation adds
+**QUESTIONS #28 (a)–(f)**: (a) the Seamless→"Mark changing block" fold;
+(b) the 200-char strip threshold + the strip's clip-at-card-height cost;
+(c) the ⑂ toggle can't close a follow-the-scroll bloom (no third state
+invented); (d) follow-the-scroll's reach = wherever blooming exists
+(unlocked columns keep their no-bloom pre-13 shape); (e) the canvas
+switcher writes CHOSEN via `chooseVariant` (the explicit-gesture reading
+of R40; view-local display pick recorded as the alternative); (f) the
+margin grid's fixed reserved rail. Zero stop-and-ask items arose; nothing
+gated the core.
+
+**NOT this session's:** the phase closeout ritual (canonical docs, master
+plan row, the R59 handoff) — the coordinator instructs it after round 3
+adjudicates.
+
 # STAGE B CLOSEOUT (2026-07-18, same Fable implementer session — the review ladder's anchor)
 
 **Run shape:** B1 → B2 → B3, one commit per step (`3b4ef50` · `300aac0` ·
