@@ -340,6 +340,120 @@ invites it):
 - **Chapter-grouping options: GREEN-LIT** — the three schema shapes go to her (in
   the sitting-3 reply; decision next sitting).
 
+### Sitting 4 (2026-07-17, night) — ratifications, the paragraph question dissolved, Pool redefined, the edit-home clarification
+
+**Her message VERBATIM (standing instruction; two screenshots re-supplied the lost
+Notion refs — saved to `sitting-refs/`; captures removed for publication):**
+
+> [Image #9] this notion picture shows the background color option on a text block
+> with the block mover to the left this picture is a little blurry because it's in
+> motion but it shows the blue bar showing where the block is moving: [Image #10]
+> also: yes, I agree with what you said about the highlighting scheme. i like takes
+> being visually distinct. i like the changing block wash and that you can turn it
+> off. i liek the editing indicator being a setting. also, with the other options
+> like when the other takes are inline just beneath the block, you can't click on
+> them to edit them? i thought you could basically always edit everythign that you
+> can see? i really like everything that you said about the highlighting scheeme. i
+> think that for marginalia, it could show the cards still as marginalia but only
+> have them one marginalia block high (even if the block is only a sentence, it
+> would just make the post vertically taller), and you can scroll through the
+> marginalia horizontally. and on longer blocks, you still have the marginalia in
+> the normal way. i think that follow the scroll should be an option for how to see
+> takes though - that is an excellent idea!! for all the different modes. i do agree
+> that full text columsn and slot split, it shouldn't be offered becasue it already
+> is offered. so if takes were always whole block, then what was the deal with a
+> sentence sized block? i think there's no point in having a block that actually
+> secretly can't have takes - that's super confusing. also, i do think that multi
+> paragraph blocks should be possible and they should survive as the ceiling. i feel
+> like sub paragraph splits should just create 2 or 3 new paragraphs. if you
+> highlight a sentence in a paragraph and do "make this a block", it should suddenly
+> be a new paragraph with a different block above it and a different block below it.
+> and yeah, i agree the callout frame makes sense to put at a block level. for the
+> chapter groupings - i think that a reading section table is fine. we don't need
+> nesting readings for now. callign it blocks - good. pool can just be posts or
+> something: I mean that pool should be an area for posts that do not belong to any
+> book. i think that this will help cut down on the number of floating notes / posts
+> that i have - most htings should be addable to some book or anotehr with a tag.
+> you can promote a tag (or several tags, AND joining or OR joining) to being a
+> "Book". does that make more sense? i feel like you should be able to add things
+> manually to a book or have a book that is based on tags - you should be able to
+> save them. i'm wondering if you manually add something to a book - should that add
+> a tag to the post that says it is book ownership? i think it would be okay if
+> posts could be in multiple books but that gets back to the where can it be edited
+> ? i think earlier we decided that posts have one place where they can be edited
+> and if they try to be edited out of their home, it makes a copy of that post, but
+> how do you know where the post's home is? i think if we can nail this down, it
+> would help. I guess library would be all books, posts, and blocks. like litearlly
+> everything, sortable and searchable.
+
+**Rulings and resolutions:**
+
+- **R22 — The highlighting scheme is RATIFIED in full** (Q11 closed): takes always
+  visually distinct; changing-block wash with its off-toggle; editing indicator a
+  setting (off / outline / background, off default); the marginalia wash+ring rule
+  always on in marginalia.
+- **R23 — Editability confirmed everywhere, her check answered YES:** in EVERY
+  fan-out style — the inline stack included — every visible take is editable in
+  place; clicking in migrates the live editor. (R8 was always style-universal; v2's
+  own header says "type in any take or paragraph.")
+- **R24 — Marginalia sizing (her design):** for SHORT fanned blocks, the margin
+  cards render as a ONE-CARD-HIGH strip that scrolls HORIZONTALLY — the post grows
+  vertically to fit the strip even when the block is a single sentence; longer
+  blocks keep the normal vertical card column.
+- **R25 — Follow-the-scroll is RATIFIED and GENERALIZED:** an OPTION for how takes
+  are viewed in ALL modes ("that is an excellent idea!! for all the different
+  modes"), not just marginalia's expand-all behavior. Full-text columns and
+  slot-split offering no expand-all: agreed.
+- **R26 — THE PARAGRAPH QUESTION DISSOLVED (Q12 closed, no machinery change):**
+  her clarifying question ("what was the deal with a sentence sized block?")
+  exposed that the feared thing never existed — there is NO block that "secretly
+  can't have takes": takes were ALWAYS whole-block (I7), a sentence-sized block
+  fans fine (it is simply a short paragraph), and there are NO sub-paragraph seams
+  — block boundaries render as newlines, so every block IS its own paragraph on
+  the surface. Her rulings confirm the existing semantics exactly: **multi-
+  paragraph blocks survive as the ceiling**, and **make-block-on-a-sentence
+  PROMOTES it to its own paragraph** with the before/after text as separate
+  blocks — which is precisely what the shipped compound divide does today.
+  Nothing is un-built; a clarifying sentence joins CoreDescription at plan
+  ratification (the "floor is a sentence" line gains "…and a block is always its
+  own paragraph on the surface").
+- **R27 — Callout frame at block level: AGREED** (Q13's shape ratified; the
+  `presentation` metadata rides the comments lockstep event).
+- **R28 — Chapters: the `reading_section` table RULED** ("fine; we don't need
+  nesting readings for now") — Q5 closed.
+- **R29 — POOL REDEFINED (the sitting-3 ambiguity resolved):** "pool should be an
+  area for posts that do not belong to any book" — the un-shelved-posts surface,
+  whose PURPOSE is to drive floating posts down ("most things should be addable
+  to some book or another with a tag"). The name stays loose ("posts or
+  something"). The scraps area's rename to **"Blocks"** confirmed good.
+- **R30 — Tag promotion to Book:** one or SEVERAL tags, **AND-joined or
+  OR-joined**, can be promoted to a saved Book (= smart readings on the shelf;
+  manual books coexist). Engineering note: the v1 SmartQuerySpec vocabulary is
+  ANY-of tags only — the AND-of-tags form is an additive vocabulary extension
+  this implies.
+- **R31 — The EDIT-HOME question (her "nail this down") — the model already
+  answers it, pending her confirmation:** posts have NO home-vs-away and NO
+  copy-on-edit rule. Membership is not ownership: books point at posts
+  non-exclusively (the deliberate asymmetry that makes on-demand books work);
+  editing a post edits THE post, everywhere, in every book that shows it. What
+  her memory reaches for is the BLOCK rule (I2 single ownership + pool-drag
+  COPIES with lineage) and the VERSION family: wanting a book-local divergent
+  copy is a deliberate gesture (`duplicateAsVersion` + `version_of`), never an
+  automatic consequence of editing. So "how do you know where the post's home
+  is" dissolves: its home is the library; books are saved ways of collecting it.
+- **R32 — LIBRARY = EVERYTHING:** "all books, posts, and blocks. like literally
+  everything, sortable and searchable" — the total catalog across entity types.
+  (Fable's consolidation note, recorded as advice not ruling: the sidebar noun
+  pile is growing — Shelf · Journal · Library · Pool · Blocks · Tags · Canvas —
+  and Pool-as-bookless-posts is queryable as a Library filter; whether it earns
+  a top-level word or lives as a saved filter is worth one deliberate look at
+  the IA when the plan is drafted.)
+- **Fable recommendation (recorded, her call owed): NO ownership tags on manual
+  add** — reifying membership as a tag creates two truths for one fact
+  (`reading_post` vs the tag) with all the divergence that brings; the honest
+  answer to "which books hold this post" is showing the reverse lookup as a
+  metadata chip on the post. Pending her yes/no.
+
 ## Emerging direction (running synthesis — updated after sitting 2)
 
 - **Two voices, one structure:** the Terminal voice leads (her default); the Study
@@ -371,12 +485,11 @@ invites it):
    (Library = all posts; timeline one of its views).
 3. Canvas: stays a sidebar word (sitting 2). Its v1 design investment level still
    open (functional-as-is vs restyled this phase).
-4. Pool naming — HALF-RULED sitting 3 (R20): the pool area renames to **"Blocks"**;
-   the trailing clause "and pool can still just be posts or something" is ambiguous
-   — clarification owed (Library surface reads "Posts"?).
-5. Chapter-grouping model shape — options DELIVERED in the sitting-3 reply
-   (`reading_section` table · marker rows · nested readings; Fable recommends the
-   section table); her pick owed.
+4. ~~Pool naming~~ — RESOLVED sitting 4 (R29): scraps area = "Blocks"; "Pool" =
+   the bookless-posts surface (name loose). Residual: does Pool earn a top-level
+   sidebar word or live as a Library filter (the R32 consolidation note)?
+5. ~~Chapter-grouping model shape~~ — RULED sitting 4 (R28): the
+   `reading_section` table; no nested readings.
 6. ~~Comment placement~~ — RULED sitting 2 (R7): margin default; inline-tinted as a
    setting.
 7. ~~Which direction leads~~ — RULED sitting 2 (R1) + confirmed sitting 3 (R12):
@@ -387,13 +500,18 @@ invites it):
    her confirm owed — currently unassigned).
 10. Seam-visibility default: invisible at rest (§12) with a toggle — the toggle's
     home (menu? per-post? global setting?).
-11. The editing-indicator scheme (R14's proposal: off/outline/background setting +
-    the always-on marginalia rule) — ratify or adjust.
-12. THE PARAGRAPH FLOOR (R18): (a) do multi-paragraph blocks survive as the
-    ceiling? (b) hard refusal vs default-with-escape for sub-paragraph splits?
-    The biggest open item — it reshapes the gesture surface and simplifies
-    cross-fan machinery; CoreDescription's "floor is a sentence" would be
-    superseded at ratification.
-13. Callout shape (R16's proposal: block-level `presentation` metadata riding the
-    comments lockstep) — ratify or adjust; export mapping detail.
-14. Expand-all-fans per-style adaptation (the sitting-3 proposal) — ratify.
+11. ~~The editing-indicator scheme~~ — RATIFIED sitting 4 (R22).
+12. ~~THE PARAGRAPH FLOOR~~ — DISSOLVED sitting 4 (R26): the feared sub-paragraph
+    take machinery never existed; multi-paragraph ceiling survives; make-block
+    promotes to own paragraph (= shipped behavior). Clarifying line joins
+    CoreDescription at ratification.
+13. ~~Callout shape~~ — RATIFIED at block level sitting 4 (R27); export mapping
+    detail remains plan-drafting work.
+14. ~~Expand-all-fans per-style~~ — RATIFIED sitting 4 and GENERALIZED (R25):
+    follow-the-scroll becomes a takes-viewing OPTION in all modes.
+15. Ownership tags on manual book-add — Fable recommends NO (two truths for one
+    fact; show membership as a reverse-lookup chip instead) — her yes/no owed.
+16. The R31 edit-home clarification (posts have no home; versions are the
+    deliberate divergence door) — her confirmation owed.
+17. Pool's IA slot: top-level sidebar word vs Library saved-filter (R32's note).
+18. ⌘N = New Post — proposed sitting 3, not yet confirmed.
