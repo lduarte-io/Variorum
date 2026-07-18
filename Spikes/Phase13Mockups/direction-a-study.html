@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction A — The Study</title>
+<style>
+  :root{
+    --room:#f0e8d6; --room-deep:#e7dcc4; --paper:#fffdf6; --ink:#332c21; --muted:#8a7d66;
+    --accent:#9c4f2e; --seam:#c9b998; --select:#faf0d8; --take:#e9ecdc; --take-line:#c5cbb0;
+    --line:#e3d9c2;
+  }
+  body{margin:0;background:#faf7f0;color:var(--ink);font:15px/1.6 -apple-system,"Helvetica Neue",sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:56px 24px 120px;}
+  h1{font:600 30px/1.2 Charter,Georgia,serif;margin:0;}
+  .sub{color:var(--muted);font-size:14px;margin:6px 0 8px;}
+  .nav a{color:var(--accent);text-decoration:none;font-size:13px;margin-right:14px;}
+  section{margin-top:64px;}
+  h2{font:600 21px/1.3 Charter,Georgia,serif;margin:0 0 4px;}
+  .caption{color:var(--muted);font-size:13.5px;max-width:760px;margin:0 0 18px;}
+  .frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 14px rgba(80,60,20,.07);}
+
+  /* ---------- app chrome ---------- */
+  .app{display:flex;min-height:600px;background:var(--room);}
+  .side{width:196px;background:var(--room-deep);padding:20px 0;flex-shrink:0;}
+  .side .app-name{font:600 15px Charter,Georgia,serif;padding:0 20px 14px;color:#6d5a3a;}
+  .side a{display:block;padding:7px 20px;color:#5c5138;text-decoration:none;font-size:13.5px;}
+  .side a.on{background:#dccfae;color:#332c21;font-weight:600;border-radius:0 20px 20px 0;margin-right:14px;}
+  .side .grp{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#a3936f;padding:18px 20px 6px;}
+  .main{flex:1;padding:36px 44px;overflow:hidden;}
+
+  /* ---------- shelf ---------- */
+  .shelf-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;}
+  .shelf-h .t{font:600 24px Charter,Georgia,serif;}
+  .shelf-h .new{font-size:13px;color:var(--accent);}
+  .shelf{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+  .book{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:0;overflow:hidden;}
+  .book .cover{height:104px;padding:16px 16px 12px;display:flex;flex-direction:column;justify-content:flex-end;}
+  .book .cover .bt{font:600 17px/1.25 Charter,Georgia,serif;color:#fffdf6;}
+  .book .meta{padding:10px 16px 13px;font-size:12px;color:var(--muted);}
+  .c1{background:linear-gradient(160deg,#7d3b2e,#9c5a3e);} .c2{background:linear-gradient(160deg,#3d5a4c,#5c7a64);}
+  .c3{background:linear-gradient(160deg,#41506e,#5d6f92);} .c4{background:linear-gradient(160deg,#8a743a,#a89253);}
+  .c5{background:linear-gradient(160deg,#5c4a6e,#7a6690);} .c6{background:linear-gradient(160deg,#856049,#a3806a);}
+  .book.finished .meta::after{content:"✓ finished";color:#3d5a4c;font-weight:600;margin-left:6px;}
+  .book.hovered{outline:2px solid var(--accent);outline-offset:2px;}
+  .book.hovered .meta{color:var(--ink);}
+  .bound{margin-top:5px;height:3px;background:#eee4cd;border-radius:2px;overflow:hidden;}
+  .bound i{display:block;height:100%;width:62%;background:var(--accent);}
+  .hoverlab{font-size:11.5px;color:var(--accent);margin-top:8px;}
+
+  /* ---------- book open ---------- */
+  .bo-title{font:600 26px Charter,Georgia,serif;margin-bottom:2px;}
+  .bo-sub{font-size:12.5px;color:var(--muted);margin-bottom:26px;}
+  .chap{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#a3936f;margin:26px 0 12px;display:flex;align-items:center;gap:10px;}
+  .chap::after{content:"";flex:1;border-top:1px solid var(--line);}
+  .chap .drag{cursor:grab;color:#c9b998;}
+  .post{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:22px 26px;margin-bottom:14px;}
+  .post .pt{font:600 16.5px Charter,Georgia,serif;margin-bottom:6px;}
+  .post p{font:15px/1.72 Charter,Georgia,serif;margin:0;color:#3d362a;}
+  .post .pm{font-size:11.5px;color:var(--muted);margin-top:10px;}
+  .dropzone{border:1.5px dashed var(--seam);border-radius:8px;padding:14px;text-align:center;color:var(--muted);font-size:13px;background:rgba(255,253,246,.5);}
+
+  /* ---------- editor ---------- */
+  .ed{max-width:660px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:44px 52px;}
+  .ed .et{font:600 24px Charter,Georgia,serif;margin-bottom:20px;}
+  .blk{position:relative;padding:8px 2px;}
+  .blk p{font:15.5px/1.78 Charter,Georgia,serif;margin:0;color:#332c21;}
+  .seam{border:none;border-top:1.5px dotted var(--seam);margin:4px 0;}
+  .seam.ghost{border-top-color:transparent;}
+  .blk.sel{background:var(--select);border-radius:6px;padding:10px 12px;margin:0 -12px;}
+  .blk.sel .bmeta{position:absolute;right:-160px;top:8px;width:140px;font-size:11px;color:var(--muted);line-height:1.5;}
+  .badge{position:absolute;right:-34px;top:6px;background:var(--accent);color:#fffdf6;font-size:11px;border-radius:10px;padding:1px 7px;}
+  .takes{margin:12px -12px 4px;padding:14px 14px 10px;background:var(--take);border:1px solid var(--take-line);border-radius:8px;}
+  .takes .th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#758160;margin-bottom:10px;}
+  .take{background:#fffef9;border:1px solid var(--take-line);border-radius:6px;padding:10px 12px;margin-bottom:8px;}
+  .take p{font:14px/1.6 Charter,Georgia,serif;margin:0;color:#3d362a;}
+  .take .tl{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .take.chosen{border-color:var(--accent);}
+  .take.chosen .tl::after{content:"  ✓ chosen";color:var(--accent);font-weight:600;}
+  .cmt{margin:10px -12px 0;padding:9px 12px;border-left:3px solid #c9a24a;background:#fbf5e2;border-radius:0 6px 6px 0;font-size:12.5px;color:#6d5f3e;}
+
+  /* ---------- dark ---------- */
+  .darkband{background:#202124;border-radius:12px;padding:36px;display:flex;justify-content:center;}
+  .ed.dark{background:#292a2e;border-color:#3a3b40;}
+  .ed.dark .et,.ed.dark .blk p{color:#e6e1d6;}
+  .ed.dark .seam{border-top-color:#57544a;}
+  .ed.dark .blk.sel{background:#33322c;}
+  .ed.dark .takes{background:#2e3129;border-color:#42463a;}
+  .ed.dark .take{background:#333630;border-color:#42463a;}
+  .ed.dark .take p{color:#d9d5c9;}
+  .ed.dark .badge{background:#d29a6b;color:#202124;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Direction A — “The Study”</h1>
+  <p class="sub">The Phase 11 mockup language, matured: a warm sepia room, white paper posts, serif prose, dotted seams, tinted takes.</p>
+  <p class="nav"><a href="index.html">← all directions</a> <a href="direction-b-terminal.html">B · Terminal Study</a> <a href="direction-c-reading-room.html">C · Reading Room</a></p>
+
+  <section>
+    <h2>1 · The shelf (home)</h2>
+    <p class="caption">A quiet bookshelf: your books and notebooks as covers, nothing else. Info is on demand —
+    the outlined book shows the hover state (word count, bounded-length progress, last touched). One of these
+    is the Journal; one is finished and reads that way; “Dream Journal” shows a <strong>bounded length</strong>
+    (the machinery that already exists, finally given a face).</p>
+    <div class="frame"><div class="app">
+      <div class="side">
+        <div class="app-name">Variorum</div>
+        <a class="on">Shelf</a><a>Journal</a><a>Library</a><a>Pool</a><a>Tags</a>
+        <div class="grp">On the desk</div>
+        <a>Orbit — ch. 4</a><a>Today's entry</a>
+      </div>
+      <div class="main">
+        <div class="shelf-h"><span class="t">Shelf</span><span class="new">+ New book</span></div>
+        <div class="shelf">
+          <div class="book"><div class="cover c1"><span class="bt">Journal 2026</span></div><div class="meta">ongoing · entry most days</div></div>
+          <div class="book hovered"><div class="cover c2"><span class="bt">Dream Journal</span></div>
+            <div class="meta">14 entries · 6,120 words · touched yesterday
+              <div class="bound"><i></i></div><div class="hoverlab">bounded: 62% of 10,000 words</div>
+            </div></div>
+          <div class="book"><div class="cover c3"><span class="bt">Orbit</span></div><div class="meta">a book · 4 chapters · 31,400 words</div></div>
+          <div class="book"><div class="cover c4"><span class="bt">Attention (series)</span></div><div class="meta">3 posts · drafting</div></div>
+          <div class="book finished"><div class="cover c5"><span class="bt">Star Notes</span></div><div class="meta">smart · tag star/*</div></div>
+          <div class="book finished"><div class="cover c6"><span class="bt">Letters, 2025</span></div><div class="meta">28 posts</div></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <h2>2 · A book, open</h2>
+    <p class="caption">Posts one after another in their order — the infinite vertical scroll. Chapters are real,
+    reorderable groupings (the ⠿ handle), not tag derivations. The dashed zone is the drag-a-post-in affordance
+    you asked for.</p>
+    <div class="frame"><div class="app">
+      <div class="side">
+        <div class="app-name">Variorum</div>
+        <a>Shelf</a><a>Journal</a><a>Library</a><a>Pool</a><a>Tags</a>
+        <div class="grp">Orbit</div><a class="on">Read</a><a>Scrub</a><a>Outline</a>
+      </div>
+      <div class="main">
+        <div class="bo-title">Orbit</div>
+        <div class="bo-sub">a book · 4 chapters · 31,400 words · sorted by hand</div>
+        <div class="chap"><span class="drag">⠿</span> I · Leaving</div>
+        <div class="post"><div class="pt">The night we decided</div>
+          <p>It was not a decision so much as a noticing. The bags had been packed for weeks in the way that
+          minds pack: quietly, denying it, one resolve at a time.</p>
+          <div class="pm">2,140 words · last major revision May 3</div></div>
+        <div class="post"><div class="pt">Inventory</div>
+          <p>What you carry determines what you can leave. I made three lists and threw two of them away.</p>
+          <div class="pm">1,730 words</div></div>
+        <div class="chap"><span class="drag">⠿</span> II · The long middle</div>
+        <div class="post"><div class="pt">Weeks like water</div>
+          <p>Progress in the middle of anything is invisible from inside it. The days repeated with small
+          variations, the way a theme repeats until suddenly it is a fugue.</p>
+          <div class="pm">3,020 words · ⑂ 2 blocks carry takes</div></div>
+        <div class="dropzone">drag a post here — from the Library, another book, or the shelf</div>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <h2>3 · The editor — blocks, seams, takes, a comment</h2>
+    <p class="caption">The post is BIG; the room recedes. Dotted seams replace the tint stripes (they appear on
+    hover/focus — the middle one is shown; at rest the page is seamless). The selected block gets the warm
+    highlight plus its ordinal and word count in the margin. The fanned block shows the ⑂ badge; its takes sit
+    in the sage panel — a different background from the post, as you asked. The gold strip is a block
+    <strong>comment</strong> (your new feature) in its margin-note voice.</p>
+    <div class="frame" style="background:var(--room);padding:40px 24px;">
+      <div class="ed">
+        <div class="et">Weeks like water</div>
+        <div class="blk"><p>Progress in the middle of anything is invisible from inside it. The days repeated
+          with small variations, the way a theme repeats until suddenly it is a fugue.</p></div>
+        <hr class="seam">
+        <div class="blk sel"><p>We measured the crossing not in miles but in habits formed and abandoned.
+          Coffee at dawn lasted eleven days. The log-keeping lasted longer, because it lied less.</p>
+          <div class="bmeta">block 2 / 5<br>34 words<br>⌘S committed · 3</div></div>
+        <hr class="seam ghost">
+        <div class="blk"><span class="badge">⑂ 3</span><p>The storm found us on the fourteenth day, and I have
+          three ways of telling it.</p>
+          <div class="takes">
+            <div class="th">Takes — this block</div>
+            <div class="take chosen"><div class="tl">plain telling</div><p>The storm found us on the fourteenth day, and I have three ways of telling it.</p></div>
+            <div class="take"><div class="tl">softer opening</div><p>On the fourteenth day the weather turned, gently at first, the way bad news is polite before it isn't.</p></div>
+            <div class="take"><div class="tl">take 3</div><p>Storms at sea are administrative: lists of things to lash down, in an order you learn exactly once.</p></div>
+          </div>
+          <div class="cmt">💬 take 1 is what I prefer, but the ending of the “polite” one might belong in ch. III</div>
+        </div>
+        <hr class="seam ghost">
+        <div class="blk"><p>Afterward the boat was smaller and we were larger, and neither of us mentioned it.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Dark — thought-through grey</h2>
+    <p class="caption">Not black: a grey room, warm ink, the same language. (Your Gemini note.)</p>
+    <div class="darkband">
+      <div class="ed dark" style="max-width:560px;">
+        <div class="et">Weeks like water</div>
+        <div class="blk"><p>Progress in the middle of anything is invisible from inside it.</p></div>
+        <hr class="seam">
+        <div class="blk sel"><p>We measured the crossing not in miles but in habits formed and abandoned.</p></div>
+        <div class="blk"><span class="badge">⑂ 3</span>
+          <div class="takes"><div class="th" style="color:#9aa587;">Takes</div>
+            <div class="take chosen"><p>The storm found us on the fourteenth day…</p></div>
+            <div class="take"><p>On the fourteenth day the weather turned…</p></div>
+          </div></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="nav" style="margin-top:48px;"><a href="index.html">← all directions</a> <a href="direction-b-terminal.html">next: B · Terminal Study →</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction C — The Reading Room</title>
+<style>
+  :root{
+    --room:#eceae4; --page:#ffffff; --ink:#211e19; --muted:#95908a; --accent:#7a5c3e;
+    --line:#dfdcd4; --seam:#c9c4ba; --select:#f5efe2; --take:#f0f1ea; --take-line:#d8dacb;
+  }
+  body{margin:0;background:#f5f4f0;color:var(--ink);font:15px/1.65 -apple-system,"Helvetica Neue",sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:56px 24px 120px;}
+  h1{font:600 30px/1.2 "New York","Iowan Old Style",Georgia,serif;margin:0;}
+  .sub{color:var(--muted);font-size:14px;margin:6px 0 8px;}
+  .nav a{color:var(--accent);text-decoration:none;font-size:13px;margin-right:14px;}
+  section{margin-top:64px;}
+  h2{font:600 21px/1.3 "New York","Iowan Old Style",Georgia,serif;margin:0 0 4px;}
+  .caption{color:#7d786f;font-size:13.5px;max-width:760px;margin:0 0 18px;}
+  .frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--room);
+         box-shadow:0 2px 14px rgba(60,55,40,.06);}
+
+  /* chrome that hides */
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 22px;
+          color:#a49e93;font-size:12.5px;border-bottom:1px solid rgba(0,0,0,.03);}
+  .topbar .l a{color:#a49e93;text-decoration:none;margin-right:14px;}
+  .topbar .l a.on{color:var(--ink);font-weight:600;}
+  .topbar.faded{opacity:.45;}
+
+  /* shelf: covers grid */
+  .shelfmain{padding:34px 44px 44px;}
+  .sh{font:600 24px "New York",Georgia,serif;margin-bottom:20px;}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:26px;}
+  .bk{text-align:center;}
+  .cov{height:150px;border-radius:4px 8px 8px 4px;box-shadow:0 6px 14px rgba(50,45,35,.18);
+       display:flex;align-items:flex-end;padding:12px;position:relative;}
+  .cov::before{content:"";position:absolute;left:7px;top:0;bottom:0;width:1.5px;background:rgba(255,255,255,.25);}
+  .cov .t{color:#fff;font:600 14.5px/1.3 "New York",Georgia,serif;text-align:left;}
+  .k1{background:linear-gradient(150deg,#6e3a2c,#94553c);} .k2{background:linear-gradient(150deg,#37503f,#54725a);}
+  .k3{background:linear-gradient(150deg,#3c4a66,#5a6b8c);} .k4{background:linear-gradient(150deg,#7d6a34,#a08b4e);}
+  .k5{background:linear-gradient(150deg,#54455f,#75648a);}
+  .bk .m{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.5;}
+  .bk.fin .m::before{content:"✓ finished · ";color:#37503f;font-weight:600;}
+  .ring{margin:6px auto 0;width:64px;height:3px;border-radius:2px;background:#ddd8cc;overflow:hidden;}
+  .ring i{display:block;height:100%;width:62%;background:var(--accent);}
+
+  /* reading flow */
+  .pagecol{max-width:600px;margin:0 auto;padding:48px 0 60px;}
+  .page{background:var(--page);border-radius:6px;box-shadow:0 3px 16px rgba(60,55,40,.10);padding:52px 58px;}
+  .page .bt{font:600 25px/1.25 "New York",Georgia,serif;text-align:center;margin-bottom:4px;}
+  .page .bs{font-size:12px;color:var(--muted);text-align:center;margin-bottom:34px;}
+  .chapline{text-align:center;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#a49681;margin:34px 0 22px;}
+  .page p{font:15.5px/1.85 "New York","Iowan Old Style",Georgia,serif;margin:0 0 14px;color:#2a2620;}
+  .page p.first::first-letter{font-size:290%;float:left;line-height:.85;padding:4px 8px 0 0;color:var(--accent);}
+  .pnum{text-align:center;color:#c2bcb0;font-size:11px;margin-top:26px;}
+
+  /* editing summoned */
+  .blk{position:relative;border-radius:6px;}
+  .blk.lit{background:var(--select);margin:0 -14px;padding:10px 14px;}
+  .blk.lit .halo{position:absolute;right:-140px;top:6px;width:118px;font-size:11px;color:var(--muted);line-height:1.55;}
+  .badge{position:absolute;left:-40px;top:4px;color:var(--accent);border:1px solid var(--line);background:#fff;
+         border-radius:12px;font-size:11px;padding:1px 7px;}
+  .takestrip{margin:14px -14px 2px;background:var(--take);border:1px solid var(--take-line);border-radius:8px;padding:12px 14px;}
+  .takestrip .th{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8b9070;margin-bottom:9px;}
+  .tk{background:#fff;border:1px solid var(--take-line);border-radius:6px;padding:9px 12px;margin-bottom:7px;}
+  .tk p{font:13.5px/1.6 "New York",Georgia,serif !important;margin:0 !important;}
+  .tk .tl{font-size:10.5px;color:var(--muted);margin-bottom:3px;}
+  .tk.chosen{border-color:var(--accent);}
+  .tk.chosen .tl::after{content:"  ✓ chosen";color:var(--accent);font-weight:600;}
+  .cmt{margin:10px -14px 0;font-size:12.5px;color:#7c6a3f;background:#f7f1de;border-radius:6px;padding:8px 12px;}
+  .cmt::before{content:"💬 ";}
+
+  /* dark */
+  .darkband{background:#232120;border-radius:12px;padding:36px;display:flex;justify-content:center;}
+  .page.dark{background:#2b2825;box-shadow:none;}
+  .page.dark .bt,.page.dark p{color:#e3dcd0;}
+  .page.dark .chapline{color:#8d8371;}
+  .page.dark .blk.lit{background:#38332b;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Direction C — “The Reading Room”</h1>
+  <p class="sub">iBooks as an editing surface: the page is everything, the chrome dissolves, the machinery is summoned.</p>
+  <p class="nav"><a href="index.html">← all directions</a> <a href="direction-a-study.html">A · The Study</a> <a href="direction-b-terminal.html">B · Terminal Study</a></p>
+
+  <section>
+    <h2>1 · The shelf (home)</h2>
+    <p class="caption">The Books-app shelf: covers with spines, shadows, nothing else. The bar above is the
+    entire chrome. Bounded books wear a thin progress ring under their cover; finished books say so and
+    nothing more.</p>
+    <div class="frame">
+      <div class="topbar"><span class="l"><a class="on">Shelf</a><a>Journal</a><a>Library</a><a>Pool</a><a>Tags</a></span><span>⌘N new book · ⌘J today</span></div>
+      <div class="shelfmain">
+        <div class="sh">Shelf</div>
+        <div class="grid">
+          <div class="bk"><div class="cov k1"><span class="t">Journal 2026</span></div><div class="m">ongoing</div></div>
+          <div class="bk"><div class="cov k2"><span class="t">Dream Journal</span></div><div class="m">14 entries</div><div class="ring"><i></i></div></div>
+          <div class="bk"><div class="cov k3"><span class="t">Orbit</span></div><div class="m">4 chapters</div></div>
+          <div class="bk"><div class="cov k4"><span class="t">Attention</span></div><div class="m">series · 3 posts</div></div>
+          <div class="bk fin"><div class="cov k5"><span class="t">Letters, 2025</span></div><div class="m">28 posts</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2 · Reading — a finished book is nothing but the text</h2>
+    <p class="caption">The infinite scroll of the whole book on one continuous page-column; chapter breaks are
+    typographic, posts flow together (their seams exist but don't perform). The top bar has faded — this is
+    the sink-in state. Everything you see is still editable: click any paragraph and it wakes (next section).</p>
+    <div class="frame">
+      <div class="topbar faded"><span class="l"><a>Shelf</a><a class="on">Orbit</a></span><span>ch. II · 41%</span></div>
+      <div class="pagecol"><div class="page">
+        <div class="bt">Orbit</div>
+        <div class="bs">II · THE LONG MIDDLE</div>
+        <p class="first">Progress in the middle of anything is invisible from inside it. The days repeated with
+        small variations, the way a theme repeats until suddenly it is a fugue.</p>
+        <p>We measured the crossing not in miles but in habits formed and abandoned. Coffee at dawn lasted
+        eleven days. The log-keeping lasted longer, because it lied less.</p>
+        <p>The storm found us on the fourteenth day, and I have three ways of telling it.</p>
+        <div class="chapline">· · ·</div>
+        <p>Afterward the boat was smaller and we were larger, and neither of us mentioned it.</p>
+        <div class="pnum">— 41% · weeks like water —</div>
+      </div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · Editing, summoned — the same page, awake</h2>
+    <p class="caption">Click a paragraph: it lights, its ordinal and count appear in the margin, and only then
+    does the machinery show — the ⑂ badge floats in the left margin, takes unfold beneath in their own tinted
+    register, the block comment sits under them. Close it and the page returns to pure text.</p>
+    <div class="frame">
+      <div class="topbar"><span class="l"><a>Shelf</a><a class="on">Orbit</a></span><span>editing · ⌘S commit</span></div>
+      <div class="pagecol"><div class="page">
+        <p>We measured the crossing not in miles but in habits formed and abandoned. Coffee at dawn lasted
+        eleven days. The log-keeping lasted longer, because it lied less.</p>
+        <div class="blk lit"><span class="badge">⑂ 3</span>
+          <p style="margin:0;">The storm found us on the fourteenth day, and I have three ways of telling it.</p>
+          <span class="halo">block 3 / 5<br>15 words<br>3 takes</span>
+          <div class="takestrip">
+            <div class="th">Takes for this block</div>
+            <div class="tk chosen"><div class="tl">plain telling</div><p>The storm found us on the fourteenth day, and I have three ways of telling it.</p></div>
+            <div class="tk"><div class="tl">softer opening</div><p>On the fourteenth day the weather turned, gently at first, the way bad news is polite before it isn't.</p></div>
+          </div>
+          <div class="cmt">take 1 preferred — but the “polite” ending might belong in ch. III</div>
+        </div>
+        <p style="margin-top:14px;">Afterward the boat was smaller and we were larger, and neither of us mentioned it.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Dark — a warm grey room</h2>
+    <div class="darkband">
+      <div class="page dark" style="max-width:520px;padding:40px 46px;">
+        <div class="bt" style="font-size:20px;">Orbit</div>
+        <div class="chapline">II · THE LONG MIDDLE</div>
+        <p>Progress in the middle of anything is invisible from inside it.</p>
+        <div class="blk lit" style="padding:8px 12px;margin:0 -12px;"><p style="margin:0;">The storm found us on the fourteenth day, and I have three ways of telling it.</p></div>
+        <p style="margin-top:12px;">Afterward the boat was smaller and we were larger.</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="nav" style="margin-top:48px;"><a href="direction-b-terminal.html">← B · Terminal Study</a> <a href="index.html">all directions</a></p>
+</div>
+</body>
+</html>
