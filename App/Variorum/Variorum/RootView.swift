@@ -22,6 +22,9 @@ struct RootView: View {
     @State private var readings: ReadingsViewModel
     @State private var pool: PoolViewModel
     @State private var selection: SidebarSelection?
+    /// Phase 13 (B1): the live voice — tokens + idioms, environment-fed to
+    /// every surface (R1; feature code never holds a literal color).
+    @State private var theme: ThemeStore
 
     init(session: AppSession, services: AppServices? = nil) {
         self.session = session
@@ -30,6 +33,7 @@ struct RootView: View {
         _tags = State(initialValue: TagsViewModel(session: session))
         _readings = State(initialValue: ReadingsViewModel(session: session))
         _pool = State(initialValue: PoolViewModel(session: session))
+        _theme = State(initialValue: ThemeStore(session: session))
     }
 
     var body: some View {
@@ -85,6 +89,8 @@ struct RootView: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .environment(theme)
+        .task { await theme.start() }
         .task { await library.start() }
         .task { await library.startJournal() }
         .task { await tags.start() }

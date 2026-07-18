@@ -65,3 +65,26 @@ public enum FanStyle: String, Codable, Sendable, CaseIterable, DatabaseValueConv
     case marginGrid = "margin_grid"
     case slotSplit = "slot_split"
 }
+
+/// The design VOICE (Phase 13, B1 — sitting ruling R1: TWO first-class
+/// voices, tokens AND idioms, the Terminal voice leading and the Study
+/// voice — the Phase 11 mockups' look — switchable; hold at exactly two,
+/// R12). Stored in the synced `setting` table under 'theme_voice'
+/// (document semantics, the fan_style class). The voice carries the token
+/// set AND the idiom slots — the app-side theme layer resolves both;
+/// nothing here stores rendering.
+public enum ThemeVoice: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
+    case terminal
+    case study
+}
+
+/// The editing-indicator setting (Phase 13 — rulings R14/R22, ratified
+/// sitting 4): how the block being EDITED is marked in the plain editor.
+/// OFF is the default ("sometimes people don't even want to see what
+/// block they're editing"); cursor-only is legitimate. Marginalia keeps
+/// its own always-on wash+ring rule regardless (R22's letter).
+public enum EditingIndicatorStyle: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
+    case off
+    case outline
+    case background
+}
