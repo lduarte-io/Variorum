@@ -155,6 +155,13 @@ extension Queries {
         public let id: String
         public let title: String
         public let detail: String?
+
+        public init(kind: Kind, id: String, title: String, detail: String?) {
+            self.kind = kind
+            self.id = id
+            self.title = title
+            self.detail = detail
+        }
     }
 
     /// Title/name/handle search across books, posts, and blocks — "all

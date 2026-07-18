@@ -1,0 +1,256 @@
+//
+//  AppSettingsView.swift
+//  Variorum
+//
+//  Phase 13, B2 — the Settings window: APPEARANCE (the B1 global settings
+//  — voice R1, seams R42, editing indicator R14/R22, inline comments R7,
+//  follow-the-scroll R25, fan style) and TAGS (R52 — tag management's real
+//  home: "if it's not in the sidebar it still needs to be somewhere":
+//  create, adjust hierarchy, rename, delete; ⌘K-reachable; in-context
+//  editing everywhere stands beside it). Promote-tag(s)-to-book (R30/R37)
+//  lives here too — the manager is where you look at tags.
+//
+
+import SwiftUI
+import VariorumCore
+
+struct AppSettingsView: View {
+    let session: AppSession
+    @State private var theme: ThemeStore
+    @State private var tags: TagsViewModel
+
+    init(session: AppSession) {
+        self.session = session
+        _theme = State(initialValue: ThemeStore(session: session))
+        _tags = State(initialValue: TagsViewModel(session: session))
+    }
+
+    var body: some View {
+        TabView {
+            AppearancePane(theme: theme)
+                .tabItem { Label("Appearance", systemImage: "paintpalette") }
+            TagManagerPane(session: session, tags: tags)
+                .tabItem { Label("Tags", systemImage: "tag") }
+        }
+        .frame(width: 520, height: 440)
+        .task { await theme.start() }
+        .task { await tags.start() }
+    }
+}
+
+// MARK: - Appearance (B1's settings, faced)
+
+private struct AppearancePane: View {
+    let theme: ThemeStore
+
+    var body: some View {
+        Form {
+            Section("Voice") {
+                Picker("Design voice", selection: Binding(
+                    get: { theme.settings.voice },
+                    set: { theme.setVoice($0) })) {
+                    Text("Terminal").tag(ThemeVoice.terminal)
+                    Text("Study").tag(ThemeVoice.study)
+                }
+                .pickerStyle(.segmented)
+                Text("Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Section("Editor") {
+                Toggle("Show block seams (dotted lines between blocks)", isOn: Binding(
+                    get: { theme.settings.seamsVisible },
+                    set: { theme.setSeamsVisible($0) }))
+                Picker("Mark the block being edited", selection: Binding(
+                    get: { theme.settings.editingIndicator },
+                    set: { theme.setEditingIndicator($0) })) {
+                    Text("Off — the cursor is enough").tag(EditingIndicatorStyle.off)
+                    Text("Outline ring").tag(EditingIndicatorStyle.outline)
+                    Text("Background").tag(EditingIndicatorStyle.background)
+                }
+                Toggle("Show comments inline (tinted, under the block)", isOn: Binding(
+                    get: { theme.settings.inlineComments },
+                    set: { theme.setInlineComments($0) }))
+                Toggle("Takes follow the scroll", isOn: Binding(
+                    get: { theme.settings.followTheScroll },
+                    set: { theme.setFollowTheScroll($0) }))
+                Picker("Takes open as", selection: Binding(
+                    get: { theme.settings.fanStyle },
+                    set: { theme.setFanStyle($0) })) {
+                    Text("Stack").tag(FanStyle.stack)
+                    Text("Carousel").tag(FanStyle.carousel)
+                    Text("Margin grid").tag(FanStyle.marginGrid)
+                    Text("Slot split").tag(FanStyle.slotSplit)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .padding(8)
+    }
+}
+
+// MARK: - The tag manager (R52)
+
+private struct TagManagerPane: View {
+    let session: AppSession
+    let tags: TagsViewModel
+    @State private var newTagParent: String?
+    @State private var newTagSheet = false
+    @State private var renameTarget: Tag?
+    @State private var nameField = ""
+    @State private var promoteTags: Set<String> = []
+    @State private var promoteSheet = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            List {
+                ForEach(tags.tags, id: \.id) { tag in
+                    HStack {
+                        Toggle("", isOn: Binding(
+                            get: { promoteTags.contains(tag.path) },
+                            set: { on in
+                                if on { promoteTags.insert(tag.path) } else { promoteTags.remove(tag.path) }
+                            }))
+                        .labelsHidden()
+                        .toggleStyle(.checkbox)
+                        Text(String(repeating: "    ", count: tags.depth(of: tag)) + tag.name)
+                        Text(tag.path)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                    .contextMenu {
+                        Button("New Child Tag…") {
+                            newTagParent = tag.id
+                            nameField = ""
+                            newTagSheet = true
+                        }
+                        Button("Rename…") {
+                            nameField = tag.name
+                            renameTarget = tag
+                        }
+                        Divider()
+                        Button("Delete (with subtree)", role: .destructive) {
+                            Task { await tags.deleteTag(tag.id) }
+                        }
+                    }
+                }
+                if tags.tags.isEmpty {
+                    Text("No tags yet.").foregroundStyle(.secondary)
+                }
+            }
+            HStack {
+                Button("New Tag…") {
+                    newTagParent = nil
+                    nameField = ""
+                    newTagSheet = true
+                }
+                Spacer()
+                // R30/R37: promote one or SEVERAL tags to a saved book —
+                // AND-joined or OR-joined; the tags stay on the posts.
+                Button("Promote to Book…") { promoteSheet = true }
+                    .disabled(promoteTags.isEmpty)
+            }
+            if let error = tags.lastError {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
+        }
+        .padding(12)
+        .alert(newTagParent == nil ? "New Tag" : "New Child Tag", isPresented: $newTagSheet) {
+            TextField("Name", text: $nameField)
+            Button("Create") {
+                let name = nameField
+                let parent = newTagParent
+                Task { await tags.createTag(parentID: parent, name: name) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert(
+            "Rename Tag",
+            isPresented: Binding(
+                get: { renameTarget != nil },
+                set: { if !$0 { renameTarget = nil } }),
+            presenting: renameTarget
+        ) { tag in
+            TextField("Name", text: $nameField)
+            Button("Rename") {
+                let name = nameField
+                Task { await tags.renameTag(tag.id, to: name) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $promoteSheet) {
+            PromoteTagsSheet(session: session, tagPaths: promoteTags.sorted())
+        }
+    }
+}
+
+/// R30's face: tags → a saved SMART book on the shelf. AND-joined
+/// (`tagsAll`) or OR-joined (`tags`); the promotion LEAVES the tags on the
+/// posts (R37 — trivially: nothing here touches applications).
+struct PromoteTagsSheet: View {
+    let session: AppSession
+    let tagPaths: [String]
+    @State private var name = ""
+    @State private var joinAll = false
+    @State private var error: String?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Promote to Book").font(.headline)
+            Text("Creates a smart book on the shelf collecting posts by these tags. The tags stay on the posts.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(tagPaths.map { "#\($0)" }.joined(separator: "  "))
+                .font(.callout)
+            TextField("Book name", text: $name)
+            if tagPaths.count > 1 {
+                Picker("Posts must carry", selection: $joinAll) {
+                    Text("any of these tags (OR)").tag(false)
+                    Text("all of these tags (AND)").tag(true)
+                }
+                .pickerStyle(.radioGroup)
+            }
+            if let error {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
+            HStack {
+                Spacer()
+                Button("Cancel") { dismiss() }
+                Button("Create Book") { promote() }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        .padding(16)
+        .frame(minWidth: 380)
+    }
+
+    /// The spec construction is the whole promotion (pinned in
+    /// `ShelfAndPaletteTests`): OR → `tags`, AND → `tagsAll` (R30's letter,
+    /// the A2 vocabulary).
+    static func spec(paths: [String], joinAll: Bool) -> Queries.SmartQuerySpec {
+        joinAll
+            ? Queries.SmartQuerySpec(tagsAll: paths)
+            : Queries.SmartQuerySpec(tags: paths)
+    }
+
+    private func promote() {
+        let bookName = name.trimmingCharacters(in: .whitespaces)
+        let paths = tagPaths
+        let all = joinAll
+        Task {
+            do {
+                _ = try await session.runner.run { ops in
+                    try ops.createReading(
+                        name: bookName, kind: .smart,
+                        querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())
+                }
+                dismiss()
+            } catch {
+                self.error = String(describing: error)
+            }
+        }
+    }
+}

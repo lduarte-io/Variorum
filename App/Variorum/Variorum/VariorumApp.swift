@@ -21,12 +21,14 @@ struct VariorumApp: App {
     @NSApplicationDelegateAdaptor(VariorumAppDelegate.self) private var appDelegate
     @State private var bootstrap = AppBootstrap()
     @State private var services: AppServices?
+    /// Phase 13 (B2): the menu-command routing channel (⌘N/⌘J/⌘K).
+    @State private var router = ShellRouter()
 
     var body: some Scene {
         WindowGroup {
             switch bootstrap.state {
             case .ready(let session):
-                RootView(session: session, services: services)
+                RootView(session: session, services: services, router: router)
                     .onAppear { appDelegate.session = session }
                     .task {
                         guard services == nil else { return }
@@ -47,7 +49,17 @@ struct VariorumApp: App {
             }
         }
         .commands {
-            EditorCommands(bootstrap: bootstrap)
+            EditorCommands(bootstrap: bootstrap, router: router)
+        }
+        // Phase 13 (B2/R52): the Settings window — Appearance (the voice +
+        // the B1 global settings) and the TAG MANAGER's real home.
+        Settings {
+            if case .ready(let session) = bootstrap.state {
+                AppSettingsView(session: session)
+            } else {
+                Text("Open the main window first.")
+                    .padding(24)
+            }
         }
     }
 }

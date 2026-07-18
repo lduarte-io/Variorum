@@ -16,6 +16,9 @@ import VariorumCore
 
 struct EditorCommands: Commands {
     let bootstrap: AppBootstrap
+    /// Phase 13 (B2): the shell routing channel — ⌘N/⌘J/⌘K land in
+    /// RootView through this.
+    let router: ShellRouter
     /// The "Show Blocks" tint toggle (9d) — shared with `EditorView` via
     /// AppStorage so the menu state and every editor's overlay agree.
     @AppStorage("showBlockBoundaries") private var showBlocks = false
@@ -26,6 +29,23 @@ struct EditorCommands: Commands {
     }
 
     var body: some Commands {
+        // Phase 13 (B2): ⌘N = New Post (R41, ruled sitting 5 — "command N
+        // should be new post"; new BLOCK needs no command, blocks are born
+        // by typing) + the dated home's shortcut.
+        CommandGroup(replacing: .newItem) {
+            Button("New Post") { newPost() }
+                .keyboardShortcut("n", modifiers: .command)
+                .disabled(session == nil)
+            Button("Today's Entry") { todaysEntry() }
+                .keyboardShortcut("j", modifiers: .command)
+                .disabled(session == nil)
+        }
+        // ⌘K (R15, ratified): find anything — posts, books, commands.
+        CommandGroup(after: .sidebar) {
+            Button("Find Anything…") { router.paletteRequested = true }
+                .keyboardShortcut("k", modifiers: .command)
+                .disabled(session == nil)
+        }
         CommandGroup(after: .saveItem) {
             Button("Commit Take") {
                 session?.editorRouter.active?.commitCaretVariant()
@@ -120,6 +140,37 @@ struct EditorCommands: Commands {
     /// Extract", … — generic when the stack is empty).
     static func undoMenuTitle(for topLabel: String?) -> String {
         topLabel.map { "Undo \($0)" } ?? "Undo Structural Change"
+    }
+
+    // MARK: - ⌘N / ⌘J (Phase 13, B2)
+
+    private func newPost() {
+        guard let session else { return }
+        Task { @MainActor in
+            do {
+                let post = try await session.runner.run { ops in
+                    try ops.createPost(title: "Untitled")
+                }
+                router.pendingSelection = .post(post.id)
+            } catch {
+                session.editorRouter.active?.showStatus("New post failed: \(error)")
+            }
+        }
+    }
+
+    private func todaysEntry() {
+        guard let session else { return }
+        Task { @MainActor in
+            do {
+                let day = JournalDay.dayString(from: Date())
+                let result = try await session.runner.run { ops in
+                    try ops.createOrOpenJournalEntry(entryDate: day)
+                }
+                router.pendingSelection = .post(result.container.id)
+            } catch {
+                session.editorRouter.active?.showStatus("Today's entry failed: \(error)")
+            }
+        }
     }
 
     // MARK: - Import door (Phase 11b, B2)

@@ -119,7 +119,12 @@ struct PoolSection: View {
     @State private var importer: ImportModel?
 
     var body: some View {
-        Section("Pool") {
+        // Phase 13 (R20/R29): the scraps area is named BLOCKS ("makes it
+        // the most sense"); "Pool" is the bookless-POSTS surface now. The
+        // rows stay IN the sidebar (a build-time call, recorded): scrap
+        // drag-into-draft needs the scrap and the draft visible together —
+        // the ratified Phase 10 reason survives the rename.
+        Section("Blocks") {
             if let pool = model.activePool {
                 ForEach(model.items, id: \.block.blockID) { item in
                     VStack(alignment: .leading, spacing: 1) {
@@ -137,21 +142,21 @@ struct PoolSection: View {
                     }
                 }
                 if model.items.isEmpty {
-                    Text("No scraps yet — open the pool and type some (or drop text here).")
+                    Text("No scraps yet — open Blocks and type some (or drop text here).")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
                             poolDrop(providers, poolID: pool.id)
                         }
                 }
-                Button("Open Pool") { openPool(pool.id) }
+                Button("Open Blocks") { openPool(pool.id) }
                     .buttonStyle(.borderless)
                     .font(.caption)
                     .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
                         poolDrop(providers, poolID: pool.id)
                     }
             } else {
-                Button("Create Pool") {
+                Button("Create Blocks Area") {
                     Task {
                         if let id = await model.createPool() { openPool(id) }
                     }
