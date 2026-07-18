@@ -14,16 +14,64 @@ extension Operations {
         sortDir: SortDirection = .asc,
         groupingTagId: String? = nil,
         querySpec: String? = nil,
-        maxPosts: Int? = nil
+        maxPosts: Int? = nil,
+        wordTarget: Int? = nil
     ) throws -> Reading {
         let now = date.now
         let reading = Reading(
             id: newID(), ownerId: currentOwnerID(), name: name, kind: kind,
             profile: profile, sortField: sortField, sortDir: sortDir,
             groupingTagId: groupingTagId, querySpec: querySpec, maxPosts: maxPosts,
+            wordTarget: wordTarget,
             createdAt: now, updatedAt: now)
         try database.write { db in try reading.insert(db) }
         return reading
+    }
+
+    // MARK: - Extent faces (Phase 13, A1/A2 — the bounded-notebook thread)
+
+    /// Sets (or clears, with nil) the words-based extent TARGET (v1_11).
+    /// A display/progress semantic, never an add-time refusal — word counts
+    /// change with every edit, so membership can't enforce them; the shelf
+    /// face shows progress and the boundary offers extend-or-start-new.
+    /// Non-positive targets refuse; a LOCKED (finished) reading refuses —
+    /// extending a bounded notebook is un-finishing it first (the
+    /// setReadingSort parallel; PROVISIONAL, QUESTIONS bundle).
+    public func setReadingWordTarget(_ id: String, wordTarget: Int?) throws {
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: id)
+            }
+            if let wordTarget, wordTarget <= 0 {
+                throw OperationError.invalidExtent(value: wordTarget)
+            }
+            guard reading.wordTarget != wordTarget else { return }
+            reading.wordTarget = wordTarget
+            reading.updatedAt = date.now
+            try reading.update(db)
+        }
+    }
+
+    /// Sets (or clears) the post-count extent — `max_posts` has had NO
+    /// setter since v1 (the brief's "no UI face at all" finding starts
+    /// here). Same guards as the word target. Lowering the cap below the
+    /// current live membership is legal: existing memberships stand;
+    /// further adds refuse at the standing `readingAtCapacity` gate.
+    public func setReadingMaxPosts(_ id: String, maxPosts: Int?) throws {
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: id)
+            }
+            if let maxPosts, maxPosts <= 0 {
+                throw OperationError.invalidExtent(value: maxPosts)
+            }
+            guard reading.maxPosts != maxPosts else { return }
+            reading.maxPosts = maxPosts
+            reading.updatedAt = date.now
+            try reading.update(db)
+        }
     }
 
     public func renameReading(_ id: String, name: String) throws {

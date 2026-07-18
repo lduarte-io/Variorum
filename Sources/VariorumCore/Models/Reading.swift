@@ -22,6 +22,11 @@ public struct Reading: VariorumRecord {
     public var querySpec: String?
     /// Extent constraint (e.g. a fixed-length journal).
     public var maxPosts: Int?
+    /// The words-based extent TARGET (Phase 13, v1_11 — bounded-length
+    /// notebooks, §14 item 10). Display/progress semantics only: never an
+    /// add-time refusal (edits change word counts; membership can't
+    /// enforce them). nil = unbounded.
+    public var wordTarget: Int?
     /// Declared "done" — reversible.
     public var locked: Bool
     public var createdAt: Date
@@ -40,6 +45,7 @@ public struct Reading: VariorumRecord {
         groupingTagId: String? = nil,
         querySpec: String? = nil,
         maxPosts: Int? = nil,
+        wordTarget: Int? = nil,
         locked: Bool = false,
         createdAt: Date,
         updatedAt: Date,
@@ -56,6 +62,7 @@ public struct Reading: VariorumRecord {
         self.groupingTagId = groupingTagId
         self.querySpec = querySpec
         self.maxPosts = maxPosts
+        self.wordTarget = wordTarget
         self.locked = locked
         self.createdAt = createdAt
         self.updatedAt = updatedAt

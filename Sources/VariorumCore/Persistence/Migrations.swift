@@ -361,6 +361,18 @@ extension AppDatabase {
                 """)
             try createOutboxCaptureTriggers(db, table: "reading_section", pk: "id")
         }
+        // Phase 13, Step A1 (AppSpec §14 item 10 — bounded-length notebooks;
+        // R38's bounded thread: "declare a length at start; at its end,
+        // extend or start a new notebook — she'd like WORDS as a unit"):
+        // `reading.word_target`, the words-based sibling of `max_posts`.
+        // A display TARGET, deliberately never an add-time refusal —
+        // membership can't enforce a word count that every edit changes;
+        // the shelf shows progress ("62% of 10,000w") and the boundary
+        // offers extend-or-new. Additive nullable column; plain metadata
+        // CAS. Rides the SAME §12 lockstep event as v1_8–v1_10.
+        migrator.registerMigration("v1_11_reading_word_target") { db in
+            try db.execute(sql: "ALTER TABLE reading ADD COLUMN word_target INTEGER")
+        }
         return migrator
     }
 }

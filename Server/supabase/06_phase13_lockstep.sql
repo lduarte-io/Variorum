@@ -97,3 +97,12 @@ alter table reading_section enable row level security;
 revoke all on reading_section from anon, authenticated;
 
 alter table reading_post add column if not exists section_id text;
+
+-- ---------------------------------------------------------------------------
+-- 4. reading.word_target (client migration v1_11) — bounded-length
+--    notebooks in WORDS (§14 item 10; the max_posts sibling). A display
+--    target, never an add-time refusal — enforcement would need word
+--    counts at membership time, which edits immediately invalidate.
+-- ---------------------------------------------------------------------------
+
+alter table reading add column if not exists word_target bigint;

@@ -133,6 +133,10 @@ public enum OperationError: Error, Equatable, Sendable {
     /// `restoreBlockComment` addressed a comment that is not deleted.
     case commentNotDeleted(id: String)
 
+    // Reading extents (Phase 13, Step A1 — v1_11 + the max_posts face).
+    /// An extent (word target or post cap) must be positive; nil clears.
+    case invalidExtent(value: Int)
+
     // Reading sections / chapters (Phase 13, Step A1 — v1_10).
     case sectionNotFound(id: String)
     case invalidSectionName(name: String)
