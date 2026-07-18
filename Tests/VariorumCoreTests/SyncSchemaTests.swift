@@ -95,6 +95,8 @@ struct SyncSchemaTests {
                 "SELECT default_variant_id FROM block WHERE id = ?", [mergedBlock])!
             let lens = try ops.createLens(post: post.id, name: "thread")
             _ = try ops.setLensChoice(lens: lens.id, block: mergedBlock, variant: mergedVariant)
+            // Phase 13 (A1): fixture row for the lockstep event's table.
+            _ = try ops.addBlockComment(to: mergedBlock, text: "take 1 preferred")
             let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             let tag = try ops.createTag(parent: nil, name: "life")

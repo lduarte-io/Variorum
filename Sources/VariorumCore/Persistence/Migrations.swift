@@ -256,6 +256,48 @@ extension AppDatabase {
             try createOutboxCaptureTriggers(db, table: "lens", pk: "id")
             try createOutboxCaptureTriggers(db, table: "lens_choice", pk: "id")
         }
+        // Phase 13, Step A1 (author-decided 2026-07-17, AppSpec §14 items
+        // 6/9; sitting rulings R7/R27 context): BLOCK COMMENTS — working
+        // notes on a BLOCK, deliberately never per-take (her words: per-take
+        // comments "would become absolutely insane"). Their own TABLE
+        // (multiple per block), tombstoned like every synced row, with
+        // deleted comments visible and RESURRECTABLE ("the feature shouldn't
+        // be excessively skimpy"). NO uniqueness — comments have no natural
+        // key; display order is (created_at, id). Cascade: block tombstone →
+        // its live comments with the block's EXACT stamp, so restoreBlock/
+        // restoreContainer revive cascade victims and independently-deleted
+        // comments stay dead (the standing contract). Travel rules
+        // (duplicate onto structural successors) are the operations layer's
+        // (Phase 13 Step A2), never triggers. Part of the ONE SyncSpec §12
+        // lockstep event with v1_9–v1_11 (mirror DDL:
+        // Server/supabase/06_phase13_lockstep.sql; deploy pre-authorized,
+        // R53 — mirror → Mac only, the phone app is removed).
+        migrator.registerMigration("v1_8_block_comment") { db in
+            try db.execute(sql: """
+                CREATE TABLE block_comment (
+                  id           TEXT PRIMARY KEY,
+                  owner_id     TEXT,
+                  block_id     TEXT NOT NULL,
+                  text         TEXT NOT NULL,
+                  created_at   TEXT NOT NULL,
+                  updated_at   TEXT NOT NULL,
+                  deleted_at   TEXT,
+                  sync_version INTEGER NOT NULL DEFAULT 0,
+                  FOREIGN KEY (block_id) REFERENCES block(id)
+                );
+                CREATE INDEX idx_block_comment_block ON block_comment(block_id);
+                """)
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_block_tombstone_comment
+                AFTER UPDATE OF deleted_at ON block
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE block_comment SET deleted_at = NEW.deleted_at
+                    WHERE block_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try createOutboxCaptureTriggers(db, table: "block_comment", pk: "id")
+        }
         return migrator
     }
 }

@@ -173,6 +173,17 @@ extension Operations {
                   AND lens_id IN (SELECT id FROM lens WHERE deleted_at IS NULL)
                 """,
             arguments: [nowStamp, blockID, stamp])
+        // Phase 13 (v1_8): the block's comments revive by the same
+        // exact-stamp contract. No extra live-parent guard — the parent IS
+        // the block being restored; an independently-deleted comment keeps
+        // its different stamp and stays dead (its own resurrection door is
+        // `restoreBlockComment`).
+        try db.execute(
+            sql: """
+                UPDATE block_comment SET deleted_at = NULL, updated_at = ?
+                WHERE block_id = ? AND deleted_at = ?
+                """,
+            arguments: [nowStamp, blockID, stamp])
     }
 
     @discardableResult

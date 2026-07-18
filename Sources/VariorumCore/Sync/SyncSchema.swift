@@ -67,6 +67,11 @@ public enum SyncSchema {
         SyncTable("canvas_layout"),
         SyncTable("lens"),
         SyncTable("lens_choice"),
+        // Phase 13, Step A1 (the one lockstep event, SyncSpec §12): block
+        // comments (working notes — metadata CAS, NO uniqueness, no repair
+        // class; text races converge server-version-wins, deliberately not
+        // S5 — that doctrine is scoped to variant.working_text).
+        SyncTable("block_comment"),
         SyncTable("setting", primaryKey: "key", hasTombstone: false),
     ]
 

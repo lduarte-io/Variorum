@@ -120,4 +120,18 @@ public enum OperationError: Error, Equatable, Sendable {
     /// `bulkSegments` mints no block from it, so the gesture refuses
     /// instead of minting an empty post).
     case emptyImport
+
+    // Block comments (Phase 13, Step A1 — v1_8).
+    case commentNotFound(id: String)
+    /// A comment must say something — whitespace-only text refuses (an
+    /// empty note is a delete, not an edit).
+    case invalidCommentText
+    /// `restoreBlockComment` addressed a comment that is not deleted.
+    case commentNotDeleted(id: String)
+
+    // Reading sections / chapters (Phase 13, Step A1 — v1_10).
+    case sectionNotFound(id: String)
+    case invalidSectionName(name: String)
+    /// A membership can only be assigned to a section of ITS OWN reading.
+    case sectionNotInReading(sectionID: String, readingID: String)
 }

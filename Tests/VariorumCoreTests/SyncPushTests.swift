@@ -69,6 +69,8 @@ struct SyncPushTests {
                 "SELECT default_variant_id FROM block WHERE id = ?", [postBlock])!
             let lens = try ops.createLens(post: post.id, name: "thread")
             _ = try ops.setLensChoice(lens: lens.id, block: postBlock, variant: postVariant)
+            // Phase 13 (A1): the lockstep event's table.
+            _ = try ops.addBlockComment(to: postBlock, text: "note")
         }
 
         try await a.push()
