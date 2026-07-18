@@ -1258,6 +1258,229 @@ canary silent, closeout + dispositions HERE, commit per convention,
 `/Applications` refresh, then the stage report — round 3 reviews Stage C
 PLUS the round-2 fixes (dispositions above are its anchor).
 
+# STAGE C CONTINUATION (2026-07-18 — the C1 session stopped at the author's ~500k context line; this section is the FRESH continuation session's self-contained anchor)
+
+**State: C1 is COMPLETE and committed (the chosen seam — C2 had not
+meaningfully started; a 12-line fragment was deliberately reverted so the
+tree sits exactly at the C1 commits). C2 and C3 REMAIN, plus the stage
+gate.** Commits this stage: `bd0b866` (C1: typography/margins/decoration
+layer/comments UI/callouts/export mapping) · `5cfbfbe` (C1 part 2: word
+counts R11, caret-precise landings, chapter drag bar R19) · this docs
+commit. **Counts at the seam (full suites, green, re-verified): core 728
+in 88 suites (was 720/87) · Mac 411 in 76 suites (was 400/73) · mobile
+11/4 (untouched).** The continuation reads: everything the STAGE C
+HANDOFF above lists, PLUS this section.
+
+## C1 — DONE (where everything lives)
+
+- **`Theme/EditorTypography.swift`** — `EditorTypography` (the ONE global
+  voice typography every TK2 surface write reads through
+  `EditorDocument.baseAttributes`: terminal = SF Mono 14, study = Iowan
+  Old Style 16; `inlineCommentSpacing` = 22 widens the uniform paragraph
+  gap when inline comments are ON; `gutterInset` = the R9 margin math,
+  maxColumn 680 / floor 28) + `EditorSurfaceChrome` (voice+dark+inline →
+  tokens/typography/NSColors) + `NSTextView.applyVoiceChrome` (colors,
+  caret, font, full-range base-attribute refresh PRESERVING blockID —
+  an ordinary storage write on voice switch, never §3 rendering
+  attributes). `RootView.onChange(of: theme.settings)` keeps the global
+  current; each surface coordinator also applies idempotently
+  (`appliedChrome` guard) in makeNSView/updateNSView.
+- **`Features/Editor/BlockDecor.swift`** — `EditorAppearance` (voice,
+  dark, seamsVisible, indicator, inlineComments — pushed by Views via
+  `model.appearance`, models never read environments); `BlockDecor` pure
+  geometry (Frame/State, `seamYs` mid-gap between CONSECUTIVE visible
+  frames, `verticalPad`+`calloutRect` = the R17 white-gap cap (ideal 5,
+  minWhiteGap 6), `indicatorRect` (+8/-3 outline offset), `dropBoundary`
+  (visible frames → before-entry index, `entryCount` = end),
+  `gutterFitsCards` ≥150); `CalloutPalette` (names
+  blue/green/sand/violet/rose — token NAMES stored, colors resolved per
+  scheme, unknown → blue fail-open); `BlockDecorOverlayController` —
+  REUSABLE (editor: comment doors + drag handles wired via convenience
+  init; read tier: `init(textView:onOpenComments:nil, onMoveBlock:nil)` =
+  quiet cards, no handles). Handles render only when seamsVisible AND a
+  drop door exists; drop = ONE `reorder` op. View classes: DecorRectView
+  / SeamLineView (dotted 1.5 on [1.5,4] dash) / CommentCardView
+  (marginCard-with-rule / strip / badge styles; hitTest passthrough when
+  onClick nil) / DragHandleView (⠿, superview-space drag reporting).
+- **`EditorViewModel`** — `appearance` (didSet → refreshDecorations);
+  `decorSink`; `refreshDecorations()` (the old refreshTint walk emitting
+  `BlockDecor.State`; SKIPS ENTIRELY when nothing is decorated — the calm
+  default costs nothing, pinned); observations `observePresentations` /
+  `observeComments` (+ `adoptPresentations`/`adoptComments` test seams);
+  `commentsPanel: CommentsPanelState?` + `openComments`/
+  `openCaretComments`; `setCaretCallout(color:)` / `setCaretCalloutEmoji`
+  (ASYNC, through `Operations.updateBlockPresentation` — see traps);
+  `moveBlock(fromEntry:toBoundary:)` (ASYNC → `.before(slots[b].blockID)`
+  / `.start`/`.end`); `postWordCount` (INCREMENTAL per-variant cache in
+  `adoptSurfaceTextMap` — only CHANGED texts re-enumerate; caret-block
+  live adjustment in `updateCaretContext`); caret-block change refreshes
+  decorations only when indicator ≠ off.
+- **`ReadPostViewModel`/`ReadPostView`** — the same decoration language
+  read-only: `appearance` + `decorSink` + `startDecorContext()` (its own
+  observation) + `refreshDecor()` (whole-post frames; indicator forced
+  .off); chrome applied via coordinator `applyChrome`; badges anchored at
+  the COLUMN edge (both tiers: `min(width - w - 8, columnRight + 6)`).
+- **`CommentsPanel.swift`** — `CommentsPanelModel` (observed live+deleted
+  snapshot; CRUD through the Stage A ops; refusals speak) +
+  `CommentsPanel` sheet (deleted section collapsible, Restore per row) —
+  presented from `EditorView.sheet(item: $model.commentsPanel)`.
+- **`EditorCommands`** — Block ▸ Comments… (⌘⇧'), Block ▸ Callout (5
+  colors / Emoji… NSAlert prompt / Remove), "Toggle Block Seams" ⌘⇧B (a
+  BUTTON that reads the setting then flips via the runner — the 9d
+  "Show Blocks" Toggle + its AppStorage are GONE; `EditorView` drives
+  `model.appearance` from the ThemeStore environment instead).
+- **`BlockTint.swift`** — REDUCED to `stableHash` (lineage stripes) +
+  `viewRect` (the container→view mapping the decor walks use);
+  indices/tintIndex/paletteCount + their pins removed with the look (R6).
+  `BlockTintOverlayController`/`PassthroughTintView` deleted from
+  EditorView.swift.
+- **Core** — `Queries.containerComments` + `Queries.blockPresentations`
+  (per-container feeds, cost ∝ post); `Operations.updateBlockPresentation`
+  (read-modify-write in ONE transaction; `setBlockPresentation` routes
+  through it); the callout→blockquote EXPORT mapping
+  (`Queries.exportMapped`) in exportPost/exportBlock/exportReading/bulk —
+  bodies now route through `exportPost` — with THE LOAD-BEARING NEGATIVE
+  PIN `renderedTextNeverMapsCallouts` (the bridge's join brain never
+  maps) and the frame-free export==renderedText byte pin kept.
+- **Landings** — `PaletteModel.execute(onOpen: (SidebarSelection,
+  String?) -> Void)` (block hits carry their ID); RootView `BlockTarget`
+  state → `PostDetailView.initialBlockID` / `PoolDetailView.
+  initialBlockID` → existing jump/caretSeed machinery; LibraryCatalogView
+  `onOpenBlock` optional door. **Chapters** — navigator rows
+  `.draggable(section.id)` + `.dropDestination` with the accent insertion
+  bar + end zone; `BookStructureModel.moveChapter(_:before:)` (foreign
+  payloads/no-op drops touch nothing).
+- **Tests added** — core `Phase13SurfaceQueryTests` (8); Mac
+  `Phase13SurfaceTests` (EditorTypographyTests 4 / BlockDecorGeometryTests
+  6 / CommentsAndReorderTests 3), `TintRegistrationTests` reworked to the
+  decor feed (DecorRegistration…), `BlockTintAndMetricsTests` pruned to
+  the survivors, `BookStructureTests` + chapter-drag pin,
+  `ShelfAndPaletteTests` palette pin extended (block IDs ride).
+
+## C2 + C3 — REMAINING (the design decisions already made; extend, don't reinvent)
+
+**C2 — takes presentations (the v2-canon restyle + R24/R25):**
+- **Restyle `TakesBoardView` + `TakePaneView` + `CollapsibleTakeCard` on
+  VoiceTokens** (via `@Environment(ThemeStore.self) private var
+  themeStore: ThemeStore?` + `.fallback(for:)` — the established
+  pattern): take cards = tokens.card bg + takeLine border; CHOSEN = a
+  3pt tokens.chosen leading bar + "✓ chosen" mark (v2's grammar); LIVE =
+  tokens.ring stroke 1.5 (TakePaneView already strokes the live pane —
+  swap accentColor→tokens.ring; give TakePaneView an optional tokens
+  param, default nil = current look, so AlignedPostsView compiles
+  unchanged); the bloomed block's in-article cell wears tokens.wash (the
+  changing-block marker) behind a **"Mark changing block" toggle,
+  default ON** (R13/R22 — @AppStorage("markChangingBlock"); the existing
+  `seamlessReading` state is the marginGrid-specific ancestor — fold or
+  keep beside it, continuation's call, record it); article column
+  `.frame(maxWidth: 680)` centered + padding ≥24 (R9).
+- **R24 short-block strip in `marginGridBloom`**: SHORT fanned block →
+  the margin cards render as a ONE-CARD-HIGH horizontally-scrolling
+  strip (single-row HStack in ScrollView(.horizontal), cards ~220w,
+  ~110h; the HStack row's height = the card, so the post grows
+  vertically — her letter); LONGER blocks keep the existing 3-tall
+  grid. The short/long rule: a pure static (e.g.
+  `TakesViewModel.usesHorizontalStrip(text:)`) on a character threshold
+  (~200 chars ≈ under ~3 lines at 68ch) — a BUILD-TIME CALL, record it
+  in the closeout + QUESTIONS.
+- **R25 follow-the-scroll**: TakesBoardView pushes
+  `theme.settings.followTheScroll` into the model (plain var, like
+  `EditorView`'s appearance pattern); rows in ALL compositions get
+  `.onAppear/.onDisappear` → `model.rowAppeared/rowDisappeared(blockID:)`
+  maintaining `visibleFannedBlocks`; blooming reads ONE helper
+  `model.isBloomed(slot)` = `expandedBlocks.contains || (followTheScroll
+  && slot.hasFan && visibleFannedBlocks.contains)` — replace the direct
+  `expandedBlocks.contains` reads in articleRow/lockedColumns. (The
+  reverted 12-line fragment was exactly the two properties +
+  doc-comment for this — re-add them.)
+- **Expand-all gating**: the Expand All/Close All buttons render only
+  when `columns.count == 1 && fanStyle != .slotSplit` (R25's letter:
+  not offered in full-text columns or slot-split — they're already
+  whole-post presentations).
+- **The + new take doors**: ghost buttons ("+ new take (branch)" ·
+  "+ blank take") at the end of stackBloom, pagedTakesRow, and the
+  marginGrid strip/grid — v2's dashed footer. Model methods to add:
+  `branchTake(blockID:from:)` = `ops.branchVariant(blockID, from:
+  renderedVariantID)` and `newBlankTake(blockID:)` =
+  `ops.newBlankVariant(blockID)` — both ASYNC AWAITED (the trap below),
+  via the existing `run` helper.
+- **Tests** (extend `TakesBoardTests`): the strip rule (pure threshold);
+  follow-the-scroll effective blooming (set followTheScroll, drive
+  rowAppeared, assert isBloomed without expandedBlocks); gating (style/
+  column combinations); the branch/blank doors (fan grows through ops).
+
+**C3 — canvas as a post view (R40):**
+- **`PostDetailView.Mode` gains `.canvas`** ("Canvas") →
+  `CanvasView(session:, containerID: postID).id("canvas-\(postID)")` —
+  `canvasProjection`/`poolListing` already work over ANY container
+  (renderPost-based; verified). PoolDetailView keeps its existing canvas
+  face.
+- **The MINIMAL takes switcher** (the mobile-inheritable pattern, R58's
+  seed): `CanvasProjection` gains `fans: [String: [Variant]]` (additive
+  core change — fetch live ACTIVE takes for the container's fanned
+  blocks, fan order, cost ∝ container; own core test). Card face: a
+  "see takes" mini button on fanned cards → a small ‹ [take k of n ·
+  label] › selector; ‹›  = **`chooseVariant` to the prev/next active
+  take** — the PROVISIONAL reading of R40's "switch that block to
+  another one of its own takes" (it IS an explicit per-block gesture, so
+  I3's deliberate-choice doctrine holds; the alternative — a view-local
+  display pick — is the recorded option; QUESTIONS it). Sealed posts
+  refuse through the existing message path.
+- **Styling**: canvas cards move off the yellow onto tokens.card +
+  takeLine border (tokens via the optional-environment pattern).
+- **Tests**: core — the fans field (fan order, active-only, per
+  container); Mac — the switcher calls chooseVariant (model-level:
+  switch → chosen moves; CanvasAndPoolTests is the home).
+
+**The STAGE GATE (after C3, per the boundary protocol):** full three
+suites at counts ≥ the seam's; A0 re-check (`Spikes/Phase13DecorationSpike`
+re-run — baselines: decorated keystroke p95 ≈0.79 ms, overlay reposition
+0.02 ms, read-tier 0.44 ms median; NOTE the spike is self-contained and
+does NOT read EditorTypography, so the voice change doesn't skew it —
+but the REAL surfaces now default to SF Mono 14 instead of
+.preferredFont 13, worth one sentence in the closeout); TEXTKIT2 §5
+posture (no macOS update → unchanged); canary silent; the Stage C
+closeout INTO THIS FILE (self-contained for the round-3 cold reviewer —
+anchor: both prior round sections + this continuation section); commit;
+`/Applications` refresh from Release; the stage report. Round 3 reviews
+Stage C PLUS the Stage B round-2 fixes. **The closeout ritual (canonical
+docs, master plan, THE R59 HANDOFF) is NOT the stage's — the coordinator
+instructs it after round 3.**
+
+## Traps this session hit (the continuation inherits these for free)
+
+1. **The app target's default actor isolation is MainActor**: every
+   cross-actor snapshot type (observation closure results) needs
+   `nonisolated struct` (hit on CommentsPanelModel.Snapshot,
+   ReadPostViewModel.DecorContext, EditorAppearance); nested test funcs
+   need explicit `@MainActor`; `NSColor(Color)` needs `import SwiftUI`
+   in AppKit-ish files; a nonisolated type's member calling a
+   MainActor-isolated API needs `@MainActor` on that member
+   (EditorAppearance.tokens).
+2. **Model gestures must be ASYNC-AWAITED, never `Task { runner.run }`
+   fire-and-forget** — unstructured tasks race tests AND each other
+   (hit on moveBlock + the callout doors: two gestures landed out of
+   order). Partial-edit doors must read stored state INSIDE the
+   transaction — `Operations.updateBlockPresentation` is the RMW
+   pattern (the Stage B designation-read precedent).
+3. **The `withEditor` harness drives projections BY HAND**: after any
+   op, `try h.reload()` — model caches (slots, presentationsByBlock)
+   never self-update under the test host; `h.settle()` alone is not a
+   projection delivery.
+4. **`EditorTypography.current` is process-global**: any test that sets
+   it must `defer { restore }` (the Mac suite shares the process).
+5. Suite-level `-only-testing:` names only (the standing vacuous-success
+   trap); piped xcodebuild masks exit codes; never kill her running
+   Variorum.app.
+
+## C1 PROVISIONALs (recorded as QUESTIONS #27; the end-checkpoint walk)
+
+See `notes/QUESTIONS.md` #27 (a)–(h) — inline-comment mechanism (the
+uniformly widened gap), handles-ride-seams, the narrow-gutter badge
+degradation, gutter emoji placement, the ⌘⇧B button-not-toggle face, the
+spaced-callout export byte-shift, visible-frames-only drop targets, the
+status line's "commits N" not built.
+
 # STAGE B CLOSEOUT (2026-07-18, same Fable implementer session — the review ladder's anchor)
 
 **Run shape:** B1 → B2 → B3, one commit per step (`3b4ef50` · `300aac0` ·
