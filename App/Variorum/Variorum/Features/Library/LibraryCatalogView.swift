@@ -53,7 +53,9 @@ final class LibraryCatalogModel {
             }
             guard generation == searchGeneration else { return }  // stale
             hits = filtered(all)
-            await loadTagChips(for: hits.filter { $0.kind == .post }.map(\.id))
+            await loadTagChips(
+                for: hits.filter { $0.kind == .post }.map(\.id),
+                generation: generation)
             lastError = nil
         } catch {
             guard generation == searchGeneration else { return }
@@ -71,17 +73,25 @@ final class LibraryCatalogModel {
     }
 
     /// The tags column's chips (bounded to the visible hits; ONE grouped
-    /// query — round 2 NIT: the per-post loop was N round trips).
-    private func loadTagChips(for postIDs: [String]) async {
+    /// query — round 2 NIT: the per-post loop was N round trips). The
+    /// chips read is a SECOND suspension point, so it re-checks the
+    /// generation before landing (round 3 MINOR: the round-2 guard
+    /// covered `hits` but not `postTags` — gen 1's chips could resume
+    /// last and describe the previous query's hits). Internal for the
+    /// stale-generation pin.
+    func loadTagChips(for postIDs: [String], generation: Int) async {
         guard !postIDs.isEmpty else {
-            postTags = [:]
+            if generation == searchGeneration { postTags = [:] }
             return
         }
         do {
-            postTags = try await session.database.read { db in
+            let chips = try await session.database.read { db in
                 try TagChips.load(db, postIDs: postIDs)
             }
+            guard generation == searchGeneration else { return }  // stale chips never land
+            postTags = chips
         } catch {
+            guard generation == searchGeneration else { return }
             lastError = String(describing: error)
         }
     }

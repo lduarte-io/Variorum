@@ -237,6 +237,66 @@ struct JournalBooksTests {
         }
     }
 
+    @Test func aLockedBooksEntryDoorFollowsTheOutcomeDoctrine() async throws {
+        // Round 3, MINOR (red-on-old by behavioral revert — the pre-fix
+        // door caught only alreadyInReading): on a LOCKED book, the DAILY
+        // branch still opens the entry with a SPEAKING note (never nil +
+        // raw error), and the NON-DAILY branch refuses BEFORE MINTING —
+        // no stray `.generic` post lands in the Pool per click.
+        try await withShellSession2 { session, db in
+            // DAILY half: designate, lock, knock.
+            _ = try await JournalBooks.openToday(session: session, day: "2026-07-24")
+            let dailyID = try #require(try await db.read { db in
+                try Queries.dailyJournalBookID(db)
+            })
+            try await session.runner.run { ops in try ops.lockReading(dailyID) }
+            let daily = BookStructureModel(session: session, readingID: dailyID)
+            let openedID = await daily.newEntry(day: "2026-07-25")
+            #expect(openedID != nil,
+                    "the entry ALWAYS opens — the locked add never voids the door")
+            #expect(daily.lastError?.contains("finished") == true,
+                    "the note SPEAKS instead of a raw thrown description")
+
+            // NON-DAILY half: a locked dream journal refuses BEFORE the mint.
+            let dreamID = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(
+                    name: "Dream Journal", kind: .curated, profile: "journal")
+                try ops.lockReading(book.id)
+                return book.id
+            }
+            let before = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL
+                    """) ?? 0
+            }
+            let dream = BookStructureModel(session: session, readingID: dreamID)
+            let refused = await dream.newEntry(day: "2026-07-25")
+            #expect(refused == nil, "a locked non-daily book's door refuses")
+            #expect(dream.lastError?.contains("locked") == true,
+                    "the refusal speaks through the message table")
+            let after = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL
+                    """) ?? 0
+            }
+            #expect(after == before,
+                    "REFUSE BEFORE MINT — no stray post per click on a locked book")
+
+            // The capacity gate refuses pre-mint the same way.
+            let cappedID = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(
+                    name: "Tiny", kind: .curated, profile: "journal", maxPosts: 1)
+                let filler = try ops.createPost(title: "filler", profile: .generic)
+                _ = try ops.addPostToReading(filler.id, to: book.id)
+                return book.id
+            }
+            let capped = BookStructureModel(session: session, readingID: cappedID)
+            let overCap = await capped.newEntry(day: "2026-07-25")
+            #expect(overCap == nil)
+            #expect(capped.lastError?.contains("limit") == true)
+        }
+    }
+
     @Test func chapterDragDropsBeforeTargetOrAtTheEnd() async throws {
         // Stage C (R19's polished bar): the navigator drag lands as ONE
         // reorderSection; no-op drops and foreign payloads touch nothing.

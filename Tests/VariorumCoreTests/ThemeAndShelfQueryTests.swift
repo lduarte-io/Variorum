@@ -176,6 +176,49 @@ struct ShelfQueryTests {
         }
     }
 
+    @Test func cappedBooksCountExactlyTheAssemblysCappedSet() throws {
+        // Round 3 NIT (red-on-old: the pre-fix counts summed EVERY match/
+        // member): max_posts LIMITs the book view read-side, so the shelf
+        // number counts the capped, ordered set the reader sees — for a
+        // capped SMART book and for a curated book whose cap was lowered
+        // below its membership (#25(d) legal).
+        try withOperations { ops, db in
+            let stars = try ops.createTag(parent: nil, name: "stars")
+            for text in ["one two", "one two three", "one two three four"] {
+                let post = try ops.createPost(title: text, profile: .generic)
+                _ = try ops.newBlock(in: post.id, text: text, at: .end)
+                try ops.applyTag(stars.id, toPost: post.id)
+            }
+            let smart = try ops.createReading(
+                name: "star-notes", kind: .smart,
+                querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON(),
+                maxPosts: 2)
+
+            let curated = try ops.createReading(name: "orbit", kind: .curated)
+            let a = try ops.createPost(title: "a", profile: .generic)
+            _ = try ops.newBlock(in: a.id, text: "alpha beta gamma", at: .end)
+            _ = try ops.addPostToReading(a.id, to: curated.id)
+            let b = try ops.createPost(title: "b", profile: .generic)
+            _ = try ops.newBlock(in: b.id, text: "delta epsilon", at: .end)
+            _ = try ops.addPostToReading(b.id, to: curated.id)
+            try ops.setReadingMaxPosts(curated.id, maxPosts: 1)  // lowered below membership
+
+            let counts = try db.read { try Queries.bookWordCounts($0) }
+            // Smart, capped at 2: created_at-ASC order → the 2- and 3-word
+            // posts count; the 4-word third match does NOT (old code: 9).
+            #expect(counts[smart.id] == 5,
+                    "a capped smart book counts its assembly's capped set")
+            // Curated, cap lowered to 1: only the first member counts
+            // (old code: 5).
+            #expect(counts[curated.id] == 3,
+                    "a lowered cap counts what the book view shows")
+
+            // And the counts agree with the assembly itself — one brain.
+            let smartAssembly = try db.read { try Queries.assembleReading($0, readingID: smart.id) }
+            #expect(smartAssembly.count == 2)
+        }
+    }
+
     @Test func poolPostsAreExactlyTheBooklessLivePosts() throws {
         try withOperations { ops, db in
             let inBook = try ops.createPost(title: "in a book", profile: .generic)

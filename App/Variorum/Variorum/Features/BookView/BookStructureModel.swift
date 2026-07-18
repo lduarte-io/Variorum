@@ -218,24 +218,51 @@ final class BookStructureModel {
     /// wear (pinned, red-on-old verified by revert).
     /// The designation read runs INSIDE the runner (round 2, MINOR: the
     /// pre-runner read raced).
+    ///
+    /// Round 3, MINOR — the Outcome doctrine at this sibling door (the
+    /// round-2 ⌘J shape, applied consistently): on a LOCKED/FULL book the
+    /// DAILY branch still opens the entry (the untouchable create-or-open)
+    /// with a SPEAKING note; the NON-DAILY branch refuses BEFORE MINTING —
+    /// `assertReadingAcceptsPosts` runs inside the serialized closure, so
+    /// a concurrent lock can never strand a stray `.generic` post in the
+    /// Pool — and its refusal speaks through the message table (the raw
+    /// `String(describing:)` retired with it).
     func newEntry(day: String? = nil) async -> String? {
         let entryDay = day ?? JournalDay.dayString(from: Date())
         do {
             let readingID = readingID
-            return try await session.runner.run { ops in
+            let outcome: (id: String, note: String?) = try await session.runner.run { ops in
                 if try ops.dailyJournalBookID() == readingID {
                     let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
                     do {
                         _ = try ops.addPostToReading(entry.container.id, to: readingID)
-                    } catch OperationError.alreadyInReading {}
-                    return entry.container.id
+                    } catch OperationError.alreadyInReading {
+                    } catch OperationError.lockedReading {
+                        return (entry.container.id,
+                                "Today's entry opened, but this book is finished — it "
+                                + "wasn't added. Reopen the book in its settings, or pick "
+                                + "a new daily journal (Use as Daily Journal).")
+                    } catch OperationError.readingAtCapacity {
+                        return (entry.container.id,
+                                "Today's entry opened, but this book is at its post cap — "
+                                + "it wasn't added. Extend the cap in the book's settings.")
+                    }
+                    return (entry.container.id, nil)
                 }
+                // REFUSE BEFORE MINT: the gate runs first, in the same
+                // serialized closure as the mint it protects.
+                try ops.assertReadingAcceptsPosts(readingID)
                 let post = try ops.createPost(
                     title: nil, profile: .generic, entryDate: entryDay)
                 try ops.setSegmentationDefault(post.id, segmentation: .oneBlock)
                 _ = try ops.addPostToReading(post.id, to: readingID)
-                return post.id
+                return (post.id, nil)
             }
+            lastError = outcome.note
+            return outcome.id
+        } catch let error as OperationError {
+            lastError = ReadingsViewModel.message(error)
+            return nil
         } catch {
             lastError = String(describing: error)
             return nil

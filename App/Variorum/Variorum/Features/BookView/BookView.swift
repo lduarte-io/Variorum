@@ -250,7 +250,11 @@ struct BookView: View {
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                     }
-                    if structure.reading?.profile == "journal" {
+                    // Round 3, MINOR: no entry door on a FINISHED book
+                    // (additive — the model's in-closure gate covers the
+                    // concurrent-lock race the hidden button can't).
+                    if structure.reading?.profile == "journal",
+                       structure.reading?.locked != true {
                         Button(tokens.chromeLabel("+ new entry")) {
                             Task {
                                 if let id = await structure.newEntry() {

@@ -56,6 +56,36 @@ struct ReadingExtentTests {
         }
     }
 
+    @Test func assertReadingAcceptsPostsMirrorsTheAddGateExactly() throws {
+        // Phase 13 round 3: the refuse-BEFORE-mint gate — every refusal
+        // `addPostToReading` would throw for a fresh post, thrown without
+        // a post: missing reading, wrong kind, locked, at capacity; a
+        // willing book passes.
+        try withOperations { ops, _ in
+            let book = try ops.createReading(name: "orbit", kind: .curated, maxPosts: 1)
+            try ops.assertReadingAcceptsPosts(book.id)  // willing: no throw
+
+            #expect(throws: OperationError.self) {
+                try ops.assertReadingAcceptsPosts("no-such-reading")
+            }
+            let smart = try ops.createReading(name: "auto", kind: .smart)
+            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .curated)) {
+                try ops.assertReadingAcceptsPosts(smart.id)
+            }
+            let filler = try ops.createPost(title: "f", profile: .generic)
+            _ = try ops.addPostToReading(filler.id, to: book.id)
+            #expect(throws: OperationError.readingAtCapacity(id: book.id)) {
+                try ops.assertReadingAcceptsPosts(book.id)
+            }
+            try ops.setReadingMaxPosts(book.id, maxPosts: nil)
+            try ops.assertReadingAcceptsPosts(book.id)  // cap cleared: willing
+            try ops.lockReading(book.id)
+            #expect(throws: OperationError.lockedReading(id: book.id)) {
+                try ops.assertReadingAcceptsPosts(book.id)
+            }
+        }
+    }
+
     @Test func wordTargetIsATargetNeverAnAddTimeRefusal() throws {
         try withOperations { ops, _ in
             // A tiny word target, then far more words than it names — every

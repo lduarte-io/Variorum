@@ -73,8 +73,15 @@ final class ThemeStore {
         run { try $0.setFanStyle(style) }
     }
 
+    /// Round 3 NIT: setters CHAIN instead of racing — parallel unstructured
+    /// tasks could enter the runner out of click order and settle on the
+    /// older value (the trap-2 class at the settings surface). Each write
+    /// awaits its predecessor, so the last click always wins.
+    @ObservationIgnored private var pendingWrite: Task<Void, Never>?
+
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) {
-        Task {
+        pendingWrite = Task { [previous = pendingWrite] in
+            await previous?.value
             do {
                 try await session.runner.run(body)
                 lastError = nil

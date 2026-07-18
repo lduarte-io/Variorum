@@ -9,7 +9,10 @@
 //  posts flow together. Clicking a post opens it for editing in the book
 //  view (in-place waking is Stage C's v2-canon surface). Text loads
 //  lazily per post (`.task` per row inside the LazyVStack — viewport-
-//  shaped, P3).
+//  shaped, P3). Round 3 MAJOR: the column WAS a plain VStack — every row
+//  materialized and fetched on open, cost ∝ book size, exactly the shape
+//  this header already claimed not to have; now genuinely lazy, pinned by
+//  the DEBUG materialization counter below.
 //
 
 import SwiftUI
@@ -37,7 +40,10 @@ struct ReadingFlowView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                VStack(spacing: 28) {
+                // LAZY (P3 — round 3 MAJOR): rows materialize near the
+                // viewport only; the page paper/shadow wrap the column,
+                // so laziness costs the styling nothing.
+                LazyVStack(spacing: 28) {
                     if let readingName {
                         Text(readingName)
                             .font(page.serifTitle)
@@ -76,6 +82,17 @@ struct ReadingFlowView: View {
     }
 }
 
+#if DEBUG
+/// Round 3 (MAJOR) pin support: counts FlowPostView materializations so
+/// the virtualization pin can assert the LazyVStack defers off-viewport
+/// rows (a plain VStack materializes the whole book at once — red on the
+/// pre-fix code by behavioral revert).
+@MainActor
+enum ReadingFlowMaterialization {
+    static var count = 0
+}
+#endif
+
 /// One post on the page: lazy text, serif paragraphs; the whole body is a
 /// click target to wake editing.
 private struct FlowPostView: View {
@@ -85,6 +102,19 @@ private struct FlowPostView: View {
     let onWake: () -> Void
 
     @State private var paragraphs: [String] = []
+
+    init(
+        session: AppSession, entry: Queries.ReadingEntry,
+        page: ReadingPageTokens, onWake: @escaping () -> Void
+    ) {
+        self.session = session
+        self.entry = entry
+        self.page = page
+        self.onWake = onWake
+        #if DEBUG
+        ReadingFlowMaterialization.count += 1
+        #endif
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {

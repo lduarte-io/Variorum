@@ -194,6 +194,33 @@ struct PromoteAndPaletteTests {
         }
     }
 
+    @Test func staleTagChipReadsNeverLand() async throws {
+        // Round 3, MINOR (red-on-old by behavioral revert — remove the
+        // post-read generation check and the stale chips land): the chips
+        // read is a second suspension point after the round-2 hits guard;
+        // a superseded generation's chips must never describe the newer
+        // query's rows.
+        try await withShellSession { session, _ in
+            let (tagged, other) = try await session.runner.run { ops -> (String, String) in
+                let tag = try ops.createTag(parent: nil, name: "stars")
+                let tagged = try ops.createPost(title: "tagged post", profile: .generic)
+                try ops.applyTag(tag.id, toPost: tagged.id)
+                let other = try ops.createPost(title: "plain post", profile: .generic)
+                return (tagged.id, other.id)
+            }
+            let model = LibraryCatalogModel(session: session)
+            await model.search()  // the CURRENT generation's chips
+            #expect(model.postTags[tagged] == ["stars"])
+
+            // A STALE generation's chips arrive late (the race, made
+            // deterministic): they must not land.
+            await model.loadTagChips(for: [other], generation: 0)
+            #expect(model.postTags[tagged] == ["stars"],
+                    "the superseded read never overwrites the current chips")
+            #expect(model.postTags.count >= 1)
+        }
+    }
+
     @Test func extentInputDistinguishesClearFromTypo() {
         // Round 2, MINOR (red-on-old: `Int("10k")` = nil silently CLEARED
         // a stored extent): empty clears, digits set, garbage REFUSES.

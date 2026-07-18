@@ -600,6 +600,15 @@ final class CommentCardView: NSView {
     override func mouseDown(with event: NSEvent) {
         onClick?()
     }
+
+    /// Round 3 (MINOR): a quiet card is CLICK-THROUGH — the read tier
+    /// builds the controller with no comments door (`onClick == nil`), and
+    /// without this a card/strip/badge was a dead zone over the text
+    /// (swallowing click-to-focus). The DecorRectView/SeamLineView rule,
+    /// applied conditionally: no door ⇒ no hit.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        onClick == nil ? nil : super.hitTest(point)
+    }
 }
 
 /// The block drag handle (R19): "⠿" in the left gutter; dragging reports

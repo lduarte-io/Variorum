@@ -975,7 +975,14 @@ Results + dispositions here; the canonical-doc ratification batch (CoreDescripti
 pillar 3's chapter line → reading_section; the tags-flat surface note; the
 block-is-its-own-paragraph clarifying line; §12's view-list updates incl.
 canvas-as-view; §14 delta pointing at this file's sittings; SyncSpec §12 event
-record); master plan row 13 → done, pointer → **Phase 12** (now with real-use
+record; **AppSpec §7 DDL** — `block_comment`, `reading_section`,
+`block.presentation`, `reading_post.section_id`, `reading.word_target` (the
+canonical schema must not lag the four shipped migrations — round 3 MINOR);
+**AppSpec §9 operations** — comment CRUD/travel + `restoreBlockComment`,
+section CRUD + `restoreSection`, `setBlockPresentation`/
+`updateBlockPresentation`, `setReadingWordTarget`/`setReadingMaxPosts`,
+`assertReadingAcceptsPosts`; **the ratified SmartQuerySpec vocabulary gains
+`tagsAll`** in §14's Phase 4 record); master plan row 13 → done, pointer → **Phase 12** (now with real-use
 evidence accumulating); KnownIssues reconciliation (restore-drill row closes;
 typographic PDF row disposition); the author handoff LAST, checklist at top (the
 deferred 11b walk items fold into her first real session with the new UI).
@@ -1638,6 +1645,113 @@ gated the core.
 **NOT this session's:** the phase closeout ritual (canonical docs, master
 plan row, the R59 handoff) — the coordinator instructs it after round 3
 adjudicates.
+
+## Stage C cold review, round 3 (2026-07-18 — the ladder's cap) — findings + dispositions
+
+**1 MAJOR / 5 MINOR / 3 NIT, ZERO BLOCKER, plus a clean bill on both
+suites and every round-2 fix. ALL NINE AGREED — zero disputes; every
+mechanism traced in code by the fixer before fixing. Per the ladder's
+rule these fixes land POST-CAP (the Phase 9/11a precedent): no further
+review round; this record + the pins are the confirmation. Post-fix
+gates: core 731 green in 88 suites · Mac 421 in 78 · mobile 11/4 (+2
+core, +4 Mac — the round's pins); `/Applications` refreshed from
+Release.**
+
+1. **MAJOR — the reading flow was NOT virtualized** (ReadingFlowView:
+   plain `VStack` at both levels while its own header and the B3 closeout
+   claimed "`.task` per row inside the LazyVStack — viewport-shaped, P3");
+   opening Read mode fired one `renderPost` per member entry and laid out
+   the whole book up front — cost ∝ book size, P3's banned shape, hit by
+   Journal 2026 (~96 entries) on one click and by every finished book's
+   auto-open. AGREED — traced exactly as found (the closeout claim was
+   false in code; this section is the correction of record). FIXED: the
+   page column is a `LazyVStack` (the paper/shadow wrap the column, so
+   the styling is untouched) + a DEBUG `ReadingFlowMaterialization`
+   counter in `FlowPostView.init`. Pin:
+   `theReadingFlowVirtualizesItsRows` (150 fabricated entries in a
+   700×500 hosted window → materializations < 75). **RED VERIFIED BY
+   BEHAVIORAL REVERT at suite level** (VStack restored → **300**
+   materializations, the whole extent twice — the exact pre-fix shape).
+2. **MINOR — the book navigator's "+ new entry" door on a LOCKED journal
+   book kept the pre-fix wedge shape round 2's MAJOR 2 fixed at ⌘J**
+   (only `alreadyInReading` caught; per-op transactions mean the mints
+   COMMIT before the add throws): a locked daily book's entry existed but
+   never opened (raw `String(describing:)` error); a locked non-daily
+   book minted a stray `.generic` dated post into the Pool per click.
+   AGREED. FIXED per the coordinator's instruction — the Outcome doctrine
+   applied consistently: the DAILY branch catches locked/at-capacity and
+   returns the entry WITH a speaking note (the entry always opens); the
+   NON-DAILY branch REFUSES BEFORE MINTING via the new core read
+   **`Operations.assertReadingAcceptsPosts`** (the addPostToReading gate
+   without a post, run INSIDE the serialized closure — the
+   `dailyJournalBookID` precedent, so a concurrent lock can't strand a
+   stray; own core pin `assertReadingAcceptsPostsMirrorsTheAddGateExactly`
+   covering missing/wrong-kind/locked/at-capacity/willing); refusals speak
+   through `ReadingsViewModel.message`; PLUS the door hides on
+   `reading.locked` (additive — the gate covers the race the hidden
+   button can't). Pin: `aLockedBooksEntryDoorFollowsTheOutcomeDoctrine`
+   (daily: opens + "finished" note; non-daily: nil + speaking "locked" +
+   container count UNCHANGED; capacity: refuses speaking "limit"). **RED
+   VERIFIED BY BEHAVIORAL REVERT** (catches + gate removed → all three
+   predicted failures: openedID nil, no note, after 3 ≠ before 2 — the
+   stray minted).
+3. **MINOR — `CommentCardView` lacked the hit-test passthrough the C1
+   record claimed** (`mouseDown` overridden, `hitTest` not — the read
+   tier's quiet cards, built with `onOpenComments: nil`, were dead click
+   zones over the text). AGREED. FIXED: `hitTest` returns nil when
+   `onClick == nil` (the DecorRectView/SeamLineView rule, conditional).
+   Pin: `aQuietCommentCardIsClickThrough` (nil door → hitTest nil; door →
+   non-nil). **RED VERIFIED BY BEHAVIORAL REVERT** (override removed →
+   the card returned itself).
+4. **MINOR — the closeout ritual's canonical-doc batch omitted AppSpec §7
+   DDL, §9 operations, and the SmartQuerySpec `tagsAll` vocabulary** —
+   the shipped schema/ops would have survived the ritual undocumented
+   (permanent drift; CLAUDE.md's align rule). AGREED. FIXED: the ritual
+   list now names §7's five DDL additions, §9's operation set (incl.
+   `restoreSection`, `updateBlockPresentation`, both extent setters, and
+   this round's `assertReadingAcceptsPosts`), and the `tagsAll`
+   vocabulary line. Doc-only; no pin owed.
+5. **MINOR — `loadTagChips` was not generation-guarded** (round 2's
+   finding-9 fix covered `hits` but not `postTags`: the chips read is a
+   SECOND suspension point, so a superseded generation's chips could land
+   last and describe the previous query's rows). AGREED — exactly the
+   class finding 9 named. FIXED: the generation rides into `loadTagChips`
+   and is re-checked after the chips read (error half too); internal for
+   the pin. Pin: `staleTagChipReadsNeverLand` (a stale-generation call
+   after a completed search never overwrites the current chips). **RED
+   VERIFIED BY BEHAVIORAL REVERT** (guard removed → the stale read wiped
+   the current chips to nil).
+6. **MINOR — the typographic-PDF KnownIssues row was owned by "13 (UI
+   design)" but built/scoped by no stage.** AGREED. FIXED as directed:
+   the row's owner now reads "13 → disposition owed at the Phase 13 taste
+   checkpoint (build in the fix round, or re-own with a named phase —
+   author call; carried on the R59 handoff checklist)" with a round-3
+   flag in the row body — a deliberate author call at the checkpoint,
+   never a silent carry.
+7. **NIT — ThemeStore's fire-and-forget setters** (the trap-2 shape:
+   parallel unstructured `Task { runner.run }` can enter the runner out
+   of click order and settle on the older value). AGREED — consistency
+   debt, honestly non-deterministic to pin (the reviewer's own label; no
+   pin per the hallucination guard's architectural-class rule — the
+   mechanism is traced: unstructured task scheduling order is
+   unspecified). TAKEN: setters now CHAIN (`pendingWrite` awaits its
+   predecessor) — FIFO in click order by construction.
+8. **NIT — `EditorTypography.current` is a global mutable singleton.**
+   AGREED — recorded as DELIBERATE, unchanged: main-thread-confined by
+   convention (the file's concurrency note + trap 4's defer-restore rule),
+   accepted against `EditorDocument.baseAttributes`' pre-existing static
+   shape; the deviation stays a choice on this record, not drift.
+9. **NIT — smart-book word counts ignored `max_posts`.** AGREED — and the
+   trace widened it honestly: a CURATED book whose cap was LOWERED below
+   its membership (#25(d) legal) had the same skew. TAKEN (the
+   LIMIT-alignment shape): `bookWordCounts` now counts a capped book
+   (either kind) over `assembleReading`'s OWN capped, ordered set — one
+   brain, no duplicated ordering; capped books are rare and the load
+   stays one-shot (#26(g)). Pin:
+   `cappedBooksCountExactlyTheAssemblysCappedSet` (smart capped at 2 of 3
+   matches → 5 words not 9; curated lowered to 1 of 2 → 3 not 5). **RED
+   VERIFIED BY BEHAVIORAL REVERT** (capped pass removed → 9 and 5, the
+   exact pre-fix sums).
 
 # STAGE B CLOSEOUT (2026-07-18, same Fable implementer session — the review ladder's anchor)
 

@@ -112,6 +112,22 @@ extension Queries {
                 arguments: StatementArguments(match.arguments))
             counts[reading.id] = texts.reduce(0) { $0 + wordCount($1) }
         }
+        // A CAP counts like the assembly renders (round 3 NIT): `max_posts`
+        // LIMITs the book view read-side (the Phase 4 extent rule, both
+        // kinds), so a capped book's shelf number counts EXACTLY the
+        // capped, ordered set the reader sees — a capped smart book's
+        // extra matches don't count, and neither do a curated book's
+        // members beyond a cap LOWERED below its membership (#25(d)
+        // legal). Capped books are rare; one assembly each, still
+        // one-shot (#26(g)).
+        for reading in try readings(db) where reading.maxPosts != nil {
+            let capped = try assembleReading(db, readingID: reading.id)
+            counts[reading.id] = try capped.reduce(0) { total, entry in
+                total + (try renderPost(db, containerID: entry.postID)
+                    .compactMap(\.text)
+                    .reduce(0) { $0 + wordCount($1) })
+            }
+        }
         return counts
     }
 

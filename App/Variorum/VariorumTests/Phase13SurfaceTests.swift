@@ -158,6 +158,23 @@ struct BlockDecorGeometryTests {
         #expect(BlockDecor.gutterFitsCards(viewWidth: 1200, textRight: 900))
         #expect(!BlockDecor.gutterFitsCards(viewWidth: 736, textRight: 708))
     }
+
+    @MainActor
+    @Test func aQuietCommentCardIsClickThrough() {
+        // Round 3, MINOR (red-on-old by behavioral revert — without the
+        // hitTest override the card returned itself): the read tier's
+        // quiet cards (no comments door) must never swallow clicks meant
+        // for the text beneath; with a door, the card hits normally.
+        let card = CommentCardView(frame: NSRect(x: 0, y: 0, width: 120, height: 20))
+        card.present(text: "note", tint: .yellow, ink: .black,
+                     style: .marginCard(rule: .brown))
+        let inside = NSPoint(x: 60, y: 10)
+        #expect(card.hitTest(inside) == nil,
+                "no door (onClick nil) ⇒ click-through")
+        card.onClick = {}
+        #expect(card.hitTest(inside) != nil,
+                "with a door the card is clickable")
+    }
 }
 
 // MARK: - The comments panel + the handle drop (live pipeline)

@@ -150,6 +150,34 @@ extension Operations {
         }
     }
 
+    /// The `addPostToReading` GATE without a post (Phase 13, round 3): a
+    /// door that MINTS a post destined for a reading can refuse BEFORE
+    /// minting, inside one serialized runner closure (the
+    /// `dailyJournalBookID` read-inside-the-runner precedent — a pre-check
+    /// outside the runner would race a concurrent lock and strand the
+    /// mint). Throws exactly the add-side refusals a fresh post would hit:
+    /// missing/tombstoned reading, wrong kind, locked, at capacity.
+    public func assertReadingAcceptsPosts(_ readingID: String) throws {
+        try database.read { db in
+            let reading = try liveReading(db, readingID)
+            guard reading.kind == .curated else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .curated)
+            }
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: readingID)
+            }
+            if let maxPosts = reading.maxPosts {
+                let liveCount = try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                    arguments: [readingID]) ?? 0
+                if liveCount >= maxPosts {
+                    throw OperationError.readingAtCapacity(id: readingID)
+                }
+            }
+        }
+    }
+
     public func removePostFromReading(_ postID: String, from readingID: String) throws {
         try database.write { db in
             let reading = try liveReading(db, readingID)

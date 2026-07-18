@@ -233,6 +233,44 @@ struct BookViewTests {
                 "realization must not scale with reading size: \(small) ms -> \(large) ms")
     }
 
+    @Test func theReadingFlowVirtualizesItsRows() async throws {
+        // Phase 13 round 3, MAJOR (red-on-old by behavioral revert — the
+        // pre-fix plain VStack materializes ALL rows on first layout):
+        // the reading flow's page column is a LazyVStack; a 150-entry
+        // book must materialize only near-viewport rows on open. The
+        // DEBUG counter counts FlowPostView inits; `.task` not firing
+        // under the test host doesn't block an init-count pin.
+        try await withBookWorld(posts: 1) { session, _, _, _ in
+            let entries = (0..<150).map {
+                Queries.ReadingEntry(
+                    postID: "p\($0)", title: "t\($0)", entryDate: nil, sectionPath: nil)
+            }
+            ReadingFlowMaterialization.count = 0
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 500),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: ReadingFlowView(
+                session: session, readingName: "Orbit",
+                grouped: [(section: nil, entries: entries)],
+                onWake: { _ in }))
+            hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 500)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { ReadingFlowMaterialization.count > 0 })
+            await settle(window, hosting, until: { false }, maxTurns: 4)
+
+            let materialized = ReadingFlowMaterialization.count
+            #expect(materialized > 0, "visible rows rendered")
+            #expect(materialized < 75,
+                    "a 150-entry book must not materialize its whole extent on open: \(materialized) row materializations")
+        }
+    }
+
     @Test func aSyncGapSlotInsideAMemberPostRendersWithoutCrashing() async throws {
         try await withBookWorld(posts: 2, blocksPerPost: 2) { session, db, readingID, postIDs in
             // Manufacture the SyncSpec §5 gap state (a live placement whose
