@@ -67,3 +67,33 @@ revoke all on block_comment from anon, authenticated;
 -- ---------------------------------------------------------------------------
 
 alter table block add column if not exists presentation text;
+
+-- ---------------------------------------------------------------------------
+-- 3. reading_section (client migration v1_10) — real chapters (R28: "a
+--    reading section table is fine; we don't need nesting readings").
+--    Ordered metadata rows; position races converge by CAS like every
+--    fractional index. reading_post gains section_id — a dangling pointer
+--    reads as unsectioned client-side (the chosen-variant fallback class).
+-- ---------------------------------------------------------------------------
+
+create table reading_section (
+  id                text primary key,
+  reading_id        text,
+  name              text,
+  position          text,
+  created_at        text,
+  updated_at        text,
+  deleted_at        text,
+  sync_version      bigint not null default 0,
+  server_seq        bigint not null default 0,
+  server_written_at timestamptz not null default clock_timestamp()
+);
+
+create trigger stamp_seq_reading_section before insert or update on reading_section
+  for each row execute function stamp_server_seq();
+create index idx_seq_reading_section on reading_section (server_seq);
+
+alter table reading_section enable row level security;
+revoke all on reading_section from anon, authenticated;
+
+alter table reading_post add column if not exists section_id text;

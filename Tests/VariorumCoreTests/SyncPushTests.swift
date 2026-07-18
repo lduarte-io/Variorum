@@ -52,6 +52,9 @@ struct SyncPushTests {
             _ = try ops.merge(b1.id, b2.id)  // edges
             let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
+            // Phase 13 (A1): the lockstep event's chapter table.
+            let chapter = try ops.createSection(in: reading.id, name: "ch. I")
+            try ops.assignPostToSection(post.id, in: reading.id, section: chapter.id)
             let tag = try ops.createTag(parent: nil, name: "life")
             _ = try ops.applyTag(tag.id, toPost: post.id)
             let anyBlock = try db.fetchString(

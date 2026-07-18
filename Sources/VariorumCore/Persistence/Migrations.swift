@@ -313,6 +313,54 @@ extension AppDatabase {
         migrator.registerMigration("v1_9_block_presentation") { db in
             try db.execute(sql: "ALTER TABLE block ADD COLUMN presentation TEXT")
         }
+        // Phase 13, Step A1 (sitting rulings R28 + R50 — "a reading section
+        // table is fine; we don't need nesting readings"; the BOOKS
+        // REVERSAL, sitting 1): REAL CHAPTERS — first-class reorderable
+        // groupings of posts within a book, superseding tag-derived
+        // sections for curated books. `reading_section` is an ordered
+        // metadata row list (fractional-index positions, §6; no natural
+        // key, no uniqueness — duplicate chapter names are legal, like
+        // lens names); `reading_post.section_id` is the membership's
+        // chapter pointer (R50: reading_post = which book, section_id =
+        // which chapter within it). A DANGLING section_id reads as
+        // UNSECTIONED at read time — the chosen-variant fallback class
+        // (AppSpec §7's grouping_tag_id precedent); deliberately NO
+        // cascade from section to membership, and deleting a chapter
+        // never touches the posts. Cascade: reading tombstone → its live
+        // sections (exact stamp). Rides the SAME §12 lockstep event as
+        // v1_8/v1_9/v1_11.
+        migrator.registerMigration("v1_10_reading_sections") { db in
+            try db.execute(sql: """
+                CREATE TABLE reading_section (
+                  id           TEXT PRIMARY KEY,
+                  reading_id   TEXT NOT NULL,
+                  name         TEXT NOT NULL,
+                  position     TEXT NOT NULL,
+                  created_at   TEXT NOT NULL,
+                  updated_at   TEXT NOT NULL,
+                  deleted_at   TEXT,
+                  sync_version INTEGER NOT NULL DEFAULT 0,
+                  FOREIGN KEY (reading_id) REFERENCES reading(id)
+                );
+                CREATE INDEX idx_reading_section_order ON reading_section(reading_id, position);
+                """)
+            // SQLite allows ADD COLUMN with REFERENCES when the default is
+            // NULL; out-of-order sync application is covered by the apply
+            // transaction's deferred FKs (SyncSpec §5).
+            try db.execute(sql: """
+                ALTER TABLE reading_post ADD COLUMN section_id TEXT REFERENCES reading_section(id)
+                """)
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_reading_tombstone_section
+                AFTER UPDATE OF deleted_at ON reading
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE reading_section SET deleted_at = NEW.deleted_at
+                    WHERE reading_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try createOutboxCaptureTriggers(db, table: "reading_section", pk: "id")
+        }
         return migrator
     }
 }

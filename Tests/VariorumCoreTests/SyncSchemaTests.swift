@@ -99,6 +99,9 @@ struct SyncSchemaTests {
             _ = try ops.addBlockComment(to: mergedBlock, text: "take 1 preferred")
             let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
+            // Phase 13 (A1): chapter fixture + a sectioned membership.
+            let chapter = try ops.createSection(in: reading.id, name: "I / leaving")
+            try ops.assignPostToSection(post.id, in: reading.id, section: chapter.id)
             let tag = try ops.createTag(parent: nil, name: "life")
             let child = try ops.createTag(parent: tag.id, name: "goals")
             _ = try ops.applyTag(child.id, toPost: post.id)

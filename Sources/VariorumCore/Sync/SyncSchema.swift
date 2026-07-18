@@ -54,6 +54,9 @@ public enum SyncSchema {
         SyncTable("edge"),
         SyncTable("container_block"),
         SyncTable("reading"),
+        // Phase 13 (A1): sections precede reading_post — the membership's
+        // section_id FK points here, and apply order is FK-friendly.
+        SyncTable("reading_section"),
         SyncTable("reading_post"),
         SyncTable("post_tag"),
         SyncTable("block_tag"),
@@ -68,9 +71,13 @@ public enum SyncSchema {
         SyncTable("lens"),
         SyncTable("lens_choice"),
         // Phase 13, Step A1 (the one lockstep event, SyncSpec §12): block
-        // comments (working notes — metadata CAS, NO uniqueness, no repair
-        // class; text races converge server-version-wins, deliberately not
-        // S5 — that doctrine is scoped to variant.working_text).
+        // comments — working notes; metadata CAS, NO uniqueness, no repair
+        // class (text races converge server-version-wins, deliberately not
+        // S5 — that doctrine is scoped to variant.working_text). Its
+        // sibling `reading_section` sits above, before reading_post (FK
+        // order); same no-natural-key, no-repair posture, and the
+        // membership's dangling section_id reads as unsectioned (the
+        // chosen-variant fallback class) so no repair rides the pointer.
         SyncTable("block_comment"),
         SyncTable("setting", primaryKey: "key", hasTombstone: false),
     ]

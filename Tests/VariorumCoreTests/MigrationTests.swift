@@ -15,8 +15,9 @@ struct MigrationTests {
         // Phase 11 (v1_5/v1_7, the one §12 lockstep event): canvas card
         // positions + saved lenses.
         "canvas_layout", "lens", "lens_choice",
-        // Phase 13 (v1_8, the Phase 13 §12 lockstep event): block comments.
-        "block_comment",
+        // Phase 13 (v1_8/v1_10, the Phase 13 §12 lockstep event): block
+        // comments + reading sections (chapters).
+        "block_comment", "reading_section",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -35,9 +36,10 @@ struct MigrationTests {
         "uq_canvas_layout_live", "idx_canvas_layout_block",
         "idx_lens_container",
         "uq_lens_choice_live", "idx_lens_choice_block",
-        // Phase 13 (v1_8). Deliberately NO unique index — comments have no
-        // natural key.
+        // Phase 13 (v1_8/v1_10). Deliberately NO unique indexes — neither
+        // comments nor chapters have a natural key.
         "idx_block_comment_block",
+        "idx_reading_section_order",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -46,7 +48,7 @@ struct MigrationTests {
         "container_block", "reading", "reading_post", "tag",
         "post_tag", "block_tag", "reference", "setting",
         "canvas_layout", "lens", "lens_choice",
-        "block_comment",
+        "block_comment", "reading_section",
     ]
 
     @Test func allTablesExist() throws {
