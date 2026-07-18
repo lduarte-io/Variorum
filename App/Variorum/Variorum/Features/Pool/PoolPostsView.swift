@@ -106,10 +106,15 @@ struct PoolPostsView: View {
     let tags: TagsViewModel
     let onOpen: (SidebarSelection) -> Void
 
-    @Environment(ThemeStore.self) private var theme
+    // Optional: test hosts (and future embeddings) may lack the
+    // environment — fall back to the leading voice's tokens.
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
-    private var tokens: VoiceTokens { theme.tokens(for: scheme) }
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme)
+            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+    }
 
     var body: some View {
         VStack(spacing: 0) {

@@ -81,15 +81,13 @@ final class LibraryViewModel {
     }
 
     /// The notebook rule's Mac door: "today's entry" creates OR opens (the
-    /// operations layer decides — one entry per calendar day). `day` is
-    /// injectable for tests; the default is the local calendar date.
+    /// operations layer decides — one entry per calendar day), and — Phase
+    /// 13 B3, R50 — ensures the DAILY JOURNAL BOOK holds it (created +
+    /// pinned + designated on first use; the journal lives on the shelf as
+    /// ordinary membership). `day` is injectable for tests.
     func openJournalEntry(day: String? = nil) async -> String? {
-        let entryDay = day ?? JournalDay.dayString(from: Date())
         do {
-            let result = try await session.runner.run { ops in
-                try ops.createOrOpenJournalEntry(entryDate: entryDay)
-            }
-            return result.container.id
+            return try await JournalBooks.openToday(session: session, day: day)
         } catch {
             lastError = String(describing: error)
             return nil

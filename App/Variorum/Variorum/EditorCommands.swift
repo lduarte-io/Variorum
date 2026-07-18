@@ -162,11 +162,9 @@ struct EditorCommands: Commands {
         guard let session else { return }
         Task { @MainActor in
             do {
-                let day = JournalDay.dayString(from: Date())
-                let result = try await session.runner.run { ops in
-                    try ops.createOrOpenJournalEntry(entryDate: day)
-                }
-                router.pendingSelection = .post(result.container.id)
+                // The R50 door: create-or-open + the daily-book membership.
+                let id = try await JournalBooks.openToday(session: session)
+                router.pendingSelection = .post(id)
             } catch {
                 session.editorRouter.active?.showStatus("Today's entry failed: \(error)")
             }

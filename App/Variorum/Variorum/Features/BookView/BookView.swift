@@ -2,13 +2,14 @@
 //  BookView.swift
 //  Variorum
 //
-//  The continuous book view (Phase 10 Step 4 — AppSpec §12): the reading's
-//  posts in ONE continuous scroll, NOT paginated. Unfocused posts render
-//  through the read-cheap tier (Step 2); exactly one post upgrades to the
-//  live inline editor on click (Step 3's handoff — teardown flushes the
-//  leaving post, the arriving editor seeds the clicked caret). LazyVStack
-//  is the virtualization: off-viewport posts never instantiate (P3).
-//  Functional, unstyled (Phase 13 owns beauty).
+//  The continuous book view (Phase 10 Step 4; reworked Phase 13 B3): the
+//  reading's posts in ONE continuous scroll with REAL CHAPTERS (R28/R50 —
+//  reading_section rows, movable, superseding tag-path headers for curated
+//  books), the terminal BOOK NAVIGATOR (R43: chapters · outline · settings;
+//  clicking a post opens it IN the current editor — the inline focus, no
+//  context jump; NO separate chapter view), and the READING FLOW mode
+//  (R2 — direction C; a finished book opens into it). Unfocused posts
+//  render read-cheap; exactly one upgrades to the live inline editor (P3).
 //
 
 import SwiftUI
@@ -19,6 +20,7 @@ struct BookView: View {
     let readingID: String
     var readingName: String?
     @State private var model: BookViewModel
+    @State private var structure: BookStructureModel
     @State private var focus = BookFocusState()
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
@@ -31,53 +33,284 @@ struct BookView: View {
         self.readingID = readingID
         self.readingName = readingName
         _model = State(initialValue: model ?? BookViewModel(session: session, readingID: readingID))
+        _structure = State(initialValue: BookStructureModel(session: session, readingID: readingID))
     }
 
+    // Optional: test hosts (and future embeddings) may lack the
+    // environment — fall back to the leading voice's tokens.
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
     @State private var scrubFraction: Double = 0
     @State private var scrubLabel: String?
+    @State private var newChapterPresented = false
+    @State private var chapterNameField = ""
+    @State private var renameChapterTarget: ReadingSection?
+    @State private var settingsShown = false
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme)
+            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+    }
 
     var body: some View {
+        HStack(spacing: 0) {
+            navigator
+            Divider().overlay(tokens.line)
+            switch structure.mode {
+            case .book:
+                bookBody
+            case .read:
+                ReadingFlowView(
+                    session: session,
+                    readingName: readingName ?? model.readingName,
+                    grouped: structure.chaptersActive
+                        ? structure.grouped(entries: model.entries)
+                        : [(nil, model.entries)],
+                    onWake: { postID in
+                        structure.mode = .book
+                        focus.focus(postID)
+                    })
+            }
+        }
+        .background(tokens.surface)
+        .task { await model.start() }
+        .task { await structure.start() }
+        .overlay(alignment: .bottom) {
+            if let error = model.lastError ?? structure.lastError {
+                Text(error)
+                    .font(tokens.small)
+                    .foregroundStyle(.red)
+                    .textSelection(.enabled)
+                    .padding(4)
+            }
+        }
+        .alert("New Chapter", isPresented: $newChapterPresented) {
+            TextField("Name", text: $chapterNameField)
+            Button("Create") {
+                let name = chapterNameField
+                Task { await structure.createChapter(named: name) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert(
+            "Rename Chapter",
+            isPresented: Binding(
+                get: { renameChapterTarget != nil },
+                set: { if !$0 { renameChapterTarget = nil } }),
+            presenting: renameChapterTarget
+        ) { section in
+            TextField("Name", text: $chapterNameField)
+            Button("Rename") {
+                let name = chapterNameField
+                Task { await structure.renameChapter(section.id, to: name) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $settingsShown) {
+            BookSettingsSheet(structure: structure)
+        }
+    }
+
+    // MARK: - The navigator (R43: chapters · outline · settings)
+
+    private var navigator: some View {
+        ScrollViewReader { proxy in
+            VStack(alignment: .leading, spacing: 6) {
+                Text(tokens.path([readingName ?? model.readingName ?? "book"]))
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+                HStack(spacing: 8) {
+                    Picker("", selection: Binding(
+                        get: { structure.mode == .read },
+                        set: { structure.mode = $0 ? .read : .book })) {
+                        Text(tokens.chromeLabel("Book")).tag(false)
+                        Text(tokens.chromeLabel("Read")).tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                    Button {
+                        settingsShown = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Book settings — finish, length, rename")
+                }
+                if let reading = structure.reading, reading.locked {
+                    Text(tokens.chromeLabel("✓ finished"))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 2) {
+                        ForEach(structure.grouped(entries: model.entries), id: \.section?.id) { group in
+                            if let section = group.section {
+                                Button {
+                                    // Navigate: land the book scroll at the
+                                    // chapter (the flow view shows it too).
+                                    withAnimation { proxy.scrollTo("nav-noop") }
+                                    scrollTarget = "chapter-\(section.id)"
+                                } label: {
+                                    Text(tokens.chromeLabel(section.name))
+                                        .font(tokens.small.weight(.semibold))
+                                        .foregroundStyle(tokens.accent)
+                                        .lineLimit(1)
+                                }
+                                .buttonStyle(.plain)
+                                .contextMenu { chapterMenu(section) }
+                            } else if structure.chaptersActive {
+                                Text(tokens.chromeLabel("unfiled"))
+                                    .font(tokens.small.weight(.semibold))
+                                    .foregroundStyle(tokens.muted)
+                            }
+                            // The top-level outline: posts; clicking one
+                            // opens it in the CURRENT editor (R43 — no
+                            // context jump).
+                            ForEach(group.entries, id: \.postID) { entry in
+                                Button {
+                                    structure.mode = .book
+                                    focus.focus(entry.postID)
+                                    scrollTarget = "page-\(entry.postID)"
+                                } label: {
+                                    Text(entryTitle(entry))
+                                        .font(tokens.small)
+                                        .foregroundStyle(
+                                            focus.focusedPostID == entry.postID
+                                                ? tokens.ink : tokens.muted)
+                                        .lineLimit(1)
+                                        .padding(.leading, group.section != nil ? 10 : 0)
+                                }
+                                .buttonStyle(.plain)
+                                .contextMenu { postChapterMenu(entry) }
+                            }
+                        }
+                    }
+                    .id("nav-noop")
+                }
+                Spacer(minLength: 4)
+                if structure.reading?.kind == .curated {
+                    Button(tokens.chromeLabel("+ new chapter")) {
+                        chapterNameField = ""
+                        newChapterPresented = true
+                    }
+                    .buttonStyle(.borderless)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    if structure.reading?.profile == "journal" {
+                        Button(tokens.chromeLabel("+ new entry")) {
+                            Task {
+                                if let id = await structure.newEntry() {
+                                    focus.focus(id)
+                                }
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                    }
+                }
+            }
+            .padding(12)
+            .frame(width: 190)
+            .background(tokens.room)
+        }
+    }
+
+    /// The book scroll's pending landing (chapter/outline clicks).
+    @State private var scrollTarget: String?
+
+    @ViewBuilder
+    private func chapterMenu(_ section: ReadingSection) -> some View {
+        Button("Rename…") {
+            chapterNameField = section.name
+            renameChapterTarget = section
+        }
+        Button("Move Up") { Task { await structure.moveChapter(section.id, up: true) } }
+        Button("Move Down") { Task { await structure.moveChapter(section.id, up: false) } }
+        Divider()
+        Button("Delete Chapter", role: .destructive) {
+            Task { await structure.deleteChapter(section.id) }
+        }
+        Button("Restore Last Deleted Chapter") {
+            Task { await structure.restoreLastDeletedChapter() }
+        }
+    }
+
+    @ViewBuilder
+    private func postChapterMenu(_ entry: Queries.ReadingEntry) -> some View {
+        if structure.reading?.kind == .curated {
+            Menu("Chapter") {
+                ForEach(structure.sections, id: \.id) { section in
+                    Button(section.name) {
+                        Task { await structure.assign(entry.postID, to: section.id) }
+                    }
+                }
+                Divider()
+                Button("None") {
+                    Task { await structure.assign(entry.postID, to: nil) }
+                }
+            }
+        }
+    }
+
+    // MARK: - The book body (chapters + read-cheap posts + one live editor)
+
+    private var bookBody: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
-                    if let name = readingName ?? model.readingName {
-                        Text(name).font(.title2).padding(.bottom, 8)
-                    }
                     if model.entries.isEmpty {
-                        Text("This reading has no posts yet.")
-                            .foregroundStyle(.secondary)
+                        Text("This book has no posts yet.")
+                            .foregroundStyle(tokens.muted)
                     }
-                    ForEach(Array(model.entries.enumerated()), id: \.element.postID) { i, entry in
-                        if let section = model.sectionHeader(at: i) {
-                            Text(section)
-                                .font(.headline)
-                                .padding(.top, 12)
+                    if structure.chaptersActive {
+                        ForEach(structure.grouped(entries: model.entries), id: \.section?.id) { group in
+                            if let section = group.section {
+                                chapterHeader(section)
+                            } else {
+                                Text(tokens.chromeLabel("unfiled"))
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.muted)
+                                    .padding(.top, 12)
+                            }
+                            ForEach(group.entries, id: \.postID) { entry in
+                                postHeader(entry)
+                                postBody(entry)
+                                    .padding(.bottom, 16)
+                            }
                         }
-                        postHeader(entry)
-                        postBody(entry)
-                            .padding(.bottom, 16)
+                    } else {
+                        ForEach(Array(model.entries.enumerated()), id: \.element.postID) { i, entry in
+                            if let section = model.sectionHeader(at: i) {
+                                Text(section)
+                                    .font(tokens.heading)
+                                    .padding(.top, 12)
+                            }
+                            postHeader(entry)
+                            postBody(entry)
+                                .padding(.bottom, 16)
+                        }
                     }
                     if model.truncated {
-                        // Never a SILENT cut (round 1 NIT) — the dated home's
-                        // surface says what it isn't showing.
                         Text("Showing the first \(BookViewModel.entryWindow) posts — "
-                            + "the rest of this reading isn't loaded yet "
+                            + "the rest of this book isn't loaded yet "
                             + "(windowing arrives with Phase 12).")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
                             .padding(.vertical, 8)
                     }
                 }
-                .padding(12)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 16)
+            }
+            .onChange(of: scrollTarget) { _, target in
+                guard let target else { return }
+                withAnimation { proxy.scrollTo(target, anchor: .top) }
+                scrollTarget = nil
             }
             .safeAreaInset(edge: .bottom) {
                 // BOOK-SCRUB (Phase 11, A5 — the Phase 6 memo's ruling):
-                // MODEL-DRIVEN — the post list is the scrubber's domain
-                // (page = a post; 50 entries = 50 pages even if one is 10k
-                // words), never live text geometry. Landing is an anchor
-                // scroll over the model; the hybrid jump remains the
-                // WITHIN-post primitive (caret reveals after focus) —
-                // reconciliation recorded in the closeout.
+                // MODEL-DRIVEN — the post list is the scrubber's domain.
                 if model.entries.count > 1 {
                     VStack(spacing: 2) {
                         Slider(value: Binding(
@@ -91,8 +324,8 @@ struct BookView: View {
                             }), in: 0...1)
                         if let scrubLabel {
                             Text(scrubLabel)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
                         }
                     }
                     .padding(.horizontal, 12)
@@ -101,36 +334,44 @@ struct BookView: View {
                 }
             }
         }
-        .task { await model.start() }
-        .overlay(alignment: .bottom) {
-            if let error = model.lastError {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .textSelection(.enabled)
-                    .padding(4)
-            }
+    }
+
+    private func chapterHeader(_ section: ReadingSection) -> some View {
+        HStack(spacing: 6) {
+            Text("⠿")
+                .foregroundStyle(tokens.faint)
+                .help("Chapters reorder from the navigator (Move Up / Move Down)")
+            Text(tokens.chromeLabel(section.name))
+                .font(tokens.heading)
+                .foregroundStyle(tokens.accent)
         }
+        .padding(.top, 16)
+        .id("chapter-\(section.id)")
+        .contextMenu { chapterMenu(section) }
+    }
+
+    private func entryTitle(_ entry: Queries.ReadingEntry) -> String {
+        entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
     }
 
     private func scrubTitle(_ entry: Queries.ReadingEntry) -> String {
         let index = model.entries.firstIndex { $0.postID == entry.postID } ?? 0
-        let title = entry.title?.isEmpty == false ? entry.title! : "Untitled"
-        return "Page \(index + 1) of \(model.entries.count) — \(title)"
+        return "Page \(index + 1) of \(model.entries.count) — \(entryTitle(entry))"
     }
 
     private func postHeader(_ entry: Queries.ReadingEntry) -> some View {
         HStack(spacing: 6) {
-            Text(entry.title?.isEmpty == false ? entry.title! : "Untitled")
-                .font(.subheadline.weight(.semibold))
+            Text(entryTitle(entry))
+                .font(tokens.body.weight(.semibold))
             if let date = entry.entryDate {
                 Text(date)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
             }
         }
         .padding(.top, 4)
         .id("page-\(entry.postID)")  // the scrubber's landing anchor
+        .contextMenu { postChapterMenu(entry) }
     }
 
     @ViewBuilder
@@ -153,6 +394,64 @@ struct BookView: View {
                     focus.focus(entry.postID, fanBlock: blockID)
                 })
                 .id("read-\(entry.postID)")
+        }
+    }
+}
+
+/// The navigator's settings leg (R43): finish, rename, extents — the book's
+/// own faces, beside the shelf's.
+struct BookSettingsSheet: View {
+    let structure: BookStructureModel
+    @State private var nameField = ""
+    @State private var wordTargetField = ""
+    @State private var maxPostsField = ""
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Book Settings").font(.headline)
+            Form {
+                TextField("Name", text: $nameField)
+                TextField("Word target (blank = none)", text: $wordTargetField)
+                TextField("Post cap (blank = none)", text: $maxPostsField)
+                if let reading = structure.reading {
+                    Toggle("Finished", isOn: Binding(
+                        get: { reading.locked },
+                        set: { finished in Task { await structure.setFinished(finished) } }))
+                }
+            }
+            Text("Finishing freezes the book's membership and order (reversible). A finished book opens as pure text.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            HStack {
+                Spacer()
+                Button("Close") { save(); dismiss() }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(16)
+        .frame(minWidth: 380)
+        .onAppear {
+            nameField = structure.reading?.name ?? ""
+            wordTargetField = structure.reading?.wordTarget.map(String.init) ?? ""
+            maxPostsField = structure.reading?.maxPosts.map(String.init) ?? ""
+        }
+    }
+
+    private func save() {
+        let name = nameField.trimmingCharacters(in: .whitespaces)
+        let target = Int(wordTargetField.trimmingCharacters(in: .whitespaces))
+        let cap = Int(maxPostsField.trimmingCharacters(in: .whitespaces))
+        Task {
+            if !name.isEmpty, name != structure.reading?.name {
+                await structure.rename(to: name)
+            }
+            if target != structure.reading?.wordTarget {
+                await structure.setWordTarget(target)
+            }
+            if cap != structure.reading?.maxPosts {
+                await structure.setMaxPosts(cap)
+            }
         }
     }
 }

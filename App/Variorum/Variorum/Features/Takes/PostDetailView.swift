@@ -46,6 +46,9 @@ struct PostDetailView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .frame(maxWidth: 420)
+                // Phase 13 (B3, R35): the membership indicator — "this
+                // post also appears in N books" + the divergence door.
+                MembershipChip(session: session, postID: postID)
                 Button("References", systemImage: "books.vertical") {
                     referencesShown.toggle()
                 }
