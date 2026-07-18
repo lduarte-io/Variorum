@@ -38,7 +38,7 @@ direction until then. Also wanted: **drag posts onto a book** (the membership op
 exists; the drag face doesn't).
 
 **Taste anchors (her words, condensed):**
-- **The Phase 11 mockup is still the single best anchor** — "closer to what i want
+- **The Phase 11 mockup (v2) is still the single best anchor** — "closer to what i want
   than apple notes or terminal is." Specifically liked: the **sepia background with
   white posts**, the colors, the font, **takes having a different background color
   than the overall post** ("that's helpful"), **dotted lines between blocks**
@@ -60,7 +60,7 @@ exists; the drag face doesn't).
 **Feel/theme:** she'd like warm-literary-paper (option A) AND other feels available
 as **user-selectable theme options** — A and B as choices, not a single identity.
 **Light/dark:** lives in light primarily — design light first — but dark must "feel
-thought through": **Gemini-style dark GREY, not black.**
+thought through". 
 
 **IA (her reactions):** the current pile **Journal, Library, Pool, Tags is good**
 (pool described by her as "where you add standalone items" — note: the pool holds
@@ -539,16 +539,92 @@ Notion refs — saved to `sitting-refs/`; captures removed for publication):**
   (no context jump). **NO separate chapter view** — reordering posts within a
   chapter happens in the book view itself.
 
+### Sitting 6 (2026-07-18, small hours) — Pool restored, hierarchy given its chance, the end-taste-checkpoint, black dark
+
+**Her message VERBATIM (standing instruction; she ALSO edited this file directly —
+recorded in R51):**
+
+> wait, where did pool go? also, it actually is kinda nice to have tags with
+> hierarchy. i haven't used the app really at all so that's not really evidence. keep
+> the hierarchy surfaced so that i can see if it does actually become useful to me
+> and so that i get the chance to actually use it. i think tags could still be edited
+> elsewhere. also, where did Pool go? or is pool just supposed to be surfaced via the
+> library? I think pool is still nicer to have at the top level because when you make
+> a random post, that's where it goes, and it's still easier to find and see. and
+> it's an easier place to add tags to a bunch of posts at once (in the terminal style
+> view, remember how i said there should be tags, well that should be an addable
+> surface within pool and library). also, just make a note that I'll do the phone
+> install and check after phase 13. i just want to get this UI portion done for now.
+> also, i don't think every milestone should gate on a tasate checkpoint. i want to
+> do a taste checkpoint once the whole thing is done, it'll be easier for me to
+> consider it all once it's done. i won't be able to tell if i like the structure if
+> it all still looks bad with ugly sapcing, no background colors, no fonts, etc.
+> also, are you going to be able to pull in the fonts that we decided on / need? i
+> think that it should be possible for you to do so but just checking on that. in
+> terms of item 20 - i think that an entry should know its journal book the same way
+> posts are going to know what book they're a part of - but is that the new table
+> showing what chapter they are in? or i can just make the journals be tagged that
+> and promote that tag into being a book - which is basically "book membership is a
+> tag" without making it a whole separate tag. one journal post per day is a
+> fragments rule that shouldn't be changed. i added to the notes plan specifying that
+> v2 is the best anchor, not just the mockup. also, i removed the gemini style dark
+> grey instead of black, because i realized that i actually like a fully black
+> background more.
+
+**Rulings:**
+
+- **R44 — POOL STAYS TOP-LEVEL** (Q17 — the pinned-filter proposal OVERRULED):
+  "when you make a random post, that's where it goes, and it's still easier to find
+  and see." **The sidebar, final: Shelf · Library · Pool · Blocks.**
+- **R45 — Tag HIERARCHY stays SURFACED** (supersedes R39's dormant-at-the-surface
+  half; the dropped dedicated tab stands): "i haven't used the app really at all so
+  that's not really evidence — keep the hierarchy surfaced so that i can see if it
+  does actually become useful to me." Tags are edited in context, wherever they
+  appear.
+- **R46 — The list views' TAGS column is an ADDABLE surface in Pool AND Library** —
+  batch-tagging a bunch of posts inline, terminal-style.
+- **R47 — Phone install + check AFTER Phase 13** (her note; "i just want to get this
+  UI portion done"). Consequence spelled for the plan: the A1 lockstep DEPLOY
+  executes at the phase END as one choreography — mirror → Mac → phone — before any
+  new-schema use on the real store; build work rides the dev store meanwhile; the
+  standing no-lens/canvas/name-writes interim constraint simply continues (moot
+  while she isn't using the app).
+- **R48 — ONE taste checkpoint, AT THE END** (supersedes the per-milestone taste
+  gate): "i won't be able to tell if i like the structure if it all still looks bad
+  with ugly spacing, no background colors, no fonts." Milestones keep their
+  TECHNICAL gates (suites, perf numbers, cold reviews); she judges the whole
+  assembled thing once, on the running app, and the fix round follows.
+- **R49 — Fonts: confirmed feasible, no dependency needed.** Everything the anchors
+  use ships with macOS as system fonts (Charter, Georgia, Iowan Old Style, New
+  York, SF Mono, Menlo — the v2 mockup's stack included); nothing to license or
+  bundle. A non-system font later = her licensing call (R21's roadmap item).
+- **R50 — Journal-book binding RESOLVED (Q20):** an entry knows its journal book
+  **the same way any post knows its books — ordinary membership** (curated add, or
+  tag + promote-that-tag-to-a-book — her "book membership is a tag without making
+  it a whole separate tag"). Her chapter question answered: `reading_post` = which
+  book; `reading_post.section_id` = which CHAPTER within it (chapters optional for
+  journals). **The ONE-JOURNAL-POST-PER-DAY rule is a Fragments-bridge rule and is
+  UNTOUCHABLE** — the daily journal keeps it exactly; how other journal-like books
+  coexist with it on a given day is B3's design detail INSIDE that constraint.
+- **R51 — Her direct in-file edits recorded (kept, reconciled):** sitting 1's
+  anchor line now names **v2** as the best anchor; the grey-dark clause is removed
+  because **dark mode = a FULLY BLACK background** (her re-ruling — supersedes the
+  sittings-1/2 grey statements; every downstream carrier in this file updated to
+  match).
+
 ## Emerging direction (running synthesis — updated after sitting 2)
 
 - **Two voices, one structure:** the Terminal voice leads (her default); the Study
   voice (= the Phase 11 mockups' look) is the switchable second. Same IA, layout,
-  and gestures in both; voices carry tokens AND idioms (R1). Dark = thought-through
-  grey in both. Light designed first.
+  and gestures in both; voices carry tokens AND idioms (R1). Dark = a FULLY BLACK
+  background in both (sitting-6 re-ruling). Light designed first.
 - Home = the **list shelf** (terminal style, tags column) with the **bottom
   quick-entry bar** (blinking cursor; Enter → whole post; list above scrolls under a
-  max height). Sidebar: Shelf · Journal · Library · Pool · Tags · Canvas. Library =
-  all posts (timeline is one of its view modes).
+  max height). Sidebar, FINAL (sitting 6): **Shelf · Library · Pool · Blocks** —
+  Journal pinned on the shelf; tags hierarchical, surfaced, edited in context (no
+  dedicated tab); canvas a post view. Library = everything (timeline one of its
+  view modes); the tags column is an addable batch-tagging surface in Pool and
+  Library.
 - Books are real: ordered posts, **reorderable first-class chapters** (model options
   round owed to her), finishable (`reading.locked`'s face), boundable (`max_posts`
   face + a words-based option), smart books on the same shelf; **the reading-flow
@@ -597,15 +673,15 @@ Notion refs — saved to `sitting-refs/`; captures removed for publication):**
 15. ~~Ownership tags~~ — RULED NO sitting 5 (R36); membership chip instead.
 16. ~~Edit-home~~ — CONFIRMED sitting 5 (R35) + the multi-book indicator UI
     requirement.
-17. Pool's IA slot — the plan DRAFT proposes: a pinned Library filter ("No book"),
-    not a top-level word (the sidebar collapsed to Shelf · Library · Blocks after
-    R38–R40). Her ratify at plan review.
+17. ~~Pool's IA slot~~ — RULED sitting 6 (R44): TOP-LEVEL (the filter proposal
+    overruled). Sidebar final: Shelf · Library · Pool · Blocks.
 18. ~~⌘N~~ — RULED sitting 5 (R41): New Post.
-19. Tags-flat surface + Tags tab dropped (R39) — her confirm at plan review that
-    dormant-not-removed hierarchy is the right reading of "keep them that way."
-20. Journal-books binding model (which membership shape ties an entry to its
-    journal book; the per-book day rule) — an early-phase ask-her design item
-    (plan step B3).
+19. ~~Tags surface~~ — RE-RULED sitting 6 (R45): hierarchy stays SURFACED (given
+    its chance); no dedicated tab; edited in context.
+20. ~~Journal-books binding~~ — RESOLVED sitting 6 (R50): ordinary membership
+    (curated or tag→promoted book); the one-entry-per-day rule untouchable
+    (Fragments); daily-vs-other-books day interplay = B3 detail inside that
+    constraint.
 
 ---
 
@@ -647,8 +723,9 @@ Notion refs — saved to `sitting-refs/`; captures removed for publication):**
   rule (R17) governs every colored block.
 - **A voice = tokens + idioms** (R1): the Terminal voice's `›`/slashes/`~/`/cursor
   and the Study voice's sepia/paper/serif are load-bearing; no flattening into a
-  palette swap. Hold at exactly two voices (R12). Light designed first; dark =
-  thought-through grey (Gemini-class, never black).
+  palette swap. Hold at exactly two voices (R12). Light designed first; dark = a
+  FULLY BLACK background (author re-ruling, sitting 6 — supersedes the earlier
+  grey note).
 - **Margins are sacred** (R9). **Everything visible in an editing surface is
   editable** (R8/R23). **No per-block background colors except callouts** (R6).
 - No new third-party dependencies (design systems included) without the author.
@@ -685,8 +762,12 @@ automated half per the 12 plan's Step 5 wording.*
 - SmartQuerySpec gains `tagsAll` (AND-of-tags, R30) — JSON vocabulary only, no
   migration; old clients ignore unknown keys by the ratified v1 rule.
 - `06_phase13_lockstep.sql` (mirror tables + lockstep marker bump); **the client
-  refuses to sync until the deploy — the deploy is an author gate, and her
-  pending PHONE install folds into this event's every-client step.**
+  refuses to sync until the deploy — the deploy is an author gate that executes
+  at the PHASE END as one choreography: mirror → Mac install → phone install
+  (R47: she does the phone install-and-check after 13), all before any
+  new-schema use on the real store.** Build work rides the dev store meanwhile
+  (the A4 fence); the standing interim constraint (no lens/canvas/name writes on
+  the un-updated phone) simply continues until the event completes.
 *Tests: migration walks, cascade/tombstone pins, serializer completeness, the
 lockstep-refusal pin — the full Phase 11a A1 discipline.*
 
@@ -705,27 +786,29 @@ inverses where structural.*
 spacing) + IDIOM SLOTS (selection marker, path grammar, label voice, cursor,
 comment presentation); the two voices; the global settings (voice, seam
 visibility, editing indicator off/outline/background, inline-comments,
-follow-the-scroll). Light first; grey dark for both voices.
+follow-the-scroll). Light first; the fully-black dark for both voices (R51).
 
-**B2 — the sidebar + Shelf + Library:** sidebar collapses to **Shelf · Library ·
-Blocks** (R38–R40: Journal pinned INTO the shelf; Tags tab dropped — flat surface,
-hierarchy dormant (R39); Canvas demoted to a post view). The shelf: terminal LIST
+**B2 — the sidebar + Shelf + Library:** sidebar = **Shelf · Library · Pool ·
+Blocks** (R44 final: Pool top-level — random posts land there; Journal pinned
+INTO the shelf (R38); no Tags tab but tag HIERARCHY stays SURFACED and tags are
+edited in context (R45); Canvas a post view (R40)). The shelf: terminal LIST
 style with TAGS column (R4), pinning (R38), finish + word-target faces
 (`reading.locked` / `max_posts` / `word_target` finally visible), the **bottom
 quick-entry bar** (blinking cursor; Enter → whole post; list scrolls under a max
 height — R3); ⌘N = New Post (R41); **⌘K palette** (posts, books, commands —
 every buried capability typeable, R15). Library = EVERYTHING (books, posts,
-blocks; sortable, searchable; timeline as a view mode; **PROPOSED: "No book" as
-a pinned filter = the Pool**, open Q17 — her ratify).
+blocks; sortable, searchable; timeline as a view mode). **The tags column is an
+ADDABLE batch-tagging surface in Pool and Library (R46).**
 
 **B3 — books:** the book view with **real chapters** (reading_section rows,
 movable with drag handles + the Notion insertion bar — R19), drag-posts-in,
 promote-tag(s)-to-book with AND/OR (R30/R37 — the tag stays), the **multi-book
 membership indicator + duplicate-as-version door** (R35 — the editor states
-"also appears in N books"), journal books (**ask-her design item, Q20:** the
-entry↔journal-book binding + per-book day rule — resolved live, then built),
-the terminal **book navigator** (chapters/outline/settings; post-click opens in
-the current editor; no chapter view — R43), and the reading-flow view mode
+"also appears in N books"), the terminal **book navigator** (chapters/outline/settings; post-click opens in
+the current editor; no chapter view — R43), **journal books per R50** (binding =
+ordinary membership, curated or tag→promoted; the one-entry-per-day rule
+UNTOUCHABLE — the daily-vs-other-journal-books day interplay is this step's one
+design detail, resolved inside that constraint), and the reading-flow view mode
 (direction C) with finished books opening into it.
 
 ## Stage C — the editor surfaces
@@ -750,11 +833,13 @@ as the mobile-inheritable pattern.
 ## Milestone gates (every stage boundary)
 
 Full suites green at baseline+; the A0 numbers re-checked (no decoration
-regression); TEXTKIT2 §5 on the current point release; canary silent; **a taste
-checkpoint with the author on the RUNNING app over the design corpus** — her
-reactions recorded in this file as further sitting entries; a cold review over
-the accumulated diff per the ladder rules. `/Applications` refresh after each
-Mac-app milestone.
+regression); TEXTKIT2 §5 on the current point release; canary silent; a cold
+review over the accumulated diff per the ladder rules. **The TASTE CHECKPOINT is
+ONE, AT THE END (R48 — author re-ruling, supersedes per-milestone taste gates):**
+she judges the WHOLE assembled thing on the running app over the design corpus —
+"i won't be able to tell if i like the structure if it all still looks bad" —
+her reactions become further sitting entries here, and a fix round follows
+before the phase closes. `/Applications` refresh after each Mac-app milestone.
 
 ## Closeout ritual (adapted)
 
