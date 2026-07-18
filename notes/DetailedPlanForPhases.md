@@ -34,8 +34,9 @@ read-tier per-view cost at scale; keystroke headroom under decorations —
 the 12 plan's "answer 4"), a seeded DESIGN CORPUS in the dev store
 (design the library/timeline/book surfaces against volume; A4-fenced),
 and the ~30-min backup restore drill. **Comments join this phase:** the
-schema is ONE SyncSpec §12 lockstep event with its own commit; the
-author's pending phone install folds into that event's every-client step;
+schema is ONE SyncSpec §12 lockstep event with its own commit (deploy
+mirror→Mac when ready, pre-authorized — the author removed the phone app
+2026-07-18, so no client waits and the 11a interim constraint dissolves);
 her follow-up round firmed the shape — an own TABLE, tombstoned, with
 deleted comments visible and resurrectable (never skimpy). **The
 follow-up round also re-centered NOTEBOOKS into the sittings' design

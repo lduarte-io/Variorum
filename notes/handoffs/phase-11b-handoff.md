@@ -14,10 +14,12 @@ self-contained: a fresh session can answer your questions from it alone.
 > naturally into 13's author-attended design sittings. **Item 5 is
 > superseded: Phase 12 is deferred (no real use yet = no evidence to
 > harden against) and Phase 13 runs next** — the master plan pointer
-> carries the record. The phone install (item 3) is expected to fold
-> into 13's block-comments lockstep event (one install covers it and
-> the 11a constraint); until it lands, the no-lens/canvas/block-names
-> rule stands.
+> carries the record. ~~The phone install (item 3) is expected to fold
+> into 13's block-comments lockstep event~~ — **superseded 2026-07-18:
+> the author REMOVED the app from her phone (no content on it), so no
+> un-updated client exists, the no-lens/canvas/block-names rule
+> dissolves, and the phone simply reinstalls onto current schema
+> whenever she next wants it (Phase 15's orbit).**
 
 1. **☐ Relaunch from `/Applications`.** The coordinator refreshes
    `/Applications/Variorum.app` to the post-ladder Release build if the

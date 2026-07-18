@@ -612,6 +612,64 @@ recorded in R51):**
   sittings-1/2 grey statements; every downstream carrier in this file updated to
   match).
 
+### Sitting 7 (2026-07-18) — the kickoff round: tags' home, the deploy un-gated, Fable staffing, full autonomy
+
+**Her message VERBATIM (standing instruction):**
+
+> am i going to be able to add new tags and adjust tag hierachy in a place in
+> settings then? if it'sn ot in the sidebar it still needs o be somewhere. also, just
+> do the schema deploy. i removed the app from my phone and don't have it on my phone
+> right now and i have no real content in it, so i just want to do the schema deploy.
+> the phone consideration is still majorly secondary at this point - i want the real
+> thing on my mac, not the dev store, more than i want to verify the phone before
+> that happens. also, it'll be fable staffing. and i think that everything is fine to
+> get going. can phase 13 get to completion without me at this point? unless a new
+> question appears? even then, maybe questions should jsut be noted and the execution
+> should continue because honestly, we've spent so long ironing all of this out that
+> i'm hoping to get a phase 13 that can just build so i can assess the app in a state
+> that is supposed to be completely useable and interpretable, so i can see what is
+> still confusing. i also want to note that i LOVED the terminal view of the mockup
+> too, and I also did love the book view. so options 2 & 3 of the mockup you built
+> me, with the original v2 mockup being more of the editing surface of the book view
+> that was option 3 of the mockup that you built me. just make sure that the session
+> does know about that mockup / terminal thing too because it was useful.
+
+**Rulings:**
+
+- **R52 — Tag management gets a real home: SETTINGS** ("if it's not in the sidebar
+  it still needs to be somewhere") — create tags, adjust hierarchy, rename; also
+  ⌘K-reachable; in-context tag editing everywhere (R45/R46) stands beside it.
+- **R53 — The schema deploy is AUTHORIZED and UN-GATED (supersedes R47's
+  end-of-phase choreography):** she REMOVED the app from her phone (no content, no
+  un-updated client exists) — the 11a no-lens/canvas/name-writes interim constraint
+  DISSOLVES, and the lockstep is **mirror → Mac only**. Deploy when A1's artifacts
+  land, via the stored PAT arrangement (the 9c precedent; her words: "just do the
+  schema deploy"). Accepted consequence: once the marker bumps, the pre-13
+  installed Mac app visibly refuses to sync until the phase's build replaces it —
+  fine, she isn't using it. The phone is "majorly secondary": it reinstalls onto
+  current schema whenever she next wants it. Her priority: **the real thing on her
+  Mac** — the phase ends with the finished app on `/Applications` against the real
+  store.
+- **R54 — Staffing: FABLE** — coordinator Opus · implementer Fable · cold reviewer
+  Fable, the Phase 10/11 same-model shape; the Sync/ rider stands.
+- **R55 — FULLY AUTONOMOUS execution:** the phase runs to completion WITHOUT her.
+  New questions do NOT stop the build — "questions should just be noted and the
+  execution should continue": every ambiguity gets the PROVISIONAL treatment
+  (implement the most spec/sitting-defensible reading, record it here + QUESTIONS,
+  keep going), INCLUDING product-flavored ones this phase (her explicit widening of
+  the standing PROVISIONAL rule, for this phase only). Her one planned touchpoint
+  is the END taste checkpoint (R48) — she wants to assess "an app that is supposed
+  to be completely useable and interpretable, so i can see what is still
+  confusing." CLAUDE.md's author-only calls (invariant violations, new
+  dependencies, destroying her data) remain hard stops — none should arise.
+- **R56 — The anchor set, final:** she LOVED round-1 **direction B (the Terminal
+  Study)** and **direction C (the Reading Room)** — "options 2 & 3 of the mockup
+  you built me" — with **mockups-v2 as the EDITING surface of C's book view**. The
+  implementing session must treat `Spikes/Phase13Mockups/` (rounds 1–2) as canon
+  anchors BESIDE `Spikes/Phase11Mockups/mockups-v2.html`: B for the terminal
+  voice, C for the reading/book view, v2 for the active editing surface, round 2
+  for the merged rules.
+
 ## Emerging direction (running synthesis — updated after sitting 2)
 
 - **Two voices, one structure:** the Terminal voice leads (her default); the Study
@@ -682,6 +740,8 @@ recorded in R51):**
     (curated or tag→promoted book); the one-entry-per-day rule untouchable
     (Fragments); daily-vs-other-books day interplay = B3 detail inside that
     constraint.
+21. ~~Tag management's home~~ — RULED sitting 7 (R52): Settings (+ ⌘K), with
+    in-context editing everywhere.
 
 ---
 
@@ -706,10 +766,17 @@ recorded in R51):**
 > an ordinary cast; the Sync/ rider stands regardless). Environment traps: piped
 > xcodebuild masks exit codes; a live app instance blocks the Mac test runner
 > (NEVER kill her running Variorum.app); wrong `-only-testing:` names report
-> vacuous success; SwiftUI `.task` doesn't fire under the test host. **Hard
-> author gates:** the lockstep deploy (Step A4); every per-milestone taste
-> checkpoint (she reacts to RUNNING increments, not screenshots, wherever
-> possible); anything marked ask-her.
+> vacuous success; SwiftUI `.task` doesn't fire under the test host.
+> **Staffing (author, 2026-07-18 — R54): coordinator Opus · implementer FABLE ·
+> cold reviewer FABLE, the 10/11 same-model shape; the Sync/ rider stands.**
+> **Execution is FULLY AUTONOMOUS (R55): no mid-phase author questions — every
+> ambiguity, product-flavored included, gets PROVISIONAL-and-continue (implement
+> the most defensible reading, record it, keep building); her one planned
+> touchpoint is the END taste checkpoint (R48). The lockstep deploy is
+> pre-authorized (R53) via the stored PAT arrangement.** The anchor set (R56):
+> `Phase13Mockups` direction B = the terminal voice, direction C = the
+> reading/book view, `mockups-v2.html` = the active editing surface, round 2 =
+> the merged rules.
 
 ## Ground rules (binding)
 
@@ -761,13 +828,14 @@ automated half per the 12 plan's Step 5 wording.*
   bounded thread; extendable at the boundary).
 - SmartQuerySpec gains `tagsAll` (AND-of-tags, R30) — JSON vocabulary only, no
   migration; old clients ignore unknown keys by the ratified v1 rule.
-- `06_phase13_lockstep.sql` (mirror tables + lockstep marker bump); **the client
-  refuses to sync until the deploy — the deploy is an author gate that executes
-  at the PHASE END as one choreography: mirror → Mac install → phone install
-  (R47: she does the phone install-and-check after 13), all before any
-  new-schema use on the real store.** Build work rides the dev store meanwhile
-  (the A4 fence); the standing interim constraint (no lens/canvas/name writes on
-  the un-updated phone) simply continues until the event completes.
+- `06_phase13_lockstep.sql` (mirror tables + lockstep marker bump); **deploy
+  AUTHORIZED and UN-GATED (R53, supersedes R47):** the phone app is REMOVED (no
+  un-updated client exists; the 11a interim constraint dissolves) — the lockstep
+  is **mirror → Mac only**; deploy when these artifacts land, via the stored PAT
+  arrangement (the 9c precedent; her sitting-7 authorization on record).
+  Accepted consequence: the pre-13 installed Mac app visibly refuses to sync
+  from the marker bump until the phase's build replaces it. The phone reinstalls
+  onto current schema whenever she next wants it (Phase 15's orbit).
 *Tests: migration walks, cascade/tombstone pins, serializer completeness, the
 lockstep-refusal pin — the full Phase 11a A1 discipline.*
 
@@ -798,7 +866,9 @@ quick-entry bar** (blinking cursor; Enter → whole post; list scrolls under a m
 height — R3); ⌘N = New Post (R41); **⌘K palette** (posts, books, commands —
 every buried capability typeable, R15). Library = EVERYTHING (books, posts,
 blocks; sortable, searchable; timeline as a view mode). **The tags column is an
-ADDABLE batch-tagging surface in Pool and Library (R46).**
+ADDABLE batch-tagging surface in Pool and Library (R46).** **Tag management gets
+its real home in SETTINGS (R52): create tags, adjust hierarchy, rename —
+⌘K-reachable; in-context editing everywhere stands.**
 
 **B3 — books:** the book view with **real chapters** (reading_section rows,
 movable with drag handles + the Notion insertion bar — R19), drag-posts-in,
