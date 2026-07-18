@@ -9,8 +9,17 @@
 //  styles as a user SETTING (stack / carousel / margin grid / slot split;
 //  whichever is set is what expand-all-fans opens document-wide). EVERY
 //  pane is an editing surface; the ONE live editor migrates on click;
-//  choosing stays the explicit ✓. Functional and unstyled (Phase 13 owns
-//  beauty).
+//  choosing stays the explicit ✓.
+//
+//  Phase 13, Stage C2 — the v2-canon restyle (R12: mockups-v2 is CANON for
+//  the active view; anchor beside it: Phase13Mockups/round-2 §3): take
+//  cards on VoiceTokens (card paper, takeLine border, the 3pt chosen bar +
+//  "✓ chosen" mark, the live ring); the changing-block WASH behind its
+//  default-on toggle (R13/R22); the R24 short-block one-card-high
+//  HORIZONTAL strip in the margin grid; follow-the-scroll as a
+//  takes-viewing option in all modes (R25); expand-all only where
+//  meaningful; the ＋new-take doors (v2's dashed footer). R9: the article
+//  holds the 68ch-class measure, never the window edge.
 //
 
 import SwiftUI
@@ -23,12 +32,32 @@ struct TakesBoardView: View {
     /// The carousel's EXPLICIT beneath-count control (1–4, user-chosen for
     /// their screen width — never auto-only; the spike's round-2 call).
     @AppStorage("takesBeneathCount") private var beneathCount = 2
-    /// The margin grid's seamless-reading toggle (highlight + grid off).
-    @State private var seamlessReading = false
+    /// R13/R22 — the changing-block WASH marks the block whose takes are
+    /// open, default ON, toggleable ("Mark the changing block" — v2's
+    /// letter). Folds the old marginGrid-only "Seamless" toggle: the wash
+    /// is now the ONE changing-block marker across every in-flow style
+    /// (recorded as a Stage C build-time call).
+    @AppStorage("markChangingBlock") private var markChangingBlock = true
     /// Discrete paging offsets per block (whole cards, never halfway).
     @State private var pageOffsets: [String: Int] = [:]
     @State private var lensNamePrompt: LensNamePrompt?
     @State private var diffPresentation: DiffPresentation?
+    /// Phase 13 (C2): the voice reaches the board — optional environment,
+    /// terminal fallback (test hosts lack it — the established pattern).
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    private var themeSettings: Queries.ThemeSettings {
+        themeStore?.settings ?? Queries.ThemeSettings()
+    }
+
+    /// The margin grid's reserved rail width — fixed so the article column
+    /// stays a straight measure whether or not a row blooms (R9's calm).
+    private let marginRailWidth: CGFloat = 340
 
     struct DiffPresentation: Identifiable {
         let leftTitle: String
@@ -74,7 +103,12 @@ struct TakesBoardView: View {
             }
             content
         }
+        .background(tokens.surface)
         .task { await model.start() }
+        .onAppear { model.followTheScroll = themeSettings.followTheScroll }
+        .onChange(of: themeSettings.followTheScroll) { _, new in
+            model.followTheScroll = new
+        }
         .onDisappear { model.teardown() }
         .sheet(item: $diffPresentation) { diff in
             DiffView(
@@ -113,15 +147,20 @@ struct TakesBoardView: View {
                     .fixedSize()
                     .help("How many takes show side by side (your screen width, your call)")
             }
-            if model.projection.fanStyle == .marginGrid {
-                Toggle("Seamless", isOn: $seamlessReading)
+            if model.columns.count <= 1 && model.projection.fanStyle != .slotSplit {
+                Toggle("Mark changing block", isOn: $markChangingBlock)
                     .toggleStyle(.checkbox)
-                    .help("Read the text plainly — no highlight, no grid")
+                    .help("Wash the block whose takes are open (R13 — the transient marker)")
             }
 
-            Button("Expand All Fans") { model.expandAllFans() }
-            Button("Close All") { model.closeAllFans() }
-                .disabled(model.expandedBlocks.isEmpty)
+            if model.offersExpandAll {
+                // R25's agreed half: expand-all only where it means
+                // something — columns/slot-split ARE whole-post fan
+                // presentations already.
+                Button("Expand All Fans") { model.expandAllFans() }
+                Button("Close All") { model.closeAllFans() }
+                    .disabled(model.expandedBlocks.isEmpty)
+            }
 
             Spacer()
 
@@ -168,46 +207,97 @@ struct TakesBoardView: View {
     }
 
     /// Composition B: ONE article column; a bloomed slot fans out in place,
-    /// in the set style; the rest of the article stays normal, full width.
+    /// in the set style; the rest of the article stays normal. The column
+    /// holds the 68ch-class measure, centered, with real gutters (R9).
     private var singleColumnArticle: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 6) {
                 ForEach(model.projection.slots, id: \.placementID) { slot in
                     articleRow(slot: slot, column: model.columns[0])
+                        .onAppear { model.rowAppeared(slot.blockID) }
+                        .onDisappear { model.rowDisappeared(slot.blockID) }
                 }
             }
-            .padding(12)
+            .frame(maxWidth: articleMeasure, alignment: .leading)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 18)
         }
+    }
+
+    /// R9's measure: 680pt of prose; the margin-grid composition adds its
+    /// reserved rail beside it (v2's rail-row — the article column stays
+    /// straight whether or not a row blooms).
+    private var articleMeasure: CGFloat {
+        model.projection.fanStyle == .marginGrid
+            ? 680 + 16 + marginRailWidth
+            : 680
     }
 
     @ViewBuilder
     private func articleRow(slot: Queries.RenderedBlock, column: TakesColumn) -> some View {
-        let bloomed = model.expandedBlocks.contains(slot.blockID)
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                if slot.hasFan {
-                    Button("⑂\(slot.activeVariantCount)") { model.toggleExpanded(slot.blockID) }
-                        .controlSize(.mini)
-                        .help(bloomed ? "Close this fan" : "Open this fan (\(styleName))")
+        let bloomed = model.isBloomed(slot)
+        if model.projection.fanStyle == .marginGrid {
+            // v2's rail-row: article left at the fixed measure, the takes
+            // rail right (empty until the block blooms — R24 shapes it).
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    fanToggleRow(slot: slot, bloomed: bloomed)
+                    washedCell(slot: slot, column: column, washed: bloomed)
                 }
-                Spacer()
+                .frame(maxWidth: 680, alignment: .topLeading)
+                Group {
+                    if bloomed {
+                        marginRail(slot: slot, column: column)
+                    } else {
+                        Color.clear.frame(height: 1)
+                    }
+                }
+                .frame(width: marginRailWidth, alignment: .topLeading)
             }
-            if bloomed && model.projection.fanStyle == .slotSplit {
-                // The slot itself splits — the in-flow text is one of the
-                // split's panes, not a separate copy.
-                slotSplitBloom(slot: slot, column: column)
-            } else if bloomed && model.projection.fanStyle == .marginGrid {
-                marginGridBloom(slot: slot, column: column)
-            } else {
-                cell(slot: slot, column: column, tinted: false)
-                if bloomed && model.projection.fanStyle == .stack {
-                    stackBloom(slot: slot, column: column)
-                }
-                if bloomed && model.projection.fanStyle == .carousel {
-                    carouselBloom(slot: slot, column: column)
+        } else {
+            VStack(alignment: .leading, spacing: 4) {
+                fanToggleRow(slot: slot, bloomed: bloomed)
+                if bloomed && model.projection.fanStyle == .slotSplit {
+                    // The slot itself splits — the in-flow text is one of
+                    // the split's panes, not a separate copy (no wash: the
+                    // split replaces the flow cell).
+                    slotSplitBloom(slot: slot, column: column)
+                } else {
+                    washedCell(slot: slot, column: column, washed: bloomed)
+                    if bloomed && model.projection.fanStyle == .stack {
+                        stackBloom(slot: slot, column: column)
+                    }
+                    if bloomed && model.projection.fanStyle == .carousel {
+                        carouselBloom(slot: slot, column: column)
+                    }
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func fanToggleRow(slot: Queries.RenderedBlock, bloomed: Bool) -> some View {
+        if slot.hasFan {
+            HStack {
+                Button("⑂\(slot.activeVariantCount)") { model.toggleExpanded(slot.blockID) }
+                    .controlSize(.mini)
+                    .tint(tokens.accent)
+                    .help(bloomed ? "Close this fan" : "Open this fan (\(styleName))")
+                Spacer()
+            }
+        }
+    }
+
+    /// The in-flow article cell, wearing the changing-block WASH while its
+    /// takes are open (R13 — behind the default-on toggle).
+    private func washedCell(
+        slot: Queries.RenderedBlock, column: TakesColumn, washed: Bool
+    ) -> some View {
+        cell(slot: slot, column: column, tinted: false)
+            .padding(2)
+            .background(washed && markChangingBlock ? tokens.wash : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 
     /// Composition A, LOCKED: registered comparison rows — block starts
@@ -225,7 +315,7 @@ struct TakesBoardView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     cell(slot: slot, column: column,
                                          tinted: i < tints.count ? tints[i] : false)
-                                    if model.expandedBlocks.contains(slot.blockID) {
+                                    if model.isBloomed(slot) {
                                         inCellBloom(slot: slot, column: column)
                                     }
                                 }
@@ -233,6 +323,8 @@ struct TakesBoardView: View {
                             }
                         }
                     }
+                    .onAppear { model.rowAppeared(slot.blockID) }
+                    .onDisappear { model.rowDisappeared(slot.blockID) }
                 }
             }
             .padding(12)
@@ -249,6 +341,8 @@ struct TakesBoardView: View {
                         LazyVStack(alignment: .leading, spacing: 6) {
                             ForEach(model.projection.slots, id: \.placementID) { slot in
                                 cell(slot: slot, column: column, tinted: false)
+                                    .onAppear { model.rowAppeared(slot.blockID) }
+                                    .onDisappear { model.rowDisappeared(slot.blockID) }
                             }
                         }
                         .padding(6)
@@ -322,15 +416,18 @@ struct TakesBoardView: View {
             TakePaneView(
                 text: resolved.text,
                 isLive: model.focusedPane == key && !model.projection.sealed,
+                tokens: tokens,
                 onFocusRequest: { model.focus(key) },
                 onEdit: { model.paneEdited(variantID: resolved.variantID, newText: $0) })
-                .background(tinted ? Color.yellow.opacity(0.15) : Color.clear)
+                // Sameness divergence tints in the voice's accent (was the
+                // unstyled yellow — the Stage C2 token swap).
+                .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
                 .contextMenu {
                     cellMenu(slot: slot, column: column, resolved: resolved)
                 }
         } else {
             Text("· · ·")  // a gap slot renders a gap, never crashes
-                .foregroundStyle(.secondary)
+                .foregroundStyle(tokens.muted)
         }
     }
 
@@ -379,17 +476,20 @@ struct TakesBoardView: View {
     }
 
     /// STACK: takes stacked under the block, each with a quick
-    /// expand/collapse (round 2's addition).
+    /// expand/collapse (round 2's addition); v2's dashed growth doors
+    /// close the stack.
     private func stackBloom(slot: Queries.RenderedBlock, column: TakesColumn) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(model.projection.fans[slot.blockID] ?? [], id: \.id) { take in
                 CollapsibleTakeCard(
                     take: take, isChosen: take.id == slot.variantID,
                     isLive: paneKeyIsLive(column: column, slot: slot, take: take),
+                    tokens: tokens,
                     onFocus: { focusPane(column: column, slot: slot, take: take) },
                     onEdit: { model.paneEdited(variantID: take.id, newText: $0) },
                     onChoose: { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } })
             }
+            newTakeDoors(slot: slot)
         }
         .padding(.leading, 24)
     }
@@ -411,16 +511,30 @@ struct TakesBoardView: View {
         return pagedTakesRow(takes: takes, slot: slot, column: column, pageKey: slot.blockID)
     }
 
-    /// MARGIN GRID: the article text keeps flowing (highlighted while the
-    /// grid is open); the takes overflow RIGHTWARD in a ~3-tall grid with
-    /// horizontal scroll; the seamless toggle reads plainly.
-    private func marginGridBloom(slot: Queries.RenderedBlock, column: TakesColumn) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            cell(slot: slot, column: column, tinted: !seamlessReading)
-                .frame(maxWidth: .infinity)
-            if !seamlessReading {
+    /// MARGIN GRID's rail (R24, her design): a SHORT fanned block's cards
+    /// render as a ONE-CARD-HIGH strip scrolling HORIZONTALLY — the row
+    /// grows vertically to the card even when the block is a sentence;
+    /// LONGER blocks keep the ~3-tall grid growing rightward. Both end in
+    /// the growth doors.
+    private func marginRail(slot: Queries.RenderedBlock, column: TakesColumn) -> some View {
+        let takes = model.projection.fans[slot.blockID] ?? []
+        return VStack(alignment: .leading, spacing: 4) {
+            Text("takes · \(takes.count)")
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+            if TakesViewModel.usesHorizontalStrip(text: slot.text) {
                 ScrollView(.horizontal) {
-                    let takes = model.projection.fans[slot.blockID] ?? []
+                    HStack(alignment: .top, spacing: 6) {
+                        ForEach(takes, id: \.id) { take in
+                            takeMiniPane(take: take, slot: slot, column: column)
+                                .frame(width: 220, height: 110, alignment: .topLeading)
+                                .clipped()
+                        }
+                        newTakeDoors(slot: slot)
+                    }
+                }
+            } else {
+                ScrollView(.horizontal) {
                     let columnsOfThree = stride(from: 0, to: takes.count, by: 3).map {
                         Array(takes[$0..<min($0 + 3, takes.count)])
                     }
@@ -433,9 +547,9 @@ struct TakesBoardView: View {
                             }
                             .frame(width: 220)
                         }
+                        newTakeDoors(slot: slot)
                     }
                 }
-                .frame(maxWidth: 460)
             }
         }
     }
@@ -459,8 +573,8 @@ struct TakesBoardView: View {
                     Button("◀") { pageOffsets[pageKey] = max(offset - 1, 0) }
                         .disabled(offset == 0)
                     Text("\(offset + 1)–\(min(offset + beneathCount, takes.count)) of \(takes.count)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
                     Button("▶") {
                         pageOffsets[pageKey] = min(offset + 1, takes.count - beneathCount)
                     }
@@ -468,33 +582,66 @@ struct TakesBoardView: View {
                 }
                 .controlSize(.mini)
             }
+            newTakeDoors(slot: slot)
         }
     }
 
+    /// v2's dashed footer — the fan-growth doors (R23: takes are minted
+    /// where takes are seen). Under a seal the ops refuse and the refusal
+    /// speaks (the 9d fire-and-speak posture).
+    private func newTakeDoors(slot: Queries.RenderedBlock) -> some View {
+        HStack(spacing: 8) {
+            Button("＋ new take (branch)") {
+                guard let from = slot.variantID else { return }
+                Task { await model.branchTake(blockID: slot.blockID, from: from) }
+            }
+            .disabled(slot.variantID == nil)
+            Text("·").foregroundStyle(tokens.faint)
+            Button("＋ blank take") {
+                Task { await model.newBlankTake(blockID: slot.blockID) }
+            }
+        }
+        .buttonStyle(.plain)
+        .font(tokens.small)
+        .foregroundStyle(tokens.muted)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+        .fixedSize()
+    }
+
+
     /// A take's pane inside a bloom: editable on click like every pane,
-    /// with the explicit ✓ beside it.
+    /// with the explicit ✓ beside it — on the v2-canon card (card paper,
+    /// takeLine border, the 3pt chosen bar + "✓ chosen").
     private func takeMiniPane(
         take: Variant, slot: Queries.RenderedBlock, column: TakesColumn
     ) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 4) {
-                if let label = take.label {
-                    Text(label).font(.caption2).foregroundStyle(.secondary)
+        let isChosen = take.id == slot.variantID
+        return TakeCardFrame(isChosen: isChosen, tokens: tokens) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    if let label = take.label {
+                        Text(label).font(tokens.small).foregroundStyle(tokens.muted)
+                    }
+                    if isChosen {
+                        Text("✓ chosen").font(tokens.small).foregroundStyle(tokens.chosen)
+                    }
+                    Spacer()
+                    Button("✓") { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } }
+                        .controlSize(.mini)
+                        .disabled(isChosen)
+                        .help("Choose this take — the post shows it (everywhere)")
                 }
-                if take.id == slot.variantID {
-                    Text("chosen").font(.caption2).foregroundStyle(.blue)
-                }
-                Spacer()
-                Button("✓") { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } }
-                    .controlSize(.mini)
-                    .disabled(take.id == slot.variantID)
-                    .help("Choose this take — the post shows it (everywhere)")
+                TakePaneView(
+                    text: liveText(take),
+                    isLive: paneKeyIsLive(column: column, slot: slot, take: take),
+                    tokens: tokens,
+                    onFocusRequest: { focusPane(column: column, slot: slot, take: take) },
+                    onEdit: { model.paneEdited(variantID: take.id, newText: $0) })
             }
-            TakePaneView(
-                text: liveText(take),
-                isLive: paneKeyIsLive(column: column, slot: slot, take: take),
-                onFocusRequest: { focusPane(column: column, slot: slot, take: take) },
-                onEdit: { model.paneEdited(variantID: take.id, newText: $0) })
         }
     }
 
@@ -550,44 +697,70 @@ struct TakesBoardView: View {
     }
 }
 
+// MARK: - The v2-canon card frame (Stage C2's grammar: card paper +
+// takeLine border + the 3pt chosen leading bar)
+
+struct TakeCardFrame<Content: View>: View {
+    let isChosen: Bool
+    let tokens: VoiceTokens
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            (isChosen ? tokens.chosen : Color.clear)
+                .frame(width: 3)
+            content()
+                .padding(.vertical, 5)
+                .padding(.horizontal, 7)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .background(tokens.card)
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.takeLine, lineWidth: 1))
+    }
+}
+
 // MARK: - The collapsible stack card (round 2: quick expand/collapse)
 
 private struct CollapsibleTakeCard: View {
     let take: Variant
     let isChosen: Bool
     let isLive: Bool
+    let tokens: VoiceTokens
     let onFocus: () -> Void
     let onEdit: (String) -> Void
     let onChoose: () -> Void
     @State private var collapsed = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 4) {
-                Button(collapsed ? "▸" : "▾") { collapsed.toggle() }
-                    .controlSize(.mini)
-                    .buttonStyle(.plain)
-                if let label = take.label {
-                    Text(label).font(.caption2).foregroundStyle(.secondary)
+        TakeCardFrame(isChosen: isChosen, tokens: tokens) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Button(collapsed ? "▸" : "▾") { collapsed.toggle() }
+                        .controlSize(.mini)
+                        .buttonStyle(.plain)
+                    if let label = take.label {
+                        Text(label).font(tokens.small).foregroundStyle(tokens.muted)
+                    }
+                    if isChosen {
+                        Text("✓ chosen").font(tokens.small).foregroundStyle(tokens.chosen)
+                    }
+                    Spacer()
+                    Button("✓") { onChoose() }
+                        .controlSize(.mini)
+                        .disabled(isChosen)
                 }
-                if isChosen {
-                    Text("chosen").font(.caption2).foregroundStyle(.blue)
+                if collapsed {
+                    Text(take.workingText.split(separator: "\n").first.map(String.init) ?? "(empty)")
+                        .font(.callout)
+                        .lineLimit(1)
+                        .foregroundStyle(tokens.muted)
+                        .onTapGesture { collapsed = false }
+                } else {
+                    TakePaneView(
+                        text: take.workingText, isLive: isLive, tokens: tokens,
+                        onFocusRequest: onFocus, onEdit: onEdit)
                 }
-                Spacer()
-                Button("✓") { onChoose() }
-                    .controlSize(.mini)
-                    .disabled(isChosen)
-            }
-            if collapsed {
-                Text(take.workingText.split(separator: "\n").first.map(String.init) ?? "(empty)")
-                    .font(.callout)
-                    .lineLimit(1)
-                    .foregroundStyle(.secondary)
-                    .onTapGesture { collapsed = false }
-            } else {
-                TakePaneView(
-                    text: take.workingText, isLive: isLive,
-                    onFocusRequest: onFocus, onEdit: onEdit)
             }
         }
     }

@@ -18,6 +18,13 @@ import VariorumCore
 struct TakePaneView: View {
     let text: String
     let isLive: Bool
+    /// Stage C2 (the v2-canon restyle): nil = the pre-13 look (the
+    /// BlockTOC/tutorial call sites compile unchanged); set = voice-token
+    /// styling — a TRANSPARENT surface (the wrapping card or article
+    /// provides the paper), ink from the voice, and the LIVE ring in
+    /// tokens.ring (R22's rule: among many editable surfaces, the ring is
+    /// how you find the one live editor).
+    var tokens: VoiceTokens? = nil
     /// A plain click on a read pane — the container migrates the live
     /// editor here.
     var onFocusRequest: (() -> Void)?
@@ -29,12 +36,17 @@ struct TakePaneView: View {
     var body: some View {
         TakePaneSurface(
             text: text, isLive: isLive, height: $height,
+            ink: tokens.map { NSColor($0.ink) },
             onFocusRequest: onFocusRequest, onEdit: onEdit)
             .frame(minHeight: height)
             .overlay(
-                RoundedRectangle(cornerRadius: 3)
-                    .stroke(isLive ? Color.accentColor : Color.gray.opacity(0.25),
-                            lineWidth: isLive ? 1.5 : 0.5))
+                RoundedRectangle(cornerRadius: tokens == nil ? 3 : 6)
+                    .stroke(strokeColor, lineWidth: isLive ? 1.5 : 0.5))
+    }
+
+    private var strokeColor: Color {
+        if let tokens { return isLive ? tokens.ring : .clear }
+        return isLive ? Color.accentColor : Color.gray.opacity(0.25)
     }
 }
 
@@ -42,6 +54,9 @@ private struct TakePaneSurface: NSViewRepresentable {
     let text: String
     let isLive: Bool
     @Binding var height: CGFloat
+    /// Voice styling (Stage C2): non-nil ⇒ transparent background (the
+    /// card/article behind provides the paper) + this ink.
+    var ink: NSColor?
     var onFocusRequest: (() -> Void)?
     var onEdit: ((String) -> Void)?
 
@@ -56,6 +71,7 @@ private struct TakePaneSurface: NSViewRepresentable {
             coordinator?.onFocusRequest?()
         }
         context.coordinator.onFocusRequest = onFocusRequest
+        applyStyle(to: view)
         view.string = text
         view.isEditable = isLive
         context.coordinator.remeasure()
@@ -66,12 +82,39 @@ private struct TakePaneSurface: NSViewRepresentable {
         context.coordinator.onEdit = onEdit
         context.coordinator.onFocusRequest = onFocusRequest
         view.isEditable = isLive
+        applyStyle(to: view)
+        // A voice switch changes the ONE global typography (C1's
+        // EditorTypography); live-adopt it so open panes re-font without
+        // reconstruction (an ordinary storage write, never §3 attributes).
+        if view.font != EditorDocument.baseFont {
+            view.font = EditorDocument.baseFont
+            view.defaultParagraphStyle = EditorDocument.baseParagraphStyle
+            view.typingAttributes = EditorDocument.baseAttributes
+            if let storage = view.textStorage, storage.length > 0 {
+                storage.beginEditing()
+                storage.addAttributes(
+                    EditorDocument.baseAttributes,
+                    range: NSRange(location: 0, length: storage.length))
+                storage.endEditing()
+            }
+            context.coordinator.remeasure()
+        }
         // The buffer is authoritative while live: a projection may lag the
         // keystroke; never clobber the surface under the caret. Read panes
         // adopt any change.
         if !isLive, view.string != text {
             view.string = text
             context.coordinator.remeasure()
+        }
+    }
+
+    private func applyStyle(to view: TakeTextView) {
+        if let ink {
+            view.drawsBackground = false
+            view.textColor = ink
+            view.insertionPointColor = ink
+        } else {
+            view.drawsBackground = true
         }
     }
 

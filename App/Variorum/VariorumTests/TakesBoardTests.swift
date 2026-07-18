@@ -499,3 +499,134 @@ struct TakesBufferConvergenceTests {
         }
     }
 }
+
+// MARK: - Phase 13, Stage C2 — the takes presentations' pins: the R24
+// strip rule (pure threshold), R25 follow-the-scroll blooming (visibility
+// alone blooms fanned rows, refcounted across columns, never a single-take
+// row), expand-all gating (only the single-column non-slot-split article),
+// and the fan-growth doors (branch/blank land through ops; chosen never
+// moves — I3 rides).
+
+@Suite("Takes presentations (Phase 13, C2)")
+@MainActor
+struct TakesPresentationTests {
+    /// R24's short/long rule is a pure character threshold — short blocks
+    /// take the one-card-high horizontal strip; longer blocks keep the
+    /// vertical grid; a gap slot (nil text) reads short.
+    @Test func theStripRuleIsAPureCharacterThreshold() {
+        #expect(TakesViewModel.usesHorizontalStrip(text: "One short sentence."))
+        #expect(TakesViewModel.usesHorizontalStrip(text: nil))
+        #expect(TakesViewModel.usesHorizontalStrip(text: ""))
+        let long = String(repeating: "prose ", count: 60)  // 360 chars
+        #expect(!TakesViewModel.usesHorizontalStrip(text: long))
+        // The threshold's edge: 199 strips, 200 grids.
+        #expect(TakesViewModel.usesHorizontalStrip(text: String(repeating: "a", count: 199)))
+        #expect(!TakesViewModel.usesHorizontalStrip(text: String(repeating: "a", count: 200)))
+    }
+
+    /// R25: with follow-the-scroll ON, a fanned row near the viewport
+    /// blooms WITHOUT any expansion; visibility is refcounted (multi-column
+    /// compositions repeat rows); single-take rows never bloom; the option
+    /// off = visibility means nothing; explicit expansion works regardless.
+    @Test func followTheScrollBloomsVisibleFannedRowsWithoutExpansion() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID, defaults: freshDefaults("follow"))
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            let fannedSlot = model.projection.slots.first { $0.blockID == world.blocks[0] }!
+            let singleSlot = model.projection.slots.first { $0.blockID == world.blocks[2] }!
+
+            // OFF: visibility alone never blooms.
+            model.rowAppeared(world.blocks[0])
+            #expect(!model.isBloomed(fannedSlot))
+
+            model.followTheScroll = true
+            #expect(model.isBloomed(fannedSlot),
+                    "a visible fanned row blooms under follow-the-scroll")
+            #expect(model.expandedBlocks.isEmpty, "no expansion was recorded")
+
+            // A single-take row is visible but never blooms.
+            model.rowAppeared(world.blocks[2])
+            #expect(!model.isBloomed(singleSlot))
+            #expect(model.visibleFannedBlocks == [world.blocks[0]],
+                    "the visible-fanned set holds exactly the fanned visible rows")
+
+            // REFCOUNT: a second column's copy appears; one disappears —
+            // the block stays visible until the LAST copy leaves.
+            model.rowAppeared(world.blocks[0])
+            model.rowDisappeared(world.blocks[0])
+            #expect(model.isBloomed(fannedSlot),
+                    "one column scrolling away must not blind the others")
+            model.rowDisappeared(world.blocks[0])
+            #expect(!model.isBloomed(fannedSlot))
+
+            // Explicit expansion blooms regardless of the option.
+            model.followTheScroll = false
+            model.toggleExpanded(world.blocks[0])
+            #expect(model.isBloomed(fannedSlot))
+        }
+    }
+
+    /// Expand-all renders only where it means something: the single-column
+    /// article in a non-slot-split style (columns and slot-split ARE
+    /// whole-post fan presentations — R25's agreed half).
+    @Test func expandAllIsOfferedOnlyWhereMeaningful() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID, defaults: freshDefaults("gate"))
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+
+            #expect(model.projection.fanStyle == .stack)
+            #expect(model.offersExpandAll, "single column, stack: offered")
+
+            model.adopt(Queries.TakesProjection(
+                slots: model.projection.slots, fans: model.projection.fans,
+                fanStyle: .slotSplit))
+            #expect(!model.offersExpandAll, "slot split IS a whole-post presentation")
+
+            model.adopt(Queries.TakesProjection(
+                slots: model.projection.slots, fans: model.projection.fans,
+                fanStyle: .marginGrid))
+            #expect(model.offersExpandAll, "margin grid's expand-all is meaningful")
+
+            model.addScratchColumn()
+            #expect(!model.offersExpandAll, "multi-column compositions never offer it")
+        }
+    }
+
+    /// The ＋new-take doors land through ops: branch copies the shown
+    /// take's text; blank mints empty; the fan grows in order; chosen
+    /// never moves (I3 rides the doors).
+    @Test func theNewTakeDoorsGrowTheFanThroughOps() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID, defaults: freshDefaults("doors"))
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+
+            let blockID = world.blocks[2]  // the single-take block
+            await model.branchTake(blockID: blockID, from: world.chosen[2])
+            #expect(model.statusMessage == nil)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            let afterBranch = model.projection.fans[blockID] ?? []
+            #expect(afterBranch.count == 2, "branch grew the fan")
+            #expect(afterBranch.last?.workingText == "Block three, only take.",
+                    "the branch inherits the source take's text (the default gesture)")
+
+            await model.newBlankTake(blockID: blockID)
+            #expect(model.statusMessage == nil)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            let afterBlank = model.projection.fans[blockID] ?? []
+            #expect(afterBlank.count == 3, "blank grew the fan again")
+            #expect(afterBlank.last?.workingText == "",
+                    "the blank take is the genuinely-different-take gesture")
+
+            // Chosen never moved: the doors mint, they do not choose (I3).
+            let slot = model.projection.slots.first { $0.blockID == blockID }!
+            #expect(slot.variantID == world.chosen[2])
+            #expect(slot.hasFan, "the once-single block now badges")
+        }
+    }
+}

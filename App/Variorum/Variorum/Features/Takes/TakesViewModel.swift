@@ -73,6 +73,66 @@ final class TakesViewModel {
     private(set) var expandedBlocks: Set<String> = []
     private(set) var statusMessage: String?
 
+    // MARK: - Follow-the-scroll (Phase 13 C2, R25)
+
+    /// R25 — follow-the-scroll as a takes-viewing OPTION in all modes.
+    /// Pushed by the View from the theme settings (models never read
+    /// environments — the EditorView appearance pattern).
+    var followTheScroll = false
+    /// Near-viewport row bookkeeping: per-block REF COUNTS, because the
+    /// multi-column compositions repeat a block's row — a disappear in one
+    /// column must not blind the others. Observed (not ignored) so blooms
+    /// re-render as rows come and go; when `followTheScroll` is off,
+    /// `isBloomed` short-circuits before reading it, so Observation never
+    /// tracks the churn (the calm default costs nothing).
+    private var rowVisibility: [String: Int] = [:]
+
+    /// The visible FANNED blocks (R25's set — derived from the counts
+    /// against the current projection, so a fan born mid-visibility is
+    /// picked up without a re-appear).
+    var visibleFannedBlocks: Set<String> {
+        Set(projection.slots
+            .filter { $0.hasFan && (rowVisibility[$0.blockID] ?? 0) > 0 }
+            .map(\.blockID))
+    }
+
+    func rowAppeared(_ blockID: String) {
+        rowVisibility[blockID, default: 0] += 1
+    }
+
+    func rowDisappeared(_ blockID: String) {
+        let next = (rowVisibility[blockID] ?? 0) - 1
+        if next <= 0 {
+            rowVisibility.removeValue(forKey: blockID)
+        } else {
+            rowVisibility[blockID] = next
+        }
+    }
+
+    /// THE bloom rule (R25): explicitly expanded, OR — with follow-the-
+    /// scroll on — any fanned row near the viewport.
+    func isBloomed(_ slot: Queries.RenderedBlock) -> Bool {
+        expandedBlocks.contains(slot.blockID)
+            || (followTheScroll && slot.hasFan
+                && (rowVisibility[slot.blockID] ?? 0) > 0)
+    }
+
+    /// Expand-all only where it MEANS something (R25's agreed half): the
+    /// single-column article that isn't slot-split — full-text columns and
+    /// slot-split ARE whole-post fan presentations already.
+    var offersExpandAll: Bool {
+        columns.count == 1 && projection.fanStyle != .slotSplit
+    }
+
+    /// R24's short/long rule for the margin grid: a SHORT fanned block gets
+    /// the one-card-high horizontally-scrolling strip; longer blocks keep
+    /// the vertical card column. The threshold is a character count (~200
+    /// chars ≈ under three lines at the 68ch measure) — a BUILD-TIME CALL,
+    /// recorded in the Stage C closeout + QUESTIONS #28.
+    nonisolated static func usesHorizontalStrip(text: String?) -> Bool {
+        (text ?? "").count < 200
+    }
+
     struct PaneKey: Equatable, Hashable {
         var columnID: String
         var blockID: String
@@ -421,6 +481,20 @@ final class TakesViewModel {
 
     func setFanStyle(_ style: FanStyle) async {
         await run { ops in try ops.setFanStyle(style) }
+    }
+
+    // MARK: - The fan-growth doors (Phase 13 C2 — v2's dashed footer)
+
+    /// "＋ new take (branch)" — the default gesture: inherits the shown
+    /// take's text (OverallModel §3's letter). Awaited through the runner
+    /// (never fire-and-forget); a sealed post's refusal speaks.
+    func branchTake(blockID: String, from variantID: String) async {
+        await run { ops in _ = try ops.branchVariant(blockID, from: variantID) }
+    }
+
+    /// "＋ blank take" — the genuinely-different-take gesture.
+    func newBlankTake(blockID: String) async {
+        await run { ops in _ = try ops.newBlankVariant(blockID) }
     }
 
     // MARK: - Plumbing
