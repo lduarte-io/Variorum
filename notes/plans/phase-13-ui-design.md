@@ -775,6 +775,34 @@ recorded in R51):**
   4 (the "rethinking" note) — flag for the closeout ritual's
   canonical-doc batch.
 
+### Author directive (2026-07-18, mid-Stage-C, via the coordinator) — R59: handoff + checkpoint mechanics
+
+**Her words VERBATIM (standing instruction; typos hers):**
+
+> make sure that you write your thorough handoff after this phase is complete - i
+> expect that the you as the orchestrator will have a very full context and i
+> expect to have to manage / ratfy / assess / judge / whatever handoff items and
+> give tweaks and go through my UI / UX review with a new session.
+
+**Ruling:**
+
+- **R59 — The phase handoff must be exceptionally thorough, because the R48
+  taste checkpoint runs in a NEW session anchored on it** (a refinement of
+  R48's mechanics: her reactions and tweak requests will be managed from a
+  fresh session — nothing may depend on any live session's context; the
+  CLAUDE.md completeness bar applied hard). `notes/handoffs/phase-13-handoff.md`
+  (the phase's LAST act, written at the closeout ritual) must carry: the
+  complete ratify list (QUESTIONS #23–#26 + Stage C's additions — each
+  PROVISIONAL with its options and what shipped); a **guided UI/UX walk** for
+  her review (per surface, both voices, how to reach everything — the
+  legibility mandate applied to the handoff itself: what to look at, what to
+  try, what's a setting); the checkpoint mechanics (her reactions → further
+  sitting entries here → the fix round follows); and the standard content at
+  full depth (what shipped and why it's shaped that way, counts, findings +
+  dispositions in brief, exactly what she must do next as a checklist at the
+  top). Changes nothing about Stage C's scope or the boundary protocol; the
+  stage closeouts are written knowing they feed that handoff.
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

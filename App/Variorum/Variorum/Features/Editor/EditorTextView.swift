@@ -24,6 +24,28 @@ final class EditorTextView: NSTextView {
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
 
+    /// Phase 13, C1 (R9 — margins are sacred): the detail editor centers a
+    /// bounded prose column by widening `textContainerInset` with the
+    /// window; nil (the inline editor) keeps the fixed inset — its column
+    /// is bounded by the book view's SwiftUI frame instead.
+    var maxColumnWidth: CGFloat? {
+        didSet { updateGutters() }
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        updateGutters()
+    }
+
+    private func updateGutters() {
+        guard let maxColumnWidth else { return }
+        let inset = EditorTypography.gutterInset(
+            viewWidth: bounds.width, maxColumn: maxColumnWidth)
+        if abs(textContainerInset.width - inset) > 0.5 {
+            textContainerInset = NSSize(width: inset, height: textContainerInset.height)
+        }
+    }
+
     /// The pool-drag pasteboard type (Phase 10 Step 7): the payload is the
     /// pool block's ID and NOTHING else — the text copy happens inside
     /// `poolDragCopy`, the one deliberate operation (review focus 6: no
@@ -125,7 +147,10 @@ final class EditorTextView: NSTextView {
         let textView = EditorTextView(usingTextLayoutManager: true)
         precondition(textView.textLayoutManager != nil, "TK2 opt-in failed at construction")
 
-        textView.textContainerInset = NSSize(width: 8, height: 8)
+        // R9 (Phase 13 C1): generous top air + the centered bounded column
+        // (the horizontal inset is dynamic — updateGutters).
+        textView.textContainerInset = NSSize(width: EditorTypography.minGutter, height: 24)
+        textView.maxColumnWidth = EditorTypography.maxColumnWidth
         textView.isEditable = true
         textView.isSelectable = true
         textView.isRichText = false

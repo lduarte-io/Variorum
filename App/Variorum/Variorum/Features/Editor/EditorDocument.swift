@@ -31,8 +31,10 @@ nonisolated enum EditorDocument {
     /// The editor-surface separator between blocks (author-confirmed 2a).
     static let separator = "\n"
 
-    /// The one base font of the unstyled technical-phase editor.
-    static var baseFont: NSFont { .preferredFont(forTextStyle: .body) }
+    /// The one base font — voice-resolved since Phase 13 C1 (the editor
+    /// surfaces get their voice in Stage C; `EditorTypography.current` is
+    /// the single source every surface write shares).
+    static var baseFont: NSFont { EditorTypography.current.font }
 
     /// The uniform paragraph gap (author ruling 2026-07-12, QUESTIONS #12's
     /// presentation half): a PURE-STYLE spacing after every paragraph —
@@ -41,10 +43,11 @@ nonisolated enum EditorDocument {
     /// keeps block boundaries INVISIBLE at rest, and a gap applied only at
     /// seams would make every boundary inferable — a uniform gap after
     /// every paragraph (intra-block newlines and seams alike) reveals
-    /// nothing. The size rides the font (visual polish is Phase 13's).
+    /// nothing. The size rides the voice's font (and widens uniformly when
+    /// inline comments are on — EditorTypography's letter).
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
-        style.paragraphSpacing = (baseFont.pointSize * 0.5).rounded()
+        style.paragraphSpacing = EditorTypography.current.paragraphSpacing
         return style
     }
 

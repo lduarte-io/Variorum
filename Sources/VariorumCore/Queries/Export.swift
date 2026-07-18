@@ -46,28 +46,53 @@ extension Queries {
             .map { ($0.label, $0.workingText) }
     }
 
+    // MARK: - The callout → blockquote mapping (Phase 13 C1, R16/R27)
+
+    /// A callout block EXPORTS as a Markdown blockquote (the execution
+    /// plan's letter: "export maps to blockquote") — `> ` per line, the
+    /// frame's emoji leading the first line. EXPORT-ONLY by design: this
+    /// mapper is called by the export projections and NEVER by
+    /// `renderedText` — the one join brain feeding the Fragments bridge
+    /// stays plain prose (pinned). Non-callout kinds pass through
+    /// unchanged (a future frame family exports as prose until it earns
+    /// its own mapping).
+    static func exportMapped(_ text: String, presentation: BlockPresentation?) -> String {
+        guard let presentation, presentation.kind == BlockPresentation.calloutKind
+        else { return text }
+        var lines = text.components(separatedBy: "\n")
+        if let emoji = presentation.emoji, !emoji.isEmpty, !lines.isEmpty {
+            lines[0] = lines[0].isEmpty ? emoji : "\(emoji) \(lines[0])"
+        }
+        return lines
+            .map { $0.isEmpty ? ">" : "> \($0)" }
+            .joined(separator: "\n")
+    }
+
     // MARK: - Post export
 
-    /// A post (or pool) as Markdown. Without variants this IS
-    /// `renderedText` — one brain, pinned equal. With `includeVariants`,
-    /// each fanned block's alternates section follows the block IN PLACE
-    /// (the chosen take renders in the document flow; the section trails
-    /// it — the single-block export shape, repeated), joined through the
-    /// same conditional join so stored spacing stays byte-exact. A fanned
+    /// A post (or pool) as Markdown. Without variants (and without
+    /// callouts) this IS `renderedText` — one brain, pinned equal; callout
+    /// blocks map to blockquotes (export-only — the rendering/bridge
+    /// projection never maps). With `includeVariants`, each fanned block's
+    /// alternates section follows the block IN PLACE (the chosen take
+    /// renders in the document flow; the section trails it — the
+    /// single-block export shape, repeated), joined through the same
+    /// conditional join so stored spacing stays byte-exact. A fanned
     /// block whose chosen take is blank still contributes its section
     /// (the takes are the author's work; the blank chosen skips as ever).
     public static func exportPost(
         _ db: Database, postID: String, includeVariants: Bool = false
     ) throws -> String {
-        guard includeVariants else {
+        let frames = try blockPresentations(db, containerID: postID)
+        guard includeVariants || !frames.isEmpty else {
             return try renderedText(db, containerID: postID)
         }
         var pieces: [String] = []
         for slot in try renderPost(db, containerID: postID) {
             if let text = slot.text, !text.isEmpty {
-                pieces.append(text)
+                pieces.append(exportMapped(text, presentation: frames[slot.blockID]))
             }
-            if slot.hasFan {
+            if includeVariants, slot.hasFan {
                 let alternates = try exportAlternates(
                     db, blockID: slot.blockID, renderedVariantID: slot.variantID)
                 if !alternates.isEmpty {
@@ -91,7 +116,8 @@ extension Queries {
             db,
             sql: """
                 SELECT COALESCE(chosen.id, dflt.id)                     AS variant_id,
-                       COALESCE(chosen.working_text, dflt.working_text) AS text
+                       COALESCE(chosen.working_text, dflt.working_text) AS text,
+                       b.presentation                                   AS presentation
                 FROM block b
                 LEFT JOIN container_block cb
                   ON cb.block_id = b.id AND cb.deleted_at IS NULL
@@ -111,7 +137,9 @@ extension Queries {
         let renderedText: String? = row["text"]
         var pieces: [String] = []
         if let renderedText, !renderedText.isEmpty {
-            pieces.append(renderedText)
+            pieces.append(exportMapped(
+                renderedText,
+                presentation: BlockPresentation.decode(row["presentation"])))
         }
         let alternates = try exportAlternates(
             db, blockID: blockID, renderedVariantID: renderedID)
@@ -145,7 +173,7 @@ extension Queries {
             }
             let title = displayTitle(entry.title, entryDate: entry.entryDate)
             pieces.append(grouped ? "### \(title)" : "## \(title)")
-            let body = try renderedText(db, containerID: entry.postID)
+            let body = try exportPost(db, postID: entry.postID)
             if !body.isEmpty {
                 pieces.append(body)
             }
@@ -232,7 +260,7 @@ extension Queries {
             let path = uniquePath(base: "\(folder)\(base)", id: id, used: &usedPaths)
             files.append(ExportFile(
                 relativePath: path,
-                contents: try renderedText(db, containerID: id)))
+                contents: try exportPost(db, postID: id)))
         }
 
         // Pools (author ruling 2026-07-16, #22c): through the ONE pools
@@ -245,7 +273,7 @@ extension Queries {
                 id: pool.id, used: &usedPaths)
             files.append(ExportFile(
                 relativePath: path,
-                contents: try renderedText(db, containerID: pool.id)))
+                contents: try exportPost(db, postID: pool.id)))
         }
 
         if includeReadings {

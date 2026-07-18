@@ -23,6 +23,54 @@ extension Queries {
             .fetchAll(db)
     }
 
+    /// The container's live comments per block, display order — the C1
+    /// margin/inline surfaces' feed (one indexed pass over the container's
+    /// placements; cost ∝ the post's own comments, P1). Blocks with no
+    /// comments are absent.
+    public static func containerComments(
+        _ db: Database, containerID: String
+    ) throws -> [String: [BlockComment]] {
+        let rows = try BlockComment.fetchAll(
+            db,
+            sql: """
+                SELECT bc.*
+                FROM block_comment bc
+                JOIN container_block cb
+                  ON cb.block_id = bc.block_id AND cb.deleted_at IS NULL
+                WHERE cb.container_id = ? AND bc.deleted_at IS NULL
+                ORDER BY bc.block_id, bc.created_at, bc.id
+                """,
+            arguments: [containerID])
+        return Dictionary(grouping: rows, by: \.blockId)
+    }
+
+    /// The container's callout frames per block (Phase 13 C1 — the R16/R27
+    /// rendering feed): live blocks' decoded presentations; plain blocks
+    /// and malformed JSON are absent (fail-open, the BlockPresentation
+    /// doctrine). Cost ∝ the post (one placement join).
+    public static func blockPresentations(
+        _ db: Database, containerID: String
+    ) throws -> [String: BlockPresentation] {
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT b.id AS block_id, b.presentation AS presentation
+                FROM block b
+                JOIN container_block cb
+                  ON cb.block_id = b.id AND cb.deleted_at IS NULL
+                WHERE cb.container_id = ? AND b.deleted_at IS NULL
+                  AND b.presentation IS NOT NULL
+                """,
+            arguments: [containerID])
+        var result: [String: BlockPresentation] = [:]
+        for row in rows {
+            if let decoded = BlockPresentation.decode(row["presentation"]) {
+                result[row["block_id"] as String] = decoded
+            }
+        }
+        return result
+    }
+
     /// Live-comment counts per block for one container — the editor
     /// surface's margin/badge feed (one indexed pass over the container's
     /// placements; cost ∝ the post, P1). Blocks with no comments are absent.

@@ -81,9 +81,22 @@ extension Operations {
     public func setBlockPresentation(
         _ blockID: String, _ presentation: BlockPresentation?
     ) throws {
+        try updateBlockPresentation(blockID) { _ in presentation }
+    }
+
+    /// Read-modify-write on the block's presentation in ONE transaction
+    /// (Phase 13 C1 — the partial-edit doors: "set the emoji, keep the
+    /// color" must transform the STORED frame, never a projection cache;
+    /// the Stage B round-2 designation-read precedent). Same guards and
+    /// no-op behavior as the plain setter — which now routes through here.
+    public func updateBlockPresentation(
+        _ blockID: String,
+        _ transform: (BlockPresentation?) throws -> BlockPresentation?
+    ) throws {
         try database.write { db in
             var block = try liveBlock(db, blockID)
             try ensurePlacementUnlocked(db, blockID: blockID)
+            let presentation = try transform(BlockPresentation.decode(block.presentation))
             if let presentation,
                presentation.kind.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 throw OperationError.invalidPresentationKind

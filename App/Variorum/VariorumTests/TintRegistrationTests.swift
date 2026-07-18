@@ -2,14 +2,14 @@
 //  TintRegistrationTests.swift
 //  VariorumTests
 //
-//  Phase 10 Step 8 — the "Show Blocks" tint ↔ text mis-registration
-//  (KnownIssues row, trace-first): TK2 fragment frames are TEXT-CONTAINER-
-//  relative, the overlay views live in the TEXT VIEW — the 9d tint emitted
-//  container coordinates unconverted, so every stripe sat one
-//  textContainerOrigin (8 px ≈ half a line) above its text and block
-//  boundaries crossed lines mid-way. Pinned at the pure mapping layer AND
-//  against real TK2 geometry in a window (red on old: the emitted span
-//  minY missed the text's view-space top by the inset).
+//  The container→view registration pins (Phase 10 Step 8's traced
+//  mis-registration, carried forward into Phase 13 C1's decoration layer):
+//  TK2 fragment frames are TEXT-CONTAINER-relative, the overlay views live
+//  in the TEXT VIEW — the mapping applies `textContainerOrigin` in exactly
+//  one place (`BlockTint.viewRect`), and the decoration pass
+//  (`refreshDecorations`, the 9d tint walk's successor) emits frames that
+//  REGISTER with the text they decorate. Red on the old unconverted path
+//  by the same mechanism the Phase 10 pin was.
 //
 
 import AppKit
@@ -18,8 +18,8 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
-@Suite("Tint registration (Phase 10 Step 8)")
-struct TintRegistrationMappingTests {
+@Suite("Decor registration — the pure mapping (Phase 10 Step 8 / Phase 13 C1)")
+struct DecorRegistrationMappingTests {
     @Test func theContainerToViewMappingAppliesTheOrigin() {
         let rect = BlockTint.viewRect(
             containerTop: 80, containerBottom: 96,
@@ -36,18 +36,17 @@ struct TintRegistrationMappingTests {
 }
 
 @MainActor
-@Suite("Tint registration in a real window (Phase 10 Step 8)", .serialized)
-struct TintRegistrationWindowTests {
+@Suite("Decor registration in a real window (Phase 13 C1)", .serialized)
+struct DecorRegistrationWindowTests {
     private func pump(_ seconds: TimeInterval = 0.05) {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
 
-    /// The red-on-old pin: every emitted stripe must REGISTER with its
-    /// block's text — span top == the block's first fragment's top in VIEW
-    /// coordinates (container + origin), span bottom == the last
-    /// fragment's bottom likewise. The old path missed by exactly the
-    /// inset on every span.
-    @Test func everyStripeRegistersWithItsBlocksText() async throws {
+    /// The registration pin, on the decoration pass: every emitted block
+    /// frame must REGISTER with its block's text — frame top == the
+    /// block's first fragment's top in VIEW coordinates (container +
+    /// origin), frame bottom == the last fragment's bottom likewise.
+    @Test func everyDecorFrameRegistersWithItsBlocksText() async throws {
         let long = (0..<40).map { "word\($0)" }.joined(separator: " ")  // wraps
         try await withEditor(seedBlocks: [long, "short block", long, "tail short"]) { h in
             let window = NSWindow(
@@ -63,19 +62,23 @@ struct TintRegistrationWindowTests {
             window.orderFrontRegardless()
             pump()
 
-            var captured: [EditorViewModel.BlockTintSpan] = []
-            h.model.tintSink = { captured = $0 }
-            h.model.blockTintEnabled = true
-            h.model.refreshTint()
+            var captured = BlockDecor.State()
+            h.model.decorSink = { captured = $0 }
+            var appearance = EditorAppearance()
+            appearance.seamsVisible = true  // R42's global toggle drives the pass
+            h.model.appearance = appearance
+            h.model.refreshDecorations()
             pump()
-            #expect(captured.count == 4, "all four blocks are in view")
+            #expect(captured.frames.count == 4, "all four blocks are in view")
+            #expect(captured.entryCount == 4)
+            #expect(captured.appearance.seamsVisible)
 
             // Ground truth straight from TK2, converted by the origin.
             let layoutManager = try #require(h.textView.textLayoutManager)
             let contentManager = try #require(layoutManager.textContentManager)
             let origin = h.textView.textContainerOrigin
             layoutManager.ensureLayout(for: layoutManager.documentRange)
-            for span in captured {
+            for span in captured.frames {
                 let range = h.model.index.range(ofEntryAt: span.entryIndex)
                 func fragmentFrame(at offset: Int) throws -> CGRect {
                     let location = try #require(contentManager.location(
@@ -90,18 +93,36 @@ struct TintRegistrationWindowTests {
                 let first = try fragmentFrame(at: range.location)
                 let last = try fragmentFrame(at: max(range.location, range.upperBound - 1))
                 #expect(abs(span.frame.minY - (first.minY + origin.y)) < 0.5,
-                        "entry \(span.entryIndex): stripe top must sit on the text's view-space top")
+                        "entry \(span.entryIndex): frame top must sit on the text's view-space top")
                 #expect(abs(span.frame.maxY - (last.maxY + origin.y)) < 0.5,
-                        "entry \(span.entryIndex): stripe bottom must sit on the text's view-space bottom")
+                        "entry \(span.entryIndex): frame bottom must sit on the text's view-space bottom")
             }
 
-            // The stable-color rules stand untouched: never-adjacent, and
-            // spans tile the blocks in order.
-            for i in 1..<captured.count {
-                #expect(captured[i].colorIndex != captured[i - 1].colorIndex)
-                #expect(captured[i].frame.minY >= captured[i - 1].frame.maxY - 0.5,
-                        "stripes never overlap upward")
+            // Frames tile the blocks in order (never overlap upward), and
+            // the seam derivation yields one seam per interior boundary,
+            // each strictly between its neighbors.
+            for i in 1..<captured.frames.count {
+                #expect(captured.frames[i].frame.minY
+                    >= captured.frames[i - 1].frame.maxY - 0.5,
+                    "frames never overlap upward")
             }
+            let seams = BlockDecor.seamYs(captured.frames)
+            #expect(seams.count == 3, "three interior boundaries")
+            for (i, y) in seams.enumerated() {
+                #expect(y >= captured.frames[i].frame.maxY - 0.5)
+                #expect(y <= captured.frames[i + 1].frame.minY + 0.5)
+            }
+
+            // The column edges ride the inset (the badge/comment gutters
+            // anchor off these).
+            #expect(abs(captured.textLeft - origin.x) < 0.5)
+            #expect(abs(captured.textRight
+                - (h.textView.bounds.width - h.textView.textContainerInset.width)) < 0.5)
+
+            // The calm default costs nothing: everything off ⇒ empty state.
+            h.model.appearance = EditorAppearance()
+            pump()
+            #expect(captured.frames.isEmpty, "no decorations ⇒ no frames walked")
         }
     }
 }

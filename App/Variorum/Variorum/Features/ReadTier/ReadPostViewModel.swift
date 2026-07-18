@@ -65,6 +65,18 @@ final class ReadPostViewModel {
     /// editor's).
     @ObservationIgnored var badgeSink: (([ReadBadge]) -> Void)?
 
+    /// Phase 13 C1 — the read tier renders the same decoration language as
+    /// the editor (callouts, seams, read-only comment cards) through the
+    /// shared controller; no indicator (no caret), no handles (no doors).
+    @ObservationIgnored var decorSink: ((BlockDecor.State) -> Void)?
+    @ObservationIgnored private var lastDecorState = BlockDecor.State()
+    /// Theme context, pushed by the View.
+    var appearance = EditorAppearance() {
+        didSet { if oldValue != appearance { refreshDecor() } }
+    }
+    @ObservationIgnored private(set) var presentationsByBlock: [String: BlockPresentation] = [:]
+    @ObservationIgnored private(set) var commentsByBlock: [String: [BlockDecor.CommentBrief]] = [:]
+
     // MARK: - Internals (never observed)
 
     @ObservationIgnored private(set) var slots: [Queries.RenderedBlock] = []
@@ -120,6 +132,38 @@ final class ReadPostViewModel {
         } catch {
             canaryMessage = "Post observation failed: \(error)"
         }
+    }
+
+    /// The decoration context, live (Phase 13 C1) — one small per-post
+    /// fetch; runs beside `start()` for the surface's lifetime.
+    func startDecorContext() async {
+        do {
+            for try await value in session.database.observe({ [postID] db in
+                DecorContext(
+                    presentations: try Queries.blockPresentations(db, containerID: postID),
+                    comments: try Queries.containerComments(db, containerID: postID)
+                        .mapValues { comments in
+                            comments.map { BlockDecor.CommentBrief(id: $0.id, text: $0.text) }
+                        })
+            }) {
+                adoptDecorContext(value)
+            }
+        } catch is CancellationError {
+        } catch {
+            canaryMessage = "Decoration observation failed: \(error)"
+        }
+    }
+
+    nonisolated struct DecorContext: Equatable, Sendable {
+        var presentations: [String: BlockPresentation] = [:]
+        var comments: [String: [BlockDecor.CommentBrief]] = [:]
+    }
+
+    /// Internal so tests drive the context without observations.
+    func adoptDecorContext(_ context: DecorContext) {
+        presentationsByBlock = context.presentations
+        commentsByBlock = context.comments
+        refreshDecor()
     }
 
     // MARK: - Projection → surface
@@ -246,6 +290,74 @@ final class ReadPostViewModel {
             badges = result
             badgeSink?(result)
         }
+        refreshDecor()
+    }
+
+    /// The read tier's decoration pass (Phase 13 C1): whole-post frames —
+    /// a read view is fully laid out by construction, and the walk runs
+    /// only when something is decorated (calm default costs nothing).
+    func refreshDecor() {
+        func send(_ state: BlockDecor.State) {
+            if state != lastDecorState {
+                lastDecorState = state
+                decorSink?(state)
+            }
+        }
+        let needsFrames = appearance.seamsVisible
+            || !presentationsByBlock.isEmpty
+            || !commentsByBlock.isEmpty
+        guard needsFrames, let textView,
+              let layoutManager = textView.textLayoutManager,
+              let contentManager = layoutManager.textContentManager,
+              !index.entries.isEmpty
+        else {
+            send(BlockDecor.State())
+            return
+        }
+        let origin = textView.textContainerOrigin
+        let docStart = contentManager.documentRange.location
+
+        func fragmentFrame(atOffset offset: Int) -> CGRect? {
+            guard let location = contentManager.location(docStart, offsetBy: offset)
+            else { return nil }
+            var frame: CGRect?
+            layoutManager.enumerateTextLayoutFragments(from: location, options: []) {
+                frame = $0.layoutFragmentFrame
+                return false
+            }
+            return frame
+        }
+
+        var frames: [BlockDecor.Frame] = []
+        var location = 0
+        for (i, entry) in index.entries.enumerated() {
+            defer { location += entry.length + 1 }
+            guard let first = fragmentFrame(atOffset: location),
+                  let last = fragmentFrame(atOffset: max(location, location + entry.length - 1))
+            else { continue }
+            frames.append(BlockDecor.Frame(
+                entryIndex: i, blockID: entry.blockID,
+                frame: BlockTint.viewRect(
+                    containerTop: min(first.minY, last.minY),
+                    containerBottom: max(first.maxY, last.maxY),
+                    containerOrigin: origin,
+                    viewWidth: textView.bounds.width)))
+        }
+        // Read tier: no caret (no indicator), no drop door (no handles) —
+        // the controller's nil doors keep those dark.
+        var readAppearance = appearance
+        readAppearance.indicator = .off
+        send(BlockDecor.State(
+            frames: frames,
+            fannedBlockIDs: Set(slots.filter(\.hasFan).map(\.blockID)),
+            appearance: readAppearance,
+            caretBlockID: nil,
+            presentations: presentationsByBlock,
+            comments: commentsByBlock,
+            textLeft: origin.x,
+            textRight: textView.bounds.width - textView.textContainerInset.width,
+            viewWidth: textView.bounds.width,
+            entryCount: index.entries.count))
     }
 
     /// The surface's plain text — test convenience.

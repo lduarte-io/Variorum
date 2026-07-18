@@ -19,9 +19,6 @@ struct EditorCommands: Commands {
     /// Phase 13 (B2): the shell routing channel — ⌘N/⌘J/⌘K land in
     /// RootView through this.
     let router: ShellRouter
-    /// The "Show Blocks" tint toggle (9d) — shared with `EditorView` via
-    /// AppStorage so the menu state and every editor's overlay agree.
-    @AppStorage("showBlockBoundaries") private var showBlocks = false
 
     private var session: AppSession? {
         if case .ready(let session) = bootstrap.state { return session }
@@ -129,10 +126,74 @@ struct EditorCommands: Commands {
             .keyboardShortcut("t", modifiers: [.command, .shift])
             .disabled(session?.editorRouter.active == nil)
 
-            // The "Show Blocks" tint mode (9d): stable soft-pastel block
-            // backgrounds, same color never adjacent (BlockTint).
-            Toggle("Show Blocks", isOn: $showBlocks)
+            // The caret block's comments (Phase 13 C1, R7 — the keyboard
+            // door beside the margin/inline faces).
+            Button("Comments…") {
+                session?.editorRouter.active?.openCaretComments()
+            }
+            .keyboardShortcut("'", modifiers: [.command, .shift])
+            .disabled(session?.editorRouter.active == nil)
+
+            // The callout frame (R16/R27): block-level presentation —
+            // takes share the frame; colors are theme-token NAMES.
+            Menu("Callout") {
+                ForEach(CalloutPalette.names, id: \.self) { name in
+                    Button(name.capitalized) {
+                        let editor = session?.editorRouter.active
+                        Task { await editor?.setCaretCallout(color: name) }
+                    }
+                }
+                Divider()
+                Button("Emoji…") { promptCalloutEmoji() }
+                Button("Remove Callout") {
+                    let editor = session?.editorRouter.active
+                    Task { await editor?.setCaretCallout(color: nil) }
+                }
+            }
+            .disabled(session?.editorRouter.active == nil)
+
+            Divider()
+
+            // Phase 13 C1 (R6/R42): dotted seams on the GLOBAL setting —
+            // supersedes the 9d "Show Blocks" tint toggle (that look is
+            // retired; this is its face now). ⌘⇧B keeps the muscle memory.
+            Button("Toggle Block Seams") { toggleSeams() }
                 .keyboardShortcut("b", modifiers: [.command, .shift])
+                .disabled(session == nil)
+        }
+    }
+
+    /// Flip the global seam setting (R42 — a synced document setting, not
+    /// per-window state; every editor and the Settings pane follow).
+    private func toggleSeams() {
+        guard let session else { return }
+        Task { @MainActor in
+            do {
+                let current = try await session.database.read { db in
+                    try Queries.themeSettings(db).seamsVisible
+                }
+                try await session.runner.run { ops in
+                    try ops.setSeamsVisible(!current)
+                }
+            } catch {
+                session.editorRouter.active?.showStatus("Seam toggle failed: \(error)")
+            }
+        }
+    }
+
+    /// The callout emoji prompt (her sitting-3 reference wore "💡").
+    private func promptCalloutEmoji() {
+        guard let session, let editor = session.editorRouter.active else { return }
+        let alert = NSAlert()
+        alert.messageText = "Callout Emoji"
+        alert.informativeText = "A leading glyph for this callout (leave empty for none)."
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        alert.accessoryView = field
+        alert.addButton(withTitle: "Set")
+        alert.addButton(withTitle: "Cancel")
+        if alert.runModal() == .alertFirstButtonReturn {
+            let emoji = field.stringValue
+            Task { await editor.setCaretCalloutEmoji(emoji) }
         }
     }
 

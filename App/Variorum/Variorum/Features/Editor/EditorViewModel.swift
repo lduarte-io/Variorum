@@ -129,20 +129,30 @@ final class EditorViewModel {
     /// rendering attributes — memo obligation).
     @ObservationIgnored var badgeSink: (([BlockBadge]) -> Void)?
 
-    /// 9d — the "Show Blocks" tint mode: one span per visible block, its
-    /// stable palette index and document-coordinate frame. Same overlay
-    /// doctrine as the badges: views over the text, NEVER rendering
-    /// attributes (TEXTKIT2 §3 — the flaky path).
-    struct BlockTintSpan: Equatable {
-        let entryIndex: Int
-        let colorIndex: Int
-        let frame: CGRect
+    /// Phase 13 C1 — the decoration overlay feed (seams R6/R42, the
+    /// editing indicator R14/R22, callouts R16/R17, comment faces R7, drag
+    /// handles R19). The model computes visible-block geometry + context;
+    /// `BlockDecorOverlayController` renders. Same overlay doctrine as the
+    /// badges: views over the text, NEVER rendering attributes (TEXTKIT2
+    /// §3 — the flaky path). Supersedes the 9d tint spans — that look is
+    /// RETIRED (R6: "we shouldn't have all the blocks as different
+    /// colors"); its toggle's face became seam visibility.
+    @ObservationIgnored var decorSink: ((BlockDecor.State) -> Void)?
+    @ObservationIgnored private var lastDecorState = BlockDecor.State()
+    /// Theme context, pushed by the View (models never read environments).
+    var appearance = EditorAppearance() {
+        didSet { if oldValue != appearance { refreshDecorations() } }
     }
-    @ObservationIgnored var tintSink: (([BlockTintSpan]) -> Void)?
-    private var tintSpans: [BlockTintSpan] = []
-    /// Set by the view from its AppStorage toggle.
-    var blockTintEnabled = false {
-        didSet { if oldValue != blockTintEnabled { refreshTint() } }
+    /// Callout frames + comment briefs for this container, observed live
+    /// (cost ∝ the post — the P1 unit).
+    @ObservationIgnored private(set) var presentationsByBlock: [String: BlockPresentation] = [:]
+    @ObservationIgnored private(set) var commentsByBlock: [String: [BlockDecor.CommentBrief]] = [:]
+    /// The block whose comments panel is open (nil = closed).
+    var commentsPanel: CommentsPanelState?
+
+    struct CommentsPanelState: Equatable, Identifiable {
+        let blockID: String
+        var id: String { blockID }
     }
 
     struct FanPanelState: Equatable, Identifiable {
@@ -246,12 +256,53 @@ final class EditorViewModel {
         }
     }
 
-    /// Runs for the editor's lifetime: header + slots, live.
+    /// Runs for the editor's lifetime: header + slots + decorations, live.
     func start() async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.observeHeader() }
             group.addTask { await self.observeSlots() }
+            group.addTask { await self.observePresentations() }
+            group.addTask { await self.observeComments() }
         }
+    }
+
+    private func observePresentations() async {
+        do {
+            for try await value in session.database.observe({ [postID] db in
+                try Queries.blockPresentations(db, containerID: postID)
+            }) {
+                adoptPresentations(value)
+            }
+        } catch is CancellationError {
+        } catch {
+            statusMessage = "Presentation observation failed: \(error)"
+        }
+    }
+
+    private func observeComments() async {
+        do {
+            for try await value in session.database.observe({ [postID] db in
+                try Queries.containerComments(db, containerID: postID).mapValues { comments in
+                    comments.map { BlockDecor.CommentBrief(id: $0.id, text: $0.text) }
+                }
+            }) {
+                adoptComments(value)
+            }
+        } catch is CancellationError {
+        } catch {
+            statusMessage = "Comment observation failed: \(error)"
+        }
+    }
+
+    /// Internal so tests can drive decoration context without observations.
+    func adoptPresentations(_ value: [String: BlockPresentation]) {
+        presentationsByBlock = value
+        refreshDecorations()
+    }
+
+    func adoptComments(_ value: [String: [BlockDecor.CommentBrief]]) {
+        commentsByBlock = value
+        refreshDecorations()
     }
 
     /// Teardown: persist what only the editor knows (open tail, scroll
@@ -2400,6 +2451,7 @@ final class EditorViewModel {
 
     func updateCaretContext() {
         guard let textView else { return }
+        let previousCaretBlock = caretBlockID
         let selection = textView.selectedRange()
         let caret = selection.location
         var location = 0
@@ -2431,14 +2483,21 @@ final class EditorViewModel {
         // bar, context menu, and shortcuts read these planner verdicts
         // (one brain, three doors). Cost: the caret block's boundary scan.
         refreshGestureAvailability()
+        // The editing indicator follows the caret (R14): refresh only when
+        // it is on and the caret changed blocks (the decor pass is
+        // viewport-bounded; off costs nothing).
+        if appearance.indicator != .off, caretBlockID != previousCaretBlock {
+            refreshDecorations()
+        }
     }
 
     /// Badges for fanned blocks currently laid out near the viewport.
     /// Cost ∝ fanned blocks (fans are opt-in and rare) — no ensureLayout,
     /// unlaid-out blocks simply have no badge until scrolled to (P1).
     func refreshBadges() {
-        defer { refreshTint() }  // 9d: the tint rides every badge refresh
-                                 // trigger (scroll, layout, projection).
+        defer { refreshDecorations() }  // the decor layer rides every badge
+                                        // refresh trigger (scroll, layout,
+                                        // projection).
         guard let textView,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager
@@ -2479,25 +2538,32 @@ final class EditorViewModel {
         }
     }
 
-    /// 9d — "Show Blocks": per-block tint spans for the visible region.
-    /// Viewport-proportional: the visible character window (the
-    /// `topVisibleOffset` fragment idiom, both edges) prunes the entry walk
-    /// to on-screen entries; each visible entry costs two single-fragment
-    /// lookups (first and last fragment frames). Colors are stable per
-    /// block ID with the never-adjacent rule (`BlockTint`).
-    func refreshTint() {
-        func send(_ spans: [BlockTintSpan]) {
-            if spans != tintSpans {
-                tintSpans = spans
-                tintSink?(spans)
+    /// Phase 13 C1 — the decoration pass: per-block geometry for the
+    /// visible region + the decoration context, emitted to the overlay
+    /// controller. Viewport-proportional exactly like the 9d tint walk it
+    /// supersedes: the visible character window (the `topVisibleOffset`
+    /// fragment idiom, both edges) prunes the entry walk to on-screen
+    /// entries; each visible entry costs two single-fragment lookups
+    /// (first and last fragment frames). When nothing is decorated (seams
+    /// off, indicator off, no callouts, no comments) the walk is skipped
+    /// entirely — the calm default costs nothing.
+    func refreshDecorations() {
+        func send(_ state: BlockDecor.State) {
+            if state != lastDecorState {
+                lastDecorState = state
+                decorSink?(state)
             }
         }
-        guard blockTintEnabled, let textView, loaded,
+        let needsFrames = appearance.seamsVisible
+            || appearance.indicator != .off
+            || !presentationsByBlock.isEmpty
+            || !commentsByBlock.isEmpty
+        guard needsFrames, let textView, loaded,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager,
               !index.entries.isEmpty
         else {
-            send([])
+            send(BlockDecor.State())
             return
         }
         let visible = viewportBounds(of: textView)
@@ -2530,8 +2596,7 @@ final class EditorViewModel {
             return frame
         }
 
-        let colors = BlockTint.indices(for: index.entries.map(\.blockID))
-        var spans: [BlockTintSpan] = []
+        var frames: [BlockDecor.Frame] = []
         var location = 0
         for (i, entry) in index.entries.enumerated() {
             defer { location += entry.length + 1 }
@@ -2548,9 +2613,100 @@ final class EditorViewModel {
                 containerOrigin: origin,
                 viewWidth: textView.bounds.width)
             guard frame.intersects(visible) else { continue }
-            spans.append(BlockTintSpan(entryIndex: i, colorIndex: colors[i], frame: frame))
+            frames.append(BlockDecor.Frame(
+                entryIndex: i, blockID: entry.blockID, frame: frame))
         }
-        send(spans)
+        send(BlockDecor.State(
+            frames: frames,
+            fannedBlockIDs: Set(slots.filter(\.hasFan).map(\.blockID)),
+            appearance: appearance,
+            caretBlockID: caretBlockID,
+            presentations: presentationsByBlock,
+            comments: commentsByBlock,
+            textLeft: origin.x,
+            textRight: textView.bounds.width - textView.textContainerInset.width,
+            viewWidth: textView.bounds.width,
+            entryCount: index.entries.count))
+    }
+
+    // MARK: - Comments + callouts + block reorder (Phase 13, C1)
+
+    /// The comments panel door (R7's faces all route here).
+    func openComments(blockID: String) {
+        commentsPanel = CommentsPanelState(blockID: blockID)
+    }
+
+    /// Opens the caret block's comments (the Block-menu/keyboard door).
+    func openCaretComments() {
+        guard let caretBlockID else {
+            showStatus("Place the caret in a block to see its comments.")
+            return
+        }
+        openComments(blockID: caretBlockID)
+    }
+
+    /// Sets/clears the caret block's callout frame (R16/R27 — the menu
+    /// door; presentation is the BLOCK's, takes share the frame).
+    func setCaretCallout(color: String?, emoji: String? = nil) async {
+        guard let caretBlockID else {
+            showStatus("Place the caret in a block first.")
+            return
+        }
+        do {
+            // Read-modify-write in ONE transaction (the stored frame is
+            // the truth — never the projection cache).
+            try await session.runner.run { ops in
+                try ops.updateBlockPresentation(caretBlockID) { existing in
+                    color.map { BlockPresentation(color: $0, emoji: emoji ?? existing?.emoji) }
+                }
+            }
+        } catch {
+            showOperationError(error)
+        }
+    }
+
+    /// Sets the caret block's callout emoji (keeps the color; a callout is
+    /// minted with the default color when none exists yet).
+    func setCaretCalloutEmoji(_ emoji: String?) async {
+        guard let caretBlockID else {
+            showStatus("Place the caret in a block first.")
+            return
+        }
+        let trimmed = emoji?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = (trimmed?.isEmpty == false) ? trimmed : nil
+        do {
+            try await session.runner.run { ops in
+                try ops.updateBlockPresentation(caretBlockID) { existing in
+                    BlockPresentation(
+                        color: existing?.color ?? CalloutPalette.defaultName,
+                        emoji: normalized)
+                }
+            }
+        } catch {
+            showOperationError(error)
+        }
+    }
+
+    /// The handle drop (R19): entry `fromEntry` lands BEFORE boundary
+    /// `toBoundary` (0…entryCount). One ordinary `reorder` operation —
+    /// undo inverse included; the observation's full render redraws.
+    func moveBlock(fromEntry: Int, toBoundary: Int) async {
+        guard slots.indices.contains(fromEntry),
+              toBoundary >= 0, toBoundary <= slots.count,
+              toBoundary != fromEntry, toBoundary != fromEntry + 1
+        else { return }
+        let blockID = slots[fromEntry].blockID
+        let insert: Operations.InsertPosition =
+            toBoundary == slots.count ? .end
+            : toBoundary == 0 ? .start
+            : .before(slots[toBoundary].blockID)
+        do {
+            try await session.runner.run { ops in
+                try ops.reorder(blockID, to: insert)
+            }
+        } catch {
+            showOperationError(error)
+        }
     }
 
     // MARK: - Surface plumbing

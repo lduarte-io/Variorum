@@ -24,9 +24,11 @@ struct EditorView: View {
     var inline = false
     @State private var model: EditorViewModel
     @State private var inlineHeight: CGFloat = 24
-    /// The "Show Blocks" tint mode (9d) — shared with the Block menu's
-    /// toggle via AppStorage.
-    @AppStorage("showBlockBoundaries") private var showBlocks = false
+    /// Phase 13 (C1): the voice reaches the text surface — chrome, font,
+    /// seams, indicator, comments all resolve from the theme environment
+    /// (optional: test hosts lack it — the terminal fallback).
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
 
     init(
         session: AppSession, postID: String, inline: Bool = false,
@@ -39,6 +41,14 @@ struct EditorView: View {
         model.pendingCaretSeed = caretSeed
         model.pendingFanSeed = fanSeed
         _model = State(initialValue: model)
+    }
+
+    private var themeSettings: Queries.ThemeSettings {
+        themeStore?.settings ?? Queries.ThemeSettings()
+    }
+
+    private var chrome: EditorSurfaceChrome {
+        EditorSurfaceChrome(tokens: themeSettings, dark: scheme == .dark)
     }
 
     var body: some View {
@@ -60,19 +70,29 @@ struct EditorView: View {
                     .background(.quaternary)
             }
             if inline {
-                InlineEditorSurface(model: model, height: $inlineHeight)
+                InlineEditorSurface(model: model, height: $inlineHeight, chrome: chrome)
                     .frame(height: inlineHeight)
             } else {
-                EditorSurface(model: model)
+                EditorSurface(model: model, chrome: chrome)
             }
             CommitBar(model: model)
         }
         .task { await model.start() }
-        .onAppear { model.blockTintEnabled = showBlocks }
-        .onChange(of: showBlocks) { _, enabled in model.blockTintEnabled = enabled }
+        .onAppear { model.appearance = EditorAppearance(themeSettings, dark: scheme == .dark) }
+        .onChange(of: themeSettings) { _, new in
+            model.appearance = EditorAppearance(new, dark: scheme == .dark)
+        }
+        .onChange(of: scheme) { _, new in
+            model.appearance = EditorAppearance(themeSettings, dark: new == .dark)
+        }
         .onDisappear { model.teardown() }
         .sheet(item: $model.fanPanel) { panel in
             FanPanel(model: model, state: panel)
+        }
+        .sheet(item: $model.commentsPanel) { panel in
+            // Phase 13 C1 (R7): the block's comments — margin/inline faces
+            // all open here; deleted comments visible + resurrectable.
+            CommentsPanel(session: session, blockID: panel.blockID)
         }
         .sheet(item: $model.divideWCeremony) { state in
             // The W ceremony (Phase 9, contract item 3): one sheet; any
@@ -119,6 +139,7 @@ struct EditorView: View {
 
 private struct EditorSurface: NSViewRepresentable {
     let model: EditorViewModel
+    let chrome: EditorSurfaceChrome
 
     func makeCoordinator() -> Coordinator {
         Coordinator(model: model)
@@ -127,6 +148,7 @@ private struct EditorSurface: NSViewRepresentable {
     func makeNSView(context: Context) -> NSScrollView {
         let (scrollView, textView) = EditorTextView.makeEditor()
         context.coordinator.surfaceDelegate.wire(to: textView)
+        context.coordinator.applyChrome(chrome, to: textView, scrollView: scrollView)
         model.attach(textView: textView, scrollView: scrollView)
         let model = model
         textView.onPoolDrop = { [weak model] blockID, offset, includeFan in
@@ -137,7 +159,11 @@ private struct EditorSurface: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        // All updates flow through the model (projection-driven).
+        // Projection updates flow through the model; only the VOICE
+        // (chrome/typography) applies here, on change.
+        if let textView = nsView.documentView as? EditorTextView {
+            context.coordinator.applyChrome(chrome, to: textView, scrollView: nsView)
+        }
     }
 
     static func dismantleNSView(_ nsView: NSScrollView, coordinator: Coordinator) {
@@ -149,8 +175,9 @@ private struct EditorSurface: NSViewRepresentable {
         let model: EditorViewModel
         let surfaceDelegate: EditorSurfaceDelegate
         private var badges: BadgeOverlayController?
-        private var tint: BlockTintOverlayController?
+        private var decor: BlockDecorOverlayController?
         private var anchor: ScrollAnchorController?
+        private var appliedChrome: EditorSurfaceChrome?
 
         init(model: EditorViewModel) {
             self.model = model
@@ -159,13 +186,27 @@ private struct EditorSurface: NSViewRepresentable {
 
         func install(scrollView: NSScrollView, textView: EditorTextView) {
             badges = BadgeOverlayController(model: model, textView: textView)
-            tint = BlockTintOverlayController(model: model, textView: textView)
+            decor = BlockDecorOverlayController(model: model, textView: textView)
             anchor = ScrollAnchorController(model: model, scrollView: scrollView)
+        }
+
+        /// Idempotent per chrome value — a real voice/scheme change
+        /// re-styles the whole surface (rare, deliberate).
+        func applyChrome(
+            _ chrome: EditorSurfaceChrome, to textView: EditorTextView,
+            scrollView: NSScrollView
+        ) {
+            guard appliedChrome != chrome else { return }
+            appliedChrome = chrome
+            textView.applyVoiceChrome(chrome)
+            scrollView.backgroundColor = chrome.paper
+            scrollView.drawsBackground = true
+            model.refreshBadges()
         }
 
         func uninstall() {
             badges?.uninstall()
-            tint?.uninstall()
+            decor?.uninstall()
             anchor?.uninstall()
         }
     }
@@ -184,6 +225,7 @@ private struct EditorSurface: NSViewRepresentable {
 struct InlineEditorSurface: NSViewRepresentable {
     let model: EditorViewModel
     @Binding var height: CGFloat
+    var chrome = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
 
     func makeCoordinator() -> Coordinator {
         Coordinator(model: model)
@@ -192,6 +234,7 @@ struct InlineEditorSurface: NSViewRepresentable {
     func makeNSView(context: Context) -> EditorTextView {
         let textView = EditorTextView.makeInlineEditor()
         context.coordinator.surfaceDelegate.wire(to: textView)
+        context.coordinator.applyChrome(chrome, to: textView)
         model.attach(textView: textView, scrollView: nil)
         let model = model
         textView.onPoolDrop = { [weak model] blockID, offset, includeFan in
@@ -205,6 +248,7 @@ struct InlineEditorSurface: NSViewRepresentable {
 
     func updateNSView(_ nsView: EditorTextView, context: Context) {
         // Projection-driven through the model; the width is SwiftUI's.
+        context.coordinator.applyChrome(chrome, to: nsView)
         context.coordinator.remeasure()
     }
 
@@ -217,21 +261,29 @@ struct InlineEditorSurface: NSViewRepresentable {
         let model: EditorViewModel
         let surfaceDelegate: EditorSurfaceDelegate
         private var badges: BadgeOverlayController?
-        private var tint: BlockTintOverlayController?
+        private var decor: BlockDecorOverlayController?
         private weak var textView: EditorTextView?
         private var storageToken: NSObjectProtocol?
         private var reportHeight: ((CGFloat) -> Void)?
+        private var appliedChrome: EditorSurfaceChrome?
 
         init(model: EditorViewModel) {
             self.model = model
             self.surfaceDelegate = EditorSurfaceDelegate(model: model)
         }
 
+        func applyChrome(_ chrome: EditorSurfaceChrome, to textView: EditorTextView) {
+            guard appliedChrome != chrome else { return }
+            appliedChrome = chrome
+            textView.applyVoiceChrome(chrome)
+            model.refreshBadges()
+        }
+
         func install(textView: EditorTextView, reportHeight: @escaping (CGFloat) -> Void) {
             self.textView = textView
             self.reportHeight = reportHeight
             badges = BadgeOverlayController(model: model, textView: textView)
-            tint = BlockTintOverlayController(model: model, textView: textView)
+            decor = BlockDecorOverlayController(model: model, textView: textView)
             // Every storage change (typing, projections, structural
             // rewrites) can change the content height; re-measure after
             // the edit settles. Cost: layout validation over a warm
@@ -263,7 +315,7 @@ struct InlineEditorSurface: NSViewRepresentable {
             if let storageToken { NotificationCenter.default.removeObserver(storageToken) }
             storageToken = nil
             badges?.uninstall()
-            tint?.uninstall()
+            decor?.uninstall()
             reportHeight = nil
         }
     }
@@ -363,10 +415,13 @@ final class BadgeOverlayController {
             let button = buttons[badge.blockID] ?? makeButton(blockID: badge.blockID)
             button.title = "⑂\(badge.variantCount)"
             button.sizeToFit()
-            // Corner badge: top-right of the block's first fragment.
+            // Corner badge: top-right of the block's first fragment — at
+            // the prose COLUMN's edge, not the window's (Phase 13 C1, R9:
+            // wide gutters put the window edge far from the text).
             let size = button.frame.size
+            let columnRight = textView.bounds.width - textView.textContainerInset.width
             button.frame = NSRect(
-                x: textView.bounds.width - size.width - 12,
+                x: min(textView.bounds.width - size.width - 8, columnRight + 6),
                 y: badge.frame.minY,
                 width: size.width, height: size.height)
             if button.superview == nil { textView.addSubview(button) }
@@ -392,71 +447,6 @@ final class BadgeOverlayController {
         guard let blockID = sender.identifier?.rawValue else { return }
         model.openFan(blockID: blockID)
     }
-}
-
-// MARK: - Block tint overlay (9d "Show Blocks" — overlay views, not text attributes)
-
-/// Renders the tint spans the view model computes (`refreshTint`) as
-/// translucent passthrough views UNDER the other overlays. Same doctrine as
-/// the badges: geometry from fragment frames, decorations never on the text
-/// storage (TEXTKIT2 §3 — rendering attributes are the flaky path).
-@MainActor
-final class BlockTintOverlayController {
-    /// Soft pastels at low alpha — functional, unstyled (Phase 13 owns the
-    /// pretty version). Order pairs with `BlockTint`'s palette indices.
-    private static let palette: [NSColor] = [
-        .systemBlue.withAlphaComponent(0.09),
-        .systemGreen.withAlphaComponent(0.09),
-        .systemOrange.withAlphaComponent(0.09),
-        .systemPurple.withAlphaComponent(0.09),
-        .systemTeal.withAlphaComponent(0.09),
-    ]
-
-    private let model: EditorViewModel
-    private weak var textView: EditorTextView?
-    private var views: [PassthroughTintView] = []
-
-    init(model: EditorViewModel, textView: EditorTextView) {
-        self.model = model
-        self.textView = textView
-        model.tintSink = { [weak self] spans in self?.render(spans) }
-    }
-
-    func uninstall() {
-        model.tintSink = nil
-        for view in views { view.removeFromSuperview() }
-        views.removeAll()
-    }
-
-    private func render(_ spans: [EditorViewModel.BlockTintSpan]) {
-        guard let textView else { return }
-        while views.count < spans.count {
-            let view = PassthroughTintView(frame: .zero)
-            textView.addSubview(view, positioned: .below, relativeTo: nil)
-            views.append(view)
-        }
-        while views.count > spans.count {
-            views.removeLast().removeFromSuperview()
-        }
-        for (view, span) in zip(views, spans) {
-            view.frame = span.frame
-            view.layer?.backgroundColor =
-                Self.palette[span.colorIndex % Self.palette.count].cgColor
-        }
-    }
-}
-
-/// A colored rectangle that never intercepts the mouse — the editor
-/// underneath keeps every click and drag.
-private final class PassthroughTintView: NSView {
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        wantsLayer = true
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 // MARK: - Content-anchored scroll restore (the memo's resize obligation)

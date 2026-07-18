@@ -309,6 +309,10 @@ struct BookView: View {
                             .padding(.vertical, 8)
                     }
                 }
+                // R9 (Phase 13 C1): the book page is a bounded, centered
+                // prose column — text never runs near the window edge.
+                .frame(maxWidth: 760, alignment: .leading)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
             }

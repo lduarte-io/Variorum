@@ -81,6 +81,14 @@ struct RootView: View {
             paletteOpen = true
             router.paletteRequested = false
         }
+        // Phase 13 C1: the voice's text-surface half — keep the one global
+        // typography current so surfaces created LATER materialize in the
+        // right voice (open surfaces re-style through their own chrome
+        // application; both writers set the same resolved value).
+        .onChange(of: theme.settings) { _, settings in
+            EditorTypography.current = EditorTypography.resolve(
+                voice: settings.voice, inlineComments: settings.inlineComments)
+        }
         .task { await theme.start() }
         .task { await library.start() }
         .task { await library.startJournal() }

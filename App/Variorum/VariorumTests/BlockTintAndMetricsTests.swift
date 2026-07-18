@@ -2,55 +2,26 @@
 //  BlockTintAndMetricsTests.swift
 //  VariorumTests
 //
-//  Phase 9d — the pure status-bar and tint helpers: stable never-adjacent
-//  block colors (the author's no-zebra rule) and the word counter.
+//  The pure status-bar helpers + what survives of the 9d tint machinery
+//  after Phase 13 C1 retired its look (R6 — dotted seams are the boundary
+//  mechanism; no per-block background colors).
 //
 
 import Foundation
 import Testing
 @testable import Variorum
 
-@Suite("BlockTint (9d — Show Blocks)")
+@Suite("BlockTint survivors (Phase 13 C1 retired the tint look)")
 struct BlockTintTests {
-    @Test func adjacentBlocksNeverShareAColor() {
-        // Property over many orderings, including IDs engineered to hash
-        // into the same palette slot.
-        let ids = (0..<200).map { "block-\($0)" }
-        let indices = BlockTint.indices(for: ids)
-        for (a, b) in zip(indices, indices.dropFirst()) {
-            #expect(a != b)
-        }
-        // Same-slot neighbors specifically: duplicate-ID adjacency is the
-        // worst case (identical hash), and the bump must still separate.
-        let clones = BlockTint.indices(for: ["twin", "twin", "twin"])
-        for (a, b) in zip(clones, clones.dropFirst()) {
-            #expect(a != b)
-        }
-    }
-
-    @Test func colorsAreDeterministicAcrossCalls() {
-        let ids = (0..<50).map { "id-\($0)" }
-        #expect(BlockTint.indices(for: ids) == BlockTint.indices(for: ids))
-    }
-
-    @Test func insertingABlockNeverRecolorsThePrefix() {
-        // The author's anti-zebra requirement: a new block in the middle
-        // must not ripple colors backwards through the document.
-        let ids = (0..<50).map { "id-\($0)" }
-        let before = BlockTint.indices(for: ids)
-        var inserted = ids
-        inserted.insert("the-new-block", at: 25)
-        let after = BlockTint.indices(for: inserted)
-        #expect(Array(after.prefix(25)) == Array(before.prefix(25)))
-        // And the whole list still satisfies the adjacency rule.
-        for (a, b) in zip(after, after.dropFirst()) {
-            #expect(a != b)
-        }
-    }
+    // The pastel palette + never-adjacent index machinery retired with the
+    // 9d tint LOOK. What survives is pinned here: the stable hash (the
+    // lineage stripes' color identity); the container→view mapping keeps
+    // its own registration pins in DecorRegistrationTests.
 
     @Test func theHashIsStableNotProcessSeeded() {
-        // Pinned constant: FNV-1a("block") — a change to the hash function
-        // would silently recolor every document on upgrade; make it loud.
+        // Pinned constant: the FNV-1a offset basis — a change to the hash
+        // function would silently recolor every lineage stripe on upgrade;
+        // make it loud.
         #expect(BlockTint.stableHash("") == 0xcbf2_9ce4_8422_2325)
         #expect(BlockTint.stableHash("a") != BlockTint.stableHash("b"))
     }
