@@ -1,8 +1,9 @@
 # Phase 13 — UI design passes (plan-in-progress · design sittings record)
 
-> **STATUS: DRAFT PLAN READY FOR THE AUTHOR'S REVIEW (2026-07-17, after five
-> sittings).** The execution plan is drafted at the bottom of this file; the author
-> reviews it (plus open questions 17/19/20), then invokes `/run-phase 13`.
+> **STATUS: RATIFIED (sitting 7, 2026-07-18) — EXECUTION UNDERWAY: `/run-phase 13`
+> invoked 2026-07-18, all-Fable cast per R54 (her direct-edit amendment: coordinator
+> Fable too).** Seven sittings recorded below; every open question is closed; the
+> execution plan is at the bottom of this file.
 > Per the two-stage process (CLAUDE.md model policy, author 2026-07-17): this file
 > accumulates the author-attended design sittings' record — the 11a "kickoff spike
 > record" precedent: what's recorded here from her own words is BINDING input — and
@@ -650,8 +651,10 @@ recorded in R51):**
   current schema whenever she next wants it. Her priority: **the real thing on her
   Mac** — the phase ends with the finished app on `/Applications` against the real
   store.
-- **R54 — Staffing: FABLE** — coordinator Opus · implementer Fable · cold reviewer
-  Fable, the Phase 10/11 same-model shape; the Sync/ rider stands.
+- **R54 — Staffing: FABLE** — coordinator Fable · implementer Fable · cold reviewer
+  Fable (all-Fable — her amendment by direct edit, 2026-07-18, supersedes the
+  recorded Opus-coordinator half), the Phase 10/11 same-model review shape; the
+  Sync/ rider stands.
 - **R55 — FULLY AUTONOMOUS execution:** the phase runs to completion WITHOUT her.
   New questions do NOT stop the build — "questions should just be noted and the
   execution should continue": every ambiguity gets the PROVISIONAL treatment
@@ -767,7 +770,7 @@ recorded in R51):**
 > xcodebuild masks exit codes; a live app instance blocks the Mac test runner
 > (NEVER kill her running Variorum.app); wrong `-only-testing:` names report
 > vacuous success; SwiftUI `.task` doesn't fire under the test host.
-> **Staffing (author, 2026-07-18 — R54): coordinator Opus · implementer FABLE ·
+> **Staffing (author, 2026-07-18 — R54): coordinator Fable · implementer FABLE ·
 > cold reviewer FABLE, the 10/11 same-model shape; the Sync/ rider stands.**
 > **Execution is FULLY AUTONOMOUS (R55): no mid-phase author questions — every
 > ambiguity, product-flavored included, gets PROVISIONAL-and-continue (implement
