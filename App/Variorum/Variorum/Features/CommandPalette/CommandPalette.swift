@@ -85,7 +85,13 @@ final class PaletteModel {
         items = result
     }
 
-    func execute(_ item: PaletteItem, onOpen: (SidebarSelection) -> Void) {
+    /// Executes a row. Block hits carry their block ID beside the home
+    /// selection (Stage C: the caret lands ON the block, not just in the
+    /// right post — the round-2 MINOR's recorded remainder).
+    func execute(
+        _ item: PaletteItem,
+        onOpen: (SidebarSelection, _ blockID: String?) -> Void
+    ) {
         switch item.kind {
         case .command:
             if let index = Int(item.id.dropFirst("command-".count)),
@@ -93,15 +99,16 @@ final class PaletteModel {
                 commands[index].action()
             }
         case .book:
-            onOpen(.reading(String(item.id.dropFirst("book-".count))))
+            onOpen(.reading(String(item.id.dropFirst("book-".count))), nil)
         case .post:
-            onOpen(.post(String(item.id.dropFirst("post-".count))))
+            onOpen(.post(String(item.id.dropFirst("post-".count))), nil)
         case .block:
-            // A block opens its HOME surface (round 2, MINOR: Enter must
-            // execute — fire-and-speak on the legibility surface itself);
-            // caret-precise landing is Stage C's.
+            // A block opens its HOME surface with the caret seeded at the
+            // block itself (fire-and-speak on the legibility surface).
             if let home = item.homeContainerID {
-                onOpen(item.homeIsPool ? .pool(home) : .post(home))
+                onOpen(
+                    item.homeIsPool ? .pool(home) : .post(home),
+                    String(item.id.dropFirst("block-".count)))
             }
         }
     }
@@ -109,7 +116,7 @@ final class PaletteModel {
 
 struct CommandPaletteView: View {
     let model: PaletteModel
-    let onOpen: (SidebarSelection) -> Void
+    let onOpen: (SidebarSelection, _ blockID: String?) -> Void
     @Environment(\.dismiss) private var dismiss
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -134,8 +141,8 @@ struct CommandPaletteView: View {
                 .focused($fieldFocused)
                 .onSubmit {
                     if let first = model.items.first {
-                        model.execute(first) { selection in
-                            onOpen(selection)
+                        model.execute(first) { selection, blockID in
+                            onOpen(selection, blockID)
                         }
                         dismiss()
                     }
@@ -143,8 +150,8 @@ struct CommandPaletteView: View {
             Divider().overlay(tokens.line)
             List(model.items) { item in
                 Button {
-                    model.execute(item) { selection in
-                        onOpen(selection)
+                    model.execute(item) { selection, blockID in
+                        onOpen(selection, blockID)
                     }
                     dismiss()
                 } label: {

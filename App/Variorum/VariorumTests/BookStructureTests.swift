@@ -236,4 +236,50 @@ struct JournalBooksTests {
             #expect(books.map(\.id) == [nextID])
         }
     }
+
+    @Test func chapterDragDropsBeforeTargetOrAtTheEnd() async throws {
+        // Stage C (R19's polished bar): the navigator drag lands as ONE
+        // reorderSection; no-op drops and foreign payloads touch nothing.
+        try await withShellSession2 { session, db in
+            let readingID = try await session.runner.run { ops in
+                let reading = try ops.createReading(name: "orbit", kind: .curated)
+                _ = try ops.createSection(in: reading.id, name: "I")
+                _ = try ops.createSection(in: reading.id, name: "II")
+                _ = try ops.createSection(in: reading.id, name: "III")
+                return reading.id
+            }
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            @MainActor func refresh() async throws {
+                let snapshot = try await db.read { [readingID] db in
+                    BookStructureModel.Snapshot(
+                        reading: try Queries.reading(db, id: readingID),
+                        sections: try Queries.readingSections(db, readingID: readingID),
+                        deletedSections: try Queries.deletedReadingSections(db, readingID: readingID),
+                        assignments: try Queries.sectionAssignments(db, readingID: readingID))
+                }
+                structure.adopt(snapshot)
+            }
+            try await refresh()
+            let ids = structure.sections.map(\.id)
+            #expect(structure.sections.map(\.name) == ["I", "II", "III"])
+
+            // Drop III before I.
+            await structure.moveChapter(ids[2], before: ids[0])
+            try await refresh()
+            #expect(structure.sections.map(\.name) == ["III", "I", "II"])
+
+            // Drop III at the END.
+            await structure.moveChapter(ids[2], before: nil)
+            try await refresh()
+            #expect(structure.sections.map(\.name) == ["I", "II", "III"])
+
+            // No-op drops: own position, own next boundary, foreign string.
+            await structure.moveChapter(ids[0], before: ids[0])
+            await structure.moveChapter(ids[0], before: ids[1])
+            await structure.moveChapter("not-a-section", before: ids[0])
+            try await refresh()
+            #expect(structure.sections.map(\.name) == ["I", "II", "III"])
+            #expect(structure.lastError == nil)
+        }
+    }
 }

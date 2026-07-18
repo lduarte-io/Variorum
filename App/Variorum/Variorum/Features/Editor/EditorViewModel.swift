@@ -54,6 +54,12 @@ final class EditorViewModel {
     /// selection's when one exists.
     private(set) var caretBlockWordCount: Int?
     private(set) var selectionWordCount: Int?
+    /// Phase 13 C1 (R11 — word-count prominence): the post's total,
+    /// maintained INCREMENTALLY (per-variant cache; only changed texts
+    /// re-enumerate — cost ∝ the edit, the P1 unit; the caret block's
+    /// live count adjusts the total between projections).
+    private(set) var postWordCount: Int?
+    @ObservationIgnored private var wordCountByVariant: [String: Int] = [:]
     /// Fan badges for on-screen fanned blocks (document coordinates).
     private(set) var badges: [BlockBadge] = []
     /// The block whose fan panel is open (nil = closed).
@@ -512,10 +518,34 @@ final class EditorViewModel {
     private func adoptSurfaceTextMap(_ new: [Queries.RenderedBlock]) {
         var map: [String: String] = [:]
         map.reserveCapacity(new.count)
+        var counts: [String: Int] = [:]
+        counts.reserveCapacity(new.count)
         for slot in new {
-            if let variantID = slot.variantID { map[variantID] = slot.text ?? "" }
+            guard let variantID = slot.variantID else { continue }
+            let text = slot.text ?? ""
+            map[variantID] = text
+            // Word counts re-enumerate ONLY changed texts (R11's total at
+            // P1 cost — an echo re-enumerates nothing; the equality check
+            // is the same in-memory compare class the echo path already
+            // performs).
+            if surfaceTextByVariant[variantID] == text,
+               let cached = wordCountByVariant[variantID] {
+                counts[variantID] = cached
+            } else {
+                counts[variantID] = TextMetrics.wordCount(text)
+            }
         }
         surfaceTextByVariant = map
+        wordCountByVariant = counts
+        publishPostWordCount()
+    }
+
+    /// The total = the CURRENT slots' cached counts (stale variants fall
+    /// out naturally; gaps count nothing). O(blocks) per call.
+    private func publishPostWordCount() {
+        let total = slots.compactMap(\.variantID)
+            .reduce(0) { $0 + (wordCountByVariant[$1] ?? 0) }
+        if postWordCount != total { postWordCount = total }
     }
 
     /// Same block sequence, different content (choose-variant, an external
@@ -2479,6 +2509,13 @@ final class EditorViewModel {
         selectionWordCount = selection.length > 0
             ? TextMetrics.wordCount(viewText(selection))
             : nil
+        // The live buffer's caret-block count keeps the post TOTAL current
+        // between projections (R11).
+        if let caretVariantID, let fresh = caretBlockWordCount,
+           wordCountByVariant[caretVariantID] != fresh {
+            wordCountByVariant[caretVariantID] = fresh
+            publishPostWordCount()
+        }
         // Gesture enablement rides every caret/selection change — the menu
         // bar, context menu, and shortcuts read these planner verdicts
         // (one brain, three doors). Cost: the caret block's boundary scan.

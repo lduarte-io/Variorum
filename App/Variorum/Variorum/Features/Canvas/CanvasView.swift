@@ -248,6 +248,8 @@ struct CanvasView: View {
 struct PoolDetailView: View {
     let session: AppSession
     let poolID: String
+    /// Stage C: a caret-precise landing (palette/Library block hits).
+    var initialBlockID: String? = nil
 
     enum Mode: String, CaseIterable {
         case scraps = "Scraps"
@@ -255,6 +257,7 @@ struct PoolDetailView: View {
     }
 
     @State private var mode: Mode = .scraps
+    @State private var pendingCaret: Int?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -270,11 +273,25 @@ struct PoolDetailView: View {
             Divider()
             switch mode {
             case .scraps:
-                EditorView(session: session, postID: poolID)
-                    .id(poolID)
+                EditorView(session: session, postID: poolID, caretSeed: pendingCaret)
+                    .id("\(poolID)-caret-\(pendingCaret ?? -1)")
             case .canvas:
                 CanvasView(session: session, containerID: poolID)
                     .id("canvas-\(poolID)")
+            }
+        }
+        .onAppear {
+            guard let initialBlockID else { return }
+            Task {
+                // The same landing math as PostDetailView.jump — the
+                // block's surface offset seeds the editor's caret.
+                let offset: Int? = try? await session.database.read { [poolID] db in
+                    let slots = try Queries.renderPost(db, containerID: poolID)
+                    guard let i = slots.firstIndex(where: { $0.blockID == initialBlockID })
+                    else { return nil }
+                    return BlockRangeIndex(slots: slots, tail: nil).range(ofEntryAt: i).location
+                }
+                if let offset { pendingCaret = offset }
             }
         }
     }

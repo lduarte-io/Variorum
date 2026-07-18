@@ -111,6 +111,9 @@ struct LibraryCatalogView: View {
     let library: LibraryViewModel
     let tags: TagsViewModel
     let onOpen: (SidebarSelection) -> Void
+    /// Stage C: block hits land caret-precise when the shell provides the
+    /// door (nil falls back to plain navigation).
+    var onOpenBlock: ((SidebarSelection, String) -> Void)? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -271,9 +274,17 @@ struct LibraryCatalogView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             // A block hit opens its HOME surface (round 2,
-                            // MINOR: dead rows violated fire-and-speak).
+                            // MINOR: dead rows violated fire-and-speak) —
+                            // caret-precise where the shell offers the
+                            // Stage C door.
                             if let home = hit.homeContainerID {
-                                onOpen(hit.homeIsPool ? .pool(home) : .post(home))
+                                let selection: SidebarSelection =
+                                    hit.homeIsPool ? .pool(home) : .post(home)
+                                if let onOpenBlock {
+                                    onOpenBlock(selection, hit.id)
+                                } else {
+                                    onOpen(selection)
+                                }
                             }
                         }
                     }

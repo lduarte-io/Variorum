@@ -18,6 +18,9 @@ import VariorumCore
 struct PostDetailView: View {
     let session: AppSession
     let postID: String
+    /// Stage C: a caret-precise landing (palette/Library block hits) —
+    /// the Write editor opens with its caret seeded at this block.
+    var initialBlockID: String? = nil
 
     enum Mode: String, CaseIterable {
         case write = "Write"
@@ -80,6 +83,9 @@ struct PostDetailView: View {
         .inspector(isPresented: $referencesShown) {
             ReferencePanel(session: session, postID: postID)
                 .inspectorColumnWidth(min: 240, ideal: 340)
+        }
+        .onAppear {
+            if let initialBlockID { jump(to: initialBlockID) }
         }
     }
 

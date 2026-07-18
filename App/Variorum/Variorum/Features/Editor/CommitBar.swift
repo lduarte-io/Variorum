@@ -13,14 +13,22 @@ struct CommitBar: View {
     let model: EditorViewModel
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
+    // Phase 13 C1 (R11): the status line wears the voice; the word counts
+    // are PROMINENT (the terminal mockup's liked idiom).
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            Divider()
+            Divider().overlay(tokens.line)
             HStack(spacing: 12) {
-                Text(caretLabel)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(tokens.chromeLabel(caretLabel))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                 Button("Commit (⌘S)") { model.commitCaretVariant() }
                     .disabled(model.caretVariantID == nil || model.header?.locked == true)
                 Button(model.commitList == nil ? "History" : "Hide History") {
@@ -83,21 +91,25 @@ struct CommitBar: View {
                               action: model.openCaretFan)
 
                 Spacer()
-                if let words = wordCountLabel {
-                    Text(words)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize()
-                }
                 if let status = model.statusMessage {
                     Text(status)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
+                if let words = wordCountLabel {
+                    // R11: word-count PROMINENCE — the accent-colored,
+                    // always-there part of the editing surface.
+                    Text(tokens.chromeLabel(words))
+                        .font(tokens.small.weight(.semibold))
+                        .foregroundStyle(tokens.accent)
+                        .fixedSize()
+                }
             }
-            .padding(6)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(tokens.surface)
             if model.commitList != nil {
                 CommitHistoryView(model: model)
                     .frame(maxHeight: 180)
@@ -118,7 +130,7 @@ struct CommitBar: View {
             // "block 6/23" (9d): the user-facing number is the current
             // order, derived at read time; the stable ID stays the identity.
             let ordinal = model.caretOrdinal.map { "\($0)/\(model.blockCount)" } ?? "—"
-            return "block \(ordinal) · \(shortID(model.caretBlockID))"
+            return "blk \(ordinal) · \(shortID(model.caretBlockID))"
         }
         if model.hasOpenTail { return "open tail" }
         return "—"
@@ -126,8 +138,13 @@ struct CommitBar: View {
 
     private var wordCountLabel: String? {
         var parts: [String] = []
-        if let block = model.caretBlockWordCount { parts.append("\(block) words") }
-        if let selected = model.selectionWordCount { parts.append("\(selected) selected") }
+        if let block = model.caretBlockWordCount { parts.append("\(block)w") }
+        if let selected = model.selectionWordCount { parts.append("\(selected)w selected") }
+        // R11: the post total, always ambient (incremental — never a
+        // whole-document walk per keystroke).
+        if let total = model.postWordCount {
+            parts.append("\(total.formatted())w post")
+        }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 

@@ -159,6 +159,24 @@ final class BookStructureModel {
         await run { try $0.reorderSection(sectionID, to: target) }
     }
 
+    /// R19's polished gesture (Stage C): drop a dragged chapter BEFORE
+    /// `targetID` (nil = the end). Foreign strings and no-op drops (the
+    /// chapter's own edges) touch nothing.
+    func moveChapter(_ sectionID: String, before targetID: String?) async {
+        guard sectionID != targetID,
+              sections.contains(where: { $0.id == sectionID })
+        else { return }
+        if let targetID {
+            guard let targetIndex = sections.firstIndex(where: { $0.id == targetID })
+            else { return }
+            if targetIndex > 0, sections[targetIndex - 1].id == sectionID { return }
+            await run { try $0.reorderSection(sectionID, to: .before(targetID)) }
+        } else {
+            guard sections.last?.id != sectionID else { return }
+            await run { try $0.reorderSection(sectionID, to: .end) }
+        }
+    }
+
     /// File a post into a chapter (nil = unfiled).
     func assign(_ postID: String, to sectionID: String?) async {
         await run { try $0.assignPostToSection(postID, in: self.readingID, section: sectionID) }

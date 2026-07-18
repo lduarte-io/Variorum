@@ -144,18 +144,44 @@ struct BookView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(structure.grouped(entries: model.entries), id: \.section?.id) { group in
                             if let section = group.section {
+                                // R19's insertion bar: the drop target
+                                // shows exactly where the chapter lands.
+                                if chapterDropTarget == section.id {
+                                    Rectangle()
+                                        .fill(tokens.ring)
+                                        .frame(height: 2)
+                                }
                                 Button {
                                     // Navigate: land the book scroll at the
                                     // chapter (the flow view shows it too).
                                     scrollTarget = "chapter-\(section.id)"
                                 } label: {
-                                    Text(tokens.chromeLabel(section.name))
-                                        .font(tokens.small.weight(.semibold))
-                                        .foregroundStyle(tokens.accent)
-                                        .lineLimit(1)
+                                    HStack(spacing: 4) {
+                                        Text("⠿")
+                                            .font(tokens.small)
+                                            .foregroundStyle(tokens.faint)
+                                        Text(tokens.chromeLabel(section.name))
+                                            .font(tokens.small.weight(.semibold))
+                                            .foregroundStyle(tokens.accent)
+                                            .lineLimit(1)
+                                    }
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu { chapterMenu(section) }
+                                .draggable(section.id)
+                                .dropDestination(for: String.self) { items, _ in
+                                    guard let dragged = items.first else { return false }
+                                    Task {
+                                        await structure.moveChapter(dragged, before: section.id)
+                                    }
+                                    return true
+                                } isTargeted: { targeted in
+                                    if targeted {
+                                        chapterDropTarget = section.id
+                                    } else if chapterDropTarget == section.id {
+                                        chapterDropTarget = nil
+                                    }
+                                }
                             } else if structure.chaptersActive {
                                 Text(tokens.chromeLabel("unfiled"))
                                     .font(tokens.small.weight(.semibold))
@@ -181,6 +207,25 @@ struct BookView: View {
                                 .buttonStyle(.plain)
                                 .contextMenu { postChapterMenu(entry) }
                             }
+                        }
+                        // The end drop zone: drag a chapter past the last
+                        // one to land it at the end (R19).
+                        if structure.chaptersActive, structure.reading?.kind == .curated {
+                            if chapterDropAtEnd {
+                                Rectangle()
+                                    .fill(tokens.ring)
+                                    .frame(height: 2)
+                            }
+                            Color.clear
+                                .frame(height: 14)
+                                .contentShape(Rectangle())
+                                .dropDestination(for: String.self) { items, _ in
+                                    guard let dragged = items.first else { return false }
+                                    Task {
+                                        await structure.moveChapter(dragged, before: nil)
+                                    }
+                                    return true
+                                } isTargeted: { chapterDropAtEnd = $0 }
                         }
                     }
                     .id("nav-noop")
@@ -227,6 +272,10 @@ struct BookView: View {
 
     /// The book scroll's pending landing (chapter/outline clicks).
     @State private var scrollTarget: String?
+    /// R19 drag state: the chapter the dragged one would land BEFORE, and
+    /// the end zone's highlight.
+    @State private var chapterDropTarget: String?
+    @State private var chapterDropAtEnd = false
 
     @ViewBuilder
     private func chapterMenu(_ section: ReadingSection) -> some View {

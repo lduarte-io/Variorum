@@ -29,6 +29,15 @@ struct RootView: View {
     @State private var palette: PaletteModel
     @State private var selection: SidebarSelection? = .shelf
     @State private var paletteOpen = false
+    /// Stage C: a palette/Library block hit lands CARET-PRECISE — the
+    /// target block rides beside the selection and seeds the opened
+    /// editor's caret (cleared on ordinary navigation).
+    @State private var blockTarget: BlockTarget?
+
+    struct BlockTarget: Equatable {
+        let containerID: String
+        let blockID: String
+    }
     /// Phase 13 (B1): the live voice — tokens + idioms, environment-fed.
     @State private var theme: ThemeStore
     @Environment(\.openSettings) private var openSettings
@@ -66,8 +75,8 @@ struct RootView: View {
         }
         .environment(theme)
         .sheet(isPresented: $paletteOpen) {
-            CommandPaletteView(model: palette) { picked in
-                selection = picked
+            CommandPaletteView(model: palette) { picked, blockID in
+                open(picked, blockID: blockID)
             }
             .environment(theme)
         }
@@ -109,7 +118,8 @@ struct RootView: View {
         case .library:
             LibraryCatalogView(
                 session: session, model: catalog, library: library, tags: tags,
-                onOpen: { selection = $0 })
+                onOpen: { selection = $0 },
+                onOpenBlock: { picked, blockID in open(picked, blockID: blockID) })
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts, library: library,
@@ -118,8 +128,11 @@ struct RootView: View {
         case .post(let postID):
             // Phase 11 (A3): the mode switcher — Write / Takes / Compare
             // over one post, one store.
-            PostDetailView(session: session, postID: postID)
-                .id(postID) // a different post is a different editor
+            PostDetailView(
+                session: session, postID: postID,
+                initialBlockID: target(for: postID))
+                // a different post (or block landing) is a different editor
+                .id("\(postID)#\(target(for: postID) ?? "")")
         case .tag(let tagID):
             FolderView(session: session, tagID: tagID) { postID in
                 selection = .post(postID)
@@ -132,8 +145,10 @@ struct RootView: View {
             // A scraps container ("Blocks") opens in the ordinary detail
             // editor (the ratified Phase 10 shape); the canvas is its
             // second face (Phase 11, A7).
-            PoolDetailView(session: session, poolID: poolID)
-                .id(poolID)
+            PoolDetailView(
+                session: session, poolID: poolID,
+                initialBlockID: target(for: poolID))
+                .id("\(poolID)#\(target(for: poolID) ?? "")")
         case .recovery:
             RecoveryView(session: session, library: library) { postID in
                 selection = .post(postID)
@@ -143,6 +158,21 @@ struct RootView: View {
                 selection = .post(postID)
             }
         }
+    }
+
+    /// Navigation with an optional caret-precise block landing (Stage C).
+    private func open(_ picked: SidebarSelection, blockID: String?) {
+        switch (picked, blockID) {
+        case (.post(let id), .some(let block)), (.pool(let id), .some(let block)):
+            blockTarget = BlockTarget(containerID: id, blockID: block)
+        default:
+            blockTarget = nil
+        }
+        selection = picked
+    }
+
+    private func target(for containerID: String) -> String? {
+        blockTarget?.containerID == containerID ? blockTarget?.blockID : nil
     }
 
     /// The dated home's door (R38: the journal lives on the shelf;

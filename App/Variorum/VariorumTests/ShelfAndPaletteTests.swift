@@ -147,14 +147,14 @@ struct PromoteAndPaletteTests {
 
             // Execution: a command runs its action; a post routes.
             if let command = model.items.first(where: { $0.kind == .command }) {
-                model.execute(command) { _ in }
+                model.execute(command) { _, _ in }
             }
             #expect(executed == ["seams"])
             model.query = "storm"
             await model.refresh()
             var opened: SidebarSelection?
             if let post = model.items.first(where: { $0.kind == .post }) {
-                model.execute(post) { opened = $0 }
+                model.execute(post) { picked, _ in opened = picked }
             }
             if case .post = opened {} else {
                 Issue.record("a post hit must route to .post — got \(String(describing: opened))")
@@ -180,13 +180,17 @@ struct PromoteAndPaletteTests {
             await model.refresh()
             let blocks = model.items.filter { $0.kind == .block }
             #expect(blocks.count == 2)
-            var opened: [SidebarSelection] = []
+            var opened: [(SidebarSelection, String?)] = []
             for hit in blocks {
-                model.execute(hit) { opened.append($0) }
+                model.execute(hit) { opened.append(($0, $1)) }
             }
             #expect(opened.count == 2, "every block hit NAVIGATES — no dead rows")
-            #expect(opened.contains { if case .pool = $0 { true } else { false } })
-            #expect(opened.contains { if case .post = $0 { true } else { false } })
+            #expect(opened.contains { if case .pool = $0.0 { true } else { false } })
+            #expect(opened.contains { if case .post = $0.0 { true } else { false } })
+            // Stage C: the landing is CARET-PRECISE — the block ID rides
+            // beside the home selection for the shell to seed the caret.
+            #expect(opened.allSatisfy { $0.1 != nil && !$0.1!.isEmpty },
+                    "block hits carry their block ID")
         }
     }
 
