@@ -8,7 +8,9 @@
 //  aligned composition — versions & outline↔draft; version_of's door 2),
 //  OUTLINE (outline-left/draft-right over derivedBlocks — A5), BLOCKS (the
 //  collapsible block-TOC — A6; jump-to-block re-seeds the Write editor's
-//  caret so the hybrid primitive lands it).
+//  caret so the hybrid primitive lands it), and — Phase 13 C3 (R40) —
+//  CANVAS (spatial block arrangement as a VIEW on the post, the minimal
+//  takes switcher only; the sidebar door is gone by ruling).
 //  Mode is session UI state; every mode reads the same store.
 //
 
@@ -28,6 +30,7 @@ struct PostDetailView: View {
         case compare = "Compare"
         case outline = "Outline"
         case blocks = "Blocks"
+        case canvas = "Canvas"
     }
 
     @State private var mode: Mode = .write
@@ -48,7 +51,7 @@ struct PostDetailView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .frame(maxWidth: 420)
+                .frame(maxWidth: 500)
                 // Phase 13 (B3, R35): the membership indicator — "this
                 // post also appears in N books" + the divergence door.
                 MembershipChip(session: session, postID: postID)
@@ -78,6 +81,11 @@ struct PostDetailView: View {
                     jump(to: blockID)
                 })
                 .id("toc-\(postID)")
+            case .canvas:
+                // C3 (R40): canvas as a view ON the post — canvasProjection
+                // works over ANY container (a post is a container).
+                CanvasView(session: session, containerID: postID)
+                    .id("canvas-\(postID)")
             }
         }
         .inspector(isPresented: $referencesShown) {

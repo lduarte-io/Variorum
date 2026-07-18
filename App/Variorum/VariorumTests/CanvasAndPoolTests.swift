@@ -192,3 +192,94 @@ struct CanvasAndPoolTests {
         }
     }
 }
+
+// MARK: - Phase 13, Stage C3 (R40) — the minimal takes switcher: canvas is
+// a view on a POST too, and ‹ › moves the block's chosen take one step at
+// a time through `chooseVariant` (the PROVISIONAL explicit-gesture reading
+// — I3's deliberate-choice door; QUESTIONS #28). Sealed posts refuse and
+// the refusal speaks.
+
+@Suite("Canvas takes switcher (Phase 13, C3)")
+@MainActor
+struct CanvasTakesSwitcherTests {
+    @Test func theSwitcherMovesChosenOneTakeAtATimeAndClampsAtTheEnds() async throws {
+        try await withWorld { session, db in
+            // A POST's canvas (R40: canvas is a view on a post, not just
+            // pools) with one fanned block: [t1 chosen, t2, t3].
+            let world = try await session.runner.run { ops -> (post: String, block: String, takes: [String]) in
+                let post = try ops.createPost(title: "spatial", profile: .generic)
+                let mint = try ops.newBlock(in: post.id, text: "take one", at: .end)
+                _ = try ops.newBlock(in: post.id, text: "single", at: .end)
+                let t2 = try ops.branchVariant(mint.block.id, from: mint.variant.id)
+                try ops.autosave(t2.id, text: "take two", charDelta: 4)
+                let t3 = try ops.branchVariant(mint.block.id, from: t2.id)
+                try ops.autosave(t3.id, text: "take three", charDelta: 4)
+                return (post.id, mint.block.id, [mint.variant.id, t2.id, t3.id])
+            }
+            let model = CanvasViewModel(session: session, containerID: world.post)
+            @MainActor func refresh() async throws {
+                model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
+            }
+            try await refresh()
+
+            func chosenNow() async throws -> String? {
+                try await db.read { db in
+                    try Queries.renderPost(db, containerID: world.post)
+                        .first { $0.blockID == world.block }?.variantID
+                }
+            }
+
+            // The single-take block offers no switcher; the fanned one does.
+            let position = model.takePosition(blockID: world.block)
+            #expect(position?.index == 0)
+            #expect(position?.count == 3)
+            let single = model.projection.cards.first { $0.block.blockID != world.block }!
+            #expect(model.takePosition(blockID: single.block.blockID) == nil)
+
+            // ‹ at the front clamps — no op fires, chosen unmoved.
+            await model.switchTake(blockID: world.block, delta: -1)
+            #expect(try await chosenNow() == world.takes[0])
+
+            // › steps EXACTLY one take: t1 → t2 → t3.
+            await model.switchTake(blockID: world.block, delta: 1)
+            #expect(try await chosenNow() == world.takes[1], "one step, not a jump")
+            try await refresh()
+            await model.switchTake(blockID: world.block, delta: 1)
+            #expect(try await chosenNow() == world.takes[2])
+            try await refresh()
+
+            // › at the end clamps.
+            await model.switchTake(blockID: world.block, delta: 1)
+            #expect(try await chosenNow() == world.takes[2])
+
+            // ‹ walks back.
+            await model.switchTake(blockID: world.block, delta: -1)
+            #expect(try await chosenNow() == world.takes[1])
+            #expect(model.statusMessage == nil)
+        }
+    }
+
+    @Test func aSealedPostsSwitcherRefusesAndSpeaks() async throws {
+        try await withWorld { session, db in
+            let world = try await session.runner.run { ops -> (post: String, block: String, chosen: String) in
+                let post = try ops.createPost(title: "sealed", profile: .generic)
+                let mint = try ops.newBlock(in: post.id, text: "take one", at: .end)
+                let t2 = try ops.branchVariant(mint.block.id, from: mint.variant.id)
+                try ops.autosave(t2.id, text: "take two", charDelta: 4)
+                try ops.lockPost(post.id)
+                return (post.id, mint.block.id, mint.variant.id)
+            }
+            let model = CanvasViewModel(session: session, containerID: world.post)
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
+
+            await model.switchTake(blockID: world.block, delta: 1)
+            #expect(model.statusMessage?.contains("sealed") == true,
+                    "the seal's refusal speaks (fire-and-speak)")
+            let chosen = try await db.read { db in
+                try Queries.renderPost(db, containerID: world.post)
+                    .first { $0.blockID == world.block }?.variantID
+            }
+            #expect(chosen == world.chosen, "chosen never moved under the seal")
+        }
+    }
+}

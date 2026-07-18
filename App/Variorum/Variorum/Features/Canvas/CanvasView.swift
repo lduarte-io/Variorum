@@ -2,15 +2,24 @@
 //  CanvasView.swift
 //  Variorum
 //
-//  Phase 11, Step A7 — the sticky-notes canvas (AppSpec §12), POOLS FIRST
-//  (the plan's answered interpretation 4, PROVISIONAL — extending to posts
-//  later is cheap; the table's shape doesn't change). Blocks-as-cards over
-//  `canvas_layout`: a drag's END is ONE `setCanvasPosition` (metadata CAS —
-//  a two-device race converges to either position, pinned in core); cards
-//  render read-cheap; un-positioned cards stack in a default column until
-//  first dragged (nothing persisted until the author places them). Layout
-//  rows tombstone with their block/container (the A1 triggers). Functional,
-//  unstyled.
+//  Phase 11, Step A7 — the sticky-notes canvas (AppSpec §12), pools first.
+//  Blocks-as-cards over `canvas_layout`: a drag's END is ONE
+//  `setCanvasPosition` (metadata CAS — a two-device race converges to
+//  either position, pinned in core); cards render read-cheap;
+//  un-positioned cards stack in a default column until first dragged
+//  (nothing persisted until the author places them). Layout rows tombstone
+//  with their block/container (the A1 triggers).
+//
+//  Phase 13, Stage C3 (R40) — canvas is a VIEW you open on a post or the
+//  scraps (the sidebar door is gone; PostDetailView + PoolDetailView carry
+//  the mode). Cards move onto the voice tokens, and fanned cards gain the
+//  MINIMAL takes switcher — "see takes" → a small ‹ take k of n › selector
+//  that switches THAT block's take one at a time, deliberately the
+//  mobile-inheritable pattern (R58's seed). ‹ › = `chooseVariant`
+//  (PROVISIONAL reading of R40's "switch that block to another one of its
+//  own takes" — an explicit per-block gesture, so I3's deliberate-choice
+//  doctrine holds; the view-local-display alternative is recorded —
+//  QUESTIONS #28).
 //
 
 import Foundation
@@ -127,6 +136,45 @@ final class CanvasViewModel {
             statusMessage = TakesViewModel.message(for: error)
         }
     }
+
+    // MARK: - The minimal takes switcher (Phase 13 C3, R40)
+
+    /// Where the block's RENDERED take sits in its fan: (index, count) —
+    /// nil for single-take blocks (no switcher) and for a rendered take
+    /// that isn't in the active fan (a fallback state; the switcher then
+    /// starts from the front on ›).
+    func takePosition(blockID: String) -> (index: Int?, count: Int)? {
+        guard let fan = projection.fans[blockID], fan.count > 1 else { return nil }
+        let currentID = projection.cards
+            .first { $0.block.blockID == blockID }?.block.variantID
+        return (fan.firstIndex { $0.id == currentID }, fan.count)
+    }
+
+    /// ‹ › — ONE take at a time: `chooseVariant` to the previous/next
+    /// ACTIVE take (the deliberate, explicit per-block gesture — I3). Ends
+    /// clamp; a sealed post's refusal speaks through the message path.
+    func switchTake(blockID: String, delta: Int) async {
+        guard let fan = projection.fans[blockID], fan.count > 1 else { return }
+        let currentID = projection.cards
+            .first { $0.block.blockID == blockID }?.block.variantID
+        let target: Int
+        if let index = fan.firstIndex(where: { $0.id == currentID }) {
+            target = index + delta
+        } else {
+            // The rendered take fell out of the active fan (fallback
+            // display): › enters the fan at its front; ‹ does nothing.
+            target = delta > 0 ? 0 : -1
+        }
+        guard fan.indices.contains(target) else { return }
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                try ops.chooseVariant(blockID, variantID: fan[target].id)
+            }
+        } catch {
+            statusMessage = TakesViewModel.message(for: error)
+        }
+    }
 }
 
 struct CanvasView: View {
@@ -142,6 +190,17 @@ struct CanvasView: View {
     }
 
     @State private var tagSheetBlock: TagSheetBlock?
+    /// C3 (R40): the ONE open takes switcher — minimal by design (opening
+    /// another card's closes this one).
+    @State private var switcherBlockID: String?
+    /// The voice reaches the canvas (optional environment, terminal
+    /// fallback — the established pattern).
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
 
     struct TagSheetBlock: Identifiable {
         let id: String
@@ -177,6 +236,7 @@ struct CanvasView: View {
                 }
             }
         }
+        .background(tokens.room)
         .task { await model.start() }
         .task { await model.startTags() }
         .sheet(item: $tagSheetBlock) { target in
@@ -200,23 +260,29 @@ struct CanvasView: View {
         let blockID = item.block.blockID
         let resting = model.restingPosition(blockID: blockID)
         let offset = model.dragOffsets[blockID] ?? .zero
+        let hasFan = item.block.hasFan
         return VStack(alignment: .leading, spacing: 4) {
             // Gap slots render gaps, never crash (SyncSpec §5).
             Text(item.block.text?.isEmpty == false ? item.block.text! : "· · ·")
                 .font(Font(EditorDocument.baseFont))
+                .foregroundStyle(tokens.ink)
                 .textSelection(.enabled)
                 .lineLimit(8)
             if !item.tagPaths.isEmpty {
                 Text(item.tagPaths.joined(separator: " · "))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+            }
+            if hasFan {
+                takesFooter(item: item, blockID: blockID)
             }
         }
         .padding(8)
         .frame(width: 240, alignment: .topLeading)
-        .background(Color.yellow.opacity(0.18))
+        .background(tokens.card)
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        .shadow(radius: 1)
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.takeLine, lineWidth: 1))
+        .shadow(color: .black.opacity(0.12), radius: 1, y: 1)
         .offset(x: resting.x + offset.width, y: resting.y + offset.height)
         .gesture(
             DragGesture()
@@ -236,6 +302,48 @@ struct CanvasView: View {
                 Task { await model.resetPosition(blockID: blockID) }
             }
         }
+    }
+
+    /// R40's MINIMAL takes switcher: "see takes" → ‹ take k of n › — one
+    /// at a time, that block only, nothing else of the fan machinery (the
+    /// mobile-inheritable pattern).
+    @ViewBuilder
+    private func takesFooter(item: Queries.PoolItem, blockID: String) -> some View {
+        if switcherBlockID == blockID, let position = model.takePosition(blockID: blockID) {
+            HStack(spacing: 6) {
+                Button("‹") { Task { await model.switchTake(blockID: blockID, delta: -1) } }
+                    .disabled((position.index ?? 0) <= 0)
+                Text(switcherLabel(item: item, position: position))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                Button("›") { Task { await model.switchTake(blockID: blockID, delta: 1) } }
+                    .disabled(position.index.map { $0 >= position.count - 1 } ?? false)
+                Spacer()
+                Button("done") { switcherBlockID = nil }
+                    .buttonStyle(.plain)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .controlSize(.mini)
+        } else {
+            Button("⑂ see takes (\(item.block.activeVariantCount))") {
+                switcherBlockID = blockID
+            }
+            .buttonStyle(.plain)
+            .font(tokens.small)
+            .foregroundStyle(tokens.accent)
+        }
+    }
+
+    private func switcherLabel(
+        item: Queries.PoolItem, position: (index: Int?, count: Int)
+    ) -> String {
+        guard let index = position.index else { return "take — of \(position.count)" }
+        let fan = model.projection.fans[item.block.blockID] ?? []
+        let label = fan.indices.contains(index) ? fan[index].label : nil
+        let name = label.map { " · \($0)" } ?? ""
+        return "take \(index + 1) of \(position.count)\(name)"
     }
 }
 

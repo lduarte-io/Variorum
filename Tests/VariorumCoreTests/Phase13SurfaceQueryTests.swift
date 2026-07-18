@@ -168,4 +168,42 @@ struct Phase13SurfaceQueryTests {
             #expect(exported == "future frame")
         }
     }
+
+    // MARK: - Stage C3 (R40): the canvas projection's fans feed
+
+    /// The minimal takes switcher's feed: `canvasProjection.fans` carries
+    /// exactly the FANNED blocks' live ACTIVE takes in fan order — archived
+    /// and tombstoned takes excluded, single-take blocks absent, other
+    /// containers never leaking in (cost ∝ this container, P1).
+    @Test func canvasProjectionCarriesActiveFansForFannedBlocksOnly() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "spatial", profile: .generic)
+            let fanned = try ops.newBlock(in: post.id, text: "take one", at: .end)
+            let single = try ops.newBlock(in: post.id, text: "alone", at: .end).block
+            let second = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            try ops.autosave(second.id, text: "take two", charDelta: 4)
+            // Branch the third FROM the second (a branch lands beside its
+            // source, so this keeps the fan order legible).
+            let third = try ops.branchVariant(fanned.block.id, from: second.id)
+            try ops.autosave(third.id, text: "take three", charDelta: 4)
+            let archived = try ops.branchVariant(fanned.block.id, from: third.id)
+            try ops.archiveVariant(archived.id)
+
+            // A fanned block in ANOTHER container never leaks in.
+            let other = try ops.createPost(title: "elsewhere", profile: .generic)
+            let foreign = try ops.newBlock(in: other.id, text: "far", at: .end)
+            _ = try ops.branchVariant(foreign.block.id, from: foreign.variant.id)
+
+            let projection = try db.read {
+                try Queries.canvasProjection($0, container: post.id)
+            }
+            #expect(Set(projection.fans.keys) == [fanned.block.id],
+                    "fanned blocks only — the single-take block is absent")
+            #expect(projection.fans[single.id] == nil)
+            #expect(projection.fans[fanned.block.id]?.map(\.id)
+                        == [fanned.variant.id, second.id, third.id],
+                    "fan order, active-only (the archived take is out)")
+            #expect(projection.cards.count == 2, "the cards half is unchanged")
+        }
+    }
 }

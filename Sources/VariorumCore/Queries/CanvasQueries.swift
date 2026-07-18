@@ -29,24 +29,37 @@ extension Queries {
         }
     }
 
-    /// One canvas projection: the pool's cards (its blocks, rendered) plus
-    /// their positions. Cost ∝ the container's own size (P1).
+    /// One canvas projection: the container's cards (its blocks, rendered)
+    /// plus their positions — and, Phase 13 C3 (R40's minimal takes
+    /// switcher), the FANNED blocks' live active fans in fan order, so the
+    /// one-at-a-time selector needs no second fetch. Cost ∝ the container's
+    /// own size (P1); single-take blocks are absent from `fans`.
     public struct CanvasProjection: Equatable, Sendable {
         public var cards: [PoolItem]
         public var positions: [String: CanvasPosition]
+        /// blockID → the block's live ACTIVE takes, fan order — fanned
+        /// blocks only (the switcher's feed; additive, default empty).
+        public var fans: [String: [Variant]]
 
-        public init(cards: [PoolItem] = [], positions: [String: CanvasPosition] = [:]) {
+        public init(
+            cards: [PoolItem] = [], positions: [String: CanvasPosition] = [:],
+            fans: [String: [Variant]] = [:]
+        ) {
             self.cards = cards
             self.positions = positions
+            self.fans = fans
         }
     }
 
     public static func canvasProjection(
         _ db: Database, container containerID: String
     ) throws -> CanvasProjection {
-        CanvasProjection(
-            cards: try poolListing(db, poolID: containerID),
-            positions: try canvasLayouts(db, container: containerID))
+        let cards = try poolListing(db, poolID: containerID)
+        let fannedIDs = cards.filter { $0.block.hasFan }.map(\.block.blockID)
+        return CanvasProjection(
+            cards: cards,
+            positions: try canvasLayouts(db, container: containerID),
+            fans: try activeFans(db, blockIDs: fannedIDs))
     }
 }
 
