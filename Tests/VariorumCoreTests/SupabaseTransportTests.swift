@@ -107,9 +107,13 @@ struct SupabaseTransportTests {
         let schema = try strippingComments(
             String(contentsOf: root.appendingPathComponent("01_mirror_schema.sql"), encoding: .utf8)
             + "\n"
-            + String(contentsOf: root.appendingPathComponent("05_phase11_lockstep.sql"), encoding: .utf8))
+            + String(contentsOf: root.appendingPathComponent("05_phase11_lockstep.sql"), encoding: .utf8)
+            + "\n"
+            + String(contentsOf: root.appendingPathComponent("06_phase13_lockstep.sql"), encoding: .utf8))
+        // The deployed RPC bodies are the LAST rework in deploy order —
+        // 06's (Phase 13) since it re-creates both functions.
         let rpc = try strippingComments(String(
-            contentsOf: root.appendingPathComponent("05_phase11_lockstep.sql"), encoding: .utf8))
+            contentsOf: root.appendingPathComponent("06_phase13_lockstep.sql"), encoding: .utf8))
 
         for table in SyncSchema.tables {
             #expect(schema.contains("create table \(table.name) ("),

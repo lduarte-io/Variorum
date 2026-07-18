@@ -29,12 +29,19 @@ struct AuthRLSDDLTests {
         return try String(contentsOf: url, encoding: .utf8)
     }
 
-    /// The RLS/grant surface: 04 (the auth flip) + 05 (the Phase 11
-    /// lockstep event), in deploy order.
+    /// The lockstep-event files, in deploy order. Every future event
+    /// appends here; the marker pins below read the LAST one.
+    private static let lockstepFiles = [
+        "05_phase11_lockstep.sql",
+        "06_phase13_lockstep.sql",
+    ]
+
+    /// The RLS/grant surface: 04 (the auth flip) + the lockstep events
+    /// (05 Phase 11, 06 Phase 13), in deploy order.
     private static func composedSQL() throws -> String {
-        try strippingComments(sqlFile("04_auth_rls.sql"))
-            + "\n"
-            + strippingComments(sqlFile("05_phase11_lockstep.sql"))
+        try ([sqlFile("04_auth_rls.sql")] + lockstepFiles.map(sqlFile))
+            .map(strippingComments)
+            .joined(separator: "\n")
     }
 
     /// The body the deployed server actually runs: the LAST
@@ -101,7 +108,8 @@ struct AuthRLSDDLTests {
         // ran before they existed).
         #expect(sql.contains("revoke execute on function sync_schema_version() from public, anon;"))
         #expect(sql.contains("grant execute on function sync_schema_version() to authenticated"))
-        for table in ["canvas_layout", "lens", "lens_choice", "sync_meta"] {
+        for table in ["canvas_layout", "lens", "lens_choice", "sync_meta",
+                      "block_comment", "reading_section"] {
             #expect(sql.contains("revoke all on \(table) from anon, authenticated;"),
                     "\(table) needs its own revoke (created after 04's sweep)")
         }
@@ -195,16 +203,16 @@ struct AuthRLSDDLTests {
 
     // MARK: - The §12 version-check mechanism (Phase 11, A1)
 
-    /// THE DRIFT PIN: the marker 05 deploys must equal the client's
-    /// `SyncSchema.lockstepVersion` — a future lockstep event that bumps
-    /// one side without the other fails the build here.
+    /// THE DRIFT PIN: the marker the LATEST lockstep file deploys must
+    /// equal the client's `SyncSchema.lockstepVersion` — a future lockstep
+    /// event that bumps one side without the other fails the build here.
     @Test func theDeployedLockstepMarkerMatchesTheClientVersion() throws {
-        let sql = Self.strippingComments(try Self.sqlFile("05_phase11_lockstep.sql"))
+        let sql = Self.strippingComments(try Self.sqlFile(Self.lockstepFiles.last!))
         guard let range = sql.range(
             of: #"insert into sync_meta \(key, value\) values \('lockstep_version', '(\d+)'\)"#,
             options: .regularExpression)
         else {
-            Issue.record("05 must end by inserting the lockstep marker")
+            Issue.record("the latest lockstep file must end by inserting the marker")
             return
         }
         let insert = String(sql[range])
@@ -212,6 +220,25 @@ struct AuthRLSDDLTests {
             .compactMap { Int($0) }
         #expect(digits.last == SyncSchema.lockstepVersion,
                 "the mirror marker (\(String(describing: digits.last))) must equal SyncSchema.lockstepVersion (\(SyncSchema.lockstepVersion))")
+        // And the deploy-order history is monotonic: each event's marker
+        // exceeds its predecessor's (a re-run of an OLD file after a newer
+        // deploy would silently downgrade the advertised version — the
+        // on-conflict upsert makes the last run win).
+        var previous = 1
+        for file in Self.lockstepFiles {
+            let fileSQL = Self.strippingComments(try Self.sqlFile(file))
+            guard let markerRange = fileSQL.range(
+                of: #"insert into sync_meta \(key, value\) values \('lockstep_version', '(\d+)'\)"#,
+                options: .regularExpression),
+                  let value = String(fileSQL[markerRange])
+                    .components(separatedBy: "'").compactMap(Int.init).last
+            else {
+                Issue.record("\(file) must insert a lockstep marker")
+                continue
+            }
+            #expect(value > previous, "\(file)'s marker must exceed its predecessor's")
+            previous = value
+        }
     }
 
     @Test func theVersionRPCReadsTheMarkerAndDefaultsToOne() throws {
@@ -222,13 +249,16 @@ struct AuthRLSDDLTests {
         #expect(body.contains("), 1)"), "the pre-marker era is DEFINED as version 1")
     }
 
-    /// The marker insert is the FILE'S LAST STATEMENT — a partially-executed
-    /// deploy must never advertise the new version before the tables exist.
-    @Test func theMarkerInsertIsTheLastStatementOfTheLockstepFile() throws {
-        let sql = Self.strippingComments(try Self.sqlFile("05_phase11_lockstep.sql"))
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        #expect(sql.hasSuffix("on conflict (key) do update set value = excluded.value;"),
-                "the lockstep marker upsert must terminate the file")
+    /// The marker insert is EVERY lockstep file's LAST STATEMENT — a
+    /// partially-executed deploy must never advertise the new version
+    /// before the tables exist.
+    @Test func theMarkerInsertIsTheLastStatementOfEveryLockstepFile() throws {
+        for file in Self.lockstepFiles {
+            let sql = Self.strippingComments(try Self.sqlFile(file))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            #expect(sql.hasSuffix("on conflict (key) do update set value = excluded.value;"),
+                    "\(file): the lockstep marker upsert must terminate the file")
+        }
     }
 
     // MARK: - Header choreography pins (prose, deliberately)
@@ -242,6 +272,16 @@ struct AuthRLSDDLTests {
         #expect(sql05.contains("this file runs on the mirror FIRST"))
         #expect(sql05.contains("SyncSpec §12"))
         #expect(sql05.contains("NEVER headless"))
+        // 06 (Phase 13): the choreography adapts to R53 — the deploy is
+        // pre-authorized and the lockstep is mirror → Mac only (the phone
+        // app is removed); the header must carry that record, not 05's.
+        let sql06 = try Self.sqlFile("06_phase13_lockstep.sql")
+        #expect(sql06.contains("THE CHOREOGRAPHY"))
+        #expect(sql06.contains("this file runs on the mirror FIRST"))
+        #expect(sql06.contains("SyncSpec §12"))
+        #expect(sql06.contains("PRE-AUTHORIZED"))
+        #expect(sql06.contains("R53"))
+        #expect(sql06.contains("MIRROR → MAC only"))
     }
 
     @Test func theHeaderCarriesTheSignupsOffPrecondition() throws {

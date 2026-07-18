@@ -130,6 +130,12 @@ extension SyncEngine {
         // A lens_choice's variant parent is deliberately absent: a dead
         // variant is the read-time fall-through class, never a cascade.
         case "lens_choice": parents = [("lens_id", "lens"), ("block_id", "block")]
+        // Phase 13 (A1): comments cascade with their block; sections with
+        // their reading. reading_post's SECTION parent is deliberately
+        // absent — a dead section is the dangles-as-unsectioned read-time
+        // class, never a cascade.
+        case "block_comment": parents = [("block_id", "block")]
+        case "reading_section": parents = [("reading_id", "reading")]
         default: return nil
         }
         for parent in parents {
@@ -549,8 +555,12 @@ extension SyncEngine {
             _ = try enqueueMatching("block_tag", "block_id = ?", [parent.rowID])
             _ = try enqueueMatching("canvas_layout", "block_id = ?", [parent.rowID])
             _ = try enqueueMatching("lens_choice", "block_id = ?", [parent.rowID])
+            // Phase 13 (A1): the block's comments died with it locally.
+            _ = try enqueueMatching("block_comment", "block_id = ?", [parent.rowID])
         case "reading":
             _ = try enqueueMatching("reading_post", "reading_id = ?", [parent.rowID])
+            // Phase 13 (A1): the reading's chapters died with it locally.
+            _ = try enqueueMatching("reading_section", "reading_id = ?", [parent.rowID])
         case "tag":
             _ = try enqueueMatching("post_tag", "tag_id = ?", [parent.rowID])
             _ = try enqueueMatching("block_tag", "tag_id = ?", [parent.rowID])

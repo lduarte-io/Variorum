@@ -35,10 +35,14 @@ public enum SyncSchema {
     /// 9c-era 13-table deployment (defined retroactively: a mirror with no
     /// `sync_meta` marker reports 1); version 2 = the Phase 11 lockstep
     /// event (v1_5 canvas_layout + v1_6 block.name + v1_7 lens/lens_choice;
-    /// mirror DDL 05_phase11_lockstep.sql). **Bump this constant together
-    /// with the mirror file's marker in every future lockstep event** — the
-    /// DDL pin (`AuthRLSDDLTests`) fails the build if they drift.
-    public static let lockstepVersion = 2
+    /// mirror DDL 05_phase11_lockstep.sql); version 3 = the Phase 13 event
+    /// (v1_8 block_comment + v1_9 block.presentation + v1_10
+    /// reading_section/section_id + v1_11 reading.word_target; mirror DDL
+    /// 06_phase13_lockstep.sql — deploy pre-authorized, R53). **Bump this
+    /// constant together with the mirror file's marker in every future
+    /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
+    /// if they drift.
+    public static let lockstepVersion = 3
     /// The 13 synced tables in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
