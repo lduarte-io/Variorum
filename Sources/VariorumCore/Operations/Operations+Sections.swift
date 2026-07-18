@@ -63,8 +63,12 @@ extension Operations {
 
     /// Tombstone the chapter. Memberships keep their `section_id` pointers
     /// — dangling reads as unsectioned (deliberately NO cascade; the posts
-    /// are untouched, and restoring order is re-creating a chapter, not
-    /// resurrecting rows).
+    /// are untouched). Recovery is `restoreSection` below: BECAUSE the
+    /// pointers are never rewritten, an un-deleted chapter gets its posts
+    /// back for free (Stage A review round 1, MINOR 2 — re-creating a
+    /// chapter mints a fresh id the surviving pointers could never
+    /// reattach to, so a restore door is owed; the never-skimpy /
+    /// restoreContainer doctrine).
     public func deleteSection(_ id: String) throws {
         try database.write { db in
             var section = try liveSection(db, id)
@@ -75,6 +79,31 @@ extension Operations {
             let now = date.now
             section.deletedAt = now
             section.updatedAt = now
+            try section.update(db)
+        }
+    }
+
+    /// The chapter's resurrection door (the comment-restore parallel; NO
+    /// undo entry — the tags/locks exclusion class, this door is the
+    /// recovery). One tombstone flip: the memberships' surviving pointers
+    /// reattach without a write. Requires the reading live and unlocked
+    /// (a chapter revival is structure); a section that died WITH its
+    /// reading (cascade victim) refuses here — readings have no restore
+    /// door of their own, a standing pre-13 boundary.
+    public func restoreSection(_ id: String) throws {
+        try database.write { db in
+            guard var section = try ReadingSection.fetchOne(db, key: id) else {
+                throw OperationError.sectionNotFound(id: id)
+            }
+            guard section.deletedAt != nil else {
+                throw OperationError.sectionNotDeleted(id: id)
+            }
+            let reading = try liveReading(db, section.readingId)
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: reading.id)
+            }
+            section.deletedAt = nil
+            section.updatedAt = date.now
             try section.update(db)
         }
     }

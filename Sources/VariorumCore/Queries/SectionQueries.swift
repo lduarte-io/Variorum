@@ -13,6 +13,19 @@ extension Queries {
             .fetchAll(db)
     }
 
+    /// The book's DELETED chapters — the recovery surface behind
+    /// `restoreSection` (Stage A review round 1, MINOR 2: an accidental
+    /// chapter delete must be undoable while the store still holds the
+    /// assignments). Newest deletion first, the deleted-comments parallel.
+    public static func deletedReadingSections(
+        _ db: Database, readingID: String
+    ) throws -> [ReadingSection] {
+        try ReadingSection
+            .filter(Column("reading_id") == readingID && Column("deleted_at") != nil)
+            .order(Column("deleted_at").desc, Column("id"))
+            .fetchAll(db)
+    }
+
     /// post → LIVE chapter, for one reading's memberships. The dangling
     /// rule embodied (AppSpec §7's fallback class): a membership whose
     /// `section_id` points at a tombstoned/missing section is ABSENT here —

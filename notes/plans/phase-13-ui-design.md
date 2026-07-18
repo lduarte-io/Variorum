@@ -938,10 +938,14 @@ green, the FULL three suites green at the stage gate. Commits: `1dc8656`
 `e109480` (A0). **Stage gate counts: core `swift test` 703 green in 85
 suites (baseline 651/77) · Mac app 380 green in 68 suites (baseline,
 non-vacuous — 381 ✔ lines in the log) · mobile 11 green in 4 suites.**
-Canary silent everywhere (the decoration spike's explicit TK2 opt-in
-precondition held; the Mac suite's standing canary tests green); no macOS
-point update since the Phase 6 spike's 26.4.1 (25E253) — the TEXTKIT2 §5
-matrix stands on the same build the A0 spike just re-exercised.
+Canary status, stated precisely (round-1 NIT 2's correction): the Mac
+suite's standing `willSwitchToNSLayoutManager` canary tests are green; the
+decoration spike installs NO in-run observer — its whole canary is the
+explicit TK2 opt-in precondition at construction plus (post-review) the
+reposition-path precondition, which CRASHES the run on a mid-measurement
+fallback rather than silently measuring bare inserts. No macOS point
+update since the Phase 6 spike's 26.4.1 (25E253) — the TEXTKIT2 §5 matrix
+stands on the same build the A0 spike just re-exercised.
 
 ## A1 — the schema, the ONE SyncSpec §12 lockstep event (v1_8–v1_11)
 
@@ -1017,9 +1021,15 @@ replaces it at `/Applications`.** Build work rides the dev store meanwhile.
   originals untouched.
 - **Presentation travel:** structural successors INHERIT the source's frame
   (the span was the callout's content); merge keeps the frame only when
-  BOTH sources agree, else mints PLAIN (QUESTIONS #24); the copy family
-  copies it like `block.name`. `mintBlock`/`mintFanBlock` gained the
-  parameter (default nil — `newBlock` unchanged).
+  BOTH sources agree, else mints PLAIN (QUESTIONS #24). The copy family:
+  `duplicateAsVersion`/`promoteLens` copy presentation AND `block.name`
+  together; **`poolDragCopy` copies presentation (and comments) but has
+  NEVER copied `block.name`** — a pre-existing asymmetry this phase's
+  additions made visible (round-1 finding 3; the original "copies it like
+  block.name" wording here was wrong for that one op). Behavior left AS
+  SHIPPED — aligning it either way is the author's call, recorded as
+  QUESTIONS #24(e). `mintBlock`/`mintFanBlock` gained the parameter
+  (default nil — `newBlock` unchanged).
 - **`SmartQuerySpec.tagsAll` (R30):** one conjunct per path, subtree
   semantics each, AND-composing with the v1 fields; JSON vocabulary only —
   nil encodes ABSENT, so pre-13 specs round-trip byte-identically (pinned).
@@ -1115,6 +1125,64 @@ posture: real-store access stays author-assisted — Phase 12 Step 0's rule).
 Logged as QUESTIONS #23 (comments: seal posture · created_at preservation ·
 metadata-CAS-not-S5 · deleted-comments-don't-travel), #24 (presentation:
 seal posture · inherit-on-split · merge-agree-else-plain · token-name
-colors), #25 (sections/extents: curated-only · locked-reading postures ·
-word_target-never-enforces · the added `setReadingMaxPosts`). Zero
+colors · (e) the poolDragCopy name asymmetry), #25 (sections/extents:
+curated-only · locked-reading postures · word_target-never-enforces · the
+added `setReadingMaxPosts` · (e) the chapter delete/restore shape). Zero
 stop-and-ask items arose; nothing gated the core.
+
+## Stage A cold review, round 1 (2026-07-18) — findings + dispositions
+
+**0 BLOCKER / 0 MAJOR / 3 MINOR / 2 NIT; all five AGREED, all five fixed
+in this round (no disputes). Post-fix counts: core 706 green in 85 suites
+(was 703) · Mac 380/68 · mobile 11/4.**
+
+1. **MINOR — the two new orphan-repair extensions had no race tests
+   entering them** (the convergence test reached the dead state via the
+   batch's own tombstones; a typo'd string would no-op silently with every
+   suite green; SyncSpec §7's outbox-row assertion had no Phase 13
+   instantiation). AGREED — mechanism traced exactly as found. Fixed: two
+   new convergence tests
+   (`aCommentRacingItsBlocksDeletionJoinsTheCascadeOnBothSides`,
+   `aSectionRacingItsReadingsDeletionJoinsTheCascadeOnBothSides`) —
+   device A pushes the child, device B deletes the parent WITHOUT pulling
+   it; direction 1 asserted on A (suppressed-cascade victim stamped +
+   EXPLICITLY enqueued) and direction 2 on B (arriving orphan joins the
+   cascade with the parent's exact stamp + enqueued), then full settle to
+   byte-identical dumps. **Red-on-old verified by BEHAVIORAL REVERT,
+   both directions:** removing the two `deadParentStamp` cases fails both
+   tests' B-side assertions; removing the two `enqueueMatching` lines
+   fails both A-side outbox assertions; restored, green.
+2. **MINOR — `deleteSection` was unrecoverable through any offered path
+   and the disposition was missing from the PROVISIONAL record** (fresh
+   UUIDs can never reattach the surviving pointers; the never-skimpy /
+   `restoreContainer` doctrine points at a restore door). AGREED — the
+   in-code justification did miss the assignment half. Fixed with the
+   coordinator's arbitration lean: **`restoreSection`** (one tombstone
+   flip; assignments reattach for FREE because the dangle rule never
+   rewrote pointers — pinned by
+   `restoreSectionReattachesTheSurvivingAssignmentsForFree`), plus
+   `Queries.deletedReadingSections` (the recovery surface), the
+   `sectionNotDeleted` refusal, locked-reading refusal, and the
+   cascade-victim boundary (a section that died WITH its reading refuses —
+   readings have no restore door, a standing pre-13 boundary). No undo
+   entry (the tags/locks class — the door IS the recovery, the comments
+   parallel). Recorded as QUESTIONS #25(e).
+3. **MINOR — the recorded presentation-travel rule was false for
+   `poolDragCopy`** ("copies it like block.name" — poolDragCopy has never
+   copied `name`, so a named+framed+commented scrap dragged to a draft
+   keeps frame and notes but silently loses its name; nobody ever decided
+   that). AGREED. Fixed: the closeout wording corrected above (behavior
+   deliberately UNCHANGED — aligning it is the author's call); the
+   asymmetry recorded as QUESTIONS #24(e). (Commit `498eab5`'s message
+   carries the wrong wording as immutable history; this section is the
+   correction of record.)
+4. **NIT — the spike's overlay-reposition guard-return could silently
+   degrade the "+OVERLAYS" condition on a mid-run TK1 fallback.** AGREED;
+   taken now per the coordinator (the spike is the re-run gate artifact):
+   `reposition()` now PRECONDITION-crashes on a fallback. The hardened
+   spike re-ran: numbers match the recorded baseline within noise
+   (decorated p95 0.76 ms vs the recorded 0.79; the recorded table stands
+   as the baseline).
+5. **NIT — the closeout's "canary silent everywhere" over-implied an
+   in-run observer in the spike.** AGREED; the canary-status paragraph
+   above now states the guard surface precisely.

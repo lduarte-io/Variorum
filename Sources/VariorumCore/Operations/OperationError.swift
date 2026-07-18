@@ -142,4 +142,6 @@ public enum OperationError: Error, Equatable, Sendable {
     case invalidSectionName(name: String)
     /// A membership can only be assigned to a section of ITS OWN reading.
     case sectionNotInReading(sectionID: String, readingID: String)
+    /// `restoreSection` addressed a chapter that is not deleted.
+    case sectionNotDeleted(id: String)
 }

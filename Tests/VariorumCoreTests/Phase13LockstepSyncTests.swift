@@ -163,6 +163,95 @@ struct Phase13SyncConvergenceTests {
         #expect(try a.db.deletedAt("reading_section", world.sectionID) != nil)
     }
 
+    // MARK: - The orphan races (Stage A review round 1, MINOR 1: the two
+    // new repair extensions must be ENTERED by a test — SyncSpec §7's
+    // "every repair test must assert the outbox row exists". Both tests
+    // were verified RED by behavioral revert: commenting out the new
+    // deadParentStamp case (direction 2) or the new enqueueMatching line
+    // (direction 1) fails the matching assertions below.)
+
+    @Test func aCommentRacingItsBlocksDeletionJoinsTheCascadeOnBothSides() async throws {
+        let (_, a, b) = try makePair()
+        let blockID = try a.with { ops, _ -> String in
+            let post = try ops.createPost(title: "post", profile: .generic)
+            let block = try ops.newBlock(in: post.id, text: "Prose.", at: .end).block
+            _ = try ops.newBlock(in: post.id, text: "Sibling.", at: .end)
+            return block.id
+        }
+        try await syncBoth(a, b)
+
+        // A comments and pushes; B — which NEVER pulls the comment —
+        // deletes the block and pushes. The comment is an orphan on both
+        // sides of the wire.
+        let commentID = try a.with { ops, _ in
+            try ops.addBlockComment(to: blockID, text: "racing the delete").id
+        }
+        _ = try await a.push()
+        try b.with { ops, _ in try ops.deleteBlock(blockID) }
+        _ = try await b.push()
+
+        // Direction 1 (A): the block tombstone arrives; A's LOCAL cascade
+        // kills the comment with the triggers muted — the repair must
+        // enqueue the victim's tombstone explicitly or B never learns.
+        _ = try await a.pull()
+        let blockStamp = try a.db.deletedAt("block", blockID)
+        #expect(blockStamp != nil)
+        #expect(try a.db.deletedAt("block_comment", commentID) == blockStamp,
+                "A: the suppressed cascade stamped the comment with the block's exact deleted_at")
+        #expect(try a.db.outboxContains("block_comment", commentID),
+                "A: the repair write reaches the outbox explicitly (SyncSpec §7)")
+
+        // Direction 2 (B): the LIVE comment arrives under the locally-dead
+        // block — it joins the cascade with the parent's exact stamp.
+        _ = try await b.pull()
+        #expect(try b.db.deletedAt("block_comment", commentID)
+                == (try b.db.deletedAt("block", blockID)),
+                "B: the arriving orphan joins the cascade with the parent's stamp")
+        #expect(try b.db.outboxContains("block_comment", commentID),
+                "B: the direction-2 repair enqueues too")
+
+        try await syncBoth(a, b)
+        try await syncBoth(a, b)
+        #expect(try a.syncedDump() == (try b.syncedDump()))
+        #expect(try a.outboxCount() == 0)
+        #expect(try b.outboxCount() == 0)
+    }
+
+    @Test func aSectionRacingItsReadingsDeletionJoinsTheCascadeOnBothSides() async throws {
+        let (_, a, b) = try makePair()
+        let readingID = try a.with { ops, _ -> String in
+            try ops.createReading(name: "orbit", kind: .curated).id
+        }
+        try await syncBoth(a, b)
+
+        let sectionID = try a.with { ops, _ in
+            try ops.createSection(in: readingID, name: "I / racing").id
+        }
+        _ = try await a.push()
+        try b.with { ops, _ in try ops.deleteReading(readingID) }
+        _ = try await b.push()
+
+        // Direction 1 (A).
+        _ = try await a.pull()
+        let readingStamp = try a.db.deletedAt("reading", readingID)
+        #expect(readingStamp != nil)
+        #expect(try a.db.deletedAt("reading_section", sectionID) == readingStamp)
+        #expect(try a.db.outboxContains("reading_section", sectionID),
+                "A: the suppressed-cascade victim's tombstone is enqueued explicitly")
+
+        // Direction 2 (B).
+        _ = try await b.pull()
+        #expect(try b.db.deletedAt("reading_section", sectionID)
+                == (try b.db.deletedAt("reading", readingID)))
+        #expect(try b.db.outboxContains("reading_section", sectionID))
+
+        try await syncBoth(a, b)
+        try await syncBoth(a, b)
+        #expect(try a.syncedDump() == (try b.syncedDump()))
+        #expect(try a.outboxCount() == 0)
+        #expect(try b.outboxCount() == 0)
+    }
+
     @Test func aRestoredBlockRevivesItsCommentsAcrossTheWire() async throws {
         let (_, a, b) = try makePair()
         let world = try a.with { ops, _ -> (blockID: String, commentID: String) in

@@ -145,6 +145,42 @@ struct ReadingSectionTests {
         }
     }
 
+    @Test func restoreSectionReattachesTheSurvivingAssignmentsForFree() throws {
+        // Stage A review round 1, MINOR 2: BECAUSE deleteSection never
+        // rewrites membership pointers, the restore door is one tombstone
+        // flip and the chapter gets its posts back without a write.
+        try withOperations { ops, db in
+            let (reading, postIDs) = try makeBook(ops)
+            let chapter = try ops.createSection(in: reading.id, name: "I")
+            try ops.assignPostToSection(postIDs[0], in: reading.id, section: chapter.id)
+            try ops.assignPostToSection(postIDs[1], in: reading.id, section: chapter.id)
+
+            try ops.deleteSection(chapter.id)
+            #expect(try db.read { try Queries.sectionAssignments($0, readingID: reading.id) }
+                    .isEmpty)
+            let deleted = try db.read { try Queries.deletedReadingSections($0, readingID: reading.id) }
+            #expect(deleted.map(\.id) == [chapter.id],
+                    "the deleted chapter stays visible — the recovery surface")
+
+            try ops.restoreSection(chapter.id)
+            let assignments = try db.read { try Queries.sectionAssignments($0, readingID: reading.id) }
+            #expect(assignments == [postIDs[0]: chapter.id, postIDs[1]: chapter.id],
+                    "both posts reattach — no membership row was ever rewritten")
+            #expect(try db.read { try Queries.readingSections($0, readingID: reading.id) }
+                    .map(\.id) == [chapter.id])
+
+            // Refusals: restoring a live chapter; restoring under a lock.
+            #expect(throws: OperationError.sectionNotDeleted(id: chapter.id)) {
+                try ops.restoreSection(chapter.id)
+            }
+            try ops.deleteSection(chapter.id)
+            try ops.lockReading(reading.id)
+            #expect(throws: OperationError.lockedReading(id: reading.id)) {
+                try ops.restoreSection(chapter.id)
+            }
+        }
+    }
+
     // MARK: - Guards
 
     @Test func smartReadingsRefuseChapters() throws {

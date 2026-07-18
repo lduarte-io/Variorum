@@ -178,8 +178,19 @@ final class OverlayDeck {
 
     /// Reposition every overlay from the CURRENT viewport's fragment
     /// geometry — the per-keystroke / per-scroll decoration work.
+    /// PRECONDITION, not guard-return (Stage A review round 1, NIT 1): a
+    /// TK2→TK1 fallback mid-run must CRASH the measurement, never let the
+    /// "+OVERLAYS" condition silently measure bare inserts while reporting
+    /// decorated numbers — these are the baselines every milestone gate
+    /// re-checks, and the spike re-runs after point updates, where
+    /// fallback behavior is exactly what shifts. (The spike installs no
+    /// willSwitchToNSLayoutManager observer; the opt-in precondition at
+    /// construction plus this one are its whole canary.)
     func reposition() {
-        guard let tv, let lm = tv.textLayoutManager else { return }
+        guard let tv else { preconditionFailure("editor deallocated mid-measurement") }
+        guard let lm = tv.textLayoutManager else {
+            preconditionFailure("TK2→TK1 fallback mid-run — measurement invalid")
+        }
         let viewport = viewportRange(tv)
         var index = 0
         lm.enumerateTextLayoutFragments(from: viewport.location, options: [.ensuresLayout]) { fragment in
