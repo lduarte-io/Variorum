@@ -195,6 +195,151 @@ takes are open, and the takes as editable cards in a grid to the right of the ar
   visible, ambient part of the editing surface.
 - Acknowledged, no action: round-1 pages don't need clickable cross-navigation.
 
+### Sitting 3 (2026-07-17, late evening) — highlighting, v2-as-canon, callouts, the paragraph-floor direction, chapters green-lit
+
+**Her message VERBATIM (same instruction as sitting 2 — her words beside the rulings;
+she attached seven screenshots, manifest below):**
+
+> well i think that the block that you're looking at hte different fans of can be shown
+> in a few ways. i think that this is nice enough, it's a good separation: [Image #2]
+> but i also like this view, where it actually is a different background on the block
+> that has a bunch of fans and is being edited. when this was the case, the other block
+> being edited got the bar around it. i included an image where a different block is
+> being edited and where it's not for it to be clear, but i like this rule for when
+> we're doing the marginalia thing. [Image #4] [Image #3]. i'm also not sure if fan out
+> all is always goign to work with every mode of seeing your different options -
+> thoughts on that? also, in this one, the active editor doesn't even have a highlight
+> but it works because the cursor is there blinking: [Image #5]. so talk to me a little
+> about my different options and what you think would be good. this view also doesn't
+> have the block being edited highlighted and i still think it looks good: [Image #6].
+> maybe it should be a setting? idk, i think that having the takes that are being
+> debated be a different color is helpful and the box around is also helpful, but i
+> think the box around should be optional (or background color is optional) for
+> currently editing this block. sometimes people don't even want to see what block
+> they're editing, it does make it busier. showing the different takes in a different
+> color still helps though, at least it helps you see what full block is being
+> replaced. the v2 mockup really is the best place to look for all of this and the v2
+> mockup is still the most "active view" look i've seen and liked.
+> file://<home>/dev/variorum/Spikes/Phase11Mockups/mockups-v2.html
+> also yes, i like the command K palette for the everything being accesible. every
+> buried capability shoudl absolutely be typeable and shortcutable. i also want to know
+> what command n is right now - new post? i think that's what it should be, but i'm
+> open to new block. i'm a little conflicted on it though. one thing i will say that
+> notes and notion both have is the ability to make a separated little background color
+> block of text within the writing - i defitely want to add that [Image #7]. also, i'm
+> starting to realize all the millions of issues having takes for different words
+> causes - i think i'd be willing to go back and say that it can only be done at the
+> paragraph level. that woudl take a lot of inspo from notion, where the blocks can be
+> dragged up or down, and have different colors, and there's a little more natural
+> separation between the blocks. this an example on notion of moving a block in motion,
+> you can see the bar where it's going to go and that shows up. [Image #8] I don't
+> think we need the notion stuff of the photos and the different left and right blocks,
+> we're staying text editor, but i do like the spacing and the way the different color
+> background on the blocks still has white between them. i think the lack of white
+> between the block colors is why i wasn't enjoying it earlier. you can move and save
+> these images and this message too for the active chat. and yeah, we can also do the
+> chapter grouping model options. journal should appear on the shelf as a notebook, the
+> pool area should be called blocks i think (makes it the most sense) and pool can
+> still just be posts or something. what are your thoughts on all of these items? i'm
+> still a little unclear on how the highlighting should work and i don't know if i made
+> it clear enough how much i like mockup v2 - that should be an editor view option,
+> also wit hthe book reading option. the terminal view should still have the same
+> capabilities but yes, i agree we can hold exactly 2. just those two captures both
+> modes i like. i do think being able to choose your font should eventually be on the
+> roadmap, but not for now.
+
+**Image manifest.** The attached screenshots lived only in macOS's drag-temp folder and
+were purged before they could be copied (checked the same minutes; Desktop copies don't
+exist). Six of seven are screenshots OF `Spikes/Phase11Mockups/mockups-v2.html`, which
+is in the repo — each is exactly reproducible; the two Notion references are described
+precisely (the author may re-attach them for the record; `sitting-refs/README.md`
+invites it):
+
+- **#2** — v2 **tab 1 (fan-out styles), the inline STACK**: takes stacked in the flow
+  under the paragraph, chosen take with green left-bar + tab chips, dashed "+ new take
+  (branch) · + blank take" footer. Her: "nice enough, it's a good separation."
+- **#3** — v2 **tab 1, marginalia (side cards) with "Mark the changing block" ON,
+  editing INSIDE the changing block**: the changing block wears the grey wash; the live
+  editor sits in a take card (ring + "live editor" chip); no other block marked.
+- **#4** — same, but **editing a DIFFERENT block than the changing one**: that block
+  wears the blue outline ring while the changing block keeps the grey wash. Her: "i
+  like this rule for when we're doing the marginalia thing."
+- **#5** — v2 **tab 2 (full-text columns), one column**: NO editing indicator at all —
+  just the caret. Her: "it works because the cursor is there blinking."
+- **#6** — v2 **tab 3 (aligned posts / versions)**: no editing highlight; colored
+  lineage rails on block cards. Her: "i still think it looks good."
+- **#7** — **Notion callout closeup**: a rounded, soft-blue background block ("💡 goal
+  <3 / like this") inside normal prose — the separated-colored-text-block feature she
+  wants.
+- **#8** — **Notion mid-drag**: dragging a block with the horizontal blue insertion bar
+  showing where it will land; also shows Notion's colored blocks separated by white.
+
+**Rulings (hers) and proposals (Fable's, pending her ratify):**
+
+- **R12 — mockups-v2 is CANON for the active/editing view** ("the best place to look
+  for all of this… the most 'active view' look i've seen and liked") — it becomes an
+  **editor view option**, beside the book-reading view; the Study voice's editing
+  surface derives from v2, and the Terminal voice must carry the SAME capabilities.
+  **Hold at exactly two voices confirmed** — "just those two captures both modes i
+  like."
+- **R13 — Takes-open marking:** the tinted/distinct take cards are constant ("still
+  helps… see what full block is being replaced"); the **grey wash on the changing
+  block stays** (v2's "Mark the changing block," toggleable). The inline stack (#2)
+  is an acceptable presentation too.
+- **R14 — The EDITING indicator is OPTIONAL** ("sometimes people don't even want to
+  see what block they're editing, it does make it busier") — a setting; ring and
+  background are the two candidate forms; cursor-only is legitimate (#5/#6).
+  **PROPOSED scheme (Fable)**: a three-way setting **off / outline / background**
+  with **off** the default in the plain editor (cursor suffices), PLUS the marginalia
+  rule from #3/#4 always-on IN MARGINALIA (wash = changing block; ring = the other
+  block being edited) because many-editable-surfaces need the ring to find the
+  editor. Pending her ratify.
+- **R15 — ⌘K ratified** ("every buried capability should absolutely be typeable and
+  shortcutable"). Fact recorded: **⌘N is currently unassigned** (no newItem command
+  group; "New Post" is a shortcut-less sidebar button; plain ⌘K free, ⌘⇧K = Make
+  Block). **PROPOSED: ⌘N = New Post** — her leaning; and "new block" needs no
+  command because blocks are born by typing (crystallization) — Enter at the
+  paragraph level IS new-block. Pending her confirm.
+- **R16 — CALLOUT blocks WANTED** (#7): a separated, background-colored text block
+  within the writing (Notes/Notion class). **PROPOSED shape**: block-level
+  presentation metadata (e.g. a nullable `presentation` column on `block` — kind /
+  color / optional emoji), identity-level like `block.name`, synced as plain CAS
+  metadata, riding the SAME §12 lockstep event as comments; takes share the callout
+  frame (presentation is the block's, not the take's); export maps to a blockquote
+  form. Pending ratify.
+- **R17 — The white-gap diagnosis (binding for any colored blocks):** colored block
+  backgrounds must keep base-background breathing room between blocks — "the lack of
+  white between the block colors is why i wasn't enjoying it earlier" (the 9d tint's
+  real defect).
+- **R18 — THE PARAGRAPH-FLOOR DIRECTION (uncertainty preserved: "i think i'd be
+  willing to go back and say"):** takes/blocks only at the **paragraph level** — no
+  sub-paragraph take machinery; Notion-inspired: draggable blocks, natural
+  separation. Precision on what this actually changes (Fable): takes were ALWAYS
+  block-level (I7); today's everyday granularity is already the paragraph
+  (crystallization); sentence-sized blocks arise only from deliberate
+  extract/divide-at-sentence gestures. So the change = **raise the SPLIT floor**:
+  extract/divide/Make-Block snap to paragraph boundaries only; sentence-level
+  BoundarySnapping retires from gestures (stays for TOC first-sentence display);
+  cross-fan bracketing and the W get dramatically simpler. **Open halves for her:**
+  (a) do MULTI-paragraph blocks survive (the ceiling — merge produces them;
+  CoreDescription calls them important)? (b) hard refusal vs. default-with-escape?
+  NOT yet ruled — next sitting.
+- **R19 — Block drag gets the Notion insertion bar** (#8): drag up/down with the
+  horizontal drop-target bar. (Reorder machinery ships; the bar is the design.)
+- **R20 — Shelf/naming:** **the Journal appears on the shelf as a notebook** (Q1
+  RULED; the sidebar door stays per sitting 2). **The pool area is renamed
+  "Blocks"** ("makes it the most sense"). Her trailing clause "and pool can still
+  just be posts or something" is AMBIGUOUS — flagged, clarification owed (possibly:
+  the Library surface reads "Posts"?). Not guessed.
+- **R21 — Font choice: eventually on the roadmap, NOT now.**
+- **PROPOSED (Fable) — expand-all-fans adapts per style** (her doubt is right: "not
+  sure if fan out all is always going to work with every mode"): literal in the
+  inline-stack style; in marginalia = follow-the-scroll (the near-viewport fanned
+  block's cards show); absorbed/not-offered in full-text columns and slot-split
+  (those styles ARE whole-post fan presentations). Pending ratify.
+- **Chapter-grouping options: GREEN-LIT** — the three schema shapes go to her (in
+  the sitting-3 reply; decision next sitting).
+
 ## Emerging direction (running synthesis — updated after sitting 2)
 
 - **Two voices, one structure:** the Terminal voice leads (her default); the Study
@@ -220,23 +365,35 @@ takes are open, and the takes as editable cards in a grid to the right of the ar
 
 ## Open questions (running)
 
-1. Does the JOURNAL live on the shelf as a notebook among notebooks, or stay its
-   own top-level place (or both — a notebook with a dedicated door)? *(Sidebar door
-   confirmed in sitting 2; on-shelf-also still open.)*
+1. ~~Journal on the shelf~~ — RULED sitting 3 (R20): yes, a notebook on the shelf;
+   the sidebar door stays.
 2. ~~Timeline folded into Library as a view mode~~ — leaning confirmed sitting 2
    (Library = all posts; timeline one of its views).
 3. Canvas: stays a sidebar word (sitting 2). Its v1 design investment level still
    open (functional-as-is vs restyled this phase).
-4. The pool's product name/face ("scraps"? "loose notes"?) so its role reads.
-5. Chapter-grouping model shape (options round owed — 2–3 schema shapes with
-   tradeoffs).
+4. Pool naming — HALF-RULED sitting 3 (R20): the pool area renames to **"Blocks"**;
+   the trailing clause "and pool can still just be posts or something" is ambiguous
+   — clarification owed (Library surface reads "Posts"?).
+5. Chapter-grouping model shape — options DELIVERED in the sitting-3 reply
+   (`reading_section` table · marker rows · nested readings; Fable recommends the
+   section table); her pick owed.
 6. ~~Comment placement~~ — RULED sitting 2 (R7): margin default; inline-tinted as a
    setting.
-7. ~~Which direction leads~~ — RULED sitting 2 (R1): Terminal leads; Study second;
-   C = a view mode, not a theme.
-8. How far do terminal idioms extend into navigation (she floated terminal-style
-   chapter/journal browsing — "idk")? Per-surface vs global voice switching?
-9. The ⌘K command palette as the accessibility-of-power mechanism — her reaction
-   owed.
-10. Seam-visibility default: invisible at rest (§12) with a toggle — what's the
-    toggle's home (menu? per-post? global setting)?
+7. ~~Which direction leads~~ — RULED sitting 2 (R1) + confirmed sitting 3 (R12):
+   Terminal leads; Study second (its editing surface = mockups-v2); hold at two.
+8. How far do terminal idioms extend into navigation? Per-surface vs global voice
+   switching?
+9. ~~⌘K~~ — RATIFIED sitting 3 (R15). Remaining: ⌘N = New Post (proposed,
+   her confirm owed — currently unassigned).
+10. Seam-visibility default: invisible at rest (§12) with a toggle — the toggle's
+    home (menu? per-post? global setting?).
+11. The editing-indicator scheme (R14's proposal: off/outline/background setting +
+    the always-on marginalia rule) — ratify or adjust.
+12. THE PARAGRAPH FLOOR (R18): (a) do multi-paragraph blocks survive as the
+    ceiling? (b) hard refusal vs default-with-escape for sub-paragraph splits?
+    The biggest open item — it reshapes the gesture surface and simplifies
+    cross-fan machinery; CoreDescription's "floor is a sentence" would be
+    superseded at ratification.
+13. Callout shape (R16's proposal: block-level `presentation` metadata riding the
+    comments lockstep) — ratify or adjust; export mapping detail.
+14. Expand-all-fans per-style adaptation (the sitting-3 proposal) — ratify.
