@@ -1,5 +1,20 @@
 # Phase 12 — Hardening & perf validation (execution plan)
 
+> **DEFERRED (author, 2026-07-17 — before any kickoff; do NOT execute this plan yet).**
+> There has been NO real daily use of the app, so this plan's governing premise
+> ("months of real daily use behind the store by now") is false, and its own
+> evidence-first ground rule keys everything off Step 0's real-store measurements —
+> the soak audit (Step 2), the windowing gate (Step 3), the GC memo's inputs (Step 4),
+> and most of the debt sweep (Step 6) are vacuous today, and Step 1's corpus builders
+> would be calibrated by guesses, which this plan itself forbids. **Phase 13 runs
+> first** (re-sequenced — the master plan pointer's deferral paragraph is the record);
+> this phase re-slots after 13 plus a window of real daily use. Pulled forward into
+> 13's kickoff: the "answer 4" Phase-13-prerequisite measurements, a dev-store
+> design-corpus seed, and Step 5's restore drill (verify whether it already ran before
+> re-running here). At the eventual kickoff: re-baseline the test counts, and fold in
+> Phase 13's changes (the block-comments schema/lockstep event, any styling-era
+> surfaces) before executing. Nothing else in this plan is amended.
+
 > Authored 2026-07-16 at Phase 11b's closeout per the front-loaded-planning
 > rule, FROM `notes/plans/phase-12-brief.md` — the brief's pre-answered
 > decisions (the Phase 8 backup ritual is DRILLED here; the fault-injection

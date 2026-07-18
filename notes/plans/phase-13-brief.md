@@ -26,9 +26,49 @@ The Phase 11 kickoff mockups (`Spikes/Phase11Mockups/mockups.html` + `mockups-v2
 committed at `924f591`) are a liked visual reference: the author's words at the 11b
 kickoff — she "quite liked their appearance," and "they still look nicer than the app,"
 acknowledging the UI stage hasn't arrived yet. When this phase's design sessions start,
-open those pages beside the app: they are the one existing artifact of her visual taste
-for this product (captioned sections, the takes/lens presentation). Reference, not
+open those pages beside the app as one input among several. Reference, not
 contract — the just-in-time plan weighs them like everything else in this sketch.
+
+**Her correction (2026-07-17):** liking the mockups better than the current app is NOT
+the same as their being her design preference — do not treat them as a settled
+direction, and do not read them as "the one existing artifact of her visual taste."
+She expects a genuine EXPLORATORY opening to this phase: more questions asked of her,
+more prototypes/directions to react to, and real effort spent on fine-tuning the small
+details — she "wouldn't build just based off how the prototype looks." She knows 13 is
+the phase that needs her most and is prepared to spend the time.
+
+## Author additions (2026-07-17, pre-Phase-12 intake — direction-level; the canonical record is AppSpec §14's 2026-07-17 delta)
+
+- **N-post side-by-side (user setting).** The posts-axis side-by-side (the 11a aligned view)
+  is two posts today; on large screens she wants the option of MORE, with the column count
+  user-controllable — the same control family as the takes view's shipped 1–4 columns, on
+  the posts axis. Functional capability + layout work; slot it in the per-view passes.
+- **Reference panel beside multi-post views.** She wants a reference openable while posts
+  sit side by side (today the panel lives only in the single-post detail inspector). A
+  window-composition question for this phase's layout work — the panel machinery itself
+  (B3) needs no change.
+- **Block comments — DECIDED 2026-07-17: this phase OWNS them** (her call, same day).
+  Block-level working notes, never per-take; travel-through-structural-ops rules and
+  schema shape are the design round's, asked to her live (see the §14 delta). Schema =
+  a SyncSpec §12 lockstep event with its own commit — the "no VariorumCore changes"
+  rule below gains this one deliberate, author-ratified exception, and her pending
+  phone install folds into the lockstep's every-client step (one install covers this
+  and the outstanding 11a constraint).
+- **Chat/conversation reference kind (noted, LOW priority — her explicit "make a note".)**
+  Paste-in two-sided transcripts rendered chat-style in the reference panel. Design-time
+  question if taken: where pasted content lives (an app-written transcript file behind the
+  existing file machinery vs a content column on `reference`). No urgency; hers to pull.
+- **Her urgency (2026-07-17, re-affirming the 2026-07-16 note above):** the mockup pages
+  "looked so much better and [are] easier to just understand… colors, spacing" — and
+  later the same day this phase was **re-sequenced NEXT** (Phase 12 deferred until after
+  13 + real use; master plan pointer has the record).
+- **Pulled forward from deferred Phase 12 (2026-07-17):** the kickoff sitting takes the
+  three design-prerequisite measurements (decoration/rendering-attribute budget on the
+  live TK2 editor, read-tier per-view cost at scale, keystroke headroom under
+  decorations — the 12 plan's "answer 4"), seeds a DESIGN CORPUS in the dev store (so
+  density/calm decisions are made against volume, not a handful of posts; A4-fenced,
+  never the real store), and runs the ~30-min backup restore drill (protective before
+  real use ramps).
 
 ## Process shape (leaning — differs from /run-phase deliberately)
 
@@ -37,8 +77,11 @@ author* (AppSpec §12: "UI design happens later, iteratively, with the author").
 short author-driven design sessions (author + one agent), each ending in a committed,
 runnable increment; the *gates* run per milestone rather than per session — a perf/regression
 check (the binding list above) and a cold review pass over each milestone's accumulated diff.
-Model policy: these sessions are interactive and taste-driven — Opus by default; the author
-redirects if a session turns into engineering.
+Model policy: the "Opus by default" leaning here was superseded 2026-07-11 (CLAUDE.md model
+policy): **author-attended Fable sessions, the 9d shape**; a cold review may be requested per
+pass, not owed by default. Per her 2026-07-17 instruction, the phase OPENS with the
+exploratory round (questions + divergent prototypes) BEFORE any committed styling increment —
+the increments begin once she has chosen a direction from real alternatives.
 
 ## Likely workstreams (leanings)
 

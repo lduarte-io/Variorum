@@ -32,6 +32,23 @@ full severity; this line is why mobile stays cheap.
    is the whole game). Default stance: desktop-only, forever fine; revisit only on explicit
    author demand with iPad evidence.
 
+## Author additions (2026-07-17, pre-Phase-12 intake — direction-level; the canonical record is AppSpec §14's 2026-07-17 delta)
+
+- **Journal-like notebooks (the dream journal).** She wants additional dated, journal-like
+  "books" without takes machinery, usable from the phone — a dream journal is her named
+  example. Model question deliberately undesigned: what a notebook IS (a tag + smart
+  reading over journal-profile posts — zero schema; a reading with journal profile; or a
+  first-class notebook column), and how the one-entry-per-day rule scopes per notebook
+  (`createOrOpenJournalEntry` is keyed per-day globally today). Ask her live at the owning
+  phase; phone-first puts the surface here, but the Mac-side model half may pull earlier
+  if she starts wanting the notebook before this phase.
+- **Phone takes viewing — she is rethinking the never-on-phone stance** (pillar 8's
+  boundary, hers to move; thinking-about level, no commitment). Her floated shape is
+  strictly limited: takes visible for ONE block of ONE post at a time. Rung 2 of the scope
+  ladder above (fan viewing before fan gestures, read-only + maybe `chooseVariant`) is the
+  matching leaning — her refinement narrows it further, which the data model supports
+  trivially (the FanPanel's queries are platform-neutral).
+
 ## Prerequisites from earlier phases (check before planning)
 
 - **Pull-to-head windowing (Phase 12):** the phone syncing a mature corpus needs it; a full

@@ -8,20 +8,54 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ Phase 12 — Hardening & perf validation.**
-Kickoff anchors: `notes/plans/phase-12-hardening.md` (the execution plan,
-authored at 11b's closeout FROM `notes/plans/phase-12-brief.md` — the
-brief's ratified decisions binding) + the Phase 11b closeout paragraph
-below (final counts = the baselines) + `notes/KnownIssuesAndTechDebt.md`
-(the rows Phase 12 owns: pull-to-head windowing, tombstone GC memo,
-restore drill, poison-row assessment, bridge-sweep remedy, bounded-window
-affordances, within-post-virtualization assessment). Staffing (CLAUDE.md
-model policy): coordinator Opus · implementer Opus · cold reviewer FABLE
-under the cross-model review flow; the Sync/ rider routes any engine
-surgery to Fable. Hard author gates: the GC decision memo (Phase-6-class
-— she adjudicates; nothing purges without her acceptance), the
-device-retirement policy inside it, and every real-store access moment
-(the soak audit reads her live corpus — author-assist, never headless).
+**→ Phase 13 — UI design passes** *(re-sequenced ahead of Phase 12 —
+author decision 2026-07-17; the deferral paragraph below is the record).*
+Kickoff anchors: `notes/plans/phase-13-brief.md` (an orientation sketch —
+a head start, not a contract — carrying the 2026-07-16 design-reference
+note WITH the author's 2026-07-17 correction, and the "Author additions
+(2026-07-17)" scope: **block comments are Phase 13's** (her call), the
+N-post side-by-side setting, reference-beside-multi-post-views, the
+chat-format reference note) + AppSpec §14's 2026-07-17 author-intake
+delta + the Phase 11b closeout paragraph below (final counts = the
+baselines: core 651/77 · Mac 380/68 · mobile 11/4). Staffing (CLAUDE.md
+model policy): **author-attended Fable sessions — the 9d shape, no
+`/run-phase` cast by default** (design iteration wants the author
+present); the just-in-time plan is authored AT the kickoff sitting, with
+her, FROM the brief. **Her process instruction (2026-07-17): the phase
+OPENS with a genuine exploratory round** — more questions to her,
+multiple prototypes/directions, real effort on fine-tuning small
+details — before any committed styling; the Phase 11 mockups are
+liked-better-than-now, NOT a settled preference; she knows 13 needs her
+most and is prepared for it. **The kickoff also absorbs the items pulled
+forward from deferred Phase 12:** the three design-prerequisite
+measurements (decoration/rendering-attribute budget on the live editor;
+read-tier per-view cost at scale; keystroke headroom under decorations —
+the 12 plan's "answer 4"), a seeded DESIGN CORPUS in the dev store
+(design the library/timeline/book surfaces against volume; A4-fenced),
+and the ~30-min backup restore drill. **Comments join this phase:** the
+schema is ONE SyncSpec §12 lockstep event with its own commit; the
+author's pending phone install folds into that event's every-client step.
+
+*(Phase 12 DEFERRED 2026-07-17 — author decision, this sitting: there
+has been NO real daily use of the app yet, so the hardening plan's
+governing premise ("months of real daily use behind the store") is
+false, and its own evidence-first ground rule keys every step off Step
+0's real-store measurements — the soak audit, the windowing decision
+gate, the GC memo's inputs, and five of the debt sweep's rows are
+vacuous today, and the scale benchmarks would be calibrated by guesses,
+which the plan itself forbids. The app becoming pleasant to use (13) is
+upstream of the evidence 12 needs, so 12 re-slots AFTER Phase 13 plus a
+window of real daily use, its plan intact with a deferral banner
+(`notes/plans/phase-12-hardening.md`); at its eventual kickoff:
+re-baseline the counts and fold in 13's changes (the comments
+schema/lockstep, styling-era surfaces). Interim risk accepted: per-phase
+test depth, the A1 rotating backups, and the live mirror cover the gap;
+the week-one dump-compare ritual begins when real use does. The Phase
+11b handoff walk items (1–3) are deferred to post-13 the same way — her
+call: walk the app thoroughly once it's worth using. This supersedes the
+sequencing rationale's "UI design (13) after hardening (12)" for this
+one pair — substrate-first governed 0–11; the audit now follows the use
+that beauty unlocks.)*
 *(Phase 11b CLOSED 2026-07-16: B1–B3 shipped — export/import + the
 reference panel; the ladder closed at round 2, zero new HIGH; the
 checkpoint ratified #20–#22 the same day with #22c BUILT — pools join
@@ -86,8 +120,8 @@ combined feel pass still owed.)*
 | 10 | **Readings & first views** | Prove the model under divergent traversals | Reading CRUD (curated + smart), continuous book view (virtualized), folder view, timeline view, minimal pool (listing + drag-into-draft — author 2026-07-06) — functional, unstyled — plus the 2026-07-09 scope additions (tag management/application UI, post lifecycle + seal + Mac entry-date faces, the tint-registration fix, the ask-her-live paste/newline-spacing ruling — QUESTIONS #12) and the echo-detection KnownIssues fix; brief: `notes/plans/phase-10-brief.md`; plan: `notes/plans/phase-10-readings-and-first-views.md` | Views render from store only; virtualization verified (P3); a tortured-to-build view = model finding, surfaced | **done** |
 | 11a | **Remaining views I — views & the lens/version family** (formalized from row 11 at kickoff, 2026-07-13 — the brief's subdivision recommendation, author-authorized) | The full view traversal set, functional and unstyled — shaped by the author-attended kickoff mockup spike (2026-07-12/13; BINDING record in the plan's "Kickoff spike record" section) | The four fan-out styles as a user setting (stack/carousel/margin-grid/slot-split, all editing surfaces, one live editor migrating); side-by-side's two compositions (1–4 full-text columns with block-start lock; in-column slot split); **SAVED LENSES** (`lens`/`lens_choice` schema + view memory + ✓/adopt/diverge-here/branch-all gestures) and the version family (`version_of` op + two doors, `duplicateAsVersion`, `promoteLens`); aligned versions & outline↔draft (lineage-keyed rows, sameness signals); diff (swap-and-reread absorbed by lenses); book-scrub; expand-all-fans; block-TOC + `block.name`; canvas + `canvas_layout` (ONE SyncSpec §12 lockstep event, four additive changes, own schema commits); full pool; unplaced-blocks; cross-fan bracketing (#10/#11 ask-her-live); the modes tutorial; the offline-label fix (A0). Plan: `notes/plans/phase-11-remaining-views.md` (Stage A) | Stage A gate: full suites; gesture soak over the new surface; sync convergence incl. canvas/name/lens rows; P1/P3 spot checks; TEXTKIT2 §5; scrub honors the Phase 6 decision | **done** (mirror deploy at the coordinator's post-ladder gate) |
 | 11b | **Remaining views II — export/import + reference panel** (formalized from row 11 at kickoff, 2026-07-13) | Work is always theirs to download; sources beside the draft | **`.md` + basic PDF export (scope ratified 2026-07-06: posts/readings/blocks; fan "Alternates" sections; bulk one-gesture library export); markdown/text drop-in import** (author 2026-07-06); reference panel (Quick Look/PDFKit drag-into-draft, WKWebView); brief: `notes/plans/phase-11-brief.md`; plan: `notes/plans/phase-11-remaining-views.md` (Stage B) | Exports pure projections matching the ratified shapes (incl. the 2026-07-12 conditional join); import→export round-trip sanity; source files untouched; TCC prompts author-assist | **done** |
-| 12 | **Hardening & perf validation** | The invariant holds at corpus scale, on Tahoe, under sync | Large-corpus stress (years of journals + a book), per-OS matrix run, sync soak analysis (months of real two-device data), pull-to-head windowing, tombstone-GC decision memo (author adjudicates), backup restore drill, deferred-debt sweep; brief: `notes/plans/phase-12-brief.md` | P1 benchmarks at scale; zero TK1 fallbacks; convergence holds; KnownIssues has no orphaned entries | pending |
-| 13 | **UI design passes** | Make it beautiful — with the author, iteratively | Visual design, layout, interaction polish, theming; Liquid Glass where it earns its place; sketch: `notes/plans/phase-13-brief.md` | Author-driven acceptance; perf invariant re-verified after styling | pending |
+| 12 | **Hardening & perf validation** | The invariant holds at corpus scale, on Tahoe, under sync | Large-corpus stress (years of journals + a book), per-OS matrix run, sync soak analysis (months of real two-device data), pull-to-head windowing, tombstone-GC decision memo (author adjudicates), backup restore drill, deferred-debt sweep; brief: `notes/plans/phase-12-brief.md` | P1 benchmarks at scale; zero TK1 fallbacks; convergence holds; KnownIssues has no orphaned entries | **deferred** (author 2026-07-17: no real use yet = no evidence to harden against; runs after 13 + a real-use window; plan intact with deferral banner; the design-prereq measurements + corpus seed + restore drill pulled into 13's kickoff) |
+| 13 | **UI design passes** | Make it beautiful — with the author, iteratively | Visual design, layout, interaction polish, theming; Liquid Glass where it earns its place; **block comments** (schema lockstep + ops + UI — author 2026-07-17); the deferred-12 pull-forwards at kickoff (design-prereq measurements, dev-store design corpus, restore drill); sketch: `notes/plans/phase-13-brief.md` (incl. the 2026-07-17 author additions) | Author-driven acceptance; perf invariant re-verified after styling; the exploratory round precedes committed styling (author 2026-07-17) | **next** (re-sequenced ahead of 12 — author 2026-07-17) |
 | 14 | **Accounts & multi-tenant** | Commercial shape | Multi-tenant hardening of 9c's auth (per-user isolation at commercial scale, account provisioning for non-author users — the single-user auth core moved to 9c, author 2026-07-07); **"variorum edition" full-fidelity export; server privacy/E2EE decision** (author 2026-07-06); sketch: `notes/plans/phase-14-brief.md` | Isolation tests; existing single-user data migrates cleanly | pending |
 | 15 | **iOS full surface** | Beyond capture: reading views, more of the model on mobile | Scope decided then (still no fan gestures unless the author revisits); sketch: `notes/plans/phase-15-brief.md` | Same core + sync | pending |
 | — | Web (WASM SQLite) | someday | — | — | unowned |
@@ -102,7 +136,7 @@ Phases may subdivide when their just-in-time plans are written; the table then g
 - **Sync (5) before the editor (7):** all UI code is born onto a sync-aware persistence layer (apply mode, outbox, repairs live from the start) — no retrofits — and the moment iOS capture (8) exists, the author starts journaling for real.
 - **The TK2 spike (6) before the editor (7)** — `notes/TEXTKIT2_NOTES.md` §2 documents viewport/height/scroll-to-location as the stack's least reliable subsystem; the facts must be learned *on Tahoe* before book-scrub is designed onto them. Xcode 26 on both machines is this phase's hard prerequisite.
 - **iOS capture (8) immediately after editor v1** — the author's stated priority: journal from the phone early, use the product while building it. Real daily use is also the best sync soak test.
-- **Views split into first (10) and remaining (11)**; **UI design (13) after hardening (12)** — substrate first, beauty later, with the author; **accounts (14) reuse the same sync protocol.**
+- **Views split into first (10) and remaining (11)**; **UI design (13) after hardening (12)** — substrate first, beauty later, with the author; **accounts (14) reuse the same sync protocol.** *(The 13/12 half superseded 2026-07-17 — 13 now precedes 12: the hardening evidence requires the real daily use that only a usable app generates; the pointer's deferral paragraph is the record.)*
 
 ## Closeout log
 

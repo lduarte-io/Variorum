@@ -8,6 +8,17 @@ self-contained: a fresh session can answer your questions from it alone.
 
 ## Your checklist (in order)
 
+> **Deferral note (author, 2026-07-17):** items 1–3 are deferred until
+> after Phase 13 — her call: it makes more sense to walk and thoroughly
+> use the app once it's actually pleasant to use; the walk folds
+> naturally into 13's author-attended design sittings. **Item 5 is
+> superseded: Phase 12 is deferred (no real use yet = no evidence to
+> harden against) and Phase 13 runs next** — the master plan pointer
+> carries the record. The phone install (item 3) is expected to fold
+> into 13's block-comments lockstep event (one install covers it and
+> the 11a constraint); until it lands, the no-lens/canvas/block-names
+> rule stands.
+
 1. **☐ Relaunch from `/Applications`.** The coordinator refreshes
    `/Applications/Variorum.app` to the post-ladder Release build if the
    app is quit; if it's running when they try, quit it and either ask
