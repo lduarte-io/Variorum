@@ -18,11 +18,12 @@ N-post side-by-side setting, reference-beside-multi-post-views, the
 chat-format reference note) + AppSpec §14's 2026-07-17 author-intake
 delta + the Phase 11b closeout paragraph below (final counts = the
 baselines: core 651/77 · Mac 380/68 · mobile 11/4). Staffing (CLAUDE.md
-model policy): **author-attended Fable sessions — the 9d shape, no
-`/run-phase` cast by default** (design iteration wants the author
-present); the just-in-time plan is authored AT the kickoff sitting, with
-her, FROM the brief. **Her process instruction (2026-07-17): the phase
-OPENS with a genuine exploratory round** — more questions to her,
+model policy, refined by her follow-up the same day): **two-stage** —
+the exploratory/design/plan-authoring **sittings** are author-attended
+Fable sessions (begun 2026-07-17), and once the plan is fully made,
+**execution runs as an ordinary `/run-phase` cast** (she invokes it;
+staffing decided at that kickoff). **Her process instruction
+(2026-07-17): the sittings OPEN with a genuine exploratory round** — more questions to her,
 multiple prototypes/directions, real effort on fine-tuning small
 details — before any committed styling; the Phase 11 mockups are
 liked-better-than-now, NOT a settled preference; she knows 13 needs her
@@ -34,7 +35,16 @@ the 12 plan's "answer 4"), a seeded DESIGN CORPUS in the dev store
 (design the library/timeline/book surfaces against volume; A4-fenced),
 and the ~30-min backup restore drill. **Comments join this phase:** the
 schema is ONE SyncSpec §12 lockstep event with its own commit; the
-author's pending phone install folds into that event's every-client step.
+author's pending phone install folds into that event's every-client step;
+her follow-up round firmed the shape — an own TABLE, tombstoned, with
+deleted comments visible and resurrectable (never skimpy). **The
+follow-up round also re-centered NOTEBOOKS into the sittings' design
+conversation** (§14 items 9–12): the shelf/finish/bounded-length
+notebook surface over the EXISTING reading machinery (`max_posts` has no
+UI face today) plus first-class reorderable chapter groupings (a model
+option round, undecided) — the 13 plan scopes what lands where. And
+13's goal explicitly includes **LEGIBILITY** — making what the app can
+do discoverable — not just beauty.
 
 *(Phase 12 DEFERRED 2026-07-17 — author decision, this sitting: there
 has been NO real daily use of the app yet, so the hardening plan's

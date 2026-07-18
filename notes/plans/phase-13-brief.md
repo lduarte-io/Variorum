@@ -48,12 +48,30 @@ the phase that needs her most and is prepared to spend the time.
   window-composition question for this phase's layout work — the panel machinery itself
   (B3) needs no change.
 - **Block comments — DECIDED 2026-07-17: this phase OWNS them** (her call, same day).
-  Block-level working notes, never per-take; travel-through-structural-ops rules and
-  schema shape are the design round's, asked to her live (see the §14 delta). Schema =
-  a SyncSpec §12 lockstep event with its own commit — the "no VariorumCore changes"
-  rule below gains this one deliberate, author-ratified exception, and her pending
-  phone install folds into the lockstep's every-client step (one install covers this
-  and the outstanding 11a constraint).
+  Block-level working notes, never per-take. **Shape firmed in her follow-up round:
+  their own TABLE** (multiple per block), tombstoned via `deleted_at`, and **deleted
+  comments visible somewhere and resurrectable** — accidental deletion recoverable;
+  "the feature shouldn't be excessively skimpy." Travel-through-structural-ops rules
+  are the design round's, asked to her live (her instinct: duplicate where needed,
+  easy to resolve — see the §14 delta). Schema = a SyncSpec §12 lockstep event with
+  its own commit — the "no VariorumCore changes" rule below gains this deliberate,
+  author-ratified exception, and her pending phone install folds into the lockstep's
+  every-client step (one install covers this and the outstanding 11a constraint).
+- **NOTEBOOKS (2026-07-17 follow-up — re-centered here from the Phase 15 orbit; §14
+  item 10 is the canonical record).** The dream-journal ask clarified: not a per-day
+  rule but the notebook as a first-class, LEGIBLE product surface — a place where you
+  make posts and see them one after another; a **shelf view** of her notebooks (click
+  in; **finish** them); starting a "new" journal as a separate notebook; and
+  **bounded-length notebooks** (declare a length at start; extend or start a new one
+  when it ends — she'd like *words* as a unit). The machinery substantially exists and
+  is invisible: curated readings ARE ordered post lists, `reading.max_posts` is the
+  extent constraint (fixed-length journals were its motivating example) with **no UI
+  face at all**, `reading.locked` is "declared done," profiles include `'journal'`.
+  Genuinely new: the shelf/finish faces, a words-based extent option, and —
+  her direction, model-level — **first-class reorderable chapter groupings within a
+  book** ("groupings of posts should actually be something," not tag-derived
+  sections; e.g. a `reading_section` table — 2–3 options for the design round, NOT
+  decided). The sittings design this; the plan scopes what lands in 13 vs later.
 - **Chat/conversation reference kind (noted, LOW priority — her explicit "make a note".)**
   Paste-in two-sided transcripts rendered chat-style in the reference panel. Design-time
   question if taken: where pasted content lives (an app-written transcript file behind the
@@ -62,6 +80,10 @@ the phase that needs her most and is prepared to spend the time.
   "looked so much better and [are] easier to just understand… colors, spacing" — and
   later the same day this phase was **re-sequenced NEXT** (Phase 12 deferred until after
   13 + real use; master plan pointer has the record).
+- **Legibility is first-class scope (2026-07-17):** "it's really unclear what you can
+  even do in the app right now" — information architecture and discoverability of the
+  capabilities that already exist (readings/notebooks, extents, the seal, export, the
+  pool, lenses…) are as much this phase's job as visual polish.
 - **Pulled forward from deferred Phase 12 (2026-07-17):** the kickoff sitting takes the
   three design-prerequisite measurements (decoration/rendering-attribute budget on the
   live TK2 editor, read-tier per-view cost at scale, keystroke headroom under
@@ -77,11 +99,13 @@ author* (AppSpec §12: "UI design happens later, iteratively, with the author").
 short author-driven design sessions (author + one agent), each ending in a committed,
 runnable increment; the *gates* run per milestone rather than per session — a perf/regression
 check (the binding list above) and a cold review pass over each milestone's accumulated diff.
-Model policy: the "Opus by default" leaning here was superseded 2026-07-11 (CLAUDE.md model
-policy): **author-attended Fable sessions, the 9d shape**; a cold review may be requested per
-pass, not owed by default. Per her 2026-07-17 instruction, the phase OPENS with the
-exploratory round (questions + divergent prototypes) BEFORE any committed styling increment —
-the increments begin once she has chosen a direction from real alternatives.
+Model policy: the "Opus by default" leaning here was superseded 2026-07-11 (CLAUDE.md), then
+refined 2026-07-17 into a **two-stage shape**: the exploratory/design/plan-authoring
+**sittings** are author-attended **Fable** sessions, and once the plan is fully made,
+**execution runs as an ordinary `/run-phase` cast** (she invokes it; staffing decided at that
+kickoff). Per her 2026-07-17 instruction, the sittings OPEN with the exploratory round
+(questions + divergent prototypes) BEFORE any committed styling direction — increments begin
+once she has chosen from real alternatives.
 
 ## Likely workstreams (leanings)
 

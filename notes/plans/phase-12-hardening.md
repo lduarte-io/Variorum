@@ -123,7 +123,11 @@
    corpus scale (Phase 10 recorded 0.35 ms median — re-verify);
    (c) keystroke-path headroom under tint/badge/gap decorations at the
    Step 1 corpus. Numbers recorded in the closeout for the design phase
-   to start from.
+   to start from. ***(MOVED to Phase 13's kickoff — author, 2026-07-17,
+   with the deferral: these three measurements run THERE, against a
+   seeded design corpus. At this phase's eventual kickoff, consume 13's
+   recorded numbers; re-measure only if styling changed the measured
+   surfaces.)***
 
 ## Steps
 
@@ -207,6 +211,10 @@ purge-below-horizon only; a full GC round-trip on the harness) — scoped
 at her direction, not before.
 
 ### Step 5 — the backup restore drill (KnownIssues row)
+***(MOVED to Phase 13's kickoff — author, 2026-07-17, with the deferral.
+At this phase: VERIFY the drill ran there (the KnownIssues row carries
+the new owner), re-run only if the backup machinery changed since, and
+keep the runbook section current in this plan's closeout.)***
 **Work:** take a rotating cold copy (Phase 8's A1 machinery), open it
 through the recoverable-open path as a real store, verify it renders
 (library, a post, a fan, the journal) and that sync stays OFF for the
@@ -239,9 +247,9 @@ The closeout states the sweep's outcome row by row.
 expectations; re-affirmations need the recorded evidence, not tests.
 
 ### Step 7 — Phase 13 prerequisite numbers + phase verification
-**Work:** answer 4's three measurements (rendering-attribute budget on
-the live editor; read-tier per-view cost at scale; keystroke headroom
-under decorations), recorded for the design phase. Then the phase gate:
+**Work:** answer 4's three measurements — ***taken at Phase 13's kickoff
+per the 2026-07-17 move; verify currency here rather than re-measuring***.
+Then the phase gate:
 full suites on all three targets; the benchmark record compared against
 every recorded prior number; the soak record complete; the KnownIssues
 table verified zero-orphan.

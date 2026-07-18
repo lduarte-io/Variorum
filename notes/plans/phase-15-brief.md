@@ -34,14 +34,14 @@ full severity; this line is why mobile stays cheap.
 
 ## Author additions (2026-07-17, pre-Phase-12 intake — direction-level; the canonical record is AppSpec §14's 2026-07-17 delta)
 
-- **Journal-like notebooks (the dream journal).** She wants additional dated, journal-like
-  "books" without takes machinery, usable from the phone — a dream journal is her named
-  example. Model question deliberately undesigned: what a notebook IS (a tag + smart
-  reading over journal-profile posts — zero schema; a reading with journal profile; or a
-  first-class notebook column), and how the one-entry-per-day rule scopes per notebook
-  (`createOrOpenJournalEntry` is keyed per-day globally today). Ask her live at the owning
-  phase; phone-first puts the surface here, but the Mac-side model half may pull earlier
-  if she starts wanting the notebook before this phase.
+- **Journal-like notebooks (the dream journal) — RE-CENTERED 2026-07-17 (her follow-up):
+  the notebook is a first-class MAC product surface, designed in the Phase 13 sittings**
+  (AppSpec §14 item 10 + the 13 brief carry the direction: shelf view, finish, bounded
+  lengths over the existing reading machinery, first-class chapter groupings; NOT about
+  a per-day rule). What remains 15-relevant: the PHONE half — journaling into a chosen
+  notebook from the capture surface (a notebook picker; how the per-day create-or-open
+  rule scopes per notebook if the design round gives notebooks dated pages) — designed
+  here against whatever notebook shape 13 lands.
 - **Phone takes viewing — she is rethinking the never-on-phone stance** (pillar 8's
   boundary, hers to move; thinking-about level, no commitment). Her floated shape is
   strictly limited: takes visible for ONE block of ONE post at a time. Rung 2 of the scope
