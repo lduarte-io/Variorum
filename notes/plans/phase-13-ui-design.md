@@ -924,3 +924,197 @@ record); master plan row 13 → done, pointer → **Phase 12** (now with real-us
 evidence accumulating); KnownIssues reconciliation (restore-drill row closes;
 typographic PDF row disposition); the author handoff LAST, checklist at top (the
 deferred 11b walk items fold into her first real session with the new UI).
+
+---
+
+# STAGE A CLOSEOUT (2026-07-18, single Fable implementer session — the review ladder's anchor)
+
+**Run shape:** A1 schema commits 1–4 → the sync-shaping commit → THE DEPLOY
+(pre-authorized, R53) → A2 → A0, one commit per step, each commit's own suite
+green, the FULL three suites green at the stage gate. Commits: `1dc8656`
+(v1_8 block_comment) · `f19b519` (v1_9 block.presentation) · `bd5e322`
+(v1_10 reading_section + section_id) · `db614d4` (v1_11 word_target) ·
+`72dc3cb` (sync shaping, lockstep 3) · `498eab5` (A2 travel + tagsAll) ·
+`e109480` (A0). **Stage gate counts: core `swift test` 703 green in 85
+suites (baseline 651/77) · Mac app 380 green in 68 suites (baseline,
+non-vacuous — 381 ✔ lines in the log) · mobile 11 green in 4 suites.**
+Canary silent everywhere (the decoration spike's explicit TK2 opt-in
+precondition held; the Mac suite's standing canary tests green); no macOS
+point update since the Phase 6 spike's 26.4.1 (25E253) — the TEXTKIT2 §5
+matrix stands on the same build the A0 spike just re-exercised.
+
+## A1 — the schema, the ONE SyncSpec §12 lockstep event (v1_8–v1_11)
+
+- **v1_8 `block_comment`** — id/owner_id/block_id/text/created_at/updated_at/
+  deleted_at/sync_version; NO uniqueness (no natural key → no repair class);
+  `idx_block_comment_block`; cascade block→comments with the block's EXACT
+  stamp (own trigger); outbox capture via the shared helper; joins
+  `flipBlockCascadeTombstones` so `restoreBlock`/`restoreContainer` revive
+  cascade victims while independently-deleted comments stay dead (pinned).
+  Ops: `addBlockComment` / `editBlockComment` / `deleteBlockComment` /
+  `restoreBlockComment` (the resurrection door — deleted comments visible
+  via `Queries.deletedBlockComments`, "never skimpy"); `Queries.blockComments`
+  + `commentCounts` (the C1 margin feed). Comment text is METADATA under the
+  merge matrix (server-version-wins CAS) — S5 stays scoped to
+  `variant.working_text` by design (QUESTIONS #23).
+- **v1_9 `block.presentation`** — nullable TEXT, canonical sorted-keys JSON
+  (`BlockPresentation`: kind/color/emoji; kind "callout" ships; `color` is a
+  THEME-TOKEN name — the R1 two-voices rule forbids storing palette values);
+  identity-level like `block.name`; takes SHARE the frame (R16). `setBlock
+  Presentation` mirrors `setBlockName` (no-op guard, no touch/churn, seal-
+  refused PROVISIONAL). Malformed stored JSON reads as a PLAIN block (fail-
+  open — losing a frame renders prose; fail-closed stays the query doctrine).
+- **v1_10 `reading_section` + `reading_post.section_id`** — chapters (R28/
+  R50): ordered rows (fractional positions; duplicate names legal), no
+  nesting; membership's `section_id` = which chapter; A DANGLING pointer
+  reads as UNSECTIONED (the chosen-variant fallback class — deleting a
+  chapter never rewrites memberships; pinned at stored-pointer and
+  resolved-read levels; NO repair rides the pointer). Cascade reading→
+  sections (exact stamp). Ops: `createSection`/`renameSection`/
+  `deleteSection`/`reorderSection`/`assignPostToSection`; locked reading
+  freezes chapter STRUCTURE while rename stays free (the `renameReading`
+  parallel); smart readings refuse chapters (QUESTIONS #25). Registry entry
+  placed BEFORE `reading_post` — the standing FK-order walk caught the
+  original placement (apply order stays FK-friendly).
+- **v1_11 `reading.word_target`** — the words-based extent TARGET (§14 item
+  10): display/progress semantics, deliberately NEVER an add-time refusal
+  (pinned); `setReadingWordTarget` + `setReadingMaxPosts` (the v1 column's
+  FIRST setter); both refuse non-positive and refuse under a locked reading;
+  lowering `max_posts` below membership is legal (adds refuse at the
+  standing capacity gate).
+- **Sync shaping:** `lockstepVersion` 2→3; repairs' `deadParentStamp` +
+  direction-1 enumeration cover both new children; `AuthRLSDDLTests`
+  reworked to the THREE-file deployed composition (04+05+06, last-body-wins)
+  with a NEW marker-monotonicity pin; `SupabaseTransportTests` composes
+  01+05+06; `Phase13SyncConvergenceTests` (5): metadata across the wire,
+  the comment CAS race (ONE row, no conflict variant), cross-device exact-
+  stamp cascades, the section-delete-races-assignment dangle (NO repair —
+  read-time fallback on both devices), restoreBlock revival propagation.
+
+### THE DEPLOY — EXECUTED (2026-07-18, R53's pre-authorization; the 9c/11a PAT arrangement)
+
+`Server/supabase/06_phase13_lockstep.sql` executed VERBATIM on the
+production mirror via the Management API (HTTP 201). Verified in the same
+sitting: `sync_schema_version()` = **3**; `block_comment` and
+`reading_section` present with ZERO rows; RLS enabled on both; all three
+new columns live (`block.presentation`, `reading.word_target`,
+`reading_post.section_id`); both RPCs + the version RPC in place. **The
+lockstep is mirror → Mac only (the phone app is removed — R53); the
+accepted consequence is NOW LIVE: the pre-13 installed Mac build visibly
+refuses to sync (outbox intact, cursor unmoved) until this phase's build
+replaces it at `/Applications`.** Build work rides the dev store meanwhile.
+
+## A2 — travel rules + the tagsAll vocabulary
+
+- **Comment travel (duplicate-onto-successors, her ratified instinct):**
+  extract/divide keep A's and copy to the minted half; divide-W copies to B
+  AND C (A, preserved whole, keeps originals); merge carries BOTH sides onto
+  A′; poolDragCopy/duplicateAsVersion/promoteLens carry per-block copies.
+  Copies are fresh owner-stamped rows with the source's `created_at`
+  PRESERVED (a note's date is part of the note; keeps order stable —
+  PROVISIONAL, QUESTIONS #23); DELETED comments never travel. Undo needed
+  ZERO new machinery (pinned): reverting a mint cascades the copies away;
+  originals untouched.
+- **Presentation travel:** structural successors INHERIT the source's frame
+  (the span was the callout's content); merge keeps the frame only when
+  BOTH sources agree, else mints PLAIN (QUESTIONS #24); the copy family
+  copies it like `block.name`. `mintBlock`/`mintFanBlock` gained the
+  parameter (default nil — `newBlock` unchanged).
+- **`SmartQuerySpec.tagsAll` (R30):** one conjunct per path, subtree
+  semantics each, AND-composing with the v1 fields; JSON vocabulary only —
+  nil encodes ABSENT, so pre-13 specs round-trip byte-identically (pinned).
+  The promote-tag(s)-to-book GESTURE is B2/B3's face over this vocabulary.
+
+## A0 — measurements + design corpus + restore drill (the deferred-12 pull-forwards)
+
+### (i) The three design-prerequisite numbers (Spikes/Phase13DecorationSpike; RELEASE build, macOS 26.4.1/25E253; 220-block ≈ 10k-word document, editor 700×900)
+
+| measurement | median | p95 | max |
+|---|---|---|---|
+| (a) keystroke edit path, BARE (insert + viewport ensureLayout) | 0.57 ms | 0.75 ms | 1.00 ms |
+| (a) + paragraph GAP (paragraphSpacing 12 — the Phase 10 presentation gap) | 0.58 ms | 0.75 ms | 0.83 ms |
+| (a) + GAP + OVERLAYS (18 seams + 18 badges + ring, fragment-geometry repositioned per keystroke) | 0.61 ms | 0.79 ms | 1.01 ms |
+| (a) overlay reposition alone (the scroll-tick cost) | 0.02 ms | 0.02 ms | 0.02 ms |
+| (a) FOR THE RECORD: rendering-attribute add/remove over the viewport (§3 caveat STANDS — the rule is overlays) | 0.68 ms | 0.92 ms | 0.99 ms |
+| (b) read-tier per-view setup+fullLayout, 200 views (180×5-block + 20×50-block) | 0.44 ms | 3.69 ms | 3.88 ms |
+
+- **(b)** re-verifies Phase 10's 0.35 ms-median construction at design-
+  corpus scale (the p95 tail is the 50-block posts); memory Δ1.4 MB at a
+  dozen live views, Δ25.8 MB at 200 — the real tier virtualizes and never
+  holds 200.
+- **(c) keystroke headroom vs the 8 ms bar: 7.21 ms decorated** (bare
+  7.25 ms). The ENTIRE Stage C decoration language — seams, ring, badges,
+  gap — costs ~0.04 ms at p95 as overlays. **Design verdict for Stages
+  B/C: the decoration budget is a rounding error when the ground rule
+  (overlays, never rendering attributes) is followed; no styling decision
+  in this phase is perf-constrained at these scales.** These are the
+  baseline numbers every milestone gate re-checks.
+
+### (ii) The design corpus (Spikes/DesignCorpusSeeder — the DEV store, A4-fenced by construction)
+
+Seeded 2026-07-18 into `Variorum-dev/variorum.sqlite` (existing store moved
+aside timestamped — never deleted; every row through the operations layer;
+rows born unowned; the dev store never pairs with the mirror): **193 posts
++ 1 pool · 625 blocks · 710 variants · ~44k words · 35 comments · 4
+chapters · 5 books · 9 hierarchical tags · 8 canvas positions · 1 lens.**
+The shelf it draws: the daily journal (~96 dated entries, IN a curated
+"Journal 2026" book — R50's ordinary-membership shape), the bounded
+**Dream Journal** (word_target 10,000 — the shelf's "62% of 10,000w"
+material), **Orbit** (18 posts across 4 real chapters with fans, comments,
+callouts), the finished **Letters, 2025** (28 posts, locked),
+the **attention** series (URL references), **star-notes** (a smart book
+from a tag, locked), a ~10k-word long draft (scroll-feel material), 25
+bookless quick posts (the Pool population), 30 scraps (fans, block tags,
+canvas positions), and recovery material (an archived post, a deleted
+post, a deleted block, a deleted comment). Re-seed anytime:
+`cd Spikes/DesignCorpusSeeder && swift run DesignCorpusSeeder --replace`.
+
+### (iii) The restore drill — EXECUTED (the KnownIssues row closes)
+
+**Automated half:** `StoreRestoreDrillTests` (2 green) — a cold copy taken
+MID-ACTIVITY via the A1 backup API opens through the recoverable-open path:
+`integrity_check` ok; content renders whole (post, fan, comment, chapter);
+the post-backup edit is absent (the copy is the snapshot); the restored
+copy is a fully LIVE store (post-restore writes work); the rotation
+filename round-trips; self-contained (no sidecar files required).
+**On-disk rehearsal:** executed against the freshly seeded dev store —
+backup → `Variorum-dev/Backups/variorum-backup-seed-drill-*.sqlite` →
+`openStore` → integrity ok, container counts match (seeder output is the
+record). The REAL-store drill differs by exactly one path substitution
+(runbook step 1); it was deliberately NOT run against her store (autonomy
+posture: real-store access stays author-assisted — Phase 12 Step 0's rule).
+
+**THE RESTORE RUNBOOK (kept current by deferred-12's Step 5):**
+1. Pick the newest copy in `<store dir>/Backups/` (real store:
+   `~/Library/Containers/io.lduarte.Variorum/Data/Library/Application
+   Support/Variorum/Backups/`; names sort chronologically).
+2. COPY it aside (never operate on the only backup):
+   `cp variorum-backup-<stamp>.sqlite ~/Desktop/restore-candidate.sqlite`.
+3. Verify: `sqlite3 restore-candidate.sqlite "PRAGMA integrity_check;"` →
+   `ok`.
+4. Inspect content headlessly if wanted (it is a plain SQLite store), or
+   open it as a store: quit Variorum, move the damaged
+   `variorum.sqlite`(+`-wal`/`-shm`) aside — NEVER delete — and put the
+   candidate in its place as `variorum.sqlite`; relaunch. The recoverable-
+   open path (`openStore`) migrates it forward if it predates the current
+   schema.
+5. The restored store renders the library/posts/fans/journal as of the
+   backup instant; work written after the backup lives only in the moved-
+   aside damaged store and the mirror.
+6. **THE SYNC RULE (the A4-fence posture):** the copy carries the
+   original's `sync_state` cursor, outbox, and `sync_row_seq` VERBATIM. A
+   restored REAL store may sync again — the engine's CAS/merge machinery
+   reconciles it against the mirror (stale rows re-pull; S5 rescues any
+   text race as conflict takes) — but do it DELIBERATELY: relaunch, let one
+   full pull→push round converge, then dump-compare against the mirror
+   before trusting the reunion. A restored DEV/drill copy must never be
+   pointed at the production mirror at all.
+
+## PROVISIONAL dispositions (R55: noted-and-continued; the end-checkpoint walk)
+
+Logged as QUESTIONS #23 (comments: seal posture · created_at preservation ·
+metadata-CAS-not-S5 · deleted-comments-don't-travel), #24 (presentation:
+seal posture · inherit-on-split · merge-agree-else-plain · token-name
+colors), #25 (sections/extents: curated-only · locked-reading postures ·
+word_target-never-enforces · the added `setReadingMaxPosts`). Zero
+stop-and-ask items arose; nothing gated the core.
