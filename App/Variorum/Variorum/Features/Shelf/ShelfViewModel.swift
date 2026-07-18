@@ -156,6 +156,12 @@ final class ShelfViewModel {
         await run { try $0.setReadingMaxPosts(readingID, maxPosts: maxPosts) }
     }
 
+    /// The re-designation door (round 2, MAJOR 2): point Today's Entry at
+    /// a new daily journal book.
+    func designateDailyJournal(_ readingID: String) async {
+        await run { try $0.setDailyJournalBook(readingID) }
+    }
+
     /// Drag a post ONTO a book row (sitting 1: "drag posts onto a book").
     /// Tolerant of the already-in case — a drop is a gesture, not a form.
     func addPost(_ postID: String, to readingID: String) async {

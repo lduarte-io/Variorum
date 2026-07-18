@@ -166,40 +166,9 @@ extension Queries {
                 "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
             ]
             guard let spec = decodeSpec(reading.querySpec) else { return [] }
-            if let profile = spec.profile {
-                conditions.append("c.profile = ?")
-                arguments.append(profile)
-            }
-            if let from = spec.entryDateFrom {
-                conditions.append("c.entry_date >= ?")
-                arguments.append(from)
-            }
-            if let to = spec.entryDateTo {
-                conditions.append("c.entry_date <= ?")
-                arguments.append(to)
-            }
-            let tagMatch = """
-                EXISTS (SELECT 1 FROM post_tag pt
-                         JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
-                        WHERE pt.post_id = c.id AND pt.deleted_at IS NULL
-                          AND (t.path = ?
-                               OR substr(t.path, 1, length(?) + 1) = ? || '/'))
-                """
-            if let paths = spec.tags, !paths.isEmpty {
-                conditions.append(
-                    "(" + Array(repeating: tagMatch, count: paths.count).joined(separator: " OR ") + ")")
-                for path in paths {
-                    arguments.append(contentsOf: [path, path, path])
-                }
-            }
-            // tagsAll (Phase 13, R30): one conjunct per path — every path
-            // must have a live application at or under it.
-            if let allPaths = spec.tagsAll, !allPaths.isEmpty {
-                for path in allPaths {
-                    conditions.append(tagMatch)
-                    arguments.append(contentsOf: [path, path, path])
-                }
-            }
+            let match = smartMatchSQL(spec)
+            conditions += match.conditions
+            arguments += match.arguments
             // A smart reading has no positions; `manual` is meaningless for
             // it — fall back to created_at ascending (PROVISIONAL, see
             // phase closeout).
@@ -254,8 +223,57 @@ extension Queries {
         return "(\(column) IS NULL), \(column) \(direction), c.id \(direction)"
     }
 
-    private static func decodeSpec(_ json: String?) -> SmartQuerySpec? {
+    static func decodeSpec(_ json: String?) -> SmartQuerySpec? {
         guard let json else { return SmartQuerySpec() }  // no spec = no constraints
         return try? JSONDecoder().decode(SmartQuerySpec.self, from: Data(json.utf8))
+    }
+
+    /// The smart predicate's SQL half over a `container c` scope — ONE
+    /// implementation shared by reading assembly, the Pool, and the
+    /// membership chip (Stage B review round 2, MAJOR 3: derived membership
+    /// must be visible to the drainage surfaces — R29/R30's purpose). The
+    /// caller supplies the ambient scoping (live/unarchived/kind); this
+    /// returns only the SPEC's own conditions, ANDed. An empty spec returns
+    /// no conditions (matches all posts — the ratified NULL-spec rule).
+    static func smartMatchSQL(
+        _ spec: SmartQuerySpec
+    ) -> (conditions: [String], arguments: [(any DatabaseValueConvertible)?]) {
+        var conditions: [String] = []
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        if let profile = spec.profile {
+            conditions.append("c.profile = ?")
+            arguments.append(profile)
+        }
+        if let from = spec.entryDateFrom {
+            conditions.append("c.entry_date >= ?")
+            arguments.append(from)
+        }
+        if let to = spec.entryDateTo {
+            conditions.append("c.entry_date <= ?")
+            arguments.append(to)
+        }
+        let tagMatch = """
+            EXISTS (SELECT 1 FROM post_tag pt
+                     JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                    WHERE pt.post_id = c.id AND pt.deleted_at IS NULL
+                      AND (t.path = ?
+                           OR substr(t.path, 1, length(?) + 1) = ? || '/'))
+            """
+        if let paths = spec.tags, !paths.isEmpty {
+            conditions.append(
+                "(" + Array(repeating: tagMatch, count: paths.count).joined(separator: " OR ") + ")")
+            for path in paths {
+                arguments.append(contentsOf: [path, path, path])
+            }
+        }
+        // tagsAll (Phase 13, R30): one conjunct per path — every path
+        // must have a live application at or under it.
+        if let allPaths = spec.tagsAll, !allPaths.isEmpty {
+            for path in allPaths {
+                conditions.append(tagMatch)
+                arguments.append(contentsOf: [path, path, path])
+            }
+        }
+        return (conditions, arguments)
     }
 }

@@ -84,6 +84,22 @@ extension Operations {
         }
     }
 
+    /// The designated daily book, read THROUGH the operations seam so the
+    /// ensure-membership door can check-and-act inside ONE runner-serialized
+    /// sequence (Stage B review round 2, MINOR: a pre-runner read let two
+    /// rapid Today's-Entry invocations both see nil and mint two "Journal"
+    /// books). Dangling designations read as nil (the fallback class).
+    public func dailyJournalBookID() throws -> String? {
+        try database.read { try Queries.dailyJournalBookID($0) }
+    }
+
+    /// The designated daily book's display name — the ensure door's
+    /// speaking notes name the book they couldn't add to.
+    public func dailyJournalBookName() throws -> String? {
+        guard let id = try dailyJournalBookID() else { return nil }
+        return try database.read { try Queries.reading($0, id: id)?.name }
+    }
+
     // MARK: - The one upsert shape
 
     /// UPDATE-then-INSERT, never `INSERT OR REPLACE`: an outer ON CONFLICT

@@ -48,8 +48,7 @@ struct BookView: View {
     @State private var settingsShown = false
 
     private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme)
-            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {
@@ -148,7 +147,6 @@ struct BookView: View {
                                 Button {
                                     // Navigate: land the book scroll at the
                                     // chapter (the flow view shows it too).
-                                    withAnimation { proxy.scrollTo("nav-noop") }
                                     scrollTarget = "chapter-\(section.id)"
                                 } label: {
                                     Text(tokens.chromeLabel(section.name))
@@ -196,6 +194,17 @@ struct BookView: View {
                     .buttonStyle(.borderless)
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
+                    // Round 2, MINOR: the recovery door lives HERE too —
+                    // deleting the ONLY chapter leaves no section row to
+                    // hang the context menu off.
+                    if !structure.deletedSections.isEmpty {
+                        Button(tokens.chromeLabel("restore deleted chapter")) {
+                            Task { await structure.restoreLastDeletedChapter() }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                    }
                     if structure.reading?.profile == "journal" {
                         Button(tokens.chromeLabel("+ new entry")) {
                             Task {
@@ -405,6 +414,7 @@ struct BookSettingsSheet: View {
     @State private var nameField = ""
     @State private var wordTargetField = ""
     @State private var maxPostsField = ""
+    @State private var parseError: String?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -423,10 +433,15 @@ struct BookSettingsSheet: View {
             Text("Finishing freezes the book's membership and order (reversible). A finished book opens as pure text.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            if let parseError {
+                Text(parseError).font(.caption).foregroundStyle(.red)
+            }
             HStack {
                 Spacer()
-                Button("Close") { save(); dismiss() }
-                    .keyboardShortcut(.defaultAction)
+                Button("Close") {
+                    if save() { dismiss() }
+                }
+                .keyboardShortcut(.defaultAction)
             }
         }
         .padding(16)
@@ -438,20 +453,27 @@ struct BookSettingsSheet: View {
         }
     }
 
-    private func save() {
+    /// Round 2, MINOR: unparseable input REFUSES and keeps (ExtentInput —
+    /// the one parse rule shared with the shelf's sheet).
+    private func save() -> Bool {
+        guard let target = ExtentInput.parse(wordTargetField),
+              let cap = ExtentInput.parse(maxPostsField)
+        else {
+            parseError = "Extents are plain numbers (e.g. 10000) — nothing was changed."
+            return false
+        }
         let name = nameField.trimmingCharacters(in: .whitespaces)
-        let target = Int(wordTargetField.trimmingCharacters(in: .whitespaces))
-        let cap = Int(maxPostsField.trimmingCharacters(in: .whitespaces))
         Task {
             if !name.isEmpty, name != structure.reading?.name {
                 await structure.rename(to: name)
             }
-            if target != structure.reading?.wordTarget {
-                await structure.setWordTarget(target)
+            if target.intValue != structure.reading?.wordTarget {
+                await structure.setWordTarget(target.intValue)
             }
-            if cap != structure.reading?.maxPosts {
-                await structure.setMaxPosts(cap)
+            if cap.intValue != structure.reading?.maxPosts {
+                await structure.setMaxPosts(cap.intValue)
             }
         }
+        return true
     }
 }

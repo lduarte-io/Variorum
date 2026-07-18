@@ -42,10 +42,15 @@ final class ReadingsViewModel {
     }
 
     @discardableResult
-    func create(name: String, kind: ReadingKind) async -> String? {
+    func create(
+        name: String, kind: ReadingKind, profile: String? = nil,
+        sortField: SortField = .manual, sortDir: SortDirection = .asc
+    ) async -> String? {
         do {
             let reading = try await session.runner.run { ops in
-                try ops.createReading(name: name, kind: kind)
+                try ops.createReading(
+                    name: name, kind: kind, profile: profile,
+                    sortField: sortField, sortDir: sortDir)
             }
             lastError = nil
             return reading.id

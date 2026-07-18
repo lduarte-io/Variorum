@@ -163,11 +163,30 @@ struct EditorCommands: Commands {
         Task { @MainActor in
             do {
                 // The R50 door: create-or-open + the daily-book membership.
-                let id = try await JournalBooks.openToday(session: session)
-                router.pendingSelection = .post(id)
+                let outcome = try await JournalBooks.openToday(session: session)
+                router.pendingSelection = .post(outcome.postID)
+                if let note = outcome.note {
+                    speak(session, title: "Today's Entry", message: note)
+                }
             } catch {
-                session.editorRouter.active?.showStatus("Today's entry failed: \(error)")
+                speak(session, title: "Today's Entry",
+                      message: "Today's entry failed: \(error)")
             }
+        }
+    }
+
+    /// Fire-and-speak with no editor required (round 2, MAJOR 2: the
+    /// active-editor status line is nil on the shelf — the retired silent
+    /// posture; the alert fallback is the importFiles precedent).
+    @MainActor
+    private func speak(_ session: AppSession, title: String, message: String) {
+        if let editor = session.editorRouter.active {
+            editor.showStatus(message)
+        } else {
+            let alert = NSAlert()
+            alert.messageText = title
+            alert.informativeText = message
+            alert.runModal()
         }
     }
 

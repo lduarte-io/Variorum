@@ -253,10 +253,16 @@ try withDependencies {
     let dreamStart = date("2026-05-02 07:15")
     for day in stride(from: 0, to: 70, by: 5) {
         clock.set(dreamStart.addingTimeInterval(Double(day) * 86_400))
+        // Stage B round 2, BLOCKER: dream entries are .generic + dated —
+        // container profile='journal' is the DAILY journal's shape (the
+        // canonical-entry query and the bridge sweep key on it); journal-
+        // BOOK identity lives on reading.profile. One-block segmentation
+        // keeps the notebook feel.
         let (postID, _) = try makePost(
             title: "the \(["lighthouse", "orchard", "flooded library", "slow train", "glass city"].randomElement(using: &rng)!) dream",
-            profile: .journal, entryDate: dayKey(dreamStart, plusDays: day),
+            profile: .generic, entryDate: dayKey(dreamStart, plusDays: day),
             paragraphs: Int.random(in: 1...3, using: &rng))
+        try ops.setSegmentationDefault(postID, segmentation: .oneBlock)
         try ops.applyTag(dreams.id, toPost: postID)
         _ = try ops.addPostToReading(postID, to: dreamBook.id)
     }

@@ -748,6 +748,33 @@ recorded in R51):**
 
 ---
 
+### Sitting 8 (2026-07-18, mid-execution — via the coordinator; the author intervened during the Stage B review round 2 fixes)
+
+**Her message VERBATIM (standing instruction; typos hers):**
+
+> the dream "journal is more the shaep of just being a notebook you can add
+> to. i think i will include takes on mobile, so it's not even the same
+> fragments ssue of not having takes in general or ahving a surface that
+> can't add takes. so it's just a nromal notebook basically.
+
+**Rulings:**
+
+- **R57 — Non-daily journal-like books are NORMAL NOTEBOOKS** (confirms
+  the round-2 BLOCKER fix direction, shipped before the ruling arrived):
+  entries are ORDINARY posts — no container `profile='journal'`, full
+  takes machinery, nothing bridge-coupled; only the daily journal wears
+  the journal-profile/bridge shape. **Shipped disposition:** a non-daily
+  journal book's "+ new entry" mints `.generic` + `entry_date` (a generic
+  post column with no bridge/daily coupling — kept for the dated-notebook
+  feel) + one-block segmentation set explicitly; the one-entry-per-day
+  rule stays scoped to the daily journal exactly as R50 said (the rule's
+  real scope is the journal SHAPE, which these entries no longer wear).
+- **R58 — Mobile takes: she now LEANS include** ("i think i will include
+  takes on mobile") — recorded with her uncertainty preserved; Phase 15's
+  orbit; NOTHING built this phase. Refines AppSpec §14's 2026-07-17 item
+  4 (the "rethinking" note) — flag for the closeout ritual's
+  canonical-doc batch.
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)
@@ -1130,6 +1157,79 @@ curated-only · locked-reading postures · word_target-never-enforces · the
 added `setReadingMaxPosts` · (e) the chapter delete/restore shape). Zero
 stop-and-ask items arose; nothing gated the core.
 
+# STAGE C HANDOFF (2026-07-18 — for a FRESH implementer session; this section is self-contained by contract)
+
+**State: Stages A and B are COMPLETE, including review rounds 1 (Stage A,
+all five findings fixed) and 2 (Stage B, all thirteen findings fixed) —
+dispositions in the two round sections below. STAGE C HAS NOT STARTED.**
+The author directed a fresh session for Stage C (context management);
+round 3 — the FINAL reviewer session under the ladder cap — runs at the
+Stage C boundary over Stage C plus the round-2 fixes.
+
+**A fresh Stage C session reads, in order:** `CLAUDE.md`; this file IN
+FULL (sittings 1–8 first — R1–R58 are BINDING; the execution plan's Stage
+C section and ground rules; both review-round disposition sections);
+`notes/plans/phase-13-brief.md`; `notes/AppSpec.md` §12 + §14's 2026-07-17
+delta; `notes/TEXTKIT2_NOTES.md` §3 (rendering-attribute fragility governs
+EVERY editor decoration — overlays only, the Phase 7 badge pattern);
+the R56 anchor set: `Spikes/Phase11Mockups/mockups-v2.html` (the active
+editing surface's CANON — R12), `Spikes/Phase13Mockups/direction-b` (the
+terminal voice), `direction-c` (the reading/book view),
+`round-2-terminal-first.html` (the merged rules).
+
+**Stage C's scope (the execution plan's letter):**
+- **C1 — the writing surface:** margins (R9), dotted seams on the global
+  toggle (R42 — the setting + queries exist: `Queries.themeSettings.
+  seamsVisible`; the 9d tint mode's LOOK retires), the editing-indicator
+  setting faces (off/outline/background — `EditingIndicatorStyle` ships;
+  marginalia's always-on wash+ring rule per R22), word-count prominence
+  (R11 — `Queries.wordCount` is the one counting rule), block drag
+  handles + the Notion insertion bar (R19), CALLOUT rendering with white
+  gaps (R17; `block.presentation` + `BlockPresentation` ship; export
+  maps to blockquote — the export half is C1's), COMMENTS UI (margin
+  default, inline-tinted setting — R7; `Queries.blockComments`/
+  `deletedBlockComments`/`commentCounts` + the CRUD/travel ops ship; the
+  deleted-comments recovery surface is C1's face).
+- **C2 — takes presentations:** the v2-canon active view as an editor
+  view option (R12); marginalia incl. the short-block ONE-CARD-HIGH
+  HORIZONTAL strip (R24); the inline stack; follow-the-scroll as a
+  takes-viewing option in ALL modes (R25 — the setting ships);
+  expand-all only where meaningful (not in columns/slot-split); every
+  visible take editable in place, ONE live editor migrating (R23/R8; P3
+  holds mechanically).
+- **C3 — canvas as a post view** (R40): reachable from a post/scraps
+  (NOT the sidebar — already removed), spatial arrange (`canvas_layout`
+  + ops ship), the MINIMAL takes switcher only ("see takes" → one-at-a-
+  time) — built as the mobile-inheritable pattern (R58: she now leans
+  takes-on-mobile; the minimal switcher is that surface's seed).
+- Stage C also owes: palette block hits' CARET-PRECISE landing (round-2
+  finding 6 recorded it as C's), and the R19 polished drag bar for
+  chapters (Move Up/Down shipped functional in B3).
+
+**Binding constraints a fresh session must not re-derive:** the ground
+rules section above (decorations OFF the live editor — overlay views
+only; white-gap rule R17; margins sacred R9; voice = tokens + idioms —
+use `Theme/VoiceTokens.swift`, never literal colors; fully-black dark
+R51); the A0 measurement baselines (Stage A closeout — re-check at the
+gate: decorated keystroke p95 ≈0.79 ms, overlay reposition 0.02 ms,
+read-tier 0.44 ms median); **R57** (sitting 8): non-daily journal-like
+books are NORMAL notebooks — entries are `.generic`+`entry_date`+
+one-block segmentation, never container `profile='journal'`; R55's
+PROVISIONAL-and-continue discipline (QUESTIONS #23–#26 hold the open
+walks); environment traps (piped xcodebuild masks exit codes; a live
+Variorum.app blocks the test runner — NEVER kill hers; wrong
+`-only-testing:` names report VACUOUS success — verify "Test run with N
+tests", N > 0; SwiftUI `.task` doesn't fire under the test host — models
+expose `adopt()` for tests; the app target's default actor isolation is
+MainActor — mark cross-actor snapshot types `nonisolated`).
+
+**Gate counts a fresh session starts from (do NOT re-run at session
+start):** core 720/87 · Mac 400/73 · mobile 11/4. Stage-end protocol:
+full suites at these counts+, A0 numbers re-checked, TEXTKIT2 §5 posture,
+canary silent, closeout + dispositions HERE, commit per convention,
+`/Applications` refresh, then the stage report — round 3 reviews Stage C
+PLUS the round-2 fixes (dispositions above are its anchor).
+
 # STAGE B CLOSEOUT (2026-07-18, same Fable implementer session — the review ladder's anchor)
 
 **Run shape:** B1 → B2 → B3, one commit per step (`3b4ef50` · `300aac0` ·
@@ -1229,6 +1329,125 @@ sheets live on under the shelf); `SidebarSelection.timeline` (Library
 absorbs it). Nothing requiring the author arose; the deferred pieces are
 Stage C's by plan (v2-canon takes surfaces, seams/ring/wash, comments UI,
 callout rendering, canvas-as-view).
+
+## Stage B cold review, round 2 (2026-07-18) — findings + dispositions
+
+**1 BLOCKER / 4 MAJOR / 6 MINOR / 2 NIT — ALL AGREED, ALL FIXED (no
+disputes). Under the ladder these were NEW HIGH findings; their fixes get
+the round-3 pass at the Stage C boundary. Post-fix gates: core 720 green
+in 87 suites · Mac 400/73 · mobile 11/4; `/Applications` refreshed; the
+dev-store design corpus RESEEDED on the fixed shape.**
+
+1. **BLOCKER — non-daily journal-book entries minted as
+   `profile='journal'` + `entry_date`, the exact shape the daily system
+   keys on.** Mechanism verified against the named code: `canonical
+   JournalEntry` (Timeline.swift) selects the day's entry by
+   profile+date — a dream entry created first WAS ⌘J's answer (and
+   `openToday` then added it to the daily book); the bridge sweep
+   (BridgeEngine) enumerates `profile='journal'` posts — a lone dream
+   entry pushed to Fragments as the day's journal, a shared day tripped
+   the duplicate-day pause. FIXED per the arbitration read (and RATIFIED
+   mid-fix by sitting 8/R57): non-daily entries mint **`.generic` +
+   `entry_date` + explicit one-block segmentation** (journal-BOOK identity
+   lives on `reading.profile`); the design-corpus seeder's dream entries
+   corrected and THE DEV STORE RESEEDED. Pins:
+   `aDreamEntryNeverCollidesWithTheDailyJournal` (dream on day D → the
+   daily door mints its OWN entry; exactly ONE journal-shaped row on D —
+   the bridge-sweep shape can't pause) + the scoped test now asserts the
+   `.generic`+one-block shape. **RED VERIFIED BY BEHAVIORAL REVERT**
+   (flipping back to `.journal`: the daily door returned the dream
+   entry's ID — the exact predicted collision). QUESTIONS #26(a)
+   corrected (the "scope stays exactly the daily door" claim was false as
+   first shipped; the scope is the SHAPE). Note for the record: the first
+   red-run attempt used a per-test `-only-testing:` name and reported
+   VACUOUS success ("0 tests") — the kickoff's environment trap, caught;
+   the real red ran at suite granularity.
+2. **MAJOR — finishing/filling the daily book permanently wedged ⌘J**
+   (openToday caught only `alreadyInReading`; `lockedReading`/
+   `readingAtCapacity` threw; the ⌘J error surfaced via the active-editor
+   status line, nil on the shelf = silent). FIXED: `JournalBooks.openToday`
+   returns an `Outcome(postID, note)` — the entry ALWAYS opens; locked/
+   capacity produce a speaking note naming the book and the recovery
+   path; `EditorCommands` speaks via the editor status line OR an NSAlert
+   (the importFiles precedent — never silent without an editor);
+   LibraryViewModel surfaces the note in the sidebar overlay. The
+   RE-DESIGNATION DOOR shipped: "Use as Daily Journal" on journal-profile
+   books' shelf menu (+ "Create Journal Book" in the new-book alert — §14
+   item 10's start-a-new-journal face). Pin:
+   `aFinishedDailyBookNeverWedgesTodaysEntry` (lock the daily book →
+   entry opens + note speaks + membership skipped; re-designation heals).
+   **RED VERIFIED BY BEHAVIORAL REVERT** (stripping the catches: the pin
+   caught the exact pre-fix `lockedReading` throw).
+3. **MAJOR — smart-book (derived) membership was invisible to the Pool
+   and the membership chip** (promote-tags-to-book didn't drain the Pool
+   it was ruled to drain, and the reading was un-noted — the R55 contract
+   missed). FIXED per the arbitration lean: `poolPosts` excludes and
+   `readingsContaining` includes smart-book matches through ONE shared
+   predicate builder (`smartMatchSQL`, extracted from `assembleReading` —
+   behavior-identical refactor, existing suites guard); bounded to live
+   smart readings; malformed specs fail closed; the empty spec matches
+   everything (the ratified NULL-spec rule — such a book empties the
+   Pool). Pin: `promotedSmartBooksDrainThePoolAndFeedTheChip` (drain +
+   chip + the FLAP + fail-closed). The reading + flap consequence
+   recorded as QUESTIONS #26(h).
+4. **MAJOR — the shelf word count was wrong by construction** (SQL space
+   arithmetic: newlines not separators, consecutive spaces multiplied —
+   against I4's multi-paragraph blocks and the 2026-07-12 stored-newlines
+   ruling; disagreed with the editor's own counts). FIXED:
+   `bookWordCounts` now counts app-side in the same one-shot read with
+   Unicode `.byWords` — the editor's `TextMetrics` rule; two surfaces,
+   one answer (`Queries.wordCount` is the one implementation). The two
+   MINOR skews fixed with it: ARCHIVED member posts excluded (the Phase 4
+   ambient ratification) and SMART books counted (a word target on a
+   smart book shows real progress). Pins:
+   `wordCountsUseTheEditorsRuleNotSpaceArithmetic` ("one\ntwo" → 2 — the
+   old SQL counted 1; "a  b" → 2 — old counted 3) +
+   `wordCountsExcludeArchivedMembersAndCountSmartBooks` (both red on the
+   old query by construction — the assertions name values the old code
+   could not produce).
+5. **MAJOR — two ratified capabilities dropped in the sidebar→Library
+   move** (the per-post EXPORT doors and version_of DOOR 1). FIXED:
+   both menu groups restored verbatim in `LibraryCatalogView`'s post
+   context menu (Export Markdown/with-Takes/PDF through the same
+   ExportModel doors; "Mark as Versions with" over the observed library
+   posts — `LibraryViewModel.markAsVersions` is live again); filenames
+   derive title-else-date like the retired implementation.
+6. **MINOR — palette block hits were dead rows.** FIXED: `CatalogHit`
+   carries `homeContainerID` + `homeIsPool`; palette Enter/click opens
+   the home post or Blocks pool (caret-precise landing recorded as Stage
+   C work); Library block rows navigate the same way. Pin:
+   `paletteBlockHitsNavigateToTheirHome` (both kinds route; no dead rows).
+7. **MINOR — unparseable extent input silently CLEARED a stored extent.**
+   FIXED: `ExtentInput.parse` (ONE implementation, both sheets) — empty =
+   clear, digits = value, garbage = REFUSE-and-keep with a spoken line.
+   Pin: `extentInputDistinguishesClearFromTypo` ("10k"/"12,000" refuse).
+8. **MINOR — the chapter recovery door vanished with the last chapter.**
+   FIXED: `deletedSections` joined the observed snapshot; "restore
+   deleted chapter" renders beside "+ new chapter" whenever non-empty —
+   no section row needed.
+9. **MINOR — query-driven refreshes raced.** FIXED with the standing
+   Phase 8 pattern: generation-stamped adoption in `LibraryCatalogModel.
+   search` and `PaletteModel.refresh`; the `didSet`-spawned task removed
+   (view bindings spawn explicitly), so tests drive deterministically.
+10. **MINOR — check-then-act on the daily designation outside the
+    runner.** FIXED: `Operations.dailyJournalBookID()` (a core read
+    helper) lets both doors read INSIDE the serialized runner closure —
+    two rapid ⌘J invocations can no longer double-mint.
+11. **MINOR — word-count skews (archived/smart).** Fixed inside finding 4.
+12. **NIT — LIKE sanitization.** FIXED: `\`, `%`, `_` escaped + `ESCAPE`
+    clauses on every catalog LIKE; block search excludes archived homes
+    (the ambient-view rule).
+13. **NIT — cleanliness batch.** FIXED: the stale RootView comment;
+    `VoiceTokens.fallback(for:)` consolidates the per-view fallback;
+    `TagChips.load` (one grouped `json_each` query) replaces both N+1
+    tag-chip loops; the no-op `scrollTo("nav-noop")` removed.
+
+**Session note (honesty for round 3):** during the BLOCKER's red-proof a
+`git checkout` mistakenly restored `BookStructureModel.swift` to its
+committed B3 state, clobbering the uncommitted round-2 edits; the file
+was reconstructed in full from the session record and re-verified (the
+16-test fix sweep + the full Mac suite re-ran green). The reconstructed
+file is what this round's commit contains.
 
 ## Stage A cold review, round 1 (2026-07-18) — findings + dispositions
 

@@ -97,6 +97,13 @@ extension VoiceTokens {
         }
     }
 
+    /// The environment-missing fallback (test hosts, future embeddings):
+    /// the leading voice at the ambient scheme. One name so the per-view
+    /// boilerplate reads as one idea (round 2 NIT).
+    static func fallback(for scheme: ColorScheme) -> VoiceTokens {
+        resolve(voice: .terminal, dark: scheme == .dark)
+    }
+
     // MARK: - Terminal (direction B / round 2)
 
     static let terminalLight = VoiceTokens(

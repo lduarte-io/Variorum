@@ -137,8 +137,8 @@ struct RootView: View {
         }
     }
 
-    /// The dated home's door (R38: the journal lives on the shelf; the
-    /// daily book's ensure-membership half lands with B3).
+    /// The dated home's door (R38: the journal lives on the shelf;
+    /// `JournalBooks.openToday` carries the ensure-membership half).
     private func openToday() {
         Task {
             if let id = await library.openJournalEntry() {

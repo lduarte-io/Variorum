@@ -31,8 +31,7 @@ struct ReadingFlowView: View {
         scheme == .dark ? .dark : .light
     }
     private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme)
-            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {

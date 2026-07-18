@@ -27,8 +27,7 @@ struct MembershipChip: View {
     @State private var status: String?
 
     private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme)
-            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {

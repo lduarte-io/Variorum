@@ -52,20 +52,7 @@ final class PoolPostsModel {
             return
         }
         postTags = (try? await session.database.read { db in
-            var result: [String: [String]] = [:]
-            for postID in ids {
-                let paths = try String.fetchAll(
-                    db,
-                    sql: """
-                        SELECT t.path FROM post_tag pt
-                        JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
-                        WHERE pt.post_id = ? AND pt.deleted_at IS NULL
-                        ORDER BY t.path
-                        """,
-                    arguments: [postID])
-                if !paths.isEmpty { result[postID] = paths }
-            }
-            return result
+            try TagChips.load(db, postIDs: ids)
         }) ?? [:]
     }
 
@@ -112,8 +99,7 @@ struct PoolPostsView: View {
     @Environment(\.colorScheme) private var scheme
 
     private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme)
-            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {

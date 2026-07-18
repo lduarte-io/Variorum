@@ -26,6 +26,10 @@ final class BookStructureModel {
 
     private(set) var reading: Reading?
     private(set) var sections: [ReadingSection] = []
+    /// Non-empty when a chapter can be restored — the recovery door must
+    /// exist even when NO section rows remain to hang a menu off (round 2,
+    /// MINOR: deleting the only chapter made restoreSection unreachable).
+    private(set) var deletedSections: [ReadingSection] = []
     private(set) var assignments: [String: String] = [:]
     private(set) var lastError: String?
     var mode: ViewMode = .book
@@ -41,6 +45,7 @@ final class BookStructureModel {
     nonisolated struct Snapshot: Equatable, Sendable {
         var reading: Reading?
         var sections: [ReadingSection]
+        var deletedSections: [ReadingSection]
         var assignments: [String: String]
     }
 
@@ -50,6 +55,7 @@ final class BookStructureModel {
                 Snapshot(
                     reading: try Queries.reading(db, id: readingID),
                     sections: try Queries.readingSections(db, readingID: readingID),
+                    deletedSections: try Queries.deletedReadingSections(db, readingID: readingID),
                     assignments: try Queries.sectionAssignments(db, readingID: readingID))
             }) {
                 adopt(value)
@@ -63,6 +69,7 @@ final class BookStructureModel {
     func adopt(_ snapshot: Snapshot) {
         reading = snapshot.reading
         sections = snapshot.sections
+        deletedSections = snapshot.deletedSections
         assignments = snapshot.assignments
         if !modeSeeded, let reading = snapshot.reading {
             mode = Self.defaultMode(for: reading)
@@ -130,18 +137,11 @@ final class BookStructureModel {
     }
 
     func restoreLastDeletedChapter() async {
-        do {
-            let deleted = try await session.database.read { [readingID] db in
-                try Queries.deletedReadingSections(db, readingID: readingID)
-            }
-            guard let newest = deleted.first else {
-                lastError = "No deleted chapter to restore."
-                return
-            }
-            await run { try $0.restoreSection(newest.id) }
-        } catch {
-            lastError = String(describing: error)
+        guard let newest = deletedSections.first else {
+            lastError = "No deleted chapter to restore."
+            return
         }
+        await run { try $0.restoreSection(newest.id) }
     }
 
     /// Move a chapter one slot up/down (the movable-chapters gesture; the
@@ -186,19 +186,26 @@ final class BookStructureModel {
 
     /// "New Entry" on a journal-profile book. THE DAILY BOOK routes
     /// through `createOrOpenJournalEntry` — the one-entry-per-day rule is
-    /// a Fragments-bridge rule and is UNTOUCHABLE (R50); OTHER journal
-    /// books (the dream journal) mint a plain dated post and add it to
-    /// THIS book — several entries on one day are legal there, and the
-    /// daily rule's scope stays exactly the daily door (pinned).
+    /// a Fragments-bridge rule and is UNTOUCHABLE (R50). OTHER journal
+    /// books (the dream journal) mint a **`.generic`** dated post with
+    /// one-block segmentation set explicitly (the notebook feel) and add
+    /// it to THIS book — **NEVER container `profile='journal'`** (Stage B
+    /// review round 2, BLOCKER: that profile+date shape IS the daily
+    /// journal's identity — `canonicalJournalEntry` and the Fragments
+    /// bridge sweep both key on it, so a `.journal` dream entry became
+    /// "the day's entry" for ⌘J and pushed/paused the bridge's day.
+    /// Journal-BOOK identity lives on `reading.profile`, not the post).
+    /// Several entries on one day stay legal in these books; the daily
+    /// rule's scope is the daily SHAPE, which these entries no longer
+    /// wear (pinned, red-on-old verified by revert).
+    /// The designation read runs INSIDE the runner (round 2, MINOR: the
+    /// pre-runner read raced).
     func newEntry(day: String? = nil) async -> String? {
         let entryDay = day ?? JournalDay.dayString(from: Date())
         do {
             let readingID = readingID
-            let dailyBookID = try await session.database.read { db in
-                try Queries.dailyJournalBookID(db)
-            }
             return try await session.runner.run { ops in
-                if dailyBookID == readingID {
+                if try ops.dailyJournalBookID() == readingID {
                     let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
                     do {
                         _ = try ops.addPostToReading(entry.container.id, to: readingID)
@@ -206,7 +213,8 @@ final class BookStructureModel {
                     return entry.container.id
                 }
                 let post = try ops.createPost(
-                    title: nil, profile: .journal, entryDate: entryDay)
+                    title: nil, profile: .generic, entryDate: entryDay)
+                try ops.setSegmentationDefault(post.id, segmentation: .oneBlock)
                 _ = try ops.addPostToReading(post.id, to: readingID)
                 return post.id
             }
@@ -237,16 +245,27 @@ final class BookStructureModel {
 enum JournalBooks {
     nonisolated static let defaultDailyBookName = "Journal"
 
+    /// The door's outcome: the entry ALWAYS opens; `note` speaks when the
+    /// membership half couldn't happen (Stage B review round 2, MAJOR 2:
+    /// finishing/filling the daily book is an EXPECTED gesture in the
+    /// bounded-notebook flow — it must never wedge ⌘J into a thrown error,
+    /// and never silently).
+    struct Outcome: Equatable {
+        let postID: String
+        let note: String?
+    }
+
     @MainActor
-    static func openToday(session: AppSession, day: String? = nil) async throws -> String {
+    static func openToday(session: AppSession, day: String? = nil) async throws -> Outcome {
         let entryDay = day ?? JournalDay.dayString(from: Date())
-        let existing = try await session.database.read { db in
-            try Queries.dailyJournalBookID(db)
-        }
+        // The designation read runs INSIDE the runner (round 2, MINOR:
+        // two rapid invocations both saw nil pre-runner and minted two
+        // "Journal" books).
         return try await session.runner.run { ops in
             let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
             let bookID: String
-            if let existing {
+            var bookName = defaultDailyBookName
+            if let existing = try ops.dailyJournalBookID() {
                 bookID = existing
             } else {
                 let book = try ops.createReading(
@@ -261,8 +280,25 @@ enum JournalBooks {
             } catch OperationError.alreadyInReading {
                 // The day's entry is already shelved — the notebook page
                 // was simply reopened.
+            } catch OperationError.lockedReading {
+                // The daily book is FINISHED (the bounded-notebook flow's
+                // expected end): the entry still opens; the note speaks
+                // and points at the re-designation door.
+                bookName = (try? ops.dailyJournalBookName() ?? nil) ?? bookName
+                return Outcome(
+                    postID: entry.container.id,
+                    note: "Today's entry opened, but “\(bookName)” is finished — "
+                        + "it wasn't added. Pick a new daily journal from a book's "
+                        + "shelf menu (Use as Daily Journal), or reopen “\(bookName)”.")
+            } catch OperationError.readingAtCapacity {
+                bookName = (try? ops.dailyJournalBookName() ?? nil) ?? bookName
+                return Outcome(
+                    postID: entry.container.id,
+                    note: "Today's entry opened, but “\(bookName)” is at its post cap — "
+                        + "it wasn't added. Extend the cap or start a new daily journal "
+                        + "(Use as Daily Journal in a book's shelf menu).")
             }
-            return entry.container.id
+            return Outcome(postID: entry.container.id, note: nil)
         }
     }
 }

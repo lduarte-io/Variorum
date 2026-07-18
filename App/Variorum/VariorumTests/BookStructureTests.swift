@@ -100,7 +100,7 @@ struct BookStructureModelTests {
 struct JournalBooksTests {
     @Test func openTodayEnsuresTheDailyBookPinnedDesignatedAndMembered() async throws {
         try await withShellSession2 { session, db in
-            let entryID = try await JournalBooks.openToday(session: session, day: "2026-07-18")
+            let entryID = try await JournalBooks.openToday(session: session, day: "2026-07-18").postID
 
             let bookID = try await db.read { db in try Queries.dailyJournalBookID(db) }
             let designated = try #require(bookID, "first use designates a daily book")
@@ -116,7 +116,8 @@ struct JournalBooksTests {
             // The SAME day re-opens the SAME entry (the untouchable
             // one-entry-per-day rule) and mints nothing new.
             let again = try await JournalBooks.openToday(session: session, day: "2026-07-18")
-            #expect(again == entryID)
+            #expect(again.postID == entryID)
+            #expect(again.note == nil)
             let count = try await db.read { db in
                 try Int.fetchOne(db, sql: """
                     SELECT COUNT(*) FROM reading_post WHERE deleted_at IS NULL
@@ -128,7 +129,10 @@ struct JournalBooksTests {
 
     @Test func otherJournalBooksMintFreelyTheDailyRuleStaysScoped() async throws {
         try await withShellSession2 { session, db in
-            // A dream journal — journal-profile, NOT the designated daily.
+            // A dream journal — journal-profile BOOK, NOT the designated
+            // daily; its entries mint as .generic (the round-2 BLOCKER's
+            // fix — the daily shape is profile+date, and these must not
+            // wear it).
             let dreamID = try await session.runner.run { ops in
                 try ops.createReading(name: "Dream Journal", kind: .curated, profile: "journal").id
             }
@@ -144,6 +148,15 @@ struct JournalBooksTests {
                     """, arguments: [dreamID])
             }
             #expect(members == 2)
+            let shape = try await db.read { [first] db in
+                try Row.fetchOne(db, sql: """
+                    SELECT profile, segmentation_default FROM container WHERE id = ?
+                    """, arguments: [first])
+            }
+            #expect((shape?["profile"] as String?) == "generic",
+                    "a non-daily entry NEVER wears profile='journal' (the BLOCKER's shape)")
+            #expect((shape?["segmentation_default"] as String?) == "one_block",
+                    "the notebook feel rides explicit segmentation, not the profile")
 
             // The DAILY book's own new-entry door routes through
             // create-or-open — the rule holds there.
@@ -153,6 +166,74 @@ struct JournalBooksTests {
             let one = await daily.newEntry(day: "2026-07-19")
             let two = await daily.newEntry(day: "2026-07-19")
             #expect(one == two, "the daily book's door is create-or-open — one entry per day")
+        }
+    }
+
+    @Test func aDreamEntryNeverCollidesWithTheDailyJournal() async throws {
+        // Round 2, BLOCKER (red-on-old, verified by behavioral revert):
+        // with a dream entry created FIRST on day D, the daily door must
+        // still mint ITS OWN entry (the old .journal-profile dream WAS
+        // canonicalJournalEntry's answer), and the Fragments bridge's
+        // day-enumeration shape (profile='journal' + entry_date) must see
+        // exactly ONE row on D — no duplicate-day pause, no dream text
+        // pushed as the day's journal.
+        try await withShellSession2 { session, db in
+            let dreamBookID = try await session.runner.run { ops in
+                try ops.createReading(name: "Dream Journal", kind: .curated, profile: "journal").id
+            }
+            let structure = BookStructureModel(session: session, readingID: dreamBookID)
+            let dreamID = try #require(await structure.newEntry(day: "2026-07-20"))
+
+            let outcome = try await JournalBooks.openToday(session: session, day: "2026-07-20")
+            #expect(outcome.postID != dreamID,
+                    "the daily door mints its own entry — the dream is not the day's journal")
+
+            // The bridge sweep's exact shape: ONE journal-profile row on D.
+            let journalShaped = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container
+                    WHERE kind = 'post' AND profile = 'journal'
+                      AND entry_date = '2026-07-20' AND deleted_at IS NULL
+                    """)
+            }
+            #expect(journalShaped == 1,
+                    "exactly one daily-shaped entry on the day — the bridge never pauses D")
+        }
+    }
+
+    @Test func aFinishedDailyBookNeverWedgesTodaysEntry() async throws {
+        // Round 2, MAJOR 2 (red-on-old: the pre-fix door THREW
+        // lockedReading): finishing the daily journal is the bounded-
+        // notebook flow's expected end — the entry still opens, the note
+        // SPEAKS, membership is skipped.
+        try await withShellSession2 { session, db in
+            _ = try await JournalBooks.openToday(session: session, day: "2026-07-21")
+            let dailyID = try #require(try await db.read { db in
+                try Queries.dailyJournalBookID(db)
+            })
+            try await session.runner.run { ops in try ops.lockReading(dailyID) }
+
+            let outcome = try await JournalBooks.openToday(session: session, day: "2026-07-22")
+            #expect(outcome.note?.contains("finished") == true,
+                    "the door SPEAKS — never a throw, never silence")
+            let membered = try await db.read { [id = outcome.postID] db in
+                try Queries.readingsContaining(db, postID: id)
+            }
+            #expect(membered.isEmpty, "membership skipped; the entry still opened")
+
+            // Re-designation heals the flow: a new journal book takes over.
+            let nextID = try await session.runner.run { ops in
+                let next = try ops.createReading(
+                    name: "Journal II", kind: .curated, profile: "journal")
+                try ops.setDailyJournalBook(next.id)
+                return next.id
+            }
+            let healed = try await JournalBooks.openToday(session: session, day: "2026-07-23")
+            #expect(healed.note == nil)
+            let books = try await db.read { [id = healed.postID] db in
+                try Queries.readingsContaining(db, postID: id)
+            }
+            #expect(books.map(\.id) == [nextID])
         }
     }
 }

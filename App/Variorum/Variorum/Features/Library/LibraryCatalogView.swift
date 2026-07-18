@@ -14,6 +14,7 @@ import Foundation
 import GRDB // AsyncValueObservation iteration
 import Observation
 import SwiftUI
+import UniformTypeIdentifiers
 import VariorumCore
 
 @MainActor
@@ -25,12 +26,16 @@ final class LibraryCatalogModel {
     @ObservationIgnored let session: AppSession
     var scope: Scope = .all
     var mode: Mode = .list
-    var query = "" {
-        didSet { Task { await search() } }
-    }
+    /// Set by the view's binding, which also spawns `search()` — no hidden
+    /// didSet task (deterministic under test; the generation guard orders
+    /// the UI's unordered spawns).
+    var query = ""
     private(set) var hits: [Queries.CatalogHit] = []
     private(set) var postTags: [String: [String]] = [:]
     private(set) var lastError: String?
+    /// Generation-stamped adoption (round 2, MINOR — the Phase 8 ruling):
+    /// per-keystroke tasks are unordered; only the NEWEST read may land.
+    private var searchGeneration = 0
 
     init(session: AppSession) {
         self.session = session
@@ -39,15 +44,19 @@ final class LibraryCatalogModel {
     /// One-shot per typed query / scope change (the core query's contract);
     /// the resting state is books + recent posts.
     func search() async {
+        searchGeneration += 1
+        let generation = searchGeneration
         do {
             let query = query
             let all = try await session.database.read { db in
                 try Queries.searchCatalog(db, query: query, limitPerKind: 40)
             }
+            guard generation == searchGeneration else { return }  // stale
             hits = filtered(all)
             await loadTagChips(for: hits.filter { $0.kind == .post }.map(\.id))
             lastError = nil
         } catch {
+            guard generation == searchGeneration else { return }
             lastError = String(describing: error)
         }
     }
@@ -61,7 +70,8 @@ final class LibraryCatalogModel {
         }
     }
 
-    /// The tags column's chips (bounded to the visible hits).
+    /// The tags column's chips (bounded to the visible hits; ONE grouped
+    /// query — round 2 NIT: the per-post loop was N round trips).
     private func loadTagChips(for postIDs: [String]) async {
         guard !postIDs.isEmpty else {
             postTags = [:]
@@ -69,20 +79,7 @@ final class LibraryCatalogModel {
         }
         do {
             postTags = try await session.database.read { db in
-                var result: [String: [String]] = [:]
-                for postID in postIDs {
-                    let paths = try String.fetchAll(
-                        db,
-                        sql: """
-                            SELECT t.path FROM post_tag pt
-                            JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
-                            WHERE pt.post_id = ? AND pt.deleted_at IS NULL
-                            ORDER BY t.path
-                            """,
-                        arguments: [postID])
-                    if !paths.isEmpty { result[postID] = paths }
-                }
-                return result
+                try TagChips.load(db, postIDs: postIDs)
             }
         } catch {
             lastError = String(describing: error)
@@ -125,8 +122,7 @@ struct LibraryCatalogView: View {
     @State private var renameTitle = ""
 
     private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme)
-            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {
@@ -195,7 +191,10 @@ struct LibraryCatalogView: View {
             }
             HStack(spacing: 10) {
                 TextField(tokens.chromeLabel("Search books, posts, blocks…"),
-                          text: Binding(get: { model.query }, set: { model.query = $0 }))
+                          text: Binding(get: { model.query }, set: { value in
+                              model.query = value
+                              Task { await model.search() }
+                          }))
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
                     .frame(maxWidth: 320)
@@ -269,6 +268,14 @@ struct LibraryCatalogView: View {
                                     .foregroundStyle(tokens.faint)
                             }
                         }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            // A block hit opens its HOME surface (round 2,
+                            // MINOR: dead rows violated fire-and-speak).
+                            if let home = hit.homeContainerID {
+                                onOpen(hit.homeIsPool ? .pool(home) : .post(home))
+                            }
+                        }
                     }
                 }
             }
@@ -329,8 +336,27 @@ struct LibraryCatalogView: View {
             Button("Tags…") {
                 tagSheetTarget = .init(id: hit.id, title: hit.title)
             }
+            Divider()
+            // version_of DOOR 1 (Phase 11 A2's TWO-door ratification —
+            // round 2, MAJOR 5: dropped in the sidebar→Library move,
+            // restored verbatim; the same op door 2 emits).
+            Menu("Mark as Versions with") {
+                ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
+                    Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
+                        Task { await library.markAsVersions(hit.id, other.postID) }
+                    }
+                }
+            }
             Button("Duplicate as Version") {
                 Task { await library.duplicateAsVersion(postID: hit.id) }
+            }
+            Divider()
+            // The per-post export doors (Phase 11b B1's ratified context-
+            // menu shapes — round 2, MAJOR 5: restored).
+            Menu("Export") {
+                Button("Markdown…") { exportPost(hit, includeVariants: false) }
+                Button("Markdown with Takes…") { exportPost(hit, includeVariants: true) }
+                Button("PDF…") { exportPostPDF(hit) }
             }
             Divider()
             Button("Archive") {
@@ -346,5 +372,69 @@ struct LibraryCatalogView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Export doors (Phase 11b B1's ratified shapes, restored —
+    // round 2, MAJOR 5; the panel is the author-visible moment, the
+    // projection shapes live in Queries)
+
+    private func exportPost(_ hit: Queries.CatalogHit, includeVariants: Bool) {
+        let name = exportFileName(hit)
+        guard let url = ExportPanels.saveFile(
+            defaultName: "\(name).md", type: .markdownFile) else { return }
+        Task {
+            let exporter = ExportModel(session: session)
+            if let markdown = await exporter.markdown(
+                forPost: hit.id, includeVariants: includeVariants) {
+                exporter.writeMarkdown(markdown, to: url)
+            }
+        }
+    }
+
+    private func exportPostPDF(_ hit: Queries.CatalogHit) {
+        let name = exportFileName(hit)
+        guard let url = ExportPanels.saveFile(
+            defaultName: "\(name).pdf", type: .pdf) else { return }
+        Task {
+            let exporter = ExportModel(session: session)
+            if let data = await exporter.pdfData(forPost: hit.id) {
+                exporter.writePDF(data, to: url)
+            }
+        }
+    }
+
+    private func exportFileName(_ hit: Queries.CatalogHit) -> String {
+        let title = Queries.sanitizedFilename(hit.title)
+        if !title.isEmpty, hit.title != "Untitled" { return title }
+        if let day = hit.detail, !day.isEmpty { return day }
+        return "Untitled"
+    }
+}
+
+/// One grouped tag-chip load shared by the Library and the Pool (round 2
+/// NIT: the per-post loops were N round trips each).
+enum TagChips {
+    nonisolated static func load(
+        _ db: Database, postIDs: [String]
+    ) throws -> [String: [String]] {
+        let json = String(
+            decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8),
+            as: UTF8.self)
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT pt.post_id AS post_id, t.path AS path
+                FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                WHERE pt.deleted_at IS NULL
+                  AND pt.post_id IN (SELECT value FROM json_each(?))
+                ORDER BY pt.post_id, t.path
+                """,
+            arguments: [json])
+        var result: [String: [String]] = [:]
+        for row in rows {
+            result[row["post_id"] as String, default: []].append(row["path"])
+        }
+        return result
     }
 }

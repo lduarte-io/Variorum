@@ -163,6 +163,43 @@ struct PromoteAndPaletteTests {
         }
     }
 
+    @Test func paletteBlockHitsNavigateToTheirHome() async throws {
+        // Round 2, MINOR (was a silent `break`): Enter on a block result
+        // opens its HOME surface — post or Blocks pool.
+        try await withShellSession { session, _ in
+            _ = try await session.runner.run { ops in
+                let pool = try ops.createPool(title: "scraps")
+                _ = try ops.newBlock(in: pool.id, text: "a lantern scrap", at: .end)
+                let post = try ops.createPost(title: "harbor")
+                let made = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
+                try ops.setBlockName(made.block.id, name: "the lantern thesis")
+                return post.id
+            }
+            let model = PaletteModel(session: session)
+            model.query = "lantern"
+            await model.refresh()
+            let blocks = model.items.filter { $0.kind == .block }
+            #expect(blocks.count == 2)
+            var opened: [SidebarSelection] = []
+            for hit in blocks {
+                model.execute(hit) { opened.append($0) }
+            }
+            #expect(opened.count == 2, "every block hit NAVIGATES — no dead rows")
+            #expect(opened.contains { if case .pool = $0 { true } else { false } })
+            #expect(opened.contains { if case .post = $0 { true } else { false } })
+        }
+    }
+
+    @Test func extentInputDistinguishesClearFromTypo() {
+        // Round 2, MINOR (red-on-old: `Int("10k")` = nil silently CLEARED
+        // a stored extent): empty clears, digits set, garbage REFUSES.
+        #expect(ExtentInput.parse("") == .clear)
+        #expect(ExtentInput.parse("  ") == .clear)
+        #expect(ExtentInput.parse("10000") == .value(10_000))
+        #expect(ExtentInput.parse("10k") == nil)
+        #expect(ExtentInput.parse("12,000") == nil)
+    }
+
     @Test func catalogScopeFilterIsExact() throws {
         let hits = [
             Queries.CatalogHit(kind: .book, id: "b", title: "Book", detail: nil),

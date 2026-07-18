@@ -84,10 +84,15 @@ final class LibraryViewModel {
     /// operations layer decides — one entry per calendar day), and — Phase
     /// 13 B3, R50 — ensures the DAILY JOURNAL BOOK holds it (created +
     /// pinned + designated on first use; the journal lives on the shelf as
-    /// ordinary membership). `day` is injectable for tests.
+    /// ordinary membership). A finished/full daily book never wedges the
+    /// door: the entry still opens and the NOTE speaks (round 2, MAJOR 2 —
+    /// surfaced through `lastError`, the overlay that exists without an
+    /// editor). `day` is injectable for tests.
     func openJournalEntry(day: String? = nil) async -> String? {
         do {
-            return try await JournalBooks.openToday(session: session, day: day)
+            let outcome = try await JournalBooks.openToday(session: session, day: day)
+            lastError = outcome.note
+            return outcome.postID
         } catch {
             lastError = String(describing: error)
             return nil

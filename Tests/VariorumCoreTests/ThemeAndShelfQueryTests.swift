@@ -127,6 +127,55 @@ struct ShelfQueryTests {
         }
     }
 
+    @Test func wordCountsUseTheEditorsRuleNotSpaceArithmetic() throws {
+        // Round 2, MAJOR 4 (red-on-old): newlines separate words (I4's
+        // multi-paragraph blocks; the 2026-07-12 spacing ruling stores
+        // meaningful newlines), consecutive spaces don't multiply, and the
+        // rule is the editor's own Unicode .byWords — two surfaces, ONE
+        // answer.
+        #expect(Queries.wordCount("one\ntwo") == 2, "the old SQL counted 1")
+        #expect(Queries.wordCount("a  b") == 2, "the old SQL counted 3")
+        #expect(Queries.wordCount("  ") == 0)
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let post = try ops.createPost(title: "p", profile: .generic)
+            _ = try ops.newBlock(in: post.id, text: "first line\nsecond  line", at: .end)
+            _ = try ops.addPostToReading(post.id, to: book.id)
+            let counts = try db.read { try Queries.bookWordCounts($0) }
+            #expect(counts[book.id] == 4)
+        }
+    }
+
+    @Test func wordCountsExcludeArchivedMembersAndCountSmartBooks() throws {
+        // Round 2, MINOR skews (red-on-old both halves): the book view
+        // excludes archived members (the Phase 4 ambient ratification) —
+        // the shelf number must agree; and a word target on a SMART book
+        // must show real progress, never a perpetual 0%.
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let live = try ops.createPost(title: "live", profile: .generic)
+            _ = try ops.newBlock(in: live.id, text: "three live words", at: .end)
+            _ = try ops.addPostToReading(live.id, to: book.id)
+            let archived = try ops.createPost(title: "archived", profile: .generic)
+            _ = try ops.newBlock(in: archived.id, text: "these words must not count", at: .end)
+            _ = try ops.addPostToReading(archived.id, to: book.id)
+            try ops.archiveContainer(archived.id)
+
+            let stars = try ops.createTag(parent: nil, name: "stars")
+            let tagged = try ops.createPost(title: "tagged", profile: .generic)
+            _ = try ops.newBlock(in: tagged.id, text: "two words", at: .end)
+            try ops.applyTag(stars.id, toPost: tagged.id)
+            let smart = try ops.createReading(
+                name: "star-notes", kind: .smart,
+                querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON(),
+                wordTarget: 100)
+
+            let counts = try db.read { try Queries.bookWordCounts($0) }
+            #expect(counts[book.id] == 3, "the archived member's words never count")
+            #expect(counts[smart.id] == 2, "smart books count their derived members")
+        }
+    }
+
     @Test func poolPostsAreExactlyTheBooklessLivePosts() throws {
         try withOperations { ops, db in
             let inBook = try ops.createPost(title: "in a book", profile: .generic)
@@ -148,6 +197,49 @@ struct ShelfQueryTests {
             try ops.removePostFromReading(inBook.id, from: book.id)
             let after = try db.read { try Queries.poolPosts($0, limit: 50) }
             #expect(Set(after.map(\.postID)) == [floating.id, inBook.id])
+        }
+    }
+
+    @Test func promotedSmartBooksDrainThePoolAndFeedTheChip() throws {
+        // Round 2, MAJOR 3 (red-on-old): R30's flagship gesture — promote
+        // #stars to a book — must DRAIN the pool and show on the R35 chip;
+        // derived membership counts as being in a book. The flap is the
+        // recorded consequence (#26(h)): tag edits move posts in and out.
+        try withOperations { ops, db in
+            let stars = try ops.createTag(parent: nil, name: "stars")
+            let tagged = try ops.createPost(title: "starry", profile: .generic)
+            _ = try ops.newBlock(in: tagged.id, text: "Prose.", at: .end)
+            try ops.applyTag(stars.id, toPost: tagged.id)
+            let plain = try ops.createPost(title: "plain", profile: .generic)
+            _ = try ops.newBlock(in: plain.id, text: "Prose.", at: .end)
+
+            // Before the promotion: both are bookless.
+            var pool = try db.read { try Queries.poolPosts($0, limit: 50) }
+            #expect(Set(pool.map(\.postID)) == [tagged.id, plain.id])
+
+            // The promotion (R30: tags → a saved smart book).
+            let smart = try ops.createReading(
+                name: "star-notes", kind: .smart,
+                querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
+
+            pool = try db.read { try Queries.poolPosts($0, limit: 50) }
+            #expect(pool.map(\.postID) == [plain.id],
+                    "the tagged post DRAINED — derived membership is membership")
+            let chip = try db.read { try Queries.readingsContaining($0, postID: tagged.id) }
+            #expect(chip.map(\.id) == [smart.id],
+                    "the chip shows the smart book — one membership truth")
+
+            // The flap (recorded): untag → back to the pool, off the chip.
+            try ops.removeTag(stars.id, fromPost: tagged.id)
+            pool = try db.read { try Queries.poolPosts($0, limit: 50) }
+            #expect(Set(pool.map(\.postID)) == [tagged.id, plain.id])
+            #expect(try db.read { try Queries.readingsContaining($0, postID: tagged.id) }.isEmpty)
+
+            // A MALFORMED spec matches nothing (fail closed — the ratified
+            // rule): the pool is unaffected by a corrupt book.
+            _ = try ops.createReading(name: "corrupt", kind: .smart, querySpec: "not json")
+            pool = try db.read { try Queries.poolPosts($0, limit: 50) }
+            #expect(Set(pool.map(\.postID)) == [tagged.id, plain.id])
         }
     }
 

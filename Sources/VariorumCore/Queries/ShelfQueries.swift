@@ -46,21 +46,27 @@ extension Queries {
         }
     }
 
-    /// Whitespace-word counts of every curated book's rendered content, in
-    /// ONE pass over live memberships → live placements → rendered variants
-    /// (chosen with the default fallback — the read-time rule in SQL, the
-    /// `renderedLength` COALESCE shape). ONE-SHOT by contract (see header).
-    /// Smart books are absent (their membership is a predicate, not rows —
-    /// the view model may count a smart book on open if wanted).
+    /// Word counts of every book's rendered content — curated AND smart
+    /// (Stage B review round 2, MAJOR 4 + MINOR skews). ONE-SHOT by
+    /// contract (see header). Counting happens app-side with the SAME
+    /// Unicode `.byWords` rule as the editor's `TextMetrics`, so the
+    /// shelf's "62% of 10,000w" and the editor's counts agree on the same
+    /// prose (the SQL space-arithmetic predecessor miscounted newlines and
+    /// consecutive spaces — multi-paragraph blocks are I4's core case).
+    /// ARCHIVED member posts are excluded, matching the reading assembly's
+    /// ambient-view ratification (the book view doesn't show them; the
+    /// shelf number must not count them).
     public static func bookWordCounts(_ db: Database) throws -> [String: Int] {
+        var counts: [String: Int] = [:]
+        // Curated memberships: one pass, rendered take per slot (the
+        // chosen-with-default-fallback read-time rule in SQL).
         let rows = try Row.fetchAll(
             db,
             sql: """
-                SELECT rp.reading_id AS reading_id,
-                       SUM(LENGTH(TRIM(v.working_text))
-                           - LENGTH(REPLACE(TRIM(v.working_text), ' ', ''))
-                           + (LENGTH(TRIM(v.working_text)) > 0)) AS words
+                SELECT rp.reading_id AS reading_id, v.working_text AS text
                 FROM reading_post rp
+                JOIN container c
+                  ON c.id = rp.post_id AND c.deleted_at IS NULL AND c.archived_at IS NULL
                 JOIN container_block cb
                   ON cb.container_id = rp.post_id AND cb.deleted_at IS NULL
                 JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
@@ -73,11 +79,50 @@ extension Queries {
                        b.default_variant_id)
                  AND v.deleted_at IS NULL
                 WHERE rp.deleted_at IS NULL
-                GROUP BY rp.reading_id
                 """)
-        return Dictionary(uniqueKeysWithValues: rows.map {
-            ($0["reading_id"] as String, ($0["words"] as Int? ?? 0))
-        })
+        for row in rows {
+            counts[row["reading_id"], default: 0] += wordCount(row["text"])
+        }
+        // Smart books: derived membership through the ONE shared predicate
+        // (a word target on a smart book must show real progress — the
+        // extent sheet offers it).
+        for reading in try readings(db) where reading.kind == .smart {
+            guard let spec = decodeSpec(reading.querySpec) else { continue }
+            let match = smartMatchSQL(spec)
+            let conditions = (["c.deleted_at IS NULL", "c.archived_at IS NULL",
+                               "c.kind = 'post'"] + match.conditions)
+                .joined(separator: " AND ")
+            let texts = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT v.working_text FROM container c
+                    JOIN container_block cb
+                      ON cb.container_id = c.id AND cb.deleted_at IS NULL
+                    JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                    JOIN variant v
+                      ON v.id = COALESCE(
+                           (SELECT id FROM variant chosen
+                             WHERE chosen.id = cb.chosen_variant_id
+                               AND chosen.block_id = cb.block_id
+                               AND chosen.deleted_at IS NULL AND chosen.status = 'active'),
+                           b.default_variant_id)
+                     AND v.deleted_at IS NULL
+                    WHERE \(conditions)
+                    """,
+                arguments: StatementArguments(match.arguments))
+            counts[reading.id] = texts.reduce(0) { $0 + wordCount($1) }
+        }
+        return counts
+    }
+
+    /// The one word-counting rule (Unicode `.byWords` — the editor's
+    /// `TextMetrics` counts the same way; two surfaces, one answer).
+    public static func wordCount(_ text: String) -> Int {
+        var count = 0
+        text.enumerateSubstrings(
+            in: text.startIndex..., options: [.byWords, .substringNotRequired]
+        ) { _, _, _, _ in count += 1 }
+        return count
     }
 
     /// The shelf's TAGS column feed (R4/round-2: the shelf shows tags):
@@ -110,22 +155,43 @@ extension Queries {
 
     /// The POOL surface (R44/R29 — "an area for posts that do not belong
     /// to any book"; its purpose is driving floating posts INTO books):
-    /// live, non-archived posts with NO live reading membership, newest
-    /// touched first. Bounded like every held listing.
+    /// live, non-archived posts with NO live curated membership AND no
+    /// live SMART book collecting them (Stage B review round 2, MAJOR 3:
+    /// promote-tags-to-book must DRAIN the pool — R30's flagship gesture;
+    /// derived membership counts as being in a book). Consequence,
+    /// recorded (#26(h)): tag edits move posts in and out of the Pool —
+    /// derived membership flaps by design. A malformed smart spec matches
+    /// nothing (fail closed); an EMPTY spec matches everything (the
+    /// ratified NULL-spec rule — such a book empties the Pool). Newest
+    /// touched first; bounded like every held listing.
     public static func poolPosts(_ db: Database, limit: Int) throws -> [TimelineItem] {
-        try Row.fetchAll(
+        var exclusions: [String] = ["""
+            NOT EXISTS (SELECT 1 FROM reading_post rp
+                         WHERE rp.post_id = c.id AND rp.deleted_at IS NULL)
+            """]
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        for reading in try readings(db) where reading.kind == .smart {
+            guard let spec = decodeSpec(reading.querySpec) else { continue }
+            let match = smartMatchSQL(spec)
+            if match.conditions.isEmpty {
+                // The empty spec matches every post — nothing is bookless.
+                return []
+            }
+            exclusions.append("NOT (" + match.conditions.joined(separator: " AND ") + ")")
+            arguments += match.arguments
+        }
+        return try Row.fetchAll(
             db,
             sql: """
                 SELECT id, title, entry_date,
                        COALESCE(last_touched_at, created_at) AS stamp
                 FROM container c
                 WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
-                  AND NOT EXISTS (SELECT 1 FROM reading_post rp
-                                   WHERE rp.post_id = c.id AND rp.deleted_at IS NULL)
+                  AND \(exclusions.joined(separator: " AND "))
                 ORDER BY stamp DESC, id DESC
                 LIMIT ?
                 """,
-            arguments: [limit]
+            arguments: StatementArguments(arguments + [limit])
         ).map {
             TimelineItem(
                 postID: $0["id"], title: $0["title"],
@@ -134,9 +200,14 @@ extension Queries {
     }
 
     /// The books holding a post — the R35 membership chip's feed ("this
-    /// post also appears in N books"). Indexed via `idx_reading_post_post`.
+    /// post also appears in N books"): curated memberships (indexed via
+    /// `idx_reading_post_post`) PLUS the smart books whose predicate
+    /// collects the post (round 2, MAJOR 3 — one membership truth across
+    /// the Pool and the chip). Archived posts match no smart book (the
+    /// ambient-view rule); their curated rows still list (the recovery
+    /// surfaces show where things belonged).
     public static func readingsContaining(_ db: Database, postID: String) throws -> [Reading] {
-        try Reading.fetchAll(
+        var result = try Reading.fetchAll(
             db,
             sql: """
                 SELECT r.* FROM reading r
@@ -145,6 +216,19 @@ extension Queries {
                 ORDER BY r.name, r.id
                 """,
             arguments: [postID])
+        for reading in try readings(db) where reading.kind == .smart {
+            guard let spec = decodeSpec(reading.querySpec) else { continue }
+            let match = smartMatchSQL(spec)
+            let conditions = (["c.id = ?", "c.deleted_at IS NULL",
+                               "c.archived_at IS NULL", "c.kind = 'post'"]
+                              + match.conditions).joined(separator: " AND ")
+            let matches = try Bool.fetchOne(
+                db,
+                sql: "SELECT EXISTS (SELECT 1 FROM container c WHERE \(conditions))",
+                arguments: StatementArguments([postID] + match.arguments)) ?? false
+            if matches { result.append(reading) }
+        }
+        return result.sorted { ($0.name, $0.id) < ($1.name, $1.id) }
     }
 
     // MARK: - The catalog search (Library = EVERYTHING, R32; ⌘K's feed, R15)
@@ -155,12 +239,22 @@ extension Queries {
         public let id: String
         public let title: String
         public let detail: String?
+        /// Block hits: the HOME container's id + kind — a block result must
+        /// be able to NAVIGATE (round 2, MINOR: dead palette rows violated
+        /// fire-and-speak on the legibility surface itself).
+        public let homeContainerID: String?
+        public let homeIsPool: Bool
 
-        public init(kind: Kind, id: String, title: String, detail: String?) {
+        public init(
+            kind: Kind, id: String, title: String, detail: String?,
+            homeContainerID: String? = nil, homeIsPool: Bool = false
+        ) {
             self.kind = kind
             self.id = id
             self.title = title
             self.detail = detail
+            self.homeContainerID = homeContainerID
+            self.homeIsPool = homeIsPool
         }
     }
 
@@ -176,13 +270,19 @@ extension Queries {
     ) throws -> [CatalogHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         var hits: [CatalogHit] = []
-        let like = "%\(trimmed.replacingOccurrences(of: "%", with: ""))%"
+        // LIKE-escape the query (round 2 NIT: `_` is a single-char
+        // wildcard too; escape the escape first, then both wildcards).
+        let escaped = trimmed
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_")
+        let like = "%\(escaped)%"
 
         let books = try Row.fetchAll(
             db,
             sql: """
                 SELECT id, name, kind, locked FROM reading
-                WHERE deleted_at IS NULL AND (? = '' OR name LIKE ?)
+                WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')
                 ORDER BY name LIMIT ?
                 """,
             arguments: [trimmed, like, limitPerKind])
@@ -198,7 +298,7 @@ extension Queries {
             sql: """
                 SELECT id, title, entry_date FROM container
                 WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
-                  AND (? = '' OR COALESCE(title, '') LIKE ? OR COALESCE(entry_date, '') LIKE ?)
+                  AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')
                 ORDER BY COALESCE(last_touched_at, created_at) DESC, id DESC
                 LIMIT ?
                 """,
@@ -218,20 +318,24 @@ extension Queries {
                 sql: """
                     SELECT b.id AS id,
                            COALESCE(b.name, SUBSTR(v.working_text, 1, 80)) AS handle,
-                           c.title AS home
+                           c.title AS home, c.id AS home_id, c.kind AS home_kind
                     FROM block b
                     JOIN container_block cb ON cb.block_id = b.id AND cb.deleted_at IS NULL
                     JOIN container c ON c.id = cb.container_id AND c.deleted_at IS NULL
+                     AND c.archived_at IS NULL
                     LEFT JOIN variant v ON v.id = b.default_variant_id AND v.deleted_at IS NULL
                     WHERE b.deleted_at IS NULL
-                      AND (b.name LIKE ? OR (c.kind = 'pool' AND v.working_text LIKE ?))
+                      AND (b.name LIKE ? ESCAPE '\\'
+                           OR (c.kind = 'pool' AND v.working_text LIKE ? ESCAPE '\\'))
                     ORDER BY b.updated_at DESC LIMIT ?
                     """,
                 arguments: [like, like, limitPerKind])
             hits += blocks.map {
                 CatalogHit(
                     kind: .block, id: $0["id"], title: $0["handle"] ?? "block",
-                    detail: $0["home"])
+                    detail: $0["home"],
+                    homeContainerID: $0["home_id"],
+                    homeIsPool: ($0["home_kind"] as String) == "pool")
             }
         }
         return hits

@@ -39,8 +39,7 @@ struct ShelfView: View {
     @State private var extentTarget: Reading?
 
     private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme)
-            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {
@@ -79,9 +78,21 @@ struct ShelfView: View {
                 let name = nameField
                 Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .smart) }
             }
+            // §14 item 10's "starting a 'new' journal as a separate
+            // notebook" — a journal-profile book (dated, one entry after
+            // another; round 2's re-designation door pairs with it).
+            Button("Create Journal Book") {
+                let name = nameField
+                Task {
+                    await readings.create(
+                        name: name.isEmpty ? "Untitled Journal" : name,
+                        kind: .curated, profile: "journal",
+                        sortField: .entryDate, sortDir: .asc)
+                }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("A book holds a hand-picked, ordered post list; a smart book collects by filter.")
+            Text("A book holds a hand-picked, ordered post list; a smart book collects by filter; a journal book holds dated entries.")
         }
         .alert(
             "Rename Book",
@@ -230,6 +241,14 @@ struct ShelfView: View {
             Button("Edit Filter…") { smartTarget = reading }
         }
         Button("Length & Extent…") { extentTarget = reading }
+        if reading.kind == .curated, reading.profile == "journal" {
+            // Round 2, MAJOR 2's re-designation door: finishing a bounded
+            // daily journal is the EXPECTED flow — this is where the next
+            // one takes over.
+            Button("Use as Daily Journal") {
+                Task { await model.designateDailyJournal(reading.id) }
+            }
+        }
         Divider()
         Button(reading.locked ? "Reopen" : "Finish") {
             Task { await model.setFinished(reading.id, finished: !reading.locked) }
@@ -305,6 +324,27 @@ struct ShelfView: View {
     }
 }
 
+/// Extent-field parsing, ONE implementation for both sheets (round 2,
+/// MINOR): empty = CLEAR, digits = a value, anything else = INVALID —
+/// refuse and KEEP; a typo while editing must never silently delete a
+/// stored extent (`Int("10k")` was nil, and nil meant clear).
+enum ExtentInput: Equatable {
+    case clear
+    case value(Int)
+
+    static func parse(_ field: String) -> ExtentInput? {
+        let trimmed = field.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty { return .clear }
+        guard let value = Int(trimmed) else { return nil }
+        return .value(value)
+    }
+
+    var intValue: Int? {
+        if case .value(let value) = self { return value }
+        return nil
+    }
+}
+
 /// The extent faces (word target / post cap — the machinery that existed
 /// since v1 with "no UI face at all", plus v1_11's words unit).
 struct BookExtentSheet: View {
@@ -312,6 +352,7 @@ struct BookExtentSheet: View {
     let reading: Reading
     @State private var wordTargetField = ""
     @State private var maxPostsField = ""
+    @State private var parseError: String?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -324,15 +365,22 @@ struct BookExtentSheet: View {
                 TextField("Word target (e.g. 10000)", text: $wordTargetField)
                 TextField("Post cap (max posts)", text: $maxPostsField)
             }
+            if let parseError {
+                Text(parseError).font(.caption).foregroundStyle(.red)
+            }
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }
                 Button("Save") {
-                    let target = Int(wordTargetField.trimmingCharacters(in: .whitespaces))
-                    let cap = Int(maxPostsField.trimmingCharacters(in: .whitespaces))
+                    guard let target = ExtentInput.parse(wordTargetField),
+                          let cap = ExtentInput.parse(maxPostsField)
+                    else {
+                        parseError = "Extents are plain numbers (e.g. 10000) — nothing was changed."
+                        return
+                    }
                     Task {
-                        await model.setWordTarget(reading.id, target: target)
-                        await model.setMaxPosts(reading.id, maxPosts: cap)
+                        await model.setWordTarget(reading.id, target: target.intValue)
+                        await model.setMaxPosts(reading.id, maxPosts: cap.intValue)
                         dismiss()
                     }
                 }

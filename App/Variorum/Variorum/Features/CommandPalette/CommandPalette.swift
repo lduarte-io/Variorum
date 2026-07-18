@@ -27,6 +27,10 @@ struct PaletteItem: Identifiable, Equatable {
     let kind: Kind
     let title: String
     let detail: String?
+    /// Block rows: the home container to open (round 2, MINOR — a block
+    /// hit must NAVIGATE; caret-precise landing is Stage C's).
+    var homeContainerID: String?
+    var homeIsPool = false
 
     static func == (lhs: PaletteItem, rhs: PaletteItem) -> Bool {
         lhs.id == rhs.id
@@ -41,16 +45,21 @@ final class PaletteModel {
     /// composition; the palette only lists and picks).
     @ObservationIgnored var commands: [(title: String, action: @MainActor () -> Void)] = []
 
-    var query = "" {
-        didSet { Task { await refresh() } }
-    }
+    /// Set by the view's binding, which also spawns `refresh()` — no
+    /// hidden didSet task, so tests drive the model deterministically and
+    /// the generation guard only has the UI's unordered tasks to order.
+    var query = ""
     private(set) var items: [PaletteItem] = []
+    /// Generation-stamped adoption (round 2, MINOR — the Phase 8 ruling).
+    private var generation = 0
 
     init(session: AppSession) {
         self.session = session
     }
 
     func refresh() async {
+        generation += 1
+        let mine = generation
         let trimmed = query.trimmingCharacters(in: .whitespaces).lowercased()
         var result: [PaletteItem] = []
         // Commands first — matching ones only once a query exists.
@@ -65,11 +74,13 @@ final class PaletteModel {
         let hits = (try? await session.database.read { db in
             try Queries.searchCatalog(db, query: query, limitPerKind: 12)
         }) ?? []
+        guard mine == generation else { return }  // a newer keystroke won
         result += hits.map { hit in
             PaletteItem(
                 id: "\(hit.kind)-\(hit.id)",
                 kind: hit.kind == .book ? .book : (hit.kind == .post ? .post : .block),
-                title: hit.title, detail: hit.detail)
+                title: hit.title, detail: hit.detail,
+                homeContainerID: hit.homeContainerID, homeIsPool: hit.homeIsPool)
         }
         items = result
     }
@@ -86,11 +97,12 @@ final class PaletteModel {
         case .post:
             onOpen(.post(String(item.id.dropFirst("post-".count))))
         case .block:
-            // A block opens its home surface — the Library's block hits
-            // carry the home container; navigating block-precise is Stage
-            // C's caret-seed work. For now: nothing better than ignoring a
-            // missing home quietly.
-            break
+            // A block opens its HOME surface (round 2, MINOR: Enter must
+            // execute — fire-and-speak on the legibility surface itself);
+            // caret-precise landing is Stage C's.
+            if let home = item.homeContainerID {
+                onOpen(item.homeIsPool ? .pool(home) : .post(home))
+            }
         }
     }
 }
@@ -106,14 +118,16 @@ struct CommandPaletteView: View {
     @FocusState private var fieldFocused: Bool
 
     private var tokens: VoiceTokens {
-        themeStore?.tokens(for: scheme)
-            ?? VoiceTokens.resolve(voice: .terminal, dark: scheme == .dark)
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {
         VStack(spacing: 0) {
             TextField(tokens.chromeLabel("Find anything — posts, books, commands…"),
-                      text: Binding(get: { model.query }, set: { model.query = $0 }))
+                      text: Binding(get: { model.query }, set: { value in
+                          model.query = value
+                          Task { await model.refresh() }
+                      }))
                 .textFieldStyle(.plain)
                 .font(tokens.body)
                 .padding(12)
