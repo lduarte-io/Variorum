@@ -39,8 +39,11 @@ extension Operations {
             let rendered = try renderedVariant(db, block: source, placement: sourcePlacement)
 
             let now = date.now
+            // Phase 13 (A2): the copy is a copy — the callout frame rides
+            // (identity-level metadata, the block-name/copyPost family).
             var copy = Block(
-                id: newID(), ownerId: currentOwnerID(), createdAt: now, updatedAt: now)
+                id: newID(), ownerId: currentOwnerID(),
+                presentation: source.presentation, createdAt: now, updatedAt: now)
             try copy.insert(db)
 
             var variants: [Variant] = []
@@ -92,6 +95,10 @@ extension Operations {
 
             let edge = try insertLineageEdge(
                 db, from: copy.id, to: poolBlockID, originOp: "pool_copy", now: now)
+            // Phase 13 (A2) travel: the scrap's working notes ride the copy
+            // (the plan's letter: pool-copy carries them); the pool original
+            // keeps its own.
+            try copyLiveComments(db, from: poolBlockID, to: copy.id, now: now)
             try touchContainer(db, postID, now: now)
             return PoolDragCopyResult(
                 block: copy, variants: variants, placement: placement, edge: edge)

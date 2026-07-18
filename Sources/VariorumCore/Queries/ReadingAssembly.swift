@@ -36,22 +36,33 @@ extension Queries {
     ///
     /// Semantics: conditions AND across fields; `tags` matches ANY of the
     /// listed paths with subtree semantics (a post tagged at or under any
-    /// path). A NULL/absent spec matches all posts (no constraints — plain
-    /// predicate semantics); a *malformed* spec assembles empty (fail
-    /// closed on corrupt data, never crash).
+    /// path); `tagsAll` (Phase 13, A1 — ruling R30's AND-joined tag
+    /// promotion) requires EVERY listed path to match, subtree semantics
+    /// each — the additive vocabulary extension the promote-tags-to-book
+    /// gesture implies. A NULL/absent spec matches all posts (no
+    /// constraints — plain predicate semantics); a *malformed* spec
+    /// assembles empty (fail closed on corrupt data, never crash); unknown
+    /// keys are ignored (the ratified v1 rule — old vocabularies decode
+    /// unchanged, no migration).
     public struct SmartQuerySpec: Codable, Equatable, Sendable {
         public var tags: [String]?
+        /// AND-of-tags (R30): every path must match. nil/empty = no
+        /// constraint. Encoded only when present, so pre-13 specs
+        /// round-trip byte-identically.
+        public var tagsAll: [String]?
         public var profile: String?
         public var entryDateFrom: String?
         public var entryDateTo: String?
 
         public init(
             tags: [String]? = nil,
+            tagsAll: [String]? = nil,
             profile: String? = nil,
             entryDateFrom: String? = nil,
             entryDateTo: String? = nil
         ) {
             self.tags = tags
+            self.tagsAll = tagsAll
             self.profile = profile
             self.entryDateFrom = entryDateFrom
             self.entryDateTo = entryDateTo
@@ -167,17 +178,25 @@ extension Queries {
                 conditions.append("c.entry_date <= ?")
                 arguments.append(to)
             }
+            let tagMatch = """
+                EXISTS (SELECT 1 FROM post_tag pt
+                         JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                        WHERE pt.post_id = c.id AND pt.deleted_at IS NULL
+                          AND (t.path = ?
+                               OR substr(t.path, 1, length(?) + 1) = ? || '/'))
+                """
             if let paths = spec.tags, !paths.isEmpty {
-                let one = """
-                    EXISTS (SELECT 1 FROM post_tag pt
-                             JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
-                            WHERE pt.post_id = c.id AND pt.deleted_at IS NULL
-                              AND (t.path = ?
-                                   OR substr(t.path, 1, length(?) + 1) = ? || '/'))
-                    """
                 conditions.append(
-                    "(" + Array(repeating: one, count: paths.count).joined(separator: " OR ") + ")")
+                    "(" + Array(repeating: tagMatch, count: paths.count).joined(separator: " OR ") + ")")
                 for path in paths {
+                    arguments.append(contentsOf: [path, path, path])
+                }
+            }
+            // tagsAll (Phase 13, R30): one conjunct per path — every path
+            // must have a live application at or under it.
+            if let allPaths = spec.tagsAll, !allPaths.isEmpty {
+                for path in allPaths {
+                    conditions.append(tagMatch)
                     arguments.append(contentsOf: [path, path, path])
                 }
             }

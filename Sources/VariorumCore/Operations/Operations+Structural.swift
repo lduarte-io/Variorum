@@ -95,9 +95,15 @@ extension Operations {
                 try source.update(db)
 
                 let minted = try mintBlock(
-                    db, text: spanText, in: context.container.id, at: insertAt, now: now)
+                    db, text: spanText, in: context.container.id, at: insertAt,
+                    presentation: context.block.presentation, now: now)
                 let edge = try insertLineageEdge(
                     db, from: minted.block.id, to: blockID, originOp: "extract", now: now)
+                // Phase 13 (A2) travel: the source keeps its comments; the
+                // minted half gets COPIES (the ratified duplicate-onto-
+                // successors direction). The undo inverse needs nothing new
+                // — tombstoning the minted block cascades to its copies.
+                try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
                 try registerTextChange(
                     db, blockID: blockID, charDelta: text.count - remainder.count,
                     forceMajorRevision: false, now: now)
@@ -173,9 +179,13 @@ extension Operations {
 
                 let minted = try mintBlock(
                     db, text: halves.second, in: context.container.id,
-                    at: .after(blockID), now: now)
+                    at: .after(blockID),
+                    presentation: context.block.presentation, now: now)
                 let edge = try insertLineageEdge(
                     db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
+                // Phase 13 (A2) travel: both halves were the block's content
+                // — A keeps its comments, C gets copies.
+                try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
                 try registerTextChange(
                     db, blockID: blockID, charDelta: text.count - halves.first.count,
                     forceMajorRevision: false, now: now)
@@ -310,9 +320,13 @@ extension Operations {
                 let minted = try mintFanBlock(
                     db, texts: texts, in: containerID,
                     position: successors.isEmpty ? positionB : positionC,
-                    defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex, now: now)
+                    defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
+                    presentation: context.block.presentation, now: now)
                 let edge = try insertLineageEdge(
                     db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
+                // Phase 13 (A2) travel: the W's copies land on BOTH
+                // successors; A — preserved whole — keeps its originals.
+                try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
                 successors.append(FanHalf(
                     block: minted.block, variants: minted.variants,
                     placement: minted.placement, edge: edge))
@@ -416,14 +430,25 @@ extension Operations {
             let tail = second.rendered.workingText
             let needsSpace = !head.isEmpty && !tail.isEmpty
                 && head.last?.isWhitespace != true && tail.first?.isWhitespace != true
+            // Phase 13 (A2): A' keeps the frame only when BOTH sources
+            // agree on it (both-nil included) — merging a callout with
+            // plain prose mints a plain block rather than silently picking
+            // a side (PROVISIONAL, QUESTIONS bundle).
+            let presentation = first.block.presentation == second.block.presentation
+                ? first.block.presentation : nil
             let minted = try mintFanBlock(
                 db, texts: [needsSpace ? head + " " + tail : head + tail],
                 in: containerID, position: position,
-                defaultIndex: 0, chosenIndex: 0, now: now)
+                defaultIndex: 0, chosenIndex: 0, presentation: presentation, now: now)
             let firstEdge = try insertLineageEdge(
                 db, from: minted.block.id, to: firstBlockID, originOp: "merge", now: now)
             let secondEdge = try insertLineageEdge(
                 db, from: minted.block.id, to: secondBlockID, originOp: "merge", now: now)
+            // Phase 13 (A2) travel: A' carries BOTH sides' notes (copies
+            // preserve created_at, so the merged list reads chronologically
+            // across both sources); B and C keep their originals as lineage.
+            try copyLiveComments(db, from: firstBlockID, to: minted.block.id, now: now)
+            try copyLiveComments(db, from: secondBlockID, to: minted.block.id, now: now)
             try touchContainer(db, containerID, now: now)
 
             return MergeResult(
@@ -488,12 +513,15 @@ extension Operations {
     /// row set, shared by the structural ops (which add lineage on top).
     /// The block↔variant FK circle resolves by inserting the block with a
     /// NULL default first, then pointing it at the freshly inserted variant.
+    /// `presentation` is the Phase 13 travel half: a structural successor
+    /// inherits its source's callout frame (nil for brand-new blocks).
     func mintBlock(
         _ db: Database, text: String, in containerID: String,
-        at insert: InsertPosition, now: Date
+        at insert: InsertPosition, presentation: String? = nil, now: Date
     ) throws -> MintedBlock {
         var block = Block(
-            id: newID(), ownerId: currentOwnerID(), createdAt: now, updatedAt: now)
+            id: newID(), ownerId: currentOwnerID(), presentation: presentation,
+            createdAt: now, updatedAt: now)
         try block.insert(db)
 
         let variant = Variant(
@@ -529,10 +557,11 @@ extension Operations {
     /// ancestors differ per operation.
     private func mintFanBlock(
         _ db: Database, texts: [String], in containerID: String, position: String,
-        defaultIndex: Int, chosenIndex: Int?, now: Date
+        defaultIndex: Int, chosenIndex: Int?, presentation: String? = nil, now: Date
     ) throws -> MintedFanBlock {
         var block = Block(
-            id: newID(), ownerId: currentOwnerID(), createdAt: now, updatedAt: now)
+            id: newID(), ownerId: currentOwnerID(), presentation: presentation,
+            createdAt: now, updatedAt: now)
         try block.insert(db)
 
         var variants: [Variant] = []

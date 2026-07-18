@@ -338,6 +338,7 @@ extension Operations {
 
             var blockCopy = Block(
                 id: newID(), ownerId: currentOwnerID(), name: block.name,
+                presentation: block.presentation,
                 createdAt: now, updatedAt: now)
             try blockCopy.insert(db)
 
@@ -377,6 +378,9 @@ extension Operations {
 
             _ = try insertLineageEdge(
                 db, from: blockCopy.id, to: block.id, originOp: "manual", now: now)
+            // Phase 13 (A2) travel: working notes ride both copy operations
+            // (duplicate-as-version AND promote — the plan's letter).
+            try copyLiveComments(db, from: block.id, to: blockCopy.id, now: now)
 
             if firstPair == nil { firstPair = (block.id, blockCopy.id) }
             blockCopies.append((source: block.id, copy: blockCopy.id))
