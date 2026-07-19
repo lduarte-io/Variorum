@@ -803,6 +803,480 @@ recorded in R51):**
   top). Changes nothing about Stage C's scope or the boundary protocol; the
   stage closeouts are written knowing they feed that handoff.
 
+### Sitting 9 (2026-07-18 evening — the R48 taste checkpoint begins; fresh session anchored on the handoff per R59; reactions batch 1, with screenshots)
+
+**Her message VERBATIM (standing instruction; typos hers; [Image #N] markers hers — screenshots from her Desktop/temp, described after the quote):**
+
+> hi fable! I'm ready to get into the walkthrough from phase 13 and ready to
+> address some issues that i've noticed. notes/handoffs/phase-13-handoff.md.
+> I've already noticed some more serious useability and clarity issues. I
+> might need some vocab mroe defined for me or we just need some changes
+> overall. here's one example: [Image #2] i don't know what the scratch
+> option even is. also, i don't know what duplicate as version would mean
+> for the scratch. i also couldn't see takes while the scratch column was
+> open, even though i'm in the takes tab. [Image #3] also the marginalia was
+> too hard to see - it's not really clear how you close the takes of items
+> that you have open, the marginalia was weirdly cut off, and it didn't push
+> things up and down like in the demo so that the marginalia could have more
+> regular room. i also don't get how these multiple scratch columsn are
+> supposed to work and as you can see in the previous image it's not
+> resizing cleanly. and in canvas mode you couldn't move things freely, it
+> had a verticle limit and i couldn't move the block that is more up and
+> more up than it is here for some reason. [Image #5] [Image #4] you Can't
+> unmark things as versions too which is another serious issue. i also think
+> that being able to choose any post as outline is a little bit confusing.
+> also it needs to be easy to make a post inside of a book. overall i jsut
+> have some serious useabiltiy questions. [Image #6] clicking on "in no
+> book" also doesn't let you easily add it to a book, which it should. the
+> meaning of duplicate as version versus mark as verison is unclear. i don't
+> know why i can't make this one sentence a block and i don't see where the
+> setting to see where different blocks are is, and the error message is cut
+> off here [Image #7] i can see in the lower corner that i'm in block 2/2 so
+> that's why i can't make a new one but it's still kind of unclear. the take
+> editor is clear for when you already have takes but you can't make a new
+> take in it, which is really confsuign. the options at the bottom of the
+> write editor should absolutely still be there in the take editor -
+> arguably, people will often live in the take editor and the main writing
+> editor should stay an option but i feel like the take editor should be teh
+> primary default view and it should be very clear what branching does. also
+> what does branch all fans into a new thread do? i feel like this is all
+> pretty confusing
+
+**The screenshots (described for the record):** (1) Takes mode, Margin grid, Chosen + ONE Scratch column — both showing identical text, no take cards anywhere, no visible per-block pick affordance; the scratch column's editor frame sized oddly against the window. (2) Takes mode single-column margin grid — take cards ("takes · 2") clipped mid-card at the RIGHT WINDOW EDGE; the second block's card group crowded directly under the first's. (3) Takes mode with THREE columns (Chosen + Scratch + Scratch), all identical text. (4) Canvas mode on a post — the ‹ take 1 of 2 › switcher open on one card; her complaint: a card near the top could not be dragged further UP (the shipped `max(0, …)` origin clamp in `CanvasView.swift:115-116`). (5) The membership chip popover ("This post is in no book — it lives in the Pool.") with its second line TRUNCATED ("Editing here edits the post everywhere it appears. T…") and Duplicate as Version the only action. (6) Write mode with a cross-block selection; the status-line refusal TRUNCATED ("That span is t…"); sidebar footer shows **"Bridge error — Retry"** (unraised by her; logged for investigation).
+
+**Rulings (R60+; her uncertainty preserved where she has it):**
+
+- **R60 — Versions must be UN-markable in the UI** ("you Can't unmark things as versions too which is another serious issue"). `Operations.removeVersionOf` has existed in core since 11a (round 1) with NO face — the exact 9d class (shipped op, no door). The fix round builds the door(s) wherever version links are shown.
+- **R61 — The membership chip must offer ADD-to-book directly** ("clicking on 'in no book' also doesn't let you easily add it to a book, which it should") — the popover currently offers only the divergence door (Duplicate as Version); it gains an add-to-book path.
+- **R62 — Making a post INSIDE a book must be easy** — a direct new-post-in-this-book door (journal books have "+ new entry"; non-journal books have no equivalent — New Post lands in the Pool and needs a membership drag).
+- **R63 — The Write editor's bottom gesture bar belongs in the Takes editor too** ("should absolutely still be there in the take editor") — firm.
+- **R64 (direction, uncertainty preserved) — she leans toward the Takes editor as the PRIMARY default view** ("arguably, people will often live in the take editor and the main writing editor should stay an option but i feel like the take editor should be teh primary default view") — a lean, not a settled flip; the fix round designs what "default" means (per-post memory vs global) and asks live. Rides with: "it should be very clear what branching does."
+
+**Reactions recorded for the fix round (defects vs legibility vs design questions — triaged by the session):**
+
+*Defect-class (mechanism traced or visible in the screenshots):*
+1. Margin-grid take cards CLIP at the right window edge (the #28f fixed rail overruns the viewport instead of fitting inside it).
+2. The membership-chip popover truncates its explainer text.
+3. The status-line refusal truncates ("That span is t…") — refusal copy exists (9d fire-and-speak) but the surface cuts it off; the whole message must be readable.
+4. The 2-column takes layout mis-sizes ("it's not resizing cleanly") — the scratch column's frame vs window width.
+5. Canvas drag clamps at the top-left origin (`max(0, …)` both axes) — free spatial arrangement can't move a card up/left past 0. Designed clamp, reads as a defect; the fix round frees it (expanding origin / negative-coordinate scroll).
+6. "Bridge error — Retry" visible in the sidebar footer (her screenshot; unraised) — investigate.
+
+*Legibility-class (shipped behavior is defensible but failed her cold — the R48 walk's whole point; the 11a ratified shapes are NOT self-explaining on the restyled surface):*
+7. "Scratch" is opaque — the pick-a-different-take-per-block affordance inside a scratch column never surfaced for her, so the column read as a pointless duplicate of Chosen.
+8. Columns HIDE per-block blooms (the 11a "columns are whole-post fan presentations" ruling, #28d) — in the Takes tab this read as "takes disappeared." Revisit the presentation or make the relationship visible.
+9. How to CLOSE an open bloom (the ⑂ toggle / Close All) never surfaced.
+10. Duplicate as Version vs Mark as Versions — the shared word "version" with two different gestures (copy-then-link vs link-only) is failing; naming/explainer work.
+11. The toolbar Duplicate as Version sits ambiguously ABOVE column context ("what would it mean for the scratch") — it's post-level (copies chosen), never column-level; the column-level door is 💾 save-as-lens → ⧉ promote. Placement/labeling work.
+12. "Branch all fans into a new thread" is unglossed jargon.
+13. Make Block's refusal on a whole-block selection is correct but unclear even un-truncated ("i can see in the lower corner that i'm in block 2/2 … but it's still kind of unclear").
+14. The seam toggle (Settings → Appearance → "Show block seams"; ⌘⇧B) was undiscoverable when she wanted "the setting to see where different blocks are."
+15. Overall: "i feel like this is all pretty confusing" — the legibility mandate (§14 item 11) is NOT yet met on the takes/versions surface.
+
+*Design-gap-class:*
+16. NO first-take door in Takes mode — the "＋ new take (branch) / ＋ blank take" doors render only inside an OPEN bloom, so an unfanned block cannot grow its first take there (the 9d first-branch chicken-and-egg reborn on the new surface).
+17. Margin cards don't get vertical room — "it didn't push things up and down like in the demo" (the v2 mockups pushed content; shipped overlays reserve no vertical space — #27a's recorded TK2 reasoning vs the R24 strip's existing post-grows-to-fit precedent; mechanism is the fix round's design question).
+18. Multiple scratch columns' purpose unclear (what a second/third thread is FOR needs to be visible: compare full alternate readings side by side).
+19. "Being able to choose any post as outline is a little bit confusing" — the Outline mode's free source-picker; design question, not ruled.
+
+**Status:** #23–#28 remain OPEN (nothing ratified this batch — the walk continues). The fix round follows the accumulated list; its cast is her call (R48/R59). No canonical-doc deltas yet — R60–R63 become §14 deltas when the fix round ships them.
+
+### Sitting 9, continued (2026-07-18 evening — reactions batch 2; THE FIX ROUND CALLED: author-attended, this session)
+
+**Her message VERBATIM (standing instruction; typos hers):**
+
+> ok i think the scratch columns / lenses need to be their own tab at an
+> absolute minimum so that it's clear that there is one tab alone where you
+> aren't supposed to be able to edit, you're just choosing views of the same
+> thing. i kind of had thought that we would promote views from the column
+> look at different takes but i think that this is fine too and it is
+> defensible. i think we should be clear about what the deal with a named
+> lens is though-is this something where you choose your lens on the main
+> writer page? I just dont think it should share with lens. or you should be
+> able to edit within the scratch columns - i think that would also be fine.
+> i think that we need more prominent post names or something so that it's
+> much more clear when something is a brand new post. and i think mark as
+> versions should still be deleatble and at least unmarkable as the
+> versions. duplicate as version meaning nothing for the scratch - i think
+> that we duplicate as version from scratch would be save as lens into
+> promote, otherwise it just wouldn't be chosen. maybe duplicate for a
+> scratch column should be - promote this, but does it have to be saved as a
+> lens? I guess it makes sense to save it as a lense if you didnt' really
+> want that post. i think the langauge just needs to be clearer somehow.
+> branch all fans into new thread is too confusing as jargon but i guess
+> what it's going makes sense. also, yeah, the sync isn't working. i think
+> we need to add removeVersionOf. we need an easier take and as mentioned i
+> think the take view should be the main view. i also think we desperately
+> need keyboard shortcuts for opening and closing fans. and maybe a little
+> keyboard shortcut helper that can appear on hover and has a dictionary tab
+> or something. i think shipped cards should reserve at least two cards of
+> verticle room with the marginalia option, or you should be able to choose
+> what grid you want up to like 3 high and 2 wide or something - it's too
+> hard to only be able to see two takes and it should be an option i think.
+> i want to pause here and fix these issues because it's still a little too
+> confusing. we also really need a way to add a post into a book already -
+> not sure if i mentioend that, butwe should add it. these useability gaps
+> are too much, right now it's very confusing. you can also ask me questions
+> if any of this wasn't clear enough
+
+**Rulings (R65+; her uncertainty preserved where she has it):**
+
+- **R65 — Scratch columns / lenses become their OWN TAB** ("at an absolute
+  minimum"): one mode alone whose deal is choosing views of the same thing;
+  the Takes tab keeps the per-block fan cards. Pane editability inside the
+  new tab: she offered BOTH shapes as fine ("you aren't supposed to be able
+  to edit" first; "or you should be able to edit within the scratch columns
+  - i think that would also be fine") — settled by the in-session question
+  round. Recorded with it: she had half-expected promote-a-view-from-columns
+  to be the shape, and judges the shipped lens design "fine too and it is
+  defensible."
+- **R66 — Named-lens legibility.** Her question ("is this something where
+  you choose your lens on the main writer page?") answered in-session: NO —
+  a lens NEVER renders on Write (a lens is never rendering truth, the 11a
+  pin); it appears only as a column in the columns surface. The fix makes
+  that self-evident (tab separation + the dictionary). Her "I just dont
+  think it should share with lens" read by the session as: the takes surface
+  shouldn't share its tab with the lens machinery (consistent with R65) —
+  flagged for her correction if misread.
+- **R67 — Post identity must be prominent** ("more prominent post names or
+  something so that it's much more clear when something is a brand new
+  post") — the Duplicate-as-Version / promote disorientation: landing in a
+  minted post must be unmistakable.
+- **R68 — Version links are deletable/unmarkable** (firms R60; "i think we
+  need to add removeVersionOf" — the face ships this round).
+- **R69 — The scratch column's promote door captures the COLUMN's picks**
+  ("duplicate as version from scratch would be save as lens into promote,
+  otherwise it just wouldn't be chosen"); whether the named-lens save stays
+  a mandatory step is her open question ("does it have to be saved as a
+  lens? I guess it makes sense to save it as a lense if you didnt' really
+  want that post") — settled by the in-session question round; either way
+  "the langauge just needs to be clearer somehow."
+- **R70 — "Branch all fans into a new thread" is too-confusing jargon** —
+  rename + gloss; the capability itself "makes sense."
+- **R71 — The bridge failure is real and joins the fix round** ("also,
+  yeah, the sync isn't working" — the screenshot's "Bridge error"). The
+  status row hides the error detail behind a hover tooltip
+  (`BridgeStatusViews.swift`) — itself the truncated-refusal class; surface
+  it, then diagnose the underlying failure.
+- **R72 — Takes becomes the MAIN view** (firmer than R64's lean: "as
+  mentioned i think the take view should be the main view"), and "we need
+  an easier take" — first-take creation must be easy (batch 1's item 16
+  confirmed as a build item). Default-view semantics pinned by the
+  in-session question round.
+- **R73 — Fan open/close KEYBOARD SHORTCUTS** ("we desperately need") +
+  a hover shortcut helper with a dictionary/glossary tab ("a little
+  keyboard shortcut helper that can appear on hover and has a dictionary
+  tab or something") — the legibility mandate's concrete face: the app
+  carries its own vocabulary.
+- **R74 — The margin grid gets vertical room and a density option**:
+  reserve at least TWO cards of vertical room in the marginalia
+  presentation, and/or a user-choosable grid up to ~3 high × 2 wide —
+  "it's too hard to only be able to see two takes and it should be an
+  option i think."
+- **R75 — Add-post-into-book re-confirmed** (firms R62 — "we also really
+  need a way to add a post into a book already").
+- **R76 — THE FIX ROUND RUNS NOW, AUTHOR-ATTENDED, THIS SESSION** ("i want
+  to pause here and fix these issues because it's still a little too
+  confusing") — the R48/R59 cast call is made: a direct Fable session with
+  her, not a `/run-phase` cast. The guided walk resumes after the fixes.
+
+**Question round 1 (in-session, same sitting — four structural calls put to
+her with options; three settled, one opened a design conversation):**
+
+- **R77 — The new tab is named "Lenses"** (her pick from Lenses / Views /
+  fold-into-Compare): the dictionary defines the word; scratch columns
+  become "unsaved lenses," collapsing two words into one idea.
+- **R78 — Promote from a scratch column is DIRECT** ("Make this a post" —
+  captures the column's picks straight into a new linked post; an optional
+  "also keep as a lens" checkbox; the mandatory save-as-lens-first step is
+  retired). Matches her own reasoning: a lens is for when you didn't really
+  want a post.
+- **R79 — "Takes is the main view" means: a post opens in Takes the FIRST
+  time; thereafter each post reopens in the mode you last used there**
+  (remember-per-post; Write stays one click away in the picker).
+- **The pane-editability question opened the real design conversation
+  (OPEN — "let's chat more about this"). Her answer VERBATIM (standing
+  instruction; typos hers):**
+
+  > I think that choosing only is okay, but only if you have a button that
+  > says "open this lens in editor" or something like that. the most
+  > anoying thing would be to build a lens, go back to the editor, and have
+  > to select your lens. we also have to decide something - does "takes"
+  > show you only one lens at a time? because seeing the different lenses
+  > is basically a way of having the column editor with different takes
+  > open, if you chose manually what you want for block 2, 5, 6, 7, and 10
+  > or whatever. so i think it should be possible to open lenses in the
+  > multi column take editor - which brings me back to feeling like the
+  > column / lenses tab shoudl be editable, because it would basically be
+  > like the multi column take editor. especially because i feel like the
+  > multi column take editor should have a button to elevate it to a lens.
+  > so maybe multi column editor + lens editor is the same tab? and multi
+  > column as a view moves out of the normal takes view? it's a pretty
+  > different approach from the other approaches so i think that would be
+  > fair. i also think you should always when you've chosen takes even on
+  > the normal take screen be able to elevate what you have to being a
+  > lens. i think we just need a clearer way of seeing lens name, lens
+  > choosing, and lens machinery and maybe lenses shoudl be the multi
+  > column editor. and at that point, new scratch column would basically be
+  > the same as "branch all fans into a new take". but scratch column just
+  > for flipping options also makes sense... so i don't know. clearly
+  > lenses are diffferent from takes but the blend between them is close
+  > enough limitations might read as annoying. let's chat more about this.
+
+  The session's read of where she's converging (proposal put to her in the
+  chat, ruling pending): **the Lenses tab IS the editable multi-column
+  editor** — the columns composition moves out of Takes wholesale; Takes
+  stays single-column per-block fan work; the scratch-vs-branch-all
+  distinction surfaces as two differently-named new-column doors (flip
+  EXISTING takes vs mint NEW takes everywhere); a "save current choices as
+  a lens" door joins the normal Takes screen (her elevate ask); "open this
+  lens in editor" dissolves because a lens column IS an editor.
+
+### Sitting 9, continued (2026-07-18 late evening — reactions batch 3: the Lenses model green-lit with amendments; the entanglement diagnosed; three more screenshots)
+
+**Her message VERBATIM (standing instruction; typos hers; [Image #N] markers hers):**
+
+> i think taht the + column makes sense - you can have more views than you
+> have takes afterall. i think recombine existing takes still is a bit too
+> much jargon to parse - maybe like "new lens without new takes" or
+> something like that (but i don't think what i said just now is too clear
+> either - maybe it needs a help text hover or something). and i think new
+> takes on every block is helpful. i also think new takes on every block
+> should still be an option in the traditional takes editor. arranging
+> versus writing might be a clearer lable. also, i think we need ways of
+> changing the columns between being lenses, new columns (that haven't been
+> named yet), etc. i think names should be more prominent for lenses
+> because of that - the unnamed ones should still get something like "Lens
+> 1" or something so that when you're selecting which columns you want in
+> your multi view (which i guess is a minimum of 1 column when there's no
+> other takes or views of what's selected to see), you can replace any
+> column with a different named lens or replace with a new column, for
+> however many you chose to see visible. also, we can't see takes right now
+> in the journal which is so confusing because the takes can still EXIST
+> (especially due to sync rules) but you can't actually edit them. i'd fix
+> that and include a note like - only the chosen view shows on fragments
+> (only if the user has a fragments account linked, and even then that
+> might not always be true for variorum mobile) - or something like that.
+> this view when you click on the takes is also too frustrating because if
+> you make a new blank take, it doesn't select that one, and it just feels
+> a little bit clunky. you should have new blank take and choose it, and
+> you can also see all the takes without being able to immediately edit
+> them without choosing. i do think we still need some take machinery in
+> the main writer view, i'm just wondering what UI would be better. i also
+> am not even seeing the column comparison mode? but i did see it earlier?
+> am i missing something? picture for that: [Image #10] and then picture
+> for clunky write machinery: [Image #11] i also have a scratch column but
+> it is so confusing how i can even select different takes: [Image #13]
+> and when i have slot split on 4 i still see nothing with the scratch
+> block next to it? the scratch view being in the same view as takes is
+> breaking it and now i can't even get to the multi column editor that i
+> could earlier. give me your thoughts on this and help me work out the
+> resolution to it but i like the build list thus far.
+
+**The screenshots:** (#10) Takes tab, Fan style dropdown open (Stack /
+Carousel / Margin grid / ✓ Slot split ×4) with Chosen + Scratch columns
+behind it — slot split showing NOTHING beside the scratch column. (#11)
+**the pre-13 Phase 7 FanPanel sheet** ("Fan — block EFCC1AAB": rows of
+Branch/Choose/Archive/Lock/Delete + New Blank Take/Close) — the Write-side
+takes door still opens this unstyled view-only panel; non-chosen takes
+cannot be edited there. (#13) Chosen + Scratch columns, ring focused in the
+scratch pane, NO visible per-block take-pick affordance.
+
+**Rulings (R80+; her uncertainty preserved):**
+
+- **R80 — The + Column / column-slots model is green-lit** ("+ column makes
+  sense - you can have more views than you have takes afterall"): the
+  Lenses tab is N swappable column slots, minimum ONE (just Chosen when
+  there's nothing else to see), user-chosen count.
+- **R81 — Door language: ARRANGING vs WRITING** ("arranging versus writing
+  might be a clearer lable"); "recombine existing takes" still too much
+  jargon; her own sketch ("new lens without new takes") self-flagged
+  unclear; **help-text hovers required** on these doors.
+- **R82 — "New takes on every block" is helpful AND must also be offered in
+  the traditional Takes editor** (branch-all lives in both tabs; in Lenses
+  it opens as a column).
+- **R83 — Columns are mutable slots with PROMINENT lens names**: any column
+  replaceable via its header (Chosen / any named lens / a new unnamed
+  lens); unnamed lenses auto-name "Lens 1", "Lens 2"… — a scratch column IS
+  an unnamed lens, now visibly.
+- **R84 — Journal takes visibility is broken in practice** ("the takes can
+  still EXIST (especially due to sync rules) but you can't actually edit
+  them"): fix it, and add a projection note — her wording preserved: "only
+  the chosen view shows on fragments (only if the user has a fragments
+  account linked, and even then that might not always be true for variorum
+  mobile)"; final copy the session's. Session hypothesis (to verify at
+  build): the journal book's entries surface takes only through the
+  read-tier ⑂ → the OLD FanPanel, which cannot edit non-chosen takes.
+- **R85 — The Write-side fan panel (the Phase 7 FanPanel, screenshot #11)
+  is the clunk**: "new blank take" must select the new take ("you should
+  have new blank take and choose it"); seeing takes without being able to
+  edit-without-choosing is the frustration; Write DOES keep take machinery
+  ("i do think we still need some take machinery in the main writer view,
+  i'm just wondering what UI would be better" — the shape is the session's
+  to propose).
+- **R86 — The fan-style × columns entanglement is confirmed broken in
+  practice** (slot split ×4 beside a scratch column renders nothing; the
+  multi-column editor became unreachable "and i can't even get to the
+  multi column editor that i could earlier"; scratch take-picking
+  undiscoverable — "the scratch view being in the same view as takes is
+  breaking it"): the Takes/Lenses split resolves it STRUCTURALLY — fan
+  styles belong to Takes (one column, the post); columns belong to Lenses;
+  the two never co-occupy a surface again.
+
+### Sitting 9, continued (2026-07-18 late evening — reactions batch 4: FanPanel retirement confirmed; the canvas switcher OVERRULED to view-local; adopt-swap; the keyboard vocabulary)
+
+**Her message VERBATIM (standing instruction; typos hers):**
+
+> i agree that the fan panel should be retired and the take machinery
+> should be pulled into just that item in writing. and that's where close
+> all takes really matters - it restores the writing pane to being a plain
+> writing pain with no buttons at all. in canvas I feel like the switcher
+> should only change the post if you explicitly select it - like not just
+> viewing it in the post it notes (which the post it notes should also be
+> savable as a lens, right?), but if you choose something it's only chosen
+> if chosen very carefully. in the lens column i think it's fair to change
+> just that lens pick but then i think any lens column should have a very
+> obvious "promote lens to chosen" button - which should also rename the
+> "chosen one" into a named lens view. and on the takes board, i agree
+> with minting a new take on each block without it being chosen. as you go
+> through and fill items in, it can be selected. or maybe an option in
+> takes where you expliccitly have to say "open new blank take as chosen"
+> rather than the deafult - maybe a power user keyboard shortcut. also,
+> did yo usee my keyboard shortcut about a new take, archive take, etc.
+> keyboard shortcut and a keyboard shortcut help pane? what else should be
+> on there to make this really useable? respond to this, we'll confirm
+> everything, and you'll start building.
+
+**Rulings (R87+):**
+
+- **R87 — The FanPanel is RETIRED everywhere; Write's take machinery is the
+  inline v2 bloom** at the ⑂/caret block ("the take machinery should be
+  pulled into just that item in writing"); **Close All restores the plain
+  writing pane — "no buttons at all"** in the prose surface (the calm
+  default, now a stated rule; the bottom gesture bar is chrome, not
+  prose-surface buttons).
+- **R88 — The canvas switcher is OVERRULED to VIEW-LOCAL (#28e answered
+  the other way):** ‹ › on a canvas card only changes what that card
+  SHOWS; chosen moves only through an explicit, careful choose gesture
+  ("it's only chosen if chosen very carefully"). The canvas card-picks are
+  SAVABLE AS A LENS (her "the post it notes should also be savable as a
+  lens, right?" — yes; built). Requires per-canvas view state + a
+  differs-from-chosen marker (the #28e alternative's recorded cost,
+  accepted).
+- **R89 — Lens columns: ‹ › changes that lens's pick only (fair, her
+  word); every lens column carries a VERY OBVIOUS "promote lens to
+  chosen" door; adopting PRESERVES the outgoing chosen as a named lens**
+  ("which should also rename the 'chosen one' into a named lens view" —
+  session reading, confirmed in-chat: a nothing-is-lost swap; the old
+  chosen arrangement auto-names as a lens, renameable).
+- **R90 — Takes-board minting never chooses (ratified: "i agree with
+  minting a new take on each block without it being chosen"); an explicit
+  "open new blank take as chosen" power variant exists via keyboard
+  shortcut** ("maybe a power user keyboard shortcut").
+- **R91 — The keyboard vocabulary extends to the take lifecycle** (new
+  take, archive take, etc.) **+ the shortcut help pane** (hover cheat
+  sheet + a helper with Shortcuts and Dictionary tabs); the session
+  proposes the full map (in-chat table) and additions for real
+  usability; her confirmation gates the build start.
+
+**Batch 5 (2026-07-18 ~11:30 PM — the confirmation; build START). Her
+message VERBATIM (standing instruction; typos hers):**
+
+> yes, adopting swaps, never destroys - it should auto save as a lens and
+> we should handle name collisions (by adding like a (1) to the name or
+> something, with an increasing integer. I like the chosen until xyz date
+> name being the auto though. and yes i agree, every shortcut should be a
+> menu item and refusal messages should be larger for people to be able
+> tos ee them. also, i think the fragments bridge now issue was due to
+> changes fragments made to sync - it went away after logout and log back
+> in. i do think it's bad that there wasn't a more helpful message though
+> [Image #14]
+
+(#14: the sidebar healthy again — "Synced 11:27 PM · Bridged 11:27 PM".)
+
+- **R92 — Adopt-swap ratified precisely:** adopting a lens auto-saves the
+  outgoing chosen as a lens named "chosen until <date>"; name collisions
+  resolve with an increasing-integer suffix ("(1)", "(2)", …).
+- **R93 — Every shortcut is also a menu item; refusal messages must be
+  large enough to read** (the in-chat map + helper design confirmed).
+- **R94 — The bridge outage resolved by sign-out/sign-in** (her read:
+  Fragments-side sync changes; consistent with a wedged token-refresh
+  path). The standing defect is the UNHELPFUL message: bridge/sync
+  failures must CLASSIFY and speak — an auth-shaped failure says
+  re-authenticate and offers the door; error text renders inline, never
+  hover-only. Diagnosis folded into the build item.
+- **The confirmation gate is passed — the fix-round build begins** (this
+  session, author-attended, per R76). The one shipped-PROVISIONAL this
+  sitting reverses is #28e (canvas switcher → view-local; R88) — QUESTIONS
+  updated with the sitting as the record.
+
+### Sitting 9 — THE FIX ROUND'S BUILD RECORD (2026-07-18/19, author-attended Fable session per R76; commits 06e6068…5d6b55d)
+
+**Everything her batches ruled is BUILT, tested, and green.** Gates:
+**core 738/88 · Mac 423/78 · mobile 11/4** (up from 731/421/11 — the new
+machinery's tests). Per ruling:
+
+- **The Takes/Lenses split (R65/R80–R83/R86):** the LENSES tab is the
+  editable multi-column editor and all lens machinery's one home — column
+  slots (min 1, the NAME is the slot picker), auto-named unnamed lenses
+  ("Lens 1"…), the arranging-vs-writing + Column doors with hover glosses,
+  the per-block ‹ take k of n › switcher moving that column's pick only,
+  visible per-column doors (✓ Make this the post · ⧉ Make this a post ·
+  💾), the one-rule footer. TAKES is single-column always — fan styles and
+  columns can never co-occupy again (her slot-split-beside-scratch
+  showed-nothing state is structurally impossible now).
+- **Adopt-swap (R89/R92):** core `adoptLensPreservingChosen` +
+  `adoptPicksPreservingChosen` — outgoing chosen auto-preserved as
+  "chosen until <date>" (+" (n)" on collision) in the SAME transaction;
+  toast names the way back; swap-back round-trip pinned.
+- **Direct promote (R78):** core `promotePicks` — scratch columns promote
+  without a lens; "keep as a lens too" offered; the forced 💾 step retired.
+- **Takes default (R79):** posts open in Takes first; per-post last-mode
+  memory after.
+- **FanPanel RETIRED (R87/R84/R85):** WriteTakesPanel = the same v2 card
+  grammar scoped to one block (editable, ✓, lifecycle, archived takes with
+  their way back, growth doors — minting never chooses, R90, the new card
+  takes the ring; "＋ blank & choose" beside them); ⎋/Close All restores
+  the plain page; the R84 Fragments note on journal-shaped posts
+  (TakesProjection gained profile/entry_date); the Takes bottom bar (R63)
+  rides both boards — Commit ⌘S/History/Seal/Set Date + structural buttons
+  present and SPEAKING.
+- **The keyboard family + helper (R73/R91/R93):** the full map (⌘⇧T · ⎋ ·
+  ⌘T · ⌥⌘T · ⇧⌥⌘T · ⌘⏎ · ⌃⌘←/→ · ⌘⇧A · ⌘⇧L · ⌃⌘↑/↓ · ⌘1–7 · ⌘/), every
+  shortcut a menu item, one command channel to the visible surface,
+  nothing a dead key; the Shortcuts & Dictionary window (her ratified
+  vocabulary sentence at the top; every app word defined) with hover
+  cheat-sheet "?" buttons on both bars.
+- **Versions (R60/R68):** core `unmarkPostsAsVersions` (every cross-post
+  edge; mark↔unmark round-trip pinned) + faces in Compare ("Unmark") and
+  the Library ("Unmark Versions with" — unlinked picks SPEAK).
+- **Books & identity (R61/R62/R67/R75):** the membership chip is the ADD
+  door (add to any open curated book, per-book remove, readable refusals,
+  untruncated text) and the divergence door now ends in "Open the Copy";
+  "+ new post" joins non-journal curated books' navigators (atomic
+  `newPostInReading` — refusals mint no stray); the post's NAME sits
+  prominent in the detail header, click-to-rename.
+- **Canvas (R88 — #28e ANSWERED, the alternative):** free movement
+  (origin-shifted board, negative coords legal); ‹ › view-local with the
+  differs-from-chosen marker; "✓ choose this take" the one careful
+  gesture (viewing legal under seal; choosing refuses speaking); picks
+  savable as a lens; old writes-chosen pins rewritten to the new
+  semantics.
+- **Errors speak (R71/R93/R94):** bridge/sync causes inline + classified
+  (auth-shaped → "sign in again" guidance + the Account door), status-line
+  refusals wrap readable, the whole-block Make Block refusal explains
+  itself. Her outage's class (a wedged session after Fragments-side auth
+  changes) now names itself instead of hiding in a tooltip.
+- **Also probed:** the promoteLens sparse fall-through suspicion — traced,
+  CORRECT as shipped (optional chaining flattens); finding dismissed
+  hollow per the hallucination guard, sharp pin kept.
+
+**Deliberately NOT in this round:** the typographic PDF (still her
+explicit checkpoint call), margin-card push-down beyond the R74 reserved
+room (the grid now reserves its height — if the demo-style full reflow is
+still wanted after she tries it, that's a next-batch item), and the walk's
+remaining surfaces (#23–#27 untouched — the ratify walk continues).
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)
