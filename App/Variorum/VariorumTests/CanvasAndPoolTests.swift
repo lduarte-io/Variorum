@@ -193,19 +193,17 @@ struct CanvasAndPoolTests {
     }
 }
 
-// MARK: - Phase 13, Stage C3 (R40) — the minimal takes switcher: canvas is
-// a view on a POST too, and ‹ › moves the block's chosen take one step at
-// a time through `chooseVariant` (the PROVISIONAL explicit-gesture reading
-// — I3's deliberate-choice door; QUESTIONS #28). Sealed posts refuse and
-// the refusal speaks.
+// MARK: - Phase 13, Stage C3 (R40) + the taste checkpoint's R88 (#28e
+// ANSWERED the other way): the switcher is VIEW-LOCAL — ‹ › changes what
+// the card SHOWS; chosen moves ONLY through the explicit ✓ gesture
+// (chooseViewedTake). The canvas's picks are savable as a lens.
 
-@Suite("Canvas takes switcher (Phase 13, C3)")
+@Suite("Canvas takes switcher (Phase 13, C3 — R88 view-local)")
 @MainActor
 struct CanvasTakesSwitcherTests {
-    @Test func theSwitcherMovesChosenOneTakeAtATimeAndClampsAtTheEnds() async throws {
+    @Test func theSwitcherMovesTheViewOnlyAndTheCheckIsTheOneChooser() async throws {
         try await withWorld { session, db in
-            // A POST's canvas (R40: canvas is a view on a post, not just
-            // pools) with one fanned block: [t1 chosen, t2, t3].
+            // A POST's canvas (R40) with one fanned block: [t1 chosen, t2, t3].
             let world = try await session.runner.run { ops -> (post: String, block: String, takes: [String]) in
                 let post = try ops.createPost(title: "spatial", profile: .generic)
                 let mint = try ops.newBlock(in: post.id, text: "take one", at: .end)
@@ -217,10 +215,7 @@ struct CanvasTakesSwitcherTests {
                 return (post.id, mint.block.id, [mint.variant.id, t2.id, t3.id])
             }
             let model = CanvasViewModel(session: session, containerID: world.post)
-            @MainActor func refresh() async throws {
-                model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
-            }
-            try await refresh()
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
 
             func chosenNow() async throws -> String? {
                 try await db.read { db in
@@ -230,36 +225,32 @@ struct CanvasTakesSwitcherTests {
             }
 
             // The single-take block offers no switcher; the fanned one does.
-            let position = model.takePosition(blockID: world.block)
-            #expect(position?.index == 0)
-            #expect(position?.count == 3)
+            #expect(model.takePosition(blockID: world.block)?.count == 3)
             let single = model.projection.cards.first { $0.block.blockID != world.block }!
             #expect(model.takePosition(blockID: single.block.blockID) == nil)
 
-            // ‹ at the front clamps — no op fires, chosen unmoved.
-            await model.switchTake(blockID: world.block, delta: -1)
-            #expect(try await chosenNow() == world.takes[0])
+            // ‹ at the front clamps; stepping moves the VIEW, never chosen
+            // (R88: "it's only chosen if chosen very carefully").
+            model.switchTake(blockID: world.block, delta: -1)
+            #expect(model.viewedDiffersFromChosen(blockID: world.block) == false)
+            model.switchTake(blockID: world.block, delta: 1)
+            #expect(model.takePosition(blockID: world.block)?.index == 1)
+            #expect(try await chosenNow() == world.takes[0], "viewing never writes chosen")
+            #expect(model.viewedDiffersFromChosen(blockID: world.block),
+                    "the differs-from-chosen marker's condition holds")
+            model.switchTake(blockID: world.block, delta: 1)
+            model.switchTake(blockID: world.block, delta: 1)
+            #expect(model.takePosition(blockID: world.block)?.index == 2, "the end clamps")
 
-            // › steps EXACTLY one take: t1 → t2 → t3.
-            await model.switchTake(blockID: world.block, delta: 1)
-            #expect(try await chosenNow() == world.takes[1], "one step, not a jump")
-            try await refresh()
-            await model.switchTake(blockID: world.block, delta: 1)
+            // ✓ — the ONE careful gesture: the viewed take becomes chosen;
+            // the pick clears (viewed == chosen again).
+            await model.chooseViewedTake(blockID: world.block)
             #expect(try await chosenNow() == world.takes[2])
-            try await refresh()
-
-            // › at the end clamps.
-            await model.switchTake(blockID: world.block, delta: 1)
-            #expect(try await chosenNow() == world.takes[2])
-
-            // ‹ walks back.
-            await model.switchTake(blockID: world.block, delta: -1)
-            #expect(try await chosenNow() == world.takes[1])
-            #expect(model.statusMessage == nil)
+            #expect(model.viewedDiffersFromChosen(blockID: world.block) == false)
         }
     }
 
-    @Test func aSealedPostsSwitcherRefusesAndSpeaks() async throws {
+    @Test func viewingIsLegalUnderASealButChoosingRefusesAndSpeaks() async throws {
         try await withWorld { session, db in
             let world = try await session.runner.run { ops -> (post: String, block: String, chosen: String) in
                 let post = try ops.createPost(title: "sealed", profile: .generic)
@@ -272,7 +263,11 @@ struct CanvasTakesSwitcherTests {
             let model = CanvasViewModel(session: session, containerID: world.post)
             model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
 
-            await model.switchTake(blockID: world.block, delta: 1)
+            // Viewing isn't authoring — the seal doesn't stop ‹ › (the 9d
+            // Show-Takes doctrine); choosing IS, and refuses speaking.
+            model.switchTake(blockID: world.block, delta: 1)
+            #expect(model.viewedDiffersFromChosen(blockID: world.block))
+            await model.chooseViewedTake(blockID: world.block)
             #expect(model.statusMessage?.contains("sealed") == true,
                     "the seal's refusal speaks (fire-and-speak)")
             let chosen = try await db.read { db in
@@ -280,6 +275,35 @@ struct CanvasTakesSwitcherTests {
                     .first { $0.blockID == world.block }?.variantID
             }
             #expect(chosen == world.chosen, "chosen never moved under the seal")
+        }
+    }
+
+    @Test func canvasPicksSaveAsALens() async throws {
+        try await withWorld { session, db in
+            let world = try await session.runner.run { ops -> (post: String, block: String, t2: String) in
+                let post = try ops.createPost(title: "kept", profile: .generic)
+                let mint = try ops.newBlock(in: post.id, text: "take one", at: .end)
+                let t2 = try ops.branchVariant(mint.block.id, from: mint.variant.id)
+                try ops.autosave(t2.id, text: "take two", charDelta: 4)
+                return (post.id, mint.block.id, t2.id)
+            }
+            let model = CanvasViewModel(session: session, containerID: world.post)
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
+
+            model.switchTake(blockID: world.block, delta: 1)
+            await model.saveViewPicksAsLens(name: "canvas thread")
+            let pick = try await db.read { [post = world.post] db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT lc.variant_id FROM lens_choice lc
+                        JOIN lens l ON l.id = lc.lens_id
+                        WHERE l.container_id = ? AND l.name = 'canvas thread'
+                          AND lc.deleted_at IS NULL
+                        """,
+                    arguments: [post])
+            }
+            #expect(pick == world.t2, "the canvas's viewed take became the lens's pick")
         }
     }
 }
