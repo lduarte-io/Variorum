@@ -297,6 +297,29 @@ struct JournalBooksTests {
         }
     }
 
+    /// Sitting 9 batch 6 (her screenshot: a fresh curated book's navigator
+    /// missing ALL its doors): the LIVE start() path must deliver the
+    /// reading — the doors' `reading?.kind == .curated` condition hangs
+    /// off it. Drives the real observation, not adopt().
+    @Test func startDeliversTheReadingSoTheNavigatorDoorsCanRender() async throws {
+        try await withShellSession2 { session, _ in
+            let readingID = try await session.runner.run { ops in
+                try ops.createReading(name: "my book :)", kind: .curated).id
+            }
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            let task = Task { await structure.start() }
+            defer { task.cancel() }
+            var spins = 0
+            while structure.reading == nil, spins < 200 {
+                try await Task.sleep(for: .milliseconds(10))
+                spins += 1
+            }
+            #expect(structure.reading?.kind == .curated,
+                    "the live observation delivers — the + doors' condition is satisfiable")
+            #expect(structure.lastError == nil)
+        }
+    }
+
     @Test func chapterDragDropsBeforeTargetOrAtTheEnd() async throws {
         // Stage C (R19's polished bar): the navigator drag lands as ONE
         // reorderSection; no-op drops and foreign payloads touch nothing.

@@ -115,6 +115,22 @@ struct PostDetailView: View {
             mode = Self.rememberedMode(postID: postID)
             if let initialBlockID { jump(to: initialBlockID) }
         }
+        .task(id: postID) {
+            // Sitting 9 batch 6: a BLOCKLESS post opens in WRITE no matter
+            // what — blocks are born by typing there (crystallization);
+            // Takes/Lenses have nothing to show and no way to start. The
+            // Takes-first default (R79) applies once the post has blocks.
+            let blocks = (try? await session.database.read { [postID] db in
+                try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [postID])
+            }) ?? 0
+            if blocks == 0 { mode = .write }
+        }
         .onChange(of: mode) { _, new in
             UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
         }

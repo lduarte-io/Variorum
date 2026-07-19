@@ -136,10 +136,13 @@ struct HelperView: View {
          "A new post minted from a lens or column, linked to the original as a version. "
          + "\"Promote is the bridge\" from a way of looking to a thing of its own."),
         ("version",
-         "A different POST linked to this one (compare them in Compare mode). "
-         + "MARK as versions = link two existing posts, copies nothing. "
-         + "DUPLICATE as version = copy this post AND link it, one gesture. "
-         + "Both are unmarkable — the link deletes without touching either post."),
+         "A different POST related to this one. Two gestures share the word, and they do "
+         + "different things: MARK AS VERSIONS is a CONNECTION ONLY — it draws a link "
+         + "between two posts that already exist; nothing is copied, neither post changes; "
+         + "the link just lets Compare pair them. DUPLICATE AS VERSION is a COPY — it mints "
+         + "a whole new post (takes and all) and draws that same link in one gesture. "
+         + "Rule of thumb: mark = connect, duplicate = copy + connect. UNMARK deletes only "
+         + "the connection — both posts stay exactly as they are."),
         ("commit",
          "An immutable savepoint of one take (⌘S). Commits are append-only — "
          + "restoring one never erases another."),

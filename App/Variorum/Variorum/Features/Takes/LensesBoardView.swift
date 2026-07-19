@@ -192,7 +192,18 @@ struct LensesBoardView: View {
 
     @ViewBuilder
     private var content: some View {
-        if model.alignmentLocked {
+        if model.projection.slots.isEmpty {
+            VStack(spacing: 8) {
+                Text("Nothing here yet — blocks are born by typing.")
+                    .foregroundStyle(tokens.muted)
+                Button("Start writing (Write mode)") {
+                    NotificationCenter.default.post(
+                        name: .variorumSwitchMode, object: nil,
+                        userInfo: ["mode": "Write", "postID": postID])
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if model.alignmentLocked {
             lockedColumns
         } else {
             unlockedColumns

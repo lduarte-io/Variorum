@@ -1277,6 +1277,63 @@ room (the grid now reserves its height — if the demo-style full reflow is
 still wanted after she tries it, that's a next-batch item), and the walk's
 remaining surfaces (#23–#27 untouched — the ratify walk continues).
 
+### Sitting 9, continued (2026-07-19 ~12:45 AM — batch 6: first reactions to fix round 1; two bugs, fixed same session)
+
+**Her messages VERBATIM (standing instruction; typos hers):**
+
+> ok so early bugs are no "add post" button exists in the book view. also,
+> i did command n for a new post and i can't even edit it when i open it
+> straight into the takes view? it's not even editable to start with,
+> theres no default block or ability to make and type new blocks. i need
+> to explore everything else you just built and told me about for columns,
+> taes, and edits, and canvas but first i have to look like that. i also
+> think we need version links versus the make new version to be clarified
+> in the dictionary if it isn't yet, i didn't check but i do think that
+> what we have with version linking still feels a little bit confusing in
+> terms of what's a copy, what's just a connection, etc. also, waht is the
+> typographic pdf? and what are 23-27? i couldn't try the margin cards due
+> to the take typing issue. [Image #15]
+
+> [Image #16] this is what books looks like
+
+(#15: ⌘N's Untitled post open in Takes — a BLANK board, nothing typable.
+#16: "~/my book :)" — the navigator with book/read + ⚙ but NO bottom
+doors at all, body "This book has no posts yet.")
+
+**Dispositions (same session):**
+
+- **R95 — A BLOCKLESS post never opens into Takes** (the R79 default's
+  missing guard — a fresh ⌘N post was a dead end: Takes/Lenses have no
+  typing surface; blocks are born in Write's crystallization). Fixed:
+  blockless posts force-open in WRITE regardless of mode memory; the
+  Takes and Lenses boards gain an empty state ("Nothing here yet — blocks
+  are born by typing" + a Start-writing door) so an emptied post is never
+  a blank void either.
+- **R96 — The add-post door joins the BOOK BODY** (her "no 'add post'
+  button exists in the book view"): "+ new post in this book" (or "+ new
+  entry" on journal books) now renders at the end of the book's flow —
+  the navigator rail's twin, where writing ends. The navigator doors'
+  live load path was PROBED (a new live-start test drives the real
+  observation: the reading arrives, curated kind intact — green), so the
+  screenshot's doorless rail is most consistent with the book being
+  SMART ("Create Smart Book"), where chapters/adds are designed-absent
+  (#25a) but were absent-and-SILENT — the navigator now explains a smart
+  book's collection model in place. Open question to her: which button
+  minted "my book :)" — if it was "Create Book" and the doors are still
+  missing after relaunch, that's a live repro to chase.
+- **R97 — The dictionary's version entry sharpened** (her "what's a copy,
+  what's just a connection"): mark = CONNECT only (nothing copied,
+  nothing changed); duplicate = COPY + connect in one gesture; unmark
+  deletes only the connection. Her instinct that the naming itself may
+  still confuse is noted — if the sharpened words don't land on her next
+  pass, renaming the gestures is the next lever.
+- Her questions answered in-chat: the typographic PDF (the KnownIssues
+  row awaiting HER disposition at this checkpoint) and QUESTIONS #23–#27
+  (the ratify-walk bundles, summarized).
+
+Counts after batch 6: **core 738/88 · Mac 424/78 · mobile 11/4**;
+`/Applications` re-refreshed.
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

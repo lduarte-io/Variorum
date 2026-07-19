@@ -243,6 +243,21 @@ struct TakesBoardView: View {
 
     private var singleColumnArticle: some View {
         ScrollView {
+            if model.projection.slots.isEmpty {
+                // Batch 6: an empty post must never be a dead end — blocks
+                // are born by TYPING, and Write is where typing lives.
+                VStack(spacing: 8) {
+                    Text("Nothing here yet — blocks are born by typing.")
+                        .foregroundStyle(tokens.muted)
+                    Button("Start writing (Write mode)") {
+                        NotificationCenter.default.post(
+                            name: .variorumSwitchMode, object: nil,
+                            userInfo: ["mode": "Write", "postID": postID])
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            }
             LazyVStack(alignment: .leading, spacing: 6) {
                 ForEach(model.projection.slots, id: \.placementID) { slot in
                     articleRow(slot: slot)

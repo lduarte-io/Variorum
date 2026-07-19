@@ -282,6 +282,15 @@ struct BookView: View {
                         .help("A new post born inside this book — no drag needed")
                     }
                 }
+                if structure.reading?.kind == .smart {
+                    // Batch 6 legibility: a smart book's missing add/chapter
+                    // doors are DESIGNED (#25a — membership is derived) —
+                    // but absent-and-silent read as broken. Say so.
+                    Text("smart book — it collects posts by its tags. Tag a post anywhere and it appears here; chapters and direct adds are for hand-picked books.")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(12)
             .frame(width: 190)
@@ -375,6 +384,39 @@ struct BookView: View {
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                             .padding(.vertical, 8)
+                    }
+                    // Sitting 9 batch 6: the add-post door lives IN the
+                    // book's flow too, where writing ends — the navigator
+                    // rail's twin (R62/R75; discoverability is the point).
+                    if structure.reading?.locked != true {
+                        if structure.reading?.profile == "journal" {
+                            Button(tokens.chromeLabel("+ new entry")) {
+                                Task {
+                                    if let id = await structure.newEntry() {
+                                        focus.focus(id)
+                                        scrollTarget = "page-\(id)"
+                                    }
+                                }
+                            }
+                            .buttonStyle(.borderless)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.accent)
+                            .padding(.top, 12)
+                        } else if structure.reading?.kind == .curated {
+                            Button(tokens.chromeLabel("+ new post in this book")) {
+                                Task {
+                                    if let id = await structure.newPost() {
+                                        focus.focus(id)
+                                        scrollTarget = "page-\(id)"
+                                    }
+                                }
+                            }
+                            .buttonStyle(.borderless)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.accent)
+                            .padding(.top, 12)
+                            .help("A new post born inside this book — no drag needed")
+                        }
                     }
                 }
                 // R9 (Phase 13 C1): the book page is a bounded, centered
