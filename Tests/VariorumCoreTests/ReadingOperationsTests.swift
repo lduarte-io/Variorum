@@ -32,6 +32,51 @@ struct ReadingOperationsTests {
         }
     }
 
+    @Test func newPostInReadingMintsPostAndMembershipAtomically() throws {
+        try withOperations { ops, db in
+            let reading = try ops.createReading(name: "Orbit", kind: .curated)
+            let existing = try ops.createPost(title: "already here")
+            _ = try ops.addPostToReading(existing.id, to: reading.id)
+            let section = try ops.createSection(in: reading.id, name: "Part One")
+
+            // The happy path: post + membership + chapter in ONE gesture.
+            let post = try ops.newPostInReading(
+                reading.id, section: section.id, title: "born inside")
+            #expect(try memberPostIDs(db, reading.id) == [existing.id, post.id],
+                    "the new post lands at the book's end")
+            let sectionID = try db.fetchString(
+                "SELECT section_id FROM reading_post WHERE post_id = ?", [post.id])
+            #expect(sectionID == section.id)
+
+            // A refusal mints NO stray post (the assertReadingAcceptsPosts
+            // doctrine, with the mint inside the guard).
+            let containersBefore = try db.fetchInt("SELECT COUNT(*) FROM container") ?? 0
+            try ops.lockReading(reading.id)
+            #expect(throws: OperationError.lockedReading(id: reading.id)) {
+                _ = try ops.newPostInReading(reading.id, title: "stray?")
+            }
+            try ops.unlockReading(reading.id)
+            let other = try ops.createReading(name: "Elsewhere", kind: .curated)
+            let foreignSection = try ops.createSection(in: other.id, name: "Foreign")
+            #expect(throws: OperationError.sectionNotInReading(
+                sectionID: foreignSection.id, readingID: reading.id)) {
+                _ = try ops.newPostInReading(reading.id, section: foreignSection.id)
+            }
+            let smart = try ops.createReading(name: "Smart", kind: .smart)
+            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .curated)) {
+                _ = try ops.newPostInReading(smart.id)
+            }
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == containersBefore,
+                    "every refusal left zero stray posts behind")
+
+            // Capacity refuses the mint the same way.
+            try ops.setReadingMaxPosts(reading.id, maxPosts: 2)
+            #expect(throws: OperationError.readingAtCapacity(id: reading.id)) {
+                _ = try ops.newPostInReading(reading.id, title: "over")
+            }
+        }
+    }
+
     @Test func addPostAppendsInOrderAndReturnsTheMembership() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(name: "Book", kind: .curated)

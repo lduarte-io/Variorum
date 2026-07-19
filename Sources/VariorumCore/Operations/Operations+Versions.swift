@@ -161,26 +161,81 @@ extension Operations {
             let post = try livePost(db, lens.containerId)
             try ensureUnlocked(post)
             let picks = try Queries.effectiveLensSelection(db, lens: lensID)
-            var restored: [(String, String?)] = []
-            let now = date.now
-            for placement in try ContainerBlock
-                .filter(Column("container_id") == post.id && Column("deleted_at") == nil)
-                .order(Column("position"), Column("id"))
-                .fetchAll(db) {
-                guard let pick = picks[placement.blockId],
-                      placement.chosenVariantId != pick else { continue }
-                restored.append((placement.id, placement.chosenVariantId))
-                var updated = placement
-                updated.chosenVariantId = pick
-                updated.updatedAt = now
-                try updated.update(db)
-            }
-            return restored
+            return try applyAdoptedPicks(db, postID: post.id, picks: picks)
         }
         guard !preImages.isEmpty else { return }
         undoStack?.register(label: "Adopt Lens") {
             try $0.revertChosenPointers(preImages)
         }
+    }
+
+    /// ADOPT-SWAP (taste checkpoint, Sitting 9 — R89/R92: "adopting swaps,
+    /// never destroys"): adopt the lens AND, in the SAME transaction,
+    /// preserve the OUTGOING chosen arrangement as a lens of its own —
+    /// named "chosen until <date>", integer-suffixed on collision — so
+    /// promoting a way of looking to being-the-post can always be undone by
+    /// promoting the old one back. The preservation lens records an
+    /// EXPLICIT pick for every renderable slot (full-fidelity, not sparse:
+    /// later chosen moves must never bleed through what it preserves).
+    /// Returns the preservation lens; no undo entry for it (the lens class
+    /// — trivially deleted); the adopt half registers its pointer inverse
+    /// exactly like `adoptLens`.
+    @discardableResult
+    public func adoptLensPreservingChosen(_ lensID: String) throws -> Lens {
+        let (preservation, preImages):
+            (Lens, [(placementID: String, chosen: String?)]) = try database.write { db in
+            let lens = try liveLens(db, lensID)
+            let post = try livePost(db, lens.containerId)
+            try ensureUnlocked(post)
+            let now = date.now
+            let preservation = Lens(
+                id: newID(), ownerId: currentOwnerID(), containerId: post.id,
+                name: try preservationLensName(db, postID: post.id, now: now),
+                createdAt: now, updatedAt: now)
+            try preservation.insert(db)
+            for placement in try ContainerBlock
+                .filter(Column("container_id") == post.id && Column("deleted_at") == nil)
+                .order(Column("position"), Column("id"))
+                .fetchAll(db) {
+                guard let block = try? liveBlock(db, placement.blockId),
+                      let shown = try? renderedVariant(db, block: block, placement: placement)
+                else { continue }  // gap slots preserve nothing
+                try LensChoice(
+                    id: newID(), lensId: preservation.id, blockId: block.id,
+                    variantId: shown.id, createdAt: now, updatedAt: now)
+                    .insert(db)
+            }
+            let picks = try Queries.effectiveLensSelection(db, lens: lensID)
+            let preImages = try applyAdoptedPicks(db, postID: post.id, picks: picks)
+            return (preservation, preImages)
+        }
+        if !preImages.isEmpty {
+            undoStack?.register(label: "Adopt Lens") {
+                try $0.revertChosenPointers(preImages)
+            }
+        }
+        return preservation
+    }
+
+    /// PROMOTE PICKS (taste checkpoint — R78: direct promote, no forced
+    /// lens save): a new version-post whose chosen := the given SPARSE
+    /// picks overlaying the source's chosen (un-picked slots follow chosen
+    /// — the same fall-through `promoteLens` has, pinned). This is the
+    /// scratch column's "Make this a post" door — the picks are view state
+    /// that never needed to become a lens first. A pick naming a take that
+    /// isn't live on its block falls through harmlessly (the copy resolves
+    /// like an un-picked slot). Same undo as every post mint.
+    @discardableResult
+    public func promotePicks(
+        post postID: String, picks: [String: String], carryFans: Bool = true
+    ) throws -> PostCopyResult {
+        let result: PostCopyResult = try database.write { db in
+            try copyPost(db, sourceID: postID, chosenPicks: picks, carryFans: carryFans)
+        }
+        undoStack?.register(label: "Make Into a Post") {
+            try $0.revertMintedContainer(result.post.id)
+        }
+        return result
     }
 
     /// BRANCH ALL FANS: the eager thread — a new lens whose pick on EVERY
@@ -204,38 +259,109 @@ extension Operations {
                 id: newID(), ownerId: currentOwnerID(), containerId: postID,
                 name: trimmed, createdAt: now, updatedAt: now)
             try lens.insert(db)
-
-            for placement in try ContainerBlock
-                .filter(Column("container_id") == postID && Column("deleted_at") == nil)
-                .order(Column("position"), Column("id"))
-                .fetchAll(db) {
-                guard let block = try? liveBlock(db, placement.blockId),
-                      let shown = try? renderedVariant(db, block: block, placement: placement)
-                else { continue }  // gap slots render gaps; nothing to branch
-                let next = try String.fetchOne(
-                    db,
-                    sql: """
-                        SELECT fan_position FROM variant
-                        WHERE block_id = ? AND deleted_at IS NULL
-                        ORDER BY fan_position DESC, id DESC LIMIT 1
-                        """,
-                    arguments: [block.id])
-                let take = Variant(
-                    id: newID(), blockId: block.id, parentVariantId: shown.id,
-                    workingText: shown.workingText,
-                    fanPosition: FractionalIndex.between(next, nil),
-                    createdAt: now, updatedAt: now)
-                try take.insert(db)
+            for (blockID, takeID) in try branchAllFanTakes(db, postID: postID, now: now)
+                .sorted(by: { $0.key < $1.key }) {
                 try LensChoice(
-                    id: newID(), lensId: lens.id, blockId: block.id,
-                    variantId: take.id, createdAt: now, updatedAt: now)
+                    id: newID(), lensId: lens.id, blockId: blockID,
+                    variantId: takeID, createdAt: now, updatedAt: now)
                     .insert(db)
             }
             return lens
         }
     }
 
+    /// BRANCH ALL FANS, no lens (taste checkpoint — R80/R82's "write new
+    /// takes" column): mints a fresh take on every renderable slot,
+    /// branched from what the slot shows, and returns the picks map
+    /// (blockID → new take) for the caller's UNNAMED column. Same seal
+    /// refusal; same no-undo rationale (branch-class rows).
+    @discardableResult
+    public func branchAllFans(post postID: String) throws -> [String: String] {
+        try database.write { db in
+            let post = try livePost(db, postID)
+            try ensureUnlocked(post)
+            return try branchAllFanTakes(db, postID: postID, now: date.now)
+        }
+    }
+
     // MARK: - Internals
+
+    /// The branch-every-slot loop both `branchAllFans` doors share: a fresh
+    /// take per renderable slot, branched from what the slot shows, fan's
+    /// end. Returns blockID → minted take id.
+    private func branchAllFanTakes(
+        _ db: Database, postID: String, now: Date
+    ) throws -> [String: String] {
+        var picks: [String: String] = [:]
+        for placement in try ContainerBlock
+            .filter(Column("container_id") == postID && Column("deleted_at") == nil)
+            .order(Column("position"), Column("id"))
+            .fetchAll(db) {
+            guard let block = try? liveBlock(db, placement.blockId),
+                  let shown = try? renderedVariant(db, block: block, placement: placement)
+            else { continue }  // gap slots render gaps; nothing to branch
+            let next = try String.fetchOne(
+                db,
+                sql: """
+                    SELECT fan_position FROM variant
+                    WHERE block_id = ? AND deleted_at IS NULL
+                    ORDER BY fan_position DESC, id DESC LIMIT 1
+                    """,
+                arguments: [block.id])
+            let take = Variant(
+                id: newID(), blockId: block.id, parentVariantId: shown.id,
+                workingText: shown.workingText,
+                fanPosition: FractionalIndex.between(next, nil),
+                createdAt: now, updatedAt: now)
+            try take.insert(db)
+            picks[block.id] = take.id
+        }
+        return picks
+    }
+
+    /// The adopt loop both adopt doors share: every pick → its slot's
+    /// chosen (exactly `chooseVariant`'s row transition), returning the
+    /// pre-image pointers for the compound undo.
+    private func applyAdoptedPicks(
+        _ db: Database, postID: String, picks: [String: String]
+    ) throws -> [(placementID: String, chosen: String?)] {
+        var restored: [(String, String?)] = []
+        let now = date.now
+        for placement in try ContainerBlock
+            .filter(Column("container_id") == postID && Column("deleted_at") == nil)
+            .order(Column("position"), Column("id"))
+            .fetchAll(db) {
+            guard let pick = picks[placement.blockId],
+                  placement.chosenVariantId != pick else { continue }
+            restored.append((placement.id, placement.chosenVariantId))
+            var updated = placement
+            updated.chosenVariantId = pick
+            updated.updatedAt = now
+            try updated.update(db)
+        }
+        return restored
+    }
+
+    /// "chosen until Jul 18, 2026" — the adopt-swap preservation lens's
+    /// auto-name (R92; her pick), integer-suffixed against the post's LIVE
+    /// lens names on collision ("… (1)", "… (2)", first free). Fixed
+    /// en_US_POSIX format so the name is deterministic under test.
+    private func preservationLensName(
+        _ db: Database, postID: String, now: Date
+    ) throws -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "MMM d, yyyy"
+        let base = "chosen until \(formatter.string(from: now))"
+        let names = Set(try String.fetchAll(
+            db,
+            sql: "SELECT name FROM lens WHERE container_id = ? AND deleted_at IS NULL",
+            arguments: [postID]))
+        guard names.contains(base) else { return base }
+        var n = 1
+        while names.contains("\(base) (\(n))") { n += 1 }
+        return "\(base) (\(n))"
+    }
 
     func insertVersionOfEdge(
         _ db: Database, _ blockAID: String, _ blockBID: String, originOp: String, now: Date

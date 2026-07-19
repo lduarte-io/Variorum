@@ -150,6 +150,57 @@ extension Operations {
         }
     }
 
+    /// NEW POST IN A BOOK (taste checkpoint, Sitting 9 — R62/R75: "it needs
+    /// to be easy to make a post inside of a book"): mint the post AND its
+    /// membership in ONE transaction, so a refusal (locked, at capacity,
+    /// wrong kind, dead section) leaves NO stray post behind — the round-3
+    /// `assertReadingAcceptsPosts` doctrine, now with the mint inside the
+    /// same guard. Optional chapter assignment rides the membership row.
+    /// No undo entry (createPost's class — deleteContainer is the inverse,
+    /// recoverable via restoreContainer).
+    @discardableResult
+    public func newPostInReading(
+        _ readingID: String, section sectionID: String? = nil,
+        title: String? = nil, profile: Profile? = nil, entryDate: String? = nil
+    ) throws -> Container {
+        if let entryDate, !JournalDay.isValid(entryDate) {
+            throw OperationError.invalidEntryDate(entryDate)
+        }
+        return try database.write { db in
+            let reading = try liveReading(db, readingID)
+            guard reading.kind == .curated else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .curated)
+            }
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: readingID)
+            }
+            if let maxPosts = reading.maxPosts {
+                let liveCount = try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                    arguments: [readingID]) ?? 0
+                if liveCount >= maxPosts {
+                    throw OperationError.readingAtCapacity(id: readingID)
+                }
+            }
+            if let sectionID {
+                let section = try liveSection(db, sectionID)
+                guard section.readingId == readingID else {
+                    throw OperationError.sectionNotInReading(
+                        sectionID: sectionID, readingID: readingID)
+                }
+            }
+            let post = try insertPost(db, title: title, profile: profile, entryDate: entryDate)
+            try ReadingPost(
+                id: newID(), readingId: readingID, postId: post.id,
+                position: try readingPosition(db, readingID: readingID, at: .end),
+                sectionId: sectionID,
+                createdAt: date.now)
+                .insert(db)
+            return post
+        }
+    }
+
     /// The `addPostToReading` GATE without a post (Phase 13, round 3): a
     /// door that MINTS a post destined for a reading can refuse BEFORE
     /// minting, inside one serialized runner closure (the

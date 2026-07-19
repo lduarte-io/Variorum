@@ -209,6 +209,31 @@ struct VersionOperationsTests {
         }
     }
 
+    @Test func promoteFollowsTheSourcesRechosenSlotWhereTheLensIsSilent() throws {
+        try withOperations { ops, db in
+            let w = try makeWorld(ops, db)
+            // Block 2 gains a second take the author ✓-chose — chosen ≠
+            // default now, and the lens is SILENT on block 2. The sparse
+            // effective-picks map must fall through to the source slot's
+            // CHOSEN, not to nil (which the read-time fallback renders as
+            // the copy's default — the wrong text).
+            let base2 = try #require(try db.fetchString(
+                "SELECT chosen_variant_id FROM container_block WHERE block_id = ?", [w.block2]))
+            let rechosen = try ops.branchVariant(w.block2, from: base2)
+            try ops.autosave(rechosen.id, text: "Rewritten second block.", charDelta: 10)
+            try ops.chooseVariant(w.block2, variantID: rechosen.id)
+
+            let promoted = try ops.promoteLens(w.lensID)
+            let text = try db.read { try Queries.renderedText($0, containerID: promoted.post.id) }
+            #expect(text.hasSuffix("Rewritten second block."),
+                    "a lens-silent slot follows the source's CHOSEN, never its default")
+            let copyBlock2 = promoted.blockCopies[1].copy
+            let copyChosen = try db.fetchString(
+                "SELECT chosen_variant_id FROM container_block WHERE block_id = ?", [copyBlock2])
+            #expect(copyChosen != nil, "the copy carries a real chosen pointer, not a nil fallback")
+        }
+    }
+
     @Test func chosenOnlyPromoteMaterializesSingleVariantBlocks() throws {
         try withOperations { ops, db in
             let w = try makeWorld(ops, db)
@@ -220,6 +245,112 @@ struct VersionOperationsTests {
                     "chosen-only: exactly the take the lens shows")
             let text = try db.read { try Queries.renderedText($0, containerID: promoted.post.id) }
             #expect(text.hasPrefix("Take two, bolder."))
+        }
+    }
+
+    // MARK: - The taste-checkpoint gestures (Sitting 9 — R78/R80/R89/R92)
+
+    /// The test clock's day rendered exactly as the op renders it (local
+    /// zone — "chosen until" wants HER calendar day, so the test derives
+    /// the expectation instead of pinning a zone).
+    private static var testClockDay: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: Date(timeIntervalSince1970: 1_782_864_000))
+    }
+
+    @Test func adoptSwapAdoptsTheLensAndPreservesTheOutgoingChosenAsALens() throws {
+        try withOperations { ops, db in
+            let w = try makeWorld(ops, db)
+            let preservation = try ops.adoptLensPreservingChosen(w.lensID)
+
+            // The adopt half: block 1's chosen moved to the lens's pick.
+            let chosen1 = try db.fetchString(
+                "SELECT chosen_variant_id FROM container_block WHERE block_id = ?", [w.block1])
+            #expect(chosen1 == w.alt1, "adopt: every effective pick → chosen")
+
+            // The preservation half: a lens named on the test clock's day,
+            // whose EXPLICIT picks render the OUTGOING chosen exactly.
+            #expect(preservation.name == "chosen until \(Self.testClockDay)")
+            #expect(preservation.containerId == w.postID)
+            let preservedPick1 = try db.fetchString(
+                """
+                SELECT variant_id FROM lens_choice
+                WHERE lens_id = ? AND block_id = ? AND deleted_at IS NULL
+                """, [preservation.id, w.block1])
+            #expect(preservedPick1 == w.chosen1, "the OLD chosen is preserved, explicitly")
+            let preservedCount = try db.fetchInt(
+                "SELECT COUNT(*) FROM lens_choice WHERE lens_id = ? AND deleted_at IS NULL",
+                [preservation.id])
+            #expect(preservedCount == 2, "full-fidelity: EVERY renderable slot gets a pick")
+
+            // Swapping back: adopting the preservation lens restores the
+            // old arrangement — nothing was destroyed.
+            try ops.adoptLens(preservation.id)
+            let restored1 = try db.fetchString(
+                "SELECT chosen_variant_id FROM container_block WHERE block_id = ?", [w.block1])
+            #expect(restored1 == w.chosen1, "promote the old one back — the R89 swap promise")
+        }
+    }
+
+    @Test func adoptSwapPreservationNamesSuffixOnCollision() throws {
+        try withOperations { ops, db in
+            let w = try makeWorld(ops, db)
+            _ = try ops.createLens(post: w.postID, name: "chosen until \(Self.testClockDay)")
+            let first = try ops.adoptLensPreservingChosen(w.lensID)
+            #expect(first.name == "chosen until \(Self.testClockDay) (1)")
+            let second = try ops.adoptLensPreservingChosen(w.lensID)
+            #expect(second.name == "chosen until \(Self.testClockDay) (2)",
+                    "increasing integer, first free — R92's letter")
+        }
+    }
+
+    @Test func promotePicksMakesThePostDirectlyFromSparseViewPicks() throws {
+        try withOperations { ops, db in
+            let w = try makeWorld(ops, db)
+            let lensesBefore = try db.fetchInt("SELECT COUNT(*) FROM lens") ?? 0
+
+            let result = try ops.promotePicks(post: w.postID, picks: [w.block1: w.alt1])
+            let text = try db.read { try Queries.renderedText($0, containerID: result.post.id) }
+            #expect(text.hasPrefix("Take two, bolder."), "the pick IS the copy's chosen")
+            #expect(text.hasSuffix("Steady second block."), "un-picked slots follow the source's chosen")
+
+            // Direct: NO lens was minted anywhere (R78 — the forced
+            // save-as-lens step is retired).
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM lens") == lensesBefore)
+
+            // A stale pick (not a take of its block) falls through, never throws.
+            let lenient = try ops.promotePicks(post: w.postID, picks: [w.block1: "no-such-take"])
+            let lenientText = try db.read { try Queries.renderedText($0, containerID: lenient.post.id) }
+            #expect(lenientText.hasPrefix("Take one."), "invalid view picks resolve like un-picked slots")
+        }
+    }
+
+    @Test func branchAllFansWithoutALensMintsTakesAndReturnsPicksOnly() throws {
+        try withOperations { ops, db in
+            let w = try makeWorld(ops, db)
+            let lensesBefore = try db.fetchInt("SELECT COUNT(*) FROM lens") ?? 0
+            let fan1Before = try db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL", [w.block1]) ?? 0
+
+            let picks = try ops.branchAllFans(post: w.postID)
+            #expect(picks.count == 2, "one fresh take per renderable slot")
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM lens") == lensesBefore,
+                    "the unnamed column needs NO lens row")
+            let fan1After = try db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL", [w.block1])
+            #expect(fan1After == fan1Before + 1)
+            // Each minted take inherits the SHOWN text (branch semantics).
+            let mintedText = try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [picks[w.block1]])
+            #expect(mintedText == "Take one.")
+
+            // The seal refuses fan growth here like everywhere.
+            try ops.lockPost(w.postID)
+            #expect(throws: OperationError.lockedPost(id: w.postID)) {
+                _ = try ops.branchAllFans(post: w.postID)
+            }
         }
     }
 
