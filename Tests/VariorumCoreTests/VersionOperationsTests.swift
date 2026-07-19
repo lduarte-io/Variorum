@@ -84,6 +84,19 @@ struct VersionOperationsTests {
             #expect(throws: OperationError.postHasNoBlocks(id: empty.id)) {
                 _ = try ops.markPostsAsVersions(a.id, empty.id)
             }
+
+            // Sitting 9 (R60/R68): UNMARK removes every cross-post link —
+            // the peers stop seeing each other; re-marking works fresh;
+            // unmarking again says there's nothing to unmark.
+            try ops.unmarkPostsAsVersions(a.id, b.id)
+            let peersAfter = try db.read { try Queries.versionPeerPosts($0, of: a.id) }
+            #expect(peersAfter.isEmpty, "unmarked — the pair no longer reads as versions")
+            #expect(throws: OperationError.versionLinkNotFound(a: a.id, b: b.id)) {
+                try ops.unmarkPostsAsVersions(a.id, b.id)
+            }
+            _ = try ops.markPostsAsVersions(a.id, b.id)
+            #expect(try db.read { try Queries.versionPeerPosts($0, of: a.id) } == [b.id],
+                    "trivially re-markable — the tags/locks class")
         }
     }
 

@@ -5,9 +5,15 @@
 //  Phase 13, B3 — the R35 UI REQUIREMENT (her "nail this down", resolved
 //  sitting 5): when a post appears in multiple books, the editor SAYS so,
 //  and duplicate-as-version is presented as THE way to separate this
-//  book's copy from what shows elsewhere — the divergence door made
-//  discoverable at the moment it matters. Membership is not ownership:
+//  book's copy from what shows elsewhere. Membership is not ownership:
 //  editing a post edits THE post, everywhere (R31).
+//
+//  Taste-checkpoint fix round (Sitting 9 — R61/R67): the chip is now also
+//  the ADD door ("clicking on 'in no book' also doesn't let you easily add
+//  it to a book, which it should"): add to any open curated book, remove
+//  per book, and after Duplicate-as-Version the copy is one click away —
+//  landing in a brand-new post must be unmistakable. The explainer text
+//  wraps (the truncation class, dead).
 //
 
 import SwiftUI
@@ -23,8 +29,10 @@ struct MembershipChip: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @State private var books: [Reading] = []
+    @State private var addableBooks: [Reading] = []
     @State private var popoverShown = false
     @State private var status: String?
+    @State private var duplicatedPostID: String?
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -39,7 +47,7 @@ struct MembershipChip: View {
                 .foregroundStyle(books.count > 1 ? tokens.accent : tokens.muted)
         }
         .buttonStyle(.borderless)
-        .help("Which books hold this post — and the door to diverge a copy")
+        .help("Which books hold this post — add it to one, or diverge a copy")
         .popover(isPresented: $popoverShown, arrowEdge: .bottom) {
             VStack(alignment: .leading, spacing: 8) {
                 if books.isEmpty {
@@ -49,23 +57,59 @@ struct MembershipChip: View {
                     Text("This post appears in \(books.count) book\(books.count == 1 ? "" : "s"):")
                         .font(.callout.weight(.semibold))
                     ForEach(books, id: \.id) { book in
-                        Button(book.name) {
-                            popoverShown = false
-                            onOpenBook?(book.id)
+                        HStack(spacing: 6) {
+                            Button(book.name) {
+                                popoverShown = false
+                                onOpenBook?(book.id)
+                            }
+                            .buttonStyle(.link)
+                            Spacer()
+                            Button("remove") { remove(from: book) }
+                                .buttonStyle(.borderless)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .help("Take this post out of “\(book.name)” (the post itself is untouched)")
                         }
-                        .buttonStyle(.link)
                     }
                 }
+                // R61 — the ADD door, right where "in no book" is read.
+                if !addableBooks.isEmpty {
+                    Menu("Add to Book") {
+                        ForEach(addableBooks, id: \.id) { book in
+                            Button(book.name) { add(to: book) }
+                        }
+                    }
+                    .fixedSize()
+                }
                 Divider()
-                Text("Editing here edits the post everywhere it appears. To make this a separate post that can diverge:")
+                Text("Editing here edits the post everywhere it appears. "
+                    + "To make a separate post that can diverge:")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: 260, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: 280, alignment: .leading)
                 Button("Duplicate as Version") {
                     duplicate()
                 }
+                .help("A full copy — takes and all — as a new post, linked to this one as a version")
                 if let status {
-                    Text(status).font(.caption).foregroundStyle(.secondary)
+                    Text(status)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 280, alignment: .leading)
+                }
+                if let copy = duplicatedPostID {
+                    // R67: landing in a brand-new post must be unmistakable
+                    // — the copy is one click away, never hunted for.
+                    Button("Open the Copy") {
+                        popoverShown = false
+                        NotificationCenter.default.post(
+                            name: .variorumOpenPost, object: nil,
+                            userInfo: ["postID": copy])
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
                 }
             }
             .padding(12)
@@ -85,21 +129,84 @@ struct MembershipChip: View {
     }
 
     private func refresh() async {
-        books = (try? await session.database.read { [postID] db in
+        let membership = (try? await session.database.read { [postID] db in
             try Queries.readingsContaining(db, postID: postID)
         }) ?? []
+        books = membership
+        let memberIDs = Set(membership.map(\.id))
+        // Addable = open curated books the post isn't already in (smart
+        // books collect by tags — the chip never pretends to add there).
+        addableBooks = ((try? await session.database.read { db in
+            try Queries.readings(db)
+        }) ?? [])
+            .filter { $0.kind == .curated && !$0.locked && !memberIDs.contains($0.id) }
+    }
+
+    private func add(to book: Reading) {
+        Task {
+            do {
+                _ = try await session.runner.run { [postID] ops in
+                    try ops.addPostToReading(postID, to: book.id)
+                }
+                status = "Added to “\(book.name)”."
+            } catch {
+                status = ChipRefusals.message(for: error, bookName: book.name)
+            }
+            await refresh()
+        }
+    }
+
+    private func remove(from book: Reading) {
+        Task {
+            do {
+                try await session.runner.run { [postID] ops in
+                    try ops.removePostFromReading(postID, from: book.id)
+                }
+                status = "Removed from “\(book.name)” — the post itself is untouched."
+            } catch {
+                status = ChipRefusals.message(for: error, bookName: book.name)
+            }
+            await refresh()
+        }
     }
 
     private func duplicate() {
         Task {
             do {
-                _ = try await session.runner.run { [postID] ops in
+                let result = try await session.runner.run { [postID] ops in
                     try ops.duplicateAsVersion(postID)
                 }
-                status = "Duplicated — the copy is in the Pool until you shelve it."
+                duplicatedPostID = result.post.id
+                status = "Duplicated — the copy is its own post now (in the Pool until you shelve it)."
             } catch {
-                status = "Refused: \(error)"
+                status = ChipRefusals.message(for: error, bookName: nil)
             }
         }
     }
+}
+
+/// Readable refusal copy for the chip's doors (the "Refused: error(…)"
+/// class retired — Sitting 9, R93).
+enum ChipRefusals {
+    static func message(for error: Error, bookName: String?) -> String {
+        guard let error = error as? OperationError else { return String(describing: error) }
+        let book = bookName.map { "“\($0)”" } ?? "that book"
+        switch error {
+        case .lockedReading:
+            return "\(book) is finished — reopen it (its settings) to change what's in it."
+        case .readingAtCapacity:
+            return "\(book) is at its post cap — extend the cap in its settings."
+        case .alreadyInReading:
+            return "This post is already in \(book)."
+        case .lockedPost:
+            return "This post is sealed — unseal it first."
+        default:
+            return "Refused: \(error)"
+        }
+    }
+}
+
+extension Notification.Name {
+    /// A surface asks the shell to open a post (RootView routes it).
+    static let variorumOpenPost = Notification.Name("variorumOpenPost")
 }

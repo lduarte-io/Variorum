@@ -368,6 +368,15 @@ struct LibraryCatalogView: View {
                     }
                 }
             }
+            // Sitting 9 (R60/R68): the inverse door beside the mark — an
+            // unlinked pick speaks its refusal instead of silently no-oping.
+            Menu("Unmark Versions with") {
+                ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
+                    Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
+                        Task { await library.unmarkVersions(hit.id, other.postID) }
+                    }
+                }
+            }
             Button("Duplicate as Version") {
                 Task { await library.duplicateAsVersion(postID: hit.id) }
             }

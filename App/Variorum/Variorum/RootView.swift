@@ -85,6 +85,12 @@ struct RootView: View {
             selection = pending
             router.pendingSelection = nil
         }
+        // Sitting 9 (R67): surfaces hand the shell a post to open (the
+        // chip's "Open the Copy", and any future minted-post moment).
+        .onReceive(NotificationCenter.default.publisher(for: .variorumOpenPost)) { note in
+            guard let id = note.userInfo?["postID"] as? String else { return }
+            router.pendingSelection = .post(id)
+        }
         .onChange(of: router.paletteRequested) { _, requested in
             guard requested else { return }
             paletteOpen = true

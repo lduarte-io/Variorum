@@ -265,6 +265,21 @@ struct BookView: View {
                         .buttonStyle(.borderless)
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
+                    } else if structure.reading?.kind == .curated,
+                              structure.reading?.locked != true {
+                        // Sitting 9 (R62/R75): "it needs to be easy to make
+                        // a post inside of a book" — the non-journal door.
+                        Button(tokens.chromeLabel("+ new post")) {
+                            Task {
+                                if let id = await structure.newPost() {
+                                    focus.focus(id)
+                                }
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                        .help("A new post born inside this book — no drag needed")
                     }
                 }
             }

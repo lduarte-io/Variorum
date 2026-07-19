@@ -871,6 +871,8 @@ final class TakesViewModel {
                 return "That take is archived — unarchive it first."
             case .lockedVariant:
                 return "That take is locked — unlock it or branch a new take."
+            case .versionLinkNotFound:
+                return "These two posts aren't marked as versions — nothing to unmark."
             default:
                 return "Refused: \(error)"
             }

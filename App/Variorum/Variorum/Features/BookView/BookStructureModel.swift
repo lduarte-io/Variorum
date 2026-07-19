@@ -269,6 +269,26 @@ final class BookStructureModel {
         }
     }
 
+    /// Sitting 9 (R62/R75): a NEW POST born INSIDE this book — one
+    /// transaction (post + membership; refusals mint no stray), the
+    /// non-journal sibling of "+ new entry".
+    func newPost() async -> String? {
+        do {
+            let readingID = readingID
+            let post = try await session.runner.run { ops in
+                try ops.newPostInReading(readingID)
+            }
+            lastError = nil
+            return post.id
+        } catch let error as OperationError {
+            lastError = ReadingsViewModel.message(error)
+            return nil
+        } catch {
+            lastError = String(describing: error)
+            return nil
+        }
+    }
+
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
         do {
             try await session.runner.run(body)

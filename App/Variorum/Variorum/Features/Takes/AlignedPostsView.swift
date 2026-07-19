@@ -166,6 +166,23 @@ final class AlignedPostsViewModel {
         }
     }
 
+    /// Sitting 9 (R60/R68): the link is unmarkable right where it shows —
+    /// removes every cross-post version edge; both posts untouched.
+    func unmarkVersions() {
+        guard let otherID = otherPostID else { return }
+        statusMessage = nil
+        Task { [runner = session.runner, anchorPostID] in
+            do {
+                try await runner.run { ops in
+                    try ops.unmarkPostsAsVersions(anchorPostID, otherID)
+                }
+                statusMessage = "Unmarked — the posts are no longer versions of each other (both untouched; re-mark any time)."
+            } catch {
+                statusMessage = TakesViewModel.message(for: error)
+            }
+        }
+    }
+
     func choose(blockID: String, variantID: String) {
         statusMessage = nil
         Task { [runner = session.runner] in
@@ -253,6 +270,9 @@ struct AlignedPostsView: View {
             }
             if model.projection.isVersionPeer {
                 Text("versions").font(.caption).foregroundStyle(.blue)
+                Button("Unmark") { model.unmarkVersions() }
+                    .help("These two stop being versions of each other — the link deletes, "
+                        + "both posts stay exactly as they are (Sitting 9, R60)")
             }
             if model.otherPostID != nil {
                 Button("Diff") { showingDiff = true }

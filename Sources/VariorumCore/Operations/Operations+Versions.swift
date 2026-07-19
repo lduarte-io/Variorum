@@ -52,6 +52,42 @@ extension Operations {
         }
     }
 
+    /// UNMARK POSTS AS VERSIONS (taste checkpoint, Sitting 9 — R60/R68:
+    /// "mark as versions should still be … at least unmarkable"): tombstone
+    /// EVERY live `version_of` edge between the two posts' placed blocks —
+    /// the peer traversal matches any of them, so removing only one could
+    /// leave the pair still reading as linked. Trivially re-markable (the
+    /// tags/locks class — no undo entry). Refuses when no link exists.
+    public func unmarkPostsAsVersions(_ postAID: String, _ postBID: String) throws {
+        try database.write { db in
+            // A cross-post edge: one endpoint placed in A, the other in B
+            // (either orientation) — the same shape the peer traversal
+            // matches, so unmarking removes exactly what made them peers.
+            let crossPredicate = """
+                type = 'version_of' AND deleted_at IS NULL
+                  AND ((source_block_id IN (SELECT block_id FROM container_block
+                          WHERE container_id = ? AND deleted_at IS NULL)
+                        AND target_block_id IN (SELECT block_id FROM container_block
+                          WHERE container_id = ? AND deleted_at IS NULL))
+                    OR (source_block_id IN (SELECT block_id FROM container_block
+                          WHERE container_id = ? AND deleted_at IS NULL)
+                        AND target_block_id IN (SELECT block_id FROM container_block
+                          WHERE container_id = ? AND deleted_at IS NULL)))
+                """
+            let count = try Int.fetchOne(
+                db,
+                sql: "SELECT COUNT(*) FROM edge WHERE " + crossPredicate,
+                arguments: [postAID, postBID, postBID, postAID]) ?? 0
+            guard count > 0 else {
+                throw OperationError.versionLinkNotFound(a: postAID, b: postBID)
+            }
+            let stamped = DateFormatter.variorumISO8601.string(from: date.now)
+            try db.execute(
+                sql: "UPDATE edge SET deleted_at = ? WHERE " + crossPredicate,
+                arguments: [stamped, postAID, postBID, postBID, postAID])
+        }
+    }
+
     /// The post-level door ("Mark as Versions", brief item 2): posts are
     /// edges-only across versions (I8) and edges are block-to-block (the
     /// schema's letter), so the post relationship RIDES a block-level edge —

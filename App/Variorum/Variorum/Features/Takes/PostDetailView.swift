@@ -14,6 +14,7 @@
 //  Mode is session UI state; every mode reads the same store.
 //
 
+import GRDB
 import SwiftUI
 import VariorumCore
 
@@ -52,6 +53,10 @@ struct PostDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
+                // Sitting 9 (R67): the post's NAME, prominent — "much more
+                // clear when something is a brand new post"; click to
+                // rename right here.
+                PostTitleLabel(session: session, postID: postID)
                 Picker("Mode", selection: $mode) {
                     ForEach(Mode.allCases, id: \.self) { mode in
                         Text(mode.rawValue).tag(mode)
@@ -121,6 +126,60 @@ struct PostDetailView: View {
                   let target = Mode(rawValue: raw)
             else { return }
             mode = target
+        }
+    }
+
+    /// R67 — the post's identity, always visible and renameable in place.
+    private struct PostTitleLabel: View {
+        let session: AppSession
+        let postID: String
+        @State private var title: String = ""
+        @State private var editing = false
+        @State private var draft = ""
+
+        var body: some View {
+            Button {
+                draft = title
+                editing = true
+            } label: {
+                Text(title.isEmpty ? "Untitled" : title)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(title.isEmpty ? .secondary : .primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: 260, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+            .help("The post's name — click to rename")
+            .popover(isPresented: $editing, arrowEdge: .bottom) {
+                HStack {
+                    TextField("Post name", text: $draft)
+                        .frame(width: 240)
+                        .onSubmit { rename() }
+                    Button("Rename") { rename() }
+                        .keyboardShortcut(.defaultAction)
+                }
+                .padding(10)
+            }
+            .task(id: postID) { await refresh() }
+        }
+
+        private func refresh() async {
+            title = (try? await session.database.read { [postID] db in
+                try String.fetchOne(
+                    db, sql: "SELECT title FROM container WHERE id = ?", arguments: [postID])
+            }) ?? ""
+        }
+
+        private func rename() {
+            editing = false
+            let name = draft.trimmingCharacters(in: .whitespaces)
+            Task {
+                try? await session.runner.run { [postID] ops in
+                    try ops.renameContainer(postID, title: name.isEmpty ? nil : name)
+                }
+                await refresh()
+            }
         }
     }
 

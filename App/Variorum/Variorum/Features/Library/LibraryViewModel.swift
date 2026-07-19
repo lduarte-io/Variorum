@@ -140,6 +140,13 @@ final class LibraryViewModel {
         await run { ops in _ = try ops.markPostsAsVersions(postAID, postBID) }
     }
 
+    /// Sitting 9 (R60/R68): the mark's inverse, same door shape. Picking a
+    /// pair that isn't linked speaks its refusal (fire-and-speak, never a
+    /// silent no-op).
+    func unmarkVersions(_ postAID: String, _ postBID: String) async {
+        await run { ops in try ops.unmarkPostsAsVersions(postAID, postBID) }
+    }
+
     /// Duplicate-as-version from anywhere (the spike's ruling: the post
     /// exactly as it is — unambiguous from any surface).
     func duplicateAsVersion(postID: String) async {
