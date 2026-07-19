@@ -67,6 +67,7 @@ struct LensesBoardView: View {
             }
             content
             footerRule
+            TakesBottomBar(model: model)
         }
         .background(tokens.surface)
         .task { await model.start() }

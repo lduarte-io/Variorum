@@ -21,11 +21,18 @@ extension Queries {
         public var lensSelections: [String: [String: String]]
         public var fanStyle: FanStyle
         public var sealed: Bool
+        /// The post's profile + entry date (taste-checkpoint R84: the
+        /// journal-shaped surfaces show the Fragments projection note; the
+        /// Takes bottom bar shows the date face). Same container row the
+        /// seal already reads.
+        public var profile: Profile?
+        public var entryDate: String?
 
         public init(
             slots: [RenderedBlock] = [], fans: [String: [Variant]] = [:],
             lenses: [Lens] = [], lensSelections: [String: [String: String]] = [:],
-            fanStyle: FanStyle = .stack, sealed: Bool = false
+            fanStyle: FanStyle = .stack, sealed: Bool = false,
+            profile: Profile? = nil, entryDate: String? = nil
         ) {
             self.slots = slots
             self.fans = fans
@@ -33,6 +40,8 @@ extension Queries {
             self.lensSelections = lensSelections
             self.fanStyle = fanStyle
             self.sealed = sealed
+            self.profile = profile
+            self.entryDate = entryDate
         }
     }
 
@@ -46,12 +55,15 @@ extension Queries {
         for lens in lenses {
             selections[lens.id] = try effectiveLensSelection(db, lens: lens.id)
         }
-        let sealed = try Bool.fetchOne(
-            db, sql: "SELECT locked FROM container WHERE id = ?",
-            arguments: [containerID]) ?? false
+        let header = try Row.fetchOne(
+            db, sql: "SELECT locked, profile, entry_date FROM container WHERE id = ?",
+            arguments: [containerID])
         return TakesProjection(
             slots: slots, fans: fans, lenses: lenses, lensSelections: selections,
-            fanStyle: try fanStyle(db), sealed: sealed)
+            fanStyle: try fanStyle(db),
+            sealed: header?["locked"] ?? false,
+            profile: (header?["profile"] as String?).flatMap(Profile.init(rawValue:)),
+            entryDate: header?["entry_date"])
     }
 
     /// blockID → the block's live ACTIVE fan in fan order, for a set of

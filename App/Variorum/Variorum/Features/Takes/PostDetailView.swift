@@ -113,6 +113,13 @@ struct PostDetailView: View {
         .onChange(of: mode) { _, new in
             UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
         }
+        .onReceive(NotificationCenter.default.publisher(for: .variorumSwitchMode)) { note in
+            guard note.userInfo?["postID"] as? String == postID,
+                  let raw = note.userInfo?["mode"] as? String,
+                  let target = Mode(rawValue: raw)
+            else { return }
+            mode = target
+        }
     }
 
     private func jump(to blockID: String) {

@@ -87,7 +87,10 @@ struct EditorView: View {
         }
         .onDisappear { model.teardown() }
         .sheet(item: $model.fanPanel) { panel in
-            FanPanel(model: model, state: panel)
+            // Sitting 9 (R87): the FanPanel is retired — Write's take
+            // machinery is the same v2 card grammar as everywhere else,
+            // scoped to this block.
+            WriteTakesPanel(session: session, postID: postID, blockID: panel.blockID)
         }
         .sheet(item: $model.commentsPanel) { panel in
             // Phase 13 C1 (R7): the block's comments — margin/inline faces

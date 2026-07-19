@@ -90,7 +90,19 @@ struct TakesBoardView: View {
                     .frame(maxWidth: .infinity)
                     .background(.quaternary)
             }
+            if model.isJournalShaped {
+                // R84 — the Fragments projection note on journal entries.
+                Text("Takes live here in Variorum. Only the CHOSEN text is what Fragments sees "
+                    + "(when a Fragments account is linked) — sync conflicts can add takes here "
+                    + "too; nothing is lost, choose what the entry shows.")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+            }
             singleColumnArticle
+            TakesBottomBar(model: model)
         }
         .background(tokens.surface)
         .task { await model.start() }

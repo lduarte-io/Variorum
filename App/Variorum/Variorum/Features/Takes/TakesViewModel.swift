@@ -631,16 +631,115 @@ final class TakesViewModel {
 
     /// "＋ new take (branch)" — the default gesture: inherits the shown
     /// take's text (OverallModel §3's letter). Awaited through the runner
-    /// (never fire-and-forget); a sealed post's refusal speaks.
-    func branchTake(blockID: String, from variantID: String) async {
-        await run { ops in _ = try ops.branchVariant(blockID, from: variantID) }
+    /// (never fire-and-forget); a sealed post's refusal speaks. Returns the
+    /// minted take so the calling surface can move the ring onto it
+    /// (Sitting 9: "it just feels a little bit clunky" — you're typing in
+    /// the new take instantly, chosen untouched).
+    @discardableResult
+    func branchTake(blockID: String, from variantID: String) async -> Variant? {
+        statusMessage = nil
+        do {
+            return try await session.runner.run { ops in
+                try ops.branchVariant(blockID, from: variantID)
+            }
+        } catch {
+            statusMessage = Self.message(for: error)
+            return nil
+        }
     }
 
     /// "＋ blank take" — the genuinely-different-take gesture. Minting
     /// NEVER chooses (R90: "as you go through and fill items in, it can be
     /// selected"); the new card gets the ring so you're typing instantly.
-    func newBlankTake(blockID: String) async {
-        await run { ops in _ = try ops.newBlankVariant(blockID) }
+    @discardableResult
+    func newBlankTake(blockID: String) async -> Variant? {
+        statusMessage = nil
+        do {
+            return try await session.runner.run { ops in
+                try ops.newBlankVariant(blockID)
+            }
+        } catch {
+            statusMessage = Self.message(for: error)
+            return nil
+        }
+    }
+
+    // MARK: - Take lifecycle (the retired FanPanel's doors, kept — R87:
+    // one grammar everywhere, refusals speak)
+
+    func archiveTake(_ variantID: String) async {
+        await run { ops in try ops.archiveVariant(variantID) }
+    }
+
+    func unarchiveTake(_ variantID: String) async {
+        await run { ops in try ops.unarchiveVariant(variantID) }
+    }
+
+    func setTakeLocked(_ variantID: String, locked: Bool) async {
+        await run { ops in
+            if locked {
+                try ops.lockVariant(variantID)
+            } else {
+                try ops.unlockVariant(variantID)
+            }
+        }
+    }
+
+    func deleteTake(_ variantID: String) async {
+        await run { ops in try ops.deleteVariant(variantID) }
+    }
+
+    // MARK: - Post-level doors (R63: the bottom bar's options ride along)
+
+    /// Commit the FOCUSED take's buffer (⌘S in takes surfaces).
+    func commitFocusedTake() async {
+        guard let variantID = focusedPane?.variantID else {
+            statusMessage = "Click into a take first — ⌘S commits the take you're in."
+            return
+        }
+        await autosave.flushNow()
+        await run { ops in _ = try ops.commit(variantID) }
+        if statusMessage == nil { statusMessage = "Committed — an immutable savepoint of this take." }
+    }
+
+    func toggleSeal() async {
+        let sealed = projection.sealed
+        await run { [postID] ops in
+            if sealed {
+                try ops.unlockPost(postID)
+            } else {
+                try ops.lockPost(postID)
+            }
+        }
+    }
+
+    func updateEntryDate(_ day: String?) async {
+        await run { [postID] ops in try ops.setEntryDate(postID, entryDate: day) }
+    }
+
+    /// R84's note condition: the daily-journal SHAPE (profile journal +
+    /// entry date) is exactly what the Fragments bridge sweeps.
+    var isJournalShaped: Bool {
+        projection.profile == .journal && projection.entryDate != nil
+    }
+
+    /// The bar's speaking surface (9d fire-and-speak — a message, never a
+    /// dead key).
+    func speak(_ message: String) {
+        statusMessage = message
+    }
+
+    func speakStructuralGesturesLiveInWrite(gesture: String) {
+        statusMessage =
+            "\(gesture) works on selected text in Write (⌘1) — switch there, select, and the same door fires."
+    }
+
+    func restoreCommit(_ commit: CommitPoint) async {
+        await run { ops in try ops.restoreCommit(commit.variantId, commitID: commit.id) }
+        if statusMessage == nil {
+            statusMessage =
+                "Restored — the savepoint is back in the take's buffer. Nothing was lost: commits are append-only."
+        }
     }
 
     /// The R90 power variant (⇧⌥⌘T — "open new blank take as chosen"):
