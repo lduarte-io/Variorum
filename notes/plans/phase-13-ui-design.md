@@ -1334,6 +1334,122 @@ doors at all, body "This book has no posts yet.")
 Counts after batch 6: **core 738/88 · Mac 424/78 · mobile 11/4**;
 `/Applications` re-refreshed.
 
+### Sitting 9, continued (2026-07-19 ~2 AM — batches 7 + 8: the window discovery, usability rulings, the Terminal-idiom audit)
+
+**Her messages VERBATIM (standing instruction; typos hers; screenshots
+#17–#21 described below):**
+
+> i need a way of going into the editor view from books. also, what is 1w
+> post? I'm going to have to deal with the other ratify issues after we
+> fix this. also, i think that smart books should still let you add, and
+> should just tell you that tags are going to be added. if a smart book is
+> based on a view like "before June", then it should give you a
+> descriptive error message when you can't add something. also, there's a
+> weird bug: I can't see the bottom of the screen and i can't drag the top
+> of the window down for resizing it at all without it snapping back to
+> being at the top. [Image #17] also, the caroseul seems bugged in a new
+> way too [Image #18]. i can't see as many options for it as i see listed,
+> and even though you can see there's three takes there's no way to move
+> between them. i also can't see the blocks details at the botto mlike
+> block 1/5 or anything since i can't see the bottom of the editor, as
+> mentioned. also, even when margin says 2 high, it is not actually 2
+> high. [Image #19]. also, i feel like hover on mark as versions should
+> expalin what the point of marking as versions is - i'm lowkey still
+> unclear on the poitn of that if they have no relation to each other.
+> what does that even really mean? you can't even see them side by side
+> because the blocks don't match up. i also think the outline tab should
+> have a button to make it more useful that says like make outline for
+> post where you can get a new copy of the post (or whatever the outline
+> is - actual copy?) with a side that says outline, automatically named
+> "outline of xyz", or something like that. and maybe choose what lens
+> you're comparing the outline to on that page too? for what it works
+> for?also, what's the point of the blocks page? and the text on it is
+> all super mini. [Image #20] also, i crated book, not a smart book.
+> there's also this layout bug with the white bar in the middle [Image #21]
+
+> also, terminal has slowly but steadily lost all the personality details
+> that i liked so much from the original terminal view. there's no
+> blinking line with "new post" that lets me type it on the main shelf
+> screen, as we had specified. there's no little > to show the way. I
+> haven't seen a ~/path in a while. can you look at what the plan for
+> phase 13 had? I feel like what we have is actually wildly incomplete
+> given what i had specified and given teh mockup of the terminal that i
+> specifically said i liked.
+
+(#17: the book view — curated confirmed; the BODY's "+ new post in this
+book" door present and used; the navigator rail's bottom doors NOT
+visible. #18: carousel ⑂3 showing two cards, no pager. #19: margin grid
+"2 high" showing tall clipped cards. #20: the Blocks TOC, tiny rows.
+#21: Write mode with a white band mid-window and dead space below.)
+
+**THE UNIFYING DIAGNOSIS (session): the WINDOW is taller than the screen
+and refuses to shrink** — her book is CURATED (her correction + the
+body door working proves `reading.kind == .curated` holds), so the
+navigator doors DO render — at the rail's bottom, BELOW THE SCREEN. The
+same oversize hides the editor's bottom bar (blk n/n, word counts), the
+shelf's quick-entry + hint bars (the "no blinking line" half of her
+Terminal complaint), and plausibly renders the #21 white band (offscreen
+backing-store staleness). Unstick steps given in-chat (drag the window
+down by its title bar, then resize; option-green zoom-to-fit); a sane
+`defaultSize` (1240×840) added for fresh windows; if it persists after
+re-positioning, the next datum is whether the bottom-right corner drag
+also refuses.
+
+**The Terminal-idiom AUDIT (her batch-8 charge, checked against R1/R3/R4):**
+- The quick-entry bar (blinking cursor), the `~/shelf` ls-line, and the
+  hint bar SHIPPED and are in `ShelfView` (entryBar/hintBar at the
+  view's bottom; the ls-line its header) — hidden by the window bug, not
+  gone. `~/` paths live in the book navigator (her own #16 shows
+  "~/my book :)").
+- **The `›` selection marker was defined as a token and consumed
+  NOWHERE** — a REAL erosion (Stage B built the slot, no surface used
+  it). First consumer wired this batch (the sidebar's selected row);
+  a FULL idiom pass is queued (R100).
+
+**Rulings (R98+; her uncertainty preserved):**
+
+- **R98 — Smart books accept adds BY TAGGING** ("i think that smart books
+  should still let you add, and should just tell you that tags are going
+  to be added"): adding a post to a smart book applies the tags its
+  filter needs and SAYS so; a filter the post can't satisfy by tagging
+  (e.g. entry-date bounds — her "before June" example — or a profile
+  mismatch) refuses with a DESCRIPTIVE message naming the filter.
+  QUEUED — the next build stretch (a core op over SmartQuerySpec with
+  state-transition tests; the chip's Add-to-Book list will include smart
+  books once it lands).
+- **R99 — The Outline tab gains "Make outline post"** (her shape: a new
+  linked copy auto-named "outline of xyz", selected as the outline side;
+  her uncertainty preserved — "or whatever the outline is - actual
+  copy?"). Session note: `duplicateAsVersion` already mints exactly the
+  structure the outline view maps (per-block lineage edges), so the mint
+  is cheap; the OPEN QUESTION put to her: does the outline copy start as
+  FULL TEXT (she condenses each block down) or as an empty skeleton?
+  Her lens-on-the-outline-page follow-up recorded as part of the same
+  item. QUEUED behind her answer.
+- **R100 — The Terminal idiom pass** ("terminal has slowly but steadily
+  lost all the personality details"): the `›` marker everywhere selection
+  lives (sidebar done this batch; shelf rows, palette, book navigator
+  next), `~/` path grammar re-checked per surface, the quick-entry bar
+  confirmed visible once the window fits. Her charge to re-read the
+  phase plan's Terminal specification against the shipped app is
+  accepted — the audit continues next stretch with the R1/R3/R4/R12
+  sittings as the checklist.
+
+**Fixed this batch (no new rulings — defect/legibility dispositions):**
+carousel blooms now show the WHOLE fan, chosen included and marked (the
+⑂3-vs-2-cards mismatch dead); margin-grid cards are UNIFORM one-card
+height clipped exactly like the strip ("2 high" is literally two cards);
+every book post header gains **"open ↗"** into the full editor (her "way
+of going into the editor view from books"); word counts labeled
+readably ("12w block · 1,204w in post") with a hover explainer (her
+"what is 1w post?"); Mark-as-Versions' hover now explains the POINT
+(connection-not-copy; pairing in Compare/diff; the honest alignment
+caveat — lineage-linked copies align block-by-block, hand-linked posts
+pair loosely); the Blocks TOC rows read at body size (her "super mini");
+the `›` sidebar marker (above). Blocks-page purpose explained in-chat
+(the block-level table of contents — jump/reorder/name/move blocks
+without scrolling prose).
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

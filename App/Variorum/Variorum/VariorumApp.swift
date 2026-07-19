@@ -25,6 +25,9 @@ struct VariorumApp: App {
     @State private var router = ShellRouter()
 
     var body: some Scene {
+        // Batch 7: a sane fresh-window size (the oversized-window report —
+        // an inherited frame taller than the screen made the shelf's
+        // bottom bars and the navigator's doors invisible).
         WindowGroup {
             switch bootstrap.state {
             case .ready(let session):
@@ -48,6 +51,7 @@ struct VariorumApp: App {
                 StoreFailureView(error: error) { bootstrap.retry() }
             }
         }
+        .defaultSize(width: 1240, height: 840)
         .commands {
             EditorCommands(bootstrap: bootstrap, router: router)
         }

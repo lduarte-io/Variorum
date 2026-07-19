@@ -52,23 +52,32 @@ struct SidebarView: View {
 
     private var tokens: VoiceTokens { theme.tokens(for: scheme) }
 
+    /// The `›` idiom (R1): the selected row's label wears the voice's
+    /// marker; Study's marker is empty, so this is Terminal's alone.
+    private func markerLabel(_ title: String, _ target: SidebarSelection) -> String {
+        selection == target ? tokens.selectionMarker + title : title
+    }
+
     var body: some View {
         List(selection: $selection) {
             Section {
+                // Batch 7 (her audit: "there's no little › to show the
+                // way") — the R1 selection-marker idiom, wired at last:
+                // the selected row wears the voice's marker.
                 Label {
-                    Text(tokens.chromeLabel("Shelf"))
+                    Text(tokens.chromeLabel(markerLabel("Shelf", .shelf)))
                 } icon: {
                     Image(systemName: "books.vertical")
                 }
                 .tag(SidebarSelection.shelf)
                 Label {
-                    Text(tokens.chromeLabel("Library"))
+                    Text(tokens.chromeLabel(markerLabel("Library", .library)))
                 } icon: {
                     Image(systemName: "text.book.closed")
                 }
                 .tag(SidebarSelection.library)
                 Label {
-                    Text(tokens.chromeLabel("Pool"))
+                    Text(tokens.chromeLabel(markerLabel("Pool", .poolPosts)))
                 } icon: {
                     Image(systemName: "tray")
                 }

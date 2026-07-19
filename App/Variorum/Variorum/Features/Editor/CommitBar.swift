@@ -111,6 +111,7 @@ struct CommitBar: View {
                         .font(tokens.small.weight(.semibold))
                         .foregroundStyle(tokens.accent)
                         .fixedSize()
+                        .help("Word counts: the block you're in · your selection · the whole post")
                 }
                 // Sitting 9 (R73/R91): hover = the cheat sheet; click =
                 // the full helper with the dictionary.
@@ -149,12 +150,12 @@ struct CommitBar: View {
 
     private var wordCountLabel: String? {
         var parts: [String] = []
-        if let block = model.caretBlockWordCount { parts.append("\(block)w") }
+        if let block = model.caretBlockWordCount { parts.append("\(block)w block") }
         if let selected = model.selectionWordCount { parts.append("\(selected)w selected") }
         // R11: the post total, always ambient (incremental — never a
         // whole-document walk per keystroke).
         if let total = model.postWordCount {
-            parts.append("\(total.formatted())w post")
+            parts.append("\(total.formatted())w in post")
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }

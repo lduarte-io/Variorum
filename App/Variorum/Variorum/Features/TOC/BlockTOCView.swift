@@ -241,12 +241,13 @@ struct BlockTOCView: View {
                 Button(isExpanded ? "▾" : "▸") { model.toggleExpanded(row.blockID) }
                     .buttonStyle(.plain)
                 Text("\(ordinal)/\(model.rows.count)")
-                    .font(.caption2.monospacedDigit())
+                    .font(.caption.monospacedDigit())
                     .foregroundStyle(.tertiary)
                 // The handle: name else read-time first sentence (the
-                // core derivation — one brain).
+                // core derivation — one brain). Batch 7: body-size — the
+                // TOC is a reading surface, not fine print.
                 Text(Queries.tocHandle(name: row.name, text: row.text))
-                    .font(row.name != nil ? .callout.weight(.semibold) : .callout)
+                    .font(row.name != nil ? .body.weight(.semibold) : .body)
                     .lineLimit(1)
                 if row.hasFan {
                     Text("⑂").font(.caption).foregroundStyle(.blue)

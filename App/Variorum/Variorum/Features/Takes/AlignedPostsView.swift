@@ -267,6 +267,13 @@ struct AlignedPostsView: View {
                 // DOOR 2: the side-by-side view offers the link on
                 // unlinked posts — the same op as the library door.
                 Button("Mark as Versions") { model.markAsVersions() }
+                    .help("Says 'these two posts are versions of the same piece' — a connection, "
+                        + "not a copy. Linked posts find each other here in Compare (the picker's "
+                        + "'Versions of this post' section) and pair in the diff. Blocks align "
+                        + "side-by-side where LINEAGE connects them, so copies made with "
+                        + "Duplicate as Version line up block-by-block; two unrelated posts you "
+                        + "hand-link only pair loosely. Unmarkable any time — nothing is copied "
+                        + "or changed by marking.")
             }
             if model.projection.isVersionPeer {
                 Text("versions").font(.caption).foregroundStyle(.blue)

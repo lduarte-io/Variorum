@@ -368,10 +368,11 @@ struct TakesBoardView: View {
         .padding(.leading, 24)
     }
 
-    /// CAROUSEL: chosen stays in flow; beneath it a 1–4-wide paged row.
+    /// CAROUSEL: the WHOLE fan as cards, chosen included and marked
+    /// (Sitting 9 batch 7: filtering chosen out made "⑂3" show two cards
+    /// with no way to reach the third — the count must match what blooms).
     private func carouselBloom(slot: Queries.RenderedBlock) -> some View {
-        let takes = (model.projection.fans[slot.blockID] ?? [])
-            .filter { $0.id != slot.variantID }
+        let takes = model.projection.fans[slot.blockID] ?? []
         return pagedTakesRow(takes: takes, slot: slot, pageKey: slot.blockID)
             .padding(.leading, 24)
     }
@@ -415,7 +416,13 @@ struct TakesBoardView: View {
                         ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
                             VStack(spacing: 6) {
                                 ForEach(group, id: \.id) { take in
+                                    // Batch 7: UNIFORM card height, exactly
+                                    // like the strip — "2 high" must be
+                                    // literally two card-heights, never a
+                                    // clipped column of tall cards.
                                     takeMiniPane(take: take, slot: slot)
+                                        .frame(width: 220, height: 110, alignment: .topLeading)
+                                        .clipped()
                                 }
                             }
                             .frame(width: 220)

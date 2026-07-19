@@ -491,6 +491,17 @@ struct BookView: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
             }
+            // Sitting 9 batch 7: the door OUT of the book into the post's
+            // full editor (modes, takes, lenses — everything).
+            Button(tokens.chromeLabel("open ↗")) {
+                NotificationCenter.default.post(
+                    name: .variorumOpenPost, object: nil,
+                    userInfo: ["postID": entry.postID])
+            }
+            .buttonStyle(.borderless)
+            .font(tokens.small)
+            .foregroundStyle(tokens.accent)
+            .help("Open this post in the full editor (Write · Takes · Lenses · …)")
         }
         .padding(.top, 4)
         .id("page-\(entry.postID)")  // the scrubber's landing anchor
