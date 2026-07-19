@@ -2433,6 +2433,96 @@ final class EditorViewModel {
         }
     }
 
+    // MARK: - Caret take shortcuts (Sitting 9, R73/R90 — the keyboard
+    // family in Write: mint on the block you're in; minting never chooses
+    // except the explicit power variant)
+
+    func mintCaretTake(blank: Bool, asChosen: Bool = false) {
+        guard let blockID = caretBlockID else {
+            showStatus("Put the caret in a block first — takes grow on the block you're in.")
+            return
+        }
+        let sourceID = caretVariantID
+        Task {
+            await autosave.flushNow()
+            do {
+                try await session.runner.run { ops in
+                    let take: Variant
+                    if blank {
+                        take = try ops.newBlankVariant(blockID)
+                    } else {
+                        guard let sourceID else {
+                            throw OperationError.variantNotFound(id: blockID)
+                        }
+                        take = try ops.branchVariant(blockID, from: sourceID)
+                    }
+                    if asChosen {
+                        try ops.chooseVariant(blockID, variantID: take.id)
+                    }
+                }
+                showStatus(asChosen
+                    ? "New blank take opened as chosen — type away (the old take is still in the fan)."
+                    : "New take added on this block — ⌘⇧T shows the takes.")
+            } catch {
+                showOperationError(error)
+            }
+        }
+    }
+
+    /// ⌘⇧L from Write (Sitting 9): the post's current choices become a
+    /// named lens — an explicit pick per renderable slot (the elevate door
+    /// without leaving the page).
+    func saveCurrentChoicesAsLens(named name: String) {
+        let choices: [(String, String)] = index.entries.compactMap { entry in
+            entry.variantID.map { (entry.blockID, $0) }
+        }
+        Task {
+            do {
+                try await session.runner.run { [postID] ops in
+                    let lens = try ops.createLens(post: postID, name: name)
+                    for (blockID, variantID) in choices {
+                        _ = try ops.setLensChoice(lens: lens.id, block: blockID, variant: variantID)
+                    }
+                }
+                showStatus("Saved — “\(name)” remembers these choices (open it in Lenses, ⌘3).")
+            } catch {
+                showOperationError(error)
+            }
+        }
+    }
+
+    func archiveCaretTake() {
+        guard let variantID = caretVariantID else {
+            showStatus("Put the caret in a block first — ⌘⇧A archives the take you're on.")
+            return
+        }
+        Task {
+            await autosave.flushNow()
+            do {
+                try await session.runner.run { ops in
+                    try ops.archiveVariant(variantID)
+                }
+                showStatus("Take archived — it stays in the block's history (unarchive from Takes).")
+            } catch {
+                showOperationError(error)
+            }
+        }
+    }
+
+    /// ⌃⌘↑/↓ — the caret jumps to the previous/next block's start (R73's
+    /// navigation pair). Uses the tiling index (never diffing) and the
+    /// ordinary caret-reveal scroll.
+    func jumpToAdjacentBlock(_ delta: Int) {
+        guard let textView, let currentID = caretBlockID,
+              let currentIndex = index.entries.firstIndex(where: { $0.blockID == currentID })
+        else { return }
+        let target = currentIndex + delta
+        guard index.entries.indices.contains(target) else { return }
+        let range = index.range(ofEntryAt: target)
+        textView.setSelectedRange(NSRange(location: range.location, length: 0))
+        textView.scrollRangeToVisible(NSRange(location: range.location, length: 0))
+    }
+
     func fanAction(_ action: FanAction) {
         guard let panel = fanPanel else { return }
         let blockID = panel.blockID

@@ -20,6 +20,7 @@ struct TakesBottomBar: View {
     @State private var pickedDate = Date()
     @State private var historyShown = false
     @State private var history: [CommitPoint] = []
+    @Environment(\.openWindow) private var openWindow
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -94,6 +95,9 @@ struct TakesBottomBar: View {
                         .foregroundStyle(tokens.accent)
                         .fixedSize()
                 }
+                Button("?") { openWindow(id: "variorum-helper") }
+                    .controlSize(.small)
+                    .help(HelperCheatSheet.summary)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)

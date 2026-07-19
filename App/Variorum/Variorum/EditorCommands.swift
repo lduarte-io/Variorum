@@ -119,11 +119,60 @@ struct EditorCommands: Commands {
             Divider()
 
             // The fan door (9d): ANY block, any arity — the badge stays
-            // fan-only, the door does not.
+            // fan-only, the door does not. In the boards it TOGGLES the
+            // focused block's bloom (Sitting 9, R73).
             Button("Show Takes") {
-                session?.editorRouter.active?.openCaretFan()
+                if let editor = session?.editorRouter.active {
+                    editor.openCaretFan()
+                } else {
+                    TakesCommand.post(.toggleFan)
+                }
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
+            .disabled(session == nil)
+
+            // The take lifecycle's keyboard family (Sitting 9, R73/R90/R93
+            // — every shortcut a menu item; the visible surface handles;
+            // nothing is a dead key).
+            Button("New Take (Branch)") { TakesCommand.post(.branch) }
+                .keyboardShortcut("t", modifiers: .command)
+                .disabled(session == nil)
+            Button("New Blank Take") { TakesCommand.post(.blank) }
+                .keyboardShortcut("t", modifiers: [.command, .option])
+                .disabled(session == nil)
+            Button("New Blank Take as Chosen") { TakesCommand.post(.blankChoose) }
+                .keyboardShortcut("t", modifiers: [.command, .option, .shift])
+                .disabled(session == nil)
+            Button("Choose This Take") { TakesCommand.post(.choose) }
+                .keyboardShortcut(.return, modifiers: .command)
+                .disabled(session == nil)
+            Button("Previous Take") { TakesCommand.post(.stepPrev) }
+                .keyboardShortcut(.leftArrow, modifiers: [.command, .control])
+                .disabled(session == nil)
+            Button("Next Take") { TakesCommand.post(.stepNext) }
+                .keyboardShortcut(.rightArrow, modifiers: [.command, .control])
+                .disabled(session == nil)
+            Button("Archive Take") { TakesCommand.post(.archive) }
+                .keyboardShortcut("a", modifiers: [.command, .shift])
+                .disabled(session == nil)
+            Button("Save Choices as Lens…") { TakesCommand.post(.saveLens) }
+                .keyboardShortcut("l", modifiers: [.command, .shift])
+                .disabled(session == nil)
+            Button("Close All Takes (Esc)") { TakesCommand.post(.closeAll) }
+                .disabled(session == nil)
+
+            Divider()
+
+            // R73's block navigation pair (Write's caret).
+            Button("Previous Block") {
+                session?.editorRouter.active?.jumpToAdjacentBlock(-1)
+            }
+            .keyboardShortcut(.upArrow, modifiers: [.command, .control])
+            .disabled(session?.editorRouter.active == nil)
+            Button("Next Block") {
+                session?.editorRouter.active?.jumpToAdjacentBlock(1)
+            }
+            .keyboardShortcut(.downArrow, modifiers: [.command, .control])
             .disabled(session?.editorRouter.active == nil)
 
             // The caret block's comments (Phase 13 C1, R7 — the keyboard
@@ -161,7 +210,27 @@ struct EditorCommands: Commands {
                 .keyboardShortcut("b", modifiers: [.command, .shift])
                 .disabled(session == nil)
         }
+        // ⌘1–⌘7 — the post modes (Sitting 9, R73; PostDetailView listens).
+        CommandGroup(before: .toolbar) {
+            ForEach(Array(PostDetailView.Mode.allCases.enumerated()), id: \.offset) { i, mode in
+                Button(mode.rawValue) {
+                    NotificationCenter.default.post(
+                        name: .variorumSwitchMode, object: nil,
+                        userInfo: ["mode": mode.rawValue])
+                }
+                .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
+                .disabled(session == nil)
+            }
+            Divider()
+        }
+        // ⌘/ — the shortcut helper + dictionary (Sitting 9, R73/R91).
+        CommandGroup(after: .help) {
+            Button("Shortcuts & Dictionary") { openWindow(id: "variorum-helper") }
+                .keyboardShortcut("/", modifiers: .command)
+        }
     }
+
+    @Environment(\.openWindow) private var openWindow
 
     /// Flip the global seam setting (R42 — a synced document setting, not
     /// per-window state; every editor and the Settings pane follow).

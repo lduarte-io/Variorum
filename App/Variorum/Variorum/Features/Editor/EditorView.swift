@@ -16,6 +16,8 @@ import VariorumCore
 struct EditorView: View {
     let session: AppSession
     let postID: String
+    /// ⌘⇧L in Write (Sitting 9, R73) — the save-choices prompt.
+    @State private var saveLensPrompt = false
     /// Inline mode (Phase 10 Step 3): the editor lives inside a multi-post
     /// container's scroll — a bare, content-sized TK2 surface instead of
     /// the detail editor's own scroll view. Exactly one EditorView exists
@@ -92,6 +94,15 @@ struct EditorView: View {
             // scoped to this block.
             WriteTakesPanel(session: session, postID: postID, blockID: panel.blockID)
         }
+        .sheet(isPresented: $saveLensPrompt) {
+            LensNameSheet(title: "Save current choices as a lens") { name in
+                model.saveCurrentChoicesAsLens(named: name)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .variorumTakesCommand)) { note in
+            guard let command = TakesCommand.from(note) else { return }
+            handleTakesCommand(command)
+        }
         .sheet(item: $model.commentsPanel) { panel in
             // Phase 13 C1 (R7): the block's comments — margin/inline faces
             // all open here; deleted comments visible + resurrectable.
@@ -134,6 +145,35 @@ struct EditorView: View {
         } message: { _ in
             Text("Restoring will resurrect the full pre-split text into this "
                 + "block's buffer — the split-off half still exists next door.")
+        }
+    }
+}
+
+extension EditorView {
+    /// Write's half of the R73 keyboard family: the caret block is the
+    /// target; inapplicable commands SAY where they live (never dead).
+    fileprivate func handleTakesCommand(_ command: TakesCommand) {
+        switch command {
+        case .toggleFan:
+            model.openCaretFan()
+        case .branch:
+            model.mintCaretTake(blank: false)
+        case .blank:
+            model.mintCaretTake(blank: true)
+        case .blankChoose:
+            model.mintCaretTake(blank: true, asChosen: true)
+        case .archive:
+            model.archiveCaretTake()
+        case .choose:
+            model.showStatus(
+                "Write shows the chosen takes already — Takes (⌘2) is where you pick among them.")
+        case .stepPrev, .stepNext:
+            model.showStatus(
+                "Step through takes in Takes (⌘2), or open this block's takes with ⌘⇧T.")
+        case .closeAll:
+            break  // Write has no blooms; the plain page is already here.
+        case .saveLens:
+            saveLensPrompt = true
         }
     }
 }

@@ -13,6 +13,7 @@ struct CommitBar: View {
     let model: EditorViewModel
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
+    @Environment(\.openWindow) private var openWindow
     // Phase 13 C1 (R11): the status line wears the voice; the word counts
     // are PROMINENT (the terminal mockup's liked idiom).
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -106,6 +107,11 @@ struct CommitBar: View {
                         .foregroundStyle(tokens.accent)
                         .fixedSize()
                 }
+                // Sitting 9 (R73/R91): hover = the cheat sheet; click =
+                // the full helper with the dictionary.
+                Button("?") { openWindow(id: "variorum-helper") }
+                    .controlSize(.small)
+                    .help(HelperCheatSheet.summary)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)

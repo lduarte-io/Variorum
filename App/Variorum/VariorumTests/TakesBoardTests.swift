@@ -694,8 +694,12 @@ struct TakesPresentationTests {
                 fanStyle: .marginGrid))
             #expect(model.offersExpandAll, "margin grid's expand-all is meaningful")
 
+            // Sitting 9 (R86): columns moved to the LENSES tab — the Takes
+            // board is single-column always, so columns no longer suppress
+            // expand-all (the old multi-column condition is retired).
             model.addScratchColumn()
-            #expect(!model.offersExpandAll, "multi-column compositions never offer it")
+            #expect(model.offersExpandAll,
+                    "columns live in Lenses now — they never gate the Takes board")
         }
     }
 

@@ -751,6 +751,81 @@ final class TakesViewModel {
         }
     }
 
+    // MARK: - The keyboard family's board half (R73)
+
+    /// Which board hosts this model — ⌃⌘←/→ means "move the ring" in
+    /// Takes and "move this column's pick" in Lenses.
+    enum HostSurface { case takes, lenses }
+    @ObservationIgnored var host: HostSurface = .takes
+
+    /// The board asks its view to open the save-as-lens prompt (⌘⇧L —
+    /// the view owns sheets, the model owns nothing UI).
+    var lensPromptRequested = false
+
+    /// ⌃⌘←/→ dispatch (R73): Takes moves the RING across the focused
+    /// block's fan cards; Lenses steps the focused pane's column pick.
+    func stepTakes(by delta: Int) async {
+        guard let pane = focusedPane,
+              let slot = projection.slots.first(where: { $0.blockID == pane.blockID })
+        else {
+            statusMessage = "Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings."
+            return
+        }
+        switch host {
+        case .lenses:
+            if let column = columns.first(where: { $0.id == pane.columnID }),
+               column.kind != .main {
+                await stepPick(columnID: column.id, slot: slot, by: delta)
+                return
+            }
+            fallthrough
+        case .takes:
+            guard let fan = projection.fans[slot.blockID], fan.count > 1,
+                  let current = fan.firstIndex(where: { $0.id == pane.variantID })
+            else {
+                statusMessage = "This block has one take — ⌘T branches a second."
+                return
+            }
+            let next = min(max(current + delta, 0), fan.count - 1)
+            guard next != current else { return }
+            if !expandedBlocks.contains(slot.blockID) { expandedBlocks.insert(slot.blockID) }
+            focus(PaneKey(
+                columnID: pane.columnID, blockID: slot.blockID, variantID: fan[next].id))
+        }
+    }
+
+    /// ⌘⏎ — choose the take the ring is in (the ONE careful gesture, by
+    /// keyboard).
+    func chooseFocusedTake() async {
+        guard let pane = focusedPane else {
+            statusMessage = "Click into a take first — ⌘⏎ chooses the take you're in."
+            return
+        }
+        await choose(blockID: pane.blockID, variantID: pane.variantID)
+        if statusMessage == nil { statusMessage = "✓ chosen — the post shows this take everywhere." }
+    }
+
+    /// ⌘⇧T — toggle the focused (or first fanned) block's bloom.
+    func toggleFocusedFan() {
+        let blockID = focusedPane?.blockID
+            ?? projection.slots.first(where: \.hasFan)?.blockID
+            ?? projection.slots.first?.blockID
+        guard let blockID else { return }
+        toggleExpanded(blockID)
+    }
+
+    /// ⌘⇧A — archive the take the ring is in.
+    func archiveFocusedTake() async {
+        guard let pane = focusedPane else {
+            statusMessage = "Click into a take first — ⌘⇧A archives the take you're in."
+            return
+        }
+        await archiveTake(pane.variantID)
+        if statusMessage == nil {
+            statusMessage = "Take archived — it stays in the block's history (unarchive below)."
+        }
+    }
+
     /// The lens column's per-block ‹ › switcher (R83/R89 — the canvas
     /// grammar reused; here it moves THAT COLUMN's pick only, view-local
     /// for scratch, live-edited for named lenses; ends clamp).

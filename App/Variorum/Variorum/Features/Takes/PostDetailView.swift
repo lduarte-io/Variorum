@@ -114,8 +114,10 @@ struct PostDetailView: View {
             UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
         }
         .onReceive(NotificationCenter.default.publisher(for: .variorumSwitchMode)) { note in
-            guard note.userInfo?["postID"] as? String == postID,
-                  let raw = note.userInfo?["mode"] as? String,
+            // A postID-less notification is the ⌘1–⌘7 broadcast — the
+            // visible detail responds; a postID-carrying one is targeted.
+            if let target = note.userInfo?["postID"] as? String, target != postID { return }
+            guard let raw = note.userInfo?["mode"] as? String,
                   let target = Mode(rawValue: raw)
             else { return }
             mode = target

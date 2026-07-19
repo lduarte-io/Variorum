@@ -106,11 +106,19 @@ struct TakesBoardView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
-        .onAppear { model.followTheScroll = themeSettings.followTheScroll }
+        .onAppear {
+            model.followTheScroll = themeSettings.followTheScroll
+            model.host = .takes
+        }
         .onChange(of: themeSettings.followTheScroll) { _, new in
             model.followTheScroll = new
         }
         .onDisappear { model.teardown() }
+        .onExitCommand { model.closeAllFans() }  // ⎋ — the plain page (R87)
+        .onReceive(NotificationCenter.default.publisher(for: .variorumTakesCommand)) { note in
+            guard let command = TakesCommand.from(note) else { return }
+            handleTakesCommand(command)
+        }
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
@@ -120,6 +128,55 @@ struct TakesBoardView: View {
             LensNameSheet(title: "Save current choices as a lens") { name in
                 Task { await model.saveCurrentChoicesAsLens(name: name) }
             }
+        }
+    }
+
+    /// The board's half of the R73 keyboard family — the focused pane is
+    /// the target; without one, the command SAYS what to do.
+    private func handleTakesCommand(_ command: TakesCommand) {
+        switch command {
+        case .toggleFan:
+            model.toggleFocusedFan()
+        case .closeAll:
+            model.closeAllFans()
+        case .branch:
+            guard let pane = model.focusedPane else {
+                model.speak("Click into a take first — ⌘T branches the take you're in.")
+                return
+            }
+            Task {
+                if let take = await model.branchTake(blockID: pane.blockID, from: pane.variantID) {
+                    model.focus(.init(
+                        columnID: pane.columnID, blockID: pane.blockID, variantID: take.id))
+                }
+            }
+        case .blank:
+            guard let pane = model.focusedPane else {
+                model.speak("Click into a block first — ⌥⌘T adds a blank take there.")
+                return
+            }
+            Task {
+                if let take = await model.newBlankTake(blockID: pane.blockID) {
+                    model.focus(.init(
+                        columnID: pane.columnID, blockID: pane.blockID, variantID: take.id))
+                }
+            }
+        case .blankChoose:
+            guard let pane = model.focusedPane else {
+                model.speak("Click into a block first — ⇧⌥⌘T opens a blank take as chosen there.")
+                return
+            }
+            Task { await model.newBlankTakeAsChosen(blockID: pane.blockID) }
+        case .choose:
+            Task { await model.chooseFocusedTake() }
+        case .stepPrev:
+            Task { await model.stepTakes(by: -1) }
+        case .stepNext:
+            Task { await model.stepTakes(by: 1) }
+        case .archive:
+            Task { await model.archiveFocusedTake() }
+        case .saveLens:
+            lensNamePrompt = true
         }
     }
 

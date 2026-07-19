@@ -71,7 +71,12 @@ struct LensesBoardView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
+        .onAppear { model.host = .lenses }
         .onDisappear { model.teardown() }
+        .onReceive(NotificationCenter.default.publisher(for: .variorumTakesCommand)) { note in
+            guard let command = TakesCommand.from(note) else { return }
+            handleTakesCommand(command)
+        }
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
@@ -80,6 +85,64 @@ struct LensesBoardView: View {
         .sheet(item: $lensNamePrompt) { prompt in
             LensNameSheet { name in
                 Task { await model.saveScratchAsLens(columnID: prompt.columnID, name: name) }
+            }
+        }
+    }
+
+    /// The Lenses half of the R73 family: the focused pane's COLUMN is the
+    /// thread — branching diverges the thread; stepping moves its pick.
+    private func handleTakesCommand(_ command: TakesCommand) {
+        switch command {
+        case .toggleFan:
+            model.speak("Blooms live in Takes (⌘2) — here every column is a whole reading.")
+        case .closeAll:
+            break
+        case .branch:
+            guard let pane = model.focusedPane else {
+                model.speak("Click into a pane first — ⌘T diverges that column at that block.")
+                return
+            }
+            Task {
+                await model.divergeHere(
+                    columnID: pane.columnID, blockID: pane.blockID,
+                    fromVariantID: pane.variantID)
+            }
+        case .blank:
+            guard let pane = model.focusedPane else {
+                model.speak("Click into a pane first — ⌥⌘T adds a blank take on that block.")
+                return
+            }
+            Task {
+                if let take = await model.newBlankTake(blockID: pane.blockID) {
+                    await model.pick(
+                        columnID: pane.columnID, blockID: pane.blockID, variantID: take.id)
+                }
+            }
+        case .blankChoose:
+            guard let pane = model.focusedPane else {
+                model.speak("Click into a pane first — ⇧⌥⌘T opens a blank take as chosen there.")
+                return
+            }
+            Task { await model.newBlankTakeAsChosen(blockID: pane.blockID) }
+        case .choose:
+            Task { await model.chooseFocusedTake() }
+        case .stepPrev:
+            Task { await model.stepTakes(by: -1) }
+        case .stepNext:
+            Task { await model.stepTakes(by: 1) }
+        case .archive:
+            Task { await model.archiveFocusedTake() }
+        case .saveLens:
+            if let pane = model.focusedPane,
+               let column = model.columns.first(where: { $0.id == pane.columnID }),
+               case .scratch = column.kind {
+                lensNamePrompt = LensPrompt(columnID: column.id)
+            } else if let scratch = model.columns.first(where: {
+                if case .scratch = $0.kind { return true } else { return false }
+            }) {
+                lensNamePrompt = LensPrompt(columnID: scratch.id)
+            } else {
+                model.speak("Nothing unnamed to save — named lenses save themselves as you work.")
             }
         }
     }

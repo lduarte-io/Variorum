@@ -51,6 +51,12 @@ struct VariorumApp: App {
         .commands {
             EditorCommands(bootstrap: bootstrap, router: router)
         }
+        // Sitting 9 (R73/R91): the shortcut helper + dictionary window
+        // (⌘/, Help menu, the status bars' "?").
+        Window("Shortcuts & Dictionary", id: "variorum-helper") {
+            HelperView()
+        }
+        .defaultSize(width: 680, height: 560)
         // Phase 13 (B2/R52): the Settings window — Appearance (the voice +
         // the B1 global settings) and the TAG MANAGER's real home.
         Settings {
