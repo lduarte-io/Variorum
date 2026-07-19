@@ -306,6 +306,35 @@ struct VersionOperationsTests {
         }
     }
 
+    @Test func adoptPicksSwapPreservesThenAdoptsAndSkipsStalePicks() throws {
+        try withOperations { ops, db in
+            let w = try makeWorld(ops, db)
+            let preservation = try ops.adoptPicksPreservingChosen(
+                post: w.postID, picks: [w.block1: w.alt1, w.block2: "gone-take"])
+
+            let chosen1 = try db.fetchString(
+                "SELECT chosen_variant_id FROM container_block WHERE block_id = ?", [w.block1])
+            #expect(chosen1 == w.alt1, "the live pick adopted")
+            let preservedPick1 = try db.fetchString(
+                """
+                SELECT variant_id FROM lens_choice
+                WHERE lens_id = ? AND block_id = ? AND deleted_at IS NULL
+                """, [preservation.id, w.block1])
+            #expect(preservedPick1 == w.chosen1, "the outgoing chosen preserved first")
+
+            // The stale pick was skipped, never half-applied.
+            let chosen2 = try db.fetchString(
+                "SELECT chosen_variant_id FROM container_block WHERE block_id = ?", [w.block2])
+            #expect(chosen2 != "gone-take")
+
+            // Swap-back works here too.
+            try ops.adoptLens(preservation.id)
+            let restored1 = try db.fetchString(
+                "SELECT chosen_variant_id FROM container_block WHERE block_id = ?", [w.block1])
+            #expect(restored1 == w.chosen1)
+        }
+    }
+
     @Test func promotePicksMakesThePostDirectlyFromSparseViewPicks() throws {
         try withOperations { ops, db in
             let w = try makeWorld(ops, db)

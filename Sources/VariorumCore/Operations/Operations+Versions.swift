@@ -217,6 +217,56 @@ extension Operations {
         return preservation
     }
 
+    /// ADOPT-SWAP for PICKS (the scratch column's "✓ Make this the post" —
+    /// R89's obvious door on every non-Chosen column, same preservation
+    /// promise as `adoptLensPreservingChosen`): the sparse view picks →
+    /// chosen, with the outgoing chosen preserved as a full-fidelity lens
+    /// first, ONE transaction. Stale picks (not a live active take of
+    /// their block) are skipped like `setLensChoice` would refuse them —
+    /// the swap never half-applies a dead pick.
+    @discardableResult
+    public func adoptPicksPreservingChosen(
+        post postID: String, picks: [String: String]
+    ) throws -> Lens {
+        let (preservation, preImages):
+            (Lens, [(placementID: String, chosen: String?)]) = try database.write { db in
+            let post = try livePost(db, postID)
+            try ensureUnlocked(post)
+            let now = date.now
+            let preservation = Lens(
+                id: newID(), ownerId: currentOwnerID(), containerId: post.id,
+                name: try preservationLensName(db, postID: post.id, now: now),
+                createdAt: now, updatedAt: now)
+            try preservation.insert(db)
+            var validated: [String: String] = [:]
+            for placement in try ContainerBlock
+                .filter(Column("container_id") == post.id && Column("deleted_at") == nil)
+                .order(Column("position"), Column("id"))
+                .fetchAll(db) {
+                guard let block = try? liveBlock(db, placement.blockId),
+                      let shown = try? renderedVariant(db, block: block, placement: placement)
+                else { continue }
+                try LensChoice(
+                    id: newID(), lensId: preservation.id, blockId: block.id,
+                    variantId: shown.id, createdAt: now, updatedAt: now)
+                    .insert(db)
+                if let pick = picks[block.id],
+                   let take = try Variant.fetchOne(db, key: pick),
+                   take.blockId == block.id, take.deletedAt == nil, take.status == .active {
+                    validated[block.id] = pick
+                }
+            }
+            let preImages = try applyAdoptedPicks(db, postID: post.id, picks: validated)
+            return (preservation, preImages)
+        }
+        if !preImages.isEmpty {
+            undoStack?.register(label: "Adopt Lens") {
+                try $0.revertChosenPointers(preImages)
+            }
+        }
+        return preservation
+    }
+
     /// PROMOTE PICKS (taste checkpoint — R78: direct promote, no forced
     /// lens save): a new version-post whose chosen := the given SPARSE
     /// picks overlaying the source's chosen (un-picked slots follow chosen
