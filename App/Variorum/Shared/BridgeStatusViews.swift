@@ -66,16 +66,7 @@ struct BridgeStatusRow: View {
         // Sitting 9 (R94): the CAUSE renders inline, never hover-only —
         // "i do think it's bad that there wasn't a more helpful message."
         if let error = bridge.status.lastError, !bridge.status.isBridging {
-            if ErrorPresentation.isAuthShaped(error) {
-                Text(ErrorPresentation.authGuidance)
-                    .foregroundStyle(.orange)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Text(error)
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .lineLimit(4)
-                .fixedSize(horizontal: false, vertical: true)
+            ErrorCauseNote(error: error)
         }
         }
         .font(.caption)

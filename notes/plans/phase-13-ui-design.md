@@ -1509,6 +1509,89 @@ Counts: core 738/88 · Mac 424/78 · mobile 11/4. Still queued: R98
 (smart-book adds by tagging), R99 (outline mint — awaiting her
 full-text-vs-skeleton answer), R100's remaining idiom pass.
 
+### Sitting 9, continued (2026-07-19 afternoon — the wedged window ACTUALLY root-caused; the batch-8 diagnosis CORRECTED on the record)
+
+**Her messages VERBATIM (standing instruction; typos hers):**
+
+> hi claude, so we've been working on things in variorum but i've been
+> experiencing a bug where the window is stuck to the absolute top of the
+> mac and can't be dragged down, the top snaps to the top of the computer
+> again. not sure what the deal with that is, a session tried to fix it
+> but it didn't work. i coudl restart my computer but it's just an issue
+> with this app. is till can't see the bottom
+
+> it looks like you've fixed it, but the sync area needs to ahve a little
+> protection from blocks because it's being written over. this loks very
+> encouraging thus far though.
+
+*(The second message reacted to a DEV-STORE debug run mid-diagnosis — the
+dev store never wedged; the encouragement was premature but the overlap
+report it carried was real and is fixed below.)*
+
+**THE BATCH-8 DIAGNOSIS WAS WRONG, and this entry corrects the record.**
+Batch 8 ruled the wedge "a persisted oversized frame that macOS
+constrainment keeps re-imposing" and shipped a frame-clamping sanitizer.
+Empirical refutation, live on her machine: with the persisted frame
+RESET to 1240×840 and the Release app relaunched, the window came up
+sane and then **regrew itself to 1240×1723–1731 ~5 s after launch** —
+the moment the first bridge error landed. The persisted frame was the
+bug's SYMPTOM (the autosave recording an inflated minimum), and the
+sanitizer never fired usefully because no clamp can beat a live layout
+minimum: macOS re-imposes `contentMinSize` immediately.
+
+**The true mechanism, traced and arithmetic-verified:** the R94
+inline-cause block renders in NON-SCROLLING window chrome (the sidebar's
+status footer), and the window's minimum-size computation probes content
+at near-zero width. `Text(authGuidance).fixedSize(horizontal: false,
+vertical: true)` with NO line limit measures **one character per line**
+under that probe — the ~140-char guidance ≈ 140 lines ≈ **1693 pt** —
+and that becomes the WINDOW's minimum height. (The error text below it
+was innocent: its `lineLimit(4)` caps the probe — which is also the
+proof lineLimit bounds it.) Reproduced in the dev store by env-injecting
+her exact bridge error into the footer (window min snapped to 1693,
+width-independent); killed by the fix below. Why every earlier probe was
+clean: the A4 fence keeps dev-store sync/bridge OFF, so the error branch
+— the only tall path — never rendered in any dev probe, and the batch-8
+per-surface minimums (~148 pt) were measured without an error present.
+
+**The fix (minimal, provably bounded):** the cause block extracted into
+ONE shared component (`ErrorCauseNote`, in `Shared/ErrorPresentation.swift`
+— both status rows now render it) with **load-bearing line limits**:
+guidance `.lineLimit(6)`, error `.lineLimit(4)` (unchanged), beside the
+kept `fixedSize`. Rendering at real widths is IDENTICAL (3–4 wrapped
+lines, verified by AX measurement in the reproduction). Same limit added
+to `QuickEntryBar`'s error line (same hazard class, shelf/library bottom
+chrome). The remaining `fixedSize(h:false,v:true)` instances live in
+bounded contexts (sheets with minWidth, scroll content, the helper
+window) — swept, judged safe, left alone; the class rule for future
+chrome: **an unlimited fixedSize text may never sit in non-scrolling
+window chrome.** **RED-ON-OLD PIN:** `ChromeMinHeightTests` measures the
+real component under the same near-zero-width probe — reverting the line
+limits reds it at **3395 pt measured**; shipped code greens at a few
+caption lines (a second test pins that footer-width rendering stays a
+real multi-line wrap, never a truncation).
+
+**Also this entry:** her overlap report fixed — the footer VStack gains
+an opaque voiced background (`tokens.room`) + top divider, so scrap rows
+scrolling under the inset can never write over the sync/bridge lines.
+The batch-8 sanitizer stays as belt-and-suspenders (macOS itself clamps
+oversized frames at restore/resize once no min-height demand exists —
+observed live; the sanitizer's activation hooks provably never fired
+during the wedge, so it gets no credit and no further investment).
+
+**Operational side-findings, recorded:** (1) her Fragments-side session
+is STRANDED — the bridge fails every round with `endpointFailure(status:
+400, refresh_token_not_found)`; the R94 guidance and the only Account…
+doors sat below the screen edge the whole time. Sign-out/sign-in via the
+now-visible footer clears it (her own outage's known remedy). (2) Her
+disk hit 100% full (134 MB free) mid-session — Docker fully removed at
+her direction (~17 GB back; she'll clear Claude scratch + DerivedData
+after her Fragments agent settles its docs); near-full disks were
+starting to fail app writes machine-wide.
+
+Counts: core 738/88 · **Mac 426/79** · mobile 11/4. Still queued: R98,
+R99 (awaiting her full-text-vs-skeleton answer), R100's remaining pass.
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

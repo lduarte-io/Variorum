@@ -67,12 +67,17 @@ struct RootView: View {
                 .navigationSplitViewColumnWidth(min: 180, ideal: 210)
                 .safeAreaInset(edge: .bottom) {
                     if let services {
+                        // Sitting 9 (her report): the scrap rows scroll UNDER
+                        // this inset — an opaque voiced background + divider
+                        // keep the status rows readable over any list content.
                         VStack(alignment: .leading, spacing: 0) {
+                            Divider().overlay(theme.tokens(for: scheme).line)
                             SyncStatusRow(services: services)
                             BridgeStatusRow(bridge: services.bridge) {
                                 accountSheetShown = true
                             }
                         }
+                        .background(theme.tokens(for: scheme).room)
                     }
                 }
         } detail: {

@@ -58,9 +58,14 @@ struct QuickEntryBar: View {
             }
             .padding(.bottom, lastError == nil ? 10 : 2)
             if let lastError {
+                // lineLimit is LOAD-BEARING beside fixedSize — an unlimited
+                // fixedSize text in non-scrolling chrome inflates the WINDOW
+                // minimum during the near-zero-width min-size probe (the
+                // wedged-window root cause; see SyncStatusRow).
                 Text(lastError)
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
+                    .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.bottom, 8)
             }

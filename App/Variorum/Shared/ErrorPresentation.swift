@@ -11,6 +11,38 @@
 //
 
 import Foundation
+import SwiftUI
+
+/// The R94 inline-cause block, ONE component for every status row: the
+/// auth guidance (when the failure is auth-shaped) + the verbatim error —
+/// wrapping, selectable, never hover-only.
+///
+/// The line limits are LOAD-BEARING, not cosmetic. This block lives in
+/// non-scrolling window chrome (the sidebar footer), and the window's
+/// minimum-size probe proposes near-zero width — an UNLIMITED
+/// `fixedSize(vertical: true)` text measures one-character-per-line there
+/// (~140 lines ≈ 1693 pt for the guidance string alone), and that number
+/// becomes the WINDOW's minimum height. That was the Sitting 9 wedged
+/// window: pinned taller than the screen, undraggable, every bottom bar
+/// invisible. `ChromeMinHeightTests` pins the probed height.
+struct ErrorCauseNote: View {
+    let error: String
+
+    @ViewBuilder
+    var body: some View {
+        if ErrorPresentation.isAuthShaped(error) {
+            Text(ErrorPresentation.authGuidance)
+                .foregroundStyle(.orange)
+                .lineLimit(6)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        Text(error)
+            .foregroundStyle(.secondary)
+            .textSelection(.enabled)
+            .lineLimit(4)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
 
 enum ErrorPresentation {
     /// True when the failure smells like a dead/stale session — the class

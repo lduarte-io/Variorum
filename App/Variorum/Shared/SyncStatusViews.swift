@@ -73,16 +73,7 @@ struct SyncStatusRow: View {
         // failure names its fix and the Account door is right there.
         if let error = sync.status.lastError, !sync.status.lastErrorIsOffline,
            !sync.status.isSyncing {
-            if ErrorPresentation.isAuthShaped(error) {
-                Text(ErrorPresentation.authGuidance)
-                    .foregroundStyle(.orange)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Text(error)
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .lineLimit(4)
-                .fixedSize(horizontal: false, vertical: true)
+            ErrorCauseNote(error: error)
         }
         }
         .font(.caption)
