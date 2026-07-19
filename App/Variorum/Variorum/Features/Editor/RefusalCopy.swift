@@ -24,7 +24,7 @@ nonisolated enum RefusalCopy {
         case .crossBlockSpan:
             "The selection crosses a block boundary. Divide the neighbors at the edges you want, then merge the middle pieces."
         case .wholeBlockSpan:
-            "That span is the whole block — it already is a block."
+            "That selection already IS a whole block (see blk n/n below) — nothing to make. Select part of it to split one out."
         case .middleSpanNeedsMakeBlock:
             "Extract takes a span at the block's start or end. For a middle span, use Make Block from Selection."
         case .fannedMiddleSpan:

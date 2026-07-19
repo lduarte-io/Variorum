@@ -29,6 +29,9 @@ struct RootView: View {
     @State private var palette: PaletteModel
     @State private var selection: SidebarSelection? = .shelf
     @State private var paletteOpen = false
+    /// Sitting 9 (R94): the bridge row's auth-shaped failures open the
+    /// account sheet from right there.
+    @State private var accountSheetShown = false
     /// Stage C: a palette/Library block hit lands CARET-PRECISE — the
     /// target block rides beside the selection and seeds the opened
     /// editor's caret (cleared on ordinary navigation).
@@ -66,7 +69,9 @@ struct RootView: View {
                     if let services {
                         VStack(alignment: .leading, spacing: 0) {
                             SyncStatusRow(services: services)
-                            BridgeStatusRow(bridge: services.bridge)
+                            BridgeStatusRow(bridge: services.bridge) {
+                                accountSheetShown = true
+                            }
                         }
                     }
                 }
@@ -74,6 +79,11 @@ struct RootView: View {
             detail
         }
         .environment(theme)
+        .sheet(isPresented: $accountSheetShown) {
+            if let services {
+                AccountView(services: services)
+            }
+        }
         .sheet(isPresented: $paletteOpen) {
             CommandPaletteView(model: palette) { picked, blockID in
                 open(picked, blockID: blockID)

@@ -22,6 +22,7 @@ struct SyncStatusRow: View {
     private var sync: SyncSession { services.sync }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
         HStack(spacing: 6) {
             if !sync.allowsSync {
                 // The A4 fence: a dev-store session never syncs — no
@@ -54,7 +55,6 @@ struct SyncStatusRow: View {
                 } else {
                     Text("Sync error")
                         .foregroundStyle(.red)
-                        .help(error)
                     Button("Retry") { sync.triggerSync() }
                     Button("Account…") { showingAccount = true }
                 }
@@ -68,6 +68,22 @@ struct SyncStatusRow: View {
                 Button("Sync now") { sync.triggerSync() }
                 Button("Account…") { showingAccount = true }
             }
+        }
+        // Sitting 9 (R94): the cause inline, classified — an auth-shaped
+        // failure names its fix and the Account door is right there.
+        if let error = sync.status.lastError, !sync.status.lastErrorIsOffline,
+           !sync.status.isSyncing {
+            if ErrorPresentation.isAuthShaped(error) {
+                Text(ErrorPresentation.authGuidance)
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(error)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .lineLimit(4)
+                .fixedSize(horizontal: false, vertical: true)
+        }
         }
         .font(.caption)
         .padding(6)

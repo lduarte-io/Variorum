@@ -13,8 +13,12 @@ import VariorumCore
 
 struct BridgeStatusRow: View {
     let bridge: BridgeSession
+    /// The auth door for auth-shaped failures (Sitting 9, R94) — the Mac
+    /// sidebar passes its account-sheet opener; absent = no door shown.
+    var onOpenAccount: (() -> Void)?
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
         HStack(spacing: 6) {
             if !bridge.allowsBridge {
                 // The A4 fence's bridge seam: dev stores (and the phone,
@@ -28,11 +32,14 @@ struct BridgeStatusRow: View {
             } else if bridge.status.isBridging {
                 ProgressView().controlSize(.small)
                 Text("Bridging…")
-            } else if let error = bridge.status.lastError {
+            } else if bridge.status.lastError != nil {
                 Text("Bridge error")
                     .foregroundStyle(.red)
-                    .help(error)
                 Button("Retry") { bridge.trigger(manual: true) }
+                if let onOpenAccount,
+                   ErrorPresentation.isAuthShaped(bridge.status.lastError ?? "") {
+                    Button("Account…") { onOpenAccount() }
+                }
             } else {
                 Text(lastBridgedLabel)
                     .foregroundStyle(.secondary)
@@ -55,6 +62,21 @@ struct BridgeStatusRow: View {
                 }
                 Button("Bridge now") { bridge.trigger(manual: true) }
             }
+        }
+        // Sitting 9 (R94): the CAUSE renders inline, never hover-only —
+        // "i do think it's bad that there wasn't a more helpful message."
+        if let error = bridge.status.lastError, !bridge.status.isBridging {
+            if ErrorPresentation.isAuthShaped(error) {
+                Text(ErrorPresentation.authGuidance)
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(error)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .lineLimit(4)
+                .fixedSize(horizontal: false, vertical: true)
+        }
         }
         .font(.caption)
         .padding(6)

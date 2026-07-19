@@ -93,11 +93,16 @@ struct CommitBar: View {
 
                 Spacer()
                 if let status = model.statusMessage {
+                    // Sitting 9 (R93): refusals must be READABLE — two
+                    // lines, wrapping, selectable; never "That span is t…".
                     Text(status)
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
+                        .lineLimit(2)
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 460, alignment: .trailing)
+                        .help(status)
                 }
                 if let words = wordCountLabel {
                     // R11: word-count PROMINENCE — the accent-colored,
