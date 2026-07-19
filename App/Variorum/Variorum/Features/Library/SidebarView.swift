@@ -53,31 +53,41 @@ struct SidebarView: View {
     private var tokens: VoiceTokens { theme.tokens(for: scheme) }
 
     /// The `›` idiom (R1): the selected row's label wears the voice's
-    /// marker; Study's marker is empty, so this is Terminal's alone.
-    private func markerLabel(_ title: String, _ target: SidebarSelection) -> String {
-        selection == target ? tokens.selectionMarker + title : title
+    /// marker in the ACCENT color; unselected rows carry none. Study's
+    /// marker is empty, so this is Terminal's alone.
+    @ViewBuilder
+    private func markedTitle(_ title: String, _ target: SidebarSelection) -> some View {
+        HStack(spacing: 2) {
+            if selection == target, !tokens.selectionMarker.isEmpty {
+                Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
+                    .foregroundStyle(tokens.accent)
+                    .fontWeight(.bold)
+            }
+            Text(tokens.chromeLabel(title))
+        }
     }
 
     var body: some View {
         List(selection: $selection) {
             Section {
-                // Batch 7 (her audit: "there's no little › to show the
-                // way") — the R1 selection-marker idiom, wired at last:
-                // the selected row wears the voice's marker.
+                // Batch 7/8 (her audit: "there's no little › to show the
+                // way … it being a color ›") — the R1 selection-marker
+                // idiom, wired: the selected row alone wears the voice's
+                // marker, in the ACCENT color.
                 Label {
-                    Text(tokens.chromeLabel(markerLabel("Shelf", .shelf)))
+                    markedTitle("Shelf", .shelf)
                 } icon: {
                     Image(systemName: "books.vertical")
                 }
                 .tag(SidebarSelection.shelf)
                 Label {
-                    Text(tokens.chromeLabel(markerLabel("Library", .library)))
+                    markedTitle("Library", .library)
                 } icon: {
                     Image(systemName: "text.book.closed")
                 }
                 .tag(SidebarSelection.library)
                 Label {
-                    Text(tokens.chromeLabel(markerLabel("Pool", .poolPosts)))
+                    markedTitle("Pool", .poolPosts)
                 } icon: {
                     Image(systemName: "tray")
                 }

@@ -149,6 +149,11 @@ struct LibraryCatalogView: View {
                     onOpen(.post(postID))
                 }
             }
+            // Sitting 9 batch 8 (her directive): the round-2 mockup's
+            // quick-entry bar rides the Library too — type, ⏎, and the
+            // typed text IS a post, opened.
+            Divider().overlay(tokens.line)
+            QuickEntryBar(session: session, onOpen: onOpen)
         }
         .background(tokens.surface)
         .task { await model.search() }

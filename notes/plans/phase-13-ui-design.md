@@ -1450,6 +1450,65 @@ the `›` sidebar marker (above). Blocks-page purpose explained in-chat
 (the block-level table of contents — jump/reorder/name/move blocks
 without scrolling prose).
 
+### Sitting 9, continued (2026-07-19 ~3 AM — batch 8 resolution: the window ROOT-CAUSED and sanitized; the Library quick-entry directive)
+
+**Her messages VERBATIM (standing instruction; typos hers):**
+
+> ok, there's definitely just a bug with the view. i can't move it down
+> from being stuck to the absolute top of the screen, even after
+> restarting the app. I can't drag it down from the title bar, it snaps
+> back into place/ zoom fit makes it wider but can't bring the bottom
+> into view - it just stays still stuck as too big for teh scren and
+> absolutely unmovable. it can't be shrinked and the layout is cooked.
+> also, where is the quick entry bar? i don't see it at all. it should be
+> a quick entry bar into a new ost straight from shelf. also, the > is
+> only on one item, rather than it being a color > on the one i chos eand
+> the other ones not having it. there were also inline comments like
+> this: // which I liked. i don't see hwo the quick entry bar passed. and
+> the resize is still broken
+
+> make sure that the auto create new post with typing immediately on the
+> library page is created the way it was in the most recent round of the
+> mockups before the app is next rebuilt for me
+
+**The diagnosis, EMPIRICAL this time** (a temporary debug window-probe run
+against the dev store AND against a live backup copy of her real store —
+the store copy set aside and restored): the layout demands are HEALTHY
+(window content minimum ≈148pt on every probed surface; the sidebar
+List's tall frame is normal scroll-under-inset geometry) — so the wedge
+is a PERSISTED OVERSIZED FRAME that macOS's window constrainment keeps
+re-pinning to the screen top: moves snap back, and the bottom edge with
+its resize corners sits unreachable below the screen. **The fix makes
+the state unsurvivable rather than chasing the original writer:**
+`VariorumAppDelegate` gains a window SANITIZER — at launch and on every
+app activation, any non-fullscreen window larger than its screen's
+visible frame is clamped back inside it. Relaunching self-heals; nothing
+she does can wedge it again. (The probe code was removed after serving.)
+
+**Batch 8 dispositions:**
+- **The quick-entry bar was never missing** — it shipped on the shelf
+  (mockup-exact: hint line, field, blinking block cursor, ⏎ opens the
+  post) and sat below the wedged window's fold. Her "i don't see how the
+  quick entry bar passed" is answered honestly: ops and views are
+  tested; nothing tests whether WINDOW GEOMETRY hides chrome — the
+  sanitizer closes that class.
+- **Her directive executed:** the bar is now ONE shared component
+  (`QuickEntryBar`, the round-2 mockup's shape as the contract) and the
+  **LIBRARY page carries it too** — type, ⏎, the typed text is a post,
+  opened.
+- **The › marker is now a COLOR ›** (accent, bold) on the selected
+  sidebar row only — her batch-8 correction of the batch-7 wiring.
+- **The `//` comments memory checked against canon:** the ratified
+  round-2 mockup uses "# comment" (its idiom line reads "› selection ·
+  path slashes · ~/shelf · blinking cursor · # comments · status line"),
+  and "#" is what shipped on the margin comment cards. The "//" she
+  remembers is the earlier direction-B draft. HER CALL whether to switch
+  the token to "//" — one string in the voice layer.
+
+Counts: core 738/88 · Mac 424/78 · mobile 11/4. Still queued: R98
+(smart-book adds by tagging), R99 (outline mint — awaiting her
+full-text-vs-skeleton answer), R100's remaining idiom pass.
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

@@ -28,9 +28,6 @@ struct ShelfView: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
-    @State private var entryText = ""
-    @State private var cursorOn = true
-    @FocusState private var entryFocused: Bool
     @State private var createPresented = false
     @State private var nameField = ""
     @State private var renameTarget: Reading?
@@ -262,51 +259,12 @@ struct ShelfView: View {
         }
     }
 
-    // MARK: - Quick entry (R3)
+    // MARK: - Quick entry (R3 — the shared bar; Library carries it too)
 
     private var entryBar: some View {
         VStack(alignment: .leading, spacing: 4) {
             Divider().overlay(tokens.line)
-            Text(tokens.chromeLabel("new post — start typing · ⏎ opens it as a post"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-                .padding(.top, 8)
-            HStack(spacing: 2) {
-                TextField("", text: $entryText, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.ink)
-                    .focused($entryFocused)
-                    .lineLimit(1...4)
-                    .onSubmit { submitEntry() }
-                if tokens.showsBlockCursor && entryText.isEmpty && !entryFocused {
-                    Rectangle()
-                        .fill(tokens.accent)
-                        .frame(width: 8, height: 16)
-                        .opacity(cursorOn ? 1 : 0)
-                        .task {
-                            while !Task.isCancelled {
-                                try? await Task.sleep(for: .milliseconds(550))
-                                cursorOn.toggle()
-                            }
-                        }
-                }
-                Spacer()
-            }
-            .padding(.bottom, 10)
-        }
-        .padding(.horizontal, 28)
-        .background(tokens.card)
-        .onTapGesture { entryFocused = true }
-    }
-
-    private func submitEntry() {
-        let text = entryText
-        entryText = ""
-        Task {
-            if let id = await model.quickEntry(text) {
-                onOpen(.post(id))
-            }
+            QuickEntryBar(session: session, onOpen: onOpen)
         }
     }
 
