@@ -213,7 +213,7 @@ struct TakesBoardTests {
             try await refresh()
             let lens = await model.saveScratchAsLens(columnID: scratch.id, name: "thread")
             try await refresh()
-            await model.branchAllFans(lensName: "eager thread")
+            await model.addWriteColumn()  // "write new takes" — mints takes, never chooses
             try await refresh()
             model.focus(TakesViewModel.PaneKey(
                 columnID: model.columns[0].id, blockID: world.blocks[0],
@@ -243,6 +243,109 @@ struct TakesBoardTests {
             } else {
                 Issue.record("saveScratchAsLens returned nil")
             }
+        }
+    }
+
+    /// Sitting 9's column-slot machinery (R80/R83/R89/R90): auto-names,
+    /// slot replacement, the write-column's minted picks, the ‹ › switcher
+    /// clamping, adopt-swap's preservation, and the blank-take power pair.
+    @Test func columnSlotsAutoNameReplaceStepAndSwap() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID, defaults: freshDefaults("slots"))
+            @MainActor func refresh() async throws {
+                model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            }
+            try await refresh()
+
+            // Auto-names: "Lens 1", "Lens 2" — visible unnamed lenses (R83).
+            model.addScratchColumn()
+            model.addScratchColumn()
+            #expect(model.columns[1].name == "Lens 1")
+            #expect(model.columns[2].name == "Lens 2")
+
+            // The write column mints ONE take per renderable slot and picks
+            // exactly them (R81's "write new takes").
+            let fanBefore = try await db.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM variant WHERE deleted_at IS NULL") ?? 0
+            }
+            await model.addWriteColumn()
+            #expect(model.columns.count == 4)
+            let written = model.columns[3]
+            #expect(written.picks.count == 3, "a pick on every renderable slot")
+            let fanAfter = try await db.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM variant WHERE deleted_at IS NULL") ?? 0
+            }
+            #expect(fanAfter == fanBefore + 3, "exactly the minted takes, nothing else")
+            try await refresh()
+
+            // ‹ › steps THAT column's pick only, ends clamped (R89).
+            let slot1 = model.projection.slots[0]
+            let scratchID = model.columns[1].id
+            #expect(model.pickPosition(columnID: scratchID, slot: slot1)?.index == 1)
+            await model.stepPick(columnID: scratchID, slot: slot1, by: -1)
+            #expect(model.pickPosition(columnID: scratchID, slot: slot1)?.index == 1,
+                    "the start clamps")
+            await model.stepPick(columnID: scratchID, slot: slot1, by: 1)
+            #expect(model.pickPosition(columnID: scratchID, slot: slot1)?.index == 2)
+            // The pick the column now holds (fan-position order — branch
+            // lands beside its source, so don't assume creation order).
+            let steppedPick = model.columns.first { $0.id == scratchID }!.picks[world.blocks[0]]
+            #expect(steppedPick != nil && steppedPick != world.chosen[0])
+            let chosenNow = try await db.read { [postID = world.postID] db in
+                try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT chosen_variant_id FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL ORDER BY position, id
+                        """, arguments: [postID]).map { $0["chosen_variant_id"] as String? }
+            }
+            #expect(chosenNow[0] == world.chosen[0], "stepping a pick never writes chosen")
+
+            // Slot replacement (R83): the write column becomes Chosen in place.
+            model.replaceColumnWithChosen(written.id)
+            #expect(model.columns[3].kind == .main)
+
+            // Adopt-swap (R92): the scratch column's pick becomes the post;
+            // the outgoing chosen survives as the auto-named lens.
+            await model.adoptColumn(scratchID)
+            try await refresh()
+            let chosenAfter = try await db.read { [postID = world.postID] db in
+                try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT chosen_variant_id FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL ORDER BY position, id
+                        """, arguments: [postID]).map { $0["chosen_variant_id"] as String? }
+            }
+            #expect(chosenAfter[0] == steppedPick,
+                    "the adopted pick IS the post now")
+            let preserved = model.projection.lenses.first { $0.name.hasPrefix("chosen until") }
+            #expect(preserved != nil, "the old chosen survives as a lens (adopting swaps, never destroys)")
+            #expect(model.statusMessage?.contains("chosen until") == true,
+                    "the toast names the way back")
+
+            // The blank-take pair (R90): default mints WITHOUT choosing;
+            // the power variant mints AND chooses.
+            await model.newBlankTake(blockID: world.blocks[2])
+            try await refresh()
+            let chosen3 = try await db.read { [block = world.blocks[2]] db in
+                try String.fetchOne(
+                    db, sql: "SELECT chosen_variant_id FROM container_block WHERE block_id = ?",
+                    arguments: [block])
+            }
+            #expect(chosen3 == world.chosen[2], "default blank take never chooses")
+            await model.newBlankTakeAsChosen(blockID: world.blocks[2])
+            try await refresh()
+            let chosen3After = try await db.read { [block = world.blocks[2]] db in
+                try String.fetchOne(
+                    db, sql: "SELECT chosen_variant_id FROM container_block WHERE block_id = ?",
+                    arguments: [block])
+            }
+            #expect(chosen3After != world.chosen[2], "the power variant chooses what it minted")
         }
     }
 

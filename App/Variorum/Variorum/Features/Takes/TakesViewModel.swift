@@ -118,10 +118,11 @@ final class TakesViewModel {
     }
 
     /// Expand-all only where it MEANS something (R25's agreed half): the
-    /// single-column article that isn't slot-split — full-text columns and
-    /// slot-split ARE whole-post fan presentations already.
+    /// article that isn't slot-split (slot split IS a whole-post fan
+    /// presentation already). Columns no longer figure in — they live in
+    /// the LENSES tab now (Sitting 9, R86: the entanglement is dead).
     var offersExpandAll: Bool {
-        columns.count == 1 && projection.fanStyle != .slotSplit
+        projection.fanStyle != .slotSplit
     }
 
     /// R24's short/long rule for the margin grid: a SHORT fanned block gets
@@ -192,6 +193,7 @@ final class TakesViewModel {
             if case .lens(let lensID) = columns[index].kind,
                !new.lenses.contains(where: { $0.id == lensID }) {
                 columns[index].kind = .scratch
+                if columns[index].name == nil { columns[index].name = nextAutoName() }
                 changed = true
             }
         }
@@ -283,15 +285,43 @@ final class TakesViewModel {
         liveBuffers.removeValue(forKey: variantID)
     }
 
-    // MARK: - Columns
+    // MARK: - Columns (the Lenses tab's slots — Sitting 9, R80/R83)
 
+    /// The next free "Lens n" auto-name among the current columns (R83:
+    /// unnamed lenses are named too, so slots can be told apart and
+    /// replaced deliberately).
+    private func nextAutoName() -> String {
+        let taken = Set(columns.compactMap(\.name))
+        var n = 1
+        while taken.contains("Lens \(n)") { n += 1 }
+        return "Lens \(n)"
+    }
+
+    /// "+ Column → arrange existing takes" (R81's language): a fresh
+    /// unnamed lens mirroring chosen; flip blocks to takes that already
+    /// exist. Mints nothing.
     func addScratchColumn() {
         guard columns.count < 4 else { return }
-        // The transparent lens is the default for new threads (the LAZY
-        // ruling): a fresh column starts as an empty overlay; takes mint
-        // only on divergence.
-        columns.append(TakesColumn(kind: .scratch))
+        columns.append(TakesColumn(kind: .scratch, name: nextAutoName()))
         saveMemory()
+    }
+
+    /// "+ Column → write new takes" (R81/R82): a fresh take on EVERY
+    /// renderable block (branched from what the post shows), opened as an
+    /// unnamed column whose picks are exactly the minted takes.
+    func addWriteColumn() async {
+        guard columns.count < 4 else { return }
+        statusMessage = nil
+        do {
+            let picks: [String: String] = try await session.runner.run { [postID] ops in
+                try ops.branchAllFans(post: postID)
+            }
+            guard columns.count < 4 else { return }
+            columns.append(TakesColumn(kind: .scratch, picks: picks, name: nextAutoName()))
+            saveMemory()
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
     }
 
     func addLensColumn(_ lensID: String) {
@@ -304,6 +334,42 @@ final class TakesViewModel {
         guard columns.count > 1 else { return }
         columns.removeAll { $0.id == columnID }
         saveMemory()
+    }
+
+    // MARK: - Column slot swapping (R83: any column replaceable in place)
+
+    func replaceColumnWithChosen(_ columnID: String) {
+        guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
+        columns[i] = TakesColumn(id: columnID, kind: .main)
+        saveMemory()
+    }
+
+    func replaceColumnWithLens(_ columnID: String, lensID: String) {
+        guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
+        columns[i] = TakesColumn(id: columnID, kind: .lens(lensID))
+        saveMemory()
+    }
+
+    func replaceColumnWithNewScratch(_ columnID: String) {
+        guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
+        columns[i] = TakesColumn(id: columnID, kind: .scratch, name: nextAutoName())
+        saveMemory()
+    }
+
+    func replaceColumnWithNewWrite(_ columnID: String) async {
+        guard columns.contains(where: { $0.id == columnID }) else { return }
+        statusMessage = nil
+        do {
+            let picks: [String: String] = try await session.runner.run { [postID] ops in
+                try ops.branchAllFans(post: postID)
+            }
+            guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
+            columns[i] = TakesColumn(
+                id: columnID, kind: .scratch, picks: picks, name: nextAutoName())
+            saveMemory()
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
     }
 
     private func saveMemory() {
@@ -383,6 +449,7 @@ final class TakesViewModel {
                 // Diverging the main column starts a scratch thread —
                 // chosen never moves without ✓.
                 columns[i].kind = .scratch
+                if columns[i].name == nil { columns[i].name = nextAutoName() }
                 columns[i].picks[blockID] = take.id
                 saveMemory()
             case .scratch:
@@ -433,19 +500,71 @@ final class TakesViewModel {
         }
     }
 
-    /// ⧉ per column: a lens column promotes (chosen := its picks; fans ride
-    /// by default, chosen-only offered); the main column duplicates (the
-    /// post exactly as it is). Scratch columns save-as-lens first (💾) —
-    /// the shipped shape, recorded in the closeout.
-    func promoteColumn(_ columnID: String, carryFans: Bool = true) async {
+    /// "✓ Make this the post" — the R89 obvious door on every non-Chosen
+    /// column. ADOPTING SWAPS, NEVER DESTROYS (R92): the outgoing chosen is
+    /// auto-preserved as a lens ("chosen until <date>", suffixed on
+    /// collision) in the same transaction; the toast names it so the way
+    /// back is visible.
+    func adoptColumn(_ columnID: String) async {
         guard let column = columns.first(where: { $0.id == columnID }) else { return }
+        statusMessage = nil
+        do {
+            let preservation: Lens
+            switch column.kind {
+            case .main:
+                statusMessage = "This column IS the post — nothing to adopt."
+                return
+            case .lens(let lensID):
+                preservation = try await session.runner.run { ops in
+                    try ops.adoptLensPreservingChosen(lensID)
+                }
+            case .scratch:
+                let picks = column.picks
+                preservation = try await session.runner.run { [postID] ops in
+                    try ops.adoptPicksPreservingChosen(post: postID, picks: picks)
+                }
+            }
+            statusMessage =
+                "Adopted — the post now shows this column. The old chosen is kept as the lens “\(preservation.name)”."
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// ⧉ "Make this a post" per column: a lens column promotes; a SCRATCH
+    /// column promotes DIRECTLY from its picks (R78 — the forced
+    /// save-as-lens step is retired; `keepAsLens` optionally saves the way
+    /// of looking too); the main column duplicates (the post exactly as it
+    /// is). Fans ride by default, chosen-only offered at the gesture.
+    func promoteColumn(_ columnID: String, carryFans: Bool = true, keepAsLens: Bool = false) async {
+        guard let column = columns.first(where: { $0.id == columnID }) else { return }
+        statusMessage = nil
         switch column.kind {
         case .main:
             await duplicateAsVersion()
         case .lens(let lensID):
             await run { ops in _ = try ops.promoteLens(lensID, carryFans: carryFans) }
         case .scratch:
-            statusMessage = "Save this column as a lens first (💾) — promoting materializes a lens."
+            let picks = column.picks
+            let lensName = column.name ?? "Lens"
+            do {
+                let promoted: Operations.PostCopyResult = try await session.runner.run { [postID] ops in
+                    let result = try ops.promotePicks(
+                        post: postID, picks: picks, carryFans: carryFans)
+                    if keepAsLens {
+                        let lens = try ops.createLens(post: postID, name: lensName)
+                        for (blockID, variantID) in picks.sorted(by: { $0.key < $1.key }) {
+                            _ = try ops.setLensChoice(
+                                lens: lens.id, block: blockID, variant: variantID)
+                        }
+                    }
+                    return result
+                }
+                statusMessage =
+                    "Made a new post — “\(promoted.post.title ?? "untitled")” is now its own post, linked as a version."
+            } catch {
+                statusMessage = Self.message(for: error)
+            }
         }
     }
 
@@ -453,15 +572,40 @@ final class TakesViewModel {
         await run { [postID] ops in _ = try ops.duplicateAsVersion(postID) }
     }
 
-    /// BRANCH-ALL-FANS: the eager thread (explicit command; new columns
-    /// default to the transparent scratch instead).
-    func branchAllFans(lensName: String) async {
+    /// "Write new takes on every block" from the TAKES tab (R82: the door
+    /// lives in both tabs): mints the takes into each block's fan — no
+    /// column, no lens — and says what happened.
+    func writeNewTakesEverywhere() async {
+        statusMessage = nil
+        do {
+            let picks: [String: String] = try await session.runner.run { [postID] ops in
+                try ops.branchAllFans(post: postID)
+            }
+            statusMessage =
+                "New takes written on \(picks.count) block\(picks.count == 1 ? "" : "s") — open any fan to see them, or open them side by side in Lenses."
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// "Save current choices as a lens…" (the Takes tab's elevate door —
+    /// Sitting 9's "you should always … be able to elevate what you have to
+    /// being a lens"): a lens whose EXPLICIT pick on every renderable slot
+    /// is what the post currently shows.
+    func saveCurrentChoicesAsLens(name: String) async {
+        let shown: [(String, String)] = projection.slots.compactMap { slot in
+            slot.variantID.map { (slot.blockID, $0) }
+        }
         statusMessage = nil
         do {
             let lens: Lens = try await session.runner.run { [postID] ops in
-                try ops.branchAllFans(post: postID, lensName: lensName)
+                let lens = try ops.createLens(post: postID, name: name)
+                for (blockID, variantID) in shown {
+                    _ = try ops.setLensChoice(lens: lens.id, block: blockID, variant: variantID)
+                }
+                return lens
             }
-            addLensColumn(lens.id)
+            statusMessage = "Saved — “\(lens.name)” now remembers these choices."
         } catch {
             statusMessage = Self.message(for: error)
         }
@@ -492,9 +636,45 @@ final class TakesViewModel {
         await run { ops in _ = try ops.branchVariant(blockID, from: variantID) }
     }
 
-    /// "＋ blank take" — the genuinely-different-take gesture.
+    /// "＋ blank take" — the genuinely-different-take gesture. Minting
+    /// NEVER chooses (R90: "as you go through and fill items in, it can be
+    /// selected"); the new card gets the ring so you're typing instantly.
     func newBlankTake(blockID: String) async {
         await run { ops in _ = try ops.newBlankVariant(blockID) }
+    }
+
+    /// The R90 power variant (⇧⌥⌘T — "open new blank take as chosen"):
+    /// mint AND choose in one gesture, both halves in one serialized run.
+    func newBlankTakeAsChosen(blockID: String) async {
+        await run { ops in
+            let take = try ops.newBlankVariant(blockID)
+            try ops.chooseVariant(blockID, variantID: take.id)
+        }
+    }
+
+    /// The lens column's per-block ‹ › switcher (R83/R89 — the canvas
+    /// grammar reused; here it moves THAT COLUMN's pick only, view-local
+    /// for scratch, live-edited for named lenses; ends clamp).
+    func stepPick(columnID: String, slot: Queries.RenderedBlock, by delta: Int) async {
+        guard let column = columns.first(where: { $0.id == columnID }),
+              column.kind != .main,
+              let fan = projection.fans[slot.blockID], fan.count > 1,
+              let current = resolvedTake(column: column, slot: slot)
+        else { return }
+        guard let index = fan.firstIndex(where: { $0.id == current.variantID }) else { return }
+        let next = min(max(index + delta, 0), fan.count - 1)
+        guard next != index else { return }
+        await pick(columnID: columnID, blockID: slot.blockID, variantID: fan[next].id)
+    }
+
+    /// The switcher's "take k of n" caption for a column's block.
+    func pickPosition(columnID: String, slot: Queries.RenderedBlock) -> (index: Int, count: Int)? {
+        guard let column = columns.first(where: { $0.id == columnID }),
+              let fan = projection.fans[slot.blockID], fan.count > 1,
+              let current = resolvedTake(column: column, slot: slot),
+              let index = fan.firstIndex(where: { $0.id == current.variantID })
+        else { return nil }
+        return (index + 1, fan.count)
     }
 
     // MARK: - Plumbing

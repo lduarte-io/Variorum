@@ -27,13 +27,21 @@ struct PostDetailView: View {
     enum Mode: String, CaseIterable {
         case write = "Write"
         case takes = "Takes"
+        case lenses = "Lenses"
         case compare = "Compare"
         case outline = "Outline"
         case blocks = "Blocks"
         case canvas = "Canvas"
     }
 
-    @State private var mode: Mode = .write
+    /// R79 (Sitting 9): a post opens in TAKES the first time; thereafter it
+    /// reopens in whatever mode you last used there (per-post memory,
+    /// scroll-position class — local, never synced).
+    static func rememberedMode(postID: String, defaults: UserDefaults = .standard) -> Mode {
+        defaults.string(forKey: "postMode.\(postID)").flatMap(Mode.init(rawValue:)) ?? .takes
+    }
+
+    @State private var mode: Mode = .takes
     /// A TOC jump's landing: the Write editor re-seeds at this caret (the
     /// hybrid primitive fires in the editor — TK2 §3: no folding here).
     @State private var pendingCaret: Int?
@@ -70,6 +78,12 @@ struct PostDetailView: View {
             case .takes:
                 TakesBoardView(session: session, postID: postID)
                     .id("takes-\(postID)")
+            case .lenses:
+                // Sitting 9 (R65/R86): the multi-column editor + lens
+                // machinery's one home — columns never share a surface
+                // with fan styles again.
+                LensesBoardView(session: session, postID: postID)
+                    .id("lenses-\(postID)")
             case .compare:
                 AlignedPostsView(session: session, anchorPostID: postID)
                     .id("compare-\(postID)")
@@ -93,7 +107,11 @@ struct PostDetailView: View {
                 .inspectorColumnWidth(min: 240, ideal: 340)
         }
         .onAppear {
+            mode = Self.rememberedMode(postID: postID)
             if let initialBlockID { jump(to: initialBlockID) }
+        }
+        .onChange(of: mode) { _, new in
+            UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
         }
     }
 

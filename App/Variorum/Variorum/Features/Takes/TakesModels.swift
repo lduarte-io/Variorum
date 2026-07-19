@@ -32,11 +32,20 @@ struct TakesColumn: Identifiable, Equatable, Codable {
     /// chosen). Ignored for `.main`/`.lens` (a lens's picks live in the
     /// store).
     var picks: [String: String] = [:]
+    /// The UNNAMED lens's display name ("Lens 1", "Lens 2"… — Sitting 9,
+    /// R83: a scratch column IS an unnamed lens, visibly; auto-assigned at
+    /// creation, persisted with the view memory). Named-lens columns show
+    /// the lens's own name; nil on `.main`.
+    var name: String?
 
-    init(id: String = UUID().uuidString, kind: TakesColumnKind, picks: [String: String] = [:]) {
+    init(
+        id: String = UUID().uuidString, kind: TakesColumnKind,
+        picks: [String: String] = [:], name: String? = nil
+    ) {
         self.id = id
         self.kind = kind
         self.picks = picks
+        self.name = name
     }
 }
 
