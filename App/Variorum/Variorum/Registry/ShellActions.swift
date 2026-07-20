@@ -186,17 +186,27 @@ struct ShellActions {
 
     // MARK: - The tutorial doors (13b Stage 2, R113)
 
-    /// Help ▸ Restore Tutorial… — fire-and-DO: replace the tutorial book
-    /// wholesale (after a spoken confirm when one exists), then OPEN the
-    /// fresh copy. `confirm` is the injectable seam over the modal alert.
+    /// Help ▸ Restore Tutorial… — fire-and-DO, ONE discovery (Stage 2
+    /// ladder, MAJOR-A): the spoken confirm gates on ANYTHING the replace
+    /// would destroy existing (not just a live book — a bookless store can
+    /// still hold tagged posts, hers included), and the SAME discovery
+    /// flows into the replace, so what was confirmed is exactly what dies.
+    /// `confirm` is the injectable seam over the modal alert. A
+    /// double-press converges: the session latch makes the second press a
+    /// synchronous no-op (NIT-6).
     func restoreTutorial(confirm: (() -> Bool)? = nil) {
+        guard session.beginTutorialDoor() else { return }
         Task { @MainActor in
-            if await TutorialSeeder.existingBookID(session: session) != nil {
-                let confirmed = confirm?() ?? Self.confirmTutorialReplace()
-                guard confirmed else { return }
-            }
+            defer { session.endTutorialDoor() }
             do {
-                let bookID = try await TutorialSeeder.restore(session: session)
+                let existing = try await session.database.read { db in
+                    try TutorialSeeder.discover(db)
+                }
+                if !existing.isEmpty {
+                    let confirmed = confirm?() ?? Self.confirmTutorialReplace()
+                    guard confirmed else { return }
+                }
+                let bookID = try await TutorialSeeder.restore(session: session, existing: existing)
                 shell.pendingSelection = .reading(bookID)
                 status.speak("The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your shelf.")
             } catch {
@@ -206,11 +216,19 @@ struct ShellActions {
     }
 
     /// The open entrance (⌘K row, Library door): an existing book opens;
-    /// none ⇒ seed one first. Fire-and-DO — never a lecture.
-    func openTutorial() {
+    /// none ⇒ seed one first — through the restore path (confirm and all)
+    /// when a bookless store still holds tutorial residue (MINOR-D5).
+    /// Fire-and-DO — never a lecture; failures speak. Shares the door
+    /// latch with Restore (the two doors must not race each other either).
+    func openTutorial(confirm: (() -> Bool)? = nil) {
+        guard session.beginTutorialDoor() else { return }
         Task { @MainActor in
+            defer { session.endTutorialDoor() }
             do {
-                let bookID = try await TutorialSeeder.findOrSeed(session: session)
+                guard let bookID = try await TutorialSeeder.findOrSeed(
+                    session: session,
+                    confirmReplace: { confirm?() ?? Self.confirmTutorialReplace() })
+                else { return }
                 shell.pendingSelection = .reading(bookID)
             } catch {
                 status.speak("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")

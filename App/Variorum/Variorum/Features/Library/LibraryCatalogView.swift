@@ -124,6 +124,11 @@ struct LibraryCatalogView: View {
     /// Stage C: block hits land caret-precise when the shell provides the
     /// door (nil falls back to plain navigation).
     var onOpenBlock: ((SidebarSelection, String) -> Void)? = nil
+    /// 13b Stage 2 ladder, MINOR-D6: the tutorial door routes through the
+    /// shell's fire-and-DO act (`ShellActions.openTutorial` — failures
+    /// speak; the old inline `try?` swallowed them silently while the
+    /// ShellActions sibling spoke).
+    let onOpenTutorial: () -> Void
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -201,14 +206,9 @@ struct LibraryCatalogView: View {
                 Menu {
                     Button("Archived & Deleted") { onOpen(.recovery) }
                     // 13b Stage 2: the old entrance points at the tutorial
-                    // BOOK (find-or-seed, then open).
-                    Button("Open the Tutorial") {
-                        Task { @MainActor in
-                            if let bookID = try? await TutorialSeeder.findOrSeed(session: session) {
-                                onOpen(.reading(bookID))
-                            }
-                        }
-                    }
+                    // BOOK (find-or-seed, then open) — via the shell's one
+                    // fire-and-DO door (MINOR-D6: never a silent `try?`).
+                    Button("Open the Tutorial") { onOpenTutorial() }
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }

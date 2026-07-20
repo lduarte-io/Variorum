@@ -157,7 +157,9 @@ struct RootView: View {
             LibraryCatalogView(
                 session: session, model: catalog, library: library, tags: tags,
                 onOpen: { selection = $0 },
-                onOpenBlock: { picked, blockID in open(picked, blockID: blockID) })
+                onOpenBlock: { picked, blockID in open(picked, blockID: blockID) },
+                // MINOR-D6: the one fire-and-DO tutorial door (failures speak).
+                onOpenTutorial: { ShellActions(session: session, shell: router).openTutorial() })
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts, library: library,

@@ -88,6 +88,23 @@ final class AppSession {
         }
         return coordinator
     }
+
+    /// 13b Stage 2 ladder (NIT-6): the tutorial doors' in-flight latch —
+    /// a double-pressed Restore must never race two discoveries into two
+    /// live field guides. Session-scoped (parallel test worlds stay
+    /// independent); `begin` runs synchronously at PRESS time, so the
+    /// second press bails before any await can interleave.
+    private(set) var tutorialDoorInFlight = false
+
+    func beginTutorialDoor() -> Bool {
+        if tutorialDoorInFlight { return false }
+        tutorialDoorInFlight = true
+        return true
+    }
+
+    func endTutorialDoor() {
+        tutorialDoorInFlight = false
+    }
     #endif
 
     init(database: AppDatabase) {

@@ -39,12 +39,16 @@ enum TutorialSeeder {
     nonisolated static let scrapPoolTitle = "tutorial scraps"
 
     /// What the confirm sheet says before a wholesale replace — plain
-    /// words, exact scope (the spoken confirm, brief decision 6).
+    /// words, exact scope (the spoken confirm, brief decision 6; the
+    /// Stage 2 ladder's MINOR-D3/D4 accuracy pass: the copy discloses the
+    /// EXACT tag and the PLURAL name-based scope, because cleanup deletes
+    /// every same-named book and pool — a user's colliding names included,
+    /// accept-and-document per the architect's recorded call).
     nonisolated static let replaceQuestion = "Restore the tutorial?"
     nonisolated static let replaceDetail =
-        "This replaces \u{201C}\(bookName)\u{201D} with a fresh copy: every post tagged "
-        + "\u{201C}\(tagName)\u{201D}, the \u{201C}\(scrapPoolTitle)\u{201D} pool, and the book itself "
-        + "are deleted and re-seeded. Nothing else is touched."
+        "This replaces the tutorial with a fresh copy: every post tagged exactly "
+        + "\u{201C}\(tagName)\u{201D}, every pool named \u{201C}\(scrapPoolTitle)\u{201D}, and every book "
+        + "named \u{201C}\(bookName)\u{201D} are deleted and re-seeded. Nothing else is touched."
 
     // MARK: - The lesson plan (the coverage CONTRACT, walk-asserted)
 
@@ -67,6 +71,10 @@ enum TutorialSeeder {
 
     // MARK: - Discovery (reads — the doomed set for a wholesale replace)
 
+    /// ONE discovery per door entrance (Stage 2 ladder, MAJOR-A): the
+    /// confirm gates on `isEmpty` — the SAME predicate as the destruction —
+    /// and the SAME `Existing` flows into the replace, so what the user
+    /// confirmed is exactly what dies (no second read, no TOCTOU).
     struct Existing: Sendable {
         var readingIDs: [String] = []
         var taggedPostIDs: [String] = []
@@ -84,8 +92,11 @@ enum TutorialSeeder {
             .map(\.id)
         if let tag = try Queries.allTags(db).first(where: { $0.path == tagName }) {
             existing.tagID = tag.id
+            // The EXACT tag, never the subtree (MINOR-D3): the seeder only
+            // ever applies `tutorial` itself — a post tagged `tutorial/…`
+            // is hers, and the confirm's disclosure must stay true.
             existing.taggedPostIDs = try Queries
-                .everythingTagged(db, tagID: tag.id, includeSubtree: true)
+                .everythingTagged(db, tagID: tag.id, includeSubtree: false)
                 .postIDs
         }
         existing.poolIDs = try Queries.pools(db)
@@ -94,38 +105,54 @@ enum TutorialSeeder {
         return existing
     }
 
-    /// The live tutorial book, if one exists (the open-the-tutorial door).
-    @MainActor
-    static func existingBookID(session: AppSession) async -> String? {
-        (try? await session.database.read { db in
-            try Queries.readings(db).first { $0.name == bookName }?.id
-        }) ?? nil
-    }
-
     // MARK: - The doors
 
-    /// Open door: an existing book is simply opened; none ⇒ seed fresh.
+    /// Open door: an existing book simply opens. No book but tutorial
+    /// RESIDUE (tagged lessons, the scrap pool a deleted book left behind)
+    /// ⇒ the restore path, `confirmReplace` included (MINOR-D5/MAJOR-A:
+    /// seeding beside residue minted a second "tutorial scraps" pool —
+    /// titles aren't unique — and kept orphaned old lessons beside fresh
+    /// ones; and the residue may include HER tagged posts, hers to refuse
+    /// for). Nothing at all ⇒ a pure fresh seed (cleanup over an empty
+    /// discovery is a no-op, so it is the same one shape). Returns nil
+    /// when the confirm declined.
     @MainActor
-    @discardableResult
-    static func findOrSeed(session: AppSession) async throws -> String {
-        if let existing = await existingBookID(session: session) { return existing }
-        let tagID = try await session.database.read { db in try discover(db).tagID }
-        return try await session.runner.run { ops in
-            try seed(ops: ops, existingTagID: tagID)
-        }
+    static func findOrSeed(
+        session: AppSession, confirmReplace: () -> Bool
+    ) async throws -> String? {
+        let existing = try await session.database.read { db in try discover(db) }
+        if let bookID = existing.readingIDs.first { return bookID }
+        if !existing.isEmpty, !confirmReplace() { return nil }
+        return try await restore(session: session, existing: existing)
     }
 
     /// Restore door: wholesale replace — cleanup by reserved identity,
     /// then a pristine seed. Idempotent by construction (discovery finds
-    /// whatever a partial earlier run left behind).
+    /// whatever a partial earlier run left behind). The caller passes the
+    /// SAME `Existing` its confirm disclosed (MAJOR-A).
+    @MainActor
+    @discardableResult
+    static func restore(session: AppSession, existing: Existing) async throws -> String {
+        try await session.runner.run { _ in
+            // MINOR-D1: the seed is not HER act — nothing here may land on
+            // the session's structural-undo stack (⌥⌘Z must never pop an
+            // inverse for an act she never performed; the twin's
+            // `duplicateAsVersion` registers one). The seeder runs through
+            // a QUIET Operations facade: the same ambient database the
+            // session's own Operations reads, the same serialized runner
+            // turn, NO undo stack.
+            let quiet = Operations(undoStack: nil)
+            cleanup(ops: quiet, existing: existing)
+            return try seed(ops: quiet, existingTagID: existing.tagID)
+        }
+    }
+
+    /// One-discovery convenience for direct callers (tests, the walk).
     @MainActor
     @discardableResult
     static func restore(session: AppSession) async throws -> String {
         let existing = try await session.database.read { db in try discover(db) }
-        return try await session.runner.run { ops in
-            cleanup(ops: ops, existing: existing)
-            return try seed(ops: ops, existingTagID: existing.tagID)
-        }
+        return try await restore(session: session, existing: existing)
     }
 
     /// Deletion is tombstones through Operations — everything recoverable

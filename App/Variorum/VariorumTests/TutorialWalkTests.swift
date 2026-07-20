@@ -80,6 +80,33 @@ private enum TutorialWalkError: Error {
     case missingStagedContent(String)
 }
 
+/// One user post's whole subtree, byte-for-byte (NIT-5: the wholesale pin
+/// used to compare ONE container row — now its placements, blocks, and
+/// variants ride the comparison too).
+private func userPostRows(_ db: Database, postID: String) throws -> [Row] {
+    try Row.fetchAll(db, sql: "SELECT * FROM container WHERE id = ?", arguments: [postID])
+        + Row.fetchAll(
+            db,
+            sql: "SELECT * FROM container_block WHERE container_id = ? ORDER BY id",
+            arguments: [postID])
+        + Row.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM block WHERE id IN
+                  (SELECT block_id FROM container_block WHERE container_id = ?)
+                ORDER BY id
+                """,
+            arguments: [postID])
+        + Row.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM variant WHERE block_id IN
+                  (SELECT block_id FROM container_block WHERE container_id = ?)
+                ORDER BY id
+                """,
+            arguments: [postID])
+}
+
 @MainActor
 private func slots(_ db: AppDatabase, _ postID: String) async throws -> [Queries.RenderedBlock] {
     try await db.read { try Queries.renderPost($0, containerID: postID) }
@@ -288,8 +315,8 @@ struct TutorialDoorTests {
             let userPost = try session.operations.createPost(title: "my real essay")
             _ = try session.operations.newBlock(in: userPost.id, text: "my own words.")
             let userBook = try session.operations.createReading(name: "my book", kind: .curated)
-            let userRow = try await db.read { db in
-                try Container.fetchOne(db, key: userPost.id)
+            let userRows = try await db.read { [postID = userPost.id] db in
+                try userPostRows(db, postID: postID)
             }
 
             // Wound the tutorial: delete one lesson, edit another.
@@ -320,13 +347,171 @@ struct TutorialDoorTests {
             let freshSlots = try await slots(db, freshDivide)
             #expect(freshSlots[0].text?.contains("Divide cuts a block in two") == true)
 
-            // The user's world is byte-untouched.
-            let userRowAfter = try await db.read { db in
-                try Container.fetchOne(db, key: userPost.id)
+            // The user's world is byte-untouched — the post AND its
+            // placements/blocks/variants (NIT-5).
+            let userRowsAfter = try await db.read { [postID = userPost.id] db in
+                try userPostRows(db, postID: postID)
             }
-            #expect(userRowAfter == userRow, "restore never touches her rows")
+            #expect(!userRowsAfter.isEmpty)
+            #expect(userRowsAfter == userRows, "restore never touches her rows — down to the variants")
             let userBookLive = try await db.read { try Queries.reading($0, id: userBook.id) != nil }
             #expect(userBookLive)
+        }
+    }
+
+    /// Stage 2 ladder MAJOR-A pin (red-on-old): the confirm gates on the
+    /// SAME predicate as the destruction — anything tutorial-shaped, not
+    /// just a live book. The finding's concrete path: she deletes the book
+    /// (lessons survive as tagged bookless posts) and tags one of her OWN
+    /// posts `tutorial` (the tags lesson teaches the gesture); the old
+    /// door saw no book, asked nothing, and silently tombstoned her post.
+    @Test func theConfirmGatesOnEverythingTheReplaceDestroys() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            try session.operations.deleteReading(bookID)
+            let userPost = try session.operations.createPost(title: "my tagged essay")
+            _ = try session.operations.newBlock(in: userPost.id, text: "my own words, wearing the tag.")
+            let tagID = try await db.read { db in
+                try Queries.allTags(db).first { $0.path == TutorialSeeder.tagName }?.id
+            }
+            _ = try session.operations.applyTag(try #require(tagID), toPost: userPost.id)
+
+            let actions = ShellActions(session: session, shell: ShellRouter())
+            var consulted = false
+            actions.restoreTutorial(confirm: { consulted = true; return false })
+            await poll { consulted }
+            #expect(consulted, "no live book, but tagged content exists — the confirm still gates")
+            await poll { !session.tutorialDoorInFlight }
+            let userStillLive = try await db.read { db in
+                try Container.fetchOne(db, key: userPost.id)?.deletedAt == nil
+            }
+            #expect(userStillLive == true, "an unconfirmed Restore deletes NOTHING — her post survives")
+        }
+    }
+
+    /// Stage 2 ladder MINOR-D3 pin (red-on-old): cleanup destroys exactly
+    /// what the confirm discloses — the EXACT `tutorial` tag, never its
+    /// sub-tags. The seeder only ever applies the exact tag; a post tagged
+    /// `tutorial/…` is hers.
+    @Test func aSubTaggedUserPostSurvivesTheRestore() async throws {
+        try await withTutorialWorld { session, db, _ in
+            let parentID = try await db.read { db in
+                try Queries.allTags(db).first { $0.path == TutorialSeeder.tagName }?.id
+            }
+            let child = try session.operations.createTag(
+                parent: try #require(parentID), name: "keepsake")
+            let userPost = try session.operations.createPost(title: "my keepsake notes")
+            _ = try session.operations.newBlock(in: userPost.id, text: "sub-tagged, mine.")
+            _ = try session.operations.applyTag(child.id, toPost: userPost.id)
+
+            _ = try await TutorialSeeder.restore(session: session)
+            let stillLive = try await db.read { db in
+                try Container.fetchOne(db, key: userPost.id)?.deletedAt == nil
+            }
+            #expect(stillLive == true, "a `tutorial/…` post is NOT the tutorial's to clean up")
+        }
+    }
+
+    /// Stage 2 ladder MINOR-D4 (the architect's recorded call, built):
+    /// keying stays NAME-BASED, accept-and-document — a USER reading named
+    /// exactly "the field guide" is the replace's to delete (readings have
+    /// no restore door — the standing pre-13 boundary), and the reshaped
+    /// confirm (a) fires whenever anything exists and (b) discloses "every
+    /// book named …" PLURAL, so the collision costs nothing undisclosed.
+    /// Her member posts survive (cleanup deletes tagged posts only;
+    /// deleting a reading never touches containers). Coverage pin — the
+    /// behavior is accepted; the missing piece was a pin at the edge.
+    @Test func aSameNamedUserBookDiesWithTheConfirmedReplaceButItsPostsSurvive() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let herBook = try session.operations.createReading(
+                name: TutorialSeeder.bookName, kind: .curated)
+            let herPost = try session.operations.createPost(title: "her chapter draft")
+            _ = try session.operations.newBlock(
+                in: herPost.id, text: "her words, in her same-named book.")
+            _ = try session.operations.addPostToReading(herPost.id, to: herBook.id)
+
+            let shell = ShellRouter()
+            let actions = ShellActions(session: session, shell: shell)
+            var consulted = false
+            actions.restoreTutorial(confirm: { consulted = true; return true })
+            await poll { shell.pendingSelection != nil }
+            #expect(consulted, "the collision case is confirm-gated")
+
+            let (fieldGuides, herBookLive, herPostLive) = try await db.read { db -> (Int, Bool, Bool) in
+                (try Queries.readings(db).filter { $0.name == TutorialSeeder.bookName }.count,
+                 try Queries.reading(db, id: herBook.id) != nil,
+                 try Container.fetchOne(db, key: herPost.id)?.deletedAt == nil)
+            }
+            #expect(fieldGuides == 1, "exactly one live field guide — name-based keying, documented")
+            #expect(!herBookLive,
+                    "her same-named book died with the replace — the accepted, DISCLOSED cost")
+            #expect(herPostLive == true, "member posts survive; only the structure is gone")
+        }
+    }
+
+    /// Stage 2 ladder MINOR-D5 pin (red-on-old): the open entrance on a
+    /// book-DELETED store that still holds tutorial residue routes through
+    /// the RESTORE path — confirm included — instead of seeding beside the
+    /// residue (which grew a second "tutorial scraps" pool and kept
+    /// orphaned old lessons beside fresh ones; titles aren't unique).
+    @Test func openOnABooklessStoreWithResidueRestoresInsteadOfDuplicating() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            try session.operations.deleteReading(bookID)
+
+            let shell = ShellRouter()
+            let actions = ShellActions(session: session, shell: shell)
+            var consulted = false
+            actions.openTutorial(confirm: { consulted = true; return true })
+            await poll { shell.pendingSelection != nil }
+            #expect(consulted, "residue exists — the open door replaces, so it asks first")
+
+            let (pools, tagged) = try await db.read { db -> (Int, Int) in
+                let pools = try Queries.pools(db)
+                    .filter { $0.title == TutorialSeeder.scrapPoolTitle }.count
+                let tag = try Queries.allTags(db).first { $0.path == TutorialSeeder.tagName }
+                let tagged = try tag.map {
+                    try Queries.everythingTagged(db, tagID: $0.id, includeSubtree: false)
+                        .postIDs.count
+                } ?? 0
+                return (pools, tagged)
+            }
+            #expect(pools == 1, "never a second scrap pool")
+            #expect(tagged == TutorialSeeder.plan.flatMap(\.lessons).count + 1,
+                    "the lessons + the twin, exactly once — no orphans beside fresh copies")
+        }
+    }
+
+    /// Stage 2 ladder NIT-6 pin (red-on-old): a double-pressed Restore
+    /// converges — the session latch makes the second press a synchronous
+    /// no-op, so two discoveries can never race into two live field guides
+    /// (and the confirm is asked ONCE, not once per press).
+    @Test func aDoublePressedRestoreConvergesToOneFieldGuide() async throws {
+        try await withTutorialWorld { session, db, _ in
+            let shell = ShellRouter()
+            let actions = ShellActions(session: session, shell: shell)
+            var confirmCount = 0
+            actions.restoreTutorial(confirm: { confirmCount += 1; return true })
+            actions.restoreTutorial(confirm: { confirmCount += 1; return true })
+            await poll { shell.pendingSelection != nil }
+            await poll { !session.tutorialDoorInFlight }
+            #expect(confirmCount == 1, "the second press is a no-op — one door in flight per session")
+            let fieldGuides = try await db.read { db in
+                try Queries.readings(db).filter { $0.name == TutorialSeeder.bookName }.count
+            }
+            #expect(fieldGuides == 1, "never two live field guides")
+        }
+    }
+
+    /// Stage 2 ladder MINOR-D1 pin (red-on-old): seeding is not HER act —
+    /// the session's structural-undo stack is untouched by a restore (the
+    /// seed's `duplicateAsVersion` used to leave a stray "Duplicate as
+    /// Version" inverse; her next unmatched ⌥⌘Z popped it and the twin
+    /// lesson vanished — the R112 class through the tutorial's own door).
+    @Test func theSeederNeverTouchesTheStructuralUndoStack() async throws {
+        try await withTutorialWorld { session, _, _ in
+            #expect(session.undoStack.depth == 0, "the world's own seed left no inverse")
+            _ = try await TutorialSeeder.restore(session: session)
+            #expect(session.undoStack.depth == 0,
+                    "a restore leaves ⌥⌘Z exactly as it found it")
         }
     }
 
@@ -335,10 +520,15 @@ struct TutorialDoorTests {
             let shell = ShellRouter()
             let actions = ShellActions(session: session, shell: shell)
 
-            // Declined confirm: nothing replaced.
-            actions.restoreTutorial(confirm: { false })
-            try? await Task.sleep(for: .milliseconds(50))
-            await poll { shell.pendingSelection == nil }
+            // Declined confirm: the gate is REACHED (the spy proves it —
+            // NIT-3: the old negative poll on pendingSelection passed on
+            // its first turn and covered nothing), and nothing is replaced.
+            var consulted = false
+            actions.restoreTutorial(confirm: { consulted = true; return false })
+            await poll { consulted }
+            #expect(consulted, "the confirm was consulted")
+            await poll { !session.tutorialDoorInFlight }  // the door finished
+            #expect(shell.pendingSelection == nil, "a declined confirm opens nothing")
             let stillThere = try await db.read { try Queries.reading($0, id: bookID) != nil }
             #expect(stillThere, "Cancel keeps the existing book")
 
