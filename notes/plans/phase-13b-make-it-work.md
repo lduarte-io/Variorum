@@ -285,12 +285,12 @@ Commits per batch/stage with the standing message convention.
 | M1 | MERGE whole-feature design memo (R116) | owed — written during Stage 1, her rulings |
 | M2 | W CEREMONY memo + reachability (R116) | reachability ANSWERED: built but unreachable on her real path — memo owed, build rides T4 |
 | N1 | Take-archive vanish trap: ⌘⇧A in Takes hides the take with no UI recovery (fans query active-only) | new, Stage 0(b) → T5 |
-| N2 | Dead take-pane canary (fallback invisible in take panes) | new, Stage 0(a), spot-verified → T2 |
-| N3 | Triple AutosaveCoordinator; two can run over one post | new, Stage 0(a), spot-verified → T2 |
+| N2 | Dead take-pane canary (fallback invisible in take panes) | **RESOLVED 1a** (rendered banner on the unified surface; red-on-old pin) |
+| N3 | Triple AutosaveCoordinator; two can run over one post | **RESOLVED 1a** (one per-post coordinator at session scope; identity + clobber pins red-on-old) |
 | N4 | ⌥⌘Z executes-then-reports-into-nil outside Write (silent state change) | new, Stage 0(b), spot-verified → T1 |
 | N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | new, Stage 0(b), spot-verified → T1 |
 | N6 | Take-label setter missing in core; lens-rename face missing | new, Stage 0(b) → T5 |
-| N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | new, Stage 0(c) → 1a (flagged mid-flight + soak invariant) |
+| N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | **RESOLVED 1a** (the rail pages discretely with the ◀ x–y of n ▶ door; red-on-old pin + soak capacity invariant) |
 | N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
 | N9 | AD-17 quick-entry lands in Takes where typing does nothing ("just start typing" broken at the landing) | new, Stage 0(c) → 1b (R118 registry case) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
@@ -467,3 +467,154 @@ glass city dream", one scratch post "stage0 audit scratch post".
 ## Stage closeouts
 
 *(one section per stage, written before that stage's session ends)*
+
+## Stage 1a closeout (2026-07-20, fresh implementer session — COMPLETE)
+
+**Counts:** Mac app **455 tests / 89 suites** green (was 431/81 — +24
+tests, +8 suites) · core **747/90** green and byte-untouched (the
+constraint held: zero `Sources/VariorumCore` changes) · the mobile
+target builds clean (its `AutosaveCoordinator` single-owner API kept;
+its own suite untouched). `/Applications/Variorum.app` refreshed from
+Release. Commits `00cc802` → this one, in five logical chunks.
+
+### What moved where (old → new)
+
+| Old | New |
+|---|---|
+| `TakesViewModel.liveBuffers` / `focusedPane` / `resolvedTake` fall-through / `projectionCaughtUp` (the four moving parts, 23 refs / 5 files) | **`Surface/PaneTextAuthority.swift`** — pure, `nonisolated`, unit-tested (9 tests); the VM stores ONE observed authority value and forwards (`liveBuffers`/`focusedPane` are computed forwards, so every pin and call site reads unchanged; `PaneKey` moved in, typealias kept) |
+| `TakePaneView.swift` (deleted) + `ReadPostTextView` class + the take-pane/read-tier/inline measurement brains (3 private copies) | **`Surface/PaneSurface.swift`** — `PaneSurfaceView` (read+live modes, RENDERED canary, voice styling, the pane identity `pane:role\|variantID` on the NSView identifier) + `PaneTextView` (one text-view class; `ReadPostTextView` is now a typealias) + `PaneMeasurement` (the ONE height brain — the read tier and inline editor call it; each keeps its own re-measure TRIGGER by need, width-hook vs storage-edit, but the formula is one) |
+| The read tier's `frameDidChangeNotification` width trigger | the shared width-gated `layout()` hook (the batch-12 proven mechanism, now every pane's) |
+| Per-VM `AutosaveCoordinator` mints (Editor:37 / Takes:36 / TOC:33) + per-surface quitFinalize registrations | **`AppSession.autosave(forPost:)`** — one coordinator per open post, session-cached, registered with the quit door ONCE at creation; `AutosaveCoordinator` gains multicast `observe`/`stopObserving` beside the single-owner closures (mobile-compatible) |
+| `EditorViewModel.surfaceTextByVariant` + `wordCountByVariant` + `surfaceMatches` + the applyProjection if-chain | **`Features/Editor/EditorProjectionEngine.swift`** — `EditorSurfaceLedger` (echo map + R11 word-count cache, pure, 4 tests) + `EditorProjectionPolicy` (the pinned precedence: not-loaded ▸ busy ▸ forced ▸ echo ▸ same-sequence ▸ full). EVM executes verdicts and delegates ledger touches |
+| `TakesBoardView` `@State pageOffsets` (carousel/slot-split) + the rail's invisible horizontal ScrollViews | model-owned `pageOffsets`/`stepPage` + **the paged rail** (AD-2): whole columns, explicit ◀ x–y of n ▶, only the visible page renders |
+
+### Bug classes closed (every one red-on-old, behavioral-revert verified)
+
+- **Stack-style liveness bypass** (`TakesBoardView:672-674`): cards take
+  authority-resolved `text:`; pin extends `TakesArticleRenderTests` to the
+  stack style (revert showed the stale store text — RED confirmed).
+- **N2 dead canary**: the surface publishes into a rendered banner;
+  `PaneSurfaceTests` drives notification → canary → publish → banner
+  (both halves RED on the reverted publish wiring). `FallbackCanary`
+  gained a static `assertionHandler` test seam (debug stop-the-world made
+  the path untestable otherwise — production never touches it).
+- **N3 triple autosave**: identity pin (=== across Editor/Takes/TOC on
+  one post) + the clobber pin (interleaved surface edits converge to the
+  NEWEST text; the reverted shape stored the stale panel text) — both RED
+  on the reverted wiring.
+- **AD-2 fan truncation** (coordinator addendum, traced in-architecture):
+  the rail realized every card and clipped all past `gridCols×220pt` —
+  no pager, no affordance. Fixed with the board's own discrete-paging
+  grammar; pin RED on the reverted view half (4 rendered where 2 fit);
+  the soak carries the capacity invariant permanently.
+
+### The board soak (P-7, `TakesBoardSoakTests`)
+
+Two seeds × 24 actions over the REAL mounted board (focus/type/choose/
+expand/expand-all/branch/blank/blank-and-choose/adopt-as-lens/style-
+switch across all four styles/page-step + ONE remount), invariants after
+EVERY action: ≤1 editable pane (one live ring); every read pane mirrors
+the authority's text for its variant; article/stack panes hold measured
+height at real width; every realized slot renders its article pane
+(R103's kept line; slot-split blooms exempt by design); the AD-2 page
+capacity. Non-vacuity by construction + asserted. ~9 s for both seeds.
+
+### Judgment calls / PROVISIONALs (R119 — for the author's en-masse walk)
+
+1. **AD-2's grammar change:** R24's "horizontally-scrolling strip"
+   becomes a PAGED strip (the carousel's ratified whole-cards-never-
+   halfway grammar). An invisible horizontal scroll in a 220pt rail was
+   the defect's mechanism; discrete paging is the board's own idiom. Her
+   call if she wants scroll-plus-pager instead.
+2. **Authority layering:** the column-kind → pick mapping stays in
+   `TakesViewModel` (3 lines); the authority takes the resolved pick.
+   Keeps the Surface layer free of Takes feature types (`Surface/` sits
+   beside `Theme/` as a shared layer, the sanctioned pattern — not a
+   feature module).
+3. **TOC exceeded the strict brief:** `BlockTOCViewModel` adopted the
+   full authority (buffers + focus), retiring the round-2 NIT-5 accepted
+   residual (blurred-pane stale flash). `makeLive` gained the take's ID.
+4. **Empty-note condition simplified** (`TakesShared`): `resolved.text`
+   already overlays the buffer, so the second clause was redundant —
+   `resolved.text.isEmpty` alone now.
+5. **Autosave registry lifetime:** session-cached per post, never
+   evicted — bounded by posts opened per session; an idle coordinator
+   holds a dictionary and no timers. The quitFinalize `isEmpty` pin
+   migrated meaning: surfaces can no longer linger in the quit path BY
+   CONSTRUCTION (they never register); the post's entry is session-owned
+   and clean-flush idempotent.
+6. **T3 slice scope (the honest line count):** EVM 2,994 → 2,951 — the
+   raw shrink is modest because the extraction (~200 lines of concern)
+   was partly offset by the policy switch + documentation. What actually
+   moved: the text-authority state and the projection DECISION are now
+   pure, named, tested code. The projection EXECUTORS
+   (`renderFull`/`applyDifferential`) deliberately stayed: they write
+   `index`/`slots`/`tailText` entangled with gestures, caret, badges,
+   and scroll anchoring — moving them mid-phase, before the ladder, on
+   the app's riskiest tested file, against a behavior-parity mandate,
+   was the wrong risk. The natural NEXT slices: command routing (1b's,
+   ~1,200 lines of gesture/W machinery) and then the projection
+   executors once routing is out.
+7. **The stack pin's timing:** asserts inside the 500 ms autosave
+   debounce (a long settle would let pre-fix code converge late and
+   hollow the pin); revert-verified RED.
+8. **Soak interpretations:** "mode-switch" = one mid-script remount with
+   a FRESH hosting view (PostDetailView's `.id` identity break,
+   reproduced faithfully); "adopt" = save-current-choices-as-lens +
+   `adoptLens` (the Takes tab's reachable adopt door).
+9. **Coordinator addendum executed:** AD-2 traced to the board's rail
+   (my rebuild territory) and fixed here; pid 58603 (dev-store Debug
+   leftover) quit after the app-drive file landed, per the brief.
+
+### Deviations from the brief
+
+- The "article cell rendering" replacement kept `TakesCellView` as the
+  cell WRAPPER (context menu, empty-note overlay, tint) — its text
+  surface is the new component; the wrapper is composition, not a
+  duplicate surface.
+- The soak's "article mirrors the chosen take's buffer" invariant landed
+  as the STRONGER general form (every read pane mirrors the authority).
+
+### Findings worth keeping (harness class)
+
+- `NSHostingView.rootView` replacement KEEPS the old `@State` (same
+  structural identity) — a soak-shakedown catch: a "remount" that swaps
+  rootView silently drives the old view model. Fresh hosting view (or
+  `.id`) is the faithful teardown. Future view-layer harnesses beware.
+- `-only-testing:VariorumTests/Suite/testName` with a Swift Testing
+  function name matched ZERO tests and reported SUCCESS (the recorded
+  vacuous-success trap, confirmed live) — filter at suite level and read
+  the "Test run with N tests" line.
+
+### Inputs for the Stage 1b brief-writer
+
+- **The pane identity scheme** (`pane:role|variantID` on every surface's
+  NSView identifier) is available to the registry-walk test for locating
+  rendered surfaces/doors; roles in use: `article`, `card`, `mini`,
+  `panel`, `toc`, `cell`, `tutorial`.
+- **Cross-mode text safety now rides ONE coordinator:** fire-and-DO's
+  mode-switch choreography can rely on `session.autosave(forPost:)` —
+  the leaving surface's pending text and the arriving surface's flushes
+  serialize on the same instance (the soak's remount exercises exactly
+  this). No per-surface flush ordering to reason about.
+- **Command routing observed while extracting:** the four hand-kept
+  `TakesCommand` switches remain (EditorView / TakesBoardView /
+  LensesBoardView / CanvasView) — untouched here, the registry's to
+  absorb; `TakesViewModel.speakStructuralGesturesLiveInWrite` (D3's
+  lecture, factually wrong copy) is still the Takes divide door —
+  deliberately untouched (no product-behavior changes in 1a); it should
+  DIE with 1b's fire-and-DO rewiring, not be reworded.
+- **Registry-relevant discovery:** the board's paging is now a MODEL
+  door (`stepPage`) — if 1b wants keyboard paging (⌘←/→ through a
+  fan's pages), it's one registry act away, no view surgery.
+- **N9's cheap half:** with the authority in place, "just start typing"
+  in Takes could focus the first slot's article pane
+  (`authority.focus`) — the landing affordance is one registry act; no
+  new machinery needed.
+- **EditorViewModel post-slice shape:** projection/text-authority
+  concerns are out; what remains is (a) command routing + gesture
+  machinery + the W ceremony (~1,900 lines — 1b's slice boundary
+  decides how much moves), (b) crystallization (KEEP verbatim), (c)
+  decoration/badge geometry (a later candidate). The `viewText` /
+  `programmaticReplace` / `setBlockAttribute` surface plumbing stays
+  with the storage owner by design.
