@@ -68,6 +68,17 @@ func withReadTier<T>(
     }
 }
 
+@MainActor
+private func poll(
+    _ condition: @MainActor () -> Bool, turns: Int = 400
+) async {
+    for _ in 0..<turns {
+        if condition() { return }
+        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(5))
+    }
+}
+
 @Suite("Read tier (Phase 10 Step 2)")
 struct ReadTierTests {
     @Test func projectionFidelityJoinsBlocksWithTheEditorSeparator() async throws {
@@ -194,6 +205,59 @@ struct ReadTierTests {
                 })
             #expect(fresh.string == "alpha\nbeta",
                     "the remade surface renders — never permanently blank")
+        }
+    }
+
+    /// Stage 2 ladder MAJOR-C pin (red-on-old, behavioral-revert
+    /// verified): the read tier carried the editor's
+    /// starved-decoration-host mechanism un-fixed — after a
+    /// dismantle→remake on the SAME model with unchanged content and
+    /// width (the cycle `detach()` documents), `refreshDecor` recomputes
+    /// a state EQUAL to the stale `lastDecorState` and the equality gate
+    /// starves the fresh controller: no callouts/comments/seams — and,
+    /// same gate one field over, no ⑂ badges — until the next real
+    /// change. Wiring now DELIVERS (`pushOverlaysToSinks`, the real
+    /// coordinator's `install` last act — this pin drives the REAL
+    /// install/uninstall path).
+    @Test func aRemadeReadSurfaceStillRendersDecorAndBadges() async throws {
+        try await withReadTier(seedBlocks: ["a callout block", "a fanned block"]) { h in
+            func hasDecor(_ view: NSView) -> Bool {
+                view.subviews.contains {
+                    String(describing: type(of: $0)).contains("DecorRectView")
+                }
+            }
+            func hasBadge(_ view: NSView) -> Bool {
+                view.subviews.contains { ($0 as? NSButton)?.title.contains("⑂") == true }
+            }
+
+            // Stage a callout + a fan (real rows — the decor context).
+            let slots = try await h.database.read { try Queries.renderPost($0, containerID: h.postID) }
+            try h.session.operations.setBlockPresentation(
+                slots[0].blockID, BlockPresentation(color: "blue", emoji: nil))
+            _ = try h.session.operations.branchVariant(
+                slots[1].blockID, from: slots[1].variantID!)
+
+            // Mount 1 — the REAL wiring path (what makeNSView does; the
+            // harness already attached the text view).
+            let first = ReadPostSurfaceCoordinator(model: h.model)
+            first.install(textView: h.textView)
+            await poll { hasDecor(h.textView) && hasBadge(h.textView) }
+            #expect(hasDecor(h.textView) && hasBadge(h.textView), "the first mount renders")
+
+            // Dismantle → remake on the SAME model, same width (a
+            // container move — SwiftUI recreates representables).
+            first.uninstall()
+            let fresh = ReadPostTextView.makeReadSurface()
+            fresh.frame = NSRect(x: 0, y: 0, width: 600, height: 100)
+            h.model.attach(textView: fresh)
+            let second = ReadPostSurfaceCoordinator(model: h.model)
+            second.install(textView: fresh)
+            await poll { hasDecor(fresh) && hasBadge(fresh) }
+            #expect(hasDecor(fresh),
+                    "the remade surface renders its callout — never starved")
+            #expect(hasBadge(fresh),
+                    "…and its ⑂ badge (the same equality gate, one field over)")
+            second.uninstall()
         }
     }
 

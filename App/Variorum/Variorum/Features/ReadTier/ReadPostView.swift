@@ -89,8 +89,8 @@ private struct ReadPostSurface: NSViewRepresentable {
     let onFocusRequest: ((Int) -> Void)?
     let onBadgeTap: ((String) -> Void)?
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(model: model)
+    func makeCoordinator() -> ReadPostSurfaceCoordinator {
+        ReadPostSurfaceCoordinator(model: model)
     }
 
     func makeNSView(context: Context) -> ReadPostTextView {
@@ -116,70 +116,77 @@ private struct ReadPostSurface: NSViewRepresentable {
     /// Deliberate recycling (the Step 0 memo's obligation — leaked text
     /// views are the classic NSViewRepresentable rot): the canary disarms,
     /// the sinks clear, the overlay drops its buttons.
-    static func dismantleNSView(_ nsView: ReadPostTextView, coordinator: Coordinator) {
+    static func dismantleNSView(_ nsView: ReadPostTextView, coordinator: ReadPostSurfaceCoordinator) {
         coordinator.uninstall()
     }
+}
 
-    @MainActor
-    final class Coordinator {
-        let model: ReadPostViewModel
-        var onFocusRequest: ((Int) -> Void)?
-        var onBadgeTap: ((String) -> Void)?
-        private var badges: ReadBadgeOverlay?
-        private var decor: BlockDecorOverlayController?
-        private var observation: Task<Void, Never>?
-        private var decorObservation: Task<Void, Never>?
-        private var appliedChrome: EditorSurfaceChrome?
+/// The read surface's coordinator — file-scope + internal (Stage 2 ladder,
+/// MAJOR-C) so the dismantle→remake pin drives the REAL install/uninstall
+/// path, not a replica.
+@MainActor
+final class ReadPostSurfaceCoordinator {
+    let model: ReadPostViewModel
+    var onFocusRequest: ((Int) -> Void)?
+    var onBadgeTap: ((String) -> Void)?
+    private var badges: ReadBadgeOverlay?
+    private var decor: BlockDecorOverlayController?
+    private var observation: Task<Void, Never>?
+    private var decorObservation: Task<Void, Never>?
+    private var appliedChrome: EditorSurfaceChrome?
 
-        init(model: ReadPostViewModel) {
-            self.model = model
+    init(model: ReadPostViewModel) {
+        self.model = model
+    }
+
+    func applyChrome(_ chrome: EditorSurfaceChrome, to textView: ReadPostTextView) {
+        guard appliedChrome != chrome else { return }
+        appliedChrome = chrome
+        textView.applyVoiceChrome(chrome)
+        model.remeasure()
+    }
+
+    func install(textView: ReadPostTextView) {
+        // The live projections, for exactly the surface's lifetime.
+        observation = Task { [model] in await model.start() }
+        decorObservation = Task { [model] in await model.startDecorContext() }
+        let overlay = ReadBadgeOverlay(textView: textView) { [weak self] blockID in
+            self?.onBadgeTap?(blockID)
         }
-
-        func applyChrome(_ chrome: EditorSurfaceChrome, to textView: ReadPostTextView) {
-            guard appliedChrome != chrome else { return }
-            appliedChrome = chrome
-            textView.applyVoiceChrome(chrome)
-            model.remeasure()
+        badges = overlay
+        model.badgeSink = { [weak overlay] badges in overlay?.render(badges) }
+        // Phase 13 C1: the shared decoration controller, read-only
+        // doors (no handles; comment cards are quiet).
+        let decorController = BlockDecorOverlayController(
+            textView: textView, onOpenComments: nil, onMoveBlock: nil)
+        decor = decorController
+        model.decorSink = { [weak decorController] state in
+            decorController?.render(state)
         }
-
-        func install(textView: ReadPostTextView) {
-            // The live projections, for exactly the surface's lifetime.
-            observation = Task { [model] in await model.start() }
-            decorObservation = Task { [model] in await model.startDecorContext() }
-            let overlay = ReadBadgeOverlay(textView: textView) { [weak self] blockID in
-                self?.onBadgeTap?(blockID)
-            }
-            badges = overlay
-            model.badgeSink = { [weak overlay] badges in overlay?.render(badges) }
-            // Phase 13 C1: the shared decoration controller, read-only
-            // doors (no handles; comment cards are quiet).
-            let decorController = BlockDecorOverlayController(
-                textView: textView, onOpenComments: nil, onMoveBlock: nil)
-            decor = decorController
-            model.decorSink = { [weak decorController] state in
-                decorController?.render(state)
-            }
-            // Width reflows change wrapping, so height must re-measure —
-            // the SHARED width-gated layout hook (13b 1a: the batch-12
-            // brain, one copy for every pane surface; replaces this
-            // surface's private frame-notification trigger).
-            textView.onWidthChange = { [weak model] in
-                model?.viewWidthChanged()
-            }
+        // Width reflows change wrapping, so height must re-measure —
+        // the SHARED width-gated layout hook (13b 1a: the batch-12
+        // brain, one copy for every pane surface; replaces this
+        // surface's private frame-notification trigger).
+        textView.onWidthChange = { [weak model] in
+            model?.viewWidthChanged()
         }
+        // Wiring DELIVERS (MAJOR-C — the read tier's twin of the editor's
+        // `pushDecorationsToSink` walk fix): state computed before this
+        // host existed must not stay invisible until the next real change.
+        model.pushOverlaysToSinks()
+    }
 
-        func uninstall() {
-            observation?.cancel()
-            observation = nil
-            decorObservation?.cancel()
-            decorObservation = nil
-            badges?.uninstall()
-            badges = nil
-            decor?.uninstall()
-            decor = nil
-            model.decorSink = nil
-            model.detach()
-        }
+    func uninstall() {
+        observation?.cancel()
+        observation = nil
+        decorObservation?.cancel()
+        decorObservation = nil
+        badges?.uninstall()
+        badges = nil
+        decor?.uninstall()
+        decor = nil
+        model.decorSink = nil
+        model.detach()
     }
 }
 

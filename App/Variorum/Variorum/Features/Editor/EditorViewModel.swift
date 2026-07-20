@@ -2716,12 +2716,6 @@ final class EditorViewModel {
         }
     }
 
-    /// Phase 13 C1 — the decoration pass: per-block geometry for the
-    /// visible region + the decoration context, emitted to the overlay
-    /// controller. Viewport-proportional exactly like the 9d tint walk it
-    /// supersedes: the visible character window (the `topVisibleOffset`
-    /// fragment idiom, both edges) prunes the entry walk to on-screen
-    /// entries; each visible entry costs two single-fragment lookups
     /// A freshly-wired overlay host gets the CURRENT decorations (Stage 2
     /// walk fix — the starved-host class): the mount order can compute a
     /// decoration state BEFORE the sink exists (`attach` precedes the
@@ -2735,6 +2729,12 @@ final class EditorViewModel {
         refreshDecorations()
     }
 
+    /// Phase 13 C1 — the decoration pass: per-block geometry for the
+    /// visible region + the decoration context, emitted to the overlay
+    /// controller. Viewport-proportional exactly like the 9d tint walk it
+    /// supersedes: the visible character window (the `topVisibleOffset`
+    /// fragment idiom, both edges) prunes the entry walk to on-screen
+    /// entries; each visible entry costs two single-fragment lookups
     /// (first and last fragment frames). When nothing is decorated (seams
     /// off, indicator off, no callouts, no comments) the walk is skipped
     /// entirely — the calm default costs nothing.

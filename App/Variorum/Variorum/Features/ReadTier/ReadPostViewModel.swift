@@ -166,6 +166,25 @@ final class ReadPostViewModel {
         refreshDecor()
     }
 
+    /// A freshly-wired overlay host gets the CURRENT state (Stage 2
+    /// ladder, MAJOR-C — the starved-host class, read-tier edition): the
+    /// editor's walk fix landed only in `EditorViewModel`'s
+    /// convenience-init path, while this model wires its sinks through the
+    /// controller's designated init with no push — and on the
+    /// dismantle→remake cycle `detach()` already documents, the remade
+    /// surface recomputes a decor state EQUAL to the stale
+    /// `lastDecorState` (same content, same width), so the equality gate
+    /// starved the fresh controller: no callouts/comments/seams — and,
+    /// same gate one field over, no ⑂ badges — until the next real
+    /// change. Wiring is a delivery: badges push from stored state, the
+    /// decor gate re-arms and recomputes. The coordinator calls this as
+    /// `install`'s last act, after both sinks exist.
+    func pushOverlaysToSinks() {
+        badgeSink?(badges)
+        lastDecorState = BlockDecor.State()
+        refreshDecor()
+    }
+
     // MARK: - Projection → surface
 
     /// Internal so tests drive projections deterministically.
