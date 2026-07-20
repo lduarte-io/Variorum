@@ -47,10 +47,13 @@ nonisolated enum CapabilityRegistry {
         return takeFamily(ctx)
     }
 
-    /// Write-editor-scoped doors (caret acts): the attached editor or the
-    /// Write mode mounting one.
+    /// Write-editor-scoped doors (caret acts): ATTACHMENT ONLY (round-1
+    /// MINOR-3). These acts call the attached editor directly — enablement
+    /// must never outrun the actual editor ("Write mode, editor still
+    /// mounting" was an enabled-but-silent window, the enabled-into-nil
+    /// class the registry exists to kill).
     private static let writeEditor: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
-        ctx.writeEditorAttached || ctx.mode == .write ? .act : .unavailable
+        ctx.writeEditorAttached ? .act : .unavailable
     }
 
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
@@ -94,13 +97,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks are born inside a post — open one first.",
-            availability: { ctx in
-                if ctx.writeEditorAttached { return .act }
-                switch ctx.mode {
-                case .write, .takes, .lenses: return .act
-                default: return .unavailable
-                }
-            }),
+            availability: takeFamily),  // NIT-3: the one named rule, not a copy
 
         // MARK: The take family (take scope)
         Capability(
@@ -164,8 +161,11 @@ nonisolated enum CapabilityRegistry {
             id: .closeAllTakes, verb: "Close All Takes (Esc)", scope: .take,
             doors: [.menuBar],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Takes bloom inside a post — open one first.",
-            availability: takeFamily),
+            unavailableNote: "Takes bloom on the Takes board (⌘2) — close-all acts there.",
+            // NIT-2: blooms exist ONLY on the Takes board — Write and
+            // Lenses consumed the command with a silent `break` while the
+            // menu item rendered enabled (the enabled-but-void class).
+            availability: { ctx in ctx.mode == .takes ? .act : .unavailable }),
         Capability(
             id: .pageFanBack, verb: "Previous Page of Takes", scope: .take,
             doors: [.menuBar],
@@ -207,13 +207,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: "⌘S", takesAccess: .native,
             unavailableNote: "Nothing to commit here — ⌘S commits a take inside a post.",
-            availability: { ctx in
-                if ctx.writeEditorAttached { return .act }
-                switch ctx.mode {
-                case .write, .takes, .lenses: return .act
-                default: return .unavailable
-                }
-            }),
+            availability: takeFamily),  // NIT-3: the one named rule, not a copy
         Capability(
             id: .structuralUndo, verb: "Undo Structural Change", scope: .app,
             doors: [.menuBar, .palette],
@@ -227,7 +221,12 @@ nonisolated enum CapabilityRegistry {
             doors: [.bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Sealing acts on an open post — open one first.",
-            availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
+            // Round-1 MINOR-1: the attached-editor arm — a book-inline or
+            // pool editor (mode nil, editor attached) seals through its
+            // own routed handler; the rule must say so.
+            availability: { ctx in
+                ctx.writeEditorAttached || ctx.mode != nil ? .act : .unavailable
+            }),
 
         // MARK: Write-editor-scoped menu doors (declared so the menu's
         // rendered set is fully covered by the registry walk)
@@ -248,13 +247,8 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .bottomBar],
             shortcutLabel: "⌘⇧'", takesAccess: .native,
             unavailableNote: "Comments live on a block — open a post first.",
-            availability: { ctx in
-                if ctx.writeEditorAttached { return .act }
-                switch ctx.mode {
-                case .write, .takes, .lenses: return .act  // the bars' block menus carry the door
-                default: return .unavailable
-                }
-            }),
+            // The bars' block menus carry the door in Write/Takes/Lenses.
+            availability: takeFamily),  // NIT-3: the one named rule, not a copy
         Capability(
             id: .callout, verb: "Callout", scope: .block,
             doors: [.menuBar],

@@ -236,10 +236,14 @@ struct TakesBottomBar: View {
            let slot = model.projection.slots.first(where: { $0.blockID == pane.blockID }),
            let column = model.columns.first,
            let resolved = model.resolvedTake(column: column, slot: slot) {
+            // O(the focused take) per render — the P1 edit unit.
             parts.append("\(TextMetrics.wordCount(resolved.text))w take")
         }
-        let total = model.projection.slots.reduce(0) { $0 + TextMetrics.wordCount($1.text ?? "") }
-        parts.append("\(total.formatted())w post")
+        // Round-1 MINOR-5: the post total is the model's CACHE (recomputed
+        // per projection, incremental) — the bar re-renders per keystroke
+        // (it reads the observed authority) and must never re-enumerate
+        // every slot's full text each time.
+        parts.append("\(model.postWordCount.formatted())w post")
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 

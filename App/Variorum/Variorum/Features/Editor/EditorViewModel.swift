@@ -1929,8 +1929,16 @@ final class EditorViewModel {
         }
         // 13b 1b — the fire-and-DO landing (move-and-execute): a Takes/
         // Lenses door parked a Write intent on the router; the arriving
-        // editor consumes it once the index is real.
-        if let intent = session.commandRouter.pendingWriteIntent {
+        // editor consumes it once the index is real — ONLY for its OWN
+        // post (round-1 MAJOR, half b: every full-document editor runs
+        // this — detail Write, book-inline, pool — and a mismatched
+        // consume would run a structural gesture on the wrong post at a
+        // meaningless offset). A mismatched intent is left parked: a
+        // book-inline/pool editor rendering mid-choreography must not
+        // destroy the intent the detail's arriving editor is about to
+        // take; staleness is the router's (cleared on detail change).
+        if let intent = session.commandRouter.pendingWriteIntent,
+           intent.postID == postID {
             session.commandRouter.pendingWriteIntent = nil
             applyWriteIntent(intent)
         }

@@ -66,12 +66,23 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
 /// render. Cross-mode text safety rides the per-post AutosaveCoordinator
 /// (Stage 1a): the leaving surface's pending text and the arriving
 /// surface's flushes serialize on one instance.
+///
+/// Staleness discipline (Stage 1 ladder, the round-1 MAJOR): the intent is
+/// STAMPED with its post and valid for exactly the round that parked it —
+/// the parker clears it when the mode switch refuses (`requestMode` false),
+/// the router clears it when the detail changes post or unmounts, and the
+/// consuming editor takes it ONLY for its own post. This is the machinery
+/// that can run a structural gesture without a user gesture at the moment
+/// of execution — it must never fire from a stale parking.
 nonisolated struct WriteIntent: Equatable, Sendable {
     enum FollowUp: Equatable, Sendable {
         case structural(StructuralAct)
         case deleteInEveryTake
     }
 
+    /// The post the intent was parked FOR — the consumption gate: an
+    /// editor consumes only an intent stamped with its own post.
+    var postID: String
     /// The block to land in (nil ⇒ use `caretAtDocumentEnd` / start).
     var blockID: String?
     /// UTF-16 offset within the block (clamped on landing).
@@ -87,9 +98,18 @@ nonisolated struct WriteIntent: Equatable, Sendable {
 }
 
 /// A fire-and-DO landing in Takes (e.g. Lenses' ⌘⇧T: blooms live in Takes —
-/// so GO there and bloom, visibly).
+/// so GO there and bloom, visibly). Same staleness discipline as
+/// `WriteIntent` (post-stamped, one round): a stale landing consumed by an
+/// unrelated board would bloom a foreign block AND eat that board's N9
+/// landing focus.
 nonisolated enum TakesLanding: Equatable, Sendable {
-    case bloom(blockID: String)
+    case bloom(postID: String, blockID: String)
+
+    var postID: String {
+        switch self {
+        case .bloom(let postID, _): postID
+        }
+    }
 }
 
 // MARK: - Availability context

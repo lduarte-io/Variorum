@@ -55,9 +55,14 @@ struct WriteTakesPanel: View {
                 Spacer()
                 Button("Open Takes mode") {
                     // 13b 1b: composed routing (P-4) — and the ring lands
-                    // bloomed on this block over there.
-                    session.commandRouter.pendingTakesLanding = .bloom(blockID: blockID)
-                    session.commandRouter.requestMode(.takes, postID: postID)
+                    // bloomed on this block over there. A refused switch
+                    // clears the parking (the round-1 MAJOR's half-a
+                    // pattern); `requestMode` speaks the refusal itself.
+                    session.commandRouter.pendingTakesLanding =
+                        .bloom(postID: postID, blockID: blockID)
+                    if !session.commandRouter.requestMode(.takes, postID: postID) {
+                        session.commandRouter.pendingTakesLanding = nil
+                    }
                     dismiss()
                 }
                 .help("The full board — every block's takes at once (⌘2)")

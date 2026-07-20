@@ -66,7 +66,15 @@ final class BlockTOCViewModel {
     /// The ONE live block (P3's split: expanded rows are read-cheap; one
     /// upgrades on click) — the authority's, forwarded.
     var liveBlockID: String? { authority.livePane?.blockID }
-    private(set) var statusMessage: String?
+    /// The TOC's transient outcome line. PRESENTATION is the shell's
+    /// StatusCenter (round-1 MINOR-2 — the AD-14 forward this VM alone
+    /// lacked; Blocks is a full mode surface, and its own red caption
+    /// never dismissed). The property remains the tested truth.
+    private(set) var statusMessage: String? {
+        didSet {
+            if let statusMessage { session.status.speak(statusMessage) }
+        }
+    }
 
     func start() async {
         do {
@@ -218,9 +226,8 @@ struct BlockTOCView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if let status = model.statusMessage {
-                Text(status).font(.caption).foregroundStyle(.red).padding(.horizontal, 12)
-            }
+            // (Round-1 MINOR-2: the never-dismissing red caption is gone —
+            // outcomes render in the shell's one StatusToast.)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     ForEach(Array(model.rows.enumerated()), id: \.element.placementID) { i, row in

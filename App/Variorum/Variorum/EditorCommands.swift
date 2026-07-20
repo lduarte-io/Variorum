@@ -127,8 +127,11 @@ struct EditorCommands: Commands {
             Divider()
             Button(verb(.exportLibrary)) { actions?.exportLibrary() }
                 .disabled(session == nil)
+            // Round-1 MINOR-3: the ONE enablement idiom (the registry) —
+            // attachment-level; a caret outside any block speaks in
+            // ShellActions instead of silently returning.
             Button(verb(.exportCaretBlock)) { actions?.exportCaretBlock() }
-                .disabled(session?.editorRouter.active?.caretBlockID == nil)
+                .disabled(!enabled(.exportCaretBlock))
         }
         CommandGroup(after: .undoRedo) {
             // Per-op labels (Phase 9); N4 (13b 1b): the outcome reports
@@ -221,7 +224,10 @@ struct EditorCommands: Commands {
 
             Divider()
 
-            // R73's block navigation pair (Write's caret).
+            // R73's block navigation pair (Write's caret). Enablement is
+            // ATTACHMENT-level (round-1 MINOR-3): enabled ⇒ the editor the
+            // action chains into exists — never enabled-but-silent while
+            // Write is still mounting.
             Button(verb(.previousBlock)) {
                 session?.editorRouter.active?.jumpToAdjacentBlock(-1)
             }
@@ -255,7 +261,10 @@ struct EditorCommands: Commands {
                     Task { await editor?.setCaretCallout(color: nil) }
                 }
             }
-            .disabled(session?.editorRouter.active == nil)
+            // Round-1 MINOR-3: the ONE enablement idiom — the registry's
+            // attachment-level rule (same truth the old ad-hoc nil check
+            // read, now declared once as data).
+            .disabled(!enabled(.callout))
 
             Divider()
 

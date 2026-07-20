@@ -49,10 +49,18 @@ struct ShellActions {
 
     /// The seal door (palette + routed): the mounted surface runs its own
     /// teardown contract (Write finalizes the open tail first); with no
-    /// surface handler but an open post, flush-and-toggle directly.
+    /// surface handler but an open post, flush-and-toggle directly. The
+    /// dispatch is QUIET (round-1 MINOR-1): in handler-less modes
+    /// (Compare/Outline/Blocks; Canvas falls through) the fallback below
+    /// ACTS, so the unhandled note — "open a post first", with a post open
+    /// — was a factually wrong refusal flashing right before "Sealed.".
+    /// Where the fallback genuinely can't act, IT speaks the honest note.
     func toggleSeal() {
-        if router.dispatch(.toggleSeal) { return }
-        guard let postID = router.activePostID else { return }
+        if router.dispatch(.toggleSeal, speakingWhenUnhandled: false) { return }
+        guard let postID = router.activePostID else {
+            status.speak(CapabilityRegistry.capability(.sealPost).unavailableNote)
+            return
+        }
         Task { @MainActor in
             do {
                 let sealed = try await session.database.read { db in
@@ -146,8 +154,14 @@ struct ShellActions {
     }
 
     func exportCaretBlock() {
+        // Round-1 MINOR-3: the guard SPEAKS — enablement is attachment-
+        // level (the registry), so a caret outside any block (the open
+        // tail) reaches here and must never be a silent no-op.
         guard let editor = session.editorRouter.active,
-              let blockID = editor.caretBlockID else { return }
+              let blockID = editor.caretBlockID else {
+            status.speak(CapabilityRegistry.capability(.exportCaretBlock).unavailableNote)
+            return
+        }
         let postID = editor.postID
         Task { @MainActor in
             // Default filename from the block's read-time HANDLE (name else
@@ -228,7 +242,15 @@ struct ShellActions {
         case .chooseTake: return { dispatch(.takes(.choose)) }
         case .saveChoicesAsLens: return { dispatch(.takes(.saveLens)) }
         case .toggleSeams: return { toggleSeams() }
-        default: return {}
+        default:
+            // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without
+            // a wired case must never compile into a silent no-op row —
+            // loud in DEBUG, an honest sentence in release.
+            let status = self.status
+            return {
+                assertionFailure("palette act \(id) has no wired action")
+                status.speak("That command isn't wired to the palette yet.")
+            }
         }
     }
 }

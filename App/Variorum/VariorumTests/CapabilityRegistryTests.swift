@@ -176,4 +176,47 @@ struct CapabilityRegistryTests {
             .addBlockAtEnd, in: CapabilityContext(mode: .takes)) == .act,
             "D3's third leg: the add-block door is native where takes live")
     }
+
+    // MARK: - Stage 1 ladder, round-1 registry-fact pins
+
+    /// Round-1 MINOR-3: the Write-editor-scoped acts call the attached
+    /// editor DIRECTLY, so enablement is attachment-level — "Write mode,
+    /// editor still mounting" was an enabled-but-silent window (the
+    /// enabled-into-nil class).
+    @Test func writeEditorScopedActsAreEnabledOnlyWithARealEditor() {
+        let mountingWrite = CapabilityContext(mode: .write, writeEditorAttached: false)
+        let attached = CapabilityContext(mode: .write, writeEditorAttached: true)
+        let inlineAttached = CapabilityContext(mode: nil, writeEditorAttached: true)
+        for id in [CapabilityID.previousBlock, .nextBlock, .callout, .exportCaretBlock] {
+            #expect(!CapabilityRegistry.isEnabled(id, in: mountingWrite),
+                    "\(id): never enabled before the editor it chains into exists")
+            #expect(CapabilityRegistry.isEnabled(id, in: attached))
+            #expect(CapabilityRegistry.isEnabled(id, in: inlineAttached),
+                    "\(id): a book-inline/pool editor counts — attachment is the truth")
+        }
+    }
+
+    /// Round-1 MINOR-1 (the related half): sealing works wherever a post
+    /// is open OR an editor is attached — the book-inline/pool contexts
+    /// (mode nil, editor attached) seal through their routed handler.
+    @Test func sealPostIsAvailableWhereverItActuallyWorks() {
+        #expect(CapabilityRegistry.isEnabled(
+            .sealPost, in: CapabilityContext(mode: nil, writeEditorAttached: true)),
+            "an attached book-inline/pool editor can seal")
+        #expect(CapabilityRegistry.isEnabled(.sealPost, in: CapabilityContext(mode: .compare)))
+        #expect(!CapabilityRegistry.isEnabled(.sealPost, in: CapabilityContext(mode: nil)),
+                "no post, no editor — honestly grey")
+    }
+
+    /// Round-1 NIT-2: blooms exist only on the Takes board — Write and
+    /// Lenses consumed `.closeAll` with a silent `break` while the menu
+    /// item rendered enabled.
+    @Test func closeAllTakesIsScopedToTheTakesBoard() {
+        #expect(CapabilityRegistry.isEnabled(
+            .closeAllTakes, in: CapabilityContext(mode: .takes)))
+        #expect(!CapabilityRegistry.isEnabled(
+            .closeAllTakes, in: CapabilityContext(mode: .write, writeEditorAttached: true)))
+        #expect(!CapabilityRegistry.isEnabled(
+            .closeAllTakes, in: CapabilityContext(mode: .lenses)))
+    }
 }

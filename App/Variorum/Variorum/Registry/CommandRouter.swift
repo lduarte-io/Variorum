@@ -45,6 +45,22 @@ final class CommandRouter {
         activePostID = postID
         activeMode = mode
         self.applyMode = applyMode
+        // Staleness (round-1 MAJOR, half b): a parked choreography intent
+        // for ANOTHER post has missed its round — the detail it targeted is
+        // gone. Clear it here (register-ordering-proof: on a P→Q switch
+        // SwiftUI may run Q's onAppear before P's onDisappear, so the
+        // token-guarded unregister below can be a no-op).
+        // Staleness (round-1 MAJOR, half b): a parked choreography intent
+        // for ANOTHER post has missed its round — the detail it targeted is
+        // gone. Clear it here (register-ordering-proof: on a P→Q switch
+        // SwiftUI may run Q's onAppear before P's onDisappear, so the
+        // token-guarded unregister below can be a no-op).
+        if let pending = pendingWriteIntent, pending.postID != postID {
+            pendingWriteIntent = nil
+        }
+        if let landing = pendingTakesLanding, landing.postID != postID {
+            pendingTakesLanding = nil
+        }
         return token
     }
 
@@ -54,6 +70,10 @@ final class CommandRouter {
         applyMode = nil
         activePostID = nil
         activeMode = nil
+        // A genuine teardown (no successor mounted yet): any parked
+        // choreography intent's round is over (round-1 MAJOR, half b).
+        pendingWriteIntent = nil
+        pendingTakesLanding = nil
     }
 
     /// The detail reports its mode truth (its own `@State` changed).
@@ -62,14 +82,22 @@ final class CommandRouter {
         activeMode = mode
     }
 
+    /// What a stale targeted mode request says (round-1 MAJOR, half a: the
+    /// mismatch branch was a silent door inside the anti-silent-door
+    /// machinery). Shared with the pins.
+    static let staleModeRequestNote =
+        "The open post changed — that request no longer applies."
+
     /// Routes a mode switch to the mounted detail. `postID` targets a
     /// specific post (the sidebar rail); nil addresses whichever detail is
-    /// visible (⌘1–⌘7). No detail ⇒ the request SPEAKS instead of
-    /// vanishing (the Stage 0 silent-drop class).
+    /// visible (⌘1–⌘7). No detail, or a stale targeted request ⇒ the
+    /// request SPEAKS instead of vanishing (the Stage 0 silent-drop class).
     @discardableResult
     func requestMode(_ mode: PostMode, postID: String? = nil) -> Bool {
         if let postID, let active = activePostID, postID != active {
-            return false  // stale targeted request — a different post mounted meanwhile
+            // Stale targeted request — a different post mounted meanwhile.
+            speak?(Self.staleModeRequestNote)
+            return false
         }
         guard let applyMode else {
             speak?(CapabilityRegistry.capability(.switchMode).unavailableNote)
@@ -96,13 +124,19 @@ final class CommandRouter {
     }
 
     /// Routes a command to the top-most handler that consumes it. Nothing
-    /// consumed ⇒ the registry's honest note speaks. Returns consumption.
+    /// consumed ⇒ the registry's honest note speaks — UNLESS the caller has
+    /// its own fallback act (`speakingWhenUnhandled: false` — the round-1
+    /// MINOR-1 class: `toggleSeal`'s shell fallback SEALS in handler-less
+    /// modes, so a "no post open" refusal flashing first was factually
+    /// wrong and immediately contradicted). Returns consumption.
     @discardableResult
-    func dispatch(_ command: RoutedCommand) -> Bool {
+    func dispatch(_ command: RoutedCommand, speakingWhenUnhandled: Bool = true) -> Bool {
         for entry in handlers.reversed() where entry.handler(command) {
             return true
         }
-        speak?(CapabilityRegistry.unhandledNote(for: command, context: currentContext()))
+        if speakingWhenUnhandled {
+            speak?(CapabilityRegistry.unhandledNote(for: command, context: currentContext()))
+        }
         return false
     }
 

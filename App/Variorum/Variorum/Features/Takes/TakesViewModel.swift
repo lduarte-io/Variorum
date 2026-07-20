@@ -80,6 +80,49 @@ final class TakesViewModel {
         }
     }
 
+    // MARK: - Word counts (Stage 1 ladder MINOR-5 — P-8 binds P1 here)
+
+    /// The post total over the projection's rendered slot texts — CACHED,
+    /// recomputed per PROJECTION (settle cadence), never per bar render.
+    /// The bar used to reduce `TextMetrics.wordCount` over EVERY slot each
+    /// render, and it re-renders per keystroke (it reads the observed
+    /// authority) — O(post length) per keystroke, the class the Write
+    /// editor's ledger exists to prevent.
+    private(set) var postWordCount = 0
+    /// Per-slot texts + counts from the LAST adoption — only slots whose
+    /// text actually changed re-enumerate (the `EditorSurfaceLedger.adopt`
+    /// discipline, mirrored).
+    @ObservationIgnored private var slotCountTexts: [String: String] = [:]
+    @ObservationIgnored private var slotCounts: [String: Int] = [:]
+    /// Test seam: how many slots have been genuinely re-counted (the
+    /// MINOR-5 pin asserts adoption is incremental, not recount-all).
+    @ObservationIgnored private(set) var slotRecountCount = 0
+
+    private func refreshWordCounts(_ new: Queries.TakesProjection) {
+        var texts: [String: String] = [:]
+        texts.reserveCapacity(new.slots.count)
+        var counts: [String: Int] = [:]
+        counts.reserveCapacity(new.slots.count)
+        var total = 0
+        for slot in new.slots {
+            let text = slot.text ?? ""
+            let count: Int
+            if slotCountTexts[slot.blockID] == text,
+               let cached = slotCounts[slot.blockID] {
+                count = cached
+            } else {
+                count = TextMetrics.wordCount(text)
+                slotRecountCount += 1
+            }
+            texts[slot.blockID] = text
+            counts[slot.blockID] = count
+            total += count
+        }
+        slotCountTexts = texts
+        slotCounts = counts
+        if postWordCount != total { postWordCount = total }
+    }
+
     // MARK: - Follow-the-scroll (Phase 13 C2, R25)
 
     /// R25 — follow-the-scroll as a takes-viewing OPTION in all modes.
@@ -182,6 +225,7 @@ final class TakesViewModel {
     /// never fires `.task`).
     func adopt(_ new: Queries.TakesProjection) {
         projection = new
+        refreshWordCounts(new)
         // THE CONVERGENCE HALF of the buffer-authoritative discipline
         // (review round 2, MAJOR): adoption only runs clean or at settle
         // (the observation loop defers while dirty), so any buffer with NO
@@ -800,7 +844,7 @@ final class TakesViewModel {
             speak("Click into a block first — then the gesture knows where to act.")
             return
         }
-        var intent = WriteIntent(blockID: slot.blockID)
+        var intent = WriteIntent(postID: postID, blockID: slot.blockID)
         // The caret/selection transfers when the focused pane shows the
         // CHOSEN take (Write shows chosen — same text, same offsets). A
         // non-chosen pane lands at the block's start; on a fanned block
@@ -830,10 +874,16 @@ final class TakesViewModel {
         // Flush FIRST, then switch: the arriving editor's first render
         // reads the store, and the gesture must plan against the text the
         // author sees (the one per-post coordinator serializes the rest).
+        // A REFUSED switch clears the parking (round-1 MAJOR, half a): a
+        // stale intent surviving here would execute a structural gesture
+        // unprompted at the next editor mount. `requestMode` speaks the
+        // refusal itself (both failure branches).
         Task { [postID] in
             await autosave.flushNow()
             session.commandRouter.pendingWriteIntent = intent
-            session.commandRouter.requestMode(.write, postID: postID)
+            if !session.commandRouter.requestMode(.write, postID: postID) {
+                session.commandRouter.pendingWriteIntent = nil
+            }
         }
     }
 
@@ -909,11 +959,15 @@ final class TakesViewModel {
         }
         guard landingEnabled else { return }
         // A cross-mode landing (Lenses' ⌘⇧T: blooms live in Takes — GO
-        // there and bloom, visibly).
-        if let landing = session.commandRouter.pendingTakesLanding {
+        // there and bloom, visibly). Post-stamped (the round-1 MAJOR's
+        // staleness discipline): a landing for ANOTHER post is left alone —
+        // consuming it here would bloom a foreign block and eat THIS
+        // board's landing focus below.
+        if let landing = session.commandRouter.pendingTakesLanding,
+           landing.postID == postID {
             session.commandRouter.pendingTakesLanding = nil
             switch landing {
-            case .bloom(let blockID):
+            case .bloom(_, let blockID):
                 expandedBlocks.insert(blockID)
                 if let slot = new.slots.first(where: { $0.blockID == blockID }),
                    let variantID = slot.variantID {

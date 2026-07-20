@@ -128,11 +128,16 @@ struct LensesBoardView: View {
         switch command {
         case .toggleFan:
             // Fire-and-DO (13b 1b — the lecture retired): blooms live in
-            // Takes, so GO there, visibly, and bloom the focused block.
+            // Takes, so GO there, visibly, and bloom the focused block. A
+            // refused switch clears the parking (the round-1 MAJOR's
+            // half-a pattern); `requestMode` speaks the refusal itself.
             if let pane = model.focusedPane {
-                session.commandRouter.pendingTakesLanding = .bloom(blockID: pane.blockID)
+                session.commandRouter.pendingTakesLanding =
+                    .bloom(postID: postID, blockID: pane.blockID)
             }
-            session.commandRouter.requestMode(.takes, postID: postID)
+            if !session.commandRouter.requestMode(.takes, postID: postID) {
+                session.commandRouter.pendingTakesLanding = nil
+            }
         case .closeAll:
             break
         case .branch:

@@ -224,7 +224,8 @@ struct TakesLandingTests {
             let post = try session.operations.createPost(title: "bloom")
             _ = try session.operations.newBlock(in: post.id, text: "first.")
             let target = try session.operations.newBlock(in: post.id, text: "second target.")
-            session.commandRouter.pendingTakesLanding = .bloom(blockID: target.block.id)
+            session.commandRouter.pendingTakesLanding =
+                .bloom(postID: post.id, blockID: target.block.id)
             let model = TakesViewModel(session: session, postID: post.id)
             model.landingEnabled = true
             model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
@@ -277,6 +278,7 @@ struct MoveAndExecuteTests {
                 in: post.id, text: "First sentence here. Second sentence here.")
             // The choreography's parked half: what Takes leaves behind.
             session.commandRouter.pendingWriteIntent = WriteIntent(
+                postID: post.id,
                 blockID: minted.block.id,
                 offsetInBlock: 21,  // inside "Second…" — snaps to the boundary
                 followUp: .structural(.divide))
@@ -396,6 +398,305 @@ struct MoveAndExecuteTests {
             #expect(intent.blockID == second.block.id)
             #expect(intent.offsetInBlock == 0,
                     "the memo's reading: merge joins UPWARD — the caret lands at the seam above")
+        }
+    }
+}
+
+// MARK: - Stage 1 ladder, round-1 fix pins (each verified red by behavioral
+// revert; the revert results are recorded in the round-1 dispositions
+// section of notes/plans/phase-13b-make-it-work.md)
+
+@MainActor
+@Suite("Stale WriteIntent (13b Stage 1 ladder, round-1 MAJOR)")
+struct StaleWriteIntentTests {
+    /// Half (a), end to end — the finding's own pin: park an intent, make
+    /// `requestMode` fail (postID mismatch — another post mounted during
+    /// the flush await), mount the post's editor later, and assert NO
+    /// gesture ran. Pre-fix: the mismatch branch returned false silently,
+    /// the intent survived, and the later editor divided the block by
+    /// itself at the stale offset.
+    @Test func aRefusedModeSwitchClearsTheParkedIntentAndNothingEverRuns() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "stale-a")
+            let minted = try session.operations.newBlock(
+                in: post.id, text: "First sentence here. Second sentence here.")
+            // The user clicked ANOTHER post while the choreography's flush
+            // awaited: the mounted detail is not the intent's post.
+            _ = session.commandRouter.registerDetail(
+                postID: "another-post", mode: .takes) { _ in }
+
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: minted.block.id, variantID: minted.variant.id))
+            model.notePaneSelection(
+                variantID: minted.variant.id, range: NSRange(location: 21, length: 0))
+
+            model.moveToWriteAndRun(.structural(.divide))
+            // The refused switch SPEAKS (the mismatch branch was a silent
+            // door inside the anti-silent-door machinery) …
+            await poll {
+                session.status.current?.text == CommandRouter.staleModeRequestNote
+            }
+            #expect(session.status.current?.text == CommandRouter.staleModeRequestNote)
+            // … and the parking is CLEARED — nothing lies in wait.
+            #expect(session.commandRouter.pendingWriteIntent == nil,
+                    "a refused mode switch leaves no parked intent")
+
+            // "Minutes later": the user opens the post in Write. Pre-fix,
+            // this render consumed the stale intent and divided unprompted.
+            let editor = EditorViewModel(session: session, postID: post.id)
+            editor.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: editor)
+            delegate.wire(to: textView)
+            editor.attach(textView: textView, scrollView: scrollView)
+            let (slots, header) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: post.id),
+                 try Queries.containerHeader(db, containerID: post.id))
+            }
+            editor.adoptHeader(header)
+            editor.applyProjection(slots)
+            await editor.pendingIntentTask?.value
+
+            #expect(editor.pendingIntentTask == nil, "no follow-up gesture was spawned")
+            let after = try await db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(after.count == 1,
+                    "the store is untouched — no structural gesture ran unprompted")
+        }
+    }
+
+    /// Half (b) — the consumption gate: every full-document editor runs
+    /// `applyFocusSeeds` (detail Write, book-inline, pool), so an intent
+    /// is post-stamped and an editor takes ONLY its own post's intent. A
+    /// mismatched intent is left parked (a book-inline editor rendering
+    /// mid-choreography must not destroy the detail editor's landing).
+    @Test func aStaleIntentForAnotherPostIsNeverConsumedByAMountedEditor() async throws {
+        try await withSessionWorld { session, db in
+            let postP = try session.operations.createPost(title: "intent-owner")
+            let mintedP = try session.operations.newBlock(
+                in: postP.id, text: "First sentence here. Second sentence here.")
+            let postQ = try session.operations.createPost(title: "innocent-bystander")
+            _ = try session.operations.newBlock(in: postQ.id, text: "Q's only block.")
+
+            session.commandRouter.pendingWriteIntent = WriteIntent(
+                postID: postP.id, blockID: mintedP.block.id,
+                offsetInBlock: 21, followUp: .structural(.divide))
+
+            // An editor for a DIFFERENT post mounts (book-inline/pool
+            // shape — no detail registration involved).
+            let editor = EditorViewModel(session: session, postID: postQ.id)
+            editor.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: editor)
+            delegate.wire(to: textView)
+            editor.attach(textView: textView, scrollView: scrollView)
+            let (slots, header) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: postQ.id),
+                 try Queries.containerHeader(db, containerID: postQ.id))
+            }
+            editor.adoptHeader(header)
+            editor.applyProjection(slots)
+            await editor.pendingIntentTask?.value
+
+            #expect(session.commandRouter.pendingWriteIntent != nil,
+                    "the mismatched intent stays parked for its own post's editor")
+            #expect(editor.pendingIntentTask == nil,
+                    "the wrong post's editor never spawned the follow-up")
+            let qAfter = try await db.read { try Queries.renderPost($0, containerID: postQ.id) }
+            #expect(qAfter.count == 1, "Q's store is untouched")
+        }
+    }
+
+    /// Half (b), freshness — one-round validity as detail-lifecycle
+    /// clearing: a parked intent dies when the detail changes post
+    /// (register-ordering-proof) or unmounts entirely.
+    @Test func theDetailLifecycleClearsStaleParkedIntents() async throws {
+        try await withSessionWorld { session, _ in
+            // Register-with-a-different-post clears (P→Q switch — Q's
+            // onAppear may run BEFORE P's onDisappear, so the clearing
+            // must ride registration, not only teardown).
+            _ = session.commandRouter.registerDetail(
+                postID: "p", mode: .takes) { _ in }
+            session.commandRouter.pendingWriteIntent = WriteIntent(
+                postID: "p", blockID: nil, followUp: .structural(.divide))
+            session.commandRouter.pendingTakesLanding = .bloom(postID: "p", blockID: "b")
+            _ = session.commandRouter.registerDetail(
+                postID: "q", mode: .takes) { _ in }
+            #expect(session.commandRouter.pendingWriteIntent == nil,
+                    "a different post's registration clears the stale intent")
+            #expect(session.commandRouter.pendingTakesLanding == nil,
+                    "…and the stale landing")
+
+            // A genuine unregister (detail gone, no successor) clears too.
+            let token = session.commandRouter.registerDetail(
+                postID: "r", mode: .takes) { _ in }
+            session.commandRouter.pendingWriteIntent = WriteIntent(
+                postID: "r", blockID: nil, followUp: .structural(.merge))
+            session.commandRouter.pendingTakesLanding = .bloom(postID: "r", blockID: "b2")
+            session.commandRouter.unregisterDetail(token)
+            #expect(session.commandRouter.pendingWriteIntent == nil,
+                    "a genuine detail teardown ends the intent's round")
+            #expect(session.commandRouter.pendingTakesLanding == nil)
+
+            // The happy path is untouched: same-post registration keeps a
+            // parked intent (the arriving editor consumes it).
+            _ = session.commandRouter.registerDetail(
+                postID: "s", mode: .takes) { _ in }
+            session.commandRouter.pendingWriteIntent = WriteIntent(
+                postID: "s", blockID: nil, followUp: .structural(.divide))
+            _ = session.commandRouter.registerDetail(
+                postID: "s", mode: .write) { _ in }
+            #expect(session.commandRouter.pendingWriteIntent != nil,
+                    "same-post registration leaves the in-flight intent alone")
+        }
+    }
+
+    /// Half (a)'s parenthetical: the postID-mismatch branch SPEAKS.
+    @Test func aStaleTargetedModeRequestSpeaks() async throws {
+        try await withSessionWorld { session, _ in
+            _ = session.commandRouter.registerDetail(
+                postID: "p1", mode: .takes) { _ in }
+            #expect(!session.commandRouter.requestMode(.write, postID: "other"))
+            #expect(session.status.current?.text == CommandRouter.staleModeRequestNote,
+                    "the mismatch branch is no longer a silent door")
+        }
+    }
+
+    /// The landing twin (the MAJOR's staleness discipline extended to
+    /// `TakesLanding`): a stale landing for ANOTHER post is not consumed —
+    /// pre-fix it bloomed a foreign block ID and, worse, set
+    /// `landingFocusDone`, eating the consuming board's own N9
+    /// "just start typing" focus.
+    @Test func aStaleLandingForAnotherPostNeverEatsTheBoardsLandingFocus() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "landing-guard")
+            let minted = try session.operations.newBlock(in: post.id, text: "the first block.")
+            session.commandRouter.pendingTakesLanding =
+                .bloom(postID: "another-post", blockID: "foreign-block")
+
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.landingEnabled = true
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+
+            #expect(session.commandRouter.pendingTakesLanding != nil,
+                    "the mismatched landing stays parked")
+            #expect(!model.expandedBlocks.contains("foreign-block"),
+                    "no foreign block bloomed")
+            #expect(model.authority.livePane?.blockID == minted.block.id,
+                    "the board's own N9 landing focus still happened")
+        }
+    }
+}
+
+@MainActor
+@Suite("Seal door in handler-less modes (13b Stage 1 ladder, round-1 MINOR-1)")
+struct SealDoorTests {
+    /// Compare/Outline/Blocks register no command handler (Canvas falls
+    /// through), so the seal dispatch is unhandled and the shell fallback
+    /// SEALS. Pre-fix the unhandled dispatch spoke "open a post first" —
+    /// with a post open — a factually wrong refusal immediately replaced
+    /// by "Sealed.". The dispatch is quiet now; only the outcome speaks.
+    @Test func sealFromAHandlerLessModeActsWithoutAWrongRefusalFlash() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "seal-me")
+            _ = try session.operations.newBlock(in: post.id, text: "a block.")
+            _ = session.commandRouter.registerDetail(
+                postID: post.id, mode: .compare) { _ in }
+
+            let actions = ShellActions(session: session, shell: ShellRouter())
+            actions.toggleSeal()
+            // The pre-fix wrong note landed SYNCHRONOUSLY inside the
+            // dispatch, before the fallback's Task ran.
+            #expect(session.status.current == nil,
+                    "no wrong refusal flash — the quiet dispatch left speech to the outcome")
+
+            await poll {
+                (try? db.read { db in
+                    try Queries.containerHeader(db, containerID: post.id)?.locked
+                }) == true
+            }
+            let sealed = try await db.read { db in
+                try Queries.containerHeader(db, containerID: post.id)?.locked
+            }
+            #expect(sealed == true, "the fallback ACTED — the post sealed")
+            #expect(session.status.current?.text.contains("Sealed") == true,
+                    "the one honest outcome spoke")
+        }
+    }
+
+    /// Where the fallback genuinely can't act (no post open anywhere),
+    /// the honest note still speaks — the quiet dispatch didn't create a
+    /// new silent door. (Parity guard, not a red pin: the old code also
+    /// spoke here, via the dispatch.)
+    @Test func sealWithNoPostOpenStillSpeaksTheHonestNote() async throws {
+        try await withSessionWorld { session, _ in
+            let actions = ShellActions(session: session, shell: ShellRouter())
+            actions.toggleSeal()
+            #expect(session.status.current?.text
+                    == "Sealing acts on an open post — open one first.")
+        }
+    }
+}
+
+@MainActor
+@Suite("Block TOC status forward (13b Stage 1 ladder, round-1 MINOR-2)")
+struct BlockTOCStatusTests {
+    /// Blocks is a full mode surface; its VM was the ONE surface VM not
+    /// forwarding `statusMessage` to the StatusCenter — refusals rendered
+    /// in a private never-dismissing red caption instead of AD-14's one
+    /// presentation.
+    @Test func tocRefusalsLandInTheOneStatusCenter() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "toc-status")
+            let minted = try session.operations.newBlock(in: post.id, text: "a block.")
+            try session.operations.lockPost(post.id)  // sealed — deletes refuse
+            _ = db
+
+            let model = BlockTOCViewModel(session: session, postID: post.id)
+            await model.deleteBlock(minted.block.id)
+
+            let expected = OpsRefusalCopy.message(for: OperationError.lockedPost(id: post.id))
+            #expect(model.statusMessage == expected, "the property stays the tested truth")
+            #expect(session.status.current?.text == expected,
+                    "the TOC's outcome reached the ONE presentation (AD-14)")
+        }
+    }
+}
+
+@MainActor
+@Suite("Takes word-count cache (13b Stage 1 ladder, round-1 MINOR-5)")
+struct TakesWordCountTests {
+    /// The bar re-renders per keystroke (it reads the observed authority)
+    /// and used to reduce `TextMetrics.wordCount` over EVERY slot's full
+    /// text each render — O(post length) per keystroke. The total is now
+    /// the model's cache: recomputed per PROJECTION, and only for slots
+    /// whose text actually changed (the Write ledger's discipline).
+    @Test func slotWordCountsRecomputeOnlyWhereTextChanged() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "counts")
+            _ = try session.operations.newBlock(in: post.id, text: "one two three.")
+            let second = try session.operations.newBlock(in: post.id, text: "four five.")
+            _ = try session.operations.newBlock(in: post.id, text: "six.")
+
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            #expect(model.postWordCount == 6, "3 + 2 + 1 words over the rendered slots")
+            #expect(model.slotRecountCount == 3, "first adoption counts every slot once")
+
+            // An unchanged projection re-adopts with ZERO recounts (the
+            // pre-fix shape re-enumerated everything, every time).
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            #expect(model.slotRecountCount == 3, "unchanged texts reuse their cached counts")
+            #expect(model.postWordCount == 6)
+
+            // One slot's text changes ⇒ exactly one recount.
+            try session.operations.autosave(
+                second.variant.id, text: "four five six seven.", charDelta: 10)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            #expect(model.slotRecountCount == 4, "only the changed slot re-enumerated")
+            #expect(model.postWordCount == 8, "3 + 4 + 1")
         }
     }
 }
