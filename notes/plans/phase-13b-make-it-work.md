@@ -1,14 +1,20 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — **Stage 2 BUILT + WALKED (closeout below; the
-Stage 2 review ladder is NEXT)**: "the field guide" (6 chapters · 21
-act-ready lessons) + the Help ▸ Restore Tutorial… product door +
-`TutorialWalkTests` (32) + the visual walk (2 happy-path breakers fixed
-in-stage, revert-verified) + the REAL-store seed executed behind the A1
-rail. Counts: **Mac 530/106 · core 747/90 untouched**. Stage 1 CLOSED
-(ladder closed at round 2; 1a/1b closeouts + dispositions below; Mac
-499/100 at its close). Stage 0 complete + ratified batch 17; started
-2026-07-20.
+**Status:** ACTIVE — **Stage 2 ladder round 1 FIX PASS COMPLETE
+(dispositions below; round 2's fresh reviewer is NEXT)**: the tutorial
+door reshaped (one discovery, confirm on everything the replace
+destroys, the same `Existing` into the replace, the session latch, the
+quiet undo-free seeder), the read tier's starved-overlay twin fixed
+(push-on-wire, badges included), the as-chosen reveal host-gated — 2
+MAJOR + 6 MINOR + 6 NIT all dispositioned, 8 new pins, every bug-class
+fix behavioral-revert verified RED. Counts: **Mac 538/106 · core 747/90
+untouched**. Stage 2 BUILT + WALKED (closeout below): "the field guide"
+(6 chapters · 21 act-ready lessons) + the Help ▸ Restore Tutorial…
+product door + `TutorialWalkTests` + the visual walk (2 happy-path
+breakers fixed in-stage, revert-verified) + the REAL-store seed executed
+behind the A1 rail. Stage 1 CLOSED (ladder closed at round 2; 1a/1b
+closeouts + dispositions below; Mac 499/100 at its close). Stage 0
+complete + ratified batch 17; started 2026-07-20.
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
 `notes/plans/phase-13-ui-design.md`, batches 15–16; defects D1–D4 in batch 15).
@@ -1559,6 +1565,12 @@ through existing Operations ONLY). `/Applications/Variorum.app`
 refreshed from Release and carrying the tutorial build. Commits:
 `7c08111` (the spine) → `63bb594` (walk fixes) → the closeout commit.
 
+*(Ladder round-1 correction, NIT-1 — a correction note, not a rewrite:
+`TutorialWalkTests` shipped as **34** tests, not 32, and there was no
+"+1 elsewhere" — the true decomposition is 499 + 34 − 3 = 530. The 530
+total and the suite count were right; only the decomposition above was
+invented. Recorded here so the history stays as written.)*
+
 ### The book (the coverage contract, executed)
 
 **"the field guide"** — a curated book, 6 real chapters
@@ -1829,6 +1841,12 @@ makes it pristine — deliberately left as a live exercise of the door.
 - New ledger rows N11 (palette stepping), N12 (Write focus on bare
   mode switch — verify unlocked first), N13 (chapters → exportReading;
   a core Queries seam). Confirmed live: N8/AD-8 (T7).
+- *(Ladder round 1, NIT-4 — recorded, no headless fix owed):* several
+  `TutorialWalkTests` acts execute at the raw ops layer
+  (makeBlock/choose/ceremony/extract/merge) rather than through
+  registry doors — the unlocked drives own driving those acts through
+  the REAL doors (they are the same acts the deferred live list above
+  names); the headless store-outcome assertions stay as they are.
 - The Stage 3 verification drives should START with the deferred live
   list above (ceremony sheet, drags, selections, typing surface,
   archive recovery, save panels, palette stepping) — an UNLOCKED
@@ -1840,7 +1858,7 @@ makes it pristine — deliberately left as a live exercise of the door.
   regression by definition).
 - The dev store's walk residue is one Restore away from pristine.
 
-## Stage 2 ladder — round 1 findings (VERBATIM record; fix pass pending)
+## Stage 2 ladder — round 1 findings (VERBATIM record; fix pass COMPLETE — dispositions follow the clean bill)
 
 **[MAJOR-A] · `Registry/ShellActions.swift:194` vs
 `Features/Tutorial/TutorialSeeder.swift:135–145` · The spoken-confirm
@@ -1963,3 +1981,196 @@ denormalization; P1/P3 honored; the registry discipline held incl. the
 new act; the A10 absorption residue-free; the choreography + seal
 show-and-tell end-to-end on tutorial content; the N9 noteMode caution
 needed no extension.
+
+### Stage 2 ladder — round 1 dispositions (fix pass, 2026-07-20; fresh implementer session)
+
+*Every finding traced to its concrete mechanism before disposal; every
+bug-class fix carries a red-on-old pin verified by BEHAVIORAL REVERT
+(the fix's logic reverted with signatures kept so the pins compile on
+both sides, the pin run RED, the fix restored, the full suite re-run
+green on shipped code). Three revert batches: REVERT-A = the door
+reshape reverted (book-only confirm gate, no latch, blind findOrSeed);
+REVERT-B = subtree cleanup + session-ops seeding restored; REVERT-C =
+no push-on-wire + the unconditional reveal. New pins live in
+`VariorumTests/TutorialWalkTests.swift` (six added to the "Tutorial
+doors" suite), `VariorumTests/ReadTierTests.swift` (one), and
+`VariorumTests/TakesBoardTests.swift` (one). Counts after the pass:
+**Mac 538/106** green (was 530/106) · **core 747/90**,
+`Sources/VariorumCore` byte-untouched (git-status-verified — the D1 fix
+uses core's EXISTING `Operations(undoStack: nil)` init). Fix commits:
+`080d06f` (the door reshape) → `b6f585f` (the read tier's delivery) →
+`53c110e` (the reveal gate).*
+
+**[MAJOR-A] — AGREED-FIXED, the one-discovery reshape.** Trace
+confirmed exactly as written: `restoreTutorial` consulted the confirm
+only when a live reading named "the field guide" existed, while
+`restore()` → `cleanup()` destroyed by the full identity (every
+`tutorial`-tagged post, every same-named pool and reading);
+`Existing.isEmpty` — the correct predicate — was dead code with zero
+references. Fix: ONE `discover` per entrance in `ShellActions.
+restoreTutorial`; the confirm gates on `!existing.isEmpty`; the SAME
+`Existing` is passed into `TutorialSeeder.restore(session:existing:)`
+(the read-twice TOCTOU closed — what was confirmed is exactly what
+dies); a one-discovery convenience overload serves direct callers.
+Pin: `theConfirmGatesOnEverythingTheReplaceDestroys` (seed → delete the
+book → tag a USER post `tutorial` → restore with a declining spy) —
+REVERT-A (book-only gate, no latch, blind findOrSeed) ran RED with the
+smoking gun: `consulted == false` AND her tagged post tombstoned.
+
+**[MAJOR-C] — AGREED-FIXED, the read tier's push-on-wire (badges
+included).** Trace confirmed AND found the mechanism reaches one more
+field: `ReadPostSurfaceCoordinator.install` wires `decorSink` into the
+controller's designated init with no push; `detach()` resets
+`loaded`/`slots`/`index` but not `lastDecorState`, so the documented
+dismantle→remake cycle recomputes an EQUAL state (same content, same
+width) and the equality gate starves the fresh controller — and the
+`refreshBadges` `result != badges` gate is the IDENTICAL mechanism one
+field over, so the remade surface lost its ⑂ badges too. The
+closeout's Focus-2 premise ("the controller init is shared") is
+CONFIRMED FALSIFIED — the push lived only in the EditorViewModel
+convenience init. Fix: `ReadPostViewModel.pushOverlaysToSinks()`
+(badges delivered from stored state; the decor gate re-armed and
+recomputed) as `install`'s last act, after both sinks exist — chosen
+over a `detach()`-side reset because the push ALSO covers the
+attach-before-install nil-sink window (the editor's original trigger),
+making wiring itself the delivery in every order; the coordinator
+hoisted to file scope (`ReadPostSurfaceCoordinator`, internal) so the
+pin drives the REAL install/uninstall path. Pin:
+`aRemadeReadSurfaceStillRendersDecorAndBadges` (mount over a real
+callout + fan → uninstall → remake same model/width) — REVERT-C (the
+push commented out) ran RED on BOTH halves (no `DecorRectView`, no ⑂
+on the remade surface).
+
+**[MINOR-D1] — AGREED-FIXED.** Trace: the seed's `duplicateAsVersion`
+(the compare lesson's twin) registers a "Duplicate as Version" inverse
+on the session stack via `session.runner.run`'s undo-carrying
+Operations — one stray entry per seed; her next unmatched ⌥⌘Z would
+revert an act she never performed. Fix: `restore(session:existing:)`
+runs cleanup + seed through a QUIET facade — `Operations(undoStack:
+nil)`, core's existing public init (same ambient database dependency,
+same serialized runner turn, no stack; core stays byte-untouched).
+Snapshot-restore was NOT chosen: `UndoStack` exposes no snapshot API
+and adding one would break the core freeze. Pin:
+`theSeederNeverTouchesTheStructuralUndoStack` — REVERT-B (session ops
+restored) ran RED: depth 1 after the world's seed, 2 after the second
+restore.
+
+**[MINOR-D2] — AGREED-FIXED.** Trace confirmed for both leaky hosts:
+on Lenses, `revealTake` lands the ring on (lensColumn, block, NEW
+take) while that column renders its unchanged PICK — an unhosted pane,
+ring gone; on Write's panel with no focused pane the fallback is
+`"takes-main"`, which the panel never renders. Fix: the reveal gated
+on host in `revealChosenTake` — Takes keeps the ordinary reveal (the
+article pane renders the new chosen; an opened fan renders every
+take); Lenses focuses the `.main` column (the one that renders chosen)
+and, when none is open, LEAVES the ring where it is (a rendered pane)
+rather than moving it onto nothing; the Write panel passes its own
+column as the new `preferredColumnID`. Pin:
+`blankChooseOnALensesHostKeepsTheRingOnAHostedPane` (asserts
+`authority.livePane` ∈ the rendered-pane set computed exactly as the
+cells key) — REVERT-C ran RED with the smoking gun visible in the
+failure output: livePane named the lens column with the minted take
+while that column renders the pick.
+
+**[MINOR-D3] — AGREED-FIXED.** Trace: `discover` collected
+`includeSubtree: true` while the confirm said "every post tagged
+'tutorial'" and the seeder only ever applies the exact tag. Fix:
+`includeSubtree: false` (the identity IS the exact tag) + the copy
+states "tagged exactly". Pin: `aSubTaggedUserPostSurvivesTheRestore`
+(a `tutorial/keepsake` post rides through a full restore) — REVERT-B
+(subtree back on) ran RED: the sub-tagged post tombstoned.
+
+**[MINOR-D4] — ARCHITECT-CALL BUILT (accept-and-document, as
+recorded).** The one-discovery reshape + confirm-whenever-anything-
+exists landed via MAJOR-A; the copy now discloses the PLURAL
+name-based scope ("every pool named …", "every book named 'the field
+guide'"); keying stays name-based. Coverage pin (deliberately NOT
+claimed red-on-old — the book-exists collision path was already
+confirm-gated; the finding's bug halves red under MAJOR-A/D3's
+reverts): `aSameNamedUserBookDiesWithTheConfirmedReplaceButItsPosts
+Survive` exercises the edge the wholesale pin never did — her
+same-named book dies WITH consultation, exactly one live field guide
+remains, and her member posts survive (cleanup deletes tagged posts
+only; deleting a reading never touches containers).
+
+**[MINOR-D5] — AGREED-FIXED** (folded into the one-discovery reshape
+per the findings' own convergence): `findOrSeed` routes a
+non-empty-but-bookless discovery through the restore path — cleanup +
+confirm — instead of seeding blind beside residue; the truly-empty
+store stays a pure fresh seed through the same one shape (cleanup over
+an empty discovery is a no-op). `ShellActions.openTutorial` gains the
+injectable confirm seam and shares the NIT-6 latch (the two doors
+can't race each other either). Pin:
+`openOnABooklessStoreWithResidueRestoresInsteadOfDuplicating` —
+REVERT-A ran RED with both predicted symptoms live: `pools → 2` (the
+second "tutorial scraps") and `tagged → 44` (orphaned old lessons
+beside fresh ones), plus no confirm.
+
+**[MINOR-D6] — AGREED-FIXED.** The Library "Open the Tutorial" door
+routes through `actions.openTutorial()` (the shell's fire-and-DO body:
+failures speak through the StatusCenter, and the door now inherits the
+latch + D5's confirm) — `LibraryCatalogView` gains a required
+`onOpenTutorial` closure supplied by RootView; the silent
+`try? … findOrSeed` is gone. Honestly labeled pin-light as the finding
+itself did (error-path copy; the routed body's own behavior is pinned
+by the door suite).
+
+**[NIT-1] — AGREED-FIXED ON THE RECORD:** the closeout's arithmetic
+corrected by a bracketed correction note under its counts paragraph
+(34, not 32; no "+1 elsewhere"; the 530 total stood) — history
+annotated, not rewritten.
+
+**[NIT-2] — AGREED-FIXED:** `pushDecorationsToSink` moved out of the
+middle of `refreshDecorations`' doc comment in EditorViewModel; each
+function now sits under its own whole comment (the split halves
+reunited verbatim).
+
+**[NIT-3] — AGREED-FIXED:** the declined-confirm negative poll
+(`poll { shell.pendingSelection == nil }` — true on its first turn)
+replaced with REAL coverage: a consulted-spy poll proves the gate was
+reached, a latch-idle poll proves the door FINISHED declined, then the
+`stillThere` + nothing-opened asserts run against a completed door.
+
+**[NIT-4] — RECORD-ONLY, CONFIRMED ROUTED:** the raw-ops walk-test
+acts are now named explicitly on the closeout's "For the Stage 3
+brief-writer" list (a marked ladder addition) — the unlocked drives
+own driving those acts through the real doors; no headless change.
+
+**[NIT-5] — AGREED-FIXED:** the wholesale pin's user-world comparison
+extended from ONE container row to the post's full subtree
+(placements + blocks + variants, ordered `SELECT *` rows) — still
+byte-identical across a restore.
+
+**[NIT-6] — AGREED-FIXED** (folded into the reshape as the findings
+converged): the session-scoped in-flight latch
+(`AppSession.beginTutorialDoor`/`endTutorialDoor`, checked
+SYNCHRONOUSLY at press time so the second press bails before any await
+can interleave; session-scoped so parallel test worlds stay
+independent — a process-global latch would couple them). Pin:
+`aDoublePressedRestoreConvergesToOneFieldGuide` — REVERT-A ran RED
+deterministically on `confirmCount → 2` (the old door consulted per
+press).
+
+**REAL-store note (the fix-pass rail honored):** the real store was
+NOT touched. The already-seeded field guide is data and remains valid —
+the seed logic itself is unchanged (identical rows under old and new
+seeders), and the one runtime residue the old path left there (the
+stray "Duplicate as Version" undo entry) was SESSION-scoped, in-memory,
+and died with the graceful ⌘Q recorded in the closeout. Nothing about
+the seeded content needs the architect's attention; the fixed doors
+simply govern future presses.
+
+**For round 2's fresh reviewer:** the diff unit is `080d06f` +
+`b6f585f` + `53c110e` + the dispositions commit, over the round-1
+anchor `d80f9e3`. Focus-worthy edges of the fixes themselves: (a) the
+latch is per-SESSION — two ShellActions instances over one session
+share it by construction (both construction sites hold the session),
+and `TutorialSeeder.restore` direct calls (tests, the walk) bypass it
+deliberately; (b) `findOrSeed` returns nil on a declined residue
+confirm and `openTutorial` then opens nothing — chosen over opening a
+lesson-post remnant (there is no book to open; the user said no to
+making one); (c) the D2 Lenses no-`.main`-column case keeps the ring in
+place and reveals nothing — the mint+choose still happened and speaks
+through the projection; (d) `pushOverlaysToSinks` pushes STALE badge
+frames at install (correct while geometry is unchanged; a later
+`refreshBadges` re-delivers if it differs).
