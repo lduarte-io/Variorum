@@ -1839,3 +1839,127 @@ makes it pristine — deliberately left as a live exercise of the door.
   any lesson its theme touches (P-6: a broken tutorial step is a
   regression by definition).
 - The dev store's walk residue is one Restore away from pristine.
+
+## Stage 2 ladder — round 1 findings (VERBATIM record; fix pass pending)
+
+**[MAJOR-A] · `Registry/ShellActions.swift:194` vs
+`Features/Tutorial/TutorialSeeder.swift:135–145` · The spoken-confirm
+gate keys on a NARROWER predicate than the destruction it gates —
+Restore can delete user content with NO confirm.** `restoreTutorial`
+consults the confirm only when `existingBookID != nil` (a live reading
+named "the field guide"), but `restore()` → `cleanup()` deletes EVERY
+post tagged `tutorial` (subtree-wide), every pool named "tutorial
+scraps", and every same-named reading — regardless. Concrete path: she
+deletes the tutorial book (everything is deletable; lessons survive as
+tagged bookless posts) or tags one of HER OWN posts `tutorial` (the
+tags lesson teaches the gesture), presses Help ▸ Restore Tutorial… →
+`existingBookID == nil` → NO confirm → her content silently tombstoned.
+`TutorialSeeder.Existing.isEmpty` (75–77) — the correct gate predicate
+— is DEAD CODE, never referenced. Fix: run `discover` ONCE in
+`restoreTutorial`, gate the confirm on `!existing.isEmpty`, pass that
+same `Existing` into the replace (closes the read-twice TOCTOU too).
+Red-on-old pin: seed → delete the book → tag a user post `tutorial` →
+`restoreTutorial(confirm: spy)` → assert confirm consulted / user post
+survives an unconfirmed call.
+
+**[MAJOR-C] · `Features/ReadTier/ReadPostView.swift:145–168` +
+`ReadPostViewModel.swift:71–72,108–121,298–304` · The
+starved-decoration-host class (walk fix 2) is fixed only in
+`EditorViewModel`; the READ TIER carries the identical mechanism
+un-fixed.** Same `lastDecorState` equality gate; `Coordinator.install`
+wires `decorSink` with NO push-on-wire; only the EditorViewModel-typed
+CONVENIENCE init got `pushDecorationsToSink()` — the read tier uses the
+designated init, which pushes nothing. The trigger is documented real
+in this very file (`detach()`'s comment: dismantle→remake on the SAME
+model happens; the Stage-1 round-1 MINOR reset `loaded`/`slots` for
+exactly that cycle but NOT `lastDecorState`) → after a remount with
+unchanged content/width the fresh controller renders no
+callouts/comments/seams until the next real decor change. The
+closeout's Focus-2 premise ("on all controller inits — the init is
+shared") is falsified by the code. Fix: same push (or reset
+`lastDecorState` in `detach()`); pin over a mounted read surface driven
+dismantle→remake; fails on current code.
+
+**[MINOR-D1] · `TutorialSeeder.swift:527` + core `duplicateAsVersion` +
+`Shared/AppSession.swift:95–99` · Every seed leaves a stray "Duplicate
+as Version" entry on the session structural-undo stack** — her next
+unmatched ⌥⌘Z pops an inverse for an act she never performed (toast +
+the twin lesson vanishes): the R112 class via the tutorial's own door.
+Fix: seed through an Operations facade with `undoStack: nil` (or
+snapshot/restore the stack around the seed). Pin: after restore, stack
+unchanged; fails on current code.
+
+**[MINOR-D2] · `TakesViewModel.swift:1049–1061` + `LensesBoardView.swift:
+164–169` + `WriteTakesPanel.swift:222–223` · `newBlankTakeAsChosen` now
+reveals UNCONDITIONALLY on every host** — on a lens column (pick
+unchanged → pane never rendered) or the Write panel with no focused
+pane (falls to `"takes-main"`, a column the panel doesn't render) the
+authority can move onto a pane NO surface hosts → the live ring
+silently disappears. The closeout's blast-radius claim is falsified for
+this one door. Fix: gate the reveal on host/preferredColumnID. Pin: on
+a `.lenses` host, blankChoose from a lens column → `authority.livePane`
+names a renderable pane; fails on current code.
+
+**[MINOR-D3] · `TutorialSeeder.swift:88` vs `:44–47` · Cleanup destroys
+a WIDER set than the confirm discloses:** `everythingTagged(
+includeSubtree: true)` kills a post tagged `tutorial/anything` while
+the confirm says "every post tagged 'tutorial'"; the seeder itself only
+ever applies the exact tag. Fix: `includeSubtree: false` (matches the
+identity), or disclose sub-tags in the copy. Pinnable.
+
+**[MINOR-D4] · `TutorialSeeder.swift:82–84,142–144` · A USER reading
+named "the field guide" dies in a restore with NO recovery door**
+(readings have no restore — the standing pre-13 boundary; member posts
+survive, structure gone permanently); the confirm says "the book
+itself" singular while cleanup deletes ALL same-named readings; the
+wholesale pin seeds a non-colliding name and never exercises the edge.
+Fix (architect's R120 call, recorded): the one-discovery reshape +
+confirm-whenever-anything-exists (MAJOR-A) + accurate plural/sub-tag
+copy + a collision-case pin; keying stays name-based,
+accept-and-document. Pinnable.
+
+**[MINOR-D5] · `TutorialSeeder.swift:110–116` · `findOrSeed` seeds
+WITHOUT cleanup** — a book-deleted-but-pool-alive store grows a second
+"tutorial scraps" pool (titles aren't unique) and keeps orphaned old
+lessons beside fresh ones; only a later Restore heals. Fix: route
+find-or-seed through the one-discovery shape — non-empty-but-bookless ⇒
+the restore path (with its confirm, per MAJOR-A). Pinnable.
+
+**[MINOR-D6] · `Features/Library/LibraryCatalogView.swift:203–210` ·
+the Library "Open the Tutorial" door swallows failure silently
+(`try? … findOrSeed`)** while its ShellActions sibling speaks. Fix:
+route through `actions.openTutorial()`. Honestly labeled
+pin-light (error-path copy): hygiene + consistency.
+
+**NITs:** (1) closeout arithmetic — `TutorialWalkTests` is 34, not 32
+(the 530 total is right; the decomposition invented "+1 elsewhere") —
+correct the record; (2) `pushDecorationsToSink` inserted mid-doc-comment
+in EditorViewModel (2719–2740), splitting `refreshDecorations`' comment
+— reunite; (3) the declined-confirm negative poll is vacuous (passes on
+first turn) — keep the `stillThere` assert, drop the implied coverage
+or make it real; (4) several walk-test "acts" execute at the raw ops
+layer (makeBlock/choose/ceremony/extract/merge) not through doors —
+recorded for Stage 3's unlocked drive, no fix owed now; (5) the
+"user rows byte-identical" pin compares ONE container row — extend to
+its blocks/variants (cheap); (6) double-press Restore can race two
+discoveries into two live field guides — the one-discovery reshape + an
+in-flight guard closes it.
+
+**Verdicts recorded:** judgment calls 1/3/4/5/6/7 SOUND (7 with residue
+folding into the one-discovery reshape); call 2 SOUND-in-principle but
+under-implemented (MAJOR-A) and over-implemented (D3); call 8 SOUND for
+the Takes board, leaky on blankChoose's other hosts (D2). Focus 1 NOT
+fully sound (A/D3/D4/D5 are its named edges, live); Focus 2 NOT sound
+as stated (MAJOR-C falsifies the shared-init premise); Foci 3/4 SOUND
+(N13 verified independently: `reading_section` never reaches export —
+core frozen, routing forced).
+
+**Clean bill (abridged):** core byte-untouched (git-verified); Mac
+530/0 by the reviewer's own run; the seeder writes through Operations
+only (sync-shaped by construction, P2 honored); R57 zero-journal pinned
++ verified read-only against her REAL store (0 journal-shaped rows; her
+15+2 untouched; the backup on disk, arithmetic exact); no
+denormalization; P1/P3 honored; the registry discipline held incl. the
+new act; the A10 absorption residue-free; the choreography + seal
+show-and-tell end-to-end on tutorial content; the N9 noteMode caution
+needed no extension.
