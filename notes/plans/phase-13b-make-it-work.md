@@ -132,8 +132,10 @@ rewire EditorCommands / bottom bars / context menus / ⌘K palette through
 it; fire-and-DO with visible mode-switch choreography; retire the three
 routing regimes and every notification-as-decision (P-4); the T3 slice
 moves command routing out of EditorViewModel; fixes D3, N4, N5 with
-red-on-old pins; drafts the W + merge design memos (T4) as paper for the
-architect and the author's en-masse walk.
+red-on-old pins; drafts the W + merge design memos (T4) in PLAIN LANGUAGE
+(R120: no jargon — the app's own vocabulary or terms defined in place; the
+architect approves them and the builds proceed; her review comes at the
+end checkpoint, never as a gate).
 
 ## Stage 1a execution brief (self-contained — read this + the constitution + the two Stage 0 dossiers; nothing else assumed)
 
@@ -245,6 +247,23 @@ spacing + the margin-grid shift D2; book view incl. D1; the merge + W
 memos' builds; looks-polish LAST per R111). Each batch: build → soak +
 pins → screenshot-verify against the app itself → point-by-point report →
 ledger update → commit → `/Applications` refresh.
+
+## The end checkpoint (R121 — replaces per-stage author gates)
+
+After the Stage 0 ratification (done, batch 17), the author gates NOTHING
+until Stage 3 completes — her call ("it's sometimes hard for me to give an
+opinion with existing bugs still present"). Stages run continuously:
+1a → 1b → the Stage 1 ladder → Stage 2 (tutorial) + its ladder → Stage 3
+themed batches. The cold-review ladders and the standing hard stops
+(invariants, schema-meaning changes, new dependencies, credentials,
+deleting her content, origin pushes) are unchanged. THE ONE CHECKPOINT at
+the end bundles: the en-masse walk of every recorded judgment call /
+PROVISIONAL from all stages; the T4 memos (self-executing per R120, now
+reviewed); the TUTORIAL WALK — Stage 2's guided post seeded in the REAL
+store (empty by her declaration, batch 17) so she experiences the finished
+flows directly; a fresh screenshot tour of every surface; and the standing
+asks A1–A3. Her reactions become new sitting entries; any resulting fix
+round is the phase's tail.
 
 ## Hygiene (R114 — binding)
 
@@ -392,7 +411,7 @@ them.
 | T1 | **Capability registry + fire-and-DO rewiring** — kills the silent-⌘S class, dead keys, lecturing doors, unheard broadcasts, the ⌥⌘Z silent state change, the mode-switch drop, the palette gaps, and D3 (incl. the add-block-at-end door in Takes) | 1 |
 | T2 | **One text surface + PaneTextAuthority + autosave consolidation** — kills the frozen/clipped classes (incl. the live stack-style instance), the dead canary, the triple measurement brains, the dual-autosave hazard; the randomized BOARD SOAK lands here | 1 |
 | T3 | **EditorViewModel decomposition** (P-9; enabling work for T1/T2) | 1 |
-| T4 | **The W + merge design memos** (paper, written during Stage 1; her rulings on the edges) → their builds ride the registry | memos: 1 · builds: 3 |
+| T4 | **The W + merge design memos** (paper, written during Stage 1 in PLAIN LANGUAGE; SELF-EXECUTING per R120 — builds proceed on the architect-approved memo, her review at the end checkpoint) → their builds ride the registry | memos: 1 · builds: 3 |
 | T5 | **Takes lifecycle completeness** — delete/lock/unarchive faces; archived-takes visibility (today ⌘⇧A makes a take VANISH with no UI way back — the fans query is active-only); take-label op + face; lens-rename face | 3 |
 | T6 | **Book view** — D1, focus unification, collapse-all correctness | 3 |
 | T7 | **Geometry/spacing** — D2 (two traced candidates from both audits: the centered article+rail unit widening the measure and shifting prose left ~rail/2 — `TakesBoardView.swift:315–319` + `PostDetailView.swift:70–75` reading the same UserDefaults key two ways; `fanToggleRow` rendering above every block incl. unfanned); the crowdedness pass | 3 |

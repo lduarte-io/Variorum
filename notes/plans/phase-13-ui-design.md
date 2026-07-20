@@ -3334,3 +3334,37 @@ matrix so it drives the worst cells first.
   `PaneTextAuthority` + autosave consolidation + the board soak). The 1b
   brief finalizes at 1a's closeout (just-in-time). Stage 0(c) app-drive
   folds into T5–T7 on landing.
+
+## Sitting 9, batch 18 (2026-07-20) — memos self-executing, ONE end checkpoint (R120–R121)
+
+- **R120 — MEMOS ARE SELF-EXECUTING, AND PLAIN.** "honestly, plan to
+  just move forward with the memos you make, and just make an effort to
+  not have them be overly jargon-y." The T4 memos (W, merge — and any
+  future R116 memo in this phase) no longer gate on a pre-build ruling
+  from her: the architect's memo decisions — product-flavored edges
+  included — are DELEGATED for 13b, recorded, and reviewed at the end
+  checkpoint. Memos are written in plain language: the app's own
+  vocabulary or terms defined in place, no architecture jargon. The
+  standing hard stops (invariants, schema-meaning changes, new
+  dependencies, credentials, deleting her content, origin pushes)
+  remain untouched.
+- **R121 — CONTINUOUS EXECUTION THROUGH STAGE 3; ONE CHECKPOINT AT THE
+  END.** Her instinct, adopted: "it's sometimes hard for me to give an
+  opinion with existing bugs still present." The en-masse judgment-call
+  walk merges with everything else into ONE end-of-phase checkpoint
+  after Stage 3: the accumulated PROVISIONALs/judgment calls from all
+  stages, the memos, the TUTORIAL WALK (Stage 2's artifact, seeded in
+  the real store for her), a fresh screenshot tour, and the standing
+  asks (A1 the `//` glyph, A2 QUESTIONS #23–#28 remainder, A3 the
+  typographic PDF). Stages run continuously without her gating between
+  them; the cold-review ladders and the hard-stop list are UNCHANGED.
+- **Operational (her screensaver/brightness questions, answered on the
+  record):** 0% brightness is harmless — `screencapture` reads the
+  rendered framebuffer, never the backlight. The screensaver firing
+  "despite caffeinate" is the missing flag: plain `caffeinate` holds
+  only SYSTEM sleep; display sleep + the screensaver need
+  `caffeinate -d`. Resolution: every drive session runs its own
+  `caffeinate -d` for its duration (baked into the briefs — a locked
+  screen would also swallow synthetic keystrokes); she may optionally
+  set Lock Screen → screensaver "Never" as belt-and-braces, but NO
+  setting change is required of her.
