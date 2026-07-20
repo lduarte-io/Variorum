@@ -191,4 +191,5 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case switchMode
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
+    case restoreTutorial
 }

@@ -35,8 +35,6 @@ enum SidebarSelection: Hashable {
     case pool(String)
     /// The archived + deleted recovery surfaces (⌘K / Library-reachable).
     case recovery
-    /// The modes tutorial (⌘K / Library-reachable).
-    case tutorial
 }
 
 struct SidebarView: View {

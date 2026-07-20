@@ -307,6 +307,14 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar],
             shortcutLabel: "⌘/", takesAccess: nil,
             unavailableNote: "", availability: always),
+        // Phase 13b Stage 2 (R113): the tutorial's product door — replace
+        // wholesale after a spoken confirm; idempotent; fire-and-DO (it
+        // seeds AND opens the fresh book).
+        Capability(
+            id: .restoreTutorial, verb: "Restore Tutorial…", scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
     ]
 
     // MARK: - Lookup

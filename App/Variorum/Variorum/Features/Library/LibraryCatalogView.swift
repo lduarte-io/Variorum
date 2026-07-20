@@ -200,7 +200,15 @@ struct LibraryCatalogView: View {
                 Spacer()
                 Menu {
                     Button("Archived & Deleted") { onOpen(.recovery) }
-                    Button("Modes Tutorial") { onOpen(.tutorial) }
+                    // 13b Stage 2: the old entrance points at the tutorial
+                    // BOOK (find-or-seed, then open).
+                    Button("Open the Tutorial") {
+                        Task { @MainActor in
+                            if let bookID = try? await TutorialSeeder.findOrSeed(session: session) {
+                                onOpen(.reading(bookID))
+                            }
+                        }
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }

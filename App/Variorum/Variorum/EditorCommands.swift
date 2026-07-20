@@ -57,7 +57,7 @@ struct EditorCommands: Commands {
         .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
         .closeAllTakes, .pageFanBack, .pageFanForward,
         .previousBlock, .nextBlock, .blockComments, .callout,
-        .toggleSeams, .switchMode, .helper,
+        .toggleSeams, .switchMode, .helper, .restoreTutorial,
     ]
 
     /// The SwiftUI key wiring per shortcut-labeled capability — the walk
@@ -285,9 +285,17 @@ struct EditorCommands: Commands {
             Divider()
         }
         // ⌘/ — the shortcut helper + dictionary (Sitting 9, R73/R91).
+        // 13b Stage 2 (R113): the tutorial's Help-menu doors — open the
+        // field guide, and Restore Tutorial… (replace-wholesale after a
+        // spoken confirm; fire-and-DO — it seeds AND opens).
         CommandGroup(after: .help) {
             Button(verb(.helper)) { openWindow(id: "variorum-helper") }
                 .keyboardShortcut("/", modifiers: .command)
+            Divider()
+            Button("Open the Tutorial") { actions?.openTutorial() }
+                .disabled(session == nil)
+            Button(verb(.restoreTutorial)) { actions?.restoreTutorial() }
+                .disabled(session == nil)
         }
     }
 

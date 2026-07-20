@@ -184,6 +184,51 @@ struct ShellActions {
         }
     }
 
+    // MARK: - The tutorial doors (13b Stage 2, R113)
+
+    /// Help ▸ Restore Tutorial… — fire-and-DO: replace the tutorial book
+    /// wholesale (after a spoken confirm when one exists), then OPEN the
+    /// fresh copy. `confirm` is the injectable seam over the modal alert.
+    func restoreTutorial(confirm: (() -> Bool)? = nil) {
+        Task { @MainActor in
+            if await TutorialSeeder.existingBookID(session: session) != nil {
+                let confirmed = confirm?() ?? Self.confirmTutorialReplace()
+                guard confirmed else { return }
+            }
+            do {
+                let bookID = try await TutorialSeeder.restore(session: session)
+                shell.pendingSelection = .reading(bookID)
+                status.speak("The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your shelf.")
+            } catch {
+                status.speak("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
+            }
+        }
+    }
+
+    /// The open entrance (⌘K row, Library door): an existing book opens;
+    /// none ⇒ seed one first. Fire-and-DO — never a lecture.
+    func openTutorial() {
+        Task { @MainActor in
+            do {
+                let bookID = try await TutorialSeeder.findOrSeed(session: session)
+                shell.pendingSelection = .reading(bookID)
+            } catch {
+                status.speak("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")
+            }
+        }
+    }
+
+    /// The spoken confirm (brief decision 6): plain words, exact scope.
+    @MainActor
+    private static func confirmTutorialReplace() -> Bool {
+        let alert = NSAlert()
+        alert.messageText = TutorialSeeder.replaceQuestion
+        alert.informativeText = TutorialSeeder.replaceDetail
+        alert.addButton(withTitle: "Replace")
+        alert.addButton(withTitle: "Cancel")
+        return alert.runModal() == .alertFirstButtonReturn
+    }
+
     /// Flip the global seam setting (R42 — a synced document setting).
     func toggleSeams() {
         Task { @MainActor in
@@ -210,7 +255,7 @@ struct ShellActions {
         .commitTake, .structuralUndo, .sealPost,
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd,
         .showTakes, .newTake, .blankTake, .chooseTake,
-        .saveChoicesAsLens, .toggleSeams,
+        .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
     ]
 
     /// Palette rows for the act capabilities: title = the registry verb,
@@ -242,6 +287,7 @@ struct ShellActions {
         case .chooseTake: return { dispatch(.takes(.choose)) }
         case .saveChoicesAsLens: return { dispatch(.takes(.saveLens)) }
         case .toggleSeams: return { toggleSeams() }
+        case .restoreTutorial: return { restoreTutorial() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without
             // a wired case must never compile into a silent no-op row —
