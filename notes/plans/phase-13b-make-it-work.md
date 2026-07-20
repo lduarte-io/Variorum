@@ -321,7 +321,7 @@ for faithful remounts; `-only-testing:` with a Swift Testing FUNCTION
 name = vacuous success at zero tests — filter at suite level and confirm
 the "Test run with N tests" line.
 
-### Stage 2 — the tutorial spine (R113)
+### Stage 2 — the tutorial spine (R113) — full brief in "## Stage 2 execution brief" below (finalized 2026-07-20 at Stage 1 close; where this section's original wording predates R120 — "her ruling before its fix" — the brief supersedes: memos are self-executing)
 
 Build the guided tutorial flow touching EVERY functionality (first take,
 choose, blank take, divide, extract, make block, merge — and the W where its
@@ -1446,3 +1446,101 @@ tutorial spine (Stage 2) can rely on everything in the 1b closeout's
 choreography is safe to script against mode switches, and the
 StatusCenter is the ONE place every outcome (including refusals made on
 purpose) lands.
+
+## Stage 2 execution brief (self-contained — finalized 2026-07-20 after Stage 1 closed; read this + the constitution + the Stage 1 stage-level closeout + the 1b "Inputs for the Stage 2 tutorial brief-writer")
+
+**Goal (R113, her words):** a tutorial that "could walk you through all
+the functionality, and has been walked through all the functionality…
+if it touched every functionality and actually worked perfectly, [it]
+would be the thorough UI edit and pass needed." Stage 2 builds it, WALKS
+it, and fixes everything the walk trips over. Output: the tutorial as
+the app's permanent acceptance layer (P-6) and its discoverability face.
+
+**Architect decisions (binding):**
+
+1. **The tutorial is a curated BOOK, built of the app's own objects** —
+   a book with real chapters (`reading_section` rows), lessons as posts,
+   instructions IN the prose. The app teaches itself WITH itself: by the
+   time she's read the book she has USED books, chapters, posts, and
+   blocks. Name it in the app's voice (implementer's call; plain, warm,
+   terminal-flavored — the memos' bar). All content NON-JOURNAL
+   (`.generic`; never `profile='journal'` — R57; the bridge sweeps
+   journal days only).
+2. **Lesson content is act-ready:** each lesson's prose tells the reader
+   what to do AND its blocks are pre-shaped for the act (a paragraph
+   begging for a second take; two blocks that read as one thought,
+   ready to merge; a pre-fanned block whose divide opens the ceremony; a
+   sealed mini-post whose refusal demonstrates the status toast — the
+   deliberate-refusal show-and-tell from the 1b inputs).
+3. **Coverage (every lesson names its acts; this list is the contract):**
+   getting around (shelf, library, ⌘K, the Helper) · writing + blocks
+   (typing/crystallization, seams toggle, make block, add-block-at-end,
+   block names, callouts) · takes (first take, ＋take, blank take,
+   choose, the styles incl. the paged rail, expand/collapse, ⌘S commit,
+   history/restore, archive — teach where an archived take GOES only as
+   far as today's truth allows; N1/T5 is Stage 3's, route the lesson
+   honestly around it) · divide + THE CEREMONY (single-variant divide;
+   fan-then-divide → the W sheet end to end) · extract · merge (seam,
+   selection chain, from-Takes upward) · comments · tags · lenses
+   (column, save, adopt-swaps-never-destroys) · compare · outline ·
+   the Blocks area/TOC · canvas · books (the tutorial book itself:
+   chapters, reorder, collapsed cards, finish/extent) · pool/scraps ·
+   export (block/post/book) · seal + unseal · both undo stacks (⌘Z text
+   vs ⌥⌘Z structural) · the choreography itself (divide-from-Takes:
+   watch the app switch, act, and speak).
+4. **The walk is mandatory and comes AFTER the build:** drive EVERY
+   lesson in the dev store through the visual loop (AX/keystrokes +
+   window-scoped screencapture; run your own `caffeinate -d`;
+   pid-verify the dev instance; never touch a /Applications instance).
+   Triage every stumble: (a) a happy-path breaker → FIX in-stage,
+   red-on-old pin; (b) a known Stage 3 ledger item → verify the row,
+   design the lesson around it honestly; (c) a new out-of-scope defect →
+   new ledger row, Stage 3. The stage is done when a full walk produces
+   zero stumbles.
+5. **The executable half:** `TutorialWalkTests` — for each lesson,
+   execute its acts HEADLESSLY through the same registry/operations
+   doors against freshly-seeded tutorial content and assert the outcome
+   the prose promises (store state, not pixels). Green forever after; a
+   change that breaks a tutorial step is a regression by definition
+   (P-6). The screenshot walk is the visual half and re-runs per Stage 3
+   batch.
+6. **Seeding is a product door, not a spike:** an idempotent seeder
+   through Operations (extend the A10/DesignCorpusSeeder patterns),
+   invoked from a Help-menu door ("Restore Tutorial…" — registry-
+   declared, fire-and-DO like everything). Re-seed restores pristine
+   lessons (existing tutorial book replaced wholesale after a spoken
+   confirm); everything deletable like any post/book.
+7. **The A10 modes tutorial is ABSORBED, not duplicated:** its
+   polish/thread/fork content becomes a chapter of the one tutorial
+   book; the old entrance points at the new book; record the
+   supersession (A10 was a ratified deliverable — this is its
+   growth, and the author reviews it at the checkpoint).
+8. **REAL-store seeding at stage close** (batch-17 allowance): run an A1
+   rotating backup FIRST; require ZERO running Variorum instances;
+   pid/path/store-fence verified (the sanctioned real-store opt-in door
+   from a Debug-build tool, or the refreshed /Applications build's own
+   Restore-Tutorial door driven via the visual loop); the tutorial book
+   appears on her real shelf for the end checkpoint. Log exactly what
+   was written.
+9. **Choreography caution (from the Stage 1 close):** any NEW landing
+   kind must declare its landing mode in `noteMode` or it is cleared on
+   arrival — the round-scoping is deliberate.
+
+**Tests:** `TutorialWalkTests` (every lesson); pins for every in-stage
+fix (red-on-old, revert-verified); the registry walk extended to the new
+Help door; full Mac + core suites green at close. Baselines: **Mac
+499/100 · core 747/90** (core stays untouched — the seeder writes
+through existing Operations only).
+
+**Constraints:** behavior parity outside the tutorial + its door;
+`Sources/VariorumCore` untouched; P1–P3 (the seeded book is ordinary
+data — no special rendering path); VoiceControls vocabulary; the R120/
+R119 posture (choose, record, continue; judgment calls to the closeout).
+
+**Process:** fresh implementer session; commits in logical chunks with
+the standing trailer; "## Stage 2 closeout" in this file (lesson
+inventory, walk log summary + screenshot dir, fixes with pins, judgment
+calls, what the Stage 3 brief-writer needs); `/Applications` refreshed;
+the environment traps from the Stage 1a/1b briefs apply verbatim (incl.
+PIPESTATUS, suite-level test filters, the NSHostingView remount trap).
+**Review:** the standard ladder follows the closeout.
