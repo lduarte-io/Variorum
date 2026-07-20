@@ -73,11 +73,11 @@ struct TakesBottomBar: View {
                 guard let from else {
                     return model.speak("This block has no renderable take to branch from.")
                 }
-                Task { await model.branchTake(blockID: slot.blockID, from: from) }
+                Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
             }
             Button("＋ Blank take (⌥⌘T)") {
                 guard let slot = targetSlot else { return speakNoTarget() }
-                Task { await model.newBlankTake(blockID: slot.blockID) }
+                Task { await model.newBlankTakeRevealed(blockID: slot.blockID) }
             }
             Button("＋ Blank take, opened as chosen (⇧⌥⌘T)") {
                 guard let slot = targetSlot else { return speakNoTarget() }
@@ -125,7 +125,7 @@ struct TakesBottomBar: View {
                     guard let from else {
                         return model.speak("This block has no renderable take to branch from.")
                     }
-                    Task { await model.branchTake(blockID: slot.blockID, from: from) }
+                    Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 .help("A new take on the block you're in, branched from what's shown (⌘T)")

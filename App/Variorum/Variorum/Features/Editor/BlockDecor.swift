@@ -222,6 +222,10 @@ final class BlockDecorOverlayController {
                 Task { await model?.moveBlock(fromEntry: from, toBoundary: to) }
             })
         model.decorSink = { [weak self] state in self?.render(state) }
+        // Stage 2 walk fix (the starved-host class): wiring delivers the
+        // current state — decorations computed before this host existed
+        // must not stay invisible until the next real change.
+        model.pushDecorationsToSink()
     }
 
     init(

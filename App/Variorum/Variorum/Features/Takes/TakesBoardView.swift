@@ -199,10 +199,11 @@ struct TakesBoardView: View {
                 return
             }
             Task {
-                if let take = await model.branchTake(blockID: pane.blockID, from: pane.variantID) {
-                    model.focus(.init(
-                        columnID: pane.columnID, blockID: pane.blockID, variantID: take.id))
-                }
+                // Stage 2 walk fix: branch REVEALS — fan open, ring on the
+                // new take (before this, ⌘T on a closed fan was invisible).
+                await model.branchTakeRevealed(
+                    blockID: pane.blockID, from: pane.variantID,
+                    preferredColumnID: pane.columnID)
             }
         case .blank:
             guard let pane = model.focusedPane else {
@@ -210,10 +211,8 @@ struct TakesBoardView: View {
                 return
             }
             Task {
-                if let take = await model.newBlankTake(blockID: pane.blockID) {
-                    model.focus(.init(
-                        columnID: pane.columnID, blockID: pane.blockID, variantID: take.id))
-                }
+                await model.newBlankTakeRevealed(
+                    blockID: pane.blockID, preferredColumnID: pane.columnID)
             }
         case .blankChoose:
             guard let pane = model.focusedPane else {
@@ -626,13 +625,13 @@ struct TakesBoardView: View {
         HStack(spacing: 8) {
             Button("＋ new take (branch)") {
                 guard let from = slot.variantID else { return }
-                Task { await model.branchTake(blockID: slot.blockID, from: from) }
+                Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
             }
             .disabled(slot.variantID == nil)
             .help("A new take that starts as a copy of what's shown (⌘T)")
             Text("·").foregroundStyle(tokens.faint)
             Button("＋ blank take") {
-                Task { await model.newBlankTake(blockID: slot.blockID) }
+                Task { await model.newBlankTakeRevealed(blockID: slot.blockID) }
             }
             .help("A genuinely different take, from scratch (⌥⌘T; ⇧⌥⌘T opens it as chosen)")
         }

@@ -89,10 +89,13 @@ struct TakesCellView: View {
     ) -> [PaneTextView.MenuItemSpec] {
         var specs: [PaneTextView.MenuItemSpec] = [
             .init(title: "＋ New take — branch of this one (⌘T)") {
-                Task { await model.branchTake(blockID: slot.blockID, from: resolved.variantID) }
+                Task {
+                    await model.branchTakeRevealed(
+                        blockID: slot.blockID, from: resolved.variantID)
+                }
             },
             .init(title: "＋ Blank take (⌥⌘T)") {
-                Task { await model.newBlankTake(blockID: slot.blockID) }
+                Task { await model.newBlankTakeRevealed(blockID: slot.blockID) }
             },
             .init(
                 title: "✓ Choose this take (the post shows it)",

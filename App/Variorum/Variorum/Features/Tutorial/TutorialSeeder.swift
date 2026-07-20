@@ -525,6 +525,10 @@ enum TutorialSeeder {
             + "Version for any post, any time.",
         ])
         let twin = try ops.duplicateAsVersion(versions.post.id)
+        // A distinct title (walk finding): the copy inherits the lesson's
+        // title, and two identical rows in the ⌘K palette invite opening
+        // the wrong one.
+        try ops.renameContainer(twin.post.id, title: "compare & versions \u{2014} the twin")
         try ops.applyTag(tagID, toPost: twin.post.id)
 
         _ = try lesson(looking, "outline \u{B7} blocks \u{B7} canvas", [

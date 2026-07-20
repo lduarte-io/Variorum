@@ -397,6 +397,61 @@ struct TutorialWritingActsTests {
         }
     }
 
+    /// Stage 2 WALK FIX pin (red-on-old, behavioral-revert verified): the
+    /// shaping lesson's callout frame was BLANK on an ordinary Write mount
+    /// — `refreshDecorations` had run before the overlay controller wired
+    /// `decorSink` (attach precedes install; the model was already
+    /// loaded), and the `lastDecorState` equality gate then starved the
+    /// new host until the next real change. Wiring now DELIVERS the
+    /// current state: the callout renders the moment the host exists.
+    @Test func aFreshlyMountedEditorRendersTheCalloutFrame() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let shaping = try await db.read { try lessonID($0, bookID: bookID, "shaping blocks") }
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 900, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let model = EditorViewModel(session: session, postID: shaping)
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: model)
+            delegate.wire(to: textView)
+            window.contentView = scrollView
+            window.makeKeyAndOrderFront(nil)
+            model.attach(textView: textView, scrollView: scrollView)
+
+            // The starved order: everything adopted BEFORE the overlay
+            // host exists (the loaded-model mount).
+            let (slots, header, presentations) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: shaping),
+                 try Queries.containerHeader(db, containerID: shaping),
+                 try Queries.blockPresentations(db, containerID: shaping))
+            }
+            model.adoptHeader(header)
+            model.applyProjection(slots)
+            model.adoptPresentations(presentations)
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+
+            // NOW the host wires — exactly the makeNSView order.
+            let decor = BlockDecorOverlayController(model: model, textView: textView)
+            _ = decor
+            await poll {
+                textView.subviews.contains {
+                    String(describing: type(of: $0)).contains("DecorRectView")
+                }
+            }
+            #expect(textView.subviews.contains {
+                String(describing: type(of: $0)).contains("DecorRectView")
+            }, "the callout frame renders the moment the host exists — never starved")
+        }
+    }
+
     @Test func addBlockAtEndMintsAndHandsTheRingOver() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "blocks & typing") }
@@ -459,6 +514,56 @@ struct TutorialTakesActsTests {
             let slotNow = try #require(after.slots.first { $0.blockID == lighthouse.blockID })
             #expect(slotNow.variantID == lighthouse.variantID,
                     "minting never chooses — the post still shows the original")
+        }
+    }
+
+    /// Stage 2 WALK FIX pin (red-on-old, behavioral-revert verified): ⌘T
+    /// on a block with a CLOSED fan used to mint an INVISIBLE take — the
+    /// handler focused the new pane but never opened the fan, so the
+    /// article kept showing chosen and the only trace was the ⑂ counter.
+    /// The lesson's promise is literal: "a second take appears beside it."
+    /// Every mint door now REVEALS: fan open + ring on the minted take.
+    @Test func branchOnAClosedFanRevealsTheNewTake() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "your first take") }
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1000, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let model = TakesViewModel(session: session, postID: lesson)
+            let hosting = NSHostingView(
+                rootView: TakesBoardView(session: session, postID: lesson, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 700)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            await poll { session.commandRouter.handlerCount > 0 }
+            await poll { !model.projection.slots.isEmpty }
+            let first = model.projection.slots[0]
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: first.blockID, variantID: first.variantID!))
+            #expect(!model.expandedBlocks.contains(first.blockID), "the fan starts CLOSED")
+
+            // The ⌘T door's exact routed body.
+            session.commandRouter.dispatch(.takes(.branch))
+            await poll {
+                (model.projection.fans[first.blockID]?.count ?? 0) == 2
+                    && model.expandedBlocks.contains(first.blockID)
+            }
+            #expect(model.expandedBlocks.contains(first.blockID),
+                    "the fan OPENED — the second take appears beside the first")
+            let fan = try #require(model.projection.fans[first.blockID])
+            #expect(fan.count == 2)
+            let minted = try #require(fan.first { $0.id != first.variantID })
+            #expect(model.authority.livePane?.variantID == minted.id,
+                    "the ring is on the new take — typing continues there")
         }
     }
 

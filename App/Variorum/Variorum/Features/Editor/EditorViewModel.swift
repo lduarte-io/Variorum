@@ -2722,6 +2722,19 @@ final class EditorViewModel {
     /// supersedes: the visible character window (the `topVisibleOffset`
     /// fragment idiom, both edges) prunes the entry walk to on-screen
     /// entries; each visible entry costs two single-fragment lookups
+    /// A freshly-wired overlay host gets the CURRENT decorations (Stage 2
+    /// walk fix — the starved-host class): the mount order can compute a
+    /// decoration state BEFORE the sink exists (`attach` precedes the
+    /// coordinator's `install`, and the model may already be loaded), and
+    /// the `lastDecorState` equality gate then starves the new host until
+    /// the next REAL change — callouts/seams/handles blank on an ordinary
+    /// mount, timing-dependent. Re-arming the gate before refreshing makes
+    /// wiring itself a delivery.
+    func pushDecorationsToSink() {
+        lastDecorState = BlockDecor.State()
+        refreshDecorations()
+    }
+
     /// (first and last fragment frames). When nothing is decorated (seams
     /// off, indicator off, no callouts, no comments) the walk is skipped
     /// entirely — the calm default costs nothing.

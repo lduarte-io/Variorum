@@ -1047,10 +1047,56 @@ final class TakesViewModel {
     /// The R90 power variant (⇧⌥⌘T — "open new blank take as chosen"):
     /// mint AND choose in one gesture, both halves in one serialized run.
     func newBlankTakeAsChosen(blockID: String) async {
-        await run { ops in
-            let take = try ops.newBlankVariant(blockID)
-            try ops.chooseVariant(blockID, variantID: take.id)
+        statusMessage = nil
+        do {
+            let take = try await session.runner.run { ops -> Variant in
+                let take = try ops.newBlankVariant(blockID)
+                try ops.chooseVariant(blockID, variantID: take.id)
+                return take
+            }
+            revealTake(blockID: blockID, variantID: take.id)
+        } catch {
+            statusMessage = Self.message(for: error)
         }
+    }
+
+    // MARK: - Reveal (Stage 2 tutorial-walk fix — the R112 class)
+
+    /// A minted take must be SEEN. Before this, ⌘T (and the bar's ＋ take,
+    /// the block menu, the growth doors) on a CLOSED fan minted a take
+    /// that appeared NOWHERE — the article kept showing the chosen take
+    /// and the only trace was the ⑂ counter ticking. The lesson's literal
+    /// promise ("a second take appears beside it") is the contract (P-6):
+    /// every mint door opens the block's fan and puts the ring on the new
+    /// take, so typing continues there instantly.
+    func revealTake(blockID: String, variantID: String, preferredColumnID: String? = nil) {
+        expandedBlocks.insert(blockID)
+        let columnID = preferredColumnID
+            ?? focusedPane.flatMap { $0.blockID == blockID ? $0.columnID : nil }
+            ?? landingColumnID
+        focus(PaneKey(columnID: columnID, blockID: blockID, variantID: variantID))
+    }
+
+    /// Branch + reveal — the ONE body behind ⌘T, the bar's ＋ take, the
+    /// block ▾ menu, the growth doors, and the card context menu.
+    @discardableResult
+    func branchTakeRevealed(
+        blockID: String, from variantID: String, preferredColumnID: String? = nil
+    ) async -> Variant? {
+        guard let take = await branchTake(blockID: blockID, from: variantID) else { return nil }
+        revealTake(blockID: blockID, variantID: take.id, preferredColumnID: preferredColumnID)
+        return take
+    }
+
+    /// Blank + reveal — ⌥⌘T's one body (minting never chooses, R90; the
+    /// blank card blooms and takes the ring).
+    @discardableResult
+    func newBlankTakeRevealed(
+        blockID: String, preferredColumnID: String? = nil
+    ) async -> Variant? {
+        guard let take = await newBlankTake(blockID: blockID) else { return nil }
+        revealTake(blockID: blockID, variantID: take.id, preferredColumnID: preferredColumnID)
+        return take
     }
 
     // MARK: - The keyboard family's board half (R73)
