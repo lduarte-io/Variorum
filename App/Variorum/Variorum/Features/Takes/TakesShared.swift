@@ -136,6 +136,65 @@ struct LineageStripe: View {
     }
 }
 
+/// Batch 14 — the takes article's LEFT-MARGIN comment note (her placement
+/// suggestion; the round-2 margin-comment idiom, takes-side): the block's
+/// first comment, glyph-prefixed, click for the full panel. Fetched per
+/// visible row (LazyVStack — cost ∝ viewport).
+struct CommentMarginNote: View {
+    let session: AppSession
+    let blockID: String
+    let tokens: VoiceTokens
+    @State private var comments: [BlockComment] = []
+    @State private var panelShown = false
+
+    var body: some View {
+        if let first = comments.first {
+            Button {
+                panelShown = true
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tokens.commentPrefix + first.text)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.commentInk)
+                        .lineLimit(4)
+                        .multilineTextAlignment(.leading)
+                    if comments.count > 1 {
+                        Text(tokens.chromeLabel("+\(comments.count - 1) more"))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                    }
+                }
+                .padding(.leading, 8)
+                .overlay(alignment: .leading) {
+                    Rectangle()
+                        .fill(tokens.commentInk.opacity(0.5))
+                        .frame(width: 2)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("This block's comments — click to read, add, or edit them")
+            .popover(isPresented: $panelShown) {
+                CommentsPanel(session: session, blockID: blockID)
+            }
+            .onChange(of: panelShown) { _, shown in
+                if !shown { Task { await refresh() } }
+            }
+            .task(id: blockID) { await refresh() }
+        } else {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .task(id: blockID) { await refresh() }
+        }
+    }
+
+    private func refresh() async {
+        comments = (try? await session.database.read { [blockID] db in
+            try Queries.blockComments(db, blockID: blockID)
+        }) ?? []
+    }
+}
+
 /// Naming sheet for lenses (save-as-lens, save-current-choices).
 struct LensNameSheet: View {
     var title: String = "Name this lens"

@@ -71,8 +71,10 @@ struct ShelfView: View {
             }
             .frame(maxHeight: listContentHeight > 0 ? listContentHeight : nil, alignment: .top)
             entryBar
-            hintBar
+            // Batch 14: the ⌘k advice bar rides the WINDOW BOTTOM (her
+            // ask); the entry box stays high with the list.
             Spacer(minLength: 0)
+            hintBar
         }
         .background(tokens.surface)
         .task { await model.start() }
@@ -283,10 +285,9 @@ struct ShelfView: View {
     // MARK: - Quick entry (R3 — the shared bar; Library carries it too)
 
     private var entryBar: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Divider().overlay(tokens.line)
-            QuickEntryBar(session: session, onOpen: onOpen, autofocus: true)
-        }
+        // Batch 14: the dashed box floats under the list — no divider,
+        // like the round-1 mockup she attached.
+        QuickEntryBar(session: session, onOpen: onOpen, autofocus: true)
     }
 
     private var hintBar: some View {

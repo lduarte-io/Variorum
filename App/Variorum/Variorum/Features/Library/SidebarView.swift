@@ -44,6 +44,9 @@ struct SidebarView: View {
     let model: LibraryViewModel
     let pool: PoolViewModel
     @Binding var selection: SidebarSelection?
+    /// Batch 14: the open post's current mode (the rail's › marker) —
+    /// broadcast by PostDetailView, tracked by the shell.
+    var postMode: String = PostDetailView.Mode.takes.rawValue
     @Environment(ThemeStore.self) private var theme
     @Environment(\.colorScheme) private var scheme
     /// Phase 11b (B2): the drop-in import model, created on first drop.
@@ -109,6 +112,41 @@ struct SidebarView: View {
                 Text(tokens.chromeLabel("Variorum"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
+            }
+            // Batch 14 (her ruling — supersedes the bottom mode line):
+            // the post MODES live here, "in the same verticle pane as
+            // shelf / library / pools, but with a separator so it's clear
+            // that it's only for when you're within a post."
+            if case .post(let postID) = selection {
+                Section {
+                    ForEach(PostDetailView.Mode.allCases, id: \.self) { m in
+                        Button {
+                            NotificationCenter.default.post(
+                                name: .variorumSwitchMode, object: nil,
+                                userInfo: ["mode": m.rawValue, "postID": postID])
+                        } label: {
+                            HStack(spacing: 2) {
+                                if m.rawValue == postMode, !tokens.selectionMarker.isEmpty {
+                                    Text(tokens.selectionMarker
+                                        .trimmingCharacters(in: .whitespaces))
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(tokens.accent)
+                                }
+                                Text(tokens.chromeLabel(m.rawValue))
+                                    .font(tokens.mono)
+                                    .fontWeight(m.rawValue == postMode ? .semibold : .regular)
+                                    .foregroundStyle(
+                                        m.rawValue == postMode ? tokens.accent : tokens.muted)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .help("\(m.rawValue) (⌘\((PostDetailView.Mode.allCases.firstIndex(of: m) ?? 0) + 1))")
+                    }
+                } header: {
+                    Text(tokens.chromeLabel("this post"))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                }
             }
         }
         .scrollContentBackground(.hidden)

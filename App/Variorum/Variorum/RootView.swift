@@ -29,6 +29,8 @@ struct RootView: View {
     @State private var palette: PaletteModel
     @State private var selection: SidebarSelection? = .shelf
     @State private var paletteOpen = false
+    /// Batch 14: the open post's current mode — the sidebar rail's marker.
+    @State private var postMode: String = PostDetailView.Mode.takes.rawValue
     /// Sitting 9 (R94): the bridge row's auth-shaped failures open the
     /// account sheet from right there.
     @State private var accountSheetShown = false
@@ -63,7 +65,9 @@ struct RootView: View {
 
     var body: some View {
         NavigationSplitView {
-            SidebarView(session: session, model: library, pool: pool, selection: $selection)
+            SidebarView(
+                session: session, model: library, pool: pool, selection: $selection,
+                postMode: postMode)
                 .navigationSplitViewColumnWidth(min: 180, ideal: 210)
                 .safeAreaInset(edge: .bottom) {
                     if let services {
@@ -105,6 +109,10 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .variorumOpenPost)) { note in
             guard let id = note.userInfo?["postID"] as? String else { return }
             router.pendingSelection = .post(id)
+        }
+        // Batch 14: the sidebar's post rail marks the current mode.
+        .onReceive(NotificationCenter.default.publisher(for: .variorumModeDidChange)) { note in
+            if let raw = note.userInfo?["mode"] as? String { postMode = raw }
         }
         .onChange(of: router.paletteRequested) { _, requested in
             guard requested else { return }

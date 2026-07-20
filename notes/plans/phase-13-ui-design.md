@@ -1852,6 +1852,93 @@ the running Claude session, so grant between sessions. Once granted,
 sessions can screenshot the dev-store app and self-review (the
 launch/window-probe machinery already ships in-session).
 
+### Sitting 9, continued (2026-07-20 ~midnight — batch 14: THE VISUAL LOOP ARRIVES; the frozen-article root cause; the sidebar mode rail; the dashed-box entry; R108–R110)
+
+**Her message VERBATIM (standing instruction; typos hers; screenshots
+#29–#35 — incl. the round-1 shelf mockup and book mockup as references):**
+
+> ok, i turned the terminal capability on. let me know if you can do it
+> and if you can't do it, i may have to quit and restart. also, i like
+> this box cutout separation more and think it looks more like the
+> terminal. can we get the advice bar with commands moved to the bottom?
+> also, there seems to be a bug in that when something is chosen, it
+> still doesn't appear as chosen in the space above. also, lines multiple
+> paragraph breaks below the start of a take still aren't appearing when
+> the take isn't expanded, so our fix wasn't thorough enough. also, the
+> bottom looks too crowded with the two blocks. I think the different
+> modes should be on the left, in the same verticle pane as shelf /
+> library / pools, but with a separator so it's clear that it's only for
+> when you're within a post. expanded view: [image] non expanded:
+> [image] just straight up missing the rest of the blocks. in margin
+> grid it appears, but also the margin grid is not showing the blocks 2
+> high even when that setting is made. we just need a lot more work.
+> even when there is a comment, i can't really see the comment anywhere
+> (I suppose it oculd go on the left in the blank area). I also said in
+> my earlier message that I wanted the title aligned with the text, like
+> how the mockup looks, for a neater view. can you go back and read
+> through all my messages more thoroughly? I feel like communication is
+> breaking down under how many issues there are and you aren't seeing
+> everything i've said.
+
+**THE VISUAL LOOP IS LIVE:** her Screen-Recording grant works with NO
+Terminal restart — sessions now `screencapture` the real screen, launch
+the dev-store Debug app, find its window (CGWindowList), and SEE their
+work. This batch's shelf changes were verified by screenshot against the
+round-1 mockup open in her own browser. Standing practice from here: any
+visual change gets a dev-store screenshot before shipping.
+
+**THE FROZEN ARTICLE, actually root-caused (both her reopened reports —
+one mechanism, two hazards, pinned):** `TakesViewModel.liveBuffers` was
+`@ObservationIgnored` — a keystroke in the live pane updated the buffer,
+but SwiftUI NEVER re-evaluated the read rows that mirror it through
+`resolvedTake`, so the article cell froze on stale text AND stale
+height until the projection eventually caught up ("doesn't appear as
+chosen in the space above"; "multiple paragraph breaks below the start
+still aren't appearing"). Second hazard, visible in her screenshot as
+TWO live rings: the fan cards shared the article cell's pane key
+(`takes-main` + block + variant) — focusing the CHOSEN take's card made
+the article cell "live" too, and a live pane never adopts text. FIXES:
+liveBuffers is OBSERVED (invalidation ∝ realized rows — P3-bounded; the
+live pane stays buffer-authoritative behind the `!isLive` adopt guard),
+and the fan cards pane in their own `takes-fan` namespace (exactly ONE
+live ring again — R22). PIN: `TakesArticleRenderTests` (3 tests over
+the REAL mounted board — closed-fan full-text/full-height, the
+edit-follow, and `focusedChosenCardNeverFreezesTheArticleCell`, which
+REDS with either half reverted — verified by behavioral revert).
+
+**Rulings (R108+):**
+
+- **R108 — The post modes live in the SIDEBAR** (supersedes R107's
+  bottom line — "the bottom looks too crowded with the two blocks"): a
+  separated `this post` section under Shelf/Library/Pool/Blocks, shown
+  only while a post is open, the current mode wearing the color ›
+  (PostDetailView broadcasts `variorumModeDidChange`; the rail switches
+  via the standing `variorumSwitchMode` door; ⌘1–⌘7 unchanged). The
+  bottom holds ONE status line again.
+- **R109 — The quick entry is the DASHED-BOX cutout** (her call, mockup
+  attached): hint INSIDE the box as the placeholder, blinking block
+  cursor, no divider — floating under the last shelf row; the ⌘k advice
+  bar moves to the WINDOW BOTTOM with the void between (screenshot-
+  verified against the mockup).
+- **R110 — Density outranks the strip**: R24's one-card-high horizontal
+  strip is the 1-HIGH look; an explicit "2/3 high" margin-grid setting
+  stacks cards even for short blocks ("not showing the blocks 2 high
+  even when that setting is made").
+- **Comments in the takes margin** (her placement suggestion): a block
+  with comments shows its first one LEFT of the article cell —
+  glyph-prefixed ("//" now visible for her R100 call), rule-edged,
+  "+N more", click for the full panel; fetched per realized row.
+- **Alignment, this time as she meant it**: the post MASTHEAD and the
+  takes control line share the ARTICLE's measure and left edge (title
+  directly over the text, one column — margin-grid widens both
+  together). Batch 12's book-title half stands.
+
+**Verification:** Mac suite **431 green in 81 suites** (was 428/80 — the
+three article pins); core untouched at 747/90; the frozen-article pin
+red-verified by behavioral revert of each half; shelf verified BY
+SCREENSHOT against the mockup. Open questions left with her: none new —
+#23–#27, typographic-PDF, and the "//" ratification (now seeable) stand.
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

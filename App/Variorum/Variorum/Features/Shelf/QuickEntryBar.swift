@@ -33,12 +33,32 @@ struct QuickEntryBar: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(tokens.chromeLabel("new post — start typing · ⏎ opens it as a post"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-                .padding(.top, 10)
-            HStack(spacing: 2) {
+        // Batch 14 (her call, with the round-1 mockup attached): the
+        // DASHED-BOX cutout — "i like this box cutout separation more and
+        // think it looks more like the terminal." The hint lives INSIDE
+        // the box as the placeholder; typing replaces it.
+        VStack(alignment: .leading, spacing: 4) {
+            ZStack(alignment: .topLeading) {
+                if entryText.isEmpty {
+                    HStack(spacing: 6) {
+                        Text(tokens.chromeLabel("new post — just start typing · ⏎ opens it"))
+                            .font(tokens.body)
+                            .foregroundStyle(tokens.faint)
+                        if tokens.showsBlockCursor && !entryFocused {
+                            Rectangle()
+                                .fill(tokens.accent)
+                                .frame(width: 8, height: 16)
+                                .opacity(cursorOn ? 1 : 0)
+                                .task {
+                                    while !Task.isCancelled {
+                                        try? await Task.sleep(for: .milliseconds(550))
+                                        cursorOn.toggle()
+                                    }
+                                }
+                        }
+                    }
+                    .allowsHitTesting(false)
+                }
                 TextField("", text: $entryText, axis: .vertical)
                     .textFieldStyle(.plain)
                     .font(tokens.body)
@@ -46,21 +66,14 @@ struct QuickEntryBar: View {
                     .focused($entryFocused)
                     .lineLimit(1...4)
                     .onSubmit { submit() }
-                if tokens.showsBlockCursor && entryText.isEmpty && !entryFocused {
-                    Rectangle()
-                        .fill(tokens.accent)
-                        .frame(width: 8, height: 16)
-                        .opacity(cursorOn ? 1 : 0)
-                        .task {
-                            while !Task.isCancelled {
-                                try? await Task.sleep(for: .milliseconds(550))
-                                cursorOn.toggle()
-                            }
-                        }
-                }
-                Spacer()
             }
-            .padding(.bottom, lastError == nil ? 12 : 2)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+            .contentShape(Rectangle())
+            .onTapGesture { entryFocused = true }
             if let lastError {
                 // lineLimit is LOAD-BEARING beside fixedSize — an unlimited
                 // fixedSize text in non-scrolling chrome inflates the WINDOW
@@ -71,12 +84,10 @@ struct QuickEntryBar: View {
                     .foregroundStyle(tokens.accent)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.bottom, 8)
             }
         }
         .padding(.horizontal, 28)
-        .background(tokens.card)
-        .onTapGesture { entryFocused = true }
+        .padding(.vertical, 10)
         .task {
             if autofocus { entryFocused = true }
         }

@@ -53,6 +53,13 @@ struct TakesBoardView: View {
     /// in Lenses now).
     private let mainColumn = TakesColumn(id: "takes-main", kind: .main)
 
+    /// Batch 14 (her image-#9 report — TWO live rings): the fan CARDS pane
+    /// in their own namespace. When the chosen take's card was focused,
+    /// its key EQUALED the article cell's (same column/block/variant) —
+    /// both went live, and a live pane never adopts text, so the article
+    /// froze stale. Distinct namespaces keep exactly ONE pane live (R22).
+    static let fanColumnID = "takes-fan"
+
     /// R74: the rail's reserved width follows the chosen column count.
     private var marginRailWidth: CGFloat {
         CGFloat(gridCols) * 220 + CGFloat(max(gridCols - 1, 0)) * 6
@@ -256,6 +263,10 @@ struct TakesBoardView: View {
             .help("The rare whole-post acts: a rewrite pass, saving choices as a lens, "
                 + "duplicating as a version")
         }
+        // Batch 14 (her alignment ask): the control line shares the
+        // article's measure and left edge — one column, like the mockup.
+        .frame(maxWidth: articleMeasure, alignment: .leading)
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
         .padding(.vertical, 6)
     }
@@ -374,6 +385,15 @@ struct TakesBoardView: View {
             .padding(2)
             .background(washed && markChangingBlock ? tokens.wash : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
+            // Batch 14 (her "even when there is a comment, i can't really
+            // see the comment anywhere (I suppose it oculd go on the left
+            // in the blank area)"): the block's comments in the LEFT
+            // margin — the round-2 margin-comment idiom, takes-side.
+            .overlay(alignment: .topLeading) {
+                CommentMarginNote(session: session, blockID: slot.blockID, tokens: tokens)
+                    .frame(width: 150, alignment: .topLeading)
+                    .offset(x: -166)
+            }
     }
 
     /// STACK: takes stacked under the block.
@@ -421,7 +441,11 @@ struct TakesBoardView: View {
                 .foregroundStyle(tokens.muted)
             if takes.isEmpty {
                 newTakeDoors(slot: slot)
-            } else if TakesViewModel.usesHorizontalStrip(text: slot.text) {
+            } else if TakesViewModel.usesHorizontalStrip(text: slot.text), gridRows == 1 {
+                // R24's one-card-high strip is the 1-HIGH look; an explicit
+                // 2/3-high density setting outranks it (batch 14: "margin
+                // grid is not showing the blocks 2 high even when that
+                // setting is made").
                 ScrollView(.horizontal) {
                     HStack(alignment: .top, spacing: 6) {
                         ForEach(takes, id: \.id) { take in
@@ -570,13 +594,13 @@ struct TakesBoardView: View {
 
     private func paneKeyIsLive(slot: Queries.RenderedBlock, take: Variant) -> Bool {
         model.focusedPane == TakesViewModel.PaneKey(
-            columnID: mainColumn.id, blockID: slot.blockID, variantID: take.id)
+            columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id)
             && !model.projection.sealed
     }
 
     private func focusPane(slot: Queries.RenderedBlock, take: Variant) {
         model.focus(TakesViewModel.PaneKey(
-            columnID: mainColumn.id, blockID: slot.blockID, variantID: take.id))
+            columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id))
     }
 
     private func liveText(_ take: Variant) -> String {

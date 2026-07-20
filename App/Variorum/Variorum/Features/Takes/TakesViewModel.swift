@@ -147,7 +147,15 @@ final class TakesViewModel {
     @ObservationIgnored private var deferredProjection: Queries.TakesProjection?
     /// Per-variant buffer while a pane is live and unsettled — the
     /// buffer-authoritative rule in miniature (the editor's discipline).
-    @ObservationIgnored private(set) var liveBuffers: [String: String] = [:]
+    /// OBSERVED (batch 14 — the frozen-article root cause): `resolvedTake`
+    /// feeds every read pane from this dictionary, so a keystroke in the
+    /// live pane must invalidate the rows that mirror it ("when something
+    /// is chosen, it still doesn't appear as chosen in the space above" —
+    /// the article cell froze on stale text AND stale height until the
+    /// projection eventually caught up). Invalidation cost is bounded by
+    /// the REALIZED rows (LazyVStack, P3); the live pane itself stays
+    /// buffer-authoritative behind the `!isLive` adopt guard.
+    private(set) var liveBuffers: [String: String] = [:]
 
     // MARK: - Lifecycle
 

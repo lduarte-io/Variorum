@@ -18,6 +18,13 @@ import GRDB
 import SwiftUI
 import VariorumCore
 
+extension Notification.Name {
+    /// Batch 14: the detail view broadcasts its current mode so the
+    /// sidebar's post rail (her ruling — modes on the left, in the
+    /// sidebar, separated) can mark it with the ›.
+    static let variorumModeDidChange = Notification.Name("variorumModeDidChange")
+}
+
 struct PostDetailView: View {
     let session: AppSession
     let postID: String
@@ -56,6 +63,17 @@ struct PostDetailView: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// Batch 14 (her alignment ask, restated from batch 12): the masthead
+    /// shares the ARTICLE's measure and left edge — title directly over
+    /// the text, like the mockup. Margin-grid widens the takes article by
+    /// its reserved rail; the masthead follows.
+    private var mastheadMeasure: CGFloat {
+        guard mode == .takes, themeStore?.settings.fanStyle == .marginGrid else { return 680 }
+        let stored = UserDefaults.standard.integer(forKey: "takesGridCols")
+        let cols = stored == 0 ? 1 : max(1, min(2, stored))
+        return 680 + 16 + CGFloat(cols) * 220 + CGFloat(max(cols - 1, 0)) * 6
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Batch 9 (R101): the MASTHEAD — the round-2 canon's et/es
@@ -79,6 +97,8 @@ struct PostDetailView: View {
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                 .help("Show the post's references (sources beside the draft)")
             }
+            .frame(maxWidth: mastheadMeasure, alignment: .leading)
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
             .padding(.top, 12)
             .padding(.bottom, 8)
@@ -114,18 +134,20 @@ struct PostDetailView: View {
                 CanvasView(session: session, containerID: postID)
                     .id("canvas-\(postID)")
             }
-            // Batch 12 (her pick at the question round): the MODE LINE
-            // lives at the BOTTOM — the terminal modeline idiom, in the
-            // neighborhood her eyes already work in (blk n/n, counts,
-            // commit). ⌘1–⌘7 unchanged.
-            Divider().overlay(tokens.line)
-            HStack {
-                ModeTabs(mode: $mode, tokens: tokens)
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 3)
-            .background(tokens.room)
+        }
+        // Batch 14 (supersedes R107's bottom line — her "the bottom looks
+        // too crowded with the two blocks"): the modes live in the
+        // SIDEBAR's post section now; this view broadcasts its state so
+        // the rail can mark the current mode.
+        .onChange(of: mode) { _, new in
+            NotificationCenter.default.post(
+                name: .variorumModeDidChange, object: nil,
+                userInfo: ["mode": new.rawValue, "postID": postID])
+        }
+        .onAppear {
+            NotificationCenter.default.post(
+                name: .variorumModeDidChange, object: nil,
+                userInfo: ["mode": mode.rawValue, "postID": postID])
         }
         .inspector(isPresented: $referencesShown) {
             ReferencePanel(session: session, postID: postID)
@@ -162,37 +184,6 @@ struct PostDetailView: View {
                   let target = Mode(rawValue: raw)
             else { return }
             mode = target
-        }
-    }
-
-    /// Batch 9 (R101): the mode row as voiced words — the current mode
-    /// wears the voice's marker + accent; the rest sit muted. Replaces
-    /// the stock segmented picker (the "spread out buttons" complaint).
-    struct ModeTabs: View {
-        @Binding var mode: Mode
-        let tokens: VoiceTokens
-
-        var body: some View {
-            HStack(spacing: 1) {
-                ForEach(Array(Mode.allCases.enumerated()), id: \.element) { i, m in
-                    Button {
-                        mode = m
-                    } label: {
-                        HStack(spacing: 2) {
-                            if m == mode, !tokens.selectionMarker.isEmpty {
-                                Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(tokens.accent)
-                            }
-                            Text(tokens.chromeLabel(m.rawValue))
-                                .fontWeight(m == mode ? .semibold : .regular)
-                        }
-                    }
-                    .buttonStyle(VoicedButtonStyle(
-                        tokens: tokens, role: m == mode ? .primary : .quiet, font: tokens.mono))
-                    .help("\(m.rawValue) (⌘\(i + 1))")
-                }
-            }
         }
     }
 
