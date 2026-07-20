@@ -108,20 +108,123 @@ No building. Three parts, briefs below:
 synthesis in this file: per-component verdicts and the ranked themed backlog.
 **Gate:** the author ratifies verdicts + backlog before Stage 1 builds.
 
-### Stage 1 — the interaction-layer consolidation
+### Stage 1 — the interaction-layer consolidation (GATE PASSED 2026-07-20, batch 17; subdivided 1a/1b)
 
-The selective rebuild, scoped by Stage 0's ratified verdicts. Expected core
-(subject to Stage 0 evidence): the capability registry + fire-and-DO
-rewiring of every door (P-1/P-2); ONE text surface + `PaneTextAuthority`
-(P-3) with the existing pins migrated green; `TakesViewModel` decomposition
-(P-9); notification discipline (P-4); defects D1–D3 fixed in-architecture
-(not as patches), each red-on-old pinned. **Tests:** the registry walk; the
-`PaneTextAuthority` unit + invariant suite; the RANDOMIZED BOARD SOAK
-(seeded action sequences over the mounted board — type, choose, expand,
-branch, adopt, mode-switch — invariants checked per action: one live ring,
-article mirrors the chosen buffer, realized heights match text at real
-width, empty takes show the kept line); full suites green. **Review:** the
-standard ladder.
+The author ratified all Stage 0 verdicts + the backlog verbatim, with two
+riders now binding: **R118 TAKES PARITY** — Takes is the main editing view;
+for every editing capability Takes offers it natively or via fire-and-DO
+move-and-execute; Write is never the privileged surface — and **R119
+REBUILD EMPOWERMENT** — if implementation fights test churn or debt, the
+implementer may exceed a KEEP verdict (recorded, en-masse review later);
+PROVISIONAL-and-continue governs every mid-stage ambiguity. Stage 1 runs
+as TWO fresh implementer sessions (the context-degradation rule), one
+review ladder over the combined diff after 1b.
+
+**Stage 1a — the surface + authority consolidation (T2 + its T3 slice).**
+Full brief below ("Stage 1a execution brief").
+
+**Stage 1b — the capability registry (T1 + its T3 slice + the T4 memos).**
+Sketch (the full brief is written just-in-time at 1a's closeout): the
+registry as a pure model — every act declared once (verb, scope, per-mode
+availability, doors, refusal copy) with the R118 parity table (every
+editing capability reachable from Takes) and the registry-walk test;
+rewire EditorCommands / bottom bars / context menus / ⌘K palette through
+it; fire-and-DO with visible mode-switch choreography; retire the three
+routing regimes and every notification-as-decision (P-4); the T3 slice
+moves command routing out of EditorViewModel; fixes D3, N4, N5 with
+red-on-old pins; drafts the W + merge design memos (T4) as paper for the
+architect and the author's en-masse walk.
+
+## Stage 1a execution brief (self-contained — read this + the constitution + the two Stage 0 dossiers; nothing else assumed)
+
+**Goal:** retire the pane-text/liveness bug class and the text-surface
+duplication at their source. No new features; behavior parity everywhere
+except the named bug fixes.
+
+**Architect precision on P-3 (binding):** the app deliberately keeps TWO
+surface kinds. (i) The FULL-DOCUMENT editor — `EditorTextView` +
+`BlockRangeIndex` + crystallization/reconciler, Write's multi-block
+editor. KEEP; do NOT absorb it into the pane surface — its identity
+machinery is the app's riskiest, best-tested code (AppSpec §15 risk 1).
+(ii) The PANE surface — ONE new TK2 component (read + live modes)
+replacing `TakePaneView`, `ReadPostView`'s view core, and the takes
+article cell rendering: one width-gated measurement brain, one RENDERED
+canary, shared focus plumbing. Both kinds consult the one authority and
+the one autosave.
+
+**Deliverables:**
+1. **`PaneTextAuthority`** (new; pure Swift, unit-tested): THE answer to
+   "what text does pane P show, and is it live" over (pane identity,
+   focus state, live-buffer map, store projection, catch-up state) —
+   absorbing the semantics of today's four moving parts (`liveBuffers`,
+   `resolvedTake`, `deferredProjection`, `projectionCaughtUp`, spread 23
+   refs / 5 files). Invariants as code: exactly one live pane per
+   context; the live pane is buffer-authoritative; read panes are
+   projection-authoritative once caught up; a read pane mirroring a
+   variant with a live buffer never renders staler text than that
+   buffer.
+2. **The pane surface component** per the P-3 precision, adopted by every
+   take pane (all four fan styles), the read tier, and the article cell.
+   Fixes **N2** (the take-pane canary today writes `canaryMessage` that
+   NOTHING renders — `TakePaneView.swift:131–145`; the unified surface
+   renders fallback status everywhere, red-on-old pin) and the
+   **stack-style liveness bypass** (`TakesBoardView.swift:672–674` feeds
+   panes `take.workingText` directly — the frozen-article class still
+   live in one style; route through the authority, pin per the batch-14
+   `TakesArticleRenderTests` pattern extended to the stack style).
+3. **Autosave consolidation (N3):** ONE `AutosaveCoordinator` per
+   open-post context (today Editor/Takes/BlockTOC each mint their own —
+   `EditorViewModel.swift:37`, `TakesViewModel.swift:36`,
+   `BlockTOCView.swift:33` — and two can run concurrently over one
+   post). Own it at the post-session scope, inject it everywhere;
+   red-on-old pin (single-instance assertion that fails on the old
+   shape). Do not break the mobile target's use of the shared class.
+4. **The T3 slice:** extract the buffer/projection/text-authority
+   concerns from `EditorViewModel` (2,994 lines) into the new
+   components; it shrinks accordingly. Command routing stays put — that
+   is 1b's slice.
+5. **The randomized BOARD SOAK** (P-7): seeded action sequences over the
+   real mounted board (type, choose, expand/collapse, branch, adopt,
+   style-switch, mode-switch), invariants checked after EVERY action:
+   one live ring; the article cell mirrors the chosen take's buffer;
+   realized pane heights match their text at real width; empty takes
+   render the kept line. Non-vacuity enforced per seed.
+
+**Tests:** every existing pin migrates GREEN (`TakePaneMeasureTests`,
+`TakesArticleRenderTests`, the board tests, ReadTier tests); every fixed
+bug class red-on-old (behavioral-revert verified); zero-test views gain
+focused coverage as they are touched (`PostDetailView`,
+`WriteTakesPanel` at minimum); full Mac + core suites green at close.
+
+**Constraints:** `Sources/VariorumCore` UNTOUCHED (no ops/schema changes
+in 1a; `Sync/` untouched a fortiori). P1–P3 hold (invalidation ∝
+realized rows; ONE live editor; virtualization intact). TK2 discipline
+per TEXTKIT2_NOTES §4 (explicit TK2 opt-in, no TK1 APIs, canary armed —
+and now rendered). No new dependencies. Seal/refusal semantics
+unchanged. Chrome rules stand (VoiceControls vocabulary; fixedSize ⇒
+lineLimit; overlays never rendering attributes).
+
+**Process:** PROVISIONAL-and-continue per R119 — every judgment call
+recorded in the closeout for the author's en-masse walk; commits in
+logical chunks with the standing trailer convention; end by writing the
+"Stage 1a closeout" section in this file (what moved where, counts,
+deviations, judgment calls, the refined 1b brief inputs) and refreshing
+`/Applications/Variorum.app` from Release per the standing convention.
+
+**Environment traps (recorded across sittings; honor them):** piped
+`xcodebuild … | tail` masks exit codes — check `PIPESTATUS` or avoid
+piping; run `xcodebuild test` from `App/Variorum/` (repo root silently
+finds no scheme; grep-empty ≠ green — confirm the "Test run with N
+tests" line); `-only-testing:` with a wrong suite name = vacuous SUCCESS
+on zero tests; a live app instance fails the Mac test runner — before
+your FIRST build/test, check `pgrep -fl Variorum`: a leftover
+DerivedData/Debug instance from the Stage 0 app-drive may be quit (by
+pid, after verifying its path is DerivedData/…/Debug) ONCE
+`notes/plans/phase-13b-stage0-app-drive.md` exists (before that file
+exists the app-drive session may still be driving it — do pure-Swift
+work first and re-check); NEVER quit or kill any `/Applications/
+Variorum.app` instance (the author's real store); never `git checkout`
+over uncommitted work; mobile sims are the 26.2-runtime devices.
 
 ### Stage 2 — the tutorial spine (R113)
 

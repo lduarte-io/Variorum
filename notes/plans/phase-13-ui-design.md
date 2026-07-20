@@ -3298,3 +3298,39 @@ table row; CLAUDE.md model policy gains the 13b cast line; Stage 0
 agents A (architecture survey) and B (capability matrix) launched;
 Stage 0(c) — the self-driven app-walk bug inventory — queued behind the
 matrix so it drives the worst cells first.
+
+## Sitting 9, batch 17 (2026-07-20) — STAGE 0 RATIFIED; Stage 1 kicks off (R118–R119)
+
+- **The Stage 0 gate PASSED:** "I agree with all of these… I like all of
+  your plans, so keep going… I ratify all of your verdicts." Verdicts and
+  backlog T1–T8 stand as synthesized.
+- **R118 — TAKES PARITY (binding registry-design input for T1):** "I
+  don't really want Write to have capabilities that Takes doesn't - I see
+  takes as the main editing view for those using the most powerful
+  feature of this app, so it shouldn't be limited." For every editing
+  capability, Takes offers it natively or via fire-and-DO
+  move-and-execute; Write is never the privileged surface.
+- **R119 — REBUILD EMPOWERMENT + THE EN-MASSE POSTURE:** verdicts
+  ratified, and beyond them — "if once the code is going there's tons of
+  test churn and you're fighting technical debt, feel empowered to
+  change anything." Mid-stage issues: choose the best way forward,
+  record it, queue it for her en-masse walk ("just choose the best way
+  forward and save it for me to go through en masse later") — the R55
+  PROVISIONAL-and-continue posture carried into 13b. Also re-affirmed:
+  "we do need much more testing" (the Stage 1 test obligations stand;
+  zero-test views gain coverage as they're touched).
+- **The REAL STORE is usable for this phase:** she has not started real
+  use — "nothing real is in there right now"; writing to the real store
+  is allowed (e.g. the Stage 2 tutorial living there for her to walk).
+  She is SIGNED OUT on the real store (sync inactive; the Fragments
+  bridge active) — explicitly NOT an issue to fix unless it comes up.
+  Note for Stage 2: tutorial content must stay non-journal (R57 —
+  normal-notebook shapes), so the bridge (journal days only) never
+  projects tutorial text to Fragments.
+- **Executed this batch:** Stage 1 subdivided into 1a/1b (fresh
+  implementer session each, per the context-degradation rule) with
+  self-contained execution briefs in the 13b plan; the Stage 1a
+  implementer launched (T2 + its T3 slice: the pane surface +
+  `PaneTextAuthority` + autosave consolidation + the board soak). The 1b
+  brief finalizes at 1a's closeout (just-in-time). Stage 0(c) app-drive
+  folds into T5–T7 on landing.
