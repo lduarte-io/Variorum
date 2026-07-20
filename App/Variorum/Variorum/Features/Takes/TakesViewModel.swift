@@ -1046,7 +1046,7 @@ final class TakesViewModel {
 
     /// The R90 power variant (⇧⌥⌘T — "open new blank take as chosen"):
     /// mint AND choose in one gesture, both halves in one serialized run.
-    func newBlankTakeAsChosen(blockID: String) async {
+    func newBlankTakeAsChosen(blockID: String, preferredColumnID: String? = nil) async {
         statusMessage = nil
         do {
             let take = try await session.runner.run { ops -> Variant in
@@ -1054,9 +1054,32 @@ final class TakesViewModel {
                 try ops.chooseVariant(blockID, variantID: take.id)
                 return take
             }
-            revealTake(blockID: blockID, variantID: take.id)
+            revealChosenTake(
+                blockID: blockID, variantID: take.id, preferredColumnID: preferredColumnID)
         } catch {
             statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// Stage 2 ladder, MINOR-D2: the as-chosen mint's reveal is gated on
+    /// the HOST — the ring may only land on a pane some surface renders.
+    /// On the Takes board (and Write's panel, which passes its own column
+    /// as `preferredColumnID`) the ordinary reveal is right: the article
+    /// pane renders the new chosen and an opened fan renders every take.
+    /// On the LENSES board a lens/scratch column keeps showing its own
+    /// pick, so the unconditional reveal parked the ring on a pane NO
+    /// column hosts and the live ring silently vanished — there the ring
+    /// goes to the column that renders CHOSEN (`.main`), and when no such
+    /// column is open the ring stays where it is (a rendered pane) rather
+    /// than moving onto nothing.
+    private func revealChosenTake(blockID: String, variantID: String, preferredColumnID: String?) {
+        switch host {
+        case .takes:
+            revealTake(
+                blockID: blockID, variantID: variantID, preferredColumnID: preferredColumnID)
+        case .lenses:
+            guard let main = columns.first(where: { $0.kind == .main }) else { return }
+            focus(PaneKey(columnID: main.id, blockID: blockID, variantID: variantID))
         }
     }
 

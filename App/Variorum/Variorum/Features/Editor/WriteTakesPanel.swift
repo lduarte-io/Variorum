@@ -220,7 +220,13 @@ struct WriteTakesPanel: View {
             .help("A genuinely different take, from scratch — NOT chosen until you ✓ it (⌥⌘T)")
             Text("·").foregroundStyle(tokens.faint)
             Button("＋ blank & choose") {
-                Task { await model.newBlankTakeAsChosen(blockID: blockID) }
+                // MINOR-D2: the panel names its OWN column — with no pane
+                // focused the reveal used to fall to "takes-main", a
+                // column this panel never renders, and the ring vanished.
+                Task {
+                    await model.newBlankTakeAsChosen(
+                        blockID: blockID, preferredColumnID: column.id)
+                }
             }
             .help("The power gesture: a blank take that becomes the post's text right now (⇧⌥⌘T)")
         }

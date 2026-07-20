@@ -472,6 +472,63 @@ struct TakesBoardTests {
             #expect(orphans.count == 1, "the unrelated block is an orphan")
         }
     }
+
+    /// Stage 2 ladder MINOR-D2 pin (red-on-old, behavioral-revert
+    /// verified): ⇧⌥⌘T's reveal is gated on the HOST. On a Lenses board a
+    /// lens column keeps showing its own PICK after the mint+choose (the
+    /// pick didn't change — chosen did), so the old unconditional
+    /// `revealTake` parked the ring on a pane NO column renders and the
+    /// live ring silently vanished. The ring must always land on a pane
+    /// some column actually hosts.
+    @Test func blankChooseOnALensesHostKeepsTheRingOnAHostedPane() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID,
+                defaults: freshDefaults("blankChooseLens"))
+            model.host = .lenses
+            @MainActor func refresh() async throws {
+                model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            }
+            try await refresh()
+
+            // A saved lens with an explicit pick on block 1 — its column
+            // renders that pick regardless of chosen.
+            let pickedTake = world.extraTakes[world.blocks[0]]![0]
+            let lens = try await session.runner.run { [postID = world.postID] ops in
+                try ops.createLens(post: postID, name: "the other reading")
+            }
+            _ = try session.operations.setLensChoice(
+                lens: lens.id, block: world.blocks[0], variant: pickedTake)
+            try await refresh()
+            model.addLensColumn(lens.id)
+
+            // The user's focus is the LENS column's pane on block 1 (what
+            // the lens board's .blankChoose dispatch reads).
+            let lensColumn = try #require(model.columns.first {
+                if case .lens = $0.kind { return true } else { return false }
+            })
+            model.focus(TakesViewModel.PaneKey(
+                columnID: lensColumn.id, blockID: world.blocks[0], variantID: pickedTake))
+
+            await model.newBlankTakeAsChosen(blockID: world.blocks[0])
+            try await refresh()
+
+            // The rendered pane set: what the board's cells actually key.
+            let rendered = Set(model.columns.flatMap { column in
+                model.projection.slots.compactMap { slot -> TakesViewModel.PaneKey? in
+                    guard let resolved = model.resolvedTake(column: column, slot: slot)
+                    else { return nil }
+                    return TakesViewModel.PaneKey(
+                        columnID: column.id, blockID: slot.blockID,
+                        variantID: resolved.variantID)
+                }
+            })
+            let live = try #require(model.authority.livePane)
+            #expect(rendered.contains(live),
+                    "the live ring is on a pane a column hosts — never nowhere")
+        }
+    }
 }
 
 // MARK: - Review round 1, MINOR 2: the quit door awaits EVERY live
