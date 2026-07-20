@@ -88,14 +88,20 @@ struct TakesCellView: View {
         resolved: (variantID: String, text: String)
     ) -> [PaneTextView.MenuItemSpec] {
         var specs: [PaneTextView.MenuItemSpec] = [
+            // R2-A: the cell KNOWS its column — on the Lenses host the
+            // mint lands as THIS column's pick (the ring follows).
             .init(title: "＋ New take — branch of this one (⌘T)") {
                 Task {
                     await model.branchTakeRevealed(
-                        blockID: slot.blockID, from: resolved.variantID)
+                        blockID: slot.blockID, from: resolved.variantID,
+                        preferredColumnID: column.id)
                 }
             },
             .init(title: "＋ Blank take (⌥⌘T)") {
-                Task { await model.newBlankTakeRevealed(blockID: slot.blockID) }
+                Task {
+                    await model.newBlankTakeRevealed(
+                        blockID: slot.blockID, preferredColumnID: column.id)
+                }
             },
             .init(
                 title: "✓ Choose this take (the post shows it)",

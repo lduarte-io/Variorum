@@ -529,6 +529,118 @@ struct TakesBoardTests {
                     "the live ring is on a pane a column hosts — never nowhere")
         }
     }
+
+    /// Stage 2 ladder round-2 NIT-R2-C pin (red-on-old): blankChoose on a
+    /// Lenses host with NO chosen-showing column used to be a visually
+    /// SILENT success (every open column keeps its own pick) — against
+    /// fire-and-speak. The no-main branch now says where the act went.
+    @Test func blankChooseWithNoChosenColumnSpeaks() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID,
+                defaults: freshDefaults("blankChooseSpeaks"))
+            model.host = .lenses
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            // No .main column open: the one column becomes a scratch lens.
+            model.replaceColumnWithNewScratch(model.columns[0].id)
+            #expect(!model.columns.contains { $0.kind == .main })
+
+            await model.newBlankTakeAsChosen(blockID: world.blocks[0])
+            #expect(model.statusMessage?.contains("Chosen") == true,
+                    "the act speaks — never a visually silent success")
+        }
+    }
+
+    /// Stage 2 ladder round-2 R2-A pin (red-on-old, behavioral-revert
+    /// verified): the D2 class ONE DOOR OVER — the bar's ＋ take (and the
+    /// cell-menu twins, same body) on a LENSES host used to reveal to a
+    /// pane no column renders (an un-chosen mint changes neither the
+    /// column's pick nor chosen: ring vanished, take appeared nowhere).
+    /// Host-gated now: the mint lands as the focused column's PICK — the
+    /// board's own ⌘T semantics — and the ring follows onto the pane
+    /// that now renders it.
+    @Test func barMintDoorOnALensesHostLandsInTheFocusedColumn() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID,
+                defaults: freshDefaults("barMintLens"))
+            model.host = .lenses
+            @MainActor func refresh() async throws {
+                model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            }
+            try await refresh()
+
+            let pickedTake = world.extraTakes[world.blocks[0]]![0]
+            let lens = try await session.runner.run { [postID = world.postID] ops in
+                try ops.createLens(post: postID, name: "the bar's thread")
+            }
+            _ = try session.operations.setLensChoice(
+                lens: lens.id, block: world.blocks[0], variant: pickedTake)
+            try await refresh()
+            model.addLensColumn(lens.id)
+            let lensColumn = try #require(model.columns.first {
+                if case .lens = $0.kind { return true } else { return false }
+            })
+            model.focus(TakesViewModel.PaneKey(
+                columnID: lensColumn.id, blockID: world.blocks[0], variantID: pickedTake))
+
+            // The bar's ＋ take body, exactly (no preferred column —
+            // resolution falls to the focused pane's column).
+            let minted = await model.branchTakeRevealed(
+                blockID: world.blocks[0], from: pickedTake)
+            let take = try #require(minted)
+            try await refresh()
+
+            // The mint IS the column's pick now (visible where you are)…
+            let lensPick = model.projection.lensSelections[lens.id]?[world.blocks[0]]
+            #expect(lensPick == take.id, "the mint lands as the focused column's pick")
+            // …and the ring names a pane a column actually renders.
+            let rendered = Set(model.columns.flatMap { column in
+                model.projection.slots.compactMap { slot -> TakesViewModel.PaneKey? in
+                    guard let resolved = model.resolvedTake(column: column, slot: slot)
+                    else { return nil }
+                    return TakesViewModel.PaneKey(
+                        columnID: column.id, blockID: slot.blockID,
+                        variantID: resolved.variantID)
+                }
+            })
+            let live = try #require(model.authority.livePane)
+            #expect(rendered.contains(live),
+                    "the live ring is on a pane a column hosts — never nowhere")
+        }
+    }
+
+    /// Stage 2 ladder round-2 pin (the R2-A class-completeness sweep's
+    /// own find, red-on-old): `divergeHere` from the TAKES board's cell
+    /// menu was a SILENT NO-OP — the cells carry board-local column IDs
+    /// ("takes-main"/"takes-fan") that never live in `columns`, so the
+    /// old body's index guard returned before minting anything (the R112
+    /// class). Host-gated now: on the takes host it routes through the
+    /// takes reveal (mint + fan open + ring on the fan card).
+    @Test func divergeHereFromTheArticleCellMintsOnTheTakesBoard() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID,
+                defaults: freshDefaults("divergeArticle"))
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+
+            // The single-take block — the cell menu's exact call.
+            let minted = await model.divergeHere(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: world.blocks[2], fromVariantID: world.chosen[2])
+            let take = try #require(minted, "the door MINTS — never a silent no-op")
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            #expect(model.projection.fans[world.blocks[2]]?.contains { $0.id == take.id } == true)
+            #expect(model.expandedBlocks.contains(world.blocks[2]), "the fan opened")
+            #expect(model.authority.livePane == TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesFanColumnID,
+                blockID: world.blocks[2], variantID: take.id),
+                    "the ring keys the fan card the bloom renders")
+        }
+    }
 }
 
 // MARK: - Review round 1, MINOR 2: the quit door awaits EVERY live

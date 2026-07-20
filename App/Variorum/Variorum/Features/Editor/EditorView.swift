@@ -481,6 +481,10 @@ final class BadgeOverlayController {
         self.model = model
         self.textView = textView
         model.badgeSink = { [weak self] badges in self?.render(badges) }
+        // R2-B (Stage 2 ladder round 2): wiring DELIVERS — badges computed
+        // before this host existed must not stay invisible until the next
+        // real badge/viewport change (the decor twin's fix, badge field).
+        model.pushBadgesToSink()
     }
 
     func uninstall() {

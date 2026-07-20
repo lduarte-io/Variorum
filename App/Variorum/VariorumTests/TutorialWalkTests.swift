@@ -642,6 +642,63 @@ struct TutorialWritingActsTests {
         }
     }
 
+    /// Stage 2 ladder round-2 R2-B pin (red-on-old, behavioral-revert
+    /// verified): the starved-host class's LAST field — the editor's
+    /// BADGE sink. `BadgeOverlayController.init` wired `model.badgeSink`
+    /// with no push, `refreshBadges` gates on `result != badges`, and
+    /// nothing resets `badges` at attach — so a freshly-wired overlay
+    /// over a loaded model (both editor representables build fresh
+    /// coordinators) showed no ⑂ until a real badge/viewport change,
+    /// which a fully-visible short post never produces. Wiring now
+    /// DELIVERS (`pushBadgesToSink`), symmetric with the decor twin and
+    /// the read tier.
+    @Test func aFreshlyWiredBadgeOverlayShowsTheFans() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let choosing = try await db.read { try lessonID($0, bookID: bookID, "choosing & the board") }
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 900, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let model = EditorViewModel(session: session, postID: choosing)
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: model)
+            delegate.wire(to: textView)
+            window.contentView = scrollView
+            window.makeKeyAndOrderFront(nil)
+            model.attach(textView: textView, scrollView: scrollView)
+
+            // The starved order: the model loads and computes badges
+            // BEFORE the overlay host exists (the loaded-model mount).
+            let (slots, header) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: choosing),
+                 try Queries.containerHeader(db, containerID: choosing))
+            }
+            model.adoptHeader(header)
+            model.applyProjection(slots)
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            model.refreshBadges()
+            #expect(!model.badges.isEmpty,
+                    "the rain fan is in view — the stored badge state exists BEFORE the host wires")
+
+            // NOW the badge host wires — exactly the install order.
+            let overlay = BadgeOverlayController(model: model, textView: textView)
+            _ = overlay
+            func hasBadge() -> Bool {
+                textView.subviews.contains { ($0 as? NSButton)?.title.contains("⑂") == true }
+            }
+            await poll { hasBadge() }
+            #expect(hasBadge(),
+                    "the ⑂ badge renders the moment the host exists — never starved")
+        }
+    }
+
     @Test func addBlockAtEndMintsAndHandsTheRingOver() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "blocks & typing") }
@@ -754,6 +811,16 @@ struct TutorialTakesActsTests {
             let minted = try #require(fan.first { $0.id != first.variantID })
             #expect(model.authority.livePane?.variantID == minted.id,
                     "the ring is on the new take — typing continues there")
+            // Round-2 strengthening (R2-A sweep, red-on-old): the ring's
+            // FULL key must name a pane the board renders — the mint is
+            // an un-chosen take, rendered as a FAN card, never in the
+            // article (which renders chosen). The old article-keyed
+            // reveal left the authority on ("takes-main", block, mint):
+            // no style renders that pane, so no ring was drawn anywhere.
+            #expect(model.authority.livePane == TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesFanColumnID,
+                blockID: first.blockID, variantID: minted.id),
+                    "the ring keys the fan card the bloom actually renders")
         }
     }
 

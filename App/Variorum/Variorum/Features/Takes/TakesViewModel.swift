@@ -517,11 +517,34 @@ final class TakesViewModel {
     }
 
     /// DIVERGE HERE: edit-as-this-thread — mints a take branched from what
-    /// the pane shows; the column adopts it (visible, not chosen). One
-    /// operations body for the store half; the column's own state updates
-    /// after it lands.
-    func divergeHere(columnID: String, blockID: String, fromVariantID: String) async {
-        guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return }
+    /// the pane shows; the mint becomes VISIBLE where you are (never
+    /// chosen). HOST-GATED (Stage 2 ladder round 2, R2-A sweep): on the
+    /// Lenses host the column adopts the mint as its pick; on the TAKES
+    /// host the cells carry board-local column IDs ("takes-main"/
+    /// "takes-fan") that never live in `columns` — the old body's index
+    /// guard silently NO-OPPED the cell menu's door there (the R112
+    /// class, sweep-found) — so it routes through the takes reveal (fan
+    /// opens, ring on the mint).
+    @discardableResult
+    func divergeHere(columnID: String, blockID: String, fromVariantID: String) async -> Variant? {
+        switch host {
+        case .takes:
+            return await branchTakeRevealed(
+                blockID: blockID, from: fromVariantID, preferredColumnID: columnID)
+        case .lenses:
+            return await branchIntoColumn(
+                columnID: columnID, blockID: blockID, fromVariantID: fromVariantID)
+        }
+    }
+
+    /// The Lenses-side branch core (the old `divergeHere` body): the mint
+    /// lands as the COLUMN's pick — named lenses live-edit in the same
+    /// serialized breath — and the ring follows onto the pane that now
+    /// renders it (R2-A: never stranded on the replaced key).
+    private func branchIntoColumn(
+        columnID: String, blockID: String, fromVariantID: String
+    ) async -> Variant? {
+        guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return nil }
         let kind = columns[index].kind
         statusMessage = nil
         do {
@@ -534,24 +557,64 @@ final class TakesViewModel {
                 }
                 return take
             }
-            guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
+            adoptMintIntoColumn(
+                columnID: columnID, kind: kind, blockID: blockID, variantID: take.id)
+            return take
+        } catch {
+            statusMessage = Self.message(for: error)
+            return nil
+        }
+    }
+
+    /// The Lenses-side blank core (⌥⌘T's column half — R2-A: ONE brain
+    /// with the branch core; the old keyboard door minted via
+    /// `newBlankTake` then `pick`, which on the Chosen column REFUSED the
+    /// pick after minting — an invisible take plus a lecture, the R112
+    /// class. Both mint gestures now agree: a mint into the Chosen column
+    /// starts a scratch thread, chosen never moves without ✓).
+    private func blankIntoColumn(columnID: String, blockID: String) async -> Variant? {
+        guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return nil }
+        let kind = columns[index].kind
+        statusMessage = nil
+        do {
+            let take: Variant = try await session.runner.run { ops in
+                let take = try ops.newBlankVariant(blockID)
+                if case .lens(let lensID) = kind {
+                    _ = try ops.setLensChoice(lens: lensID, block: blockID, variant: take.id)
+                }
+                return take
+            }
+            adoptMintIntoColumn(
+                columnID: columnID, kind: kind, blockID: blockID, variantID: take.id)
+            return take
+        } catch {
+            statusMessage = Self.message(for: error)
+            return nil
+        }
+    }
+
+    /// The column's adoption of a fresh mint + the ring-follow (shared by
+    /// the branch and blank cores).
+    private func adoptMintIntoColumn(
+        columnID: String, kind: TakesColumnKind, blockID: String, variantID: String
+    ) {
+        if let i = columns.firstIndex(where: { $0.id == columnID }) {
             switch kind {
             case .main:
                 // Diverging the main column starts a scratch thread —
                 // chosen never moves without ✓.
                 columns[i].kind = .scratch
                 if columns[i].name == nil { columns[i].name = nextAutoName() }
-                columns[i].picks[blockID] = take.id
+                columns[i].picks[blockID] = variantID
                 saveMemory()
             case .scratch:
-                columns[i].picks[blockID] = take.id
+                columns[i].picks[blockID] = variantID
                 saveMemory()
             case .lens:
                 break  // the store carries it; the projection follows
             }
-        } catch {
-            statusMessage = Self.message(for: error)
         }
+        focus(PaneKey(columnID: columnID, blockID: blockID, variantID: variantID))
     }
 
     /// 💾 — a scratch column becomes a durable NAMED lens (deliberate; no
@@ -955,6 +1018,12 @@ final class TakesViewModel {
     /// The Takes board's fixed main-column identity (shared with the view).
     nonisolated static let takesMainColumnID = "takes-main"
 
+    /// The Takes board's fan-card namespace (shared with the view — the
+    /// bloom's cards key on it). R2-A sweep: an UN-chosen mint renders as
+    /// a fan card, never in the article (which renders chosen only), so
+    /// reveals map article-keyed focus onto this namespace.
+    nonisolated static let takesFanColumnID = "takes-fan"
+
     private func consumeLandings(_ new: Queries.TakesProjection) {
         // A minted block's pane goes live the moment its slot arrives.
         if let want = pendingFocusVariantID,
@@ -1078,7 +1147,14 @@ final class TakesViewModel {
             revealTake(
                 blockID: blockID, variantID: variantID, preferredColumnID: preferredColumnID)
         case .lenses:
-            guard let main = columns.first(where: { $0.kind == .main }) else { return }
+            guard let main = columns.first(where: { $0.kind == .main }) else {
+                // NIT-R2-C: without a chosen-showing column the act
+                // succeeds with nothing visible — a silent success is
+                // against fire-and-speak, so say where it went.
+                speak("Chosen \u{2014} the post now shows the new blank take; "
+                    + "add a \u{201C}Chosen (the post)\u{201D} column to see it here.")
+                return
+            }
             focus(PaneKey(columnID: main.id, blockID: blockID, variantID: variantID))
         }
     }
@@ -1100,26 +1176,94 @@ final class TakesViewModel {
         focus(PaneKey(columnID: columnID, blockID: blockID, variantID: variantID))
     }
 
+    /// Column resolution for an UN-chosen mint on the TAKES host (R2-A
+    /// sweep): the article renders CHOSEN only, so an article-keyed (or
+    /// landing-keyed) reveal would strand the ring's authority on a pane
+    /// no style renders — the mint blooms as a FAN card, and the reveal
+    /// keys the fan namespace the bloom actually renders.
+    private func takesUnchosenRevealColumnID(
+        preferredColumnID: String?, blockID: String
+    ) -> String {
+        let columnID = preferredColumnID
+            ?? focusedPane.flatMap { $0.blockID == blockID ? $0.columnID : nil }
+            ?? landingColumnID
+        return columnID == Self.takesMainColumnID ? Self.takesFanColumnID : columnID
+    }
+
+    /// Column resolution on the LENSES host (R2-A): a mint is visible
+    /// only as a column's pick — the door needs a real column (the cell
+    /// menus pass theirs; the bar falls back to the focused pane's).
+    private func lensesMintColumnID(
+        preferredColumnID: String?, blockID: String
+    ) -> String? {
+        if let preferredColumnID, columns.contains(where: { $0.id == preferredColumnID }) {
+            return preferredColumnID
+        }
+        if let pane = focusedPane, pane.blockID == blockID,
+           columns.contains(where: { $0.id == pane.columnID }) {
+            return pane.columnID
+        }
+        return nil
+    }
+
+    nonisolated static let lensesMintNeedsColumnNote =
+        "Click into a column's pane first — on this board a new take lands as that column's pick."
+
     /// Branch + reveal — the ONE body behind ⌘T, the bar's ＋ take, the
-    /// block ▾ menu, the growth doors, and the card context menu.
+    /// block ▾ menu, the growth doors, and the card context menu. R2-A
+    /// (Stage 2 ladder round 2): HOST-GATED like `revealChosenTake` — on
+    /// the Takes board the mint blooms as a fan card and the ring lands
+    /// on it; on the Lenses board an un-chosen mint is visible ONLY as a
+    /// column's pick, so the door routes through the board's own
+    /// pick-into-column semantics (the branch core `divergeHere` shares)
+    /// and the ring follows onto the pane that now renders it.
     @discardableResult
     func branchTakeRevealed(
         blockID: String, from variantID: String, preferredColumnID: String? = nil
     ) async -> Variant? {
-        guard let take = await branchTake(blockID: blockID, from: variantID) else { return nil }
-        revealTake(blockID: blockID, variantID: take.id, preferredColumnID: preferredColumnID)
-        return take
+        switch host {
+        case .takes:
+            guard let take = await branchTake(blockID: blockID, from: variantID)
+            else { return nil }
+            revealTake(
+                blockID: blockID, variantID: take.id,
+                preferredColumnID: takesUnchosenRevealColumnID(
+                    preferredColumnID: preferredColumnID, blockID: blockID))
+            return take
+        case .lenses:
+            guard let columnID = lensesMintColumnID(
+                preferredColumnID: preferredColumnID, blockID: blockID) else {
+                speak(Self.lensesMintNeedsColumnNote)
+                return nil
+            }
+            return await branchIntoColumn(
+                columnID: columnID, blockID: blockID, fromVariantID: variantID)
+        }
     }
 
     /// Blank + reveal — ⌥⌘T's one body (minting never chooses, R90; the
-    /// blank card blooms and takes the ring).
+    /// blank card blooms and takes the ring). Host-gated like the branch
+    /// twin (R2-A).
     @discardableResult
     func newBlankTakeRevealed(
         blockID: String, preferredColumnID: String? = nil
     ) async -> Variant? {
-        guard let take = await newBlankTake(blockID: blockID) else { return nil }
-        revealTake(blockID: blockID, variantID: take.id, preferredColumnID: preferredColumnID)
-        return take
+        switch host {
+        case .takes:
+            guard let take = await newBlankTake(blockID: blockID) else { return nil }
+            revealTake(
+                blockID: blockID, variantID: take.id,
+                preferredColumnID: takesUnchosenRevealColumnID(
+                    preferredColumnID: preferredColumnID, blockID: blockID))
+            return take
+        case .lenses:
+            guard let columnID = lensesMintColumnID(
+                preferredColumnID: preferredColumnID, blockID: blockID) else {
+                speak(Self.lensesMintNeedsColumnNote)
+                return nil
+            }
+            return await blankIntoColumn(columnID: columnID, blockID: blockID)
+        }
     }
 
     // MARK: - The keyboard family's board half (R73)

@@ -2716,6 +2716,18 @@ final class EditorViewModel {
         }
     }
 
+    /// A freshly-wired BADGE host gets the CURRENT badges (Stage 2 ladder
+    /// round 2, R2-B — the starved-host class's LAST field): both editor
+    /// representables build fresh `BadgeOverlayController`s over
+    /// possibly-loaded models, `refreshBadges` gates on `result !=
+    /// badges`, and nothing resets `badges` at attach — a fully-visible
+    /// short post would never produce the change that un-starves the
+    /// overlay. Wiring is a delivery, symmetric with the decor twin above
+    /// and the read tier's `pushOverlaysToSinks`.
+    func pushBadgesToSink() {
+        badgeSink?(badges)
+    }
+
     /// A freshly-wired overlay host gets the CURRENT decorations (Stage 2
     /// walk fix — the starved-host class): the mount order can compute a
     /// decoration state BEFORE the sink exists (`attach` precedes the

@@ -155,11 +155,12 @@ struct LensesBoardView: View {
                 model.speak("Click into a pane first — ⌥⌘T adds a blank take on that block.")
                 return
             }
+            // R2-A: ONE brain with the bar/menu doors (host-gated inside).
+            // The old mint-then-pick pair REFUSED the pick on the Chosen
+            // column after minting — an invisible take plus a lecture.
             Task {
-                if let take = await model.newBlankTake(blockID: pane.blockID) {
-                    await model.pick(
-                        columnID: pane.columnID, blockID: pane.blockID, variantID: take.id)
-                }
+                await model.newBlankTakeRevealed(
+                    blockID: pane.blockID, preferredColumnID: pane.columnID)
             }
         case .blankChoose:
             guard let pane = model.focusedPane else {

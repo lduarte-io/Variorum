@@ -58,7 +58,7 @@ struct TakesBoardView: View {
     /// its key EQUALED the article cell's (same column/block/variant) —
     /// both went live, and a live pane never adopts text, so the article
     /// froze stale. Distinct namespaces keep exactly ONE pane live (R22).
-    static let fanColumnID = "takes-fan"
+    static let fanColumnID = TakesViewModel.takesFanColumnID
 
     /// R74: the rail's reserved width follows the chosen column count.
     private var marginRailWidth: CGFloat {
