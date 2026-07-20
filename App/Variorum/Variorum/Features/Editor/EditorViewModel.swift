@@ -34,10 +34,18 @@ final class EditorViewModel {
     init(session: AppSession, postID: String) {
         self.session = session
         self.postID = postID
-        self.autosave = AutosaveCoordinator(runner: session.runner)
-        autosave.onError = { [weak self] error in self?.showOperationError(error) }
-        autosave.onSettled = { [weak self] in self?.applyPendingIfClean() }
+        // 13b 1a (N3): the ONE per-post coordinator — shared with every
+        // other surface editing this post (takes panel, TOC), so two
+        // debounced pipelines can never race a stale flush over a newer
+        // one. Callbacks are multicast observers (a shared coordinator has
+        // several listeners); removed at teardown.
+        self.autosave = session.autosave(forPost: postID)
+        autosaveToken = autosave.observe(
+            onError: { [weak self] error in self?.showOperationError(error) },
+            onSettled: { [weak self] in self?.applyPendingIfClean() })
     }
+
+    @ObservationIgnored private var autosaveToken: UUID?
 
     // MARK: - Observable UI state
 
@@ -326,6 +334,12 @@ final class EditorViewModel {
             session.editorRouter.active = nil
         }
         canary.disarm()
+        // The shared coordinator outlives this surface — detach the
+        // observers (finalizeWork below still flushes it directly).
+        if let autosaveToken {
+            autosave.stopObserving(autosaveToken)
+            self.autosaveToken = nil
+        }
         return finalizeWork()
     }
 

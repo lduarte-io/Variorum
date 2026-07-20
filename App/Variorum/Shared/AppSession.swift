@@ -53,7 +53,32 @@ final class AppSession {
     /// expanded block — registers a flush here; the quit door awaits them
     /// ALL, not just the focused editor (the Phase 10 quit-door class,
     /// reintroduced by the new surfaces, closed the same way).
+    /// (13b 1a refinement: surfaces no longer register themselves — the
+    /// per-post autosave registry below registers each coordinator ONCE,
+    /// so the quit door covers every surface of every open post by
+    /// construction.)
     let quitFinalize = QuitFinalizeRegistry()
+
+    /// Phase 13b Stage 1a (N3): ONE `AutosaveCoordinator` per open post.
+    /// Three surfaces used to mint their own (Editor / Takes / BlockTOC),
+    /// so TWO debounced pipelines could run over one post at once (the
+    /// Write takes panel over the Write editor) and flush a stale buffer
+    /// OVER a newer one — the ordering was luck. One coordinator per post
+    /// makes the newest text win structurally (one pending entry per
+    /// variant). Coordinators are session-cached (tiny — a dictionary and
+    /// an armed task only while dirty; bounded by posts opened per
+    /// session) and each registers with the quit door exactly once.
+    private var postAutosaves: [String: AutosaveCoordinator] = [:]
+
+    func autosave(forPost postID: String) -> AutosaveCoordinator {
+        if let existing = postAutosaves[postID] { return existing }
+        let coordinator = AutosaveCoordinator(runner: runner)
+        postAutosaves[postID] = coordinator
+        _ = quitFinalize.register { [weak coordinator] in
+            await coordinator?.flushNow()
+        }
+        return coordinator
+    }
     #endif
 
     init(database: AppDatabase) {

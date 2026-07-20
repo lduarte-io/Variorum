@@ -530,11 +530,16 @@ struct QuitFinalizeSurfacesTests {
             }
             #expect(stored == "TOC-typed, then ⌘Q")
 
-            // Teardown unregisters — a closed surface never lingers in
-            // the quit path (this session's registry is now empty: the
-            // takes test's model above lives in a DIFFERENT session).
+            // 13b 1a (N3): surfaces no longer register themselves — the
+            // quit entry is the POST's session-owned shared coordinator
+            // (registered once at creation, weak, clean-flush no-op), so
+            // nothing surface-scoped can linger by construction. Teardown
+            // detaches the surface's observers; the post's entry remains
+            // and a second finalize is a harmless no-op.
             model.teardown()
-            #expect(session.quitFinalize.isEmpty)
+            #expect(!session.quitFinalize.isEmpty,
+                    "the post's shared coordinator stays registered at session scope")
+            await session.quitFinalize.finalizeAll()  // idempotent, clean
         }
     }
 }

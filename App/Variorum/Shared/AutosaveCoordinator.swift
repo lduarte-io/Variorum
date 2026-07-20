@@ -39,11 +39,46 @@ final class AutosaveCoordinator {
 
     /// Surfaced refusals (a variant locked mid-flight, a sealed post, …) —
     /// the operations layer's error, rendered by the editor, never retried
-    /// blindly.
+    /// blindly. (Single-owner form — the mobile capture editor's; Mac
+    /// surfaces share one coordinator per post and use `observe` instead.)
     var onError: (@MainActor (Error) -> Void)?
     /// Fires after every flush settles (clean or failed) — the view model's
-    /// cue to apply a deferred projection.
+    /// cue to apply a deferred projection. (Single-owner form; see above.)
     var onSettled: (@MainActor () -> Void)?
+
+    // Phase 13b Stage 1a (N3): ONE coordinator per open post means SEVERAL
+    // surfaces (Write editor, takes board, Write takes panel, block TOC)
+    // listen at once — multicast observers beside the single-owner
+    // closures (which the mobile target keeps using unchanged).
+    private var errorObservers: [UUID: @MainActor (Error) -> Void] = [:]
+    private var settledObservers: [UUID: @MainActor () -> Void] = [:]
+
+    /// Registers a surface's callbacks; remove with `stopObserving` at the
+    /// surface's teardown (a shared coordinator outlives any one surface).
+    func observe(
+        onError: (@MainActor (Error) -> Void)? = nil,
+        onSettled: (@MainActor () -> Void)? = nil
+    ) -> UUID {
+        let token = UUID()
+        if let onError { errorObservers[token] = onError }
+        if let onSettled { settledObservers[token] = onSettled }
+        return token
+    }
+
+    func stopObserving(_ token: UUID) {
+        errorObservers[token] = nil
+        settledObservers[token] = nil
+    }
+
+    private func notifyError(_ error: Error) {
+        onError?(error)
+        for observer in errorObservers.values { observer(error) }
+    }
+
+    private func notifySettled() {
+        onSettled?()
+        for observer in settledObservers.values { observer() }
+    }
 
     /// True while any edit is unpersisted (pending or mid-write).
     var isDirty: Bool { !pending.isEmpty || flushesInFlight > 0 }
@@ -98,7 +133,7 @@ final class AutosaveCoordinator {
         let batch = pending
         pending = [:]
         guard !batch.isEmpty else {
-            onSettled?()
+            notifySettled()
             return
         }
         flushesInFlight += 1
@@ -120,9 +155,9 @@ final class AutosaveCoordinator {
             }
         }
         if let firstError {
-            onError?(firstError)
+            notifyError(firstError)
         }
         flushesInFlight -= 1
-        onSettled?()
+        notifySettled()
     }
 }

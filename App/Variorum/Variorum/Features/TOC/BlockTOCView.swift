@@ -30,23 +30,24 @@ final class BlockTOCViewModel {
     init(session: AppSession, postID: String) {
         self.session = session
         self.postID = postID
-        self.autosave = AutosaveCoordinator(runner: session.runner)
-        autosave.onError = { [weak self] error in
-            self?.statusMessage = TakesViewModel.message(for: error)
-        }
-        // The quit door awaits the expanded block's debounced buffer too
-        // (review round 1, MINOR 2).
-        quitToken = session.quitFinalize.register { [weak autosave = self.autosave] in
-            await autosave?.flushNow()
-        }
+        // 13b 1a (N3): the ONE per-post coordinator; the quit door covers
+        // it at the session scope.
+        self.autosave = session.autosave(forPost: postID)
+        autosaveToken = autosave.observe(
+            onError: { [weak self] error in
+                self?.statusMessage = TakesViewModel.message(for: error)
+            })
+        // (Buffer convergence rides `adopt(rows:)` — the settle happens
+        // WITH fresh rows in hand, so a landed buffer never reverts the
+        // display to stale text for even one cycle.)
     }
 
-    @ObservationIgnored private var quitToken: UUID?
+    @ObservationIgnored private var autosaveToken: UUID?
 
     func teardown() {
-        if let quitToken {
-            session.quitFinalize.unregister(quitToken)
-            self.quitToken = nil
+        if let autosaveToken {
+            autosave.stopObserving(autosaveToken)
+            self.autosaveToken = nil
         }
         Task { await autosave.flushNow() }
     }

@@ -33,7 +33,10 @@ final class TakesViewModel {
         self.session = session
         self.postID = postID
         self.defaults = defaults
-        self.autosave = AutosaveCoordinator(runner: session.runner)
+        // 13b 1a (N3): the ONE per-post coordinator (shared with the Write
+        // editor and the TOC on the same post). The quit door covers it at
+        // the session scope — this surface no longer registers itself.
+        self.autosave = session.autosave(forPost: postID)
         if let memory = TakesViewMemory.load(postID: postID, defaults: defaults) {
             columns = memory.columns
             alignmentLocked = memory.alignmentLocked
@@ -41,22 +44,19 @@ final class TakesViewModel {
             columns = [TakesColumn(kind: .main)]
             alignmentLocked = true
         }
-        autosave.onError = { [weak self] error in
-            self?.statusMessage = Self.message(for: error)
-        }
-        autosave.onSettled = { [weak self] in
-            guard let self, !self.autosave.isDirty, let deferred = self.deferredProjection else { return }
-            self.deferredProjection = nil
-            self.adopt(deferred)
-        }
-        // The quit door awaits this surface's debounced buffers too
-        // (review round 1, MINOR 2 — the Phase 10 quit-door class).
-        quitToken = session.quitFinalize.register { [weak autosave = self.autosave] in
-            await autosave?.flushNow()
-        }
+        autosaveToken = autosave.observe(
+            onError: { [weak self] error in
+                self?.statusMessage = Self.message(for: error)
+            },
+            onSettled: { [weak self] in
+                guard let self, !self.autosave.isDirty,
+                      let deferred = self.deferredProjection else { return }
+                self.deferredProjection = nil
+                self.adopt(deferred)
+            })
     }
 
-    @ObservationIgnored private var quitToken: UUID?
+    @ObservationIgnored private var autosaveToken: UUID?
 
     // MARK: - Observable state
 
@@ -204,9 +204,9 @@ final class TakesViewModel {
     }
 
     func teardown() {
-        if let quitToken {
-            session.quitFinalize.unregister(quitToken)
-            self.quitToken = nil
+        if let autosaveToken {
+            autosave.stopObserving(autosaveToken)
+            self.autosaveToken = nil
         }
         Task { await autosave.flushNow() }
     }
