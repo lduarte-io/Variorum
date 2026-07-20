@@ -63,11 +63,10 @@ final class EditorViewModel {
     private(set) var caretBlockWordCount: Int?
     private(set) var selectionWordCount: Int?
     /// Phase 13 C1 (R11 — word-count prominence): the post's total,
-    /// maintained INCREMENTALLY (per-variant cache; only changed texts
-    /// re-enumerate — cost ∝ the edit, the P1 unit; the caret block's
-    /// live count adjusts the total between projections).
+    /// maintained INCREMENTALLY (per-variant cache in the LEDGER; only
+    /// changed texts re-enumerate — cost ∝ the edit, the P1 unit; the
+    /// caret block's live count adjusts the total between projections).
     private(set) var postWordCount: Int?
-    @ObservationIgnored private var wordCountByVariant: [String: Int] = [:]
     /// Fan badges for on-screen fanned blocks (document coordinates).
     private(set) var badges: [BlockBadge] = []
     /// The block whose fan panel is open (nil = closed).
@@ -209,14 +208,12 @@ final class EditorViewModel {
     /// Times `desyncRecovery` has fired this session — the Step 8 soak
     /// asserts ZERO (store == index == surface through every interleaving).
     @ObservationIgnored private(set) var desyncRecoveryCount = 0
-    /// The text the surface currently holds per variant — maintained at
-    /// every adoption point (full render, differential, structural apply)
-    /// and every edit record, so `surfaceMatches` detects our own autosave
-    /// echo WITHOUT reading the surface (Phase 10 Step 1 — the KnownIssues
-    /// O(post-length) echo-compare fix: the old path extracted
-    /// `attributedSubstring` for every slot on every clean projection
-    /// arrival, document-proportional main-thread work at debounce rate).
-    @ObservationIgnored private var surfaceTextByVariant: [String: String] = [:]
+    /// The surface-text truth per variant + word-count cache — the
+    /// LEDGER (13b 1a, T3 slice: the echo-detection map moved into
+    /// `EditorSurfaceLedger`, pure and unit-tested; the semantics are the
+    /// Phase 10 Step 1 fix's, unchanged — echo detection never reads the
+    /// surface).
+    @ObservationIgnored private var ledger = EditorSurfaceLedger()
     /// Surface text extractions (`viewText` calls), test-visible: the echo
     /// pin asserts a projection echo performs ZERO of these (red on the old
     /// per-slot-extraction path).
@@ -450,115 +447,62 @@ final class EditorViewModel {
     // MARK: - Projection → surface
 
     /// Internal so tests can drive projections without the observation.
+    /// The DECISION lives in `EditorProjectionPolicy` (13b 1a — the
+    /// precedence order is pinned as pure code); this executes it.
     func applyProjection(_ new: [Queries.RenderedBlock]) {
         guard textView != nil else {
             pendingProjection = new
             return
         }
-        if !loaded {
-            // First render: there is no local tail yet — the pre-load index
-            // is a placeholder, never a tail to preserve.
+        let decision = EditorProjectionPolicy.decide(
+            loaded: loaded,
+            // The buffer is authoritative while dirty; defer until clean.
+            // A structural flight defers too (round 3 NIT): a delivery
+            // rewriting the surface mid-flight is geometry-safe
+            // post-round-2 but would clear text-undo and double-rewrite
+            // under the gesture — the flight's exit applies the deferred
+            // value through the settle machinery.
+            busy: autosave.isDirty || mintInFlight || structuralInFlight,
+            forceFull: forceFullRender,
+            matchesSurface: ledger.matches(new, entries: index.entries),
+            sameSequence: new.map(\.blockID) == index.entries.map(\.blockID))
+        switch decision {
+        case .initialRender:
+            // First render: there is no local tail yet — the pre-load
+            // index is a placeholder, never a tail to preserve.
             renderFull(new, preserveTail: false)
             loaded = true
             applyFocusSeeds()
-            return
-        }
-        // The buffer is authoritative while dirty; defer until clean. A
-        // structural flight defers too (round 3 NIT): a delivery rewriting
-        // the surface mid-flight is geometry-safe post-round-2 (the seam
-        // guards fall back to full render on any mismatch) but would clear
-        // text-undo and double-rewrite under the gesture — the flight's
-        // exit applies the deferred value through the settle machinery.
-        if autosave.isDirty || mintInFlight || structuralInFlight {
+        case .deferUntilClean:
             pendingProjection = new
-            return
-        }
-        if forceFullRender {
+        case .forcedFullRender:
             forceFullRender = false
             renderFull(new, preserveTail: true)
-            return
-        }
-        if surfaceMatches(new) {
+        case .adoptEcho:
             // Our own autosave echo (or metadata-only movement): adopt the
             // projection for badge/fan data, touch nothing in the view.
             slots = new
             adoptSurfaceTextMap(new)
             refreshBadges()
-            return
-        }
-        if new.map(\.blockID) == index.entries.map(\.blockID) {
+        case .differential:
             applyDifferential(new)
-        } else {
+        case .fullRender:
             renderFull(new, preserveTail: true)
         }
     }
 
-    /// True when the projection and the live surface agree on every slot:
-    /// same blocks, same rendered variants, same texts, same editability.
-    ///
-    /// Cost (Phase 10 Step 1 — resolves the KnownIssues echo-detection row):
-    /// the surface is NEVER read here. `surfaceTextByVariant` carries the
-    /// text the surface is known to hold per variant — written at every
-    /// adoption point and every edit record — so the echo check is an
-    /// in-memory comparison (no `attributedSubstring` extraction, no
-    /// allocation; the old path extracted every slot's text from the
-    /// storage on each clean projection arrival, O(post length) of
-    /// main-thread surface reads at autosave-debounce rate). The pin
-    /// asserts `surfaceTextReads` stays flat through an echo.
-    private func surfaceMatches(_ new: [Queries.RenderedBlock]) -> Bool {
-        guard new.count == index.entries.count else { return false }
-        for (i, slot) in new.enumerated() {
-            let entry = index.entries[i]
-            let editable = !slot.isGap && !slot.variantLocked
-            guard slot.blockID == entry.blockID,
-                  slot.variantID == entry.variantID,
-                  editable == entry.editable
-            else { return false }
-            let text = slot.text ?? ""
-            guard text.utf16.count == entry.length else { return false }
-            guard let variantID = slot.variantID else {
-                // A gap slot renders as an empty read-only range; the length
-                // check above (0 == 0) is the whole comparison.
-                continue
-            }
-            guard text == surfaceTextByVariant[variantID] else { return false }
-        }
-        return true
-    }
-
     /// Adopts `new` as the known surface text per variant — called wherever
-    /// the surface is (re)written from a projection, so the map always
+    /// the surface is (re)written from a projection, so the ledger always
     /// describes what the view actually shows.
     private func adoptSurfaceTextMap(_ new: [Queries.RenderedBlock]) {
-        var map: [String: String] = [:]
-        map.reserveCapacity(new.count)
-        var counts: [String: Int] = [:]
-        counts.reserveCapacity(new.count)
-        for slot in new {
-            guard let variantID = slot.variantID else { continue }
-            let text = slot.text ?? ""
-            map[variantID] = text
-            // Word counts re-enumerate ONLY changed texts (R11's total at
-            // P1 cost — an echo re-enumerates nothing; the equality check
-            // is the same in-memory compare class the echo path already
-            // performs).
-            if surfaceTextByVariant[variantID] == text,
-               let cached = wordCountByVariant[variantID] {
-                counts[variantID] = cached
-            } else {
-                counts[variantID] = TextMetrics.wordCount(text)
-            }
-        }
-        surfaceTextByVariant = map
-        wordCountByVariant = counts
+        ledger.adopt(new)
         publishPostWordCount()
     }
 
     /// The total = the CURRENT slots' cached counts (stale variants fall
     /// out naturally; gaps count nothing). O(blocks) per call.
     private func publishPostWordCount() {
-        let total = slots.compactMap(\.variantID)
-            .reduce(0) { $0 + (wordCountByVariant[$1] ?? 0) }
+        let total = ledger.totalWords(over: slots)
         if postWordCount != total { postWordCount = total }
     }
 
@@ -758,7 +702,7 @@ final class EditorViewModel {
         // The edited block's surface truth, for echo detection (Step 1):
         // this extraction is O(the edited block) and already paid for the
         // autosave itself.
-        surfaceTextByVariant[variantID] = text
+        ledger.recordEdit(variantID: variantID, text: text)
         let oldLength = editedRange.length - delta
         autosave.record(
             variantID: variantID, text: text,
@@ -841,7 +785,7 @@ final class EditorViewModel {
         guard let last = index.entries.indices.last,
               index.entries[last].editable,
               let variantID = index.entries[last].variantID,
-              let knownText = surfaceTextByVariant[variantID]
+              let knownText = ledger.textByVariant[variantID]
         else { return }
         let run = tailText.prefix(while: { $0 == "\n" }).count
         guard run > 0 else { return }
@@ -854,7 +798,7 @@ final class EditorViewModel {
             over: NSRange(location: oldRange.upperBound, length: run))
         tailText = String(tailText.dropFirst(run))
         let newText = knownText + String(repeating: "\n", count: run)
-        surfaceTextByVariant[variantID] = newText
+        ledger.recordEdit(variantID: variantID, text: newText)
         autosave.record(variantID: variantID, text: newText, charDelta: run)
     }
 
@@ -915,7 +859,7 @@ final class EditorViewModel {
         //   gesture: they run through an undo-stack-FREE Operations so
         //   ⌥⌘Z never offers an inverse for something she never did.
         for correction in outcome.corrections {
-            surfaceTextByVariant[correction.variantID] = correction.text
+            ledger.recordEdit(variantID: correction.variantID, text: correction.text)
             autosave.record(
                 variantID: correction.variantID,
                 text: correction.text,
@@ -962,7 +906,7 @@ final class EditorViewModel {
             textView?.undoManager?.removeAllActions()
         }
         for block in outcome.applied {
-            surfaceTextByVariant[block.variantID] = block.text
+            ledger.recordEdit(variantID: block.variantID, text: block.text)
         }
         index.crystallize(
             minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },
@@ -2616,8 +2560,7 @@ final class EditorViewModel {
         // The live buffer's caret-block count keeps the post TOTAL current
         // between projections (R11).
         if let caretVariantID, let fresh = caretBlockWordCount,
-           wordCountByVariant[caretVariantID] != fresh {
-            wordCountByVariant[caretVariantID] = fresh
+           ledger.setLiveWordCount(variantID: caretVariantID, count: fresh) {
             publishPostWordCount()
         }
         // Gesture enablement rides every caret/selection change — the menu
