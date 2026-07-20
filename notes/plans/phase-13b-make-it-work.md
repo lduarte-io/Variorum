@@ -2174,3 +2174,70 @@ place and reveals nothing — the mint+choose still happened and speaks
 through the projection; (d) `pushOverlaysToSinks` pushes STALE badge
 frames at install (correct while geometry is unchanged; a later
 `refreshBadges` re-delivers if it differs).
+
+## Stage 2 ladder — round 2 (VERDICT: zero new BLOCKER/MAJOR — the Stage 2 ladder CLOSES at round 2; residual fixes land post-close)
+
+The round-2 fresh cold reviewer verified EVERY round-1 disposition HOLDS
+(all pins read; the full Mac suite re-run independently: 538/538 green;
+`Sources/VariorumCore` byte-untouched git-verified; the fix-diff scope
+exactly the four declared commits; the door reshape reviewed WHOLE as a
+destructive seam and found honest — one discovery, confirm-gates-what-
+dies, tombstones through Operations only, the latch synchronous and
+defer-cleared) and SUSTAINED all four flagged notes (a: the latch covers
+every app construction site by construction; b: a declined confirm
+opening nothing is the user's own Cancel — cosmetic copy note recorded;
+c: sustained WITH the silent-corner residue below; d: stale badge frames
+at install are geometry-correct, re-delivery traced). Round-2 findings,
+verbatim-faithful:
+
+**[MINOR-R2-A] · `TakesBottomBar.swift:76,80,128` +
+`TakesShared.swift:91–99` (mounted on Lenses via
+`LensesBoardView.swift:67,270,295`) · The D2 class survives ONE DOOR
+OVER: the un-chosen mint doors reveal to an unhosted pane on the Lenses
+host.** The bar is mounted by BOTH boards; its ＋New/＋Blank/"+ take"
+doors and the cell context-menu twins call
+`branchTakeRevealed`/`newBlankTakeRevealed` unconditionally; on Lenses
+the mint changes neither the column's pick nor chosen, so no column
+renders the revealed pane — ring vanishes, take appears nowhere;
+inconsistent with the same board's own keyboard doors (which route
+pick-into-column and are visible by construction). Fix: host-gate the
+Revealed brains as `revealChosenTake` was gated — on `.lenses`, route
+through the board's pick-into-column semantics. Pin: the D2 pin's exact
+shape over the bar door; reds on current code.
+
+**[MINOR-R2-B] · `EditorView.swift:480–484` +
+`EditorViewModel.swift:2713–2716` · The starved-host class survives on
+the editor's BADGE sink — the LAST un-fixed field of the mechanism
+MAJOR-C closed.** The read tier got both fields (decor + badges); the
+editor got only decor. `BadgeOverlayController.init` wires
+`model.badgeSink` with no push; `attach` neither resets `badges` nor
+forces delivery; `refreshBadges` carries the same equality gate; both
+editor representables build fresh coordinators over possibly-loaded
+models → a freshly-wired overlay shows no ⑂ until a real badge/viewport
+change (a fully-visible short post never gets one). Fix: deliver stored
+badges at wire time, symmetric with the read tier. Pin: the read-tier
+pin's badge half over the editor's real install path; reds on current
+code.
+
+**[NIT-R2-C] · `TakesViewModel.swift:1075–1084` · blankChoose on a
+Lenses host with NO `.main` column is a visually silent success** when
+every open column holds an explicit pick for the block — nothing visible
+changes and nothing speaks, against fire-and-speak. One spoken line in
+the no-main branch; fold into the R2-A fix.
+
+**[NIT-R2-D · SPECULATIVE, RECORD-ONLY] · the discovery→confirm→restore
+window is open to SYNC, not to the user** (an apply landing a
+tutorial-tagged row mid-modal survives cleanup and the seed mints beside
+it — two field guides until the next Restore heals). Single-device
+today; pin-impossible without a contrived apply-mid-modal harness;
+recorded, no fix owed.
+
+**Architect's routing:** R2-A + R2-B + R2-C → the residual fix pass NOW,
+with a CLASS-COMPLETENESS SWEEP obligation: enumerate every door that
+calls a reveal brain (× hosts) and every equality-gated overlay sink
+(× hosts), verify each is either fixed or provably safe, and record the
+enumeration in the dispositions — the ladder has now caught two
+adjacent-door survivals of fixed classes; the sweep ends the pattern.
+R2-D stays record-only. The cosmetic notes (b's confirm copy;
+exportCaretBlock's tail phrasing from Stage 1) ride Stage 3's polish
+themes.
