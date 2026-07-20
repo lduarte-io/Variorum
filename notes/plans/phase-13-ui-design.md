@@ -1693,6 +1693,165 @@ this batch — no VariorumCore changes). Still queued: R98 (smart-book
 adds by tagging), R99 (awaiting her full-text-vs-skeleton answer),
 R100's remaining per-surface audit.
 
+### Sitting 9, continued (2026-07-19 night — batches 10–13: the question round (R98/R99/R100 answered), the block menu, Blocks as a 4th area, collapsed book pages, the bottom mode line, and TWO pinned defects; R104–R107)
+
+**Her messages VERBATIM (standing instruction; typos hers; five messages
+across one working stretch — screenshots #23–#28 described inline):**
+
+> how do I fix the TCC blocked part? I don't want to allow audio but i
+> can allow screen recording by the terminal. also, can you ask me R98,
+> R99, and R100 in question format? also, I tried clicking on the + take
+> button but it just opens up takes +1 and i don't see an option in the
+> bottom bar where i can add a new take or anything, how do I do that at
+> this poitn in time? [#23: margin grid, ⑂+ bloomed, "takes · 1", ONE
+> chosen card, NO growth doors visible]
+
+> ok so there was a different session i had that was supposed to fix
+> this fixed height issue, which it mostly did, but now on lenses the
+> same issue appears. […the b6dae25 report pasted…] also, I feel like we
+> need a block menu. the same issue has appeared where i can see the
+> takes but i can't make a new take. [#24: same rail, same missing doors]
+
+> also, I don't like seeing the blocks on the side, i think it's way too
+> crowded. i think blocks should just be a 4th area and you should be
+> able to make blocks as stand alone entries, not just appended to one
+> entry. it's so unlear how you're supposed to add tags right now. I
+> also don't think yoiu should see the content within a post when you're
+> on the book screen unless you click something to toggle that post to
+> expand. or hit something to expand or collapse all books. also, the
+> title of the book should be aligned to the text of the post and there
+> shouldn't be so much open space to the left - refer to this image.
+> [#25: the round-1 book mockup — narrow rail, title over post CARDS
+> (title + excerpt + meta), everything on one leading edge]. I also feel
+> like the location of where all of the write takes lenses compare
+> outline blocks canvas buttons are is not very ergonomic - i would
+> accept suggestions on where that should go
+
+> [#26/#27] there's another severe issue / bug, beyond not being able to
+> even make new takes. in the first image you see that i can't even see
+> the full text of the take, in the second you see it expanded, but the
+> text that's underneath several newlines never even shows. it just
+> feels so broken and like the editor is a long way off from being
+> useable still. i asked about the terminal permission controls, but
+> maybe we need some testing setup where you can take screenshots /
+> pictures for yourself and assess progress? it's just not feeling like
+> we're moving forward. also, did you add the items from all of my
+> prompts? i'm concerned by the terminal thing never having been brought
+> up again.
+
+> [#28] i don't know if my temp screenshots earlier showing the issue
+> will be processed soon enoguh to make a difference, so here's the
+> picture with the take expanded showing more text and showing that not
+> expanded (even though the text is in the chosen take), it didn't
+> appear. still not sure what the deal with the terminal permissions are
+
+**THE QUESTION ROUND (AskUserQuestion, her answers verbatim in the
+session record):** R98 → **"apply and report (the user already
+deliberately tried to add it), but make sure that the filter that can't
+be satisfied message still appears"**; R99 → **"First sentence per
+block"**; R100's comment glyph → **"i can't see comments right now - not
+sure hwo they're supposed to be made. i can only choose once i do see
+them, but probably switch to //"**; the mode-row location (her
+"suggestions" invitation, three previewed options) → **"Bottom mode line
+(Recommended)"**.
+
+**THE TWO PINNED DEFECTS (both hers, both mechanism-traced):**
+
+- **The clipped take (#26–#28, "the text that's underneath several
+  newlines never even shows"):** every READ take pane (cards AND the
+  takes article's cells) measured its height ONCE at install — BEFORE
+  SwiftUI hands it real width. A zero-width container lays out ~nothing,
+  reports ~one line, and NO later event re-measures a read pane (the
+  LIVE pane re-measures per keystroke — which is exactly why the
+  expanded/focused take looked right while every read rendering clipped
+  to one line). FIX: `TakeTextView` gains a width-gated `layout()` hook —
+  the first real layout re-measures; RED-ON-OLD PIN
+  (`TakePaneMeasureTests`): the hosted read pane with
+  "hello\n\n\n\nhi there" measures **exactly the 24-pt floor** with the
+  hook reverted (verified by behavioral revert) and grows to hold every
+  paragraph shipped.
+- **The Lenses window-min recurrence ("now on lenses the same issue
+  appears"):** the boards' status/journal-note/footer-rule texts were
+  unlimited `fixedSize` in NON-SCROLLING chrome — the exact b6dae25
+  class, missed by that fix's sweep. FIX: ONE `ChromeNotice` component
+  (voiced text + LOAD-BEARING lineLimit) now renders every board notice
+  (Takes status + R84 note, Lenses status + footer rule, the book
+  navigator's smart-book note); `ChromeMinHeightTests` gains the
+  ChromeNotice near-zero-width probe pin.
+
+**Rulings (R104+):**
+
+- **R104 — The BLOCK MENU** (her ask verbatim): a `block ▾` word-menu in
+  the takes/lenses status line — new take (branch), blank take, blank-
+  as-chosen, Comments…, Open in Write — acting on the pane you're in (a
+  one-block post needs no click; fire-and-speak otherwise), beside a
+  one-click `+ take` twin. The same family lands on the take cell's
+  RIGHT-CLICK menu (＋ new take / ＋ blank take), and Write's status
+  line gains `comments`. ALSO the defect half: the margin rail's growth
+  doors sat at the END of the horizontal card scroll — clipped past the
+  rail width, invisible (her #23/#24) — they render BELOW the cards now,
+  always on screen.
+- **R105 — Blocks is a FOURTH AREA; standalone blocks are born there**
+  (supersedes the rows-in-sidebar build-time call — her "way too
+  crowded"): the sidebar is four flat areas (Shelf · Library · Pool ·
+  Blocks); `BlocksAreaView` lists every scrap with tags, drag-out, and
+  drop-in import, plus a block-flavored quick-entry bar — ⏎ mints ONE
+  standalone block (never appended to a post). Recorded consequence:
+  sidebar-to-editor scrap dragging retires with the rows (the pool
+  editor and canvas remain the side-by-side scrap surfaces).
+- **R106 — Book pages collapse to CARDS by default** (her ruling + the
+  #25 mockup): a book shows title-excerpt-meta cards ("2,140w · ⑂ takes
+  on 2 blocks" class), click to expand in place (the focused/live post
+  is always expanded), `expand all · collapse all` beside the book's
+  meta line; the book TITLE now heads the CONTENT COLUMN, and the column
+  is LEFT-ANCHORED beside the navigator (the centering gulf is gone).
+- **R107 — The mode row is the BOTTOM MODE LINE** (her pick): write ·
+  takes · lenses · compare · outline · blocks · canvas as voiced words
+  at the window's bottom edge (the terminal modeline idiom), the current
+  mode wearing the color › + accent; the masthead is pure title + path.
+  Honest note: the mode line renders BELOW each view's status line (her
+  preview drew it above; hoisting the status bars out of all seven mode
+  views is the flip if she wants it — one structural pass).
+- **Tags discoverability** (her "so unclear how you're supposed to add
+  tags"): a `tags…` door in BOTH status lines (Write + Takes/Lenses)
+  opening the post's tag sheet in place. (The Settings manager and
+  Library batch-tagging stand unchanged.)
+
+**R98/R99/R100 executions:** R98 BUILT per her refinement —
+`Operations.collectPostIntoSmartReading` (apply-and-report; the add IS
+the tagging, no membership row; every unsatisfiable filter refuses
+DESCRIPTIVELY: malformed spec, profile, date bounds naming the bound,
+archived post, a filter tag that no longer exists — build-time call: the
+op never mints taxonomy), 6 state-transition tests; the chip's Add menu
+gains smart books "(by tagging)" and the shelf drop routes smart books
+through it with a muted REPORT line (never red). R99 BUILT —
+`Operations.mintOutlinePost` ("outline of <title>"; first sentence per
+block via the tocHandle rule, names ignored; empty blocks seed EMPTY —
+the mint never invents prose; honest-direction `derived_from` per block
++ the first-pair `version_of` anchor; refuses blockless; undo =
+revertMintedContainer), 3 tests; the Outline tab gains the `make outline
+post` door (header + empty state) and the kin mapping unions BOTH
+derivation directions (a hand-written outline's draft descends from it;
+a minted outline descends from the draft — both pair now). R100's
+glyph: terminal `commentPrefix` → **"// " (PROVISIONAL — her "probably";
+she ratifies once comments are visible, which R104's doors now make
+reachable)**; ThemeTests pin updated with the provisionality noted.
+
+**Verification:** core `swift test` **747 green in 90 suites** (was
+738/88 — the two new suites); Mac suite **428 green in 80 suites** (was
+426/79 — the TakePaneMeasure pin suite + the ChromeNotice pin; the two
+BookViewTests hosting tests adapted to R106 via the `initiallyExpanded`
+seam — all-expanded must STILL virtualize, the stronger P3 claim); both
+defect pins verified red-on-old by behavioral revert (the pane pin read
+exactly the 24-pt floor with the hook reverted). **Operational note for HER (the terminal question,
+answered in-session):** System Settings → Privacy & Security → Screen &
+System Audio Recording → add Terminal
+(/System/Applications/Utilities/Terminal.app) — screenshots are silent
+stills, no audio is granted; macOS asks to relaunch Terminal, which ends
+the running Claude session, so grant between sessions. Once granted,
+sessions can screenshot the dev-store app and self-review (the
+launch/window-probe machinery already ships in-session).
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

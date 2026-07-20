@@ -25,15 +25,20 @@ struct BookView: View {
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
+    /// `initiallyExpanded` (batch 12, R106): posts render as collapsed
+    /// CARDS by default; tests that assert on rendered post content seed
+    /// the expansion set here (the expand-all button's state, injectable).
     init(
         session: AppSession, readingID: String, readingName: String? = nil,
-        model: BookViewModel? = nil
+        model: BookViewModel? = nil,
+        initiallyExpanded: Set<String> = []
     ) {
         self.session = session
         self.readingID = readingID
         self.readingName = readingName
         _model = State(initialValue: model ?? BookViewModel(session: session, readingID: readingID))
         _structure = State(initialValue: BookStructureModel(session: session, readingID: readingID))
+        _expandedPosts = State(initialValue: initiallyExpanded)
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -298,10 +303,14 @@ struct BookView: View {
                     // Batch 6 legibility: a smart book's missing add/chapter
                     // doors are DESIGNED (#25a — membership is derived) —
                     // but absent-and-silent read as broken. Say so.
-                    Text("smart book — it collects posts by its tags. Tag a post anywhere and it appears here; chapters and direct adds are for hand-picked books.")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .fixedSize(horizontal: false, vertical: true)
+                    // (ChromeNotice: navigator = non-scrolling chrome — the
+                    // window-min class; batch 12 sweep.)
+                    ChromeNotice(
+                        tokens: tokens,
+                        text: "smart book — it collects posts by its tags. Tag a post "
+                            + "anywhere and it appears here; chapters and direct adds "
+                            + "are for hand-picked books.",
+                        lines: 6)
                 }
             }
             .padding(12)
@@ -357,6 +366,30 @@ struct BookView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
+                    // Batch 12 (her mockup reference): the book's TITLE
+                    // heads the content column, aligned with the post
+                    // cards — never floating in rail-side dead space.
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tokens.chromeLabel(readingName ?? model.readingName ?? "book"))
+                            .font(tokens.title)
+                            .foregroundStyle(tokens.ink)
+                        HStack(spacing: 8) {
+                            Text(tokens.chromeLabel(bookMetaLine))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                            // Batch 12: posts render COLLAPSED by default —
+                            // cards, not content; these are the all-doors.
+                            Button(tokens.chromeLabel("expand all")) {
+                                expandedPosts = Set(model.entries.map(\.postID))
+                            }
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                            Button(tokens.chromeLabel("collapse all")) {
+                                expandedPosts.removeAll()
+                            }
+                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                        }
+                    }
+                    .padding(.bottom, 10)
                     if model.entries.isEmpty {
                         Text("This book has no posts yet.")
                             .foregroundStyle(tokens.muted)
@@ -372,9 +405,7 @@ struct BookView: View {
                                     .padding(.top, 12)
                             }
                             ForEach(group.entries, id: \.postID) { entry in
-                                postHeader(entry)
-                                postBody(entry)
-                                    .padding(.bottom, 16)
+                                postRow(entry)
                             }
                         }
                     } else {
@@ -384,9 +415,7 @@ struct BookView: View {
                                     .font(tokens.heading)
                                     .padding(.top, 12)
                             }
-                            postHeader(entry)
-                            postBody(entry)
-                                .padding(.bottom, 16)
+                            postRow(entry)
                         }
                     }
                     if model.truncated {
@@ -431,12 +460,15 @@ struct BookView: View {
                         }
                     }
                 }
-                // R9 (Phase 13 C1): the book page is a bounded, centered
-                // prose column — text never runs near the window edge.
+                // R9's measure holds (760pt) — but the column is LEFT-
+                // ANCHORED beside the navigator now (batch 12, her mockup
+                // reference: "there shouldn't be so much open space to the
+                // left"; centering left a rail-to-title gulf on wide
+                // windows).
                 .frame(maxWidth: 760, alignment: .leading)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 32)
-                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 40)
+                .padding(.vertical, 20)
             }
             .onChange(of: scrollTarget) { _, target in
                 guard let target else { return }
@@ -494,8 +526,84 @@ struct BookView: View {
         return "Page \(index + 1) of \(model.entries.count) — \(entryTitle(entry))"
     }
 
-    private func postHeader(_ entry: Queries.ReadingEntry) -> some View {
+    /// Batch 12: kind + extent at a glance under the title.
+    private var bookMetaLine: String {
+        var parts: [String] = [structure.reading?.kind == .smart ? "smart book" : "book"]
+        if structure.sections.count > 0 { parts.append("\(structure.sections.count) chapters") }
+        parts.append("\(model.entries.count) posts")
+        return parts.joined(separator: " · ")
+    }
+
+    /// Batch 12 (her ruling): a post shows as a collapsed CARD until
+    /// expanded — "you shouldn't see the content within a post on the book
+    /// screen unless you click something." The focused post (live editor)
+    /// is always expanded. Seeded by `initiallyExpanded` (tests).
+    @State private var expandedPosts: Set<String>
+
+    @ViewBuilder
+    private func postRow(_ entry: Queries.ReadingEntry) -> some View {
+        let expanded = expandedPosts.contains(entry.postID)
+            || focus.focusedPostID == entry.postID
+        if expanded {
+            postHeader(entry, expanded: true)
+            postBody(entry)
+                .padding(.bottom, 16)
+        } else {
+            collapsedPostCard(entry)
+                .padding(.bottom, 10)
+        }
+    }
+
+    /// The collapsed card (her referenced mockup: title, excerpt, meta —
+    /// bordered, aligned with the book title). Click = expand in place.
+    private func collapsedPostCard(_ entry: Queries.ReadingEntry) -> some View {
+        Button {
+            expandedPosts.insert(entry.postID)
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Text("▸")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                    Text(entryTitle(entry))
+                        .font(tokens.body.weight(.semibold))
+                        .foregroundStyle(tokens.ink)
+                    if let date = entry.entryDate {
+                        Text(date)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                    }
+                    Spacer()
+                    Button(tokens.chromeLabel("open ↗")) {
+                        NotificationCenter.default.post(
+                            name: .variorumOpenPost, object: nil,
+                            userInfo: ["postID": entry.postID])
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                    .help("Open this post in the full editor (Write · Takes · Lenses · …)")
+                }
+                PostCardExcerpt(session: session, postID: entry.postID, tokens: tokens)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(tokens.card)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .id("page-\(entry.postID)")  // the scrubber's landing anchor
+        .contextMenu { postChapterMenu(entry) }
+    }
+
+    private func postHeader(_ entry: Queries.ReadingEntry, expanded: Bool = false) -> some View {
         HStack(spacing: 6) {
+            if expanded {
+                Button("▾") { expandedPosts.remove(entry.postID) }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help("Collapse this post back to its card")
+            }
             Text(entryTitle(entry))
                 .font(tokens.body.weight(.semibold))
             if let date = entry.entryDate {
@@ -510,9 +618,7 @@ struct BookView: View {
                     name: .variorumOpenPost, object: nil,
                     userInfo: ["postID": entry.postID])
             }
-            .buttonStyle(.borderless)
-            .font(tokens.small)
-            .foregroundStyle(tokens.accent)
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .help("Open this post in the full editor (Write · Takes · Lenses · …)")
         }
         .padding(.top, 4)
@@ -540,6 +646,48 @@ struct BookView: View {
                     focus.focus(entry.postID, fanBlock: blockID)
                 })
                 .id("read-\(entry.postID)")
+        }
+    }
+}
+
+/// Batch 12 — the collapsed card's excerpt + meta line (her referenced
+/// mockup: "2,140w · rev may 3" / "⑂ takes on 2 blocks"). Fetched per
+/// visible card (LazyVStack realization — cost ∝ what's on screen, P1).
+private struct PostCardExcerpt: View {
+    let session: AppSession
+    let postID: String
+    let tokens: VoiceTokens
+    @State private var excerpt = ""
+    @State private var meta = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if !excerpt.isEmpty {
+                Text(excerpt)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
+            }
+            if !meta.isEmpty {
+                Text(tokens.chromeLabel(meta))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+            }
+        }
+        .task(id: postID) {
+            let slots = (try? await session.database.read { [postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }) ?? []
+            let first = slots.compactMap(\.text).first { !$0.isEmpty } ?? ""
+            excerpt = String(first.prefix(280))
+            let words = slots.reduce(0) { $0 + TextMetrics.wordCount($1.text ?? "") }
+            let fanned = slots.filter(\.hasFan).count
+            var parts = ["\(words.formatted())w"]
+            if fanned > 0 {
+                parts.append("⑂ takes on \(fanned) block\(fanned == 1 ? "" : "s")")
+            }
+            meta = parts.joined(separator: " · ")
         }
     }
 }

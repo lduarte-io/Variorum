@@ -131,7 +131,7 @@ extension VoiceTokens {
         selectionMarker: "› ",
         pathPrefix: "~/",
         pathSeparator: "/",
-        commentPrefix: "# ",
+        commentPrefix: "// ",
         showsBlockCursor: true,
         lowercasesChrome: true)
 
@@ -161,7 +161,7 @@ extension VoiceTokens {
         selectionMarker: "› ",
         pathPrefix: "~/",
         pathSeparator: "/",
-        commentPrefix: "# ",
+        commentPrefix: "// ",
         showsBlockCursor: true,
         lowercasesChrome: true)
 

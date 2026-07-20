@@ -35,6 +35,21 @@ struct ChromeMinHeightTests {
         + "\\\"error_code\\\":\\\"refresh_token_not_found\\\","
         + "\\\"msg\\\":\\\"Invalid Refresh Token: Refresh Token Not Found\\\"}\")"
 
+    @Test func chromeNoticeNearZeroWidthProbeStaysBounded() {
+        // Batch 12 (the Lenses recurrence): the boards' status/footer texts
+        // are the same hazard class as ErrorCauseNote — ChromeNotice is
+        // their one shared shape, and its line limit is what bounds the
+        // window's near-zero-width minimum-size probe. A ~200-char notice
+        // with the limit reverted measures >1000 pt here.
+        let longStatus = String(
+            repeating: "Saved the current choices as a lens named after today. ", count: 4)
+        let host = NSHostingController(
+            rootView: ChromeNotice(
+                tokens: .terminalLight, text: longStatus))
+        let probed = host.sizeThatFits(in: NSSize(width: 1, height: 0))
+        #expect(probed.height < 400)
+    }
+
     @Test func causeNoteNearZeroWidthProbeStaysBounded() {
         let host = NSHostingController(
             rootView: VStack(alignment: .leading, spacing: 2) {

@@ -50,12 +50,12 @@ struct LensesBoardView: View {
         VStack(alignment: .leading, spacing: 0) {
             header
             if let status = model.statusMessage {
-                Text(status)
-                    .font(.caption)
-                    .foregroundStyle(tokens.accent)
-                    .textSelection(.enabled)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 12)
+                // ChromeNotice: the line limit is LOAD-BEARING here — HER
+                // Lenses wedge (batch 12): this exact slot rendered a long
+                // status with unlimited fixedSize in non-scrolling chrome,
+                // and the window minimum inflated (the b6dae25 class).
+                ChromeNotice(tokens: tokens, text: status, ink: tokens.accent)
+                    .padding(.horizontal, 24)
                     .padding(.vertical, 4)
             }
             if model.projection.sealed {
@@ -421,13 +421,12 @@ struct LensesBoardView: View {
     // MARK: - The one rule (stated, not implied)
 
     private var footerRule: some View {
-        Text("Columns are ways of looking at the same post. Nothing here changes the post "
-            + "except ✓ (make this the post) and ⧉ (make a new post). Typing edits the take "
-            + "you're in — the same take, everywhere it appears.")
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 12)
+        ChromeNotice(
+            tokens: tokens,
+            text: "Columns are ways of looking at the same post. Nothing here changes the post "
+                + "except ✓ (make this the post) and ⧉ (make a new post). Typing edits the take "
+                + "you're in — the same take, everywhere it appears.")
+            .padding(.horizontal, 24)
             .padding(.vertical, 6)
     }
 }

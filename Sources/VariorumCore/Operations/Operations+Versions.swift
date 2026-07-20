@@ -162,6 +162,73 @@ extension Operations {
         return result
     }
 
+    /// MAKE OUTLINE POST (taste checkpoint, Sitting 9 — R99; her batch-10
+    /// answer: FIRST SENTENCE PER BLOCK): a linked condensation copy — one
+    /// block per source block, seeded with the source's rendered take's
+    /// first sentence (the read-time `tocHandle` rule, block names ignored;
+    /// an EMPTY source block seeds an empty block — the mint never invents
+    /// prose), named "outline of <title>", each minted block
+    /// `derived_from` its source (the HONEST direction: the outline
+    /// descends from the draft), plus ONE `version_of` anchor on the first
+    /// pair (the post-level link, the copy family's letter). The Outline
+    /// view maps kin in EITHER derivation direction, so the minted outline
+    /// pairs immediately. Refuses a blockless source. A sealed source is
+    /// legal — reading isn't authoring; the source is never touched.
+    @discardableResult
+    public func mintOutlinePost(of postID: String) throws -> PostCopyResult {
+        let result: PostCopyResult = try database.write { db in
+            let source = try livePost(db, postID)
+            let now = date.now
+            let sourceTitle = source.title?.isEmpty == false ? source.title! : "untitled"
+            let outline = Container(
+                id: newID(), ownerId: currentOwnerID(), kind: .post,
+                title: "outline of \(sourceTitle)",
+                profile: nil, entryDate: nil, locked: false, floatingNotes: nil,
+                segmentationDefault: source.segmentationDefault,
+                lastTouchedAt: now, createdAt: now, updatedAt: now)
+            try outline.insert(db)
+
+            let placements = try ContainerBlock
+                .filter(Column("container_id") == postID && Column("deleted_at") == nil)
+                .order(Column("position"), Column("id"))
+                .fetchAll(db)
+
+            var blockCopies: [(source: String, copy: String)] = []
+            for placement in placements {
+                guard let block = try Block.fetchOne(db, key: placement.blockId),
+                      block.deletedAt == nil,
+                      let take = try? renderedVariant(db, block: block, placement: placement)
+                else { continue }  // gap slots (SyncSpec §5) mint nothing
+
+                let text = take.workingText
+                let sentence = text.isEmpty
+                    ? ""
+                    : Queries.tocHandle(name: nil, text: text)
+                let minted = try mintBlock(
+                    db, text: sentence, in: outline.id, at: .end, now: now)
+                let edge = Edge(
+                    id: newID(), sourceBlockId: minted.block.id, targetBlockId: block.id,
+                    type: .derivedFrom, originOp: "manual", createdAt: now)
+                try edge.insert(db)
+                try registerTextChange(
+                    db, blockID: minted.block.id, charDelta: sentence.count,
+                    forceMajorRevision: false, now: now)
+                blockCopies.append((source: block.id, copy: minted.block.id))
+            }
+            guard let firstPair = blockCopies.first else {
+                throw OperationError.postHasNoBlocks(id: postID)
+            }
+            let versionEdge = try insertVersionOfEdge(
+                db, firstPair.copy, firstPair.source, originOp: "manual", now: now)
+            return PostCopyResult(
+                post: outline, blockCopies: blockCopies, versionEdge: versionEdge)
+        }
+        undoStack?.register(label: "Make Outline Post") {
+            try $0.revertMintedContainer(result.post.id)
+        }
+        return result
+    }
+
     /// PROMOTE LENS: a new version-post whose chosen := the lens's
     /// EFFECTIVE picks (fall-through slots follow the source's chosen).
     /// Fans ride by DEFAULT; `carryFans: false` is the choose-at-promote

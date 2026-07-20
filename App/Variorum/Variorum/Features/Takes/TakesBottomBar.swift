@@ -20,12 +20,72 @@ struct TakesBottomBar: View {
     @State private var pickedDate = Date()
     @State private var historyShown = false
     @State private var history: [CommitPoint] = []
+    /// Batch 12 (her "we need a block menu"): the comments/tags sheets the
+    /// status line opens.
+    @State private var commentsTarget: BlockSheetTarget?
+    @State private var tagsShown = false
     @Environment(\.openWindow) private var openWindow
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
+    struct BlockSheetTarget: Identifiable {
+        let id: String
+    }
+
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    /// The block the menu acts on: the pane you're in; on a one-block post,
+    /// THE block (her screenshots' case — no click should be needed).
+    private var targetSlot: Queries.RenderedBlock? {
+        if let pane = model.focusedPane {
+            return model.projection.slots.first { $0.blockID == pane.blockID }
+        }
+        if model.projection.slots.count == 1 { return model.projection.slots.first }
+        return nil
+    }
+
+    /// The BLOCK MENU (batch 12 — her ask, verbatim: "I feel like we need
+    /// a block menu. the same issue has appeared where i can see the takes
+    /// but i can't make a new take."): every block-scoped act, one door,
+    /// always visible in the status line. Fire-and-speak when no block is
+    /// in reach.
+    private var blockMenu: some View {
+        VoicedMenu(tokens: tokens, label: "block") {
+            Button("＋ New take — branch of what's shown (⌘T)") {
+                guard let slot = targetSlot else { return speakNoTarget() }
+                let from = model.focusedPane?.variantID ?? slot.variantID
+                guard let from else {
+                    return model.speak("This block has no renderable take to branch from.")
+                }
+                Task { await model.branchTake(blockID: slot.blockID, from: from) }
+            }
+            Button("＋ Blank take (⌥⌘T)") {
+                guard let slot = targetSlot else { return speakNoTarget() }
+                Task { await model.newBlankTake(blockID: slot.blockID) }
+            }
+            Button("＋ Blank take, opened as chosen (⇧⌥⌘T)") {
+                guard let slot = targetSlot else { return speakNoTarget() }
+                Task { await model.newBlankTakeAsChosen(blockID: slot.blockID) }
+            }
+            Divider()
+            Button("Comments…") {
+                guard let slot = targetSlot else { return speakNoTarget() }
+                commentsTarget = BlockSheetTarget(id: slot.blockID)
+            }
+            Divider()
+            Button("Open in Write") {
+                NotificationCenter.default.post(
+                    name: .variorumSwitchMode, object: nil,
+                    userInfo: ["mode": "Write", "postID": model.postID])
+            }
+        }
+        .help("Everything block-scoped: new takes, comments — acts on the block you're in")
+    }
+
+    private func speakNoTarget() {
+        model.speak("Click into a block first — the block menu acts on the block you're in.")
     }
 
     var body: some View {
@@ -38,6 +98,20 @@ struct TakesBottomBar: View {
                 Text(tokens.chromeLabel(contextLabel))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
+                blockMenu
+                Button(tokens.chromeLabel("+ take")) {
+                    // The one-click twin of the menu's first item (her
+                    // batch-10 report: "i don't see an option in the
+                    // bottom bar where i can add a new take").
+                    guard let slot = targetSlot else { return speakNoTarget() }
+                    let from = model.focusedPane?.variantID ?? slot.variantID
+                    guard let from else {
+                        return model.speak("This block has no renderable take to branch from.")
+                    }
+                    Task { await model.branchTake(blockID: slot.blockID, from: from) }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .help("A new take on the block you're in, branched from what's shown (⌘T)")
                 Button(tokens.chromeLabel("commit ⌘S")) {
                     Task { await model.commitFocusedTake() }
                 }
@@ -55,6 +129,9 @@ struct TakesBottomBar: View {
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens))
                 .help("A sealed post is frozen — nothing under it changes until unsealed")
+                Button(tokens.chromeLabel("tags…")) { tagsShown = true }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
+                    .help("The post's tags — apply or remove them right here")
                 Button(tokens.chromeLabel(
                     model.projection.entryDate.map { "date: \($0)" } ?? "set date…")) {
                     pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
@@ -114,6 +191,12 @@ struct TakesBottomBar: View {
         }
         .sheet(isPresented: $historyShown) {
             historySheet
+        }
+        .sheet(item: $commentsTarget) { target in
+            CommentsPanel(session: model.session, blockID: target.id)
+        }
+        .sheet(isPresented: $tagsShown) {
+            TagAssignmentSheet(session: model.session, postID: model.postID, postTitle: nil)
         }
     }
 

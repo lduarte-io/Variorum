@@ -30,6 +30,9 @@ struct MembershipChip: View {
     @Environment(\.colorScheme) private var scheme
     @State private var books: [Reading] = []
     @State private var addableBooks: [Reading] = []
+    /// R98 (batch 10): unlocked SMART books join the add list — adding
+    /// applies the tags their filter needs (apply-and-report).
+    @State private var addableSmartBooks: [Reading] = []
     @State private var popoverShown = false
     @State private var status: String?
     @State private var duplicatedPostID: String?
@@ -73,10 +76,18 @@ struct MembershipChip: View {
                     }
                 }
                 // R61 — the ADD door, right where "in no book" is read.
-                if !addableBooks.isEmpty {
+                if !addableBooks.isEmpty || !addableSmartBooks.isEmpty {
                     Menu("Add to Book") {
                         ForEach(addableBooks, id: \.id) { book in
                             Button(book.name) { add(to: book) }
+                        }
+                        if !addableSmartBooks.isEmpty {
+                            Divider()
+                            // R98: smart books collect by filter — adding
+                            // IS tagging, and the door says so.
+                            ForEach(addableSmartBooks, id: \.id) { book in
+                                Button("\(book.name) (by tagging)") { collect(into: book) }
+                            }
                         }
                     }
                     .fixedSize()
@@ -140,12 +151,39 @@ struct MembershipChip: View {
         }) ?? []
         books = membership
         let memberIDs = Set(membership.map(\.id))
-        // Addable = open curated books the post isn't already in (smart
-        // books collect by tags — the chip never pretends to add there).
-        addableBooks = ((try? await session.database.read { db in
+        let all = ((try? await session.database.read { db in
             try Queries.readings(db)
         }) ?? [])
+        // Addable = open curated books the post isn't already in.
+        addableBooks = all
             .filter { $0.kind == .curated && !$0.locked && !memberIDs.contains($0.id) }
+        // R98 (supersedes the pre-batch-10 "never pretends to add there"):
+        // open smart books too — the add applies the filter's tags.
+        addableSmartBooks = all
+            .filter { $0.kind == .smart && !$0.locked && !memberIDs.contains($0.id) }
+    }
+
+    /// R98 — apply-and-report through `collectPostIntoSmartReading`.
+    private func collect(into book: Reading) {
+        Task {
+            do {
+                let result = try await session.runner.run { [postID] ops in
+                    try ops.collectPostIntoSmartReading(postID, into: book.id)
+                }
+                status = result.alreadyMatched
+                    ? "Already collected — it matches “\(book.name)”'s filter."
+                    : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
+            } catch let error as OperationError {
+                if case .smartFilterUnsatisfiable(_, let reason) = error {
+                    status = "“\(book.name)” can't take this post: \(reason)"
+                } else {
+                    status = ChipRefusals.message(for: error, bookName: book.name)
+                }
+            } catch {
+                status = String(describing: error)
+            }
+            await refresh()
+        }
     }
 
     private func add(to book: Reading) {

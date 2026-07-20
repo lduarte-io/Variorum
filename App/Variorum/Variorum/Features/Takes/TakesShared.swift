@@ -72,6 +72,15 @@ struct TakesCellView: View {
 
     @ViewBuilder
     private func menu(resolved: (variantID: String, text: String)) -> some View {
+        // Batch 12 (the block-menu family): the most direct door of all —
+        // right-click the text you're looking at.
+        Button("＋ New take — branch of this one (⌘T)") {
+            Task { await model.branchTake(blockID: slot.blockID, from: resolved.variantID) }
+        }
+        Button("＋ Blank take (⌥⌘T)") {
+            Task { await model.newBlankTake(blockID: slot.blockID) }
+        }
+        Divider()
         Button("✓ Choose this take (the post shows it)") {
             Task { await model.choose(blockID: slot.blockID, variantID: resolved.variantID) }
         }

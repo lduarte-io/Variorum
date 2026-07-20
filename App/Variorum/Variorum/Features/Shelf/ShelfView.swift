@@ -132,6 +132,15 @@ struct ShelfView: View {
                     .font(tokens.small)
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
+                    .lineLimit(4)
+                    .padding(6)
+            } else if let report = model.lastReport {
+                // R98's report half — informative, never red.
+                Text(tokens.chromeLabel(report))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .textSelection(.enabled)
+                    .lineLimit(3)
                     .padding(6)
             }
         }

@@ -134,6 +134,14 @@ private struct TakePaneSurface: NSViewRepresentable {
         func install(view: TakeTextView, publishHeight: @escaping (CGFloat) -> Void) {
             self.view = view
             self.publishHeight = publishHeight
+            // Batch 12 (her clipped-take report): the pane measures once at
+            // install, BEFORE SwiftUI hands it real width — a zero-width
+            // container lays out almost nothing and reports ~one line, and
+            // no later event re-measures a READ pane (the live pane
+            // re-measures per keystroke, which is why only reads clipped).
+            // The geometry hook re-measures whenever layout delivers a new
+            // width, so the first real layout corrects the height.
+            view.onWidthChange = { [weak self] in self?.remeasure() }
             canary.onFire = { [weak self] message in self?.canaryMessage = message }
             canary.arm(for: view)
         }
@@ -162,6 +170,19 @@ private struct TakePaneSurface: NSViewRepresentable {
 
 final class TakeTextView: NSTextView {
     var onPlainClick: (() -> Void)?
+    /// Fires when layout gives the view a NEW width (batch 12 — the
+    /// clipped-take fix's trigger; width-gated so height publishes can't
+    /// loop through it).
+    var onWidthChange: (() -> Void)?
+    private var lastLaidOutWidth: CGFloat = -1
+
+    override func layout() {
+        super.layout()
+        if bounds.width != lastLaidOutWidth {
+            lastLaidOutWidth = bounds.width
+            onWidthChange?()
+        }
+    }
 
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)

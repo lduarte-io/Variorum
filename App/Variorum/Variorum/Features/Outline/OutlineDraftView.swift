@@ -77,12 +77,22 @@ final class OutlineDraftViewModel {
                 for try await value in session.database.observe({ db -> OutlineDraftProjection in
                     let outlineSlots = try Queries.renderPost(db, containerID: outlineID)
                     let draftSlots = try Queries.renderPost(db, containerID: draftID)
+                    let placed = Set(draftSlots.map(\.blockID))
                     var mapping: [String: [String]] = [:]
                     for slot in outlineSlots where !slot.isGap {
                         // The CTE, verbatim — the view never re-derives.
-                        mapping[slot.blockID] = try Queries.derivedBlocks(
+                        // Batch 12 (R99): kin map in EITHER direction — a
+                        // hand-written outline's draft blocks DESCEND from
+                        // it; a MINTED outline descends from the draft
+                        // (honest lineage). Union, dedup, descendants first.
+                        var kin = try Queries.derivedBlocks(
                             db, fromOutlineBlock: slot.blockID, inContainer: draftID)
                             .map(\.blockID)
+                        for ancestor in try Queries.ancestors(db, of: slot.blockID)
+                        where placed.contains(ancestor.blockID) && !kin.contains(ancestor.blockID) {
+                            kin.append(ancestor.blockID)
+                        }
+                        mapping[slot.blockID] = kin
                     }
                     return OutlineDraftProjection(
                         outlineSlots: outlineSlots, draftSlots: draftSlots,
@@ -95,6 +105,23 @@ final class OutlineDraftViewModel {
             } catch {
                 self.statusMessage = String(describing: error)
             }
+        }
+    }
+
+    /// R99 (her batch-10 answer): mint "outline of <title>" — first
+    /// sentence per block, linked block-by-block — and select it as the
+    /// outline side.
+    func makeOutlinePost() async {
+        do {
+            let result = try await session.runner.run { [draftPostID] ops in
+                try ops.mintOutlinePost(of: draftPostID)
+            }
+            statusMessage = nil
+            outlinePostID = result.post.id
+        } catch let error as OperationError {
+            statusMessage = "Make outline refused: \(error)"
+        } catch {
+            statusMessage = String(describing: error)
         }
     }
 
@@ -131,17 +158,35 @@ struct OutlineDraftView: View {
             ?? OutlineDraftViewModel(session: session, draftPostID: draftPostID))
     }
 
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             if let status = model.statusMessage {
-                Text(status).font(.caption).foregroundStyle(.red).padding(.horizontal, 12)
+                ChromeNotice(tokens: tokens, text: status, ink: tokens.accent)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 4)
             }
             if model.outlinePostID == nil {
                 Spacer()
-                Text("Pick the outline post — its items map to the draft blocks they became.")
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
+                VStack(spacing: 8) {
+                    Text("Pick the outline post — its items map to the draft blocks they became.")
+                        .foregroundStyle(tokens.muted)
+                    // R99 — the door: no outline yet? Mint one.
+                    Button(tokens.chromeLabel("make outline post")) {
+                        Task { await model.makeOutlinePost() }
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
+                    .help("A linked copy named \"outline of …\" — each block starts as its "
+                        + "source's first sentence; edits map block-by-block")
+                }
+                .frame(maxWidth: .infinity)
                 Spacer()
             } else {
                 columns
@@ -161,6 +206,12 @@ struct OutlineDraftView: View {
                 }
             }
             .fixedSize()
+            Button(tokens.chromeLabel("make outline post")) {
+                Task { await model.makeOutlinePost() }
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+            .help("A linked copy named \"outline of …\" — each block starts as its "
+                + "source's first sentence; edits map block-by-block (R99)")
             Toggle("Tracked scroll", isOn: $model.trackedScroll)
                 .toggleStyle(.checkbox)
                 .help("Clicking an outline item scrolls the draft to what it became")

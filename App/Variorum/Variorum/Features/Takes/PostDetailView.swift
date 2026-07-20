@@ -72,7 +72,6 @@ struct PostDetailView: View {
                     MembershipChip(session: session, postID: postID)
                 }
                 Spacer()
-                ModeTabs(mode: $mode, tokens: tokens)
                 Button("References", systemImage: "books.vertical") {
                     referencesShown.toggle()
                 }
@@ -115,6 +114,18 @@ struct PostDetailView: View {
                 CanvasView(session: session, containerID: postID)
                     .id("canvas-\(postID)")
             }
+            // Batch 12 (her pick at the question round): the MODE LINE
+            // lives at the BOTTOM — the terminal modeline idiom, in the
+            // neighborhood her eyes already work in (blk n/n, counts,
+            // commit). ⌘1–⌘7 unchanged.
+            Divider().overlay(tokens.line)
+            HStack {
+                ModeTabs(mode: $mode, tokens: tokens)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 3)
+            .background(tokens.room)
         }
         .inspector(isPresented: $referencesShown) {
             ReferencePanel(session: session, postID: postID)

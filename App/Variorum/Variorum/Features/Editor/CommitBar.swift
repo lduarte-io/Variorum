@@ -13,6 +13,9 @@ struct CommitBar: View {
     let model: EditorViewModel
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
+    /// Batch 12 — the tags door ("so unclear how you're supposed to add
+    /// tags"): the post's tag sheet, right in the status line.
+    @State private var tagsShown = false
     @Environment(\.openWindow) private var openWindow
     // Phase 13 C1 (R11): the status line wears the voice; the word counts
     // are PROMINENT (the terminal mockup's liked idiom).
@@ -53,6 +56,17 @@ struct CommitBar: View {
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens))
                 .help("A sealed post is frozen — nothing under it changes until unsealed")
+                Button(tokens.chromeLabel("tags…")) { tagsShown = true }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
+                    .help("The post's tags — apply or remove them right here")
+                    .sheet(isPresented: $tagsShown) {
+                        TagAssignmentSheet(
+                            session: model.session, postID: model.postID,
+                            postTitle: model.header?.title)
+                    }
+                Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
+                    .help("The caret block's comments — working notes on a block, never per-take")
                 Button(tokens.chromeLabel(
                     model.header?.entryDate.map { "date: \($0)" } ?? "set date…")) {
                     pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()

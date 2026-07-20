@@ -144,4 +144,12 @@ public enum OperationError: Error, Equatable, Sendable {
     case sectionNotInReading(sectionID: String, readingID: String)
     /// `restoreSection` addressed a chapter that is not deleted.
     case sectionNotDeleted(id: String)
+
+    // Smart collection (taste checkpoint, Sitting 9 — R98).
+    /// The smart reading's filter cannot be satisfied by tagging (date
+    /// bounds, a profile mismatch, an archived post, a malformed spec, or
+    /// a filter tag that no longer exists) — refused with a DESCRIPTIVE
+    /// reason naming the filter, per the author's ruling ("it should give
+    /// you a descriptive error message when you can't add something").
+    case smartFilterUnsatisfiable(readingID: String, reason: String)
 }

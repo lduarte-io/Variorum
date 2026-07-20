@@ -146,6 +146,12 @@ struct RootView: View {
                 session: session, model: poolPosts, library: library,
                 readings: readings, tags: tags,
                 onOpen: { selection = $0 })
+        case .blocks:
+            // Batch 12: the Blocks AREA — standalone blocks live and are
+            // born here (the sidebar rows retired).
+            BlocksAreaView(session: session, model: pool) { poolID in
+                selection = .pool(poolID)
+            }
         case .post(let postID):
             // Phase 11 (A3): the mode switcher — Write / Takes / Compare
             // over one post, one store.

@@ -24,6 +24,10 @@ enum SidebarSelection: Hashable {
     case library
     /// The bookless-posts surface (R29/R44).
     case poolPosts
+    /// Batch 12 (her ruling — supersedes the rows-in-sidebar build-time
+    /// call): Blocks is a 4TH AREA, not inline sidebar rows ("way too
+    /// crowded"); standalone blocks are made THERE.
+    case blocks
     case post(String)
     case tag(String)
     case reading(String)
@@ -92,13 +96,19 @@ struct SidebarView: View {
                     Image(systemName: "tray")
                 }
                 .tag(SidebarSelection.poolPosts)
+                // Batch 12: Blocks joins as the FOURTH AREA — R44's
+                // sidebar, finally literal. The inline scrap rows are
+                // gone ("way too crowded"); the area page holds them.
+                Label {
+                    markedTitle("Blocks", .blocks)
+                } icon: {
+                    Image(systemName: "square.on.square")
+                }
+                .tag(SidebarSelection.blocks)
             } header: {
                 Text(tokens.chromeLabel("Variorum"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
-            }
-            PoolSection(session: session, model: pool) { poolID in
-                selection = .pool(poolID)
             }
         }
         .scrollContentBackground(.hidden)

@@ -36,7 +36,7 @@ struct ThemeTokenTests {
         #expect(terminal.selectionMarker == "› ")
         #expect(terminal.path(["Shelf"]) == "~/shelf")
         #expect(terminal.path(["Orbit", "II", "Weeks"]) == "~/orbit/ii/weeks")
-        #expect(terminal.commentPrefix == "# ")
+        #expect(terminal.commentPrefix == "// ")  // R100, batch 10: her "probably switch to //" — PROVISIONAL until she sees comments live
         #expect(terminal.showsBlockCursor)
         #expect(terminal.chromeLabel("6 Books") == "6 books")
     }

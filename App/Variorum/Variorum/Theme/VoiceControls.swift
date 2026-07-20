@@ -137,3 +137,27 @@ struct StatusDot: View {
             .foregroundStyle(tokens.faint)
     }
 }
+
+/// A board-chrome NOTICE: status lines, seal notes, footer rules — any
+/// wrapping text in NON-SCROLLING window chrome. The line limit beside
+/// `fixedSize` is LOAD-BEARING: an unlimited fixedSize text here measures
+/// one character per line under the window's near-zero-width minimum-size
+/// probe, and its full height becomes the WINDOW's minimum (the
+/// wedged-window root cause, b6dae25 — it recurred on the Lenses tab,
+/// batch 12, through the boards' unlimited status texts). Pinned by
+/// `ChromeMinHeightTests`.
+struct ChromeNotice: View {
+    let tokens: VoiceTokens
+    let text: String
+    var ink: Color?
+    var lines: Int = 4
+
+    var body: some View {
+        Text(text)
+            .font(tokens.small)
+            .foregroundStyle(ink ?? tokens.muted)
+            .lineLimit(lines)
+            .fixedSize(horizontal: false, vertical: true)
+            .textSelection(.enabled)
+    }
+}

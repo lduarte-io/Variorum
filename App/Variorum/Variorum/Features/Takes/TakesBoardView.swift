@@ -75,12 +75,10 @@ struct TakesBoardView: View {
         VStack(alignment: .leading, spacing: 0) {
             header
             if let status = model.statusMessage {
-                Text(status)
-                    .font(.caption)
-                    .foregroundStyle(tokens.accent)
-                    .textSelection(.enabled)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 12)
+                // ChromeNotice: the line limit is LOAD-BEARING here
+                // (window-min probe class — batch 12's Lenses recurrence).
+                ChromeNotice(tokens: tokens, text: status, ink: tokens.accent)
+                    .padding(.horizontal, 24)
                     .padding(.vertical, 4)
             }
             if model.projection.sealed {
@@ -94,13 +92,12 @@ struct TakesBoardView: View {
             }
             if model.isJournalShaped {
                 // R84 — the Fragments projection note on journal entries.
-                Text("Takes live here in Variorum. Only the CHOSEN text is what Fragments sees "
-                    + "(when a Fragments account is linked) — sync conflicts can add takes here "
-                    + "too; nothing is lost, choose what the entry shows.")
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 12)
+                ChromeNotice(
+                    tokens: tokens,
+                    text: "Takes live here in Variorum. Only the CHOSEN text is what Fragments sees "
+                        + "(when a Fragments account is linked) — sync conflicts can add takes here "
+                        + "too; nothing is lost, choose what the entry shows.")
+                    .padding(.horizontal, 24)
                     .padding(.vertical, 4)
             }
             singleColumnArticle
@@ -432,9 +429,14 @@ struct TakesBoardView: View {
                                 .frame(width: 220, height: 110, alignment: .topLeading)
                                 .clipped()
                         }
-                        newTakeDoors(slot: slot)
                     }
                 }
+                // Batch 12 (her "i can't make a new take"): the growth
+                // doors sat at the END of the horizontal scroll — clipped
+                // past the rail's width, invisible. They live BELOW the
+                // cards now, always on screen (R72's promise made real in
+                // this style too).
+                newTakeDoors(slot: slot)
             } else {
                 ScrollView(.horizontal) {
                     let groups = stride(from: 0, to: takes.count, by: gridRows).map {
@@ -455,10 +457,12 @@ struct TakesBoardView: View {
                             }
                             .frame(width: 220)
                         }
-                        newTakeDoors(slot: slot)
                     }
                 }
                 .frame(minHeight: gridReservedHeight, alignment: .top)
+                // Batch 12: same relocation as the strip — doors below,
+                // never behind a horizontal scroll.
+                newTakeDoors(slot: slot)
             }
         }
     }

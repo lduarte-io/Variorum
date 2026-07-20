@@ -25,6 +25,8 @@ final class ShelfViewModel {
     private(set) var wordCounts: [String: Int] = [:]
     private(set) var bookTags: [String: [String]] = [:]
     private(set) var lastError: String?
+    /// R98: apply-and-report's REPORT half — not an error, rendered muted.
+    private(set) var lastReport: String?
 
     init(session: AppSession) {
         self.session = session
@@ -164,15 +166,33 @@ final class ShelfViewModel {
 
     /// Drag a post ONTO a book row (sitting 1: "drag posts onto a book").
     /// Tolerant of the already-in case — a drop is a gesture, not a form.
+    /// R98 (batch 10): a SMART book accepts the drop BY TAGGING —
+    /// apply-and-report; a filter tagging can't satisfy refuses
+    /// descriptively (the op's reason reaches the shelf's status line).
     func addPost(_ postID: String, to readingID: String) async {
         do {
-            try await session.runner.run { ops in
-                _ = try ops.addPostToReading(postID, to: readingID)
+            let kind = books.first { $0.reading.id == readingID }?.reading.kind
+            if kind == .smart {
+                let result = try await session.runner.run { ops in
+                    try ops.collectPostIntoSmartReading(postID, into: readingID)
+                }
+                lastError = nil
+                lastReport = result.alreadyMatched
+                    ? "Already collected — it matches this book's filter."
+                    : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — smart books collect by filter."
+            } else {
+                try await session.runner.run { ops in
+                    _ = try ops.addPostToReading(postID, to: readingID)
+                }
+                lastError = nil
             }
-            lastError = nil
         } catch let error as OperationError {
             if case .alreadyInReading = error { return }
-            lastError = ReadingsViewModel.message(error)
+            if case .smartFilterUnsatisfiable(_, let reason) = error {
+                lastError = "That book can't take this post: \(reason)"
+            } else {
+                lastError = ReadingsViewModel.message(error)
+            }
         } catch {
             lastError = String(describing: error)
         }

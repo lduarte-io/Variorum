@@ -150,7 +150,7 @@ struct BookViewTests {
     }
 
     @Test func offViewportPostsNeverInstantiate() async throws {
-        try await withBookWorld(posts: 60) { session, db, readingID, _ in
+        try await withBookWorld(posts: 60) { session, db, readingID, postIDs in
             // The model is injected and hand-driven: the test host never
             // fires SwiftUI's `.task` appearance callbacks (representable
             // lifecycles DO run — the read surfaces' observations start
@@ -167,8 +167,14 @@ struct BookViewTests {
                 window.orderOut(nil)
                 window.close()
             }
+            // Batch 12 (R106): posts collapse to cards by default — this
+            // test asserts on RENDERED post content, so it seeds the
+            // expand-all state; virtualization must hold even then (the
+            // stronger claim: all-expanded still costs the viewport).
             let hosting = NSHostingView(
-                rootView: BookView(session: session, readingID: readingID, model: model))
+                rootView: BookView(
+                    session: session, readingID: readingID, model: model,
+                    initiallyExpanded: Set(postIDs)))
             hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 800)
             window.contentView = hosting
             window.makeKeyAndOrderFront(nil)
@@ -306,7 +312,9 @@ struct BookViewTests {
                 window.close()
             }
             let hosting = NSHostingView(
-                rootView: BookView(session: session, readingID: readingID, model: model))
+                rootView: BookView(
+                    session: session, readingID: readingID, model: model,
+                    initiallyExpanded: Set(postIDs)))  // R106: render the content
             hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 600)
             window.contentView = hosting
             window.makeKeyAndOrderFront(nil)

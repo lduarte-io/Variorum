@@ -108,73 +108,8 @@ final class PoolViewModel {
     }
 }
 
-struct PoolSection: View {
-    let session: AppSession
-    let model: PoolViewModel
-    /// Opens the pool container in the detail editor.
-    var openPool: (String) -> Void
-    /// Phase 11b (B2): the pool's own drop-in import model (drop text or a
-    /// plain-text file on the pool → scraps in that pool; a deeper drop
-    /// target than the sidebar's library door, so it wins on its rows).
-    @State private var importer: ImportModel?
-
-    var body: some View {
-        // Phase 13 (R20/R29): the scraps area is named BLOCKS ("makes it
-        // the most sense"); "Pool" is the bookless-POSTS surface now. The
-        // rows stay IN the sidebar (a build-time call, recorded): scrap
-        // drag-into-draft needs the scrap and the draft visible together —
-        // the ratified Phase 10 reason survives the rename.
-        Section("Blocks") {
-            if let pool = model.activePool {
-                ForEach(model.items, id: \.block.blockID) { item in
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(preview(item))
-                            .lineLimit(2)
-                        if !item.tagPaths.isEmpty {
-                            Text(item.tagPaths.joined(separator: " · "))
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .onDrag { PoolViewModel.dragProvider(blockID: item.block.blockID) }
-                    .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
-                        poolDrop(providers, poolID: pool.id)
-                    }
-                }
-                if model.items.isEmpty {
-                    Text("No scraps yet — open Blocks and type some (or drop text here).")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
-                            poolDrop(providers, poolID: pool.id)
-                        }
-                }
-                Button("Open Blocks") { openPool(pool.id) }
-                    .buttonStyle(.borderless)
-                    .font(.caption)
-                    .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
-                        poolDrop(providers, poolID: pool.id)
-                    }
-            } else {
-                Button("Create Blocks Area") {
-                    Task {
-                        if let id = await model.createPool() { openPool(id) }
-                    }
-                }
-                .buttonStyle(.borderless)
-                .font(.caption)
-            }
-        }
-    }
-
-    private func preview(_ item: Queries.PoolItem) -> String {
-        let text = item.block.text ?? ""
-        return text.isEmpty ? "(empty scrap)" : text
-    }
-
-    private func poolDrop(_ providers: [NSItemProvider], poolID: String) -> Bool {
-        let model = importer ?? ImportModel(session: session)
-        importer = model
-        return model.handleDrop(providers, into: .pool(poolID))
-    }
-}
+// Batch 12 (Sitting 9): the sidebar `PoolSection` rows RETIRED — her
+// ruling ("i don't like seeing the blocks on the side, i think it's way
+// too crowded. i think blocks should just be a 4th area"); the Blocks
+// AREA (`BlocksAreaView`) is the scraps' home now, and standalone blocks
+// are born there. `PoolViewModel` + the drag payload live on unchanged.
