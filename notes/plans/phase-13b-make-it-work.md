@@ -1,13 +1,14 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — **Stage 1 CLOSED (ladder closed at round 2; residuals
-fixed)**: 1a + 1b closeouts, the architect acceptance, both ladder
-rounds' findings + dispositions, and the stage-level closeout are all
-below. Final Stage 1 counts: **Mac 499/100 · core 747/90 untouched**.
-NEXT: Stage 2 (the tutorial spine — its brief-writer reads the
-"Stage 1 closeout (stage-level)" section + the 1b "Inputs for the
-Stage 2 tutorial brief-writer"). Stage 0 complete + ratified batch 17;
-started 2026-07-20.
+**Status:** ACTIVE — **Stage 2 BUILT + WALKED (closeout below; the
+Stage 2 review ladder is NEXT)**: "the field guide" (6 chapters · 21
+act-ready lessons) + the Help ▸ Restore Tutorial… product door +
+`TutorialWalkTests` (32) + the visual walk (2 happy-path breakers fixed
+in-stage, revert-verified) + the REAL-store seed executed behind the A1
+rail. Counts: **Mac 530/106 · core 747/90 untouched**. Stage 1 CLOSED
+(ladder closed at round 2; 1a/1b closeouts + dispositions below; Mac
+499/100 at its close). Stage 0 complete + ratified batch 17; started
+2026-07-20.
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
 `notes/plans/phase-13-ui-design.md`, batches 15–16; defects D1–D4 in batch 15).
@@ -387,6 +388,9 @@ Commits per batch/stage with the standing message convention.
 | N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
 | N9 | AD-17 quick-entry lands in Takes where typing does nothing | **RESOLVED 1b** (the landing focuses the first slot's article pane; live transitions claim the keyboard; red-on-old) |
 | N10 | The deferred T3 slice: EditorViewModel's gesture-execution band + the projection executors move TOGETHER (one seam), plus the TakesViewModel decomposition (890→1,113, P-9 pressure) | Stage 3 (post-ladder; both implementers AND the round-1 reviewer concurred with the deferral on the merits; row added by the architect per the round-1 MINOR — deferred work always has an owner) |
+| N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | new, Stage 2 walk → Stage 3 (small: selectedIndex + onKeyPress arrows + ⏎ runs selected) |
+| N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | new, Stage 2 walk — VERIFY-THEN-FIX at an unlocked drive (observed under the locked session, where first-responder semantics are abnormal) → Stage 3 |
+| N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | new, Stage 2 walk → Stage 3 (a core Queries change — one seam: assembleReading gains section resolution for curated books) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -1544,3 +1548,294 @@ calls, what the Stage 3 brief-writer needs); `/Applications` refreshed;
 the environment traps from the Stage 1a/1b briefs apply verbatim (incl.
 PIPESTATUS, suite-level test filters, the NSHostingView remount trap).
 **Review:** the standard ladder follows the closeout.
+
+## Stage 2 closeout (2026-07-20, fresh implementer session — COMPLETE)
+
+**Counts:** Mac app **530 tests / 106 suites** green (was 499/100 —
++32 `TutorialWalkTests` incl. 2 walk-fix pins, −3 retired
+`ModesTutorialTests`, +1 elsewhere in the diff arithmetic) · core
+**747/90** green and **byte-untouched** (git-verified; the seeder writes
+through existing Operations ONLY). `/Applications/Variorum.app`
+refreshed from Release and carrying the tutorial build. Commits:
+`7c08111` (the spine) → `63bb594` (walk fixes) → the closeout commit.
+
+### The book (the coverage contract, executed)
+
+**"the field guide"** — a curated book, 6 real chapters
+(`reading_section` rows) · 21 `.generic` lesson posts, every one tagged
+`tutorial` (the restore identity — disclosed IN the tags lesson),
+`word_target` 4000 (the extent face teaches itself on the shelf),
+plus the staged satellites: the **"compare & versions — the twin"**
+version copy (tagged; retitled at seed — walk finding: two identical
+palette rows), the **"tutorial scraps"** pool (2 scraps, the second
+fanned for ⌥-drag), and the **sealed** "the seal" lesson.
+`TutorialSeeder.plan` is the machine-readable contract; the walk test
+asserts seeded book ⇔ plan exactly. Zero journal-shaped rows (profile
+OR entry_date — the R57 bridge guard, pinned).
+
+Chapters → lessons → headline acts:
+- **welcome** — *start here* (the book's own objects; the toast; ⌘/;
+  Restore Tutorial), *getting around* (shelf/quick entry, Library,
+  Pool, Blocks, ⌘K, ⌘N/⌘J, the seven modes).
+- **writing** — *blocks & typing* (crystallization, I4, ⌘⇧B seams,
+  word counts), *shaping blocks* (⌘⇧K's staged lonely sentence,
+  ＋new-block doors, the NAMED block, the CALLOUT with 💡).
+- **takes** — *your first take* (⌘T/⌥⌘T on the staged lighthouse
+  block; ONE ring), *choosing & the board* (⌘⏎; the staged 4-take rain
+  fan; styles; the ◀ x–y of n ▶ paged rail + ⌥⌘←→), *keeping takes
+  safe* (⌘S/history/restore; archive with the honest
+  road-back-through-Write note — N1/T5 routed around, not lied about).
+- **structure** — *divide* (snap-and-proceed; the choreography NAMED as
+  a feature), *the take ceremony* (staged 3-take ferry block; check
+  two, leave one; undo restores whole), *extract & make block*, *merge*
+  (the staged waiting pair; the fanned pair whose spare take stays in
+  lineage; joins-upward from Takes), *the two undos* (⌘Z vs ⌥⌘Z; the
+  insurance savepoint).
+- **ways of looking** — *lenses* (2×2 takes + the saved "the other
+  reading" lens; adopt-swaps-never-destroys), *compare & versions* (the
+  seeded twin; mark vs duplicate; unmark), *outline · blocks · canvas*.
+- **the library of things** — *comments & tags* (staged margin comment;
+  the tag disclosure), *books & the shelf* (this book itself: chapters,
+  reorder, cards, Book·Read, finish/extent), *pool & scraps*, *export —
+  it's all yours* (Markdown with Takes… = the Alternates shape), *the
+  seal* (the deliberate-refusal toast show-and-tell), *three ways of
+  working* (**the A10 absorption**).
+
+### The doors
+
+Help ▸ **Restore Tutorial…** — registry-declared (`.restoreTutorial`,
+menuBar + palette, availability `always`), fire-and-DO: spoken confirm
+naming the EXACT scope (only when a tutorial exists), wholesale replace
+by the app's own identities (the `tutorial` tag + the reserved
+book/pool names), then opens the fresh book and speaks ("The tutorial
+is fresh — 'the field guide' is on your shelf."). Help ▸ **Open the
+Tutorial** + the ⌘K row + the Library ⋯ menu are find-or-seed OPEN
+entrances (navigation-class, deliberately not registry-declared — the
+1b judgment-call-#4 scope rule). The registry walk covers the new
+capability via the existing statics equality (menuRendered +
+paletteActs grew with the declaration).
+
+**A10 SUPERSESSION RECORDED:** the Phase 11 A10 modes tutorial
+(`ModesTutorialView` + model + tests + the `.tutorial` sidebar case) is
+DELETED; its polish-in-place / thread-one-piece / fork-the-piece
+teaching lives on as the "three ways of working" lesson (act-ready:
+the staged thread take; the ratified vocabulary sentence verbatim);
+every old entrance now opens the book. A10 was a ratified deliverable —
+this is its growth into the R113 spine; the author reviews the
+absorption at the end checkpoint.
+
+### TutorialWalkTests (P-6's executable half — 32 tests, 7 suites)
+
+Book shape (plan ⇔ seed exactly; R57 zero-journal pin; tag identity +
+faces; act-ready staging: the 4-take fan, the 3-take ferry, the seal,
+the named block + callout JSON, the lens, the comment, the scrap fan,
+the twin link) · the doors (restore replaces wholesale AND leaves a
+user's rows byte-identical — pinned against a seeded user post/book;
+confirm-declined keeps the book; the door seeds+opens+speaks; open
+never duplicates) · per-chapter acts through the registry/operations
+doors with STORE outcomes asserted — highlights: the ⌘⇧K compound
+frees the exact sentence; the routed ⌘T over the REAL mounted board
+reveals (walk-fix pin); commit/history/restore round-trip; archive +
+unarchive; the choreography end-to-end ON tutorial content (park →
+visible switch → landed cut); `divideW` with an unchecked take +
+structural undo restoring the whole; merge's single-space join; the
+fanned merge's lineage promise; the undo-insurance savepoint pin;
+adopt-preserving-chosen mints "chosen until"; twin independence;
+outline mint; canvas memory; comment edit/delete/restore; chapters
+reorder + finish reversibility; poolDragCopy ± fan; exports (post with
+Alternates, book as one document, block alone); the sealed ⌘S refusal
+landing verbatim in the StatusCenter.
+
+### The walk (the visual loop — dev store, Debug build, pid-scoped)
+
+Screenshots: `notes/plans/phase-13b-stage2-screens/` (~40 captures,
+gitignored). Driven with a rebuilt AX/CGEvent tool (scratchpad;
+`CGEventPostToPid` + menu-path AXPress + window-scoped
+`screencapture -l`), own `caffeinate -d`.
+**Environment: the login session was SCREEN-LOCKED throughout** (the
+Stage 0(c) condition): menu key-equivalents, SwiftUI-field typing
+(palette, quick entry), menu AXPress, and captures all work; real
+clicks/drags/scroll never deliver, window-content AX is degraded, and
+the NSTextView editor receives no caret/typing events (menu
+equivalents only). Consequence: Takes-surface acts and every menu door
+were LIVE-driven; Write-caret-precise acts were not drivable live.
+
+**Live-verified (highlights):** the seed via the product door; the
+spoken confirm sheet (exact scope copy); Cancel keeps the book
+(⎋/⌘. dismiss the modal); the book view (chapters, collapsed cards,
+21 posts); every lesson's Takes face + the Write faces; the N9 landing
+("LANDED:" typed straight into the ring); ⌘T-reveal post-fix (fan
+blooms, ✓ card, pager, growth doors); ⌥⌘→ paging (3–3 of 3); the
+COMMIT toast; the UNDO toast ("Undid: Divide") + both cuts restored;
+the divide REFUSAL toast ("No legal boundary for that here."); the
+choreography live (Takes → visible Write switch → snapped cut — fired
+once from the ⌘K palette act row, an accidental proof of the palette's
+fire-and-DO); the SEALED lesson's banner + greyed commit + unseal door
++ the sealed-refusal toast verbatim; Compare's aligned pair with
+lineage bars; Blocks/TOC self-referential rows; the callout + seams +
+handles rendering on mount POST-FIX (w41); the shelf faces ("the field
+guide · #tutorial · 21 posts · 6 ch · 79% of 4000w" — the row's 0%
+right after seeding is a settle-cadence artifact, correct on next
+refresh); the REAL-store door end-to-end (below).
+
+**Stumbles → triage:**
+1. **⌘T minted an INVISIBLE take** (closed fan: no bloom, no ring —
+   the article kept showing chosen; the bar's ＋take didn't even
+   focus). Happy-path breaker → **FIXED in-stage**:
+   `TakesViewModel.revealTake` + `branchTakeRevealed`/
+   `newBlankTakeRevealed` (blankChoose reveals too); every mint door
+   (⌘T/⌥⌘T/⇧⌥⌘T, bar, block ▾, growth doors, card context menu)
+   routes through the one brain; Lenses' pick-into-column and the
+   Write panel's always-listed takes keep their own
+   visible-by-construction semantics. Pin
+   `branchOnAClosedFanRevealsTheNewTake` (the REAL routed door over
+   the mounted board) — behavioral revert ran RED (expandedBlocks
+   empty). Re-driven live: w08.
+2. **The callout lesson rendered NO frame** (and that mount had no
+   seams/handles either). Traced to a mount-order race: `attach`
+   precedes the coordinator's `install`, so a loaded model computes
+   decorations into a NIL `decorSink` and the `lastDecorState`
+   equality gate then STARVES the freshly-wired host until the next
+   real change. Happy-path breaker (and a pre-existing timing-
+   dependent class) → **FIXED in-stage**: wiring now delivers
+   (`pushDecorationsToSink` re-arms the gate;
+   `BlockDecorOverlayController.init` calls it). Pin
+   `aFreshlyMountedEditorRendersTheCalloutFrame` reproduces the
+   starved order over the real mounted editor — behavioral revert RED.
+   Re-driven live: w41 (frame + 💡 + seams + handles on mount).
+3. **Palette keyboard row-stepping missing** (⏎ = first row only; the
+   › never moves; act rows shadow same-named posts). Real gap, not a
+   lesson-promise breaker (the lesson promises "⏎ opens the hit" —
+   true) → **ledger N11**, Stage 3.
+4. **⌘1-then-type lands nowhere** (Write never claims the caret on a
+   bare mode switch; the lesson's own instruction says "click", so no
+   prose lie). Observed under the lock where first-responder semantics
+   are abnormal → **ledger N12, VERIFY-THEN-FIX** at an unlocked
+   drive.
+5. **Chapters don't reach `exportReading`** (headless walk finding:
+   `assembleReading.sectionPath` is grouping-tag-only; core frozen) →
+   **ledger N13**; the export lesson + test assert the honest shape.
+6. **N8/AD-8 CONFIRMED live** on the comments lesson (the margin
+   comment clips under the sidebar at default width) — the existing
+   T7 row, now with tutorial-content evidence (w25).
+7. Seeder polish from the walk: the version twin retitled
+   ("compare & versions — the twin") — two identical ⌘K rows invited
+   opening the wrong post.
+
+**Environment-gated live remainder** (each headlessly pinned through
+the same code paths; folds into the Stage 3 unlocked drives per the
+Stage 0(c) precedent): the ceremony SHEET's on-screen walk (its store
+half — divideW + undo — is pinned; the sheet is untouched Phase 9
+machinery), precise selections (extract/make-block at the staged
+spans), typing/crystallization's surface half, archive-recovery
+through Write's panel, all drags (scrap → draft, canvas cards, chapter
+reorder), save-panel exports, the Restore confirm's Replace press
+(modal keys dead under lock; Cancel + the no-book path both proven),
+palette ↓-stepping (N11 anyway). One anomaly on the record: the FIRST
+dev-instance restore seeded but did not visibly auto-open/speak —
+never reproduced (the real-store run did both; the headless pin covers
+the mechanism); noted alongside two blank utility windows the app
+creates at every launch (a 500×500 layer-0 white window + a layer-101
+panel — identity unestablished, no app code creates NSWindows; worth a
+look at an unlocked drive).
+
+**Exit-bar reading (honest):** every lesson surface reachable under
+the locked session was driven; both happy-path breakers found were
+fixed in-stage, revert-verified, and re-driven clean; the un-drivable
+remainder is enumerated above and headlessly covered. Zero OPEN
+stumbles on the walked surface; the locked-session residue is the
+Stage 3 drives' first item.
+
+### REAL-store seeding (the brief's rail, executed in order)
+
+1. **A1 backup FIRST**: `variorum-backup-2026-07-20-175038.sqlite`
+   into the store's own `Backups/` (WAL-safe `.backup`;
+   `integrity_check` ok; 15 live containers / 2 readings — matching
+   the live store pre-seed).
+2. **Zero instances**: pgrep-verified (the dev instance quit first).
+3. **Fence/path**: the real store had NO field guide (count 0);
+   `/Applications` refreshed from Release (this build) BEFORE launch;
+   the launched instance verified visually as the REAL store (Study
+   voice, her Journal + "my book :)", Signed out + Bridged footer — no
+   dev-fence line) and by pid/path.
+4. **The product door itself seeded it**: Help ▸ Restore Tutorial… on
+   the /Applications instance (no confirm — nothing to replace); the
+   door seeded, AUTO-OPENED the book, and spoke the toast (r02).
+5. **Written** (verified read-only post-quit): 1 reading "the field
+   guide" + 6 sections + 21 memberships; 22 posts tagged `tutorial`
+   (21 lessons + the twin); 1 pool "tutorial scraps" (2 scraps, one
+   fanned); "the seal" sealed; assorted blocks/takes/lens/comment per
+   the seed; **zero journal-shaped rows** (her Journal book
+   untouched). Her pre-existing 15 containers and 2 readings:
+   untouched. The app was quit gracefully (⌘Q, quit-door flush) after
+   verification — it was the instance this session launched.
+
+**Dev-store state left behind** (re-seed awareness): the field guide
+plus walk artifacts (extra takes on the first-take/keeping lessons, a
+chosen-take change on the choosing lesson, "a quick post minted by the
+stage 2 walk", the pre-retitle twin). One Help ▸ Restore Tutorial…
+makes it pristine — deliberately left as a live exercise of the door.
+
+### Judgment calls (R119 — for the end-checkpoint walk)
+
+1. **The tutorial's name and voice are the implementer's call as
+   briefed**: "the field guide", lowercase lesson titles, warm
+   terminal-flavored prose in the memos' register — she reads the book
+   itself at the checkpoint.
+2. **The restore identity is the `tutorial` TAG + reserved names**
+   (book "the field guide", pool "tutorial scraps") — the app's own
+   machinery as the marker, disclosed in the tags lesson; a lesson she
+   un-tags becomes HERS and survives restores (asserted). No schema,
+   no defaults-key bookkeeping (a defaults key would leak across the
+   dev/real store fence).
+3. **"Open the Tutorial" entrances are navigation-class** (not
+   registry capabilities) per the 1b registry-scope call; the ACT
+   (restore) is declared.
+4. **The book carries a word target (4000)** so the extent face is
+   real on her shelf — the books lesson owns the explanation.
+5. **The A10 demo's UserDefaults keys are gone** with the view;
+   leftover A10 demo posts in any store remain ordinary deletable
+   posts (none exist in the real store).
+6. **The ceremony/merge lessons teach the memos' calls verbatim**
+   (divide IS the door; merge joins upward from Takes) — the
+   contestable memo calls stay on her checkpoint list unchanged.
+7. **The seeder tolerates partial cleanup** (`try?` per delete): a
+   half-deleted tutorial can't wedge a restore; the fresh seed is the
+   goal.
+8. **Walk fix 1 changes mint-door behavior everywhere** (fan opens +
+   ring moves on every mint) — the R112-class fix the lesson demanded;
+   if she prefers quieter minting anywhere, that's an R116
+   reconsideration, not a revert.
+
+### For the Stage 2 review ladder
+
+- The diff unit: `7c08111` + `63bb594` + this closeout commit.
+- Focus 1: the seeder's cleanup scope (the tag-identity contract — can
+  a wholesale replace ever touch hers? The pin says no; check the
+  discovery queries' edges: archived tutorial posts ARE tagged and die
+  with the replace — intended: archive is kept-out-of-view, and the
+  confirm says "every post tagged tutorial").
+- Focus 2: the two walk fixes' blast radius (revealTake on the LENSES
+  model host; pushDecorationsToSink on read-tier/inline editors — the
+  controller init is shared).
+- Focus 3: TutorialWalkTests' store-outcome assertions vs the prose's
+  promises (P-6: is any lesson promising something untested?).
+- Focus 4: the N11–N13 routings (were any actually in-scope?).
+- Ladder mechanics: fresh reviewer, `notes/REVIEW_PROMPT.md` verbatim;
+  this closeout is the anchor.
+
+### For the Stage 3 brief-writer
+
+- New ledger rows N11 (palette stepping), N12 (Write focus on bare
+  mode switch — verify unlocked first), N13 (chapters → exportReading;
+  a core Queries seam). Confirmed live: N8/AD-8 (T7).
+- The Stage 3 verification drives should START with the deferred live
+  list above (ceremony sheet, drags, selections, typing surface,
+  archive recovery, save panels, palette stepping) — an UNLOCKED
+  session is the one requirement; the axdrive tool pattern is in this
+  session's scratchpad and trivially rebuilt.
+- The tutorial is now the acceptance spine: every Stage 3 batch re-runs
+  `TutorialWalkTests` for free (suite-level) and should screenshot-walk
+  any lesson its theme touches (P-6: a broken tutorial step is a
+  regression by definition).
+- The dev store's walk residue is one Restore away from pristine.
