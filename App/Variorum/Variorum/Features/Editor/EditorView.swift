@@ -53,6 +53,10 @@ struct EditorView: View {
         EditorSurfaceChrome(tokens: themeSettings, dark: scheme == .dark)
     }
 
+    private var chromeTokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
     var body: some View {
         @Bindable var model = model
         VStack(spacing: 0) {
@@ -65,11 +69,12 @@ struct EditorView: View {
                     .textSelection(.enabled)
             }
             if model.header?.locked == true {
-                Text("Sealed post — read-only")
-                    .font(.caption)
+                Text(chromeTokens.chromeLabel("sealed post — read-only"))
+                    .font(chromeTokens.small)
+                    .foregroundStyle(chromeTokens.muted)
                     .padding(4)
                     .frame(maxWidth: .infinity)
-                    .background(.quaternary)
+                    .background(chromeTokens.wash)
             }
             if inline {
                 InlineEditorSurface(model: model, height: $inlineHeight, chrome: chrome)

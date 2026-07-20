@@ -196,13 +196,25 @@ struct BookView: View {
                                     focus.focus(entry.postID)
                                     scrollTarget = "page-\(entry.postID)"
                                 } label: {
-                                    Text(entryTitle(entry))
-                                        .font(tokens.small)
-                                        .foregroundStyle(
-                                            focus.focusedPostID == entry.postID
-                                                ? tokens.ink : tokens.muted)
-                                        .lineLimit(1)
-                                        .padding(.leading, group.section != nil ? 10 : 0)
+                                    HStack(spacing: 2) {
+                                        // Batch 9 (R100's continuation): the
+                                        // focused post wears the color › in
+                                        // the navigator too.
+                                        if focus.focusedPostID == entry.postID,
+                                           !tokens.selectionMarker.isEmpty {
+                                            Text(tokens.selectionMarker
+                                                .trimmingCharacters(in: .whitespaces))
+                                                .font(tokens.small.weight(.bold))
+                                                .foregroundStyle(tokens.accent)
+                                        }
+                                        Text(entryTitle(entry))
+                                            .font(tokens.small)
+                                            .foregroundStyle(
+                                                focus.focusedPostID == entry.postID
+                                                    ? tokens.ink : tokens.muted)
+                                            .lineLimit(1)
+                                    }
+                                    .padding(.leading, group.section != nil ? 10 : 0)
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu { postChapterMenu(entry) }

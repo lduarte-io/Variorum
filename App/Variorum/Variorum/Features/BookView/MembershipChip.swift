@@ -120,10 +120,16 @@ struct MembershipChip: View {
         }
     }
 
+    /// Batch 9 (R101): the es line wears the voice's PATH grammar where a
+    /// real path exists — "~/orbit" in terminal, "in Orbit" in study; no
+    /// book and many books stay plain words.
     private var label: String {
         switch books.count {
         case 0: "in no book"
-        case 1: "in \(books[0].name)"
+        case 1:
+            tokens.pathPrefix.isEmpty
+                ? "in \(books[0].name)"
+                : tokens.path([books[0].name])
         default: "in \(books.count) books"
         }
     }

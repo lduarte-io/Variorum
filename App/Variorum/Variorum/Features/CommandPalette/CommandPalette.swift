@@ -156,6 +156,14 @@ struct CommandPaletteView: View {
                     dismiss()
                 } label: {
                     HStack(spacing: 8) {
+                        // Batch 9 (R100's continuation): ⏎ runs the FIRST
+                        // row — it wears the color › so the way is shown.
+                        Text(item.id == model.items.first?.id
+                            ? tokens.selectionMarker.trimmingCharacters(in: .whitespaces)
+                            : " ")
+                            .font(tokens.body.weight(.bold))
+                            .foregroundStyle(tokens.accent)
+                            .frame(width: 10)
                         Image(systemName: icon(for: item.kind))
                             .foregroundStyle(tokens.muted)
                             .frame(width: 16)

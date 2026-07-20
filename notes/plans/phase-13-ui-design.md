@@ -1592,6 +1592,107 @@ starting to fail app writes machine-wide.
 Counts: core 738/88 · **Mac 426/79** · mobile 11/4. Still queued: R98,
 R99 (awaiting her full-text-vs-skeleton answer), R100's remaining pass.
 
+### Sitting 9, continued (2026-07-19 evening — batch 9: "these buttons are not the best you and I can do" — the chrome joins the voice; R101–R103)
+
+**Her message VERBATIM (standing instruction; typos hers; screenshot #22
+described below):**
+
+> hi claude, we have been working on phase 13 and I think that we are good
+> to just keep going and keep making changes. the first thing i would say
+> is that the text is a little bit awkward - the buttons look very spready
+> out, it's not super clear where the editor is, I think it just needs
+> some more redesigning. I think the website of mockup v2 was better
+> looking and the terminal one was also better looking - the start new
+> post typing isn't high up and doens't look as appealing to use. [Image]
+> also, we need to fix what happens in a block when one take is deleted
+> entirely but others exist - does it keep its own line? I think that's
+> fair. I want you to overall take a pass through and focus on useability,
+> design, and joy for this project! I gave a lot of thoughts before the
+> pass 13, so you can look through my original comments, the mockups, see
+> what you think is carried out well and what isn't, and try to do another
+> redesign pass on it. i think that there's still elements that are a
+> little bit unclear, I want you to step up and think about this like a
+> senior product designer and a design architect and someone who can see
+> the painpoints of using this daily and work to make them better. these
+> buttons are not the best you and I can do, I'm sure of it
+
+(#22: the Takes view on a one-block post — the stock segmented mode
+picker spread across the top, a full-width Aqua toolbar row beneath it
+(Fan-style popup, two steppers, a checkbox, five bezel buttons), the
+lone block floating in white, and a bezel-button bottom bar.)
+
+**THE DIAGNOSIS (this pass's finding):** the voiced surfaces Stage B/C
+built are canon-faithful, but the CHROME around them never joined the
+voice — the mode row, the takes toolbar, and both bottom bars remained
+stock Aqua controls at default spacing, bolted above and below voiced
+pages. The round-2 canon's chrome grammar is the opposite: chrome is
+quiet TEXT — words you can click, a chip for a toggled state, a muted
+status line — and the page is the hero. "The buttons look very spready
+out" and "not super clear where the editor is" are both this one gap;
+her charge to re-read the mockups confirmed it (round-2 §1–3: the kbar,
+the et/es masthead, "+ new take" as a CARD, no bezel anywhere).
+
+**Rulings (R101+):**
+
+- **R101 — The chrome joins the voice** (executes and extends R100): ONE
+  voiced control vocabulary (`Theme/VoiceControls.swift` — text-word
+  buttons with a hover wash + role inks, the round-2 chip, word-menus
+  with their own ▾, the faint status dot) replaces stock Aqua in page
+  chrome. Applied this batch: the post header becomes the round-2
+  MASTHEAD (the title over its path line — the membership chip now reads
+  the voice's path grammar, `~/orbit`, when the post lives in exactly
+  one book; the mode row is quiet voiced words with the current mode
+  wearing the color › + accent — the segmented picker retired); the
+  takes toolbar collapses to ONE quiet line (style/density as word-menus,
+  the R13 wash as a `wash: on` chip, expand/close as words) with the
+  three rare whole-post acts folded into a `post actions ▾` menu; both
+  bottom bars (Write's CommitBar, the Takes/Lenses bar) restyle as
+  round-2 STATUS LINES on the room — every R63 door kept, voiced, with
+  faint-dot separators; seal banners wash-tinted. Nothing lost a door;
+  the rows stop shouting over the page.
+- **R102 — The quick-entry bar rides RIGHT BELOW the shelf's rows** (her
+  "the start new post typing isn't high up and doens't look as appealing
+  to use"): the shelf's list region now HUGS its content, so the entry
+  bar (+ the ⌘K hint line) sits directly under the last book — the
+  round-2 mockup's geometry at every window size — while a shelf taller
+  than the window still pins the bar above the fold exactly as R3 ruled.
+  The shelf also opens with the cursor already IN the bar ("start
+  typing" is literal now); the Library's bar keeps its pinned-bottom
+  placement under the full catalog.
+- **R103 — An emptied take KEEPS the block's own line** (her "does it
+  keep its own line? I think that's fair" — ruled YES): on EDITING
+  surfaces the block's line survives a take being deleted down to
+  nothing. Write already renders it by construction (the empty slot
+  between separators — pinned since Phase 7 by
+  `EditorDocumentTests.emptyTakesRenderAsEmptySlots`, "one\n\nthree");
+  the takes article now marks the kept line with a faint "empty take —
+  line kept" note instead of an invisible void (boundaries are invisible
+  at rest, so a silent empty block was undiscoverable — also the R90
+  blank-and-choose gesture's visibility). Export/renderedText continue
+  to SKIP blank takes (the Phase 4 ratification — output, not editing).
+
+**Also this batch (R100's continuation):** the ⌘K palette's first row —
+the one ⏎ runs — wears the color ›; the book navigator's focused post
+wears it too (sidebar shipped batch 8; shelf rows have no persistent
+selection to mark).
+
+**Build record:** `VoiceControls.swift` (new — VoicedButtonStyle /
+VoicedChip / VoicedMenu / StatusDot); PostDetailView (masthead + ModeTabs
++ voiced title label); MembershipChip (path-grammar label); TakesBoardView
+(one-line header, voiced seal banner); TakesBottomBar + CommitBar (status
+lines); EditorView (voiced seal banner); ShelfView (content-hugging list
+region, autofocused entry); QuickEntryBar (autofocus parameter, presence
+padding); TakesShared (the R103 marker); CommandPalette + BookView (the ›
+continuations). New chrome text all carries line limits or single-line
+labels (the wedged-window class rule holds — and a dev-store launch
+probe confirmed the new chrome demands no inflated window minimum:
+fresh window 1422×985, layer-0, sane position; screen-capture TCC was
+denied so the probe is geometric, not pixel). Verification: **Mac suite
+426/426 green in 79 suites** on the final code (core/mobile untouched
+this batch — no VariorumCore changes). Still queued: R98 (smart-book
+adds by tagging), R99 (awaiting her full-text-vs-skeleton answer),
+R100's remaining per-surface audit.
+
 # THE EXECUTION PLAN (DRAFT — for the author's review, then `/run-phase 13`)
 
 ## Kickoff message (for the coordinator session)

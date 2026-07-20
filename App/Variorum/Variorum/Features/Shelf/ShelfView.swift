@@ -34,6 +34,13 @@ struct ShelfView: View {
     @State private var manageTarget: Reading?
     @State private var smartTarget: Reading?
     @State private var extentTarget: Reading?
+    /// Batch 9 (R102): the list region hugs its content, so the
+    /// quick-entry bar rides RIGHT BELOW the rows — the round-2 mockup's
+    /// geometry at every window size ("the start new post typing isn't
+    /// high up"). On a shelf taller than the window the region fills the
+    /// window and the bar stays pinned above the fold, exactly as R3
+    /// ruled.
+    @State private var listContentHeight: CGFloat = 0
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -58,9 +65,14 @@ struct ShelfView: View {
                 }
                 .padding(.horizontal, 28)
                 .padding(.vertical, 10)
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) {
+                    listContentHeight = $0
+                }
             }
+            .frame(maxHeight: listContentHeight > 0 ? listContentHeight : nil, alignment: .top)
             entryBar
             hintBar
+            Spacer(minLength: 0)
         }
         .background(tokens.surface)
         .task { await model.start() }
@@ -264,7 +276,7 @@ struct ShelfView: View {
     private var entryBar: some View {
         VStack(alignment: .leading, spacing: 4) {
             Divider().overlay(tokens.line)
-            QuickEntryBar(session: session, onOpen: onOpen)
+            QuickEntryBar(session: session, onOpen: onOpen, autofocus: true)
         }
     }
 

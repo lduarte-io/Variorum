@@ -84,11 +84,13 @@ struct TakesBoardView: View {
                     .padding(.vertical, 4)
             }
             if model.projection.sealed {
-                Text("Sealed post — takes are viewable; choosing and new takes are frozen.")
-                    .font(.caption)
+                Text(tokens.chromeLabel(
+                    "sealed post — takes are viewable; choosing and new takes are frozen"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                     .padding(4)
                     .frame(maxWidth: .infinity)
-                    .background(.quaternary)
+                    .background(tokens.wash)
             }
             if model.isJournalShaped {
                 // R84 — the Fragments projection note on journal entries.
@@ -182,61 +184,87 @@ struct TakesBoardView: View {
 
     // MARK: - Header
 
+    /// Batch 9 (R101): ONE quiet voiced line — style/density as compact
+    /// word-menus, the wash as a chip, expand/close as words, and the
+    /// three rare post-level acts folded into a single "post actions"
+    /// menu. Every door the old toolbar had is still one click away; the
+    /// row just stops shouting over the page.
     private var header: some View {
-        HStack(spacing: 10) {
-            Picker("Fan style", selection: Binding(
-                get: { model.projection.fanStyle },
-                set: { style in Task { await model.setFanStyle(style) } })) {
-                Text("Stack").tag(FanStyle.stack)
-                Text("Carousel").tag(FanStyle.carousel)
-                Text("Margin grid").tag(FanStyle.marginGrid)
-                Text("Slot split").tag(FanStyle.slotSplit)
+        HStack(spacing: 8) {
+            VoicedMenu(tokens: tokens, label: "style: \(styleName)") {
+                styleOption("Stack", .stack)
+                styleOption("Carousel", .carousel)
+                styleOption("Margin grid", .marginGrid)
+                styleOption("Slot split", .slotSplit)
             }
-            .pickerStyle(.menu)
-            .fixedSize()
+            .help("How a block's takes fan open")
 
             if model.projection.fanStyle == .carousel || model.projection.fanStyle == .slotSplit {
-                Stepper("× \(beneathCount)", value: $beneathCount, in: 1...4)
-                    .fixedSize()
-                    .help("How many takes show side by side (your screen width, your call)")
+                VoicedMenu(tokens: tokens, label: "× \(beneathCount) beside") {
+                    ForEach(1...4, id: \.self) { n in
+                        Button("× \(n)") { beneathCount = n }
+                    }
+                }
+                .help("How many takes show side by side (your screen width, your call)")
             }
             if model.projection.fanStyle == .marginGrid {
                 // R74 — the grid density option: "you should be able to
                 // choose what grid you want, up to like 3 high and 2 wide".
-                Stepper("\(gridRows) high", value: $gridRows, in: 1...3)
-                    .fixedSize()
-                    .help("How many take cards stack vertically in the margin")
-                Stepper("\(gridCols) wide", value: $gridCols, in: 1...2)
-                    .fixedSize()
-                    .help("How many card columns the margin shows before scrolling")
+                VoicedMenu(tokens: tokens, label: "\(gridRows) high") {
+                    ForEach(1...3, id: \.self) { n in
+                        Button("\(n) high") { gridRows = n }
+                    }
+                }
+                .help("How many take cards stack vertically in the margin")
+                VoicedMenu(tokens: tokens, label: "\(gridCols) wide") {
+                    ForEach(1...2, id: \.self) { n in
+                        Button("\(n) wide") { gridCols = n }
+                    }
+                }
+                .help("How many card columns the margin shows before scrolling")
             }
             if model.projection.fanStyle != .slotSplit {
-                Toggle("Mark changing block", isOn: $markChangingBlock)
-                    .toggleStyle(.checkbox)
+                VoicedChip(
+                    tokens: tokens,
+                    text: markChangingBlock ? "wash: on" : "wash: off",
+                    on: markChangingBlock
+                ) { markChangingBlock.toggle() }
                     .help("Wash the block whose takes are open (R13 — the transient marker)")
             }
 
             if model.offersExpandAll {
-                Button("Expand All Fans") { model.expandAllFans() }
-                Button("Close All") { model.closeAllFans() }
+                Button(tokens.chromeLabel("expand all")) { model.expandAllFans() }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help("Open every block's fan (they stay open once expanded)")
+                Button(tokens.chromeLabel("close all")) { model.closeAllFans() }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .disabled(model.expandedBlocks.isEmpty)
+                    .help("Back to the plain page (⎋)")
             }
 
             Spacer()
 
-            Button("Write new takes on every block") {
-                Task { await model.writeNewTakesEverywhere() }
+            VoicedMenu(tokens: tokens, label: "post actions", role: .primary) {
+                Button("Write new takes on every block") {
+                    Task { await model.writeNewTakesEverywhere() }
+                }
+                .help("A fresh take on every block, branched from what the post shows — "
+                    + "a full rewrite pass. See them in each block's fan, or side by side in Lenses.")
+                Button("Save choices as lens…") { lensNamePrompt = true }
+                    .help("Keep the post's current takes as a named way of looking (a lens) — "
+                        + "you can bring it back or compare against it in Lenses")
+                Button("Duplicate as Version") { Task { await model.duplicateAsVersion() } }
+                    .help("A full copy of this post — takes and all — as a new post, linked as a version")
             }
-            .help("A fresh take on every block, branched from what the post shows — "
-                + "a full rewrite pass. See them in each block's fan, or side by side in Lenses.")
-            Button("Save choices as lens…") { lensNamePrompt = true }
-                .help("Keep the post's current takes as a named way of looking (a lens) — "
-                    + "you can bring it back or compare against it in Lenses")
-            Button("Duplicate as Version") { Task { await model.duplicateAsVersion() } }
-                .help("A full copy of this post — takes and all — as a new post, linked as a version")
+            .help("The rare whole-post acts: a rewrite pass, saving choices as a lens, "
+                + "duplicating as a version")
         }
-        .controlSize(.small)
-        .padding(8)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 6)
+    }
+
+    private func styleOption(_ name: String, _ style: FanStyle) -> some View {
+        Button(name) { Task { await model.setFanStyle(style) } }
     }
 
     // MARK: - The article (ONE column; blooms in the set style)
@@ -247,13 +275,15 @@ struct TakesBoardView: View {
                 // Batch 6: an empty post must never be a dead end — blocks
                 // are born by TYPING, and Write is where typing lives.
                 VStack(spacing: 8) {
-                    Text("Nothing here yet — blocks are born by typing.")
+                    Text(tokens.chromeLabel("Nothing here yet — blocks are born by typing."))
+                        .font(tokens.body)
                         .foregroundStyle(tokens.muted)
-                    Button("Start writing (Write mode)") {
+                    Button(tokens.chromeLabel("Start writing (Write mode)")) {
                         NotificationCenter.default.post(
                             name: .variorumSwitchMode, object: nil,
                             userInfo: ["mode": "Write", "postID": postID])
                     }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 60)
@@ -327,15 +357,13 @@ struct TakesBoardView: View {
         HStack {
             if slot.hasFan {
                 Button("⑂\(slot.activeVariantCount)") { model.toggleExpanded(slot.blockID) }
-                    .controlSize(.mini)
-                    .tint(tokens.accent)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     .help(bloomed ? "Close this fan (⌘⇧T)" : "Open this fan (\(styleName)) — ⌘⇧T")
             } else {
                 // R72's "we need an easier take": every block offers its
                 // FIRST take — no fan required to grow one.
                 Button("⑂ +") { model.toggleExpanded(slot.blockID) }
-                    .controlSize(.mini)
-                    .tint(tokens.muted)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .help("Give this block its first alternative take (⌘⇧T)")
             }
             Spacer()
@@ -450,8 +478,9 @@ struct TakesBoardView: View {
                 }
             }
             if takes.count > beneathCount {
-                HStack {
+                HStack(spacing: 4) {
                     Button("◀") { pageOffsets[pageKey] = max(offset - 1, 0) }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         .disabled(offset == 0)
                     Text("\(offset + 1)–\(min(offset + beneathCount, takes.count)) of \(takes.count)")
                         .font(tokens.small)
@@ -459,9 +488,9 @@ struct TakesBoardView: View {
                     Button("▶") {
                         pageOffsets[pageKey] = min(offset + 1, takes.count - beneathCount)
                     }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .disabled(offset >= takes.count - beneathCount)
                 }
-                .controlSize(.mini)
             }
             newTakeDoors(slot: slot)
         }
@@ -510,7 +539,7 @@ struct TakesBoardView: View {
                     }
                     Spacer()
                     Button("✓") { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } }
-                        .controlSize(.mini)
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                         .disabled(isChosen)
                         .help("Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
                 }
@@ -601,8 +630,9 @@ private struct CollapsibleTakeCard: View {
                     }
                     Spacer()
                     Button("✓") { onChoose() }
-                        .controlSize(.mini)
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                         .disabled(isChosen)
+                        .help("Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
                 }
                 if collapsed {
                     Text(take.workingText.split(separator: "\n").first.map(String.init) ?? "(empty)")

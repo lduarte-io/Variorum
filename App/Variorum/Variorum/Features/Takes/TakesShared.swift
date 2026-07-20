@@ -43,6 +43,24 @@ struct TakesCellView: View {
                 onFocusRequest: { model.focus(key) },
                 onEdit: { model.paneEdited(variantID: resolved.variantID, newText: $0) })
                 .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
+                .overlay(alignment: .topLeading) {
+                    // Batch 9 (R103, her ruling): a take deleted down to
+                    // nothing KEEPS the block's own line — and the kept
+                    // line says what it is instead of sitting as an
+                    // invisible void (boundaries are invisible at rest).
+                    // Write renders the same empty line as plain prose;
+                    // export still skips blank takes (the Phase 4 rule —
+                    // output, not editing).
+                    if resolved.text.isEmpty,
+                       model.liveBuffers[resolved.variantID]?.isEmpty != false {
+                        Text(tokens.chromeLabel("empty take — line kept"))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .padding(.leading, 8)
+                            .padding(.top, 6)
+                            .allowsHitTesting(false)
+                    }
+                }
                 .contextMenu {
                     menu(resolved: resolved)
                 }

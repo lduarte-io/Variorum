@@ -31,27 +31,36 @@ struct TakesBottomBar: View {
     var body: some View {
         VStack(spacing: 0) {
             Divider().overlay(tokens.line)
-            HStack(spacing: 12) {
+            // Batch 9 (R101): the round-2 status-line grammar — quiet
+            // voiced words on the room, never a bezel row. Every door
+            // stays (R63); only the register changes.
+            HStack(spacing: 10) {
                 Text(tokens.chromeLabel(contextLabel))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
-                Button("Commit (⌘S)") { Task { await model.commitFocusedTake() } }
-                    .disabled(model.projection.sealed)
-                    .help("An immutable savepoint of the take you're in")
-                Button("History") { Task { await openHistory() } }
+                Button(tokens.chromeLabel("commit ⌘S")) {
+                    Task { await model.commitFocusedTake() }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .disabled(model.projection.sealed)
+                .help("An immutable savepoint of the take you're in")
+                Button(tokens.chromeLabel("history")) { Task { await openHistory() } }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
                     .help("The focused take's savepoints — restore any of them")
 
-                Divider().frame(height: 14)
+                StatusDot(tokens: tokens)
 
-                Button(model.projection.sealed ? "Unseal" : "Seal") {
+                Button(tokens.chromeLabel(model.projection.sealed ? "unseal" : "seal")) {
                     Task { await model.toggleSeal() }
                 }
-                .controlSize(.small)
-                Button(model.projection.entryDate.map { "Date: \($0)" } ?? "Set Date…") {
+                .buttonStyle(VoicedButtonStyle(tokens: tokens))
+                .help("A sealed post is frozen — nothing under it changes until unsealed")
+                Button(tokens.chromeLabel(
+                    model.projection.entryDate.map { "date: \($0)" } ?? "set date…")) {
                     pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
                     datePickerShown = true
                 }
-                .controlSize(.small)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens))
                 .popover(isPresented: $datePickerShown) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Entry date").font(.headline)
@@ -76,16 +85,16 @@ struct TakesBottomBar: View {
                     .padding(12)
                 }
 
-                Divider().frame(height: 14)
+                StatusDot(tokens: tokens)
 
                 // The structural gestures, present and SPEAKING (R63 +
                 // the 9d posture): they need Write's text selection.
                 ForEach(["Divide", "Extract", "Make Block", "Merge"], id: \.self) { name in
-                    Button(name) {
+                    Button(tokens.chromeLabel(name)) {
                         model.speakStructuralGesturesLiveInWrite(gesture: name)
                     }
-                    .controlSize(.small)
-                    .opacity(0.45)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .opacity(0.6)
                 }
 
                 Spacer()
@@ -96,12 +105,12 @@ struct TakesBottomBar: View {
                         .fixedSize()
                 }
                 Button("?") { openWindow(id: "variorum-helper") }
-                    .controlSize(.small)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .help(HelperCheatSheet.summary)
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(tokens.surface)
+            .background(tokens.room)
         }
         .sheet(isPresented: $historyShown) {
             historySheet

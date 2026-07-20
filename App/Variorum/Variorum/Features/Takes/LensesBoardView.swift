@@ -149,25 +149,28 @@ struct LensesBoardView: View {
 
     // MARK: - Header
 
+    /// Batch 9 (R101): the same quiet voiced line as the Takes header —
+    /// the align toggle as a chip, the column door as a word-menu.
     private var header: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             if model.columns.count > 1 {
-                Toggle("Align blocks", isOn: Binding(
-                    get: { model.alignmentLocked },
-                    set: { model.alignmentLocked = $0 }))
-                    .toggleStyle(.checkbox)
+                VoicedChip(
+                    tokens: tokens,
+                    text: model.alignmentLocked ? "align: on" : "align: off",
+                    on: model.alignmentLocked
+                ) { model.alignmentLocked.toggle() }
                     .help("Locked: registered comparison rows (honest whitespace). "
                         + "Unlocked: each column flows as its own read.")
             }
             Spacer()
             addColumnMenu
         }
-        .controlSize(.small)
-        .padding(8)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 6)
     }
 
     private var addColumnMenu: some View {
-        Menu("+ Column") {
+        VoicedMenu(tokens: tokens, label: "+ column", role: .primary) {
             Button("New lens — arrange existing takes") { model.addScratchColumn() }
                 .help("A fresh way of looking that starts as a mirror of the post. "
                     + "Flip any block to a take that already exists — nothing new is written.")
@@ -183,7 +186,6 @@ struct LensesBoardView: View {
                 }
             }
         }
-        .fixedSize()
         .disabled(model.columns.count >= 4)
         .help("You can have more views than you have takes — a column is a way of looking, not a copy.")
     }
@@ -194,13 +196,15 @@ struct LensesBoardView: View {
     private var content: some View {
         if model.projection.slots.isEmpty {
             VStack(spacing: 8) {
-                Text("Nothing here yet — blocks are born by typing.")
+                Text(tokens.chromeLabel("Nothing here yet — blocks are born by typing."))
+                    .font(tokens.body)
                     .foregroundStyle(tokens.muted)
-                Button("Start writing (Write mode)") {
+                Button(tokens.chromeLabel("Start writing (Write mode)")) {
                     NotificationCenter.default.post(
                         name: .variorumSwitchMode, object: nil,
                         userInfo: ["mode": "Write", "postID": postID])
                 }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if model.alignmentLocked {

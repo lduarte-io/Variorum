@@ -26,31 +26,39 @@ struct CommitBar: View {
     var body: some View {
         VStack(spacing: 0) {
             Divider().overlay(tokens.line)
-            HStack(spacing: 12) {
+            // Batch 9 (R101): the round-2 status-line grammar — quiet
+            // voiced words on the room; every door stays.
+            HStack(spacing: 10) {
                 Text(tokens.chromeLabel(caretLabel))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
-                Button("Commit (⌘S)") { model.commitCaretVariant() }
+                Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     .disabled(model.caretVariantID == nil || model.header?.locked == true)
-                Button(model.commitList == nil ? "History" : "Hide History") {
+                    .help("An immutable savepoint of the take under the caret")
+                Button(tokens.chromeLabel(model.commitList == nil ? "history" : "hide history")) {
                     model.toggleCommitHistory()
                 }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens))
                 .disabled(model.caretVariantID == nil && model.commitList == nil)
+                .help("The caret take's savepoints — restore any of them")
 
-                Divider().frame(height: 14)
+                StatusDot(tokens: tokens)
 
                 // The post lifecycle faces (Phase 10 Step 8): the seal
                 // toggle and Mac-side entry-date editing live with the open
                 // post — the editor knows the header state.
-                Button(model.header?.locked == true ? "Unseal" : "Seal") {
+                Button(tokens.chromeLabel(model.header?.locked == true ? "unseal" : "seal")) {
                     model.toggleSeal()
                 }
-                .controlSize(.small)
-                Button(model.header?.entryDate.map { "Date: \($0)" } ?? "Set Date…") {
+                .buttonStyle(VoicedButtonStyle(tokens: tokens))
+                .help("A sealed post is frozen — nothing under it changes until unsealed")
+                Button(tokens.chromeLabel(
+                    model.header?.entryDate.map { "date: \($0)" } ?? "set date…")) {
                     pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
                     datePickerShown = true
                 }
-                .controlSize(.small)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens))
                 .popover(isPresented: $datePickerShown) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Entry date").font(.headline)
@@ -75,7 +83,7 @@ struct CommitBar: View {
                     .padding(12)
                 }
 
-                Divider().frame(height: 14)
+                StatusDot(tokens: tokens)
 
                 // The gesture button bar (9d — the fourth door): dimmed by
                 // the planner's verdict but ALWAYS clickable — a refused
@@ -116,12 +124,12 @@ struct CommitBar: View {
                 // Sitting 9 (R73/R91): hover = the cheat sheet; click =
                 // the full helper with the dictionary.
                 Button("?") { openWindow(id: "variorum-helper") }
-                    .controlSize(.small)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .help(HelperCheatSheet.summary)
             }
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(tokens.surface)
+            .background(tokens.room)
             if model.commitList != nil {
                 CommitHistoryView(model: model)
                     .frame(maxHeight: 180)
@@ -132,9 +140,9 @@ struct CommitBar: View {
     private func gestureButton(
         _ title: String, available: Bool, action: @escaping () -> Void
     ) -> some View {
-        Button(title, action: action)
-            .controlSize(.small)
-            .opacity(available ? 1 : 0.45)
+        Button(tokens.chromeLabel(title), action: action)
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .opacity(available ? 1 : 0.55)
     }
 
     private var caretLabel: String {

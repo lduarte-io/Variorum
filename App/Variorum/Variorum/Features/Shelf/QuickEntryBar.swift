@@ -16,6 +16,10 @@ import VariorumCore
 struct QuickEntryBar: View {
     let session: AppSession
     let onOpen: (SidebarSelection) -> Void
+    /// Batch 9 (R102): the shelf is the terminal home — it opens with the
+    /// cursor already in the bar, so "start typing" is literal. Library
+    /// leaves focus alone.
+    var autofocus = false
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -33,7 +37,7 @@ struct QuickEntryBar: View {
             Text(tokens.chromeLabel("new post — start typing · ⏎ opens it as a post"))
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
-                .padding(.top, 8)
+                .padding(.top, 10)
             HStack(spacing: 2) {
                 TextField("", text: $entryText, axis: .vertical)
                     .textFieldStyle(.plain)
@@ -56,7 +60,7 @@ struct QuickEntryBar: View {
                 }
                 Spacer()
             }
-            .padding(.bottom, lastError == nil ? 10 : 2)
+            .padding(.bottom, lastError == nil ? 12 : 2)
             if let lastError {
                 // lineLimit is LOAD-BEARING beside fixedSize — an unlimited
                 // fixedSize text in non-scrolling chrome inflates the WINDOW
@@ -73,6 +77,9 @@ struct QuickEntryBar: View {
         .padding(.horizontal, 28)
         .background(tokens.card)
         .onTapGesture { entryFocused = true }
+        .task {
+            if autofocus { entryFocused = true }
+        }
     }
 
     private func submit() {

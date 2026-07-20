@@ -49,33 +49,42 @@ struct PostDetailView: View {
     /// Phase 11b (B3): the reference panel — per-post sources beside the
     /// draft (§7/§12; a viewing aid, session UI state).
     @State private var referencesShown = false
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                // Sitting 9 (R67): the post's NAME, prominent — "much more
-                // clear when something is a brand new post"; click to
-                // rename right here.
-                PostTitleLabel(session: session, postID: postID)
-                Picker("Mode", selection: $mode) {
-                    ForEach(Mode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
+            // Batch 9 (R101): the MASTHEAD — the round-2 canon's et/es
+            // grammar instead of a toolbar. Title over its path line on
+            // the left; the mode tabs as quiet voiced words on the right;
+            // the page below is the hero.
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
+                    // Sitting 9 (R67): the post's NAME, prominent — click
+                    // to rename right here.
+                    PostTitleLabel(session: session, postID: postID, tokens: tokens)
+                    // Phase 13 (B3, R35): the membership indicator — now
+                    // the es path line ("~/orbit") + the add/diverge door.
+                    MembershipChip(session: session, postID: postID)
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(maxWidth: 500)
-                // Phase 13 (B3, R35): the membership indicator — "this
-                // post also appears in N books" + the divergence door.
-                MembershipChip(session: session, postID: postID)
+                Spacer()
+                ModeTabs(mode: $mode, tokens: tokens)
                 Button("References", systemImage: "books.vertical") {
                     referencesShown.toggle()
                 }
                 .labelStyle(.iconOnly)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                 .help("Show the post's references (sources beside the draft)")
             }
-            .padding(6)
-            Divider()
+            .padding(.horizontal, 24)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            .background(tokens.surface)
+            Divider().overlay(tokens.line)
             switch mode {
             case .write:
                 EditorView(session: session, postID: postID, caretSeed: pendingCaret)
@@ -145,10 +154,42 @@ struct PostDetailView: View {
         }
     }
 
+    /// Batch 9 (R101): the mode row as voiced words — the current mode
+    /// wears the voice's marker + accent; the rest sit muted. Replaces
+    /// the stock segmented picker (the "spread out buttons" complaint).
+    struct ModeTabs: View {
+        @Binding var mode: Mode
+        let tokens: VoiceTokens
+
+        var body: some View {
+            HStack(spacing: 1) {
+                ForEach(Array(Mode.allCases.enumerated()), id: \.element) { i, m in
+                    Button {
+                        mode = m
+                    } label: {
+                        HStack(spacing: 2) {
+                            if m == mode, !tokens.selectionMarker.isEmpty {
+                                Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(tokens.accent)
+                            }
+                            Text(tokens.chromeLabel(m.rawValue))
+                                .fontWeight(m == mode ? .semibold : .regular)
+                        }
+                    }
+                    .buttonStyle(VoicedButtonStyle(
+                        tokens: tokens, role: m == mode ? .primary : .quiet, font: tokens.mono))
+                    .help("\(m.rawValue) (⌘\(i + 1))")
+                }
+            }
+        }
+    }
+
     /// R67 — the post's identity, always visible and renameable in place.
     private struct PostTitleLabel: View {
         let session: AppSession
         let postID: String
+        let tokens: VoiceTokens
         @State private var title: String = ""
         @State private var editing = false
         @State private var draft = ""
@@ -159,11 +200,11 @@ struct PostDetailView: View {
                 editing = true
             } label: {
                 Text(title.isEmpty ? "Untitled" : title)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(title.isEmpty ? .secondary : .primary)
+                    .font(tokens.title)
+                    .foregroundStyle(title.isEmpty ? tokens.muted : tokens.ink)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    .frame(maxWidth: 260, alignment: .leading)
+                    .frame(maxWidth: 380, alignment: .leading)
             }
             .buttonStyle(.plain)
             .help("The post's name — click to rename")
