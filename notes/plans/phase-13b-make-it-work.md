@@ -1,13 +1,12 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — Stage 1 COMPLETE (1a + 1b closeouts below; the
-architect acceptance of 1b — memo approvals + the T3-deviation stance —
-is recorded after the 1b closeout). The Stage 1 REVIEW LADDER: round 1
-(cold) DONE and its FIX PASS DONE (dispositions section below — all
-findings AGREED-FIXED or architect-resolved, every bug-class fix
-red-on-old by behavioral revert; Mac 497/100 · core 747/90 untouched);
-ROUND 2 (fresh cold reviewer re-reviewing the fixes) is NEXT. Then
-Stage 2 (the tutorial spine). Stage 0 complete + ratified batch 17;
+**Status:** ACTIVE — **Stage 1 CLOSED (ladder closed at round 2; residuals
+fixed)**: 1a + 1b closeouts, the architect acceptance, both ladder
+rounds' findings + dispositions, and the stage-level closeout are all
+below. Final Stage 1 counts: **Mac 499/100 · core 747/90 untouched**.
+NEXT: Stage 2 (the tutorial spine — its brief-writer reads the
+"Stage 1 closeout (stage-level)" section + the 1b "Inputs for the
+Stage 2 tutorial brief-writer"). Stage 0 complete + ratified batch 17;
 started 2026-07-20.
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
@@ -1342,3 +1341,108 @@ surfaces + R118 parity; AD-14's one presentation now total across
 surface VMs; P1/P-8 on the fix surface (settle-cadence counting, nothing
 O(corpus)); the choreography's flush-first ordering rides the one
 per-post coordinator with no interleaving hazard at the park site.
+
+### Stage 1 ladder — round 2 dispositions (residual fix pass, 2026-07-20; same fix-pass session)
+
+*The ladder CLOSED at round 2 (zero new BLOCKER/MAJOR); these residuals
+landed post-close per the standing pattern. Every mechanism re-traced
+before fixing; the one bug-class fix revert-verified RED. New pins in
+`CommandRoutingTests` suite "Stale WriteIntent". Counts after the pass:
+**Mac 499/100** green (was 497/100) · **core 747/90**,
+`Sources/VariorumCore` still byte-untouched. Fix commit: `cd1650c`.*
+
+**[MINOR-R2] — AGREED-FIXED.** Trace confirmed independently: the park +
+successful `requestMode(.write, P)` begins a round whose consumption
+door (`applyFocusSeeds` at `.initialRender`) is one render pass + one
+async projection delivery away; a competing ⌘2–⌘7 switch in that gap
+unmounts EditorView pre-render, and the SAME-post parcel defeats both
+round-1 clearing doors (registerDetail — same detail, never re-fires;
+unregisterDetail — never torn down). The round-1 invariant ("valid for
+exactly the round that parked it") was keyed on detail IDENTITY, not the
+ROUND. Fix — the reviewer's proposed shape, verified sound by own trace:
+`noteMode` clears a parked parcel the moment the detail reports any mode
+other than the parcel's LANDING mode (`WriteIntent` ⇒ `.write`,
+`TakesLanding` ⇒ `.takes`). Ordering safety verified and PINNED: the
+park precedes `applyMode(.write)`, whose own `onChange` reports the
+landing mode first — the pin asserts `noteMode(.write)` keeps the
+in-flight intent before `noteMode(.lenses)` clears it. Pins (2):
+`aCompetingModeSwitchAbortsTheRoundAndClearsTheParkedIntent` (the full
+window end-to-end — park via the real choreography, successful request,
+landing-mode report kept, competing report cleared, later same-post
+Write mount runs NOTHING; behavioral revert of the noteMode clearing ran
+RED with the same smoking gun as round 1: the orphaned intent DIVIDED
+THE BLOCK UNPROMPTED, store 1→2) and
+`aCompetingModeSwitchClearsTheParkedLandingToo` (the twin's round
+boundary; RED under the same revert). Restored; suite green.
+
+**[NIT-R2-1] — AGREED-FIXED** (no pin owed; the mechanism was a fix-pass
+edit artifact — the restore-after-REVERT-2 edit re-added the staleness
+comment above the surviving copy). One copy deleted.
+
+**[NIT-R2-2] — AGREED-FIXED, the cheaper shape taken.** Traced: the
+change-detection texts in `slotCountTexts` were exactly the OLD
+projection's slot texts (adopt is the only projection door and always
+refreshed both), so diffing against `self.projection` BEFORE the
+overwrite is equivalent by construction — `refreshWordCounts(old:new:)`
+now runs first in `adopt` and builds a transient old-text index; the
+stored text copy is GONE (the "never copies of persisted text in state"
+rule is leaned on zero extra times; `slotCounts` remains — counts are
+derived values, sanctioned state). The MINOR-5 pin
+(`slotWordCountsRecomputeOnlyWhereTextChanged`) held byte-unchanged
+through the reshape — the recount discipline is pinned independent of
+the detection mechanism, exactly as intended.
+
+**[NIT-R2-3] — AGREED-FIXED** (no pin owed; traced: the
+editor-detaching-between-menu-open-and-click race reached a bare
+`return`). `promptCalloutEmoji`'s guard speaks the callout note (a nil
+SESSION still returns silently — no status surface exists to speak to);
+`exportCaretBlock`'s note is now caret-specific — "Put the caret in a
+block to export it." — because its ONE speaking site is precisely the
+attached-editor caret-outside-any-block case (the menu grey covers
+everything else; nothing pinned the old copy, grep-verified).
+
+## Stage 1 closeout (stage-level, 2026-07-20 — written at ladder close for the Stage 2 brief-writer and the end-checkpoint walk)
+
+Stage 1 rebuilt the interaction layer's two load-bearing floors and
+closed its review ladder at round 2 with zero open findings. **1a** put
+pane text/liveness under ONE pure tested authority (`PaneTextAuthority`
+— exactly one live ring, buffer-authoritative live pane, catch-up read
+panes) rendered by ONE pane surface (`PaneSurface` — one measurement
+brain, a RENDERED canary, the full-document editor deliberately kept as
+its own kind), consolidated autosave to one per-post coordinator
+(`AppSession.autosave(forPost:)`), and landed the randomized board soak;
+**1b** made every routed act data (the 33-capability
+`Registry/` — availability, doors, refusal copy, the R118 parity table
+declared and walk-enforced), replaced all three Stage 0 routing regimes
+with the `CommandRouter`, and made fire-and-DO real (the mode-switch
+choreography; the W ceremony reachable from Takes; ⌘S/⌥⌘Z/landing/
+palette/context-menu cells fixed; AD-14's one StatusCenter
+presentation); **the ladder** (round 1: 1 MAJOR/5 MINOR/3 NIT; round 2:
+zero new HIGH, 1 MINOR/3 NIT residuals) then hardened the choreography's
+one genuinely new hazard — a parked `WriteIntent` is now post-stamped
+and round-scoped (cleared on refused switch, detail change, teardown,
+AND any off-landing-mode report), so the app's first
+gesture-without-a-user-gesture machinery cannot fire stale — and retired
+the last silent/wrong-speech residues (seal double-speak, TOC caption,
+enabled-into-nil menu items, the O(post)-per-keystroke word count).
+**Counts trajectory: Mac 431/81 (pre-13b) → 455/89 (1a) → 485/96 (1b) →
+497/100 (round-1 fixes) → 499/100 (round-2 residuals)**; core 747/90
+byte-untouched throughout; every bug-class fix in the stage carries a
+behavioral-revert-verified red-on-old pin. **Classes retired
+structurally:** frozen/clipped pane text (the authority), the dead
+canary, dual autosave, silent doors / dead keys / lecture-and-redirect /
+broadcast-into-the-void (registry + router + fire-and-DO), the
+enabled-but-void menu class both ways, fragmented refusal presentation,
+and stale choreography parcels. **Deferred to Stage 3, each owned:** the
+T3 second slice — EditorViewModel's gesture band + projection executors
+move TOGETHER as one seam (ledger **N10**; both implementers + both
+reviewers concurred) — and the TakesViewModel P-9 decomposition (890 →
+~1,240 with the choreography/landings/paging, recorded 1b judgment call
+#2); the takes-lifecycle completeness set (**N1, N6** — T5), geometry/
+spacing/crowdedness (**D2, N8, AD-7/AD-8** — T7), book view (**D1** —
+T6), and the memos' deeper behavior builds (**M1/M2** tails). The
+tutorial spine (Stage 2) can rely on everything in the 1b closeout's
+"Inputs for the Stage 2 tutorial brief-writer" plus: the round-scoped
+choreography is safe to script against mode switches, and the
+StatusCenter is the ONE place every outcome (including refusals made on
+purpose) lands.
