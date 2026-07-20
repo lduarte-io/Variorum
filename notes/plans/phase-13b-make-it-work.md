@@ -1016,3 +1016,102 @@ revisit condition stated in the memo).
 - **TakesViewModel growth (890→1,113)** noted as recorded P-9 pressure —
   a Stage 3 decomposition candidate once the ladder settles Stage 1's
   shape.
+
+## Stage 1 ladder — round 1 findings (VERBATIM record; fix pass pending)
+
+*Process note (2026-07-20): the original 1b implementer session was lost
+to the author's API session limit immediately after acknowledging these
+findings — zero fixes had been applied, working tree clean at `49e8c48`.
+The fix pass runs as a FRESH session anchored on THIS section (which is
+why it exists: the verbatim findings previously lived only in a session
+message — the delivery-verification lesson applied). The fresh session is
+also the better cast: the old session had passed the ~500k-token
+degradation line.*
+
+**[MAJOR]** · `Features/Takes/TakesViewModel.swift:833-837` +
+`Registry/CommandRouter.swift:70-80` +
+`Features/Editor/EditorViewModel.swift:1933-1935` · A stale parked
+`WriteIntent` survives a failed mode switch and later executes a
+structural gesture unprompted. Mechanism: `moveToWriteAndRun` parks
+`pendingWriteIntent` then calls `requestMode(.write, postID:)`
+DISCARDING the result. `requestMode` fails two ways: (a) `postID !=
+activePostID` (user clicked another post during the preceding `await
+autosave.flushNow()`) — returns false SILENTLY (the mismatch branch at
+CommandRouter.swift:71-73 doesn't speak — itself a silent-door residue);
+(b) no detail mounted (speaks, but the intent stays). The intent carries
+no postID and no freshness token, and `applyFocusSeeds` consumes it at
+the FIRST render of ANY subsequently-mounted full-document editor (detail
+Write of a different post, book-inline, pool — all run `applyFocusSeeds`
+on `.initialRender`). Worst case: divide invoked from Takes on post P,
+switch races, nothing visible; minutes later the user opens P in Write
+and the app divides a block by itself at the stale offset (different
+post: lands at 0, a refusal speaks out of nowhere). Red-on-old pin: park
+an intent, make `requestMode` fail, mount an editor later, assert store
+unchanged / no gesture ran — fails on current code · Fix: clear
+`pendingWriteIntent` (and speak) when `requestMode` returns false; and/or
+stamp `WriteIntent` with postID + one-round validity so
+`applyFocusSeeds` discards mismatches.
+
+**[MINOR-1]** · `Registry/ShellActions.swift:53-74` +
+`Registry/CommandRouter.swift:101-107` · `toggleSeal` in handler-less
+modes (Compare/Outline/Blocks; Canvas falls through) speaks the
+factually wrong `sealPost.unavailableNote` ("open a post first" — a post
+IS open), THEN the ShellActions fallback seals and speaks "Sealed" — a
+wrong refusal flash replaced by success, undermining AD-14's one
+presentation. Related: `sealPost` availability ignores
+`writeEditorAttached`, so `isEnabled(.sealPost)` is false in
+book-inline/pool contexts where the act works · Fix: a non-speaking
+dispatch variant for commands with shell fallbacks (or register the
+missing handlers); add the `writeEditorAttached` arm.
+
+**[MINOR-2]** · `Features/TOC/BlockTOCView.swift:38,221-222,190-193` ·
+AD-14 gap: `BlockTOCViewModel.statusMessage` is the only surface VM not
+forwarding to `StatusCenter`; the TOC renders its own never-dismissing
+red caption. Blocks is a full mode surface — the sheet exemption doesn't
+cover it · Fix: the same one-line `didSet` forward; drop the caption.
+
+**[MINOR-3]** · `EditorCommands.swift:226,231,244-258` +
+`Registry/ShellActions.swift:149-150` · The enabled-into-nil class
+survives in non-routed menu items: `previousBlock`/`nextBlock` take
+registry enablement (`mode == .write` OR attached) but optional-chain
+into a possibly-nil editor (enabled-but-silent in Write pre-attachment);
+the Callout menu + `exportCaretBlock` use a third idiom
+(`editorRouter.active == nil` checks; a silent `guard else return`).
+Three enablement idioms coexist in the file P-1 unified · Fix: route as
+handled commands, or derive availability from attachment only.
+
+**[MINOR-4]** · plan-file ledger · T3's deferred slice had no owner row ·
+**RESOLVED BY THE ARCHITECT pre-pass** (row N10; the reviewer
+independently CONCURRED with the deferral on the merits).
+
+**[MINOR-5]** · `Features/Takes/TakesBottomBar.swift:241` ·
+O(post-length) word count per keystroke: `wordCountLabel` runs
+`TextMetrics.wordCount` over EVERY slot's full text each bar render, and
+the bar re-renders per keystroke (reads `focusedPane`/`resolvedTake`;
+every `paneEdited` mutates the observed authority). The Write editor
+caches per-variant for exactly this reason (P-8 binds the rebuilt layer
+to P1) · Fix: per-variant count cache on the model (recompute only the
+edited variant / on projection adoption).
+
+**[NIT-1]** · `Registry/ShellActions.swift:231` · `paletteAction`'s
+`default: return {}` — a future `paletteActs` entry without a case
+compiles into a silent no-op palette row; no walk covers the switch ·
+Make the default speak, or pin paletteActs ⊆ handled cases.
+
+**[NIT-2]** · `Features/Editor/EditorView.swift:189-190` +
+`Features/Takes/LensesBoardView.swift:136-137` · `.takes(.closeAll)`
+consumed with `break` in Write and Lenses — enabled menu item, silent
+no-op in two of three enabled modes · Scope `closeAllTakes` availability
+to `.takes`, or speak.
+
+**[NIT-3]** · `Registry/CapabilityRegistry.swift:97-103,210-216,251-257`
+· `addBlockAtEnd`/`commitTake`/`blockComments` inline byte-identical
+copies of the `takeFamily` availability closure · Name it once.
+
+**Clean bill (round 1, abridged):** suites verified by the reviewer's own
+runs (Mac 485/96; core diff empty); PaneTextAuthority invariants; the
+board soak's realness (fresh-hosting-view remount honored); N2/N3/D3/N4/
+N5/N9 pins end-to-end; the registry walk's declared⇔rendered enforcement
++ R118 parity as code; P-4's three regimes deleted (grep-verified);
+memos canon-checked; P1/P3 on the new surfaces (visible-page rendering,
+clamped offsets, ≤1 live editor).
