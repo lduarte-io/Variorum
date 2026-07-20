@@ -1,6 +1,6 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — Stage 0 underway (started 2026-07-20).
+**Status:** ACTIVE — Stage 1b underway (Stage 0 complete + ratified batch 17; Stage 1a COMPLETE — closeout below; started 2026-07-20).
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
 `notes/plans/phase-13-ui-design.md`, batches 15–16; defects D1–D4 in batch 15).
@@ -88,7 +88,7 @@ discard tested, ratified behavior and re-earn its bugs).
 
 ## Stages
 
-### Stage 0 — the audits (read-only; ACTIVE)
+### Stage 0 — the audits (read-only; COMPLETE — findings + (c) inventory below)
 
 No building. Three parts, briefs below:
 - **(a) Architecture / tech-debt survey** of the Mac frontend — evidence
@@ -124,18 +124,8 @@ review ladder over the combined diff after 1b.
 Full brief below ("Stage 1a execution brief").
 
 **Stage 1b — the capability registry (T1 + its T3 slice + the T4 memos).**
-Sketch (the full brief is written just-in-time at 1a's closeout): the
-registry as a pure model — every act declared once (verb, scope, per-mode
-availability, doors, refusal copy) with the R118 parity table (every
-editing capability reachable from Takes) and the registry-walk test;
-rewire EditorCommands / bottom bars / context menus / ⌘K palette through
-it; fire-and-DO with visible mode-switch choreography; retire the three
-routing regimes and every notification-as-decision (P-4); the T3 slice
-moves command routing out of EditorViewModel; fixes D3, N4, N5 with
-red-on-old pins; drafts the W + merge design memos (T4) in PLAIN LANGUAGE
-(R120: no jargon — the app's own vocabulary or terms defined in place; the
-architect approves them and the builds proceed; her review comes at the
-end checkpoint, never as a gate).
+Full brief below ("Stage 1b execution brief") — finalized 2026-07-20 at
+1a's closeout, per the just-in-time rule.
 
 ## Stage 1a execution brief (self-contained — read this + the constitution + the two Stage 0 dossiers; nothing else assumed)
 
@@ -227,6 +217,102 @@ exists the app-drive session may still be driving it — do pure-Swift
 work first and re-check); NEVER quit or kill any `/Applications/
 Variorum.app` instance (the author's real store); never `git checkout`
 over uncommitted work; mobile sims are the 26.2-runtime devices.
+
+## Stage 1b execution brief (self-contained — read this + the constitution + the Stage 0 dossiers + the Stage 1a closeout; nothing else assumed)
+
+**Goal:** the capability registry + fire-and-DO everywhere. The confusion
+class (R112) dies structurally; R118 Takes parity becomes enforced fact.
+
+**Deliverables:**
+
+1. **The registry** (pure model + data; a shared layer beside `Surface/`,
+   not a feature module): every user-facing act declared ONCE — id + verb
+   in the app's own vocabulary; scope (block / take / post / book / app);
+   availability as a pure function of (mode, focus/caret/selection
+   context, post state); doors (menu bar / context menu / bottom bar /
+   shortcut / ⌘K palette); refusal copy sourced from the operations
+   layer's real refusals, never invented. **The R118 parity table is part
+   of the declaration:** every editing capability is available in Takes
+   natively or via move-and-execute; Write is never privileged.
+2. **The registry walk** (the P-1 test): every declared door renders
+   where declared; every rendered door is declared (locate surfaces via
+   1a's pane identity scheme `pane:role|variantID` — roles `article`,
+   `card`, `mini`, `panel`, `toc`, `cell`, `tutorial`); no act is
+   unavailable in EVERY mode; the parity assertions.
+3. **Fire-and-DO rewiring (P-2):** EditorCommands, both bottom bars, the
+   take-card context menu (AD-4's stock Cut/Copy/Fonts replaced with
+   registry-driven Variorum vocabulary), and the ⌘K palette (its
+   claimed-but-missing takes/structural/export commands) all render and
+   route through the registry. Mode-switch choreography designed ONCE and
+   reused: an act native to another mode switches visibly, executes, and
+   leaves the user somewhere sensible. Cross-mode text safety rides the
+   single per-post `AutosaveCoordinator` (1a's guarantee — leaving and
+   arriving surfaces serialize on one instance; the soak's remount
+   exercises it).
+4. **The named cells fixed, each red-on-old:** **D3** (the structural
+   four + add-block-at-end reachable from Takes;
+   `speakStructuralGesturesLiveInWrite` DIES with the rewiring — it is
+   not reworded); **N4** (⌥⌘Z reports through a mode-independent status
+   surface, never into nil); **N5** (⌘S acts wherever advertised — in
+   Takes/Lenses it commits the focused/chosen take through the
+   authority; where genuinely no target, a real spoken refusal);
+   **N9/AD-17** (the quick-entry landing: typing in Takes goes somewhere
+   — `authority.focus` on the first slot's article pane, the 1a input's
+   one-call path); **AD-14** (ONE refusal/status presentation:
+   consistent copy, placement, and auto-dismiss policy); and the
+   matrix's **enabled-menu-items-posting-into-the-void** class (menu
+   enablement itself derives from the registry).
+5. **P-4 discipline:** the four hand-kept `TakesCommand` switches
+   (EditorView / TakesBoardView / LensesBoardView / CanvasView) are
+   absorbed by registry routing; `variorumSwitchMode`'s
+   6-poster/1-conditional-observer shape is replaced by composed routing
+   (a notification may survive as an announcement only — no decision
+   rides it, and nothing is silently dropped when no PostDetailView is
+   mounted).
+6. **The T3 slice:** command routing + gesture dispatch (the ~1,200-line
+   band the 1a closeout mapped) moves out of `EditorViewModel` into the
+   registry layer. The W-ceremony machinery moves only if routing
+   extraction forces it; crystallization untouched; the projection
+   executors stay (their slice is post-ladder, per the 1a call).
+7. **The T4 memos (PLAIN LANGUAGE, R120)** as two standalone files the
+   author will read at the end checkpoint —
+   `notes/plans/phase-13b-memo-w-ceremony.md` and
+   `notes/plans/phase-13b-memo-merge.md`. THE W CEREMONY: what it is in
+   the app's own words; its real doors, Takes-first per R118; when the
+   sheet appears; the edge cases enumerated (locked takes, sealed posts,
+   unmarked takes, undo); how a fan-first writer DISCOVERS it (Helper +
+   tutorial name it). MERGE: the everyday gesture in plain words; the
+   N-ary chain recap; what happens to fans when blocks merge and how the
+   app says it; cross-mode reachability; edge cases (sealed, locked,
+   empty blocks, undo). The ARCHITECT approves the memos (self-executing
+   per R120 — no author gate); build in THIS stage exactly the
+   reachability/door halves the registry work carries naturally; deeper
+   behavior changes are Stage 3's, referenced from the memos.
+8. **Optional if trivial under the registry** (else record for Stage 3):
+   keyboard paging for 1a's paged rail (⌘←/→ — one registry act per the
+   1a input, no view surgery).
+
+**Tests:** the registry walk + parity pins; every fixed cell red-on-old
+(behavioral-revert verified); zero-test views gain coverage as touched
+(`SidebarView`, `RootView` at minimum); full Mac + core suites green at
+close. Baselines now: **Mac 455/89 · core 747/90**.
+
+**Constraints:** `Sources/VariorumCore` untouched; P1–P3; TK2 discipline;
+VoiceControls vocabulary; seal semantics unchanged. Parity nuance: 1b
+deliberately CHANGES user-visible behavior where Stage 0 documented
+broken cells — doors that act now, lectures that die; that is the
+mandate. Everything else stays parity.
+
+**Process:** the R119/R120/R121 posture (choose, record, continue);
+commits in logical chunks with the standing trailer; the "Stage 1b
+closeout" section in this file (judgment calls for the walk, memo
+pointers, inputs for the ladder + the Stage 2 brief-writer);
+`/Applications` refresh at close. **Environment traps:** ALL of the 1a
+brief's, PLUS the two 1a discoveries: `NSHostingView.rootView`
+replacement keeps the old `@State` — use a fresh hosting view / `.id`
+for faithful remounts; `-only-testing:` with a Swift Testing FUNCTION
+name = vacuous success at zero tests — filter at suite level and confirm
+the "Test run with N tests" line.
 
 ### Stage 2 — the tutorial spine (R113)
 
