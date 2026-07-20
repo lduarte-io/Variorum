@@ -1276,3 +1276,69 @@ editor mounts (honest-grey vs the old enabled-but-silent — P-2 says
 grey); (4) `exportCaretBlock` is now enabled with the caret in the open
 tail and speaks instead of greying (context can't see caretBlockID —
 acceptable under fire-and-DO?).
+
+## Stage 1 ladder — round 2 (VERDICT: zero new BLOCKER/MAJOR — the ladder CLOSES at round 2; residual fixes land post-close per the standing pattern)
+
+The round-2 fresh cold reviewer verified EVERY round-1 disposition HOLDS
+(all pins located, read, and re-run; the full Mac suite re-run
+independently: 497/100 green, count arithmetic exact; `Sources/
+VariorumCore` byte-untouched across the whole 13b range, git-verified)
+and SUSTAINED all four flagged judgment calls (leave-it-parked: sound
+for its class, refined by the MINOR below; the TakesLanding extension:
+the right call; attachment-only grey: P-2's own text; exportCaretBlock
+speaks: the P-2 contract, copy nit noted). Round-2 findings, verbatim:
+
+**[MINOR-R2] · `Features/Takes/TakesViewModel.swift:881–887` +
+`Registry/CommandRouter.swift:67–77,96–108` +
+`Features/Editor/EditorViewModel.swift:1940–1944` · A SAME-POST parked
+`WriteIntent` survives an ABORTED round and executes on a later Write
+mount — the MAJOR's class through a window the fix doesn't cover.**
+Mechanism (traced): the park + `requestMode(.write, P)` SUCCEEDS →
+`applyMode(.write)` flips the detail's `@State` → the arriving editor
+consumes only at `.initialRender` (one render pass + the first async
+projection delivery). In that tens-of-ms gap a competing mode switch
+(⌘2–⌘7, user-reachable) flips the detail off Write; EditorView unmounts
+before any `.initialRender`; the intent stays parked — the post MATCHES,
+so neither `registerDetail` (same detail, no re-registration) nor
+`unregisterDetail` (never torn down) clears it. The NEXT Write mount of
+that post — minutes later — consumes it and runs the structural gesture
+unprompted. The fix's own stated invariant ("valid for exactly the round
+that parked it") is not fully delivered: clearing keys on detail
+IDENTITY, not on the ROUND. The `TakesLanding` twin has the same window
+(benign consequence: stale bloom/focus). Red-on-old pinnable (park →
+successful request → report a competing mode → later mount → assert no
+gesture ran). Proposed fix: clear `pendingWriteIntent` in `noteMode`
+when the reported mode differs from the intent's landing mode (and the
+landing twin when mode leaves `.takes`); ordering safe — the park
+precedes `applyMode(.write)`, whose own `onChange` reports `.write` and
+keeps the parcel.
+
+**[NIT-R2-1] · `Registry/CommandRouter.swift:48–57`** · the 5-line
+"Staleness (round-1 MAJOR, half b)" comment pasted twice verbatim inside
+`registerDetail` — fix-pass edit artifact; delete one copy.
+
+**[NIT-R2-2] · `Features/Takes/TakesViewModel.swift:95,101–124`** ·
+`slotCountTexts` holds a full second copy of every slot's rendered text
+for change detection. Bounded and settle-cadence (P1-clean), but the
+"never copies of persisted text in state" rule is now leaned on twice,
+and a cheaper shape is in-hand: `adopt` still holds the OLD projection
+before the overwrite — diff old-vs-new slots (or per-slot hashes), no
+text copy. Cleanliness only; honestly labeled unpinnable.
+
+**[NIT-R2-3] · `EditorCommands.swift:297–310`** · `promptCalloutEmoji`'s
+`guard … else { return }` is the file's last silent-return idiom (frame
+race reachable only if the editor detaches between menu-open and click);
+speak the callout note. Related copy nit: `exportCaretBlock`'s spoken
+note reads oddly when heard IN Write with the caret in the open tail — a
+caret-specific sentence would read better. Cosmetic.
+
+**Clean bill (round 2, abridged):** fix-diff scope matches the
+disposition record exactly (11 app + 2 test files, nothing stray);
+`speakingWhenUnhandled:` has exactly one quiet call site whose fallback
+guard speaks (pinned); the TOC forward cannot double-present; the seal
+check-then-act race degrades to a spoken ops refusal, never wrong state;
+the registry walk still enforces declared⇔rendered on all four door
+surfaces + R118 parity; AD-14's one presentation now total across
+surface VMs; P1/P-8 on the fix surface (settle-cadence counting, nothing
+O(corpus)); the choreography's flush-first ordering rides the one
+per-post coordinator with no interleaving hazard at the park site.
