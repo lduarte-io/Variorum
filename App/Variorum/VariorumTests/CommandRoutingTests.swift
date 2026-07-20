@@ -303,8 +303,8 @@ struct MoveAndExecuteTests {
             }
             let after = try await db.read { try Queries.renderPost($0, containerID: post.id) }
             #expect(after.count == 2, "the carried divide LANDED — a real cut, not a lecture")
-            #expect(after[0].text == "First sentence here.")
-            #expect(after[1].text == "Second sentence here.")
+            #expect(after.first?.text == "First sentence here.")
+            #expect(after.dropFirst().first?.text == "Second sentence here.")
         }
     }
 

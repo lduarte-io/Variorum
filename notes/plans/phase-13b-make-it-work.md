@@ -1,6 +1,8 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — Stage 1b underway (Stage 0 complete + ratified batch 17; Stage 1a COMPLETE — closeout below; started 2026-07-20).
+**Status:** ACTIVE — Stage 1 COMPLETE (1a + 1b closeouts below); next: the
+Stage 1 review ladder over the combined diff, then Stage 2 (the tutorial
+spine). Stage 0 complete + ratified batch 17; started 2026-07-20.
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
 `notes/plans/phase-13-ui-design.md`, batches 15–16; defects D1–D4 in batch 15).
@@ -366,19 +368,19 @@ Commits per batch/stage with the standing message convention.
 |---|------|--------|
 | D1 | Book card collapse no-ops on the focused post (`BookView.swift:545` force-expand disjunct; traced batch 15, confirmed by both audits) | → T6 |
 | D2 | Margin grid shifts the post left; suspicious inter-block vertical gaps; spacing pass | two candidate mechanisms traced by both audits → T7 (trace-before-fix stands) |
-| D3 | Takes structural-gesture gap: Make Block silent, Divide redirects (`TakesViewModel.swift:742`, copy factually wrong), no add-block-at-end door in Takes | confirmed → T1 |
-| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | matrix DELIVERED (~310 cells; ≈40 silent, 4 lecturing, 12 missing) → T1/T7 |
-| M1 | MERGE whole-feature design memo (R116) | owed — written during Stage 1, her rulings |
-| M2 | W CEREMONY memo + reachability (R116) | reachability ANSWERED: built but unreachable on her real path — memo owed, build rides T4 |
+| D3 | Takes structural-gesture gap: Make Block silent, Divide redirects, no add-block-at-end door in Takes | **RESOLVED 1b** (fire-and-DO move-and-execute on all four + the lecture DELETED; native ＋new-block door in Takes/Lenses; red-on-old end-to-end pin) |
+| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | registry + router LANDED 1b (T1 done — silent/lecture/dead-key classes structurally closed; the walk keeps them closed); crowdedness half stays → T7 |
+| M1 | MERGE whole-feature design memo (R116) | **WRITTEN 1b** (`phase-13b-memo-merge.md`, self-executing per R120); doors/reachability built; deeper builds → Stage 3 |
+| M2 | W CEREMONY memo + reachability (R116) | **WRITTEN 1b** (`phase-13b-memo-w-ceremony.md`); the ceremony is REACHABLE from Takes (divide fire-and-DOes; Helper dictionary names it) |
 | N1 | Take-archive vanish trap: ⌘⇧A in Takes hides the take with no UI recovery (fans query active-only) | new, Stage 0(b) → T5 |
 | N2 | Dead take-pane canary (fallback invisible in take panes) | **RESOLVED 1a** (rendered banner on the unified surface; red-on-old pin) |
 | N3 | Triple AutosaveCoordinator; two can run over one post | **RESOLVED 1a** (one per-post coordinator at session scope; identity + clobber pins red-on-old) |
-| N4 | ⌥⌘Z executes-then-reports-into-nil outside Write (silent state change) | new, Stage 0(b), spot-verified → T1 |
-| N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | new, Stage 0(b), spot-verified → T1 |
+| N4 | ⌥⌘Z executes-then-reports-into-nil outside Write (silent state change) | **RESOLVED 1b** (reports through the StatusCenter on every surface; red-on-old pin) |
+| N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | **RESOLVED 1b** (routed — the mounted board commits the focused take, pinned over the real board; truly-uncommittable contexts disable the item; red-on-old) |
 | N6 | Take-label setter missing in core; lens-rename face missing | new, Stage 0(b) → T5 |
 | N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | **RESOLVED 1a** (the rail pages discretely with the ◀ x–y of n ▶ door; red-on-old pin + soak capacity invariant) |
 | N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
-| N9 | AD-17 quick-entry lands in Takes where typing does nothing ("just start typing" broken at the landing) | new, Stage 0(c) → 1b (R118 registry case) |
+| N9 | AD-17 quick-entry lands in Takes where typing does nothing | **RESOLVED 1b** (the landing focuses the first slot's article pane; live transitions claim the keyboard; red-on-old) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -704,3 +706,285 @@ capacity. Non-vacuity by construction + asserted. ~9 s for both seeds.
   decoration/badge geometry (a later candidate). The `viewText` /
   `programmaticReplace` / `setBlockAttribute` surface plumbing stays
   with the storage owner by design.
+
+## Stage 1b closeout (2026-07-20, fresh implementer session — COMPLETE)
+
+**Counts:** Mac app **485 tests / 96 suites** green (was 455/89 — +30
+tests, +7 suites) · core **747/90** green and byte-untouched ·
+`VariorumMobile` builds clean. `/Applications/Variorum.app` refreshed
+from Release. Commits `184c1b4` → the closeout commit, in three logical
+chunks.
+
+### What shipped
+
+**The registry (P-1)** — `App/Variorum/Variorum/Registry/` (a shared
+layer beside `Surface/`, ~1,080 lines): `Capability.swift` (the model:
+verb in the app's vocabulary, scope, doors, shortcut label, ops-honest
+`unavailableNote`, availability as a PURE function of
+`CapabilityContext(mode, writeEditorAttached, undoAvailable)`, and the
+**R118 parity table in the declaration** — `takesAccess: .native /
+.moveAndExecute`, non-nil for every editing capability);
+`CapabilityRegistry.swift` (the 33-capability table + door/lookup
+helpers + the router's unhandled-note source); `PostMode.swift` (the
+seven modes, moved out of PostDetailView — typealias keeps every call
+site); `CommandRouter.swift`; `StatusCenter.swift` + `StatusToast.swift`;
+`OpsRefusalCopy.swift`; `ShellActions.swift`.
+
+**The router (P-4)** — ALL THREE Stage 0 routing regimes are gone:
+- `.variorumTakesCommand`, `.variorumSwitchMode`, and
+  `.variorumModeDidChange` are DELETED (`TakesCommands.swift` removed;
+  the `TakesCommand` enum lives registry-side, notification-free).
+  `.variorumOpenPost` survives deliberately (an announcement with one
+  shell observer — no decision rides it; recorded).
+- Surfaces register `RoutedCommand` handlers with
+  `session.commandRouter` by composition (LIFO stack, token-guarded
+  against SwiftUI's appear/disappear ordering); EditorView /
+  TakesBoardView / LensesBoardView / CanvasView each register the
+  switch they used to hang on `onReceive`. An unhandled dispatch SPEAKS
+  the registry's note — the broadcast-into-the-void class is
+  structurally impossible.
+- Mode truth stays PostDetailView's `@State`; the detail REGISTERS
+  (postID + apply-closure) and reports changes with `noteMode`; the
+  sidebar rail reads the router's observable mirror (RootView's
+  broadcast-derived `postMode` shadow deleted); ⌘1–⌘7 and every
+  "switch mode" door call `requestMode` — with no detail mounted it
+  speaks instead of vanishing.
+- Menu enablement derives from the registry over the router's live
+  context (`EditorCommands` 415 → 308 lines; titles come from the
+  declared verbs; every action routes through `ShellActions`). The
+  enabled-item-posting-into-the-void class is dead both ways: acts
+  route where they can act (incl. via choreography), and truly
+  inapplicable contexts disable the item (honest grey — recorded
+  judgment call #3 below).
+
+**Fire-and-DO (P-2) — the named cells, each red-on-old:**
+- **D3 (the lecture DIES):** `speakStructuralGesturesLiveInWrite` is
+  DELETED, not reworded. The Takes/Lenses structural doors (bar
+  buttons, ⌘⇧D/E/K/M, palette rows) perform the ONE mode-switch
+  choreography — `TakesViewModel.moveToWriteAndRun`: flush first (the
+  1a per-post coordinator serializes the arriving editor's reads), park
+  a `WriteIntent` (target block + the live pane's carried
+  caret/selection where the pane shows the CHOSEN take), `requestMode
+  (.write)` visibly; the arriving editor consumes the intent at first
+  render (`applyFocusSeeds`), lands the selection, runs the gesture —
+  which plans against the REAL landed selection, so any refusal is the
+  operation's own, spoken. **On a fanned block, divide opens the take
+  ceremony — the W is now reachable from her real path (M2's
+  reachability half, built).** Merge from Takes lands at the block's
+  START (joins upward — the merge memo's call). End-to-end pin: a
+  parked divide intent LANDS and the store shows two blocks
+  (revert-verified red: one block, silence).
+- **D3's third leg:** "＋ new block" — NATIVE in Takes/Lenses
+  (`ops.newBlock(text:"", at:.end)`; the minted block's pane takes the
+  ring the moment its slot arrives — typing continues instantly);
+  doors: the board's end-of-article dashed door, the bar's block menu,
+  Block ▸ New Block at End of Post, the palette. In Write: caret-to-end
+  (typing there births blocks). Red-on-old: ring handover pin.
+- **N4:** `ShellActions.structuralUndo` reports through the
+  StatusCenter — visible on EVERY surface (red-on-old: the old
+  report-into-nil-editor shape left the center empty).
+- **N5:** ⌘S routes `.commit` — the mounted board commits the FOCUSED
+  take (pinned over the REAL mounted TakesBoardView: menu action body →
+  dispatch → handler → commit_point row; revert-verified red at zero
+  rows); where truly nothing commits the item is grey.
+- **N9/AD-17:** the Takes board landing focuses the first slot's
+  article pane (`landingEnabled`, board-only — the Write panel's
+  embedded model never steals it, pinned), and `PaneSurface` CLAIMS the
+  keyboard on every read→live transition (window-attach deferred claim
+  for panes born live) — "just start typing" is literal, and
+  ring-stepping (⌃⌘←/→) types into the right pane too. Cross-mode
+  landings ride `TakesLanding.bloom`: Lenses' ⌘⇧T (its lecture died)
+  and the Write panel's "Open Takes mode" land bloomed and ringed.
+- **AD-14:** `StatusCenter` + `StatusToast` = ONE presentation — the
+  root detail overlay, one auto-dismiss policy (6 s, injectable),
+  R93-readable (wrapping, selectable, load-bearing lineLimit).
+  EditorViewModel/TakesViewModel/CanvasViewModel `statusMessage`s
+  forward on set (properties stay — every pin reads unchanged); the
+  board-top ChromeNotices, CommitBar's trailing status, and Canvas's
+  status line (the live unguarded b6dae25 fixedSize instance) are
+  retired. Sheets keep their in-sheet notices (a sheet covers the
+  toast; recorded judgment call #6).
+- **AD-4:** right-clicking a take card now shows the Variorum
+  vocabulary — `PaneTextView.menu(for:)` renders registry-declared
+  items ABOVE the standard edit menu (the SwiftUI `.contextMenu` never
+  fired inside the NSTextView — that was the mechanism); branch /
+  blank / choose / diverge / archive / diff / show-take, with archive
+  newly on the cell menu (its ⌘⇧A twin was already Takes-reachable).
+- **Write's ⌘⏎ / ⌃⌘←→ lectures died:** both now OPEN the caret
+  block's takes panel (the surface where choosing/stepping lives).
+- **⌥⌘←/→ keyboard fan paging** (deliverable 8, taken): one paging
+  brain — the model owns key/limit (`pageTarget`), the board renders
+  from the same answers (`railRowsPerColumn` shared), the menu items
+  route `.pageFan`. NOTE the deviation: the brief sketched ⌘←/→; those
+  are line-start/end text-editing keys in every live pane — overriding
+  them app-wide would break basic typing, so the chord is ⌥⌘←/→
+  (recorded judgment call #7).
+- **⌘K palette (R15 made true):** 18 registry act rows (the structural
+  four, the take family, commit, undo, seal, add-block, import/export,
+  seams) beside the shell's navigation rows — same routed bodies as the
+  menu; an act that can't work here speaks its honest note.
+- **OpsRefusalCopy** moved to the shared layer; Canvas/TOC/Tutorial
+  stop reaching into the Takes feature for refusal copy
+  (`TakesViewModel.message(for:)` forwards, so every pin reads
+  unchanged). Canvas's silent `default: break` handler is gone: step/
+  choose speak when no switcher is open; everything else is honestly
+  unavailable there (R40 — canvas arranges).
+- **Helper dictionary** gains "divide / the take ceremony", "merge",
+  "extract / make block" (the memos' discovery half). The Helper's
+  taught keys are now TRUE on the default surface — ⌘⇧D/⌘S act in
+  Takes.
+
+**The T4 memos (R120, plain language, self-executing):**
+`notes/plans/phase-13b-memo-w-ceremony.md` and
+`notes/plans/phase-13b-memo-merge.md` — what each act is in the app's
+words, the doors (Takes-first per R118), every edge case as a plain
+sentence, discovery, and the decided-here-built-later list (Stage 3).
+Their reachability/door halves are BUILT this stage.
+
+### The registry walk (P-1's test) + the new pins
+
+`CapabilityRegistryTests` (13): declaration totality; no act unavailable
+in every sampled context; **R118 parity** (native ⇒ acts in Takes;
+moveAndExecute ⇒ actElsewhere(.write); nothing Write-available is
+Takes-unavailable); declared ⇔ rendered on all four door surfaces
+(rendered sets pinned as statics on EditorCommands / TakesBottomBar /
+CommitBar / EditorViewModel / TakesCellView); every shortcut label has
+exactly one key wiring; every routed command has honest fallback copy;
+the named D3/N5 cells as availability facts. `CommandRoutingTests` (11):
+router mechanics (LIFO, token-guarded stale unregister, fall-through,
+speak-on-unhandled), the N4/N5/N9/AD-14/D3/mode-drop/add-block/merge-
+upward pins. `PostDetailRoutingTests` mounts the REAL detail shell
+(registration + R79 takes-first + a routed request that MOUNTS the
+actual Write editor); `SidebarSmokeTests` mounts the rail (zero-test-
+view obligation; RootView remains untested — recorded below).
+
+### Red-on-old verifications (every one by behavioral revert, run RED)
+
+Batch A: N4 (undo → old nil-editor reporting: center empty, RED); N5
+(⌘S → old `editorRouter.active?` call with the board mounted: zero
+commit rows, RED); the mode-drop class (requestMode's speak removed:
+RED); AD-14 (the statusMessage didSet forward removed: RED). Batch B:
+the landing consumption inert (N9 + cross-mode bloom + add-block ring:
+all RED); the choreography replaced with the old lecture (intent never
+parked, mode never switched: RED); the intent consumption removed (the
+parked divide never lands — the store stays ONE block: RED, the exact
+silent-nothing D3 shipped with). All restored; final suites green.
+(One artifact: the end-to-end pin originally indexed `after[1]` and
+CRASHED the runner during the deliberate red run — hardened to
+optional indexing so the pin fails gracefully; the .ips in
+DiagnosticReports at 05:08 is that revert run, not a product crash.)
+
+### Judgment calls / PROVISIONALs (R119/R120 — for the author's en-masse walk)
+
+1. **The T3 slice boundary (THE deviation to review).** The brief's
+   letter: "command routing + gesture dispatch (~1,200 lines) moves out
+   of EditorViewModel into the registry layer." What MOVED: the routing
+   TERMINUS — EditorCommands' dispatch/enablement decisions into
+   ShellActions + the registry (415→308; every remaining line is menu
+   rendering), the four notification switches into router-registered
+   handlers, mode routing into CommandRouter. What did NOT move: EVM's
+   gesture EXECUTION band (`applyStructural`, the compounds, the W
+   state machine) — it writes `index`/`slots`/`textView`/undo through
+   `runStructural`, which is fused to the projection executors the 1a
+   closeout deliberately left in place; moving execution "into the
+   registry layer" would put storage-coupled code in a pure shared
+   layer, and moving it to a sibling controller mid-stage, pre-ladder,
+   on the app's riskiest tested file (~243 tests) against a
+   behavior-parity mandate is the same wrong risk 1a recorded for the
+   executors. EVM is 3,037 lines (grew ~86: intent consumption,
+   jumpToDocumentEnd, walk statics). The honest next slice (post-
+   ladder, one seam, one review): gesture band + projection executors
+   TOGETHER into an editor-feature controller. R119 empowerment
+   invoked; the ladder should judge whether this satisfies T3's intent.
+2. **TakesViewModel grew** (890 → 1,113) — the choreography, landings,
+   add-block, paging, and comments-request landed on the takes
+   conductor (they are board semantics). P-9 pressure noted; its
+   decomposition is Stage 3 material if the ladder agrees.
+3. **"Isn't rendered" = disabled, for menus.** P-2's letter says a door
+   that can never act isn't rendered; macOS menus keep stable item
+   lists, so truly-inapplicable contexts DISABLE (standard grey — ⌘C
+   with no selection). The crime was enabled-but-void, which is now
+   impossible. Rendered-but-grey ≠ a bad cell where the act is
+   genuinely impossible there.
+4. **The registry's scope is the ROUTED vocabulary** (menu bar, bars,
+   take-card context menu, palette — 33 capabilities). Surface-local
+   doors that already work (Library/Pool context menus, book navigator,
+   history/tags/date buttons) are deliberately NOT declared this stage;
+   the registry grows to cover them as Stage 3 touches them.
+5. **Landing focus vs the 1a article pin:** the N9 landing makes the
+   first slot's article pane LIVE at board open, which collided with
+   the batch-14 pin's premise (an article READ pane mirroring the
+   buffer). The pin was adapted — ring moved aside before the
+   assertion — preserving its exact intent (read-pane mirroring).
+   Recorded because a live-at-open article pane is a real behavior
+   change (it is N9's point).
+6. **Sheets keep in-sheet status displays** (WriteTakesPanel); the
+   window-level toast would render under a sheet. AD-14's "one
+   presentation" reads as one WINDOW-LEVEL presentation.
+7. **Keyboard paging chord is ⌥⌘←/→, not the brief's ⌘←/→** (line
+   start/end in every text surface — a global menu shortcut would
+   swallow basic caret movement).
+8. **Merge from Takes joins UPWARD** (the focused block into the one
+   above) — the merge memo's contestable call, revisited only if it
+   trips her (R116).
+9. **Canvas's take family beyond step/choose is unavailable** (grey)
+   rather than move-and-execute — R40: canvas is an arranging view;
+   switching modes to deliver a refusal helps nobody. Contestable.
+10. **`.variorumOpenPost` survives** as a pure announcement (one shell
+    observer, no decision rides it) — P-4-compliant; retiring it means
+    threading ShellRouter into MembershipChip/BookView for no
+    behavioral gain.
+11. **The visual smoke was blocked by the locked login session** (the
+    dev app launched and ran clean — no crash report for the app
+    process — but the screen showed the screensaver; AX saw no window).
+    The screenshot-verify pass folds into the Stage 2/3 drives per the
+    Stage 0(c) precedent (caffeinate -d + unlocked session).
+
+### Memo pointers + contestable memo calls
+
+`notes/plans/phase-13b-memo-w-ceremony.md` — contestable: NO separate
+"Divide into takes…" named command (divide IS the door; the ceremony
+appears exactly when the block is fanned). `notes/plans/
+phase-13b-memo-merge.md` — contestable: merge-joins-upward from Takes;
+"merge with block above/below" pair deliberately not built (Stage 3
+revisit condition stated in the memo).
+
+### Inputs for the Stage 1 review ladder (the cold reviewer's foci)
+
+- The combined 1a+1b diff is the review unit. Focus 1: the
+  **choreography's failure modes** — intent parked but the mode switch
+  refused/raced; the flush-then-switch ordering; a block deleted
+  between surfaces (lands at 0, speaks); intent consumed exactly once.
+- Focus 2: **handler/detail registration lifecycles** — SwiftUI
+  appear/disappear ordering (token guards pinned, but review the sheet/
+  inline-editor cases: WriteTakesPanel over Write registers EditorView's
+  handler UNDER the sheet, parity with the old observer behavior).
+- Focus 3: **the enablement context** — `writeEditorAttached` covers
+  book-inline and pool editors (mode == nil there); check every
+  registry availability rule against the matrix's surfaces column.
+- Focus 4: **AD-14's removals** — the board/CommitBar/Canvas local
+  status displays are gone; confirm no surface now lacks feedback a
+  test doesn't cover (sheets kept theirs).
+- Focus 5: the T3 deviation (judgment call #1) — agree or direct the
+  next slice.
+- Ladder mechanics: fresh reviewer, `notes/REVIEW_PROMPT.md` verbatim;
+  these closeouts are the anchor.
+
+### Inputs for the Stage 2 tutorial brief-writer
+
+- The tutorial can now RELY on: every structural act reachable from
+  Takes (the default surface) with real execution; the take ceremony
+  reachable via divide-on-a-fanned-block from either surface; ＋ new
+  block in Takes; ⌘S/⌥⌘Z acting everywhere they're advertised; the
+  ⌘K palette carrying the act vocabulary; ONE status toast every
+  outcome lands in (the tutorial can point at it); the Helper
+  dictionary naming divide/ceremony/merge/extract.
+- The tutorial should EXERCISE: the move-and-execute choreography
+  (divide from Takes end to end), the W sheet (fan a block, divide),
+  merge-upward from Takes, the add-block door, the landing focus
+  ("just start typing"), and the toast (make a refusal happen on
+  purpose — sealed post — and show the spoken answer).
+- Tutorial content must stay non-journal (R57/batch-17 note — the
+  bridge sweeps journal days only).
+- The seeded tutorial post lives in the REAL store at the end
+  checkpoint (batch 17: "nothing real is in there right now").
