@@ -588,6 +588,86 @@ struct StaleWriteIntentTests {
                     "the board's own N9 landing focus still happened")
         }
     }
+
+    /// Round-2 MINOR-R2 — the SAME-POST aborted round: the request
+    /// SUCCEEDS, but a competing mode switch (⌘2–⌘7) flips the detail off
+    /// Write in the tens-of-ms before the arriving editor's first render.
+    /// Same post ⇒ register/unregister clearing never fires (detail
+    /// identity, not round); the round boundary is the detail's MODE
+    /// report — `noteMode` clears a parcel whose landing mode the round
+    /// left. Pre-fix, the orphaned intent divided unprompted at the NEXT
+    /// Write mount, minutes later.
+    @Test func aCompetingModeSwitchAbortsTheRoundAndClearsTheParkedIntent() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "aborted-round")
+            let minted = try session.operations.newBlock(
+                in: post.id, text: "First sentence here. Second sentence here.")
+            var modes: [PostMode] = []
+            _ = session.commandRouter.registerDetail(
+                postID: post.id, mode: .takes
+            ) { modes.append($0) }
+
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: minted.block.id, variantID: minted.variant.id))
+            model.notePaneSelection(
+                variantID: minted.variant.id, range: NSRange(location: 21, length: 0))
+
+            model.moveToWriteAndRun(.structural(.divide))
+            await poll { session.commandRouter.pendingWriteIntent != nil }
+            #expect(modes == [.write], "the request succeeded — the round began")
+
+            // The detail's own onChange reports the LANDING mode first —
+            // the parcel survives (the ordering-safety half).
+            session.commandRouter.noteMode(.write)
+            #expect(session.commandRouter.pendingWriteIntent != nil,
+                    "reporting the landing mode keeps the in-flight intent")
+
+            // The competing switch: the editor unmounts before any
+            // .initialRender; the detail reports the new truth.
+            #expect(session.commandRouter.requestMode(.lenses))
+            session.commandRouter.noteMode(.lenses)
+            #expect(session.commandRouter.pendingWriteIntent == nil,
+                    "the round is over — the parcel cleared on the mode report")
+
+            // "Minutes later": Write mounts again on the SAME post.
+            let editor = EditorViewModel(session: session, postID: post.id)
+            editor.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: editor)
+            delegate.wire(to: textView)
+            editor.attach(textView: textView, scrollView: scrollView)
+            let (slots, header) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: post.id),
+                 try Queries.containerHeader(db, containerID: post.id))
+            }
+            editor.adoptHeader(header)
+            editor.applyProjection(slots)
+            await editor.pendingIntentTask?.value
+
+            #expect(editor.pendingIntentTask == nil, "no follow-up gesture spawned")
+            let after = try await db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(after.count == 1, "no structural gesture ran unprompted")
+        }
+    }
+
+    /// The landing twin's round boundary (benign consequence pre-fix —
+    /// stale bloom/focus — but the same window).
+    @Test func aCompetingModeSwitchClearsTheParkedLandingToo() async throws {
+        try await withSessionWorld { session, _ in
+            _ = session.commandRouter.registerDetail(
+                postID: "p", mode: .lenses) { _ in }
+            session.commandRouter.pendingTakesLanding = .bloom(postID: "p", blockID: "b")
+            session.commandRouter.noteMode(.takes)
+            #expect(session.commandRouter.pendingTakesLanding != nil,
+                    "the landing mode's report keeps the parcel")
+            session.commandRouter.noteMode(.canvas)
+            #expect(session.commandRouter.pendingTakesLanding == nil,
+                    "any other mode report ends the landing's round")
+        }
+    }
 }
 
 @MainActor

@@ -89,36 +89,42 @@ final class TakesViewModel {
     /// authority) — O(post length) per keystroke, the class the Write
     /// editor's ledger exists to prevent.
     private(set) var postWordCount = 0
-    /// Per-slot texts + counts from the LAST adoption — only slots whose
-    /// text actually changed re-enumerate (the `EditorSurfaceLedger.adopt`
-    /// discipline, mirrored).
-    @ObservationIgnored private var slotCountTexts: [String: String] = [:]
+    /// Per-slot counts from the LAST adoption — only slots whose text
+    /// actually changed re-enumerate (the `EditorSurfaceLedger.adopt`
+    /// discipline, mirrored). Counts are derived values, allowed in state;
+    /// change detection diffs against the OLD projection still in hand at
+    /// adoption time — no second copy of any slot's text is retained
+    /// (round-2 NIT-R2-2).
     @ObservationIgnored private var slotCounts: [String: Int] = [:]
     /// Test seam: how many slots have been genuinely re-counted (the
     /// MINOR-5 pin asserts adoption is incremental, not recount-all).
     @ObservationIgnored private(set) var slotRecountCount = 0
 
-    private func refreshWordCounts(_ new: Queries.TakesProjection) {
-        var texts: [String: String] = [:]
-        texts.reserveCapacity(new.slots.count)
+    /// Called with the OUTGOING projection before `projection` is
+    /// overwritten (the old slot texts are the last adoption's texts by
+    /// construction — `adopt` is the only projection door).
+    private func refreshWordCounts(old: Queries.TakesProjection, new: Queries.TakesProjection) {
+        var oldTexts: [String: String] = [:]
+        oldTexts.reserveCapacity(old.slots.count)
+        for slot in old.slots {
+            oldTexts[slot.blockID] = slot.text ?? ""
+        }
         var counts: [String: Int] = [:]
         counts.reserveCapacity(new.slots.count)
         var total = 0
         for slot in new.slots {
             let text = slot.text ?? ""
             let count: Int
-            if slotCountTexts[slot.blockID] == text,
+            if oldTexts[slot.blockID] == text,
                let cached = slotCounts[slot.blockID] {
                 count = cached
             } else {
                 count = TextMetrics.wordCount(text)
                 slotRecountCount += 1
             }
-            texts[slot.blockID] = text
             counts[slot.blockID] = count
             total += count
         }
-        slotCountTexts = texts
         slotCounts = counts
         if postWordCount != total { postWordCount = total }
     }
@@ -224,8 +230,8 @@ final class TakesViewModel {
     /// Internal so tests drive projections deterministically (the test host
     /// never fires `.task`).
     func adopt(_ new: Queries.TakesProjection) {
+        refreshWordCounts(old: projection, new: new)
         projection = new
-        refreshWordCounts(new)
         // THE CONVERGENCE HALF of the buffer-authoritative discipline
         // (review round 2, MAJOR): adoption only runs clean or at settle
         // (the observation loop defers while dirty), so any buffer with NO

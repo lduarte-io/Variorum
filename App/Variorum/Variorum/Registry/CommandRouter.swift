@@ -50,11 +50,6 @@ final class CommandRouter {
         // gone. Clear it here (register-ordering-proof: on a P→Q switch
         // SwiftUI may run Q's onAppear before P's onDisappear, so the
         // token-guarded unregister below can be a no-op).
-        // Staleness (round-1 MAJOR, half b): a parked choreography intent
-        // for ANOTHER post has missed its round — the detail it targeted is
-        // gone. Clear it here (register-ordering-proof: on a P→Q switch
-        // SwiftUI may run Q's onAppear before P's onDisappear, so the
-        // token-guarded unregister below can be a no-op).
         if let pending = pendingWriteIntent, pending.postID != postID {
             pendingWriteIntent = nil
         }
@@ -80,6 +75,21 @@ final class CommandRouter {
     func noteMode(_ mode: PostMode) {
         guard detailToken != nil else { return }
         activeMode = mode
+        // Round-2 MINOR-R2 (the aborted-round window): a parked parcel is
+        // valid for exactly the ROUND that parked it, and the round is
+        // over the moment the detail reports any mode other than the
+        // parcel's landing mode — a competing switch (⌘2–⌘7) in the
+        // tens-of-ms before the arriving surface consumes leaves the
+        // parcel orphaned on a SAME-post detail, which register/unregister
+        // clearing (detail identity, not round) can never see. Ordering is
+        // safe: the park precedes `applyMode(.write)`, whose own onChange
+        // reports the LANDING mode first and keeps the parcel.
+        if pendingWriteIntent != nil, mode != .write {
+            pendingWriteIntent = nil
+        }
+        if pendingTakesLanding != nil, mode != .takes {
+            pendingTakesLanding = nil
+        }
     }
 
     /// What a stale targeted mode request says (round-1 MAJOR, half a: the

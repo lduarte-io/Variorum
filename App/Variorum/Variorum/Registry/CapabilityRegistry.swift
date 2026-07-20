@@ -259,7 +259,10 @@ nonisolated enum CapabilityRegistry {
             id: .exportCaretBlock, verb: "Export Block as Markdown…", scope: .block,
             doors: [.menuBar],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "Exporting a block starts from Write's caret block.",
+            // Round-2 NIT-R2-3 copy: the note's ONE speaking site is the
+            // caret-outside-any-block case (attached editor, open tail) —
+            // so it says exactly that.
+            unavailableNote: "Put the caret in a block to export it.",
             availability: writeEditor),
 
         // MARK: Modes + app scope

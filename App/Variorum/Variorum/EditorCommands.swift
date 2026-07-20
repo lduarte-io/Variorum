@@ -295,7 +295,15 @@ struct EditorCommands: Commands {
 
     /// The callout emoji prompt (her sitting-3 reference wore "💡").
     private func promptCalloutEmoji() {
-        guard let session, let editor = session.editorRouter.active else { return }
+        // Round-2 NIT-R2-3: the file's last silent return speaks (the
+        // editor detaching between menu-open and click). A nil session
+        // has no status surface to speak to — nothing exists yet.
+        guard let session, let editor = session.editorRouter.active else {
+            if case .ready(let session) = bootstrap.state {
+                session.status.speak(CapabilityRegistry.capability(.callout).unavailableNote)
+            }
+            return
+        }
         let alert = NSAlert()
         alert.messageText = "Callout Emoji"
         alert.informativeText = "A leading glyph for this callout (leave empty for none)."
