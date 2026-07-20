@@ -156,12 +156,18 @@ Commits per batch/stage with the standing message convention.
 
 | # | Item | Status |
 |---|------|--------|
-| D1 | Book card collapse no-ops on the focused post (`BookView.swift:545` force-expand disjunct; traced batch 15) | open — Stage 1/3 |
-| D2 | Margin grid shifts the post left; suspicious inter-block vertical gaps; spacing pass | open — trace first |
-| D3 | Takes structural-gesture gap: Make Block silent, Divide redirects (`TakesViewModel.swift:742`), no add-block-at-end door in Takes | open — Stage 1 (P-1/P-2) |
-| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | Stage 0(b) matrix → backlog |
-| M1 | MERGE whole-feature design memo (R116) | owed — Stage 1/2 seam |
-| M2 | W CEREMONY whole-feature design memo + reachability finding (R116; she has never seen it) | owed — Stage 0(b) answers reachability first |
+| D1 | Book card collapse no-ops on the focused post (`BookView.swift:545` force-expand disjunct; traced batch 15, confirmed by both audits) | → T6 |
+| D2 | Margin grid shifts the post left; suspicious inter-block vertical gaps; spacing pass | two candidate mechanisms traced by both audits → T7 (trace-before-fix stands) |
+| D3 | Takes structural-gesture gap: Make Block silent, Divide redirects (`TakesViewModel.swift:742`, copy factually wrong), no add-block-at-end door in Takes | confirmed → T1 |
+| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | matrix DELIVERED (~310 cells; ≈40 silent, 4 lecturing, 12 missing) → T1/T7 |
+| M1 | MERGE whole-feature design memo (R116) | owed — written during Stage 1, her rulings |
+| M2 | W CEREMONY memo + reachability (R116) | reachability ANSWERED: built but unreachable on her real path — memo owed, build rides T4 |
+| N1 | Take-archive vanish trap: ⌘⇧A in Takes hides the take with no UI recovery (fans query active-only) | new, Stage 0(b) → T5 |
+| N2 | Dead take-pane canary (fallback invisible in take panes) | new, Stage 0(a), spot-verified → T2 |
+| N3 | Triple AutosaveCoordinator; two can run over one post | new, Stage 0(a), spot-verified → T2 |
+| N4 | ⌥⌘Z executes-then-reports-into-nil outside Write (silent state change) | new, Stage 0(b), spot-verified → T1 |
+| N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | new, Stage 0(b), spot-verified → T1 |
+| N6 | Take-label setter missing in core; lens-rename face missing | new, Stage 0(b) → T5 |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -216,9 +222,84 @@ write → make blocks → takes → choose → book → comments → tags — wo
 matrix cells first, screencapture each step, log every defect with its
 screenshot and a one-line repro. No fixes in Stage 0.
 
-## Stage 0 findings
+## Stage 0 findings — the architect's synthesis (2026-07-20)
 
-*(filled by the architect as results land)*
+**Inputs:** the two audit dossiers beside this file
+(`phase-13b-stage0-architecture-survey.md`,
+`phase-13b-stage0-capability-matrix.md`; the (c) app-drive inventory follows)
+plus the architect's spot-verification pass — EVERY checked claim confirmed:
+the take-pane canary writes a message no view ever renders
+(`TakePaneView.swift:131–145` — a TK1 fallback in any take pane would be
+invisible, while `ReadPostView.swift:57` renders its own); THREE
+`AutosaveCoordinator` instantiations (Editor / Takes / BlockTOC — one more
+than the survey claimed), so two debounced autosave pipelines can run over
+one post with the Write takes panel open; ⌘S optional-chains into a nil
+editor outside Write (`EditorCommands.swift:46–51`, never disabled) while
+the Takes bar ADVERTISES "commit ⌘S"; ⌥⌘Z EXECUTES the structural undo and
+reports into nil outside Write (`EditorCommands.swift:398–413`) — a silent
+state change; no take-label setter exists anywhere in core Operations (the
+schema column and renderers exist); the W door opens only via
+divide-with-caret-in-a-fanned-block (`StructuralGesturePlanner`,
+`.divideW` branch) — in Write.
+
+**Headline numbers:** 80 files / ~21.4k lines in the Mac target; 31
+@Observable view models; ~431 tests distributed INVERSELY to churn (Editor
+~243; the Takes/Lenses layer ~25–40 over the app's highest-sediment ~3.6k
+lines; PostDetailView / WriteTakesPanel / SidebarView / RootView: zero).
+~310 capability cells audited: ≈40 silent key/surface combinations, 4
+lecture-and-refuse doors (+2 borderline), 12 missing-door findings (2 of
+them operation-level). Notification bus: 4 custom names, 12 post sites, 8
+observers; `variorumSwitchMode` has 6 posters and ONE conditional observer
+— mode switches are silently dropped when no PostDetailView is mounted.
+Command routing runs through THREE regimes (editor-router calls /
+notification broadcasts / direct actions); every bad cell is one of
+ungated-call-into-nil, gated-to-grey dead key, or
+broadcast-without-listener — precisely the classes P-1's registry retires.
+A FOURTH text path exists: Compare/Outline/Canvas/ReadingFlow render prose
+via SwiftUI `Text`, outside the typography brain entirely.
+
+**M2 ANSWERED — the W ceremony:** fully built (`DivideWSheet`,
+`EditorViewModel` ~1983–2109) and UNREACHABLE on the author's real path.
+Its only trigger is divide-with-caret-in-a-fanned-block in Write; in Takes
+(the default mode, R79) the Divide button lectures with FACTUALLY WRONG
+copy (claims selection-based; divide is caret-based), ⌘⇧D is a dead key,
+and nothing in the app — helper, tutorial, menus — names the ceremony's
+existence. Her R116 instinct is verified verbatim: a feature patched into
+half-existence. The memo (T4) designs its real doors; the registry carries
+them.
+
+### Verdicts (keep / consolidate / rebuild)
+
+| Component | Verdict |
+|---|---|
+| Live editor pipeline (BlockRangeIndex, crystallization, reconciler, TK2 wrapper) | **KEEP the machinery; DECOMPOSE `EditorViewModel`** (2,994 lines, 10+ concerns — the app's real god object). "The core needs work" lands as decomposition + becoming the ONE live mode of the unified surface — NOT an identity-machinery rewrite. |
+| Takes/Lenses interaction layer | **REBUILD IN PLACE** on the new architecture (PaneTextAuthority + registry + decomposed VMs). Highest sediment, worst coverage-to-churn, both recent bug classes lived here — and one frozen-article variant is STILL LIVE: the stack style feeds panes `take.workingText` directly, bypassing liveBuffers (`TakesBoardView.swift:672–674`). |
+| Text surfaces (3 TK2 wrappers + the 4th SwiftUI-Text prose path) | **CONSOLIDATE to ONE surface family** (P-3): one measurement brain, one rendered canary, live/read as modes. Fixes the dead take-pane canary and the three divergent re-measure triggers as a class; the Text path gets absorbed or explicitly chartered for non-prose micro-text only. |
+| Command routing (EditorCommands + notifications + bars + palette) | **REBUILD as the capability registry** (P-1/P-2). Three regimes become one; silent doors, dead keys, lectures, unheard broadcasts, and palette gaps retire structurally. |
+| Autosave | **CONSOLIDATE to one coordinator per open post** (three per-VM instantiations today). |
+| BookView | **KEEP + targeted fixes** (D1; fold `BookFocusState` — a third focus authority — into the one focus model). |
+| Canvas | **KEEP + small fixes** (the one live unguarded b6dae25-class fixedSize, `CanvasView.swift:318–325`; stop calling `TakesViewModel.message(for:)` cross-feature). |
+| Shelf / Library / Pool / Tags / Readings / Timeline / References / Export / Import / Settings / Help | **KEEP** (small, clean, read through Queries). |
+| Core Operations | **ADD two small ops/faces:** a take-label setter (column + renderers exist, no setter); a lens-rename face (op exists, no door). |
+
+### The ranked themed backlog (the ratification ask)
+
+| # | Theme | Stage |
+|---|-------|-------|
+| T1 | **Capability registry + fire-and-DO rewiring** — kills the silent-⌘S class, dead keys, lecturing doors, unheard broadcasts, the ⌥⌘Z silent state change, the mode-switch drop, the palette gaps, and D3 (incl. the add-block-at-end door in Takes) | 1 |
+| T2 | **One text surface + PaneTextAuthority + autosave consolidation** — kills the frozen/clipped classes (incl. the live stack-style instance), the dead canary, the triple measurement brains, the dual-autosave hazard; the randomized BOARD SOAK lands here | 1 |
+| T3 | **EditorViewModel decomposition** (P-9; enabling work for T1/T2) | 1 |
+| T4 | **The W + merge design memos** (paper, written during Stage 1; her rulings on the edges) → their builds ride the registry | memos: 1 · builds: 3 |
+| T5 | **Takes lifecycle completeness** — delete/lock/unarchive faces; archived-takes visibility (today ⌘⇧A makes a take VANISH with no UI way back — the fans query is active-only); take-label op + face; lens-rename face | 3 |
+| T6 | **Book view** — D1, focus unification, collapse-all correctness | 3 |
+| T7 | **Geometry/spacing** — D2 (two traced candidates from both audits: the centered article+rail unit widening the measure and shifting prose left ~rail/2 — `TakesBoardView.swift:315–319` + `PostDetailView.swift:70–75` reading the same UserDefaults key two ways; `fanToggleRow` rendering above every block incl. unfanned); the crowdedness pass | 3 |
+| T8 | **The tutorial spine** (R113) — after T1/T2 make every flow wire-able | 2 |
+| — | Looks-polish LAST (R111) | tail |
+
+**Stage 1 scope = T1 + T2 + T3 (+ the T4 memos on paper).**
+**Gate:** the author ratifies these verdicts + this backlog before Stage 1
+builds. The (c) app-drive inventory refines T5–T7's contents but is not
+expected to move the verdicts.
 
 ## Stage closeouts
 
