@@ -1,20 +1,16 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — **Stage 2 ladder round 1 FIX PASS COMPLETE
-(dispositions below; round 2's fresh reviewer is NEXT)**: the tutorial
-door reshaped (one discovery, confirm on everything the replace
-destroys, the same `Existing` into the replace, the session latch, the
-quiet undo-free seeder), the read tier's starved-overlay twin fixed
-(push-on-wire, badges included), the as-chosen reveal host-gated — 2
-MAJOR + 6 MINOR + 6 NIT all dispositioned, 8 new pins, every bug-class
-fix behavioral-revert verified RED. Counts: **Mac 538/106 · core 747/90
-untouched**. Stage 2 BUILT + WALKED (closeout below): "the field guide"
-(6 chapters · 21 act-ready lessons) + the Help ▸ Restore Tutorial…
-product door + `TutorialWalkTests` + the visual walk (2 happy-path
-breakers fixed in-stage, revert-verified) + the REAL-store seed executed
-behind the A1 rail. Stage 1 CLOSED (ladder closed at round 2; 1a/1b
-closeouts + dispositions below; Mac 499/100 at its close). Stage 0
-complete + ratified batch 17; started 2026-07-20.
+**Status:** ACTIVE — **Stage 2 CLOSED (ladder closed at round 2; both
+fix passes complete; stage-level closeout below — Stage 3 is NEXT)**:
+"the field guide" (6 chapters · 21 act-ready lessons) + the hardened
+Restore/Open doors (one discovery, confirm-gates-what-dies, the session
+latch, the quiet undo-free seeder) + the starved-overlay class ended on
+ALL sinks (sweep table b: 5/5 push-on-wire) + the
+ring-on-an-unhosted-pane class swept (table a: 30 cells, 15 fixed / 15
+provably safe) + the REAL-store seed behind the A1 rail. Counts: **Mac
+542/106 · core 747/90 untouched**. Stage 1 CLOSED (ladder closed at
+round 2; 1a/1b closeouts + dispositions below; Mac 499/100 at its
+close). Stage 0 complete + ratified batch 17; started 2026-07-20.
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
 `notes/plans/phase-13-ui-design.md`, batches 15–16; defects D1–D4 in batch 15).
@@ -2175,7 +2171,7 @@ through the projection; (d) `pushOverlaysToSinks` pushes STALE badge
 frames at install (correct while geometry is unchanged; a later
 `refreshBadges` re-delivers if it differs).
 
-## Stage 2 ladder — round 2 (VERDICT: zero new BLOCKER/MAJOR — the Stage 2 ladder CLOSES at round 2; residual fixes land post-close)
+## Stage 2 ladder — round 2 (VERDICT: zero new BLOCKER/MAJOR — the Stage 2 ladder CLOSED at round 2; residual fix pass COMPLETE — dispositions + the sweep tables follow the findings)
 
 The round-2 fresh cold reviewer verified EVERY round-1 disposition HOLDS
 (all pins read; the full Mac suite re-run independently: 538/538 green;
@@ -2241,3 +2237,187 @@ adjacent-door survivals of fixed classes; the sweep ends the pattern.
 R2-D stays record-only. The cosmetic notes (b's confirm copy;
 exportCaretBlock's tail phrasing from Stage 1) ride Stage 3's polish
 themes.
+
+### Stage 2 ladder — round 2 dispositions (residual fix pass, 2026-07-20; same fix-pass session)
+
+*Every finding traced before disposal; every bug-class fix red-on-old by
+behavioral revert (signatures kept; pins run RED; fixes restored; full
+suite green on shipped code). Counts after the pass: **Mac 542/106**
+green (was 538/106; +4 pins, one existing pin strengthened) · **core
+747/90**, `Sources/VariorumCore` byte-untouched (git-verified). Fix
+commit: `f4f3ae5`. Revert batches: REVERT-R2a = the host gates + the
+fan-namespace mapping + the no-op-guarded divergeHere + the silent
+no-main branch restored to pre-fix logic; REVERT-R2b = the badge push
+commented out.*
+
+**[MINOR-R2-A] — AGREED-FIXED, and the sweep widened it.** Trace
+confirmed: the bar's ＋New/＋Blank/"+ take" doors and the cell-menu
+twins call the Revealed brains unconditionally; on `.lenses` the mint
+changes neither pick nor chosen, so `revealTake` focused a pane no
+column renders. Fix: `branchTakeRevealed`/`newBlankTakeRevealed` are
+HOST-GATED like `revealChosenTake` — `.lenses` resolves a real column
+(the cell menus now pass theirs; the bar falls back to the focused
+pane's; none ⇒ the spoken `lensesMintNeedsColumnNote`, matching the
+keyboard doors' own guards) and routes through the board's
+pick-into-column cores (`branchIntoColumn`/`blankIntoColumn` — the
+`divergeHere` body extracted and shared; named lenses live-edit in the
+same serialized breath; a mint into the Chosen column starts a scratch
+thread, chosen never moves without ✓) with the ring FOLLOWING onto the
+pane that now renders the mint. The Lenses keyboard ⌥⌘T consolidates
+onto the same brain — its old mint-then-`pick` pair REFUSED the pick on
+the Chosen column AFTER minting (an invisible take plus a lecture, the
+R112 class, fixed by the consolidation). **The sweep's own finds, fixed
+with the class:** (1) on the TAKES host an article-keyed reveal
+stranded the ring's AUTHORITY on `("takes-main", block, mint)` — a pane
+NO style renders (the article renders chosen only; an un-chosen mint
+blooms as a FAN card) — `takesUnchosenRevealColumnID` maps
+article/landing keys onto the fan namespace (`takesFanColumnID` hoisted
+to the model; the view aliases it); (2) `divergeHere` from the takes
+board's cell menu was a SILENT NO-OP (board-local column IDs never live
+in `columns`; the index guard returned before minting anything) — now
+host-gated: the takes arm routes through the takes reveal. Pins:
+`barMintDoorOnALensesHostLandsInTheFocusedColumn` (REVERT-R2a RED
+twice — the lens pick unmoved AND the ring on an unhosted pane),
+`divergeHereFromTheArticleCellMintsOnTheTakesBoard` (RED: `minted →
+nil`, the silent no-op live), and the round-1
+`branchOnAClosedFanRevealsTheNewTake` STRENGTHENED with a full-key
+assert (RED: livePane on `takes-main`).
+
+**[MINOR-R2-B] — AGREED-FIXED.** Trace confirmed: the read tier got
+both fields, the editor only decor — `BadgeOverlayController.init`
+wired with no push; nothing resets `badges` at attach; the
+`result != badges` gate starves a fresh host over a loaded model, and a
+fully-visible short post never produces the un-starving change. Fix:
+`EditorViewModel.pushBadgesToSink()` called from
+`BadgeOverlayController.init` after wiring — symmetric with the decor
+twin and the read tier; stored badges are geometry-correct until the
+next real change re-delivers (the round-2 reviewer's sustained note d).
+Pin: `aFreshlyWiredBadgeOverlayShowsTheFans` (the choosing lesson's
+rain fan; stored badges asserted non-empty BEFORE the wire) —
+REVERT-R2b ran RED (no ⑂ on the wired host; the sibling decor pin
+stayed green — the fields are independent, which is exactly why this
+one survived round 1).
+
+**[NIT-R2-C] — AGREED-FIXED** (folded into R2-A as routed): the
+no-`.main` branch of `revealChosenTake` speaks — "Chosen — the post now
+shows the new blank take; add a \u{201C}Chosen (the post)\u{201D} column to see it
+here." Pin: `blankChooseWithNoChosenColumnSpeaks` — REVERT-R2a ran RED
+(`statusMessage` nil, the silent success live).
+
+**[NIT-R2-D] — RECORD-ONLY, as routed.** No action; the
+apply-mid-modal window stays on the record (single-device today;
+pin-impossible without a contrived harness).
+
+**THE CLASS-COMPLETENESS SWEEP (the architect's addition, executed):**
+
+*Table (a) — every reveal-brain door × every host that can mount it.
+Verdicts: FIXED-R1/FIXED-R2 (pin named) or SAFE (why, one line).*
+
+| Door → brain | Takes host | Lenses host | Write panel |
+|---|---|---|---|
+| Bar block-menu ＋New + "+ take" → `branchTakeRevealed` (no preferred) | FIXED-R2 — article/landing keys map to the fan namespace (strengthened `branchOnAClosedFanRevealsTheNewTake`) | FIXED-R2 (`barMintDoorOnALensesHostLandsInTheFocusedColumn`) | — (bar not mounted) |
+| Bar block-menu ＋Blank → `newBlankTakeRevealed` (no preferred) | FIXED-R2 — same host-gated brain as ＋New (one body, the pins cover the gate) | FIXED-R2 — same brain | — |
+| Bar ＋Blank-as-chosen → `newBlankTakeAsChosen` | SAFE — the mint IS chosen; the article renders it (`revealChosenTake` .takes arm; round-1 D2 disposition) | FIXED-R1 (`blankChooseOnALensesHostKeepsTheRingOnAHostedPane`) + FIXED-R2 speak (`blankChooseWithNoChosenColumnSpeaks`) | — |
+| Takes keyboard ⌘T/⌥⌘T (preferred = pane.columnID) | FIXED-R2 — `takes-main` maps to the fan namespace; `takes-fan` renders the mint directly | — (routes to the Lenses handler there) | — |
+| Takes keyboard ⇧⌥⌘T | SAFE — chosen mint, article renders it | — | — |
+| Growth doors (`newTakeDoors`, takes board only) → both Revealed brains (no preferred) | FIXED-R2 — same host-gated brains | — (not rendered) | — |
+| Cell menu ＋New/＋Blank (both boards; now preferred = column.id) | FIXED-R2 — `takes-main` cell maps to fan | FIXED-R2 — the cell's own column adopts the pick | — (panel renders its own cards, not `TakesCellView`) |
+| Cell menu "Diverge here" → `divergeHere` | FIXED-R2 (`divergeHereFromTheArticleCellMintsOnTheTakesBoard` — was a silent no-op) | SAFE — `branchIntoColumn` + ring-follow (the R2-A core; the bar pin exercises it) | — |
+| Lenses keyboard ⌘T → `divergeHere(pane.columnID)` | — | FIXED-R2 — ring-follow added in the shared core (previously stranded on the replaced key) | — |
+| Lenses keyboard ⌥⌘T | — | FIXED-R2 — consolidated onto `newBlankTakeRevealed` (old pair minted then REFUSED the Chosen-column pick) | — |
+| Lenses keyboard ⇧⌥⌘T | — | FIXED-R1 + R2-C | — |
+| Panel growth doors (branch/blank → direct mint + `focus(column.id)`; blank&choose → preferred = column.id) | — | — | SAFE — the panel renders EVERY fan take keyed `column.id`, so any of its focuses is hosted (round-1 D2 gave blank&choose the preferred column) |
+| `addBlockAtEnd` → `consumeLandings` pendingFocus | SAFE — focuses the new block's CHOSEN variant; the article renders it (pin `addBlockAtEndMintsAndHandsTheRingOver`) | SAFE — sparse picks can never cover a brand-new block, so every column resolves it to chosen (hosted) | — |
+| `consumeLandings` bloom/N9 landing focus | SAFE — keys (takes-main, block, chosen) = the article | SAFE — `landingEnabled` is set ONLY by `TakesBoardView`; the landing half never runs on the Lenses host (grep-verified) | — |
+| Canvas ‹ › switcher | SAFE — view-local viewing state; calls NO reveal brain (grep-verified) | — | — |
+
+30 door×host cells enumerated: **15 FIXED** (11 across rounds 1–2 with
+8 named pins + the strengthened round-1 pin), **15 SAFE** with the
+mechanism stated. **One recorded residual (cosmetic, Stage 3 polish):**
+on a LONG open fan the revealed fan card may sit on a later PAGE of the
+carousel/rail — the fan is open, the counter ticks, and the ◀ x–y of
+n ▶ pager advertises it, so this is not the silent-vanish class; an
+auto-page-to-the-mint is a polish call for Stage 3's takes theme.
+
+*Table (b) — every equality-gated overlay sink × every wiring path
+(grep-verified complete: the app has exactly these four sink fields and
+these six construction/wiring sites; no other gated delivery exists).*
+
+| Sink · gate | Wiring path | Verdict |
+|---|---|---|
+| `EditorViewModel.decorSink` · `lastDecorState` equality | `BlockDecorOverlayController` convenience init (BlockDecor.swift:224) ← EditorView FULL coordinator install | FIXED-R1 walk fix 2 — `pushDecorationsToSink` in the one shared init (pin `aFreshlyMountedEditorRendersTheCalloutFrame`) |
+| same | ← INLINE coordinator install (same convenience init) | FIXED-R1 — same single wiring point |
+| `EditorViewModel.badgeSink` · `result != badges` | `BadgeOverlayController.init` (EditorView:483) ← BOTH editor coordinators | FIXED-R2 — `pushBadgesToSink` (pin `aFreshlyWiredBadgeOverlayShowsTheFans`) |
+| `ReadPostViewModel.decorSink` · `lastDecorState` equality | `ReadPostSurfaceCoordinator.install` | FIXED-R1 fix pass (MAJOR-C) — `pushOverlaysToSinks` (pin `aRemadeReadSurfaceStillRendersDecorAndBadges`) |
+| `ReadPostViewModel.badgeSink` · `result != badges` | same install | FIXED-R1 fix pass (MAJOR-C) — same push, the pin's badge half |
+
+5 sink×path cells: **5 FIXED**, 0 remaining. Every sink in the app now
+delivers at wire time — the starved-host class has no un-pushed field
+left, and table (b)'s grep is the completeness proof.
+
+## Stage 2 closeout (stage-level, 2026-07-20 — written at ladder close for the Stage 3 brief-writer and the end-checkpoint walk)
+
+**STAGE 2 CLOSED.** The tutorial spine (R113/P-6) is built, walked,
+twice-cold-reviewed, and hardened: the ladder closed at round 2 with
+zero new BLOCKER/MAJOR; the round-1 fix pass (2 MAJOR + 6 MINOR + 6
+NIT) and the round-2 residual pass (R2-A/B/C + the class-completeness
+sweep) are fully dispositioned above, every bug-class fix red-on-old by
+behavioral revert.
+
+**Counts trajectory:** Mac 499/100 (Stage 1 close) → 530/106 (the spine
++ walk fixes) → 538/106 (round-1 fix pass, +8 pins) → **542/106 final**
+(round-2 residuals, +4 pins + one strengthened). Core **747/90
+byte-untouched across the entire stage** (git-verified at every pass —
+the seeder writes through existing Operations only, including the
+quiet `Operations(undoStack: nil)` facade). `/Applications/Variorum.app`
+refreshed from Release at each pass.
+
+**The tutorial's final shape:** "the field guide" — a curated book of
+the app's own objects (6 real chapters · 21 act-ready `.generic`
+lessons, every one tagged `tutorial`, `word_target` 4000), plus the
+version twin, the "tutorial scraps" pool (one fanned scrap), and the
+sealed lesson. Seeding is a product door hardened by the ladder: Help ▸
+Restore Tutorial… runs ONE discovery, confirms whenever ANYTHING the
+replace destroys exists (exact-tag, plural name-based scope in the
+copy), replaces exactly what was confirmed, never touches the
+structural-undo stack, and converges under a double press (the session
+latch); the open entrances route bookless residue through the same
+confirmed restore. The tutorial is seeded in her REAL store (data
+unchanged by the fix rounds — the fixed doors govern future presses)
+and `TutorialWalkTests` (now 41 across its suites — counted, not
+derived) is the permanent acceptance layer: every Stage 3 batch re-runs
+it for free.
+
+**Classes ended this stage (the ladder's arc):** the
+confirm-gate-narrower-than-destruction seam (MAJOR-A's reshape); the
+starved-overlay-host class — ALL five sink×path cells now deliver at
+wire time (sweep table b: 5/5 FIXED, grep-complete); the
+ring-on-an-unhosted-pane class — 30 door×host cells enumerated, 15
+fixed / 15 provably safe (sweep table a), including the sweep's own
+finds (the article-keyed reveal strand; `divergeHere`'s silent no-op on
+the takes board; the Lenses ⌥⌘T mint-then-refused-pick).
+
+**What Stage 3 inherits:**
+- **The unlocked-drive list FIRST** (the locked-session remainder from
+  the walk): the ceremony SHEET on-screen, precise selections
+  (extract/make-block at the staged spans), typing/crystallization's
+  surface half, archive recovery through Write's panel, all drags
+  (scrap → draft, canvas cards, chapter reorder), save-panel exports,
+  the Restore confirm's Replace press, palette ↓-stepping — plus the
+  two blank utility windows at launch (identity unestablished) and the
+  N12 verify-unlocked item.
+- **Ledger rows:** N11 (palette keyboard row-stepping), N12 (Write
+  focus on a bare mode switch — verify unlocked first), N13 (chapters
+  never reach `exportReading` — a core Queries seam, routing forced).
+  Confirmed live: N8/AD-8 (T7).
+- **The raw-ops walk-test acts** (round-1 NIT-4): drive
+  makeBlock/choose/ceremony/extract/merge through the REAL doors at the
+  unlocked drives; the headless store-outcome assertions stay.
+- **Cosmetic/copy notes riding Stage 3 polish themes:** the
+  declined-confirm copy note (round-2 sustained note b);
+  `exportCaretBlock`'s open-tail phrasing (Stage 1); the
+  auto-page-to-the-mint call (sweep table a's recorded residual — a
+  revealed fan card can sit on a later page of a long fan's pager).
+- The dev store's walk residue remains one Restore away from pristine;
+  the R2-D speculative record (sync landing mid-confirm-modal) stays on
+  file for the eventual multi-device era.
