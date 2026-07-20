@@ -50,6 +50,138 @@ struct PostDetailModeMemoryTests {
 }
 
 @MainActor
+@Suite("PostDetail mode routing (13b 1b, P-4)", .serialized)
+struct PostDetailRoutingTests {
+    private func pump(_ seconds: TimeInterval = 0.03) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    private func settle(
+        _ window: NSWindow, _ hosting: NSView,
+        until predicate: () -> Bool, maxTurns: Int = 60
+    ) async {
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(20))
+            if predicate() { return }
+        }
+    }
+
+    private func contains<V: NSView>(_ type: V.Type, in view: NSView) -> Bool {
+        if view is V { return true }
+        return view.subviews.contains { contains(type, in: $0) }
+    }
+
+    /// The mounted detail registers with the CommandRouter, and a routed
+    /// mode request actually SWITCHES the surface — the composed
+    /// replacement for `.variorumSwitchMode`, exercised over the real
+    /// mounted shell (the wiring no other test touched).
+    @Test func theMountedDetailRegistersAndRoutedRequestsSwitchTheSurface() async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "routing")
+            _ = try session.operations.newBlock(in: post.id, text: "a block, so Takes opens.")
+            // A fresh mode memory (the R79 takes-first default).
+            UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+            }
+            let hosting = NSHostingView(
+                rootView: PostDetailView(session: session, postID: post.id)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+
+            await settle(window, hosting, until: {
+                session.commandRouter.activePostID == post.id
+            })
+            #expect(session.commandRouter.activePostID == post.id,
+                    "the detail registered with the router")
+            #expect(session.commandRouter.activeMode == .takes, "R79: takes-first")
+
+            // The routed request (⌘1 / the sidebar rail) switches the REAL
+            // surface: Write's full-document editor mounts.
+            #expect(session.commandRouter.requestMode(.write, postID: post.id))
+            await settle(window, hosting, until: {
+                self.contains(EditorTextView.self, in: hosting)
+            })
+            #expect(session.commandRouter.activeMode == .write,
+                    "the detail reported its new truth (the rail's mirror)")
+            #expect(contains(EditorTextView.self, in: hosting),
+                    "the Write editor actually mounted — the request ACTED")
+        }
+    }
+}
+
+@MainActor
+@Suite("Sidebar smoke (13b 1b — zero-test-view obligation)", .serialized)
+struct SidebarSmokeTests {
+    /// The sidebar mounts with the post-mode rail (its ThemeStore
+    /// environment requirement and the rail's router-fed marker input —
+    /// a missing environment or a rail regression crashes/fails here).
+    @Test func theSidebarMountsWithThePostModeRail() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "sidebar")
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 260, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let selection = Binding<SidebarSelection?>.constant(.post(post.id))
+            let hosting = NSHostingView(
+                rootView: SidebarView(
+                    session: session, model: LibraryViewModel(session: session),
+                    pool: PoolViewModel(session: session), selection: selection,
+                    postMode: PostMode.takes.rawValue)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 260, height: 600)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+            #expect(hosting.subviews.isEmpty == false, "the sidebar rendered")
+        }
+    }
+}
+
+@MainActor
 @Suite("WriteTakesPanel (13b 1a)", .serialized)
 struct WriteTakesPanelTests {
     private func pump(_ seconds: TimeInterval = 0.03) {
