@@ -2,9 +2,13 @@
 
 **Status:** ACTIVE — Stage 1 COMPLETE (1a + 1b closeouts below; the
 architect acceptance of 1b — memo approvals + the T3-deviation stance —
-is recorded after the 1b closeout). The Stage 1 REVIEW LADDER (round 1,
-cold) is RUNNING over the combined 1a+1b diff. Then Stage 2 (the tutorial
-spine). Stage 0 complete + ratified batch 17; started 2026-07-20.
+is recorded after the 1b closeout). The Stage 1 REVIEW LADDER: round 1
+(cold) DONE and its FIX PASS DONE (dispositions section below — all
+findings AGREED-FIXED or architect-resolved, every bug-class fix
+red-on-old by behavioral revert; Mac 497/100 · core 747/90 untouched);
+ROUND 2 (fresh cold reviewer re-reviewing the fixes) is NEXT. Then
+Stage 2 (the tutorial spine). Stage 0 complete + ratified batch 17;
+started 2026-07-20.
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
 `notes/plans/phase-13-ui-design.md`, batches 15–16; defects D1–D4 in batch 15).
@@ -1017,7 +1021,7 @@ revisit condition stated in the memo).
   a Stage 3 decomposition candidate once the ladder settles Stage 1's
   shape.
 
-## Stage 1 ladder — round 1 findings (VERBATIM record; fix pass pending)
+## Stage 1 ladder — round 1 findings (VERBATIM record; fix pass COMPLETE — dispositions follow the clean bill)
 
 *Process note (2026-07-20): the original 1b implementer session was lost
 to the author's API session limit immediately after acknowledging these
@@ -1115,3 +1119,160 @@ N5/N9 pins end-to-end; the registry walk's declared⇔rendered enforcement
 + R118 parity as code; P-4's three regimes deleted (grep-verified);
 memos canon-checked; P1/P3 on the new surfaces (visible-page rendering,
 clamped offsets, ≤1 live editor).
+
+### Stage 1 ladder — round 1 dispositions (fix pass, 2026-07-20; fresh implementer session)
+
+*Every finding traced to its concrete mechanism before disposal; every
+bug-class fix carries a red-on-old pin verified by BEHAVIORAL REVERT
+(the fix's wiring reverted, the pin run RED, the fix restored — the
+types/fields stayed so the pins compile on both sides). New pins live in
+`VariorumTests/CommandRoutingTests.swift` (suites "Stale WriteIntent",
+"Seal door in handler-less modes", "Block TOC status forward", "Takes
+word-count cache") and `VariorumTests/CapabilityRegistryTests.swift`
+(the three ladder registry-fact tests appended to the walk suite).
+Counts after the pass: **Mac 497/100** green (was 485/96) · **core
+747/90**, `Sources/VariorumCore` byte-untouched (git-status-verified).
+Fix commit: `b1f6250`.*
+
+**[MAJOR] — AGREED-FIXED, both halves + the landing twin.** Trace
+confirmed exactly as written: `moveToWriteAndRun` discarded
+`requestMode`'s result; the postID-mismatch branch (user clicks another
+post during the pre-switch `await flushNow()`) returned false with no
+speech; the un-stamped intent survived and `applyFocusSeeds` consumed it
+at the FIRST render of ANY full-document editor. Fixes: **(a)** the
+parker clears `pendingWriteIntent` when `requestMode` returns false, and
+the mismatch branch speaks `CommandRouter.staleModeRequestNote` ("The
+open post changed — that request no longer applies."); **(b)**
+`WriteIntent` gains `postID` + detail-lifecycle freshness —
+`applyFocusSeeds` consumes only its OWN post's intent (a mismatched
+intent is deliberately LEFT PARKED: a book-inline/pool editor rendering
+mid-choreography must not destroy the detail editor's landing);
+`registerDetail` clears parcels stamped for a different post
+(register-ordering-proof — on a P→Q switch Q's onAppear can precede P's
+onDisappear, making the token-guarded unregister a no-op); a genuine
+`unregisterDetail` clears both parcels (the round is over).
+**Extension, same class, recorded:** `TakesLanding` got the identical
+discipline (post-stamp; clear-on-refused-switch at its two parking
+sites, WriteTakesPanel + LensesBoardView; consumption guard in
+`consumeLandings`) — traced mechanism: a stale landing consumed by an
+unrelated board bloomed a foreign block ID AND set `landingFocusDone`,
+eating that board's own N9 "just start typing" focus. Pins (5, suite
+"Stale WriteIntent"): `aRefusedModeSwitchClearsTheParkedIntentAndNothing
+EverRuns` (the finding's own end-to-end pin — REVERT-1 of half (a) ran
+RED with the smoking gun: the reverted code DIVIDED THE BLOCK UNPROMPTED
+at the later editor mount, store 1→2 blocks, plus zero speech);
+`aStaleTargetedModeRequestSpeaks` (RED under REVERT-1);
+`aStaleIntentForAnotherPostIsNeverConsumedByAMountedEditor`,
+`theDetailLifecycleClearsStaleParkedIntents`, and
+`aStaleLandingForAnotherPostNeverEatsTheBoardsLandingFocus` (all RED
+under REVERT-2 of half (b) — the landing pin's red showed the foreign
+bloom AND `livePane → nil`, the eaten focus, live). Both reverts
+restored; the suite is green on shipped code.
+
+**[MINOR-1] — AGREED-FIXED.** Trace: `toggleSeal`'s
+`router.dispatch(.toggleSeal)` speaks the unhandled note synchronously
+in handler-less modes (Compare/Outline/Blocks register no handler;
+Canvas's handler falls through) — "open a post first" with a post open —
+then the ShellActions fallback seals and speaks "Sealed.". Fixes:
+`dispatch` gains `speakingWhenUnhandled:` (default true — every other
+call site unchanged); `toggleSeal` dispatches QUIET and its
+no-post guard now speaks the honest `sealPost.unavailableNote` itself
+(the quiet dispatch must not create a new silent door — pinned as a
+parity guard, `sealWithNoPostOpenStillSpeaksTheHonestNote`, not claimed
+red); `sealPost` availability gains the `writeEditorAttached` arm
+(book-inline/pool editors seal through their own routed EditorView
+handler — the rule now says so). Pins:
+`sealFromAHandlerLessModeActsWithoutAWrongRefusalFlash` (asserts
+`status.current == nil` immediately after the call — the wrong note
+landed synchronously pre-fix — then the real seal + "Sealed."; REVERT-3
+ran RED capturing the wrong note verbatim) and
+`sealPostIsAvailableWhereverItActuallyWorks` (RED on the reverted arm).
+
+**[MINOR-2] — AGREED-FIXED.** Trace: `BlockTOCViewModel.statusMessage`
+was the one surface VM without the AD-14 `didSet` forward; the view
+rendered it as a never-dismissing red caption — Blocks is a full mode
+surface, outside the sheet exemption. Fix: the same one-line forward
+(`session.status.speak`) + the caption removed from `BlockTOCView`.
+Pin: `tocRefusalsLandInTheOneStatusCenter` (a sealed-post deleteBlock
+refusal reaches the StatusCenter; the property stays the tested truth;
+REVERT-3 ran RED — center empty).
+
+**[MINOR-3] — AGREED-FIXED.** Trace: `previousBlock`/`nextBlock` were
+registry-enabled under `writeEditorAttached || mode == .write` but their
+menu actions optional-chain into `editorRouter.active` — in Write with
+the editor still mounting they were enabled-but-silent (the
+enabled-into-nil class); Callout and `exportCaretBlock` used a third
+idiom (raw `editorRouter.active == nil` disables; a silent
+`guard else return`). Fix — the reviewer's "derive availability from
+attachment only" option: the `writeEditor` availability rule is now
+ATTACHMENT-ONLY (enabled ⇔ the editor the action chains into exists),
+and all four items read the one registry idiom (`enabled(id)`);
+`exportCaretBlock`'s guard SPEAKS its declared note for the
+caret-outside-any-block case its coarser enablement now admits (the
+open tail — fire → real refusal, P-2). Not taken: routing them as
+handled commands (heavier — four handler switches grow for acts whose
+one true home is the attached editor; attachment IS the actability
+truth). Pin: `writeEditorScopedActsAreEnabledOnlyWithARealEditor`
+(never enabled unattached; enabled when attached, incl. the
+book-inline/pool context; REVERT-3 ran RED on all four ids).
+
+**[MINOR-4] — RESOLVED-BY-ARCHITECT** (pre-pass): ledger row N10 owns
+the deferred T3 slice (gesture band + projection executors move
+TOGETHER, post-ladder). No action this pass.
+
+**[MINOR-5] — AGREED-FIXED.** Trace: `TakesBottomBar.wordCountLabel`
+reduced `TextMetrics.wordCount` over EVERY slot's full projection text
+per render, and the bar re-renders per keystroke (it reads
+`focusedPane`/`resolvedTake`, and every `paneEdited` mutates the one
+observed `authority` property) — O(post length) per keystroke, the
+class P-8 binds the rebuilt layer against. Fix: the post total is now
+`TakesViewModel.postWordCount`, recomputed per PROJECTION adoption with
+the `EditorSurfaceLedger.adopt` discipline mirrored (per-slot text+count
+cache; only changed texts re-enumerate; `slotRecountCount` is the test
+seam); the bar reads the cached total. The focused-take half stays a
+per-render count of ONE take (O(the edit unit) — the Write editor's
+live-caret-count precedent). Displayed values are byte-identical to the
+old label (the old reduce also only changed at projection cadence).
+Pin: `slotWordCountsRecomputeOnlyWhereTextChanged` (first adoption
+counts N; unchanged re-adoption counts ZERO more; a one-slot edit
+counts exactly one more; totals asserted; REVERT-3 — recount-all — ran
+RED at 6 then 9 recounts).
+
+**[NIT-1] — AGREED-FIXED** (no pin owed; traced mechanism: a future
+`paletteActs` entry without a `paletteAction` case compiles into
+`default: return {}` — a rendered palette row that does nothing, and no
+walk can introspect closures to catch it). The default is now loud in
+DEBUG (`assertionFailure`) and speaks an honest sentence in release —
+the row can never be silent. Justification: the invocation-walk
+alternative can't run (several palette bodies open modal panels).
+
+**[NIT-2] — AGREED-FIXED** (bonus pin, cheap): traced — Write's and
+Lenses' handlers consume `.takes(.closeAll)` with `break` while the
+menu item rendered enabled (`takeFamily`); blooms exist only on the
+Takes board. `closeAllTakes` availability is now scoped to `.takes`
+(the reviewer's first option); its unavailable-note names the board.
+The handlers' `break` arms stay (unreachable from the now-disabled
+door; behavior parity). Pin: `closeAllTakesIsScopedToTheTakesBoard`
+(RED under REVERT-3).
+
+**[NIT-3] — AGREED-FIXED** (no pin owed; traced: the
+`addBlockAtEnd`/`commitTake`/`blockComments` availability closures were
+byte-identical copies of `takeFamily` — three places for one rule to
+drift). All three now name `takeFamily`; the registry walk's existing
+facts pin the unchanged semantics. `blockComments`' inline comment
+("the bars' block menus carry the door") moved to the declaration.
+
+**For round 2's reviewer:** the fix surface is 11 app files + 2 test
+files (commit `b1f6250` — Registry/{Capability, CommandRouter,
+CapabilityRegistry, ShellActions}, TakesViewModel, EditorViewModel,
+WriteTakesPanel, LensesBoardView, BlockTOCView, TakesBottomBar,
+EditorCommands). Judgment calls WORTH A LOOK: (1) the mismatched-intent
+leave-it-parked reading in `applyFocusSeeds` (protects the book-inline
+race; staleness is the router's lifecycle clearing — is the pairing
+airtight?); (2) the TakesLanding extension (same class, small, but it
+widens the diff beyond the finding's letter); (3) MINOR-3's
+attachment-only reading briefly greys the four caret acts while Write's
+editor mounts (honest-grey vs the old enabled-but-silent — P-2 says
+grey); (4) `exportCaretBlock` is now enabled with the caret in the open
+tail and speaks instead of greying (context can't see caretBlockID —
+acceptable under fire-and-DO?).
