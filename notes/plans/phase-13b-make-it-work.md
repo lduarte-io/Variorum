@@ -290,6 +290,9 @@ Commits per batch/stage with the standing message convention.
 | N4 | ⌥⌘Z executes-then-reports-into-nil outside Write (silent state change) | new, Stage 0(b), spot-verified → T1 |
 | N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | new, Stage 0(b), spot-verified → T1 |
 | N6 | Take-label setter missing in core; lens-rename face missing | new, Stage 0(b) → T5 |
+| N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | new, Stage 0(c) → 1a (flagged mid-flight + soak invariant) |
+| N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
+| N9 | AD-17 quick-entry lands in Takes where typing does nothing ("just start typing" broken at the landing) | new, Stage 0(c) → 1b (R118 registry case) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -422,6 +425,44 @@ them.
 **Gate:** the author ratifies these verdicts + this backlog before Stage 1
 builds. The (c) app-drive inventory refines T5–T7's contents but is not
 expected to move the verdicts.
+
+### Stage 0(c) — the app-drive inventory (LANDED 2026-07-20)
+
+Dossier: `phase-13b-stage0-app-drive.md`; 50 window-targeted captures in
+`phase-13b-stage0-screens/` (~29 MB, deliberately UNTRACKED — local
+evidence referenced by path; gitignored). The drive ran against the DEV
+instance (pid- and store-verified) via direct accessibility actions +
+pid-scoped keyboard events — notably while the login session was
+SCREEN-LOCKED, which blocked real mouse clicks; the take-focus-dependent
+checks (completing an archive, the D1 body-click variant, live-editor
+mounting) remain for a later unlocked drive and fold into the ordinary
+Stage 3 verification drives (no TCC change needed). **22 defects
+(AD-1…AD-22) logged; 9 matrix worst-cells confirmed live; verdicts
+UNMOVED, as predicted.** Routing of the genuinely new finds:
+
+- **AD-2 — fan truncation (the worst new discovery):** "takes · 4"
+  renders exactly 2 cards — no pager, no more-door; half the fan is
+  unreachable. IN-TERRITORY for the running Stage 1a build → flagged to
+  the implementer mid-flight with the soak invariant "every active take
+  renders a card or an explicit more-door" (directive mirrored here per
+  the delivery-verification rule).
+- **AD-7** (margin-grid cells balloon into ~2/3-empty wash slabs — the
+  likely mechanism behind her "suspicious vertical gaps") + **AD-8**
+  (margin comments clip UNDER the sidebar — entirely invisible at the
+  default window width) → **T7**.
+- **AD-17** (quick-entry mints a post then lands in Takes where typing
+  does nothing — "just start typing" broken at the landing; a concrete
+  R118 registry case) + **AD-14** (refusal quality inconsistent; refusal
+  lines never auto-dismiss) + **AD-4** (stock Cut/Copy/Fonts right-click
+  on take cards, zero Variorum vocabulary; archived takes have no
+  visible road back) → **1b / T5**.
+
+**INCIDENT (architect-verified):** the author's real-store /Applications
+instance exited during the audit window — a CLEAN exit (no crash report
+in DiagnosticReports); the drive's events were pid-scoped to the dev
+instance throughout; the store is WAL-safe; she relaunches whenever.
+Dev-store mutations for re-seed awareness: one branched take on "the
+glass city dream", one scratch post "stage0 audit scratch post".
 
 ## Stage closeouts
 
