@@ -30,16 +30,20 @@ struct TakesCellView: View {
     let slot: Queries.RenderedBlock
     let column: TakesColumn
     let tinted: Bool
+    /// Surface identity for tests/soaks ("article" on the takes board's
+    /// main cell; the default elsewhere).
+    var role: String = "cell"
     let onDiff: (TakesDiffPresentation) -> Void
 
     var body: some View {
         if let resolved = model.resolvedTake(column: column, slot: slot) {
             let key = TakesViewModel.PaneKey(
                 columnID: column.id, blockID: slot.blockID, variantID: resolved.variantID)
-            TakePaneView(
+            PaneSurfaceView(
                 text: resolved.text,
-                isLive: model.focusedPane == key && !model.projection.sealed,
+                isLive: model.authority.isLive(key, sealed: model.projection.sealed),
                 tokens: tokens,
+                role: role, variantID: resolved.variantID,
                 onFocusRequest: { model.focus(key) },
                 onEdit: { model.paneEdited(variantID: resolved.variantID, newText: $0) })
                 .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
@@ -50,9 +54,10 @@ struct TakesCellView: View {
                     // invisible void (boundaries are invisible at rest).
                     // Write renders the same empty line as plain prose;
                     // export still skips blank takes (the Phase 4 rule —
-                    // output, not editing).
-                    if resolved.text.isEmpty,
-                       model.liveBuffers[resolved.variantID]?.isEmpty != false {
+                    // output, not editing). `resolved.text` already
+                    // overlays the live buffer (the authority), so the
+                    // emptiness check is one equality (13b 1a).
+                    if resolved.text.isEmpty {
                         Text(tokens.chromeLabel("empty take — line kept"))
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)

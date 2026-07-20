@@ -257,8 +257,9 @@ struct ModesTutorialView: View {
         {
             if let shape = model.shape,
                let slot = slot(shape.polishBlockID) {
-                TakePaneView(
+                PaneSurfaceView(
                     text: slot.text ?? "", isLive: false,
+                    role: "tutorial",
                     onFocusRequest: {
                         if let id = model.demoPostID { openPost?(id) }
                     })

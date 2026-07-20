@@ -79,9 +79,9 @@ struct TakesArticleRenderTests {
         }
     }
 
-    private func takeViews(in view: NSView) -> [TakeTextView] {
-        var found: [TakeTextView] = []
-        if let take = view as? TakeTextView { found.append(take) }
+    private func takeViews(in view: NSView) -> [PaneTextView] {
+        var found: [PaneTextView] = []
+        if let take = view as? PaneTextView { found.append(take) }
         for sub in view.subviews { found.append(contentsOf: takeViews(in: sub)) }
         return found
     }
@@ -177,6 +177,67 @@ struct TakesArticleRenderTests {
             // clobbers a live pane — the buffer-authoritative guard.)
             #expect(takeViews(in: hosting).first?.string == typed,
                     "article shows \(takeViews(in: hosting).first?.string ?? "nil")")
+        }
+    }
+
+    @Test func stackStyleReadCardsFollowTheLiveBufferNotStaleStoreText() async throws {
+        // 13b Stage 1a (the batch-14 pattern EXTENDED to the stack style):
+        // `CollapsibleTakeCard` fed panes raw `take.workingText`, bypassing
+        // the live buffers — the ONE card path left outside the authority.
+        // Mechanism: edit the chosen take from the ARTICLE cell (live);
+        // its stack-bloom CARD is a read pane mirroring the same variant —
+        // while the autosave debounce holds, the store (and the manually-
+        // driven projection here) is stale, so the pre-fix card shows the
+        // OLD text. Post-fix every card resolves through the authority.
+        // (No observation task runs — the projection stays deliberately
+        // stale, so a late flush can't green the old code.)
+        try await withTakesWorld { session, db, postID, blockID, chosenID, chosenText in
+            let model = TakesViewModel(session: session, postID: postID)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: postID) })
+            defer { model.teardown() }
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1200, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: TakesBoardView(session: session, postID: postID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1200, height: 800)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            #expect(model.projection.fanStyle == .stack, "the stack style is the default")
+            await settle(window, hosting, until: { !takeViews(in: hosting).isEmpty })
+
+            // Bloom the fan; focus the ARTICLE cell (main column) for the
+            // chosen take — its fan CARD is then a read pane.
+            model.toggleExpanded(blockID)
+            await settle(window, hosting, until: { takeViews(in: hosting).count >= 2 })
+            model.focus(TakesViewModel.PaneKey(
+                columnID: "takes-main", blockID: blockID, variantID: chosenID))
+            await settle(window, hosting, until: { false }, maxTurns: 3)
+
+            let typed = chosenText + " — typed into the article"
+            model.paneEdited(variantID: chosenID, newText: typed)
+            let cardID = NSUserInterfaceItemIdentifier("pane:card|\(chosenID)")
+            // SHORT settle, deliberately inside the 500 ms autosave
+            // debounce: the card must follow the BUFFER at once — waiting
+            // for the store's round trip would let the pre-fix code
+            // converge late and hollow the pin.
+            await settle(
+                window, hosting,
+                until: {
+                    takeViews(in: hosting).contains {
+                        $0.identifier == cardID && $0.string == typed
+                    }
+                }, maxTurns: 5)
+
+            let card = takeViews(in: hosting).first { $0.identifier == cardID }
+            #expect(card != nil, "the chosen take's stack card rendered")
+            #expect(card?.string == typed,
+                    "the stack card follows the live buffer (shows: \(card?.string ?? "nil"))")
         }
     }
 

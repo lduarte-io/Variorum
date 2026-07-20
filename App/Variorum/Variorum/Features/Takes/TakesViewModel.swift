@@ -66,8 +66,8 @@ final class TakesViewModel {
         didSet { saveMemory() }
     }
     /// The ONE live pane (P3: the live editor migrates on click; everything
-    /// else renders read-cheap).
-    private(set) var focusedPane: PaneKey?
+    /// else renders read-cheap) — the authority's, forwarded.
+    var focusedPane: PaneKey? { authority.livePane }
     /// Fanned blocks currently bloomed — SESSION-ONLY by the plan's letter
     /// (fans stay open once expanded; close-all resets; nothing persists).
     private(set) var expandedBlocks: Set<String> = []
@@ -134,28 +134,25 @@ final class TakesViewModel {
         (text ?? "").count < 200
     }
 
-    struct PaneKey: Equatable, Hashable {
-        var columnID: String
-        var blockID: String
-        /// The specific take the pane shows (a bloomed fan shows several
-        /// panes per block).
-        var variantID: String
-    }
+    /// The pane family's key type — the authority's (13b Stage 1a: the
+    /// alias keeps every call site and pin naming unchanged).
+    typealias PaneKey = PaneTextAuthority.PaneKey
 
     // MARK: - Internals
 
     @ObservationIgnored private var deferredProjection: Queries.TakesProjection?
-    /// Per-variant buffer while a pane is live and unsettled — the
-    /// buffer-authoritative rule in miniature (the editor's discipline).
-    /// OBSERVED (batch 14 — the frozen-article root cause): `resolvedTake`
-    /// feeds every read pane from this dictionary, so a keystroke in the
-    /// live pane must invalidate the rows that mirror it ("when something
-    /// is chosen, it still doesn't appear as chosen in the space above" —
-    /// the article cell froze on stale text AND stale height until the
-    /// projection eventually caught up). Invalidation cost is bounded by
-    /// the REALIZED rows (LazyVStack, P3); the live pane itself stays
-    /// buffer-authoritative behind the `!isLive` adopt guard.
-    private(set) var liveBuffers: [String: String] = [:]
+    /// THE pane-text/liveness authority (13b Stage 1a, P-3): live pane +
+    /// per-variant buffers + resolution live here as one tested value.
+    /// OBSERVED as a stored property (batch 14 — the frozen-article root
+    /// cause): `resolvedTake` feeds every read pane through the authority,
+    /// so a keystroke in the live pane invalidates the rows that mirror it.
+    /// Invalidation cost is bounded by the REALIZED rows (LazyVStack, P3);
+    /// the live pane itself stays buffer-authoritative behind the `!isLive`
+    /// adopt guard.
+    private(set) var authority = PaneTextAuthority()
+
+    /// The buffer overlay, forwarded (pins and cells read it).
+    var liveBuffers: [String: String] { authority.buffers }
 
     // MARK: - Lifecycle
 
@@ -189,9 +186,7 @@ final class TakesViewModel {
         // dirty half). Accepted residual, recorded: a stale pre-flush
         // emission racing settle can flicker one observation cycle before
         // the post-commit emission converges it.
-        for variantID in liveBuffers.keys where autosave.pending[variantID] == nil {
-            projectionCaughtUp(variantID: variantID)
-        }
+        authority.settle(isPending: { autosave.pending[$0] != nil })
         // Columns referencing lenses that died drop back to scratch with
         // the lens's last-known picks LOST deliberately (the lens was the
         // durable home; a deleted lens's thread is gone — its takes remain
@@ -221,7 +216,8 @@ final class TakesViewModel {
     /// What a column shows for a slot: the column's pick where one exists
     /// and is still a live ACTIVE take of the block, else the slot's
     /// ordinary chosen resolution (sparse overrides — the fall-through
-    /// class everywhere).
+    /// class everywhere). The fall-through + buffer overlay live in the
+    /// AUTHORITY (13b P-3); this maps the column kind to its pick.
     func resolvedTake(column: TakesColumn, slot: Queries.RenderedBlock) -> (variantID: String, text: String)? {
         let pick: String?
         switch column.kind {
@@ -232,12 +228,17 @@ final class TakesViewModel {
         case .lens(let lensID):
             pick = projection.lensSelections[lensID]?[slot.blockID]
         }
-        if let pick,
-           let take = projection.fans[slot.blockID]?.first(where: { $0.id == pick }) {
-            return (take.id, liveBuffers[take.id] ?? take.workingText)
-        }
-        guard let variantID = slot.variantID else { return nil }  // gap
-        return (variantID, liveBuffers[variantID] ?? (slot.text ?? ""))
+        return authority.resolvedText(
+            pick: pick, slot: slot, fan: projection.fans[slot.blockID])
+    }
+
+    /// A take's displayed text anywhere it renders raw (fan cards, the
+    /// stack style, the Write panel): the authority's overlay — a read
+    /// pane mirroring a dirty variant never shows staler text than the
+    /// buffer (the frozen-article class, closed for EVERY card path —
+    /// the stack style's `take.workingText` bypass was the last live one).
+    func liveText(_ take: Variant) -> String {
+        authority.text(variantID: take.id, storeText: take.workingText)
     }
 
     /// One row's displayed texts across the columns (the sameness input).
@@ -248,18 +249,21 @@ final class TakesViewModel {
     // MARK: - Focus (the ONE live editor migrates)
 
     func focus(_ pane: PaneKey) {
-        guard focusedPane != pane else { return }
-        // The leaving pane's text lands before the arriving pane goes live
-        // (the handoff contract in miniature — flush, then migrate).
-        let leaving = focusedPane
-        focusedPane = pane
-        if leaving != nil {
-            Task { await autosave.flushNow() }
+        switch authority.focus(pane) {
+        case .unchanged:
+            return
+        case .migrated(let leaving):
+            // The leaving pane's text lands as the ring migrates (the
+            // handoff contract in miniature — safety rides the buffers +
+            // the `!isLive` adopt guard; the flush converges the store).
+            if leaving != nil {
+                Task { await autosave.flushNow() }
+            }
         }
     }
 
     func blur() {
-        focusedPane = nil
+        authority.blur()
         Task { await autosave.flushNow() }
     }
 
@@ -267,12 +271,12 @@ final class TakesViewModel {
     /// the edit lands in exactly THAT take's working_text (visible-not-
     /// chosen is real and editable — durable, synced).
     func paneEdited(variantID: String, newText: String) {
-        let old = liveBuffers[variantID]
-            ?? currentStoreText(variantID: variantID)
-            ?? ""
+        let old = authority.text(
+            variantID: variantID,
+            storeText: currentStoreText(variantID: variantID) ?? "")
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
-        liveBuffers[variantID] = newText
+        authority.bufferEdited(variantID: variantID, text: newText)
         autosave.record(variantID: variantID, text: newText, charDelta: cost)
     }
 
@@ -285,12 +289,12 @@ final class TakesViewModel {
         return projection.slots.first { $0.variantID == variantID }?.text
     }
 
-    /// Settled buffers converge back to the store's text — called by
-    /// `adopt` for every entry with no pending autosave record (round 2
-    /// MAJOR: the seam existed unwired; the display could go permanently
-    /// stale and clobber newer store text on resumed typing).
+    /// Settled buffers converge back to the store's text (round 2 MAJOR:
+    /// the seam existed unwired; the display could go permanently stale
+    /// and clobber newer store text on resumed typing). The rule lives in
+    /// the authority now; this forwards for the callers/pins that name it.
     func projectionCaughtUp(variantID: String) {
-        liveBuffers.removeValue(forKey: variantID)
+        authority.catchUp(variantID: variantID)
     }
 
     // MARK: - Columns (the Lenses tab's slots — Sitting 9, R80/R83)
@@ -383,6 +387,24 @@ final class TakesViewModel {
     private func saveMemory() {
         TakesViewMemory(columns: columns, alignmentLocked: alignmentLocked)
             .save(postID: postID, defaults: defaults)
+    }
+
+    // MARK: - Discrete paging (session-only; model-owned)
+
+    /// Per-key page offsets for the card rows (carousel, slot split, and —
+    /// AD-2's fix — the margin rail): whole cards/columns, never halfway,
+    /// an EXPLICIT ◀ ▶ door instead of an invisible horizontal scroll.
+    /// Model-owned (13b 1a) so the AD-2 pin and the board soak can drive
+    /// page coverage; session-only like expansion.
+    private(set) var pageOffsets: [String: Int] = [:]
+
+    /// The clamped current offset for a key (limit = last legal offset).
+    func pageOffset(_ key: String, limit: Int) -> Int {
+        min(max(pageOffsets[key] ?? 0, 0), max(limit, 0))
+    }
+
+    func stepPage(_ key: String, by delta: Int, limit: Int) {
+        pageOffsets[key] = min(max(pageOffset(key, limit: limit) + delta, 0), max(limit, 0))
     }
 
     // MARK: - Expansion (session-only)

@@ -57,15 +57,20 @@ final class BlockTOCViewModel {
     /// Expanded rows — SESSION-ONLY in v1 (the ratified reading; nothing
     /// persisted anywhere).
     private(set) var expanded: Set<String> = []
+    /// THE pane-text/liveness authority (13b 1a, P-3): the TOC previously
+    /// kept NO buffer map — the round-2 NIT-5 accepted residual (a blurred
+    /// pane could flash pre-flush projection text). The shared authority
+    /// retires it: rows resolve through the buffer overlay like every pane.
+    private(set) var authority = PaneTextAuthority()
     /// The ONE live block (P3's split: expanded rows are read-cheap; one
-    /// upgrades on click).
-    private(set) var liveBlockID: String?
+    /// upgrades on click) — the authority's, forwarded.
+    var liveBlockID: String? { authority.livePane?.blockID }
     private(set) var statusMessage: String?
 
     func start() async {
         do {
             for try await value in session.database.observeBlockTOC(postID) {
-                rows = value
+                adopt(rows: value)
             }
         } catch is CancellationError {
         } catch {
@@ -95,37 +100,51 @@ final class BlockTOCViewModel {
         }
     }
 
-    /// Test seam: adopt a projection deterministically.
-    func adopt(rows: [Queries.TOCRow]) { self.rows = rows }
+    /// Test seam: adopt a projection deterministically. Settle-time
+    /// convergence rides every adoption (the authority's rule): buffers
+    /// with no pending autosave drop, so external edits reach the rows.
+    func adopt(rows: [Queries.TOCRow]) {
+        self.rows = rows
+        authority.settle(isPending: { autosave.pending[$0] != nil })
+    }
     func adopt(tray: [Queries.TrayItem]) { self.tray = tray }
+
+    /// A row's displayed text: the authority's overlay over the store's
+    /// row text (13b 1a — retires the NIT-5 stale-flash residual).
+    func displayText(variantID: String?, storeText: String?) -> String {
+        guard let variantID else { return storeText ?? "" }
+        return authority.text(variantID: variantID, storeText: storeText ?? "")
+    }
 
     // MARK: - Expansion (session-only) + the one live editor
 
     func toggleExpanded(_ blockID: String) {
         if expanded.contains(blockID) {
             expanded.remove(blockID)
-            if liveBlockID == blockID { liveBlockID = nil }
+            if liveBlockID == blockID { authority.blur() }
         } else {
             expanded.insert(blockID)
         }
     }
 
-    func makeLive(_ blockID: String) {
-        guard liveBlockID != blockID else { return }
-        liveBlockID = blockID
-        // ACCEPTED (round 2, NIT 5 — recorded): the TOC keeps NO live-
-        // buffer map, so the just-blurred pane can show the pre-flush
-        // projection text for one flush+observe cycle (the flush is forced
-        // right here, so the window is sub-second and self-healing). The
-        // takes board carries the full buffer discipline because its panes
-        // are the flagship editing surface; the TOC's expand-to-edit is a
-        // convenience — revisit with Phase 13's polish if it ever shows.
-        Task { await autosave.flushNow() }
+    func makeLive(_ blockID: String, variantID: String) {
+        let key = PaneTextAuthority.PaneKey(
+            columnID: "toc", blockID: blockID, variantID: variantID)
+        switch authority.focus(key) {
+        case .unchanged:
+            return
+        case .migrated:
+            // The leaving pane's text lands as the ring migrates; the
+            // buffer overlay keeps the just-blurred row current meanwhile.
+            Task { await autosave.flushNow() }
+        }
     }
 
     func paneEdited(variantID: String, oldText: String, newText: String) {
-        let cost = TakeEditCost.utf16Cost(from: oldText, to: newText)
+        let old = authority.text(variantID: variantID, storeText: oldText)
+        let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
+        authority.bufferEdited(variantID: variantID, text: newText)
         autosave.record(variantID: variantID, text: newText, charDelta: cost)
     }
 
@@ -287,12 +306,14 @@ struct BlockTOCView: View {
             }
             if isExpanded {
                 // The read-cheap tier; ONE block upgrades live on click
-                // (P3's split, reused).
+                // (P3's split, reused). Text resolves through the
+                // authority — a blurred row never flashes stale (13b 1a).
                 if let variantID = row.variantID {
-                    TakePaneView(
-                        text: row.text ?? "",
+                    PaneSurfaceView(
+                        text: model.displayText(variantID: variantID, storeText: row.text),
                         isLive: model.liveBlockID == row.blockID && !row.variantLocked,
-                        onFocusRequest: { model.makeLive(row.blockID) },
+                        role: "toc", variantID: variantID,
+                        onFocusRequest: { model.makeLive(row.blockID, variantID: variantID) },
                         onEdit: { newText in
                             model.paneEdited(
                                 variantID: variantID,

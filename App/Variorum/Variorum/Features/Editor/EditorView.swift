@@ -352,11 +352,12 @@ struct InlineEditorSurface: NSViewRepresentable {
         }
 
         func remeasure() {
-            guard let textView, let layoutManager = textView.textLayoutManager else { return }
-            layoutManager.ensureLayout(for: layoutManager.documentRange)
-            let height = layoutManager.usageBoundsForTextContainer.height
-                + textView.textContainerInset.height * 2
-            reportHeight?(max(height, 24))
+            // The ONE measurement brain (13b 1a — the third private copy
+            // retired; the inline editor keeps its own re-measure TRIGGER,
+            // the storage-edit notification, because its heights change on
+            // model-driven storage writes, not only on width).
+            guard let textView else { return }
+            reportHeight?(max(PaneMeasurement.height(of: textView), 24))
         }
 
         func uninstall() {

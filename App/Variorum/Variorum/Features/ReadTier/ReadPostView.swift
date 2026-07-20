@@ -127,7 +127,6 @@ private struct ReadPostSurface: NSViewRepresentable {
         var onBadgeTap: ((String) -> Void)?
         private var badges: ReadBadgeOverlay?
         private var decor: BlockDecorOverlayController?
-        private var frameToken: NSObjectProtocol?
         private var observation: Task<Void, Never>?
         private var decorObservation: Task<Void, Never>?
         private var appliedChrome: EditorSurfaceChrome?
@@ -160,12 +159,12 @@ private struct ReadPostSurface: NSViewRepresentable {
             model.decorSink = { [weak decorController] state in
                 decorController?.render(state)
             }
-            // Width reflows change wrapping, so height must re-measure.
-            textView.postsFrameChangedNotifications = true
-            frameToken = NotificationCenter.default.addObserver(
-                forName: NSView.frameDidChangeNotification, object: textView, queue: .main
-            ) { [weak model] _ in
-                MainActor.assumeIsolated { model?.viewWidthChanged() }
+            // Width reflows change wrapping, so height must re-measure —
+            // the SHARED width-gated layout hook (13b 1a: the batch-12
+            // brain, one copy for every pane surface; replaces this
+            // surface's private frame-notification trigger).
+            textView.onWidthChange = { [weak model] in
+                model?.viewWidthChanged()
             }
         }
 
@@ -174,8 +173,6 @@ private struct ReadPostSurface: NSViewRepresentable {
             observation = nil
             decorObservation?.cancel()
             decorObservation = nil
-            if let frameToken { NotificationCenter.default.removeObserver(frameToken) }
-            frameToken = nil
             badges?.uninstall()
             badges = nil
             decor?.uninstall()
@@ -186,44 +183,10 @@ private struct ReadPostSurface: NSViewRepresentable {
     }
 }
 
-// MARK: - The text view
-
-final class ReadPostTextView: NSTextView {
-    /// A click that created no selection — the click-to-focus gesture
-    /// (drag-selections stay selections; the ratified read-tier contract
-    /// keeps both).
-    var onPlainClick: ((Int) -> Void)?
-
-    override func mouseDown(with event: NSEvent) {
-        super.mouseDown(with: event)  // the selection tracking loop runs first
-        guard selectedRange().length == 0 else { return }
-        let point = convert(event.locationInWindow, from: nil)
-        onPlainClick?(characterIndexForInsertion(at: point))
-    }
-
-    /// The spike-proven read surface: explicit TK2 opt-in, non-editable,
-    /// selectable, sized by the container (no enclosing scroll view of its
-    /// own — it lives inside the multi-post scroll).
-    static func makeReadSurface() -> ReadPostTextView {
-        let textView = ReadPostTextView(usingTextLayoutManager: true)
-        precondition(textView.textLayoutManager != nil, "TK2 opt-in failed at construction")
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.isRichText = false
-        textView.textContainerInset = NSSize(width: 8, height: 8)
-        textView.isVerticallyResizable = false
-        textView.isHorizontallyResizable = false
-        textView.autoresizingMask = [.width]
-        textView.textContainer?.widthTracksTextView = true
-        textView.font = EditorDocument.baseFont
-        // The uniform paragraph gap (2026-07-12 ruling, presentation
-        // half): typed text carries the same style every surface write
-        // applies — one look, stored nowhere.
-        textView.defaultParagraphStyle = EditorDocument.baseParagraphStyle
-        textView.typingAttributes = EditorDocument.baseAttributes
-        return textView
-    }
-}
+// The text view: `ReadPostTextView` IS the shared pane surface now
+// (13b 1a, P-3 — the typealias + `makeReadSurface` factory live in
+// Surface/PaneSurface.swift; plain-click offsets, the width-gated
+// remeasure hook, and the TK2 opt-in are the one component's).
 
 // MARK: - Fan badges (overlay views, not text attributes)
 

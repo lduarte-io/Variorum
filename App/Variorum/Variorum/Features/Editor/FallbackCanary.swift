@@ -26,6 +26,13 @@ final class FallbackCanary {
     /// this; debug builds stop at the assertion first).
     var onFire: ((String) -> Void)?
 
+    /// Test seam (Phase 13b 1a — the N2 rendered-canary pin): debug builds
+    /// stop the world on fire BY DESIGN, which makes the fire→render path
+    /// untestable through the real assertion. The pin injects a no-op here
+    /// for exactly one test's scope and restores it; production code never
+    /// touches this.
+    static var assertionHandler: @MainActor (String) -> Void = { assertionFailure($0) }
+
     /// Arms for ONE text view (scoped, so multiple editors attribute
     /// correctly).
     func arm(for textView: NSTextView) {
@@ -55,8 +62,8 @@ final class FallbackCanary {
         let message = "TextKit 2 -> TextKit 1 fallback (\(phase) NSLayoutManager). "
             + "A TK1 API or OS change downgraded the editor; P1-class bug (TEXTKIT2_NOTES §0/§4)."
         Self.log.fault("\(message, privacy: .public)")
-        assertionFailure(message) // debug: stop the world (memo posture)
-        onFire?(message)          // release: visible in-app diagnostic
+        Self.assertionHandler(message) // debug: stop the world (memo posture)
+        onFire?(message)               // release: visible in-app diagnostic
     }
 
     deinit {

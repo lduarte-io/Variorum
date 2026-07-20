@@ -177,7 +177,8 @@ struct BlockTOCTests {
             // Expansion is session-only: a fresh model starts collapsed.
             model.toggleExpanded(blockID)
             #expect(model.expanded.contains(blockID))
-            model.makeLive(blockID)
+            // 13b 1a: makeLive names the take too (the authority's PaneKey).
+            model.makeLive(blockID, variantID: "the-block's-take")
             #expect(model.liveBlockID == blockID, "ONE live block (P3's split)")
             let fresh = BlockTOCViewModel(session: session, postID: postID)
             #expect(fresh.expanded.isEmpty, "collapse state persists NOWHERE in v1")

@@ -231,12 +231,11 @@ final class ReadPostViewModel {
 
     /// Lays out and publishes the content height; cost ∝ this post's own
     /// size (the Step 0 memo's accepted cost model — measured 0.35 ms for
-    /// a typical post, 2.6 ms for a 50-block one).
+    /// a typical post, 2.6 ms for a 50-block one). The formula is the ONE
+    /// measurement brain (13b 1a — this was one of three private copies).
     func remeasure() {
-        guard let textView, let layoutManager = textView.textLayoutManager else { return }
-        layoutManager.ensureLayout(for: layoutManager.documentRange)
-        let height = layoutManager.usageBoundsForTextContainer.height
-            + textView.textContainerInset.height * 2
+        guard let textView else { return }
+        let height = PaneMeasurement.height(of: textView)
         lastMeasuredWidth = textView.bounds.width
         if abs(contentHeight - max(height, 1)) > 0.5 {
             contentHeight = max(height, 1)

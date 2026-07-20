@@ -34,8 +34,6 @@ struct TakesBoardView: View {
     /// this much room while a block's takes are open.
     @AppStorage("takesGridRows") private var gridRows = 2
     @AppStorage("takesGridCols") private var gridCols = 1
-    /// Discrete paging offsets per block (whole cards, never halfway).
-    @State private var pageOffsets: [String: Int] = [:]
     @State private var lensNamePrompt = false
     @State private var diffPresentation: TakesDiffPresentation?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -381,7 +379,7 @@ struct TakesBoardView: View {
     private func washedCell(slot: Queries.RenderedBlock, washed: Bool) -> some View {
         TakesCellView(
             model: model, tokens: tokens, slot: slot, column: mainColumn,
-            tinted: false, onDiff: { diffPresentation = $0 })
+            tinted: false, role: "article", onDiff: { diffPresentation = $0 })
             .padding(2)
             .background(washed && markChangingBlock ? tokens.wash : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -396,12 +394,17 @@ struct TakesBoardView: View {
             }
     }
 
-    /// STACK: takes stacked under the block.
+    /// STACK: takes stacked under the block. The card's text routes
+    /// through the AUTHORITY (13b 1a — the stack style fed panes raw
+    /// `take.workingText`, bypassing the live buffers: the frozen-article
+    /// class, still live in exactly this style; pinned in
+    /// TakesArticleRenderTests's stack extension).
     private func stackBloom(slot: Queries.RenderedBlock) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(model.projection.fans[slot.blockID] ?? [], id: \.id) { take in
                 CollapsibleTakeCard(
-                    take: take, isChosen: take.id == slot.variantID,
+                    take: take, text: model.liveText(take),
+                    isChosen: take.id == slot.variantID,
                     isLive: paneKeyIsLive(slot: slot, take: take),
                     tokens: tokens,
                     onFocus: { focusPane(slot: slot, take: take) },
@@ -429,64 +432,87 @@ struct TakesBoardView: View {
     }
 
     /// MARGIN GRID's rail (R24 + R74): a SHORT fanned block's cards render
-    /// as the ONE-CARD-HIGH horizontal strip; longer blocks keep the grid —
-    /// now `gridRows` tall (her density call) with `gridCols` columns
-    /// visible, and the row RESERVES that vertical room so cards get
-    /// regular space (the post grows — Sitting 9's push-down ask).
+    /// one-card-high; longer blocks keep the grid — `gridRows` tall (her
+    /// density call) with `gridCols` columns visible, and the row RESERVES
+    /// that vertical room so cards get regular space (the post grows —
+    /// Sitting 9's push-down ask).
+    ///
+    /// AD-2 (13b 1a): the rail PAGES DISCRETELY — whole columns, an
+    /// explicit ◀ x–y of n ▶ door — instead of the old horizontal
+    /// ScrollView, which realized every card but CLIPPED all past the
+    /// rail's width with no pager, no scrollbar, no affordance ("takes ·
+    /// 4", two cards, half the fan unreachable). The carousel's discrete-
+    /// paging grammar (whole cards, never halfway) is now the rail's too.
     private func marginRail(slot: Queries.RenderedBlock) -> some View {
         let takes = model.projection.fans[slot.blockID] ?? []
+        // R24's one-card-high strip for short blocks when density is
+        // 1-high; an explicit 2/3-high setting outranks it (batch 14).
+        let rowsPerColumn =
+            (TakesViewModel.usesHorizontalStrip(text: slot.text) && gridRows == 1)
+            ? 1 : gridRows
         return VStack(alignment: .leading, spacing: 4) {
             Text("takes · \(takes.count)")
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             if takes.isEmpty {
                 newTakeDoors(slot: slot)
-            } else if TakesViewModel.usesHorizontalStrip(text: slot.text), gridRows == 1 {
-                // R24's one-card-high strip is the 1-HIGH look; an explicit
-                // 2/3-high density setting outranks it (batch 14: "margin
-                // grid is not showing the blocks 2 high even when that
-                // setting is made").
-                ScrollView(.horizontal) {
-                    HStack(alignment: .top, spacing: 6) {
-                        ForEach(takes, id: \.id) { take in
+            } else {
+                railCards(takes: takes, slot: slot, rowsPerColumn: rowsPerColumn)
+                    .frame(
+                        minHeight: rowsPerColumn > 1 ? gridReservedHeight : 0,
+                        alignment: .top)
+                // Batch 12 (her "i can't make a new take"): the growth
+                // doors live BELOW the cards, always on screen (R72's
+                // promise; never behind pagination either).
+                newTakeDoors(slot: slot)
+            }
+        }
+    }
+
+    /// The rail's paged card window: takes chunk into columns of
+    /// `rowsPerColumn`; `gridCols` columns are visible; ◀ ▶ move one
+    /// column at a time. Every take is a card on SOME page — none is ever
+    /// silently clipped away (the AD-2 pin + the soak invariant).
+    private func railCards(
+        takes: [Variant], slot: Queries.RenderedBlock, rowsPerColumn: Int
+    ) -> some View {
+        let columns = stride(from: 0, to: takes.count, by: rowsPerColumn).map {
+            Array(takes[$0..<min($0 + rowsPerColumn, takes.count)])
+        }
+        let pageKey = "rail-\(slot.blockID)"
+        let limit = max(columns.count - gridCols, 0)
+        let offset = model.pageOffset(pageKey, limit: limit)
+        let visible = Array(columns.dropFirst(offset).prefix(gridCols))
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .top, spacing: 6) {
+                ForEach(Array(visible.enumerated()), id: \.offset) { _, column in
+                    VStack(spacing: 6) {
+                        ForEach(column, id: \.id) { take in
+                            // Batch 7: UNIFORM card height — "2 high" is
+                            // literally two card-heights, never a clipped
+                            // column of tall cards.
                             takeMiniPane(take: take, slot: slot)
                                 .frame(width: 220, height: 110, alignment: .topLeading)
                                 .clipped()
                         }
                     }
+                    .frame(width: 220)
                 }
-                // Batch 12 (her "i can't make a new take"): the growth
-                // doors sat at the END of the horizontal scroll — clipped
-                // past the rail's width, invisible. They live BELOW the
-                // cards now, always on screen (R72's promise made real in
-                // this style too).
-                newTakeDoors(slot: slot)
-            } else {
-                ScrollView(.horizontal) {
-                    let groups = stride(from: 0, to: takes.count, by: gridRows).map {
-                        Array(takes[$0..<min($0 + gridRows, takes.count)])
-                    }
-                    HStack(alignment: .top, spacing: 6) {
-                        ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
-                            VStack(spacing: 6) {
-                                ForEach(group, id: \.id) { take in
-                                    // Batch 7: UNIFORM card height, exactly
-                                    // like the strip — "2 high" must be
-                                    // literally two card-heights, never a
-                                    // clipped column of tall cards.
-                                    takeMiniPane(take: take, slot: slot)
-                                        .frame(width: 220, height: 110, alignment: .topLeading)
-                                        .clipped()
-                                }
-                            }
-                            .frame(width: 220)
-                        }
-                    }
+            }
+            if columns.count > gridCols {
+                let firstShown = offset * rowsPerColumn + 1
+                let lastShown = min((offset + gridCols) * rowsPerColumn, takes.count)
+                HStack(spacing: 4) {
+                    Button("◀") { model.stepPage(pageKey, by: -1, limit: limit) }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                        .disabled(offset == 0)
+                    Text("\(firstShown)–\(lastShown) of \(takes.count)")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                    Button("▶") { model.stepPage(pageKey, by: 1, limit: limit) }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                        .disabled(offset >= limit)
                 }
-                .frame(minHeight: gridReservedHeight, alignment: .top)
-                // Batch 12: same relocation as the strip — doors below,
-                // never behind a horizontal scroll.
-                newTakeDoors(slot: slot)
             }
         }
     }
@@ -496,7 +522,11 @@ struct TakesBoardView: View {
     private func pagedTakesRow(
         takes: [Variant], slot: Queries.RenderedBlock, pageKey: String
     ) -> some View {
-        let offset = min(max(pageOffsets[pageKey] ?? 0, 0), max(takes.count - beneathCount, 0))
+        // Offsets live on the MODEL now (13b 1a, AD-2's companion move):
+        // one paging brain for carousel, slot split, and the rail — and
+        // the soak can drive page coverage.
+        let limit = max(takes.count - beneathCount, 0)
+        let offset = model.pageOffset(pageKey, limit: limit)
         let visible = Array(takes.dropFirst(offset).prefix(beneathCount))
         return VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .top, spacing: 6) {
@@ -507,17 +537,15 @@ struct TakesBoardView: View {
             }
             if takes.count > beneathCount {
                 HStack(spacing: 4) {
-                    Button("◀") { pageOffsets[pageKey] = max(offset - 1, 0) }
+                    Button("◀") { model.stepPage(pageKey, by: -1, limit: limit) }
                         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         .disabled(offset == 0)
                     Text("\(offset + 1)–\(min(offset + beneathCount, takes.count)) of \(takes.count)")
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
-                    Button("▶") {
-                        pageOffsets[pageKey] = min(offset + 1, takes.count - beneathCount)
-                    }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .disabled(offset >= takes.count - beneathCount)
+                    Button("▶") { model.stepPage(pageKey, by: 1, limit: limit) }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                        .disabled(offset >= limit)
                 }
             }
             newTakeDoors(slot: slot)
@@ -571,10 +599,11 @@ struct TakesBoardView: View {
                         .disabled(isChosen)
                         .help("Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
                 }
-                TakePaneView(
-                    text: liveText(take),
+                PaneSurfaceView(
+                    text: model.liveText(take),
                     isLive: paneKeyIsLive(slot: slot, take: take),
                     tokens: tokens,
+                    role: "mini", variantID: take.id,
                     onFocusRequest: { focusPane(slot: slot, take: take) },
                     onEdit: { model.paneEdited(variantID: take.id, newText: $0) })
             }
@@ -593,18 +622,15 @@ struct TakesBoardView: View {
     }
 
     private func paneKeyIsLive(slot: Queries.RenderedBlock, take: Variant) -> Bool {
-        model.focusedPane == TakesViewModel.PaneKey(
-            columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id)
-            && !model.projection.sealed
+        model.authority.isLive(
+            TakesViewModel.PaneKey(
+                columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id),
+            sealed: model.projection.sealed)
     }
 
     private func focusPane(slot: Queries.RenderedBlock, take: Variant) {
         model.focus(TakesViewModel.PaneKey(
             columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id))
-    }
-
-    private func liveText(_ take: Variant) -> String {
-        model.liveBuffers[take.id] ?? take.workingText
     }
 }
 
@@ -635,6 +661,10 @@ struct TakeCardFrame<Content: View>: View {
 
 private struct CollapsibleTakeCard: View {
     let take: Variant
+    /// The AUTHORITY-resolved display text (13b 1a): the card never reads
+    /// `take.workingText` directly — that was the stack style's liveness
+    /// bypass (a dirty edit showed stale store text in read cards).
+    let text: String
     let isChosen: Bool
     let isLive: Bool
     let tokens: VoiceTokens
@@ -663,14 +693,15 @@ private struct CollapsibleTakeCard: View {
                         .help("Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
                 }
                 if collapsed {
-                    Text(take.workingText.split(separator: "\n").first.map(String.init) ?? "(empty)")
+                    Text(text.split(separator: "\n").first.map(String.init) ?? "(empty)")
                         .font(.callout)
                         .lineLimit(1)
                         .foregroundStyle(tokens.muted)
                         .onTapGesture { collapsed = false }
                 } else {
-                    TakePaneView(
-                        text: take.workingText, isLive: isLive, tokens: tokens,
+                    PaneSurfaceView(
+                        text: text, isLive: isLive, tokens: tokens,
+                        role: "card", variantID: take.id,
                         onFocusRequest: onFocus, onEdit: onEdit)
                 }
             }

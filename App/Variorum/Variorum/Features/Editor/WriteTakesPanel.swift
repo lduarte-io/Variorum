@@ -159,10 +159,11 @@ struct WriteTakesPanel: View {
                     .fixedSize()
                     .controlSize(.mini)
                 }
-                TakePaneView(
-                    text: model.liveBuffers[take.id] ?? take.workingText,
-                    isLive: model.focusedPane == key && !model.projection.sealed,
+                PaneSurfaceView(
+                    text: model.liveText(take),
+                    isLive: model.authority.isLive(key, sealed: model.projection.sealed),
                     tokens: tokens,
+                    role: "panel", variantID: take.id,
                     onFocusRequest: { model.focus(key) },
                     onEdit: { model.paneEdited(variantID: take.id, newText: $0) })
             }

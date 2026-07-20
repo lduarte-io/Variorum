@@ -516,7 +516,7 @@ struct QuitFinalizeSurfacesTests {
             }
             let model = BlockTOCViewModel(session: session, postID: postID)
             let row = try await db.read { try Queries.blockTOC($0, post: postID) }[0]
-            model.makeLive(row.blockID)
+            model.makeLive(row.blockID, variantID: row.variantID!)
             model.paneEdited(
                 variantID: row.variantID!, oldText: row.text ?? "",
                 newText: "TOC-typed, then ⌘Q")

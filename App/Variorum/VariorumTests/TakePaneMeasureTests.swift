@@ -21,7 +21,7 @@ import Testing
 struct TakePaneMeasureTests {
     private func pumpedPaneHeight(text: String) -> CGFloat {
         let host = NSHostingController(
-            rootView: TakePaneView(text: text, isLive: false)
+            rootView: PaneSurfaceView(text: text, isLive: false)
                 .frame(width: 400))
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 400, height: 600),
@@ -34,8 +34,8 @@ struct TakePaneMeasureTests {
             RunLoop.main.run(until: Date().addingTimeInterval(0.05))
             host.view.layoutSubtreeIfNeeded()
         }
-        func findTakeView(_ view: NSView) -> TakeTextView? {
-            if let take = view as? TakeTextView { return take }
+        func findTakeView(_ view: NSView) -> PaneTextView? {
+            if let take = view as? PaneTextView { return take }
             for sub in view.subviews {
                 if let found = findTakeView(sub) { return found }
             }
