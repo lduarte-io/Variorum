@@ -1,7 +1,9 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — Stage 1 COMPLETE (1a + 1b closeouts below); next: the
-Stage 1 review ladder over the combined diff, then Stage 2 (the tutorial
+**Status:** ACTIVE — Stage 1 COMPLETE (1a + 1b closeouts below; the
+architect acceptance of 1b — memo approvals + the T3-deviation stance —
+is recorded after the 1b closeout). The Stage 1 REVIEW LADDER (round 1,
+cold) is RUNNING over the combined 1a+1b diff. Then Stage 2 (the tutorial
 spine). Stage 0 complete + ratified batch 17; started 2026-07-20.
 **Created:** 2026-07-20, at the taste checkpoint's Sitting 9, batches 15–16
 (the governing rulings **R111–R117** are recorded verbatim-faithful in
@@ -988,3 +990,28 @@ revisit condition stated in the memo).
   bridge sweeps journal days only).
 - The seeded tutorial post lives in the REAL store at the end
   checkpoint (batch 17: "nothing real is in there right now").
+
+### Architect acceptance of Stage 1b (2026-07-20, pre-ladder)
+
+- **Both T4 memos READ IN FULL and APPROVED** (R120 satisfied — they are
+  now the design of record): plain language throughout; every ratified
+  semantic checked against canon (the single-space merge join, W's
+  preserve-the-original + unchecked-takes-stay rule, locked-takes-copied,
+  merge speaking about the fan it folds away, undo insurance). Both
+  flagged contestable calls SUSTAINED: (1) divide IS the door — no
+  separate ceremony command (consistent with the ratified
+  two-commands/three-doors contract; a second name for one act is R112
+  clutter); (2) merge-from-Takes joins UPWARD, with the memo's own R116
+  revisit trigger standing (if the upward reading trips her in practice,
+  the feature gets reconsidered, not patched). Both stay on the author's
+  end-checkpoint reading list.
+- **The T3 deviation (1b judgment call #1) — accepted as the plan of
+  record, subject to the ladder:** the gesture-execution band stays in
+  EditorViewModel, fused to the projection executors 1a held back; the
+  proposed next slice moves band + executors TOGETHER as one seam,
+  post-ladder. The architect agrees a pre-ladder mechanical move of the
+  riskiest tested file served no one; the LADDER should adjudicate the
+  call on the merits (it is listed in the closeout's review foci).
+- **TakesViewModel growth (890→1,113)** noted as recorded P-9 pressure —
+  a Stage 3 decomposition candidate once the ladder settles Stage 1's
+  shape.
