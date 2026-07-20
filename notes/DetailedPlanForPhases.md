@@ -8,7 +8,28 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ Phase 12 — Hardening & perf validation** *(next in sequence — but it
+**→ Phase 13b — Make It Work (usability & interaction hardening) — ACTIVE
+2026-07-20.** Created at the taste checkpoint's Sitting 9, batches 15–16
+(rulings R111–R117 in `notes/plans/phase-13-ui-design.md`): the author's
+verdict is that USABILITY is the app's first-class problem — "i can't even
+click around the app without finding a million first class obvious bugs" —
+and the diagnosis (verified in code) is an accreted, never-designed
+interaction layer: Write-gated gestures Takes never inherited, three TK2
+text surfaces with no single liveness authority, sediment from fourteen
+screenshot-speed fix batches. Plan + the binding architectural principles:
+**`notes/plans/phase-13b-make-it-work.md`** (all-Fable cast; the R117
+architect mandate — Fable holds architectural ownership). Shape: Stage 0
+read-only audits (architecture survey · capability matrix · self-driven
+bug inventory) → author ratifies verdicts + backlog → Stage 1 selective
+interaction-layer consolidation (capability registry, fire-and-DO, ONE
+text surface + liveness authority) → Stage 2 the tutorial spine (R113: a
+tutorial flow touching every functionality, working perfectly, IS the
+thorough UI pass) → Stage 3+ themed batches. Mockup fidelity DEMOTED to
+reference status (R111); looks-polish waits for functionality. Phase 12's
+deferral stands unchanged — it follows 13b plus the real-use window 13b
+exists to unlock.
+
+**Phase 12 — Hardening & perf validation** *(next in sequence after 13b — but it
 kicks off only AFTER a window of real daily use: the 2026-07-17 deferral
 paragraph below remains the record, and its condition finally becomes
 satisfiable — Phase 13 closed 2026-07-18 and the app is now the thing
@@ -130,6 +151,7 @@ combined feel pass still owed.)*
 | 11b | **Remaining views II — export/import + reference panel** (formalized from row 11 at kickoff, 2026-07-13) | Work is always theirs to download; sources beside the draft | **`.md` + basic PDF export (scope ratified 2026-07-06: posts/readings/blocks; fan "Alternates" sections; bulk one-gesture library export); markdown/text drop-in import** (author 2026-07-06); reference panel (Quick Look/PDFKit drag-into-draft, WKWebView); brief: `notes/plans/phase-11-brief.md`; plan: `notes/plans/phase-11-remaining-views.md` (Stage B) | Exports pure projections matching the ratified shapes (incl. the 2026-07-12 conditional join); import→export round-trip sanity; source files untouched; TCC prompts author-assist | **done** |
 | 12 | **Hardening & perf validation** | The invariant holds at corpus scale, on Tahoe, under sync | Large-corpus stress (years of journals + a book), per-OS matrix run, sync soak analysis (months of real two-device data), pull-to-head windowing, tombstone-GC decision memo (author adjudicates), backup restore drill, deferred-debt sweep; brief: `notes/plans/phase-12-brief.md` | P1 benchmarks at scale; zero TK1 fallbacks; convergence holds; KnownIssues has no orphaned entries | **deferred** (author 2026-07-17: no real use yet = no evidence to harden against; runs after 13 + a real-use window; plan intact with deferral banner; the design-prereq measurements + corpus seed + restore drill pulled into 13's kickoff) |
 | 13 | **UI design passes** | Make it beautiful — with the author, iteratively | Visual design, layout, interaction polish, theming; Liquid Glass where it earns its place; **block comments** (schema lockstep + ops + UI — author 2026-07-17); the deferred-12 pull-forwards at kickoff (design-prereq measurements, dev-store design corpus, restore drill); sketch: `notes/plans/phase-13-brief.md` (incl. the 2026-07-17 author additions); sittings + execution plan + closeouts: `notes/plans/phase-13-ui-design.md` (R1–R59) | Author-driven acceptance; perf invariant re-verified after styling; the exploratory round precedes committed styling (author 2026-07-17) | **done** (closed 2026-07-18; the R48/R59 taste checkpoint + fix round are the author's next act, from `notes/handoffs/phase-13-handoff.md`) |
+| 13b | **Make It Work — usability & interaction hardening** (author 2026-07-20, Sitting 9 batches 15–16) | The app becomes actually usable: every door works or speaks honestly, the interaction layer gets its missing architecture, the tutorial proves every flow | Stage 0 audits (architecture survey, capability matrix, self-driven bug inventory) → selective interaction-layer consolidation (capability registry, fire-and-DO R115, ONE text surface + `PaneTextAuthority`, board soak) → the tutorial spine (R113) → themed batches; merge + W design memos per the friction doctrine (R116); plan + binding principles: `notes/plans/phase-13b-make-it-work.md` | The tutorial flow green end-to-end as the permanent acceptance script; the capability matrix clean (no silent/lecturing doors); board soak + registry walk green; author-ratified backlog burned down | **in progress** (Stage 0) |
 | 14 | **Accounts & multi-tenant** | Commercial shape | Multi-tenant hardening of 9c's auth (per-user isolation at commercial scale, account provisioning for non-author users — the single-user auth core moved to 9c, author 2026-07-07); **"variorum edition" full-fidelity export; server privacy/E2EE decision** (author 2026-07-06); sketch: `notes/plans/phase-14-brief.md` | Isolation tests; existing single-user data migrates cleanly | pending |
 | 15 | **iOS full surface** | Beyond capture: reading views, more of the model on mobile | Scope decided then (still no fan gestures unless the author revisits); sketch: `notes/plans/phase-15-brief.md` | Same core + sync | pending |
 | — | Web (WASM SQLite) | someday | — | — | unowned |

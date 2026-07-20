@@ -3164,3 +3164,137 @@ in this round (no disputes). Post-fix counts: core 706 green in 85 suites
 5. **NIT — the closeout's "canary silent everywhere" over-implied an
    in-run observer in the spike.** AGREED; the canary-status paragraph
    above now states the guard surface precisely.
+
+---
+
+## Sitting 9, batch 15 (2026-07-20, post-reset) — THE STABILIZATION RESHAPING (R111–R114)
+
+Context: the chat reset (brief Fable outage). An Opus interim reply ran a
+coverage audit of the sitting — its one confirmed dropped item was her
+FIRST message's gap-analysis ask. Fable then re-verified the architecture
+evidence directly before this batch: THREE TK2 text surfaces
+(`EditorTextView` / `TakePaneView` / `ReadPostView`; the fallback canary
+is SHARED, not triplicated), the pane-text/liveness decision spread ~30
+refs across 4 files (`liveBuffers`/`resolvedTake`/`deferredProjection`/
+`projectionCaughtUp`) with no single tested authority, and
+`TakesViewModel` at 890 lines / 180 comment lines of ruling-tagged
+sediment. (Opus's figures — 54 sites, per-wrapper canaries — were
+inflated; the structural diagnosis survives verification.)
+
+- **R111 — mockups are REFERENCES, not spec.** "the mockups were more
+  mockups… they look better designed than the app does — their spacing,
+  fonts, colors, etc. are better thought out." She mostly LIKES the
+  app's looks now; judge the app against screenshots of ITSELF; the
+  mockup gap-list demoted to a cheap later deliverable ("arguably not
+  that important right now"); looks-polish resumes after functionality
+  ("the editor's looks can be worked on once the functionality is there,
+  bug free, seamless").
+- **R112 — USABILITY IS THE FIRST-CLASS PROBLEM.** "i can't even click
+  around the app without finding a million first class obvious bugs…
+  the app isn't very usable atm." The named class: buttons, overall
+  slight crowdedness, and CONFUSION OF WHAT IS POSSIBLE AND WHAT IS
+  BROKEN. Her ruling example: at the bottom block of a post in Takes
+  there is no way to make a new block — Make Block silently does
+  nothing, Divide speaks but redirects to Write — "the most basic thing
+  (separate this part into a block so i can start making takes) doesn't
+  work smoothly."
+- **R113 — THE TUTORIAL IS THE AUDIT.** A tutorial flow "that could walk
+  you through all the functionality, and has been walked through all the
+  functionality… if it touched every functionality and actually worked
+  perfectly, would be the thorough UI edit and pass needed." Adopted as
+  the spine: build it, fix everything it touches, keep it green as the
+  permanent acceptance script.
+- **R114 — process + staffing.** Themed fix batches through the real
+  loop RATIFIED; best note/hygiene practices mandatory — "you shouldn't
+  be a god terminal session"; all context saved to repo docs; several
+  phases expected, Fable orchestrating with fresh sessions per stage;
+  **Fable implements AND reviews all of this** (her call — "the really
+  crucial work of making the app actually WORK in practice"); the LIVE
+  EDITOR CORE IS IN SCOPE ("i do think the live editor core needs some
+  work done tbh"); selective fresh starts allowed where evidence
+  supports ("if we have to start some things fresh even i'm open to
+  that").
+
+**Defects logged this batch:**
+
+- **D1 — book card collapse no-ops on the focused post (TRACED).**
+  `BookView.swift:545` — `expanded = expandedPosts.contains(…) ||
+  focus.focusedPostID == entry.postID`: clicking into an expanded body
+  focuses the post, and the force-expand disjunct makes the ▾ button
+  (line 603) silently do nothing thereafter. Fix shape: collapsing the
+  focused post must also release/move focus. Red-on-old pin owed.
+- **D2 — margin grid shifts the whole post left; spacing needs work.**
+  Her screenshot also shows suspiciously large vertical gaps between
+  blocks in the takes article. Suspect: the R74 reserved rail/room
+  repositioning the article column per-style. UNTRACED — trace before
+  fixing, per the hallucination guard.
+- **D3 — the Takes structural-gesture gap (the R112 class).** Structural
+  gestures are Write-wired by BUILD-ORDER ACCIDENT (Phase 9 wired them
+  into the editor when Write was the only editing surface; Takes/Lenses
+  arrived 11a/13 and inherited nothing). Make Block is SILENT in Takes
+  (a fire-and-speak violation); Divide's redirect notice is
+  `TakesViewModel.swift:742`; there is NO add-block-at-end door in
+  Takes. Fix shape PROPOSED (product call hers at plan ratification):
+  fire-and-speak evolves to FIRE-AND-DO — a door either works in-mode,
+  or performs the mode-switch-and-apply itself, or isn't shown;
+  lecture-and-refuse is retired for reachable acts.
+- **D4 — the capability-confusion theme** → the Stage 0 capability
+  matrix (every mode × every action: door exists? fires? speaks?
+  works?).
+
+**PROPOSED (awaiting her go): Phase 13b — "make it work."** Stage 0
+read-only audits (frontend architecture/tech-debt survey with
+per-component keep/consolidate/rebuild verdicts INCLUDING the live
+editor core; the capability matrix; a self-driven bug inventory via the
+visual loop — Fable walks the app, not her) → she ratifies the ranked
+backlog → Stage 1 text-surface + interaction-layer consolidation (ONE
+text surface component, ONE tested liveness authority, board invariant
+suite + randomized board soak — the ops-soak pattern lifted to the view
+layer) → Stage 2 the tutorial spine (R113) → Stage 3+ themed batches
+through the loop (build → soak+pins → screenshot-verify → point-by-point
+report). Fable's verdict on her "vibecoded?" question, recorded:
+substrate NO; component chrome mostly fine; the INTERACTION LAYER is
+genuinely under-architected and sedimented — selective rebuild of that
+layer, not a fresh frontend; per-component rebuild calls deferred to
+Stage 0 evidence.
+
+## Sitting 9, batch 16 (2026-07-20) — THE GO (R115–R117); Phase 13b opens
+
+- **R115 — FIRE-AND-DO ratified.** "I agree that it should be
+  fire-and-DO." The 9d fire-and-speak posture evolves: a rendered door
+  either performs the act (including any mode-switch choreography,
+  visibly) or delivers the ops layer's real refusal; doors that can
+  never act in their context aren't rendered; lecture-and-redirect is
+  retired.
+- **R116 — the FRICTION DOCTRINE (hers, verbatim-faithful).** "if you
+  keep pushing up against a rule — how merge is supposed to work, the w
+  ceremony (that i have yet to seen an interaction for, if it does
+  exist) — it's a sign that things have been underarchitected in that
+  area and that the whole feature needs to be considered thoughtfully,
+  not just patched into half existence. Every feature needs its edge
+  cases thought about, even though right now we also need the happy
+  path working." Consequences: merge and the W ceremony each get a
+  WHOLE-FEATURE design memo (behavior whole, edge cases enumerated on
+  paper, her rulings on product-flavored edges) instead of further
+  patches; and her parenthetical is itself a finding — the W ceremony
+  EXISTS (Phase 9's one-sheet, `divideW`) but she has NEVER seen it;
+  its real-workflow reachability is a Stage 0(b) question (hypothesis:
+  fanning happens in Takes, divide is Write-gated, so the ceremony's
+  only trigger may be unreachable on her actual path).
+- **R117 — the ARCHITECT MANDATE.** Scope agreed in full; the selective
+  interaction-layer rebuild on audit evidence agreed; live editor core
+  in scope (re-confirmed); all-Fable (re-confirmed); "go ahead and
+  start Stage 0 now"; stages must be recorded; Fable chooses the
+  architectural principles — "I'm giving you power as the project's
+  architect and as the entity that knows the code base and the goals
+  best at the moment… this is your chance to lay the plans that the
+  app relies on." CLAUDE.md updates authorized; running things by her
+  optional, ownership expected.
+
+**Executed this batch:** Phase 13b created ACTIVE — plan
+`notes/plans/phase-13b-make-it-work.md` (principles + stages + Stage 0
+briefs + the running ledger); the master plan gains the 13b pointer +
+table row; CLAUDE.md model policy gains the 13b cast line; Stage 0
+agents A (architecture survey) and B (capability matrix) launched;
+Stage 0(c) — the self-driven app-walk bug inventory — queued behind the
+matrix so it drives the worst cells first.
