@@ -101,7 +101,7 @@ final class ModesTutorialModel {
             await loadShape(postID: postID)
             startObservation(postID: postID)
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 
@@ -162,7 +162,7 @@ final class ModesTutorialModel {
             defaults.set(copies, forKey: Self.forkedCopiesKey)
             statusMessage = "Forked — the version copy sits in your library beside the demo."
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 
@@ -181,7 +181,7 @@ final class ModesTutorialModel {
                 }
             }
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
         defaults.removeObject(forKey: Self.demoDefaultsKey)
         defaults.removeObject(forKey: Self.forkedCopiesKey)
@@ -195,7 +195,7 @@ final class ModesTutorialModel {
         do {
             try await session.runner.run(body)
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 }

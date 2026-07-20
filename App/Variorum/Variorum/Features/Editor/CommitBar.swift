@@ -26,6 +26,13 @@ struct CommitBar: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// The registry ids this bar renders (13b 1b — walk-asserted with the
+    /// Takes bar's against the bottomBar door set).
+    static let renderedCapabilities: [CapabilityID] = [
+        .commitTake, .sealPost, .blockComments, .divide, .extract, .makeBlock,
+        .merge, .showTakes,
+    ]
+
     var body: some View {
         VStack(spacing: 0) {
             Divider().overlay(tokens.line)
@@ -114,18 +121,9 @@ struct CommitBar: View {
                               action: model.openCaretFan)
 
                 Spacer()
-                if let status = model.statusMessage {
-                    // Sitting 9 (R93): refusals must be READABLE — two
-                    // lines, wrapping, selectable; never "That span is t…".
-                    Text(status)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(2)
-                        .textSelection(.enabled)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: 460, alignment: .trailing)
-                        .help(status)
-                }
+                // 13b 1b (AD-14): the transient status line moved to the
+                // ONE shell toast (StatusCenter — R93's readability rides
+                // there: wrapping, selectable, auto-dismissing).
                 if let words = wordCountLabel {
                     // R11: word-count PROMINENCE — the accent-colored,
                     // always-there part of the editing surface.

@@ -47,7 +47,18 @@ final class CanvasViewModel {
     private(set) var projection = Queries.CanvasProjection()
     /// In-flight drag offsets (view state; the store writes at drag END).
     var dragOffsets: [String: CGSize] = [:]
-    private(set) var statusMessage: String?
+    /// Presentation is the shell's StatusCenter (13b 1b, AD-14); the
+    /// property remains the tested truth and forwards on set.
+    private(set) var statusMessage: String? {
+        didSet {
+            if let statusMessage { session.status.speak(statusMessage) }
+        }
+    }
+
+    /// The routed commands' speaking surface (fire-and-speak, never dead).
+    func speak(_ message: String) {
+        statusMessage = message
+    }
     /// The pool's tag filter (Phase 11, A8): nil = everything; a tag
     /// filters to `everythingTagged`'s BLOCK semantics, subtree included.
     private(set) var filterTagID: String?
@@ -130,7 +141,7 @@ final class CanvasViewModel {
                     container: containerID, block: blockID, x: x, y: y)
             }
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 
@@ -141,7 +152,7 @@ final class CanvasViewModel {
                 try ops.removeCanvasPosition(container: containerID, block: blockID)
             }
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 
@@ -228,7 +239,7 @@ final class CanvasViewModel {
             saveViewMemory()
             statusMessage = "✓ chosen — the post shows this take everywhere now."
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 
@@ -249,7 +260,7 @@ final class CanvasViewModel {
             }
             statusMessage = "Saved — “\(lens.name)” remembers this canvas's takes (open it in Lenses)."
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 }
@@ -278,6 +289,8 @@ struct CanvasView: View {
     /// C3 (R40): the ONE open takes switcher — minimal by design (opening
     /// another card's closes this one).
     @State private var switcherBlockID: String?
+    /// 13b 1b: the routed-command registration's lifecycle token.
+    @State private var commandToken: UUID?
     /// The voice reaches the canvas (optional environment, terminal
     /// fallback — the established pattern).
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -315,14 +328,9 @@ struct CanvasView: View {
             }
             .controlSize(.small)
             .padding(6)
-            if let status = model.statusMessage {
-                Text(status)
-                    .font(.caption)
-                    .foregroundStyle(tokens.accent)
-                    .textSelection(.enabled)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 12)
-            }
+            // 13b 1b (AD-14): the status line moved to the ONE shell
+            // toast — which also retires this slot's unprotected
+            // fixedSize text in non-scrolling chrome (the b6dae25 class).
             ScrollView([.horizontal, .vertical]) {
                 ZStack(alignment: .topLeading) {
                     // The board's extent grows with the cards.
@@ -345,13 +353,34 @@ struct CanvasView: View {
                 Task { await model.saveViewPicksAsLens(name: name) }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .variorumTakesCommand)) { note in
-            guard let command = TakesCommand.from(note), let open = switcherBlockID else { return }
-            switch command {
-            case .stepPrev: model.switchTake(blockID: open, delta: -1)
-            case .stepNext: model.switchTake(blockID: open, delta: 1)
-            case .choose: Task { await model.chooseViewedTake(blockID: open) }
-            default: break
+        .onAppear {
+            // 13b 1b (P-4): registered handler, not a notification. The
+            // canvas handles the switcher's step/choose; with no switcher
+            // open it SPEAKS (it used to drop them silently); everything
+            // else falls through to the router's honest note (the
+            // registry marks it unavailable here — R40: canvas arranges).
+            commandToken = session.commandRouter.registerHandler { command in
+                switch command {
+                case .takes(.stepPrev), .takes(.stepNext), .takes(.choose):
+                    guard let open = switcherBlockID else {
+                        model.speak(
+                            "Open a card's ‹ › switcher first — stepping and choosing act on it.")
+                        return true
+                    }
+                    switch command {
+                    case .takes(.stepPrev): model.switchTake(blockID: open, delta: -1)
+                    case .takes(.stepNext): model.switchTake(blockID: open, delta: 1)
+                    default: Task { await model.chooseViewedTake(blockID: open) }
+                    }
+                    return true
+                default:
+                    return false
+                }
+            }
+        }
+        .onDisappear {
+            if let commandToken {
+                session.commandRouter.unregisterHandler(commandToken)
             }
         }
     }

@@ -54,9 +54,10 @@ struct WriteTakesPanel: View {
                     .font(.headline)
                 Spacer()
                 Button("Open Takes mode") {
-                    NotificationCenter.default.post(
-                        name: .variorumSwitchMode, object: nil,
-                        userInfo: ["mode": "Takes", "postID": postID])
+                    // 13b 1b: composed routing (P-4) — and the ring lands
+                    // bloomed on this block over there.
+                    session.commandRouter.pendingTakesLanding = .bloom(blockID: blockID)
+                    session.commandRouter.requestMode(.takes, postID: postID)
                     dismiss()
                 }
                 .help("The full board — every block's takes at once (⌘2)")
@@ -239,10 +240,4 @@ struct WriteTakesPanel: View {
                 .fetchAll(db)
         }) ?? []
     }
-}
-
-extension Notification.Name {
-    /// A surface asks the post detail to switch modes (the panel's "Open
-    /// Takes mode" door — PostDetailView listens).
-    static let variorumSwitchMode = Notification.Name("variorumSwitchMode")
 }

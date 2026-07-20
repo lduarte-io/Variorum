@@ -264,6 +264,14 @@ struct TakesArticleRenderTests {
             window.makeKeyAndOrderFront(nil)
             await settle(window, hosting, until: { !takeViews(in: hosting).isEmpty })
 
+            // 13b 1b adaptation: the N9 landing focus puts the ring on the
+            // first slot's article pane at board open — this pin is about a
+            // READ article mirroring the buffer, so move the ring aside
+            // (the live pane is buffer-authoritative through its OWN
+            // NSTextView, a different contract, pinned elsewhere).
+            model.landingEnabled = false
+            model.blur()
+
             // Her live flow: type MORE into the chosen take's pane (the
             // live-buffer path), then keep working — the article cell
             // above must follow the buffer, not a stale projection.

@@ -51,7 +51,14 @@ final class EditorViewModel {
 
     private(set) var header: Queries.ContainerHeader?
     private(set) var canaryMessage: String?
-    private(set) var statusMessage: String?
+    /// The editor's transient outcome line. PRESENTATION is the shell's
+    /// StatusCenter (13b 1b, AD-14 — one placement, one auto-dismiss
+    /// policy); the property remains the tested truth and forwards on set.
+    private(set) var statusMessage: String? {
+        didSet {
+            if let statusMessage { session.status.speak(statusMessage) }
+        }
+    }
     private(set) var caretBlockID: String?
     private(set) var caretVariantID: String?
     /// 9d — the caret block's user-facing number (1-based, current order,
@@ -1920,6 +1927,79 @@ final class EditorViewModel {
             pendingFanSeed = nil
             openFan(blockID: fanBlock)
         }
+        // 13b 1b — the fire-and-DO landing (move-and-execute): a Takes/
+        // Lenses door parked a Write intent on the router; the arriving
+        // editor consumes it once the index is real.
+        if let intent = session.commandRouter.pendingWriteIntent {
+            session.commandRouter.pendingWriteIntent = nil
+            applyWriteIntent(intent)
+        }
+    }
+
+    /// The choreography's Write half: land the caret/selection (clamped to
+    /// the target block), then run the follow-up gesture — which plans
+    /// against the REAL landed selection, so its refusal (if any) is the
+    /// operation's own, spoken. Task handle test-visible (the pin awaits
+    /// the landed gesture deterministically).
+    @ObservationIgnored private(set) var pendingIntentTask: Task<Void, Never>?
+
+    private func applyWriteIntent(_ intent: WriteIntent) {
+        guard let textView else { return }
+        var location = 0
+        var length = 0
+        if intent.caretAtDocumentEnd {
+            location = index.documentLength
+        } else if let blockID = intent.blockID,
+                  let i = index.entries.firstIndex(where: { $0.blockID == blockID }) {
+            let range = index.range(ofEntryAt: i)
+            let offset = min(max(0, intent.offsetInBlock), range.length)
+            location = range.location + offset
+            length = min(max(0, intent.selectionLength), range.length - offset)
+        } else {
+            // The block vanished between surfaces (a sync race): land at
+            // the start rather than guessing; any follow-up speaks there.
+            location = 0
+        }
+        textView.setSelectedRange(NSRange(location: location, length: length))
+        textView.window?.makeFirstResponder(textView)
+        updateCaretContext()
+        guard let followUp = intent.followUp else { return }
+        pendingIntentTask = Task { [weak self] in
+            guard let self else { return }
+            switch followUp {
+            case .structural(let act):
+                await invokeGesture(Self.plannerCommand(for: act))
+            case .deleteInEveryTake:
+                await deleteInEveryTake()
+            }
+            pendingIntentTask = nil
+        }
+    }
+
+    /// Registry act → planner command (the registry never imports the
+    /// planner; the Editor feature owns the mapping).
+    nonisolated static func plannerCommand(
+        for act: StructuralAct
+    ) -> StructuralGesturePlanner.Command {
+        switch act {
+        case .divide: .divideAtCursor
+        case .extract: .extractSelection
+        case .makeBlock: .makeBlockFromSelection
+        case .merge: .mergeBlocks
+        }
+    }
+
+    /// The add-block door's Write half: the caret jumps to the document's
+    /// end — typing there births blocks (crystallization; blocks are born
+    /// by typing in Write).
+    func jumpToDocumentEnd() {
+        guard let textView else { return }
+        let end = index.documentLength
+        textView.setSelectedRange(NSRange(location: end, length: 0))
+        textView.scrollRangeToVisible(NSRange(location: end, length: 0))
+        textView.window?.makeFirstResponder(textView)
+        updateCaretContext()
+        showStatus("Caret at the end — typing here starts a new block.")
     }
 
     /// The visible snap (contract item 2): the selection moves to the
@@ -2119,6 +2199,12 @@ final class EditorViewModel {
 
     /// Context-menu items for the text view — the second door, same brain:
     /// each item's enablement is a fresh planner verdict at menu-build time.
+    /// The registry ids Write's context menu renders (13b 1b — walk-
+    /// asserted against the contextMenu door set's Write half).
+    nonisolated static let contextMenuCapabilities: [CapabilityID] = [
+        .divide, .extract, .makeBlock, .merge, .deleteInEveryTake, .showTakes,
+    ]
+
     func contextMenuItems() -> [EditorTextView.StructuralMenuItem] {
         guard textView != nil else { return [] }
         // Doors fire and speak (author 2026-07-09, superseding the

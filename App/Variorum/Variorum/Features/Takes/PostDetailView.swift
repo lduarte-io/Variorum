@@ -18,13 +18,6 @@ import GRDB
 import SwiftUI
 import VariorumCore
 
-extension Notification.Name {
-    /// Batch 14: the detail view broadcasts its current mode so the
-    /// sidebar's post rail (her ruling — modes on the left, in the
-    /// sidebar, separated) can mark it with the ›.
-    static let variorumModeDidChange = Notification.Name("variorumModeDidChange")
-}
-
 struct PostDetailView: View {
     let session: AppSession
     let postID: String
@@ -32,15 +25,10 @@ struct PostDetailView: View {
     /// the Write editor opens with its caret seeded at this block.
     var initialBlockID: String? = nil
 
-    enum Mode: String, CaseIterable {
-        case write = "Write"
-        case takes = "Takes"
-        case lenses = "Lenses"
-        case compare = "Compare"
-        case outline = "Outline"
-        case blocks = "Blocks"
-        case canvas = "Canvas"
-    }
+    /// The mode vocabulary moved to the Registry layer (13b 1b — the
+    /// capability table declares per-mode availability); the alias keeps
+    /// every call site and pin naming unchanged.
+    typealias Mode = PostMode
 
     /// R79 (Sitting 9): a post opens in TAKES the first time; thereafter it
     /// reopens in whatever mode you last used there (per-post memory,
@@ -50,6 +38,9 @@ struct PostDetailView: View {
     }
 
     @State private var mode: Mode = .takes
+    /// 13b 1b: the mode-router registration's lifecycle token (composed
+    /// routing — the notification channels are retired).
+    @State private var routerToken: UUID?
     /// A TOC jump's landing: the Write editor re-seeds at this caret (the
     /// hybrid primitive fires in the editor — TK2 §3: no folding here).
     @State private var pendingCaret: Int?
@@ -135,27 +126,27 @@ struct PostDetailView: View {
                     .id("canvas-\(postID)")
             }
         }
-        // Batch 14 (supersedes R107's bottom line — her "the bottom looks
-        // too crowded with the two blocks"): the modes live in the
-        // SIDEBAR's post section now; this view broadcasts its state so
-        // the rail can mark the current mode.
-        .onChange(of: mode) { _, new in
-            NotificationCenter.default.post(
-                name: .variorumModeDidChange, object: nil,
-                userInfo: ["mode": new.rawValue, "postID": postID])
-        }
-        .onAppear {
-            NotificationCenter.default.post(
-                name: .variorumModeDidChange, object: nil,
-                userInfo: ["mode": mode.rawValue, "postID": postID])
-        }
         .inspector(isPresented: $referencesShown) {
             ReferencePanel(session: session, postID: postID)
                 .inspectorColumnWidth(min: 240, ideal: 340)
         }
+        // 13b 1b (P-4): the mode shell registers with the CommandRouter —
+        // mode truth stays this view's @State; requests reach it by
+        // composition and the sidebar rail reads the router's observable
+        // mirror (both notification channels are retired; a request with
+        // no detail mounted SPEAKS instead of vanishing).
         .onAppear {
             mode = Self.rememberedMode(postID: postID)
             if let initialBlockID { jump(to: initialBlockID) }
+            let binding = $mode
+            routerToken = session.commandRouter.registerDetail(
+                postID: postID, mode: mode
+            ) { binding.wrappedValue = $0 }
+        }
+        .onDisappear {
+            if let routerToken {
+                session.commandRouter.unregisterDetail(routerToken)
+            }
         }
         .task(id: postID) {
             // Sitting 9 batch 6: a BLOCKLESS post opens in WRITE no matter
@@ -175,15 +166,7 @@ struct PostDetailView: View {
         }
         .onChange(of: mode) { _, new in
             UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .variorumSwitchMode)) { note in
-            // A postID-less notification is the ⌘1–⌘7 broadcast — the
-            // visible detail responds; a postID-carrying one is targeted.
-            if let target = note.userInfo?["postID"] as? String, target != postID { return }
-            guard let raw = note.userInfo?["mode"] as? String,
-                  let target = Mode(rawValue: raw)
-            else { return }
-            mode = target
+            session.commandRouter.noteMode(new)
         }
     }
 

@@ -45,7 +45,13 @@ struct TakesCellView: View {
                 tokens: tokens,
                 role: role, variantID: resolved.variantID,
                 onFocusRequest: { model.focus(key) },
-                onEdit: { model.paneEdited(variantID: resolved.variantID, newText: $0) })
+                onEdit: { model.paneEdited(variantID: resolved.variantID, newText: $0) },
+                onSelectionChange: { range in
+                    // The choreography's carried caret (13b 1b): what a
+                    // fire-and-DO landing brings into Write.
+                    model.notePaneSelection(variantID: resolved.variantID, range: range)
+                },
+                menuItems: { menuSpecs(resolved: resolved) })
                 .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
                 .overlay(alignment: .topLeading) {
                     // Batch 9 (R103, her ruling): a take deleted down to
@@ -66,57 +72,72 @@ struct TakesCellView: View {
                             .allowsHitTesting(false)
                     }
                 }
-                .contextMenu {
-                    menu(resolved: resolved)
-                }
         } else {
             Text("· · ·")  // a gap slot renders a gap, never crashes
                 .foregroundStyle(tokens.muted)
         }
     }
 
-    @ViewBuilder
-    private func menu(resolved: (variantID: String, text: String)) -> some View {
-        // Batch 12 (the block-menu family): the most direct door of all —
-        // right-click the text you're looking at.
-        Button("＋ New take — branch of this one (⌘T)") {
-            Task { await model.branchTake(blockID: slot.blockID, from: resolved.variantID) }
-        }
-        Button("＋ Blank take (⌥⌘T)") {
-            Task { await model.newBlankTake(blockID: slot.blockID) }
-        }
-        Divider()
-        Button("✓ Choose this take (the post shows it)") {
-            Task { await model.choose(blockID: slot.blockID, variantID: resolved.variantID) }
-        }
-        .disabled(slot.variantID == resolved.variantID)
-        Button("Diverge here (new take, this thread)") {
-            Task {
-                await model.divergeHere(
-                    columnID: column.id, blockID: slot.blockID,
-                    fromVariantID: resolved.variantID)
-            }
-        }
+    /// The take card's context menu (13b 1b, AD-4): right-clicking a pane
+    /// used to show ONLY the stock text menu — the SwiftUI `.contextMenu`
+    /// never fired inside the NSTextView. The Variorum vocabulary now
+    /// renders through the pane surface's real menu path, above the
+    /// standard edit items. Registry-declared: see
+    /// `TakesCellView.contextMenuCapabilities`.
+    private func menuSpecs(
+        resolved: (variantID: String, text: String)
+    ) -> [PaneTextView.MenuItemSpec] {
+        var specs: [PaneTextView.MenuItemSpec] = [
+            .init(title: "＋ New take — branch of this one (⌘T)") {
+                Task { await model.branchTake(blockID: slot.blockID, from: resolved.variantID) }
+            },
+            .init(title: "＋ Blank take (⌥⌘T)") {
+                Task { await model.newBlankTake(blockID: slot.blockID) }
+            },
+            .init(
+                title: "✓ Choose this take (the post shows it)",
+                enabled: slot.variantID != resolved.variantID
+            ) {
+                Task { await model.choose(blockID: slot.blockID, variantID: resolved.variantID) }
+            },
+            .init(title: "Diverge here (new take, this thread)") {
+                Task {
+                    await model.divergeHere(
+                        columnID: column.id, blockID: slot.blockID,
+                        fromVariantID: resolved.variantID)
+                }
+            },
+            .init(title: "Archive this take (⌘⇧A)") {
+                Task { await model.archiveTake(resolved.variantID) }
+            },
+        ]
         if slot.variantID != resolved.variantID, let chosenText = slot.text {
-            Button("Diff against chosen") {
+            specs.append(.init(title: "Diff against chosen") {
                 onDiff(TakesDiffPresentation(
                     leftTitle: "chosen", rightTitle: "this take",
                     left: chosenText, right: resolved.text))
-            }
+            })
         }
         if let fan = model.projection.fans[slot.blockID], fan.count > 1 {
-            Menu("Show take") {
-                ForEach(fan, id: \.id) { take in
-                    Button(TakesShared.takeLabel(take, chosen: slot.variantID)) {
+            specs.append(.init(
+                title: "Show take",
+                children: fan.map { take in
+                    .init(title: TakesShared.takeLabel(take, chosen: slot.variantID)) {
                         Task {
                             await model.pick(
                                 columnID: column.id, blockID: slot.blockID, variantID: take.id)
                         }
                     }
-                }
-            }
+                }))
         }
+        return specs
     }
+
+    /// The registry ids this menu renders (walk-asserted against the
+    /// contextMenu door set's take-scope half).
+    static let contextMenuCapabilities: [CapabilityID] = [
+        .newTake, .blankTake, .chooseTake, .divergeHere, .archiveTake, .diffAgainstChosen,
+    ]
 }
 
 enum TakesShared {

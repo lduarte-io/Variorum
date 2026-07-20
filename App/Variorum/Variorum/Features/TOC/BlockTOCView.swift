@@ -35,7 +35,7 @@ final class BlockTOCViewModel {
         self.autosave = session.autosave(forPost: postID)
         autosaveToken = autosave.observe(
             onError: { [weak self] error in
-                self?.statusMessage = TakesViewModel.message(for: error)
+                self?.statusMessage = OpsRefusalCopy.message(for: error)
             })
         // (Buffer convergence rides `adopt(rows:)` — the settle happens
         // WITH fresh rows in hand, so a landed buffer never reverts the
@@ -190,7 +190,7 @@ final class BlockTOCViewModel {
         do {
             try await session.runner.run(body)
         } catch {
-            statusMessage = TakesViewModel.message(for: error)
+            statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
 }

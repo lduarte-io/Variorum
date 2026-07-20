@@ -143,6 +143,21 @@ struct HelperView: View {
          + "a whole new post (takes and all) and draws that same link in one gesture. "
          + "Rule of thumb: mark = connect, duplicate = copy + connect. UNMARK deletes only "
          + "the connection — both posts stay exactly as they are."),
+        ("divide / the take ceremony",
+         "Divide cuts a block in two at your cursor (⌘⇧D — works from Takes too; the "
+         + "app carries you to Write and cuts). When the block has SEVERAL takes, each "
+         + "take needs its own cut — the \"Divide into takes\" sheet lists every take, "
+         + "you place each cut, and confirm. Unchecked takes stay with the original; "
+         + "⌥⌘Z puts everything back."),
+        ("merge",
+         "Join neighboring blocks into one (⌘⇧M): cursor at the seam, or a selection "
+         + "across the run. From Takes it joins your block with the one above. The "
+         + "merged text is what you were LOOKING at; other takes stay with the released "
+         + "blocks in lineage — the app says so, and undo brings them back."),
+        ("extract / make block",
+         "Extract (⌘⇧E) pulls a selected span at a block's edge into its own block; "
+         + "Make Block (⌘⇧K) does the same for a middle span. Both work from Takes — "
+         + "select in your take, and the app carries the selection to Write and acts."),
         ("commit",
          "An immutable savepoint of one take (⌘S). Commits are append-only — "
          + "restoring one never erases another."),

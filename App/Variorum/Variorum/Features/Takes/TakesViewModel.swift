@@ -71,7 +71,14 @@ final class TakesViewModel {
     /// Fanned blocks currently bloomed — SESSION-ONLY by the plan's letter
     /// (fans stay open once expanded; close-all resets; nothing persists).
     private(set) var expandedBlocks: Set<String> = []
-    private(set) var statusMessage: String?
+    /// The board's transient outcome line. PRESENTATION is the shell's
+    /// StatusCenter (AD-14 — one placement, one auto-dismiss policy); the
+    /// property remains the tested truth and forwards on set.
+    private(set) var statusMessage: String? {
+        didSet {
+            if let statusMessage { session.status.speak(statusMessage) }
+        }
+    }
 
     // MARK: - Follow-the-scroll (Phase 13 C2, R25)
 
@@ -201,6 +208,10 @@ final class TakesViewModel {
             }
         }
         if changed { saveMemory() }
+        // 13b 1b: programmatic landings (add-block focus, cross-mode
+        // blooms, the N9 "just start typing" ring) resolve against the
+        // fresh slots.
+        consumeLandings(new)
     }
 
     func teardown() {
@@ -759,9 +770,210 @@ final class TakesViewModel {
         statusMessage = message
     }
 
-    func speakStructuralGesturesLiveInWrite(gesture: String) {
-        statusMessage =
-            "\(gesture) works on selected text in Write (⌘1) — switch there, select, and the same door fires."
+    // MARK: - Fire-and-DO (13b 1b, R115/R118 — the D3 lecture's replacement)
+
+    /// The block a routed command acts on: the pane you're in; on a
+    /// one-block post, THE block (no click should be needed).
+    var commandTargetSlot: Queries.RenderedBlock? {
+        if let pane = focusedPane {
+            return projection.slots.first { $0.blockID == pane.blockID }
+        }
+        if projection.slots.count == 1 { return projection.slots.first }
+        return nil
+    }
+
+    enum MoveAndExecuteAct: Equatable {
+        case structural(StructuralAct)
+        case deleteInEveryTake
+    }
+
+    /// The ONE mode-switch choreography's takes-side half: park a Write
+    /// landing (block + carried caret/selection + the gesture) on the
+    /// router, flush this surface's pending text (same per-post
+    /// coordinator — the arriving editor serializes on it), and switch
+    /// modes VISIBLY. The gesture then plans against the real landed
+    /// selection, so any refusal is the operation's own, spoken — the
+    /// lecture-and-redirect door is retired (its copy was also factually
+    /// wrong for Divide).
+    func moveToWriteAndRun(_ act: MoveAndExecuteAct) {
+        guard let slot = commandTargetSlot else {
+            speak("Click into a block first — then the gesture knows where to act.")
+            return
+        }
+        var intent = WriteIntent(blockID: slot.blockID)
+        // The caret/selection transfers when the focused pane shows the
+        // CHOSEN take (Write shows chosen — same text, same offsets). A
+        // non-chosen pane lands at the block's start; on a fanned block
+        // divide opens the take ceremony, where cuts are adjusted per
+        // take (the W memo's reading).
+        let carried: NSRange? = {
+            guard let sel = paneSelection,
+                  sel.variantID == focusedPane?.variantID,
+                  sel.variantID == slot.variantID else { return nil }
+            return sel.range
+        }()
+        switch act {
+        case .structural(.merge):
+            // The merge memo: joining from Takes joins UPWARD — the caret
+            // lands at the block's start, the seam with the block above.
+            intent.offsetInBlock = 0
+        case .structural(.divide):
+            intent.offsetInBlock = carried?.location ?? 0
+        case .structural(.extract), .structural(.makeBlock), .deleteInEveryTake:
+            intent.offsetInBlock = carried?.location ?? 0
+            intent.selectionLength = carried?.length ?? 0
+        }
+        switch act {
+        case .structural(let gesture): intent.followUp = .structural(gesture)
+        case .deleteInEveryTake: intent.followUp = .deleteInEveryTake
+        }
+        // Flush FIRST, then switch: the arriving editor's first render
+        // reads the store, and the gesture must plan against the text the
+        // author sees (the one per-post coordinator serializes the rest).
+        Task { [postID] in
+            await autosave.flushNow()
+            session.commandRouter.pendingWriteIntent = intent
+            session.commandRouter.requestMode(.write, postID: postID)
+        }
+    }
+
+    /// D3's third leg — the add-block door, NATIVE in Takes/Lenses: an
+    /// empty block mints at the post's end and its pane takes the ring the
+    /// moment its slot arrives ("just start typing", literally).
+    func addBlockAtEnd() async {
+        statusMessage = nil
+        do {
+            let result: Operations.NewBlockResult = try await session.runner.run { [postID] ops in
+                try ops.newBlock(in: postID, text: "", at: .end)
+            }
+            pendingFocusVariantID = result.variant.id
+            statusMessage = "New block added at the end — type away."
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
+    /// The routed comments door (⌘⇧' — the bars' block menu made
+    /// keyboard-reachable): the bar presents the sheet for this target.
+    struct CommentsRequest: Identifiable, Equatable {
+        let blockID: String
+        var id: String { blockID }
+    }
+
+    var commentsRequest: CommentsRequest?
+
+    func requestComments() {
+        guard let slot = commandTargetSlot else {
+            speak("Click into a block first — comments live on the block you're in.")
+            return
+        }
+        commentsRequest = CommentsRequest(blockID: slot.blockID)
+    }
+
+    // MARK: - Pane selection (the choreography's carried caret)
+
+    /// The live pane's current selection, reported by the pane surface —
+    /// what a fire-and-DO landing carries into Write.
+    @ObservationIgnored private(set) var paneSelection: (variantID: String, range: NSRange)?
+
+    func notePaneSelection(variantID: String, range: NSRange) {
+        paneSelection = (variantID, range)
+    }
+
+    // MARK: - Landings (13b 1b — N9/AD-17 + the cross-mode bloom)
+
+    /// True on the PRIMARY takes board only (never the Write panel's
+    /// embedded model): landing focus + cross-mode landings apply there.
+    @ObservationIgnored var landingEnabled = false
+    @ObservationIgnored private var landingFocusDone = false
+    /// A freshly-minted block's variant: its pane takes the ring when the
+    /// slot arrives (the add-block door's second half).
+    @ObservationIgnored private var pendingFocusVariantID: String?
+
+    /// The landing column for programmatic focus: the takes board's main
+    /// column, or the lens board's first column.
+    private var landingColumnID: String {
+        host == .takes ? Self.takesMainColumnID : (columns.first?.id ?? "main")
+    }
+
+    /// The Takes board's fixed main-column identity (shared with the view).
+    nonisolated static let takesMainColumnID = "takes-main"
+
+    private func consumeLandings(_ new: Queries.TakesProjection) {
+        // A minted block's pane goes live the moment its slot arrives.
+        if let want = pendingFocusVariantID,
+           let slot = new.slots.first(where: { $0.variantID == want }) {
+            pendingFocusVariantID = nil
+            focus(PaneKey(columnID: landingColumnID, blockID: slot.blockID, variantID: want))
+            return
+        }
+        guard landingEnabled else { return }
+        // A cross-mode landing (Lenses' ⌘⇧T: blooms live in Takes — GO
+        // there and bloom, visibly).
+        if let landing = session.commandRouter.pendingTakesLanding {
+            session.commandRouter.pendingTakesLanding = nil
+            switch landing {
+            case .bloom(let blockID):
+                expandedBlocks.insert(blockID)
+                if let slot = new.slots.first(where: { $0.blockID == blockID }),
+                   let variantID = slot.variantID {
+                    focus(PaneKey(
+                        columnID: landingColumnID, blockID: blockID, variantID: variantID))
+                }
+            }
+            landingFocusDone = true
+            return
+        }
+        // N9/AD-17 — "just start typing" at the Takes landing: with
+        // nothing focused, the first block's article pane takes the ring.
+        if !landingFocusDone, authority.livePane == nil,
+           let first = new.slots.first, let variantID = first.variantID {
+            landingFocusDone = true
+            authority.focus(PaneKey(
+                columnID: landingColumnID, blockID: first.blockID, variantID: variantID))
+        }
+    }
+
+    // MARK: - Keyboard fan paging (13b 1b — AD-2's keyboard companion)
+
+    /// Density inputs, pushed by the board (models never read @AppStorage).
+    var beneathCount = 2
+    var gridRows = 2
+    var gridCols = 1
+
+    /// R24's strip exception, one brain with the board's chunking.
+    func railRowsPerColumn(slotText: String?) -> Int {
+        (Self.usesHorizontalStrip(text: slotText) && gridRows == 1) ? 1 : gridRows
+    }
+
+    nonisolated static func railPageKey(_ blockID: String) -> String { "rail-\(blockID)" }
+
+    /// The focused (else first-expanded) block's paging key + last legal
+    /// offset in the CURRENT style — the board renders with the same
+    /// answer, so the keyboard and the ◀ ▶ doors can never disagree.
+    func pageTarget() -> (key: String, limit: Int)? {
+        let blockID = focusedPane?.blockID
+            ?? projection.slots.first { expandedBlocks.contains($0.blockID) }?.blockID
+        guard let blockID, let fan = projection.fans[blockID], fan.count > 1 else { return nil }
+        switch projection.fanStyle {
+        case .carousel, .slotSplit:
+            return (blockID, max(fan.count - beneathCount, 0))
+        case .marginGrid:
+            let text = projection.slots.first { $0.blockID == blockID }?.text
+            let rows = railRowsPerColumn(slotText: text)
+            let columns = (fan.count + rows - 1) / rows
+            return (Self.railPageKey(blockID), max(columns - gridCols, 0))
+        case .stack:
+            return nil
+        }
+    }
+
+    func pageFocusedFan(by delta: Int) {
+        guard let (key, limit) = pageTarget(), limit > 0 else {
+            speak("Open a block's takes first — ⌥⌘← and ⌥⌘→ page through its cards.")
+            return
+        }
+        stepPage(key, by: delta, limit: limit)
     }
 
     func restoreCommit(_ commit: CommitPoint) async {
@@ -892,21 +1104,10 @@ final class TakesViewModel {
         }
     }
 
+    /// The ops-refusal vocabulary moved to the shared layer (13b 1b —
+    /// Canvas/TOC/Tutorial no longer reach into this feature for copy);
+    /// kept as a forward so every pin and call site reads unchanged.
     static func message(for error: Error) -> String {
-        if let error = error as? OperationError {
-            switch error {
-            case .lockedPost:
-                return "This post is sealed — unseal it to change takes or choices."
-            case .archivedVariant:
-                return "That take is archived — unarchive it first."
-            case .lockedVariant:
-                return "That take is locked — unlock it or branch a new take."
-            case .versionLinkNotFound:
-                return "These two posts aren't marked as versions — nothing to unmark."
-            default:
-                return "Refused: \(error)"
-            }
-        }
-        return String(describing: error)
+        OpsRefusalCopy.message(for: error)
     }
 }

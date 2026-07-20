@@ -28,6 +28,8 @@ struct LensesBoardView: View {
     @State private var model: TakesViewModel
     @State private var lensNamePrompt: LensPrompt?
     @State private var diffPresentation: TakesDiffPresentation?
+    /// 13b 1b: the routed-command registration's lifecycle token.
+    @State private var commandToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -49,15 +51,10 @@ struct LensesBoardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            if let status = model.statusMessage {
-                // ChromeNotice: the line limit is LOAD-BEARING here — HER
-                // Lenses wedge (batch 12): this exact slot rendered a long
-                // status with unlimited fixedSize in non-scrolling chrome,
-                // and the window minimum inflated (the b6dae25 class).
-                ChromeNotice(tokens: tokens, text: status, ink: tokens.accent)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 4)
-            }
+            // 13b 1b (AD-14): the transient status line moved to the ONE
+            // shell toast (StatusCenter — its lineLimit stays load-bearing
+            // there, the b6dae25 class); the board renders state banners
+            // only.
             if model.projection.sealed {
                 Text("Sealed post — takes are viewable; choosing and new takes are frozen.")
                     .font(.caption)
@@ -71,11 +68,16 @@ struct LensesBoardView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
-        .onAppear { model.host = .lenses }
-        .onDisappear { model.teardown() }
-        .onReceive(NotificationCenter.default.publisher(for: .variorumTakesCommand)) { note in
-            guard let command = TakesCommand.from(note) else { return }
-            handleTakesCommand(command)
+        .onAppear {
+            model.host = .lenses
+            // 13b 1b (P-4): registered handler, not a notification.
+            commandToken = session.commandRouter.registerHandler { handleRouted($0) }
+        }
+        .onDisappear {
+            if let commandToken {
+                session.commandRouter.unregisterHandler(commandToken)
+            }
+            model.teardown()
         }
         .sheet(item: $diffPresentation) { diff in
             DiffView(
@@ -89,12 +91,48 @@ struct LensesBoardView: View {
         }
     }
 
+    /// The Lenses routed-command handler (13b 1b): the take family as
+    /// before, plus the fire-and-DO structural doors and the native
+    /// add-block door (shared model machinery with the Takes board).
+    private func handleRouted(_ command: RoutedCommand) -> Bool {
+        switch command {
+        case .takes(let takes):
+            handleTakesCommand(takes)
+            return true
+        case .structural(let act):
+            model.moveToWriteAndRun(.structural(act))
+            return true
+        case .deleteInEveryTake:
+            model.moveToWriteAndRun(.deleteInEveryTake)
+            return true
+        case .commit:
+            Task { await model.commitFocusedTake() }
+            return true
+        case .addBlockAtEnd:
+            Task { await model.addBlockAtEnd() }
+            return true
+        case .toggleSeal:
+            Task { await model.toggleSeal() }
+            return true
+        case .comments:
+            model.requestComments()
+            return true
+        case .pageFan:
+            return false  // fan pages live on the Takes board
+        }
+    }
+
     /// The Lenses half of the R73 family: the focused pane's COLUMN is the
     /// thread — branching diverges the thread; stepping moves its pick.
     private func handleTakesCommand(_ command: TakesCommand) {
         switch command {
         case .toggleFan:
-            model.speak("Blooms live in Takes (⌘2) — here every column is a whole reading.")
+            // Fire-and-DO (13b 1b — the lecture retired): blooms live in
+            // Takes, so GO there, visibly, and bloom the focused block.
+            if let pane = model.focusedPane {
+                session.commandRouter.pendingTakesLanding = .bloom(blockID: pane.blockID)
+            }
+            session.commandRouter.requestMode(.takes, postID: postID)
         case .closeAll:
             break
         case .branch:
@@ -200,9 +238,7 @@ struct LensesBoardView: View {
                     .font(tokens.body)
                     .foregroundStyle(tokens.muted)
                 Button(tokens.chromeLabel("Start writing (Write mode)")) {
-                    NotificationCenter.default.post(
-                        name: .variorumSwitchMode, object: nil,
-                        userInfo: ["mode": "Write", "postID": postID])
+                    session.commandRouter.requestMode(.write, postID: postID)
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
             }

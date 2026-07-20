@@ -18,6 +18,8 @@ struct EditorView: View {
     let postID: String
     /// ⌘⇧L in Write (Sitting 9, R73) — the save-choices prompt.
     @State private var saveLensPrompt = false
+    /// 13b 1b: the routed-command registration's lifecycle token.
+    @State private var commandToken: UUID?
     /// Inline mode (Phase 10 Step 3): the editor lives inside a multi-post
     /// container's scroll — a bare, content-sized TK2 surface instead of
     /// the detail editor's own scroll view. Exactly one EditorView exists
@@ -104,9 +106,15 @@ struct EditorView: View {
                 model.saveCurrentChoicesAsLens(named: name)
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .variorumTakesCommand)) { note in
-            guard let command = TakesCommand.from(note) else { return }
-            handleTakesCommand(command)
+        .onAppear {
+            // 13b 1b (P-4): the routed-command channel — a registered
+            // handler by composition, not a notification observer.
+            commandToken = session.commandRouter.registerHandler { handleRouted($0) }
+        }
+        .onDisappear {
+            if let commandToken {
+                session.commandRouter.unregisterHandler(commandToken)
+            }
         }
         .sheet(item: $model.commentsPanel) { panel in
             // Phase 13 C1 (R7): the block's comments — margin/inline faces
@@ -155,30 +163,55 @@ struct EditorView: View {
 }
 
 extension EditorView {
-    /// Write's half of the R73 keyboard family: the caret block is the
-    /// target; inapplicable commands SAY where they live (never dead).
-    fileprivate func handleTakesCommand(_ command: TakesCommand) {
+    /// Write's routed-command handler (13b 1b): the caret block is the
+    /// target. The old choose/step LECTURES are retired (P-2): both now
+    /// OPEN the caret block's takes panel — the surface where picking and
+    /// stepping live, one click deep, right here.
+    fileprivate func handleRouted(_ command: RoutedCommand) -> Bool {
         switch command {
-        case .toggleFan:
-            model.openCaretFan()
-        case .branch:
-            model.mintCaretTake(blank: false)
-        case .blank:
-            model.mintCaretTake(blank: true)
-        case .blankChoose:
-            model.mintCaretTake(blank: true, asChosen: true)
-        case .archive:
-            model.archiveCaretTake()
-        case .choose:
-            model.showStatus(
-                "Write shows the chosen takes already — Takes (⌘2) is where you pick among them.")
-        case .stepPrev, .stepNext:
-            model.showStatus(
-                "Step through takes in Takes (⌘2), or open this block's takes with ⌘⇧T.")
-        case .closeAll:
-            break  // Write has no blooms; the plain page is already here.
-        case .saveLens:
-            saveLensPrompt = true
+        case .takes(let takes):
+            switch takes {
+            case .toggleFan:
+                model.openCaretFan()
+            case .branch:
+                model.mintCaretTake(blank: false)
+            case .blank:
+                model.mintCaretTake(blank: true)
+            case .blankChoose:
+                model.mintCaretTake(blank: true, asChosen: true)
+            case .archive:
+                model.archiveCaretTake()
+            case .choose, .stepPrev, .stepNext:
+                // Fire-and-DO: choosing/stepping happens among the block's
+                // takes — open them (the panel's cards carry ✓ and the
+                // whole fan).
+                model.openCaretFan()
+            case .closeAll:
+                break  // Write has no blooms; the plain page is already here.
+            case .saveLens:
+                saveLensPrompt = true
+            }
+            return true
+        case .structural(let act):
+            Task { await model.invokeGesture(EditorViewModel.plannerCommand(for: act)) }
+            return true
+        case .deleteInEveryTake:
+            Task { await model.deleteInEveryTake() }
+            return true
+        case .commit:
+            model.commitCaretVariant()
+            return true
+        case .addBlockAtEnd:
+            model.jumpToDocumentEnd()
+            return true
+        case .toggleSeal:
+            model.toggleSeal()
+            return true
+        case .comments:
+            model.openCaretComments()
+            return true
+        case .pageFan:
+            return false  // fan pages live on the Takes board
         }
     }
 }

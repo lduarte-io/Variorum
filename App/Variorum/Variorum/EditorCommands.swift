@@ -2,12 +2,16 @@
 //  EditorCommands.swift
 //  Variorum
 //
-//  Menu wiring (Phase 7 Steps 5 + 7): the commit shortcut and the
-//  structural-undo item. Structural undo is DISTINCT from command-Z —
-//  command-Z stays NSTextView's per-buffer text undo; the two stacks never
-//  interleave (OverallModel §3). undo() runs through OperationsRunner, so
-//  two concurrent invocations execute one at a time (the KnownIssues
-//  serialization note).
+//  The menu bar (rewired Phase 13b, Stage 1b — P-1/P-2): items render FROM
+//  the capability registry (titles = the declared verbs; enablement = the
+//  declared availability over the router's live context) and route through
+//  ShellActions → CommandRouter — never directly into a maybe-nil editor.
+//  The three Stage 0 routing regimes are gone: no item is ever
+//  enabled-but-void (the silent-⌘S class), no shortcut is a dead key where
+//  its act can work (the D3 class — Takes/Lenses fire-and-DO), and an act
+//  that can't work here is honestly grey. Structural undo stays DISTINCT
+//  from command-Z (OverallModel §3) and reports through the StatusCenter
+//  on every surface (N4).
 //
 
 import AppKit
@@ -25,167 +29,219 @@ struct EditorCommands: Commands {
         return nil
     }
 
+    private var actions: ShellActions? {
+        session.map { ShellActions(session: $0, shell: router) }
+    }
+
+    /// Registry-driven enablement (P-1: gating is data). Reads the
+    /// router's observable context, so the menu tracks mode/editor/undo
+    /// changes.
+    private func enabled(_ id: CapabilityID) -> Bool {
+        session?.commandRouter.isEnabled(id) ?? false
+    }
+
+    private func verb(_ id: CapabilityID) -> String {
+        CapabilityRegistry.capability(id).verb
+    }
+
+    /// The menu bar's rendered capability set — asserted equal to the
+    /// registry's menuBar door set by the registry walk test (declared ⇔
+    /// rendered).
+    static let menuRendered: [CapabilityID] = [
+        .newPost, .todaysEntry, .findAnything, .commitTake,
+        .importFiles, .exportLibrary, .exportCaretBlock,
+        .structuralUndo,
+        .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
+        .addBlockAtEnd, .showTakes,
+        .newTake, .blankTake, .blankTakeAsChosen, .chooseTake,
+        .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
+        .closeAllTakes, .pageFanBack, .pageFanForward,
+        .previousBlock, .nextBlock, .blockComments, .callout,
+        .toggleSeams, .switchMode, .helper,
+    ]
+
+    /// The SwiftUI key wiring per shortcut-labeled capability — the walk
+    /// asserts every declared shortcut label has a mapping here (and only
+    /// here: one place to collide).
+    static func keyEquivalent(for id: CapabilityID) -> (KeyEquivalent, EventModifiers)? {
+        switch id {
+        case .newPost: ("n", .command)
+        case .todaysEntry: ("j", .command)
+        case .findAnything: ("k", .command)
+        case .commitTake: ("s", .command)
+        case .structuralUndo: ("z", [.command, .option])
+        case .divide: ("d", [.command, .shift])
+        case .extract: ("e", [.command, .shift])
+        case .makeBlock: ("k", [.command, .shift])
+        case .merge: ("m", [.command, .shift])
+        case .showTakes: ("t", [.command, .shift])
+        case .newTake: ("t", .command)
+        case .blankTake: ("t", [.command, .option])
+        case .blankTakeAsChosen: ("t", [.command, .option, .shift])
+        case .chooseTake: (.return, .command)
+        case .previousTake: (.leftArrow, [.command, .control])
+        case .nextTake: (.rightArrow, [.command, .control])
+        case .archiveTake: ("a", [.command, .shift])
+        case .saveChoicesAsLens: ("l", [.command, .shift])
+        case .pageFanBack: (.leftArrow, [.command, .option])
+        case .pageFanForward: (.rightArrow, [.command, .option])
+        case .previousBlock: (.upArrow, [.command, .control])
+        case .nextBlock: (.downArrow, [.command, .control])
+        case .blockComments: ("'", [.command, .shift])
+        case .toggleSeams: ("b", [.command, .shift])
+        case .helper: ("/", .command)
+        case .switchMode: nil  // ⌘1–⌘7, wired per mode below
+        default: nil
+        }
+    }
+
     var body: some Commands {
-        // Phase 13 (B2): ⌘N = New Post (R41, ruled sitting 5 — "command N
-        // should be new post"; new BLOCK needs no command, blocks are born
-        // by typing) + the dated home's shortcut.
+        // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.
         CommandGroup(replacing: .newItem) {
-            Button("New Post") { newPost() }
+            Button(verb(.newPost)) { actions?.newPost() }
                 .keyboardShortcut("n", modifiers: .command)
                 .disabled(session == nil)
-            Button("Today's Entry") { todaysEntry() }
+            Button(verb(.todaysEntry)) { actions?.todaysEntry() }
                 .keyboardShortcut("j", modifiers: .command)
                 .disabled(session == nil)
         }
         // ⌘K (R15, ratified): find anything — posts, books, commands.
         CommandGroup(after: .sidebar) {
-            Button("Find Anything…") { router.paletteRequested = true }
+            Button(verb(.findAnything)) { router.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(session == nil)
         }
         CommandGroup(after: .saveItem) {
-            Button("Commit Take") {
-                session?.editorRouter.active?.commitCaretVariant()
-            }
-            .keyboardShortcut("s", modifiers: .command)
+            // N5 (13b 1b): ⌘S acts wherever advertised — the mounted
+            // surface commits its focused/caret take; where truly nothing
+            // can commit, the item is honestly grey (it used to be an
+            // always-enabled call into a nil editor).
+            Button(verb(.commitTake)) { actions?.commitTake() }
+                .keyboardShortcut("s", modifiers: .command)
+                .disabled(!enabled(.commitTake))
         }
-        // Phase 11b (B1): the File-menu export doors — the bulk gesture
-        // (the whole library, ONE gesture — the no-lock-in principle) and
-        // the caret block's single-block export. Projections and shapes
-        // live in Queries; panels are the author-visible moments.
+        // Phase 11b (B1): the File-menu export doors.
         CommandGroup(after: .importExport) {
-            // B2's panel door (the drop's keyboard-reachable twin): each
-            // picked file becomes a post via the same import operation.
-            Button("Import Files…") { importFiles() }
+            Button(verb(.importFiles)) { actions?.importFiles() }
                 .disabled(session == nil)
             Divider()
-            Button("Export Library…") { exportLibrary() }
+            Button(verb(.exportLibrary)) { actions?.exportLibrary() }
                 .disabled(session == nil)
-            Button("Export Block as Markdown…") { exportCaretBlock() }
+            Button(verb(.exportCaretBlock)) { actions?.exportCaretBlock() }
                 .disabled(session?.editorRouter.active?.caretBlockID == nil)
         }
         CommandGroup(after: .undoRedo) {
-            // Per-op labels (Phase 9, KnownIssues entry): the stack's change
-            // observer keeps UndoMenuState current; disabled when empty.
+            // Per-op labels (Phase 9); N4 (13b 1b): the outcome reports
+            // through the StatusCenter — visible on EVERY surface, never
+            // into a nil editor.
             Button(Self.undoMenuTitle(for: session?.undoMenuState.topLabel)) {
-                structuralUndo()
+                actions?.structuralUndo()
             }
             .keyboardShortcut("z", modifiers: [.command, .option])
             .disabled(session?.undoMenuState.topLabel == nil)
         }
-        // The structural gestures' menu-bar door (Phase 9, contract item 1:
-        // two named commands). Doors fire and speak (author 2026-07-09,
-        // superseding the disabled-door posture): items are enabled whenever
-        // an editor is focused, invocation plans against the CURRENT
-        // selection, and a refusal surfaces its copy in the status bar —
-        // a refused shortcut was previously a silently dead key. The planner
-        // verdict still dims the button bar (`gestureAvailability`).
+        // The structural gestures' menu-bar door (Phase 9, contract item 1;
+        // rewired 13b 1b): enablement is the REGISTRY's — in Write the
+        // planner speaks per-invocation as before; in Takes/Lenses the same
+        // items now FIRE-AND-DO (the one mode-switch choreography lands the
+        // caret and runs the gesture); where nothing can act they are grey.
         CommandMenu("Block") {
-            Button("Divide Block at Cursor") {
-                session?.editorRouter.active?.divideAtCursor()
-            }
-            .keyboardShortcut("d", modifiers: [.command, .shift])
-            .disabled(session?.editorRouter.active == nil)
+            Button(verb(.divide)) { actions?.dispatch(.structural(.divide)) }
+                .keyboardShortcut("d", modifiers: [.command, .shift])
+                .disabled(!enabled(.divide))
 
-            Button("Extract Selection") {
-                session?.editorRouter.active?.extractSelection()
-            }
-            .keyboardShortcut("e", modifiers: [.command, .shift])
-            .disabled(session?.editorRouter.active == nil)
+            Button(verb(.extract)) { actions?.dispatch(.structural(.extract)) }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+                .disabled(!enabled(.extract))
 
-            Button("Make Block from Selection") {
-                session?.editorRouter.active?.makeBlockFromSelection()
-            }
-            .keyboardShortcut("k", modifiers: [.command, .shift])
-            .disabled(session?.editorRouter.active == nil)
+            Button(verb(.makeBlock)) { actions?.dispatch(.structural(.makeBlock)) }
+                .keyboardShortcut("k", modifiers: [.command, .shift])
+                .disabled(!enabled(.makeBlock))
 
             Divider()
 
-            Button("Merge Blocks") {
-                session?.editorRouter.active?.mergeBlocks()
-            }
-            .keyboardShortcut("m", modifiers: [.command, .shift])
-            .disabled(session?.editorRouter.active == nil)
+            Button(verb(.merge)) { actions?.dispatch(.structural(.merge)) }
+                .keyboardShortcut("m", modifiers: [.command, .shift])
+                .disabled(!enabled(.merge))
 
-            // #11b (author, 2026-07-13): the deliberate, NAMED command —
-            // deletes the selected span from EVERY take that contains it
-            // uniquely, and reports the takes it couldn't match.
-            Button("Delete in Every Take") {
-                let editor = session?.editorRouter.active
-                Task { await editor?.deleteInEveryTake() }
-            }
-            .disabled(session?.editorRouter.active == nil)
+            // #11b (author, 2026-07-13): the deliberate, NAMED command.
+            Button(verb(.deleteInEveryTake)) { actions?.dispatch(.deleteInEveryTake) }
+                .disabled(!enabled(.deleteInEveryTake))
+
+            // D3's third leg (13b 1b): the add-block door — native on the
+            // boards (an empty block mints and its pane goes live), caret
+            //-to-end in Write (typing there births blocks).
+            Button(verb(.addBlockAtEnd)) { actions?.dispatch(.addBlockAtEnd) }
+                .disabled(!enabled(.addBlockAtEnd))
 
             Divider()
 
-            // The fan door (9d): ANY block, any arity — the badge stays
-            // fan-only, the door does not. In the boards it TOGGLES the
-            // focused block's bloom (Sitting 9, R73).
-            Button("Show Takes") {
-                if let editor = session?.editorRouter.active {
-                    editor.openCaretFan()
-                } else {
-                    TakesCommand.post(.toggleFan)
-                }
-            }
-            .keyboardShortcut("t", modifiers: [.command, .shift])
-            .disabled(session == nil)
+            // The fan door (9d): ANY block, any arity. In Lenses the door
+            // fire-and-DOes: blooms live in Takes, so it GOES there.
+            Button(verb(.showTakes)) { actions?.dispatch(.takes(.toggleFan)) }
+                .keyboardShortcut("t", modifiers: [.command, .shift])
+                .disabled(!enabled(.showTakes))
 
-            // The take lifecycle's keyboard family (Sitting 9, R73/R90/R93
-            // — every shortcut a menu item; the visible surface handles;
-            // nothing is a dead key).
-            Button("New Take (Branch)") { TakesCommand.post(.branch) }
+            // The take lifecycle's keyboard family (Sitting 9, R73/R90/R93;
+            // routed 13b 1b — a registered surface handles or the router
+            // speaks; nothing is a dead key where the act can work).
+            Button(verb(.newTake)) { actions?.dispatch(.takes(.branch)) }
                 .keyboardShortcut("t", modifiers: .command)
-                .disabled(session == nil)
-            Button("New Blank Take") { TakesCommand.post(.blank) }
+                .disabled(!enabled(.newTake))
+            Button(verb(.blankTake)) { actions?.dispatch(.takes(.blank)) }
                 .keyboardShortcut("t", modifiers: [.command, .option])
-                .disabled(session == nil)
-            Button("New Blank Take as Chosen") { TakesCommand.post(.blankChoose) }
+                .disabled(!enabled(.blankTake))
+            Button(verb(.blankTakeAsChosen)) { actions?.dispatch(.takes(.blankChoose)) }
                 .keyboardShortcut("t", modifiers: [.command, .option, .shift])
-                .disabled(session == nil)
-            Button("Choose This Take") { TakesCommand.post(.choose) }
+                .disabled(!enabled(.blankTakeAsChosen))
+            Button(verb(.chooseTake)) { actions?.dispatch(.takes(.choose)) }
                 .keyboardShortcut(.return, modifiers: .command)
-                .disabled(session == nil)
-            Button("Previous Take") { TakesCommand.post(.stepPrev) }
+                .disabled(!enabled(.chooseTake))
+            Button(verb(.previousTake)) { actions?.dispatch(.takes(.stepPrev)) }
                 .keyboardShortcut(.leftArrow, modifiers: [.command, .control])
-                .disabled(session == nil)
-            Button("Next Take") { TakesCommand.post(.stepNext) }
+                .disabled(!enabled(.previousTake))
+            Button(verb(.nextTake)) { actions?.dispatch(.takes(.stepNext)) }
                 .keyboardShortcut(.rightArrow, modifiers: [.command, .control])
-                .disabled(session == nil)
-            Button("Archive Take") { TakesCommand.post(.archive) }
+                .disabled(!enabled(.nextTake))
+            Button(verb(.archiveTake)) { actions?.dispatch(.takes(.archive)) }
                 .keyboardShortcut("a", modifiers: [.command, .shift])
-                .disabled(session == nil)
-            Button("Save Choices as Lens…") { TakesCommand.post(.saveLens) }
+                .disabled(!enabled(.archiveTake))
+            Button(verb(.saveChoicesAsLens)) { actions?.dispatch(.takes(.saveLens)) }
                 .keyboardShortcut("l", modifiers: [.command, .shift])
-                .disabled(session == nil)
-            Button("Close All Takes (Esc)") { TakesCommand.post(.closeAll) }
-                .disabled(session == nil)
+                .disabled(!enabled(.saveChoicesAsLens))
+            Button(verb(.closeAllTakes)) { actions?.dispatch(.takes(.closeAll)) }
+                .disabled(!enabled(.closeAllTakes))
+            // AD-2's companion (13b 1b): the paged fan rail, keyboard-able.
+            Button(verb(.pageFanBack)) { actions?.dispatch(.pageFan(-1)) }
+                .keyboardShortcut(.leftArrow, modifiers: [.command, .option])
+                .disabled(!enabled(.pageFanBack))
+            Button(verb(.pageFanForward)) { actions?.dispatch(.pageFan(1)) }
+                .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
+                .disabled(!enabled(.pageFanForward))
 
             Divider()
 
             // R73's block navigation pair (Write's caret).
-            Button("Previous Block") {
+            Button(verb(.previousBlock)) {
                 session?.editorRouter.active?.jumpToAdjacentBlock(-1)
             }
             .keyboardShortcut(.upArrow, modifiers: [.command, .control])
-            .disabled(session?.editorRouter.active == nil)
-            Button("Next Block") {
+            .disabled(!enabled(.previousBlock))
+            Button(verb(.nextBlock)) {
                 session?.editorRouter.active?.jumpToAdjacentBlock(1)
             }
             .keyboardShortcut(.downArrow, modifiers: [.command, .control])
-            .disabled(session?.editorRouter.active == nil)
+            .disabled(!enabled(.nextBlock))
 
-            // The caret block's comments (Phase 13 C1, R7 — the keyboard
-            // door beside the margin/inline faces).
-            Button("Comments…") {
-                session?.editorRouter.active?.openCaretComments()
-            }
-            .keyboardShortcut("'", modifiers: [.command, .shift])
-            .disabled(session?.editorRouter.active == nil)
+            // The caret block's comments (Phase 13 C1, R7; routed 13b 1b —
+            // the boards open their target block's panel, so ⌘⇧' works
+            // where the bars' block menu already offered the door).
+            Button(verb(.blockComments)) { actions?.dispatch(.comments) }
+                .keyboardShortcut("'", modifiers: [.command, .shift])
+                .disabled(!enabled(.blockComments))
 
-            // The callout frame (R16/R27): block-level presentation —
-            // takes share the frame; colors are theme-token NAMES.
-            Menu("Callout") {
+            // The callout frame (R16/R27).
+            Menu(verb(.callout)) {
                 ForEach(CalloutPalette.names, id: \.self) { name in
                     Button(name.capitalized) {
                         let editor = session?.editorRouter.active
@@ -203,52 +259,30 @@ struct EditorCommands: Commands {
 
             Divider()
 
-            // Phase 13 C1 (R6/R42): dotted seams on the GLOBAL setting —
-            // supersedes the 9d "Show Blocks" tint toggle (that look is
-            // retired; this is its face now). ⌘⇧B keeps the muscle memory.
-            Button("Toggle Block Seams") { toggleSeams() }
+            // Phase 13 C1 (R6/R42): dotted seams on the GLOBAL setting.
+            Button(verb(.toggleSeams)) { actions?.toggleSeams() }
                 .keyboardShortcut("b", modifiers: [.command, .shift])
                 .disabled(session == nil)
         }
-        // ⌘1–⌘7 — the post modes (Sitting 9, R73; PostDetailView listens).
+        // ⌘1–⌘7 — the post modes (routed 13b 1b: composition, not a
+        // broadcast — with no post open the items are honestly grey; a
+        // routed request that finds no detail SPEAKS instead of vanishing).
         CommandGroup(before: .toolbar) {
-            ForEach(Array(PostDetailView.Mode.allCases.enumerated()), id: \.offset) { i, mode in
-                Button(mode.rawValue) {
-                    NotificationCenter.default.post(
-                        name: .variorumSwitchMode, object: nil,
-                        userInfo: ["mode": mode.rawValue])
-                }
-                .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
-                .disabled(session == nil)
+            ForEach(Array(PostMode.allCases.enumerated()), id: \.offset) { i, mode in
+                Button(mode.rawValue) { actions?.requestMode(mode) }
+                    .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
+                    .disabled(!enabled(.switchMode))
             }
             Divider()
         }
         // ⌘/ — the shortcut helper + dictionary (Sitting 9, R73/R91).
         CommandGroup(after: .help) {
-            Button("Shortcuts & Dictionary") { openWindow(id: "variorum-helper") }
+            Button(verb(.helper)) { openWindow(id: "variorum-helper") }
                 .keyboardShortcut("/", modifiers: .command)
         }
     }
 
     @Environment(\.openWindow) private var openWindow
-
-    /// Flip the global seam setting (R42 — a synced document setting, not
-    /// per-window state; every editor and the Settings pane follow).
-    private func toggleSeams() {
-        guard let session else { return }
-        Task { @MainActor in
-            do {
-                let current = try await session.database.read { db in
-                    try Queries.themeSettings(db).seamsVisible
-                }
-                try await session.runner.run { ops in
-                    try ops.setSeamsVisible(!current)
-                }
-            } catch {
-                session.editorRouter.active?.showStatus("Seam toggle failed: \(error)")
-            }
-        }
-    }
 
     /// The callout emoji prompt (her sitting-3 reference wore "💡").
     private func promptCalloutEmoji() {
@@ -270,146 +304,5 @@ struct EditorCommands: Commands {
     /// Extract", … — generic when the stack is empty).
     static func undoMenuTitle(for topLabel: String?) -> String {
         topLabel.map { "Undo \($0)" } ?? "Undo Structural Change"
-    }
-
-    // MARK: - ⌘N / ⌘J (Phase 13, B2)
-
-    private func newPost() {
-        guard let session else { return }
-        Task { @MainActor in
-            do {
-                let post = try await session.runner.run { ops in
-                    try ops.createPost(title: "Untitled")
-                }
-                router.pendingSelection = .post(post.id)
-            } catch {
-                session.editorRouter.active?.showStatus("New post failed: \(error)")
-            }
-        }
-    }
-
-    private func todaysEntry() {
-        guard let session else { return }
-        Task { @MainActor in
-            do {
-                // The R50 door: create-or-open + the daily-book membership.
-                let outcome = try await JournalBooks.openToday(session: session)
-                router.pendingSelection = .post(outcome.postID)
-                if let note = outcome.note {
-                    speak(session, title: "Today's Entry", message: note)
-                }
-            } catch {
-                speak(session, title: "Today's Entry",
-                      message: "Today's entry failed: \(error)")
-            }
-        }
-    }
-
-    /// Fire-and-speak with no editor required (round 2, MAJOR 2: the
-    /// active-editor status line is nil on the shelf — the retired silent
-    /// posture; the alert fallback is the importFiles precedent).
-    @MainActor
-    private func speak(_ session: AppSession, title: String, message: String) {
-        if let editor = session.editorRouter.active {
-            editor.showStatus(message)
-        } else {
-            let alert = NSAlert()
-            alert.messageText = title
-            alert.informativeText = message
-            alert.runModal()
-        }
-    }
-
-    // MARK: - Import door (Phase 11b, B2)
-
-    private func importFiles() {
-        guard let session else { return }
-        let urls = ImportPanels.chooseFiles()
-        guard !urls.isEmpty else { return }
-        Task { @MainActor in
-            let importer = ImportModel(session: session)
-            await importer.importFiles(urls, into: .library)
-            let message = importer.lastError.map { "Import failed: \($0)" }
-                ?? importer.lastReport ?? "Import finished."
-            if let editor = session.editorRouter.active {
-                editor.showStatus(message)
-            } else {
-                let alert = NSAlert()
-                alert.messageText = "Import Files"
-                alert.informativeText = message
-                alert.runModal()
-            }
-        }
-    }
-
-    // MARK: - Export doors (Phase 11b, B1)
-
-    private func exportLibrary() {
-        guard let session else { return }
-        guard let folder = ExportPanels.chooseFolder(prompt: "Export Library") else { return }
-        Task { @MainActor in
-            let exporter = ExportModel(session: session)
-            // Readings ride ALWAYS-ON at this face (round 2, recorded
-            // build-time call for the checkpoint walk: the ratified
-            // "optional folder views" is the manifest's includeReadings
-            // parameter — built and pinned; a user-facing toggle (accessory
-            // checkbox on the chooser) is a product-surface choice, hers).
-            await exporter.writeBulkExport(to: folder)
-            let message = exporter.lastError.map { "Export failed: \($0)" }
-                ?? exporter.lastReport ?? "Export finished."
-            if let editor = session.editorRouter.active {
-                editor.showStatus(message)
-            } else {
-                let alert = NSAlert()
-                alert.messageText = "Export Library"
-                alert.informativeText = message
-                alert.runModal()
-            }
-        }
-    }
-
-    private func exportCaretBlock() {
-        guard let session, let editor = session.editorRouter.active,
-              let blockID = editor.caretBlockID else { return }
-        let postID = editor.postID
-        Task { @MainActor in
-            // Default filename from the block's read-time HANDLE (name else
-            // first sentence — the A6 tocHandle, one brain), through the
-            // same sanitize rule as every other export door (review round
-            // 1, NIT 2 — the literal "Block.md" was the odd one out).
-            let handle: String? = try? await session.database.read { db in
-                try Queries.blockTOC(db, post: postID)
-                    .first { $0.blockID == blockID }
-                    .map { Queries.tocHandle(name: $0.name, text: $0.text) }
-            }
-            guard let url = ExportPanels.saveFile(
-                defaultName: ExportModel.blockExportFileName(handle: handle),
-                type: .markdownFile) else { return }
-            let exporter = ExportModel(session: session)
-            if let markdown = await exporter.markdown(forBlock: blockID) {
-                exporter.writeMarkdown(markdown, to: url)
-            }
-            editor.showStatus(
-                exporter.lastError.map { "Export failed: \($0)" }
-                    ?? exporter.lastReport ?? "Export finished.")
-        }
-    }
-
-    private func structuralUndo() {
-        guard let session else { return }
-        let undoStack = session.undoStack // Sendable; the closure must not capture the session
-        Task { @MainActor in
-            do {
-                let label = try await session.runner.run { ops in
-                    try undoStack.undo(with: ops)
-                }
-                session.editorRouter.active?.showStatus(
-                    label.map { "Undid: \($0)" } ?? "No structural change to undo.")
-            } catch {
-                // A failed inverse stays on the stack (UndoStack doctrine);
-                // the user resolves (e.g. unseals the post) and retries.
-                session.editorRouter.active?.showStatus("Undo failed: \(error)")
-            }
-        }
     }
 }

@@ -36,6 +36,8 @@ struct TakesBoardView: View {
     @AppStorage("takesGridCols") private var gridCols = 1
     @State private var lensNamePrompt = false
     @State private var diffPresentation: TakesDiffPresentation?
+    /// 13b 1b: the routed-command registration's lifecycle token.
+    @State private var commandToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -79,13 +81,9 @@ struct TakesBoardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            if let status = model.statusMessage {
-                // ChromeNotice: the line limit is LOAD-BEARING here
-                // (window-min probe class — batch 12's Lenses recurrence).
-                ChromeNotice(tokens: tokens, text: status, ink: tokens.accent)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 4)
-            }
+            // 13b 1b (AD-14): the transient status line moved to the ONE
+            // shell toast (StatusCenter) — consistent placement + a real
+            // auto-dismiss; the board renders state banners only.
             if model.projection.sealed {
                 Text(tokens.chromeLabel(
                     "sealed post — takes are viewable; choosing and new takes are frozen"))
@@ -113,16 +111,28 @@ struct TakesBoardView: View {
         .onAppear {
             model.followTheScroll = themeSettings.followTheScroll
             model.host = .takes
+            // 13b 1b: this is THE takes board — landings (N9's "just
+            // start typing" ring, cross-mode blooms) apply here, never in
+            // the Write panel's embedded model.
+            model.landingEnabled = true
+            pushDensity()
+            // The routed-command channel (P-4): a registered handler by
+            // composition, not a notification observer.
+            commandToken = session.commandRouter.registerHandler { handleRouted($0) }
         }
         .onChange(of: themeSettings.followTheScroll) { _, new in
             model.followTheScroll = new
         }
-        .onDisappear { model.teardown() }
-        .onExitCommand { model.closeAllFans() }  // ⎋ — the plain page (R87)
-        .onReceive(NotificationCenter.default.publisher(for: .variorumTakesCommand)) { note in
-            guard let command = TakesCommand.from(note) else { return }
-            handleTakesCommand(command)
+        .onChange(of: beneathCount) { _, _ in pushDensity() }
+        .onChange(of: gridRows) { _, _ in pushDensity() }
+        .onChange(of: gridCols) { _, _ in pushDensity() }
+        .onDisappear {
+            if let commandToken {
+                session.commandRouter.unregisterHandler(commandToken)
+            }
+            model.teardown()
         }
+        .onExitCommand { model.closeAllFans() }  // ⎋ — the plain page (R87)
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
@@ -132,6 +142,46 @@ struct TakesBoardView: View {
             LensNameSheet(title: "Save current choices as a lens") { name in
                 Task { await model.saveCurrentChoicesAsLens(name: name) }
             }
+        }
+    }
+
+    /// The board keeps the density inputs on the model (one paging brain —
+    /// the keyboard door and the ◀ ▶ doors can never disagree).
+    private func pushDensity() {
+        model.beneathCount = beneathCount
+        model.gridRows = gridRows
+        model.gridCols = gridCols
+    }
+
+    /// The board's routed-command handler (13b 1b): the take family as
+    /// before, plus the fire-and-DO structural doors (move-and-execute),
+    /// the native add-block door, and keyboard fan paging.
+    private func handleRouted(_ command: RoutedCommand) -> Bool {
+        switch command {
+        case .takes(let takes):
+            handleTakesCommand(takes)
+            return true
+        case .structural(let act):
+            model.moveToWriteAndRun(.structural(act))
+            return true
+        case .deleteInEveryTake:
+            model.moveToWriteAndRun(.deleteInEveryTake)
+            return true
+        case .commit:
+            Task { await model.commitFocusedTake() }
+            return true
+        case .addBlockAtEnd:
+            Task { await model.addBlockAtEnd() }
+            return true
+        case .toggleSeal:
+            Task { await model.toggleSeal() }
+            return true
+        case .comments:
+            model.requestComments()
+            return true
+        case .pageFan(let delta):
+            model.pageFocusedFan(by: delta)
+            return true
         }
     }
 
@@ -285,9 +335,7 @@ struct TakesBoardView: View {
                         .font(tokens.body)
                         .foregroundStyle(tokens.muted)
                     Button(tokens.chromeLabel("Start writing (Write mode)")) {
-                        NotificationCenter.default.post(
-                            name: .variorumSwitchMode, object: nil,
-                            userInfo: ["mode": "Write", "postID": postID])
+                        session.commandRouter.requestMode(.write, postID: postID)
                     }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
                 }
@@ -299,6 +347,25 @@ struct TakesBoardView: View {
                     articleRow(slot: slot)
                         .onAppear { model.rowAppeared(slot.blockID) }
                         .onDisappear { model.rowDisappeared(slot.blockID) }
+                }
+                if !model.projection.slots.isEmpty {
+                    // D3's third leg (13b 1b): the add-block door lives
+                    // where blocks end — the same dashed grammar as the
+                    // fan-growth doors. The minted block's pane takes the
+                    // ring, so typing continues instantly.
+                    Button("＋ new block") {
+                        Task { await model.addBlockAtEnd() }
+                    }
+                    .buttonStyle(.plain)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+                    .fixedSize()
+                    .help("A new block at the end of the post — type right into it")
                 }
             }
             .frame(maxWidth: articleMeasure, alignment: .leading)
@@ -447,9 +514,8 @@ struct TakesBoardView: View {
         let takes = model.projection.fans[slot.blockID] ?? []
         // R24's one-card-high strip for short blocks when density is
         // 1-high; an explicit 2/3-high setting outranks it (batch 14).
-        let rowsPerColumn =
-            (TakesViewModel.usesHorizontalStrip(text: slot.text) && gridRows == 1)
-            ? 1 : gridRows
+        // ONE brain with the keyboard pager (13b 1b): the model answers.
+        let rowsPerColumn = model.railRowsPerColumn(slotText: slot.text)
         return VStack(alignment: .leading, spacing: 4) {
             Text("takes · \(takes.count)")
                 .font(tokens.small)
@@ -479,7 +545,7 @@ struct TakesBoardView: View {
         let columns = stride(from: 0, to: takes.count, by: rowsPerColumn).map {
             Array(takes[$0..<min($0 + rowsPerColumn, takes.count)])
         }
-        let pageKey = "rail-\(slot.blockID)"
+        let pageKey = TakesViewModel.railPageKey(slot.blockID)
         let limit = max(columns.count - gridCols, 0)
         let offset = model.pageOffset(pageKey, limit: limit)
         let visible = Array(columns.dropFirst(offset).prefix(gridCols))

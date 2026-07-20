@@ -29,8 +29,6 @@ struct RootView: View {
     @State private var palette: PaletteModel
     @State private var selection: SidebarSelection? = .shelf
     @State private var paletteOpen = false
-    /// Batch 14: the open post's current mode — the sidebar rail's marker.
-    @State private var postMode: String = PostDetailView.Mode.takes.rawValue
     /// Sitting 9 (R94): the bridge row's auth-shaped failures open the
     /// account sheet from right there.
     @State private var accountSheetShown = false
@@ -67,7 +65,9 @@ struct RootView: View {
         NavigationSplitView {
             SidebarView(
                 session: session, model: library, pool: pool, selection: $selection,
-                postMode: postMode)
+                // 13b 1b: the rail's marker reads the router's observable
+                // mode truth (the broadcast-derived shadow is retired).
+                postMode: (session.commandRouter.activeMode ?? .takes).rawValue)
                 .navigationSplitViewColumnWidth(min: 180, ideal: 210)
                 .safeAreaInset(edge: .bottom) {
                     if let services {
@@ -86,6 +86,19 @@ struct RootView: View {
                 }
         } detail: {
             detail
+                // 13b 1b (AD-14): the ONE status/refusal presentation —
+                // every transient outcome (refusals, undo reports, routed
+                // speech) renders HERE, mode- and surface-independent,
+                // with the one auto-dismiss policy.
+                .overlay(alignment: .bottom) {
+                    if let item = session.status.current {
+                        StatusToast(
+                            item: item,
+                            tokens: theme.tokens(for: scheme),
+                            onDismiss: { session.status.clear() })
+                            .padding(.bottom, 46)
+                    }
+                }
         }
         .environment(theme)
         .sheet(isPresented: $accountSheetShown) {
@@ -109,10 +122,6 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .variorumOpenPost)) { note in
             guard let id = note.userInfo?["postID"] as? String else { return }
             router.pendingSelection = .post(id)
-        }
-        // Batch 14: the sidebar's post rail marks the current mode.
-        .onReceive(NotificationCenter.default.publisher(for: .variorumModeDidChange)) { note in
-            if let raw = note.userInfo?["mode"] as? String { postMode = raw }
         }
         .onChange(of: router.paletteRequested) { _, requested in
             guard requested else { return }
@@ -220,28 +229,25 @@ struct RootView: View {
         }
     }
 
-    /// The ⌘K vocabulary (R15): the buried capabilities, typeable. Actions
-    /// live in composition — the palette lists and picks only.
+    /// The ⌘K vocabulary (R15, completed 13b 1b): navigation rows here in
+    /// composition, ACT rows from the capability registry (the same routed
+    /// bodies as the menu doors — the palette's claimed takes/structural/
+    /// export commands are finally real; an act that can't work here
+    /// speaks its honest note).
     private func wirePaletteCommands() {
-        palette.commands = [
-            ("New Post", { [self] in
-                Task {
-                    if let id = await library.createPost() { selection = .post(id) }
-                }
-            }),
-            ("Today's Entry", { [self] in openToday() }),
+        let actions = ShellActions(session: session, shell: router)
+        var rows: [(title: String, action: @MainActor () -> Void)] = [
             ("Go to Shelf", { [self] in selection = .shelf }),
             ("Go to Library", { [self] in selection = .library }),
             ("Go to Pool", { [self] in selection = .poolPosts }),
             ("Archived & Deleted", { [self] in selection = .recovery }),
             ("Modes Tutorial", { [self] in selection = .tutorial }),
             ("Settings — Appearance & Tags", { [self] in openSettings() }),
-            ("Toggle Block Seams", { [self] in
-                theme.setSeamsVisible(!theme.settings.seamsVisible)
-            }),
             ("Use Terminal Voice", { [self] in theme.setVoice(.terminal) }),
             ("Use Study Voice", { [self] in theme.setVoice(.study) }),
         ]
+        rows.append(contentsOf: actions.paletteEntries())
+        palette.commands = rows
     }
 
 }

@@ -20,17 +20,34 @@ struct TakesBottomBar: View {
     @State private var pickedDate = Date()
     @State private var historyShown = false
     @State private var history: [CommitPoint] = []
-    /// Batch 12 (her "we need a block menu"): the comments/tags sheets the
-    /// status line opens.
-    @State private var commentsTarget: BlockSheetTarget?
+    /// Batch 12 (her "we need a block menu"): the tags sheet the status
+    /// line opens. (The comments sheet is model-driven since 13b 1b — the
+    /// routed ⌘⇧' door and the menu item share `commentsRequest`.)
     @State private var tagsShown = false
     @Environment(\.openWindow) private var openWindow
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
-    struct BlockSheetTarget: Identifiable {
-        let id: String
-    }
+    /// The registry ids this bar renders (walk-asserted with CommitBar's
+    /// against the bottomBar door set).
+    static let renderedCapabilities: [CapabilityID] = [
+        .newTake, .blankTake, .blankTakeAsChosen, .addBlockAtEnd, .blockComments,
+        .commitTake, .sealPost, .divide, .extract, .makeBlock, .merge,
+    ]
+
+    /// The structural doors the bar renders (registry-walk-asserted: the
+    /// bottomBar-doored structural set, in gesture order).
+    static let structuralBar: [(title: String, act: StructuralAct, help: String)] = [
+        ("Divide", .divide,
+         "Cut the block you're in at your cursor — in Write, carried there for you; "
+         + "a block with several takes opens the take ceremony"),
+        ("Extract", .extract,
+         "Pull your selected span out into its own block — in Write, carried there for you"),
+        ("Make Block", .makeBlock,
+         "Your selected span becomes its own block — in Write, carried there for you"),
+        ("Merge", .merge,
+         "Join the block you're in with the one above it — in Write, carried there for you"),
+    ]
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -38,12 +55,9 @@ struct TakesBottomBar: View {
 
     /// The block the menu acts on: the pane you're in; on a one-block post,
     /// THE block (her screenshots' case — no click should be needed).
+    /// (13b 1b: the rule moved to the model — the routed commands share it.)
     private var targetSlot: Queries.RenderedBlock? {
-        if let pane = model.focusedPane {
-            return model.projection.slots.first { $0.blockID == pane.blockID }
-        }
-        if model.projection.slots.count == 1 { return model.projection.slots.first }
-        return nil
+        model.commandTargetSlot
     }
 
     /// The BLOCK MENU (batch 12 — her ask, verbatim: "I feel like we need
@@ -70,18 +84,21 @@ struct TakesBottomBar: View {
                 Task { await model.newBlankTakeAsChosen(blockID: slot.blockID) }
             }
             Divider()
-            Button("Comments…") {
-                guard let slot = targetSlot else { return speakNoTarget() }
-                commentsTarget = BlockSheetTarget(id: slot.blockID)
+            Button("＋ New block at the end of the post") {
+                // D3's third leg (13b 1b): native — the minted block's
+                // pane takes the ring; typing continues instantly.
+                Task { await model.addBlockAtEnd() }
+            }
+            Divider()
+            Button("Comments… (⌘⇧')") {
+                model.requestComments()
             }
             Divider()
             Button("Open in Write") {
-                NotificationCenter.default.post(
-                    name: .variorumSwitchMode, object: nil,
-                    userInfo: ["mode": "Write", "postID": model.postID])
+                model.session.commandRouter.requestMode(.write, postID: model.postID)
             }
         }
-        .help("Everything block-scoped: new takes, comments — acts on the block you're in")
+        .help("Everything block-scoped: new takes, new blocks, comments — acts on the block you're in")
     }
 
     private func speakNoTarget() {
@@ -164,14 +181,17 @@ struct TakesBottomBar: View {
 
                 StatusDot(tokens: tokens)
 
-                // The structural gestures, present and SPEAKING (R63 +
-                // the 9d posture): they need Write's text selection.
-                ForEach(["Divide", "Extract", "Make Block", "Merge"], id: \.self) { name in
-                    Button(tokens.chromeLabel(name)) {
-                        model.speakStructuralGesturesLiveInWrite(gesture: name)
+                // The structural gestures, present and ACTING (13b 1b —
+                // R115/R118: fire-and-DO replaces the retired lecture):
+                // each door performs the one mode-switch choreography —
+                // Write, caret landed in your block, gesture run; on a
+                // fanned block Divide opens the take ceremony (the W memo).
+                ForEach(Self.structuralBar, id: \.title) { door in
+                    Button(tokens.chromeLabel(door.title)) {
+                        model.moveToWriteAndRun(.structural(door.act))
                     }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .opacity(0.6)
+                    .help(door.help)
                 }
 
                 Spacer()
@@ -192,8 +212,11 @@ struct TakesBottomBar: View {
         .sheet(isPresented: $historyShown) {
             historySheet
         }
-        .sheet(item: $commentsTarget) { target in
-            CommentsPanel(session: model.session, blockID: target.id)
+        .sheet(item: Binding(
+            get: { model.commentsRequest },
+            set: { model.commentsRequest = $0 })
+        ) { target in
+            CommentsPanel(session: model.session, blockID: target.blockID)
         }
         .sheet(isPresented: $tagsShown) {
             TagAssignmentSheet(session: model.session, postID: model.postID, postTitle: nil)

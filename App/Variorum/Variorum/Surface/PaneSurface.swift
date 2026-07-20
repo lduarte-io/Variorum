@@ -48,6 +48,62 @@ final class PaneTextView: NSTextView {
     /// the clicked UTF-16 offset (the read tier seeds the editor's caret
     /// from it; take panes ignore the value).
     var onPlainClick: ((Int) -> Void)?
+
+    /// 13b 1b (AD-4): the pane's Variorum context menu — right-clicking a
+    /// take card used to show ONLY the stock text menu (the SwiftUI
+    /// `.contextMenu` never fires inside an NSTextView); the composer now
+    /// supplies registry-vocabulary items rendered ABOVE the standard edit
+    /// items (the EditorTextView pattern).
+    struct MenuItemSpec {
+        let title: String
+        var enabled = true
+        var action: () -> Void = {}
+        var children: [MenuItemSpec] = []
+    }
+
+    var variorumMenu: (() -> [MenuItemSpec])?
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        let inherited = super.menu(for: event)
+        guard let items = variorumMenu?(), !items.isEmpty else { return inherited }
+        let menu = inherited ?? NSMenu()
+        for (i, item) in items.enumerated() {
+            menu.insertItem(Self.makeMenuItem(for: item), at: i)
+        }
+        menu.insertItem(NSMenuItem.separator(), at: items.count)
+        return menu
+    }
+
+    private static func makeMenuItem(for spec: MenuItemSpec) -> NSMenuItem {
+        let menuItem = NSMenuItem(
+            title: spec.title,
+            action: #selector(PaneMenuTrampoline.fire(_:)),
+            keyEquivalent: "")
+        let trampoline = PaneMenuTrampoline(enabled: spec.enabled, action: spec.action)
+        menuItem.target = trampoline
+        menuItem.representedObject = trampoline  // retains it for the menu's life
+        if !spec.children.isEmpty {
+            let submenu = NSMenu(title: spec.title)
+            for child in spec.children {
+                submenu.addItem(makeMenuItem(for: child))
+            }
+            menuItem.submenu = submenu
+        }
+        return menuItem
+    }
+
+    /// 13b 1b (N9's keyboard half): a pane that goes LIVE should hold the
+    /// keyboard — set when liveness arrives before the view has a window
+    /// (programmatic landings), honored at attach.
+    var claimsKeyboardOnAttach = false
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if claimsKeyboardOnAttach, let window {
+            claimsKeyboardOnAttach = false
+            window.makeFirstResponder(self)
+        }
+    }
     /// Fires when layout gives the view a NEW width (batch 12 — the
     /// clipped-take fix's trigger; width-gated so height publishes can't
     /// loop through it).
@@ -104,6 +160,25 @@ final class PaneTextView: NSTextView {
 /// meaningfully.
 typealias ReadPostTextView = PaneTextView
 
+/// The pane menu's target (the EditorTextView trampoline pattern): retained
+/// by its NSMenuItem via representedObject; validates enablement.
+private final class PaneMenuTrampoline: NSObject, NSMenuItemValidation {
+    private let enabled: Bool
+    private let action: () -> Void
+
+    init(enabled: Bool, action: @escaping () -> Void) {
+        self.enabled = enabled
+        self.action = action
+    }
+
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool { enabled }
+
+    @objc func fire(_ sender: NSMenuItem) {
+        guard enabled else { return }
+        action()
+    }
+}
+
 extension PaneTextView {
     /// The read tier's configuration (non-editable always; the container
     /// sizes it; selection + plain-click per the ratified read contract).
@@ -145,6 +220,11 @@ struct PaneSurfaceView: View {
     /// A live pane's edit: the full new text (the model computes cost and
     /// routes autosave).
     var onEdit: ((String) -> Void)?
+    /// 13b 1b: the live pane's selection, reported as it changes — the
+    /// fire-and-DO choreography carries it into Write.
+    var onSelectionChange: ((NSRange) -> Void)?
+    /// 13b 1b (AD-4): the pane's Variorum context-menu items.
+    var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     @State private var height: CGFloat = 24
     @State private var canaryMessage: String?
 
@@ -165,7 +245,8 @@ struct PaneSurfaceView: View {
                 text: text, isLive: isLive, height: $height, canaryMessage: $canaryMessage,
                 ink: tokens.map { NSColor($0.ink) },
                 role: role, variantID: variantID,
-                onFocusRequest: onFocusRequest, onEdit: onEdit)
+                onFocusRequest: onFocusRequest, onEdit: onEdit,
+                onSelectionChange: onSelectionChange, menuItems: menuItems)
                 .frame(minHeight: height)
                 .overlay(
                     RoundedRectangle(cornerRadius: tokens == nil ? 3 : 6)
@@ -191,6 +272,8 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var variantID: String?
     var onFocusRequest: (() -> Void)?
     var onEdit: ((String) -> Void)?
+    var onSelectionChange: ((NSRange) -> Void)?
+    var menuItems: (() -> [PaneTextView.MenuItemSpec])?
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -206,10 +289,13 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             coordinator?.onFocusRequest?()
         }
         context.coordinator.onFocusRequest = onFocusRequest
+        context.coordinator.onSelectionChange = onSelectionChange
+        view.variorumMenu = menuItems
         applyStyle(to: view)
         applyIdentity(to: view)
         view.string = text
         view.isEditable = isLive
+        context.coordinator.noteLiveness(isLive)
         context.coordinator.remeasure()
         return view
     }
@@ -217,7 +303,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     func updateNSView(_ view: PaneTextView, context: Context) {
         context.coordinator.onEdit = onEdit
         context.coordinator.onFocusRequest = onFocusRequest
+        context.coordinator.onSelectionChange = onSelectionChange
+        view.variorumMenu = menuItems
         view.isEditable = isLive
+        context.coordinator.noteLiveness(isLive)
         applyStyle(to: view)
         applyIdentity(to: view)
         // A voice switch changes the ONE global typography (C1's
@@ -269,10 +358,27 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     final class Coordinator: NSObject, NSTextViewDelegate {
         var onEdit: ((String) -> Void)?
         var onFocusRequest: (() -> Void)?
+        var onSelectionChange: ((NSRange) -> Void)?
         private weak var view: PaneTextView?
         private var publishHeight: ((CGFloat) -> Void)?
         private var publishCanary: ((String) -> Void)?
         private let canary = FallbackCanary()
+        private var wasLive = false
+
+        /// 13b 1b (N9's keyboard half): a pane TRANSITIONING to live holds
+        /// the keyboard — programmatic ring moves (the Takes landing, the
+        /// add-block door, ⌃⌘←/→ steps) must make "just start typing"
+        /// literal. A click-focused pane is already first responder (the
+        /// claim is a no-op); read transitions never claim.
+        func noteLiveness(_ live: Bool) {
+            defer { wasLive = live }
+            guard live, !wasLive, let view else { return }
+            if let window = view.window {
+                window.makeFirstResponder(view)
+            } else {
+                view.claimsKeyboardOnAttach = true
+            }
+        }
 
         func install(
             view: PaneTextView,
@@ -306,6 +412,11 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             guard let view else { return }
             onEdit?(view.string)
             remeasure()
+        }
+
+        func textViewDidChangeSelection(_ notification: Notification) {
+            guard let view else { return }
+            onSelectionChange?(view.selectedRange())
         }
 
         func remeasure() {

@@ -59,6 +59,15 @@ final class AppSession {
     /// construction.)
     let quitFinalize = QuitFinalizeRegistry()
 
+    /// Phase 13b Stage 1b (P-1/P-4): the ONE command-routing brain — the
+    /// menu bar/palette/bars route surface commands and mode switches
+    /// through this; surfaces register handlers by composition. Replaces
+    /// the notification regimes (see `Registry/CommandRouter.swift`).
+    let commandRouter = CommandRouter()
+    /// Phase 13b Stage 1b (AD-14): the ONE status/refusal presentation —
+    /// transient outcomes land here and render as the shell's toast.
+    let status = StatusCenter()
+
     /// Phase 13b Stage 1a (N3): ONE `AutosaveCoordinator` per open post.
     /// Three surfaces used to mint their own (Editor / Takes / BlockTOC),
     /// so TWO debounced pipelines could run over one post at once (the
@@ -95,6 +104,16 @@ final class AppSession {
         undo.setChangeObserver {
             Task { @MainActor in menuState.refresh(from: undo) }
         }
+        #if os(macOS)
+        // 13b 1b composition wiring: routed speech lands in the status
+        // center; the router's context reads the observable editor router
+        // and undo mirror (so menu enablement tracks them).
+        let status = self.status
+        commandRouter.speak = { status.speak($0) }
+        let editorRouter = self.editorRouter
+        commandRouter.writeEditorAttached = { editorRouter.active != nil }
+        commandRouter.undoAvailable = { menuState.topLabel != nil }
+        #endif
     }
 }
 

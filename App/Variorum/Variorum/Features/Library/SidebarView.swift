@@ -121,9 +121,11 @@ struct SidebarView: View {
                 Section {
                     ForEach(PostDetailView.Mode.allCases, id: \.self) { m in
                         Button {
-                            NotificationCenter.default.post(
-                                name: .variorumSwitchMode, object: nil,
-                                userInfo: ["mode": m.rawValue, "postID": postID])
+                            // 13b 1b (P-4): composed routing — the rail
+                            // asks the router, which reaches the mounted
+                            // detail (or speaks; never a dropped
+                            // broadcast).
+                            session.commandRouter.requestMode(m, postID: postID)
                         } label: {
                             HStack(spacing: 2) {
                                 if m.rawValue == postMode, !tokens.selectionMarker.isEmpty {
