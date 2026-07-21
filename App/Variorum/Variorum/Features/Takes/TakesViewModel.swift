@@ -263,10 +263,17 @@ final class TakesViewModel {
         // fresh slots.
         consumeLandings(new)
         // 13b 3F: a revealed mint that lagged its projection pages its fan
-        // now (re-parks itself while the take is still in flight).
+        // now (re-parking while the take is still in flight). NIT-2: a
+        // re-park inherits the DECREMENTED budget — a fresh reveal gets a
+        // fresh one — and drops at zero (the take is not coming).
         if let pending = pendingRevealPage {
             pendingRevealPage = nil
             pageToReveal(blockID: pending.blockID, variantID: pending.variantID)
+            if pendingRevealPage != nil {
+                pendingRevealPage = pending.retriesLeft > 1
+                    ? (pending.blockID, pending.variantID, pending.retriesLeft - 1)
+                    : nil
+            }
         }
     }
 
@@ -1218,8 +1225,14 @@ final class TakesViewModel {
     // MARK: - Auto-page to the reveal (13b 3F)
 
     /// A revealed take not yet in the projection (the mint's observation
-    /// lags the op): resolved at the next `adopt`.
-    @ObservationIgnored private var pendingRevealPage: (blockID: String, variantID: String)?
+    /// lags the op): resolved at the next `adopt`. The retry budget (NIT-2,
+    /// Stage 3 ladder round 1) retires the zombie: a reveal for a take
+    /// that never arrives — a refused mint, a raced delete — used to
+    /// re-park on every adopt forever. The real mint sequence resolves on
+    /// the first adopt; a budget of 2 also covers a stale emission ordered
+    /// before the mint; past it the park drops (the fan stays open and the
+    /// ring focused — only the auto-page is forgone).
+    @ObservationIgnored private var pendingRevealPage: (blockID: String, variantID: String, retriesLeft: Int)?
 
     /// Pages the set style's pager so `variantID`'s card is on the visible
     /// page — the fan was open and the counter ticked, but a mint at the
@@ -1228,7 +1241,7 @@ final class TakesViewModel {
     func pageToReveal(blockID: String, variantID: String) {
         guard let fan = projection.fans[blockID],
               let index = fan.firstIndex(where: { $0.id == variantID }) else {
-            pendingRevealPage = (blockID, variantID)
+            pendingRevealPage = (blockID, variantID, 2)
             return
         }
         switch projection.fanStyle {
