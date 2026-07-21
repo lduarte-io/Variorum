@@ -260,6 +260,19 @@ final class EditorViewModel {
         // first layout pass delivers real frames.
         overlayGeometryGeneration &+= 1
         textView.onLayoutSettle = { [weak self] in self?.overlayLayoutDidSettle() }
+        // MINOR-2 (Stage 3 ladder round 1): a width reflow is a geometry
+        // event with NO storage edit — and TK2's lazy invalidation means
+        // no display pass is guaranteed to report it either, so the width
+        // handler both bumps the generation AND schedules the same
+        // coalesced delivery directly (the delivered/scheduled guards
+        // make a riding draw-pass report a no-op; delivery stays on the
+        // next runloop turn, after this cycle's remeasure has laid the
+        // new width out).
+        textView.onWidthReflow = { [weak self] in
+            guard let self else { return }
+            overlayGeometryGeneration &+= 1
+            overlayLayoutDidSettle()
+        }
         canary.onFire = { [weak self] message in self?.canaryMessage = message }
         canary.arm(for: textView)
         textView.onCommitShortcut = { [weak self] in self?.commitCaretVariant() }
@@ -1692,7 +1705,11 @@ final class EditorViewModel {
     /// the overlay family ONCE per storage generation, on the next runloop
     /// turn — after the pass that laid the edited storage out. The
     /// equality gates then deliver real frames; an already-correct refresh
-    /// is a cheap no-op.
+    /// is a cheap no-op. The generation's INPUTS (the class axis, completed
+    /// at the Stage 3 ladder's MINOR-2): storage content (every character
+    /// edit), surface attach, and — since the round-1 fix — surface WIDTH
+    /// (a reflow re-lays every fragment with no storage edit; the inline
+    /// book-view editor has no scroll-view resize coverage of its own).
     @ObservationIgnored private(set) var overlayGeometryGeneration = 0
     @ObservationIgnored private var overlayGenerationDelivered = -1
     @ObservationIgnored private var overlaySettleScheduled = false

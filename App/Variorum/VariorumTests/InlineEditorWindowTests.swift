@@ -128,6 +128,140 @@ struct InlineEditorWindowTests {
             try expectStoreMatchesView(h)
         }
     }
+
+    /// MINOR-2 pin (13b Stage 3 ladder round 1; CONFIRMED — red on the
+    /// pre-fix code and by behavioral revert, the badge 816pt from the
+    /// reflowed fragment): the inline (book-view) editor's WIDTH-REFLOW
+    /// axis. The N14 settle trigger keyed ONLY on storage generation — a
+    /// geometry-only width change (the book column resizing) re-lays the
+    /// text but bumped no generation, `applyChrome` is equality-gated, and
+    /// the inline form has no ScrollAnchorController (the detail editor's
+    /// resize→refreshBadges coverage is scrollView-only) — so the ⑂
+    /// badge/decor frames sat at pre-reflow positions until the next
+    /// keystroke or remount: the fixed cold-mount class one INPUT AXIS
+    /// over. The fix: the width reflow joins the generation's inputs
+    /// (`EditorTextView.onWidthReflow`), and the handler schedules the
+    /// coalesced delivery DIRECTLY — TK2 invalidates lazily, so a bare
+    /// frame change guarantees no display pass to report through.
+    /// HARNESS NOTE (load-bearing): the before phase must reach the
+    /// steady state (delivered == generation) through the settle path —
+    /// a pending undelivered mount generation would heal the reflow by
+    /// accident and mask the red.
+    @Test func inlineBadgesTrackAWidthReflow() async throws {
+        // Long wrapping prose between two fanned blocks: narrowing the
+        // wrapper moves the last fan's block down by hundreds of points.
+        let blocks = ["First fanned block."]
+            + (0..<6).map { p in
+                (0..<80).map { "word\(($0 &+ p) % 977)" }.joined(separator: " ")
+            }
+            + ["Last fanned block."]
+        try await withInlineEditor(seedBlocks: blocks) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 300),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let container = NSView(frame: NSRect(x: 0, y: 0, width: 700, height: 300))
+            window.contentView = container
+            container.addSubview(h.textView)
+            let textView = h.textView
+            // The wrapper width is SwiftUI's in the app; the height report
+            // follows it (the real InlineEditorSurface shape).
+            var wrapperWidth: CGFloat = 700
+            let coordinator = InlineEditorSurface.Coordinator(model: h.model)
+            coordinator.install(textView: textView) { height in
+                textView.frame = NSRect(x: 0, y: 0, width: wrapperWidth, height: height)
+            }
+            window.orderFrontRegardless()
+            defer {
+                coordinator.uninstall()
+                window.orderOut(nil)
+                window.close()
+            }
+
+            // Fan the first and last blocks.
+            let slots = try h.storeSlots()
+            let first = try #require(slots.first)
+            let last = try #require(slots.last)
+            _ = try h.session.operations.branchVariant(
+                first.blockID, from: #require(first.variantID))
+            _ = try h.session.operations.branchVariant(
+                last.blockID, from: #require(last.variantID))
+            try h.reload()
+            // Reach the app's STEADY state through the settle path itself:
+            // warm full layout, force the display pass, and let the
+            // trigger deliver every pending generation — "badges
+            // delivered" (the routing's premise) with delivered ==
+            // generation, exactly the state a live editor idles in.
+            coordinator.remeasure()
+            window.layoutIfNeeded()
+            window.display()
+
+            /// Ground truth: entry i's first laid-out fragment, in view
+            /// coordinates — the same frame `refreshBadges` computes from.
+            @MainActor func fragmentY(entry i: Int) -> CGFloat? {
+                guard let lm = textView.textLayoutManager,
+                      let cm = lm.textContentManager else { return nil }
+                let range = h.model.index.range(ofEntryAt: i)
+                guard let location = cm.location(
+                    cm.documentRange.location, offsetBy: range.location) else { return nil }
+                var frame: CGRect?
+                lm.enumerateTextLayoutFragments(from: location, options: []) { fragment in
+                    frame = fragment.layoutFragmentFrame
+                    return false
+                }
+                return frame.map {
+                    $0.offsetBy(
+                        dx: textView.textContainerOrigin.x,
+                        dy: textView.textContainerOrigin.y).origin.y
+                }
+            }
+            @MainActor func badgeY(_ blockID: String) -> CGFloat? {
+                h.model.badges.first { $0.blockID == blockID }?.frame.origin.y
+            }
+            // The proven N14-pin wait: async polling drains the settle
+            // trigger's main-queue hop; the display call gives any
+            // draw-pass report its chance too.
+            @MainActor func pumpUntil(_ condition: @MainActor () -> Bool) async {
+                for _ in 0..<400 {
+                    if condition() { return }
+                    window.displayIfNeeded()
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(5))
+                }
+            }
+            let lastEntry = blocks.count - 1
+            await pumpUntil {
+                guard let y = badgeY(last.blockID),
+                      let truth = fragmentY(entry: lastEntry) else { return false }
+                return abs(y - truth) < 1
+            }
+            let before = try #require(badgeY(last.blockID))
+            #expect(abs(before - (fragmentY(entry: lastEntry) ?? -1)) < 1,
+                    "delivered at the real frame before the reflow (steady state)")
+
+            // THE REFLOW: the wrapper narrows — the app's path is a SwiftUI
+            // width change (updateNSView = equality-gated applyChrome +
+            // remeasure), the frame following via the height report. NO
+            // storage edit rides it — the axis under test.
+            wrapperWidth = 360
+            textView.setFrameSize(NSSize(width: 360, height: textView.frame.height))
+            coordinator.remeasure()
+            // Every chance to heal: display passes + queue turns (the
+            // settle trigger's async hop rides these when it fires at all).
+            await pumpUntil {
+                guard let y = badgeY(last.blockID),
+                      let truth = fragmentY(entry: lastEntry) else { return false }
+                return abs(y - truth) < 1
+            }
+
+            let truth = try #require(fragmentY(entry: lastEntry))
+            #expect(truth - before > 40,
+                    "the reflow genuinely moved the block (non-vacuity)")
+            let after = try #require(badgeY(last.blockID))
+            #expect(abs(after - truth) < 1,
+                    "the ⑂ badge tracks the reflowed fragment geometry (MINOR-2)")
+        }
+    }
 }
 
 /// `withEditor`'s inline twin: the bare content-sized text view, attached

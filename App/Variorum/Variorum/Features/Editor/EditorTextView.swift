@@ -33,6 +33,16 @@ final class EditorTextView: NSTextView {
     /// into one post-pass overlay refresh per storage generation.
     var onLayoutSettle: (() -> Void)?
 
+    /// N14's WIDTH axis (13b Stage 3 ladder round 1, MINOR-2): a width
+    /// change reflows every fragment with NO storage edit — the third
+    /// geometry-generation input beside storage content and attach. The
+    /// model bumps the overlay generation here so the next display pass's
+    /// settle delivery reads post-reflow frames; without it the inline
+    /// (book-view) editor's badges/decor sat at pre-reflow positions after
+    /// a column resize (the detail editor's resize coverage is
+    /// scrollView-only).
+    var onWidthReflow: (() -> Void)?
+
     override func viewWillDraw() {
         super.viewWillDraw()
         onLayoutSettle?()
@@ -47,8 +57,10 @@ final class EditorTextView: NSTextView {
     }
 
     override func setFrameSize(_ newSize: NSSize) {
+        let widthChanged = newSize.width != frame.size.width
         super.setFrameSize(newSize)
         updateGutters()
+        if widthChanged { onWidthReflow?() }
     }
 
     private func updateGutters() {
