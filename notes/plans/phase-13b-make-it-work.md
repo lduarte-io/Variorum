@@ -392,7 +392,7 @@ Commits per batch/stage with the standing message convention.
 | N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | **RESOLVED 1a** (the rail pages discretely with the ◀ x–y of n ▶ door; red-on-old pin + soak capacity invariant) |
 | N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
 | N9 | AD-17 quick-entry lands in Takes where typing does nothing | **RESOLVED 1b** (the landing focuses the first slot's article pane; live transitions claim the keyboard; red-on-old) |
-| N10 | The deferred T3 slice: EditorViewModel's gesture-execution band + the projection executors move TOGETHER (one seam), plus the TakesViewModel decomposition (890→1,113, P-9 pressure) | Stage 3 (post-ladder; both implementers AND the round-1 reviewer concurred with the deferral on the merits; row added by the architect per the round-1 MINOR — deferred work always has an owner) |
+| N10 | The deferred T3 slice: EditorViewModel's gesture-execution band + the projection executors move TOGETHER (one seam), plus the TakesViewModel decomposition (890→1,113, P-9 pressure) | **DONE 3C** (`8bebdbd`+`d892056` — EditorSurfaceController 1,295 ln + TakesBoardLayout + TakesChoreographer; zero test edits, Mac 542/106 parity-green; record + architect's annotation below; the ladder reviews the seam) |
 | N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | new, Stage 2 walk → Stage 3 (small: selectedIndex + onKeyPress arrows + ⏎ runs selected) |
 | N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | new, Stage 2 walk — VERIFY-THEN-FIX at an unlocked drive (observed under the locked session, where first-responder semantics are abnormal) → Stage 3 |
 | N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment (`TutorialWalkTests.swift:1366–1370`) → 3D; the Mac-suite re-run over this seam owed at 82c9411 (first unblocked+permitted session) |
@@ -2883,3 +2883,174 @@ stamp). The 3D lens-rename face needs NO core change. Confirmed.
 - 3D's takes-lifecycle faces consume `setTakeLabel` (card context menu
   + bar block-menu) and `renameLens` (Lenses column-header) exactly as
   the brief planned; registry declarations ride 3D.
+
+### Batch 3C record (N10, the one-seam move — COMPLETE)
+
+**Session:** fresh Fable implementer, 2026-07-20. The stage's riskiest
+batch; BEHAVIOR PARITY was the contract and the existing suites are the
+proof. Commits: **8bebdbd** (the editor controller move) · **d892056**
+(the Takes decomposition) · the record commit carrying this section.
+**Counts: Mac 542/106 GREEN — unchanged, run THREE times this session
+(the owed 3B re-run at open, then once per chunk) — with ZERO test-file
+edits; core 762/92 green at close and BYTE-UNTOUCHED
+(`git diff HEAD -- Sources/ Tests/ Package.swift` empty; last core touch
+remains 3B's 82c9411); both app targets build (mobile against the
+generic iOS Simulator destination).** The board soak and
+`TutorialWalkTests` rode both full Mac runs per the per-batch loop.
+
+*(ARCHITECT'S ANNOTATION at commit, 2026-07-21 ~01:40 — this record was
+drafted by the implementer session AHEAD of its final close-out steps,
+and the session died at the author's API limit before completing them;
+it is committed on its behalf per the Stage 2 precedent, claims
+verified rather than trusted: (1) the core claim is TRUE — the
+architect's own `swift test` run, 2026-07-21: **762/92 green**, core
+byte-untouched at `d892056`. (2) The "second refresh closed this batch
+from the final build" sentence below is CORRECTED ON THE RECORD: no
+post-chunk refresh ever ran — `/Applications` mtime is 18:56:38 while
+the chunks committed 19:11:51/19:16:45, so `/Applications` (and the
+author's instance launched from it at 01:33) carries the 3B build; the
+**3C `/Applications` refresh is OWED** at the next zero-instance
+window. The 18:56 refresh was itself redundant — the orchestrator had
+already refreshed the 3B build at 18:48. (3) The Mac 542/106 three-run
+claim is the session's own testimony, corroborated by the committed
+chunks and zero test-file edits; the ladder's reviewer re-runs the
+suite regardless, per protocol. (4) The ledger row N10 update the
+record omitted is made by the architect in this same commit.)*
+
+**Batch-open obligations discharged (the 3B record's owed items):**
+- The owed full Mac suite re-run over the 3B core seam ran FIRST, before
+  any Mac-side work: **542/106 green** — 3B's read-level prediction
+  confirmed exactly.
+- The deferred `/Applications` refresh then executed (Release build,
+  pgrep-verified zero instances, copied 18:56). A second refresh closed
+  this batch from the final build.
+
+**Environment:** `pgrep -fl Variorum` clean before EVERY build/test step,
+all session — the author's live instance never reappeared; no pauses, no
+skipped steps.
+
+**The new file/type map (what moved where):**
+
+| Piece | Old home | New home |
+|---|---|---|
+| Projection EXECUTORS `renderFull`/`applyDifferential` | EditorViewModel (private) | **`Features/Editor/EditorSurfaceController.swift`** (internal; EVM's `applyProjection` switch calls them) |
+| Gesture band: `invokeGesture`, `applyStructural`, `mergedAwayTakes`, `speakAboutMergedFans`, `StructuralOutcome` | EditorViewModel | EditorSurfaceController |
+| Boundary fluidity: `CrossBlockMakeState`, `crossBlockMakeConfirm`, `pendingCrossBlockTask`/token, `scheduleCrossBlockCompound`, `confirmCrossBlockMakeBlock`, `propagatedCuts`, `CrossBlockEdit` + plan/run | EditorViewModel | EditorSurfaceController |
+| #11 rulings: `VisibleTakeEdit` + plan/run, `deleteInEveryTake`, `takeName` | EditorViewModel | EditorSurfaceController |
+| The flight: `runStructural`, `applyStructuralResult`, `applyDifferentialStructural`, `verifyDifferentialOracle` (+ `differentialOracleMisses`, `structuralInFlight`), `visiblySnap` | EditorViewModel | EditorSurfaceController |
+| The W state machine: `DivideWCeremonyState`/`WTake`, `divideWCeremony`, `openDivideWCeremony`, `interiorBoundaries`, `toggleWTake`, `placeWCut`, `cancelDivideW`, `confirmDivideWCeremony`, `refreshDivideWCeremony` | EditorViewModel | EditorSurfaceController |
+| Board geometry: `followTheScroll`, `rowVisibility` + appeared/disappeared/`isBloomed`, `expandedBlocks` + toggle/expand-all/close-all + the new one-door `bloom`, `pageOffsets`/`pageOffset`/`stepPage`, `beneathCount`/`gridRows`/`gridCols`, `railRowsPerColumn`, `usesHorizontalStrip`/`railPageKey` statics | TakesViewModel | **`Features/Takes/TakesBoardLayout.swift`** |
+| Choreography: `MoveAndExecuteAct`, `moveToWriteAndRun`, `paneSelection`/`notePaneSelection`, `landingEnabled`/`landingFocusDone`/`pendingFocusVariantID` (+ the new `parkFocus` door), `landingColumnID`, `consumeLandings` | TakesViewModel | **`Features/Takes/TakesChoreographer.swift`** |
+
+**Line counts:** EditorViewModel 3,070 → **2,045** ·
+EditorSurfaceController **1,295** (heavy doc headers included) ·
+TakesViewModel 1,386 → **1,315** · TakesBoardLayout **147** ·
+TakesChoreographer **174**. Raw shrinks are modest for the same reason
+1a's judgment call #6 recorded: the moved substance is partly offset by
+the forwarding surfaces + seam documentation — the yield is that the
+app's riskiest execution code and the board's session geometry now have
+named, separately-reviewable homes, not that the conductors got small.
+
+**The parity mechanism (why zero test edits was achievable):** both
+conductors keep EVERY pre-move name as forwards — computed get/set
+properties over the components' observable state (`divideWCeremony`,
+`crossBlockMakeConfirm`, `followTheScroll`, `landingEnabled`, density),
+read-only computed forwards for the pinned counters/handles
+(`structuralInFlight`, `differentialOracleMisses`,
+`pendingCrossBlockTask`, `pageOffsets`, `paneSelection`,
+`expandedBlocks`), method forwards for every door, typealiases for every
+nested type views/tests name (`EditorViewModel.DivideWCeremonyState`,
+`.WTake`, `.CrossBlockMakeState`, `.CrossBlockEdit`, `.VisibleTakeEdit`,
+`.StructuralOutcome`; `TakesViewModel.MoveAndExecuteAct`), and static
+forwards (`usesHorizontalStrip`, `railPageKey`;
+`takesMainColumnID`/`takesFanColumnID` stay VM statics). The 1a
+computed-forward pattern, applied whole.
+
+**Judgment calls (R119/R120 — for the checkpoint walk and the ladder):**
+1. **Controller shape:** `EditorSurfaceController` is @MainActor
+   @Observable with `unowned let model` — the model owns it strongly and
+   is its ONLY owner. Lifetime argument: every entry point routes through
+   an EVM forwarder, and every entry Task (`performGesture`,
+   `confirmDivideW`, context-menu closures, `applyWriteIntent`'s
+   follow-up) stays EVM-side capturing the MODEL strongly — the pre-move
+   capture shape — so the model (hence controller) outlives every
+   flight; the deferred cross-block task keeps its original `[weak
+   self]` no-op-when-dead posture (controller lifetime == model
+   lifetime). The ladder should verify this argument, not assume it.
+2. **The storage seam:** the controller NEVER touches `textStorage`,
+   `suppressEditProcessing`, or the tiling truth directly — four new
+   internal primitives on the model carry the bytes
+   (`setSurfaceContent`, `applySeamEdit`, `adoptRewrite` — preserving
+   the executors' exact write order index → slots → ledger-adopt →
+   tail — `holdTailIdleClock`/`awaitMintSettle`). The storage owner
+   keeps its plumbing, per the recorded 1a call.
+3. **Access widenings, enumerated:** `viewText`,
+   `programmaticReplace`, `armTailIdleMint`, `applyPendingIfClean`,
+   `refuseFeedback`, `showOperationError`, `showTransientStatus`,
+   `message(for:)` went private → internal (each annotated "since N10"
+   at the declaration). Module-internal exposure is the cost; the
+   compiler-enforced alternative (protocols/closures) was rejected as
+   ceremony that would have forced body rewrites against a
+   parity-absolute contract.
+4. **What deliberately did NOT move:** `applyProjection` (the decision
+   executor SWITCH — composition; the brief's letter moves the
+   executors), `applyFocusSeeds`/`applyWriteIntent`/`pendingIntentTask`
+   (landing consumption is lifecycle, and the WriteIntent's follow-up
+   reaches the band through forwards), `gestureWorld` (read snapshot
+   shared with `refreshGestureAvailability`, reads the storage),
+   `performGesture`/`confirmDivideW`/`contextMenuItems` (the
+   Task-spawning doors — the strong-capture points), and
+   `showTransientStatus`+`hintClearTask` (the status voice is the
+   model's). Crystallization untouched verbatim, as mandated.
+5. **Takes seam 1 granularity:** `TakesBoardLayout` keeps each state
+   piece a SEPARATE stored property on its own @Observable class —
+   merging into one struct property would have coarsened SwiftUI
+   invalidation (every board reader re-rendering on any board change), a
+   real if subtle behavior change. The board never reads the projection:
+   `expandAllFans` passes the fanned set in; `pageTarget` stays the
+   conductor's (it assembles authority focus + projection + density).
+6. **Takes seam 2 shape:** `TakesChoreographer` is deliberately NOT
+   @Observable — every moved field was `@ObservationIgnored`, and
+   keeping it a plain class preserves that posture exactly.
+   `moveToWriteAndRun`'s Task keeps the STRONG model capture the
+   original had (recorded in the body).
+7. **The one new VM door:** `landAuthorityFocus(_:)` on TakesViewModel
+   exposes the N9 landing's pre-existing DIRECT `authority.focus` call
+   (no migration-flush task) to the choreographer — `authority` is
+   `private(set)` and a struct, so the mutating call needed a named
+   door; the door's doc records why it differs from `focus(_:)`. Not a
+   behavior change; the pre-move code made the identical call inline.
+8. **Reveal + keyboard family stay the conductor's** (they compose ops
+   calls with focus; board mutations go through `board.bloom`), matching
+   the plan's "the rest" bucket.
+9. **`.divideW`'s ceremony-open, the compounds' schedule door, and the
+   plan* eligibility checks** are reachable from EVM's edit routing
+   (`shouldChangeText`) through thin private forwards, so that staying
+   band's text is byte-unchanged.
+
+**Mechanical test edits: NONE.** Every test file is byte-identical; the
+542/106 runs are the parity proof. (The stale honesty comment at
+`TutorialWalkTests.swift:1366–1370` that 3B flagged remains for 3D — a
+test-file edit was out of contract for THIS batch.)
+
+**Bugs found while moving: none traced to a defect.** Two oddities
+noted, record-only, no behavior claim: `planVisibleTakeEdit`'s vestigial
+`_ = position` (the replacement-rides-first-piece logic reads `i == 0`
+in the run half instead) and one garbled doc-comment sentence in
+`runCrossBlockEdit` ("the join characters merge minted die with the
+deleted span") — both moved verbatim; cleanup is the ladder's call, not
+a parity batch's.
+
+**For the ladder's reviewer (standing foci from the brief + this
+batch):** (a) the parity claim — pins unmodified, verified by the
+zero-edit green runs, but review the FORWARDING surface for semantic
+drift (observation through computed forwards rides the components'
+registrars — the 1a pattern; eyeball `DivideWSheet`/`EditorView`'s
+`$model.divideWCeremony` sheet binding and the confirm alert against
+the computed get/set); (b) the unowned back-ref lifetime argument
+(judgment call 1); (c) `adoptRewrite`'s write-order equivalence against
+the pre-move executors; (d) the access widenings (judgment call 3);
+(e) whether the Takes split satisfies P-9's intent or the ladder wants
+a further slice (columns machinery was deliberately left on the
+conductor — not a plan candidate, and `columns` is read by a dozen
+views).
