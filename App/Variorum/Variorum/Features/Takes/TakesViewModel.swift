@@ -14,6 +14,14 @@
 //  No business rules live here: every gesture is an Operations call; the
 //  projections come from Queries.takesProjection.
 //
+//  13b Stage 3 (N10 — the P-9 decomposition): the board's session-only
+//  view-geometry state lives in `TakesBoardLayout` and the cross-surface
+//  choreography (move-and-execute parking, landings) in
+//  `TakesChoreographer`; this class remains the takes CONDUCTOR
+//  (projection lifecycle, authority mapping, columns, the ops-call
+//  gestures, the keyboard family) and forwards both components' surfaces
+//  so every call site and pin reads unchanged.
+//
 
 import Foundation
 import GRDB // AsyncValueObservation iteration
@@ -68,9 +76,17 @@ final class TakesViewModel {
     /// The ONE live pane (P3: the live editor migrates on click; everything
     /// else renders read-cheap) — the authority's, forwarded.
     var focusedPane: PaneKey? { authority.livePane }
-    /// Fanned blocks currently bloomed — SESSION-ONLY by the plan's letter
-    /// (fans stay open once expanded; close-all resets; nothing persists).
-    private(set) var expandedBlocks: Set<String> = []
+    /// The board's session-only view-geometry state (13b Stage 3, N10 —
+    /// the P-9 decomposition's seam 1): expansion, paging, follow-the-
+    /// scroll visibility, density. Every pre-move property/method name is
+    /// forwarded below, so views and pins read unchanged.
+    @ObservationIgnored let board = TakesBoardLayout()
+    /// The cross-surface choreography (seam 2): move-and-execute parking,
+    /// the carried pane selection, landing consumption. Lazy so the
+    /// composition can reference `self`.
+    @ObservationIgnored private(set) lazy var choreography = TakesChoreographer(model: self)
+    /// Fanned blocks currently bloomed — the board's (forwarded).
+    var expandedBlocks: Set<String> { board.expandedBlocks }
     /// The board's transient outcome line. PRESENTATION is the shell's
     /// StatusCenter (AD-14 — one placement, one auto-dismiss policy); the
     /// property remains the tested truth and forwards on set.
@@ -129,48 +145,34 @@ final class TakesViewModel {
         if postWordCount != total { postWordCount = total }
     }
 
-    // MARK: - Follow-the-scroll (Phase 13 C2, R25)
+    // MARK: - Follow-the-scroll (Phase 13 C2, R25) — the board's, forwarded
 
-    /// R25 — follow-the-scroll as a takes-viewing OPTION in all modes.
-    /// Pushed by the View from the theme settings (models never read
-    /// environments — the EditorView appearance pattern).
-    var followTheScroll = false
-    /// Near-viewport row bookkeeping: per-block REF COUNTS, because the
-    /// multi-column compositions repeat a block's row — a disappear in one
-    /// column must not blind the others. Observed (not ignored) so blooms
-    /// re-render as rows come and go; when `followTheScroll` is off,
-    /// `isBloomed` short-circuits before reading it, so Observation never
-    /// tracks the churn (the calm default costs nothing).
-    private var rowVisibility: [String: Int] = [:]
+    /// R25 — pushed by the View from the theme settings.
+    var followTheScroll: Bool {
+        get { board.followTheScroll }
+        set { board.followTheScroll = newValue }
+    }
 
-    /// The visible FANNED blocks (R25's set — derived from the counts
-    /// against the current projection, so a fan born mid-visibility is
-    /// picked up without a re-appear).
+    /// The visible FANNED blocks (R25's set — derived from the board's
+    /// counts against the current projection, so a fan born mid-visibility
+    /// is picked up without a re-appear).
     var visibleFannedBlocks: Set<String> {
         Set(projection.slots
-            .filter { $0.hasFan && (rowVisibility[$0.blockID] ?? 0) > 0 }
+            .filter { $0.hasFan && board.isRowVisible($0.blockID) }
             .map(\.blockID))
     }
 
     func rowAppeared(_ blockID: String) {
-        rowVisibility[blockID, default: 0] += 1
+        board.rowAppeared(blockID)
     }
 
     func rowDisappeared(_ blockID: String) {
-        let next = (rowVisibility[blockID] ?? 0) - 1
-        if next <= 0 {
-            rowVisibility.removeValue(forKey: blockID)
-        } else {
-            rowVisibility[blockID] = next
-        }
+        board.rowDisappeared(blockID)
     }
 
-    /// THE bloom rule (R25): explicitly expanded, OR — with follow-the-
-    /// scroll on — any fanned row near the viewport.
+    /// THE bloom rule (R25) — the board's.
     func isBloomed(_ slot: Queries.RenderedBlock) -> Bool {
-        expandedBlocks.contains(slot.blockID)
-            || (followTheScroll && slot.hasFan
-                && (rowVisibility[slot.blockID] ?? 0) > 0)
+        board.isBloomed(slot)
     }
 
     /// Expand-all only where it MEANS something (R25's agreed half): the
@@ -181,13 +183,11 @@ final class TakesViewModel {
         projection.fanStyle != .slotSplit
     }
 
-    /// R24's short/long rule for the margin grid: a SHORT fanned block gets
-    /// the one-card-high horizontally-scrolling strip; longer blocks keep
-    /// the vertical card column. The threshold is a character count (~200
-    /// chars ≈ under three lines at the 68ch measure) — a BUILD-TIME CALL,
-    /// recorded in the Stage C closeout + QUESTIONS #28.
+    /// R24's short/long rule for the margin grid — the board layout's
+    /// rule; the static forward keeps every `TakesViewModel.` call site
+    /// and pin unchanged.
     nonisolated static func usesHorizontalStrip(text: String?) -> Bool {
-        (text ?? "").count < 200
+        TakesBoardLayout.usesHorizontalStrip(text: text)
     }
 
     /// The pane family's key type — the authority's (13b Stage 1a: the
@@ -450,42 +450,36 @@ final class TakesViewModel {
             .save(postID: postID, defaults: defaults)
     }
 
-    // MARK: - Discrete paging (session-only; model-owned)
+    // MARK: - Discrete paging (session-only) — the board's, forwarded
 
-    /// Per-key page offsets for the card rows (carousel, slot split, and —
-    /// AD-2's fix — the margin rail): whole cards/columns, never halfway,
-    /// an EXPLICIT ◀ ▶ door instead of an invisible horizontal scroll.
-    /// Model-owned (13b 1a) so the AD-2 pin and the board soak can drive
-    /// page coverage; session-only like expansion.
-    private(set) var pageOffsets: [String: Int] = [:]
+    var pageOffsets: [String: Int] { board.pageOffsets }
 
     /// The clamped current offset for a key (limit = last legal offset).
     func pageOffset(_ key: String, limit: Int) -> Int {
-        min(max(pageOffsets[key] ?? 0, 0), max(limit, 0))
+        board.pageOffset(key, limit: limit)
     }
 
     func stepPage(_ key: String, by delta: Int, limit: Int) {
-        pageOffsets[key] = min(max(pageOffset(key, limit: limit) + delta, 0), max(limit, 0))
+        board.stepPage(key, by: delta, limit: limit)
     }
 
-    // MARK: - Expansion (session-only)
+    // MARK: - Expansion (session-only) — the board's, forwarded
 
     func toggleExpanded(_ blockID: String) {
-        if expandedBlocks.contains(blockID) {
-            expandedBlocks.remove(blockID)
-        } else {
-            expandedBlocks.insert(blockID)
-        }
+        board.toggleExpanded(blockID)
     }
 
     /// Expand-all-fans (AppSpec §12): every FANNED block blooms, in the set
-    /// style; fans stay open once expanded; close-all resets.
+    /// style; fans stay open once expanded; close-all resets. The conductor
+    /// supplies the projection's fanned set (the board never reads the
+    /// projection).
     func expandAllFans() {
-        expandedBlocks = Set(projection.slots.filter(\.hasFan).map(\.blockID))
+        board.expandAll(
+            fannedBlockIDs: Set(projection.slots.filter(\.hasFan).map(\.blockID)))
     }
 
     func closeAllFans() {
-        expandedBlocks = []
+        board.closeAllFans()
     }
 
     // MARK: - Gestures (every one an Operations call)
@@ -895,65 +889,15 @@ final class TakesViewModel {
         return nil
     }
 
-    enum MoveAndExecuteAct: Equatable {
-        case structural(StructuralAct)
-        case deleteInEveryTake
-    }
+    /// The choreographer's act vocabulary (13b Stage 3, N10); the alias
+    /// keeps every `TakesViewModel.MoveAndExecuteAct` reference unchanged.
+    typealias MoveAndExecuteAct = TakesChoreographer.MoveAndExecuteAct
 
-    /// The ONE mode-switch choreography's takes-side half: park a Write
-    /// landing (block + carried caret/selection + the gesture) on the
-    /// router, flush this surface's pending text (same per-post
-    /// coordinator — the arriving editor serializes on it), and switch
-    /// modes VISIBLY. The gesture then plans against the real landed
-    /// selection, so any refusal is the operation's own, spoken — the
-    /// lecture-and-redirect door is retired (its copy was also factually
-    /// wrong for Divide).
+    /// The ONE mode-switch choreography's takes-side half — the
+    /// choreographer's (13b Stage 3, N10); forwarded so every routed door
+    /// and pin reads unchanged.
     func moveToWriteAndRun(_ act: MoveAndExecuteAct) {
-        guard let slot = commandTargetSlot else {
-            speak("Click into a block first — then the gesture knows where to act.")
-            return
-        }
-        var intent = WriteIntent(postID: postID, blockID: slot.blockID)
-        // The caret/selection transfers when the focused pane shows the
-        // CHOSEN take (Write shows chosen — same text, same offsets). A
-        // non-chosen pane lands at the block's start; on a fanned block
-        // divide opens the take ceremony, where cuts are adjusted per
-        // take (the W memo's reading).
-        let carried: NSRange? = {
-            guard let sel = paneSelection,
-                  sel.variantID == focusedPane?.variantID,
-                  sel.variantID == slot.variantID else { return nil }
-            return sel.range
-        }()
-        switch act {
-        case .structural(.merge):
-            // The merge memo: joining from Takes joins UPWARD — the caret
-            // lands at the block's start, the seam with the block above.
-            intent.offsetInBlock = 0
-        case .structural(.divide):
-            intent.offsetInBlock = carried?.location ?? 0
-        case .structural(.extract), .structural(.makeBlock), .deleteInEveryTake:
-            intent.offsetInBlock = carried?.location ?? 0
-            intent.selectionLength = carried?.length ?? 0
-        }
-        switch act {
-        case .structural(let gesture): intent.followUp = .structural(gesture)
-        case .deleteInEveryTake: intent.followUp = .deleteInEveryTake
-        }
-        // Flush FIRST, then switch: the arriving editor's first render
-        // reads the store, and the gesture must plan against the text the
-        // author sees (the one per-post coordinator serializes the rest).
-        // A REFUSED switch clears the parking (round-1 MAJOR, half a): a
-        // stale intent surviving here would execute a structural gesture
-        // unprompted at the next editor mount. `requestMode` speaks the
-        // refusal itself (both failure branches).
-        Task { [postID] in
-            await autosave.flushNow()
-            session.commandRouter.pendingWriteIntent = intent
-            if !session.commandRouter.requestMode(.write, postID: postID) {
-                session.commandRouter.pendingWriteIntent = nil
-            }
-        }
+        choreography.moveToWriteAndRun(act)
     }
 
     /// D3's third leg — the add-block door, NATIVE in Takes/Lenses: an
@@ -965,7 +909,7 @@ final class TakesViewModel {
             let result: Operations.NewBlockResult = try await session.runner.run { [postID] ops in
                 try ops.newBlock(in: postID, text: "", at: .end)
             }
-            pendingFocusVariantID = result.variant.id
+            choreography.parkFocus(onVariant: result.variant.id)
             statusMessage = "New block added at the end — type away."
         } catch {
             statusMessage = Self.message(for: error)
@@ -989,30 +933,24 @@ final class TakesViewModel {
         commentsRequest = CommentsRequest(blockID: slot.blockID)
     }
 
-    // MARK: - Pane selection (the choreography's carried caret)
+    // MARK: - Pane selection + landings — the choreographer's, forwarded
+    // (13b Stage 3, N10)
 
     /// The live pane's current selection, reported by the pane surface —
     /// what a fire-and-DO landing carries into Write.
-    @ObservationIgnored private(set) var paneSelection: (variantID: String, range: NSRange)?
-
-    func notePaneSelection(variantID: String, range: NSRange) {
-        paneSelection = (variantID, range)
+    var paneSelection: (variantID: String, range: NSRange)? {
+        choreography.paneSelection
     }
 
-    // MARK: - Landings (13b 1b — N9/AD-17 + the cross-mode bloom)
+    func notePaneSelection(variantID: String, range: NSRange) {
+        choreography.notePaneSelection(variantID: variantID, range: range)
+    }
 
     /// True on the PRIMARY takes board only (never the Write panel's
     /// embedded model): landing focus + cross-mode landings apply there.
-    @ObservationIgnored var landingEnabled = false
-    @ObservationIgnored private var landingFocusDone = false
-    /// A freshly-minted block's variant: its pane takes the ring when the
-    /// slot arrives (the add-block door's second half).
-    @ObservationIgnored private var pendingFocusVariantID: String?
-
-    /// The landing column for programmatic focus: the takes board's main
-    /// column, or the lens board's first column.
-    private var landingColumnID: String {
-        host == .takes ? Self.takesMainColumnID : (columns.first?.id ?? "main")
+    var landingEnabled: Bool {
+        get { choreography.landingEnabled }
+        set { choreography.landingEnabled = newValue }
     }
 
     /// The Takes board's fixed main-column identity (shared with the view).
@@ -1024,58 +962,49 @@ final class TakesViewModel {
     /// reveals map article-keyed focus onto this namespace.
     nonisolated static let takesFanColumnID = "takes-fan"
 
+    /// The landing column for programmatic focus — the choreographer's.
+    private var landingColumnID: String { choreography.landingColumnID }
+
     private func consumeLandings(_ new: Queries.TakesProjection) {
-        // A minted block's pane goes live the moment its slot arrives.
-        if let want = pendingFocusVariantID,
-           let slot = new.slots.first(where: { $0.variantID == want }) {
-            pendingFocusVariantID = nil
-            focus(PaneKey(columnID: landingColumnID, blockID: slot.blockID, variantID: want))
-            return
-        }
-        guard landingEnabled else { return }
-        // A cross-mode landing (Lenses' ⌘⇧T: blooms live in Takes — GO
-        // there and bloom, visibly). Post-stamped (the round-1 MAJOR's
-        // staleness discipline): a landing for ANOTHER post is left alone —
-        // consuming it here would bloom a foreign block and eat THIS
-        // board's landing focus below.
-        if let landing = session.commandRouter.pendingTakesLanding,
-           landing.postID == postID {
-            session.commandRouter.pendingTakesLanding = nil
-            switch landing {
-            case .bloom(_, let blockID):
-                expandedBlocks.insert(blockID)
-                if let slot = new.slots.first(where: { $0.blockID == blockID }),
-                   let variantID = slot.variantID {
-                    focus(PaneKey(
-                        columnID: landingColumnID, blockID: blockID, variantID: variantID))
-                }
-            }
-            landingFocusDone = true
-            return
-        }
-        // N9/AD-17 — "just start typing" at the Takes landing: with
-        // nothing focused, the first block's article pane takes the ring.
-        if !landingFocusDone, authority.livePane == nil,
-           let first = new.slots.first, let variantID = first.variantID {
-            landingFocusDone = true
-            authority.focus(PaneKey(
-                columnID: landingColumnID, blockID: first.blockID, variantID: variantID))
-        }
+        choreography.consumeLandings(new)
     }
 
-    // MARK: - Keyboard fan paging (13b 1b — AD-2's keyboard companion)
+    /// The N9 landing's direct-authority focus door (the choreographer's
+    /// one write into the authority): the landing ring claims the pane
+    /// WITHOUT the migration flush task — at a landing there is no leaving
+    /// pane with pending text, exactly the pre-move `authority.focus`
+    /// call. Internal for the choreographer; everything else focuses
+    /// through `focus(_:)`.
+    func landAuthorityFocus(_ pane: PaneKey) {
+        authority.focus(pane)
+    }
 
-    /// Density inputs, pushed by the board (models never read @AppStorage).
-    var beneathCount = 2
-    var gridRows = 2
-    var gridCols = 1
+    // MARK: - Keyboard fan paging (13b 1b — AD-2's keyboard companion;
+    // density + chunking are the board layout's, forwarded)
+
+    /// Density inputs, pushed by the board view (models never read
+    /// @AppStorage) — stored on the board layout.
+    var beneathCount: Int {
+        get { board.beneathCount }
+        set { board.beneathCount = newValue }
+    }
+    var gridRows: Int {
+        get { board.gridRows }
+        set { board.gridRows = newValue }
+    }
+    var gridCols: Int {
+        get { board.gridCols }
+        set { board.gridCols = newValue }
+    }
 
     /// R24's strip exception, one brain with the board's chunking.
     func railRowsPerColumn(slotText: String?) -> Int {
-        (Self.usesHorizontalStrip(text: slotText) && gridRows == 1) ? 1 : gridRows
+        board.railRowsPerColumn(slotText: slotText)
     }
 
-    nonisolated static func railPageKey(_ blockID: String) -> String { "rail-\(blockID)" }
+    nonisolated static func railPageKey(_ blockID: String) -> String {
+        TakesBoardLayout.railPageKey(blockID)
+    }
 
     /// The focused (else first-expanded) block's paging key + last legal
     /// offset in the CURRENT style — the board renders with the same
@@ -1169,7 +1098,7 @@ final class TakesViewModel {
     /// every mint door opens the block's fan and puts the ring on the new
     /// take, so typing continues there instantly.
     func revealTake(blockID: String, variantID: String, preferredColumnID: String? = nil) {
-        expandedBlocks.insert(blockID)
+        board.bloom(blockID)
         let columnID = preferredColumnID
             ?? focusedPane.flatMap { $0.blockID == blockID ? $0.columnID : nil }
             ?? landingColumnID
@@ -1303,7 +1232,7 @@ final class TakesViewModel {
             }
             let next = min(max(current + delta, 0), fan.count - 1)
             guard next != current else { return }
-            if !expandedBlocks.contains(slot.blockID) { expandedBlocks.insert(slot.blockID) }
+            if !board.expandedBlocks.contains(slot.blockID) { board.bloom(slot.blockID) }
             focus(PaneKey(
                 columnID: pane.columnID, blockID: slot.blockID, variantID: fan[next].id))
         }

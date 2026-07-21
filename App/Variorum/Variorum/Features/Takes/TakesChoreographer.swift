@@ -1,0 +1,174 @@
+//
+//  TakesChoreographer.swift
+//  Variorum
+//
+//  13b Stage 3, N10 — the TakesViewModel P-9 decomposition, seam 2 of 2
+//  (the plan's "choreography/landings" candidate, proposed from the code):
+//  the CROSS-SURFACE choreography moves out of the conductor — the
+//  fire-and-DO move-and-execute parking (1b's D3 replacement), the pane
+//  selection the choreography carries, and the LANDING consumption (N9's
+//  "just start typing" ring, the cross-mode bloom, the minted block's
+//  focus-when-its-slot-arrives). These are the pieces that talk to the
+//  ROUTER and to other surfaces; the conductor keeps the board's own
+//  semantics (projection, columns, ops-call gestures, the keyboard
+//  family) and forwards every existing name, so every view and pin call
+//  site reads unchanged (behavior parity is the batch contract).
+//
+//  The back-reference is `unowned`: the view model owns the choreographer
+//  strongly and is the only owner; the one internal Task here
+//  (moveToWriteAndRun's flush-then-park) captures the MODEL through the
+//  method the forwarder invoked, matching the pre-move capture shape.
+//
+
+import Foundation
+import Observation
+import VariorumCore
+
+@MainActor
+final class TakesChoreographer {
+    unowned let model: TakesViewModel
+
+    init(model: TakesViewModel) {
+        self.model = model
+    }
+
+    // MARK: - Fire-and-DO (13b 1b, R115/R118 — the D3 lecture's replacement)
+
+    enum MoveAndExecuteAct: Equatable {
+        case structural(StructuralAct)
+        case deleteInEveryTake
+    }
+
+    /// The ONE mode-switch choreography's takes-side half: park a Write
+    /// landing (block + carried caret/selection + the gesture) on the
+    /// router, flush this surface's pending text (same per-post
+    /// coordinator — the arriving editor serializes on it), and switch
+    /// modes VISIBLY. The gesture then plans against the real landed
+    /// selection, so any refusal is the operation's own, spoken — the
+    /// lecture-and-redirect door is retired (its copy was also factually
+    /// wrong for Divide).
+    func moveToWriteAndRun(_ act: MoveAndExecuteAct) {
+        guard let slot = model.commandTargetSlot else {
+            model.speak("Click into a block first — then the gesture knows where to act.")
+            return
+        }
+        var intent = WriteIntent(postID: model.postID, blockID: slot.blockID)
+        // The caret/selection transfers when the focused pane shows the
+        // CHOSEN take (Write shows chosen — same text, same offsets). A
+        // non-chosen pane lands at the block's start; on a fanned block
+        // divide opens the take ceremony, where cuts are adjusted per
+        // take (the W memo's reading).
+        let carried: NSRange? = {
+            guard let sel = paneSelection,
+                  sel.variantID == model.focusedPane?.variantID,
+                  sel.variantID == slot.variantID else { return nil }
+            return sel.range
+        }()
+        switch act {
+        case .structural(.merge):
+            // The merge memo: joining from Takes joins UPWARD — the caret
+            // lands at the block's start, the seam with the block above.
+            intent.offsetInBlock = 0
+        case .structural(.divide):
+            intent.offsetInBlock = carried?.location ?? 0
+        case .structural(.extract), .structural(.makeBlock), .deleteInEveryTake:
+            intent.offsetInBlock = carried?.location ?? 0
+            intent.selectionLength = carried?.length ?? 0
+        }
+        switch act {
+        case .structural(let gesture): intent.followUp = .structural(gesture)
+        case .deleteInEveryTake: intent.followUp = .deleteInEveryTake
+        }
+        // Flush FIRST, then switch: the arriving editor's first render
+        // reads the store, and the gesture must plan against the text the
+        // author sees (the one per-post coordinator serializes the rest).
+        // A REFUSED switch clears the parking (round-1 MAJOR, half a): a
+        // stale intent surviving here would execute a structural gesture
+        // unprompted at the next editor mount. `requestMode` speaks the
+        // refusal itself (both failure branches).
+        // Strong model capture, deliberately — the pre-move Task held the
+        // view model for the flush-then-park's duration; the choreographer
+        // rides its owner's lifetime.
+        Task { [model, postID = model.postID] in
+            await model.autosave.flushNow()
+            model.session.commandRouter.pendingWriteIntent = intent
+            if !model.session.commandRouter.requestMode(.write, postID: postID) {
+                model.session.commandRouter.pendingWriteIntent = nil
+            }
+        }
+    }
+
+    // MARK: - Pane selection (the choreography's carried caret)
+
+    /// The live pane's current selection, reported by the pane surface —
+    /// what a fire-and-DO landing carries into Write.
+    private(set) var paneSelection: (variantID: String, range: NSRange)?
+
+    func notePaneSelection(variantID: String, range: NSRange) {
+        paneSelection = (variantID, range)
+    }
+
+    // MARK: - Landings (13b 1b — N9/AD-17 + the cross-mode bloom)
+
+    /// True on the PRIMARY takes board only (never the Write panel's
+    /// embedded model): landing focus + cross-mode landings apply there.
+    var landingEnabled = false
+    private var landingFocusDone = false
+    /// A freshly-minted block's variant: its pane takes the ring when the
+    /// slot arrives (the add-block door's second half).
+    private var pendingFocusVariantID: String?
+
+    /// Parks the add-block door's second half (the conductor's
+    /// `addBlockAtEnd` calls this after the mint).
+    func parkFocus(onVariant variantID: String) {
+        pendingFocusVariantID = variantID
+    }
+
+    /// The landing column for programmatic focus: the takes board's main
+    /// column, or the lens board's first column.
+    var landingColumnID: String {
+        model.host == .takes
+            ? TakesViewModel.takesMainColumnID
+            : (model.columns.first?.id ?? "main")
+    }
+
+    func consumeLandings(_ new: Queries.TakesProjection) {
+        // A minted block's pane goes live the moment its slot arrives.
+        if let want = pendingFocusVariantID,
+           let slot = new.slots.first(where: { $0.variantID == want }) {
+            pendingFocusVariantID = nil
+            model.focus(TakesViewModel.PaneKey(
+                columnID: landingColumnID, blockID: slot.blockID, variantID: want))
+            return
+        }
+        guard landingEnabled else { return }
+        // A cross-mode landing (Lenses' ⌘⇧T: blooms live in Takes — GO
+        // there and bloom, visibly). Post-stamped (the round-1 MAJOR's
+        // staleness discipline): a landing for ANOTHER post is left alone —
+        // consuming it here would bloom a foreign block and eat THIS
+        // board's landing focus below.
+        if let landing = model.session.commandRouter.pendingTakesLanding,
+           landing.postID == model.postID {
+            model.session.commandRouter.pendingTakesLanding = nil
+            switch landing {
+            case .bloom(_, let blockID):
+                model.board.bloom(blockID)
+                if let slot = new.slots.first(where: { $0.blockID == blockID }),
+                   let variantID = slot.variantID {
+                    model.focus(TakesViewModel.PaneKey(
+                        columnID: landingColumnID, blockID: blockID, variantID: variantID))
+                }
+            }
+            landingFocusDone = true
+            return
+        }
+        // N9/AD-17 — "just start typing" at the Takes landing: with
+        // nothing focused, the first block's article pane takes the ring.
+        if !landingFocusDone, model.focusedPane == nil,
+           let first = new.slots.first, let variantID = first.variantID {
+            landingFocusDone = true
+            model.landAuthorityFocus(TakesViewModel.PaneKey(
+                columnID: landingColumnID, blockID: first.blockID, variantID: variantID))
+        }
+    }
+}
