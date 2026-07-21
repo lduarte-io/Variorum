@@ -383,10 +383,10 @@ enum TutorialSeeder {
             + "into the second take and press \u{2318}\u{21E7}A — it leaves the board, out "
             + "of the fan but never gone.",
 
-            "Honesty note: today an archived take doesn't show anywhere on this "
-            + "board. To bring one back, switch to Write (\u{2318}1), open the block's "
-            + "takes panel (\u{2318}\u{21E7}T), and its archived list has an Unarchive "
-            + "button. A nearer road back is on the workbench.",
+            "Never gone means never gone: an \u{201C}archived \u{B7} 1\u{201D} door appears "
+            + "right under that block's takes. Open it and Unarchive puts the "
+            + "take straight back in the fan — no leaving the board. (Write's "
+            + "takes panel keeps the same archived list, if you're over there.)",
         ])
         try take(on: keeping.blocks[2],
             "This is the spare take — archive me: click into me, then \u{2318}\u{21E7}A.")
@@ -637,11 +637,14 @@ enum TutorialSeeder {
             + "overheard lines, stray sentences, one-liners you'll want later.",
 
             "A pool named \u{201C}tutorial scraps\u{201D} was seeded for you with two "
-            + "scraps. Open the Blocks area and drag one into any lesson post: "
-            + "it lands as a COPY with lineage back to the scrap — the scrap "
-            + "stays in its pool. Hold \u{2325} while dragging and the whole fan "
-            + "rides the copy, takes and all (the second scrap has two, to "
-            + "try exactly that).",
+            + "scraps — the Blocks area's pool menu switches between pools, so "
+            + "look for it there. To drag one into a post: open any lesson in "
+            + "Write (\u{2318}1) and press the scraps button in the post's top-right "
+            + "corner (beside References). The scraps sit beside the page — "
+            + "drag one in, and it lands as a COPY with lineage back to the "
+            + "scrap, which stays in its pool. Hold \u{2325} while dragging and the "
+            + "whole fan rides the copy, takes and all (the second scrap has "
+            + "two, to try exactly that).",
 
             "The Blocks area's own dashed box mints scraps: type, \u{23CE}, and the "
             + "line is kept as a standalone block. Drag pieces out as your "
@@ -665,7 +668,8 @@ enum TutorialSeeder {
             "Your work is always yours to take out. Any post exports as "
             + "Markdown or PDF from the library's right-click Export menu; a "
             + "block exports alone via File \u{25B8} Export Block as Markdown\u{2026}; a "
-            + "book exports as one document from its shelf right-click; and "
+            + "book exports as one document — its chapters as headings, this "
+            + "very book included — from its shelf right-click; and "
             + "File \u{25B8} Export Library\u{2026} writes the whole library as a folder "
             + "of Markdown in one gesture.",
 

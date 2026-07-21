@@ -886,13 +886,27 @@ struct TutorialTakesActsTests {
             let after = try await projection(db, lesson)
             #expect(after.fans[spareHost.blockID]?.contains { $0.id == spare.id } == false,
                     "⌘⇧A — out of the fan")
+            // The road back the lesson teaches NOW lives on this board
+            // (13b 3D — N1): the speech names the door, and the door's
+            // listing is real.
+            #expect(model.statusMessage?.contains("archived \u{B7} n") == true,
+                    "the archive speech names the in-Takes road")
+            model.adopt(after)
+            await model.refreshArchived()
+            #expect(model.archivedCounts[spareHost.blockID] == 1,
+                    "the \u{201C}archived \u{B7} 1\u{201D} door the lesson promises is real")
+            #expect(model.archivedTakes[spareHost.blockID]?.map(\.id) == [spare.id])
 
-            // The honest road back the lesson names: Write's takes panel
-            // rides the same model door.
+            // Unarchive — the listing's own act (Write's panel rides the
+            // same model door).
             await model.unarchiveTake(spare.id)
             let back = try await projection(db, lesson)
             #expect(back.fans[spareHost.blockID]?.contains { $0.id == spare.id } == true,
                     "never gone — Unarchive restores it to the fan")
+            model.adopt(back)
+            await model.refreshArchived()
+            #expect(model.archivedCounts[spareHost.blockID] == nil,
+                    "the door retires when nothing is archived")
         }
     }
 }
@@ -1362,14 +1376,16 @@ struct TutorialLibraryActsTests {
                     "a fanned block exports with its fan showing")
             #expect(postMarkdown.contains("verdict"), "every open take reaches paper")
 
-            // The whole book exports as ONE document (every lesson inside).
-            // Honesty note (Stage 2 walk finding → ledger): reading_section
-            // CHAPTERS don't reach exportReading — its section headings ride
-            // the smart-book grouping tag only (`assembleReading.sectionPath`;
-            // core-frozen this stage, routed to Stage 3). The lesson prose
-            // deliberately doesn't promise chapter headings on paper.
+            // The whole book exports as ONE document (every lesson inside)
+            // WITH its chapters as headings — the 3B core seam (N13)
+            // reaching paper through the existing door; the lesson now
+            // promises it, so the walk asserts it (P-6).
             let bookMarkdown = try await db.read { try Queries.exportReading($0, readingID: bookID) }
             #expect(bookMarkdown.contains("# \(TutorialSeeder.bookName)"))
+            for chapter in TutorialSeeder.plan.map(\.chapter) {
+                #expect(bookMarkdown.contains("## \(chapter)"),
+                        "every chapter heads its lessons on paper (N13/3B)")
+            }
             for title in TutorialSeeder.plan.flatMap(\.lessons) {
                 #expect(bookMarkdown.contains(title), "every lesson reaches the one document")
             }
