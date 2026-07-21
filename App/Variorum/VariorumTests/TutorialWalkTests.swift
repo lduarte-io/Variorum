@@ -699,6 +699,82 @@ struct TutorialWritingActsTests {
         }
     }
 
+    /// N14 pin (13b Stage 3F; red-on-old, behavioral-revert verified): THE
+    /// COLD-MOUNT deterministic repro from the 3A drive — a post's FIRST
+    /// mount since launch (no saved scroll anchor) rendered every ⑂ badge
+    /// collapsed onto ONE top anchor, because every mount-time overlay
+    /// refresh (renderFull's, the clip's, applyChrome's) runs BEFORE TK2's
+    /// first layout pass and nothing refreshed after it — the only
+    /// post-layout triggers were user scrolls and the saved-anchor jump,
+    /// which is exactly why warm models and remounts healed. The
+    /// layout-settle trigger (`EditorTextView.viewWillDraw` → one coalesced
+    /// overlay refresh per storage generation) re-delivers real frames; the
+    /// decor family rides the same one call.
+    @Test func aColdFirstMountPlacesEachBadgeAtItsBlock() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            // Two fanned blocks with real prose between them: their badges
+            // must land at DIFFERENT heights once real layout exists.
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "extract & make block")
+            }
+            let before = try await slots(db, lesson)
+            let firstSlot = try #require(before.first)
+            let lastSlot = try #require(before.last)
+            _ = try session.operations.branchVariant(
+                firstSlot.blockID, from: #require(firstSlot.variantID))
+            _ = try session.operations.branchVariant(
+                lastSlot.blockID, from: #require(lastSlot.variantID))
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 900, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let model = EditorViewModel(session: session, postID: lesson)
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: model)
+            delegate.wire(to: textView)
+            window.contentView = scrollView
+            window.makeKeyAndOrderFront(nil)
+
+            // THE REAL COLD ORDER (makeNSView): attach → the overlay host
+            // wires (delivers whatever exists) → the projection renders
+            // into UN-LAID storage (its refresh reads garbage frames) →
+            // the first display pass lays the document out.
+            model.attach(textView: textView, scrollView: scrollView)
+            let badgeHost = BadgeOverlayController(model: model, textView: textView)
+            _ = badgeHost
+            let (slotsNow, header) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: lesson),
+                 try Queries.containerHeader(db, containerID: lesson))
+            }
+            model.adoptHeader(header)
+            model.applyProjection(slotsNow)
+            window.layoutIfNeeded()
+            window.display()
+
+            func badgeYs() -> [CGFloat] {
+                textView.subviews
+                    .compactMap { $0 as? NSButton }
+                    .filter { $0.title.hasPrefix("⑂") }
+                    .map { $0.frame.origin.y }
+                    .sorted()
+            }
+            await poll {
+                let ys = badgeYs()
+                return ys.count == 2 && ys[1] - ys[0] > 40
+            }
+            let ys = badgeYs()
+            #expect(ys.count == 2, "both fanned blocks carry a badge")
+            #expect((ys.last ?? 0) - (ys.first ?? 0) > 40,
+                    "each badge sits at its OWN block — never collapsed onto one top anchor (N14)")
+        }
+    }
+
     @Test func addBlockAtEndMintsAndHandsTheRingOver() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "blocks & typing") }

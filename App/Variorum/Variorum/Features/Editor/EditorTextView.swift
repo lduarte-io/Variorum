@@ -24,6 +24,20 @@ final class EditorTextView: NSTextView {
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
 
+    /// N14 (13b Stage 3F) — the overlay family's LAYOUT-SETTLE trigger.
+    /// Fragment-geometry consumers (badges, decor) that compute before
+    /// TK2's first viewport layout read garbage frames, and no mount-time
+    /// trigger runs after the layout pass — the cold-mount starve/collapse
+    /// class. `viewWillDraw` runs once per display pass, on the pass that
+    /// lays out whatever the storage now holds; the model coalesces this
+    /// into one post-pass overlay refresh per storage generation.
+    var onLayoutSettle: (() -> Void)?
+
+    override func viewWillDraw() {
+        super.viewWillDraw()
+        onLayoutSettle?()
+    }
+
     /// Phase 13, C1 (R9 — margins are sacred): the detail editor centers a
     /// bounded prose column by widening `textContainerInset` with the
     /// window; nil (the inline editor) keeps the fixed inset — its column

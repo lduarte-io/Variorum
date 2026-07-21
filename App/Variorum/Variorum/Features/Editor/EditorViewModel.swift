@@ -255,6 +255,11 @@ final class EditorViewModel {
     func attach(textView: EditorTextView, scrollView: NSScrollView?) {
         self.textView = textView
         self.scrollView = scrollView
+        // N14: a fresh surface is a fresh geometry world — whatever the
+        // overlays computed against the old one is stale until this view's
+        // first layout pass delivers real frames.
+        overlayGeometryGeneration &+= 1
+        textView.onLayoutSettle = { [weak self] in self?.overlayLayoutDidSettle() }
         canary.onFire = { [weak self] message in self?.canaryMessage = message }
         canary.arm(for: textView)
         textView.onCommitShortcut = { [weak self] in self?.commitCaretVariant() }
@@ -662,6 +667,12 @@ final class EditorViewModel {
     /// characters only). `editedRange` is the NEW characters' range; the old
     /// length is `editedRange.length - delta`.
     func storageDidEdit(_ editedRange: NSRange, changeInLength delta: Int) {
+        // N14: EVERY storage character edit dirties overlay geometry — the
+        // suppressed programmatic writes included (renderFull's
+        // setSurfaceContent is exactly the cold-mount path). The refresh
+        // itself waits for the layout pass that consumes the edit
+        // (`overlayLayoutDidSettle`), never runs against pre-layout frames.
+        overlayGeometryGeneration &+= 1
         guard !suppressEditProcessing else { return }
         let verdict = pendingVerdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
         pendingVerdict = nil
@@ -1661,6 +1672,45 @@ final class EditorViewModel {
         // viewport-bounded; off costs nothing).
         if appearance.indicator != .off, caretBlockID != previousCaretBlock {
             refreshDecorations()
+        }
+    }
+
+    // MARK: - The overlay layout-settle trigger (N14, 13b Stage 3F)
+
+    /// THE COLD-MOUNT CLASS, traced: every mount/edit-time overlay refresh
+    /// (attach → renderFull → `refreshBadges`, applyChrome, the clip's
+    /// mount-time bounds change) runs BEFORE TK2's first viewport layout —
+    /// fragment enumeration over un-laid storage returns collapsed/estimate
+    /// frames, so every ⑂ badge lands on one top anchor and the decor walk
+    /// computes garbage. The only post-layout refreshes were user scrolls
+    /// and the saved-anchor `JumpPrimitive` jump (which forces layout) —
+    /// which is exactly why a WARM model (saved anchor) healed and a COLD
+    /// model (post's first open since launch) stayed collapsed, and why a
+    /// mid-document choose (differential replace + pre-layout refresh)
+    /// neither caused nor healed it. The fix: the surface reports each
+    /// display pass (`EditorTextView.viewWillDraw`), and the model re-runs
+    /// the overlay family ONCE per storage generation, on the next runloop
+    /// turn — after the pass that laid the edited storage out. The
+    /// equality gates then deliver real frames; an already-correct refresh
+    /// is a cheap no-op.
+    @ObservationIgnored private(set) var overlayGeometryGeneration = 0
+    @ObservationIgnored private var overlayGenerationDelivered = -1
+    @ObservationIgnored private var overlaySettleScheduled = false
+
+    private func overlayLayoutDidSettle() {
+        guard overlayGenerationDelivered != overlayGeometryGeneration,
+              !overlaySettleScheduled else { return }
+        overlaySettleScheduled = true
+        let generation = overlayGeometryGeneration
+        // The async hop lands after the WHOLE display pass (wherever in it
+        // TK2 ran layout) and keeps subview mutation out of viewWillDraw.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            overlaySettleScheduled = false
+            overlayGenerationDelivered = generation
+            // A generation bumped between schedule and run re-arms on its
+            // own draw pass — delivered records what this refresh SAW.
+            refreshBadges()
         }
     }
 
