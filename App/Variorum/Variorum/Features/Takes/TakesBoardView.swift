@@ -64,16 +64,24 @@ struct TakesBoardView: View {
     /// froze stale. Distinct namespaces keep exactly ONE pane live (R22).
     static let fanColumnID = TakesViewModel.takesFanColumnID
 
+    /// The rail card's geometry (13b 3F — her grid design input: the cards
+    /// "a little bit wider and show the option better"; height stays the
+    /// batch-7 uniform rule — "2 high" is literally two card-heights).
+    static let railCardWidth: CGFloat = 250
+    static let railCardHeight: CGFloat = 110
+
     /// R74: the rail's reserved width follows the chosen column count.
     private var marginRailWidth: CGFloat {
-        CGFloat(gridCols) * 220 + CGFloat(max(gridCols - 1, 0)) * 6
+        CGFloat(gridCols) * Self.railCardWidth + CGFloat(max(gridCols - 1, 0)) * 6
     }
 
-    /// R74's "at least two cards of vertical room": while a block's takes
-    /// are open in grid form, the row reserves this height — the post
-    /// GROWS so the cards get regular room (the strip precedent).
-    private var gridReservedHeight: CGFloat {
-        CGFloat(gridRows) * 110 + CGFloat(max(gridRows - 1, 0)) * 6
+    /// R74's vertical room, HONEST about the fan (13b 3F, AD-7's other
+    /// half): the row reserves what the tallest visible column can
+    /// actually hold — min(cards, rows) high — steady across ◀ ▶ pages,
+    /// never an empty reserve below a 1-take fan.
+    private func gridReservedHeight(cardCount: Int, rowsPerColumn: Int) -> CGFloat {
+        let rows = min(max(cardCount, 1), rowsPerColumn)
+        return CGFloat(rows) * Self.railCardHeight + CGFloat(max(rows - 1, 0)) * 6
     }
 
     init(session: AppSession, postID: String, model: TakesViewModel? = nil) {
@@ -336,125 +344,168 @@ struct TakesBoardView: View {
     // MARK: - The article (ONE column; blooms in the set style)
 
     private var singleColumnArticle: some View {
-        ScrollView {
-            if model.projection.slots.isEmpty {
-                // Batch 6: an empty post must never be a dead end — blocks
-                // are born by TYPING, and Write is where typing lives.
-                VStack(spacing: 8) {
-                    Text(tokens.chromeLabel("Nothing here yet — blocks are born by typing."))
-                        .font(tokens.body)
+        // The GeometryReader is the N8 fix's one width source: the comment
+        // margin clamps into the room the centering ACTUALLY leaves,
+        // instead of hanging a fixed 166pt into space the sidebar owns.
+        GeometryReader { proxy in
+            let commentRoom = max((proxy.size.width - articleMeasure) / 2, 0)
+            ScrollView {
+                if model.projection.slots.isEmpty {
+                    // Batch 6: an empty post must never be a dead end — blocks
+                    // are born by TYPING, and Write is where typing lives.
+                    VStack(spacing: 8) {
+                        Text(tokens.chromeLabel("Nothing here yet — blocks are born by typing."))
+                            .font(tokens.body)
+                            .foregroundStyle(tokens.muted)
+                        Button(tokens.chromeLabel("Start writing (Write mode)")) {
+                            session.commandRouter.requestMode(.write, postID: postID)
+                        }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 60)
+                }
+                LazyVStack(alignment: .leading, spacing: 6) {
+                    ForEach(model.projection.slots, id: \.placementID) { slot in
+                        articleRow(slot: slot, commentRoom: commentRoom)
+                            .onAppear { model.rowAppeared(slot.blockID) }
+                            .onDisappear { model.rowDisappeared(slot.blockID) }
+                    }
+                    if !model.projection.slots.isEmpty {
+                        // D3's third leg (13b 1b): the add-block door lives
+                        // where blocks end — the same dashed grammar as the
+                        // fan-growth doors. The minted block's pane takes the
+                        // ring, so typing continues instantly.
+                        Button("＋ new block") {
+                            Task { await model.addBlockAtEnd() }
+                        }
+                        .buttonStyle(.plain)
+                        .font(tokens.small)
                         .foregroundStyle(tokens.muted)
-                    Button(tokens.chromeLabel("Start writing (Write mode)")) {
-                        session.commandRouter.requestMode(.write, postID: postID)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+                        .fixedSize()
+                        .help("A new block at the end of the post — type right into it")
                     }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
                 }
+                .frame(maxWidth: articleMeasure, alignment: .leading)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 60)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 18)
             }
-            LazyVStack(alignment: .leading, spacing: 6) {
-                ForEach(model.projection.slots, id: \.placementID) { slot in
-                    articleRow(slot: slot)
-                        .onAppear { model.rowAppeared(slot.blockID) }
-                        .onDisappear { model.rowDisappeared(slot.blockID) }
-                }
-                if !model.projection.slots.isEmpty {
-                    // D3's third leg (13b 1b): the add-block door lives
-                    // where blocks end — the same dashed grammar as the
-                    // fan-growth doors. The minted block's pane takes the
-                    // ring, so typing continues instantly.
-                    Button("＋ new block") {
-                        Task { await model.addBlockAtEnd() }
-                    }
-                    .buttonStyle(.plain)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 7)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
-                    .fixedSize()
-                    .help("A new block at the end of the post — type right into it")
-                }
-            }
-            .frame(maxWidth: articleMeasure, alignment: .leading)
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 24)
-            .padding(.vertical, 18)
         }
     }
 
-    /// R9's measure: 680pt of prose; the margin-grid composition adds its
-    /// reserved rail beside it.
-    private var articleMeasure: CGFloat {
+    /// Whether the margin rail is part of the composition RIGHT NOW (13b
+    /// 3F, D2/AD-6): only while some fan is actually open — the at-rest
+    /// page must never shift for an empty reserve. Follow-the-scroll keeps
+    /// the measure stable whenever the post has any fan at all (blooms
+    /// come and go with scrolling; the prose must not wobble).
+    private var railEngaged: Bool {
         model.projection.fanStyle == .marginGrid
-            ? 680 + 16 + marginRailWidth
-            : 680
+            && (!model.expandedBlocks.isEmpty
+                || (model.followTheScroll
+                    && model.projection.slots.contains { $0.hasFan }))
     }
 
+    /// R9's measure: 680pt of prose; an ENGAGED margin rail widens the
+    /// composition by its reserved width (D2: at rest — any style — the
+    /// article sits exactly where Write and stack put it).
+    private var articleMeasure: CGFloat {
+        Self.articleMeasure(engagedRailWidth: railEngaged ? marginRailWidth : nil)
+    }
+
+    /// The composition-measure brain (13b 3F — the D2/AD-6 pin's target):
+    /// at rest the article is the 680 prose column in EVERY style; only a
+    /// rail that is actually engaged (an open fan in margin grid) widens
+    /// the composition. The old always-wide margin-grid measure shifted
+    /// the whole page ~118pt left for an EMPTY reserve.
+    nonisolated static func articleMeasure(engagedRailWidth: CGFloat?) -> CGFloat {
+        guard let engagedRailWidth else { return 680 }
+        return 680 + 16 + engagedRailWidth
+    }
+
+    /// ONE structural shape for every style and bloom state (13b 3F): the
+    /// article cell keeps a STABLE identity across expand/collapse —
+    /// branch-per-state trees re-identified the cell's NSView on every
+    /// bloom (a churned live pane momentarily doubled the ring; the board
+    /// soak caught it) — the conditional parts render AROUND the cell.
     @ViewBuilder
-    private func articleRow(slot: Queries.RenderedBlock) -> some View {
+    private func articleRow(slot: Queries.RenderedBlock, commentRoom: CGFloat) -> some View {
         let bloomed = model.isBloomed(slot)
-        if model.projection.fanStyle == .marginGrid {
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 4) {
-                    fanToggleRow(slot: slot, bloomed: bloomed)
-                    washedCell(slot: slot, washed: bloomed)
-                }
-                .frame(maxWidth: 680, alignment: .topLeading)
-                Group {
-                    if bloomed {
-                        marginRail(slot: slot)
-                    } else {
-                        Color.clear.frame(height: 1)
-                    }
-                }
-                .frame(width: marginRailWidth, alignment: .topLeading)
-            }
-        } else {
+        let style = model.projection.fanStyle
+        // The slot-split bloom REPLACES the cell — the style's whole point
+        // (the same branch flip the pre-3F tree had).
+        let splitBloomed = bloomed && style == .slotSplit && slot.hasFan
+        HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                fanToggleRow(slot: slot, bloomed: bloomed)
-                if bloomed && !slot.hasFan {
-                    // The FIRST-take door (R72): an unfanned block blooms
-                    // into just the growth doors, whatever the style.
-                    washedCell(slot: slot, washed: true)
-                    fanFooter(slot: slot).padding(.leading, 24)
-                } else if bloomed && model.projection.fanStyle == .slotSplit {
+                if !splitBloomed {
+                    washedCell(slot: slot, washed: bloomed, commentRoom: commentRoom)
+                }
+                if splitBloomed {
+                    closeFanLine(slot: slot)
                     slotSplitBloom(slot: slot)
-                } else {
-                    washedCell(slot: slot, washed: bloomed)
-                    if bloomed && model.projection.fanStyle == .stack {
-                        stackBloom(slot: slot)
-                    }
-                    if bloomed && model.projection.fanStyle == .carousel {
-                        carouselBloom(slot: slot)
-                    }
+                }
+                if bloomed, !slot.hasFan, style != .marginGrid {
+                    // The FIRST-take door (R72): an unfanned block blooms
+                    // into just the growth doors, whatever the style (the
+                    // grid renders them in its rail instead).
+                    fanFooter(slot: slot).padding(.leading, 24)
+                }
+                if bloomed, slot.hasFan, style == .stack {
+                    stackBloom(slot: slot)
+                }
+                if bloomed, slot.hasFan, style == .carousel {
+                    carouselBloom(slot: slot)
                 }
             }
-        }
-    }
-
-    @ViewBuilder
-    private func fanToggleRow(slot: Queries.RenderedBlock, bloomed: Bool) -> some View {
-        HStack {
-            if slot.hasFan {
-                Button("⑂\(slot.activeVariantCount)") { model.toggleExpanded(slot.blockID) }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                    .help(bloomed ? "Close this fan (⌘⇧T)" : "Open this fan (\(styleName)) — ⌘⇧T")
-            } else {
-                // R72's "we need an easier take": every block offers its
-                // FIRST take — no fan required to grow one.
-                Button("⑂ +") { model.toggleExpanded(slot.blockID) }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help("Give this block its first alternative take (⌘⇧T)")
+            .frame(maxWidth: 680, alignment: .topLeading)
+            if style == .marginGrid, bloomed {
+                marginRail(slot: slot)
+                    .frame(width: marginRailWidth, alignment: .topLeading)
             }
-            Spacer()
         }
     }
 
-    private func washedCell(slot: Queries.RenderedBlock, washed: Bool) -> some View {
-        TakesCellView(
+    /// The fan door as a CORNER BADGE (13b 3F — the D2 ledger row's second
+    /// traced candidate: `fanToggleRow` stacked a button row above EVERY
+    /// block, unfanned included, so the takes page at rest carried 3-4×
+    /// Write's inter-block gaps). Write's grammar, mirrored: ⑂n at the
+    /// block's top-right, in the margin, zero vertical footprint — and
+    /// R72's first-take door ("⑂+") keeps its always-visible offer.
+    @ViewBuilder
+    private func fanBadge(slot: Queries.RenderedBlock, bloomed: Bool) -> some View {
+        Button(slot.hasFan ? "⑂\(slot.activeVariantCount)" : "⑂+") {
+            model.toggleExpanded(slot.blockID)
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: slot.hasFan ? .primary : .quiet))
+        .help(slot.hasFan
+              ? (bloomed ? "Close this fan (⌘⇧T)" : "Open this fan (\(styleName)) — ⌘⇧T")
+              : "Give this block its first alternative take (⌘⇧T)")
+    }
+
+    /// The slot-split bloom's close door (its bloom REPLACES the cell, so
+    /// the corner badge has no host there).
+    private func closeFanLine(slot: Queries.RenderedBlock) -> some View {
+        HStack {
+            Spacer()
+            fanBadge(slot: slot, bloomed: true)
+        }
+    }
+
+    private func washedCell(
+        slot: Queries.RenderedBlock, washed: Bool, commentRoom: CGFloat
+    ) -> some View {
+        let bloomed = model.isBloomed(slot)
+        // N8/AD-8: the comment note clamps into the real gutter — the full
+        // card where ≥90pt of margin exists, the compact // chip below
+        // that; never laid out in space the sidebar owns.
+        let compactNote = commentRoom < 90
+        let noteWidth = min(150, max(commentRoom - 16, 24))
+        return TakesCellView(
             model: model, tokens: tokens, slot: slot, column: mainColumn,
             tinted: false, role: "article", onDiff: { diffPresentation = $0 })
             .padding(2)
@@ -465,9 +516,20 @@ struct TakesBoardView: View {
             // in the blank area)"): the block's comments in the LEFT
             // margin — the round-2 margin-comment idiom, takes-side.
             .overlay(alignment: .topLeading) {
-                CommentMarginNote(session: session, blockID: slot.blockID, tokens: tokens)
-                    .frame(width: 150, alignment: .topLeading)
-                    .offset(x: -166)
+                CommentMarginNote(
+                    session: session, blockID: slot.blockID, tokens: tokens,
+                    compact: compactNote)
+                    .frame(width: noteWidth, alignment: .topLeading)
+                    .offset(x: -(noteWidth + (compactNote ? 4 : 16)))
+            }
+            // The fan door rides the cell's corner (never its own row) —
+            // in an engaged grid bloom the rail's own header carries the
+            // close instead (the badge would collide with the rail).
+            .overlay(alignment: .topTrailing) {
+                if !(model.projection.fanStyle == .marginGrid && bloomed) {
+                    fanBadge(slot: slot, bloomed: bloomed)
+                        .offset(x: 40)
+                }
             }
     }
 
@@ -527,15 +589,25 @@ struct TakesBoardView: View {
         // ONE brain with the keyboard pager (13b 1b): the model answers.
         let rowsPerColumn = model.railRowsPerColumn(slotText: slot.text)
         return VStack(alignment: .leading, spacing: 4) {
-            Text("takes · \(takes.count)")
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+            HStack(spacing: 6) {
+                Text("takes · \(takes.count)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                // The engaged grid bloom's CLOSE door (the corner badge
+                // stands down here — this is where it would collide).
+                Button("✕") { model.toggleExpanded(slot.blockID) }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help("Close this fan (⌘⇧T)")
+            }
             if takes.isEmpty {
                 fanFooter(slot: slot)
             } else {
                 railCards(takes: takes, slot: slot, rowsPerColumn: rowsPerColumn)
                     .frame(
-                        minHeight: rowsPerColumn > 1 ? gridReservedHeight : 0,
+                        minHeight: rowsPerColumn > 1
+                            ? gridReservedHeight(
+                                cardCount: takes.count, rowsPerColumn: rowsPerColumn)
+                            : 0,
                         alignment: .top)
                 // Batch 12 (her "i can't make a new take"): the growth
                 // doors live BELOW the cards, always on screen (R72's
@@ -566,13 +638,18 @@ struct TakesBoardView: View {
                         ForEach(column, id: \.id) { take in
                             // Batch 7: UNIFORM card height — "2 high" is
                             // literally two card-heights, never a clipped
-                            // column of tall cards.
-                            takeMiniPane(take: take, slot: slot)
-                                .frame(width: 220, height: 110, alignment: .topLeading)
+                            // column of tall cards. 13b 3F (N23): the card
+                            // CAPS but no longer amputates — its content
+                            // scrolls, so the whole take is reachable.
+                            takeMiniPane(take: take, slot: slot, capped: true)
+                                .frame(
+                                    width: Self.railCardWidth,
+                                    height: Self.railCardHeight,
+                                    alignment: .topLeading)
                                 .clipped()
                         }
                     }
-                    .frame(width: 220)
+                    .frame(width: Self.railCardWidth)
                 }
             }
             if columns.count > gridCols {
@@ -716,33 +793,40 @@ struct TakesBoardView: View {
         .fixedSize()
     }
 
-    /// A take's pane inside a bloom, on the v2-canon card.
-    private func takeMiniPane(take: Variant, slot: Queries.RenderedBlock) -> some View {
+    /// A take's pane inside a bloom, on the v2-canon card. 13b 3F (N25 +
+    /// her grid inputs): choosing is the card's HEADER — one full-width
+    /// clickable band ("choose" / "✓ chosen"), never a corner ✓ beside a
+    /// "✓ chosen" text (the doubled checkmark), and it costs the text box
+    /// no width. `capped` (the rail's fixed-height cards): the content
+    /// SCROLLS in place, so no part of the take is unreachable (N23).
+    private func takeMiniPane(
+        take: Variant, slot: Queries.RenderedBlock, capped: Bool = false
+    ) -> some View {
         let isChosen = take.id == slot.variantID
         return TakeCardFrame(isChosen: isChosen, tokens: tokens) {
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    if let label = take.label {
-                        Text(label).font(tokens.small).foregroundStyle(tokens.muted)
-                    }
-                    if isChosen {
-                        Text("✓ chosen").font(tokens.small).foregroundStyle(tokens.chosen)
-                    }
-                    Spacer()
-                    Button("✓") { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                        .disabled(isChosen)
-                        .help("Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
+                TakeChooseHeader(
+                    tokens: tokens, isChosen: isChosen, label: take.label,
+                    onChoose: {
+                        Task { await model.choose(blockID: slot.blockID, variantID: take.id) }
+                    })
+                if capped {
+                    ScrollView(.vertical) { miniPaneSurface(take: take, slot: slot) }
+                } else {
+                    miniPaneSurface(take: take, slot: slot)
                 }
-                PaneSurfaceView(
-                    text: model.liveText(take),
-                    isLive: paneKeyIsLive(slot: slot, take: take),
-                    tokens: tokens,
-                    role: "mini", variantID: take.id,
-                    onFocusRequest: { focusPane(slot: slot, take: take) },
-                    onEdit: { model.paneEdited(variantID: take.id, newText: $0) })
             }
         }
+    }
+
+    private func miniPaneSurface(take: Variant, slot: Queries.RenderedBlock) -> some View {
+        PaneSurfaceView(
+            text: model.liveText(take),
+            isLive: paneKeyIsLive(slot: slot, take: take),
+            tokens: tokens,
+            role: "mini", variantID: take.id,
+            onFocusRequest: { focusPane(slot: slot, take: take) },
+            onEdit: { model.paneEdited(variantID: take.id, newText: $0) })
     }
 
     // MARK: - Small helpers
@@ -766,6 +850,41 @@ struct TakesBoardView: View {
     private func focusPane(slot: Queries.RenderedBlock, take: Variant) {
         model.focus(TakesViewModel.PaneKey(
             columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id))
+    }
+}
+
+// MARK: - The choose header (13b 3F — N25 + her grid design inputs)
+
+/// The card's chosen-marking as a clickable HEADER: "choose" marks the
+/// take chosen; the chosen card reads "✓ chosen" (the ONE checkmark).
+/// Full-width band — the text box below keeps its whole width.
+struct TakeChooseHeader: View {
+    let tokens: VoiceTokens
+    let isChosen: Bool
+    let label: String?
+    let onChoose: () -> Void
+
+    var body: some View {
+        Button(action: onChoose) {
+            HStack(spacing: 4) {
+                Text(tokens.chromeLabel(isChosen ? "✓ chosen" : "choose"))
+                    .font(tokens.small)
+                    .foregroundStyle(isChosen ? tokens.chosen : tokens.muted)
+                if let label {
+                    Text(label)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isChosen)
+        .help(isChosen
+              ? "The post shows this take (everywhere)"
+              : "Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
     }
 }
 
@@ -815,17 +934,11 @@ private struct CollapsibleTakeCard: View {
                     Button(collapsed ? "▸" : "▾") { collapsed.toggle() }
                         .controlSize(.mini)
                         .buttonStyle(.plain)
-                    if let label = take.label {
-                        Text(label).font(tokens.small).foregroundStyle(tokens.muted)
-                    }
-                    if isChosen {
-                        Text("✓ chosen").font(tokens.small).foregroundStyle(tokens.chosen)
-                    }
-                    Spacer()
-                    Button("✓") { onChoose() }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                        .disabled(isChosen)
-                        .help("Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
+                    // 13b 3F (N25's grammar, unified): choosing is the
+                    // header band here too — one checkmark, ever.
+                    TakeChooseHeader(
+                        tokens: tokens, isChosen: isChosen, label: take.label,
+                        onChoose: onChoose)
                 }
                 if collapsed {
                     Text(text.split(separator: "\n").first.map(String.init) ?? "(empty)")

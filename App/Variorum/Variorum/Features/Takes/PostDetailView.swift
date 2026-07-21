@@ -58,14 +58,12 @@ struct PostDetailView: View {
 
     /// Batch 14 (her alignment ask, restated from batch 12): the masthead
     /// shares the ARTICLE's measure and left edge — title directly over
-    /// the text, like the mockup. Margin-grid widens the takes article by
-    /// its reserved rail; the masthead follows.
-    private var mastheadMeasure: CGFloat {
-        guard mode == .takes, themeStore?.settings.fanStyle == .marginGrid else { return 680 }
-        let stored = UserDefaults.standard.integer(forKey: "takesGridCols")
-        let cols = stored == 0 ? 1 : max(1, min(2, stored))
-        return 680 + 16 + CGFloat(cols) * 220 + CGFloat(max(cols - 1, 0)) * 6
-    }
+    /// the text, like the mockup. 13b 3F (D2/AD-6): the old margin-grid
+    /// widening is DELETED with the always-on rail it compensated — the
+    /// article's at-rest measure is 680 in every style now (the rail
+    /// engages only while a fan is open), so the masthead is a constant
+    /// and the duplicate UserDefaults-read width brain dies with it.
+    private let mastheadMeasure: CGFloat = 680
 
     var body: some View {
         VStack(spacing: 0) {

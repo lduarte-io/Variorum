@@ -185,6 +185,11 @@ struct CommentMarginNote: View {
     let session: AppSession
     let blockID: String
     let tokens: VoiceTokens
+    /// 13b 3F (N8/AD-8): under ~90pt of real gutter the full card cannot
+    /// fit — the note degrades to the // chip (count included) instead of
+    /// laying out in space the sidebar owns. Same philosophy as Write's
+    /// `gutterFitsCards` degrade.
+    var compact = false
     @State private var comments: [BlockComment] = []
     @State private var panelShown = false
 
@@ -194,22 +199,34 @@ struct CommentMarginNote: View {
                 panelShown = true
             } label: {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(tokens.commentPrefix + first.text)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.commentInk)
-                        .lineLimit(4)
-                        .multilineTextAlignment(.leading)
-                    if comments.count > 1 {
-                        Text(tokens.chromeLabel("+\(comments.count - 1) more"))
+                    if compact {
+                        Text(tokens.chromeLabel(
+                            comments.count > 1
+                                ? "\(tokens.commentPrefix)\(comments.count)"
+                                : tokens.commentPrefix))
                             .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .foregroundStyle(tokens.commentInk)
+                            .lineLimit(1)
+                    } else {
+                        Text(tokens.commentPrefix + first.text)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.commentInk)
+                            .lineLimit(4)
+                            .multilineTextAlignment(.leading)
+                        if comments.count > 1 {
+                            Text(tokens.chromeLabel("+\(comments.count - 1) more"))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.faint)
+                        }
                     }
                 }
-                .padding(.leading, 8)
+                .padding(.leading, compact ? 0 : 8)
                 .overlay(alignment: .leading) {
-                    Rectangle()
-                        .fill(tokens.commentInk.opacity(0.5))
-                        .frame(width: 2)
+                    if !compact {
+                        Rectangle()
+                            .fill(tokens.commentInk.opacity(0.5))
+                            .frame(width: 2)
+                    }
                 }
                 .contentShape(Rectangle())
             }

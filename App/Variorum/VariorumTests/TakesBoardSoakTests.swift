@@ -106,7 +106,14 @@ struct TakesBoardSoakTests {
         let identified = identifiedPanes(in: hosting)
 
         // 1 — ONE live ring.
-        let liveCount = panes(in: hosting).filter(\.isEditable).count
+        let livePanes = panes(in: hosting).filter(\.isEditable)
+        let liveCount = livePanes.count
+        if liveCount > 1 {
+            for pane in livePanes {
+                print("LIVE-PANE [\(tag)]:", pane.identifier?.rawValue ?? "?",
+                      pane.frame, "window:", pane.window != nil)
+            }
+        }
         #expect(liveCount <= 1, "[\(tag)] one live ring — found \(liveCount)")
 
         // 2 + 3 — read panes mirror the authority; realized free-height

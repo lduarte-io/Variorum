@@ -641,6 +641,19 @@ struct TakesBoardTests {
                     "the ring keys the fan card the bloom renders")
         }
     }
+
+    /// 13b Stage 3F pin (D2/AD-6; red-on-old, behavioral-revert verified):
+    /// the margin grid AT REST measured 680+16+rail — the whole article +
+    /// masthead centered around an EMPTY reserved rail and shifted ~118pt
+    /// left of where Write and every other style put the prose. The
+    /// measure brain now widens ONLY for an engaged rail (an open fan);
+    /// at rest every style shares the one 680 prose column.
+    @Test func theMarginGridAtRestSharesEveryStyleMeasure() {
+        #expect(TakesBoardView.articleMeasure(engagedRailWidth: nil) == 680,
+                "no open fan ⇒ the 680 prose column, margin grid included")
+        #expect(TakesBoardView.articleMeasure(engagedRailWidth: 236) == CGFloat(932),
+                "an engaged rail widens the composition by exactly its reserve")
+    }
 }
 
 // MARK: - Review round 1, MINOR 2: the quit door awaits EVERY live
