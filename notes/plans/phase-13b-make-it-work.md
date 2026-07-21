@@ -403,6 +403,12 @@ Commits per batch/stage with the standing message convention.
 | N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46; the exact-boundary form works, 48). Loud refusal, never silent; but snap and prose disagree. Mechanism inferred, not traced | new, 3A → 3H (snap semantics are the cut-placement memo's territory; either the snap widens suffix spans to the containing sentence's start, or the lesson prose narrows) |
 | N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | new, 3A → 3D (T5/IA design: multi-pool surfacing + a real drag geometry; the lesson-prose half rides the fix) |
 | N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | new, 3A → 3E (needs a human-hand drag before defect status; if real it joins D1's book-view batch) |
+| N21 | Chapter dragging in the BOOK VIEW body (author, 2026-07-21 afternoon): "you should be able to drag chapters within the book view, not just in that sidebar, but there are two places where the dots that indicate dragging make me feel like it should be draggable and it isn't" — locate both false-affordance ⠿ spots; dots that don't drag either drag or lose the dots (the R112 honesty rule applied to affordances) | new, author → 3E (joins N20/D1's book batch) |
+| N22 | Clicking a collapsed post CARD in the book view should open the post — "clicking on the post should bring you to it, not just the smaller open button (I mean the separated box, not the text that you can actively edit)" | new, author → 3E |
+| N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | new, author → 3F (T7; joins AD-7/D2) |
+| N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | new, author → 3D |
+| N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | new, author → 3F |
+| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | new, author → verify next drive / design Stage 4 |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -2687,6 +2693,67 @@ give thorough solutions… it can be its own phase if it needs to be."
 
 Sequenced after 3F (its fixes ride the same overlay/geometry
 verification drives) and before 3G (looks-polish stays LAST per R111).
+
+### Author additions (2026-07-21 afternoon — verbatim-faithful, routed; her sequencing directive: "finish these batches first… only handle these fixes / stage 4 plans / etc. in ways that are architecturally consistent")
+
+**3F scope grows (margin grid):** N23 (the scroll bug — inaccessible
+take content) and N25 (the extra ✓ on the chosen take) join D2/N8/AD-7;
+her DESIGN INPUTS for the grid recorded: non-chosen takes "use the full
+size of the box… a little bit wider and show the option better", and
+chosen-marking becomes "a header where you would click on it to mark it
+chosen… without making the box of text less wide."
+
+**3H scope grows (her structural-design inputs — the memo addenda now
+carry her direction, not just options):**
+1. **A MERGE CEREMONY** (her sketch): "if you're merging two blocks
+   with takes, there should be something like the W ceremony but for
+   keeping the takes of your two blocks. Maybe instead of having
+   scissors, there is a + that you move around?" — the W's mirror,
+   designed whole in the merge-memo addendum (with the N17 round-trip
+   and the lineage-road naming); semantics changes remain HER
+   checkpoint ruling, but the design now aims at her sketch.
+2. **The join without sentence punctuation:** merge "should account for
+   merging two blocks that don't have periods or other sentence
+   markers" — the join-character rule (space vs newline vs nothing)
+   designed for outline-ish content; memo edge.
+3. **DIVIDE GRANULARITY RELAXED (her ruling, uncertainty preserved):**
+   "we should allow divide even if it's not on a sentence… or do we
+   allow cuts on newlines too? I think if we allow cuts on new lines
+   that would be fine, but tbh I don't see why we wouldn't allow a
+   divide with only a word left there, given that a block is at minimum
+   one character." Newlines are her floor; her lean is word-level
+   freedom. The memo settles the exact snap rule (word-edge snapping vs
+   none; refusal cases); this supersedes the sentence-only reading of
+   the ratified snap-and-proceed contract BY HER DIRECTION — the
+   boundary-snapping change is core Domain work, SANCTIONED as 3H's
+   core allowance (own commits, exact tests, no schema; the Stage 3
+   brief's "core only in 3B" line is amended by this paragraph).
+4. **End-of-block cut = no second half for that take:** "if you put the
+   cut marker at the very end of the block, it's clear that the W
+   ceremony won't mint a 2nd block for that take" (her 2-paragraph vs
+   1-paragraph example) — a divideW semantics addition (a take whose
+   cut sits at its end contributes a first half only), memo-designed,
+   core-sanctioned under the same allowance.
+
+**### Stage 4 stub (recorded at her request — "I think I'm going to
+want a stage 4"; scoped AFTER this stage's batches + ladder):**
+- The OUTLINE post's utility — "go into the utility of outline post…
+  and make some changes there."
+- The CANVAS view mode — same directive.
+- **EDITING IN COMPARE:** "you should be able to actually edit the
+  posts in compare, otherwise the compare view is not actually
+  particularly useful except for seeing what the difference is." Her
+  own caution recorded verbatim: "i know we recently unified our text
+  editing surface and I do not want to go back to that class of bugs,
+  so defer it to stage 4 if that's a change that needs more time" —
+  the architect concurs: cross-POST live editing extends the
+  PaneTextAuthority's one-live-ring contract across post contexts;
+  Stage 4 designs it on the authority, never beside it.
+- Takes-side block drag-reorder (N26's design half, pending the
+  verify).
+- D1 status note: her "collapsing a post you extended is [still not]
+  working" report arrived while 3E was in flight and unlanded —
+  expected; D1 remains 3E's.
 
 ### Batch 3G — the looks-polish tail (R111; bounded)
 
