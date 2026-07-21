@@ -43,6 +43,11 @@ struct VoicedButtonStyle: ButtonStyle {
         var body: some View {
             configuration.label
                 .font(font ?? tokens.small)
+                // The chrome class rule (N15 / the wedged-window lesson):
+                // a voiced button label is one line, always — under
+                // compression it truncates, never wraps mid-word
+                // ("com mit ⌘S").
+                .lineLimit(1)
                 .foregroundStyle(ink)
                 .padding(.horizontal, 5)
                 .padding(.vertical, 2)

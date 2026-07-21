@@ -37,107 +37,34 @@ struct CommitBar: View {
         VStack(spacing: 0) {
             Divider().overlay(tokens.line)
             // Batch 9 (R101): the round-2 status-line grammar — quiet
-            // voiced words on the room; every door stays.
-            HStack(spacing: 10) {
-                Text(tokens.chromeLabel(caretLabel))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                    .disabled(model.caretVariantID == nil || model.header?.locked == true)
-                    .help("An immutable savepoint of the take under the caret")
-                Button(tokens.chromeLabel(model.commitList == nil ? "history" : "hide history")) {
-                    model.toggleCommitHistory()
+            // voiced words on the room; every door stays. 13b 3F (N15):
+            // the bar is ADAPTIVE — one row where it fits (the detail
+            // editor), two rows where it doesn't (the book-inline form,
+            // whose default width wrapped every label mid-word — "com mit
+            // ⌘S"; her call: "it needs 2 rows or something").
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    identityCluster
+                    StatusDot(tokens: tokens)
+                    postCluster
+                    StatusDot(tokens: tokens)
+                    gestureCluster
+                    Spacer()
+                    trailingCluster
                 }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                .disabled(model.caretVariantID == nil && model.commitList == nil)
-                .help("The caret take's savepoints — restore any of them")
-
-                StatusDot(tokens: tokens)
-
-                // The post lifecycle faces (Phase 10 Step 8): the seal
-                // toggle and Mac-side entry-date editing live with the open
-                // post — the editor knows the header state.
-                Button(tokens.chromeLabel(model.header?.locked == true ? "unseal" : "seal")) {
-                    model.toggleSeal()
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                .help("A sealed post is frozen — nothing under it changes until unsealed")
-                Button(tokens.chromeLabel("tags…")) { tagsShown = true }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                    .help("The post's tags — apply or remove them right here")
-                    .sheet(isPresented: $tagsShown) {
-                        TagAssignmentSheet(
-                            session: model.session, postID: model.postID,
-                            postTitle: model.header?.title)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 10) {
+                        identityCluster
+                        StatusDot(tokens: tokens)
+                        postCluster
+                        Spacer()
                     }
-                Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                    .help("The caret block's comments — working notes on a block, never per-take")
-                Button(tokens.chromeLabel(
-                    model.header?.entryDate.map { "date: \($0)" } ?? "set date…")) {
-                    pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
-                    datePickerShown = true
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                .popover(isPresented: $datePickerShown) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Entry date").font(.headline)
-                        DatePicker(
-                            "Entry date", selection: $pickedDate, displayedComponents: .date)
-                            .datePickerStyle(.graphical)
-                            .labelsHidden()
-                        HStack {
-                            Button("Clear Date") {
-                                datePickerShown = false
-                                Task { await model.updateEntryDate(nil) }
-                            }
-                            Spacer()
-                            Button("Set") {
-                                datePickerShown = false
-                                let day = JournalDay.dayString(from: pickedDate)
-                                Task { await model.updateEntryDate(day) }
-                            }
-                            .keyboardShortcut(.defaultAction)
-                        }
+                    HStack(spacing: 10) {
+                        gestureCluster
+                        Spacer()
+                        trailingCluster
                     }
-                    .padding(12)
                 }
-
-                StatusDot(tokens: tokens)
-
-                // The gesture button bar (9d — the fourth door): dimmed by
-                // the planner's verdict but ALWAYS clickable — a refused
-                // click speaks its refusal instead of going silent.
-                gestureButton("Divide", available: model.gestureAvailability.divide,
-                              action: model.divideAtCursor)
-                gestureButton("Extract", available: model.gestureAvailability.extract,
-                              action: model.extractSelection)
-                gestureButton("Make Block", available: model.gestureAvailability.makeBlock,
-                              action: model.makeBlockFromSelection)
-                gestureButton("Merge", available: model.gestureAvailability.merge,
-                              action: model.mergeBlocks)
-                gestureButton("Takes", available: model.gestureAvailability.takes,
-                              action: model.openCaretFan)
-
-                Spacer()
-                // 13b 1b (AD-14): the transient status line moved to the
-                // ONE shell toast (StatusCenter — R93's readability rides
-                // there: wrapping, selectable, auto-dismissing).
-                if let words = wordCountLabel {
-                    // R11: word-count PROMINENCE — the accent-colored,
-                    // always-there part of the editing surface.
-                    Text(tokens.chromeLabel(words))
-                        .font(tokens.small.weight(.semibold))
-                        .foregroundStyle(tokens.accent)
-                        .fixedSize()
-                        .help("Word counts: the block you're in · your selection · the whole post")
-                }
-                // Sitting 9 (R73/R91): hover = the cheat sheet; click =
-                // the full helper with the dictionary.
-                Button("?") { openWindow(id: "variorum-helper") }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(HelperCheatSheet.summary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
@@ -147,6 +74,109 @@ struct CommitBar: View {
                     .frame(maxHeight: 180)
             }
         }
+    }
+
+    /// Caret identity + the take acts (commit, history).
+    @ViewBuilder private var identityCluster: some View {
+        Text(tokens.chromeLabel(caretLabel))
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .lineLimit(1)
+        Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+            .disabled(model.caretVariantID == nil || model.header?.locked == true)
+            .help("An immutable savepoint of the take under the caret")
+        Button(tokens.chromeLabel(model.commitList == nil ? "history" : "hide history")) {
+            model.toggleCommitHistory()
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .disabled(model.caretVariantID == nil && model.commitList == nil)
+        .help("The caret take's savepoints — restore any of them")
+    }
+
+    /// The post lifecycle faces (Phase 10 Step 8): the seal toggle, tags,
+    /// comments, and Mac-side entry-date editing live with the open post.
+    @ViewBuilder private var postCluster: some View {
+        Button(tokens.chromeLabel(model.header?.locked == true ? "unseal" : "seal")) {
+            model.toggleSeal()
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .help("A sealed post is frozen — nothing under it changes until unsealed")
+        Button(tokens.chromeLabel("tags…")) { tagsShown = true }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens))
+            .help("The post's tags — apply or remove them right here")
+            .sheet(isPresented: $tagsShown) {
+                TagAssignmentSheet(
+                    session: model.session, postID: model.postID,
+                    postTitle: model.header?.title)
+            }
+        Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens))
+            .help("The caret block's comments — working notes on a block, never per-take")
+        Button(tokens.chromeLabel(
+            model.header?.entryDate.map { "date: \($0)" } ?? "set date…")) {
+            pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
+            datePickerShown = true
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .popover(isPresented: $datePickerShown) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Entry date").font(.headline)
+                DatePicker(
+                    "Entry date", selection: $pickedDate, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                HStack {
+                    Button("Clear Date") {
+                        datePickerShown = false
+                        Task { await model.updateEntryDate(nil) }
+                    }
+                    Spacer()
+                    Button("Set") {
+                        datePickerShown = false
+                        let day = JournalDay.dayString(from: pickedDate)
+                        Task { await model.updateEntryDate(day) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(12)
+        }
+    }
+
+    /// The gesture button bar (9d — the fourth door): dimmed by the
+    /// planner's verdict but ALWAYS clickable — a refused click speaks
+    /// its refusal instead of going silent.
+    @ViewBuilder private var gestureCluster: some View {
+        gestureButton("Divide", available: model.gestureAvailability.divide,
+                      action: model.divideAtCursor)
+        gestureButton("Extract", available: model.gestureAvailability.extract,
+                      action: model.extractSelection)
+        gestureButton("Make Block", available: model.gestureAvailability.makeBlock,
+                      action: model.makeBlockFromSelection)
+        gestureButton("Merge", available: model.gestureAvailability.merge,
+                      action: model.mergeBlocks)
+        gestureButton("Takes", available: model.gestureAvailability.takes,
+                      action: model.openCaretFan)
+    }
+
+    /// 13b 1b (AD-14): the transient status line moved to the ONE shell
+    /// toast (StatusCenter — R93's readability rides there).
+    @ViewBuilder private var trailingCluster: some View {
+        if let words = wordCountLabel {
+            // R11: word-count PROMINENCE — the accent-colored,
+            // always-there part of the editing surface.
+            Text(tokens.chromeLabel(words))
+                .font(tokens.small.weight(.semibold))
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
+                .help("Word counts: the block you're in · your selection · the whole post")
+        }
+        // Sitting 9 (R73/R91): hover = the cheat sheet; click =
+        // the full helper with the dictionary.
+        Button("?") { openWindow(id: "variorum-helper") }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .help(HelperCheatSheet.summary)
     }
 
     private func gestureButton(
