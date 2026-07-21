@@ -90,3 +90,79 @@ Undo (⌥⌘Z) restores the source blocks — takes, choices, and all.
 - Whether Takes should offer an explicit "merge with block above/below"
   pair instead of the upward default — revisit only if the upward
   reading trips her in practice (R116's friction rule).
+
+---
+
+# Addendum: the merge ceremony (authored 2026-07-21 by the 13b architect; BUILT AT STAGE 4 — the author discusses goals and tradeoffs at that stage's kickoff; merge's stored meaning is canonical, so the semantic changes here are HER ruling to make, not the architect's)
+
+*Why this exists: the author divided a two-take block and merged it
+back, and take 2 seemed to vanish (it was safe in lineage, but nothing
+pointed there). Her direction, quoted in the plan file: "there should be
+something like the W ceremony but for keeping the takes of your two
+blocks. Maybe instead of having scissors, there is a + that you move
+around?" Plus: the join should handle text with no sentence
+punctuation.*
+
+## When it appears
+
+- Both blocks have one take: **merge stays instant.** No ceremony, no
+  sheet — the everyday case is untouched.
+- Either block has several takes: **the merge ceremony opens** — the
+  W's mirror. Today's behavior (join the two visible takes, everything
+  else to lineage, spoken in a toast) becomes the sheet's DEFAULT
+  proposal instead of a silent rule.
+
+## What the sheet shows
+
+The two blocks' takes, side by side — left block's takes on the left,
+right block's on the right — with **＋ marks you place between them**:
+
+- **A ＋ between two takes PAIRS them:** the merged block gets a take
+  that is left-half + right-half joined. Pair take 1 with take 1 and
+  take 2 with take 2, and your divided block comes back whole — the
+  round trip she expected just works.
+- **An unpaired take can ride whole:** check "carry" and it lands on
+  the merged block as its own take, unjoined (for "this alternate
+  stands on its own" cases).
+- **Or stay behind:** an unchecked take stays with its released source
+  block in lineage — today's rule, now visible and chosen instead of
+  silent.
+- The default proposal pre-pairs the two CHOSEN takes (exactly what
+  merge does today), so confirming immediately = current behavior.
+- Takes are never multiplied combinatorially — you place pairings by
+  hand; nothing is cartesian-producted. (That standing rule survives;
+  pairing is choosing, not multiplying.)
+
+## The join, previewed
+
+The sheet PREVIEWS each paired take's joined text, with a three-way
+join control: **space · new line · nothing.** The default follows
+today's rule (a single space, unless either side already brings its own
+whitespace). Outline-ish text with no periods is exactly why the
+preview + newline option exist — you see the join before you commit it,
+so no cleverness has to guess your intent. Instant merges (the
+no-ceremony case) keep the canon rule unchanged.
+
+## The road behind you, named
+
+Whatever stays in lineage, the confirmation speech names the actual
+road: takes stay findable under **Library → Archived & Deleted →
+Unplaced blocks** (and ⌥⌘Z undoes the whole merge). The toast-copy
+half of this is cheap and canon-preserving, so it lands in Stage 3's
+geometry batch rather than waiting for the ceremony.
+
+## Tradeoffs to settle at the Stage 4 kickoff
+
+1. **The semantics extension is the real decision:** today a merge
+   mints ONE take; with pairing it can mint several (and carry some).
+   Lineage edges and undo cover it identically either way — but this
+   changes what "merge" means in the canon, which is yours to ratify.
+2. Should "carry" exist at all, or is pair-or-leave cleaner?
+3. Join memory: should the sheet remember your last join choice
+   (per-session), or always reset to the default?
+4. Does the ceremony threshold feel right (any fan on either side), or
+   should a fanned-but-chosen-only merge stay instant with the toast?
+5. The N-ary chain (selection across 3+ blocks with fans): recommended
+   to stay OUT of the ceremony (chain-merge the visible takes as
+   today) — a 3-way pairing surface is complexity nobody asked for.
+   Agree?

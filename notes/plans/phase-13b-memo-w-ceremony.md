@@ -105,3 +105,77 @@ Where Divide lives after Stage 1b:
 - A hint on the Takes board when a fanned block's divide is invoked —
   "each take gets its own cut" — belongs to the tutorial pass if the
   sheet's own title proves insufficient.
+
+---
+
+# Addendum: the cut, redesigned (authored 2026-07-21 by the 13b architect; BUILT AT STAGE 4 — the author discusses goals and tradeoffs at that stage's kickoff, so nothing here is final until that conversation)
+
+*Why this exists: the author's 2026-07-21 rulings — cuts should not be
+limited to sentence ends, the scissors should be draggable, and a cut at
+a take's very end should mean "this take doesn't split." Her words are
+quoted in the plan file's ledger (N16, N18) and Author-additions
+section.*
+
+## Where cuts can go (the new rule)
+
+A cut can go **between any two words** — and at newlines, which is what
+outline-style writing needs ("I rarely use periods within my outline").
+The scissors snap to the nearest word edge, so half a word can never end
+up in each block. Sentence ends and newlines are still the easiest spots
+to land on (the scissors settle onto them a little more readily), but
+they're no longer the only spots.
+
+One rule everywhere: plain divide (one take, no ceremony) follows the
+same rule. Two behaviors for one gesture would be the confusion class
+this phase exists to kill.
+
+## The ends mean something now
+
+- **Scissors at a take's very END:** that take doesn't split — all of it
+  rides into the first block, and it simply has no say in the second.
+  (Her example: a two-paragraph take splits; the one-paragraph take puts
+  its scissors at the end and contributes only a first half.)
+- **Scissors at a take's very START:** the mirror — all of it rides into
+  the second block.
+- A happy consequence: the old "this take is a single sentence, so it
+  can't be placed" dead end disappears. Every take always has a legal
+  placement now — split it somewhere, or park the scissors at either
+  end.
+- In plain no-ceremony divide, a cut at the block's start or end still
+  refuses ("nothing to divide") — there's no second take to give the
+  whole text to.
+
+## How placing feels
+
+- **Every checked take is visible at once**, each with its own ✂ sitting
+  in its text. No clicking into takes one at a time.
+- **Drag the ✂** and it glides between word edges. Click a spot to jump
+  it there (the current gesture survives).
+- **Keyboard:** ←/→ nudge the active take's scissors a word at a time;
+  ⌥←/→ jump by sentence; ⇥ moves between takes; ⏎ confirms when every
+  checked take is placed.
+- The app still proposes each cut where it can match your original spot
+  in that take's wording — you adjust from a good guess, not from zero.
+
+## What this dissolves
+
+- The N18 stumble (a selection late in the last sentence refusing to
+  extract) — word-edge snapping makes those spans legal.
+- The single-sentence-take dead end (above).
+
+## Tradeoffs to settle at the Stage 4 kickoff
+
+1. How strong should the sentence/newline "magnetism" be — a gentle
+   settle, or none at all (pure word edges)?
+2. Is the start-of-take mirror rule wanted, or is end-only enough?
+3. Word-edge snapping is the recommended floor (mid-word cuts serve
+   nobody). Agree?
+4. Does the relaxed rule extend to EXTRACT's boundary checks too?
+   (Recommended: yes — same one-rule-everywhere logic; extract's
+   "boundary-adjacent" requirement itself is untouched.)
+
+*Store semantics are untouched by all of this: divide and the W still
+write exactly the same rows — only where the cut offsets may fall, and
+how you place them, changes. The boundary rules live in one Domain
+function (`BoundarySnapping`), which is where the change goes — with its
+own tests, its own commit, and no schema work.*

@@ -2668,7 +2668,26 @@ scheduled at the first unblocked window.
    improve or record no-change-needed); **auto-page-to-the-mint** on
    long fans (sweep table (a)'s recorded residual).
 
-### Batch 3H — the ceremony interaction + the merge round-trip (added 2026-07-21 from the author's second hands-on session; memo-first per R116/R120)
+### Batch 3H — RESTRUCTURED 2026-07-21 (the author's direction: "we should have the plan sorted out now for what you said would be in 3H, while it can be part of stage 4")
+
+**The restructure:** the memo addenda are AUTHORED NOW by the architect
+— `phase-13b-memo-w-ceremony.md` "Addendum: the cut, redesigned" and
+`phase-13b-memo-merge.md` "Addendum: the merge ceremony" — and the
+BUILDS move to **Stage 4**, which opens author-attended: she starts a
+fresh implementer session and discusses goals/tradeoffs at its kickoff
+(the addenda are that conversation's basis; R120's self-execution is
+SUPERSEDED for these two designs by her stated attendance — the
+tradeoff lists in each addendum are the agenda). What old-3H leaves IN
+Stage 3: the canon-preserving lineage-road TOAST COPY (name the
+Library → Archived & Deleted → Unplaced blocks road in merge's speech)
+and N18's lesson-prose honesty → both ride 3F's copy notes; the snap
+semantics change itself is Stage 4's. Stage 3's remaining batches are
+therefore 3F → 3G → the ladder.
+
+*(The original 3H scoping, kept for the record below — its items now
+route per the restructure.)*
+
+### Batch 3H (original scoping, superseded — see the restructure above)
 
 The author's findings N16/N17 get root-cause treatment, her explicit
 process demand: "really consider the root cause of these issues and
@@ -2736,7 +2755,17 @@ carry her direction, not just options):**
    core-sanctioned under the same allowance.
 
 **### Stage 4 stub (recorded at her request — "I think I'm going to
-want a stage 4"; scoped AFTER this stage's batches + ladder):**
+want a stage 4"; scoped AFTER this stage's batches + ladder. PROCESS,
+her 2026-07-21 direction: Stage 4 opens AUTHOR-ATTENDED — she starts a
+fresh implementer session and discusses goals/tradeoffs at kickoff; the
+two memo addenda authored 2026-07-21 are the opening material):**
+- **The memo builds (moved here from 3H):** the cut redesign
+  (draggable ✂, word-edge cuts + newlines, end/start-of-take
+  semantics, all-takes-at-once placement — the W memo's addendum;
+  includes the `BoundarySnapping` core change, own commits) and the
+  MERGE CEREMONY (pairing ＋, carry/leave, join preview — the merge
+  memo's addendum; its semantics extension is HER ruling at the
+  kickoff).
 - The OUTLINE post's utility — "go into the utility of outline post…
   and make some changes there."
 - The CANVAS view mode — same directive.
