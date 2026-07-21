@@ -396,6 +396,10 @@ Commits per batch/stage with the standing message convention.
 | N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | new, Stage 2 walk → Stage 3 (small: selectedIndex + onKeyPress arrows + ⏎ runs selected) |
 | N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | new, Stage 2 walk — VERIFY-THEN-FIX at an unlocked drive (observed under the locked session, where first-responder semantics are abnormal) → Stage 3 |
 | N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment (`TutorialWalkTests.swift:1366–1370`) → 3D; the Mac-suite re-run over this seam owed at 82c9411 (first unblocked+permitted session) |
+| N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record). Suspects to TRACE, not assume: overlay add-path idempotence vs the R2-B push-at-wire double-delivery; a collapsed/stale anchor frame rendering at origin | new → Stage 3F (overlay class; trace-before-fix) |
+| N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | new → Stage 3F (T7 crowdedness; adaptive/2-row bar layout) |
+| N16 | W ceremony cut-placement (author, same session): (a) POSSIBLE BUG — "wasn't letting me move where the cut actually was past where it automatically had put the item" (trace the sheet's boundary offering/clamping); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask — visually drag the scissors. Root-cause treatment demanded by the author ("not whack a mole… it can be its own phase if it needs to be") | new → Batch 3H (memo-first per R116/R120: a W-memo interaction addendum, then the build) |
+| N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path (silent = a fire-and-speak bug, trace it), and (b) the symmetric round-trip expectation is now a live product question: a merge-memo addendum lays out options (status quo + louder speech; lineage-aligned zip of fans; something else) — the DECISION IS HERS at the checkpoint (merge semantics are canonical; changing canon is a standing hard stop) | new → 3H (memo addendum + the toast trace); decision → end checkpoint |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -2643,6 +2647,32 @@ scheduled at the first unblocked window.
    `exportCaretBlock`'s tail phrasing (check the shipped copy;
    improve or record no-change-needed); **auto-page-to-the-mint** on
    long fans (sweep table (a)'s recorded residual).
+
+### Batch 3H — the ceremony interaction + the merge round-trip (added 2026-07-21 from the author's second hands-on session; memo-first per R116/R120)
+
+The author's findings N16/N17 get root-cause treatment, her explicit
+process demand: "really consider the root cause of these issues and
+give thorough solutions… it can be its own phase if it needs to be."
+1. **The W-memo interaction addendum FIRST** (plain language, R120
+   self-executing): the sheet's cut-placement interaction designed
+   whole — why the current click-to-place clamps or appears to
+   (N16a's trace decides bug vs design), an all-takes-at-once
+   placement surface, the draggable scissors affordance, keyboard
+   placement, and what "no legal spot" looks like. Then the build,
+   pinned; the ceremony's store semantics (divideW) are UNTOUCHED.
+2. **The merge-memo round-trip addendum:** the divide-then-merge
+   symmetric case laid out with options and consequences (status quo +
+   unmissable speech · lineage-aligned fan zip · other). NO build
+   beyond a traced fire-and-speak fix if N17a shows the toast silent —
+   merge semantics are canon and the ruling is the author's at the end
+   checkpoint.
+3. **Also recorded here, no build:** her cut-granularity question
+   (cuts snap to sentence boundaries — canon: the block floor is a
+   sentence; she noted "i guess it does actually work so that's good")
+   goes on the checkpoint conversation list, not the backlog.
+
+Sequenced after 3F (its fixes ride the same overlay/geometry
+verification drives) and before 3G (looks-polish stays LAST per R111).
 
 ### Batch 3G — the looks-polish tail (R111; bounded)
 
