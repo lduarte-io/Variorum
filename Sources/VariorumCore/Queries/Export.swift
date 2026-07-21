@@ -153,29 +153,61 @@ extension Queries {
 
     /// A reading as ONE Markdown document: `# <name>`, then the assembled
     /// posts in reading order — each under a heading (title, else entry
-    /// date, else "Untitled"). When the reading groups by a tag root, a
-    /// section heading precedes each section's first post (posts drop one
-    /// heading level so the hierarchy reads). Bodies are the plain post
-    /// projection; the pieces join through the one join brain. A missing/
-    /// tombstoned reading exports empty (tolerant read).
+    /// date, else "Untitled"). When the book has live CHAPTERS (curated
+    /// only — Phase 13b 3B, N13) or groups by a tag root, a section
+    /// heading precedes each section's posts (posts drop one heading level
+    /// so the hierarchy reads). The chapter path renders EXACTLY the book
+    /// view's grouped presentation (`BookStructureModel.grouped`, mirrored
+    /// by the assembly): chapters in `(position, id)` order — EMPTY
+    /// chapters included, same-named chapters each under their own
+    /// heading — with unfiled entries trailing under the book view's own
+    /// "unfiled" label. Bodies are the plain post projection; the pieces
+    /// join through the one join brain. A missing/tombstoned reading
+    /// exports empty (tolerant read).
     public static func exportReading(_ db: Database, readingID: String) throws -> String {
         guard let reading = try reading(db, id: readingID) else { return "" }
         let entries = try assembleReading(db, readingID: readingID)
-        let grouped = entries.contains { $0.sectionPath != nil }
-        var pieces: [String] = ["# \(reading.name)"]
-        var lastSection: String?
-        var sectionEmitted = false
-        for entry in entries {
-            if grouped, !sectionEmitted || lastSection != entry.sectionPath {
-                sectionEmitted = true
-                lastSection = entry.sectionPath
-                pieces.append("## \(entry.sectionPath ?? "Ungrouped")")
+        let chapters = reading.kind == .curated
+            ? try readingSections(db, readingID: readingID) : []
+
+        // One grouped shape, two resolutions: chapter groups (by id — the
+        // assembly's `sectionID`), or the Phase 11b run clustering over
+        // the tag-grouping `sectionPath` (byte-identical output — runs of
+        // an equal path share one heading; nil paths head "Ungrouped").
+        var groups: [(heading: String?, entries: [ReadingEntry])] = []
+        let grouped: Bool
+        if chapters.isEmpty {
+            grouped = entries.contains { $0.sectionPath != nil }
+            for entry in entries {
+                if groups.isEmpty || groups[groups.count - 1].heading != entry.sectionPath {
+                    groups.append((entry.sectionPath, [entry]))
+                } else {
+                    groups[groups.count - 1].entries.append(entry)
+                }
             }
-            let title = displayTitle(entry.title, entryDate: entry.entryDate)
-            pieces.append(grouped ? "### \(title)" : "## \(title)")
-            let body = try exportPost(db, postID: entry.postID)
-            if !body.isEmpty {
-                pieces.append(body)
+        } else {
+            grouped = true
+            for chapter in chapters {
+                groups.append((chapter.name, entries.filter { $0.sectionID == chapter.id }))
+            }
+            let unfiled = entries.filter { $0.sectionID == nil }
+            if !unfiled.isEmpty {
+                groups.append(("unfiled", unfiled))
+            }
+        }
+
+        var pieces: [String] = ["# \(reading.name)"]
+        for group in groups {
+            if grouped {
+                pieces.append("## \(group.heading ?? "Ungrouped")")
+            }
+            for entry in group.entries {
+                let title = displayTitle(entry.title, entryDate: entry.entryDate)
+                pieces.append(grouped ? "### \(title)" : "## \(title)")
+                let body = try exportPost(db, postID: entry.postID)
+                if !body.isEmpty {
+                    pieces.append(body)
+                }
             }
         }
         return joinRenderedTexts(pieces)

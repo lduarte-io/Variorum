@@ -11,21 +11,38 @@ extension Queries {
         public let postID: String
         public let title: String?
         public let entryDate: String?
-        /// The section this post falls under when the reading groups by a
-        /// tag root: the path of the *immediate child* of the grouping tag
-        /// whose subtree contains a tag applied to the post (the lexically
-        /// smallest such path when several match — deterministic). `nil` ⇒
-        /// ungrouped: no grouping tag, a dangling/tombstoned grouping tag
-        /// (the AppSpec §7 read-time rule), or a post outside every section.
+        /// The section this post falls under. Two sources, one field
+        /// (Phase 13b, 3B — N13): on a CURATED reading with live chapters
+        /// this is the chapter's NAME (`reading_section.name` — chapters
+        /// win, mirroring the book view's `chaptersActive` precedence);
+        /// otherwise it is the tag-grouping section — the path of the
+        /// *immediate child* of the grouping tag whose subtree contains a
+        /// tag applied to the post (the lexically smallest such path when
+        /// several match — deterministic). `nil` ⇒ ungrouped/unfiled: no
+        /// grouping source, a dangling/tombstoned pointer (the AppSpec §7
+        /// read-time rule), or a post outside every section.
         public let sectionPath: String?
 
+        /// The CHAPTER id behind `sectionPath` when chapters govern
+        /// (Phase 13b, 3B — N13): the live `reading_section.id` the
+        /// membership's `section_id` resolved to. `nil` on the tag-grouping
+        /// path, on unfiled entries, and on dangling pointers. Carried so
+        /// consumers (export) can distinguish same-named chapters and merge
+        /// in EMPTY chapters — names have no uniqueness (AppSpec §7).
+        public let sectionID: String?
+
         /// Public so view layers and tests can build projections directly
-        /// (the RenderedBlock precedent).
-        public init(postID: String, title: String?, entryDate: String?, sectionPath: String?) {
+        /// (the RenderedBlock precedent). `sectionID` defaults nil so
+        /// pre-13b callers construct unchanged.
+        public init(
+            postID: String, title: String?, entryDate: String?,
+            sectionPath: String?, sectionID: String? = nil
+        ) {
             self.postID = postID
             self.title = title
             self.entryDate = entryDate
             self.sectionPath = sectionPath
+            self.sectionID = sectionID
         }
     }
 
@@ -95,7 +112,10 @@ extension Queries {
 
     /// Assembles a reading: curated memberships by `(position, id)` or the
     /// smart predicate, ordered by `sort_field`/`sort_dir`, capped by
-    /// `max_posts`, sectioned by the grouping tag. A missing or tombstoned
+    /// `max_posts`, sectioned by the book's live CHAPTERS where they exist
+    /// (curated only — Phase 13b 3B, N13; the book view's grouped order:
+    /// chapters by position, unfiled entries trailing) else by the
+    /// grouping tag. A missing or tombstoned
     /// reading assembles empty (tolerant read). Tombstoned posts are
     /// excluded; archived posts are excluded too (domain archive =
     /// kept-but-out-of-view, AppSpec §6 — PROVISIONAL, see phase closeout).
@@ -114,11 +134,37 @@ extension Queries {
               reading.deletedAt == nil
         else { return [] }
 
+        // N13 (Phase 13b, 3B): REAL CHAPTERS reach the assembly. A curated
+        // book with live `reading_section` rows resolves each membership's
+        // `section_id` instead of the tag grouping — the book view's
+        // shipped presentation semantics mirrored (BookStructureModel
+        // .grouped + chaptersActive, BookView/ReadingFlowView render from
+        // them): chapters govern in `(position, id)` order, entries keep
+        // the reading's own order within their chapter, unfiled entries
+        // TRAIL under no section, and a dangling/tombstoned pointer reads
+        // as unsectioned (the AppSpec §7 fallback class — nothing repairs
+        // or rewrites it). Chapters WIN over a grouping tag exactly where
+        // the book view's `chaptersActive` does (curated + any live
+        // section); a chapterless curated book — and every smart book
+        // (smart readings refuse sections) — assembles exactly as before.
+        let hasChapters: Bool
+        if reading.kind == .curated {
+            hasChapters = try Bool.fetchOne(
+                db,
+                sql: """
+                    SELECT EXISTS(SELECT 1 FROM reading_section
+                                  WHERE reading_id = ? AND deleted_at IS NULL)
+                    """,
+                arguments: [readingID]) ?? false
+        } else {
+            hasChapters = false
+        }
+
         // Grouping is active only while the tag is live: a dangling
         // `grouping_tag_id` reads as NULL/ungrouped (AppSpec §7; SET NULL
         // never fires under soft delete).
         var groupingRootID: String?
-        if let tagID = reading.groupingTagId {
+        if let tagID = reading.groupingTagId, !hasChapters {
             groupingRootID = try String.fetchOne(
                 db,
                 sql: "SELECT id FROM tag WHERE id = ? AND deleted_at IS NULL",
@@ -143,13 +189,42 @@ extension Queries {
 
         let sql: String
         switch reading.kind {
+        case .curated where hasChapters:
+            // The chapter path. The LEFT JOIN embodies the dangling rule
+            // (`sectionAssignments`' live-section join, inlined): a dead or
+            // missing section — or, defensively, a foreign reading's
+            // section, unreachable through Operations — resolves NULL and
+            // the entry files as unfiled. `(s.id IS NULL)` trails the
+            // unfiled entries (the book view's stragglers-trail call);
+            // within a chapter the reading's own order rule holds.
+            let order = reading.sortField == .manual
+                ? "rp.position, rp.id"
+                : stampOrder(reading.sortField, reading.sortDir)
+            sql = """
+                SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
+                       s.name AS section_path, s.id AS section_id
+                FROM reading_post rp
+                JOIN container c
+                  ON c.id = rp.post_id
+                 AND c.deleted_at IS NULL
+                 AND c.archived_at IS NULL
+                 AND c.kind = 'post'
+                LEFT JOIN reading_section s
+                  ON s.id = rp.section_id
+                 AND s.reading_id = rp.reading_id
+                 AND s.deleted_at IS NULL
+                WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
+                ORDER BY (s.id IS NULL), s.position, s.id, \(order)
+                """
+            arguments.append(readingID)
+
         case .curated:
             let order = reading.sortField == .manual
                 ? "rp.position, rp.id"
                 : stampOrder(reading.sortField, reading.sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
-                       \(sectionSelect) AS section_path
+                       \(sectionSelect) AS section_path, NULL AS section_id
                 FROM reading_post rp
                 JOIN container c
                   ON c.id = rp.post_id
@@ -177,7 +252,7 @@ extension Queries {
                 : stampOrder(reading.sortField, reading.sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
-                       \(sectionSelect) AS section_path
+                       \(sectionSelect) AS section_path, NULL AS section_id
                 FROM container c
                 WHERE \(conditions.joined(separator: " AND "))
                 ORDER BY \(order)
@@ -202,7 +277,8 @@ extension Queries {
                     postID: row["post_id"],
                     title: row["title"],
                     entryDate: row["entry_date"],
-                    sectionPath: row["section_path"])
+                    sectionPath: row["section_path"],
+                    sectionID: row["section_id"])
             }
     }
 
