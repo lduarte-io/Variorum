@@ -1,7 +1,10 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — **Stage 2 CLOSED (ladder closed at round 2; both
-fix passes complete; stage-level closeout below — Stage 3 is NEXT)**:
+**Status:** ACTIVE — **Stage 3 OPEN (execution brief at the end of this
+file, authored just-in-time 2026-07-20 by the successor architect session
+at the handoff cutover per `phase-13b-orchestrator-handoff.md`; batches
+running under R121)**. Stage 2 CLOSED (ladder closed at round 2; both
+fix passes complete; stage-level closeout below):
 "the field guide" (6 chapters · 21 act-ready lessons) + the hardened
 Restore/Open doors (one discovery, confirm-gates-what-dies, the session
 latch, the quiet undo-free seeder) + the starved-overlay class ended on
@@ -2421,3 +2424,277 @@ the takes board; the Lenses ⌥⌘T mint-then-refused-pick).
 - The dev store's walk residue remains one Restore away from pristine;
   the R2-D speculative record (sync landing mid-confirm-modal) stays on
   file for the eventual multi-device era.
+
+## Stage 3 execution brief (self-contained — authored just-in-time 2026-07-20 by the successor architect session at the Stage 2/3 handoff cutover; per batch, read: this brief + the constitution + the Stage 1/2 stage-level closeouts + the running ledger + the named batch inputs; nothing else assumed)
+
+**Goal:** burn down the ratified backlog's Stage 3 themes and complete
+the coverage the locked-session walks couldn't reach. At close: no
+unowned open ledger rows, the tutorial green (P-6), every batch
+screenshot-verified against the app itself, the ladder closed — then the
+ONE R121 end checkpoint assembles.
+
+### Environment state at authoring (verified 2026-07-20 18:16; binding until observed otherwise)
+
+A LIVE REAL-STORE instance is running: **pid 20720, path
+`~/Library/Developer/Xcode/DerivedData/Variorum-*/Build/Products/Release/
+Variorum.app`, launched 16:40:47 — AFTER the founding session's 15:33
+handoff commit.** Nothing in the record launched it, so it is treated as
+THE AUTHOR'S OWN session (Launch Services can resolve "Variorum" to the
+DerivedData Release copy; it holds the real store open —
+`Application Support/Variorum/variorum.sqlite`, lsof-verified — and its
+bytes are the same final Stage 2 build `/Applications` carries; the
+15:32 refresh copied FROM this product). Also resolved on the record:
+the Stage 2 backup name `175038` is UTC (≈11:50 MDT — pre-ladder,
+consistent with the closeout's ordering; no anomaly).
+
+**Rules while ANY real-store instance lives (whether `/Applications` or
+DerivedData Release):**
+- NEVER quit or kill it — it is the author's live session; the standing
+  "/Applications instance" prohibition covers it by store, not by path.
+- NO Mac `xcodebuild test` runs (a live instance fails the runner —
+  Runningboard error 5; the standing trap).
+- **NO Release builds** (NEW trap, this brief): `xcodebuild
+  -configuration Release build` writes into the very bundle the live
+  instance is executing from — mutating a running app's signed bundle on
+  disk is a crash/kill class. No `/Applications` refresh either (it
+  builds Release first). Skip and RECORD; the next unblocked batch
+  refreshes.
+- `swift test` (core) and Debug builds are unaffected.
+- Check `pgrep -fl Variorum` before EVERY build/test step, every batch.
+  A Debug dev-store instance from our own drives stays quittable per the
+  standing rule (path- and pid-verified first).
+
+**Batch order rule:** 3A (the drive) is Stage 3's first item BY
+PRIORITY, but it requires an unlocked, author-free session with zero
+real-store instances. Until the environment allows it, 3B (blocked by
+nothing — core-side by construction) runs first. The orchestrator
+sequences 3C → 3D → 3E → 3F/3G around the drive, inserting it at the
+first opening; drive findings route per the Stage 2 triage rule
+(happy-path breaker → fix in-batch with a pin; known ledger row →
+verify + design around honestly; new defect → new ledger row).
+
+### Batch 3A — the unlocked verification drive (a drive session; fixes only for happy-path breakers, each red-on-old)
+
+**Preconditions:** zero Variorum instances (pgrep); an unlocked session
+verified EMPIRICALLY (deliver a synthetic event and confirm its effect —
+the locked-session signature is events swallowed / clicks undelivered);
+own `caffeinate -d`; Debug dev-store build, pid/path/store verified; the
+axdrive pattern from the Stage 0(c)/Stage 2 walks (CGEventPostToPid +
+menu-path AXPress + window-scoped `screencapture -l`), rebuilt from the
+recorded pattern.
+
+**Contents (the Stage 2 closeout's inherit list, verbatim-faithful):**
+1. The ceremony SHEET on-screen end to end: fan a block, divide from
+   Takes (the choreography), the sheet's checklist / per-take cut
+   placement / uncheck / Confirm / Cancel — the store half is pinned;
+   this is the surface half (and the author's R116 parenthetical made
+   the sheet's real-world visibility a first-class question).
+2. Precise selections: extract + make-block at the staged spans in the
+   field guide's lessons.
+3. Typing/crystallization's surface half: type past a paragraph → the
+   mint; the idle-mint; the N9 landing typed live (re-verify unlocked).
+4. Archive recovery through Write's takes panel (the current honest
+   road — pre-3D truth).
+5. All drags: scrap → draft (plain and ⌥ fan-carry), canvas cards,
+   chapter reorder in the book navigator.
+6. Save-panel exports (post/book/block through the real NSSavePanel;
+   TCC prompts get RECORDED, never worked around).
+7. The Restore confirm's Replace press — on the DEV store, whose walk
+   residue makes the confirm + wholesale replace a real exercise.
+8. Palette ↓-stepping (expected missing — N11's live evidence).
+9. **N12 VERIFY:** bare ⌘1 into Write, then type — is the caret claimed
+   in a normal session? Verdict updates the ledger row (fix lands in
+   3E, or falls out if the lock was the whole story).
+10. **The two blank utility windows at launch:** establish identity
+    (AX + `CGWindowListCopyWindowInfo` — owner, class, layer) or record
+    precisely what resists identification.
+11. The NIT-4 raw-ops acts driven through the REAL doors:
+    makeBlock/choose/ceremony/extract/merge as the user would reach
+    them.
+
+**Output:** a "Batch 3A drive log" section in this file (per-item
+verdict + screenshot refs; screenshots to a gitignored
+`phase-13b-stage3-screens/` dir), ledger updates, pins for anything
+fixed. No build work beyond breaker fixes.
+
+### Batch 3B — the core seam (fresh implementer; the stage's ONE sanctioned core-touch batch)
+
+`Sources/VariorumCore` changes are allowed in THIS batch only —
+sanctioned by the ratified Stage 0 verdict ("Core Operations: ADD two
+small ops/faces") and the N13 routing. Own commits per the schema/model
+convention (no schema changes exist here — additive query/op work only,
+so NO §12 lockstep event); `Sync/` untouched a fortiori; the mobile
+target must still build.
+
+1. **N13 — chapters reach export.** `assembleReading` gains
+   `reading_section` resolution for CURATED books: each membership's
+   `section_id` resolves to its live section; dangling/tombstoned ⇒
+   unsectioned (the ratified read-time rule, AppSpec §7); smart books
+   keep grouping-tag sectioning UNCHANGED (byte-identical assembly,
+   pinned). **Mirror the shipped book-view presentation semantics —
+   ordering by section `position`, where unsectioned posts land, empty
+   sections — so the export matches what the book view shows; read the
+   BookView/navigator's rules from code first and cite them in the
+   closeout; do not invent a second sectioning truth.** `exportReading`
+   renders the resolved chapters through its EXISTING sectioned-output
+   shape (the smart-book sectionPath path) — a chaptered curated book
+   exports with chapter headings. Tests: curated assembly (ordering,
+   dangling ⇒ unsectioned, empty sections, smart-book byte-parity) +
+   export (headings present; every existing export pin green). The
+   tutorial's export lesson honesty note updates ONLY if its promise
+   text changes — the walk test owns the assertion either way.
+2. **T5's core op — `setTakeLabel(variant, label)`.** The Stage 0
+   verdict's missing setter (column + renderers exist). Follow the
+   `setBlockName` precedent: identity-level metadata — no-op guard, no
+   touch/churn, `updated_at` stamped, nil/empty clears to NULL, refuses
+   under a sealed post (the seal refuses everything under the post —
+   Phase 2's ratified scope), allowed on a LOCKED take (lock freezes
+   the BUFFER, not metadata — record as a PROVISIONAL judgment call for
+   the walk). Metadata-CAS under sync, no uniqueness, no repair class.
+   Exact state-transition tests per the operations conventions.
+3. **Confirm-and-record:** `renameLens` exists in core (11a) — the 3D
+   face needs no core change; state where it lives.
+
+**Verification:** full `swift test` green; core count grows from
+747/90. The Mac suite CANNOT run while the live real-store instance
+holds — RECORD the exact commit at which the Mac re-run is owed; the
+first unblocked moment runs the full Mac suite BEFORE any further
+Mac-side work builds on this seam.
+
+### Batch 3C — N10, the one-seam move (fresh implementer; the stage's riskiest batch — behavior parity absolute)
+
+1. EditorViewModel's gesture-execution band (`applyStructural`, the
+   compounds, the W state machine, `runStructural`) and the projection
+   executors (`renderFull`/`applyDifferential`) move TOGETHER into an
+   editor-feature controller — a sibling under `Features/Editor/`,
+   NEVER the shared Registry layer (storage-coupled code stays
+   feature-side; both 1a/1b closeouts recorded this seam). EVM keeps:
+   composition, crystallization (verbatim), decoration/badge geometry,
+   and the `viewText`/`programmaticReplace`/`setBlockAttribute` surface
+   plumbing (the storage owner keeps its plumbing — the 1a call).
+2. The TakesViewModel P-9 decomposition (~1,240 lines): split by
+   concern (board layout/paging · choreography/landings · the rest);
+   the implementer proposes the seams FROM the code and records them.
+3. **Parity is the contract:** every existing pin stays green
+   UNMODIFIED (they are the parity proof; a pin edit is a red flag the
+   closeout must justify line by line); the board soak re-runs; zero
+   user-visible changes; no features smuggled inside the refactor.
+
+Blocked while the live instance holds (needs the Mac runner) —
+scheduled at the first unblocked window.
+
+### Batch 3D — T5 takes lifecycle faces (may share a session with 3E)
+
+1. **Archived takes become visible + recoverable in-mode** (N1's
+   vanish trap dies): a door on the Takes surface reveals archived
+   takes (design within the v2 card grammar; the fans query stays
+   active-only — the archived listing is its own read), with unarchive
+   as the act; ⌘⇧A speaks where the take went. R118: the road back
+   lives in Takes, not just Write's panel. AD-4's archived-road-back
+   half closes with it.
+2. **Take-label face** (3B's op gets its door): card context menu +
+   bar block-menu; labels already render on cards.
+3. **Lens-rename face** (op exists): the Lenses column-header menu.
+4. Registry: the new acts declared (unarchive/label/lens-rename) with
+   doors, availability, honest notes; the walk grows; every new door
+   fire-and-DOes.
+5. **The tutorial keeps pace (P-6):** the "keeping takes safe" lesson's
+   honest routing note dies — the lesson teaches the real road back;
+   seeder + walk tests updated. (The REAL store's seeded book goes
+   stale with every lesson edit — the end checkpoint re-seeds behind
+   the A1 rail; recorded there.)
+
+### Batch 3E — T6 book view + N11 (+ N12 if verified)
+
+1. **D1:** collapsing the focused post releases/moves focus (the traced
+   `BookView.swift:545` force-expand disjunct; red-on-old pin);
+   collapse-all correctness; `BookFocusState` folds into the one focus
+   model (the Stage 0 verdict).
+2. **N11:** palette keyboard row-stepping — `selectedIndex` + ↓/↑ +
+   ⏎ runs the SELECTED row; the › marker moves; red-on-old pin
+   (⏎-always-first is the old truth).
+3. **N12** (if 3A verified it real): the bare mode switch into Write
+   claims the caret — the N9 landing pattern applied to Write's
+   arrival; pinned. If 3A found the lock was the whole story, the row
+   closes as environment-artifact with the drive log as evidence.
+
+### Batch 3F — T7 geometry/spacing + copy notes (may share a session with 3G)
+
+1. **D2 — TRACE FIRST** (the hallucination guard; two recorded
+   candidates: `TakesBoardView.swift:315–319` +
+   `PostDetailView.swift:70–75` reading one UserDefaults key two ways;
+   `fanToggleRow` rendering above every block incl. unfanned). Fix the
+   traced mechanism; pin where pinnable; screenshot-verify the margin
+   grid no longer shifts the article.
+2. **N8/AD-8:** margin comments clip UNDER the sidebar at default
+   width — geometry fix within R7's margin-default language (clamp,
+   flip, or reflow; the implementer designs and records).
+3. **AD-7:** margin-grid wash slabs (~2/3-empty cells) — the ballooning
+   mechanism traced and fixed.
+4. **The crowdedness pass** (R112's named half; bounded): the worst
+   instances from the Stage 0(c) inventory + the 3A drive, addressed
+   with restraint; before/after screenshots.
+5. **Memo polish halves:** the Write seam-hover affordance (merge
+   memo — build if it earns its place in this pass, else record
+   against its memo); the ceremony cut-placement polish (only if
+   cheap). NOT owed: the merge above/below pair and the divide hint —
+   their memo revisit-conditions stand untripped.
+6. **Copy notes:** the declined-residue-confirm copy (round-2 note b);
+   `exportCaretBlock`'s tail phrasing (check the shipped copy;
+   improve or record no-change-needed); **auto-page-to-the-mint** on
+   long fans (sweep table (a)'s recorded residual).
+
+### Batch 3G — the looks-polish tail (R111; bounded)
+
+Judged against screenshots of the APP ITSELF, not the mockups; the
+worst self-evident looks defects from the accumulated screenshot
+corpus, with restraint (the author mostly likes the app's looks now).
+L1 (the mockup gap-list) stays LOW: produce it only if trivially cheap
+at the end; else it remains a recorded non-deliverable for the
+checkpoint.
+
+### The per-batch loop (binding, every batch)
+
+build → soak + pins (the board soak AND `TutorialWalkTests` re-run per
+batch — suite-level, free; a broken tutorial step is a regression by
+definition) → screenshot-verify where the environment allows (else
+record + fold into the next drive) → point-by-point ledger update →
+commit(s) with the standing trailer → `/Applications` refresh when
+unblocked (skip + record otherwise).
+
+### The Stage 3 ladder
+
+ONE ladder over the combined Stage 3 diff after the last batch: fresh
+cold reviewer, `notes/REVIEW_PROMPT.md` verbatim, this brief + the
+batch records + the stage closeout as anchor. Standing foci to include
+at closeout time: the 3B core seam (the phase's first core touch —
+review it as core: invariants, byte-parity of untouched paths, the op
+conventions), 3C's parity claim (pins unmodified?), the drive's
+in-batch fixes. Round 2 re-reviews; new HIGH ⇒ round 3; cap 3;
+class-completeness sweep if any fixed class recurs adjacent. Fix
+passes: fresh session when the prior nears ~500k; repo-first verbatim
+findings BEFORE any fix session sees them.
+
+### Baselines + constraints
+
+**Mac 542/106 · core 747/90 · mobile 11/4** at Stage 3 open. Core
+changes ONLY in 3B. P1–P3; TK2 discipline (TEXTKIT2_NOTES §4); the
+VoiceControls vocabulary; overlays never rendering attributes;
+chrome `fixedSize` ⇒ `lineLimit`; seal semantics unchanged; no new
+dependencies; the standing author-only hard stops. Process: the
+R119/R120/R121 posture (choose, record, continue — judgment calls to
+the batch records for the checkpoint walk); environment traps: ALL of
+the Stage 1a/1b/2 briefs' verbatim, PLUS this brief's live-instance
+rules, PLUS zsh `pipestatus` (lowercase) not `PIPESTATUS`.
+
+### The end checkpoint prep (owed by the orchestrator after the ladder)
+
+Per the handoff: bundle every recorded judgment call/PROVISIONAL from
+all stages; the two memos; the TUTORIAL WALK in the real store — which
+requires a REAL-STORE RE-SEED first (lesson content changes in 3D/3F
+make her seeded book stale): full A1 rail — backup → zero instances →
+fence verified → the refreshed `/Applications` build's own Restore
+door; log exactly what was written. Then the fresh screenshot tour and
+the standing asks A1–A3 + the flagged items (the R24 paged-strip
+wording, merge-joins-upward, the N9 landing-focus change, the
+unexplained clean exit, the blank utility windows verdict).
