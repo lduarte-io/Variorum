@@ -77,6 +77,20 @@ struct BlocksAreaView: View {
             Text(tokens.chromeLabel("· \(model.items.count) blocks · standalone scraps"))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
+            // 13b Stage 3 (3D — N19): several pools are all REACHABLE now —
+            // the area used to show only the oldest, so any later pool
+            // ("tutorial scraps") rendered nowhere.
+            if model.pools.count > 1 {
+                VoicedMenu(
+                    tokens: tokens,
+                    label: "pool: \(PoolNaming.title(model.activePool))"
+                ) {
+                    ForEach(model.pools, id: \.id) { pool in
+                        Button(PoolNaming.title(pool)) { model.select(poolID: pool.id) }
+                    }
+                }
+                .help("Which scraps container this area shows — every pool is here")
+            }
             Spacer()
             if let pool = model.activePool {
                 Button(tokens.chromeLabel("open as editor")) { openPool(pool.id) }

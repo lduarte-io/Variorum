@@ -32,9 +32,26 @@ final class PoolViewModel {
     @ObservationIgnored private var itemsTask: Task<Void, Never>?
     @ObservationIgnored private var observedPoolID: String?
 
-    /// THE pool (CoreDescription's singular; the schema allows several —
-    /// the section shows the oldest, the fuller pool is Phase 11's).
-    var activePool: Container? { pools.first }
+    /// The pool the surfaces show (13b Stage 3, 3D — N19): `pools.first`
+    /// alone made every pool but the OLDEST unreachable in the Blocks
+    /// area ("tutorial scraps" rendered nowhere on any store with an
+    /// older pool). A picker now selects among them; the oldest stays the
+    /// default (the pre-13b truth), and a dead selection falls back.
+    private(set) var selectedPoolID: String?
+
+    var activePool: Container? {
+        pools.first { $0.id == selectedPoolID } ?? pools.first
+    }
+
+    /// The picker's door: select a pool and re-observe its items.
+    func select(poolID: String) {
+        guard selectedPoolID != poolID else { return }
+        selectedPoolID = poolID
+        let active = activePool?.id
+        if active != observedPoolID {
+            restartItems(active)
+        }
+    }
 
     init(session: AppSession) {
         self.session = session
@@ -44,7 +61,9 @@ final class PoolViewModel {
         do {
             for try await value in session.database.observePools() {
                 pools = value
-                let active = value.first?.id
+                // Honors the selection (N19); a selected pool that died
+                // falls back to the oldest via `activePool`.
+                let active = activePool?.id
                 if active != observedPoolID {
                     restartItems(active)
                 }

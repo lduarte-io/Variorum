@@ -44,9 +44,11 @@ struct PostDetailView: View {
     /// A TOC jump's landing: the Write editor re-seeds at this caret (the
     /// hybrid primitive fires in the editor — TK2 §3: no folding here).
     @State private var pendingCaret: Int?
-    /// Phase 11b (B3): the reference panel — per-post sources beside the
-    /// draft (§7/§12; a viewing aid, session UI state).
-    @State private var referencesShown = false
+    /// The inspector's occupant (session UI state): the reference panel
+    /// (Phase 11b B3 — per-post sources beside the draft) or — 13b Stage 3,
+    /// 3D (N19) — the SCRAPS panel, the drag-into-draft geometry.
+    enum InspectorPanel { case references, scraps }
+    @State private var inspectorPanel: InspectorPanel?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -81,8 +83,15 @@ struct PostDetailView: View {
                     MembershipChip(session: session, postID: postID)
                 }
                 Spacer()
+                Button("Scraps", systemImage: "square.on.square.dashed") {
+                    inspectorPanel = inspectorPanel == .scraps ? nil : .scraps
+                }
+                .labelStyle(.iconOnly)
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help("Show the scraps beside the draft — drag one into the page "
+                    + "(⌥ carries its whole fan)")
                 Button("References", systemImage: "books.vertical") {
-                    referencesShown.toggle()
+                    inspectorPanel = inspectorPanel == .references ? nil : .references
                 }
                 .labelStyle(.iconOnly)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
@@ -126,9 +135,20 @@ struct PostDetailView: View {
                     .id("canvas-\(postID)")
             }
         }
-        .inspector(isPresented: $referencesShown) {
-            ReferencePanel(session: session, postID: postID)
-                .inspectorColumnWidth(min: 240, ideal: 340)
+        .inspector(isPresented: Binding(
+            get: { inspectorPanel != nil },
+            set: { if !$0 { inspectorPanel = nil } })
+        ) {
+            switch inspectorPanel {
+            case .references:
+                ReferencePanel(session: session, postID: postID)
+                    .inspectorColumnWidth(min: 240, ideal: 340)
+            case .scraps:
+                ScrapsPanel(session: session)
+                    .inspectorColumnWidth(min: 220, ideal: 300)
+            case nil:
+                EmptyView()
+            }
         }
         // 13b 1b (P-4): the mode shell registers with the CommandRouter —
         // mode truth stays this view's @State; requests reach it by

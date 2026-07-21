@@ -154,3 +154,76 @@ struct PoolDragTests {
                 "the payload is the ID; the text copy is the operation's (review focus 6)")
     }
 }
+
+// MARK: - 13b Stage 3, Batch 3D (N19): every pool is reachable
+
+/// The N19 listing half: `activePool = pools.first` made every pool but
+/// the OLDEST unreachable — "tutorial scraps" rendered nowhere on any
+/// store with an older pool. The picker's selection drives the listing;
+/// the oldest stays the default; a dead selection falls back.
+/// (Red-on-old verified by behavioral revert: `activePool` ignoring
+/// `selectedPoolID` turns the selection half red.)
+@MainActor
+@Suite("Pool selection (13b 3D — N19)")
+struct PoolSelectionTests {
+    @Test func everyPoolIsReachableAndSelectionDrivesTheListing() async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let (older, newer, olderBlock, newerBlock) = try await session.runner.run { ops in
+                let older = try ops.createPool(title: "scraps")
+                let olderBlock = try ops.newBlock(in: older.id, text: "the old scrap")
+                let newer = try ops.createPool(title: "tutorial scraps")
+                let newerBlock = try ops.newBlock(in: newer.id, text: "the tutorial scrap")
+                return (older.id, newer.id, olderBlock.block.id, newerBlock.block.id)
+            }
+
+            let model = PoolViewModel(session: session)
+            let observation = Task { await model.start() }
+            defer { observation.cancel() }
+
+            @MainActor func poll(_ predicate: @MainActor () -> Bool) async {
+                for _ in 0..<2000 {
+                    if predicate() { return }
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(1))
+                }
+            }
+
+            await poll { model.pools.count == 2 && !model.items.isEmpty }
+            #expect(model.pools.map(\.id) == [older, newer], "oldest first — the listing order")
+            #expect(model.activePool?.id == older,
+                    "the oldest stays the DEFAULT (the pre-13b truth)")
+            #expect(model.items.map(\.block.blockID) == [olderBlock])
+
+            // The picker's door: the newer pool's scraps become reachable.
+            model.select(poolID: newer)
+            await poll { model.items.map(\.block.blockID) == [newerBlock] }
+            #expect(model.activePool?.id == newer, "selection wins")
+            #expect(model.items.map(\.block.blockID) == [newerBlock],
+                    "the listing follows the selection — N19's unreachable pool is reachable")
+
+            // A dead selection falls back to the oldest.
+            try await session.runner.run { ops in
+                try ops.deleteContainer(newer)
+            }
+            await poll { model.pools.count == 1 }
+            #expect(model.activePool?.id == older, "a dead selection falls back")
+            await poll { model.items.map(\.block.blockID) == [olderBlock] }
+            #expect(model.items.map(\.block.blockID) == [olderBlock])
+        }
+    }
+}
