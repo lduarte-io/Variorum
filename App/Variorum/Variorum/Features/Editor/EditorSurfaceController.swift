@@ -328,10 +328,16 @@ final class EditorSurfaceController {
 
     private func speakAboutMergedFans(_ otherTakes: Int) {
         guard otherTakes > 0 else { return }
+        // 13b 3F (old-3H's canon-preserving half, N17c): the toast NAMES
+        // the lineage road — the 3A drive proved the road exists but
+        // nothing pointed at it ("in lineage" named no place). Copy only;
+        // merge's semantics are canon.
         model.showTransientStatus(
             otherTakes == 1
-                ? "Merged the visible takes — 1 other take stays with the released block in lineage (undo brings it back here)."
-                : "Merged the visible takes — \(otherTakes) other takes stay with the released blocks in lineage (undo brings them back here).")
+                ? "Merged the visible takes — 1 other take stays with the released block "
+                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes)."
+                : "Merged the visible takes — \(otherTakes) other takes stay with the released blocks "
+                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes).")
     }
 
     /// What a structural operation reports back to the rewrite path: where

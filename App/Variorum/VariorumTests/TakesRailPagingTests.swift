@@ -157,4 +157,60 @@ struct TakesRailPagingTests {
                     "every active take is a card on SOME page — none is unreachable (saw \(seen.count) of \(fanIDs.count))")
         }
     }
+
+    /// 13b Stage 3F pin (the Stage 2 sweep table (a)'s recorded residual;
+    /// red-on-old, behavioral-revert verified): a mint at the end of a
+    /// LONG open fan landed BEHIND the pager — the fan was open, the
+    /// counter ticked, the ◀ x–y of n ▶ door advertised it, but the
+    /// revealed card sat on a later page. `revealTake` now pages to the
+    /// card (parking until the mint's projection arrives — the real mint
+    /// sequence, exercised here).
+    @Test func aRevealedMintOnALongFanPagesTheRailToItsCard() async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 9))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let longText = String(repeating: "prose that outgrows the strip rule. ", count: 8)
+            let post = try session.operations.createPost(title: "the long fan")
+            let minted = try session.operations.newBlock(in: post.id, text: longText)
+            // A CHAIN of branches (each from the previous) lands each mint
+            // after its source: fan order 1…5, deterministic.
+            var lastID = minted.variant.id
+            for _ in 2...5 {
+                lastID = try session.operations.branchVariant(minted.block.id, from: lastID).id
+            }
+            try session.operations.setFanStyle(.marginGrid)
+
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.gridRows = 2
+            model.gridCols = 1
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            defer { model.teardown() }
+
+            // The real mint sequence: the op lands, the reveal runs BEFORE
+            // the projection catches up (the observation lags), the fresh
+            // projection then arrives.
+            let sixth = try session.operations.branchVariant(minted.block.id, from: lastID)
+            model.revealTake(blockID: minted.block.id, variantID: sixth.id)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+
+            // 6 takes at 2-high, 1-wide ⇒ 3 columns, last legal offset 2;
+            // the mint is in column 2 — the pager must show it.
+            let key = TakesViewModel.railPageKey(minted.block.id)
+            #expect(model.pageOffset(key, limit: 2) == 2,
+                    "the rail pages to the revealed mint's column — never a mint behind the door")
+        }
+    }
 }

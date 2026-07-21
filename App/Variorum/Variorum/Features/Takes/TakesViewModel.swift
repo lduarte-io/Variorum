@@ -262,6 +262,12 @@ final class TakesViewModel {
         // blooms, the N9 "just start typing" ring) resolve against the
         // fresh slots.
         consumeLandings(new)
+        // 13b 3F: a revealed mint that lagged its projection pages its fan
+        // now (re-parks itself while the take is still in flight).
+        if let pending = pendingRevealPage {
+            pendingRevealPage = nil
+            pageToReveal(blockID: pending.blockID, variantID: pending.variantID)
+        }
     }
 
     func teardown() {
@@ -1200,10 +1206,52 @@ final class TakesViewModel {
     /// take, so typing continues there instantly.
     func revealTake(blockID: String, variantID: String, preferredColumnID: String? = nil) {
         board.bloom(blockID)
+        // 13b 3F (sweep table (a)'s recorded residual): on a LONG open fan
+        // the revealed card could sit on a later ◀ ▶ page — page to it.
+        pageToReveal(blockID: blockID, variantID: variantID)
         let columnID = preferredColumnID
             ?? focusedPane.flatMap { $0.blockID == blockID ? $0.columnID : nil }
             ?? landingColumnID
         focus(PaneKey(columnID: columnID, blockID: blockID, variantID: variantID))
+    }
+
+    // MARK: - Auto-page to the reveal (13b 3F)
+
+    /// A revealed take not yet in the projection (the mint's observation
+    /// lags the op): resolved at the next `adopt`.
+    @ObservationIgnored private var pendingRevealPage: (blockID: String, variantID: String)?
+
+    /// Pages the set style's pager so `variantID`'s card is on the visible
+    /// page — the fan was open and the counter ticked, but a mint at the
+    /// end of a long fan landed BEHIND the ◀ x–y of n ▶ door. One paging
+    /// brain with the board (`pageOffset`/`stepPage` read the same state).
+    func pageToReveal(blockID: String, variantID: String) {
+        guard let fan = projection.fans[blockID],
+              let index = fan.firstIndex(where: { $0.id == variantID }) else {
+            pendingRevealPage = (blockID, variantID)
+            return
+        }
+        switch projection.fanStyle {
+        case .carousel, .slotSplit:
+            let limit = max(fan.count - beneathCount, 0)
+            let current = pageOffset(blockID, limit: limit)
+            if index < current || index >= current + beneathCount {
+                board.setPage(blockID, to: min(index, limit), limit: limit)
+            }
+        case .marginGrid:
+            let rows = max(railRowsPerColumn(
+                slotText: projection.slots.first { $0.blockID == blockID }?.text), 1)
+            let column = index / rows
+            let columns = (fan.count + rows - 1) / rows
+            let limit = max(columns - gridCols, 0)
+            let key = Self.railPageKey(blockID)
+            let current = pageOffset(key, limit: limit)
+            if column < current || column >= current + gridCols {
+                board.setPage(key, to: min(column, limit), limit: limit)
+            }
+        case .stack:
+            break  // the stack renders every card; nothing pages
+        }
     }
 
     /// Column resolution for an UN-chosen mint on the TAKES host (R2-A

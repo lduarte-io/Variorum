@@ -439,10 +439,17 @@ enum TutorialSeeder {
             "At dawn the ferry crossed. The storm stayed in everyone's coat pockets, unmentioned.")
 
         _ = try lesson(structure, "extract & make block", [
+            // 13b 3F (N18's honesty half): the old "from anywhere in this
+            // paragraph" over-promised — the snap rounds the selection's
+            // START to the nearest sentence boundary, so a late start in
+            // the FINAL sentence rounds forward to the block end and
+            // refuses. The prose promises what the snap delivers; the snap
+            // semantics themselves are Stage 4's memo territory.
             "Extract pulls a span at a block's EDGE out into its own block — "
             + "zero ceremony, the source block keeps its identity and all its "
-            + "takes. Select from anywhere in this paragraph to its end and "
-            + "press \u{2318}\u{21E7}E — and this closing line is begging to stand alone.",
+            + "takes. Select from a sentence's start to this paragraph's end "
+            + "and press \u{2318}\u{21E7}E (the app snaps your selection to sentence "
+            + "boundaries) — and this closing line is begging to stand alone.",
 
             "A MIDDLE span can't extract (the two ends would be left holding "
             + "hands), so Make Block (\u{2318}\u{21E7}K) is the tool there: it runs two "

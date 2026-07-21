@@ -228,7 +228,15 @@ struct ShellActions {
                 guard let bookID = try await TutorialSeeder.findOrSeed(
                     session: session,
                     confirmReplace: { confirm?() ?? Self.confirmTutorialReplace() })
-                else { return }
+                else {
+                    // 13b 3F (Stage 2 round-2 note b): findOrSeed's one nil
+                    // path is a DECLINED confirm — the user asked to OPEN
+                    // and nothing opened; say why instead of going quiet.
+                    status.speak(
+                        "Nothing opened — re-seeding the tutorial would replace the "
+                        + "tutorial residue on this store, and you cancelled. Everything stays as it is.")
+                    return
+                }
                 shell.pendingSelection = .reading(bookID)
             } catch {
                 status.speak("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")

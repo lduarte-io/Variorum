@@ -130,6 +130,12 @@ final class TakesBoardLayout {
         pageOffsets[key] = min(max(pageOffset(key, limit: limit) + delta, 0), max(limit, 0))
     }
 
+    /// The reveal's direct page set (13b 3F — auto-page to the mint): the
+    /// same clamped write the ◀ ▶ door makes, addressed absolutely.
+    func setPage(_ key: String, to offset: Int, limit: Int) {
+        pageOffsets[key] = min(max(offset, 0), max(limit, 0))
+    }
+
     // MARK: - Density inputs + the rail's chunking (13b 1b — AD-2's
     // keyboard companion shares one brain with the board's rendering)
 

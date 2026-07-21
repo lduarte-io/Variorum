@@ -153,7 +153,8 @@ struct HelperView: View {
          "Join neighboring blocks into one (⌘⇧M): cursor at the seam, or a selection "
          + "across the run. From Takes it joins your block with the one above. The "
          + "merged text is what you were LOOKING at; other takes stay with the released "
-         + "blocks in lineage — the app says so, and undo brings them back."),
+         + "blocks — find them under Library → Archived & Deleted → Unplaced blocks, "
+         + "or ⌥⌘Z brings everything straight back."),
         ("extract / make block",
          "Extract (⌘⇧E) pulls a selected span at a block's edge into its own block; "
          + "Make Block (⌘⇧K) does the same for a middle span. Both work from Takes — "
