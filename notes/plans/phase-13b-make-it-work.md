@@ -388,14 +388,14 @@ Commits per batch/stage with the standing message convention.
 | N3 | Triple AutosaveCoordinator; two can run over one post | **RESOLVED 1a** (one per-post coordinator at session scope; identity + clobber pins red-on-old) |
 | N4 | ⌥⌘Z executes-then-reports-into-nil outside Write (silent state change) | **RESOLVED 1b** (reports through the StatusCenter on every surface; red-on-old pin) |
 | N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | **RESOLVED 1b** (routed — the mounted board commits the focused take, pinned over the real board; truly-uncommittable contexts disable the item; red-on-old) |
-| N6 | Take-label setter missing in core; lens-rename face missing | new, Stage 0(b) → T5 |
+| N6 | Take-label setter missing in core; lens-rename face missing | **CORE HALF DONE 3B** (`setTakeLabel` shipped on the setBlockName precedent, commit 82c9411 — locked-take allowed PROVISIONAL, archived allowed; `renameLens` confirmed existing since 11a, `Operations+Lens.swift:44` — no core change needed); the FACES (card/bar label doors, Lenses column-header rename, registry rows) stay → T5/3D |
 | N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | **RESOLVED 1a** (the rail pages discretely with the ◀ x–y of n ▶ door; red-on-old pin + soak capacity invariant) |
 | N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
 | N9 | AD-17 quick-entry lands in Takes where typing does nothing | **RESOLVED 1b** (the landing focuses the first slot's article pane; live transitions claim the keyboard; red-on-old) |
 | N10 | The deferred T3 slice: EditorViewModel's gesture-execution band + the projection executors move TOGETHER (one seam), plus the TakesViewModel decomposition (890→1,113, P-9 pressure) | Stage 3 (post-ladder; both implementers AND the round-1 reviewer concurred with the deferral on the merits; row added by the architect per the round-1 MINOR — deferred work always has an owner) |
 | N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | new, Stage 2 walk → Stage 3 (small: selectedIndex + onKeyPress arrows + ⏎ runs selected) |
 | N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | new, Stage 2 walk — VERIFY-THEN-FIX at an unlocked drive (observed under the locked session, where first-responder semantics are abnormal) → Stage 3 |
-| N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | new, Stage 2 walk → Stage 3 (a core Queries change — one seam: assembleReading gains section resolution for curated books) |
+| N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment (`TutorialWalkTests.swift:1366–1370`) → 3D; the Mac-suite re-run over this seam owed at 82c9411 (first unblocked+permitted session) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -2707,3 +2707,179 @@ door; log exactly what was written. Then the fresh screenshot tour and
 the standing asks A1–A3 + the flagged items (the R24 paged-strip
 wording, merge-joins-upward, the N9 landing-focus change, the
 unexplained clean exit, the blank utility windows verdict).
+
+### Batch 3B record (the core seam — COMPLETE)
+
+**Session:** fresh Fable implementer, 2026-07-20. The stage's ONE
+sanctioned core-touch batch, per the brief. Commits: **309adc7** (N13)
+· **82c9411** (setTakeLabel) · the record commit carrying this section.
+**Counts: core 747/90 → 762/92, full `swift test` green** (+15 tests /
++2 suites: `ChapterAssemblyExportTests` 6, `TakeLabelTests` 9). Both
+app targets Debug-build green against the seam (Mac
+`xcodebuild -scheme Variorum build`; mobile `-scheme VariorumMobile`,
+generic iOS Simulator destination — builds only). `Sync/` untouched;
+NO schema change (additive query/op work only, exactly as sanctioned).
+
+**Environment note (material):** the author's live real-store instance
+(pid 20720) EXITED mid-batch — `pgrep -fl Variorum` empty, verified
+twice. The owed Mac re-run was therefore ATTEMPTED immediately (the
+brief's "first unblocked moment"), but `xcodebuild test` is
+**permission-denied for this session** (the auto-mode classifier blocks
+it — the environment was configured while the live-instance rule held).
+Not worked around. **THE FULL MAC SUITE RE-RUN IS OWED AT/AFTER COMMIT
+82c9411 — the first session with the runner unblocked AND permitted
+runs it BEFORE any further Mac-side work builds on this seam** (3C
+needs the runner anyway; run it at 3C's open). Read-level prediction:
+green — no Mac test asserts assembly order or export shape on a
+chaptered fixture (`BookStructureTests`/`BookViewTests` build entries
+by hand; `ScrubAndOutlineTests`' fixture is chapterless; the walk
+test's export assertions are `contains`-only, title presence
+unaffected). The `/Applications` refresh was deliberately SKIPPED —
+refreshing her daily-drive build over a Mac suite that hasn't re-run
+would invert the discipline; it rides the same first unblocked session,
+after the green run.
+
+**1 — N13, chapters reach export (commit 309adc7).**
+`Queries.assembleReading` (`Sources/VariorumCore/Queries/
+ReadingAssembly.swift`) now resolves `reading_section` for CURATED
+books: a new `.curated where hasChapters` SQL branch LEFT-JOINs the
+live section (`s.id = rp.section_id AND s.reading_id = rp.reading_id
+AND s.deleted_at IS NULL`), returns the chapter NAME as `sectionPath`
+plus a new additive `ReadingEntry.sectionID` (defaulted init param —
+source-compatible; carried so consumers can distinguish same-named
+chapters and merge empty ones), and orders `(s.id IS NULL), s.position,
+s.id, <the reading's own order>`. `exportReading`
+(`Queries/Export.swift`) renders the resolved chapters through the
+existing sectioned grammar — `## chapter` / `### post` — grouping BY
+SECTION ID, with EMPTY chapters emitting their headings and unfiled
+entries trailing under `## unfiled`; the tag-grouping path is a
+run-clustering restatement producing byte-identical Phase 11b output.
+
+**The sectioning-semantics citations (mirrored, never invented):**
+- `BookStructureModel.grouped` — `App/Variorum/Variorum/Features/
+  BookView/BookStructureModel.swift:97–118`: chapters in `(position,
+  id)` order (via `Queries.readingSections`,
+  `Sources/VariorumCore/Queries/SectionQueries.swift:9–14`), entries in
+  the reading's own order within their chapter, unfiled entries LAST
+  under a nil group (line 96: "stragglers trail — recorded call"),
+  EMPTY chapters present (`sections.map { ($0, bySection[$0.id] ?? [])
+  }`, lines 111–113).
+- `chaptersActive` — `BookStructureModel.swift:88–91`: chapters govern
+  exactly when `kind == .curated && !sections.isEmpty`; smart books and
+  chapterless curated books keep the Phase 4 tag headers. The assembly
+  mirrors this precedence bit-for-bit.
+- Renderers proving the semantics are THE shipped ones:
+  `BookView.swift:397–410` (chapter headers incl. empty, "unfiled"
+  label at 402; navigator twin at 150–194) and
+  `ReadingFlowView.swift:53–60` (section name rendered per group,
+  empty included).
+- The dangling rule inlined from `Queries.sectionAssignments`
+  (`SectionQueries.swift:34–50`): dead/missing section ⇒ unsectioned;
+  nothing repairs or rewrites the stored pointer.
+
+**The `sectionPath` consumer enumeration (grep-complete over Sources/ +
+App/, non-test) + behavior deltas:**
+1. `Queries/Export.swift` (`exportReading`) — the target: chaptered
+   curated books now export chapter headings (previously silently
+   chapterless — the N13 defect).
+2. `Queries/ReadingAssembly.swift` — the definition.
+3. `BookViewModel.sectionHeader(at:)` — `App/.../BookView/
+   BookViewModel.swift:74–77`, rendered ONLY in BookView's
+   non-`chaptersActive` branch (`BookView.swift:411–419`). Delta: on a
+   chaptered book that branch runs only in the transient window before
+   the structure observation delivers sections; during it, headers now
+   show chapter names at group boundaries instead of nothing. Benign;
+   converges to the grouped branch. (Recorded judgment call.)
+
+**`assembleReading` ORDER consumers (the wider delta class — the
+chaptered order changed to the book view's grouped order):**
+4. `observeReading` → `BookViewModel.entries`: (a) BookView's grouped
+   branch + ReadingFlowView regroup via `BookStructureModel.grouped` —
+   cross-chapter input order is regroup-insensitive and within-chapter
+   order is unchanged ⇒ NO visible change; (b) **book-scrub**
+   (`scrubTarget`): pages on a chaptered book now follow the VISUAL
+   grouped order rather than raw membership position — the scrubber
+   matches what the eye sees (improvement, recorded).
+5. `ShelfQueries.swift:124` (capped books' shelf word counts): a capped
+   chaptered book's counted first-N now follows grouped order — still
+   exactly the set the book view renders under the same cap (agreement
+   by construction; the cap-follows-assembly rule).
+6. `ReadingsViewModel.movePost` (`:103`) + the membership sheet listing
+   (`ReadingViews.swift:232`): the sheet lists chaptered books in
+   grouped order; ±1 within a chapter reorders correctly against the
+   visual neighbor; a CROSS-chapter step writes a position against a
+   different chapter's neighbor — display-inert (grouping wins) but can
+   scramble underlying manual positions. Accepted edge, recorded: the
+   real chapter management is the book navigator (drag/context menus);
+   3D/3E may hide the ±1 arrows across chapter boundaries if it ever
+   bites.
+
+**N13 judgment calls / PROVISIONALs (R119/R120, for the checkpoint
+walk):**
+- (a) Chapters WIN over tag grouping on a chaptered curated book (the
+  `chaptersActive` precedence); the grouping tag is not computed then.
+- (b) The chaptered export's unfiled heading is the book view's own
+  label, `## unfiled` (BookView.swift:191/402); the tag path keeps
+  `## Ungrouped` byte-parity.
+- (c) EMPTY chapters export their headings (the book view renders
+  them; an empty `## chapter` line is the honest mirror).
+- (d) Same-named chapters each export their own heading (grouping by
+  `sectionID`; names carry no uniqueness — AppSpec §7).
+- (e) A FOREIGN reading's section pointer (unreachable through ops —
+  `assignPostToSection` guards, `Operations+Sections.swift:148–151`;
+  sync-race shape only) reads as UNSECTIONED in the assembly rather
+  than mirroring `grouped()`'s theoretical entry-VANISH — the one
+  deliberate deviation, loss-avoiding (an export must never drop a
+  post).
+- (f) `ReadingEntry.sectionID` added as a defaulted-init public field
+  (additive, source-compatible; projection-only — no schema).
+
+**Tests (all six in `ChapterAssemblyExportTests`):** grouped order +
+chapter reorder reaching the assembly + the cap counting grouped order;
+dangle ⇒ unsectioned-and-trailing + `restoreSection` reattaching;
+chapters-win-then-revert (the chapterless book returns to tag grouping
+`==`-identical); smart byte-parity against a raw-SQL stray section row
+(the sync-race shape — ops refuse it); the chaptered export's exact
+markdown (headings, empty chapter, unfiled trail); duplicate-name
+chapters emitting two headings. Every existing export/assembly pin
+green in the full run.
+
+**2 — T5's core op, `setTakeLabel` (commit 82c9411).**
+`Operations+Variant.swift`, "Take identity metadata" MARK: the
+`setBlockName` precedent verbatim (`Operations+Block.swift:56–67`) —
+live-variant fetch, the seal via `ensurePlacementUnlocked` (a take is
+under the post through its block's placement), trim + nil/empty ⇒
+NULL, no-op guard (no `updated_at`, no outbox row), `updated_at` stamp
+on real change. No touch stamp, no churn. Metadata-CAS under sync; the
+standing variant outbox triggers verified by test (`outboxContains`),
+not assumed. **PROVISIONAL (the brief's own flag): ALLOWED on a LOCKED
+take** — the lock freezes the BUFFER, not identity metadata; pinned
+that labeling mints NO commit and leaves the lock standing. **Judgment
+call: allowed on an ARCHIVED take** — the archived listing (3D's face)
+is where labels help most; pinned that labeling never resurrects.
+Dead takes refuse (`variantNotFound`); sealed posts refuse
+(`lockedPost`). Nine exact state-transition tests incl. the end-to-end
+pin that a label set through the op reaches the export Alternates
+section as `take: "<label>"`.
+
+**3 — Confirm-and-record:** `renameLens` EXISTS in core since Phase 11a
+— `Sources/VariorumCore/Operations/Operations+Lens.swift:44–56`
+(trim, empty refuses `invalidLensName`, no-op guard, `updated_at`
+stamp). The 3D lens-rename face needs NO core change. Confirmed.
+
+**4 — 3D hand-off items (seeder/lessons untouched per the brief):**
+- The export lesson (`TutorialSeeder.swift:664–677`) routes around
+  chapters by not promising them; it MAY now promise them ("a book
+  exports as one document — its chapters as headings"). Lesson-content
+  edit + the walk-test strengthening belong to 3D; the real-store
+  re-seed rides the end checkpoint as already recorded.
+- The STALE honesty comment at `TutorialWalkTests.swift:1366–1370`
+  ("CHAPTERS don't reach exportReading… core-frozen this stage") is now
+  false — delete it and optionally assert the chapter headings that
+  now appear (the field guide is a chaptered curated book, so
+  `exportsShowTheFansAndTheChapters` can finally earn its name). Left
+  un-edited HERE because no Mac-side edit lands without the runnable
+  Mac suite.
+- 3D's takes-lifecycle faces consume `setTakeLabel` (card context menu
+  + bar block-menu) and `renameLens` (Lenses column-header) exactly as
+  the brief planned; registry declarations ride 3D.
