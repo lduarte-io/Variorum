@@ -378,9 +378,9 @@ Commits per batch/stage with the standing message convention.
 | # | Item | Status |
 |---|------|--------|
 | D1 | Book card collapse no-ops on the focused post (`BookView.swift:545` force-expand disjunct; traced batch 15, confirmed by both audits) | **RESOLVED 3E** (commit 23b0c12 — `BookFocusState` folded into `BookViewModel`, the book's ONE focus model: focus implies expansion, collapse RELEASES focus, collapse-all releases everything; the disjunct deleted; red-on-old by FULL behavioral revert — the editor stayed mounted, her exact repro; hosted + model pins) |
-| D2 | Margin grid shifts the post left; suspicious inter-block vertical gaps; spacing pass | two candidate mechanisms traced by both audits → T7 (trace-before-fix stands) |
+| D2 | Margin grid shifts the post left; suspicious inter-block vertical gaps; spacing pass | **RESOLVED 3F** (commit e511710 — BOTH candidates traced real and fixed: the always-wide measure → bloom-gated rail (at rest every style shares the 680 column; the masthead's duplicate UserDefaults width brain DELETED; measure-brain pin red-on-revert) + `fanToggleRow` → the corner-badge overlay (zero vertical footprint, Write's ⑂ grammar; AD-9's gaps close); the slab half was AD-7's pane-stretch, fixed with it) |
 | D3 | Takes structural-gesture gap: Make Block silent, Divide redirects, no add-block-at-end door in Takes | **RESOLVED 1b** (fire-and-DO move-and-execute on all four + the lecture DELETED; native ＋new-block door in Takes/Lenses; red-on-old end-to-end pin) |
-| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | registry + router LANDED 1b (T1 done — silent/lecture/dead-key classes structurally closed; the walk keeps them closed); crowdedness half stays → T7 |
+| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | registry + router LANDED 1b (T1 done — silent/lecture/dead-key classes structurally closed; the walk keeps them closed); crowdedness: the NAMED instances done 3F per the trim (N15's bars; D2's gap rows; the grid cells) — the broad subjective sweep waits for her presence at the Stage 4 kickoff (the architect's recorded trim call) |
 | M1 | MERGE whole-feature design memo (R116) | **WRITTEN 1b** (`phase-13b-memo-merge.md`, self-executing per R120); doors/reachability built; deeper builds → Stage 3 |
 | M2 | W CEREMONY memo + reachability (R116) | **WRITTEN 1b** (`phase-13b-memo-w-ceremony.md`); the ceremony is REACHABLE from Takes (divide fire-and-DOes; Helper dictionary names it) |
 | N1 | Take-archive vanish trap: ⌘⇧A in Takes hides the take with no UI recovery (fans query active-only) | **RESOLVED 3D** (commit 1ea9cc4 — the "archived · n" door + listing in every bloom's footer, Unarchive right there; the fans query stays active-only, the listing is its OWN read at projection cadence; every archive door speaks the road back host-gated, refusals outrank; red-verified by revert) |
@@ -390,24 +390,24 @@ Commits per batch/stage with the standing message convention.
 | N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | **RESOLVED 1b** (routed — the mounted board commits the focused take, pinned over the real board; truly-uncommittable contexts disable the item; red-on-old) |
 | N6 | Take-label setter missing in core; lens-rename face missing | **CORE HALF DONE 3B** (`setTakeLabel` shipped on the setBlockName precedent, commit 82c9411 — locked-take allowed PROVISIONAL, archived allowed; `renameLens` confirmed existing since 11a, `Operations+Lens.swift:44` — no core change needed); the FACES **DONE 3D** (commit 1ea9cc4 — card context menu + bar block-menu + Write-panel ⋯ label doors over one request/set pair with the current-label-resolving sheet; Lenses column ⋯ "Rename lens…" prefilled; registry rows declared incl. the new `.surface` door + the R118 renameLens exemption on R86) |
 | N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | **RESOLVED 1a** (the rail pages discretely with the ◀ x–y of n ▶ door; red-on-old pin + soak capacity invariant) |
-| N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
+| N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | **RESOLVED 3F** (commits f580098 + e511710 — AD-7 traced to the representable ACCEPTING tall proposals under a minHeight floor: panes now frame at EXACT measured height, pin red-on-revert at 430.0; the reservation is honest (min(cards,rows)); AD-8: the note clamps into the room the centering actually leaves — full card ≥90pt of gutter, the // count chip below, never under the sidebar) |
 | N9 | AD-17 quick-entry lands in Takes where typing does nothing | **RESOLVED 1b** (the landing focuses the first slot's article pane; live transitions claim the keyboard; red-on-old) |
 | N10 | The deferred T3 slice: EditorViewModel's gesture-execution band + the projection executors move TOGETHER (one seam), plus the TakesViewModel decomposition (890→1,113, P-9 pressure) | **DONE 3C** (`8bebdbd`+`d892056` — EditorSurfaceController 1,295 ln + TakesBoardLayout + TakesChoreographer; zero test edits, Mac 542/106 parity-green; record + architect's annotation below; the ladder reviews the seam) |
 | N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | **RESOLVED 3E** (commit cb47fe5 — selectedIndex + ↓/↑ on the field + ⏎ runs the SELECTED row, marker rides the selection, refresh resets; pinned on the drive's exact shadow bite — red by revert: the extract ACT ran) |
 | N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | **RESOLVED 3E** (commit cb47fe5 — the bare arrival claims the caret in `applyFocusSeeds`: detail editors only, one next-turn retry; the inline book editor never steals focus, pinned both ways; nothing rides the router so the noteMode round-scope is untouched by construction; red by revert) |
 | N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment **DONE 3D** (commit 7fea406 — the lesson promises chapters; the comment deleted; every plan chapter asserted as a ## heading on paper); the owed Mac re-run ran at 3C (542/106) and again at 3D+3E close (556/112) |
-| N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record). Suspects to TRACE, not assume: overlay add-path idempotence vs the R2-B push-at-wire double-delivery; a collapsed/stale anchor frame rendering at origin | **REPRODUCED + SHARPENED 3A**: precondition = a COLD model (post's first open since launch) — first Write mount collapses ALL badges onto one top anchor (the layered capture, shots 28/29); choose is unrelated; any remount heals; warm models correct; **the class is the whole overlay family** — cold mounts also starve callout frames/💡/seams/handles until any decor-input change (shots 49–51, store JSON verified). Double-delivery suspect looks WRONG; stale-geometry-at-compute + input-equality-gate starving matches all evidence (inferred, not traced) → 3F (trace-before-fix, evidence in the 3A log) |
-| N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | **EVIDENCE CAPTURED 3A** (shot 66 — every item wraps mid-word at default width) → Stage 3F (T7 crowdedness; adaptive/2-row bar layout) |
+| N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record) | **RESOLVED 3F** (commit 213a2bb — TRACED: every mount/edit-time overlay refresh runs BEFORE TK2's first layout pass and no trigger ran after it (the only post-layout refreshes were scrolls and the saved-anchor JUMP, which forces layout — exactly why warm models/remounts healed and cold models didn't); the equality gates and the add path were NOT the mechanism. Fixed at the substrate: `EditorTextView.viewWillDraw` → ONE coalesced overlay refresh per storage generation, detail + inline both; the read tier provably safe (ensureLayout-before-read); class enumeration in the 3F record. Pin `aColdFirstMountPlacesEachBadgeAtItsBlock` red-on-revert: badge-y delta 0.0, the collapsed anchor) |
+| N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | **RESOLVED 3F** (commits e638c39 + f7684d3 — the class rule: VoicedButtonStyle labels lineLimit(1) app-wide (truncate, never wrap); BOTH status bars (CommitBar incl. book-inline; TakesBottomBar, the same class caught live) adaptive by MEASURED width — her "2 rows or something" below 1080pt, whole labels; ViewThatFits rejected on the record (compressible children defeat its fit test — seen live); screenshot-verified at 980pt, shot 3f-10) |
 | N16 | W ceremony cut-placement (author, same session; (a) RECLASSIFIED by her follow-up): (a) sentence-boundary snapping is ratified, so the "can't move the cut" experience is likely DESIGNED — the trace now VERIFIES the sheet offers EVERY legal interior sentence boundary (a multi-boundary take must be placeable at any of them; only-the-proposed-spot-accepted would still be a bug); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask re-affirmed — "i think the scissors should still be movable" (visual drag). Root-cause treatment demanded ("not whack a mole… it can be its own phase if it needs to be") | **(a) VERIFIED GOOD 3A** — a 3-sentence take offered BOTH interior boundaries as cut-at buttons and the ✂ moved on click (shots 33/34); her experience = the one-boundary case + affordance plainness. (b)/(c) → Batch 3H (memo-first per R116/R120) |
 | N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path, (b) the symmetric round-trip product question (DECISION HERS at the checkpoint), (c) what UI road leads from a merged block to its pre-merge takes | **(a) CLOSED 3A — the toast SPEAKS on both paths** (Takes choreography shot 55; book-inline seam shot 68; mid-block book-inline caret gets the real refusal spoken, 67; likeliest silent-read: the 6 s auto-dismiss). **(c) ANSWERED 3A**: two roads — ⌥⌘Z right away, or Library → ⋯ → Archived & Deleted → "Unplaced blocks" (Place-in-pool door, takes intact; shot 58) — road exists, nothing points at it; the 3H memo addendum weighs naming it in the toast and/or a lineage door on the merged block. (b) → end checkpoint |
-| N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46; the exact-boundary form works, 48). Loud refusal, never silent; but snap and prose disagree. Mechanism inferred, not traced | new, 3A → 3H (snap semantics are the cut-placement memo's territory; either the snap widens suffix spans to the containing sentence's start, or the lesson prose narrows) |
+| N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46) | **PROSE HALF DONE 3F** (commit a78326f — the lesson promises sentence-boundary starts and says the snap out loud; the walk's extract anchor survives verbatim); the SNAP-SEMANTICS half stays Stage 4's (her divide-granularity ruling — the W memo addendum's territory) |
 | N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | **RESOLVED 3D** (commit c808e85 — PoolViewModel selection + the Blocks-area pool picker, oldest default, dead-selection fallback; the ScrapsPanel in the post detail's inspector wires the orphaned drag payload to real geometry beside the draft; the lesson prose re-cut; the drop half was already pinned; red by revert: the tutorial pool unreachable) |
 | N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | **TRACED SOUND 3E** — every app-side link pinned or type-matched (draggable(String) ⇄ dropDestination; the action is the store-pinned moveChapter(before:), BookStructureTests:325–362; NO app code between SwiftUI's drop callback and the pinned door); verdict sound-but-synthetic-artifact per the 3A tool note (List-reorder drops never commit under synthetic drags) + her N21 phrasing implying the sidebar drag works by hand → **NEEDS-HUMAN-VERIFY at the checkpoint** (one navigator drag; if it fails by hand, suspect the 2px indicator competing as a drop target — no fix fabricated) |
 | N21 | Chapter dragging in the BOOK VIEW body (author, 2026-07-21 afternoon): "you should be able to drag chapters within the book view, not just in that sidebar, but there are two places where the dots that indicate dragging make me feel like it should be draggable and it isn't" — locate both false-affordance ⠿ spots; dots that don't drag either drag or lose the dots (the R112 honesty rule applied to affordances) | **RESOLVED 3E** (commit 23b0c12 — the body chapter-header ⠿ DRAGS: navigator-identical insert-before + indicator + end zone, honest help; two-spots verdict recorded: only THREE ⠿ sites exist — body header FIXED, navigator rows already draggable (N20's human-verify), Write's handle is N26's) |
 | N22 | Clicking a collapsed post CARD in the book view should open the post — "clicking on the post should bring you to it, not just the smaller open button (I mean the separated box, not the text that you can actively edit)" | **RESOLVED 3E** (commit 23b0c12 — the card BODY opens the post; the ▸ disclosure is a real expand-in-place button; open ↗ stays; each target does what it looks like) |
-| N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | new, author → 3F (T7; joins AD-7/D2) |
+| N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | **RESOLVED 3F** (commit e511710 — the rail's fixed-height cards scroll IN PLACE (ScrollView inside the 250×110 card): every take fully reachable, the uniform grid height honest; grid-only by construction — carousel/slot-split cards were never capped) |
 | N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | **RESOLVED 3D** (commit c7c50cf — the tag-entry face types-to-create: paths create missing levels through the taxonomy ops, the leaf applies, one runner turn; forgiving edges; red by revert. Recorded: if she meant tagging the BOOK OBJECT — readings carry no tags in the schema — that is a checkpoint model question) |
-| N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | new, author → 3F |
+| N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | **RESOLVED 3F** (commit e511710 — choosing is the card's full-width clickable HEADER (`TakeChooseHeader`: "choose" / "✓ chosen", ONE checkmark ever, text box keeps its whole width — her header ask verbatim); the stack card unified onto the same grammar; cards widen 220→250 ("a little bit wider"); screenshot 3f-03) |
 | N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | new, author → verify next drive / design Stage 4 |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
@@ -3734,3 +3734,214 @@ The tutorial's REAL-store seed is stale against 3D's lesson edits — the
 end checkpoint re-seed stands. (f) The books lesson's dead ☰ promise
 existed since Stage 2 — worth a ladder glance at whether other lesson
 prose over-promises (the walk asserts acts, not every claim).
+
+### Batch 3F record (geometry/overlays + copy notes, trimmed per the architect's call — COMPLETE)
+
+**Session:** fresh Fable implementer, 2026-07-21 (~15:20–16:15). Commits:
+**213a2bb** (N14) · **f580098** (AD-7 pane) · **e511710** (the margin-grid
+package: D2/N23/N25/N8 + gaps + reservation) · **e638c39** + **f7684d3**
+(N15 both bars + the class rule) · **a78326f** (copy notes + auto-page).
+**Counts: Mac 556/112 → 560/112 GREEN** (full suite ×2, TutorialWalkTests
++ the board soak rode both; +4 pins) · **core 762/92 green, BYTE-UNTOUCHED**
+(`git diff 52deb5b..HEAD -- Sources/ Tests/ Package.swift` empty; core
+re-run fresh this session). `/Applications` refreshed from Release
+16:13:54 (pgrep-gated; zero instances at build AND copy).
+
+**1 — N14, THE HEADLINE (commit 213a2bb). THE TRACED MECHANISM (the
+drive's inference corrected):** every mount/edit-time overlay refresh —
+`attach` → `renderFull` → `refreshBadges` (EditorSurfaceController:166),
+`applyChrome`'s, the clip's mount-time `boundsChanged` — runs BEFORE
+TK2's first viewport layout pass; fragment enumeration over un-laid
+storage returns collapsed frames (every ⑂ at one top anchor; the decor
+walk computes garbage), and NO refresh trigger existed after the layout
+pass: the only post-layout refreshes were user scrolls and the
+saved-anchor `JumpPrimitive` jump, which FORCES layout itself
+(layoutViewport + single-fragment ensuresLayout). That single fact
+explains the whole 3A evidence table: a WARM model healed because
+teardown stores `editorRouter.scrollAnchors[postID]` and the remount's
+renderFull JUMPS (forced layout precedes the refresh); ANY remount
+healed the same way; a COLD model (first open since launch — no anchor)
+never jumped, so the pre-layout garbage stood; choose neither caused nor
+healed (differential replace + pre-layout refresh recomputes garbage over
+the invalidated region). The drive's two refinements to its own
+inference: the input-equality gates were NOT the starving mechanism (the
+missing TRIGGER was — post-layout, `result != badges` passes fine), and
+the "layering" was never an add-path bug (`render()` reconciles by
+blockID; two blocks' badges shared one collapsed anchor). **The fix, one
+mechanism for the family:** `EditorTextView.viewWillDraw` reports each
+display pass (EditorTextView.swift:37); the model coalesces ONE overlay
+refresh per storage GENERATION — `overlayGeometryGeneration` bumped at
+every storage character edit incl. suppressed programmatic writes
+(storageDidEdit's top, before the suppression guard) and at attach —
+delivered on the next runloop turn (after the whole pass, subview
+mutation out of viewWillDraw), running `refreshBadges` + the riding
+`refreshDecorations` (EditorViewModel — the settle block above
+refreshBadges). **The class enumeration (every TK2 fragment-geometry
+consumer in the app, grep-complete):** EditorViewModel
+refreshBadges/refreshDecorations on the DETAIL editor — FIXED (the
+trigger); same on the INLINE book editor — FIXED (same EditorTextView
+class, wired at the same attach); ReadPostViewModel refreshBadges/
+refreshDecor — PROVABLY SAFE (every geometry read is preceded by
+`PaneMeasurement.height`'s full-document ensureLayout — pane-scale by
+construction — plus the `viewWidthChanged` width-settle trigger);
+JumpPrimitive — SAFE (ensures its own layout);
+EditorViewModel.topVisibleOffset — SAFE (consumed at scroll/teardown
+time over warm layout; a nil miss falls back). **Pin:**
+`aColdFirstMountPlacesEachBadgeAtItsBlock` — the drive's deterministic
+repro (cold model, no saved anchor, the real makeNSView order, two
+fanned blocks) — **RED by behavioral revert** (trigger unwired): badge-y
+delta 0.0, the collapsed anchor verbatim; GREEN restored.
+
+**2 — AD-7, the wash slab (commit f580098). THE MECHANISM (deeper than
+the drive's reserved-height reading):** an NSViewRepresentable ACCEPTS a
+tall height proposal, and `PaneSurfaceView` framed its surface
+`.frame(minHeight: height)` — a floor that never pushes DOWN. The
+margin-grid row (HStack whose rail reserves card room) PROPOSED the row
+height to the article cell's pane, which stretched to it — the wash
+rendered as the ~2/3-empty slab; natural-height compositions (stack/
+carousel) never propose tall, which is why the slab was grid-only. Fix:
+the pane frames at its EXACT measured height (PaneSurface.swift:250) —
+the wash hugs the text everywhere; the batch-12 width-hook convergence
+pin still green. **Pin:** `aTallRowNeverStretchesThePaneIntoASlab` —
+RED by revert (minHeight restored): height → 430.0, the pane stretched
+to the row exactly.
+
+**3 — The margin-grid package (commit e511710).**
+- **D2/AD-6 (the shift):** the grid's measure was ALWAYS 680+16+rail —
+  the page centered around an EMPTY reserve, ~118pt left of every other
+  style. The rail now ENGAGES only while a fan is open
+  (`railEngaged`; follow-the-scroll holds the measure stable whenever
+  the post has any fan); at rest EVERY style shares the 680 prose
+  column. PostDetailView's duplicate UserDefaults-read masthead brain
+  (the ledger's "one key two ways" candidate, PostDetailView:63–68) is
+  DELETED — the masthead is a 680 constant. **Pin:**
+  `theMarginGridAtRestSharesEveryStyleMeasure` on the extracted measure
+  brain (`TakesBoardView.articleMeasure(engagedRailWidth:)`) — RED by
+  revert (always-wide): 932 at rest.
+- **The gap candidate (D2's second traced mechanism; AD-9):**
+  `fanToggleRow` — a stacked button row above EVERY block, unfanned
+  included — is DELETED; the fan door is a CORNER BADGE overlay at the
+  cell's top-right margin (Write's ⑂ grammar mirrored; R72's "⑂+"
+  first-take offer stays always-visible; zero vertical footprint). The
+  close door moves into the rail's own header ("takes · n ✕") in an
+  engaged grid bloom and a close line on the slot-split bloom (whose
+  bloom replaces the cell, as before).
+- **N23 (content inaccessible):** the rail's fixed-height cards SCROLL
+  in place (`capped` ⇒ ScrollView inside the 250×110 card) — every take
+  fully reachable; carousel/slot-split cards stay natural-height (they
+  were never capped — N23 was grid-only by construction).
+- **N25 + her grid inputs:** choosing is the card's full-width clickable
+  HEADER (`TakeChooseHeader` — "choose" / "✓ chosen", ONE checkmark
+  ever, the text box keeps its whole width — her header ask verbatim);
+  the stack card (`CollapsibleTakeCard`) unified onto the same grammar;
+  rail cards widen 220→250 ("a little bit wider").
+- **AD-7's reservation half:** the rail reserves min(cards, rows)
+  card-heights (`gridReservedHeight(cardCount:rowsPerColumn:)`) —
+  steady across ◀ ▶ pages, never an empty reserve below a 1-take fan.
+- **N8/AD-8 (comments under the sidebar):** the article area's ONE
+  GeometryReader computes the room the centering ACTUALLY leaves
+  (`commentRoom = (width − articleMeasure)/2`); the margin note clamps
+  into it — the full card at ≥90pt of gutter, the compact `//`+count
+  chip below that (Write's `gutterFitsCards` degrade philosophy,
+  takes-side; `CommentMarginNote.compact`) — never laid out in space the
+  sidebar owns.
+- **THE STRUCTURAL-IDENTITY LESSON (caught by the board soak, seed 21,
+  worth keeping):** the first cut branched `articleRow`'s tree per bloom
+  state — SwiftUI re-identified the article cell's NSView on expand and
+  TWO live panes briefly rendered the same variant (`liveCount → 2`,
+  both `pane:article|…0002`). The row is now ONE structural shape (the
+  cell at a stable position; conditional parts render AROUND it) and
+  the soak is green; the soak's invariant-1 check now PRINTS the live
+  panes' identities on failure (a permanent diagnostics gain).
+
+**4 — N15, both bars (commits e638c39 + f7684d3).** The class rule
+lands where the class lives: `VoicedButtonStyle` labels are
+`lineLimit(1)` app-wide (truncate, never wrap "com mit ⌘S"). Both
+status bars — `CommitBar` (Write, incl. the book-inline form = the 3A
+shot-66 surface) and `TakesBottomBar` (Takes/Lenses, the SAME class
+caught live in this session's screenshots) — are ADAPTIVE by MEASURED
+width: one row where it fits, two rows (< 1080pt) where it doesn't;
+clusters shared verbatim between arrangements; the takes bar's context
+label gains lineLimit(1) (it was the wrapped "blk 1/4 · 30cf6191"
+stack); word-count texts trade fixedSize for lineLimit(1) (the
+min-height-probe class). **The ViewThatFits lesson (worth keeping):**
+the first cut used ViewThatFits and it NEVER fell through — every
+cluster is compressible (lineLimit truncation), so the one-row
+arrangement "fits" any width; the flexible-children gotcha, seen live
+at 980pt as a page-wide truncation parade. Measured-width switching is
+the pattern for compressible chrome.
+
+**5 — Copy notes + auto-page (commit a78326f).**
+- The MERGE TOAST names the lineage road (old-3H's canon-preserving
+  half): "…takes stay with the released blocks (Library → Archived &
+  Deleted → Unplaced blocks; ⌥⌘Z undoes)" — copy only
+  (EditorSurfaceController.speakAboutMergedFans); the Helper
+  dictionary's merge entry names the same road.
+- The DECLINED-residue confirm SPEAKS (Stage 2 round-2 note b):
+  `openTutorial`'s one nil path is a declined confirm — the door now
+  says "Nothing opened — …you cancelled. Everything stays as it is."
+- N18's honesty half: the extract lesson stops promising "from anywhere
+  in this paragraph" — it now promises sentence-boundary starts and
+  says the snap out loud; the walk's extract-act anchor ("— and this
+  closing line…") survives verbatim, so no walk assertion changed
+  (verified by the riding full-suite runs); the snap-semantics change
+  itself stays Stage 4's memo territory (her divide-granularity ruling).
+- `exportCaretBlock` tail phrasing: **NO CHANGE NEEDED, recorded** —
+  the round-2 NIT-R2-3 copy already says exactly the tail case ("Put
+  the caret in a block to export it.", CapabilityRegistry:295).
+- AUTO-PAGE-TO-THE-MINT (sweep table (a)'s recorded residual):
+  `revealTake` pages the set style's pager so the revealed card is on
+  the visible page (carousel/slot-split by card index; the rail by
+  column; `TakesBoardLayout.setPage` = the ◀ ▶ door's clamped write
+  addressed absolutely — one paging brain), parking until the mint's
+  projection arrives (consumed at `adopt` — the real mint sequence).
+  **Pin:** `aRevealedMintOnALongFanPagesTheRailToItsCard` — RED by
+  revert (call unwired): pageOffset → 0, the mint behind the door.
+
+**6 — The 3D hand-off (archived listing × margin grid): CHECKED, sound
+by construction.** The archived section renders in `fanFooter` inside
+the rail (width 250/cols; the 420 card cap clamps to the rail's
+column); the rail is IN LAYOUT, so an open archived list grows the
+row's height and pushes later rows down — no overlap class exists. On
+the next drive's list for a visual once-over.
+
+**Screenshot evidence (machine free 15:55–16:10; the author returned
+~16:10 and all GUI work stopped):** `phase-13b-stage3-screens/`
+3f-02 (margin grid AT REST — no shift, corner badges, tight gaps) ·
+3f-03 (the bloom package — rail engaged with "takes · n ✕", choose
+headers with ONE checkmark, cells and cards hugging content, pager) ·
+3f-10 (the two-row takes bar at 980pt — whole labels, no wrapping).
+Deferred to the next drive: N23's in-card scroll by hand; the compact
+`//` comment chip at narrow gutters; the archived listing in the grid;
+the book-inline CommitBar's two-row form (verified by-width on the
+takes bar; same mechanism); N26's Write drag-handle verify (standing).
+
+**Judgment calls (R119, for the walk):** (a) D2's "must not shift" read
+as AT-REST invariance — an ENGAGED rail still widens the centered
+composition (the only way the cards get real room at 1-col+ without
+clipping); the masthead never widens (batch-14's alignment ask holds at
+rest, where it's visible). (b) The bloom-time re-center is motivated
+(content appears); follow-the-scroll pins the measure wide whenever any
+fan exists so scrolling never wobbles the prose. (c) The corner badge
+offsets 40pt into the right margin — at windows narrower than ~750pt it
+may clip at the edge (the margin idiom's known bound; the comment chip
+degrades, the badge is next if the ladder wants it). (d) The card cap
+stays 110pt uniform (batch-7's rule); density handles taller wants;
+in-card scroll makes the cap honest. (e) The two-bar width threshold is
+1080pt — a build-time call, trivially tunable. (f) The soak's
+diagnostic print stays (speaks only in failure states). (g) The memo
+polish halves (Write seam-hover; ceremony cut-placement polish) are NOT
+built — both sit on Stage 4's rework surfaces (the merge/W memo
+addenda own those redesigns); building polish there now would collide
+with her attended kickoff. Recorded against their memos.
+
+**For the ladder:** (a) the N14 settle trigger — eye the generation
+arithmetic and the async hop's ordering argument (a generation bumped
+between schedule and run re-arms on its own draw pass); (b) the
+articleRow single-shape restructure — the soak caught the identity
+churn once; review the conditional slots for any remaining
+branch-flip of a LIVE pane (slot-split's cell swap is pre-existing);
+(c) the exact-height pane — any composition that WANTED proposal
+stretching (Lenses columns eyeballed, none found); (d) the 1080pt bar
+threshold + the badge's 40pt offset (both build-time calls); (e) the
+grid's engaged-shift judgment call (a) against her design inputs.
