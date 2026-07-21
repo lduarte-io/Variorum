@@ -105,12 +105,34 @@ struct TagAssignmentSheet: View {
         _model = State(initialValue: TagAssignmentViewModel(session: session, postID: postID))
     }
 
+    /// 13b Stage 3, 3D (N24): the type-to-create field's buffer.
+    @State private var typedTag = ""
+    @FocusState private var typedFocused: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Tags for “\(postTitle?.isEmpty == false ? postTitle! : "Untitled")”")
                 .font(.headline)
+            // N24 — her words: "freely type tags in to a book, not just
+            // select from already created tags." ⏎ applies; missing tags
+            // (each “/” level) are created on the way; an existing path
+            // just applies.
+            TextField(
+                "type a tag — ⏎ applies it (new tags are created; “/” nests: life/goals)",
+                text: $typedTag)
+                .textFieldStyle(.roundedBorder)
+                .focused($typedFocused)
+                .onSubmit {
+                    let raw = typedTag
+                    Task {
+                        if await model.applyTypedPath(raw) != nil {
+                            typedTag = ""
+                        }
+                        typedFocused = true
+                    }
+                }
             if model.allTags.isEmpty {
-                Text("No tags yet — create one in the sidebar's Tags section.")
+                Text("No tags yet — type one above, or manage the taxonomy in Settings (⌘,).")
                     .foregroundStyle(.secondary)
             }
             List(model.allTags, id: \.id) { tag in

@@ -168,3 +168,88 @@ struct TagAndFolderTests {
         }
     }
 }
+
+// MARK: - 13b Stage 3, Batch 3D (N24): free-typed tags
+
+/// Type-to-create on the tag-entry face — "freely type tags in to a book,
+/// not just select from already created tags." Creation runs through the
+/// EXISTING taxonomy ops (one per missing path segment) + one applyTag,
+/// in one serialized runner turn. (Red-on-old by API absence made
+/// behavioral: reverting `applyTypedPath` to resolve-only — no creates —
+/// turns the create pins red.)
+@MainActor
+@Suite("Free-typed tags (13b 3D — N24)")
+struct FreeTypedTagTests {
+    @Test func aTypedPathCreatesTheMissingTagsAndAppliesTheLeaf() async throws {
+        try await withWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "book post")
+            }
+            let model = TagAssignmentViewModel(session: session, postID: post.id)
+            await model.load()
+
+            // A brand-new hierarchy, typed as a path.
+            let applied = await model.applyTypedPath("life/goals/2026")
+            #expect(applied == "life/goals/2026")
+            #expect(model.lastError == nil)
+            let tags = try await db.read { try Queries.allTags($0) }
+            #expect(tags.map(\.path) == ["life", "life/goals", "life/goals/2026"],
+                    "every missing level is created, parents first")
+            let worn = try await db.read { try Queries.postTags($0, postID: post.id) }
+            #expect(worn.map(\.path) == ["life/goals/2026"],
+                    "the LEAF is applied — intermediate levels are taxonomy, not applications")
+            #expect(model.isApplied(tags[2].id), "the sheet's rows re-synced")
+
+            // An existing path just applies — nothing duplicated.
+            let post2 = try await session.runner.run { ops in
+                try ops.createPost(title: "second post")
+            }
+            let model2 = TagAssignmentViewModel(session: session, postID: post2.id)
+            await model2.load()
+            let reapplied = await model2.applyTypedPath("life/goals/2026")
+            #expect(reapplied == "life/goals/2026")
+            let tagCount = try await db.read {
+                try Int.fetchOne(
+                    $0, sql: "SELECT COUNT(*) FROM tag WHERE deleted_at IS NULL") ?? 0
+            }
+            #expect(tagCount == 3, "typing an existing path mints NOTHING")
+
+            // A partial prefix exists: only the remainder is created.
+            _ = await model2.applyTypedPath("life/habits")
+            let after = try await db.read { try Queries.allTags($0) }
+            #expect(after.map(\.path).contains("life/habits"))
+            #expect(after.count == 4, "life was reused, only habits minted")
+        }
+    }
+
+    @Test func typedEdgesAreForgivingAndRefusalsSpeak() async throws {
+        try await withWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "edges")
+            }
+            let model = TagAssignmentViewModel(session: session, postID: post.id)
+            await model.load()
+
+            // Slash noise trims away (a "/a//b/" entry is a/b).
+            let applied = await model.applyTypedPath(" /life//goals/ ")
+            #expect(applied == "life/goals")
+
+            // Typing a tag the post already wears is a polite no-op.
+            let again = await model.applyTypedPath("life/goals")
+            #expect(again == "life/goals")
+            #expect(model.lastError == nil, "already-tagged is never an error at this face")
+            let worn = try await db.read { try Queries.postTags($0, postID: post.id) }
+            #expect(worn.count == 1)
+
+            // Nothing typed: the field speaks instead of minting.
+            let empty = await model.applyTypedPath("   ")
+            #expect(empty == nil)
+            #expect(model.lastError != nil)
+            let tagCount = try await db.read {
+                try Int.fetchOne(
+                    $0, sql: "SELECT COUNT(*) FROM tag WHERE deleted_at IS NULL") ?? 0
+            }
+            #expect(tagCount == 2, "no stray mints on refused input")
+        }
+    }
+}

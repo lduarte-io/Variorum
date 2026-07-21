@@ -126,6 +126,73 @@ final class TagAssignmentViewModel {
         appliedTagIDs.contains(tagID)
     }
 
+    /// 13b Stage 3, 3D (N24 — her words: "I want to be able to freely type
+    /// tags in to a book, not just have to select from already created
+    /// tags"): TYPE-TO-CREATE. A typed path ("life/goals/2024") walks the
+    /// live taxonomy for its deepest existing prefix, creates the missing
+    /// remainder through the EXISTING taxonomy ops (`createTag` per
+    /// segment — the subtree path stays the op layer's), and applies the
+    /// LEAF to the post — all in ONE serialized runner turn, so a racing
+    /// duplicate refuses through the op's own guard. Already-applied
+    /// leaves no-op politely. Returns the leaf's path on success (the
+    /// field clears on it).
+    @discardableResult
+    func applyTypedPath(_ raw: String) async -> String? {
+        let segments = raw.split(separator: "/")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        guard !segments.isEmpty else {
+            lastError = "Type a tag name — “/” makes a hierarchy (life/goals)."
+            return nil
+        }
+        guard segments.allSatisfy({ !$0.contains("/") }) else {
+            lastError = "Tag names can't be empty or contain “/”."
+            return nil
+        }
+        do {
+            let post = postID
+            // Resolve the deepest existing live prefix from a read; the
+            // creates + apply then run in one serialized runner turn. A
+            // create racing between the two refuses through the op's own
+            // duplicate-path guard (surfaced, retypable) — the ops layer
+            // stays the only integrity authority.
+            let live = try await session.database.read { try Queries.allTags($0) }
+            var parentID: String?
+            var missing: [String] = []
+            var existingLeafID: String?
+            var path = ""
+            for (i, segment) in segments.enumerated() {
+                path = path.isEmpty ? segment : "\(path)/\(segment)"
+                if missing.isEmpty, let existing = live.first(where: { $0.path == path }) {
+                    parentID = existing.id
+                    if i == segments.count - 1 { existingLeafID = existing.id }
+                } else {
+                    missing.append(segment)
+                }
+            }
+            let leafPath = path
+            try await session.runner.run { [parentID, missing, existingLeafID] ops in
+                var parent = parentID
+                for segment in missing {
+                    parent = try ops.createTag(parent: parent, name: segment).id
+                }
+                guard let leafID = existingLeafID ?? parent else { return }
+                do {
+                    _ = try ops.applyTag(leafID, toPost: post)
+                } catch OperationError.alreadyTagged {
+                    // Already wearing it — typing it again is a no-op,
+                    // never an error.
+                }
+            }
+            await load()  // re-sync the sheet's rows (the new tag + check)
+            lastError = nil
+            return leafPath
+        } catch {
+            lastError = TagsViewModel.message(error)
+            return nil
+        }
+    }
+
     /// Apply or remove — exactly the Phase 2 op, then re-sync local state.
     func toggle(_ tagID: String) async {
         do {
