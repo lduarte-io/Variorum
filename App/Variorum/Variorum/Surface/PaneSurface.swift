@@ -247,7 +247,14 @@ struct PaneSurfaceView: View {
                 role: role, variantID: variantID,
                 onFocusRequest: onFocusRequest, onEdit: onEdit,
                 onSelectionChange: onSelectionChange, menuItems: menuItems)
-                .frame(minHeight: height)
+                // EXACT height, not a floor (13b 3F, AD-7): an
+                // NSViewRepresentable ACCEPTS a tall proposal, so in any
+                // composition whose row is taller than the text (the margin
+                // grid's reserved rail) a `minHeight` pane STRETCHED to the
+                // row and the wash rendered as a mostly-empty slab. The
+                // pane is always its measured content height; the width
+                // hook + publishes keep it converged (the batch-12 pin).
+                .frame(height: height)
                 .overlay(
                     RoundedRectangle(cornerRadius: tokens == nil ? 3 : 6)
                         .stroke(strokeColor, lineWidth: isLive ? 1.5 : 0.5))
