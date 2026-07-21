@@ -393,13 +393,16 @@ Commits per batch/stage with the standing message convention.
 | N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
 | N9 | AD-17 quick-entry lands in Takes where typing does nothing | **RESOLVED 1b** (the landing focuses the first slot's article pane; live transitions claim the keyboard; red-on-old) |
 | N10 | The deferred T3 slice: EditorViewModel's gesture-execution band + the projection executors move TOGETHER (one seam), plus the TakesViewModel decomposition (890→1,113, P-9 pressure) | **DONE 3C** (`8bebdbd`+`d892056` — EditorSurfaceController 1,295 ln + TakesBoardLayout + TakesChoreographer; zero test edits, Mac 542/106 parity-green; record + architect's annotation below; the ladder reviews the seam) |
-| N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | new, Stage 2 walk → Stage 3 (small: selectedIndex + onKeyPress arrows + ⏎ runs selected) |
-| N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | new, Stage 2 walk — VERIFY-THEN-FIX at an unlocked drive (observed under the locked session, where first-responder semantics are abnormal) → Stage 3 |
+| N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | **CONFIRMED live-unlocked 3A** (shots 05/06; the shadow bit the drive itself — ⌘K "extract" ⏎ ran the act, shot 41) → 3E (small: selectedIndex + onKeyPress arrows + ⏎ runs selected) |
+| N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | **VERIFIED REAL 3A** (unlocked repro, shots 08/09; click-first control types fine) → 3E fix |
 | N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment (`TutorialWalkTests.swift:1366–1370`) → 3D; the Mac-suite re-run over this seam owed at 82c9411 (first unblocked+permitted session) |
-| N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record). Suspects to TRACE, not assume: overlay add-path idempotence vs the R2-B push-at-wire double-delivery; a collapsed/stale anchor frame rendering at origin | new → Stage 3F (overlay class; trace-before-fix) |
-| N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | new → Stage 3F (T7 crowdedness; adaptive/2-row bar layout) |
-| N16 | W ceremony cut-placement (author, same session; (a) RECLASSIFIED by her follow-up): (a) sentence-boundary snapping is ratified, so the "can't move the cut" experience is likely DESIGNED — the trace now VERIFIES the sheet offers EVERY legal interior sentence boundary (a multi-boundary take must be placeable at any of them; only-the-proposed-spot-accepted would still be a bug); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask re-affirmed — "i think the scissors should still be movable" (visual drag). Root-cause treatment demanded ("not whack a mole… it can be its own phase if it needs to be") | new → Batch 3H (memo-first per R116/R120); (a)'s verify also rides the 3A drive |
-| N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path (silent = a fire-and-speak bug, trace it), and (b) the symmetric round-trip expectation is now a live product question: a merge-memo addendum lays out options (status quo + louder speech; lineage-aligned zip of fans; something else) — the DECISION IS HERS at the checkpoint (merge semantics are canonical; changing canon is a standing hard stop). (c) Her follow-up (same night): she cannot FIND the released source blocks — "there's no source blocks left after the merge?" — so the 3A drive + 3H owe a CONCRETE answer: what UI road, if any, leads from a merged block to its pre-merge takes (the unplaced-blocks view? a lineage door? session undo only?) — reported to her plainly; if the road is missing or undiscoverable, the memo addendum weighs ADDING it (canon-preserving: `derived_from` edges + the ancestors query already exist) beside the semantic options | new → 3H (memo addendum + the toast trace); the lineage-road verify → 3A; decision → end checkpoint |
+| N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record). Suspects to TRACE, not assume: overlay add-path idempotence vs the R2-B push-at-wire double-delivery; a collapsed/stale anchor frame rendering at origin | **REPRODUCED + SHARPENED 3A**: precondition = a COLD model (post's first open since launch) — first Write mount collapses ALL badges onto one top anchor (the layered capture, shots 28/29); choose is unrelated; any remount heals; warm models correct; **the class is the whole overlay family** — cold mounts also starve callout frames/💡/seams/handles until any decor-input change (shots 49–51, store JSON verified). Double-delivery suspect looks WRONG; stale-geometry-at-compute + input-equality-gate starving matches all evidence (inferred, not traced) → 3F (trace-before-fix, evidence in the 3A log) |
+| N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | **EVIDENCE CAPTURED 3A** (shot 66 — every item wraps mid-word at default width) → Stage 3F (T7 crowdedness; adaptive/2-row bar layout) |
+| N16 | W ceremony cut-placement (author, same session; (a) RECLASSIFIED by her follow-up): (a) sentence-boundary snapping is ratified, so the "can't move the cut" experience is likely DESIGNED — the trace now VERIFIES the sheet offers EVERY legal interior sentence boundary (a multi-boundary take must be placeable at any of them; only-the-proposed-spot-accepted would still be a bug); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask re-affirmed — "i think the scissors should still be movable" (visual drag). Root-cause treatment demanded ("not whack a mole… it can be its own phase if it needs to be") | **(a) VERIFIED GOOD 3A** — a 3-sentence take offered BOTH interior boundaries as cut-at buttons and the ✂ moved on click (shots 33/34); her experience = the one-boundary case + affordance plainness. (b)/(c) → Batch 3H (memo-first per R116/R120) |
+| N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path, (b) the symmetric round-trip product question (DECISION HERS at the checkpoint), (c) what UI road leads from a merged block to its pre-merge takes | **(a) CLOSED 3A — the toast SPEAKS on both paths** (Takes choreography shot 55; book-inline seam shot 68; mid-block book-inline caret gets the real refusal spoken, 67; likeliest silent-read: the 6 s auto-dismiss). **(c) ANSWERED 3A**: two roads — ⌥⌘Z right away, or Library → ⋯ → Archived & Deleted → "Unplaced blocks" (Place-in-pool door, takes intact; shot 58) — road exists, nothing points at it; the 3H memo addendum weighs naming it in the toast and/or a lineage door on the merged block. (b) → end checkpoint |
+| N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46; the exact-boundary form works, 48). Loud refusal, never silent; but snap and prose disagree. Mechanism inferred, not traced | new, 3A → 3H (snap semantics are the cut-placement memo's territory; either the snap widens suffix spans to the containing sentence's start, or the lesson prose narrows) |
+| N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | new, 3A → 3D (T5/IA design: multi-pool surfacing + a real drag geometry; the lesson-prose half rides the fix) |
+| N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | new, 3A → 3E (needs a human-hand drag before defect status; if real it joins D1's book-view batch) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -3081,6 +3084,245 @@ in the run half instead) and one garbled doc-comment sentence in
 `runCrossBlockEdit` ("the join characters merge minted die with the
 deleted span") — both moved verbatim; cleanup is the ladder's call, not
 a parity batch's.
+
+### Batch 3A drive log (the unlocked drive — COMPLETE)
+
+**Session:** fresh Fable drive session, 2026-07-21 ~04:00–05:10 (the
+author's authorized night window). Dev-store Debug build, pid/path/
+store-fence verified (`Variorum-dev/` lsof + the footer line); session
+UNLOCKED verified empirically (synthetic click switched the sidebar
+selection — shot 01); own `caffeinate -d`; the axdrive tool rebuilt in
+the scratchpad (CGEventPostToPid keys + menu AXPress + session-level
+mouse + window-scoped `screencapture -l`; source preserved at the
+scratchpad, pattern unchanged from Stage 0(c)/2). Screenshots (~50):
+`notes/plans/phase-13b-stage3-screens/` (gitignored, entry added this
+commit). **ZERO code changes; zero fixes owed** — every stumble was
+either a known ledger row (verified + recorded) or a NEW row (no fix
+per the triage rule; nothing met the happy-path-breaker fix bar,
+because every breaker traced to an already-owned row's class). Mac
+suite not re-run (no code changed; 542/106 stands from 3C's three
+runs). The dev store was left PRISTINE by a final Help ▸ Restore
+Tutorial… (22 tagged posts verified); residue outside the restore's
+scope, recorded: the drive's own "Untitled" quick post ("the 3A quick
+post…" — user-shaped by design) beside the stage-2 walk's quick posts.
+The owed 3C `/Applications` refresh was executed at this session's
+zero-instance close (Release build + copy; recorded below).
+
+**Per-item verdicts (the brief's 12, in drive order):**
+
+7. **Restore confirm's Replace press — PASS** (done FIRST as directed).
+   The confirm is its own modal alert window (layer 8); the copy is the
+   round-1 hardened shape verbatim ("…every post tagged exactly
+   'tutorial', every pool named 'tutorial scraps', and every book named
+   'the field guide' are deleted and re-seeded. Nothing else is
+   touched." — shots 02/03); Replace ran the wholesale replace, the
+   fresh book AUTO-OPENED, and the toast spoke ("The tutorial is fresh —
+   'the field guide' is on your shelf.", shot 04). Exercised twice
+   (drive open + close), both clean.
+10. **The two blank utility windows — IDENTIFIED, no app defect.**
+   lldb attach (Debug, get-task-allow) + CGWindowList: the 500×500
+   layer-0 blank = `TUINSWindow` from **TextInputUIMacHelper.framework**
+   (the system text-input candidate/accent machinery; isVisible=0);
+   the 312×237 layer-101 panel = `SPRoundedWindow` from
+   **SafariPlatformSupport.framework** (rides WebKit, which the
+   reference panel links; isVisible=0); plus four 1728×33 AppKit
+   menu-bar strips not in `NSApp.windows`. ALL are onscreen=false —
+   never rendered in a normal session; the Stage 2 sighting was the
+   locked-session enumeration seeing offscreen windows. CLOSED.
+8. **Palette ↓-stepping — N11 CONFIRMED live-unlocked.** ⌘K "divide":
+   the › marker sits on the act row and ↓ does not move it (shots
+   05/06 identical; the arrow lands in the text field). The shadowing
+   consequence bit the drive itself: ⌘K "extract" ⏎ ran the EXTRACT
+   ACT (real refusal toast) instead of opening the extract lesson
+   (shot 41) — N11's "lessons unreachable first by ⏎" verbatim. → 3E
+   unchanged.
+9. **N12 — VERIFIED REAL, not a lock artifact.** Bare ⌘1 into Write
+   then typing: the mode arrives (bar even shows blk 4/4) but
+   "N12TEST" lands NOWHERE (shots 08/09); the click-first control
+   types fine. → 3E fix stands.
+3. **Typing/crystallization surface half + N9 — PASS.** Typed past a
+   paragraph at the post end: blk 4/4 → 6/6 — paragraph-1 crystallized
+   when paragraph 2 began AND the trailing partial idle-minted (shots
+   11/12); seams show the boundaries (13). The N9 landing LIVE: shelf
+   quick-entry ⏎ → post opens in Takes, ring claimed, typing landed
+   with zero clicks (shot 14; the quick-entry line lands as block
+   content, header "Untitled" — matches the shelf's own copy, no
+   promise broken).
+12-N14. **REPRODUCED DETERMINISTICALLY + the layered state captured +
+   the class GENERALIZED.** The repro precondition is a **COLD model —
+   the post's first open since app launch** (not the choose, not the
+   arrival mode): the first Write mount renders every ⑂ badge at the
+   TOP of the document collapsed onto one anchor — after relaunch the
+   two-fan lesson shows "⑂2 stacked ON ⑂4" at the top-right, her
+   "lays on top of the other take button" exactly (shots 28/29; single-
+   badge form 16/26). Choose neither causes nor heals it (18–20); ANY
+   mode-switch remount heals (21); warm models render correctly
+   (23/24/27 controls). **The class is the whole overlay family, not
+   badges:** the shaping lesson's COLD first mount rendered NO callout
+   frame, NO 💡, NO seams, NO handles — store JSON verified present —
+   and a seams double-toggle (any decor-input change) bloomed
+   everything (shots 49/50/51). Her "happens in other places too"
+   explained. Suspected mechanism (INFERRED, not traced — 3F owns
+   trace-before-fix): the cold load computes overlay state before
+   editor geometry exists; the R2-B/walk-fix-2 wire-push faithfully
+   delivers those garbage-geometry frames; the input-equality gates
+   (`lastDecorState`, `result != badges`) then starve re-delivery
+   because the INPUTS never change — the initial-layout completion is
+   not a refresh trigger. The ledger row's "R2-B double-delivery"
+   suspect looks WRONG (no duplication observed — the "doubling" is
+   two blocks' badges sharing one collapsed anchor); the "stale anchor
+   frame" suspect matches everything. → 3F, evidence attached.
+1. **The ceremony sheet end-to-end — PASS, all halves.** Invoked from
+   TAKES via the bar's divide door: the choreography visibly switched
+   to Write and opened the sheet with the carried caret's cut
+   pre-placed (shot 33). Checklist default = only the shown take
+   checked (memo-faithful); checking take 2 demanded its cut ("place
+   the cut below" + **Divide disabled while a checked take is
+   un-placed** — the memo's rule live, shot 35); Cancel INERT (fresh
+   state on re-open, 37b/38); Confirm executed the divide (blk 4→5,
+   first-halves/second-halves fans ⑂2+⑂2, unchecked take 3 stayed
+   off-stage, shot 39); ⌥⌘Z restored the whole with the per-op label
+   ("Undid: Divide into Variants", shot 40).
+12-N16(a). **VERIFIED — the cut is placeable at EVERY legal interior
+   boundary.** A 3-sentence take showed BOTH interior boundaries as
+   "cut at:" buttons; clicking the second MOVED the ✂ (shots 33/34).
+   Her "can't move the cut" reads as the one-boundary case (a
+   2-sentence take has exactly one legal spot) plus the affordance's
+   plainness — (b)/(c) stay 3H design asks. (a) CLOSES as
+   works-as-ratified.
+2. **Precise selections — extract + make-block at the staged spans —
+   PASS, with one new finding.** Extract of the staged closing
+   sentence worked at the exact boundary (3→4 blocks, source identity
+   kept, shot 48); Make Block freed the staged middle sentence via the
+   compound (5→7 blocks, shot 52) — both through real menu doors. NEW
+   (row N18): a suffix selection starting LATE in the final sentence
+   refuses ("No legal boundary for that here.", shots 45/46) — the
+   start edge appears to round to the NEAREST boundary (forward, to
+   the block end ⇒ empty span) while the lesson promises "select from
+   ANYWHERE in this paragraph to its end". Mechanism inferred, not
+   traced; loud refusal, not silent; but prose vs snap disagree. → N18.
+12-N17(a). **The merge-folds-a-fan toast SPEAKS on BOTH driven
+   paths.** From Takes (bar door → choreography): "Merged the visible
+   takes — 1 other take stays with the released block in lineage (undo
+   brings it back here)." (shot 55). From BOOK-INLINE (the bar's merge
+   at a seam): same toast over the book view (shot 68); a mid-block
+   caret there got the real Write refusal spoken (67) — fire-and-speak
+   holds. NO silent path found; her silent experience is most likely
+   the 6-second auto-dismiss or a covering surface. The fire-and-speak
+   half of N17(a) CLOSES; the round-trip product question (b) remains
+   hers at the checkpoint.
+12-N17(c). **THE LINEAGE-ROAD ANSWER (for the author, step by step):**
+   after a fanned merge there are exactly TWO roads to the released
+   source blocks and their takes — **(1) right away:** ⌥⌘Z (Edit ▸
+   Undo Merge) restores the source blocks in place, takes and all (the
+   toast names this road). **(2) any time later:** Library → the ⋯
+   menu (top right) → **Archived & Deleted** → the **"Unplaced
+   blocks"** section lists every released source block with its text —
+   each row has a **"Place in pool"** door that brings the block back
+   as a placeable object, ALL its takes intact (shot 58; store
+   verified: both released blocks live, spare take active, the
+   `derived_from`/merge edges present). What is NOT a road: Compare
+   (version-linked posts only), Outline (outline↔draft posts only),
+   the post's Blocks tab (placed blocks only), the sidebar Blocks area
+   (a pool's scraps, see N19). HONEST DISCOVERABILITY VERDICT: the
+   road exists but nothing points at it — the toast says "in lineage"
+   without naming a place, and "Archived & Deleted" is not where
+   "lineage" suggests looking. The 3H memo addendum should weigh
+   naming the road in the toast and/or a lineage door on the merged
+   block (both canon-preserving) beside the semantic options.
+4. **Archive recovery through Write's panel — PASS.** ⌘⇧A on the
+   staged spare take leaves the board with the toast "Take archived —
+   it stays in the block's history (unarchive below)." (shot 82);
+   Write → caret in the block → the takes panel's **"archived takes"**
+   list shows it with **Unarchive / Delete**; Unarchive returns it to
+   the live fan (shots 84/85). The lesson's honesty note matches
+   shipped behavior exactly. (N1/T5's in-mode road remains 3D's.)
+5. **Drags — split verdict.** **Canvas cards: PASS** — dragging a
+   card by its EDGE moves it freely and it stays (shot 78); a drag
+   started in the card's TEXT selects text instead (the card body is a
+   live surface — R8-consistent, worth a 3F glance for a grab
+   affordance). **Chapter reorder: the ACT works via the navigator's
+   context menu** (Move Up/Down verified in the store both ways, shots
+   71/72) **but drag-reorder never committed** under synthetic drags —
+   the drop indicator line appeared (then froze on attempt 1, cleared
+   later) and the store never changed (two attempts incl. a slow
+   spring-loaded profile) → NEW row N20, needs a human-hand check
+   before defect status. **Scrap → draft (plain AND ⌥): NOT DRIVABLE —
+   NEW row N19**, see below.
+6. **Save-panel exports — PASS ×3, no TCC prompts** (the save panel IS
+   the sandbox grant; files landed in real ~/Documents, then cleaned
+   up). **Block** export via File ▸ Export Block as Markdown…: the
+   ratified Alternates shape with the take listed (the tocHandle
+   default filename). **Book** export via the shelf row's Export
+   Markdown…: **CHAPTER HEADINGS PRESENT** (`# the field guide` /
+   `## welcome` / `### start here` …) — **the N13/3B seam's first UI
+   sighting: chapters reach export through the existing door with
+   zero face work, exactly as the 3B record predicted.** **Post**
+   export via the Library row's Export ▸ Markdown with Takes…: correct
+   content. PDF doors present, not driven (Markdown was the contract).
+11. **The NIT-4 raw-ops acts through REAL doors — ALL DRIVEN:**
+   makeBlock (Block ▸ Make Block from Selection, shot 52) · choose
+   (the Write takes panel's ✓, shots 17/18, and the swap rendered) ·
+   ceremony (bar divide door from Takes + menu door from Write, shots
+   33–40) · extract (Block ▸ Extract Selection, shot 48) · merge (the
+   Takes bar door + the book-inline bar door, shots 55/68). Every act
+   verified against the store or the rendered surface.
+12-N15. **Evidence captured:** the book-inline block bar at default
+   width wraps EVERY item mid-word ("com mit ⌘s", "his tor y",
+   "div ide", "mak e blo ck"… — shot 66), matching and exceeding her
+   screenshot. → 3F unchanged.
+
+**New ledger rows (no fixes, per triage):**
+- **N18** — extract/make-block boundary snapping rounds the selection's
+  start edge to the NEAREST boundary, so a suffix selection starting
+  late in the block's final sentence refuses ("No legal boundary…")
+  while the extract lesson promises "select from anywhere … to its
+  end" (shots 45/46 vs 48). Mechanism inferred (planner's snap
+  choice), not traced. Either the snap widens to the containing
+  sentence's start for suffix spans, or the lesson prose narrows —
+  snap semantics are 3H's memo territory. → 3H.
+- **N19** — the tutorial scraps are UNREACHABLE and scrap→draft has no
+  drag geometry: `PoolViewModel.activePool = pools.first`
+  (PoolSection.swift:37 — "the section shows the oldest") makes the
+  Blocks area list ONLY the oldest pool (the dev corpus's "scraps",
+  30 rows), so "tutorial scraps" renders NOWHERE (grep of the AX tree
+  + store cross-check); the pool lesson's instruction ("Open the
+  Blocks area and drag one into any lesson post") is unfollowable on
+  any store with an older pool — and even where the scraps DO list,
+  NO layout puts a scrap list and a draft on screen together (the drag
+  payload `.onDrag` and the editor's `performDragOperation`/⌥-fan
+  target both exist in code, orphaned; no second window; the
+  canvas-on-a-post renders the scrap tag FILTER but zero scraps —
+  shots 74/75/76/79). On the author's real store the tutorial pool is
+  likely `pools.first` so the listing half may not bite there — the
+  geometry half still does. → 3D (T5/IA), with the lesson-prose half.
+- **N20** — chapter drag-reorder in the book navigator never commits
+  under synthetic drags (indicator renders, store unchanged; the
+  context-menu Move Up/Down road works and is store-verified). Needs a
+  human-hand drag before defect status; if real, it's D1's batch. → 3E.
+
+**Ledger rows verified/closed this drive:** N11 confirmed (→3E) · N12
+VERIFIED REAL (→3E) · N14 reproduced + sharpened (→3F) · N15 evidence
+(→3F) · N16(a) CLOSED works-as-ratified ((b)/(c) → 3H) · N17(a) CLOSED
+speaks-on-both-paths ((b) → checkpoint; (c) ANSWERED above, memo
+addendum note → 3H) · item 10's blank windows CLOSED (system
+machinery, never visible).
+
+**Tool notes (for future drives):** pid-posted key equivalents mostly
+route (⌘K/⌘1–7/⌘T family all fine) but ⌘⇧B did NOT reach the menu item
+while an NSTextView had focus (the menu AXPress works — prefer AXPress
+for menu acts) and Return never confirmed the NSSavePanel (click the
+Save button by frame instead); displayed-vs-global coordinate
+conversion errors caused two harmless mis-clicks early — convert every
+time (g = d·0.815 + origin at 2× on this window). SwiftUI
+drag-and-drop DOES engage from synthetic drags for freeform surfaces
+(canvas) but List-reorder drops never committed (N20's ambiguity).
+
+**`/Applications` refresh (the owed 3C item):** executed at this
+session's close — zero instances pgrep-verified, Release build green,
+product copied; the author's next launch carries the 3B+3C build. The
+first drive OVER that build was this session (Debug twin of the same
+source), and its verdicts stand for 3D–3H sequencing.
 
 **For the ladder's reviewer (standing foci from the brief + this
 batch):** (a) the parity claim — pins unmodified, verified by the
