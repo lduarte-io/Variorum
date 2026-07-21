@@ -409,6 +409,7 @@ Commits per batch/stage with the standing message convention.
 | N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | **RESOLVED 3D** (commit c7c50cf — the tag-entry face types-to-create: paths create missing levels through the taxonomy ops, the leaf applies, one runner turn; forgiving edges; red by revert. Recorded: if she meant tagging the BOOK OBJECT — readings carry no tags in the schema — that is a checkpoint model question) |
 | N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | **RESOLVED 3F** (commit e511710 — choosing is the card's full-width clickable HEADER (`TakeChooseHeader`: "choose" / "✓ chosen", ONE checkmark ever, text box keeps its whole width — her header ask verbatim); the stack card unified onto the same grammar; cards widen 220→250 ("a little bit wider"); screenshot 3f-03) |
 | N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | new, author → verify next drive / design Stage 4 |
+| N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -3974,3 +3975,120 @@ grid's engaged-shift judgment call (a) against her design inputs.
 **Clean bill (abridged; the full verification list is in the round-1 session's report, its substance re-verifiable from the pins):** suites re-run by the reviewer; the 3B seam's operations conventions + export totality + smart-book byte-parity + Sync/-untouched all diff-verified; 3C's moved bodies mechanically compared (differ only by the four sanctioned seam primitives whose bodies reproduce the removed text verbatim; write-order equivalence confirmed; the unowned lifetime argument holds; observation postures preserved); N14's ordering sound in every constructible interleaving with the read tier provably safe; registry declared⇔rendered + R118 held on every new face incl. the recorded renameLens exemption; refusals outrank road speech (pinned); P1–P3 on every new surface; D1/N22/N21 mechanisms verified; N20's needs-human-verify honest; the tutorial's prose matches shipped behavior on every checked edit; the ledger holds no unowned open rows.
 
 **Architect's routing (2026-07-21):** MINOR-1 → RESOLVED-BY-ARCHITECT pre-pass (the correction notes above + the ledger cell, this commit; the reviewer's fact re-verified by the architect's own grep). MINOR-2 + NIT-1/2/3/4 → ONE fresh fix session. MINOR-2's order is conditional per the hallucination guard: BUILD THE PROPOSED PIN FIRST as the confirm (hosted inline editor, width resize, badge-frame assert) — if it runs RED the finding is CONFIRMED, fix it (wire the settle trigger's geometry axis for the inline form, symmetric with the detail editor's resize coverage) and keep the pin; if it runs GREEN the finding is record-only for the next drive (no fix without a traced red). NITs: trace each, fix cheaply, no pins owed (NIT-2's tidy may carry one if free). Round 2 (fresh reviewer) reviews the fix diff per the ladder.
+
+### Stage 3 ladder — round 1 dispositions (fix pass)
+
+**Session:** fresh Fable fix session, 2026-07-21 (~16:40–17:30). Commits
+**a4739d7** (MINOR-2 pin + fix) · **b96f2b3** (NIT-2 + pin) · **c48059b**
+(NIT-1/3/4) · the record commit carrying this section. **Counts:
+Mac 560/112 → 562/112 GREEN** (full suite at close; +2 pins) ·
+**core 762/92 green, BYTE-UNTOUCHED** (`git diff a9c0ac4..HEAD --
+Sources/ Tests/ Package.swift` empty; core re-run fresh this session).
+**`/Applications` refresh OWED** — the author's instance (pid 69653) was
+live at close and stayed live; skip-and-record per the standing gate
+(the 3C precedent). Execute at the next zero-instance window.
+
+**[MINOR-2] · CONFIRMED-AND-FIXED (the pin-first order ran exactly as
+routed).** The proposed pin was built FIRST as the confirm
+(`inlineBadgesTrackAWidthReflow`, InlineEditorWindowTests — the real
+`InlineEditorSurface.Coordinator` over a hosted inline editor, two
+fanned blocks with long wrapping prose between, wrapper width 700 →
+360) and ran **RED on current code**: with the before phase at the
+app's steady state (badges delivered at real frames, delivered ==
+generation), the reflow left the ⑂ badge **816.0 pt** from the
+reflowed fragment through 2 s of display passes and queue turns — the
+reviewer's mechanism verbatim (geometry-only reflow bumps no storage
+generation; `applyChrome` equality-gated; no ScrollAnchorController on
+the inline form). **The fix (commit a4739d7), the honest seam traced:**
+the width reflow is a GENERATION INPUT — `EditorTextView.setFrameSize`
+reports width changes (`onWidthReflow`), and the model's handler bumps
+`overlayGeometryGeneration` **and schedules the coalesced delivery
+directly**, because TK2's lazy invalidation guarantees no display pass
+after a bare frame change (measured in the harness: `needsDisplay`
+stays false after `setFrameSize` AND after a full remeasure — a
+bump-only fix waiting on `viewWillDraw` verifiably never delivered).
+Delivery stays on the next runloop turn, after the same SwiftUI
+cycle's remeasure has laid the new width out; the delivered/scheduled
+guards coalesce any riding draw-pass report; the detail editor
+inherits the axis as hardening (its scroll coverage stands). **Pin
+revert-verified:** wiring unwired → RED (gen 2→2 at the reflow, badge
+816.0 off) → GREEN restored. Ledger row **N27** added, resolved
+in-pass. **Two harness lessons recorded in the pin (the 3E
+bare-NSWindow family):** a headless test window never genuinely draws,
+so (a) the before phase MUST reach delivered == generation through the
+settle path — a pending undelivered mount generation heals the reflow
+by accident and masks the red (observed: an early pin shape went
+revert-GREEN exactly this way); (b) sync `RunLoop.run` pumping does
+not drain the settle trigger's main-queue hop under Swift Testing —
+the async `Task.yield`/`sleep` poll (the N14 pin's pattern) does.
+
+**[NIT-1] · AGREED-FIXED (deleted; commit c48059b).** Traced: the
+per-segment guard's condition is structurally impossible —
+`split(separator: "/")` can never yield a segment containing `/`, and
+the `.filter { !$0.isEmpty }` above it drops empties — so the
+"Tag names can't be empty or contain "/"" refusal copy was
+unreachable dead code. The reviewer's make-it-real alternative was
+declined with a reason: the forgiving collapse of slash noise
+("/a//b/" applies a/b) is the SHIPPED, PINNED behavior
+(`typedEdgesAreForgivingAndRefusalsSpeak`), and the first guard
+(all-slash/whitespace input) remains — reachable, tested, good copy.
+A comment at the site records why no per-segment guard exists.
+
+**[NIT-2] · AGREED-FIXED (retry cap — the reviewer's second option;
+commit b96f2b3, with the welcome free pin).** Traced: `pageToReveal`
+parks `(blockID, variantID)` when the revealed take isn't in the
+adopted projection, and `adopt` re-parked unconditionally — a take
+that never arrives (refused mint, raced delete) re-parked forever;
+worse than idle cost, the stale park could still fire a surprise
+page-jump arbitrarily late if the id ever arrived. The park now
+carries `retriesLeft: 2` (the real mint sequence resolves on the first
+adopt; a stale emission ordered before the mint on the second); a
+re-park inherits the DECREMENTED budget — a fresh reveal gets a fresh
+one — and drops at zero. Past the budget only the auto-page is
+forgone (fan open, ring focused — recorded accepted degradation).
+**Free pin** `aRevealForATakeThatNeverArrivesStopsRetrying` (park, two
+stale adopts, the take arrives three adopts late → `pageOffset` stays
+0) — revert-RED (unconditional re-park restored: `pageOffset → 2`,
+the late surprise jump) → GREEN restored; the 3F auto-page pin green
+on both sides, as its sequence resolves inside the budget.
+
+**[NIT-3] · AGREED-FIXED (both cleanups; commit c48059b).**
+(a) `planVisibleTakeEdit`'s vestigial `_ = position` dropped with its
+`enumerated()` dance (plain `for i in touched`); the
+replacement-rides-the-first-piece comment moved to where it is TRUE —
+`runVisibleTakeEdit` places it (`i == 0 ? edit.replacement : ""`),
+emptying every later piece's slot. (b) `runCrossBlockEdit`'s garbled
+doc sentence ("the join characters merge minted die with the deleted
+span") repaired from the code's actual behavior: the mapped range's
+ends are anchored in the verbatim-preserved leading/trailing pieces
+(`intraStart` from the first piece's start; the trailing keep measured
+back from the last piece's end), so **every join character the merges
+minted falls inside the replaced span and is deleted with it** — the
+surface reads exactly "the selection vanished". Truth of the claim
+verified against the range arithmetic before writing it (all joins lie
+strictly between the two anchors).
+
+**[NIT-4] · AGREED-FIXED (copy only; commit c48059b).** Routing
+verified before wording: Write's ⌘⇧A is `archiveCaretTake`
+(EditorView:183 — Write-only; the boards have their own
+`archiveFocusedTake`), and ⌘⇧T on Write opens the caret block's
+`WriteTakesPanel`, whose "archived takes" list ships since 3D. The
+road copy now names that NEAREST road in the Takes-board siblings'
+voice: "Take archived — never gone: the takes panel (⌘⇧T) keeps it
+under "archived takes"." **Tutorial consistency checked, no edit
+needed:** the "keeping takes safe" lesson already teaches the board's
+"archived · 1" door AND names Write's panel explicitly ("Write's
+takes panel keeps the same archived list, if you're over there") —
+aligned as-is; no test pinned the old string.
+
+**For round 2 (fresh reviewer):** (a) the MINOR-2 fix's
+direct-schedule choice — the width handler calls
+`overlayLayoutDidSettle()` itself rather than waiting for a
+`viewWillDraw` report; verify the delivery-ordering argument (the hop
+lands after the same cycle's remeasure; the guards coalesce a riding
+draw report) and that no path can deliver over colder layout than the
+pre-fix behavior; (b) the detail editor now takes width bumps too —
+confirm the coalesced extra refresh is harmless beside
+ScrollAnchorController's immediate one; (c) NIT-2's budget constant
+(2) and the accepted three-adopts-late degradation; (d) NIT-1's
+delete-over-make-real call against the pinned forgiving parse.
