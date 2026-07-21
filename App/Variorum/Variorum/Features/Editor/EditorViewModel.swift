@@ -1050,12 +1050,14 @@ final class EditorViewModel {
     /// (Step 3): caret placement from the read-tier click, then the
     /// focus-then-fan panel where a badge tap drove the focus.
     private func applyFocusSeeds() {
+        var caretClaimed = false
         if let seed = pendingCaretSeed, let textView {
             pendingCaretSeed = nil
             let clamped = min(max(0, seed), max(0, index.documentLength))
             textView.setSelectedRange(NSRange(location: clamped, length: 0))
             textView.window?.makeFirstResponder(textView)
             updateCaretContext()
+            caretClaimed = true
         }
         if let fanBlock = pendingFanSeed {
             pendingFanSeed = nil
@@ -1075,6 +1077,34 @@ final class EditorViewModel {
            intent.postID == postID {
             session.commandRouter.pendingWriteIntent = nil
             applyWriteIntent(intent)
+            caretClaimed = true
+        }
+        // 13b Stage 3, 3E (N12): a BARE arrival — no seed, no parked
+        // intent — claims the caret too, so "⌘1 then type" is literal
+        // (the N9 landing doctrine on Write's arrival: an arriving
+        // editing surface is for typing, with zero clicks owed). Scoped
+        // to the DETAIL editor (`scrollView != nil`): the inline
+        // book-view editor mounts on the book's own focus model and must
+        // never steal the window's focus as a side effect of rendering.
+        // Nothing rides the router (no new parcel — the noteMode
+        // staleness discipline is untouched by construction); the caret
+        // lands at the document start, matching the Takes landing's
+        // first-block choice. The window can lag the first projection by
+        // a beat (attach precedes insertion), so a missing window gets
+        // ONE next-turn retry, then gives up quietly.
+        if !caretClaimed, scrollView != nil, let textView {
+            let claim = { [weak textView, weak self] in
+                guard let textView, let window = textView.window else { return false }
+                if textView.selectedRange().location > (self?.index.documentLength ?? 0) {
+                    textView.setSelectedRange(NSRange(location: 0, length: 0))
+                }
+                window.makeFirstResponder(textView)
+                self?.updateCaretContext()
+                return true
+            }
+            if !claim() {
+                Task { @MainActor in _ = claim() }
+            }
         }
     }
 

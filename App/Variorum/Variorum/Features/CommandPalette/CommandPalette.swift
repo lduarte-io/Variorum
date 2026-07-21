@@ -53,6 +53,22 @@ final class PaletteModel {
     /// Generation-stamped adoption (round 2, MINOR — the Phase 8 ruling).
     private var generation = 0
 
+    /// 13b Stage 3, 3E (N11): keyboard row-stepping. The › marker sits on
+    /// the SELECTED row (not always the first), ↓/↑ move it, ⏎ runs it.
+    /// Every refresh resets to the top (a new query is a new list — the
+    /// pre-N11 ⏎-runs-first behavior is the selection's DEFAULT, no longer
+    /// its only truth).
+    private(set) var selectedIndex = 0
+
+    var selectedItem: PaletteItem? {
+        items.indices.contains(selectedIndex) ? items[selectedIndex] : nil
+    }
+
+    func moveSelection(by delta: Int) {
+        guard !items.isEmpty else { return }
+        selectedIndex = min(max(selectedIndex + delta, 0), items.count - 1)
+    }
+
     init(session: AppSession) {
         self.session = session
     }
@@ -83,6 +99,7 @@ final class PaletteModel {
                 homeContainerID: hit.homeContainerID, homeIsPool: hit.homeIsPool)
         }
         items = result
+        selectedIndex = 0  // N11: a fresh list selects its top row
     }
 
     /// Executes a row. Block hits carry their block ID beside the home
@@ -139,9 +156,21 @@ struct CommandPaletteView: View {
                 .font(tokens.body)
                 .padding(12)
                 .focused($fieldFocused)
+                // 13b 3E (N11): ↓/↑ step the › marker through the rows
+                // while the field keeps the keyboard; ⏎ runs the SELECTED
+                // row (the field's caret never needed the arrows — this is
+                // a one-line list navigator, the ⌘K grammar everywhere).
+                .onKeyPress(.downArrow) {
+                    model.moveSelection(by: 1)
+                    return .handled
+                }
+                .onKeyPress(.upArrow) {
+                    model.moveSelection(by: -1)
+                    return .handled
+                }
                 .onSubmit {
-                    if let first = model.items.first {
-                        model.execute(first) { selection, blockID in
+                    if let selected = model.selectedItem {
+                        model.execute(selected) { selection, blockID in
                             onOpen(selection, blockID)
                         }
                         dismiss()
@@ -156,9 +185,9 @@ struct CommandPaletteView: View {
                     dismiss()
                 } label: {
                     HStack(spacing: 8) {
-                        // Batch 9 (R100's continuation): ⏎ runs the FIRST
-                        // row — it wears the color › so the way is shown.
-                        Text(item.id == model.items.first?.id
+                        // N11 (13b 3E): ⏎ runs the SELECTED row — the ›
+                        // marker rides the selection, moved by ↓/↑.
+                        Text(item.id == model.selectedItem?.id
                             ? tokens.selectionMarker.trimmingCharacters(in: .whitespaces)
                             : " ")
                             .font(tokens.body.weight(.bold))

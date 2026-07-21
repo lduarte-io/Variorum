@@ -163,6 +163,58 @@ struct PromoteAndPaletteTests {
         }
     }
 
+    /// 13b Stage 3, 3E (N11): keyboard row-stepping — ⏎ runs the SELECTED
+    /// row, not always the first; ↓/↑ move the selection (clamped); a
+    /// refresh resets to the top. The 3A drive's shadow bite is the named
+    /// case: ⌘K "extract" ⏎ ran the EXTRACT ACT instead of opening the
+    /// extract lesson — stepping down first now reaches the post row.
+    /// Red-on-old: `selectedItem`/`moveSelection` reverted to first-row-
+    /// always turns the stepped-execution half red (behavioral revert).
+    @Test func paletteArrowsMoveTheSelectionAndEnterRunsIt() async throws {
+        try await withShellSession { session, _ in
+            _ = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "extract lesson")
+                _ = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
+                return post.id
+            }
+            let model = PaletteModel(session: session)
+            var executed: [String] = []
+            model.commands = [("Extract Selection", { executed.append("act") })]
+            model.query = "extract"
+            await model.refresh()
+
+            // The shadow shape: the act row first, the same-named post
+            // beneath it. Default selection = the top row (the pre-N11
+            // behavior is the default, not the only truth).
+            #expect(model.items.count >= 2)
+            #expect(model.selectedIndex == 0)
+            #expect(model.selectedItem?.kind == .command)
+
+            // ↓ moves the › marker; ⏎ runs the SELECTED row.
+            model.moveSelection(by: 1)
+            #expect(model.selectedItem?.kind == .post,
+                    "the shadowed post row is keyboard-reachable now")
+            var opened: SidebarSelection?
+            if let selected = model.selectedItem {
+                model.execute(selected) { picked, _ in opened = picked }
+            }
+            #expect(executed.isEmpty, "the act did NOT run — the selection did")
+            if case .post = opened {} else {
+                Issue.record("stepping+⏎ opens the post — got \(String(describing: opened))")
+            }
+
+            // Clamps at both ends; ↑ returns; refresh resets.
+            model.moveSelection(by: 99)
+            #expect(model.selectedIndex == model.items.count - 1, "clamped at the end")
+            model.moveSelection(by: -99)
+            #expect(model.selectedIndex == 0, "clamped at the top")
+            model.moveSelection(by: 1)
+            model.query = "extract lesson"
+            await model.refresh()
+            #expect(model.selectedIndex == 0, "a fresh list selects its top row")
+        }
+    }
+
     @Test func paletteBlockHitsNavigateToTheirHome() async throws {
         // Round 2, MINOR (was a silent `break`): Enter on a block result
         // opens its HOME surface — post or Blocks pool.

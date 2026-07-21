@@ -214,3 +214,101 @@ struct FocusHandoffTests {
         }
     }
 }
+
+// MARK: - 13b Stage 3, Batch 3E (N12): the bare arrival claims the caret
+
+/// N12 (3A-verified real, unlocked): a bare mode switch into Write — ⌘1,
+/// no seed, no parked intent — left the caret NOWHERE; "⌘1 then type"
+/// typed into the void. The fix rides `applyFocusSeeds` (the arriving
+/// editor's one landing door): with nothing else claiming, the DETAIL
+/// editor takes first responder at its first render. Scoped: the inline
+/// book-view editor (scrollView nil) must NEVER steal focus as a render
+/// side effect — the book's own focus model drives it.
+/// Red-on-old: the claim branch is new — reverting it restores the
+/// no-first-responder arrival and the first pin fails.
+@MainActor
+@Suite("Write's bare-arrival caret claim (13b 3E — N12)", .serialized)
+struct BareArrivalFocusTests {
+    @Test func aBareModeSwitchIntoWriteClaimsTheCaret() async throws {
+        try await withEditor(seedBlocks: ["Alpha.", "Beta."]) { h in
+            // A FRESH detail editor for the same post, hosted in a real
+            // window BEFORE its first projection — the ⌘1 arrival shape.
+            let model = EditorViewModel(session: h.session, postID: h.postID)
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: model)
+            delegate.wire(to: textView)
+            model.attach(textView: textView, scrollView: scrollView)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 500),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            window.contentView = scrollView
+            window.orderFrontRegardless()
+            #expect(window.firstResponder !== textView, "pre-arrival: nothing claimed")
+
+            // The first projection arrives (the observation's delivery,
+            // driven by hand): no caret seed, no fan seed, no intent.
+            let (slots, header) = try await h.database.read { [postID = h.postID] db in
+                (try Queries.renderPost(db, containerID: postID),
+                 try Queries.containerHeader(db, containerID: postID))
+            }
+            model.adoptHeader(header)
+            model.applyProjection(slots)
+
+            #expect(window.firstResponder === textView,
+                    "\u{2318}1 then type is literal — the arriving editor holds the caret")
+            #expect(textView.selectedRange().location <= model.index.documentLength)
+            model.teardown()
+        }
+    }
+
+    @Test func theInlineBookEditorNeverStealsFocusOnRender() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            // The INLINE shape (the book view's): scrollView nil. Its
+            // render must not grab the window from whatever the user is
+            // doing — the book's focus model owns that.
+            let model = EditorViewModel(session: h.session, postID: h.postID)
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let textView = EditorTextView.makeInlineEditor()
+            let delegate = EditorSurfaceDelegate(model: model)
+            delegate.wire(to: textView)
+            model.attach(textView: textView, scrollView: nil)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 500),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let container = NSView(frame: NSRect(x: 0, y: 0, width: 700, height: 500))
+            container.addSubview(textView)
+            textView.frame = NSRect(x: 0, y: 0, width: 700, height: 200)
+            window.contentView = container
+            window.orderFrontRegardless()
+
+            let (slots, header) = try await h.database.read { [postID = h.postID] db in
+                (try Queries.renderPost(db, containerID: postID),
+                 try Queries.containerHeader(db, containerID: postID))
+            }
+            model.adoptHeader(header)
+            model.applyProjection(slots)
+            // Pumped turns so a (wrong) deferred claim would land too.
+            for _ in 0..<4 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(15))
+            }
+
+            #expect(window.firstResponder !== textView,
+                    "an inline render is never a focus grab")
+            model.teardown()
+        }
+    }
+}
