@@ -2836,6 +2836,21 @@ and I'm very happy with everything I've seen. It seems like stage 1 and
 interaction layer + the field guide; supports R111's restraint call on
 the looks tail (she likes the app's looks) — the 3G batch stays bounded.
 
+### The Stage 3/4 boundary (the author's 2026-07-21 directive, superseding the prep note below where they differ)
+
+The orchestrator session's LAST ACTION is to author **the Stage 4
+handoff — a handoff document + paste-ready kickoff prompt in the same
+form as `phase-13b-orchestrator-handoff.md`** (the founding session's
+cutover artifact this session was itself kicked off from). Stage 4
+opens AUTHOR-ATTENDED with a fresh implementer session; the two memo
+addenda are the kickoff's opening material. **Architect's call,
+recorded for her correction:** the R121 end-checkpoint bundle is
+ASSEMBLED at Stage 3 close as planned, and DELIVERED as part of the
+Stage 4 kickoff sitting rather than as a separate event — one sitting
+covers the checkpoint walk (judgment calls, memos, tutorial walk in
+the real store, screenshot tour, asks A1–A3 + flagged items) and the
+Stage 4 goals/tradeoffs discussion, since she will be present for both.
+
 ### The end checkpoint prep (owed by the orchestrator after the ladder)
 
 Per the handoff: bundle every recorded judgment call/PROVISIONAL from
