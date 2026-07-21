@@ -614,10 +614,12 @@ enum TutorialSeeder {
             + "moves or copies it.",
 
             "The chapter list on the left is workable: \u{FF0B} new chapter, "
-            + "right-click a chapter to rename, move, or delete it, drag the \u{2630} "
-            + "handles to reorder posts, \u{FF0B} new entry mints a post right inside "
-            + "the book. Posts show as collapsed cards — click one to expand it, "
-            + "open \u{2197} to jump into the full editor.",
+            + "right-click a chapter to rename, move, or delete it, and drag "
+            + "the \u{28FF} dots — in the list or on the page's chapter headings — "
+            + "to reorder chapters. \u{FF0B} new post mints a post right inside "
+            + "the book. Posts show as collapsed cards: clicking a card opens "
+            + "the post in the full editor; its \u{25B8} expands it in place, "
+            + "right here.",
 
             "The Book \u{B7} Read toggle at the top switches to the reading flow: "
             + "the whole book as one calm, continuous page. A finished book "

@@ -324,3 +324,117 @@ struct BookViewTests {
         }
     }
 }
+
+// MARK: - 13b Stage 3, Batch 3E (D1): focus + expansion — ONE model
+
+@MainActor
+private func countLiveEditors(in view: NSView) -> Int {
+    var count = view is EditorTextView ? 1 : 0
+    for sub in view.subviews { count += countLiveEditors(in: sub) }
+    return count
+}
+
+/// D1's mechanism was `BookView.swift`'s force-expand disjunct
+/// (`expandedPosts.contains || focused ==`): two authorities answered
+/// "is this post expanded", and the collapse door only wrote one — so
+/// collapsing the FOCUSED post no-opped, forever. The fold makes the
+/// conductor (`BookViewModel`) the one focus authority (the Stage 0
+/// verdict: `BookFocusState` — a third focus authority — dies into it):
+/// focus implies expansion, collapse releases focus.
+/// Red-on-old verified by behavioral revert: `collapse` NOT releasing
+/// focus (the old semantics translated into the new model) leaves the
+/// editor mounted and both pins fail.
+@MainActor
+@Suite("Book focus — one model (13b 3E, D1)", .serialized)
+struct BookFocusFoldTests {
+    private func pump(_ seconds: TimeInterval = 0.05) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    private func settle(
+        _ window: NSWindow, _ hosting: NSView,
+        until predicate: () -> Bool, maxTurns: Int = 40
+    ) async {
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump(0.02)
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(20))
+            if predicate() { return }
+        }
+    }
+
+    @Test func focusImpliesExpansionAndCollapseReleasesFocus() async throws {
+        try await withBookWorld(posts: 3) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+
+            #expect(!model.isExpanded(postIDs[0]), "cards by default (R106)")
+            model.focus(postIDs[0], caret: 5)
+            #expect(model.isExpanded(postIDs[0]), "focus implies expansion")
+            #expect(model.focusedPostID == postIDs[0])
+            #expect(model.caretSeed == 5)
+
+            // D1: the collapse door works ON THE FOCUSED POST.
+            model.collapse(postIDs[0])
+            #expect(!model.isExpanded(postIDs[0]), "collapsed — the disjunct is dead")
+            #expect(model.focusedPostID == nil, "collapse releases focus")
+            #expect(model.caretSeed == nil, "seeds die with the focus they rode")
+
+            // Collapsing a DIFFERENT post leaves the focus alone.
+            model.focus(postIDs[1])
+            model.expand(postIDs[2])
+            model.collapse(postIDs[2])
+            #expect(model.focusedPostID == postIDs[1])
+
+            // Collapse-all correctness (D1's second half): everything back
+            // to cards, focus released — no survivor.
+            model.collapseAll()
+            #expect(model.expandedPosts.isEmpty, "collapse all collapses ALL")
+            #expect(model.focusedPostID == nil)
+
+            model.expandAll()
+            #expect(model.expandedPosts == Set(postIDs))
+        }
+    }
+
+    @Test func collapsingTheFocusedPostUnmountsTheLiveEditor() async throws {
+        try await withBookWorld(posts: 3) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: BookView(session: session, readingID: readingID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 800)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { false }, maxTurns: 4)
+
+            // Focus the first post: the ONE live inline editor mounts.
+            model.focus(postIDs[0])
+            await settle(window, hosting, until: { countLiveEditors(in: hosting) == 1 })
+            #expect(countLiveEditors(in: hosting) == 1, "the focused post's editor mounted")
+
+            // D1 — the author's headline repro: collapse the post you're
+            // in. The editor must UNMOUNT and the card must come back.
+            model.collapse(postIDs[0])
+            await settle(window, hosting, until: { countLiveEditors(in: hosting) == 0 })
+            #expect(countLiveEditors(in: hosting) == 0,
+                    "collapsing the focused post really collapses it (the editor released)")
+            #expect(model.focusedPostID == nil)
+        }
+    }
+}

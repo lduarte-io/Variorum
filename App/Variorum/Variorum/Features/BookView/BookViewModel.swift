@@ -96,22 +96,66 @@ final class BookViewModel {
         }
         return entries[index]
     }
-}
 
-/// The book view's focus state (Phase 10 Step 3/4): exactly ONE focused
-/// post — P3's one-live-editor rule holds by construction. Seeds ride the
-/// next focus so the editor lands with the clicked caret (or the tapped
-/// badge's fan panel — interpretation 1, focus first).
-@MainActor
-@Observable
-final class BookFocusState {
+    // MARK: - Focus + expansion — ONE model (13b Stage 3, 3E: D1 + the
+    // Stage 0 verdict "fold BookFocusState — a third focus authority —
+    // into the one focus model"). What replaced BookFocusState: this
+    // conductor is now the book surface's single focus authority — the
+    // P-3 discipline the takes side gets from PaneTextAuthority, applied
+    // to "which POST holds the live inline editor". Exactly one focused
+    // post (P3's one-live-editor rule by construction); focus IMPLIES
+    // expansion; and collapse RELEASES focus — the two states can no
+    // longer disagree, which is precisely the D1 mechanism (the old
+    // `expandedPosts.contains || focused ==` force-expand disjunct read
+    // two authorities and the collapse door only wrote one).
+
     private(set) var focusedPostID: String?
+    /// Seeds ride the next focus so the editor lands with the clicked
+    /// caret (or the tapped badge's fan panel — interpretation 1, focus
+    /// first).
     private(set) var caretSeed: Int?
     private(set) var fanSeed: String?
+    /// Posts showing content (read-cheap or live) instead of their card.
+    private(set) var expandedPosts: Set<String> = []
 
+    func isExpanded(_ postID: String) -> Bool {
+        expandedPosts.contains(postID)
+    }
+
+    /// Focus a post (nil = release): the focused post is always expanded.
     func focus(_ postID: String?, caret: Int? = nil, fanBlock: String? = nil) {
         caretSeed = caret
         fanSeed = fanBlock
         focusedPostID = postID
+        if let postID { expandedPosts.insert(postID) }
+    }
+
+    /// Expand to the read tier (the card's disclosure).
+    func expand(_ postID: String) {
+        expandedPosts.insert(postID)
+    }
+
+    /// D1: collapsing a post collapses it — focused included. Focus is
+    /// RELEASED (the live editor unmounts; its teardown flushes pending
+    /// text through the per-post coordinator, the Stage 1a machinery).
+    func collapse(_ postID: String) {
+        expandedPosts.remove(postID)
+        if focusedPostID == postID {
+            focusedPostID = nil
+            caretSeed = nil
+            fanSeed = nil
+        }
+    }
+
+    /// D1's collapse-all half: everything back to cards, focus released.
+    func collapseAll() {
+        expandedPosts.removeAll()
+        focusedPostID = nil
+        caretSeed = nil
+        fanSeed = nil
+    }
+
+    func expandAll() {
+        expandedPosts.formUnion(entries.map(\.postID))
     }
 }

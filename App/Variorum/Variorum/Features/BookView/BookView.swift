@@ -21,13 +21,13 @@ struct BookView: View {
     var readingName: String?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
-    @State private var focus = BookFocusState()
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
     /// `initiallyExpanded` (batch 12, R106): posts render as collapsed
     /// CARDS by default; tests that assert on rendered post content seed
-    /// the expansion set here (the expand-all button's state, injectable).
+    /// the expansion set here (13b 3E: expansion lives on the MODEL now —
+    /// the one focus authority; the seed lands there).
     init(
         session: AppSession, readingID: String, readingName: String? = nil,
         model: BookViewModel? = nil,
@@ -36,9 +36,10 @@ struct BookView: View {
         self.session = session
         self.readingID = readingID
         self.readingName = readingName
-        _model = State(initialValue: model ?? BookViewModel(session: session, readingID: readingID))
+        let resolved = model ?? BookViewModel(session: session, readingID: readingID)
+        for postID in initiallyExpanded { resolved.expand(postID) }
+        _model = State(initialValue: resolved)
         _structure = State(initialValue: BookStructureModel(session: session, readingID: readingID))
-        _expandedPosts = State(initialValue: initiallyExpanded)
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -72,7 +73,7 @@ struct BookView: View {
                         : [(nil, model.entries)],
                     onWake: { postID in
                         structure.mode = .book
-                        focus.focus(postID)
+                        model.focus(postID)
                     })
             }
         }
@@ -198,14 +199,14 @@ struct BookView: View {
                             ForEach(group.entries, id: \.postID) { entry in
                                 Button {
                                     structure.mode = .book
-                                    focus.focus(entry.postID)
+                                    model.focus(entry.postID)
                                     scrollTarget = "page-\(entry.postID)"
                                 } label: {
                                     HStack(spacing: 2) {
                                         // Batch 9 (R100's continuation): the
                                         // focused post wears the color › in
                                         // the navigator too.
-                                        if focus.focusedPostID == entry.postID,
+                                        if model.focusedPostID == entry.postID,
                                            !tokens.selectionMarker.isEmpty {
                                             Text(tokens.selectionMarker
                                                 .trimmingCharacters(in: .whitespaces))
@@ -215,7 +216,7 @@ struct BookView: View {
                                         Text(entryTitle(entry))
                                             .font(tokens.small)
                                             .foregroundStyle(
-                                                focus.focusedPostID == entry.postID
+                                                model.focusedPostID == entry.postID
                                                     ? tokens.ink : tokens.muted)
                                             .lineLimit(1)
                                     }
@@ -275,7 +276,7 @@ struct BookView: View {
                         Button(tokens.chromeLabel("+ new entry")) {
                             Task {
                                 if let id = await structure.newEntry() {
-                                    focus.focus(id)
+                                    model.focus(id)
                                 }
                             }
                         }
@@ -289,7 +290,7 @@ struct BookView: View {
                         Button(tokens.chromeLabel("+ new post")) {
                             Task {
                                 if let id = await structure.newPost() {
-                                    focus.focus(id)
+                                    model.focus(id)
                                 }
                             }
                         }
@@ -379,12 +380,14 @@ struct BookView: View {
                                 .foregroundStyle(tokens.muted)
                             // Batch 12: posts render COLLAPSED by default —
                             // cards, not content; these are the all-doors.
+                            // 13b 3E (D1): collapse-all really collapses
+                            // ALL — the focused post's editor releases too.
                             Button(tokens.chromeLabel("expand all")) {
-                                expandedPosts = Set(model.entries.map(\.postID))
+                                model.expandAll()
                             }
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                             Button(tokens.chromeLabel("collapse all")) {
-                                expandedPosts.removeAll()
+                                model.collapseAll()
                             }
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         }
@@ -408,6 +411,7 @@ struct BookView: View {
                                 postRow(entry)
                             }
                         }
+                        bodyChapterEndZone  // N21: drag a chapter past the last
                     } else {
                         ForEach(Array(model.entries.enumerated()), id: \.element.postID) { i, entry in
                             if let section = model.sectionHeader(at: i) {
@@ -434,7 +438,7 @@ struct BookView: View {
                             Button(tokens.chromeLabel("+ new entry")) {
                                 Task {
                                     if let id = await structure.newEntry() {
-                                        focus.focus(id)
+                                        model.focus(id)
                                         scrollTarget = "page-\(id)"
                                     }
                                 }
@@ -447,7 +451,7 @@ struct BookView: View {
                             Button(tokens.chromeLabel("+ new post in this book")) {
                                 Task {
                                     if let id = await structure.newPost() {
-                                        focus.focus(id)
+                                        model.focus(id)
                                         scrollTarget = "page-\(id)"
                                     }
                                 }
@@ -503,11 +507,23 @@ struct BookView: View {
         }
     }
 
+    /// 13b 3E (N21 — her "the dots … make me feel like it should be
+    /// draggable and it isn't"): the body's chapter header now DRAGS. The
+    /// dots are honest — same insert-before semantics, same indicator
+    /// grammar, and the same model door (`moveChapter(before:)`) as the
+    /// navigator; the end zone below the last group lands a chapter last.
+    @ViewBuilder
     private func chapterHeader(_ section: ReadingSection) -> some View {
+        if bodyChapterDropTarget == section.id {
+            Rectangle()
+                .fill(tokens.ring)
+                .frame(height: 2)
+        }
         HStack(spacing: 6) {
             Text("⠿")
                 .foregroundStyle(tokens.faint)
-                .help("Chapters reorder from the navigator (Move Up / Move Down)")
+                .help("Drag to reorder this chapter — here or in the navigator "
+                    + "(right-click for Move Up / Move Down)")
             Text(tokens.chromeLabel(section.name))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
@@ -515,7 +531,46 @@ struct BookView: View {
         .padding(.top, 16)
         .id("chapter-\(section.id)")
         .contextMenu { chapterMenu(section) }
+        .draggable(section.id)
+        .dropDestination(for: String.self) { items, _ in
+            guard let dragged = items.first else { return false }
+            Task {
+                await structure.moveChapter(dragged, before: section.id)
+            }
+            return true
+        } isTargeted: { targeted in
+            if targeted {
+                bodyChapterDropTarget = section.id
+            } else if bodyChapterDropTarget == section.id {
+                bodyChapterDropTarget = nil
+            }
+        }
     }
+
+    /// The body's end drop zone (N21's twin of the navigator's R19 zone).
+    @ViewBuilder
+    private var bodyChapterEndZone: some View {
+        if structure.chaptersActive, structure.reading?.kind == .curated {
+            if bodyChapterDropAtEnd {
+                Rectangle()
+                    .fill(tokens.ring)
+                    .frame(height: 2)
+            }
+            Color.clear
+                .frame(height: 14)
+                .contentShape(Rectangle())
+                .dropDestination(for: String.self) { items, _ in
+                    guard let dragged = items.first else { return false }
+                    Task {
+                        await structure.moveChapter(dragged, before: nil)
+                    }
+                    return true
+                } isTargeted: { bodyChapterDropAtEnd = $0 }
+        }
+    }
+
+    @State private var bodyChapterDropTarget: String?
+    @State private var bodyChapterDropAtEnd = false
 
     private func entryTitle(_ entry: Queries.ReadingEntry) -> String {
         entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
@@ -536,15 +591,13 @@ struct BookView: View {
 
     /// Batch 12 (her ruling): a post shows as a collapsed CARD until
     /// expanded — "you shouldn't see the content within a post on the book
-    /// screen unless you click something." The focused post (live editor)
-    /// is always expanded. Seeded by `initiallyExpanded` (tests).
-    @State private var expandedPosts: Set<String>
-
+    /// screen unless you click something." 13b 3E (D1): expansion + focus
+    /// live on the MODEL now, ONE authority — the focused post is expanded
+    /// because `focus` insists, and `collapse` releases focus, so the old
+    /// force-expand disjunct (the D1 mechanism) is gone.
     @ViewBuilder
     private func postRow(_ entry: Queries.ReadingEntry) -> some View {
-        let expanded = expandedPosts.contains(entry.postID)
-            || focus.focusedPostID == entry.postID
-        if expanded {
+        if model.isExpanded(entry.postID) {
             postHeader(entry, expanded: true)
             postBody(entry)
                 .padding(.bottom, 16)
@@ -555,16 +608,30 @@ struct BookView: View {
     }
 
     /// The collapsed card (her referenced mockup: title, excerpt, meta —
-    /// bordered, aligned with the book title). Click = expand in place.
+    /// bordered, aligned with the book title). 13b 3E (N22 — her ruling:
+    /// "clicking on the post should bring you to it, not just the smaller
+    /// open button"): the card BODY opens the post in the full editor; the
+    /// ▸ disclosure is the expand-in-place door. Each target does what it
+    /// looks like.
     private func collapsedPostCard(_ entry: Queries.ReadingEntry) -> some View {
         Button {
-            expandedPosts.insert(entry.postID)
+            NotificationCenter.default.post(
+                name: .variorumOpenPost, object: nil,
+                userInfo: ["postID": entry.postID])
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
-                    Text("▸")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
+                    Button {
+                        model.expand(entry.postID)
+                    } label: {
+                        Text("▸")
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .padding(.horizontal, 2)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("Expand this post in place — read it right here")
                     Text(entryTitle(entry))
                         .font(tokens.body.weight(.semibold))
                         .foregroundStyle(tokens.ink)
@@ -593,6 +660,7 @@ struct BookView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .help("Click to open this post in the full editor; ▸ expands it in place")
         .id("page-\(entry.postID)")  // the scrubber's landing anchor
         .contextMenu { postChapterMenu(entry) }
     }
@@ -600,7 +668,10 @@ struct BookView: View {
     private func postHeader(_ entry: Queries.ReadingEntry, expanded: Bool = false) -> some View {
         HStack(spacing: 6) {
             if expanded {
-                Button("▾") { expandedPosts.remove(entry.postID) }
+                // 13b 3E (D1): the ONE collapse door — releases focus too
+                // (the model's rule), so collapsing the post you're typing
+                // in actually collapses it.
+                Button("▾") { model.collapse(entry.postID) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .help("Collapse this post back to its card")
             }
@@ -628,22 +699,22 @@ struct BookView: View {
 
     @ViewBuilder
     private func postBody(_ entry: Queries.ReadingEntry) -> some View {
-        if focus.focusedPostID == entry.postID {
+        if model.focusedPostID == entry.postID {
             // The ONE live editor (P3 by construction: a single focused id).
             EditorView(
                 session: session, postID: entry.postID, inline: true,
-                caretSeed: focus.caretSeed, fanSeed: focus.fanSeed)
+                caretSeed: model.caretSeed, fanSeed: model.fanSeed)
                 .id(entry.postID)
         } else {
             ReadPostView(
                 session: session, postID: entry.postID,
                 onFocusRequest: { offset in
-                    focus.focus(entry.postID, caret: offset)
+                    model.focus(entry.postID, caret: offset)
                 },
                 onBadgeTap: { blockID in
                     // Interpretation 1 (PROVISIONAL): focus FIRST, then the
                     // fan panel opens on the one live surface.
-                    focus.focus(entry.postID, fanBlock: blockID)
+                    model.focus(entry.postID, fanBlock: blockID)
                 })
                 .id("read-\(entry.postID)")
         }
