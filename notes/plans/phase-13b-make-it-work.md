@@ -2781,6 +2781,23 @@ two memo addenda authored 2026-07-21 are the opening material):**
   usability, design, polish, clunky interactions, not just defects —
   PROPOSE-ONLY: every finding brought to her to consider (taste
   questions are hers); nothing built autonomously from it.
+- **Infrastructure: parallel-use hardening (her 2026-07-21 ask — use
+  the app while stages run).** The blocker is the BUNDLE IDENTIFIER,
+  not the app's name/path: the Mac test runner launches its own copy
+  of the app and macOS (RunningBoard) refuses two instances of one
+  identity per login session; renaming `/Applications/Variorum.app`
+  changes nothing, and re-identifying the copy would give it a
+  DIFFERENT sandbox container — an empty store without her data (the
+  identifier is also the key to the data container). The clean fix,
+  Stage 4's to build: **give the TEST HOST its own bundle identifier**
+  so the runner's launched copy never collides with her running app —
+  suites then run while she writes. Verify the identity-sensitive
+  tests survive (EntitlementsTests reads the signed host; the
+  dev-store fence; defaults-reading suites). Interim etiquette stands:
+  build-for-testing compiles under her live instance; suite runs +
+  `/Applications` refreshes wait for natural app-quit windows — batch
+  latency, never correctness. (Release-era: CI on a second
+  machine/VM matching the Xcode major — the branching future's home.)
 - The OUTLINE post's utility — "go into the utility of outline post…
   and make some changes there."
 - The CANVAS view mode — same directive.
