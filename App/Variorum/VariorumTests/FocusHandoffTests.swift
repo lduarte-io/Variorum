@@ -250,6 +250,12 @@ struct BareArrivalFocusTests {
             }
             window.contentView = scrollView
             window.orderFrontRegardless()
+            // A bare NSWindow AUTO-ASSIGNS its first key view on order-
+            // front (the harness artifact the first run exposed) — the
+            // real app's SwiftUI hosting does no such favor (the 3A drive
+            // proved the void). Neutralize it so the pin exercises the
+            // CLAIM, not AppKit's initial-key-view pick.
+            window.makeFirstResponder(nil)
             #expect(window.firstResponder !== textView, "pre-arrival: nothing claimed")
 
             // The first projection arrives (the observation's delivery,
@@ -293,6 +299,7 @@ struct BareArrivalFocusTests {
             textView.frame = NSRect(x: 0, y: 0, width: 700, height: 200)
             window.contentView = container
             window.orderFrontRegardless()
+            window.makeFirstResponder(nil)  // the same harness artifact
 
             let (slots, header) = try await h.database.read { [postID = h.postID] db in
                 (try Queries.renderPost(db, containerID: postID),
