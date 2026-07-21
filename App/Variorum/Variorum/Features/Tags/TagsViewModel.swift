@@ -145,10 +145,12 @@ final class TagAssignmentViewModel {
             lastError = "Type a tag name — “/” makes a hierarchy (life/goals)."
             return nil
         }
-        guard segments.allSatisfy({ !$0.contains("/") }) else {
-            lastError = "Tag names can't be empty or contain “/”."
-            return nil
-        }
+        // No per-segment validity guard: `split(separator: "/")` can never
+        // yield a segment containing "/" and the filter above drops the
+        // empties, so slash noise collapses forgivingly ("/a//b/" is a/b —
+        // pinned by `typedEdgesAreForgivingAndRefusalsSpeak`). A guard here
+        // was dead code with unreachable refusal copy (Stage 3 ladder
+        // round 1, NIT-1 — deleted).
         do {
             let post = postID
             // Resolve the deepest existing live prefix from a read; the

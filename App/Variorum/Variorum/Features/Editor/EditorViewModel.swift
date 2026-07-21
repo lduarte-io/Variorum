@@ -1573,7 +1573,11 @@ final class EditorViewModel {
                 try await session.runner.run { ops in
                     try ops.archiveVariant(variantID)
                 }
-                showStatus("Take archived — it stays in the block's history (unarchive from Takes).")
+                // NIT-4 (Stage 3 ladder round 1): the road copy names the
+                // NEAREST road — Write's own takes panel keeps the archived
+                // list (the tutorial's "keeping takes safe" lesson teaches
+                // both roads; the Takes-board siblings name theirs).
+                showStatus("Take archived — never gone: the takes panel (⌘⇧T) keeps it under “archived takes”.")
             } catch {
                 showOperationError(error)
             }

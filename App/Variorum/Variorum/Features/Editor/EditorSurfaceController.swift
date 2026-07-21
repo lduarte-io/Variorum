@@ -667,10 +667,13 @@ final class EditorSurfaceController {
     /// The compound itself: merge the touched run left-to-right, then apply
     /// the intended edit to the merged buffer — ONE undo compound, one
     /// serialized runner body, through the one structural door. The mapped
-    /// range's ends live in the verbatim-preserved leading/trailing pieces,
-    /// so the join characters merge minted die with the deleted span — the
-    /// surface reads exactly "the selection vanished" (her principle: text
-    /// that looks like basic text behaves like basic text).
+    /// range's ends are anchored in the verbatim-preserved leading/trailing
+    /// pieces (`intraStart` from the first piece's start; the trailing keep
+    /// measured back from the last piece's end), so every join character
+    /// the merges minted falls inside the replaced span and is deleted
+    /// with it — the surface reads exactly "the selection vanished" (her
+    /// principle: text that looks like basic text behaves like basic
+    /// text).
     func runCrossBlockEdit(_ edit: CrossBlockEdit) async {
         let stack = model.session.undoStack
         _ = await runStructural { ops in
@@ -762,20 +765,20 @@ final class EditorSurfaceController {
               range.upperBound <= model.index.range(ofEntryAt: last).upperBound
         else { return nil }
         var pieces: [VisibleTakeEdit.Piece] = []
-        for (position, i) in touched.enumerated() {
+        for i in touched {
             guard let variantID = entries[i].variantID, entries[i].editable else { return nil }
             let entryRange = model.index.range(ofEntryAt: i)
             let intersection = NSIntersectionRange(range, entryRange)
             let intraRange = NSRange(
                 location: intersection.location - entryRange.location,
                 length: intersection.length)
-            // The replacement (if any) rides the FIRST piece.
-            _ = position
             pieces.append(VisibleTakeEdit.Piece(
                 variantID: variantID,
                 intraRange: intraRange,
                 text: model.viewText(entryRange)))
         }
+        // The replacement (if any) rides the FIRST piece — placed by
+        // `runVisibleTakeEdit`, which empties every later piece's slot.
         return VisibleTakeEdit(
             pieces: pieces,
             replacement: replacement,
