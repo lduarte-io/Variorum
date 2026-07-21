@@ -20,6 +20,8 @@ struct TakesBottomBar: View {
     @State private var pickedDate = Date()
     @State private var historyShown = false
     @State private var history: [CommitPoint] = []
+    /// N15's class: the bar's measured width — the one/two-row switch.
+    @State private var barWidth: CGFloat = 0
     /// Batch 12 (her "we need a block menu"): the tags sheet the status
     /// line opens. (The comments sheet is model-driven since 13b 1b — the
     /// routed ⌘⇧' door and the menu item share `commentsRequest`.)
@@ -120,101 +122,38 @@ struct TakesBottomBar: View {
             Divider().overlay(tokens.line)
             // Batch 9 (R101): the round-2 status-line grammar — quiet
             // voiced words on the room, never a bezel row. Every door
-            // stays (R63); only the register changes.
-            HStack(spacing: 10) {
-                Text(tokens.chromeLabel(contextLabel))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                blockMenu
-                Button(tokens.chromeLabel("+ take")) {
-                    // The one-click twin of the menu's first item (her
-                    // batch-10 report: "i don't see an option in the
-                    // bottom bar where i can add a new take").
-                    guard let slot = targetSlot else { return speakNoTarget() }
-                    let from = model.focusedPane?.variantID ?? slot.variantID
-                    guard let from else {
-                        return model.speak("This block has no renderable take to branch from.")
-                    }
-                    Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                .help("A new take on the block you're in, branched from what's shown (⌘T)")
-                Button(tokens.chromeLabel("commit ⌘S")) {
-                    Task { await model.commitFocusedTake() }
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                .disabled(model.projection.sealed)
-                .help("An immutable savepoint of the take you're in")
-                Button(tokens.chromeLabel("history")) { Task { await openHistory() } }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                    .help("The focused take's savepoints — restore any of them")
-
-                StatusDot(tokens: tokens)
-
-                Button(tokens.chromeLabel(model.projection.sealed ? "unseal" : "seal")) {
-                    Task { await model.toggleSeal() }
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                .help("A sealed post is frozen — nothing under it changes until unsealed")
-                Button(tokens.chromeLabel("tags…")) { tagsShown = true }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                    .help("The post's tags — apply or remove them right here")
-                Button(tokens.chromeLabel(
-                    model.projection.entryDate.map { "date: \($0)" } ?? "set date…")) {
-                    pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
-                    datePickerShown = true
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                .popover(isPresented: $datePickerShown) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Entry date").font(.headline)
-                        DatePicker(
-                            "Entry date", selection: $pickedDate, displayedComponents: .date)
-                            .datePickerStyle(.graphical)
-                            .labelsHidden()
-                        HStack {
-                            Button("Clear Date") {
-                                datePickerShown = false
-                                Task { await model.updateEntryDate(nil) }
-                            }
+            // stays (R63); only the register changes. 13b 3F (N15's
+            // class): the bar is ADAPTIVE by MEASURED width — one row
+            // where it fits, two where it doesn't (never mid-word wraps,
+            // never a page-wide truncation parade).
+            Group {
+                if barWidth > 0, barWidth < 1080 {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 10) {
+                            takeCluster
+                            StatusDot(tokens: tokens)
+                            postCluster
                             Spacer()
-                            Button("Set") {
-                                datePickerShown = false
-                                let day = JournalDay.dayString(from: pickedDate)
-                                Task { await model.updateEntryDate(day) }
-                            }
-                            .keyboardShortcut(.defaultAction)
+                        }
+                        HStack(spacing: 10) {
+                            gestureCluster
+                            Spacer()
+                            trailingCluster
                         }
                     }
-                    .padding(12)
-                }
-
-                StatusDot(tokens: tokens)
-
-                // The structural gestures, present and ACTING (13b 1b —
-                // R115/R118: fire-and-DO replaces the retired lecture):
-                // each door performs the one mode-switch choreography —
-                // Write, caret landed in your block, gesture run; on a
-                // fanned block Divide opens the take ceremony (the W memo).
-                ForEach(Self.structuralBar, id: \.title) { door in
-                    Button(tokens.chromeLabel(door.title)) {
-                        model.moveToWriteAndRun(.structural(door.act))
+                } else {
+                    HStack(spacing: 10) {
+                        takeCluster
+                        StatusDot(tokens: tokens)
+                        postCluster
+                        StatusDot(tokens: tokens)
+                        gestureCluster
+                        Spacer()
+                        trailingCluster
                     }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(door.help)
                 }
-
-                Spacer()
-                if let words = wordCountLabel {
-                    Text(tokens.chromeLabel(words))
-                        .font(tokens.small.weight(.semibold))
-                        .foregroundStyle(tokens.accent)
-                        .fixedSize()
-                }
-                Button("?") { openWindow(id: "variorum-helper") }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(HelperCheatSheet.summary)
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { barWidth = $0 }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(tokens.room)
@@ -242,6 +181,104 @@ struct TakesBottomBar: View {
                 Task { await model.setTakeLabel(request.variantID, label: label) }
             }
         }
+    }
+
+    /// Take context + take acts (the block menu, + take, commit, history).
+    @ViewBuilder private var takeCluster: some View {
+        Text(tokens.chromeLabel(contextLabel))
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .lineLimit(1)
+        blockMenu
+        Button(tokens.chromeLabel("+ take")) {
+            // The one-click twin of the menu's first item (her
+            // batch-10 report: "i don't see an option in the
+            // bottom bar where i can add a new take").
+            guard let slot = targetSlot else { return speakNoTarget() }
+            let from = model.focusedPane?.variantID ?? slot.variantID
+            guard let from else {
+                return model.speak("This block has no renderable take to branch from.")
+            }
+            Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+        .help("A new take on the block you're in, branched from what's shown (⌘T)")
+        Button(tokens.chromeLabel("commit ⌘S")) {
+            Task { await model.commitFocusedTake() }
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+        .disabled(model.projection.sealed)
+        .help("An immutable savepoint of the take you're in")
+        Button(tokens.chromeLabel("history")) { Task { await openHistory() } }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens))
+            .help("The focused take's savepoints — restore any of them")
+    }
+
+    /// The post-level doors (seal, tags, entry date).
+    @ViewBuilder private var postCluster: some View {
+        Button(tokens.chromeLabel(model.projection.sealed ? "unseal" : "seal")) {
+            Task { await model.toggleSeal() }
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .help("A sealed post is frozen — nothing under it changes until unsealed")
+        Button(tokens.chromeLabel("tags…")) { tagsShown = true }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens))
+            .help("The post's tags — apply or remove them right here")
+        Button(tokens.chromeLabel(
+            model.projection.entryDate.map { "date: \($0)" } ?? "set date…")) {
+            pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
+            datePickerShown = true
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .popover(isPresented: $datePickerShown) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Entry date").font(.headline)
+                DatePicker(
+                    "Entry date", selection: $pickedDate, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                HStack {
+                    Button("Clear Date") {
+                        datePickerShown = false
+                        Task { await model.updateEntryDate(nil) }
+                    }
+                    Spacer()
+                    Button("Set") {
+                        datePickerShown = false
+                        let day = JournalDay.dayString(from: pickedDate)
+                        Task { await model.updateEntryDate(day) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(12)
+        }
+    }
+
+    /// The structural gestures, present and ACTING (13b 1b — R115/R118:
+    /// fire-and-DO replaces the retired lecture): each door performs the
+    /// one mode-switch choreography — Write, caret landed in your block,
+    /// gesture run; on a fanned block Divide opens the take ceremony.
+    @ViewBuilder private var gestureCluster: some View {
+        ForEach(Self.structuralBar, id: \.title) { door in
+            Button(tokens.chromeLabel(door.title)) {
+                model.moveToWriteAndRun(.structural(door.act))
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .help(door.help)
+        }
+    }
+
+    @ViewBuilder private var trailingCluster: some View {
+        if let words = wordCountLabel {
+            Text(tokens.chromeLabel(words))
+                .font(tokens.small.weight(.semibold))
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
+        }
+        Button("?") { openWindow(id: "variorum-helper") }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .help(HelperCheatSheet.summary)
     }
 
     private var contextLabel: String {

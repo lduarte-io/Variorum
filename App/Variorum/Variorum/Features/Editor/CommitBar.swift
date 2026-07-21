@@ -13,6 +13,8 @@ struct CommitBar: View {
     let model: EditorViewModel
     @State private var datePickerShown = false
     @State private var pickedDate = Date()
+    /// N15: the bar's measured width — the one-row/two-row switch.
+    @State private var barWidth: CGFloat = 0
     /// Batch 12 — the tags door ("so unclear how you're supposed to add
     /// tags"): the post's tag sheet, right in the status line.
     @State private var tagsShown = false
@@ -41,31 +43,39 @@ struct CommitBar: View {
             // the bar is ADAPTIVE — one row where it fits (the detail
             // editor), two rows where it doesn't (the book-inline form,
             // whose default width wrapped every label mid-word — "com mit
-            // ⌘S"; her call: "it needs 2 rows or something").
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
-                    identityCluster
-                    StatusDot(tokens: tokens)
-                    postCluster
-                    StatusDot(tokens: tokens)
-                    gestureCluster
-                    Spacer()
-                    trailingCluster
-                }
-                VStack(alignment: .leading, spacing: 2) {
+            // ⌘S"; her call: "it needs 2 rows or something"). MEASURED
+            // width, not ViewThatFits: every cluster is compressible
+            // (lineLimit(1) truncation), so ViewThatFits judged the
+            // one-row arrangement as "fitting" at any width and never
+            // fell through — the flexible-children gotcha, seen live.
+            Group {
+                if barWidth > 0, barWidth < 1080 {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 10) {
+                            identityCluster
+                            StatusDot(tokens: tokens)
+                            postCluster
+                            Spacer()
+                        }
+                        HStack(spacing: 10) {
+                            gestureCluster
+                            Spacer()
+                            trailingCluster
+                        }
+                    }
+                } else {
                     HStack(spacing: 10) {
                         identityCluster
                         StatusDot(tokens: tokens)
                         postCluster
-                        Spacer()
-                    }
-                    HStack(spacing: 10) {
+                        StatusDot(tokens: tokens)
                         gestureCluster
                         Spacer()
                         trailingCluster
                     }
                 }
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { barWidth = $0 }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(tokens.room)
