@@ -377,36 +377,36 @@ Commits per batch/stage with the standing message convention.
 
 | # | Item | Status |
 |---|------|--------|
-| D1 | Book card collapse no-ops on the focused post (`BookView.swift:545` force-expand disjunct; traced batch 15, confirmed by both audits) | → T6 |
+| D1 | Book card collapse no-ops on the focused post (`BookView.swift:545` force-expand disjunct; traced batch 15, confirmed by both audits) | **RESOLVED 3E** (commit 23b0c12 — `BookFocusState` folded into `BookViewModel`, the book's ONE focus model: focus implies expansion, collapse RELEASES focus, collapse-all releases everything; the disjunct deleted; red-on-old by FULL behavioral revert — the editor stayed mounted, her exact repro; hosted + model pins) |
 | D2 | Margin grid shifts the post left; suspicious inter-block vertical gaps; spacing pass | two candidate mechanisms traced by both audits → T7 (trace-before-fix stands) |
 | D3 | Takes structural-gesture gap: Make Block silent, Divide redirects, no add-block-at-end door in Takes | **RESOLVED 1b** (fire-and-DO move-and-execute on all four + the lecture DELETED; native ＋new-block door in Takes/Lenses; red-on-old end-to-end pin) |
 | D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | registry + router LANDED 1b (T1 done — silent/lecture/dead-key classes structurally closed; the walk keeps them closed); crowdedness half stays → T7 |
 | M1 | MERGE whole-feature design memo (R116) | **WRITTEN 1b** (`phase-13b-memo-merge.md`, self-executing per R120); doors/reachability built; deeper builds → Stage 3 |
 | M2 | W CEREMONY memo + reachability (R116) | **WRITTEN 1b** (`phase-13b-memo-w-ceremony.md`); the ceremony is REACHABLE from Takes (divide fire-and-DOes; Helper dictionary names it) |
-| N1 | Take-archive vanish trap: ⌘⇧A in Takes hides the take with no UI recovery (fans query active-only) | new, Stage 0(b) → T5 |
+| N1 | Take-archive vanish trap: ⌘⇧A in Takes hides the take with no UI recovery (fans query active-only) | **RESOLVED 3D** (commit 1ea9cc4 — the "archived · n" door + listing in every bloom's footer, Unarchive right there; the fans query stays active-only, the listing is its OWN read at projection cadence; every archive door speaks the road back host-gated, refusals outrank; red-verified by revert) |
 | N2 | Dead take-pane canary (fallback invisible in take panes) | **RESOLVED 1a** (rendered banner on the unified surface; red-on-old pin) |
 | N3 | Triple AutosaveCoordinator; two can run over one post | **RESOLVED 1a** (one per-post coordinator at session scope; identity + clobber pins red-on-old) |
 | N4 | ⌥⌘Z executes-then-reports-into-nil outside Write (silent state change) | **RESOLVED 1b** (reports through the StatusCenter on every surface; red-on-old pin) |
 | N5 | ⌘S advertised in Takes bar, silently no-ops outside Write | **RESOLVED 1b** (routed — the mounted board commits the focused take, pinned over the real board; truly-uncommittable contexts disable the item; red-on-old) |
-| N6 | Take-label setter missing in core; lens-rename face missing | **CORE HALF DONE 3B** (`setTakeLabel` shipped on the setBlockName precedent, commit 82c9411 — locked-take allowed PROVISIONAL, archived allowed; `renameLens` confirmed existing since 11a, `Operations+Lens.swift:44` — no core change needed); the FACES (card/bar label doors, Lenses column-header rename, registry rows) stay → T5/3D |
+| N6 | Take-label setter missing in core; lens-rename face missing | **CORE HALF DONE 3B** (`setTakeLabel` shipped on the setBlockName precedent, commit 82c9411 — locked-take allowed PROVISIONAL, archived allowed; `renameLens` confirmed existing since 11a, `Operations+Lens.swift:44` — no core change needed); the FACES **DONE 3D** (commit 1ea9cc4 — card context menu + bar block-menu + Write-panel ⋯ label doors over one request/set pair with the current-label-resolving sheet; Lenses column ⋯ "Rename lens…" prefilled; registry rows declared incl. the new `.surface` door + the R118 renameLens exemption on R86) |
 | N7 | AD-2 fan truncation: "takes · 4" renders 2 cards, no more-door — half the fan unreachable | **RESOLVED 1a** (the rail pages discretely with the ◀ x–y of n ▶ door; red-on-old pin + soak capacity invariant) |
 | N8 | AD-8 margin comments clip under the sidebar (invisible at default width); AD-7 margin-grid wash slabs | new, Stage 0(c) → T7 |
 | N9 | AD-17 quick-entry lands in Takes where typing does nothing | **RESOLVED 1b** (the landing focuses the first slot's article pane; live transitions claim the keyboard; red-on-old) |
 | N10 | The deferred T3 slice: EditorViewModel's gesture-execution band + the projection executors move TOGETHER (one seam), plus the TakesViewModel decomposition (890→1,113, P-9 pressure) | **DONE 3C** (`8bebdbd`+`d892056` — EditorSurfaceController 1,295 ln + TakesBoardLayout + TakesChoreographer; zero test edits, Mac 542/106 parity-green; record + architect's annotation below; the ladder reviews the seam) |
-| N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | **CONFIRMED live-unlocked 3A** (shots 05/06; the shadow bit the drive itself — ⌘K "extract" ⏎ ran the act, shot 41) → 3E (small: selectedIndex + onKeyPress arrows + ⏎ runs selected) |
-| N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | **VERIFIED REAL 3A** (unlocked repro, shots 08/09; click-first control types fine) → 3E fix |
-| N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment (`TutorialWalkTests.swift:1366–1370`) → 3D; the Mac-suite re-run over this seam owed at 82c9411 (first unblocked+permitted session) |
+| N11 | ⌘K palette has NO keyboard row-stepping: ⏎ always runs the FIRST row (the › marker never moves; ↓/↑ unhandled — `CommandPaletteView` has no selection state); other rows are mouse-only, and act rows shadow same-named posts ("divide"/"merge" lessons unreachable first by ⏎) | **RESOLVED 3E** (commit cb47fe5 — selectedIndex + ↓/↑ on the field + ⏎ runs the SELECTED row, marker rides the selection, refresh resets; pinned on the drive's exact shadow bite — red by revert: the extract ACT ran) |
+| N12 | A bare mode switch into Write never focuses the editor — ⌘1-then-type lands nowhere (no caret claim; the N9 landing solved exactly this for Takes; the choreography/clicks focus it, a plain switch doesn't) | **RESOLVED 3E** (commit cb47fe5 — the bare arrival claims the caret in `applyFocusSeeds`: detail editors only, one next-turn retry; the inline book editor never steals focus, pinned both ways; nothing rides the router so the noteMode round-scope is untouched by construction; red by revert) |
+| N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment **DONE 3D** (commit 7fea406 — the lesson promises chapters; the comment deleted; every plan chapter asserted as a ## heading on paper); the owed Mac re-run ran at 3C (542/106) and again at 3D+3E close (556/112) |
 | N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record). Suspects to TRACE, not assume: overlay add-path idempotence vs the R2-B push-at-wire double-delivery; a collapsed/stale anchor frame rendering at origin | **REPRODUCED + SHARPENED 3A**: precondition = a COLD model (post's first open since launch) — first Write mount collapses ALL badges onto one top anchor (the layered capture, shots 28/29); choose is unrelated; any remount heals; warm models correct; **the class is the whole overlay family** — cold mounts also starve callout frames/💡/seams/handles until any decor-input change (shots 49–51, store JSON verified). Double-delivery suspect looks WRONG; stale-geometry-at-compute + input-equality-gate starving matches all evidence (inferred, not traced) → 3F (trace-before-fix, evidence in the 3A log) |
 | N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | **EVIDENCE CAPTURED 3A** (shot 66 — every item wraps mid-word at default width) → Stage 3F (T7 crowdedness; adaptive/2-row bar layout) |
 | N16 | W ceremony cut-placement (author, same session; (a) RECLASSIFIED by her follow-up): (a) sentence-boundary snapping is ratified, so the "can't move the cut" experience is likely DESIGNED — the trace now VERIFIES the sheet offers EVERY legal interior sentence boundary (a multi-boundary take must be placeable at any of them; only-the-proposed-spot-accepted would still be a bug); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask re-affirmed — "i think the scissors should still be movable" (visual drag). Root-cause treatment demanded ("not whack a mole… it can be its own phase if it needs to be") | **(a) VERIFIED GOOD 3A** — a 3-sentence take offered BOTH interior boundaries as cut-at buttons and the ✂ moved on click (shots 33/34); her experience = the one-boundary case + affordance plainness. (b)/(c) → Batch 3H (memo-first per R116/R120) |
 | N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path, (b) the symmetric round-trip product question (DECISION HERS at the checkpoint), (c) what UI road leads from a merged block to its pre-merge takes | **(a) CLOSED 3A — the toast SPEAKS on both paths** (Takes choreography shot 55; book-inline seam shot 68; mid-block book-inline caret gets the real refusal spoken, 67; likeliest silent-read: the 6 s auto-dismiss). **(c) ANSWERED 3A**: two roads — ⌥⌘Z right away, or Library → ⋯ → Archived & Deleted → "Unplaced blocks" (Place-in-pool door, takes intact; shot 58) — road exists, nothing points at it; the 3H memo addendum weighs naming it in the toast and/or a lineage door on the merged block. (b) → end checkpoint |
 | N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46; the exact-boundary form works, 48). Loud refusal, never silent; but snap and prose disagree. Mechanism inferred, not traced | new, 3A → 3H (snap semantics are the cut-placement memo's territory; either the snap widens suffix spans to the containing sentence's start, or the lesson prose narrows) |
-| N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | new, 3A → 3D (T5/IA design: multi-pool surfacing + a real drag geometry; the lesson-prose half rides the fix) |
-| N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | new, 3A → 3E (needs a human-hand drag before defect status; if real it joins D1's book-view batch) |
-| N21 | Chapter dragging in the BOOK VIEW body (author, 2026-07-21 afternoon): "you should be able to drag chapters within the book view, not just in that sidebar, but there are two places where the dots that indicate dragging make me feel like it should be draggable and it isn't" — locate both false-affordance ⠿ spots; dots that don't drag either drag or lose the dots (the R112 honesty rule applied to affordances) | new, author → 3E (joins N20/D1's book batch) |
-| N22 | Clicking a collapsed post CARD in the book view should open the post — "clicking on the post should bring you to it, not just the smaller open button (I mean the separated box, not the text that you can actively edit)" | new, author → 3E |
+| N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | **RESOLVED 3D** (commit c808e85 — PoolViewModel selection + the Blocks-area pool picker, oldest default, dead-selection fallback; the ScrapsPanel in the post detail's inspector wires the orphaned drag payload to real geometry beside the draft; the lesson prose re-cut; the drop half was already pinned; red by revert: the tutorial pool unreachable) |
+| N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | **TRACED SOUND 3E** — every app-side link pinned or type-matched (draggable(String) ⇄ dropDestination; the action is the store-pinned moveChapter(before:), BookStructureTests:325–362; NO app code between SwiftUI's drop callback and the pinned door); verdict sound-but-synthetic-artifact per the 3A tool note (List-reorder drops never commit under synthetic drags) + her N21 phrasing implying the sidebar drag works by hand → **NEEDS-HUMAN-VERIFY at the checkpoint** (one navigator drag; if it fails by hand, suspect the 2px indicator competing as a drop target — no fix fabricated) |
+| N21 | Chapter dragging in the BOOK VIEW body (author, 2026-07-21 afternoon): "you should be able to drag chapters within the book view, not just in that sidebar, but there are two places where the dots that indicate dragging make me feel like it should be draggable and it isn't" — locate both false-affordance ⠿ spots; dots that don't drag either drag or lose the dots (the R112 honesty rule applied to affordances) | **RESOLVED 3E** (commit 23b0c12 — the body chapter-header ⠿ DRAGS: navigator-identical insert-before + indicator + end zone, honest help; two-spots verdict recorded: only THREE ⠿ sites exist — body header FIXED, navigator rows already draggable (N20's human-verify), Write's handle is N26's) |
+| N22 | Clicking a collapsed post CARD in the book view should open the post — "clicking on the post should bring you to it, not just the smaller open button (I mean the separated box, not the text that you can actively edit)" | **RESOLVED 3E** (commit 23b0c12 — the card BODY opens the post; the ▸ disclosure is a real expand-in-place button; open ↗ stays; each target does what it looks like) |
 | N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | new, author → 3F (T7; joins AD-7/D2) |
-| N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | new, author → 3D |
+| N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | **RESOLVED 3D** (commit c7c50cf — the tag-entry face types-to-create: paths create missing levels through the taxonomy ops, the leaf applies, one runner turn; forgiving edges; red by revert. Recorded: if she meant tagging the BOOK OBJECT — readings carry no tags in the schema — that is a checkpoint model question) |
 | N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | new, author → 3F |
 | N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | new, author → verify next drive / design Stage 4 |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
@@ -3450,3 +3450,245 @@ the pre-move executors; (d) the access widenings (judgment call 3);
 a further slice (columns machinery was deliberately left on the
 conductor — not a plan candidate, and `columns` is read by a dozen
 views).
+
+### Batch 3D record (T5 takes lifecycle faces + the pool road — COMPLETE)
+
+**Session:** fresh Fable implementer, 2026-07-21 (one session running 3D
+then 3E, per the brief's may-share allowance). Commits: **1ea9cc4**
+(lifecycle faces) · **c808e85** (N19) · **c7c50cf** (N24) · **7fea406**
+(tutorial). **Counts at the combined 3D+3E close: Mac 542/106 →
+556/112 GREEN (full suite; the board soak + TutorialWalkTests rode it);
+core 762/92 green and BYTE-UNTOUCHED across the session**
+(`git diff bb6fa96..HEAD -- Sources/ Tests/ Package.swift` empty; the
+core count re-run fresh). Mobile untouched (Mac-target files only — no
+`Shared/`, no core; no mobile build owed).
+
+**Environment (material):** the author's real-store instance (pid 59601,
+`/Applications`) ran from session open until ~14:45 — per the brief's
+live-instance rules, ALL Mac test runs and Release builds deferred;
+compile gates ran via `xcodebuild build-for-testing` (compiles app +
+test targets WITHOUT launching the runner — safe under a live instance;
+a pattern worth keeping). At the zero-instance window: the full suite,
+the revert-red passes, and the owed `/Applications` refresh (Release
+green, pgrep-gated, copied 15:07:53 — her next launch carries 3B+3C+3D+3E).
+She was ACTIVE at the machine the whole session (HIDIdleTime ≤ 14 ms at
+every check) — **screenshot verification SKIPPED per the brief; the
+visual list is recorded below for the next drive.**
+
+**1 — Archived takes visible + recoverable in Takes (N1; commit 1ea9cc4).**
+The fans query stays ACTIVE-ONLY by design; the archived listing is its
+own read — `TakesViewModel.refreshArchived()` (one indexed query over
+the post's blocks → `archivedCounts` + fan-ordered `archivedTakes`),
+refreshed by the board at projection cadence (the WriteTakesPanel
+precedent: `.task` + `.onChange(of: projection)`). The door: an
+**"archived · n"** quiet disclosure in every bloom's footer
+(`fanFooter` = growth doors + archived section; all five bloom sites
+incl. the unfanned R72 bloom, so a block whose LAST extra take was
+archived still shows its road). Open, it lists v2-grammar cards
+(label + preview) with **Unarchive** — the act, right there — and
+Delete. **Every archive door speaks the road back** (the speech moved
+INTO `archiveTake` so the cell menu, the bar, and ⌘⇧A all say it):
+host-gated copy — Takes names the in-board door; Lenses points at ⌘2
+(that board renders no archived list and must not promise one).
+Unarchive confirms out loud; **refusals (seal, I10) outrank the road
+speech** (pinned). AD-4's archived-road-back half closes with it.
+
+**2/3 — Take-label + lens-rename faces (N6; commit 1ea9cc4).**
+`setTakeLabel` (3B's op): doors on the take card context menu (both
+boards — `TakesCellView.menuSpecs`), the bar's block menu, and Write's
+panel ⋯; ONE model request/set pair (`requestTakeLabel`/`setTakeLabel`)
+with the `TakeLabelSheet` hosted on TakesBottomBar (it rides both
+boards) + WriteTakesPanel; the prompt resolves the CURRENT label from
+the fan OR the archived listing (change/clear starts from truth); empty
+commits clear (the core NULLs). `renameLens` (core since 11a,
+`Operations+Lens.swift:44` per the 3B confirm): the Lenses column ⋯
+menu's "Rename lens…" over a prefilled `LensNameSheet` (gains
+`initialName`).
+
+**4 — N19, the pool road (commit c808e85).** LISTING half:
+`PoolViewModel` gains a SELECTION (`selectedPoolID`/`select(poolID:)`);
+`activePool` honors it — oldest stays the DEFAULT (pre-13b truth), a
+dead selection falls back; the Blocks area header grows a pool picker
+(VoicedMenu word-menu grammar) when several pools exist. GEOMETRY half:
+**`ScrapsPanel`** — the scraps' side seat in the post detail's
+INSPECTOR (the ReferencePanel "beside the draft" precedent): rows carry
+the Phase 10 drag payload (`.onDrag` → `PoolViewModel.dragProvider`,
+the orphaned half), fanned rows note "⑂n — ⌥-drag carries all takes",
+and the panel's copy names where drops land (Write's page / a book's
+open post). PostDetailView's inspector is a two-panel switch
+(References | Scraps; masthead buttons). The DROP half needed nothing —
+already pinned end-to-end (PoolDragTests: `poolDrop` emits exactly
+`poolDragCopy`, ⌥ carries the fan, seal refuses spoken): N19 was
+missing geometry + listing, never the operation.
+
+**5 — N24, free-typed tags (commit c7c50cf).**
+`TagAssignmentViewModel.applyTypedPath`: the tag-entry face
+(TagAssignmentSheet — the bottom bar's tags… door in books and posts,
+the library's Tags…) gains a TYPE-TO-CREATE field: ⏎ applies the typed
+tag; hierarchy typed as a PATH; each missing level created through the
+EXISTING taxonomy ops (`createTag` per segment, parents first) and the
+LEAF applied, one serialized runner turn. Forgiving edges: slash noise
+trims; an already-worn tag no-ops politely (`alreadyTagged` swallowed
+at this face); empty speaks and mints nothing. The sheet's stale
+empty-state copy (pre-R52 "sidebar's Tags section") replaced.
+
+**6 — Registry.** `unarchiveTake`/`labelTake`/`renameLens` declared;
+`Capability.Door` gains **`.surface`** (inline acts whose target is
+pointed at directly — per-surface `surfaceCapabilities` statics on
+TakesBoardView + WriteTakesPanel, walk-asserted like the four routed
+tables); the context-menu walk union grows
+(`LensesBoardView.columnMenuCapabilities`); the R118 parity test
+exempts `renameLens` ON THE RECORD (R65/R86: lens machinery's one home
+is Lenses — Write has no lens door either; no surface privileged).
+
+**7 — The tutorial keeps pace (commit 7fea406; P-6).** "keeping takes
+safe": the honesty note DIES — the real in-Takes road taught. "pool &
+scraps": the pool picker + the scraps-panel drag road, ⌥-promise
+intact. "export — it's all yours": PROMISES chapters (the 3B hand-off).
+"books & the shelf": re-cut — **a FALSE pre-existing promise found and
+killed** ("drag the ☰ handles to reorder posts": no post-drag handles
+ever existed anywhere) → the honest chapter-dots + new card semantics.
+Walk tests: the stale core-frozen comment (1366–1370) DELETED;
+`exportsShowTheFansAndTheChapters` earns its name (every plan chapter
+asserted as a `##` heading); the archive walk drives the new road
+(speech + door counts + retire). Content stays non-journal (R57).
+**REAL-store note:** the seeded book is now stale against these lesson
+edits — the end checkpoint re-seeds behind the A1 rail (standing).
+
+**Judgment calls (R119, for the walk):** (a) `.surface` as a new Door
+case rather than mis-filing under `.contextMenu` — the precedent that
+inline ✓/＋ doors stay undeclared HOLDS (door tables cover routed
+surfaces); `.surface` exists for acts whose ONLY doors are inline
+cards. (b) The archived read is view-triggered at projection cadence,
+never inside `adopt()` (adopt stays sync + deterministic for tests).
+(c) Pool selection is session-only (not persisted) — the oldest-default
+keeps the pre-13b behavior on every fresh launch. (d) The ScrapsPanel
+is post-detail only; the BookView gets no panel (posts open from the
+book; the book-inline editor still accepts drops); the Takes board does
+NOT accept drops and the panel says so instead of pretending. (e) N24
+read as the TagAssignmentSheet (the one shared tag-entry face reachable
+from a book's post bar — her "type tags in to a book"); readings
+themselves cannot be tagged (schema: post_tag/block_tag only) — if she
+meant tagging the BOOK OBJECT, that is a model question for the
+checkpoint, recorded here. (f) The typed path's deepest-prefix read
+runs before the runner turn; a racing create refuses through the op's
+own guard (surfaced, retypable) — the ops layer stays the only
+integrity authority.
+
+### Batch 3E record (T6 book view + palette + the Write landing — COMPLETE)
+
+**Session:** same Fable implementer, 2026-07-21. Commits: **23b0c12**
+(D1+N22+N21) · **cb47fe5** (N11+N12) · **8e6ddd2** (harness fix + the
+red-verification record) · the record commit carrying this section.
+Counts as above (the 556/112 run followed the last code commit).
+
+**1 — D1 (the batch headline; the author re-reported it broken the day
+before, pre-fix — expected, the fix was unlanded).** The traced
+mechanism: `BookView.swift:545`'s force-expand disjunct
+(`expandedPosts.contains || focused ==`) read TWO authorities while the
+collapse door wrote one — collapsing the focused post no-opped forever.
+The fix is the Stage 0 verdict executed: **`BookFocusState` (the "third
+focus authority") is DELETED, folded into `BookViewModel`** — the book
+surface's ONE focus model (what replaced it: the conductor now answers
+focus + expansion together; the P-3 one-authority discipline applied to
+"which post holds the live inline editor"). Rules as code: focus
+IMPLIES expansion; **collapse RELEASES focus** (seeds die with it);
+collapse-all releases everything; the view reads `model.isExpanded`
+ONLY — the disjunct is gone. `initiallyExpanded` still seeds (now onto
+the model; the test seam unchanged). Pins: the model rules + the hosted
+D1 pin (focused post mounts the ONE inline editor → `model.collapse`
+UNMOUNTS it) — **red-on-old by FULL behavioral revert** (disjunct
+restored + no-release collapse): the editor STAYED MOUNTED after
+collapse, the author's exact repro, plus the stranded `focusedPostID`.
+
+**2 — N22.** The collapsed card's click targets are honest: the card
+BODY opens the post in the full editor (her ruling verbatim); the **▸
+disclosure** is now a real button — expand-in-place; open ↗ stays as
+the explicit door. Help copy on each says which is which.
+
+**3 — N21.** The body's chapter-header ⠿ dots DRAG: same
+insert-before semantics, indicator bar, and model door
+(`structure.moveChapter(before:)`, store-pinned) as the navigator, plus
+a body end-drop zone; the misleading "reorder from the navigator" help
+replaced. **The two-spots verdict (recorded for the checkpoint):**
+exactly THREE ⠿ sites exist in the app — the body chapter header (spot
+1, false affordance, NOW FIXED), the navigator chapter rows (already
+`.draggable` — N20's subject), and Write's BlockDecor block-drag handle
+(N26's pending verify). If her second spot is the navigator, N20's
+human-verify covers it; if Write's handle, N26 owns it. No other dots
+render anywhere (grep-complete).
+
+**4 — N20 TRACE VERDICT: sound-but-synthetic-artifact →
+NEEDS-HUMAN-VERIFY.** The chain, traced link by link: `.draggable(
+section.id)` (String Transferable) type-matches `.dropDestination(for:
+String.self)`; the drop action is `items.first →
+structure.moveChapter(dragged, before:)`; that model door is
+STORE-PINNED both directions incl. the no-op guards
+(BookStructureTests:325–362), and the same op's menu road was
+store-verified live in the 3A drive (shots 71/72). NO app code sits
+between SwiftUI's drop callback and the pinned door — the only
+unpinnable link is SwiftUI's own drag-session machinery, which the 3A
+tool notes already flagged as synthetic-drag-hostile for list reorder
+(freeform canvas drags engaged; List-reorder drops never committed).
+Her N21 phrasing ("not just in that sidebar") reads as the sidebar drag
+WORKING under her hand. Per the brief's rule — do not fix what isn't
+traced broken — NO code change, NO pin fabricated; the checkpoint asks
+her for one human drag in the navigator. If it fails by hand, the
+suspect is the drop-target geometry (the 2px indicator bar competing as
+a target), not the model.
+
+**5 — N11 (commit cb47fe5).** `PaletteModel.selectedIndex` +
+`moveSelection` (clamped) + `selectedItem`; refresh resets to the top;
+↓/↑ intercepted on the query field (`.onKeyPress` — the field keeps the
+keyboard, the › marker moves rows); ⏎ runs the SELECTED row; the marker
+renders on the selection. Pin: the 3A drive's shadow bite verbatim —
+⌘K "extract": stepping ↓ reaches the same-named post row and ⏎ opens it
+while the act does NOT run; clamps + refresh-reset. **Red by revert**
+(first-row-always): `executed → ["act"]` — the extract act ran, the
+drive's exact bite.
+
+**6 — N12 (commit cb47fe5; 3A-verified real, so the fix was owed).** A
+BARE mode switch into Write claims the caret: `applyFocusSeeds` (the
+arriving editor's one landing door) gains the no-seed/no-intent branch —
+the DETAIL editor (`scrollView != nil`) takes first responder at its
+first render (one next-turn retry for the window-lags-projection beat);
+caret lands at the document start (the Takes landing's first-block
+choice, mirrored). **Scoped deliberately:** the INLINE book editor
+never steals focus as a render side effect — the book's own focus model
+drives it (pinned both ways). **The noteMode caution honored BY
+CONSTRUCTION:** nothing rides the router — no new parcel, no
+declaration to clear, the round-scope discipline untouched. Harness
+finding worth keeping: a bare NSWindow AUTO-ASSIGNS its first key view
+on order-front — the pins neutralize it (`makeFirstResponder(nil)`) to
+exercise the claim, not AppKit's pick. **Red by revert** (claim branch
+off): firstResponder stays the window.
+
+**Red-on-old, all six verified by behavioral revert this session (each
+isolated, run RED with its smoking gun, restored, the restore
+re-verified by the closing 556/112 full run):** N12 · D1 (full revert)
+· N11 · N19 · the archived listing · N24. The label face's re-request
+resolution rides the archived/label pins (new-machinery coverage;
+`setTakeLabel` itself is 3B's red-pinned op).
+
+**Screenshot list for the next drive (skipped this session — the
+author held the machine throughout):** the archived · n door + its
+cards (stack + margin-grid forms); the label sheet from the card menu
+and the bar; the Lenses rename door; the Blocks-area pool picker on a
+multi-pool store; the ScrapsPanel + one REAL hand drag into Write
+(plain + ⌥); the tag type-to-create field on a book's post; the book
+card body-click vs ▸ split; a body chapter drag (and the N20 navigator
+drag BY HAND); palette ↓↓⏎ onto a shadowed post; bare ⌘1-then-type.
+
+**For 3F/3H and the ladder:** (a) the archived section renders inside
+`fanFooter` at all five bloom sites — 3F's D2/geometry pass should eye
+the margin-grid rail with an open archived list (width 420 cap chosen;
+rail cards are 220 — the listing sits under the rail's footer, not in
+the card grid). (b) The ScrapsPanel width (min 220 / ideal 300) is a
+build-time call — 3F may polish. (c) `expandAll` uses `formUnion`
+(manually-expanded non-entry posts survive — trivial, recorded). (d)
+The ladder should eye the `.surface` door taxonomy call and the R118
+renameLens exemption (both argued in the registry/test comments). (e)
+The tutorial's REAL-store seed is stale against 3D's lesson edits — the
+end checkpoint re-seed stands. (f) The books lesson's dead ☰ promise
+existed since Stage 2 — worth a ladder glance at whether other lesson
+prose over-promises (the walk asserts acts, not every claim).
