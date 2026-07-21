@@ -1,9 +1,10 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — **Stage 3 OPEN (execution brief at the end of this
-file, authored just-in-time 2026-07-20 by the successor architect session
-at the handoff cutover per `phase-13b-orchestrator-handoff.md`; batches
-running under R121)**. Stage 2 CLOSED (ladder closed at round 2; both
+**Status:** ACTIVE — **Stage 3 CLOSED (2026-07-21; ladder closed at
+round 2, ZERO BLOCKER/MAJOR both rounds; stage closeout at the end of
+this file; Mac 562/112 · core 762/92). Stage 4 is NEXT — author-attended
+kickoff per the Stage 4 stub; the handoff is
+`phase-13b-stage4-handoff.md`.** Stage 2 CLOSED (ladder closed at round 2; both
 fix passes complete; stage-level closeout below):
 "the field guide" (6 chapters · 21 act-ready lessons) + the hardened
 Restore/Open doors (one discovery, confirm-gates-what-dies, the session
@@ -4092,3 +4093,103 @@ confirm the coalesced extra refresh is harmless beside
 ScrollAnchorController's immediate one; (c) NIT-2's budget constant
 (2) and the accepted three-adopts-late degradation; (d) NIT-1's
 delete-over-make-real call against the pinned forgiving parse.
+
+## Stage 3 ladder — round 2 (VERDICT: ZERO new BLOCKER/MAJOR — the Stage 3 ladder CLOSES at round 2)
+
+The round-2 fresh cold reviewer (over `d9e7af4..daccc3b`) re-ran both
+suites itself — core **762/92** green · Mac **562/112** green, counts
+exact, core byte-untouched diff-verified across the whole fix range —
+and verified EVERY round-1 disposition HOLDS (each pin located, read
+whole, and passed by name; the MINOR-1 four-⠿-sites fact re-verified by
+its own grep; NIT-3's repaired doc sentence verified against the range
+arithmetic; NIT-4's routing chain walked end to end). All four fix-pass
+foci verified SOUND: the direct-schedule choice (structurally additive —
+no path delivers over colder layout than pre-fix; no feedback loop), the
+detail editor's inherited width axis (harmless beside
+ScrollAnchorController; live-resize badges now track instead of
+freezing), NIT-2's budget (2 matches the constructible miss sequences;
+past-budget degradation is cosmetic-only), NIT-1's delete (the guard was
+provably dead; a "real" one would contradict the pinned forgiving
+collapse).
+
+**The one finding, verbatim-faithful — [NIT · SPECULATIVE], record-only,
+no fix owed:** `EditorViewModel.swift:271–275 + :1721–1736` — the
+width-reflow delivery's warmth is ordering-dependent (the hop's
+refreshBadges forces no layout of its own); an ordering with NEITHER a
+display pass NOR an updateNSView remeasure would deliver over un-relaid
+geometry and suppress the later heal. The reviewer could not construct
+it (in-viewport editors draw on resize; out-of-viewport rows tear down
+and re-attach, which bumps the generation), and the failure shape equals
+the PRE-fix staleness class — the delivery is strictly additive. Stays
+on the record for any future drive that meets it live. Two observations
+recorded with it: the exact-float width compare (fully coalesced, cost
+fine) and the pin's duplicated harness body (motivated, commented).
+
+**Architect's disposition (round-2 close):** the SPECULATIVE NIT is
+RECORD-ONLY as the reviewer routed it; no fix pass runs. The
+`/Applications` refresh stayed OWED through both rounds (the author's
+live instance) — discharged at the first zero-instance window, recorded
+below when it happens.
+
+## Stage 3 closeout (stage-level, 2026-07-21 — written at ladder close for the Stage 4 handoff and the end-checkpoint walk)
+
+**STAGE 3 CLOSED.** Seven working sessions (five implementer batches +
+one drive + the ladder's fix pass) over two days, the ladder closed at
+round 2 with zero BLOCKER/MAJOR in EITHER round — the stage's headline
+mechanisms (the phase's first core surgery, its riskiest refactor, and
+a substrate-level overlay fix) all verified by cold review against the
+code, not the narrative.
+
+**Counts trajectory:** Mac 542/106 (Stage 2 close) → 556/112 (3D+3E) →
+560/112 (3F) → **562/112 final** (ladder fixes) · core 747/90 →
+**762/92** (3B, the ONE sanctioned core batch — chapters-reach-export +
+`setTakeLabel`; byte-untouched before and after) · mobile 11/4
+untouched. Every bug-class fix in the stage carries a
+behavioral-revert-verified red-on-old pin.
+
+**What shipped, by batch:** **3B** — `assembleReading`/`exportReading`
+resolve real chapters for curated books (mirroring the book view's own
+sectioning semantics; smart books byte-identical, pinned) +
+`setTakeLabel` on the `setBlockName` conventions. **3C** — the N10
+one-seam move: EditorSurfaceController (gesture band + W state machine
++ projection executors + boundary fluidity, the storage seam kept on
+the model via four verbatim primitives) + the TakesViewModel split
+(TakesBoardLayout / TakesChoreographer), ZERO test edits — the parity
+proof. **3A** — the unlocked drive: all 12 items, 94 captures; closed
+N16(a)/N17(a) good, verified N12 real, answered her lineage-road
+question concretely, identified the blank windows as system artifacts,
+sharpened N14 to a deterministic cold-mount repro, and found
+N18/N19/N20. **3D** — archived takes visible + recoverable IN Takes;
+take-label + lens-rename faces; the pool road repaired (multi-pool
+picker + ScrapsPanel drag geometry); free-typed tag entry; the tutorial
+kept honest. **3E** — D1 dead (one focus authority; collapse releases),
+card-click opens, body chapter drag + honest dots, palette ↓/↑/⏎, the
+Write landing (⌘1-then-type literal). **3F** — N14 root-caused and
+fixed at the substrate (overlays computed before TK2's first viewport
+layout with no post-layout trigger; `viewWillDraw` display-pass
+reporting + one coalesced refresh per storage generation), the margin
+grid made honest (scroll, exact-height cells, one checkmark, her
+full-width design inputs), both bars adaptive, the copy notes incl. the
+lineage road named in merge's speech. **Ladder** — MINOR-2 (the
+SPECULATIVE inline width-reflow axis) CONFIRMED RED pin-first and fixed
+(the width axis is now a generation input); the enumeration correction;
+four NITs; one record-only residual.
+
+**Classes ended this stage:** the cold-mount overlay starve (the
+starved-host family's THIRD and final life — the fix gives the whole
+family its first genuine post-layout refresh trigger, both editor
+forms, both axes); the book view's focus/collapse contradiction (one
+authority); the false-affordance dots; the lecture-free archive road.
+
+**Deferred/restructured on the record:** 3G → Stage 4's CLOSING
+propose-only sweep (her direction); 3H's builds → Stage 4 (memo addenda
+AUTHORED — the kickoff agenda); N20 needs-human-verify; N26 verify;
+the round-2 SPECULATIVE NIT record-only; the `/Applications` refresh
+owed at the first zero-instance window.
+
+**What Stage 4 inherits is enumerated in the Stage 4 stub above and
+the handoff document** (`notes/plans/phase-13b-stage4-handoff.md` — the
+orchestrator's last act). The R121 checkpoint bundle rides the same
+handoff: every batch record's judgment calls, the two memos + addenda,
+the tutorial walk (REAL-store re-seed owed first, behind the A1 rail),
+the screenshot corpus, and the standing asks.
