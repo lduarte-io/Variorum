@@ -33,6 +33,7 @@ struct TakesBottomBar: View {
     static let renderedCapabilities: [CapabilityID] = [
         .newTake, .blankTake, .blankTakeAsChosen, .addBlockAtEnd, .blockComments,
         .commitTake, .sealPost, .divide, .extract, .makeBlock, .merge,
+        .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
     ]
 
     /// The structural doors the bar renders (registry-walk-asserted: the
@@ -82,6 +83,15 @@ struct TakesBottomBar: View {
             Button("＋ Blank take, opened as chosen (⇧⌥⌘T)") {
                 guard let slot = targetSlot else { return speakNoTarget() }
                 Task { await model.newBlankTakeAsChosen(blockID: slot.blockID) }
+            }
+            Button("Label take…") {
+                // 13b Stage 3 (3D — N6): the 3B op's bar door; acts on the
+                // take you're in (the shown take on a one-block post).
+                guard let slot = targetSlot else { return speakNoTarget() }
+                guard let variantID = model.focusedPane?.variantID ?? slot.variantID else {
+                    return model.speak("This block has no renderable take to label.")
+                }
+                model.requestTakeLabel(variantID: variantID)
             }
             Divider()
             Button("＋ New block at the end of the post") {
@@ -220,6 +230,17 @@ struct TakesBottomBar: View {
         }
         .sheet(isPresented: $tagsShown) {
             TagAssignmentSheet(session: model.session, postID: model.postID, postTitle: nil)
+        }
+        .sheet(item: Binding(
+            get: { model.takeLabelRequest },
+            set: { model.takeLabelRequest = $0 })
+        ) { request in
+            // 13b Stage 3 (3D — N6): ONE sheet host for both boards (the
+            // bar rides Takes and Lenses; the cell menus and the block
+            // menu all set the same model request).
+            TakeLabelSheet(currentLabel: request.currentLabel) { label in
+                Task { await model.setTakeLabel(request.variantID, label: label) }
+            }
         }
     }
 

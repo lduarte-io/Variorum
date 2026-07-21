@@ -32,6 +32,10 @@ struct WriteTakesPanel: View {
 
     private let column = TakesColumn(id: "write-panel-main", kind: .main)
 
+    /// The registry ids this panel renders INLINE (13b Stage 3, 3D — the
+    /// `.surface` door; walk-asserted): the archived list's Unarchive.
+    static let surfaceCapabilities: [CapabilityID] = [.unarchiveTake]
+
     init(session: AppSession, postID: String, blockID: String) {
         self.session = session
         self.postID = postID
@@ -124,6 +128,14 @@ struct WriteTakesPanel: View {
         .onChange(of: model.projection) { _, _ in
             Task { await loadArchived() }
         }
+        .sheet(item: Binding(
+            get: { model.takeLabelRequest },
+            set: { model.takeLabelRequest = $0 })
+        ) { request in
+            TakeLabelSheet(currentLabel: request.currentLabel) { label in
+                Task { await model.setTakeLabel(request.variantID, label: label) }
+            }
+        }
         .onDisappear { model.teardown() }
     }
 
@@ -154,6 +166,11 @@ struct WriteTakesPanel: View {
                     .help("Choose this take — the post shows it (everywhere); ⌘⏎")
                     Menu("⋯") {
                         Button("Archive") { Task { await model.archiveTake(take.id) } }
+                        Button("Label…") {
+                            // 13b Stage 3 (3D — N6): the label door rides
+                            // Write's panel too (one grammar everywhere).
+                            model.requestTakeLabel(variantID: take.id)
+                        }
                         Button(take.locked ? "Unlock" : "Lock") {
                             Task { await model.setTakeLocked(take.id, locked: !take.locked) }
                         }

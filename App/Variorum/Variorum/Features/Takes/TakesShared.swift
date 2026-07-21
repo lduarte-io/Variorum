@@ -119,6 +119,11 @@ struct TakesCellView: View {
             .init(title: "Archive this take (⌘⇧A)") {
                 Task { await model.archiveTake(resolved.variantID) }
             },
+            // 13b Stage 3 (3D — N6): the 3B `setTakeLabel` op's card door;
+            // the bar hosts the sheet on both boards.
+            .init(title: "Label take\u{2026}") {
+                model.requestTakeLabel(variantID: resolved.variantID)
+            },
         ]
         if slot.variantID != resolved.variantID, let chosenText = slot.text {
             specs.append(.init(title: "Diff against chosen") {
@@ -146,6 +151,7 @@ struct TakesCellView: View {
     /// contextMenu door set's take-scope half).
     static let contextMenuCapabilities: [CapabilityID] = [
         .newTake, .blankTake, .chooseTake, .divergeHere, .archiveTake, .diffAgainstChosen,
+        .labelTake,
     ]
 }
 
@@ -230,9 +236,55 @@ struct CommentMarginNote: View {
     }
 }
 
-/// Naming sheet for lenses (save-as-lens, save-current-choices).
+/// The take-label prompt (13b Stage 3, 3D — N6's face): set, change, or
+/// clear a label on one take. Empty commits clear (the core op NULLs).
+struct TakeLabelSheet: View {
+    let currentLabel: String?
+    let onSet: (String?) -> Void
+    @State private var label = ""
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(currentLabel == nil ? "Label this take" : "Change the take's label")
+                .font(.headline)
+            TextField("e.g. bolder opening", text: $label)
+                .frame(width: 260)
+                .onSubmit(submit)
+            Text("A label names a take on its card and in exports — identity only, never printed in the prose.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(width: 260, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                if currentLabel != nil {
+                    Button("Clear Label") {
+                        onSet(nil)
+                        dismiss()
+                    }
+                }
+                Spacer()
+                Button("Cancel") { dismiss() }
+                Button("Set") { submit() }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(16)
+        .onAppear { label = currentLabel ?? "" }
+    }
+
+    private func submit() {
+        let trimmed = label.trimmingCharacters(in: .whitespaces)
+        onSet(trimmed.isEmpty ? nil : trimmed)
+        dismiss()
+    }
+}
+
+/// Naming sheet for lenses (save-as-lens, save-current-choices, rename).
 struct LensNameSheet: View {
     var title: String = "Name this lens"
+    /// Prefill (the rename door starts from the current name).
+    var initialName: String = ""
     let onName: (String) -> Void
     @State private var name = ""
     @Environment(\.dismiss) private var dismiss
@@ -243,6 +295,7 @@ struct LensNameSheet: View {
             TextField("e.g. bolder thread", text: $name)
                 .frame(width: 260)
                 .onSubmit(submit)
+                .onAppear { if name.isEmpty { name = initialName } }
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }

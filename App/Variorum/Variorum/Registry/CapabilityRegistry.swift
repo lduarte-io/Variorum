@@ -178,6 +178,36 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌥⌘→", takesAccess: .native,
             unavailableNote: "Take pages live on the Takes board (⌘2).",
             availability: { ctx in ctx.mode == .takes ? .act : .unavailable }),
+        // 13b Stage 3 (3D — T5/N1): the road BACK from an archive lives in
+        // Takes too (R118), as the archived listing's own card door. A
+        // `.surface` act: its target is the archived card itself, so no
+        // routed context command exists (an archived take can never hold
+        // the ring).
+        Capability(
+            id: .unarchiveTake, verb: "Unarchive Take", scope: .take,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Unarchiving acts on an archived take — open its block's takes first.",
+            availability: takeFamily),
+        // 13b Stage 3 (3D — T5/N6): the 3B core op `setTakeLabel` gets its
+        // faces — the take card's context menu and the bar's block menu.
+        Capability(
+            id: .labelTake, verb: "Label Take…", scope: .take,
+            doors: [.contextMenu, .bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Labels live on a take inside a post — open one first.",
+            availability: takeFamily),
+        // 13b Stage 3 (3D — T5/N6): `renameLens` (core since 11a) gets its
+        // door on the Lenses column header. Lens machinery's ONE home is
+        // the Lenses tab (R65/R86), so the act is deliberately
+        // Lenses-scoped — the R118 parity table exempts it by that ruling
+        // (Write has no lens door either; no surface is privileged).
+        Capability(
+            id: .renameLens, verb: "Rename Lens…", scope: .post,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Lenses are renamed from their column header in Lenses (⌘3).",
+            availability: { ctx in ctx.mode == .lenses ? .act : .unavailable }),
         Capability(
             id: .divergeHere, verb: "Diverge here (new take, this thread)", scope: .take,
             doors: [.contextMenu],

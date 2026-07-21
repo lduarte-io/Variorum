@@ -136,8 +136,15 @@ nonisolated struct Capability: Identifiable, Sendable {
     /// Where the act's doors are rendered. The registry walk asserts every
     /// declared door is rendered by its surface and every rendered door is
     /// declared.
+    ///
+    /// `.surface` (13b Stage 3, 3D): rendered INLINE on a board/panel
+    /// surface — an act whose target is pointed at directly (an archived
+    /// take's own card) rather than routed by context. Surfaces that render
+    /// surface-doored acts declare them in a `surfaceCapabilities` static,
+    /// and the walk asserts declared ⇔ rendered exactly like the four
+    /// routed door tables.
     enum Door: Sendable, Hashable, CaseIterable {
-        case menuBar, contextMenu, bottomBar, palette
+        case menuBar, contextMenu, bottomBar, palette, surface
     }
 
     /// R118 — TAKES PARITY, part of the declaration: how the Takes surface
@@ -181,6 +188,8 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case previousTake, nextTake, archiveTake, saveChoicesAsLens, closeAllTakes
     case pageFanBack, pageFanForward
     case divergeHere, diffAgainstChosen
+    // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
+    case unarchiveTake, labelTake, renameLens
     // Commit + undo
     case commitTake, structuralUndo
     // Post scope

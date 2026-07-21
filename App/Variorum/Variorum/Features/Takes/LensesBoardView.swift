@@ -42,6 +42,19 @@ struct LensesBoardView: View {
         var id: String { "save-\(columnID)" }
     }
 
+    /// 13b Stage 3 (3D — N6): the rename door's payload.
+    struct LensRenamePrompt: Identifiable {
+        let lensID: String
+        let currentName: String
+        var id: String { "rename-\(lensID)" }
+    }
+
+    @State private var lensRenamePrompt: LensRenamePrompt?
+
+    /// The registry ids the column-header menus render (13b Stage 3, 3D —
+    /// walk-asserted with the other contextMenu statics).
+    static let columnMenuCapabilities: [CapabilityID] = [.renameLens]
+
     init(session: AppSession, postID: String, model: TakesViewModel? = nil) {
         self.session = session
         self.postID = postID
@@ -87,6 +100,11 @@ struct LensesBoardView: View {
         .sheet(item: $lensNamePrompt) { prompt in
             LensNameSheet { name in
                 Task { await model.saveScratchAsLens(columnID: prompt.columnID, name: name) }
+            }
+        }
+        .sheet(item: $lensRenamePrompt) { prompt in
+            LensNameSheet(title: "Rename lens", initialName: prompt.currentName) { name in
+                Task { await model.renameLens(prompt.lensID, to: name) }
             }
         }
     }
@@ -435,6 +453,12 @@ struct LensesBoardView: View {
                 }
                 .help("A new linked post whose text is what this lens shows")
                 Menu("⋯") {
+                    Button("Rename lens…") {
+                        // 13b Stage 3 (3D — N6): `renameLens` (core since
+                        // 11a) finally gets its door.
+                        lensRenamePrompt = LensRenamePrompt(
+                            lensID: lensID, currentName: columnTitle(column))
+                    }
                     Button("Duplicate lens") { Task { await model.duplicateLens(lensID) } }
                     Button("Delete lens", role: .destructive) {
                         Task { await model.deleteLens(lensID) }

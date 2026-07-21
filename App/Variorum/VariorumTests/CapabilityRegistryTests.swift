@@ -57,9 +57,14 @@ struct CapabilityRegistryTests {
     @Test func everyEditingCapabilityDeclaresItsTakesAccess() {
         // Editing capabilities = block/take/post scopes. App-scope acts and
         // the Write-caret navigation/identity doors are exempt by
-        // declaration (takesAccess nil), and that exemption is EXPLICIT:
+        // declaration (takesAccess nil), and that exemption is EXPLICIT.
+        // `.renameLens` (13b 3D): lens machinery's ONE home is the Lenses
+        // tab (R65/R86) — the act is Lenses-scoped by ruling, so Takes
+        // parity doesn't apply (Write has no lens door either; no surface
+        // is privileged over another).
         let exempt: Set<CapabilityID> = [
             .previousBlock, .nextBlock, .callout, .exportCaretBlock, .switchMode,
+            .renameLens,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {
@@ -115,7 +120,17 @@ struct CapabilityRegistryTests {
     @Test func theContextMenusRenderExactlyTheDeclaredContextDoors() {
         let rendered = Set(EditorViewModel.contextMenuCapabilities)
             .union(TakesCellView.contextMenuCapabilities)
+            .union(LensesBoardView.columnMenuCapabilities)  // 13b 3D: renameLens
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
+    }
+
+    /// 13b Stage 3 (3D): the `.surface` door — acts rendered INLINE on a
+    /// board/panel (the archived listing's Unarchive) declare themselves in
+    /// per-surface statics, walk-asserted like the routed door tables.
+    @Test func theSurfacesRenderExactlyTheDeclaredSurfaceActs() {
+        let rendered = Set(TakesBoardView.surfaceCapabilities)
+            .union(WriteTakesPanel.surfaceCapabilities)
+        #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
     @Test func everyShortcutLabelHasExactlyOneKeyWiring() {

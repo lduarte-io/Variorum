@@ -53,6 +53,10 @@ struct TakesBoardView: View {
     /// in Lenses now).
     private let mainColumn = TakesColumn(id: "takes-main", kind: .main)
 
+    /// The registry ids this board renders INLINE (13b Stage 3, 3D — the
+    /// `.surface` door; walk-asserted): the archived listing's Unarchive.
+    static let surfaceCapabilities: [CapabilityID] = [.unarchiveTake]
+
     /// Batch 14 (her image-#9 report — TWO live rings): the fan CARDS pane
     /// in their own namespace. When the chosen take's card was focused,
     /// its key EQUALED the article cell's (same column/block/variant) —
@@ -108,6 +112,13 @@ struct TakesBoardView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
+        // 13b Stage 3 (3D — N1): the archived listing is its own read
+        // (the fans query stays active-only), refreshed at projection
+        // cadence — the WriteTakesPanel precedent.
+        .task { await model.refreshArchived() }
+        .onChange(of: model.projection) { _, _ in
+            Task { await model.refreshArchived() }
+        }
         .onAppear {
             model.followTheScroll = themeSettings.followTheScroll
             model.host = .takes
@@ -408,7 +419,7 @@ struct TakesBoardView: View {
                     // The FIRST-take door (R72): an unfanned block blooms
                     // into just the growth doors, whatever the style.
                     washedCell(slot: slot, washed: true)
-                    newTakeDoors(slot: slot).padding(.leading, 24)
+                    fanFooter(slot: slot).padding(.leading, 24)
                 } else if bloomed && model.projection.fanStyle == .slotSplit {
                     slotSplitBloom(slot: slot)
                 } else {
@@ -477,7 +488,7 @@ struct TakesBoardView: View {
                     onEdit: { model.paneEdited(variantID: take.id, newText: $0) },
                     onChoose: { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } })
             }
-            newTakeDoors(slot: slot)
+            fanFooter(slot: slot)
         }
         .padding(.leading, 24)
     }
@@ -520,7 +531,7 @@ struct TakesBoardView: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             if takes.isEmpty {
-                newTakeDoors(slot: slot)
+                fanFooter(slot: slot)
             } else {
                 railCards(takes: takes, slot: slot, rowsPerColumn: rowsPerColumn)
                     .frame(
@@ -529,7 +540,7 @@ struct TakesBoardView: View {
                 // Batch 12 (her "i can't make a new take"): the growth
                 // doors live BELOW the cards, always on screen (R72's
                 // promise; never behind pagination either).
-                newTakeDoors(slot: slot)
+                fanFooter(slot: slot)
             }
         }
     }
@@ -613,8 +624,67 @@ struct TakesBoardView: View {
                         .disabled(offset >= limit)
                 }
             }
-            newTakeDoors(slot: slot)
+            fanFooter(slot: slot)
         }
+    }
+
+    /// The bloom's footer (13b Stage 3, 3D): the growth doors + — where
+    /// archived takes exist — the archived listing's door (N1: the road
+    /// back lives in Takes, right under the fan the take left).
+    private func fanFooter(slot: Queries.RenderedBlock) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            newTakeDoors(slot: slot)
+            archivedSection(slot: slot)
+        }
+    }
+
+    /// "archived · n" — a quiet disclosure under the growth doors; open,
+    /// it lists the block's archived takes on the one card grammar with
+    /// Unarchive (the act, right here) and Delete.
+    @ViewBuilder
+    private func archivedSection(slot: Queries.RenderedBlock) -> some View {
+        if let count = model.archivedCounts[slot.blockID], count > 0 {
+            let revealed = model.revealedArchived.contains(slot.blockID)
+            VStack(alignment: .leading, spacing: 4) {
+                Button(tokens.chromeLabel(
+                    "\(revealed ? "▾" : "▸") archived · \(count)")) {
+                    model.toggleArchivedRevealed(slot.blockID)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help("This block's archived takes — out of the fan, never gone")
+                if revealed {
+                    ForEach(model.archivedTakes[slot.blockID] ?? [], id: \.id) { take in
+                        archivedCard(take: take)
+                    }
+                }
+            }
+        }
+    }
+
+    private func archivedCard(take: Variant) -> some View {
+        TakeCardFrame(isChosen: false, tokens: tokens) {
+            HStack(alignment: .top, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    if let label = take.label {
+                        Text(label).font(tokens.small).foregroundStyle(tokens.muted)
+                    }
+                    Text(take.workingText.isEmpty
+                         ? "(empty take)" : String(take.workingText.prefix(160)))
+                        .font(tokens.small)
+                        .lineLimit(3)
+                        .foregroundStyle(tokens.muted)
+                }
+                Spacer()
+                Button("Unarchive") { Task { await model.unarchiveTake(take.id) } }
+                    .controlSize(.mini)
+                    .help("Back into the fan — right here (the fan re-opens with it)")
+                Button("Delete", role: .destructive) {
+                    Task { await model.deleteTake(take.id) }
+                }
+                .controlSize(.mini)
+            }
+        }
+        .frame(maxWidth: 420, alignment: .leading)
     }
 
     /// v2's dashed footer — the fan-growth doors (R23: takes are minted

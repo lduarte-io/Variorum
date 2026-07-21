@@ -815,12 +815,113 @@ final class TakesViewModel {
     // MARK: - Take lifecycle (the retired FanPanel's doors, kept — R87:
     // one grammar everywhere, refusals speak)
 
+    /// 13b Stage 3 (3D — N1/R118): every archive door speaks the road
+    /// BACK, and the road it names lives right here in Takes (the
+    /// archived listing under the block's takes). Host-gated copy: the
+    /// Lenses board renders no archived list, so it points at the Takes
+    /// board instead of promising a door it doesn't have.
     func archiveTake(_ variantID: String) async {
         await run { ops in try ops.archiveVariant(variantID) }
+        if statusMessage == nil {
+            switch host {
+            case .takes:
+                statusMessage = "Take archived — never gone: "
+                    + "\u{201C}archived \u{B7} n\u{201D} under this block's takes brings it back."
+            case .lenses:
+                statusMessage = "Take archived — never gone: the archived list "
+                    + "under this block's takes on the Takes board (\u{2318}2) brings it back."
+            }
+        }
     }
 
     func unarchiveTake(_ variantID: String) async {
         await run { ops in try ops.unarchiveVariant(variantID) }
+        if statusMessage == nil {
+            statusMessage = "Take unarchived — back in the block's fan."
+        }
+    }
+
+    // MARK: - The archived listing (13b Stage 3, 3D — N1: the road back
+    // lives in Takes). The fans query stays ACTIVE-ONLY by design; the
+    // archived listing is its own read, refreshed by the board view at
+    // projection cadence (the WriteTakesPanel precedent) — cost ∝ the
+    // post's blocks (one indexed query), P1-shaped.
+
+    /// Archived-take counts per block — the "archived · n" door's truth.
+    private(set) var archivedCounts: [String: Int] = [:]
+    /// The archived takes themselves, fan-ordered, for every counted block
+    /// (author-scale small: archived rows per post).
+    private(set) var archivedTakes: [String: [Variant]] = [:]
+    /// Blocks whose archived listing is open (session-only, like blooms).
+    private(set) var revealedArchived: Set<String> = []
+
+    func toggleArchivedRevealed(_ blockID: String) {
+        if revealedArchived.contains(blockID) {
+            revealedArchived.remove(blockID)
+        } else {
+            revealedArchived.insert(blockID)
+        }
+    }
+
+    /// One read for counts + rows over the post's live blocks. The view
+    /// calls this on appearance and at projection cadence; tests call it
+    /// directly (the observation never fires under the test host).
+    func refreshArchived() async {
+        let blockIDs = projection.slots.map(\.blockID)
+        guard !blockIDs.isEmpty else {
+            if !archivedCounts.isEmpty { archivedCounts = [:] }
+            if !archivedTakes.isEmpty { archivedTakes = [:] }
+            return
+        }
+        let rows: [Variant] = (try? await session.database.read { db in
+            try Variant
+                .filter(
+                    blockIDs.contains(Column("block_id"))
+                        && Column("deleted_at") == nil
+                        && Column("status") == VariantStatus.archived.rawValue)
+                .order(Column("fan_position"), Column("id"))
+                .fetchAll(db)
+        }) ?? []
+        let grouped = Dictionary(grouping: rows, by: \.blockId)
+        archivedTakes = grouped
+        archivedCounts = grouped.mapValues(\.count)
+    }
+
+    // MARK: - Take labels (13b Stage 3, 3D — N6: the 3B op's faces)
+
+    /// The label prompt's payload (model-driven sheet — the
+    /// `commentsRequest` pattern; the bar hosts the sheet on both boards).
+    struct TakeLabelRequest: Identifiable, Equatable {
+        let variantID: String
+        let currentLabel: String?
+        var id: String { variantID }
+    }
+
+    var takeLabelRequest: TakeLabelRequest?
+
+    /// Opens the label prompt for a take (card menu / bar block-menu).
+    func requestTakeLabel(variantID: String) {
+        takeLabelRequest = TakeLabelRequest(
+            variantID: variantID, currentLabel: currentLabel(of: variantID))
+    }
+
+    private func currentLabel(of variantID: String) -> String? {
+        for (_, fan) in projection.fans {
+            if let take = fan.first(where: { $0.id == variantID }) {
+                return take.label
+            }
+        }
+        for (_, archived) in archivedTakes {
+            if let take = archived.first(where: { $0.id == variantID }) {
+                return take.label
+            }
+        }
+        return nil
+    }
+
+    /// The op call (empty clears — the core trims and NULLs).
+    func setTakeLabel(_ variantID: String, label: String?) async {
+        await run { ops in try ops.setTakeLabel(variantID, label: label) }
     }
 
     func setTakeLocked(_ variantID: String, locked: Bool) async {
@@ -1258,16 +1359,14 @@ final class TakesViewModel {
         toggleExpanded(blockID)
     }
 
-    /// ⌘⇧A — archive the take the ring is in.
+    /// ⌘⇧A — archive the take the ring is in. The road-back speech is
+    /// `archiveTake`'s (one copy on every door — 3D/N1).
     func archiveFocusedTake() async {
         guard let pane = focusedPane else {
             statusMessage = "Click into a take first — ⌘⇧A archives the take you're in."
             return
         }
         await archiveTake(pane.variantID)
-        if statusMessage == nil {
-            statusMessage = "Take archived — it stays in the block's history (unarchive below)."
-        }
     }
 
     /// The lens column's per-block ‹ › switcher (R83/R89 — the canvas
