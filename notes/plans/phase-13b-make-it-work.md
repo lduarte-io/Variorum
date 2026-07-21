@@ -2784,7 +2784,9 @@ two memo addenda authored 2026-07-21 are the opening material):**
   working" report arrived while 3E was in flight and unlanded —
   expected; D1 remains 3E's.
 
-### Batch 3G — the looks-polish tail (R111; bounded)
+### 3F trimmed / 3G retired (author-raised 2026-07-21, architect's recorded call): 3F proceeds NOW but trimmed — it is defect-shaped (the overlay cold-mount substrate bug N14 gates everything Stage 4 builds on; the grid scroll bug N23 hides content — functionality by R111's own standard) and its surfaces barely intersect Stage 4's rework list (ceremony/merge sheets, outline, canvas, compare). The broad crowdedness pass SHRINKS to the named instances (N15 + the drive's worst cells) — sweeping subjective judgments wait for her presence at the Stage 4 kickoff. 3G RETIRES: its copy notes fold into 3F; the standalone looks sweep is dropped; L1 stays unbuilt; looks work on Stage-4 surfaces happens there. Stage 3 = 3F → the ladder.
+
+### Batch 3G — the looks-polish tail (R111; bounded — RETIRED per the note above)
 
 Judged against screenshots of the APP ITSELF, not the mockups; the
 worst self-evident looks defects from the accumulated screenshot
