@@ -2765,7 +2765,22 @@ two memo addenda authored 2026-07-21 are the opening material):**
   includes the `BoundarySnapping` core change, own commits) and the
   MERGE CEREMONY (pairing ＋, carry/leave, join preview — the merge
   memo's addendum; its semantics extension is HER ruling at the
-  kickoff).
+  kickoff — her 2026-07-21 re-affirmation on the record: "a merge
+  ceremony to match the divide ceremony… I think is an important
+  option to have").
+- **THE KICKOFF AGENDA (her 2026-07-21 direction — what she will bring
+  to the Stage 4 orchestrator at the author-attended start):** her
+  ideas and improvements for the OUTLINE, COMPARE, and CANVAS pages;
+  the merge ceremony; the cut redesign's tradeoff list; "any other
+  bugs / issues / usability things I've noticed" accumulated by then;
+  plus the checkpoint bundle (delivered at this same sitting per the
+  recorded boundary call). The Stage 4 plan must be written expecting
+  ALL of these as kickoff inputs.
+- **THE CLOSING ITEM (3G reinterpreted, her direction):** after all
+  her noticed issues are addressed, a suggested-improvements sweep —
+  usability, design, polish, clunky interactions, not just defects —
+  PROPOSE-ONLY: every finding brought to her to consider (taste
+  questions are hers); nothing built autonomously from it.
 - The OUTLINE post's utility — "go into the utility of outline post…
   and make some changes there."
 - The CANVAS view mode — same directive.
@@ -2785,6 +2800,16 @@ two memo addenda authored 2026-07-21 are the opening material):**
   expected; D1 remains 3E's.
 
 ### 3F trimmed / 3G retired (author-raised 2026-07-21, architect's recorded call): 3F proceeds NOW but trimmed — it is defect-shaped (the overlay cold-mount substrate bug N14 gates everything Stage 4 builds on; the grid scroll bug N23 hides content — functionality by R111's own standard) and its surfaces barely intersect Stage 4's rework list (ceremony/merge sheets, outline, canvas, compare). The broad crowdedness pass SHRINKS to the named instances (N15 + the drive's worst cells) — sweeping subjective judgments wait for her presence at the Stage 4 kickoff. 3G RETIRES: its copy notes fold into 3F; the standalone looks sweep is dropped; L1 stays unbuilt; looks work on Stage-4 surfaces happens there. Stage 3 = 3F → the ladder.
+
+*(SUPERSEDED IN PART by the author the same day — "I disagree with 3G
+being entirely retired": 3G is REINTERPRETED, not dropped. It becomes
+**Stage 4's CLOSING item** — a suggested-improvements sweep run AFTER
+all her noticed issues are addressed: usability, design, polish, and
+"interactions that might feel clunky" — surfacing things she may not
+have seen or considered. Binding posture: it is PROPOSE-ONLY —
+"everything it surfaces should be brought to me to consider… it's all
+a taste question"; nothing it finds is built autonomously. Stage 3's
+shape is unchanged: 3F → the ladder.)*
 
 ### Batch 3G — the looks-polish tail (R111; bounded — RETIRED per the note above)
 
