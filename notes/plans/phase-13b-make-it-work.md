@@ -2687,6 +2687,15 @@ the batch records for the checkpoint walk); environment traps: ALL of
 the Stage 1a/1b/2 briefs' verbatim, PLUS this brief's live-instance
 rules, PLUS zsh `pipestatus` (lowercase) not `PIPESTATUS`.
 
+### Interim author reaction (2026-07-20 ~18:30 — on the record for the end checkpoint)
+
+Unprompted, after ~1.5 h of live use of the final Stage 2 build (her own
+real-store session, 16:40–18:30): *"the app is looking amazing thus far
+and I'm very happy with everything I've seen. It seems like stage 1 and
+2 were enormous successes."* First hands-on reaction to the rebuilt
+interaction layer + the field guide; supports R111's restraint call on
+the looks tail (she likes the app's looks) — the 3G batch stays bounded.
+
 ### The end checkpoint prep (owed by the orchestrator after the ladder)
 
 Per the handoff: bundle every recorded judgment call/PROVISIONAL from
