@@ -170,6 +170,36 @@ extension Operations {
         }
     }
 
+    // MARK: - Take identity metadata
+
+    /// Sets (or clears, with nil/whitespace-only) a take's label — the fan
+    /// card's handle and the export "Alternates" section's `take: "<label>"`
+    /// name (Phase 13b 3B — T5's missing setter; the column and renderers
+    /// shipped long ago). Identity-level metadata on the `setBlockName`
+    /// precedent: no touch stamp, no churn (naming a take is not working on
+    /// the prose), a no-op set writes nothing, `updated_at` stamped on real
+    /// change. Plain metadata-CAS under sync — no uniqueness, no repair
+    /// class; the standing variant outbox triggers carry the UPDATE.
+    ///
+    /// Refuses under a sealed post (the seal refuses everything under the
+    /// post — the Phase 2 ratified scope, via the placement guard).
+    /// ALLOWED on a LOCKED take: the lock freezes the BUFFER, not identity
+    /// metadata (PROVISIONAL, batch 3B — recorded for the checkpoint walk).
+    /// Allowed on an ARCHIVED take: the archived listing is exactly where a
+    /// label helps identify a take (3B judgment call, same record).
+    public func setTakeLabel(_ variantID: String, label: String?) throws {
+        try database.write { db in
+            var variant = try liveVariant(db, variantID)
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
+            let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
+            guard variant.label != normalized else { return }
+            variant.label = normalized
+            variant.updatedAt = date.now
+            try variant.update(db)
+        }
+    }
+
     // MARK: - Shared internals
 
     /// A variant whose buffer may be edited right now: live, active,
