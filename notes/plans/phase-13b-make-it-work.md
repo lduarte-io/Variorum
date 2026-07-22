@@ -1,10 +1,14 @@
 # Phase 13b — Make It Work (usability & interaction hardening)
 
-**Status:** ACTIVE — **Stage 3 CLOSED (2026-07-21; ladder closed at
-round 2, ZERO BLOCKER/MAJOR both rounds; stage closeout at the end of
-this file; Mac 562/112 · core 762/92). Stage 4 is NEXT — author-attended
-kickoff per the Stage 4 stub; the handoff is
-`phase-13b-stage4-handoff.md`.** Stage 2 CLOSED (ladder closed at round 2; both
+**Status:** ACTIVE — **STAGE 4 OPEN (kickoff sitting held 2026-07-21/22,
+author-attended: environment acts discharged, S4-1…S4-33 recorded, both
+memo addenda RULED, QUESTIONS #23–#28 ALL ANSWERED, flagged items
+dispositioned, the per-record judgment-call walk DEFERRED-IN-PLACE at
+her direction; the execution brief is authored — batches 4G-first →
+4A–4F → the ladder → the closing propose-only sweep; see "Stage 4
+execution brief" at this file's end).** Stage 3 CLOSED (2026-07-21;
+ladder closed at round 2, ZERO BLOCKER/MAJOR both rounds; Mac 562/112 ·
+core 762/92). Stage 2 CLOSED (ladder closed at round 2; both
 fix passes complete; stage-level closeout below):
 "the field guide" (6 chapters · 21 act-ready lessons) + the hardened
 Restore/Open doors (one discovery, confirm-gates-what-dies, the session
@@ -417,12 +421,13 @@ Commits per batch/stage with the standing message convention.
 | N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
 | N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
 | N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | new, author → Stage 4 |
-| N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern | new, author → Stage 4 |
+| N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern. **S4-33 (her rider): the Takes bar gets a DIRECT "comments" button like Write's — parity of prominence, not just existence** | new, author → Stage 4 |
 | N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | new, author → Stage 4 scoping call at brief time |
 | N37 | Readings RESTORE door (S4-28.2, reverses the pre-13 boundary): `restoreReading` on the `restoreContainer` pattern (tombstone flip + exact-stamp revival of sections/memberships) + a deleted-readings recovery surface; curated at least | new, author → Stage 4 |
 | N38 | Smart → smart+curated conversion (S4-28.4, direction-level, uncertainty preserved): curating/chaptering a smart book converts it (membership materialization design), a fresh smart book mintable off the same tag; the #25(a) promote-to-curated design, now wanted | new, author → Stage 4 scoping call; design memo owed if deferred |
 | N39 | Blocks-list positional moves (S4-30g): type a target position number ("what number block… out of the total post") + move-to-top / move-to-bottom doors — dragging stops being the only long-distance move | new, author → Stage 4 |
 | N40 | The takes strip's height jumping (S4-31b, her ruling): ONE fixed strip height with in-strip scrolling ("you can scroll within the strip"); kills the back-and-forth height changes and dissolves the recorded #28(b) clip cost | new, author → Stage 4 |
+| N41 | Inline-comments airiness (S4-32, her deferral): the uniform gap widening "doesn't look great" but is not Stage 4 scope — DEFERRED to a future stage; the 13b closeout names its owner (candidates: a later polish window, or an R116 memo if it keeps bothering her) | new, author → deferred beyond Stage 4 |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
@@ -4620,3 +4625,239 @@ open a fan it opens the rail sounds like it works"); (d) drew no
 comment — treated as blessed (it is the unchanged pre-13 shape),
 flagged here in case she meant otherwise. QUESTIONS #28 → fully
 ANSWERED ((e) was R88's earlier answer).
+
+### Part 9 — the sitting's closing directions (2026-07-22; the checkpoint walk closes here by her call)
+
+**S4-32:** (1) She now sees how to reach comments (unblocked by the
+in-sitting answer; N35's prominence work stands — she couldn't find it
+unaided). (2) **The inline-comments airiness DEFERRED to a future
+stage by her direction** ("it doesn't look great, but it's not a big
+enough issue to fix in this already busy stage") — new ledger row
+N41; the 13b closeout names its eventual owner. (3) The Seamless-fold
+blessed on the explanation ("seems like your recommended path is an
+improvement"). (4) **#28(d) now EXPLICITLY blessed** ("follow the
+scroll doesn't have to reach unlocked lens columns, that's fine") —
+the treated-as-blessed flag resolves. (5) **THE PER-RECORD
+JUDGMENT-CALL WALK IS DEFERRED at her direction** — "I'd keep it all
+there in the record for if I do want to look at it, but for now just
+using the app and seeing how it feels and what I notice is what I'm
+more focused on." The R121 en-masse walk's per-record portion stands
+DEFERRED-IN-PLACE: every judgment call remains recorded and
+addressable; nothing is deemed ratified-by-silence; her organic use is
+the active review channel (the author-as-live-finding-source lesson).
+The formal tutorial-walk item converts to the same organic channel
+(the field guide is freshly seeded). (6) **"I think we're honestly
+ready to author the stage4 execution brief"** — the brief follows
+below, just-in-time per the standing rule.
+
+**S4-33 (her rider, same sitting):** "the comments button should be
+there in takes the way it is in write, on the bottom bar" — the Takes
+bar surfaces a direct "comments" button (today it hides under the
+bar's block ▾ menu); the R118 parity instinct applied to the door's
+PROMINENCE, not just its existence. Folded into N35.
+
+## Stage 4 execution brief (authored just-in-time 2026-07-22 at the kickoff sitting's close — the author present and ratifying; self-contained per batch: read this + the constitution + the "Stage 4 kickoff sitting" record (S4-1…S4-33) + the two RULED memos + the named ledger rows; nothing else assumed)
+
+**Goal:** build everything the kickoff sitting ruled — the two
+ceremonies, the compare/outline/lenses rework, the takes/canvas/books
+packages, and the clarity items — through the standing machinery, ending
+with the ladder and the closing PROPOSE-ONLY sweep. The author is now in
+organic daily use: her reports during the stage are live findings
+(machinery lesson 8) — record verbatim, route to the owning batch, never
+let one drop.
+
+**Baselines at open:** Mac **562/112** · core **762/92** · mobile
+**11/4**. `/Applications` carries the full ladder-fix build; the REAL
+store holds the fresh field guide; her instance may be RUNNING at any
+time — the live-instance rules bind every batch (by STORE, not path; no
+Mac test runs, no Release builds while one lives — until 4G lands).
+
+**Core allowances (enumerated — everything else `Sources/VariorumCore`
+untouched; `Sync/` untouched except the serializer/registry walk v1_12
+requires, which is Fable work under the standing rider — this cast is
+all-Fable):** 4A `BoundarySnapping` + its snap consumers (the ruled cut
+rule); 4B the merge-pairing operation (the ruled canon extension); 4D
+`poolDragCopy` copies `block.name` (S4-27, one line + tests); 4F
+`restoreReading` + migration v1_12 `container.word_target` + its
+registry/serializer/mirror artifacts. Own commits per the schema/model
+convention; exact state-transition tests per the operations
+conventions; the mobile target must still build after every core touch.
+
+### Batch order (each a FRESH implementer session; 4G FIRST by design — it unlocks suites-beside-her-live-app for every later batch)
+
+**4G — parallel-use hardening (the stub's infrastructure item; FIRST).**
+The TEST HOST gets its own bundle identifier so the runner's launched
+copy never collides with her running app (RunningBoard refuses two
+instances of one identity; the data container stays keyed to the app's
+own identifier — untouched). Verify the identity-sensitive tests
+survive: `EntitlementsTests` (reads the signed host), the dev-store
+fence, defaults-reading suites. One zero-instance verification window is
+needed ONCE (full Mac suite green under the new identity, then again
+with a live real-store instance RUNNING — the unlock proven); thereafter
+suites run beside her writing. `/Applications` refresh rules unchanged
+(Release builds still need zero instances).
+
+**4A — the cut redesign (the W memo's addendum, RULED — build to it).**
+Core: `BoundarySnapping` learns the ruled rule — cuts between any two
+words and at newlines; gentle sentence/newline settle; word-edge floor;
+EXTRACT's edges join the same rule (own commit, exhaustive Domain
+tests). Editor: plain divide follows the rule (divide-on-an-empty-line
+works — N28's divide half); the ceremony sheet rework — every checked
+take visible at once with its ✂ in its text; drag glides between word
+edges; click-to-jump survives; keyboard placement (←/→ word, ⌥←/→
+sentence, ⇥ between takes, ⏎ when placed); end-parking = first-half
+only, start-parking = second-half only (divideW gains the
+end/start-of-take semantics — core, same commit family); the
+single-sentence dead end gone both ways. Refusal copy updated
+(the "No legal boundary" class shrinks to genuinely-empty cases).
+Tutorial keeps pace (P-6): the extract lesson's prose RE-WIDENS
+honestly (N18's narrowing reverses); the divide/ceremony lessons teach
+the new placement; walk tests updated with the prose.
+
+**4B — the merge ceremony (the merge memo's addendum, RULED — build to
+it).** Core: the pairing operation — a ceremony merge mints ONE take
+per ＋ pairing plus carried takes whole (fresh block, `derived_from`
+edges both sources, sources released to lineage exactly as today;
+NOTHING cartesian; the instant no-fan merge byte-unchanged). Exact
+state-transition tests incl. round-trip (divide-W then pair-back ⇒
+texts restored), undo (one ⌥⌘Z restores sources whole), seal/lock
+refusals. UI: the sheet — left takes | right takes, ＋ between pairs,
+carry checkboxes, stay-behind default for unpaired; join preview with
+space · newline · nothing (default = canon rule; per-session memory);
+threshold = any fan on either side, PRE-PAIRED with the chosen takes
+(⏎ = today's outcome); N-ary chains bypass (chain-merge as today).
+The lineage-road speech survives on both paths. **CANON RECORDING DUTY
+at stage close:** AppSpec §9's merge entry + OverallModel §7 gain the
+pairing delta (her S4-23 ruling is the authority). Tutorial: the merge
+lesson gains the ceremony (the staged fanned pair is already there).
+
+**4C — the compare/outline/lenses rework (S4-2/S4-3/S4-12, N29/N33).**
+The mode row drops to SIX: **Outline RETIRES as a tab** — its one
+unique power (make-outline-post, R99) moves into Compare's header;
+stored mode memories migrate (outline → compare); ⌘1–⌘6 reflow.
+Compare rebuilt as "Lenses across posts" on the ONE architecture:
+cells are `PaneSurface` panes over `PaneTextAuthority` — fully
+EDITABLE, ONE live ring across both posts (two post contexts, two
+per-post autosave coordinators, one ring — the authority's contract
+extends across contexts; design ON the authority, never beside it);
+per-post block REORDER by drag (each column reorders ITS post only);
+up to FOUR compare columns (the anchor + up to three peers — S4-2c +
+the 2026-07-17 N-post intake; the picker grows per column); the
+lineage-color relationship TOGGLEABLE (S4-12); the
+"follow this post's order" TOGGLE (display-only lineage-tied ordering
+of the other columns — S4-3's shape; order-drag sync deliberately NOT
+built until display-only proves insufficient); **N29 no-relationship
+honesty** — zero-lineage pairs render plain side-by-side with "there
+is no relationship here", no blanks, no rails; rails only where
+lineage speaks; zero-lineage version-marking says alignment will be
+loose; **N33** the Diff sheet gains a save button (NSSavePanel, the
+export-door conventions). LENSES: block drag-reorder on the board
+(one post, one order — all columns move together, S4-2d); the
+"+ column" door gains prominence (S4-10/N32d). The compare cells
+leaving SwiftUI `Text` retires that surface's slice of the fourth
+text path. Tutorial: the compare/outline lesson re-cut for the merged
+tab; walk tests follow.
+
+**4D — takes board + editor QoL (N28 · N40 · S4-24 · S4-19 · S4-20 ·
+N34 · N35/S4-33 · N39 · N32a–c · S4-27e).** Insert-new-block-BELOW the
+caret/focused block — registry act, BOTH editors (Write + Takes, her
+parity ruling), core's positional `newBlock(at:)` under it; N40 the
+fixed-height strip with in-strip scroll (one height, no jumping);
+S4-24 the scroll+pager hybrid rail (free horizontal scroll ON TOP of
+the pager; the ◀ x–y of n ▶ counter stays truthful — scrolling and
+paging agree; nothing off-edge undiscoverable, the AD-2 lesson binds);
+S4-19 the drag-handle hover setting (Write; default ON; OFF = fully
+clean; seams-on static display unchanged); S4-20 the default-view flip
+(new opens → Write; per-post memory stands); N34 the one_block FACE
+(per-post door + optional global face; entry-wide — governs paste);
+N35+S4-33 commenting prominence (a DIRECT "comments" button on the
+Takes bar like Write's; the margin-click-to-add affordance built if it
+earns its place in this pass, else recorded against N41's future
+stage); N39 Blocks-list positional moves (type-a-number + move to
+top/bottom); N32a–c the clarity items (move-to-pool honest copy;
+pools-vs-tags de-blur in the Blocks area; scrap-row TAG doors —
+registry-declared, both Blocks area and ScrapsPanel); S4-27e
+`poolDragCopy` copies the name (core, own commit).
+
+**4E — canvas (N30, built to her rulings).** Spread-grid DEFAULT
+placement for unpositioned cards (the pile dies); the long-post
+answer designed IN-BATCH and recorded (lazy realization vs the
+drag-in-from-a-bank model — the implementer proposes from the code,
+the architect rules; her fork is on the record); EDITABLE cards (the
+one-live-ring discipline extends to canvas panes — supersedes R40
+arrange-only, her direction); RESIZABLE cards (size persists in
+`canvas_layout.view_state`-class local/synced state — follow the
+existing position precedent exactly); the block-order number on each
+card (bottom-right, read-time derived); the click-in-order mode
+(explicit: click cards in sequence, numbered preview, ONE confirm
+applies the reorder through ordinary ops, ⌥⌘Z undoes; cancel inert);
+fit-all-in-view door; a grab affordance (header strip/edge grammar —
+the 3A drag-in-text note). P1: realization bounded — a never-opened
+long post must not realize every card (the batch's design answer owns
+this).
+
+**4F — books (N31 · N36 · N37; the deferral decisions land here).**
+The progress bar on the existing scroll view; the KINDLE-STYLE paged
+view — page = a post (vertical scroll within, any length), horizontal
+bottom scrub bar, flip forward/back; built on renderPost + the read
+tier + the model-driven scrubber brain (the Phase 6 memo's
+model-driven ruling binds — no live-geometry scrubbing); N37
+`restoreReading` (core, own commit: tombstone flip + exact-stamp
+revival of sections/memberships — the `restoreContainer` pattern) + a
+deleted-readings recovery surface (the Archived & Deleted precedent);
+N36 per-post word target — migration v1_12 `container.word_target`
+(additive; display/progress semantics mirroring the reading's; NEVER
+an add/type-time refusal) + mirror DDL + marker bump, **the deploy
+itself gated on HER explicit go-ahead at the batch** (the R53
+precedent — mirror → Mac only). **DEFERRALS EXECUTED (recorded here,
+owed as 4F deliverables):** the UNIFORM-PAGE traditional book view →
+Stage 5, with the DETAILED BRIEF/PLAN authored in this batch (her
+S4-16 condition — pagination architecture, lazy page realization per
+P1, page-count estimation, the scrub bar's page domain); N38
+smart→smart+curated conversion → Stage 5, with its DESIGN MEMO
+authored in this batch (conversion/materialization semantics, the
+fresh-smart-book-off-the-same-tag door).
+
+### The machinery (binding, every batch)
+
+The per-batch loop verbatim (build → soak + pins + TutorialWalkTests →
+screenshot-verify where the environment allows → point-by-point ledger
+update → commits with the standing trailer → `/Applications` refresh at
+zero-instance windows only). Fresh implementer session per batch,
+briefed by THIS file's named sections only; implementers mark
+unverified claims PENDING (the dead-session rule); the orchestrator
+verifies. Registry discipline: every new act declared (verb,
+availability, doors, honest note); the walk grows with each. R118
+parity holds on every new capability. P-6: any lesson a batch touches
+updates in the same batch, walk tests riding. Environment traps: ALL
+prior briefs' verbatim (tight pgrep; store-not-path; build-for-testing
+under live instances; zsh pipestatus; suite-level -only-testing; UTC
+backups; fresh hosting views; the bare-NSWindow first-responder trap;
+async-poll settle draining). The author is a LIVE FINDING SOURCE all
+stage — her mid-stage reports get verbatim recording + routing, same
+turn.
+
+### The ladder (one, over the combined Stage 4 diff)
+
+Fresh cold reviewer, `notes/REVIEW_PROMPT.md` verbatim, this brief +
+the batch records as anchor. Standing foci to enumerate at closeout
+time: the 4A/4B core surgery (BoundarySnapping's new rule table; the
+pairing op's state transitions; canon-doc deltas drafted, not yet
+applied), 4C's cross-post authority extension (the one-ring invariant
+across contexts — the soak should gain a compare-board variant), the
+v1_12 lockstep artifacts, 4E's realization bounds. Round 2 re-reviews;
+new HIGH ⇒ round 3; cap 3; class-completeness sweeps where a fixed
+class recurs adjacent (enumerate trigger INPUTS, not just consumers).
+
+### The closing item (after the ladder + her noticed issues are addressed)
+
+The PROPOSE-ONLY improvements sweep (3G reinterpreted, her binding
+posture): usability, design, polish, clunky interactions — EVERYTHING
+it surfaces goes to her to consider; nothing built autonomously from
+it. Then the stage closeout: counts, classes ended, canon deltas
+applied (AppSpec §9/OverallModel §7 merge pairing; AppSpec §14 gains
+the Stage 4 sitting delta pointing at S4-1…S4-33), the deferred
+judgment-call walk's standing note, Stage 5's shape (the two authored
+deferral documents + whatever her organic use surfaced), and the
+`/Applications` refresh + field-guide re-seed if lessons changed
+(behind the A1 rail, as ever).
