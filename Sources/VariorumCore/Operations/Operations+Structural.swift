@@ -469,8 +469,10 @@ extension Operations {
 
             let head = first.rendered.workingText
             let tail = second.rendered.workingText
-            let needsSpace = !head.isEmpty && !tail.isEmpty
-                && head.last?.isWhitespace != true && tail.first?.isWhitespace != true
+            // The canon join, through the ONE join brain (13b 4B —
+            // `MergeJoin.canon` IS this rule; the ceremony's previews and
+            // pairings share it, so they can never disagree about a byte).
+            let joined = MergeJoin.canon(head: head, tail: tail).joined(head, tail)
             // Phase 13 (A2): A' keeps the frame only when BOTH sources
             // agree on it (both-nil included) — merging a callout with
             // plain prose mints a plain block rather than silently picking
@@ -478,7 +480,7 @@ extension Operations {
             let presentation = first.block.presentation == second.block.presentation
                 ? first.block.presentation : nil
             let minted = try mintFanBlock(
-                db, texts: [needsSpace ? head + " " + tail : head + tail],
+                db, texts: [joined],
                 in: containerID, position: position,
                 defaultIndex: 0, chosenIndex: 0, presentation: presentation, now: now)
             let firstEdge = try insertLineageEdge(
