@@ -5062,3 +5062,29 @@ the 13b build record, the §12 deploy-gate pattern, two 4G-era
 environment traps, the deferral-with-docs rule, the in-batch
 propose→rule loop) are in the skill's own commit and flagged in the
 orchestrator's reply + the eventual handoff.
+
+### Addendum to the EOL directive (author, same night — pre-authorizations recorded same turn)
+
+1. **The v1_12 MIRROR DEPLOY is PRE-AUTHORIZED** — her words: "you also
+   have my permission to do the mirror deploys when you get there —
+   I'm confident that they will be fine." The R53 precedent's shape
+   applies: the deploy executes AT BATCH 4F through the stored PAT
+   arrangement, mirror → Mac only (the phone stays uninstalled), §12
+   choreography (mirror FIRST, then the client build ships), with the
+   marker readback + probes verified and logged in the 4F record. The
+   handoff-checklist item converts from "give the go-ahead" to "review
+   the executed deploy record." Post-4F `/Applications` refreshes are
+   therefore UNBLOCKED once the mirror is at marker 4.
+2. **ALL-FABLE CONFIRMED** — "all fable is confirmed": the Stage 4
+   cast stands as running, and the 13c recommended cast (all-Fable
+   under /architect-phase) is confirmed IN ADVANCE — the 13c plan
+   records its cast as author-confirmed 2026-07-22 rather than
+   pending-at-kickoff.
+3. **Environment for the overnight run:** she has CLOSED her app ("so
+   it's ready for any refresh") and left the machine open/unlocked for
+   visual verifications. Zero-instance windows are the expected state
+   all night — per-batch `/Applications` refreshes resume on the
+   standing cadence (post-4F ones behind the deploy, per item 1), and
+   batch drives may use real clicks/drags/typing (verify the unlocked
+   state empirically at each drive per the 3A precondition; own
+   `caffeinate -d` as ever).
