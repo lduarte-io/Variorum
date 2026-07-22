@@ -417,7 +417,7 @@ Commits per batch/stage with the standing message convention.
 | N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
 | N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | **DIVIDE HALF RESOLVED 4A** (commit 44f7fe9): the "make a sentence first" trap dies — any two words divide now, so a one-sentence take (± trailing newline) always has a legal cut; the honest residue recorded in the 4A record: a cut at the block's very START/END still refuses per the memo's letter ("nothing to divide"), so the trailing-empty-line "give me a new block below" intent is exactly the INSERT-BELOW act's. **INSERT-BELOW RESOLVED 4D — N28 CLOSED, the row's last half** (commit 62800c3: "New Block Below" as a DECLARED registry act, ⌥⌘N, NATIVE in BOTH editors per S4-13 — Write through the one structural door (caret lands IN the empty mint), Takes/Lenses via the parkFocus ring handover; doors: Block menu, both bars, palette; sealed refuses spoken; newlines-as-content in takes panes untouched) |
 | N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | **RESOLVED 4C** (commits de4e4e3+eb17ad0 — `CompareComposition`, the honesty rule as a PURE brain: zero relationship ⇒ ONE free segment, plain side-by-side in own orders + the "there is no relationship here" header line; partial relationships align ONLY kin rows, unrelated stretches pack with NO blanks; rails render only where kinship exists, both sides colored by the anchor kin, behind the S4-12 lineage-colors toggle; zero-lineage version-marking SPEAKS the loose-alignment consequence — pinned at the composition, the model, and the tutorial walk) |
-| N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | new, author → Stage 4 |
+| N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | **RESOLVED 4E** (commits a2005f7+139e289+10be249+39d0887, built to the recorded Phase-1 ruling — spread-grid + pure 2D viewport culling ADOPTED, the bank REJECTED with her fork recorded as a 13c input: (a) the pile dies into derived grid slots; (b) lazy realization with the P1 bound pinned pure+hosted (realized set independent of post size; the ReadingFlow counter precedent); (c) EDITABLE PaneSurface cards over the ONE authority — edits land on the take the card SHOWS, chosen only through ✓ (R88 untouched), seal refuses liveness/edits while arrangement stays allowed (#18); Canvas's fourth-text-path slice RETIRED (ReadingFlow remains); (d) RESIZABLE with LOCAL size memory (no canvas_layout size home — synced w/h recorded for 13c); (e) the bottom-right read-time ordinal; (f) click-in-order — numbered preview, ONE confirm = ordinary reorders under ONE ⌥⌘Z compound, cancel inert, sealed refuses spoken; (g) fit-all — scroll when it fits, else the read-only overview zoom with silhouettes + the γ ordering rider; plus ⌘S-in-canvas per the ruling's (c)(2) and the ⠿ grab strip (the 3A note). Canvas board soak + tutorial walk act ride the PENDING suite run — Mac expected 619/117 → 640/121) |
 | N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
 | N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | **(d) the "+ column" half DONE 4C** (commit 6f1b602 — while ONE column is open, an empty DASHED COLUMN waits beside it, the shelf's dashed new-post grammar, one shared menu body with the header door; retreats once a second column exists). **(a)–(c) RESOLVED 4D — N32 CLOSED** (commit 582ab36: (a) the door reads "Move out to a pool (leaves this post)" and the completion SPEAKS the I2 consequence + the road back — the old silent success was pinned and the pin edited red-on-old; (b) the canvas filter names itself a TAG (label) filter with de-blurring help, the pool menus say container-vs-label at the door; (c) `.tagBlock` DECLARED — one `.surface` act rendered by THREE surfaces (Blocks-area rows, ScrapsPanel rows, the canvas card — S4-15's formerly-only door now declared), all over the ONE BlockTagAssignmentSheet, walk-asserted; R118-exempt with reasoning, the renameLens class) |
 | N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | **RESOLVED 4D** (commit f5b0b30 — the PER-POST door: "newlines make blocks: on/off" chips on BOTH bars (Write reads the observed header; Takes/Lenses refresh at projection cadence), ON ⇒ per-post NIL (inherit global) / OFF ⇒ `.oneBlock`, the consequence SPOKEN ("governs future entry — existing blocks never re-segment"); ZERO semantics change — entry-wide is the model's standing meaning, exactly S4-21's ratification; allowed under seal (container-row metadata class). The OPTIONAL GLOBAL FACE DEFERRED, recorded: `upsertSetting` is Operations-internal and no public `default_segmentation` setter exists — one small core op away, and 4D's core allowance was exactly the poolDragCopy line; flagged for the ladder/13c) |
@@ -6102,6 +6102,268 @@ verbatim).
 - The `.tagBlock` availability is `always` — an act whose doors are
   all `.surface` never renders a routed/dimmed door, so the rule is
   honest by construction; confirm the reading.
+
+### Batch 4E record (the canvas package — N30 RESOLVED, built to the recorded Phase-1 ruling; core untouched at 798/94 GREEN, Mac-suite execution carried PENDING under the locked-session regime)
+
+**The in-batch propose→rule gate (the brief's own design), executed:**
+the implementer's Phase-1 report proposed from the code — (a) spread-grid
+default placement + LAZY REALIZATION by pure 2D viewport culling, with
+the BANK MODEL rejected on the composition argument (it strands
+unpositioned cards outside click-in-order and fit-all — this batch's own
+deliverables — and opens her exact never-arranged-long-post scenario to
+an EMPTY canvas) and the hybrid rejected with it; (b) the schema facts
+(`canvas_layout` = id/owner_id/container_id/block_id/x/y/timestamps/
+sync_version — NO view-state or size home; migration v1_5), confirming
+the standing size-is-local pre-ruling; (c) the batched ruling list
+(fit-all mechanism; ⌘S-in-canvas). **The architect's ruling is recorded
+VERBATIM in this file — "### Batch 4E Phase-1 ruling" below (commit
+ee776e7): (a) ADOPTED with the rider details endorsed and HER FORK
+recorded (the bank as a future FACE atop culling — a 13c/sweep input);
+(b) CONFIRMED (size local; synced w/h a recorded 13c lockstep input);
+(c)(1) fit-all = the read-only overview zoom with the α/β/γ riders;
+(c)(2) ⌘S-in-canvas YES per the 4D precedent; the latitude items
+endorsed.** Her fork is on the record through that section.
+
+**What shipped (four commits + this record's):**
+- **`a2005f7` (the package):** `CanvasBoardGeometry` (pure — spread-grid
+  slots in pointer order, square-ish ceil(√n) columns, grid origin BELOW
+  the positioned bounding box; the realized-set culling function; fit
+  scale; size clamps) + `CanvasViewModel` extracted to its own file
+  (P-9) and reworked on the takes/compare observation discipline
+  (`CanvasFace` = projection + sealed delivered atomically — the sealed
+  flag via the EXISTING `Queries.containerHeader` read, zero core
+  change; dirty-deferral; `authority.settle` at adopt) + the rebuilt
+  card. The pile dies (S4-7a); realization is culled (S4-7b — the
+  `realizedCards` ForEach filter; mount pre-geometry culls against a
+  bounded 1600×1200 default window; recull hysteresis 130pt under a
+  260pt margin); EDITABLE cards (S4-7c — PaneSurface panes over the ONE
+  authority, pre-4C single-post identity shape; edits land on the take
+  the card DISPLAYS — `authority.resolvedText(pick:slot:fan:)` IS the
+  R88 pick's fall-through with the buffer overlay; chosen moves only
+  through ✓; in-card scrolling at any size, the N23/N40 shape); the
+  LIVE pane's card is EXEMPT from derealization and the ring FOLLOWS a
+  ‹ › step; sealed = no liveness (authority gate) + ops refusals spoken
+  + arrangement still allowed (#18's letter, pinned); RESIZABLE cards
+  (S4-7d — corner grip, clamps 160×90…640×600, LOCAL
+  `canvasSizeMemory.<container>` beside the picks key); the ordinal
+  bottom-right (S4-7e — read-time, never stored); CLICK-IN-ORDER
+  (S4-7f — explicit mode; panes suspend into static SwiftUI bodies so
+  clicks mean SEQUENCE; numbered preview; ONE confirm = k ordinary
+  `reorder` ops under ONE "Order Blocks" compound, ⌥⌘Z restores whole;
+  cancel inert; seal refused at the door, spoken); FIT-ALL (S4-7g —
+  fitting boards just scroll; larger boards enter the READ-ONLY
+  overview at floor-clamped scale with SILHOUETTE cards, so the
+  realization bound survives the zoom; clicks return to 1:1 centered OR
+  assign sequence numbers while ordering — the γ rider BUILT, badges
+  counter-scaled); the GRAB affordance (the 3A note — the ⠿ header
+  strip is the honest drag region; the pane's own context menu carries
+  the card doors, the AD-4 pattern). +18 tests in 4 new suites.
+- **`139e289` (⌘S — ruling (c)(2)):** `takeFamilyPlusCompare` RENAMED
+  `takeFamilyPlusEditableBoards` (+ `.canvas`; one named rule, never a
+  copy); the canvas handler consumes `.commit` for the live pane's take
+  (flush-first, no-focus speaks — the 4D letter); the registry pin
+  gains the canvas-enabled line (justified in-line; red-on-old by
+  construction — the pre-4E registry read canvas unavailable).
+- **`10be249` (the soak, P-7):** the canvas board-soak variant (the 4C
+  compare shape) — two seeds over the REAL mounted CanvasView on a
+  100-card post: focus/type/‹ ›/drags/an order round (apply asserts the
+  clicked sequence leads the stored order; cancel asserts inertness)/a
+  fit-all round/a remount; after EVERY action: ≤1 live pane (order mode
+  and overview hold 0), read canvas panes mirror the authority,
+  realization bounded (< the corpus), `canvas_layout` rows == the
+  dragged set (nothing else writes positions), the overview read-only.
+- **`39d0887` (tutorial, P-6):** the "blocks · canvas" lesson's canvas
+  half re-cut (spread grid, ⠿ grab, resize grip, editable cards, the
+  corner number, order-by-clicking + ⌥⌘Z, fit-all; 3 → 4 paragraphs,
+  non-journal); NEW walk act `clickInOrderReordersTheCanvasLessonBlocks`
+  (prose promises + the door RUN on the lesson's own content + one-⌥⌘Z
+  restore).
+
+**Counts:** core **798/94 GREEN** (full `swift test` re-run; ZERO core
+changes — `git diff -- Sources/ Tests/ Package.swift` EMPTY, verified;
+4E has no core allowance and used none; `Sync/` untouched). Mobile:
+**BUILD SUCCEEDED** (no `Shared/` touch — verified by diff; insurance
+run). Mac: **PENDING** — expected arithmetic on top of 4D's pending
+expectation: 619/117 → **640/121** (+5 CanvasBoardGeometryTests, +8
+CanvasRealizationTests, +1 CanvasHostedRealizationTests, +4
+CanvasOrderAndOverviewTests — 4 new suites; +2 canvas-soak runs in the
+existing soak suite; +1 TutorialWalkTests act; the
+CapabilityRegistryTests edit is count-neutral), NOT asserted: no Mac
+suite executed (`CGSSessionScreenIsLocked` read **1** at the app-side
+test phase, checked once per the regime note; `build-for-testing`
+compiled app + tests clean after every commit — the block is execution,
+not code).
+
+**The fourth-text-path record:** Canvas's slice is RETIRED — the card's
+SwiftUI `Text` prose body is gone; every canvas prose surface is a
+`PaneSurface` pane over the one authority (the deliberate exceptions:
+the order-mode STATIC card body — panes suspend so clicks mean
+sequence, a mode-scoped face of already-realized text, never a liveness
+path — and the overview's silhouettes, cheap non-prose shapes). What
+REMAINS of the fourth path: **ReadingFlow** (its phase keeps it) and
+the Diff sheet's deliberate monospaced listing (the 4C record's line).
+
+**Registry/R118 note:** NO new declared acts — order-by-clicking,
+fit-all, the resize grip, the grab strip, and the ordinal are in-view
+affordances of un-routed acts (the standing 4A–4D reading; canvas
+editing is direct manipulation on its own surface, the canvas-switcher
+class). The one registry edit is `commitTake`'s availability (the ruled
+(c)(2)); `takeFamilyPlusCanvas` (step/choose) stands untouched — the
+R88 switcher story is unchanged by editability. R118 parity untouched.
+
+**Red-on-old / behavioral-revert evidence (execution PENDING under the
+regime; procedures exact):**
+- *(a) The spread-grid pin* — revert = in
+  `CanvasViewModel.restingPosition`, replace the `spreadDefaults`
+  fallback with the A7 stack (`CGPoint(x: 20, y: 20 + Double(index) *
+  90)` over the card's index — commit `a2005f7`'s pre-image, the old
+  CanvasView.swift:120–126 at `3f3a7f5`). Expected reds:
+  `spreadGridDefaultsReplaceThePileAndNothingPersists` at the
+  distinct-columns AND no-overlap expectations (every unpositioned card
+  sat at x=20 on 90pt pitch under taller cards — the pile, proven).
+- *(b) The realization pin* — revert = `realizedCards` returns
+  `visibleCards` (the model half) and/or the board's ForEach renders
+  `visibleCards` (the view half — the pre-4E eager shape). Expected
+  reds: `aLongPostsMountRealizesABoundedSetNotEveryCard` ("never
+  realizes every card"), `aMountedLongPostRealizesABoundedCardSet`
+  (hierarchy panes = 300; the materialization counter ≥ 300 on the
+  first pass alone), and the soak's bounded-realization invariant at
+  every step.
+- *(c) The derealization exemption* — revert = drop the
+  `authority.livePane?.blockID == id` arm from `realizedCards`.
+  Expected red: `theLivePanesCardSurvivesDerealization` at the
+  exemption expectation (the culled-set-left-it expectation stays
+  green — the pin discriminates the mechanism).
+- *(d) The ⌘S availability* — revert = remove `|| ctx.mode == .canvas`
+  from `takeFamilyPlusEditableBoards`. Expected red: the new canvas
+  line in `commitActsWhereverAdvertisedAndNowhereElse` (justification
+  in-line at the expectation).
+- *(e) Contract pins, recorded honestly (the 4C (c) precedent — they
+  cannot compile against the old types):* the pane-edit/seal/size/
+  commit/order/fit-all pins guard NEW capabilities (the old canvas had
+  no panes, no order mode, no overview, no sizes); the pile CLASS dies
+  pinned via (a), the eager-realization CLASS via (b).
+- *PENDING with the suite run:* the full Mac suite (expected 640/121 —
+  cumulatively discharges 4A's 581/113, 4B's 590/114, 4C's 611/117,
+  and 4D's 619/117), the (a)–(d) revert executions, the canvas soak +
+  TutorialWalkTests (they ride the suite), and the visual loop: the
+  spread grid's look on the design corpus; grab-strip drag feel beside
+  in-text selection; the resize grip; the live ring on a canvas card;
+  order-mode flow (badges, Apply/Cancel, the top strip under narrow
+  widths — chrome texts carry lineLimit); the overview's zoom, badge
+  legibility at scale, click-to-return landing accuracy (the
+  marker+ScrollViewReader road); ⌘S on a live canvas pane. The owed
+  `/Applications` refresh stays WITHHELD (4A call 7's reasoning
+  verbatim); the field guide is now FIVE prose revisions behind — the
+  re-seed rides the A1 rail at the orchestrator's consolidated window.
+
+**Traced mechanisms:**
+- *The pile (S4-7b's named concern):* `restingPosition` defaulted every
+  unpositioned card to `(20, 20 + index*90)` — one left-edge column,
+  overlapping whenever a card exceeded 90pt. The spread grid replaces
+  the FORMULA (same derived-never-persisted contract); the culled
+  ForEach replaces the EAGER `ZStack` render (a ZStack has no laziness
+  — every card materialized at mount, which editable panes would have
+  turned into N full TK2 layouts).
+- *Why culling is pure:* the model knows every card's resting frame
+  (stored-or-derived position + local-or-default size), so the realized
+  set is arithmetic over (frames, visibleRect, margin) — no view-side
+  geometry re-derivation; `onScrollGeometryChange` only REPORTS the
+  visible rect (origin-shifted, scale-mapped) into the brain.
+- *Why order mode suspends panes:* an NSTextView owns the mouse events
+  over its text (the same fact behind the grab strip — the 3A note), so
+  sequence clicks over live panes would be eaten; the static SwiftUI
+  body makes the whole card an honest click target, and `isPaneLive`'s
+  orderMode gate keeps the ring out structurally.
+- *Why silhouettes under zoom:* at 0.25 scale the inflated viewport
+  covers ~16× the area — pane realization there would break the very
+  bound the batch exists to honor; silhouettes render ALL cards for
+  pennies (rects + counter-scaled badges), so the overview is both
+  complete AND bounded, and the γ rider gets legible numbers.
+
+**Judgment calls / PROVISIONALs (R119 — for the author's deferred walk):**
+1. **Culling constants:** margin 260pt (one default-card pitch — edge
+   cards realize before they scroll on), recull hysteresis 130pt (half
+   the margin — scrolling can't outrun the margin between culls), mount
+   default window 1600×1200 (bounded before the first geometry report).
+2. **Spread grid:** ceil(√n) columns (square-ish — minimizes scroll in
+   both axes); pitch = DEFAULT card size + 20pt gutter (resized cards
+   may overlap grid neighbors until dragged — dragging is exactly what
+   persists a position); origin below the positioned bounding box + two
+   gutters; slots recompute per adopt (pointer order).
+3. **Default card size 240×170** (the old 240 width kept; height makes
+   ~6 text lines + chrome); clamps 160×90…640×600.
+4. **The ring follows a ‹ › step** on the live card (the card is the
+   surface; what it shows is what you edit). Alternative (blur on step)
+   recorded — one line to flip.
+5. **Order-mode entry refuses under seal AT THE DOOR, speaking** (the
+   mode exists to reorder; clicking through a dead-end mode first would
+   be the lecture class); the ops-layer `reorder` refusal remains the
+   belt underneath.
+6. **Order apply = k ops for k clicked cards** (`reorder(c₀, .start)`,
+   then `.after` chains): the unclicked keep their fractional keys, so
+   "clicked prefix then unclicked in relative order" falls out of the
+   position algebra with no touch to unclicked rows. A second click on
+   a numbered card unnumbers it (toggle; the rest renumber).
+7. **Fit-all on a fitting board scrolls, never zooms** (scale ≥ 1 =
+   nothing to shrink); the overview floor is 0.25 with in-overview
+   scrolling beyond it (honest: fit as far as legible, scroll the
+   rest, never a lie of fit).
+8. **Overview silhouettes render ALL cards deliberately** — the
+   realization BOUND governs pane/content realization; silhouettes are
+   the cheap completeness face (traced above). Badges counter-scale
+   ≤3×.
+9. **Programmatic scroll rides ScrollViewReader + a positioned marker**
+   (the API-conservative road); `ScrollPosition` recorded as the
+   alternative if the marker ever proves insufficient. **The β fallback
+   was NOT needed** — the coordinate/gesture tax never approached the
+   rejected option (iii): the only mappings are the report's
+   origin-shift/scale division and the marker's placement.
+10. **The γ rider BUILT** (it earned its place cheaply — one branch in
+    `overviewClicked` + the counter-scaled badges the silhouettes
+    already carry).
+11. **Size memory shape:** `[blockID: [w, h]]` under
+    `canvasSizeMemory.<containerID>` beside the picks key;
+    `loadViewMemory` loads both; "Reset size" rides the card menus.
+12. **`CanvasFace` (projection + sealed) is composed APP-SIDE** over
+    existing core reads (`canvasProjection` + `containerHeader`) — zero
+    core change; the core `observeCanvas` door stands for its existing
+    pins.
+13. **The soak's defaults hygiene:** deterministic incrementing UUIDs
+    recur across runs, so the canvas view-memory keys are cleaned
+    around the hosted tests (the 4G defaults-suite rule applied).
+14. **PoolDetailView untouched** — the pool's canvas face inherits the
+    whole package (lens-save stays hidden there; a pool cannot be
+    sealed so the order door never refuses there).
+
+**Deviations from the brief:** none in scope or semantics — every
+S4-7 letter (a)–(g) shipped, to the recorded ruling. Execution
+deviations are the regime's PENDING carries (suite run, the revert
+executions, visual loop, the withheld `/Applications` refresh — 4A
+call 7's reasoning holds verbatim).
+
+**For the ladder (foci):**
+- `cardFrames`/`realizedCards` are computed properties rebuilt per
+  access (O(n) dictionary builds; bounded by post size, fine at
+  hundreds of cards — a reviewer's eye on the body-eval hot path if
+  the corpus ever reads thousands).
+- The scroll-geometry report's scale mapping while the overview is
+  active (division by `overviewScale` — verify the recull hysteresis
+  can't thrash at the scale boundary).
+- The order-apply's seal belt: a seal landing BETWEEN entry and apply
+  hits the first `reorder`'s refusal inside `withCompound` (zero
+  entries applied ⇒ nothing to unwind) — confirm the unwind path's
+  cleanliness.
+- `switchTake`'s ring-follow when the OLD take's buffer is dirty (the
+  focus migration flushes through the one per-post coordinator —
+  confirm no clobber window against the settle discipline).
+- The hosted realization pin's headroom (realized < 80 of 300 at
+  800×600; the counter < 300 across SwiftUI re-render passes — confirm
+  stability under harness timing).
+- The soak's `draggedBlocks == layout rows` invariant deliberately
+  never exercises `resetPosition` (scope note for a reviewer).
+- The takes footer hides in order mode (deliberate — sequence clicks
+  own the card); confirm the reading.
 
 ### Orchestrator regime note (post-4A, 2026-07-22 overnight — the LOCKED-SESSION regime; binding for the remaining batches until the first unlock)
 
