@@ -404,7 +404,7 @@ Commits per batch/stage with the standing message convention.
 | N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record) | **RESOLVED 3F** (commit 213a2bb — TRACED: every mount/edit-time overlay refresh runs BEFORE TK2's first layout pass and no trigger ran after it (the only post-layout refreshes were scrolls and the saved-anchor JUMP, which forces layout — exactly why warm models/remounts healed and cold models didn't); the equality gates and the add path were NOT the mechanism. Fixed at the substrate: `EditorTextView.viewWillDraw` → ONE coalesced overlay refresh per storage generation, detail + inline both; the read tier provably safe (ensureLayout-before-read); class enumeration in the 3F record. Pin `aColdFirstMountPlacesEachBadgeAtItsBlock` red-on-revert: badge-y delta 0.0, the collapsed anchor) |
 | N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | **RESOLVED 3F** (commits e638c39 + f7684d3 — the class rule: VoicedButtonStyle labels lineLimit(1) app-wide (truncate, never wrap); BOTH status bars (CommitBar incl. book-inline; TakesBottomBar, the same class caught live) adaptive by MEASURED width — her "2 rows or something" below 1080pt, whole labels; ViewThatFits rejected on the record (compressible children defeat its fit test — seen live); screenshot-verified at 980pt, shot 3f-10) |
 | N16 | W ceremony cut-placement (author, same session; (a) RECLASSIFIED by her follow-up): (a) sentence-boundary snapping is ratified, so the "can't move the cut" experience is likely DESIGNED — the trace now VERIFIES the sheet offers EVERY legal interior sentence boundary (a multi-boundary take must be placeable at any of them; only-the-proposed-spot-accepted would still be a bug); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask re-affirmed — "i think the scissors should still be movable" (visual drag). Root-cause treatment demanded ("not whack a mole… it can be its own phase if it needs to be") | **(a) VERIFIED GOOD 3A** (shots 33/34). **(b)/(c) RESOLVED 4A** (commit 44f7fe9, on core 1e85a99+792decc — the ruled cut redesign built to the RULED W addendum): the sheet shows EVERY checked take's text at once as a word-token flow with a ✂ slot at every legal position — no clicking into takes one at a time (b); the ✂ DRAGS and glides between word edges, click-to-jump survives, keyboard placement ←/→ word · ⌥←/→ sentence · ⇥ takes · ⏎ confirm (c); parking at either end per S4-22; visual drag/looks verification PENDING the next unlocked-session window (screen locked all batch — the 4A record's environment note) |
-| N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path, (b) the symmetric round-trip product question (DECISION HERS at the checkpoint), (c) what UI road leads from a merged block to its pre-merge takes | **(a) CLOSED 3A — the toast SPEAKS on both paths** (Takes choreography shot 55; book-inline seam shot 68; mid-block book-inline caret gets the real refusal spoken, 67; likeliest silent-read: the 6 s auto-dismiss). **(c) ANSWERED 3A**: two roads — ⌥⌘Z right away, or Library → ⋯ → Archived & Deleted → "Unplaced blocks" (Place-in-pool door, takes intact; shot 58) — road exists, nothing points at it; the 3H memo addendum weighs naming it in the toast and/or a lineage door on the merged block. (b) → end checkpoint |
+| N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path, (b) the symmetric round-trip product question (DECISION HERS at the checkpoint), (c) what UI road leads from a merged block to its pre-merge takes | **(a) CLOSED 3A — the toast SPEAKS on both paths** (Takes choreography shot 55; book-inline seam shot 68; mid-block book-inline caret gets the real refusal spoken, 67; likeliest silent-read: the 6 s auto-dismiss). **(c) ANSWERED 3A** (two roads; nothing pointed at them) **+ the toast NAMES the road since 3F** (N17c). **(b) RESOLVED 4B — N17 CLOSED** (S4-23 ruling 1 answered the product question, the ceremony build made it real: any fan on either side opens the merge ceremony pre-paired, divide-W-then-pair-back 1+1/2+2 round-trips both takes whole — pinned at core (`divideWThenPairBackRoundTripsBothTakesWhole`) and on the lesson's own content; the 4B implementer's reading: (a)/(c) closed at 3A/3F, (b) was the row's last open half — no life remains) |
 | N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46) | **RESOLVED 4A** (commits 1e85a99+44f7fe9+9f6b328 — S4-22 ruling 4): extract's span edges joined the ruled WORD rule (settle onto word edges; the late-start refusal class dissolves — red-on-old pins at the planner AND on the lesson's own text), and the 3F prose narrowing (a78326f) REVERSED — "select from anywhere in this paragraph to its end" returns, now true; the refusal copy states the rule ("cuts land between words, at sentence ends, and at line breaks") |
 | N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | **RESOLVED 3D** (commit c808e85 — PoolViewModel selection + the Blocks-area pool picker, oldest default, dead-selection fallback; the ScrapsPanel in the post detail's inspector wires the orphaned drag payload to real geometry beside the draft; the lesson prose re-cut; the drop half was already pinned; red by revert: the tutorial pool unreachable) |
 | N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | **CLOSED at the S4 sitting (S4-18): works by her hand** ("working fine") — the 3E sound-but-synthetic-artifact verdict confirmed; the synthetic tool's List-reorder hostility was the whole story; no fix owed |
@@ -5295,6 +5295,240 @@ into divide.
 - 4B (merge ceremony) inherits the parking precedent: the pairing
   op's result shape should mirror `sourceVariantIDs` (correspondence
   arrays over positional promises).
+
+### Batch 4B record (the merge ceremony — the RULED merge addendum built; core GREEN 797/94 with the behavioral revert executed, Mac-suite execution carried PENDING under the locked-session regime)
+
+**What shipped (four commits + this record's):**
+- **`d3923b1` (core 1/2):** `MergeJoin` (Domain) — the merge join as a
+  value: three explicit joins (space · newline · nothing) and
+  `canon(head:tail:)`, the AppSpec §9 single-space rule as a RESOLVER.
+  The instant `merge` adopts it byte-identically (the existing merge
+  suite re-run green as the parity net) — ONE join brain, shared by the
+  op, the ceremony's pairings, and the sheet's previews, so no two
+  surfaces can disagree about a byte.
+- **`a7da2b6` (core 2/2):** `Operations.mergeCeremony(first:second:
+  pairings:carries:)` — one take minted per ＋ pairing (explicit
+  per-pairing join; the op never guesses), carried takes ride whole
+  (label kept, born unlocked, commits never copied), all on ONE fresh
+  merged block; NOTHING cartesian. Composes with `merge` identically:
+  adjacency, seal refusal via `placedContext`, both placements released
+  with `last_container_id` stamped, `derived_from`/'merge' edges to both
+  sources, comments copied both sides, presentation both-agree-else-
+  plain, touch-without-reshuffle, ONE "Merge Takes" undo entry
+  (revivingPlacementRows + whole-fan tombstone — `revertStructural`
+  unchanged). Result carries a `sources` correspondence array
+  (`.pairing(first:second:)`/`.carried(_)`, index-aligned with
+  `variants` — the 4A `sourceVariantIDs` precedent, adopted as directed).
+  Two new typed refusals: `mergedBlockWouldHaveNoTake` (I10 at birth —
+  the sheet blocker's belt; `mintFanBlock` with zero texts would have
+  crashed at `variants[defaultIndex]`, the 4A guard class) and
+  `takePairedTwice` (1:1 arity). `mintFanBlock` gains an optional
+  index-aligned `labels` parameter (nil-defaulted; divideW/merge call
+  sites untouched). +12 ceremony tests +4 MergeJoin tests.
+- **`544dd23` (app):** the door + the sheet. `applyStructural`'s
+  `.merge` case gains the THRESHOLD branch (S4-23 ruling 4): either
+  slot's `activeVariantCount > 1` → `openMergeCeremony` (flush → read
+  both true fans → pre-pair the two RENDERED takes under the session-
+  remembered join or the canon default); both ≤1 → `runInstantMerge`,
+  the old body VERBATIM (also the fallthrough when the true fans read
+  unfanned at open — the threshold reads truth, not the projection).
+  `.mergeChain` untouched (ruling 5 — chains bypass). The sheet
+  (`MergeCeremonySheet`, ordinary SwiftUI, the W sheet's functional-
+  unstyled register): two take columns, click one on each side and the
+  ＋ lands between them; per-pairing segmented join control + JOINED
+  preview through `MergeJoin` itself; carry checkboxes on unpaired
+  takes; stay-behind counted and named in-sheet; `confirmBlocker`
+  honest-copy gate (`canConfirm := blocker == nil`); esc/⏎; cancel
+  touches nothing. Confirm mirrors the W's disciplines: synchronous
+  one-flight guard; DRIFT CHECK over BOTH fans (membership + text;
+  refresh keeps pairings/carries by TAKE IDENTITY and the author's
+  chosen joins, re-derives previews, speaks); ceremonial full re-render
+  (seam nil), caret at the merged block's start; the sheet survives
+  refusals. Join memory lives on `AppSession` (`mergeJoinMemory`).
+  The lineage-road speech survives on BOTH paths (instant copy
+  verbatim; the ceremony's stay-behind wording names the same road +
+  ⌥⌘Z). Takes-side merge rides the SAME controller door (the
+  choreography's joins-upward landing plans `.merge` at the seam), so a
+  fanned pair opens the ceremony from Takes with zero choreography
+  change — the divide-from-Takes precedent, verified from code. NO
+  registry change: merge stays the one declared act; the sheet's
+  controls are in-sheet affordances, not doors (the 4A reading).
+  +8 `MergeCeremonySheetTests` (1 new suite) + the justified
+  `BoundaryFluidityTests` pin edit + the soak's merge arm gains the
+  ceremony branch (cancel-or-confirm, the W arm's shape — the ceremony
+  path soaks under all 3 seeds).
+- **`88f58bd` (tutorial, P-6):** the merge lesson teaches the ceremony
+  (pre-paired ⏎, ＋ pairings and the 1+1/2+2 round trip, carry, the
+  three-way preview, nothing-cartesian); the lesson grew 6 → 7
+  paragraphs and the spare-take staging moved to `blocks[6]`; every
+  sentinel text existing pins key on is byte-kept. NEW walk act
+  `theMergeCeremonyPairsAndCarriesTheStagedTakes` (prose promises
+  asserted + pair-the-shown + carry-the-spare on the lesson's own
+  content, one ⌥⌘Z restoring the sources whole); the instant-op walk
+  pin re-framed on the record (it pins the stored meaning the
+  ceremony's ⏎ default promises — and the chain path's brick). Content
+  non-journal (R57).
+
+**Counts:** core **781/92 → 797/94 GREEN** (`swift test`, full suite —
++12 `StructuralMergeCeremonyTests`, +4 `MergeJoinTests`). Mobile:
+**BUILD SUCCEEDED** after each core commit AND after the app commit's
+`Shared/AppSession.swift` touch. Mac: **PENDING** — expected arithmetic
+on top of 4A's pending expectation: 581/113 → **590/114** (+8
+MergeCeremonySheetTests in 1 new suite, +1 TutorialWalkTests act), NOT
+asserted: no Mac suite executed this batch (the locked-session regime;
+`CGSSessionScreenIsLocked` read **1** at the app-side test phase, checked
+once per the regime note; `build-for-testing` compiled app + tests clean
+— the block is execution, not code).
+
+**Red-on-old / behavioral-revert evidence:**
+- *Executed (core, behavioral revert):* `mergeCeremony` was temporarily
+  reverted to the OLD one-take merge meaning (before the mint:
+  `texts = [texts[0]]; labels = [labels[0]]; sources = [sources[0]]`,
+  defaultIndex clamped 0). The suite went RED loudly:
+  `divideWThenPairBackRoundTripsBothTakesWhole` (2 issues — the
+  round trip collapses to one take), `lockedTakesPairAndCarryByCopy`
+  (the carry vanishes), and `ceremonyExactRows`'s second-take
+  assertions TRAP (Index out of range at `variants[1]` — aborting the
+  parallel run; a trap is a loud red, noted honestly). Restored →
+  merge-family 24/3 green, full core 797/94 green.
+- *PENDING (Mac, procedure for the verifier — also recorded at the top
+  of `MergeCeremonySheetTests.swift`):* revert = restore the pre-4B
+  `.merge` case body in `EditorSurfaceController.applyStructural`
+  (delete the arity branch; inline `runInstantMerge`'s body as the
+  case body — commit `544dd23`'s controller hunk reversed). Expected
+  reds: `aFannedMergeOpensTheCeremonyPrePaired`,
+  `confirmingThePrePairedSheetReproducesTheInstantOutcome`,
+  `aPairingPlusCarryMintsBothTakes`, `confirmRefusesToJoinDriftedText`,
+  `theSessionRemembersTheLastConfirmedJoin` — each on its
+  `mergeCeremony != nil` expectation (the old code merges instantly; no
+  sheet ever exists). The edited `mergeOnFannedBlocksSpeaksAboutTheFan`
+  also goes red at the same expectation (its justified edit is in-line:
+  the promise it guarded — the fan spoken about, the road named — is
+  still asserted, now through the ceremony's confirm).
+
+**Traced mechanisms:**
+- *N17(b), the silent vanish:* the `.merge` case called `ops.merge`
+  directly — the takes disposition was a stored RULE with no surface
+  (the toast spoke after the fact; nothing offered a choice). The
+  threshold branch turns the rule into a SHOWN, PRE-PAIRED default: the
+  same outcome is one ⏎ away, and every other disposition is one click
+  away. The instant path survives untouched exactly where no fan means
+  there is no choice to show.
+- *The I10 gate:* `mintFanBlock` with zero texts crashes at
+  `variants[defaultIndex]` — `mergedBlockWouldHaveNoTake` turns the
+  impossible state into a typed refusal and the sheet's blocker keeps
+  it from ever being requested (the 4A `divideSideWouldBeEmpty` class,
+  merge-side).
+- *Why the drift check covers BOTH fans (broader than the W's
+  marked-only):* the sheet's previews and canon-default joins derive
+  from EVERY listed take's text, and an unlisted new take must appear
+  in the columns — so membership or text drift anywhere refreshes.
+
+**Judgment calls / PROVISIONALs (R119 — for the author's deferred walk):**
+1. **Chosen/default on the merged block** (the architect's precision,
+   recorded as the exact rule): the take minted from the pairing of the
+   two RENDERED takes wherever that pairing sits in sheet order; else
+   the FIRST pairing in sheet order; a carry only when no pairing
+   exists (first carry in mechanical order). Chosen == default at mint
+   (today's instant-merge shape generalized).
+2. **PROVISIONAL — pairing arity is 1:1** (`takePairedTwice`): a take
+   sits in at most one pairing and never both pairs and carries.
+   Multi-pairing (one take joined into two pairings) is deliberately
+   NOT built — one gate away if she wants it; "pairing is choosing by
+   hand" is satisfied by 1:1.
+3. **Join control scope = PER-PAIRING** (the flagged mechanical call):
+   an outline-ish pair can take `newline` while a prose pair in the
+   same sheet takes `space` — a sheet-global control would forbid
+   exactly the case the preview exists for. Memory sub-rule
+   (mechanical, recorded): on confirm, when all confirmed pairings
+   agree on ONE join it is remembered; a mixed sheet leaves the memory
+   unchanged; carry-only confirms carry no join to remember.
+4. **Join memory lives on `AppSession`**, not a process static:
+   per-session == per-launch in production (one AppSession per launch,
+   fresh launch = canon default, ruling 3's letter) and parallel test
+   worlds stay isolated (a static would leak confirmed joins across
+   suites).
+5. **"Instant merge byte-unchanged" read as BEHAVIOR, not source
+   bytes:** `merge()` now resolves its join through `MergeJoin.canon`
+   (one join brain); the existing merge suite is the parity net the
+   brief itself names, re-run green. The alternative (a copied rule in
+   two places) is the drift class the ONE-join-brain doctrine exists to
+   prevent.
+6. **The threshold's door decision reads the SLOTS' arity** (cheap,
+   synchronous, the same source `mergedAwayTakes` already trusts), and
+   the ceremony OPEN re-reads the true fans: stale-fanned falls through
+   to the instant path (truth decides); stale-unfanned instant-merges
+   with the standing toast (the pre-4B behavior, delivery-cadence
+   narrow, self-healing at the next projection).
+7. **PROVISIONAL — a carried take keeps its LABEL** (the name is part
+   of the take it rides in on; consistent with `includeFan` pool
+   copies); copies born unlocked, commits never copied (the
+   poolDragCopy doctrine). Pairing-minted takes are unlabeled.
+8. **Carries land in MECHANICAL order** (first block's carries in fan
+   order, then the second's — the architect's fan_position rule); the
+   caller's array order never reaches the store.
+9. **Undo label "Merge Takes"** — a distinct label beside "Merge",
+   paralleling "Divide into Variants" beside "Divide" (the Edit menu
+   names what a ⌥⌘Z will restore).
+10. **Ceremony confirm: seam nil + caret at the merged block's start**
+    (the W confirm's exact precedent — ceremonial acts re-render fully,
+    permanently; author 2026-07-07).
+11. **Empty takes pair and carry legally** (a join of empty texts is
+    an empty take) — unlike the W's empty-cut refusal there is no
+    positional guess to make here; the author chose the takes by hand.
+12. **The ceremony's stay-behind speech re-words the instant toast**
+    ("Merged — N take(s) stay with the released blocks in lineage
+    (road; ⌥⌘Z)"): "Merged the visible takes" would be FALSE on a
+    pairing sheet; the road and the undo stay named on both paths.
+13. **Sheet interaction: click-one-per-side auto-pairs** (selection
+    marker `›`, the ＋ lands on the second click) — no separate "pair"
+    button; removal returns both takes to their columns. The sheet
+    keeps the functional-unstyled register (4A call 8's line).
+14. **Accepted residual (the W's recorded class):** the confirm's
+    drift check is check-then-act — a sync apply committing in the ms
+    between the read and the op still joins by identity (never by
+    stale offsets — pairings are identity-based, so the exposure is
+    weaker than the W's: the JOIN choice may lag a text edit, the
+    content never mis-cuts). The true fix is op-level expected-text
+    preconditions; recorded, not built (the W round-3 disposition's
+    reasoning applies verbatim).
+
+**Deviations from the brief:** none in scope or semantics. Execution
+deviations are the regime's PENDING carries (suite run, app-side revert
+reds, visual loop, the owed `/Applications` refresh — withheld exactly
+as 4A's call 7: shipping a suite-unverified ceremony to her daily build
+is the wrong risk; one command once the suite is green). NOTE for the
+re-seed decision: the merge lesson's prose changed AGAIN (after 4A's
+cut lessons) — the REAL store's seeded field guide is now two revisions
+behind; the re-seed rides the A1 rail at the orchestrator's
+consolidated window.
+
+**For the ladder (foci):**
+- The op's validation ORDER (arity set → per-side resolution → carry
+  resolution → release): same-ID-twice inside one pairing reads
+  `takePairedTwice`, not `variantNotFound` — deliberate (the arity set
+  is the cheapest total check; the sheet can produce neither).
+- The chosen-rule constants: `renderedPairing ?? 0` with carries-only
+  handled by construction (texts[0] IS the first carry) — verify the
+  fallback survives refactors.
+- The drift check's completeness: count + per-ID text equality over
+  both fans (a same-count membership swap reads as text drift via the
+  nil snapshot lookup — covered; worth a reviewer's eye).
+- The sheet's `model.mergeCeremony ?? presented` snapshot pattern (the
+  W sheet's exact idiom) and the selection-state reset on pairing.
+- The stale-slots corners in judgment call 6 (both directions).
+- 4A's flagged inheritance: the result's `sources` correspondence
+  array replaces positional promises — check every consumer reads it
+  (the walk act and pins do; no app surface consumes it yet beyond
+  counts).
+- **CANON-DELTA NOTE (the orchestrator's stage-close recording duty,
+  per the brief):** AppSpec §9's merge entry + OverallModel §7 gain the
+  pairing delta NOW THAT THE BUILD HAS LANDED — S4-23 ruling 1 is the
+  authority; the entries' "fans are NOT cartesian-producted" line
+  survives verbatim (pairing is choosing by hand); the one-take
+  sentence gains the ceremony's several-takes extension and the
+  instant case's unchanged rule. Not applied by this batch (the
+  orchestrator's duty at stage close, per the brief's letter).
 
 ### Orchestrator regime note (post-4A, 2026-07-22 overnight — the LOCKED-SESSION regime; binding for the remaining batches until the first unlock)
 
