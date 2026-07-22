@@ -124,6 +124,34 @@ extension Operations {
         try updateLiveContainer(id) { $0.segmentationDefault = segmentation }
     }
 
+    /// Sets (or clears, with nil) the per-POST words-based extent TARGET
+    /// (13b Stage 4, v1_12 — S4-28.1/N36; the `setReadingWordTarget` twin).
+    /// Display/progress semantics only, never an add/type-time refusal —
+    /// word counts change with every edit, so nothing gates on them.
+    /// Non-positive targets refuse; a no-op set writes nothing (the
+    /// identity-level class — no touch, no churn, `updated_at` unmoved).
+    /// PROVISIONAL (13b 4F judgment call — the seal posture): a SEALED
+    /// post refuses, mirroring the reading extent setters' refuse-under-
+    /// locked rule ("extending a finished notebook is un-finishing it
+    /// first" — a sealed post is marked complete, and its writing goal is
+    /// part of what "complete" froze). The alternative reading — the N34
+    /// container-row-metadata-allowed class (title/date/profile/
+    /// segmentation stay editable under seal) — is one guard-line away;
+    /// recorded in the 4F batch record for the author's walk.
+    public func setPostWordTarget(_ id: String, wordTarget: Int?) throws {
+        try database.write { db in
+            var post = try livePost(db, id)
+            try ensureUnlocked(post)
+            if let wordTarget, wordTarget <= 0 {
+                throw OperationError.invalidExtent(value: wordTarget)
+            }
+            guard post.wordTarget != wordTarget else { return }
+            post.wordTarget = wordTarget
+            post.updatedAt = date.now
+            try post.update(db)
+        }
+    }
+
     /// Floating notes are post *content*, so a locked post refuses the edit
     /// (title/date/profile above are library metadata and stay editable —
     /// the lock freezes edits, commits, order, and chosen variants).

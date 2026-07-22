@@ -26,6 +26,9 @@ extension Queries {
         /// `default_segmentation` setting, falling back to `.paragraph`
         /// (the schema seed) — resolved here so the editor never re-derives it.
         public let effectiveSegmentation: Segmentation
+        /// The per-POST word target (v1_12, 13b 4F — S4-28.1): display/
+        /// progress only; the bars show "n% of Nw". nil = no target.
+        public let wordTarget: Int?
     }
 
     /// nil ⇒ the container is missing or tombstoned (render nothing; the
@@ -44,7 +47,8 @@ extension Queries {
             entryDate: container.entryDate,
             locked: container.locked,
             archived: container.archivedAt != nil,
-            effectiveSegmentation: container.segmentationDefault ?? settingMode ?? .paragraph)
+            effectiveSegmentation: container.segmentationDefault ?? settingMode ?? .paragraph,
+            wordTarget: container.wordTarget)
     }
 
     /// A block's live fan in fan order (`(fan_position, id)`), archived takes
