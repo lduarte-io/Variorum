@@ -1407,6 +1407,23 @@ final class EditorViewModel {
         }
     }
 
+    /// 13b 4F (N36 — S4-28.1): the per-post word target's Write half. The
+    /// observed header carries the stored value back into the bar's face
+    /// (the setter's write stamps `updated_at`, so the header observation
+    /// delivers). Refusals — the sealed post's PROVISIONAL refuse among
+    /// them — speak through the standing door.
+    func setPostWordTarget(_ target: Int?) async {
+        do {
+            try await session.runner.run { [postID] ops in
+                try ops.setPostWordTarget(postID, wordTarget: target)
+            }
+            showStatus(target.map(WordTargetFaceCopy.setNote)
+                ?? WordTargetFaceCopy.clearNote)
+        } catch {
+            showOperationError(error)
+        }
+    }
+
     /// Mac-side entry-date editing (brief item 5 — `setEntryDate`'s first
     /// Mac face; the ops-boundary day-key guard enforces canon).
     func updateEntryDate(_ day: String?) async {

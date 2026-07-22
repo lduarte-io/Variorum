@@ -46,6 +46,32 @@ nonisolated enum SegmentationFaceCopy {
         + "re-segment. Per post."
 }
 
+/// 13b 4F (N36 — S4-28.1): the per-post word-target face's shared
+/// vocabulary — ONE home for the copy both bars speak (the face rides the
+/// word-count label in Write's CommitBar and the Takes/Lenses bar alike;
+/// R118 parity of prominence). A target is display/progress ONLY — the
+/// ratified `word_target` semantics, mirrored per post: never a wall,
+/// never an entry-time refusal.
+nonisolated enum WordTargetFaceCopy {
+    /// The word-count label's hover help (both bars) — it names the quiet
+    /// door: clicking the counts opens the target setter.
+    static let help =
+        "Word counts — click to set a word target for this post. "
+        + "A target shows progress here; it is a measure, never a wall."
+    static let fieldPrompt = "Word target (blank = none)"
+    static let parseError = "Targets are plain numbers (e.g. 5000) — nothing was changed."
+    static func setNote(_ target: Int) -> String {
+        "Word target set — \(target.formatted())w. Progress shows beside the "
+        + "word counts; a target is a measure, never a wall."
+    }
+    static let clearNote = "Word target cleared."
+    /// The label's progress segment ("26% of 5,000w target").
+    static func progressSegment(words: Int, target: Int) -> String {
+        let percent = Int((Double(words) / Double(target) * 100).rounded())
+        return "\(percent)% of \(target.formatted())w target"
+    }
+}
+
 nonisolated enum OpsRefusalCopy {
     static func message(for error: Error) -> String {
         if let error = error as? OperationError {

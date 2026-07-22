@@ -245,4 +245,82 @@ struct LifecycleFacesTests {
             #expect(model.deleted.map(\.postID) == [deleted.id])
         }
     }
+
+    /// 13b 4F (N37 — S4-28.2): the deleted-books recovery door — the
+    /// surface-local restore emits exactly `restoreReading`, and the book
+    /// comes back whole (chapters + memberships + assignments; the core
+    /// suite owns the exact-stamp semantics — this pins the FACE's road).
+    @Test func theDeletedBooksDoorRestoresThroughTheModel() async throws {
+        try await withWorld { session, db in
+            let book = try session.operations.createReading(name: "orbit", kind: .curated)
+            let post = try session.operations.createPost(title: "p", profile: .generic)
+            _ = try session.operations.newBlock(in: post.id, text: "Prose.", at: .end)
+            _ = try session.operations.addPostToReading(post.id, to: book.id)
+            let chapter = try session.operations.createSection(in: book.id, name: "I")
+            try session.operations.assignPostToSection(post.id, in: book.id, section: chapter.id)
+            try session.operations.deleteReading(book.id)
+
+            let listed = try await db.read { try Queries.deletedReadings($0) }
+            #expect(listed.map(\.id) == [book.id], "the recovery surface's feed")
+
+            let model = RecoveryViewModel(session: session)
+            await model.restoreReading(book.id)
+            #expect(model.lastError == nil)
+            let (live, sections, assignments) = try await db.read { [bookID = book.id] db in
+                (try Queries.reading(db, id: bookID) != nil,
+                 try Queries.readingSections(db, readingID: bookID).map(\.id),
+                 try Queries.sectionAssignments(db, readingID: bookID))
+            }
+            #expect(live)
+            #expect(sections == [chapter.id])
+            #expect(assignments == [post.id: chapter.id], "the book is back WHOLE")
+
+            // The door speaks on a refused restore (fire-and-speak).
+            await model.restoreReading(book.id)
+            #expect(model.lastError?.isEmpty == false,
+                    "restoring a live book refuses out loud, never silently")
+        }
+    }
+
+    /// 13b 4F (N36 — S4-28.1): the per-post word-target face's model
+    /// halves share ONE op; the Write half's truth is the observed header,
+    /// the Takes half refreshes at its chip's cadence; the sealed refusal
+    /// (the recorded PROVISIONAL) speaks.
+    @Test func theWordTargetFaceHalvesShareOneOpAndSpeak() async throws {
+        try await withEditor(seedBlocks: ["alpha words here"]) { h in
+            await h.model.setPostWordTarget(5_000)
+            let stored = try await h.database.read { [postID = h.postID] db in
+                try Container.fetchOne(db, key: postID)?.wordTarget
+            }
+            #expect(stored == 5_000)
+            #expect(h.model.statusMessage?.contains("never a wall") == true)
+            try h.reload()
+            #expect(h.model.header?.wordTarget == 5_000,
+                    "the bar's face reads the observed header")
+
+            // The Takes half: same op, chip-cadence refresh.
+            let takes = TakesViewModel(session: h.session, postID: h.postID)
+            await takes.refreshSegmentation()
+            #expect(takes.postWordTarget == 5_000)
+            await takes.setPostWordTarget(nil)
+            #expect(takes.postWordTarget == nil, "the setter refreshes its own truth")
+
+            // The sealed refusal (PROVISIONAL — the 4F seal-posture call)
+            // reaches the surface as speech, never silence.
+            await h.model.setPostWordTarget(1_000)
+            try await h.session.runner.run { [postID = h.postID] ops in
+                try ops.lockPost(postID)
+            }
+            await h.model.setPostWordTarget(2_000)
+            #expect(h.model.statusMessage?.contains("sealed") == true)
+            let sealedStored = try await h.database.read { [postID = h.postID] db in
+                try Container.fetchOne(db, key: postID)?.wordTarget
+            }
+            #expect(sealedStored == 1_000, "the sealed post's target never moved")
+
+            // The label's progress arithmetic (the face's one formula).
+            #expect(WordTargetFaceCopy.progressSegment(words: 1_250, target: 5_000)
+                    == "25% of 5,000w target")
+        }
+    }
 }

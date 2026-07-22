@@ -204,12 +204,15 @@ struct CommitBar: View {
     @ViewBuilder private var trailingCluster: some View {
         if let words = wordCountLabel {
             // R11: word-count PROMINENCE — the accent-colored,
-            // always-there part of the editing surface.
-            Text(tokens.chromeLabel(words))
-                .font(tokens.small.weight(.semibold))
-                .foregroundStyle(tokens.accent)
-                .lineLimit(1)
-                .help("Word counts: the block you're in · your selection · the whole post")
+            // always-there part of the editing surface. 13b 4F (N36):
+            // the counts are now the per-post word-target face too —
+            // progress rides the label, clicking opens the setter (zero
+            // new bar width; the target's truth is the observed header).
+            WordTargetFace(
+                tokens: tokens, baseLabel: words,
+                words: model.postWordCount,
+                target: model.header?.wordTarget,
+                onSet: { target in await model.setPostWordTarget(target) })
         }
         // Sitting 9 (R73/R91): hover = the cheat sheet; click =
         // the full helper with the dictionary.

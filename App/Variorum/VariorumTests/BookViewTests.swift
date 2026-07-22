@@ -438,3 +438,179 @@ struct BookFocusFoldTests {
         }
     }
 }
+
+/// 13b Stage 4, Batch 4F (S4-9, ledger N31): the book-view package's model
+/// brains + the paged view's P1/P3 shape. Progress and pages are BOTH
+/// model-driven over the POST LIST (the Phase 6 memo's ruling — never live
+/// text/pixel geometry); the paged view mounts exactly ONE page.
+@MainActor
+@Suite("Paged view + progress bar (13b 4F, S4-9)", .serialized)
+struct PagedBookViewTests {
+    private func pump(_ seconds: TimeInterval = 0.05) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    private func settle(
+        _ window: NSWindow, _ hosting: NSView,
+        until predicate: () -> Bool, maxTurns: Int = 40
+    ) async {
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump(0.02)
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(20))
+            if predicate() { return }
+        }
+    }
+
+    @Test func theProgressBrainIsPureModelDrivenAndSticky() async throws {
+        try await withBookWorld(posts: 5) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            #expect(model.readingProgress == nil, "an unadopted book shows nothing")
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+
+            // Before any visibility report: position 1 (the top).
+            #expect(model.readingProgress?.position == 1)
+            #expect(model.readingProgress?.total == 5)
+
+            // The FURTHEST visible post is the position (post domain,
+            // never pixels).
+            model.noteVisible(postIDs[0], true)
+            model.noteVisible(postIDs[1], true)
+            #expect(model.readingProgress?.position == 2)
+            #expect(model.readingProgress?.fraction == 0.4)
+
+            // Scrolling on: 1 leaves, 3 arrives (index 2 visible too).
+            model.noteVisible(postIDs[0], false)
+            model.noteVisible(postIDs[2], true)
+            #expect(model.readingProgress?.position == 3)
+
+            // STICKY: a transition frame with zero reports keeps the last
+            // position instead of snapping to nothing.
+            model.noteVisible(postIDs[1], false)
+            model.noteVisible(postIDs[2], false)
+            #expect(model.readingProgress?.position == 3)
+
+            // A foreign id (a stale report after entries changed) counts
+            // for nothing.
+            model.noteVisible("not-a-post", true)
+            #expect(model.readingProgress?.position == 3)
+
+            // The pure half directly: last page = 100%.
+            let position = BookViewModel.progressPosition(
+                visible: [postIDs[4]], entries: model.entries, previous: nil)
+            #expect(position == 5)
+        }
+    }
+
+    @Test func thePageBrainClampsFlipsSeedsAndReleasesFocus() async throws {
+        try await withBookWorld(posts: 4) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+
+            #expect(model.pagedIndex == 0)
+            #expect(model.currentPage?.postID == postIDs[0])
+
+            // Flips clamp at both covers.
+            model.flipPage(by: -1)
+            #expect(model.pagedIndex == 0)
+            model.flipPage(by: 1)
+            #expect(model.pagedIndex == 1)
+            model.openPage(99)
+            #expect(model.pagedIndex == 3, "clamped to the last page")
+
+            // The navigator's page-jump door.
+            model.openPage(post: postIDs[2])
+            #expect(model.pagedIndex == 2)
+            model.openPage(post: "not-a-post")
+            #expect(model.pagedIndex == 2, "a foreign id flips nothing")
+
+            // Entering pages lands on the post you were in (focus wins).
+            model.focus(postIDs[1])
+            model.seedPageFromFocus()
+            #expect(model.pagedIndex == 1)
+
+            // Flipping AWAY from a live page releases focus (pages open
+            // read-cheap — the calm default; the editor's teardown flush
+            // is the standing discipline).
+            model.flipPage(by: 1)
+            #expect(model.focusedPostID == nil, "the flip released focus")
+
+            // Adoption clamps a stale page index (a shrunk book).
+            model.openPage(3)
+            model.adopt(Array(model.entries.prefix(2)))
+            #expect(model.pagedIndex == 1)
+
+            // The scrub brain is the SAME one the scroll view uses.
+            #expect(BookViewModel.scrubIndex(fraction: 0, count: 4) == 0)
+            #expect(BookViewModel.scrubIndex(fraction: 1, count: 4) == 3)
+        }
+    }
+
+    @Test func thePagedViewRealizesExactlyOnePageAndFlipsContent() async throws {
+        try await withBookWorld(posts: 60) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 700, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: PagedBookView(session: session, model: model, structure: structure))
+            hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 800)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
+
+            // P1/P3's shape: ONE page mounts — a 60-post book realizes
+            // exactly one read surface, independent of book size.
+            #expect(countReadSurfaces(in: hosting) == 1,
+                    "the paged view mounts exactly the current page")
+            func pageText() -> String {
+                var text = ""
+                func walk(_ v: NSView) {
+                    if let read = v as? ReadPostTextView { text += read.string }
+                    for s in v.subviews { walk(s) }
+                }
+                walk(hosting)
+                return text
+            }
+            await settle(window, hosting, until: { pageText().contains("in post 0") })
+            #expect(pageText().contains("in post 0"), "page 1 shows the first post")
+
+            // Flip: still one surface, and the CONTENT is the next post's.
+            model.flipPage(by: 1)
+            await settle(window, hosting, until: { pageText().contains("in post 1") })
+            #expect(countReadSurfaces(in: hosting) == 1,
+                    "a flip swaps the page — it never accumulates surfaces")
+            #expect(pageText().contains("in post 1"))
+            #expect(!pageText().contains("in post 0"), "the old page unmounted")
+
+            // Focus upgrades the current page to THE one live editor.
+            model.focus(postIDs[1])
+            await settle(window, hosting, until: { countLiveEditors(in: hosting) == 1 })
+            #expect(countLiveEditors(in: hosting) == 1)
+            #expect(countReadSurfaces(in: hosting) == 0,
+                    "the page upgraded — read tier swapped for the live editor")
+
+            // Flipping away releases focus and returns read-cheap.
+            model.flipPage(by: 1)
+            await settle(window, hosting, until: { countLiveEditors(in: hosting) == 0 })
+            #expect(countLiveEditors(in: hosting) == 0)
+            #expect(countReadSurfaces(in: hosting) == 1)
+        }
+    }
+}

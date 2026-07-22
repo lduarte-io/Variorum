@@ -38,6 +38,12 @@ final class RecoveryViewModel {
     private(set) var unplaced: [Queries.UnplacedBlock] = []
     private(set) var unplacedTruncated = false
     private(set) var pools: [Container] = []
+    /// 13b 4F (N37 — S4-28.2, the author's reversal of the pre-13
+    /// "readings have no restore door" boundary): deleted BOOKS, one
+    /// `restoreReading` away — chapters and memberships revive by the
+    /// exact-stamp rule; diverged stories stay dead.
+    private(set) var deletedReadings: [Reading] = []
+    private(set) var deletedReadingsTruncated = false
     private(set) var archivedTruncated = false
     private(set) var deletedTruncated = false
     private(set) var lastError: String?
@@ -95,6 +101,38 @@ final class RecoveryViewModel {
                 pools = value.pools
             }
         } catch is CancellationError {
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    func startDeletedReadings() async {
+        do {
+            for try await value in session.database.observe({ db in
+                try Queries.deletedReadings(db, limit: Self.window + 1)
+            }) {
+                deletedReadingsTruncated = value.count > Self.window
+                deletedReadings = deletedReadingsTruncated
+                    ? Array(value.prefix(Self.window)) : value
+            }
+        } catch is CancellationError {
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    /// The restore door (surface-local, the standing recovery-surface
+    /// class): the book comes back whole — chapters, memberships, and
+    /// chapter assignments by the exact-stamp rule; it reappears on the
+    /// shelf by itself (the shelf observes).
+    func restoreReading(_ readingID: String) async {
+        do {
+            try await session.runner.run { ops in
+                try ops.restoreReading(readingID)
+            }
+            lastError = nil
+        } catch let error as OperationError {
+            lastError = OpsRefusalCopy.message(for: error)
         } catch {
             lastError = String(describing: error)
         }
@@ -181,6 +219,37 @@ struct RecoveryView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            Section("Deleted books") {
+                // 13b 4F (N37 — S4-28.2): deleting a book is recoverable
+                // now — the reversal of the pre-13 boundary, her ruling.
+                if model.deletedReadings.isEmpty {
+                    Text("No deleted books.").foregroundStyle(.secondary)
+                }
+                ForEach(model.deletedReadings, id: \.id) { reading in
+                    HStack(spacing: 6) {
+                        Text(reading.name)
+                        Text(reading.kind == .smart ? "smart book" : "book")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if let deletedAt = reading.deletedAt {
+                            Text(deletedAt.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Button("Restore") {
+                            Task { await model.restoreReading(reading.id) }
+                        }
+                        .help("The book comes back whole — chapters and membership included; "
+                            + "posts deleted separately stay in Recently Deleted below")
+                    }
+                }
+                if model.deletedReadingsTruncated {
+                    Text("Showing the \(RecoveryViewModel.window) most recently deleted books — older ones aren't listed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
             Section("Recently Deleted") {
                 if model.deleted.isEmpty {
                     Text("Nothing deleted.").foregroundStyle(.secondary)
@@ -215,6 +284,7 @@ struct RecoveryView: View {
         }
         .task { await model.startArchived() }
         .task { await model.startDeleted() }
+        .task { await model.startDeletedReadings() }
         .task { await model.startUnplaced() }
     }
 

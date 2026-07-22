@@ -64,6 +64,11 @@ struct BookView: View {
             switch structure.mode {
             case .book:
                 bookBody
+            case .pages:
+                // 13b 4F (S4-9(2), N31): the Kindle-style paged view —
+                // page = a post, one page mounted at a time (P3), the
+                // bottom scrub over the same model-driven post domain.
+                PagedBookView(session: session, model: model, structure: structure)
             case .read:
                 ReadingFlowView(
                     session: session,
@@ -126,11 +131,14 @@ struct BookView: View {
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
                 HStack(spacing: 8) {
+                    // 13b 4F (S4-9): three view modes now — the scroll
+                    // book, the paged book, the reading flow.
                     Picker("", selection: Binding(
-                        get: { structure.mode == .read },
-                        set: { structure.mode = $0 ? .read : .book })) {
-                        Text(tokens.chromeLabel("Book")).tag(false)
-                        Text(tokens.chromeLabel("Read")).tag(true)
+                        get: { structure.mode },
+                        set: { structure.mode = $0 })) {
+                        Text(tokens.chromeLabel("Book")).tag(BookStructureModel.ViewMode.book)
+                        Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ViewMode.pages)
+                        Text(tokens.chromeLabel("Read")).tag(BookStructureModel.ViewMode.read)
                     }
                     .pickerStyle(.segmented)
                     Button {
@@ -159,8 +167,19 @@ struct BookView: View {
                                 }
                                 Button {
                                     // Navigate: land the book scroll at the
-                                    // chapter (the flow view shows it too).
-                                    scrollTarget = "chapter-\(section.id)"
+                                    // chapter (the flow view shows it too);
+                                    // while PAGING, flip to the chapter's
+                                    // first page (13b 4F).
+                                    if structure.mode == .pages {
+                                        if let first = structure
+                                            .grouped(entries: model.entries)
+                                            .first(where: { $0.section?.id == section.id })?
+                                            .entries.first {
+                                            model.openPage(post: first.postID)
+                                        }
+                                    } else {
+                                        scrollTarget = "chapter-\(section.id)"
+                                    }
                                 } label: {
                                     HStack(spacing: 4) {
                                         Text("⠿")
@@ -198,15 +217,26 @@ struct BookView: View {
                             // context jump).
                             ForEach(group.entries, id: \.postID) { entry in
                                 Button {
-                                    structure.mode = .book
-                                    model.focus(entry.postID)
-                                    scrollTarget = "page-\(entry.postID)"
+                                    // While PAGING the navigator is a
+                                    // page-jump: land the post's page,
+                                    // read-cheap (13b 4F — the calm
+                                    // default; a click in the page
+                                    // upgrades to the live editor).
+                                    if structure.mode == .pages {
+                                        model.openPage(post: entry.postID)
+                                    } else {
+                                        structure.mode = .book
+                                        model.focus(entry.postID)
+                                        scrollTarget = "page-\(entry.postID)"
+                                    }
                                 } label: {
                                     HStack(spacing: 2) {
                                         // Batch 9 (R100's continuation): the
                                         // focused post wears the color › in
-                                        // the navigator too.
-                                        if model.focusedPostID == entry.postID,
+                                        // the navigator too — and while
+                                        // PAGING, the current page does
+                                        // (13b 4F).
+                                        if navigatorMarks(entry),
                                            !tokens.selectionMarker.isEmpty {
                                             Text(tokens.selectionMarker
                                                 .trimmingCharacters(in: .whitespaces))
@@ -216,7 +246,7 @@ struct BookView: View {
                                         Text(entryTitle(entry))
                                             .font(tokens.small)
                                             .foregroundStyle(
-                                                model.focusedPostID == entry.postID
+                                                navigatorMarks(entry)
                                                     ? tokens.ink : tokens.muted)
                                             .lineLimit(1)
                                     }
@@ -484,6 +514,22 @@ struct BookView: View {
                 // MODEL-DRIVEN — the post list is the scrubber's domain.
                 if model.entries.count > 1 {
                     VStack(spacing: 2) {
+                        // 13b 4F (S4-9(1), N31): the PROGRESS BAR — where
+                        // you are in the book, over the same post-list
+                        // domain ("post 12 of 50 · 24%"); the slider
+                        // below stays the JUMP control.
+                        if let progress = model.readingProgress {
+                            HStack(spacing: 8) {
+                                ProgressView(value: progress.fraction)
+                                    .progressViewStyle(.linear)
+                                    .tint(tokens.accent)
+                                Text(tokens.chromeLabel(
+                                    "post \(progress.position) of \(progress.total) · \(Int((progress.fraction * 100).rounded()))%"))
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.muted)
+                                    .lineLimit(1)
+                            }
+                        }
                         Slider(value: Binding(
                             get: { scrubFraction },
                             set: { fraction in
@@ -576,6 +622,13 @@ struct BookView: View {
         entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
     }
 
+    /// The navigator's "you are here": the focused post — and, while
+    /// paging, the current page (13b 4F).
+    private func navigatorMarks(_ entry: Queries.ReadingEntry) -> Bool {
+        model.focusedPostID == entry.postID
+            || (structure.mode == .pages && model.currentPage?.postID == entry.postID)
+    }
+
     private func scrubTitle(_ entry: Queries.ReadingEntry) -> String {
         let index = model.entries.firstIndex { $0.postID == entry.postID } ?? 0
         return "Page \(index + 1) of \(model.entries.count) — \(entryTitle(entry))"
@@ -597,13 +650,24 @@ struct BookView: View {
     /// force-expand disjunct (the D1 mechanism) is gone.
     @ViewBuilder
     private func postRow(_ entry: Queries.ReadingEntry) -> some View {
+        // 13b 4F (S4-9(1)): the row's CONTENT view (card, or expanded
+        // body — exactly one tracked view per row) reports its scroll
+        // visibility into the model's progress brain. Model-driven per
+        // the Phase 6 ruling: the report is one boolean per realized row;
+        // progress is derived from the POST LIST, never pixel geometry.
         if model.isExpanded(entry.postID) {
             postHeader(entry, expanded: true)
             postBody(entry)
                 .padding(.bottom, 16)
+                .onScrollVisibilityChange(threshold: 0.05) { visible in
+                    model.noteVisible(entry.postID, visible)
+                }
         } else {
             collapsedPostCard(entry)
                 .padding(.bottom, 10)
+                .onScrollVisibilityChange(threshold: 0.05) { visible in
+                    model.noteVisible(entry.postID, visible)
+                }
         }
     }
 

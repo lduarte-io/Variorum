@@ -65,6 +65,8 @@ final class BookViewModel {
     func adopt(_ new: [Queries.ReadingEntry]) {
         truncated = new.count > Self.entryWindow
         entries = truncated ? Array(new.prefix(Self.entryWindow)) : new
+        // The page brain never points past the (possibly shrunk) list.
+        pagedIndex = Self.clampedPage(pagedIndex, count: entries.count)
     }
 
     /// The section header to show ABOVE entry `i`, if any: grouping is
@@ -95,6 +97,106 @@ final class BookViewModel {
             return nil
         }
         return entries[index]
+    }
+
+    // MARK: - Reading progress (13b 4F — S4-9(1), N31: "it needs a
+    // progress bar"). MODEL-DRIVEN per the Phase 6 memo's ruling: the
+    // domain is the POST LIST, never live text/pixel geometry — the view
+    // reports which posts' content is on screen (SwiftUI scroll
+    // visibility, one boolean per realized row) and the brain answers
+    // "you are at post k of n" from the entry order alone. Cost ∝
+    // realized rows (P1); nothing here reads TK2 geometry.
+
+    /// The posts whose CONTENT view is currently on screen (the card, or
+    /// the expanded body — one tracked view per row).
+    private(set) var visiblePosts: Set<String> = []
+    /// The sticky progress position (1-based): the FURTHEST visible post.
+    /// Sticky so a transition frame with zero reports (row swap, mode
+    /// flip) never snaps the bar to nothing.
+    private(set) var progressPosition: Int?
+
+    func noteVisible(_ postID: String, _ visible: Bool) {
+        if visible {
+            visiblePosts.insert(postID)
+        } else {
+            visiblePosts.remove(postID)
+        }
+        progressPosition = Self.progressPosition(
+            visible: visiblePosts, entries: entries, previous: progressPosition)
+    }
+
+    /// The pure half (pinned): the furthest visible entry's 1-based
+    /// position; `previous` when nothing reports (sticky); nil only
+    /// before anything was ever visible.
+    nonisolated static func progressPosition(
+        visible: Set<String>, entries: [Queries.ReadingEntry], previous: Int?
+    ) -> Int? {
+        let indexByID = Dictionary(
+            uniqueKeysWithValues: entries.enumerated().map { ($0.element.postID, $0.offset) })
+        let furthest = visible.compactMap { indexByID[$0] }.max()
+        if let furthest { return furthest + 1 }
+        return previous
+    }
+
+    /// The bar's rendering: position, total, and the filled fraction.
+    var readingProgress: (position: Int, total: Int, fraction: Double)? {
+        guard !entries.isEmpty else { return nil }
+        let position = min(progressPosition ?? 1, entries.count)
+        return (position, entries.count, Double(position) / Double(entries.count))
+    }
+
+    // MARK: - The paged view's page brain (13b 4F — S4-9(2), N31: page =
+    // a POST; the same model-driven domain as the scrubber — the post
+    // list; the Phase 6 memo binds).
+
+    /// The current page (an index into `entries`; clamped on adopt).
+    private(set) var pagedIndex = 0
+
+    nonisolated static func clampedPage(_ index: Int, count: Int) -> Int {
+        guard count > 0 else { return 0 }
+        return min(max(index, 0), count - 1)
+    }
+
+    /// The current page's entry (nil on an empty book).
+    var currentPage: Queries.ReadingEntry? {
+        guard pagedIndex >= 0, pagedIndex < entries.count else { return nil }
+        return entries[pagedIndex]
+    }
+
+    /// Land on a page. Flipping away from a live page RELEASES focus —
+    /// pages open read-cheap (the calm default; P3's one-live-editor rule
+    /// holds by construction either way, since only the current page
+    /// mounts). The unmounting editor's teardown flushes pending text
+    /// through the per-post coordinator (the standing discipline).
+    func openPage(_ index: Int) {
+        let clamped = Self.clampedPage(index, count: entries.count)
+        guard clamped != pagedIndex else { return }
+        pagedIndex = clamped
+        if let focused = focusedPostID, entries.indices.contains(clamped),
+           entries[clamped].postID != focused {
+            focus(nil)
+        }
+    }
+
+    /// Land on a post's page (the navigator's door while paging).
+    func openPage(post postID: String) {
+        guard let index = entries.firstIndex(where: { $0.postID == postID }) else { return }
+        openPage(index)
+    }
+
+    func flipPage(by delta: Int) {
+        openPage(pagedIndex + delta)
+    }
+
+    /// Entering the paged view lands on the post you were in (focus wins,
+    /// else the page you last held).
+    func seedPageFromFocus() {
+        if let focused = focusedPostID,
+           let index = entries.firstIndex(where: { $0.postID == focused }) {
+            pagedIndex = index
+        } else {
+            pagedIndex = Self.clampedPage(pagedIndex, count: entries.count)
+        }
     }
 
     // MARK: - Focus + expansion — ONE model (13b Stage 3, 3E: D1 + the

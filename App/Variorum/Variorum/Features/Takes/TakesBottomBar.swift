@@ -303,10 +303,14 @@ struct TakesBottomBar: View {
 
     @ViewBuilder private var trailingCluster: some View {
         if let words = wordCountLabel {
-            Text(tokens.chromeLabel(words))
-                .font(tokens.small.weight(.semibold))
-                .foregroundStyle(tokens.accent)
-                .lineLimit(1)
+            // 13b 4F (N36): the counts are the per-post word-target face
+            // here too — R118 parity of prominence with Write's bar; the
+            // target refreshes with the segmentation chip's cadence.
+            WordTargetFace(
+                tokens: tokens, baseLabel: words,
+                words: model.postWordCount,
+                target: model.postWordTarget,
+                onSet: { target in await model.setPostWordTarget(target) })
         }
         Button("?") { openWindow(id: "variorum-helper") }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))

@@ -22,7 +22,11 @@ final class BookStructureModel {
     @ObservationIgnored let session: AppSession
     let readingID: String
 
-    enum ViewMode { case book, read }
+    /// 13b 4F (S4-9(2), N31): `.pages` joins — the Kindle-style paged view
+    /// (page = a post, vertical scroll within, a bottom horizontal scrub),
+    /// BESIDE the existing views per her letter ("love the existing book
+    /// reading view, I think we need those other 2 as well").
+    enum ViewMode { case book, pages, read }
 
     private(set) var reading: Reading?
     private(set) var sections: [ReadingSection] = []

@@ -1019,12 +1019,21 @@ final class TakesViewModel {
     /// carry it; an external change catches up at the next projection —
     /// recorded).
     private(set) var newlinesMintBlocks = true
+    /// 13b 4F (N36): the per-post word target, for the bar's face — same
+    /// refresh cadence as the segmentation chip (the bar re-reads at
+    /// projection cadence and the setter refreshes itself; an external
+    /// change catches up at the next projection — recorded).
+    private(set) var postWordTarget: Int?
 
     func refreshSegmentation() async {
-        let effective = (try? await session.database.read { [postID] db in
-            try Queries.containerHeader(db, containerID: postID)?.effectiveSegmentation
+        // ONE header read now carries BOTH bar facts (4F: + the target).
+        let header = (try? await session.database.read { [postID] db in
+            try Queries.containerHeader(db, containerID: postID)
         }) ?? nil
-        if let effective { newlinesMintBlocks = effective != .oneBlock }
+        if let header {
+            newlinesMintBlocks = header.effectiveSegmentation != .oneBlock
+            postWordTarget = header.wordTarget
+        }
     }
 
     /// The one_block face — a door over the Phase-1 machinery
@@ -1042,6 +1051,20 @@ final class TakesViewModel {
             statusMessage = mint
                 ? SegmentationFaceCopy.mintOnNote
                 : SegmentationFaceCopy.mintOffNote
+        }
+    }
+
+    /// 13b 4F (N36 — S4-28.1): the per-post word target's Takes/Lenses
+    /// half (R118 parity with Write's). Refusals — the sealed post's
+    /// PROVISIONAL refuse among them — speak through the standing door.
+    func setPostWordTarget(_ target: Int?) async {
+        await run { [postID] ops in
+            try ops.setPostWordTarget(postID, wordTarget: target)
+        }
+        await refreshSegmentation()
+        if statusMessage == nil {
+            statusMessage = target.map(WordTargetFaceCopy.setNote)
+                ?? WordTargetFaceCopy.clearNote
         }
     }
 
