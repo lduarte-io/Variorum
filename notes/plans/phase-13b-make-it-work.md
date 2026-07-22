@@ -385,7 +385,7 @@ Commits per batch/stage with the standing message convention.
 | D1 | Book card collapse no-ops on the focused post (`BookView.swift:545` force-expand disjunct; traced batch 15, confirmed by both audits) | **RESOLVED 3E** (commit 23b0c12 — `BookFocusState` folded into `BookViewModel`, the book's ONE focus model: focus implies expansion, collapse RELEASES focus, collapse-all releases everything; the disjunct deleted; red-on-old by FULL behavioral revert — the editor stayed mounted, her exact repro; hosted + model pins) |
 | D2 | Margin grid shifts the post left; suspicious inter-block vertical gaps; spacing pass | **RESOLVED 3F** (commit e511710 — BOTH candidates traced real and fixed: the always-wide measure → bloom-gated rail (at rest every style shares the 680 column; the masthead's duplicate UserDefaults width brain DELETED; measure-brain pin red-on-revert) + `fanToggleRow` → the corner-badge overlay (zero vertical footprint, Write's ⑂ grammar; AD-9's gaps close); the slab half was AD-7's pane-stretch, fixed with it) |
 | D3 | Takes structural-gesture gap: Make Block silent, Divide redirects, no add-block-at-end door in Takes | **RESOLVED 1b** (fire-and-DO move-and-execute on all four + the lecture DELETED; native ＋new-block door in Takes/Lenses; red-on-old end-to-end pin) |
-| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | registry + router LANDED 1b (T1 done — silent/lecture/dead-key classes structurally closed; the walk keeps them closed); crowdedness: the NAMED instances done 3F per the trim (N15's bars; D2's gap rows; the grid cells) — the broad subjective sweep waits for her presence at the Stage 4 kickoff (the architect's recorded trim call) |
+| D4 | Capability-confusion theme (buttons/crowdedness/what's-possible) | registry + router LANDED 1b (T1 done — silent/lecture/dead-key classes structurally closed; the walk keeps them closed); crowdedness: the NAMED instances done 3F per the trim (N15's bars; D2's gap rows; the grid cells). **CLOSED at the 13b closeout:** the structural half is done (registry + router + fire-and-DO retired the silent/lecture/dead-key classes and the walk keeps them closed); the remaining BROAD SUBJECTIVE sweep is re-owned to the standalone **Design & UI review** row (unslotted, re-runnable, propose-only) — the author's 2026-07-22 extraction, deliberately NOT 13c's. |
 | M1 | MERGE whole-feature design memo (R116) | **WRITTEN 1b** (`phase-13b-memo-merge.md`, self-executing per R120); doors/reachability built; deeper builds → Stage 3 |
 | M2 | W CEREMONY memo + reachability (R116) | **WRITTEN 1b** (`phase-13b-memo-w-ceremony.md`); the ceremony is REACHABLE from Takes (divide fire-and-DOes; Helper dictionary names it) |
 | N1 | Take-archive vanish trap: ⌘⇧A in Takes hides the take with no UI recovery (fans query active-only) | **RESOLVED 3D** (commit 1ea9cc4 — the "archived · n" door + listing in every bloom's footer, Unarchive right there; the fans query stays active-only, the listing is its OWN read at projection cadence; every archive door speaks the road back host-gated, refusals outrank; red-verified by revert) |
@@ -424,15 +424,15 @@ Commits per batch/stage with the standing message convention.
 | N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern. **S4-33 (her rider): the Takes bar gets a DIRECT "comments" button like Write's — parity of prominence, not just existence** | **RESOLVED 4D** (commit 63fae31 — S4-33's direct "comments" button on the Takes/Lenses bar beside seal/tags/date, Write's order mirrored (the block ▾ item and ⌘⇧' stay, one `requestComments`); the MARGIN-CLICK-TO-ADD BUILT in its minimal form — an uncommented CARET block offers a quiet "+ //" exactly where its margin card would sit (live editor, margin-card mode, caret block only; clicking opens the panel); the full every-block-hover mockup grammar RECORDED as the next rung for 13c if she wants more; pin red-on-old) |
 | N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | **RESOLVED 4F, DEPLOY-READY** (commits be61db9 schema + 9006c41 op + 2492ac0 faces — migration v1_12 `container.word_target` additive nullable, the reading column's twin VERBATIM (display/progress only, never an entry-time refusal — pinned); `setPostWordTarget` on the extent-setter conventions (non-positive refuses, nil clears, no-op writes nothing, identity-level no-touch/no-churn; SEAL POSTURE PROVISIONAL: refuse, the reading-extent mirror — the N34 metadata-allowed alternative one guard line away); the FACES ride the word-count label BOTH bars already carry (R118 parity, zero new width — progress in the label, click opens the ExtentInput setter popover; Write reads the observed header, Takes refreshes at chip cadence). Sync artifacts COMPLETE: `07_phase13b_lockstep.sql` (marker 3 → 4, choreography header, NO RPC rework — additive column on an allowlisted table), client `lockstepVersion` 4, the A6 walks + mirror-DDL coverage GREEN over the column. **THE DEPLOY IS THE ORCHESTRATOR'S at the consolidated window (pre-authorized, EOL addendum): mirror FIRST, then the client refresh — until marker 4, a v1_12 client visibly refuses to sync by design; the shipped `/Applications` build stays marker-3 meanwhile** |
 | N37 | Readings RESTORE door (S4-28.2, reverses the pre-13 boundary): `restoreReading` on the `restoreContainer` pattern (tombstone flip + exact-stamp revival of sections/memberships) + a deleted-readings recovery surface; curated at least | **RESOLVED 4F** (commits 6784d24 core + 2492ac0 surface — `restoreReading` on the restoreContainer pattern: tombstone flip + EXACT-STAMP revival of chapters AND memberships, diverged stories dead (independent deletes; the live-post guard), assignments reattach FREE; smart books restore by the flip alone (not refused — recorded); finished restores finished; no undo entry (recovery-door class); `readingNotDeleted` typed; `Queries.deletedReadings` + the "Deleted books" section in Archived & Deleted with the surface-local Restore door. **The boundary reversal recorded for the canon-delta list**; `restoreSection`'s died-with-its-reading refusal now has the two-step road (restoreReading FIRST) — interaction PINNED, doc updated. DOCUMENTED CORNER pinned: reading-dies-then-post-dies leaves that membership dead through BOTH restores (twice-diverged stamp story); add-to-book is the road back. Behavioral reverts EXECUTED core-side (both guards red); the walk act restores the whole field guide on itself) |
-| N38 | Smart → smart+curated conversion (S4-28.4, direction-level, uncertainty preserved): curating/chaptering a smart book converts it (membership materialization design), a fresh smart book mintable off the same tag; the #25(a) promote-to-curated design, now wanted | new, author → Stage 4 scoping call; design memo owed if deferred |
+| N38 | Smart → smart+curated conversion (S4-28.4, direction-level, uncertainty preserved): curating/chaptering a smart book converts it (membership materialization design), a fresh smart book mintable off the same tag; the #25(a) promote-to-curated design, now wanted | **RE-OWNED to PHASE 13c — committed scope** (the author's EOL directive). Its S4-16-class condition is DISCHARGED: the design memo `notes/plans/phase-13c-memo-smart-to-curated.md` was authored in 4F (three conversion shapes, A recommended, zero schema change confirmed, five rulings wanted from her at the 13c kickoff). |
 | N39 | Blocks-list positional moves (S4-30g): type a target position number ("what number block… out of the total post") + move-to-top / move-to-bottom doors — dragging stops being the only long-distance move | **RESOLVED 4D** (commit 582ab36 — the Blocks rows' ⋯ menu gains Move to top / Move to bottom / "Move to block #…" with a typed position out of the total post; ONE ordinary `reorder` per move (⌥⌘Z undoes via its own inverse), ordinal math counts as a human counts, out-of-range clamps, already-there speaks a no-op and writes nothing, malformed entries speak; pinned) |
 | N40 | The takes strip's height jumping (S4-31b, her ruling): ONE fixed strip height with in-strip scrolling ("you can scroll within the strip"); kills the back-and-forth height changes and dissolves the recorded #28(b) clip cost | **RESOLVED 4D** (commit 37b5ece — TRACED: the jumping was variable card heights in the strip forms (carousel/slot-split cards sized to their take's text, so paging/typing re-heighted the row). ONE fixed card height (railCardHeight) across EVERY strip form — rail, carousel, slot split — with the content scrolling in-card (the N23 shape, generalized); #28(b)'s clip cost dissolves into that scroll. Built WITH S4-24's hybrid: free horizontal scrolling settling on whole cards, writing back into the one paging brain — counter, ⌥⌘←/→, and scroll agree at rest by construction) |
-| N41 | Inline-comments airiness (S4-32, her deferral): the uniform gap widening "doesn't look great" but is not Stage 4 scope — DEFERRED to a future stage; the 13b closeout names its owner (candidates: a later polish window, or an R116 memo if it keeps bothering her) | new, author → deferred beyond Stage 4 |
+| N41 | Inline-comments airiness (S4-32, her deferral): the uniform gap widening "doesn't look great" but is not Stage 4 scope — DEFERRED to a future stage; the 13b closeout names its owner (candidates: a later polish window, or an R116 memo if it keeps bothering her) | **OWNER NAMED at the 13b closeout: PHASE 13c** (the author's EOL directive discharges the "the 13b closeout names its owner" duty). The mechanism constraint is on the record (S4-30(a): an overlay cannot reserve vertical space in TK2 — the uniform gap is the honest mechanism), so if it still bothers her it is an R116 memo conversation, not a patch. |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | **RESOLVED 4C** (commit eb17ad0 — Save… on the Diff sheet: NSSavePanel per the 11b export-door conventions; `LineDiff.exportText` is a pure projection of the RENDERED lines (marker-prefixed, matching-mode stated in the header), pinned byte-stable; the outcome speaks sheet-locally, cancel says nothing) |
-| L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
-| A1 | `//` comment-glyph ratification | hers, once comments used in anger |
-| A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
-| A3 | Typographic-PDF disposition | hers, standing |
+| L1 | Mockup gap-list ("anything that truly didn't make it over") | **RE-OWNED at the 13b closeout** → the standalone **Design & UI review** row on the master plan's phase table (unslotted, re-runnable, propose-only). Never built in 13b by design (R111's looks-last rule); it is exactly that round's material. |
+| A1 | `//` comment-glyph ratification | **CLOSED — RATIFIED by the author 2026-07-22 (S4-25(3))**; the same sentence carried the live finding that she could not FIND any comment door, which became N35 and shipped in 4D. |
+| A2 | QUESTIONS #23–#27 + remainder of #28 | **CLOSED — QUESTIONS #23–#28 ALL ANSWERED at the Stage 4 kickoff sitting** (S4-26…S4-31); statuses updated in `notes/QUESTIONS.md`. The four spawned directions (N36/N37/N38 + the GC hard-delete note) were routed there. |
+| A3 | Typographic-PDF disposition | **CLOSED — SETTLED by the author 2026-07-22 (S4-25(4))**: re-owned to **Phase 14**, beside the variorum-edition export; the KnownIssues row's owner updated. |
 
 ## Stage 0 briefs (self-contained for fresh sessions/agents)
 
@@ -7417,3 +7417,123 @@ Method per procedure: clean tree → apply the recorded revert → `build-for-te
   should a peer with NO kinship at all flush at the first bound (as the
   whole-board zero-lineage case does) instead of trailing every aligned
   row?
+
+### The gate execution record — the ORCHESTRATOR's half (the round-3 MAJOR's remaining parts, 2026-07-22)
+
+*The fix session's half (Part A round-3 fixes + Part B's 18 revert-red
+executions) sits above. These are the parts it was told not to write.*
+
+**(1) The three gate failures — traces, settled.** All three landed in
+territory the locked session had only ever COMPILED. **(a) The compare
+soak's clipped pane was a REAL defect** (`16e5fcb`): `remeasure()`'s
+`@State` height publish could fire mid-view-update, SwiftUI DROPS state
+writes made during an update, and a dropped write left a compare pane
+framed one line tall under two lines of text with nothing left to
+re-publish — the soak's invariant was its own red pin (12 issues, both
+seeds, deterministic). **(b) The multi-peer composition failure was a
+REAL defect and the failing pin was RIGHT** (`e5b8221`): `flushFree()`
+flushed every column's pending run before any aligned row, so one peer's
+kin row force-flushed another's trailing run into a sparse segment — the
+gap parade N29 exists to kill, at segment scale. **(c) The canvas grid
+pin was a HARNESS artifact** (`2e60d0d`): under `#expect`'s operator
+decomposition a bare literal sum types as `Int` against a `CGFloat`, and
+the solver resolves that through `AnyHashable`, where
+`AnyHashable(CGFloat(460)) != AnyHashable(Int(460))` even for equal
+values. Geometry re-derived exact; no tolerance introduced; the class
+swept (and round 3 additionally swept the INVERSE hole — `!=` across
+mismatched numeric types is silently true, a hollow pin — and found it
+clean).
+
+**(2) The count decomposition — CORRECTED, the earlier hypothesis
+FALSIFIED.** The gate-failure section named "parameterized-test
+counting" as the leading suspect and the orchestrator repeated it. Round
+3 falsified it empirically: **645 `@Test` declarations == 645 reported
+tests**, so the top line counts test FUNCTIONS, and parameterization
+(5 parameterized tests, 11 cases) would push the number UP, not down.
+**The truth: 648 was an arithmetic ACCUMULATION ERROR across six batch
+records whose sessions never executed a suite** — no test was missing or
+dropped. Recorded as the lesson: hand-estimated counts across
+unexecutable sessions drift, and the drift compounds silently.
+(Suites: 120 `@Suite` declarations vs 122 reported — two implicit suites
+from bare `@Test`-bearing structs.)
+
+**(3) The green runs.** Post-fix: **645/122 GREEN** (orchestrator's own
+run), independently re-run by the round-3 reviewer. After the round-3
+post-cap fixes: **652 tests / 123 suites GREEN**, orchestrator-verified
+by its own run. Core **817/96 GREEN** throughout, `Sources/` diff empty
+across the entire ladder + fix range; mobile builds.
+
+**(4) The revert-red executions — DISCHARGED:** 18 executed, 18
+confirmed RED, each restored byte-identical (the fix session's table
+above). Three honest findings came with them — two batch records
+MIS-ATTRIBUTED a pin's mechanism (the pin was sound; the recorded revert
+targeted the wrong hunk, proven by supplementary reverts) and one
+recorded expected-red list was over-broad. **Those are documentation
+defects in the batch records, not code defects** — recorded here so the
+records are read with that correction.
+
+**(5) The visual loop — DISCHARGED BY REASSIGNMENT, not by execution.**
+The author extracted the visual/design/UI review from this phase at the
+closeout (2026-07-22) into a standalone, re-runnable master-plan row.
+The gate's visual half therefore does not run here; the accumulated
+per-batch visual-loop item lists in the 4A–4F records ARE that round's
+first backlog. **Consequence stated plainly: several Stage 4 surfaces
+ship machine-verified but visually uninspected** — both ceremony sheets,
+the rebuilt Compare, the reworked Canvas, the paged book view + progress
+bar. The author accepted being first eyes.
+
+### The deploy chain — EXECUTED (2026-07-22, under the author's standing pre-authorization)
+
+**The v1_12 mirror deploy RAN and is verified.** Marker probed at **3**
+before, **4** after via the client's own `sync_schema_version()` RPC;
+`container.word_target` present as `bigint`, nullable; the mirror's 17
+container rows untouched (0 carry a target). §12 choreography honored —
+mirror FIRST, then the client. Both statements ran verbatim from
+`Server/supabase/07_phase13b_lockstep.sql`, marker last, via the stored
+PAT (the 9c/13 precedent).
+
+**`/Applications` refreshed** from a green Release build (zero instances
+pgrep-verified at build AND copy; `codesign --verify --deep --strict`
+OK; identity confirmed `io.lduarte.Variorum`, i.e. the RELEASE identity,
+not the 4G debug host). **The A1 backup ran FIRST**:
+`variorum-backup-2026-07-22-203034.sqlite` (UTC name), `integrity_check`
+ok. Launching the refreshed build **applied migration v1_12 in her real
+store** (`grdb_migrations` tail confirms `v1_12_container_word_target`)
+with her content intact (49 live containers / 3 readings, unchanged
+before and after; `integrity_check` ok).
+
+**TWO THINGS DID NOT COMPLETE — both on the author's checklist:**
+
+- **The field-guide re-seed did NOT run.** The tutorial in her real
+  store is **six lesson-prose revisions stale** (4A's cut lessons, 4B's
+  merge lesson, 4C's four, 4D's seven, 4E's canvas half, 4F's books).
+  Deliberately left to her: Help ▸ Restore Tutorial… is a
+  confirm-gated DESTRUCTIVE door whose Replace press is a human act by
+  design and by precedent (the Stage 2 and Stage 4-kickoff records both
+  note she pressed it herself), the orchestrator's GUI automation did
+  not yield, and the backup is already on disk. Store verified UNTOUCHED
+  by the attempt (1 field guide / 22 tagged posts / 6 chapters, before
+  and after).
+- **A GUI OBSERVATION, honestly unresolved:** from the orchestrator's
+  vantage the refreshed app launched with a live menu bar and a "Variorum"
+  entry in its Window menu, but **zero AX-visible windows**, and it
+  refused Apple-Event quit. A fresh relaunch behaved the same. **This is
+  NOT asserted as a defect:** the same screenshots showed no Terminal
+  window either, so the captured screen was demonstrably not the
+  author's actual screen (Spaces/display vantage), and every
+  non-GUI signal says the build is healthy — menu bar alive, migration
+  applied, store consistent, suites green, signature valid. She verifies
+  in one glance; if the app genuinely opens windowless for HER, that is
+  a launch defect and the first item of the next round.
+
+**Sync state — a PRE-EXISTING finding, not a deploy consequence.** The
+real store's outbox holds ~1,216 rows and does not drain. Cause traced:
+**there is no `io.lduarte.Variorum.auth` Keychain item** — only
+`io.lduarte.Variorum.fragments-auth` (the bridge's separate session) —
+so the app is SIGNED OUT of its own sync, and a signed-out engine
+refuses rounds leaving the outbox intact and the cursor unmoved, exactly
+as designed. **Proven pre-existing:** the pre-deploy backup already held
+**1,210** outbox rows and the oldest entry is stamped **2026-07-20T05:06Z**
+— two days before this deploy. Nothing is lost; the queue drains when
+she signs in (which currently needs the consent page served on the LAN
+until the stargazing.tech page ships — the standing 9c residual).
