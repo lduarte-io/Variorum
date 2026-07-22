@@ -239,6 +239,57 @@ struct CompareViewModelTests {
         }
     }
 
+    /// 13b 4D (the 4C handoff — judgment call 4's recorded upgrade, built):
+    /// ⌘S in Compare commits the FOCUSED pane's take — whichever POST it
+    /// belongs to (the flush routes through that post's own coordinator);
+    /// no focus speaks instead of guessing.
+    @Test func commitFocusedTakeCommitsThePaneOwnPostsTake() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.peerSlots = [.init(postID: world.twin)]
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
+
+            @MainActor func commits(_ variantID: String) async throws -> Int {
+                try await db.read { db in
+                    try Int.fetchOne(
+                        db, sql: "SELECT COUNT(*) FROM commit_point WHERE variant_id = ?",
+                        arguments: [variantID]) ?? 0
+                }
+            }
+
+            // No focus: speaks, commits nothing.
+            await model.commitFocusedTake()
+            #expect(model.statusMessage?.contains("Click into a pane") == true)
+
+            // Focus a PEER pane — pending text flushes through the twin's
+            // own pipeline and the commit lands on that take.
+            let twinSlot = model.projection.peers[world.twin]!.slots[0]
+            let twinKey = PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.twin)", blockID: twinSlot.blockID,
+                variantID: twinSlot.variantID!, context: world.twin)
+            model.focus(twinKey)
+            model.paneEdited(
+                postID: world.twin, variantID: twinSlot.variantID!,
+                newText: "the committed twin text")
+            await model.commitFocusedTake()
+            #expect(try await commits(twinSlot.variantID!) == 1,
+                    "⌘S committed the focused pane's take")
+            let committedText = try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: "SELECT text FROM commit_point WHERE variant_id = ?",
+                    arguments: [twinSlot.variantID!])
+            }
+            #expect(committedText == "the committed twin text",
+                    "the flush preceded the commit — the savepoint holds the typed text")
+            let anchorSlot = model.projection.anchor.slots[0]
+            #expect(try await commits(anchorSlot.variantID!) == 0,
+                    "the anchor's take is untouched — the pane's own post only")
+            model.teardown()
+        }
+    }
+
     /// S4-2d's compare half: a drag reorders ITS OWN post only — the
     /// other column's stored order is byte-untouched, and one ⌥⌘Z undoes
     /// (an ordinary `reorder` through ops, never a bespoke order store).

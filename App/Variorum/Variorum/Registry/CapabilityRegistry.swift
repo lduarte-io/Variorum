@@ -47,6 +47,15 @@ nonisolated enum CapabilityRegistry {
         return takeFamily(ctx)
     }
 
+    /// Commit additionally acts in COMPARE (13b 4D — the 4C handoff:
+    /// compare panes are fully editable since 4C, and its board now
+    /// registers the `.commit` handler; ⌘S commits the focused pane's
+    /// take — the N5 letter extended to the new editable surface).
+    private static let takeFamilyPlusCompare: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        if ctx.mode == .compare { return .act }
+        return takeFamily(ctx)
+    }
+
     /// Write-editor-scoped doors (caret acts): ATTACHMENT ONLY (round-1
     /// MINOR-3). These acts call the attached editor directly — enablement
     /// must never outrun the actual editor ("Write mode, editor still
@@ -264,7 +273,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: "⌘S", takesAccess: .native,
             unavailableNote: "Nothing to commit here — ⌘S commits a take inside a post.",
-            availability: takeFamily),  // NIT-3: the one named rule, not a copy
+            availability: takeFamilyPlusCompare),  // 13b 4D: + compare (the 4C handoff)
         Capability(
             id: .structuralUndo, verb: "Undo Structural Change", scope: .app,
             doors: [.menuBar, .palette],

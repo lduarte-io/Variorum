@@ -191,7 +191,14 @@ struct CapabilityRegistryTests {
         // N5's silent half is structurally impossible: where nothing can
         // commit, the door is DISABLED (it used to be enabled-into-nil).
         #expect(!CapabilityRegistry.isEnabled(.commitTake, in: CapabilityContext(mode: nil)))
-        #expect(!CapabilityRegistry.isEnabled(.commitTake, in: CapabilityContext(mode: .compare)))
+        // 13b 4D (JUSTIFIED EDIT — the 4C handoff, judgment call 4's
+        // recorded upgrade): compare is an EDITABLE surface since 4C and
+        // its board registers the `.commit` handler now, so the door is
+        // enabled there — the old `!isEnabled(compare)` line pinned the
+        // pre-4C read-only shape. This flipped expectation is the change's
+        // red-on-old proof (old registry: takeFamily ⇒ unavailable).
+        #expect(CapabilityRegistry.isEnabled(.commitTake, in: CapabilityContext(mode: .compare)),
+                "⌘S commits the focused compare pane (the N5 letter, extended)")
     }
 
     @Test func addBlockAtEndIsNativeInTakes() {

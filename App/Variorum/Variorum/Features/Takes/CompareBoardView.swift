@@ -574,6 +574,29 @@ final class CompareViewModel {
     func speak(_ message: String) {
         statusMessage = message
     }
+
+    /// 13b 4D (the 4C handoff — judgment call 4's recorded one-gate
+    /// upgrade, built): ⌘S in Compare commits the FOCUSED pane's take
+    /// through the authority (the N5 letter extended to the new editable
+    /// surface). The flush routes through the pane's OWN post's
+    /// coordinator (the cross-context handback's rule); no focus speaks.
+    func commitFocusedTake() async {
+        guard let pane = authority.livePane else {
+            statusMessage = "Click into a pane first — ⌘S commits the take you're in."
+            return
+        }
+        let postID = pane.context.isEmpty ? anchorPostID : pane.context
+        await coordinator(for: postID).flushNow()
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                _ = try ops.commit(pane.variantID)
+            }
+            statusMessage = "Committed — an immutable savepoint of this take."
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
 }
 
 // MARK: - The board
@@ -586,6 +609,11 @@ struct CompareBoardView: View {
     /// The drop indicator's target (the BookView idiom).
     @State private var dropTargetBlockID: String?
     @State private var dropAtEndPostID: String?
+    /// 13b 4D (the 4C handoff): the routed-command registration's token —
+    /// Compare now handles `.commit` (and ONLY that; everything else falls
+    /// through to the router's honest note — its editing stays direct
+    /// manipulation, the canvas-switcher class).
+    @State private var commandToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -624,7 +652,23 @@ struct CompareBoardView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
-        .onDisappear { model.teardown() }
+        .onAppear {
+            // 13b 4D (the 4C handoff): ⌘S acts where it's advertised — the
+            // one routed command this board consumes; the rest return
+            // false and keep falling through (compare's editing is direct
+            // manipulation — the recorded 4C reading stands).
+            commandToken = session.commandRouter.registerHandler { command in
+                guard case .commit = command else { return false }
+                Task { await model.commitFocusedTake() }
+                return true
+            }
+        }
+        .onDisappear {
+            if let commandToken {
+                session.commandRouter.unregisterHandler(commandToken)
+            }
+            model.teardown()
+        }
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
