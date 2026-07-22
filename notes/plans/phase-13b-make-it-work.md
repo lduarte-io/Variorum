@@ -6122,3 +6122,54 @@ run at once), then each batch's recorded revert-red procedures, then the
 withheld refresh (post-4F: behind the pre-authorized v1_12 deploy,
 mirror first). Orchestrator spot-checks at 4A close: core 781/92
 re-run GREEN independently; commits/record/ledger verified present.
+
+### Batch 4E Phase-1 ruling (the architect, 2026-07-22 — recorded ahead of the build per the delivery-verification lesson; the batch record will carry the proposal + this ruling together)
+
+1. **(a) ADOPTED: spread-grid default placement + LAZY REALIZATION by
+   pure 2D viewport culling. The bank model is REJECTED for this batch;
+   the hybrid rejected with it.** The decisive reasoning, endorsed: the
+   bank strands unpositioned cards outside click-in-order (S4-7f) and
+   fit-all (S4-7g) — this batch's own deliverables — and opens her
+   exact scenario (the never-arranged long post) to an EMPTY canvas;
+   culling keeps one surface and one mental model, the realized set is
+   a pure function of (positions, sizes, visibleRect, margin) with
+   deterministic spread-grid defaults as its input, and the P1 bound
+   (realized count independent of post size) is unit-pinnable plus
+   DEBUG-counter-pinnable on the ReadingFlow precedent. The rider
+   details are endorsed as proposed: the live pane's card is exempt
+   from derealization (the ring never dies by scrolling); the default
+   grid starts below the positioned cards' bounding box (defaults
+   never hide under her arrangement); nothing persists until a drag.
+   **HER FORK, recorded for the 13c/sweep inputs:** if real use ever
+   shows a post too large for a navigable spread grid, the BANK
+   returns as a future FACE on top of culling (a listing of
+   never-positioned cards; culling is needed under it anyway) —
+   nothing this batch builds forecloses it.
+2. **(b) CONFIRMED by the schema facts:** card SIZE persists LOCALLY
+   this batch (the view-memory class; `canvas_layout` has no
+   view-state home and 4E has no core allowance). Additive `w`/`h`
+   columns + a §12 lockstep event are RECORDED as a 13c/sweep input.
+3. **(c)(1) Fit-all: option (i) — the read-only overview zoom —
+   with two riders.** (α) Strictly TRANSIENT and read/arrange-inert:
+   below 1:1 no editing and no dragging — a click returns to 1:1
+   centered (exception in (γ)); no persistent zoom machinery.
+   (β) PRE-AUTHORIZED FALLBACK: if the coordinate/gesture tax creeps
+   toward the rejected option (iii)'s complexity, fall back to option
+   (ii) (scroll-to-bounds + speak when it can't fit — her own "when
+   there's not too many cards" bound) and record the fallback with the
+   mechanism that forced it; no second round-trip needed. (γ) SOFT
+   RIDER, build only if it earns its place cheaply: while
+   click-in-order mode is ACTIVE, clicks in the overview assign
+   sequence numbers instead of returning to 1:1 (fit-all + click-in-
+   order together is the natural "see everything, order by clicking"
+   composition; number badges must stay legible at scale) — else
+   record it as the next rung.
+4. **(c)(2) ⌘S in canvas: YES** — exactly the 4D `takeFamilyPlusCompare`
+   precedent (availability gains `.canvas`; the canvas handler consumes
+   `.commit` for the live pane's take; the one registry-pin edit
+   justified in-line). The N5 class closes on its third surface.
+5. **The recorded-latitude items are ENDORSED as stated:** header-strip
+   grab grammar; partial click-in-order = clicked prefix then unclicked
+   in relative order; the canvas soak variant on the 4C compare-soak
+   shape; sealed flag via the existing app-side read; core untouched
+   throughout.
