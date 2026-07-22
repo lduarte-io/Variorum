@@ -58,4 +58,27 @@ struct DiffViewTests {
         let relaxed = LineDiff.compute(a: "para\n", b: "para", normalizeWhitespace: true)
         #expect(relaxed.map(\.kind) == [.same, .removed])
     }
+
+    /// 13b 4C (N33/S4-6): the save door's text is a pure projection of the
+    /// rendered lines — marker-prefixed, header-lined, byte-stable.
+    @Test func exportTextProjectsExactlyTheRenderedLines() {
+        let lines = LineDiff.compute(
+            a: "alpha\nbeta", b: "alpha\nBETA", normalizeWhitespace: false)
+        let text = LineDiff.exportText(
+            lines: lines, leftTitle: "the post", rightTitle: "the twin",
+            normalizedWhitespace: false)
+        #expect(text == """
+            diff — the post → the twin
+
+              alpha
+            − beta
+            + BETA
+
+            """)
+        let normalized = LineDiff.exportText(
+            lines: LineDiff.compute(a: "x", b: "x", normalizeWhitespace: true),
+            leftTitle: "a", rightTitle: "b", normalizedWhitespace: true)
+        #expect(normalized.contains("(whitespace ignored when matching lines)"),
+                "the matching mode is stated in the file — the reader can't be misled")
+    }
 }

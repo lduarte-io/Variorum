@@ -16,6 +16,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 import VariorumCore
 
 // MARK: - The pure line diff
@@ -80,6 +81,31 @@ nonisolated enum LineDiff {
         while j < m { append(.added, bLines[j]); j += 1 }
         return lines
     }
+
+    /// N33 (13b 4C, S4-6): the diff as plain text — "useful to feed to an
+    /// AI agent or something." Exactly the rendered lines, marker-prefixed
+    /// (space · − · +), under a one-line header; a pure projection of what
+    /// the sheet shows, so the file can never disagree with the screen.
+    static func exportText(
+        lines: [Line], leftTitle: String, rightTitle: String,
+        normalizedWhitespace: Bool
+    ) -> String {
+        var out = "diff — \(leftTitle) → \(rightTitle)\n"
+        if normalizedWhitespace {
+            out += "(whitespace ignored when matching lines)\n"
+        }
+        out += "\n"
+        for line in lines {
+            let marker: String
+            switch line.kind {
+            case .same: marker = "  "
+            case .removed: marker = "− "
+            case .added: marker = "+ "
+            }
+            out += marker + line.text + "\n"
+        }
+        return out
+    }
 }
 
 // MARK: - The face
@@ -90,6 +116,9 @@ struct DiffView: View {
     let leftText: String
     let rightText: String
     @State private var normalizeWhitespace = false
+    /// N33: the save door's sheet-local outcome line (the sheet has no
+    /// StatusCenter; the answer renders right here, never silently).
+    @State private var saveNote: String?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -99,7 +128,17 @@ struct DiffView: View {
                 Spacer()
                 Toggle("Ignore whitespace", isOn: $normalizeWhitespace)
                     .toggleStyle(.checkbox)
+                // N33 (S4-6): export the diff text to a file — the 11b
+                // export-door conventions (NSSavePanel; the sandbox grants
+                // write access to whatever the author picks).
+                Button("Save…") { save() }
+                    .help("Save this diff as a plain-text file — e.g. to feed to an AI agent")
                 Button("Close") { dismiss() }
+            }
+            if let saveNote {
+                Text(saveNote)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 1) {
@@ -123,6 +162,29 @@ struct DiffView: View {
         }
         .padding(12)
         .frame(minWidth: 560, minHeight: 380)
+    }
+
+    /// N33's act: what the sheet shows, to a file the author picks.
+    private func save() {
+        let lines = LineDiff.compute(
+            a: leftText, b: rightText, normalizeWhitespace: normalizeWhitespace)
+        let text = LineDiff.exportText(
+            lines: lines, leftTitle: leftTitle, rightTitle: rightTitle,
+            normalizedWhitespace: normalizeWhitespace)
+        let sanitize: (String) -> String = {
+            $0.replacingOccurrences(of: "/", with: "-")
+                .replacingOccurrences(of: ":", with: "-")
+        }
+        guard let url = ExportPanels.saveFile(
+            defaultName: "diff — \(sanitize(leftTitle)) vs \(sanitize(rightTitle)).txt",
+            type: .plainText)
+        else { return }  // cancelled — nothing to say
+        do {
+            try text.write(to: url, atomically: true, encoding: .utf8)
+            saveNote = "Saved to “\(url.lastPathComponent)”."
+        } catch {
+            saveNote = "Save failed: \(error.localizedDescription)"
+        }
     }
 
     private func marker(_ kind: LineDiff.Kind) -> String {

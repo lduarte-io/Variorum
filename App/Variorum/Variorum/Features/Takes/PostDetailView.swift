@@ -4,9 +4,10 @@
 //
 //  Phase 11, Step A3 — the post detail's mode switcher: WRITE (the ordinary
 //  Phase 7 editor), TAKES (the takes/lens board — the multi-variant editing
-//  view the author elevated to core identity), COMPARE (the two-post
-//  aligned composition — versions & outline↔draft; version_of's door 2),
-//  OUTLINE (outline-left/draft-right over derivedBlocks — A5), BLOCKS (the
+//  view the author elevated to core identity), COMPARE (13b 4C: "lenses
+//  across posts" — editable multi-post columns over the one authority;
+//  versions & outline↔draft both live here, and make-outline-post rides
+//  its header — the Outline tab retired into it, S4-3), BLOCKS (the
 //  collapsible block-TOC — A6; jump-to-block re-seeds the Write editor's
 //  caret so the hybrid primitive lands it), and — Phase 13 C3 (R40) —
 //  CANVAS (spatial block arrangement as a VIEW on the post, the minimal
@@ -32,9 +33,13 @@ struct PostDetailView: View {
 
     /// R79 (Sitting 9): a post opens in TAKES the first time; thereafter it
     /// reopens in whatever mode you last used there (per-post memory,
-    /// scroll-position class — local, never synced).
+    /// scroll-position class — local, never synced). 13b 4C: stored values
+    /// decode through `PostMode.fromStored`, so a post left in the retired
+    /// Outline tab reopens in Compare — no stored value strands. (The
+    /// S4-20 first-open default flip to Write is Batch 4D's, not this
+    /// change's.)
     static func rememberedMode(postID: String, defaults: UserDefaults = .standard) -> Mode {
-        defaults.string(forKey: "postMode.\(postID)").flatMap(Mode.init(rawValue:)) ?? .takes
+        defaults.string(forKey: "postMode.\(postID)").flatMap(Mode.fromStored) ?? .takes
     }
 
     @State private var mode: Mode = .takes
@@ -116,11 +121,11 @@ struct PostDetailView: View {
                 LensesBoardView(session: session, postID: postID)
                     .id("lenses-\(postID)")
             case .compare:
-                AlignedPostsView(session: session, anchorPostID: postID)
+                // 13b 4C: "lenses across posts" — the merged Compare
+                // (editable panes, one ring across posts, per-post reorder;
+                // the retired Outline tab's make-outline-post in its header).
+                CompareBoardView(session: session, postID: postID)
                     .id("compare-\(postID)")
-            case .outline:
-                OutlineDraftView(session: session, draftPostID: postID)
-                    .id("outline-\(postID)")
             case .blocks:
                 BlockTOCView(session: session, postID: postID, onJump: { blockID in
                     jump(to: blockID)

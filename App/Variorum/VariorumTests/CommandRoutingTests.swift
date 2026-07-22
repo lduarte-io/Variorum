@@ -673,7 +673,8 @@ struct StaleWriteIntentTests {
 @MainActor
 @Suite("Seal door in handler-less modes (13b Stage 1 ladder, round-1 MINOR-1)")
 struct SealDoorTests {
-    /// Compare/Outline/Blocks register no command handler (Canvas falls
+    /// Compare/Blocks register no command handler (Outline retired into
+    /// Compare, 13b 4C; Canvas falls
     /// through), so the seal dispatch is unhandled and the shell fallback
     /// SEALS. Pre-fix the unhandled dispatch spoke "open a post first" —
     /// with a post open — a factually wrong refusal immediately replaced

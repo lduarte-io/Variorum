@@ -136,7 +136,7 @@ struct CapabilityRegistryTests {
     @Test func everyShortcutLabelHasExactlyOneKeyWiring() {
         for capability in CapabilityRegistry.all {
             guard capability.doors.contains(.menuBar), capability.shortcutLabel != nil,
-                  capability.id != .switchMode  // ⌘1–⌘7, wired per mode
+                  capability.id != .switchMode  // ⌘1–⌘6, wired per mode
             else { continue }
             #expect(EditorCommands.keyEquivalent(for: capability.id) != nil,
                     "\(capability.id) declares \(capability.shortcutLabel!) and the menu wires it")

@@ -90,7 +90,7 @@ struct EditorCommands: Commands {
         case .blockComments: ("'", [.command, .shift])
         case .toggleSeams: ("b", [.command, .shift])
         case .helper: ("/", .command)
-        case .switchMode: nil  // ⌘1–⌘7, wired per mode below
+        case .switchMode: nil  // ⌘1–⌘6, wired per mode below
         default: nil
         }
     }
@@ -273,7 +273,7 @@ struct EditorCommands: Commands {
                 .keyboardShortcut("b", modifiers: [.command, .shift])
                 .disabled(session == nil)
         }
-        // ⌘1–⌘7 — the post modes (routed 13b 1b: composition, not a
+        // ⌘1–⌘6 — the post modes (routed 13b 1b: composition, not a
         // broadcast — with no post open the items are honestly grey; a
         // routed request that finds no detail SPEAKS instead of vanishing).
         CommandGroup(before: .toolbar) {

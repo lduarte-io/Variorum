@@ -51,7 +51,8 @@ struct ShellActions {
     /// teardown contract (Write finalizes the open tail first); with no
     /// surface handler but an open post, flush-and-toggle directly. The
     /// dispatch is QUIET (round-1 MINOR-1): in handler-less modes
-    /// (Compare/Outline/Blocks; Canvas falls through) the fallback below
+    /// (Compare/Blocks; Canvas falls through — Outline retired into
+    /// Compare, 13b 4C) the fallback below
     /// ACTS, so the unhandled note — "open a post first", with a post open
     /// — was a factually wrong refusal flashing right before "Sealed.".
     /// Where the fallback genuinely can't act, IT speaks the honest note.

@@ -43,9 +43,26 @@ struct PostDetailModeMemoryTests {
         #expect(PostDetailView.rememberedMode(postID: "p1", defaults: defaults) == .takes)
     }
 
-    @Test func theModeVocabularyIsTheSevenModeRail() {
+    /// 13b 4C (S4-3) — red-on-old: a post left in the RETIRED Outline tab
+    /// reopens in Compare, its successor (pre-4C code decoded "Outline"
+    /// to the outline tab; a naive case-drop would strand it on the
+    /// `.takes` fallback — the migration pin holds the successor mapping).
+    @Test func aRememberedOutlineModeMigratesToCompare() {
+        let defaults = freshDefaults("outline-migration")
+        defaults.set("Outline", forKey: "postMode.p1")
+        #expect(PostDetailView.rememberedMode(postID: "p1", defaults: defaults) == .compare,
+                "outline retired INTO compare — no stored value strands")
+        #expect(PostMode.fromStored("Outline") == .compare)
+        #expect(PostMode.fromStored("Compare") == .compare)
+        #expect(PostMode.fromStored("NotAMode") == nil)
+    }
+
+    /// 13b 4C: the row is SIX — Outline retired (justified pin edit: the
+    /// seven-mode pin's successor; the mode-row change IS the ruled
+    /// behavior change, S4-3).
+    @Test func theModeVocabularyIsTheSixModeRail() {
         #expect(PostDetailView.Mode.allCases.map(\.rawValue) ==
-                ["Write", "Takes", "Lenses", "Compare", "Outline", "Blocks", "Canvas"])
+                ["Write", "Takes", "Lenses", "Compare", "Blocks", "Canvas"])
     }
 }
 

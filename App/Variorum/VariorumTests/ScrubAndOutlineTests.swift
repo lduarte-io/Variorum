@@ -4,8 +4,10 @@
 //
 //  Phase 11, Step A5 — book-scrub (model-driven: the post list is the
 //  scrubber's domain, the Phase 6 memo's ruling) and outline↔draft (the
-//  mapping is `Queries.derivedBlocks`' — the CTE's, verbatim, never
-//  re-derived view-side).
+//  mapping is the lineage CTEs', verbatim, never re-derived view-side —
+//  13b 4C: the Outline tab retired into Compare, and the mapping pin
+//  migrated onto the compare board's kinship read; justification at the
+//  test).
 //
 
 import Dependencies
@@ -83,10 +85,19 @@ struct ScrubAndOutlineTests {
         }
     }
 
-    /// The outline mapping matches the CTE exactly — pinned against a REAL
-    /// lineage world (a version copy whose blocks derive from the outline's,
-    /// one of them divided so depth-2 descendants appear).
-    @Test func outlineMappingMatchesTheDerivedBlocksCTEExactly() async throws {
+    /// 13b 4C (justified pin migration, recorded in the batch record): the
+    /// Outline TAB retired into Compare (S4-3), and OutlineDraftViewModel
+    /// died with it — this pin's SEMANTIC core survives re-pinned here:
+    /// the outline↔draft mapping is the lineage traversal's, VERBATIM,
+    /// never re-derived view-side. The compare board reads
+    /// `Queries.blockKinship` (ancestors + descendants — the same CTEs);
+    /// a minted outline registers block-by-block against its draft, a
+    /// divide's pieces collapse onto ONE outline point's row, and a fresh
+    /// unrelated block maps to nothing (a free row, not a blank).
+    /// The retired tab's tracked-scroll/highlight faces die with the
+    /// surface (her ruling: outline "needs to be nothing that a compare
+    /// already isn't") — they are deliberately not re-pinned.
+    @Test func outlineBesideItsDraftRegistersThroughLineageInCompare() async throws {
         try await withWorld { session, db in
             let (outlineID, draftID) = try await session.runner.run { ops -> (String, String) in
                 let outline = try ops.createPost(title: "the outline", profile: .blog)
@@ -102,49 +113,44 @@ struct ScrubAndOutlineTests {
                 return (outline.id, draft.post.id)
             }
 
-            let model = OutlineDraftViewModel(session: session, draftPostID: draftID)
-            model.outlinePostID = outlineID
-            // The observation task is asynchronous; fetch the same
-            // projection deterministically for the pin.
-            let expected = try await db.read { db -> [String: [String]] in
-                var mapping: [String: [String]] = [:]
-                for slot in try Queries.renderPost(db, containerID: outlineID) where !slot.isGap {
-                    mapping[slot.blockID] = try Queries.derivedBlocks(
-                        db, fromOutlineBlock: slot.blockID, inContainer: draftID)
-                        .map(\.blockID)
-                }
-                return mapping
+            // The projection reads the CTE-backed kinship verbatim — the
+            // ONE read brain the observation and this pin share.
+            let projection = try await db.read { db in
+                try CompareViewModel.read(db, anchor: draftID, peers: [outlineID])
             }
-            // Wait for the model's own observation to deliver.
-            for _ in 0..<200 where model.projection.mapping.isEmpty {
-                try await Task.sleep(for: .milliseconds(10))
+            let expected = try await db.read { db in
+                try Queries.blockKinship(db, anchor: draftID, other: outlineID)
             }
-            #expect(model.projection.mapping == expected,
-                    "the view's mapping IS the CTE's — verbatim")
+            #expect(projection.kinship[outlineID] == expected,
+                    "the board's kinship IS the lineage traversal's — verbatim")
 
-            // Shape sanity on the real world: outline block 1 became TWO
-            // blocks (the divide's pieces); block 2 exactly one; the fresh
-            // draft block appears in NO mapping.
-            let outlineBlocks = try await db.read { db in
-                try Queries.renderPost(db, containerID: outlineID).map(\.blockID)
-            }
-            #expect(expected[outlineBlocks[0]]?.count == 2)
-            #expect(expected[outlineBlocks[1]]?.count == 1)
+            // Registration: the divide's two pieces sit on ONE outline
+            // point's row (the span); point two pairs; the fresh draft
+            // block is free — never a blank row.
             let draftBlocks = try await db.read { db in
                 try Queries.renderPost(db, containerID: draftID).map(\.blockID)
             }
-            let mapped = Set(expected.values.flatMap { $0 })
-            #expect(Set(draftBlocks).subtracting(mapped).count == 1,
-                    "exactly the fresh block maps to nothing")
-
-            // Selection drives the highlight + the tracked-scroll target
-            // from the SAME mapping.
-            model.selectOutlineBlock(outlineBlocks[0])
-            #expect(model.highlightedDraftBlocks == Set(expected[outlineBlocks[0]] ?? []))
-            #expect(model.scrollTarget == expected[outlineBlocks[0]]?.first)
-            model.trackedScroll = false
-            #expect(model.scrollTarget == nil, "independent scroll — no forced landing")
-            model.teardown()
+            let outlineBlocks = try await db.read { db in
+                try Queries.renderPost(db, containerID: outlineID).map(\.blockID)
+            }
+            let segments = CompareComposition.segments(
+                anchorBlocks: outlineBlocks,
+                peerBlocks: [draftBlocks],
+                kinships: [try await db.read { db in
+                    try Queries.blockKinship(db, anchor: outlineID, other: draftID)
+                }],
+                followAnchorOrder: true)
+            guard case .aligned(let pointOne) = segments.first else {
+                Issue.record("outline point one aligns"); return
+            }
+            #expect(pointOne.anchorBlockID == outlineBlocks[0])
+            #expect(pointOne.peerKin == [[draftBlocks[0], draftBlocks[1]]],
+                    "the divide's span shares point one's row")
+            #expect(segments.contains(.aligned(.init(
+                anchorBlockID: outlineBlocks[1],
+                peerKin: [[draftBlocks[2]]], peerMoved: [false]))))
+            #expect(segments.contains(.free(anchor: [], peers: [[draftBlocks[3]]])),
+                    "the fresh block flows free — no blank row invented for it")
         }
     }
 }

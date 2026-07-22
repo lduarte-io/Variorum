@@ -78,7 +78,7 @@ final class CommandRouter {
         // Round-2 MINOR-R2 (the aborted-round window): a parked parcel is
         // valid for exactly the ROUND that parked it, and the round is
         // over the moment the detail reports any mode other than the
-        // parcel's landing mode — a competing switch (⌘2–⌘7) in the
+        // parcel's landing mode — a competing switch (⌘2–⌘6) in the
         // tens-of-ms before the arriving surface consumes leaves the
         // parcel orphaned on a SAME-post detail, which register/unregister
         // clearing (detail identity, not round) can never see. Ordering is
@@ -100,7 +100,7 @@ final class CommandRouter {
 
     /// Routes a mode switch to the mounted detail. `postID` targets a
     /// specific post (the sidebar rail); nil addresses whichever detail is
-    /// visible (⌘1–⌘7). No detail, or a stale targeted request ⇒ the
+    /// visible (⌘1–⌘6). No detail, or a stale targeted request ⇒ the
     /// request SPEAKS instead of vanishing (the Stage 0 silent-drop class).
     @discardableResult
     func requestMode(_ mode: PostMode, postID: String? = nil) -> Bool {

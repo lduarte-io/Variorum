@@ -68,7 +68,7 @@ struct HelperView: View {
             ("⌘⇧M", "merge blocks"),
         ]),
         ShortcutGroup(title: "Navigation", items: [
-            ("⌘1 – ⌘7", "post modes: Write · Takes · Lenses · Compare · Outline · Blocks · Canvas"),
+            ("⌘1 – ⌘6", "post modes: Write · Takes · Lenses · Compare · Blocks · Canvas"),
             ("⌘K", "find anything — posts, books, blocks, commands"),
             ("⌘N", "new post"),
             ("⌘J", "today's journal entry"),

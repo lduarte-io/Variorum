@@ -297,9 +297,9 @@ nonisolated enum CapabilityRegistry {
 
         // MARK: Modes + app scope
         Capability(
-            id: .switchMode, verb: "Switch Mode (⌘1–⌘7)", scope: .post,
+            id: .switchMode, verb: "Switch Mode (⌘1–⌘6)", scope: .post,
             doors: [.menuBar],
-            shortcutLabel: "⌘1–7", takesAccess: nil,
+            shortcutLabel: "⌘1–6", takesAccess: nil,
             unavailableNote: "Open a post first — the modes live inside a post.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
         Capability(
