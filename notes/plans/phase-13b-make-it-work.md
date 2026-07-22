@@ -409,14 +409,14 @@ Commits per batch/stage with the standing message convention.
 | N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | **RESOLVED 3F** (commit e511710 — the rail's fixed-height cards scroll IN PLACE (ScrollView inside the 250×110 card): every take fully reachable, the uniform grid height honest; grid-only by construction — carousel/slot-split cards were never capped) |
 | N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | **RESOLVED 3D** (commit c7c50cf — the tag-entry face types-to-create: paths create missing levels through the taxonomy ops, the leaf applies, one runner turn; forgiving edges; red by revert. Recorded: if she meant tagging the BOOK OBJECT — readings carry no tags in the schema — that is a checkpoint model question) |
 | N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | **RESOLVED 3F** (commit e511710 — choosing is the card's full-width clickable HEADER (`TakeChooseHeader`: "choose" / "✓ chosen", ONE checkmark ever, text box keeps its whole width — her header ask verbatim); the stack card unified onto the same grammar; cards widen 220→250 ("a little bit wider"); screenshot 3f-03) |
-| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **TRACED at the S4 sitting (S4-11): the handles are SEAMS-GATED** — `renderHandles` renders zero unless `seamsVisible && onMoveBlock != nil` (BlockDecor.swift:419–423, the recorded build-time call); her Write look with seams off confirmed invisible; works-as-built + undiscoverable (nothing names the gate; faint ink compounds). HER DESIGN REVIEW owed this sitting: seams-gated with honest copy vs hover vs always-on; Takes-side drag design unchanged → Stage 4 |
+| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **TRACED at the S4 sitting (S4-11): the handles are SEAMS-GATED** — `renderHandles` renders zero unless `seamsVisible && onMoveBlock != nil` (BlockDecor.swift:419–423, the recorded build-time call); her Write look with seams off confirmed invisible; works-as-built + undiscoverable (nothing names the gate; faint ink compounds). **RULED S4-19: hover-reveal as a Write-mode SETTING, default ON** (OFF = the fully clean surface; seams-on static display stays per the architect's flagged reading); Takes-side leans on the board's own clarity; build → Stage 4 |
 | N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
 | N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | new, author → Stage 4 |
 | N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | new, author → Stage 4 (compare rework) |
 | N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | new, author → Stage 4 |
 | N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
 | N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
-| N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; the one design detail: typing-only vs entry-wide (paste) semantics — entry-wide is the model's current meaning | new, author → Stage 4 |
+| N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | new, author → Stage 4 |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
@@ -4445,3 +4445,31 @@ N20 chapter drag is wokring fine though") — the 3E
 sound-but-synthetic-artifact verdict confirmed exactly; the synthetic
 drag tool's List-reorder hostility was the whole story. No fix, no
 code; ledger updated.
+
+### Part 3 — the drag-handle ruling, the default-view reversal, the paste answer (2026-07-22)
+
+**S4-19 — Drag handles: hover-reveal as a Write-mode SETTING, default
+ON.** Her words: "it should ALSO be a setting if you want to show the
+drag bars on hover. i really value the super clean writing view so it
+should still be an option to not have that, but i think that show on
+hover can be a setting for the write mode that should default to being
+on. I feel like the take mode makes moving the blocks clear anyway."
+Shape: a Write setting — handles reveal on hover (default ON); OFF =
+the fully clean surface. ARCHITECT'S READING, flagged for her
+correction: the seams-on static display stays as today (seams = the
+working-with-blocks state; the new setting governs the AT-REST hover),
+and the Takes-side block-move design leans on the board's own clarity
+rather than gaining handles. N26 updated — design RULED, build Stage 4.
+
+**S4-20 — DEFAULT VIEW REVERSAL: new opens default to WRITE.** Her
+words: "I also want to reverse my decision to default to the takes
+view - I want to default to the write view on new opens, actually."
+SUPERSEDES the takes-first default half of R72/R79 (Sitting 9) on the
+record. ARCHITECT'S READING, flagged: the per-post mode MEMORY stands —
+only the first-open default flips (a post you left in Takes reopens in
+Takes). One-line build; Stage 4.
+
+**S4-21 — The one_block setting governs PASTE too.** "i also think
+that the one_block setting should govern paste too" — entry-wide
+semantics ratified (the model's current meaning; no typing-only
+divergence). N34's one open detail CLOSED.
