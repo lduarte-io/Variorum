@@ -95,6 +95,44 @@ and CLAUDE.md conflict, CLAUDE.md wins.
   (`TakesViewModel` at 890 lines is the standing counterexample). Same
   hygiene rule as the substrate, applied where it was being waived.
 
+## Applying the constitution — precisions proven in 13b's build record (added 2026-07-22 at the author's EOL-directive review; the P-1…P-9 block above stays byte-verbatim — these bind the same way, as application notes)
+
+- **P-1's scope is the ROUTED vocabulary, grown incrementally.** The
+  registry covers acts routed through shared doors (menu bar, bottom
+  bars, take-card context menus, shortcuts, the ⌘K palette);
+  surface-local doors that already work are NOT retro-declared
+  wholesale — the registry grows to cover them as work touches them
+  (the 1b scope call, reviewer-sustained). Acts whose ONLY doors are
+  inline on cards/rows declare the `.surface` door case rather than
+  mis-filing under `.contextMenu` (the 3D precedent).
+- **P-3 keeps TWO deliberate surface kinds.** The FULL-DOCUMENT editor
+  (`EditorTextView` + `BlockRangeIndex` + crystallization/reconciler —
+  the app's riskiest, best-tested identity machinery, AppSpec §15 risk
+  1) is never absorbed into the pane surface; the PANE surface
+  (`PaneSurface`) is the one component every pane composes. Both kinds
+  consult the ONE authority (`PaneTextAuthority`) and the ONE per-post
+  autosave coordinator (`AppSession.autosave(forPost:)`). Any liveness
+  extension (cross-post editing, canvas cards) extends the authority's
+  one-live-ring contract ON the authority — never a second liveness
+  mechanism beside it.
+- **Layer placement:** storage-coupled code lives feature-side, never
+  in the shared `Registry/`/`Surface/` layers; the storage owner keeps
+  its plumbing — cross-seam moves route bytes through a few NAMED
+  internal primitives on the owner rather than exposing storage
+  internals (the 3C seam). Parity refactors keep every pre-move name
+  as computed forwards/typealiases so every existing pin compiles and
+  passes UNMODIFIED — zero test edits is the parity proof (the 3C
+  pattern).
+- **The overlay/sink delivery law (the starved-host and N14 classes,
+  each ended in 13b only after recurring adjacent):** every
+  equality-gated sink delivers its stored state AT WIRE TIME — wiring
+  is the delivery — and overlay geometry refreshes trigger on EVERY
+  input axis (storage edits, width reflows, AND the first post-layout
+  display pass); state computed before layout exists is garbage that
+  equality gates then freeze. The closing form for any recurrence of a
+  fixed class is the sweep table: instance × host/path, each cell
+  FIXED-with-named-pin or provably SAFE with the mechanism stated.
+
 ## The cast and the context budget
 
 - **All-Fable by default** (orchestrator, implementers, reviewers) —
@@ -177,6 +215,15 @@ commit(s) → install refresh only at sanctioned zero-instance windows.
   list for the author — and the build follows her rulings on it. The
   two 13b memos (`phase-13b-memo-w-ceremony.md`, `-merge.md`) are the
   form.
+- **In-batch design forks reserved for the architect** ("the
+  implementer proposes, the architect rules"): the implementer returns
+  with its proposal BEFORE building that half; the ruling lands
+  repo-first, then the build proceeds (the 4E realization-bounds
+  pattern).
+- **Deferring ruled scope out of the phase requires its detailed
+  brief/design memo authored IN-PHASE as a deliverable** (the author's
+  S4-16 condition) — deferral moves work in time, never into
+  vagueness.
 
 ## The review ladder (identical to /run-phase's rules 3–4; summarized)
 
@@ -198,7 +245,13 @@ by STORE, not path — NEVER quit/kill one; no Release builds or
 /Applications refreshes while one lives; `xcodebuild build-for-testing`
 compiles without the runner; Mac tests from `App/Variorum/`,
 suite-level `-only-testing` only, confirm the "Test run with N tests"
-line; zsh `pipestatus`; backups WAL-safe with UTC names, ALWAYS before
+line; zsh `pipestatus`; NEVER add a custom build configuration (Xcode
+builds SPM package dependencies RELEASE under any configuration not
+named exactly "Debug" — silently stripping VariorumCore's DEBUG-gated
+oracles out from under the tests, the 4G-recorded trap); suites running
+beside a live session flash the test host's windows on screen — prefer
+zero-instance windows for timing-sensitive measurements; backups
+WAL-safe with UTC names, ALWAYS before
 touching the real store (the A1 rail); drives need unlocked +
 author-free + own `caffeinate -d`; screenshots in gitignored dirs;
 never `git checkout` over uncommitted work; never push.
@@ -214,3 +267,13 @@ the top, self-contained — if a question would need this session's
 context, the docs are incomplete); the next phase's plan + kickoff
 message authored just-in-time; hard stop — the author kicks off what's
 next.
+
+Two deploy-adjacent rules proven in 13b (added 2026-07-22): schema/
+mirror changes are SyncSpec §12 lockstep events whose MIRROR DEPLOY
+executes only on the author's explicit go-ahead (the R53 precedent) —
+and any install refresh that would put her daily-drive build's
+`lockstepVersion` ahead of the deployed marker is HELD until the
+deploy lands (a mismatched client visibly refuses to sync by design;
+don't strand her build in that state). Lesson/tutorial content edits
+stale the REAL store's seeded field guide — the closeout re-seeds it
+via the product door behind the A1 rail.
