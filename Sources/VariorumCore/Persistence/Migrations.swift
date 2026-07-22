@@ -373,6 +373,23 @@ extension AppDatabase {
         migrator.registerMigration("v1_11_reading_word_target") { db in
             try db.execute(sql: "ALTER TABLE reading ADD COLUMN word_target INTEGER")
         }
+        // Phase 13b, Stage 4 Batch 4F (author ruling S4-28.1, ledger N36 —
+        // "you should be able to set a word limit on a post if you want"):
+        // `container.word_target`, the per-POST twin of v1_11's reading
+        // column. Same semantics VERBATIM: a display/progress TARGET,
+        // deliberately never an add/type-time refusal — word counts change
+        // with every edit, so nothing gates on them; the editor bars show
+        // progress ("62% of 5,000w"). Additive nullable column; plain
+        // metadata CAS, no uniqueness, no repair rule. Its OWN SyncSpec §12
+        // lockstep event (marker 3 → 4; mirror DDL
+        // Server/supabase/07_phase13b_lockstep.sql — deploy PRE-AUTHORIZED
+        // by the author, the 13b EOL addendum; the ORCHESTRATOR executes it
+        // at the consolidated window, mirror first, then the client build
+        // ships). Until the mirror is at marker 4, a v1_12 client visibly
+        // refuses to sync — outbox intact, cursor unmoved, by design.
+        migrator.registerMigration("v1_12_container_word_target") { db in
+            try db.execute(sql: "ALTER TABLE container ADD COLUMN word_target INTEGER")
+        }
         return migrator
     }
 }

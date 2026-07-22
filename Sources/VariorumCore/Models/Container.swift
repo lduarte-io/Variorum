@@ -25,6 +25,10 @@ public struct Container: VariorumRecord {
     public var floatingNotes: String?
     /// Per-post override of the global `default_segmentation` setting.
     public var segmentationDefault: Segmentation?
+    /// The per-POST words-based extent TARGET (13b Stage 4, v1_12 — S4-28.1;
+    /// `reading.word_target`'s twin). Display/progress semantics only:
+    /// never an add/type-time refusal. nil = no target.
+    public var wordTarget: Int?
     /// Any keystroke (sort: noisy).
     public var lastTouchedAt: Date?
     /// Crossed the churn threshold (sort: meaningful) — AppSpec §10.
@@ -48,6 +52,7 @@ public struct Container: VariorumRecord {
         lockedAt: Date? = nil,
         floatingNotes: String? = nil,
         segmentationDefault: Segmentation? = nil,
+        wordTarget: Int? = nil,
         lastTouchedAt: Date? = nil,
         lastMajorRevisionAt: Date? = nil,
         churnAccumulator: Double = 0,
@@ -68,6 +73,7 @@ public struct Container: VariorumRecord {
         self.lockedAt = lockedAt
         self.floatingNotes = floatingNotes
         self.segmentationDefault = segmentationDefault
+        self.wordTarget = wordTarget
         self.lastTouchedAt = lastTouchedAt
         self.lastMajorRevisionAt = lastMajorRevisionAt
         self.churnAccumulator = churnAccumulator

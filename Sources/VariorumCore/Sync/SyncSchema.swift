@@ -38,11 +38,16 @@ public enum SyncSchema {
     /// mirror DDL 05_phase11_lockstep.sql); version 3 = the Phase 13 event
     /// (v1_8 block_comment + v1_9 block.presentation + v1_10
     /// reading_section/section_id + v1_11 reading.word_target; mirror DDL
-    /// 06_phase13_lockstep.sql — deploy pre-authorized, R53). **Bump this
+    /// 06_phase13_lockstep.sql — deploy pre-authorized, R53); version 4 =
+    /// the Phase 13b Stage 4 event (v1_12 container.word_target — the
+    /// per-post extent target, S4-28.1/N36; mirror DDL
+    /// 07_phase13b_lockstep.sql — deploy pre-authorized by the 13b EOL
+    /// addendum, executed by the orchestrator at the consolidated
+    /// post-ladder window). **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 3
+    public static let lockstepVersion = 4
     /// The 13 synced tables in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs

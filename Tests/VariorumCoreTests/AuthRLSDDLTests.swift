@@ -34,10 +34,11 @@ struct AuthRLSDDLTests {
     private static let lockstepFiles = [
         "05_phase11_lockstep.sql",
         "06_phase13_lockstep.sql",
+        "07_phase13b_lockstep.sql",
     ]
 
     /// The RLS/grant surface: 04 (the auth flip) + the lockstep events
-    /// (05 Phase 11, 06 Phase 13), in deploy order.
+    /// (05 Phase 11, 06 Phase 13, 07 Phase 13b), in deploy order.
     private static func composedSQL() throws -> String {
         try ([sqlFile("04_auth_rls.sql")] + lockstepFiles.map(sqlFile))
             .map(strippingComments)
@@ -282,6 +283,19 @@ struct AuthRLSDDLTests {
         #expect(sql06.contains("PRE-AUTHORIZED"))
         #expect(sql06.contains("R53"))
         #expect(sql06.contains("MIRROR → MAC only"))
+        // 07 (Phase 13b, Stage 4): pre-authorized by the EOL addendum;
+        // executed by the ORCHESTRATOR at the consolidated window, never a
+        // batch implementer; still mirror → Mac only (the phone stays
+        // uninstalled). And the no-RPC-rework reading is stated: v1_12
+        // adds a column to an allowlisted table — 06's bodies stand.
+        let sql07 = try Self.sqlFile("07_phase13b_lockstep.sql")
+        #expect(sql07.contains("THE CHOREOGRAPHY"))
+        #expect(sql07.contains("this file runs on the mirror FIRST"))
+        #expect(sql07.contains("SyncSpec §12"))
+        #expect(sql07.contains("PRE-AUTHORIZED"))
+        #expect(sql07.contains("MIRROR → MAC only"))
+        #expect(sql07.contains("NO RPC REWORK RIDES THIS EVENT"))
+        #expect(sql07.contains("ORCHESTRATOR"))
     }
 
     @Test func theHeaderCarriesTheSignupsOffPrecondition() throws {
