@@ -7537,3 +7537,113 @@ as designed. **Proven pre-existing:** the pre-deploy backup already held
 — two days before this deploy. Nothing is lost; the queue drains when
 she signs in (which currently needs the consent page served on the LAN
 until the stargazing.tech page ships — the standing 9c residual).
+
+## Stage 4 closeout (stage-level, 2026-07-22)
+
+**STAGE 4 CLOSED.** Seven batches (4G infrastructure + 4A–4F build), a
+three-round ladder, a failed-then-discharged stage-close gate, and the
+deploy chain. Every batch built to rulings the author made at the
+kickoff sitting — S4-1…S4-33 and the two RULED memo addenda — and the
+architect re-verified core green at every batch boundary rather than
+trusting a report.
+
+**Counts trajectory:** Mac 562/112 (Stage 3 close) → **652/123 final**
+(orchestrator-verified by its own run) · core 762/92 → **817/96**
+(4A's `BoundarySnapping` + divideW parking, 4B's `MergeJoin` +
+`mergeCeremony`, 4D's `poolDragCopy` name line, 4F's v1_12 +
+`setPostWordTarget` + `restoreReading` — each its own commit, mobile
+building after every core touch) · mobile 11/4 untouched.
+
+**What shipped, by batch:** **4G** — the test host got its own bundle
+identity (ONE pbxproj line; Release byte-untouched), so Mac suites run
+beside her live app; PROVEN both ways. **4A** — the ruled cut rule
+(word-edge/newline cuts, gentle settle, word-edge floor, extract joining
+the one rule) + divideW END/START parking with the I10-at-birth guard +
+the rebuilt ceremony sheet (every checked take visible, draggable ✂,
+keyboard placement). **4B** — the merge ceremony: `MergeJoin` as ONE
+join brain, `mergeCeremony` minting one take per hand-placed pairing
+plus carries, nothing cartesian, the any-fan threshold pre-paired so ⏎
+reproduces the old outcome. **4C** — Outline RETIRED into a Compare
+rebuilt as "lenses across posts": the one-live-ring contract extended
+across post contexts ON `PaneTextAuthority`, editable cells, per-post
+reorder, four columns, N29 honesty, the diff Save door. **4D** —
+insert-below in both editors, the fixed-height strip, the scroll+pager
+hybrid, hover handles, the Write-first default, the one_block face,
+comment prominence, positional moves, the pools-vs-tags clarity set.
+**4E** — canvas on the architect's ruling: spread-grid placement + lazy
+realization by pure viewport culling (the P1 answer to her long-post
+question), editable and resizable cards, order numbers, click-in-order,
+fit-all. **4F** — the book progress bar and Kindle-style paged view
+(both model-driven per the Phase 6 ruling), `restoreReading`, v1_12's
+per-post word target, and the TWO 13c deferral documents her S4-16
+condition required.
+
+**The ladder (three rounds, the cap):** round 1 — zero BLOCKER, 1 MAJOR
+(the unexecuted Mac verification, bound as the stage-close gate), 2
+MINOR, 4 NIT. Round 2 — zero new HIGH; every fix verified by trace.
+Round 3 (scoped over the gate fixes, the author's explicit ask) — zero
+BLOCKER, 1 MAJOR (the missing gate record — the orchestrator's own,
+discharged above), 6 MINOR, 2 NIT, all dispositioned; its fixes landed
+post-cap. **The gate failed on first execution and that was the system
+working:** three tests that had only ever compiled ran for the first
+time and found two REAL defects.
+
+**Classes ended this stage:** the sentence-only cut floor (one word-edge
+rule everywhere); merge's one-take ceiling (pairing, her canon ruling);
+Compare's read-only-ness and its gap parade; the canvas pile and its
+unbounded realization; the mid-update `@State` publish drop on the ONE
+shared pane surface.
+
+**What this stage taught, carried into 13c's plan explicitly** (per her
+EOL directive): the eleven "Stage 4 lessons" — one-ring-across-contexts
+lives on the authority; a new editable surface joins `commitTake` and
+registers a `.commit` handler; ONE snap brain and ONE join brain;
+ceremony-sheet disciplines (one-flight, drift-refresh, cancel-inert,
+I10-at-birth); the realization-bound discipline; correspondence arrays;
+model-driven navigation; the locked-session regime; in-view affordances
+vs declared acts; the §12 deploy-gate pattern. Two also went into the
+`/architect-phase` skill itself.
+
+## Phase 13b closeout (PHASE-LEVEL, 2026-07-22 — the phase CLOSES here by the author's end-of-life directive; there is no Stage 5)
+
+**PHASE 13b CLOSED.** Five stages (0 audits · 1 interaction-layer
+consolidation · 2 the tutorial spine · 3 themed batches · 4 the
+ceremonies and views), each with its own review ladder, closed under the
+architect mandate the author granted at R117.
+
+**Counts, phase-wide:** Mac **431/81 → 652/123** · core **747/90 →
+817/96** · mobile 11/4 throughout. Every bug-class fix in the phase
+carries a red-on-old pin verified by behavioral revert.
+
+**What the phase was for, and whether it worked.** The author's verdict
+at its creation was that usability was the app's first-class problem —
+"i can't even click around the app without finding a million first class
+obvious bugs" — and the diagnosis was an accreted, never-designed
+interaction layer. The phase answered structurally rather than by
+patching: a **capability registry** (every act declared once, doors and
+refusals as data, walk-enforced), **fire-and-DO** (a rendered door acts
+or speaks the operations layer's real refusal — lecture-and-redirect
+retired), **ONE text surface and ONE liveness authority**
+(`PaneSurface` + `PaneTextAuthority`, later extended across post
+contexts), **one autosave coordinator per post**, and **the tutorial as
+the executable spec** — "the field guide", a curated book of the app's
+own objects, which every batch since re-runs for free. Stage 3 then
+root-caused the overlay classes that had been surfacing as her
+"happens in other places too" bugs, and Stage 4 built the two ceremonies
+and reworked the views she asked for.
+
+**Why it closes here:** the plan file reached ~5,000 lines, and R114's
+read-in-full rule is load-bearing for every fresh session. Her call:
+"the fix is to close the file, not weaken the reading rule."
+
+**What follows:** **Phase 13c** (`notes/plans/phase-13c-book-forms-and-conversions.md`)
+with committed scope — the uniform-page book view, the smart→curated
+conversion, and N41 — each carrying the brief or memo 4F authored for
+it; and a standalone, re-runnable **Design & UI review** row on the
+master plan, which is where the visual verification and the
+propose-only sweep now live. Phase 12 still waits on the real-use
+window it always needed.
+
+**Left for the author** (`notes/handoffs/phase-13b-handoff.md`): the
+field-guide re-seed, the signed-out sync, the windowless-launch check,
+and a "worth a look" list of what changed most.
