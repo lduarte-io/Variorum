@@ -1010,6 +1010,41 @@ final class TakesViewModel {
         await run { [postID] ops in try ops.setEntryDate(postID, entryDate: day) }
     }
 
+    // MARK: - The one_block face (13b 4D — N34, S4-14/S4-21)
+
+    /// Whether newlines mint blocks in this post (the EFFECTIVE
+    /// segmentation ≠ one_block) — the bar chip's truth. Refreshed by the
+    /// bar at projection cadence and by the setter (a segmentation change
+    /// alone doesn't move the takes projection, so the observation can't
+    /// carry it; an external change catches up at the next projection —
+    /// recorded).
+    private(set) var newlinesMintBlocks = true
+
+    func refreshSegmentation() async {
+        let effective = (try? await session.database.read { [postID] db in
+            try Queries.containerHeader(db, containerID: postID)?.effectiveSegmentation
+        }) ?? nil
+        if let effective { newlinesMintBlocks = effective != .oneBlock }
+    }
+
+    /// The one_block face — a door over the Phase-1 machinery
+    /// (`setSegmentationDefault`, Phase 2; NO semantics change: `one_block`
+    /// is entry-wide — typing and paste — by the model's standing meaning,
+    /// S4-21 ratified). ON ⇒ per-post nil (inherit the global default);
+    /// OFF ⇒ `.oneBlock`. Allowed under seal (the container-row metadata
+    /// class; entry itself refuses under seal anyway).
+    func setNewlinesMintBlocks(_ mint: Bool) async {
+        await run { [postID] ops in
+            try ops.setSegmentationDefault(postID, segmentation: mint ? nil : .oneBlock)
+        }
+        await refreshSegmentation()
+        if statusMessage == nil {
+            statusMessage = mint
+                ? SegmentationFaceCopy.mintOnNote
+                : SegmentationFaceCopy.mintOffNote
+        }
+    }
+
     /// R84's note condition: the daily-journal SHAPE (profile journal +
     /// entry date) is exactly what the Fragments bridge sweeps.
     var isJournalShaped: Bool {

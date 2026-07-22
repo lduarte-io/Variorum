@@ -1385,6 +1385,28 @@ final class EditorViewModel {
         }
     }
 
+    /// 13b 4D (N34 — S4-14/S4-21): the one_block face's Write half — a
+    /// door over the Phase-1 machinery (`setSegmentationDefault`, Phase 2;
+    /// NO semantics change: `one_block` is entry-wide — typing and paste —
+    /// by the model's standing meaning). ON ⇒ per-post nil (inherit the
+    /// global default, paragraph); OFF ⇒ `.oneBlock`. The header
+    /// observation refreshes `effectiveSegmentation`, so the chip and the
+    /// crystallization mode follow. Allowed under seal (the container-row
+    /// metadata class — title/date/profile; entry itself refuses under
+    /// seal anyway).
+    func setNewlinesMintBlocks(_ mint: Bool) async {
+        do {
+            try await session.runner.run { [postID] ops in
+                try ops.setSegmentationDefault(postID, segmentation: mint ? nil : .oneBlock)
+            }
+            showStatus(mint
+                ? SegmentationFaceCopy.mintOnNote
+                : SegmentationFaceCopy.mintOffNote)
+        } catch {
+            showOperationError(error)
+        }
+    }
+
     /// Mac-side entry-date editing (brief item 5 — `setEntryDate`'s first
     /// Mac face; the ops-boundary day-key guard enforces canon).
     func updateEntryDate(_ day: String?) async {

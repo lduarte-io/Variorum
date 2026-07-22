@@ -13,6 +13,39 @@
 import Foundation
 import VariorumCore
 
+/// 13b 4D (N34 — S4-14/S4-21): the one_block face's shared vocabulary —
+/// ONE home for the copy both bars speak (Write's CommitBar and the
+/// Takes/Lenses bar face the same per-post setting). The setting is a FACE
+/// over the Phase-1 segmentation machinery (`setSegmentationDefault`,
+/// Phase 2); `one_block` is ENTRY-WIDE by the model's standing meaning —
+/// typing AND paste (S4-21 ratified it; no semantics change here, ever).
+nonisolated enum SegmentationFaceCopy {
+    /// The chip's label halves (legible words, R93 — never a coined term).
+    static let chipOn = "newlines make blocks: on"
+    static let chipOff = "newlines make blocks: off"
+
+    /// The honest consequence, spoken on toggle (the architect precision:
+    /// segmentation governs FUTURE entry — existing blocks never
+    /// re-segment).
+    static let mintOffNote =
+        "Newlines now stay inside the block in this post — typing and pasting "
+        + "won't make new blocks; Divide (⌘⇧D) or New Block Below (⌥⌘N) split "
+        + "deliberately. Existing blocks are untouched."
+    static let mintOnNote =
+        "Newlines make blocks again in this post — each finished paragraph "
+        + "becomes its own block as you type past it, and pasted paragraphs "
+        + "arrive as blocks. Existing blocks are untouched."
+
+    /// The chip's hover help (both bars).
+    static let help =
+        "ON (the standard): each finished paragraph becomes its own block as "
+        + "you type past it; pasted paragraphs arrive as blocks. OFF (opt-in): "
+        + "newlines stay INSIDE the block — typing and pasting never make "
+        + "blocks in this post; Divide (⌘⇧D) or New Block Below (⌥⌘N) split "
+        + "deliberately. Governs future entry only — existing blocks never "
+        + "re-segment. Per post."
+}
+
 nonisolated enum OpsRefusalCopy {
     static func message(for error: Error) -> String {
         if let error = error as? OperationError {

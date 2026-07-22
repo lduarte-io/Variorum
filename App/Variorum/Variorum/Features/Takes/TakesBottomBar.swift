@@ -260,6 +260,23 @@ struct TakesBottomBar: View {
             }
             .padding(12)
         }
+        // 13b 4D (N34 — S4-14/S4-21): the one_block face — an in-view
+        // setting chip (the wash-chip class, recorded not declared) over
+        // the Phase-1 machinery; the honest consequence speaks on toggle.
+        // Refresh rides the bar at projection cadence (a segmentation
+        // change alone never moves the takes projection — the setter
+        // refreshes itself; an external change catches up next projection).
+        VoicedChip(
+            tokens: tokens,
+            text: model.newlinesMintBlocks
+                ? SegmentationFaceCopy.chipOn : SegmentationFaceCopy.chipOff,
+            on: model.newlinesMintBlocks
+        ) {
+            let mint = model.newlinesMintBlocks
+            Task { await model.setNewlinesMintBlocks(!mint) }
+        }
+        .task(id: model.projection) { await model.refreshSegmentation() }
+        .help(SegmentationFaceCopy.help)
     }
 
     /// The structural gestures, present and ACTING (13b 1b — R115/R118:

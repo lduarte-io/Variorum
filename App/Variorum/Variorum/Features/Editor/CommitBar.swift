@@ -130,7 +130,27 @@ struct CommitBar: View {
             datePickerShown = true
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens))
-        .popover(isPresented: $datePickerShown) {
+        .popover(isPresented: $datePickerShown, content: datePickerPopover)
+        // 13b 4D (N34 — S4-14/S4-21): the one_block face's Write half — an
+        // in-view setting chip over the Phase-1 machinery; the header
+        // observation keeps `effectiveSegmentation` (and this chip) live.
+        newlinesChip
+    }
+
+    /// The one_block chip (its truth is the observed header).
+    @ViewBuilder private var newlinesChip: some View {
+        let mints = model.header?.effectiveSegmentation != .oneBlock
+        VoicedChip(
+            tokens: tokens,
+            text: mints ? SegmentationFaceCopy.chipOn : SegmentationFaceCopy.chipOff,
+            on: mints
+        ) {
+            Task { await model.setNewlinesMintBlocks(!mints) }
+        }
+        .help(SegmentationFaceCopy.help)
+    }
+
+    @ViewBuilder private func datePickerPopover() -> some View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Entry date").font(.headline)
                 DatePicker(
@@ -152,7 +172,6 @@ struct CommitBar: View {
                 }
             }
             .padding(12)
-        }
     }
 
     /// The gesture button bar (9d — the fourth door): dimmed by the

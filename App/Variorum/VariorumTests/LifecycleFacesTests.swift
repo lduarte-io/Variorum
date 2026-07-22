@@ -180,6 +180,44 @@ struct LifecycleFacesTests {
         }
     }
 
+    /// 13b 4D (N34 — S4-14/S4-21): the one_block FACE over the Phase-1
+    /// machinery, both halves. The mapping is the pin: OFF ⇒ per-post
+    /// `.oneBlock` (entry-wide by the model's standing meaning — typing
+    /// AND paste; S4-21), ON ⇒ per-post NIL (inherit the global default);
+    /// the honest consequence speaks; the Takes model's chip truth
+    /// follows its refresh. NO semantics change is under test — the
+    /// segmentation machinery's own pins are Phase 1/2's.
+    @Test func theNewlinesFaceMapsOnToInheritAndOffToOneBlock() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            // Write half: OFF ⇒ one_block.
+            await h.model.setNewlinesMintBlocks(false)
+            var stored = try await h.database.read { [postID = h.postID] db in
+                try Container.fetchOne(db, key: postID)?.segmentationDefault
+            }
+            #expect(stored == .oneBlock)
+            #expect(h.model.statusMessage?.contains("won't make new blocks") == true,
+                    "the consequence speaks — future entry only")
+
+            // ON ⇒ nil (inherit the global default, paragraph).
+            await h.model.setNewlinesMintBlocks(true)
+            stored = try await h.database.read { [postID = h.postID] db in
+                try Container.fetchOne(db, key: postID)?.segmentationDefault
+            }
+            #expect(stored == nil)
+
+            // Takes half: the chip truth follows the effective state.
+            let takes = TakesViewModel(session: h.session, postID: h.postID)
+            await takes.refreshSegmentation()
+            #expect(takes.newlinesMintBlocks == true)
+            await takes.setNewlinesMintBlocks(false)
+            #expect(takes.newlinesMintBlocks == false, "the setter refreshes its own truth")
+            stored = try await h.database.read { [postID = h.postID] db in
+                try Container.fetchOne(db, key: postID)?.segmentationDefault
+            }
+            #expect(stored == .oneBlock)
+        }
+    }
+
     @Test func thePickerConversionRoundTripsTheDayString() {
         // The picker's Date seed and the stored day agree in both
         // directions (the local calendar, midday-anchored against DST).
