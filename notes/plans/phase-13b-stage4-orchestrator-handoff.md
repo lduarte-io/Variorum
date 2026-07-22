@@ -27,29 +27,42 @@ ROLE handoff — the state is in the plan file and the commits.
 > session per batch, repo-first records, then ONE ladder over the
 > combined diff, then the closing PROPOSE-ONLY sweep (everything it
 > surfaces comes to me). You hold the R117 architect mandate; the
-> S4 rulings and the ruled memos govern the designs — do not re-open
-> them; the standing author-only hard stops are untouched. I am in
-> ORGANIC USE of the app: my reports are live findings — record
-> verbatim, route to the owning batch, answer point-by-point, same
-> turn. My scheduled touchpoints: the 4F mirror-deploy go-ahead
-> (v1_12) and the closing sweep; ask me nothing else that the record
-> already answers.
+> S4 rulings and the ruled memos govern the designs — build to them
+> and don't re-ask what's settled, **but settled is not
+> undiscussable: if implementation surfaces a NEW technical
+> constraint, a question the rulings don't answer, or a real doubt
+> about a settled design, bring it to me** — that's her explicit
+> instruction, not a loophole. The standing author-only hard stops
+> are untouched. I am in ORGANIC USE of the app: my reports are live
+> findings — record verbatim, route to the owning batch, answer
+> point-by-point, same turn. My scheduled touchpoints: the 4F
+> mirror-deploy go-ahead (v1_12) and the closing sweep; beyond
+> those, come to me when something genuinely new needs my judgment —
+> just not with questions the record already answers.
 
 ## The role (as amended through the kickoff sitting)
 
 - **R117 architect mandate** unchanged; P-1…P-9 bind. **The S4 rulings
   (S4-1…S4-33) and the two RULED memo addenda are settled design** —
-  the execution orchestrator builds them, never re-litigates them;
-  genuinely NEW ambiguities get PROVISIONAL-and-continue (R119/R121)
-  or, where product-flavored and gating, a live question to the author
-  (she is present in daily life, not at a sitting).
+  the execution orchestrator builds them and does not re-litigate them
+  absent new information. **Settled ≠ undiscussable (the author's
+  explicit 2026-07-22 amendment):** "sometimes there's a newfound
+  technical constraint, question, or doubt and the orchestrator should
+  be able to bring that up" — a NEW constraint discovered in
+  implementation, a question the rulings don't answer, or a genuine
+  doubt about a settled design GOES TO HER; what's forbidden is
+  re-asking decided questions on no new grounds. Purely mechanical new
+  ambiguities still get PROVISIONAL-and-continue (R119/R121).
 - **All-Fable cast**; fresh implementer session per batch; fix sessions
   fresh when a prior nears ~500k. **Agents die at her API limits** —
   implementers mark unverified claims PENDING; the orchestrator
   verifies a dead session's claims before committing its record (the
-  3C annotation is the worked example). **The orchestrator itself must
-  stay lean** (this cutover's lesson): delegate reading-heavy work to
-  implementers, keep records tight, and hand off before ~500k.
+  3C annotation is the worked example). **Plan the cutover seam** (this
+  handoff's own lesson, stated precisely): a rulings-heavy
+  author-attended sitting is context WELL spent — the ~500k line is a
+  quality cliff, not a spending critique — so watch the meter and hand
+  the role off at a clean seam (as the author directed here) instead
+  of pushing execution into a degraded tail.
 - **The judgment-call walk is DEFERRED-IN-PLACE** (S4-32): every
   recorded call stands addressable; nothing is ratified-by-silence;
   her organic use is the active review channel. Do not re-ask them.
