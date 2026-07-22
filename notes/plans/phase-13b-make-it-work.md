@@ -4816,7 +4816,10 @@ S4-16 condition — pagination architecture, lazy page realization per
 P1, page-count estimation, the scrub bar's page domain); N38
 smart→smart+curated conversion → Stage 5, with its DESIGN MEMO
 authored in this batch (conversion/materialization semantics, the
-fresh-smart-book-off-the-same-tag door).
+fresh-smart-book-off-the-same-tag door). *(2026-07-22 EOL directive:
+"Stage 5" reads PHASE 13C — 13b closes at Stage 4's end, no Stage 5
+exists; the two 4F documents are authored as 13c INPUTS. See "The 13b
+end-of-life directive" section at this file's end.)*
 
 ### The machinery (binding, every batch)
 
@@ -4860,7 +4863,9 @@ the Stage 4 sitting delta pointing at S4-1…S4-33), the deferred
 judgment-call walk's standing note, Stage 5's shape (the two authored
 deferral documents + whatever her organic use surfaced), and the
 `/Applications` refresh + field-guide re-seed if lessons changed
-(behind the A1 rail, as ever).
+(behind the A1 rail, as ever). *(2026-07-22 EOL directive: "Stage 5's
+shape" reads PHASE 13C's — the closeout is the FULL 13b phase closeout
+and creates 13c; see the directive section at this file's end.)*
 
 ### Batch 4G record (parallel-use hardening) — CLOSED 2026-07-22, both proof runs GREEN
 
@@ -4978,3 +4983,82 @@ runs, then by the runs):**
   batches should still prefer zero-instance windows for runs that
   measure timing-sensitive settle behavior, since contention is now
   possible by design.
+
+## The 13b end-of-life directive (author, 2026-07-22 overnight — received mid-4A by the execution orchestrator; recorded verbatim-faithful the same turn; BINDING)
+
+Her rulings, routed:
+
+1. **13b CLOSES at Stage 4's end — there will be no Stage 5.** Her
+   reasoning, verbatim-faithful: the plan file's ~5,000 lines tax
+   R114's read-in-full rule on every fresh implementer, reviewer, and
+   fix session, and the cost grows with every appended stage — "the
+   fix is to close the file, not weaken the reading rule." After the
+   ladder and the propose-only sweep, the FULL standing closeout
+   ritual runs and **Phase 13c is created**.
+2. **13c's COMMITTED scope — "ruled and wanted, deferred in time only,
+   not optional":** (1) the uniform-page traditional book view, built
+   from the detailed brief 4F must produce; (2) the smart→smart+curated
+   book conversion (N38), built from the design memo 4F must produce;
+   (3) N41, the inline-comments airiness — 13c is its named owner
+   (the "13b closeout names its owner" duty is hereby discharged).
+   Beyond the committed core: her organic-use findings still open at
+   close route into 13c per the standing triage, and the sweep's
+   surfacings enter ONLY as propose-only items for her approval at the
+   13c kickoff — "the sweep never commits scope on its own."
+3. **13c runs under the NEW `/architect-phase` skill**
+   (`.claude/skills/architect-phase/SKILL.md`, commits c22bfa5 +
+   eda4b58 — the 13b architect shape preserved as the repo's second
+   phase-execution shape; CLAUDE.md's autonomous-phase-execution
+   section records it). The 13c plan file + kickoff message are
+   authored FOR that shape, complete to the point that she can
+   literally invoke `/architect-phase 13c`; the recommended cast is
+   included, marked as HERS to confirm at kickoff. The orchestrator
+   holds architect latitude on the MECHANICS of the 13c creation —
+   what the new plan file carries verbatim versus binds by reference,
+   how it stays LEAN ("that's the entire point"), and how the master
+   plan table gains the row.
+4. **The architectural rules travel forward — not optional:** the 13c
+   plan file carries the P-1…P-9 constitution VERBATIM as its binding
+   principles (copy, don't summarize; the skill requires this). Beyond
+   the constitution: any architectural rules, class lessons, or
+   binding practices STAGE 4 ITSELF established get written into the
+   13c plan's principles/lessons sections explicitly — what was
+   learned must reach 13c's plan, prompt, and process, not die with
+   13b's closed file. Anything general enough for the skill itself is
+   amended INTO the skill (additions only — the P-1…P-9 block stays
+   byte-verbatim, untouched; add around it, never reword it) and
+   highlighted in the handoff.
+5. **Deliverables before the orchestrator stops:** (1) the Stage 4
+   closeout AND the 13b phase closeout — master plan table +
+   current-phase pointer + closeout-log paragraph; the canon deltas
+   applied per the brief (AppSpec §9 / OverallModel §7 gain the
+   merge-pairing ruling; AppSpec §14 gains the Stage 4 sitting delta
+   pointing at S4-1…S4-33); KnownIssues rows re-routed; every open
+   ledger row dispositioned or re-owned into 13c — no orphans. (2) The
+   author handoff `notes/handoffs/phase-13b-handoff.md`, self-contained
+   for a fresh session, her checklist at the top (the v1_12 deploy
+   go-ahead if still held, the sweep's propose-only list, any held
+   ratifications). (3) The 13c plan file in `notes/plans/`.
+6. **Overnight posture:** she is away; nothing stops to ask her.
+   PROVISIONAL-and-continue everything short of a standing author-only
+   hard stop; anything genuinely hers (the v1_12 mirror deploy, sweep
+   items, ratifications) is HELD and bundled into the handoff
+   checklist + the 13c kickoff agenda — the save-questions-for-the-
+   sitting pattern. Hard stops remain hard stops: hold and record,
+   never improvise around them. Her standing rider from the same
+   message: "If there's a serious blocking issue you can stop rather
+   than build the wrong thing, otherwise I'll want you to continue."
+
+**Routing consequences (orchestrator, same turn):** the execution
+brief's two "→ Stage 5" deferral targets (the uniform-page view; N38)
+now read → PHASE 13C — bracketed notes added at the brief's 4F
+paragraph and the closing-item paragraph; the 4F deliverable documents
+are authored as 13c INPUTS and will be named in the 13c plan. N41's
+owner is 13c (ledger row updated at the stage closeout with the rest).
+The `/architect-phase` skill was reviewed the same turn per her ask:
+P-1…P-9 verified BYTE-IDENTICAL to this file's constitution (mechanical
+diff); the additions the review produced (application precisions from
+the 13b build record, the §12 deploy-gate pattern, two 4G-era
+environment traps, the deferral-with-docs rule, the in-batch
+propose→rule loop) are in the skill's own commit and flagged in the
+orchestrator's reply + the eventual handoff.
