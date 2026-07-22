@@ -88,8 +88,12 @@ extension Operations {
     /// recovery). One tombstone flip: the memberships' surviving pointers
     /// reattach without a write. Requires the reading live and unlocked
     /// (a chapter revival is structure); a section that died WITH its
-    /// reading (cascade victim) refuses here — readings have no restore
-    /// door of their own, a standing pre-13 boundary.
+    /// reading (cascade victim) refuses here while the reading is dead —
+    /// since 13b 4F (N37/S4-28.2, the author's reversal of the pre-13
+    /// "readings have no restore door" boundary) the road is
+    /// `restoreReading` FIRST, which revives exact-stamp cascade victims
+    /// itself; this door then serves chapters deleted INDEPENDENTLY of
+    /// their (now live again) reading.
     public func restoreSection(_ id: String) throws {
         try database.write { db in
             guard var section = try ReadingSection.fetchOne(db, key: id) else {

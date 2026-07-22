@@ -107,10 +107,75 @@ extension Operations {
         try updateLiveReading(id) { $0.locked = false }
     }
 
-    /// Tombstone; the reading trigger cascades to its memberships.
+    /// Tombstone; the reading triggers cascade to its memberships
+    /// (v1_core) and its chapters (v1_10), all stamped with the reading's
+    /// exact `deleted_at`. Recoverable via `restoreReading` below.
     public func deleteReading(_ id: String) throws {
         let now = date.now
         try updateLiveReading(id, now: now) { $0.deletedAt = now }
+    }
+
+    /// Undo a `deleteReading` (13b Stage 4, 4F — N37, the author's
+    /// S4-28.2 ruling: "I feel like readings should have a restore door?
+    /// at least the curated ones if they're deleted" — DELIBERATELY
+    /// reversing the standing pre-13 "readings have no restore door"
+    /// boundary). The `restoreContainer` pattern: clear the reading's
+    /// tombstone, then revive every cascade victim carrying its EXACT
+    /// stamp — its `reading_section` chapters and its `reading_post`
+    /// memberships. Rows whose story diverged stay dead: an independently
+    /// deleted chapter or removed membership carries a different stamp,
+    /// and a membership whose POST has since died stays dead even at the
+    /// matching stamp (a live pointer at a dead post helps nobody — the
+    /// restoreContainer live-parent guard, applied to the post side).
+    /// Chapter assignments reattach for FREE (the dangle rule never
+    /// rewrote `section_id`). Smart readings restore by the flip alone —
+    /// their membership is derived, so the sweeps match nothing; the op
+    /// deliberately does not refuse them (recorded reading). A finished
+    /// (locked) book restores finished. NO undo entry — this door IS the
+    /// recovery (the restoreContainer/restoreSection class). Outbox rows
+    /// ride the ordinary triggers (this is a local write, never apply
+    /// mode). Uniqueness is safe by construction: no live membership can
+    /// exist for a dead reading (every add refuses through liveReading).
+    public func restoreReading(_ id: String) throws {
+        try database.write { db in
+            guard var reading = try Reading.fetchOne(db, key: id) else {
+                throw OperationError.readingNotFound(id: id)
+            }
+            guard let deletedAt = reading.deletedAt else {
+                throw OperationError.readingNotDeleted(id: id)
+            }
+            let stamp = DateFormatter.variorumISO8601.string(from: deletedAt)
+            let now = date.now
+            let nowStamp = DateFormatter.variorumISO8601.string(from: now)
+
+            reading.deletedAt = nil
+            reading.updatedAt = now
+            try reading.update(db)
+
+            // Chapters: exact-stamp cascade victims revive; independently
+            // deleted chapters (different stamp) stay dead — and now have
+            // a working `restoreSection` door, because the reading is
+            // live again (the boundary reversal's second half).
+            try db.execute(
+                sql: """
+                    UPDATE reading_section SET deleted_at = NULL, updated_at = ?
+                    WHERE reading_id = ? AND deleted_at = ?
+                    """,
+                arguments: [nowStamp, id, stamp])
+
+            // Memberships: exact-stamp victims whose post is still LIVE.
+            // (A post deleted independently stamps its own memberships via
+            // the container cascade — different stamp, doubly safe; a post
+            // that died AFTER this reading did matches the stamp and is
+            // exactly what the live-post guard keeps dead.)
+            try db.execute(
+                sql: """
+                    UPDATE reading_post SET deleted_at = NULL
+                    WHERE reading_id = ? AND deleted_at = ?
+                      AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL)
+                    """,
+                arguments: [id, stamp])
+        }
     }
 
     // MARK: - Curated membership

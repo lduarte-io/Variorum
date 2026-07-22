@@ -102,6 +102,25 @@ extension Queries {
             sql: "SELECT * FROM reading WHERE deleted_at IS NULL ORDER BY name, id")
     }
 
+    /// The deleted-books recovery surface (13b Stage 4, 4F — N37/S4-28.2:
+    /// `restoreReading`'s listing; the `deletedPosts` parallel): tombstoned
+    /// readings, newest deletion first. Soft-delete is the only delete
+    /// (S2), so everything here is one restore away until GC. `limit`: the
+    /// tombstone listing grows forever — a held observation bounds it;
+    /// one-shot callers omit.
+    public static func deletedReadings(_ db: Database, limit: Int? = nil) throws -> [Reading] {
+        var sql = """
+            SELECT * FROM reading WHERE deleted_at IS NOT NULL
+            ORDER BY deleted_at DESC, id DESC
+            """
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        if let limit {
+            sql += " LIMIT ?"
+            arguments.append(limit)
+        }
+        return try Reading.fetchAll(db, sql: sql, arguments: StatementArguments(arguments))
+    }
+
     /// One reading's row, tolerant (nil when missing or tombstoned) —
     /// review round 1 NIT: headers fetch ONE reading, never the listing.
     public static func reading(_ db: Database, id: String) throws -> Reading? {

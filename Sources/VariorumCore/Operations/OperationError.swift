@@ -11,6 +11,9 @@ public enum OperationError: Error, Equatable, Sendable {
     case variantNotFound(id: String)
     case commitNotFound(id: String)
     case readingNotFound(id: String)
+    /// `restoreReading` addressed a reading that is not deleted (13b 4F —
+    /// N37/S4-28.2; the containerNotDeleted/sectionNotDeleted parallel).
+    case readingNotDeleted(id: String)
     case tagNotFound(id: String)
     case referenceNotFound(id: String)
 
