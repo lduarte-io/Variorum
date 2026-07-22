@@ -275,10 +275,38 @@ struct LifecycleFacesTests {
             #expect(sections == [chapter.id])
             #expect(assignments == [post.id: chapter.id], "the book is back WHOLE")
 
-            // The door speaks on a refused restore (fire-and-speak).
+            // The door speaks on a refused restore (fire-and-speak) — IN
+            // APP WORDS (13b Stage 4 ladder round 1, MINOR-2; pin
+            // STRENGTHENED in place, justified: the old expectation
+            // accepted the raw enum dump "Refused: readingNotDeleted(id:
+            // …)", which is exactly the class the finding ends — the
+            // double-click path must speak plainly).
             await model.restoreReading(book.id)
-            #expect(model.lastError?.isEmpty == false,
-                    "restoring a live book refuses out loud, never silently")
+            let refusal = try #require(model.lastError)
+            #expect(!refusal.contains("readingNotDeleted"),
+                    "no enum dump on the double-click path: \(refusal)")
+            #expect(refusal.contains("already restored"),
+                    "the refusal says the true state in app words: \(refusal)")
+        }
+    }
+
+    /// 13b Stage 4 ladder round 1, MINOR-2 — the copy-level pin (red on
+    /// old: all three fell to the default "Refused: <enum dump>" case):
+    /// the two Stage 4 recovery-door errors and the extent belt speak app
+    /// words, never a raw enum dump. `readingNotFound` is NOT reachable
+    /// through the restore door today (no hard-delete path exists — GC is
+    /// Phase 12's), but `liveReading` throws it from every reading op, so
+    /// the copy serves as the shared belt.
+    @Test func stage4RefusalCopyCarriesNoEnumDump() {
+        let cases: [(OperationError, String)] = [
+            (.readingNotDeleted(id: "r1"), "readingNotDeleted"),
+            (.readingNotFound(id: "r1"), "readingNotFound"),
+            (.invalidExtent(value: 0), "invalidExtent"),
+        ]
+        for (error, dump) in cases {
+            let copy = OpsRefusalCopy.message(for: error)
+            #expect(!copy.contains(dump), "app words, not an enum dump: \(copy)")
+            #expect(!copy.hasPrefix("Refused:"), "the default-case prefix is the dump's marker: \(copy)")
         }
     }
 

@@ -304,10 +304,15 @@ struct ShelfView: View {
     }
 }
 
-/// Extent-field parsing, ONE implementation for both sheets (round 2,
-/// MINOR): empty = CLEAR, digits = a value, anything else = INVALID —
-/// refuse and KEEP; a typo while editing must never silently delete a
-/// stored extent (`Int("10k")` was nil, and nil meant clear).
+/// Extent-field parsing, ONE implementation for every extent door (round
+/// 2, MINOR): empty = CLEAR, positive digits = a value, anything else =
+/// INVALID — refuse and KEEP; a typo while editing must never silently
+/// delete a stored extent (`Int("10k")` was nil, and nil meant clear).
+/// 13b Stage 4 ladder round 1, MINOR-2 (the invalidExtent class sweep):
+/// NON-POSITIVE input is INVALID here too — every consumer feeds an
+/// extent setter and all three ops refuse `<= 0` (`invalidExtent`), so
+/// the one parse rule refuses it AT the field, refuse-and-keep, and no
+/// door can reach the op's raw refusal; the op stays the belt.
 enum ExtentInput: Equatable {
     case clear
     case value(Int)
@@ -315,7 +320,7 @@ enum ExtentInput: Equatable {
     static func parse(_ field: String) -> ExtentInput? {
         let trimmed = field.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty { return .clear }
-        guard let value = Int(trimmed) else { return nil }
+        guard let value = Int(trimmed), value > 0 else { return nil }
         return .value(value)
     }
 
@@ -355,7 +360,7 @@ struct BookExtentSheet: View {
                     guard let target = ExtentInput.parse(wordTargetField),
                           let cap = ExtentInput.parse(maxPostsField)
                     else {
-                        parseError = "Extents are plain numbers (e.g. 10000) — nothing was changed."
+                        parseError = "Extents are plain positive numbers (e.g. 10000) — nothing was changed."
                         return
                     }
                     Task {

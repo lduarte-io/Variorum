@@ -879,7 +879,7 @@ struct BookSettingsSheet: View {
         guard let target = ExtentInput.parse(wordTargetField),
               let cap = ExtentInput.parse(maxPostsField)
         else {
-            parseError = "Extents are plain numbers (e.g. 10000) — nothing was changed."
+            parseError = "Extents are plain positive numbers (e.g. 10000) — nothing was changed."
             return false
         }
         let name = nameField.trimmingCharacters(in: .whitespaces)

@@ -59,7 +59,7 @@ nonisolated enum WordTargetFaceCopy {
         "Word counts — click to set a word target for this post. "
         + "A target shows progress here; it is a measure, never a wall."
     static let fieldPrompt = "Word target (blank = none)"
-    static let parseError = "Targets are plain numbers (e.g. 5000) — nothing was changed."
+    static let parseError = "Targets are plain positive numbers (e.g. 5000) — nothing was changed."
     static func setNote(_ target: Int) -> String {
         "Word target set — \(target.formatted())w. Progress shows beside the "
         + "word counts; a target is a measure, never a wall."
@@ -84,6 +84,23 @@ nonisolated enum OpsRefusalCopy {
                 return "That take is locked — unlock it or branch a new take."
             case .versionLinkNotFound:
                 return "These two posts aren't marked as versions — nothing to unmark."
+            // 13b Stage 4 ladder round 1, MINOR-2: the two Stage 4 doors
+            // that spoke raw enum dumps get app words. `readingNotDeleted`
+            // is the recovery door's double-click/raced-restore path;
+            // `readingNotFound` is its absent-row sibling AND the shared
+            // `liveReading` guard's refusal (missing OR tombstoned) from
+            // every reading op, so the copy serves both meanings.
+            case .readingNotDeleted:
+                return "That book is already restored — it's back on the shelf."
+            case .readingNotFound:
+                return "That book can't be found — it may have been deleted, "
+                    + "or removed on another device."
+            // The belt behind the extent faces (same finding): the ops
+            // layer refuses non-positive targets/caps typed nowhere the
+            // ONE `ExtentInput.parse` rule now guards.
+            case .invalidExtent:
+                return "A word target or post cap must be a positive number — "
+                    + "nothing was changed."
             default:
                 return "Refused: \(error)"
             }

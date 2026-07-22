@@ -281,6 +281,13 @@ struct PromoteAndPaletteTests {
         #expect(ExtentInput.parse("10000") == .value(10_000))
         #expect(ExtentInput.parse("10k") == nil)
         #expect(ExtentInput.parse("12,000") == nil)
+        // 13b Stage 4 ladder round 1, MINOR-2 (red-on-old: parse accepted
+        // any Int, so "0"/"-5" reached the ops layer and its refusal
+        // surfaced as a raw enum dump): non-positive is INVALID at the
+        // field — every ExtentInput consumer feeds a setter that refuses
+        // `<= 0`, and the refusal now lands refuse-and-keep at the door.
+        #expect(ExtentInput.parse("0") == nil)
+        #expect(ExtentInput.parse("-5") == nil)
     }
 
     @Test func catalogScopeFilterIsExact() throws {
