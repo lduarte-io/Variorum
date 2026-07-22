@@ -351,4 +351,221 @@ struct TakesBoardSoakTests {
             }
         }
     }
+
+    // MARK: - The COMPARE board soak (13b 4C — the cross-post authority)
+
+    /// The compare-board variant (the Stage 4 brief's named addition):
+    /// seeded actions across TWO posts' columns — focus, type, choose,
+    /// bloom, per-post reorder, the follow/lineage toggles, and a remount —
+    /// with the invariants checked after EVERY action:
+    /// - at most ONE live pane across BOTH posts (the 4C authority
+    ///   contract, verified on the rendered surface);
+    /// - every read pane mirrors ITS OWN post's authority text (the
+    ///   buffer overlay never leaks across posts, never goes stale);
+    /// - a reorder in one column NEVER reorders the other post (S4-2d);
+    /// - realized compare panes hold their measured height.
+    @Test(arguments: [5, 17] as [UInt64])
+    func randomizedCompareBoardSoakHoldsEveryInvariant(seed: UInt64) async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: seed))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let base = "compared prose that runs long enough to wrap and measure. "
+            let (anchorID, twinID): (String, String) = try {
+                let anchor = try session.operations.createPost(title: "soak anchor")
+                let m1 = try session.operations.newBlock(in: anchor.id, text: base + "One.")
+                _ = try session.operations.newBlock(in: anchor.id, text: base + "Two.")
+                _ = try session.operations.newBlock(in: anchor.id, text: base + "Three.")
+                let extra = try session.operations.branchVariant(m1.block.id, from: m1.variant.id)
+                try session.operations.autosave(
+                    extra.id, text: base + "another take on one.", charDelta: 6)
+                let twin = try session.operations.duplicateAsVersion(anchor.id)
+                return (anchor.id, twin.post.id)
+            }()
+
+            var model = CompareViewModel(session: session, anchorPostID: anchorID)
+            model.peerSlots = [.init(postID: twinID)]
+            var observing = Task { [model] in await model.start() }
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1200, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                observing.cancel()
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            var hosting = NSHostingView(
+                rootView: CompareBoardView(session: session, postID: anchorID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1200, height: 900)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<40 where model.projection.anchor.slots.isEmpty
+                || model.projection.peers[twinID] == nil {
+                await settle(window, hosting, turns: 1)
+            }
+            #expect(!model.projection.anchor.slots.isEmpty, "the board mounted with both posts")
+
+            @MainActor func storedOrders() async throws -> (anchor: [String], twin: [String]) {
+                try await db.read { db in
+                    (try Queries.renderPost(db, containerID: anchorID).map(\.blockID),
+                     try Queries.renderPost(db, containerID: twinID).map(\.blockID))
+                }
+            }
+
+            @MainActor func compareStoreText(_ variantID: String) -> String? {
+                for face in [model.projection.anchor] + Array(model.projection.peers.values) {
+                    for (_, fan) in face.fans {
+                        if let take = fan.first(where: { $0.id == variantID }) {
+                            return take.workingText
+                        }
+                    }
+                    if let slot = face.slots.first(where: { $0.variantID == variantID }) {
+                        return slot.text
+                    }
+                }
+                return nil
+            }
+
+            @MainActor func checkCompareInvariants(tag: String) {
+                let identified = identifiedPanes(in: hosting)
+                // 1 — ONE live ring across BOTH posts.
+                let liveCount = panes(in: hosting).filter(\.isEditable).count
+                #expect(liveCount <= 1, "[\(tag)] one live ring across posts — found \(liveCount)")
+                // 2 + 4 — read panes mirror the authority for their own
+                // post's variant; realized compare panes hold measured height.
+                for pane in identified where !pane.view.isEditable {
+                    guard let store = compareStoreText(pane.variantID) else { continue }
+                    let expected = model.authority.text(
+                        variantID: pane.variantID, storeText: store)
+                    #expect(pane.view.string == expected,
+                            "[\(tag)] \(pane.role) pane mirrors its post's authority text")
+                    if pane.role == "compare" {
+                        let measured = PaneMeasurement.height(of: pane.view)
+                        #expect(pane.view.bounds.height + 3 >= measured,
+                                "[\(tag)] compare pane height holds measured \(measured)")
+                    }
+                }
+            }
+
+            var generator = SeededGenerator(seed: seed &+ 7)
+            var counts: [String: Int] = [:]
+            var step = 0
+
+            @MainActor func paneKey(post: String, index: Int) -> PaneTextAuthority.PaneKey? {
+                guard let face = model.face(for: post), !face.slots.isEmpty else { return nil }
+                let slot = face.slots[min(index, face.slots.count - 1)]
+                guard let variantID = slot.variantID else { return nil }
+                return PaneTextAuthority.PaneKey(
+                    columnID: "compare-\(post)", blockID: slot.blockID,
+                    variantID: variantID, context: post)
+            }
+
+            @MainActor func perform(_ action: String) async throws {
+                counts[action, default: 0] += 1
+                switch action {
+                case "focusAnchor":
+                    if let key = paneKey(post: anchorID, index: Int.random(in: 0..<3, using: &generator)) {
+                        model.focus(key)
+                    }
+                case "focusTwin":
+                    if let key = paneKey(post: twinID, index: Int.random(in: 0..<3, using: &generator)) {
+                        model.focus(key)
+                    }
+                case "type":
+                    guard let pane = model.authority.livePane, !pane.context.isEmpty else { return }
+                    model.paneEdited(
+                        postID: pane.context, variantID: pane.variantID,
+                        newText: base + "typed step \(step) seed \(seed).")
+                case "choose":
+                    // Choose the anchor's second take where the fan exists.
+                    if let (blockID, fan) = model.projection.anchor.fans.first(where: { $1.count > 1 }),
+                       let take = fan.randomElement(using: &generator) {
+                        await model.choose(blockID: blockID, variantID: take.id)
+                    }
+                case "bloom":
+                    if let slot = model.projection.anchor.slots.first(where: \.hasFan) {
+                        model.toggleExpanded(slot.blockID)
+                    }
+                case "toggleFollow":
+                    model.followAnchorOrder.toggle()
+                case "toggleLineage":
+                    model.lineageColorsOn.toggle()
+                case "reorderAnchor", "reorderTwin":
+                    let post = action == "reorderAnchor" ? anchorID : twinID
+                    let other = action == "reorderAnchor" ? twinID : anchorID
+                    let before = try await storedOrders()
+                    let otherBefore = post == anchorID ? before.twin : before.anchor
+                    guard let face = model.face(for: post), face.slots.count > 1 else { return }
+                    let blockID = face.slots[0].blockID
+                    await model.moveBlock(blockID, inPost: post, before: nil)
+                    let after = try await storedOrders()
+                    let otherAfter = post == anchorID ? after.twin : after.anchor
+                    #expect(otherAfter == otherBefore,
+                            "[seed \(seed) step \(step)] reorder in \(action) never touches \(other.suffix(4))")
+                case "remount":
+                    break  // handled in the script loop
+                default:
+                    Issue.record("unknown compare soak action \(action)")
+                }
+            }
+
+            let core = ["focusAnchor", "type", "focusTwin", "type", "choose",
+                        "bloom", "reorderAnchor", "reorderTwin", "toggleFollow",
+                        "toggleLineage"]
+            let pool = core + ["focusAnchor", "focusTwin", "type", "type"]
+            var script = core
+            for _ in 0..<10 {
+                script.append(pool.randomElement(using: &generator)!)
+            }
+            let remountAt = Int.random(in: 8..<script.count, using: &generator)
+
+            for (i, action) in script.enumerated() {
+                step = i
+                if i == remountAt {
+                    counts["remount", default: 0] += 1
+                    observing.cancel()
+                    model.teardown()
+                    model = CompareViewModel(session: session, anchorPostID: anchorID)
+                    model.peerSlots = [.init(postID: twinID)]
+                    observing = Task { [model] in await model.start() }
+                    hosting = NSHostingView(
+                        rootView: CompareBoardView(
+                            session: session, postID: anchorID, model: model))
+                    hosting.frame = NSRect(x: 0, y: 0, width: 1200, height: 900)
+                    window.contentView = hosting
+                    for _ in 0..<40 where model.projection.anchor.slots.isEmpty
+                        || model.projection.peers[twinID] == nil {
+                        await settle(window, hosting, turns: 1)
+                    }
+                }
+                try await perform(action)
+                await settle(window, hosting)
+                checkCompareInvariants(tag: "seed \(seed) step \(i) \(action)")
+            }
+
+            // Quiescence: both posts' pipelines drain.
+            await session.autosave(forPost: anchorID).flushNow()
+            await session.autosave(forPost: twinID).flushNow()
+            for (action, minimum) in [("focusAnchor", 1), ("focusTwin", 1), ("type", 1),
+                                      ("reorderAnchor", 1), ("reorderTwin", 1),
+                                      ("toggleFollow", 1), ("remount", 1)] {
+                #expect((counts[action] ?? 0) >= minimum,
+                        "non-vacuity: \(action) ran (seed \(seed))")
+            }
+        }
+    }
 }
