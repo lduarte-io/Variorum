@@ -416,10 +416,10 @@ Commits per batch/stage with the standing message convention.
 | N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **TRACED at the S4 sitting (S4-11): the handles are SEAMS-GATED** — `renderHandles` renders zero unless `seamsVisible && onMoveBlock != nil` (BlockDecor.swift:419–423, the recorded build-time call); her Write look with seams off confirmed invisible; works-as-built + undiscoverable (nothing names the gate; faint ink compounds). **RULED S4-19: hover-reveal as a Write-mode SETTING, default ON** (OFF = the fully clean surface; seams-on static display stays per the architect's flagged reading); Takes-side leans on the board's own clarity; build → Stage 4 |
 | N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
 | N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | **DIVIDE HALF RESOLVED 4A** (commit 44f7fe9): the "make a sentence first" trap dies — any two words divide now, so a one-sentence take (± trailing newline) always has a legal cut; the honest residue recorded in the 4A record: a cut at the block's very START/END still refuses per the memo's letter ("nothing to divide"), so the trailing-empty-line "give me a new block below" intent is exactly the INSERT-BELOW act's — **insert-below stays 4D** (both editors per S4-13) |
-| N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | new, author → Stage 4 (compare rework) |
+| N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | **RESOLVED 4C** (commits de4e4e3+eb17ad0 — `CompareComposition`, the honesty rule as a PURE brain: zero relationship ⇒ ONE free segment, plain side-by-side in own orders + the "there is no relationship here" header line; partial relationships align ONLY kin rows, unrelated stretches pack with NO blanks; rails render only where kinship exists, both sides colored by the anchor kin, behind the S4-12 lineage-colors toggle; zero-lineage version-marking SPEAKS the loose-alignment consequence — pinned at the composition, the model, and the tutorial walk) |
 | N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | new, author → Stage 4 |
 | N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
-| N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
+| N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | **(d) the "+ column" half DONE 4C** (commit 6f1b602 — while ONE column is open, an empty DASHED COLUMN waits beside it, the shelf's dashed new-post grammar, one shared menu body with the header door; retreats once a second column exists); **(a)–(c) stay 4D's** |
 | N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | new, author → Stage 4 |
 | N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern. **S4-33 (her rider): the Takes bar gets a DIRECT "comments" button like Write's — parity of prominence, not just existence** | new, author → Stage 4 |
 | N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | new, author → Stage 4 scoping call at brief time |
@@ -428,7 +428,7 @@ Commits per batch/stage with the standing message convention.
 | N39 | Blocks-list positional moves (S4-30g): type a target position number ("what number block… out of the total post") + move-to-top / move-to-bottom doors — dragging stops being the only long-distance move | new, author → Stage 4 |
 | N40 | The takes strip's height jumping (S4-31b, her ruling): ONE fixed strip height with in-strip scrolling ("you can scroll within the strip"); kills the back-and-forth height changes and dissolves the recorded #28(b) clip cost | new, author → Stage 4 |
 | N41 | Inline-comments airiness (S4-32, her deferral): the uniform gap widening "doesn't look great" but is not Stage 4 scope — DEFERRED to a future stage; the 13b closeout names its owner (candidates: a later polish window, or an R116 memo if it keeps bothering her) | new, author → deferred beyond Stage 4 |
-| N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
+| N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | **RESOLVED 4C** (commit eb17ad0 — Save… on the Diff sheet: NSSavePanel per the 11b export-door conventions; `LineDiff.exportText` is a pure projection of the RENDERED lines (marker-prefixed, matching-mode stated in the header), pinned byte-stable; the outcome speaks sheet-locally, cancel says nothing) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -5529,6 +5529,283 @@ consolidated window.
   sentence gains the ceremony's several-takes extension and the
   instant case's unchanged rule. Not applied by this batch (the
   orchestrator's duty at stage close, per the brief's letter).
+
+### Batch 4C record (the compare/outline/lenses rework — Outline RETIRED into a compare rebuilt as "lenses across posts"; core untouched at 797/94 GREEN, Mac-suite execution carried PENDING under the locked-session regime)
+
+**What shipped (six commits + this record's):**
+- **`249777b` (authority):** the one-ring contract EXTENDS ACROSS POST
+  CONTEXTS (the architect precision; S4-2a ratified twice). `PaneKey`
+  gains a `context` field (the pane's post; defaulted so every pre-4C
+  single-post call site and pin reads byte-unchanged); the invariant is
+  restated AT THE AUTHORITY — exactly one live pane across every mounted
+  context, structurally (livePane stays a single optional over the
+  union); a cross-context migration hands back the LEAVING pane's
+  context so the caller flushes THAT post's coordinator. Never a second
+  liveness mechanism beside the authority. +3 unit pins (cross-context
+  migration/handback; context-as-identity incl. the default-context
+  equality that keeps old keys old; union settle).
+- **`de4e4e3` (composition):** `CompareComposition` — N29's honesty rule
+  as a PURE brain over `PostAlignment.rows` (the 11a lineage-keyed
+  registration survives verbatim; its pins stand; the enum gains an
+  explicit `nonisolated`, no behavior change). Segments over the anchor
+  spine, up to four columns: kin rows ALIGN only where kinship exists;
+  unrelated stretches pack side by side in their OWN orders (free
+  segments — no blanks); zero lineage, or the follow toggle off,
+  collapses to ONE free segment. `railedAnchors` = the rail rule's
+  anchor half. +6 pins (zero-lineage; partial; span+moved; multi-peer;
+  follow-off; leading orphans/empty).
+- **`eb17ad0` (the rework):** the mode row drops to SIX — `PostMode`
+  loses `.outline`; stored memories MIGRATE at decode
+  (`PostMode.fromStored`: "Outline" → `.compare`, its successor; pin
+  red-on-old by the recorded revert); ⌘1–⌘6 reflow by construction.
+  `CompareBoardView` replaces `AlignedPostsView`: PaneSurface cells over
+  the ONE authority — fully EDITABLE, one ring across all columns and
+  posts, per-post `session.autosave(forPost:)` pipelines (TWO+ live
+  coordinators = the DESIGNED per-post N3 boundary, recorded reading);
+  up to four columns (anchor + three peers, duplicate picks refused);
+  ⠿ per-post drag-reorder (insert-before + end zones, ONE ordinary
+  `reorder` per drop, ⌥⌘Z undoes; cross-post drops refuse and SPEAK);
+  the follow-order TOGGLE (display-only, session-local) + the
+  lineage-colors TOGGLE (rails only where lineage speaks, both sides
+  colored by the anchor kin); the honesty header line per peer;
+  zero-lineage version-marking speaks the loose consequence.
+  make-outline-post (R99) re-homed into Compare's header, opening the
+  mint as a column; `OutlineDraftView` DELETED (pin migration justified
+  at the test); N33 Diff Save… (`LineDiff.exportText` pinned pure;
+  sheet-local outcome). +11 model/composition pins in 2 new suites,
+  +1 migration pin, +1 export pin.
+- **`6f1b602` (lenses):** S4-2d's lenses half — ⠿ drag-reorder on BOTH
+  column layouts (one post, one order, every column together BY
+  CONSTRUCTION — columns render the one slot order;
+  `TakesViewModel.reorderBlock` is the one body); S4-10/N32d — while ONE
+  column is open, an empty DASHED COLUMN waits beside it (the shelf's
+  dashed grammar; one shared menu body with the header door; retreats at
+  two columns). +2 pins in 1 new suite (reorder-for-every-column +
+  one-⌥⌘Z restore + successor no-op; payload round-trip).
+- **`d172c07` (tutorial, P-6):** "compare & versions" RE-CUT for the
+  merged tab (editable panes + the cross-post ring, ⠿ reorder, the
+  honesty promise VERBATIM, the toggles, make-outline-post's new home,
+  Diff Save…); "outline · blocks · canvas" → **"blocks · canvas"**
+  (⌘5/⌘6; outlining pointed at the previous lesson); "getting around"
+  teaches six modes ⌘1–⌘6; "shaping blocks" reads ⌘5. Walk tests follow:
+  `outlineMintsALinkedCondensation` re-anchored on the compare lesson
+  (+ prose promises + point-by-point kinship registration), NEW act
+  `compareHonestyHoldsOnTheLessonsOwnContent` (an unrelated lesson
+  composes to ONE free segment), canvas act re-anchored. Non-journal
+  (R57). +1 walk act net.
+- **`f752709` (soak, P-7):** the board soak's COMPARE variant — two
+  seeds over the REAL mounted board (anchor + version twin): focus both
+  posts / type / choose / bloom / per-post reorders / both toggles / a
+  mid-script remount; after EVERY action: ≤1 live pane across BOTH
+  posts, every read pane mirrors ITS OWN post's authority text,
+  reorders never touch the other post (stored orders asserted around
+  every reorder), compare panes hold measured height. +2 (1 test × 2
+  seeds).
+
+**Counts:** core **797/94 GREEN** (full `swift test` re-run; ZERO core
+changes — `git diff f742841..HEAD -- Sources/ Tests/ Package.swift` is
+EMPTY, verified; 4C has no core allowance and used none). Mobile:
+**BUILD SUCCEEDED** (no Shared/ touch; insurance run). Mac: **PENDING**
+— expected arithmetic on top of 4B's pending expectation:
+590/114 → **611/117** (+3 PaneTextAuthorityTests, +11 CompareBoardTests
+in 2 new suites, +2 LensesReorderTests in 1 new suite,
++1 PostDetailAndPanelTests, +1 DiffViewTests, +1 TutorialWalkTests,
++2 compare-soak runs; renames — six-mode pin, the outline pin
+migration — are count-neutral), NOT asserted: no Mac suite executed
+(`CGSSessionScreenIsLocked` read **1** at the app-side test phase,
+checked once per the regime note; `build-for-testing` compiled app +
+tests clean after every commit — the block is execution, not code).
+
+**The mode-retirement enumeration (grep-complete; nothing strands):**
+- Changed: `Registry/PostMode.swift` (case dropped; `fromStored`
+  migration door), `PostDetailView.swift` (rememberedMode decode +
+  switch case + header doc), `Registry/CapabilityRegistry.swift`
+  (`.switchMode` verb/shortcutLabel → ⌘1–⌘6),
+  `EditorCommands.swift` (2 comments), `Registry/CommandRouter.swift`
+  (2 comments), `Registry/ShellActions.swift` (handler-less-modes
+  comment), `Features/Help/HelperView.swift:71` (the ⌘1–⌘7 dictionary
+  row → six modes), `TutorialSeeder.swift` (plan + 4 lessons).
+- Deleted: `Features/Outline/OutlineDraftView.swift`,
+  `Features/Takes/AlignedPostsView.swift`.
+- Self-reflowing, verified, no edit needed: the sidebar mode rail and
+  the ⌘1–⌘6 CommandGroup (both `ForEach` over `allCases` with derived
+  indexes); the ⌘K palette renders no mode rows (PostMode grep);
+  `CanvasView`'s `Mode` is its own local pool-mode enum, unrelated.
+- Tests: PostDetailAndPanelTests (six-mode pin, renamed + justified
+  in-line; the NEW migration pin), CommandRoutingTests +
+  CapabilityRegistryTests (comments; the `.compare`-mode registrations
+  stand — Compare still registers no handler, judgment call 4),
+  ScrubAndOutlineTests (the outline-mapping pin MIGRATED — justification
+  in the test doc), TutorialWalkTests (anchors moved with the prose).
+- Stored state: the ONLY stored mode strings are the per-post memory
+  keys (`postMode.*`, grep-verified two call sites) — migrated at
+  decode; nothing else persists a mode.
+
+**The fourth-text-path record (the brief's named slice):** Compare's
+slice is RETIRED — `AlignedPostsView`'s SwiftUI `Text` prose cells, its
+bloom `Text` rows, and `OutlineDraftView`'s outline/draft `Text` rows
+are all deleted; every compare prose surface (cells AND bloomed fan
+cards) is now a `PaneSurface` pane over the one authority. What REMAINS
+of the fourth path: **ReadingFlow** (its phase keeps it) and **Canvas
+cards** (4E's editable-cards work retires it there); the Diff sheet's
+monospaced line listing stays SwiftUI `Text` deliberately (a diff
+listing, not a prose editing surface — recorded, not scoped); BlockTOC
+already composes PaneSurface for its expanded rows.
+
+**Registry/R118 note:** no new registry acts — make-outline-post's new
+home, the two compare toggles, the diff Save…, the add-column stub, and
+the ⠿ drag handles are all in-view/in-sheet affordances of un-routed
+acts (the 4A/4B reading, applied and recorded); the registry's one edit
+is the `.switchMode` label. R118 parity untouched: compare's editing is
+direct manipulation on its own surface (the canvas-switcher class),
+never a routed editing capability Write holds and Takes lacks.
+
+**Red-on-old / behavioral-revert evidence (execution PENDING under the
+regime; procedures exact):**
+- *(a) The mode-memory migration pin* — revert = in
+  `PostMode.fromStored`, drop the `"Outline"` mapping (return
+  `PostMode(rawValue: raw)` only — commit `eb17ad0`'s PostMode hunk
+  reversed). Expected red: `aRememberedOutlineModeMigratesToCompare`
+  (a remembered "Outline" decodes nil → falls to the `.takes` default —
+  exactly the stranding the brief forbids, proven load-bearing).
+  `theModeVocabularyIsTheSixModeRail` needs no revert-red: it IS the
+  ruled change (justified rename in-line).
+- *(b) The honesty composition* — behavioral revert = in
+  `CompareComposition.segments`, force every anchor row aligned (treat
+  empty `kinLists` as aligned rows instead of free packing — the OLD
+  gap-parade shape reproduced). Expected reds:
+  `zeroLineagePacksOneFreeSegment`,
+  `partialRelationshipAlignsOnlyWhereLineageSpeaks`,
+  `compareHonestyHoldsOnTheLessonsOwnContent`, and the free-row
+  expectation in `outlineBesideItsDraftRegistersThroughLineageInCompare`.
+- *(c) New-contract pins* (the cross-post authority, per-post edit
+  routing, reorder isolation, the lenses drag face): the OLD compare had
+  NO editing and the old authority no context field — these pin a NEW
+  capability's invariants (they cannot compile against the old types);
+  recorded honestly as contract pins, not bug-class red-on-old. The
+  gap-parade CLASS dies by surface replacement, pinned via (b).
+- *(d) PENDING with the suite run:* the full Mac suite (expected
+  611/117 — cumulatively discharges 4A's 581/113 and 4B's 590/114
+  pending runs), the (a)/(b) revert executions, the compare soak +
+  TutorialWalkTests (they ride the suite), and the visual loop (the
+  honesty line + rails + toggles; ⠿ drags on both boards; the dashed
+  stub; the Diff save panel under sandbox). Prefer a zero-instance
+  window (the soak measures settle behavior — the 4G contention note).
+
+**Traced mechanisms:**
+- *N29, the gap parade:* `AlignedPostsView` rendered a `blank` ("—")
+  cell for EVERY kin-less row and a lineage stripe on EVERY row
+  unconditionally — on zero-lineage posts that is one blank per block
+  on each side, the parade her screenshot shows, colored as if related.
+  The mechanism of the fix is architectural: alignment is now a
+  DERIVED privilege (kin rows only), not the layout's default; absence
+  of kinship packs, never blanks; rails derive from kinship + the
+  toggle, and both sides color by the anchor kin so "same color = same
+  family" is literally true (the old stripe colored by row anchor even
+  when nothing related).
+- *S4-2b, compare-as-lenses:* the old cells were read-only `Text` — no
+  liveness, no buffer discipline, so "fully editable" required the
+  authority, not a patch; extending `PaneKey` with context (rather than
+  a per-post authority pair) is what keeps ONE optional the structural
+  guarantee across posts, and the migration handback is what routes the
+  leaving flush to the right per-post pipeline (two dirty posts at
+  once is compare's normal state).
+- *S4-10, the unfindable door:* the "+ column" word-menu sat top-right
+  in chrome while her eye was on the column area; the stub renders the
+  door AS a waiting column exactly while there is one column — the
+  state she was in when she couldn't find it.
+
+**Judgment calls / PROVISIONALs (R119 — for the author's deferred walk):**
+1. **Free stretches render as INDEX-PAIRED rows** (each column's next
+   block side by side; absent cells are clear space, never "—").
+   Options: per-column packed VStacks (truest "own orders packing" —
+   REJECTED: a zero-lineage compare would realize both entire posts in
+   one LazyVStack item, against P3's bounded realization); index-paired
+   rows (CHOSEN — row-granular virtualization, still plainly
+   side-by-side); measured masonry (rejected: view-side geometry
+   re-derivation). Recorded consequence: a short cell sits beside a
+   tall one with clear space below — spacing, not a blank marker.
+2. **`followAnchorOrder` defaults ON; both toggles are SESSION-LOCAL
+   view-model state** (never persisted — deliberately NOT the
+   TakesViewMemory class: a reading posture, not an arrangement). The
+   11a aligned promise and the tutorial's prose hold where lineage
+   exists; zero-lineage renders plain regardless of the toggle.
+3. **Peer-column reorder under follow-order ON lands AND speaks**: the
+   stored order changes (real, undoable) and the board says the display
+   is lineage-tied right now — spoken ONLY when the dragged block is
+   kin (kin-less blocks' display follows their own order and shows the
+   change immediately). Alternative (disable peer drags under the
+   toggle) rejected — a door that works-and-speaks beats a dead door
+   (P-2).
+4. **Compare registers NO CommandRouter handler** (the pre-4C shape):
+   routed take-family acts stay honestly grey in Compare; its editing
+   is direct manipulation (the canvas-switcher class). The one-gate
+   upgrade (a `.commit` handler + a `takeFamilyPlusCompare` rule so ⌘S
+   commits the focused compare pane) is recorded for the ladder/4D.
+5. **Duplicate peer picks refuse** (one post per column — two panes
+   sharing one key would both answer live; the refusal speaks).
+6. **The auto-default fires at most once per mount** (first version
+   peer fills the empty first slot; clearing it STAYS cleared — the
+   old view's refill wart deliberately dies).
+7. **PROVISIONAL — make-outline-post with all four columns full still
+   MINTS, then speaks** ("close a column to open it here"): the outline
+   is a real linked post either way (visible in the library; nothing
+   silently lost). The alternative (refuse before minting) recorded;
+   hers to reverse.
+8. **Bloomed fan cards are PANES** (editable, the one grammar) — the
+   old compare's bloom was read-only text; ✓ stays the only choosing
+   door (minting-never-chooses untouched — no mint doors exist here).
+9. **The relationship line's vocabulary:** "there is no relationship
+   here" (her words verbatim) · "versions" · "versions · no shared
+   lineage — loose alignment" · "linked by lineage".
+10. **Sealed posts per column:** a "sealed — read-only" tag in that
+    column's header; panes refuse liveness via the authority's sealed
+    gate; op refusals speak (fire-and-DO; reading stays free).
+11. **The dashed stub appears only while exactly ONE column is open**
+    (her exact state when the door was unfindable). Options: an
+    always-present trailing stub (rejected: permanent width tax);
+    header-only prominence (rejected: that IS the door she missed).
+12. **Diff Save speaks sheet-locally** (the sheet has no StatusCenter
+    reach; an in-sheet caption answers; cancel says nothing).
+13. **Order-drag SYNC deliberately NOT built** (the brief's boundary,
+    recorded): "follow this post's order" stays display-only until
+    display-only proves insufficient in her use.
+
+**Deviations from the brief:** none in scope or semantics. Execution
+deviations are the regime's PENDING carries (suite run, the two revert
+executions, visual loop, the withheld `/Applications` refresh — 4A call
+7's reasoning holds verbatim). NOTE for the re-seed decision: the
+tutorial prose changed a THIRD time (four lessons this batch) — the
+REAL store's seeded field guide is now three revisions behind; the
+re-seed rides the A1 rail at the orchestrator's consolidated window.
+
+**For the ladder (foci):**
+- The cross-post authority extension (the brief's named first focus):
+  `PaneKey.context` rides EVERY key equality — verify no surface can
+  build the same pane's key with two different contexts (compare is
+  the only context-carrying caller today; Takes/Lenses stay default —
+  walked, worth a cold re-walk).
+- A REMOVED peer slot with a dirty coordinator: `mountedPostIDs`
+  shrinks, so the union-settle no longer covers that post's pending
+  buffers — the buffer drops at the next adopt while the flush is
+  still in flight (no rendered pane shows it; the session-scoped
+  coordinator still flushes; re-adding the peer before the flush lands
+  shows store text one settle-cycle stale, self-healing). Traced,
+  accepted as transient; a reviewer should confirm the window's width.
+- The index-paired free rows' ID stability under heavy edits (IDs
+  derive from block IDs + a running index; a mid-list insert re-keys
+  the tail of its free stretch — LazyVStack re-realizes those rows,
+  cost ∝ the stretch).
+- The follow-order speak condition reads the PRE-op projection's
+  kinship (order-independent, so never stale in the way that matters)
+  — confirm.
+- Judgment call 4 (no compare handler): decide whether ⌘S-in-compare
+  should upgrade at 4D.
+- The soak's `storedOrders` read-around-reorder timing (reads are
+  serialized through the runner's write; confirmed deterministic in
+  design — worth the reviewer's eye once it executes).
+- The `CompareViewModel.read` brain: one more consumer (the migrated
+  ScrubAndOutline pin) — keep observation and pins reading through it.
 
 ### Orchestrator regime note (post-4A, 2026-07-22 overnight — the LOCKED-SESSION regime; binding for the remaining batches until the first unlock)
 
