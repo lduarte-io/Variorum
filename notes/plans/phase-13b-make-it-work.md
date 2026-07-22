@@ -6882,3 +6882,165 @@ the MINOR-1 gap).
   parallel stands; on file for the multi-device era).
 - **[NIT-3] — RECORD-ONLY** (the records' own foci confirmed; the
   memoization threshold noted for corpus scale).
+
+### Stage 4 ladder — round 1 fix pass (dispositions)
+
+**Fresh fix session, 2026-07-22 — scope exactly the routed set:
+[MINOR-2] + [NIT-1] + [NIT-4] + the invalidExtent class-completeness
+sweep. Three fix commits (`7521ff2` · `2283d5e` · `4a3980a`) + this
+record's. Core UNTOUCHED (verified: `git diff -- Sources/ Tests/
+Package.swift` EMPTY; full `swift test` re-run 817/96 GREEN as
+insurance). Compile gate: `xcodebuild build-for-testing` GREEN; mobile
+insurance build GREEN. Session lock checked ONCE per the regime:
+`CGSSessionScreenIsLocked` = 1 — LOCKED, so Mac-suite execution and the
+new pins' revert-red executions are carried PENDING with exact
+procedures below.**
+
+**[MINOR-2] — FIXED (`7521ff2`). Trace CONFIRMED, and the copy-home map
+is one door wider than the finding's letter:** the raw dump has THREE
+copy homes, not one — `OpsRefusalCopy` (routes: TakesViewModel.run →
+the Takes-bar WordTargetFace; RecoveryViewModel.restoreReading — the
+finding's two doors), `EditorViewModel.operationMessage` (the Write
+CommitBar face's route; its default also dumps), and
+`ReadingsViewModel.message` (the shelf/book extent sheets' route; its
+default also dumps). What changed: (a) `OpsRefusalCopy` gains REAL
+copy for `readingNotDeleted` ("That book is already restored — it's
+back on the shelf."), `readingNotFound` ("can't be found — may have
+been deleted, or removed on another device"; the VERIFY instruction
+discharged: through the restore door this error is UNREACHABLE today —
+`restoreReading` throws it only when the row is ABSENT and no
+hard-delete path exists anywhere (GC is Phase 12's) — but `liveReading`
+throws the same case for missing-OR-tombstoned from every reading op,
+so the copy serves as the shared belt), and `invalidExtent` (the belt).
+(b) THE FACE GUARD — BUILT, at the ONE parse rule (the recorded
+choice): `ExtentInput.parse` now returns nil for NON-POSITIVE input.
+Options weighed: (i) guard inside `parse` — CHOSEN: all four extent
+doors already feed this one function, refuse-and-keep lands AT the
+field with the popover/sheet still open, and every future ExtentInput
+consumer inherits the guard; (ii) per-surface guards in each `save()` —
+rejected, three copies of one rule (the drift class); (iii) copy-only,
+no guard — rejected: WordTargetFace's `save()` closes the popover
+before the op runs, so the op's refusal would land in the status bar
+after the field vanished, and the face's own "plain numbers" promise
+would stay subtly false. The op's `<= 0` refusal stays the belt (the
+routing's letter). The three parse-error strings gain "positive" (no
+test pinned the old strings — grep-verified).
+
+**The invalidExtent CLASS-COMPLETENESS SWEEP (producers enumerated by
+grep over `Sources/VariorumCore/Operations/` — exactly three throwers;
+doors enumerated by grep over every app-side caller of the three ops —
+exactly four, six producer×door cells):**
+
+| Producer (op) | Door (surface → copy home) | Verdict |
+|---|---|---|
+| `setPostWordTarget` (Operations+Container.swift:146) | Write CommitBar `WordTargetFace` → EditorViewModel.operationMessage | **FIXED at the door** — `ExtentInput.parse` refuses non-positive at the field (pin: `extentInputDistinguishesClearFromTypo`); the op is unreachable with `<= 0` from this surface. (operationMessage's default would still dump — behind a provably-closed door; recorded honestly.) |
+| `setPostWordTarget` | Takes/Lenses bar `WordTargetFace` → TakesViewModel.run → **OpsRefusalCopy** | **FIXED twice** — the parse guard (same pin) + the real `invalidExtent` belt copy (pin: `stage4RefusalCopyCarriesNoEnumDump`). |
+| `setReadingWordTarget` (Operations+Reading.swift:47) | Shelf `BookExtentSheet` → ShelfViewModel.run → ReadingsViewModel.message | **FIXED at the door** — same parse guard, same pin; sheet keeps refuse-and-keep with the "positive" promise. |
+| `setReadingWordTarget` | BookView "Book Settings" sheet → BookStructureModel.run → ReadingsViewModel.message | **FIXED at the door** — same parse guard (the sheet's `save()` routes through `ExtentInput.parse`, verified at BookView.swift). |
+| `setReadingMaxPosts` (Operations+Reading.swift:68) | Shelf `BookExtentSheet` (cap field) → ReadingsViewModel.message | **FIXED at the door** — same parse guard, same pin. |
+| `setReadingMaxPosts` | BookView "Book Settings" sheet (cap field) → ReadingsViewModel.message | **FIXED at the door** — same parse guard, same pin. |
+
+No other app-side caller of the three ops exists (grep-verified; the
+TutorialWalk act calls `setPostWordTarget` with a positive literal —
+a test, not a door). Class mechanism: ONE parse rule guards every
+door; the belt copy is real where OpsRefusalCopy routes; the two
+sibling copy homes' defaults still dump for genuinely uncovered errors
+— consolidating their defaults onto OpsRefusalCopy is a REAL candidate
+(the "one refusal vocabulary" doctrine) but changes message prefixes
+existing pins may key on: recorded for the propose-only sweep, not
+done under the locked regime.
+
+**[MINOR-2]/sweep pins + PENDING procedures (the regime's form):**
+- `stage4RefusalCopyCarriesNoEnumDump` (LifecycleFacesTests) — revert =
+  delete the three new `OpsRefusalCopy` cases (commit `7521ff2`'s
+  OpsRefusalCopy hunk reversed); expected red: all three fall to the
+  default and the copy contains the enum case name + the "Refused:"
+  prefix — both expectations fail per case.
+- The STRENGTHENED double-click assertion in
+  `theDeletedBooksDoorRestoresThroughTheModel` (justified in-line: the
+  old expectation accepted the dump) — same revert; expected red: the
+  `!contains("readingNotDeleted")` and `contains("already restored")`
+  expectations both fail (old lastError = "Refused:
+  readingNotDeleted(id: …)").
+- `extentInputDistinguishesClearFromTypo`'s two new lines — revert =
+  drop `value > 0` from `ExtentInput.parse` (commit `7521ff2`'s
+  ShelfView hunk reversed); expected red: `parse("0")` reads
+  `.value(0)` and `parse("-5")` reads `.value(-5)`, both `!= nil`.
+
+**[NIT-1] — FIXED (`2283d5e`). Trace CONFIRMED as the 4C record's own
+accepted transient, now shrunk:** every compare pane's key carries
+`context: postID` (anchor included), so a removed/replaced peer column
+whose post held the live pane left `livePane` keyed to an UNMOUNTED
+context — no rendered pane showed it, and the union-settle (which
+iterates `mountedPostIDs`) stopped covering that post's pending
+buffers. What changed: `releaseLivePane(leavingPost:)` in
+`CompareViewModel` — when the outgoing slot's postID (the OLD value)
+matches `livePane?.context`: `authority.blur()` + a TARGETED
+`flushNow()` of the leaving post's coordinator, called from
+`removePeerSlot` (both arms — the single-slot clear included) and from
+`setPeer` when the post actually changes (a same-post re-pick never
+blurs). Blur chosen over targeted migration (the finding offered
+either): there is no principled "next" pane to migrate to on a column
+close, and blur is the zero-cost, zero-guess arm. Safety: the leaving
+post can never be the anchor or another mounted column (setPeer's
+dedupe + no self version-links), so the release cannot touch a pane
+that stays mounted.
+- Pin: `removingOrReplacingTheLiveColumnsPeerReleasesTheRing`
+  (CompareBoardTests) — remove path with a DIRTY live pane (blur + the
+  buffer LANDS in the store, not dropped), replace path, and the
+  same-post no-op guard. PENDING procedure: revert = delete the
+  `releaseLivePane` helper + its two call sites (commit `2283d5e`'s
+  CompareBoardView hunk reversed); expected red: both
+  `authority.livePane == nil` expectations fail — the ring stays keyed
+  to the removed/replaced post's context (and the landed-text poll
+  may time out on the dropped-flush half; the livePane expectations
+  are the discriminating red).
+
+**[NIT-4] — FIXED (`4a3980a`), precision only, ZERO behavior change.
+Trace CONFIRMED:** `openMergeCeremony` seeds the pre-pair with
+`model.session.mergeJoinMemory ?? MergeJoin.canon(...)` — so with a
+session memory set, ⏎ joins by the MEMORY (ruling 3's letter), and
+"confirming immediately IS current behavior" was true only for fresh
+sessions. Grep-complete carrier list, all reworded to the routing's
+exact framing (⏎ reproduces today's exact outcome in a FRESH session /
+when no join memory is set; with a memory set the pre-pair joins by
+the memory): the `openMergeCeremony` default-pre-pairing comment, the
+`.merge` threshold-branch comment, `MergeCeremonyState.firstRenderedID`'s
+doc, the `MergeCeremonySheet` file header, the `MergeCeremonySheetTests`
+suite header, `confirmingThePrePairedSheetReproducesTheInstantOutcome`'s
+doc comment (that test RUNS in a fresh session, so its NAME stays
+accurate and unchanged — renaming was declined as pure churn under the
+locked regime; the doc scopes it, justified in-line), and the
+`TutorialWalkTests` instant-op pin framing (now "the ceremony's
+fresh-session default promises"). No pin expectations changed; no pin
+names changed; no code paths changed.
+
+**Counts:** core **817/96 GREEN** (full re-run, zero core diff — the
+constraint verified). Mac: **PENDING** — expected arithmetic on top of
+the round-1 expectation 646/122: **648/122** (+1
+`stage4RefusalCopyCarriesNoEnumDump` in LifecycleFacesTests, +1
+`removingOrReplacingTheLiveColumnsPeerReleasesTheRing` in
+CompareBoardTests; no new suites; the strengthened/extended pins are
+count-neutral). NOT asserted: no Mac suite executed (the locked-session
+regime; lock read **1** once at session start; `build-for-testing`
+compiled app + tests clean — the block is execution, not code). The
+consolidated unlocked-window run now discharges at **648/122**, then
+the recorded revert-red procedures (all six batches' + round 1's three
+above).
+
+**Commits:** `7521ff2` (MINOR-2 + sweep) · `2283d5e` (NIT-1) ·
+`4a3980a` (NIT-4) · this record's.
+
+**For round 2 / the orchestrator:**
+- The consolidated-run arithmetic moved: **646/122 → 648/122** (the
+  MAJOR's gate figure updates; everything else about the gate stands).
+- Recorded, not done (propose-only sweep candidates): consolidating
+  `EditorViewModel.operationMessage` and `ReadingsViewModel.message`
+  defaults onto `OpsRefusalCopy.message` (one refusal vocabulary — the
+  1b doctrine's unfinished half; prefix-sensitive pins make it a
+  deliberate pass, not a rider); `ExtentInput`'s Shelf-file placement
+  (the 4F judgment call 12 note stands — mechanical move to Registry/
+  if a later pass wants it).
+- The three parse-error strings changed ("plain positive numbers") —
+  no test pinned the old strings (grep-verified); the visual loop's
+  word-target item picks up the new copy incidentally.
