@@ -417,6 +417,7 @@ Commits per batch/stage with the standing message convention.
 | N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
 | N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
 | N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | new, author → Stage 4 |
+| N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern | new, author → Stage 4 |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
@@ -4512,3 +4513,23 @@ undiscoverable). (2) **Merge-joins-upward BLESSED** (the memo's
 revisit-trigger stands). (3) **The N9 landing focus BLESSED** (live
 first pane at board arrival stays). (4) **The mint-reveal change
 BLESSED EVERYWHERE** (no quieter door wanted).
+
+### Part 6 — the flagged items, batch B (2026-07-22, question tool)
+
+**S4-25:** (1) **The A10 absorption BLESSED** (one tutorial spine; the
+standalone modes demo stays retired). (2) **The 2026-07-20 clean exit
+CLOSED as a one-off** — never recurred; stays on the record; a
+recurrence reopens it. (3) **A1 RATIFIED — the `//` comment glyph is
+fine** — AND her ratifying sentence carried a live finding: **"how are
+you supposed to leave a comment? I don't see a command for it and i
+don't see a button for it."** The doors exist — Write's bottom bar has
+a literal "comments" button (her own screenshot shows it), Takes
+carries it under the bar's block ▾ menu, Block ▸ Comments (⌘⇧') from
+the menu bar — and she never found ANY of them: the R112
+discoverability class on the crowded bar. NEW ledger row **N35**;
+Stage 4 gives commenting prominence (candidates: a margin-click-to-add
+affordance in the comment gutter — the mockups' own grammar; bar
+de-crowding is the same batch's concern). (4) **A3 SETTLED: the
+typographic PDF re-owns to PHASE 14** (joins the variorum-edition
+export work; the KnownIssues row's owner updated — the taste-checkpoint
+disposition it was waiting on is made).
