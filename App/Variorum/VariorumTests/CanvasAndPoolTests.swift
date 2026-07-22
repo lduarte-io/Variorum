@@ -371,7 +371,19 @@ struct CanvasBoardGeometryTests {
             CGRect(x: 300, y: 250, width: 240, height: 170),
         ]
         let origin = CanvasBoardGeometry.gridOrigin(positionedFrames: positioned)
-        #expect(origin.y == 250 + 170 + 40, "below maxY plus two gutters")
+        // Justified pin edit (Stage 4 gate execution): the RHS is typed
+        // CGFloat EXPLICITLY. The geometry is EXACT — origin.y is
+        // bit-for-bit 460.0 (250, 170, and 40 are all exactly
+        // representable; traced at the gate) — but under #expect's
+        // operator decomposition the bare literal sum `250 + 170 + 40`
+        // types as Int (the literals' default under `+`), and the solver
+        // resolves `CGFloat == Int` via implicit AnyHashable promotion,
+        // where CGFloat skips the cross-type numeric canonicalization:
+        // AnyHashable(CGFloat(460)) != AnyHashable(460) even for equal
+        // values (Double passes; CGFloat fails — reproduced minimally).
+        // Typing the literal keeps the comparison EXACT equality — no
+        // tolerance is introduced, so no real regression can hide.
+        #expect(origin.y == CGFloat(250 + 170 + 40), "below maxY plus two gutters")
         #expect(origin.x == 20)
     }
 
