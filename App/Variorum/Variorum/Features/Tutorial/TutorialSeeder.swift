@@ -635,11 +635,24 @@ enum TutorialSeeder {
             + "this post and becomes a scrap there (a block lives in one "
             + "place; \u{2325}\u{2318}Z brings it back).",
 
-            "CANVAS (\u{2318}6) scatters the blocks as cards you can drag around — "
-            + "arrangement is yours and is remembered, the post's order doesn't "
-            + "move. The \u{2039} \u{203A} switcher on a card flips which take you're "
-            + "viewing (\u{201C}viewing — not what the post shows\u{201D}); choosing stays a "
-            + "separate, deliberate \u{2713}.",
+            // 13b 4E (N30/S4-7): the canvas package, taught whole.
+            "CANVAS (\u{2318}6) scatters the blocks as sticky-note cards. They open "
+            + "in a tidy grid until you arrange them; drag a card by its \u{2823} "
+            + "header — arrangement is yours and is remembered, the post's order "
+            + "doesn't move — and resize it from the corner grip. Click into a "
+            + "card and type: edits land on the take the card is showing. The "
+            + "little number in a card's corner is the block's place in the "
+            + "post's current order.",
+
+            "The canvas has one door back into order: \u{201C}order by clicking\u{201D}. "
+            + "Click cards in the order the post should read — each shows its "
+            + "number as you go — then Apply once: the numbered cards lead the "
+            + "post and everything else keeps its relative order after them "
+            + "(\u{2325}\u{2318}Z undoes; Cancel changes nothing). \u{201C}Fit all\u{201D} shows every "
+            + "card at once — bigger boards open a read-only overview; click any "
+            + "card to land back on it. The \u{2039} \u{203A} switcher on a card flips "
+            + "which take you're viewing (\u{201C}viewing — not what the post "
+            + "shows\u{201D}); choosing stays a separate, deliberate \u{2713}.",
         ])
 
         // —————————————————————————— the library of things ——————————————————

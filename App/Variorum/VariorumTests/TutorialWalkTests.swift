@@ -1576,6 +1576,54 @@ struct TutorialLookingActsTests {
             #expect(layouts[first.blockID]?.y == 17, "arrangement is yours and is remembered")
         }
     }
+
+    /// 13b 4E (N30/S4-7f): the canvas lesson teaches the reworked canvas,
+    /// and its one spatial→structural door RUNS on the lesson's own
+    /// content — click cards in order, one Apply reorders the post, one
+    /// ⌥⌘Z restores it whole.
+    @Test func clickInOrderReordersTheCanvasLessonBlocks() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "blocks \u{B7} canvas")
+            }
+            // The lesson's prose PROMISES the package it teaches.
+            let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
+            #expect(prose.contains("order by clicking"),
+                    "the lesson names the click-in-order door")
+            #expect(prose.contains("edits land on the take the card is showing"),
+                    "the lesson promises editable cards (S4-7c)")
+            #expect(prose.contains("resize it from the corner grip"),
+                    "the lesson promises resizable cards (S4-7d)")
+            #expect(prose.contains("Fit all"), "the lesson names the fit-all door")
+            #expect(prose.contains("\u{2325}\u{2318}Z undoes"), "the undo road is named")
+
+            let before = try await slots(db, lesson).map(\.blockID)
+            #expect(before.count >= 3, "the lesson has cards to order")
+
+            let model = CanvasViewModel(session: session, containerID: lesson)
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: lesson) })
+            model.enterOrderMode()
+            // Click the LAST card first, then the first — the numbered
+            // preview shows as the prose promises.
+            model.toggleOrderClick(blockID: before[before.count - 1])
+            model.toggleOrderClick(blockID: before[0])
+            #expect(model.pendingOrderNumber(blockID: before[before.count - 1]) == 1)
+            await model.applyOrder()
+
+            let after = try await slots(db, lesson).map(\.blockID)
+            #expect(after.first == before.last,
+                    "the clicked cards lead the post in click order")
+            #expect(after[1] == before[0])
+
+            // One ⌥⌘Z restores the whole arrangement (ONE compound).
+            let undoStack = session.undoStack
+            _ = try await session.runner.run { ops in
+                try undoStack.undo(with: ops)
+            }
+            let restored = try await slots(db, lesson).map(\.blockID)
+            #expect(restored == before, "one undo restores the pre-order arrangement")
+        }
+    }
 }
 
 // MARK: - the library of things (chapter acts)
