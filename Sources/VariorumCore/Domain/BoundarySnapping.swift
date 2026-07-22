@@ -20,9 +20,21 @@ import Foundation
 /// Sentence detection mirrors `SegmentationRules`' coarse scanner exactly
 /// (terminator run + trailing closers + whitespace; a newline always ends a
 /// sentence): deliberately not smarter — coarse, not forensic.
+///
+/// **The word rule (13b Stage 4, the ruled cut redesign — S4-22):** cuts may
+/// land between ANY two words and at newlines. `.word` granularity is the
+/// legal-cut set (a superset of `.sentence`, which supersets `.paragraph`),
+/// and `settle(_:in:among:)` is the one snap brain: word edges are free,
+/// sentence ends and newlines pull a little (GENTLE SETTLE — ruling 1). The
+/// word-edge floor (ruling 3) holds by construction: candidates only ever
+/// sit at word starts, so a cut can never land mid-word, and a one-word
+/// half stays legal.
 public enum BoundarySnapping {
     public enum Granularity: Sendable {
         case sentence, paragraph
+        /// Every legal cut under the ruled rule: word starts (after any
+        /// whitespace run), which subsume sentence and paragraph starts.
+        case word
     }
 
     /// How an extract span sits against its text: a prefix (leading span,
@@ -35,13 +47,19 @@ public enum BoundarySnapping {
     // MARK: - Boundaries
 
     /// All valid cut offsets (UTF-16) for a granularity, ascending. Always
-    /// contains 0 and the end; sentence granularity is a superset of
-    /// paragraph granularity (a paragraph break also ends a sentence).
+    /// contains 0 and the end; each granularity is a superset of the one
+    /// below it: word ⊇ sentence ⊇ paragraph (a paragraph break also ends a
+    /// sentence; a sentence or paragraph start is always a word start). The
+    /// unions are kept explicit so the containment holds by construction,
+    /// never by hoping the scanners agree.
     public static func boundaries(in text: String, granularity: Granularity) -> [Int] {
         var set: Set<Int> = [0, text.utf16.count]
         set.formUnion(paragraphBoundaries(in: text))
-        if granularity == .sentence {
+        if granularity == .sentence || granularity == .word {
             set.formUnion(sentenceBoundaries(in: text))
+        }
+        if granularity == .word {
+            set.formUnion(wordBoundaries(in: text))
         }
         return set.sorted()
     }
@@ -55,6 +73,36 @@ public enum BoundarySnapping {
             let (da, db) = (abs(a - clamped), abs(b - clamped))
             return da == db ? a < b : da < db
         } ?? clamped
+    }
+
+    // MARK: - The gentle settle (13b Stage 4, S4-22 ruling 1)
+
+    /// How many UTF-16 units of extra reach a sentence end or newline gets
+    /// when a cut settles ("pull a little" — deliberately small: about a
+    /// terminator-plus-space's width, so the common landings stay easy
+    /// without ever overriding a deliberate exact placement, which always
+    /// wins at distance zero).
+    public static let settlePull = 2
+
+    /// The ruled snap: the nearest of `candidates` wins, except that a
+    /// STRONG candidate (a sentence/paragraph boundary of `text`, or either
+    /// text edge) may catch the cut from up to `settlePull` units further
+    /// away than a plain word edge. Distance ties — after the pull — go to
+    /// the earlier position (the standing convention). `candidates` is any
+    /// subset of the word-rule set (callers filter the interior for divide,
+    /// keep the ends for parking/spans); empty candidates answer `nil`.
+    public static func settle(_ cut: Int, in text: String, among candidates: [Int]) -> Int? {
+        guard !candidates.isEmpty else { return nil }
+        let clamped = min(max(cut, 0), text.utf16.count)
+        let strong = Set(boundaries(in: text, granularity: .sentence))
+        func effectiveDistance(_ candidate: Int) -> Int {
+            let raw = abs(candidate - clamped)
+            return strong.contains(candidate) ? max(0, raw - settlePull) : raw
+        }
+        return candidates.min { a, b in
+            let (da, db) = (effectiveDistance(a), effectiveDistance(b))
+            return da == db ? a < b : da < db
+        }
     }
 
     // MARK: - Extract classification
@@ -149,6 +197,30 @@ public enum BoundarySnapping {
         for char in text {
             if char.isWhitespace {
                 inSeparatorRun = inSeparatorRun || char.isNewline
+            } else {
+                if inSeparatorRun, seenContent { result.append(offset) }
+                inSeparatorRun = false
+                seenContent = true
+            }
+            offset += char.utf16Width
+        }
+        return result
+    }
+
+    /// Offsets where a word starts after ANY whitespace run with content
+    /// before it — the ruled cut rule's grid (S4-22). The paragraph scanner
+    /// generalized: the separator run no longer needs a newline. Offsets
+    /// accumulate per grapheme cluster, so every boundary is grapheme-
+    /// aligned by construction (the word-edge floor can never split an
+    /// emoji any more than it splits a word).
+    private static func wordBoundaries(in text: String) -> [Int] {
+        var result: [Int] = []
+        var offset = 0
+        var inSeparatorRun = false
+        var seenContent = false
+        for char in text {
+            if char.isWhitespace {
+                inSeparatorRun = true
             } else {
                 if inSeparatorRun, seenContent { result.append(offset) }
                 inSeparatorRun = false

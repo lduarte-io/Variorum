@@ -64,6 +64,115 @@ struct BoundarySnappingTests {
         #expect(BoundarySnapping.boundaries(in: "", granularity: .paragraph) == [0])
     }
 
+    // MARK: Boundaries — word granularity (13b Stage 4, the ruled cut rule)
+
+    @Test func wordBoundariesSitAtEveryWordStart() {
+        // "One two three": word starts at 4 and 8, plus the standing 0/end.
+        #expect(BoundarySnapping.boundaries(in: "One two three", granularity: .word)
+            == [0, 4, 8, 13])
+    }
+
+    @Test func multiSpaceRunsYieldOneBoundaryAtTheNextWord() {
+        // The run is the separator; the boundary is the following word's
+        // start (the standing after-the-separator convention).
+        #expect(BoundarySnapping.boundaries(in: "One   two", granularity: .word)
+            == [0, 6, 9])
+    }
+
+    @Test func newlinesAreWordBoundariesToo() {
+        // The outline case (the addendum's driver): no terminators at all,
+        // every line start is a legal cut.
+        #expect(BoundarySnapping.boundaries(in: "point one\npoint two", granularity: .word)
+            == [0, 6, 10, 16, 19])
+    }
+
+    @Test func wordGranularityIsASupersetOfSentenceGranularity() {
+        let fixtures = [
+            "One. Two! Three?",
+            "Para one.\n\nPara two.\nPara three.",
+            #"He said "Stop!" and left. Really?! Fine."#,
+            "No terminator\nNext line.",
+            "Hi 👩‍👩‍👧‍👦. Done.",
+            "", "   ", "single",
+        ]
+        for text in fixtures {
+            let word = Set(BoundarySnapping.boundaries(in: text, granularity: .word))
+            let sentence = Set(BoundarySnapping.boundaries(in: text, granularity: .sentence))
+            #expect(word.isSuperset(of: sentence), "not a superset for \(text)")
+        }
+    }
+
+    @Test func edgeWhitespaceProducesNoInternalWordBoundaries() {
+        // No content before the leading run / after the trailing run — a
+        // one-word text has NO interior cut (the word-edge floor's other
+        // face: nothing to divide).
+        #expect(BoundarySnapping.boundaries(in: "  hello  ", granularity: .word)
+            == [0, 9])
+        #expect(BoundarySnapping.boundaries(in: "hello", granularity: .word)
+            == [0, 5])
+        #expect(BoundarySnapping.boundaries(in: "", granularity: .word) == [0])
+    }
+
+    @Test func wordBoundariesAreGraphemeAligned() {
+        // Each emoji cluster is one "word"; boundaries sit at cluster
+        // starts, never inside surrogate pairs or ZWJ sequences.
+        let text = "Hi 👩‍👩‍👧‍👦 done"
+        #expect(BoundarySnapping.boundaries(in: text, granularity: .word)
+            == [0, 3, 15, 19])
+        for boundary in BoundarySnapping.boundaries(in: text, granularity: .word) {
+            #expect(BoundarySnapping.graphemeIndex(atUTF16: boundary, in: text) != nil)
+        }
+    }
+
+    // MARK: The gentle settle (S4-22 ruling 1)
+
+    @Test func settlePicksTheNearestWordEdgeWhenNoStrongBoundaryIsNear() {
+        // "alpha beta gamma delta": word edges 6, 11, 17 — none strong
+        // (no terminators, no newlines). Plain nearest wins.
+        let text = "alpha beta gamma delta"
+        let interior = [6, 11, 17]
+        #expect(BoundarySnapping.settle(8, in: text, among: interior) == 6)
+        #expect(BoundarySnapping.settle(10, in: text, among: interior) == 11)
+        #expect(BoundarySnapping.settle(16, in: text, among: interior) == 17)
+    }
+
+    @Test func sentenceEndsPullALittle() {
+        // "One. Two three": word edges 5 (strong — sentence start) and 9
+        // (plain). Cut 7 is equidistant-raw (2/2): the pull decides for 5.
+        // Cut 8 is raw 3-vs-1 for 9; the pull (3−2=1 vs 1) TIES effective
+        // distance and the earlier boundary wins — still 5. Cut 9 is exact:
+        // the deliberate placement always wins.
+        let text = "One. Two three"
+        let interior = [5, 9]
+        #expect(BoundarySnapping.settle(7, in: text, among: interior) == 5)
+        #expect(BoundarySnapping.settle(8, in: text, among: interior) == 5)
+        #expect(BoundarySnapping.settle(9, in: text, among: interior) == 9)
+    }
+
+    @Test func newlinesPullLikeSentenceEnds() {
+        // "one\ntwo three": 4 is a paragraph (⊂ sentence) boundary, 8 plain.
+        let text = "one\ntwo three"
+        let interior = [4, 8]
+        #expect(BoundarySnapping.settle(6, in: text, among: interior) == 4)
+        #expect(BoundarySnapping.settle(8, in: text, among: interior) == 8)
+    }
+
+    @Test func settleRespectsTheCandidateSubset() {
+        // Callers filter (interior-only for divide; ends kept for parking):
+        // the settle never answers outside what it was given.
+        let text = "One. Two three"
+        #expect(BoundarySnapping.settle(1, in: text, among: [5, 9]) == 5)
+        #expect(BoundarySnapping.settle(0, in: text, among: [0, 5, 9, 14]) == 0)
+        #expect(BoundarySnapping.settle(13, in: text, among: [0, 5, 9, 14]) == 14)
+        #expect(BoundarySnapping.settle(7, in: text, among: []) == nil)
+    }
+
+    @Test func settleClampsOutOfRangeCuts() {
+        let text = "One. Two three"
+        #expect(BoundarySnapping.settle(-9, in: text, among: [5, 9]) == 5)
+        #expect(BoundarySnapping.settle(99, in: text, among: [5, 9]) == 9)
+    }
+
     // MARK: Snap
 
     @Test func snapPicksTheNearestBoundary() {
