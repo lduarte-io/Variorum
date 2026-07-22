@@ -54,6 +54,72 @@ struct PaneTextAuthorityTests {
         #expect(!authority.isLive(a) && !authority.isLive(b))
     }
 
+    /// 13b Stage 4 (4C — the compare rework's architect precision): ONE
+    /// authority may span several POST contexts (compare's columns are
+    /// different posts), pane identity carries its context, and the
+    /// one-ring invariant holds over the UNION — focusing a pane in post B
+    /// migrates the ring OUT of post A's pane the same instant, and the
+    /// migration hands back the leaving pane's context so the caller can
+    /// flush THAT post's coordinator.
+    @Test func oneRingHoldsAcrossPostContexts() {
+        var authority = PaneTextAuthority()
+        let inPostA = PaneTextAuthority.PaneKey(
+            columnID: "compare-anchor", blockID: "bA", variantID: "vA", context: "postA")
+        let inPostB = PaneTextAuthority.PaneKey(
+            columnID: "compare-col-1", blockID: "bB", variantID: "vB", context: "postB")
+
+        #expect(authority.focus(inPostA) == .migrated(from: nil))
+        #expect(authority.isLive(inPostA))
+        #expect(!authority.isLive(inPostB))
+
+        // Cross-context migration: one optional, one ring — structurally.
+        let outcome = authority.focus(inPostB)
+        guard case .migrated(let leaving) = outcome else {
+            Issue.record("cross-context focus must migrate"); return
+        }
+        #expect(leaving == inPostA)
+        #expect(leaving?.context == "postA",
+                "the migration names the LEAVING pane's post — its coordinator flushes")
+        #expect(!authority.isLive(inPostA))
+        #expect(authority.isLive(inPostB))
+        #expect(authority.livePane?.context == "postB")
+    }
+
+    /// Context is part of pane IDENTITY: the same column/block/variant
+    /// triple in different contexts is a different pane (no accidental
+    /// two-live-panes via a context-blind equality), and the default
+    /// context keeps every single-post key equal to its pre-4C self.
+    @Test func contextIsPartOfPaneIdentity() {
+        let bare = key("main", "b1", "v1")
+        let defaulted = PaneTextAuthority.PaneKey(
+            columnID: "main", blockID: "b1", variantID: "v1", context: "")
+        #expect(bare == defaulted, "the default context IS the single-post identity")
+        let contextual = PaneTextAuthority.PaneKey(
+            columnID: "main", blockID: "b1", variantID: "v1", context: "postA")
+        #expect(bare != contextual)
+
+        var authority = PaneTextAuthority()
+        authority.focus(bare)
+        #expect(!authority.isLive(contextual),
+                "a context-carrying twin of the live key is NOT live")
+    }
+
+    /// Buffers are keyed by VARIANT (globally unique) — the overlay and
+    /// settle rules need no per-context split, and a union-pending closure
+    /// keeps each post's dirty buffers authoritative independently.
+    @Test func settleAcrossContextsDropsOnlyTheFullyLandedBuffers() {
+        var authority = PaneTextAuthority()
+        authority.bufferEdited(variantID: "vA", text: "typed in post A")
+        authority.bufferEdited(variantID: "vB", text: "typed in post B")
+
+        // Post A's coordinator landed; post B's is still pending — the
+        // union closure answers per variant.
+        authority.settle(isPending: { $0 == "vB" })
+
+        #expect(authority.text(variantID: "vA", storeText: "store A") == "store A")
+        #expect(authority.text(variantID: "vB", storeText: "store B") == "typed in post B")
+    }
+
     @Test func aSealedContextHasNoLivePane() {
         var authority = PaneTextAuthority()
         let a = key("main", "b1", "v1")

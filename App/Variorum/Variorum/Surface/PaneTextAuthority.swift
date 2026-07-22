@@ -10,10 +10,17 @@
 //  re-derive the decision.
 //
 //  The invariants, as code (each pinned in PaneTextAuthorityTests):
-//  - EXACTLY ONE live pane per context: `livePane` is a single optional —
-//    a second live pane is structurally unrepresentable (the batch-14
-//    two-rings defect class, closed by construction instead of by
-//    per-surface key conventions).
+//  - EXACTLY ONE live pane across EVERY mounted context of this authority:
+//    `livePane` is a single optional — a second live pane is structurally
+//    unrepresentable (the batch-14 two-rings defect class, closed by
+//    construction instead of by per-surface key conventions). 13b Stage 4
+//    (4C — the compare rework's architect precision): a pane's identity
+//    CARRIES its post context (`PaneKey.context`), so one authority may
+//    span several post contexts (the compare board's columns are different
+//    POSTS) and the one-ring invariant holds over the UNION — never a
+//    second liveness mechanism beside the authority. Single-post owners
+//    leave `context` at its default; every pre-4C call site and pin reads
+//    unchanged.
 //  - The LIVE pane is BUFFER-AUTHORITATIVE: while an edit is unsettled the
 //    buffer overlays the store text (`text(variantID:storeText:)` always
 //    prefers the buffer), and surfaces must never clobber a live pane
@@ -47,11 +54,18 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
         /// The specific take the pane shows (a bloomed fan shows several
         /// panes per block).
         var variantID: String
+        /// The POST CONTEXT the pane belongs to (13b 4C): an authority
+        /// spanning several posts (the compare board) keys each pane with
+        /// its post, so the caller can route the leaving pane's flush to
+        /// THAT post's coordinator on migration. Single-post authorities
+        /// leave the default — every pre-4C call site reads unchanged.
+        var context: String = ""
     }
 
     /// The ONE live pane (P3: the live editor migrates on click;
     /// everything else renders read-cheap). A single optional — two live
-    /// panes cannot exist.
+    /// panes cannot exist, in one post context or across the union of all
+    /// mounted contexts (13b 4C).
     private(set) var livePane: PaneKey?
 
     /// Per-variant buffer while a pane is live and unsettled — the
@@ -64,7 +78,9 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
         /// The pane was already live — nothing to do.
         case unchanged
         /// The ring migrated; `from` is the leaving pane (nil when no pane
-        /// was live). The caller flushes the leaving pane's buffer.
+        /// was live). The caller flushes the leaving pane's buffer —
+        /// through the LEAVING pane's own context's coordinator where the
+        /// authority spans several posts (13b 4C: `from.context` names it).
         case migrated(from: PaneKey?)
     }
 
