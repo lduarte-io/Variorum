@@ -48,11 +48,14 @@ nonisolated enum CapabilityRegistry {
     }
 
     /// Commit additionally acts in COMPARE (13b 4D — the 4C handoff:
-    /// compare panes are fully editable since 4C, and its board now
-    /// registers the `.commit` handler; ⌘S commits the focused pane's
-    /// take — the N5 letter extended to the new editable surface).
-    private static let takeFamilyPlusCompare: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
-        if ctx.mode == .compare { return .act }
+    /// compare panes are fully editable since 4C, and its board registers
+    /// the `.commit` handler; ⌘S commits the focused pane's take — the N5
+    /// letter extended to the new editable surface) and in CANVAS (13b 4E,
+    /// the Phase-1 ruling's (c)(2): canvas cards edit through the one
+    /// authority since 4E, and its handler consumes `.commit` the same
+    /// way — the N5 class closed on its third surface).
+    private static let takeFamilyPlusEditableBoards: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        if ctx.mode == .compare || ctx.mode == .canvas { return .act }
         return takeFamily(ctx)
     }
 
@@ -273,7 +276,7 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: "⌘S", takesAccess: .native,
             unavailableNote: "Nothing to commit here — ⌘S commits a take inside a post.",
-            availability: takeFamilyPlusCompare),  // 13b 4D: + compare (the 4C handoff)
+            availability: takeFamilyPlusEditableBoards),  // 13b 4D: + compare; 4E: + canvas
         Capability(
             id: .structuralUndo, verb: "Undo Structural Change", scope: .app,
             doors: [.menuBar, .palette],

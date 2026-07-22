@@ -199,6 +199,13 @@ struct CapabilityRegistryTests {
         // red-on-old proof (old registry: takeFamily ⇒ unavailable).
         #expect(CapabilityRegistry.isEnabled(.commitTake, in: CapabilityContext(mode: .compare)),
                 "⌘S commits the focused compare pane (the N5 letter, extended)")
+        // 13b 4E (the Phase-1 ruling's (c)(2) — the 4D precedent, third
+        // surface): canvas cards edit through the one authority since 4E
+        // and the canvas handler consumes `.commit` now. Red-on-old by
+        // construction: the pre-4E registry resolved canvas through
+        // takeFamily ⇒ unavailable — this line fails on that code.
+        #expect(CapabilityRegistry.isEnabled(.commitTake, in: CapabilityContext(mode: .canvas)),
+                "⌘S commits the live canvas pane's take (the N5 class, third surface)")
     }
 
     @Test func addBlockAtEndIsNativeInTakes() {
