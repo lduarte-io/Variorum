@@ -4861,3 +4861,120 @@ judgment-call walk's standing note, Stage 5's shape (the two authored
 deferral documents + whatever her organic use surfaced), and the
 `/Applications` refresh + field-guide re-seed if lessons changed
 (behind the A1 rail, as ever).
+
+### Batch 4G record (parallel-use hardening) — CLOSED 2026-07-22, both proof runs GREEN
+
+**What changed (commit 57bf287, ONE line):** the Mac app target's
+**Debug** configuration's `PRODUCT_BUNDLE_IDENTIFIER` becomes
+**`io.lduarte.Variorum.debug`**
+(`App/Variorum/Variorum.xcodeproj/project.pbxproj:627`, config block
+E1C271AA — the "Variorum" PBXNativeTarget's Debug entry per its
+XCConfigurationList at pbxproj:926). Release (pbxproj:661) is
+byte-untouched — the shipping `/Applications` identity, her sandbox
+data container `~/Library/Containers/io.lduarte.Variorum/`, and her
+signing are all unchanged. Mobile targets untouched. RunningBoard keys
+one-instance-per-login-session on **bundle identity**, and the test
+runner launches the Debug-built host — so the collision with her
+running app is gone by construction.
+
+**Why this design (the three arrangements the brief named):**
+- *Per-configuration override* (CHOSEN): the runner's host IS the
+  Debug build; one line; zero new maintenance surface.
+- *Dedicated test-host target* (REJECTED): every later batch's new
+  source file would need dual target membership or the tests host a
+  stale app — a standing footgun for 4A–4F.
+- *Third build configuration for the Test action* (REJECTED — the
+  trap worth recording): Xcode builds SPM package dependencies in
+  RELEASE mode under any configuration not named exactly "Debug",
+  which would silently strip VariorumCore's DEBUG-gated machinery
+  (the structural-seam oracle, materialization counters) out from
+  under the very tests that rely on it.
+
+**Identity-sensitive test verdicts (all verified from code before the
+runs, then by the runs):**
+- `EntitlementsTests` — reads the signed host via
+  `SecTaskCreateFromSelf`, never by identity; entitlements are
+  synthesized from build settings that did not change. Codesign dump
+  of the new host confirmed all four pins present
+  (app-sandbox, user-selected read-write, bookmarks.app-scope,
+  network.client) under `Identifier=io.lduarte.Variorum.debug`. GREEN
+  in both runs.
+- *The A4 dev-store fence* — `StoreLocation.resolve` keys on
+  `#if DEBUG` + the explicit opt-in, never on identity
+  (`App/Variorum/Shared/StoreLocation.swift:30`); store paths are
+  container-relative (`AppDatabase.defaultStoreURL`,
+  `Sources/VariorumCore/Persistence/AppDatabase+Dependency.swift:56`).
+  The fence is now structurally STRONGER: the sandboxed test host
+  runs in its own container and cannot even read
+  `~/Library/Containers/io.lduarte.Variorum/`. Phase8ServicesTests'
+  fence pins (path-shape assertions) GREEN.
+- *Defaults-reading suites* — every `UserDefaults` use is `.standard`
+  (now the debug container's own domain) or a private throwaway
+  suite; no test depends on prior domain contents (all set up and
+  clean up their own keys — verified across
+  Phase8ServicesTests / PostDetailAndPanelTests / TakesBoard* /
+  TakesRailPagingTests). Side benefit: test writes to `.standard` no
+  longer land in HER app's defaults domain.
+- *No identity reads anywhere*: zero `Bundle.main.bundleIdentifier` /
+  `Bundle(identifier:)` uses in app, Shared, tests, or core; the
+  `io.lduarte.Variorum` strings that exist are constants (pasteboard
+  type, attribute key, log subsystem, Keychain service names), never
+  compared against the running identity. `SignInFlow`'s
+  `variorum://` callback rides `ASWebAuthenticationSession` with no
+  Info.plist scheme registration — no LaunchServices conflict
+  between the two identities.
+
+**The proof runs (BOTH executed — neither PENDING):**
+- **(b) beside her LIVE real-store instance** (PID 76789,
+  `/Applications`, running the whole time and alive after): full Mac
+  suite via `test-without-building` — **✔ 562 tests / 112 suites
+  passed in 39.6 s**. The unlock itself, proven.
+- **(a) at a zero-instance window** (she quit on her own later;
+  pgrep-verified empty before the run): **✔ 562 / 112 passed in
+  38.7 s**.
+- Count arithmetic: baseline 562/112 → 562/112 both runs. This batch
+  adds no tests (build-configuration infrastructure; no bug-class
+  fix, so no red-on-old pin is owed — the two proof runs are the
+  evidence).
+- Mobile: `xcodebuild build -scheme VariorumMobile` (generic iOS
+  Simulator destination) **BUILD SUCCEEDED**.
+- `/Applications` NOT refreshed — no shipping-behavior change exists
+  (Release untouched); the standing owed refresh + field-guide
+  re-seed items are unchanged.
+
+**Recorded consequences + judgment calls for the author's walk:**
+1. *The Xcode-Run (Debug) dev app moves with the test host* — same
+   copy, same identity — into the fresh container
+   `~/Library/Containers/io.lduarte.Variorum.debug/`. The seeded
+   design corpus was COLD-COPIED in (34M: `variorum.sqlite` + WAL +
+   `Backups/`; sources read-only, the old container's `Variorum-dev/`
+   left byte-untouched incl. its pre-seed snapshots) so later
+   batches' screenshot walks keep their corpus. The old copy is now
+   redundant — cleaning it up is hers to decide, never ours.
+2. *The `-VariorumRealStore` debug opt-in narrows* (judgment call,
+   flagged): from a debug build it now opens the real-VARIANT store
+   INSIDE the debug container — an empty store, never her corpus,
+   because sandbox isolation now enforces what the fence promised.
+   If she ever wants a debug build over her actual corpus, that now
+   takes deliberate effort (temporary local revert of the Debug id,
+   or a store copy). Recorded as a strengthening; hers to revisit.
+3. *Keychain separation*: the debug-identity app can no longer read
+   the release app's auth items (ACLs ride the app's designated
+   requirement) — a dev-run app starts signed out. Consistent with
+   A4 (dev-store sessions never pair with the production mirror
+   anyway); tests mint their own items and were never entitled to
+   hers.
+
+**Traps discovered (for every later batch):**
+- The tight pgrep pattern (`Variorum.app/Contents/MacOS`) ALSO
+  matches the DerivedData test host while a suite runs — a mid-run
+  check shows two entries; discriminate by path (`/Applications` =
+  hers/real-store) exactly as the store-not-path rule says.
+- The SPM release-mode-under-custom-configs trap above — binding on
+  any future "just add a Test configuration" idea.
+- Suites now running beside her writing WILL briefly show the test
+  host in the Dock and may flash test windows (the bare-NSWindow
+  suites create real windows); accepted as the ratified trade — but
+  batches should still prefer zero-instance windows for runs that
+  measure timing-sensitive settle behavior, since contention is now
+  possible by design.
