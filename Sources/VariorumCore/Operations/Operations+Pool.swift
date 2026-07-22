@@ -41,8 +41,13 @@ extension Operations {
             let now = date.now
             // Phase 13 (A2): the copy is a copy — the callout frame rides
             // (identity-level metadata, the block-name/copyPost family).
+            // 13b Stage 4 (4D — S4-27e, her ruling): the NAME rides too. The
+            // recorded pre-13 asymmetry dies: a named scrap dragged into a
+            // draft keeps its name, consistent with duplicateAsVersion /
+            // promoteLens (identity-level metadata travels with the copy).
             var copy = Block(
                 id: newID(), ownerId: currentOwnerID(),
+                name: source.name,
                 presentation: source.presentation, createdAt: now, updatedAt: now)
             try copy.insert(db)
 

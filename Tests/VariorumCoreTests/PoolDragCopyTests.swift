@@ -85,6 +85,36 @@ struct PoolDragCopyTests {
         }
     }
 
+    /// 13b Stage 4 (4D — S4-27e, her ruling): `poolDragCopy` copies the
+    /// block's NAME too. RED-ON-OLD: before this change the copy's `name`
+    /// was nil (the recorded pre-13 asymmetry — presentation and comments
+    /// rode, the name did not); verified by behavioral revert of the one
+    /// `name: source.name` line. Consistent with duplicateAsVersion /
+    /// promoteLens (identity-level metadata travels with the copy).
+    @Test func poolDragCopyCopiesTheBlockName() throws {
+        try withOperations { ops, db in
+            let world = try PoolWorld(ops)
+            try ops.setBlockName(world.p.block.id, name: "the harbor scrap")
+
+            // Default copy carries the name…
+            let copy = try ops.poolDragCopy(
+                world.p.block.id, to: world.post.id, at: .after(world.anchor.block.id))
+            #expect(copy.block.name == "the harbor scrap")
+            // …and so does an includeFan copy.
+            let fanCopy = try ops.poolDragCopy(
+                world.p.block.id, to: world.post.id, includeFan: true)
+            #expect(fanCopy.block.name == "the harbor scrap")
+
+            // The source keeps its own name (a copy, never a move)…
+            #expect(try db.fetchString(
+                "SELECT name FROM block WHERE id = ?", [world.p.block.id]) == "the harbor scrap")
+            // …and an unnamed scrap still copies as unnamed (no invention).
+            let unnamed = try ops.newBlock(in: world.pool.id, text: "nameless.")
+            let unnamedCopy = try ops.poolDragCopy(unnamed.block.id, to: world.post.id)
+            #expect(unnamedCopy.block.name == nil)
+        }
+    }
+
     @Test func poolDragCopyTouchesTheTargetPostWithoutReshuffling() throws {
         try withOperations { ops, db in
             let world = try PoolWorld(ops)
