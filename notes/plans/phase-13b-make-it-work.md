@@ -7299,3 +7299,103 @@ CGFloat/AnyHashable trap recorded where the next author meets it).
 
 **No round 4** — round 3 is the ladder's cap; these fixes land post-cap
 per the standing pattern (the Phase 9 / 11a / 13 precedent).
+
+### The gate execution record — Part A/B (2026-07-22, a fresh Opus implementer session under the Fable-exhaustion contingency; the session was UNLOCKED and the Mac suite RAN)
+
+*Scope note: this section carries ONLY the post-cap fix pass (Part A) and
+the revert-red executions (Part B). The gate record's other parts — the
+three failure traces, the corrected count decomposition, and the
+visual-loop disposition (discharged by REASSIGNMENT to the author's
+standalone Design & UI review row) — are the orchestrator's, in the
+closeout.*
+
+**Environment at execution:** login session unlocked; `pgrep -fl
+'Variorum.app/Contents/MacOS'` empty at start (no real-store instance);
+macOS 26.5.2. Baseline at open: Mac **645/122**, core **817/96**. No
+Release build, no `/Applications` refresh, no mirror touch. Core
+constraint held: `git diff` over `Sources/ Tests/ Package.swift` EMPTY at
+every commit and at close (one temporary core revert executed and
+restored — Part B, procedure 4A-b′; verified byte-identical after).
+
+#### Part A — the round-3 post-cap fixes (3 commits)
+
+| Finding | Disposition as built | Commit | Pins |
+|---|---|---|---|
+| **MINOR-B** (Compare's anchor/peer flush asymmetry) | The BEHAVIOR stands (the reviewer's and the architect's judgement: the anchor genuinely IS bounded by every aligned row — its pending blocks precede this anchor block in the anchor's own order, and the anchor's order is the board's spine). The PROMISE was what was wrong: the flush comment now states the asymmetry and its accepted consequence (material that would once have shared one packed segment can split into two sparser ones), with the reviewer's traced composition written out. | `6e8c346` | `theAnchorFlushesAtEveryAlignedRowWhileAPeerRunWaits` — anchor `[A,B,C]`, peer0 `[P1x, C1']` kin C, peer1 `[B2']` kin B ⇒ the shipped 4 segments `free[A|—|—] · aligned(B) · free[—|P1x|—] · aligned(C)`. Flipping either half of the rule reds it (verified: RED under the 4C(b) revert). |
+| **MINOR-C** (the zero-kinship peer's placement) | Recorded as a **PROVISIONAL** — behavior UNCHANGED — at the site (`CompareComposition.segments`' doc) and in the 4C section below; the author's call at the 13c kickoff. | `6e8c346` | `aPeerWithNoKinshipAtAllTrailsEveryAlignedRow` — anchor `[A,B]`, peer0 `[U1,U2]` zero kinship, peer1 `[A'']` kin A ⇒ the shipped `aligned(A) · free[B | U1,U2 | —]` (2 segments; the unrelated column's material begins after every aligned row). |
+| **MINOR-D + E + F** (PaneSurface hardening) | The STRUCTURAL shape, one commit: **`PanePublisher`** — every state write the pane coordinator makes leaves through one door, so a publish added later inherits the discipline instead of needing a hand-added repair (D). Each publish writes SYNCHRONOUSLY (the common working path) and is re-made on a later main-queue turn; deferred turns **COALESCE** — one per turn however many publishes of either kind fired, which is F's un-coalesced canary echo dead. The height re-publish is a real **convergence loop** (E): re-measure → compare against what the pane RENDERS (`view.bounds.height`, the compare soak's own 3pt slack) → re-schedule while short, **BOUNDED** at `healTurnBudget = 3` (one turn carries the ordinary case; three covers a second dropped write plus a layout settle; a shortfall surviving the budget is structural — a composer constraining the frame — and an unbounded loop would spin the main queue for the pane's life). `invalidate()` drops every closure and pending duty at dismantle. | `120c418` | New suite `PanePublishDoorTests` (5, manual scheduler — no RunLoop pumping): coalescing (3 publishes ⇒ 1 turn, exactly 1 canary echo); the heal retries the whole budget and no further while the frame stays short; it stops the moment the frame converges within slack; a DROPPED sync write is re-published and lands; an invalidated publisher writes nothing. **Honestly unpinnable, stated in the file:** that SwiftUI actually drops a write made during a view-update pass is framework behavior — the pins SIMULATE the drop; the real-mount evidence stays the compare soak's height invariant (green in the final run). |
+| **NIT-A** | One paragraph in `PaneSurface.swift`'s measurement-discipline header: why a full-document `ensureLayout` is legitimate there (every composer passes ONE take's / one post-read's text ⇒ pane-scale by construction; the full-document editor uses its own coordinator), so the heal's repeat measurement is P1-safe and bounded regardless. | `120c418` | — (documentation) |
+| **NIT-B** | The `CGFloat`/`AnyHashable` trap recorded where the next test author meets it: a **test-conventions header** in `EditorTestSupport.swift` (type both sides of a numeric `#expect`; the fix is never a tolerance) + a pointer from the live example (`theGridStartsBelowThePositionedBoundingBox`). The reviewer's swept fact rides both: the INVERSE hole — a mismatched `#expect(a != b)` is silently TRUE, i.e. a hollow pin — and the sweep found the repo CLEAN of it. | `bf47b7e` | — (documentation) |
+
+#### Part B — the revert-red executions (the gate's part 4)
+
+Method per procedure: clean tree → apply the recorded revert → `build-for-testing` → run the named pin(s) suite-level → confirm RED against the recorded expected evidence → `git checkout HEAD --` → verify byte-identical. **18 procedures executed; 18 confirmed RED.** Two recorded procedures did not exercise their named pin and one recorded expected-red is over-broad — all three recorded below as findings, none papered over, none "fixed" by weakening a pin.
+
+| # | Procedure (as recorded) | Revert applied | RED evidence observed | Restored |
+|---|---|---|---|---|
+| R-1 | round-1 MINOR-2: delete the three new `OpsRefusalCopy` cases | `git checkout 7521ff2~1 --` OpsRefusalCopy.swift (+ShelfView/BookView, disjoint pins) | `stage4RefusalCopyCarriesNoEnumDump` 6 issues (`"Refused: readingNotDeleted(id: \"r1\")"`, `readingNotFound`, `invalidExtent` — dump + prefix per case); the STRENGTHENED `theDeletedBooksDoorRestoresThroughTheModel` 2 issues (`!contains("readingNotDeleted")` and `contains("already restored")`) | ✓ |
+| R-2 | round-1 sweep: drop `value > 0` from `ExtentInput.parse` | same checkout (ShelfView hunk) | `extentInputDistinguishesClearFromTypo`: `parse("0") → .value(0)`, `parse("-5") → .value(-5)`, both `!= nil` | ✓ |
+| R-3 | round-1 NIT-1: delete `releaseLivePane` + its two call sites | `git checkout 2283d5e~1 --` CompareBoardView.swift | `removingOrReplacingTheLiveColumnsPeerReleasesTheRing` 3 issues — `livePane` still keyed to the removed context on BOTH the remove and replace paths, and the dirty buffer's landed text lost (`"First block of the piece."` where the typed text was expected) | ✓ |
+| 4A-a | restore `snapToInteriorBoundary`/`snapSpan` to the `.sentence`-only bodies | surgical (both function bodies) | `aOneSentenceBlockNowDividesBetweenWords` (`.refusal(.nothingToDo)` vs divide@9); `aLateStartInTheFinalSentenceExtractsAtTheWordEdge` (refusal vs extract); `aLateStartSelectionInTheExtractLessonNowPlansAnExtract` (tutorial). The recorded justified pin EDITS also red exactly as predicted: `caretNearTheStart…` 16 vs 6, `paragraphMarksAreLegalCutsToo` 11 vs 5, `sentenceEndsStillPullThePlannerSnap` 16 vs 23 | ✓ |
+| 4A-a′ | **FINDING (mis-attributed procedure, resolved):** `aFannedOneWordBlockStillOpensTheCeremonyUnseeded` stayed GREEN under 4A-a — its mechanism is the `divideW` nil-seed arm, a different hunk of the same commit, not the snap bodies. Supplementary revert executed to prove it is not hollow: restore the pre-fan `guard let cut else { return .refusal(.nothingToDo) }` ordering | surgical (planner divide arm) | RED: `.refusal(.nothingToDo)` where `.divideW(activeCut: nil)` is expected | ✓ |
+| 4A-b | restore `legalCutPositions` to the interior filter | surgical (`EditorSurfaceController.legalCutPositions`) | `placeWCutAcceptsParkingPositions` 4 issues (cut stays 13; `parkedAtEnd`/`parkedAtStart` false — the placements no-op); `allTakesParkedAtOneEndGateConfirmWithHonestCopy` 4 issues (`canConfirm` still true; `confirmBlocker` nil); `confirmWithAParkedTakeRidesItWholeIntoOneSuccessor` 2 issues (the parked take split instead of riding whole). `legalCutPositionsIncludeTheParkingEndsAndRefuseEmptyText` reds with them | ✓ |
+| 4A-b′ | **FINDING (mis-attributed procedure, resolved):** `theCeremonyParksATakeAndItRidesWholeIntoTheFirstBlock` (TutorialWalkTests) stayed GREEN under 4A-b — it calls the ops layer directly with cuts, bypassing the sheet's legal set, so its mechanism is the CORE `divideW` parking arms. Supplementary revert executed (the 4A record's own core behavioral revert, re-applied to attribute the Mac pin) | `Sources/VariorumCore/Operations/Operations+Structural.swift` — the two parking arms short-circuited (temporary; restored, core diff verified EMPTY) | RED: `Caught error: invalidCut(variantID: …, cut: 99)` | ✓ |
+| 4B | restore the pre-4B `.merge` case body (delete the arity branch; always instant-merge) | surgical (`EditorSurfaceController.applyStructural`) | All five recorded pins RED on their `mergeCeremony != nil` expectations — `aFannedMergeOpensTheCeremonyPrePaired`, `confirmingThePrePairedSheetReproducesTheInstantOutcome` (+ undo label `"Merge"` vs `"Merge Takes"`), `aPairingPlusCarryMintsBothTakes` (+ arity 1 vs 2), `confirmRefusesToJoinDriftedText`, `theSessionRemembersTheLastConfirmedJoin`; plus `pairingMutationsKeepArityAndCarryExclusive` and the edited `mergeOnFannedBlocksSpeaksAboutTheFan` (BoundaryFluidityTests), exactly as the record predicted | ✓ |
+| 4C-a | drop the `"Outline"` mapping in `PostMode.fromStored` | surgical | `aRememberedOutlineModeMigratesToCompare`: `fromStored("Outline") → nil` and `rememberedMode → .write` (the stranding the brief forbids) | ✓ |
+| 4C-b | force every anchor row aligned (the OLD gap-parade shape) | surgical, TWO arms — see the finding | `partialRelationshipAlignsOnlyWhereLineageSpeaks` (5 segments vs 4; the free stretch became aligned rows with empty peerKin) under arm A alone; with BOTH arms (the free-packing branch AND the zero-kinship short-circuit) also `zeroLineagePacksOneFreeSegment` (3 aligned rows + a free tail vs one free segment) and `compareHonestyHoldsOnTheLessonsOwnContent` (5 aligned rows of empty cells — the gap parade, verbatim). Both round-3 pins (MINOR-B/C) red with them | ✓ |
+| 4C-b **FINDING** | The recorded expected-red list is over-broad in two ways, recorded honestly: **(i)** arm A alone cannot red the zero-lineage pins — the `guard anyKin` short-circuit returns before the branch, so the honest revert is BOTH arms (executed; see above); **(ii)** `outlineBesideItsDraftRegistersThroughLineageInCompare`'s free-row expectation stays GREEN under both arms — its fixture has kin on EVERY anchor row, and the free row it asserts is a peer's trailing orphan run, which both versions emit identically. That expectation is a CONTRACT pin over the new brain (there is no pre-4C composition to run red), not red-on-old. Not hollow — it discriminates the trailing-orphan behavior — but the record's attribution was wrong | — | — | — |
+| 4D-1 | S4-20 flip: restore `?? .takes` (+ the `.takes` initial state) | surgical (`PostDetailView`) | `aPostOpensInWriteFirstThenWhereItWasLeft` — all three `.write` expectations read `.takes` | ✓ |
+| 4D-2 | S4-19 hover: restore `renderHandles`' pre-4D body | surgical (`BlockDecor`) | `hoverRevealsTheHoveredBlocksHandleUnderTheSetting` — `handles() → 0` at both hover-reveal expectations (seams off ⇒ no handle); the seams-on line stayed green | ✓ |
+| 4D-3 | N35 chip: delete the `renderAddChip` call | surgical (`BlockDecor`) | `theMarginOffersAddACommentAtTheCaretBlock` — `addChipBlockID → nil` at both (`"b0"`, `"b1"`) | ✓ |
+| 4D-4 | N40/S4-24: restore the windowed rail render | surgical, mechanism-isolating (the `ForEach` iterates `columns.dropFirst(offset).prefix(gridCols)` again; the scroll wrapper left in place so the file compiles — a deviation from "restore the whole pre-4D body", recorded) | `everyTakeOfAFourTakeFanIsACardOnSomeExplicitPage` — `Set(strip)` holds 2 of 4 takes; `strip.count → 2` vs 4 (the old window renders 2 of 4, verbatim as recorded) | ✓ |
+| 4D-5 | Compare ⌘S: restore `availability: takeFamily` | surgical (`CapabilityRegistry.takeFamilyPlusEditableBoards`) | `commitActsWhereverAdvertisedAndNowhereElse` — the COMPARE line fails (`isEnabled(.commitTake, mode: .compare)`) | ✓ |
+| 4D-6 | N32(a): the pre-4D SILENT success | surgical (`BlockTOCView.moveToPool` — the status message removed) | `namingMovingToPoolAndExpansionBehave` — `statusMessage?.contains("LEFT this post") → nil` | ✓ |
+| 4E-a | spread grid → the A7 stack (`x:20, y:20+index*90`) | surgical (`CanvasViewModel.restingPosition`) | `spreadGridDefaultsReplaceThePileAndNothingPersists` 6 issues — one distinct minX (the single left column) and five overlapping frame pairs (the PILE, proven) | ✓ |
+| 4E-b | realization → the eager `visibleCards` | surgical (`realizedCards`) | `aLongPostsMountRealizesABoundedSetNotEveryCard` (80 of 80 realized, twice); `aMountedLongPostRealizesABoundedCardSet` (hosted: 300 realized, materialization counter 600) — the recorded ≥300 first-pass figure exceeded | ✓ |
+| 4E-c | drop the `authority.livePane?.blockID == id` arm | surgical (`realizedCards`) | `theLivePanesCardSurvivesDerealization` — RED at the exemption expectation (line 528) ONLY; the culled-set-left-it expectation (532) stayed green, so the pin discriminates the mechanism exactly as recorded | ✓ |
+| 4E-d | remove `|| ctx.mode == .canvas` | executed with 4D-5 (same declaration, separate expectations) | `commitActsWhereverAdvertisedAndNowhereElse` — the CANVAS line fails | ✓ |
+| 4F | — | — | **Nothing to execute:** the 4F record's app-side evidence is contract pins by its own honest classification (paged view, progress brain, target faces, recovery surface — new capabilities with no pre-4F behavior); its core reverts were EXECUTED inline at build time | — |
+
+**Findings from Part B, stated plainly (none of them hollow pins):**
+1. **Two recorded procedures were mis-attributed** — 4A(a)'s
+   `aFannedOneWordBlockStillOpensTheCeremonyUnseeded` (its mechanism is
+   the `divideW` nil-seed arm) and 4A(b)'s tutorial parking pin (its
+   mechanism is the CORE parking arms, reached directly through ops).
+   Both were proven red by supplementary reverts against their real
+   mechanisms; the pins are sound, the recorded procedures were not.
+2. **One recorded expected-red is over-broad** — 4C(b) as written cannot
+   red the zero-lineage pins (the `guard anyKin` short-circuit precedes
+   the branch; BOTH arms are the honest revert, executed), and
+   `outlineBesideItsDraftRegistersThroughLineageInCompare` is a contract
+   pin, not red-on-old, for the traced reason above.
+3. **One deliberate deviation in method** — 4D-4's revert isolates the
+   mechanism (windowed render) rather than restoring the whole pre-4D
+   body, so the file still compiles against 4E/4F's later changes; the
+   red evidence matches the record's expectation exactly (2 of 4).
+
+#### Counts from this session's own runs (not inherited)
+
+- **Mac: 652 tests / 123 suites GREEN** ("Test run with 652 tests in 123
+  suites passed after 59.3s"), the clean tree at `bf47b7e`. Arithmetic
+  on the round-3 reviewer's verified 645/122: **+7 tests** (2 compare
+  composition pins, 5 `PanePublishDoorTests`), **+1 suite**
+  (`PanePublishDoorTests`) — the corrected decomposition discipline
+  applied to this session's own additions.
+- **core: 817 tests / 96 suites GREEN** (`swift test`, unchanged — the
+  core diff is empty).
+- mobile 11/4 untouched (no mobile-facing change; nothing in `Shared/`).
+
+#### For the orchestrator
+
+- The gate's part 4 is DISCHARGED with the table above; the three
+  findings are the honest residue and want a line in the closeout (they
+  are documentation-accuracy findings about the batch records'
+  procedures, not code defects).
+- `/Applications` refresh, the Release build, the mirror deploy, and the
+  field-guide re-seed remain untouched and owed — deliberately not run
+  here.
+- The MINOR-C PROVISIONAL is now recorded in three places (the code
+  site, the pin, and this record) and is on the 13c kickoff's ask list:
+  should a peer with NO kinship at all flush at the first bound (as the
+  whole-board zero-lineage case does) instead of trailing every aligned
+  row?
