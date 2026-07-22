@@ -126,6 +126,12 @@ struct EditorView: View {
             // dismissal other than Confirm is a cancel — no rows touched.
             DivideWSheet(model: model, presented: state)
         }
+        .sheet(item: $model.mergeCeremony) { state in
+            // The merge ceremony (13b Stage 4, 4B — the W's mirror,
+            // S4-23): one sheet; any dismissal other than Merge is a
+            // cancel — no rows touched.
+            MergeCeremonySheet(model: model, presented: state)
+        }
         .alert(
             "Make one block across boundaries?",
             isPresented: Binding(

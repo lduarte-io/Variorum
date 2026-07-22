@@ -286,19 +286,26 @@ final class EditorSurfaceController {
             }
 
         case .merge(let leadingIndex, let trailingIndex, let leadingID, let trailingID):
-            let trailingLength = model.index.entries[trailingIndex].length
-            // #11c (the sitting ruling, 2026-07-13): merge on fanned blocks
-            // SPEAKS about what it does to the fan.
-            let otherTakes = mergedAwayTakes([leadingIndex, trailingIndex])
-            let landed = await runStructural { ops in
-                let result = try ops.merge(leadingID, trailingID)
-                // Caret at the join: right where the trailing half begins.
-                let join = max(0, result.variant.workingText.utf16.count - trailingLength)
-                return StructuralOutcome(
-                    caretBlockID: result.block.id, caretOffset: join,
-                    seam: .merge(leadingIndex: leadingIndex, mergedID: result.block.id))
+            // The ceremony threshold (13b 4B — S4-23 ruling 4): ANY fan on
+            // either side opens the merge ceremony, PRE-PAIRED with the two
+            // rendered takes so ⏎ immediately reproduces the instant
+            // outcome — the silent-vanish experience cannot recur. Unfanned
+            // pairs keep the instant path byte-unchanged. (The slots' arity
+            // is the door's cheap gate; the open re-reads the true fans and
+            // falls back to the instant path if the projection was stale.)
+            let leadingArity = leadingIndex < model.slots.count
+                ? model.slots[leadingIndex].activeVariantCount : 1
+            let trailingArity = trailingIndex < model.slots.count
+                ? model.slots[trailingIndex].activeVariantCount : 1
+            if leadingArity > 1 || trailingArity > 1 {
+                await openMergeCeremony(
+                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
+                    leadingID: leadingID, trailingID: trailingID)
+            } else {
+                await runInstantMerge(
+                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
+                    leadingID: leadingID, trailingID: trailingID)
             }
-            if landed { speakAboutMergedFans(otherTakes) }
 
         case .makeBlockAcrossBlocks(let indices, let blockIDs, let startCut, let endCut):
             // Phase 11, A9 (the guided flow — the v1 refusal becomes a
@@ -369,6 +376,325 @@ final class EditorSurfaceController {
                     + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes)."
                 : "Merged the visible takes — \(otherTakes) other takes stay with the released blocks "
                     + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes).")
+    }
+
+    /// The everyday instant merge — today's exact `.merge` body, byte-
+    /// unchanged (13b 4B moved it behind the ceremony threshold; unfanned
+    /// pairs and the stale-projection fallthrough land here).
+    private func runInstantMerge(
+        leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
+    ) async {
+        let trailingLength = model.index.entries[trailingIndex].length
+        // #11c (the sitting ruling, 2026-07-13): merge on fanned blocks
+        // SPEAKS about what it does to the fan.
+        let otherTakes = mergedAwayTakes([leadingIndex, trailingIndex])
+        let landed = await runStructural { ops in
+            let result = try ops.merge(leadingID, trailingID)
+            // Caret at the join: right where the trailing half begins.
+            let join = max(0, result.variant.workingText.utf16.count - trailingLength)
+            return StructuralOutcome(
+                caretBlockID: result.block.id, caretOffset: join,
+                seam: .merge(leadingIndex: leadingIndex, mergedID: result.block.id))
+        }
+        if landed { speakAboutMergedFans(otherTakes) }
+    }
+
+    // MARK: - The merge ceremony (13b Stage 4, Batch 4B — S4-23, ruled)
+
+    /// The merge ceremony's ONE sheet: both blocks' takes side by side,
+    /// ＋ pairings placed by hand, carry checkboxes, stay-behind default —
+    /// the W's mirror. Non-nil = the sheet is up; opening touches no rows;
+    /// cancel sets nil; confirm funnels through the one structural door
+    /// into `Operations.mergeCeremony`.
+    var mergeCeremony: MergeCeremonyState?
+
+    struct MergeCeremonyState: Equatable, Identifiable {
+        let firstBlockID: String
+        let secondBlockID: String
+        /// The rendered take of each side at open time — the default
+        /// pre-pairing's parts (S4-23 ruling 4: ⏎ = today's exact outcome).
+        let firstRenderedID: String?
+        let secondRenderedID: String?
+        var firstTakes: [MergeTake]
+        var secondTakes: [MergeTake]
+        /// Ordered — sheet order IS the operation's pairing order (the
+        /// chosen rule's fallback reads it).
+        var pairings: [MergePairingDraft]
+        var id: String { firstBlockID + "+" + secondBlockID }
+
+        func take(_ id: String) -> MergeTake? {
+            firstTakes.first { $0.id == id } ?? secondTakes.first { $0.id == id }
+        }
+
+        func isPaired(_ takeID: String) -> Bool {
+            pairings.contains { $0.firstVariantID == takeID || $0.secondVariantID == takeID }
+        }
+
+        /// The columns show UNPAIRED takes; paired ones render in the
+        /// pairings section (a take sits in exactly one place).
+        var unpairedFirst: [MergeTake] { firstTakes.filter { !isPaired($0.id) } }
+        var unpairedSecond: [MergeTake] { secondTakes.filter { !isPaired($0.id) } }
+
+        var carriedIDs: [String] {
+            (firstTakes + secondTakes).filter(\.carried).map(\.id)
+        }
+
+        /// Takes that stay with the released sources in lineage on confirm.
+        var stayBehindCount: Int {
+            (firstTakes + secondTakes).count - 2 * pairings.count - carriedIDs.count
+        }
+
+        /// Confirm gates on I10 at birth, with the reason spoken (the
+        /// architect's precision): the merged block must receive at least
+        /// one take. The op's `mergedBlockWouldHaveNoTake` is the belt.
+        var confirmBlocker: String? {
+            if pairings.isEmpty && carriedIDs.isEmpty {
+                return "Nothing would land on the merged block — pair takes with ＋, or check “carry” on at least one."
+            }
+            return nil
+        }
+
+        var canConfirm: Bool { confirmBlocker == nil }
+    }
+
+    struct MergeTake: Equatable, Identifiable {
+        let variant: Variant
+        var carried = false
+        var id: String { variant.id }
+    }
+
+    struct MergePairingDraft: Equatable, Identifiable {
+        let firstVariantID: String
+        let secondVariantID: String
+        var join: MergeJoin
+        var id: String { firstVariantID + "+" + secondVariantID }
+    }
+
+    /// Builds the ceremony over the two blocks' live ACTIVE fans, pre-
+    /// paired with the two rendered takes (ruling 4) under the session-
+    /// remembered join or the canon default (ruling 3). The buffer flushes
+    /// first so every take's stored text — what the sheet shows and the op
+    /// will join — matches the surface. No rows are touched by opening.
+    /// If the true fans turn out unfanned (the slots' arity was a stale
+    /// projection), the instant path runs instead — the threshold rule
+    /// reads truth, not the projection.
+    private func openMergeCeremony(
+        leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
+    ) async {
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        do {
+            let (firstFan, secondFan) = try await model.session.database.read { db in
+                (try Queries.blockFan(db, blockID: leadingID)
+                    .filter { $0.deletedAt == nil && $0.status == .active },
+                 try Queries.blockFan(db, blockID: trailingID)
+                    .filter { $0.deletedAt == nil && $0.status == .active })
+            }
+            guard firstFan.count > 1 || secondFan.count > 1 else {
+                await runInstantMerge(
+                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
+                    leadingID: leadingID, trailingID: trailingID)
+                return
+            }
+            let firstRenderedID = model.index.entries
+                .first { $0.blockID == leadingID }?.variantID
+            let secondRenderedID = model.index.entries
+                .first { $0.blockID == trailingID }?.variantID
+            var state = MergeCeremonyState(
+                firstBlockID: leadingID, secondBlockID: trailingID,
+                firstRenderedID: firstRenderedID, secondRenderedID: secondRenderedID,
+                firstTakes: firstFan.map { MergeTake(variant: $0) },
+                secondTakes: secondFan.map { MergeTake(variant: $0) },
+                pairings: [])
+            // The default pre-pairing: the two RENDERED takes, joined by
+            // the remembered choice or the canon rule — confirming
+            // immediately IS current behavior.
+            if let head = firstFan.first(where: { $0.id == firstRenderedID }),
+               let tail = secondFan.first(where: { $0.id == secondRenderedID }) {
+                state.pairings = [MergePairingDraft(
+                    firstVariantID: head.id, secondVariantID: tail.id,
+                    join: model.session.mergeJoinMemory
+                        ?? MergeJoin.canon(head: head.workingText, tail: tail.workingText))]
+            }
+            mergeCeremony = state
+        } catch {
+            model.showOperationError(error)
+        }
+    }
+
+    /// Places a ＋ between two takes (one from each column). A newly paired
+    /// take stops carrying — paired and carried are exclusive (the op's
+    /// 1:1 arity, mirrored here so the sheet can never request a refusal).
+    func pairMergeTakes(firstID: String, secondID: String) {
+        guard var state = mergeCeremony,
+              let head = state.firstTakes.first(where: { $0.id == firstID }),
+              let tail = state.secondTakes.first(where: { $0.id == secondID }),
+              !state.isPaired(firstID), !state.isPaired(secondID)
+        else { return }
+        setMergeCarried(&state, takeID: firstID, carried: false)
+        setMergeCarried(&state, takeID: secondID, carried: false)
+        state.pairings.append(MergePairingDraft(
+            firstVariantID: firstID, secondVariantID: secondID,
+            join: model.session.mergeJoinMemory
+                ?? MergeJoin.canon(
+                    head: head.variant.workingText, tail: tail.variant.workingText)))
+        mergeCeremony = state
+    }
+
+    func removeMergePairing(_ pairingID: String) {
+        guard var state = mergeCeremony else { return }
+        state.pairings.removeAll { $0.id == pairingID }
+        mergeCeremony = state
+    }
+
+    func setMergeJoin(pairingID: String, join: MergeJoin) {
+        guard var state = mergeCeremony,
+              let i = state.pairings.firstIndex(where: { $0.id == pairingID }) else { return }
+        state.pairings[i].join = join
+        mergeCeremony = state
+    }
+
+    func toggleMergeCarry(_ takeID: String) {
+        guard var state = mergeCeremony, !state.isPaired(takeID) else { return }
+        let carried = state.take(takeID)?.carried ?? false
+        setMergeCarried(&state, takeID: takeID, carried: !carried)
+        mergeCeremony = state
+    }
+
+    private func setMergeCarried(
+        _ state: inout MergeCeremonyState, takeID: String, carried: Bool
+    ) {
+        if let i = state.firstTakes.firstIndex(where: { $0.id == takeID }) {
+            state.firstTakes[i].carried = carried
+        }
+        if let i = state.secondTakes.firstIndex(where: { $0.id == takeID }) {
+            state.secondTakes[i].carried = carried
+        }
+    }
+
+    /// Cancel does nothing — no rows were touched by the ceremony.
+    func cancelMergeCeremony() {
+        mergeCeremony = nil
+    }
+
+    func confirmMergeCeremony() async {
+        guard let state = mergeCeremony, state.canConfirm else { return }
+        // The one-flight door, checked synchronously BEFORE any await (the
+        // W confirm's discipline): refuse visibly and KEEP the ceremony.
+        guard !structuralInFlight else {
+            model.refuseFeedback("Another structural change is still landing.")
+            return
+        }
+        // The sheet may have sat open while a sync round landed edits (the
+        // W confirm's drift class): the previews and the canon-default
+        // joins were derived from SNAPSHOT texts. Verify both fans against
+        // the CURRENT store first; on any drift, refresh the ceremony
+        // (pairings and carries kept by take identity, previews re-derived)
+        // instead of confirming what the author wasn't shown.
+        do {
+            let (firstFan, secondFan) = try await model.session.database.read {
+                db -> ([Variant], [Variant]) in
+                (try Queries.blockFan(db, blockID: state.firstBlockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active },
+                 try Queries.blockFan(db, blockID: state.secondBlockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active })
+            }
+            let snapshot = Dictionary(uniqueKeysWithValues:
+                (state.firstTakes + state.secondTakes).map { ($0.id, $0.variant.workingText) })
+            let current = firstFan + secondFan
+            let drifted = current.count != snapshot.count
+                || current.contains { snapshot[$0.id] != $0.workingText }
+            if drifted {
+                refreshMergeCeremony(from: state, firstFan: firstFan, secondFan: secondFan)
+                return
+            }
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+        let pairings = state.pairings.map {
+            Operations.MergePairing(
+                firstVariantID: $0.firstVariantID,
+                secondVariantID: $0.secondVariantID,
+                join: $0.join)
+        }
+        let carries = state.carriedIDs
+        let stayBehind = state.stayBehindCount
+        let landed = await runStructural { ops in
+            let result = try ops.mergeCeremony(
+                state.firstBlockID, state.secondBlockID,
+                pairings: pairings, carries: carries)
+            // seam nil: ceremonial acts re-render fully from the store —
+            // the permanent shape (author, 2026-07-07); caret at the
+            // merged block's start (the W confirm's precedent).
+            return StructuralOutcome(
+                caretBlockID: result.block.id, caretOffset: 0, seam: nil)
+        }
+        // The sheet dismisses only when the merge LANDED — a refusal keeps
+        // the ceremony and its pairings for the author.
+        if landed {
+            mergeCeremony = nil
+            // Ruling 3: the session remembers the last CONFIRMED join.
+            // Mechanical rule (recorded): when the confirmed pairings agree
+            // on one join it is remembered; a mixed sheet leaves the memory
+            // unchanged; carry-only confirms carry no join to remember.
+            let joins = Set(pairings.map(\.join))
+            if joins.count == 1, let only = joins.first {
+                model.session.mergeJoinMemory = only
+            }
+            speakAboutStayBehindTakes(stayBehind)
+        }
+    }
+
+    /// The ceremony's lineage-road speech (the instant path keeps its
+    /// "visible takes" copy verbatim — this is the pairing wording of the
+    /// same promise; the road survives on BOTH paths).
+    private func speakAboutStayBehindTakes(_ count: Int) {
+        guard count > 0 else { return }
+        model.showTransientStatus(
+            count == 1
+                ? "Merged — 1 take stays with the released blocks in lineage "
+                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes)."
+                : "Merged — \(count) takes stay with the released blocks in lineage "
+                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes).")
+    }
+
+    /// Rebuilds the ceremony over the CURRENT fans: carries survive by
+    /// take identity, pairings survive where BOTH sides still live, joins
+    /// are kept (the author chose them), previews re-derive from the new
+    /// texts. The author reviews and confirms again — nothing is joined
+    /// from a drifted snapshot.
+    private func refreshMergeCeremony(
+        from state: MergeCeremonyState, firstFan: [Variant], secondFan: [Variant]
+    ) {
+        guard !firstFan.isEmpty, !secondFan.isEmpty,
+              firstFan.count > 1 || secondFan.count > 1
+        else {
+            // A side dissolved (or both fans folded to singles): the
+            // ceremony no longer applies — re-invoke and the door
+            // re-decides against truth.
+            mergeCeremony = nil
+            model.showStatus("These blocks' takes changed — try the merge again.")
+            return
+        }
+        let carried = Set(state.carriedIDs)
+        var next = MergeCeremonyState(
+            firstBlockID: state.firstBlockID, secondBlockID: state.secondBlockID,
+            firstRenderedID: state.firstRenderedID,
+            secondRenderedID: state.secondRenderedID,
+            firstTakes: firstFan.map { MergeTake(variant: $0, carried: carried.contains($0.id)) },
+            secondTakes: secondFan.map { MergeTake(variant: $0, carried: carried.contains($0.id)) },
+            pairings: [])
+        let firstIDs = Set(firstFan.map(\.id))
+        let secondIDs = Set(secondFan.map(\.id))
+        next.pairings = state.pairings.filter {
+            firstIDs.contains($0.firstVariantID) && secondIDs.contains($0.secondVariantID)
+        }
+        mergeCeremony = next
+        model.showStatus("The takes changed while the sheet was open — review the pairings before merging.")
     }
 
     /// What a structural operation reports back to the rewrite path: where

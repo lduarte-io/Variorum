@@ -89,6 +89,12 @@ final class AppSession {
         return coordinator
     }
 
+    /// 13b Stage 4, Batch 4B (S4-23 ruling 3): the merge ceremony's
+    /// per-SESSION join memory — the last CONFIRMED join choice seeds the
+    /// next sheet's pairings; a fresh launch resets to the canon default
+    /// (one AppSession per launch; parallel test worlds stay independent).
+    var mergeJoinMemory: MergeJoin?
+
     /// 13b Stage 2 ladder (NIT-6): the tutorial doors' in-flight latch —
     /// a double-pressed Restore must never race two discoveries into two
     /// live field guides. Session-scoped (parallel test worlds stay

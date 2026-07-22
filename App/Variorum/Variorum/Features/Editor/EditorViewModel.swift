@@ -100,6 +100,13 @@ final class EditorViewModel {
         get { structural.divideWCeremony }
         set { structural.divideWCeremony = newValue }
     }
+    /// The merge ceremony's ONE sheet (13b Stage 4, Batch 4B — the W's
+    /// mirror, S4-23): a merge landing on a fanned pair routes here.
+    /// State OWNED by the surface controller; forwarded like the W's.
+    var mergeCeremony: MergeCeremonyState? {
+        get { structural.mergeCeremony }
+        set { structural.mergeCeremony = newValue }
+    }
 
     struct GestureAvailability: Equatable {
         var divide = false
@@ -116,6 +123,9 @@ final class EditorViewModel {
     // reference — views (DivideWSheet, EditorView) and pins — unchanged.
     typealias DivideWCeremonyState = EditorSurfaceController.DivideWCeremonyState
     typealias WTake = EditorSurfaceController.WTake
+    typealias MergeCeremonyState = EditorSurfaceController.MergeCeremonyState
+    typealias MergeTake = EditorSurfaceController.MergeTake
+    typealias MergePairingDraft = EditorSurfaceController.MergePairingDraft
     typealias StructuralOutcome = EditorSurfaceController.StructuralOutcome
     typealias CrossBlockMakeState = EditorSurfaceController.CrossBlockMakeState
     typealias CrossBlockEdit = EditorSurfaceController.CrossBlockEdit
@@ -1222,6 +1232,38 @@ final class EditorViewModel {
         await structural.confirmDivideWCeremony()
     }
 
+    // MARK: - The merge ceremony — forwards (13b Stage 4, Batch 4B; the
+    // state machine lives in `EditorSurfaceController`, the W's pattern)
+
+    func pairMergeTakes(firstID: String, secondID: String) {
+        structural.pairMergeTakes(firstID: firstID, secondID: secondID)
+    }
+
+    func removeMergePairing(_ pairingID: String) {
+        structural.removeMergePairing(pairingID)
+    }
+
+    func setMergeJoin(pairingID: String, join: MergeJoin) {
+        structural.setMergeJoin(pairingID: pairingID, join: join)
+    }
+
+    func toggleMergeCarry(_ takeID: String) {
+        structural.toggleMergeCarry(takeID)
+    }
+
+    /// Cancel does nothing — no rows were touched by the ceremony.
+    func cancelMergeCeremony() {
+        structural.cancelMergeCeremony()
+    }
+
+    func confirmMerge() {
+        Task { await confirmMergeCeremony() }
+    }
+
+    func confirmMergeCeremony() async {
+        await structural.confirmMergeCeremony()
+    }
+
     /// Context-menu items for the text view — the second door, same brain:
     /// each item's enablement is a fresh planner verdict at menu-build time.
     /// The registry ids Write's context menu renders (13b 1b — walk-
@@ -2134,6 +2176,10 @@ final class EditorViewModel {
             return "The text changed while that gesture was landing — nothing was altered; try it again on the current text."
         case .divideSideWouldBeEmpty:
             return "Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end."
+        case .mergedBlockWouldHaveNoTake:
+            return "The merged block needs at least one take — pair takes with ＋, or check “carry” on one."
+        case .takePairedTwice:
+            return "A take can sit in only one pairing (and a paired take can't also carry) — remove the duplicate first."
         default: return "The operation was refused: \(opError)"
         }
     }

@@ -354,8 +354,11 @@ struct BoundaryFluidityTests {
         }
     }
 
-    /// #11c: merge stays the explicit seam-removal gesture — and on fanned
-    /// blocks it SPEAKS about what it does to the fan.
+    /// #11c → 13b 4B (justified pin edit, S4-23 ruling 4): a merge landing
+    /// on a fanned pair now opens the merge CEREMONY instead of instantly
+    /// folding the fan away — confirming the pre-paired sheet reproduces
+    /// the old outcome, and the lineage-road speech survives on the
+    /// ceremony path (the promise this pin originally guarded).
     @Test func mergeOnFannedBlocksSpeaksAboutTheFan() async throws {
         try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { harness in
             let secondSlot = try await harness.database.read { [postID = harness.postID] db in
@@ -369,13 +372,20 @@ struct BoundaryFluidityTests {
             harness.textView.setSelectedRange(NSRange(location: 4, length: 10))
             await harness.model.invokeGesture(.mergeBlocks)
 
+            // The ceremony opened (no rows touched yet); ⏎ = the old
+            // instant outcome.
+            #expect(harness.model.mergeCeremony != nil)
+            await harness.model.confirmMergeCeremony()
+
             let slots = try await harness.database.read { [postID = harness.postID] db in
                 try Queries.renderPost(db, containerID: postID)
             }
             #expect(slots.count == 1, "merge merged")
             let status = try #require(harness.model.statusMessage)
-            #expect(status.contains("other take"),
+            #expect(status.contains("take"),
                     "the gesture SPEAKS about the fan it folded away: \(status)")
+            #expect(status.contains("Unplaced blocks"),
+                    "the lineage road stays named on the ceremony path: \(status)")
         }
     }
 

@@ -110,11 +110,21 @@ struct GestureSoakTests {
                     h.model.updateCaretContext()
                     await h.model.invokeGesture(.makeBlockFromSelection)
                 case 10:  // merge at a random caret or small selection
+                    // (13b 4B: a fanned pair opens the merge CEREMONY —
+                    // pre-paired, so confirming is today's outcome; the
+                    // soak cancels or confirms like the W's arm.)
                     let at = pick(docLength + 1)
                     let length = pick(2) == 0 ? 0 : pick(min(20, docLength - at + 1))
                     h.textView.setSelectedRange(NSRange(location: at, length: length))
                     h.model.updateCaretContext()
                     await h.model.invokeGesture(.mergeBlocks)
+                    if h.model.mergeCeremony != nil {
+                        if pick(3) == 0 {
+                            h.model.cancelMergeCeremony()
+                        } else {
+                            await h.model.confirmMergeCeremony()
+                        }
+                    }
                 case 11:  // an external write: branch a fan, or structural undo
                     await h.flush()
                     guard !h.model.autosave.isDirty, !h.model.mintInFlight else { break }
