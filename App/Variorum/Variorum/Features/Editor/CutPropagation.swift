@@ -8,8 +8,10 @@
 //  each side of the cut (clamped to grapheme boundaries and the text's
 //  edges) is located in the target take; a UNIQUE match proposes the
 //  corresponding position, snapped to the nearest legal interior boundary —
-//  the same "legal cut" the planner uses. Zero or multiple matches propose
-//  nothing: a proposal is a seed, never a guess.
+//  the same "legal cut" the planner uses (13b 4A: the ruled WORD rule with
+//  the gentle settle; proposals stay INTERIOR deliberately — parking a take
+//  at its end is a human decision, never a seed). Zero or multiple matches
+//  propose nothing: a proposal is a seed, never a guess.
 //
 
 import Foundation

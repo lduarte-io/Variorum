@@ -54,11 +54,14 @@ private func caret(_ offset: Int) -> NSRange { NSRange(location: offset, length:
 
 // Fixtures. UTF-16 landmarks are asserted in the first test so every
 // hand-computed offset below is pinned, not hoped.
-private let twoSentences = "First sentence. Second one."       // boundary at 16
+private let twoSentences = "First sentence. Second one."       // sentence boundary at 16
 private let threeSentences = "Intro clause. Middle stays here. Tail sentence."
-// boundaries at 14 and 33
-private let twoParas = "Para one.\n\nPara two."                // boundary at 11
-private let oneSentence = "Only one sentence here."            // no interior boundary
+// sentence boundaries at 14 and 33
+private let twoParas = "Para one.\n\nPara two."                // paragraph boundary at 11
+private let oneSentence = "Only one sentence here."
+// one sentence — but under the ruled word rule (13b 4A) its word edges
+// 5, 9, 18 are legal cuts; only a ONE-WORD block has no interior cut now
+private let oneWord = "Onlyword."
 
 @Suite("StructuralGesturePlanner — fixtures")
 struct PlannerFixtureTests {
@@ -71,6 +74,17 @@ struct PlannerFixtureTests {
             == [0, 11, 20])
         #expect(BoundarySnapping.boundaries(in: oneSentence, granularity: .sentence)
             == [0, 23])
+        // The word-rule landmarks (13b 4A) the updated tests lean on.
+        #expect(BoundarySnapping.boundaries(in: twoSentences, granularity: .word)
+            == [0, 6, 16, 23, 27])
+        #expect(BoundarySnapping.boundaries(in: threeSentences, granularity: .word)
+            == [0, 6, 14, 21, 27, 33, 38, 47])
+        #expect(BoundarySnapping.boundaries(in: twoParas, granularity: .word)
+            == [0, 5, 11, 16, 20])
+        #expect(BoundarySnapping.boundaries(in: oneSentence, granularity: .word)
+            == [0, 5, 9, 18, 23])
+        #expect(BoundarySnapping.boundaries(in: oneWord, granularity: .word)
+            == [0, 9])
     }
 }
 
@@ -85,22 +99,52 @@ struct PlannerDivideTests {
     }
 
     @Test func caretNearTheStartStillSnapsInterior_neverToZero() {
-        // Raw snap would choose 0 (distance 2 < 14) — divide's legal cuts
-        // are interior, so the one interior boundary wins.
+        // Raw snap would choose 0 (distance 2) — divide's legal cuts are
+        // interior, so the nearest interior one wins. 13b 4A pin edit
+        // (justified): under the word rule the nearest interior cut to
+        // caret 2 is the word edge 6, no longer the lone sentence mark 16.
         let world = makeWorld([B(twoSentences)])
         let plan = Planner.plan(.divideAtCursor, selection: caret(2), world: world)
-        #expect(plan == .divide(entryIndex: 0, blockID: "b0", snappedCut: 16))
+        #expect(plan == .divide(entryIndex: 0, blockID: "b0", snappedCut: 6))
     }
 
     @Test func paragraphMarksAreLegalCutsToo() {
+        // 13b 4A pin edit (justified): caret 3 now settles on the word
+        // edge 5 (distance 2) — the paragraph mark 11 is strong but eight
+        // units away. A caret NEAR the mark still settles onto it (the
+        // gentle pull): caret 9 → 11, not just raw-nearest.
         let world = makeWorld([B(twoParas)])
-        let plan = Planner.plan(.divideAtCursor, selection: caret(3), world: world)
-        #expect(plan == .divide(entryIndex: 0, blockID: "b0", snappedCut: 11))
+        #expect(Planner.plan(.divideAtCursor, selection: caret(3), world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 5))
+        #expect(Planner.plan(.divideAtCursor, selection: caret(9), world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 11))
     }
 
-    @Test func singleSentenceBlockHasNoLegalCut() {
+    @Test func aOneSentenceBlockNowDividesBetweenWords() {
+        // 13b 4A red-on-old pin (S4-22 — the dead end dissolves): the old
+        // rule refused .nothingToDo here; the word rule cuts at the
+        // nearest word edge (caret 10 → edge 9).
         let world = makeWorld([B(oneSentence)])
         #expect(Planner.plan(.divideAtCursor, selection: caret(10), world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 9))
+    }
+
+    @Test func sentenceEndsStillPullThePlannerSnap() {
+        // The gentle settle through the planner: caret 18 sits 2 from the
+        // strong mark 16 and 5 from the word edge 23 — 16 catches it; a
+        // caret hard against the plain edge stays there (23 exact wins).
+        let world = makeWorld([B(twoSentences)])
+        #expect(Planner.plan(.divideAtCursor, selection: caret(18), world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 16))
+        #expect(Planner.plan(.divideAtCursor, selection: caret(23), world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 23))
+    }
+
+    @Test func aOneWordBlockHasNoLegalCut() {
+        // The genuinely-empty case the refusal class shrank to (13b 4A):
+        // no interior word edge exists at all.
+        let world = makeWorld([B(oneWord)])
+        #expect(Planner.plan(.divideAtCursor, selection: caret(4), world: world)
             == .refusal(.nothingToDo))
     }
 
@@ -123,6 +167,17 @@ struct PlannerDivideTests {
         let world = makeWorld([B(twoSentences, arity: 2, locked: true)])
         let plan = Planner.plan(.divideAtCursor, selection: caret(18), world: world)
         #expect(plan == .divideW(entryIndex: 0, blockID: "b0", activeCut: 16))
+    }
+
+    @Test func aFannedOneWordBlockStillOpensTheCeremonyUnseeded() {
+        // 13b 4A red-on-old pin (the dead end gone BOTH ways): the old
+        // rule refused .nothingToDo before the fan check, so a fanned
+        // block whose rendered take was one sentence (now: one word) had
+        // no door to the ceremony at all. The ceremony opens with a nil
+        // seed — parking is a legal placement inside it (S4-22 ruling 2).
+        let world = makeWorld([B(oneWord, arity: 3)])
+        #expect(Planner.plan(.divideAtCursor, selection: caret(4), world: world)
+            == .divideW(entryIndex: 0, blockID: "b0", activeCut: nil))
     }
 
     @Test func aLockedSingleVariantBlockRefuses() {
@@ -251,6 +306,20 @@ struct PlannerExtractTests {
             .extractSelection, selection: NSRange(location: 15, length: 1), world: world)
             == .refusal(.nothingToDo))
     }
+
+    @Test func aLateStartInTheFinalSentenceExtractsAtTheWordEdge() {
+        // 13b 4A red-on-old pin — THE N18 stumble, dissolved (S4-22 ruling
+        // 4): a suffix selection starting late in the block's FINAL
+        // sentence used to round its start FORWARD to the block end (the
+        // old sentence-only set: 41 → 47), collapsing the span and
+        // refusing "No legal boundary…". The word rule settles the start
+        // onto the word edge 38 — the span "sentence." extracts.
+        let world = makeWorld([B(threeSentences)])
+        let plan = Planner.plan(
+            .extractSelection, selection: NSRange(location: 41, length: 6), world: world)
+        #expect(plan == .extract(
+            entryIndex: 0, blockID: "b0", snappedSpan: 38..<47, edge: .suffix, otherTakes: 0))
+    }
 }
 
 // MARK: - Make Block from Selection (the composed middle-span gesture)
@@ -298,10 +367,13 @@ struct PlannerMakeBlockTests {
         // refusal — single×single plans the GUIDED flow; EXTRACT keeps
         // .crossBlockSpan (its op is single-source by definition).
         let world = makeWorld([B(twoSentences), B(oneSentence)])
-        // (Selection 20..40: the start snaps to block 1's boundary at 16;
-        // the end — 12 units into the boundary-less second block — snaps
-        // to its END, so the whole block rides. A shorter selection whose
-        // end snaps back to 0 correctly plans .nothingToDo instead.)
+        // (Selection 20..40: the start settles to block 1's strong mark at
+        // 16; the end — 12 units into the second block — settles onto its
+        // word edge 9 (13b 4A pin edit, justified: the old sentence-only
+        // set had nothing interior, so the whole block rode; the word rule
+        // honors where the selection actually ended). A selection whose
+        // end settles back to 0 still drops the block and plans
+        // .nothingToDo with one piece left.)
         let guided = Planner.plan(
             .makeBlockFromSelection, selection: NSRange(location: 20, length: 20), world: world)
         guard case .makeBlockAcrossBlocks(_, _, let startCut, let endCut) = guided else {
@@ -309,11 +381,11 @@ struct PlannerMakeBlockTests {
             return
         }
         #expect(startCut == 16)
-        #expect(endCut == 23, "the whole boundary-less last block rides")
+        #expect(endCut == 9, "the end settles onto the second block's word edge")
         #expect(Planner.plan(
-            .makeBlockFromSelection, selection: NSRange(location: 20, length: 12), world: world)
+            .makeBlockFromSelection, selection: NSRange(location: 20, length: 10), world: world)
             == .refusal(.nothingToDo),
-            "an end that snaps off its block leaves fewer than two pieces")
+            "an end that settles off its block leaves fewer than two pieces")
         #expect(Planner.plan(
             .extractSelection, selection: NSRange(location: 20, length: 12), world: world)
             == .refusal(.crossBlockSpan))
@@ -493,10 +565,17 @@ struct PlannerPrecedenceTests {
     @Test func theCaretAtTheLastBlocksEndIsBlockSideNotTailSide() {
         // With a tail open, the last block's exact end (== the tail
         // separator offset) still belongs to the block: divide there is a
-        // nothingToDo (no interior cut at the very end), never a tail refusal.
+        // block-side verdict, never a tail refusal. 13b 4A pin edit
+        // (justified): the block-side verdict is now a DIVIDE at the
+        // nearest interior word edge (18) — the one-word world below keeps
+        // the refusal half of the original pin honest.
         let world = makeWorld([B(oneSentence)], tail: "typing")
         let end = world.index.range(ofEntryAt: 0).upperBound
         #expect(Planner.plan(.divideAtCursor, selection: caret(end), world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 18))
+        let wordWorld = makeWorld([B(oneWord)], tail: "typing")
+        let wordEnd = wordWorld.index.range(ofEntryAt: 0).upperBound
+        #expect(Planner.plan(.divideAtCursor, selection: caret(wordEnd), world: wordWorld)
             == .refusal(.nothingToDo))
     }
 
@@ -549,8 +628,10 @@ struct PlannerPrecedenceTests {
                           world: makeWorld([B(threeSentences, arity: 2)])))          // fannedMiddleSpan
         note(Planner.plan(.mergeBlocks, selection: caret(1),
                           world: makeWorld([B("Aa."), B("Bb.")])))                   // notASeam
+        // 13b 4A: a one-SENTENCE block divides now (word edges); the
+        // nothingToDo producer is the genuinely-empty one-WORD block.
         note(Planner.plan(.divideAtCursor, selection: caret(5),
-                          world: makeWorld([B(oneSentence)])))                       // nothingToDo
+                          world: makeWorld([B(oneWord)])))                           // nothingToDo
         note(Planner.plan(.divideAtCursor, selection: NSRange(location: 0, length: 999),
                           world: plain))                                             // invalidSelection
         #expect(reached == Set(Planner.Refusal.allCases))
@@ -563,13 +644,16 @@ struct PlannerPrecedenceTests {
 struct PlannerGraphemeTests {
     @Test func aCaretInsideAZWJFamilySnapsToAGraphemeAlignedBoundary() {
         let text = "Family 👨‍👩‍👧‍👦 here. Next sentence."
-        let boundary = BoundarySnapping.boundaries(in: text, granularity: .sentence)
-            .first { $0 != 0 && $0 != text.utf16.count }!
         let world = makeWorld([B(text)])
         // Caret INSIDE the 11-unit emoji cluster (offset 9 splits it).
+        // 13b 4A pin edit (justified): the word rule's nearest interior
+        // edge is 7 — the cluster's own start, grapheme-aligned by the
+        // scanner's construction (the old rule snapped to the lone
+        // sentence mark at 25).
         let plan = Planner.plan(.divideAtCursor, selection: caret(9), world: world)
-        #expect(plan == .divide(entryIndex: 0, blockID: "b0", snappedCut: boundary))
-        #expect(BoundarySnapping.graphemeIndex(atUTF16: boundary, in: text) != nil,
+        #expect(plan == .divide(entryIndex: 0, blockID: "b0", snappedCut: 7))
+        guard case .divide(_, _, let cut) = plan else { return }
+        #expect(BoundarySnapping.graphemeIndex(atUTF16: cut, in: text) != nil,
                 "the planner only ever hands out grapheme-aligned cuts")
     }
 
@@ -588,14 +672,25 @@ struct PlannerGraphemeTests {
     @Test func spanSnappingIsGraphemeSafeToo() {
         let text = "Start 👩‍🚀 one. End two."
         let world = makeWorld([B(text)])
+        // A selection splitting the astronaut settles both edges onto the
+        // cluster's own word edges (6..<12 — the emoji is its own "word"):
+        // grapheme-aligned by construction. 13b 4A pin edit (justified):
+        // under the word rule that span is a true MIDDLE span, so the
+        // composed command plans it and extract refuses toward Make Block —
+        // the pin's point (no unaligned offsets leak) is asserted on the
+        // planned span itself.
         let plan = Planner.plan(
-            .extractSelection,
+            .makeBlockFromSelection,
             selection: NSRange(location: 7, length: 3),  // splits the astronaut
             world: world)
-        if case .extract(_, _, let span, _, _) = plan {
-            #expect(BoundarySnapping.graphemeRange(span, in: text) != nil)
-        } else if case .refusal(let r) = plan {
-            #expect(r == .nothingToDo)  // collapsed snap is also legal here
+        guard case .makeBlock(_, _, let span) = plan else {
+            Issue.record("expected the composed middle-span plan, got \(plan)")
+            return
         }
+        #expect(span == 6..<12)
+        #expect(BoundarySnapping.graphemeRange(span, in: text) != nil)
+        #expect(Planner.plan(
+            .extractSelection, selection: NSRange(location: 7, length: 3), world: world)
+            == .refusal(.middleSpanNeedsMakeBlock))
     }
 }

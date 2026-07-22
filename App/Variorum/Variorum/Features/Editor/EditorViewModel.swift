@@ -2132,6 +2132,8 @@ final class EditorViewModel {
         case .archivedVariant: return "This take is archived — unarchive it first."
         case .bufferChangedSinceGesture:
             return "The text changed while that gesture was landing — nothing was altered; try it again on the current text."
+        case .divideSideWouldBeEmpty:
+            return "Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end."
         default: return "The operation was refused: \(opError)"
         }
     }

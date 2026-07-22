@@ -98,7 +98,11 @@ nonisolated enum StructuralGesturePlanner {
         case divide(entryIndex: Int, blockID: String, snappedCut: Int)
         /// Divide invoked on a fanned block: route to the W ceremony sheet,
         /// with the active (rendered) variant's snapped cut as the seed.
-        case divideW(entryIndex: Int, blockID: String, activeCut: Int)
+        /// `nil` (13b 4A): the active take has no interior word edge (a
+        /// one-word take) — the ceremony still opens, unseeded; parking at
+        /// either end is a legal placement there (S4-22 ruling 2), so the
+        /// old single-take dead end no longer blocks the door.
+        case divideW(entryIndex: Int, blockID: String, activeCut: Int?)
         /// Boundary-adjacent span: extract. `otherTakes` > 0 drives the
         /// passive fanned-extract hint (contract item 8).
         case extract(entryIndex: Int, blockID: String, snappedSpan: Range<Int>,
@@ -170,34 +174,34 @@ nonisolated enum StructuralGesturePlanner {
         let entry = world.index.entries[i]
         guard entry.variantID != nil else { return .refusal(.gapSlot) }
         let text = world.textAt(i)
-        guard let cut = snapToInteriorBoundary(intra, in: text) else {
-            return .refusal(.nothingToDo)
-        }
+        let cut = snapToInteriorBoundary(intra, in: text)
         if fanArity(world, i) > 1 {
             // The W door: marked variants are COPIED through, so a locked
             // rendered take does not refuse here (Phase 3 op semantics).
+            // A nil cut (one-word active take) still opens the ceremony —
+            // parking is a legal placement there (13b 4A, S4-22 ruling 2);
+            // the sheet seeds nothing and the author places by hand.
             return .divideW(entryIndex: i, blockID: entry.blockID, activeCut: cut)
         }
+        guard let cut else { return .refusal(.nothingToDo) }
         guard entry.editable else { return .refusal(.lockedVariant) }
         return .divide(entryIndex: i, blockID: entry.blockID, snappedCut: cut)
     }
 
     /// Divide's legal cuts are INTERIOR boundaries only — 0 and the end are
     /// boundaries but not cuts (the op refuses empty halves), so the nearest
-    /// LEGAL boundary is the nearest interior one. The legal set is
-    /// sentence ∪ paragraph marks (contract item 2 names both;
-    /// `.sentence` granularity is exactly that superset). Internal:
+    /// LEGAL boundary is the nearest interior one. The legal set is the
+    /// ruled WORD rule (13b 4A, S4-22): every word edge and newline, with
+    /// the gentle settle pulling toward sentence ends and line breaks —
+    /// `BoundarySnapping.settle` is the one snap brain. Internal:
     /// CutPropagation snaps its W-ceremony proposals through this same
-    /// function (one implementation of "legal cut").
+    /// function (one implementation of "legal cut"; proposals stay
+    /// interior deliberately — parking is a human decision, never a seed).
     static func snapToInteriorBoundary(_ cut: Int, in text: String) -> Int? {
         let end = text.utf16.count
-        let interior = BoundarySnapping.boundaries(in: text, granularity: .sentence)
+        let interior = BoundarySnapping.boundaries(in: text, granularity: .word)
             .filter { $0 != 0 && $0 != end }
-        let clamped = min(max(cut, 0), end)
-        return interior.min { a, b in
-            let (da, db) = (abs(a - clamped), abs(b - clamped))
-            return da == db ? a < b : da < db
-        }
+        return BoundarySnapping.settle(cut, in: text, among: interior)
     }
 
     // MARK: - Spans: extract & the composed middle-span gesture (items 1–2, 5–6, 8)
@@ -285,12 +289,19 @@ nonisolated enum StructuralGesturePlanner {
         let lastText = world.textAt(last)
         let firstRange = world.index.range(ofEntryAt: first)
         let lastRange = world.index.range(ofEntryAt: last)
-        let startCut = BoundarySnapping.snap(
+        // The one cut rule (13b 4A): edges settle onto word edges, with the
+        // gentle sentence/newline pull; 0 and the end stay legal (a
+        // snapped-off edge drops its block from the span, as before).
+        let startCut = BoundarySnapping.settle(
             max(0, selection.location - firstRange.location),
-            in: firstText, granularity: .sentence)
-        let endCut = BoundarySnapping.snap(
+            in: firstText,
+            among: BoundarySnapping.boundaries(in: firstText, granularity: .word))
+            ?? 0
+        let endCut = BoundarySnapping.settle(
             min(lastRange.length, selection.upperBound - lastRange.location),
-            in: lastText, granularity: .sentence)
+            in: lastText,
+            among: BoundarySnapping.boundaries(in: lastText, granularity: .word))
+            ?? lastRange.length
         // The pieces that actually ride the span (a snapped-off edge drops
         // its block): fewer than two pieces means the "cross-block" span
         // collapsed to nothing worth a compound.
@@ -315,11 +326,17 @@ nonisolated enum StructuralGesturePlanner {
             startCut: startCut, endCut: endCut)
     }
 
-    /// Both span ends snap to the nearest legal boundary (full set — 0 and
-    /// the end are legal span edges, unlike divide cuts).
+    /// Both span ends settle to the nearest legal boundary under the ruled
+    /// WORD rule (13b 4A — S4-22 ruling 4: extract's span edges join the
+    /// one rule, dissolving the N18 late-start refusal class; the
+    /// prefix/suffix boundary-adjacency requirement itself is untouched).
+    /// The full set — 0 and the end are legal span edges, unlike divide cuts.
     private static func snapSpan(_ span: Range<Int>, in text: String) -> Range<Int> {
-        let lower = BoundarySnapping.snap(span.lowerBound, in: text, granularity: .sentence)
-        let upper = BoundarySnapping.snap(span.upperBound, in: text, granularity: .sentence)
+        let candidates = BoundarySnapping.boundaries(in: text, granularity: .word)
+        let lower = BoundarySnapping.settle(span.lowerBound, in: text, among: candidates)
+            ?? span.lowerBound
+        let upper = BoundarySnapping.settle(span.upperBound, in: text, among: candidates)
+            ?? span.upperBound
         return min(lower, upper)..<max(lower, upper)
     }
 

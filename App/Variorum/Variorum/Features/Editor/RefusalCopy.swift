@@ -32,7 +32,11 @@ nonisolated enum RefusalCopy {
         case .notASeam:
             "To merge, put the caret at a block seam or select across the blocks to join."
         case .nothingToDo:
-            "No legal boundary for that here."
+            // 13b 4A: under the ruled cut rule this class shrank to the
+            // genuinely-empty cases — a one-word or empty block, an empty
+            // or blank selection, a span that settled closed. The copy now
+            // states the rule instead of implying boundaries are scarce.
+            "No legal cut spot for that here — cuts land between words, at sentence ends, and at line breaks."
         case .invalidSelection:
             "The editor lost track of the selection — try again."
         }

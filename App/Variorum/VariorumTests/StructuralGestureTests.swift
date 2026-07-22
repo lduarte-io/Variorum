@@ -106,9 +106,13 @@ struct StructuralRewriteDoorTests {
     }
 
     @Test func refusalsSurfaceVisiblyAndTouchNothing() async throws {
-        try await withEditor(seedBlocks: ["Only one sentence here."]) { h in
+        // 13b 4A fixture edit (justified): a one-SENTENCE block divides
+        // under the word rule, so the genuinely-empty fixture is a
+        // one-WORD block — the pin's point (refusals speak and touch
+        // nothing) is unchanged.
+        try await withEditor(seedBlocks: ["Onlyword."]) { h in
             let before = h.documentText
-            h.textView.setSelectedRange(NSRange(location: 10, length: 0))
+            h.textView.setSelectedRange(NSRange(location: 4, length: 0))
             h.model.updateCaretContext()
             await h.model.invokeGesture(.divideAtCursor)
 
@@ -262,14 +266,16 @@ struct DivideExtractGestureTests {
     @Test func theSnappedRangeIsWhatReachesTheOperation() async throws {
         try await withEditor(seedBlocks: ["Intro clause. Middle stays here. Tail sentence."]) { h in
             // A deliberately sloppy selection nowhere near the boundaries:
-            // the op must receive the SNAPPED span, so the stored halves
-            // split exactly at the sentence marks.
+            // the op must receive the SNAPPED span. 13b 4A pin edit
+            // (justified): the sloppy span " sent" settles onto the word
+            // edges 38..47 — the word "sentence." extracts (the old
+            // sentence-only rule widened it to the whole final sentence).
             h.textView.setSelectedRange(NSRange(location: 37, length: 5))
             h.model.updateCaretContext()
             await h.model.invokeGesture(.extractSelection)
 
             let slots = try h.storeSlots()
-            #expect(slots.map(\.text) == ["Intro clause. Middle stays here.", "Tail sentence."])
+            #expect(slots.map(\.text) == ["Intro clause. Middle stays here. Tail", "sentence."])
         }
     }
 
@@ -692,10 +698,93 @@ struct DivideWCeremonyTests {
     @Test func placeWCutRefusesIllegalPositions() async throws {
         try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
             let (v1, _) = try await openCeremony(h)
-            h.model.placeWCut(takeID: v1, cut: 7)  // not a legal boundary
+            h.model.placeWCut(takeID: v1, cut: 7)  // mid-word — not a legal boundary
             let state = try #require(h.model.divideWCeremony)
             let active = try #require(state.takes.first { $0.id == v1 })
             #expect(active.cut == 13, "only click-to-place onto LEGAL boundaries")
+        }
+    }
+
+    // MARK: 13b 4A — parking (S4-22 ruling 2) + the confirm gate
+
+    @Test func placeWCutAcceptsParkingPositions() async throws {
+        // Red-on-old: the old boundary list was interior-only, so placing
+        // at 0 or the end silently no-opped and the cut stayed at 13.
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let (v1, _) = try await openCeremony(h)
+            h.model.placeWCut(takeID: v1, cut: 25)  // the very end
+            var state = try #require(h.model.divideWCeremony)
+            var active = try #require(state.takes.first { $0.id == v1 })
+            #expect(active.cut == 25)
+            #expect(active.parkedAtEnd)
+            h.model.placeWCut(takeID: v1, cut: 0)   // the very start
+            state = try #require(h.model.divideWCeremony)
+            active = try #require(state.takes.first { $0.id == v1 })
+            #expect(active.cut == 0)
+            #expect(active.parkedAtStart)
+        }
+    }
+
+    @Test func allTakesParkedAtOneEndGateConfirmWithHonestCopy() async throws {
+        // The architect's I10 precision: if every checked take parks at
+        // one end, the other successor would be born takeless — the sheet
+        // refuses the confirm state and SAYS WHY (the op's
+        // divideSideWouldBeEmpty is the belt behind this gate).
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let (v1, v2) = try await openCeremony(h)
+            h.model.toggleWTake(v2)                  // mark; proposal 24
+            h.model.placeWCut(takeID: v1, cut: 25)   // park at the end
+            h.model.placeWCut(takeID: v2, cut: 36)   // park at the end
+            var state = try #require(h.model.divideWCeremony)
+            #expect(!state.canConfirm)
+            #expect(state.confirmBlocker?.contains("first block") == true)
+
+            // Splitting one take anywhere reopens the door.
+            h.model.placeWCut(takeID: v2, cut: 24)
+            state = try #require(h.model.divideWCeremony)
+            #expect(state.canConfirm)
+            #expect(state.confirmBlocker == nil)
+
+            // The mirror: everything parked at the start gates too.
+            h.model.placeWCut(takeID: v1, cut: 0)
+            h.model.placeWCut(takeID: v2, cut: 0)
+            state = try #require(h.model.divideWCeremony)
+            #expect(!state.canConfirm)
+            #expect(state.confirmBlocker?.contains("second block") == true)
+        }
+    }
+
+    @Test func confirmWithAParkedTakeRidesItWholeIntoOneSuccessor() async throws {
+        // End-to-end through the real pipeline: v2 parks at its end — the
+        // whole take rides into B; C carries only v1's ending.
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let (v1, v2) = try await openCeremony(h)
+            h.model.toggleWTake(v2)
+            h.model.placeWCut(takeID: v2, cut: 36)   // park v2 at its end
+            let state = try #require(h.model.divideWCeremony)
+            #expect(state.canConfirm)
+            await h.model.confirmDivideWCeremony()
+
+            #expect(h.model.divideWCeremony == nil, "the cut landed")
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["First alpha.", "First omega."])
+            let fanTexts = try await h.database.read { db in
+                try slots.map { slot in
+                    try String.fetchAll(
+                        db,
+                        sql: """
+                            SELECT working_text FROM variant
+                            WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                            ORDER BY fan_position, id
+                            """,
+                        arguments: [slot.blockID])
+                }
+            }
+            #expect(fanTexts[0]
+                == ["First alpha.", "Intro pad. First alpha. First omega."])
+            #expect(fanTexts[1] == ["First omega."],
+                    "the parked take has no say in the second block")
+            _ = v1
         }
     }
 }

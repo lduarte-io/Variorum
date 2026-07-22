@@ -81,12 +81,30 @@ final class EditorSurfaceController {
         var takes: [WTake]
         var id: String { blockID }
 
-        /// Every marked take needs a legal cut before the mint (the op's
-        /// own requirement, mirrored so Confirm can gate).
-        var canConfirm: Bool {
+        /// Confirm gates on the WHOLE rule, with the reason spoken (13b 4A,
+        /// the architect's precision): every marked take placed, AND each
+        /// successor block born with at least one take — if every checked
+        /// take parks at one end, the other block would be takeless (I10).
+        /// nil = confirmable. The op's `divideSideWouldBeEmpty` is the belt
+        /// behind this gate.
+        var confirmBlocker: String? {
             let marked = takes.filter(\.marked)
-            return !marked.isEmpty && marked.allSatisfy { $0.cut != nil }
+            if marked.isEmpty {
+                return "Check at least one take to carry the cut through."
+            }
+            if marked.contains(where: { $0.cut == nil }) {
+                return "Place the ✂ in every checked take — drag it, click a spot, or use ←/→ (⇥ moves between takes)."
+            }
+            if !marked.contains(where: { !$0.parkedAtEnd }) {
+                return "Every checked take rides whole into the first block — the second block would be born without a take. Split at least one, or park one at its start."
+            }
+            if !marked.contains(where: { !$0.parkedAtStart }) {
+                return "Every checked take rides whole into the second block — the first block would be born without a take. Split at least one, or park one at its end."
+            }
+            return nil
         }
+
+        var canConfirm: Bool { confirmBlocker == nil }
 
         var markedCuts: [String: Int] {
             Dictionary(uniqueKeysWithValues: takes.compactMap { take in
@@ -99,14 +117,27 @@ final class EditorSurfaceController {
     struct WTake: Equatable, Identifiable {
         let variant: Variant
         var marked: Bool
-        /// The cut carried through this take (UTF-16, interior boundary of
-        /// its text) — pre-seeded by string-context matching, freely
-        /// adjusted; nil = unseeded (no unique match) until placed.
+        /// The cut carried through this take (UTF-16, any legal word-rule
+        /// position of its text INCLUDING 0 and the end — parking, S4-22) —
+        /// pre-seeded by string-context matching, freely adjusted; nil =
+        /// unseeded (no unique match) until placed.
         var cut: Int?
-        /// The legal cut positions in this take's text (interior
-        /// sentence/paragraph boundaries) — the click-to-place targets.
+        /// The legal cut positions in this take's text under the ruled
+        /// WORD rule, ends included (the parking slots) — the click/drag/
+        /// keyboard targets. Empty exactly when the take's text is empty
+        /// (0 and the end coincide: nothing to place — uncheck it).
         let boundaries: [Int]
         var id: String { variant.id }
+
+        /// Parking (S4-22 ruling 2): at the very end ⇒ the whole take
+        /// rides into the FIRST block; at the very start ⇒ the SECOND.
+        var parkedAtEnd: Bool {
+            cut != nil && cut == variant.workingText.utf16.count
+                && !variant.workingText.isEmpty
+        }
+        var parkedAtStart: Bool {
+            cut == 0 && !variant.workingText.isEmpty
+        }
     }
 
     // MARK: - Projection → surface (the executors; the DECISION lives in
@@ -1123,11 +1154,14 @@ final class EditorSurfaceController {
 
     /// Builds the one-sheet ceremony state: the block's live ACTIVE fan as
     /// a checklist (the rendered take pre-marked with the gesture's snapped
-    /// cut), per-take cut proposals by string-context matching, per-take
-    /// legal cut positions. The buffer flushes first so every take's stored
-    /// text — what the sheet shows and the op will cut — matches the
-    /// surface. No rows are touched by opening.
-    private func openDivideWCeremony(blockID: String, activeCut: Int) async {
+    /// cut — nil when its text has no interior word edge; the ceremony
+    /// still opens and parking covers it, 13b 4A), per-take cut proposals
+    /// by string-context matching, per-take legal cut positions under the
+    /// ruled WORD rule (ends included — the parking slots). The buffer
+    /// flushes first so every take's stored text — what the sheet shows
+    /// and the op will cut — matches the surface. No rows are touched by
+    /// opening.
+    private func openDivideWCeremony(blockID: String, activeCut: Int?) async {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
@@ -1152,11 +1186,13 @@ final class EditorSurfaceController {
                     marked: variant.id == activeTake.id,
                     cut: variant.id == activeTake.id
                         ? activeCut
-                        : CutPropagation.propose(
-                            activeCut: activeCut,
-                            activeText: activeTake.workingText,
-                            targetText: variant.workingText),
-                    boundaries: interiorBoundaries(of: variant.workingText))
+                        : activeCut.flatMap {
+                            CutPropagation.propose(
+                                activeCut: $0,
+                                activeText: activeTake.workingText,
+                                targetText: variant.workingText)
+                        },
+                    boundaries: Self.legalCutPositions(of: variant.workingText))
             }
             divideWCeremony = DivideWCeremonyState(
                 blockID: blockID, activeVariantID: activeTake.id, takes: takes)
@@ -1165,10 +1201,14 @@ final class EditorSurfaceController {
         }
     }
 
-    private func interiorBoundaries(of text: String) -> [Int] {
-        let end = text.utf16.count
-        return BoundarySnapping.boundaries(in: text, granularity: .sentence)
-            .filter { $0 != 0 && $0 != end }
+    /// A take's placeable cut positions: the ruled WORD rule's full set —
+    /// word edges, sentence ends, newlines, AND both ends (0 = start
+    /// parking, the end = end parking; S4-22 ruling 2). Empty text answers
+    /// [] — its two ends coincide, so there is nothing to place (the memo's
+    /// "uncheck it" case, and the one genuinely-empty message left).
+    nonisolated static func legalCutPositions(of text: String) -> [Int] {
+        guard !text.isEmpty else { return [] }
+        return BoundarySnapping.boundaries(in: text, granularity: .word)
     }
 
     func toggleWTake(_ takeID: String) {
@@ -1295,7 +1335,7 @@ final class EditorSurfaceController {
                 variant: variant,
                 marked: old?.marked ?? false,
                 cut: cut,
-                boundaries: interiorBoundaries(of: variant.workingText))
+                boundaries: Self.legalCutPositions(of: variant.workingText))
         }
         divideWCeremony = DivideWCeremonyState(
             blockID: state.blockID, activeVariantID: activeCurrent.id, takes: takes)

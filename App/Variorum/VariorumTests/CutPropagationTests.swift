@@ -40,6 +40,11 @@ struct CutPropagationTests {
     }
 
     @Test func proposalsAlwaysLandOnALegalInteriorBoundary() {
+        // 13b 4A pin edit (justified): the legal set is now the WORD rule's
+        // interior (S4-22 — one rule everywhere), so the mapped position 23
+        // is itself legal and the proposal lands EXACTLY there (the old
+        // sentence-only set forced it back to 14). Never 0 or the end:
+        // parking is a human decision, not a seed.
         let active = "One two. Three four."
         let target = "Pad sentence. One two. Three four. Tail bit."
         guard let proposal = CutPropagation.propose(
@@ -47,8 +52,9 @@ struct CutPropagationTests {
             Issue.record("expected a proposal")
             return
         }
+        #expect(proposal == 23)
         let end = target.utf16.count
-        let interior = BoundarySnapping.boundaries(in: target, granularity: .sentence)
+        let interior = BoundarySnapping.boundaries(in: target, granularity: .word)
             .filter { $0 != 0 && $0 != end }
         #expect(interior.contains(proposal))
     }
@@ -87,10 +93,12 @@ struct CutPropagationTests {
     }
 
     @Test func aTargetWithoutALegalCutProposesNothing() {
-        // The context matches, but the target (one unterminated clause) has
-        // no interior boundary to snap to — nothing legal to propose.
+        // 13b 4A fixture edit (justified): under the word rule the old
+        // multi-word target HAS interior cuts, so the no-legal-cut case is
+        // a target with no interior word edge at all — one word (plus
+        // trailing whitespace so the space-bearing needle still matches).
         let proposal = CutPropagation.propose(
-            activeCut: 3, activeText: "abc def", targetText: "xx abc def yy", window: 3)
+            activeCut: 3, activeText: "abc def", targetText: "abc ", window: 1)
         #expect(proposal == nil)
     }
 }
