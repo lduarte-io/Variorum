@@ -1123,6 +1123,84 @@ struct TutorialStructureActsTests {
         }
     }
 
+    @Test func theCeremonyParksATakeAndItRidesWholeIntoTheFirstBlock() async throws {
+        // 13b 4A (S4-22 ruling 2): the lesson now teaches parking — a take
+        // whose ✂ sits at its very end doesn't split; the whole take rides
+        // into the first block and has no say in the second.
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "the take ceremony") }
+            let before = try await projection(db, lesson)
+            let ferry = try #require(before.slots.first {
+                $0.text?.contains("The ferry crossed at dawn") == true
+            })
+            let fan = try #require(before.fans[ferry.blockID])
+            let original = try #require(fan.first { $0.workingText.hasPrefix("The ferry crossed") })
+            let parked = try #require(fan.first { $0.workingText.contains("grey of first light") })
+
+            let cuts = [
+                original.id: try utf16Offset(of: "Nobody", in: original.workingText),
+                parked.id: parked.workingText.utf16.count,  // ✂ at the very end
+            ]
+            let result = try await session.runner.run { ops in
+                try ops.divideW(ferry.blockID, cuts: cuts)
+            }
+            #expect(result.first.variants.count == 2,
+                    "the split take's first half + the parked take, whole")
+            #expect(result.first.variants.map(\.workingText).contains(parked.workingText),
+                    "the parked take rides verbatim")
+            #expect(result.second.variants.count == 1,
+                    "the parked take has no say in the second block")
+            #expect(result.second.sourceVariantIDs == [original.id])
+
+            // ⌥⌘Z puts the whole thing back, parked takes and all.
+            ShellActions(session: session, shell: ShellRouter()).structuralUndo()
+            await poll {
+                ((try? db.read { try Queries.renderPost($0, containerID: lesson) })?.count ?? 0)
+                    == before.slots.count
+            }
+            let restored = try await projection(db, lesson)
+            #expect(restored.fans[ferry.blockID]?.count == 3, "back as it was")
+        }
+    }
+
+    @Test func aLateStartSelectionInTheExtractLessonNowPlansAnExtract() async throws {
+        // 13b 4A red-on-old (the N18 stumble, dissolved on the lesson's own
+        // text): the prose re-widened to "select from anywhere in this
+        // paragraph to its end" — a selection starting MID-WORD late in
+        // the final stretch settles onto the word edge and extracts, where
+        // the old sentence-only snap rounded forward to the block end and
+        // refused.
+        try await withTutorialWorld { _, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "extract & make block")
+            }
+            let lessonSlots = try await slots(db, lesson)
+            let host = try #require(lessonSlots.first {
+                $0.text?.contains("begging to stand alone") == true
+            })
+            let text = host.text ?? ""
+            let index = BlockRangeIndex(
+                entries: [.init(
+                    blockID: host.blockID, variantID: host.variantID,
+                    length: (text as NSString).length, editable: true)],
+                tailLength: nil)
+            let world = StructuralGesturePlanner.World(
+                index: index, fanArities: [1], sealed: false, textAt: { _ in text })
+            let start = try utf16Offset(of: "begging", in: text) + 3  // mid-word
+            let plan = StructuralGesturePlanner.plan(
+                .extractSelection,
+                selection: NSRange(location: start, length: (text as NSString).length - start),
+                world: world)
+            guard case .extract(_, _, let span, let edge, _) = plan else {
+                Issue.record("the lesson's promise must hold — got \(plan)")
+                return
+            }
+            #expect(edge == .suffix)
+            #expect(span.lowerBound == (try utf16Offset(of: "begging", in: text)),
+                    "the start settles onto the word edge, not the block end")
+        }
+    }
+
     @Test func extractPullsTheClosingLineIntoItsOwnBlock() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "extract & make block") }

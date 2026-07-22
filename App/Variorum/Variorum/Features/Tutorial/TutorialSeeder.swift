@@ -394,10 +394,14 @@ enum TutorialSeeder {
         // ———————————————————————————— structure ————————————————————————————
 
         _ = try lesson(structure, "divide", [
+            // 13b 4A: the ruled cut redesign (S4-22) — cuts land between
+            // any two words; sentence ends and line breaks pull gently.
             "Divide cuts a block in two at your cursor — the everyday gesture "
             + "for \u{201C}this part should stand on its own so I can work on it "
-            + "separately.\u{201D} The cut snaps to the nearest sentence boundary, and "
-            + "the app shows you where it landed.",
+            + "separately.\u{201D} The cut can land between any two words — it snaps "
+            + "to the nearest word edge, settles a little more readily onto "
+            + "sentence ends and line breaks, and the app shows you where it "
+            + "landed. Only a single word has nothing to divide.",
 
             "This block holds two thoughts and they deserve two blocks. Put your "
             + "cursor right before this second sentence and press \u{2318}\u{21E7}D.",
@@ -418,19 +422,25 @@ enum TutorialSeeder {
             + "text, so each take needs its own cut. The app asks exactly once, "
             + "in one sheet — the take ceremony.",
 
+            // 13b 4A: the sheet shows every checked take at once, the ✂
+            // drags between word edges, keyboard placement, and PARKING.
             "The block below carries three takes, staged for it. Put your cursor "
             + "mid-block and press \u{2318}\u{21E7}D. The sheet titled \u{201C}Divide into takes\u{201D} "
-            + "lists every take with a checkbox: your cut is pre-placed where it "
-            + "could be matched; where it couldn't, click the sentence boundary "
-            + "you want. Leave the third take UNCHECKED before you confirm.",
+            + "shows every take with a checkbox, each checked take's text laid "
+            + "out with a ✂ you can place anywhere between words: drag it, "
+            + "click a spot, or use \u{2190}/\u{2192} (\u{2325} jumps by sentence, \u{21E5} moves "
+            + "between takes). Your cut is pre-placed where it could be "
+            + "matched. Leave the third take UNCHECKED before you confirm.",
 
             "The ferry crossed at dawn. Nobody on board spoke about the storm.",
 
             "Confirm makes two blocks: the first holds every checked take's "
             + "first half, the second the endings — your openings and endings "
-            + "stay mix-and-matchable. The unchecked take didn't vanish: it "
-            + "stays with the original block, preserved whole off-stage, and "
-            + "\u{2325}\u{2318}Z puts the whole thing back as it was.",
+            + "stay mix-and-matchable. A take doesn't have to split at all: "
+            + "park its \u{2702} at the very end and the whole take rides into the "
+            + "first block (at the very start, the second). The unchecked take "
+            + "didn't vanish: it stays with the original block, preserved whole "
+            + "off-stage, and \u{2325}\u{2318}Z puts the whole thing back as it was.",
         ])
         let ceremonyBlock = ceremony.blocks[2]
         try take(on: ceremonyBlock,
@@ -439,17 +449,17 @@ enum TutorialSeeder {
             "At dawn the ferry crossed. The storm stayed in everyone's coat pockets, unmentioned.")
 
         _ = try lesson(structure, "extract & make block", [
-            // 13b 3F (N18's honesty half): the old "from anywhere in this
-            // paragraph" over-promised — the snap rounds the selection's
-            // START to the nearest sentence boundary, so a late start in
-            // the FINAL sentence rounds forward to the block end and
-            // refuses. The prose promises what the snap delivers; the snap
-            // semantics themselves are Stage 4's memo territory.
+            // 13b 4A: the N18 narrowing (3F, commit a78326f) REVERSES —
+            // extract's span edges joined the ruled word rule (S4-22
+            // ruling 4), so a selection starting anywhere snaps to the
+            // nearest word edge and the late-start refusal class is gone.
+            // The prose re-widens honestly.
             "Extract pulls a span at a block's EDGE out into its own block — "
             + "zero ceremony, the source block keeps its identity and all its "
-            + "takes. Select from a sentence's start to this paragraph's end "
-            + "and press \u{2318}\u{21E7}E (the app snaps your selection to sentence "
-            + "boundaries) — and this closing line is begging to stand alone.",
+            + "takes. Select from anywhere in this paragraph to its end and "
+            + "press \u{2318}\u{21E7}E (the selection's edges snap to the nearest word "
+            + "edge, settling gently onto sentence ends) — and this closing "
+            + "line is begging to stand alone.",
 
             "A MIDDLE span can't extract (the two ends would be left holding "
             + "hands), so Make Block (\u{2318}\u{21E7}K) is the tool there: it runs two "
