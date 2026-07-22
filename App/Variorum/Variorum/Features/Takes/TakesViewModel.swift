@@ -505,6 +505,29 @@ final class TakesViewModel {
         }
     }
 
+    /// 13b 4C (S4-2d, the lenses half): block drag-reorder on the board —
+    /// ONE post, ONE order, so every column moves together BY CONSTRUCTION
+    /// (columns render `projection.slots` order; no column holds an order
+    /// of its own). An ordinary `reorder` through ops — one op per drop,
+    /// ⌥⌘Z undoes; the drag FACE was the missing piece, never the
+    /// machinery. `before: nil` ⇒ the post's end.
+    func reorderBlock(_ blockID: String, before targetBlockID: String?) async {
+        guard projection.slots.contains(where: { $0.blockID == blockID }) else { return }
+        if let targetBlockID {
+            guard targetBlockID != blockID,
+                  projection.slots.contains(where: { $0.blockID == targetBlockID })
+            else { return }
+            // Dropping right before its own successor is a no-op.
+            if let from = projection.slots.firstIndex(where: { $0.blockID == blockID }),
+               let to = projection.slots.firstIndex(where: { $0.blockID == targetBlockID }),
+               to == from + 1 { return }
+        } else if projection.slots.last?.blockID == blockID {
+            return  // already last
+        }
+        let insert: Operations.InsertPosition = targetBlockID.map { .before($0) } ?? .end
+        await run { ops in try ops.reorder(blockID, to: insert) }
+    }
+
     /// A scratch/lens column adopts a different take for one slot (a VIEW
     /// change — never touches chosen).
     func pick(columnID: String, blockID: String, variantID: String) async {

@@ -50,10 +50,23 @@ struct LensesBoardView: View {
     }
 
     @State private var lensRenamePrompt: LensRenamePrompt?
+    /// 13b 4C (S4-2d): the block drag-reorder's drop indicator.
+    @State private var dropTargetBlockID: String?
+    @State private var dropAtEnd = false
 
     /// The registry ids the column-header menus render (13b Stage 3, 3D —
     /// walk-asserted with the other contextMenu statics).
     static let columnMenuCapabilities: [CapabilityID] = [.renameLens]
+
+    /// The drag payload (one post — no cross-post scoping needed here).
+    static func dragPayload(blockID: String) -> String {
+        "lens-move:\(blockID)"
+    }
+
+    static func parseDragPayload(_ raw: String) -> String? {
+        guard raw.hasPrefix("lens-move:") else { return nil }
+        return String(raw.dropFirst("lens-move:".count))
+    }
 
     init(session: AppSession, postID: String, model: TakesViewModel? = nil) {
         self.session = session
@@ -231,25 +244,68 @@ struct LensesBoardView: View {
         .padding(.vertical, 6)
     }
 
+    /// The add-column MENU ITEMS — one body behind both doors (the header
+    /// word-menu and the 4C dashed stub column below).
+    @ViewBuilder
+    private var addColumnMenuItems: some View {
+        Button("New lens — arrange existing takes") { model.addScratchColumn() }
+            .help("A fresh way of looking that starts as a mirror of the post. "
+                + "Flip any block to a take that already exists — nothing new is written.")
+        Button("New lens — write new takes") {
+            Task { await model.addWriteColumn() }
+        }
+        .help("A fresh take on EVERY block, branched from what the post shows — "
+            + "a full rewrite pass beside the original. New takes are written.")
+        if !model.projection.lenses.isEmpty {
+            Divider()
+            ForEach(model.projection.lenses, id: \.id) { lens in
+                Button("Open “\(lens.name)”") { model.addLensColumn(lens.id) }
+            }
+        }
+    }
+
     private var addColumnMenu: some View {
         VoicedMenu(tokens: tokens, label: "+ column", role: .primary) {
-            Button("New lens — arrange existing takes") { model.addScratchColumn() }
-                .help("A fresh way of looking that starts as a mirror of the post. "
-                    + "Flip any block to a take that already exists — nothing new is written.")
-            Button("New lens — write new takes") {
-                Task { await model.addWriteColumn() }
-            }
-            .help("A fresh take on EVERY block, branched from what the post shows — "
-                + "a full rewrite pass beside the original. New takes are written.")
-            if !model.projection.lenses.isEmpty {
-                Divider()
-                ForEach(model.projection.lenses, id: \.id) { lens in
-                    Button("Open “\(lens.name)”") { model.addLensColumn(lens.id) }
-                }
-            }
+            addColumnMenuItems
         }
         .disabled(model.columns.count >= 4)
         .help("You can have more views than you have takes — a column is a way of looking, not a copy.")
+    }
+
+    /// 13b 4C (S4-10/N32d — she could not find the "+ column" door): while
+    /// ONE column is open, an EMPTY DASHED COLUMN waits beside it — the
+    /// shelf's dashed new-post grammar, the door rendered exactly where a
+    /// column would appear. It retreats once a second column exists (the
+    /// header word-menu remains the standing door). An in-view affordance
+    /// of the same un-registered add-column act, recorded — not a new
+    /// registry act.
+    private var addColumnStub: some View {
+        Menu {
+            addColumnMenuItems
+        } label: {
+            VStack(spacing: 8) {
+                Text(tokens.chromeLabel("＋ column"))
+                    .font(tokens.mono)
+                    .foregroundStyle(tokens.accent)
+                Text(tokens.chromeLabel("open another reading beside this one"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(
+                    tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+        .padding(10)
+        .help("A column is a way of looking, not a copy — open the post's chosen "
+            + "takes, a saved lens, or a fresh one, side by side with this column")
     }
 
     // MARK: - Content
@@ -267,10 +323,19 @@ struct LensesBoardView: View {
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if model.alignmentLocked {
-            lockedColumns
         } else {
-            unlockedColumns
+            // 4C (S4-10): the dashed waiting column sits beside a lone
+            // column — the door where the second column would appear.
+            HStack(spacing: 0) {
+                if model.alignmentLocked {
+                    lockedColumns
+                } else {
+                    unlockedColumns
+                }
+                if model.columns.count == 1 {
+                    addColumnStub.frame(width: 190)
+                }
+            }
         }
     }
 
@@ -282,20 +347,33 @@ struct LensesBoardView: View {
                 columnHeaders
                 ForEach(model.projection.slots, id: \.placementID) { slot in
                     let tints = Sameness.tints(model.rowTexts(slot: slot))
-                    HStack(alignment: .top, spacing: 8) {
-                        LineageStripe(blockID: slot.blockID)
-                        ForEach(Array(model.columns.enumerated()), id: \.element.id) { i, column in
-                            VStack(alignment: .leading, spacing: 3) {
-                                TakesCellView(
-                                    model: model, tokens: tokens, slot: slot, column: column,
-                                    tinted: i < tints.count ? tints[i] : false,
-                                    onDiff: { diffPresentation = $0 })
-                                pickSwitcher(slot: slot, column: column)
+                    VStack(alignment: .leading, spacing: 3) {
+                        if dropTargetBlockID == slot.blockID {
+                            Rectangle().fill(tokens.ring).frame(height: 2)
+                        }
+                        HStack(alignment: .top, spacing: 8) {
+                            dragHandle(slot.blockID)
+                            LineageStripe(blockID: slot.blockID)
+                            ForEach(Array(model.columns.enumerated()), id: \.element.id) { i, column in
+                                VStack(alignment: .leading, spacing: 3) {
+                                    TakesCellView(
+                                        model: model, tokens: tokens, slot: slot, column: column,
+                                        tinted: i < tints.count ? tints[i] : false,
+                                        onDiff: { diffPresentation = $0 })
+                                    pickSwitcher(slot: slot, column: column)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
                             }
-                            .frame(maxWidth: .infinity, alignment: .topLeading)
                         }
                     }
+                    .contentShape(Rectangle())
+                    .dropDestination(for: String.self) { items, _ in
+                        dropBlock(items, before: slot.blockID)
+                    } isTargeted: { targeted in
+                        noteDropTarget(slot.blockID, targeted: targeted)
+                    }
                 }
+                endDropZone
             }
             .padding(12)
         }
@@ -311,13 +389,28 @@ struct LensesBoardView: View {
                         LazyVStack(alignment: .leading, spacing: 6) {
                             ForEach(model.projection.slots, id: \.placementID) { slot in
                                 VStack(alignment: .leading, spacing: 3) {
-                                    TakesCellView(
-                                        model: model, tokens: tokens, slot: slot, column: column,
-                                        tinted: false,
-                                        onDiff: { diffPresentation = $0 })
-                                    pickSwitcher(slot: slot, column: column)
+                                    if dropTargetBlockID == slot.blockID {
+                                        Rectangle().fill(tokens.ring).frame(height: 2)
+                                    }
+                                    HStack(alignment: .top, spacing: 4) {
+                                        dragHandle(slot.blockID)
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            TakesCellView(
+                                                model: model, tokens: tokens, slot: slot,
+                                                column: column, tinted: false,
+                                                onDiff: { diffPresentation = $0 })
+                                            pickSwitcher(slot: slot, column: column)
+                                        }
+                                    }
+                                }
+                                .contentShape(Rectangle())
+                                .dropDestination(for: String.self) { items, _ in
+                                    dropBlock(items, before: slot.blockID)
+                                } isTargeted: { targeted in
+                                    noteDropTarget(slot.blockID, targeted: targeted)
                                 }
                             }
+                            endDropZone
                         }
                         .padding(6)
                     }
@@ -325,6 +418,50 @@ struct LensesBoardView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Block drag-reorder (13b 4C, S4-2d — one post, one order)
+
+    /// The ⠿ handle: dragging a block reorders THE POST — every column
+    /// moves together by construction (all columns render the one slot
+    /// order; no column keeps an order of its own).
+    private func dragHandle(_ blockID: String) -> some View {
+        Text("⠿")
+            .font(tokens.small)
+            .foregroundStyle(tokens.faint)
+            .help("Drag to reorder this block — one post, one order: every column moves together")
+            .draggable(Self.dragPayload(blockID: blockID))
+    }
+
+    private func dropBlock(_ items: [String], before targetBlockID: String?) -> Bool {
+        guard let raw = items.first, let blockID = Self.parseDragPayload(raw) else {
+            return false
+        }
+        Task { await model.reorderBlock(blockID, before: targetBlockID) }
+        return true
+    }
+
+    private func noteDropTarget(_ blockID: String, targeted: Bool) {
+        if targeted {
+            dropTargetBlockID = blockID
+        } else if dropTargetBlockID == blockID {
+            dropTargetBlockID = nil
+        }
+    }
+
+    /// Drag past the last block to land it at the end.
+    private var endDropZone: some View {
+        VStack(spacing: 2) {
+            if dropAtEnd {
+                Rectangle().fill(tokens.ring).frame(height: 2)
+            }
+            Color.clear.frame(height: 12)
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .dropDestination(for: String.self) { items, _ in
+            dropBlock(items, before: nil)
+        } isTargeted: { dropAtEnd = $0 }
     }
 
     /// The per-block ‹ take k of n › switcher (the canvas grammar reused —

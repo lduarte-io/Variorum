@@ -924,3 +924,64 @@ struct TakesPresentationTests {
         }
     }
 }
+
+// MARK: - 13b Stage 4, Batch 4C (S4-2d) — the lenses board's block
+// drag-reorder: one post, one order, every column together.
+
+@Suite("Lenses block reorder (13b 4C)")
+@MainActor
+struct LensesReorderTests {
+    /// The drag face lands ONE ordinary `reorder` op: the post's order
+    /// changes for EVERY column at once (columns render the one slot
+    /// order — no column keeps its own), picks survive untouched (they
+    /// key on block IDs, not positions), and one ⌥⌘Z restores the order.
+    @Test func aDropReordersThePostForEveryColumnAndUndoes() async throws {
+        try await withWorld { session, db in
+            let world = try await TakesWorld.make(session, db)
+            let model = TakesViewModel(
+                session: session, postID: world.postID,
+                defaults: freshDefaults("lens-reorder"))
+            model.host = .lenses
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            // A scratch column with an explicit pick — order-independent.
+            model.addScratchColumn()
+            await model.pick(
+                columnID: model.columns[1].id, blockID: world.blocks[0],
+                variantID: world.extraTakes[world.blocks[0]]![0])
+
+            let before = model.projection.slots.map(\.blockID)
+            await model.reorderBlock(world.blocks[0], before: world.blocks[2])
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            #expect(model.projection.slots.map(\.blockID)
+                    == [world.blocks[1], world.blocks[0], world.blocks[2]],
+                    "one ordinary reorder — the stored order moved")
+            #expect(model.columns[1].picks[world.blocks[0]]
+                    == world.extraTakes[world.blocks[0]]![0],
+                    "picks ride the block, not the position — every column shows the new order")
+
+            // Dropping a block before its own successor is a no-op (no
+            // gratuitous op, no undo entry).
+            await model.reorderBlock(world.blocks[1], before: world.blocks[0])
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            #expect(model.projection.slots.map(\.blockID)
+                    == [world.blocks[1], world.blocks[0], world.blocks[2]])
+
+            // ⌥⌘Z: the ordinary inverse restores the exact order.
+            let undoStack = session.undoStack
+            _ = try await session.runner.run { ops in try undoStack.undo(with: ops) }
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: world.postID) })
+            #expect(model.projection.slots.map(\.blockID) == before,
+                    "one ⌥⌘Z restores the pre-drag order")
+            model.teardown()
+        }
+    }
+
+    /// The payload round-trip (the drop parses exactly what the handle
+    /// wrote — a foreign string never reorders anything).
+    @Test func dragPayloadRoundTripsAndRejectsForeignStrings() {
+        let payload = LensesBoardView.dragPayload(blockID: "b-123")
+        #expect(LensesBoardView.parseDragPayload(payload) == "b-123")
+        #expect(LensesBoardView.parseDragPayload("compare-move:p:b") == nil)
+        #expect(LensesBoardView.parseDragPayload("random text") == nil)
+    }
+}
