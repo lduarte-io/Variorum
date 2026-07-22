@@ -179,3 +179,20 @@ write exactly the same rows — only where the cut offsets may fall, and
 how you place them, changes. The boundary rules live in one Domain
 function (`BoundarySnapping`), which is where the change goes — with its
 own tests, its own commit, and no schema work.*
+
+## RULINGS (2026-07-22, the Stage 4 kickoff sitting — the author settled all four tradeoffs; this addendum is now BUILD-READY as ruled)
+
+1. **Magnetism: GENTLE SETTLE.** Word edges are free; sentence ends and
+   newlines pull a little — the common landings stay easy, nothing
+   forced.
+2. **Start-of-take mirror: YES, both ends.** End = the whole take rides
+   into the first block; start = the whole take rides into the second.
+   Every take always has a legal placement — the single-sentence dead
+   end is gone in both directions.
+3. **Word-edge floor: YES.** A cut never lands mid-word; a one-word
+   half remains legal (her block-is-at-minimum-one-character case is
+   satisfied by the floor, not defeated by it).
+4. **EXTRACT joins the relaxed rule: YES.** One rule everywhere —
+   extract's span edges snap to word edges/newlines exactly like
+   divide's cuts (the N18 late-start refusal class dissolves); the
+   prefix/suffix boundary-adjacency requirement itself is untouched.

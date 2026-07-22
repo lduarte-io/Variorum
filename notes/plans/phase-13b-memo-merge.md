@@ -166,3 +166,26 @@ geometry batch rather than waiting for the ceremony.
    to stay OUT of the ceremony (chain-merge the visible takes as
    today) — a 3-way pairing surface is complexity nobody asked for.
    Agree?
+
+## RULINGS (2026-07-22, the Stage 4 kickoff sitting — the author settled all five tradeoffs; this addendum is now BUILD-READY as ruled)
+
+1. **THE SEMANTICS EXTENSION IS ADOPTED — her canon ruling.** A merge
+   ceremony can mint SEVERAL takes on the merged block: each ＋ pairing
+   mints a joined take, carries ride whole. Divide-then-merge
+   round-trips whole when you pair 1+1 and 2+2. Nothing is
+   cartesian-producted — pairing is choosing by hand. The instant
+   no-fan merge keeps minting exactly one take, unchanged. **Canon
+   recording duty:** AppSpec §9's merge entry and OverallModel §7 gain
+   this delta when the build lands (the Stage 4 closeout).
+2. **Carry EXISTS.** An unpaired take may ride whole onto the merged
+   block as its own take, unjoined.
+3. **Join memory: PER-SESSION.** The sheet remembers the last join
+   choice within a session; a fresh launch resets to the canon default
+   (single space unless a side brings its own whitespace).
+4. **Threshold: ANY FAN on either side opens the sheet**, pre-paired
+   with the two chosen takes — ⏎ immediately reproduces today's exact
+   outcome; one keystroke buys visibility. The silent-vanish experience
+   cannot recur.
+5. **N-ary chains stay OUT.** A 3+-block selection chain-merges the
+   visible takes instantly as today (toast, lineage, undo); pairwise
+   ceremony merges reach every outcome when the takes matter.

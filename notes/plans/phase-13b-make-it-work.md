@@ -4473,3 +4473,30 @@ Takes). One-line build; Stage 4.
 that the one_block setting should govern paste too" — entry-wide
 semantics ratified (the model's current meaning; no typing-only
 divergence). N34's one open detail CLOSED.
+
+### Part 4 — the memo addenda RULED (2026-07-22, via the question tool per her direction; all nine answered; the rulings are appended to each memo, which are now BUILD-READY)
+
+**S4-22 — The cut redesign (W addendum), all four tradeoffs:**
+(1) Magnetism = GENTLE SETTLE (word edges free; sentence ends +
+newlines pull a little). (2) Start-of-take mirror = YES, BOTH ENDS
+(end ⇒ whole take to the first block, start ⇒ whole take to the
+second; every take always has a legal placement — the dead-end class
+gone). (3) Word-edge floor = YES (never mid-word; a one-word half
+stays legal). (4) EXTRACT joins the relaxed rule = YES (one rule
+everywhere; the N18 refusal class dissolves; prefix/suffix adjacency
+untouched).
+
+**S4-23 — The merge ceremony (merge addendum), all five tradeoffs:**
+(1) **THE SEMANTICS EXTENSION ADOPTED — her canon ruling:** pairing
+mints SEVERAL takes on the merged block (＋ per pairing; carries ride
+whole); divide-then-merge round-trips whole; nothing cartesian —
+pairing is choosing by hand. The instant no-fan merge keeps minting
+exactly one take. CANON CONSEQUENCE: AppSpec §9's merge entry +
+OverallModel §7 gain this delta WHEN THE BUILD LANDS (the Stage 4
+closeout's recording duty; the ruling itself is on the record now).
+(2) CARRY KEPT (an unpaired take may ride whole). (3) Join memory =
+PER-SESSION (fresh launch resets to the canon default). (4) Threshold
+= ANY FAN on either side opens the sheet, pre-paired with the chosen
+takes so ⏎ = today's exact outcome. (5) N-ary chains stay OUT of the
+ceremony (3+-block selections chain-merge the visible takes instantly
+as today; pairwise ceremony merges reach every outcome).
