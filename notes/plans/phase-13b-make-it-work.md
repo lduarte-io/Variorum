@@ -409,8 +409,14 @@ Commits per batch/stage with the standing message convention.
 | N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | **RESOLVED 3F** (commit e511710 — the rail's fixed-height cards scroll IN PLACE (ScrollView inside the 250×110 card): every take fully reachable, the uniform grid height honest; grid-only by construction — carousel/slot-split cards were never capped) |
 | N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | **RESOLVED 3D** (commit c7c50cf — the tag-entry face types-to-create: paths create missing levels through the taxonomy ops, the leaf applies, one runner turn; forgiving edges; red by revert. Recorded: if she meant tagging the BOOK OBJECT — readings carry no tags in the schema — that is a checkpoint model question) |
 | N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | **RESOLVED 3F** (commit e511710 — choosing is the card's full-width clickable HEADER (`TakeChooseHeader`: "choose" / "✓ chosen", ONE checkmark ever, text box keeps its whole width — her header ask verbatim); the stack card unified onto the same grammar; cards widen 220→250 ("a little bit wider"); screenshot 3f-03) |
-| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | new, author → verify next drive / design Stage 4 |
+| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **SHARPENED at the S4 sitting (S4-1): she CANNOT SEE the handle at all** ("I don't see it and haven't been able to use it") — code renders ⠿ at `tokens.faint` in the live editor's left gutter only; her live Write-mode look is the first datum, then Stage 4 verify-then-fix (faint ink / clipped gutter / render condition); Takes-side design unchanged → Stage 4 |
 | N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
+| N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED | new, author → Stage 4 |
+| N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose | new, author → Stage 4 (compare rework) |
+| N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | new, author → Stage 4 |
+| N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view | new, author → Stage 4 |
+| N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence; the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
+| N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
 | A2 | QUESTIONS #23–#27 + remainder of #28 | hers, standing |
@@ -4193,3 +4199,171 @@ orchestrator's last act). The R121 checkpoint bundle rides the same
 handoff: every batch record's judgment calls, the two memos + addenda,
 the tutorial walk (REAL-store re-seed owed first, behind the A1 rail),
 the screenshot corpus, and the standing asks.
+
+## Stage 4 kickoff sitting (2026-07-21/22, AUTHOR-ATTENDED — the running record; part 1: the environment acts + her opening design conversation)
+
+*The Stage 4 orchestrator session opened on the handoff's kickoff
+prompt; the author redirected the opening to a design conversation
+FIRST (compare/outline/canvas + what she's noticed) — the R121
+checkpoint-bundle walk and the memo-addenda rulings follow in later
+parts of this sitting. Recorded per the standing rule: verbatim-
+faithful, point-by-point, same turn, routed.*
+
+### The owed environment acts — BOTH DISCHARGED (2026-07-22 ~05:14–05:17 UTC; the author quit her instance to open the window)
+
+- **A1 backup FIRST:** `variorum-backup-2026-07-22-051433.sqlite` (UTC
+  name) into the real store's own `Backups/`; `integrity_check` ok;
+  50 live containers / 3 readings pre-seed, backup count matching.
+- **The `/Applications` Release refresh:** zero instances pgrep-verified
+  at build AND copy; product copied 2026-07-21 23:16:14 MDT. The
+  installed build now carries the complete Stage 3 + ladder-fix set
+  (through `c48059b` — it had lacked the three ladder-fix commits).
+- **The REAL-store tutorial re-seed, via the product door on the
+  refreshed build** (pid 76789): Help ▸ Restore Tutorial… invoked by AX
+  menu press; the hardened confirm appeared on the author's own screen
+  and SHE pressed Replace (the handoff's "fitting" path, verbatim).
+  Verified read-only post-seed: 1 "the field guide" + 6 chapters + 21
+  memberships + 22 tagged posts (21 lessons + the twin) + 1 "tutorial
+  scraps" pool + the sealed lesson; ZERO journal-shaped rows; her own
+  content untouched (the pre-seed store had 23 tagged rows — the extra
+  one died inside the confirmed scope; everything pre-seed is in the
+  backup). **The app remains RUNNING for the sitting** — no Mac test
+  runs / no Release builds while it lives, per the standing rules.
+
+### Her opening rulings + asks (S4-1 … S4-10; screenshots on file with the session — the Takes slot-split shot, mockup pages 2/3, the Compare gap shot)
+
+**S4-1 — N26 outcome: she CANNOT SEE Write's block drag handle.** Her
+words: "I don't see a Write blocks's drag handle though - my previous
+session said it existed but I don't see it and haven't been able to use
+it." Code fact (verified this sitting): `DragHandleView` renders ⠿ in
+the live editor's LEFT GUTTER at `tokens.faint` ink, wired only where
+the drop door exists (`BlockDecor.swift:618–657`, pooled at :425–436;
+read tier hides them by design; her attached screenshot was TAKES mode,
+where no handles exist). Route: her live look in Write is the first
+datum; then Stage 4 verify-then-fix (candidates: faint-ink invisibility
+— a D4-class honesty problem even if "rendering"; gutter placement
+clipped by margins; or a render-condition defect). Ledger N26 updated.
+
+**S4-2 — Compare/Lenses, the governing direction:** (a) "one live pane
+across both posts is fine" — RATIFIED (stated twice). (b) Compare posts
+"should be fully editable though, including being able to rearrange
+blocks in this view. I think I envisioned it more like lenses" … the
+compare tab "shouldn't feel too different from the lens tab, aside from
+being different posts and allowing reordering." (c) "add the ability to
+have a third lens column and a third compare column" — Lenses ALREADY
+caps at 4 (`TakesViewModel:390`; the "+ column" word-menu, top-right of
+the Lenses header, `LensesBoardView:234–252`) — so the lens half is a
+DISCOVERABILITY finding, not a build; Compare is hard-fixed at 2
+(anchor + picker) and the third-column ask is real build scope, joining
+her standing 2026-07-17 N-post side-by-side intake (AppSpec §14). (d)
+Block REORDER by drag: in LENSES, dragging a block moves it "on all the
+lenses" (one post, one order — correct by the model, wants the drag
+face); in COMPARE, order stays per-post — "a huge point of a post
+instead of a lens is the posts allowing different block orders."
+
+**S4-3 — Outline folds into Compare.** Her words: "outline should
+probably just be folded into the compare tab - maybe you can make an
+outline post easily, but I don't think it as an outline needs to be
+anything that a compare already isn't"; outlining an EXISTING post is
+not her use case — she outlines BEFORE the post ("write the outline,
+work on it with a fresh take on each one in the lenses field or in the
+normal take editor with all takes open, and then promote it to a post");
+"I'm honestly not even sure outline needs to be an explicit compare
+mode at all or different than normal compare." IF an outline mode
+exists: lineage-color relationship between associated blocks (mockup
+page 3's rail grammar — her screenshot); and a setting where the
+compared posts "follow your own order no matter what and it's based on
+lineage, to the extent possible" — order-drag either impacting both
+posts' orders, or display-only lineage-tied ordering. Uncertainty
+preserved: mode-vs-no-mode is HERS to settle when the design lands.
+
+**S4-4 — No-relationship honesty in Compare.** Comparing two posts with
+zero lineage/version history (or marking versions with zero lineage)
+"should tell you that and not show them with a gap in between them,
+just say 'there is no relationship here', and show the blocks side by
+side but with no color to indicate relationship" (her screenshot: the
+current gap parade against "the seal"). "I'm open to thoughts" —
+architect concurs outright: it is the R112 honesty rule applied to
+alignment; blanks/rails should only render where lineage actually
+speaks.
+
+**S4-5 — The Takes trap: divide-on-empty-line + no insert-below.** "You
+can't currently divide a block on an empty line, but then at the same
+time you can't insert a new block underneath, so you can feel kind of
+trapped by needing to make a sentence first" (Takes specifically). The
+divide half rides the ALREADY-RULED cut redesign (newline + word-edge
+cuts — the W addendum). NEW ask: an insert-block-BELOW-the-focused-
+block door (the shipped ＋new-block is end-of-post only; core
+`newBlock(at:)` already takes a position — a registry act away).
+PRESERVED: takes panes keep accepting newlines as content ("I value
+that you can add new lines to a block in takes, I don't want to get rid
+of that"); Write's current behavior liked as-is.
+
+**S4-6 — Diff sheet: keep, plus a save button.** "The diff sheet is
+fine honestly, it's more of a cute detail at this point (maybe we need
+to add a save button to it though? it could be useful to feed to an AI
+agent or something)."
+
+**S4-7 — Canvas usability package.** (a) Cards should "automatically
+start saving in more of a spread out grid" — OR the alternative model:
+an explicit drag-in from "a scrollable bank of posts" when there are
+many. (b) Her performance question — "do we have any plan for if there
+were tons of long blocks in a post?" — answered honestly: NO plan
+today; every card realizes and unpositioned cards pile in the default
+column; the concern is real and the brief must answer it (spread-grid
+default + lazy realization, or the bank model). (c) "You can't edit
+them within the sticky note, which is annoying" — canvas cards become
+EDITABLE (the R40 arrange-only stance is superseded by her direction;
+one-live-ring discipline extends there). (d) "You can't resize them so
+for longer paragraphs it's not that useful" — RESIZABLE cards. (e)
+Block order visible on cards ("maybe a number in the bottom right
+corner?"). (f) A click-in-order mode "where you can click on the notes
+in the order that you want the post to be ordered could be cool" — the
+ONE spatial→structural door she wants; "aside from that i dont see a
+great way to let the spatial arrangement" adopt into order. (g) "Fit
+everything in view would be helpful when there's not too many cards."
+
+**S4-8 — Blocks/pool clarity package.** (a) "I'm a little confused at
+what 'move to pool' does on a block in the blocks view of a post" —
+answered in-sitting (it is `moveBlock` to the chosen pool: the block
+LEAVES the post under I2 and becomes a scrap there); the door owes
+clearer copy. (b) The Blocks area "needs to make the ability to add to
+different pools based on tags more obvious - pools are by the tag, I
+see now. It's a little confusing" — model clarification owed in the UI:
+pools are CONTAINERS, tags are labels, the canvas tag-filter is only a
+filter; the faces must stop letting the two blur. (c) Her scraps
+vision: "each scrap is an individual item - one that can have tags
+added to it, etc." — block-tag faces exist (11a A8); prominence is the
+gap. (d) **Copy-vs-instance RATIFIED as COPY** — she reasoned both
+sides and lands "a little more towards the copy idea - finished
+writing can't change anyway, that removes a headache"; this MATCHES
+founding canon (no shared blocks across posts; reuse is copy +
+lineage — CoreDescription "What it is not"). Her noted future want: "a
+lineage list of all posts with that block" — a someday face, recorded.
+
+**S4-9 — Book view package (Stage 4 scope by her direction: "would like
+to see those this phase").** She loves the current infinite-scroll book
+view. Asks: (1) "it needs a progress bar"; (2) the iBooks/Kindle-style
+paged view — "flip through the pages and scroll on the bottom
+horizontal bar, but each page is a post with a verticle scroll that
+could be as long as a post can be. so i could flip through the 'book'
+of my journal" (the 11a scrubber is a jump-track on the vertical
+scroll — NOT this); (3) "a traditional book view with the same size on
+every page" — uniform fixed-size pages, text flowing across them. All
+three beside the existing view, not replacing it ("love the existing
+book reading view, I think we need those other 2 as well").
+
+**S4-10 — Housekeeping answers given in-sitting:** the Lenses third
+column exists today behind "+ column" (top-right of the Lenses board);
+if she knew the door and it misbehaves, that upgrades to a defect —
+her confirmation pending.
+
+### Routing (architect, same turn)
+
+All of S4-1…S4-10 are Stage 4 brief inputs; the brief is authored after
+the memo-addenda rulings + the rest of the checkpoint walk. Ledger rows
+added/updated below: N26 (S4-1 outcome), N28 (S4-5), N29 (S4-4), N30
+(S4-7), N31 (S4-9), N32 (S4-8a–c), N33 (S4-6). S4-2/S4-3 are the
+compare/outline/lenses rework's governing record (with the Stage 4
+stub's compare-editing entry and her 2026-07-17 N-post intake). S4-8d
+is a canon RATIFICATION (no ledger row — nothing changes).
