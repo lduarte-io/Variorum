@@ -98,7 +98,7 @@ enum Sameness {
 /// (or nil for an orphan row — a kin-less block of the other post) beside
 /// its lineage kin from the other post (0 = blank, 1 = the pair, >1 = a
 /// divide's span).
-struct AlignmentRow: Equatable, Identifiable {
+nonisolated struct AlignmentRow: Equatable, Identifiable {
     var anchorBlockID: String?
     var otherBlockIDs: [String]
     /// True when this row's other-side kin arrive OUT of the other post's
@@ -108,7 +108,9 @@ struct AlignmentRow: Equatable, Identifiable {
     var id: String { anchorBlockID ?? "orphan-\(otherBlockIDs.joined(separator: "+"))" }
 }
 
-enum PostAlignment {
+/// Pure registration brain (13b 4C: explicitly nonisolated — the compare
+/// composition layer builds on it from nonisolated contexts).
+nonisolated enum PostAlignment {
     /// Builds the aligned rows: ANCHOR the opened post's order (round 6's
     /// answer); each other-side block lands beside its lineage kin
     /// (`kinship`: otherBlockID → anchorBlockID); kin-less other blocks
