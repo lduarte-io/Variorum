@@ -275,6 +275,7 @@ final class BlockDecorOverlayController {
         for handle in handleViews { handle.removeFromSuperview() }
         indicatorView?.removeFromSuperview()
         insertionBar?.removeFromSuperview()
+        addChip?.removeFromSuperview()
         seamViews = []
         calloutViews = []
         emojiLabels = []
@@ -282,6 +283,8 @@ final class BlockDecorOverlayController {
         handleViews = []
         indicatorView = nil
         insertionBar = nil
+        addChip = nil
+        addChipBlockID = nil
     }
 
     // MARK: Render
@@ -442,6 +445,58 @@ final class BlockDecorOverlayController {
                     width: 32, height: 16)
             }
         }
+        renderAddChip(state, tokens: tokens, in: textView, fitsCards: fitsCards)
+    }
+
+    // MARK: The margin add-a-comment door (13b 4D — N35, the mockups' own
+    // margin grammar in its MINIMAL form)
+
+    private var addChip: CommentCardView?
+    /// Test seam: which block the add door currently offers (nil = none).
+    private(set) var addChipBlockID: String?
+
+    /// A quiet "+ //" in the comment gutter at the CARET block — exactly
+    /// where its margin card would sit — whenever the block has no
+    /// comments yet. Scoped deliberately small (the N35 disposition):
+    /// margin-card mode only (the gutter must fit cards; the inline
+    /// setting has its own strip grammar), the live editor only (the read
+    /// tier has no comments door), the caret block only (the calm margin
+    /// never grows a rail of + buttons). Clicking opens the block's
+    /// comments panel — the same door every comment face opens.
+    private func renderAddChip(
+        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView,
+        fitsCards: Bool
+    ) {
+        let caretID = state.caretBlockID
+        let eligible = onOpenComments != nil
+            && !state.appearance.inlineComments
+            && fitsCards
+        guard eligible, let caretID,
+              state.comments[caretID]?.isEmpty ?? true,
+              let frame = state.frames.first(where: { $0.blockID == caretID })
+        else {
+            addChip?.removeFromSuperview()
+            addChip = nil
+            addChipBlockID = nil
+            return
+        }
+        let chip = addChip ?? {
+            let chip = CommentCardView()
+            addChip = chip
+            return chip
+        }()
+        if chip.superview == nil { textView.addSubview(chip) }
+        addChipBlockID = caretID
+        chip.onClick = onOpenComments.map { open in { open(caretID) } }
+        chip.present(
+            text: "+ \(tokens.commentPrefix.trimmingCharacters(in: .whitespaces))",
+            tint: .clear, ink: NSColor(tokens.faint),
+            style: .badge)
+        chip.toolTip = "Add a comment on this block (⌘⇧')"
+        let yNudge: CGFloat = state.fannedBlockIDs.contains(caretID) ? 22 : 0
+        chip.frame = CGRect(
+            x: state.textRight + 12, y: frame.frame.minY + yNudge,
+            width: 44, height: 16)
     }
 
     private func renderHandles(_ state: BlockDecor.State, in textView: NSTextView) {

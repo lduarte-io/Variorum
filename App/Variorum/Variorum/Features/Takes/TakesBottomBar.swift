@@ -231,6 +231,14 @@ struct TakesBottomBar: View {
         Button(tokens.chromeLabel("tags…")) { tagsShown = true }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
             .help("The post's tags — apply or remove them right here")
+        // 13b 4D (N35 + S4-33, her rider verbatim: "the comments button
+        // should be there in takes the way it is in write, on the bottom
+        // bar") — parity of PROMINENCE, not just existence: the same
+        // direct door Write's bar carries (the block ▾ menu's item stays;
+        // the routed ⌘⇧' and this button share `requestComments`).
+        Button(tokens.chromeLabel("comments")) { model.requestComments() }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens))
+            .help("The block's comments — working notes on a block, never per-take (⌘⇧')")
         Button(tokens.chromeLabel(
             model.projection.entryDate.map { "date: \($0)" } ?? "set date…")) {
             pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()

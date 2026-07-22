@@ -638,10 +638,16 @@ enum TutorialSeeder {
         // —————————————————————————— the library of things ——————————————————
 
         let commentsTags = try lesson(library, "comments & tags", [
+            // 13b 4D (N35/S4-33): the doors she couldn't find, named where
+            // comments are taught — the bar button (both editors now) and
+            // the margin's own + door.
             "A COMMENT is a working note on a BLOCK — about the writing, not in "
             + "it: \u{201C}take 1 is better, but take 2's ending\u{2026}\u{201D}. This block "
             + "carries one; it renders in the margin with a // prefix. Click it "
-            + "to open the block's comments panel — or press \u{2318}\u{21E7}' anywhere.",
+            + "to open the block's comments panel — or press \u{2318}\u{21E7}' anywhere. "
+            + "The comments button sits in the bottom bar in Write and Takes "
+            + "alike, and in Write an uncommented block offers a quiet \u{FF0B} in "
+            + "the margin right where its note would sit.",
 
             "Comments survive the knife: divide or merge a commented block and "
             + "the note rides onto the successors. Deleted comments stay "

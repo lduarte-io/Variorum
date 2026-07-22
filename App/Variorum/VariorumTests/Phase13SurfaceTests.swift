@@ -314,6 +314,65 @@ struct CommentsAndReorderTests {
         }
     }
 
+    /// 13b 4D (N35 — the margin add-a-comment door, the mockups' grammar
+    /// in its minimal form): an uncommented CARET block offers a quiet
+    /// "+ //" exactly where its margin card would sit; a commented block's
+    /// card IS the door; inline mode, narrow gutters, and the read tier
+    /// offer none. RED ON OLD: pre-4D nothing rendered in the margin for
+    /// an uncommented block (the N35/S4-25 finding — she couldn't find any
+    /// way to leave a comment).
+    @Test func theMarginOffersAddACommentAtTheCaretBlock() async throws {
+        try await withEditor(seedBlocks: ["Alpha.", "Beta."]) { h in
+            let controller = BlockDecorOverlayController(
+                textView: h.textView, onOpenComments: { _ in }, onMoveBlock: nil)
+            defer { controller.uninstall() }
+            var state = BlockDecor.State()
+            state.frames = [
+                .init(entryIndex: 0, blockID: "b0",
+                      frame: CGRect(x: 100, y: 0, width: 540, height: 30)),
+                .init(entryIndex: 1, blockID: "b1",
+                      frame: CGRect(x: 100, y: 40, width: 540, height: 30)),
+            ]
+            state.entryCount = 2
+            state.viewWidth = 900
+            state.textLeft = 100
+            state.textRight = 640  // gutter 260 ≥ 150: margin cards fit
+
+            state.caretBlockID = "b0"
+            controller.render(state)
+            #expect(controller.addChipBlockID == "b0",
+                    "the caret block's empty margin offers the + door")
+            state.caretBlockID = "b1"
+            controller.render(state)
+            #expect(controller.addChipBlockID == "b1", "the door follows the caret")
+
+            // A commented block's own card is the door — no second +.
+            state.comments["b1"] = [.init(id: "c1", text: "a note")]
+            controller.render(state)
+            #expect(controller.addChipBlockID == nil)
+
+            // Inline mode keeps the strip grammar — no margin +.
+            state.comments = [:]
+            state.appearance.inlineComments = true
+            controller.render(state)
+            #expect(controller.addChipBlockID == nil)
+
+            // A narrow gutter (badge territory) offers none.
+            state.appearance.inlineComments = false
+            state.viewWidth = 700  // gutter 60 < 150
+            controller.render(state)
+            #expect(controller.addChipBlockID == nil)
+
+            // The read tier (no comments door) never offers it.
+            let readOnly = BlockDecorOverlayController(
+                textView: h.textView, onOpenComments: nil, onMoveBlock: nil)
+            defer { readOnly.uninstall() }
+            state.viewWidth = 900
+            readOnly.render(state)
+            #expect(readOnly.addChipBlockID == nil)
+        }
+    }
+
     @Test func theCalloutDoorSetsAndClearsTheCaretBlocksFrame() async throws {
         try await withEditor(seedBlocks: ["Framed prose.", "Plain prose."]) { h in
             h.textView.setSelectedRange(NSRange(location: 2, length: 0))
