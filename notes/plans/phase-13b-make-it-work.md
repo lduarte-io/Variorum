@@ -421,6 +421,8 @@ Commits per batch/stage with the standing message convention.
 | N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | new, author → Stage 4 scoping call at brief time |
 | N37 | Readings RESTORE door (S4-28.2, reverses the pre-13 boundary): `restoreReading` on the `restoreContainer` pattern (tombstone flip + exact-stamp revival of sections/memberships) + a deleted-readings recovery surface; curated at least | new, author → Stage 4 |
 | N38 | Smart → smart+curated conversion (S4-28.4, direction-level, uncertainty preserved): curating/chaptering a smart book converts it (membership materialization design), a fresh smart book mintable off the same tag; the #25(a) promote-to-curated design, now wanted | new, author → Stage 4 scoping call; design memo owed if deferred |
+| N39 | Blocks-list positional moves (S4-30g): type a target position number ("what number block… out of the total post") + move-to-top / move-to-bottom doors — dragging stops being the only long-distance move | new, author → Stage 4 |
+| N40 | The takes strip's height jumping (S4-31b, her ruling): ONE fixed strip height with in-strip scrolling ("you can scroll within the strip"); kills the back-and-forth height changes and dissolves the recorded #28(b) clip cost | new, author → Stage 4 |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
@@ -4581,3 +4583,40 @@ AND FOUR NEW DIRECTIONS, her words:**
    scoping call at brief time; if deferred, the design memo is owed
    (the uniform-page treatment).
 QUESTIONS #25 → ANSWERED (with the four spawned rows).
+
+### Part 8 — the A2 walk, second half: QUESTIONS #26–#28 (2026-07-22, question tool; her clarifying questions answered in-sitting)
+
+**S4-29 — #26 structure bundle: ALL EIGHT BLESSED**, conditional on her
+reading of (h), which is CORRECT and was confirmed in-sitting: "FLAPS"
+means exactly "membership in a book comes and goes with the tags" — a
+smart book's membership is live query results; tagging pulls a post out
+of the Pool and onto the chip, untagging returns it. "if so that's
+fine." QUESTIONS #26 → ANSWERED.
+
+**S4-30 — #27 writing surface:** (c)/(d)/(f)/(h) blessed ("everything
+else is fine"). **(a) questioned, mechanism explained in-sitting** (an
+overlay cannot push text down in TK2; selective per-block gaps would
+both smear fragile attribute surgery into every write path AND make
+commented blocks inferable from spacing alone — uniform is the honest
+mechanism); the call STANDS; if the airier-everywhere consequence
+bothers her in real use it becomes an R116 memo, not a patch. **(e)
+questioned, explained in-sitting** (the menu item flips the setting but
+cannot SHOW a live ✓ without a standing observation bridge; Settings
+shows the true state); stands as-is; the live-✓ upgrade is one small
+build away if she asks. **(g) blessed WITH a new ask — N39:** "the
+blocks page should have an option to type in what number block you
+want it to be out of the total post, or move to top or move to bottom,
+so you don't only have to drag it." (b) was superseded by S4-19 before
+this walk. QUESTIONS #27 → ANSWERED.
+
+**S4-31 — #28 takes/canvas:** **(a) clarified in-sitting — NOT the
+block-seams setting** (⌘⇧B stays a setting, untouched; "Seamless" was
+the old margin-grid-only checkbox that hid wash AND cards); with that,
+(a) stands. **(b) RULED — N40:** the strip gets ONE fixed height with
+scrolling inside it — "there should be one length that the strip is
+and you can scroll within the strip. it's annoying to see it jump back
+and forth and change in height." (c) blessed; (f) blessed ("when i
+open a fan it opens the rail sounds like it works"); (d) drew no
+comment — treated as blessed (it is the unchanged pre-13 shape),
+flagged here in case she meant otherwise. QUESTIONS #28 → fully
+ANSWERED ((e) was R88's earlier answer).
