@@ -48,6 +48,17 @@ nonisolated enum CompareComposition {
     /// `followAnchorOrder` OFF (S4-3/S4-12's display-only toggle) — or no
     /// kinship anywhere — collapses to ONE free segment: every column in
     /// its own order, side by side.
+    ///
+    /// PROVISIONAL (ladder round 3, MINOR-C — the author's call at the 13c
+    /// kickoff; recorded in the plan file's Batch 4C section): in a MIXED
+    /// multi-peer board, a peer with NO kinship at all has no row that
+    /// bounds its run, so its whole post renders in the TRAILING free
+    /// segment — below every aligned row. On a long anchor fully kin to
+    /// another peer that column reads blank for many rows. The alternative
+    /// (special-case an empty `kinships` peer to flush at the first bound,
+    /// as the whole-board zero-lineage case does) is one arm away; the
+    /// shipped behavior is pinned by
+    /// `aPeerWithNoKinshipAtAllTrailsEveryAlignedRow`.
     static func segments(
         anchorBlocks: [String],
         peerBlocks: [[String]],
@@ -105,13 +116,24 @@ nonisolated enum CompareComposition {
         /// run precedes that peer's kin in the peer's own order). A peer
         /// with NO kin in the row keeps its run pending — peers register
         /// against the anchor INDEPENDENTLY (the multi-peer pin's letter),
-        /// so another peer's kin row never splits a stretch: unrelated
-        /// runs pack side by side in the next segment that genuinely
-        /// bounds them (or the trailing one). The gate's traced defect was
-        /// the unconditional flush here — peer2's kin row force-flushed
-        /// peer1's trailing run into its own mostly-empty segment
-        /// (aligned·free[P1x|—]·aligned·free[—|P2x] where the record
-        /// promises aligned·aligned·free[P1x|P2x]).
+        /// so another peer's kin row never splits that peer's stretch.
+        /// The gate's traced defect was the unconditional flush here —
+        /// peer2's kin row force-flushed peer1's trailing run into its own
+        /// mostly-empty segment (aligned·free[P1x|—]·aligned·free[—|P2x]
+        /// where the record promises aligned·aligned·free[P1x|P2x]).
+        ///
+        /// THE ASYMMETRY, stated honestly (ladder round 3, MINOR-B — the
+        /// behavior is deliberate, the earlier wording was not): the
+        /// ANCHOR side still flushes at EVERY aligned row, because it
+        /// genuinely IS bounded by every one of them (a pending anchor
+        /// block precedes this anchor block in the anchor's own order, and
+        /// the anchor's order is the board's spine). Only PEER runs wait.
+        /// The accepted consequence: material that would once have shared
+        /// one packed segment can split into two sparser ones — anchor
+        /// [A,B,C] with peer0 [P1x, C1'] (kin C) and peer1 [B2'] (kin B)
+        /// composes `free[A|—|—] · aligned(B) · free[—|P1x|—] ·
+        /// aligned(C)`, not one `free[A|P1x|—]`. Pinned exactly:
+        /// `theAnchorFlushesAtEveryAlignedRowWhileAPeerRunWaits`.
         func flushFree(forcing: [Bool]) {
             let flushable = (0..<peerCount).filter { forcing[$0] && !freePeers[$0].isEmpty }
             guard !freeAnchor.isEmpty || !flushable.isEmpty else { return }

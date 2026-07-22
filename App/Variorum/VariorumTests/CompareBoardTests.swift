@@ -89,6 +89,55 @@ struct CompareCompositionTests {
         ])
     }
 
+    /// The flush asymmetry, pinned exactly (ladder round 3, MINOR-B): a
+    /// PEER's kin-less run waits for a row its OWN kin bounds, but the
+    /// ANCHOR flushes at every aligned row — it genuinely is bounded by
+    /// each of them (its pending blocks precede this anchor block in the
+    /// anchor's own order). The accepted consequence, from the reviewer's
+    /// traced configuration: material that would once have shared one
+    /// packed segment splits into two sparser ones. This pin exists so the
+    /// shipped placement is explicit and cannot drift unnoticed — flipping
+    /// either half (anchor waits / peer flushes) reds it.
+    @Test func theAnchorFlushesAtEveryAlignedRowWhileAPeerRunWaits() {
+        // Anchor A B C — peer0: P1x (kin-less), C1' (kin C);
+        //                peer1: B2' (kin B).
+        let segments = CompareComposition.segments(
+            anchorBlocks: ["A", "B", "C"],
+            peerBlocks: [["P1x", "C1'"], ["B2'"]],
+            kinships: [["C1'": "C"], ["B2'": "B"]],
+            followAnchorOrder: true)
+        #expect(segments == [
+            // A is bounded by the arriving aligned row and flushes alone…
+            .free(anchor: ["A"], peers: [[], []]),
+            .aligned(.init(anchorBlockID: "B", peerKin: [[], ["B2'"]],
+                           peerMoved: [false, false])),
+            // …while peer0's P1x waited for the row its OWN kin bounds.
+            .free(anchor: [], peers: [["P1x"], []]),
+            .aligned(.init(anchorBlockID: "C", peerKin: [["C1'"], []],
+                           peerMoved: [false, false])),
+        ])
+    }
+
+    /// PROVISIONAL, pinned as shipped (ladder round 3, MINOR-C — the
+    /// author's call at the 13c kickoff): in a MIXED multi-peer board a
+    /// peer with NO kinship at all has no row that bounds its run, so its
+    /// whole post trails EVERY aligned row. Here that packs tighter than
+    /// the alternative (2 segments), but scaled to a long fully-kin anchor
+    /// the unrelated column reads blank for that many rows. The pin
+    /// records the choice; it is not a claim that the choice is settled.
+    @Test func aPeerWithNoKinshipAtAllTrailsEveryAlignedRow() {
+        let segments = CompareComposition.segments(
+            anchorBlocks: ["A", "B"],
+            peerBlocks: [["U1", "U2"], ["A''"]],
+            kinships: [[:], ["A''": "A"]],
+            followAnchorOrder: true)
+        #expect(segments == [
+            .aligned(.init(anchorBlockID: "A", peerKin: [[], ["A''"]],
+                           peerMoved: [false, false])),
+            .free(anchor: ["B"], peers: [["U1", "U2"], []]),
+        ])
+    }
+
     /// The follow-order toggle OFF is the display-only escape (S4-3's
     /// shape): every column flows whole, in its own order — even where
     /// kinship exists. Rails stay a separate channel (the lineage-color
