@@ -7096,3 +7096,45 @@ are the standing infrastructure-failure class). Honestly named
 unverified: the mobile insurance build (structurally unaffected); and
 everything behind the PENDING Mac execution, which remains claims
 until the gate runs.
+
+## The stage-close gate — first execution (2026-07-22 morning, the session UNLOCKED; the author back and machine idle by her word): THE CONSOLIDATED RUN FAILED — the review RE-OPENS at round 3 per the ladder's own rule
+
+**The run:** full Mac suite at `dbc55ab` — **"Test run with 645 tests in
+122 suites failed after 58.5s with 14 issues"; TEST FAILED.** 119 suites
+passed + 3 failed = 122 (the suite count matches); the TEST count reads
+645 vs the recorded expectation 648 — the decomposition is owed by the
+fix session (parameterized-test counting is the leading suspect, but it
+gets accounted exactly, not hand-waved).
+
+**The three failures (verbatim-faithful; all in never-executed
+territory — the locked session meant these Mac tests had only ever
+compiled):**
+1. `randomizedCompareBoardSoakHoldsEveryInvariant(seed:)` — 12 issues
+   across BOTH seeds (5, 17), all the same expectation at
+   `TakesBoardSoakTests.swift:462`: `(pane.view.bounds.height + 3 →
+   32.0) >= (measured → 46.0)` — a compare pane renders 32pt where its
+   text measures 46pt: the clipped-pane class (AD-7/3F's family) on
+   4C's surface, or a harness width mismatch between measure and
+   render. TRACE DECIDES; no assumption.
+2. `theGridStartsBelowThePositionedBoundingBox` —
+   `CanvasAndPoolTests.swift:374`: `(origin.y → 460.0) == (250 + 170 +
+   40 → 460)` failing — the display reads equal, so the leading suspect
+   is float-precision (459.999… displayed as 460.0) in the 4E grid
+   math or an exact-integer expectation over float arithmetic.
+3. `multiPeerRowsMergeOnTheAnchorSpine` — `CompareBoardTests.swift:85`:
+   the composition's actual segment sequence (aligned A · free [P1x|—]
+   · aligned B · free [—|P2x]) differs from the test's expectation —
+   either the pure brain mis-composes the multi-peer merge or the
+   never-run test encodes a wrong expectation. TRACE DECIDES.
+
+**Routing (the architect, same turn):** ONE fresh GATE SESSION executes
+the whole bundle: (1) trace each failure to its mechanism — code bug
+(the failing test IS the red pin; fix the code) vs wrong test
+expectation (a justified, line-by-line pin edit per the standing
+discipline); (2) the exact 645-vs-648 count decomposition; (3) the full
+suite re-run GREEN; (4) then EVERY recorded revert-red procedure (the
+six batches' + round 1's three); (5) then the visual loop with
+screenshots (the machine is idle by the author's word). Everything
+lands in a "gate execution record" section. THEN round 3 (a fresh cold
+reviewer) reviews the gate fixes per the re-opened ladder; the deploy →
+Release → `/Applications` → re-seed chain stays HELD behind round 3.
