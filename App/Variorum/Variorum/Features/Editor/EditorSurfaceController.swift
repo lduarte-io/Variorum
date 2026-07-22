@@ -288,8 +288,11 @@ final class EditorSurfaceController {
         case .merge(let leadingIndex, let trailingIndex, let leadingID, let trailingID):
             // The ceremony threshold (13b 4B — S4-23 ruling 4): ANY fan on
             // either side opens the merge ceremony, PRE-PAIRED with the two
-            // rendered takes so ⏎ immediately reproduces the instant
-            // outcome — the silent-vanish experience cannot recur. Unfanned
+            // rendered takes so ⏎ reproduces the instant outcome — exactly,
+            // when no session join memory is set (a fresh session); with a
+            // memory set the pre-pair joins by the MEMORY, not canon
+            // (ruling 3's letter). The silent-vanish experience cannot
+            // recur either way. Unfanned
             // pairs keep the instant path byte-unchanged. (The slots' arity
             // is the door's cheap gate; the open re-reads the true fans and
             // falls back to the instant path if the projection was stale.)
@@ -439,7 +442,9 @@ final class EditorSurfaceController {
         let firstBlockID: String
         let secondBlockID: String
         /// The rendered take of each side at open time — the default
-        /// pre-pairing's parts (S4-23 ruling 4: ⏎ = today's exact outcome).
+        /// pre-pairing's parts (S4-23 ruling 4: ⏎ = today's exact outcome
+        /// when no session join memory is set; a remembered join seeds the
+        /// pre-pair instead — ruling 3's letter).
         let firstRenderedID: String?
         let secondRenderedID: String?
         var firstTakes: [MergeTake]
@@ -537,8 +542,11 @@ final class EditorSurfaceController {
                 secondTakes: secondFan.map { MergeTake(variant: $0) },
                 pairings: [])
             // The default pre-pairing: the two RENDERED takes, joined by
-            // the remembered choice or the canon rule — confirming
-            // immediately IS current behavior.
+            // the remembered choice or the canon rule. Precision (ladder
+            // round 1, NIT-4): confirming immediately reproduces today's
+            // exact outcome in a FRESH session — no join memory set; once
+            // a session memory exists the pre-pair joins by the MEMORY,
+            // not canon (ruling 3's letter).
             if let head = firstFan.first(where: { $0.id == firstRenderedID }),
                let tail = secondFan.first(where: { $0.id == secondRenderedID }) {
                 state.pairings = [MergePairingDraft(

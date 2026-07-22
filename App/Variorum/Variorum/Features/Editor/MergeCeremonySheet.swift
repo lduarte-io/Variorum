@@ -10,8 +10,10 @@
 //  canon rule or the session's last confirmed choice); unpaired takes may
 //  CARRY whole; everything else stays with the released blocks in lineage
 //  — today's rule, now visible and chosen instead of silent. The sheet
-//  opens PRE-PAIRED with the two rendered takes, so ⏎ immediately
-//  reproduces the instant merge's exact outcome. Cancel touches nothing;
+//  opens PRE-PAIRED with the two rendered takes, so ⏎ reproduces the
+//  instant merge's exact outcome when no session join memory is set (a
+//  fresh session); a remembered join seeds the pre-pair instead —
+//  ruling 3's letter. Cancel touches nothing;
 //  the live editor is untouched for the ceremony's whole duration. The
 //  sheet is ordinary SwiftUI — never the live TK2 editor.
 //

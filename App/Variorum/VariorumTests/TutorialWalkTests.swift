@@ -1313,9 +1313,12 @@ struct TutorialStructureActsTests {
             let above = before.slots[index - 1]
 
             // The INSTANT op (13b 4B: in the UI a fanned pair now opens the
-            // merge ceremony, whose ⏎ default reproduces exactly this; the
-            // instant op remains the chain path's brick — this pins the
-            // stored meaning the ceremony's default promises).
+            // merge ceremony, whose ⏎ default reproduces exactly this WHEN
+            // no session join memory is set — a fresh session; a remembered
+            // join seeds the pre-pair instead, ruling 3's letter (the
+            // ladder round 1 NIT-4 precision); the instant op remains the
+            // chain path's brick — this pins the stored meaning the
+            // ceremony's fresh-session default promises).
             let result = try await session.runner.run { ops in
                 try ops.merge(above.blockID, fannedSlot.blockID)
             }

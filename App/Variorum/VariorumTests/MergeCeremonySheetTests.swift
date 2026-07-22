@@ -4,10 +4,13 @@
 //
 //  The merge ceremony's door + state machine (13b Stage 4, Batch 4B — the
 //  RULED merge addendum, S4-23): ANY fan on either side opens the sheet
-//  PRE-PAIRED with the two rendered takes (⏎ = today's exact outcome);
-//  pairings and carries flow through Operations.mergeCeremony; unfanned
-//  pairs and N-ary chains keep their instant paths byte-unchanged; the
-//  session remembers the last confirmed join.
+//  PRE-PAIRED with the two rendered takes (⏎ = today's exact outcome in a
+//  FRESH session / when no join memory is set; with a session memory set
+//  the pre-pair joins by the MEMORY — ruling 3's letter; precision per
+//  ladder round 1, NIT-4); pairings and carries flow through
+//  Operations.mergeCeremony; unfanned pairs and N-ary chains keep their
+//  instant paths byte-unchanged; the session remembers the last
+//  confirmed join.
 //
 //  RED-ON-OLD (procedure for the verifier, the locked-session regime):
 //  revert = restore the pre-4B `.merge` case body in
@@ -68,9 +71,12 @@ struct MergeCeremonySheetTests {
         }
     }
 
-    /// ⏎ immediately reproduces today's exact outcome: one minted take
-    /// from the visible pair, the spare take behind in lineage, the road
-    /// named, ONE undo entry.
+    /// ⏎ reproduces today's exact outcome — in this FRESH session (no
+    /// join memory is set, so the pre-pair joins by canon; with a memory
+    /// set it would join by the memory, ruling 3's letter — the framing
+    /// precision of ladder round 1, NIT-4): one minted take from the
+    /// visible pair, the spare take behind in lineage, the road named,
+    /// ONE undo entry.
     @Test func confirmingThePrePairedSheetReproducesTheInstantOutcome() async throws {
         try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
             let slots = try h.storeSlots()
