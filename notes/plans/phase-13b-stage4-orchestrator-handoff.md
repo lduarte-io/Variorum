@@ -89,11 +89,28 @@ ROLE handoff — the state is in the plan file and the commits.
   **4G's whole purpose is that Mac suites now run beside her live
   app** — but Release builds / `/Applications` refreshes still need
   zero-instance windows.
-- **BATCH 4G:** ⟦FINALIZED AT CUTOVER — see the "Batch 4G record" in
-  the plan file for the design, the proof-run status (which of the
-  two runs executed, which is PENDING), and the orchestrator's
-  verification note. Any PENDING run is the NEXT session's first
-  obligation before it relies on the unlock.⟧
+- **BATCH 4G: CLOSED, both proof runs GREEN, nothing pending**
+  (commits `57bf287` + `38174f1`; orchestrator-verified at cutover —
+  diff exactly one line, record present, tree clean). The design: the
+  Mac target's DEBUG `PRODUCT_BUNDLE_IDENTIFIER` →
+  `io.lduarte.Variorum.debug`; Release (her `/Applications` identity,
+  container, signing) byte-untouched. **THE UNLOCK IS PROVEN: the full
+  Mac suite ran 562/112 GREEN beside her LIVE real-store instance**
+  (and again 562/112 at a zero-instance window; mobile builds).
+  Suites now run while she writes; Release builds + `/Applications`
+  refreshes still need zero-instance windows. Read the full "Batch 4G
+  record" (plan file ~line 4865) — it carries three judgment calls
+  for her eventual walk (the dev app's fresh container with the
+  corpus cold-copied; the `-VariorumRealStore` opt-in now narrowed to
+  never-her-corpus; Keychain separation) and THREE TRAPS for your
+  batches: (1) the tight pgrep pattern now ALSO matches the
+  DerivedData test host mid-run — discriminate by path before
+  treating a match as her instance; (2) never add a custom build
+  configuration (SPM builds packages release under any config not
+  named "Debug" — strips the DEBUG oracles); (3) test windows flash
+  on screen beside her writing during runs — prefer zero-instance
+  windows for timing-sensitive measurements, and warn her if a long
+  suite run will flash while she's working.
 
 ## What the kickoff sitting settled (pointers — the plan file's record is the truth)
 
