@@ -403,19 +403,20 @@ Commits per batch/stage with the standing message convention.
 | N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path, (b) the symmetric round-trip product question (DECISION HERS at the checkpoint), (c) what UI road leads from a merged block to its pre-merge takes | **(a) CLOSED 3A — the toast SPEAKS on both paths** (Takes choreography shot 55; book-inline seam shot 68; mid-block book-inline caret gets the real refusal spoken, 67; likeliest silent-read: the 6 s auto-dismiss). **(c) ANSWERED 3A**: two roads — ⌥⌘Z right away, or Library → ⋯ → Archived & Deleted → "Unplaced blocks" (Place-in-pool door, takes intact; shot 58) — road exists, nothing points at it; the 3H memo addendum weighs naming it in the toast and/or a lineage door on the merged block. (b) → end checkpoint |
 | N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46) | **PROSE HALF DONE 3F** (commit a78326f — the lesson promises sentence-boundary starts and says the snap out loud; the walk's extract anchor survives verbatim); the SNAP-SEMANTICS half stays Stage 4's (her divide-granularity ruling — the W memo addendum's territory) |
 | N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | **RESOLVED 3D** (commit c808e85 — PoolViewModel selection + the Blocks-area pool picker, oldest default, dead-selection fallback; the ScrapsPanel in the post detail's inspector wires the orphaned drag payload to real geometry beside the draft; the lesson prose re-cut; the drop half was already pinned; red by revert: the tutorial pool unreachable) |
-| N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | **TRACED SOUND 3E** — every app-side link pinned or type-matched (draggable(String) ⇄ dropDestination; the action is the store-pinned moveChapter(before:), BookStructureTests:325–362; NO app code between SwiftUI's drop callback and the pinned door); verdict sound-but-synthetic-artifact per the 3A tool note (List-reorder drops never commit under synthetic drags) + her N21 phrasing implying the sidebar drag works by hand → **NEEDS-HUMAN-VERIFY at the checkpoint** (one navigator drag; if it fails by hand, suspect the 2px indicator competing as a drop target — no fix fabricated) |
+| N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | **CLOSED at the S4 sitting (S4-18): works by her hand** ("working fine") — the 3E sound-but-synthetic-artifact verdict confirmed; the synthetic tool's List-reorder hostility was the whole story; no fix owed |
 | N21 | Chapter dragging in the BOOK VIEW body (author, 2026-07-21 afternoon): "you should be able to drag chapters within the book view, not just in that sidebar, but there are two places where the dots that indicate dragging make me feel like it should be draggable and it isn't" — locate both false-affordance ⠿ spots; dots that don't drag either drag or lose the dots (the R112 honesty rule applied to affordances) | **RESOLVED 3E** (commit 23b0c12 — the body chapter-header ⠿ DRAGS: navigator-identical insert-before + indicator + end zone, honest help; two-spots verdict recorded — CORRECTED by ladder round 1 MINOR-1: FOUR ⠿ sites exist (the miss, ScrapsPanel.swift:105, honestly drags, so the conclusion survives) — body header FIXED, navigator rows already draggable (N20's human-verify), Write's handle is N26's, scrap rows drag honestly) |
 | N22 | Clicking a collapsed post CARD in the book view should open the post — "clicking on the post should bring you to it, not just the smaller open button (I mean the separated box, not the text that you can actively edit)" | **RESOLVED 3E** (commit 23b0c12 — the card BODY opens the post; the ▸ disclosure is a real expand-in-place button; open ↗ stays; each target does what it looks like) |
 | N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | **RESOLVED 3F** (commit e511710 — the rail's fixed-height cards scroll IN PLACE (ScrollView inside the 250×110 card): every take fully reachable, the uniform grid height honest; grid-only by construction — carousel/slot-split cards were never capped) |
 | N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | **RESOLVED 3D** (commit c7c50cf — the tag-entry face types-to-create: paths create missing levels through the taxonomy ops, the leaf applies, one runner turn; forgiving edges; red by revert. Recorded: if she meant tagging the BOOK OBJECT — readings carry no tags in the schema — that is a checkpoint model question) |
 | N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | **RESOLVED 3F** (commit e511710 — choosing is the card's full-width clickable HEADER (`TakeChooseHeader`: "choose" / "✓ chosen", ONE checkmark ever, text box keeps its whole width — her header ask verbatim); the stack card unified onto the same grammar; cards widen 220→250 ("a little bit wider"); screenshot 3f-03) |
-| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **SHARPENED at the S4 sitting (S4-1): she CANNOT SEE the handle at all** ("I don't see it and haven't been able to use it") — code renders ⠿ at `tokens.faint` in the live editor's left gutter only; her live Write-mode look is the first datum, then Stage 4 verify-then-fix (faint ink / clipped gutter / render condition); Takes-side design unchanged → Stage 4 |
+| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **TRACED at the S4 sitting (S4-11): the handles are SEAMS-GATED** — `renderHandles` renders zero unless `seamsVisible && onMoveBlock != nil` (BlockDecor.swift:419–423, the recorded build-time call); her Write look with seams off confirmed invisible; works-as-built + undiscoverable (nothing names the gate; faint ink compounds). HER DESIGN REVIEW owed this sitting: seams-gated with honest copy vs hover vs always-on; Takes-side drag design unchanged → Stage 4 |
 | N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
-| N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED | new, author → Stage 4 |
-| N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose | new, author → Stage 4 (compare rework) |
+| N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | new, author → Stage 4 |
+| N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | new, author → Stage 4 (compare rework) |
 | N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | new, author → Stage 4 |
-| N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view | new, author → Stage 4 |
-| N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence; the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
+| N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
+| N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
+| N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; the one design detail: typing-only vs entry-wide (paste) semantics — entry-wide is the model's current meaning | new, author → Stage 4 |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
@@ -4367,3 +4368,80 @@ added/updated below: N26 (S4-1 outcome), N28 (S4-5), N29 (S4-4), N30
 compare/outline/lenses rework's governing record (with the Stage 4
 stub's compare-editing entry and her 2026-07-17 N-post intake). S4-8d
 is a canon RATIFICATION (no ledger row — nothing changes).
+
+### Part 2 — her follow-up round (2026-07-22 ~05:30 UTC; verbatim-faithful, routed same turn)
+
+**Confirmed: the re-seed's Replace press was hers** (the product door's
+confirm, pressed at the machine — the A1-rail re-seed record stands as
+written).
+
+**S4-11 — N26 TRACED: the Write drag handles are SEAMS-GATED, working
+as built, undiscoverable.** Her Write-mode screenshot (seams off) shows
+no handles and she reports never seeing them. The mechanism, exact:
+`renderHandles` renders ZERO handles unless `state.appearance.
+seamsVisible && onMoveBlock != nil` (`BlockDecor.swift:419–423` — the
+recorded build-time call: "handles ride the seams-visible mode — the
+boundaries-shown state IS the working-with-blocks state; at rest the
+surface stays calm, §12"). With seams ON (⌘⇧B) the ⠿ should appear in
+the left gutter at `tokens.faint`. NOTHING in the app says handles live
+behind the seams toggle — the R112 discoverability class, compounded by
+faint ink. The build-time call is now UP FOR HER REVIEW at this
+sitting: keep seams-gating (with honest copy + possibly stronger ink),
+or hover-revealed, or always-on. Stage 4 builds her answer.
+
+**S4-12 — Compare rulings ratified:** "follow this post's order" ships
+as a small TOGGLE, not a mode ("I agree"); the lineage-color
+relationship is TOGGLEABLE on/off ("you should be able to turn on or
+off"); the no-relationship partial-nuance (rails only where lineage
+speaks) agreed.
+
+**S4-13 — Editor parity ruling:** "i also don't think we should make
+the write and take editors different, so write should also gain 'insert
+new block below'." N28 updated — the insert-below act lands in BOTH
+Write and Takes.
+
+**S4-14 — NEW SETTING: newlines don't auto-mint blocks (opt-in, never
+the default).** Her words: "a setting where newlines don't
+automatically mint new blocks - then you'd have to deliberately divide
+or make a new block below. i don't think that should be the default,
+but i think it should be an option." FACT (verified): the machinery has
+existed since Phase 1 — segmentation `one_block`
+(`CrystallizationPlanner.oneBlock`; `EditorViewModel` honors it;
+`setSegmentationDefault` shipped Phase 2 and `BookStructureModel:257`
+already calls it) — the ask is a FACE (per-post door; global default
+face optional). Brief nuance to settle: `one_block` governs BULK entry
+too (paste lands as one block) — typing-only vs entry-wide semantics is
+the one design detail (entry-wide is the model's current meaning).
+
+**S4-15 — Scrap tagging TRACED: she is right — no door where she
+works.** `BlockTagAssignmentSheet` (11a A8) is mounted in EXACTLY ONE
+place app-wide: the canvas card's "Tags…" menu (`CanvasView.swift:461`,
+sheet at :348). No tag door exists on Blocks-area rows
+(`BlocksAreaView`), ScrapsPanel rows, or the pool's posts listing. N32
+sharpened: Stage 4 adds registry-declared tag doors on scrap rows;
+meanwhile the canvas right-click is the one working road.
+
+**S4-16 — Uniform-page book view: deferral latitude granted.** "It can
+be moved to stage 5 if needed, if it's quite a big lift for a stage
+that already has a lot to be done - either done still by this
+orchestrator or by a different one. I do think that a detailed brief or
+even plan should be drafted if we aren't going to do that though." N31
+updated: the in/out call lands at Stage 4 brief-authoring when total
+scope is visible; if deferred, a DETAILED BRIEF/PLAN is owed as a Stage
+4 deliverable (her explicit condition). The progress bar + the
+Kindle-style post-per-page view stay Stage 4 regardless.
+
+**S4-17 — ROADMAP: Apple Notes import (her declaration).** "In a phase
+soon I'm going to have to implement import (at least from apple notes
+to begin with) and a way of handling that import… It might even need to
+be a more thorough import tool or way to have them in quarantine
+because i don't want to overwhelm my library with my existing 10k notes
+and it would feel too messy." Recorded in the master plan's phase table
+(unslotted row, details when she starts). More details promised at
+project start; nothing built or designed now.
+
+**S4-18 — N20 CLOSED: the navigator chapter drag works by hand** ("the
+N20 chapter drag is wokring fine though") — the 3E
+sound-but-synthetic-artifact verdict confirmed exactly; the synthetic
+drag tool's List-reorder hostility was the whole story. No fix, no
+code; ledger updated.
