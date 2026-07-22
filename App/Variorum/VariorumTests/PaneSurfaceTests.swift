@@ -101,3 +101,155 @@ struct PaneSurfaceTests {
         window.contentViewController = nil
     }
 }
+
+// MARK: - The ONE publish door (13b Stage 4, ladder round 3 — MINOR-D/E/F)
+
+/// `PanePublisher` is the structural half of the round-3 hardening: every
+/// state write a pane makes leaves through it, so the deferral discipline
+/// is inherited rather than hand-added per publish. These pins drive it
+/// with a MANUAL scheduler (no RunLoop pumping — the standing settle rule)
+/// and a stubbed pane, so the coalescing, the convergence loop, and its
+/// bound are pinned exactly.
+///
+/// Honestly unpinnable here (stated, not papered over): that SwiftUI
+/// actually drops a state write made during a view-update pass is the
+/// framework behavior this exists for — the pins simulate a dropped write
+/// rather than provoke one, and the real-mount evidence stays the compare
+/// soak's height invariant.
+@MainActor
+@Suite("Pane publish door (13b 4, round-3 MINOR-D/E/F)")
+struct PanePublishDoorTests {
+    /// A hand-drained main queue.
+    private final class ManualScheduler {
+        private var work: [() -> Void] = []
+        var pending: Int { work.count }
+        func schedule(_ item: @escaping () -> Void) { work.append(item) }
+        /// Runs exactly the turns queued when the drain began.
+        @discardableResult func drainOneTurn() -> Int {
+            let batch = work
+            work = []
+            batch.forEach { $0() }
+            return batch.count
+        }
+    }
+
+    /// MINOR-F's fix, generalized: however many publishes of either kind
+    /// fire inside one turn, exactly ONE deferred turn is scheduled — the
+    /// canary echo no longer publishes on its own uncoalesced channel.
+    @Test func everyPublishCoalescesIntoOneDeferredTurn() {
+        let scheduler = ManualScheduler()
+        var heights: [CGFloat] = []
+        var canaries: [String] = []
+        let publisher = PanePublisher(
+            measure: { 46 }, renderedHeight: { 46 },
+            writeHeight: { heights.append($0) },
+            writeCanary: { canaries.append($0) },
+            schedule: { scheduler.schedule($0) })
+
+        publisher.publishHeight()
+        publisher.publishCanary("fell back to TextKit 1")
+        publisher.publishCanary("fell back to TextKit 1")
+        #expect(heights == [46], "the sync height write is the working path")
+        #expect(canaries.count == 2, "each canary fire writes synchronously")
+        #expect(scheduler.pending == 1, "three publishes, ONE deferred turn")
+
+        scheduler.drainOneTurn()
+        #expect(publisher.deferredTurns == 1)
+        #expect(canaries.count == 3, "exactly one coalesced canary echo")
+        #expect(heights == [46, 46], "one heal re-publish; converged, so it stops")
+        #expect(scheduler.pending == 0, "a converged heal schedules nothing further")
+    }
+
+    /// MINOR-E's fix: the heal is a CONVERGENCE loop, not one unverified
+    /// retry — while the pane renders short of its measured text the
+    /// publish is re-made, and the loop is BOUNDED so a structurally
+    /// constrained frame cannot spin the main queue forever.
+    @Test func theHealReSchedulesWhileTheFrameIsShortAndStopsAtTheBound() {
+        let scheduler = ManualScheduler()
+        var heights: [CGFloat] = []
+        let publisher = PanePublisher(
+            measure: { 46 },
+            renderedHeight: { 29 },  // the clipped pane: never converges
+            writeHeight: { heights.append($0) }, writeCanary: { _ in },
+            schedule: { scheduler.schedule($0) })
+
+        publisher.publishHeight()
+        var turns = 0
+        while scheduler.pending > 0, turns < PanePublisher.healTurnBudget + 5 {
+            scheduler.drainOneTurn()
+            turns += 1
+        }
+        #expect(turns == PanePublisher.healTurnBudget,
+                "the heal retried the whole budget and no further")
+        #expect(heights.count == PanePublisher.healTurnBudget + 1,
+                "one sync write + one per healed turn")
+        #expect(scheduler.pending == 0, "the bound holds — no perpetual turn")
+    }
+
+    /// The other half of the same rule: as soon as the rendered frame
+    /// agrees (within the slack the compare soak itself allows), the heal
+    /// stops — no gratuitous turns per keystroke.
+    @Test func theHealStopsAsSoonAsTheFrameConverges() {
+        let scheduler = ManualScheduler()
+        var rendered: CGFloat = 29
+        var heights: [CGFloat] = []
+        let publisher = PanePublisher(
+            measure: { 46 }, renderedHeight: { rendered },
+            writeHeight: { heights.append($0) }, writeCanary: { _ in },
+            schedule: { scheduler.schedule($0) })
+
+        publisher.publishHeight()
+        rendered = 46 - PanePublisher.convergenceSlack  // exactly within slack
+        scheduler.drainOneTurn()
+        #expect(scheduler.pending == 0, "converged frame ⇒ no further turns")
+        #expect(heights == [46, 46])
+    }
+
+    /// The hole the door exists for: a synchronous write DROPPED (as
+    /// SwiftUI may drop one made during an update pass) is re-made on the
+    /// deferred turn, so the pane ends framed at its measured height.
+    @Test func aDroppedSynchronousWriteIsRepublishedOnTheDeferredTurn() {
+        let scheduler = ManualScheduler()
+        var landed: CGFloat = 0
+        var dropNext = true
+        let publisher = PanePublisher(
+            measure: { 46 }, renderedHeight: { landed },
+            writeHeight: { height in
+                if dropNext { dropNext = false; return }  // the dropped write
+                landed = height
+            },
+            writeCanary: { _ in }, schedule: { scheduler.schedule($0) })
+
+        publisher.publishHeight()
+        #expect(landed == 0, "the sync write was dropped — the bug's state")
+        scheduler.drainOneTurn()
+        #expect(landed == 46, "the heal re-published and it landed")
+        #expect(scheduler.pending == 0, "and then converged")
+    }
+
+    /// A dismantled pane publishes nothing: `invalidate()` drops every
+    /// closure and every pending duty, and an already-scheduled turn finds
+    /// nothing to do (no write into a torn-down view's state).
+    @Test func anInvalidatedPublisherStopsWriting() {
+        let scheduler = ManualScheduler()
+        var heights: [CGFloat] = []
+        var canaries: [String] = []
+        let publisher = PanePublisher(
+            measure: { 46 }, renderedHeight: { 29 },
+            writeHeight: { heights.append($0) },
+            writeCanary: { canaries.append($0) },
+            schedule: { scheduler.schedule($0) })
+
+        publisher.publishHeight()
+        publisher.publishCanary("fell back")
+        publisher.invalidate()
+        scheduler.drainOneTurn()
+        #expect(heights == [46], "only the pre-invalidate sync write")
+        #expect(canaries == ["fell back"], "no echo after teardown")
+        #expect(scheduler.pending == 0)
+
+        publisher.publishHeight()
+        #expect(heights == [46], "and nothing publishes afterwards")
+        #expect(scheduler.pending == 0)
+    }
+}

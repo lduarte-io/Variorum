@@ -20,6 +20,17 @@
 //  re-measures on the WIDTH-GATED layout hook — a zero-width install
 //  cannot pin a pane at one line, whichever surface composes it.
 //
+//  Why a full-document `ensureLayout` is legitimate HERE (ladder round 3,
+//  NIT-A — verified P1-safe, not a violation): every composer of this
+//  component passes ONE take's / one post-read's text, so "the document"
+//  is pane-scale by construction and layout cost is bounded by the unit
+//  on screen (P1's letter). The full-document EDITOR is the other surface
+//  kind and uses its own coordinator and its own viewport-bounded layout
+//  — nothing here touches it. The heal below therefore measures more than
+//  once per settle deliberately; a repeat `ensureLayout` over already-laid
+//  text is near-free, and the bound (`PanePublisher.healTurnBudget`) caps
+//  it regardless.
+//
 
 import AppKit
 import SwiftUI
@@ -38,6 +49,136 @@ enum PaneMeasurement {
         layoutManager.ensureLayout(for: layoutManager.documentRange)
         return layoutManager.usageBoundsForTextContainer.height
             + view.textContainerInset.height * 2
+    }
+}
+
+// MARK: - The ONE publish door
+
+/// Every state write a pane surface makes leaves through here (ladder
+/// round 3, MINOR-D/E/F — the class-level fix over two hand-added
+/// repairs, on the one component every pane composes, P-3).
+///
+/// The hole it closes: a pane publishes its measured height and its
+/// canary message into SwiftUI `@State`, and both can fire MID view-update
+/// (the width-gated layout hook runs inside SwiftUI's layout pass;
+/// `updateNSView`'s text-adopt remeasure runs inside the update
+/// transaction). SwiftUI may DROP a state write made during an update
+/// ("Modifying state during view update … undefined behavior"), and a
+/// dropped height write left a compare pane framed one line tall under two
+/// lines of text with nothing left to re-publish.
+///
+/// The shape (why a helper, not two repairs): a publish added to this
+/// coordinator later inherits the discipline STRUCTURALLY — there is no
+/// second way out. Each publish (a) writes synchronously, the common
+/// working path a deferred-only publish would starve under a busy main
+/// queue, and (b) is re-made on a later main-queue turn, where a write
+/// always lands. Deferred turns COALESCE (one per turn, however many
+/// publishes of either kind fired — MINOR-F's un-coalesced canary echo
+/// dies here), and the height re-publish is a real CONVERGENCE loop
+/// (MINOR-E): it re-measures, compares against what the pane actually
+/// renders, and re-schedules while the frame is short — BOUNDED, because
+/// a shortfall that survives the budget is not a dropped write (a
+/// composer deliberately constraining the frame would otherwise spin the
+/// main queue for the pane's whole life).
+@MainActor
+final class PanePublisher {
+    /// Deferred work runs on the next main-queue turn; tests inject a
+    /// manual scheduler and drain it (no RunLoop pumping).
+    typealias Scheduler = (@escaping () -> Void) -> Void
+
+    /// Deferred turns a height publish may take to converge. One turn
+    /// carries the ordinary case (the write lands, SwiftUI re-frames);
+    /// three covers a second dropped write plus a layout settle. Beyond
+    /// that the shortfall is structural, not a dropped write.
+    static let healTurnBudget = 3
+    /// How much shorter than its measured text a pane may render before
+    /// the heal calls it un-converged (the compare soak's own tolerance).
+    static let convergenceSlack: CGFloat = 3
+
+    /// nil ⇒ the pane is gone; publishing stops.
+    private var measure: (() -> CGFloat?)?
+    private var renderedHeight: (() -> CGFloat?)?
+    private var writeHeight: ((CGFloat) -> Void)?
+    private var writeCanary: ((String) -> Void)?
+    private let schedule: Scheduler
+
+    private var turnScheduled = false
+    private var pendingCanary: String?
+    private var healTurnsLeft = 0
+    /// Observation for the pins (and for a future soak): how many deferred
+    /// turns this publisher has run.
+    private(set) var deferredTurns = 0
+
+    init(
+        measure: @escaping () -> CGFloat?,
+        renderedHeight: @escaping () -> CGFloat?,
+        writeHeight: @escaping (CGFloat) -> Void,
+        writeCanary: @escaping (String) -> Void,
+        schedule: @escaping Scheduler = { work in DispatchQueue.main.async(execute: work) }
+    ) {
+        self.measure = measure
+        self.renderedHeight = renderedHeight
+        self.writeHeight = writeHeight
+        self.writeCanary = writeCanary
+        self.schedule = schedule
+    }
+
+    /// Measure and publish the pane's height, then heal until the rendered
+    /// frame agrees (or the budget runs out).
+    func publishHeight() {
+        guard let height = measure?() else { return }
+        writeHeight?(height)
+        healTurnsLeft = Self.healTurnBudget
+        scheduleTurn()
+    }
+
+    /// Publish a canary message (sync) plus ONE coalesced echo next turn.
+    func publishCanary(_ message: String) {
+        writeCanary?(message)
+        pendingCanary = message
+        scheduleTurn()
+    }
+
+    /// The pane is going away: drop every closure and every pending duty.
+    /// A turn already scheduled runs and finds nothing to do.
+    func invalidate() {
+        measure = nil
+        renderedHeight = nil
+        writeHeight = nil
+        writeCanary = nil
+        pendingCanary = nil
+        healTurnsLeft = 0
+    }
+
+    private func scheduleTurn() {
+        guard !turnScheduled else { return }
+        turnScheduled = true
+        schedule { [weak self] in self?.runTurn() }
+    }
+
+    private func runTurn() {
+        turnScheduled = false
+        deferredTurns += 1
+        if let message = pendingCanary {
+            pendingCanary = nil
+            writeCanary?(message)
+        }
+        guard healTurnsLeft > 0 else { return }
+        healTurnsLeft -= 1
+        guard let height = measure?() else {
+            healTurnsLeft = 0
+            return
+        }
+        writeHeight?(height)
+        // The convergence check: what does the pane actually RENDER? While
+        // it renders short of its text, the write did not take — try again
+        // until the budget is spent.
+        let rendered = renderedHeight?() ?? height
+        if rendered + Self.convergenceSlack < height, healTurnsLeft > 0 {
+            scheduleTurn()
+        } else {
+            healTurnsLeft = 0
+        }
     }
 }
 
@@ -367,8 +508,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         var onFocusRequest: (() -> Void)?
         var onSelectionChange: ((NSRange) -> Void)?
         private weak var view: PaneTextView?
-        private var publishHeight: ((CGFloat) -> Void)?
-        private var publishCanary: ((String) -> Void)?
+        /// The ONE publish door (round-3 MINOR-D/E/F). Nothing in this
+        /// coordinator writes SwiftUI state except through it.
+        private var publisher: PanePublisher?
         private let canary = FallbackCanary()
         private var wasLive = false
 
@@ -393,29 +535,33 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             publishCanary: @escaping (String) -> Void
         ) {
             self.view = view
-            self.publishHeight = publishHeight
-            self.publishCanary = publishCanary
+            publisher = PanePublisher(
+                measure: { [weak view] in
+                    guard let view else { return nil }
+                    return max(PaneMeasurement.height(of: view), 24)
+                },
+                renderedHeight: { [weak view] in view?.bounds.height },
+                writeHeight: publishHeight,
+                // N2: the canary message is PUBLISHED into the rendered
+                // banner (it used to land in a private var nothing read).
+                writeCanary: { [weak view] message in
+                    view?.notePublishedCanary(message)
+                    publishCanary(message)
+                })
             // Batch 12 (her clipped-take report): the pane measures once at
             // install, BEFORE SwiftUI hands it real width — the width-gated
             // layout hook re-measures when real layout arrives.
             view.onWidthChange = { [weak self] in self?.remeasure() }
-            // N2: the canary message is PUBLISHED into the rendered banner
-            // (it used to land in a private var nothing read). The async
-            // echo is the Stage 4 gate's dropped-write heal (see
-            // remeasure()): a fire during a view-update pass could be
-            // dropped; the echo re-lands the same message next turn.
             canary.onFire = { [weak self] message in
-                self?.view?.notePublishedCanary(message)
-                self?.publishCanary?(message)
-                DispatchQueue.main.async { self?.publishCanary?(message) }
+                self?.publisher?.publishCanary(message)
             }
             canary.arm(for: view)
         }
 
         func uninstall() {
             canary.disarm()
-            publishHeight = nil
-            publishCanary = nil
+            publisher?.invalidate()
+            publisher = nil
             view = nil
         }
 
@@ -430,42 +576,15 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             onSelectionChange?(view.selectedRange())
         }
 
+        /// Measure and publish, through the ONE door. The Stage 4 gate's
+        /// clipped-pane failure (the batch-12/AD-7 class, one
+        /// publish-timing hole over) is closed inside `PanePublisher`:
+        /// synchronous write + a bounded, coalesced convergence heal. No
+        /// loop — a height write triggers no remeasure (`updateNSView`
+        /// remeasures only on string/font change; the layout hook is
+        /// width-gated).
         func remeasure() {
-            guard let view else { return }
-            publishHeight?(max(PaneMeasurement.height(of: view), 24))
-            // Stage 4 gate fix (the compare soak's clipped-pane failure —
-            // the batch-12/AD-7 class, one publish-timing hole over): the
-            // publish above writes @State, and remeasure can fire MID
-            // view-update — the width-gated layout hook runs inside
-            // SwiftUI's layout pass, and updateNSView's text-adopt
-            // remeasure runs inside the update transaction. SwiftUI can
-            // DROP a state write made during an update ("Modifying state
-            // during view update … undefined behavior"), and a dropped
-            // height write left a compare pane framed one line tall
-            // (29pt) under two lines of text (46pt) with NOTHING left to
-            // re-publish — the string matched, the width was final, so no
-            // later event remeasured. The synchronous publish stays (it
-            // is the common, working path — a deferred-only publish
-            // starves under a busy main queue); the HEAL below re-measures
-            // and re-publishes on the next main-queue turn, where a write
-            // always lands, closing exactly the dropped case. Coalesced
-            // (one heal per turn); no loop — a height write triggers no
-            // remeasure (updateNSView remeasures only on string/font
-            // change; the layout hook is width-gated).
-            scheduleHealPublish()
-        }
-
-        private var healScheduled = false
-
-        private func scheduleHealPublish() {
-            guard !healScheduled else { return }
-            healScheduled = true
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                self.healScheduled = false
-                guard let view = self.view else { return }
-                self.publishHeight?(max(PaneMeasurement.height(of: view), 24))
-            }
+            publisher?.publishHeight()
         }
     }
 }
