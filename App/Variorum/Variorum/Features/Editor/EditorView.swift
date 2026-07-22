@@ -28,6 +28,11 @@ struct EditorView: View {
     var inline = false
     @State private var model: EditorViewModel
     @State private var inlineHeight: CGFloat = 24
+    /// 13b 4D (S4-19, her ruling): drag handles reveal on hover — a
+    /// Write-mode setting, default ON; OFF = the fully clean surface.
+    /// Local (the density-settings class; the synced-setting alternative
+    /// recorded — core is frozen this batch).
+    @AppStorage("writeHoverHandles") private var writeHoverHandles = true
     /// Phase 13 (C1): the voice reaches the text surface — chrome, font,
     /// seams, indicator, comments all resolve from the theme environment
     /// (optional: test hosts lack it — the terminal fallback).
@@ -87,13 +92,10 @@ struct EditorView: View {
             CommitBar(model: model)
         }
         .task { await model.start() }
-        .onAppear { model.appearance = EditorAppearance(themeSettings, dark: scheme == .dark) }
-        .onChange(of: themeSettings) { _, new in
-            model.appearance = EditorAppearance(new, dark: scheme == .dark)
-        }
-        .onChange(of: scheme) { _, new in
-            model.appearance = EditorAppearance(themeSettings, dark: new == .dark)
-        }
+        .onAppear { pushAppearance() }
+        .onChange(of: themeSettings) { _, _ in pushAppearance() }
+        .onChange(of: scheme) { _, _ in pushAppearance() }
+        .onChange(of: writeHoverHandles) { _, _ in pushAppearance() }
         .onDisappear { model.teardown() }
         .sheet(item: $model.fanPanel) { panel in
             // Sitting 9 (R87): the FanPanel is retired — Write's take
@@ -169,6 +171,14 @@ struct EditorView: View {
 }
 
 extension EditorView {
+    /// The ONE appearance push (models never read SwiftUI environments or
+    /// @AppStorage): theme + scheme + the S4-19 hover-handle setting.
+    fileprivate func pushAppearance() {
+        var appearance = EditorAppearance(themeSettings, dark: scheme == .dark)
+        appearance.hoverHandles = writeHoverHandles
+        model.appearance = appearance
+    }
+
     /// Write's routed-command handler (13b 1b): the caret block is the
     /// target. The old choose/step LECTURES are retired (P-2): both now
     /// OPEN the caret block's takes panel — the surface where picking and

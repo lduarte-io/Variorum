@@ -256,6 +256,64 @@ struct CommentsAndReorderTests {
         }
     }
 
+    /// 13b 4D (S4-19, her ruling): drag handles reveal on HOVER — default
+    /// ON; OFF = the fully clean surface; seams-on keeps the static
+    /// all-handles display unchanged (the flagged reading). RED ON OLD:
+    /// pre-4D `renderHandles` rendered ZERO handles with seams off no
+    /// matter what (the N26/S4-11 undiscoverability trace) — the
+    /// hover-reveal expectations below fail there.
+    @Test func hoverRevealsTheHoveredBlocksHandleUnderTheSetting() async throws {
+        try await withEditor(seedBlocks: ["Alpha.", "Beta."]) { h in
+            @MainActor func handles() -> Int {
+                h.textView.subviews.filter { $0 is DragHandleView }.count
+            }
+            let controller = BlockDecorOverlayController(
+                textView: h.textView, onOpenComments: nil, onMoveBlock: { _, _ in })
+            defer { controller.uninstall() }
+            var state = BlockDecor.State()
+            state.frames = [
+                .init(entryIndex: 0, blockID: "b0",
+                      frame: CGRect(x: 0, y: 0, width: 400, height: 30)),
+                .init(entryIndex: 1, blockID: "b1",
+                      frame: CGRect(x: 0, y: 40, width: 400, height: 30)),
+            ]
+            state.entryCount = 2
+            state.appearance = EditorAppearance()  // seams OFF; hoverHandles defaults ON
+
+            controller.render(state)
+            #expect(handles() == 0, "at rest, nothing hovered: the calm surface")
+
+            controller.noteHover(atY: 15)
+            #expect(handles() == 1, "hover reveals exactly the hovered block's handle")
+            #expect(controller.hoveredBlockID == "b0")
+            controller.noteHover(atY: 55)
+            #expect(handles() == 1)
+            #expect(controller.hoveredBlockID == "b1", "the reveal follows the pointer")
+            controller.noteHover(atY: nil)
+            #expect(handles() == 0, "the pointer left — clean again")
+
+            // OFF = the fully clean surface, hover or not (her letter).
+            state.appearance.hoverHandles = false
+            controller.render(state)
+            controller.noteHover(atY: 15)
+            #expect(handles() == 0, "setting OFF: the fully clean writing view")
+
+            // Seams ON: the static all-handles display stands unchanged
+            // (the recorded build-time call — S4-19's flagged reading).
+            state.appearance.seamsVisible = true
+            controller.render(state)
+            #expect(handles() == 2, "seams-on shows every visible handle, as before")
+
+            // The read tier (no drop door) never tracks or reveals.
+            let readOnly = BlockDecorOverlayController(
+                textView: h.textView, onOpenComments: nil, onMoveBlock: nil)
+            defer { readOnly.uninstall() }
+            readOnly.render(state)
+            readOnly.noteHover(atY: 15)
+            #expect(readOnly.hoveredBlockID == nil, "no door, no handles — the read tier")
+        }
+    }
+
     @Test func theCalloutDoorSetsAndClearsTheCaretBlocksFrame() async throws {
         try await withEditor(seedBlocks: ["Framed prose.", "Plain prose."]) { h in
             h.textView.setSelectedRange(NSRange(location: 2, length: 0))

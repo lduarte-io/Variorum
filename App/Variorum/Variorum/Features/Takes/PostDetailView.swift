@@ -31,18 +31,18 @@ struct PostDetailView: View {
     /// every call site and pin naming unchanged.
     typealias Mode = PostMode
 
-    /// R79 (Sitting 9): a post opens in TAKES the first time; thereafter it
-    /// reopens in whatever mode you last used there (per-post memory,
-    /// scroll-position class — local, never synced). 13b 4C: stored values
-    /// decode through `PostMode.fromStored`, so a post left in the retired
-    /// Outline tab reopens in Compare — no stored value strands. (The
-    /// S4-20 first-open default flip to Write is Batch 4D's, not this
-    /// change's.)
+    /// 13b 4D (S4-20, her reversal on the record): a post opens in WRITE
+    /// the first time — supersedes the takes-first half of R72/R79
+    /// (Sitting 9); the per-post mode MEMORY stands untouched: thereafter
+    /// a post reopens in whatever mode you last used there (per-post,
+    /// scroll-position class — local, never synced). 13b 4C: stored
+    /// values decode through `PostMode.fromStored`, so a post left in the
+    /// retired Outline tab reopens in Compare — no stored value strands.
     static func rememberedMode(postID: String, defaults: UserDefaults = .standard) -> Mode {
-        defaults.string(forKey: "postMode.\(postID)").flatMap(Mode.fromStored) ?? .takes
+        defaults.string(forKey: "postMode.\(postID)").flatMap(Mode.fromStored) ?? .write
     }
 
-    @State private var mode: Mode = .takes
+    @State private var mode: Mode = .write
     /// 13b 1b: the mode-router registration's lifecycle token (composed
     /// routing — the notification channels are retired).
     @State private var routerToken: UUID?
@@ -174,8 +174,10 @@ struct PostDetailView: View {
         .task(id: postID) {
             // Sitting 9 batch 6: a BLOCKLESS post opens in WRITE no matter
             // what — blocks are born by typing there (crystallization);
-            // Takes/Lenses have nothing to show and no way to start. The
-            // Takes-first default (R79) applies once the post has blocks.
+            // Takes/Lenses have nothing to show and no way to start. (Since
+            // S4-20 the first-open default is Write anyway; this guard
+            // still matters for a REMEMBERED Takes/Lenses mode on a post
+            // whose blocks have since gone.)
             let blocks = (try? await session.database.read { [postID] db in
                 try Int.fetchOne(
                     db,

@@ -29,18 +29,28 @@ struct PostDetailModeMemoryTests {
         return defaults
     }
 
-    @Test func aPostOpensInTakesFirstThenWhereItWasLeft() {
+    /// 13b 4D (S4-20 — JUSTIFIED PIN EDIT, line by line, her reversal on
+    /// the record: "I want to default to the write view on new opens"):
+    /// every `.takes` default expectation flips to `.write` — the edited
+    /// pin is RED ON OLD code (pre-4D `rememberedMode` returns `.takes`
+    /// for a virgin post), which is exactly the flip's proof. The per-post
+    /// MEMORY lines are UNCHANGED — only the first-open default moved
+    /// (the R72/R79 takes-first half superseded; memory stands).
+    @Test func aPostOpensInWriteFirstThenWhereItWasLeft() {
         let defaults = freshDefaults("memory")
-        // R79: the first open is TAKES.
+        // S4-20: the first open is WRITE (was .takes — R79's half, superseded).
+        #expect(PostDetailView.rememberedMode(postID: "p1", defaults: defaults) == .write)
+        // Thereafter: whatever mode was last used THERE (per post) — a
+        // post you left in Takes reopens in Takes (memory untouched).
+        defaults.set("Takes", forKey: "postMode.p1")
         #expect(PostDetailView.rememberedMode(postID: "p1", defaults: defaults) == .takes)
-        // Thereafter: whatever mode was last used THERE (per post).
         defaults.set("Lenses", forKey: "postMode.p1")
         #expect(PostDetailView.rememberedMode(postID: "p1", defaults: defaults) == .lenses)
-        #expect(PostDetailView.rememberedMode(postID: "p2", defaults: defaults) == .takes,
-                "memory is per-post")
+        #expect(PostDetailView.rememberedMode(postID: "p2", defaults: defaults) == .write,
+                "memory is per-post; the default is Write (S4-20)")
         // A stale/unknown value falls back to the default, never crashes.
         defaults.set("NotAMode", forKey: "postMode.p1")
-        #expect(PostDetailView.rememberedMode(postID: "p1", defaults: defaults) == .takes)
+        #expect(PostDetailView.rememberedMode(postID: "p1", defaults: defaults) == .write)
     }
 
     /// 13b 4C (S4-3) — red-on-old: a post left in the RETIRED Outline tab
@@ -115,9 +125,12 @@ struct PostDetailRoutingTests {
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "routing")
-            _ = try session.operations.newBlock(in: post.id, text: "a block, so Takes opens.")
-            // A fresh mode memory (the R79 takes-first default).
-            UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+            _ = try session.operations.newBlock(in: post.id, text: "a block, so Takes can host.")
+            // 13b 4D (S4-20 — justified edit): the first-open DEFAULT is
+            // Write now, so this test seeds a REMEMBERED Takes mode — the
+            // takes-mounted → write-request transition it exercises is
+            // unchanged, and the seeding doubles as a memory-stands pin.
+            UserDefaults.standard.set(PostMode.takes.rawValue, forKey: "postMode.\(post.id)")
 
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
@@ -140,7 +153,8 @@ struct PostDetailRoutingTests {
             })
             #expect(session.commandRouter.activePostID == post.id,
                     "the detail registered with the router")
-            #expect(session.commandRouter.activeMode == .takes, "R79: takes-first")
+            #expect(session.commandRouter.activeMode == .takes,
+                    "the per-post MEMORY landed it in Takes (S4-20: the default is Write; memory stands)")
 
             // The routed request (⌘1 / the sidebar rail) switches the REAL
             // surface: Write's full-document editor mounts.

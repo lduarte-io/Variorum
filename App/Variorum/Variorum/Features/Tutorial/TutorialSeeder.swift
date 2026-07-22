@@ -255,11 +255,13 @@ enum TutorialSeeder {
             + "\u{2318}J opens today's journal entry — the journal is its own daily "
             + "notebook on the shelf.",
 
+            // 13b 4D (S4-20): the first-open default is WRITE now; the
+            // per-post memory is worth teaching in the same breath.
             "A post opens into one of six modes — the tabs read Write \u{B7} Takes \u{B7} "
             + "Lenses \u{B7} Compare \u{B7} Blocks \u{B7} Canvas, and \u{2318}1 through \u{2318}6 "
-            + "switch between them. Takes is where a post usually opens; Write is "
-            + "the plain full page. The rest of this book visits each mode where "
-            + "it earns its keep.",
+            + "switch between them. A post opens in Write the first time — the "
+            + "plain full page; after that it remembers the mode you left it in. "
+            + "The rest of this book visits each mode where it earns its keep.",
 
             "Try it now: press \u{2318}K, type \u{201C}getting\u{201D}, and \u{23CE} back to this very "
             + "lesson. Then press \u{2318}2 for Takes and \u{2318}1 for Write, and watch the "

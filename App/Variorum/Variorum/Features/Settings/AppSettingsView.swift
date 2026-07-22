@@ -42,6 +42,11 @@ struct AppSettingsView: View {
 
 private struct AppearancePane: View {
     let theme: ThemeStore
+    /// 13b 4D (S4-19, her ruling): hover-revealed drag handles in Write —
+    /// default ON; OFF = the fully clean surface. LOCAL (this Mac's
+    /// UserDefaults, the takes-density class — deliberately not the synced
+    /// setting table this batch; recorded).
+    @AppStorage("writeHoverHandles") private var writeHoverHandles = true
 
     var body: some View {
         Form {
@@ -71,6 +76,10 @@ private struct AppearancePane: View {
                 Toggle("Show comments inline (tinted, under the block)", isOn: Binding(
                     get: { theme.settings.inlineComments },
                     set: { theme.setInlineComments($0) }))
+                Toggle("Show the block drag handle on hover (Write)", isOn: $writeHoverHandles)
+                Text("ON: pointing at a block in Write reveals its ⠿ drag handle in the left margin. OFF: the fully clean writing surface. With block seams shown (⌘⇧B), every handle shows regardless. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Toggle("Takes follow the scroll", isOn: Binding(
                     get: { theme.settings.followTheScroll },
                     set: { theme.setFollowTheScroll($0) }))

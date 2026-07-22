@@ -41,6 +41,13 @@ nonisolated struct EditorAppearance: Equatable, Sendable {
     var seamsVisible = false
     var indicator: EditingIndicatorStyle = .off
     var inlineComments = false
+    /// 13b 4D (S4-19, her ruling): drag handles reveal on HOVER in Write —
+    /// a setting, default ON; OFF = the fully clean surface. The seams-on
+    /// STATIC display is unchanged (seams = the working-with-blocks state);
+    /// this governs the AT-REST hover only. Local (UserDefaults
+    /// `writeHoverHandles`, the density-settings class), pushed by the
+    /// View like every appearance input.
+    var hoverHandles = true
 
     init() {}
 
@@ -236,9 +243,31 @@ final class BlockDecorOverlayController {
         self.textView = textView
         self.onOpenComments = onOpenComments
         self.onMoveBlock = onMoveBlock
+        // 13b 4D (S4-19): hover tracking exists only where a drop door
+        // does — the read tier (nil doors) never tracks or reveals.
+        if onMoveBlock != nil {
+            let tracker = HandleHoverTracker()
+            tracker.onHover = { [weak self, weak textView] windowPoint in
+                guard let self else { return }
+                guard let windowPoint, let textView else {
+                    return self.noteHover(atY: nil)
+                }
+                self.noteHover(atY: textView.convert(windowPoint, from: nil).y)
+            }
+            let area = NSTrackingArea(
+                rect: .zero,
+                options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
+                owner: tracker, userInfo: nil)
+            textView.addTrackingArea(area)
+            hoverTracker = tracker
+            hoverArea = area
+        }
     }
 
     func uninstall() {
+        if let hoverArea { textView?.removeTrackingArea(hoverArea) }
+        hoverArea = nil
+        hoverTracker = nil
         for view in seamViews { view.removeFromSuperview() }
         for view in calloutViews { view.removeFromSuperview() }
         for label in emojiLabels { label.removeFromSuperview() }
@@ -416,25 +445,68 @@ final class BlockDecorOverlayController {
     }
 
     private func renderHandles(_ state: BlockDecor.State, in textView: NSTextView) {
-        // Handles ride the seams-visible mode (the recorded build-time
-        // call: the boundaries-shown state IS the working-with-blocks
-        // state; at rest the surface stays calm — §12) — and exist only
-        // where a drop door does (the read tier renders none).
-        let frames = (state.appearance.seamsVisible && onMoveBlock != nil)
-            ? state.frames : []
+        // Handles exist only where a drop door does (the read tier renders
+        // none). Two reveal regimes (13b 4D, S4-19 — her ruling):
+        // - seams ON: every visible block's handle, statically — the
+        //   recorded build-time call stands unchanged (boundaries-shown IS
+        //   the working-with-blocks state; faint ink as before);
+        // - seams OFF + the hover setting ON (default): the HOVERED
+        //   block's handle reveals, in the stronger muted ink (the S4-1
+        //   faint-invisibility finding); setting OFF = the fully clean
+        //   surface. A drag in flight keeps its handle alive regardless —
+        //   removing the view mid-drag would sever the event stream.
+        let frames: [BlockDecor.Frame]
+        if onMoveBlock == nil {
+            frames = []
+        } else if state.appearance.seamsVisible {
+            frames = state.frames
+        } else if let dragging = dragEntryIndex {
+            frames = state.frames.filter { $0.entryIndex == dragging }
+        } else if state.appearance.hoverHandles, let hoveredBlockID {
+            frames = state.frames.filter { $0.blockID == hoveredBlockID }
+        } else {
+            frames = []
+        }
         pool(&handleViews, count: frames.count, in: textView, below: false) {
             DragHandleView()
         }
+        let tokens = state.appearance.tokens
         for (handle, frame) in zip(handleViews, frames) {
             handle.frame = CGRect(
                 x: max(0, state.textLeft - 22), y: frame.frame.minY + 1,
                 width: 18, height: 18)
-            handle.inkColor = NSColor(state.appearance.tokens.faint)
+            handle.inkColor = NSColor(
+                state.appearance.seamsVisible ? tokens.faint : tokens.muted)
             let entryIndex = frame.entryIndex
             handle.onDragBegan = { [weak self] in self?.dragBegan(entryIndex: entryIndex) }
             handle.onDragMoved = { [weak self] point in self?.dragMoved(to: point) }
             handle.onDragEnded = { [weak self] point in self?.dragEnded(at: point) }
         }
+    }
+
+    // MARK: Hover reveal (13b 4D, S4-19)
+
+    private var hoverTracker: HandleHoverTracker?
+    private var hoverArea: NSTrackingArea?
+    private(set) var hoveredBlockID: String?
+
+    /// The hover input, in text-view coordinates (internal so tests drive
+    /// it without synthetic mouse events; nil = the pointer left).
+    /// Re-renders handles ONLY when the hovered block changes — mouse-moved
+    /// cadence never re-renders per event (cost: one frames scan).
+    func noteHover(atY y: CGFloat?) {
+        guard onMoveBlock != nil else { return }
+        let id = y.flatMap { y in
+            state.frames.first {
+                $0.frame.minY - 4 <= y && y <= $0.frame.maxY + 4
+            }?.blockID
+        }
+        guard id != hoveredBlockID else { return }
+        hoveredBlockID = id
+        // Mid-drag, defer — renderHandles keeps the dragged handle; the
+        // next render after drag end settles the reveal.
+        guard dragEntryIndex == nil, let textView else { return }
+        renderHandles(state, in: textView)
     }
 
     /// Grows/shrinks a view pool in place.
@@ -612,6 +684,27 @@ final class CommentCardView: NSView {
     /// applied conditionally: no door ⇒ no hit.
     override func hitTest(_ point: NSPoint) -> NSView? {
         onClick == nil ? nil : super.hitTest(point)
+    }
+}
+
+/// The hover tracker (13b 4D, S4-19): an NSTrackingArea owner reporting
+/// window-space pointer moves into the overlay controller. A plain
+/// responder — never in the view hierarchy, never intercepts clicks (the
+/// tracking area delivers moved/exited to its OWNER regardless of hit
+/// testing, so the text surface's events are untouched).
+final class HandleHoverTracker: NSResponder {
+    var onHover: ((NSPoint?) -> Void)?
+
+    override func mouseMoved(with event: NSEvent) {
+        onHover?(event.locationInWindow)
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        onHover?(event.locationInWindow)
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        onHover?(nil)
     }
 }
 
