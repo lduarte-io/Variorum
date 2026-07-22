@@ -572,4 +572,239 @@ struct TakesBoardSoakTests {
             }
         }
     }
+
+    // MARK: - The CANVAS board soak (13b 4E — editable cards + culling)
+
+    /// The canvas variant (the 4E batch's recorded addition, the compare
+    /// soak's shape): seeded actions over the REAL mounted CanvasView —
+    /// focus, type, ‹ › steps, card drags, an order-mode round, a fit-all
+    /// round, and a remount — with the invariants checked after EVERY
+    /// action:
+    /// - at most ONE live pane (the authority's structural invariant on
+    ///   the rendered surface; order mode and the overview hold it at 0);
+    /// - every read pane mirrors the authority's text for its variant
+    ///   (the buffer overlay never goes stale on a card);
+    /// - realization stays BOUNDED (realizedCards < the 100-card corpus —
+    ///   the 4E P1 clause, soaked under every action);
+    /// - canvas_layout rows exist ONLY for dragged cards (arrangement
+    ///   writes at drag end, nothing else writes positions);
+    /// - an applied order round lands the clicked sequence as the stored
+    ///   prefix.
+    @Test(arguments: [11, 23] as [UInt64])
+    func randomizedCanvasBoardSoakHoldsEveryInvariant(seed: UInt64) async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: seed))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let base = "canvas prose that runs long enough to wrap and scroll a card. "
+            let postID: String = try {
+                let post = try session.operations.createPost(title: "soak canvas")
+                for i in 0..<100 {
+                    let mint = try session.operations.newBlock(
+                        in: post.id, text: base + "Card \(i).")
+                    if i == 0 {
+                        let extra = try session.operations.branchVariant(
+                            mint.block.id, from: mint.variant.id)
+                        try session.operations.autosave(
+                            extra.id, text: base + "another take on card zero.", charDelta: 6)
+                    }
+                }
+                return post.id
+            }()
+            UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(postID)")
+            UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(postID)")
+            defer {
+                UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(postID)")
+                UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(postID)")
+            }
+
+            var model = CanvasViewModel(session: session, containerID: postID)
+            var observing = Task { [model] in await model.start() }
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                observing.cancel()
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            var hosting = NSHostingView(rootView: CanvasView(
+                session: session, containerID: postID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 700)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<60 where model.projection.cards.count < 100 {
+                await settle(window, hosting, turns: 1)
+            }
+            #expect(model.projection.cards.count == 100, "the canvas mounted")
+
+            var draggedBlocks: Set<String> = []
+
+            @MainActor func canvasStoreText(_ variantID: String) -> String? {
+                for (_, fan) in model.projection.fans {
+                    if let take = fan.first(where: { $0.id == variantID }) {
+                        return take.workingText
+                    }
+                }
+                return model.projection.cards
+                    .first { $0.block.variantID == variantID }?.block.text
+            }
+
+            @MainActor func checkCanvasInvariants(tag: String) async throws {
+                // 1 — at most ONE live pane on the rendered surface.
+                let liveCount = panes(in: hosting).filter(\.isEditable).count
+                #expect(liveCount <= 1, "[\(tag)] one live ring — found \(liveCount)")
+                // 2 — read panes mirror the authority for their variant.
+                for pane in identifiedPanes(in: hosting)
+                where pane.role == "canvas" && !pane.view.isEditable {
+                    guard let store = canvasStoreText(pane.variantID) else { continue }
+                    let expected = model.authority.text(
+                        variantID: pane.variantID, storeText: store)
+                    #expect(pane.view.string == expected,
+                            "[\(tag)] canvas pane mirrors the authority")
+                }
+                // 3 — realization stays bounded (the 4E P1 clause).
+                #expect(model.realizedCards.count < 100,
+                        "[\(tag)] realized \(model.realizedCards.count) of 100 — bounded")
+                // 4 — positions exist ONLY for dragged cards.
+                let rows = try await db.read { db in
+                    try Row.fetchAll(db, sql: """
+                        SELECT block_id FROM canvas_layout WHERE deleted_at IS NULL
+                        """).map { $0["block_id"] as String }
+                }
+                #expect(Set(rows) == draggedBlocks,
+                        "[\(tag)] layout rows == the dragged set (nothing else writes positions)")
+            }
+
+            var generator = SeededGenerator(seed: seed &+ 3)
+            var counts: [String: Int] = [:]
+            var step = 0
+
+            @MainActor func randomRealizedCard() -> Queries.PoolItem? {
+                let cards = model.realizedCards
+                guard !cards.isEmpty else { return nil }
+                return cards[Int.random(in: 0..<cards.count, using: &generator)]
+            }
+
+            @MainActor func perform(_ action: String) async throws {
+                counts[action, default: 0] += 1
+                switch action {
+                case "focus":
+                    guard !model.orderMode, !model.overviewActive,
+                          let item = randomRealizedCard(),
+                          let resolved = model.resolvedCard(item: item) else { return }
+                    model.focus(
+                        blockID: item.block.blockID, variantID: resolved.variantID)
+                case "type":
+                    guard let pane = model.authority.livePane else { return }
+                    model.paneEdited(
+                        blockID: pane.blockID, variantID: pane.variantID,
+                        newText: base + "typed step \(step) seed \(seed).")
+                case "switch":
+                    guard let (blockID, _) = model.projection.fans.first else { return }
+                    model.switchTake(blockID: blockID, delta: step % 2 == 0 ? 1 : -1)
+                case "drag":
+                    guard !model.overviewActive, let item = randomRealizedCard() else { return }
+                    let blockID = item.block.blockID
+                    await model.dragEnded(
+                        blockID: blockID,
+                        translation: CGSize(
+                            width: Double(Int.random(in: -80...200, using: &generator)),
+                            height: Double(Int.random(in: -60...220, using: &generator))))
+                    draggedBlocks.insert(blockID)
+                case "orderRound":
+                    guard !model.overviewActive else { return }
+                    let before = try await db.read { db in
+                        try Queries.renderPost(db, containerID: postID).map(\.blockID)
+                    }
+                    model.enterOrderMode()
+                    guard model.orderMode else { return }
+                    let picks = Array(before.shuffled(using: &generator).prefix(3))
+                    for blockID in picks { model.toggleOrderClick(blockID: blockID) }
+                    if step % 2 == 0 {
+                        await model.applyOrder()
+                        let after = try await db.read { db in
+                            try Queries.renderPost(db, containerID: postID).map(\.blockID)
+                        }
+                        #expect(Array(after.prefix(picks.count)) == picks,
+                                "[seed \(seed) step \(step)] the clicked sequence leads the post")
+                    } else {
+                        model.cancelOrderMode()
+                        let after = try await db.read { db in
+                            try Queries.renderPost(db, containerID: postID).map(\.blockID)
+                        }
+                        #expect(after == before,
+                                "[seed \(seed) step \(step)] cancel is inert")
+                    }
+                case "fitAllRound":
+                    _ = model.fitAll(viewport: CGSize(width: 900, height: 650))
+                    if model.overviewActive {
+                        if step % 2 == 0, let item = randomRealizedCard() {
+                            _ = model.overviewClicked(blockID: item.block.blockID)
+                        } else {
+                            model.exitOverview()
+                        }
+                    }
+                    #expect(model.authority.livePane == nil || !model.overviewActive,
+                            "[seed \(seed) step \(step)] the overview is read-only (α)")
+                case "remount":
+                    break  // handled in the script loop
+                default:
+                    Issue.record("unknown canvas soak action \(action)")
+                }
+            }
+
+            let core = ["focus", "type", "switch", "drag", "orderRound", "fitAllRound"]
+            let pool = core + ["focus", "type", "drag"]
+            var script = core
+            for _ in 0..<8 {
+                script.append(pool.randomElement(using: &generator)!)
+            }
+            let remountAt = Int.random(in: 6..<script.count, using: &generator)
+
+            for (i, action) in script.enumerated() {
+                step = i
+                if i == remountAt {
+                    counts["remount", default: 0] += 1
+                    observing.cancel()
+                    model.teardown()
+                    model = CanvasViewModel(session: session, containerID: postID)
+                    observing = Task { [model] in await model.start() }
+                    hosting = NSHostingView(rootView: CanvasView(
+                        session: session, containerID: postID, model: model))
+                    hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 700)
+                    window.contentView = hosting
+                    for _ in 0..<60 where model.projection.cards.count < 100 {
+                        await settle(window, hosting, turns: 1)
+                    }
+                }
+                try await perform(action)
+                await settle(window, hosting)
+                try await checkCanvasInvariants(tag: "seed \(seed) step \(i) \(action)")
+            }
+
+            // Quiescence: the pipeline drains.
+            await session.autosave(forPost: postID).flushNow()
+            for (action, minimum) in [("focus", 1), ("type", 1), ("switch", 1),
+                                      ("drag", 1), ("orderRound", 1),
+                                      ("fitAllRound", 1), ("remount", 1)] {
+                #expect((counts[action] ?? 0) >= minimum,
+                        "non-vacuity: \(action) ran (seed \(seed))")
+            }
+        }
+    }
 }
