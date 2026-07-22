@@ -5722,6 +5722,24 @@ regime; procedures exact):**
   state she was in when she couldn't find it.
 
 **Judgment calls / PROVISIONALs (R119 — for the author's deferred walk):**
+0. **PROVISIONAL — a peer with NO kinship at all trails EVERY aligned row**
+   (added post-cap, ladder round 3 MINOR-C; behavior UNCHANGED, now
+   recorded and pinned). In a MIXED multi-peer board an unrelated peer has
+   no row that bounds its run, so its whole post renders in the trailing
+   free segment: anchor `[A,B]` + peer0 `[U1,U2]` (zero kinship) + peer1
+   `[A'']` (kin A) composes `aligned(A) · free[B | U1,U2 | —]`. It packs
+   tighter than the alternative here, but scaled to a long anchor fully
+   kin to another peer, the unrelated column reads blank for that many
+   rows — against the file header's honesty rule, which the 4C record
+   stated only for the WHOLE-BOARD zero-lineage case and left undefined
+   for the mixed case. Options: (a) as shipped — CHOSEN, nothing invented
+   mid-fix; (b) special-case an empty-`kinships` peer to flush at the
+   first bound, as the whole-board case does (one arm); (c) flush a peer's
+   run at any aligned row once its remaining kin count is zero (more
+   general, more surprising). **Hers at the 13c kickoff.** Pin:
+   `aPeerWithNoKinshipAtAllTrailsEveryAlignedRow`; site note in
+   `CompareModels.swift`; full record in "The gate execution record —
+   Part A/B".
 1. **Free stretches render as INDEX-PAIRED rows** (each column's next
    block side by side; absent cells are clear space, never "—").
    Options: per-column packed VStacks (truest "own orders packing" —
