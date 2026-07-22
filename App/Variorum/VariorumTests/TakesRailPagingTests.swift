@@ -136,25 +136,30 @@ struct TakesRailPagingTests {
             model.toggleExpanded(blockID)
             await settle(window, hosting, until: { !cardVariantIDs(in: hosting).isEmpty })
 
-            // THE AD-2 RED: 2 high × 1 wide fits TWO cards — the pre-fix
-            // rail rendered all FOUR (two of them clipped past the rail's
-            // width, unreachable); the paged rail renders exactly the
-            // visible page.
-            let firstPage = cardVariantIDs(in: hosting)
-            #expect(firstPage.count == 2,
-                    "the rail renders exactly the visible page, never clipped extras (rendered \(firstPage.count))")
+            // 13b 4D (S4-24(1) — JUSTIFIED PIN EDIT, her ruling): the old
+            // assertion ("renders exactly the visible page") pinned the
+            // DISCRETE WINDOW — the AD-2 fix's mechanism — which the ruled
+            // scroll+pager HYBRID deliberately replaces: every card is IN
+            // the strip now, free scrolling reaches it, and the window is
+            // the scroll view's, not a render slice. The AD-2 CLASS (a
+            // take unreachable with no affordance) is pinned instead as:
+            // every take present in the strip + the ◀ ▶ pager and the
+            // counter still riding the ONE paging brain the scroll writes
+            // back into (nothing off-edge is ever undiscoverable — three
+            // affordances agree).
+            let strip = cardVariantIDs(in: hosting)
+            #expect(Set(strip) == Set(fanIDs),
+                    "the hybrid strip carries EVERY take — none unreachable (saw \(strip.count) of \(fanIDs.count))")
+            #expect(strip.count == fanIDs.count, "each take exactly once — no duplicates")
 
-            // The explicit door covers the WHOLE fan: walk the pages and
-            // collect every take that becomes visible.
-            var seen = Set(firstPage)
+            // The pager door still walks the one paging brain (the counter
+            // derives from the same offset the scroll settles into).
             let pageKey = "rail-\(blockID)"
-            for _ in 0..<3 {
-                model.stepPage(pageKey, by: 1, limit: 1)
-                await settle(window, hosting, until: { false }, maxTurns: 3)
-                seen.formUnion(cardVariantIDs(in: hosting))
-            }
-            #expect(seen == Set(fanIDs),
-                    "every active take is a card on SOME page — none is unreachable (saw \(seen.count) of \(fanIDs.count))")
+            #expect(model.pageOffset(pageKey, limit: 1) == 0)
+            model.stepPage(pageKey, by: 1, limit: 1)
+            await settle(window, hosting, until: { false }, maxTurns: 3)
+            #expect(model.pageOffset(pageKey, limit: 1) == 1,
+                    "the ◀ ▶ door pages the same brain the scroll position reads")
         }
     }
 

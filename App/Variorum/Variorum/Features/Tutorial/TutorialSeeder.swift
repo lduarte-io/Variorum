@@ -360,11 +360,15 @@ enum TutorialSeeder {
 
             "The rain came in from the sea without an opinion about any of us.",
 
-            "When a fan holds more takes than fit, the rail pages: \u{25C0} 1\u{2013}2 of 4 \u{25B6} "
-            + "— \u{2325}\u{2318}\u{2190} and \u{2325}\u{2318}\u{2192} turn the pages from the keyboard. The "
-            + "style: menu in the board's top line picks how fans open — stack, "
-            + "carousel, margin grid, or slot split — and \u{238B} closes every fan at "
-            + "once.",
+            // 13b 4D (S4-24(1)/N40): the scroll+pager hybrid + the fixed
+            // strip — the prose keeps pace with the ruled behavior.
+            "When a fan holds more takes than fit, the strip scrolls freely "
+            + "sideways AND pages: \u{25C0} 1\u{2013}2 of 4 \u{25B6} — \u{2325}\u{2318}\u{2190} and \u{2325}\u{2318}\u{2192} turn "
+            + "the pages from the keyboard, and the counter always agrees with "
+            + "what you scrolled to. Take cards keep one steady height; a long "
+            + "take scrolls inside its card. The style: menu in the board's top "
+            + "line picks how fans open — stack, carousel, margin grid, or slot "
+            + "split — and \u{238B} closes every fan at once.",
         ])
         let fanned = choosing.blocks[2]
         try take(on: fanned, "The rain arrived off the sea like a verdict none of us had appealed.")

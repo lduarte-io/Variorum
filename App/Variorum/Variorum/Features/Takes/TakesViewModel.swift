@@ -476,6 +476,14 @@ final class TakesViewModel {
         board.stepPage(key, by: delta, limit: limit)
     }
 
+    /// 13b 4D (S4-24(1) — the scroll+pager hybrid's write-back): a settled
+    /// scroll addresses the SAME clamped offset the ◀ ▶ door writes — one
+    /// paging brain, so the counter, the keyboard pager, and the scroll
+    /// position can never disagree.
+    func setPage(_ key: String, to offset: Int, limit: Int) {
+        board.setPage(key, to: offset, limit: limit)
+    }
+
     // MARK: - Expansion (session-only) — the board's, forwarded
 
     func toggleExpanded(_ blockID: String) {

@@ -147,17 +147,21 @@ struct TakesBoardSoakTests {
                     "[\(tag)] slot \(slot.blockID.suffix(4)) renders its article pane")
         }
 
-        // 5 — AD-2: mini cards per block never exceed the page capacity
-        // (2 with the pinned density/beneath settings) — the rest are
-        // behind the explicit pager, never silently clipped.
+        // 5 — the AD-2 class under the S4-24 HYBRID (13b 4D — JUSTIFIED
+        // EDIT, her ruling): the strip carries EVERY take now (free scroll
+        // + the ◀ ▶ pager + the counter, one brain), so the invariant
+        // flips from "≤ the discrete page capacity" to "exactly the fan —
+        // nothing missing (the unreachable-take class), nothing
+        // duplicated". A realized bloom renders its whole strip.
         var miniPerBlock: [String: Int] = [:]
         for pane in identified where pane.role == "mini" {
             guard let block = blockID(of: pane.variantID, model) else { continue }
             miniPerBlock[block, default: 0] += 1
         }
         for (block, count) in miniPerBlock {
-            #expect(count <= 2,
-                    "[\(tag)] block \(block.suffix(4)) shows \(count) cards — page capacity is 2")
+            let fanCount = model.projection.fans[block]?.count ?? 0
+            #expect(count == fanCount,
+                    "[\(tag)] block \(block.suffix(4)) strips \(count) cards for a fan of \(fanCount)")
         }
     }
 

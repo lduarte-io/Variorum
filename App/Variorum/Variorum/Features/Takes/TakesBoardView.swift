@@ -622,10 +622,16 @@ struct TakesBoardView: View {
         }
     }
 
-    /// The rail's paged card window: takes chunk into columns of
-    /// `rowsPerColumn`; `gridCols` columns are visible; ◀ ▶ move one
-    /// column at a time. Every take is a card on SOME page — none is ever
-    /// silently clipped away (the AD-2 pin + the soak invariant).
+    /// The rail's card strip — the SCROLL + PAGER HYBRID (13b 4D, S4-24(1),
+    /// her ruling: "free horizontal scrolling returns on the fan rail ON
+    /// TOP of the pager"). Takes chunk into columns of `rowsPerColumn`;
+    /// EVERY column is in the strip (nothing off-edge is undiscoverable —
+    /// the AD-2 lesson binds three ways: scroll reaches it, ◀ ▶ reaches
+    /// it, the counter names it); the scroll SETTLES onto whole-column
+    /// boundaries (viewAligned) and the leading column writes back into
+    /// the model's ONE paging brain, so the ◀ x–y of n ▶ counter, the
+    /// keyboard pager, and the scroll position agree at rest by
+    /// construction.
     private func railCards(
         takes: [Variant], slot: Queries.RenderedBlock, rowsPerColumn: Int
     ) -> some View {
@@ -635,78 +641,121 @@ struct TakesBoardView: View {
         let pageKey = TakesViewModel.railPageKey(slot.blockID)
         let limit = max(columns.count - gridCols, 0)
         let offset = model.pageOffset(pageKey, limit: limit)
-        let visible = Array(columns.dropFirst(offset).prefix(gridCols))
         return VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .top, spacing: 6) {
-                ForEach(Array(visible.enumerated()), id: \.offset) { _, column in
-                    VStack(spacing: 6) {
-                        ForEach(column, id: \.id) { take in
-                            // Batch 7: UNIFORM card height — "2 high" is
-                            // literally two card-heights, never a clipped
-                            // column of tall cards. 13b 3F (N23): the card
-                            // CAPS but no longer amputates — its content
-                            // scrolls, so the whole take is reachable.
-                            takeMiniPane(take: take, slot: slot, capped: true)
-                                .frame(
-                                    width: Self.railCardWidth,
-                                    height: Self.railCardHeight,
-                                    alignment: .topLeading)
-                                .clipped()
+            ScrollView(.horizontal) {
+                HStack(alignment: .top, spacing: 6) {
+                    ForEach(Array(columns.enumerated()), id: \.offset) { i, column in
+                        VStack(spacing: 6) {
+                            ForEach(column, id: \.id) { take in
+                                // Batch 7: UNIFORM card height — "2 high"
+                                // is literally two card-heights. 13b 3F
+                                // (N23) + 4D (N40): ONE fixed card height,
+                                // the content SCROLLS in place — the whole
+                                // take reachable, the strip never jumping.
+                                takeMiniPane(take: take, slot: slot, capped: true)
+                                    .frame(
+                                        width: Self.railCardWidth,
+                                        height: Self.railCardHeight,
+                                        alignment: .topLeading)
+                                    .clipped()
+                            }
                         }
+                        .frame(width: Self.railCardWidth)
+                        .id(i)
                     }
-                    .frame(width: Self.railCardWidth)
                 }
+                .scrollTargetLayout()
             }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(
+                id: stripBinding(key: pageKey, limit: limit, ids: Array(columns.indices)),
+                anchor: .leading)
             if columns.count > gridCols {
                 let firstShown = offset * rowsPerColumn + 1
                 let lastShown = min((offset + gridCols) * rowsPerColumn, takes.count)
-                HStack(spacing: 4) {
-                    Button("◀") { model.stepPage(pageKey, by: -1, limit: limit) }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                        .disabled(offset == 0)
-                    Text("\(firstShown)–\(lastShown) of \(takes.count)")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                    Button("▶") { model.stepPage(pageKey, by: 1, limit: limit) }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                        .disabled(offset >= limit)
-                }
+                pagerLine(
+                    pageKey: pageKey, limit: limit, offset: offset,
+                    caption: "\(firstShown)–\(lastShown) of \(takes.count)")
             }
         }
     }
 
-    /// The shared discrete-paging row (carousel + slot split): whole cards,
-    /// never halfway; ◀ ▶ move one card at a time.
+    /// The shared strip row (carousel + slot split) — the same HYBRID
+    /// (S4-24(1)): every take is in the strip, free scrolling settles onto
+    /// whole cards, the ◀ ▶ door and the counter ride the one paging
+    /// brain. N40 (S4-31b, her ruling): ONE fixed strip height — every
+    /// card is exactly one card-height and its content scrolls within, so
+    /// the strip never changes height as takes differ or pages turn (the
+    /// recorded #28(b) clip cost dissolves into the in-card scroll).
     private func pagedTakesRow(
         takes: [Variant], slot: Queries.RenderedBlock, pageKey: String
     ) -> some View {
-        // Offsets live on the MODEL now (13b 1a, AD-2's companion move):
-        // one paging brain for carousel, slot split, and the rail — and
-        // the soak can drive page coverage.
+        // Offsets live on the MODEL (13b 1a, AD-2's companion move): one
+        // paging brain for carousel, slot split, and the rail — and the
+        // soak can drive page coverage.
         let limit = max(takes.count - beneathCount, 0)
         let offset = model.pageOffset(pageKey, limit: limit)
-        let visible = Array(takes.dropFirst(offset).prefix(beneathCount))
         return VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .top, spacing: 6) {
-                ForEach(visible, id: \.id) { take in
-                    takeMiniPane(take: take, slot: slot)
-                        .frame(maxWidth: .infinity)
+            ScrollView(.horizontal) {
+                HStack(alignment: .top, spacing: 6) {
+                    ForEach(takes, id: \.id) { take in
+                        takeMiniPane(take: take, slot: slot, capped: true)
+                            .frame(height: Self.railCardHeight, alignment: .topLeading)
+                            .clipped()
+                            .containerRelativeFrame(
+                                .horizontal, count: max(beneathCount, 1), span: 1,
+                                spacing: 6)
+                    }
                 }
+                .scrollTargetLayout()
             }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(
+                id: stripBinding(key: pageKey, limit: limit, ids: takes.map(\.id)),
+                anchor: .leading)
             if takes.count > beneathCount {
-                HStack(spacing: 4) {
-                    Button("◀") { model.stepPage(pageKey, by: -1, limit: limit) }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                        .disabled(offset == 0)
-                    Text("\(offset + 1)–\(min(offset + beneathCount, takes.count)) of \(takes.count)")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                    Button("▶") { model.stepPage(pageKey, by: 1, limit: limit) }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                        .disabled(offset >= limit)
-                }
+                pagerLine(
+                    pageKey: pageKey, limit: limit, offset: offset,
+                    caption: "\(offset + 1)–\(min(offset + beneathCount, takes.count)) of \(takes.count)")
             }
             fanFooter(slot: slot)
+        }
+    }
+
+    /// The hybrid's shared write-back binding (S4-24(1) — the honesty
+    /// mechanism, recorded): scrollPosition reads the model's clamped
+    /// offset and a settled scroll writes the SAME clamped offset back
+    /// (`setPage`) — the counter never lies because it derives from the
+    /// exact state the scroll and the ◀ ▶ door both address.
+    private func stripBinding<ID: Hashable>(
+        key: String, limit: Int, ids: [ID]
+    ) -> Binding<ID?> {
+        Binding<ID?>(
+            get: {
+                let offset = model.pageOffset(key, limit: limit)
+                return ids.indices.contains(offset) ? ids[offset] : ids.first
+            },
+            set: { leading in
+                guard let leading, let index = ids.firstIndex(of: leading) else { return }
+                model.setPage(key, to: index, limit: limit)
+            })
+    }
+
+    /// The ◀ x–y of n ▶ line (unchanged grammar — the pager door survives
+    /// ON TOP of the scroll, per the ruling's letter).
+    private func pagerLine(
+        pageKey: String, limit: Int, offset: Int, caption: String
+    ) -> some View {
+        HStack(spacing: 4) {
+            Button("◀") { model.stepPage(pageKey, by: -1, limit: limit) }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .disabled(offset == 0)
+            Text(caption)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+            Button("▶") { model.stepPage(pageKey, by: 1, limit: limit) }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .disabled(offset >= limit)
         }
     }
 
