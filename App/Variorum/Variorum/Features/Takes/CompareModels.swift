@@ -98,12 +98,30 @@ nonisolated enum CompareComposition {
         var segments: [Segment] = []
         var freeAnchor: [String] = []
         var freePeers: [[String]] = Array(repeating: [], count: peerCount)
-        func flushFree() {
-            guard !freeAnchor.isEmpty || freePeers.contains(where: { !$0.isEmpty })
-            else { return }
-            segments.append(.free(anchor: freeAnchor, peers: freePeers))
+        /// Flush pending free material AHEAD of an aligned row — but only
+        /// what that row actually ORDERS: the anchor's own pending blocks
+        /// (they precede this anchor block in the anchor's order) and the
+        /// pending runs of peers whose KIN sits in the arriving row (the
+        /// run precedes that peer's kin in the peer's own order). A peer
+        /// with NO kin in the row keeps its run pending — peers register
+        /// against the anchor INDEPENDENTLY (the multi-peer pin's letter),
+        /// so another peer's kin row never splits a stretch: unrelated
+        /// runs pack side by side in the next segment that genuinely
+        /// bounds them (or the trailing one). The gate's traced defect was
+        /// the unconditional flush here — peer2's kin row force-flushed
+        /// peer1's trailing run into its own mostly-empty segment
+        /// (aligned·free[P1x|—]·aligned·free[—|P2x] where the record
+        /// promises aligned·aligned·free[P1x|P2x]).
+        func flushFree(forcing: [Bool]) {
+            let flushable = (0..<peerCount).filter { forcing[$0] && !freePeers[$0].isEmpty }
+            guard !freeAnchor.isEmpty || !flushable.isEmpty else { return }
+            var peers: [[String]] = Array(repeating: [], count: peerCount)
+            for p in flushable {
+                peers[p] = freePeers[p]
+                freePeers[p] = []
+            }
+            segments.append(.free(anchor: freeAnchor, peers: peers))
             freeAnchor = []
-            freePeers = Array(repeating: [], count: peerCount)
         }
         for p in 0..<peerCount {
             freePeers[p] += orphanRuns[p][String?.none] ?? []
@@ -113,7 +131,7 @@ nonisolated enum CompareComposition {
             if kinLists.allSatisfy(\.isEmpty) {
                 freeAnchor.append(anchor)
             } else {
-                flushFree()
+                flushFree(forcing: kinLists.map { !$0.isEmpty })
                 segments.append(.aligned(AlignedRow(
                     anchorBlockID: anchor,
                     peerKin: kinLists,
@@ -123,7 +141,7 @@ nonisolated enum CompareComposition {
                 freePeers[p] += orphanRuns[p][anchor] ?? []
             }
         }
-        flushFree()
+        flushFree(forcing: Array(repeating: true, count: peerCount))
         return segments
     }
 
