@@ -4866,6 +4866,12 @@ deferral documents + whatever her organic use surfaced), and the
 (behind the A1 rail, as ever). *(2026-07-22 EOL directive: "Stage 5's
 shape" reads PHASE 13C's — the closeout is the FULL 13b phase closeout
 and creates 13c; see the directive section at this file's end.)*
+*(Ladder round 1, MINOR-1 — the canon-delta list gains the S4-22
+deltas: OverallModel §7's boundary-snapping line updates to the ruled
+word rule + gentle settle, and AppSpec §9's divide/divideW entries gain
+the word-edge/newline cut rule + the end/start PARKING semantics
+(independently-sized fans; the I10 all-parked refusal) — applied at
+the closeout beside the S4-23 merge-pairing delta.)*
 
 ### Batch 4G record (parallel-use hardening) — CLOSED 2026-07-22, both proof runs GREEN
 
@@ -6758,3 +6764,121 @@ re-run GREEN independently; commits/record/ledger verified present.
    in relative order; the canvas soak variant on the 4C compare-soak
    shape; sealed flag via the existing app-side read; core untouched
    throughout.
+
+## Stage 4 ladder — round 1 findings (VERBATIM record; cold reviewer over the combined Stage 4 diff at 77fc0d1; recorded repo-first before any fix session)
+
+**Reviewer's own verification state:** core 817/96 GREEN by its own run;
+`build-for-testing` GREEN; mobile build GREEN; the session lock
+re-verified (the Mac suite could not execute in the review either).
+
+**[MAJOR] · the batch records + the review's environment check · The
+entire Mac-side verification for all six batches remains UNEXECUTED —
+the stage's largest open claim, and the review could not discharge it
+either.** Every batch record carries Mac PENDING (expected cumulative
+562/112 → 646/122, ~84 new tests / ~9 new suites); all app-side
+revert-red procedures and the visual loop are recorded but unexecuted.
+The reviewer re-verified the block is real (lock re-checked; the 4A
+control-suite trace showed the hang is environmental) and that
+compile-green ≠ run-green. Not a code defect and honestly recorded
+throughout; MAJOR because it is the gate: **the ladder's clean bill is
+CONDITIONAL — the stage must not close, and the deploy → Release →
+`/Applications` chain must not run, before the consolidated 646/122
+run plus the recorded revert-red procedures execute and match the
+arithmetic. Any failure there re-opens this review.**
+
+**[MINOR-1] · OverallModel §7 + AppSpec §9 (divide/divideW) vs the
+stage-close canon-delta checklist · The S4-22 cut-rule/parking canon
+deltas have NO recorded owner** — S4-23 carries its explicit canon
+consequence but S4-22 does not: OverallModel §7 still reads
+"boundaries snap to sentence/paragraph marks" (now the word rule +
+gentle settle) and AppSpec §9's divideW entry still reads first-half/
+second-half for every marked variant (parking makes the fans
+independently sized). Fix: add the S4-22 deltas to the canon-delta
+list before the closeout runs (doc class; no pin possible).
+
+**[MINOR-2] · Registry/OpsRefusalCopy.swift:87 +
+Features/Library/RecoveryView.swift (restoreReading catch) +
+Features/Editor/WordTargetFace.swift:86 · Two NEW Stage 4 doors speak
+raw enum dumps on reachable refusals.** (a) Double-click Restore on a
+deleted book (or a sync-raced restore) → "Refused:
+readingNotDeleted(id: …)". (b) Type "0"/"-5" in the word-target
+popover → "Refused: invalidExtent(value: 0)" (ExtentInput.parse
+accepts any Int). The 13b bar is refusals-in-app-words (R115); the
+ceremony's new errors got real copy — these two didn't. Red-on-old
+pinnable. Fix: two OpsRefusalCopy cases (+ optionally a non-positive
+guard at the face). NOTE: the invalidExtent half predates 4F on the
+shelf's BookExtentSheet — a standing class the new face reproduces;
+worth a class-completeness sweep over invalidExtent producers.
+
+**[NIT-1] · CompareBoardView.swift:437–445 (removePeerSlot) /
+420–430 (setPeer) · A live pane keyed to a removed peer context is
+never blurred** — the authority keeps livePane on an unmounted column
+and adopt's union-settle no longer covers that post (the 4C record's
+own traced, accepted transient). One `authority.blur()` (or targeted
+migration) when the removed/replaced slot's postID matches
+livePane?.context shrinks the window at zero cost.
+
+**[NIT-2 · SPECULATIVE, record-only] · restoreReading sweeps ×
+SyncSpec §7 orphan repair · a narrow cross-device same-stamp
+double-membership corner** (uq_reading_post_live would fail the
+restore transaction — spoken refusal, no corruption; succeeds after
+the pull completes). Reproduction could not be built; the identical
+class has existed for restoreContainer since Phase 5. Recorded.
+
+**[NIT-3] · CompareBoardView.rows + CanvasViewModel
+cardFrames/realizedCards · composition/geometry rebuilt per body
+evaluation** — post-bounded, P1-clean today; the batch records
+themselves flag it; memoize on projection identity if the corpus ever
+reads thousands. Confirms the records' own foci.
+
+**[NIT-4] · EditorSurfaceController.openMergeCeremony comment
+("confirming immediately IS current behavior") · precision only:**
+with a session mergeJoinMemory set, the pre-pair joins by the memory,
+not canon — ruling 3's letter (recorded in the 4B record), but the
+comment and the 4B walk-pin framing overstate "today's exact outcome"
+for non-fresh sessions.
+
+**Clean bill (abridged; the reviewer's full list is in its session
+report — its substance re-verifiable from the pins):** the 4A/4B core
+surgery verified in detail (grapheme alignment, containment, one snap
+brain, parking guards, MergeJoin byte-parity, ceremony-op composition,
+chosen rules, drift checks); the 4C authority extension (defaulted
+context, one structural livePane, leaving-context handback, per-post
+coordinators as the designed N3 boundary); v1_12's lockstep artifacts
+(additive; marker == constant; the NO-RPC-REWORK claim verified
+against 06's deployed bodies; serializer column-catalog-driven; Sync/
+touched at exactly the SyncSchema constant); the 4F ops (identity-level
+setter; restoreReading's live-post guard traced + revert-verified; the
+two-step restoreSection road; the twice-diverged corner pinned as
+behavior); P1/P3 on every new surface (one page mounts; model-driven
+progress/scrub; pure culling; fan-bounded strips); registry/R118 (two
+new declared acts; one renamed availability rule; ⌘1–⌘6 complete;
+N39's ordinal math); environment/process claims (4G one line; the
+withheld refresh true in the filesystem; both 13c documents present;
+R57 grep-verified; canon-delta application correctly scheduled except
+the MINOR-1 gap).
+
+### Stage 4 ladder — round 1 dispositions (the architect's routing, recorded before the fix session)
+
+- **[MAJOR] — AGREED; it IS the standing regime, now ladder-bound.**
+  The consolidated 646/122 run + every recorded revert-red procedure +
+  the visual loop execute at the first unlocked window, BEFORE the
+  stage closes and BEFORE the deploy → Release → refresh chain. Any
+  failure re-opens the review (round 2/3 per the ladder). No fix
+  session; the orchestrator holds the gate (watcher armed).
+- **[MINOR-1] — RESOLVED-BY-ARCHITECT, this commit:** the stage-close
+  canon-delta list (the brief's closing item) now carries the S4-22
+  deltas explicitly — see the bracketed addition at the closing-item
+  paragraph.
+- **[MINOR-2] + [NIT-1] + [NIT-4] → ONE fresh fix session** (the
+  standing pattern): real refusal copy for the two doors (+ the face
+  guard if it matches the face's own promise), red-on-old pinned
+  (execution PENDING under the regime; procedures recorded); the
+  invalidExtent producer CLASS-COMPLETENESS SWEEP (enumerate
+  producers × surfaces, verdict each — the recurred-class rule); the
+  compare blur-on-peer-removal with its pin; the comment/pin-framing
+  precision. Core untouched throughout.
+- **[NIT-2] — RECORD-ONLY** as the reviewer routed (the restoreContainer
+  parallel stands; on file for the multi-device era).
+- **[NIT-3] — RECORD-ONLY** (the records' own foci confirmed; the
+  memoization threshold noted for corpus scale).
