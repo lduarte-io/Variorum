@@ -511,6 +511,255 @@ extension Operations {
         return result
     }
 
+    // MARK: - The merge ceremony (13b Stage 4, Batch 4B — S4-23, ruled)
+
+    /// One hand-placed ＋ pairing: the merged block gets a take that is the
+    /// first block's take joined with the second block's take. `join` is
+    /// explicit — the sheet resolves the canon default (`MergeJoin.canon`)
+    /// or the author's three-way choice; the operation never guesses.
+    public struct MergePairing: Equatable, Sendable {
+        /// A take of the FIRST (earlier-placed) block.
+        public let firstVariantID: String
+        /// A take of the SECOND block.
+        public let secondVariantID: String
+        public let join: MergeJoin
+
+        public init(firstVariantID: String, secondVariantID: String, join: MergeJoin) {
+            self.firstVariantID = firstVariantID
+            self.secondVariantID = secondVariantID
+            self.join = join
+        }
+    }
+
+    public struct MergeCeremonyResult: Equatable, Sendable {
+        /// Where each minted take came from — index-aligned with `variants`
+        /// (the 4A `sourceVariantIDs` precedent: correspondence arrays over
+        /// positional promises).
+        public enum TakeSource: Equatable, Sendable {
+            case pairing(firstVariantID: String, secondVariantID: String)
+            case carried(variantID: String)
+        }
+
+        /// A' — the fresh merged block.
+        public let block: Block
+        /// Its fan: one take per pairing (in the pairings' given order),
+        /// then the carried takes (first block's in fan order, then the
+        /// second's).
+        public let variants: [Variant]
+        /// The provenance of each entry in `variants`, index-aligned.
+        public let sources: [TakeSource]
+        public let placement: ContainerBlock
+        /// A' derived_from the first (earlier-placed) source.
+        public let firstEdge: Edge
+        /// A' derived_from the second source.
+        public let secondEdge: Edge
+        /// The released placement rows (pre-images undo flips back).
+        public let releasedFirstPlacementID: String
+        public let releasedSecondPlacementID: String
+    }
+
+    /// The merge CEREMONY's operation (the ruled addendum,
+    /// `notes/plans/phase-13b-memo-merge.md` — S4-23 ruling 1, her canon
+    /// extension of AppSpec §9 / OverallModel §7): a ceremony merge mints
+    /// ONE take per hand-placed ＋ pairing (left-half + right-half joined
+    /// per the pairing's explicit join) PLUS each carried take whole
+    /// (unjoined, its label riding along), all on ONE fresh merged block
+    /// standing where the pair stood. NOTHING is cartesian-producted —
+    /// pairing is choosing by hand, so divide-then-merge round-trips whole
+    /// when you pair 1+1 and 2+2. Unpaired, uncarried takes stay with the
+    /// released sources in lineage — today's rule, now visible and chosen.
+    ///
+    /// Everything else composes with `merge` byte-identically: adjacency
+    /// required, both placements released with `last_container_id` stamped
+    /// (sources stay live as lineage; reversible by re-pointing),
+    /// `derived_from`/'merge' edges to both sources, comments copied from
+    /// both sides, presentation kept only when both sources agree, the post
+    /// touched without reshuffling, ONE undo entry restoring the sources
+    /// whole. Locked takes pair/carry fine — their buffers are COPIED,
+    /// never edited. The instant no-fan `merge` is untouched.
+    ///
+    /// Chosen/default on the merged block (the recorded rule): the take
+    /// minted from the pairing of the two RENDERED takes when that pairing
+    /// exists; else the first pairing in the given order; a carry becomes
+    /// chosen only when no pairing exists. Guards: at least one pairing or
+    /// carry (`mergedBlockWouldHaveNoTake` — I10 at birth); each take in at
+    /// most one pairing and never both paired and carried
+    /// (`takePairedTwice` — 1:1, PROVISIONAL); every referenced take must
+    /// be a live ACTIVE take of its named side (`variantNotFound` /
+    /// `archivedVariant`).
+    @discardableResult
+    public func mergeCeremony(
+        _ firstBlockID: String, _ secondBlockID: String,
+        pairings: [MergePairing], carries: [String]
+    ) throws -> MergeCeremonyResult {
+        let result: MergeCeremonyResult = try database.write { db in
+            let first = try placedContext(db, blockID: firstBlockID)
+            let second = try placedContext(db, blockID: secondBlockID)
+            let containerID = first.container.id
+            let neighborID = try String.fetchOne(
+                db,
+                sql: """
+                    SELECT block_id FROM container_block
+                    WHERE container_id = ? AND deleted_at IS NULL AND position > ?
+                    ORDER BY position, id LIMIT 1
+                    """,
+                arguments: [containerID, first.placement.position])
+            guard second.container.id == containerID, neighborID == secondBlockID else {
+                throw OperationError.blocksNotAdjacent(first: firstBlockID, second: secondBlockID)
+            }
+            guard !pairings.isEmpty || !carries.isEmpty else {
+                throw OperationError.mergedBlockWouldHaveNoTake(
+                    first: firstBlockID, second: secondBlockID)
+            }
+
+            // 1:1 arity (PROVISIONAL): no take twice, no paired-and-carried.
+            var participating = Set<String>()
+            for id in pairings.flatMap({ [$0.firstVariantID, $0.secondVariantID] }) + carries {
+                guard participating.insert(id).inserted else {
+                    throw OperationError.takePairedTwice(variantID: id)
+                }
+            }
+
+            // The two live ACTIVE fans, in fan order — validation and the
+            // carries' mechanical ordering both read these.
+            func activeFan(_ blockID: String) throws -> [Variant] {
+                try Variant.fetchAll(
+                    db,
+                    sql: """
+                        SELECT * FROM variant
+                        WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                        ORDER BY fan_position, id
+                        """,
+                    arguments: [blockID])
+            }
+            let firstFan = try activeFan(firstBlockID)
+            let secondFan = try activeFan(secondBlockID)
+            let firstByID = Dictionary(uniqueKeysWithValues: firstFan.map { ($0.id, $0) })
+            let secondByID = Dictionary(uniqueKeysWithValues: secondFan.map { ($0.id, $0) })
+
+            /// A referenced take must be a live ACTIVE take of its named
+            /// side. An archived take of the right block diagnoses
+            /// precisely; anything else — missing, tombstoned, or the wrong
+            /// block — is not found among this side's takes.
+            func resolve(
+                _ id: String, among side: [String: Variant], of blockID: String
+            ) throws -> Variant {
+                if let take = side[id] { return take }
+                if let stray = try Variant.fetchOne(db, key: id),
+                   stray.deletedAt == nil, stray.status == .archived,
+                   stray.blockId == blockID {
+                    throw OperationError.archivedVariant(id: id)
+                }
+                throw OperationError.variantNotFound(id: id)
+            }
+
+            var texts: [String] = []
+            var labels: [String?] = []
+            var sources: [MergeCeremonyResult.TakeSource] = []
+            for pairing in pairings {
+                let head = try resolve(
+                    pairing.firstVariantID, among: firstByID, of: firstBlockID)
+                let tail = try resolve(
+                    pairing.secondVariantID, among: secondByID, of: secondBlockID)
+                texts.append(pairing.join.joined(head.workingText, tail.workingText))
+                labels.append(nil)
+                sources.append(.pairing(
+                    firstVariantID: head.id, secondVariantID: tail.id))
+            }
+            // Every carry must be a live ACTIVE take of either side (the
+            // arity set above already forbids doubles); an archived take of
+            // either block diagnoses precisely.
+            for id in carries where firstByID[id] == nil && secondByID[id] == nil {
+                if let stray = try Variant.fetchOne(db, key: id),
+                   stray.deletedAt == nil, stray.status == .archived,
+                   stray.blockId == firstBlockID || stray.blockId == secondBlockID {
+                    throw OperationError.archivedVariant(id: id)
+                }
+                throw OperationError.variantNotFound(id: id)
+            }
+            // Carries land in MECHANICAL order (the recorded rule): the
+            // first block's carried takes in fan order, then the second's —
+            // the caller's array order never reaches the store.
+            let carrySet = Set(carries)
+            for take in firstFan + secondFan where carrySet.contains(take.id) {
+                texts.append(take.workingText)
+                labels.append(take.label)
+                sources.append(.carried(variantID: take.id))
+            }
+
+            let now = date.now
+
+            // Release both placements; the blocks stay live as lineage,
+            // stamped with their last home (merge's exact release).
+            for context in [first, second] {
+                var released = context.placement
+                released.deletedAt = now
+                released.updatedAt = now
+                try released.update(db)
+                var sourceBlock = context.block
+                sourceBlock.lastContainerId = containerID
+                sourceBlock.updatedAt = now
+                try sourceBlock.update(db)
+            }
+
+            // A' stands exactly where the pair stood.
+            func outerNeighbor(_ aggregate: String, _ comparison: String, _ anchor: String) throws -> String? {
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT \(aggregate)(position) FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL AND position \(comparison) ?
+                        """,
+                    arguments: [containerID, anchor])
+            }
+            let position = FractionalIndex.between(
+                try outerNeighbor("MAX", "<", first.placement.position),
+                try outerNeighbor("MIN", ">", second.placement.position))
+
+            // Chosen/default: the rendered×rendered pairing when it exists;
+            // else the first pairing; a carry only when no pairing exists.
+            let renderedPairing = pairings.firstIndex {
+                $0.firstVariantID == first.rendered.id
+                    && $0.secondVariantID == second.rendered.id
+            }
+            let defaultIndex = renderedPairing ?? 0
+
+            // Phase 13 (A2): A' keeps the frame only when BOTH sources
+            // agree on it (both-nil included) — merge's exact rule.
+            let presentation = first.block.presentation == second.block.presentation
+                ? first.block.presentation : nil
+            let minted = try mintFanBlock(
+                db, texts: texts, in: containerID, position: position,
+                defaultIndex: defaultIndex, chosenIndex: defaultIndex,
+                presentation: presentation, labels: labels, now: now)
+            let firstEdge = try insertLineageEdge(
+                db, from: minted.block.id, to: firstBlockID, originOp: "merge", now: now)
+            let secondEdge = try insertLineageEdge(
+                db, from: minted.block.id, to: secondBlockID, originOp: "merge", now: now)
+            // Phase 13 (A2) travel: A' carries BOTH sides' notes (merge's
+            // exact rule); the sources keep their originals as lineage.
+            try copyLiveComments(db, from: firstBlockID, to: minted.block.id, now: now)
+            try copyLiveComments(db, from: secondBlockID, to: minted.block.id, now: now)
+            try touchContainer(db, containerID, now: now)
+
+            return MergeCeremonyResult(
+                block: minted.block, variants: minted.variants, sources: sources,
+                placement: minted.placement,
+                firstEdge: firstEdge, secondEdge: secondEdge,
+                releasedFirstPlacementID: first.placement.id,
+                releasedSecondPlacementID: second.placement.id)
+        }
+        undoStack?.register(label: "Merge Takes") {
+            try $0.revertStructural(
+                restoringTexts: [],
+                tombstoningBlocks: [.init(result.block.id, result.variants)],
+                revivingPlacementRows: [
+                    result.releasedFirstPlacementID, result.releasedSecondPlacementID,
+                ])
+        }
+        return result
+    }
+
     // MARK: - Shared internals
 
     struct PlacedContext {
@@ -593,14 +842,18 @@ extension Operations {
     }
 
     /// A fresh block carrying a whole fan (divide-W's successors, merge's
-    /// single-variant result): one variant per text, fresh fan positions
+    /// single-variant result, the merge ceremony's paired+carried fan): one
+    /// variant per text, fresh fan positions
     /// preserving the given order, parentless (block-level edges carry the
     /// lineage; the variant parent tree never crosses blocks), placed at an
     /// exact position. Lineage edges are the caller's — their count and
-    /// ancestors differ per operation.
+    /// ancestors differ per operation. `labels`, when given, rides
+    /// index-aligned with `texts` (13b 4B: a carried take keeps its label —
+    /// the name is part of the take it rides in on; pairings mint unlabeled).
     private func mintFanBlock(
         _ db: Database, texts: [String], in containerID: String, position: String,
-        defaultIndex: Int, chosenIndex: Int?, presentation: String? = nil, now: Date
+        defaultIndex: Int, chosenIndex: Int?, presentation: String? = nil,
+        labels: [String?]? = nil, now: Date
     ) throws -> MintedFanBlock {
         var block = Block(
             id: newID(), ownerId: currentOwnerID(), presentation: presentation,
@@ -609,11 +862,12 @@ extension Operations {
 
         var variants: [Variant] = []
         var lastFanPosition: String?
-        for text in texts {
+        for (i, text) in texts.enumerated() {
             let fanPosition = lastFanPosition.map { FractionalIndex.between($0, nil) }
                 ?? FractionalIndex.initial()
             let variant = Variant(
                 id: newID(), blockId: block.id, workingText: text,
+                label: labels.flatMap { i < $0.count ? $0[i] : nil },
                 fanPosition: fanPosition, createdAt: now, updatedAt: now)
             try variant.insert(db)
             variants.append(variant)

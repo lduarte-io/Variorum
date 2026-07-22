@@ -69,6 +69,15 @@ public enum OperationError: Error, Equatable, Sendable {
     case divideSideWouldBeEmpty(blockID: String)
     /// Merge requires its two blocks placed adjacently in one container.
     case blocksNotAdjacent(first: String, second: String)
+    /// The merge ceremony (13b Stage 4, S4-23): the merged block must be
+    /// born with at least one take — ≥1 pairing or ≥1 carry (I10 at
+    /// confirm; the sheet gates the same state with honest copy, this is
+    /// the belt behind it).
+    case mergedBlockWouldHaveNoTake(first: String, second: String)
+    /// The merge ceremony's pairing arity, v1 (PROVISIONAL — 1:1 by
+    /// construction): each take participates in at most ONE pairing, and a
+    /// paired take cannot also be carried. "Pairing is choosing by hand."
+    case takePairedTwice(variantID: String)
     /// poolDragCopy's source must live in a pool.
     case blockNotInPool(id: String)
     /// A live block whose slot resolves to no live variant — unreachable
