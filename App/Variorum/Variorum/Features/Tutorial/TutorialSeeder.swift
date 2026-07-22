@@ -703,15 +703,26 @@ enum TutorialSeeder {
             + "the post in the full editor; its \u{25B8} expands it in place, "
             + "right here.",
 
-            "The Book \u{B7} Read toggle at the top switches to the reading flow: "
-            + "the whole book as one calm, continuous page. A finished book "
-            + "opens there by itself.",
+            // 13b 4F (S4-9): the three view modes + the progress bar.
+            "Three views of a book share the toggle at the top. BOOK is this "
+            + "scroll — a progress bar at the bottom shows where you are, "
+            + "post by post. PAGES flips through the book like a paged "
+            + "reader: each page is one post, however long (scroll within "
+            + "it), and the bottom bar flips forward and back or scrubs "
+            + "straight to a page. READ is the reading flow: the whole book "
+            + "as one calm, continuous page. A finished book opens there by "
+            + "itself.",
 
+            // 13b 4F (N36/N37): the per-post target + the restore door.
             "Books can be FINISHED (right-click the book on the shelf \u{25B8} "
             + "Length & Extent\u{2026}, or the \u{2713} finished face): finishing freezes "
             + "membership and order, reversibly. A book can also carry a word "
             + "target — this one wears one, so its shelf row shows progress. "
-            + "Targets are a measure, never a wall.",
+            + "A single post can wear its own target too: click the word "
+            + "counts in the editor's bottom bar. Targets are a measure, "
+            + "never a wall. And deleting a book is recoverable: Library \u{25B8} "
+            + "Archived & Deleted lists deleted books with a Restore door — "
+            + "chapters and membership come back with it.",
         ])
 
         let scraps = try lesson(library, "pool & scraps", [

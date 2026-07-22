@@ -1684,6 +1684,74 @@ struct TutorialLibraryActsTests {
         }
     }
 
+    /// 13b 4F (S4-9 + N36 + N37): the books lesson's new promises, run on
+    /// the field guide itself — the pages flip the guide's own lessons,
+    /// the per-post target face is real, and a deleted book restores
+    /// WHOLE (the S4-28.2 reversal, exercised on the tutorial book).
+    @Test func pagesFlipTheGuideTargetsAreRealAndTheBookRestoresWhole() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            // The prose promises (P-6: the lesson says it, the app does it).
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "books & the shelf") }
+            let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
+            #expect(prose.contains("PAGES"), "the lesson teaches the paged view")
+            #expect(prose.contains("progress bar"))
+            #expect(prose.contains("click the word counts"))
+            #expect(prose.contains("Restore door"))
+
+            // PAGES: the page brain flips the guide post by post (the
+            // model-driven domain — the entry list).
+            let model = BookViewModel(session: session, readingID: bookID)
+            model.adopt(try await db.read { [bookID] in
+                try Queries.assembleReading($0, readingID: bookID, limit: 300)
+            })
+            #expect(model.currentPage != nil)
+            let total = model.entries.count
+            model.openPage(total - 1)
+            #expect(model.currentPage?.postID == model.entries.last?.postID,
+                    "the scrub reaches the last page")
+            model.flipPage(by: 1)
+            #expect(model.pagedIndex == total - 1, "the last cover clamps")
+            model.openPage(post: lesson)
+            #expect(model.currentPage?.postID == lesson, "the navigator jumps to a page")
+
+            // The per-post word target on the lesson's own post: set,
+            // progress computes, clear (display only — the lesson's words:
+            // a measure, never a wall).
+            try session.operations.setPostWordTarget(lesson, wordTarget: 500)
+            let header = try await db.read { try Queries.containerHeader($0, containerID: lesson) }
+            #expect(header?.wordTarget == 500)
+            try session.operations.setPostWordTarget(lesson, wordTarget: nil)
+
+            // The RESTORE door, on the field guide itself: delete the
+            // whole book, restore it — chapters, memberships, and
+            // assignments come back exactly (the exact-stamp rule).
+            let before = try await db.read { [bookID] db in
+                (sections: try Queries.readingSections(db, readingID: bookID).map(\.id),
+                 entries: try Queries.assembleReading(db, readingID: bookID).map(\.postID),
+                 assignments: try Queries.sectionAssignments(db, readingID: bookID))
+            }
+            try session.operations.deleteReading(bookID)
+            let deadGuide: Reading? = try await db.read { [bookID] in
+                try Queries.reading($0, id: bookID)
+            }
+            #expect(deadGuide == nil)
+            let listedDeleted: [String] = try await db.read {
+                try Queries.deletedReadings($0).map(\.id)
+            }
+            #expect(listedDeleted == [bookID],
+                    "the recovery surface lists the deleted guide")
+            try session.operations.restoreReading(bookID)
+            let after = try await db.read { [bookID] db in
+                (sections: try Queries.readingSections(db, readingID: bookID).map(\.id),
+                 entries: try Queries.assembleReading(db, readingID: bookID).map(\.postID),
+                 assignments: try Queries.sectionAssignments(db, readingID: bookID))
+            }
+            #expect(after.sections == before.sections, "all six chapters back, in order")
+            #expect(after.entries == before.entries, "every lesson back, in order")
+            #expect(after.assignments == before.assignments, "every chapter assignment back")
+        }
+    }
+
     @Test func scrapsDragCopyOutAndTheFanRidesWithOption() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "pool & scraps") }
