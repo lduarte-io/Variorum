@@ -7504,8 +7504,17 @@ before and after; `integrity_check` ok).
 
 **TWO THINGS DID NOT COMPLETE — both on the author's checklist:**
 
-- **The field-guide re-seed did NOT run.** The tutorial in her real
-  store is **six lesson-prose revisions stale** (4A's cut lessons, 4B's
+- **The field-guide re-seed — RAN 2026-07-22 (post-closeout, on her
+  go-ahead once she confirmed the app opens).** Help ▸ Restore
+  Tutorial… → Replace, via the app's own door; verified by the store
+  (old guide `423C671D…` tombstoned; fresh guide `CEF73570…` with 6
+  chapters / 21 memberships / 22 tagged / the scraps pool; zero
+  journal-shaped rows; her 49 containers / 3 readings untouched;
+  integrity ok; a fresh backup `…-230128` taken first). The paragraph
+  below is kept as the closeout-time record — it was true AT the
+  closeout; the re-seed followed her later message. *(Original
+  closeout-time note:)* The tutorial in her real store was **six
+  lesson-prose revisions stale** (4A's cut lessons, 4B's
   merge lesson, 4C's four, 4D's seven, 4E's canvas half, 4F's books).
   Deliberately left to her: Help ▸ Restore Tutorial… is a
   confirm-gated DESTRUCTIVE door whose Replace press is a human act by

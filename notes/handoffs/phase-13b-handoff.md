@@ -29,15 +29,16 @@ here depends on the sessions that did the work (three of which are gone).
   `cd Spikes/AuthPairingSpike && python3 -m http.server 3000` (the
   standing 9c residual). *Your Fragments bridge was unaffected — it has
   its own session and was working today.*
-- [ ] **3. Re-seed the field guide** — Help ▸ **Restore Tutorial…**, then
-  press Replace. The tutorial is **six lesson-prose revisions stale** and
-  currently teaches superseded behavior (the old cut rule, no merge
-  ceremony, the retired Outline tab). I deliberately left the press to
-  you: it is a confirm-gated destructive door, the precedent in both
-  prior records is that you press it, and my GUI automation wasn't
-  yielding. **Your backup is already on disk** —
-  `variorum-backup-2026-07-22-203034.sqlite`, integrity-checked, in the
-  store's own `Backups/`.
+- [x] **3. Re-seed the field guide — DONE 2026-07-22** (you authorized
+  it after confirming the app opens). Ran Help ▸ Restore Tutorial… and
+  pressed Replace via the app's own door; verified by the store: the old
+  field guide (`423C671D…`) is tombstoned and a fresh one
+  (`CEF73570…`, created just now) carries all 6 chapters, 21 memberships,
+  22 tagged posts, and the scraps pool; zero journal-shaped rows (R57);
+  your 49 containers / 3 readings untouched; `integrity_check` ok. A
+  fresh backup was taken first (`variorum-backup-2026-07-22-230128.sqlite`,
+  beside the earlier `…-203034`). The instance I launched to do it is
+  still open on the fresh tutorial — quit it whenever.
 - [ ] **4. When your Fable credits reset: `/architect-phase 13c`.**
   The plan is written and complete. Two obligations open that phase —
   re-reviewing the 76 lines of 13b gate fixes, and reviewing the applied
