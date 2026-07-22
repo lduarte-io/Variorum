@@ -7138,3 +7138,164 @@ screenshots (the machine is idle by the author's word). Everything
 lands in a "gate execution record" section. THEN round 3 (a fresh cold
 reviewer) reviews the gate fixes per the re-opened ladder; the deploy →
 Release → `/Applications` → re-seed chain stays HELD behind round 3.
+
+## Stage 4 ladder — round 3 (VERBATIM record; scoped cold reviewer over the three gate-fix commits `e5b8221`/`16e5fcb`/`2e60d0d`; the author asked for this review explicitly. ROUND 3 IS THE CAP — fixes land post-cap per the standing pattern, no round 4)
+
+*Cast note: the author's Fable allocation was exhausted mid-gate, so
+this round ran on OPUS under CLAUDE.md's pre-agreed contingency (the
+Opus-reviewer fallback with the hardened REVIEW_PROMPT when the Fable
+budget ends). The reviewer re-ran the full Mac suite itself: 645/122
+GREEN, TEST SUCCEEDED.*
+
+**Verdict shape: ZERO BLOCKER · 1 MAJOR (documentation completeness —
+the orchestrator's own) · 6 MINOR · 2 NIT.**
+
+**[MAJOR] · the plan file, "The stage-close gate — first execution" ·
+the gate execution record the routing mandated DOES NOT EXIST; four of
+its five deliverables are undischarged AND unrecorded, so the plan tells
+a fresh session only that the gate FAILED.** Evidence: the plan file's
+last commit is `72a4c49`; `git diff --name-only 72a4c49..2e60d0d`
+returns three `App/` files only. Missing: the count decomposition; the
+green re-run (the reviewer ran it); every recorded revert-red procedure
+("the six batches' + round 1's three") — no evidence of execution
+anywhere in the repo; the visual loop. The ladder's own "every finding
+gets a written disposition" is unmet for the three gate findings. This
+is exactly CLAUDE.md's completeness bar — the gate's state is currently
+answerable only from the dead gate session's context.
+
+**[MINOR-A] · same section · the recorded 645-vs-648 hypothesis is
+FALSIFIABLE, and the answer is available now.** Counted in
+`App/Variorum/VariorumTests/`: **645 `@Test` declarations** (5 of them
+parameterized), and the runner reports **645 tests**. The equality
+proves the top-line counts test FUNCTIONS, not cases — if
+parameterization inflated the count it would sit ABOVE 645, not below.
+So 648 was an arithmetic ACCUMULATION ERROR across the batch records
+(the fix pass's 646→648 included), not three missing or dropped tests.
+(Suites: 120 `@Suite` declarations vs 122 reported — two implicit
+suites from bare `@Test`-bearing structs.)
+
+**[MINOR-B] · `CompareModels.swift:101-125` (fix 1) · the new flush's
+own stated promise is not what it does in the configuration the fix
+newly creates, and nothing pins it.** The comment says a kin-less
+peer's run "packs side by side in the next segment that genuinely
+bounds [it]" — it does not, because the ANCHOR still flushes
+unconditionally at every aligned row while the peer does not. Traced
+with a standalone harness (anchor `[A,B,C]`, peer0 `[P1x, C1']` kin C,
+peer1 `[B2']` kin B): pre-fix 3 segments `free[A|P1x|—] · aligned(B) ·
+aligned(C)`; post-fix 4 segments `free[A|—|—] · aligned(B) ·
+free[—|P1x|—] · aligned(C)` — two of them single-column. Material that
+shared one packed segment is now split into two sparse ones. The only
+multi-peer pin has empty pending-anchor material at both aligned rows,
+so it cannot discriminate this case either way.
+
+**[MINOR-C] · `CompareModels.swift:115-144` (fix 1) · a peer with NO
+kinship at all now renders its entire post below every aligned row — an
+unrecorded, unpinned product-flavored choice made inside a fix commit.**
+Traced (anchor `[A,B]`, peer0 `[U1,U2]` zero kinship, peer1 `[A'']` kin
+A): post-fix packs tighter (3 rows vs 4) so it is not obviously wrong,
+but the unrelated column's content now begins AFTER every aligned row —
+scaled to a 20-block anchor fully kin to peer1, column 3 reads blank
+for twenty rows. Against the file header's own honesty rule, which the
+record states only for the whole-board case and leaves undefined for
+the mixed multi-peer case.
+
+**[MINOR-D] · `PaneSurface.swift:433-470` (fix 2) · the heal closes two
+INSTANCES of the hole, not the CLASS — on the one component every pane
+composes (P-3).** The write path is unchanged (the runtime "Modifying
+state during view update" warning still fires); a third publish added
+to this coordinator later inherits the hole silently with no compiler
+or test signal. Fix (hardening): route every publish through one
+`publish(_:)` helper that owns the deferral, or move height/canary onto
+a coordinator-owned `@Observable`.
+
+**[MINOR-E] · `PaneSurface.swift:460-470` (fix 2) · the heal is a
+single UNVERIFIED retry, not a convergence.** `scheduleHealPublish`
+publishes once on the next main-queue turn and never checks the
+outcome; `healScheduled` is already false, so nothing re-schedules. If
+that publish is itself dropped the pane is stuck exactly as the bug
+describes, and only a 2-seed randomized soak would notice. (The trigger
+for a second drop is SPECULATIVE; the missing convergence check is
+not.)
+
+**[MINOR-F] · `PaneSurface.swift:407-412` (fix 2) · the canary echo
+double-publishes on every fire** and is the one publish in the file
+without the coalescing its sibling just gained — idempotent, so no
+wrong behavior, but redundant and inconsistent within one commit.
+
+**[NIT-A] · `PaneSurface.swift:433-455` · the heal doubles
+`PaneMeasurement.height(of:)` per `remeasure()`** (two
+`ensureLayout(for: documentRange)` passes) and `remeasure()` fires per
+keystroke. **Verified P1-SAFE, not a violation** — every composer
+passes a single take's text so layout is block-scale by construction,
+and the full-document editor uses its own untouched coordinator. Worth
+one line in the file's measurement-discipline header.
+
+**[NIT-B] · `CanvasAndPoolTests.swift:374` (fix 3) · the pin edit is
+correct; the trap it dodges is still unguarded for the next author.**
+Root cause reproduced outside the repo (`AnyHashable(CGFloat(460)) ==
+AnyHashable(460)` is false; the Double twin is true); the class sweep
+holds. The reviewer additionally swept the INVERSE hole — `#expect(a !=
+b)` across mismatched numeric types is silently TRUE and would be a
+hollow pin — and found it clean.
+
+**Clean bill (round 3, abridged):** the suite genuinely green by the
+reviewer's own run (645/122, TEST SUCCEEDED — the three gate failures
+gone); core untouched and the Sync rider respected (empty diff over
+`Sources/`, `Sync/` untouched); no store/schema/operations exposure (all
+three commits App-side; `CompareComposition` is a `nonisolated enum` of
+pure functions; S1–S5, I1–I10, and the §12 lockstep untouched, v1_12
+deploy state unchanged); **fix 1's "the failing pin was right" verdict
+CONFIRMED** (pre-fix output reproduces the gate record's captured
+sequence exactly; post-fix equals the pin's expectation); **fix 1's
+"single-peer byte-identical by construction" claim HOLDS** (re-derived
+by hand AND by harness against all five composition pins); fix 2's
+no-loop claim verified at the trigger set (width-gated hook; remeasure
+triggers enumerated); fix 2's lifetime handling safe (`uninstall()`
+nils the closures; `[weak self]` + `guard let view`; coalescing cannot
+publish a stale-width height); fix 2's sibling-publisher audit accurate
+(blast radius bounded to take-scale panes); fix 3 introduces NO
+tolerance (geometry re-derived independently; exact equality preserved,
+so the pin still discriminates a real regression).
+
+### Stage 4 ladder — round 3 dispositions (the architect's routing, recorded before any fix session)
+
+**[MAJOR] — AGREED; the ORCHESTRATOR'S OWN to discharge.** The gate
+execution record is written as part of this closeout (it is the
+finding's own fix), carrying: the three traces, the CORRECTED count
+decomposition, the green re-run, the revert-red execution results, and
+the visual-loop disposition. **Correction of scope, recorded honestly:**
+the visual loop is NO LONGER a gate deliverable — the author extracted
+the visual/design/UI review from this phase entirely at the closeout
+(2026-07-22), into a standalone re-runnable master-plan row. The gate's
+visual half is therefore DISCHARGED BY REASSIGNMENT, not by execution,
+and the record says so plainly.
+
+**[MINOR-A] — AGREED, and the orchestrator's own earlier hypothesis is
+FALSIFIED on the record.** The reviewer's empirical decomposition
+(645 declarations == 645 reported; parameterization would push the
+count UP, not down) supersedes the "parameterized soaks were
+double-counted" reading the gate-failure section carried and the
+orchestrator repeated to the author. The gate execution record states
+the corrected decomposition; the author was told directly.
+
+**[MINOR-B] + [MINOR-C] → the post-cap fix session.** Both concern
+Compare's segment placement — new, product-flavored, and UNPINNED,
+on a surface the author is about to see for the first time. B: state
+the anchor asymmetry honestly (the reviewer's own judgement is that the
+BEHAVIOR is defensible — the anchor genuinely IS bounded by every
+aligned row — and the PROMISE is what is wrong) and pin the traced
+configuration. C: record the zero-kinship placement as a PROVISIONAL in
+the 4C section and pin it. Both get the traced inputs as their pins.
+
+**[MINOR-D] + [MINOR-E] + [MINOR-F] → the post-cap fix session
+(PaneSurface hardening, one commit).** The class-level fix (one
+`publish` helper owning the deferral) subsumes F, and E's convergence
+check rides it: measure-and-compare, re-schedule while short, bounded.
+Highest blast radius in the app — worth the structural shape rather
+than two hand-added repairs.
+
+**[NIT-A] + [NIT-B] → the same session** (one header line; the
+CGFloat/AnyHashable trap recorded where the next author meets it).
+
+**No round 4** — round 3 is the ladder's cap; these fixes land post-cap
+per the standing pattern (the Phase 9 / 11a / 13 precedent).
