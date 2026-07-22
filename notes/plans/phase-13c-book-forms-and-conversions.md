@@ -41,15 +41,35 @@ is the constitution splice, the real baselines, and the notes below.
 
 ## First acts at phase start (before any batch)
 
-1. **Re-review the 13b gate fixes — 76 lines, three commits
-   (`e5b8221`, `16e5fcb`, `2e60d0d`).** The author asked for this
-   explicitly: the work is important and landed at the very end of 13b
-   under model-exhaustion conditions. `16e5fcb` in particular modifies
-   `Surface/PaneSurface.swift` — the ONE text surface every pane in the
-   app composes (P-3) — so its blast radius is the editor, takes,
-   lenses, compare, canvas, and the read tier alike. A ladder round-3
-   cold review ran over it at 13b's close (verdict in the 13b plan
-   file); this is a SECOND look with fresh eyes, not a repeat.
+1. **Re-review the 13b gate fixes AND THE TWO DEFECTS THEY CORRECTED —
+   76 lines, three commits (`e5b8221`, `16e5fcb`, `2e60d0d`), plus the
+   round-3 post-cap hardening (`120c418`).** The author asked for this
+   explicitly (2026-07-22): "look over the defects and the fixes." These
+   were REAL bugs found when the stage-close gate ran tests that a
+   locked login session had only ever compiled — not cosmetic. The two
+   defects, so you know what you're re-checking:
+   - **The mid-view-update `@State` height drop** (`16e5fcb`, hardened
+     in `120c418`): `PaneSurface`'s `remeasure()` could publish a height
+     through a SwiftUI `Binding` *during* an update pass, which SwiftUI
+     silently drops — leaving a compare pane framed one line tall under
+     two lines of text with nothing left to re-publish. `PaneSurface` is
+     **the ONE text surface every pane composes** (P-3), so this reaches
+     the editor, takes, lenses, compare, canvas, and the read tier
+     alike. The fix routes every publish through one `PanePublisher`
+     door with a bounded convergence heal; the first cut patched two
+     instances, and `120c418` made it structural (that history is the
+     round-3 record). **Confirm the class is truly closed** — a publish
+     added later must inherit the discipline, not need its own repair.
+   - **The multi-peer Compare flush** (`e5b8221`): `CompareComposition`
+     force-flushed one peer's unrelated blocks into a sparse segment —
+     the gap parade N29 exists to kill, at segment scale. The failing
+     test was the correct pin. Two placement behaviors it left are
+     recorded below (the kin-less-peer question) and are a live design
+     item this phase — read them together with the fix.
+   A ladder round-3 cold review already ran over these at 13b's close
+   (verdict + traces in the 13b plan file's round-3 sections); this is a
+   SECOND look with fresh eyes on code that landed under model
+   exhaustion, not a repeat for its own sake.
 2. **Review the applied canon deltas.** 13b's closeout wrote real
    semantic changes into the canonical docs — the merge-pairing
    extension (AppSpec §9 + OverallModel §7), the cut rule + parking
@@ -110,6 +130,25 @@ is the constitution splice, the real baselines, and the notes below.
    overlay cannot reserve vertical space in TK2; the uniform gap is
    the honest mechanism) — if it still bothers her in use, this is an
    R116 design-memo conversation at the sitting, not a patch.
+4. **Compare — a "show related blocks only" setting** *(author request
+   2026-07-22, at the 13b closeout — verbatim: "we should have a
+   setting to only show related blocks - that would make the pane feel
+   more usable")*. A per-view toggle (session/view-local, the
+   follow-order/lineage-colour toggle class from 4C — no schema) that
+   collapses each column to only the blocks with lineage kinship to the
+   anchor, hiding the unrelated stretches. **This RESOLVES the 4C
+   kin-less-peer PROVISIONAL directly** (13b plan, Batch 4C judgment
+   call 0 — a peer with no kinship renders its whole post below every
+   aligned row): with the setting on, an unrelated peer simply shows
+   nothing, and a partly-related one shows only its kin rows. Her call
+   at the kickoff: whether "off" keeps today's shipped placement (the
+   PROVISIONAL as-is) or the placement itself changes — the setting may
+   make the placement question moot. Design detail (the empty-column
+   affordance, whether "related" means direct `derived_from`/`version_of`
+   or the transitive lineage the alignment already computes) is the
+   kickoff's; it composes with the honesty line (N29) — an all-unrelated
+   pair with the setting on says "there is no relationship here" over
+   two empty columns.
 
 ## What deliberately did NOT come here (author's decision, 2026-07-22 — the largest Opus divergence from the Fable draft)
 
