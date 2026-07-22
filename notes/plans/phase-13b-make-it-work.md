@@ -5295,3 +5295,23 @@ into divide.
 - 4B (merge ceremony) inherits the parking precedent: the pairing
   op's result shape should mirror `sourceVariantIDs` (correspondence
   arrays over positional promises).
+
+### Orchestrator regime note (post-4A, 2026-07-22 overnight — the LOCKED-SESSION regime; binding for the remaining batches until the first unlock)
+
+The machine auto-locked despite the addendum's open-machine intent
+(`CGSSessionScreenIsLocked = 1`, orchestrator-reverified; the Mac test
+runner hangs pre-connection under it — 4A's control-suite-verified
+finding; nothing in the diff). Nobody unlocks it — credentials are hers,
+a standing hard stop. The regime: batches CONTINUE (her rider: continue
+unless building the wrong thing — designs are ruled; only verification
+is deferred). Per batch while locked: core `swift test` runs normally;
+app halves compile-gate via `xcodebuild build-for-testing`; Mac suite
+EXECUTION, app-side behavioral-revert reds, the visual loop, and the
+`/Applications` refresh are carried PENDING with EXACT procedures in the
+batch record (the 4A record's form). The orchestrator holds an UNLOCK
+WATCHER; at the first unlocked window the consolidated set runs: ONE
+full Mac suite (cumulative — it discharges every pending batch's suite
+run at once), then each batch's recorded revert-red procedures, then the
+withheld refresh (post-4F: behind the pre-authorized v1_12 deploy,
+mirror first). Orchestrator spot-checks at 4A close: core 781/92
+re-run GREEN independently; commits/record/ledger verified present.
