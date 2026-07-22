@@ -34,6 +34,9 @@ struct ScrapsPanel: View {
     @State private var model: PoolViewModel
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// 13b 4D (N32(c) — S4-15): the panel rows' TAG door, registry-walked.
+    static let surfaceCapabilities: [CapabilityID] = [.tagBlock]
+    @State private var tagSheetBlock: CanvasView.TagSheetBlock?
 
     init(session: AppSession) {
         self.session = session
@@ -97,6 +100,10 @@ struct ScrapsPanel: View {
         .padding(10)
         .background(tokens.surface)
         .task { await model.start() }
+        .sheet(item: $tagSheetBlock) { target in
+            BlockTagAssignmentSheet(
+                session: session, blockID: target.id, preview: target.preview)
+        }
     }
 
     private func scrapRow(_ item: Queries.PoolItem) -> some View {
@@ -123,7 +130,16 @@ struct ScrapsPanel: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .onDrag { PoolViewModel.dragProvider(blockID: item.block.blockID) }
-        .help("Drag into the page — a copy with lineage; ⌥ carries the whole fan")
+        // 13b 4D (N32(c) — S4-15): the tag door on the panel rows too —
+        // the same sheet as the Blocks area and the canvas card.
+        .contextMenu {
+            Button("Tags…") {
+                tagSheetBlock = CanvasView.TagSheetBlock(
+                    id: item.block.blockID, preview: item.block.text)
+            }
+        }
+        .help("Drag into the page — a copy with lineage; ⌥ carries the whole fan; "
+            + "right-click to tag")
     }
 
     private func preview(_ item: Queries.PoolItem) -> String {

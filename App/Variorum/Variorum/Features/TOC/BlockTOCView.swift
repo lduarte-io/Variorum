@@ -179,6 +179,39 @@ final class BlockTOCViewModel {
         await run { ops in try ops.reorder(blockID, to: target) }
     }
 
+    /// 13b 4D (N39, her ask verbatim: "type in what number block you want
+    /// it to be out of the total post, or move to top or move to bottom,
+    /// so you don't only have to drag it"): a positional move — the block
+    /// becomes #target of the post (1-based, clamped to the live count).
+    /// ONE ordinary `reorder` op (⌥⌘Z undoes — the op registers its own
+    /// inverse); position math over the OTHER rows' order, so "make me
+    /// #k" reads exactly as a human counts.
+    func move(blockID: String, toOrdinal target: Int) async {
+        guard rows.contains(where: { $0.blockID == blockID }) else { return }
+        let others = rows.filter { $0.blockID != blockID }
+        let clamped = min(max(target, 1), rows.count)
+        let insert: Operations.InsertPosition =
+            clamped - 1 >= others.count ? .end : .before(others[clamped - 1].blockID)
+        // Already there? Speak the no-op honestly instead of writing rows.
+        if let current = rows.firstIndex(where: { $0.blockID == blockID }),
+           current + 1 == clamped {
+            statusMessage = "Already block \(clamped) of \(rows.count)."
+            return
+        }
+        await run { ops in try ops.reorder(blockID, to: insert) }
+        if statusMessage == nil {
+            statusMessage = "Moved — now block \(clamped) of \(rows.count) (⌥⌘Z undoes)."
+        }
+    }
+
+    func moveToTop(_ blockID: String) async {
+        await move(blockID: blockID, toOrdinal: 1)
+    }
+
+    func moveToBottom(_ blockID: String) async {
+        await move(blockID: blockID, toOrdinal: rows.count)
+    }
+
     func deleteBlock(_ blockID: String) async {
         await run { ops in try ops.deleteBlock(blockID) }
     }
@@ -189,8 +222,23 @@ final class BlockTOCViewModel {
         await run { ops in try ops.restoreBlock(blockID) }
     }
 
-    func moveToPool(_ blockID: String, poolID: String) async {
+    /// 13b 4D (N32(a), her confusion answered in the UI): move-to-pool is
+    /// `moveBlock` — the block LEAVES the post (I2: one home per block; its
+    /// takes go with it) and becomes a scrap there. The completion SPEAKS
+    /// the consequence and the road back.
+    func moveToPool(_ blockID: String, poolID: String, poolTitle: String? = nil) async {
         await run { ops in try ops.moveBlock(blockID, to: poolID, at: .end) }
+        if statusMessage == nil {
+            let name = (poolTitle?.isEmpty == false) ? "\u{201C}\(poolTitle!)\u{201D}" : "the pool"
+            statusMessage = "Moved to \(name) — the block LEFT this post (a block lives in "
+                + "one place; its takes went with it). Find it in Blocks; ⌥⌘Z brings it back."
+        }
+    }
+
+    /// The view's speaking surface (fire-and-speak — a malformed position
+    /// entry gets words, never silence).
+    func speak(_ message: String) {
+        statusMessage = message
     }
 
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
@@ -213,6 +261,9 @@ struct BlockTOCView: View {
     @State private var model: BlockTOCViewModel
     @State private var renameTarget: Queries.TOCRow?
     @State private var renameText = ""
+    /// 13b 4D (N39): the typed-position prompt's target + entry.
+    @State private var moveTarget: Queries.TOCRow?
+    @State private var moveOrdinalText = ""
 
     init(
         session: AppSession, postID: String,
@@ -258,6 +309,28 @@ struct BlockTOCView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+        // 13b 4D (N39): "what number block you want it to be out of the
+        // total post" — a typed position, clamped; non-numbers speak.
+        .alert(
+            "Move to block # (of \(model.rows.count))",
+            isPresented: Binding(
+                get: { moveTarget != nil },
+                set: { if !$0 { moveTarget = nil } }),
+            presenting: moveTarget
+        ) { row in
+            TextField("Position (1–\(model.rows.count))", text: $moveOrdinalText)
+            Button("Move") {
+                let raw = moveOrdinalText.trimmingCharacters(in: .whitespaces)
+                Task {
+                    if let target = Int(raw) {
+                        await model.move(blockID: row.blockID, toOrdinal: target)
+                    } else {
+                        model.speak("\u{201C}\(raw)\u{201D} isn't a position number — type 1 to \(model.rows.count).")
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
     }
 
     @ViewBuilder
@@ -296,10 +369,32 @@ struct BlockTOCView: View {
                         renameTarget = row
                     }
                     Button("Jump to block") { onJump?(row.blockID) }
-                    Menu("Move to pool") {
+                    Divider()
+                    // 13b 4D (N39): long-distance moves without dragging —
+                    // top / bottom / a typed position number.
+                    Button("Move to top") {
+                        Task { await model.moveToTop(row.blockID) }
+                    }
+                    .disabled(ordinal == 1)
+                    Button("Move to bottom") {
+                        Task { await model.moveToBottom(row.blockID) }
+                    }
+                    .disabled(ordinal == model.rows.count)
+                    Button("Move to block #…") {
+                        moveOrdinalText = "\(ordinal)"
+                        moveTarget = row
+                    }
+                    Divider()
+                    // 13b 4D (N32(a)): the honest title — it MOVES the
+                    // block out of this post (I2), never a copy.
+                    Menu("Move out to a pool (leaves this post)") {
                         ForEach(model.pools, id: \.id) { pool in
                             Button(pool.title ?? "Untitled pool") {
-                                Task { await model.moveToPool(row.blockID, poolID: pool.id) }
+                                Task {
+                                    await model.moveToPool(
+                                        row.blockID, poolID: pool.id,
+                                        poolTitle: pool.title)
+                                }
                             }
                         }
                     }

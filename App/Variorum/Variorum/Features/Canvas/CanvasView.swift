@@ -273,6 +273,10 @@ struct CanvasView: View {
     @State private var model: CanvasViewModel
     @State private var lensPromptShown = false
 
+    /// 13b 4D (N32(c) — S4-15): the card's "Tags…" — app-wide it was the
+    /// ONE tag door; now registry-declared with its scrap-row siblings.
+    static let surfaceCapabilities: [CapabilityID] = [.tagBlock]
+
     init(
         session: AppSession, containerID: String, offersLensSave: Bool = true,
         model: CanvasViewModel? = nil
@@ -308,15 +312,22 @@ struct CanvasView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Picker("Filter", selection: Binding(
+                // 13b 4D (N32(b) — S4-8b, her "pools are by the tag, I see
+                // now. It's a little confusing"): the picker NAMES itself a
+                // tag filter and its help de-blurs the model — this is a
+                // LABEL filter, never a container switch.
+                Picker("Tag filter", selection: Binding(
                     get: { model.filterTagID },
                     set: { tagID in Task { await model.applyFilter(tagID: tagID) } })) {
-                    Text("All scraps").tag(String?.none)
+                    Text("tag filter: all").tag(String?.none)
                     ForEach(model.allTags, id: \.id) { tag in
-                        Text(tag.path).tag(String?.some(tag.id))
+                        Text("#\(tag.path)").tag(String?.some(tag.id))
                     }
                 }
                 .fixedSize()
+                .help("Show only cards wearing a tag — a LABEL filter, not a pool: "
+                    + "pools are containers (a block lives in exactly one); tags are "
+                    + "labels (a block can wear many). Every card stays where it lives.")
                 Spacer()
                 if offersLensSave, !model.viewPicks.isEmpty {
                     // R88: the canvas's picks are a lens-shaped arrangement

@@ -24,6 +24,10 @@ struct BlocksAreaView: View {
     /// Opens the scraps container in the detail editor.
     var openPool: (String) -> Void
 
+    /// 13b 4D (N32(c) — S4-15): the scrap rows' TAG door, registry-walked
+    /// (`.surface` — the target is the row itself).
+    static let surfaceCapabilities: [CapabilityID] = [.tagBlock]
+
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @State private var importer: ImportModel?
@@ -31,6 +35,8 @@ struct BlocksAreaView: View {
     @State private var cursorOn = true
     @FocusState private var entryFocused: Bool
     @State private var lastError: String?
+    /// The tag sheet's target (the canvas card's exact idiom).
+    @State private var tagSheetBlock: CanvasView.TagSheetBlock?
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -67,6 +73,10 @@ struct BlocksAreaView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
+        .sheet(item: $tagSheetBlock) { target in
+            BlockTagAssignmentSheet(
+                session: session, blockID: target.id, preview: target.preview)
+        }
     }
 
     private var header: some View {
@@ -89,7 +99,10 @@ struct BlocksAreaView: View {
                         Button(PoolNaming.title(pool)) { model.select(poolID: pool.id) }
                     }
                 }
-                .help("Which scraps container this area shows — every pool is here")
+                // 13b 4D (N32(b)): pools-vs-tags, said plainly at the door.
+                .help("Which pool this area shows. Pools are CONTAINERS — a scrap "
+                    + "lives in exactly one; tags are LABELS — a scrap can wear many. "
+                    + "Right-click a scrap to tag it.")
             }
             Spacer()
             if let pool = model.activePool {
@@ -123,8 +136,18 @@ struct BlocksAreaView: View {
         .onTapGesture {
             if let pool = model.activePool { openPool(pool.id) }
         }
+        // 13b 4D (N32(c) — S4-15, her scraps vision: "each scrap is an
+        // individual item - one that can have tags added to it"): the tag
+        // door, right on the row (the canvas card's exact sheet).
+        .contextMenu {
+            Button("Tags…") {
+                tagSheetBlock = CanvasView.TagSheetBlock(
+                    id: item.block.blockID, preview: item.block.text)
+            }
+        }
         .help("Drag into an open editor to copy it in (⌥ carries the whole fan); "
-            + "click to open the Blocks editor")
+            + "click to open the Blocks editor; right-click to tag "
+            + "(tags are labels — the pool it lives in is its container)")
     }
 
     /// The standalone-block entry (the quick-entry idiom, block-flavored):

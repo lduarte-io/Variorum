@@ -130,6 +130,67 @@ struct BlockTOCTests {
         }
     }
 
+    /// 13b 4D (N39, her ask): positional moves — a typed target position
+    /// plus top/bottom doors, all ONE ordinary `reorder` per move (⌥⌘Z
+    /// undoes via the op's own inverse). Position math reads as a human
+    /// counts: "make me block #k of the post".
+    @Test func positionalMovesLandTheBlockAtTheTypedOrdinal() async throws {
+        try await withWorld { session, db in
+            let (postID, blocks) = try await session.runner.run { ops -> (String, [String]) in
+                let post = try ops.createPost(title: "post", profile: .blog)
+                var ids: [String] = []
+                for i in 1...4 {
+                    ids.append(try ops.newBlock(in: post.id, text: "Block \(i).", at: .end).block.id)
+                }
+                return (post.id, ids)
+            }
+            let model = BlockTOCViewModel(session: session, postID: postID)
+            @MainActor func reload() async throws {
+                model.adopt(rows: try await db.read { try Queries.blockTOC($0, post: postID) })
+            }
+            @MainActor func order() async throws -> [String] {
+                try await db.read { try Queries.renderPost($0, containerID: postID).map(\.blockID) }
+            }
+            try await reload()
+
+            // #4 → #2 (a long-distance move without dragging).
+            await model.move(blockID: blocks[3], toOrdinal: 2)
+            #expect(try await order() == [blocks[0], blocks[3], blocks[1], blocks[2]])
+            #expect(model.statusMessage?.contains("block 2 of 4") == true)
+
+            // Move to top / bottom.
+            try await reload()
+            await model.moveToBottom(blocks[0])
+            #expect(try await order() == [blocks[3], blocks[1], blocks[2], blocks[0]])
+            try await reload()
+            await model.moveToTop(blocks[2])
+            #expect(try await order() == [blocks[2], blocks[3], blocks[1], blocks[0]])
+
+            // Out-of-range clamps (her "out of the total post" is the
+            // range); already-there speaks a no-op, writes nothing.
+            try await reload()
+            await model.move(blockID: blocks[2], toOrdinal: 99)
+            #expect(try await order() == [blocks[3], blocks[1], blocks[0], blocks[2]],
+                    "99 clamps to the end")
+            try await reload()
+            let stamp = try await order()
+            await model.move(blockID: blocks[2], toOrdinal: 4)
+            #expect(try await order() == stamp, "already #4 — nothing written")
+            #expect(model.statusMessage?.contains("Already block 4") == true)
+
+            // ⌥⌘Z undoes the last positional move (reorder registers its
+            // own inverse — no new undo machinery).
+            try await reload()
+            await model.move(blockID: blocks[3], toOrdinal: 4)
+            let moved = try await order()
+            let undoStack = session.undoStack
+            _ = try await session.runner.run { ops in
+                try undoStack.undo(with: ops)
+            }
+            #expect(try await order() != moved, "one ⌥⌘Z restores the previous order")
+        }
+    }
+
     @Test func deleteAndTrayRestoreRoundTripThroughTheUIPath() async throws {
         try await withWorld { session, db in
             let (postID, doomed) = try await session.runner.run { ops -> (String, String) in
@@ -183,8 +244,12 @@ struct BlockTOCTests {
             let fresh = BlockTOCViewModel(session: session, postID: postID)
             #expect(fresh.expanded.isEmpty, "collapse state persists NOWHERE in v1")
 
-            await model.moveToPool(blockID, poolID: poolID)
-            #expect(model.statusMessage == nil)
+            // 13b 4D (N32(a) — JUSTIFIED EDIT: the door now SPEAKS its
+            // consequence on success; her S4-8a confusion was exactly a
+            // silent success — the old `== nil` pinned the silence).
+            await model.moveToPool(blockID, poolID: poolID, poolTitle: "scraps")
+            #expect(model.statusMessage?.contains("LEFT this post") == true,
+                    "the move speaks the I2 consequence and the road back")
             let pool = try await db.read { try Queries.poolListing($0, poolID: poolID) }
             #expect(pool.map(\.block.blockID) == [blockID],
                     "move-to-pool is the Phase 2 moveBlock — same block id, new home (I2)")

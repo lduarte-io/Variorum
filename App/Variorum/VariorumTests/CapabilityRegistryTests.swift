@@ -62,9 +62,12 @@ struct CapabilityRegistryTests {
         // tab (R65/R86) — the act is Lenses-scoped by ruling, so Takes
         // parity doesn't apply (Write has no lens door either; no surface
         // is privileged over another).
+        // `.tagBlock` (13b 4D — N32(c)): scraps live OUTSIDE the post-mode
+        // row (Blocks area / ScrapsPanel / canvas cards) — no editing mode
+        // is privileged over another, the renameLens class.
         let exempt: Set<CapabilityID> = [
             .previousBlock, .nextBlock, .callout, .exportCaretBlock, .switchMode,
-            .renameLens,
+            .renameLens, .tagBlock,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {
@@ -130,6 +133,10 @@ struct CapabilityRegistryTests {
     @Test func theSurfacesRenderExactlyTheDeclaredSurfaceActs() {
         let rendered = Set(TakesBoardView.surfaceCapabilities)
             .union(WriteTakesPanel.surfaceCapabilities)
+            // 13b 4D (N32(c)): the scrap tag door's three surfaces.
+            .union(BlocksAreaView.surfaceCapabilities)
+            .union(ScrapsPanel.surfaceCapabilities)
+            .union(CanvasView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

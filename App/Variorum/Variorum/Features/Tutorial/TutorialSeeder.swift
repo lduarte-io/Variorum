@@ -623,10 +623,17 @@ enum TutorialSeeder {
             + "Compare now: an outline is just a related post beside its "
             + "draft — the previous lesson's \u{201C}make outline post\u{201D}.)",
 
+            // 13b 4D (N39 + N32(a)): positional moves + the honest
+            // move-out-to-a-pool consequence, taught where the doors live.
             "BLOCKS (\u{2318}5) is the post as a table of contents: one row per "
             + "block, named where you set names, first sentence where you "
-            + "didn't. Rows reorder with \u{2191} \u{2193}, rename with Name\u{2026}, and a row "
-            + "expands to edit in place — handy in a long post.",
+            + "didn't. Rows reorder with \u{2191} \u{2193} — or skip the dragging: the "
+            + "row's \u{22EF} menu has Move to top, Move to bottom, and Move to "
+            + "block #\u{2026}, where you type the position you want out of the "
+            + "total post. A row expands to edit in place — handy in a long "
+            + "post. Move out to a pool does what it says: the block LEAVES "
+            + "this post and becomes a scrap there (a block lives in one "
+            + "place; \u{2325}\u{2318}Z brings it back).",
 
             "CANVAS (\u{2318}6) scatters the blocks as cards you can drag around — "
             + "arrangement is yours and is remembered, the post's order doesn't "
@@ -714,6 +721,15 @@ enum TutorialSeeder {
             + "line is kept as a standalone block. Drag pieces out as your "
             + "drafts want them — copy out is the only direction, so the pool "
             + "never tangles with your posts.",
+
+            // 13b 4D (N32(b)/(c) — S4-8/S4-15): scraps are individual
+            // items; the pools-vs-tags distinction said plainly.
+            "Each scrap is its own item and can wear TAGS: right-click a "
+            + "scrap row — here, in the side panel, or on a canvas card — "
+            + "and Tags\u{2026} opens its tag sheet. Worth keeping straight: a "
+            + "POOL is a container (a scrap lives in exactly one; moving it "
+            + "moves it), while a TAG is a label (a scrap can wear many, and "
+            + "filtering by tag never moves anything).",
         ])
         _ = scraps
         let scrapPool = try ops.createPool(title: scrapPoolTitle)

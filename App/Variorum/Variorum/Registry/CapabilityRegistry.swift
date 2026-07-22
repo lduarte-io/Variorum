@@ -219,6 +219,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Lenses are renamed from their column header in Lenses (⌘3).",
             availability: { ctx in ctx.mode == .lenses ? .act : .unavailable }),
+        // 13b 4D (N32(c) — S4-15's trace made right): block TAGGING gets
+        // doors where scraps live. `BlockTagAssignmentSheet` (11a A8) was
+        // mounted in EXACTLY ONE place app-wide — the canvas card's menu;
+        // now the Blocks-area rows and the ScrapsPanel rows carry the same
+        // door, all declared as ONE `.surface` act (the target is pointed
+        // at directly — the archived-card class; each surface declares it
+        // in its `surfaceCapabilities` static and the walk asserts).
+        // R118 exemption, recorded: scraps live OUTSIDE the post-mode row
+        // (Blocks area / panel / canvas) — no editing mode is privileged
+        // over another, so the parity table exempts it like `renameLens`.
+        Capability(
+            id: .tagBlock, verb: "Tag Block…", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Tags go on a block where you see it — scrap rows and canvas cards carry the door.",
+            availability: always),
         Capability(
             id: .divergeHere, verb: "Diverge here (new take, this thread)", scope: .take,
             doors: [.contextMenu],
