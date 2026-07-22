@@ -403,9 +403,9 @@ Commits per batch/stage with the standing message convention.
 | N13 | `reading_section` chapters never reach `exportReading` — `assembleReading.sectionPath` rides the smart-book grouping tag only, so a chaptered book exports with no chapter headings (core-frozen this stage; the export lesson deliberately doesn't promise them) | **CORE DONE 3B** (commit 309adc7 — assembleReading resolves chapters for curated books in the BOOK VIEW's grouped order, `sectionID` additive; exportReading emits chapter headings incl. empty chapters + the `## unfiled` trail; smart-book byte-parity pinned; consumer deltas + citations in the 3B record). Existing export doors show chapters with NO face work; the export-lesson prose upgrade + the stale walk-test comment **DONE 3D** (commit 7fea406 — the lesson promises chapters; the comment deleted; every plan chapter asserted as a ## heading on paper); the owed Mac re-run ran at 3C (542/106) and again at 3D+3E close (556/112) |
 | N14 | Doubled fan badge (author, 2026-07-21 03:36, on the 3B build): choose a take in Write's takes panel → "the take button goes up to the top and lays on top of the other take button" (the ⑂ badge); heals on mode-switch remount; "happens in other places too" (screenshot on record) | **RESOLVED 3F** (commit 213a2bb — TRACED: every mount/edit-time overlay refresh runs BEFORE TK2's first layout pass and no trigger ran after it (the only post-layout refreshes were scrolls and the saved-anchor JUMP, which forces layout — exactly why warm models/remounts healed and cold models didn't); the equality gates and the add path were NOT the mechanism. Fixed at the substrate: `EditorTextView.viewWillDraw` → ONE coalesced overlay refresh per storage generation, detail + inline both; the read tier provably safe (ensureLayout-before-read); class enumeration in the 3F record. Pin `aColdFirstMountPlacesEachBadgeAtItsBlock` red-on-revert: badge-y delta 0.0, the collapsed anchor) |
 | N15 | The block bar in book-inline form is cramped — buttons wrap mid-word ("com mit ⌘S", "Divi de"); her suggestion: "it needs 2 rows or something" (screenshot on record) | **RESOLVED 3F** (commits e638c39 + f7684d3 — the class rule: VoicedButtonStyle labels lineLimit(1) app-wide (truncate, never wrap); BOTH status bars (CommitBar incl. book-inline; TakesBottomBar, the same class caught live) adaptive by MEASURED width — her "2 rows or something" below 1080pt, whole labels; ViewThatFits rejected on the record (compressible children defeat its fit test — seen live); screenshot-verified at 980pt, shot 3f-10) |
-| N16 | W ceremony cut-placement (author, same session; (a) RECLASSIFIED by her follow-up): (a) sentence-boundary snapping is ratified, so the "can't move the cut" experience is likely DESIGNED — the trace now VERIFIES the sheet offers EVERY legal interior sentence boundary (a multi-boundary take must be placeable at any of them; only-the-proposed-spot-accepted would still be a bug); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask re-affirmed — "i think the scissors should still be movable" (visual drag). Root-cause treatment demanded ("not whack a mole… it can be its own phase if it needs to be") | **(a) VERIFIED GOOD 3A** — a 3-sentence take offered BOTH interior boundaries as cut-at buttons and the ✂ moved on click (shots 33/34); her experience = the one-boundary case + affordance plainness. (b)/(c) → Batch 3H (memo-first per R116/R120) |
+| N16 | W ceremony cut-placement (author, same session; (a) RECLASSIFIED by her follow-up): (a) sentence-boundary snapping is ratified, so the "can't move the cut" experience is likely DESIGNED — the trace now VERIFIES the sheet offers EVERY legal interior sentence boundary (a multi-boundary take must be placeable at any of them; only-the-proposed-spot-accepted would still be a bug); (b) design ask — edit multiple takes' cuts without clicking into each; (c) design ask re-affirmed — "i think the scissors should still be movable" (visual drag). Root-cause treatment demanded ("not whack a mole… it can be its own phase if it needs to be") | **(a) VERIFIED GOOD 3A** (shots 33/34). **(b)/(c) RESOLVED 4A** (commit 44f7fe9, on core 1e85a99+792decc — the ruled cut redesign built to the RULED W addendum): the sheet shows EVERY checked take's text at once as a word-token flow with a ✂ slot at every legal position — no clicking into takes one at a time (b); the ✂ DRAGS and glides between word edges, click-to-jump survives, keyboard placement ←/→ word · ⌥←/→ sentence · ⇥ takes · ⏎ confirm (c); parking at either end per S4-22; visual drag/looks verification PENDING the next unlocked-session window (screen locked all batch — the 4A record's environment note) |
 | N17 | Merge-after-divide "loses" takes (author, same session): 2-take block → ceremony divide → merge back ⇒ 1 block, 1 take. The stored behavior IS canon (merge joins the visible takes; other takes stay on the released sources in lineage; undo restores — AppSpec §9, OverallModel §7, the merge memo's own section) — but (a) VERIFY the merge toast actually SPOKE in her path, (b) the symmetric round-trip product question (DECISION HERS at the checkpoint), (c) what UI road leads from a merged block to its pre-merge takes | **(a) CLOSED 3A — the toast SPEAKS on both paths** (Takes choreography shot 55; book-inline seam shot 68; mid-block book-inline caret gets the real refusal spoken, 67; likeliest silent-read: the 6 s auto-dismiss). **(c) ANSWERED 3A**: two roads — ⌥⌘Z right away, or Library → ⋯ → Archived & Deleted → "Unplaced blocks" (Place-in-pool door, takes intact; shot 58) — road exists, nothing points at it; the 3H memo addendum weighs naming it in the toast and/or a lineage door on the merged block. (b) → end checkpoint |
-| N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46) | **PROSE HALF DONE 3F** (commit a78326f — the lesson promises sentence-boundary starts and says the snap out loud; the walk's extract anchor survives verbatim); the SNAP-SEMANTICS half stays Stage 4's (her divide-granularity ruling — the W memo addendum's territory) |
+| N18 | Extract/make-block boundary snapping rounds the selection START edge to the NEAREST boundary: a suffix selection starting late in the block's final sentence rounds FORWARD to the block end → empty span → "No legal boundary for that here." — while the extract lesson promises "select from anywhere in this paragraph to its end" (3A shots 45/46) | **RESOLVED 4A** (commits 1e85a99+44f7fe9+9f6b328 — S4-22 ruling 4): extract's span edges joined the ruled WORD rule (settle onto word edges; the late-start refusal class dissolves — red-on-old pins at the planner AND on the lesson's own text), and the 3F prose narrowing (a78326f) REVERSED — "select from anywhere in this paragraph to its end" returns, now true; the refusal copy states the rule ("cuts land between words, at sentence ends, and at line breaks") |
 | N19 | Tutorial scraps unreachable + scrap→draft drag has NO geometry: `PoolViewModel.activePool = pools.first` (PoolSection.swift:37) shows only the OLDEST pool in the Blocks area, so "tutorial scraps" renders nowhere on any store with an older pool (dev store live: the corpus "scraps" 30 shadow it) and the pool lesson's drag instruction is unfollowable; and even where listed, NO layout shows a scrap list beside a draft — the `.onDrag` payload and the editor's ⌥-aware `performDragOperation` both exist, orphaned (no second window; canvas-on-a-post renders the scrap tag filter but zero scraps — shots 74–79) | **RESOLVED 3D** (commit c808e85 — PoolViewModel selection + the Blocks-area pool picker, oldest default, dead-selection fallback; the ScrapsPanel in the post detail's inspector wires the orphaned drag payload to real geometry beside the draft; the lesson prose re-cut; the drop half was already pinned; red by revert: the tutorial pool unreachable) |
 | N20 | Chapter drag-reorder in the book navigator never commits under synthetic drags (drop indicator renders — froze once — store unchanged over two attempts incl. slow spring-load profile); the context-menu Move Up/Down road WORKS (store-verified both directions, 3A shots 69–72) | **CLOSED at the S4 sitting (S4-18): works by her hand** ("working fine") — the 3E sound-but-synthetic-artifact verdict confirmed; the synthetic tool's List-reorder hostility was the whole story; no fix owed |
 | N21 | Chapter dragging in the BOOK VIEW body (author, 2026-07-21 afternoon): "you should be able to drag chapters within the book view, not just in that sidebar, but there are two places where the dots that indicate dragging make me feel like it should be draggable and it isn't" — locate both false-affordance ⠿ spots; dots that don't drag either drag or lose the dots (the R112 honesty rule applied to affordances) | **RESOLVED 3E** (commit 23b0c12 — the body chapter-header ⠿ DRAGS: navigator-identical insert-before + indicator + end zone, honest help; two-spots verdict recorded — CORRECTED by ladder round 1 MINOR-1: FOUR ⠿ sites exist (the miss, ScrapsPanel.swift:105, honestly drags, so the conclusion survives) — body header FIXED, navigator rows already draggable (N20's human-verify), Write's handle is N26's, scrap rows drag honestly) |
@@ -415,7 +415,7 @@ Commits per batch/stage with the standing message convention.
 | N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | **RESOLVED 3F** (commit e511710 — choosing is the card's full-width clickable HEADER (`TakeChooseHeader`: "choose" / "✓ chosen", ONE checkmark ever, text box keeps its whole width — her header ask verbatim); the stack card unified onto the same grammar; cards widen 220→250 ("a little bit wider"); screenshot 3f-03) |
 | N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **TRACED at the S4 sitting (S4-11): the handles are SEAMS-GATED** — `renderHandles` renders zero unless `seamsVisible && onMoveBlock != nil` (BlockDecor.swift:419–423, the recorded build-time call); her Write look with seams off confirmed invisible; works-as-built + undiscoverable (nothing names the gate; faint ink compounds). **RULED S4-19: hover-reveal as a Write-mode SETTING, default ON** (OFF = the fully clean surface; seams-on static display stays per the architect's flagged reading); Takes-side leans on the board's own clarity; build → Stage 4 |
 | N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
-| N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | new, author → Stage 4 |
+| N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | **DIVIDE HALF RESOLVED 4A** (commit 44f7fe9): the "make a sentence first" trap dies — any two words divide now, so a one-sentence take (± trailing newline) always has a legal cut; the honest residue recorded in the 4A record: a cut at the block's very START/END still refuses per the memo's letter ("nothing to divide"), so the trailing-empty-line "give me a new block below" intent is exactly the INSERT-BELOW act's — **insert-below stays 4D** (both editors per S4-13) |
 | N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | new, author → Stage 4 (compare rework) |
 | N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | new, author → Stage 4 |
 | N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
@@ -5088,3 +5088,210 @@ orchestrator's reply + the eventual handoff.
    batch drives may use real clicks/drags/typing (verify the unlocked
    state empirically at each drive per the 3A precondition; own
    `caffeinate -d` as ever).
+
+### Batch 4A record (the cut redesign — the RULED W addendum built; core GREEN, Mac-suite execution environment-blocked by a LOCKED session, carried PENDING)
+
+**What shipped (four commits):**
+- **`1e85a99` (core 1/2):** `BoundarySnapping` learned the ruled rule —
+  `.word` granularity (cuts between ANY two words and at newlines; the
+  paragraph scanner generalized to any-whitespace runs, grapheme-aligned
+  by construction; containment `word ⊇ sentence ⊇ paragraph` pinned
+  across a fixture corpus) and `settle(_:in:among:)`, the ONE snap
+  brain (S4-22 ruling 1: word edges free; sentence ends + newlines pull
+  `settlePull = 2` UTF-16 units; exact placements always win; ties to
+  the earlier boundary). The word-edge floor (ruling 3) holds by
+  construction — candidates only sit at word starts.
+- **`792decc` (core 2/2):** `divideW` parking (ruling 2) — cut at a
+  take's very END ⇒ the whole take rides into B VERBATIM (no seam,
+  nothing trimmed; trailing newlines are meaningful stored spacing),
+  C's fan omits it; very START ⇒ the mirror. `FanHalf` gains
+  `sourceVariantIDs` (the fans are independently sized now);
+  defaults/chosen resolve PER SIDE (rendered-where-contributing, else
+  the side's first take with chosen NULL — the standing
+  rendered-unmarked rule applied per side). Guards: empty-take cuts
+  refuse `invalidCut` (0 == end — which block gets the blank would be
+  a guess); every-take-parked-at-one-end refuses the NEW
+  `OperationError.divideSideWouldBeEmpty` (the other successor would
+  violate I10 at birth — the architect's forced-by-invariant
+  precision). Store semantics otherwise untouched: same rows, same
+  release, same undo inverse (asymmetric fans covered by a new pin).
+- **`44f7fe9` (editor):** ONE rule at every door — the planner's
+  `snapToInteriorBoundary` / `snapSpan` / cross-block edge cuts all
+  settle over the word rule (plain divide on a one-sentence block
+  works; N18's late-start extract works; the guided flow's edges
+  follow); `Plan.divideW.activeCut` is now `Int?` and a fanned block
+  whose rendered take has no interior edge STILL opens the ceremony,
+  unseeded (the dead end gone both ways); CutPropagation proposals stay
+  INTERIOR deliberately (parking is a human decision, never a seed).
+  The ceremony sheet REBUILT: every checked take's text renders as a
+  word-token flow with a ✂ slot at every legal position (N16(b) — no
+  clicking into takes one at a time); the ✂ DRAGS and glides between
+  word edges with click-to-jump intact (N16(c)); keyboard placement
+  ←/→ word · ⌥←/→ sentence · ⇥ between takes · ⏎ confirms, over the
+  pure `WCutPlacement` brain; parking slots at 0/end with plain-words
+  notes; `confirmBlocker` speaks EVERY disable reason incl. the
+  all-parked I10 gate (`canConfirm := blocker == nil`; the op error is
+  the belt); outline takes keep their line structure (newline-flagged
+  tokens force flow breaks). Refusal copy: "No legal boundary for that
+  here." → "No legal cut spot for that here — cuts land between words,
+  at sentence ends, and at line breaks." (the class shrank to
+  genuinely-empty cases: one-word/empty blocks, blank/collapsed spans).
+- **`9f6b328` (tutorial, P-6):** the divide lesson teaches the word
+  rule; the ceremony lesson teaches the reworked sheet + parking; the
+  extract lesson RE-WIDENS ("select from anywhere in this paragraph to
+  its end" returns — the 3F/a78326f narrowing reversed; the walk's
+  extract anchor survives verbatim). Two new walk acts on the lessons'
+  own content (the parking act; the N18 promise act). Content stays
+  non-journal (R57). No registry change: no new user-facing act exists
+  in 4A (divide/extract/ceremony already declared; the sheet's keys
+  are in-sheet affordances, not doors) — R118 untouched.
+
+**Counts:** core **762/92 → 781/92 GREEN** (`swift test`, full suite —
++11 BoundarySnapping, +8 divideW parking). Mobile: **BUILD SUCCEEDED**
+after each core commit. Mac: **PENDING** — expected arithmetic
+562/112 → **581/113** (+4 planner-divide, +1 planner-extract,
++3 ceremony, +2 tutorial acts, +9 `WCutPlacementTests` in 1 new
+suite), NOT asserted: no Mac suite executed this batch (below).
+
+**THE ENVIRONMENT FINDING (binding on every later batch until it
+clears): the login session is LOCKED and the Mac test runner cannot
+run at all.** The EOL addendum expected the machine open/unlocked
+overnight; empirically `CGSSessionScreenIsLocked = 1` (verified twice,
+incl. after a `caffeinate -u` display wake — the machine auto-locked;
+unlocking needs her password and was not attempted). Mechanism:
+`xcodebuild test-without-building` launches the host (the app pid
+prints its saved-state line) but the runner "hung before establishing
+connection" at ~341 s, on the FULL suite twice AND on an untouched
+control suite (`CutPropagationTests`) — the diff is not the cause;
+the GUI test host needs the unlocked session. Consequences, all
+carried PENDING for the orchestrator (or a later batch at an unlocked
+window): (1) the full Mac suite run; (2) the app-side red-on-old
+REVERT executions (list below); (3) the visual loop (sheet
+screenshots; drag/keyboard feel); (4) the board soak +
+`TutorialWalkTests` re-run (they ride the Mac suite); (5) — judgment
+call — the owed per-batch `/Applications` refresh is WITHHELD until
+the Mac suite runs green on this diff (her app is closed and the
+window is open, but shipping a suite-unverified sheet rework to her
+daily build is the wrong risk; the refresh is one command once the
+suite is green). `build-for-testing` compiles the whole app + test
+bundle clean — the block is execution, not code.
+
+**Red-on-old verification:**
+- *Executed (core, behavioral revert):* the parking branches were
+  temporarily disabled in `divideW` (the two parking arms short-
+  circuited to the old fall-through) — ALL EIGHT parking pins ran RED
+  failing with the exact pre-change behavior (`invalidCut` at
+  0/length), incl. both `divideSideWouldBeEmpty` expectations reading
+  the old error; restored, 24/24 suite green. One justified pin edit:
+  `divideWRefusals`' `cuts:[v1: 0]` expectation `invalidCut` →
+  `divideSideWouldBeEmpty` (cut 0 is now START PARKING; with only one
+  marked take that legally means "B would be takeless") — reasoning
+  in-line at the test.
+- *PENDING (Mac, procedure for the verifier):* (a) planner word-rule
+  pins (`aOneSentenceBlockNowDividesBetweenWords`,
+  `aLateStartInTheFinalSentenceExtractsAtTheWordEdge`,
+  `aFannedOneWordBlockStillOpensTheCeremonyUnseeded`,
+  `aLateStartSelectionInTheExtractLessonNowPlansAnExtract`) — revert =
+  restore `snapToInteriorBoundary`/`snapSpan` to the `.sentence`-only
+  bodies (commit `44f7fe9`'s planner hunks); each must fail with the
+  old refusal/snap. (b) parking-placement pins
+  (`placeWCutAcceptsParkingPositions`,
+  `allTakesParkedAtOneEndGateConfirmWithHonestCopy`,
+  `confirmWithAParkedTakeRidesItWholeIntoOneSuccessor`,
+  `theCeremonyParksATakeAndItRidesWholeIntoTheFirstBlock`) — revert =
+  restore `legalCutPositions` to the interior filter; the placements
+  no-op and the pins go red. Every justified pin EDIT carries its
+  reasoning as an in-line comment at the changed expectation
+  (planner snap values 16→6, 11→5, endCut 23→9, the sloppy-extract
+  span, the one-word refusal fixtures, the grapheme-test rewrites,
+  CutPropagation's exact-23 + one-word no-cut fixture).
+
+**Traced mechanisms (the changes' whys):**
+- N16(b)/(c): the old sheet listed marked takes but placement was
+  per-take "cut at:" snippet buttons (click into each take's row); the
+  ✂ was rendered text, not draggable. The flow layout + slot geometry
+  (PreferenceKey frames, row-first nearest-slot drag scoring with a
+  4-pt strong-slot catch — the settle's visual half) is the mechanism
+  that makes the scissors a THING you move.
+- N18: `snapSpan` snapped both span ends to `.sentence` boundaries —
+  a start past the final sentence's midpoint rounded FORWARD to the
+  end, collapsing the span (the 3A shots' refusal). Word-rule settle
+  keeps the start on the nearest word edge.
+- N28 divide half: a one-sentence take had NO interior sentence
+  boundary, so `snapToInteriorBoundary` returned nil and divide
+  refused before the fan check ("make a sentence first"). Word edges
+  exist in any two-word text; and for fans the nil no longer blocks
+  the ceremony. HONEST RESIDUE: a cut at the very start/end of a
+  block still refuses plain divide ("nothing to divide" — the memo's
+  letter), so the trailing-empty-line "new block below" intent is
+  4D's insert-below act, not divide's; recorded on the N28 row.
+- The I10 parking gate: `mintFanBlock` with zero texts would have
+  crashed (`variants[defaultIndex]`) — the guard turns an impossible
+  state into a typed refusal, and the sheet's blocker keeps it from
+  ever being requested.
+
+**Judgment calls / PROVISIONALs (R119 — for the author's deferred walk):**
+1. **`settlePull = 2` UTF-16 units** (the "pull a little" constant).
+   Options: 0 (pure nearest — reads as no magnetism), 1 (barely
+   perceptible), 2 (≈ a terminator+space; a cut dropped 2 units past
+   the midpoint toward a word edge still settles on the sentence end),
+   proportional-to-word-length (unpredictable). Chose 2; exact
+   placements always win (distance 0). One constant, one place.
+2. **Empty checked takes refuse placement** (boundaries = [] → the
+   sheet says "uncheck it"; core refuses the cut): 0 and the end
+   coincide, so WHICH block gets the blank would be a guess. The
+   alternative (deterministic end-parking) was rejected as silent
+   invention. Matches the memo's original "uncheck it" posture.
+3. **Whitespace-only takes MAY park** (both ends offered, nothing
+   interior): the author decides which successor carries the
+   blank-ish take; refusing entirely would resurrect a dead-end class
+   for takes that are deliberate visual blanks.
+4. **Per-side default/chosen** (parked-rendered case): B gets the
+   rendered take's whole copy as default+chosen; the side without the
+   rendered take falls back to its first contributing take, chosen
+   NULL — the standing rendered-unmarked rule, applied per side.
+5. **Proposals never park** (CutPropagation stays interior): a seed
+   at 0/end would silently decide "this take doesn't split" — that is
+   exactly the decision parking exists to hand the author.
+6. **Drag settle bonus = 4 pt** for strong slots (the geometric half
+   of ruling 1 in the sheet; discrete slots make most drags exact
+   anyway).
+7. **The `/Applications` refresh withheld** this batch (see the
+   environment finding) — the FIRST batch-owed refresh executes with
+   the PENDING suite run at the next unlocked window.
+8. **The sheet keeps its functional-unstyled register** (system fonts,
+   VoiceTokens inks for ✂/slots/washes only) — the full voice restyle
+   is looks-pass territory (R111 demotes looks; the propose-only sweep
+   may raise it).
+9. **⇥ inside the sheet is intercepted for take-cycling** (`.onKeyPress`
+   on the focused container) — the brief's letter; the cost is that
+   ⇥ no longer walks the sheet's buttons while the flow has focus
+   (Cancel/Divide remain esc/⏎). Flagged for the visual pass.
+
+**Deviations from the brief:** none in scope or semantics. Execution
+deviations are the environment-blocked verifications above, each
+carried PENDING with its procedure. The brief's "divide on an empty
+line works" is delivered at the letter of the ruled addendum (any
+two words; newline cuts; ceremony parking) — the trailing-empty-line
+corner is recorded honestly on N28 rather than silently stretched
+into divide.
+
+**For the next batch / the ladder:**
+- FIRST ACT AT ANY UNLOCKED WINDOW: run the full Mac suite; execute
+  the two PENDING revert procedures; then the owed `/Applications`
+  refresh (zero instances — her app is closed) + the field-guide
+  re-seed decision (the three cut lessons' prose changed: the REAL
+  store's seeded guide is now one revision behind — re-seed rides the
+  A1 rail per the standing rule, at the orchestrator's call).
+- Ladder foci: the `divideW` parking state transitions (per-side
+  defaults; the undo inverse over asymmetric fans); the planner's
+  settle consistency (one brain — check no door still calls
+  `BoundarySnapping.snap(.sentence)` for CUT purposes; the remaining
+  `.sentence` uses are the strong-set queries, deliberate); the
+  sheet's drag hit-testing under wrapping (slot orphaned at a line
+  end); `CutFlowLayout` under very long takes (token count = word
+  count — fan-bounded, but a 2k-word take renders 2k tokens; if the
+  ladder judges it heavy, virtualize the flow or cap with a scroll).
+- 4B (merge ceremony) inherits the parking precedent: the pairing
+  op's result shape should mirror `sourceVariantIDs` (correspondence
+  arrays over positional promises).
