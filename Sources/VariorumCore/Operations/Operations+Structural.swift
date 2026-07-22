@@ -212,19 +212,26 @@ extension Operations {
     /// One successor block of a W divide: its half-fan in marked order.
     public struct FanHalf: Equatable, Sendable {
         public let block: Block
-        /// One variant per marked source variant, in fan order.
+        /// One variant per CONTRIBUTING source variant, in fan order. A
+        /// take parked at its far end (S4-22 parking) contributes to only
+        /// one successor, so the two halves' fans may differ in size.
         public let variants: [Variant]
+        /// The marked source variant each entry of `variants` was cut (or
+        /// parked whole) from — aligned index-for-index with `variants`.
+        public let sourceVariantIDs: [String]
         public let placement: ContainerBlock
         public let edge: Edge
     }
 
     public struct DivideWResult: Equatable, Sendable {
-        /// B — the first halves.
+        /// B — the first halves (plus takes parked whole at their END).
         public let first: FanHalf
-        /// C — the second halves.
+        /// C — the second halves (plus takes parked whole at their START).
         public let second: FanHalf
-        /// The marked source variants in fan order — `first.variants[i]` and
-        /// `second.variants[i]` are the halves of `markedSourceIDs[i]`.
+        /// ALL marked source variants in fan order. A split take appears in
+        /// both halves' `sourceVariantIDs`; a parked take in exactly one —
+        /// the per-half arrays carry the correspondence since parking
+        /// (13b Stage 4) made the two fans independently sized.
         public let markedSourceIDs: [String]
         /// A's released placement row (the pre-image undo flips back live).
         public let releasedPlacementID: String
@@ -238,14 +245,27 @@ extension Operations {
     /// live and unplaced, the unplaced-blocks population), every variant and
     /// commit untouched, unmarked variants staying on A as lineage.
     /// Reversible by re-pointing at A (`placeBlock`). B/C defaults are the
-    /// halves of A's rendered variant when it is marked (also the new
-    /// placements' chosen), else the halves of the first marked variant
-    /// (chosen left NULL). Cuts are per-variant UTF-16 offsets, seam-trimmed
-    /// (well-formedness checked; boundary snapping is the editor's, as in
-    /// `divide`). Marked variants may be locked — their buffers are copied,
-    /// not edited. An unfanned block is accepted too, deliberately: W on a
-    /// single variant is a divide with release-A semantics instead of
-    /// in-place — the editor picks the gesture, the op doesn't second-guess.
+    /// halves of A's rendered variant when it contributes to that successor
+    /// (also that placement's chosen), else that side's first contributing
+    /// take (chosen left NULL). Cuts are per-variant UTF-16 offsets, seam-
+    /// trimmed (well-formedness checked; boundary snapping is the editor's,
+    /// as in `divide`). Marked variants may be locked — their buffers are
+    /// copied, not edited. An unfanned block is accepted too, deliberately:
+    /// W on a single variant is a divide with release-A semantics instead
+    /// of in-place — the editor picks the gesture, the op doesn't
+    /// second-guess.
+    ///
+    /// **Parking (13b Stage 4, S4-22 ruling 2):** a cut at a take's very
+    /// END means the take doesn't split — ALL of it rides into B, verbatim
+    /// (no seam exists, so nothing is trimmed; trailing newlines are
+    /// meaningful stored spacing), and C's fan simply omits it. A cut at
+    /// the very START is the mirror: the whole take rides into C. Every
+    /// non-empty take therefore always has a legal placement — the single-
+    /// sentence dead end is gone in both directions. Two guards ride the
+    /// semantics: an EMPTY take's cut refuses (`invalidCut` — 0 and the
+    /// end coincide, so which block gets the blank would be a guess), and
+    /// every-take-parked-at-one-end refuses (`divideSideWouldBeEmpty` —
+    /// the other successor would violate I10 at birth).
     @discardableResult
     public func divideW(_ blockID: String, cuts: [String: Int]) throws -> DivideWResult {
         let result: DivideWResult = try database.write { db in
@@ -272,14 +292,31 @@ extension Operations {
                     """,
                 arguments: [blockID])
             let marked = fan.filter { cuts.keys.contains($0.id) }
-            var halves: [(first: String, second: String)] = []
+            // Each side's (text, source) pairs in fan order. A split take
+            // contributes to both; a parked take (S4-22) to exactly one —
+            // its WHOLE text, verbatim (no seam, nothing trimmed).
+            var firstSide: [(text: String, sourceID: String)] = []
+            var secondSide: [(text: String, sourceID: String)] = []
             for variant in marked {
                 let cut = cuts[variant.id] ?? 0
-                guard let pair = BoundarySnapping.seamTrimmedHalves(
+                let length = variant.workingText.utf16.count
+                if length > 0, cut == length {
+                    firstSide.append((variant.workingText, variant.id))
+                } else if length > 0, cut == 0 {
+                    secondSide.append((variant.workingText, variant.id))
+                } else if let pair = BoundarySnapping.seamTrimmedHalves(
                         variant.workingText, cutAtUTF16: cut),
-                      !pair.first.isEmpty, !pair.second.isEmpty
-                else { throw OperationError.invalidCut(variantID: variant.id, cut: cut) }
-                halves.append(pair)
+                    !pair.first.isEmpty, !pair.second.isEmpty {
+                    firstSide.append((pair.first, variant.id))
+                    secondSide.append((pair.second, variant.id))
+                } else {
+                    throw OperationError.invalidCut(variantID: variant.id, cut: cut)
+                }
+            }
+            // The parking guard (I10 by construction): each successor must
+            // be born with at least one take.
+            guard !firstSide.isEmpty, !secondSide.isEmpty else {
+                throw OperationError.divideSideWouldBeEmpty(blockID: blockID)
             }
 
             let now = date.now
@@ -312,14 +349,17 @@ extension Operations {
             let positionB = FractionalIndex.between(try neighbor("MAX", "<"), follower)
             let positionC = FractionalIndex.between(positionB, follower)
 
-            // Defaults and chosen: the rendered variant's halves when it is
-            // marked; otherwise the first marked variant's halves, chosen NULL.
-            let renderedIndex = marked.firstIndex { $0.id == context.rendered.id }
+            // Defaults and chosen, PER SIDE (parking makes the two fans
+            // independently populated): the rendered variant's half/copy
+            // where it contributes to this successor, else the side's first
+            // contributing take with chosen left NULL — the standing
+            // rendered-unmarked rule, applied per side.
             var successors: [FanHalf] = []
-            for texts in [halves.map(\.first), halves.map(\.second)] {
+            for (side, position) in [(firstSide, positionB), (secondSide, positionC)] {
+                let renderedIndex = side.firstIndex { $0.sourceID == context.rendered.id }
                 let minted = try mintFanBlock(
-                    db, texts: texts, in: containerID,
-                    position: successors.isEmpty ? positionB : positionC,
+                    db, texts: side.map(\.text), in: containerID,
+                    position: position,
                     defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
                     presentation: context.block.presentation, now: now)
                 let edge = try insertLineageEdge(
@@ -329,6 +369,7 @@ extension Operations {
                 try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
                 successors.append(FanHalf(
                     block: minted.block, variants: minted.variants,
+                    sourceVariantIDs: side.map(\.sourceID),
                     placement: minted.placement, edge: edge))
             }
 

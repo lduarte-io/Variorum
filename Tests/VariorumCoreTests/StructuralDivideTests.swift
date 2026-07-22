@@ -346,7 +346,11 @@ struct StructuralDivideTests {
             #expect(throws: OperationError.noMarkedVariants(blockID: a)) {
                 try ops.divideW(a, cuts: [:])
             }
-            #expect(throws: OperationError.invalidCut(variantID: world.v1, cut: 0)) {
+            // 13b 4A pin edit (justified): cut 0 on the one marked take is
+            // no longer an invalid cut — it is START PARKING (S4-22 ruling
+            // 2), and the refusal is now the parking guard: the whole take
+            // rides into C, leaving B with no takes (I10 at birth).
+            #expect(throws: OperationError.divideSideWouldBeEmpty(blockID: a)) {
                 try ops.divideW(a, cuts: [world.v1: 0])
             }
             #expect(throws: OperationError.variantNotFound(id: "stranger")) {
@@ -371,6 +375,161 @@ struct StructuralDivideTests {
             #expect(try db.deletedAt("container_block", world.a.placement.id) == nil)
             #expect(stack.topLabel != "Divide")
             #expect(stack.topLabel != "Divide into Variants")
+        }
+    }
+
+    // MARK: Parking (13b Stage 4, S4-22 ruling 2 — end/start-of-take semantics)
+
+    @Test func divideWEndParkingContributesAFirstHalfOnly() throws {
+        // V2 ("Two intact.", 11 units) parks at its END: the whole take
+        // rides into B verbatim; C's fan omits it entirely.
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 11,   // split: "One alpha. | One omega."
+                world.v2: 11,   // parked at the end — no second half
+            ])
+
+            #expect(result.first.variants.map(\.workingText)
+                == ["One alpha.", "Two intact."])
+            #expect(result.second.variants.map(\.workingText) == ["One omega."])
+            #expect(result.first.sourceVariantIDs == [world.v1, world.v2])
+            #expect(result.second.sourceVariantIDs == [world.v1])
+            #expect(result.markedSourceIDs == [world.v1, world.v2])
+
+            // The parked copy is a COPY: V2 itself is untouched on A.
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [world.v2]) == "Two intact.")
+            // Rendered (V1) contributes to both sides: default + chosen on each.
+            #expect(result.first.block.defaultVariantId == result.first.variants[0].id)
+            #expect(result.second.block.defaultVariantId == result.second.variants[0].id)
+            #expect(result.first.placement.chosenVariantId == result.first.variants[0].id)
+            #expect(result.second.placement.chosenVariantId == result.second.variants[0].id)
+        }
+    }
+
+    @Test func divideWStartParkingContributesASecondHalfOnly() throws {
+        // The mirror: V2 parks at its START — the whole take rides into C.
+        try withOperations { ops, _ in
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 11,
+                world.v2: 0,
+            ])
+            #expect(result.first.variants.map(\.workingText) == ["One alpha."])
+            #expect(result.second.variants.map(\.workingText)
+                == ["One omega.", "Two intact."])
+            #expect(result.first.sourceVariantIDs == [world.v1])
+            #expect(result.second.sourceVariantIDs == [world.v1, world.v2])
+        }
+    }
+
+    @Test func divideWParkedRenderedTakeStillAnchorsItsSide() throws {
+        // Park the RENDERED take (V1) at its end and split V3: B's default
+        // and chosen are V1's whole copy; C — where V1 doesn't contribute —
+        // falls back to its first contributing take, chosen NULL (the
+        // standing rendered-unmarked rule, now applied per side).
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 21,   // "One alpha. One omega." — parked at its end
+                world.v3: 13,   // split: "Three start.\n | Three end."
+            ])
+            #expect(result.first.variants.map(\.workingText)
+                == ["One alpha. One omega.", "Three start."])
+            #expect(result.second.variants.map(\.workingText) == ["Three end."])
+            #expect(result.first.block.defaultVariantId == result.first.variants[0].id)
+            #expect(result.first.placement.chosenVariantId == result.first.variants[0].id)
+            #expect(result.second.block.defaultVariantId == result.second.variants[0].id)
+            #expect(result.second.placement.chosenVariantId == nil,
+                    "chosen stays NULL where the rendered take doesn't contribute")
+            #expect(try db.read { try ops.renderedVariant($0, blockID: result.second.block.id) }
+                .workingText == "Three end.")
+        }
+    }
+
+    @Test func divideWParkingCopiesVerbatimIncludingTrailingNewlines() throws {
+        // Parking has no seam, so nothing trims — trailing newlines are
+        // meaningful stored spacing (the 2026-07-12 ruling) and ride whole.
+        try withOperations { ops, _ in
+            let world = try WWorld(ops)
+            try ops.autosave(world.v2, text: "Line one.\n\n", charDelta: 0)
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 11,
+                world.v2: 11,   // "Line one.\n\n".utf16.count == 11 — the end
+            ])
+            #expect(result.first.variants.map(\.workingText)
+                == ["One alpha.", "Line one.\n\n"])
+        }
+    }
+
+    @Test func divideWAllParkedAtOneEndRefuses() throws {
+        // Every checked take parked at the same end would birth a takeless
+        // successor — I10 by construction; the op refuses and nothing moves.
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let world = try WWorld(ops)
+            let a = world.a.block.id
+            #expect(throws: OperationError.divideSideWouldBeEmpty(blockID: a)) {
+                try ops.divideW(a, cuts: [world.v1: 21, world.v2: 11])  // both ends
+            }
+            #expect(throws: OperationError.divideSideWouldBeEmpty(blockID: a)) {
+                try ops.divideW(a, cuts: [world.v1: 0, world.v2: 0])    // both starts
+            }
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM edge") == 0)
+            #expect(try db.deletedAt("container_block", world.a.placement.id) == nil)
+            #expect(stack.topLabel != "Divide into Variants")
+        }
+    }
+
+    @Test func divideWEmptyTakeCutRefuses() throws {
+        // An empty take's 0 and end coincide — which block gets the blank
+        // would be a guess, so the cut refuses (the sheet says "uncheck it").
+        try withOperations { ops, _ in
+            let world = try WWorld(ops)
+            try ops.autosave(world.v2, text: "", charDelta: 0)
+            #expect(throws: OperationError.invalidCut(variantID: world.v2, cut: 0)) {
+                try ops.divideW(world.a.block.id, cuts: [world.v1: 11, world.v2: 0])
+            }
+        }
+    }
+
+    @Test func divideWWhitespaceOnlyTakeParksAtEitherEnd() throws {
+        // A whitespace-only take has no interior cut but CAN park — the
+        // author decides which successor carries the blank-ish take.
+        try withOperations { ops, _ in
+            let world = try WWorld(ops)
+            try ops.autosave(world.v2, text: "\n\n", charDelta: 0)
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 11, world.v2: 2,  // parked at its end → rides into B
+            ])
+            #expect(result.first.variants.map(\.workingText) == ["One alpha.", "\n\n"])
+            #expect(result.second.variants.map(\.workingText) == ["One omega."])
+        }
+    }
+
+    @Test func divideWUndoWithParkingRestoresEverything() throws {
+        // The undo inverse needs nothing new for parking: both successors
+        // tombstone (asymmetric fans and all) and A's placement flips back.
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let world = try WWorld(ops)
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 11, world.v2: 11,
+            ])
+            try stack.undo(with: ops)
+            #expect(try liveBlockOrder(db, in: world.post.id)
+                == [world.before.block.id, world.a.block.id, world.after.block.id])
+            for half in [result.first, result.second] {
+                #expect(try db.deletedAt("block", half.block.id) != nil)
+                for variant in half.variants {
+                    #expect(try db.deletedAt("variant", variant.id) != nil)
+                }
+            }
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [world.v2]) == "Two intact.")
         }
     }
 

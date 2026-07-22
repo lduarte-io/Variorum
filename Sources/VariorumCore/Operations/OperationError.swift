@@ -60,6 +60,13 @@ public enum OperationError: Error, Equatable, Sendable {
     case fannedBlock(id: String)
     /// divideW needs at least one marked variant to carry the cut through.
     case noMarkedVariants(blockID: String)
+    /// divideW parking (13b Stage 4, S4-22 ruling 2): a cut at a take's
+    /// very end parks the whole take on the FIRST successor; at its very
+    /// start, on the SECOND. If every marked take parks at the same end,
+    /// the other successor would be born with no takes — an I10 violation
+    /// by construction — so the operation refuses (the ceremony sheet
+    /// gates the same state with honest copy; this is the belt behind it).
+    case divideSideWouldBeEmpty(blockID: String)
     /// Merge requires its two blocks placed adjacently in one container.
     case blocksNotAdjacent(first: String, second: String)
     /// poolDragCopy's source must live in a pool.
