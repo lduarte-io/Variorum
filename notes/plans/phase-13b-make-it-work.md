@@ -418,12 +418,12 @@ Commits per batch/stage with the standing message convention.
 | N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | **DIVIDE HALF RESOLVED 4A** (commit 44f7fe9): the "make a sentence first" trap dies — any two words divide now, so a one-sentence take (± trailing newline) always has a legal cut; the honest residue recorded in the 4A record: a cut at the block's very START/END still refuses per the memo's letter ("nothing to divide"), so the trailing-empty-line "give me a new block below" intent is exactly the INSERT-BELOW act's. **INSERT-BELOW RESOLVED 4D — N28 CLOSED, the row's last half** (commit 62800c3: "New Block Below" as a DECLARED registry act, ⌥⌘N, NATIVE in BOTH editors per S4-13 — Write through the one structural door (caret lands IN the empty mint), Takes/Lenses via the parkFocus ring handover; doors: Block menu, both bars, palette; sealed refuses spoken; newlines-as-content in takes panes untouched) |
 | N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | **RESOLVED 4C** (commits de4e4e3+eb17ad0 — `CompareComposition`, the honesty rule as a PURE brain: zero relationship ⇒ ONE free segment, plain side-by-side in own orders + the "there is no relationship here" header line; partial relationships align ONLY kin rows, unrelated stretches pack with NO blanks; rails render only where kinship exists, both sides colored by the anchor kin, behind the S4-12 lineage-colors toggle; zero-lineage version-marking SPEAKS the loose-alignment consequence — pinned at the composition, the model, and the tutorial walk) |
 | N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | **RESOLVED 4E** (commits a2005f7+139e289+10be249+39d0887, built to the recorded Phase-1 ruling — spread-grid + pure 2D viewport culling ADOPTED, the bank REJECTED with her fork recorded as a 13c input: (a) the pile dies into derived grid slots; (b) lazy realization with the P1 bound pinned pure+hosted (realized set independent of post size; the ReadingFlow counter precedent); (c) EDITABLE PaneSurface cards over the ONE authority — edits land on the take the card SHOWS, chosen only through ✓ (R88 untouched), seal refuses liveness/edits while arrangement stays allowed (#18); Canvas's fourth-text-path slice RETIRED (ReadingFlow remains); (d) RESIZABLE with LOCAL size memory (no canvas_layout size home — synced w/h recorded for 13c); (e) the bottom-right read-time ordinal; (f) click-in-order — numbered preview, ONE confirm = ordinary reorders under ONE ⌥⌘Z compound, cancel inert, sealed refuses spoken; (g) fit-all — scroll when it fits, else the read-only overview zoom with silhouettes + the γ ordering rider; plus ⌘S-in-canvas per the ruling's (c)(2) and the ⠿ grab strip (the 3A note). Canvas board soak + tutorial walk act ride the PENDING suite run — Mac expected 619/117 → 640/121) |
-| N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
+| N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | **STAGE-4 HALVES RESOLVED 4F** (commits 2492ac0+4a38644 — (1) the PROGRESS BAR on the scroll view, model-driven per the Phase 6 ruling: rows report scroll visibility, the pure sticky brain answers "post k of n" from the POST LIST, the bar renders beside the standing jump slider; (2) the KINDLE-STYLE PAGED VIEW: `PagedBookView` in a three-way Book · Pages · Read toggle — page = a post with vertical scroll of any length, ◀ ▶ flips + the bottom scrub over the SAME `scrubIndex` brain, EXACTLY ONE page mounts (hosted-pinned), read-cheap with click-to-live via the standing focus machinery, flip releases focus, the navigator becomes a page-jump while paging; tutorial keeps pace + the walk act runs the flips on the guide itself). **The UNIFORM-PAGE half RE-OWNED TO PHASE 13C per the EOL directive, with her S4-16 condition DISCHARGED: `notes/plans/phase-13c-uniform-page-view-brief.md`** (the detailed brief — two-tier estimated/measured pagination, the settled facts cited, edge cases on paper, five open questions) |
 | N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | **(d) the "+ column" half DONE 4C** (commit 6f1b602 — while ONE column is open, an empty DASHED COLUMN waits beside it, the shelf's dashed new-post grammar, one shared menu body with the header door; retreats once a second column exists). **(a)–(c) RESOLVED 4D — N32 CLOSED** (commit 582ab36: (a) the door reads "Move out to a pool (leaves this post)" and the completion SPEAKS the I2 consequence + the road back — the old silent success was pinned and the pin edited red-on-old; (b) the canvas filter names itself a TAG (label) filter with de-blurring help, the pool menus say container-vs-label at the door; (c) `.tagBlock` DECLARED — one `.surface` act rendered by THREE surfaces (Blocks-area rows, ScrapsPanel rows, the canvas card — S4-15's formerly-only door now declared), all over the ONE BlockTagAssignmentSheet, walk-asserted; R118-exempt with reasoning, the renameLens class) |
 | N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | **RESOLVED 4D** (commit f5b0b30 — the PER-POST door: "newlines make blocks: on/off" chips on BOTH bars (Write reads the observed header; Takes/Lenses refresh at projection cadence), ON ⇒ per-post NIL (inherit global) / OFF ⇒ `.oneBlock`, the consequence SPOKEN ("governs future entry — existing blocks never re-segment"); ZERO semantics change — entry-wide is the model's standing meaning, exactly S4-21's ratification; allowed under seal (container-row metadata class). The OPTIONAL GLOBAL FACE DEFERRED, recorded: `upsertSetting` is Operations-internal and no public `default_segmentation` setter exists — one small core op away, and 4D's core allowance was exactly the poolDragCopy line; flagged for the ladder/13c) |
 | N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern. **S4-33 (her rider): the Takes bar gets a DIRECT "comments" button like Write's — parity of prominence, not just existence** | **RESOLVED 4D** (commit 63fae31 — S4-33's direct "comments" button on the Takes/Lenses bar beside seal/tags/date, Write's order mirrored (the block ▾ item and ⌘⇧' stay, one `requestComments`); the MARGIN-CLICK-TO-ADD BUILT in its minimal form — an uncommented CARET block offers a quiet "+ //" exactly where its margin card would sit (live editor, margin-card mode, caret block only; clicking opens the panel); the full every-block-hover mockup grammar RECORDED as the next rung for 13c if she wants more; pin red-on-old) |
-| N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | new, author → Stage 4 scoping call at brief time |
-| N37 | Readings RESTORE door (S4-28.2, reverses the pre-13 boundary): `restoreReading` on the `restoreContainer` pattern (tombstone flip + exact-stamp revival of sections/memberships) + a deleted-readings recovery surface; curated at least | new, author → Stage 4 |
+| N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | **RESOLVED 4F, DEPLOY-READY** (commits be61db9 schema + 9006c41 op + 2492ac0 faces — migration v1_12 `container.word_target` additive nullable, the reading column's twin VERBATIM (display/progress only, never an entry-time refusal — pinned); `setPostWordTarget` on the extent-setter conventions (non-positive refuses, nil clears, no-op writes nothing, identity-level no-touch/no-churn; SEAL POSTURE PROVISIONAL: refuse, the reading-extent mirror — the N34 metadata-allowed alternative one guard line away); the FACES ride the word-count label BOTH bars already carry (R118 parity, zero new width — progress in the label, click opens the ExtentInput setter popover; Write reads the observed header, Takes refreshes at chip cadence). Sync artifacts COMPLETE: `07_phase13b_lockstep.sql` (marker 3 → 4, choreography header, NO RPC rework — additive column on an allowlisted table), client `lockstepVersion` 4, the A6 walks + mirror-DDL coverage GREEN over the column. **THE DEPLOY IS THE ORCHESTRATOR'S at the consolidated window (pre-authorized, EOL addendum): mirror FIRST, then the client refresh — until marker 4, a v1_12 client visibly refuses to sync by design; the shipped `/Applications` build stays marker-3 meanwhile** |
+| N37 | Readings RESTORE door (S4-28.2, reverses the pre-13 boundary): `restoreReading` on the `restoreContainer` pattern (tombstone flip + exact-stamp revival of sections/memberships) + a deleted-readings recovery surface; curated at least | **RESOLVED 4F** (commits 6784d24 core + 2492ac0 surface — `restoreReading` on the restoreContainer pattern: tombstone flip + EXACT-STAMP revival of chapters AND memberships, diverged stories dead (independent deletes; the live-post guard), assignments reattach FREE; smart books restore by the flip alone (not refused — recorded); finished restores finished; no undo entry (recovery-door class); `readingNotDeleted` typed; `Queries.deletedReadings` + the "Deleted books" section in Archived & Deleted with the surface-local Restore door. **The boundary reversal recorded for the canon-delta list**; `restoreSection`'s died-with-its-reading refusal now has the two-step road (restoreReading FIRST) — interaction PINNED, doc updated. DOCUMENTED CORNER pinned: reading-dies-then-post-dies leaves that membership dead through BOTH restores (twice-diverged stamp story); add-to-book is the road back. Behavioral reverts EXECUTED core-side (both guards red); the walk act restores the whole field guide on itself) |
 | N38 | Smart → smart+curated conversion (S4-28.4, direction-level, uncertainty preserved): curating/chaptering a smart book converts it (membership materialization design), a fresh smart book mintable off the same tag; the #25(a) promote-to-curated design, now wanted | new, author → Stage 4 scoping call; design memo owed if deferred |
 | N39 | Blocks-list positional moves (S4-30g): type a target position number ("what number block… out of the total post") + move-to-top / move-to-bottom doors — dragging stops being the only long-distance move | **RESOLVED 4D** (commit 582ab36 — the Blocks rows' ⋯ menu gains Move to top / Move to bottom / "Move to block #…" with a typed position out of the total post; ONE ordinary `reorder` per move (⌥⌘Z undoes via its own inverse), ordinal math counts as a human counts, out-of-range clamps, already-there speaks a no-op and writes nothing, malformed entries speak; pinned) |
 | N40 | The takes strip's height jumping (S4-31b, her ruling): ONE fixed strip height with in-strip scrolling ("you can scroll within the strip"); kills the back-and-forth height changes and dissolves the recorded #28(b) clip cost | **RESOLVED 4D** (commit 37b5ece — TRACED: the jumping was variable card heights in the strip forms (carousel/slot-split cards sized to their take's text, so paging/typing re-heighted the row). ONE fixed card height (railCardHeight) across EVERY strip form — rail, carousel, slot split — with the content scrolling in-card (the N23 shape, generalized); #28(b)'s clip cost dissolves into that scroll. Built WITH S4-24's hybrid: free horizontal scrolling settling on whole cards, writing back into the one paging brain — counter, ⌥⌘←/→, and scroll agree at rest by construction) |
@@ -6365,7 +6365,330 @@ call 7's reasoning holds verbatim).
 - The takes footer hides in order mode (deliberate — sequence clicks
   own the card); confirm the reading.
 
-### Orchestrator regime note (post-4A, 2026-07-22 overnight — the LOCKED-SESSION regime; binding for the remaining batches until the first unlock)
+### Batch 4F record (books + restoreReading + v1_12 — N31's Stage-4 halves RESOLVED with the uniform-page half re-owned to 13c per S4-16 · N36 RESOLVED, DEPLOY-READY · N37 RESOLVED; core 817/96 GREEN with the behavioral reverts executed, Mac-suite execution carried PENDING under the locked-session regime. THE STAGE'S LAST BATCH — the ladder is next)
+
+**What shipped (six commits + this record's):**
+- **`be61db9` (core — SCHEMA, OWN COMMIT, FIRST):** migration **v1_12
+  `container.word_target`** (S4-28.1/N36 — the per-post twin of v1_11's
+  reading column, semantics VERBATIM: display/progress only, NEVER an
+  entry-time refusal; additive nullable; metadata CAS, no uniqueness, no
+  repair rule). The §12 event's artifacts, one commit so the drift pins
+  never straddle: **`Server/supabase/07_phase13b_lockstep.sql`** (06's
+  form — choreography header, mirror → Mac only, marker upsert to **4**
+  as the LAST statement; **NO RPC rework rides the event** — 06's
+  to_jsonb/jsonb_populate_record bodies carry new columns automatically
+  and `container` is already allowlisted + owner-guarded, stated in the
+  header and pinned); client **`lockstepVersion` 3 → 4**;
+  `AuthRLSDDLTests` gains 07 in `lockstepFiles` (marker-drift, monotonic
+  history, and last-statement pins now read it) + 07 header pins; the
+  Container record carries the column (round-trip pinned); the A6
+  serializer/registry walks + the in-repo mirror-DDL coverage check
+  GREEN over the column — their job.
+- **`9006c41` (core — the op + read side):** **`setPostWordTarget`** on
+  the extent-setter conventions (non-positive → `invalidExtent`; nil
+  clears; no-op writes nothing — identity-level: no touch, no churn,
+  no outbox row, pinned; pools/missing refuse typed; **the SEAL POSTURE
+  PROVISIONAL — judgment call 1 below**); `ContainerHeader` gains
+  `wordTarget` (the column's read side through the EXISTING
+  observed-header pipe — judgment call 2); one wire test (plain
+  metadata CAS, byte-identical dumps, empty outboxes). Behavioral
+  revert EXECUTED (below).
+- **`6784d24` (core — restoreReading, OWN COMMIT):** **N37 built** — the
+  `restoreContainer` pattern verbatim: tombstone flip + EXACT-STAMP
+  revival of the reading's chapters and memberships; diverged stories
+  stay dead (independent deletes carry their own stamps; a membership
+  whose POST has since died stays dead at the matching stamp — the
+  live-post guard); chapter ASSIGNMENTS reattach free (the dangle rule
+  never rewrote `section_id` — sections + memberships + assignments
+  pinned whole). Smart books restore by the flip alone (deliberately
+  not refused); finished restores finished; NO undo entry (the
+  recovery-door class); outbox rides the ordinary triggers (pinned);
+  new typed `readingNotDeleted`. `Queries.deletedReadings` (the
+  `deletedPosts` parallel, bounded). **The restoreSection interaction
+  pinned** (the brief's named check): while the reading is dead the old
+  refusal stands (`readingNotFound`); after `restoreReading`, an
+  INDEPENDENTLY deleted chapter — deliberately left dead by the
+  exact-stamp sweep — now has a working door; `restoreSection`'s
+  "standing pre-13 boundary" doc comment updated to the two-step road.
+  Behavioral reverts EXECUTED (below).
+- **`2492ac0` (the app package):** **(1) the PROGRESS BAR** on the
+  scroll book view (S4-9(1)) — rows report SwiftUI scroll VISIBILITY
+  (one boolean per realized row, `onScrollVisibilityChange` threshold
+  0.05 on the row's ONE content view — card or expanded body), the pure
+  sticky brain answers "post k of n · p%" from the POST LIST alone
+  (foreign ids count for nothing; zero-report transition frames keep
+  the last position — pinned); rendered as a thin ProgressView + label
+  ABOVE the standing jump slider (the slider stays the jump control —
+  judgment call 6). **(2) the KINDLE-STYLE PAGED VIEW** (S4-9(2), her
+  words) — `PagedBookView` beside Book/Read in a THREE-WAY toggle
+  (`BookStructureModel.ViewMode` gains `.pages`; a finished book still
+  opens into Read): page = a post, vertical ScrollView of any length,
+  page header (chapter context · title · date · open ↗), ◀ ▶ flips +
+  the bottom horizontal scrub over the SAME `scrubIndex` brain, "page
+  k of n — title" label; EXACTLY ONE page mounts (hosted-pinned: a
+  60-post book realizes 1 read surface; a flip swaps, never
+  accumulates); the page opens READ-CHEAP, a click upgrades it to THE
+  one live editor via the standing `BookViewModel.focus` machinery, a
+  badge tap seeds the fan; **flipping releases focus** (judgment call
+  7); the navigator becomes a PAGE-JUMP while paging (posts land
+  read-cheap, chapters land their first page, the › marker follows the
+  current page); entering pages seeds from focus; `pagedIndex` lives on
+  the model (survives mode flips; adopt clamps it). **(3) N36's
+  faces** — the target rides the word-count label BOTH bars already
+  carry (`WordTargetFace`, one shared control; `WordTargetFaceCopy` in
+  the Registry — one copy home): progress in the label ("· 25% of
+  5,000w target"), click opens the setter popover (`ExtentInput` — the
+  shelf's one parse rule, refuse-and-keep), Write's truth is the
+  observed header, Takes refreshes at the segmentation chip's cadence
+  (`refreshSegmentation` now carries both facts — judgment call 11);
+  refusals incl. the PROVISIONAL sealed refuse SPEAK (pinned). **(4)
+  N37's surface** — "Deleted books" joins the Archived & Deleted home
+  (bounded window+1 listing; surface-local Restore door emitting
+  exactly `restoreReading`; the book returns WHOLE through the model —
+  pinned; a refused restore speaks).
+- **`4a38644` (tutorial, P-6):** the "books & the shelf" lesson gains
+  the three-view toggle paragraph (BOOK + its progress bar · PAGES ·
+  READ) and the extended finish/target paragraph (the per-post target's
+  door named — "click the word counts in the editor's bottom bar";
+  deleting a book recoverable via Archived & Deleted). Non-journal
+  (R57). NEW walk act
+  `pagesFlipTheGuideTargetsAreRealAndTheBookRestoresWhole`, run on the
+  field guide ITSELF: prose promises + the page brain flips/scrubs/
+  clamps the guide's lessons + the navigator jump + `setPostWordTarget`
+  through the header + the FULL delete→list→restore round-trip with
+  chapters/lessons/assignments order-compared before/after.
+- **`6107924` (the two 13c documents — the EOL directive's
+  committed-scope inputs; her S4-16 condition DISCHARGED):**
+  - **`notes/plans/phase-13c-uniform-page-view-brief.md`** — the
+    detailed brief for the uniform-page traditional book view
+    (S4-9(3)): two-tier pagination (globally ESTIMATED from a
+    block-extent index; locally MEASURED by bounded CTFramesetter
+    windows — the 11b PDF path; the TK2-spike estimate-revise
+    precedent), settled facts separated and cited (the Phase 6 ruling;
+    TK2 cannot flow one document into many containers — pagination
+    lives OUTSIDE the editor stack; AppSpec §4's stored-estimates door
+    with derived-vs-stored options), the estimated-page scrub domain
+    with honest tildes, spread-only realization (P1/P3), composition
+    with 4F's shipped machinery, edge cases decided on paper (splitting
+    blocks; chapter breaks; callouts; no comments; v1 read-only with
+    wake-to-edit; the resize posture), five open questions for the 13c
+    architect.
+  - **`notes/plans/phase-13c-memo-smart-to-curated.md`** — the N38
+    design memo (S4-28.4, her uncertainty preserved; the T4 register):
+    THREE conversion shapes enumerated — (A) materialize-and-convert +
+    the fresh-smart-book offer (the recommendation; zero schema change,
+    no new repair class, the cross-device race thought through), (B)
+    the true hybrid derived∪pinned with its semantic knot NAMED (the
+    pinned-because-chaptered-then-untagged question), (C) snapshot-child
+    as the fallback; the conversion doors (refusal-becomes-offer per
+    R115, one transaction, order frozen what-you-see); what never
+    changes (the daily rule, drainage, R30); FIVE plain-language
+    rulings wanted from her at the 13c kickoff.
+
+**Counts:** core **798/94 → 817/96 GREEN** (full `swift test` after each
+core commit — +2 schema/record, +8 op incl. the wire test, +9
+restoreReading; 2 new suites: `ContainerWordTargetTests`,
+`RestoreReadingTests`). Mobile: **BUILD SUCCEEDED after every core
+commit** (the migration compiles into the mobile target). Mac:
+**PENDING** — expected arithmetic on top of 4E's pending expectation:
+640/121 → **646/122** (+3 `PagedBookViewTests` in 1 new suite in
+BookViewTests.swift, +2 LifecycleFacesTests, +1 TutorialWalkTests act),
+NOT asserted: no Mac suite executed (`CGSSessionScreenIsLocked` read
+**1** at the app-side test phase, checked once per the regime note;
+`build-for-testing` compiled app + tests clean after every commit — the
+block is execution, not code). **THE CUMULATIVE PENDING RUN NOW
+DISCHARGES ALL SIX BATCHES: 4A 581/113 → 4B 590/114 → 4C 611/117 → 4D
+619/117 → 4E 640/121 → 4F 646/122.**
+
+**THE DEPLOY-READY NOTE (the batch's standing consequence):**
+`07_phase13b_lockstep.sql` is authored, pinned (the marker-4 upsert ==
+`SyncSchema.lockstepVersion` — the drift pin fails the build if either
+moves alone), and **NOT RUN — the deploy is the ORCHESTRATOR'S at the
+consolidated post-ladder window** (pre-authorized by the EOL addendum;
+the R53 shape: mirror FIRST, marker readback + probes logged, THEN the
+client Release refresh). Consequences, exact: (1) until the mirror is at
+marker 4, a v1_12 client **visibly refuses to sync** — outbox intact,
+cursor unmoved, by design (SyncSpec §12); (2) the shipped
+`/Applications` build stays marker-3 and KEEPS SYNCING against the
+marker-3 mirror meanwhile — nothing degrades before the window; (3) at
+the window the order is mirror-deploy → Release build → copy →
+relaunch, back-to-back at a zero-instance window (between the deploy
+and the copy, the OLD build would refuse visibly if launched — the
+accepted §12 consequence, same as the Phase 13 event's); (4) the
+production mirror and the real store were NOT touched by this batch
+(the file is repo-side only).
+
+**Traced mechanisms:**
+- *Why restoreReading's membership sweep carries a live-post guard:*
+  the reading's cascade stamps its memberships with the READING's
+  `deleted_at`; a post deleted AFTER the reading leaves that stamp in
+  place (the container cascade only restamps LIVE memberships), so the
+  exact-stamp sweep alone would revive a live pointer at a dead post.
+- *The DOCUMENTED CORNER (found by this batch's own test, pinned as
+  behavior):* in that same order-of-deaths, `restoreContainer` on the
+  post sweeps by the POST's stamp — which that membership never wears —
+  so restoring the reading AND the post leaves the membership dead: a
+  twice-diverged story, consistent with the standing doctrine ("rows
+  whose story diverged are left alone"); the ordinary add-to-book door
+  is the honest road back (asserted in
+  `aPostThatDiedAfterTheReadingStaysOutOnRestore`).
+- *Why the paged view has no pagination problem:* page = a POST — the
+  page domain IS the post list (the Phase 6 model-driven ruling's
+  letter), so "any length" costs nothing; the genuinely hard uniform-
+  page problem is exactly what the 13c brief designs.
+- *Why the progress mechanism is Phase-6-clean:* the reports are
+  per-realized-row booleans from the SwiftUI scroll container (never
+  TK2 layout, never pixel math in the model); the brain's only inputs
+  are (visible ids, the entry list) — the post domain.
+- *Why marker + lockstepVersion share one commit:* the AuthRLSDDL drift
+  pin reads BOTH (the last lockstep file's marker must equal the
+  client constant) — splitting them leaves an unbuildable midpoint.
+- *Why the word-target face adds zero bar width:* it re-skins the
+  word-count label both bars already render (Button in the label's own
+  register); the crowded-bar concerns (N15/N35) are untouched.
+
+**Registry/R118 note:** NO new declared acts — the three-way view-mode
+toggle, the progress bar, the page flips/scrub, the word-target label
+face, and the Deleted-books Restore door are all in-view/surface-local
+affordances of un-routed acts (the standing 4A–4E reading; the restore
+door is the 1b registry-scope call's recovery-surface class). R118
+parity held by construction: the target face ships on BOTH bars in the
+same commit. The registry file is byte-untouched this batch.
+
+**Red-on-old / behavioral-revert evidence:**
+- *EXECUTED (core, headless — run RED, then restored green):*
+  - `setPostWordTarget`'s seal + no-op guards temporarily dropped →
+    `aSealedPostRefusesTheTargetProvisional` RED ("an error was
+    expected but none was thrown") and the no-op outbox pin RED (a row
+    enqueued); restored, 10/10 green.
+  - `restoreReading`'s live-post guard dropped → 
+    `aPostThatDiedAfterTheReadingStaysOutOnRestore` RED (the dead
+    post's membership revived); the section sweep broadened past the
+    exact stamp → `divergedStoriesStayDead` RED (the independently
+    deleted chapter revived) AND
+    `theRevivedReadingOpensTheRestoreSectionDoor` RED
+    (`sectionNotDeleted` — already alive); restored, 9/9 green.
+- *Contract pins, recorded honestly (the 4C (c)/4E (e) precedent):* the
+  paged view, the progress brain, the target faces, and the recovery
+  surface are NEW capabilities with no pre-4F behavior to run red —
+  their pins are contract pins (the one-page realization pin, the
+  sticky-progress pin, the face pins, the restore-whole pins); the
+  v1_12 drift CLASS is pinned structurally (AuthRLSDDL + A6 walks fail
+  the build on either side moving alone).
+- *PENDING with the suite run (exact procedures for the verifier):*
+  (1) the FULL Mac suite (`xcodebuild test-without-building -scheme
+  Variorum -destination 'platform=macOS'` from `App/Variorum/`; expect
+  **646/122** — cumulatively discharges every prior batch's pending
+  run; confirm the "Test run with 646 tests" line); (2) the visual
+  loop: the three-way toggle; the paged view's flip/scrub feel, the
+  page header's chapter line, the read→live upgrade and the
+  flip-away release; the progress bar's movement while scrolling the
+  scroll view (sticky, never snapping to zero mid-scroll); the
+  word-target popover on BOTH bars (set 5000 on a post with known
+  counts — the label gains "· n% of 5,000w target"; sealed post: the
+  refusal speaks); the Deleted books section (delete a throwaway book
+  in the DEV store, restore it, chapters back); (3) the
+  `/Applications` refresh — WITHHELD and now BEHIND THE DEPLOY (the
+  DEPLOY-READY note's order); (4) the field-guide re-seed — the prose
+  is a SIXTH revision past the seeded real-store copy (4A cuts, 4B
+  merge, 4C's four, 4D's seven, 4E canvas, 4F books) — rides the A1
+  rail at the orchestrator's window.
+
+**Judgment calls / PROVISIONALs (R119 — for the author's deferred walk):**
+1. **The seal posture on `setPostWordTarget` — PROVISIONAL: REFUSE**
+   (`lockedPost`), mirroring the reading extent setters' refuse-under-
+   locked rule — a sealed post is marked complete, and its writing goal
+   reads as part of what "complete" froze (the architect's recorded
+   lean, followed). Options weighed: (a) refuse — CHOSEN; (b) allow
+   under the N34 container-row-metadata class (title/date/profile/
+   segmentation stay editable under seal — one guard line + one pin
+   rewrite to flip); (c) allow-clear-only — rejected as contrived.
+   In-line at the op and the pin.
+2. **Core read-side touches beyond the strict three-item allowance,
+   each the letter's read side:** `ContainerHeader.wordTarget` (the
+   bars' live face through the EXISTING observed-header pipe — an
+   app-side raw-SQL read would go stale after the setter and break the
+   query-layer discipline), `Queries.deletedReadings` (N37's recovery
+   feed — the surface cannot exist without a listing), and
+   `restoreSection`'s doc-comment update (the boundary its refusal
+   cites reversed). Nothing else in `Sources/` moved; `Sync/` exactly
+   the lockstepVersion constant.
+3. **No mint-time `wordTarget` on `createPost`** (unlike
+   `createReading`'s birth param): the setter is the only door — no
+   flow mints a post with a target in hand; one door, one test surface.
+4. **The face IS the word-count label** (both bars): zero new width on
+   the N15/N35-contested bars; the cost is a QUIET door
+   (help-discoverable + the tutorial sentence names it). Alternatives
+   recorded for the propose-only sweep: a dedicated bar button; a Post
+   menu item.
+5. **Pools refuse the target** (`wrongContainerKind` via `livePost`) —
+   a word target is a post concept (her words: "a word limit on a
+   post"); scraps don't have writing goals.
+6. **The progress bar renders BESIDE the jump slider** (thin
+   ProgressView + "post k of n · p%"), not merged INTO it — a two-way
+   slider that scrolling drags while the user scrubs fights the hand;
+   two honest controls beat one contested one. Threshold 0.05 (a row
+   counts as visible at a sliver — the furthest-sliver reading matches
+   "where am I"), sticky across zero-report frames.
+7. **Flipping a page releases focus** (pages open read-cheap — the calm
+   default; the alternative, focus-follows-the-flip, would mount a
+   live editor per flip). The navigator lands pages READ-CHEAP too
+   (while paging it is a jump tool; the book-mode click keeps its
+   focus-to-edit behavior). `pagedIndex` lives on the MODEL so the
+   page survives mode flips within the session; entering pages seeds
+   from focus.
+8. **`restoreReading` readings:** smart books not refused (the flip
+   restores the book + its spec; the sweeps match nothing — recorded);
+   finished restores finished (no lock guard on a recovery door — the
+   restoreContainer parallel); no undo entry (the door IS the
+   recovery); membership uniqueness safe by construction (no live
+   membership can exist for a dead reading — every add refuses through
+   `liveReading`).
+9. **The documented corner** (traced above) pinned as BEHAVIOR, not
+   patched: patching it would need cross-stamp membership archaeology
+   in `restoreContainer` — the diverged-stories doctrine says leave it;
+   the add-to-book door is one click.
+10. **`refreshSegmentation` extended, not renamed** (one header read
+    now carries both bar facts — segmentation + target): minimizing
+    churn under the locked verification regime beat the nicer name;
+    flagged for the ladder if it cares.
+11. **`deletedReadings` lists smart books too** — the restore door
+    serves them (judgment call 8); the listing says "smart book" per
+    row.
+12. **`ExtentInput` reused from `ShelfView.swift`** by the new face
+    (same module) — the one parse rule, deliberately not duplicated; if
+    the ladder reads the Shelf-file placement as a cross-feature smell,
+    the move to Registry/ is mechanical.
+
+**Deviations from the brief:** none in scope or semantics — every 4F
+letter shipped (progress bar, paged view, N37 + surface, N36 + v1_12 +
+artifacts, both 13c documents, tutorial); the deploy deliberately NOT
+executed (the brief's own letter — the orchestrator's window). Execution
+deviations are the regime's PENDING carries (suite run, visual loop, the
+withheld refresh now behind the deploy).
+
+**For the ladder (this is the stage's LAST batch — the ladder is next; foci):**
+- The v1_12 lockstep artifacts: the marker/constant drift pins; the
+  NO-RPC-REWORK reading (verify against 06's deployed bodies that
+  to_jsonb/jsonb_populate_record genuinely carry the new column both
+  directions — the header states it, the A6 walk covers the DDL text,
+  the gated integration pass is the runtime proof at deploy time).
+- `restoreReading`'s sweep SQL against `restoreContainer`'s (the
+  live-parent guard shape; the documented corner's disposition).
+- The paged view's flip-away-from-a-dirty-live-page window (focus
+  release → editor unmount → teardown flush through the per-post
+  coordinator — the 4E ring-follow class; confirm no clobber window
+  against the settle discipline).
+- The progress reports under fast scrolling + LazyVStack recycling
+  (sticky logic vs stale sets; the visual loop verifies feel).
+- The seal-posture PROVISIONAL (product-flavored — flag for her walk,
+  not for autonomous re-decision).
+- The word-target face's quiet-door discoverability (judgment call 4 —
+  a sweep candidate, not a defect).
+- The 13c brief's S2 claim (TK2 single-container) — re-verify against
+  the SDK at 13c build time; it is stated as verify-at-build.
+
+
 
 The machine auto-locked despite the addendum's open-machine intent
 (`CGSSessionScreenIsLocked = 1`, orchestrator-reverified; the Mac test
