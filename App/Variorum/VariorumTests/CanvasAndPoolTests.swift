@@ -383,6 +383,12 @@ struct CanvasBoardGeometryTests {
         // values (Double passes; CGFloat fails — reproduced minimally).
         // Typing the literal keeps the comparison EXACT equality — no
         // tolerance is introduced, so no real regression can hide.
+        // Round-3 NIT-B: the general rule now lives where the next author
+        // meets it — `EditorTestSupport.swift`'s test-conventions header
+        // (type both sides of a numeric #expect). The INVERSE shape is the
+        // dangerous one — a mismatched `#expect(a != b)` is silently TRUE,
+        // i.e. a hollow pin — and the round-3 sweep found the repo clean of
+        // it.
         #expect(origin.y == CGFloat(250 + 170 + 40), "below maxY plus two gutters")
         #expect(origin.x == 20)
     }

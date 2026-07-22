@@ -8,6 +8,23 @@
 //  through EditorSurfaceDelegate, so edits travel the production path:
 //  shouldChangeTextIn → storage edit → didProcessEditing → index/autosave.
 //
+//  ── Test conventions worth knowing before you write a pin ──────────────
+//
+//  TYPE BOTH SIDES OF A NUMERIC `#expect` (13b Stage 4 gate + ladder round
+//  3, NIT-B — the trap cost one green suite a false RED). `#expect`
+//  decomposes its operands, and a mismatched pair like
+//  `CGFloat == <Int literal sum>` resolves through implicit `AnyHashable`
+//  promotion — where CGFloat skips the cross-type numeric canonicalization
+//  Double gets: `AnyHashable(CGFloat(460)) == AnyHashable(460)` is FALSE
+//  for bit-identical values (the Double twin is true). The fix is never a
+//  tolerance: type the literal (`CGFloat(250 + 170 + 40)`) and keep exact
+//  equality. Live example + trace: `CanvasAndPoolTests`'
+//  `theGridStartsBelowThePositionedBoundingBox`.
+//  The INVERSE is the dangerous direction and was swept at round 3: a
+//  mismatched `#expect(a != b)` is silently TRUE — a pin that can never
+//  fail. The sweep found the repo CLEAN of that shape; keep it clean by
+//  typing both sides.
+//
 
 import AppKit
 import Dependencies
