@@ -489,18 +489,28 @@ enum TutorialSeeder {
             + "whole run as one undoable act. From Takes, Merge joins the block "
             + "you're in UPWARD, into the one above.",
 
-            "When a merging block has other takes, the merged text is what you "
-            + "were LOOKING at — the other takes are not glued together in every "
-            + "combination. They stay with the released blocks in lineage, the "
-            + "app says so out loud, and \u{2325}\u{2318}Z brings the sources back, takes "
-            + "and all. The block below carries a spare take so you can watch "
-            + "exactly that happen when you merge it into this one.",
+            // 13b 4B (S4-23): the merge CEREMONY — fanned merges are no
+            // longer a silent rule; the sheet shows the choice.
+            "When either block has other takes, Merge opens a small CEREMONY "
+            + "instead of deciding silently: both blocks' takes side by side, "
+            + "pre-paired with the two you were looking at — press \u{23CE} and you "
+            + "get exactly the everyday join. Pair takes with \u{FF0B} and the merged "
+            + "block gets one joined take per pairing (divide a two-take block, "
+            + "pair 1+1 and 2+2, and it comes back whole); check \u{201C}carry\u{201D} to "
+            + "ride a take over unjoined; each pairing previews its join — "
+            + "space, new line, or nothing. Takes are never multiplied "
+            + "combinatorially: pairing is choosing by hand.",
 
-            "This block has a second take — merge me upward and the app will "
-            + "tell you where my other take went.",
+            "Whatever you leave unpaired stays with the released blocks in "
+            + "lineage — the app names the road, and \u{2325}\u{2318}Z brings the sources "
+            + "back, takes and all. The block below carries a spare take so you "
+            + "can watch the ceremony open when you merge it into this one.",
+
+            "This block has a second take — merge me upward and the ceremony "
+            + "will open with my takes laid out for pairing.",
         ])
-        try take(on: merging.blocks[5],
-            "The spare take: I stay with my released block in lineage when you merge — undo brings me home.")
+        try take(on: merging.blocks[6],
+            "The spare take: pair me, carry me, or leave me in lineage — the merge ceremony asks; undo brings me home.")
 
         _ = try lesson(structure, "the two undos", [
             "Variorum keeps two undo stacks, deliberately separate. \u{2318}Z is TEXT "

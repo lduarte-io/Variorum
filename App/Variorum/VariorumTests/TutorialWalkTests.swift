@@ -1256,7 +1256,10 @@ struct TutorialStructureActsTests {
             let index = try #require(before.slots.firstIndex { $0.blockID == fannedSlot.blockID })
             let above = before.slots[index - 1]
 
-            // From Takes, merge joins UPWARD: focused block into the one above.
+            // The INSTANT op (13b 4B: in the UI a fanned pair now opens the
+            // merge ceremony, whose ⏎ default reproduces exactly this; the
+            // instant op remains the chain path's brick — this pins the
+            // stored meaning the ceremony's default promises).
             let result = try await session.runner.run { ops in
                 try ops.merge(above.blockID, fannedSlot.blockID)
             }
@@ -1276,6 +1279,60 @@ struct TutorialStructureActsTests {
                     arguments: [fannedSlot.blockID]) ?? 0
             }
             #expect(releasedTakes == 2, "they stay with the released block — undo brings them back")
+        }
+    }
+
+    @Test func theMergeCeremonyPairsAndCarriesTheStagedTakes() async throws {
+        // 13b 4B (S4-23): the lesson now teaches the ceremony — pair the
+        // two takes you were looking at, CARRY the spare, and the merged
+        // block holds both; ⌥⌘Z restores the sources whole. Run on the
+        // lesson's own staged fanned pair.
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "merge") }
+            let before = try await projection(db, lesson)
+
+            // The lesson's prose PROMISES the ceremony's grammar.
+            let ceremonyProse = try #require(before.slots.first {
+                $0.text?.contains("opens a small CEREMONY") == true
+            }).text ?? ""
+            #expect(ceremonyProse.contains("pre-paired"), "⏎ = the everyday join, promised")
+            #expect(ceremonyProse.contains("carry"), "the carry option, promised")
+
+            let fannedSlot = try #require(before.slots.first {
+                $0.text?.hasPrefix("This block has a second take") == true
+            })
+            let fan = try #require(before.fans[fannedSlot.blockID])
+            let rendered = try #require(fan.first { $0.id == fannedSlot.variantID })
+            let spare = try #require(fan.first { $0.workingText.contains("The spare take") })
+            let index = try #require(before.slots.firstIndex { $0.blockID == fannedSlot.blockID })
+            let above = before.slots[index - 1]
+
+            let result = try await session.runner.run { ops in
+                try ops.mergeCeremony(
+                    above.blockID, fannedSlot.blockID,
+                    pairings: [.init(
+                        firstVariantID: above.variantID!,
+                        secondVariantID: rendered.id,
+                        join: MergeJoin.canon(
+                            head: above.text ?? "", tail: rendered.workingText))],
+                    carries: [spare.id])
+            }
+            #expect(result.variants.count == 2, "one joined take + the carried spare")
+            #expect(result.variants[0].workingText
+                == (above.text ?? "") + " " + rendered.workingText,
+                "the pairing joins exactly what was shown")
+            #expect(result.variants[1].workingText == spare.workingText,
+                    "the spare rides whole — pair me, carry me, the prose says")
+
+            // ⌥⌘Z puts the whole thing back — takes and all.
+            ShellActions(session: session, shell: ShellRouter()).structuralUndo()
+            await poll {
+                ((try? db.read { try Queries.renderPost($0, containerID: lesson) })?.count ?? 0)
+                    == before.slots.count
+            }
+            let restored = try await projection(db, lesson)
+            #expect(restored.fans[fannedSlot.blockID]?.count == 2,
+                    "the sources came back whole, spare take included")
         }
     }
 
