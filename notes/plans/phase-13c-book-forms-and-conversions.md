@@ -12,7 +12,54 @@ file is the phase's ONE running record.
 **Cast:** all-Fable (orchestrator · fresh implementer per batch · fresh
 cold reviewer per ladder round) — **author-confirmed IN ADVANCE,
 2026-07-22** ("all fable is confirmed", the EOL addendum); she may still
-redirect at the kickoff sitting.
+redirect at the kickoff sitting. **She intends to kick 13c off when her
+Fable credits reset** (stated at the 13b closeout).
+**The paste-ready kickoff message is the third section below**
+("Kickoff message"); the two sections before it exist because this file
+changed hands between models and opens with two review obligations.
+
+## PROVENANCE — read this before trusting any line (author's instruction, 2026-07-22)
+
+**This file was drafted by FABLE and finished by OPUS, and the seam is
+deliberately visible in git.** The Fable Stage 4 execution orchestrator
+wrote the draft in its scratchpad and then hit the author's Fable token
+limit mid-gate; an Opus session finished 13b's closeout and this plan.
+Two commits make the handoff auditable:
+
+1. **`224938b` — "FABLE-AUTHORED SCRATCH PLAN"**: the draft committed
+   UNEDITED (constitution placeholder and empty baselines included).
+2. **the next commit — the Opus edits**: `git diff 224938b <this file>`
+   shows EXACTLY what changed hands.
+
+**Your instruction as the 13c orchestrator (hers, verbatim-faithful):**
+review the plan file overall AND the Opus changes specifically — "so it
+can use its own judgement or ask me questions if anything seems to be
+different." The largest deliberate divergence is named for you: **the
+visual/design/UI review left this phase's scope entirely** (see
+"What deliberately did NOT come here"). Everything else in the Opus diff
+is the constitution splice, the real baselines, and the notes below.
+
+## First acts at phase start (before any batch)
+
+1. **Re-review the 13b gate fixes — 76 lines, three commits
+   (`e5b8221`, `16e5fcb`, `2e60d0d`).** The author asked for this
+   explicitly: the work is important and landed at the very end of 13b
+   under model-exhaustion conditions. `16e5fcb` in particular modifies
+   `Surface/PaneSurface.swift` — the ONE text surface every pane in the
+   app composes (P-3) — so its blast radius is the editor, takes,
+   lenses, compare, canvas, and the read tier alike. A ladder round-3
+   cold review ran over it at 13b's close (verdict in the 13b plan
+   file); this is a SECOND look with fresh eyes, not a repeat.
+2. **Review the applied canon deltas.** 13b's closeout wrote real
+   semantic changes into the canonical docs — the merge-pairing
+   extension (AppSpec §9 + OverallModel §7), the cut rule + parking
+   semantics (same sections), and `restoreReading`'s deliberate
+   reversal of the readings-have-no-restore-door boundary (AppSpec §9).
+   These are not bookkeeping: a round-1 reviewer already caught the
+   delta checklist incomplete once. Read them against the S4 rulings
+   they encode before building on them.
+3. **Verify the baselines below with your own runs** (the skill's
+   verify-don't-trust rule).
 
 ## Kickoff message (for the fresh /architect-phase 13c orchestrator — read this first)
 
@@ -25,8 +72,13 @@ redirect at the kickoff sitting.
 > the ledger below. Then `notes/handoffs/phase-13b-handoff.md` (state
 > at the boundary; anything still-held there that the author has since
 > discharged is recorded in its checklist). Confirm the repo state with
-> `git log --oneline -10` and `git status`. Verify the baselines below
-> with your own runs before building on them. The phase OPENS with an
+> `git log --oneline -10` and `git status`. **Read "PROVENANCE" and
+> "First acts at phase start" below before anything else — this file
+> changed hands between models mid-flight, the seam is auditable by
+> `git diff`, and two review obligations open the phase.** Verify the
+> baselines below with your own runs before building on them. Note what
+> deliberately did NOT come into this phase (its own section). The
+> phase OPENS with an
 > author-attended kickoff sitting — the agenda is the "Kickoff sitting
 > agenda" section; bring the question batches (≤4 per call), record
 > her rulings verbatim-faithful in this file the same turn, then run
@@ -59,26 +111,55 @@ redirect at the kickoff sitting.
    the honest mechanism) — if it still bothers her in use, this is an
    R116 design-memo conversation at the sitting, not a patch.
 
+## What deliberately did NOT come here (author's decision, 2026-07-22 — the largest Opus divergence from the Fable draft)
+
+**The visual / design / UI review round is NOT 13c's.** The Fable draft
+assumed 13b's closing propose-only sweep would feed this phase's kickoff
+agenda. The author removed that: the sweep and the accumulated
+screenshot/usability verification became a **standalone, re-runnable
+item on the master plan's phase table** (unslotted, like the Apple Notes
+import), because — her reasoning — 13c "already has a defined scope and
+several big issues," the review is "something that can be run multiple
+times," and separating it "saves the 13c orchestrator context from going
+through a bunch of screenshots and items before it begins the more
+defined items."
+
+Consequences for you, stated plainly:
+
+- **Do NOT import the visual backlog.** The per-batch visual-loop items
+  live in 13b's batch records (4A–4F); a future design-review round
+  starts by reading those lists. They are not 13c ledger rows.
+- **Several 13b Stage 4 surfaces shipped with machine verification but
+  NO visual pass** — the reworked take ceremony sheet, the merge
+  ceremony sheet, the rebuilt Compare board, the reworked Canvas, and
+  the paged book view + progress bar. The suite, soaks, and pins cover
+  their behavior; nobody has LOOKED at them. The author accepted being
+  first eyes.
+- **ONE targeted exception you must honor:** the uniform-page book view
+  (committed scope 1) composes directly with the **paged view and
+  progress bar 4F shipped**, which are among those visually unverified
+  surfaces. Look at them when you build on them — that is not the same
+  as adopting the sweep.
+
 ## Kickoff sitting agenda (bring as question batches; record rulings verbatim)
 
 - The N38 memo's five rulings; the uniform-page brief's five open
   questions.
-- **The 13b closing sweep's propose-only list** (in the 13b handoff):
-  items she approves ENTER 13c scope as ledger rows; unapproved items
-  are recorded declined-or-parked. The sweep never committed scope on
-  its own — her approval here is the only door.
+- Any 13b handoff checklist items she has not yet discharged, incl.
+  held ratifications (its "worth a look" list is advisory, never a
+  requirement; the deferred-in-place judgment-call walk stays deferred
+  and is never re-asked unprompted).
 - Open organic-use findings from her 13b-era reports (standing triage:
   happy-path breaker / owned row / new row).
-- Any still-held items from the 13b handoff checklist (held
-  ratifications; the deferred-in-place judgment-call walk stays
-  deferred and is never re-asked unprompted).
-- **Kickoff candidates (propose-only, recorded during Stage 4 — enter
-  only on her approval):** the canvas BANK as a future face atop
-  culling (the 4E fork); synced canvas card-size columns (`w`/`h` — a
-  §12 lockstep event); the full margin-hover comment grammar (4D built
-  the minimal caret-block "+ //"); the N34 GLOBAL one_block face (one
-  small core setter away — the 4D-recorded blocker); the word-target
-  face's discoverability (the 4F quiet door); [+ the sweep's list].
+- **Kickoff candidates (propose-only, recorded during Stage 4 — each
+  enters scope ONLY on her approval; none is owed):** the canvas BANK
+  as a future face atop culling (the 4E fork she preserved); synced
+  canvas card-size columns (`w`/`h` — a §12 lockstep event); the full
+  margin-hover comment grammar (4D built the minimal caret-block
+  "+ //"); the N34 GLOBAL one_block face (one small core setter away —
+  the 4D-recorded blocker); the word-target face's discoverability (the
+  4F quiet door); consolidating the two sibling refusal-copy homes onto
+  `OpsRefusalCopy` (the round-1 fix pass's recorded candidate).
 
 ## Binding principles
 
@@ -86,8 +167,59 @@ redirect at the kickoff sitting.
 requirement; the author's directive: copy, don't summarize; byte-exact
 from 13b's plan file).**
 
-[P-1…P-9 BLOCK COPIED BYTE-VERBATIM AT FINALIZATION — placeholder in
-this draft only; the finalized file carries the full block]
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
 
 **The skill's "Applying the constitution" precisions bind here as
 written there** (P-1's routed-vocabulary scope + `.surface`; P-3's two
@@ -149,12 +281,22 @@ placement + parity-by-forwards; the overlay/sink delivery law).
 | C1 | The uniform-page book view (from the 4F brief) | committed, not started |
 | C2 | N38 smart→smart+curated conversion (from the 4F memo; her five rulings first) | committed, not started |
 | C3 | N41 inline-comments airiness (R116-class conversation first) | committed, not started |
-| — | [kickoff-approved sweep items enter here as rows] | — |
+| — | [kickoff-approved candidates enter here as rows] | — |
 
-## Baselines at open
+## Baselines at open (VERIFY with your own runs — the skill's rule)
 
-[FILLED AT 13B CLOSEOUT: core ###/## · Mac ###/### · mobile 11/4;
-the v1_12 deploy + /Applications state; the field-guide seed state]
+- **Core `swift test`: 817 tests / 96 suites** green.
+- **Mac `xcodebuild test`: 645 tests / 122 suites** green — the count
+  the 13b gate verified by execution. NOTE the arithmetic lesson worth
+  carrying: the batch records' hand-estimated 648 was wrong by 3 because
+  **a parameterized `@Test(arguments:)` reports as ONE test regardless
+  of case count** (13b Stage 4 added two 2-seed soaks that were each
+  counted as two), plus a retired/migrated pin. Estimate counts that
+  way or don't estimate them.
+- **Mobile: 11 / 4**, builds clean.
+- **The v1_12 lockstep state and the `/Applications` + field-guide seed
+  state are recorded in the 13b handoff's checklist** — read it there
+  rather than trusting a number copied here.
 
 ## Environment traps (the invariant core — the skill's environment section binds; this phase's specifics)
 
