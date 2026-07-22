@@ -63,7 +63,7 @@ enum TutorialSeeder {
         ("structure", ["divide", "the take ceremony", "extract & make block",
                        "merge", "the two undos"]),
         ("ways of looking", ["lenses", "compare & versions",
-                             "outline \u{B7} blocks \u{B7} canvas"]),
+                             "blocks \u{B7} canvas"]),
         ("the library of things", ["comments & tags", "books & the shelf",
                                    "pool & scraps", "export — it's all yours",
                                    "the seal", "three ways of working"]),
@@ -255,8 +255,8 @@ enum TutorialSeeder {
             + "\u{2318}J opens today's journal entry — the journal is its own daily "
             + "notebook on the shelf.",
 
-            "A post opens into one of seven modes — the tabs read Write \u{B7} Takes \u{B7} "
-            + "Lenses \u{B7} Compare \u{B7} Outline \u{B7} Blocks \u{B7} Canvas, and \u{2318}1 through \u{2318}7 "
+            "A post opens into one of six modes — the tabs read Write \u{B7} Takes \u{B7} "
+            + "Lenses \u{B7} Compare \u{B7} Blocks \u{B7} Canvas, and \u{2318}1 through \u{2318}6 "
             + "switch between them. Takes is where a post usually opens; Write is "
             + "the plain full page. The rest of this book visits each mode where "
             + "it earns its keep.",
@@ -304,7 +304,7 @@ enum TutorialSeeder {
             + "mints an empty block and puts your cursor in it — just keep typing.",
 
             "A block can carry a NAME — a handle for finding it, never printed in "
-            + "the prose. This block wears one: open the Blocks tab (\u{2318}6) and "
+            + "the prose. This block wears one: open the Blocks tab (\u{2318}5) and "
             + "you'll see \u{201C}the named block\u{201D} where every other row shows its first "
             + "sentence. Name\u{2026} on any row sets or clears one.",
 
@@ -570,9 +570,27 @@ enum TutorialSeeder {
             + "in one gesture. Mark = connect, duplicate = copy + connect.",
 
             "This lesson already has a version twin — it was duplicated when "
-            + "the book was seeded. Open Compare (\u{2318}4): the two posts sit "
-            + "aligned block by block, kinship traced by lineage. Edit the twin "
-            + "as brutally as you like; this original never feels it.",
+            + "the book was seeded. Open Compare (\u{2318}4): the posts sit side "
+            + "by side, related blocks tied by lineage — and every pane is "
+            + "EDITABLE. Click into either column and type: the edit lands in "
+            + "that post, and the one live ring moves wherever you click, "
+            + "across posts. Drag a block's \u{28FF} handle to reorder it — each "
+            + "column reorders its own post only.",
+
+            "Compare is honest about relationships. \u{201C}Follow this post's "
+            + "order\u{201D} arranges the other columns beside their related blocks "
+            + "(display only — nothing moves); lineage colors mark the "
+            + "families, and rails appear only where a real relationship "
+            + "exists. Compare against an unrelated post and it says \u{201C}there "
+            + "is no relationship here\u{201D} — the two just sit plainly side by "
+            + "side, no blanks, no colors.",
+
+            "Outlines live here too: press \u{201C}make outline post\u{201D} in "
+            + "Compare's header and the app mints a linked condensation — "
+            + "first sentence per block — and opens it beside this post, "
+            + "registered point by point. And the Diff sheet now has "
+            + "Save\u{2026} — the whole diff as a plain-text file, ready to hand "
+            + "to an AI agent.",
 
             "Unmark deletes only the connection — both posts stay exactly as "
             + "they are. The library's right-click menu has Duplicate as "
@@ -585,21 +603,18 @@ enum TutorialSeeder {
         try ops.renameContainer(twin.post.id, title: "compare & versions \u{2014} the twin")
         try ops.applyTag(tagID, toPost: twin.post.id)
 
-        _ = try lesson(looking, "outline \u{B7} blocks \u{B7} canvas", [
-            "Three more ways of looking, each a different traversal of the same "
-            + "post — nothing is ever copied into a view.",
+        _ = try lesson(looking, "blocks \u{B7} canvas", [
+            "Two more ways of looking, each a different traversal of the same "
+            + "post — nothing is ever copied into a view. (Outlining lives in "
+            + "Compare now: an outline is just a related post beside its "
+            + "draft — the previous lesson's \u{201C}make outline post\u{201D}.)",
 
-            "OUTLINE (\u{2318}5) pairs a draft with an outline post, mapped by "
-            + "lineage. Press \u{201C}make outline post\u{201D} there and the app mints one "
-            + "from this post — first sentence per block — and shows which "
-            + "outline point became which block.",
-
-            "BLOCKS (\u{2318}6) is the post as a table of contents: one row per "
+            "BLOCKS (\u{2318}5) is the post as a table of contents: one row per "
             + "block, named where you set names, first sentence where you "
             + "didn't. Rows reorder with \u{2191} \u{2193}, rename with Name\u{2026}, and a row "
             + "expands to edit in place — handy in a long post.",
 
-            "CANVAS (\u{2318}7) scatters the blocks as cards you can drag around — "
+            "CANVAS (\u{2318}6) scatters the blocks as cards you can drag around — "
             + "arrangement is yours and is remembered, the post's order doesn't "
             + "move. The \u{2039} \u{203A} switcher on a card flips which take you're "
             + "viewing (\u{201C}viewing — not what the post shows\u{201D}); choosing stays a "

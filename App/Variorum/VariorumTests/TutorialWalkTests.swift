@@ -1439,11 +1439,23 @@ struct TutorialLookingActsTests {
         }
     }
 
+    /// 13b 4C: the mint's lesson home moved — the COMPARE lesson teaches
+    /// "make outline post" now (Compare's header, the retired Outline
+    /// tab's one unique power, S4-3/R99). The act runs on that lesson's
+    /// own content, and the mint REGISTERS beside its draft through the
+    /// same lineage kinship the board reads.
     @Test func outlineMintsALinkedCondensation() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read {
-                try lessonID($0, bookID: bookID, "outline \u{B7} blocks \u{B7} canvas")
+                try lessonID($0, bookID: bookID, "compare & versions")
             }
+            // The lesson's prose PROMISES the door's new home.
+            let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
+            #expect(prose.contains("make outline post"),
+                    "the compare lesson teaches the outline door")
+            #expect(prose.contains("there is no relationship here"),
+                    "the honesty line is promised where compare is taught")
+
             let result = try await session.runner.run { ops in
                 try ops.mintOutlinePost(of: lesson)
             }
@@ -1451,13 +1463,53 @@ struct TutorialLookingActsTests {
             let outlineSlots = try await slots(db, result.post.id)
             let sourceSlots = try await slots(db, lesson)
             #expect(outlineSlots.count == sourceSlots.count, "one outline point per block")
+
+            // "registered point by point": every outline block kins its
+            // source in the board's own kinship read.
+            let kinship = try await db.read { db in
+                try Queries.blockKinship(db, anchor: lesson, other: result.post.id)
+            }
+            #expect(kinship.count == outlineSlots.count,
+                    "every outline point registers beside the block it condenses")
+        }
+    }
+
+    /// 13b 4C: the compare lesson's honesty promise, executable — an
+    /// UNRELATED lesson post composes to ONE free segment (plain side by
+    /// side, no aligned rows), while the seeded twin aligns.
+    @Test func compareHonestyHoldsOnTheLessonsOwnContent() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "compare & versions")
+            }
+            let unrelated = try await db.read {
+                try lessonID($0, bookID: bookID, "blocks \u{B7} canvas")
+            }
+            let strangerKinship = try await db.read { db in
+                try Queries.blockKinship(db, anchor: lesson, other: unrelated)
+            }
+            #expect(strangerKinship.isEmpty, "two lessons share no lineage")
+            let lessonBlocks = try await slots(db, lesson).map(\.blockID)
+            let strangerBlocks = try await slots(db, unrelated).map(\.blockID)
+            let plain = CompareComposition.segments(
+                anchorBlocks: lessonBlocks,
+                peerBlocks: [strangerBlocks],
+                kinships: [strangerKinship],
+                followAnchorOrder: true)
+            #expect(plain == [.free(anchor: lessonBlocks, peers: [strangerBlocks])],
+                    "no relationship ⇒ plain side-by-side, no blanks, nothing aligned")
+
+            // The twin, by contrast, aligns everywhere lineage speaks.
+            let versionSlots = try await slots(db, lesson)
+            let peers = try await db.read { try Queries.versionPeers($0, of: versionSlots[0].blockID) }
+            #expect(!peers.isEmpty, "the twin is still seeded")
         }
     }
 
     @Test func canvasRemembersAnArrangement() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read {
-                try lessonID($0, bookID: bookID, "outline \u{B7} blocks \u{B7} canvas")
+                try lessonID($0, bookID: bookID, "blocks \u{B7} canvas")
             }
             let first = try await slots(db, lesson)[0]
             _ = try await session.runner.run { ops in
