@@ -1195,6 +1195,14 @@ final class EditorViewModel {
         }
     }
 
+    /// 13b 4D (N28/S4-13) — insert-below's Write half, forwarded (the
+    /// machinery lives in `EditorSurfaceController`, the one structural
+    /// door): an empty block mints under the caret block and the caret
+    /// lands in it.
+    func insertBlockBelowCaret() async {
+        await structural.insertBlockBelowCaret()
+    }
+
     /// The add-block door's Write half: the caret jumps to the document's
     /// end — typing there births blocks (crystallization; blocks are born
     /// by typing in Write).

@@ -1053,6 +1053,30 @@ final class TakesViewModel {
         }
     }
 
+    /// 13b 4D (N28's second half — the Takes trap's insert door; S4-13):
+    /// an empty block mints right BELOW the focused block (the pane you're
+    /// in; on a one-block post, THE block) and its pane takes the ring the
+    /// moment its slot arrives — the addBlockAtEnd ring-handover precedent
+    /// at `.after(...)`. Position through the ops layer's fractional index
+    /// (the architect precision); sealed posts refuse through the op,
+    /// spoken.
+    func insertBlockBelowFocused() async {
+        guard let slot = commandTargetSlot else {
+            speak("Click into a block first — the new block lands right below it.")
+            return
+        }
+        statusMessage = nil
+        do {
+            let result: Operations.NewBlockResult = try await session.runner.run { [postID] ops in
+                try ops.newBlock(in: postID, text: "", at: .after(slot.blockID))
+            }
+            choreography.parkFocus(onVariant: result.variant.id)
+            statusMessage = "New block added below — type away."
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
     /// The routed comments door (⌘⇧' — the bars' block menu made
     /// keyboard-reachable): the bar presents the sheet for this target.
     struct CommentsRequest: Identifiable, Equatable {

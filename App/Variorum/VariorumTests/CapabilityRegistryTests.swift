@@ -152,7 +152,8 @@ struct CapabilityRegistryTests {
             .takes(.archive), .takes(.saveLens),
             .structural(.divide), .structural(.extract), .structural(.makeBlock),
             .structural(.merge),
-            .deleteInEveryTake, .commit, .addBlockAtEnd, .toggleSeal, .comments,
+            .deleteInEveryTake, .commit, .addBlockAtEnd, .insertBlockBelow,
+            .toggleSeal, .comments,
             .pageFan(1),
         ]
         for command in commands {
@@ -190,6 +191,22 @@ struct CapabilityRegistryTests {
         #expect(CapabilityRegistry.availability(
             .addBlockAtEnd, in: CapabilityContext(mode: .takes)) == .act,
             "D3's third leg: the add-block door is native where takes live")
+    }
+
+    /// 13b 4D (N28/S4-13): insert-below is NATIVE in BOTH editors by
+    /// construction — her editor-parity ruling ("write should also gain
+    /// 'insert new block below'"), as a registry fact.
+    @Test func insertBlockBelowIsNativeInBothEditors() {
+        #expect(CapabilityRegistry.availability(
+            .insertBlockBelow, in: CapabilityContext(mode: .takes)) == .act)
+        #expect(CapabilityRegistry.availability(
+            .insertBlockBelow,
+            in: CapabilityContext(mode: .write, writeEditorAttached: true)) == .act)
+        #expect(CapabilityRegistry.availability(
+            .insertBlockBelow, in: CapabilityContext(mode: .lenses)) == .act)
+        #expect(!CapabilityRegistry.isEnabled(
+            .insertBlockBelow, in: CapabilityContext(mode: nil)),
+            "honestly grey with no post open")
     }
 
     // MARK: - Stage 1 ladder, round-1 registry-fact pins

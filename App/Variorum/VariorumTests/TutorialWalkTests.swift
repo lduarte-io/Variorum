@@ -792,6 +792,62 @@ struct TutorialWritingActsTests {
         }
     }
 
+    /// 13b 4D (N28's second half — S4-13 editor parity, the lesson's own
+    /// promise): ⌥⌘N mints an empty block RIGHT UNDER the one you're in,
+    /// and the cursor lands in it — Write and Takes alike.
+    @Test func newBlockBelowMintsUnderTheFocusedBlockInBothEditors() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "shaping blocks") }
+
+            // — Takes: the focused pane's block is the target; the minted
+            //   pane takes the ring when its slot arrives.
+            let model = TakesViewModel(session: session, postID: lesson)
+            model.adopt(try await projection(db, lesson))
+            let before = model.projection.slots
+            let target = before[1]
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: target.blockID, variantID: target.variantID!))
+            await model.insertBlockBelowFocused()
+            let afterTakes = try await slots(db, lesson)
+            #expect(afterTakes.count == before.count + 1)
+            let mintIndex = try #require(
+                afterTakes.firstIndex { $0.blockID == target.blockID }) + 1
+            #expect(afterTakes[mintIndex].text == "", "born empty, right below the focused block")
+            model.adopt(try await projection(db, lesson))
+            #expect(model.authority.livePane?.blockID == afterTakes[mintIndex].blockID,
+                    "typing continues instantly in the minted block")
+
+            // — Write: the caret block is the target; the caret lands in
+            //   the mint (through the one structural door).
+            let editor = EditorViewModel(session: session, postID: lesson)
+            editor.tailIdleSleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let delegate = EditorSurfaceDelegate(model: editor)
+            delegate.wire(to: textView)
+            editor.attach(textView: textView, scrollView: scrollView)
+            let (postSlots, header) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: lesson),
+                 try Queries.containerHeader(db, containerID: lesson))
+            }
+            editor.adoptHeader(header)
+            editor.applyProjection(postSlots)
+            let writeTarget = postSlots[0]
+            textView.setSelectedRange(NSRange(location: 2, length: 0))  // inside block 0
+            editor.updateCaretContext()
+            #expect(editor.caretBlockID == writeTarget.blockID)
+            await editor.insertBlockBelowCaret()
+            let afterWrite = try await slots(db, lesson)
+            #expect(afterWrite.count == afterTakes.count + 1)
+            let writeMintIndex = try #require(
+                afterWrite.firstIndex { $0.blockID == writeTarget.blockID }) + 1
+            #expect(afterWrite[writeMintIndex].text == "",
+                    "born empty, right below the caret block")
+            #expect(editor.caretBlockID == afterWrite[writeMintIndex].blockID,
+                    "the caret lands in the minted block")
+        }
+    }
+
     @Test func theSeamsToggleFlipsTheGlobalSetting() async throws {
         try await withTutorialWorld { session, db, _ in
             let before = try await db.read { try Queries.themeSettings($0).seamsVisible }

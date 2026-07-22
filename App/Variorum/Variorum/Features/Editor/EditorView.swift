@@ -210,6 +210,11 @@ extension EditorView {
         case .addBlockAtEnd:
             model.jumpToDocumentEnd()
             return true
+        case .insertBlockBelow:
+            // 13b 4D (N28/S4-13): native in Write — an empty block mints
+            // under the caret block; the caret lands in it.
+            Task { await model.insertBlockBelowCaret() }
+            return true
         case .toggleSeal:
             model.toggleSeal()
             return true

@@ -399,6 +399,33 @@ final class EditorSurfaceController {
         if landed { speakAboutMergedFans(otherTakes) }
     }
 
+    // MARK: - Insert block below (13b Stage 4, 4D — N28/S4-13)
+
+    /// The Write half of the insert-below act: an EMPTY block mints right
+    /// under the caret block (`newBlock(at: .after(...))` — the ops layer's
+    /// fractional index places it) and the caret lands in it. Runs through
+    /// `runStructural` — the one structural door: one flight at a time,
+    /// flush-first, store-led rewrite (seam nil ⇒ the ceremonial full
+    /// re-render; no seam vocabulary exists for an insert), caret by
+    /// identity. A sealed post refuses through the op, spoken.
+    func insertBlockBelowCaret() async {
+        guard let blockID = model.caretBlockID else {
+            // Fire-and-speak (no silent door): the open tail / empty post
+            // cases say what makes blocks there instead of guessing a
+            // position.
+            model.refuseFeedback(model.index.entries.isEmpty
+                ? "No blocks yet — type on the page and each finished paragraph becomes one."
+                : "Put the caret in a block first — the new block lands right below it.")
+            return
+        }
+        let landed = await runStructural { [postID = model.postID] ops in
+            let result = try ops.newBlock(in: postID, text: "", at: .after(blockID))
+            return StructuralOutcome(
+                caretBlockID: result.block.id, caretOffset: 0, seam: nil)
+        }
+        if landed { model.showStatus("New block added below — type away.") }
+    }
+
     // MARK: - The merge ceremony (13b Stage 4, Batch 4B — S4-23, ruled)
 
     /// The merge ceremony's ONE sheet: both blocks' takes side by side,

@@ -280,7 +280,7 @@ struct ShellActions {
     static let paletteActs: [CapabilityID] = [
         .newPost, .todaysEntry, .importFiles, .exportLibrary,
         .commitTake, .structuralUndo, .sealPost,
-        .divide, .extract, .makeBlock, .merge, .addBlockAtEnd,
+        .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow,
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
     ]
@@ -308,6 +308,7 @@ struct ShellActions {
         case .makeBlock: return { dispatch(.structural(.makeBlock)) }
         case .merge: return { dispatch(.structural(.merge)) }
         case .addBlockAtEnd: return { dispatch(.addBlockAtEnd) }
+        case .insertBlockBelow: return { dispatch(.insertBlockBelow) }
         case .showTakes: return { dispatch(.takes(.toggleFan)) }
         case .newTake: return { dispatch(.takes(.branch)) }
         case .blankTake: return { dispatch(.takes(.blank)) }

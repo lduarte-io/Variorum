@@ -142,6 +142,11 @@ struct LensesBoardView: View {
         case .addBlockAtEnd:
             Task { await model.addBlockAtEnd() }
             return true
+        case .insertBlockBelow:
+            // 13b 4D (N28/S4-13): the shared model machinery — the mint's
+            // pane takes the ring via the landing (first column resolves).
+            Task { await model.insertBlockBelowFocused() }
+            return true
         case .toggleSeal:
             Task { await model.toggleSeal() }
             return true

@@ -329,6 +329,39 @@ struct MoveAndExecuteTests {
         }
     }
 
+    /// 13b 4D (N28/S4-13): the insert-below door mints RIGHT UNDER the
+    /// focused block (never at the end) and hands the ring to the mint's
+    /// pane — the addBlockAtEnd ring-handover precedent at `.after(...)`.
+    @Test func theInsertBelowDoorMintsUnderTheFocusedBlockAndHandsTheRingOver() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "grow downward")
+            let first = try session.operations.newBlock(in: post.id, text: "first block.")
+            _ = try session.operations.newBlock(in: post.id, text: "last block.")
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+
+            // No focus on a MULTI-block post: fire-and-speak, no guess.
+            await model.insertBlockBelowFocused()
+            #expect((try await db.read {
+                try Queries.renderPost($0, containerID: post.id)
+            }).count == 2, "no target — nothing minted")
+
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: first.block.id, variantID: first.variant.id))
+            await model.insertBlockBelowFocused()
+            let slots = try await db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(slots.count == 3)
+            #expect(slots[1].text == "", "born empty, BETWEEN the two blocks")
+            #expect(slots[0].blockID == first.block.id)
+
+            // The projection echo hands the ring to the new pane.
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            #expect(model.authority.livePane?.blockID == slots[1].blockID,
+                    "typing continues instantly in the minted block")
+        }
+    }
+
     /// N5's pin, over the REAL board wiring: the menu's exact action body
     /// (`ShellActions.commitTake`) with a Takes board mounted commits the
     /// focused take. The old ⌘S called `editorRouter.active?` = nil here —

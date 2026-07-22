@@ -192,6 +192,11 @@ struct TakesBoardView: View {
         case .addBlockAtEnd:
             Task { await model.addBlockAtEnd() }
             return true
+        case .insertBlockBelow:
+            // 13b 4D (N28/S4-13): native in Takes — the minted block's pane
+            // takes the ring when its slot arrives.
+            Task { await model.insertBlockBelowFocused() }
+            return true
         case .toggleSeal:
             Task { await model.toggleSeal() }
             return true

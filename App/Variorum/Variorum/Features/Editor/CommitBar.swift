@@ -33,6 +33,7 @@ struct CommitBar: View {
     static let renderedCapabilities: [CapabilityID] = [
         .commitTake, .sealPost, .blockComments, .divide, .extract, .makeBlock,
         .merge, .showTakes,
+        .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
     ]
 
     var body: some View {
@@ -166,6 +167,15 @@ struct CommitBar: View {
                       action: model.makeBlockFromSelection)
         gestureButton("Merge", available: model.gestureAvailability.merge,
                       action: model.mergeBlocks)
+        // 13b 4D (N28/S4-13): insert-below — an empty block right under the
+        // caret block, the caret landing in it (parity with the Takes bar's
+        // block-menu door). Fire-and-speak: no caret block ⇒ the refusal
+        // speaks; a sealed post refuses through the op.
+        Button(tokens.chromeLabel("＋ below")) {
+            Task { await model.insertBlockBelowCaret() }
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        .help("New Block Below (⌥⌘N) — an empty block right under the one you're in; type straight into it")
         gestureButton("Takes", available: model.gestureAvailability.takes,
                       action: model.openCaretFan)
     }

@@ -52,7 +52,7 @@ struct EditorCommands: Commands {
         .importFiles, .exportLibrary, .exportCaretBlock,
         .structuralUndo,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
-        .addBlockAtEnd, .showTakes,
+        .addBlockAtEnd, .insertBlockBelow, .showTakes,
         .newTake, .blankTake, .blankTakeAsChosen, .chooseTake,
         .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
         .closeAllTakes, .pageFanBack, .pageFanForward,
@@ -70,6 +70,7 @@ struct EditorCommands: Commands {
         case .findAnything: ("k", .command)
         case .commitTake: ("s", .command)
         case .structuralUndo: ("z", [.command, .option])
+        case .insertBlockBelow: ("n", [.command, .option])
         case .divide: ("d", [.command, .shift])
         case .extract: ("e", [.command, .shift])
         case .makeBlock: ("k", [.command, .shift])
@@ -176,6 +177,13 @@ struct EditorCommands: Commands {
             //-to-end in Write (typing there births blocks).
             Button(verb(.addBlockAtEnd)) { actions?.dispatch(.addBlockAtEnd) }
                 .disabled(!enabled(.addBlockAtEnd))
+
+            // 13b 4D (N28/S4-13): insert-below — an empty block mints right
+            // under the caret/focused block, NATIVE in Write and Takes
+            // alike (her editor-parity ruling); the caret/ring lands in it.
+            Button(verb(.insertBlockBelow)) { actions?.dispatch(.insertBlockBelow) }
+                .keyboardShortcut("n", modifiers: [.command, .option])
+                .disabled(!enabled(.insertBlockBelow))
 
             Divider()
 

@@ -36,6 +36,7 @@ struct TakesBottomBar: View {
         .newTake, .blankTake, .blankTakeAsChosen, .addBlockAtEnd, .blockComments,
         .commitTake, .sealPost, .divide, .extract, .makeBlock, .merge,
         .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
+        .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
     ]
 
     /// The structural doors the bar renders (registry-walk-asserted: the
@@ -96,6 +97,12 @@ struct TakesBottomBar: View {
                 model.requestTakeLabel(variantID: variantID)
             }
             Divider()
+            Button("＋ New block below this one (⌥⌘N)") {
+                // 13b 4D (N28/S4-13): insert-below, native — an empty block
+                // mints right under the block you're in and its pane takes
+                // the ring. The Takes trap's second half closes here.
+                Task { await model.insertBlockBelowFocused() }
+            }
             Button("＋ New block at the end of the post") {
                 // D3's third leg (13b 1b): native — the minted block's
                 // pane takes the ring; typing continues instantly.

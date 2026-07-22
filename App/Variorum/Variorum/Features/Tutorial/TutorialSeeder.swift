@@ -299,9 +299,12 @@ enum TutorialSeeder {
             + "\u{2318}\u{21E7}K (Make Block from Selection), and watch it become its own "
             + "block — from Takes, the app carries you to Write and does it there.",
 
-            "New blocks can also be asked for directly: the block \u{25BE} menu in the "
-            + "bottom bar has \u{FF0B} New block at the end of the post. In Takes it "
-            + "mints an empty block and puts your cursor in it — just keep typing.",
+            // 13b 4D (N28/S4-13): the insert-below door joins the direct asks.
+            "New blocks can also be asked for directly: \u{2325}\u{2318}N (New Block "
+            + "Below) mints an empty block right under the one you're in and "
+            + "puts your cursor in it — Write and Takes alike; the block \u{25BE} "
+            + "menu in the bottom bar also has \u{FF0B} New block at the end of the "
+            + "post. Either way, just keep typing.",
 
             "A block can carry a NAME — a handle for finding it, never printed in "
             + "the prose. This block wears one: open the Blocks tab (\u{2318}5) and "

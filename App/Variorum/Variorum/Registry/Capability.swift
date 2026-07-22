@@ -53,6 +53,7 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     case deleteInEveryTake
     case commit          // ⌘S — commit the focused/caret take
     case addBlockAtEnd   // D3's third leg: a new block at the post's end
+    case insertBlockBelow  // 13b 4D (N28/S4-13): a new block BELOW the caret/focused block
     case toggleSeal
     case comments        // ⌘⇧' — the target block's comments panel
     case pageFan(Int)    // ⌥⌘←/→ — page the focused block's take cards
@@ -183,6 +184,7 @@ nonisolated struct Capability: Identifiable, Sendable {
 nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // Structural (block scope)
     case divide, extract, makeBlock, merge, deleteInEveryTake, addBlockAtEnd
+    case insertBlockBelow  // 13b 4D (N28's second half; S4-13: native in BOTH editors)
     // The take family (take scope)
     case showTakes, newTake, blankTake, blankTakeAsChosen, chooseTake
     case previousTake, nextTake, archiveTake, saveChoicesAsLens, closeAllTakes

@@ -98,6 +98,17 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Blocks are born inside a post — open one first.",
             availability: takeFamily),  // NIT-3: the one named rule, not a copy
+        // 13b 4D (N28's second half — the Takes trap's insert door; S4-13:
+        // editor parity, native in BOTH Write and Takes by construction).
+        // The minted block is EMPTY (its one live variant, empty text — I10
+        // holds; blank takes render as the kept line); the caret/ring lands
+        // in it. Sealed posts refuse through the op, spoken.
+        Capability(
+            id: .insertBlockBelow, verb: "New Block Below", scope: .block,
+            doors: [.menuBar, .bottomBar, .palette],
+            shortcutLabel: "⌥⌘N", takesAccess: .native,
+            unavailableNote: "Blocks are born inside a post — open one first.",
+            availability: takeFamily),  // the one named rule, not a copy
 
         // MARK: The take family (take scope)
         Capability(
@@ -406,6 +417,7 @@ nonisolated enum CapabilityRegistry {
         case .deleteInEveryTake: id = .deleteInEveryTake
         case .commit: id = .commitTake
         case .addBlockAtEnd: id = .addBlockAtEnd
+        case .insertBlockBelow: id = .insertBlockBelow
         case .toggleSeal: id = .sealPost
         case .comments: id = .blockComments
         case .pageFan: id = .pageFanBack
