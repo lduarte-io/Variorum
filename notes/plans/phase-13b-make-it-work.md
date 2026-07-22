@@ -4500,3 +4500,15 @@ PER-SESSION (fresh launch resets to the canon default). (4) Threshold
 takes so ⏎ = today's exact outcome. (5) N-ary chains stay OUT of the
 ceremony (3+-block selections chain-merge the visible takes instantly
 as today; pairwise ceremony merges reach every outcome).
+
+### Part 5 — the flagged behavior changes, batch A (2026-07-22, question tool)
+
+**S4-24:** (1) **The R24 paged strip is CONTESTED — she wants the
+SCROLL + PAGER HYBRID:** free horizontal scrolling returns on the fan
+rail ON TOP of the pager (Stage 4 build; design care: the ◀ x–y of
+n ▶ counter stays honest — scrolling and paging must agree on what's
+visible; the AD-2 lesson binds: nothing off-edge may ever be
+undiscoverable). (2) **Merge-joins-upward BLESSED** (the memo's
+revisit-trigger stands). (3) **The N9 landing focus BLESSED** (live
+first pane at board arrival stays). (4) **The mint-reveal change
+BLESSED EVERYWHERE** (no quieter door wanted).
