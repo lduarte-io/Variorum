@@ -7044,3 +7044,55 @@ above).
 - The three parse-error strings changed ("plain positive numbers") —
   no test pinned the old strings (grep-verified); the visual loop's
   word-target item picks up the new copy incidentally.
+
+## Stage 4 ladder — round 2 (VERDICT: ZERO new BLOCKER/MAJOR — the Stage 4 ladder CLOSES at round 2; the round-1 MAJOR's stage-close gate stays ARMED)
+
+The round-2 fresh cold reviewer re-verified independently: core 817/96
+GREEN by its own run; `build-for-testing` GREEN; the session lock
+re-verified LOCKED with zero instances (the Mac suite could not execute
+this round either); all three fix commits diff-read in full; every
+load-bearing fix-pass claim re-verified in code, not trusted.
+
+**Fix verification:** [MINOR-2] VERIFIED CORRECT (the three OpsRefusalCopy
+cases real; the pin discriminates against the old default; the sweep's
+enumerations independently re-verified — exactly 3 producers, exactly 4
+doors, ALL through the one `ExtentInput.parse`, whose non-positive guard
+refuse-and-keeps; the readingNotFound-unreachable claim verified at the
+throw sites; the recovery door routes through OpsRefusalCopy so the
+strengthened pin bites). [NIT-1] VERIFIED CORRECT (releaseLivePane called
+with the OLD postID before mutation in all three sites; the critical
+safety fact verified — `blur()` clears livePane ONLY, buffers survive
+into the targeted flush; the cannot-touch-a-mounted-pane claim verified;
+the residual transient honestly framed as shrunk-not-eliminated).
+[NIT-4] VERIFIED comment-only (zero code-path/expectation changes; all
+seven carriers; the kept test name correctly scoped).
+
+**The persisting round-1 MAJOR (NOT new — does not trigger round 3):**
+the stage-close gate stands at the fix pass's arithmetic — the
+consolidated **648/122** run + every recorded revert-red procedure (six
+batches' + round 1's three) + the visual loop execute at the first
+unlocked zero-instance window, BEFORE the stage closes and BEFORE the
+deploy → Release → `/Applications` → re-seed chain. Any failure
+re-opens the review at round 3.
+
+**[NIT-5 · record-only, dispositioned as routed]:** a removed/replaced
+compare peer's observation token is retained until `teardown()` — the
+unmounted post's coordinator callbacks still fire into the board's
+status path. Harmless (bounded per board session; settle iterates
+mounted posts only; arguably useful — a failing flush of the leaving
+post still speaks); no pin could distinguish it behaviorally.
+RECORD-ONLY.
+
+**Round-2 clean bill (abridged):** core-untouched across all fix
+commits (diff-verified + own green run); the 646→648 arithmetic exact;
+MINOR-1's canon-delta resolution present at the closing-item paragraph;
+v1_12 lockstep consistency (constant == marker; additive; deploy
+correctly withheld); the 4G identity split true in the filesystem;
+`mergeCeremony` re-read against the RULED addendum and matching; both
+word-target refusal routes speak real copy; no additional
+raw-enum-dump-on-refusal door exists on the Stage-4 surfaces (the
+reviewer's own class sweep — remaining `String(describing:)` catches
+are the standing infrastructure-failure class). Honestly named
+unverified: the mobile insurance build (structurally unaffected); and
+everything behind the PENDING Mac execution, which remains claims
+until the gate runs.
