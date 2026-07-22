@@ -418,6 +418,9 @@ Commits per batch/stage with the standing message convention.
 | N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | new, author → Stage 4 |
 | N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | new, author → Stage 4 |
 | N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern | new, author → Stage 4 |
+| N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | new, author → Stage 4 scoping call at brief time |
+| N37 | Readings RESTORE door (S4-28.2, reverses the pre-13 boundary): `restoreReading` on the `restoreContainer` pattern (tombstone flip + exact-stamp revival of sections/memberships) + a deleted-readings recovery surface; curated at least | new, author → Stage 4 |
+| N38 | Smart → smart+curated conversion (S4-28.4, direction-level, uncertainty preserved): curating/chaptering a smart book converts it (membership materialization design), a fresh smart book mintable off the same tag; the #25(a) promote-to-curated design, now wanted | new, author → Stage 4 scoping call; design memo owed if deferred |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | new, author → Stage 4 (compare rework) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
 | A1 | `//` comment-glyph ratification | hers, once comments used in anger |
@@ -4533,3 +4536,48 @@ de-crowding is the same batch's concern). (4) **A3 SETTLED: the
 typographic PDF re-owns to PHASE 14** (joins the variorum-edition
 export work; the KnownIssues row's owner updated — the taste-checkpoint
 disposition it was waiting on is made).
+
+### Part 7 — the A2 walk, first half: QUESTIONS #23–#25 (2026-07-22, question tool; verbatim-faithful)
+
+**S4-26 — #23 comments bundle: ALL FOUR BLESSED** (seal-refuse ·
+created_at preserved on travel · metadata-CAS never conflict-as-variant
+· deleted comments don't travel). QUESTIONS #23 → ANSWERED.
+
+**S4-27 — #24 callouts: (a)–(d) ALL BLESSED; (e) RULED — poolDragCopy
+COPIES THE NAME TOO.** The pre-13 asymmetry dies: a named scrap dragged
+into a draft keeps its name (one-line core change, consistent with
+duplicateAsVersion/promoteLens; Stage 4 build, core allowance noted for
+the brief). QUESTIONS #24 → ANSWERED.
+
+**S4-28 — #25 chapters/extents: (a)/(b)/(d)/(e) blessed as shipped
+("the others are all fine"), (c)'s display-only semantics unchallenged —
+AND FOUR NEW DIRECTIONS, her words:**
+1. **Per-POST word target (N36):** "I think you should be able to set
+   a word limit on a post if you want - it's still helpful." Same
+   display/progress-never-refusal semantics as `reading.word_target`;
+   COST FLAGGED: a `container` column = an additive schema migration +
+   a §12 lockstep event (mirror → Mac; the phone stays uninstalled).
+   Stage 4 scoping call at brief time.
+2. **Readings get a RESTORE DOOR (N37):** "I feel like readings should
+   have a restore door? at least the curated ones if they're deleted."
+   Reverses the standing pre-13 boundary — `restoreReading` (tombstone
+   flip + exact-stamp cascade revival: sections + memberships — the
+   `restoreContainer` pattern) + a deleted-readings recovery surface.
+   Stage 4.
+3. **Hard-deletes / storage consideration (FUTURE phase, her routing):**
+   "I think we should consider if we allow hard deletes of anything,
+   because archived takes could add up storage wise. maybe put it on
+   the plan to add a button that lets you delete other takes on books
+   marked finished or something? something to consider in a future
+   phase." → recorded onto the KnownIssues Tombstone-GC row (owner 12)
+   as her named candidate face (bulk take-cleanup on finished books).
+4. **Smart → smart+curated conversion (N38, direction-level,
+   uncertainty preserved):** "adding a chapter and curating a smart
+   book a little should be allowed, but then you should be able to
+   make a new 'smart book' off the same tag. so maybe the book
+   converts from smart to a smart + curated book?" — the
+   promote-to-curated design #25(a) anticipated, now wanted; real
+   model design (conversion/materialization semantics). Stage 4
+   scoping call at brief time; if deferred, the design memo is owed
+   (the uniform-page treatment).
+QUESTIONS #25 → ANSWERED (with the four spawned rows).
