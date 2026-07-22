@@ -413,20 +413,20 @@ Commits per batch/stage with the standing message convention.
 | N23 | Margin-grid CANNOT SCROLL — "a substantial part of the take is inaccessible" | **RESOLVED 3F** (commit e511710 — the rail's fixed-height cards scroll IN PLACE (ScrollView inside the 250×110 card): every take fully reachable, the uniform grid height honest; grid-only by construction — carousel/slot-split cards were never capped) |
 | N24 | Tags on a book: free-typed entry — "I want to be able to freely type tags in to a book, not just have to select from already created tags" (type-to-create; taxonomy CRUD exists, the entry face is select-only) | **RESOLVED 3D** (commit c7c50cf — the tag-entry face types-to-create: paths create missing levels through the taxonomy ops, the leaf applies, one runner turn; forgiving edges; red by revert. Recorded: if she meant tagging the BOOK OBJECT — readings carry no tags in the schema — that is a checkpoint model question) |
 | N25 | Extra/duplicate checkmark on the chosen take in marginalia (margin grid) | **RESOLVED 3F** (commit e511710 — choosing is the card's full-width clickable HEADER (`TakeChooseHeader`: "choose" / "✓ chosen", ONE checkmark ever, text box keeps its whole width — her header ask verbatim); the stack card unified onto the same grammar; cards widen 220→250 ("a little bit wider"); screenshot 3f-03) |
-| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **TRACED at the S4 sitting (S4-11): the handles are SEAMS-GATED** — `renderHandles` renders zero unless `seamsVisible && onMoveBlock != nil` (BlockDecor.swift:419–423, the recorded build-time call); her Write look with seams off confirmed invisible; works-as-built + undiscoverable (nothing names the gate; faint ink compounds). **RULED S4-19: hover-reveal as a Write-mode SETTING, default ON** (OFF = the fully clean surface; seams-on static display stays per the architect's flagged reading); Takes-side leans on the board's own clarity; build → Stage 4 |
+| N26 | Block drag-reorder in Write & Takes (author sketch, uncertainty preserved: "for take, you could click and hold on the take button, where for write you could maybe just drag the only block you're typing in? idk") — FIRST verify whether Write's shipped Stage-C drag handles actually reorder (if a shipped face is broken, that's a 3F-class fix); the Takes-side design → Stage 4 stub | **TRACED at the S4 sitting (S4-11): the handles are SEAMS-GATED** — `renderHandles` renders zero unless `seamsVisible && onMoveBlock != nil` (BlockDecor.swift:419–423, the recorded build-time call); her Write look with seams off confirmed invisible; works-as-built + undiscoverable (nothing names the gate; faint ink compounds). **RULED S4-19: hover-reveal as a Write-mode SETTING, default ON** (OFF = the fully clean surface; seams-on static display stays per the architect's flagged reading); Takes-side leans on the board's own clarity. **RESOLVED 4D** (commit bf16171 — built exactly as ruled: NSTrackingArea → `noteHover` → the HOVERED block's ⠿ in MUTED ink (the S4-1 faint finding); OFF = zero handles at rest; seams-on static display byte-unchanged; storage LOCAL `writeHoverHandles` + the Settings ▸ Appearance toggle — the synced alternative recorded, core frozen this batch; pin red-on-old) |
 | N27 | Inline (book-view) editor: ⑂ badge/decor frames don't track a WIDTH reflow — the N14 class one input axis over (ladder round-1 MINOR-2, filed SPECULATIVE; **CONFIRMED by the pin-first order** — the proposed pin ran RED on current code: badge 816pt from the reflowed fragment, no heal across 2 s of display passes) | **RESOLVED round-1 fix pass** (commit a4739d7 — the width reflow joins the settle trigger's GENERATION INPUTS: `EditorTextView.setFrameSize` reports width changes (`onWidthReflow`); the model's handler bumps `overlayGeometryGeneration` AND schedules the coalesced delivery directly, because TK2's lazy invalidation guarantees no display pass after a bare frame change (measured: `needsDisplay` stays false after `setFrameSize` and after a full remeasure); the detail editor inherits the axis as hardening. Pin `inlineBadgesTrackAWidthReflow` revert-RED — wiring unwired ⇒ gen 2→2, 816.0 off — GREEN restored) |
-| N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | **DIVIDE HALF RESOLVED 4A** (commit 44f7fe9): the "make a sentence first" trap dies — any two words divide now, so a one-sentence take (± trailing newline) always has a legal cut; the honest residue recorded in the 4A record: a cut at the block's very START/END still refuses per the memo's letter ("nothing to divide"), so the trailing-empty-line "give me a new block below" intent is exactly the INSERT-BELOW act's — **insert-below stays 4D** (both editors per S4-13) |
+| N28 | The Takes trap (S4-5): no divide on an empty line + no insert-block-BELOW door — "trapped by needing to make a sentence first". Divide half rides the cut redesign (the W addendum); insert-below is a new registry act over core's existing positional `newBlock(at:)`; newlines-as-content in takes panes PRESERVED. **S4-13: insert-below lands in BOTH Write and Takes** (editor parity, her ruling) | **DIVIDE HALF RESOLVED 4A** (commit 44f7fe9): the "make a sentence first" trap dies — any two words divide now, so a one-sentence take (± trailing newline) always has a legal cut; the honest residue recorded in the 4A record: a cut at the block's very START/END still refuses per the memo's letter ("nothing to divide"), so the trailing-empty-line "give me a new block below" intent is exactly the INSERT-BELOW act's. **INSERT-BELOW RESOLVED 4D — N28 CLOSED, the row's last half** (commit 62800c3: "New Block Below" as a DECLARED registry act, ⌥⌘N, NATIVE in BOTH editors per S4-13 — Write through the one structural door (caret lands IN the empty mint), Takes/Lenses via the parkFocus ring handover; doors: Block menu, both bars, palette; sealed refuses spoken; newlines-as-content in takes panes untouched) |
 | N29 | Compare shows a gap parade + lineage rails on posts with NO relationship (S4-4): must say "there is no relationship here" and render plain side-by-side, no blanks, no colors; zero-lineage version-marking says alignment will be loose; rails only where lineage speaks (partial-relationship nuance, agreed S4-12) | **RESOLVED 4C** (commits de4e4e3+eb17ad0 — `CompareComposition`, the honesty rule as a PURE brain: zero relationship ⇒ ONE free segment, plain side-by-side in own orders + the "there is no relationship here" header line; partial relationships align ONLY kin rows, unrelated stretches pack with NO blanks; rails render only where kinship exists, both sides colored by the anchor kin, behind the S4-12 lineage-colors toggle; zero-lineage version-marking SPEAKS the loose-alignment consequence — pinned at the composition, the model, and the tutorial walk) |
 | N30 | Canvas usability package (S4-7): spread-grid default placement (or the bank model — brief decides), long-post realization/pile concern, EDITABLE cards (supersedes R40 arrange-only, her direction), RESIZABLE cards, order number on cards, click-in-order mode, fit-all-in-view | new, author → Stage 4 |
 | N31 | Book view package (S4-9): progress bar on the scroll view; the Kindle-style paged view (page = a post, vertical scroll per page, bottom horizontal scrub); the uniform-page traditional book view — all beside the existing view. **S4-16: the uniform-page half MAY defer to a Stage 5** (this or a successor orchestrator) if Stage 4's load demands — deferral REQUIRES a detailed brief/plan as a Stage 4 deliverable (her condition); the other two stay Stage 4 | new, author → Stage 4 |
-| N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | **(d) the "+ column" half DONE 4C** (commit 6f1b602 — while ONE column is open, an empty DASHED COLUMN waits beside it, the shelf's dashed new-post grammar, one shared menu body with the header door; retreats once a second column exists); **(a)–(c) stay 4D's** |
-| N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | new, author → Stage 4 |
-| N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern. **S4-33 (her rider): the Takes bar gets a DIRECT "comments" button like Write's — parity of prominence, not just existence** | new, author → Stage 4 |
+| N32 | Blocks/pool clarity (S4-8a–c): "move to pool" door owes honest copy (it MOVES the block out of the post); pools-vs-tags model blur in the Blocks area faces; scrap tag faces need prominence — **S4-15 TRACED: exactly ONE tag door app-wide (canvas card "Tags…", CanvasView:461); Stage 4 adds registry-declared tag doors on scrap rows** (Blocks area + ScrapsPanel); the Lenses "+ column" door discoverability (S4-10) | **(d) the "+ column" half DONE 4C** (commit 6f1b602 — while ONE column is open, an empty DASHED COLUMN waits beside it, the shelf's dashed new-post grammar, one shared menu body with the header door; retreats once a second column exists). **(a)–(c) RESOLVED 4D — N32 CLOSED** (commit 582ab36: (a) the door reads "Move out to a pool (leaves this post)" and the completion SPEAKS the I2 consequence + the road back — the old silent success was pinned and the pin edited red-on-old; (b) the canvas filter names itself a TAG (label) filter with de-blurring help, the pool menus say container-vs-label at the door; (c) `.tagBlock` DECLARED — one `.surface` act rendered by THREE surfaces (Blocks-area rows, ScrapsPanel rows, the canvas card — S4-15's formerly-only door now declared), all over the ONE BlockTagAssignmentSheet, walk-asserted; R118-exempt with reasoning, the renameLens class) |
+| N34 | Newlines-don't-mint SETTING (S4-14, opt-in never default): a FACE over the Phase-1 `one_block` segmentation machinery (`setSegmentationDefault` shipped Phase 2); per-post door + optional global face; **S4-21: entry-wide RATIFIED — the setting governs paste too** | **RESOLVED 4D** (commit f5b0b30 — the PER-POST door: "newlines make blocks: on/off" chips on BOTH bars (Write reads the observed header; Takes/Lenses refresh at projection cadence), ON ⇒ per-post NIL (inherit global) / OFF ⇒ `.oneBlock`, the consequence SPOKEN ("governs future entry — existing blocks never re-segment"); ZERO semantics change — entry-wide is the model's standing meaning, exactly S4-21's ratification; allowed under seal (container-row metadata class). The OPTIONAL GLOBAL FACE DEFERRED, recorded: `upsertSetting` is Operations-internal and no public `default_segmentation` setter exists — one small core op away, and 4D's core allowance was exactly the poolDragCopy line; flagged for the ladder/13c) |
+| N35 | Comment-door discoverability (S4-25): she ratified the `//` glyph while unable to FIND any way to leave a comment — the doors exist (Write bar's "comments" button; Takes bar block ▾; Block ▸ Comments ⌘⇧') and none were findable; Stage 4: commenting prominence (margin-click-to-add candidate — the mockup grammar) riding the bar-crowding concern. **S4-33 (her rider): the Takes bar gets a DIRECT "comments" button like Write's — parity of prominence, not just existence** | **RESOLVED 4D** (commit 63fae31 — S4-33's direct "comments" button on the Takes/Lenses bar beside seal/tags/date, Write's order mirrored (the block ▾ item and ⌘⇧' stay, one `requestComments`); the MARGIN-CLICK-TO-ADD BUILT in its minimal form — an uncommented CARET block offers a quiet "+ //" exactly where its margin card would sit (live editor, margin-card mode, caret block only; clicking opens the panel); the full every-block-hover mockup grammar RECORDED as the next rung for 13c if she wants more; pin red-on-old) |
 | N36 | Per-POST word target (S4-28.1): display/progress only, mirroring `reading.word_target` semantics; COST: additive `container` column + a §12 lockstep event (mirror → Mac) | new, author → Stage 4 scoping call at brief time |
 | N37 | Readings RESTORE door (S4-28.2, reverses the pre-13 boundary): `restoreReading` on the `restoreContainer` pattern (tombstone flip + exact-stamp revival of sections/memberships) + a deleted-readings recovery surface; curated at least | new, author → Stage 4 |
 | N38 | Smart → smart+curated conversion (S4-28.4, direction-level, uncertainty preserved): curating/chaptering a smart book converts it (membership materialization design), a fresh smart book mintable off the same tag; the #25(a) promote-to-curated design, now wanted | new, author → Stage 4 scoping call; design memo owed if deferred |
-| N39 | Blocks-list positional moves (S4-30g): type a target position number ("what number block… out of the total post") + move-to-top / move-to-bottom doors — dragging stops being the only long-distance move | new, author → Stage 4 |
-| N40 | The takes strip's height jumping (S4-31b, her ruling): ONE fixed strip height with in-strip scrolling ("you can scroll within the strip"); kills the back-and-forth height changes and dissolves the recorded #28(b) clip cost | new, author → Stage 4 |
+| N39 | Blocks-list positional moves (S4-30g): type a target position number ("what number block… out of the total post") + move-to-top / move-to-bottom doors — dragging stops being the only long-distance move | **RESOLVED 4D** (commit 582ab36 — the Blocks rows' ⋯ menu gains Move to top / Move to bottom / "Move to block #…" with a typed position out of the total post; ONE ordinary `reorder` per move (⌥⌘Z undoes via its own inverse), ordinal math counts as a human counts, out-of-range clamps, already-there speaks a no-op and writes nothing, malformed entries speak; pinned) |
+| N40 | The takes strip's height jumping (S4-31b, her ruling): ONE fixed strip height with in-strip scrolling ("you can scroll within the strip"); kills the back-and-forth height changes and dissolves the recorded #28(b) clip cost | **RESOLVED 4D** (commit 37b5ece — TRACED: the jumping was variable card heights in the strip forms (carousel/slot-split cards sized to their take's text, so paging/typing re-heighted the row). ONE fixed card height (railCardHeight) across EVERY strip form — rail, carousel, slot split — with the content scrolling in-card (the N23 shape, generalized); #28(b)'s clip cost dissolves into that scroll. Built WITH S4-24's hybrid: free horizontal scrolling settling on whole cards, writing back into the one paging brain — counter, ⌥⌘←/→, and scroll agree at rest by construction) |
 | N41 | Inline-comments airiness (S4-32, her deferral): the uniform gap widening "doesn't look great" but is not Stage 4 scope — DEFERRED to a future stage; the 13b closeout names its owner (candidates: a later polish window, or an R116 memo if it keeps bothering her) | new, author → deferred beyond Stage 4 |
 | N33 | Diff sheet save button (S4-6): export the diff text to a file — "useful to feed to an AI agent" | **RESOLVED 4C** (commit eb17ad0 — Save… on the Diff sheet: NSSavePanel per the 11b export-door conventions; `LineDiff.exportText` is a pure projection of the RENDERED lines (marker-prefixed, matching-mode stated in the header), pinned byte-stable; the outcome speaks sheet-locally, cancel says nothing) |
 | L1 | Mockup gap-list ("anything that truly didn't make it over") | LOW, later per R111 |
@@ -5806,6 +5806,302 @@ re-seed rides the A1 rail at the orchestrator's consolidated window.
   design — worth the reviewer's eye once it executes).
 - The `CompareViewModel.read` brain: one more consumer (the migrated
   ScrubAndOutline pin) — keep observation and pins reading through it.
+
+### Batch 4D record (takes board + editor QoL — N28 CLOSED · N40/N39/N34/N35 RESOLVED · N32 CLOSED · N26 RESOLVED · S4-19/S4-20/S4-24(1)/S4-27e/S4-33 built · the 4C ⌘S handoff built; core 798/94 GREEN with the behavioral revert executed, Mac-suite execution carried PENDING under the locked-session regime)
+
+**What shipped (eight commits + this record's):**
+- **`acfe7b8` (core, OWN COMMIT — the batch's exact allowance, used and
+  nothing more):** `poolDragCopy` copies **`block.name`** (S4-27e, her
+  ruling — the recorded pre-13 asymmetry dies). ONE line
+  (`name: source.name` in the copy's mint) + the pin
+  `poolDragCopyCopiesTheBlockName` (rides default AND includeFan copies;
+  source keeps its own; unnamed copies unnamed). Consistent with
+  duplicateAsVersion/promoteLens. `git diff acfe7b8..HEAD -- Sources/
+  Tests/ Package.swift` is EMPTY (verified — no core byte beyond this
+  commit; `Sync/` untouched); mobile BUILD SUCCEEDED after the touch.
+- **`62800c3` (insert-below — N28's second half, S4-13 parity):** **"New
+  Block Below" (⌥⌘N)** as a DECLARED registry act, NATIVE in BOTH
+  editors by construction. Core's positional `newBlock(at: .after(…))`
+  under it — no core change needed; the mint is EMPTY (one live variant,
+  empty text — I10 holds; blank takes render as the kept line). Write:
+  through `runStructural` (one flight, flush-first, store-led full
+  re-render, caret by identity lands IN the mint); open-tail/empty-post
+  carets fire-and-speak. Takes/Lenses: `insertBlockBelowFocused` on the
+  `commandTargetSlot` (one-block posts need no click) + the
+  `parkFocus` ring handover (the addBlockAtEnd precedent at
+  `.after`). Doors: Block menu, both bars (Takes block ▾ menu; Write's
+  "＋ below"), ⌘K palette; Shortcuts helper row; unhandledNote mapped;
+  sealed refuses through the op, spoken.
+- **`37b5ece` (N40 + S4-24(1) — the strip + the hybrid):** ONE fixed
+  card height (`railCardHeight`) across every strip form (rail ·
+  carousel · slot split), content scrolling in-card — the strip never
+  jumps height again and #28(b)'s clip cost dissolves. The
+  **scroll+pager HYBRID**: every card is IN the strip (plain HStack —
+  fan-bounded, deterministic), `scrollTargetLayout` + `viewAligned`
+  settle onto whole cards, and `scrollPosition(id:)` WRITES BACK into
+  the model's one paging brain (`setPage`) — ◀ x–y of n ▶, ⌥⌘←/→, and
+  the scroll address the same clamped offset. `pageToReveal`/auto-page
+  machinery survives byte-unchanged (the model offset now also drives
+  the scroll).
+- **`bf16171` (S4-19 + S4-20):** hover-revealed drag handles as a
+  Write-mode setting, default ON (NSTrackingArea → `noteHover` → the
+  HOVERED block's ⠿ in MUTED ink; OFF = the fully clean surface;
+  seams-on static display BYTE-UNCHANGED — the flagged reading; the
+  read tier never tracks; a drag in flight keeps its handle). Settings ▸
+  Appearance face. AND the default-view flip: **new opens default to
+  WRITE** (`rememberedMode`'s fallback + the @State initial); per-post
+  memory untouched; the 4C `fromStored` migration untouched.
+- **`f5b0b30` (N34):** the one_block FACE — "newlines make blocks:
+  on/off" chips on BOTH bars over `setSegmentationDefault` (ON ⇒
+  per-post nil, OFF ⇒ `.oneBlock`); the consequence SPOKEN; copy lives
+  once (`SegmentationFaceCopy`, Registry). ZERO semantics change
+  (entry-wide is the model's standing meaning — S4-21's letter; the
+  2026-07-12 crystallization/spacing semantics untouched).
+- **`63fae31` (N35 + S4-33):** the Takes/Lenses bar's DIRECT "comments"
+  button (parity of prominence with Write's — her rider verbatim) + the
+  margin-click-to-add affordance BUILT minimal (the "+ //" chip at the
+  uncommented caret block, margin-card mode, live editor only).
+- **`582ab36` (N39 + N32(a)–(c)):** positional moves on the Blocks rows
+  (top/bottom/typed-#, one `reorder` each, ⌥⌘Z undoes); move-to-pool's
+  honest copy + spoken I2 consequence; pools-vs-tags de-blur at the
+  faces; `.tagBlock` DECLARED (`.surface`) and rendered by THREE
+  surfaces over the one `BlockTagAssignmentSheet` (Blocks-area rows,
+  ScrapsPanel rows, the canvas card — S4-15's formerly-only door now
+  declared), walk-asserted.
+- **`d79b366` (the 4C handoff):** ⌘S in COMPARE commits the focused
+  pane's take — `commitFocusedTake` (flush through the pane's OWN
+  post's coordinator via `PaneKey.context`, then one commit; no focus
+  speaks); the board registers a handler consuming `.commit` and ONLY
+  that; registry rule `takeFamilyPlusCompare`. Small and bounded, as
+  the brief asked.
+- **Tutorial kept pace in the SAME commits (P-6):** "shaping blocks"
+  (⌥⌘N both editors), "choosing & the board" (the hybrid + the steady
+  card height), "getting around" (write-first + memory), "blocks &
+  typing" (the newlines switch), "comments & tags" (both new doors),
+  "blocks · canvas" (positional moves + the move-out consequence),
+  "pool & scraps" (scrap tagging + containers-vs-labels). One new walk
+  act (`newBlockBelowMintsUnderTheFocusedBlockInBothEditors`); walk
+  tests ride the PENDING suite run.
+
+**Counts:** core **797/94 → 798/94 GREEN** (`swift test`, full suite —
++1 the S4-27e pin; the behavioral revert executed and restored). Mobile:
+**BUILD SUCCEEDED** after the core commit (no `Shared/` touch this
+batch — verified by diff). Mac: **PENDING** — expected arithmetic on top
+of 4C's pending expectation: 611/117 → **619/117** (+1
+CommandRoutingTests insert-below, +1 CapabilityRegistryTests
+insert-below-native, +1 TutorialWalkTests act, +2 Phase13SurfaceTests
+(hover; margin chip), +1 LifecycleFacesTests N34, +1 BlockTOCTests N39,
++1 CompareBoardTests ⌘S; renames/edits count-neutral, no new suites),
+NOT asserted: no Mac suite executed (`CGSSessionScreenIsLocked` read
+**1** at the app-side test phase, checked once per the regime note;
+`build-for-testing` compiled app + tests clean after every commit — the
+block is execution, not code).
+
+**Registry/R118 note:** TWO new declared acts — `insertBlockBelow`
+(verb/doors/⌥⌘N/honest note; `takesAccess: .native` — native in BOTH
+editors by construction, R118's letter) and `tagBlock` (`.surface`;
+R118-EXEMPT with recorded reasoning — scraps live outside the post-mode
+row, the renameLens class). The walk grows on both (menu/palette/bar
+statics; the three `surfaceCapabilities` statics). In-view affordances
+per the 4A/4B/4C reading, recorded not declared: the hybrid scroll, the
+pager line, the hover handles, the newlines chips, the positional-move
+menu items, the direct comments button (the EXISTING blockComments
+capability's door set made prominent — no new act), the margin "+ //"
+chip (a face of the same comments door).
+
+**Red-on-old / behavioral-revert evidence:**
+- *Executed (core, behavioral revert, run RED):* the `name:
+  source.name` line removed from `poolDragCopy` ⇒
+  `poolDragCopyCopiesTheBlockName` failed at BOTH copy expectations
+  (`nil != "the harbor scrap"`); restored ⇒ full core 798/94 green.
+- *PENDING (Mac, procedures for the verifier — exact):*
+  1. **S4-20 flip:** revert = restore `?? .takes` in
+     `PostDetailView.rememberedMode` (+ the `@State … = .takes`
+     initial). Red: `aPostOpensInWriteFirstThenWhereItWasLeft` at all
+     three `.write` default expectations (the edited pin IS the flip's
+     proof — old code returns `.takes`).
+  2. **S4-19 hover:** revert = restore `renderHandles`' pre-4D body
+     (`seamsVisible && onMoveBlock != nil ? state.frames : []`, faint
+     ink). Red: `hoverRevealsTheHoveredBlocksHandleUnderTheSetting` at
+     the two hover-reveal expectations (zero handles with seams off —
+     the N26/S4-11 trace); the seams-on line stays green.
+  3. **N35 chip:** revert = delete the `renderAddChip` call in
+     `renderComments`. Red: `theMarginOffersAddACommentAtTheCaretBlock`
+     at `addChipBlockID == "b0"`.
+  4. **N40/S4-24:** revert = restore the pre-4D windowed
+     `railCards`/`pagedTakesRow` bodies (commit `37b5ece`'s
+     TakesBoardView hunks reversed). Red: the edited
+     `TakesRailPagingTests` pin at `Set(strip) == Set(fanIDs)` (the old
+     window renders 2 of 4).
+  5. **Compare ⌘S:** revert = restore `availability: takeFamily` on
+     `.commitTake`. Red: `commitActsWhereverAdvertisedAndNowhereElse`
+     at the flipped compare line.
+  6. **N32(a):** the edited BlockTOCTests expectation
+     (`contains("LEFT this post")`) is red on the old code by
+     construction (the old success was SILENT — `statusMessage == nil`
+     was the pre-4D pin, edited with in-line justification).
+  - *Contract pins, recorded honestly (the 4C (c) precedent — they
+    cannot compile against the old types):* insert-below's
+    position/ring pins, N39's positional pins, N34's face pins, the
+    hybrid's write-back binding. The classes they guard died by
+    construction (declared act; one paging brain), pinned going
+    forward.
+- *PENDING with the suite run:* the full Mac suite (expected 619/117 —
+  cumulatively discharges 4A's 581/113, 4B's 590/114, and 4C's
+  611/117), the six revert procedures above, TutorialWalkTests + the
+  board soak (they ride the suite), and the visual loop: the hover
+  reveal's feel; the hybrid's scroll-settle + counter agreement on a
+  long fan; strip height steadiness while typing near take-length
+  differences; the bars' two-row fit under 1080pt with the new chip +
+  button (the N15 adaptive rule absorbs them — verify at ~980pt); the
+  margin "+ //" placement; Compare ⌘S; the Settings toggle. The owed
+  `/Applications` refresh stays WITHHELD (4A call 7's reasoning
+  verbatim); the field guide is now FOUR prose revisions behind — the
+  re-seed rides the A1 rail at the orchestrator's consolidated window.
+
+**Traced mechanisms:**
+- *N28's trap (the insert half):* the shipped ＋new-block was
+  end-of-post only and divide refused at a block's very start/end (the
+  memo's letter, 4A's honest residue) — so "give me a block below THIS
+  one" had no door at all mid-post. The act is the door; the mint is
+  empty by design (the author types into it — never invented content).
+- *N40's jumping:* strip-form cards (carousel/slot-split) sized to
+  their take's TEXT — paging ◀ ▶ across takes of different lengths
+  re-heighted the whole row, and editing near length boundaries
+  wobbled it. (Observed en route, recorded: the R24 200-char
+  `usesHorizontalStrip` rule has been a geometry NO-OP since batch 14's
+  density-outranks edit — `(strip && gridRows == 1) ? 1 : gridRows`
+  always yields `gridRows`; the pure function stays pinned but drives
+  nothing. The strip form IS the 1-high arrangement.) One fixed card
+  height + in-card scroll kills the class at its input.
+- *S4-11/N26 (hover handles):* `renderHandles` rendered zero handles
+  unless `seamsVisible` — working-as-built, undiscoverable, compounded
+  by faint ink. The hover regime keeps the calm surface at rest and
+  reveals exactly where the pointer is; the muted ink answers the
+  faint-invisibility half.
+- *N35:* every comment door existed and none was findable (S4-25's
+  live finding). Prominence = the direct bar button where her eyes
+  were (S4-33), plus the margin's own grammar at the exact spot a
+  note would render.
+- *The 4C ⌘S gap:* Compare registered NO router handler, so ⌘S in an
+  EDITABLE surface fell to the router's honest-but-wrong-feeling
+  "nothing to commit here" note — the N5 class one surface over;
+  judgment call 4 recorded the one-gate upgrade, built here.
+
+**Judgment calls / PROVISIONALs (R119 — for the author's deferred walk):**
+1. **⌥⌘N** is the insert-below chord (the only free N-family chord;
+   ⌘N = New Post; the helper's Structure group carries it).
+2. **Write's insert-below rides `runStructural` with seam nil** (the
+   ceremonial full-re-render door — no seam vocabulary exists for an
+   insert; one-flight/flush/caret-by-identity inherited). No structural
+   UNDO inverse: `newBlock` registers none (the addBlockAtEnd
+   precedent — deleting the empty mint is one act); recorded.
+3. **Write's open-tail/empty-post carets SPEAK** instead of guessing a
+   position (the tail is not a block; on an empty post typing births
+   blocks). The mint-at-end alternative recorded.
+4. **The S4-24 honesty mechanism (the architect's design latitude,
+   recorded):** scroll SETTLES onto whole-card boundaries
+   (`viewAligned`) + write-back into the ONE paging brain — chosen
+   because cards never rest half-visible, so "x–y of n" is exactly
+   true at rest. Option (a) (continuous scroll + live readout) was
+   rejected: a half-visible card makes the counter a lie or a
+   cluttered approximation. SCOPE: all three strip forms (rail,
+   carousel, slot split) — one mechanism, one brain; plain HStack over
+   LazyHStack (fan-bounded cost — the stack style's own scale;
+   deterministic hierarchy for the pins).
+5. **N40's one height = `railCardHeight` (110) everywhere strip-form**
+   — one constant, one place; retunable at the visual pass (wide
+   carousel cards at 110 show ~4 lines and scroll for the rest).
+6. **S4-19 storage is LOCAL** (`writeHoverHandles`, UserDefaults — the
+   takes-density class): core is frozen this batch, and a synced
+   `setting`-table key needs a core setter; the synced alternative is
+   recorded as one small core op away (13c or a sanctioned batch).
+   Hover reveals the HOVERED block only (the Notion grammar; the
+   all-blocks-on-hover alternative recorded); the reveal ink is MUTED
+   vs the seams-static faint (deliberate — the S4-1 finding); the
+   inline book editor participates (it is a Write-shaped surface).
+7. **S4-20 touches ONLY the first-open default** — `rememberedMode`'s
+   fallback + the @State initial; memory, the blockless-opens-Write
+   guard, and the 4C migration untouched. **R72/R79-supersession note
+   for the canon delta (the orchestrator's at stage close):** "a post
+   opens in TAKES the first time" → "a post opens in WRITE the first
+   time; per-post memory unchanged" (S4-20, her reversal on the
+   record).
+8. **N34 maps ON ⇒ per-post NIL** (inherit the global default), not an
+   explicit `.paragraph` — a future global one_block choice stays
+   honored; recorded. **The optional GLOBAL face is DEFERRED with the
+   exact blocker recorded** (no public `default_segmentation` setter;
+   `upsertSetting` internal; the brief's own word is "optional") — the
+   per-post door is S4-14's ask. Allowed under seal (the
+   title/date/profile container-row class; core's own posture). The
+   Takes chip's truth refreshes at projection cadence + on set; an
+   EXTERNAL segmentation change lags until the next projection
+   (recorded residual — the Write chip has no lag, it reads the
+   observed header).
+9. **The margin-click-to-add DISPOSITION (explicit, as the brief
+   demands): BUILT, minimal.** The "+ //" chip renders at the
+   UNCOMMENTED CARET block only, in margin-card mode, on the live
+   editor — the mockups' grammar at the exact spot a note would sit,
+   with zero new crowding (one quiet chip, one block at a time). The
+   FULL grammar (every-block hover targets in the gutter) is RECORDED
+   against 13c as the next rung if her use asks for it; N41 (airiness)
+   is untouched and stays 13c's.
+10. **N39's ordinal math counts like a human**: "make me #k" is
+    position k among the OTHER rows' order; out-of-range clamps;
+    already-there speaks a no-op and writes nothing; malformed input
+    speaks. Top/bottom are the same brain at 1/count.
+11. **N32(c)'s registry reading:** ONE `.tagBlock` act with the
+    `.surface` door rendered by three surfaces' statics — the
+    target-pointed-at class (the archived-card precedent), even though
+    the faces are context-menu-shaped; R118-exempt with reasoning
+    (scraps live outside the mode row — no editing surface is
+    privileged).
+12. **Compare's handler consumes `.commit` ONLY** — every other routed
+    command still falls through (the 4C direct-manipulation reading
+    stands; only the one recorded upgrade landed). The HANDLER
+    wiring's hosted execution evidence rides the suite run at the
+    enablement level; the model pin drives `commitFocusedTake`
+    directly — if the ladder wants a hosted wiring pin (the N5
+    CommandRoutingTests shape over a mounted CompareBoardView), it is
+    one test away; recorded.
+13. **Insert-below in Takes changes NOTHING about newlines-as-content**
+    (S4-5's preserved clause): panes accept newlines exactly as
+    before; the act is a block-below door, not an Enter-behavior
+    change.
+
+**Deviations from the brief:** none in scope or semantics. The N34
+global face is deferred under the brief's own "optional" with the
+blocker recorded (call 8). Execution deviations are the regime's
+PENDING carries (suite run, the six revert procedures, visual loop, the
+withheld `/Applications` refresh — 4A call 7's reasoning holds
+verbatim).
+
+**For the ladder (foci):**
+- The hybrid's `scrollPosition` write-back under REAL scrolling
+  (executes only at the unlock): transient mid-drag binding writes
+  clamp through `setPage`; verify no oscillation between a
+  model-offset change and `viewAligned`'s settle (the binding's get
+  derives from the same state the set writes — designed fixpoint;
+  worth a cold eye + the visual loop).
+- The soak's edited invariant 5 (strip == exactly the fan) across
+  derealization timing and the settle-drain (the strip renders from
+  `projection.fans` — the same source the assertion reads; confirm no
+  action window shows a half-adopted fan).
+- The hover tracker's NSTrackingArea lifecycle across remounts
+  (uninstall removes the area; fresh hosting views per the trap list)
+  and the drag-in-flight guard (`dragEntryIndex` keeps the handle).
+- `runStructural` + `newBlock` (insert-below) beside crystallization:
+  the held idle clock + `awaitMintSettle` precede the mint; an empty
+  mid-post block coexisting with an open tail deserves a reviewer's
+  trace.
+- The bars' width: postCluster grew a chip + a button (Takes) — the
+  N15 measured-width two-row rule absorbs it by design; verify at
+  ~980pt in the visual loop.
+- N34's chip staleness on REMOTE segmentation changes (recorded
+  residual, Takes side only).
+- The `.tagBlock` availability is `always` — an act whose doors are
+  all `.surface` never renders a routed/dimmed door, so the rule is
+  honest by construction; confirm the reading.
 
 ### Orchestrator regime note (post-4A, 2026-07-22 overnight — the LOCKED-SESSION regime; binding for the remaining batches until the first unlock)
 
