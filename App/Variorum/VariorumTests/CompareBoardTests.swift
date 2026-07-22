@@ -239,6 +239,69 @@ struct CompareViewModelTests {
         }
     }
 
+    /// 13b Stage 4 ladder round 1, NIT-1 (red-on-old: the ring stayed
+    /// keyed to the removed column's context — an unmounted post no pane
+    /// renders, with the union-settle no longer covering its pending
+    /// buffers): removing OR replacing the live pane's column blurs the
+    /// authority, and the leaving post's dirty buffer flushes through its
+    /// own coordinator instead of waiting out the transient window.
+    @Test func removingOrReplacingTheLiveColumnsPeerReleasesTheRing() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.peerSlots = [.init(postID: world.twin)]
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
+
+            // Focus a twin pane and leave it DIRTY — the worst case the
+            // 4C record traced.
+            let twinSlot = model.projection.peers[world.twin]!.slots[0]
+            let twinKey = PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.twin)", blockID: twinSlot.blockID,
+                variantID: twinSlot.variantID!, context: world.twin)
+            model.focus(twinKey)
+            model.paneEdited(
+                postID: world.twin, variantID: twinSlot.variantID!,
+                newText: "typed just before the column closed")
+            #expect(model.authority.isLive(twinKey))
+
+            // ✕ on the live pane's column (single slot ⇒ postID clears).
+            model.removePeerSlot(model.peerSlots[0].id)
+            #expect(model.authority.livePane == nil,
+                    "the ring never points at an unmounted column")
+            // The targeted flush lands the leaving post's buffer.
+            await poll {
+                session.autosave(forPost: world.twin).pending.isEmpty
+            }
+            let landed = try await db.read { db in
+                try Queries.renderPost(db, containerID: world.twin)[0].text
+            }
+            #expect(landed == "typed just before the column closed",
+                    "the dirty buffer flushed on the way out, not dropped")
+
+            // The REPLACE path (the picker swaps the post): same release.
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
+            model.focus(twinKey)
+            #expect(model.authority.isLive(twinKey))
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.stranger)
+            #expect(model.authority.livePane == nil,
+                    "replacing the column releases the ring the same way")
+
+            // A no-op re-pick of the SAME post never blurs (the column
+            // still shows that post).
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.stranger])
+            let strangerSlot = model.projection.peers[world.stranger]!.slots[0]
+            let strangerKey = PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.stranger)", blockID: strangerSlot.blockID,
+                variantID: strangerSlot.variantID!, context: world.stranger)
+            model.focus(strangerKey)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.stranger)
+            #expect(model.authority.isLive(strangerKey),
+                    "re-picking the same post is not a column change")
+            model.teardown()
+        }
+    }
+
     /// 13b 4D (the 4C handoff — judgment call 4's recorded upgrade, built):
     /// ⌘S in Compare commits the FOCUSED pane's take — whichever POST it
     /// belongs to (the flush routes through that post's own coordinator);

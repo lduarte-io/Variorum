@@ -417,6 +417,20 @@ final class CompareViewModel {
 
     // MARK: Peer slot management
 
+    /// 13b Stage 4 ladder round 1, NIT-1: a removed/replaced column may
+    /// host THE live pane — the ring must never stay on an unmounted
+    /// context (no rendered pane would show it), and the moment the post
+    /// leaves `mountedPostIDs` the union-settle stops covering its pending
+    /// buffers (the 4C record's traced, accepted transient). Blur + a
+    /// targeted flush of the LEAVING post's coordinator — while we still
+    /// know which post it is — shrinks that window at zero cost.
+    private func releaseLivePane(leavingPost postID: String?) {
+        guard let postID, authority.livePane?.context == postID else { return }
+        authority.blur()
+        let coordinator = coordinator(for: postID)
+        Task { await coordinator.flushNow() }
+    }
+
     func setPeer(slotID: String, postID: String?) {
         autoFilled = true
         guard let index = peerSlots.firstIndex(where: { $0.id == slotID }) else { return }
@@ -425,6 +439,9 @@ final class CompareViewModel {
                || peerSlots.contains(where: { $0.postID == postID && $0.id != slotID }) {
             statusMessage = "That post is already open in this compare."
             return
+        }
+        if peerSlots[index].postID != postID {
+            releaseLivePane(leavingPost: peerSlots[index].postID)
         }
         peerSlots[index].postID = postID
     }
@@ -437,6 +454,7 @@ final class CompareViewModel {
     func removePeerSlot(_ slotID: String) {
         autoFilled = true
         guard let index = peerSlots.firstIndex(where: { $0.id == slotID }) else { return }
+        releaseLivePane(leavingPost: peerSlots[index].postID)
         if peerSlots.count == 1 {
             peerSlots[index].postID = nil  // the last column keeps its picker
         } else {
