@@ -23,7 +23,8 @@ struct EditorProjectionEngineTests {
             blockID: blockID, placementID: "p-\(blockID)", position: "a",
             variantID: variantID, text: text,
             activeVariantCount: variantID == nil ? 0 : 1,
-            liveVariantCount: variantID == nil ? 0 : 1, variantLocked: locked)
+            liveVariantCount: variantID == nil ? 0 : 1, commentCount: 0,
+            variantLocked: locked)
     }
 
     private func index(_ slots: [Queries.RenderedBlock]) -> BlockRangeIndex {

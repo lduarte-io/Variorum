@@ -1084,15 +1084,30 @@ final class EditorSurfaceController {
     ///    with any text keeps the ratified refusal;
     /// 2. the block has NO FAN (`activeVariantCount == 1`) — takes are
     ///    text, and a seam-key must never take one away unseen;
-    /// 3. the block carries NO ARCHIVED TAKE either
-    ///    (`liveVariantCount == 1` — 13c Stage 1 ladder, R1-1): archive is
-    ///    out-of-the-fan, not gone, so an archived take is prose the
-    ///    `deleteBlock` cascade would take with the block. Reachable in
-    ///    three ordinary gestures (branch · archive the one with the prose ·
-    ///    blank the survivor), and the fan count cannot see it — which
-    ///    falsified the carve's only authorization, "there is no text to
-    ///    lose";
+    /// 3. the block carries NO UNSHOWN TEXT — `carriesUnshownText`, the ONE
+    ///    read that answers the carve's only authorization ("there is no
+    ///    text to lose"). Two kinds live behind it, found one ladder round
+    ///    apart and deliberately wired through one name rather than two
+    ///    parallel guards: an **archived take** (R1-1 — archive is
+    ///    out-of-the-fan, not gone; reachable in three ordinary gestures:
+    ///    branch · archive the one with the prose · blank the survivor) and
+    ///    a **block COMMENT** (R2-1 — `addBlockComment` has no empty-block
+    ///    rule, and a note on an empty block is ordinary: *"I'll rewrite
+    ///    this — see the note"*). Both die in `deleteBlock`'s cascade, and
+    ///    the comment half additionally defeats AppSpec §7's ratified
+    ///    "deleted comments are visible and resurrectable — never skimpy",
+    ///    since `deletedBlockComments` is keyed by block and a tombstoned
+    ///    block is only in the tray;
     /// 4. the slot is editable (a live variant, unlocked, not a gap).
+    ///
+    /// PROVISIONAL (13c R2-1, QUESTIONS #40): a NAMED or CALLOUT empty
+    /// block still carves. `block.name` and `block.presentation` are
+    /// columns on the block row — the tombstone keeps them, undo and
+    /// `restoreBlock` bring them back with the block, and the tray lists
+    /// the block by its name — so nothing of them becomes unrecoverable,
+    /// which is the line the two counted kinds cross. Guarding on every
+    /// datum attached to a block (tags cascade too) would narrow the carve
+    /// back out of existence and undo A7.
     ///
     /// The store is verified again at run time by a compare-and-set, so a
     /// sync apply landing text into the block between the keystroke and
@@ -1113,11 +1128,11 @@ final class EditorSurfaceController {
         // No fan: a block with several takes carries text in the ones you
         // are not looking at, so the "nothing to lose" argument fails.
         guard i < model.slots.count, model.slots[i].activeVariantCount == 1 else { return nil }
-        // …and no ARCHIVED take either (R1-1). Archived takes are out of the
-        // fan but still hold prose, and deleting the block cascades them
-        // away. `liveVariantCount` counts regardless of `status`, so this is
-        // the guard that actually says "there is no text to lose".
-        guard model.slots[i].liveVariantCount == 1 else { return nil }
+        // …and nothing the slot does not SHOW (R1-1's archived take, R2-1's
+        // block comments). This is the guard that actually says "there is
+        // no text to lose"; a third kind of unshown prose extends
+        // `carriesUnshownText`, never this line.
+        guard !model.slots[i].carriesUnshownText else { return nil }
         return EmptyBlockDeletion(blockID: entry.blockID, variantID: variantID, entryIndex: i)
     }
 

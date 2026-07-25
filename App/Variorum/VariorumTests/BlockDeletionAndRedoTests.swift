@@ -186,6 +186,88 @@ struct BlockDeletionAndRedoTests {
         }
     }
 
+    /// **The fifth guard** (13c Stage 1 ladder round 2, R2-1) — R1-1's
+    /// class, one guard short, convicted by the same sentence: the carve
+    /// was authorized ONLY on *"there is no text to lose"*, and a COMMENT is
+    /// authored text. `addBlockComment` has no empty-block rule, and a note
+    /// on an empty block is an ordinary thing to write (*"I'll rewrite this
+    /// — see the note"*); `deleteBlock` then fires v1_8's cascade over it.
+    ///
+    /// Worse than the archived-take case in one specific way, and that is
+    /// why the guard is owed rather than merely tidy: `Queries
+    /// .deletedBlockComments` is keyed by BLOCK, so once the block is only
+    /// in the tray the notes have no recovery surface at all — AppSpec §7's
+    /// ratified *"deleted comments are visible and resurrectable… never
+    /// skimpy"* silently stops holding for this path.
+    @Test func aBLOCKCOMMENTKeepsTheRefusal() async throws {
+        try await withEditor(seedBlocks: ["", "hello"]) { harness in
+            let slots = try harness.storeSlots()
+            let blockID = slots[0].blockID
+            _ = try harness.session.operations.addBlockComment(
+                to: blockID, text: "I'll rewrite this — see the note")
+            try harness.reload()
+
+            let after = try harness.storeSlots()
+            #expect(after[0].text == "", "the block renders EMPTY")
+            #expect(after[0].activeVariantCount == 1, "no fan")
+            #expect(after[0].liveVariantCount == 1, "…and no archived take — R1-1's guard is satisfied")
+            #expect(after[0].commentCount == 1, "the note is the only unshown text")
+            // The pure index still names it: the guard is the caller's,
+            // where the store is known (the fan/lock/archive pins' shape).
+            #expect(harness.model.index.emptyBlockDeletion(
+                replacing: NSRange(location: 0, length: 1), isDeletion: true) == 0)
+
+            #expect(harness.model.planEmptyBlockDeletion(
+                range: NSRange(location: 0, length: 1), replacement: "") == nil,
+                "a commented block carries prose — deleting it would cascade the note away")
+        }
+    }
+
+    /// …and end to end through the REAL keystroke path: her exact gesture
+    /// on her exact case (an empty FIRST block), with a note on it. The
+    /// block must survive, and the store must still hold the comment.
+    @Test func backspaceLeavesACommentedEmptyBlockAlone() async throws {
+        try await withEditor(seedBlocks: ["", "hello"]) { harness in
+            let blockID = try harness.storeSlots()[0].blockID
+            _ = try harness.session.operations.addBlockComment(to: blockID, text: "see the note")
+            try harness.reload()
+
+            harness.replace(NSRange(location: 0, length: 1), with: "")
+            await harness.flush()
+
+            let texts = try harness.storeSlots().compactMap(\.text)
+            #expect(texts == ["", "hello"], "the commented empty block SURVIVES")
+            #expect(harness.documentText == "\nhello")
+            #expect(harness.model.index.entries.count == 2)
+            let notes = try await harness.database.read { db in
+                try Queries.blockComments(db, blockID: blockID)
+            }
+            #expect(notes.count == 1, "…and its working note is still there")
+            #expect(harness.session.undoStack.depth == 0, "nothing structural happened")
+        }
+    }
+
+    /// PROVISIONAL, and pinned as the shipped reading (13c R2-1, QUESTIONS
+    /// #40): a NAMED or CALLOUT empty block still carves. Both are columns
+    /// ON the block row — the tombstone keeps them, undo and `restoreBlock`
+    /// bring them back with the block, and the tray lists the block BY its
+    /// name — so neither becomes unrecoverable, which is the line the two
+    /// counted kinds cross. Guarding on every datum attached to a block
+    /// (tags cascade too) would narrow the carve out of existence.
+    @Test func aNAMEDOrCALLOUTEmptyBlockStillCarves_PROVISIONAL() async throws {
+        try await withEditor(seedBlocks: ["", "hello"]) { harness in
+            let blockID = try harness.storeSlots()[0].blockID
+            try harness.session.operations.setBlockName(blockID, name: "intro")
+            try harness.session.operations.setBlockPresentation(
+                blockID, BlockPresentation(color: "sand", emoji: "💡"))
+            try harness.reload()
+
+            #expect(harness.model.planEmptyBlockDeletion(
+                range: NSRange(location: 0, length: 1), replacement: "") != nil,
+                "the shipped reading: a name/frame rides the block row and revives with it")
+        }
+    }
+
     @Test func theCarveAndTheTwoCrossBlockPlansAreMUTUALLYEXCLUSIVE() async throws {
         // The carve runs FIRST in `shouldChangeText`; this is why that is
         // safe. Both cross-block plans collect their targets by INTERSECTION

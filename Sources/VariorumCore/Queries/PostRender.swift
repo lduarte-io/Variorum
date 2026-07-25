@@ -43,6 +43,13 @@ extension Queries {
         /// count, never the fan's. Counted through the live block row like
         /// its sibling, so a gap slot reads 0.
         public let liveVariantCount: Int
+        /// **Live `block_comment` rows on the block** (13c Stage 1 ladder,
+        /// R2-1). Comments are authored prose the SLOT never renders, and
+        /// `deleteBlock` fires v1_8's cascade over them — so, like an
+        /// archived take, a commented block that renders empty is not a
+        /// textless block. Counted through the live block row like its two
+        /// siblings, so a gap slot reads 0.
+        public let commentCount: Int
         /// The rendered variant's lock (frozen buffer, edit by branch/unlock).
         public let variantLocked: Bool
 
@@ -51,19 +58,42 @@ extension Queries {
         /// True when the block carries takes the fan does not show — the
         /// "renders empty but is not textless" state R1-1 found.
         public var hasArchivedTakes: Bool { liveVariantCount > activeVariantCount }
+        /// True when the block carries working notes (13c R2-1).
+        public var hasComments: Bool { commentCount > 0 }
+
+        /// **THE read for any gesture authorized on "there is no text to
+        /// lose here"** (13c Stage 1 ladder, R1-1 + R2-1 — the two halves
+        /// of one class, wired through one name so a third kind of unshown
+        /// prose extends this property rather than growing a parallel
+        /// guard). `text` is what the slot SHOWS; this is what the block
+        /// additionally HOLDS — archived takes, and block comments. Both
+        /// die in `deleteBlock`'s cascade, and the comment half additionally
+        /// breaks AppSpec §7's ratified "deleted comments are visible and
+        /// resurrectable — never skimpy", because `deletedBlockComments` is
+        /// keyed by block and a tombstoned block is only in the tray.
+        ///
+        /// Deliberately NOT included (13c R2-1, PROVISIONAL — QUESTIONS
+        /// #40): `block.name` and `block.presentation`. Those are columns
+        /// ON the block row: the tombstone keeps them, `restoreBlock` and
+        /// structural undo bring them back with the block, and the tray
+        /// lists the block BY its name. Nothing of them becomes
+        /// unrecoverable or unreachable, which is what separates them from
+        /// the two counted here.
+        public var carriesUnshownText: Bool { hasArchivedTakes || hasComments }
 
         /// Public so view layers and tests can build projections directly
         /// (the editor's pure mapping functions take these as input).
         ///
-        /// `liveVariantCount` is REQUIRED, never defaulted to the active
-        /// count: a projection builder that has not thought about archived
-        /// takes must say so, rather than silently reporting a block as
-        /// textless (the `UndoStack.register(redo:)` precedent — green by
-        /// construction, not by audit).
+        /// `liveVariantCount` and `commentCount` are REQUIRED, never
+        /// defaulted: a projection builder that has not thought about
+        /// archived takes or comments must say so, rather than silently
+        /// reporting a block as textless (the `UndoStack.register(redo:)`
+        /// precedent — green by construction, not by audit).
         public init(
             blockID: String, placementID: String, position: String,
             variantID: String?, text: String?,
-            activeVariantCount: Int, liveVariantCount: Int, variantLocked: Bool
+            activeVariantCount: Int, liveVariantCount: Int, commentCount: Int,
+            variantLocked: Bool
         ) {
             self.blockID = blockID
             self.placementID = placementID
@@ -72,6 +102,7 @@ extension Queries {
             self.text = text
             self.activeVariantCount = activeVariantCount
             self.liveVariantCount = liveVariantCount
+            self.commentCount = commentCount
             self.variantLocked = variantLocked
         }
     }
@@ -106,7 +137,13 @@ extension Queries {
                   -- against what the fan shows (R1-1).
                   (SELECT COUNT(*) FROM variant v
                     WHERE v.block_id = b.id
-                      AND v.deleted_at IS NULL)                    AS live_variant_count
+                      AND v.deleted_at IS NULL)                    AS live_variant_count,
+                  -- Working notes on the block (R2-1): prose the slot never
+                  -- renders, taken by the same cascade. Indexed by
+                  -- idx_block_comment_block; cost stays ∝ the container.
+                  (SELECT COUNT(*) FROM block_comment bc
+                    WHERE bc.block_id = b.id
+                      AND bc.deleted_at IS NULL)                   AS comment_count
                 FROM container_block cb
                 LEFT JOIN block b
                   ON b.id = cb.block_id AND b.deleted_at IS NULL
@@ -131,6 +168,7 @@ extension Queries {
                 text: row["text"],
                 activeVariantCount: row["active_variant_count"],
                 liveVariantCount: row["live_variant_count"],
+                commentCount: row["comment_count"],
                 variantLocked: row["variant_locked"])
         }
     }

@@ -332,6 +332,38 @@ struct PostRenderQueryTests {
             #expect(after[0].activeVariantCount == 1, "the fan shows only the survivor")
             #expect(after[0].liveVariantCount == 2, "…and the archived take still exists")
             #expect(after[0].hasArchivedTakes)
+            #expect(after[0].carriesUnshownText, "the one read the carve consults")
+        }
+    }
+
+    /// The SECOND kind of prose a slot does not show (13c Stage 1 ladder,
+    /// R2-1): a block COMMENT. `addBlockComment` has no empty-block rule —
+    /// a note on an empty block is an ordinary thing to write — and
+    /// `deleteBlock` fires v1_8's cascade over it, so the projection must
+    /// carry the signal for the same reason it carries the archived count.
+    /// Tombstoned comments are genuinely gone and count in neither.
+    @Test func commentCountSeesWorkingNotesTheSlotNeverRenders() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "")
+            let plain = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(plain[0].commentCount == 0)
+            #expect(!plain[0].hasComments)
+            #expect(!plain[0].carriesUnshownText, "an empty, noteless block holds nothing unshown")
+
+            let note = try ops.addBlockComment(
+                to: a.block.id, text: "I'll rewrite this — see the note")
+            let doomed = try ops.addBlockComment(to: a.block.id, text: "scratch")
+            try ops.deleteBlockComment(doomed.id)
+
+            let after = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(after[0].text == "", "the block still renders EMPTY")
+            #expect(after[0].activeVariantCount == 1, "…and the fan cannot see the note")
+            #expect(after[0].liveVariantCount == 1, "…nor can the live-variant count")
+            #expect(after[0].commentCount == 1, "the tombstoned comment counts in neither")
+            #expect(after[0].hasComments)
+            #expect(after[0].carriesUnshownText)
+            _ = note
         }
     }
 
