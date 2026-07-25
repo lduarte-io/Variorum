@@ -34,6 +34,7 @@ struct CommitBar: View {
         .commitTake, .sealPost, .blockComments, .divide, .extract, .makeBlock,
         .merge, .showTakes,
         .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
+        .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
     ]
 
     var body: some View {
@@ -195,6 +196,12 @@ struct CommitBar: View {
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         .help("New Block Below (⌥⌘N) — an empty block right under the one you're in; type straight into it")
+        // 13c 1B (A8): the delete door, beside the insert door it mirrors.
+        Button(tokens.chromeLabel("− block")) {
+            Task { await model.deleteCaretBlock() }
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        .help("Delete Block — removes the block you're in; ⌥⌘Z undoes it, ⇧⌥⌘Z redoes it, and it waits in this post's deleted-blocks tray")
         gestureButton("Takes", available: model.gestureAvailability.takes,
                       action: model.openCaretFan)
     }

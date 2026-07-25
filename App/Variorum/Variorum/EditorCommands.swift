@@ -50,9 +50,9 @@ struct EditorCommands: Commands {
     static let menuRendered: [CapabilityID] = [
         .newPost, .todaysEntry, .findAnything, .commitTake,
         .importFiles, .exportLibrary, .exportCaretBlock,
-        .structuralUndo,
+        .structuralUndo, .structuralRedo,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
-        .addBlockAtEnd, .insertBlockBelow, .showTakes,
+        .addBlockAtEnd, .insertBlockBelow, .deleteBlock, .showTakes,
         .newTake, .blankTake, .blankTakeAsChosen, .chooseTake,
         .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
         .closeAllTakes, .pageFanBack, .pageFanForward,
@@ -70,6 +70,7 @@ struct EditorCommands: Commands {
         case .findAnything: ("k", .command)
         case .commitTake: ("s", .command)
         case .structuralUndo: ("z", [.command, .option])
+        case .structuralRedo: ("z", [.command, .option, .shift])
         case .insertBlockBelow: ("n", [.command, .option])
         case .divide: ("d", [.command, .shift])
         case .extract: ("e", [.command, .shift])
@@ -143,6 +144,15 @@ struct EditorCommands: Commands {
             }
             .keyboardShortcut("z", modifiers: [.command, .option])
             .disabled(session?.undoMenuState.topLabel == nil)
+            // 13c 1B (A10): the redo half, right beside its undo — same
+            // per-op labelling, same mode-independent reporting. Distinct
+            // from ⌘⇧Z (NSTextView's text redo): the two stacks never
+            // interleave, so their doors never share a key either.
+            Button(Self.redoMenuTitle(for: session?.undoMenuState.topRedoLabel)) {
+                actions?.structuralRedo()
+            }
+            .keyboardShortcut("z", modifiers: [.command, .option, .shift])
+            .disabled(session?.undoMenuState.topRedoLabel == nil)
         }
         // The structural gestures' menu-bar door (Phase 9, contract item 1;
         // rewired 13b 1b): enablement is the REGISTRY's — in Write the
@@ -184,6 +194,13 @@ struct EditorCommands: Commands {
             Button(verb(.insertBlockBelow)) { actions?.dispatch(.insertBlockBelow) }
                 .keyboardShortcut("n", modifiers: [.command, .option])
                 .disabled(!enabled(.insertBlockBelow))
+
+            // 13c 1B (A8): the delete door where she writes — `deleteBlock`
+            // has been an operation since Phase 2 with exactly one face
+            // (the block TOC's row menu). Undoable AND redoable; the block
+            // lands in the post's tray either way.
+            Button(verb(.deleteBlock)) { actions?.dispatch(.deleteBlock) }
+                .disabled(!enabled(.deleteBlock))
 
             Divider()
 
@@ -337,5 +354,11 @@ struct EditorCommands: Commands {
     /// Extract", … — generic when the stack is empty).
     static func undoMenuTitle(for topLabel: String?) -> String {
         topLabel.map { "Undo \($0)" } ?? "Undo Structural Change"
+    }
+
+    /// The redo half's twin (13c 1B — A10): "Redo Divide", generic when
+    /// the redo stack is empty.
+    static func redoMenuTitle(for topRedoLabel: String?) -> String {
+        topRedoLabel.map { "Redo \($0)" } ?? "Redo Structural Change"
     }
 }

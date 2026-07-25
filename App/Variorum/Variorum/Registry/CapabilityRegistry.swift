@@ -121,6 +121,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌥⌘N", takesAccess: .native,
             unavailableNote: "Blocks are born inside a post — open one first.",
             availability: takeFamily),  // the one named rule, not a copy
+        // 13c 1B (A8 — her item: "I don't seem to have the ability to
+        // delete / archive empty blocks?"). `deleteBlock` has existed in
+        // Operations since Phase 2 and had exactly ONE face app-wide (the
+        // block TOC's row menu); this is its door where she writes. It is
+        // deliberately NOT restricted to empty blocks — the operation is
+        // not, the TOC door never was, and a restriction nobody ruled
+        // would be invented product behavior. Undoable (⌥⌘Z) and, since
+        // A10, redoable; the deleted block also lands in the post's tray.
+        // The destructive-action WARNING is her A12 and stays 13d — it is
+        // cheap precisely once redo makes the mistake recoverable.
+        Capability(
+            id: .deleteBlock, verb: "Delete Block", scope: .block,
+            doors: [.menuBar, .bottomBar, .palette],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Blocks live inside a post — open one first.",
+            availability: takeFamily),  // the one named rule, not a copy
 
         // MARK: The take family (take scope)
         Capability(
@@ -283,6 +299,18 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌥⌘Z", takesAccess: .native,
             unavailableNote: "No structural change to undo.",
             availability: { ctx in ctx.undoAvailable ? .act : .unavailable }),
+        // 13c 1B (A10 — "i desperately need a 'redo' command to be able to
+        // undo my structural undos for when that was an accident"). The
+        // exact mirror of the undo door, gated on the redo stack: same
+        // app scope (structural undo/redo is never a mode's property),
+        // same two doors, ⇧⌥⌘Z beside ⌥⌘Z. STRUCTURAL only — ⌘⇧Z stays
+        // NSTextView's text redo and the two never interleave.
+        Capability(
+            id: .structuralRedo, verb: "Redo Structural Change", scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: "⇧⌥⌘Z", takesAccess: .native,
+            unavailableNote: "No structural change to redo.",
+            availability: { ctx in ctx.redoAvailable ? .act : .unavailable }),
 
         // MARK: Post scope
         Capability(
@@ -446,6 +474,7 @@ nonisolated enum CapabilityRegistry {
         case .commit: id = .commitTake
         case .addBlockAtEnd: id = .addBlockAtEnd
         case .insertBlockBelow: id = .insertBlockBelow
+        case .deleteBlock: id = .deleteBlock
         case .toggleSeal: id = .sealPost
         case .comments: id = .blockComments
         case .pageFan: id = .pageFanBack

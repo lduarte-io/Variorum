@@ -225,6 +225,11 @@ extension EditorView {
             // under the caret block; the caret lands in it.
             Task { await model.insertBlockBelowCaret() }
             return true
+        case .deleteBlock:
+            // 13c 1B (A8): native in Write — the caret block goes, the
+            // caret lands in the neighbour that takes its place.
+            Task { await model.deleteCaretBlock() }
+            return true
         case .toggleSeal:
             model.toggleSeal()
             return true

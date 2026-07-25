@@ -1143,6 +1143,36 @@ final class TakesViewModel {
         }
     }
 
+    /// 13c 1B (A8 — her "I don't seem to have the ability to delete /
+    /// archive empty blocks?"): the delete door where takes live, NATIVE
+    /// (R118 parity — Write is never the privileged surface). The ring
+    /// lands on the neighbour that takes the departed block's place (the
+    /// insert-below handover precedent, other direction). Flushes first,
+    /// so a pending buffer never lands in a tombstoned variant; sealed
+    /// posts refuse through the op, spoken.
+    func deleteFocusedBlock() async {
+        guard let slot = commandTargetSlot else {
+            speak("Click into a block first — this removes the block you're in.")
+            return
+        }
+        let slots = projection.slots
+        let survivor: Queries.RenderedBlock? = slots
+            .firstIndex { $0.blockID == slot.blockID }
+            .flatMap { i in i + 1 < slots.count ? slots[i + 1] : (i > 0 ? slots[i - 1] : nil) }
+        await autosave.flushNow()
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in try ops.deleteBlock(slot.blockID) }
+            if let variantID = survivor?.variantID {
+                choreography.parkFocus(onVariant: variantID)
+            }
+            statusMessage =
+                "Block deleted — ⌥⌘Z undoes it, and it waits in this post's deleted-blocks tray."
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
     /// The routed comments door (⌘⇧' — the bars' block menu made
     /// keyboard-reachable): the bar presents the sheet for this target.
     struct CommentsRequest: Identifiable, Equatable {

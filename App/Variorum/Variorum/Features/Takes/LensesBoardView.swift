@@ -147,6 +147,10 @@ struct LensesBoardView: View {
             // pane takes the ring via the landing (first column resolves).
             Task { await model.insertBlockBelowFocused() }
             return true
+        case .deleteBlock:
+            // 13c 1B (A8): the shared model machinery, same as Takes.
+            Task { await model.deleteFocusedBlock() }
+            return true
         case .toggleSeal:
             Task { await model.toggleSeal() }
             return true

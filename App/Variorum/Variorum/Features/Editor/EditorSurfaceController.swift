@@ -429,6 +429,61 @@ final class EditorSurfaceController {
         if landed { model.showStatus("New block added below — type away.") }
     }
 
+    // MARK: - Delete block (13c batch 1B — A8)
+
+    /// The Write half of the delete-block act (her A8: "I don't seem to
+    /// have the ability to delete / archive empty blocks?"). Runs through
+    /// `runStructural` like every structural gesture — one flight, flush
+    /// first, store-led rewrite (seam nil: no seam vocabulary describes a
+    /// removal), caret by identity. A sealed post refuses through the op,
+    /// spoken.
+    ///
+    /// Deleting the post's LAST block is ALLOWED, deliberately: no
+    /// invariant makes a post's block count load-bearing, and the
+    /// blockless post is an explicitly-modelled state — it is what a fresh
+    /// post is (`BlockRangeIndex`: "When there are no entries the tail IS
+    /// the document"). The block is undoable (⌥⌘Z), redoable (⇧⌥⌘Z), and
+    /// waits in the post's deleted-blocks tray either way.
+    func deleteCaretBlock() async {
+        guard let blockID = model.caretBlockID,
+              let index = model.index.entries.firstIndex(where: { $0.blockID == blockID })
+        else {
+            // Fire-and-speak: the open tail and the empty post are not
+            // blocks, and saying so beats a silent door.
+            model.refuseFeedback(model.index.entries.isEmpty
+                ? "No blocks yet — type on the page and each finished paragraph becomes one."
+                : "Put the caret in a block first — this removes the block you're in.")
+            return
+        }
+        await runDeleteBlock(blockID, entryIndex: index, note:
+            "Block deleted — ⌥⌘Z undoes it, and it waits in this post's deleted-blocks tray.")
+    }
+
+    /// The one delete-block body both doors use: the menu/bar act above and
+    /// A7's empty-block backspace below.
+    private func runDeleteBlock(_ blockID: String, entryIndex: Int, note: String) async {
+        let landing = caretLandingAfterRemoving(entryIndex)
+        let landed = await runStructural { ops in
+            try ops.deleteBlock(blockID)
+            return StructuralOutcome(
+                caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
+        }
+        if landed { model.showStatus(note) }
+    }
+
+    /// Where the caret goes when entry `i` leaves: the START of the block
+    /// below (what the eye expects when the seam above the caret closes),
+    /// else the END of the block above. On the post's only block there is
+    /// no survivor — naming the departed block leaves the caret wherever
+    /// the fresh-post re-render put it, which is the honest answer and a
+    /// harmless no-op in `applyStructuralResult`.
+    private func caretLandingAfterRemoving(_ i: Int) -> (blockID: String, offset: Int) {
+        let entries = model.index.entries
+        if i + 1 < entries.count { return (entries[i + 1].blockID, 0) }
+        if i > 0 { return (entries[i - 1].blockID, entries[i - 1].length) }
+        return (entries[i].blockID, 0)
+    }
+
     // MARK: - The merge ceremony (13b Stage 4, Batch 4B — S4-23, ruled)
 
     /// The merge ceremony's ONE sheet: both blocks' takes side by side,
@@ -1015,6 +1070,63 @@ final class EditorSurfaceController {
         /// re-guessed).
         let lastPieceLength: Int
         let replacement: String
+    }
+
+    /// A7 (13c 1B): the narrow carve out of the cross-block refusal — a
+    /// backspace/forward-delete of the ONE separator beside an EMPTY block
+    /// deletes that block instead of refusing.
+    ///
+    /// Three guards sit here rather than in the pure index, because this
+    /// is where the fan and the store are known, and together they are
+    /// what keeps the carve from widening:
+    ///
+    /// 1. the block's SURFACE text is empty (the index's rule) — a block
+    ///    with any text keeps the ratified refusal;
+    /// 2. the block has NO FAN (`activeVariantCount == 1`) — takes are
+    ///    text, and a seam-key must never take one away unseen;
+    /// 3. the slot is editable (a live variant, unlocked, not a gap).
+    ///
+    /// The store is verified again at run time by a compare-and-set, so a
+    /// sync apply landing text into the block between the keystroke and
+    /// the transaction refuses the whole gesture rather than deleting text
+    /// nobody saw.
+    struct EmptyBlockDeletion: Sendable, Equatable {
+        let blockID: String
+        let variantID: String
+        let entryIndex: Int
+    }
+
+    func planEmptyBlockDeletion(range: NSRange, replacement: String) -> EmptyBlockDeletion? {
+        guard replacement.isEmpty,
+              let i = model.index.emptyBlockDeletion(replacing: range, isDeletion: true)
+        else { return nil }
+        let entry = model.index.entries[i]
+        guard entry.editable, let variantID = entry.variantID else { return nil }
+        // No fan: a block with several takes carries text in the ones you
+        // are not looking at, so the "nothing to lose" argument fails.
+        guard i < model.slots.count, model.slots[i].activeVariantCount == 1 else { return nil }
+        return EmptyBlockDeletion(blockID: entry.blockID, variantID: variantID, entryIndex: i)
+    }
+
+    /// Runs A7's carve through the one structural door, with the buffer
+    /// compare-and-set first (`editTakesAtomically` with an unchanged text
+    /// is a pure verification — it registers nothing and returns 0, the
+    /// `runCrossBlockEdit` precedent), so exactly ONE undo entry lands:
+    /// "Delete Block".
+    func runEmptyBlockDeletion(_ plan: EmptyBlockDeletion) async {
+        let landing = caretLandingAfterRemoving(plan.entryIndex)
+        let landed = await runStructural { ops in
+            _ = try ops.editTakesAtomically(
+                [Operations.TakeEdit(
+                    variantID: plan.variantID, newText: "", charDelta: 0, expectedText: "")],
+                undoLabel: "Delete Block")
+            try ops.deleteBlock(plan.blockID)
+            return StructuralOutcome(
+                caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
+        }
+        if landed {
+            model.showStatus("Empty block deleted — ⌥⌘Z undoes it.")
+        }
     }
 
     func planCrossBlockEdit(range: NSRange, replacement: String) -> CrossBlockEdit? {

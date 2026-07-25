@@ -128,12 +128,18 @@ struct StructuralUndoTests {
             let active = LockIsolated(0)
             let maxActive = LockIsolated(0)
             for label in ["one", "two"] {
-                undoStack.register(label: label) { _ in
-                    active.withValue { $0 += 1 }
-                    maxActive.withValue { $0 = max($0, active.value) }
-                    Thread.sleep(forTimeInterval: 0.03)   // widen any overlap window
-                    active.withValue { $0 -= 1 }
-                }
+                undoStack.register(
+                    label: label,
+                    inverse: { _ in
+                        active.withValue { $0 += 1 }
+                        maxActive.withValue { $0 = max($0, active.value) }
+                        Thread.sleep(forTimeInterval: 0.03)   // widen any overlap window
+                        active.withValue { $0 -= 1 }
+                    },
+                    // 13c 1B: the serialization test cares only about the
+                    // inverse; a synthetic entry with no re-apply is exactly
+                    // the `redo: nil` case the signature makes explicit.
+                    redo: nil)
             }
 
             async let first = runner.run { operations in try undoStack.undo(with: operations) }

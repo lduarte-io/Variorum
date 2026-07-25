@@ -176,6 +176,54 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         return .refuse(.crossesBlockBoundary)
     }
 
+    // MARK: - A7 (13c batch 1B): the empty-block carve
+
+    /// Phase 13c, batch 1B — her A7, verbatim: *"I cant use backspace to
+    /// delete empty blocks with no takes right now which is too annoying -
+    /// especially when there's an empty block right at the start of the
+    /// post."*
+    ///
+    /// A backspace at the start of a block, or a forward-delete at the end
+    /// of one, proposes deleting exactly the ONE separator character
+    /// between them — a range owned by NEITHER block, so `verdict` answers
+    /// `.crossesBlockBoundary` and the keystroke refuses. That refusal is
+    /// ratified and stays: a cross-block destructive edit must not
+    /// half-apply. But where one side of that seam is an EMPTY block the
+    /// refusal buys nothing — **there is no text to lose** — and the right
+    /// answer is to delete that block.
+    ///
+    /// This is the whole carve, and it is deliberately narrow so it cannot
+    /// widen: a **deletion** (never a replacement — typing over a seam is a
+    /// different gesture) of **exactly one inter-entry separator** where a
+    /// neighbouring entry has **zero length**. Everything else — a block
+    /// with any text, a multi-character range, a range that starts or ends
+    /// inside a block, the tail separator — falls through untouched to the
+    /// existing merge-then-edit / visible-take / refusal paths. The
+    /// no-fan and editability guards live with the caller, which is where
+    /// the fan arity is known (`EditorSurfaceController`).
+    ///
+    /// Returns the entry index to delete, or nil. **When BOTH neighbours
+    /// are empty the one BEFORE the separator wins** — backspace is the
+    /// dominant gesture and its meaning is "remove what is behind me";
+    /// preferring the block after would delete the very block the caret
+    /// sits in and never converge under repeated presses.
+    func emptyBlockDeletion(replacing range: NSRange, isDeletion: Bool) -> Int? {
+        guard isDeletion, range.length == 1, entries.count >= 2 else { return nil }
+        // Only the INTER-ENTRY separators — the tail's separator is the
+        // `closeTail` verdict's business, not this one.
+        var location = 0
+        for k in 0..<(entries.count - 1) {
+            location += entries[k].length
+            if location == range.location {
+                if entries[k].length == 0 { return k }
+                if entries[k + 1].length == 0 { return k + 1 }
+                return nil
+            }
+            location += 1  // the separator itself
+        }
+        return nil
+    }
+
     // MARK: - Mutations (applied AFTER the change, per the verdict)
 
     mutating func applyBlockEdit(at index: Int, lengthDelta: Int) {

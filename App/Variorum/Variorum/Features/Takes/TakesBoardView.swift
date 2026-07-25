@@ -197,6 +197,11 @@ struct TakesBoardView: View {
             // takes the ring when its slot arrives.
             Task { await model.insertBlockBelowFocused() }
             return true
+        case .deleteBlock:
+            // 13c 1B (A8): native in Takes (R118 parity) — the focused
+            // block goes and the ring lands on its neighbour.
+            Task { await model.deleteFocusedBlock() }
+            return true
         case .toggleSeal:
             Task { await model.toggleSeal() }
             return true

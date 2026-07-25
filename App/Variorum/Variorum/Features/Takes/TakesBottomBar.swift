@@ -37,6 +37,7 @@ struct TakesBottomBar: View {
         .commitTake, .sealPost, .divide, .extract, .makeBlock, .merge,
         .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
         .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
+        .deleteBlock,  // 13c 1B (A8): the block menu's delete door
     ]
 
     /// The structural doors the bar renders (registry-walk-asserted: the
@@ -102,6 +103,12 @@ struct TakesBottomBar: View {
                 // mints right under the block you're in and its pane takes
                 // the ring. The Takes trap's second half closes here.
                 Task { await model.insertBlockBelowFocused() }
+            }
+            Button("− Delete this block") {
+                // 13c 1B (A8): her "I don't seem to have the ability to
+                // delete / archive empty blocks?" — the door where takes
+                // live, native (R118 parity with Write's bar).
+                Task { await model.deleteFocusedBlock() }
             }
             Button("＋ New block at the end of the post") {
                 // D3's third leg (13b 1b): native — the minted block's

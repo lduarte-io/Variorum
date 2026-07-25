@@ -30,6 +30,8 @@ struct CapabilityRegistryTests {
         contexts.append(CapabilityContext(mode: nil))
         contexts.append(CapabilityContext(mode: nil, writeEditorAttached: true))  // book/pool editor
         contexts.append(CapabilityContext(mode: nil, undoAvailable: true))
+        // 13c 1B (A10): the redo stack is the second app-scope gate.
+        contexts.append(CapabilityContext(mode: nil, redoAvailable: true))
         return contexts
     }
 
@@ -83,9 +85,10 @@ struct CapabilityRegistryTests {
         // available in Write is unavailable in Takes.
         // Mode parity, with the non-mode gates satisfied (undo's stack
         // gate applies identically everywhere — it is not a mode rule).
-        let takes = CapabilityContext(mode: .takes, undoAvailable: true)
+        let takes = CapabilityContext(mode: .takes, undoAvailable: true, redoAvailable: true)
         let write = CapabilityContext(
-            mode: .write, writeEditorAttached: true, undoAvailable: true)
+            mode: .write, writeEditorAttached: true,
+            undoAvailable: true, redoAvailable: true)
         for capability in CapabilityRegistry.all {
             guard let access = capability.takesAccess else { continue }
             let inTakes = capability.availability(takes)
@@ -160,6 +163,7 @@ struct CapabilityRegistryTests {
             .structural(.divide), .structural(.extract), .structural(.makeBlock),
             .structural(.merge),
             .deleteInEveryTake, .commit, .addBlockAtEnd, .insertBlockBelow,
+            .deleteBlock,  // 13c 1B (A8)
             .toggleSeal, .comments,
             .pageFan(1),
         ]

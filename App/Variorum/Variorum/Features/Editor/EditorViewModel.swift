@@ -658,7 +658,16 @@ final class EditorViewModel {
             // ruled deviation: two blocks, NOT a join). Locked/gap/tail
             // spans keep the speaking refusal.
             pendingVerdict = nil
-            if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
+            // 13c 1B (A7): the empty-block carve runs FIRST — its range is
+            // exactly one separator, which touches no entry at all, so the
+            // two plans below can never see it (pinned). Deleting an EMPTY
+            // block is the one case where the cross-block refusal buys
+            // nothing: there is no text to lose.
+            if let empty = planEmptyBlockDeletion(range: range, replacement: replacement) {
+                scheduleCrossBlockCompound { [weak self] in
+                    await self?.runEmptyBlockDeletion(empty)
+                }
+            } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runCrossBlockEdit(compound)
                 }
@@ -1049,6 +1058,23 @@ final class EditorViewModel {
     /// The merge-then-edit plan (the controller's).
     func planCrossBlockEdit(range: NSRange, replacement: String) -> CrossBlockEdit? {
         structural.planCrossBlockEdit(range: range, replacement: replacement)
+    }
+
+    // MARK: - 13c 1B (A7/A8) — the empty-block carve + the delete door
+
+    typealias EmptyBlockDeletion = EditorSurfaceController.EmptyBlockDeletion
+
+    func planEmptyBlockDeletion(range: NSRange, replacement: String) -> EmptyBlockDeletion? {
+        structural.planEmptyBlockDeletion(range: range, replacement: replacement)
+    }
+
+    func runEmptyBlockDeletion(_ plan: EmptyBlockDeletion) async {
+        await structural.runEmptyBlockDeletion(plan)
+    }
+
+    /// A8's Write door (the Block menu / the bar / ⌘K).
+    func deleteCaretBlock() async {
+        await structural.deleteCaretBlock()
     }
 
     /// The merge-then-edit compound (the controller's).

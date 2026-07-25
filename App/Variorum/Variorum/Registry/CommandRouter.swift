@@ -169,6 +169,8 @@ final class CommandRouter {
     /// Whether the structural undo stack has an entry (wired to the undo
     /// menu state).
     @ObservationIgnored var undoAvailable: () -> Bool = { false }
+    /// Whether the structural REDO stack has an entry (13c 1B — A10).
+    @ObservationIgnored var redoAvailable: () -> Bool = { false }
 
     // MARK: - Context assembly
 
@@ -176,7 +178,8 @@ final class CommandRouter {
         CapabilityContext(
             mode: activeMode,
             writeEditorAttached: writeEditorAttached(),
-            undoAvailable: undoAvailable())
+            undoAvailable: undoAvailable(),
+            redoAvailable: redoAvailable())
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {

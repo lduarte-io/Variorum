@@ -95,7 +95,24 @@ struct ShellActions {
             } catch {
                 // A failed inverse stays on the stack (UndoStack doctrine);
                 // the user resolves (e.g. unseals the post) and retries.
-                status.speak("Undo failed: \(error)")
+                status.speak("Undo failed: \(OpsRefusalCopy.message(for: error))")
+            }
+        }
+    }
+
+    /// ⇧⌥⌘Z (13c 1B — A10): the undo door's exact mirror. Same
+    /// mode-independent execution and reporting; a refused re-apply stays
+    /// on the redo stack for retry, like a refused inverse.
+    func structuralRedo() {
+        let undoStack = session.undoStack  // Sendable; never capture the session
+        Task { @MainActor in
+            do {
+                let label = try await session.runner.run { ops in
+                    try undoStack.redo(with: ops)
+                }
+                status.speak(label.map { "Redid: \($0)" } ?? "No structural change to redo.")
+            } catch {
+                status.speak("Redo failed: \(OpsRefusalCopy.message(for: error))")
             }
         }
     }
@@ -279,8 +296,8 @@ struct ShellActions {
     /// rows (go-to, settings, voices) stay the shell's own.
     static let paletteActs: [CapabilityID] = [
         .newPost, .todaysEntry, .importFiles, .exportLibrary,
-        .commitTake, .structuralUndo, .sealPost,
-        .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow,
+        .commitTake, .structuralUndo, .structuralRedo, .sealPost,
+        .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
     ]
@@ -302,6 +319,7 @@ struct ShellActions {
         case .exportLibrary: return { exportLibrary() }
         case .commitTake: return { commitTake() }
         case .structuralUndo: return { structuralUndo() }
+        case .structuralRedo: return { structuralRedo() }
         case .sealPost: return { toggleSeal() }
         case .divide: return { dispatch(.structural(.divide)) }
         case .extract: return { dispatch(.structural(.extract)) }
@@ -309,6 +327,7 @@ struct ShellActions {
         case .merge: return { dispatch(.structural(.merge)) }
         case .addBlockAtEnd: return { dispatch(.addBlockAtEnd) }
         case .insertBlockBelow: return { dispatch(.insertBlockBelow) }
+        case .deleteBlock: return { dispatch(.deleteBlock) }
         case .showTakes: return { dispatch(.takes(.toggleFan)) }
         case .newTake: return { dispatch(.takes(.branch)) }
         case .blankTake: return { dispatch(.takes(.blank)) }

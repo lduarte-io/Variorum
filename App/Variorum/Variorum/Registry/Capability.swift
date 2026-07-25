@@ -54,6 +54,7 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     case commit          // ⌘S — commit the focused/caret take
     case addBlockAtEnd   // D3's third leg: a new block at the post's end
     case insertBlockBelow  // 13b 4D (N28/S4-13): a new block BELOW the caret/focused block
+    case deleteBlock     // 13c 1B (A8): delete the caret/focused block
     case toggleSeal
     case comments        // ⌘⇧' — the target block's comments panel
     case pageFan(Int)    // ⌥⌘←/→ — page the focused block's take cards
@@ -127,6 +128,8 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     var writeEditorAttached = false
     /// The structural undo stack has an entry.
     var undoAvailable = false
+    /// The structural REDO stack has an entry (13c 1B — A10).
+    var redoAvailable = false
 }
 
 // MARK: - The capability declaration
@@ -185,6 +188,7 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // Structural (block scope)
     case divide, extract, makeBlock, merge, deleteInEveryTake, addBlockAtEnd
     case insertBlockBelow  // 13b 4D (N28's second half; S4-13: native in BOTH editors)
+    case deleteBlock       // 13c 1B (A8): the delete door where she writes
     // The take family (take scope)
     case showTakes, newTake, blankTake, blankTakeAsChosen, chooseTake
     case previousTake, nextTake, archiveTake, saveChoicesAsLens, closeAllTakes
@@ -195,8 +199,8 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows
     // registry-declared siblings on the scrap rows)
     case tagBlock
-    // Commit + undo
-    case commitTake, structuralUndo
+    // Commit + undo/redo (13c 1B — A10 adds the redo half)
+    case commitTake, structuralUndo, structuralRedo
     // Post scope
     case sealPost
     // Write-editor-scoped doors the menu renders

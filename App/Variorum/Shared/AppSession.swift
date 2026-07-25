@@ -23,9 +23,13 @@ import VariorumCore
 @Observable
 final class UndoMenuState {
     private(set) var topLabel: String?
+    /// 13c 1B (A10): the redo half's label, from the same refresh — the
+    /// stack stays the truth, this is a projection of BOTH its ends.
+    private(set) var topRedoLabel: String?
 
     func refresh(from stack: UndoStack) {
         topLabel = stack.topLabel
+        topRedoLabel = stack.topRedoLabel
     }
 }
 
@@ -136,6 +140,7 @@ final class AppSession {
         let editorRouter = self.editorRouter
         commandRouter.writeEditorAttached = { editorRouter.active != nil }
         commandRouter.undoAvailable = { menuState.topLabel != nil }
+        commandRouter.redoAvailable = { menuState.topRedoLabel != nil }
         #endif
     }
 }
