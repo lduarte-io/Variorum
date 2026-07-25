@@ -29,6 +29,14 @@
 //    · `thePassAsksForTheRefreshItNeeds`             ← the nudge
 //    · `theInlineEditorIsOutOfScope`                 ← the scoping guard
 //    · `aLongBlockFarBelowTheLookAheadIsLeftAlone`   ← the reach bounds
+//    · `aRealScrollThroughTheAnchorControllerReachesThePass`
+//                                                    ← THE WIRE (13c ladder
+//      round 3, R3-4). Every pin above drives the pass by hand, so until
+//      this one existed the single production line that connects a scroll
+//      to this feature was unpinned: deleting it left all three suites
+//      green while the whole default-ON feature was inert in the app.
+//      Red with that line deleted (`layoutsRun → 0`, `passesRun` stuck at
+//      the attach settle's 1) and green with it.
 //
 //  `theSameBlockIsNeverLaidOutTwiceAtOneWidth` is deliberately NOT in that
 //  list any more, and the reason is worth keeping: under the once-per-
@@ -596,6 +604,94 @@ struct LongBlockLayoutHostedTests {
             sweep()
             #expect(h.model.longBlockLayout.layoutsRun == afterFirst,
                     "a second read-through must cost NOTHING")
+        }
+    }
+
+
+    /// **THE TRIGGER'S OWN PIN** (13c Stage 1 ladder round 3, R3-4 — and it
+    /// is the pin this suite was missing, not a decoration).
+    ///
+    /// Every other hosted test here drives `runLongBlockLayoutPass()` (or
+    /// `considerLongBlockLayout()`) BY HAND, and every editor test stubs the
+    /// debounce sleeper to throw — deliberately, so unrelated suites measure
+    /// the uncorrected estimate. The consequence the reviewer found: **the
+    /// one line that connects a real scroll to this feature was unpinned.**
+    /// Delete `model.considerLongBlockLayout()` from
+    /// `ScrollAnchorController.boundsChanged` and, before this test existed,
+    /// all three suites stayed green while the whole default-ON feature was
+    /// inert in the shipped app — and `/Applications` was still the previous
+    /// build, so no human had exercised it either.
+    ///
+    /// So this drives PRODUCTION'S OWN WIRING: the same
+    /// `ScrollAnchorController` `EditorView` installs, subscribed to the clip
+    /// view's real bounds notification, with the debounce let through
+    /// because the trigger is precisely what is under test.
+    /// **The isolation this pin needs, and it is the reason it is not two
+    /// lines.** The trigger has TWO inputs (the header names them): this
+    /// scroll wire, and `overlayLayoutDidSettle`'s post-layout hop. The
+    /// settle hop is generation-gated — storage content, attach, and WIDTH
+    /// bump the generation; **a scroll does not** — so it fires once after
+    /// attach and then stays quiet. A naïve version of this test scrolled a
+    /// few points on a post whose long block was already within reach and
+    /// stayed GREEN with the scroll wire deleted, satisfied by that attach
+    /// settle. Recorded because it is the trap: to pin a wire, put the work
+    /// somewhere ONLY that wire can reach.
+    ///
+    /// So the long block starts far below the look-ahead — the attach settle
+    /// provably lays out nothing — and only scrolling toward it can make it
+    /// eligible.
+    @Test func aRealScrollThroughTheAnchorControllerReachesThePass() async throws {
+        var blocks = (0..<100).map { "short block \($0) of text here" }
+        blocks[60] = (0..<3000).map { "longword\($0 % 97)" }.joined(separator: " ")
+        try await withEditor(seedBlocks: blocks) { h in
+            let (scrollView, window) = try mount(h, height: 500)
+            defer { window.orderOut(nil); window.close() }
+            h.model.longBlockLayout.defaults = isolatedDefaults()
+            // The harness stubs this to throw so nothing fires on its own
+            // (`EditorTestSupport`); here the arming IS the subject.
+            h.model.longBlockLayout.sleep = { _ in }
+
+            let anchor = ScrollAnchorController(model: h.model, scrollView: scrollView)
+            defer { anchor.uninstall() }
+
+            // TWO different drains, and they are not interchangeable: the
+            // clip's bounds notification is delivered on `OperationQueue
+            // .main`, which wants a run-loop turn, while the trigger's
+            // debounce is a main-actor `Task`, which a synchronous
+            // `RunLoop.run(until:)` never services (the plan's
+            // "async-poll, never sync RunLoop pumping" trap — measured here:
+            // pumping alone leaves `passesRun` at 0 forever).
+            @MainActor func drain() async {
+                pump(1)
+                for _ in 0..<60 {
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(2))
+                }
+            }
+
+            // Let the attach settle land, then take the baseline: whatever
+            // it did, it could not have reached block 60.
+            await drain()
+            #expect(h.model.longBlockLayout.layoutsRun == 0,
+                    "the long block starts out of reach — this pin's whole isolation")
+            let baseline = h.model.longBlockLayout.passesRun
+
+            // She scrolls toward it. Nothing else is touched: no width
+            // change, no storage edit, so the settle hop stays quiet and
+            // this scroll wire is the only thing that can arm a pass.
+            for y in stride(from: CGFloat(400), through: 1600, by: 400) {
+                scrollView.contentView.scroll(to: CGPoint(x: 0, y: y))
+                scrollView.reflectScrolledClipView(scrollView.contentView)
+                await drain()
+                if h.model.longBlockLayout.layoutsRun > 0 { break }
+            }
+
+            #expect(h.model.longBlockLayout.passesRun > baseline,
+                    "a real scroll must reach the pass — this wire is the feature's only scroll trigger in Write")
+            #expect(h.model.longBlockLayout.layoutsRun == 1,
+                    "…and it did the work: \(h.model.longBlockLayout.layoutsRun) layouts")
+            #expect(h.model.longBlockLayout.handled.keys.contains(h.model.index.entries[60].blockID),
+                    "the long block is the one it reached")
         }
     }
 
