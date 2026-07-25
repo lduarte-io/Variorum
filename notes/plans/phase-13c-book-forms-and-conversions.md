@@ -1710,6 +1710,65 @@ same reasoning the round-1 pass was accepted for.
    honest, since the alternative reading ("it was always a declaration
    edit") is what the ledger row asserted for a day.
 
+### Round 2 fix pass — ACCEPTED (2026-07-26); round 3 running
+
+**Counts core 851→852/98 · Mac 722→731/129 · mobile 14/4**, all re-run
+in full. Verified by me: the new members exist (`PostRender.swift:52,
+82`) and the package builds clean — a **third** stale-index SourceKit
+alarm this phase, checked rather than assumed every time.
+
+**R2-1 closed the class rather than the instance, in the right shape.**
+Rather than a sixth guard line, it added one named predicate —
+**`carriesUnshownText = hasArchivedTakes || hasComments`** — which is
+also where R2-8's dead code found its consumer. A future third kind of
+unshown prose extends a documented property instead of appending to a
+guard list nobody will remember to read. **The red-on-old shows the
+destruction directly**: with the guard reverted, the pin fails five ways
+and `notes.count → 0` — the comment cascading away, visible in the
+failure rather than argued about.
+
+**PROVISIONAL #40 (a *named* or *callout* empty block still carves) —
+ACCEPTED, and its reasoning is better than the disposition I wrote.** The
+line it draws is not *"is it authored"* but **"does deleting make it
+unrecoverable"** — `name` and `presentation` are columns on the block
+row, revived by undo and `restoreBlock`, and the tray lists the block
+*by its name*, so nothing goes dark. The reductio that settles it: **block
+tags cascade too**, so a guard on "anything attached to a block" would
+narrow the carve out of existence and undo the very A7 fix she asked
+for. Flipping costs two projection signals plus one guard line, and the
+entry says so.
+
+**A13(a) BUILT** — `takesAccess: .native`, ⌥⌘C, a `takeFamilyPlusCompare`
+rule covering exactly the surfaces she named, routed through the command
+vocabulary with four handlers over **one pure shared transform**. Canvas
+deliberately out (not in her ask; honestly grey per P-2, and recorded for
+the Design & UI review row).
+
+> **A9 DEFERRED to 13d — and the deferral corrected MY ledger row, which
+> is the finding under the finding.** The row asserted "no divide in
+> Takes". **False:** the bottom-bar door flushes, parks a `WriteIntent`
+> carrying her caret, switches mode *visibly*, and runs the real divide —
+> that IS 13b's fire-and-DO machinery working as designed. Her actual ask
+> is that it act **without leaving Takes**, which needs a structural
+> planning path for Takes *plus* the W ceremony mountable outside
+> `EditorSurfaceController` (a fanned block — the ordinary case in Takes —
+> opens the ceremony, whose sheet takes an `EditorViewModel`). **A
+> half-measure would ship two behaviours for one gesture — the exact
+> confusion class Stage 4 exists to kill.** I accept the sizing; the
+> round-3 reviewer is explicitly asked to judge it, since the opposite
+> reading stood in the ledger for a day. **QUESTIONS #41** lets her lift
+> it to the top of 13d if she wants.
+
+**R2-6's SPECULATIVE label was too cautious, and the fix pass said so** —
+without the guard the block is deleted while typed text is still
+unwritten. A reviewer under-claiming its own finding is the safe
+direction to err, and correcting it on the record is right.
+
+**R2-9 was demonstrated the R1-6 way again:** with the old rule and an
+injected `height += 1`, the door walk **passed** while a write escaped;
+the fixed rule caught it. That is now twice this guard has been proven by
+showing the hole open first.
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
