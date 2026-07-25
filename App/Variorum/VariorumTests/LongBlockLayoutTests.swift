@@ -21,12 +21,33 @@
 //  table). They are the ones that matter, because the brief's whole point
 //  is that the cost is not the danger and the TRIGGER is:
 //
-//    · `theSameBlockIsNeverLaidOutTwice`     ← the `handled` insert
-//    · `aBlockOverTheCapIsSkippedAndRecorded` ← the cap
-//    · `anOrdinaryPostNeverLaysOutAnything`   ← the floor
-//    · `theKillSwitchStopsItCompletely`       ← the setting guard
-//    · `thePassAsksForTheRefreshItNeeds`      ← the nudge
-//    · `theInlineEditorIsOutOfScope`          ← the scroll-view guard
+//    · `aWidthDragProducesOnePassAtTheSettledWidth…` ← the settle gate
+//    · `aBlockOverTheCapIsSkippedAndRecorded`        ← the cap AND the
+//                                                      `handled` write
+//    · `anOrdinaryPostNeverLaysOutAnything`          ← the floor
+//    · `theKillSwitchStopsItCompletely`              ← the setting guard
+//    · `thePassAsksForTheRefreshItNeeds`             ← the nudge
+//    · `theInlineEditorIsOutOfScope`                 ← the scoping guard
+//    · `aLongBlockFarBelowTheLookAheadIsLeftAlone`   ← the reach bounds
+//
+//  `theSameBlockIsNeverLaidOutTwiceAtOneWidth` is deliberately NOT in that
+//  list any more, and the reason is worth keeping: under the once-per-
+//  session contract it WAS the `handled` write's red, but under the width
+//  contract TK2's own `layoutAvailable` state covers the same ground at
+//  every width, so removing the write no longer makes it fail. Saying so
+//  is cheaper than a pin that proves nothing. What `handled` still
+//  provably does — stop a block the feature can never help from being
+//  re-considered on every pass forever — moved to the over-cap pin, where
+//  it IS red.
+//
+//  ── The width contract (architect ruling, 2026-07-26) ─────────────────
+//  Eligibility is keyed on the CONTAINER WIDTH, not once per session: a
+//  width reflow genuinely discards TK2's layout (measured: 7,300 pt laid
+//  out → 11,492 pt guessed at a narrower column), so without this the fix
+//  would silently stop working after her first sidebar toggle. The hard
+//  requirement that keeps it safe is ONE PASS PER SETTLED WIDTH, never one
+//  per width sample — that is the drag pin, and it is the first in the
+//  list above for a reason.
 //
 
 import AppKit
@@ -56,18 +77,21 @@ struct LongBlockLayoutPlannerTests {
                 candidate(2, length: 20_000),                  // ← this one
                 candidate(3, length: 30_000),
             ],
-            handled: [])
+            handled: [:], width: 600)
         #expect(plan.layOut?.blockID == "b2")
         #expect(plan.skippedOverCap.isEmpty)
+        #expect(plan.moreRemain, "b3 is waiting behind it")
     }
 
     /// ONE per pass — the frame-budget bound. A pass can never cost more
     /// than one capped layout no matter how many candidates are eligible.
     @Test func onlyOneBlockIsPlannedPerPass() {
         let plan = LongBlockLayout.decide(
-            candidates: (0..<8).map { candidate($0, length: 20_000) }, handled: [])
+            candidates: (0..<8).map { candidate($0, length: 20_000) },
+            handled: [:], width: 600)
         #expect(plan.layOut?.blockID == "b0")
         #expect(plan.skippedOverCap.isEmpty)
+        #expect(plan.moreRemain)
     }
 
     /// The cap: over it, skip and RECORD — and keep looking, because a
@@ -79,7 +103,7 @@ struct LongBlockLayoutPlannerTests {
                 candidate(0, length: LongBlockLayout.maxBlockUTF16Length + 1),
                 candidate(1, length: 20_000),
             ],
-            handled: [])
+            handled: [:], width: 600)
         #expect(plan.skippedOverCap.map(\.blockID) == ["b0"])
         #expect(plan.layOut?.blockID == "b1")
     }
@@ -89,7 +113,7 @@ struct LongBlockLayoutPlannerTests {
     @Test func exactlyAtTheCapIsStillAllowed() {
         let plan = LongBlockLayout.decide(
             candidates: [candidate(0, length: LongBlockLayout.maxBlockUTF16Length)],
-            handled: [])
+            handled: [:], width: 600)
         #expect(plan.layOut?.blockID == "b0")
     }
 
@@ -99,21 +123,32 @@ struct LongBlockLayoutPlannerTests {
                 candidate(0, length: LongBlockLayout.minBlockUTF16Length - 1),
                 candidate(1, length: 0),
             ],
-            handled: [])
+            handled: [:], width: 600)
         #expect(plan.isEmpty)
     }
 
-    @Test func anAlreadyHandledBlockIsNeverConsideredAgain() {
+    /// Handled AT THIS WIDTH is what skips a candidate — and a DIFFERENT
+    /// width makes it eligible again (the architect's 2026-07-26 ruling:
+    /// a width reflow really does discard TK2's layout, so re-laying it
+    /// out is the same bounded work for a new state, not waste).
+    @Test func aBlockIsSkippedAtTheWidthItWasHandledAtAndOnlyThere() {
         let candidates = [candidate(0, length: 20_000), candidate(1, length: 20_000)]
-        #expect(LongBlockLayout.decide(candidates: candidates, handled: ["b0"])
+        #expect(LongBlockLayout.decide(
+            candidates: candidates, handled: ["b0": 600], width: 600)
             .layOut?.blockID == "b1")
-        #expect(LongBlockLayout.decide(candidates: candidates, handled: ["b0", "b1"])
+        #expect(LongBlockLayout.decide(
+            candidates: candidates, handled: ["b0": 600, "b1": 600], width: 600)
             .isEmpty)
+        // …narrow the column and b0 is fair game again.
+        #expect(LongBlockLayout.decide(
+            candidates: candidates, handled: ["b0": 600, "b1": 600], width: 420)
+            .layOut?.blockID == "b0")
     }
 
     @Test func anAlreadyLaidOutBlockIsNeverConsidered() {
         let plan = LongBlockLayout.decide(
-            candidates: [candidate(0, length: 40_000, laidOut: true)], handled: [])
+            candidates: [candidate(0, length: 40_000, laidOut: true)],
+            handled: [:], width: 600)
         #expect(plan.isEmpty)
     }
 
@@ -253,20 +288,19 @@ struct LongBlockLayoutHostedTests {
         }
     }
 
-    /// **THE GUARD PIN the brief names: at most ONCE per block per
-    /// session** — and the leg that proves `handled` earns its keep.
+    /// **THE GUARD PIN: at most ONE layout per block PER WIDTH.**
     ///
     /// Repeated passes over an unchanged viewport, and a scroll to the far
     /// end and back, are held by TK2's own `layoutAvailable` state (1C
     /// measured that it does not discard the layout). **A WIDTH REFLOW is
     /// different, and this batch measured it: the block goes back to
     /// ESTIMATED** (7,300 pt laid out → 11,492 pt estimated at a narrower
-    /// width). So after a sidebar toggle, a split-divider drag or a window
-    /// resize, nothing but `handled` stands between this feature and a
-    /// re-layout of every long block on every resize — which is exactly
-    /// the trigger bug the brief exists to prevent. (Red with the
-    /// `handled` insert reverted: the reflow leg re-lays it out.)
-    @Test func theSameBlockIsNeverLaidOutTwice() async throws {
+    /// column) — so the architect ruled (2026-07-26) that a re-layout there
+    /// is the same bounded work for a NEW STATE rather than waste, and it
+    /// is taken. What must still hold, and is what this pins: the new width
+    /// buys **exactly one** further layout, not one per pass. (Red with the
+    /// `handled` write reverted: five passes at the new width give six.)
+    @Test func theSameBlockIsNeverLaidOutTwiceAtOneWidth() async throws {
         try await withEditor(seedBlocks: corpus(longWords: 3000)) { h in
             let (scrollView, window) = try mount(h)
             defer { window.orderOut(nil); window.close() }
@@ -296,8 +330,8 @@ struct LongBlockLayoutHostedTests {
             #expect(h.model.longBlockLayout.layoutsRun == 1)
             #expect(try fragment(h, entry: 30).laidOut)
 
-            // …and a WIDTH REFLOW, which really does re-estimate, still
-            // does not: this is the leg `handled` alone holds.
+            // …and a WIDTH REFLOW, which really does re-estimate, buys
+            // exactly ONE more — the leg `handled` alone holds.
             scrollView.frame = NSRect(x: 0, y: 0, width: 520, height: viewport)
             window.setContentSize(NSSize(width: 520, height: viewport))
             window.layoutIfNeeded()
@@ -310,8 +344,60 @@ struct LongBlockLayoutHostedTests {
                 window.displayIfNeeded()
                 pump(1)
             }
+            #expect(h.model.longBlockLayout.layoutsRun == 2,
+                    "the new width buys ONE more layout, not one per pass: \(h.model.longBlockLayout.layoutsRun)")
+            #expect(try fragment(h, entry: 30).laidOut,
+                    "and the phantom is gone again at the new width — the fix does not silently stop working")
+        }
+    }
+
+    /// **THE DRAG PIN — the guard on the failure the width ruling worried
+    /// about.** A divider drag emits a continuous stream of widths. Re-
+    /// eligibility per width SAMPLE would run layout over and over
+    /// mid-drag, which is exactly the P1 problem the trigger policy exists
+    /// to prevent. One pass per **SETTLED** width is the contract, and the
+    /// debounce that delivers it is the scroll path's own machinery reused.
+    ///
+    /// Fourteen width samples, each reaching the trigger the way a real
+    /// drag does ⇒ **ONE pass, ONE layout**. (Red with the debounce
+    /// bypassed — i.e. if the trigger ran the pass directly: 14 passes and
+    /// a layout at every width the block is estimated at.)
+    @Test func aWidthDragProducesOnePassAtTheSettledWidthNotOnePerSample() async throws {
+        try await withEditor(seedBlocks: corpus(longWords: 3000)) { h in
+            let (scrollView, window) = try mount(h)
+            defer { window.orderOut(nil); window.close() }
+            h.model.longBlockLayout.defaults = isolatedDefaults()
+            // A real (short) debounce, since the coalescing IS the subject.
+            h.model.longBlockLayout.sleep = { try await Task.sleep(for: $0) }
+            h.model.longBlockLayout.debounce = .milliseconds(40)
+
+            for width in stride(from: CGFloat(760), through: CGFloat(500), by: -20) {
+                scrollView.frame = NSRect(x: 0, y: 0, width: width, height: 600)
+                window.setContentSize(NSSize(width: width, height: 600))
+                window.layoutIfNeeded()
+                // What a drag frame delivers: a geometry event reaching the
+                // trigger. Each one must cancel the last, not run a pass.
+                h.model.considerLongBlockLayout()
+                #expect(h.model.longBlockLayout.layoutsRun == 0,
+                        "work happened DURING the drag, at width \(width)")
+            }
+
+            try await Task.sleep(for: .milliseconds(300))
+            // The EXACT claim: one layout for the settled width. A second
+            // pass cannot add one — the block is handled at this width —
+            // so this is the cost, pinned exactly.
             #expect(h.model.longBlockLayout.layoutsRun == 1,
-                    "a resize must not re-run the layout: \(h.model.longBlockLayout.layoutsRun) calls")
+                    "one layout for one settled width, not one per sample — got \(h.model.longBlockLayout.layoutsRun)")
+            // The PASS count is bounded but not exactly 1, and the reason
+            // is recorded rather than papered over: a width reflow also
+            // fires the overlay layout-settle hop by design, which is a
+            // second legitimate trigger, and under a loaded full-suite run
+            // its async hop can land after the first pass and coalesce into
+            // one more. (Alone this test observes 1; in the full suite, 2.)
+            // What must never happen is a pass per SAMPLE — R8 measured 16
+            // with the settle gate bypassed, so this bound is decisive.
+            #expect(h.model.longBlockLayout.passesRun <= 4,
+                    "\(h.model.longBlockLayout.passesRun) passes for 14 width samples — the settle gate is not coalescing")
         }
     }
 
@@ -336,8 +422,15 @@ struct LongBlockLayoutHostedTests {
             #expect(!(try fragment(h, entry: 30).laidOut),
                     "an over-cap block is left exactly as TK2 had it")
 
-            // …and it is recorded ONCE, not on every pass.
-            h.model.runLongBlockLayoutPass()
+            // …and it is dealt with ONCE: the second pass does not even
+            // re-consider it. This is the job `handled` still does under
+            // the width contract — a block the feature can never help must
+            // stop appearing in the scan's answer, not merely stop being
+            // re-recorded. (Red with the over-cap `handled` write removed:
+            // the second plan carries it again.)
+            let second = h.model.runLongBlockLayoutPass()
+            #expect(second.isEmpty,
+                    "an over-cap block was re-considered: \(String(describing: second.skippedOverCap.first?.blockID))")
             #expect(h.model.longBlockLayout.skippedOverCap == [blockID])
         }
     }
@@ -361,6 +454,7 @@ struct LongBlockLayoutHostedTests {
             }
             #expect(h.model.longBlockLayout.layoutsRun == 0)
             #expect(h.model.longBlockLayout.handled.isEmpty)
+            #expect(h.model.longBlockLayout.passesRun == 5, "passes ran; they just found nothing")
         }
     }
 
@@ -485,8 +579,9 @@ struct LongBlockLayoutHostedTests {
             sweep()
             #expect(h.model.longBlockLayout.layoutsRun <= longIDs.count,
                     "\(h.model.longBlockLayout.layoutsRun) layout calls for \(longIDs.count) long blocks")
-            #expect(h.model.longBlockLayout.handled.isSubset(of: longIDs),
-                    "a short block was touched: \(h.model.longBlockLayout.handled.subtracting(longIDs))")
+            let touched = Set(h.model.longBlockLayout.handled.keys)
+            #expect(touched.isSubset(of: longIDs),
+                    "a short block was touched: \(touched.subtracting(longIDs))")
             for i in [25, 50, 75] {
                 #expect(try fragment(h, entry: i).laidOut,
                         "block \(i) should be honest after a full read-through")

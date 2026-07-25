@@ -148,32 +148,47 @@ nonisolated enum LongBlockLayout {
     struct Plan: Equatable {
         var layOut: Candidate?
         var skippedOverCap: [Candidate] = []
+        /// Another eligible block is waiting behind the one taken, so the
+        /// driver re-arms for one more pass. False ⇒ the chain ends here
+        /// and no trailing empty pass is scheduled.
+        var moreRemain = false
 
         var isEmpty: Bool { layOut == nil && skippedOverCap.isEmpty }
     }
 
-    /// The decision, pure: the NEAREST unhandled, not-yet-laid-out,
-    /// big-enough candidate that fits under the cap. Candidates over the
-    /// cap are passed over and recorded (the scan keeps looking — a nearer
-    /// block that cannot be helped must not hide a further one that can).
+    /// The decision, pure: the NEAREST not-yet-laid-out, big-enough
+    /// candidate that fits under the cap and has not already been handled
+    /// AT THIS WIDTH. Candidates over the cap are passed over and recorded
+    /// (the scan keeps looking — a nearer block that cannot be helped must
+    /// not hide a further one that can).
+    ///
+    /// `handled` maps a block to the container width at which this surface
+    /// last dealt with it; `width` is the current one. See
+    /// `LongBlockLayoutState.handled` for why the key is a width.
     static func decide(
         candidates: [Candidate],
-        handled: Set<String>,
+        handled: [String: CGFloat],
+        width: CGFloat,
         cap: Int = maxBlockUTF16Length,
         floor: Int = minBlockUTF16Length
     ) -> Plan {
         var plan = Plan()
         for candidate in candidates {
             guard !candidate.laidOut,
-                  !handled.contains(candidate.blockID),
+                  handled[candidate.blockID] != width,
                   candidate.range.length >= floor
             else { continue }
             if candidate.range.length > cap {
                 plan.skippedOverCap.append(candidate)
                 continue
             }
+            guard plan.layOut == nil else {
+                // ONE per pass — this is the frame-budget bound. A second
+                // eligible block only sets the re-arm flag.
+                plan.moreRemain = true
+                break
+            }
             plan.layOut = candidate
-            break  // ONE per pass — this is the frame-budget bound
         }
         return plan
     }
@@ -197,42 +212,59 @@ nonisolated enum LongBlockLayout {
 
 /// Everything the phantom fix remembers for ONE editor surface. Scope is
 /// deliberate: a fresh surface is a fresh TK2 layout world, so a fresh
-/// surface genuinely must do the work again — "once per block per session"
-/// is exactly "once per block per surface lifetime".
+/// surface genuinely must do the work again.
 @MainActor
 struct LongBlockLayoutState {
     /// Blocks this surface has DEALT WITH — laid out, or skipped over the
-    /// cap. It only grows, and that is what bounds the whole feature: each
-    /// pass either does nothing or consumes one block from the remaining
-    /// set, so the chain terminates by construction.
+    /// cap — **each recorded against the CONTAINER WIDTH it was dealt with
+    /// at.** A block is eligible again only at a width it has not been
+    /// handled at.
     ///
-    /// **This set is load-bearing, and the batch measured why.** 1C found
-    /// that TK2 keeps a block's layout across scroll travel — so for
-    /// scrolling, the framework's own `layoutAvailable` state would have
-    /// been guard enough. A **WIDTH REFLOW is not the same**: measured
-    /// this batch, a laid-out 3,000-word block goes straight back to
-    /// ESTIMATED when the column narrows (7,300 pt → 11,492 pt guessed).
-    /// Without this set, every sidebar toggle, split-divider drag and
-    /// window resize would re-run the layout for every long block on
-    /// screen — precisely the trigger bug the once-per-block rule exists
-    /// to prevent.
+    /// **Why a width and not a flag — the batch measured it, and the
+    /// architect ruled on it (2026-07-26).** 1C found that TK2 keeps a
+    /// block's layout across scroll travel, and the brief's "at most once
+    /// per block per session" was written on that basis. A **WIDTH REFLOW
+    /// is not the same**: measured this batch, a laid-out 3,000-word block
+    /// goes straight back to ESTIMATED when the column narrows (7,300 pt →
+    /// 11,492 pt guessed, a *worse* over-guess than it started with). Under
+    /// the literal once-per-session rule the phantom therefore returned on
+    /// her first sidebar toggle and was never corrected again — a fix that
+    /// silently stops working. The architect's ruling, recorded because the
+    /// reasoning matters more than the outcome: the rule's purpose was
+    /// never the word "session", it was to stop the same work being redone
+    /// **wastefully**, and re-laying out a block whose layout TK2 has
+    /// genuinely thrown away is the same bounded work for a NEW STATE, not
+    /// waste. New information, same principle.
     ///
-    /// **The accepted consequence, stated rather than buried (reported to
-    /// the architect; ratify-list material):** honouring "at most once per
-    /// block per session" literally means the phantom RETURNS after a
-    /// resize and is not corrected again for that block. The narrower
-    /// alternative — re-eligibility once per width generation — is a few
-    /// lines and would keep the fix alive across resizes at the cost of a
-    /// bounded re-run per resize gesture. Not taken: the brief's bound is
-    /// explicit, and erring toward fewer triggers is the safe direction.
+    /// **What still bounds it, so this is not a widening of the trigger:**
     ///
-    /// A block EDITED after being laid out is deliberately not revisited
-    /// either: editing means the caret is in it, and typing lays it out
-    /// anyway (measured — an insertion leaves it `layoutAvailable`).
-    var handled: Set<String> = []
+    ///  · the `laidOut` check gates every candidate, so a width change that
+    ///    did NOT discard the layout costs nothing at all — re-eligibility
+    ///    only *permits* the work, TK2's own state decides whether any is
+    ///    needed;
+    ///  · one pass per **SETTLED** width, never per width sample. A divider
+    ///    drag emits a continuous stream of widths; the debounce below
+    ///    (already the scroll path's) coalesces every one of them into a
+    ///    single pass after the drag stops. Pinned
+    ///    (`aWidthDragProducesOnePassAtTheSettledWidth…`) — this is the
+    ///    guard on the failure the ruling explicitly worried about;
+    ///  · everything else is unchanged: the cap, the floor, one block per
+    ///    pass, the reach bounds, detail-editor-only, the kill switch.
+    ///
+    /// Termination still holds: within one width, the map only grows, so
+    /// each pass consumes one block from a shrinking set.
+    ///
+    /// A block EDITED after being laid out is deliberately not revisited:
+    /// editing means the caret is in it, and typing lays it out anyway
+    /// (measured — an insertion leaves it `layoutAvailable`).
+    var handled: [String: CGFloat] = [:]
     /// Test-visible: how many `ensureLayout` calls this surface has made.
-    /// The "at most once per block" pin reads this.
+    /// The once-per-block-per-width pin reads this.
     var layoutsRun = 0
+    /// Test-visible: how many passes have RUN. The drag pin reads this —
+    /// "one pass per settled width, never one per sample" is a statement
+    /// about passes, not just about layouts.
+    var passesRun = 0
     /// Test-visible record of the blocks skipped for exceeding the cap
     /// ("skip and RECORD"). Deliberately not surfaced to the author: a
     /// "this block was not optimised" message is developer noise about a
@@ -264,12 +296,31 @@ extension EditorViewModel {
         longBlockLayout.defaults.object(forKey: LongBlockLayout.settingKey) as? Bool ?? true
     }
 
-    /// The TRIGGER, debounced. Called from the two geometry events that
-    /// mean "the viewport is looking somewhere new": a scroll
-    /// (`ScrollAnchorController.boundsChanged`) and the post-layout settle
-    /// that follows attach/a storage change (`overlayLayoutDidSettle` —
-    /// the N14 delivery law's own hop, so an opened post is honest without
-    /// requiring a scroll).
+    /// The container width this surface currently lays out against — the
+    /// quantity a re-layout is keyed on, because it is what TK2's layout
+    /// actually depends on. Derived from the view rather than read off the
+    /// container so it tracks the dynamic gutter (`updateGutters`) exactly;
+    /// rounded, so sub-pixel jitter is not a new width.
+    var longBlockLayoutWidth: CGFloat {
+        guard let textView else { return 0 }
+        return (textView.bounds.width - 2 * textView.textContainerInset.width).rounded()
+    }
+
+    /// The TRIGGER, debounced. Called from the geometry events that mean
+    /// "the viewport is looking somewhere new, or at something newly
+    /// re-estimated": a scroll (`ScrollAnchorController.boundsChanged`) and
+    /// the post-layout settle that follows attach, a storage change, **or a
+    /// width reflow** (`overlayLayoutDidSettle` — the N14 delivery law's
+    /// own hop, already wired to all three axes, so an opened post is
+    /// honest without requiring a scroll and a resize is noticed without a
+    /// second mechanism).
+    ///
+    /// **The debounce is what makes the width axis safe.** A divider drag
+    /// emits a continuous stream of widths, each re-arming this and
+    /// cancelling the last, so exactly ONE pass runs — after the drag
+    /// stops — never one per sample. That is the architect's hard
+    /// requirement on the 2026-07-26 ruling, and it is the existing scroll
+    /// machinery reused rather than a second timer.
     func considerLongBlockLayout() {
         longBlockLayout.task?.cancel()
         guard longBlockLayoutEnabled, scrollView != nil else { return }
@@ -296,23 +347,31 @@ extension EditorViewModel {
         else { return LongBlockLayout.Plan() }
 
         longBlockLayout.running = true
+        longBlockLayout.passesRun += 1
         defer { longBlockLayout.running = false }
 
+        let width = longBlockLayoutWidth
         let plan = LongBlockLayout.decide(
             candidates: longBlockCandidates(
                 textView: textView, scrollView: scrollView,
                 layoutManager: layoutManager, contentManager: contentManager),
-            handled: longBlockLayout.handled)
+            handled: longBlockLayout.handled,
+            width: width)
 
         for skipped in plan.skippedOverCap {
-            longBlockLayout.handled.insert(skipped.blockID)
-            longBlockLayout.skippedOverCap.append(skipped.blockID)
+            longBlockLayout.handled[skipped.blockID] = width
+            // Recorded once per block, not once per width — the record is
+            // "this block is past the ceiling", which no resize changes.
+            if !longBlockLayout.skippedOverCap.contains(skipped.blockID) {
+                longBlockLayout.skippedOverCap.append(skipped.blockID)
+            }
         }
 
         guard let target = plan.layOut else { return plan }
         // Marked handled BEFORE the call, so even a throwing/odd AppKit
-        // path can never leave a block eligible for a second attempt.
-        longBlockLayout.handled.insert(target.blockID)
+        // path can never leave a block eligible for a second attempt at
+        // this width.
+        longBlockLayout.handled[target.blockID] = width
 
         let docStart = contentManager.documentRange.location
         guard let start = contentManager.location(docStart, offsetBy: target.range.location),
@@ -344,18 +403,21 @@ extension EditorViewModel {
         // instead of a beat later.
         //
         // **It cannot loop.** Only the HEIGHT changes, and `setFrameSize`
-        // signals `onWidthReflow` on WIDTH changes alone, so no overlay
-        // generation is bumped. The resulting clip-bounds change may
-        // re-enter this trigger — but the block is in `handled` by now, so
-        // a second layout for it is impossible; each pass consumes one
-        // block from a set that only shrinks, so the chain terminates by
+        // signals `onWidthReflow` on WIDTH changes alone — so the nudge
+        // cannot manufacture the one event that grants re-eligibility. The
+        // resulting clip-bounds change may re-enter this trigger, but the
+        // block is in `handled` at this width by now, so a second layout
+        // for it is impossible; each pass consumes one block from a set
+        // that only shrinks at a given width, so the chain terminates by
         // construction.
         textView.needsLayout = true
         textView.layoutSubtreeIfNeeded()
 
-        // More may remain (a second long block within the look-ahead);
-        // take at most one per debounce interval, never a batch.
-        considerLongBlockLayout()
+        // Re-arm ONLY when another eligible block is actually waiting —
+        // one block per debounce interval, never a batch, and no trailing
+        // empty pass when the chain is done (which is also what lets the
+        // drag pin assert an exact pass count).
+        if plan.moreRemain { considerLongBlockLayout() }
         return plan
     }
 

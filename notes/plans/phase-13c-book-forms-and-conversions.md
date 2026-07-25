@@ -2511,7 +2511,7 @@ right home.
 and this record — one commit; no schema change, no core change).
 **Counts:** core **848/98 → 848/98** (unchanged — **zero
 `Sources/VariorumCore/` lines touched**, so the baseline is coherent by
-construction) · Mac **700/127 → 718/129** (two new suites, 18 tests: 9
+construction) · Mac **700/127 → 719/129** (two new suites, 19 tests: 10
 pure + 9 hosted) · mobile **14/4 → 14/4** (RUN on the iPhone 17 Pro
 simulator, not inferred — the batch touches `EditorViewModel`, which is
 Mac-only, and the run confirms it).
@@ -2533,6 +2533,25 @@ block's **7,837 pt guess → 7,300 pt real**, and the document
 measured 537 pt for that block size. That number appears in the record
 twice from two directions, which is the corroboration worth having.
 
+#### What the architect named as this batch's best work (recorded at the fix pass, in his words' substance)
+
+Kept in the record because they are the practices, not the outcome:
+
+1. **Pinning the CAP'S DERIVATION** rather than only choosing a good
+   number — *"a number that stays honest."* `theCapStaysUnderHalfAFrameAtTheWorstMeasuredRate`
+   fails if the constant is ever raised past the evidence it came from.
+2. **The FLOOR added beyond the brief.** An ordinary post performing
+   *zero* layout calls is the correct default and was not specified;
+   revert R3 shows what its absence looks like (a post of 27-character
+   blocks starts laying blocks out one per pass).
+3. **Saying which pins are CHARACTERIZATION rather than red-on-old, in
+   the file's own header — and reporting that R6 and R7 did not fire on
+   the first attempt and why.** *"A batch that reports its own
+   counterfactuals being wrong is one I can trust the rest of."* The fix
+   pass added a third instance of the same discipline: R1's red stopped
+   reproducing under the new contract, and the header says so instead of
+   keeping a pin that proves nothing.
+
 #### The trigger policy, and why each part of it
 
 The brief's constraint was that the cost is not the danger, the TRIGGER
@@ -2541,7 +2560,7 @@ is. What that turned into:
 | Guard | Value | Why this value |
 |---|---|---|
 | **Cap** | 64,000 UTF-16 units per block | Below |
-| **Once per block** | per surface lifetime, `handled` | The brief's rule, pinned — and it turned out to be load-bearing for a reason the brief did not know (below) |
+| **Once per block** | **per CONTAINER WIDTH**, `handled` | The brief's rule as ruled at the fix pass (below): once per *session* was written before anyone knew a width reflow discards TK2's layout. One pass per **SETTLED** width, never per width sample |
 | **Floor** | 2,000 UTF-16 units (~350 words) | An ordinary post performs **zero** layout calls, ever — the calm default costs nothing (`refreshDecorations`' doctrine). This is the guard that keeps the trigger quiet in the common case |
 | **Reach** | viewport + **1 viewport** of look-ahead, and ≤ 64 fragment lookups per pass | Non-zero look-ahead is what makes E do anything (a block strictly *inside* the viewport has already been laid out by TK2 itself); bounding it is what stops "the viewport is looking at it" quietly meaning "the whole post" |
 | **Per pass** | exactly ONE block | A pass can never cost more than the cap, whatever the post looks like |
@@ -2601,7 +2620,7 @@ pins the whole thing over a real 100-block sweep: three long blocks, at
 most three layout calls, no short block ever touched, and a **second full
 read-through costs nothing at all**.
 
-#### THE FINDING — a premise in the brief is incomplete, and it changes what "once per session" delivers
+#### THE FINDING, and the architect's ruling on it (fix pass, same session)
 
 The brief's reasoning for the once-per-block rule was *"TK2 does not
 discard the layout, so a second pass is pure waste"* (1C measured that
@@ -2610,22 +2629,66 @@ measured it:** a laid-out 3,000-word block goes straight back to
 `estimatedUsageBounds` when the column narrows — **7,300 pt real →
 11,492 pt guessed**, a *worse* over-estimate than it started with.
 
-Two consequences, both recorded rather than quietly resolved:
+I built to the brief's literal bound and reported the fork rather than
+widening it myself. **The architect ruled: TAKE IT** — and the reasoning
+is worth more than the outcome, so it is recorded here as given: *"the
+rule's purpose was never the literal word 'session' — it was to prevent
+the same work being redone wastefully… Re-laying out a block whose layout
+TK2 has genuinely thrown away is not that: it is the same bounded work
+for a new state. New information changed the reasoning; the principle is
+intact."* Plus the cost of NOT taking it: the phantom returns on her
+first sidebar toggle and is then never corrected — **a fix that silently
+stops working, and a second report of the same bug** (P-5: she should not
+discover an edge we already knew about).
 
-1. **`handled` is genuinely load-bearing, not belt-and-braces.** Without
-   it, every sidebar toggle, split-divider drag and window resize would
-   re-run the layout for every long block on screen — the exact trigger
-   bug the rule exists to prevent. That is now the red-on-old leg of
-   `theSameBlockIsNeverLaidOutTwice` (revert R1: `layoutsRun → 2`).
-2. **Honouring "once per session" literally means the phantom RETURNS
-   after a resize and is not corrected again for that block.** The
-   narrower alternative — re-eligibility once per width generation — is a
-   few lines and would keep the fix alive across resizes at the cost of a
-   bounded re-run per resize gesture. **Not taken**: the brief's bound is
-   explicit, and erring toward fewer triggers is the safe direction. It
-   is a real fork; it is on the ratify list as part of **QUESTIONS #39**,
-   and it is the architect's to redirect if the reasoning above changes
-   the call.
+**What changed, and what did not.** Eligibility is now keyed on the
+CONTAINER WIDTH (`handled: [String: CGFloat]`) rather than a flag; a
+block is eligible again only at a width it has not been handled at. The
+cap, the floor, one-block-per-pass, the reach bounds, detail-editor-only
+and the kill switch are untouched.
+
+**Why the width axis does not widen the trigger** — three things, in
+order of how much work they do:
+
+1. **The `laidOut` check gates every candidate.** A width change that did
+   NOT discard the layout costs *nothing at all* — re-eligibility only
+   PERMITS the work; TK2's own state decides whether any is needed.
+2. **One pass per SETTLED width, never per sample** — the architect's
+   hard requirement, and the thing actually worth worrying about, since a
+   divider drag emits a continuous stream of widths. The existing
+   **scroll-settle debounce is reused, not duplicated**: every width
+   sample cancels and re-arms it, so one pass runs after the drag stops.
+   Pinned by `aWidthDragProducesOnePassAtTheSettledWidthNotOnePerSample`
+   — 14 samples ⇒ **1 layout**; with the settle gate bypassed, **16
+   passes** (revert R8).
+3. **The nudge cannot manufacture eligibility.** It changes only the
+   HEIGHT, and `EditorTextView.setFrameSize` signals `onWidthReflow` on
+   WIDTH changes alone — so the one event that grants re-eligibility is
+   exactly the one the fix cannot cause. Termination is unchanged: at a
+   given width the map only grows.
+
+**A second, smaller honesty item that came out of re-running the
+reverts.** Under the old contract, removing the `handled` write made
+`theSameBlockIsNeverLaidOutTwice` fail. **Under the width contract it no
+longer does** — TK2's own `layoutAvailable` state covers that ground at
+every width. Rather than keep a pin whose named guard no longer earns it,
+the claim moved to where `handled` *is* provably load-bearing: an
+over-cap block must stop appearing in the scan's answer at all, not
+merely stop being re-recorded (`aBlockOverTheCapIsSkippedAndRecorded`'s
+second-pass assertion; revert R1′ is red). The test file's own header
+says this in as many words.
+
+**One flake caught and corrected honestly, not tuned away.** The drag
+pin's first form asserted `passesRun == 1`; it passed alone and failed in
+the full-suite run at 2. The cause is real and is now in the pin's
+comment: a width reflow *also* fires the overlay layout-settle hop by
+design — a second legitimate trigger whose async hop can land after the
+first pass under load and coalesce into one more. So the pin asserts the
+exact thing it can (`layoutsRun == 1` — the cost, and a second pass
+cannot add one because the block is handled at that width) and a
+decisive bound on the rest (`passesRun <= 4` against R8's measured 16).
+The over-tight version would have been a flaky pin, which is worse than
+a slightly looser true one.
 
 #### Red-on-old evidence — every GUARD, by behavioral revert, run both ways
 
@@ -2638,7 +2701,8 @@ executed against the shipped tree and observed:
 
 | # | Revert applied | Pin(s) | Observed RED |
 |---|---|---|---|
-| R1 | the `handled` insert removed | `theSameBlockIsNeverLaidOutTwice` | after a width reflow the block is laid out AGAIN — `layoutsRun → 2` where 1 is required |
+| R8 | **the SETTLE GATE bypassed** (the trigger runs the pass directly) | `aWidthDragProducesOnePassAtTheSettledWidth…` | **16 passes** for 14 width samples where 1 is the contract — the drag failure the ruling worried about, made visible |
+| R1′ | the over-cap `handled` write removed | `aBlockOverTheCapIsSkippedAndRecorded` | the second pass re-considers the 76,269-unit block forever — `plan.isEmpty → false` |
 | R2 | the cap comparison disabled | `aBlockOverTheCapIsPassedOverAndRecorded` + `aBlockOverTheCapIsSkippedAndRecorded` | **8 issues**; a **76,269-unit** block laid out instead of skipped; `skippedOverCap → []` |
 | R3 | the floor comparison → `>= 0` | `anOrdinaryPostNeverLaysOutAnything` (+ 3 more) | an ordinary post of **27-character** blocks starts laying blocks out one per pass — `layoutsRun → 5`, `handled` 5 short blocks: the trigger-runaway class, made visible |
 | R4 | the kill-switch read → `true` | `theKillSwitchStopsItCompletely` | **5 issues**; the pass runs and the trigger arms with the switch off |
@@ -2646,9 +2710,14 @@ executed against the shipped tree and observed:
 | R6 | the detail-editor scoping guard removed (scan falls back to the whole surface, as `viewportBounds(of:)` does inline) | `theInlineEditorIsOutOfScope` | the content-sized inline surface lays out the long block — `layoutsRun → 1` where 0 is required |
 | R7 | **both** reach bounds removed (look-ahead + lookup cap) | `aLongBlockFarBelowTheLookAheadIsLeftAlone` | the pass reaches **entry 150 of 200** and lays it out |
 
-Every revert was restored and the file verified **byte-identical to a
-pre-revert checksum** (`shasum` against a pristine copy) before the next
-one; the suites re-ran fully green afterwards.
+**All eight were re-run against the SHIPPED tree after the width fix
+pass** (the guard code moved under them, so evidence gathered before the
+ruling would not have counted). Every revert was restored and the file
+verified **byte-identical to a pre-revert checksum** (`shasum` against a
+pristine copy) before the next one; the suites re-ran fully green
+afterwards, and the two new suites were re-run twice in isolation plus
+once inside the full Mac suite to check the drag pin for flake in both
+directions.
 
 **Recorded honestly about R6 and R7, because the first attempts did not
 fire.** R6's first form fabricated an `NSScrollView` around the inline
@@ -2688,10 +2757,11 @@ claim.
 6. **The debounce is 150 ms** — an engineering default of the
    `settleDebounce` class, injectable, chosen so nothing happens during a
    live scroll. Not derived from anything; adjust freely.
-7. **The once-per-block rule is honoured literally**, with the resize
-   consequence recorded rather than resolved (the FINDING above). This is
-   the one place where the shipped behaviour is knowably narrower than
-   the feature could be, and it is deliberate.
+7. **Eligibility is keyed on the container WIDTH** (the architect's
+   ruling at the fix pass), settle-gated so a drag costs one pass. The
+   width is derived from the view (`bounds.width − 2 × inset`) rather
+   than read off the text container, so it tracks the dynamic gutter
+   exactly, and it is ROUNDED so sub-pixel jitter is not a new width.
 8. **The test harness disables the debounce by default**
    (`EditorTestSupport`, one line beside the identical `tailIdleSleep`
    line) so every existing suite's geometry is byte-unchanged — notably
@@ -2705,8 +2775,10 @@ claim.
   kill switch, refresh nudge, all built and all pinned; the cap's
   reasoning is stated as asked; the whole thing is marked PROVISIONAL and
   logged; A46 was not chased and memo Parts 1 and 3 were not touched.
-- **One correction to the brief's premise**, reported not absorbed (the
-  FINDING above).
+- **One correction to the brief's premise**, reported not absorbed —
+  then RULED by the architect and built in the same session (the FINDING
+  above). The record deliberately keeps both halves: stopping at the
+  bound, and the reasoning that moved it.
 - **One addition beyond the brief**: the size floor (judgment call 3).
 - **No lookup subagent used** — every open question this batch had
   (which lever moves the scroll extent; whether a reflow re-estimates;
@@ -2722,9 +2794,12 @@ claim.
 
 #### Ladder foci suggested for this batch
 
-Whether the once-per-block rule should survive a width reflow (the
-FINDING — a real fork, currently resolved toward fewer triggers);
-whether `layoutSubtreeIfNeeded()` inside the settle hop can reach any
+Whether the width key is the right granularity now that it is ruled in
+(a reviewer should satisfy itself that the settle gate really is the only
+thing standing between a divider drag and repeated layout, and that the
+overlay settle hop cannot slip a pass through mid-drag on a slower
+machine — the drag pin bounds it at 4 for 14 samples, which is decisive
+but not 1); whether `layoutSubtreeIfNeeded()` inside the settle hop can reach any
 path where a synchronous AppKit layout is unwelcome (it is never called
 from inside a draw or a SwiftUI update — the debounce guarantees a fresh
 main-queue turn — but a reviewer should check the `overlayLayoutDidSettle`
