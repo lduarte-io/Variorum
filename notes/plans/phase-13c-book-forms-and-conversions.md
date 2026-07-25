@@ -1061,6 +1061,41 @@ tradeoff list for the author, per P-5's form. Counts at batch open:
 core **817/96**, Mac **652/123**, mobile 11/4 — all verified green by
 the architect this sitting.
 
+### Batch 1E — BUILD option E (the phantom fix), PROVISIONAL
+
+**Authorized by the architect decision in the 1C adjudication.** Batch 1C
+measured E and it is alive; this builds it. **Read 1C's record and the
+memo's Part 2 + Q3 appendix first — the measurements are yours to build
+against, not to re-derive.**
+
+**What it is:** when the viewport is looking at a block whose layout TK2
+has only *estimated*, ensure layout for **that one block's own text
+range**, once. Its over-guess collapses, the phantom below it goes, and
+TK2 keeps the layout (measured: survives scrolling away and back).
+
+**What it is NOT, and this is the whole risk:** document-scale layout.
+P1 binds cost to what is on screen and what is being edited — E is
+inside that only while it stays **one block, once**. The cost is not the
+danger; **the trigger is**. Build accordingly:
+
+1. **A hard block-size cap.** Above it, skip and record — never a hitch
+   the author would feel. Pick it from 1C's measured table (20 ms at
+   25,000 words is already past a frame budget) and state your reasoning.
+2. **At most ONCE per block per session — pinned.** TK2 does not discard
+   the layout, so a second pass is pure waste and a symptom of a trigger
+   bug. The pin is the guard against the failure mode that would make
+   this a P1 problem.
+3. **A kill switch** — she must be able to turn it off having felt it.
+4. **The refresh nudge:** 1C measured that the scroll extent corrects on
+   the NEXT display pass, not synchronously (9,063 → 8,708 pt one pass
+   later). Handle it, and do not introduce a layout loop doing so.
+
+**Mark the whole thing PROVISIONAL** and log it. **Q3 remains hers** —
+this build is so she can rule having felt it rather than from a table.
+
+**Do not** touch the memo's Parts 1 and 3 (her rulings pending), and do
+not chase A46 — 1C closed it.
+
 ### Batch 1D — the bridge (A1, A2), queued behind 1C
 
 **A1 — Fragments-landed journal entries arrive BOOKLESS. Traced by the
@@ -1217,6 +1252,79 @@ record; PROVISIONALs for anything the spec leaves genuinely open, per the
 autonomy grant. Counts at open: core **817/96**, Mac **668/125**.
 
 ## Architect adjudications
+
+### Batch 1C — ACCEPTED, and it unlocks a build decision (2026-07-26)
+
+**A46 does not exist, and the batch was right not to fix something.**
+Traced empirically with **real mouse events into a mounted window**, not
+by reading code: the phantom space below the last line **is** the
+editor's own text view, the click **reaches** it, and the caret **does
+move — to the document end**. It cannot land *inside* the phantom because
+there is no text there. That is her own sentence confirmed by
+measurement (*"nothing was actually there"*), and it is correct text-view
+behaviour over space that is not text — the same verdict the brief
+already granted the down-arrow half.
+
+Five candidate mechanisms were traced and refuted (overlay eating the
+hit; clip parked past a shrunk document — overshoot measured 0.0; a huge
+last block; a mid-document gap — none > 12 pt on screen; gutters/insets).
+**Recorded so nobody re-walks them.**
+
+**I want the restraint on the record, because it is the harder call:**
+there *was* something dead to fix — a constant 6.0 pt strip at the
+scroll view's bottom — and the batch proved it is **AppKit's own**
+(reproduced with a vanilla `NSTextView` in a vanilla `NSScrollView`, no
+Variorum code) and left it alone, pinned at ≤ 8 pt so the class speaks if
+it ever grows. Fixing that and declaring A46 addressed would have closed
+her item with a fix that could not have caused her report. **The
+hallucination guard exists for exactly this, and it held.**
+
+**Consequence, stated plainly and unwelcome: removing the phantom is now
+the ONLY remedy for what she experienced.** There is no cheaper
+independent fix hiding behind it.
+
+**Option E measured — and it is ALIVE, better than my arithmetic:**
+
+| block | cost | phantom removed | per 1k words |
+|---|---|---|---|
+| 1,000 w | 1.27 ms | 180 pt | 1.27 ms |
+| 3,000 w | 2.90 ms | 537 pt | 0.97 ms |
+| 12,000 w | 11.52 ms | 2,169 pt | 0.96 ms |
+| 25,000 w | 20.06 ms | 4,549 pt | 0.80 ms |
+
+Per-word cost is **flat-to-improving in block size** — the shape P1
+demands — against Phase 6's whole-document rate of 2.1 ms/1k. I estimated
+~6 ms for 3,000 words; measured **2.90**. And the open worry resolved
+favourably: **TK2 does not discard the layout**, so E is once per block
+per session, not a treadmill.
+
+> **ARCHITECT DECISION — build E, PROVISIONAL, with a cap (batch 1E).**
+> Reasoning, since this is the closest call of the phase so far. Her
+> directive was *"once you've found the source of the issue, please fix
+> it"*; the source is found and the only remedy is measured and cheap at
+> real block sizes. **Is E a P1 relaxation (author-only) or within P1?**
+> I judge it **within P1's letter** — P1 binds cost to *"what's on screen
+> and what's being edited"*, and laying out the block the viewport is
+> looking at is exactly that; it is document-scale layout that P1 bans,
+> and E is explicitly not that. **The honest risk is not the cost, it is
+> the TRIGGER** — a once-per-block 3 ms becomes a real problem if
+> something makes it run repeatedly. So the build carries: a hard block-
+> size cap (skip and record above it), a pin that it runs **at most once
+> per block per session**, and a kill switch. **Q3 stays on her ratify
+> list regardless** — she can turn it off having felt it, which is a
+> better position to rule from than a table of numbers.
+
+**Judgment calls accepted:** the characterization pins carry **no
+red-on-old and the batch said so explicitly** rather than leaving it
+blank — correct, since nothing was fixed; and E's measurement ships as a
+suite test rather than a `Spikes/` binary, which I am happy with (it
+re-measures on every run, so the numbers cannot silently rot).
+
+**Ladder focus adopted from its suggestion:** whether "not reproduced in
+the surface she named" equals "does not exist" — specifically whether a
+`PaneSurface` pane in Takes/Lenses/Compare, a read-tier post, or a canvas
+card could present phantom space whose click does not reach a text view.
+Added to the ladder's foci.
 
 ### Batch 1B — ACCEPTED after verification, plus a product finding for her (2026-07-26)
 
