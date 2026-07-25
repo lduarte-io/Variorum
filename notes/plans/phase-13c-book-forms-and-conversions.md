@@ -1531,6 +1531,47 @@ counterfactual; R7 needed *both* reach bounds removed because at that
 distance they cover for each other). A batch that reports its own
 counterfactuals being wrong is one whose green results mean something.
 
+### The 1E width fix pass — ACCEPTED; STAGE 1 IS COMPLETE (2026-07-26)
+
+`handled` becomes `[blockID: containerWidth]`; a block is eligible again
+only at a width it has not been handled at. **Why it does not widen the
+trigger**, in the order that matters: TK2's own `laidOut` check gates
+every candidate, so a width change that *didn't* discard layout costs
+nothing — **re-eligibility only permits work; TK2's state decides whether
+any is needed**. One pass per **settled** width, reusing the existing
+scroll-settle debounce rather than adding a second timer — **pinned: 14
+width samples ⇒ 1 layout; with the gate bypassed, 16 passes.** And the
+nudge cannot manufacture eligibility, because it changes only height
+while re-eligibility is signalled on width alone — *the one event that
+grants re-eligibility is exactly the one the fix cannot cause.*
+
+**Two reports that are the reason to trust the rest:**
+
+1. **A pin's red stopped reproducing, and it said so instead of keeping
+   it.** Under the width contract, TK2's own `layoutAvailable` state
+   covers that ground, so removing the `handled` write no longer failed
+   the test whose name claimed it. The claim moved to where `handled` **is**
+   provably load-bearing (an over-cap block must vanish from the scan's
+   answer entirely, not merely stop being re-recorded), and **the test
+   file's header says this in as many words.** A pin whose named guard no
+   longer earns it is worse than no pin, because it reads as proof.
+2. **The drag pin flaked, and the cause was real** — a width reflow also
+   fires the overlay layout-settle hop by design, a second legitimate
+   trigger whose async hop can land after the first pass under load. It
+   now asserts the exact thing it can (`layoutsRun == 1`) plus a decisive
+   bound (`passesRun ≤ 4` against the bypassed 16). **"Over-tight would
+   have meant a flaky pin, which is worse than a slightly looser true
+   one"** — correct, and the reasoning is recorded rather than the number
+   quietly relaxed.
+
+**All eight reverts were re-run against the SHIPPED tree** rather than
+relying on pre-ruling evidence — the guard code had moved under them, so
+the old evidence would not have counted. Each restored to a verified
+checksum.
+
+**Stage 1 counts: core 848/98 · Mac 719/129 · mobile 14/4** (from
+817/96 · 652/123 · 11/4 at phase open).
+
 ### Batch 1D — ACCEPTED, with one architect-directed addendum (2026-07-26)
 
 **A1's diagnosis was confirmed IN HER REAL STORE, read-only, which turns
