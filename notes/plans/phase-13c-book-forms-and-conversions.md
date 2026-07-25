@@ -1061,6 +1061,69 @@ tradeoff list for the author, per P-5's form. Counts at batch open:
 core **817/96**, Mac **652/123**, mobile 11/4 — all verified green by
 the architect this sitting.
 
+### Batch 2A — OUTLINE becomes the book's writing surface (A39, A6, the rename)
+
+**Read first:** committed scope item 1 and its indented **"Author
+direction captured 2026-07-23/24"** block (her binding book direction),
+the **A39 ledger row** (its architecture is pre-bound — do not re-derive
+it), the **A45 sub-takes finding** (it is *why* this batch matters more
+than it looks), and the **A43 ruling**.
+
+**Three things, in this order:**
+
+1. **The segmented picker becomes `Outline · Book · Read`** (from
+   `Book · Pages · Read`). Naming flag already raised with her:
+   "Outline" also named the retired post-level tab folded into Compare —
+   different surface, no hard collision.
+2. **Remove the ENTIRE bottom inset from Outline** (`BookView.swift`
+   ~512–552): both the `Slider` jump control — *"it makes no sense to
+   have a horizontal scrollbar on a vertical page"* — **and** the
+   `ProgressView` above it. She RULED the progress bar out too: *"it
+   seems a bit buggy… remove it fully for now, I'll add it later if I
+   feel inclined."* **If it is ever re-added, the bugginess she saw gets
+   investigated FIRST** — an observed defect parked by removal, not
+   chased now. Outline ends as a clean vertical-scroll read + the
+   navigator, no bottom chrome.
+3. **Outline becomes the book's WRITING surface** — the batch's real
+   work. Her words: *"a proper 'write' mode for the whole book - like
+   literally looks like write mode but has the chapter headings and the
+   posts are collapsible."*
+
+**Why this matters more than a view change — read A45.** She wanted
+sub-takes, refused the idea herself, and diagnosed the cause: *"my
+current takes should've been blocks and my block should've been a post…
+i haven't found using the upper edge of the design that much."* The
+reason she works one level too low is that **the book level has never
+been a writing surface**, so the only natural place to compose has been
+inside one post. This batch is the fix for that. Build it as the place
+she writes a book, not as a decorated list.
+
+**What binds — do NOT relitigate any of it:**
+
+- **`PaneTextAuthority`'s one-live-ring contract** (Stage 4 lesson 1):
+  this surface ADOPTS the authority. **Never a second liveness
+  mechanism.** Exactly one live pane across the whole app, still.
+- **It joins `commitTake`'s availability AND registers a `.commit`
+  handler** (Stage 4 lesson 2 — `takeFamilyPlusEditableBoards`). A new
+  editable surface that skips this ships the N5 class again.
+- **Collapse is SESSION/VIEW state** — the block-TOC precedent — and
+  **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3;
+  AppSpec §12's standing rule). This is not negotiable; it is the one
+  thing that subsystem is worst at.
+- **Virtualized per P3.** The Phase 13 round-3 MAJOR was exactly this
+  surface's sibling shipping as a plain `VStack` with cost ∝ book size.
+  `LazyVStack` + a DEBUG materialization counter as the pin.
+- **Chapters are `reading_section` rows** (AppSpec §7/§9). Render them
+  inline as headings; a dangling `section_id` reads as **unsectioned**;
+  unfiled posts **TRAIL** the chapters (ratified, QUESTIONS #26(b)).
+- **P-1:** every act this surface offers is DECLARED in the registry.
+
+**PROVISIONAL territory (use the autonomy grant, do not stall):** how
+chapter headings render in Write's typography; whether collapse state
+persists per book within a session; what a collapsed post shows (title?
+first sentence — the `tocHandle` read-time rule already exists). Record
+2–3 options, pick the most spec-defensible, log it.
+
 ### Batch 1E — BUILD option E (the phantom fix), PROVISIONAL
 
 **Authorized by the architect decision in the 1C adjudication.** Batch 1C
