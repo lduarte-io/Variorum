@@ -1494,6 +1494,35 @@ relaxation she ratified at 9b**. Not ours to make.
 membership row means decided" has a `restoreContainer`/`restoreReading`
 interaction worth stating.
 
+**The addendum ACCEPTED, and it did better than directed.** It agreed
+the push-back was right and put the correction on the record in the
+terms it was wrong in — *"nothing repaired it; it stayed bookless until
+she happened to open ⌘J on that exact date."* Then, rather than adding a
+second call site, it **hoisted the rules into
+`Operations.shelveInDailyJournalBook(_:)`** beside `createOrOpenJournalEntry`,
+where it **never throws** and returns what happened for each surface to
+word. That is the better shape and worth naming: it makes "never block
+the mint or the landing" **structural rather than a convention each
+caller has to remember** — the same reasoning as P-1's, applied one layer
+down. The bridge's private copy is gone.
+
+**The class sweep is complete and bounded** (every `createOrOpenJournalEntry`
+call site in the tree, verdicted): ⌘J/Today's Entry — already shelved,
+**deliberately NOT converted** because it also *creates and pins* the
+book, which is the act only her button press may take (#37's line held
+exactly); the bridge landing — new; phone capture — new; the daily
+branch of `BookStructureModel.newEntry` — unchanged. **Mobile 11/4 →
+14/4, RUN** on simulator, closing the gap it had honestly flagged.
+
+**One judgment call routed, not built:** the phone's note rides
+`lastError`, the capture list's only message surface, so "your entry
+isn't in a book yet" renders in the same red caption as a real failure.
+It is precedent rather than invention (that surface already carries
+human-worded non-crash notes), but a note-vs-error distinction on mobile
+is **new UI in a fix pass** — correctly recorded for the Design & UI
+review row instead of invented at 3 a.m. **Counts after: core 848/98 ·
+Mac 700/127 · mobile 14/4.**
+
 ### Batch 1C — ACCEPTED, and it unlocks a build decision (2026-07-26)
 
 **A46 does not exist, and the batch was right not to fix something.**
