@@ -814,6 +814,70 @@ NSWindow auto-assigns first responder on order-front; async-poll
 gitignored dirs; never `git checkout` over uncommitted work; never
 push.
 
+## Batch briefs
+
+### Batch 1A — the vertical-space investigation (the friction batch's first half)
+
+**Why these together:** every item here is about how much VERTICAL SPACE
+a block owns in a TK2 flow and who is allowed to draw in it. Splitting
+them would hand two sessions half a picture each.
+
+**Scope:** A3 + A4 + A41 (one investigation — the long-block phantom
+gap, the jumping tall block, the vanishing-on-scroll empty paragraphs) ·
+A40 (the callout frame misaligning, "the color spreads underneath it") ·
+F1 (the `PaneSurface` publish-door hardening — she ruled it in).
+
+**Read these sections of this file, in this order, before touching
+code:** "A3 + A4 + A41 are ONE class", "A40 refined by the author", the
+"First acts — DISCHARGED" section's F1 finding, "Binding principles"
+(P-1…P-9, verbatim), "Stage 4 lessons", "Environment traps". Then
+`notes/TEXTKIT2_NOTES.md` §2 and §3 IN FULL — this batch lives in the
+subsystem that file exists to warn about — and AppSpec §15 risk 2.
+
+**The order of work is fixed, and it is not "fix the bugs":**
+
+1. **CONFIRM OR REFUTE the recorded hypothesis first, with a pin.** The
+   hypothesis (one-directional convergence in `PanePublisher`, so an
+   over-large measured height is never corrected downward) is traced
+   from code but **NOT reproduced**. Build the pin as the confirm: red
+   confirms and you proceed; green means the hypothesis is DEAD, you say
+   so plainly in the batch record, and you keep tracing. A wrong
+   hypothesis killed cheaply is a good outcome. A fix built on an
+   unconfirmed one is the forbidden class.
+2. **Then split what you found by what it actually is.** A mis-mapping
+   or a missing convergence direction is a BUG: fix it at the one place,
+   red-on-old pin verified by behavioral revert. An ambiguity — the
+   block's visual extent genuinely having no defined answer once stored
+   trailing newlines, the uniform per-paragraph gap, and the comment
+   strip all want the same space — is **NOT a patch under P-5**. Stop,
+   and write it up for the C3 memo instead of guessing a number.
+3. **F1's hardening rides whatever you touch in `PaneSurface`:** make
+   the one-publish-door guarantee ENFORCED rather than commented — a
+   walk-style pin asserting the coordinator writes no SwiftUI state
+   outside `publisher?.`, or the type-level shape where `install` takes
+   a single value only `PanePublisher` can consume. Either is fine;
+   state which you chose and why.
+
+**Hard constraints:** P-8's overlays-never-rendering-attributes stands
+(TEXTKIT2 §3's fragile class). P-3 — you may extend `PaneSurface`, never
+add a second measurement brain or a second liveness mechanism. The
+full-document editor is NOT absorbed into the pane surface (the
+constitution's application note). Do not change the 2026-07-12 spacing
+ruling's semantics: stored trailing newlines are content, the
+presentation gap is per-PARAGRAPH and uniform, and `renderedText` /
+export / the bridge join must stay byte-identical — pin that they do.
+
+**Deliverables:** the fixes that are genuinely bugs, each with a
+revert-verified red-on-old pin; a batch record in this file's "Batch
+records" section (the 13b form — commits, counts before → after, traced
+mechanisms, numbered judgment calls, red-on-old evidence, deviations
+with reasons); and, if step 2 finds ambiguity, the **C3 memo draft**
+(`notes/plans/phase-13c-memo-block-extent.md`) — behavior whole, edges
+enumerated, refusal wordings where relevant, and a plain-language
+tradeoff list for the author, per P-5's form. Counts at batch open:
+core **817/96**, Mac **652/123**, mobile 11/4 — all verified green by
+the architect this sitting.
+
 ## Batch records
 
 *(appended per batch, the 13b form: commits, counts before → after,
