@@ -1769,6 +1769,43 @@ injected `height += 1`, the door walk **passed** while a write escaped;
 the fixed rule caught it. That is now twice this guard has been proven by
 showing the hole open first.
 
+### Round 3 — findings + dispositions (2026-07-26, FRESH reviewer; the ladder's CAP round)
+
+**1 MAJOR · 4 MINOR · 2 NIT.** Counts re-verified by its own runs (core
+852/98, Mac 731/129, mobile 14/4). **All agreed.**
+
+**Ladder status:** three rounds have run, which is the hard cap. Per the
+standing rule, **round 3's fixes land POST-CAP and no round 4 review is
+spawned** — the Phase 9 / 11a / 13 precedent.
+
+| # | Sev | Finding | Disposition |
+|---|-----|---------|-------------|
+| R3-1 | **MAJOR** | **A7's carve evaluates three of its four guards against a projection the editor DELIBERATELY holds stale.** `EditorProjectionEngine.decide` returns `.deferUntilClean` whenever `busy` (`autosave.isDirty` ‖ mint ‖ structural in flight), and autosave's debounce is 500 ms re-armed per keystroke — so **for a whole typing burst `slots` is frozen**, and `planEmptyBlockDeletion` reads `activeVariantCount`/`carriesUnshownText` from that frozen array. `runEmptyBlockDeletion` re-verifies **only the text**. Sequence: post is `["", "hello"]`, she is typing in "hello", a comment lands on the empty block (sync from another device, or her own comments sheet while the buffer is dirty), the observation defers — she backspaces at the seam, all four guards pass on stale data, the CAS passes because the text really *is* empty, and the comment cascades away. | **AGREED — FIX, post-cap.** This is R1-1/R2-1's class a third time, at a level neither previous round reached: not a missing guard but **a guard reading a stale source**. **The tell is damning and the reviewer found it: every carve pin calls `harness.reload()` between the ops write and the plan — the tests hand-refresh the projection that production does not.** The pins were green because they rehearsed a state production never reaches. **Fix at the level that ends the class: an ops-level precondition on `deleteBlock` so the authorization is re-checked INSIDE the same transaction as the tombstone** — which also subsumes R3-3. Guard lists have now failed three times; a transactional precondition cannot be read stale. |
+| R3-2 | MINOR | **The one canonical-VISION change in this phase is the one author ruling recorded without her words.** Every other ruling carries a verbatim quote; pillar 8's supersession is asserted as "with her explicit blessing" with no quoted sentence — and the two quotes that ARE on record are *weaker* than the applied wording (R58 is a lean; her intake says only "quite robust and easy to use"). | **AGREED — MY error, fix.** She *did* explicitly choose it, but from a presented option — so the honest record is **the option text she was shown and selected**, quoted, not my paraphrase of its effect. Her standing instruction is "don't add more certainty than I have", and that binds hardest on the vision document. |
+| R3-3 | MINOR | **The carve's CAS is stated as "inside the transaction"; it is check-then-act across TWO** (`editTakesAtomically` opens one write, `deleteBlock` another; `OperationsRunner` serializes bodies, it is not a transaction, and sync applies through `applyingRemote` outside it). The window is sub-ms and unpinnable; **the finding is the CLAIM**, which appears in canon and in the doc comment. | **AGREED — and R3-1's fix closes it for real** rather than annotating it. Where R2-10 correctly annotated an unfixable read-then-act, this one is fixable, so it gets fixed. Correct the canon sentence to match what ships. |
+| R3-4 | MINOR | **1E's scroll trigger is UNPINNED — delete `EditorView.swift:639` and all three suites stay green.** Every editor test stubs the debounce sleeper to throw, and the three trigger tests call `considerLongBlockLayout()` directly; nothing drives the anchor controller's bounds change. **So the entire default-ON feature could be inert in the shipped app and nothing would say so** — and `/Applications` is still 13b's build, so no human has exercised it either. | **AGREED — FIX.** This is the most consequential MINOR of the night: it means the phantom fix she will be asked to rule on (#39) has no proof it ever fires in the real app. One pin driving the bounds change, red on the deleted line. |
+| R3-5 | MINOR | **The memo she rules Q3 from is stale in exactly R1-5's way, and it is the carrier nobody swept.** It still says E "survives scrolling… not a treadmill" and that *when* to do it "is a design question" — 1E measured the opposite (a width reflow returns a laid-out block to a **worse** guess) and **built** the trigger policy. `grep -i "width\|reflow\|resiz"` over the memo returns nothing. | **AGREED — FIX.** #39 carries the correction; #29 points her at the memo, which does not. She must not rule from a document that contradicts the code. Annotate in place (the R1-5 precedent) and flip its "measured, deliberately NOT built" framing. |
+| R3-6 | NIT | The F1 walk still cannot see a write through a **mutating method** on a binding (`height.toggle()`, `$list.wrappedValue.append(…)`). Not reachable with today's two bindings. | **AGREED** — add the form or document the limit. Third layer of the same onion; each has been genuinely narrower. |
+| R3-7 | NIT | **Three CLAUDE.md drifts against docs this phase changed:** the model-policy table stops at 14/15 (13c's all-Opus cast lives only in the plan + master plan, though CLAUDE.md is where that policy is declared to live, and 13d–13h have no rows); its copy of the KnownIssues rule still says "phase" after R2-7 extended it; and it still treats Phase 15 as live while the master plan marks it superseded. | **AGREED — FIX.** CLAUDE.md is what a cold session reads first, which is exactly why these matter more than their size. |
+
+**Clean bill worth carrying:** counts verified independently; **zero
+`Sync/` AND zero `Persistence/` lines**, last migration is 13b's v1_12 so
+no §12 obligation; no `try!`/`as!`/`fatalError`/TODO introduced anywhere
+in the diff; redo's totality re-counted independently (21 + the
+compound's own = 22); **every re-apply body walked — none registers, all
+write through `database.write` so the outbox triggers fire**; exact-row
+discipline holds (`moveBlock`/`reorder` capture the *landed* position
+rather than re-deriving a jittered key); the two new counts are required
+init parameters with exactly two production construction sites and both
+subqueries hang off the LIVE block row, so a gap slot reads 0 and
+SyncSpec §5 tolerance is preserved; `shelveInDailyJournalBook` genuinely
+never throws and `.wrongKind` really is what `addPostToReading` raises;
+9b's guarantees intact; **1A's geometry is correct against the typography
+actually in use** (only `paragraphSpacing` is set, never
+`paragraphSpacingBefore`, so keeping the frame's top is right); 1E writes
+nothing to the store and cannot manufacture its own trigger; A13(a)'s
+four declared⇔rendered door tables still balance.
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
