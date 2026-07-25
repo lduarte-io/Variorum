@@ -2,10 +2,34 @@
 
 **Written:** 2026-07-25, Phase 13c Batch 1A. **Updated 2026-07-25, Batch
 1C** — Q4's dead-click investigation (verdict: no fourth bug) and the
-option-E MEASUREMENT that Q3 now rests on.
+option-E MEASUREMENT that Q3 now rests on. **Updated again 2026-07-26 at
+the Stage 1 ladder, round 3 (finding R3-5): E was BUILT after this memo
+last said it wasn't, and one of its measured facts turned out to be
+narrower than stated. Both are corrected in place below.**
 **Status:** DRAFT for the author. Parts 1 and 3 need her rulings; Part 2
-needs her to pick a posture. Nothing in Parts 2–3 is built — E was
-measured, deliberately not built, so the posture call is hers on evidence.
+**is now a posture call on something she can FEEL rather than read** —
+option E shipped in batch 1E, PROVISIONAL and default ON, with a kill
+switch in Settings → Appearance → Editor. QUESTIONS #39 carries the full
+account of what shipped and what guards it; this memo's Part 2 is the
+evidence it was built on, kept accurate.
+
+> **The two corrections, stated at the top because this is the document
+> she rules from.** *(1)* This memo said E "survives scrolling away and
+> coming back… once per block per session, not a treadmill". That is true
+> of SCROLL travel and only of scroll travel: building it measured a
+> **width reflow** — a window resize, a sidebar toggle, a split-divider
+> drag — throwing TextKit's layout away and returning a laid-out
+> 3,000-word block to an **11,492 pt guess, worse than it started**. So
+> "once per session" would have meant the phantom coming back on her first
+> sidebar toggle and never being corrected again. The shipped rule is
+> **once per block per COLUMN WIDTH**, with one pass after a drag settles
+> rather than one per width sample. *(2)* This memo said the TRIGGER —
+> which block, on what event — "is a design question, not a measurement".
+> It was, and it has been ANSWERED and built: cap, floor, one block per
+> pass, after scrolling stops, detail editor only, kill switch. The
+> reasoning for each number is in QUESTIONS #39 and the plan file's 1E
+> batch record.
+
 **Why it exists:** the friction batch was told to trace before it fixed,
 and to split what it found by what it actually *is*. Two of the three
 things it found were mis-mappings, and they are fixed (commit `01e2602`).
@@ -33,9 +57,10 @@ editor jumping when a block is taller than the screen — turned out to be
   height of text it has not laid out yet. Apple has no way to correct the
   guess, and laying out the whole document — the obvious cure — is banned
   by the app's core performance rule. **But there is one thing we can do
-  that is not banned, and it has now been measured rather than estimated:
-  lay out just the one long block (option E, ~1 ms per 1,000 words).
-  Part 2 is your call.**
+  that is not banned: lay out just the one long block (option E, ~1 ms per
+  1,000 words). It was measured first (1C), then BUILT (1E, 2026-07-26) —
+  PROVISIONAL, default ON, with a kill switch — so Part 2 is a posture call
+  you make having felt it. QUESTIONS #39.**
 - **And the follow-up you sent — "clicking does nothing at all" — was
   chased and there is no fourth bug.** The click does reach the editor and
   the caret does move; it moves to the end of your text, because there is
@@ -231,20 +256,37 @@ real app is a Release build, which is faster), macOS 26.4.1 / Xcode 26.3.
   blank lines' worth of space that was never there.
 - **(c) It survives scrolling away and coming back.** This was the open
   risk and it came out favourably: once a block is laid out, TextKit keeps
-  it laid out. Tested by scrolling to the far end of the post and back —
-  the block stayed honest. So it is a one-time cost per block per session,
-  not a treadmill.
+  it laid out across scroll travel. Tested by scrolling to the far end of
+  the post and back — the block stayed honest.
+  **CORRECTED 2026-07-26 (ladder R3-5), because this sentence used to
+  continue "so it is a one-time cost per block per session, not a
+  treadmill", and that half was wrong:** a **width reflow** is not scroll
+  travel. Building E measured it — narrow the column and a laid-out
+  3,000-word block goes straight back to a guess, at **11,492 pt, worse
+  than it started.** TextKit keeps layout across scrolling; it discards it
+  when the text has to re-wrap. So the shipped rule is once per block **per
+  column width**, not per session — otherwise the phantom would return on
+  your first sidebar toggle and never be corrected again.
 
 **One honest caveat found while measuring:** the *document's* scroll height
 does not shrink at the instant of the layout — it catches up on the next
 drawing pass (which happens immediately in normal use). So a built version
 needs the refresh nudged, not just the layout asked for. Small, but real,
 and it is the kind of thing that turns a one-line change into a careful one.
+**Followed up while building it (1E):** the guess about WHICH pass was
+wrong too — a *display* pass changes nothing (9,063 pt before and after);
+the lever is a *layout* pass (9,063 → 8,533 pt). The shipped code asks for
+layout and settles it in the same turn, measured at 0.05–0.21 ms.
 
-**What is still undecided if you say yes:** *when* to do it — which long
-block, and on what trigger (post opens? block comes near the viewport?).
-That is a design question, not a measurement, and it is where the cost
-either stays a one-time 3 ms or turns into something that runs too often.
+**What was undecided when this was written — and is now DECIDED AND BUILT**
+(ladder R3-5's correction): *when* to do it. This memo called the trigger
+"a design question, not a measurement", and it was. Batch 1E answered it:
+one block per pass; only after scrolling SETTLES, never during it; only
+blocks between a floor (~350 words, so an ordinary post costs literally
+nothing) and a cap (~11,600 words in one block — above it, skipped and
+recorded); within the viewport plus one screenful; the main Write editor
+only; and off entirely with one switch. QUESTIONS #39 gives each number's
+reasoning in plain terms.
 
 **My recommendation, now on evidence rather than arithmetic: E.** It is
 cheap, it works, it lasts, and it is bounded by one block rather than by
@@ -252,8 +294,12 @@ your post — which is the actual line the performance rule draws. **A**
 remains the fallback if you would rather not add machinery for a cosmetic
 problem at all.
 
-- **Q3.** Which posture? **Recommend E** (measured above); A if you would
-  rather leave it alone; C worth keeping in mind either way; not B, not D.
+- **Q3.** Which posture? **Recommend E — and as of 2026-07-26 it is
+  SHIPPED, PROVISIONAL and default ON**, deliberately, so this call is one
+  you make having FELT it rather than read a table (QUESTIONS #39). A is
+  still fully available: the kill switch in Settings → Appearance → Editor
+  returns the old behaviour exactly, with no relaunch. C worth keeping in
+  mind either way; not B, not D.
 - **Q4 — ANSWERED BY THE AUTHOR, 2026-07-25, and the benign reading is
   DEAD.** She was asked whether the caret lands at the end of the last
   block (which is what harmless phantom space would do). Her answer,
@@ -364,7 +410,7 @@ airiness is what bothers you, B is the conversation.
 |---|---|---|
 | Q1 | Callouts at rest: tight box, or should coloured blocks get more room? | Leave tight for now; revisit with A23's gap setting in 13d |
 | Q2 | Seam centred in the white gap — confirm | Confirm |
-| Q3 | Phantom space posture: A do-nothing / B background layout / C block-size / D clamp / **E lay out just the one long block** | **E — now measured, not guessed** (~1 ms per 1,000 words, removes the phantom exactly, survives scrolling away and back, bounded by the block not the post); **A** is the fallback if you would rather not add machinery; C worth keeping in mind; not B, not D |
+| Q3 | Phantom space posture: A do-nothing / B background layout / C block-size / D clamp / **E lay out just the one long block** | **E — measured, then BUILT** (batch 1E, 2026-07-26; PROVISIONAL, default ON, kill switch in Settings → Appearance → Editor — QUESTIONS #39). ~1 ms per 1,000 words, removes the phantom exactly, bounded by the block not the post. Layout survives scroll travel but NOT a width reflow, so it re-runs once per column width — corrected here at the ladder's round 3. **A** is still one switch away; C worth keeping in mind; not B, not D |
 | Q4 | "Not clickable as newlines" — is the caret landing at the end of the last block? | **ANSWERED by you, then investigated: there is no fourth bug.** The click does reach the editor and does move the caret — to the end of your text. It cannot go *into* the phantom because nothing is there, which is what you said. Nothing to fix here; it all rides on Q3 |
 | Q5 | Inline comments: keep uniform airiness / room only where commented / rebuild as flow content | Keep for now, or B; **not C in this phase** |
 
@@ -417,10 +463,16 @@ option-E measurement.** Every number below is reproducible: the suite is
   (2,169 pt) · 25,000 w → 20.06 ms (4,549 pt). **Per-1,000-word rate
   0.80–1.27 ms, flat-to-improving in block size**, versus the Phase 6
   spike's whole-document rate of 2.1 ms per 1,000 words (105 ms / 50 k).
-- **E's effect persists:** after laying out the long block, scrolling to
-  the far end of the post and back leaves it `layoutAvailable` at every
-  size tested — TK2 does not discard it, so E is once per block per
-  session, not a treadmill.
+- **E's effect persists across SCROLL TRAVEL:** after laying out the long
+  block, scrolling to the far end of the post and back leaves it
+  `layoutAvailable` at every size tested — TK2 does not discard it there.
+  **But NOT across a WIDTH REFLOW** (measured at batch 1E, 2026-07-26; this
+  entry originally read "so E is once per block per session, not a
+  treadmill", and that generalization was wrong): narrowing the column
+  returns a laid-out 3,000-word block to `estimatedUsageBounds` at
+  **11,492 pt** — a worse guess than the 7,837 pt it started at. Hence the
+  shipped rule, once per block per COLUMN WIDTH, with one pass after a drag
+  settles (pinned: 14 width samples ⇒ 1 layout).
 - **E's caveat:** the scroll extent does not shrink synchronously with the
   layout call — the document height corrects on the next display pass
   (measured: 9,063 pt unchanged at the instant, 8,708 pt after one pass).

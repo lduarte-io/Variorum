@@ -752,7 +752,7 @@ are this phase's opening batch.
 | A36 | Markdown folder import choosing whether folders become chapters/books ("to lure people from obsidian") | 13h |
 | A37 | EPUB library — read-only books, highlights auto-appending to a "favorite quotes" note with quote marks, dash, author, title | unslotted row |
 | A38 | "a variorum mobile app that's quite robust and easy to use" | 15 |
-| A42 | **A thorough, beautiful, robust MOBILE app** — added live 2026-07-25, moving Phase 15's material up. Shapes floated and deliberately NOT chosen (hers to rule at the mobile design sitting): a Write-like base · drag-left/right on blocks for their complex menus · a small take button · **or** takes-in-stack-only with expand/shrink. Continues R58; puts CoreDescription pillar 8's "no variant/fan gestures there" in tension — an explicit vision-doc delta, hers to make | **re-slotted — her call pending** (was 15) |
+| A42 | **A thorough, beautiful, robust MOBILE app** — added live 2026-07-25, moving Phase 15's material up. Shapes floated and deliberately NOT chosen (hers to rule at the mobile design sitting): a Write-like base · drag-left/right on blocks for their complex menus · a small take button · **or** takes-in-stack-only with expand/shrink. Continues R58; puts CoreDescription pillar 8's "no variant/fan gestures there" in tension — an explicit vision-doc delta, hers to make | **RULED 2026-07-25 — mobile gets its OWN PLAN, decided separately** (she declined all three in-sequence slots; Phase 15's row superseded, an unslotted first-class project row in its place, `notes/plans/mobile-app-plan.md`). The pillar 8 delta is applied — the option text she chose is quoted in the "Further author direction" section. *(Row corrected at the ladder's round 3 beside R3-2: it still read "her call pending" a day after she made the call — the R2-2 class, and the same section this finding was about.)* |
 | A43 | **All book views more editable** — *"chapters / posts with blocks within are genuinely helpful concepts."* Extends A39 beyond Outline; scope (Outline + Book, or all three incl. Read) is her call | **13c** |
 | A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
@@ -908,6 +908,39 @@ ask whether the block should be a post. Never invent nesting.
   (full version, not hedged): takes ARE included on mobile; "smaller
   than the Mac" survives as the rule; the journal-restrictions-are-a-
   UI-profile half is untouched.
+
+  > **THE RULING, IN THE WORDS SHE WAS SHOWN AND CHOSE** *(added
+  > 2026-07-26 at the Stage 1 ladder, round 3 — finding R3-2, and it is
+  > my error being corrected: this is the phase's ONE change to a
+  > canonical VISION document, and it was the one ruling recorded
+  > without her words. Every other ruling in this file carries a
+  > verbatim quote; this one carried my paraphrase of its effect, while
+  > the two quotes that ARE on the record — R58's "i think i will
+  > include takes on mobile" and this intake's "quite robust and easy
+  > to use" — are both WEAKER than the wording that was applied. Her
+  > standing instruction is "don't add more certainty than I have", and
+  > it binds hardest here. She did explicitly choose this, but from a
+  > presented option, so the honest record is the OPTION TEXT, quoted —
+  > not a restatement of what it did.)*
+  >
+  > She was asked whether to record takes as included on mobile, and
+  > selected the option labelled:
+  >
+  > **"Yes — record takes as included on mobile (Recommended)"**
+  >
+  > whose description, as shown to her, read:
+  >
+  > *"Rewrite pillar 8 to say mobile is a smaller surface but DOES
+  > carry take viewing and the gestures the mobile design settles on,
+  > superseding the no-fan-gestures line. Keeps the 'journal
+  > restrictions are a UI profile, never a separate data model' half
+  > intact — that part is still true and load-bearing."*
+  >
+  > **CoreDescription pillar 8's current wording is what she blessed and
+  > is deliberately NOT re-worded by this correction** — the gap was the
+  > record, not the text. What "the gestures the mobile design settles
+  > on" turn out to be is the mobile design sitting's, exactly as the
+  > option says and as `notes/plans/mobile-app-plan.md` records.
 - **A43 RULED (2026-07-25): Outline + Book are editable; Read stays a
   reading surface.** Her pick, and the reasoning she was given and
   accepted: Read's value as a distinct mode IS that it is a place to

@@ -286,9 +286,13 @@ struct PanePublishDoorTests {
     /// in neither bucket, so such a write could escape the door while the
     /// equality assertion still passed. This is the guard on the guard.
     ///
-    /// Honest about its edge (R2-9): a binding **forwarded to a child**
-    /// (`Child(height: $height)`) is not a write here and is not claimed
-    /// to be — see `assignmentCount`'s doc comment.
+    /// Honest about its two edges (R2-9, R3-6): a binding **forwarded to a
+    /// child** (`Child(height: $height)`) and a write through a **mutating
+    /// method** (`height.negate()`) are not assignments here and are not
+    /// claimed to be — the last two lines below pin that limit VISIBLY,
+    /// rather than leaving a future reader to discover it. See
+    /// `assignmentCount`'s doc comment for why the mutating-method form is
+    /// documented instead of counted.
     @Test func theWalkCountsEveryFormOfWritingToABinding() {
         let source = """
             self.height = 1
@@ -305,9 +309,15 @@ struct PanePublishDoorTests {
             let other = height
             heightOfSomethingElse = 12
             Child(height: $height)
+            height.negate()
             """
         #expect(PaneSurfaceSource.assignmentCount(of: "height", in: source) == 7,
                 "the four direct forms plus their compound-assignment variants — and nothing else")
+        // The documented limit, pinned so it is visible rather than
+        // discovered: a mutating method is a write the lexical rule cannot
+        // tell from a read (`height.round()` vs `height.rounded()`).
+        #expect(PaneSurfaceSource.assignmentCount(of: "height", in: "height.negate()") == 0,
+                "R3-6's limit, stated in a pin so nobody infers completeness the walk doesn't claim")
         // …and the door-scoped count uses the SAME rule, so the equality
         // assertion compares like with like.
         #expect(PaneSurfaceSource.assignmentCount(
@@ -410,11 +420,27 @@ private enum PaneSurfaceSource {
     ///
     /// **What it does NOT see, stated rather than implied** (13c Stage 1
     /// ladder, R2-9 — the same overstatement one level up that R1-6 closed
-    /// one level down): a binding **forwarded** to a child view
-    /// (`Child(height: $height)`) is not an assignment here, and a write
-    /// the child then makes never appears in this file at all. That is a
-    /// different act from the one F1 named, and the walk claims only what
-    /// it checks: every write *made by this file* leaves through the door.
+    /// one level down). TWO limits, both real, both narrower than the last:
+    ///
+    /// 1. A binding **forwarded** to a child view (`Child(height: $height)`)
+    ///    is not an assignment here, and a write the child then makes never
+    ///    appears in this file at all. That is a different act from the one
+    ///    F1 named.
+    /// 2. A write through a **mutating method** on the binding's value
+    ///    (`height.negate()`, `$text.wrappedValue.append(…)`) mutates it
+    ///    exactly as `=` does, and is invisible to a rule that looks for an
+    ///    assignment operator (13c ladder round 3, R3-6). **It is documented
+    ///    rather than counted, deliberately:** the walk is lexical, and
+    ///    `height.rounded()` and `height.round()` are indistinguishable
+    ///    without a type checker — counting every `name.foo(` would flag
+    ///    reads as writes and make the equality assertion meaningless. Not
+    ///    reachable with today's two bindings (a `CGFloat` and a `String?`,
+    ///    both only ever assigned); **if a pane ever publishes a collection
+    ///    or a flag set, this is the form to close**, and the honest closing
+    ///    is a type-level one, not another substring rule.
+    ///
+    /// The walk claims only what it checks: every write *made by this file*
+    /// **through an assignment** leaves through the door.
     static func assignmentCount(of name: String, in text: String) -> Int {
         wholeWordAssignments(of: name, in: text)
             + literalAssignments(of: "self.\(name)", in: text)
