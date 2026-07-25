@@ -1503,6 +1503,51 @@ decided" rule survives all the restore doors** (it walked
 `restoreContainer`, `restoreReading`, re-designate, re-mint, and the
 SyncSpec §7 repairs); and the 1C refutation is honest.
 
+### Round 1 — the FIX PASS (2026-07-26, fresh implementer session; all eleven dispositions implemented)
+
+**Counts: core 848/98 → 851/98 · Mac 719/129 → 722/129 · mobile 14/4
+(unchanged).** All three suites re-run in full and green after the last
+fix. **Zero `Sources/VariorumCore/Sync/` lines touched.** Four commits,
+one per family, plus this record.
+
+**How to read the evidence column.** Where a finding is a bug, the pin was
+run against BOTH trees and the observed RED is quoted. Where a finding is
+documentation, a claim correction, or new coverage of behaviour that
+already worked, that is said plainly rather than left ambiguous — a pin
+that is green on both sides proves nothing, and the record says which is
+which.
+
+| # | What changed | Traced mechanism | Red-on-old |
+|---|---|---|---|
+| **R1-1** | `Queries.RenderedBlock` gains **`liveVariantCount`** (live variants regardless of `status`) + `hasArchivedTakes`; `planEmptyBlockDeletion` gains the **fourth guard**, `liveVariantCount == 1`. The init parameter is **required, never defaulted** to the active count (the `register(redo:)` precedent — a projection builder that has not thought about archived takes must say so); four test construction sites updated, and `slot(…)` gains an explicit `archived:` knob. | Archive is out-of-the-fan, **not gone**: `archiveVariant` only flips `status`, and the `deleteBlock` trigger cascade tombstones every live variant regardless of status. So the three-gesture path the reviewer traced (branch · archive the one with prose · blank the survivor) leaves `activeVariantCount == 1` over a block that renders empty and still holds prose — and the carve's ONLY authorization is "there is no text to lose". | **YES, built first as the confirm per the disposition.** `anARCHIVEDTakeCarryingProseKeepsTheRefusal` ran against the **pre-fix tree** and failed at exactly the plan-time guard line (`BlockDeletionAndRedoTests.swift:183`) while every other assertion in it passed — the block *does* render empty, the fan *does* read 1, the pure index *does* name it. GREEN after. Core adds `liveVariantCountSeesArchivedTakesTheFanDoesNot` over the query itself (characterization — the field did not exist pre-fix). |
+| **R1-2** | AppSpec §9's structural-undo paragraph gains its **REDO half**; a §9 entry for **`shelveInDailyJournalBook`**; a §14 **shipped-semantics delta** naming A7's carve as the exception to the ratified cross-block refusal (with the still-open texted-seam case pointed at #34 so nobody reads it as shipped); OverallModel §3's bullet follows. | Documentation. §9 opens "Every mutation is one of these", and a fresh session reading canon could not have learned that redo exists, that a new public operation exists, or that the cross-block refusal now has one named exception. | **None owed — documentation only.** Written strictly as *what shipped*; nothing extends a ruling. The one thing deliberately NOT written: the texted-seam merge question, which is product and hers (#34). |
+| **R1-3** | `DailyBookShelving` gains **`.wrongKind`**; the residual bucket stops dumping — a private `residualReason` maps the races that can still reach it (`readingNotFound`, `containerNotFound`, `wrongContainerKind`) to short human phrases, with a generic phrase for anything else. Both surfaces word the new case. | `String(describing:)` on an `OperationError` renders its associated values — row ids and fully-qualified enum case paths — and both callers put that string in front of her. Mapping only the smart-book case would have closed the example, not the class; the residual mapping makes it structural. | **YES.** Reverted to the pre-fix shape (`.refused(String(describing: error))`, no `.wrongKind`): the pin observed **verbatim the reviewer's example** — *"…is not in the daily journal book (find it in the Pool): wrongReadingKind(id: "0000…", expected: VariorumCore.ReadingKind.curated)."* Restored and verified byte-identical by checksum. |
+| **R1-4** | `JournalBooks.openToday` keeps **create-and-pin** (the act only her button press may take, #37) and **delegates the ensure half** to `shelveInDailyJournalBook`; its notes are rewritten over the outcome cases, gaining the smart-book one. | `addPostToReading` throws `alreadyInReading` only for a **live** membership row (`liveMembership`), while the live-unique index is `WHERE deleted_at IS NULL` — so a tombstoned membership is invisible to it and it INSERTS a second row beside the tombstone. Three doors, two different rules. | **YES.** With the pre-fix `addPostToReading` + `alreadyInReading` path restored, `openTodayNeverReShelvesAnEntryTheAuthorRemoved` fails exactly as traced: `books` comes back holding "Journal", and `reading_post` holds **2** rows where 1 is required. Restored byte-identical by checksum. |
+| **R1-5** | The Debug-vs-Release clause **struck from all three carriers** (the `maxBlockUTF16Length` doc comment, `theCapStaysUnderHalfAFrameAtTheWorstMeasuredRate`, QUESTIONS #39) **plus a fourth** found while fixing — this plan's own batch-1E cap paragraph, annotated in place. Each replaced with the reviewer's traced reason. | The claim cannot be made true, which is why striking is the only honest option: `ensureLayout` executes in the system TextKit binary — the same code in both configurations — and no app code runs in that path (this target installs no layout-manager or content-storage delegate). A Release measurement would have confirmed the absence of a difference, not restored the claimed headroom. | **None owed — a false CLAIM, not a defect.** The cap constant is unchanged and its derivation pin still holds it to the half-frame budget (~4× of room), which is the only claim the evidence supports. This one mattered because #39 repeats it to her verbatim as part of what she is asked to rule from. |
+| **R1-6** | `PaneSurfaceSource.assignmentCount` now counts **all four** binding-write forms (`name =`, `self.name =`, `$name.wrappedValue =`, `_name.wrappedValue =`), split into `wholeWordAssignments` + `literalAssignments` + one `isAssignment` rule; the four forms are mutually exclusive by construction, so nothing double-counts. **No production code changed.** | The old rule required the character before the name to be neither an identifier char nor `.` nor `$` — which is precisely what excluded `self.`, `$…wrappedValue` and `_…wrappedValue`. Both sides of the walk's equality assertion used the same blind rule, so a write in any of those forms was invisible to it and the walk reported clean. | **YES, demonstrated end to end.** With the old counting rule and two escaping writes injected into `updateNSView` (`self.height = 999`, `$canaryMessage.wrappedValue = "x"`), `everyPaneStateWriteLeavesThroughThePublishDoor` **PASSED** — the hole, made visible. With the fixed rule and the same injections it caught them (`assignments → 2` vs `insideInstall → 1`). The new `theWalkCountsEveryFormOfWritingToABinding` is red on the old rule (`1` where 4 is required). `PaneSurface.swift` verified byte-identical afterwards; `git diff` on it is empty. |
+| **R1-7** | Two round-trip pins in `RedoStackTests`: **delete the block's DEFAULT out of a three-take fan** (so the re-apply must re-run `reassignDefaultIfNeeded`, not merely re-stamp `deleted_at` — a default left pointing at a tombstone is the dangling-default state SyncSpec §7 has a repair for), and **archive → undo → redo** exact-row with I10 still refusing the last active afterwards. Plus a `snapshotExcludingDeletedAt` helper for the re-tombstone case. | `performDeleteVariant` / `performArchiveVariant` are the only two re-apply bodies of their own; every other re-apply reuses a body an undo pin already exercises. Their guards (`ensureNotLastActive`, locked, chosen, default reassignment) therefore ran only on the forward path. | **Coverage of behaviour that already worked — so the honest question is whether the pins are LOAD-BEARING, and they were checked.** Neutering both re-applies (`redo: { _ in }`) reds them with the traced shapes: `deletedAt != nil` fails, the default pointer fails, the row snapshots fail. Restored byte-identical by checksum. |
+| **R1-8** | `QUESTIONS.md` restructured: **#27/#28 back under "Phase 13, Stage C"**, a `---` before the 13c heading, and the 13c entries in numeric order **29 → 39** (they ran 34, 35, 29, 36, 30, 31, 33, 37, 38, 39, 32). | Documentation. My own error at the kickoff — the 13c section was inserted beneath the Stage C heading, orphaning it and re-parenting two entries under a phase they have nothing to do with. | **None owed.** Verified by content, not by trust: every entry accounted for (#27/#28 under Stage C, #29–#39 under 13c) and the word count differs only by the R1-5 edit to #39. |
+| **R1-9** | The claim corrected in both carriers: **21** `undoStack?.register(…)` sites + the compound's own registration inside `withCompound` = **22 in production**. | Documentation. The claim is load-bearing for the totality argument, so it must match what a reviewer can count — and "23" matched nothing. | **None owed.** `grep -c '\.register('` over `Sources/` + `App/` excluding tests = 21; the compound's own call is the 22nd. |
+| **R1-10** | One recorded paragraph in `withCompound`'s doc comment. | Each collected leg's own `register` clears `redoEntries` as it lands; the catch path runs the collected inverses but does not restore the cleared future. So a compound that throws mid-body rolls its work back and still ends the redo future. | **None owed — behaviour recorded, not changed.** Defensible under "any new structural act clears the future" (she DID invoke one), and a redo stack surviving a half-applied-then-rolled-back gesture is the subtler surprise. Reachable only through a refusal landing mid-gesture. |
+| **R1-11** | The `try?` split into a `do`/`catch`: no entry for the day still returns nil (nothing to shelve), a **read failure** returns a speaking note pointing at the next round. | `try? await database.read { … }` produced `String??` and the guard flattened both nils, so a store-read failure and "there is no entry that day" were the same answer — the one silent path in a flow whose entire discipline is to speak. | **YES, two ways, by experiment rather than by revert alone.** With the lookup forced to throw: the `try?` shape reports **0 notes** (the swallow, reproduced), the fix reports **1**. **No permanent pin, deliberately:** inducing a real store-read failure in the harness would need a production seam whose only consumer is the test, and the landing that precedes this call would fail first under any schema-level sabotage. Stated rather than left blank. |
+
+**Two things worth carrying into round 2.**
+
+1. **R1-1's fix changed a core read-layer type**, so a reviewer should
+   satisfy itself that `liveVariantCount` is populated everywhere a
+   projection is built — the two production sites are `renderPost`'s SQL
+   and `LensQueries.renderPost`'s pass-through, and the required init
+   parameter is what makes a third site impossible to add silently.
+2. **R1-6 hardened a TEST**, and the thing it guards is the F1 door. The
+   demonstration above is the load-bearing part of that finding: with the
+   old rule the walk passed while two writes escaped, which is exactly the
+   failure F1 was raised to prevent one layer up.
+
+**Nothing was disputed.** Every disposition was implemented as written;
+the two places I went slightly beyond the letter are recorded above and
+both close the finding's CLASS rather than its example (R1-3's residual
+mapping; R1-5's fourth carrier in this file).
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
@@ -2199,8 +2244,10 @@ store to the post-do rows with every ID intact; that is pinned as row
 snapshots, not asserted in prose.
 
 **Totality was a deliberate choice, not an accident of effort.** A
-partial redo is a P-2 smell (a door that works sometimes), so all 23
-registration sites supply a re-apply and `register` takes `redo:`
+partial redo is a P-2 smell (a door that works sometimes), so all 21
+`undoStack?.register(…)` sites — plus the compound's own registration
+inside `withCompound`, 22 in production — supply a re-apply and
+`register` takes `redo:`
 **required, never defaulted** — a future site must decide rather than
 silently ship a hole. The work turned out bounded because most mirrors
 already existed: `restorePlacementLocation` is its own mirror given the
@@ -2384,7 +2431,9 @@ before a text re-apply, but merge/divide-W carry no `restoringTexts`, so
 a source block edited between undo and redo is re-released with its edit
 intact in lineage but no commit — the same asymmetry undo already has,
 recorded deliberately); and whether the totality claim actually holds
-across all 23 registration sites.
+across every registration site *(count corrected at the ladder's round-1
+fix pass, R1-9: **21** `undoStack?.register(…)` sites + the compound's
+own = **22** in production; "23" was not locatable)*.
 
 ### Batch 1C — the DEAD CLICK (A46) + the option-E MEASUREMENT
 
@@ -2663,9 +2712,13 @@ the feature exists to avoid). The measurement corpus's words are
 | 25,000 | 272,425 | 20.06 ms | 0.074 |
 
 Worst observed rate **0.117 ms per 1,000 units**. Budget: **half a 60 Hz
-frame (8.3 ms) in a DEBUG build** — half a frame so the same runloop turn
-has room for everything else, and Debug because her Release build is
-faster, which is margin on top of margin. 8.3 ÷ 0.117 ≈ 71,000; rounded
+frame (8.3 ms)** — half a frame so the same runloop turn has room for
+everything else. *(Corrected at the ladder's round-1 fix pass, R1-5: this
+paragraph originally added "in a DEBUG build … margin on top of margin".
+That margin is not real — `ensureLayout` runs in the system TextKit
+binary, identical in both configurations, and no app code runs in that
+path. The Debug measurement is simply THE measurement; the cap stands on
+the half-frame budget alone.)* 8.3 ÷ 0.117 ≈ 71,000; rounded
 down to **64,000**, predicted worst case **7.5 ms** (~5.7 ms at the
 measured mid-range rate). The architect's "20 ms at 25,000 words is
 already past a frame budget" is honoured with ~4× of room. In her prose
