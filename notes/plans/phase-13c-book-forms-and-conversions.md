@@ -1029,6 +1029,49 @@ tradeoff list for the author, per P-5's form. Counts at batch open:
 core **817/96**, Mac **652/123**, mobile 11/4 — all verified green by
 the architect this sitting.
 
+### Batch 1C — the DEAD CLICK (A46), queued behind 1B
+
+**Her answer to the memo's Q4, 2026-07-25, verbatim:**
+
+> *"clicking does nothing at all - it couldn't move your cursor into the
+> phantom space and the down arrow couldn't move you down either.
+> nothing was actually there."*
+
+**This is a FOURTH bug and it was explicitly offered as one.** Batch 1A
+asked the question with the two outcomes named: caret-lands-at-end
+(benign, the phantom behaving as phantom space does) versus click-does-
+nothing (a separate defect worth finding). She reports the second.
+
+**Why it is a defect, mechanically:** clicking below the last line of an
+`NSTextView` places the caret at the nearest text position — the end of
+the document. Hers does not move at all. So the phantom region is not
+merely empty, it is **not being handled by the text view**: either the
+click lands on something that is not the editor (a container, an inset,
+an overlay eating the hit), or the editor's clickable area stops short of
+the area it is displaying. The DOWN-ARROW half is correct behaviour and
+should NOT be "fixed" — there is genuinely no text below, so the caret
+has nowhere to go. **It is the dead click alone that is wrong.**
+
+**Scope:** trace it, and fix it if it is independently fixable. It may
+have a cause entirely separate from the over-estimate — in which case it
+is fixable **without** touching the estimate, which would be the best
+outcome available. Check the hit-testing path and the editor's frame
+versus its enclosing scroll view's document area, and check whether any
+overlay (the decoration hosts batch 1A just touched, the block tint, the
+comment strips) is intercepting.
+
+**Consequence recorded for the memo:** this **upgrades Q3**. Option A
+("do nothing, it's cosmetic") was recommended on the premise the phantom
+is harmless; that premise is now false. The memo's recommendation is
+revised to *measure E first, A as fallback*.
+
+**Related but distinct — do NOT conflate:** her **A22** ("scroll down
+into at least a page of empty space so I can keep the text I'm typing
+high up on the page") is *wanted* space, not phantom space. If A22 is
+built later, its space must not feel dead the way this does — clicking in
+deliberate trailing room should place the caret at the document end.
+Recorded so the two are designed together rather than fighting.
+
 ### Batch 1B — block deletion & redo (A7, A8, A10)
 
 **Why together:** all three are the structural/undo family, and redo is

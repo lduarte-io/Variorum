@@ -190,21 +190,50 @@ anyone claims it works. *Benefit:* if it holds, it fixes the case you
 actually reported — a long pasted block with dead space under it — without
 trading away the performance rule the way B does.
 
-**My recommendation: A now, with E measured as the real candidate** and C
-as the thing to keep in mind. B stays on the shelf with its cost stated.
-The difference that matters: B buys a cosmetic fix with the app's founding
-performance invariant; E, if it measures the way the spike's numbers
-suggest, buys the same fix with work bounded by one block. **I would not
-build E on arithmetic alone** — it gets measured first, and if the number
-comes back wrong it is dropped and we are back to A.
+**My recommendation — REVISED 2026-07-25 after her Q4 answer below:
+measure E, and treat A as the fallback rather than the plan.** The
+original recommendation ("A now") rested on the phantom being ugly but
+harmless. Her answer kills that premise: the space is eating a click that
+should work. So the ranking changes — **E measured first** (it removes
+the phantom, and with it the dead region, at one-block cost), **A only if
+E fails to measure well**, C still worth keeping in mind, B still on the
+shelf with its cost stated. The difference that matters between B and E
+is unchanged: B buys the fix with the app's founding performance
+invariant; E buys it with work bounded by one block. **E is still not to
+be built on arithmetic** — it gets measured, and dropped if the number
+disagrees.
 
-- **Q3.** Which posture?
-- **Q4.** One thing I could not settle from your report: *"the empty space
-  below isn't clickable as newlines"*. My reading is that you click into
-  the phantom space, the caret lands at the end of the last block rather
-  than where you clicked, and typing appends there instead of at the
-  visible spot — which is exactly what phantom space would do. **Is that
-  what you see?** If instead the click does nothing at all, that is a
+- **Q3.** Which posture? *(See the revision above — her Q4 answer moved
+  my recommendation from A to E-measured-first.)*
+- **Q4 — ANSWERED BY THE AUTHOR, 2026-07-25, and the benign reading is
+  DEAD.** She was asked whether the caret lands at the end of the last
+  block (which is what harmless phantom space would do). Her answer,
+  verbatim: *"clicking does nothing at all - it couldn't move your cursor
+  into the phantom space and the down arrow couldn't move you down
+  either. nothing was actually there."*
+
+  **This is a FOURTH bug, and it upgrades Q3.** Clicking below the text
+  in a text view should place the caret at the nearest text position —
+  the end of the document — and hers does not move at all. That means the
+  phantom region is not merely *empty*, it is **not the text view's to
+  handle**: the click is landing somewhere that isn't the editor, or the
+  editor's clickable area stops short of the space it is displaying. The
+  down-arrow half is consistent and expected (there is genuinely no text
+  below, so the caret has nowhere to go) — **it is the dead click that is
+  wrong.**
+
+  **Consequence for Q3, stated plainly:** option A ("do nothing; it's
+  cosmetic") was recommended on the premise that the phantom is ugly but
+  harmless. **That premise is now false** — it is eating a normal
+  interaction. Option **E** (lay out just the one long block) rises
+  accordingly, because removing the phantom removes the dead region with
+  it. The dead-click itself is being traced as its own investigation
+  either way, since a click that goes nowhere may have a cause
+  independent of the over-estimate — and if it does, it is fixable
+  without touching the estimate at all.
+
+  *(Original question kept for the record: "If instead the click does
+  nothing at all, that is a
   separate bug and I would go find it.
 
 ---
