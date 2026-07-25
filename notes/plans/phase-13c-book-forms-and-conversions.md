@@ -893,6 +893,30 @@ ask whether the block should be a post. Never invent nesting.
   pre-bound as with A39: `PaneTextAuthority`'s one-live-ring contract
   across pages, `commitTake` availability, P3 virtualization — never a
   second liveness mechanism.
+- **A42 RULED (2026-07-25): mobile gets its OWN PLAN, decided
+  separately** — she declined all three in-sequence slots offered
+  (after 13c · after 13e · after formatting) and chose to decouple it
+  from the phase sequence entirely. Phase 15's row is **superseded**;
+  mobile becomes an unslotted first-class project row beside the Apple
+  Notes import and the Design & UI review, starting at her word. Its
+  standing inputs — her four floated interaction shapes preserved
+  UNCHOSEN, what binds, the open questions, the inherited iOS
+  trailing-newline defect — are collected in
+  **`notes/plans/mobile-app-brief.md`** so they never depend on this
+  session. **The pillar 8 delta is APPLIED with her explicit blessing**
+  (full version, not hedged): takes ARE included on mobile; "smaller
+  than the Mac" survives as the rule; the journal-restrictions-are-a-
+  UI-profile half is untouched.
+- **A43 RULED (2026-07-25): Outline + Book are editable; Read stays a
+  reading surface.** Her pick, and the reasoning she was given and
+  accepted: Read's value as a distinct mode IS that it is a place to
+  just read — and true pagination plus live editing is the hardest
+  combination in the stack to keep stable (TEXTKIT2 §2). So Outline
+  becomes the book's writing surface (A39), Book's full-post pages
+  become editable with the stack/Write presentation choice (A44), and
+  Read keeps the flow + true-pagination pair as a reading experience.
+  R8/R23's "everything visible in an editing surface is editable" is
+  honored precisely — Read is not an editing surface.
 - **Answered for her on the record:** *"i'm also not sure where in the
   plan 'make all takes under a block into their own block' is"* — it is
   **ledger row A21**, from her own intake list ("Copy all takes to the

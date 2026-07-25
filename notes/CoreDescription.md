@@ -46,7 +46,7 @@ The design identity: **find the atomic unit, then build around it.** The unit is
 
 7. **Sane sorting.** Sort by when 80%+ of something was edited. Fixing one typo must never reshuffle the library.
 
-8. **Mobile as a smaller surface.** Add journal entries and edit existing blocks' active text from iOS; no variant/fan gestures there. Journal restrictions are a UI profile, never a separate data model — an entry can graduate to a full post with zero migration.
+8. **Mobile as a smaller surface — but a real one.** Add journal entries and edit existing blocks' active text from iOS. Journal restrictions are a UI profile, never a separate data model — an entry can graduate to a full post with zero migration. *Ratified supersession (author, 2026-07-25): the original "no variant/fan gestures there" line is superseded — **takes ARE included on mobile**. Her words: she "really do[es] need a thorough implementation of the app that is beautiful and easy to use… it's going to have to be a real and robust option." This completes the move she began at the Phase 13 sittings (R58, "i think i will include takes on mobile") and at the 2026-07-17 intake. Smaller than the Mac remains the rule — a deliberately narrower take surface, not the full fan-out vocabulary — and its exact shape is the mobile design sitting's to settle; her floated candidates are recorded in `notes/plans/mobile-app-brief.md`. Mobile is now its own separately-planned project rather than a numbered phase.*
 
 9. **Commercial someday.** Architecture must stay fast as complexity scales, and the schema is shaped now for a future row-based sync engine and multi-tenant accounts — designed-for now, built later.
 
