@@ -3,17 +3,24 @@
 **Status:** CREATED at the 13b closeout (2026-07-22, per the author's
 13b end-of-life directive — recorded in
 `notes/plans/phase-13b-make-it-work.md`, "The 13b end-of-life
-directive"). NOT STARTED — the author kicks it off with
-`/architect-phase 13c`.
+directive"). **ACTIVE from 2026-07-25** — the author opened the phase
+herself with an author-attended kickoff sitting (its record is the
+"Kickoff sitting" section below).
 **Shape:** runs under the `/architect-phase` skill
 (`.claude/skills/architect-phase/SKILL.md`) — the 13b-proven
 architect/orchestrator machinery; the skill file governs process; this
 file is the phase's ONE running record.
-**Cast:** all-Fable (orchestrator · fresh implementer per batch · fresh
-cold reviewer per ladder round) — **author-confirmed IN ADVANCE,
-2026-07-22** ("all fable is confirmed", the EOL addendum); she may still
-redirect at the kickoff sitting. **She intends to kick 13c off when her
-Fable credits reset** (stated at the 13b closeout).
+**Cast: ALL-OPUS — author ruling 2026-07-25, superseding the all-Fable
+pre-confirmation.** Her reason, in her words: "previous I was going to
+run this phase with Fable but now that Opus 5 has come out, I want to
+give it a go with this phase." Orchestrator · fresh implementer per
+batch · fresh cold reviewer per ladder round, all Opus. The shape ruling
+came at the same sitting: she invoked `/run-phase`, was offered the
+choice, and **ruled `/architect-phase`** — this plan was written for it
+and the phase is genuinely multi-batch with sittings.
+*(Superseded, kept for the thread: "all-Fable, author-confirmed IN
+ADVANCE 2026-07-22 … she intends to kick 13c off when her Fable credits
+reset." The credits question is moot — Opus 5 shipped instead.)*
 **The paste-ready kickoff message is the third section below**
 ("Kickoff message"); the two sections before it exist because this file
 changed hands between models and opens with two review obligations.
@@ -81,6 +88,101 @@ is the constitution splice, the real baselines, and the notes below.
 3. **Verify the baselines below with your own runs** (the skill's
    verify-don't-trust rule).
 
+## Kickoff sitting — 2026-07-25 (author-attended; THIS RAN, and it binds)
+
+**The phase opened here.** The author invoked the phase herself, brought
+a fresh intake list from real daily use (an exported Variorum note,
+`~/Downloads/Things I want to do before Brazil.md` — her own app's
+export, takes and all), and ruled on shape, cast, ordering, and the
+roadmap beyond this phase. Her framing, verbatim-faithful: *"Overall,
+I'm LOVING IT and couldn't be more thrilled with our work together and
+how the app is coming along… I want you to consider the list of
+suggestions at the end of this exported note and work with me to figure
+out how to order them and arrange them in more phases — 13d, e, f,
+etc."*
+
+**Her rulings (K1–K5):**
+
+- **K1 — Cast and shape: ALL-OPUS under `/architect-phase`.** Recorded
+  in the header above; supersedes the all-Fable pre-confirmation.
+  Re-confirmed by her mid-turn: "yeah, i meant /architect-phase should
+  be run for 13c."
+- **K2 — A FRICTION BATCH OPENS THIS PHASE, before the book work.**
+  Offered three orderings (friction batch inside 13c · full flip ·
+  13c untouched); she chose the first. 13c keeps its committed scope and
+  its name's "carried work" half now carries real weight: the traced
+  defects and the cheapest refusals land FIRST, then the book forms.
+  Rationale on the record: this material is what hurts her *daily*,
+  and the book work is the nicer-reading build — a whole phase of
+  waiting for backspace to delete an empty block was the wrong trade.
+  The remainder of the friction list becomes **13d**.
+- **K3 — The roadmap beyond 13c** (new master-plan rows, added the same
+  day): **13d** the rest of the refusal/ergonomics floor · **13e** takes
+  & block management · **13f** workspace (windows, tabs, stars,
+  quicknote, the post→note sweep) · **13g** formatting **+ lists and
+  checkboxes** · **13h** the LLM folder bridge + markdown folder import.
+  Unslotted: the EPUB library. Mobile stays Phase 15.
+- **K4 — Big-rock ranking (what she wants soonest):** **Workspace** and
+  **Formatting** — and at the same breath she ADDED a new item in her own
+  words: *"i also want a simple list maker and checkbox maker (like
+  hyphens, [], bullets)"* (ledger A34). The LLM folder bridge and the
+  EPUB library are wanted but rank BEHIND these; neither was chosen as
+  urgent.
+- **K5 — `post` → `note` is UI STRINGS ONLY.** Every user-facing label,
+  menu item, shortcut name, refusal copy and helper text says "note";
+  `container.kind='post'` stays (never user-facing) and the canon docs
+  keep "post" as the model term, so the ratified vocabulary (visible /
+  chosen / lens / version) stays unmuddied. Owned by 13f as one sweep.
+
+**Four claims VERIFIED IN CODE at the sitting** (not taken on report —
+these are facts the friction batch builds on):
+
+1. **Fragments-landed journal entries land bookless.**
+   `BridgeEngine.swift:254` calls `createOrOpenJournalEntry` and stops;
+   the Mac's ⌘J door (`BookStructureModel.swift:240-242`) calls it *and
+   then* `addPostToReading` into the designated daily book. The bridge
+   path never got the second half, so a landed day is a journal post in
+   no book — and "posts in no book" is exactly what Pool shows. Her
+   report was exact.
+2. **Redo does not exist.** No `redo` / `redoStack` / `canRedo` anywhere
+   in core or the app; structural undo is one-directional by omission,
+   not by design ruling.
+3. **Callout is Write-only BY DECLARATION** — the registry says
+   `availability: writeEditor`, `doors: [.menuBar]`. Both halves of her
+   ask (every mode + a shortcut) are edits to that one declaration plus
+   the P-2 fire-and-DO wiring 13b built for exactly this class.
+4. **Sync has been signed out since 2026-07-20** — the 13b handoff's
+   item 2, still undone. Read-only count of her real store at the
+   sitting: **1,868 outbox rows**, oldest `2026-07-20T05:06:34Z`, newest
+   `2026-07-25T06:53:34Z` (up from 1,216 at 13b's close). Nothing lost —
+   the engine refuses rounds and holds by design — but her mirror and
+   phone are five days stale. Surfaced to her at the top of the sitting;
+   **hers to discharge, never the phase's** (author-only: her accounts).
+
+### The friction batch (K2) — scope as ruled
+
+Opens the phase. Ledger rows **A1, A2, A3, A4, A7, A8, A9, A10, A13(a)**
+— the four verified items plus the refusals that cost her most:
+
+- the bridge's missing daily-book membership (A1) and its refresh
+  cadence (A2);
+- the two editor-layout defects she lives with — the whitespace phantom
+  (A3) and the jumping tall block (A4). *First suspect, recorded so the
+  batch doesn't rediscover it: 13b Stage 3 root-caused a sibling class —
+  overlays computed before TK2's first layout pass with no post-layout
+  trigger. Trace before fixing; the hallucination guard applies.*
+- backspace won't delete an empty block (A7) and there is no
+  delete/archive door for one at all (A8);
+- no divide in Takes (A9) — a registry availability rule, the P-1/P-2
+  class 13b built the machinery for;
+- redo for structural undo (A10) — a real absence, and the pair to A12's
+  destructive-undo warning (which stays 13d: the warning is cheap once
+  redo makes the mistake recoverable);
+- callout mode PARITY + a shortcut (A13(a)) — the declaration edit above.
+  *The pickers half (swatches, emoji) is A13(b) and stays 13e.*
+
+Everything else on the intake list is dispositioned in the ledger below.
+
 ## Kickoff message (for the fresh /architect-phase 13c orchestrator — read this first)
 
 > You are the Phase 13c architect/orchestrator for Variorum under the
@@ -117,6 +219,69 @@ is the constitution splice, the real baselines, and the notes below.
    The brief's FIVE open questions are the kickoff sitting's; its
    settled facts are cited, not re-derived. (S4-9(3); ledger N31's
    re-owned half.)
+
+   > **Author direction captured 2026-07-23/24 (pre-13c-kickoff, via
+   > screenshots + a correction round + a resolution round — recorded here
+   > so it BINDS at kickoff, not lost in chat):** In real use she found the shipped book
+   > surfaces weren't the book she pictured. This direction GROWS the plan;
+   > it does NOT simplify it (her words: "the twist is not supposed to
+   > simplify the plan… both views are supposed to exist").
+   >
+   > **The book segmented picker becomes `Outline · Book · Read`** (from
+   > `Book · Pages · Read`), and **Read** itself becomes a two-mode view:
+   >
+   > - **Outline** = today's continuous vertical-scroll book view (today's
+   >   `.book`). **Remove the ENTIRE bottom inset** (`BookView.swift:512-552`)
+   >   — both the `Slider` JUMP control ("it makes no sense to have a
+   >   horizontal scrollbar on a vertical page") AND the `ProgressView`
+   >   "post N of M · %" above it. She RULED (2026-07-24): remove the
+   >   progress bar too — "it seems a bit buggy… remove it fully for now,
+   >   I'll add it later if I feel inclined." (So if it is ever re-added,
+   >   investigate the bugginess she saw FIRST — an observed defect, parked
+   >   by removal, not chased now.) Outline ends as a clean vertical-scroll
+   >   read + the navigator, no bottom chrome.
+   > - **Book** = NEW: a two-up SPREAD where **each page is a whole POST,
+   >   vertically scrollable and fully contained** (the post does NOT flow
+   >   across pages), two posts side by side — "basically like [today's]
+   >   Pages but with two posts side by side… new compared to what we have"
+   >   (confirmed 2026-07-24), "more like a lens column, for comparison."
+   >   View B (page = post, two-up); effectively today's `.pages` paged
+   >   view made TWO-UP + book-styled. **KEEP its bottom bar.** Flip
+   >   navigation (ruled 2026-07-24): the DEFAULT advances TWO posts at
+   >   once (turn the leaf), PLUS a single-step control (her sketch: "a
+   >   half arrow button or something") that nudges the spread by ONE post
+   >   — so she can re-pair when turn-the-leaf splits two posts she wants
+   >   side by side. Arrows also navigate.
+   > - **Read** = today's reading flow, now the Apple-Books/Kindle PAIR of
+   >   modes: **(a) vertical infinite scroll** (today's `ReadingFlowView`)
+   >   and **(b) TRUE BOOK PAGINATION** — a **TWO-PAGE SPREAD** (ruled
+   >   2026-07-24), horizontal pages each a SET amount of text (text flows
+   >   across identical fixed pages). Mode (b) IS View A and IS the
+   >   uniform-page brief's hard two-tier estimator (§3) — it does NOT
+   >   evaporate; it lives here. **KEEP the bottom bar on the paginated
+   >   sub-mode**; arrows also navigate.
+   >
+   > **Net — BOTH must exist:** an Apple-Books "set text per page" true-
+   > pagination view (Read → paginated, View A) AND an Apple-Books two-up
+   > "each page is a scrollable post" spread (Book, View B). The brief's
+   > uniform-page pagination work stands UNCHANGED and lives inside Read;
+   > the Book spread is additional. Correction of record: my first read —
+   > that page=post "evaporates" the estimator — was WRONG; she wants both.
+   >
+   > **Naming flag for her:** "Outline" also names the retired post-level
+   > tab folded into Compare — different surface, no hard collision.
+   >
+   > **The small opens are now RESOLVED (2026-07-24):** Outline progress
+   > bar → removed fully (above); Read-paginated → two-page spread (above);
+   > Book flip → two-by-default + a one-post nudge control (above). Nothing
+   > on the book-view STRUCTURE is left open pre-kickoff; the brief's
+   > pagination-mechanism questions (surface, page-break policy) remain the
+   > architect's build-time calls.
+   >
+   > **Not built pre-kickoff:** her live real-store instance is running
+   > (the no-Release-build-under-live-instance rule) and this is 13c's
+   > owned scope. Queued for the 13c book-view batch.
+
 2. **Smart → smart+curated book conversion (N38)** — built from
    `notes/plans/phase-13c-memo-smart-to-curated.md` (4F's design memo
    per her S4-16-class condition: three conversion shapes with A —
@@ -317,10 +482,71 @@ placement + parity-by-forwards; the overlay/sink delivery law).
 
 | # | Item | Status |
 |---|------|--------|
-| C1 | The uniform-page book view (from the 4F brief) | committed, not started |
+| C1 | The uniform-page book view (from the 4F brief) + her 7/23–24 direction | committed, not started |
 | C2 | N38 smart→smart+curated conversion (from the 4F memo; her five rulings first) | committed, not started |
 | C3 | N41 inline-comments airiness (R116-class conversation first) | committed, not started |
-| — | [kickoff-approved candidates enter here as rows] | — |
+| C4 | Compare "show related blocks only" setting (resolves the 4C kin-less-peer PROVISIONAL) | committed, not started |
+
+### Author intake, 2026-07-25 (the kickoff sitting's list — every item dispositioned)
+
+Source: her exported note. **Nothing here is invented; each row is her
+own item.** Phase assignments are K2/K3's; rows marked **13c-friction**
+are this phase's opening batch.
+
+| # | Item (hers) | Owner |
+|---|-------------|-------|
+| A1 | Fragments-landed journal entries appear in Pool, not the Journal book *(traced)* | **13c-friction** |
+| A2 | The bridge "doesn't seem to refresh often enough" | **13c-friction** |
+| A3 | Whitespace phantom — paragraphs of empty space with nothing in them; vanish on scroll, return when you're over them | **13c-friction** |
+| A4 | Editor jumps when one block is taller than the screen; the empty space below isn't clickable as newlines | **13c-friction** |
+| A5 | "the callouts don't have the spacing on their color right" | 13d |
+| A6 | Book bottom inset — horizontal scrollbar on a vertical page; buggy progress bar | 13c (already ruled: remove both) |
+| A7 | Backspace won't delete an empty block — "especially when there's an empty block right at the start of the post" | **13c-friction** |
+| A8 | No ability to delete / archive empty blocks at all | **13c-friction** |
+| A9 | "i desperately need divide in takes mode" | **13c-friction** |
+| A10 | Redo — to undo an accidental structural undo *(traced: absent)* | **13c-friction** |
+| A11 | Divide on an empty line should put the blank line NOWHERE — block above, block below | 13d |
+| A12 | Warning before destructive actions like undoing a structural edit that created a take | 13d |
+| A13 | Callouts (a) in Takes/Compare/Lenses + a shortcut *(traced)* · (b) real colour swatches + a proper emoji picker | (a) **13c-friction** · (b) 13e |
+| A14 | ⌘⇧Enter for new block | 13d |
+| A15 | Shift-Enter keeps text in the same block — in Takes AND Write | 13d |
+| A16 | The newline-makes-a-block setting available in Takes too (N34's global `one_block` face) | 13d |
+| A17 | Delete several blocks at once — block-level highlight instead of text highlight across blocks | 13e |
+| A18 | ⌘-click in Takes to select blocks to merge; merge several when they have no takes | 13e |
+| A19 | Reorder takes | 13e |
+| A20 | Shortcut: move a take into a new block beneath the current block | 13e |
+| A21 | Copy all takes to the clipboard, or turn all takes into their own blocks | 13e |
+| A22 | Scroll into ~a page of empty space so typing stays high on the page (typewriter room) | 13d |
+| A23 | Setting: gap between blocks a paragraph tall, vs. today's height | 13d |
+| A24 | Different levels of spellchecking | 13d |
+| A25 | Two posts next to each other in the same window — "DEFINITELY need" | 13f |
+| A26 | Several Variorum windows, or one window split in half | 13f |
+| A27 | Tabs of recently-open notes under "this post", ⌘⇧1… to jump | 13f |
+| A28 | Star up to 5 notes (or books) so they're always on the left | 13f |
+| A29 | Quick-note format — a floating sticky note, no takes unless opened as its own post | 13f |
+| A30 | "post" → "note" everywhere — **UI strings only (K5)** | 13f |
+| A31 | See a book by its saved custom order OR by an attribute like time; the order savable like a lens | **13c** (book-shaped) |
+| A32 | Infinite vertical scroll editor — jump to the right part in takes, then back | 13f |
+| A33 | Formatting — bold, italics, different sized fonts, some markdown handling | 13g |
+| A34 | **"a simple list maker and checkbox maker (like hyphens, [], bullets)"** — added live at the sitting | 13g |
+| A35 | LLM folder bridge — save a post as .md in a folder, open one by path, edits sync back | 13h |
+| A36 | Markdown folder import choosing whether folders become chapters/books ("to lure people from obsidian") | 13h |
+| A37 | EPUB library — read-only books, highlights auto-appending to a "favorite quotes" note with quote marks, dash, author, title | unslotted row |
+| A38 | "a variorum mobile app that's quite robust and easy to use" | 15 |
+
+**Not this repo** (acknowledged, deliberately unscoped here): storage
+migration, planetlillian.com / stargazing.tech (its own agent — see the
+`stargazing-tech` memory), Fragments polish, the YouTube project.
+
+**One technical input recorded NOW so 13g's design sitting doesn't
+rediscover it (A33/A34):** `notes/TEXTKIT2_NOTES.md` §3 records that
+**`NSTextList` has been broken since macOS 14**, and §1 records Tahoe's
+`includesTextListMarkers` split between TK1 and TK2 expectations — so
+native TK2 lists are a known-rough area. Markdown-as-content (a typed
+`- ` or `[ ]` renders as a bullet/checkbox, the text stays the truth)
+sidesteps `NSTextList` entirely, costs zero schema, and keeps export
+free — which is a real argument for that fork over attributed runs when
+she rules the formatting shape. **Not decided; recorded as an input.**
 
 ## Baselines at open (VERIFY with your own runs — the skill's rule)
 

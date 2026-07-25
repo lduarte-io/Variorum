@@ -8,17 +8,38 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ Phase 13c — book forms, conversions & carried work — NOT STARTED
-(created 2026-07-22 at the 13b closeout; the author kicks it off with
-`/architect-phase 13c` when her Fable credits reset).** Plan:
-`notes/plans/phase-13c-book-forms-and-conversions.md` (committed scope:
-the uniform-page traditional book view from 4F's detailed brief; the
-smart→smart+curated conversion N38 from 4F's design memo; N41's
-inline-comments airiness). Two review obligations open the phase — the
-13b gate fixes' 76 lines and the applied canon deltas. **Phase 12 still
-follows the real-use window it always needed**, and a standalone,
-re-runnable **Design & UI review** row now carries the visual
-verification and propose-only sweep the author extracted from 13b.
+**→ Phase 13c — book forms, conversions & carried work — ACTIVE from
+2026-07-25** (created 2026-07-22 at the 13b closeout; opened by the
+author herself at an author-attended kickoff sitting). Plan:
+`notes/plans/phase-13c-book-forms-and-conversions.md` — its **"Kickoff
+sitting — 2026-07-25"** section is the phase's binding opening record.
+**Cast: ALL-OPUS under `/architect-phase`** (her ruling K1, superseding
+the all-Fable pre-confirmation — "now that Opus 5 has come out, I want
+to give it a go with this phase"). Committed scope: the uniform-page
+traditional book view from 4F's detailed brief (plus her 2026-07-23/24
+`Outline · Book · Read` direction), the smart→smart+curated conversion
+N38 from 4F's design memo, N41's inline-comments airiness, the Compare
+related-blocks-only setting, and book-order-as-a-lens (A31) — **opened
+by a FRICTION BATCH** (ruling K2): the traced defects and cheapest
+refusals from her 2026-07-25 intake, because that material is what hurts
+her daily and the book work is the bigger, nicer build. Two review
+obligations still open the phase — the 13b gate fixes' 76 lines and the
+applied canon deltas. **Phase 12 still follows the real-use window it
+always needed**, and a standalone, re-runnable **Design & UI review**
+row carries the visual verification and propose-only sweep the author
+extracted from 13b.
+
+**The 13d–13h roadmap was set at the same sitting (ruling K3)** from her
+fresh intake list — the full 38-item ledger with per-item owners lives
+in the 13c plan's "Author intake, 2026-07-25" table; the phase table
+below gains the rows. Her big-rock ranking (K4): **workspace and
+formatting soonest** — and she added lists/checkboxes to formatting live
+("a simple list maker and checkbox maker (like hyphens, [], bullets)");
+the LLM folder bridge and the EPUB library are wanted but rank behind.
+**Author action still open and time-sensitive:** sync has been signed
+out since 2026-07-20 — **1,868 outbox rows** as of the sitting (oldest
+`2026-07-20T05:06Z`), nothing lost, drains on sign-in; the 13b handoff's
+item 2.
 
 *(Superseded pointer, kept for the thread — Phase 13b was ACTIVE from
 2026-07-20.)* Created at the taste checkpoint's Sitting 9, batches 15–16
@@ -164,6 +185,13 @@ combined feel pass still owed.)*
 | 12 | **Hardening & perf validation** | The invariant holds at corpus scale, on Tahoe, under sync | Large-corpus stress (years of journals + a book), per-OS matrix run, sync soak analysis (months of real two-device data), pull-to-head windowing, tombstone-GC decision memo (author adjudicates), backup restore drill, deferred-debt sweep; brief: `notes/plans/phase-12-brief.md` | P1 benchmarks at scale; zero TK1 fallbacks; convergence holds; KnownIssues has no orphaned entries | **deferred** (author 2026-07-17: no real use yet = no evidence to harden against; runs after 13 + a real-use window; plan intact with deferral banner; the design-prereq measurements + corpus seed + restore drill pulled into 13's kickoff) |
 | 13 | **UI design passes** | Make it beautiful — with the author, iteratively | Visual design, layout, interaction polish, theming; Liquid Glass where it earns its place; **block comments** (schema lockstep + ops + UI — author 2026-07-17); the deferred-12 pull-forwards at kickoff (design-prereq measurements, dev-store design corpus, restore drill); sketch: `notes/plans/phase-13-brief.md` (incl. the 2026-07-17 author additions); sittings + execution plan + closeouts: `notes/plans/phase-13-ui-design.md` (R1–R59) | Author-driven acceptance; perf invariant re-verified after styling; the exploratory round precedes committed styling (author 2026-07-17) | **done** (closed 2026-07-18; the R48/R59 taste checkpoint + fix round are the author's next act, from `notes/handoffs/phase-13-handoff.md`) |
 | 13b | **Make It Work — usability & interaction hardening** (author 2026-07-20, Sitting 9 batches 15–16) | The app becomes actually usable: every door works or speaks honestly, the interaction layer gets its missing architecture, the tutorial proves every flow | Stage 0 audits (architecture survey, capability matrix, self-driven bug inventory) → selective interaction-layer consolidation (capability registry, fire-and-DO R115, ONE text surface + `PaneTextAuthority`, board soak) → the tutorial spine (R113) → themed batches; merge + W design memos per the friction doctrine (R116); plan + binding principles: `notes/plans/phase-13b-make-it-work.md` | The tutorial flow green end-to-end as the permanent acceptance script; the capability matrix clean (no silent/lecturing doors); board soak + registry walk green; author-ratified backlog burned down | **done** (CLOSED 2026-07-22 at Stage 4's end by the author's end-of-life directive — no Stage 5; the ~5k-line plan file was taxing R114's read-in-full rule, so "the fix is to close the file, not weaken the reading rule". Five stages, each laddered; Mac 431/81 → **652/123**, core 747/90 → **817/96**. Stage 4 shipped the two ceremonies (the ruled cut rule + parking; the merge-pairing ceremony — her canon ruling), Compare rebuilt as editable lenses-across-posts with Outline retired, the takes/editor QoL set, the canvas package on bounded realization, the book progress bar + paged view, `restoreReading`, and migration v1_12 (deployed). Successor: **Phase 13c**; the visual review became a standalone re-runnable row.)|
+| 13c | **Book forms, conversions & carried work** (created 2026-07-22 at the 13b closeout; opened 2026-07-25) | The book becomes the book she pictured — and the daily refusals stop | A **friction batch first** (ruling K2: the bridge's missing daily-book membership, the whitespace-phantom + jumping-block layout defects, backspace/delete on empty blocks, divide in Takes, redo, callout mode parity) → then the uniform-page traditional book view (`Outline · Book · Read` per her 7/23–24 direction + 4F's brief), N38 smart→smart+curated conversion, N41 comments airiness, Compare related-blocks-only, book-order-as-a-lens. Plan: `notes/plans/phase-13c-book-forms-and-conversions.md`; cast ALL-OPUS under `/architect-phase` | Per-batch ladder over the combined diff; the tutorial spine stays green (P-6); red-on-old absolute | **active** |
+| 13d | **The refusal & ergonomics floor** (roadmap ruling K3, 2026-07-25) | What's left of "nothing should refuse you", plus the typing ergonomics | Ledger rows A5, A11, A12, A14, A15, A16, A22, A23, A24 — callout colour spacing; divide on an empty line leaving the blank nowhere; the destructive-undo warning (pairs with 13c's redo); ⌘⇧Enter new block; shift-Enter staying in the block in BOTH editors; the global `one_block` face (N34); typewriter room; the paragraph-tall gap setting; spellcheck levels | Registry walk clean; capability matrix green by construction | pending |
+| 13e | **Takes & block management** (K3) | The fan and the block list get their missing hands | Ledger rows A13(b), A17–A21 — colour swatches + a real emoji picker; block-level multi-select and multi-delete; ⌘-click merge selection in Takes; reorder takes; move-a-take-into-a-block-below; copy-all-takes / takes-to-blocks. Plus the 13c kickoff candidates she approves (margin-hover comment grammar, canvas bank, synced card sizes) | Ladder + soaks; `fan_position` reorder pinned like every other ordering | pending |
+| 13f | **Workspace** (K3; one of her two soonest — K4) | More than one thing on screen, and the app calls them notes | Ledger rows A25–A30, A32 — two posts side by side in one window; several windows / a split window; tabs of open notes with ⌘⇧1…; starred notes; the quick-note sticky format; **the `post` → `note` UI-string sweep (K5 — strings only; `container.kind='post'` and the canon docs keep the model term)**; the infinite-scroll editor idea | P3 holds across windows (ONE live editor, `PaneTextAuthority`); no second liveness mechanism | pending |
+| 13g | **Formatting, lists & checkboxes** (K3; her other soonest — K4) | Text can look like text | Ledger rows A33–A34 — bold, italics, sizes, some markdown; **and the list/checkbox maker she added live** (hyphens, `[]`, bullets). **Opens with a design sitting**: markdown-as-content (zero schema, export free, sidesteps the broken `NSTextList`) vs. real attributed runs (schema + editor-core work) is an architectural fork and hers to rule | Whichever fork: `renderedText`/export/bridge semantics pinned unchanged; TEXTKIT2 §5 re-verified | pending |
+| 13h | **The LLM folder bridge** (K3) | Her prose is reachable from a folder without giving up block identity | Ledger rows A35–A36 — a post ⇄ `.md` file in a folder, openable by path, edits landing back through ordinary operations; markdown folder import mapping folders to chapters/books. **The Fragments bridge's proven shape pointed at a folder instead of a table** — real work, not new architecture (S5 guards the landings) | Nothing typed on either side is ever lost; round-trip byte stability per the 11b import pins | pending |
+| — | **EPUB library & highlights** (author intake 2026-07-25, ledger A37) | Her own books and fanfiction live in the app, and highlights become writing | Read-only epubs in their own area (Mac + mobile), a highlighting layer, and highlights pulled into a post — her stated shape: a highlight auto-appended to a "favorite quotes" note with quotation marks, a dash, the author's name and the book title. One or several posts linked to a book, to make book reviews easier | Source files untouched (the 11b reference-panel discipline); still never a knowledge base | pending — **unslotted** (wanted, ranked behind workspace + formatting at K4) |
 | 14 | **Accounts & multi-tenant** | Commercial shape | Multi-tenant hardening of 9c's auth (per-user isolation at commercial scale, account provisioning for non-author users — the single-user auth core moved to 9c, author 2026-07-07); **"variorum edition" full-fidelity export; server privacy/E2EE decision** (author 2026-07-06); sketch: `notes/plans/phase-14-brief.md` | Isolation tests; existing single-user data migrates cleanly | pending |
 | 15 | **iOS full surface** | Beyond capture: reading views, more of the model on mobile | Scope decided then (still no fan gestures unless the author revisits); sketch: `notes/plans/phase-15-brief.md` | Same core + sync | pending |
 | — | **Apple Notes import** (author intake 2026-07-22, at the 13b Stage 4 kickoff sitting) | Her existing corpus (~10k notes) becomes importable without overwhelming the library | At least Apple Notes as the first source; likely a thorough import tool with a QUARANTINE/staging surface — imported notes arrive somewhere reviewable, never ambient ("i don't want to overwhelm my library with my existing 10k notes and it would feel too messy"); details when she starts the project | Import→export round-trip sanity per the 11b import precedent; the staging surface keeps the library clean | pending — **unslotted by her design** (slotting decided at a future kickoff; recorded so no phase plans over it) |
