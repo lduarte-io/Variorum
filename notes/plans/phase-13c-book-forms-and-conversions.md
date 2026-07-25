@@ -1124,6 +1124,71 @@ persists per book within a session; what a collapsed post shows (title?
 first sentence — the `tocHandle` read-time rule already exists). Record
 2–3 options, pick the most spec-defensible, log it.
 
+### Batch 2B — BOOK: the two-up spread, editable (A43, A44)
+
+**Read first:** committed scope item 1's author-direction block, and the
+**A43/A44 rulings**.
+
+**What it is, in her words:** *"basically like [today's] Pages but with
+two posts side by side… new compared to what we have"*, and *"more like
+a lens column, for comparison."* **Each page is a WHOLE POST, vertically
+scrollable and fully contained — a post does NOT flow across pages.**
+That is what distinguishes Book from Read: Book paginates by *post*,
+Read paginates by *text*.
+
+**Flip navigation (ruled):** the default advances **TWO posts at once**
+(turn the leaf), **plus a single-step control** — her sketch, *"a half
+arrow button or something"* — that nudges the spread by ONE post, so she
+can re-pair when turn-the-leaf splits two posts she wanted side by side.
+Arrows navigate too. **KEEP the bottom bar** here (unlike Outline, where
+it is removed). **No horizontal scrollbar** — that was her complaint
+about the current surface.
+
+**Editable, with TWO forms (A44):** each page offers the **takes STACK**
+and **normal WRITE** as its presentation. Same bindings as 2A, restated
+because they are absolute: `PaneTextAuthority`'s one-live-ring contract
+across pages (**one live editor in the whole app, still**), `commitTake`
+availability + a `.commit` handler, P3 virtualization — realize the
+spread, not the book.
+
+**PROVISIONAL territory:** whether the stack/write choice is per-page,
+per-book, or global; where its control lives. Options, pick, log.
+
+### Batch 2C — READ: true pagination (C1, the uniform-page brief)
+
+**Read `notes/plans/phase-13c-uniform-page-view-brief.md` IN FULL** —
+4F authored it as the condition of deferring this work, its settled
+facts are cited rather than re-derived, and **its five open questions are
+PROVISIONAL under the autonomy grant** (she is asleep; record options,
+pick the most spec-defensible, log to QUESTIONS).
+
+**What it is:** Read becomes the Apple-Books/Kindle **pair** of modes —
+**(a) vertical infinite scroll** (today's `ReadingFlowView`, already
+virtualized as of Phase 13's round-3 fix) and **(b) TRUE BOOK
+PAGINATION**: a **TWO-PAGE SPREAD** of horizontal pages each holding a
+SET amount of text, with text flowing across identical fixed pages. Mode
+(b) IS the brief's hard two-tier estimated/measured pagination. **KEEP
+the bottom bar on the paginated sub-mode**; arrows navigate.
+
+**Read is NOT editable** (her A43 ruling) — it is the reading surface,
+and that is what makes it a distinct mode rather than a third editor.
+R8/R23 is honored exactly: Read is not an editing surface.
+
+**What binds:** the brief's two-tier pagination lives **outside the
+editor stack**; the scrub domain is **estimated pages**; realization is
+**spread-only and lazy** (P1 — the Stage 4 realization-bound discipline:
+the realized set is a pure function of the inputs, DEBUG counters are the
+pin form). **Model-driven navigation** (the Phase 6 ruling, Stage 4
+lesson 8): page domains ride the post list and stored estimates, **never
+live TK2 geometry**.
+
+**Cross-check with 1C's finding before you trust any height:** TK2's
+estimated geometry over-reports (measured 4,964 vs 4,597 pt on one
+block). A paginator that trusts estimated heights will paginate wrong and
+then re-paginate under her. Say explicitly in your record how your
+estimator behaves when a block's layout state flips from estimated to
+laid-out.
+
 ### Batch 1E — BUILD option E (the phantom fix), PROVISIONAL
 
 **Authorized by the architect decision in the 1C adjudication.** Batch 1C
