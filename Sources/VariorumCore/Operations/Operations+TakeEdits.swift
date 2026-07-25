@@ -74,12 +74,22 @@ extension Operations {
             return pre
         }
         guard !preImages.isEmpty else { return 0 }
-        undoStack?.register(label: undoLabel) {
-            try $0.revertStructural(
-                restoringTexts: preImages,
-                tombstoningBlocks: [],
-                revivingPlacementRows: [])
-        }
+        undoStack?.register(
+            label: undoLabel,
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: preImages,
+                    tombstoningBlocks: [],
+                    revivingPlacementRows: [])
+            },
+            // 13c 1B (A10): the same pre-images, other field — the buffers
+            // go back to their post-edit text.
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: preImages,
+                    untombstoningBlocks: [],
+                    releasingPlacementRows: [])
+            })
         return preImages.count
     }
 }

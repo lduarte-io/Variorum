@@ -156,9 +156,10 @@ extension Operations {
         let result: PostCopyResult = try database.write { db in
             try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
         }
-        undoStack?.register(label: "Duplicate as Version") {
-            try $0.revertMintedContainer(result.post.id)
-        }
+        undoStack?.register(
+            label: "Duplicate as Version",
+            inverse: { try $0.revertMintedContainer(result.post.id) },
+            redo: { try $0.reapplyMintedContainer(result.post.id) })
         return result
     }
 
@@ -223,9 +224,10 @@ extension Operations {
             return PostCopyResult(
                 post: outline, blockCopies: blockCopies, versionEdge: versionEdge)
         }
-        undoStack?.register(label: "Make Outline Post") {
-            try $0.revertMintedContainer(result.post.id)
-        }
+        undoStack?.register(
+            label: "Make Outline Post",
+            inverse: { try $0.revertMintedContainer(result.post.id) },
+            redo: { try $0.reapplyMintedContainer(result.post.id) })
         return result
     }
 
@@ -245,9 +247,10 @@ extension Operations {
             return try copyPost(
                 db, sourceID: lens.containerId, chosenPicks: picks, carryFans: carryFans)
         }
-        undoStack?.register(label: "Promote Lens") {
-            try $0.revertMintedContainer(result.post.id)
-        }
+        undoStack?.register(
+            label: "Promote Lens",
+            inverse: { try $0.revertMintedContainer(result.post.id) },
+            redo: { try $0.reapplyMintedContainer(result.post.id) })
         return result
     }
 
@@ -259,17 +262,19 @@ extension Operations {
     /// overrides now match chosen — harmlessly redundant, still a lens).
     /// Undo restores the pre-image pointers (the spike's "one compound").
     public func adoptLens(_ lensID: String) throws {
-        let preImages: [(placementID: String, chosen: String?)] = try database.write { db in
+        let moved: [AdoptedPointer] = try database.write { db in
             let lens = try liveLens(db, lensID)
             let post = try livePost(db, lens.containerId)
             try ensureUnlocked(post)
             let picks = try Queries.effectiveLensSelection(db, lens: lensID)
             return try applyAdoptedPicks(db, postID: post.id, picks: picks)
         }
-        guard !preImages.isEmpty else { return }
-        undoStack?.register(label: "Adopt Lens") {
-            try $0.revertChosenPointers(preImages)
-        }
+        guard !moved.isEmpty else { return }
+        let halves = adoptUndoHalves(moved)
+        undoStack?.register(
+            label: "Adopt Lens",
+            inverse: { try $0.revertChosenPointers(halves.previous) },
+            redo: { try $0.revertChosenPointers(halves.adopted) })
     }
 
     /// ADOPT-SWAP (taste checkpoint, Sitting 9 — R89/R92: "adopting swaps,
@@ -285,8 +290,7 @@ extension Operations {
     /// exactly like `adoptLens`.
     @discardableResult
     public func adoptLensPreservingChosen(_ lensID: String) throws -> Lens {
-        let (preservation, preImages):
-            (Lens, [(placementID: String, chosen: String?)]) = try database.write { db in
+        let (preservation, moved): (Lens, [AdoptedPointer]) = try database.write { db in
             let lens = try liveLens(db, lensID)
             let post = try livePost(db, lens.containerId)
             try ensureUnlocked(post)
@@ -309,13 +313,15 @@ extension Operations {
                     .insert(db)
             }
             let picks = try Queries.effectiveLensSelection(db, lens: lensID)
-            let preImages = try applyAdoptedPicks(db, postID: post.id, picks: picks)
-            return (preservation, preImages)
+            let moved = try applyAdoptedPicks(db, postID: post.id, picks: picks)
+            return (preservation, moved)
         }
-        if !preImages.isEmpty {
-            undoStack?.register(label: "Adopt Lens") {
-                try $0.revertChosenPointers(preImages)
-            }
+        if !moved.isEmpty {
+            let halves = adoptUndoHalves(moved)
+            undoStack?.register(
+                label: "Adopt Lens",
+                inverse: { try $0.revertChosenPointers(halves.previous) },
+                redo: { try $0.revertChosenPointers(halves.adopted) })
         }
         return preservation
     }
@@ -331,8 +337,7 @@ extension Operations {
     public func adoptPicksPreservingChosen(
         post postID: String, picks: [String: String]
     ) throws -> Lens {
-        let (preservation, preImages):
-            (Lens, [(placementID: String, chosen: String?)]) = try database.write { db in
+        let (preservation, moved): (Lens, [AdoptedPointer]) = try database.write { db in
             let post = try livePost(db, postID)
             try ensureUnlocked(post)
             let now = date.now
@@ -359,13 +364,15 @@ extension Operations {
                     validated[block.id] = pick
                 }
             }
-            let preImages = try applyAdoptedPicks(db, postID: post.id, picks: validated)
-            return (preservation, preImages)
+            let moved = try applyAdoptedPicks(db, postID: post.id, picks: validated)
+            return (preservation, moved)
         }
-        if !preImages.isEmpty {
-            undoStack?.register(label: "Adopt Lens") {
-                try $0.revertChosenPointers(preImages)
-            }
+        if !moved.isEmpty {
+            let halves = adoptUndoHalves(moved)
+            undoStack?.register(
+                label: "Adopt Lens",
+                inverse: { try $0.revertChosenPointers(halves.previous) },
+                redo: { try $0.revertChosenPointers(halves.adopted) })
         }
         return preservation
     }
@@ -385,9 +392,10 @@ extension Operations {
         let result: PostCopyResult = try database.write { db in
             try copyPost(db, sourceID: postID, chosenPicks: picks, carryFans: carryFans)
         }
-        undoStack?.register(label: "Make Into a Post") {
-            try $0.revertMintedContainer(result.post.id)
-        }
+        undoStack?.register(
+            label: "Make Into a Post",
+            inverse: { try $0.revertMintedContainer(result.post.id) },
+            redo: { try $0.reapplyMintedContainer(result.post.id) })
         return result
     }
 
@@ -477,8 +485,8 @@ extension Operations {
     /// pre-image pointers for the compound undo.
     private func applyAdoptedPicks(
         _ db: Database, postID: String, picks: [String: String]
-    ) throws -> [(placementID: String, chosen: String?)] {
-        var restored: [(String, String?)] = []
+    ) throws -> [AdoptedPointer] {
+        var restored: [AdoptedPointer] = []
         let now = date.now
         for placement in try ContainerBlock
             .filter(Column("container_id") == postID && Column("deleted_at") == nil)
@@ -486,13 +494,34 @@ extension Operations {
             .fetchAll(db) {
             guard let pick = picks[placement.blockId],
                   placement.chosenVariantId != pick else { continue }
-            restored.append((placement.id, placement.chosenVariantId))
+            restored.append(AdoptedPointer(
+                placementID: placement.id, previous: placement.chosenVariantId, adopted: pick))
             var updated = placement
             updated.chosenVariantId = pick
             updated.updatedAt = now
             try updated.update(db)
         }
         return restored
+    }
+
+    /// One slot the adopt moved: both images, so undo and REDO (13c 1B —
+    /// A10) each restore an exact pointer rather than re-deriving one.
+    struct AdoptedPointer: Sendable {
+        let placementID: String
+        let previous: String?
+        let adopted: String?
+    }
+
+    /// The two pointer sets the adopt doors register (13c 1B): `inverse`
+    /// restores `previous`, `redo` restores `adopted` — both through the
+    /// SAME `revertChosenPointers` body, so there is exactly one pointer-
+    /// restore brain.
+    private func adoptUndoHalves(
+        _ moved: [AdoptedPointer]
+    ) -> (previous: [(placementID: String, chosen: String?)],
+          adopted: [(placementID: String, chosen: String?)]) {
+        (moved.map { (placementID: $0.placementID, chosen: $0.previous) },
+         moved.map { (placementID: $0.placementID, chosen: $0.adopted) })
     }
 
     /// "chosen until Jul 18, 2026" — the adopt-swap preservation lens's

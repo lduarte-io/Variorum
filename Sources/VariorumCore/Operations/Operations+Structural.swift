@@ -115,12 +115,20 @@ extension Operations {
                     TextPreImage(variantID: context.rendered.id, text: text, postOpText: remainder)
                 )
             }
-        undoStack?.register(label: "Extract") {
-            try $0.revertStructural(
-                restoringTexts: [sourcePreImage],
-                tombstoningBlocks: [.init(result.block.id, [result.variant])],
-                revivingPlacementRows: [])
-        }
+        undoStack?.register(
+            label: "Extract",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [sourcePreImage],
+                    tombstoningBlocks: [.init(result.block.id, [result.variant])],
+                    revivingPlacementRows: [])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [sourcePreImage],
+                    untombstoningBlocks: [.init(result.block.id, [result.variant])],
+                    releasingPlacementRows: [])
+            })
         return result
     }
 
@@ -198,12 +206,20 @@ extension Operations {
                         variantID: context.rendered.id, text: text, postOpText: halves.first)
                 )
             }
-        undoStack?.register(label: "Divide") {
-            try $0.revertStructural(
-                restoringTexts: [sourcePreImage],
-                tombstoningBlocks: [.init(result.block.id, [result.variant])],
-                revivingPlacementRows: [])
-        }
+        undoStack?.register(
+            label: "Divide",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [sourcePreImage],
+                    tombstoningBlocks: [.init(result.block.id, [result.variant])],
+                    revivingPlacementRows: [])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [sourcePreImage],
+                    untombstoningBlocks: [.init(result.block.id, [result.variant])],
+                    releasingPlacementRows: [])
+            })
         return result
     }
 
@@ -380,15 +396,26 @@ extension Operations {
                 markedSourceIDs: marked.map(\.id),
                 releasedPlacementID: context.placement.id)
         }
-        undoStack?.register(label: "Divide into Variants") {
-            try $0.revertStructural(
-                restoringTexts: [],
-                tombstoningBlocks: [
-                    .init(result.first.block.id, result.first.variants),
-                    .init(result.second.block.id, result.second.variants),
-                ],
-                revivingPlacementRows: [result.releasedPlacementID])
-        }
+        undoStack?.register(
+            label: "Divide into Variants",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [],
+                    tombstoningBlocks: [
+                        .init(result.first.block.id, result.first.variants),
+                        .init(result.second.block.id, result.second.variants),
+                    ],
+                    revivingPlacementRows: [result.releasedPlacementID])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [],
+                    untombstoningBlocks: [
+                        .init(result.first.block.id, result.first.variants),
+                        .init(result.second.block.id, result.second.variants),
+                    ],
+                    releasingPlacementRows: [result.releasedPlacementID])
+            })
         return result
     }
 
@@ -500,14 +527,24 @@ extension Operations {
                 releasedFirstPlacementID: first.placement.id,
                 releasedSecondPlacementID: second.placement.id)
         }
-        undoStack?.register(label: "Merge") {
-            try $0.revertStructural(
-                restoringTexts: [],
-                tombstoningBlocks: [.init(result.block.id, [result.variant])],
-                revivingPlacementRows: [
-                    result.releasedFirstPlacementID, result.releasedSecondPlacementID,
-                ])
-        }
+        undoStack?.register(
+            label: "Merge",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [],
+                    tombstoningBlocks: [.init(result.block.id, [result.variant])],
+                    revivingPlacementRows: [
+                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
+                    ])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [],
+                    untombstoningBlocks: [.init(result.block.id, [result.variant])],
+                    releasingPlacementRows: [
+                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
+                    ])
+            })
         return result
     }
 
@@ -749,14 +786,24 @@ extension Operations {
                 releasedFirstPlacementID: first.placement.id,
                 releasedSecondPlacementID: second.placement.id)
         }
-        undoStack?.register(label: "Merge Takes") {
-            try $0.revertStructural(
-                restoringTexts: [],
-                tombstoningBlocks: [.init(result.block.id, result.variants)],
-                revivingPlacementRows: [
-                    result.releasedFirstPlacementID, result.releasedSecondPlacementID,
-                ])
-        }
+        undoStack?.register(
+            label: "Merge Takes",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [],
+                    tombstoningBlocks: [.init(result.block.id, result.variants)],
+                    revivingPlacementRows: [
+                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
+                    ])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [],
+                    untombstoningBlocks: [.init(result.block.id, result.variants)],
+                    releasingPlacementRows: [
+                        result.releasedFirstPlacementID, result.releasedSecondPlacementID,
+                    ])
+            })
         return result
     }
 

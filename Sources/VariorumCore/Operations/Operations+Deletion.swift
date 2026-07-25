@@ -12,8 +12,32 @@ extension Operations {
     /// (AppSpec §7); deletion, by contrast, demands re-pointing first.
     public func archiveVariant(_ id: String) throws {
         // nil = no-op (already archived); nothing to undo then.
-        let wasDefault: Bool? = try database.write { db in
-            var variant = try liveVariant(db, id)
+        let wasDefault = try performArchiveVariant(id, quietWhenGone: false)
+        if let wasDefault {
+            undoStack?.register(
+                label: "Archive Variant",
+                inverse: { try $0.revertArchiveVariant(id, wasDefault: wasDefault) },
+                // 13c 1B (A10): re-archive — the same row transition, run
+                // again from the same captured id.
+                redo: { _ = try $0.performArchiveVariant(id, quietWhenGone: true) })
+        }
+    }
+
+    /// The row work behind `archiveVariant`, shared with structural REDO
+    /// (13c 1B — A10). `quietWhenGone` is the redo path's divergence
+    /// bucket, mirroring the inverses' rule: a variant that died or
+    /// archived another way means the world moved past that entry, so redo
+    /// pops quietly instead of wedging the stack. Returns nil when nothing
+    /// changed.
+    @discardableResult
+    private func performArchiveVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
+        try database.write { db in
+            let existing = try Variant.fetchOne(db, key: id)
+            guard let existing, existing.deletedAt == nil else {
+                if quietWhenGone { return nil }
+                throw OperationError.variantNotFound(id: id)
+            }
+            var variant = existing
             guard variant.status != .archived else { return nil }
             try ensurePlacementUnlocked(db, blockID: variant.blockId)
             try ensureNotLastActive(db, variant)
@@ -24,11 +48,6 @@ extension Operations {
             try variant.update(db)
             try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
             return wasDefault
-        }
-        if let wasDefault {
-            undoStack?.register(label: "Archive Variant") {
-                try $0.revertArchiveVariant(id, wasDefault: wasDefault)
-            }
         }
     }
 
@@ -48,8 +67,25 @@ extension Operations {
     /// first), while it is its block's last live active variant (I10 — that
     /// is `deleteBlock`), and while locked (the guard means something).
     public func deleteVariant(_ id: String) throws {
-        let wasDefault: Bool = try database.write { db in
-            var variant = try liveVariant(db, id)
+        let wasDefault = try performDeleteVariant(id, quietWhenGone: false) ?? false
+        undoStack?.register(
+            label: "Delete Variant",
+            inverse: { try $0.revertDeleteVariant(id, wasDefault: wasDefault) },
+            // 13c 1B (A10): re-tombstone the same variant row.
+            redo: { _ = try $0.performDeleteVariant(id, quietWhenGone: true) })
+    }
+
+    /// The row work behind `deleteVariant`, shared with structural REDO
+    /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
+    @discardableResult
+    private func performDeleteVariant(_ id: String, quietWhenGone: Bool) throws -> Bool? {
+        try database.write { db in
+            let existing = try Variant.fetchOne(db, key: id)
+            guard let existing, existing.deletedAt == nil else {
+                if quietWhenGone { return nil }
+                throw OperationError.variantNotFound(id: id)
+            }
+            var variant = existing
             guard !variant.locked else {
                 throw OperationError.lockedVariant(id: id)
             }
@@ -70,9 +106,6 @@ extension Operations {
             try reassignDefaultIfNeeded(db, blockID: variant.blockId, removing: id, now: now)
             return wasDefault
         }
-        undoStack?.register(label: "Delete Variant") {
-            try $0.revertDeleteVariant(id, wasDefault: wasDefault)
-        }
     }
 
     /// Tombstones the block; the trigger chain cascades to its variants,
@@ -81,8 +114,26 @@ extension Operations {
     /// `last_container_id` is recorded first — it feeds the per-post
     /// "deleted blocks" tray.
     public func deleteBlock(_ id: String) throws {
+        try performDeleteBlock(id, quietWhenGone: false)
+        undoStack?.register(
+            label: "Delete Block",
+            inverse: { try $0.revertDeleteBlock(id) },
+            // 13c 1B (A10): re-tombstone the same block row — the cascade
+            // triggers re-stamp its children exactly as the first delete
+            // did, so `revertDeleteBlock` still finds them next undo.
+            redo: { try $0.performDeleteBlock(id, quietWhenGone: true) })
+    }
+
+    /// The row work behind `deleteBlock`, shared with structural REDO
+    /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
+    private func performDeleteBlock(_ id: String, quietWhenGone: Bool) throws {
         try database.write { db in
-            var block = try liveBlock(db, id)
+            let existing = try Block.fetchOne(db, key: id)
+            guard let existing, existing.deletedAt == nil else {
+                if quietWhenGone { return }
+                throw OperationError.blockNotFound(id: id)
+            }
+            var block = existing
             try ensurePlacementUnlocked(db, blockID: id)
             let now = date.now
             if let placement = try livePlacement(db, blockID: id) {
@@ -91,9 +142,6 @@ extension Operations {
             block.deletedAt = now
             block.updatedAt = now
             try block.update(db)
-        }
-        undoStack?.register(label: "Delete Block") {
-            try $0.revertDeleteBlock(id)
         }
     }
 

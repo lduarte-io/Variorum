@@ -12,6 +12,24 @@ import Foundation
 /// pre-images (positions, default pointers) at do-time. Undo emits ordinary
 /// operations — writes flow through the ops layer and the outbox like any
 /// other, so sync never knows undo exists.
+///
+/// REDO (Phase 13c, batch 1B — author item A10: "a 'redo' command to be
+/// able to undo my structural undos for when that was an accident").
+/// Structural redo ONLY: ⌘Z stays NSTextView's per-buffer text undo and the
+/// two stacks never interleave (AppSpec §9, ratified). Session-scoped and
+/// in-memory like the undo stack — never persisted. The shape:
+///
+/// - every entry carries BOTH halves — the `inverse` undo runs and the
+///   `redo` re-apply that puts back exactly what the inverse un-did, from
+///   the SAME do-time pre-images. So an entry MOVES between the two stacks
+///   and undo↔redo ping-pongs indefinitely without re-deriving anything;
+/// - the re-applies are exact-row like the inverses (tombstone flips,
+///   pre-image restores — never fresh rows), so do → undo → redo round-trips
+///   to the post-do row state, IDs included;
+/// - redo emits ordinary operations, exactly as undo does, so sync never
+///   learns redo exists either;
+/// - **any new structural act clears the redo stack** — the standard
+///   discipline: once the timeline forks, the abandoned future is gone.
 public final class UndoStack: @unchecked Sendable {
     public struct Entry {
         /// Registration-order token so a completed undo removes exactly the
@@ -22,10 +40,18 @@ public final class UndoStack: @unchecked Sendable {
         /// "Undo Divide"-style menu labeling from this.
         public let label: String
         let inverse: (Operations) throws -> Void
+        /// The RE-APPLY half (13c 1B): puts back exactly what `inverse`
+        /// un-did. Nil ⇒ this entry is not redoable, and undoing it CLEARS
+        /// the redo stack — redo is strictly LIFO, so an entry that cannot
+        /// be re-applied is never skipped over.
+        let redo: ((Operations) throws -> Void)?
     }
 
     private let lock = NSLock()
     private var entries: [Entry] = []
+    /// Entries undone and re-appliable, oldest-undone first (so `last` is
+    /// the next redo — LIFO, the mirror of `entries`).
+    private var redoEntries: [Entry] = []
     private var nextID = 0
     private var changeObserver: (@Sendable () -> Void)?
     /// Non-nil while a compound registration is collecting (Phase 9's
@@ -43,6 +69,15 @@ public final class UndoStack: @unchecked Sendable {
         lock.withLock { entries.last?.label }
     }
 
+    public var redoDepth: Int {
+        lock.withLock { redoEntries.count }
+    }
+
+    /// The next redo's label ("Divide") — the Edit menu's "Redo Divide".
+    public var topRedoLabel: String? {
+        lock.withLock { redoEntries.last?.label }
+    }
+
     /// Fires after every stack mutation (a registration, a completed undo,
     /// a removeAll) — outside the lock, on the mutating thread. The app
     /// wires menu invalidation here so the Edit menu can show per-op
@@ -56,10 +91,25 @@ public final class UndoStack: @unchecked Sendable {
         observer?()
     }
 
-    func register(label: String, inverse: @escaping (Operations) throws -> Void) {
+    /// Registers one forward operation's two halves. `redo` is REQUIRED
+    /// (never defaulted): a new registration site must decide how its act
+    /// is re-applied rather than silently shipping a hole in redo — pass
+    /// `nil` deliberately, and undoing past it clears the redo stack.
+    ///
+    /// Registering is a NEW structural act, so it clears the redo stack
+    /// (including during a compound's collection — the compound as a whole
+    /// is the new act). The inverses and re-applies themselves never
+    /// register, so undo and redo cannot clear it from under themselves;
+    /// `UndoStackTests` pins that.
+    func register(
+        label: String,
+        inverse: @escaping (Operations) throws -> Void,
+        redo: ((Operations) throws -> Void)?
+    ) {
         let collected: Bool = lock.withLock {
             nextID += 1
-            let entry = Entry(id: nextID, label: label, inverse: inverse)
+            let entry = Entry(id: nextID, label: label, inverse: inverse, redo: redo)
+            redoEntries.removeAll()
             if compoundCollector != nil {
                 compoundCollector?.append(entry)
                 return true
@@ -106,11 +156,28 @@ public final class UndoStack: @unchecked Sendable {
             let result = try body()
             let collected = drainCollector()
             if !collected.isEmpty {
-                register(label: label) { ops in
-                    for entry in collected.reversed() {
-                        try entry.inverse(ops)
+                // The compound's REDO mirrors its inverse: the collected
+                // re-applies run OLDEST-FIRST (forward order), exactly as
+                // the original operations ran. A compound is redoable only
+                // when EVERY leg is — a half-re-applied compound is not a
+                // state the model should ever be able to reach.
+                let redos = collected.map(\.redo)
+                let compoundRedo: ((Operations) throws -> Void)? =
+                    redos.allSatisfy { $0 != nil }
+                    ? { ops in
+                        for entry in collected {
+                            try entry.redo?(ops)
+                        }
                     }
-                }
+                    : nil
+                register(
+                    label: label,
+                    inverse: { ops in
+                        for entry in collected.reversed() {
+                            try entry.inverse(ops)
+                        }
+                    },
+                    redo: compoundRedo)
             }
             return result
         } catch {
@@ -137,13 +204,46 @@ public final class UndoStack: @unchecked Sendable {
     public func undo(with operations: Operations) throws -> String? {
         guard let entry = lock.withLock({ entries.last }) else { return nil }
         try entry.inverse(operations)
-        lock.withLock { entries.removeAll { $0.id == entry.id } }
+        lock.withLock {
+            entries.removeAll { $0.id == entry.id }
+            if entry.redo != nil {
+                redoEntries.append(entry)
+            } else {
+                // Redo is strictly LIFO: an entry that cannot be re-applied
+                // is never skipped over, so its undo ends the redo future.
+                redoEntries.removeAll()
+            }
+        }
+        notifyChange()
+        return entry.label
+    }
+
+    /// Re-applies the most recently undone entry (13c 1B — A10) and moves
+    /// it back onto the undo stack, so undo↔redo ping-pongs on the same
+    /// captured pre-images. Returns the redone entry's label, or nil when
+    /// there is nothing to redo. Mirrors `undo` exactly: the re-apply runs
+    /// OUTSIDE the lock (it is a DB write), a failure leaves the entry on
+    /// the redo stack for retry (resolve the refusal — an unsealed post,
+    /// say — and press again), and removal is by entry id.
+    @discardableResult
+    public func redo(with operations: Operations) throws -> String? {
+        guard let entry = lock.withLock({ redoEntries.last }),
+              let reapply = entry.redo
+        else { return nil }
+        try reapply(operations)
+        lock.withLock {
+            redoEntries.removeAll { $0.id == entry.id }
+            entries.append(entry)
+        }
         notifyChange()
         return entry.label
     }
 
     public func removeAll() {
-        lock.withLock { entries.removeAll() }
+        lock.withLock {
+            entries.removeAll()
+            redoEntries.removeAll()
+        }
         notifyChange()
     }
 }

@@ -108,12 +108,20 @@ extension Operations {
             return PoolDragCopyResult(
                 block: copy, variants: variants, placement: placement, edge: edge)
         }
-        undoStack?.register(label: "Pool Copy") {
-            try $0.revertStructural(
-                restoringTexts: [],
-                tombstoningBlocks: [.init(result.block.id, result.variants)],
-                revivingPlacementRows: [])
-        }
+        undoStack?.register(
+            label: "Pool Copy",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [],
+                    tombstoningBlocks: [.init(result.block.id, result.variants)],
+                    revivingPlacementRows: [])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [],
+                    untombstoningBlocks: [.init(result.block.id, result.variants)],
+                    releasingPlacementRows: [])
+            })
         return result
     }
 }

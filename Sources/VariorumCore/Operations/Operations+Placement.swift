@@ -78,8 +78,15 @@ extension Operations {
         _ blockID: String, to containerID: String, at insert: InsertPosition = .end
     ) throws {
         // Pre-image captured at do-time: the undo inverse restores the exact
-        // prior container and position string, never re-derives them.
-        let previous: (container: String, position: String) = try database.write { db in
+        // prior container and position string, never re-derives them. The
+        // POST-image rides along for structural REDO (13c 1B — A10): the
+        // minted position string is captured too, so redo restores the
+        // exact spot the move produced rather than re-deriving a fresh
+        // jittered key (which would drift on every ping-pong).
+        let images: (
+            previous: (container: String, position: String),
+            landed: (container: String, position: String)
+        ) = try database.write { db in
             _ = try liveBlock(db, blockID)
             guard var placement = try livePlacement(db, blockID: blockID) else {
                 throw OperationError.blockNotPlaced(id: blockID)
@@ -92,17 +99,28 @@ extension Operations {
             placement.position = try containerPosition(db, containerID: containerID, at: insert)
             placement.updatedAt = date.now
             try placement.update(db)
-            return previous
+            return (previous, (placement.containerId, placement.position))
         }
-        undoStack?.register(label: "Move Block") {
-            try $0.restorePlacementLocation(
-                blockID, containerID: previous.container, position: previous.position)
-        }
+        undoStack?.register(
+            label: "Move Block",
+            inverse: {
+                try $0.restorePlacementLocation(
+                    blockID, containerID: images.previous.container,
+                    position: images.previous.position)
+            },
+            redo: {
+                try $0.restorePlacementLocation(
+                    blockID, containerID: images.landed.container,
+                    position: images.landed.position)
+            })
     }
 
     /// Reposition within the current container.
     public func reorder(_ blockID: String, to insert: InsertPosition) throws {
-        let previous: (container: String, position: String) = try database.write { db in
+        let images: (
+            previous: (container: String, position: String),
+            landed: (container: String, position: String)
+        ) = try database.write { db in
             _ = try liveBlock(db, blockID)
             guard var placement = try livePlacement(db, blockID: blockID) else {
                 throw OperationError.blockNotPlaced(id: blockID)
@@ -113,12 +131,22 @@ extension Operations {
                 db, containerID: placement.containerId, at: insert)
             placement.updatedAt = date.now
             try placement.update(db)
-            return previous
+            return (previous, (placement.containerId, placement.position))
         }
-        undoStack?.register(label: "Reorder") {
-            try $0.restorePlacementLocation(
-                blockID, containerID: previous.container, position: previous.position)
-        }
+        undoStack?.register(
+            label: "Reorder",
+            inverse: {
+                try $0.restorePlacementLocation(
+                    blockID, containerID: images.previous.container,
+                    position: images.previous.position)
+            },
+            // 13c 1B (A10): the exact landed position string, not a fresh
+            // `containerPosition` derivation.
+            redo: {
+                try $0.restorePlacementLocation(
+                    blockID, containerID: images.landed.container,
+                    position: images.landed.position)
+            })
     }
 
     // MARK: - Shared internals

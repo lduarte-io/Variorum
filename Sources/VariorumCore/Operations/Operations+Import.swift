@@ -40,9 +40,10 @@ extension Operations {
             let blockIDs = try mintSegments(db, segments, into: post.id)
             return ImportResult(container: post, blockIDs: blockIDs, createdContainer: true)
         }
-        undoStack?.register(label: "Import") {
-            try $0.revertMintedContainer(result.container.id)
-        }
+        undoStack?.register(
+            label: "Import",
+            inverse: { try $0.revertMintedContainer(result.container.id) },
+            redo: { try $0.reapplyMintedContainer(result.container.id) })
         return result
     }
 
@@ -64,9 +65,10 @@ extension Operations {
             return ImportResult(container: container, blockIDs: blockIDs, createdContainer: false)
         }
         let blockIDs = result.blockIDs
-        undoStack?.register(label: "Import") {
-            try $0.revertImportedBlocks(blockIDs)
-        }
+        undoStack?.register(
+            label: "Import",
+            inverse: { try $0.revertImportedBlocks(blockIDs) },
+            redo: { try $0.reapplyImportedBlocks(blockIDs) })
         return result
     }
 
