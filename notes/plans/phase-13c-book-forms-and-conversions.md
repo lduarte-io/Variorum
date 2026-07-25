@@ -714,8 +714,8 @@ are this phase's opening batch.
 
 | # | Item (hers) | Owner |
 |---|-------------|-------|
-| A1 | Fragments-landed journal entries appear in Pool, not the Journal book *(traced)* | **13c-friction** |
-| A2 | The bridge "doesn't seem to refresh often enough" | **13c-friction** |
+| A1 | Fragments-landed journal entries appear in Pool, not the Journal book *(traced)* | **13c-friction — SHIPPED (Batch 1D).** The landing half now shelves the day's entry in the designated daily book, mirroring ⌘J; never blocks the landing (finished/full/smart/dangling books land-and-speak); never re-shelves what she removed — which is also what makes it REPAIR her two existing orphans on their next landing. No-designated-book posture PROVISIONAL, QUESTIONS #37. Third class instance found and recorded, not fixed: the mobile capture door mints bookless the same way |
+| A2 | The bridge "doesn't seem to refresh often enough" | **13c-friction — ANSWERED + one structural fix (Batch 1D).** The sign-out starvation is CONFIRMED as the dominant cause (signed out ⇒ zero sync rounds ⇒ zero `onRoundCompleted` ⇒ the bridge ran once per launch for five days) — but the hole is structural, not historical (an expired session or a failed owner adoption reach it too), so a lifecycle event now reaches the bridge when sync can't deliver a round, and a stale bridge no longer LOOKS fresh in the status row. The 60 s throttle is untouched; a periodic poll is deliberately NOT taken — QUESTIONS #38 |
 | A3 | Whitespace phantom — paragraphs of empty space with nothing in them; vanish on scroll, return when you're over them | **13c-friction** |
 | A4 | Editor jumps when one block is taller than the screen; the empty space below isn't clickable as newlines | **13c-friction** |
 | A5 | "the callouts don't have the spacing on their color right" | 13d |
@@ -2250,7 +2250,7 @@ the numbers above, each printed by a test that runs on every suite run.
   measurement.
 - **P-6:** `TutorialWalkTests` green in the full-suite run.
 
-#### Ladder foci suggested for this batch
+#### Ladder foci suggested for this batch (1C)
 
 Whether the A46 refutation is complete — i.e. whether any surface OTHER
 than the Write editor (a `PaneSurface` pane in Takes / Lenses / Compare,
@@ -2264,3 +2264,233 @@ characterization pins assert the right invariants (particularly the ≤ 8 pt
 bound, which is a judgement about how big is too big), and whether
 shipping the E measurement as a suite test rather than a spike is the
 right home.
+
+### Batch 1D — the bridge (A1 · A2)
+
+**Commits:** `88bfd9a` (A1, the daily-book membership + its suite) ·
+`2dd3e2f` (A2, the lifecycle cadence + the stale-label honesty + pins) ·
+this record.
+**Counts:** core **836/97 → 848/98** · Mac **696/127 → 700/127** ·
+mobile 11/4 (builds clean; the shared `AppServices` change is an
+optional init parameter with a default plus a method mobile does not
+call, and mobile's bridge is disabled by construction).
+**Diff scope:** 1 core file + 1 new core suite; 3 app files + 2 app
+suites. No schema change. **Zero `Sources/VariorumCore/Sync/` lines
+touched** — the scope guard held with nothing to report.
+
+#### A1 — traced in her own store before a line was written
+
+The architect's trace was correct and I built from it rather than
+re-deriving it. What I added is the **evidence from her real store**,
+read-only, which turns the trace into a fact:
+
+| day | post created | `bridge_day.last_remote_stamp` | in the Journal book? |
+|---|---|---|---|
+| 2026-07-11 | `02:12:20.581Z` | `02:12:03.437Z` (**17 s EARLIER**) | **no row at all** |
+| 2026-07-16 | 2026-07-14 | 2026-07-17 | **no row at all** |
+| 2026-07-18 / 20 / 21 | — | — | in book |
+
+A post created seventeen seconds *after* the Fragments row it landed is
+the bridge-mint signature, and it carries **no `reading_post` row at
+all** — not live, not tombstoned. Her designation is healthy (`Journal`,
+curated, pinned, unlocked), so the missing half is exactly the one the
+architect named: `BridgeEngine.land` called `createOrOpenJournalEntry`
+and stopped, while `JournalBooks.openToday` calls it *and then*
+`addPostToReading`.
+
+**The fix, and its three deliberate rules.** A landing that WROTE to a
+day (`created` / `updated` / `conflictVariant` / `rescuedVariant` —
+echoes, replays and consumed-with-a-note rows wrote nothing and shelve
+nothing) shelves that day's canonical entry in the designated daily
+book, mirroring the Mac door's error handling rather than inventing
+semantics.
+
+1. **The landing is NEVER blocked by shelving.** It runs after the body
+   is in the store and after the cursor advances, and it returns a NOTE
+   instead of throwing — a finished book, a full book, a smart book, a
+   dangling designation and any unexpected error all land-and-speak.
+   "Nothing typed in either app can be permanently lost" outranks
+   tidiness, and the note surface already exists (`LandingReport.notes`
+   → `Status.issueNotes` → the status row's "needs attention").
+2. **Never re-shelve what she took off the shelf.** A `reading_post`
+   row for the pair — **live OR tombstoned** — means the pair is already
+   decided, so the bridge leaves it alone. This is what answers the
+   otherwise-fair objection to shelving on every write: a headless round
+   can never undo a deliberate `removePostFromReading`.
+3. **…and rule 2 is also what makes it a REPAIR.** Her two orphans have
+   no membership row of any kind, so the next landing that writes to
+   those days shelves them — as it will for any entry minted by a door
+   that doesn't shelve.
+
+#### A1's judgment calls / PROVISIONAL
+
+1. **Shelve on every WRITING landing, not only at mint (judgment call).**
+   `openToday` *ensures* membership on every invocation, so parity is the
+   ensure, not the create. The mint-only alternative would never repair
+   her existing orphans and would never catch an entry minted elsewhere.
+   The objection this raises — re-adding an entry she removed — is
+   answered structurally by rule 2 above, and pinned.
+2. **No designated daily book ⇒ land, skip, and SAY SO (PROVISIONAL,
+   QUESTIONS #37).** The architect's lean, and I agree with it after
+   building the alternatives in my head: the Mac door *creates and pins*
+   a "Journal" book on first use **because she pressed a button**; a
+   headless bridge minting and pinning a book on her shelf while she
+   sleeps is a materially larger act, and it would be the first time the
+   bridge created anything but journal entries. A silent skip (option i)
+   leaves her exactly where she was — an entry in the Pool with no
+   explanation, which is the confusion she reported. Pinned that the
+   round mints **no reading at all** in this state.
+3. **A CLASS INSTANCE FOUND AND DELIBERATELY NOT FIXED — for the
+   architect, not built:** the mobile capture door
+   (`EntryListViewModel.open(on:)`,
+   `App/Variorum/VariorumMobile/Features/Capture/EntryListViewModel.swift:94`)
+   calls `createOrOpenJournalEntry` and stops, exactly as the bridge did.
+   So an entry minted **on her phone** arrives on the Mac bookless and
+   shows in the Pool — the same symptom from a different door. It is out
+   of this batch's stated scope and touches a target whose suite I did
+   not run, and the daily-book designation is a synced setting so the
+   phone could do it. **Two mitigations already in place:** A1's rule 3
+   repairs such an entry the moment Fragments writes to that day, and
+   ⌘J on the Mac repairs it the moment she opens the day. Recorded as
+   the sweep's third instance; ownership is the architect's call.
+
+#### A1's red-on-old evidence (behavioral revert, run both ways)
+
+| # | Revert applied | Observed RED |
+|---|---|---|
+| 1 | the call site unwired (`if false, outcome.wroteToTheDay`) | **9 of 12 pins red, 14 issues** — `rows.count → 0` where 1 is required; every "…LandsAndSaysWhy" note assertion `nil`; the repair and rescue pins find no membership |
+| 2 | the pure helper no-ops (`if true { return nil }`) | the same 9 pins red with the same shapes — the helper is the site, not the consumer |
+
+Both reverts restored and verified byte-clean before committing
+(`grep -c` = 0 for both markers); the suite re-ran green after restore.
+The three pins that stay GREEN under both reverts are the narrowness
+pins and are labelled as such in the file's own comment
+(`theBridgeNeverReShelvesAnEntryTheAuthorRemoved`,
+`anEchoLandingShelvesNothing`, `shelvingNeverCausesAPush`) — they hold
+the carve's edges, the 1B cannot-widen precedent.
+
+#### A2 — the trace, and it is BOTH answers at once
+
+The architect's instruction was to trace before tuning, and said plainly
+that "it was the sign-out, change nothing" would be a complete answer.
+**The trace confirms the sign-out as the dominant cause AND shows the
+hole is structural rather than historical, so I fixed the hole and left
+the throttle alone.**
+
+**What the wiring actually is.** The bridge's ONLY cadence trigger is
+`sync.onRoundCompleted` (`AppServices:111-113`), which fires when a sync
+round FINISHES. Sync rounds come from exactly three places, and **there
+is no periodic timer anywhere in the app**: `connectSyncIfAllowed` at
+sign-in/launch, `didBecomeActiveNotification`, and the outbox settle
+observation. Signed out of the Variorum project, `connectSyncIfAllowed`
+never runs, `sync.scheduler` stays nil, `triggerSync()` returns
+immediately, `roundsCompleted` never increments — **so `onRoundCompleted`
+never fires and the bridge ran exactly once per launch**, via the
+`bridge.trigger(manual: true)` in `connectBridgeIfAllowed`. That is
+2026-07-20 → 07-25, five days, with her Fragments session perfectly
+valid the whole time. Her `bridge_day` rows stop at
+`2026-07-21T23:17:45` in the real store, consistent with it.
+
+**Why it is not a one-off.** The same starvation returns whenever the
+Variorum session is absent — an expired session, a sign-out — **and on a
+failed owner adoption**, because `connectSyncIfAllowed` returns before
+composing when `runOwnerAdoption()` fails. And the 9b plan's Step 5
+names the bridge's cadence as *"launch / became-active /
+post-write-settle"*, which is not what the code does in that state: a
+spec-vs-code divergence, which CLAUDE.md says to align to the spec.
+
+**The fix (`AppServices.triggerLifecycleRound`)**: one sync round, plus
+one bridge round *only when sync cannot deliver one*. It is a CADENCE
+trigger, never manual, so the 60 s throttle still guards the
+O(journal-days) hash sweep (QUESTIONS #15's ratified relaxation).
+With sync configured the behaviour is byte-identical to before, and
+that is its own pin (`theLifecycleCadenceStillNeverInterleavesWhenSyncIsOn`
+parks a sync round mid-flight and requires zero bridge rounds beside it).
+
+**The second half — a stale bridge must not LOOK fresh.** The row's
+label was time-only, so for five days it read "Bridged 11:04 PM" and
+looked like it had just run. That is the same *silently-frozen-bridge*
+class the 9b round-1 MINOR 4 fixed for per-day rejections, and it is the
+observability half of her actual sentence: past today the label now
+carries the date.
+
+#### A2's judgment calls / what was deliberately NOT done
+
+1. **The 60 s throttle is UNCHANGED.** The trace does not justify it —
+   the latency she felt was five days, not a minute — and its own
+   ratification's "adjust freely" wording is not a reason to adjust
+   without cause.
+2. **No periodic poll was added, deliberately.** Even signed in, nothing
+   pulls Fragments while she sits in Variorum without typing or
+   switching apps; a timer would fix that and is the obvious next idea.
+   It is not mine to take: every bridge round hash-sweeps every live
+   journal day, so putting that on a clock forever is a cadence/P1
+   posture change on top of QUESTIONS #15's ratified relaxation.
+   **Recorded for her/the architect, not built.**
+3. **The `bridgeMinimumRoundInterval` init parameter is a test seam**
+   (default `.seconds(60)`, production unchanged), following the file's
+   own `makeSyncTransport`/`makeBridgeTransport` precedent — without it
+   the cadence pin would have to wait a real minute.
+4. **Mobile's became-active hook was left alone.** It still calls
+   `sync.triggerSync()`; mobile's bridge is disabled by construction
+   (`bridgeEnabled: false`), so routing it through the new method would
+   be a no-op. Recorded rather than changed.
+5. **The sync row's label was left alone** although it has the same
+   time-only form: the sync row already speaks loudly when it is off
+   ("Signed out" + a Sign in… button), which is what the bridge row
+   lacked. Flagged as a sibling candidate, not taken.
+
+#### A2's red-on-old evidence (behavioral revert, run both ways)
+
+| # | Revert applied | Pin | Observed RED |
+|---|---|---|---|
+| 1 | `triggerLifecycleRound` body → `sync.triggerSync()` alone | `theLifecycleCadenceReachesTheBridgeWhenSyncIsOff` | bridge calls never rise above the launch round — **her five days, reproduced in 2.7 s** |
+| 2 | the app hook back to `services?.sync.triggerSync()` | `theBecomeActiveHookRoutesThroughTheLifecycleCadence` | 2 issues — the rule exists but nothing calls it |
+| 3 | the label back to time-only | `theLastBridgedLabelShowsTheDateOnceItIsNotToday` | `"Bridged 9:30 AM"` for a **five-day-old** round |
+
+`theLifecycleCadenceStillNeverInterleavesWhenSyncIsOn` stayed GREEN
+under all three, as an ordering pin should. All three reverts restored
+and verified by grep; both suites re-ran green, then the full Mac suite.
+
+#### 9b's guarantees — checked, not assumed
+
+Read in the 9b record first, then verified against the diff: unchanged
+text still never pushes (`shelvingNeverCausesAPush` asserts the fake
+server's `acceptedWriteCount` is untouched across a landing round AND a
+following quiescent round); the duplicate-day pause, the fail-closed
+canonical-user gate, and `applyBridgeLanding`'s insure-overwrite-commit
+transaction are untouched by both changes — the shelving is a
+`reading_post` insert that happens after the landing and cannot reach
+the push classifier, since membership is not rendered text. The full
+core suite (all bridge suites included) is green.
+
+#### Deviations
+
+- **None from the brief's method.** A1 was built from the architect's
+  trace as instructed, with her store consulted read-only as
+  corroboration; A2 was traced before anything was tuned, and the one
+  thing the brief named as adjustable (the throttle) was left alone
+  because the trace didn't justify it.
+- **One scope addition, argued above:** A2's stale-label honesty fix.
+  It is the observability half of the same report and it is what would
+  have let her see the starvation herself.
+- **One finding recorded rather than fixed:** the mobile capture door's
+  identical missing half (A1 judgment call 3).
+- **No lookup subagent used** — nothing external was needed.
+- **P-6:** `TutorialWalkTests` green in the full Mac suite run.
+
+#### Ladder foci suggested for this batch
+
+Whether shelving on every writing landing can reach a state the three
+narrowness pins miss (particularly a duplicate-day landing, where the
+canonical entry is chosen by the notebook rule while the push half is
+paused — the shelving follows `canonicalJournalEntry`, so it shelves the
+*canonical* entry of a duplicated day); whether "any membership row,
+live or tombstoned, means decided" has a `restoreContainer` /
+`restoreReading` / sync-repair interaction worth stating (a cascade-
+tombstoned membership that never revived reads as "removed"); whether
+the note wording carries enough for her to act on without the plan file;
+and whether `triggerLifecycleRound`'s "only when sync is unconfigured"
+condition is the right discriminator versus, say, "when no sync round
+has completed recently" (the chosen form is the one that cannot double-
+trigger, which is why it is the one pinned).
