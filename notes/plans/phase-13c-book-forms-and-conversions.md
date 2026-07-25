@@ -1165,6 +1165,72 @@ autonomy grant. Counts at open: core **817/96**, Mac **668/125**.
 
 ## Architect adjudications
 
+### Batch 1B — ACCEPTED after verification, plus a product finding for her (2026-07-26)
+
+**Verified before accepting** (prompted by a stale-index diagnostic that
+appeared to contradict the report — worth doing precisely because it
+looked like a contradiction): the tree compiles clean; `register` takes
+`redo:` as a **required, non-defaulted** parameter; the flagged call
+sites do pass it; and there are **zero `redo: nil` holes** anywhere in
+core or the app. The totality claim holds. Core **836/97 confirmed by my
+own run.**
+
+**Design note worth keeping:** making `redo` *required but optional-typed*
+is the right shape — a future registration site must explicitly decide
+and pass `nil` rather than silently omitting a re-apply. That is P-1's
+"green by construction" reasoning applied to the undo layer.
+
+**The batch's own corrected assumption is the most valuable thing in it.**
+It wrote a pin asserting that a bare seam-backspace between two *texted*
+blocks still merges, on the strength of the ratified "a cross-seam delete
+just works." **The pin failed, and the pin was wrong — not the code.**
+That 2026-07-09 ruling covers a *selection spanning text*; a bare
+separator intersects neither neighbour, so both cross-block plans have
+always returned nil and the keystroke has always refused. Good
+self-correction: the implementer believed the doc, tested it, and
+reported that the doc's scope was narrower than it read.
+
+> **FINDING F3 — a product call for her, NOT taken (author-only).**
+> The corrected assumption exposes a live gap: **backspace at a seam
+> between two blocks that both have text does nothing today.** In every
+> ordinary editor that keystroke joins the two paragraphs. This invokes
+> her own stated principle *verbatim* (2026-07-09, AppSpec §14): *"there
+> is no other writing editor where you can select a bunch of text, hit
+> delete, and it doesn't delete… if your text looks like basic text with
+> no variants, it should behave like basic text."* A7's carve deliberately
+> covers only the EMPTY-block case, which is right for this batch — but
+> the texted case is the same principle one step further, and merge
+> already exists as the operation it would call. **Options for her:**
+> (i) leave it — merge stays an explicit named gesture, and a silent
+> structural merge from a keystroke is a big implicit act; (ii) backspace
+> at a seam merges when **neither** block has takes (basic text behaves
+> like basic text) and refuses-and-speaks when either does; (iii) as (ii)
+> but always, with the fan consequence spoken. **Not built. Logged as
+> QUESTIONS #34.**
+
+**The five bundled PROVISIONALs (QUESTIONS #33) — all adjudicated
+DEFENSIBLE against the spec, and all still hers to ratify:** (a) the
+delete door is not restricted to empty blocks — `deleteBlock` has always
+been general, and inventing a restriction would be inventing product
+behavior; (b) deleting a post's last block is allowed — no invariant
+makes block count load-bearing (I10 governs a block's *variants*, not a
+post's blocks), the blockless post is the modelled fresh-post state, and
+the editor already handles it; (c) **the archive half deliberately NOT
+built** — `block.archived_at` has sat in schema v1 since Phase 1 with no
+operation, query, or face, so building it means deciding what an archived
+block *means*, which is hers. **This is the correct call and the right
+kind of restraint**; (d) the both-empty tie-break resolves to the block
+before the seam — arbitrary but recorded and pinned; (e) redo is ⇧⌥⌘Z,
+never sharing ⌘⇧Z with text redo — consistent with structural undo's
+⌥⌘Z and with the never-interleave rule.
+
+**Recorded, not actioned:** redo's insurance asymmetry — a source block
+edited between undo and redo is re-released with its edit intact but
+uncommitted. This is **the same asymmetry undo already has**, not a new
+one, and the batch recorded it deliberately rather than inventing a
+sixth auto-commit occasion (which would be product behavior). Correct
+restraint; flagged for the ladder.
+
 ### Batch 1A — ACCEPTED, with one option added to the memo (2026-07-25)
 
 **The hypothesis died, and the record says so plainly.** My recorded
