@@ -1,4 +1,42 @@
-# Variorum for iPhone — orientation brief
+# Variorum for iPhone — the standalone plan
+
+## Kickoff message (paste-ready — this is how she starts it)
+
+> You are the architect/orchestrator for **Variorum for iPhone**, a
+> standalone project — NOT a numbered phase (the author decoupled it from
+> the phase sequence on 2026-07-25). Run it under the `/architect-phase`
+> skill: read `.claude/skills/architect-phase/SKILL.md` IN FULL first
+> (constitution, machinery, environment invariants), then `CLAUDE.md`,
+> then **this file IN FULL**, then the canon set —
+> `notes/CoreDescription.md` (**pillar 8 is the one that governs you, and
+> it was rewritten for this project**), `notes/OverallModel.md`,
+> `notes/AppSpec.md`, `notes/SyncSpec.md`,
+> `notes/DetailedPlanForPhases.md` (table + pointer + closeout log), and
+> `notes/KnownIssuesAndTechDebt.md`. Then read what already exists on the
+> phone: `notes/plans/phase-08-ios-capture.md` (what shipped and why it
+> is shaped that way) and `notes/plans/phase-15-brief.md` (**history —
+> its "no fan gestures" framing is superseded by pillar 8's 2026-07-25
+> delta; mine it for the reading-views thinking only**).
+>
+> **This project OPENS with an author-attended design sitting, and it
+> cannot be skipped.** The interaction shape is genuinely undecided —
+> she floated four candidates and said *"either way"*. They are recorded
+> below AS FLOATED. **Do not pre-commit one.** Bring her prototypes or
+> concrete option sets, in question batches of ≤4, and record her
+> rulings verbatim-faithful in this file the same turn.
+>
+> The bar she set, in her words: *"a thorough implementation of the app
+> that is beautiful and easy to use"* and *"it's going to have to be a
+> real and robust option."* This replaces the Phase 8 capture surface as
+> the phone's identity; it does not extend it.
+>
+> Confirm repo state with `git log --oneline -10` and `git status`, and
+> verify the current test baselines with your own runs before building
+> on them.
+
+---
+
+## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
 real and robust option"* — collected 2026-07-25 so nothing depends on
@@ -89,6 +127,20 @@ be a real and robust option."*
    trailing newlines. The fix must distinguish accidental accrual from
    the MEANINGFUL stored spacing the 2026-07-12 ruling created — never a
    blanket trim.
+
+## Suggested shape of the work (a starting point, not a commitment)
+
+The design sitting may reorder all of this. It exists so the project does
+not start from a blank page.
+
+| Stage | What | Gate |
+|---|---|---|
+| 0 | **The design sitting.** Her rulings on the interaction shape, how much take vocabulary crosses, which Mac surfaces mobile mirrors. Prototypes over prose where possible — she has said repeatedly that she rules better on something she can see | Her rulings recorded in this file, verbatim-faithful |
+| 1 | **The surface audit.** What the phone has today (Phase 8 capture), what the Mac's Write/Takes vocabulary now is after 13c–13e, and the honest list of what will be built twice if this ships before formatting (13g) lands | A written list she can look at |
+| 2 | **The writing surface.** The Write-equivalent, on the phone's own terms. Note: AppSpec §4's TK2 mandate targets the **Mac editor core**, not the phone — QUESTIONS #2 ratified SwiftUI `TextEditor` for capture, and whether a robust phone editor still wants it is an open call this project makes with evidence | Typing is pleasant on a real device; P1/P3 hold |
+| 3 | **Takes on the phone** — the deliberately narrower surface pillar 8 now permits | Her acceptance; the take vocabulary is a subset by design, and the record says which subset and why |
+| 4 | **The rest of the model** — reading views, books, navigation, per her design sitting | — |
+| 5 | **The inherited defect** — the iOS trailing-blank-lines bug (below), fixed without a blanket trim | A pin distinguishing accidental accrual from meaningful stored spacing |
 
 ## Where the rest of the record lives
 

@@ -902,7 +902,7 @@ ask whether the block should be a post. Never invent nesting.
   standing inputs — her four floated interaction shapes preserved
   UNCHOSEN, what binds, the open questions, the inherited iOS
   trailing-newline defect — are collected in
-  **`notes/plans/mobile-app-brief.md`** so they never depend on this
+  **`notes/plans/mobile-app-plan.md`** so they never depend on this
   session. **The pillar 8 delta is APPLIED with her explicit blessing**
   (full version, not hedged): takes ARE included on mobile; "smaller
   than the Mac" survives as the rule; the journal-restrictions-are-a-
