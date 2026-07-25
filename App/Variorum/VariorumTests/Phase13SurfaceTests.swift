@@ -57,7 +57,7 @@ struct EditorTypographyTests {
             Queries.RenderedBlock(
                 blockID: "b1", placementID: "p1", position: "a",
                 variantID: "v1", text: "Prose.", activeVariantCount: 1,
-                liveVariantCount: 1, variantLocked: false),
+                liveVariantCount: 1, commentCount: 0, variantLocked: false),
         ])
         let font = text.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
         #expect(font?.familyName == "Iowan Old Style",
@@ -401,6 +401,58 @@ struct CommentsAndReorderTests {
                 try Queries.blockPresentations(db, containerID: postID)
             }
             #expect(frames.isEmpty)
+        }
+    }
+
+    // MARK: - A13(a): the ONE callout transform (13c Stage 1 ladder, R2-2)
+
+    /// The frame door now hangs on four surfaces, so the transform is
+    /// PURE and shared rather than re-derived per surface (the
+    /// `MergeJoin`/`BoundarySnapping` shape, Stage 4 lessons 3–4). These
+    /// are the semantics every door inherits.
+    @Test func theCalloutTransformIsOneRuleForEveryDoor() {
+        let plain: BlockPresentation? = nil
+        let framed = BlockPresentation(color: "sand", emoji: "💡")
+
+        // A colour keeps whatever emoji is there; nil REMOVES the frame.
+        #expect(CalloutEditRule.apply(.color("rose"), to: framed)?.color == "rose")
+        #expect(CalloutEditRule.apply(.color("rose"), to: framed)?.emoji == "💡")
+        #expect(CalloutEditRule.apply(.color("rose"), to: plain)?.emoji == nil)
+        #expect(CalloutEditRule.apply(.color(nil), to: framed) == nil)
+
+        // The emoji keeps the colour, and mints the default on a plain
+        // block; empty/whitespace clears it rather than storing blanks.
+        #expect(CalloutEditRule.apply(.emoji("✱"), to: framed)?.color == "sand")
+        #expect(CalloutEditRule.apply(.emoji("✱"), to: plain)?.color == CalloutPalette.defaultName)
+        #expect(CalloutEditRule.apply(.emoji("  "), to: framed)?.emoji == nil)
+        #expect(CalloutEditRule.apply(.emoji(nil), to: framed)?.emoji == nil)
+
+        // The shortcut's single act — the whole reason ⌥⌘C is honest.
+        #expect(CalloutEditRule.apply(.toggle, to: plain)?.color == CalloutPalette.defaultName)
+        #expect(CalloutEditRule.apply(.toggle, to: framed) == nil)
+    }
+
+    /// ⌥⌘C end to end on the Write surface, through the routed door the
+    /// menu now uses (A13(a)'s second half): frame, then un-frame.
+    @Test func theCalloutToggleFramesAndUnframesTheCaretBlock() async throws {
+        try await withEditor(seedBlocks: ["Prose."]) { h in
+            h.textView.setSelectedRange(NSRange(location: 2, length: 0))
+            h.model.updateCaretContext()
+            let blockID = try h.storeSlots()[0].blockID
+
+            await h.model.applyCallout(.toggle)
+            await h.settle()
+            var frames = try await h.database.read { [postID = h.postID] db in
+                try Queries.blockPresentations(db, containerID: postID)
+            }
+            #expect(frames[blockID]?.color == CalloutPalette.defaultName)
+
+            await h.model.applyCallout(.toggle)
+            await h.settle()
+            frames = try await h.database.read { [postID = h.postID] db in
+                try Queries.blockPresentations(db, containerID: postID)
+            }
+            #expect(frames.isEmpty, "the same key takes it away")
         }
     }
 }

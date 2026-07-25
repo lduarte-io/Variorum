@@ -615,6 +615,28 @@ final class CompareViewModel {
             statusMessage = OpsRefusalCopy.message(for: error)
         }
     }
+
+    /// 13c Stage 1 ladder, R2-2 (her A13(a) named Compare explicitly): the
+    /// callout door on the FOCUSED pane's block, through the one shared
+    /// transform. Compare's panes have carried a live block since 4C, and
+    /// a pane knows its own post — so the frame lands on the block she is
+    /// looking at, whichever column it lives in.
+    func applyCallout(_ edit: CalloutEdit) async {
+        guard let pane = authority.livePane else {
+            statusMessage = "Click into a pane first — the frame goes on that block."
+            return
+        }
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                try ops.updateBlockPresentation(pane.blockID) {
+                    CalloutEditRule.apply(edit, to: $0)
+                }
+            }
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
 }
 
 // MARK: - The board
@@ -676,9 +698,20 @@ struct CompareBoardView: View {
             // false and keep falling through (compare's editing is direct
             // manipulation — the recorded 4C reading stands).
             commandToken = session.commandRouter.registerHandler { command in
-                guard case .commit = command else { return false }
-                Task { await model.commitFocusedTake() }
-                return true
+                switch command {
+                case .commit:
+                    Task { await model.commitFocusedTake() }
+                    return true
+                case .callout(let edit):
+                    // 13c R2-2 (A13(a) named Compare): the focused pane's
+                    // block takes the frame. Everything else keeps falling
+                    // through — compare's editing is direct manipulation
+                    // (the recorded 4C reading stands).
+                    Task { await model.applyCallout(edit) }
+                    return true
+                default:
+                    return false
+                }
             }
         }
         .onDisappear {

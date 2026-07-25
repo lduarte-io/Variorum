@@ -2047,19 +2047,20 @@ final class EditorViewModel {
         openComments(blockID: caretBlockID)
     }
 
-    /// Sets/clears the caret block's callout frame (R16/R27 — the menu
-    /// door; presentation is the BLOCK's, takes share the frame).
-    func setCaretCallout(color: String?, emoji: String? = nil) async {
+    /// The routed callout door's Write half (13c R2-2 — A13(a)): the
+    /// caret block's frame, through the ONE transform every surface shares
+    /// (`CalloutEditRule`), applied inside `updateBlockPresentation`'s own
+    /// transaction so the stored frame is the truth — never the projection
+    /// cache. Sealed posts refuse through the op, spoken (P-2).
+    func applyCallout(_ edit: CalloutEdit) async {
         guard let caretBlockID else {
-            showStatus("Place the caret in a block first.")
+            showStatus("Place the caret in a block first — the frame goes on that block.")
             return
         }
         do {
-            // Read-modify-write in ONE transaction (the stored frame is
-            // the truth — never the projection cache).
             try await session.runner.run { ops in
-                try ops.updateBlockPresentation(caretBlockID) { existing in
-                    color.map { BlockPresentation(color: $0, emoji: emoji ?? existing?.emoji) }
+                try ops.updateBlockPresentation(caretBlockID) {
+                    CalloutEditRule.apply(edit, to: $0)
                 }
             }
         } catch {
@@ -2067,26 +2068,17 @@ final class EditorViewModel {
         }
     }
 
+    /// Sets/clears the caret block's callout frame (R16/R27). Kept as the
+    /// named colour door the Phase 13 pins drive; the routed door above is
+    /// the one the menu and the boards use.
+    func setCaretCallout(color: String?) async {
+        await applyCallout(.color(color))
+    }
+
     /// Sets the caret block's callout emoji (keeps the color; a callout is
     /// minted with the default color when none exists yet).
     func setCaretCalloutEmoji(_ emoji: String?) async {
-        guard let caretBlockID else {
-            showStatus("Place the caret in a block first.")
-            return
-        }
-        let trimmed = emoji?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalized = (trimmed?.isEmpty == false) ? trimmed : nil
-        do {
-            try await session.runner.run { ops in
-                try ops.updateBlockPresentation(caretBlockID) { existing in
-                    BlockPresentation(
-                        color: existing?.color ?? CalloutPalette.defaultName,
-                        emoji: normalized)
-                }
-            }
-        } catch {
-            showOperationError(error)
-        }
+        await applyCallout(.emoji(emoji))
     }
 
     /// The handle drop (R19): entry `fromEntry` lands BEFORE boundary

@@ -234,6 +234,38 @@ nonisolated enum CalloutPalette {
     }
 }
 
+// MARK: - The ONE callout transform (13c Stage 1 ladder, R2-2 — A13(a))
+
+/// What each `CalloutEdit` does to a block's STORED frame. Pure, so the
+/// four surfaces that now carry the callout door (Write, Takes, Lenses,
+/// Compare) share one rule instead of each re-deriving read-modify-write
+/// semantics — the shape `MergeJoin`/`BoundarySnapping` set for their
+/// gestures (Stage 4 lessons 3–4), applied to presentation.
+///
+/// Every caller passes this straight to `Operations.updateBlockPresentation`,
+/// whose transform runs INSIDE the write transaction — so "keep the colour,
+/// change the emoji" reads the stored frame, never a projection cache.
+nonisolated enum CalloutEditRule {
+    static func apply(_ edit: CalloutEdit, to existing: BlockPresentation?) -> BlockPresentation? {
+        switch edit {
+        case .color(let name):
+            // nil REMOVES the frame; a name keeps whatever emoji is there.
+            return name.map { BlockPresentation(color: $0, emoji: existing?.emoji) }
+        case .emoji(let raw):
+            let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines)
+            return BlockPresentation(
+                color: existing?.color ?? CalloutPalette.defaultName,
+                emoji: (trimmed?.isEmpty == false) ? trimmed : nil)
+        case .toggle:
+            // A frame is one thing you either have or don't — which is what
+            // makes ⌥⌘C a legitimate single act.
+            return existing == nil
+                ? BlockPresentation(color: CalloutPalette.defaultName, emoji: nil)
+                : nil
+        }
+    }
+}
+
 // MARK: - The overlay controller
 
 /// Owns the decoration view pools over one TK2 surface — the LIVE editor

@@ -208,6 +208,11 @@ struct TakesBoardView: View {
         case .comments:
             model.requestComments()
             return true
+        case .callout(let edit):
+            // 13c R2-2 (A13(a)): "i couldn't get callouts in takes" — the
+            // frame is the block's, so it is set right here.
+            Task { await model.applyCallout(edit) }
+            return true
         case .pageFan(let delta):
             model.pageFocusedFan(by: delta)
             return true

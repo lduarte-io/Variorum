@@ -59,6 +59,18 @@ nonisolated enum CapabilityRegistry {
         return takeFamily(ctx)
     }
 
+    /// The callout frame's reach (13c Stage 1 ladder, R2-2 — her A13(a)
+    /// verbatim: callouts *"in Takes/Compare/Lenses"*). Exactly the four
+    /// surfaces she named, no more: the take family plus COMPARE, whose
+    /// panes have carried a live block since 4C. CANVAS is deliberately
+    /// out — it is not in her ask, and P-2 says a door that can't act in a
+    /// context isn't rendered enabled there; adding it is one line plus a
+    /// handler if she wants it (recorded for the Design & UI review row).
+    private static let takeFamilyPlusCompare: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        if ctx.mode == .compare { return .act }
+        return takeFamily(ctx)
+    }
+
     /// Write-editor-scoped doors (caret acts): ATTACHMENT ONLY (round-1
     /// MINOR-3). These acts call the attached editor directly — enablement
     /// must never outrun the actual editor ("Write mode, editor still
@@ -346,12 +358,21 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Comments live on a block — open a post first.",
             // The bars' block menus carry the door in Write/Takes/Lenses.
             availability: takeFamily),  // NIT-3: the one named rule, not a copy
+        // 13c Stage 1 ladder, R2-2 — her A13(a), ruled into the friction
+        // batch by K2 and built here: "callouts (a) in Takes/Compare/Lenses
+        // + a shortcut". Both halves were ONE declaration edit plus the
+        // fire-and-DO wiring 13b built for exactly this class — the frame
+        // is the BLOCK's (takes share it, R16/R27), so every surface that
+        // knows which block you are in can set it, and Write was privileged
+        // only by an accident of where the door was first hung (R118).
+        // ⌥⌘C toggles; the submenu's colours/emoji/remove route the same
+        // way. `takesAccess: .native` — Takes sets the frame right there.
         Capability(
             id: .callout, verb: "Callout", scope: .block,
             doors: [.menuBar],
-            shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "Callout frames are set from Write's caret block.",
-            availability: writeEditor),
+            shortcutLabel: "⌥⌘C", takesAccess: .native,
+            unavailableNote: "Callout frames go on a block — open a post first.",
+            availability: takeFamilyPlusCompare),
         Capability(
             id: .exportCaretBlock, verb: "Export Block as Markdown…", scope: .block,
             doors: [.menuBar],
@@ -477,6 +498,7 @@ nonisolated enum CapabilityRegistry {
         case .deleteBlock: id = .deleteBlock
         case .toggleSeal: id = .sealPost
         case .comments: id = .blockComments
+        case .callout: id = .callout
         case .pageFan: id = .pageFanBack
         }
         return capability(id).unavailableNote

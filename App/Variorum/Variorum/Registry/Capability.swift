@@ -44,6 +44,23 @@ nonisolated enum StructuralAct: String, Sendable, CaseIterable {
     case divide, extract, makeBlock, merge
 }
 
+/// The callout frame's edits (13c Stage 1 ladder, R2-2 — her A13(a):
+/// *"callouts … in Takes/Compare/Lenses + a shortcut"*). One payload, so
+/// every surface's door applies the SAME transform to the stored frame
+/// (`CalloutEditRule`) rather than each re-deriving read-modify-write
+/// semantics. `.toggle` is the shortcut's single act — a frame is one
+/// thing you either have or don't, so ⌥⌘C is honest as a toggle where a
+/// colour submenu could never be a key.
+nonisolated enum CalloutEdit: Equatable, Sendable {
+    /// Set the frame to this palette-token name; `nil` REMOVES the frame.
+    case color(String?)
+    /// Set (or, with `nil`, clear) the emoji, keeping the colour — minting
+    /// the default colour when the block has no frame yet.
+    case emoji(String?)
+    /// Frame it if it is plain, un-frame it if it is a callout.
+    case toggle
+}
+
 /// Everything the menu bar / palette / bars route to "whichever post
 /// surface is mounted". One channel, exhaustively typed — a surface handler
 /// switches over this and the compiler keeps the four handlers complete.
@@ -57,6 +74,7 @@ nonisolated enum RoutedCommand: Equatable, Sendable {
     case deleteBlock     // 13c 1B (A8): delete the caret/focused block
     case toggleSeal
     case comments        // ⌘⇧' — the target block's comments panel
+    case callout(CalloutEdit)  // 13c R2-2 (A13(a)): the target block's frame
     case pageFan(Int)    // ⌥⌘←/→ — page the focused block's take cards
 }
 

@@ -236,6 +236,11 @@ extension EditorView {
         case .comments:
             model.openCaretComments()
             return true
+        case .callout(let edit):
+            // 13c R2-2 (A13(a)): the frame door routes now — Write is one
+            // surface among four, not the privileged one (R118).
+            Task { await model.applyCallout(edit) }
+            return true
         case .pageFan:
             return false  // fan pages live on the Takes board
         }

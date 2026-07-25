@@ -11,6 +11,7 @@
 //
 
 import Foundation
+import SwiftUI  // 13c R2-2: the shortcut pin reads KeyEquivalent/EventModifiers
 import Testing
 @testable import Variorum
 
@@ -67,8 +68,11 @@ struct CapabilityRegistryTests {
         // `.tagBlock` (13b 4D — N32(c)): scraps live OUTSIDE the post-mode
         // row (Blocks area / ScrapsPanel / canvas cards) — no editing mode
         // is privileged over another, the renameLens class.
+        // 13c R2-2 (A13(a)): `.callout` LEFT this list — the frame is the
+        // BLOCK's and takes share it (R16/R27), so it declares
+        // `takesAccess: .native` like every other block-scoped editing act.
         let exempt: Set<CapabilityID> = [
-            .previousBlock, .nextBlock, .callout, .exportCaretBlock, .switchMode,
+            .previousBlock, .nextBlock, .exportCaretBlock, .switchMode,
             .renameLens, .tagBlock,
         ]
         for capability in CapabilityRegistry.all
@@ -165,6 +169,7 @@ struct CapabilityRegistryTests {
             .deleteInEveryTake, .commit, .addBlockAtEnd, .insertBlockBelow,
             .deleteBlock,  // 13c 1B (A8)
             .toggleSeal, .comments,
+            .callout(.toggle),  // 13c R2-2 (A13(a))
             .pageFan(1),
         ]
         for command in commands {
@@ -244,7 +249,12 @@ struct CapabilityRegistryTests {
         let mountingWrite = CapabilityContext(mode: .write, writeEditorAttached: false)
         let attached = CapabilityContext(mode: .write, writeEditorAttached: true)
         let inlineAttached = CapabilityContext(mode: nil, writeEditorAttached: true)
-        for id in [CapabilityID.previousBlock, .nextBlock, .callout, .exportCaretBlock] {
+        // 13c R2-2 (A13(a)) — JUSTIFIED EDIT, called out so a reviewer
+        // checks it rather than assuming: `.callout` LEFT this list. It was
+        // here because the door reached into `session.editorRouter.active`;
+        // it now ROUTES like `.comments`, so attachment is no longer its
+        // truth and the take family is. The pin below replaces the claim.
+        for id in [CapabilityID.previousBlock, .nextBlock, .exportCaretBlock] {
             #expect(!CapabilityRegistry.isEnabled(id, in: mountingWrite),
                     "\(id): never enabled before the editor it chains into exists")
             #expect(CapabilityRegistry.isEnabled(id, in: attached))
@@ -263,6 +273,40 @@ struct CapabilityRegistryTests {
         #expect(CapabilityRegistry.isEnabled(.sealPost, in: CapabilityContext(mode: .compare)))
         #expect(!CapabilityRegistry.isEnabled(.sealPost, in: CapabilityContext(mode: nil)),
                 "no post, no editor — honestly grey")
+    }
+
+    // MARK: - Stage 1 ladder, round-2: A13(a) as registry facts (R2-2)
+
+    /// Her A13(a), verbatim: *"Callouts (a) in Takes/Compare/Lenses + a
+    /// shortcut"* — ruled into the friction batch by K2 and, at round 2,
+    /// found never built. Both halves are registry facts now.
+    ///
+    /// **Red on the old registry by construction:** `.callout` declared
+    /// `availability: writeEditor`, so every line below that asks for
+    /// Takes/Lenses/Compare resolved `.unavailable`, and `shortcutLabel`
+    /// was `nil` with no key mapping.
+    @Test func theCalloutDoorReachesEverySurfaceSheNamed() {
+        for mode in [PostMode.takes, .lenses, .compare] {
+            #expect(CapabilityRegistry.availability(
+                .callout, in: CapabilityContext(mode: mode)) == .act,
+                "the frame is the BLOCK's — \(mode) sets it right there (A13(a))")
+        }
+        #expect(CapabilityRegistry.availability(
+            .callout, in: CapabilityContext(mode: .write, writeEditorAttached: true)) == .act)
+        #expect(CapabilityRegistry.capability(.callout).takesAccess == .native,
+                "native, not move-and-execute — nothing needs to relocate to frame a block")
+        // …and honestly grey where nothing can act. CANVAS is deliberately
+        // out (not in her ask; one rule line + one handler if she wants it).
+        #expect(!CapabilityRegistry.isEnabled(.callout, in: CapabilityContext(mode: nil)))
+        #expect(!CapabilityRegistry.isEnabled(.callout, in: CapabilityContext(mode: .canvas)))
+    }
+
+    @Test func theCalloutDoorHasItsShortcut() {
+        #expect(CapabilityRegistry.capability(.callout).shortcutLabel == "⌥⌘C",
+                "A13(a)'s second half")
+        let key = EditorCommands.keyEquivalent(for: .callout)
+        #expect(key?.0 == "c")
+        #expect(key?.1 == [.command, .option])
     }
 
     /// Round-1 NIT-2: blooms exist only on the Takes board — Write and

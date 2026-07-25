@@ -362,6 +362,81 @@ struct MoveAndExecuteTests {
         }
     }
 
+    /// 13c Stage 1 ladder, R2-6: **one declared act, one contract, however
+    /// many doors.** `deleteBlock` is native in Write and in Takes; Write's
+    /// door runs through `runStructural`, which flushes AND THEN checks
+    /// `isDirty`, because a flush can REFUSE and keep its text pending
+    /// (Phase 7 MAJOR 1) — running a structural op against a store the
+    /// surface disagrees with is exactly what that check exists to stop.
+    /// The Takes door flushed and then went ahead regardless.
+    ///
+    /// The refusal is induced the honest way: a pending record for a
+    /// variant that does not exist. `ops.autosave` throws, the coordinator
+    /// puts the entry BACK into `pending` (its documented posture), and
+    /// `isDirty` stays true — which is precisely the real-world shape
+    /// (a seal or lock landing remotely mid-typing).
+    @Test func theTakesDeleteDoorRefusesWhenTheFlushCouldNotBeWritten() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "unflushable")
+            let first = try session.operations.newBlock(in: post.id, text: "first block.")
+            _ = try session.operations.newBlock(in: post.id, text: "second block.")
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: first.block.id, variantID: first.variant.id))
+
+            model.autosave.record(
+                variantID: "no-such-variant", text: "typed but unwritable", charDelta: 1)
+            await model.deleteFocusedBlock()
+
+            let slots = try await db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(slots.count == 2, "the block SURVIVES a refused flush")
+            #expect(slots[0].blockID == first.block.id)
+            #expect(model.statusMessage?.hasPrefix("Unsaved changes couldn't be written") == true,
+                    "…and it says why — the same sentence Write's door speaks")
+        }
+    }
+
+    /// 13c Stage 1 ladder, R2-2 — her A13(a): *"callouts in Takes/Compare/
+    /// Lenses"*. The frame lands on the FOCUSED block, right there, with no
+    /// mode switch anywhere in the flow. Red on the old code by
+    /// construction twice over: `TakesViewModel` had no callout door at all,
+    /// and the registry declared the act `writeEditor`-only so the menu was
+    /// grey here.
+    @Test func theCalloutDoorFramesTheFocusedBlockNativelyInTakes() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "framed")
+            let first = try session.operations.newBlock(in: post.id, text: "first block.")
+            _ = try session.operations.newBlock(in: post.id, text: "second block.")
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+
+            // No focus on a MULTI-block post: fire-and-speak, no guess.
+            await model.applyCallout(.toggle)
+            var frames = try await db.read { try Queries.blockPresentations($0, containerID: post.id) }
+            #expect(frames.isEmpty, "no target — nothing framed")
+            #expect(model.statusMessage?.isEmpty == false, "…and it says so (P-2)")
+
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: first.block.id, variantID: first.variant.id))
+            await model.applyCallout(.color("sand"))
+            frames = try await db.read { try Queries.blockPresentations($0, containerID: post.id) }
+            #expect(frames[first.block.id]?.color == "sand",
+                    "the frame is the BLOCK's — Takes sets it without leaving Takes")
+
+            // The emoji door keeps the colour, and the toggle takes it away.
+            await model.applyCallout(.emoji("💡"))
+            frames = try await db.read { try Queries.blockPresentations($0, containerID: post.id) }
+            #expect(frames[first.block.id]?.color == "sand")
+            #expect(frames[first.block.id]?.emoji == "💡")
+            await model.applyCallout(.toggle)
+            frames = try await db.read { try Queries.blockPresentations($0, containerID: post.id) }
+            #expect(frames.isEmpty)
+        }
+    }
+
     /// N5's pin, over the REAL board wiring: the menu's exact action body
     /// (`ShellActions.commitTake`) with a Takes board mounted commits the
     /// focused take. The old ⌘S called `editorRouter.active?` = nil here —

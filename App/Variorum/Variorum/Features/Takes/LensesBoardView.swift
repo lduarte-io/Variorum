@@ -157,6 +157,10 @@ struct LensesBoardView: View {
         case .comments:
             model.requestComments()
             return true
+        case .callout(let edit):
+            // 13c R2-2 (A13(a)): the shared model machinery, same as Takes.
+            Task { await model.applyCallout(edit) }
+            return true
         case .pageFan:
             return false  // fan pages live on the Takes board
         }

@@ -90,6 +90,10 @@ struct EditorCommands: Commands {
         case .previousBlock: (.upArrow, [.command, .control])
         case .nextBlock: (.downArrow, [.command, .control])
         case .blockComments: ("'", [.command, .shift])
+        // 13c R2-2 (A13(a)'s second half): the shortcut is the TOGGLE —
+        // a frame is one thing you either have or don't, and a colour
+        // submenu could never be a key.
+        case .callout: ("c", [.command, .option])
         case .toggleSeams: ("b", [.command, .shift])
         case .helper: ("/", .command)
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
@@ -271,24 +275,24 @@ struct EditorCommands: Commands {
                 .keyboardShortcut("'", modifiers: [.command, .shift])
                 .disabled(!enabled(.blockComments))
 
-            // The callout frame (R16/R27).
+            // The callout frame (R16/R27). 13c R2-2 (A13(a)): every item
+            // ROUTES now — the frame is the block's, so Takes, Lenses and
+            // Compare set it where she is, instead of the door reaching
+            // into Write's editor and silently doing nothing anywhere
+            // else. ⌥⌘C toggles.
             Menu(verb(.callout)) {
+                Button("Toggle Callout") { actions?.dispatch(.callout(.toggle)) }
+                    .keyboardShortcut("c", modifiers: [.command, .option])
+                Divider()
                 ForEach(CalloutPalette.names, id: \.self) { name in
-                    Button(name.capitalized) {
-                        let editor = session?.editorRouter.active
-                        Task { await editor?.setCaretCallout(color: name) }
-                    }
+                    Button(name.capitalized) { actions?.dispatch(.callout(.color(name))) }
                 }
                 Divider()
                 Button("Emoji…") { promptCalloutEmoji() }
-                Button("Remove Callout") {
-                    let editor = session?.editorRouter.active
-                    Task { await editor?.setCaretCallout(color: nil) }
-                }
+                Button("Remove Callout") { actions?.dispatch(.callout(.color(nil))) }
             }
             // Round-1 MINOR-3: the ONE enablement idiom — the registry's
-            // attachment-level rule (same truth the old ad-hoc nil check
-            // read, now declared once as data).
+            // declared availability (now the take family plus Compare).
             .disabled(!enabled(.callout))
 
             Divider()
@@ -327,11 +331,13 @@ struct EditorCommands: Commands {
     @Environment(\.openWindow) private var openWindow
 
     /// The callout emoji prompt (her sitting-3 reference wore "💡").
+    /// 13c R2-2: the prompt gathers the glyph and the ROUTER delivers it,
+    /// so it works on every surface the door is now declared for — it no
+    /// longer needs a Write editor to exist.
     private func promptCalloutEmoji() {
-        // Round-2 NIT-R2-3: the file's last silent return speaks (the
-        // editor detaching between menu-open and click). A nil session
-        // has no status surface to speak to — nothing exists yet.
-        guard let session, let editor = session.editorRouter.active else {
+        // Round-2 NIT-R2-3: the file's last silent return speaks. A nil
+        // session has no status surface to speak to — nothing exists yet.
+        guard let actions else {
             if case .ready(let session) = bootstrap.state {
                 session.status.speak(CapabilityRegistry.capability(.callout).unavailableNote)
             }
@@ -345,8 +351,7 @@ struct EditorCommands: Commands {
         alert.addButton(withTitle: "Set")
         alert.addButton(withTitle: "Cancel")
         if alert.runModal() == .alertFirstButtonReturn {
-            let emoji = field.stringValue
-            Task { await editor.setCaretCalloutEmoji(emoji) }
+            actions.dispatch(.callout(.emoji(field.stringValue)))
         }
     }
 

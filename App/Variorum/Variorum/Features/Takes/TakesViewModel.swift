@@ -1160,6 +1160,16 @@ final class TakesViewModel {
             .firstIndex { $0.blockID == slot.blockID }
             .flatMap { i in i + 1 < slots.count ? slots[i + 1] : (i > 0 ? slots[i - 1] : nil) }
         await autosave.flushNow()
+        // 13c Stage 1 ladder, R2-6: the flush can REFUSE and keep its text
+        // pending (Phase 7 MAJOR 1), and `runStructural` — the Write door
+        // for this same declared act — has always checked that before
+        // running an op against a store the surface disagrees with. One
+        // declared act, one contract, however many doors (P-1's own
+        // reasoning); without this the two native doors differed.
+        guard !autosave.isDirty else {
+            speak("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
         statusMessage = nil
         do {
             try await session.runner.run { ops in try ops.deleteBlock(slot.blockID) }
@@ -1188,6 +1198,30 @@ final class TakesViewModel {
             return
         }
         commentsRequest = CommentsRequest(blockID: slot.blockID)
+    }
+
+    /// 13c Stage 1 ladder, R2-2 (her A13(a) — *"callouts in Takes/Compare/
+    /// Lenses"*): the callout door where takes live, NATIVE. A frame is the
+    /// BLOCK's and takes share it (R16/R27), so the surface that knows
+    /// which block you are in can set it — Write was privileged only by
+    /// where the door was first hung (R118). Same target rule as every
+    /// other block-scoped act here, and the ONE shared transform. Sealed
+    /// posts refuse through the op, spoken.
+    func applyCallout(_ edit: CalloutEdit) async {
+        guard let slot = commandTargetSlot else {
+            speak("Click into a block first — the frame goes on the block you're in.")
+            return
+        }
+        statusMessage = nil
+        do {
+            try await session.runner.run { ops in
+                try ops.updateBlockPresentation(slot.blockID) {
+                    CalloutEditRule.apply(edit, to: $0)
+                }
+            }
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
     }
 
     // MARK: - Pane selection + landings — the choreographer's, forwarded
