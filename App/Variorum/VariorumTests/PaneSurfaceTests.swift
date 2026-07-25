@@ -277,13 +277,18 @@ struct PanePublishDoorTests {
         }
     }
 
-    /// **The walk's own counting rule, pinned** (13c Stage 1 ladder, R1-6).
-    /// The walk above is only as strong as what it recognizes as a WRITE,
-    /// and its first cut saw one of the four forms Swift offers for
-    /// assigning through a `@Binding`. A write in any of the other three
-    /// escaped both sides of the equality assertion, so the walk would have
-    /// reported "every write leaves through the door" while one did not.
-    /// This is the guard on the guard.
+    /// **The walk's own counting rule, pinned** (13c Stage 1 ladder, R1-6,
+    /// extended at R2-9). The walk above is only as strong as what it
+    /// recognizes as a WRITE, and its first cut saw one of the four forms
+    /// Swift offers for assigning through a `@Binding`; R1-6 added the
+    /// other three. R2-9 added the fifth shape — COMPOUND assignment —
+    /// which mutates a binding exactly as a plain `=` does and was counted
+    /// in neither bucket, so such a write could escape the door while the
+    /// equality assertion still passed. This is the guard on the guard.
+    ///
+    /// Honest about its edge (R2-9): a binding **forwarded to a child**
+    /// (`Child(height: $height)`) is not a write here and is not claimed
+    /// to be — see `assignmentCount`'s doc comment.
     @Test func theWalkCountsEveryFormOfWritingToABinding() {
         let source = """
             self.height = 1
@@ -291,19 +296,25 @@ struct PanePublishDoorTests {
             $height.wrappedValue = 3
             _height.wrappedValue = 4
             height += 5
-            if height == 6 { }
-            if height >= 7 { }
+            self.height -= 6
+            $height.wrappedValue *= 7
+            if height == 8 { }
+            if height >= 9 { }
+            if height <= 10 { }
+            if height != 11 { }
             let other = height
-            heightOfSomethingElse = 8
+            heightOfSomethingElse = 12
+            Child(height: $height)
             """
-        #expect(PaneSurfaceSource.assignmentCount(of: "height", in: source) == 4,
-                "all four write forms count, and nothing else does")
+        #expect(PaneSurfaceSource.assignmentCount(of: "height", in: source) == 7,
+                "the four direct forms plus their compound-assignment variants — and nothing else")
         // …and the door-scoped count uses the SAME rule, so the equality
         // assertion compares like with like.
         #expect(PaneSurfaceSource.assignmentCount(
             of: "height", in: "$height.wrappedValue = 3") == 1)
         #expect(PaneSurfaceSource.assignmentCount(of: "height", in: "self.height = 1") == 1)
         #expect(PaneSurfaceSource.assignmentCount(of: "height", in: "height == 1") == 0)
+        #expect(PaneSurfaceSource.assignmentCount(of: "height", in: "height += 1") == 1)
     }
 
     /// …and the coordinator can never acquire state of its own: SwiftUI
@@ -396,6 +407,14 @@ private enum PaneSurfaceSource {
     /// the wrapped forms are followed by `.` rather than `=`), so nothing is
     /// double-counted. `self.$name` / `self._name` are covered as suffixes
     /// of their bare twins.
+    ///
+    /// **What it does NOT see, stated rather than implied** (13c Stage 1
+    /// ladder, R2-9 — the same overstatement one level up that R1-6 closed
+    /// one level down): a binding **forwarded** to a child view
+    /// (`Child(height: $height)`) is not an assignment here, and a write
+    /// the child then makes never appears in this file at all. That is a
+    /// different act from the one F1 named, and the walk claims only what
+    /// it checks: every write *made by this file* leaves through the door.
     static func assignmentCount(of name: String, in text: String) -> Int {
         wholeWordAssignments(of: name, in: text)
             + literalAssignments(of: "self.\(name)", in: text)
@@ -427,10 +446,26 @@ private enum PaneSurfaceSource {
         return count
     }
 
-    /// A single `=` (assignment), not `==`.
+    /// A write: a single `=` (never `==`), OR an arithmetic COMPOUND
+    /// assignment (`+=`, `-=`, `*=`, `/=`, `%=`) — 13c Stage 1 ladder,
+    /// R2-9. `height += 8` mutates the binding exactly as `height = …`
+    /// does, and the first rule counted it in neither bucket, so such a
+    /// write could escape the door while the walk's equality assertion
+    /// still passed.
+    ///
+    /// `<` and `>` are deliberately excluded: `<<=`/`>>=` are writes but
+    /// `<=`/`>=` are comparisons, and no shift is meaningful on the kinds
+    /// of state a pane publishes. `&=`/`|=`/`^=` likewise — bitwise, and
+    /// their comparison-lookalikes (`&&`, `||`) would need more care than
+    /// the classes involved earn. If a pane ever publishes an integer flag
+    /// set, extend the operator set here, not the callers.
     private static func isAssignment(_ tail: Substring) -> Bool {
         let after = tail.drop { $0 == " " }
-        return after.first == "=" && after.dropFirst().first != "="
+        guard let first = after.first else { return false }
+        if first == "=" { return after.dropFirst().first != "=" }
+        guard "+-*/%".contains(first) else { return false }
+        let rest = after.dropFirst()
+        return rest.first == "=" && rest.dropFirst().first != "="
     }
 
     private static func balanced(
