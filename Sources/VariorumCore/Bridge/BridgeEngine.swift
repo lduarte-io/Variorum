@@ -244,12 +244,25 @@ public struct BridgeEngine: Sendable {
     /// could not shelve says so on the round's own note surface, which the
     /// status row already renders as "needs attention".
     private func ensureDailyBookMembership(day: String) async -> String? {
-        let postID = try? await database.read { db in
-            // The notebook rule's canonical entry — the same one the landing
-            // wrote to (one shared query).
-            try Queries.canonicalJournalEntry(db, day: day)?.id
+        let postID: String?
+        do {
+            postID = try await database.read { db in
+                // The notebook rule's canonical entry — the same one the
+                // landing wrote to (one shared query).
+                try Queries.canonicalJournalEntry(db, day: day)?.id
+            }
+        } catch {
+            // 13c Stage 1 ladder, R1-11: a `try?` here collapsed a READ
+            // FAILURE into "there is no entry for that day" — the one silent
+            // path in a flow whose whole discipline is to speak. The entry is
+            // already safely in the store (the landing ran first); only the
+            // shelving is unknown, and the next round retries it.
+            return Self.unshelvedNote(
+                day: day,
+                because: "the store could not be read to find that day's entry — the next bridge round retries it")
         }
-        guard let postID = postID ?? nil else { return nil }
+        // No entry for the day is not a failure: nothing to shelve.
+        guard let postID else { return nil }
         switch Operations().shelveInDailyJournalBook(postID) {
         case .shelved, .alreadyDecided:
             return nil
@@ -265,6 +278,10 @@ public struct BridgeEngine: Sendable {
             return Self.unshelvedNote(
                 day: day,
                 because: "the daily journal book is at its post cap — extend the cap in the book's settings")
+        case .wrongKind:
+            return Self.unshelvedNote(
+                day: day,
+                because: "the designated daily journal is a SMART book, which collects by query and cannot hold memberships — pick a curated book with “Use as Daily Journal”")
         case .refused(let reason):
             return Self.unshelvedNote(day: day, because: reason)
         }

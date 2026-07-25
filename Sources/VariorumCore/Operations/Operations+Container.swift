@@ -86,8 +86,16 @@ extension Operations {
         case bookFinished
         /// The daily book is at its `max_posts` cap.
         case bookAtCapacity
-        /// Any other refusal, verbatim (e.g. a SMART book designated as the
-        /// daily journal, which cannot take memberships at all).
+        /// A SMART book is designated as the daily journal — smart readings
+        /// have no `reading_post` rows and cannot take memberships at all
+        /// (13c Stage 1 ladder, R1-3: this is the refusal an author can
+        /// actually cause AND fix, so it is modelled like its siblings
+        /// rather than falling into the residual bucket, where it rendered
+        /// as `wrongReadingKind(id: "8F3C-…", expected: …)` in front of her).
+        case wrongKind
+        /// Any other refusal — races (the book or the post died between the
+        /// read and the write) and store failures. Carries a short human
+        /// phrase, never an error dump (see `residualReason`).
         case refused(String)
     }
 
@@ -152,8 +160,35 @@ extension Operations {
             return .bookFinished
         } catch OperationError.readingAtCapacity {
             return .bookAtCapacity
+        } catch OperationError.wrongReadingKind {
+            return .wrongKind
         } catch {
-            return .refused(String(describing: error))
+            return .refused(Self.residualReason(error))
+        }
+    }
+
+    /// The residual bucket's wording (13c Stage 1 ladder, R1-3). Both
+    /// callers put this string in front of the author — the bridge's status
+    /// row and the phone's capture note — and raw `String(describing:)` on
+    /// an `OperationError` renders its associated values: row ids and
+    /// fully-qualified enum case paths. The same batch retired exactly that
+    /// pattern in `ShellActions`; this is the same fix at the source.
+    ///
+    /// What can reach here after the named cases above are races (the
+    /// designated book or the entry died between the read and the write)
+    /// and store failures. None is actionable, so each gets a short human
+    /// phrase and the internals stay out — structurally, not per-case.
+    private static func residualReason(_ error: Error) -> String {
+        guard let operationError = error as? OperationError else {
+            return "the daily journal book could not be reached"
+        }
+        switch operationError {
+        case .readingNotFound:
+            return "the daily journal book is no longer there"
+        case .containerNotFound, .wrongContainerKind:
+            return "the entry is no longer there"
+        default:
+            return "the daily journal book could not be reached"
         }
     }
 

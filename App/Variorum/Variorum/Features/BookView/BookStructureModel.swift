@@ -332,42 +332,66 @@ enum JournalBooks {
         // "Journal" books).
         return try await session.runner.run { ops in
             let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
-            let bookID: String
-            var bookName = defaultDailyBookName
-            if let existing = try ops.dailyJournalBookID() {
-                bookID = existing
-            } else {
+            // CREATE-AND-PIN stays here, and only here: minting a book on
+            // her shelf is the act only a button press she pressed may take
+            // (QUESTIONS #37 — it is why this door is deliberately not the
+            // shared helper wholesale).
+            if try ops.dailyJournalBookID() == nil {
                 let book = try ops.createReading(
                     name: defaultDailyBookName, kind: .curated, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
                 try ops.setDailyJournalBook(book.id)
                 try ops.setShelfPinned(book.id, pinned: true)
-                bookID = book.id
             }
-            do {
-                _ = try ops.addPostToReading(entry.container.id, to: bookID)
-            } catch OperationError.alreadyInReading {
-                // The day's entry is already shelved — the notebook page
-                // was simply reopened.
-            } catch OperationError.lockedReading {
+            // …and the ENSURE half delegates to the one implementation
+            // (13c Stage 1 ladder, R1-4). This door used to call
+            // `addPostToReading` itself and catch `alreadyInReading`, which
+            // fires on LIVE rows only — so a membership she had deliberately
+            // removed (a tombstoned row) was invisible here and ⌘J silently
+            // put the entry back on the shelf, while the bridge and the
+            // phone correctly left it alone. "Any membership row, live or
+            // tombstoned, means the pair is already decided" is ONE rule, and
+            // now it really is one.
+            var bookName = defaultDailyBookName
+            func namedBook() -> String {
+                (try? ops.dailyJournalBookName() ?? nil) ?? bookName
+            }
+            switch ops.shelveInDailyJournalBook(entry.container.id) {
+            case .shelved, .alreadyDecided:
+                return Outcome(postID: entry.container.id, note: nil)
+            case .bookFinished:
                 // The daily book is FINISHED (the bounded-notebook flow's
                 // expected end): the entry still opens; the note speaks
                 // and points at the re-designation door.
-                bookName = (try? ops.dailyJournalBookName() ?? nil) ?? bookName
+                bookName = namedBook()
                 return Outcome(
                     postID: entry.container.id,
                     note: "Today's entry opened, but “\(bookName)” is finished — "
                         + "it wasn't added. Pick a new daily journal from a book's "
                         + "shelf menu (Use as Daily Journal), or reopen “\(bookName)”.")
-            } catch OperationError.readingAtCapacity {
-                bookName = (try? ops.dailyJournalBookName() ?? nil) ?? bookName
+            case .bookAtCapacity:
+                bookName = namedBook()
                 return Outcome(
                     postID: entry.container.id,
                     note: "Today's entry opened, but “\(bookName)” is at its post cap — "
                         + "it wasn't added. Extend the cap or start a new daily journal "
                         + "(Use as Daily Journal in a book's shelf menu).")
+            case .wrongKind:
+                bookName = namedBook()
+                return Outcome(
+                    postID: entry.container.id,
+                    note: "Today's entry opened, but “\(bookName)” is a smart book — "
+                        + "it collects by query and can't hold entries. Pick a curated "
+                        + "book with Use as Daily Journal.")
+            case .noDailyBook, .refused:
+                // Unreachable in the ordinary path (the branch above
+                // guarantees a designation); a race gets a speaking note
+                // rather than a silent miss.
+                return Outcome(
+                    postID: entry.container.id,
+                    note: "Today's entry opened, but it wasn't added to a daily "
+                        + "journal book. Pick one with Use as Daily Journal.")
             }
-            return Outcome(postID: entry.container.id, note: nil)
         }
     }
 }

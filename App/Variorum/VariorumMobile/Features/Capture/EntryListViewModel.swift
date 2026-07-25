@@ -131,6 +131,8 @@ final class EntryListViewModel {
             return "Entry saved. Your daily journal book is finished, so it wasn't added — reopen it on the Mac."
         case .bookAtCapacity:
             return "Entry saved. Your daily journal book is full, so it wasn't added — extend it on the Mac."
+        case .wrongKind:
+            return "Entry saved. Your daily journal is a smart book, which can't hold entries — pick a curated one on the Mac."
         case .refused(let reason):
             return "Entry saved, but it wasn't added to your daily journal book: \(reason)"
         }

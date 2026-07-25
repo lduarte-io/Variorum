@@ -285,7 +285,20 @@ struct BridgeDailyBookTests {
             #expect(report.created == 1)
             #expect(try bridge.rendered(day: "2026-07-09") == "Against a smart book.")
             #expect(report.notes.count == 1)
-            #expect(report.notes.first?.contains("2026-07-09") == true)
+            let note = try #require(report.notes.first)
+            #expect(note.contains("2026-07-09"))
+            // 13c Stage 1 ladder, R1-3: this note goes in front of the
+            // author in the bridge status row. It used to be
+            // `String(describing:)` of the raw error, so it read
+            // `…: wrongReadingKind(id: "8F3C-…", expected:
+            // VariorumCore.ReadingKind.curated)`. A smart designation is a
+            // refusal she can cause AND fix, so it is modelled like its
+            // siblings and worded.
+            #expect(!note.contains("(id:"), "no row ids in front of her: \(note)")
+            #expect(!note.contains("wrongReadingKind"), "no enum case names either: \(note)")
+            #expect(!note.contains("VariorumCore."))
+            #expect(note.lowercased().contains("smart"),
+                    "…and it names the actual problem: \(note)")
         }
     }
 

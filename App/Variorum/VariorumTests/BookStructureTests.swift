@@ -127,6 +127,46 @@ struct JournalBooksTests {
         }
     }
 
+    /// **⌘J obeys the same "already decided" rule the bridge and the phone
+    /// do** (13c Stage 1 ladder, R1-4). The shared helper treats ANY
+    /// membership row — live OR tombstoned — as the pair being decided, which
+    /// is what stops a headless round from re-shelving something she took off
+    /// the shelf. `openToday` used to call `addPostToReading` itself and
+    /// catch `alreadyInReading`, which fires on LIVE rows only: a tombstoned
+    /// membership was invisible to it, so it inserted a fresh one and the
+    /// entry silently reappeared in the book. Three doors, one rule.
+    @Test func openTodayNeverReShelvesAnEntryTheAuthorRemoved() async throws {
+        try await withShellSession2 { session, db in
+            let first = try await JournalBooks.openToday(session: session, day: "2026-07-26")
+            let bookID = try #require(try await db.read { db in
+                try Queries.dailyJournalBookID(db)
+            })
+            // She takes the day off the shelf.
+            try await session.runner.run { [id = first.postID] ops in
+                try ops.removePostFromReading(id, from: bookID)
+            }
+            let afterRemoval = try await db.read { [id = first.postID] db in
+                try Queries.readingsContaining(db, postID: id)
+            }
+            #expect(afterRemoval.isEmpty)
+
+            // …and opens the same day again.
+            let again = try await JournalBooks.openToday(session: session, day: "2026-07-26")
+            #expect(again.postID == first.postID, "the same entry, the untouchable rule")
+            #expect(again.note == nil, "nothing to say — the pair is decided")
+            let books = try await db.read { [id = again.postID] db in
+                try Queries.readingsContaining(db, postID: id)
+            }
+            #expect(books.isEmpty, "her removal STANDS — ⌘J does not put it back")
+            let rows = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM reading_post WHERE reading_id = ?
+                    """, arguments: [bookID])
+            }
+            #expect(rows == 1, "…and no second membership row was minted beside the tombstone")
+        }
+    }
+
     @Test func otherJournalBooksMintFreelyTheDailyRuleStaysScoped() async throws {
         try await withShellSession2 { session, db in
             // A dream journal — journal-profile BOOK, NOT the designated
