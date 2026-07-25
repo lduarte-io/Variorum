@@ -1832,7 +1832,7 @@ across all 23 registration sites.
 
 ### Batch 1C — the DEAD CLICK (A46) + the option-E MEASUREMENT
 
-**Commits:** `<this batch>` (the `PhantomSpaceTests` characterization
+**Commits:** `ab16680` (the `PhantomSpaceTests` characterization
 pins + the memo's Q3/Q4 update + this record).
 **Counts:** core **836/97 → 836/97** (unchanged — zero core lines
 touched) · Mac **691/126 → 696/127** (one new suite, five tests: four
