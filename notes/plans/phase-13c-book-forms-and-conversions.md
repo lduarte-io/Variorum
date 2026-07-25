@@ -1096,6 +1096,20 @@ comment strips) is intercepting.
 is harmless; that premise is now false. The memo's recommendation is
 revised to *measure E first, A as fallback*.
 
+**SECOND SCOPE ITEM — MEASURE option E (do not build it).** The memo now
+recommends *E measured first*, and I promised her in writing that E would
+not be built on arithmetic. So this batch **measures and reports, and
+stops there**: instrument `ensureLayout` over a SINGLE long block's own
+text range (the block on screen or just below), at several block sizes,
+and report (a) the wall-clock cost per block size, (b) whether it
+actually collapses the phantom for that block, and (c) whether the effect
+survives scrolling away and back or has to be re-done. Compare against
+the Phase 6 spike's measured document-scale rate (105 ms / 50k words) so
+the numbers sit on the same axis. **If the numbers are bad, say so** —
+"E is dead, A stands" is a completely acceptable and useful outcome, and
+is why this is a measurement and not a build. Record the result in the
+memo under Q3 so she rules on evidence.
+
 **Related but distinct — do NOT conflate:** her **A22** ("scroll down
 into at least a page of empty space so I can keep the text I'm typing
 high up on the page") is *wanted* space, not phantom space. If A22 is
