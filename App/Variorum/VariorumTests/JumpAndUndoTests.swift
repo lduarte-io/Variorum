@@ -8,6 +8,7 @@
 //  note, resolved by the runner).
 //
 
+import CoreGraphics
 import Foundation
 import Testing
 import Dependencies
@@ -60,6 +61,52 @@ struct JumpCorrectionLoopTests {
         let result = JumpCorrectionLoop.run(initialTop: 300, maxScroll: 500) { _ in nil }
         #expect(!result.converged)
         #expect(result.finalTop == 300)
+    }
+}
+
+/// Line resolution inside one layout fragment (13c 1A — A4). A Variorum
+/// block is always its own paragraph, a paragraph is one TK2 layout
+/// fragment, so a block taller than the viewport makes fragment-granularity
+/// scroll anchoring collapse every position inside it to the block's first
+/// line. These pin the two pure lookups both halves of the anchor use.
+@Suite("Fragment line resolution (13c 1A — A4)")
+struct FragmentLinesTests {
+    /// Three 17 pt lines, fragment-local.
+    private let bounds = [
+        CGRect(x: 0, y: 0, width: 300, height: 17),
+        CGRect(x: 0, y: 17, width: 300, height: 17),
+        CGRect(x: 0, y: 34, width: 300, height: 17),
+    ]
+
+    @Test func aPointPicksTheLineItLandsIn() {
+        #expect(FragmentLines.lineIndex(atLocalY: 0, lineBounds: bounds) == 0)
+        #expect(FragmentLines.lineIndex(atLocalY: 16.9, lineBounds: bounds) == 0)
+        #expect(FragmentLines.lineIndex(atLocalY: 17, lineBounds: bounds) == 1)
+        #expect(FragmentLines.lineIndex(atLocalY: 40, lineBounds: bounds) == 2)
+    }
+
+    /// Above the first line ⇒ the first; below the last (the paragraph's
+    /// own trailing gap is inside the fragment) ⇒ the last. Never nil for
+    /// a laid-out fragment, so the anchor never silently falls back.
+    @Test func pointsOutsideTheLinesClampToTheEnds() {
+        #expect(FragmentLines.lineIndex(atLocalY: -40, lineBounds: bounds) == 0)
+        #expect(FragmentLines.lineIndex(atLocalY: 900, lineBounds: bounds) == 2)
+    }
+
+    @Test func anUnlaidFragmentResolvesToNoLine() {
+        #expect(FragmentLines.lineIndex(atLocalY: 10, lineBounds: []) == nil)
+        #expect(FragmentLines.lineIndex(atLocalOffset: 10, lineRanges: []) == nil)
+    }
+
+    @Test func anOffsetPicksTheLineThatContainsIt() {
+        let ranges = [NSRange(location: 0, length: 74),
+                      NSRange(location: 74, length: 77),
+                      NSRange(location: 151, length: 60)]
+        #expect(FragmentLines.lineIndex(atLocalOffset: 0, lineRanges: ranges) == 0)
+        #expect(FragmentLines.lineIndex(atLocalOffset: 73, lineRanges: ranges) == 0)
+        #expect(FragmentLines.lineIndex(atLocalOffset: 74, lineRanges: ranges) == 1)
+        #expect(FragmentLines.lineIndex(atLocalOffset: 200, lineRanges: ranges) == 2)
+        #expect(FragmentLines.lineIndex(atLocalOffset: 9_999, lineRanges: ranges) == 2)
     }
 }
 

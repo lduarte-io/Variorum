@@ -60,9 +60,45 @@ nonisolated enum JumpCorrectionLoop {
     }
 }
 
+/// Line resolution INSIDE one layout fragment, pure.
+///
+/// **Why this exists (13c 1A, A4 — traced and reproduced):** a TK2 layout
+/// fragment is a whole PARAGRAPH, and a Variorum block is always its own
+/// paragraph (R26/R33). So a block taller than the viewport is ONE fragment,
+/// and fragment-granularity scroll anchoring collapses every reading
+/// position inside it to the block's first line: measured, scrolled to
+/// y=2500 inside a 6127 pt block, `topVisibleOffset` answered the block's
+/// start and the restore landed at y=225 — a 2275 pt leap backwards on every
+/// width reflow (sidebar toggle, split divider, window resize). Both halves
+/// of the anchor — read and restore — resolve to the LINE through here.
+nonisolated enum FragmentLines {
+    /// The line whose typographic bounds contain `y` (fragment-local).
+    /// Above the first line ⇒ the first; below the last (the paragraph's
+    /// trailing gap) ⇒ the last. nil ⇒ the fragment has no laid-out lines.
+    static func lineIndex(atLocalY y: CGFloat, lineBounds: [CGRect]) -> Int? {
+        guard !lineBounds.isEmpty else { return nil }
+        for (i, bounds) in lineBounds.enumerated() where y < bounds.maxY { return i }
+        return lineBounds.count - 1
+    }
+
+    /// The line whose character range contains `offset` (fragment-local,
+    /// UTF-16 — the structural API's unit). Past the last range ⇒ the last.
+    static func lineIndex(atLocalOffset offset: Int, lineRanges: [NSRange]) -> Int? {
+        guard !lineRanges.isEmpty else { return nil }
+        for (i, range) in lineRanges.enumerated() where offset < range.upperBound { return i }
+        return lineRanges.count - 1
+    }
+}
+
 @MainActor
 enum JumpPrimitive {
-    /// Lands the fragment containing `offset` (UTF-16) at the viewport top.
+    /// Lands the LINE containing `offset` (UTF-16) at the viewport top.
+    ///
+    /// 13c 1A (A4): this was "lands the FRAGMENT", which for a block taller
+    /// than the viewport means "lands the block's first line" — see
+    /// `FragmentLines`. Single-line fragments are byte-unchanged (the line's
+    /// local minY is 0), so every existing caller — block-TOC jumps, scrub,
+    /// caret restore — behaves exactly as before.
     static func jump(toOffset offset: Int, textView: NSTextView, scrollView: NSScrollView?) {
         guard let scrollView,
               let layoutManager = textView.textLayoutManager,
@@ -70,6 +106,16 @@ enum JumpPrimitive {
         else { return }
 
         let clip = scrollView.contentView
+        // 13c 1A: fragment geometry is TEXT-CONTAINER-relative; the scroll
+        // offset this loop steers is VIEW-relative. The conversion was
+        // missing, so every jump landed its target one container inset
+        // BELOW the viewport top — invisible on its own because
+        // `topVisibleOffset` carried the identical error and the two
+        // cancelled on the round trip. Both halves are converted now, so
+        // read-then-restore is exact by construction rather than by two
+        // errors agreeing. (The Phase 10 container↔view class; the same
+        // conversion `refreshDecorations` applies.)
+        let containerOriginY = Double(textView.textContainerOrigin.y)
         let docHeight = textView.frame.height
         let maxScroll = Double(max(0, docHeight - clip.bounds.height))
         let docLength = contentManager.offset(
@@ -100,7 +146,23 @@ enum JumpPrimitive {
             layoutManager.enumerateTextLayoutFragments(
                 from: target, options: [.ensuresLayout]
             ) { fragment in
-                minY = Double(fragment.layoutFragmentFrame.minY)
+                let fragmentTop = Double(fragment.layoutFragmentFrame.minY)
+                // The target LINE inside the fragment (A4). `rangeInElement`
+                // is documented "relative to the document origin", and a
+                // line's `characterRange` is fragment-local, so the two
+                // compose into the line's offset within this paragraph.
+                let fragmentStart = contentManager.offset(
+                    from: contentManager.documentRange.location,
+                    to: fragment.rangeInElement.location)
+                let lines = fragment.textLineFragments
+                if let i = FragmentLines.lineIndex(
+                    atLocalOffset: max(0, clamped - fragmentStart),
+                    lineRanges: lines.map(\.characterRange)) {
+                    minY = fragmentTop + Double(lines[i].typographicBounds.minY)
+                        + containerOriginY
+                } else {
+                    minY = fragmentTop + containerOriginY
+                }
                 return false
             }
             return minY

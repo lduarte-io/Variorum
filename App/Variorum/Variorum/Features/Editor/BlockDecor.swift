@@ -94,6 +94,45 @@ nonisolated enum BlockDecor {
         let text: String
     }
 
+    /// The bottom of a fragment's TEXT, given the fragment's own frame and
+    /// its last line's typographic bottom (fragment-local).
+    ///
+    /// **The 13c 1A mis-mapping (A40), traced and measured:** TK2 folds a
+    /// paragraph's TRAILING GAP into `layoutFragmentFrame`. With the uniform
+    /// per-paragraph gap (the 2026-07-12 ruling's presentation half) a
+    /// one-line paragraph is 17 pt of text inside a **24 pt** frame in the
+    /// terminal voice — **46 pt** with inline comments on. A block frame
+    /// taken from the fragment frame therefore claims a gap that belongs to
+    /// NEITHER neighbour, consecutive block frames ABUT (measured gap 0.0),
+    /// and every decoration drawn from them inherits the claim: the callout
+    /// wash spreads under the text and touches the next block (her words —
+    /// "the color spreads underneath it"), R17's white-gap rule receives
+    /// gap 0 and can only ever return 0 pad, and `seamYs` lands the dotted
+    /// seam on the next block's first line instead of centred in the white.
+    ///
+    /// A fragment with no line fragments (not yet laid out) degrades to its
+    /// frame — the pre-fix value, never worse.
+    static func textBottom(
+        fragmentMinY: CGFloat, fragmentMaxY: CGFloat, lastLineMaxY: CGFloat?
+    ) -> CGFloat {
+        guard let lastLineMaxY else { return fragmentMaxY }
+        return min(fragmentMaxY, fragmentMinY + lastLineMaxY)
+    }
+
+    /// A fragment's TEXT rect in CONTAINER coordinates — its frame with the
+    /// trailing paragraph gap removed (`textBottom`). THE one extraction
+    /// both decoration hosts use; a private copy per host is the class this
+    /// fixes.
+    static func textRect(of fragment: NSTextLayoutFragment) -> CGRect {
+        let frame = fragment.layoutFragmentFrame
+        let bottom = textBottom(
+            fragmentMinY: frame.minY, fragmentMaxY: frame.maxY,
+            lastLineMaxY: fragment.textLineFragments.last?.typographicBounds.maxY)
+        return CGRect(
+            x: frame.minX, y: frame.minY,
+            width: frame.width, height: max(0, bottom - frame.minY))
+    }
+
     /// Seam Y positions — the midpoint of each gap between CONSECUTIVE
     /// visible blocks (a pruned neighbor draws no seam; §12's rest state
     /// is no seams at all).

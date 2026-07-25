@@ -335,12 +335,15 @@ final class ReadPostViewModel {
         let origin = textView.textContainerOrigin
         let docStart = contentManager.documentRange.location
 
+        // 13c 1A (A40) — the read tier is the SECOND host of the same
+        // mis-mapping (class sweep): the fragment's TEXT rect, never its
+        // frame (`BlockDecor.textBottom` carries the traced mechanism).
         func fragmentFrame(atOffset offset: Int) -> CGRect? {
             guard let location = contentManager.location(docStart, offsetBy: offset)
             else { return nil }
             var frame: CGRect?
             layoutManager.enumerateTextLayoutFragments(from: location, options: []) {
-                frame = $0.layoutFragmentFrame
+                frame = BlockDecor.textRect(of: $0)
                 return false
             }
             return frame

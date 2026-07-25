@@ -1943,12 +1943,16 @@ final class EditorViewModel {
         let windowEnd = offsetAt(y: visible.maxY - 1)
             .map { min($0 + 1024, index.documentLength) } ?? index.documentLength
 
+        // 13c 1A (A40): the fragment's TEXT rect, not its frame — TK2 folds
+        // the uniform per-paragraph gap into `layoutFragmentFrame`, and a
+        // decoration drawn from that claims space belonging to neither
+        // block (`BlockDecor.textBottom` carries the traced mechanism).
         func fragmentFrame(atOffset offset: Int) -> CGRect? {
             guard let location = contentManager.location(docStart, offsetBy: offset)
             else { return nil }
             var frame: CGRect?
             layoutManager.enumerateTextLayoutFragments(from: location, options: []) {
-                frame = $0.layoutFragmentFrame
+                frame = BlockDecor.textRect(of: $0)
                 return false
             }
             return frame
@@ -2155,11 +2159,28 @@ final class EditorViewModel {
               let contentManager = layoutManager.textContentManager
         else { return nil }
         let top = scrollView.contentView.bounds.origin.y
-        let point = CGPoint(x: 4, y: top + 1)
+        // 13c 1A: `textLayoutFragment(for:)` takes a TEXT-CONTAINER point —
+        // measured, not assumed (an inset-height Y error picked the block
+        // BELOW the one at the viewport top at every scroll position). The
+        // decoration pass already converted here; this site did not. Same
+        // container↔view class as the Phase 10 mis-registration, one site
+        // over.
+        let origin = textView.textContainerOrigin
+        let point = CGPoint(x: 4, y: top + 1 - origin.y)
         guard let fragment = layoutManager.textLayoutFragment(for: point) else { return nil }
-        return contentManager.offset(
+        let fragmentStart = contentManager.offset(
             from: contentManager.documentRange.location,
             to: fragment.rangeInElement.location)
+        // A block taller than the viewport is ONE fragment, so the
+        // fragment's start IS the block's start — anchoring there threw the
+        // reader back to the top of the block on every width reflow (A4).
+        // Resolve to the LINE at the viewport top instead (`FragmentLines`).
+        let lines = fragment.textLineFragments
+        guard let i = FragmentLines.lineIndex(
+            atLocalY: point.y - fragment.layoutFragmentFrame.minY,
+            lineBounds: lines.map(\.typographicBounds))
+        else { return fragmentStart }
+        return fragmentStart + lines[i].characterRange.location
     }
 
     func restoreTopVisibleOffset(_ offset: Int) {
