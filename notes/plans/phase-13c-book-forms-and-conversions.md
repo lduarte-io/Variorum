@@ -992,3 +992,251 @@ the architect this sitting.
 *(appended per batch, the 13b form: commits, counts before → after,
 traced mechanisms, numbered judgment calls/PROVISIONALs, red-on-old
 evidence, deviations with reasons, ladder foci)*
+
+### Batch 1A — the vertical-space investigation (A3 + A4 + A41 · A40 · F1)
+
+**Commits:** `01e2602` (the three geometry mis-mappings + pins) ·
+`b77686e` (F1, the enforced publish door) · this record.
+**Counts:** Mac **652/123 → 668/125** · core **817/96 → 817/96**
+(unchanged — see judgment call 5) · mobile 11/4 untouched.
+**Diff scope:** 8 files, all under `App/Variorum/`. **Zero lines of
+`Sources/VariorumCore/` changed** (`git diff --name-only … -- Sources/`
+returns nothing).
+
+#### THE HEADLINE: the recorded hypothesis is DEAD as to mechanism, and its symptom prediction was right
+
+The batch was told to confirm or refute the recorded hypothesis with a
+pin BEFORE fixing anything. Doing that first is what made the rest of the
+batch cheap, and it is worth stating both halves plainly.
+
+**REFUTED — `PanePublisher`'s one-directional convergence heal is NOT the
+site,** on four independent grounds:
+
+1. **Wrong surface.** She reports this in the Write editor, which is
+   `EditorSurface` — a TK2 text view inside an `NSScrollView` with
+   `isVerticallyResizable = true`. It sizes ITSELF from TK2 geometry.
+   `PanePublisher` is not in that path at all.
+2. **No over-report to correct.** A mounted pane's measured height equals
+   its true text extent EXACTLY (measured: 1134 vs 1134; and on the read
+   tier, `measured − (lastFragmentMaxY + 2·inset) = 0.0`). Every pane
+   measures through `PaneMeasurement`, which calls
+   `ensureLayout(documentRange)` first — pane-scale by construction, so a
+   pane never sees an estimate.
+3. **The measurement is not sticky downward.** `usageBoundsForTextContainer`
+   shrinks correctly (1134 → 29 → 1134 across a shrink/regrow).
+4. **The claim is false on its own terms.** `runTurn()` re-measures and
+   writes UNCONDITIONALLY (`PaneSurface.swift:172`); the directional check
+   at :177 gates only whether to schedule ANOTHER turn. An over-large
+   measurement is in fact the case that keeps the heal running (rendered
+   stays below measured), so it gets MORE correction attempts, not fewer.
+
+**CONFIRMED — the symptom it predicted is real, reproduced, and
+quantified**, with the true mechanism traced elsewhere (Part 2 below).
+A wrong hypothesis, killed cheaply, that still pointed at the right
+class: recorded as the good outcome it is.
+
+#### What each report actually was
+
+| Her report | Verdict | Where it went |
+|---|---|---|
+| **A40** callout colour "spreads underneath it" | **BUG — mis-mapping**, 2 hosts | Fixed, revert-verified |
+| **A4** editor jumps on a block taller than the screen | **TWO BUGS** — fragment granularity + a container/view conversion | Fixed, revert-verified |
+| **A3 + A41** phantom empty space that vanishes on scroll | **NOT OUR BUG.** TK2's documented height estimate; no public API to correct it; the only cure is P1-banned | **C3 memo** — `notes/plans/phase-13c-memo-block-extent.md` |
+| **F1** publish door green by audit, not construction | Hardening (her ruling) | Enforced by a name-independent walk |
+
+#### Traced mechanism 1 — A40, the decoration frame (FIXED)
+
+TK2 folds a paragraph's **trailing gap** into `layoutFragmentFrame`.
+Measured, Terminal voice: a one-line paragraph is **17 pt of text inside
+a 24 pt frame**; with inline comments on, 17 pt inside **46 pt**. Both
+decoration hosts built a block's frame from fragment frames, so:
+
+- every block frame claimed a gap belonging to NEITHER neighbour;
+- consecutive frames **abutted — measured gap 0.0** at every boundary;
+- the callout wash ran 7 pt under the text and touched the next block
+  (her words);
+- **R17's BINDING white-gap rule was unreachable** — `verticalPad` always
+  received gap 0, so it could only ever return 0 pad, while the frame it
+  was padding was already a whole gap too tall. The rule has been dead
+  code since it shipped;
+- `seamYs` put the dotted seam on the next block's first line rather than
+  centred in the white (off by gap/2 — 3.5 pt Terminal, 14.5 pt with
+  inline comments).
+
+Fixed at ONE new pure mapping, `BlockDecor.textBottom` / `textRect`,
+consulted by both hosts (`EditorViewModel.refreshDecorations` and
+`ReadPostViewModel.refreshDecor` — a class sweep: same defect, two hosts,
+both fixed, no third host exists — `BlockTint.viewRect`'s only two callers
+are exactly these). An unlaid fragment reports no line fragments and
+degrades to its frame: the pre-fix value, never worse.
+
+**Recorded for the reviewer:** `everyDecorFrameRegistersWithItsBlocksText`
+has asserted the FRAGMENT bottom since Phase 13 C1 while its own prose
+said *"the text's view-space bottom"* — **the pin was holding the defect
+in place.** Its ground truth is now the last LINE's typographic bottom,
+and it gained real-gap + seam-inside-the-white assertions. Changing a
+test to match a fix is normally the forbidden move; it is defensible here
+precisely because the test's stated contract and its assertion disagreed,
+and the fix makes the assertion match the prose.
+
+#### Traced mechanism 2 — A4, the scroll anchor (TWO BUGS, FIXED)
+
+The anchor is `topVisibleOffset()` (read on scroll) →
+`restoreTopVisibleOffset()` (replayed on every width reflow: sidebar
+toggle, split divider, window resize, live-resize end). It is the Phase 6
+memo's standing obligation — *never px-anchor across reflow, restore by
+text location*.
+
+**(1) Fragment granularity.** A block is always its own paragraph
+(R26/R33); a paragraph is ONE layout fragment. So a block taller than the
+viewport collapsed every reading position inside it to the block's start.
+Reproduced: scrolled to y=2500 inside a **6,127 pt** block (360 line
+fragments), the anchor answered **813** — the block's first character —
+and the restore landed at **y=225**. A **2,251 pt leap backwards**, every
+time she resizes anything. Both halves now resolve to the LINE through
+one pure helper, `FragmentLines`.
+
+**(2) Coordinate space.** `textLayoutFragment(for:)` takes a
+TEXT-CONTAINER point — measured against ground truth, not assumed
+(`refreshDecorations` already converted; this site did not). Passing a
+VIEW point made the anchor name the block BELOW the one at the viewport
+top at every stop: **entry 8 for 7, entry 20 for 19.** Same container↔view
+class as the Phase 10 mis-registration, one site over.
+
+**Why nothing had ever caught (2):** `JumpPrimitive` carried the
+IDENTICAL error in the same direction — it steered a VIEW-space scroll
+offset by a CONTAINER-space fragment minY. **The two errors cancelled on
+the round trip**, and the Phase 7 smoke pin
+(`tenThousandWordPostStaysSnappyAndAnchored`) passed for the wrong
+reason. Both are converted now, so read-then-restore is exact by
+construction rather than by two errors agreeing — and **that Phase 7 pin
+passes UNTOUCHED**, which is the strongest available evidence that the
+new pair is right.
+
+#### Traced mechanism 3 — A3 + A41, the phantom gap (NOT A PATCH → C3 memo)
+
+Her diagnostic held: a paste of a three-paragraph message stores a
+trailing newline on the first two blocks and **none on the last**, so
+"no whitespace at the end" is literally true and stored content is
+eliminated.
+
+What it is: TK2 **guesses** the height of paragraphs it has not laid out,
+and a Variorum block is one paragraph — so one very long block is one
+very large guess. Measured on 60 blocks with one 3,000-word block:
+
+| | long block | document total |
+|---|---|---|
+| at the top (`state == .estimatedUsageBounds`) | **4,964 pt** | 11,245 pt |
+| after scrolling onto it (`state == .layoutAvailable`) | **4,597 pt** | 10,885 pt |
+
+**367 pt of text that does not exist** (~21 blank lines), vanishing on
+scroll. Apple's own documented `NSTextLayoutFragment.state` names the
+transition. Controls: the same post with NO giant block wanders only
+84 pt and **upward** (the benign converging direction the Phase 6 spike
+measured); a giant block sitting ALONE at the top wanders **0 pt** (it is
+laid out immediately, never guessed).
+
+**Why it is not a patch:** an external-facts lookup confirmed there is
+**no public API to supply or correct estimated fragment heights** (Apple
+docs + the STTextView maintainer), and Apple DTS states that fluctuating
+estimated heights are expected and by design. The only cure —
+full-document layout — is banned by P1 and measured at 105 ms @ 50k words
+/ 408 ms @ 200k in the Phase 6 spike. Per the brief's step 2 this is
+**not a number to guess into the code**: it is the C3 memo, which puts
+four postures to her with recommendations.
+
+#### F1 — the publish door, ENFORCED
+
+Chose the **walk**, not the type-level shape, and the reason matters:
+`install` taking one `PanePublisher.Writes` value channels only the two
+publishes that exist today and would not stop a fourth closure being
+added beside them — so it does not close the hole F1 names. The walk is
+**name-independent by construction**: it reads the surface's own
+`@Binding` declarations out of the source and requires every write to
+each to sit lexically inside the `install(…)` call, so a binding added
+tomorrow is covered with no edit to the test. A second pin keeps SwiftUI
+state out of the coordinator entirely. **No production code changed.**
+
+#### Red-on-old evidence — every bug-class fix, by behavioral revert
+
+| # | Revert applied | Pin(s) | Observed RED |
+|---|---|---|---|
+| 1 | `BlockDecor.textRect` returns `layoutFragmentFrame` | `everyDecorFrameRegistersWithItsBlocksText` | frame bottom **7.0 pt** past the text; every gap **0.0** vs 7.0; every seam outside the white — **9 issues** |
+| 2 | `topVisibleOffset` returns `fragmentStart` | `theAnchorResolvesInsideABlockTallerThanTheViewport`, `aWidthReflowKeepsTheReadingPositionInsideATallBlock` | anchor **813** (needs > 5813); round trip **2251.0 pt** (needs ≤ 17) |
+| 3 | `topVisibleOffset` passes the VIEW point | `theAnchorNamesTheBlockAtTheViewportTopNotTheOneBelow` **+ the untouched Phase 7 smoke pin** | entry **8** for 7 and **20** for 19; smoke pin `60964 ≠ 60887`, `60999 ≠ 60964` — the cancellation made visible |
+| 4 | a state write added to `updateNSView` | `everyPaneStateWriteLeavesThroughThePublishDoor` | 2 writes, **1** inside the door |
+| 5 | a NEW `@Binding var probeWidth` written from `updateNSView` | same | caught **by name, with no edit to the test** — the name-independence claim proven |
+
+All reverts restored; `PaneSurface.swift` restored to HEAD and verified
+byte-clean before committing. Full Mac suite re-run green after restore.
+
+#### Numbered judgment calls / PROVISIONALs
+
+1. **Jumps now land flush at the viewport top**, not one container inset
+   (24 pt) below it — a consequence of fixing `JumpPrimitive`'s
+   conversion. Flush IS the documented contract ("lands the target at the
+   viewport top") and the 24 pt was an accident of the missing
+   conversion, so I did not preserve it. **Whether a jump should keep top
+   air is a taste question** — flagged for the standalone Design & UI
+   review, not decided here.
+2. **Fixed `JumpPrimitive` as well as `topVisibleOffset`** rather than
+   leaving the two errors cancelling. Both are now independently correct
+   against measured ground truth, the round trip is exact by
+   construction, and the Phase 7 pin passes untouched — which the
+   cancelling pair also did, for the wrong reason. Recorded as a decision
+   because it changes visible jump behaviour (see 1).
+3. **The A40 fix makes R17's white-gap rule bite for the first time**, and
+   with a 7 pt uniform gap it yields a **0.5 pt** callout pad in Terminal
+   (1.0 in Study, the full 5.0 with inline comments on). That is the rule
+   working exactly as written. Whether a callout should get more room at
+   rest is **hers** — memo Q1, with the connection to A23's gap setting
+   (13d) named.
+4. **`everyDecorFrameRegistersWithItsBlocksText`'s assertion was
+   changed** — justified above (its prose already stated the correct
+   contract; the assertion encoded the defect). Called out explicitly so
+   a reviewer checks it rather than assuming.
+5. **The "pin that renderedText / export / the bridge join stay
+   byte-identical" constraint is satisfied structurally, not by a new
+   pin:** the entire diff is view geometry under `App/Variorum/`, and
+   **zero lines of `Sources/VariorumCore/` changed**, so the ONE join
+   brain (`Queries.joinRenderedTexts`) and its existing pins are
+   untouched — core stays 817/96 green. Adding a fresh pin over code the
+   batch never touched would assert nothing. Recorded as a deliberate
+   reading of the constraint, flagged for the reviewer.
+6. **A40's class sweep is complete and bounded:** `BlockTint.viewRect`
+   has exactly two callers (editor + read tier), both fixed. `refreshBadges`
+   deliberately still reads `layoutFragmentFrame` — badges anchor to a
+   block's TOP (unaffected by the trailing gap) and use the frame only for
+   a generous viewport-intersection test.
+
+#### Deviations
+
+- **None from the ordered method.** Hypothesis pinned first, refuted,
+  recorded, tracing continued; bugs split from the non-bug; the non-bug
+  became the memo instead of a guessed constant.
+- **One scope addition:** A4 turned out to be TWO defects, and the second
+  (coordinate space) could only be fixed by also correcting
+  `JumpPrimitive` — otherwise a correct anchor and an incorrect restore
+  disagree. Judgment calls 1–2 record it.
+- **One lookup subagent** used (Sonnet, external facts only: TK2 estimate
+  API surface + `NSTextLineFragment` signatures). Its decisive finding —
+  no public API exists to correct estimates — is what turned A3/A41 from
+  "fix" to "memo".
+
+#### Pre-existing, untouched, recorded for the reviewer
+
+- `PaneSurface.swift:117` emits a Swift 6 Sendable warning
+  (`passing non-Sendable parameter 'work' to function expecting a
+  '@Sendable' closure`) on the `PanePublisher` scheduler default. 13b
+  code, not touched by this batch, warning only.
+- `[SwiftUI] Modifying state during view update` still logs from mounted
+  pane tests. That is the exact condition `PanePublisher` exists to
+  survive (sync write + bounded heal), not a regression — noted because a
+  reviewer reading test output will see it.
+
+#### Ladder foci suggested for this batch
+
+The container↔view and fragment-vs-text-extent conversions (are there
+other sites?); the changed decor-registration assertion; whether jumps
+landing flush is acceptable; and whether the C3 memo's Part 2 posture
+recommendation is honest about P1.
