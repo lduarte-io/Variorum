@@ -1029,6 +1029,52 @@ tradeoff list for the author, per P-5's form. Counts at batch open:
 core **817/96**, Mac **652/123**, mobile 11/4 — all verified green by
 the architect this sitting.
 
+### Batch 1B — block deletion & redo (A7, A8, A10)
+
+**Why together:** all three are the structural/undo family, and redo is
+the safety net that makes an accidental block deletion cheap.
+
+**Scope, in her words:**
+
+- **A7** — *"I cant use backspace to delete empty blocks with no takes
+  right now which is too annoying - especially when there's an empty
+  block right at the start of the post."*
+- **A8** — *"I don't seem to have the ability to delete / archive empty
+  blocks?"* (`deleteBlock` exists in Operations and has since Phase 2;
+  what's missing is a door and, for A7, the editor gesture.)
+- **A10** — *"i desperately need a 'redo' command to be able to undo my
+  structural undos for when that was an accident."* **Verified by the
+  architect: no `redo` / `redoStack` / `canRedo` exists anywhere in core
+  or the app.** Structural undo is one-directional by omission.
+
+**What binds:**
+
+- **Redo is STRUCTURAL redo only.** ⌘Z stays NSTextView's ordinary text
+  undo and the two stacks never interleave (AppSpec §9's structural-undo
+  paragraph, ratified). Session-scoped and in-memory like the undo stack
+  — no persistence across sessions; that line is deliberate.
+- **Redo emits ordinary operations**, exactly as undo does, so sync never
+  learns redo exists (same reasoning as undo's design).
+- **The redo stack clears on any new structural act** — the standard
+  discipline; state it and pin it.
+- **A7 is a cross-block destructive edit at a seam**, which the editor
+  has REFUSED since Phase 7 by ratified design. Deleting an EMPTY block
+  is the case where that refusal buys nothing — there is no text to lose.
+  Keep the general refusal; carve the empty case honestly, and make sure
+  the carve cannot widen (a block with text, or with takes, still
+  refuses). Under P-2 the door must act or speak — never silently no-op.
+  The post's FIRST block being empty is her named case: pin it.
+- **I10 stands absolutely:** a live block has at least one live variant,
+  and deleting a block's last block is `deleteBlock`, never a variant op.
+  If the post would be left with no blocks, that is a real refusal —
+  decide it against the spec and say which rule you applied.
+- **P-1:** any new act is DECLARED in the registry (verb, scope,
+  availability, doors, refusal copy) — never a per-view if-statement.
+
+**Deliverables:** the fixes with revert-verified red-on-old pins; a batch
+record; PROVISIONALs for anything the spec leaves genuinely open, per the
+autonomy grant. Counts at open: core **817/96**, Mac **668/125**.
+
 ## Architect adjudications
 
 ### Batch 1A — ACCEPTED, with one option added to the memo (2026-07-25)
