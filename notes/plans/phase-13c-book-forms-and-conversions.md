@@ -1189,6 +1189,58 @@ then re-paginate under her. Say explicitly in your record how your
 estimator behaves when a block's layout state flips from estimated to
 laid-out.
 
+### Batch 2D — the smart→curated conversion (C2/N38) + book order as a lens (A31)
+
+**Read `notes/plans/phase-13c-memo-smart-to-curated.md` IN FULL.** 4F
+authored it as the condition of deferring this work; it presents three
+conversion shapes and recommends **A (materialize-and-convert + the
+fresh-smart-book offer)**, with zero schema change confirmed for A.
+
+**Her five rulings are OWED but she is asleep.** Under the autonomy
+grant: **build to A**, mark the whole thing **PROVISIONAL**, and for each
+of the five record *what the alternative would have changed* so her
+ratify walk is a real choice and not a rubber stamp. Log to QUESTIONS.
+
+**A31 rides with it** — her intake item: *"I need the ability to see a
+book either by its saved custom order or by an attribute like time to
+freely change the order of it - should be more like lenses where the
+order can be saved."* It is book-shaped and conversion-adjacent (both are
+about a book's membership and ordering being something she can shape).
+**Note what already exists before building anything:** `reading.sort_field`
+already carries `manual | entry_date | created_at | last_touched |
+last_major_revision` with `sort_dir` — so "see it by an attribute" may be
+mostly a face over shipped machinery. Her "**saved** like lenses" half is
+the part that may need design; treat it as PROVISIONAL and say plainly
+which half was already there.
+
+### Batch 2E — Compare: "show related blocks only" (C4)
+
+**Her request, verbatim (2026-07-22):** *"we should have a setting to
+only show related blocks - that would make the pane feel more usable."*
+
+A per-view toggle (session/view-local — the follow-order/lineage-colour
+toggle class from 13b's 4C; **no schema**) that collapses each column to
+only the blocks with lineage kinship to the anchor, hiding the unrelated
+stretches.
+
+**This RESOLVES the 4C kin-less-peer PROVISIONAL** rather than needing a
+separate placement ruling (13b plan, Batch 4C judgment call 0: a peer
+with no kinship renders its whole post below every aligned row). With the
+setting ON, an unrelated peer simply shows nothing and a partly-related
+one shows only its kin rows. **Her call at ratify:** whether "off" keeps
+today's shipped placement — the setting may make the placement question
+moot, which is the outcome to aim for.
+
+**Compose with N29's honesty line, do not break it:** an all-unrelated
+pair with the setting on must **say** "there is no relationship here"
+over two empty columns, never present emptiness as if it were content.
+That honesty is the whole reason 4C's gap parade was killed.
+
+**PROVISIONAL:** whether "related" means direct `derived_from`/
+`version_of` or the transitive lineage the alignment already computes.
+Options, pick, log — and note that the alignment machinery already has an
+answer it uses, which is the cheapest defensible one.
+
 ### Batch 1E — BUILD option E (the phantom fix), PROVISIONAL
 
 **Authorized by the architect decision in the 1C adjudication.** Batch 1C
