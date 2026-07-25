@@ -15,7 +15,10 @@ import GRDB
 ///   body through ORDINARY Variorum operations — never a direct row write —
 ///   so S5's conflict-as-variant doctrine guards the truth side. Every
 ///   landing path ends in a live row, a labeled variant, or a commit:
-///   nothing typed in Fragments can be lost by the bridge.
+///   nothing typed in Fragments can be lost by the bridge. A landing that
+///   wrote to a day then shelves that day's entry in the designated daily
+///   journal book, exactly as the Mac's ⌘J door does (A1, Phase 13c) —
+///   never blocking the landing, never re-shelving what the author removed.
 /// - **Push:** for each single-entry journal day whose rendered text differs
 ///   from the AGREED hash, upsert `renderedText` under the deterministic id.
 ///   Unchanged text never pushes (the mirror of Fragments' own clobber
@@ -162,6 +165,14 @@ public struct BridgeEngine: Sendable {
                     if let note { report.notes.append(note) }
                 case .deferred: break  // handled above
                 }
+                // A1 (Phase 13c): the day's entry belongs on the shelf. This
+                // runs AFTER the body is in the store and the cursor has
+                // advanced, and it can only ever add a NOTE — the landing is
+                // never blocked by shelving (see the helper's contract).
+                if outcome.wroteToTheDay,
+                   let note = await ensureDailyBookMembership(day: entry.date) {
+                    report.notes.append(note)
+                }
             }
             // Their paging convention: a short page is the head — stop
             // (one fewer RPC per round than loop-until-empty).
@@ -201,6 +212,120 @@ public struct BridgeEngine: Sendable {
                 return nil
             }
         }
+
+        /// The landing wrote to the day's entry (minted it, overwrote its
+        /// text, or added a take). Echoes, replays, already-converged rows
+        /// and consumed-with-a-note rows wrote NOTHING, so they trigger no
+        /// shelving work.
+        var wroteToTheDay: Bool {
+            switch self {
+            case .created, .updated, .conflictVariant, .rescuedVariant:
+                return true
+            case .skipped, .deferred:
+                return false
+            }
+        }
+    }
+
+    // MARK: - The daily journal book's membership (A1, Phase 13c)
+
+    /// Whether the day's entry needs shelving, read in one pass.
+    private struct DailyBookPlan: Sendable {
+        let postID: String
+        /// nil = no daily journal book is designated (or the designation
+        /// dangles at a deleted book — the fallback class).
+        let bookID: String?
+        /// A `reading_post` row already exists for this (post, book) pair —
+        /// LIVE (already shelved) or TOMBSTONED (she took it off the shelf).
+        /// Either way the pair has a story and the bridge leaves it alone.
+        let decided: Bool
+    }
+
+    /// **The second half of the Mac's daily door, which the bridge never
+    /// had** (author report 2026-07-25: *"fragments journal did sync and
+    /// appear, but not in the journal book, just appeared in the pool"*).
+    ///
+    /// `JournalBooks.openToday` (⌘J / "Today's Entry") creates-or-opens the
+    /// day's entry AND adds it to the designated daily journal book —
+    /// ordinary membership, R50's letter. The landing half called only the
+    /// first half, so every day the bridge minted arrived in NO book, and
+    /// "posts in no book" is exactly what the Pool surface lists (R29).
+    /// Traced in the author's own store before the fix: her 2026-07-11 entry
+    /// was created 17 s after the Fragments row it landed and carried no
+    /// `reading_post` row at all.
+    ///
+    /// Three rules, each deliberate:
+    ///
+    /// - **The landing is NEVER blocked by shelving.** This runs after the
+    ///   body is in the store and returns a NOTE instead of throwing —
+    ///   "nothing typed in either app can be permanently lost" is ratified
+    ///   doctrine and outranks tidiness. Every failure arm speaks.
+    /// - **Never re-shelve what she took off the shelf.** An existing
+    ///   membership row — live or tombstoned — means the pair is already
+    ///   decided; only a pair with NO row at all is shelved. That is what
+    ///   lets this repair entries that landed bookless before the fix (and
+    ///   entries minted by any other door that doesn't shelve) without ever
+    ///   undoing a deliberate `removePostFromReading`.
+    /// - **No designated book ⇒ land and SAY SO** (PROVISIONAL, QUESTIONS
+    ///   #37). The Mac door CREATES and pins a "Journal" book on first use
+    ///   because she pressed a button; a headless bridge minting and pinning
+    ///   a book on her shelf while she sleeps is a larger act. A silent skip
+    ///   is exactly the confusion she reported, so the round says why.
+    private func ensureDailyBookMembership(day: String) async -> String? {
+        do {
+            let plan: DailyBookPlan? = try await database.read { db in
+                // The notebook rule's canonical entry — the same one the
+                // landing wrote to (one shared query).
+                guard let entry = try Queries.canonicalJournalEntry(db, day: day)
+                else { return nil }
+                guard let bookID = try Queries.dailyJournalBookID(db) else {
+                    return DailyBookPlan(postID: entry.id, bookID: nil, decided: false)
+                }
+                let decided = try Bool.fetchOne(
+                    db,
+                    sql: """
+                        SELECT EXISTS (
+                          SELECT 1 FROM reading_post
+                          WHERE reading_id = ? AND post_id = ?
+                        )
+                        """,
+                    arguments: [bookID, entry.id]) ?? false
+                return DailyBookPlan(postID: entry.id, bookID: bookID, decided: decided)
+            }
+            guard let plan else { return nil }
+            guard let bookID = plan.bookID else {
+                return Self.unshelvedNote(
+                    day: day,
+                    because: "no daily journal book is designated — open Today's Entry (⌘J), or pick one with a book's “Use as Daily Journal”")
+            }
+            guard !plan.decided else { return nil }
+            _ = try Operations().addPostToReading(plan.postID, to: bookID)
+            return nil
+        } catch let error as OperationError {
+            switch error {
+            case .alreadyInReading:
+                // Raced to shelved between the read and the write — the
+                // outcome we wanted.
+                return nil
+            case .lockedReading:
+                return Self.unshelvedNote(
+                    day: day,
+                    because: "the daily journal book is finished — reopen it in its settings, or pick a new daily journal")
+            case .readingAtCapacity:
+                return Self.unshelvedNote(
+                    day: day,
+                    because: "the daily journal book is at its post cap — extend the cap in the book's settings")
+            default:
+                return Self.unshelvedNote(day: day, because: "\(error)")
+            }
+        } catch {
+            return Self.unshelvedNote(day: day, because: "\(error)")
+        }
+    }
+
+    private static func unshelvedNote(day: String, because reason: String) -> String {
+        "\(day) landed from Fragments but is not in the daily journal book "
+            + "(find it in the Pool): \(reason)."
     }
 
     /// The landing classifier — the 9b brief's rules, verbatim in code.
