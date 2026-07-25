@@ -965,6 +965,37 @@ checklist, never improvised around): any `/Applications` refresh that
 would outrun a deployed lockstep marker, the A21-promotion offer, and
 anything the ladder cannot resolve against the canonical docs.
 
+### The overnight run — 2026-07-25 → 26 (her authorization + the regime)
+
+Her words: *"i'm stepping away for the night, so go ahead and run any
+tests and screenshot verification things that are needed while i'm
+asleep."* Combined with the autonomy grant above, this is a full
+overnight run: batches, suites, screenshot walkthroughs, the ladder.
+
+**The one environment act taken on her machine, stated plainly so she
+finds it in the morning:** `caffeinate -d` is running (11 h cap, pid
+recorded at start). **Why it is necessary and not incidental:** Stage 4's
+recorded environment lesson is that **the Mac test runner hangs
+pre-connection under a locked login session** — and 13b's gate failed for
+exactly this reason (six batches of app-side tests written but never
+executed because her machine auto-locked overnight; when they finally
+ran, three failed and two were real defects). Without holding the
+session, "run tests while I'm asleep" is not actually possible. **Side
+effect she should know about: her display stays awake.** It expires on
+its own; `kill <pid>` or `pkill caffeinate` ends it early. Nothing else
+about her machine is touched.
+
+**What CANNOT happen overnight, regardless** (author-only, unchanged):
+any mirror/schema deploy; any `/Applications` refresh that would outrun
+the deployed lockstep marker; quitting or killing her live app instance;
+pushing. Her real store is read-only to this run except behind the A1
+backup rail.
+
+**What gets bundled for her instead of guessed:** the C3 memo's five
+questions (Q4 now answered by her; Q3 revised), N38's five rulings, the
+uniform-page brief's five opens, the A21-promotion offer, and the
+jump-landing taste call. All go to the closeout ratify list.
+
 ## Batch briefs
 
 ### Batch 1A — the vertical-space investigation (the friction batch's first half)
