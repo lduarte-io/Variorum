@@ -752,6 +752,10 @@ are this phase's opening batch.
 | A36 | Markdown folder import choosing whether folders become chapters/books ("to lure people from obsidian") | 13h |
 | A37 | EPUB library — read-only books, highlights auto-appending to a "favorite quotes" note with quote marks, dash, author, title | unslotted row |
 | A38 | "a variorum mobile app that's quite robust and easy to use" | 15 |
+| A42 | **A thorough, beautiful, robust MOBILE app** — added live 2026-07-25, moving Phase 15's material up. Shapes floated and deliberately NOT chosen (hers to rule at the mobile design sitting): a Write-like base · drag-left/right on blocks for their complex menus · a small take button · **or** takes-in-stack-only with expand/shrink. Continues R58; puts CoreDescription pillar 8's "no variant/fan gestures there" in tension — an explicit vision-doc delta, hers to make | **re-slotted — her call pending** (was 15) |
+| A43 | **All book views more editable** — *"chapters / posts with blocks within are genuinely helpful concepts."* Extends A39 beyond Outline; scope (Outline + Book, or all three incl. Read) is her call | **13c** |
+| A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
+| A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
 | A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. | **13c-friction** (one investigation with A3/A4) |
 | A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
@@ -813,6 +817,87 @@ NSWindow auto-assigns first responder on order-front; async-poll
 (never sync RunLoop pumping) drains settle hops; screenshots in
 gitignored dirs; never `git checkout` over uncommitted work; never
 push.
+
+### The "sub-takes" finding — 2026-07-25, and why it is NOT a feature request (A45)
+
+Her words, verbatim, because the reasoning is the valuable part:
+
+> *"I found myself wanting sub takes (which is never going to happen and
+> shouldn't happen), which was a sign to me my current takes should've
+> been blocks and my block should've been a post (if that makes sense - i
+> haven't found using the upper edge of the design that much. i think the
+> book views all being editable will help with that)."*
+
+**This is a use-level diagnosis, and it VALIDATES the model rather than
+straining it.** I7 (no nesting — a block's variants are whole-span
+alternatives, no sub-fans) stays exactly as written; she is not asking
+to relax it and explicitly says it *"shouldn't happen."* What she
+identified is subtler and more useful: **wanting a sub-take is the
+symptom of working one level too low.** The hierarchy that answers it
+already exists and is fully built — book → post → block → take — and
+her instinct is that a wanted sub-take means the thing she called a take
+is really a block, and the thing she called a block is really a post.
+
+**Why she ended up there is a UI fact, not a model fact.** The book
+level has never been a *writing* surface — Outline is a scroll, Book is
+a spread, Read is a read — so the only place it has ever been natural to
+compose is inside ONE post, which forces everything downward into big
+blocks with many takes. **She derived A39's value independently and from
+the other direction**, which is strong corroboration that A39 is the
+right build: making the book editable is what makes the upper edge of
+the design reachable in practice.
+
+**Two consequences recorded now:**
+
+1. **A39 gains weight inside 13c.** It is no longer only "a nicer book
+   view" — it is the surface that makes the model's existing upper
+   levels usable. Prioritize accordingly within the phase.
+2. **A21 is the ESCAPE HATCH for the exact mistake she diagnosed** —
+   *"turn all takes into their own blocks"* is literally the migration
+   from "these should have been blocks" to blocks. It was filed to 13e
+   as a convenience shortcut; her finding reframes it as a **repair
+   tool** for work already shaped the wrong way. Candidate for promotion
+   into 13c beside A39 — **her call, offered, not taken.**
+
+**Standing guard for every future session:** the correct answer to any
+future "can I nest takes" is NO (I7), and the correct *response* is to
+ask whether the block should be a post. Never invent nesting.
+
+### Further author direction — 2026-07-25 (recorded verbatim-faithful; the questions it raised are hers)
+
+- **Mobile moves up, and gets a real design** (A42): *"i really do need a
+  thorough implementation of the app that is beautiful and easy to use…
+  it's going to have to be a real and robust option."* Her floated
+  shapes, preserved as floated and NOT chosen: a **Write-like base**;
+  **dragging left and right on blocks for their complex menus**; a
+  **small take button to click**; **or** takes only in **stack mode**
+  with a button to expand and shrink it. She is explicitly undecided
+  ("either way"), so the shape is the mobile phase's own design sitting
+  — do not pre-commit it. **This continues R58** (sitting 8: *"i think i
+  will include takes on mobile"*), which was a lean; this is firmer, and
+  it puts **CoreDescription pillar 8's "no variant/fan gestures there"
+  in tension** — a vision-doc delta that is hers to make explicitly, not
+  something a phase absorbs quietly.
+- **The book form needs to be more editable** (A43): *"chapters / posts
+  with blocks within are genuinely helpful concepts."* Extends A39
+  beyond Outline. **Scope question raised for her:** whether "editable"
+  means Outline + Book (with Read staying a reading surface, which is
+  what Read is *for*) or all three.
+- **Book mode offers TWO editing forms** (A44): *"stack view + the normal
+  write view should be the editing forms offered in the 'page that
+  you're flipping with full sized posts on each page' view."* A direct
+  refinement of the committed **Book** mode (two-up spread, page = a
+  whole scrollable post): each page is editable, and the page's
+  presentation is a choice between the **takes STACK** and **normal
+  Write**. Recorded as instruction, not question. Architecture is
+  pre-bound as with A39: `PaneTextAuthority`'s one-live-ring contract
+  across pages, `commitTake` availability, P3 virtualization — never a
+  second liveness mechanism.
+- **Answered for her on the record:** *"i'm also not sure where in the
+  plan 'make all takes under a block into their own block' is"* — it is
+  **ledger row A21**, from her own intake list ("Copy all takes to the
+  clipboard, **or turn all takes into their own blocks**"), currently
+  owned by **13e**. See A45 above for why it may deserve to move.
 
 ## Batch briefs
 
