@@ -2607,3 +2607,63 @@ and whether `triggerLifecycleRound`'s "only when sync is unconfigured"
 condition is the right discriminator versus, say, "when no sync round
 has completed recently" (the chosen form is the one that cannot double-
 trigger, which is why it is the one pinned).
+
+#### ADDENDUM (architect-directed, same session) — the capture door joins the sweep
+
+**The ruling:** fix the mobile capture door now, in this session, reusing
+the helper — "the same class, adjacent, and now known", and the skill's
+class-completeness rule sweeps a recurring class rather than leaving a
+known instance to an audit. **Accepted, and the push-back on my two
+"mitigations" was right — recorded because I had it wrong:** A1's rule 3
+only fires on a landing that WRITES a day, and a phone-minted day she
+never touches in Fragments produces a Variorum→Fragments **push and no
+landing at all**. So nothing repaired it; it stayed bookless until she
+happened to open ⌘J on that exact day. My report described the
+mitigations as stronger than they are.
+
+**ONE implementation, not two.** The rules moved into
+**`Operations.shelveInDailyJournalBook(_:) -> DailyBookShelving`**
+(`Operations+Container.swift`, directly beside `createOrOpenJournalEntry`
+so the two halves are read together). It **never throws** — it returns
+what happened, and each surface words it — which is what makes "never
+block the mint or the landing" structural rather than a convention each
+caller has to remember. The bridge's private copy is gone; it now
+consults the shared helper and keeps only its own wording.
+
+| Door | Shelves? | How it speaks |
+|---|---|---|
+| ⌘J / Today's Entry (`JournalBooks.openToday`) | yes, always did | its own inline version — **deliberately not converted**: it also CREATES and pins the book on first use, which is an act only a button press she pressed may take (QUESTIONS #37) |
+| Fragments bridge landing (`BridgeEngine`) | **new (A1)** | the round's note surface → the status row's "needs attention" |
+| Phone capture (`EntryListViewModel.open(on:)`) | **new (this addendum)** | `lastError`, worded to point at the Mac — the precedent is the capture surface's existing human notes ("This post is locked — unlock it on the Mac to edit") |
+| `BookStructureModel.newEntry` daily branch | yes, always did | its own notes (unchanged) |
+
+**The class sweep is now complete and bounded:** those four are every
+door in the tree that mints or opens the day's entry
+(`createOrOpenJournalEntry` has exactly these call sites plus tests).
+
+**Judgment call — the phone's note rides `lastError`.** It is the only
+message surface the capture list has, and it already carries human-worded
+non-crash notes, so this is precedent rather than invention; the cost is
+that a "your entry isn't in a book yet" line renders in the same red
+caption as a real failure. A note-vs-error distinction on mobile would be
+new UI, and this is a fix pass. Recorded for the Design & UI review row.
+
+**Red-on-old evidence (behavioral revert, run both ways):** with the
+door minting and stopping again, all three new mobile pins go red with
+the traced shapes — `aPhoneCapturedEntryJoinsTheDailyJournalBook`
+(`members → []`), `theCaptureMintIsNeverBlockedByShelving`
+(`lastError → nil`), and `theCaptureDoorNeverReShelvesAnEntryTheAuthorRemoved`
+(the removal setup throws `postNotInReading`, because nothing was ever
+shelved to remove — recorded honestly rather than filed as the narrowness
+pin I first labelled it). Restored and re-run green.
+
+**Counts after the addendum:** core **848/98** · Mac **700/127** (both
+re-run green after the hoist) · **mobile 11/4 → 14/4 — RUN, not
+inferred**, on the iPhone 17 Pro simulator (26.2). That was the gap the
+ruling named, and closing it also revealed nothing else: the whole mobile
+suite is green.
+
+**Nothing structural was needed** — no new dependency, no shared-code
+move beyond hoisting the rules into the operations layer where both
+callers already live, and zero `Sources/VariorumCore/Sync/` lines. The
+stop-and-report condition never triggered.
