@@ -997,6 +997,39 @@ questions (Q4 now answered by her; Q3 revised), N38's five rulings, the
 uniform-page brief's five opens, the A21-promotion offer, and the
 jump-landing taste call. All go to the closeout ratify list.
 
+### THE PHASE RUNS AS TWO STAGES — architect decision, 2026-07-26 (mid-run)
+
+Adopted once the friction work proved to be a coherent body of its own.
+
+- **Stage 1 — FRICTION: batches 1A · 1B · 1C · 1D(+addendum) · 1E.**
+  Her daily pain: the geometry mis-mappings, block deletion and redo, the
+  dead-click verdict, the bridge, and the phantom fix. **Its ladder runs
+  when 1E lands**, then its fixes, then **`/Applications` is refreshed**.
+- **Stage 2 — BOOKS: batches 2A · 2B · 2C · 2D · 2E**, its own ladder,
+  its own refresh.
+
+**Why two stages rather than one ladder at the end** — three reasons, and
+the third is the one that decided it:
+
+1. It is what "one ladder per stage over the combined diff" means when a
+   phase has two genuinely different bodies of work. Stage 1 is
+   editor/bridge defect work; Stage 2 is new book surfaces.
+2. A single ladder over both would review ~10 batches of diff at once,
+   which is how findings get missed.
+3. **She wakes up to REVIEWED, working fixes rather than to a promise.**
+   The friction items are what she reported as hurting daily; getting
+   them through review and into her actual daily-drive build overnight is
+   worth more than holding them behind book work that may not finish.
+
+**The refresh is legitimate and its preconditions are checked, not
+assumed:** CLAUDE.md's standing rule is that any session changing the Mac
+app ends by refreshing `/Applications`; **no schema change has landed
+this phase**, so no install can outrun the deployed lockstep marker (4)
+and the §12 hold does not bind; and a refresh requires zero instances at
+build and copy — **verified zero at this decision** (`pgrep` clean,
+2026-07-26). If an instance is live when the moment comes, the refresh is
+**HELD**, not forced — she may have opened the app.
+
 ## Batch briefs
 
 ### Batch 1A — the vertical-space investigation (the friction batch's first half)
