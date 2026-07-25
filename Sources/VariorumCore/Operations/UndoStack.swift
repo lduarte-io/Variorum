@@ -135,6 +135,17 @@ public final class UndoStack: @unchecked Sendable {
     /// as ordinary entries so the partial work stays reachable by undo —
     /// never stranded.
     ///
+    /// **Recorded behaviour, deliberate (13c Stage 1 ladder, R1-10): a
+    /// compound that throws mid-body still DESTROYS the redo future**, even
+    /// though its partial work rolls back. Each collected leg's own
+    /// `register` clears `redoEntries` as it lands, and the rollback does
+    /// not restore them. This is "any new structural act clears the future"
+    /// applied to an act that then failed — defensible (the author DID
+    /// invoke a new structural act, and a redo stack that survives a
+    /// half-applied-then-rolled-back gesture is the subtler surprise), and
+    /// cheap to reach only through a refusal landing mid-gesture. Stated
+    /// rather than silently true.
+    ///
     /// A compound entry whose inverse fails partway stays on the stack for
     /// retry like any entry; the inverses it already ran are idempotent
     /// (revert operations skip already-reverted rows), so a retry is safe.

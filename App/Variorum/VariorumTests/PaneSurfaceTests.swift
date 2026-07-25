@@ -277,6 +277,35 @@ struct PanePublishDoorTests {
         }
     }
 
+    /// **The walk's own counting rule, pinned** (13c Stage 1 ladder, R1-6).
+    /// The walk above is only as strong as what it recognizes as a WRITE,
+    /// and its first cut saw one of the four forms Swift offers for
+    /// assigning through a `@Binding`. A write in any of the other three
+    /// escaped both sides of the equality assertion, so the walk would have
+    /// reported "every write leaves through the door" while one did not.
+    /// This is the guard on the guard.
+    @Test func theWalkCountsEveryFormOfWritingToABinding() {
+        let source = """
+            self.height = 1
+            height = 2
+            $height.wrappedValue = 3
+            _height.wrappedValue = 4
+            height += 5
+            if height == 6 { }
+            if height >= 7 { }
+            let other = height
+            heightOfSomethingElse = 8
+            """
+        #expect(PaneSurfaceSource.assignmentCount(of: "height", in: source) == 4,
+                "all four write forms count, and nothing else does")
+        // …and the door-scoped count uses the SAME rule, so the equality
+        // assertion compares like with like.
+        #expect(PaneSurfaceSource.assignmentCount(
+            of: "height", in: "$height.wrappedValue = 3") == 1)
+        #expect(PaneSurfaceSource.assignmentCount(of: "height", in: "self.height = 1") == 1)
+        #expect(PaneSurfaceSource.assignmentCount(of: "height", in: "height == 1") == 0)
+    }
+
     /// …and the coordinator can never acquire state of its own: SwiftUI
     /// bindings never enter it, so `install`'s closures remain the only
     /// channel by which anything it does can reach a view.
@@ -350,22 +379,58 @@ private enum PaneSurfaceSource {
                         open: "(", close: ")")
     }
 
-    /// Assignments `name =` (never `==`, `>=`, `!=`, `+=`).
+    /// Assignments to a `@Binding var name`, in **every form Swift offers**
+    /// (never `==`, `>=`, `!=`, `+=`).
+    ///
+    /// 13c Stage 1 ladder, R1-6: the first cut counted only the bare
+    /// `name =` form and REQUIRED the preceding character not to be `.`,
+    /// `$` or `_` — so `self.name = …`, `$name.wrappedValue = …` and
+    /// `_name.wrappedValue = …` were counted in NEITHER bucket, and a write
+    /// in any of them could leave the coordinator while the walk's equality
+    /// assertion still passed. That is exactly the "green by audit" gap F1
+    /// was raised about, one level deeper: the guard against un-routed
+    /// writes had un-guarded routes of its own.
+    ///
+    /// The four search forms are mutually exclusive by construction (the
+    /// bare form's whole-word rule rejects a preceding `.`, `$` or `_`, and
+    /// the wrapped forms are followed by `.` rather than `=`), so nothing is
+    /// double-counted. `self.$name` / `self._name` are covered as suffixes
+    /// of their bare twins.
     static func assignmentCount(of name: String, in text: String) -> Int {
+        wholeWordAssignments(of: name, in: text)
+            + literalAssignments(of: "self.\(name)", in: text)
+            + literalAssignments(of: "$\(name).wrappedValue", in: text)
+            + literalAssignments(of: "_\(name).wrappedValue", in: text)
+    }
+
+    private static func wholeWordAssignments(of name: String, in text: String) -> Int {
         var count = 0
         var rest = Substring(text)
         while let hit = rest.range(of: name) {
-            let after = rest[hit.upperBound...].drop { $0 == " " }
             let before = hit.lowerBound == rest.startIndex
                 ? Character(" ") : rest[rest.index(before: hit.lowerBound)]
             let isWholeWord = !(before.isLetter || before.isNumber || before == "_"
                 || before == "." || before == "$")
-            if isWholeWord, after.first == "=", after.dropFirst().first != "=" {
-                count += 1
-            }
+            if isWholeWord, isAssignment(rest[hit.upperBound...]) { count += 1 }
             rest = rest[hit.upperBound...]
         }
         return count
+    }
+
+    private static func literalAssignments(of target: String, in text: String) -> Int {
+        var count = 0
+        var rest = Substring(text)
+        while let hit = rest.range(of: target) {
+            if isAssignment(rest[hit.upperBound...]) { count += 1 }
+            rest = rest[hit.upperBound...]
+        }
+        return count
+    }
+
+    /// A single `=` (assignment), not `==`.
+    private static func isAssignment(_ tail: Substring) -> Bool {
+        let after = tail.drop { $0 == " " }
+        return after.first == "=" && after.dropFirst().first != "="
     }
 
     private static func balanced(

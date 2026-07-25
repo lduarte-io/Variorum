@@ -155,8 +155,13 @@ struct LongBlockLayoutPlannerTests {
     /// **The cap's own derivation, pinned** so it cannot be raised past the
     /// evidence without this failing. Batch 1C's worst measured rate is
     /// 0.117 ms per 1,000 UTF-16 units (the 1,000-word case; the rate
-    /// IMPROVES with block size). The budget is half a 60 Hz frame in a
-    /// DEBUG build — Release is faster, which is margin on top.
+    /// IMPROVES with block size). The budget is half a 60 Hz frame.
+    ///
+    /// The rate was measured in a Debug build, and that is NOT extra margin
+    /// (13c Stage 1 ladder, R1-5): `ensureLayout` runs in the system
+    /// TextKit binary — identical in both configurations — and no app code
+    /// runs in that path. Half a frame is the whole of the margin, and it
+    /// is enough.
     @Test func theCapStaysUnderHalfAFrameAtTheWorstMeasuredRate() {
         let worstRateMsPer1kUnits = 0.117
         let predictedMs = Double(LongBlockLayout.maxBlockUTF16Length) / 1000

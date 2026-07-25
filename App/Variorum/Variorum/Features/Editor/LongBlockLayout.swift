@@ -91,13 +91,21 @@ nonisolated enum LongBlockLayout {
     /// | 25,000 | 272,425 | 20.06 ms | 0.074 |
     ///
     /// Worst observed rate: **0.117 ms per 1,000 units**. The budget is
-    /// **half a 60 Hz frame (8.3 ms) in a DEBUG build** — half a frame so
-    /// the same runloop turn has room for everything else, and Debug
-    /// because the shipped Release build is faster, which is margin on top
-    /// of margin. 8.3 ÷ 0.117 ≈ 71,000 units; rounded down to 64,000, whose
-    /// predicted worst case is **7.5 ms** (≈5.7 ms at the measured
-    /// mid-range rate). The architect's own note — "20 ms at 25,000 words
-    /// is already past a frame budget" — is honoured with ~4× of room.
+    /// **half a 60 Hz frame (8.3 ms)** — half a frame so the same runloop
+    /// turn has room for everything else. 8.3 ÷ 0.117 ≈ 71,000 units;
+    /// rounded down to 64,000, whose predicted worst case is **7.5 ms**
+    /// (≈5.7 ms at the measured mid-range rate). The architect's own note —
+    /// "20 ms at 25,000 words is already past a frame budget" — is honoured
+    /// with ~4× of room.
+    ///
+    /// **The numbers were measured in a Debug build, and that buys NO extra
+    /// margin** (13c Stage 1 ladder, R1-5 — the first cut claimed it did).
+    /// `ensureLayout` runs inside the system TextKit binary, which is the
+    /// same code in both configurations, and no app code runs in that path
+    /// (this target installs no layout-manager or content-storage
+    /// delegate). So the Debug measurement is simply THE measurement; the
+    /// cap stands on the half-frame budget alone, which is margin enough
+    /// and is the only claim the evidence supports.
     ///
     /// In her prose (~5.5 UTF-16 units per word with spaces) the cap is
     /// roughly **11,600 words in a SINGLE block** — orders of magnitude

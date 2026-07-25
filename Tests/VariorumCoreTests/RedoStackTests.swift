@@ -263,6 +263,112 @@ struct RedoStackTests {
         }
     }
 
+    // MARK: - The variant-lifecycle re-applies (13c Stage 1 ladder, R1-7)
+
+    /// `deleteVariant` and `archiveVariant` are the two re-applies with
+    /// **bodies of their own** — `performDeleteVariant` /
+    /// `performArchiveVariant` carry the I10 `ensureNotLastActive` guard,
+    /// the locked-variant and chosen-variant guards, and
+    /// `reassignDefaultIfNeeded`. Every other re-apply reuses a body an
+    /// undo pin already exercises; these two were reachable by no redo test
+    /// at all, so their guards ran only on the forward path.
+    ///
+    /// The sharp end of `deleteVariant`: delete the block's DEFAULT variant
+    /// out of a three-take fan, so the re-apply must re-run
+    /// `reassignDefaultIfNeeded` rather than merely re-stamp `deleted_at` —
+    /// a default pointer left at a tombstoned row is the dangling-default
+    /// state SyncSpec §7 has a repair for.
+    @Test func redoingADeleteVariantReRunsItsGuardsAndTheDefaultReassignment() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "one")
+            let second = try ops.branchVariant(a.block.id, from: a.variant.id)
+            let third = try ops.branchVariant(a.block.id, from: a.variant.id)
+            // The slot must not be pointing at the doomed take (the ops
+            // layer's live chosen guard), so choose another first.
+            try ops.chooseVariant(a.block.id, variantID: second.id)
+            #expect(try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
+                == a.variant.id)
+
+            try ops.deleteVariant(a.variant.id)
+            let defaultAfterDo = try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
+            #expect(defaultAfterDo != a.variant.id, "the default moved off the tombstone")
+            let afterDo = try snapshot(db, rows: [
+                ("variant", a.variant.id), ("variant", second.id), ("variant", third.id),
+                ("block", a.block.id),
+            ])
+
+            #expect(try stack.undo(with: ops) == "Delete Variant")
+            #expect(try db.deletedAt("variant", a.variant.id) == nil)
+            #expect(try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
+                == a.variant.id, "the pre-image default came back")
+
+            #expect(try stack.redo(with: ops) == "Delete Variant")
+            #expect(try db.deletedAt("variant", a.variant.id) != nil)
+            #expect(try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
+                == defaultAfterDo, "…and the re-apply reassigned the default again")
+            #expect(try snapshot(db, rows: [
+                ("variant", a.variant.id), ("variant", second.id), ("variant", third.id),
+                ("block", a.block.id),
+            ], excluding: ["updated_at", "deleted_at"])
+                == snapshotExcludingDeletedAt(afterDo),
+                "every other column round-trips (a re-tombstone writes a fresh stamp)")
+            #expect(stack.depth == 1 && stack.redoDepth == 0)
+        }
+    }
+
+    /// `archiveVariant`'s twin, plus its own divergence rule: the re-apply
+    /// is `quietWhenGone`, so an archive that is already true again pops
+    /// quietly rather than wedging the entry beneath it.
+    @Test func redoingAnArchiveVariantRestoresTheArchivedStateAndTheDefault() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "one")
+            let second = try ops.branchVariant(a.block.id, from: a.variant.id)
+
+            // Archiving the block's DEFAULT (and chosen — legal, unlike
+            // delete: the read-time fallback covers it).
+            try ops.archiveVariant(a.variant.id)
+            let afterDo = try snapshot(db, rows: [
+                ("variant", a.variant.id), ("variant", second.id), ("block", a.block.id),
+            ])
+            #expect(try db.fetchString(
+                "SELECT status FROM variant WHERE id = ?", [a.variant.id]) == "archived")
+            #expect(try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
+                == second.id)
+
+            #expect(try stack.undo(with: ops) == "Archive Variant")
+            #expect(try db.fetchString(
+                "SELECT status FROM variant WHERE id = ?", [a.variant.id]) == "active")
+            #expect(try db.fetchString(
+                "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
+                == a.variant.id)
+
+            #expect(try stack.redo(with: ops) == "Archive Variant")
+            #expect(try snapshot(db, rows: [
+                ("variant", a.variant.id), ("variant", second.id), ("block", a.block.id),
+            ]) == afterDo, "exact-row: status, default pointer and all")
+
+            // I10 stands on the redo path too: the archive's guard is inside
+            // the shared body, so the LAST active variant can never be
+            // archived by a re-apply either.
+            try stack.undo(with: ops)
+            try ops.archiveVariant(second.id)   // now a.variant is the last active
+            #expect(throws: OperationError.lastActiveVariant(id: a.variant.id)) {
+                try ops.archiveVariant(a.variant.id)
+            }
+        }
+    }
+
     // MARK: - Stack semantics
 
     @Test func undoAndRedoPingPongWithoutDrift() throws {
@@ -514,5 +620,17 @@ struct RedoStackTests {
             out["\(table)/\(id)"] = try db.snapshotRow(table, id, excluding: excluding)
         }
         return out
+    }
+
+    /// The same snapshot with `deleted_at` dropped, so a post-do image can
+    /// be compared against a post-redo one: a row that dies AGAIN gets a
+    /// fresh stamp, which is pre-existing undo behaviour and benign (nothing
+    /// keys off a re-tombstoned variant's stamp — the merge pin's rationale).
+    private func snapshotExcludingDeletedAt(
+        _ snapshot: [String: [String: DatabaseValue]?]
+    ) -> [String: [String: DatabaseValue]?] {
+        snapshot.mapValues { row in
+            row.map { columns in columns.filter { $0.key != "deleted_at" } }
+        }
     }
 }
