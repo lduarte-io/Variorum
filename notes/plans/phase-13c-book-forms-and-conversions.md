@@ -1060,6 +1060,58 @@ tradeoff list for the author, per P-5's form. Counts at batch open:
 core **817/96**, Mac **652/123**, mobile 11/4 — all verified green by
 the architect this sitting.
 
+### Batch 1D — the bridge (A1, A2), queued behind 1C
+
+**A1 — Fragments-landed journal entries arrive BOOKLESS. Traced by the
+architect, so build from the trace:** `BridgeEngine.swift:254` calls
+`ops.createOrOpenJournalEntry(entryDate: day)` **and stops**. The Mac's
+own daily door (`BookStructureModel.swift:240-242`) calls the same thing
+**and then** `addPostToReading(entry.container.id, to: readingID)` into
+the designated daily journal book. The bridge path never got that second
+half — so a Fragments-landed day is a journal post in no book, and
+"posts in no book" is exactly what the Pool surface shows. Her report
+(*"fragments journal did sync and appear, but not in the journal book,
+just appeared in the pool"*) is precisely this.
+
+**Make the two paths agree**, and handle the same error cases the Mac
+door already handles (`alreadyInReading`, `lockedReading`,
+`readingAtCapacity`) — read that door and mirror its semantics rather
+than inventing new ones.
+
+**The one genuine design question, and its guard rail:** what if **no
+daily journal book is designated yet**? The Mac door *creates and pins*
+one. A headless bridge minting and pinning a book on her shelf without
+her is a bigger act. **The landing must NEVER be blocked by this** —
+"nothing typed in either app can be permanently lost" is ratified
+doctrine and outranks tidiness, so the entry lands regardless. Options:
+(i) land, and skip membership silently; (ii) land, skip membership, and
+surface it in the bridge status row; (iii) land and create the book as
+the Mac door would. **Implement the most spec-defensible, mark it
+PROVISIONAL, log it.** My lean, for what it is worth: (ii) — the entry
+is never lost, and she learns why it is not on her shelf.
+
+**A2 — the bridge "doesn't seem to refresh often enough."** Trace before
+tuning. Known and relevant: bridge rounds **ride sync rounds**
+(`SyncSession.onRoundCompleted` — after sync, never interleaved, pinned
+at 9b), and cadence triggers are throttled to a **60 s minimum round
+interval**. That throttle was ratified (QUESTIONS #15) but explicitly as
+*"an engineering default of the `settleDebounce` class — adjust freely"*,
+so tuning it is not a re-litigation. **But check the likelier cause
+first:** if bridge rounds ride sync rounds, then bridge freshness is
+bounded by SYNC cadence, and she was signed out of sync entirely from
+2026-07-20 to 2026-07-25 — which would have starved the bridge of rounds
+for five days and may be the whole of what she felt. Report what you
+find; adjust the default only if the trace justifies it.
+
+**Scope guard:** `Sources/VariorumCore/Bridge/` is bridge code, NOT
+`Sources/VariorumCore/Sync/` — the standing sync-engine-surgery rider
+does not apply here. **If a fix would require touching `Sync/` itself,
+stop and report to me** rather than proceeding.
+
+**Never regress:** unchanged text must never push (pinned to the
+server's write counter); the duplicate-day pause; the fail-closed
+canonical-user gate. These are 9b's hard-won guarantees.
+
 ### Batch 1C — the DEAD CLICK (A46), queued behind 1B
 
 **Her answer to the memo's Q4, 2026-07-25, verbatim:**
