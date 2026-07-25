@@ -308,6 +308,33 @@ struct PostRenderQueryTests {
         }
     }
 
+    /// The fan is not the whole truth (13c Stage 1 ladder, R1-1): an
+    /// ARCHIVED take is out of the fan but still prose, and a `deleteBlock`
+    /// cascade takes it with the block. `liveVariantCount` is what EXISTS,
+    /// so a gesture authorized on "there is no text to lose" has something
+    /// honest to read; a tombstoned take is genuinely gone and counts in
+    /// neither.
+    @Test func liveVariantCountSeesArchivedTakesTheFanDoesNot() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "prose")
+            let plain = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(plain[0].liveVariantCount == 1)
+            #expect(!plain[0].hasArchivedTakes)
+
+            let survivor = try ops.branchVariant(a.block.id, from: a.variant.id)
+            let doomed = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.archiveVariant(a.variant.id)   // the one carrying "prose"
+            try ops.deleteVariant(doomed.id)
+            _ = survivor
+
+            let after = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(after[0].activeVariantCount == 1, "the fan shows only the survivor")
+            #expect(after[0].liveVariantCount == 2, "…and the archived take still exists")
+            #expect(after[0].hasArchivedTakes)
+        }
+    }
+
     @Test func variantLockFlagReflectsTheRenderedVariant() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()

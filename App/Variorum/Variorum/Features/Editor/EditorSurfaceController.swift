@@ -1076,7 +1076,7 @@ final class EditorSurfaceController {
     /// backspace/forward-delete of the ONE separator beside an EMPTY block
     /// deletes that block instead of refusing.
     ///
-    /// Three guards sit here rather than in the pure index, because this
+    /// Four guards sit here rather than in the pure index, because this
     /// is where the fan and the store are known, and together they are
     /// what keeps the carve from widening:
     ///
@@ -1084,7 +1084,15 @@ final class EditorSurfaceController {
     ///    with any text keeps the ratified refusal;
     /// 2. the block has NO FAN (`activeVariantCount == 1`) — takes are
     ///    text, and a seam-key must never take one away unseen;
-    /// 3. the slot is editable (a live variant, unlocked, not a gap).
+    /// 3. the block carries NO ARCHIVED TAKE either
+    ///    (`liveVariantCount == 1` — 13c Stage 1 ladder, R1-1): archive is
+    ///    out-of-the-fan, not gone, so an archived take is prose the
+    ///    `deleteBlock` cascade would take with the block. Reachable in
+    ///    three ordinary gestures (branch · archive the one with the prose ·
+    ///    blank the survivor), and the fan count cannot see it — which
+    ///    falsified the carve's only authorization, "there is no text to
+    ///    lose";
+    /// 4. the slot is editable (a live variant, unlocked, not a gap).
     ///
     /// The store is verified again at run time by a compare-and-set, so a
     /// sync apply landing text into the block between the keystroke and
@@ -1105,6 +1113,11 @@ final class EditorSurfaceController {
         // No fan: a block with several takes carries text in the ones you
         // are not looking at, so the "nothing to lose" argument fails.
         guard i < model.slots.count, model.slots[i].activeVariantCount == 1 else { return nil }
+        // …and no ARCHIVED take either (R1-1). Archived takes are out of the
+        // fan but still hold prose, and deleting the block cascades them
+        // away. `liveVariantCount` counts regardless of `status`, so this is
+        // the guard that actually says "there is no text to lose".
+        guard model.slots[i].liveVariantCount == 1 else { return nil }
         return EmptyBlockDeletion(blockID: entry.blockID, variantID: variantID, entryIndex: i)
     }
 

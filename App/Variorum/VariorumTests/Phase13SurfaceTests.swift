@@ -57,7 +57,7 @@ struct EditorTypographyTests {
             Queries.RenderedBlock(
                 blockID: "b1", placementID: "p1", position: "a",
                 variantID: "v1", text: "Prose.", activeVariantCount: 1,
-                variantLocked: false),
+                liveVariantCount: 1, variantLocked: false),
         ])
         let font = text.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
         #expect(font?.familyName == "Iowan Old Style",

@@ -46,19 +46,25 @@ struct SeededGenerator: RandomNumberGenerator {
     }
 }
 
-/// A slot literal for pure mapping tests.
+/// A slot literal for pure mapping tests. `archived` is the count of
+/// ARCHIVED takes on the block (13c Stage 1 ladder, R1-1) — the fan cannot
+/// see them, but they are still prose; the default of none is the ordinary
+/// case and any test that means otherwise says so.
 func slot(
     _ blockID: String,
     variant variantID: String? = nil,
     text: String?,
     fan activeVariantCount: Int = 1,
+    archived archivedVariantCount: Int = 0,
     locked variantLocked: Bool = false
 ) -> Queries.RenderedBlock {
     Queries.RenderedBlock(
         blockID: blockID, placementID: "p-\(blockID)", position: "m",
         variantID: variantID ?? (text == nil ? nil : "v-\(blockID)"),
         text: text,
-        activeVariantCount: activeVariantCount, variantLocked: variantLocked)
+        activeVariantCount: activeVariantCount,
+        liveVariantCount: activeVariantCount + archivedVariantCount,
+        variantLocked: variantLocked)
 }
 
 @MainActor

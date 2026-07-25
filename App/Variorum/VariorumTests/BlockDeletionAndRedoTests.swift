@@ -145,6 +145,47 @@ struct BlockDeletionAndRedoTests {
         }
     }
 
+    /// **The fourth guard** (13c Stage 1 ladder round 1, R1-1). An ARCHIVED
+    /// take is out of the fan but is still TEXT, and `deleteBlock` cascades
+    /// it away with the block — so a block that renders empty with
+    /// `activeVariantCount == 1` could still be carrying prose, and the
+    /// carve's whole authorization ("there is no text to lose") failed
+    /// there. Reachable in three ordinary gestures, all legal: branch a
+    /// take, archive the one with the prose (the other is still active, so
+    /// I10 is satisfied), blank the survivor (R90's power gesture).
+    ///
+    /// Recoverable via ⌥⌘Z and the tray, so this was never data loss — but
+    /// the NARROWNESS is what the carve was granted on, and none of the
+    /// nine original cannot-widen pins reached this state.
+    @Test func anARCHIVEDTakeCarryingProseKeepsTheRefusal() async throws {
+        try await withEditor(seedBlocks: ["prose", "hello"]) { harness in
+            let slots = try harness.storeSlots()
+            let blockID = slots[0].blockID
+            let original = try #require(slots[0].variantID)
+            let branch = try harness.session.operations.branchVariant(blockID, from: original)
+            // Legal: the branch is active, so archiving the original is not
+            // the last-active refusal.
+            try harness.session.operations.archiveVariant(original)
+            // …and blanking the survivor is an ordinary edit.
+            try harness.session.operations.autosave(branch.id, text: "", charDelta: -5)
+            try harness.reload()
+
+            let after = try harness.storeSlots()
+            #expect(after[0].text == "", "the block renders EMPTY")
+            #expect(after[0].activeVariantCount == 1,
+                    "…and the fan count cannot see the archived take — the trap")
+            #expect(harness.model.index.entries[0].length == 0)
+            // The pure index still names it: the guard is the caller's,
+            // where the store is known (the fan/lock pins' shape).
+            #expect(harness.model.index.emptyBlockDeletion(
+                replacing: NSRange(location: 0, length: 1), isDeletion: true) == 0)
+
+            #expect(harness.model.planEmptyBlockDeletion(
+                range: NSRange(location: 0, length: 1), replacement: "") == nil,
+                "an archived take carries prose — deleting the block would cascade it away")
+        }
+    }
+
     @Test func theCarveAndTheTwoCrossBlockPlansAreMUTUALLYEXCLUSIVE() async throws {
         // The carve runs FIRST in `shouldChangeText`; this is why that is
         // safe. Both cross-block plans collect their targets by INTERSECTION

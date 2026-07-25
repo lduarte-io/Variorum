@@ -87,6 +87,7 @@ extension Queries {
                 variantID: variant.id,
                 text: variant.workingText,
                 activeVariantCount: slot.activeVariantCount,
+                liveVariantCount: slot.liveVariantCount,
                 variantLocked: variant.locked)
         }
     }

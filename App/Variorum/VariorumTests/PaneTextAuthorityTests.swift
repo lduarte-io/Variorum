@@ -27,7 +27,8 @@ struct PaneTextAuthorityTests {
         Queries.RenderedBlock(
             blockID: blockID, placementID: "p-\(blockID)", position: "a",
             variantID: variantID, text: text,
-            activeVariantCount: variantID == nil ? 0 : 1, variantLocked: false)
+            activeVariantCount: variantID == nil ? 0 : 1,
+            liveVariantCount: variantID == nil ? 0 : 1, variantLocked: false)
     }
 
     // MARK: - Invariant 1: exactly one live pane

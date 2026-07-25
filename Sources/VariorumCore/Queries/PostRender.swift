@@ -33,18 +33,37 @@ extension Queries {
         /// block row, so a gap slot never badges — variants that arrived
         /// before their block (sync order) count 0 until the block lands.
         public let activeVariantCount: Int
+        /// **Live variants on the block regardless of `status`** — active
+        /// AND archived (13c Stage 1 ladder, R1-1). `activeVariantCount` is
+        /// the FAN: what the badge shows and what the author is looking at.
+        /// This is what EXISTS. The two differ exactly when a block carries
+        /// archived takes, and an archived take is still prose that a
+        /// `deleteBlock` cascade takes with it — so any gesture whose
+        /// authorization is "there is no text to lose here" must read THIS
+        /// count, never the fan's. Counted through the live block row like
+        /// its sibling, so a gap slot reads 0.
+        public let liveVariantCount: Int
         /// The rendered variant's lock (frozen buffer, edit by branch/unlock).
         public let variantLocked: Bool
 
         public var isGap: Bool { variantID == nil }
         public var hasFan: Bool { activeVariantCount > 1 }
+        /// True when the block carries takes the fan does not show — the
+        /// "renders empty but is not textless" state R1-1 found.
+        public var hasArchivedTakes: Bool { liveVariantCount > activeVariantCount }
 
         /// Public so view layers and tests can build projections directly
         /// (the editor's pure mapping functions take these as input).
+        ///
+        /// `liveVariantCount` is REQUIRED, never defaulted to the active
+        /// count: a projection builder that has not thought about archived
+        /// takes must say so, rather than silently reporting a block as
+        /// textless (the `UndoStack.register(redo:)` precedent — green by
+        /// construction, not by audit).
         public init(
             blockID: String, placementID: String, position: String,
             variantID: String?, text: String?,
-            activeVariantCount: Int, variantLocked: Bool
+            activeVariantCount: Int, liveVariantCount: Int, variantLocked: Bool
         ) {
             self.blockID = blockID
             self.placementID = placementID
@@ -52,6 +71,7 @@ extension Queries {
             self.variantID = variantID
             self.text = text
             self.activeVariantCount = activeVariantCount
+            self.liveVariantCount = liveVariantCount
             self.variantLocked = variantLocked
         }
     }
@@ -81,7 +101,12 @@ extension Queries {
                   (SELECT COUNT(*) FROM variant v
                     WHERE v.block_id = b.id
                       AND v.deleted_at IS NULL
-                      AND v.status = 'active')                     AS active_variant_count
+                      AND v.status = 'active')                     AS active_variant_count,
+                  -- Archived takes included: what EXISTS on the block, as
+                  -- against what the fan shows (R1-1).
+                  (SELECT COUNT(*) FROM variant v
+                    WHERE v.block_id = b.id
+                      AND v.deleted_at IS NULL)                    AS live_variant_count
                 FROM container_block cb
                 LEFT JOIN block b
                   ON b.id = cb.block_id AND b.deleted_at IS NULL
@@ -105,6 +130,7 @@ extension Queries {
                 variantID: row["variant_id"],
                 text: row["text"],
                 activeVariantCount: row["active_variant_count"],
+                liveVariantCount: row["live_variant_count"],
                 variantLocked: row["variant_locked"])
         }
     }
