@@ -227,6 +227,71 @@ struct PanePublishDoorTests {
         #expect(scheduler.pending == 0, "and then converged")
     }
 
+    // MARK: F1 — the one-publish-door guarantee, ENFORCED (13c 1A)
+    //
+    // The Stage 4 gate found a real bug here: a height written into SwiftUI
+    // state DURING an update pass is silently dropped, leaving a pane framed
+    // one line tall under two lines of text. `PanePublisher` closed it for
+    // the two publishes that existed — but the routing itself was a COMMENT
+    // ("Nothing in this coordinator writes SwiftUI state except through
+    // it"), and `install` takes the write closures as loose parameters, so a
+    // third piece of pane state (a measured width, a scroll offset, a
+    // selection echo) could be written straight out of `updateNSView` and
+    // nothing would fail. That is P-1's shape one layer down: green by
+    // audit rather than by construction.
+    //
+    // The chosen closing is the WALK (the registry-walk spirit, and the
+    // shape the plan's F1 finding offered first), because the type-level
+    // alternative — `install` taking one value only `PanePublisher` can
+    // consume — channels only the publishes that exist today and would not
+    // stop a fourth closure being added beside it. The walk is written
+    // NAME-INDEPENDENTLY: it reads the surface's own `@Binding`
+    // declarations out of the source, so a binding added tomorrow is
+    // covered without anyone remembering to update this test.
+
+    /// Every SwiftUI state write the pane surface makes must be lexically
+    /// inside the `install(…)` call — i.e. it becomes a `PanePublisher`
+    /// write closure and inherits the sync-write + bounded-heal discipline.
+    @Test func everyPaneStateWriteLeavesThroughThePublishDoor() throws {
+        let source = try PaneSurfaceSource.text()
+        let representable = try PaneSurfaceSource.body(
+            of: "private struct PaneSurfaceRepresentable", in: source)
+
+        // The bindings, read from the source itself — no hard-coded list.
+        var bindings: [String] = []
+        for line in representable.components(separatedBy: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix("@Binding var ") else { continue }
+            let rest = trimmed.dropFirst("@Binding var ".count)
+            bindings.append(String(rest.prefix { $0.isLetter || $0.isNumber || $0 == "_" }))
+        }
+        #expect(bindings.count >= 2, "found the pane's bindings: \(bindings)")
+
+        let installCall = try PaneSurfaceSource.installCall(in: representable)
+        for name in bindings {
+            let assignments = PaneSurfaceSource.assignmentCount(of: name, in: representable)
+            let insideInstall = PaneSurfaceSource.assignmentCount(of: name, in: installCall)
+            #expect(assignments > 0, "\(name) is written somewhere")
+            #expect(assignments == insideInstall,
+                    "every write to `\(name)` must be a PanePublisher write closure passed to install(…) — found \(assignments) write(s), \(insideInstall) inside the door")
+        }
+    }
+
+    /// …and the coordinator can never acquire state of its own: SwiftUI
+    /// bindings never enter it, so `install`'s closures remain the only
+    /// channel by which anything it does can reach a view.
+    @Test func theCoordinatorHoldsNoSwiftUIStateOfItsOwn() throws {
+        let source = try PaneSurfaceSource.text()
+        let coordinator = try PaneSurfaceSource.body(
+            of: "final class Coordinator: NSObject, NSTextViewDelegate", in: source)
+        #expect(!coordinator.contains("@Binding"),
+                "the coordinator must not declare SwiftUI bindings")
+        #expect(!coordinator.contains("@State"),
+                "the coordinator must not declare SwiftUI state")
+        // The publisher is the only thing it stores that can write outward.
+        #expect(coordinator.contains("private var publisher: PanePublisher?"))
+    }
+
     /// A dismantled pane publishes nothing: `invalidate()` drops every
     /// closure and every pending duty, and an already-scheduled turn finds
     /// nothing to do (no write into a torn-down view's state).
@@ -251,5 +316,75 @@ struct PanePublishDoorTests {
         publisher.publishHeight()
         #expect(heights == [46], "and nothing publishes afterwards")
         #expect(scheduler.pending == 0)
+    }
+}
+
+// MARK: - Source reading for the F1 walk
+
+/// Reads `PaneSurface.swift` and slices out balanced-brace bodies. Crude by
+/// design: a real parser would be a dependency, and the shapes this walk
+/// asks about (a declaration's body; one call's argument list) are
+/// unambiguous in this file.
+private enum PaneSurfaceSource {
+    static func text() throws -> String {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()   // VariorumTests
+            .deletingLastPathComponent()   // App/Variorum
+            .appendingPathComponent("Variorum/Surface/PaneSurface.swift")
+        return try String(contentsOf: url, encoding: .utf8)
+    }
+
+    /// The `{ … }` body following `declaration`, brace-balanced.
+    static func body(of declaration: String, in source: String) throws -> String {
+        let start = try #require(source.range(of: declaration),
+                                 "PaneSurface.swift no longer declares `\(declaration)` — the F1 walk must be re-pointed, not deleted")
+        return balanced(from: source[start.upperBound...], open: "{", close: "}")
+    }
+
+    /// The argument list of the `install(` call, parenthesis-balanced.
+    static func installCall(in body: String) throws -> String {
+        let start = try #require(body.range(of: "install("),
+                                 "the pane no longer installs through one call")
+        // Balance from the "(" itself — `upperBound` sits just past it.
+        return balanced(from: body[body.index(before: start.upperBound)...],
+                        open: "(", close: ")")
+    }
+
+    /// Assignments `name =` (never `==`, `>=`, `!=`, `+=`).
+    static func assignmentCount(of name: String, in text: String) -> Int {
+        var count = 0
+        var rest = Substring(text)
+        while let hit = rest.range(of: name) {
+            let after = rest[hit.upperBound...].drop { $0 == " " }
+            let before = hit.lowerBound == rest.startIndex
+                ? Character(" ") : rest[rest.index(before: hit.lowerBound)]
+            let isWholeWord = !(before.isLetter || before.isNumber || before == "_"
+                || before == "." || before == "$")
+            if isWholeWord, after.first == "=", after.dropFirst().first != "=" {
+                count += 1
+            }
+            rest = rest[hit.upperBound...]
+        }
+        return count
+    }
+
+    private static func balanced(
+        from text: Substring, open: Character, close: Character
+    ) -> String {
+        var depth = 0
+        var started = false
+        var out = ""
+        for character in text {
+            if character == open {
+                depth += 1
+                started = true
+            }
+            if started { out.append(character) }
+            if character == close {
+                depth -= 1
+                if depth == 0 { break }
+            }
+        }
+        return out
     }
 }
