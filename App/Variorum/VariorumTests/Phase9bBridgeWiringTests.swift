@@ -207,6 +207,41 @@ struct Phase9bBridgeWiringTests {
         }
     }
 
+    /// Phase 13c, batch 1D (ledger A2) — **a stale bridge must not look
+    /// fresh.** The row's time-only label read as "just now" for a bridge
+    /// whose last round was days ago, which is exactly how the author's
+    /// five-day starvation presented ("Bridged 11:04 PM", every day of it)
+    /// while she reported that the bridge "doesn't seem to refresh often
+    /// enough". Past today, the label carries the date.
+    @Test func theLastBridgedLabelShowsTheDateOnceItIsNotToday() {
+        var components = DateComponents()
+        components.year = 2026
+        components.month = 7
+        components.day = 25
+        components.hour = 9
+        components.minute = 30
+        let calendar = Calendar(identifier: .gregorian)
+        let now = calendar.date(from: components)!
+
+        #expect(BridgeStatusRow.lastBridgedLabel(nil, now: now, calendar: calendar)
+                == "Not bridged yet")
+
+        // Earlier the SAME day: time alone, as before.
+        let earlierToday = now.addingTimeInterval(-3 * 3600)
+        let todayLabel = BridgeStatusRow.lastBridgedLabel(
+            earlierToday, now: now, calendar: calendar)
+        #expect(todayLabel.hasPrefix("Bridged "))
+        #expect(!todayLabel.contains("2026"))
+
+        // Five days ago — her exact case: the date must be in the label.
+        let fiveDaysAgo = now.addingTimeInterval(-5 * 24 * 3600)
+        let staleLabel = BridgeStatusRow.lastBridgedLabel(
+            fiveDaysAgo, now: now, calendar: calendar)
+        #expect(staleLabel != todayLabel)
+        #expect(staleLabel.contains("2026"),
+                "a bridge that last ran days ago must say so: \(staleLabel)")
+    }
+
     /// The paused-day surface reaches the app layer (the status row renders
     /// `status.pausedDays` — the visible half of the duplicate-day pause).
     @Test func pausedDaysReachTheSessionStatus() async throws {

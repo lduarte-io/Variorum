@@ -42,12 +42,45 @@ struct Phase9cAuthWiringTests {
     /// composition-truths).
     private actor RecordingSyncTransport: SyncTransport {
         private(set) var calls = 0
+        /// Round PARKING for the 13c A2 ordering pin — off by default, so
+        /// every pre-existing test sees the original pass-through transport.
+        /// Parked, a round that reaches the transport suspends until
+        /// `open()`, which is how "no bridge round starts while a sync round
+        /// is in flight" becomes observable at the AppServices level.
+        private var gated = false
+        private var gateWaiters: [CheckedContinuation<Void, Never>] = []
+        private var arrivalWaiters: [CheckedContinuation<Void, Never>] = []
+
+        func park() { gated = true }
+
+        func awaitParked() async {
+            if !gateWaiters.isEmpty { return }
+            await withCheckedContinuation { arrivalWaiters.append($0) }
+        }
+
+        func open() {
+            gated = false
+            let waiters = gateWaiters
+            gateWaiters.removeAll()
+            for waiter in waiters { waiter.resume() }
+        }
+
+        private func pass() async {
+            let arrivals = arrivalWaiters
+            arrivalWaiters.removeAll()
+            for arrival in arrivals { arrival.resume() }
+            guard gated else { return }
+            await withCheckedContinuation { gateWaiters.append($0) }
+        }
+
         func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
             calls += 1
+            await pass()
             return batch.map { _ in .rejected(current: nil) }
         }
         func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
             calls += 1
+            await pass()
             return []
         }
         /// Uncounted round plumbing (the pins count data calls).
@@ -79,6 +112,7 @@ struct Phase9cAuthWiringTests {
     private func withWiredServices(
         storeVariant: AppDatabase.StoreVariant = .real,
         bridgeEnabled: Bool = true,
+        bridgeMinimumRoundInterval: Duration = .seconds(60),
         _ body: @MainActor (AppServices, AuthSession, AuthSession, AppDatabase, RecordingSyncTransport, RecordingBridgeTransport) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
@@ -106,6 +140,7 @@ struct Phase9cAuthWiringTests {
                 session: session, storeVariant: storeVariant,
                 backupEnabled: false, bridgeEnabled: bridgeEnabled,
                 auth: auth, fragmentsAuth: fragmentsAuth,
+                bridgeMinimumRoundInterval: bridgeMinimumRoundInterval,
                 makeSyncTransport: { _ in syncTransport },
                 makeBridgeTransport: { _, _ in bridgeTransport })
             await services.start()
@@ -228,6 +263,84 @@ struct Phase9cAuthWiringTests {
 
     // MARK: The retirement walk (review focus 4 — "no dead credential
     // path"; grep-pinned like the A6 walks)
+
+    // MARK: The lifecycle cadence (Phase 13c, batch 1D — ledger A2)
+    //
+    // Her report: *"the bridge doesn't seem to refresh often enough."*
+    // Traced: bridge rounds ride `sync.onRoundCompleted`, so an UNCONFIGURED
+    // sync session — signed out of the Variorum project, an expired session,
+    // or a failed owner adoption, all of which return from
+    // `connectSyncIfAllowed` before composing — leaves the bridge with NO
+    // cadence trigger at all. It then runs exactly once per launch, which is
+    // what starved it from 2026-07-20 to 07-25 while her Fragments session
+    // stayed perfectly valid.
+
+    /// THE PIN (red-on-old): with sync off and the bridge configured, a
+    /// lifecycle event still reaches the bridge.
+    @Test func theLifecycleCadenceReachesTheBridgeWhenSyncIsOff() async throws {
+        try await withWiredServices(bridgeMinimumRoundInterval: .milliseconds(50)) {
+            services, _, fragmentsAuth, _, _, bridgeTransport in
+            // Her exact state: Fragments signed in, Variorum signed out.
+            await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
+            await settle { services.bridge.isConfigured }
+            #expect(!services.sync.isConfigured, "precondition: no sync chain")
+            await settle { await bridgeTransport.calls > 0 }
+            let afterLaunch = await bridgeTransport.calls
+            #expect(afterLaunch > 0, "the launch round is the only one the old wiring had")
+
+            // Past the cadence throttle, the app becomes active.
+            try await Task.sleep(for: .milliseconds(80))
+            services.triggerLifecycleRound()
+
+            await settle { await bridgeTransport.calls > afterLaunch }
+            #expect(await bridgeTransport.calls > afterLaunch,
+                    "with sync off, a lifecycle event must still reach the bridge")
+        }
+    }
+
+    /// THE ORDERING PIN, unchanged by the fallback: with sync ON, the bridge
+    /// still rides the COMPLETED sync round and never starts beside one — so
+    /// the fallback can never become "always trigger both".
+    @Test func theLifecycleCadenceStillNeverInterleavesWhenSyncIsOn() async throws {
+        try await withWiredServices(bridgeMinimumRoundInterval: .milliseconds(50)) {
+            services, auth, fragmentsAuth, _, syncTransport, bridgeTransport in
+            await syncTransport.park()
+            await auth.adopt(Self.tokens(userID: "owner-13c"))
+            await settle { services.sync.isConfigured }
+            await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
+            await settle { services.bridge.isConfigured }
+            await settle { await bridgeTransport.calls > 0 }
+            let afterLaunch = await bridgeTransport.calls
+
+            // A sync round is parked mid-flight; the app becomes active.
+            await syncTransport.awaitParked()
+            try await Task.sleep(for: .milliseconds(80))
+            services.triggerLifecycleRound()
+            try await Task.sleep(for: .milliseconds(80))
+            #expect(await bridgeTransport.calls == afterLaunch,
+                    "no bridge round may start while a sync round is in flight")
+
+            // The completed round carries the bridge with it, as always.
+            await syncTransport.open()
+            await settle { await bridgeTransport.calls > afterLaunch }
+            #expect(await bridgeTransport.calls > afterLaunch)
+        }
+    }
+
+    /// The production hook actually uses it — otherwise the method above is
+    /// a correct rule nothing calls (the source-walk form, beside the
+    /// retirement walk below).
+    @Test func theBecomeActiveHookRoutesThroughTheLifecycleCadence() throws {
+        let appFile = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Variorum/VariorumApp.swift")
+        let text = try String(contentsOf: appFile, encoding: .utf8)
+        #expect(text.contains("services?.triggerLifecycleRound()"),
+                "the became-active hook must run the lifecycle cadence")
+        #expect(!text.contains("services?.sync.triggerSync()"),
+                "…and never sync alone: with sync unconfigured the bridge would lose every cadence trigger it has")
+    }
 
     @Test func thePasteInIsFullyRetiredInTheSharedSources() throws {
         let sharedDir = URL(fileURLWithPath: #filePath)

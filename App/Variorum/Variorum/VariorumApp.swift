@@ -45,7 +45,12 @@ struct VariorumApp: App {
                     }
                     .onReceive(NotificationCenter.default.publisher(
                         for: NSApplication.didBecomeActiveNotification)) { _ in
-                        services?.sync.triggerSync()
+                        // The lifecycle cadence, not sync alone (13c A2): a
+                        // sync round, plus a bridge round when sync cannot
+                        // deliver one — otherwise the bridge silently loses
+                        // every cadence trigger it has whenever the Variorum
+                        // session is absent. See AppServices.
+                        services?.triggerLifecycleRound()
                     }
             case .failed(let error):
                 StoreFailureView(error: error) { bootstrap.retry() }

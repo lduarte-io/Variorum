@@ -74,7 +74,26 @@ struct BridgeStatusRow: View {
     }
 
     private var lastBridgedLabel: String {
-        guard let last = bridge.status.lastSuccessAt else { return "Not bridged yet" }
-        return "Bridged \(last.formatted(date: .omitted, time: .shortened))"
+        Self.lastBridgedLabel(bridge.status.lastSuccessAt, now: Date())
+    }
+
+    /// A STALE BRIDGE MUST NOT LOOK FRESH (13c A2). The time-only form read
+    /// as "just now" for a bridge whose last round was DAYS ago — which is
+    /// exactly how the author's five-day starvation presented while she was
+    /// signed out of the Variorum project (the row said "Bridged 11:04 PM"
+    /// the whole time). Past today, the label carries the date, so the row
+    /// answers "when did this last refresh?" — the question her report
+    /// ("doesn't seem to refresh often enough") was really asking.
+    ///
+    /// Pure and injected-now so it pins by test; the view re-renders on every
+    /// status change, which is when the answer can change.
+    static func lastBridgedLabel(
+        _ last: Date?, now: Date, calendar: Calendar = .current
+    ) -> String {
+        guard let last else { return "Not bridged yet" }
+        if calendar.isDate(last, inSameDayAs: now) {
+            return "Bridged \(last.formatted(date: .omitted, time: .shortened))"
+        }
+        return "Bridged \(last.formatted(date: .abbreviated, time: .shortened))"
     }
 }

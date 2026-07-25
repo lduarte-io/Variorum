@@ -74,6 +74,7 @@ final class AppServices {
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
         backupEnabled: Bool, bridgeEnabled: Bool = false,
         auth: AuthSession? = nil, fragmentsAuth: AuthSession? = nil,
+        bridgeMinimumRoundInterval: Duration = .seconds(60),
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
         makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil
     ) {
@@ -100,7 +101,9 @@ final class AppServices {
         sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
         // THE A4 FENCE EXTENDS TO THE BRIDGE (Phase 9b): the author's live
         // Fragments journal pairs with the REAL store only.
-        bridge = BridgeSession(allowsBridge: bridgeEnabled && storeVariant == .real)
+        bridge = BridgeSession(
+            allowsBridge: bridgeEnabled && storeVariant == .real,
+            minimumRoundInterval: bridgeMinimumRoundInterval)
         self.auth = auth ?? AuthSession(configuration: ProjectConfig.variorumAuth)
         self.fragmentsAuth = fragmentsAuth ?? AuthSession(
             configuration: ProjectConfig.fragmentsAuth,
@@ -163,6 +166,35 @@ final class AppServices {
         bridge.stop()
         idleCommits.stop()
         backup?.stop()
+    }
+
+    /// THE LIFECYCLE CADENCE PULSE (the app's became-active hook; launch runs
+    /// its own through the sign-in chains): one sync round, and — only when
+    /// sync cannot deliver one — one bridge round directly.
+    ///
+    /// **A2 (Phase 13c) — the traced hole.** Bridge rounds ride
+    /// `sync.onRoundCompleted` above, which is the ordering contract and
+    /// stays exactly as it is (a landing sees the store the mirror sync just
+    /// settled). But an UNCONFIGURED sync session completes no rounds at
+    /// all, so in that state the bridge lost EVERY cadence trigger it has
+    /// and ran exactly once per launch. That is not a corner: it is the
+    /// state the author was in from 2026-07-20 to 07-25 (signed out of the
+    /// Variorum project while the Fragments session stayed valid — her
+    /// report was "the bridge doesn't seem to refresh often enough"), and it
+    /// is equally reachable through an expired Variorum session or a failed
+    /// owner adoption, since `connectSyncIfAllowed` returns before composing
+    /// on either. The 9b plan's Step 5 names the bridge's cadence as
+    /// "launch / became-active / post-write-settle"; this makes the
+    /// became-active half hold when sync is off.
+    ///
+    /// When sync IS configured, behaviour is byte-identical to before — the
+    /// bridge still follows the completed round and never interleaves with
+    /// one. The fallback is a CADENCE trigger (never manual), so the 60 s
+    /// throttle still guards the corpus hash sweep (QUESTIONS #15) against
+    /// rapid app switching.
+    func triggerLifecycleRound() {
+        sync.triggerSync()
+        if !sync.isConfigured { bridge.trigger() }
     }
 
     // MARK: - The Variorum sign-in (route A — the identity)
