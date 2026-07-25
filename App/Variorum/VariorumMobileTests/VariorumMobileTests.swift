@@ -291,6 +291,108 @@ struct EntryListTests {
         }
     }
 
+    /// THE PIN (red-on-old), Phase 13c batch 1D — ledger A1's class sweep,
+    /// third instance: **a phone-captured entry belongs in the daily journal
+    /// book too.** This door minted the day's entry and stopped, exactly as
+    /// the Fragments bridge did, so an entry captured here arrived on the
+    /// Mac in no book and showed up in the Pool — and nothing repaired it,
+    /// because a phone-minted day she never touches in Fragments produces
+    /// only a push, never a landing.
+    @Test func aPhoneCapturedEntryJoinsTheDailyJournalBook() async throws {
+        try await withMobileWorld { session, db in
+            let book = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(
+                    name: "Journal", kind: .curated, profile: "journal",
+                    sortField: .entryDate, sortDir: .asc)
+                try ops.setDailyJournalBook(book.id)
+                return book.id
+            }
+            let model = EntryListViewModel(session: session)
+
+            let postID = try #require(await model.open(on: "2026-07-07"))
+
+            let members = try await db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: "SELECT post_id FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                    arguments: [book])
+            }
+            #expect(members == [postID], "the captured entry must be shelved")
+            #expect(model.lastError == nil, "a clean shelving says nothing")
+
+            // Re-opening the day mints no second membership (the notebook
+            // rule's door is idempotent on both halves).
+            _ = await model.open(on: "2026-07-07")
+            #expect(try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ?",
+                    arguments: [book])
+            } == 1)
+        }
+    }
+
+    /// The mint is NEVER blocked by shelving, and the phone says why —
+    /// every outcome the shared helper can report has wording that points at
+    /// the Mac, where books are managed.
+    @Test func theCaptureMintIsNeverBlockedByShelving() async throws {
+        try await withMobileWorld { session, db in
+            let model = EntryListViewModel(session: session)
+
+            // No daily journal book designated at all.
+            let postID = try #require(await model.open(on: "2026-07-07"))
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT id FROM container WHERE id = ?", arguments: [postID])
+            } == postID, "the entry always opens")
+            #expect(model.lastError?.contains("journal book") == true)
+            // And no book was invented on her shelf by a capture tap.
+            #expect(try await db.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL")
+            } == 0)
+
+            // The finished / full / other-refusal wordings all speak.
+            #expect(EntryListViewModel.shelvingNote(.shelved(readingID: "r")) == nil)
+            #expect(EntryListViewModel.shelvingNote(.alreadyDecided) == nil)
+            #expect(EntryListViewModel.shelvingNote(.bookFinished)?.contains("finished") == true)
+            #expect(EntryListViewModel.shelvingNote(.bookAtCapacity)?.contains("full") == true)
+            #expect(EntryListViewModel.shelvingNote(.refused("nope"))?.contains("nope") == true)
+        }
+    }
+
+    /// A membership the author REMOVED stays removed — a capture tap must
+    /// not re-shelve it. (Red on the pre-fix door as well, though for a
+    /// different reason: with nothing ever shelved there is no membership to
+    /// remove, so the setup itself throws `postNotInReading`. Recorded
+    /// honestly rather than filed as a narrowness pin.)
+    @Test func theCaptureDoorNeverReShelvesAnEntryTheAuthorRemoved() async throws {
+        try await withMobileWorld { session, db in
+            let model = EntryListViewModel(session: session)
+            let book = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(
+                    name: "Journal", kind: .curated, profile: "journal")
+                try ops.setDailyJournalBook(book.id)
+                return book.id
+            }
+            let postID = try #require(await model.open(on: "2026-07-07"))
+            try await session.runner.run { ops in
+                try ops.removePostFromReading(postID, from: book)
+            }
+
+            _ = await model.open(on: "2026-07-07")
+
+            let rows = try await db.read { db in
+                try Row.fetchAll(
+                    db,
+                    sql: "SELECT deleted_at FROM reading_post WHERE reading_id = ?",
+                    arguments: [book])
+                    .map { $0["deleted_at"] as String? }
+            }
+            #expect(rows.count == 1, "no second membership row")
+            #expect(rows.first ?? nil != nil, "her removal stands")
+        }
+    }
+
     @Test func theListingStaysBounded() async throws {
         try await withMobileWorld { session, _ in
             for day in 10...19 {

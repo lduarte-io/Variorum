@@ -71,6 +71,92 @@ extension Operations {
         }
     }
 
+    /// What `shelveInDailyJournalBook` did, so each surface can speak in its
+    /// own voice while there stays exactly ONE implementation of the rules.
+    public enum DailyBookShelving: Equatable, Sendable {
+        /// The entry joined the designated daily journal book.
+        case shelved(readingID: String)
+        /// Nothing to do: the pair is already decided — a LIVE membership
+        /// (shelved) or a TOMBSTONED one (the author took it off the shelf).
+        case alreadyDecided
+        /// No daily journal book is designated, or the designation dangles
+        /// at a deleted book (the fallback class).
+        case noDailyBook
+        /// The daily book is finished (`reading.locked`).
+        case bookFinished
+        /// The daily book is at its `max_posts` cap.
+        case bookAtCapacity
+        /// Any other refusal, verbatim (e.g. a SMART book designated as the
+        /// daily journal, which cannot take memberships at all).
+        case refused(String)
+    }
+
+    /// **THE SECOND HALF OF THE DAILY DOOR** (Phase 13c, batch 1D — ledger
+    /// A1). The day's entry belongs on the shelf: `JournalBooks.openToday`
+    /// (⌘J / "Today's Entry") has always done create-or-open AND
+    /// `addPostToReading` into the designated daily book — ordinary
+    /// membership, R50's letter. Every OTHER door that mints the day's entry
+    /// called only the first half, so the entries they made arrived in NO
+    /// book, and "posts in no book" is exactly what the Pool surface lists
+    /// (R29) — the author's report, verbatim: *"fragments journal did sync
+    /// and appear, but not in the journal book, just appeared in the pool."*
+    ///
+    /// This is that half, made shared so the class cannot recur one door at
+    /// a time. Callers: the Fragments bridge's landing half
+    /// (`BridgeEngine.pullAndLand`) and the phone's capture door
+    /// (`EntryListViewModel.open(on:)`). ⌘J keeps its own inline version
+    /// because it additionally CREATES and pins the book on first use — a
+    /// deliberate difference, not a fork: creating a book is an act only a
+    /// button press she pressed may take (PROVISIONAL, QUESTIONS #37).
+    ///
+    /// Three rules, each deliberate:
+    ///
+    /// - **NEVER THROWS, so it can never block a mint or a landing.** It
+    ///   returns what happened; the caller words it. "Nothing typed in
+    ///   either app can be permanently lost" outranks tidiness, so a
+    ///   finished book, a full book, a smart book, a dangling designation
+    ///   and any unexpected error all report rather than propagate.
+    /// - **Never re-shelves what she took off the shelf.** ANY membership
+    ///   row for the pair — live or tombstoned — means the pair is already
+    ///   decided, so a headless round can never undo a deliberate
+    ///   `removePostFromReading`.
+    /// - **…and that same rule is what makes this a REPAIR**: an entry with
+    ///   no membership row of any kind gets shelved whenever a door reaches
+    ///   it again, which is how entries that landed bookless before this
+    ///   existed find their way onto the shelf.
+    @discardableResult
+    public func shelveInDailyJournalBook(_ postID: String) -> DailyBookShelving {
+        do {
+            let plan: (bookID: String, decided: Bool)? = try database.read { db in
+                guard let bookID = try Queries.dailyJournalBookID(db) else { return nil }
+                let decided = try Bool.fetchOne(
+                    db,
+                    sql: """
+                        SELECT EXISTS (
+                          SELECT 1 FROM reading_post
+                          WHERE reading_id = ? AND post_id = ?
+                        )
+                        """,
+                    arguments: [bookID, postID]) ?? false
+                return (bookID, decided)
+            }
+            guard let plan else { return .noDailyBook }
+            guard !plan.decided else { return .alreadyDecided }
+            _ = try addPostToReading(postID, to: plan.bookID)
+            return .shelved(readingID: plan.bookID)
+        } catch OperationError.alreadyInReading {
+            // Raced to shelved between the read and the write — the outcome
+            // we wanted.
+            return .alreadyDecided
+        } catch OperationError.lockedReading {
+            return .bookFinished
+        } catch OperationError.readingAtCapacity {
+            return .bookAtCapacity
+        } catch {
+            return .refused(String(describing: error))
+        }
+    }
+
     /// The shared mint behind `createPost`, `createOrOpenJournalEntry`,
     /// and `importPost` (internal, one shape — Phase 11b).
     func insertPost(

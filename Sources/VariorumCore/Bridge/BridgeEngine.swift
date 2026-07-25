@@ -229,97 +229,44 @@ public struct BridgeEngine: Sendable {
 
     // MARK: - The daily journal book's membership (A1, Phase 13c)
 
-    /// Whether the day's entry needs shelving, read in one pass.
-    private struct DailyBookPlan: Sendable {
-        let postID: String
-        /// nil = no daily journal book is designated (or the designation
-        /// dangles at a deleted book — the fallback class).
-        let bookID: String?
-        /// A `reading_post` row already exists for this (post, book) pair —
-        /// LIVE (already shelved) or TOMBSTONED (she took it off the shelf).
-        /// Either way the pair has a story and the bridge leaves it alone.
-        let decided: Bool
-    }
-
     /// **The second half of the Mac's daily door, which the bridge never
     /// had** (author report 2026-07-25: *"fragments journal did sync and
     /// appear, but not in the journal book, just appeared in the pool"*).
-    ///
-    /// `JournalBooks.openToday` (⌘J / "Today's Entry") creates-or-opens the
-    /// day's entry AND adds it to the designated daily journal book —
-    /// ordinary membership, R50's letter. The landing half called only the
-    /// first half, so every day the bridge minted arrived in NO book, and
-    /// "posts in no book" is exactly what the Pool surface lists (R29).
-    /// Traced in the author's own store before the fix: her 2026-07-11 entry
-    /// was created 17 s after the Fragments row it landed and carried no
+    /// Traced in her own store before the fix: her 2026-07-11 entry was
+    /// created 17 s after the Fragments row it landed and carried no
     /// `reading_post` row at all.
     ///
-    /// Three rules, each deliberate:
-    ///
-    /// - **The landing is NEVER blocked by shelving.** This runs after the
-    ///   body is in the store and returns a NOTE instead of throwing —
-    ///   "nothing typed in either app can be permanently lost" is ratified
-    ///   doctrine and outranks tidiness. Every failure arm speaks.
-    /// - **Never re-shelve what she took off the shelf.** An existing
-    ///   membership row — live or tombstoned — means the pair is already
-    ///   decided; only a pair with NO row at all is shelved. That is what
-    ///   lets this repair entries that landed bookless before the fix (and
-    ///   entries minted by any other door that doesn't shelve) without ever
-    ///   undoing a deliberate `removePostFromReading`.
-    /// - **No designated book ⇒ land and SAY SO** (PROVISIONAL, QUESTIONS
-    ///   #37). The Mac door CREATES and pins a "Journal" book on first use
-    ///   because she pressed a button; a headless bridge minting and pinning
-    ///   a book on her shelf while she sleeps is a larger act. A silent skip
-    ///   is exactly the confusion she reported, so the round says why.
+    /// The RULES live once, in `Operations.shelveInDailyJournalBook` (never
+    /// throws; a decided pair — live or tombstoned membership — is left
+    /// alone; no designated book is reported, never invented), shared with
+    /// the phone's capture door so the class cannot recur one door at a
+    /// time. What is bridge-specific is only the WORDING: a landing that
+    /// could not shelve says so on the round's own note surface, which the
+    /// status row already renders as "needs attention".
     private func ensureDailyBookMembership(day: String) async -> String? {
-        do {
-            let plan: DailyBookPlan? = try await database.read { db in
-                // The notebook rule's canonical entry — the same one the
-                // landing wrote to (one shared query).
-                guard let entry = try Queries.canonicalJournalEntry(db, day: day)
-                else { return nil }
-                guard let bookID = try Queries.dailyJournalBookID(db) else {
-                    return DailyBookPlan(postID: entry.id, bookID: nil, decided: false)
-                }
-                let decided = try Bool.fetchOne(
-                    db,
-                    sql: """
-                        SELECT EXISTS (
-                          SELECT 1 FROM reading_post
-                          WHERE reading_id = ? AND post_id = ?
-                        )
-                        """,
-                    arguments: [bookID, entry.id]) ?? false
-                return DailyBookPlan(postID: entry.id, bookID: bookID, decided: decided)
-            }
-            guard let plan else { return nil }
-            guard let bookID = plan.bookID else {
-                return Self.unshelvedNote(
-                    day: day,
-                    because: "no daily journal book is designated — open Today's Entry (⌘J), or pick one with a book's “Use as Daily Journal”")
-            }
-            guard !plan.decided else { return nil }
-            _ = try Operations().addPostToReading(plan.postID, to: bookID)
+        let postID = try? await database.read { db in
+            // The notebook rule's canonical entry — the same one the landing
+            // wrote to (one shared query).
+            try Queries.canonicalJournalEntry(db, day: day)?.id
+        }
+        guard let postID = postID ?? nil else { return nil }
+        switch Operations().shelveInDailyJournalBook(postID) {
+        case .shelved, .alreadyDecided:
             return nil
-        } catch let error as OperationError {
-            switch error {
-            case .alreadyInReading:
-                // Raced to shelved between the read and the write — the
-                // outcome we wanted.
-                return nil
-            case .lockedReading:
-                return Self.unshelvedNote(
-                    day: day,
-                    because: "the daily journal book is finished — reopen it in its settings, or pick a new daily journal")
-            case .readingAtCapacity:
-                return Self.unshelvedNote(
-                    day: day,
-                    because: "the daily journal book is at its post cap — extend the cap in the book's settings")
-            default:
-                return Self.unshelvedNote(day: day, because: "\(error)")
-            }
-        } catch {
-            return Self.unshelvedNote(day: day, because: "\(error)")
+        case .noDailyBook:
+            return Self.unshelvedNote(
+                day: day,
+                because: "no daily journal book is designated — open Today's Entry (⌘J), or pick one with a book's “Use as Daily Journal”")
+        case .bookFinished:
+            return Self.unshelvedNote(
+                day: day,
+                because: "the daily journal book is finished — reopen it in its settings, or pick a new daily journal")
+        case .bookAtCapacity:
+            return Self.unshelvedNote(
+                day: day,
+                because: "the daily journal book is at its post cap — extend the cap in the book's settings")
+        case .refused(let reason):
+            return Self.unshelvedNote(day: day, because: reason)
         }
     }
 

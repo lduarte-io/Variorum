@@ -88,15 +88,51 @@ final class EntryListViewModel {
 
     /// "New entry" for any chosen day, past or future (author 2026-07-07:
     /// backfilling is legitimate; future allowed).
+    ///
+    /// **The day's entry belongs on the shelf** (Phase 13c, batch 1D —
+    /// ledger A1, the class sweep's third instance): this door minted the
+    /// entry and stopped, exactly as the Fragments bridge did, so an entry
+    /// captured on the phone arrived on the Mac in NO book and showed up in
+    /// the Pool. Nothing repaired it either — a phone-minted day she never
+    /// touches in Fragments produces only a Variorum→Fragments push, never a
+    /// landing, so it stayed bookless until she happened to open ⌘J on that
+    /// exact day. It now runs the SAME shared second half the bridge does
+    /// (`Operations.shelveInDailyJournalBook`: never throws, so it can never
+    /// block the mint; a decided pair — live or tombstoned membership — is
+    /// left exactly as she left it; a missing designation is reported, never
+    /// invented). The entry ALWAYS opens; only the note changes.
     func open(on entryDate: String) async -> String? {
         do {
-            let result = try await session.runner.run { ops in
-                try ops.createOrOpenJournalEntry(entryDate: entryDate)
-            }
-            return result.container.id
+            let opened: (postID: String, shelving: Operations.DailyBookShelving) =
+                try await session.runner.run { ops in
+                    let entry = try ops.createOrOpenJournalEntry(entryDate: entryDate)
+                    return (entry.container.id,
+                            ops.shelveInDailyJournalBook(entry.container.id))
+                }
+            lastError = Self.shelvingNote(opened.shelving)
+            return opened.postID
         } catch {
             lastError = String(describing: error)
             return nil
+        }
+    }
+
+    /// The phone's wording for a shelving outcome — nil when there is
+    /// nothing to say. The Mac is where books are managed, so every note
+    /// points there rather than offering a door the capture surface does not
+    /// have (P-2: the door acts, and where it cannot it speaks honestly).
+    static func shelvingNote(_ shelving: Operations.DailyBookShelving) -> String? {
+        switch shelving {
+        case .shelved, .alreadyDecided:
+            return nil
+        case .noDailyBook:
+            return "Entry saved. It isn't in a journal book yet — pick a daily journal on the Mac."
+        case .bookFinished:
+            return "Entry saved. Your daily journal book is finished, so it wasn't added — reopen it on the Mac."
+        case .bookAtCapacity:
+            return "Entry saved. Your daily journal book is full, so it wasn't added — extend it on the Mac."
+        case .refused(let reason):
+            return "Entry saved, but it wasn't added to your daily journal book: \(reason)"
         }
     }
 
