@@ -1593,6 +1593,49 @@ texted-seam merge case is hers (#34), so canon records the empty-block
 carve as shipped and explicitly does *not* describe the broader behaviour
 as existing.
 
+### Round 2 — findings + dispositions (2026-07-26, FRESH cold reviewer, verbatim prompt)
+
+**2 NEW MAJOR · 5 MINOR · 3 NIT → the ladder goes to ROUND 3** (the
+standing rule: a new BLOCKER/MAJOR at round 2 earns its fixes a third
+pass). Counts re-verified by its own runs: core 851/98, Mac 722/129.
+**All findings agreed.**
+
+| # | Sev | Finding | Disposition |
+|---|-----|---------|-------------|
+| R2-1 | **MAJOR** | **A7's carve still destroys authored text — block COMMENTS** (and `presentation`/`name` one notch weaker). Traced whole: `addBlockComment` has no empty-block guard, and an empty block carrying a note is ordinary (*"I'll rewrite this — see the note"*); `planEmptyBlockDeletion`'s four guards cannot see one because `RenderedBlock` carries no comment signal; `deleteBlock` fires v1_8's cascade trigger; and because `deletedBlockComments` is keyed by `blockID` and the block is now only in the tray, **AppSpec §7's ratified "deleted comments are visible and resurrectable — never skimpy" does not hold for this path.** | **AGREED — FIX. This is R1-1's class, one guard short, and the same sentence convicts it:** the carve was granted only on *"there is no text to lose"*, and a comment is authored text. Fifth guard on R1-1's footing — and **`hasArchivedTakes` (NIT R2-7, currently dead code) is the natural shape to wire it through.** Whether a *named* or *callout* empty block should also refuse is author-flavored → ratify list. |
+| R2-2 | **MAJOR** | **A9 and A13(a) were ruled into the friction batch by K2 and never built, never deferred — while I declared Stage 1 COMPLETE.** `.callout` is still `doors: [.menuBar]`, `shortcutLabel: nil`, `availability: writeEditor` (neither half of A13(a) shipped); `.divide` is still `takesAccess: .moveAndExecute`, so Takes yanks her to Write rather than acting natively (A9 — her *"i desperately need divide in takes mode"*). Their ledger rows still read a bare `13c-friction` while every other friction row carries a shipped annotation. | **AGREED — MY PROCESS FAILURE, and the reviewer is right that it matters:** "Stage 1 COMPLETE" + a ladder + a planned refresh reads as *the friction batch is delivered*. I wrote both rows into K2's scope and then never put them in a batch brief. **FIX: build them** — they are her explicit asks and the sitting already traced A13(a) as a registry-declaration edit plus P-2 wiring. **Bounded honestly:** if either proves larger than that, record the deferral with 13d named as owner and annotate the ledger rows — what is forbidden is the silent gap, not the deferral. |
+| R2-3 | MINOR | **The master plan still tells a fresh session sync is signed out with 1,868 rows queued** — the plan file records the opposite from the same sitting (drained to 0, `server_seq 6662`). CLAUDE.md points cold sessions at the master plan for state. | **AGREED — MY error, fix.** |
+| R2-4 | MINOR | **`QUESTIONS.md` #33 and #35 are the same five 1B calls, duplicated** — on the very file R1-8 restructured. Answering one leaves an identical entry marked OPEN on a list she walks top to bottom. | **AGREED — MY error** (I added #35 without noticing 1B had filed #33). Merge on #35's fuller wording. |
+| R2-5 | MINOR | **`/Applications` is still 13b's build (mtime Jul 22)** — Stage 1's stated deliverable and the deciding reason for the two-stage split, with no HOLD recorded. | **AGREED as a RECORDING failure, not a sequencing one.** The refresh was always to follow the *closed* ladder, and the ladder did not close — round 2 found the comment-destroying carve, so refreshing now would have shipped R2-1 into her daily-drive build. **That is the two-stage plan working, not failing.** But no hold was written down, so a reader could only infer it: recorded now — **the refresh happens after round 3, and is skipped only if round 3 leaves something open.** |
+| R2-6 | MINOR | **`TakesViewModel.deleteFocusedBlock` flushes but drops the post-flush dirty guard `runStructural` applies for the same act** — so one capability's two native doors carry different safety contracts. Concrete trigger marked SPECULATIVE; the divergence is real. | **AGREED — FIX.** One `guard !autosave.isDirty` with the same spoken refusal. P-1's own reasoning: one declared act, one contract, however many doors. |
+| R2-7 | MINOR | **The KnownIssues iOS row's owner is no longer a phase**, against that file's own "no entry without naming the phase that resolves it" rule — the mobile project is deliberately unslotted. | **AGREED — FIX in the file's header:** state that unslotted first-class project rows count as owners. The rule's purpose is that nothing sits unowned; her ruling created a new kind of owner, so the rule gets extended rather than bent. |
+| R2-8 | NIT | **`hasArchivedTakes` is dead code** — added with R1-1 and consumed nowhere. | **AGREED — wire it via R2-1** (its doc comment describes exactly R2-1's role). One fix, two findings. |
+| R2-9 | NIT | **The F1 walk still overstates by one class** — compound assignment (`height += x`) and a binding forwarded to a child are both invisible to it, while the pin's prose claims "all four write forms count, and nothing else does". *The same shape R1-6 closed one level down.* | **AGREED — FIX** by counting `<op>=` and softening the prose to what is actually true. |
+| R2-10 | NIT | **`shelveInDailyJournalBook` is a read-then-write composite under a §9 header that says "each is a single transaction"** — the live-row race is caught, the tombstoned-row race is not (sub-ms, headless, honestly unpinnable). | **AGREED — one sentence in the §9 entry** naming it a read-then-act with handled races, so no future reader infers atomicity from the section header. |
+
+**Clean bill worth carrying:** redo's totality verified independently (21
+production sites + the compound's own = 22, matching R1-9's correction);
+**redo cannot clear its own future** (every re-apply path walked, none
+registers); re-applies are idempotent and therefore safely retryable;
+redo is sync-shaped through the outbox triggers; **A7's carve is narrow
+at the range level by construction** (only inter-entry separators, tail
+unreachable); **1E's trigger bound is structural, not hopeful** (the scan
+breaks before any enumerate call, `handled` is written before
+`ensureLayout` so a throwing AppKit path cannot leave a block eligible);
+the A40 sweep is complete and the badge exception is correct; **the A4
+anchor fix is symmetric by construction rather than by two cancelling
+errors**; 1D does not regress 9b (pinned across a landing round *and* a
+following quiescent round); `liveVariantCount` is populated at both
+construction sites and a silent third is impossible; canon matches what
+shipped, including correctly declining to describe the texted-seam merge
+as shipped.
+
+**Scope note the reviewer raised first, and it is correct:** Stage 2 —
+the phase's entire *committed* scope (C1, C2/N38, C3/N41, C4, A31) — has
+briefs and no implementation. Stage 1 is friction work only. Nothing in
+the records claims otherwise, but a reader skimming "Stage 1 COMPLETE"
+could infer the phase is near done. It is not.
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
