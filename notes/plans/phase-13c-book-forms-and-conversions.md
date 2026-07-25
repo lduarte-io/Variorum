@@ -1548,6 +1548,51 @@ the two places I went slightly beyond the letter are recorded above and
 both close the finding's CLASS rather than its example (R1-3's residual
 mapping; R1-5's fourth carrier in this file).
 
+### Round 1 fix pass — ACCEPTED (2026-07-26)
+
+**All eleven dispositions implemented, zero disputes, counts core
+848→851/98 · Mac 719→722/129 · mobile 14/4, all three re-run in full.**
+Verified by me: the new core read-layer member exists
+(`PostRender.swift:45`) and the package builds clean — a SourceKit
+diagnostic claiming otherwise was stale index state, the second such
+false alarm this phase and checked rather than assumed both times.
+
+**Three things it did better than the disposition asked:**
+
+1. **R1-1's new `liveVariantCount` is a REQUIRED init parameter, never
+   defaulted** — the `register(redo:)` precedent applied to the read
+   layer, so a third projection builder cannot silently report a block
+   textless. The fix closes the *class*, not the instance.
+2. **R1-6's proof is a demonstration, not an assertion.** It injected two
+   escaping writes, showed the OLD walk **passed** with the hole open,
+   then showed the fixed walk catching them — and `PaneSurface.swift` is
+   byte-identical afterward (empty diff). That is how you prove a guard
+   guards.
+3. **R1-11 states plainly that it carries no permanent pin, and why**
+   (inducing a real store-read failure needs a production seam whose only
+   consumer would be the test) — verified twice by forcing the throw
+   instead. **Stated rather than left blank** is the standard this phase
+   has held throughout.
+
+**Two deliberate steps beyond the letter, both ACCEPTED** because each
+closes the finding's *class* rather than its example — the
+class-completeness discipline, correctly applied: R1-3 mapped the whole
+residual bucket rather than only the smart-book case the reviewer
+quoted, and R1-5 struck the false margin from **a fourth carrier the
+reviewer had not found** (this plan's own 1E paragraph).
+
+**R1-5's resolution is the honest one.** The clause could not be made
+true — a Release measurement would confirm the *absence* of a difference,
+not restore headroom — so striking it was the only option that ends
+accurate rather than merely softened. The cap constant is unchanged; only
+the false justification is gone, including from `QUESTIONS.md` #39, which
+is the one place this touched what she rules from.
+
+**R1-2 left one thing out deliberately and pointed at it:** the
+texted-seam merge case is hers (#34), so canon records the empty-block
+carve as shipped and explicitly does *not* describe the broader behaviour
+as existing.
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
