@@ -172,9 +172,31 @@ not actually know the true height either, so this can just as easily cut
 off real text. **I do not recommend it** — it trades a cosmetic problem for
 a correctness one.
 
-**My recommendation: A now, with C as the thing to keep in mind**, and B
-kept on the shelf with its cost stated, only if it turns out to bother you
-daily.
+**E. Lay out just the ONE long block you are looking at — not the
+document.** *(Added by the architect at the batch adjudication; the batch
+folded this into B, and it is worth separating because the costs are not
+the same.)* The phantom you hit comes from a single enormous block
+guessing its own height. Asking TextKit to lay out **that block's own
+text range**, when it is on screen or just below, is work proportional to
+**one block**, not to the post — which is what the performance rule
+actually forbids. Rough arithmetic from the Phase 6 spike's measured rate
+(105 ms per 50,000 words): a 3,000-word block is on the order of **6 ms**.
+*Cost:* honest caveats, stated rather than buried — it fixes the block you
+are near, not phantom space contributed by everything further down the
+post; a truly gigantic single block is not bounded in principle (that is
+the "virtualize inside a post" escape hatch the spec already reserves), so
+it wants a measured size ceiling; and it needs real measurement before
+anyone claims it works. *Benefit:* if it holds, it fixes the case you
+actually reported — a long pasted block with dead space under it — without
+trading away the performance rule the way B does.
+
+**My recommendation: A now, with E measured as the real candidate** and C
+as the thing to keep in mind. B stays on the shelf with its cost stated.
+The difference that matters: B buys a cosmetic fix with the app's founding
+performance invariant; E, if it measures the way the spike's numbers
+suggest, buys the same fix with work bounded by one block. **I would not
+build E on arithmetic alone** — it gets measured first, and if the number
+comes back wrong it is dropped and we are back to A.
 
 - **Q3.** Which posture?
 - **Q4.** One thing I could not settle from your report: *"the empty space
@@ -250,7 +272,7 @@ airiness is what bothers you, B is the conversation.
 |---|---|---|
 | Q1 | Callouts at rest: tight box, or should coloured blocks get more room? | Leave tight for now; revisit with A23's gap setting in 13d |
 | Q2 | Seam centred in the white gap — confirm | Confirm |
-| Q3 | Phantom space posture: A do-nothing / B background layout / C block-size / D clamp | **A**, keeping C in mind; B only if it bothers you daily; not D |
+| Q3 | Phantom space posture: A do-nothing / B background layout / C block-size / D clamp / **E lay out just the one long block** | **A now, with E MEASURED as the real candidate** (it targets the case you actually hit, at one-block cost rather than document cost); C in mind; B only if E fails and it bothers you daily; not D |
 | Q4 | "Not clickable as newlines" — is the caret landing at the end of the last block? | Need your answer; changes whether there is a fourth bug |
 | Q5 | Inline comments: keep uniform airiness / room only where commented / rebuild as flow content | Keep for now, or B; **not C in this phase** |
 

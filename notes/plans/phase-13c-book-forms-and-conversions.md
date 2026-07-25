@@ -923,6 +923,48 @@ ask whether the block should be a post. Never invent nesting.
   clipboard, **or turn all takes into their own blocks**"), currently
   owned by **13e**. See A45 above for why it may deserve to move.
 
+### AUTONOMY GRANT — 2026-07-25 (her directive; this governs the rest of the phase)
+
+Her words: *"once you've found the source of the issue, please fix it
+and continue with the rest of the 13c phase all the way through."*
+
+**What this authorizes:** run every batch, the review ladder, and the
+closeout without returning for a sitting between them. Fix the vertical-
+space root cause once Batch 1A has *identified* it (the confirm-first
+discipline is unchanged — the grant is to fix what is found, never to
+skip finding it).
+
+**What it does NOT authorize — the standing author-only hard stops are
+untouched by it** (CLAUDE.md): inventing product behavior; violating or
+relaxing any invariant (I1–I10, P1–P3, S1–S5); adding a dependency;
+contradicting the canonical docs beyond recording deltas she has
+explicitly ruled; anything needing her accounts, credentials, or GUI
+steps; **any mirror/schema deploy** (SyncSpec §12 — hers explicitly, the
+R53 precedent); deleting or overwriting anything she created; pushing.
+
+**The operating rule for everything ambiguous in between:
+PROVISIONAL-and-continue** — the R55/architect-phase shape: write 2–3
+options into the record, implement the most spec-defensible one, mark it
+**PROVISIONAL**, log it to `notes/QUESTIONS.md`, and **bundle it into
+the closeout's ratify list** rather than stalling the run on a question
+she is not present to answer. This explicitly covers the product-flavored
+calls this phase already knows it owes her:
+
+- **N38's five rulings** (`phase-13c-memo-smart-to-curated.md`) — the
+  memo recommends shape A; build to A as PROVISIONAL, record what each
+  alternative would have changed, and put all five on the ratify list.
+- **The uniform-page brief's five open questions** — same treatment.
+- **The C3 block-extent memo's product edges** — the memo is still
+  WRITTEN as P-5 requires (edges enumerated on paper, not discovered by
+  her), and its happy path built to the most spec-defensible reading;
+  its genuinely taste-flavored calls are ratify-list items, not guesses
+  presented as decisions.
+
+**Held for her regardless of the grant** (bundled into the handoff
+checklist, never improvised around): any `/Applications` refresh that
+would outrun a deployed lockstep marker, the A21-promotion offer, and
+anything the ladder cannot resolve against the canonical docs.
+
 ## Batch briefs
 
 ### Batch 1A — the vertical-space investigation (the friction batch's first half)
@@ -986,6 +1028,80 @@ enumerated, refusal wordings where relevant, and a plain-language
 tradeoff list for the author, per P-5's form. Counts at batch open:
 core **817/96**, Mac **652/123**, mobile 11/4 — all verified green by
 the architect this sitting.
+
+## Architect adjudications
+
+### Batch 1A — ACCEPTED, with one option added to the memo (2026-07-25)
+
+**The hypothesis died, and the record says so plainly.** My recorded
+mechanism — `PanePublisher`'s one-directional heal leaving an over-large
+height uncorrected — was **REFUTED on four independent grounds**, and one
+of them is that it was false on its own terms: `runTurn()` re-measures
+and writes **unconditionally** (`PaneSurface.swift:172`); the directional
+check gates only whether another turn is *scheduled*. I read that path
+too quickly when I traced it. The confirm-first instruction caught it
+before it became a fix, which is the entire reason that instruction
+exists — **the batch spent its first effort killing the architect's
+hypothesis, and that was the correct outcome, not a detour.**
+
+**Verified myself before accepting** (verify-don't-trust):
+
+- **Judgment call 4 — the pin edit — ACCEPTED.** The concerning shape
+  would have been an assertion deleted to make a fix pass. It is not
+  that: the old assertion compared the decoration span to the *fragment*
+  bounds while its own prose said "the text's view-space bottom", so it
+  was **encoding the defect**; it survives in corrected form
+  (`first.frame.minY`), and the replacement set is strictly stronger —
+  the trailing-gap rule, the last-paragraph identity, the unlaid-fragment
+  degradation ("never worse than pre-fix"), the frame clamp, R17's white
+  gap now genuinely enforced, and — the best of them —
+  `swallowedGapsLeaveNoWhiteAtAll`, which pins **her exact reported
+  mechanism** so it cannot return unnoticed.
+- **Scope confirmed:** zero `Sources/VariorumCore/` lines changed, so
+  core's 817/96 standing untouched is coherent. Mac 652/123 → **668/125**.
+
+**Findings I am escalating rather than burying:**
+
+1. **R17's white-gap rule has been DEAD CODE since it shipped.** A
+   ratified design rule that never took effect, because it was always
+   handed a gap of 0 and always returned 0 pad. This is a canon-vs-
+   shipped discrepancy, not a bug in the ordinary sense, and it is now
+   pinned by a test that fails without it.
+2. **Two compensating errors hid a real defect through an entire phase.**
+   `JumpPrimitive` and the anchor path carried the *identical*
+   container-point/view-point confusion, so the Phase 7 smoke pin passed
+   **for the wrong reason**. Both are corrected and that pin now passes
+   untouched. Worth remembering as a class: a green pin proves agreement,
+   not correctness.
+3. **A3/A41 is a TextKit 2 platform limitation, not our bug** —
+   measured with Apple's own `NSTextLayoutFragment.state`: 4,964 pt while
+   estimated vs 4,597 pt once laid out. **This is AppSpec §15 risk 2
+   biting in daily use for the first time**, exactly where TEXTKIT2 §2
+   said it would.
+
+**My one substantive disagreement with the batch — recorded as an
+addition, not an override.** The memo folded "lay out just the one long
+block" into option B ("lay out the document in the background") and
+recommended against the pair. Those costs are not the same: B is work
+∝ document size and breaches P1; laying out **one block's own text
+range** is work ∝ one block, which is what P1 actually permits, and the
+Phase 6 spike's measured rate puts a 3,000-word block around 6 ms.
+**Added to the memo as option E**, with its honest caveats stated (it
+fixes the block you are near, not phantom contributed further down; a
+gigantic single block is the "virtualize inside a post" escape-hatch case
+and wants a measured ceiling; and it is **not to be built on arithmetic
+— it gets measured, and dropped if the number disagrees**). The
+recommendation now reads *A now, with E measured as the real candidate.*
+
+**Deferred to her, not decided:** the memo's five questions (Q3's posture
+and Q4's clickability reading chief among them), and the jump-landing
+taste call — fixing the conversion means jumps land flush at the viewport
+top instead of 24 pt below it; flush is the documented contract and the
+24 pt was an accident, so it was not preserved, but whether a jump wants
+top air is taste and goes to the Design & UI review row.
+
+**Recorded, not actioned:** a pre-existing `Sendable` warning at
+`PaneSurface.swift:117` (13b code, untouched by this batch).
 
 ## Batch records
 
