@@ -250,10 +250,157 @@ finds them.
 
 **Baselines — verified by my own runs, not trusted from the file.**
 Core `swift test`: **817 tests / 96 suites passed** (28.7 s), matching
-the recorded baseline exactly, P1 benchmarks flat. Mac suite run
-started; result recorded when it lands. Login session confirmed
-UNLOCKED (lock flag 0), so the Stage 4 locked-session regime does not
-bind this phase's opening.
+the recorded baseline exactly, P1 benchmarks flat. Mac
+`xcodebuild test`: **652 tests / 123 suites passed** (58.2 s), matching
+exactly. Mobile untouched at 11/4. Login session confirmed UNLOCKED
+(lock flag 0), so the Stage 4 locked-session regime does not bind this
+phase's opening.
+
+**F1 and F2 — both RULED by the author the same sitting.** F1: *fold the
+hardening into the friction batch* (her pick — this is the surface every
+pane composes, and it's where the gate found a real bug two days
+earlier). F2: *make OverallModel §7 match* — applied this turn, "floor
+is the sentence **(or a single word)**", matching CoreDescription pillar
+1 and her own S4-22 ruling; a contradiction removed, no new meaning.
+
+**Her sync sign-in landed (2026-07-25, same sitting):** outbox
+**1,868 → 0**, cursor at `server_seq 6662`. The 13b handoff's item 2 is
+discharged; her mirror and phone are current.
+
+### A40 refined by the author, and what it actually is (the friction batch's first real design finding)
+
+Asked which of two readings her callout report meant, she gave a third
+and better answer — **verbatim:**
+
+> *"I see the card, sometimes it isn't aligned well with the blocks, like
+> the color spreads underneath it, sometimes it just looks misaligned. i
+> think we haven't figured out how to color blocks with their weird
+> spacing well. this also relates to how the gaps that happen when you
+> have a comment inline has to eb fixed - representing it in the editor
+> as a block or something? idk?"*
+
+**Her diagnosis is right, and it names a class rather than a bug.** The
+callout frame is an OVERLAY over a TK2 flow whose vertical space is
+already contested by three ruled things: stored trailing newlines are
+block CONTENT (the 2026-07-12 ruling, option (a)), the presentation gap
+is **per-PARAGRAPH and uniform** (same ruling — deliberately not
+per-seam, so boundaries stay invisible at rest, AppSpec §12), and inline
+comments widen that same uniform gap by a strip height because **an
+overlay cannot reserve vertical space in TK2** (S4-30(a); QUESTIONS
+#27(a)). So "where does this block visually end" has no single settled
+answer, and every decoration that must draw a box around a block is
+guessing — which is exactly what "the color spreads underneath it"
+looks like.
+
+**Precedent that says this is tractable:** Phase 10 fixed the sibling
+class exactly once, at one pure mapping — *fragment frames are
+container-relative, overlays are view-relative*, which had every tint
+stripe sitting 8 px high. 13b Stage 3 then root-caused the timing half
+(overlays computed before TK2's first layout pass with no post-layout
+trigger). This is the third visit to the same neighbourhood, which under
+**P-5 is the definition of an under-architected feature.**
+
+**Ruling (mine, as architect — recorded, and hers to overturn):** the
+batch **traces before it fixes**, and the two halves split by what they
+actually are:
+
+- **If the frame is MIS-MAPPED** — the geometry says one thing and the
+  overlay draws another, the Phase 10 shape — that is a bug: fix it at
+  the one mapping, with a red-on-old pin, in the friction batch.
+- **If the frame is drawing exactly what it was told, and what it was
+  told is ambiguous** — i.e. the block's visual extent genuinely has no
+  defined answer once gaps and trailing newlines are in play — that is
+  **NOT a patch**, per P-5. It becomes a **design memo** and merges with
+  **C3/N41**, which the plan already flagged as an R116 conversation
+  rather than a fix.
+
+**C3 is therefore RESCOPED** (from "N41 inline-comments airiness") to:
+**one design memo on block extent and decoration geometry in the
+editor** — what vertical space a block owns, who may draw in the gap,
+and whether an inline comment stops being an overlay and becomes
+something the flow reserves space for honestly (her own floated idea:
+*"representing it in the editor as a block or something?"*, whose cost
+is stated up front — the editor's text must never diverge from the
+block's text, since `BlockRangeIndex`'s UTF-16 tiling invariant is what
+the app's whole identity machinery rides on, AppSpec §15 risk 1). Edges
+enumerated on paper, her rulings on the product-flavored ones, then
+build. **A5, A40, C3/N41 are one item now, not three.**
+
+### A3 + A4 + A41 are ONE class — her long-block detail unifies them
+
+Third live report the same sitting, **verbatim:**
+
+> *"it seems there are some overall issues with white space / spacing.
+> the extreme gap at the bottom of a single block came when one block was
+> really long - even if there was nothing to indicate that whitespace
+> should be there (i.e. I copied in a long message with no whitespace at
+> the end)."*
+
+**This is the diagnostic that collapses the search.** "No whitespace at
+the end" **rules out stored trailing newlines** as the cause — so the
+2026-07-12 content-spacing ruling is NOT implicated, and A40's
+gap-geometry question is a *different* problem from this one. What's
+left is a **height problem on long blocks**, and it explains all three
+reports as one class:
+
+- **A3** (phantom empty paragraphs that *"disappear on scroll then
+  reappear when you're more on top of it"*) — the signature of a height
+  that is estimated, replaced by real geometry when the region lays out,
+  and reverted when it doesn't.
+- **A4** (the editor *"jumping around"* when a block is taller than the
+  screen, with unclickable space below) — the same estimate revising
+  under her.
+- **A41** (this report) — the extreme gap under one long block, with the
+  content explanation eliminated by her own test.
+
+**HYPOTHESIS, traced from code this sitting — explicitly NOT yet
+reproduced, and the batch must confirm or refute it BEFORE fixing
+anything (hallucination guard: build the pin first as the confirm; red
+confirms, green means record-only):**
+
+`PanePublisher`'s convergence heal is **one-directional**
+(`PaneSurface.swift:177`):
+
+```swift
+if rendered + Self.convergenceSlack < height, healTurnsLeft > 0 {
+```
+
+It re-publishes only while the pane renders **SHORTER** than its
+measured height — the dropped-write case the gate found. There is **no
+convergence check for the opposite direction**: if `measure()` returns a
+height LARGER than the text actually needs — which is precisely what
+TK2's estimated geometry does before a long region is fully laid out
+(TEXTKIT2 §2: *"total document height is estimated, and the estimate
+shifts as you scroll and lay out more"*; AppSpec §15 risk 2 is the
+standing register entry) — the pane is framed **too tall**, nothing ever
+re-measures it downward, and what she sees is empty space under her text
+that she cannot click into because there is no text there. Scrolling
+forces layout that corrects the measurement; scrolling away restores the
+estimate. **That is her exact description, in both directions.**
+
+Corroborating precedent, so the batch weighs the hypothesis honestly:
+the Phase 6 spike measured the estimate **under**-reporting at rest
+(6.8% low) and *converging* with content never regressing — but it
+measured ONE full-document `NSTextView`, not a `PaneSurface` whose
+measured height is published into SwiftUI `@State` and used to frame the
+pane. The publish path is younger than the spike and is where the Stage
+4 gate found a real defect two days ago.
+
+**Batch instruction:** treat A3/A4/A41 as one investigation with one
+traced mechanism, not three fixes. If the hypothesis is refuted, say so
+plainly and keep tracing — a wrong hypothesis recorded and killed is a
+good outcome; a fix built on an unconfirmed one is the forbidden class.
+
+### A39 RULED — Outline becomes the book's writing surface
+
+Her pick: *that IS what Outline should become.* So the book's three
+modes stay three — **Outline** (write the book: Write's typography and
+margins, chapter headings inline, each post collapsible) · **Book**
+(the two-up spread, page = a whole scrollable post) · **Read** (the flow
++ true pagination pair). No fourth mode. The architectural notes on
+A39's ledger row bind: it adopts `PaneTextAuthority`'s one-live-ring
+contract, joins `commitTake`, collapse is view state and never in-place
+TK2 folding, and it virtualizes per P3.
 
 ## Kickoff message (for the fresh /architect-phase 13c orchestrator — read this first)
 
@@ -605,6 +752,7 @@ are this phase's opening batch.
 | A36 | Markdown folder import choosing whether folders become chapters/books ("to lure people from obsidian") | 13h |
 | A37 | EPUB library — read-only books, highlights auto-appending to a "favorite quotes" note with quote marks, dash, author, title | unslotted row |
 | A38 | "a variorum mobile app that's quite robust and easy to use" | 15 |
+| A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. | **13c-friction** (one investigation with A3/A4) |
 | A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
 
