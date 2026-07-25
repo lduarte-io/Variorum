@@ -1,8 +1,11 @@
 # Memo — block extent and decoration geometry in the editor (C3)
 
-**Written:** 2026-07-25, Phase 13c Batch 1A.
+**Written:** 2026-07-25, Phase 13c Batch 1A. **Updated 2026-07-25, Batch
+1C** — Q4's dead-click investigation (verdict: no fourth bug) and the
+option-E MEASUREMENT that Q3 now rests on.
 **Status:** DRAFT for the author. Parts 1 and 3 need her rulings; Part 2
-needs her to pick a posture. Nothing in Parts 2–3 is built.
+needs her to pick a posture. Nothing in Parts 2–3 is built — E was
+measured, deliberately not built, so the posture call is hers on evidence.
 **Why it exists:** the friction batch was told to trace before it fixed,
 and to split what it found by what it actually *is*. Two of the three
 things it found were mis-mappings, and they are fixed (commit `01e2602`).
@@ -26,11 +29,19 @@ editor jumping when a block is taller than the screen — turned out to be
 - **The editor jumping: two real bugs, fixed.** A block taller than the
   screen made the app forget where you were reading, and a second, older
   error made it forget by one block even on short ones.
-- **The phantom empty space: not our bug, and there is no fix.** It is
-  TextKit 2 guessing the height of text it has not laid out yet. Apple has
-  no way to correct the guess, and the only thing that would eliminate it
-  is banned by the app's core performance rule. **Part 2 is your call
-  about what we do instead.**
+- **The phantom empty space: not our bug.** It is TextKit 2 guessing the
+  height of text it has not laid out yet. Apple has no way to correct the
+  guess, and laying out the whole document — the obvious cure — is banned
+  by the app's core performance rule. **But there is one thing we can do
+  that is not banned, and it has now been measured rather than estimated:
+  lay out just the one long block (option E, ~1 ms per 1,000 words).
+  Part 2 is your call.**
+- **And the follow-up you sent — "clicking does nothing at all" — was
+  chased and there is no fourth bug.** The click does reach the editor and
+  the caret does move; it moves to the end of your text, because there is
+  no text in the phantom to put a cursor in. That is your own sentence
+  ("nothing was actually there"), confirmed by measurement. Q4 below has
+  the detail.
 
 ---
 
@@ -190,21 +201,59 @@ anyone claims it works. *Benefit:* if it holds, it fixes the case you
 actually reported — a long pasted block with dead space under it — without
 trading away the performance rule the way B does.
 
-**My recommendation — REVISED 2026-07-25 after her Q4 answer below:
-measure E, and treat A as the fallback rather than the plan.** The
-original recommendation ("A now") rested on the phantom being ugly but
-harmless. Her answer kills that premise: the space is eating a click that
-should work. So the ranking changes — **E measured first** (it removes
-the phantom, and with it the dead region, at one-block cost), **A only if
-E fails to measure well**, C still worth keeping in mind, B still on the
-shelf with its cost stated. The difference that matters between B and E
-is unchanged: B buys the fix with the app's founding performance
-invariant; E buys it with work bounded by one block. **E is still not to
-be built on arithmetic** — it gets measured, and dropped if the number
-disagrees.
+### E has now been MEASURED (2026-07-25, batch 1C) — and the numbers are good
 
-- **Q3.** Which posture? *(See the revision above — her Q4 answer moved
-  my recommendation from A to E-measured-first.)*
+E was not to be built on arithmetic, so it was measured instead: real
+windows, real posts of 60 blocks with one long block in the middle, asking
+TextKit to lay out **only that block's own text**, timed. Debug build (your
+real app is a Release build, which is faster), macOS 26.4.1 / Xcode 26.3.
+
+| Long block | Time it took | Phantom it removed | Per 1,000 words |
+|---|---|---|---|
+| 1,000 words | 1.3 ms | 180 pt | 1.27 ms |
+| 3,000 words | 2.9 ms | 537 pt | 0.97 ms |
+| 12,000 words | 11.5 ms | 2,169 pt | 0.96 ms |
+| 25,000 words | 20.1 ms | 4,549 pt | 0.80 ms |
+
+**Reading these in plain terms:**
+
+- **(a) The cost is small and it is the right shape.** About **1 ms per
+  thousand words**, and the rate stays flat (slightly *improves*) as the
+  block grows — so it scales with the block, not with the post. For
+  comparison on the same axis, the Phase 6 spike measured laying out a
+  whole *document* at 105 ms per 50,000 words — 2.1 ms per thousand. Doing
+  one block is about twice as cheap per word **and**, the part that
+  matters, it never grows with the rest of the post. Even a 25,000-word
+  single block — far past anything you have written into one block — costs
+  20 ms once.
+- **(b) It really does collapse the phantom.** Every size removed exactly
+  the over-estimate: the 3,000-word block gave back 537 points, about 31
+  blank lines' worth of space that was never there.
+- **(c) It survives scrolling away and coming back.** This was the open
+  risk and it came out favourably: once a block is laid out, TextKit keeps
+  it laid out. Tested by scrolling to the far end of the post and back —
+  the block stayed honest. So it is a one-time cost per block per session,
+  not a treadmill.
+
+**One honest caveat found while measuring:** the *document's* scroll height
+does not shrink at the instant of the layout — it catches up on the next
+drawing pass (which happens immediately in normal use). So a built version
+needs the refresh nudged, not just the layout asked for. Small, but real,
+and it is the kind of thing that turns a one-line change into a careful one.
+
+**What is still undecided if you say yes:** *when* to do it — which long
+block, and on what trigger (post opens? block comes near the viewport?).
+That is a design question, not a measurement, and it is where the cost
+either stays a one-time 3 ms or turns into something that runs too often.
+
+**My recommendation, now on evidence rather than arithmetic: E.** It is
+cheap, it works, it lasts, and it is bounded by one block rather than by
+your post — which is the actual line the performance rule draws. **A**
+remains the fallback if you would rather not add machinery for a cosmetic
+problem at all.
+
+- **Q3.** Which posture? **Recommend E** (measured above); A if you would
+  rather leave it alone; C worth keeping in mind either way; not B, not D.
 - **Q4 — ANSWERED BY THE AUTHOR, 2026-07-25, and the benign reading is
   DEAD.** She was asked whether the caret lands at the end of the last
   block (which is what harmless phantom space would do). Her answer,
@@ -212,29 +261,43 @@ disagrees.
   into the phantom space and the down arrow couldn't move you down
   either. nothing was actually there."*
 
-  **This is a FOURTH bug, and it upgrades Q3.** Clicking below the text
-  in a text view should place the caret at the nearest text position —
-  the end of the document — and hers does not move at all. That means the
-  phantom region is not merely *empty*, it is **not the text view's to
-  handle**: the click is landing somewhere that isn't the editor, or the
-  editor's clickable area stops short of the space it is displaying. The
-  down-arrow half is consistent and expected (there is genuinely no text
-  below, so the caret has nowhere to go) — **it is the dead click that is
-  wrong.**
+  That answer sent a batch (1C) to go find a fourth bug. **What it found
+  is written up below, and the short version is that there is no fourth
+  bug — your description was exactly right, and it describes the phantom
+  rather than a broken click.**
 
-  **Consequence for Q3, stated plainly:** option A ("do nothing; it's
-  cosmetic") was recommended on the premise that the phantom is ugly but
-  harmless. **That premise is now false** — it is eating a normal
-  interaction. Option **E** (lay out just the one long block) rises
-  accordingly, because removing the phantom removes the dead region with
-  it. The dead-click itself is being traced as its own investigation
-  either way, since a click that goes nowhere may have a cause
-  independent of the over-estimate — and if it does, it is fixable
-  without touching the estimate at all.
+#### What the dead-click investigation found (batch 1C, 2026-07-25)
 
-  *(Original question kept for the record: "If instead the click does
-  nothing at all, that is a
-  separate bug and I would go find it.
+The claim under test was that a click in the phantom does not reach the
+editor at all. It was tested the honest way: real windows, real posts with
+a long block, and real mouse events sent through the window's own routing —
+not a simulation of what the code "should" do.
+
+**Measured result: the phantom belongs to the editor, the click reaches it,
+and the caret moves — to the end of your text.** It cannot land *inside*
+the phantom, because there is no text there to put a cursor in. Which is
+your sentence, word for word: *"it couldn't move your cursor into the
+phantom space… nothing was actually there."* You were describing the thing
+accurately; what you were looking at is not a broken click, it is space
+that is not text pretending to be blank lines.
+
+The down-arrow half was already agreed correct for the same reason.
+
+**So there is nothing to fix in the click — and that puts the whole weight
+back on removing the phantom itself (Q3).** It also means one thing worth
+saying plainly: if we ever build **A22** (your "let me scroll into a page of
+empty space so I can keep typing high on the screen"), that space has to be
+*real* — actual room the caret can enter — or it will feel exactly as dead
+as this does.
+
+**One genuinely dead sliver was found and is recorded rather than fixed:**
+the bottom **6 points** of the editor's scrolling area — a strip about the
+height of a comma, sitting just above the commit bar — do not route clicks
+to the text. It is AppKit's, not ours: a plain, unmodified Apple text view
+in a plain scroll view does the same thing, verified. It is far too small
+to be what you saw, so nothing was changed for it; a test now pins it at
+that size, so if this class ever grows from a sliver into a band of page,
+a test says so before you have to.
 
 ---
 
@@ -301,8 +364,8 @@ airiness is what bothers you, B is the conversation.
 |---|---|---|
 | Q1 | Callouts at rest: tight box, or should coloured blocks get more room? | Leave tight for now; revisit with A23's gap setting in 13d |
 | Q2 | Seam centred in the white gap — confirm | Confirm |
-| Q3 | Phantom space posture: A do-nothing / B background layout / C block-size / D clamp / **E lay out just the one long block** | **A now, with E MEASURED as the real candidate** (it targets the case you actually hit, at one-block cost rather than document cost); C in mind; B only if E fails and it bothers you daily; not D |
-| Q4 | "Not clickable as newlines" — is the caret landing at the end of the last block? | Need your answer; changes whether there is a fourth bug |
+| Q3 | Phantom space posture: A do-nothing / B background layout / C block-size / D clamp / **E lay out just the one long block** | **E — now measured, not guessed** (~1 ms per 1,000 words, removes the phantom exactly, survives scrolling away and back, bounded by the block not the post); **A** is the fallback if you would rather not add machinery; C worth keeping in mind; not B, not D |
+| Q4 | "Not clickable as newlines" — is the caret landing at the end of the last block? | **ANSWERED by you, then investigated: there is no fourth bug.** The click does reach the editor and does move the caret — to the end of your text. It cannot go *into* the phantom because nothing is there, which is what you said. Nothing to fix here; it all rides on Q3 |
 | Q5 | Inline comments: keep uniform airiness / room only where commented / rebuild as flow content | Keep for now, or B; **not C in this phase** |
 
 ---
@@ -330,3 +393,34 @@ All taken this batch, on macOS 26.4.1 / Xcode 26.3, in real windows.
 - Paste of a three-paragraph message with blank lines between: **3 blocks**,
   trailing newline stored on the first two, none on the last — your "no
   whitespace at the end" observation confirmed exactly.
+
+**Added by batch 1C (2026-07-25) — the dead-click investigation and the
+option-E measurement.** Every number below is reproducible: the suite is
+`VariorumTests/PhantomSpaceTests`, and the E figures print on every run.
+
+- **The phantom is the editor's own surface.** A real mouse event sent
+  through the window's routing, 20 pt below the last drawn line at the
+  bottom of a 60-block post with one 3,000-word block: the click lands on
+  the editor's text view and sets the caret to the **document end**
+  (offset 34,164 of 34,164). Not a dead region.
+- **The one genuinely un-routed region: 6.0 pt** at the bottom of the
+  scroll view, constant at every window height tested (200/400/500/700/900
+  pt clip → text view always 6 pt shorter). **A vanilla `NSTextView` in a
+  vanilla `NSScrollView`, configured per Apple's documentation, shows the
+  identical 6 pt** — so it is the platform's, not ours.
+- **The long-block over-estimate, re-measured on this corpus:** 3,000-word
+  block **7,837 pt estimated → 7,300 pt laid out** (537 pt of phantom);
+  fragment state `estimatedUsageBounds` → `layoutAvailable` at exactly that
+  transition, matching 1A's independent measurement of the same mechanism.
+- **Option E, timed** (Debug build; Release is faster): 1,000 w → 1.27 ms
+  (180 pt removed) · 3,000 w → 2.90 ms (537 pt) · 12,000 w → 11.52 ms
+  (2,169 pt) · 25,000 w → 20.06 ms (4,549 pt). **Per-1,000-word rate
+  0.80–1.27 ms, flat-to-improving in block size**, versus the Phase 6
+  spike's whole-document rate of 2.1 ms per 1,000 words (105 ms / 50 k).
+- **E's effect persists:** after laying out the long block, scrolling to
+  the far end of the post and back leaves it `layoutAvailable` at every
+  size tested — TK2 does not discard it, so E is once per block per
+  session, not a treadmill.
+- **E's caveat:** the scroll extent does not shrink synchronously with the
+  layout call — the document height corrects on the next display pass
+  (measured: 9,063 pt unchanged at the instant, 8,708 pt after one pass).

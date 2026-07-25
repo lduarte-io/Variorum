@@ -757,6 +757,7 @@ are this phase's opening batch.
 | A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
 | A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. | **13c-friction** (one investigation with A3/A4) |
+| A46 | **The DEAD CLICK** — her Q4 answer, verbatim: *"clicking does nothing at all - it couldn't move your cursor into the phantom space and the down arrow couldn't move you down either. nothing was actually there."* Queued as batch 1C. | **13c-friction — INVESTIGATED (Batch 1C): NOT A BUG.** Measured through the real event route: the phantom IS the editor's surface, the click reaches it, and the caret moves — to the document END. It cannot enter the phantom because no text is there, which is her sentence exactly. Down-arrow already agreed correct. **Nothing fixed; characterization pins landed** (`PhantomSpaceTests`) and the weight moves to memo Q3 (option E, now measured). One genuinely un-routed **6 pt** strip at the bottom of every scroll view found and recorded — **AppKit's, reproduced on a vanilla `NSTextView`** — pinned at size so this class can't grow unnoticed |
 | A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
 
@@ -1828,3 +1829,202 @@ a source block edited between undo and redo is re-released with its edit
 intact in lineage but no commit — the same asymmetry undo already has,
 recorded deliberately); and whether the totality claim actually holds
 across all 23 registration sites.
+
+### Batch 1C — the DEAD CLICK (A46) + the option-E MEASUREMENT
+
+**Commits:** `<this batch>` (the `PhantomSpaceTests` characterization
+pins + the memo's Q3/Q4 update + this record).
+**Counts:** core **836/97 → 836/97** (unchanged — zero core lines
+touched) · Mac **691/126 → 696/127** (one new suite, five tests: four
+plain + one 4-case parameterized, which reports as ONE — the counting
+lesson the baselines section records) · mobile 11/4 untouched.
+**Diff scope:** ONE new test file (`App/Variorum/VariorumTests/
+PhantomSpaceTests.swift`) + two notes files. **ZERO production lines
+changed, in either target.**
+
+#### THE HEADLINE: A46 is NOT a bug, and the evidence is her own sentence
+
+The batch was sent to find a fourth bug. **It found that there isn't
+one**, and the finding is worth more than a fix would have been, because
+it moves the whole weight of her complaint onto the thing that IS real.
+
+Her words: *"clicking does nothing at all - it couldn't move your cursor
+into the phantom space and the down arrow couldn't move you down either.
+nothing was actually there."*
+
+**Measured, through the real event route** (an `NSEvent.mouseEvent` sent
+into a mounted window, hit-tested by `window.contentView.hitTest` and
+delivered to whatever that returns — never a simulation of the intended
+path):
+
+- the phantom region below the last drawn line **is the editor's own
+  `EditorTextView`** (hit test returns it);
+- clicking there **moves the caret to the DOCUMENT END** — offset
+  34,164 of 34,164 on the 60-block corpus with one 3,000-word block;
+- it cannot put the caret *inside* the phantom because there is no text
+  there — **which is her sentence, word for word.**
+
+So both halves of her report describe correct text-view behaviour over
+space that is not text. The architect's brief already conceded the
+down-arrow half; the measurement extends the same verdict to the click.
+**Under the hallucination guard this is the recorded-and-dismissed
+outcome, not a fix**: there is no traced mechanism connecting a dead
+click to her symptom, and inventing one would be the forbidden class.
+
+**Consequence, recorded because it changes what to build:** removing the
+phantom (memo Q3, option E) is now the *only* remedy for what she
+experienced — there is no cheaper independent fix hiding behind it. And
+**A22** ("scroll into a page of empty space so I can type high on the
+page") must make that space REAL — room the caret can enter — or it will
+feel exactly as dead as this does. The brief predicted this pairing; the
+measurement confirms why.
+
+#### What WAS found dead — and why it is recorded, not fixed
+
+A constant **6.0 pt** strip at the very bottom of the editor's scroll
+view routes clicks to the scroll view's background instead of the text
+view (`NSClipView` stops covering the document view there). Measured
+identical at every window height tried — 200 / 400 / 500 / 700 / 900 pt
+clip, text view always exactly 6 pt shorter.
+
+**It is AppKit's, not ours:** a vanilla `NSTextView(usingTextLayoutManager:
+true)` in a vanilla `NSScrollView`, configured the way Apple documents,
+shows the identical 6 pt with no Variorum code in the picture
+(`theBottomStripIsAppKitsNotOurs`). Not caused by `contentInsets` either
+(zeroing them and turning off `automaticallyAdjustsContentInsets` changed
+nothing).
+
+Not fixed, deliberately: 6 pt is a sliver above the commit bar, working
+around AppKit's clip-view hit testing to reclaim it would be a hack, and
+it is provably not her report. **Pinned at size instead**
+(`theDeadStripAtTheBottomOfTheScrollViewStaysASliver`, ≤ 8 pt) so that if
+this class ever grows into the readable band she described, a test says
+so before she does — P-7's letter.
+
+#### Hypotheses killed on the way (recorded so nobody re-walks them)
+
+Each was traced, tested, and refuted — all cheaply, none turned into
+code:
+
+1. **An overlay eating the hit.** No: every decoration view returns `nil`
+   from `hitTest` by construction (`DecorRectView`, `SeamLineView`, and
+   `CommentCardView` when it has no door — the round-3 rule); the two
+   that do take clicks (comment cards WITH a door, drag handles) are
+   small and margin-anchored.
+2. **The document shrinking under a deep scroll**, leaving the clip
+   parked past the end. Tested by parking at the bottom of the
+   estimate-inflated height and then forcing the long block's layout:
+   **overshoot 0.0** — AppKit re-clamps.
+3. **A huge LAST block leaving dead space at the document end.** Tested:
+   `gapBelowText` = 24.0 pt, exactly the container inset. Scrolling to
+   the bottom lays the block out, so the error is gone by the time you
+   are there.
+4. **A gap in the MIDDLE, between a long block's last line and the next
+   block's first** (her "the extreme gap at the bottom of a single
+   block"). Walked the whole post in 300 pt steps looking for one: **no
+   on-screen gap > 12 pt exists.** TK2 keeps fragment positions
+   consistent — when the block lays out, everything below moves with it
+   (which is the JUMP 1A fixed, not a gap).
+5. **The gutters and insets.** With a 1,400 pt-wide window (360 pt
+   gutters — R9's bounded column), clicks in the left gutter, the right
+   gutter and the top inset all land the caret on the correct LINE.
+
+#### The option-E MEASUREMENT (measured, deliberately NOT built)
+
+The brief was explicit — measure and stop — and the architect had
+promised her in writing that E would not be built on arithmetic. Method:
+real windows, 60-block posts with one long block in the middle,
+`ensureLayout` over **that block's own text range only**, timed with
+`ContinuousClock`. Debug build (Release is faster), macOS 26.4.1 /
+Xcode 26.3.
+
+| Long block | (a) cost | (b) phantom removed | per 1k words | (c) survives travel |
+|---|---|---|---|---|
+| 1,000 w | 1.27 ms | 180 pt | 1.27 ms | yes |
+| 3,000 w | 2.90 ms | 537 pt | 0.97 ms | yes |
+| 12,000 w | 11.52 ms | 2,169 pt | 0.96 ms | yes |
+| 25,000 w | 20.06 ms | 4,549 pt | 0.80 ms | yes |
+
+**My honest read: E is alive, and the numbers are better than the
+architect's arithmetic guessed.**
+
+- **(a) Cost** is ~1 ms per 1,000 words and the rate is **flat-to-
+  improving** as the block grows — the shape P1 actually demands (∝ the
+  block, never the post). Against the Phase 6 spike's whole-document rate
+  of **105 ms / 50,000 words = 2.1 ms per 1k**, one block is ~2× cheaper
+  per word *and* structurally bounded. Even 25,000 words in one block —
+  far past anything she has written — is a one-time 20 ms.
+- **(b)** It removes exactly the over-estimate, every size.
+- **(c) The open risk came out favourably:** TK2 does NOT discard the
+  layout. After scrolling to the far end of the post and back the
+  fragment is still `layoutAvailable` at all four sizes, so E is once per
+  block per session, not a treadmill.
+
+**Caveat found while measuring, stated rather than buried:** the *scroll
+extent* does not shrink synchronously with the layout call — the document
+height corrects on the next display pass (9,063 pt unchanged at the
+instant; 8,708 pt one pass later). A built E must nudge the refresh, not
+merely ask for layout. **Also still undecided if she says yes:** the
+TRIGGER policy (which long block, on what event) — a design question, and
+the place where a one-time 3 ms could turn into something that runs too
+often.
+
+Recorded in the memo under Q3 in her language, with the recommendation
+moved from "A now, E as candidate" to **E**, A as fallback.
+
+#### Numbered judgment calls / PROVISIONALs
+
+1. **No fix was shipped for A46** — the finding is dismissed as
+   not-a-bug and recorded, per the hallucination guard's own rule that a
+   finding whose mechanism does not trace to the symptom is recorded, not
+   fixed. The alternative (fix the 6 pt AppKit strip and call A46
+   addressed) would have been a fix that could not possibly have caused
+   her report — worse than nothing, because it would close the item.
+2. **The 6 pt strip is pinned but not fixed** (above). If she wants it
+   reclaimed, the honest shape is a bottom `contentInset` or a document-
+   view minimum height that matches the clip — one line, but it is
+   working around AppKit and it changes nothing she can see.
+3. **The pins are CHARACTERIZATION pins, not red-on-old pins**, and are
+   labelled as such in the file's header. There is no pre-fix code for
+   them to be red against; their job is to hold the measured truth so a
+   future session does not re-litigate A46 from scratch, and to fail if
+   the dead-strip class ever grows.
+4. **The E measurement ships as a TEST rather than a throwaway spike**
+   (~1.8 s of suite time). Reason: the memo's numbers are the evidence
+   she rules on, and a re-runnable measurement is worth more than a
+   number in a document — the same reasoning as the Phase 9 latency pins,
+   which also print. If the architect prefers it as a `Spikes/` binary,
+   it moves with no loss.
+
+#### Red-on-old evidence
+
+**None owed — nothing was fixed.** Stated explicitly rather than left
+blank: the batch's deliverable is a refutation plus a measurement, and
+neither class carries a red-on-old pin. The reproduction evidence is in
+the numbers above, each printed by a test that runs on every suite run.
+
+#### Deviations
+
+- **No production code changed at all** — the largest possible deviation
+  from a batch brief that expected a fix, and the correct one: the fix
+  had no bug to attach to.
+- **No lookup subagent used.** Nothing external was needed; 1A's lookup
+  had already established that no public API exists to correct TK2's
+  estimates, and this batch's questions were all answerable by
+  measurement.
+- **P-6:** `TutorialWalkTests` green in the full-suite run.
+
+#### Ladder foci suggested for this batch
+
+Whether the A46 refutation is complete — i.e. whether any surface OTHER
+than the Write editor (a `PaneSurface` pane in Takes / Lenses / Compare,
+a read-tier post in the book view, a canvas card) can present phantom
+space whose click does NOT reach a text view; the 1C probes covered the
+Write editor's scroll-view path and the inline (book) editor's frame, and
+found the pane path measures honestly because `PaneMeasurement` lays out
+first — but a reviewer should decide whether "not reproduced in the
+surface she named" is the same as "does not exist". Also: whether the
+characterization pins assert the right invariants (particularly the ≤ 8 pt
+bound, which is a judgement about how big is too big), and whether
+shipping the E measurement as a suite test rather than a spike is the
+right home.
