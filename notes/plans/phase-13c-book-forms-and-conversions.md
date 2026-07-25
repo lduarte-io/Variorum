@@ -1464,6 +1464,45 @@ the safety net that makes an accidental block deletion cheap.
 record; PROVISIONALs for anything the spec leaves genuinely open, per the
 autonomy grant. Counts at open: core **817/96**, Mac **668/125**.
 
+## Stage 1 review ladder
+
+### Round 1 — findings + dispositions (2026-07-26, fresh cold reviewer, `REVIEW_PROMPT.md` verbatim, zero framing)
+
+**0 BLOCKER · 2 MAJOR · 6 MINOR · 4 NIT.** The reviewer verified both
+suites by its own runs (core 848/98, Mac 719/129 — matching exactly) and
+confirmed zero `Sources/VariorumCore/Sync/` lines touched. **Every
+finding carries a traced mechanism; I agree with all of them.**
+
+| # | Sev | Finding | Disposition |
+|---|-----|---------|-------------|
+| R1-1 | **MAJOR** | **A7's carve fires on blocks that DO have text to lose.** The guard uses `activeVariantCount`, which excludes archived takes — but archived takes carry prose. Reachable in three ordinary gestures: branch a take, `archiveVariant` the one with prose (legal — the other is still active), blank the survivor (R90's power gesture). The block now renders empty with `activeVariantCount == 1`, so a seam backspace runs `deleteBlock` and cascades the archived prose out, while the status line says *"Empty block deleted."* | **AGREED — FIX.** The carve was granted *only* on "there is no text to lose", and that premise fails here. Recoverable via ⌥⌘Z and the tray, so not data loss — but the narrowness contract is what the carve was authorized on, and none of the nine cannot-widen pins covers archived takes. Fourth guard: count live variants regardless of `status`. |
+| R1-2 | **MAJOR** | **Three shipped semantic changes are absent from canon:** (a) structural REDO — AppSpec §9 and OverallModel §3 still describe a one-directional stack; (b) `Operations.shelveInDailyJournalBook` is a new *public* operation and §9 opens "Every mutation is one of these"; (c) A7's carve is a named exception to the ratified cross-block refusal and §14 does not record it. | **AGREED — FIX, and part of this is MY miss as architect.** I wrote the §14 delta for the kickoff *rulings* and the two canon corrections, and did not extend it as Stage 1 shipped. The reviewer is also right about *when*: **at the Stage 1 fix pass, not the closeout** — Stage 2 and 13d build on these, and a fresh session reading canon would not know redo exists. This is exactly the class the phase's own opening obligation 2 warned about. |
+| R1-3 | MINOR | **Raw `String(describing: error)` reaches two new user-facing surfaces** — her bridge status row can read *"…: wrongReadingKind(id: "8F3C-…", expected: VariorumCore.ReadingKind.curated)"*. The same batch retired this exact pattern in `ShellActions` one file over. | **AGREED — FIX.** Give `DailyBookShelving` a `.wrongKind` case (the enum already models the other named refusals). Pin: the note contains no `(id:`. |
+| R1-4 | MINOR | **⌘J and the new shared helper disagree on rule 2** — the rule the batch record called "the good one". The helper treats any membership row, live or tombstoned, as decided; `openToday` catches only `alreadyInReading`, which fires on *live* rows, so a tombstoned membership is invisible and it re-inserts. She removes today's entry from the Journal book, presses ⌘J → it is silently back on the shelf, while the bridge and phone correctly leave it alone. | **AGREED — FIX.** The brief said "make the two paths agree"; the deliberate non-conversion was justified by the *create-and-pin* difference, which is orthogonal to rule 2. `openToday` keeps create-and-pin and delegates the ensure half. |
+| R1-5 | MINOR | **The cap's stated safety margin is not real** — `ensureLayout` runs in the system TextKit binary, identical in Debug and Release, and no app code runs in that path (no layout-manager/content-storage delegates exist). So "margin on top of margin" buys nothing — and **QUESTIONS #39 repeats it to her verbatim.** | **AGREED — FIX, and this one matters disproportionately** because it is the honesty of what she is being asked to *rule from*. The number still stands on the 8.3 ms budget; only the claimed extra headroom is illusory. Strike the clause from all three carriers, or take one Release measurement and record the real figure. |
+| R1-6 | MINOR | **The F1 walk misses two write forms** — `self.height = x` and `$height.wrappedValue = x` are counted in neither bucket, so a write could escape the door while the equality assertion passes. | **AGREED — FIX.** Precisely the "green by audit" gap F1 was raised about, one level deeper: the guard against un-routed writes had an un-guarded route. |
+| R1-7 | MINOR | **Redo *correctness* is pinned for 9 of 21 sites**, and `archiveVariant`/`deleteVariant` — which have their own re-apply bodies carrying the I10 `ensureNotLastActive`, locked-variant, chosen-variant and `reassignDefaultIfNeeded` guards — are exercised by no redo test at all. | **AGREED — FIX the sharp end.** Two round-trip pins (delete-the-default with three takes; archive-then-undo-then-redo) close it cheaply. The rest reuse pinned bodies. |
+| R1-8 | NIT | **`QUESTIONS.md` structural damage** — the new 13c section was inserted beneath the "Phase 13, Stage C" heading, orphaning it and re-parenting #27/#28; entries are also out of numeric order. | **AGREED — MY error, fix.** That file is the ratify-walk surface she reads top to bottom. |
+| R1-9 | NIT | **"All 23 registration sites" is not locatable** — 21 + the compound's own + a synthetic test site = 22 at most. | **AGREED — correct the number.** The claim is load-bearing for the totality argument, so it must match what a reviewer can count. |
+| R1-10 | NIT | **A compound that throws mid-body destroys the redo future** even though its partial work rolls back. | **AGREED — record it.** Defensible under "any new structural act clears the future"; worth one line of comment either way. |
+| R1-11 | NIT | **`try?` swallows a bridge read failure into "nothing to shelve"** with no note, so a transient failure looks like a day with no entry — the one silent path in an otherwise speaking flow. | **AGREED — FIX.** |
+
+**Clean bill worth carrying forward** (things it checked specifically and
+found solid): 1E writes nothing to the store (S1–S5 untouched); its
+trigger bound is real and `decide` is pure and total; **the 1E scoping
+rationale holds at every pane host** — all three callers of the one
+measurement brain go through `PaneMeasurement.height`, which lays out
+first, so no pane can carry an estimate and 1C's "not reproduced
+elsewhere" is a *mechanism*, not an absence of evidence; the 1A geometry
+sweep is complete across all eight remaining `layoutFragmentFrame` uses;
+judgment call 4's assertion change is legitimate; redo is sync-invisible
+and registers nothing; `reapplyStructural` is I2- and seal-safe; A7's
+carve is correctly narrow *at the range level*; 1D's A2 discriminator is
+right and 9b's guarantees are untouched; **the "any membership row means
+decided" rule survives all the restore doors** (it walked
+`restoreContainer`, `restoreReading`, re-designate, re-mint, and the
+SyncSpec §7 repairs); and the 1C refutation is honest.
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
