@@ -157,6 +157,13 @@ func withEditor<T>(
         // Deterministic tests: the idle-mint clock never fires on its own —
         // tests drive `idleMintTail()` explicitly.
         model.tailIdleSleep = { _ in throw CancellationError() }
+        // 13c 1E, same discipline: the phantom fix's debounce never fires
+        // on its own — `LongBlockLayoutTests` drives
+        // `runLongBlockLayoutPass()` explicitly, and every other suite's
+        // geometry stays exactly what it measured before this batch
+        // (notably `PhantomSpaceTests`, whose whole job is to characterize
+        // the UN-corrected estimate).
+        model.longBlockLayout.sleep = { _ in throw CancellationError() }
         let (scrollView, textView) = EditorTextView.makeEditor()
         let surfaceDelegate = EditorSurfaceDelegate(model: model)
         surfaceDelegate.wire(to: textView)

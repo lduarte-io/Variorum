@@ -626,6 +626,12 @@ final class ScrollAnchorController {
             stableAnchor = model.topVisibleOffset() ?? stableAnchor
         }
         model.refreshBadges()
+        // 13c 1E (the phantom fix, PROVISIONAL — QUESTIONS #39): the
+        // viewport moved, so a block TK2 has only ESTIMATED may now be
+        // what she is looking at. Debounced (the work lands after the
+        // scroll settles, never during it), one block per pass, once per
+        // block — `LongBlockLayout.swift` carries the bounds.
+        model.considerLongBlockLayout()
     }
 
     private func liveResizeStarted(windowID: ObjectIdentifier?) {

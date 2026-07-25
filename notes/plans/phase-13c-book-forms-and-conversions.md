@@ -716,8 +716,8 @@ are this phase's opening batch.
 |---|-------------|-------|
 | A1 | Fragments-landed journal entries appear in Pool, not the Journal book *(traced)* | **13c-friction — SHIPPED (Batch 1D).** The landing half now shelves the day's entry in the designated daily book, mirroring ⌘J; never blocks the landing (finished/full/smart/dangling books land-and-speak); never re-shelves what she removed — which is also what makes it REPAIR her two existing orphans on their next landing. No-designated-book posture PROVISIONAL, QUESTIONS #37. Third class instance found and recorded, not fixed: the mobile capture door mints bookless the same way |
 | A2 | The bridge "doesn't seem to refresh often enough" | **13c-friction — ANSWERED + one structural fix (Batch 1D).** The sign-out starvation is CONFIRMED as the dominant cause (signed out ⇒ zero sync rounds ⇒ zero `onRoundCompleted` ⇒ the bridge ran once per launch for five days) — but the hole is structural, not historical (an expired session or a failed owner adoption reach it too), so a lifecycle event now reaches the bridge when sync can't deliver a round, and a stale bridge no longer LOOKS fresh in the status row. The 60 s throttle is untouched; a periodic poll is deliberately NOT taken — QUESTIONS #38 |
-| A3 | Whitespace phantom — paragraphs of empty space with nothing in them; vanish on scroll, return when you're over them | **13c-friction** |
-| A4 | Editor jumps when one block is taller than the screen; the empty space below isn't clickable as newlines | **13c-friction** |
+| A3 | Whitespace phantom — paragraphs of empty space with nothing in them; vanish on scroll, return when you're over them | **13c-friction — ADDRESSED (Batch 1E, PROVISIONAL).** 1A traced it to TK2's own height estimate (not our bug, no public API to correct it) and 1C measured the only remedy; 1E built it — the block the viewport reaches is laid out once, and the phantom under it goes. Behind a cap, a once-per-block bound, a floor, and a KILL SWITCH; memo Q3 is still hers, now on felt evidence — QUESTIONS #39 |
+| A4 | Editor jumps when one block is taller than the screen; the empty space below isn't clickable as newlines | **13c-friction — JUMPING FIXED (Batch 1A: two real defects, revert-verified); the un-clickable half was A46, which 1C proved is not a bug (the space is the editor's and the caret does move — there is just no text there); the space itself goes with 1E** |
 | A5 | "the callouts don't have the spacing on their color right" | 13d |
 | A6 | Book bottom inset — horizontal scrollbar on a vertical page; buggy progress bar | 13c (already ruled: remove both) |
 | A7 | Backspace won't delete an empty block — "especially when there's an empty block right at the start of the post" | **13c-friction — SHIPPED (Batch 1B)** |
@@ -756,7 +756,7 @@ are this phase's opening batch.
 | A43 | **All book views more editable** — *"chapters / posts with blocks within are genuinely helpful concepts."* Extends A39 beyond Outline; scope (Outline + Book, or all three incl. Read) is her call | **13c** |
 | A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
-| A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. | **13c-friction** (one investigation with A3/A4) |
+| A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. Her diagnostic was right end to end: 1A measured the mechanism (a 3,000-word block guessing 4,964 pt against 4,597 pt real), 1C measured the remedy, **1E built it (PROVISIONAL, QUESTIONS #39)** — measured in a real window at 7,837 → 7,300 pt, with the document giving back the same 537 pt. | **13c-friction — ADDRESSED (Batch 1E)** |
 | A46 | **The DEAD CLICK** — her Q4 answer, verbatim: *"clicking does nothing at all - it couldn't move your cursor into the phantom space and the down arrow couldn't move you down either. nothing was actually there."* Queued as batch 1C. | **13c-friction — INVESTIGATED (Batch 1C): NOT A BUG.** Measured through the real event route: the phantom IS the editor's surface, the click reaches it, and the caret moves — to the document END. It cannot enter the phantom because no text is there, which is her sentence exactly. Down-arrow already agreed correct. **Nothing fixed; characterization pins landed** (`PhantomSpaceTests`) and the weight moves to memo Q3 (option E, now measured). One genuinely un-routed **6 pt** strip at the bottom of every scroll view found and recorded — **AppKit's, reproduced on a vanilla `NSTextView`** — pinned at size so this class can't grow unnoticed |
 | A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
@@ -2439,6 +2439,239 @@ characterization pins assert the right invariants (particularly the ≤ 8 pt
 bound, which is a judgement about how big is too big), and whether
 shipping the E measurement as a suite test rather than a spike is the
 right home.
+
+### Batch 1E — the PHANTOM FIX (memo option E, PROVISIONAL)
+
+**Commits:** `<this record's commit>` (the build, its suite, QUESTIONS #39
+and this record — one commit; no schema change, no core change).
+**Counts:** core **848/98 → 848/98** (unchanged — **zero
+`Sources/VariorumCore/` lines touched**, so the baseline is coherent by
+construction) · Mac **700/127 → 718/129** (two new suites, 18 tests: 9
+pure + 9 hosted) · mobile **14/4 → 14/4** (RUN on the iPhone 17 Pro
+simulator, not inferred — the batch touches `EditorViewModel`, which is
+Mac-only, and the run confirms it).
+**Diff scope:** 2 new files (`Features/Editor/LongBlockLayout.swift`,
+`VariorumTests/LongBlockLayoutTests.swift`) + 4 edited, **36 added lines
+total across the four** — the whole concern lives in its own file, and
+`EditorViewModel` grew by one stored property and two call sites (P-9).
+
+#### What shipped
+
+When the viewport is looking at — or is one screenful short of — a block
+whose layout TK2 has only ESTIMATED, the editor asks for layout of that
+one block's own text range, once. Its over-guess collapses and the
+document gives back the phantom in the same turn.
+
+Measured in a real window this batch, on 1C's own corpus: the 3,000-word
+block's **7,837 pt guess → 7,300 pt real**, and the document
+**9,063 → 8,533 pt** — the same 530 pt, and the memo's independently
+measured 537 pt for that block size. That number appears in the record
+twice from two directions, which is the corroboration worth having.
+
+#### The trigger policy, and why each part of it
+
+The brief's constraint was that the cost is not the danger, the TRIGGER
+is. What that turned into:
+
+| Guard | Value | Why this value |
+|---|---|---|
+| **Cap** | 64,000 UTF-16 units per block | Below |
+| **Once per block** | per surface lifetime, `handled` | The brief's rule, pinned — and it turned out to be load-bearing for a reason the brief did not know (below) |
+| **Floor** | 2,000 UTF-16 units (~350 words) | An ordinary post performs **zero** layout calls, ever — the calm default costs nothing (`refreshDecorations`' doctrine). This is the guard that keeps the trigger quiet in the common case |
+| **Reach** | viewport + **1 viewport** of look-ahead, and ≤ 64 fragment lookups per pass | Non-zero look-ahead is what makes E do anything (a block strictly *inside* the viewport has already been laid out by TK2 itself); bounding it is what stops "the viewport is looking at it" quietly meaning "the whole post" |
+| **Per pass** | exactly ONE block | A pass can never cost more than the cap, whatever the post looks like |
+| **When** | after scrolling SETTLES (150 ms debounce), never during it | A 7 ms hop inside a live scroll is a dropped frame; the same hop when the viewport stops is invisible |
+| **Where** | the DETAIL editor only (`scrollView != nil`) | The inline/book editor is sized to CONTENT, so it has no viewport smaller than its document — "the block the viewport is looking at" would mean every block, which is the document-scale work P1 forbids. The pane surfaces measure honestly already (1C: `PaneMeasurement` lays out first) |
+| **Kill switch** | Settings → Appearance → Editor, default ON, LOCAL | She rules on Q3 having felt it. Local (the `writeHoverHandles` class) rather than the synced `setting` table: this is one Mac's editor behaviour, not document semantics |
+
+**THE CAP'S REASONING, stated as the brief asked.** 1C's table is in
+words; the quantity this code can check for FREE is the block's UTF-16
+length (already in `BlockRangeIndex.Entry` — counting words would mean
+reading each candidate's text on every scroll, which is the P1 mistake
+the feature exists to avoid). The measurement corpus's words are
+`"longword\(i % 97)"` joined by single spaces = **10.897 units/word**, so:
+
+| words | UTF-16 units | measured | ms per 1k units |
+|---|---|---|---|
+| 1,000 | 10,897 | 1.27 ms | **0.117** |
+| 3,000 | 32,691 | 2.90 ms | 0.089 |
+| 12,000 | 130,764 | 11.52 ms | 0.088 |
+| 25,000 | 272,425 | 20.06 ms | 0.074 |
+
+Worst observed rate **0.117 ms per 1,000 units**. Budget: **half a 60 Hz
+frame (8.3 ms) in a DEBUG build** — half a frame so the same runloop turn
+has room for everything else, and Debug because her Release build is
+faster, which is margin on top of margin. 8.3 ÷ 0.117 ≈ 71,000; rounded
+down to **64,000**, predicted worst case **7.5 ms** (~5.7 ms at the
+measured mid-range rate). The architect's "20 ms at 25,000 words is
+already past a frame budget" is honoured with ~4× of room. In her prose
+(~5.5 units/word) the cap is ~**11,600 words in a SINGLE block** —
+generous where it matters, hard where it would hurt. The derivation
+itself is pinned (`theCapStaysUnderHalfAFrameAtTheWorstMeasuredRate`), so
+the constant cannot be raised past its own evidence silently.
+
+#### The refresh nudge — measured, not assumed, and the first guess was wrong
+
+1C recorded the caveat (the scroll extent corrects on the *next* display
+pass, not synchronously) but not the mechanism. My first cut took
+"display pass" literally and set `needsDisplay`. **Measured: that does
+nothing** — 9,063 pt before, 9,063 pt after `window.display()` plus
+runloop turns, and on this layer-backed view `needsDisplay` does not even
+read back true. The lever is **LAYOUT**: an `NSTextView` with
+`isVerticallyResizable` re-frames itself from
+`usageBoundsForTextContainer` in its layout pass (9,063 → 8,533 pt). So
+the pass sets `needsLayout` and settles it in the same turn with
+`layoutSubtreeIfNeeded()` — measured **0.21 ms cold / 0.05 ms warm**,
+inside the cap's budget, and it closes the space *with* the layout rather
+than a beat later.
+
+**Why it cannot loop** (the brief's explicit worry): only the HEIGHT
+changes, and `EditorTextView.setFrameSize` signals `onWidthReflow` on
+WIDTH changes alone, so no overlay generation is bumped. The resulting
+clip-bounds change *can* re-enter the trigger — but the block is in
+`handled` by then, so a second layout for it is impossible; each pass
+consumes one block from a set that only shrinks, so the chain terminates
+by construction rather than by timing. `aScrollSweepTouchesEachLongBlock…`
+pins the whole thing over a real 100-block sweep: three long blocks, at
+most three layout calls, no short block ever touched, and a **second full
+read-through costs nothing at all**.
+
+#### THE FINDING — a premise in the brief is incomplete, and it changes what "once per session" delivers
+
+The brief's reasoning for the once-per-block rule was *"TK2 does not
+discard the layout, so a second pass is pure waste"* (1C measured that
+across scroll travel, correctly). **A WIDTH REFLOW is not the same, and I
+measured it:** a laid-out 3,000-word block goes straight back to
+`estimatedUsageBounds` when the column narrows — **7,300 pt real →
+11,492 pt guessed**, a *worse* over-estimate than it started with.
+
+Two consequences, both recorded rather than quietly resolved:
+
+1. **`handled` is genuinely load-bearing, not belt-and-braces.** Without
+   it, every sidebar toggle, split-divider drag and window resize would
+   re-run the layout for every long block on screen — the exact trigger
+   bug the rule exists to prevent. That is now the red-on-old leg of
+   `theSameBlockIsNeverLaidOutTwice` (revert R1: `layoutsRun → 2`).
+2. **Honouring "once per session" literally means the phantom RETURNS
+   after a resize and is not corrected again for that block.** The
+   narrower alternative — re-eligibility once per width generation — is a
+   few lines and would keep the fix alive across resizes at the cost of a
+   bounded re-run per resize gesture. **Not taken**: the brief's bound is
+   explicit, and erring toward fewer triggers is the safe direction. It
+   is a real fork; it is on the ratify list as part of **QUESTIONS #39**,
+   and it is the architect's to redirect if the reasoning above changes
+   the call.
+
+#### Red-on-old evidence — every GUARD, by behavioral revert, run both ways
+
+**Stated plainly first, because the batch ships a NEW CAPABILITY:** the
+end-to-end pins (`aPassCollapsesThePhantomOfALongBlock`, the sweep, the
+planner's decision tests) are **CHARACTERIZATION** — there is no pre-batch
+code for them to be red against; the type does not exist there. What IS
+red-on-old in the real sense is every GUARD, and each revert below was
+executed against the shipped tree and observed:
+
+| # | Revert applied | Pin(s) | Observed RED |
+|---|---|---|---|
+| R1 | the `handled` insert removed | `theSameBlockIsNeverLaidOutTwice` | after a width reflow the block is laid out AGAIN — `layoutsRun → 2` where 1 is required |
+| R2 | the cap comparison disabled | `aBlockOverTheCapIsPassedOverAndRecorded` + `aBlockOverTheCapIsSkippedAndRecorded` | **8 issues**; a **76,269-unit** block laid out instead of skipped; `skippedOverCap → []` |
+| R3 | the floor comparison → `>= 0` | `anOrdinaryPostNeverLaysOutAnything` (+ 3 more) | an ordinary post of **27-character** blocks starts laying blocks out one per pass — `layoutsRun → 5`, `handled` 5 short blocks: the trigger-runaway class, made visible |
+| R4 | the kill-switch read → `true` | `theKillSwitchStopsItCompletely` | **5 issues**; the pass runs and the trigger arms with the switch off |
+| R5 | the nudge removed | `thePassAsksForTheRefreshItNeeds` + `aPassCollapsesThePhantom…` | the block gives back **537.0 pt** and the document gives back **0** — the caveat reproduced exactly |
+| R6 | the detail-editor scoping guard removed (scan falls back to the whole surface, as `viewportBounds(of:)` does inline) | `theInlineEditorIsOutOfScope` | the content-sized inline surface lays out the long block — `layoutsRun → 1` where 0 is required |
+| R7 | **both** reach bounds removed (look-ahead + lookup cap) | `aLongBlockFarBelowTheLookAheadIsLeftAlone` | the pass reaches **entry 150 of 200** and lays it out |
+
+Every revert was restored and the file verified **byte-identical to a
+pre-revert checksum** (`shasum` against a pristine copy) before the next
+one; the suites re-ran fully green afterwards.
+
+**Recorded honestly about R6 and R7, because the first attempts did not
+fire.** R6's first form fabricated an `NSScrollView` around the inline
+view and stayed GREEN — the fabrication did not model the real
+alternative. The faithful counterfactual is the one the codebase itself
+uses for that surface (`viewportBounds(of:)`'s `textView.bounds`
+fallback), and *that* is red; the test was also corrected to frame the
+inline surface at CONTENT scale, which is what its wrapper actually does.
+R7 likewise: reverting the look-ahead **alone** stayed green, and so did
+reverting the lookup bound alone — at that distance the two bounds cover
+for each other, and only removing both is red. Both facts are written
+into the pins' own doc comments rather than left as a tidier-sounding
+claim.
+
+#### Numbered judgment calls / PROVISIONALs
+
+1. **The whole feature is PROVISIONAL (QUESTIONS #39), default ON.** The
+   brief's instruction, and the reason is the point: she rules on memo Q3
+   having FELT it, not from a table. The kill switch returns the old
+   behaviour exactly, with no relaunch (pinned).
+2. **The cap is in UTF-16 units, not words** — the length is already in
+   the index, so the check is free; measuring words would read every
+   candidate's text on every scroll, which is the P1 mistake the feature
+   exists to avoid. The word-based reading of 1C's table is converted at
+   the constant, with the conversion shown.
+3. **A FLOOR was added that the brief did not ask for.** It is the guard
+   that keeps the trigger quiet in the ordinary case (R3 shows what
+   happens without it: a post of 27-character blocks starts laying blocks
+   out). Recorded as an addition, not smuggled in.
+4. **"Skip and record" records in CODE, not to her.** `skippedOverCap` is
+   an inspectable, pinned list; there is no user-facing message. A "this
+   block was not optimised" line is developer noise about a cosmetic
+   nicety, and the kill switch is her real control.
+5. **Scoped to the detail editor**, with the inline surface deliberately
+   out (see the table). The pane surfaces are out too, for 1C's reason —
+   they lay out before measuring, so they never carry an estimate.
+6. **The debounce is 150 ms** — an engineering default of the
+   `settleDebounce` class, injectable, chosen so nothing happens during a
+   live scroll. Not derived from anything; adjust freely.
+7. **The once-per-block rule is honoured literally**, with the resize
+   consequence recorded rather than resolved (the FINDING above). This is
+   the one place where the shipped behaviour is knowably narrower than
+   the feature could be, and it is deliberate.
+8. **The test harness disables the debounce by default**
+   (`EditorTestSupport`, one line beside the identical `tailIdleSleep`
+   line) so every existing suite's geometry is byte-unchanged — notably
+   `PhantomSpaceTests`, whose whole job is to characterize the
+   UN-corrected estimate. 1E's own pins drive `runLongBlockLayoutPass()`
+   explicitly. Production default is unchanged (ON).
+
+#### Deviations
+
+- **None from the brief's four requirements** — cap, once-per-block pin,
+  kill switch, refresh nudge, all built and all pinned; the cap's
+  reasoning is stated as asked; the whole thing is marked PROVISIONAL and
+  logged; A46 was not chased and memo Parts 1 and 3 were not touched.
+- **One correction to the brief's premise**, reported not absorbed (the
+  FINDING above).
+- **One addition beyond the brief**: the size floor (judgment call 3).
+- **No lookup subagent used** — every open question this batch had
+  (which lever moves the scroll extent; whether a reflow re-estimates;
+  whether two long blocks fit one look-ahead) was answerable by
+  measurement, and was measured.
+- **Zero `Sources/VariorumCore/` lines**, zero schema, zero
+  `Sources/VariorumCore/Sync/`. The stop-and-report condition never
+  triggered.
+- **P-6:** `TutorialWalkTests` green in the full Mac suite run.
+- **P-1:** nothing new is a routed ACT — this is a rendering behaviour
+  with a Settings toggle, the `writeHoverHandles` class, which the
+  standing 4A–4F reading files as surface-local (recorded, not declared).
+
+#### Ladder foci suggested for this batch
+
+Whether the once-per-block rule should survive a width reflow (the
+FINDING — a real fork, currently resolved toward fewer triggers);
+whether `layoutSubtreeIfNeeded()` inside the settle hop can reach any
+path where a synchronous AppKit layout is unwelcome (it is never called
+from inside a draw or a SwiftUI update — the debounce guarantees a fresh
+main-queue turn — but a reviewer should check the `overlayLayoutDidSettle`
+chain for itself); whether the look-ahead of ONE viewport is the right
+reach, given that an estimated long block is tall enough that a second
+one essentially never shares a look-ahead window (measured while writing
+the tests, and the reason the two-blocks-in-one-window test was replaced
+by the scroll sweep); whether the floor at 2,000 units leaves a visible
+phantom class uncovered; and whether the detail-editor scoping is
+complete — the pane surfaces are excluded on 1C's finding that
+`PaneMeasurement` lays out first, which a reviewer should confirm still
+holds for every pane host rather than take from the record.
 
 ### Batch 1D — the bridge (A1 · A2)
 

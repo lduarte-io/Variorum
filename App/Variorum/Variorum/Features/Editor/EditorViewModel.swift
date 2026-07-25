@@ -233,6 +233,11 @@ final class EditorViewModel {
     var differentialOracleMisses: Int { structural.differentialOracleMisses }
     /// Clears a transient hint (the fanned-extract hint) after a beat.
     @ObservationIgnored private var hintClearTask: Task<Void, Never>?
+    /// 13c 1E (memo Q3, option E — PROVISIONAL, QUESTIONS #39): the
+    /// phantom fix's per-surface state. The whole concern — the cap, the
+    /// once-per-block bound, the kill switch, the scan — lives in
+    /// `LongBlockLayout.swift`; this is its one stored home.
+    @ObservationIgnored var longBlockLayout = LongBlockLayoutState()
     /// One-shot seeds applied at the first render after attach (Phase 10
     /// Step 3 — focus handoff): the read-tier click's caret offset (the
     /// read surface and the editor render the SAME materialization, so the
@@ -358,6 +363,9 @@ final class EditorViewModel {
             session.editorRouter.active = nil
         }
         canary.disarm()
+        // 13c 1E: the phantom fix's debounce dies with the surface it was
+        // measuring (its geometry world goes with the text view).
+        longBlockLayout.task?.cancel()
         // The shared coordinator outlives this surface — detach the
         // observers (finalizeWork below still flushes it directly).
         if let autosaveToken {
@@ -1847,6 +1855,12 @@ final class EditorViewModel {
             // A generation bumped between schedule and run re-arms on its
             // own draw pass — delivered records what this refresh SAW.
             refreshBadges()
+            // 13c 1E: the post-layout settle is also the "the viewport is
+            // looking somewhere new" event for a post that just OPENED (or
+            // whose storage changed) — without it the phantom fix would
+            // need a scroll to notice anything. Debounced and bounded; see
+            // `LongBlockLayout.swift`.
+            considerLongBlockLayout()
         }
     }
 

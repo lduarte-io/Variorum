@@ -47,6 +47,11 @@ private struct AppearancePane: View {
     /// UserDefaults, the takes-density class — deliberately not the synced
     /// setting table this batch; recorded).
     @AppStorage("writeHoverHandles") private var writeHoverHandles = true
+    /// 13c 1E (memo Q3, option E — PROVISIONAL, QUESTIONS #39): the
+    /// phantom fix's KILL SWITCH. Default ON so she can feel it before
+    /// ruling on the posture; LOCAL like the hover-handle setting (this is
+    /// one Mac's editor behaviour, not document semantics).
+    @AppStorage(LongBlockLayout.settingKey) private var longBlockLayout = true
 
     var body: some View {
         Form {
@@ -78,6 +83,10 @@ private struct AppearancePane: View {
                     set: { theme.setInlineComments($0) }))
                 Toggle("Show the block drag handle on hover (Write)", isOn: $writeHoverHandles)
                 Text("ON: pointing at a block in Write reveals its ⠿ drag handle in the left margin. OFF: the fully clean writing surface. With block seams shown (⌘⇧B), every handle shows regardless. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Toggle("Lay out very long blocks as you reach them", isOn: $longBlockLayout)
+                Text("ON: when you scroll near a very long block, Variorum asks the text system to measure that one block properly — which removes the empty space it was guessing at underneath. It happens once per block, only for blocks over about a long-paragraph's length and under a measured size cap, and never while you are actually scrolling. OFF: the text system's own estimate stands, and long blocks can show phantom space that vanishes when you scroll onto them. This Mac only.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Toggle("Takes follow the scroll", isOn: Binding(
