@@ -101,6 +101,15 @@ nonisolated enum OpsRefusalCopy {
             case .invalidExtent:
                 return "A word target or post cap must be a positive number — "
                     + "nothing was changed."
+            // 13c Stage 1 ladder, R3-1: the empty-block carve's
+            // authorization, re-checked inside the tombstone's own
+            // transaction. Worded here as well as in the editor's own
+            // switch so any future door onto `deleteBlock(requiring:)`
+            // inherits real words rather than the raw dump (the R1-3
+            // class).
+            case .blockCarriesUnshownText:
+                return "That block isn't empty after all — it carries a take or "
+                    + "a note that isn't shown here. Nothing was deleted."
             default:
                 return "Refused: \(error)"
             }

@@ -224,6 +224,128 @@ struct LockPlacementDeletionTests {
         }
     }
 
+    // MARK: deleteBlock's transactional precondition (13c Stage 1 ladder, R3-1)
+    //
+    // The A7 seam-backspace carve is authorized ONLY on "there is no text to
+    // lose". Three ladder rounds found three ways that could stop being true
+    // while the gesture still fired — an archived take (R1-1), a block
+    // comment (R2-1), and then the one that ended the pattern: the guards
+    // were reading the editor's PROJECTION, which is deliberately frozen
+    // while the buffer is dirty (R3-1). A guard list read from a frozen array
+    // is exactly as stale as the array, so the authorization moved HERE,
+    // inside the same transaction as the tombstone, where it cannot be a
+    // snapshot. These pins are that precondition's own.
+
+    @Test func theEmptyBlockPreconditionDeletesACleanEmptyBlock() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            _ = try ops.newBlock(in: post.id, text: "keeper")
+            let made = try ops.newBlock(in: post.id, text: "")
+
+            try ops.deleteBlock(
+                made.block.id, requiring: .emptyWithNothingUnshown(variantID: made.variant.id))
+
+            #expect(try db.deletedAt("block", made.block.id) != nil)
+        }
+    }
+
+    @Test func theEmptyBlockPreconditionRefusesALiveCOMMENT() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "")
+            _ = try ops.addBlockComment(to: made.block.id, text: "I'll rewrite this")
+
+            #expect(throws: OperationError.blockCarriesUnshownText(id: made.block.id)) {
+                try ops.deleteBlock(
+                    made.block.id, requiring: .emptyWithNothingUnshown(variantID: made.variant.id))
+            }
+            #expect(try db.deletedAt("block", made.block.id) == nil, "nothing was tombstoned")
+        }
+    }
+
+    @Test func theEmptyBlockPreconditionRefusesAnARCHIVEDTakeAndAFan() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "prose")
+            let branch = try ops.branchVariant(made.block.id, from: made.variant.id)
+            // A FAN, first: two live active takes.
+            try ops.autosave(branch.id, text: "", charDelta: -5)
+            #expect(throws: OperationError.blockCarriesUnshownText(id: made.block.id)) {
+                try ops.deleteBlock(
+                    made.block.id, requiring: .emptyWithNothingUnshown(variantID: branch.id))
+            }
+            // …and archiving the one holding the prose does NOT make it safe:
+            // archive is out of the fan, not gone, and the cascade takes it.
+            try ops.archiveVariant(made.variant.id)
+            #expect(throws: OperationError.blockCarriesUnshownText(id: made.block.id)) {
+                try ops.deleteBlock(
+                    made.block.id, requiring: .emptyWithNothingUnshown(variantID: branch.id))
+            }
+            #expect(try db.deletedAt("block", made.block.id) == nil)
+        }
+    }
+
+    @Test func theEmptyBlockPreconditionRefusesTextThatArrivedSinceTheGesture() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "")
+            // The sync-apply shape: text lands between the keystroke and the
+            // write. This is the compare-and-set the carve was always
+            // documented to make — and now genuinely makes, in ONE
+            // transaction with the tombstone (R3-3).
+            try ops.autosave(made.variant.id, text: "landed from another device", charDelta: 26)
+
+            #expect(throws: OperationError.bufferChangedSinceGesture(variantID: made.variant.id)) {
+                try ops.deleteBlock(
+                    made.block.id, requiring: .emptyWithNothingUnshown(variantID: made.variant.id))
+            }
+            #expect(try db.deletedAt("block", made.block.id) == nil)
+        }
+    }
+
+    @Test func theOrdinaryDeleteDoorIsUnaffectedByThePrecondition() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let made = try ops.newBlock(in: post.id, text: "words, takes and notes")
+            _ = try ops.branchVariant(made.block.id, from: made.variant.id)
+            _ = try ops.addBlockComment(to: made.block.id, text: "a note")
+
+            // `.none` is the default and the general door's contract: the
+            // author asked for an unrestricted delete (QUESTIONS #33(a)),
+            // and the block is undoable, redoable and tray-recoverable.
+            try ops.deleteBlock(made.block.id)
+            #expect(try db.deletedAt("block", made.block.id) != nil)
+        }
+    }
+
+    /// The REDO half of the same authorization, and it is a real window: a
+    /// comment written between the undo and the redo is not a structural
+    /// act, so it never cleared the redo future — and a redo lands a
+    /// tombstone exactly as the first delete did.
+    @Test func aRedoneEmptyBlockDeletionReChecksThePreconditionToo() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            _ = try ops.newBlock(in: post.id, text: "keeper")
+            let made = try ops.newBlock(in: post.id, text: "")
+
+            try ops.deleteBlock(
+                made.block.id, requiring: .emptyWithNothingUnshown(variantID: made.variant.id))
+            _ = try stack.undo(with: ops)
+            #expect(try db.deletedAt("block", made.block.id) == nil)
+
+            // She writes a note on the restored block, then redoes.
+            _ = try ops.addBlockComment(to: made.block.id, text: "second thoughts")
+            #expect(throws: OperationError.blockCarriesUnshownText(id: made.block.id)) {
+                _ = try stack.redo(with: ops)
+            }
+            #expect(try db.deletedAt("block", made.block.id) == nil,
+                    "the redo refused rather than cascading the note away")
+            #expect(stack.redoDepth == 1, "…and a resolvable refusal keeps its entry for retry")
+        }
+    }
+
     @Test func deleteBlockRefusedUnderALockedPost() throws {
         try withOperations { ops, _ in
             let post = try ops.createPost()

@@ -40,6 +40,15 @@ public enum OperationError: Error, Equatable, Sendable {
     case variantIsChosen(id: String)
     case archivedVariant(id: String)
 
+    /// A `deleteBlock` carrying `BlockDeletionPrecondition
+    /// .emptyWithNothingUnshown` found the block holding prose its slot does
+    /// not render — a second live take (a fan, or an archived one) or a live
+    /// block comment (13c Stage 1 ladder, R3-1). The A7 seam-backspace carve
+    /// is authorized ONLY on "there is no text to lose"; when that stops
+    /// being true between the keystroke and the transaction, the whole
+    /// gesture refuses rather than deleting text nobody saw.
+    case blockCarriesUnshownText(id: String)
+
     // Placement (I2).
     case blockAlreadyPlaced(id: String)
     case blockNotPlaced(id: String)

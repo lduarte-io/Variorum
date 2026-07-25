@@ -1076,9 +1076,27 @@ final class EditorSurfaceController {
     /// backspace/forward-delete of the ONE separator beside an EMPTY block
     /// deletes that block instead of refusing.
     ///
-    /// Four guards sit here rather than in the pure index, because this
-    /// is where the fan and the store are known, and together they are
-    /// what keeps the carve from widening:
+    /// **Where the authorization actually lives, since round 3 moved it**
+    /// (13c Stage 1 ladder, R3-1). The four guards below are the
+    /// ENABLEMENT layer: they read `model.slots`, decide fast, and let an
+    /// ordinary seam keystroke fall through to the ratified refusal without
+    /// a noisy message. They are NOT the authorization, because `slots` is
+    /// deliberately held stale whenever the editor is busy
+    /// (`EditorProjectionPolicy.decide` returns `.deferUntilClean` while the
+    /// buffer is dirty or a mint/structural flight is up, and autosave's
+    /// debounce re-arms on every keystroke — so for a whole typing burst
+    /// this array is frozen). A comment arriving in that window — from sync,
+    /// or from her own comments sheet — was invisible to guard 3, and the
+    /// block went with its note.
+    ///
+    /// The authorization is now `Operations.BlockDeletionPrecondition
+    /// .emptyWithNothingUnshown`, re-read INSIDE the tombstone's own
+    /// transaction (see `runEmptyBlockDeletion`). Read the two together:
+    /// what follows says WHY each condition matters; the operation is what
+    /// makes it true at the moment the row is written.
+    ///
+    /// The four guards, and together they are what keeps the carve from
+    /// widening:
     ///
     /// 1. the block's SURFACE text is empty (the index's rule) — a block
     ///    with any text keeps the ratified refusal;
@@ -1109,10 +1127,10 @@ final class EditorSurfaceController {
     /// datum attached to a block (tags cascade too) would narrow the carve
     /// back out of existence and undo A7.
     ///
-    /// The store is verified again at run time by a compare-and-set, so a
-    /// sync apply landing text into the block between the keystroke and
-    /// the transaction refuses the whole gesture rather than deleting text
-    /// nobody saw.
+    /// Every one of the four is re-checked in the operation's own
+    /// transaction, so a sync apply — or her comments sheet, or another
+    /// surface — changing any of them between the keystroke and the write
+    /// refuses the whole gesture rather than deleting text nobody saw.
     struct EmptyBlockDeletion: Sendable, Equatable {
         let blockID: String
         let variantID: String
@@ -1136,19 +1154,28 @@ final class EditorSurfaceController {
         return EmptyBlockDeletion(blockID: entry.blockID, variantID: variantID, entryIndex: i)
     }
 
-    /// Runs A7's carve through the one structural door, with the buffer
-    /// compare-and-set first (`editTakesAtomically` with an unchanged text
-    /// is a pure verification — it registers nothing and returns 0, the
-    /// `runCrossBlockEdit` precedent), so exactly ONE undo entry lands:
-    /// "Delete Block".
+    /// Runs A7's carve through the one structural door as **ONE
+    /// transaction** — `deleteBlock` re-checks the carve's whole
+    /// authorization inside the tombstone's own write
+    /// (`BlockDeletionPrecondition.emptyWithNothingUnshown`), so exactly one
+    /// undo entry lands: "Delete Block".
+    ///
+    /// 13c Stage 1 ladder, R3-1/R3-3: this used to verify only the TEXT,
+    /// through an `editTakesAtomically` with an unchanged buffer, in a
+    /// transaction of its own — which left the fan/archive/comment guards
+    /// standing on `model.slots`, an array the projection engine
+    /// deliberately freezes while the buffer is dirty or a flight is up. A
+    /// comment landing during a typing burst was therefore invisible to
+    /// them, and the block (and its note) went. The plan-time guards below
+    /// stay as the ENABLEMENT layer — fail fast, don't refuse noisily — but
+    /// the authorization is the operation's now, where it cannot be a
+    /// snapshot.
     func runEmptyBlockDeletion(_ plan: EmptyBlockDeletion) async {
         let landing = caretLandingAfterRemoving(plan.entryIndex)
         let landed = await runStructural { ops in
-            _ = try ops.editTakesAtomically(
-                [Operations.TakeEdit(
-                    variantID: plan.variantID, newText: "", charDelta: 0, expectedText: "")],
-                undoLabel: "Delete Block")
-            try ops.deleteBlock(plan.blockID)
+            try ops.deleteBlock(
+                plan.blockID,
+                requiring: .emptyWithNothingUnshown(variantID: plan.variantID))
             return StructuralOutcome(
                 caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
         }

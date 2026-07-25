@@ -2274,6 +2274,13 @@ final class EditorViewModel {
         case .archivedVariant: return "This take is archived — unarchive it first."
         case .bufferChangedSinceGesture:
             return "The text changed while that gesture was landing — nothing was altered; try it again on the current text."
+        // 13c R3-1: the A7 carve's authorization, re-checked inside the
+        // tombstone's transaction. Reachable when a take or a note lands on
+        // the block between the keystroke and the write — the editor's
+        // projection is deliberately frozen while typing, so the guards that
+        // enabled the gesture could not have seen it.
+        case .blockCarriesUnshownText:
+            return "That block isn't empty after all — it carries a take or a note that isn't shown here. Nothing was deleted."
         case .divideSideWouldBeEmpty:
             return "Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end."
         case .mergedBlockWouldHaveNoTake:

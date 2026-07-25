@@ -108,25 +108,80 @@ extension Operations {
         }
     }
 
+    /// An authorization `deleteBlock` re-checks **inside the tombstone's own
+    /// transaction** (13c Stage 1 ladder, R3-1/R3-3).
+    ///
+    /// **Why this exists at all, because the history is the argument.** The
+    /// A7 seam-backspace carve is a deliberate, narrow exception to the
+    /// ratified cross-block destructive-edit refusal, and its ONLY
+    /// authorization is *"there is no text to lose"*. Three review rounds
+    /// found three ways that authorization could fail while the gesture
+    /// still fired — an archived take (R1-1), a block comment (R2-1), and
+    /// finally the one that ended the pattern: the guards were reading the
+    /// editor's PROJECTION, which is deliberately held stale while the
+    /// buffer is dirty or a flight is up (R3-1). A guard list cannot fix
+    /// that; a guard list read from a frozen array is exactly as stale as
+    /// the array. **A precondition evaluated in the same transaction as the
+    /// tombstone cannot be read stale**, which is why the authorization
+    /// moved here rather than growing a sixth entry.
+    ///
+    /// It also makes the carve's long-documented compare-and-set claim TRUE
+    /// (R3-3): the check and the act are now ONE transaction, where before
+    /// they were two (`editTakesAtomically`'s write, then `deleteBlock`'s).
+    public enum BlockDeletionPrecondition: Sendable, Equatable {
+        /// The ordinary delete door: the block goes, whatever it holds. The
+        /// author asked for an unrestricted delete (QUESTIONS #33(a)), and
+        /// the block is undoable, redoable and tray-recoverable.
+        case none
+        /// **The A7 carve's authorization.** The block must still hold
+        /// nothing but one empty take: `variantID` is its ONE live variant
+        /// (so no fan and no archived take), it is active, unlocked, under
+        /// an unsealed post, its buffer is empty, and the block carries no
+        /// live comment. Anything else refuses the whole gesture — the
+        /// keystroke deletes nothing rather than deleting text nobody saw.
+        case emptyWithNothingUnshown(variantID: String)
+    }
+
     /// Tombstones the block; the trigger chain cascades to its variants,
     /// placement, edges, and block tags, all stamped with the block's exact
     /// `deleted_at` so `restoreBlock` can identify its cascade victims.
     /// `last_container_id` is recorded first — it feeds the per-post
     /// "deleted blocks" tray.
-    public func deleteBlock(_ id: String) throws {
-        try performDeleteBlock(id, quietWhenGone: false)
+    ///
+    /// `precondition` defaults to `.none` (the ordinary door). A caller
+    /// whose authorization to delete depends on what the block currently
+    /// HOLDS must pass one instead of checking beforehand: a check made
+    /// outside this transaction is a check made against a snapshot, and
+    /// `BlockDeletionPrecondition`'s doc comment records what that cost.
+    public func deleteBlock(
+        _ id: String, requiring precondition: BlockDeletionPrecondition = .none
+    ) throws {
+        try performDeleteBlock(id, quietWhenGone: false, requiring: precondition)
         undoStack?.register(
             label: "Delete Block",
             inverse: { try $0.revertDeleteBlock(id) },
             // 13c 1B (A10): re-tombstone the same block row — the cascade
             // triggers re-stamp its children exactly as the first delete
             // did, so `revertDeleteBlock` still finds them next undo.
-            redo: { try $0.performDeleteBlock(id, quietWhenGone: true) })
+            //
+            // 13c R3-1: the redo carries the SAME precondition. A redo
+            // lands a tombstone, so it needs the same authorization the
+            // first delete needed — and the window is real, because a
+            // comment written between the undo and the redo is not a
+            // structural act and therefore never cleared the redo future.
+            // A refused redo keeps its entry for retry (the resolvable
+            // bucket), which is the existing, pinned posture.
+            redo: {
+                try $0.performDeleteBlock(
+                    id, quietWhenGone: true, requiring: precondition)
+            })
     }
 
     /// The row work behind `deleteBlock`, shared with structural REDO
     /// (13c 1B — A10; `quietWhenGone` per `performArchiveVariant`).
-    private func performDeleteBlock(_ id: String, quietWhenGone: Bool) throws {
+    private func performDeleteBlock(
+        _ id: String, quietWhenGone: Bool, requiring precondition: BlockDeletionPrecondition
+    ) throws {
         try database.write { db in
             let existing = try Block.fetchOne(db, key: id)
             guard let existing, existing.deletedAt == nil else {
@@ -135,6 +190,9 @@ extension Operations {
             }
             var block = existing
             try ensurePlacementUnlocked(db, blockID: id)
+            // The authorization, re-read from the rows this transaction is
+            // about to tombstone — never from a caller's snapshot.
+            try enforce(precondition, db, blockID: id)
             let now = date.now
             if let placement = try livePlacement(db, blockID: id) {
                 block.lastContainerId = placement.containerId
@@ -142,6 +200,39 @@ extension Operations {
             block.deletedAt = now
             block.updatedAt = now
             try block.update(db)
+        }
+    }
+
+    /// `BlockDeletionPrecondition`, enforced. The counted reads mirror
+    /// `Queries.RenderedBlock.liveVariantCount` and `.commentCount` exactly
+    /// — the same two facts the projection reports, read fresh here so the
+    /// answer cannot be a snapshot's.
+    private func enforce(
+        _ precondition: BlockDeletionPrecondition, _ db: Database, blockID: String
+    ) throws {
+        guard case .emptyWithNothingUnshown(let variantID) = precondition else { return }
+        // Live, active, unlocked, unsealed — exactly `editTakesAtomically`'s
+        // guard set, which is what the carve used to borrow by writing an
+        // unchanged text through it.
+        let variant = try editableVariant(db, variantID)
+        guard variant.blockId == blockID else {
+            throw OperationError.variantNotFound(id: variantID)
+        }
+        guard variant.workingText.isEmpty else {
+            // The carve's compare-and-set, now genuinely inside the
+            // tombstone's transaction (R3-3).
+            throw OperationError.bufferChangedSinceGesture(variantID: variantID)
+        }
+        let liveVariants = try Int.fetchOne(
+            db,
+            sql: "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL",
+            arguments: [blockID]) ?? 0
+        let liveComments = try Int.fetchOne(
+            db,
+            sql: "SELECT COUNT(*) FROM block_comment WHERE block_id = ? AND deleted_at IS NULL",
+            arguments: [blockID]) ?? 0
+        guard liveVariants == 1, liveComments == 0 else {
+            throw OperationError.blockCarriesUnshownText(id: blockID)
         }
     }
 

@@ -247,6 +247,72 @@ struct BlockDeletionAndRedoTests {
         }
     }
 
+    /// **THE guard the guard list could not be** (13c Stage 1 ladder round
+    /// 3, R3-1 — the class's third and last instance, and the one that ended
+    /// the pattern rather than extending it).
+    ///
+    /// R1-1 and R2-1 each added a condition to `planEmptyBlockDeletion`.
+    /// Both read `model.slots`, which the projection engine **deliberately
+    /// holds stale**: `EditorProjectionPolicy.decide` returns
+    /// `.deferUntilClean` whenever the buffer is dirty (or a mint or
+    /// structural flight is up), and autosave's debounce re-arms on every
+    /// keystroke — so for a whole typing burst that array is frozen at
+    /// whatever the store said before she started. A comment landing in that
+    /// window is invisible to every guard, and the run path re-verified only
+    /// the TEXT, which really was empty. The block went, and with it a note
+    /// that `Queries.deletedBlockComments` — keyed by block — could no
+    /// longer surface at all.
+    ///
+    /// **The tell, and it is why the earlier pins were green:** every other
+    /// carve pin calls `harness.reload()` between the ops write and the
+    /// plan, hand-refreshing the projection production does not. They
+    /// rehearsed a state production never reaches. **This one deliberately
+    /// does not reload** — it drives the frozen projection on purpose.
+    ///
+    /// The fix is not a sixth guard: the authorization now lives in
+    /// `Operations.deleteBlock(_:requiring:)`, re-read inside the
+    /// tombstone's own transaction, where it cannot be a snapshot.
+    @Test func aCommentArrivingWhileSheIsTypingStillStopsTheCarve() async throws {
+        try await withEditor(seedBlocks: ["", "hello"]) { harness in
+            let blockID = try harness.storeSlots()[0].blockID
+
+            // She is typing: autosave holds the edit for its debounce, so
+            // the editor is BUSY and every arriving projection defers.
+            harness.type("X", at: 3)
+            #expect(harness.model.autosave.isDirty, "the burst — this pin's precondition")
+
+            // Meanwhile a comment lands on the EMPTY block. From sync, or
+            // from her own comments sheet, which never touches this buffer.
+            _ = try harness.session.operations.addBlockComment(
+                to: blockID, text: "I'll rewrite this — see the note")
+
+            // The observation delivers, and the engine defers it. This is
+            // the frozen array the guards were reading.
+            let fresh = try harness.storeSlots()
+            #expect(fresh[0].commentCount == 1, "the STORE knows about the note")
+            harness.model.applyProjection(fresh)
+            #expect(harness.model.slots[0].commentCount == 0,
+                    "…and the editor's projection deliberately does not — the freeze, reproduced")
+            #expect(harness.model.planEmptyBlockDeletion(
+                range: NSRange(location: 0, length: 1), replacement: "") != nil,
+                "so the plan-time guards PASS on stale data — which is the finding")
+
+            // Her keystroke, through the real path.
+            harness.replace(NSRange(location: 0, length: 1), with: "")
+            await harness.flush()
+
+            let after = try harness.storeSlots()
+            #expect(after.count == 2, "the empty block SURVIVES — the plan was stale, the operation was not")
+            #expect(after[0].blockID == blockID)
+            let notes = try await harness.database.read { db in
+                try Queries.blockComments(db, blockID: blockID)
+            }
+            #expect(notes.count == 1, "…and her note is still there")
+            #expect(harness.session.undoStack.depth == 0, "nothing structural happened")
+            #expect(harness.model.statusMessage?.isEmpty == false, "and the refusal SPEAKS (P-2)")
+        }
+    }
+
     /// PROVISIONAL, and pinned as the shipped reading (13c R2-1, QUESTIONS
     /// #40): a NAMED or CALLOUT empty block still carves. Both are columns
     /// ON the block row — the tombstone keeps them, undo and `restoreBlock`
