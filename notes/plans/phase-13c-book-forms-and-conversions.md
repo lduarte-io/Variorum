@@ -1381,6 +1381,67 @@ autonomy grant. Counts at open: core **817/96**, Mac **668/125**.
 
 ## Architect adjudications
 
+### Batch 1D — ACCEPTED, with one architect-directed addendum (2026-07-26)
+
+**A1's diagnosis was confirmed IN HER REAL STORE, read-only, which turns
+my trace into a fact:** her 2026-07-11 entry was created **17 seconds
+after** the `bridge_day.last_remote_stamp` of the Fragments row it landed
+from, and carries **no `reading_post` row at all** — not live, not
+tombstoned. 2026-07-16 is identical. Her designation was healthy the
+whole time (`Journal`, curated, pinned, unlocked), so the only missing
+piece really was the second half of the ⌘J door.
+
+**The fix's three rules are well-shaped and I want rule 2 on the record
+as the good one:** *any membership row, live OR tombstoned, means the
+pair is already decided.* That is what stops the bridge from re-shelving
+a post she deliberately removed from the book — the obvious objection to
+shelving on every write — and it is simultaneously what makes the fix a
+**repair** for her two existing orphans, which have no row of any kind.
+One rule, both jobs, no special case.
+
+**A2 — the answer was the sign-out, AND the hole is structural.** The
+batch confirmed the dominant cause (signed out ⇒ `connectSyncIfAllowed`
+never runs ⇒ no scheduler ⇒ `onRoundCompleted` never fires ⇒ **the bridge
+ran exactly once per launch for five days**, with her Fragments session
+valid throughout — and her `bridge_day` rows stop at 2026-07-21,
+consistent). **It did not stop at "it was the sign-out."** The same
+starvation returns on any expired Variorum session and on a failed owner
+adoption, and the 9b plan documents a cadence the code does not deliver
+in that state. Fixed at the lifecycle trigger, throttle untouched —
+correct, since the latency she felt was five days, not sixty seconds.
+The stale "Bridged 11:04 PM" label (a five-day-old round looking fresh —
+9b's MINOR-4 class) now carries the date.
+
+**PROVISIONAL #37 ACCEPTED** (no designated book ⇒ land, skip, say why):
+its reasoning is the one I would have made — the Mac door creates and
+pins a book *because she pressed a button*, and a headless overnight
+round minting one is a materially larger act.
+
+**#38 CORRECTLY LEFT TO HER** (a periodic poll): nothing pulls Fragments
+while she sits in Variorum without typing or switching apps, and a timer
+would fix that — but every bridge round hash-sweeps every live journal
+day, so putting that on a clock is a **posture change stacked on the P1
+relaxation she ratified at 9b**. Not ours to make.
+
+> **ARCHITECT-DIRECTED ADDENDUM — the mobile door.** The batch flagged
+> that `EntryListViewModel.swift:94` has the **identical missing half**:
+> a phone-minted entry also arrives bookless. I sent it back to be fixed
+> in the same session rather than deferred. **Reasoning:** it is the same
+> class, adjacent and now known, and the skill's class-completeness rule
+> says a recurring class gets swept, not audited later — leaving a known
+> instance is the "green by audit" pattern P-1 exists to kill. I also
+> judge the stated mitigations weaker than they look: A1's rule 3 fires
+> on a landing that *writes* a day, but a phone-minted entry she never
+> touches in Fragments produces no landing at all — only a
+> Variorum→Fragments push — so it stays bookless until she happens to
+> open ⌘J on that exact day. The addendum closes the mobile suite gap the
+> batch honestly flagged (it had not run it).
+
+**Ladder foci adopted:** the duplicate-day landing (shelving follows
+`canonicalJournalEntry` while push is paused), and whether "any
+membership row means decided" has a `restoreContainer`/`restoreReading`
+interaction worth stating.
+
 ### Batch 1C — ACCEPTED, and it unlocks a build decision (2026-07-26)
 
 **A46 does not exist, and the batch was right not to fix something.**
