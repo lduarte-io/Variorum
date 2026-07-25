@@ -720,10 +720,10 @@ are this phase's opening batch.
 | A4 | Editor jumps when one block is taller than the screen; the empty space below isn't clickable as newlines | **13c-friction** |
 | A5 | "the callouts don't have the spacing on their color right" | 13d |
 | A6 | Book bottom inset — horizontal scrollbar on a vertical page; buggy progress bar | 13c (already ruled: remove both) |
-| A7 | Backspace won't delete an empty block — "especially when there's an empty block right at the start of the post" | **13c-friction** |
-| A8 | No ability to delete / archive empty blocks at all | **13c-friction** |
+| A7 | Backspace won't delete an empty block — "especially when there's an empty block right at the start of the post" | **13c-friction — SHIPPED (Batch 1B)** |
+| A8 | No ability to delete / archive empty blocks at all | **13c-friction — DELETE SHIPPED (Batch 1B); ARCHIVE deliberately not built, QUESTIONS #33(c)** |
 | A9 | "i desperately need divide in takes mode" | **13c-friction** |
-| A10 | Redo — to undo an accidental structural undo *(traced: absent)* | **13c-friction** |
+| A10 | Redo — to undo an accidental structural undo *(traced: absent)* | **13c-friction — SHIPPED (Batch 1B)** |
 | A11 | Divide on an empty line should put the blank line NOWHERE — block above, block below | 13d |
 | A12 | Warning before destructive actions like undoing a structural edit that created a take | 13d |
 | A13 | Callouts (a) in Takes/Compare/Lenses + a shortcut *(traced)* · (b) real colour swatches + a proper emoji picker | (a) **13c-friction** · (b) 13e |
@@ -1476,3 +1476,223 @@ The container↔view and fragment-vs-text-extent conversions (are there
 other sites?); the changed decor-registration assertion; whether jumps
 landing flush is acceptable; and whether the C3 memo's Part 2 posture
 recommendation is honest about P1.
+
+### Batch 1B — block deletion & redo (A7 · A8 · A10)
+
+**Commits:** `5a4844e` (structural redo, the core half) · `7df0795`
+(A7's carve, A8's door, redo's faces) · this record.
+**Counts:** core **817/96 → 836/97** · Mac **668/125 → 691/126** ·
+mobile 11/4 (builds clean; `AppSession` is shared by both targets and the
+new redo wiring is inside the existing `#if os(macOS)` block).
+**Diff scope:** 9 core files + 1 new core suite; 15 app files + 1 new app
+suite. No schema change, no `Sources/VariorumCore/Sync/` change.
+
+#### A10 — structural redo: the design fork, and why this side of it
+
+The absence was real (the architect verified it; I re-verified before
+building). The interesting part is that there are exactly two ways to
+build redo here, and they are not close:
+
+**Re-run the forward operation.** `redo` = call `divide(A, cut)` again.
+Cheap to write — and wrong. Divide mints a block with a FRESH UUID, so
+the entry's own inverse, which captured the OLD id at do-time, is
+instantly stranded; the second undo would tombstone a block that no
+longer exists and leave the new one placed. Dead end, and the codebase
+already says so in its own words: the inverses are documented as
+"exact-row inverses … never fresh rows — which is why do → undo
+round-trips to row equality."
+
+**Mirror the inverse.** Every registration now carries BOTH halves —
+the `inverse` and a `redo` re-apply built from the SAME do-time
+pre-images — so an entry MOVES between two stacks and ping-pongs
+forever without re-deriving anything. `do → undo → redo` returns the
+store to the post-do rows with every ID intact; that is pinned as row
+snapshots, not asserted in prose.
+
+**Totality was a deliberate choice, not an accident of effort.** A
+partial redo is a P-2 smell (a door that works sometimes), so all 23
+registration sites supply a re-apply and `register` takes `redo:`
+**required, never defaulted** — a future site must decide rather than
+silently ship a hole. The work turned out bounded because most mirrors
+already existed: `restorePlacementLocation` is its own mirror given the
+other image, `revertChosenPointers` likewise, `restoreContainer` is
+exactly `revertMintedContainer` reversed, and `revertDeleteBlock` is
+exactly the un-tombstone `reapplyStructural` needs. Only TWO new bodies
+were written (`reapplyStructural`, `reapplyMintedContainer`), plus a
+`perform…` split on the deletion trio so the redo half can re-run the
+row work without registering.
+
+Two capture changes rode along, both load-bearing: move/reorder now keep
+the **landed** position string (a fresh `containerPosition` derivation
+would mint a new jittered key on every ping-pong and drift), and the
+three adopt doors keep both pointer images through one small
+`AdoptedPointer` value.
+
+#### What binds, and where each is pinned (`RedoStackTests`, 19 tests)
+
+| Rule | Pin |
+|---|---|
+| Redo is STRUCTURAL only; ⌘Z stays text undo, the stacks never interleave (AppSpec §9) | separate doors, separate keys (⇧⌥⌘Z vs ⌘⇧Z) — `theRedoCapabilityIsDeclared…` |
+| Session-scoped, in-memory, never persisted | `UndoStack` state only; `removeAllClearsBothStacks` |
+| Redo emits ORDINARY operations — sync never learns it exists | `redoEmitsOutboxRowsLikeAnyOperation` |
+| Any new structural act clears the redo future | `anyNewStructuralActClearsTheRedoFuture` |
+| Neither undo nor redo registers anything of its own | `neitherUndoNorRedoRegistersAnythingOfItsOwn` (the stack arithmetic) |
+| A refused redo stays on the redo stack for retry | `aRefusedRedoStaysOnTheRedoStackForRetry` (seal → unseal → succeeds) |
+| An obsolete redo pops quietly instead of wedging | `anObsoleteRedoPopsQuietlyInsteadOfWedgingTheStack` |
+| A compound redoes as ONE entry, every leg re-applied | `aCompoundRedoesAsOneEntryAndReAppliesEveryLeg` |
+| Exact-row round trip, IDs included | divide · merge · divide-W · take-edit · deleteBlock · reorder · moveBlock · post-mint · adopt |
+
+#### The one behavioral finding inside redo — verified, not assumed
+
+The first row-snapshot pins failed, and the failure was worth chasing
+rather than relaxing. A diagnostic (written, run, deleted) showed the
+ONLY differing column anywhere is `deleted_at` on rows that die AGAIN:
+a re-release or a re-tombstone writes a fresh stamp. That is
+pre-existing undo behaviour, not new — undo has always re-stamped on
+each run — and it is benign, because nothing keys off a released
+placement's stamp (the revive is by row id; `restoreBlock` and
+`restoreContainer` key off the BLOCK's and CONTAINER's stamps, which a
+released placement never carried).
+
+What IS load-bearing is the stamp's internal CONSISTENCY, so that is
+what the pins assert instead of byte-equality: after every redo→undo
+cycle the block's tombstone and its cascade victims still share ONE
+value (checked every round of the ping-pong), and
+`aRedoneThenUndoneBlockIsStillTrayRecoverable` walks it end to end
+through `Queries.trayBlocks` + `restoreBlock`. A re-apply that flipped
+children with a fresh stamp instead of the block's own would fail that
+on the FIRST cycle.
+
+#### A7 — traced mechanism, and the carve
+
+**Traced:** with blocks `["", "hello"]` the surface is `"\nhello"`;
+entry 0 occupies `(0,0)` and entry 1 `(1,5)`, with the separator at 0
+owned by NEITHER (the tiling doctrine). A backspace at the start of
+"hello" — or a forward-delete inside the empty block — proposes the
+range `(0,1)`, which is contained in no entry, so
+`BlockRangeIndex.verdict` returns `.crossesBlockBoundary` and
+`shouldChangeText` refuses. Exactly her report, and exactly her named
+"empty block right at the start of the post" case: with nothing above
+it, that seam is the ONLY gesture that can reach it.
+
+**The carve** is one pure function (`BlockRangeIndex.emptyBlockDeletion`)
+plus three caller-side guards, and its narrowness is the deliverable:
+a **deletion** (never a replacement) of **exactly one inter-entry
+separator** whose neighbour is an **empty** block, which is **unfanned**,
+**editable**, and whose stored buffer is re-verified **empty by
+compare-and-set inside the transaction** (`editTakesAtomically` with an
+unchanged text is a pure verification — it registers nothing, the
+`runCrossBlockEdit` precedent), so a sync apply landing text between the
+keystroke and the write refuses the whole gesture. Exactly ONE undo
+entry lands: "Delete Block".
+
+**Nine pins say it cannot widen:** two blocks with text · a
+multi-character range · a caret-only range · a one-character range
+inside a block · the tail separator (that is `closeTail`'s) · a
+single-block post · an empty post · a FANNED empty block · a LOCKED
+empty block. Plus `theCarveAndTheTwoCrossBlockPlansAreMUTUALLYEXCLUSIVE`,
+which is why running the carve FIRST is safe: both cross-block plans
+collect targets by intersection (`length > 0`), and a lone separator
+intersects nothing.
+
+#### The assumption this batch corrected (record it — a test caught it)
+
+I wrote a pin asserting that a bare seam-backspace between two TEXTED
+blocks still merges, on the strength of the ratified "a cross-seam
+delete just works" (2026-07-09). **It failed, and the pin was wrong, not
+the code.** That ruling covers a SELECTION that spans text; a bare
+separator range intersects neither neighbour, so `planCrossBlockEdit`
+and `planVisibleTakeEdit` have BOTH always returned nil for it and the
+keystroke has always refused. Consequence, now pinned as behaviour: the
+range shape A7 carves is the one shape that previously did NOTHING, so
+the carve changes behaviour for the empty-block case and nothing else,
+and joining two texted blocks remains the explicit merge gesture. The
+pin was rewritten to assert the refusal
+(`backspaceBetweenTwoBLOCKSWITHTEXTStillREFUSES`).
+
+#### A8 — the door
+
+`deleteBlock` has been an operation since Phase 2 and had exactly ONE
+face app-wide: the block-TOC row menu. It is now a DECLARED capability
+(P-1) — verb, block scope, doors `[.menuBar, .bottomBar, .palette]`,
+`takesAccess: .native`, the `takeFamily` availability rule reused by
+name — routed through `CommandRouter` and handled natively in Write,
+Takes and Lenses (R118: Write is never privileged). Caret/ring lands on
+the neighbour that takes the departed block's place. Both halves flush
+before deleting, so a pending buffer never lands in a tombstoned
+variant. Sealed posts refuse through the op, spoken (P-2).
+
+#### Numbered judgment calls / PROVISIONALs (all on the ratify list, QUESTIONS #33)
+
+1. **The delete door is not restricted to empty blocks** — the operation
+   isn't, the TOC door never was, and a restriction nobody ruled is
+   invented product behaviour. One availability line either way. #33(a).
+2. **Deleting the post's LAST block is allowed**, leaving a blockless
+   post. The rule applied: no invariant makes a post's block count
+   load-bearing (I10 governs variants under a live block), and the
+   blockless post is explicitly modelled — `BlockRangeIndex`'s own
+   doc comment names it the fresh-post state. Pinned end to end,
+   including that typing rebuilds. #33(b).
+3. **The "archive" half of A8 is NOT built.** `block.archived_at` exists
+   in schema v1 with NO operation, NO query and NO face anywhere;
+   building one means deciding what an archived block MEANS (render?
+   surface? restore door?), which is product design. Deliberately left
+   for her. #33(c).
+4. **Both-empty neighbours resolve to the block BEFORE the separator** —
+   deterministic, not derived from which key was pressed. Preferring the
+   block AFTER would delete the block the caret sits in and never
+   converge under repeated presses. #33(d).
+5. **Redo is ⇧⌥⌘Z**, deliberately not sharing ⌘⇧Z with NSTextView's text
+   redo — the two stacks never interleave, so their doors never share a
+   key. #33(e).
+6. **Redo's divergence bucket mirrors undo's:** a resolvable refusal
+   throws and keeps the entry (retry after unsealing); an obsolete
+   re-apply — the transition is already true — pops quietly rather than
+   wedging every entry beneath it. The `quietWhenGone` parameter on the
+   three `perform…` splits is that rule, made explicit.
+7. **A compound is redoable only when EVERY leg is** (`redo: nil` on any
+   leg ⇒ the compound carries none). A half-re-applied compound is not a
+   state the model should be able to reach.
+
+#### Red-on-old evidence
+
+| # | Item | Revert applied | Observed RED |
+|---|---|---|---|
+| 1 | A7, the consumer | the carve unwired from `shouldChangeText` (`if false, let empty = …`) | **8 issues** across `backspaceAtTheStartOfThePostDeletesTheEmptyFirstBlock` (6) and `forwardDeleteFromInsideAnEmptyBlockDeletesItToo` (2): the store keeps `["", "hello"]`, the surface keeps `"\nhello"`, the index keeps 2 entries, the undo stack stays empty — **her reported behaviour, reproduced exactly** |
+| 2 | A7, the pure carve | `emptyBlockDeletion` returns nil (`guard false, …`) | **12 issues** — the four index pins, the fan pin's index half, the mutual-exclusion pin, and both end-to-end pins |
+| 3 | A8 | — | STRUCTURAL: the capability did not exist; the P-1 registry walk (`everyCapabilityIsDeclaredExactlyOnce…`, the four door tables) and the suite do not compile against the old tree |
+| 4 | A10 | — | STRUCTURAL: `UndoStack.redo` / `redoDepth` / `topRedoLabel` did not exist; `RedoStackTests` cannot compile against the old tree |
+
+Both reverts were restored and verified byte-clean (`grep -c "guard false"` = 0
+in both files) before committing; the full Mac suite re-ran green after
+restore.
+
+#### Deviations / scope notes
+
+- **One scope addition, one line:** `ShellActions.structuralUndo`'s
+  failure copy moved from raw `\(error)` to `OpsRefusalCopy.message(for:)`
+  — writing the redo twin beside it made the asymmetry obvious, and the
+  1A record's own candidate ("consolidating the two sibling refusal-copy
+  homes onto `OpsRefusalCopy`") points the same way. No behaviour change
+  beyond readable refusals.
+- **`JumpAndUndoTests`' serialization test** gained an explicit
+  `redo: nil` — it registers a synthetic entry with no re-apply, which
+  is exactly the case the required parameter makes visible.
+- **`CapabilityRegistryTests`' sampled contexts** gained the
+  `redoAvailable` axis (and the parity contexts gained the flag), so the
+  walk still proves every act can act somewhere.
+- **No lookup subagent used** — nothing external was needed.
+- **P-6:** `TutorialWalkTests` ran green in the full-suite run.
+
+#### Ladder foci suggested for this batch
+
+Whether the carve can be reached by any range shape the nine
+cannot-widen pins miss (particularly under an open tail or a gap slot);
+whether `reapplyStructural`'s ordering (releases → un-tombstones →
+texts) has an I2 or seal interaction the pins don't reach; whether
+redo's insurance asymmetry is right (a diverged buffer is auto-committed
+before a text re-apply, but merge/divide-W carry no `restoringTexts`, so
+a source block edited between undo and redo is re-released with its edit
+intact in lineage but no commit — the same asymmetry undo already has,
+recorded deliberately); and whether the totality claim actually holds
+across all 23 registration sites.
