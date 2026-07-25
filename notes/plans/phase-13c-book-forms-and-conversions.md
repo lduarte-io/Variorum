@@ -722,11 +722,11 @@ are this phase's opening batch.
 | A6 | Book bottom inset — horizontal scrollbar on a vertical page; buggy progress bar | 13c (already ruled: remove both) |
 | A7 | Backspace won't delete an empty block — "especially when there's an empty block right at the start of the post" | **13c-friction — SHIPPED (Batch 1B)** |
 | A8 | No ability to delete / archive empty blocks at all | **13c-friction — DELETE SHIPPED (Batch 1B); ARCHIVE deliberately not built, QUESTIONS #33(c)** |
-| A9 | "i desperately need divide in takes mode" | **13c-friction** |
+| A9 | "i desperately need divide in takes mode" | **DEFERRED to 13d — recorded, not silent (13c Stage 1 ladder, R2-2).** K2 put it in the friction batch and no batch brief ever covered it; the fix pass sized it honestly and it is NOT the registry-declaration shape the sitting assumed. Divide from Takes works today via fire-and-DO (the bottom-bar door carries her to Write with the caret placed and runs it there); acting NATIVELY needs a structural planning path for Takes plus the W ceremony mountable outside `EditorSurfaceController` — materially larger than a declaration plus wiring, and out of scope for a ladder fix pass. Owner **13d**; QUESTIONS #41 |
 | A10 | Redo — to undo an accidental structural undo *(traced: absent)* | **13c-friction — SHIPPED (Batch 1B)** |
 | A11 | Divide on an empty line should put the blank line NOWHERE — block above, block below | 13d |
 | A12 | Warning before destructive actions like undoing a structural edit that created a take | 13d |
-| A13 | Callouts (a) in Takes/Compare/Lenses + a shortcut *(traced)* · (b) real colour swatches + a proper emoji picker | (a) **13c-friction** · (b) 13e |
+| A13 | Callouts (a) in Takes/Compare/Lenses + a shortcut *(traced)* · (b) real colour swatches + a proper emoji picker | (a) **13c-friction — SHIPPED (Stage 1 ladder, R2-2).** The frame is the BLOCK's and its takes share it (R16/R27), so `.callout` gained `takesAccess: .native` and the take family + Compare, every menu item routes through `CommandRouter` instead of reaching into Write's editor, and **⌥⌘C toggles**. One shared pure transform (`CalloutEditRule`) for all four doors. Canvas deliberately out (not in her ask) · (b) 13e |
 | A14 | ⌘⇧Enter for new block | 13d |
 | A15 | Shift-Enter keeps text in the same block — in Takes AND Write | 13d |
 | A16 | The newline-makes-a-block setting available in Takes too (N34's global `one_block` face) | 13d |
@@ -1029,6 +1029,19 @@ and the §12 hold does not bind; and a refresh requires zero instances at
 build and copy — **verified zero at this decision** (`pgrep` clean,
 2026-07-26). If an instance is live when the moment comes, the refresh is
 **HELD**, not forced — she may have opened the app.
+
+> **THE REFRESH IS HELD UNTIL THE LADDER CLOSES — recorded at round 2
+> (R2-5), because it was only inferable before.** `/Applications` is still
+> 13b's build (mtime Jul 22) and Stage 1's stated deliverable was that she
+> wakes to reviewed, working fixes in her daily-drive build. That has not
+> slipped; it was always to follow the **CLOSED** ladder, and the ladder
+> did not close: round 2 found the comment-destroying carve (R2-1), so a
+> refresh at that moment would have shipped exactly the defect the
+> two-stage split exists to catch. **That is the plan working, not
+> failing.** The rule, now written rather than inferred: **the refresh
+> happens after round 3, and is skipped only if round 3 leaves something
+> open.** The zero-instance precondition is re-checked at that moment, not
+> carried forward from this one.
 
 ## Batch briefs
 
@@ -1635,6 +1648,67 @@ the phase's entire *committed* scope (C1, C2/N38, C3/N41, C4, A31) — has
 briefs and no implementation. Stage 1 is friction work only. Nothing in
 the records claims otherwise, but a reader skimming "Stage 1 COMPLETE"
 could infer the phase is near done. It is not.
+
+### Round 2 — the FIX PASS (2026-07-26, fresh implementer session; all ten dispositions implemented)
+
+**Counts: core 851/98 → 852/98 · Mac 722/129 → 731/129 · mobile 14/4
+(unchanged, re-run on the iPhone 17 Pro simulator).** All three suites
+re-run IN FULL and green after the last fix. **Zero
+`Sources/VariorumCore/Sync/` lines touched.** No schema change.
+
+**How to read the evidence column** (the round-1 convention kept): where a
+finding is a bug, the pin was run against BOTH trees and the observed RED
+is quoted. Where a finding is documentation or a claim correction, that is
+said plainly — a pin green on both sides proves nothing, and the record
+says which is which.
+
+| # | What changed | Traced mechanism | Red-on-old |
+|---|---|---|---|
+| **R2-1 + R2-8** | `Queries.RenderedBlock` gains **`commentCount`** (live `block_comment` rows, one indexed correlated subquery beside the two variant counts) — **required init parameter**, the R1-1 precedent — plus `hasComments` and **`carriesUnshownText`**, which is where R2-8's dead `hasArchivedTakes` is now consumed. The carve's third guard becomes `guard !slots[i].carriesUnshownText`, replacing `liveVariantCount == 1`: **ONE name for "prose the slot does not show", not two parallel guards** — a third kind extends the property, never the guard line. `slot(…)` gains a `comments:` knob; four construction sites updated. | Archive is out-of-the-fan; a COMMENT is out of the fan *and out of the slot's text entirely*. `addBlockComment` has no empty-block rule, and a note on an empty block is an ordinary thing to write. `deleteBlock` fires v1_8's cascade over `block_comment`, so the carve — authorized ONLY on *"there is no text to lose"* — was destroying authored text; and because `deletedBlockComments` is keyed by `blockID`, a tombstoned block leaves AppSpec §7's ratified *"deleted comments are visible and resurrectable — never skimpy"* with **no surface at all**. That second half is what makes this worse than R1-1's case, not merely its twin. | **YES, and the destruction is visible in the red.** With the guard reverted to `liveVariantCount == 1` (the pre-fix line), `aBLOCKCOMMENTKeepsTheRefusal` fails at the plan-time guard and `backspaceLeavesACommentedEmptyBlockAlone` fails **5 ways** — `texts → ["hello"]` (the block gone), `entries.count → 1`, an undo entry landed, and, decisively, **`notes.count → 0`: the comment cascaded away**. GREEN after. The archived-take pin and the eleven cannot-widen pins stayed green under the revert, as narrowness pins should. Core adds `commentCountSeesWorkingNotesTheSlotNeverRenders` (characterization — the field did not exist pre-fix). |
+| **R2-1's author-flavored half** | **PROVISIONAL, QUESTIONS #40 — the shipped reading: a NAMED or CALLOUT empty block STILL CARVES**, pinned as such (`aNAMEDOrCALLOUTEmptyBlockStillCarves_PROVISIONAL`). | The line is not "is it authored" but "does deleting the block make it unrecoverable or unreachable". `block.name` and `block.presentation` are columns ON the block row: the tombstone keeps them, ⌥⌘Z and `restoreBlock` bring them back with the block, and the tray lists the block BY its name. Comments and archived takes are separate cascaded rows, and comments additionally lose their recovery surface. The reductio that settles it: **block TAGS cascade too** — a guard on "anything attached to a block" would narrow the carve out of existence and undo the A7 fix she asked for. | **None owed — a reading, not a defect.** Recorded with what flipping costs (two more projection signals + one guard line) so her answer is one line. |
+| **R2-2 — A13(a): BUILT** | `.callout` gains `takesAccess: .native`, `shortcutLabel: "⌥⌘C"` with its key wiring, and a new named availability rule `takeFamilyPlusCompare` (the take family + Compare — exactly the surfaces she named). `RoutedCommand.callout(CalloutEdit)` joins the vocabulary; **every** menu item routes (colours, Emoji…, Remove, and a new "Toggle Callout" carrying ⌥⌘C) instead of reaching into `session.editorRouter.active`. Four handlers consume it — Write, Takes, Lenses, Compare — over **one pure shared transform, `CalloutEditRule`** (the `MergeJoin`/`BoundarySnapping` shape, Stage 4 lessons 3–4), applied inside `updateBlockPresentation`'s own transaction. The emoji prompt now gathers the glyph and lets the router deliver it, so it no longer needs a Write editor to exist. | The frame is the BLOCK's and its takes share it (R16/R27) — so any surface that knows which block you are in can set it. Write was privileged only by where the door was first hung, which is the exact R118 class 13b's registry exists to kill; the declaration said `availability: writeEditor`, so in Takes/Lenses/Compare the menu was **grey** and the shortcut did not exist. | **YES, by behavioral revert.** With `availability: writeEditor` + `shortcutLabel: nil` restored: `theCalloutDoorReachesEverySurfaceSheNamed` red 3× (takes/lenses/compare all `.unavailable`), `takesIsNeverBehindWrite` red 2× (the R118 parity assertion itself), `theCalloutDoorHasItsShortcut` red (`shortcutLabel → nil`). Restored byte-identical by checksum. `theCalloutDoorFramesTheFocusedBlockNativelyInTakes` and the transform pin are **STRUCTURAL** red — `TakesViewModel.applyCallout` and `CalloutEditRule` do not exist on the old tree, so they cannot compile against it (the 1B A8/A10 precedent, labelled as such). |
+| **R2-2 — A9: DEFERRED to 13d, recorded, with the reason** | Ledger row A9 annotated; QUESTIONS #41 filed for her. **Nothing built.** | **The ledger row was wrong about the shape, and that is the finding under the finding.** K2's scope line called A9 "a registry availability rule, the P-1/P-2 class 13b built the machinery for". Traced: `.divide` is `takesAccess: .moveAndExecute`, the door **is** rendered on the Takes bottom bar, and invoking it flushes, parks a `WriteIntent` with her carried caret, switches mode visibly, and runs the real divide — i.e. it works, and it is P-2-compliant fire-and-DO, which IS the machinery 13b built. Her ask is that it act **without leaving Takes**, and that is a different build: `StructuralGesturePlanner` plans over the full-document editor's `BlockRangeIndex`, and a divide on a FANNED block — the ordinary case in Takes — opens the W ceremony, whose state machine belongs to `EditorSurfaceController` and whose sheet takes an `EditorViewModel`. Native means giving Takes a planning path AND making the ceremony mountable outside Write. A half-measure (native when unfanned, yank when fanned) is worse than either: two behaviors for one gesture is the confusion class Stage 4 named. | **None owed — nothing was fixed.** Stated explicitly rather than left blank, per the brief's bound: *"a recorded deferral is fine; a silent gap is not."* |
+| **R2-3** | The master plan's pointer section corrected: the sync sign-out is **DISCHARGED** (1,868 → 0, cursor `server_seq 6662`), with the old state kept as a superseded clause for the thread. | Documentation. CLAUDE.md points cold sessions at the master plan for state, and it still said the opposite of what the same sitting recorded four paragraphs later in the plan file. | **None owed.** Verified by content: the paragraph now matches the plan file's own record of that sitting. |
+| **R2-4** | `QUESTIONS.md` #33 and #35 merged. **#33 keeps the number** (it is what the ledger row A8, the 1B batch record and the 1B adjudication all cite) and takes **#35's fuller wording**; #35 becomes a one-line `MERGED INTO #33` pointer so nothing above or below renumbers on a list she walks top to bottom. | Documentation, my own duplication. Two identical entries meant answering one would leave the other marked OPEN. | **None owed.** Verified by content: five calls, one entry, every clause of both originals present in the survivor. |
+| **R2-5** | The plan's two-stage section gains the HOLD in as many words: **the refresh happens after round 3, and is skipped only if round 3 leaves something open**; the zero-instance precondition is re-checked at that moment, not carried forward. | Documentation. The sequencing was always right — the refresh follows the CLOSED ladder, and refreshing at round 2 would have shipped R2-1's comment-destroying carve into her daily-drive build — but a reader could only infer that, which is the same failure class as an unrecorded deferral. | **None owed.** |
+| **R2-6** | `TakesViewModel.deleteFocusedBlock` gains `guard !autosave.isDirty` after its flush, speaking **the same sentence** Write's `runStructural` speaks. | A flush can REFUSE and keep its text pending (the coordinator's documented posture, Phase 7 MAJOR 1 — a seal or lock landing remotely mid-typing is the real-world shape). `runStructural` has always checked that before running an op against a store the surface disagrees with; the Takes door flushed and proceeded regardless. One declared act, two native doors, two different safety contracts — which is P-1's own reasoning against itself. | **YES — and the finding's SPECULATIVE label was too cautious.** The pin induces the refusal honestly (a pending record for a variant that does not exist, so `ops.autosave` throws and the entry goes back into `pending`). With the guard removed: `slots.count → 1` — **the block is deleted while typed text is still unwritten** — plus the wrong survivor and no message. Restored byte-identical by checksum. |
+| **R2-9** | `isAssignment` now counts arithmetic COMPOUND assignment (`+=`, `-=`, `*=`, `/=`, `%=`) beside plain `=`; `<`/`>` and the bitwise ops are excluded **with the reason written down** (`<=`/`>=` are comparisons; no shift is meaningful on what a pane publishes). The pin's prose stops overclaiming, and `assignmentCount`'s doc comment now **states what the walk cannot see** — a binding FORWARDED to a child view is not a write here, and the walk claims only that every write *made by this file* leaves through the door. No production code changed. | `height += 8` mutates a binding exactly as `height = …` does, and the old rule (`first == "="`) counted it in **neither** side of the equality assertion — so such a write could escape the publish door while the walk reported clean. Literally the shape R1-6 closed one level down, one level up. | **YES, demonstrated end to end — the R1-6 method.** With the old counting rule AND `height += 1` injected into `updateNSView` (outside the install door), `everyPaneStateWriteLeavesThroughThePublishDoor` **PASSED** — the hole, made visible — while `theWalkCountsEveryFormOfWritingToABinding` went red (`4` where 7 is required; `"height += 1" → 0`). Restoring only the counting rule, with the same injection still in place, the walk **caught it**: `assignments → 2` vs `insideInstall → 1`. `PaneSurface.swift` restored and verified byte-identical (`git diff` empty). |
+| **R2-10** | One sentence in AppSpec §9's `shelveInDailyJournalBook` entry naming it a **read-then-act composite, not a single transaction**, with which race is caught (`alreadyInReading` on live rows) and which is not (a `removePostFromReading` committing in the sub-ms window between the read and the insert). | Documentation. §9 opens "each is a single transaction", so a future reader would have inherited an atomicity guarantee this operation does not make. | **None owed.** The unpinnable half is stated as unpinnable — the `confirmDivideWCeremony` residual's class — rather than left implied. |
+
+**Two canon edits rode the fixes, both strictly recording what shipped:**
+AppSpec §14's Stage 1 shipped-semantics delta gains **(4)** the callout
+door's reach (a DOOR-reach change, not a model change — said so in the
+text, since §12 describes callouts without saying who sets them), and
+item (3)'s carve description gains the comment guard and the
+named/callout PROVISIONAL. `KnownIssuesAndTechDebt.md`'s header states
+that an unslotted first-class project row counts as an owner (R2-7) —
+**the rule extended, not bent**: her 2026-07-25 mobile ruling created a
+kind of owner the original wording had no word for, and the rule's
+purpose (nothing sits unowned) is satisfied exactly.
+
+**Nothing was disputed.** The one place this went beyond the letter is
+R2-1's shape: the disposition asked for a fifth guard and named
+`hasArchivedTakes` as the vehicle; what landed is ONE property
+(`carriesUnshownText`) that both guards now live behind, so a third kind
+of unshown prose extends a documented predicate instead of appending a
+sixth guard line. That closes the class rather than the instance — the
+same reasoning the round-1 pass was accepted for.
+
+**Two things worth carrying into round 3.**
+
+1. **R2-1 changed a core read-layer type again.** `commentCount` is a
+   required init parameter for the same reason `liveVariantCount` is, and
+   the two production construction sites are unchanged (`renderPost`'s SQL,
+   `LensQueries.renderPost`'s pass-through). A reviewer should satisfy
+   itself that the new correlated subquery is P1-shaped: it is per-slot
+   and indexed (`idx_block_comment_block`), so cost stays ∝ the container,
+   and the core P1 benchmarks re-ran flat (`renderPost` and autosave
+   unchanged).
+2. **A9 is the one piece of ruled scope this stage does NOT deliver.** It
+   is recorded, owned by 13d, and filed to her as QUESTIONS #41 — but a
+   reviewer should judge for itself whether the sizing argument above is
+   honest, since the alternative reading ("it was always a declaration
+   edit") is what the ledger row asserted for a day.
 
 ## Architect adjudications
 

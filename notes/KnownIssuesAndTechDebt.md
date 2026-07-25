@@ -2,6 +2,8 @@
 
 Deliberately-deferred work only. **Rule: no entry without naming the phase that resolves it** — if nothing owns it, fix it now instead of parking it. Remove entries when resolved (the closing phase's closeout notes the resolution).
 
+**What counts as an owner (13c Stage 1 ladder, R2-7 — the rule EXTENDED, not bent):** a phase number, or an **unslotted first-class project row on the master plan's phase table** (today: the mobile app, the Apple Notes import, the standalone Design & UI review). The author's 2026-07-25 ruling made mobile its own decided-separately project rather than Phase 15, which created a kind of owner the original wording did not have a word for — and the rule's purpose is that nothing sits unowned, which a named project row satisfies exactly as a phase number does. What is still forbidden is the blank owner.
+
 | Item | What & why deferred | Owning phase |
 |------|--------------------|--------------|
 | Sync auth hardening — the COMMERCIAL half | **The 9c half SHIPPED 2026-07-10** (the single-user auth core: route-A delegated sign-in — her Fragments account IS her Variorum account — `owner_id` stamping + backfill through Operations, the RLS/RPC rework `04_auth_rls.sql`, transport token refresh, the paste-in retired; deployment gates at the Step 6 sitting per `notes/handoffs/phase-09c-step6-runbook.md`). What REMAINS is Phase 14's: multi-tenant isolation of the eight non-owner mirror tables (today the single-user premise + the signups-off toggle IS their guard — 04's load-bearing precondition; per-user isolation needs parent-join RLS), non-author account provisioning (re-enabling signups deliberately), rotation at scale. | 14 (Accounts) |

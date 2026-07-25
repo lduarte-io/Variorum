@@ -36,10 +36,15 @@ below gains the rows. Her big-rock ranking (K4): **workspace and
 formatting soonest** — and she added lists/checkboxes to formatting live
 ("a simple list maker and checkbox maker (like hyphens, [], bullets)");
 the LLM folder bridge and the EPUB library are wanted but rank behind.
-**Author action still open and time-sensitive:** sync has been signed
-out since 2026-07-20 — **1,868 outbox rows** as of the sitting (oldest
-`2026-07-20T05:06Z`), nothing lost, drains on sign-in; the 13b handoff's
-item 2.
+**The sync sign-out is DISCHARGED (2026-07-25, at the same sitting):**
+she signed in and the outbox drained **1,868 → 0**, cursor at
+`server_seq 6662`; her mirror and phone are current, and the 13b
+handoff's item 2 is closed. *(Superseded, kept for the thread: the
+sitting opened with sync signed out since 2026-07-20 and 1,868 rows
+queued — nothing lost, held by design. Corrected here at the Stage 1
+ladder's round 2, R2-3: this section is where a cold session reads
+state, and it still said the opposite of what the same sitting
+recorded.)*
 
 *(Superseded pointer, kept for the thread — Phase 13b was ACTIVE from
 2026-07-20.)* Created at the taste checkpoint's Sitting 9, batches 15–16
