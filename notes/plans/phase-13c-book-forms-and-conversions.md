@@ -1466,6 +1466,71 @@ autonomy grant. Counts at open: core **817/96**, Mac **668/125**.
 
 ## Architect adjudications
 
+### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
+
+**The build landed with a trigger policy better than the brief asked
+for.** Cap 64,000 UTF-16 units (≈11,600 words in ONE block), derived from
+1C's table on the axis the code can check for free —
+`BlockRangeIndex.Entry.length`, because *counting words would read text
+on every scroll, which is the exact P1 mistake* — budgeted at half a
+60 Hz frame in DEBUG, predicted worst case 7.5 ms, roughly 4× of room
+against my "20 ms is past a frame budget." **The derivation is itself
+pinned so the constant cannot outrun its evidence** — that is better than
+a well-chosen number; it is a number that stays honest.
+
+**A FLOOR beyond the brief (2,000 units), and it was the right call to
+make unprompted:** an ordinary post now performs **zero** layout calls,
+ever. Reverting it makes a post of 27-character blocks lay blocks out one
+per pass. I had not specified it; the batch exercised judgment in the
+correct direction.
+
+Also measured and worth keeping: **my nudge guess was wrong.** A *display*
+pass does nothing (9,063 pt before and after); the lever is **layout**
+(9,063 → 8,533). It cannot loop — only the height changes, so no width
+reflow fires, and re-entry finds the block `handled`.
+
+> **ARCHITECT REVERSAL — the width-reflow fork, TAKEN, with a gate.**
+> The batch found that *"TK2 does not discard the layout"* — a premise
+> **I** put in its brief from 1C's finding — **holds for scroll travel
+> but NOT for a width reflow**: a laid-out 3,000-word block returns to an
+> **11,492 pt guess** at a narrower column, *worse than it started*.
+> Honouring "once per session" literally therefore means the phantom
+> **returns after her first sidebar toggle or window resize and is never
+> corrected again.**
+>
+> **I reversed my own bound, and the reasoning matters more than the
+> outcome:** "at most once per block per session" was written before
+> anyone knew a width reflow discards layout, and its purpose was never
+> the word *session* — it was to prevent the same work being redone
+> wastefully, which is the failure mode that would make this a P1
+> violation. Re-laying out a block whose layout TK2 has genuinely thrown
+> away is not waste; it is the same bounded work for a new state. **New
+> information changed the reasoning; the principle is intact.** The cost
+> of NOT taking it is worse: we would ship a fix that silently stops
+> working, and she would report the same bug twice — which P-5 exists to
+> prevent.
+>
+> **The hard requirement attached:** re-eligibility once per **settled**
+> width, never per width *sample* — a divider drag produces a continuous
+> stream of widths, and per-sample re-eligibility would run layout
+> repeatedly mid-drag, the precise P1 problem the trigger policy exists
+> to prevent. **The drag case is pinned specifically**, because it is the
+> thing actually worth worrying about.
+>
+> **The batch was right to stop at my bound rather than widen it on its
+> own, and right to record it as a fork.** That is the shape this process
+> wants.
+
+**Verification honesty noted approvingly:** end-to-end pins are declared
+**characterization** in the file header rather than dressed as red-on-old
+(correct — this is a new capability), while every *guard* is genuinely
+red-on-old by behavioral revert, run both ways and restored to a verified
+checksum. And **two counterfactuals did not fire on the first attempt and
+the record says so** (R6's fabricated scroll view was not the real
+counterfactual; R7 needed *both* reach bounds removed because at that
+distance they cover for each other). A batch that reports its own
+counterfactuals being wrong is one whose green results mean something.
+
 ### Batch 1D — ACCEPTED, with one architect-directed addendum (2026-07-26)
 
 **A1's diagnosis was confirmed IN HER REAL STORE, read-only, which turns
