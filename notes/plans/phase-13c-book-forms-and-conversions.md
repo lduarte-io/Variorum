@@ -183,6 +183,78 @@ Opens the phase. Ledger rows **A1, A2, A3, A4, A7, A8, A9, A10, A13(a)**
 
 Everything else on the intake list is dispositioned in the ledger below.
 
+### First acts — DISCHARGED 2026-07-25 (the two opening obligations + baselines)
+
+**Obligation 1 — the 13b gate fixes and the two defects they corrected.**
+Re-read `e5b8221` / `16e5fcb` / `2e60d0d` and the round-3 hardening
+`120c418` in full, against the current `PaneSurface.swift` and
+`CompareModels.swift`. **Verdict: both fixes are sound, both mechanisms
+are real, and I traced them myself rather than accepting the commit
+prose.** The `PanePublisher` shape genuinely answers the plan's question
+— publishes write synchronously (so the common path can't starve under a
+busy main queue) *and* re-make on a later main-queue turn where a write
+always lands; deferred turns coalesce; the height re-publish is a real
+bounded convergence loop against what the pane actually renders, so a
+composer deliberately constraining a frame can't spin the queue forever.
+A publish added **to `PanePublisher`** inherits both halves for free.
+
+> **FINDING F1 (hardening candidate, not a defect — recorded, not
+> built):** the plan asked me to confirm "a publish added later must
+> inherit the discipline, not need its own repair." That holds for
+> publishes routed through `PanePublisher` — but the routing itself is a
+> **comment**, not a constraint (`PaneSurface.swift:511-512`, "Nothing in
+> this coordinator writes SwiftUI state except through it"). `install`
+> takes the write closures as parameters, so a future third piece of pane
+> state (a measured width, a scroll offset, a selection echo) can accept a
+> third closure and be written directly from `updateNSView` or a delegate
+> callback, and nothing fails. **That is the P-1 shape one layer down —
+> green by audit rather than by construction.** Two cheap closings, either
+> one small: a source-walk pin in the registry-walk spirit (assert the
+> `Coordinator` body contains no state write outside `publisher?.`), or a
+> type-level fix (`install` takes one `PanePublisher.Writes` value that
+> only `PanePublisher` can consume). **Author's call whether it enters
+> scope; nothing built on it.**
+
+The Compare fix (`e5b8221`) is correct and its expectation matches the 4C
+record's letter — peers register against the anchor independently, so a
+kin-less peer's pending run must NOT be force-flushed by another peer's
+kin row. Its two left-behind placement behaviours are exactly what **C4**
+(the related-blocks-only setting) exists to resolve; read together as the
+plan directs, C4 makes the kin-less-peer PROVISIONAL largely moot rather
+than needing a separate placement ruling.
+
+**Obligation 2 — the applied canon deltas.** Read AppSpec §7
+(`container.word_target`), §9 (the cut rule + parking; `mergeCeremony`;
+`restoreReading`; `setPostWordTarget`), §14's Stage 4 delta, and
+OverallModel §7 (merge pairing; the word-edge cut rule) against the S4
+rulings they encode. **Verdict: faithful and complete** — the parking
+semantics, the I10-at-birth gates (`divideSideWouldBeEmpty`,
+`mergedBlockWouldHaveNoTake`), the no-cartesian rule's survival, the 1:1
+pairing PROVISIONAL, `restoreReading`'s explicitly-flagged reversal of
+the standing no-restore-door boundary, and `setPostWordTarget`'s
+refuses-under-seal PROVISIONAL are all stated where a fresh session
+finds them.
+
+> **FINDING F2 (one-line canon inconsistency — flagged, NOT
+> autonomously edited):** OverallModel §7 still opens its size sentence
+> "Block size: **floor is the sentence**, default is the paragraph,
+> ceiling-less upward" — and then, in the same sentence, carries S4-22's
+> "a cut may fall between any two words … snapping to word edges with a
+> gentle settle." After S4-22 the effective floor is a **word**, and
+> CoreDescription pillar 1 already says "The floor is a sentence (**or a
+> single word**)". So OverallModel §7 is now internally in tension and
+> behind both pillar 1 and her own ruling. Proposed wording, hers to
+> bless: *"floor is the sentence (or a single word)"* — matching pillar
+> 1 exactly. Left unedited because canon changes beyond recording her
+> explicit decisions are author-only.
+
+**Baselines — verified by my own runs, not trusted from the file.**
+Core `swift test`: **817 tests / 96 suites passed** (28.7 s), matching
+the recorded baseline exactly, P1 benchmarks flat. Mac suite run
+started; result recorded when it lands. Login session confirmed
+UNLOCKED (lock flag 0), so the Stage 4 locked-session regime does not
+bind this phase's opening.
+
 ## Kickoff message (for the fresh /architect-phase 13c orchestrator — read this first)
 
 > You are the Phase 13c architect/orchestrator for Variorum under the
@@ -533,6 +605,8 @@ are this phase's opening batch.
 | A36 | Markdown folder import choosing whether folders become chapters/books ("to lure people from obsidian") | 13h |
 | A37 | EPUB library — read-only books, highlights auto-appending to a "favorite quotes" note with quote marks, dash, author, title | unslotted row |
 | A38 | "a variorum mobile app that's quite robust and easy to use" | 15 |
+| A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
+| A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
 
 **Not this repo** (acknowledged, deliberately unscoped here): storage
 migration, planetlillian.com / stargazing.tech (its own agent — see the
