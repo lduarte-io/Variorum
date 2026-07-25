@@ -1839,6 +1839,63 @@ actually in use** (only `paragraphSpacing` is set, never
 nothing to the store and cannot manufacture its own trigger; A13(a)'s
 four declared⇔rendered door tables still balance.
 
+### Round 3 — the FIX PASS (2026-07-26, fresh implementer session; POST-CAP, all seven dispositions implemented)
+
+**Counts: core 852/98 → 858/98 · Mac 731/129 → 733/129 · mobile 14/4
+(unchanged, re-run on the iPhone 17 Pro simulator).** All three suites
+re-run IN FULL and green after the last fix. **Zero
+`Sources/VariorumCore/Sync/` lines touched.** No schema change. Three
+commits (`faf4c7e`, `7818bc3`, `407e0dd`) plus this record.
+
+**Read this as the last word, because it is.** Three rounds have run —
+the hard cap — so nothing reviews these fixes. The evidence column is
+therefore written for someone who has only it: where a finding is a bug,
+the revert was executed against the SHIPPED tree and the observed RED is
+quoted; where it is documentation or a stated limit, that is said plainly
+rather than left ambiguous.
+
+| # | What changed | Traced mechanism | Red-on-old |
+|---|---|---|---|
+| **R3-1 + R3-3** | **The carve's authorization left the projection.** `Operations.deleteBlock` gains `requiring: BlockDeletionPrecondition` — `.none` (the ordinary door, the default, every existing call site unchanged) or **`.emptyWithNothingUnshown(variantID:)`**, re-checked **inside the same `database.write` as the tombstone**: the named take must be the block's ONE live variant (so no fan AND no archived take), active, unlocked, under an unsealed post, with an empty buffer, and the block must carry zero live comments. `runEmptyBlockDeletion` drops its `editTakesAtomically` CAS-write entirely, so the gesture is now genuinely ONE transaction. The plan-time guards STAY, re-described as what they are: fast enablement, not authorization. New `OperationError.blockCarriesUnshownText`, worded in the editor's own switch AND in `OpsRefusalCopy` (the R1-3 class closed for any future door). | Three rounds found three ways the carve's only authorization — *"there is no text to lose"* — could be false while the gesture still fired. R1-1 and R2-1 each added a condition to `planEmptyBlockDeletion`; **both read `model.slots`, which `EditorProjectionPolicy.decide` deliberately freezes** (`.deferUntilClean` whenever `autosave.isDirty ‖ mintInFlight ‖ structuralInFlight`, and the debounce re-arms per keystroke — so the array is frozen for a whole typing burst). A comment landing in that window is invisible to every guard; the run path re-verified only the TEXT, which really was empty. **A guard list read from a frozen array is exactly as stale as the array** — so the answer was not a sixth guard but a different LEVEL. That subsumes R3-3: the "compare-and-set inside the transaction" claim was check-then-act across two, and now it is one. | **YES, both layers, by behavioural revert, run both ways.** **App:** with the pre-fix two-transaction shape restored, `aCommentArrivingWhileSheIsTypingStillStopsTheCarve` fails **4 ways** — `after.count → 1` (the block gone), the wrong survivor, **`notes.count → 0` (the comment cascaded away)**, and an undo entry landed; the other 27 pins in that suite stayed GREEN under the revert, which is precisely the finding. **Core:** with `enforce` neutered, **9 issues across 4 pins** including the redo one. Both files restored and verified against pre-revert checksums. |
+| **R3-1's redo half** (judgment call, recorded) | The precondition **rides the structural-redo re-apply too**, not just the forward call. | A redo lands a tombstone exactly as the first delete did — and the window is real, because writing a comment is not a structural act and therefore never cleared the redo future. Deleting the empty block, undoing, writing a note on the restored block, then redoing would otherwise reproduce R2-1's destruction through a different door. A refused redo keeps its entry for retry — the existing, pinned "resolvable refusal" posture, not a new one. | **YES** — `aRedoneEmptyBlockDeletionReChecksThePreconditionToo` is among the four core pins red under the neuter (3 issues: no throw, the block tombstoned, `redoDepth → 0`). |
+| **R3-4** | **1E's scroll trigger gets the pin it never had.** A hosted test installs production's own `ScrollAnchorController` on the real clip-bounds notification and scrolls toward a long block. | The feature's only scroll wire is one line in `boundsChanged`; every 1E pin drives the pass by hand and every editor test stubs the debounce sleeper to throw, so deleting that line left all three suites green while the whole default-ON feature was inert — with `/Applications` still on the previous build, so no human had exercised it either. That matters disproportionately: **#39 asks her to rule on this feature having FELT it.** | **YES.** With the production line deleted: `passesRun` stuck at the attach settle's **1**, `layoutsRun → 0`, `handled` empty. `EditorView.swift` restored to a verified checksum. **Two things it took to make the pin honest, both written into the test:** (a) the trigger has TWO inputs — `overlayLayoutDidSettle`'s hop is generation-gated (storage · attach · WIDTH, never a scroll), so it fires once after attach; **a first version of this pin stayed GREEN with the wire deleted, satisfied by that settle**, and the shipped pin puts the long block far below the look-ahead so only a scroll can reach it. (b) TWO drains, not interchangeable: the bounds notification wants a run-loop turn (`OperationQueue.main`), the debounce is a main-actor `Task` that a synchronous `RunLoop.run(until:)` **never** services — measured: pumping alone leaves `passesRun` at 0 forever. The plan's "async-poll, never sync RunLoop pumping" trap, from the other side. |
+| **R3-2** | The pillar 8 ruling is recorded **in the words she was shown and selected** — the option's label and its full description, quoted in the plan file beside the delta. **CoreDescription pillar 8 itself is deliberately untouched.** The stale `A42` ledger row is corrected with it. | My error, and the one that most deserved catching: this is the phase's ONE change to a canonical VISION document, and it was the only author ruling in this file recorded without her words — while the two quotes that ARE on record (R58's lean; "quite robust and easy to use") are both weaker than the wording applied. Her standing instruction is *"don't add more certainty than I have."* She DID choose it — but from a presented option, so the honest record is the option text, not a restatement of its effect. | **None owed — a record correction.** The one judgment inside it: pillar 8's text was left exactly as she blessed it, because the gap was the record and re-wording it would be a second, unasked change to the vision doc. |
+| **R3-5** | The C3 memo annotated in place at every carrier — header, the `(c)` bullet, the caveat, the recommendation, the Q3 table row, and the appendix — with the "measured, deliberately NOT built" framing flipped throughout. `QUESTIONS.md` #29 now says the memo carries the correction. | It is the document she rules Q3 from, and it contradicted the code in two specific ways: it said E "survives scrolling… not a treadmill" (true of scroll travel ONLY — a width reflow returns a laid-out 3,000-word block to an 11,492 pt guess, *worse* than it started), and it said the trigger "is a design question" when 1E had decided and built it. `grep -i "width\|reflow\|resiz"` over the memo returned nothing. #39 carried the correction; #29 pointed her here, and here did not. | **None owed — staleness in a document, the R1-5 class.** Annotated rather than rewritten, so the sequence of what was known when stays legible. |
+| **R3-6** | The F1 walk's mutating-method blind spot (`height.negate()`, `$text.wrappedValue.append(…)`) **documented, and the limit PINNED** (`assignmentCount(of: "height", in: "height.negate()") == 0`) so it is visible rather than discovered. The pin's prose stops claiming more than the rule checks. | The walk is lexical, and that is the reason the form is documented rather than counted: `height.round()` and `height.rounded()` are indistinguishable without a type checker, so counting every `name.foo(` would flag reads as writes and make the walk's equality assertion meaningless. Not reachable with today's two bindings (a `CGFloat` and a `String?`, both only ever assigned). The honest closing **if a pane ever publishes a collection or a flag set** is named in the doc comment as type-level, not another substring rule. | **None owed — a stated limit, not a defect.** The disposition allowed "add the form or document the limit"; this documents it and pins the limit so the next reader inherits the fact rather than the assumption. Third layer of the same onion, and each has been genuinely narrower. |
+| **R3-7** | Three CLAUDE.md corrections: **13c's all-Opus cast + the `/architect-phase` shape ruling** written where the model policy is declared to live (with her verbatim reason), **13d–13h** named as cast-at-kickoff, the **KnownIssues owner rule** widened to match R2-7's extension, and **"Phase 15 onward" corrected — Phase 15 no longer exists** (her 2026-07-25 ruling made the iPhone app an unslotted project row). | Documentation, and it matters more than its size: CLAUDE.md is what a cold session reads FIRST, and every one of these was a statement it would have inherited as current. | **None owed.** Each edit records a decision already made and recorded elsewhere (K1, K3, R2-7, the A42 ruling); none extends one. |
+
+**Nothing was disputed.** Two places went past the letter, both closing the
+finding's class rather than its example — the round-1/round-2 precedent:
+R3-1's refusal copy landed in `OpsRefusalCopy` as well as the editor's own
+switch (so a future door onto `deleteBlock(requiring:)` cannot inherit a raw
+enum dump), and R3-2's fix corrected the adjacent stale `A42` ledger row,
+which is the R2-2 class sitting in the very section the finding was about.
+
+**What a fourth reviewer would be asked to look at, recorded because there
+will not be one:**
+
+1. **`BlockDeletionPrecondition` defaults to `.none`.** That keeps ~20 call
+   sites unchanged and is honest for the general door, but it is NOT the
+   `register(redo:)` shape (required, never defaulted) that R1-1 and R2-1
+   were praised for. The judgment: requiring it everywhere would make every
+   caller declare an authorization most of them genuinely do not have,
+   which is noise rather than a guard. The class R3-1 named — an
+   authorization read from a snapshot — is closed by the parameter
+   EXISTING and by its doc comment saying what a caller must do; a new
+   caller that wants "delete only if still empty" now has one obvious way
+   to get it right.
+2. **The redo path re-checking the precondition is a deliberate asymmetry**
+   with every other structural re-apply, which is unconditional. Argued
+   above; a reviewer might reasonably prefer redo to be a pure re-apply and
+   the window accepted (it is undoable and tray-recoverable either way).
+3. **The R3-4 pin's own fragility.** It asserts `layoutsRun == 1` after
+   scrolling toward the long block in ≤ 4 steps, which depends on the
+   corpus's geometry (100 short blocks, long at index 60, 500 pt viewport).
+   It is bounded and it broke loudly rather than silently while being
+   written, but a machine with very different metrics is where it would
+   flake first. `passesRun > baseline` is the assertion that carries the
+   finding; the other two are the "and it did the work" half.
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
