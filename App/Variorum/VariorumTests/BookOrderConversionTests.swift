@@ -213,6 +213,39 @@ struct BookOrderConversionTests {
         }
     }
 
+    @Test func theSessionsUndoDoorReachesAConversionMadeFromTheShelf() async throws {
+        // QUESTIONS #46 tells her "⌥⌘Z puts the smart book back exactly".
+        // `structuralUndo` is an APP-scope capability gated only on
+        // `undoAvailable`, so the shelf is not a special case — but the
+        // claim is only true if the shelf's writes ride the SESSION's
+        // stack, which is what this pins.
+        try await withBooksWorld { session, db in
+            let tag = try session.operations.createTag(name: "work")
+            let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
+            let reading = try session.operations.createReading(
+                name: "collected", kind: .smart,
+                sortField: .entryDate, sortDir: .desc, querySpec: spec)
+            let post = try session.operations.createPost(title: "one")
+            _ = try session.operations.applyTag(tag.id, toPost: post.id)
+
+            let model = ShelfViewModel(session: session)
+            await model.convertToCurated(
+                reading.id, keepCollecting: true, collectingName: nil)
+            #expect(session.undoStack.topLabel == "Convert to Book")
+
+            let stack = session.undoStack
+            try await session.runner.run { ops in
+                try stack.undo(with: ops)
+            }
+            let back = try #require(await db.read { try Queries.reading($0, id: reading.id) })
+            #expect(back.kind == .smart)
+            #expect(back.sortField == .entryDate)
+            #expect(back.sortDir == .desc)
+            // The collector it minted went with it.
+            #expect(try await db.read { try Queries.readings($0).count } == 1)
+        }
+    }
+
     @Test func aRefusedConversionSpeaksAndClearsTheReport() async throws {
         try await withBooksWorld { session, _ in
             let reading = try session.operations.createReading(

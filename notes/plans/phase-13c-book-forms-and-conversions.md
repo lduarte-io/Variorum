@@ -702,7 +702,7 @@ placement + parity-by-forwards; the overlay/sink delivery law).
 | # | Item | Status |
 |---|------|--------|
 | C1 | The uniform-page book view (from the 4F brief) + her 7/23–24 direction | **the READ half SHIPPED (Batch 2C)** — Read is the pair she asked for: SCROLL (the flow) and PAGES, a two-page spread of identical fixed leaves with the text flowing across them. The brief's two-tier design built as designed (estimated globally from `Queries.blockExtents` — lengths, in SQL, no prose; measured locally by CoreText), with ONE architectural rule added that the brief did not have: **a page is addressed by (post, page-in-post), never by a page number**, so a measurement replacing an estimate moves the LABEL and never the page under her. Slicing is LAZY on a measurement, not on caution — CoreText typesets per paragraph, so ordinary prose paginates whole in 3.5 ms at 26k words while the same text as ONE block costs 1.67 s (the A3/A41 shape). Read is NOT editable (A43), which is why there is no NSTextView on the surface at all — and therefore no TK2 estimated geometry to inherit (the 1C cross-check). The brief's five opens are PROVISIONAL — QUESTIONS #45; (b) deliberately goes against the brief's own lean and says why. *(The BOOK-spread half of her 7/23–24 direction shipped at 2B; Outline's at 2A.)* |
-| C2 | N38 smart→smart+curated conversion (from the 4F memo; her five rulings first) | committed, not started |
+| C2 | N38 smart→smart+curated conversion (from the 4F memo; her five rulings first) | **SHIPPED (Batch 2D) as the memo's SHAPE A — materialize-and-convert — PROVISIONAL in full.** Her five rulings were owed and she was asleep, so each is built at its most spec-defensible reading with the alternative recorded: QUESTIONS #46. The book's current results become real `reading_post` rows in the order she was looking at, `kind` flips and `sort_field` freezes to manual so nothing moves; the filter and grouping tag ride the row (the tag-derived sections SURVIVE and hand over to real chapters the moment she makes one — no new rule); the fresh collector is offered, carrying the filter/order/sectioning but never the extents or the finish state. **ZERO schema, confirmed in code**, which is why A was the right shape to build in her absence — the other two are not one-line reversals. Two doors: the shelf's deliberate menu item and the navigator's "+ new chapter", which now RENDERS on a smart book and acts (convert, then the chapter prompt — P-2's choreography). **The memo expected three refusals to become offers; only ONE was a real dead end** — adding a post already had a better answer (R98's tag-and-report) and order is now controllable everywhere (A31), so the drop gesture is untouched. Undoable and redoable on exact rows |
 | C3 | N41 inline-comments airiness (R116-class conversation first) | committed, not started |
 | C4 | Compare "show related blocks only" setting (resolves the 4C kin-less-peer PROVISIONAL) | committed, not started |
 
@@ -744,7 +744,7 @@ are this phase's opening batch.
 | A28 | Star up to 5 notes (or books) so they're always on the left | 13f |
 | A29 | Quick-note format — a floating sticky note, no takes unless opened as its own post | 13f |
 | A30 | "post" → "note" everywhere — **UI strings only (K5)** | 13f |
-| A31 | See a book by its saved custom order OR by an attribute like time; the order savable like a lens | **13c** (book-shaped) |
+| A31 | See a book by its saved custom order OR by an attribute like time; the order savable like a lens | **13c — SHIPPED (Batch 2D), and the halves were not what they looked like.** The ATTRIBUTE half already existed and had **no reachable door**: `reading.sort_field` + `setReadingSort` have shipped since Phase 2, and their only face was the Phase 10 sidebar's `ReadingsSection`, left unreferenced by Phase 13's IA rework — dead code, deleted here, its list living on as `BookOrderChoices` in the book's own navigator. The **"saved like lenses"** half is the lens grammar exactly: `Queries.ReadingOrder` is a read-time override that writes NOTHING (export, the bridge, and every other reader still see the book's own order), and "Save as This Book's Order" is the adopt door. Pinned: `assembleReading(order: X)` is byte-identical to saving X then reading — the preview cannot lie. **The one thing NOT built, deliberately: several NAMED saved orders per book** — that needs stored order profiles, i.e. a §12 lockstep event, which is never a batch's call. Recorded for her in QUESTIONS #46 |
 | A32 | Infinite vertical scroll editor — jump to the right part in takes, then back | 13f |
 | A33 | Formatting — bold, italics, different sized fonts, some markdown handling | 13g |
 | A34 | **"a simple list maker and checkbox maker (like hyphens, [], bullets)"** — added live at the sitting | 13g |
@@ -4987,3 +4987,252 @@ shortcuts** — verify nothing else in `BookView` (the navigator's rows) wanted
 conditional pair cleanly. **(8) The tutorial prose repair** — it corrects
 2A/2B's staleness, so check the whole paragraph against what those batches
 actually shipped, not only against 2C.
+
+### Batch 2D — the smart→curated conversion (C2 · N38) + book order as a lens (A31)
+
+**Commits:** two — `2569784` (core: the operation, its two undo halves, the
+read-time order override; the model-change convention honored — core in its
+own commit) and `f9cf009` (the faces, the pins, one pre-existing defect
+fixed). The ledger rows, QUESTIONS #46, and this record follow in the record
+commit.
+**Counts:** core **861/99 → 881/100** (+20, one new suite) · Mac **760/134 →
+772/135** (+12, one new suite) · mobile **14/4 untouched, `xcodebuild build
+-scheme VariorumMobile` clean**. `TutorialBookShapeTests` + `TutorialDoorTests`
+green (P-6). **No schema change; zero `Sources/VariorumCore/Sync/` lines.**
+**Her instance:** `pgrep -fl 'Variorum.app/Contents/MacOS'` clean at batch
+open and at every suite run — no Release build, no `/Applications` refresh
+from this batch.
+
+#### THE HEADLINE: the memo's shape A needed no schema, and only ONE of its three dead ends was still dead
+
+Two findings decided what this batch is.
+
+**1 — Shape A really is free of schema, and I checked rather than trusted
+it.** A smart book's membership is derived; a chapter assignment lives on
+`reading_post.section_id`; so chaptering a smart book is impossible *because
+there is no row to hold the pointer*. Materializing the current results and
+flipping `kind` (already a CHECK-legal value) turns the book into an ordinary
+curated book, at which point chapters, hand order, the capacity gate, finish
+and `restoreReading` all work because they already worked. Nothing new had to
+be taught to any consumer. That is what made A the right shape to build in
+her absence: shapes B and C are not one-line reversals, and A is.
+
+**2 — the memo named THREE refusals that should become offers, and by the
+time this batch ran, two of them had better answers already.**
+
+- *Direct add* — R98 (`collectPostIntoSmartReading`, Sitting 9 batch 10)
+  already accepts a post onto a smart book **by applying the filter's tags**
+  and reporting what it did. That is a better answer than converting the
+  whole book, so the drag-onto-a-smart-book gesture is deliberately
+  untouched. Converting there would have been a regression.
+- *Reorder* — a smart book's order is `sort_field`, and A31's own face now
+  makes it choosable on every book. No dead end left.
+- *Chapters* — genuinely dead, for the structural reason above. So exactly
+  one door became an offer, and it is the one the memo's §3 leaned on.
+
+Stated because a reviewer reading the memo would expect three and find one.
+
+#### What shipped — the operation
+
+`convertSmartReadingToCurated(_:keepCollecting:collectingName:)`, ONE
+transaction:
+
+- refuses a non-smart book (`wrongReadingKind(expected: .smart)`) and a
+  FINISHED one (`lockedReading` — converting is a structural act on a book
+  declared done; un-finish first, the bucket every sibling reading op uses);
+- materializes `Queries.assembleReading`'s CURRENT answer — the book's own
+  assembly, never a second ordering brain — into `reading_post` rows at
+  `.end`, so the fractional positions come from the one position helper;
+- flips `kind` to curated and `sort_field` to **manual**, so nothing moves on
+  screen at the moment of conversion;
+- leaves `query_spec` and `grouping_tag_id` on the row. The spec is
+  provenance (and is what makes the collector offer still possible later);
+  the grouping tag is not decoration — **curated assembly already honors a
+  grouping tag whenever the book has no live chapters**, so her tag-derived
+  sections survive the conversion intact and hand over to real chapters at
+  the moment she creates one (`chaptersActive`'s shipped precedence). Pinned
+  both ways. No new rule was needed for the memo's "what happens to derived
+  sections" question — the shipped precedence already answers it;
+- optionally mints the fresh collector: same filter, same sectioning tag,
+  same order the book had — and deliberately **not** `max_posts`,
+  `word_target`, or `locked` (a collector born capped or finished cannot
+  collect, which is the one thing it exists to do);
+- **skips posts that already carry a live membership row.** No ordinary door
+  can produce one on a smart reading, but undo can: its inverse tombstones
+  only what IT minted, so a hand-added row survives — and a second conversion
+  would otherwise throw on `uq_reading_post_live`. Cheap, and it makes
+  convert → undo → hand-add → convert a legal sequence (pinned).
+
+**Undo AND redo, exact-row on do-time ids** (the 1B contract). The inverse
+tombstones precisely the minted memberships, buries the collector, and
+restores `kind` + the stored sort pair; the re-apply un-tombstones the same
+rows with `restoreReading`'s live-parent guard (a member post that died
+stays out) and re-applies the flip. `redo:` is passed, not defaulted.
+
+#### What shipped — A31, and which half already existed
+
+**The attribute half already existed and had no reachable door.**
+`reading.sort_field` (manual / entry_date / created_at / last_touched /
+last_major_revision, each direction) and `setReadingSort` have shipped since
+Phase 2. Their ONLY face was `ReadingsSection` — the Phase 10 SIDEBAR
+section — which Phase 13's Shelf · Library · Pool · Blocks rework left
+unreferenced. It has been dead code ever since, which means **the shipped app
+has had no way at all to change a book's order**. That is most of why A31
+reads as a missing feature. The dead view is deleted; its choice list lives on
+verbatim as `BookOrderChoices` (pinned verbatim), and its door is now the
+book navigator's `order ·` menu.
+
+**The "saved like lenses" half is the lens grammar, literally.**
+`Queries.ReadingOrder` + `assembleReading(order:)` / `observeReading(order:)`:
+picking an order is a way of LOOKING — view-local on `BookViewModel.viewOrder`,
+writes nothing, and export / the Fragments projection / another device all
+still see the book's own order. "Save as This Book's Order" is the adopt door.
+This is not an analogy stretched to fit: the 11a ratification is that *a lens
+is never rendering truth*, and a browsing order that silently changed what
+export writes would violate it.
+
+Three details worth naming:
+
+- **The override is applied at the one point the stored pair would have been
+  read**, so `assembleReading(order: X)` is byte-identical to
+  `setReadingSort(X)` then `assembleReading()` — pinned across five orders,
+  because "browsing shows what saving would show" is the whole promise of a
+  preview, and two code paths agreeing by inspection is how that promise
+  quietly stops being true.
+- **It belongs in the QUERY, not in a post-fetch re-sort**, because the window
+  is applied by the query: sorting delivered rows would sort the first N of
+  the OLD order. Pinned with a 5-post book windowed to 2.
+- **Chapters keep governing** under an override, exactly as they do under a
+  stored stamp sort — one rule, not two. Pinned.
+
+`BookView` drives it with `.task(id: model.viewOrder)`, so changing the way
+she looks restarts the observation rather than re-sorting what arrived.
+
+#### The pre-existing defect this batch's visual loop found (fixed, red-on-old)
+
+**Every row in the book navigator was losing its first character**, on every
+book, since 2A. Traced rather than guessed:
+
+1. Captured the navigator — "entry 0" read "ntry 0", the smart-book notice
+   started mid-word, the order menu read "rder ·".
+2. Captured again with **this batch's own control removed**: identical. So it
+   is pre-existing, not mine (`00-without-order-control.png`).
+3. Measured it with temporary borders on the padded content box vs the
+   `.frame(width: 190)` box (`04-borders.png`): the content's ideal width is
+   **~209 pt**. `.frame(width:)` does not clip — it **centers** an over-wide
+   child — so the whole column drew ~9.5 pt left of the window edge.
+4. The floor is the segmented mode picker's own minimum, which grew when 2A
+   renamed the modes `Outline · Book · Read`. `.frame(maxWidth: .infinity)`
+   was tried first and did **nothing** (an HStack still reports its child's
+   ideal width upward); `.controlSize(.small)` brings the row under the
+   column without touching the column's intended width, and the content box
+   then sits inside the frame box exactly (`05-controlsize.png`).
+
+This is the b6dae25 chrome-sizing class, which P-8 carries as standing law.
+Fixed rather than routed to the Design & UI review row (2B's density-pill
+precedent) because that precedent covered a *taste* question about a control's
+look, and a column that clips its own text is not taste — and because this
+batch adds a row to that column.
+
+**The pin is on the rendered PIXELS**, deliberately: the clipped elements are
+SwiftUI `Text` with no `NSView` to interrogate, and a first attempt asserting
+on the `NSSegmentedControl`'s frame **passed on the pre-fix code** — the
+picker's own origin was positive; it was the text that went negative. That
+false pin was discarded rather than kept. `leftmostInkX` scans the navigator's
+band for the first pixel materially darker than its chrome.
+
+| Pin | Class | Revert applied | Observed RED |
+|---|---|---|---|
+| `theNavigatorsChromeStaysInsideItsColumn` | **red-on-old** | `.controlSize(.small)` removed | ink at **0.0 pt** (assertion: ≥ 6) — the column's text drawn flush at the window edge |
+| everything else in both suites | **structural** | — | neither `convertSmartReadingToCurated` nor `Queries.ReadingOrder` existed before this batch; the suites do not compile against the pre-2D tree |
+
+The revert was executed, observed RED, restored, and the file verified
+byte-identical by `shasum -c`.
+
+#### The visual loop (P-7)
+
+A throwaway capture suite rendered the smart-book navigator and the offer
+sheet into real windows and was **deleted after use** (the 1F/2A/2B/2C
+precedent); its captures are in the gitignored
+`notes/plans/phase-13c-2d-screens/`. Findings: the navigator defect above
+(the loop's whole justification — it had shipped through 2A's own visual
+pass), and the offer sheet reading correctly — the "why", the concrete
+promise ("Its current 4 posts stay, in the order you're looking at them"),
+the collector toggle with the default name as placeholder, and buttons that
+say what they do ("Convert & Add Chapter" when the chapter door opened it).
+The sheet is system-chromed, matching its siblings (`BookSettingsSheet`,
+`BookExtentSheet`, `SmartSpecSheet`).
+
+#### Numbered judgment calls / PROVISIONALs (all on the ratify list, QUESTIONS #46)
+
+1. **Shape A over B/C** — the memo's recommendation, built whole. The
+   alternative that matters is B (the hybrid), and its knot is recorded in her
+   entry in her terms: a post pinned by chaptering whose tag is then removed
+   has no non-surprising answer.
+2. **The collector offer is CHECKED by default.** Her sentence asks for it;
+   defaulting off would make the common case a thing to remember.
+3. **The collector carries the filter, sectioning tag and order, but not the
+   extents or the finish state.** Traced: a cap or a finish on a fresh
+   collector contradicts collecting.
+4. **"+ new chapter" renders on a smart book and opens the offer** (the
+   memo's Q3 lean, the R115 grammar). The alternative — leave it absent and
+   keep conversion to the shelf menu only — is one `if`.
+5. **The displayed order is frozen to manual** (Q4's lean), and the **cap is
+   honored** at materialization, so a converted book is never born over its
+   own capacity.
+6. **No curated → smart door** (Q5's lean). Undo/redo cover the accident; a
+   fresh collector is the honest road back.
+7. **Conversion registers a structural undo entry**, unlike
+   `addPostToReading`'s class which deliberately registers nothing. It mints
+   N rows, changes what a book IS, and may mint a second book — and there is
+   no reverse door. The alternative is "no undo entry (the recovery door is
+   the recovery)", which would leave no recovery door at all here.
+8. **A31's saved half is view-local + one save door.** Several NAMED saved
+   orders per book — the fuller lens reading — needs stored order profiles,
+   i.e. a SyncSpec §12 lockstep event. **Deliberately NOT taken**, per the
+   batch's own instruction; recorded for her.
+9. **`wrongReadingKind`'s message is now direction-aware.** It stated the
+   curated direction only, which read as nonsense on the conversion door's
+   refusal. Latent before this batch (only `collectPostIntoSmartReading`
+   could produce the smart direction, and only in a race).
+
+#### Deviations
+
+- **`ReadingsSection` deleted.** Unreferenced since Phase 13's IA rework;
+  removing it is what makes the A31 finding legible rather than a claim. Its
+  two sheets (`ManageReadingPostsSheet`, `SmartSpecSheet`) are still presented
+  by the shelf and are untouched.
+- **One pre-existing defect fixed** rather than routed (justified above).
+- **The member count in the offer is a one-shot derived read**
+  (`SmartConversionCount.collected`), not the shelf's `postCount`, which
+  counts membership rows and is therefore **0 for every smart book** — the
+  sheet would have promised "0 posts stay" every time it was shown. Pinned.
+  It runs the book's own assembly so the promised number IS the number of rows
+  minted, by construction; the `bookWordCounts` cost tier (a deliberate press,
+  never a held observation).
+
+#### Ladder foci suggested for this batch (2D)
+
+1. **Re-derive the "grouping tag survives conversion" claim cold.** It is the
+   batch's cheapest-looking decision and the one carrying the most inherited
+   behavior: it relies on curated assembly honoring `grouping_tag_id` while a
+   book has no live chapters, and on chapters winning afterwards. Both are
+   pre-2D rules; if either reading is wrong, converted books lose their
+   sections silently.
+2. **Try to break the undo/redo pair against a moving world.** The inverse
+   refuses under a re-finished book and skips dead rows; the re-apply skips a
+   membership whose post died and any pair that already has a live row. Look
+   for a sequence that leaves a conversion half-undone, or that trips
+   `uq_reading_post_live`.
+3. **Check that the view-local order really cannot leak into truth** —
+   export, `renderedText`, the Fragments projection, `bulkExportManifest`,
+   and the paged-read/spread surfaces all read `model.entries`, which now
+   reflects an override. The claim is that nothing PERSISTED changes; verify
+   there is no path where a browsing order is written or exported.
+4. **The `.controlSize(.small)` fix is a geometry change on a shipped
+   surface.** Confirm the picker still reads correctly at the voices' other
+   font settings, and that no other navigator row is near the 166 pt content
+   budget.
+5. **The offer's two doors and the R98 non-door.** Confirm that leaving the
+   drag-onto-a-smart-book gesture alone is right, and that no third surface
+   still dead-ends on a smart book.
