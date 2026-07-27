@@ -2159,6 +2159,39 @@ orchestrator's, after verification).
 
 ## Architect adjudications
 
+### The K6 fix pass — ACCEPTED (2026-07-27); THE REVIEW IS CLOSED
+
+**Verified by my own runs after the last fix: core 882/100 · Mac
+782/134, both green.** All six commits present, tree clean, zero
+`Sync/` lines, no schema; the K1 core diff read myself — the anchor is
+captured from the OLD entries before adoption and the index re-derived
+in the new list, with the clamp surviving only as the left-the-book
+fallback, exactly the ruled shape; both MAJOR pins revert-red per the
+fix record.
+
+**The two flagged deviations, adjudicated:**
+
+1. **K1's BOOK-scoped release (vs the disposition's literal
+   spread-scoped call) — ACCEPTED.** The literal form would have
+   unmounted the Outline editor mid-typing on every observation
+   delivery, because the model serves Outline too; and with identity
+   anchoring, the focused post can only leave the SPREAD by leaving the
+   BOOK — so the book test IS the spread test, and the pin's
+   stale-focus arm proves the intent. A refinement that honors the
+   finding's purpose over its letter, correctly flagged rather than
+   silently taken.
+2. **K2's override-clear on successful conversion — ACCEPTED, not
+   scope creep:** at the instant of conversion the frozen order IS the
+   stored order (content identical), and keeping a redundant override
+   layered over it would diverge confusingly later; it follows the
+   "Save as This Book's Order" door's own recorded rule.
+
+**K6f and K7 stand RECORD-ONLY; K8 landed with the round-1 commit.**
+Per the K6 "one review" ruling, the review is CLOSED — anything further
+is the author's. The end-of-phase `/Applications` refresh executes
+next (zero instances verified at this decision; re-checked at the
+copy), followed by the closeout.
+
 ### Batch 2E — ACCEPTED (2026-07-27); STAGE 2 IS BUILT — the end-of-phase Fable cold review runs next
 
 **Verified before accepting:** Mac **780/135 green by my own run**; core
