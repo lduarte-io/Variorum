@@ -93,6 +93,32 @@ extension Queries {
         }
     }
 
+    /// A reading order asked for at READ time, overriding the book's own
+    /// stored `sort_field`/`sort_dir` for exactly one assembly (13c Batch
+    /// 2D — her A31: *"see a book either by its saved custom order or by an
+    /// attribute like time to freely change the order of it"*).
+    ///
+    /// **It is a way of LOOKING, never the book.** The lens doctrine
+    /// applies literally: an override changes what this read returns and
+    /// nothing else — `reading.sort_field` is untouched, so export, the
+    /// Fragments projection, and every other reader keep seeing the book's
+    /// own order until she deliberately saves one (`setReadingSort`).
+    ///
+    /// The override is applied at exactly the point the stored field would
+    /// have been read, so `assembleReading(order: X)` returns byte-identical
+    /// entries to `setReadingSort(X)` then `assembleReading()` — pinned,
+    /// because "browsing shows what saving would show" is the whole promise
+    /// of a preview.
+    public struct ReadingOrder: Equatable, Hashable, Sendable {
+        public var field: SortField
+        public var direction: SortDirection
+
+        public init(field: SortField, direction: SortDirection) {
+            self.field = field
+            self.direction = direction
+        }
+    }
+
     /// The live readings, by name then id (a presentation order — readings
     /// are author-scale metadata, cost ∝ reading count). Phase 10
     /// (additive): the readings-management face lists through this.
@@ -146,12 +172,24 @@ extension Queries {
     /// `observeLibrary` discipline; the book view passes its window). The
     /// effective cap is the smaller of `limit` and the reading's own
     /// `max_posts`. One-shot callers omit it.
+    ///
+    /// `order` (13c 2D, additive — A31): read this assembly in a DIFFERENT
+    /// order than the book's own, without writing anything. See
+    /// `ReadingOrder`. nil = the book's stored order, exactly as before.
     public static func assembleReading(
-        _ db: Database, readingID: String, limit: Int? = nil
+        _ db: Database, readingID: String, limit: Int? = nil,
+        order: ReadingOrder? = nil
     ) throws -> [ReadingEntry] {
         guard let reading = try Reading.fetchOne(db, key: readingID),
               reading.deletedAt == nil
         else { return [] }
+
+        // The ONE place the order is decided (A31): the override stands in
+        // for the stored pair here and nowhere else, which is what makes
+        // "browsing shows what saving would show" true by construction
+        // rather than by two code paths agreeing.
+        let sortField = order?.field ?? reading.sortField
+        let sortDir = order?.direction ?? reading.sortDir
 
         // N13 (Phase 13b, 3B): REAL CHAPTERS reach the assembly. A curated
         // book with live `reading_section` rows resolves each membership's
@@ -216,9 +254,9 @@ extension Queries {
             // the entry files as unfiled. `(s.id IS NULL)` trails the
             // unfiled entries (the book view's stragglers-trail call);
             // within a chapter the reading's own order rule holds.
-            let order = reading.sortField == .manual
+            let order = sortField == .manual
                 ? "rp.position, rp.id"
-                : stampOrder(reading.sortField, reading.sortDir)
+                : stampOrder(sortField, sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
                        s.name AS section_path, s.id AS section_id
@@ -238,9 +276,9 @@ extension Queries {
             arguments.append(readingID)
 
         case .curated:
-            let order = reading.sortField == .manual
+            let order = sortField == .manual
                 ? "rp.position, rp.id"
-                : stampOrder(reading.sortField, reading.sortDir)
+                : stampOrder(sortField, sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
                        \(sectionSelect) AS section_path, NULL AS section_id
@@ -266,9 +304,9 @@ extension Queries {
             // A smart reading has no positions; `manual` is meaningless for
             // it — fall back to created_at ascending (PROVISIONAL, see
             // phase closeout).
-            let order = reading.sortField == .manual
+            let order = sortField == .manual
                 ? "c.created_at ASC, c.id ASC"
-                : stampOrder(reading.sortField, reading.sortDir)
+                : stampOrder(sortField, sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
                        \(sectionSelect) AS section_path, NULL AS section_id

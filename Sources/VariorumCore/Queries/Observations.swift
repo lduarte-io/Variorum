@@ -19,10 +19,19 @@ extension AppDatabase {
     /// (autosave stamps land there), so a standing assembly should be
     /// windowed like `observeLibrary` — the book view passes its window;
     /// nil preserves the whole-reading fetch for extent-bounded readings.
+    ///
+    /// `order` (13c 2D, additive — A31): hold the assembly in a way of
+    /// LOOKING rather than the book's own order. A view that changes it
+    /// restarts its observation (nothing is written), which is exactly why
+    /// the parameter belongs here and not in a post-fetch re-sort: the
+    /// window is applied by the query, so sorting the delivered rows would
+    /// sort only the first N of the OLD order.
     public func observeReading(
-        _ readingID: String, limit: Int? = nil
+        _ readingID: String, limit: Int? = nil, order: Queries.ReadingOrder? = nil
     ) -> AsyncValueObservation<[Queries.ReadingEntry]> {
-        observe { try Queries.assembleReading($0, readingID: readingID, limit: limit) }
+        observe {
+            try Queries.assembleReading($0, readingID: readingID, limit: limit, order: order)
+        }
     }
 
     /// The library listing (folder view), live. `limit` is deliberately

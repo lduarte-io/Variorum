@@ -335,7 +335,10 @@ extension Operations {
         }
     }
 
-    private func liveMembership(
+    /// Internal (not private) since 13c 2D: the smart→curated conversion
+    /// and its re-apply consult the same "is this pair already live?"
+    /// question `addPostToReading` does — one rule, one implementation.
+    func liveMembership(
         _ db: Database, postID: String, readingID: String
     ) throws -> ReadingPost? {
         try ReadingPost
