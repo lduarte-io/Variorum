@@ -49,16 +49,25 @@ nonisolated enum CompareComposition {
     /// kinship anywhere — collapses to ONE free segment: every column in
     /// its own order, side by side.
     ///
-    /// PROVISIONAL (ladder round 3, MINOR-C — the author's call at the 13c
-    /// kickoff; recorded in the plan file's Batch 4C section): in a MIXED
-    /// multi-peer board, a peer with NO kinship at all has no row that
-    /// bounds its run, so its whole post renders in the TRAILING free
-    /// segment — below every aligned row. On a long anchor fully kin to
-    /// another peer that column reads blank for many rows. The alternative
-    /// (special-case an empty `kinships` peer to flush at the first bound,
-    /// as the whole-board zero-lineage case does) is one arm away; the
-    /// shipped behavior is pinned by
+    /// PROVISIONAL (ladder round 3, MINOR-C — recorded in the plan file's
+    /// Batch 4C section): in a MIXED multi-peer board, a peer with NO
+    /// kinship at all has no row that bounds its run, so its whole post
+    /// renders in the TRAILING free segment — below every aligned row. On a
+    /// long anchor fully kin to another peer that column reads blank for
+    /// many rows. The alternative (special-case an empty `kinships` peer to
+    /// flush at the first bound, as the whole-board zero-lineage case does)
+    /// is one arm away; the shipped behavior is pinned by
     /// `aPeerWithNoKinshipAtAllTrailsEveryAlignedRow`.
+    ///
+    /// **13c Batch 2E — this is what `relatedOnly` (C4) answers, and the
+    /// placement above is deliberately UNCHANGED.** With the filter ON an
+    /// unrelated peer contributes no blocks at all, so the question of where
+    /// its run lands does not arise; the column is empty and SAYS so. With
+    /// the filter OFF the shipped placement stands byte-for-byte — the
+    /// setting is the remedy for "that column reads blank for many rows",
+    /// not a second placement rule. Pinned:
+    /// `relatedOnlyDropsTheKinLessPeerEntirelyAndMootsThePlacement`.
+    /// (QUESTIONS #47 carries both halves for the author.)
     static func segments(
         anchorBlocks: [String],
         peerBlocks: [[String]],
@@ -174,5 +183,62 @@ nonisolated enum CompareComposition {
     /// (the mockup page-3 rail grammar).
     static func railedAnchors(kinships: [[String: String]]) -> Set<String> {
         Set(kinships.flatMap(\.values))
+    }
+
+    /// 13c Batch 2E (committed scope C4 — her request, verbatim: *"we should
+    /// have a setting to only show related blocks - that would make the pane
+    /// feel more usable"*): the **show-related-blocks-only** filter, as a
+    /// PURE pre-pass over exactly the inputs `segments` takes. It drops
+    /// every block lineage has nothing to say about, so what survives is
+    /// only the material that RELATES across the columns — and, because
+    /// every survivor is kin, `segments` then composes nothing but aligned
+    /// rows.
+    ///
+    /// **"Related" is BLOCK-LEVEL LINEAGE — deliberately the SAME notion the
+    /// rails and the alignment already use** (`Queries.blockKinship`: the
+    /// transitive ancestors/descendants CTE, nearest kin wins, depth-bounded
+    /// at 32). ONE kinship brain, and that is the load-bearing reason: a
+    /// narrower rule (direct `derived_from` only) would hide blocks that
+    /// visibly wear a rail, and a wider one would show blocks with no rail —
+    /// either way the surface would contradict itself in the same glance.
+    /// The post-level `version_of` LINK is NOT block relatedness: it says
+    /// these two posts are versions, never WHICH blocks correspond, so a
+    /// version-linked pair with no lineage filters down to nothing and the
+    /// column says so (N29's honesty line, composed — never broken).
+    ///
+    /// Orthogonal to `followAnchorOrder` by construction: this decides WHICH
+    /// blocks show, that toggle decides HOW they arrange. Filter on + follow
+    /// off = each column's related blocks, flowing in its own order.
+    ///
+    /// **The invariant callers rely on:** a peer block survives iff its kin
+    /// names an anchor block in THIS compare, and an anchor block survives
+    /// iff some surviving peer block names it — so the anchor column is
+    /// empty exactly when every peer column is. (Pinned:
+    /// `relatedOnlyLeavesTheAnchorEmptyExactlyWhenEveryPeerIs`.)
+    ///
+    /// Cost is one pass over the same blocks `segments` already walks — the
+    /// composition's own class, never the corpus's (P1).
+    static func relatedOnly(
+        anchorBlocks: [String], peerBlocks: [[String]], kinships: [[String: String]]
+    ) -> (anchorBlocks: [String], peerBlocks: [[String]]) {
+        let anchorSet = Set(anchorBlocks)
+        var keptAnchors: Set<String> = []
+        var keptPeers: [[String]] = []
+        keptPeers.reserveCapacity(peerBlocks.count)
+        for (index, blocks) in peerBlocks.enumerated() {
+            let kinship = index < kinships.count ? kinships[index] : [:]
+            var kept: [String] = []
+            for block in blocks {
+                // A kinship entry naming a block this compare's anchor column
+                // does not show (a gap slot, a stale map mid-observation)
+                // relates to nothing HERE — drop it rather than keep a cell
+                // with no partner.
+                guard let anchor = kinship[block], anchorSet.contains(anchor) else { continue }
+                kept.append(block)
+                keptAnchors.insert(anchor)
+            }
+            keptPeers.append(kept)
+        }
+        return (anchorBlocks.filter(keptAnchors.contains), keptPeers)
     }
 }

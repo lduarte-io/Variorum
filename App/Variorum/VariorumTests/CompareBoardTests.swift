@@ -151,6 +151,109 @@ struct CompareCompositionTests {
         #expect(segments == [.free(anchor: ["A", "B"], peers: [["A'", "B'"]])])
     }
 
+    // MARK: 13c Batch 2E — "show related blocks only" (C4)
+    //
+    // CONTRACT pins over a NEW capability (the 4C record's "(c) new-contract
+    // pins" class), not red-on-old: there is no pre-2E filter to run red.
+    // Their non-hollowness is proven by the batch record's guard reverts —
+    // each surgical arm of `relatedOnly` reds a named pin below.
+
+    /// The filter keeps exactly the kin and drops exactly the rest — in each
+    /// column's OWN order — and because every survivor is kin, the
+    /// composition then holds nothing but aligned rows (the free stretches
+    /// are precisely the unrelated material).
+    @Test func relatedOnlyKeepsTheKinAndComposesOnlyAlignedRows() {
+        // Anchor A B C D — peer: A' (kin A), X, Y (unrelated), C' (kin C).
+        let kept = CompareComposition.relatedOnly(
+            anchorBlocks: ["A", "B", "C", "D"],
+            peerBlocks: [["A'", "X", "Y", "C'"]],
+            kinships: [["A'": "A", "C'": "C"]])
+        #expect(kept.anchorBlocks == ["A", "C"], "B and D relate to nothing here")
+        #expect(kept.peerBlocks == [["A'", "C'"]], "X and Y drop; the peer's order survives")
+        #expect(CompareComposition.segments(
+            anchorBlocks: kept.anchorBlocks, peerBlocks: kept.peerBlocks,
+            kinships: [["A'": "A", "C'": "C"]], followAnchorOrder: true) == [
+                .aligned(.init(anchorBlockID: "A", peerKin: [["A'"]], peerMoved: [false])),
+                .aligned(.init(anchorBlockID: "C", peerKin: [["C'"]], peerMoved: [false])),
+            ], "every survivor is kin, so nothing composes free")
+    }
+
+    /// THE HONESTY CASE (N29, composed — never broken): zero lineage filters
+    /// down to NOTHING on both sides. The board must SAY "there is no
+    /// relationship here" over the empty columns; an empty board is never
+    /// content. Pinned with the invariant the board relies on — the anchor
+    /// column is empty exactly when every peer column is.
+    @Test func relatedOnlyLeavesTheAnchorEmptyExactlyWhenEveryPeerIs() {
+        let nothing = CompareComposition.relatedOnly(
+            anchorBlocks: ["A1", "A2", "A3"], peerBlocks: [["B1", "B2"]], kinships: [[:]])
+        #expect(nothing.anchorBlocks.isEmpty)
+        #expect(nothing.peerBlocks == [[]])
+        #expect(CompareComposition.segments(
+            anchorBlocks: nothing.anchorBlocks, peerBlocks: nothing.peerBlocks,
+            kinships: [[:]], followAnchorOrder: true).isEmpty,
+                "nothing related ⇒ no rows at all — the board speaks instead")
+
+        // …and the converse arm: one kin anywhere keeps both sides non-empty.
+        let something = CompareComposition.relatedOnly(
+            anchorBlocks: ["A1", "A2"], peerBlocks: [["B1"], []],
+            kinships: [["B1": "A2"], [:]])
+        #expect(something.anchorBlocks == ["A2"])
+        #expect(something.peerBlocks == [["B1"], []])
+    }
+
+    /// **The 4C kin-less-peer PROVISIONAL, MOOTED** (13b judgment call 0 —
+    /// a peer with no kinship at all trailed EVERY aligned row, so on a long
+    /// fully-kin anchor its column read blank for that many rows). This is
+    /// the exact configuration that pin uses. With the filter ON the
+    /// unrelated peer contributes NOTHING, so the question of where its run
+    /// lands does not arise — and the placement with the filter OFF is
+    /// deliberately unchanged (`aPeerWithNoKinshipAtAllTrailsEveryAlignedRow`
+    /// still holds, byte-for-byte).
+    @Test func relatedOnlyDropsTheKinLessPeerEntirelyAndMootsThePlacement() {
+        let kept = CompareComposition.relatedOnly(
+            anchorBlocks: ["A", "B"],
+            peerBlocks: [["U1", "U2"], ["A''"]],
+            kinships: [[:], ["A''": "A"]])
+        #expect(kept.anchorBlocks == ["A"], "B relates to nothing")
+        #expect(kept.peerBlocks == [[], ["A''"]], "the unrelated column is empty, not trailing")
+        #expect(CompareComposition.segments(
+            anchorBlocks: kept.anchorBlocks, peerBlocks: kept.peerBlocks,
+            kinships: [[:], ["A''": "A"]], followAnchorOrder: true) == [
+                .aligned(.init(anchorBlockID: "A", peerKin: [[], ["A''"]],
+                               peerMoved: [false, false])),
+            ], "ONE aligned row; no trailing free segment to place anywhere")
+    }
+
+    /// A kinship entry naming an anchor block this compare does NOT show (a
+    /// gap slot; a map read a beat before the projection) relates to nothing
+    /// HERE — the peer block drops rather than surviving as a cell with no
+    /// partner.
+    @Test func relatedOnlyIgnoresKinshipPointingOutsideThisCompare() {
+        let kept = CompareComposition.relatedOnly(
+            anchorBlocks: ["A"],
+            peerBlocks: [["A'", "ghost"]],
+            kinships: [["A'": "A", "ghost": "GONE"]])
+        #expect(kept.anchorBlocks == ["A"])
+        #expect(kept.peerBlocks == [["A'"]], "a kin of an absent anchor is not related here")
+    }
+
+    /// The two toggles are ORTHOGONAL by construction: this one decides
+    /// WHICH blocks show, follow-order decides HOW they arrange. Filter on +
+    /// follow off = each column's related blocks, in its own order.
+    @Test func relatedOnlyAndFollowOrderStayOrthogonal() {
+        let kept = CompareComposition.relatedOnly(
+            anchorBlocks: ["A", "B", "C"],
+            peerBlocks: [["X", "C'", "A'"]],
+            kinships: [["A'": "A", "C'": "C"]])
+        #expect(kept.anchorBlocks == ["A", "C"])
+        #expect(kept.peerBlocks == [["C'", "A'"]], "the peer's OWN order is preserved")
+        #expect(CompareComposition.segments(
+            anchorBlocks: kept.anchorBlocks, peerBlocks: kept.peerBlocks,
+            kinships: [["A'": "A", "C'": "C"]], followAnchorOrder: false)
+                == [.free(anchor: ["A", "C"], peers: [["C'", "A'"]])],
+                "follow off still flows each column whole — of the FILTERED blocks")
+    }
+
     /// Peer blocks arriving BEFORE any kin (an opening the anchor lacks)
     /// pack a leading free stretch; empty inputs compose to nothing.
     @Test func leadingOrphansAndEmptyInputs() {
@@ -493,6 +596,117 @@ struct CompareViewModelTests {
                 model, db, anchor: world.anchor, peers: [world.twin, world.stranger])
             #expect(model.isRelated(world.stranger), "the link relates them")
             #expect(!model.hasLineage(world.stranger), "…but lineage still has nothing to say")
+            model.teardown()
+        }
+    }
+
+    /// 13c Batch 2E (C4): the filter, ON THE BOARD. Default OFF; turning it
+    /// on leaves only the kin rows, and the unrelated column reports itself
+    /// empty rather than sitting blank (the mixed case — the version twin is
+    /// related, the stranger is not).
+    @Test func relatedOnlyHidesTheUnrelatedColumnAndTheBoardSaysSo() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.peerSlots = [.init(postID: world.twin), .init(postID: world.stranger)]
+            try await adoptFresh(
+                model, db, anchor: world.anchor, peers: [world.twin, world.stranger])
+
+            #expect(!model.relatedOnly, "a filter that HIDES material is reached for, not default")
+            let unfiltered = model.display
+            #expect(unfiltered.rows.contains { row in
+                if case .free = row { return true }
+                return false
+            }, "unfiltered, the stranger's block flows in a free row")
+            #expect(unfiltered.peerHasBlocks == [true, true])
+
+            model.relatedOnly = true
+            let filtered = model.display
+            #expect(filtered.isFiltered)
+            #expect(!filtered.rows.isEmpty, "the twin's kin rows survive")
+            #expect(filtered.rows.allSatisfy { row in
+                if case .aligned = row { return true }
+                return false
+            }, "every survivor is kin — nothing composes free")
+            #expect(filtered.anchorHasBlocks)
+            #expect(filtered.peerHasBlocks == [true, false],
+                    "the stranger contributes nothing — the column's note says so")
+
+            // Every anchor block of the twin pair is kin, so the filter
+            // costs the related comparison nothing.
+            #expect(filtered.rows.count == model.projection.anchor.slots.count)
+            model.teardown()
+        }
+    }
+
+    /// THE LIVE-RING CALL, pinned (13c 2E): turning the filter on can hide
+    /// the block the ring sits in. The 4C NIT-1 precedent governs — the ring
+    /// never stays on a pane nothing renders: it blurs, the pane's own post
+    /// flushes so the typed text LANDS, and the board SPEAKS (a caret
+    /// disappearing without a word is the silent-door class). Deliberately
+    /// NOT a refusal of the toggle.
+    @Test func turningOnRelatedOnlyReleasesARingItHidesAndLandsTheText() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.peerSlots = [.init(postID: world.twin), .init(postID: world.stranger)]
+            try await adoptFresh(
+                model, db, anchor: world.anchor, peers: [world.twin, world.stranger])
+
+            let strangerSlot = model.projection.peers[world.stranger]!.slots[0]
+            let strangerKey = PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.stranger)", blockID: strangerSlot.blockID,
+                variantID: strangerSlot.variantID!, context: world.stranger)
+            model.focus(strangerKey)
+            model.paneEdited(
+                postID: world.stranger, variantID: strangerSlot.variantID!,
+                newText: "typed just before the filter hid it")
+            #expect(model.authority.isLive(strangerKey))
+
+            model.relatedOnly = true
+            #expect(model.authority.livePane == nil,
+                    "the ring never stays on a pane the filter hid")
+            #expect(model.statusMessage?.contains("hid the block you were writing in") == true,
+                    "it speaks — a caret does not vanish silently")
+            await poll { session.autosave(forPost: world.stranger).pending.isEmpty }
+            let landed = try await db.read { db in
+                try Queries.renderPost(db, containerID: world.stranger)[0].text
+            }
+            #expect(landed == "typed just before the filter hid it",
+                    "the buffer flushed on the way out, not dropped")
+            model.teardown()
+        }
+    }
+
+    /// The narrowness half: a ring on a block the filter KEEPS is untouched
+    /// — no blur, no speech. (Without it, the release guard could over-fire
+    /// and drop the ring on every toggle.)
+    @Test func relatedOnlyLeavesARingItDoesNotHideAlone() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.peerSlots = [.init(postID: world.twin)]
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
+
+            let twinSlot = model.projection.peers[world.twin]!.slots[0]
+            let twinKey = PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.twin)", blockID: twinSlot.blockID,
+                variantID: twinSlot.variantID!, context: world.twin)
+            model.focus(twinKey)
+            model.relatedOnly = true
+            #expect(model.authority.isLive(twinKey),
+                    "the twin's blocks are all kin — the ring is not hidden, so it stays")
+            #expect(model.statusMessage == nil, "nothing to say")
+
+            // …and the anchor side of the same guard.
+            let anchorSlot = model.projection.anchor.slots[0]
+            let anchorKey = PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.anchor)", blockID: anchorSlot.blockID,
+                variantID: anchorSlot.variantID!, context: world.anchor)
+            model.focus(anchorKey)
+            model.relatedOnly = false
+            model.relatedOnly = true
+            #expect(model.authority.isLive(anchorKey), "the anchor's kin block stays live too")
             model.teardown()
         }
     }

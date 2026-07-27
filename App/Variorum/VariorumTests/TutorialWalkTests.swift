@@ -1558,6 +1558,23 @@ struct TutorialLookingActsTests {
             #expect(plain == [.free(anchor: lessonBlocks, peers: [strangerBlocks])],
                     "no relationship ⇒ plain side-by-side, no blanks, nothing aligned")
 
+            // 13c 2E — the lesson's OWN promise about "related blocks only":
+            // on an unrelated pair it must tell her there is nothing to show
+            // rather than showing her nothing. The filter leaves both columns
+            // empty, which is precisely the state the board speaks over.
+            let filtered = CompareComposition.relatedOnly(
+                anchorBlocks: lessonBlocks, peerBlocks: [strangerBlocks],
+                kinships: [strangerKinship])
+            #expect(filtered.anchorBlocks.isEmpty)
+            #expect(filtered.peerBlocks == [[]])
+            #expect(CompareComposition.segments(
+                anchorBlocks: filtered.anchorBlocks, peerBlocks: filtered.peerBlocks,
+                kinships: [strangerKinship], followAnchorOrder: true).isEmpty,
+                    """
+                    related-blocks-only over an unrelated pair composes NOTHING — \
+                    the board says so instead of rendering emptiness as content
+                    """)
+
             // The twin, by contrast, aligns everywhere lineage speaks.
             let versionSlots = try await slots(db, lesson)
             let peers = try await db.read { try Queries.versionPeers($0, of: versionSlots[0].blockID) }

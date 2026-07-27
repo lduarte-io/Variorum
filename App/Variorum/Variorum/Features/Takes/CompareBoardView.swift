@@ -128,6 +128,24 @@ final class CompareViewModel {
     /// S4-12 — the lineage-color relationship, toggleable on/off.
     /// Session-local like the follow toggle.
     var lineageColorsOn = true
+    /// 13c Batch 2E (C4) — "show related blocks only": a display FILTER
+    /// collapsing every column to the blocks lineage actually connects,
+    /// hiding the unrelated stretches (her words: *"that would make the pane
+    /// feel more usable"*). SESSION-LOCAL view state exactly like the two
+    /// toggles above — a reading posture, never persisted, no schema.
+    ///
+    /// **Default OFF**, deliberately: a filter that HIDES material should be
+    /// reached for, not arrived in. With it on by default, opening Compare
+    /// against an unrelated post would land on nothing but the honesty line,
+    /// and against a version twin it changes nothing (every block is kin) —
+    /// so ON-by-default buys nothing where it helps and confuses where it
+    /// doesn't. One line to flip (QUESTIONS #47).
+    var relatedOnly = false {
+        didSet {
+            guard relatedOnly != oldValue else { return }
+            releaseLivePaneIfFilteredAway()
+        }
+    }
     /// In-cell fan blooms — session-only, like the takes board's.
     private(set) var expandedBlocks: Set<String> = []
     /// THE pane-text/liveness authority — ONE across every post context
@@ -354,20 +372,64 @@ final class CompareViewModel {
 
     // MARK: Composition (the pure brain, fed)
 
-    /// Column order is stable: the anchor, then the peer slots (a nil slot
-    /// contributes an empty column so headers and cells stay aligned).
-    var rows: [CompareRow] {
+    /// What the board renders this pass. ONE computation the view reads
+    /// ONCE (13c 2E): the rows and the per-column honesty notes come from
+    /// the same filtered inputs, so the board can never disagree with itself
+    /// about what is on screen.
+    struct Display: Equatable {
+        var rows: [CompareRow] = []
+        /// True while "related blocks only" is filtering (2E).
+        var isFiltered = false
+        var anchorHasBlocks = false
+        /// Per peer SLOT, in column order.
+        var peerHasBlocks: [Bool] = []
+    }
+
+    /// The composition's inputs, after 2E's filter. Column order is stable:
+    /// the anchor, then the peer slots (a nil slot contributes an empty
+    /// column so headers and cells stay aligned).
+    private var compositionInputs:
+        (anchor: [String], peers: [[String]], kinships: [[String: String]])
+    {
         let peerIDs = peerSlots.map(\.postID)
+        let anchor = projection.anchor.slots.filter { !$0.isGap }.map(\.blockID)
+        let peers = peerIDs.map { id -> [String] in
+            guard let id, let face = projection.peers[id] else { return [] }
+            return face.slots.filter { !$0.isGap }.map(\.blockID)
+        }
+        let kinships = peerIDs.map { id -> [String: String] in
+            guard let id else { return [:] }
+            return projection.kinship[id] ?? [:]
+        }
+        guard relatedOnly else { return (anchor, peers, kinships) }
+        let kept = CompareComposition.relatedOnly(
+            anchorBlocks: anchor, peerBlocks: peers, kinships: kinships)
+        // The kinship map rides UNFILTERED: `segments` only ever consults it
+        // for blocks it is handed, and every survivor's kin is a surviving
+        // anchor by `relatedOnly`'s invariant.
+        return (kept.anchorBlocks, kept.peerBlocks, kinships)
+    }
+
+    var display: Display {
+        let inputs = compositionInputs
+        return Display(
+            rows: composedRows(inputs),
+            isFiltered: relatedOnly,
+            anchorHasBlocks: !inputs.anchor.isEmpty,
+            peerHasBlocks: inputs.peers.map { !$0.isEmpty })
+    }
+
+    /// The board's rows (the view reads `display`; this stays the direct
+    /// accessor the pins and any single-purpose caller use).
+    var rows: [CompareRow] { composedRows(compositionInputs) }
+
+    private func composedRows(
+        _ inputs: (anchor: [String], peers: [[String]], kinships: [[String: String]])
+    ) -> [CompareRow] {
         let segments = CompareComposition.segments(
-            anchorBlocks: projection.anchor.slots.filter { !$0.isGap }.map(\.blockID),
-            peerBlocks: peerIDs.map { id in
-                guard let id, let face = projection.peers[id] else { return [] }
-                return face.slots.filter { !$0.isGap }.map(\.blockID)
-            },
-            kinships: peerIDs.map { id in
-                guard let id else { return [:] }
-                return projection.kinship[id] ?? [:]
-            },
+            anchorBlocks: inputs.anchor,
+            peerBlocks: inputs.peers,
+            kinships: inputs.kinships,
             followAnchorOrder: followAnchorOrder)
         var rows: [CompareRow] = []
         var freeIndex = 0
@@ -429,6 +491,49 @@ final class CompareViewModel {
         authority.blur()
         let coordinator = coordinator(for: postID)
         Task { await coordinator.flushNow() }
+    }
+
+    /// 13c Batch 2E: turning "related blocks only" ON can hide the very
+    /// block the live ring sits in. **The precedent is 4C's NIT-1** (a
+    /// closed column hosting the live pane): the ring never stays on a pane
+    /// nothing renders — blur, and flush THAT post's own coordinator so what
+    /// she typed LANDS in the store instead of sitting in a buffer no
+    /// surface shows.
+    ///
+    /// It **speaks**, because a caret disappearing without a word is exactly
+    /// the silent-door class 13b retired. The alternative considered —
+    /// REFUSING the toggle while a pane is live ("close the block you're
+    /// writing in first") — is lecture-and-redirect by another name (P-2):
+    /// a view toggle that stops working because you happen to be typing is
+    /// the friction this phase exists to remove, and it would refuse most
+    /// often exactly when she is deep in a comparison.
+    ///
+    /// Scoped to the TOGGLE deliberately. A projection change can also hide
+    /// the live pane's block (a block deleted in another window), but that
+    /// is the pre-existing 4C class — unguarded today, and calling this per
+    /// observation delivery would both cost a filter pass per delivery and
+    /// invent a new way for the ring to drop mid-typing. Recorded, not
+    /// widened.
+    private func releaseLivePaneIfFilteredAway() {
+        guard let pane = authority.livePane else { return }
+        let postID = pane.context.isEmpty ? anchorPostID : pane.context
+        let inputs = compositionInputs
+        let stillVisible: Bool
+        if postID == anchorPostID {
+            stillVisible = inputs.anchor.contains(pane.blockID)
+        } else if let index = peerSlots.firstIndex(where: { $0.postID == postID }),
+                  index < inputs.peers.count {
+            stillVisible = inputs.peers[index].contains(pane.blockID)
+        } else {
+            stillVisible = false
+        }
+        guard !stillVisible else { return }
+        authority.blur()
+        let coordinator = coordinator(for: postID)
+        Task { await coordinator.flushNow() }
+        statusMessage =
+            "\u{201C}Related blocks only\u{201D} hid the block you were writing in — your "
+            + "text is saved. Turn it off to go back to it."
     }
 
     func setPeer(slotID: String, postID: String?) {
@@ -681,13 +786,18 @@ struct CompareBoardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        // ONE display computation per pass (13c 2E): the rows and the
+        // per-column honesty notes read the same filtered inputs.
+        let display = model.display
+        return VStack(alignment: .leading, spacing: 0) {
             header
-            columnHeaders
+            columnHeaders(display)
             if model.peerSlots.allSatisfy({ $0.postID == nil }) {
                 emptyState
+            } else if display.isFiltered, display.rows.isEmpty {
+                nothingRelatedState
             } else {
-                boardRows
+                boardRows(display)
             }
         }
         .background(tokens.surface)
@@ -746,6 +856,16 @@ struct CompareBoardView: View {
             ) { model.lineageColorsOn.toggle() }
                 .help("Color rails mark related blocks across the columns — the same color "
                     + "means the same origin. Rails only appear where a real relationship exists.")
+            // 13c 2E (C4) — the third toggle of the same class: a way of
+            // LOOKING, session-local, nothing moved or deleted.
+            VoicedChip(
+                tokens: tokens,
+                text: model.relatedOnly ? "related blocks only: on" : "related blocks only: off",
+                on: model.relatedOnly
+            ) { model.relatedOnly.toggle() }
+                .help("On: every column shows only the blocks lineage connects across these "
+                    + "posts — the unrelated stretches are hidden. Nothing is moved or "
+                    + "deleted; this is a way of looking. Off: every block shows.")
             Spacer()
             Button(tokens.chromeLabel("make outline post")) {
                 Task { await model.makeOutlinePost() }
@@ -767,7 +887,7 @@ struct CompareBoardView: View {
 
     // MARK: Column headers
 
-    private var columnHeaders: some View {
+    private func columnHeaders(_ display: CompareViewModel.Display) -> some View {
         HStack(alignment: .top, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.projection.anchor.title ?? "This post")
@@ -780,8 +900,15 @@ struct CompareBoardView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            ForEach(model.peerSlots) { slot in
-                peerHeader(slot)
+            ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { index, slot in
+                peerHeader(
+                    slot,
+                    // The per-column note fires only in the MIXED case —
+                    // when the whole board is empty the board-level line
+                    // says it once, properly (13c 2E).
+                    filteredEmpty: display.isFiltered && !display.rows.isEmpty
+                        && slot.postID != nil
+                        && !(index < display.peerHasBlocks.count && display.peerHasBlocks[index]))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -791,7 +918,9 @@ struct CompareBoardView: View {
     }
 
     @ViewBuilder
-    private func peerHeader(_ slot: CompareViewModel.PeerSlot) -> some View {
+    private func peerHeader(
+        _ slot: CompareViewModel.PeerSlot, filteredEmpty: Bool = false
+    ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
                 Picker("Compare with", selection: Binding(
@@ -842,6 +971,19 @@ struct CompareBoardView: View {
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                 }
+                // 13c 2E: N29's honesty line under the filter — an empty
+                // column must never read as content. This is the MIXED case
+                // (another column is related, this one isn't); it also
+                // covers the version-linked-but-lineage-less peer, whose
+                // header says "versions" and would otherwise sit blank.
+                if filteredEmpty {
+                    Text(tokens.chromeLabel("related blocks only — nothing from this post"))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .help("Lineage connects none of this post's blocks to the first "
+                            + "post's, so the filter leaves this column empty. Turn "
+                            + "\u{201C}related blocks only\u{201D} off to see it whole.")
+                }
             }
         }
     }
@@ -883,12 +1025,33 @@ struct CompareBoardView: View {
         .frame(maxWidth: .infinity)
     }
 
+    /// 13c 2E — the whole-board honesty state: "related blocks only" with
+    /// NOTHING related must SAY there is no relationship, over the empty
+    /// columns. An empty board is never content (N29, composed — that
+    /// honesty is the whole reason 4C's gap parade was killed).
+    private var nothingRelatedState: some View {
+        VStack(spacing: 8) {
+            Spacer()
+            Text(tokens.chromeLabel("there is no relationship here"))
+                .foregroundStyle(tokens.muted)
+            Text("\u{201C}Related blocks only\u{201D} is on, and lineage connects nothing "
+                + "across these posts — so there is nothing to show. Turn it off to read "
+                + "them side by side.")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 420)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     // MARK: Rows
 
-    private var boardRows: some View {
+    private func boardRows(_ display: CompareViewModel.Display) -> some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 8) {
-                ForEach(model.rows) { row in
+                ForEach(display.rows) { row in
                     rowView(row)
                 }
                 endDropZones
