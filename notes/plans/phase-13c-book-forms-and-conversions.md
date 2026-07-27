@@ -1971,6 +1971,27 @@ refresh.** Note for the record: her app was LIVE at the screenshot
 ("Synced 10:13 AM"), so the no-Release-build / no-refresh / never-quit
 instance rules bind every session until the end-of-phase window.
 
+**MID-PHASE REFRESH — 2026-07-27, author-opened window (recorded the
+turn it happened).** After the 1F report reached her ("the gap on your
+screen remains until the end-of-phase refresh — your app is live"), she
+closed the app and said, verbatim: *"i've closed my app so it should be
+ready."* Read as opening the window for the 1F fix, and executed as a
+**pinned build**: `/Applications/Variorum.app` was refreshed from a
+Release build of **commit `e5c3a80`** (Stage 1 + Batch 1F, exactly the
+adjudicated set) built in a throwaway git worktree — NOT from the
+working tree, where the 2A Opus implementer was mid-flight; nothing
+unadjudicated shipped. Preconditions honored: fresh WAL-safe backup
+first (`variorum-backup-2026-07-27-171216.sqlite`, `integrity_check`
+ok — the A1 rail), zero instances verified at build AND immediately
+before the copy, signature verified after
+*[removed for publication]*
+concern (marker 4). The K6 end-of-phase refresh still happens after the
+Fable cold review closes — it is what carries Stage 2. Worktree note
+for future refreshes of this shape: the app project's local-package
+reference requires the checkout directory to be NAMED `variorum`
+(a `…/wt1f/variorum` worktree builds; any other leaf name fails SPM
+resolution).
+
 ### Batch 1F — the take-card gap (A47) — FABLE implementer, runs before Stage 2
 
 **Read first, in this order:** this sitting record and ledger row A47;
