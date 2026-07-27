@@ -2077,6 +2077,48 @@ own runs this sitting.
 
 ## Architect adjudications
 
+### Batch 2B — ACCEPTED (2026-07-27); #44(c) is a genuine push-back candidate on her walk
+
+**Verified before accepting:** Mac **745/131 green by my own run**; core
+untouched coherent by construction (zero `Sources/` lines in the stat);
+tree clean, both commits present; QUESTIONS #44 exists appended;
+**the `TutorialWalkTests` edit read in full** — legitimate adaptation of
+the paged vocabulary to the spread (equivalent-or-stronger assertions,
+including a new blank-leaf honesty check), not a weakened step; the
+registry diff read — `takeFamily` now reads
+`writeEditorAttached || takesBoardAttached`, the proxy retired for the
+truth it stood for, the `writeEditorAttached` shape reused.
+
+**The judgment calls, adjudicated:**
+
+1. **One active editable page at a time (#44(b)) — ACCEPTED as
+   PROVISIONAL.** Two mounted boards would mean two `PaneTextAuthority`
+   values and two LIFO-racing routed handlers — the trace is concrete,
+   and the shipped shape (sibling read-cheap, ring migrates on click) is
+   the app-wide P3 pattern applied consistently. The
+   both-pages-live alternative is honestly named as a bigger build.
+2. **The `takesBoardAttached` registry condition — ACCEPTED**, and it is
+   the batch's best work: `mode == .takes` was a proxy that silently
+   broke the moment a board mounted outside a post detail, and the fix
+   reports the actual attachment (RED-verified). The named consequence
+   (structural gestures read `.unavailable` in the takes form rather
+   than `.actElsewhere(.write)` — the #41 family) rides the end-of-phase
+   review's foci.
+3. **The removed jump slider (#44(c)) — ACCEPTED as flagged, and I lean
+   HER WAY on the walk:** her Outline rationale ("a horizontal scrollbar
+   on a vertical page") does not apply to a horizontal pager, and
+   S4-9(2)'s Kindle-style ask arguably wants a scrubber here. The batch
+   was right to flag rather than bury; restoring it is one control if
+   she rules so.
+4. **The density-pill clipping in half-width containers** — pre-existing
+   chrome, correctly routed to the Design & UI review row rather than
+   fixed mid-batch.
+
+**Environment note carried:** the Mac runner ran normally under a
+locked-reading login session (probed with a control suite first) —
+contradicts Stage 4 lesson 9's prediction; recorded in the batch record
+so the lesson gains its exception rather than silently drifting.
+
 ### Batch 2A — ACCEPTED (2026-07-27); the R106 flip is the ratify walk's first stop
 
 **Verified before accepting:** Mac **741/130 green by my own run**; core
