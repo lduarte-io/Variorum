@@ -18,7 +18,12 @@
 //  Measurement discipline (the batch-12 clipped-take class, closed for
 //  every composer): a pane measures through `PaneMeasurement` and
 //  re-measures on the WIDTH-GATED layout hook — a zero-width install
-//  cannot pin a pane at one line, whichever surface composes it.
+//  cannot pin a pane at one line, whichever surface composes it. Since
+//  13c 1F (A47) the discipline is BOTH-SIDED: same-width layout passes
+//  run a divergence check, so a frame left TALLER than its text (the
+//  stale class the width/string/font gates could never re-trigger on,
+//  and the heal — which only chases a SHORT frame — could never shrink)
+//  self-heals on the next pass instead of persisting for the pane's life.
 //
 //  Why a full-document `ensureLayout` is legitimate HERE (ladder round 3,
 //  NIT-A — verified P1-safe, not a violation): every composer of this
@@ -249,6 +254,21 @@ final class PaneTextView: NSTextView {
     /// clipped-take fix's trigger; width-gated so height publishes can't
     /// loop through it).
     var onWidthChange: (() -> Void)?
+    /// Fires on every SAME-WIDTH layout pass (13c 1F — A47, the take-card
+    /// gap): the frame must hug the pane's CURRENT measurement from BOTH
+    /// sides, and before this hook nothing ever re-checked it — every
+    /// remeasure trigger was gated on a width/string/font CHANGE, and the
+    /// publisher's heal re-schedules only while the frame renders SHORT of
+    /// its measurement. So a frame left TALLER than the text's real extent
+    /// (her ~450pt un-clickable void at the end of a take, born within a
+    /// minute of launch on text unchanged for days) was TERMINAL: no event
+    /// short of a width change, a text change, or a font switch would ever
+    /// correct it — "the large open gap isn't going away", verbatim. The
+    /// listener measures and re-publishes ONLY on divergence, so a
+    /// converged pane costs one warm (already-laid-out) measurement and
+    /// the loop terminates by construction: a corrective publish reframes
+    /// the view to the measurement, and the next pass measures equal.
+    var onLayoutPass: (() -> Void)?
     private var lastLaidOutWidth: CGFloat = -1
     /// Test seam (the N2 pin): the last canary message the surface
     /// PUBLISHED for rendering — proves the fire→render wiring without
@@ -264,6 +284,11 @@ final class PaneTextView: NSTextView {
         if bounds.width != lastLaidOutWidth {
             lastLaidOutWidth = bounds.width
             onWidthChange?()
+        } else {
+            // Same width: the divergence check (A47). A width pass already
+            // remeasures unconditionally, so the two branches never double
+            // a measurement in one pass.
+            onLayoutPass?()
         }
     }
 
@@ -552,6 +577,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // install, BEFORE SwiftUI hands it real width — the width-gated
             // layout hook re-measures when real layout arrives.
             view.onWidthChange = { [weak self] in self?.remeasure() }
+            // 13c 1F (A47): same-width layout passes re-check convergence,
+            // so a stale frame — in EITHER direction — self-heals on the
+            // next pass instead of persisting until a width/text/font event.
+            view.onLayoutPass = { [weak self] in self?.reconvergeIfDiverged() }
             canary.onFire = { [weak self] message in
                 self?.publisher?.publishCanary(message)
             }
@@ -582,9 +611,35 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// synchronous write + a bounded, coalesced convergence heal. No
         /// loop — a height write triggers no remeasure (`updateNSView`
         /// remeasures only on string/font change; the layout hook is
-        /// width-gated).
+        /// width-gated, and the same-width divergence check below
+        /// publishes only when the frame and the measurement disagree).
         func remeasure() {
             publisher?.publishHeight()
+        }
+
+        /// 13c 1F (A47, the take-card gap): the BOTH-SIDES convergence
+        /// law. A pane's frame is written only from exact measurements,
+        /// but a measurement taken in a transient layout state can outlive
+        /// the state it measured — and with every remeasure trigger gated
+        /// on a width/string/font CHANGE, and the publisher's heal
+        /// re-scheduling only while the frame renders SHORT, an over-tall
+        /// frame had NO correction path at all (a ~450pt dead void at the
+        /// end of a take card, stable across ring moves, scrolls, and
+        /// clicks — her A47 report). Runs on every same-width layout
+        /// pass: one warm measurement of already-laid-out pane-scale text;
+        /// publishes ONLY on divergence, so a converged pane writes
+        /// nothing and the pass chain terminates (a corrective publish
+        /// reframes the view to the measurement; the next pass measures
+        /// equal and stays silent). Composer-capped compositions never
+        /// fire it: the capped wrapper is a ScrollView AROUND the pane
+        /// (the rail's tall cards), so the pane's own bounds still equal
+        /// its measurement inside.
+        func reconvergeIfDiverged() {
+            guard let view, publisher != nil else { return }
+            let measured = max(PaneMeasurement.height(of: view), 24)
+            if abs(view.bounds.height - measured) > PanePublisher.convergenceSlack {
+                remeasure()
+            }
         }
     }
 }

@@ -123,11 +123,16 @@ struct TakesBoardSoakTests {
             let expected = model.authority.text(variantID: pane.variantID, storeText: store)
             #expect(pane.view.string == expected,
                     "[\(tag)] \(pane.role) pane mirrors the authority for \(pane.variantID.suffix(4))")
-            if pane.role == "article" || pane.role == "card" {
-                let measured = PaneMeasurement.height(of: pane.view)
-                #expect(pane.view.bounds.height + 3 >= measured,
-                        "[\(tag)] \(pane.role) height \(pane.view.bounds.height) holds measured \(measured)")
-            }
+        }
+        // 13c 1F (A47): the height invariant is BOTH-SIDED and covers the
+        // LIVE pane too. The old form (`bounds + 3 >= measured`, read panes
+        // only) was structurally blind to her defect class — a frame
+        // TALLER than its text (the ~450pt dead void at the end of a take
+        // card, which wore the live ring) passed it by construction.
+        for pane in identified where pane.role == "article" || pane.role == "card" {
+            let measured = PaneMeasurement.height(of: pane.view)
+            #expect(abs(pane.view.bounds.height - measured) <= 3,
+                    "[\(tag)] \(pane.role) height \(pane.view.bounds.height) hugs measured \(measured) from both sides")
         }
 
         // 4 — every REALIZED slot renders its article pane (R103: an empty

@@ -757,7 +757,7 @@ are this phase's opening batch.
 | A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
 | A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. Her diagnostic was right end to end: 1A measured the mechanism (a 3,000-word block guessing 4,964 pt against 4,597 pt real), 1C measured the remedy, **1E built it (PROVISIONAL, QUESTIONS #39)** — measured in a real window at 7,837 → 7,300 pt, with the document giving back the same 537 pt. | **13c-friction — ADDRESSED (Batch 1E)** |
-| A47 | **The take-card gap — added live 2026-07-27 (sitting record below), verbatim:** *"that large open space at the end of a take, without further newlines to click into bug? it still seems present… now the large open gap isn't going away when i click into other blocks, which is good because it's less annoying, but the fact that it exists is still annoying."* Screenshot on record: the TAKES view (stack style), post "Things I want to do before Brazil", a take card with ~60 visible words and a large (~550 pt) un-clickable empty region below the caret INSIDE the card; status bar `blk 28/31 · 52204DF` and **`805w take · 1,727w post`** — a counter-vs-visible-text discrepancy the investigation must explain. This is a PANE surface, explicitly OUTSIDE 1E's detail-editor scope, and it challenges 1C's "panes never carry an estimate" clean-bill claim. Her directive: Fable finds and fixes it FIRST, before Stage 2. | **13c — Batch 1F (Fable), running** |
+| A47 | **The take-card gap — added live 2026-07-27 (sitting record below), verbatim:** *"that large open space at the end of a take, without further newlines to click into bug? it still seems present… now the large open gap isn't going away when i click into other blocks, which is good because it's less annoying, but the fact that it exists is still annoying."* Screenshot on record: the TAKES view (stack style), post "Things I want to do before Brazil", a take card with ~60 visible words and a large (~550 pt) un-clickable empty region below the caret INSIDE the card; status bar `blk 28/31 · 52204DF` and **`805w take · 1,727w post`** — a counter-vs-visible-text discrepancy the investigation must explain. This is a PANE surface, explicitly OUTSIDE 1E's detail-editor scope, and it challenges 1C's "panes never carry an estimate" clean-bill claim. Her directive: Fable finds and fixes it FIRST, before Stage 2. **OUTCOME (Batch 1F, 2026-07-27): FIXED at the traced persistence mechanism — the pane frame was a past exact measurement with NO correction path (every remeasure trigger change-gated; the heal one-directional), now closed by the BOTH-SIDES convergence law on `PaneSurface` (same-width layout passes re-check frame-vs-measurement and republish on divergence), red-on-old by behavioral revert (546.0 pt frame held over 293.0 pt of text on the pre-fix code). 1C's clean bill HOLDS (measurement proven exact everywhere; hypothesis 3 refuted); hypothesis 1 refuted by the read-only store (zero trailing newlines; text unchanged since Jul 24); the 805w-vs-60 discrepancy resolved (the screenshot showed the one ~800-word take's TAIL above the void). The BIRTH event is recorded UNIDENTIFIED (launch-adjacent, recurring; candidate table + kills in the batch record) — the fix makes any birth self-heal within one layout pass. Full record: "Batch 1F" under Batch records.** | **13c — Batch 1F DONE (Fable)** |
 | A46 | **The DEAD CLICK** — her Q4 answer, verbatim: *"clicking does nothing at all - it couldn't move your cursor into the phantom space and the down arrow couldn't move you down either. nothing was actually there."* Queued as batch 1C. | **13c-friction — INVESTIGATED (Batch 1C): NOT A BUG.** Measured through the real event route: the phantom IS the editor's surface, the click reaches it, and the caret moves — to the document END. It cannot enter the phantom because no text is there, which is her sentence exactly. Down-arrow already agreed correct. **Nothing fixed; characterization pins landed** (`PhantomSpaceTests`) and the weight moves to memo Q3 (option E, now measured). One genuinely un-routed **6 pt** strip at the bottom of every scroll view found and recorded — **AppKit's, reproduced on a vanilla `NSTextView`** — pinned at size so this class can't grow unnoticed |
 | A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
@@ -3741,3 +3741,185 @@ suite is green.
 move beyond hoisting the rules into the operations layer where both
 callers already live, and zero `Sources/VariorumCore/Sync/` lines. The
 stop-and-report condition never triggered.
+
+### Batch 1F — the take-card gap (A47)
+
+**Commits:** one commit — the fix, its pin, the widened soak invariant,
+the A47 ledger update, and this record (no schema change, zero
+`Sources/VariorumCore/` lines, zero `Sources/VariorumCore/Sync/` lines).
+**Counts:** core **858/98 → 858/98** (unchanged — coherent by
+construction, nothing under `Sources/` touched) · Mac **733/129 →
+734/129** (one new pin) · mobile untouched.
+**Diff scope:** 3 files — `App/Variorum/Variorum/Surface/PaneSurface.swift`
+(the fix: ~30 lines, one hook + one coordinator method),
+`VariorumTests/TakePaneMeasureTests.swift` (the pin),
+`VariorumTests/TakesBoardSoakTests.swift` (the widened invariant).
+**Her live instance:** untouched throughout — interrogated passively only
+(a `screencapture -l` of her window, read-only `mode=ro` store and
+`immutable=1` backup queries, `ps`). No Release build, no
+`/Applications` refresh, no quit, no AX injection (declined
+`AXManualAccessibility` — it mutates app state).
+
+#### THE HEADLINE: the PERSISTENCE mechanism is traced and fixed; the birth event is honestly unidentified
+
+Her card's frame was a **past, exact measurement that nothing could ever
+correct**. The pane's height `@State` is written only from
+`PaneMeasurement.height` — proven exact at every driven state — but every
+remeasure TRIGGER was gated on a **change** (the width-gated layout hook;
+`updateNSView`'s string-adopt and font-switch; `textDidChange`), and
+`PanePublisher`'s heal re-schedules **only while the frame renders SHORT
+of its measurement**. So a frame left TALLER than its text had no
+correction path at all: no event short of a width change, a text change,
+or a font switch would ever shrink it. That is her sentence — *"the large
+open gap isn't going away when i click into other blocks"* — as
+mechanism. What I could **not** pin is the birth: the one moment that
+measured ~450 pt tall against the state the card now renders. It is
+recorded below as unidentified, with every candidate quantified and the
+kill for each; the fix is deliberately at the traced persistence
+mechanism, where it also makes **any** birth self-heal within one layout
+pass.
+
+#### The defect, observed live (not only from her screenshot)
+
+Her app was running (launched **10:12:43** today; PID 15640, a
+real-store Release build out of DerivedData — never touched). A passive
+window capture during this batch shows the A47 state still on screen:
+the Takes stack article card for block 28/31 (`52B204DF…`, her ledger's
+"52204DF" dropped the B), live ring on, showing the take's **last three
+paragraphs** and then a **~450 ± 25 pt** empty region inside the card,
+ending at the card's bottom border (void measured from the capture with
+the scale calibrated against the card's known 676 pt width). The ledger's
+"~60 visible words" are the tail of the SAME take — which resolves the
+805w-vs-60 discrepancy the brief demanded: the status bar counts the
+whole ~800-word take; the screenshot's words are the visible slice above
+the void. Her post even contains her own diagnostic of the class, in a
+block below the card: *"fix this damn whitespace bug that's happening
+(scrolling up made it disappear, then typing at the end made it
+reappear)"*. And decisively: **the void was on screen within ~60 seconds
+of a fresh launch** — the `@State` is fresh per launch, so the birth is
+launch-adjacent and RECURRING, not an ancient stale ghost.
+
+#### The four hypotheses, in the brief's order
+
+| # | Hypothesis | Verdict | Evidence |
+|---|---|---|---|
+| 1 | Stored trailing newlines (content, not a bug) | **REFUTED** | Read-only store: the take is 4,261 chars, **0 trailing newlines**, 50 internal (24 blank-line-separated paragraphs), ends `"…everywhere. "`. Unchanged since **July 24** in every rotating backup including today's 10:12 one — so no content explains the void and no store write was ever needed |
+| 2 | A stale pane height across take/text switching | **The SWITCHING half refuted; the STALE-HEIGHT half is the defect's shape** | The block has exactly ONE live take (no switch exists); article `ForEach` identity is `placementID` (stable); the mode host `switch`es boards away (fresh `@State` per tab return). But the frame IS a stale past measurement — held terminal by the trigger gap, not by switching |
+| 3 | TK2 estimated fragments inside the LIVE pane path | **REFUTED** | Live panes measure through the ONE brain (`PaneMeasurement`), and it is EXACT — delta 0.0 against a fragment-walk ground truth, zero estimated fragments after `ensureLayout` at pane scale — across mount, width reflows both directions, live typing, scroll away/back, and ring migration, in a standalone replica AND the real mounted `TakesBoardView` (VOID +0.0 at every step of both hunt drives, launch shape included). 1C's clean bill holds |
+| 4 | `PanePublisher`'s one-directional heal on UPDATE paths | **REFUTED as the site; its one-directional TRIGGER SET confirmed as the persistence mechanism** | `runTurn` re-measures fresh unconditionally (1A ground 4 re-verified); text-change, live↔read flips and width changes all re-publish correctly in the real composition. But the heal chases only a SHORT frame, and no trigger fires without a width/string/font CHANGE — an over-tall frame is terminal. This is what "isn't going away" is |
+
+#### The birth: unidentified, with the candidate table (her REAL text, read-only, measured at the pane's real 676 pt width, Study voice, comments off — the settings her store holds)
+
+True height H(study g8, 676) = **2,304 pt**; the observed stale frame ≈
+2,750–2,780. Candidates and their kills:
+
+| Candidate | Δ vs true | Kill |
+|---|---|---|
+| Inline-comments gap swap (8→30, all 50 paragraph ends) | **+1,100** | Too big for the observed void; and no pane path re-attributes storage without remeasuring (the font-gated branch remeasures; adopt remeasures; a comments toggle without a font change re-attributes NOTHING on a pane — stale-but-consistent, no void) |
+| Mono (launch-default typography) at 676 | **−310** | Wrong direction; the study-arrival font swap heals (driven in the launch-shape hunt: 1994 → 2502 exact) |
+| Mono + comments at 676 | +790 | Off by ~2×, and same no-path argument |
+| Window narrowing | n/a | The article pane is width-clamped ~676 for ANY window ≥ ~730 (verified in the harness: a 900-wide window still lays the pane at 676); her window is 1728 |
+| A transient **~470 pt-wide** layout of the pane | **+462 — the arithmetic match** | No static Takes composition produces it at her window size; rapid width flips, the launch shape (mono-first + late Study + narrow-then-wide window) and scroll-driven realization were all driven in the REAL board and all converge (VOID +0.0). A first-render/restore transient width remains the honest suspect; it did not reproduce under anything I could drive |
+
+Under the hallucination guard this stays a recorded unknown: **no fix
+was built on any unconfirmed birth**. The shipped fix is at the traced
+persistence mechanism and neutralizes every candidate equally.
+
+#### What shipped — the BOTH-SIDES convergence law
+
+`PaneTextView.layout()` gains a same-width branch: passes that did NOT
+change the width run `reconvergeIfDiverged()` — one warm measurement of
+already-laid-out pane-scale text; **publish only when the frame and the
+measurement disagree beyond the existing `convergenceSlack`**. Loop-free
+by construction: a corrective publish reframes the view to the
+measurement, the next pass measures equal and stays silent; a width pass
+keeps its existing unconditional remeasure, so no pass measures twice.
+Composer-capped compositions (the rail's tall cards) never fire it —
+their cap is a ScrollView AROUND the pane, so the pane's own bounds
+still equal its measurement inside. P-3: the ONE surface component
+extended, every composer inherits, no second measurement brain; all
+writes still leave through the ONE publish door (the F1 walk is
+untouched and green). Cost: one warm `ensureLayout`-over-laid-text +
+`usageBounds` read per realized pane per same-width layout pass —
+pane-scale (P1), the same cost class the width hook already pays per
+width change. Her on-screen card heals at its first layout pass under
+the fixed build (the end-of-phase refresh's moment, not this batch's).
+
+#### Red-on-old evidence — by behavioral revert
+
+| Revert applied | Pin | Observed RED |
+|---|---|---|
+| The same-width divergence branch removed from `layout()` (the pre-fix trigger set restored) | `aStaleTallPaneFrameReconvergesOnTheNextLayoutPass` | frame **546.0** held over **293.0** of text — a **253 pt** terminal void surviving `needsLayout` + settle passes, exactly the class (scaled to the pin's 12 paragraphs) |
+
+Restored from the pre-revert copy and verified **byte-identical by
+`shasum -c`**; the suite re-run green after restore. The pin's stale
+state is constructed by a paragraph-spacing swap behind the coordinator's
+back — **a labelled STAND-IN for the unidentified birth** (it reproduces
+the stale STATE — frame measured tall, text rendering short, no trigger
+left — not the birth event; the pin's doc comment says so in as many
+words). The widened soak invariant (below) is a characterization-class
+extension, not red-on-old: no soak action can produce the stale state,
+which is itself informative — the birth is outside the soak's action
+vocabulary.
+
+#### The harness gap this class exposed (recorded for the reviewer)
+
+`TakesBoardSoakTests`' height invariant was `bounds.height + 3 >=
+measured` over READ panes only — **one-directional and blind to the live
+pane**, so her defect (an over-tall frame on the ring-wearing card)
+passed every soak by construction. It now asserts
+`abs(bounds.height − measured) <= 3` for every article/card pane, live
+included; the authority-mirror check stays read-pane-only (the live pane
+is buffer-authoritative by design).
+
+#### Numbered judgment calls / PROVISIONALs
+
+1. **A class fix without the birth.** The persistence mechanism is fully
+   traced (trigger enumeration + the one-directional heal + her live
+   evidence); the birth is not. Fixing the persistence makes any birth
+   self-heal within a pass. The alternative — keep hunting the birth
+   before fixing anything — leaves her with a recurring launch-adjacent
+   defect while the hunt continues against a transient that did not
+   reproduce under two harness drives and a candidate table. Recorded
+   as the deliberate call.
+2. **The pin's stand-in construction** (judged above, labelled in the
+   pin itself).
+3. **Passive-only interrogation of her live instance** — screenshots and
+   read-only queries; AX tree injection declined.
+4. **The scratch hunt suite (`A47HuntTests`) was deleted after use**, as
+   its own header promised; its negative results (every driven sequence
+   converges, VOID +0.0 — including the launch shape: mono-first
+   typography, late Study arrival, narrow-then-wide window, rapid
+   unsettled width flips, scroll-driven realization) are recorded here,
+   and the real-composition invariant now lives permanently in the
+   widened soak instead.
+5. **No QUESTIONS entry**: nothing product-flavored surfaced — the take's
+   text is content exactly as stored (zero trailing newlines), and the
+   fix changes no visible behavior except removing the defect.
+6. **`805w take` vs a plain whitespace count of 817** on the same text:
+   `TextMetrics.wordCount`'s rules vs `split()` — not load-bearing (the
+   bar names the same take either way); noted so nobody chases it.
+
+#### Deviations
+
+- **None from the ordered method**: hypotheses pinned/refuted in order,
+  store read first and read-only, trace before fix, red-on-old by
+  behavioral revert with checksum restore.
+- **No lookup subagent used** — every question was answerable by
+  measurement or the repo, and was measured.
+- **P-6:** `TutorialWalkTests` green in the full Mac suite run.
+
+#### Ladder foci suggested for this batch (1F)
+
+Whether the same-width divergence check can thrash in any composition
+not considered (the termination argument: publish-on-divergence-only +
+deterministic measurement for fixed (text, attrs, width) — a reviewer
+should try to break it, e.g. under live window resize storms or a
+composition that constrains the pane's own bounds rather than wrapping
+it); whether measuring inside `layout()` on every same-width pass is
+acceptable cost at the margin-grid's realized-pane counts (the width
+hook precedent measures in `layout()` already); whether the stand-in pin
+is acceptable evidence for this fix class or the reviewer can drive the
+real birth (the launch-transient-width suspect: first-render width
+before the restored frame applies — undriven here); and whether the
+3 pt slack is the right both-sides tolerance.
