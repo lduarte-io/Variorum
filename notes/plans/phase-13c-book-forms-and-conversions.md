@@ -2157,6 +2157,57 @@ orchestrator's, after verification).
   untraced — the hallucination guard holds), K8 (the architect's own
   correction, already landed in `9eec274`).
 
+## POST-CLOSEOUT — A47 CONTINUED (A47b): the void SURVIVES the fixed build, and her birth story arrives (2026-07-27, ~15:25)
+
+**Her report, verbatim:** *"ok, so the issue is that it still appears. I
+think I actually know the cause of it - I think I made a number of
+newlines, then the newline removal on the edges of the post around the
+edges actually deleted the existing new lines, but then they appear…
+I think that the issue spawned in write when I wanted to be able to
+scroll down further on the page, but i couldn't, so then I made a bunch
+of new lines so I could have teh text in the middle of the page rather
+than the bottom. it must've been removed somehow but now there are no
+new lines there (tried to highlight what does exist so it's clear) but
+that issue is still there."* Screenshot on record: same take card
+(blk 28/31 · 52B204DF, Takes stack), taken **15:25 — twenty-one minutes
+AFTER the fixed build was installed at a zero-instance window**, so she
+was ON the 1F build; a full-width selection highlight covers the UPPER
+~250 pt of the void (selectable characters existed there at 15:25); the
+remaining ~600 pt below it un-selectable.
+
+**The store, read at ~15:30 (read-only), and it is not what the morning
+read showed:** the take is now **3,997 chars · 45 newlines · ZERO
+trailing whitespace · `updated_at 21:26:19Z` (15:26 local — one minute
+AFTER her screenshot)**. This morning's 1F read (and the sole
+commit_point, `kind=auto`, stamped **10:12:45** — launch+2s, the idle
+sweep insuring a dirty buffer) was **4,261 chars · 50 newlines ·
+trailing "…everywhere. "**. So **264 characters including 5 newlines
+LEFT this take today**, after the morning read, around the moment of
+her screenshot — and the pre-shrink text is preserved whole in the
+10:12 auto-commit (nothing is lost; the insurance held).
+
+**Two live questions, handed to Batch 1G (FABLE, spawned this turn):**
+
+1. **Why did the 1F heal not fire on the fixed build?** Top suspect,
+   stated for the record: `reconvergeIfDiverged` rides
+   `PaneTextView.layout()` — if AppKit never runs another layout pass
+   on an idle, already-laid-out card, the divergence check has no
+   trigger and a stale frame keeps forever. The 1F pin drove the pass
+   in its harness; R3-4's lesson (a feature inert in production while
+   every pin drives it by hand) may have recurred one layer up.
+2. **What removed 264 chars from this take, and was it authorized?**
+   If she deleted her highlighted selection herself, fine — but if an
+   automatic edge-trim removed stored content from INSIDE a take
+   (I4: newlines are content; the 2026-07-12 ruling made typed gaps
+   durable), that is the forbidden class, insurance notwithstanding.
+   Her own hypothesis — an edge-of-post newline removal — names the
+   open-tail whitespace-drop rule as a candidate; block 28 is NOT the
+   last block, so the geometry of where she typed matters.
+
+**Her motive is A22 verbatim** (typewriter room — she built it by hand
+out of newlines because the app refuses to scroll past the end); the
+13d plan's A22 row already binds the two: deliberate room must be REAL.
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
