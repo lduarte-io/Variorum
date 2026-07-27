@@ -2602,6 +2602,63 @@ scroll view under real trackpad gestures — one minute of live use
 closes it. If the void survives a real scroll-end or click, that is
 the `PaneMeasurement` falsifier and must be reported.
 
+## A47c — THE DRAW GAP, and the author invokes the friction doctrine (2026-07-27, ~17:15)
+
+**Her report, verbatim:** *"ok, so that bug is gone! yay! however,
+there's now a different weird thing happening when i click between that
+long block and another block. sometimes when i click on the other
+block, the long block will temporarily appear blank, before the text
+appearance is restored… on one occassion, only the final sentence
+stayed visible and the rest of it didn't reappear. there are weird
+thing happening where sometimes the whole block comes back and
+someitmes only a line or two reappears… in the worst case, the text
+stays visibly gone even after clicking in (except for two lines at the
+bottom that are not visibly gone). Does the severity of these issues
+with the long blocks and the recurrence of the issues seem to indicate
+that we need some kind of overhaul with what we're doing? and the
+underlying architecture of the block? it's fine if not, I just don't
+want to whack a mole these bugs into a bad spaghetti code situation."*
+Four screenshots on record (17:15–17:17): the long take card rendering
+with its text partially or wholly undrawn — sometimes healing on
+click-in, sometimes only the tail lines drawing.
+
+**The architect's reading, recorded before the trace so it can be
+tested:** this is the **laid-out-but-UNDRAWN state 1G identified as the
+deletion deception — the still-unfixed ROOT.** 1G fixed the FRAME
+lifecycle (the gap is gone, her confirmation on record) but its new
+heal occasions now exercise the draw path on every click, so the
+pre-existing draw gap fires visibly and often. The class is TEXTKIT2
+§2/§3's letter (content cropped until a relayout; viewport-order
+drawing against a wrong viewport notion) — a CONTENT-SIZED TK2 view
+holding arbitrarily long text inside a SwiftUI scroll has no honest
+viewport of its own.
+
+**THE P-5 INVOCATION — hers, and it is ruled correct:** three bugs in
+one layer in one day (the phantom estimate · the stale frame · the
+draw gap) is the friction doctrine's definition of an under-architected
+feature. **The response is a DESIGN MEMO, not another patch**
+(`notes/plans/phase-13d-memo-long-content-panes.md` — assigned to the
+A47c Fable session): the pane surface × LONG content × TK2, behavior
+whole, options enumerated with costs (a capped card with in-card
+scroll — the S4-31b fixed-strip precedent; an honest viewport wired to
+the outer scroll; a CoreText-drawn read tier for long takes — the 2C
+paginator precedent; thresholds and where they live), refusal/degrade
+wordings, and her rulings BEFORE the build. **The boundary is stated
+with the evidence:** the block MODEL is untouched by this — in every
+one of these defects the STORE was right (the one content loss went
+through her own keystroke on a deceptive surface and was one restore
+away) — the overhaul is of ONE rendering layer, not the architecture.
+
+**The A47c session's mandate:** trace the draw gap's mechanism
+precisely; if completing 1G's fix needs a small honest mechanism (e.g.
+a missing display invalidation after the frame lever), land THAT as
+stabilization with a pin — completing an accepted fix is not
+whack-a-mole; anything beyond it goes in the memo, unbuilt, for her
+rulings. Her A45 connection recorded: the model's upper levels are the
+long-take pressure valve, but the layer must handle long takes
+gracefully regardless — she must never be forced to restructure to
+dodge a renderer.
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
