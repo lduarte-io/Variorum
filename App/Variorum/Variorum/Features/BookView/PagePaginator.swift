@@ -58,10 +58,13 @@ enum PageComposer {
     /// Compose one post for the page.
     ///
     /// The BODY is the ratified projection and nothing else: `renderPost`'s
-    /// slots, blank takes and gaps skipped, joined by `joinRenderedTexts`
-    /// (the ONE join brain — the 2026-07-12 conditional). Stored spacing
-    /// therefore reaches the page exactly as it reaches export, which the
-    /// reading flow's paragraph-splitting deliberately does not do.
+    /// slots, blank takes and gaps skipped, joined with the 2026-07-12
+    /// conditional — and PINNED byte-equal to `Queries.renderedText` (the
+    /// one join brain's output) by `theComposedBodyIsTheRatifiedProjection`,
+    /// which is the guard that keeps this walk's join from ever drifting
+    /// from `joinRenderedTexts` (13c K6, K3). Stored spacing therefore
+    /// reaches the page exactly as it reaches export, which the reading
+    /// flow's paragraph-splitting deliberately does not do.
     ///
     /// A CALLOUT block (`block.presentation`) reads as an indented passage.
     /// That is a presentation transform over the same characters — no glyph
@@ -99,13 +102,20 @@ enum PageComposer {
         }
         let chromeLength = result.length
 
-        // The projection, verbatim (the blank-take skip is `renderedText`'s
-        // own rule — a chosen-but-empty take contributes nothing).
-        let texts = slots.compactMap(\.text).filter { !$0.isEmpty }
-        let body = Queries.joinRenderedTexts(texts)
-
-        // Block ranges inside the body, walked with the SAME join so a
-        // callout's range can never drift from the text it decorates.
+        // The projection AND the block ranges, from ONE walk (13c K6
+        // review, K3). The body used to be a separate `joinRenderedTexts`
+        // call BESIDE this walk's copy of the join conditional — two
+        // strings built by two code paths, with ranges computed on one and
+        // attributes applied to the other. Byte-equal at the time, but a
+        // future change to the one join brain would have drifted them
+        // silently: the mild shape is a callout indented on the wrong
+        // characters, the worst an out-of-bounds `addAttribute`
+        // (NSRangeException). With the walk's own output AS the body there
+        // is one string — and the body-equality pin
+        // (`theComposedBodyIsTheRatifiedProjection`: body == `renderedText`)
+        // becomes a real drift guard on this conditional instead of a
+        // tautology. The blank-take skip is `renderedText`'s own rule — a
+        // chosen-but-empty take contributes nothing, not even a join.
         var ranges: [(blockID: String, range: NSRange)] = []
         var composed = ""
         for slot in slots {
@@ -117,6 +127,7 @@ enum PageComposer {
             composed += text
             ranges.append((slot.blockID, NSRange(location: start, length: (text as NSString).length)))
         }
+        let body = composed
 
         let plainStyle = NSMutableParagraphStyle()
         plainStyle.lineSpacing = typography.lineSpacing
