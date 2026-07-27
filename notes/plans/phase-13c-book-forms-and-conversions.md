@@ -4759,8 +4759,8 @@ row records a defect the pins found in MY OWN first build.
 | Pin | Class | Revert applied | Observed RED |
 |---|---|---|---|
 | `thePaginatedReadRealizesTheSpreadNotTheBook` | **red-on-old** | the two-leaf `ForEach(pages.leaves)` → `ForEach(model.entries)` (the naive "draw the book" shape) | **60 `PageFrameNSView`s** on a 60-post book (bound is 2), and the materialization counter fails with it |
-| `readCarriesNoTextViewAtAll` | **red-on-old** | the leaf's `PageFrameView` → `ReadPostView` (the "reuse the read tier" alternative the brief's Q3 offered) | **6 `ReadPostTextView`s** + an `NSTextView` count of 6 where the assertion is 0 — the A43 ruling broken by composition |
-| `openingABookSlicesTheSpreadNotThePost` | **red-on-old** | `realize` calling `paginator.pageCount()` (my own first build) | the first post sliced to **40 pages** on open where the bound is 3 — the 1.67 s shape, caught by a pin rather than by her |
+| `readCarriesNoTextViewAtAll` | **red-on-old** | the leaf's `PageFrameView` → `ReadPostView` (the "reuse the read tier" alternative the brief's Q3 offered) | **2 `ReadPostTextView`s** and an `NSTextView` count of **2** where the assertion is 0 — the A43 ruling broken by composition (and `PageFrameNSView` falls to 0, so the realization pin fails with it) |
+| `openingABookSlicesTheSpreadNotThePost` | **red-on-old** | `realize` calling `paginator.pageCount()` (my own first build) | the first post sliced to **11 pages** on open where the bound is 3, and all three of the test's claims fail — the 1.67 s shape, caught by a pin rather than by her |
 | `aCorrectionMovesTheLabelAndNeverThePage` | **characterization** | — | new behavior; it states the address rule so a future change to page addressing has to break a test to break it |
 | `theEstimatorCountsParagraphsNotOnlyCharacters` · `aBlockLongerThanAPageContributesSeveralPages` · `onlyRealPostsCalibrateAndAMeasurementIsFinal` · `theDomainWalksAcrossPostsAndDiesAtTheCovers` | **characterization** | — | the estimator and domain rules, pinned as arithmetic |
 | `thePagesCoverThePostExactlyOnceInOrder` | **characterization** | — | the exact tier's correctness statement: page k starts where page k−1 ended, no gap, no overlap, the last page ends at the post's end |
@@ -4768,6 +4768,15 @@ row records a defect the pins found in MY OWN first build.
 | `theBarKeepsItsScrubberAndSpeaksApproximately` · `theLeafTurnsTwoPagesAndTheCoversAreDead` | **characterization** | — | the bar's controls and the domain walk through the real surface |
 | `paginationCostIsParagraphShapedAndPrintsItsNumbers` | **measurement** | — | asserts the SHAPE (flat vs climbing per-page cost), never a timing threshold; prints both tables on every run (the 1C precedent) |
 | core: `extentsResolveTheSameTakeARenderedPageWould` · `aTombstonedBlockReadsAsZeroRatherThanVanishing` · `severalPostsComeBackGroupedAndOrdered` | **characterization** | — | the extent index agrees with `renderPost`/`renderedText` about what a post contains |
+
+**All three reverts were EXECUTED, not reasoned about** (each file
+checksummed before, reverted, run, restored, `shasum -c` verified), and the
+execution corrected this table: two of the three RED numbers I first wrote
+here were estimates rather than measurements — `readCarriesNoTextViewAtAll`
+reads **2**, not 6, and `openingABookSlicesTheSpreadNotThePost` reads **11**,
+not 40. Recorded rather than quietly amended, because a red-on-old table
+whose numbers were guessed is exactly the hollow-pin class the hallucination
+guard exists to catch.
 
 **Two pins caught real defects in this batch's own code before any suite ran
 them in anger** — the eager-pagination row above, and the estimator's
