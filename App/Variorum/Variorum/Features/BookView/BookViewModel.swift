@@ -29,6 +29,23 @@ final class BookViewModel {
     private(set) var entries: [Queries.ReadingEntry] = []
     private(set) var readingName: String?
     private(set) var lastError: String?
+
+    /// A31 — the way she is LOOKING at this book's order right now. nil =
+    /// the book's own stored order (the default, and what every other
+    /// reader sees).
+    ///
+    /// **View-local by design, and that IS the answer to her lens
+    /// analogy.** A lens is never rendering truth (the 11a ratification):
+    /// browsing a book by date must not change what export writes, what the
+    /// Fragments projection pushes, or what the book looks like on another
+    /// device — only `setReadingSort` does that, through the one deliberate
+    /// save door. Not persisted, like every other view-local state (fan
+    /// expansion, canvas picks, the Compare toggles, #43(b)).
+    ///
+    /// Changing it restarts the observation (`BookView`'s `.task(id:)`)
+    /// rather than re-sorting delivered rows: the window is applied by the
+    /// query, so a post-fetch sort would sort the first N of the old order.
+    var viewOrder: Queries.ReadingOrder?
     /// True when the window really is hiding later entries (round 2 NIT:
     /// observing window+1 and capping in `adopt` means a reading of
     /// EXACTLY the window size never false-positives the marker).
@@ -49,7 +66,8 @@ final class BookViewModel {
                 try Queries.reading(db, id: readingID)?.name
             }
             for try await value in session.database.observeReading(
-                readingID, limit: Self.entryWindow + 1  // +1: the truncation probe
+                readingID, limit: Self.entryWindow + 1,  // +1: the truncation probe
+                order: viewOrder
             ) {
                 adopt(value)
             }

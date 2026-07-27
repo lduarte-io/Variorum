@@ -140,8 +140,13 @@ final class ReadingsViewModel {
             return "That post is already in this reading."
         case .readingAtCapacity:
             return "This reading is at its post limit."
-        case .wrongReadingKind:
-            return "Only curated readings hold a hand-picked post list."
+        case .wrongReadingKind(_, let expected):
+            // 13c 2D: the message used to state the CURATED direction only,
+            // which read as nonsense on the conversion door's refusal (a
+            // curated book asked to convert throws `expected: .smart`).
+            return expected == .smart
+                ? "That's already a hand-shaped book — only smart books convert."
+                : "Only hand-shaped (curated) books hold a post list you pick by hand."
         case .postNotInReading:
             return "That post isn't in this reading."
         default:

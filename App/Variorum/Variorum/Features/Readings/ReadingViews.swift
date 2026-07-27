@@ -2,147 +2,22 @@
 //  ReadingViews.swift
 //  Variorum
 //
-//  The readings faces (Phase 10 Step 6): the sidebar section (CRUD +
-//  sort pickers), curated membership management, and the smart-spec
-//  editor surfacing the v1 vocabulary plainly. Functional, unstyled.
+//  The readings faces (Phase 10 Step 6): curated membership management and
+//  the smart-spec editor surfacing the v1 vocabulary plainly. Functional,
+//  unstyled; both sheets are presented by the SHELF since Phase 13's IA
+//  rework (Shelf · Library · Pool · Blocks).
+//
+//  13c 2D: the file's `ReadingsSection` — the Phase 10 SIDEBAR section this
+//  file was named for — was DELETED here. It had been unreferenced since
+//  that IA rework, and its "Sort" submenu was the app's only door onto
+//  `setReadingSort`, so the shipped app has had no reachable way to change
+//  a book's order at all. That list now lives in `BookOrderChoices` and its
+//  door in the book's own navigator (A31).
 //
 
 import SwiftUI
 import UniformTypeIdentifiers
 import VariorumCore
-
-/// The sidebar's Readings section; selecting a reading opens the book view.
-struct ReadingsSection: View {
-    let session: AppSession
-    let model: ReadingsViewModel
-    @State private var createPresented = false
-    @State private var renameTarget: Reading?
-    @State private var nameField = ""
-    @State private var manageTarget: Reading?
-    @State private var smartTarget: Reading?
-
-    var body: some View {
-        Section("Readings") {
-            ForEach(model.readings, id: \.id) { reading in
-                HStack(spacing: 4) {
-                    Image(systemName: reading.kind == .smart ? "sparkles" : "book")
-                        .foregroundStyle(.secondary)
-                    Text(reading.name)
-                }
-                .tag(SidebarSelection.reading(reading.id))
-                .contextMenu { readingMenu(reading) }
-            }
-            Button("New Reading…") {
-                nameField = ""
-                createPresented = true
-            }
-            .buttonStyle(.borderless)
-            .font(.caption)
-        }
-        .alert("New Reading", isPresented: $createPresented) {
-            TextField("Name", text: $nameField)
-            Button("Create Curated") {
-                let name = nameField
-                Task { await model.create(name: name.isEmpty ? "Untitled" : name, kind: .curated) }
-            }
-            Button("Create Smart") {
-                let name = nameField
-                Task { await model.create(name: name.isEmpty ? "Untitled" : name, kind: .smart) }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Curated readings hold a hand-picked, ordered post list; smart readings match a filter.")
-        }
-        .alert(
-            "Rename Reading",
-            isPresented: Binding(
-                get: { renameTarget != nil },
-                set: { if !$0 { renameTarget = nil } }),
-            presenting: renameTarget
-        ) { reading in
-            TextField("Name", text: $nameField)
-            Button("Rename") {
-                let name = nameField
-                Task { await model.rename(reading.id, to: name) }
-            }
-            Button("Cancel", role: .cancel) {}
-        }
-        .sheet(item: $manageTarget) { reading in
-            ManageReadingPostsSheet(session: session, model: model, reading: reading)
-        }
-        .sheet(item: $smartTarget) { reading in
-            SmartSpecSheet(session: session, model: model, reading: reading)
-        }
-    }
-
-    @ViewBuilder
-    private func readingMenu(_ reading: Reading) -> some View {
-        Button("Rename…") {
-            nameField = reading.name
-            renameTarget = reading
-        }
-        if reading.kind == .curated {
-            Button("Manage Posts…") { manageTarget = reading }
-        } else {
-            Button("Edit Filter…") { smartTarget = reading }
-        }
-        Menu("Sort") {
-            ForEach(sortChoices, id: \.label) { choice in
-                Button {
-                    Task {
-                        await model.setSort(
-                            reading.id, field: choice.field, direction: choice.direction)
-                    }
-                } label: {
-                    if reading.sortField == choice.field && reading.sortDir == choice.direction {
-                        Label(choice.label, systemImage: "checkmark")
-                    } else {
-                        Text(choice.label)
-                    }
-                }
-            }
-        }
-        Divider()
-        // Export doors (Phase 11b, B1): a reading exports as ONE document —
-        // the shape lives in Queries.exportReading, never here.
-        Button("Export Markdown…") { exportReading(reading, asPDF: false) }
-        Button("Export PDF…") { exportReading(reading, asPDF: true) }
-        Divider()
-        Button("Delete Reading", role: .destructive) {
-            Task { await model.delete(reading.id) }
-        }
-    }
-
-    private func exportReading(_ reading: Reading, asPDF: Bool) {
-        let name = Queries.sanitizedFilename(reading.name)
-        let base = name.isEmpty ? "Untitled" : name
-        guard let url = ExportPanels.saveFile(
-            defaultName: "\(base).\(asPDF ? "pdf" : "md")",
-            type: asPDF ? .pdf : .markdownFile) else { return }
-        Task {
-            let exporter = ExportModel(session: session)
-            if asPDF {
-                if let data = await exporter.pdfData(forReading: reading.id) {
-                    exporter.writePDF(data, to: url)
-                }
-            } else if let markdown = await exporter.markdown(forReading: reading.id) {
-                exporter.writeMarkdown(markdown, to: url)
-            }
-        }
-    }
-
-    private var sortChoices: [(label: String, field: SortField, direction: SortDirection)] {
-        [
-            ("Manual order", .manual, .asc),
-            ("Entry date ↑", .entryDate, .asc),
-            ("Entry date ↓", .entryDate, .desc),
-            ("Created ↑", .createdAt, .asc),
-            ("Created ↓", .createdAt, .desc),
-            ("Last touched ↓", .lastTouched, .desc),
-            ("Major revision ↓", .lastMajorRevision, .desc),
-        ]
-    }
-}
 
 extension Reading: @retroactive Identifiable {}
 

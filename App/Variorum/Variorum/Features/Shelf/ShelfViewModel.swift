@@ -164,6 +164,37 @@ final class ShelfViewModel {
         await run { try $0.setDailyJournalBook(readingID) }
     }
 
+    /// SMART → CURATED (13c 2D — C2/N38). Reports what happened rather than
+    /// going quiet: the conversion changes what a book IS, so a silent
+    /// success on a list of book names would be the least legible outcome
+    /// on the shelf.
+    func convertToCurated(
+        _ readingID: String, keepCollecting: Bool, collectingName: String?
+    ) async {
+        do {
+            let result = try await session.runner.run { ops in
+                try ops.convertSmartReadingToCurated(
+                    readingID, keepCollecting: keepCollecting,
+                    collectingName: collectingName)
+            }
+            lastError = nil
+            let posts = result.membershipIDs.count
+            var report = "“\(result.reading.name)” is a hand-shaped book now — "
+                + "\(posts) post\(posts == 1 ? "" : "s") kept, in the order you had them."
+            if let fresh = result.collectingReading {
+                report += " “\(fresh.name)” keeps collecting the filter."
+            }
+            lastReport = report
+        } catch let error as OperationError {
+            lastReport = nil
+            lastError = ReadingsViewModel.message(error)
+        } catch {
+            lastReport = nil
+            lastError = String(describing: error)
+        }
+        await refreshAggregates()
+    }
+
     /// Drag a post ONTO a book row (sitting 1: "drag posts onto a book").
     /// Tolerant of the already-in case — a drop is a gesture, not a form.
     /// R98 (batch 10): a SMART book accepts the drop BY TAGGING —

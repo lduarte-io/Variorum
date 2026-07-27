@@ -237,6 +237,41 @@ final class BookStructureModel {
         await run { try $0.setReadingMaxPosts(self.readingID, maxPosts: cap) }
     }
 
+    /// SAVE the order she is browsing in as the book's own (A31's second
+    /// half — the lens grammar's "adopt": look freely, keep it when you
+    /// like it). `setReadingSort` has existed since Phase 2 and lost its
+    /// only door at Phase 13's IA rework; this is where it lives now.
+    func saveOrder(_ order: Queries.ReadingOrder) async {
+        await run {
+            try $0.setReadingSort(
+                self.readingID, field: order.field, direction: order.direction)
+        }
+    }
+
+    // MARK: - Smart → curated (13c 2D — C2/N38)
+
+    /// Convert, then finish the act she asked for. Returns true on success
+    /// so the caller can run the follow-up (P-2's choreography: "+ new
+    /// chapter" on a smart book converts AND opens the chapter prompt).
+    func convertToCurated(keepCollecting: Bool, collectingName: String?) async -> Bool {
+        do {
+            let readingID = readingID
+            _ = try await session.runner.run { ops in
+                try ops.convertSmartReadingToCurated(
+                    readingID, keepCollecting: keepCollecting,
+                    collectingName: collectingName)
+            }
+            lastError = nil
+            return true
+        } catch let error as OperationError {
+            lastError = ReadingsViewModel.message(error)
+            return false
+        } catch {
+            lastError = String(describing: error)
+            return false
+        }
+    }
+
     // MARK: - The journal-book entry door (R50, the B3 design detail)
 
     /// "New Entry" on a journal-profile book. THE DAILY BOOK routes

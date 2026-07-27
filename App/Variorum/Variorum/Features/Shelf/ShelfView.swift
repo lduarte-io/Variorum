@@ -34,6 +34,11 @@ struct ShelfView: View {
     @State private var manageTarget: Reading?
     @State private var smartTarget: Reading?
     @State private var extentTarget: Reading?
+    /// 13c 2D: the smart→curated offer (C2/N38), and the derived count it
+    /// promises will stay (loaded at the press — the shelf's own postCount
+    /// is membership rows, which a smart book has none of).
+    @State private var convertTarget: Reading?
+    @State private var convertCount = 0
     /// Batch 9 (R102): the list region hugs its content, so the
     /// quick-entry bar rides RIGHT BELOW the rows — the round-2 mockup's
     /// geometry at every window size ("the start new post typing isn't
@@ -127,6 +132,19 @@ struct ShelfView: View {
         }
         .sheet(item: $extentTarget) { reading in
             BookExtentSheet(model: model, reading: reading)
+        }
+        .sheet(item: $convertTarget) { reading in
+            SmartConversionOfferSheet(
+                reading: reading,
+                memberCount: convertCount,
+                followUp: .none
+            ) { keepCollecting, collectingName in
+                Task {
+                    await model.convertToCurated(
+                        reading.id, keepCollecting: keepCollecting,
+                        collectingName: collectingName)
+                }
+            }
         }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError ?? readings.lastError {
@@ -259,6 +277,19 @@ struct ShelfView: View {
             Button("Manage Posts…") { manageTarget = reading }
         } else {
             Button("Edit Filter…") { smartTarget = reading }
+            // 13c 2D (C2/N38): the DELIBERATE conversion door, beside the
+            // navigator's "+ new chapter" offer. Hidden on a finished book —
+            // converting is a structural act on a book declared done, and
+            // the op refuses it (P-2: a door that can't act isn't rendered).
+            if !reading.locked {
+                Button("Convert to a Hand-Shaped Book…") {
+                    Task {
+                        convertCount = await SmartConversionCount.collected(
+                            session, readingID: reading.id)
+                        convertTarget = reading
+                    }
+                }
+            }
         }
         Button("Length & Extent…") { extentTarget = reading }
         if reading.kind == .curated, reading.profile == "journal" {

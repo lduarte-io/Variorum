@@ -57,6 +57,11 @@ struct BookView: View {
     @State private var chapterNameField = ""
     @State private var renameChapterTarget: ReadingSection?
     @State private var settingsShown = false
+    /// 13c 2D: the smart→curated offer, what it finishes afterwards, and the
+    /// derived count it promises will stay.
+    @State private var conversionOffer = false
+    @State private var conversionFollowUp: SmartConversionFollowUp = .none
+    @State private var conversionCount = 0
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -103,7 +108,11 @@ struct BookView: View {
             }
         }
         .background(tokens.surface)
-        .task { await model.start() }
+        // 13c 2D (A31): the assembly's ORDER is a task input, so changing
+        // the way she is looking restarts the observation rather than
+        // re-sorting delivered rows (the window is applied by the query —
+        // a post-fetch sort would sort the first N of the OLD order).
+        .task(id: model.viewOrder) { await model.start() }
         .task { await structure.start() }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? structure.lastError {
@@ -139,6 +148,34 @@ struct BookView: View {
         .sheet(isPresented: $settingsShown) {
             BookSettingsSheet(structure: structure)
         }
+        // 13c 2D (C2/N38): the conversion offer — the memo's §3 "the
+        // refusal becomes an offer". One sheet, whichever door opened it.
+        .sheet(isPresented: $conversionOffer) {
+            if let reading = structure.reading {
+                SmartConversionOfferSheet(
+                    reading: reading,
+                    // The DERIVED count, not `entries.count` — the book
+                    // view's assembly is windowed (entryWindow), so a book
+                    // collecting more than the window would have promised
+                    // fewer posts than the conversion actually keeps.
+                    memberCount: conversionCount,
+                    followUp: conversionFollowUp
+                ) { keepCollecting, collectingName in
+                    let followUp = conversionFollowUp
+                    Task {
+                        let converted = await structure.convertToCurated(
+                            keepCollecting: keepCollecting,
+                            collectingName: collectingName)
+                        // P-2: the door performs the act she asked for —
+                        // conversion was the step on the way, not the point.
+                        if converted, followUp == .createChapter {
+                            chapterNameField = ""
+                            newChapterPresented = true
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - The navigator (R43: chapters · outline · settings)
@@ -163,6 +200,29 @@ struct BookView: View {
                         Text(tokens.chromeLabel("Read")).tag(BookStructureModel.ViewMode.read)
                     }
                     .pickerStyle(.segmented)
+                    // 13c 2D — found by this batch's visual loop, and
+                    // PRE-EXISTING (verified by capturing with this batch's
+                    // own control removed: identical). MEASURED with
+                    // temporary borders on the padded content box vs the
+                    // 190 pt frame box: the content's ideal width was
+                    // ~209 pt. `.frame(width:)` does not clip — it CENTERS
+                    // an over-wide child — so the whole navigator drew
+                    // ~9.5 pt left of its column and EVERY row in it (the
+                    // post list, the chapter doors, the smart-book notice)
+                    // lost its first character off the window edge. The
+                    // floor was the segmented picker's own minimum, which
+                    // grew when 2A renamed the modes `Outline · Book · Read`;
+                    // `.controlSize(.small)` brings the row under the column
+                    // without touching the column's intended width, and the
+                    // content box then sits inside the frame box exactly.
+                    // The b6dae25 chrome-sizing class, which P-8 carries as
+                    // standing law: chrome must never force its container
+                    // wider. (`.frame(maxWidth: .infinity)` was tried first
+                    // and did nothing — an HStack still reports its child's
+                    // ideal width upward.) If the smaller picker ever reads
+                    // wrong, the LOOK is the Design & UI review row's; a
+                    // column that clips its own text is not a taste question.
+                    .controlSize(.small)
                     Button {
                         settingsShown = true
                     } label: {
@@ -188,6 +248,7 @@ struct BookView: View {
                     .help("Read the book as one continuous scroll, or as real pages "
                         + "with the text flowing across them")
                 }
+                orderControl
                 if let reading = structure.reading, reading.locked {
                     Text(tokens.chromeLabel("✓ finished"))
                         .font(tokens.small)
@@ -386,16 +447,42 @@ struct BookView: View {
                     }
                 }
                 if structure.reading?.kind == .smart {
-                    // Batch 6 legibility: a smart book's missing add/chapter
-                    // doors are DESIGNED (#25a — membership is derived) —
-                    // but absent-and-silent read as broken. Say so.
-                    // (ChromeNotice: navigator = non-scrolling chrome — the
-                    // window-min class; batch 12 sweep.)
+                    // 13c 2D (C2/N38, the memo's §3 + P-2): the chapter door
+                    // is RENDERED on a smart book and it ACTS — it opens the
+                    // conversion offer and, on confirm, creates the chapter.
+                    // Before this, chapters were a dead end here: the notice
+                    // below explained the absence honestly, which is better
+                    // than silence but is still lecture-and-stop.
+                    //
+                    // NOTE what deliberately did NOT become an offer: adding
+                    // a post to a smart book already has a BETTER answer
+                    // than converting — R98's `collectPostIntoSmartReading`
+                    // applies the filter's tags and reports. Chapters are
+                    // the one genuinely dead end, because `section_id` lives
+                    // on a membership row and derived membership has none.
+                    if structure.reading?.locked != true {
+                        Button(tokens.chromeLabel("+ new chapter")) {
+                            conversionFollowUp = .createChapter
+                            Task {
+                                conversionCount = await SmartConversionCount.collected(
+                                    session, readingID: readingID)
+                                conversionOffer = true
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                        .help("Chapters need a hand-shaped book — this offers to "
+                            + "convert, keeping every post it has collected.")
+                    }
+                    // Batch 6 legibility: a smart book's derived membership
+                    // is DESIGNED (#25a) — but absent-and-silent read as
+                    // broken. Say so. (ChromeNotice: navigator =
+                    // non-scrolling chrome — the window-min class.)
                     ChromeNotice(
                         tokens: tokens,
                         text: "smart book — it collects posts by its tags. Tag a post "
-                            + "anywhere and it appears here; chapters and direct adds "
-                            + "are for hand-picked books.",
+                            + "anywhere and it appears here.",
                         lines: 6)
                 }
             }
@@ -403,6 +490,75 @@ struct BookView: View {
             .frame(width: 190)
             .background(tokens.room)
         }
+    }
+
+    // MARK: - The order control (13c 2D — A31)
+
+    /// *"see a book either by its saved custom order or by an attribute
+    /// like time to freely change the order of it - should be more like
+    /// lenses where the order can be saved."*
+    ///
+    /// The lens grammar, exactly: picking an attribute is a way of LOOKING
+    /// (view-local, writes nothing, every other reader still sees the
+    /// book's own order); "Save as this book's order" is the adopt door
+    /// (`setReadingSort`). A FINISHED book browses freely and cannot save —
+    /// its order is part of what "done" froze, and the op refuses anyway.
+    private var orderControl: some View {
+        let stored = BookOrderChoices.storedLabel(for: structure.reading)
+        let current = model.viewOrder.map(BookOrderChoices.label(for:))
+        // Deliberately NOT `VoicedMenu`: that control carries `.fixedSize()`,
+        // and this label is long enough that forcing its ideal width pushed
+        // the whole 190 pt navigator wider than its frame — every row in the
+        // column lost a character off its left edge (caught in the batch's
+        // visual loop, P-7; the b6dae25 chrome-sizing class). The label
+        // TRUNCATES instead; the menu still says everything in full.
+        return Menu {
+            Button {
+                model.viewOrder = nil
+            } label: {
+                if model.viewOrder == nil {
+                    Label("This book's order (\(stored))", systemImage: "checkmark")
+                } else {
+                    Text("This book's order (\(stored))")
+                }
+            }
+            Divider()
+            ForEach(BookOrderChoices.all) { choice in
+                Button {
+                    model.viewOrder = choice.order
+                } label: {
+                    if model.viewOrder == choice.order {
+                        Label(choice.label, systemImage: "checkmark")
+                    } else {
+                        Text(choice.label)
+                    }
+                }
+            }
+            if let order = model.viewOrder, structure.reading?.locked != true {
+                Divider()
+                Button("Save as This Book's Order") {
+                    Task {
+                        await structure.saveOrder(order)
+                        // Saved IS the book's order now — drop the override
+                        // so the menu stops claiming a separate way of
+                        // looking (and every other reader agrees).
+                        model.viewOrder = nil
+                    }
+                }
+            }
+        } label: {
+            Text(tokens.chromeLabel("order · \(current ?? stored)") + " ▾")
+                .font(tokens.small)
+                .foregroundStyle(model.viewOrder == nil ? tokens.muted : tokens.accent)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .help("Look at this book in a different order — nothing is written until "
+            + "you save it as the book's own order.")
     }
 
     /// The book scroll's pending landing (chapter/outline clicks).
