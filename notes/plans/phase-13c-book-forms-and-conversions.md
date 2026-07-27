@@ -1896,6 +1896,55 @@ will not be one:**
    flake first. `passesRun > baseline` is the assertion that carries the
    finding; the other two are the "and it did the work" half.
 
+### Stage 1 — INDEPENDENT FABLE VERIFICATION (2026-07-27, author-requested)
+
+The author returned after the Opus overnight run and asked a fresh
+**Fable** `/architect-phase` session to verify the Stage 1 work — the
+fixes, the records, and the roadmap — before deciding what runs next.
+This session now holds the 13c orchestrator role; her cast intent for
+Stage 2 is an open question bundled below, not assumed. What was
+verified, by the skill's verify-don't-trust rule:
+
+- **Counts, by my own runs:** core `swift test` **858/98 green** (P1
+  benchmarks flat); Mac `xcodebuild test` **733/129 green**. Mobile
+  **14/4 taken from the record** (run twice there on the simulator; not
+  re-run here — stated rather than implied).
+- **The R3-1 fix is genuinely at the level the record claims:**
+  `BlockDeletionPrecondition` is enforced inside `performDeleteBlock`'s
+  own `database.write` (`Operations+Deletion.swift`), fresh SQL counts
+  mirroring `liveVariantCount`/`commentCount`, and the redo carries the
+  SAME precondition. Spot-checked live: `register(redo:)` required;
+  `shelveInDailyJournalBook` + `.wrongKind`; `LongBlockLayout` + both
+  new suites; `takeFamilyPlusCompare` + ⌥⌘C in the registry.
+- **The install is functionally Stage 1**, not just recently stamped:
+  the `/Applications` binary contains the kill-switch string and
+  `blockCarriesUnshownText`; mtime 07:31, one minute before the final
+  commit. Zero instances at check. The A1 backup exists, WAL-safe, in
+  the sandbox container (`…/Variorum/Backups/variorum-backup-2026-07-25-133011.sqlite`,
+  2.99 MB, 07:30 local — the handoff's bare `Backups/` path is that
+  container directory, not the repo).
+- **F-V1 — a dateline offset, recorded so nobody reconciles it again:**
+  the batch/ladder records are datelined 2026-07-26, but every Stage 1
+  commit sits on **2026-07-25 local** (1D at 03:49 → SHIPPED at 07:32).
+  The *sequence* is internally consistent — R2-5's "install is still
+  13b's build" was true at 06:05, and the refresh at 07:31 followed
+  round 3's fixes exactly as the recorded hold required. Only the
+  written datelines are off by one day.
+- **F-V2 — one handoff-checklist imprecision:** item 3 says "opening ⌘J
+  on that date shelves them immediately" for the two orphaned past days,
+  but ⌘J opens *today's* entry. The doors that verifiably reach a past
+  day are the phone capture list's day tap (`open(on:)` — the addendum's
+  door) and any Fragments landing that writes the day. Not a code
+  defect; the fix and repair rules themselves check out.
+
+**Verdict: the Stage 1 records are faithful.** Every claim I spot-checked
+against code, commits, or the machine held, including the ones that
+would have been easiest to fudge (the install's contents, the
+transactional level of the carve fix, the red-on-old convention's
+honesty about which pins are characterization). The handoff matches the
+repo record. My assessments of the open judgment calls and the roadmap
+went to the author directly (they are hers, not records).
+
 ## Architect adjudications
 
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
