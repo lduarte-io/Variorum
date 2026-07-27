@@ -704,7 +704,7 @@ placement + parity-by-forwards; the overlay/sink delivery law).
 | C1 | The uniform-page book view (from the 4F brief) + her 7/23–24 direction | **the READ half SHIPPED (Batch 2C)** — Read is the pair she asked for: SCROLL (the flow) and PAGES, a two-page spread of identical fixed leaves with the text flowing across them. The brief's two-tier design built as designed (estimated globally from `Queries.blockExtents` — lengths, in SQL, no prose; measured locally by CoreText), with ONE architectural rule added that the brief did not have: **a page is addressed by (post, page-in-post), never by a page number**, so a measurement replacing an estimate moves the LABEL and never the page under her. Slicing is LAZY on a measurement, not on caution — CoreText typesets per paragraph, so ordinary prose paginates whole in 3.5 ms at 26k words while the same text as ONE block costs 1.67 s (the A3/A41 shape). Read is NOT editable (A43), which is why there is no NSTextView on the surface at all — and therefore no TK2 estimated geometry to inherit (the 1C cross-check). The brief's five opens are PROVISIONAL — QUESTIONS #45; (b) deliberately goes against the brief's own lean and says why. *(The BOOK-spread half of her 7/23–24 direction shipped at 2B; Outline's at 2A.)* |
 | C2 | N38 smart→smart+curated conversion (from the 4F memo; her five rulings first) | **SHIPPED (Batch 2D) as the memo's SHAPE A — materialize-and-convert — PROVISIONAL in full.** Her five rulings were owed and she was asleep, so each is built at its most spec-defensible reading with the alternative recorded: QUESTIONS #46. The book's current results become real `reading_post` rows in the order she was looking at, `kind` flips and `sort_field` freezes to manual so nothing moves; the filter and grouping tag ride the row (the tag-derived sections SURVIVE and hand over to real chapters the moment she makes one — no new rule); the fresh collector is offered, carrying the filter/order/sectioning but never the extents or the finish state. **ZERO schema, confirmed in code**, which is why A was the right shape to build in her absence — the other two are not one-line reversals. Two doors: the shelf's deliberate menu item and the navigator's "+ new chapter", which now RENDERS on a smart book and acts (convert, then the chapter prompt — P-2's choreography). **The memo expected three refusals to become offers; only ONE was a real dead end** — adding a post already had a better answer (R98's tag-and-report) and order is now controllable everywhere (A31), so the drop gesture is untouched. Undoable and redoable on exact rows |
 | C3 | N41 inline-comments airiness (R116-class conversation first) | committed, not started |
-| C4 | Compare "show related blocks only" setting (resolves the 4C kin-less-peer PROVISIONAL) | committed, not started |
+| C4 | Compare "show related blocks only" setting (resolves the 4C kin-less-peer PROVISIONAL) | **SHIPPED 2E** (commit `e8f13ee` — a third session-local toggle of the follow-order/lineage-colour class, no schema; `CompareComposition.relatedOnly` is a PURE pre-pass over `segments`' own inputs, so `segments` is byte-unchanged and every 4C honesty pin stands. "Related" = the SAME block-level transitive lineage the rails and the alignment already use (`Queries.blockKinship`) — ONE kinship brain, because a narrower rule would hide railed blocks and a wider one would show unrailed ones. Every survivor is kin ⇒ the composition holds nothing but aligned rows. **The 4C kin-less-peer PROVISIONAL is MOOTED, not re-ruled** — with the filter on the unrelated peer contributes nothing, and the filter-OFF placement is byte-unchanged. N29 COMPOSES: the all-unrelated board says "there is no relationship here" over the empty columns with the way out named; the mixed case gets a per-column note that also catches the version-linked-but-lineage-less peer. The live ring follows 4C's NIT-1 precedent — hiding it blurs, flushes that post's own coordinator, and SPEAKS; never a refusal of the toggle. Default OFF. QUESTIONS #47) |
 
 ### Author intake, 2026-07-25 (the kickoff sitting's list — every item dispositioned)
 
@@ -5270,3 +5270,248 @@ The sheet is system-chromed, matching its siblings (`BookSettingsSheet`,
 5. **The offer's two doors and the R98 non-door.** Confirm that leaving the
    drag-onto-a-smart-book gesture alone is right, and that no third surface
    still dead-ends on a smart book.
+
+### Batch 2E — Compare: "show related blocks only" (C4) — the 4C kin-less-peer PROVISIONAL MOOTED, not re-ruled; core untouched at 881/100, Mac 772/135 → **780/135**
+
+**Her request, verbatim (2026-07-22):** *"we should have a setting to only
+show related blocks - that would make the pane feel more usable."*
+
+**What shipped (one commit + this record's):**
+
+- **`e8f13ee`** — `CompareComposition.relatedOnly` (the pure filter) ·
+  `CompareViewModel.relatedOnly` + `Display` (the one per-pass
+  computation) + `releaseLivePaneIfFilteredAway` · the third header chip,
+  the whole-board honesty state, the per-column note · the tutorial
+  lesson's fifth paragraph and its walk assertion · 8 new pins.
+
+**Zero core lines, zero schema, zero `Sources/VariorumCore/Sync/` lines**
+(`git diff --stat -- Sources/VariorumCore/Sync/` empty; core suite
+unchanged at 881/100 by execution, which is the honest proof there was
+no core allowance and none was used). Mobile: **BUILD SUCCEEDED**.
+
+#### THE SHAPE: a pre-pass, so `segments` is byte-unchanged
+
+The filter is **not** a parameter on `CompareComposition.segments` and
+deliberately so. `relatedOnly(anchorBlocks:peerBlocks:kinships:)` is a
+PURE pre-pass over *exactly the inputs `segments` already takes*, and the
+view model composes the two. Consequences that paid for themselves:
+
+- **Every 4C honesty pin stands untouched** — the eight
+  `CompareCompositionTests` pins that encode N29's rule, the flush
+  asymmetry (MINOR-B), and the kin-less-peer placement (MINOR-C) run
+  byte-identical against byte-identical code. A phase that changes the
+  honesty brain to add a filter would have had to re-prove all of it.
+- **The composition needs no filter knowledge.** Because every survivor
+  is kin by construction, `segments` then emits *nothing but aligned
+  rows* — the free stretches ARE the unrelated material, which is the
+  clean statement of what the filter does.
+
+#### "Related" — the PROVISIONAL the brief named, and the argument that decided it
+
+**Chosen: BLOCK-LEVEL TRANSITIVE LINEAGE — the SAME notion the rails and
+the alignment already use** (`Queries.blockKinship`: the
+ancestors/descendants CTE, nearest kin wins, depth-bounded at 32). The
+brief flagged this as "the alignment machinery's existing answer is the
+cheapest defensible one"; it is also the *only* self-consistent one, and
+that argument is stronger than cheapness:
+
+- `railKin` reads `projection.kinship`. `CompareComposition` reads the
+  same map. **A filter on a NARROWER rule (direct `derived_from` /
+  `version_of` edges only) would hide blocks that are visibly wearing a
+  rail**, and a wider one would show blocks with no rail — the surface
+  would contradict itself inside one glance. ONE kinship brain, or the
+  rails and the filter have to be narrowed together, which is a bigger
+  and unrequested change.
+- Recorded alternative, live for her: direct-only, with the rails
+  narrowed to match. QUESTIONS #47(a).
+
+**The post-level `version_of` link is NOT block relatedness** (#47(b)):
+it says *these posts are versions*, never WHICH blocks correspond. So a
+version-linked, lineage-less peer filters to nothing — and because its
+header already says "versions", an unannotated empty column there would
+be exactly the emptiness-as-content failure N29 forbids. Hence the
+per-column note (below).
+
+#### The 4C kin-less-peer PROVISIONAL: MOOTED, and the OFF side deliberately untouched
+
+13b's judgment call 0 (ladder round 3, MINOR-C) left a peer with NO
+kinship trailing every aligned row, so against a long fully-kin anchor
+that column reads blank for that many rows. **With the filter ON the
+unrelated peer contributes nothing at all, so the question of where its
+run lands does not arise** — pinned on the exact configuration that
+PROVISIONAL's own pin uses
+(`relatedOnlyDropsTheKinLessPeerEntirelyAndMootsThePlacement` vs
+`aPeerWithNoKinshipAtAllTrailsEveryAlignedRow`, same inputs, both green).
+
+**The filter-OFF placement is byte-for-byte unchanged.** The brief's aim
+was "the outcome where the setting makes the placement question moot",
+and she asked for a *setting*, not a different placement; changing both
+at once would have spent a ruling she never made. 4C's options (b) and
+(c) stay one arm away each and are recorded in #47 as still-live if the
+OFF behavior bothers her in use. The site doc at
+`CompareComposition.segments` now carries this resolution beside the
+original PROVISIONAL rather than replacing it.
+
+#### N29's honesty line — COMPOSED at two scales, never broken
+
+| Situation | What the board does |
+|---|---|
+| Filter ON, **nothing** related anywhere | The rows area is replaced by `nothingRelatedState`: **"there is no relationship here"** (her words, the existing vocabulary) + *"…is on, and lineage connects nothing across these posts — so there is nothing to show. Turn it off to read them side by side."* The way out is named. |
+| Filter ON, **mixed** (one column related, another not) | The unrelated column's header adds **"related blocks only — nothing from this post"** with the help text naming the escape. This is also what catches the version-linked-but-lineage-less peer. |
+| Filter ON, everything related (a version twin) | Nothing changes — every block is kin. The filter costs the related comparison nothing, pinned. |
+
+The per-column note is **suppressed** when the whole board is empty (the
+board-level line says it once, properly) — three surfaces speaking the
+same fact at once is its own dishonesty.
+
+#### The live-ring call (the binding concern the brief named)
+
+**Decision: the toggle acts and the ring is RELEASED — never a refusal.**
+Turning the filter on can hide the block the live pane sits in. The
+governing precedent is **4C's own NIT-1** (a closed column hosting the
+live pane): the ring must never stay on a pane nothing renders. So
+`releaseLivePaneIfFilteredAway` blurs, flushes **that pane's own post's**
+coordinator (the cross-context handback's rule), and **SPEAKS**.
+
+- **Why not refuse the toggle while a pane is live** ("close the block
+  you're writing in first"): that is lecture-and-redirect by another name
+  (P-2, R115), and it would refuse most often exactly when she is deepest
+  in a comparison. A view toggle that stops working because you happen to
+  be typing is the friction this phase exists to remove.
+- **Why it speaks:** a caret disappearing without a word is the
+  silent-door class 13b retired.
+- **Why the flush is load-bearing and not politeness:** REVERT C below
+  shows the store still holding `"Nothing to do with it."` while the
+  typed text sat in a buffer no surface rendered. Without the release the
+  text is not lost forever (the session-scoped coordinator still flushes
+  eventually) but it is invisible and unreachable meanwhile — and the
+  filter is precisely a gesture she'd make mid-comparison.
+- **Scoped to the TOGGLE, deliberately.** A projection change can also
+  hide the live pane's block (a block deleted in another window). That is
+  the **pre-existing 4C class, unguarded today**, and calling the release
+  per observation delivery would both cost a filter pass per delivery and
+  invent a new way for the ring to drop mid-typing. Recorded, not
+  widened — a ladder focus below.
+
+#### Numbered judgment calls / PROVISIONALs (all on the #47 ratify list)
+
+1. **"Related" = transitive block lineage, the alignment's own notion**
+   (PROVISIONAL — #47(a)). The self-consistency argument above is the
+   deciding one; the direct-only alternative is recorded with its true
+   cost (the rails must narrow with it).
+2. **A `version_of` link does not relate BLOCKS** (PROVISIONAL —
+   #47(b)); the alternative makes the filter inert in the case it exists
+   for.
+3. **Default OFF** (PROVISIONAL — #47(c)). A filter that HIDES material
+   is reached for, not arrived in: on-by-default buys nothing against a
+   version twin (all kin) and lands on an explanation against an
+   unrelated post. One line to flip.
+4. **The hidden live ring releases, speaks, and lands its text; the
+   toggle never refuses** (PROVISIONAL — #47(d)), on the 4C NIT-1
+   precedent + P-2.
+5. **The filter-OFF placement is untouched** — 4C judgment call 0 is
+   MOOTED by the setting, not re-ruled. Recorded above; both 4C
+   alternatives stay live in #47.
+6. **Orthogonal to `followAnchorOrder` by construction** — this decides
+   WHICH blocks show, that decides HOW they arrange. Filter on + follow
+   off = each column's related blocks in its own order. Pinned
+   (`relatedOnlyAndFollowOrderStayOrthogonal`). The alternative
+   (related-only forces follow-order on) couples two independent toggles
+   and would surprise.
+7. **A kinship entry naming an anchor block this compare does not show**
+   (a gap slot; a map read a beat before the projection) **drops** rather
+   than surviving as a cell with no partner. Cheap, and it keeps the
+   invariant below true.
+8. **Recorded, NOT declared** (P-1's precision + Stage 4 lesson 10): the
+   chip is a view-mode affordance with no shortcut and no menu item —
+   exactly the class of its two siblings, which are also undeclared. Give
+   it a shortcut later and it must be declared then.
+9. **ONE `Display` computation per pass** (P-9): `rows` and the
+   per-column notes read the same filtered inputs, so the board cannot
+   disagree with itself about what is on screen. `rows` survives as the
+   direct accessor the pins use.
+10. **The tutorial gained a paragraph, not a lesson** — the "Compare is
+    honest about relationships" lesson would have become actively
+    misleading with a filter it never mentioned. The walk act
+    `compareHonestyHoldsOnTheLessonsOwnContent` was EXTENDED rather than
+    duplicated (count-neutral), so the new prose promise has an assertion
+    behind it (P-6). **Field-guide re-seed:** this is a further staling of
+    the already-stale seed — it joins the closeout obligation 2C/2D
+    recorded, adding nothing new to it.
+
+#### Red-on-old / guard-revert evidence
+
+**Every pin in this batch is a CONTRACT pin over a NEW capability — the
+4C record's "(c) new-contract pins" class, explicitly NOT red-on-old:**
+there is no pre-2E filter to run against, and nothing here fixes a bug.
+Their non-hollowness is proven instead by **four surgical guard reverts,
+each executed, each restored and verified byte-identical by `shasum -c`**
+(`pre-revert.sha`, both files OK after every restore; the suites re-run
+green after the last).
+
+| Revert applied | Pins that went RED | Observed |
+|---|---|---|
+| **A** — `relatedOnly` returns its inputs unchanged (the filter keeps everything) | `relatedOnlyKeepsTheKinAndComposesOnlyAlignedRows` · `relatedOnlyLeavesTheAnchorEmptyExactlyWhenEveryPeerIs` · `relatedOnlyDropsTheKinLessPeerEntirelyAndMootsThePlacement` · `relatedOnlyIgnoresKinshipPointingOutsideThisCompare` · `relatedOnlyAndFollowOrderStayOrthogonal` · `relatedOnlyHidesTheUnrelatedColumnAndTheBoardSaysSo` · `turningOnRelatedOnlyReleasesARingItHidesAndLandsTheText` · **`compareHonestyHoldsOnTheLessonsOwnContent`** (the tutorial act) | **8 pins, 22 issues.** The tutorial act's red is the informative one: the lesson's own unrelated pair filtered to 6 anchor + 4 peer blocks instead of nothing — i.e. the prose promise fails when the filter doesn't filter. `relatedOnlyLeavesARingItDoesNotHideAlone` correctly stayed GREEN (nothing is hidden, so nothing should release). |
+| **B** — the `anchorSet.contains(anchor)` guard dropped | `relatedOnlyIgnoresKinshipPointingOutsideThisCompare` **alone** | Exactly one pin, one issue: `[["A'", "ghost"]]` survived where `[["A'"]]` is right. The narrowness guard discriminates and nothing else depends on it. |
+| **C** — the `releaseLivePaneIfFilteredAway()` call removed from `relatedOnly`'s `didSet` | `turningOnRelatedOnlyReleasesARingItHidesAndLandsTheText` (3 arms) | The ring stayed on the hidden pane, nothing spoke, and — the arm worth reading — the store still held **`"Nothing to do with it."`** instead of `"typed just before the filter hid it"`: the typed text sat in a buffer no surface rendered. This is the mechanism the guard exists for, demonstrated rather than asserted. |
+| **D** — the release fires unconditionally (`guard !stillVisible` dropped) | `relatedOnlyLeavesARingItDoesNotHideAlone` (3 arms) | The ring dropped and the message spoke on a block the filter KEPT, on both the peer and the anchor arms — i.e. without the visibility check the toggle would blur every time, in the common case. |
+
+#### Test deltas
+
+| Suite | Before | After |
+|---|---|---|
+| `CompareCompositionTests` | 8 | **13** (+5) |
+| `CompareViewModelTests` | 7 | **10** (+3) |
+| `TutorialLookingActsTests` | 6 | **6** (the honesty act extended — count-neutral, P-6) |
+| **Mac total** | 772 / 135 | **780 / 135** (executed) |
+| **Core total** | 881 / 100 | **881 / 100** (executed; zero core lines) |
+| **Mobile** | 14 / 4 | builds clean (BUILD SUCCEEDED) |
+
+#### Deviations
+
+- **None from the brief.** The three things it named — the honesty line
+  composed not broken, the 4C PROVISIONAL resolved by mooting, the
+  "related" definition picked from options and logged — are each built
+  and recorded above.
+- **Environment note worth carrying (a false green caught, then
+  corrected):** `-only-testing:VariorumTests/TutorialWalkTests` matched
+  NOTHING and reported `** TEST SUCCEEDED **` — swift-testing suites are
+  addressed by their **type name**, and that file holds seven suites
+  (`TutorialLookingActsTests` is the one that carries the compare acts).
+  The "Executed 0 tests" XCTest lines are always present (there are no
+  XCTest cases), so **the `✔ Test run with N tests` line is the only
+  proof a suite ran** — exactly why the environment section demands it.
+  Recorded because a filename-shaped `-only-testing` argument is an easy
+  and silent way to skip the pin you think you just ran.
+- **Her app was NOT live** during this batch (`pgrep` clean at open); no
+  Release build, no `/Applications` refresh, no store touched.
+
+#### Ladder foci suggested for this batch (for the end-of-phase Fable review)
+
+1. **The kinship-map asymmetry inside `compositionInputs`:** the filtered
+   block lists ride with the UNFILTERED `kinships` map into `segments`.
+   That is safe by `relatedOnly`'s invariant (every survivor's kin is a
+   surviving anchor, and `segments` only consults the map for blocks it
+   is handed) — worth a cold walk of `PostAlignment.rows` to confirm no
+   path reads the map by iteration rather than by lookup.
+2. **`railKin` under the filter:** it reads the full `projection.kinship`
+   and `railedAnchors` over all mounted peers, unfiltered. Every visible
+   block is kin under the filter, so it agrees today — confirm there is
+   no configuration where a filtered-in block gets no rail or vice versa.
+3. **The release's scope:** a projection change can hide the live pane's
+   block without the toggle (the pre-existing 4C class, recorded above as
+   deliberately not widened). Confirm the window's width and whether the
+   4C accepted-transient reasoning still covers it now that a second way
+   to hide a pane exists.
+4. **`Display` vs `rows` double-computation:** the view reads `display`
+   once per pass; `rows` recomputes independently for the pins. Confirm
+   no view path still calls `model.rows` (grep says none) — a caller
+   using both would double the composition per pass.
+5. **The per-column note's suppression condition**
+   (`isFiltered && !rows.isEmpty && slot.postID != nil && !peerHasBlocks[i]`)
+   — four conjuncts is where an off-by-one lives. Worth constructing the
+   three-column mixed case by hand.
+6. **The default-OFF call** (#47(c)) is the one most likely to come back
+   from her the other way — her sentence ("would make the pane feel more
+   usable") can be read as wanting it on. The flip is one line if she
+   says so.
