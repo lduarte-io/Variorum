@@ -2107,6 +2107,56 @@ author. The implementer sanity pass over the reviewer's diff is the
 architect's (the batch records + adjudications above are that
 context).
 
+### The K6 review — FIX PASS (2026-07-27, the reviewer session itself, per the authorization above; all five dispositions implemented)
+
+**Commits:** `5bfa26c` (K2 core — the model-changes-first convention) ·
+`88214e2` (K1) · `c2e9333` (K2 faces) · `600d8f5` (K3) · `a042e3a`
+(K4+K5) · this record's. **Zero `Sources/VariorumCore/Sync/` lines, zero
+schema** (`git diff --stat` over the range: `Operations+ReadingConversion`
+is the only core source touched). **Final counts, my own full runs:**
+core **`✔ Test run with 882 tests in 100 suites`** (+1: the K2 core pin) ·
+Mac **`✔ Test run with 782 tests in 134 suites`** (+3 pins −1 deleted
+test; −1 suite = the deleted `BookProgressBrainTests`) · mobile
+**BUILD SUCCEEDED** (`generic/platform=iOS Simulator`; no mobile code in
+the diff — see deviations for the destination note). **P-6:** the seven
+tutorial suites re-run explicitly by TYPE name after everything landed —
+`✔ Test run with 49 tests in 7 suites` — beside their run inside the full
+suite. Her app was live at one instance check and untouched (no Release
+build, no `/Applications` refresh; the K6 refresh remains the
+orchestrator's, after verification).
+
+| # | What changed | Traced mechanism (why this shape) | Red-on-old evidence |
+|---|---|---|---|
+| **K1** | `PagedReadModel.adopt` captures the shown post's ID before the entries list changes and re-derives `position.postIndex` from the new list (clamp only when the post left the book). `BookViewModel.adopt` anchors `spreadLeftIndex` the same way — the FOCUSED post while it is on the spread (keeping its side: a right-page anchor lands `newIndex − 1`), else the left page — and now releases focus when its post leaves the book, via the new `releaseFocusIfItLeftTheBook()`. | Both position holders were post INDEXES merely clamped on adopt; an insertion (sync; 1D's bridge shelving) or an A31 order flip shifted every later index and the address named a DIFFERENT post — the page under her changed, falsifying 2C's own address rule; the spread could additionally strand `focusedPostID` off-book with arrows withdrawn. **One deliberate adjustment to the disposition's letter, flagged for the architect:** the disposition said "call the spread's focus-release from adopt", but `releaseFocusIfItLeftTheSpread()` there would have been mode-blind — `BookViewModel` serves OUTLINE, where the focused post is rarely on the spread's two indices, and the observation delivers at autosave-settle cadence, so the literal call would have unmounted the Outline editor mid-typing on every delivery. The release is therefore BOOK-scoped; with identity anchoring, a spread-focused post can only leave the spread by leaving the book (or the window), so the book test IS the spread test — and the stale-focus arm of the pin proves the disposition's intent is met. | **Revert-red, BOTH pins, checksum-restored (`shasum -c` OK both files).** Paged revert (re-anchor block removed): `theAddressSurvivesMembershipAndOrderChangesByIdentity` RED — the pane named post `…0001` where her post is `…000C` (`✘ Test run with 6 tests`). Spread revert (pre-fix clamp-only adopt restored): `theSpreadSurvivesMembershipAndOrderChangesByIdentity` RED on **all four arms** — both pages swapped, the focused post off-spread, stale focus never released (`✘ Test run with 7 tests`). Pin note: the paged pin drives the reader's position via `seed(fromFocus:)`, not `showPost` — `showPost` deliberately no-ops when the post is already a spread leaf, and post 1 is page one's right leaf on a short book. |
+| **K2** | Core (`5bfa26c`): `convertSmartReadingToCurated` gains `order: Queries.ReadingOrder? = nil`, forwarded to the ONE `assembleReading` call; nil = stored order, every existing caller byte-identical. Faces (`c2e9333`): `BookStructureModel.convertToCurated` gains and forwards `order:`; `BookView`'s offer-sheet closure passes `model.viewOrder`; the shelf door passes nothing (no override exists there). **Plus one composition line:** on a successful conversion the view CLEARS `model.viewOrder` — the "Save as This Book's Order" door's own recorded rule (frozen IS the book's order now; the menu must stop claiming a separate way of looking; content is identical at that instant, so nothing on screen moves). | A31's override and the conversion shipped in the same batch on the same surface; neither door passed the override, so the conversion froze the STORED order while the sheet promised "the order you're looking at them" — false exactly when an override was active, surfacing only later as a silent reorder. | **Revert-red twice, checksum-restored.** Core revert (forwarding → `order: nil` inside the op): `conversionUnderAViewOrderOverrideFreezesTheOrderSheIsLookingAt` RED on both halves (rows stored-ASC vs seen-DESC; the post-conversion read likewise). Face revert (the structure model's forwarding dropped): `theNavigatorConversionFreezesTheOrderSheIsBrowsing` RED (stored-ASC vs browsed-DESC). **The one line left unpinned, stated rather than papered over:** `BookView`'s sheet-closure argument `order: model.viewOrder` — driving a presented sheet's confirm through hosted UI is the cost; the structure-model pin sits one call below it. |
+| **K3** | `PageComposer.compose` builds ONE string: the separate `joinRenderedTexts` call is gone and `let body = composed` — the range walk's own output IS the body. Doc comments updated to carry the real guard relationship. | Two strings from two code paths (the walk's hand-copied join conditional beside the real join), ranges computed on one and attributes applied to the other; byte-equal today (compared line-level against `PostRender.swift` at review), so the degradation is structural — future drift lands callout indents on wrong characters or an out-of-bounds `addAttribute` (NSRangeException). With one string, the EXISTING pin `theComposedBodyIsTheRatifiedProjection` (body == `renderedText`) stops being a tautology and becomes the drift guard on the conditional. | **No red-on-old owed or claimed** (the two strings are byte-equal today — an architectural finding under the hallucination guard's standard: mechanism traced, justification written). Pagination suites `✔ Test run with 16 tests in 3 suites`; the pin now carries load it could not carry before. |
+| **K4** | The 13b 4F progress/visibility brain deleted from `BookViewModel` (`noteVisible` / `visiblePosts` / `progressPosition` / `readingProgress`) with its one-test suite `BookProgressBrainTests`; a note at each site records where it went and that her A6 "investigate the bugginess first" instruction binds any re-add. | Zero production callers after 2A removed the face, 2B read `spreadLeftIndex` exactly, and 2C built its own page domain — against the brain's own recorded rule ("deleted rather than kept warm on speculation"), which 2C neither honored nor amended. | **Cleanliness deletion — no pin owed.** Grep-verified zero remaining references (Canvas's unrelated `noteVisibleRect` untouched). One compile stumble caught by the build gate and fixed in the same commit: the deletion first left the dead suite's `@MainActor` + doc comment stranded above the spread suite (duplicate-attribute compile error) — the gate did its job. Book suites `✔ Test run with 23 tests in 4 suites`. |
+| **K5** | `TagListSection` deleted from `Features/Tags/TagViews.swift`; the file header now records the retirement (the `ReadingsSection` class exactly). `TagAssignmentSheet` — still referenced twice — untouched. | The second Phase-13-IA-orphaned sidebar view, found by the 2D-assigned dead-door sweep; dead code with NO capability stranded (tag create/rename/delete live in Settings — `AppSettingsView`, R52's home). | **Cleanliness deletion — no pin owed.** Grep before and after: zero references remain beyond the documentary header line; `TagCreateTarget` died with its only user. |
+
+**Deviations / notes for the architect's verification pass:**
+
+- **K1's book-scoped release** (the one place the fix deliberately
+  refines the disposition's letter — argued and pinned above; if the
+  architect reads the spread-scoped letter as binding, the change is
+  four lines, but it will break Outline typing and
+  `focusImpliesExpansionAndCollapseReleasesFocus` documents why).
+- **K2's override clear on success** rides the fix as the saved-order
+  door's own precedent applied to the same fact ("this IS the book's
+  order now"); one line to drop if the architect reads it as scope
+  creep.
+- **The 2E `-only-testing` trap fired once at ME:** a single-TEST filter
+  (`…/PagedReadViewTests/theAddressSurvives…`) matched nothing and
+  reported `✔ Test run with 0 tests` — caught by the run-line rule,
+  re-run at suite level. The trap note earns its binding status.
+- **Mobile destination note:** bare `xcodebuild build -scheme
+  VariorumMobile` now fails on a provisioning complaint about the
+  physical Mac as run destination (environment drift, not code — no
+  mobile source is in this diff); `-destination 'generic/platform=iOS
+  Simulator'` builds clean and is the honest form for future records.
+- **NOT touched, per the dispositions:** K6f and K7 (record-only; K7
+  untraced — the hallucination guard holds), K8 (the architect's own
+  correction, already landed in `9eec274`).
+
 ## Architect adjudications
 
 ### Batch 2E — ACCEPTED (2026-07-27); STAGE 2 IS BUILT — the end-of-phase Fable cold review runs next
