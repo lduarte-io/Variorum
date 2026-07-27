@@ -625,6 +625,58 @@ struct PagedReadViewTests {
         }
     }
 
+    /// 13c K6 review, K1 (MAJOR — red-on-old by behavioral revert: remove
+    /// the postID re-anchor from `PagedReadModel.adopt` and BOTH halves
+    /// fail, the page under the reader silently becoming another post's).
+    ///
+    /// The address rule's letter: a page is addressed by (post,
+    /// page-in-post) — post IDENTITY, not a position in the membership
+    /// list. `Position.postIndex` is an index, so before this fix a
+    /// membership insertion (the Fragments bridge shelving today's entry —
+    /// 1D's own work) or an A31 order flip (2D's own order menu, two
+    /// clicks away) shifted every later index and left the address naming
+    /// a DIFFERENT post. The existing address pin
+    /// (`aCorrectionMovesTheLabelAndNeverThePage`) never varies the postID
+    /// list, which is why this one exists.
+    @Test func theAddressSurvivesMembershipAndOrderChangesByIdentity() async throws {
+        try await withPagedWorld(posts: 3) { session, db, readingID, postIDs in
+            let pages = PagedReadModel(session: session)
+            let entries = try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            }
+            await pages.adopt(entries: entries, chapterOpeners: [:])
+            // The reader is IN post 1 (seed, not showPost — showPost
+            // deliberately no-ops when the post is already a spread leaf,
+            // and post 1 may be page one's right leaf on a short book).
+            pages.seed(fromFocus: postIDs[1])
+            #expect(pages.leaves.first??.postID == postIDs[1])
+
+            // A membership INSERTION before her post (a sync round, the
+            // bridge's daily shelving): every later index shifts.
+            let landed = Queries.ReadingEntry(
+                postID: "landed-mid-read", title: "today's entry",
+                entryDate: nil, sectionPath: nil)
+            await pages.adopt(entries: [landed] + entries, chapterOpeners: [:])
+            #expect(pages.leaves.first??.postID == postIDs[1],
+                    "an insertion re-anchors the address — the page under her is the same post")
+
+            // An ORDER flip (the A31 menu): the list reorders wholesale.
+            await pages.adopt(
+                entries: ([landed] + entries).reversed(), chapterOpeners: [:])
+            #expect(pages.leaves.first??.postID == postIDs[1],
+                    "a reorder re-anchors too — the address is identity, not a number")
+
+            // Her post REMOVED: the clamp is all that is left — she lands
+            // on a page that exists, never nowhere.
+            await pages.adopt(
+                entries: entries.filter { $0.postID != postIDs[1] },
+                chapterOpeners: [:])
+            let shown = pages.leaves.first??.postID
+            #expect(shown != nil && shown != postIDs[1],
+                    "a removed post cannot be shown; the clamp lands a real page")
+        }
+    }
+
     /// Turning the leaf walks the DOMAIN (two pages), the covers are dead,
     /// and the reader's address survives a re-adoption of the same book.
     @Test func theLeafTurnsTwoPagesAndTheCoversAreDead() async throws {

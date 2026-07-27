@@ -902,6 +902,55 @@ struct SpreadBookViewTests {
         }
     }
 
+    /// 13c K6 review, K1 (MAJOR — red-on-old by behavioral revert: remove
+    /// the identity re-anchor from `BookViewModel.adopt` and the first and
+    /// third expectations fail — the spread silently swaps which posts it
+    /// shows, and a focused post stranded off the book keeps its stale
+    /// focus with the arrow shortcuts withdrawn for nothing).
+    ///
+    /// The spread's index-not-identity half of the K1 class: a membership
+    /// insertion or an order flip shifts `entries`, and `spreadLeftIndex`
+    /// used to be merely clamped — so the two visible posts changed under
+    /// her. The anchor is the FOCUSED post while it is on the spread (the
+    /// page under her hands keeps its side), else the left page; focus
+    /// releases exactly when its post leaves the book.
+    @Test func theSpreadSurvivesMembershipAndOrderChangesByIdentity() async throws {
+        try await withBookWorld(posts: 3) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            let entries = try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            }
+            model.adopt(entries)
+            model.openSpread(leftIndex: 1)  // p1 · p2
+            #expect(model.leftPage?.postID == postIDs[1])
+
+            // A membership INSERTION before the spread (a sync round, the
+            // bridge's daily shelving): the pairing survives by identity.
+            let landed = Queries.ReadingEntry(
+                postID: "landed-mid-read", title: "today's entry",
+                entryDate: nil, sectionPath: nil)
+            model.adopt([landed] + entries)
+            #expect(model.leftPage?.postID == postIDs[1],
+                    "an insertion re-anchors the spread — the left page is the same post")
+            #expect(model.rightPage?.postID == postIDs[2])
+
+            // Her caret on the RIGHT page: an order flip keeps that post
+            // visible AND keeps its ring (the page under her hands).
+            model.focus(postIDs[2])
+            model.adopt(([landed] + entries).reversed())
+            #expect(model.isOnSpread(postIDs[2]),
+                    "a reorder keeps the focused post on the spread")
+            #expect(model.focusedPostID == postIDs[2], "…and its ring")
+
+            // The focused post REMOVED from the book: focus releases (the
+            // stale-focus half — no editor can mount for a post with no
+            // row, and withdrawn arrows would otherwise serve nothing).
+            model.adopt(entries.filter { $0.postID != postIDs[2] })
+            #expect(model.focusedPostID == nil,
+                    "focus releases when its post leaves the book")
+        }
+    }
+
     /// P3, the batch's load-bearing claim: the spread realizes THE SPREAD,
     /// never the book. A 60-post book puts exactly TWO posts on screen.
     /// Red-on-old by behavioral revert: rendering `model.entries` instead of

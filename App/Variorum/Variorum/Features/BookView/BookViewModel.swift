@@ -80,11 +80,53 @@ final class BookViewModel {
     /// Adoption is verbatim up to the window — the query's order and
     /// content ARE the view's (internal so tests pin exactly that); the
     /// +1 probe row is consumed into `truncated`, never rendered.
+    ///
+    /// **The spread survives by IDENTITY, not by index (13c K6 review,
+    /// K1).** `spreadLeftIndex` is a position in `entries`, so a membership
+    /// insertion or an order flip used to shift the indices and silently
+    /// swap which two posts the spread showed — and, because the old code
+    /// never re-checked focus here, could leave `focusedPostID` pointing at
+    /// an off-spread post (no editor mounted, the arrow shortcuts withdrawn
+    /// for nothing). The anchor is the FOCUSED post while it is on the
+    /// spread (the page under her hands keeps its side), else the left
+    /// page; the clamp remains only for a post that left the book, and
+    /// focus is released exactly when its post is no longer visible.
     func adopt(_ new: [Queries.ReadingEntry]) {
+        let anchor: (postID: String, wasRight: Bool)? = {
+            guard let indices = Self.spreadIndices(
+                leftIndex: spreadLeftIndex, count: entries.count)
+            else { return nil }
+            let leftID = entries[indices.left].postID
+            let rightID = indices.right.map { entries[$0].postID }
+            if let focused = focusedPostID, focused == rightID {
+                return (focused, true)
+            }
+            return (leftID, false)
+        }()
         truncated = new.count > Self.entryWindow
         entries = truncated ? Array(new.prefix(Self.entryWindow)) : new
-        // The spread brain never points past the (possibly shrunk) list.
-        spreadLeftIndex = Self.clampedPage(spreadLeftIndex, count: entries.count)
+        if let anchor,
+           let newIndex = entries.firstIndex(where: { $0.postID == anchor.postID }) {
+            spreadLeftIndex = Self.clampedPage(
+                anchor.wasRight ? newIndex - 1 : newIndex, count: entries.count)
+        } else {
+            // The anchor left the book (or the list emptied): the old
+            // clamp is all that is left to do.
+            spreadLeftIndex = Self.clampedPage(spreadLeftIndex, count: entries.count)
+        }
+        // Deliberately BOOK-scoped, not spread-scoped: this model serves
+        // Outline too, where the focused post is rarely on the spread's two
+        // indices — a spread-scoped release here would unmount the Outline
+        // editor mid-typing on every observation delivery. With identity
+        // anchoring above, a spread-focused post can only leave the spread
+        // by leaving the book (or the window), which is exactly this test.
+        releaseFocusIfItLeftTheBook()
+    }
+
+    private func releaseFocusIfItLeftTheBook() {
+        guard let focused = focusedPostID,
+              !entries.contains(where: { $0.postID == focused }) else { return }
+        focus(nil)
     }
 
     /// The section header to show ABOVE entry `i`, if any: grouping is

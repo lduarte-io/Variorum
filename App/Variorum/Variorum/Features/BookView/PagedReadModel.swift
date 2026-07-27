@@ -86,7 +86,20 @@ final class PagedReadModel {
     /// Adopt the book: its post order and which posts OPEN a chapter. Reads
     /// the extent index (lengths only — no prose) and rebuilds the estimated
     /// domain; measured posts keep their measurement.
+    ///
+    /// **The address survives by IDENTITY, not by index (13c K6 review,
+    /// K1).** `Position.postIndex` is a position in `entries`, so a
+    /// membership insertion — or an A31 order flip — used to shift every
+    /// later index and leave the address naming a DIFFERENT post: the page
+    /// under the reader silently became another post's page, which is
+    /// precisely the failure the (post, page-in-post) address rule exists to
+    /// prevent. The shown post's ID is captured before the list changes and
+    /// its index re-derived from the new list; the clamp remains only for
+    /// the post that left the book (she lands on a page that still exists,
+    /// never nowhere).
     func adopt(entries: [Queries.ReadingEntry], chapterOpeners: [String: String]) async {
+        let anchorPostID = self.entries.indices.contains(position.postIndex)
+            ? self.entries[position.postIndex].postID : nil
         self.entries = entries
         self.chapterOpeners = chapterOpeners
         let postIDs = entries.map(\.postID)
@@ -100,6 +113,11 @@ final class PagedReadModel {
                     hasChapter: chapterOpeners[entry.postID] != nil)
             }
             index.adopt(postIDs: postIDs, extents: extents, headingLines: headings)
+            if let anchorPostID,
+               let newIndex = entries.firstIndex(where: { $0.postID == anchorPostID }) {
+                position = PageIndex.Position(
+                    postIndex: newIndex, pageInPost: position.pageInPost)
+            }
             if let clamped = index.clamped(position) { position = clamped }
             await realize()
         } catch is CancellationError {
