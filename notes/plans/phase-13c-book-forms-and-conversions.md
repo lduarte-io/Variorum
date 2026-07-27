@@ -2056,6 +2056,49 @@ own runs this sitting.
 
 ## Architect adjudications
 
+### Batch 1F — ACCEPTED (2026-07-27); the persistence fix stands, the birth rides the end-of-phase review
+
+**Verified before accepting:** the diff read in full (one hook + one
+coordinator method on the ONE surface component — P-3 held; every write
+still leaves through the publish door, so the F1 walk's ground is
+untouched); Mac **734/129 green by my own run**; core untouched is
+coherent by construction (`git show --stat`: zero `Sources/` lines).
+
+**The two judgment calls, adjudicated:**
+
+1. **Fixing the persistence without the birth — ACCEPTED.** The
+   persistence mechanism is fully traced (the change-gated trigger
+   enumeration + the heal's short-side-only chase + her live "isn't
+   going away" as the observable), the fix neutralizes every birth
+   candidate equally, and the hunt was honest (two harness drives, a
+   quantified candidate table, the ~470 pt transient named as the
+   suspect that would not reproduce). Continuing to hunt while she
+   lives with a recurring launch-adjacent void was the wrong trade.
+   **The birth stays OPEN as a named ladder focus** — the end-of-phase
+   Fable reviewer is explicitly asked to try to drive it (the
+   first-render-width suspect) and to try to break the termination
+   argument.
+2. **The stand-in pin — ACCEPTED as labelled.** It reproduces the stale
+   STATE (frame tall, text short, no trigger left), not the birth, and
+   says so in its own doc comment — the 1E characterization-honesty
+   discipline applied to a defect whose trigger is unknown. The RED it
+   observed (546.0 held over 293.0 across settle passes) is the class,
+   demonstrated.
+
+**Worth naming as the batch's best work:** the harness-gap finding —
+`TakesBoardSoakTests`' height invariant was one-directional AND
+live-pane-blind, so this entire defect class passed every soak *by
+construction*. The widened both-sides invariant is the structural fix
+for the class's invisibility, which outlives this instance (P-7's
+letter: the soak could not find this bug before she did, and now it
+can).
+
+**Also noted:** the passive-only interrogation of her live instance
+(screencapture + `mode=ro`/`immutable=1` queries, AX injection
+declined) is exactly the instance discipline the environment traps
+demand, applied under pressure. Her on-screen card heals at its first
+layout pass once the end-of-phase refresh lands the fixed build.
+
 ### Batch 1E — ACCEPTED, and it made me reverse my own bound (2026-07-26)
 
 **The build landed with a trigger policy better than the brief asked
