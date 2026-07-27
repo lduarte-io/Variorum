@@ -1696,8 +1696,14 @@ struct TutorialLibraryActsTests {
             // The prose promises (P-6: the lesson says it, the app does it).
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "books & the shelf") }
             let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
-            #expect(prose.contains("PAGES"), "the lesson teaches the paged view")
-            #expect(prose.contains("progress bar"))
+            // 13c 2A/2B/2C: the lesson's vocabulary is the shipped one. The
+            // old single "progress bar" claim is replaced by the four the
+            // three modes actually make (A6 removed the bar itself).
+            #expect(prose.contains("OUTLINE"), "the lesson teaches the writing surface")
+            #expect(prose.contains("BOOK"), "…the two-up spread")
+            #expect(prose.contains("READ"), "…and the reading pair")
+            #expect(prose.contains("PAGES"), "the lesson teaches the paginated face")
+            #expect(prose.contains("flowing across"), "…and says what makes it a page")
             #expect(prose.contains("click the word counts"))
             #expect(prose.contains("Restore door"))
 
@@ -1719,6 +1725,24 @@ struct TutorialLibraryActsTests {
             #expect(model.spreadLeftIndex == total - 1, "the last cover clamps")
             model.showPost(lesson)
             #expect(model.isOnSpread(lesson), "the navigator jumps to a page")
+
+            // 13c 2C — PAGES: the guide paginates for real. The domain is
+            // built from the extent index (lengths, no prose), the spread
+            // draws two addresses, and turning the leaf walks two pages
+            // ACROSS posts. Nothing here asks a layout engine for a height.
+            let paged = PagedReadModel(session: session)
+            await paged.adopt(entries: model.entries, chapterOpeners: [:])
+            #expect(paged.index.totalPages >= model.entries.count,
+                    "every lesson is at least a page")
+            #expect(paged.leaves.compactMap { $0 }.count == 2, "a spread of two leaves")
+            #expect(paged.pageLine.contains("pages 1–2"))
+            let firstAddress = paged.position
+            paged.turn(by: 2)
+            try? await Task.sleep(for: .milliseconds(50))
+            #expect(paged.position != firstAddress, "the leaf turned")
+            #expect(paged.index.pageNumber(of: paged.position) == 3, "…by two pages")
+            #expect(paged.realizedPostCount <= PagedReadModel.cacheLimit,
+                    "and the rest of the guide was never composed (P1)")
 
             // The per-post word target on the lesson's own post: set,
             // progress computes, clear (display only — the lesson's words:

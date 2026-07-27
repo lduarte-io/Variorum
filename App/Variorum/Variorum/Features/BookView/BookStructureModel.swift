@@ -44,6 +44,22 @@ final class BookStructureModel {
     /// compile error instead.
     enum ViewMode { case outline, spread, read }
 
+    /// READ's two faces (13c Batch 2C — her 2026-07-23/24 direction: Read is
+    /// "the Apple-Books/Kindle PAIR of modes").
+    ///
+    /// - `.flow` — the vertical infinite scroll (`ReadingFlowView`), which is
+    ///   what Read has always been.
+    /// - `.pages` — TRUE BOOK PAGINATION: a two-page spread of identical
+    ///   fixed pages with the text flowing across them (`PagedReadView`).
+    ///
+    /// `.flow` is the DEFAULT, deliberately: R2's ratified behavior is that a
+    /// finished book *opens into the reading flow*, and a sub-mode default of
+    /// `.pages` would silently change what she has been opening into for two
+    /// phases. PROVISIONAL — QUESTIONS #45(e). Session/view state, never
+    /// persisted (the collapse-set class, #43(b)/#44(a)).
+    enum ReadForm: String, CaseIterable { case flow, pages }
+    var readForm: ReadForm = .flow
+
     private(set) var reading: Reading?
     private(set) var sections: [ReadingSection] = []
     /// Non-empty when a chapter can be restored — the recovery door must

@@ -32,6 +32,7 @@ struct BookView: View {
     init(
         session: AppSession, readingID: String, readingName: String? = nil,
         model: BookViewModel? = nil,
+        structure: BookStructureModel? = nil,
         initiallyExpanded: Set<String> = []
     ) {
         self.session = session
@@ -40,7 +41,12 @@ struct BookView: View {
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
         for postID in initiallyExpanded { resolved.expand(postID) }
         _model = State(initialValue: resolved)
-        _structure = State(initialValue: BookStructureModel(session: session, readingID: readingID))
+        // `structure` is injectable for the same reason `model` is (13c 2C):
+        // a hosted test drives the view MODE from outside, and hosted
+        // `.task` appearance callbacks don't fire under the test host.
+        _structure = State(
+            initialValue: structure
+                ?? BookStructureModel(session: session, readingID: readingID))
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -75,16 +81,25 @@ struct BookView: View {
                 // active one editable in Write or the takes stack (A43/A44).
                 SpreadBookView(session: session, model: model, structure: structure)
             case .read:
-                ReadingFlowView(
-                    session: session,
-                    readingName: readingName ?? model.readingName,
-                    grouped: structure.chaptersActive
-                        ? structure.grouped(entries: model.entries)
-                        : [(nil, model.entries)],
-                    onWake: { postID in
-                        structure.mode = .outline
-                        model.focus(postID)
-                    })
+                // READ is a PAIR (13c 2C, her direction): the vertical
+                // infinite scroll, and true book pagination. Neither is
+                // editable — her A43 ruling, which is what keeps Read a
+                // place to read rather than a third editor.
+                switch structure.readForm {
+                case .flow:
+                    ReadingFlowView(
+                        session: session,
+                        readingName: readingName ?? model.readingName,
+                        grouped: structure.chaptersActive
+                            ? structure.grouped(entries: model.entries)
+                            : [(nil, model.entries)],
+                        onWake: { postID in
+                            structure.mode = .outline
+                            model.focus(postID)
+                        })
+                case .pages:
+                    PagedReadView(session: session, model: model, structure: structure)
+                }
             }
         }
         .background(tokens.surface)
@@ -156,6 +171,23 @@ struct BookView: View {
                     .buttonStyle(.borderless)
                     .help("Book settings — finish, length, rename")
                 }
+                // 13c 2C: READ's pair of faces (her direction — "the
+                // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
+                // picker rather than in a bottom bar, because one of the two
+                // faces (the flow) is a vertical scroll and carries no bottom
+                // chrome at all — the A6 argument. Surface-local, so
+                // recorded rather than declared (Stage 4 lesson 10).
+                if structure.mode == .read {
+                    Picker("", selection: Binding(
+                        get: { structure.readForm },
+                        set: { structure.readForm = $0 })) {
+                        Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
+                        Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
+                    }
+                    .pickerStyle(.segmented)
+                    .help("Read the book as one continuous scroll, or as real pages "
+                        + "with the text flowing across them")
+                }
                 if let reading = structure.reading, reading.locked {
                     Text(tokens.chromeLabel("✓ finished"))
                         .font(tokens.small)
@@ -177,13 +209,17 @@ struct BookView: View {
                                     // chapter (the flow view shows it too);
                                     // in the SPREAD, show the chapter's
                                     // first page (13b 4F; 13c 2B).
+                                    let first = structure
+                                        .grouped(entries: model.entries)
+                                        .first(where: { $0.section?.id == section.id })?
+                                        .entries.first
                                     if structure.mode == .spread {
-                                        if let first = structure
-                                            .grouped(entries: model.entries)
-                                            .first(where: { $0.section?.id == section.id })?
-                                            .entries.first {
-                                            model.showPost(first.postID)
-                                        }
+                                        if let first { model.showPost(first.postID) }
+                                    } else if structure.mode == .read,
+                                              structure.readForm == .pages {
+                                        // 13c 2C: a chapter opens at its
+                                        // first PAGE, without leaving Read.
+                                        if let first { model.focus(first.postID) }
                                     } else {
                                         scrollTarget = "chapter-\(section.id)"
                                     }
@@ -232,6 +268,14 @@ struct BookView: View {
                                     // stays where it is (13c 2B).
                                     if structure.mode == .spread {
                                         model.showPost(entry.postID)
+                                    } else if structure.mode == .read,
+                                              structure.readForm == .pages {
+                                        // 13c 2C: in paginated Read the
+                                        // navigator is a PAGE jump — it must
+                                        // not throw her out of the reading
+                                        // surface into the editor (the 4F
+                                        // no-context-jump rule, R43).
+                                        model.focus(entry.postID)
                                     } else {
                                         structure.mode = .outline
                                         model.focus(entry.postID)

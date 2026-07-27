@@ -703,15 +703,20 @@ enum TutorialSeeder {
             + "the post in the full editor; its \u{25B8} expands it in place, "
             + "right here.",
 
-            // 13b 4F (S4-9): the three view modes + the progress bar.
-            "Three views of a book share the toggle at the top. BOOK is this "
-            + "scroll — a progress bar at the bottom shows where you are, "
-            + "post by post. PAGES flips through the book like a paged "
-            + "reader: each page is one post, however long (scroll within "
-            + "it), and the bottom bar flips forward and back or scrubs "
-            + "straight to a page. READ is the reading flow: the whole book "
-            + "as one calm, continuous page. A finished book opens there by "
-            + "itself.",
+            // 13b 4F (S4-9), rewritten at 13c 2A/2B/2C: the three modes and
+            // what each is FOR. (P-6: the lesson says it, the app does it —
+            // this paragraph still described the pre-2A vocabulary.)
+            "Three views of a book share the toggle at the top. OUTLINE is "
+            + "this scroll, and it is where a book gets WRITTEN: chapter "
+            + "headings, posts you can collapse, and the same editor you "
+            + "write a post in. BOOK is a two-page spread — each page is one "
+            + "whole post, and the page you are in is editable as Write or "
+            + "as its takes; \u{25C0} \u{25B6} turn the leaf two posts at a "
+            + "time, and \u{25C1} \u{25B7} nudge by one so you can re-pair. "
+            + "READ is for reading only, in two faces: SCROLL, the whole "
+            + "book as one calm continuous page, and PAGES, real book pages "
+            + "with the text flowing across them — turn the leaf, or scrub. "
+            + "A finished book opens into Read by itself.",
 
             // 13b 4F (N36/N37): the per-post target + the restore door.
             "Books can be FINISHED (right-click the book on the shelf \u{25B8} "
