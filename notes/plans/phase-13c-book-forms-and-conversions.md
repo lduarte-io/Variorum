@@ -2208,6 +2208,30 @@ her screenshot — and the pre-shrink text is preserved whole in the
 out of newlines because the app refuses to scroll past the end); the
 13d plan's A22 row already binds the two: deliberate room must be REAL.
 
+**A47b follow-up rulings (author, 2026-07-27, ~15:45 — verbatim):**
+*"I deleted the highlighted 5 lines of newlines - I don't think that is
+actually 264 characters though, so maybe something else was deleted? or
+maybe the visual glitch means that I deleted it even if it didn't
+visually seem like I was deleting it? there's a way bigger gap than the
+newlines that existed. and yeah, I think we should build A22 properly
+in 13d. You can refresh the install when this issue is fixed. I would
+restore the missing 264 characters I think."* So: **(1)** the 5-line
+deletion was HERS and deliberate — Q2 narrows to the other ~259
+characters: identify them EXACTLY (the 10:12 commit vs the current
+working_text is a computable diff) and whether her selection could have
+covered more than it visually showed (her own hypothesis — ties Q2 to
+Q1's rendering state). **(2) The restore is authorized, BOUNDED by her
+intent** (her "I think" is a hedge on content she hasn't seen): if the
+259 are real prose, restore them through ordinary operations behind the
+A1 rail — current state committed first as insurance, her deliberate
+5-newline deletion preserved; if they are whitespace-only, restoring
+junk she deliberately cleaned would contradict her intent — report
+instead, one line for her to confirm. Ambiguity ⇒ stop and report.
+**(3) The install refresh is authorized "when this issue is fixed"**
+(the post-close hold lifts on the 1G fix landing verified). **(4) A22
+is CONFIRMED for 13d** ("we should build A22 properly in 13d") — the
+13d plan's row carries it.
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
