@@ -701,7 +701,7 @@ placement + parity-by-forwards; the overlay/sink delivery law).
 
 | # | Item | Status |
 |---|------|--------|
-| C1 | The uniform-page book view (from the 4F brief) + her 7/23–24 direction | committed, not started |
+| C1 | The uniform-page book view (from the 4F brief) + her 7/23–24 direction | **the READ half SHIPPED (Batch 2C)** — Read is the pair she asked for: SCROLL (the flow) and PAGES, a two-page spread of identical fixed leaves with the text flowing across them. The brief's two-tier design built as designed (estimated globally from `Queries.blockExtents` — lengths, in SQL, no prose; measured locally by CoreText), with ONE architectural rule added that the brief did not have: **a page is addressed by (post, page-in-post), never by a page number**, so a measurement replacing an estimate moves the LABEL and never the page under her. Slicing is LAZY on a measurement, not on caution — CoreText typesets per paragraph, so ordinary prose paginates whole in 3.5 ms at 26k words while the same text as ONE block costs 1.67 s (the A3/A41 shape). Read is NOT editable (A43), which is why there is no NSTextView on the surface at all — and therefore no TK2 estimated geometry to inherit (the 1C cross-check). The brief's five opens are PROVISIONAL — QUESTIONS #45; (b) deliberately goes against the brief's own lean and says why. *(The BOOK-spread half of her 7/23–24 direction shipped at 2B; Outline's at 2A.)* |
 | C2 | N38 smart→smart+curated conversion (from the 4F memo; her five rulings first) | committed, not started |
 | C3 | N41 inline-comments airiness (R116-class conversation first) | committed, not started |
 | C4 | Compare "show related blocks only" setting (resolves the 4C kin-less-peer PROVISIONAL) | committed, not started |
@@ -4563,3 +4563,376 @@ for a full window — worth a look at what else compresses badly. **(7) The
 retired paged suite**: check that nothing the old
 `thePagedViewRealizesExactlyOnePageAndFlipsContent` guarded went unguarded —
 its successors are the two hosted spread pins.
+
+### Batch 2C — READ: true pagination (C1, the uniform-page brief)
+
+**Commits:** two builds — `211a942` (the CORE half: `Queries.blockExtents` +
+its three pins) and `e955708` (the app half: the domain, the paginator, the
+surface, its fifteen pins, the tutorial's prose + walk act); the ledger row,
+QUESTIONS #45 and this record follow in the record commit.
+**No schema change** — the extent index is DERIVED (the brief §5's option
+(a)), so AppSpec §4's stored-`length_estimate` door stays closed and unbuilt.
+**Zero `Sources/VariorumCore/Sync/` lines.**
+**Counts:** core **858/98 → 861/99** (+3 tests, +1 suite) · Mac **745/131 →
+760/134** (+15 tests, +3 suites) · mobile **builds clean**
+(`xcodebuild build -scheme VariorumMobile`), 14/4 untouched.
+**Diff scope:** 5 new files — `Sources/VariorumCore/Queries/PageExtents.swift`,
+`Features/BookView/PageDomain.swift` / `PagePaginator.swift` /
+`PagedReadModel.swift` / `PagedReadView.swift` — plus
+`BookStructureModel.swift` (the `ReadForm` pair), `BookView.swift` (the Read
+branch, the sub-toggle, the navigator's paginated jumps, the structure
+injection), `TutorialSeeder.swift` + `TutorialWalkTests.swift` (P-6), and two
+new test files.
+**Her instance:** `pgrep -fl 'Variorum.app/Contents/MacOS'` clean at batch
+open and re-checked before every suite run — no Release build, no
+`/Applications` refresh, nothing quit. The login session was UNLOCKED
+throughout (2B's recorded exception to Stage 4 lesson 9 was not needed).
+
+#### THE HEADLINE: the brief's two tiers are safe to mix only if a page is not a number — and that is the one thing the brief did not say
+
+The brief §3 gives the architecture (estimated globally, measured locally)
+and §9 asks for a pin that "estimate→exact convergence never regresses a
+visited page". Building it surfaced *why* that property is hard, and the
+answer changed the design:
+
+**If the reader's position is a page NUMBER, the two tiers cannot coexist.**
+A global page number is a prefix sum over every post before her. Correct one
+post's estimate anywhere earlier and her number now points at different text
+— the page reflows under her eyes, which is precisely the failure the brief
+warns about ("page seams would visibly lie").
+
+So the reader's position is an **ADDRESS — (post, page-within-post)** — and
+the global number is a *label* computed from the domain for display. A
+measurement moves the label; the address is untouched, so the page under her
+is the same page. That is the Phase 6 spike's accepted height story
+("estimates revise, content never regresses") expressed in a page domain, and
+it is pinned directly (`aCorrectionMovesTheLabelAndNeverThePage`).
+
+Two consequences follow from the address rule rather than from taste, and
+both are recorded as calls rather than smuggled:
+
+1. **Every post starts a new page** (judgment call 1 / #45(b)) — which is
+   what makes an address stable at all. The brief leaned the other way.
+2. **The post the reader is IN is always the post that has been sliced**, so
+   it is measured (or floored past her page) and can never be re-estimated
+   out from under her. The pin says so in the same test.
+
+#### The measurement that decided the architecture (and refuted my own first build)
+
+The batch's first build paginated a post fully on arrival and adopted the
+exact count. The suite's cost test said 22 pages in **109 ms** and getting
+worse per page — so I measured properly, in a throwaway harness, both shapes:
+
+| one post | pages | paginate ALL | one frame deep in it |
+|---|---|---|---|
+| 2,438 chars, real paragraphs | 3 | 0.1 ms | 0.02 ms |
+| 39,038 chars, real paragraphs | 46 | 0.9 ms | 0.02 ms |
+| 156,158 chars (26k words), real paragraphs | 183 | **3.5 ms** | 0.02 ms |
+| 37,760 chars as ONE unbroken paragraph | 22 | **105 ms** | 7.7 ms |
+| 151,040 chars as ONE unbroken paragraph | 92 | **1,668 ms** | 31 ms |
+
+**CoreText typesets per PARAGRAPH.** Ordinary Variorum prose is many
+paragraphs — every block is its own (R26/R33) and the join puts `"\n\n"`
+between them — so whole-post pagination is milliseconds even at book scale.
+The pathological case is ONE enormous block, which is exactly the shape her
+A3/A41 report came from (a long message pasted in one piece): every frame
+inside a giant paragraph re-typesets that paragraph from its start, and the
+cost goes quadratic.
+
+So slicing is **LAZY** — a post is cut only as far as the reader has walked,
+plus the one page of lookahead a turn needs — and a post's page count becomes
+EXACT only when slicing reaches its end. Until then the domain carries the
+estimate plus a **floor** (pages slicing has already found), which is what
+keeps the "never regresses" contract under laziness. Both the flat shape and
+the climbing one are asserted structurally (not as timing thresholds) and
+printed on every run: `paginationCostIsParagraphShapedAndPrintsItsNumbers`.
+
+*Recorded because it is a real limit, not a solved problem:* a 25k-word
+single-block post still costs ~30 ms per deep page turn inside that block.
+Bounded by the block, paid only for pages she actually turns to, and
+un-improvable without leaving CoreText.
+
+#### The 1C cross-check, answered explicitly (the batch brief asked for this)
+
+1C measured TK2's estimated geometry OVER-reporting by 367 pt on one
+3,000-word block (4,964 pt guessed vs 4,597 laid out), and the brief asked
+what my estimator does when a block's layout state flips from estimated to
+laid-out. **The honest answer is that it cannot flip, because this surface
+never enters that path:**
+
+- the estimated tier's inputs are **character counts out of SQLite**
+  (`Queries.blockExtents`, lengths computed in SQL — no prose crosses the
+  boundary and no layout engine is consulted);
+- the exact tier is **CoreText**, which lays out synchronously and completely
+  for the range it is handed; `CTFrameGetVisibleStringRange` is a measured
+  fact, not a guess;
+- **there is no NSTextView on a paginated page at all** — a page is a drawn
+  `CTFrame` — so there is no `NSTextLayoutFragment.state` to be wrong, no
+  canary to arm, and no phantom space to inherit. Pinned:
+  `readCarriesNoTextViewAtAll`.
+
+What DOES flip here is this domain's own estimate → measurement, and the
+address rule above is what bounds its blast radius to the page label.
+
+#### What shipped
+
+**1 — Read is a PAIR.** `BookStructureModel.ReadForm { flow, pages }`, with a
+`scroll | pages` control under the mode picker (it is in the navigator, not a
+bottom bar, because the SCROLL face has no bottom chrome at all — A6's
+argument). `.flow` stays the default so R2's "a finished book opens into the
+reading flow" means what it has always meant.
+
+**2 — the estimated tier.** `Queries.blockExtents` (core, own commit) returns
+one row per live block — container, block, characters, internal newlines —
+with the take resolution MIRRORING `renderPost` exactly, so the estimator and
+a rendered page can never disagree about *which* takes are on the page. Its
+agreement with `renderedText` is pinned arithmetically. `PageEstimator` models
+**paragraphs**, not characters: a block is its own paragraph, its newlines are
+content (I4), and each paragraph ends ragged — which is why a post of twenty
+short blocks is much taller than one block of the same characters (pinned at
+line level and at page level).
+
+**3 — the page domain.** `PageIndex`: one entry per post, `estimated` /
+`measured` / `floor`, prefix-summed into page numbers, with `advance`,
+`next`, `position(atPageNumber:)` and `clamped` as its whole vocabulary.
+Calibration is a running correction learned from measured posts — **and only
+from posts of two pages or more**, because a short post's count is dominated
+by the one-page floor and reports a ratio that says nothing (a book of
+one-paragraph journal entries would otherwise drag the constant to nonsense).
+Bounded to [0.5, 2.0] so one pathological post cannot wreck the domain.
+
+**4 — the exact tier.** `PageComposer` builds a post for the page: the body is
+the ratified projection and nothing else (`renderPost` slots, blank takes and
+gaps skipped, `joinRenderedTexts` — the ONE join brain), so **stored spacing
+reaches the page exactly as it reaches export**, which the reading flow's
+paragraph-splitting deliberately does not do (2A's visual loop flagged that
+this batch would meet it). `PagePaginator` slices with the 11b PDF exporter's
+proven CoreText loop.
+
+**5 — the surface.** A two-page spread of fixed logical leaves (470×660,
+46 pt margins) with paper, shadow, a folio, the post's title on its first
+page and a chapter opener where a chapter begins. A window resize SCALES the
+paper (the scale is applied to the drawing CTM, so text stays vector-crisp);
+it never repaginates. The bottom bar keeps ◀ ▶ (a leaf is two pages), the
+brief §4's SCRUBBER over the estimated domain, and a page line that wears a
+**"~"** while any post is still a guess (R112's honesty rule applied to a
+number — it drops the tilde when the whole book has been read).
+
+**6 — arrows are UNCONDITIONAL here**, and that is a direct dividend of her
+A43 ruling: 2B had to withdraw ← → while a page held the live editor
+(QUESTIONS #44(d)); Read has no editor to steal keys from.
+
+**7 — the navigator jumps PAGES without leaving Read.** A post row (and a
+chapter row) in paginated Read lands that post's first page rather than
+throwing her into Outline's editor — the 4F no-context-jump rule (R43)
+applied to a surface that did not exist when it was written.
+
+**8 — the field guide's books lesson, repaired.** Its "three views" paragraph
+still described the PRE-2A vocabulary (BOOK = the scroll, PAGES = one post
+per page, a progress bar A6 removed) — stale for two batches, and P-6 says the
+lesson is the spec. It now teaches OUTLINE · BOOK · READ with both Read faces,
+and the walk gained an act that drives `PagedReadModel` over the guide itself.
+The walk's assertions are **equivalent-or-stronger** (the 2B precedent): one
+stale `"progress bar"` claim became five vocabulary claims plus the new act.
+*(The seeded book in her store stays stale until the A1-railed re-seed — the
+13b handoff's standing item.)*
+
+#### Traced: why the composer records block ranges even though pagination does not need them
+
+A callout's indent must land on exactly the characters the callout block
+contributes, and the body is built by a join with a conditional (the
+2026-07-12 rule). Re-deriving those ranges from the finished string would
+mean re-implementing the join's condition a second time — the exact drift
+class `joinRenderedTexts` exists to prevent. So the composer walks the slots
+ONCE, emitting the string and the ranges together, and a pin asserts the
+emitted body equals `Queries.renderedText` byte for byte. One walk, one
+answer, no second join brain.
+
+#### Red-on-old evidence — stated plainly as red-on-old vs characterization
+
+**This is a FEATURE batch: no bug was fixed, so no pin is owed under the
+hallucination guard.** Three pins are nonetheless RED on an alternative
+implementation and were verified by behavioral revert (each file restored
+byte-identical, `shasum -c`); the rest are characterization and say so. One
+row records a defect the pins found in MY OWN first build.
+
+| Pin | Class | Revert applied | Observed RED |
+|---|---|---|---|
+| `thePaginatedReadRealizesTheSpreadNotTheBook` | **red-on-old** | the two-leaf `ForEach(pages.leaves)` → `ForEach(model.entries)` (the naive "draw the book" shape) | **60 `PageFrameNSView`s** on a 60-post book (bound is 2), and the materialization counter fails with it |
+| `readCarriesNoTextViewAtAll` | **red-on-old** | the leaf's `PageFrameView` → `ReadPostView` (the "reuse the read tier" alternative the brief's Q3 offered) | **6 `ReadPostTextView`s** + an `NSTextView` count of 6 where the assertion is 0 — the A43 ruling broken by composition |
+| `openingABookSlicesTheSpreadNotThePost` | **red-on-old** | `realize` calling `paginator.pageCount()` (my own first build) | the first post sliced to **40 pages** on open where the bound is 3 — the 1.67 s shape, caught by a pin rather than by her |
+| `aCorrectionMovesTheLabelAndNeverThePage` | **characterization** | — | new behavior; it states the address rule so a future change to page addressing has to break a test to break it |
+| `theEstimatorCountsParagraphsNotOnlyCharacters` · `aBlockLongerThanAPageContributesSeveralPages` · `onlyRealPostsCalibrateAndAMeasurementIsFinal` · `theDomainWalksAcrossPostsAndDiesAtTheCovers` | **characterization** | — | the estimator and domain rules, pinned as arithmetic |
+| `thePagesCoverThePostExactlyOnceInOrder` | **characterization** | — | the exact tier's correctness statement: page k starts where page k−1 ended, no gap, no overlap, the last page ends at the post's end |
+| `theComposedBodyIsTheRatifiedProjection` · `aCalloutIsIndentedWithoutAnyCharacterChanging` | **characterization** | — | the page shows `renderedText` and only that; the callout treatment changes no character |
+| `theBarKeepsItsScrubberAndSpeaksApproximately` · `theLeafTurnsTwoPagesAndTheCoversAreDead` | **characterization** | — | the bar's controls and the domain walk through the real surface |
+| `paginationCostIsParagraphShapedAndPrintsItsNumbers` | **measurement** | — | asserts the SHAPE (flat vs climbing per-page cost), never a timing threshold; prints both tables on every run (the 1C precedent) |
+| core: `extentsResolveTheSameTakeARenderedPageWould` · `aTombstonedBlockReadsAsZeroRatherThanVanishing` · `severalPostsComeBackGroupedAndOrdered` | **characterization** | — | the extent index agrees with `renderPost`/`renderedText` about what a post contains |
+
+**Two pins caught real defects in this batch's own code before any suite ran
+them in anger** — the eager-pagination row above, and the estimator's
+paragraph model, whose first test run showed two page-level assertions
+failing because the ceil hid the difference at 20 lines/page. The second was
+a TEST scale error, not a model error, and is recorded as such: the claim now
+sits at line level, where the model actually lives, and again at a page scale
+where she would see it.
+
+#### The visual loop (P-7)
+
+A throwaway capture suite rendered the whole book view (navigator included,
+light and dark) into a real 1500×950 window and was **deleted after use**
+(the 1F/2A/2B precedent). It read right: two leaves of paper with a spine of
+room between them, the chapter opener letterspaced above the post title, the
+body in the reading serif, folios centred in the bottom margin, the last leaf
+of the book blank with "end of the book", and ▶ correctly dead there. **The
+seam works** — page 1 ends mid-sentence ("…the way it always does") and page 2
+opens with its continuation ("here, without ceremony…"), which is the whole
+promise of the view, visible.
+
+Two things the loop changed: the bar's slider was **bounded to 460 pt** with a
+spacer before the page line (it had stretched to fill and jammed the label
+against the trailing edge), and the mode-seeding order in the capture itself
+exposed that `BookView` owns its `BookStructureModel` — which is why the
+**structure injection** shipped (the same seam `model:` already had).
+
+Three observations recorded, none acted on:
+**(i)** a post's LAST page leaves white space below it — that is judgment
+call 1 made visible, and it is exactly what #45(b) asks her about;
+**(ii)** in light, paper (#FFFDF6) and room are close enough that the page
+edge is carried by its shadow alone — a **Design & UI review** item;
+**(iii)** the callout's indent reads clearly as a set-in passage; the missing
+colour is noted for her in #45's closing paragraph rather than invented.
+*(Sandbox note, unchanged from 2A/2B: the test host cannot write to the
+scratchpad — `NSTemporaryDirectory()` lands in
+`~/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/`, copied out from
+there.)*
+
+#### Numbered judgment calls / PROVISIONALs
+
+1. **Every post starts a new page; text flows across pages WITHIN a post —
+   PROVISIONAL, QUESTIONS #45(b), and it deliberately contradicts the brief's
+   own lean.** The headline has the argument: with posts flowing, a
+   correction to any earlier estimate reflows every page after it, including
+   the one she is reading, and the only honest alternative is measuring the
+   whole chapter before showing page one (the P1-banned shape). Anchoring at
+   posts makes an address stable by construction. **What the alternative
+   would change:** the page count drops (short entries stop occupying whole
+   pages), the white space at a post's end disappears, and either the reader
+   accepts pages reflowing under her or the view accepts a full-book
+   measurement pass at open. Not a flag — a different build.
+2. **PAGES is a second FACE of Read, not a fourth tab (brief Q1) — and it is
+   named "Pages".** Alternatives recorded in #45(a) with what each changes: a
+   fourth top-level segment (four modes in the rail; and it would say the pair
+   is two unrelated views), or the sub-toggle in the paginated bottom bar
+   (which the SCROLL face does not have, so the door would vanish where it is
+   needed). The NAME is hers; the brief floated "Print", "Book pages",
+   "Spread".
+3. **The page is drawn by CoreText, not by a read-tier TK2 view (brief Q3).**
+   The brief leaned TK2-read-tier and said to decline only if page-slicing
+   fights it. It does fight it, in a way worth naming: a page must show
+   EXACTLY the range pagination assigned it, and asking a second layout
+   engine to re-wrap that range is two chances to disagree about where a line
+   breaks — the disagreement's shape is text visibly clipped or doubled at a
+   seam. With CoreText, **the break and the drawing are the same
+   computation.** It also keeps TK2's estimated geometry out of the surface
+   entirely (the 1C cross-check) and costs a frame per page instead of an
+   NSTextView. **What it costs:** selection and copy on the page. Read's other
+   face has never offered them either (its `Text` rows are not selectable), so
+   the pair is consistent; the roads to the text are the editing surfaces and
+   export.
+4. **A callout renders as an INDENTED passage, not a coloured frame** — a
+   deviation from the brief §7's lean, recorded in #45's closing paragraph.
+   A coloured frame is an overlay treatment and this surface has no overlay
+   layer by design (see 3). The indent is a paragraph-style transform that
+   changes no character, which is the same *class* of transform as export's
+   blockquote mapping (that one adds `"> "`, this one adds nothing) — and
+   neither touches `renderedText`. Splitting across a page boundary is free
+   with an indent, where a frame would have needed the brief's "keep callouts
+   whole" special case.
+5. **The scrubber stays (brief §4), against 2B's removal on Book** — flagged
+   as #45(c) rather than harmonised by guess, because the two briefs said
+   opposite things and her Outline complaint applies to neither surface. One
+   rule for both is one line of hers.
+6. **No one-page NUDGE control** (Book has ◁ ▷ by her ruling). A nudge exists
+   there to re-pair two POSTS that a leaf-turn split; a text spread has no
+   pairing to fix — the pages are a continuous window over one post's prose.
+   Recorded rather than skipped silently; the scrubber can land any page if
+   she wants odd/even control.
+7. **The page bears the POST's title on its first page, and a chapter opener
+   where a chapter begins.** Not in the brief. Reason: every post starting a
+   page makes a book of untitled leaves hard to place, and a printed book
+   labels its sections. Cost: the estimator must know the chrome's height or
+   every short post is estimated wrong — so `PageComposer.headingLines` is the
+   single source both sides read, which is stated in its doc comment.
+8. **Calibration learns only from posts of ≥ 2 pages.** A one-page post's
+   count is the floor, not a measurement; letting it teach would drag the
+   constant toward nonsense on exactly her corpus shape (many short journal
+   entries). Bounded to [0.5, 2.0] besides.
+9. **A `PagePaginator` cache of 4 posts, evicted by recency.** The domain
+   keeps every MEASUREMENT (they live in `PageIndex`, not the cache), so
+   eviction costs a re-slice and never a re-guess — which is why reading a
+   12-post book and coming back leaves the total exact.
+10. **`BookView` gained a `structure:` injection**, mirroring `model:`. Needed
+    because the structure model seeds its own view mode from the first
+    observed reading row, so a hosted test (and the visual loop) cannot drive
+    the mode from outside without it. Defaulted, so every existing call site
+    compiles unchanged.
+11. **The extent index is DERIVED, not stored (brief §5's option (a)).** AppSpec
+    §4's escape hatch says "stored per-block length estimates"; this is that
+    number, read. Building the column would owe a §12 lockstep event and a
+    maintenance path for a need nothing has demonstrated — the measurement says
+    reading lengths is free. Recorded so the door stays visibly closed rather
+    than forgotten.
+
+#### Deviations
+
+- **From the brief: two, both named above and both in QUESTIONS #45** —
+  judgment call 1 (post page-breaks, against §7's lean, on a P1/stability
+  argument) and judgment call 4 (callouts indented rather than framed, a
+  consequence of Q3's answer). Everything else built as the brief specifies:
+  two tiers, the estimated scrub domain, spread-only lazy realization, the
+  bottom bar kept, `renderedText` semantics, no badges, no comments, the
+  fixed-page/scale-not-repaginate posture, the empty-book leaf.
+- **From the batch brief: none.** Read is not editable; the domain rides the
+  post list and stored lengths; the 1C cross-check is answered explicitly in
+  its own section.
+- **No lookup subagent used** — every open question was answerable by
+  measurement on this machine, and the two that mattered were (the CoreText
+  cost shapes).
+- **P-6:** `TutorialWalkTests` green inside the full Mac run (760/134), with
+  the books lesson's stale prose repaired and a new walk act over the
+  paginated domain; assertions equivalent-or-stronger.
+- **P-1:** nothing new is declared, and nothing new needed declaring. The
+  surface's affordances — the `scroll | pages` toggle, the flip controls, the
+  scrubber — are surface-local under Stage 4 lesson 10, and Read routes no
+  acts at all (it is not an editing surface). The registry walk is green
+  unchanged.
+
+#### Ladder foci suggested for this batch (2C)
+
+**(1) Judgment call 1 is the thing to argue with** — a reviewer should test
+whether posts-flow really costs what the headline claims, or whether a
+bounded incremental scheme (measure forward from a chapter anchor, cache the
+frontier) gets both. **(2) The address rule** — try to find a path where a
+re-estimate DOES move the page under the reader: a book whose membership
+changes while she reads (`adopt` re-entering), a post edited under her, a
+scrub landing inside a post whose measurement then comes in shorter.
+**(3) The lazy-slicing bound** — `slice(through:)` plus the caller's one-page
+lookahead is a two-place contract; check it cannot be walked into slicing a
+whole post (especially `realize`'s 3-turn loop and `pageCount()`, which is
+deliberately off the reading path but is still public). **(4) The paginator
+cache** — 4 posts, evicted by recency, and the pins read `realizedPostCount`;
+check that eviction while a leaf is on screen cannot leave a leaf drawing a
+stale or nil frame. **(5) The composer's ranges vs the join** — the callout
+indent lands on ranges the composer computes with a duplicated copy of
+`joinRenderedTexts`' conditional; the body-equality pin covers the STRING,
+but a reviewer should decide whether the range walk should be folded into
+core beside the join instead. **(6) `PageFrameNSView.draw`** — a scaled CTM
+plus a folio drawn outside the frame's path; check the folio cannot collide
+with body text at small scales, and that `isOpaque = false` plus the SwiftUI
+paper underneath is really the right split. **(7) The unconditional arrow
+shortcuts** — verify nothing else in `BookView` (the navigator's rows) wanted
+← →, and that switching from Read to Book hands the keys back to 2B's
+conditional pair cleanly. **(8) The tutorial prose repair** — it corrects
+2A/2B's staleness, so check the whole paragraph against what those batches
+actually shipped, not only against 2C.
