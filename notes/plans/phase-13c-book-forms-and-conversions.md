@@ -757,6 +757,7 @@ are this phase's opening batch.
 | A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
 | A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. Her diagnostic was right end to end: 1A measured the mechanism (a 3,000-word block guessing 4,964 pt against 4,597 pt real), 1C measured the remedy, **1E built it (PROVISIONAL, QUESTIONS #39)** — measured in a real window at 7,837 → 7,300 pt, with the document giving back the same 537 pt. | **13c-friction — ADDRESSED (Batch 1E)** |
+| A47 | **The take-card gap — added live 2026-07-27 (sitting record below), verbatim:** *"that large open space at the end of a take, without further newlines to click into bug? it still seems present… now the large open gap isn't going away when i click into other blocks, which is good because it's less annoying, but the fact that it exists is still annoying."* Screenshot on record: the TAKES view (stack style), post "Things I want to do before Brazil", a take card with ~60 visible words and a large (~550 pt) un-clickable empty region below the caret INSIDE the card; status bar `blk 28/31 · 52204DF` and **`805w take · 1,727w post`** — a counter-vs-visible-text discrepancy the investigation must explain. This is a PANE surface, explicitly OUTSIDE 1E's detail-editor scope, and it challenges 1C's "panes never carry an estimate" clean-bill claim. Her directive: Fable finds and fixes it FIRST, before Stage 2. | **13c — Batch 1F (Fable), running** |
 | A46 | **The DEAD CLICK** — her Q4 answer, verbatim: *"clicking does nothing at all - it couldn't move your cursor into the phantom space and the down arrow couldn't move you down either. nothing was actually there."* Queued as batch 1C. | **13c-friction — INVESTIGATED (Batch 1C): NOT A BUG.** Measured through the real event route: the phantom IS the editor's surface, the click reaches it, and the caret moves — to the document END. It cannot enter the phantom because no text is there, which is her sentence exactly. Down-arrow already agreed correct. **Nothing fixed; characterization pins landed** (`PhantomSpaceTests`) and the weight moves to memo Q3 (option E, now measured). One genuinely un-routed **6 pt** strip at the bottom of every scroll view found and recorded — **AppKit's, reproduced on a vanilla `NSTextView`** — pinned at size so this class can't grow unnoticed |
 | A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
@@ -1944,6 +1945,114 @@ transactional level of the carve fix, the red-on-old convention's
 honesty about which pins are characterization). The handoff matches the
 repo record. My assessments of the open judgment calls and the roadmap
 went to the author directly (they are hers, not records).
+
+## Sitting — 2026-07-27 (author-attended; Stage 2 cast, GO, and a live finding)
+
+**K6 — the Stage 2 cast, her words verbatim:** *"we'll go with Fable
+orchestrator, Opus 5 implementer for now, with one Fable cold-reviewer
+at the end of the phase. Go ahead and run Stage 2."* Operating reading
+(the orchestrator's, recorded so it is inspectable): Stage 2's batches
+(2A–2E) go to fresh **Opus** implementer sessions; the phase's review is
+**ONE Fable cold review at the end**, over the combined diff of Batch 1F
++ Stage 2 (Stage 1's own three-round ladder already closed). If that
+review surfaces BLOCKER/MAJOR findings, the fixes land and the
+orchestrator verifies them; further review rounds only at her word —
+"one" is read as one, not as the standing up-to-three ladder. The
+`/Applications` refresh follows the closed review, zero-instance-checked
+at that moment (the R2-5 rule).
+
+**A47 — a LIVE finding, ruled to run FIRST (her words in the ledger row
+above):** the take-card gap. Her directive on staffing, verbatim: *"do
+as deep of a dive as you need to verify and fix this issue because it
+realy is quite bothersome… I would use fable to find and fix that bug as
+well as a first task, maybe spawning a unique subagent for it."* So the
+order is **1F (Fable) → 2A…2E (Opus) → the one Fable cold review →
+refresh.** Note for the record: her app was LIVE at the screenshot
+("Synced 10:13 AM"), so the no-Release-build / no-refresh / never-quit
+instance rules bind every session until the end-of-phase window.
+
+### Batch 1F — the take-card gap (A47) — FABLE implementer, runs before Stage 2
+
+**Read first, in this order:** this sitting record and ledger row A47;
+the constitution (P-1…P-9, esp. P-3, P-7, P-8) and "Stage 4 lessons";
+"Environment traps"; `notes/TEXTKIT2_NOTES.md` §2 and §3 IN FULL; batch
+record **1A** (the PanePublisher refutation — four grounds — and traced
+mechanism 3), **1C** (the pane clean-bill: "`PaneMeasurement` lays out
+first, so a pane never sees an estimate", plus `PhantomSpaceTests`),
+**1E** (the trigger table — WHY panes and the inline editor are out of
+its scope) and the round-1 clean bill's pane-host sentence. Then
+`PaneSurface.swift` / `PanePublisher` and the Takes stack's pane
+composition, with fresh eyes.
+
+**What is known, stated precisely:**
+
+- The surface is a **Takes stack card** — a `PaneSurface` pane wearing
+  the live ring — NOT the Write editor. 1E's fix is scoped
+  `scrollView != nil` (detail editor only) and **deliberately does not
+  reach panes**, on 1C's finding that every pane measures through
+  `PaneMeasurement.height`, which calls `ensureLayout(documentRange)`
+  first. **Her report is evidence that story is incomplete somewhere.**
+  Finding WHERE is the batch's job; it may be a different mechanism
+  entirely rather than a hole in that claim.
+- The gap is **stable** now — it no longer vanishes when she clicks
+  into other blocks (her words; 1A's anchor/geometry fixes are the
+  likely reason it stopped MOVING). What remains is a static
+  over-allocation of vertical space inside one card.
+- The status bar read **`805w take · 1,727w post`** while the card
+  showed ~60 words. Explain this reading: same take or a different
+  take? If the caret take really holds 805 words, where do they render?
+  If it holds ~60, why was the card framed for something far taller?
+
+**Hypotheses to confirm or refute, IN ORDER, pin-first (the
+hallucination guard: a killed hypothesis recorded is a good outcome; a
+fix built on an unconfirmed one is the forbidden class):**
+
+1. **Stored trailing newlines — CONTENT, not a bug.** Read her REAL
+   store **READ-ONLY** (the container path is in "Environment traps";
+   post "Things I want to do before Brazil", block ordinal 28/31, id
+   prefix `52204DF`): does the caret take's `working_text` end in a
+   newline run? If YES, this is the 2026-07-12 content-spacing ruling
+   plus possibly the iOS-accrual KnownIssues class — **report, never
+   trim** (trimming stored content is product-flavored and hers).
+   Evidence against, weighed honestly: she says the space has no
+   "further newlines to click into", and stored newlines are clickable
+   lines.
+2. **A stale pane height across take/text switching** — the card framed
+   for a longer sibling take (the 805-word reading?) while displaying a
+   short one; check every path that swaps a pane's text under an
+   equality-gated height sink (the overlay/sink delivery law — state
+   delivered at wire time; the starved-host class).
+3. **TK2 estimated fragments inside the LIVE pane path** — does the
+   live mode size through `PaneMeasurement` the way read panes do, or
+   does the live editor's own geometry take over when the ring lands?
+4. **`PanePublisher`'s one-directional heal on UPDATE paths** — 1A
+   refuted it for the mount path (`runTurn` re-measures
+   unconditionally); verify the same holds for text-change, live↔read
+   flips, and width changes, rather than inheriting the refutation.
+
+**Hard constraints:** trace before fixing; every bug-class fix lands
+with a red-on-old pin verified by BEHAVIORAL REVERT, restored to a
+checksum; narrowness pins where a carve/guard changes; P-3 — extend
+`PaneSurface`/the one authority, never a second measurement brain or
+liveness mechanism; P-8 overlays-never-rendering-attributes; **zero
+`Sources/VariorumCore/Sync/` lines; no schema change; her real store is
+READ-ONLY to this batch** (if a fix would need a store write, stop and
+report); **her app is LIVE** — never quit/kill it, no Release builds,
+no `/Applications` refresh (the refresh is end-of-phase regardless);
+Mac tests from `App/Variorum/` with suite-level `-only-testing`,
+confirm the "Test run with N tests" line; the full Mac suite + core
+suite green at the end, `TutorialWalkTests` included (P-6). If the
+mechanism turns out product-flavored (stored content, a taste call),
+**report with options instead of fixing** — the author decides.
+
+**Deliverables:** the traced mechanism (or the honest report that it is
+content/product-flavored); the fix with pins if it is a bug; a batch
+record in this file (the 13b form — commits, counts before → after,
+traced mechanism, judgment calls, red-on-old evidence, deviations,
+ladder foci for the end-of-phase review); the A47 ledger row updated;
+commits per convention. Counts at batch open: core **858/98** · Mac
+**733/129** · mobile 14/4 — the first two verified by the orchestrator's
+own runs this sitting.
 
 ## Architect adjudications
 
