@@ -2541,6 +2541,67 @@ cover the WRITE editor's mid-post block-end newlines (the takes path
 is pinned; Write's autosave path was code-swept but not
 experiment-pinned).
 
+### Batch 1G — ACCEPTED (2026-07-27); A47 IS CLOSED, and the security flag is resolved on the record
+
+**Verified before accepting, with extra care because the batch wrote to
+her REAL STORE:** the take is back at **4,261 bytes exactly** (the
+10:12:45 commit's text, byte-count-confirmed read-only), the
+**insurance manual commit of the 3,997 pre-restore state** sits in the
+block's history with a message naming the event (so the restore itself
+is one restore away from reversal), the fresh WAL-safe backup exists
+(`…-223415`), `/Applications` is refreshed (16:35) and signed, both
+commits present, tree clean, and **core 882/100 · Mac 786/135 green by
+my own runs**.
+
+**The subagent harness attached a SECURITY FLAG** (a store write + an
+install refresh authorized only by an orchestrator-relayed message —
+the flag is correct behavior for a harness that cannot see the author's
+session). **Resolved by the architect, who can:** both acts trace to
+the author's DIRECT words in this session, quoted in the A47b rulings
+paragraph above — *"I would restore the missing 264 characters I
+think"* and *"You can refresh the install when this issue is fixed"* —
+and the batch executed them behind the exact insurance structure the
+relay demanded (backup + commit-current-first + zero-instance windows).
+The flag, this review of it, and the trace to her words are recorded so
+no future reader mistakes the relay for improvisation.
+
+**The verdicts, adjudicated:**
+
+1. **Q1 — CONFIRMED in a sharper form than briefed, both gaps fixed.**
+   Production delivers ZERO layout passes to an idle laid-out card
+   (the census proved it — the 1F check never ran in the shipped app;
+   R3-4's class one layer up, exactly as suspected), AND the heal's
+   only remedy could be a SwiftUI equal-value no-op when the height
+   `@State` already matched (a dropped frame application — the check
+   would fire forever and heal nothing). The fix gives the check three
+   real user-event occasions (scroll-end · clicks · liveness
+   transitions — her "clicking into other blocks", verbatim) and a
+   frame lever that cannot no-op. Both revert-red. **The honest
+   falsifier is stated**: a void surviving a scroll-end/click on this
+   build points at `PaneMeasurement` itself.
+2. **Q2 — AUTHORIZED, and the deception explained.** The WAL replay
+   reconstructed her session sub-second: the 264 characters were her
+   last TWO PROSE PARAGRAPHS (the stars idea; the post→note note) plus
+   their separators — laid-out-but-UNDRAWN rows that photographed
+   blank and selected full-width, so she deleted real prose believing
+   it blank lines. Her hypothesis (a), confirmed. **No automatic
+   remover exists** — code-swept and experiment-pinned
+   (`TakePaneDurabilityTests`); the forbidden class does not fire; her
+   earlier vanished-newlines episode fits the ratified open-tail rule
+   (recorded into 13d's A22/A11 rows as input).
+3. **The restore's judgment call — ACCEPTED:** "restore the missing
+   264" was honored verbatim via `restoreCommit` because the
+   "preserve her 5-newline deletion" instruction was incompatible with
+   the bytes — the 5 newlines ARE the restored paragraphs' separators;
+   there never were standalone blank lines. One-second edit if she
+   wants the spacing tighter.
+
+**Open observation for her next real session (the one assumption the
+harness cannot prove):** that `didEndLiveScroll` posts from SwiftUI's
+scroll view under real trackpad gestures — one minute of live use
+closes it. If the void survives a real scroll-end or click, that is
+the `PaneMeasurement` falsifier and must be reported.
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
