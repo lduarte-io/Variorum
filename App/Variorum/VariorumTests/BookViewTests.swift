@@ -681,13 +681,15 @@ struct OutlineWritingSurfaceTests {
     }
 }
 
-/// 13b Stage 4, Batch 4F (S4-9, ledger N31): the book-view package's model
-/// brains + the paged view's P1/P3 shape. Progress and pages are BOTH
-/// model-driven over the POST LIST (the Phase 6 memo's ruling — never live
-/// text/pixel geometry); the paged view mounts exactly ONE page.
+/// 13b Stage 4, Batch 4F (S4-9, ledger N31): the reading-PROGRESS brain —
+/// model-driven over the POST LIST (the Phase 6 memo's ruling: never live
+/// text/pixel geometry), sticky across transition frames. 13c 2B moved the
+/// page brain's tests to the spread's own suite below; this one keeps the
+/// brain Read's flow sub-mode is the remaining candidate consumer for (2C's
+/// call — see `BookViewModel`).
 @MainActor
-@Suite("Paged view + progress bar (13b 4F, S4-9)", .serialized)
-struct PagedBookViewTests {
+@Suite("Reading progress brain (13b 4F, S4-9)", .serialized)
+struct BookProgressBrainTests {
     private func pump(_ seconds: TimeInterval = 0.05) {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
@@ -749,61 +751,48 @@ struct PagedBookViewTests {
         }
     }
 
-    @Test func thePageBrainClampsFlipsSeedsAndReleasesFocus() async throws {
-        try await withBookWorld(posts: 4) { session, db, readingID, postIDs in
-            let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
-                try Queries.assembleReading($0, readingID: readingID, limit: 300)
-            })
+}
 
-            #expect(model.pagedIndex == 0)
-            #expect(model.currentPage?.postID == postIDs[0])
+/// 13c Batch 2B (A43/A44): the BOOK mode — a two-up spread whose pages are
+/// whole posts, editable in Write or the takes stack, with ONE live editor
+/// in the app throughout.
+@MainActor
+@Suite("Book — the two-up spread (13c 2B)", .serialized)
+struct SpreadBookViewTests {
+    private func pump(_ seconds: TimeInterval = 0.05) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
 
-            // Flips clamp at both covers.
-            model.flipPage(by: -1)
-            #expect(model.pagedIndex == 0)
-            model.flipPage(by: 1)
-            #expect(model.pagedIndex == 1)
-            model.openPage(99)
-            #expect(model.pagedIndex == 3, "clamped to the last page")
-
-            // The navigator's page-jump door.
-            model.openPage(post: postIDs[2])
-            #expect(model.pagedIndex == 2)
-            model.openPage(post: "not-a-post")
-            #expect(model.pagedIndex == 2, "a foreign id flips nothing")
-
-            // Entering pages lands on the post you were in (focus wins).
-            model.focus(postIDs[1])
-            model.seedPageFromFocus()
-            #expect(model.pagedIndex == 1)
-
-            // Flipping AWAY from a live page releases focus (pages open
-            // read-cheap — the calm default; the editor's teardown flush
-            // is the standing discipline).
-            model.flipPage(by: 1)
-            #expect(model.focusedPostID == nil, "the flip released focus")
-
-            // Adoption clamps a stale page index (a shrunk book).
-            model.openPage(3)
-            model.adopt(Array(model.entries.prefix(2)))
-            #expect(model.pagedIndex == 1)
-
-            // The scrub brain is the SAME one the scroll view uses.
-            #expect(BookViewModel.scrubIndex(fraction: 0, count: 4) == 0)
-            #expect(BookViewModel.scrubIndex(fraction: 1, count: 4) == 3)
+    private func settle(
+        _ window: NSWindow, _ hosting: NSView,
+        until predicate: () -> Bool, maxTurns: Int = 40
+    ) async {
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump(0.02)
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(20))
+            if predicate() { return }
         }
     }
 
-    @Test func thePagedViewRealizesExactlyOnePageAndFlipsContent() async throws {
-        try await withBookWorld(posts: 60) { session, db, readingID, postIDs in
+    private func withHostedSpread<T>(
+        posts: Int, width: CGFloat = 1500, height: CGFloat = 800,
+        _ body: @MainActor (
+            AppSession, _ postIDs: [String], _ window: NSWindow,
+            _ hosting: NSHostingView<SpreadBookView>, _ model: BookViewModel
+        ) async throws -> T
+    ) async throws -> T {
+        try await withBookWorld(posts: posts) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
             model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             let structure = BookStructureModel(session: session, readingID: readingID)
             let window = NSWindow(
-                contentRect: NSRect(x: 80, y: 80, width: 700, height: 800),
+                contentRect: NSRect(x: 80, y: 80, width: width, height: height),
                 styleMask: [.titled], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
             defer {
@@ -811,48 +800,246 @@ struct PagedBookViewTests {
                 window.close()
             }
             let hosting = NSHostingView(
-                rootView: PagedBookView(session: session, model: model, structure: structure))
-            hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 800)
+                rootView: SpreadBookView(session: session, model: model, structure: structure))
+            hosting.frame = NSRect(x: 0, y: 0, width: width, height: height)
             window.contentView = hosting
             window.makeKeyAndOrderFront(nil)
-            await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
+            return try await body(session, postIDs, window, hosting, model)
+        }
+    }
 
-            // P1/P3's shape: ONE page mounts — a 60-post book realizes
-            // exactly one read surface, independent of book size.
-            #expect(countReadSurfaces(in: hosting) == 1,
-                    "the paged view mounts exactly the current page")
-            func pageText() -> String {
-                var text = ""
-                func walk(_ v: NSView) {
-                    if let read = v as? ReadPostTextView { text += read.string }
-                    for s in v.subviews { walk(s) }
-                }
-                walk(hosting)
-                return text
-            }
-            await settle(window, hosting, until: { pageText().contains("in post 0") })
-            #expect(pageText().contains("in post 0"), "page 1 shows the first post")
+    private func text(in view: NSView) -> String {
+        var out = ""
+        func walk(_ v: NSView) {
+            if let read = v as? ReadPostTextView { out += read.string }
+            for s in v.subviews { walk(s) }
+        }
+        walk(view)
+        return out
+    }
 
-            // Flip: still one surface, and the CONTENT is the next post's.
-            model.flipPage(by: 1)
-            await settle(window, hosting, until: { pageText().contains("in post 1") })
-            #expect(countReadSurfaces(in: hosting) == 1,
-                    "a flip swaps the page — it never accumulates surfaces")
-            #expect(pageText().contains("in post 1"))
-            #expect(!pageText().contains("in post 0"), "the old page unmounted")
+    private func count<V: NSView>(_ type: V.Type, in view: NSView) -> Int {
+        var n = view is V ? 1 : 0
+        for sub in view.subviews { n += count(type, in: sub) }
+        return n
+    }
 
-            // Focus upgrades the current page to THE one live editor.
-            model.focus(postIDs[1])
+    /// 13c 2B: the SPREAD's brain — pairing, turn-the-leaf, the one-post
+    /// nudge, the navigator jump, and the focus-release rule. All pure over
+    /// the POST LIST (Stage 4 lesson 8: the page domain is never geometry).
+    @Test func theSpreadBrainPairsTurnsNudgesAndClamps() async throws {
+        try await withBookWorld(posts: 5) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+
+            // TWO pages side by side, left first.
+            #expect(model.spreadLeftIndex == 0)
+            #expect(model.leftPage?.postID == postIDs[0])
+            #expect(model.rightPage?.postID == postIDs[1])
+            #expect(model.spreadEntries.count == 2)
+
+            // TURN THE LEAF: two posts at once (her ruling — the DEFAULT).
+            model.turnLeaf(by: 1)
+            #expect(model.spreadLeftIndex == 2)
+            #expect(model.rightPage?.postID == postIDs[3])
+
+            // The NUDGE: one post, so a split pair can be re-paired.
+            model.nudgeSpread(by: 1)
+            #expect(model.spreadLeftIndex == 3)
+            #expect(model.leftPage?.postID == postIDs[3])
+            #expect(model.rightPage?.postID == postIDs[4])
+
+            // The last leaf of an ODD book: one page and a blank leaf — a
+            // post is NEVER wrapped round from the other end.
+            model.nudgeSpread(by: 1)
+            #expect(model.spreadLeftIndex == 4)
+            #expect(model.leftPage?.postID == postIDs[4])
+            #expect(model.rightPage == nil, "a blank leaf, not a wrapped page")
+
+            // ONE enablement rule: a move that reveals nothing you cannot
+            // already see is refused (P-2 — no live door that cannot act).
+            #expect(!BookViewModel.canMove(by: 2, leftIndex: 4, count: 5))
+            #expect(!BookViewModel.canMove(by: 1, leftIndex: 4, count: 5))
+            #expect(!BookViewModel.canMove(by: 1, leftIndex: 3, count: 5),
+                    "3–4 already shows the last post; nudging on reveals nothing")
+            #expect(BookViewModel.canMove(by: -1, leftIndex: 4, count: 5))
+            #expect(!BookViewModel.canMove(by: -2, leftIndex: 0, count: 5))
+            #expect(!BookViewModel.canMove(by: 2, leftIndex: 0, count: 1),
+                    "a one-post book turns nowhere")
+
+            // The navigator's jump: a post NOT on the spread takes the left
+            // page; a post already on it never re-shuffles the pairing.
+            model.showPost(postIDs[1])
+            #expect(model.spreadLeftIndex == 1)
+            model.showPost(postIDs[2])
+            #expect(model.spreadLeftIndex == 1, "already on the spread — pairing kept")
+            model.showPost("not-a-post")
+            #expect(model.spreadLeftIndex == 1, "a foreign id flips nothing")
+
+            // Entering the spread lands on the post you were in.
+            model.focus(postIDs[4])
+            model.seedSpreadFromFocus()
+            #expect(model.spreadLeftIndex == 4)
+
+            // A move that CARRIES the live page keeps its ring; a move that
+            // leaves it behind releases it (the editor's teardown flush is
+            // the standing discipline).
+            model.openSpread(leftIndex: 3)
+            #expect(model.focusedPostID == postIDs[4], "the nudge carried the live page")
+            model.openSpread(leftIndex: 0)
+            #expect(model.focusedPostID == nil, "the turn left it behind")
+
+            // Adoption clamps a stale left index (a shrunk book).
+            model.openSpread(leftIndex: 4)
+            model.adopt(Array(model.entries.prefix(2)))
+            #expect(model.spreadLeftIndex == 1)
+
+            // The scrub brain (kept; 2C's) is untouched by the rename.
+            #expect(BookViewModel.scrubIndex(fraction: 0, count: 4) == 0)
+            #expect(BookViewModel.scrubIndex(fraction: 1, count: 4) == 3)
+        }
+    }
+
+    /// P3, the batch's load-bearing claim: the spread realizes THE SPREAD,
+    /// never the book. A 60-post book puts exactly TWO posts on screen.
+    /// Red-on-old by behavioral revert: rendering `model.entries` instead of
+    /// the two-page HStack materializes every page.
+    @Test func theSpreadRealizesTwoPagesNotTheBook() async throws {
+        try await withHostedSpread(posts: 60) { _, _, window, hosting, model in
+            BookSpreadMaterialization.count = 0
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) >= 2 })
+            #expect(countReadSurfaces(in: hosting) == 2,
+                    "two pages — never the book's extent")
+            let materialized = BookSpreadMaterialization.count
+            #expect(materialized < 8,
+                    "a 60-post book materializes the spread's pages, not 60: \(materialized)")
+            await settle(window, hosting, until: { text(in: hosting).contains("in post 1") })
+            #expect(text(in: hosting).contains("in post 0"), "the left page")
+            #expect(text(in: hosting).contains("in post 1"), "the right page")
+
+            // TURN THE LEAF: two posts on, still exactly two surfaces.
+            model.turnLeaf(by: 1)
+            await settle(window, hosting, until: { text(in: hosting).contains("in post 3") })
+            #expect(countReadSurfaces(in: hosting) == 2,
+                    "a turn swaps both pages — it never accumulates surfaces")
+            #expect(text(in: hosting).contains("in post 2"))
+            #expect(text(in: hosting).contains("in post 3"))
+            #expect(!text(in: hosting).contains("in post 0"), "the old leaf unmounted")
+
+            // The NUDGE re-pairs by one: post 3 stays, post 4 arrives.
+            model.nudgeSpread(by: 1)
+            await settle(window, hosting, until: { text(in: hosting).contains("in post 4") })
+            #expect(countReadSurfaces(in: hosting) == 2)
+            #expect(text(in: hosting).contains("in post 3"), "the nudge re-paired")
+            #expect(text(in: hosting).contains("in post 4"))
+        }
+    }
+
+    /// A44 + P3: each page is editable, and the ring MIGRATES between them —
+    /// one live editor in the app, always. The sibling stays read-cheap,
+    /// which is what makes two whole posts affordable at once.
+    @Test func theRingMigratesBetweenPagesAndOnlyOnePageIsEverLive() async throws {
+        try await withHostedSpread(posts: 6) { _, postIDs, window, hosting, model in
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) >= 2 })
+            #expect(countLiveEditors(in: hosting) == 0, "a spread opens calm")
+
+            // Click into the LEFT page: it upgrades, the right stays read.
+            model.focus(postIDs[0], caret: 0)
             await settle(window, hosting, until: { countLiveEditors(in: hosting) == 1 })
             #expect(countLiveEditors(in: hosting) == 1)
-            #expect(countReadSurfaces(in: hosting) == 0,
-                    "the page upgraded — read tier swapped for the live editor")
+            #expect(countReadSurfaces(in: hosting) == 1, "the sibling page stayed read-cheap")
 
-            // Flipping away releases focus and returns read-cheap.
-            model.flipPage(by: 1)
+            // Click into the RIGHT page: the ring MIGRATES — never two.
+            model.focus(postIDs[1], caret: 0)
+            await settle(
+                window, hosting,
+                until: { countLiveEditors(in: hosting) == 1 && countReadSurfaces(in: hosting) == 1 })
+            #expect(countLiveEditors(in: hosting) == 1,
+                    "exactly one live editor in the whole app, still")
+            #expect(countReadSurfaces(in: hosting) == 1)
+
+            // Turning the leaf leaves the live page behind: back to calm.
+            model.turnLeaf(by: 1)
             await settle(window, hosting, until: { countLiveEditors(in: hosting) == 0 })
             #expect(countLiveEditors(in: hosting) == 0)
-            #expect(countReadSurfaces(in: hosting) == 1)
+            #expect(countReadSurfaces(in: hosting) == 2)
+        }
+    }
+
+    /// Her bottom-bar ruling, both halves: the bar STAYS here (unlike
+    /// Outline, A6) and carries the form picker — and there is NO horizontal
+    /// scrollbar, the complaint that removed Outline's. Red-on-old by
+    /// behavioral revert: restoring 4F's `Slider` puts an `NSSlider` back.
+    @Test func theSpreadKeepsItsBarWithFormsAndNoSlider() async throws {
+        try await withHostedSpread(posts: 6) { _, _, window, hosting, _ in
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) >= 2 })
+            #expect(count(NSSlider.self, in: hosting) == 0,
+                    "no jump slider — no horizontal scrollbar on the spread")
+            #expect(count(NSSegmentedControl.self, in: hosting) == 1,
+                    "the bar's Write | Takes form picker is rendered (A44)")
+        }
+    }
+
+    /// Stage 4 lesson 2, half one (pure): the take family must be live in
+    /// BOTH of the spread's editing forms. Write reaches it as an attached
+    /// full-document editor (the arm Outline proved at 2A); the takes stack
+    /// reaches it by ATTACHMENT — `mode == .takes` was a proxy for "a board
+    /// is mounted" and stops being true the moment a board mounts outside a
+    /// post detail. Red-on-old: without the `takesBoardAttached` arm, the
+    /// second context greys the whole family out over a working board.
+    @Test func bothSpreadFormsJoinTheTakeFamilysAvailability() {
+        let writeForm = CapabilityContext(mode: nil, writeEditorAttached: true)
+        let takesForm = CapabilityContext(mode: nil, takesBoardAttached: true)
+        for context in [writeForm, takesForm] {
+            #expect(CapabilityRegistry.availability(.commitTake, in: context) == .act)
+            for id: CapabilityID in [
+                .newTake, .blankTake, .chooseTake, .archiveTake, .showTakes,
+            ] {
+                #expect(CapabilityRegistry.availability(id, in: context) == .act,
+                        "\(id) must act where the spread's page is editable")
+            }
+        }
+        // …and it stays honest: no board, no editor, no post ⇒ unavailable.
+        #expect(CapabilityRegistry.availability(
+            .commitTake, in: CapabilityContext(mode: nil)) == .unavailable)
+    }
+
+    /// Stage 4 lesson 2, half two (behavioral): a mounted spread CONSUMES
+    /// `.commit` in each form — the N5 class ("the door is advertised and
+    /// the keystroke falls through to nothing") closed per surface, per
+    /// form. The takes half additionally pins the attachment the registry
+    /// arm reads, so the two halves cannot drift apart.
+    @Test func aMountedSpreadConsumesTheCommitCommandInEitherForm() async throws {
+        try await withHostedSpread(posts: 4) { session, postIDs, window, hosting, model in
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) >= 2 })
+            #expect(!session.commandRouter.dispatch(.commit, speakingWhenUnhandled: false),
+                    "read-cheap only: nothing has claimed ⌘S yet")
+            #expect(!session.commandRouter.takesBoardAttached)
+
+            // WRITE form: the attached full-document editor takes it.
+            model.focus(postIDs[0], caret: 0)
+            await settle(window, hosting, until: { countLiveEditors(in: hosting) == 1 })
+            #expect(session.commandRouter.dispatch(.commit, speakingWhenUnhandled: false),
+                    "⌘S reaches the spread's Write page")
+
+            // TAKES form: the board mounts on the active page, reports its
+            // attachment, and consumes the same command.
+            model.spreadForm = .takes
+            await settle(window, hosting, until: { session.commandRouter.takesBoardAttached })
+            #expect(session.commandRouter.takesBoardAttached,
+                    "the mounted board reports itself — the availability half")
+            #expect(CapabilityRegistry.isEnabled(
+                .commitTake, in: session.commandRouter.currentContext()),
+                    "…and the registry reads it, so the menu is live")
+            #expect(session.commandRouter.dispatch(.commit, speakingWhenUnhandled: false),
+                    "⌘S reaches the spread's takes page")
+
+            // Leaving the form detaches: enablement never outruns the board.
+            model.spreadForm = .write
+            await settle(window, hosting, until: { !session.commandRouter.takesBoardAttached })
+            #expect(!session.commandRouter.takesBoardAttached)
         }
     }
 }

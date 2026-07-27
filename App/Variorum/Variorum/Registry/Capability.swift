@@ -144,6 +144,15 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// editor, the book view's inline editor, or a pool's scraps editor) —
     /// structural gestures can act directly.
     var writeEditorAttached = false
+    /// A TAKES BOARD is mounted somewhere (13c 2B). Inside a post detail
+    /// `mode == .takes` already says this; the BOOK SPREAD's takes page
+    /// mounts the same board with no detail around it, so the board reports
+    /// its own attachment — the `writeEditorAttached` shape, for the other
+    /// editable surface kind. Without it the take family would be greyed out
+    /// over a mounted, fully working board (the N5 class: Stage 4 lesson 2's
+    /// "a new editable surface joins the availability AND registers a
+    /// handler" — the handler half the board already had).
+    var takesBoardAttached = false
     /// The structural undo stack has an entry.
     var undoAvailable = false
     /// The structural REDO stack has an entry (13c 1B — A10).

@@ -33,8 +33,15 @@ nonisolated enum CapabilityRegistry {
     /// The take family: native wherever takes are editable (Write's caret
     /// block, the Takes/Lenses boards, any attached editor — pool scraps
     /// included).
+    ///
+    /// 13c 2B: `mode == .takes` was the PROXY for "a takes board is
+    /// mounted", and the proxy stopped being true the moment a board could
+    /// mount outside a post detail (the book spread's takes page). The
+    /// attachment itself is now the condition — same shape as
+    /// `writeEditorAttached`, same reason: enablement must track the surface
+    /// that actually acts, never the container it used to live in.
     private static let takeFamily: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
-        if ctx.writeEditorAttached { return .act }
+        if ctx.writeEditorAttached || ctx.takesBoardAttached { return .act }
         switch ctx.mode {
         case .write, .takes, .lenses: return .act
         default: return .unavailable

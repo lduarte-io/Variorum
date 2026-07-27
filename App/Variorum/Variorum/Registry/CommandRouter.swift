@@ -117,6 +117,37 @@ final class CommandRouter {
         return true
     }
 
+    // MARK: - Takes-board attachment (13c 2B)
+
+    /// A mounted takes board reports itself here so the registry's take
+    /// family can read the ATTACHMENT rather than the post-detail mode that
+    /// used to imply it. The book spread's takes page mounts a board with no
+    /// detail around it; `activeMode` is nil there, and without this the
+    /// whole take family (⌘S included) would grey out over a board that
+    /// works perfectly (Stage 4 lesson 2's availability half).
+    ///
+    /// A SET of tokens rather than a flag: mount/unmount order is SwiftUI's,
+    /// and an arriving board's `onAppear` can precede the departing one's
+    /// `onDisappear` — a boolean would be cleared by the teardown of a board
+    /// that no longer exists (the `registerDetail` token discipline, same
+    /// hazard, same shape of fix).
+    @ObservationIgnored private var takesBoardTokens: Set<UUID> = []
+
+    /// Observable so menu enablement re-evaluates when a board mounts.
+    private(set) var takesBoardAttached = false
+
+    func attachTakesBoard() -> UUID {
+        let token = UUID()
+        takesBoardTokens.insert(token)
+        takesBoardAttached = true
+        return token
+    }
+
+    func detachTakesBoard(_ token: UUID) {
+        takesBoardTokens.remove(token)
+        takesBoardAttached = !takesBoardTokens.isEmpty
+    }
+
     // MARK: - Surface command handlers (LIFO — last mounted wins)
 
     @ObservationIgnored private var handlers: [(token: UUID, handler: (RoutedCommand) -> Bool)] = []
@@ -178,6 +209,7 @@ final class CommandRouter {
         CapabilityContext(
             mode: activeMode,
             writeEditorAttached: writeEditorAttached(),
+            takesBoardAttached: takesBoardAttached,
             undoAvailable: undoAvailable(),
             redoAvailable: redoAvailable())
     }

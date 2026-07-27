@@ -70,10 +70,10 @@ struct BookView: View {
             case .outline:
                 outlineBody
             case .spread:
-                // The picker's "Book" (13c 2A's rename): 13b 4F's paged
-                // view — page = a post, one page mounted at a time (P3).
-                // Batch 2B makes it the two-up spread.
-                PagedBookView(session: session, model: model, structure: structure)
+                // The picker's "Book" (13c 2A's rename, 2B's build): the
+                // TWO-UP spread — each page a whole scrollable post, the
+                // active one editable in Write or the takes stack (A43/A44).
+                SpreadBookView(session: session, model: model, structure: structure)
             case .read:
                 ReadingFlowView(
                     session: session,
@@ -175,14 +175,14 @@ struct BookView: View {
                                 Button {
                                     // Navigate: land the book scroll at the
                                     // chapter (the flow view shows it too);
-                                    // while PAGING, flip to the chapter's
-                                    // first page (13b 4F).
+                                    // in the SPREAD, show the chapter's
+                                    // first page (13b 4F; 13c 2B).
                                     if structure.mode == .spread {
                                         if let first = structure
                                             .grouped(entries: model.entries)
                                             .first(where: { $0.section?.id == section.id })?
                                             .entries.first {
-                                            model.openPage(post: first.postID)
+                                            model.showPost(first.postID)
                                         }
                                     } else {
                                         scrollTarget = "chapter-\(section.id)"
@@ -224,13 +224,14 @@ struct BookView: View {
                             // context jump).
                             ForEach(group.entries, id: \.postID) { entry in
                                 Button {
-                                    // While PAGING the navigator is a
-                                    // page-jump: land the post's page,
-                                    // read-cheap (13b 4F — the calm
-                                    // default; a click in the page
-                                    // upgrades to the live editor).
+                                    // In the SPREAD the navigator is a
+                                    // page-jump: show the post, read-cheap
+                                    // (13b 4F — the calm default; a click in
+                                    // the page upgrades it to the live
+                                    // editor). A post already on the spread
+                                    // stays where it is (13c 2B).
                                     if structure.mode == .spread {
-                                        model.openPage(post: entry.postID)
+                                        model.showPost(entry.postID)
                                     } else {
                                         structure.mode = .outline
                                         model.focus(entry.postID)
@@ -613,11 +614,12 @@ struct BookView: View {
     @State private var bodyChapterDropTarget: String?
     @State private var bodyChapterDropAtEnd = false
 
-    /// The navigator's "you are here": the focused post — and, while
-    /// paging, the current page (13b 4F).
+    /// The navigator's "you are here": the focused post — and, in the
+    /// SPREAD, BOTH pages on screen (13b 4F; 13c 2B — a spread shows two
+    /// posts, so two rows are honestly "here").
     private func navigatorMarks(_ entry: Queries.ReadingEntry) -> Bool {
         model.focusedPostID == entry.postID
-            || (structure.mode == .spread && model.currentPage?.postID == entry.postID)
+            || (structure.mode == .spread && model.isOnSpread(entry.postID))
     }
 
     /// Batch 12: kind + extent at a glance under the title.

@@ -65,8 +65,8 @@ final class BookViewModel {
     func adopt(_ new: [Queries.ReadingEntry]) {
         truncated = new.count > Self.entryWindow
         entries = truncated ? Array(new.prefix(Self.entryWindow)) : new
-        // The page brain never points past the (possibly shrunk) list.
-        pagedIndex = Self.clampedPage(pagedIndex, count: entries.count)
+        // The spread brain never points past the (possibly shrunk) list.
+        spreadLeftIndex = Self.clampedPage(spreadLeftIndex, count: entries.count)
     }
 
     /// The section header to show ABOVE entry `i`, if any: grouping is
@@ -111,10 +111,18 @@ final class BookViewModel {
     // its whole bottom inset, progress bar included ("it seems a bit
     // buggy… remove it fully for now"), and the per-row visibility
     // reporting went with it rather than costing work for a face that
-    // isn't drawn. The brain stays: it is pure and pinned, the Book
-    // spread and Read's paginated sub-mode both KEEP a bottom bar, and
-    // batches 2B/2C own those. If the outline bar ever returns, her
-    // observed bugginess gets investigated FIRST.
+    // isn't drawn. If the outline bar ever returns, her observed
+    // bugginess gets investigated FIRST.
+    //
+    // 13c 2B, stated because 2A's record asked whether the spread would
+    // pick this up: **it does not, and should not.** The Book spread's
+    // position is EXACTLY known (`spreadLeftIndex` — a post-list index,
+    // not an observation of what happens to be on screen), so its bottom
+    // bar reads it directly and no row reports visibility. This brain
+    // answers a different question — "how far down a CONTINUOUS scroll of
+    // posts are you" — which only Read's flow sub-mode still asks. If 2C
+    // does not adopt it, it has no caller left and should be deleted
+    // there rather than kept warm on speculation.
 
     /// The posts whose CONTENT view is currently on screen (the card, or
     /// the expanded body — one tracked view per row).
@@ -154,57 +162,129 @@ final class BookViewModel {
         return (position, entries.count, Double(position) / Double(entries.count))
     }
 
-    // MARK: - The paged view's page brain (13b 4F — S4-9(2), N31: page =
-    // a POST; the same model-driven domain as the scrubber — the post
-    // list; the Phase 6 memo binds).
+    // MARK: - The SPREAD's page brain (13b 4F's page = a POST, made TWO-UP
+    // at 13c 2B — her direction: "basically like [today's] Pages but with
+    // two posts side by side… more like a lens column, for comparison").
+    // The domain is the POST LIST, never live text geometry (the Phase 6
+    // memo's model-driven ruling; Stage 4 lesson 8) — which is exactly what
+    // distinguishes Book from Read: **Book paginates by post, Read
+    // paginates by text.**
+    //
+    // Vocabulary, renamed OUT of the collision at 2B for the reason 2A
+    // renamed the modes: `pagedIndex` named "the one page on screen" and now
+    // means "the LEFT page of the spread", so every stale reference should
+    // be a compile error rather than silently mean something else.
 
-    /// The current page (an index into `entries`; clamped on adopt).
-    private(set) var pagedIndex = 0
+    /// The LEFT page of the spread (an index into `entries`; clamped on
+    /// adopt). The right page is its successor where the book has one.
+    private(set) var spreadLeftIndex = 0
+
+    /// How the ACTIVE page presents itself — her A44 instruction: *"stack
+    /// view + the normal write view should be the editing forms offered."*
+    /// Session/view state, never persisted (the collapse-set class,
+    /// QUESTIONS #43(b)/#44(a)); one setting for the spread, because the
+    /// forms are what the VIEW offers, not a property of a post.
+    enum SpreadForm: String, Sendable, CaseIterable { case write, takes }
+    var spreadForm: SpreadForm = .write
 
     nonisolated static func clampedPage(_ index: Int, count: Int) -> Int {
         guard count > 0 else { return 0 }
         return min(max(index, 0), count - 1)
     }
 
-    /// The current page's entry (nil on an empty book).
-    var currentPage: Queries.ReadingEntry? {
-        guard pagedIndex >= 0, pagedIndex < entries.count else { return nil }
-        return entries[pagedIndex]
+    /// The spread's two slots for a left index: the left page and — when the
+    /// book has a successor — the right. An odd book (or a nudge onto the
+    /// last post) shows ONE page and a blank leaf; nothing ever wraps round
+    /// from the other end of the book (a blank leaf is honest, a wrapped
+    /// page is a lie about where you are).
+    nonisolated static func spreadIndices(
+        leftIndex: Int, count: Int
+    ) -> (left: Int, right: Int?)? {
+        guard count > 0 else { return nil }
+        let left = clampedPage(leftIndex, count: count)
+        return (left, left + 1 < count ? left + 1 : nil)
     }
 
-    /// Land on a page. Flipping away from a live page RELEASES focus —
-    /// pages open read-cheap (the calm default; P3's one-live-editor rule
-    /// holds by construction either way, since only the current page
-    /// mounts). The unmounting editor's teardown flushes pending text
-    /// through the per-post coordinator (the standing discipline).
-    func openPage(_ index: Int) {
-        let clamped = Self.clampedPage(index, count: entries.count)
-        guard clamped != pagedIndex else { return }
-        pagedIndex = clamped
-        if let focused = focusedPostID, entries.indices.contains(clamped),
-           entries[clamped].postID != focused {
-            focus(nil)
-        }
+    /// Can a move of `posts` reveal anything you cannot already see? ONE rule
+    /// behind every flip control's enablement: a turn or a nudge that shows
+    /// no new post is refused, so the last leaf never has a live "next" that
+    /// re-shows the page you are already reading (P-2 — a door that cannot
+    /// act in its context isn't rendered live).
+    nonisolated static func canMove(
+        by posts: Int, leftIndex: Int, count: Int
+    ) -> Bool {
+        guard let here = spreadIndices(leftIndex: leftIndex, count: count) else { return false }
+        guard let there = spreadIndices(leftIndex: leftIndex + posts, count: count)
+        else { return false }
+        let visible = Set([here.left, here.right].compactMap { $0 })
+        let landing = Set([there.left, there.right].compactMap { $0 })
+        return !landing.isSubset(of: visible)
     }
 
-    /// Land on a post's page (the navigator's door while paging).
-    func openPage(post postID: String) {
+    /// The spread's entries, left first (1 or 2; empty on an empty book).
+    var spreadEntries: [Queries.ReadingEntry] {
+        guard let indices = Self.spreadIndices(leftIndex: spreadLeftIndex, count: entries.count)
+        else { return [] }
+        return [indices.left, indices.right].compactMap { $0 }.map { entries[$0] }
+    }
+
+    var leftPage: Queries.ReadingEntry? { spreadEntries.first }
+    var rightPage: Queries.ReadingEntry? { spreadEntries.count > 1 ? spreadEntries[1] : nil }
+
+    /// Land the spread with `index` as its LEFT page. Flipping away from a
+    /// live page RELEASES focus — pages open read-cheap (the calm default);
+    /// the unmounting editor's teardown flushes pending text through the
+    /// per-post coordinator (the standing discipline). A post still on the
+    /// spread KEEPS its ring: a nudge that carries your live page along has
+    /// no reason to throw your caret away.
+    func openSpread(leftIndex: Int) {
+        let clamped = Self.clampedPage(leftIndex, count: entries.count)
+        guard clamped != spreadLeftIndex else { return }
+        spreadLeftIndex = clamped
+        releaseFocusIfItLeftTheSpread()
+    }
+
+    private func releaseFocusIfItLeftTheSpread() {
+        guard let focused = focusedPostID else { return }
+        if !spreadEntries.contains(where: { $0.postID == focused }) { focus(nil) }
+    }
+
+    /// TURN THE LEAF — the default flip, two posts at a time (her ruling).
+    func turnLeaf(by leaves: Int) {
+        openSpread(leftIndex: spreadLeftIndex + 2 * leaves)
+    }
+
+    /// The single-step control (her sketch: *"a half arrow button or
+    /// something"*): nudge the spread by ONE post, so a turn that split two
+    /// posts she wanted side by side can be re-paired.
+    func nudgeSpread(by posts: Int) {
+        openSpread(leftIndex: spreadLeftIndex + posts)
+    }
+
+    /// The navigator's jump: show this post. A post already ON the spread is
+    /// left where it is (jumping to the page you are reading must not
+    /// re-shuffle the pairing you are looking at); otherwise it takes the
+    /// LEFT page.
+    func showPost(_ postID: String) {
         guard let index = entries.firstIndex(where: { $0.postID == postID }) else { return }
-        openPage(index)
+        guard !spreadEntries.contains(where: { $0.postID == postID }) else { return }
+        openSpread(leftIndex: index)
     }
 
-    func flipPage(by delta: Int) {
-        openPage(pagedIndex + delta)
+    /// True while this post is one of the spread's two pages.
+    func isOnSpread(_ postID: String) -> Bool {
+        spreadEntries.contains { $0.postID == postID }
     }
 
-    /// Entering the paged view lands on the post you were in (focus wins,
-    /// else the page you last held).
-    func seedPageFromFocus() {
+    /// Entering the spread lands on the post you were in (focus wins, else
+    /// the leaf you last held).
+    func seedSpreadFromFocus() {
         if let focused = focusedPostID,
+           !isOnSpread(focused),
            let index = entries.firstIndex(where: { $0.postID == focused }) {
-            pagedIndex = index
+            spreadLeftIndex = index
         } else {
-            pagedIndex = Self.clampedPage(pagedIndex, count: entries.count)
+            spreadLeftIndex = Self.clampedPage(spreadLeftIndex, count: entries.count)
         }
     }
 

@@ -1707,15 +1707,18 @@ struct TutorialLibraryActsTests {
             model.adopt(try await db.read { [bookID] in
                 try Queries.assembleReading($0, readingID: bookID, limit: 300)
             })
-            #expect(model.currentPage != nil)
+            #expect(model.leftPage != nil)
             let total = model.entries.count
-            model.openPage(total - 1)
-            #expect(model.currentPage?.postID == model.entries.last?.postID,
-                    "the scrub reaches the last page")
-            model.flipPage(by: 1)
-            #expect(model.pagedIndex == total - 1, "the last cover clamps")
-            model.openPage(post: lesson)
-            #expect(model.currentPage?.postID == lesson, "the navigator jumps to a page")
+            // 13c 2B: the pages are a two-up SPREAD now — the same
+            // model-driven domain (the entry list), turned a leaf at a time.
+            model.openSpread(leftIndex: total - 1)
+            #expect(model.leftPage?.postID == model.entries.last?.postID,
+                    "the spread reaches the last page")
+            #expect(model.rightPage == nil, "…and the last leaf is honest about its blank half")
+            model.turnLeaf(by: 1)
+            #expect(model.spreadLeftIndex == total - 1, "the last cover clamps")
+            model.showPost(lesson)
+            #expect(model.isOnSpread(lesson), "the navigator jumps to a page")
 
             // The per-post word target on the lesson's own post: set,
             // progress computes, clear (display only — the lesson's words:

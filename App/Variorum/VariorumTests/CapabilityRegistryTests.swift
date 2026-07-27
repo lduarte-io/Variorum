@@ -30,6 +30,10 @@ struct CapabilityRegistryTests {
         }
         contexts.append(CapabilityContext(mode: nil))
         contexts.append(CapabilityContext(mode: nil, writeEditorAttached: true))  // book/pool editor
+        // 13c 2B: a takes board mounted OUTSIDE a post detail (the book
+        // spread's takes page) — the context in which `mode` says nothing
+        // and the board's own attachment is the truth.
+        contexts.append(CapabilityContext(mode: nil, takesBoardAttached: true))
         contexts.append(CapabilityContext(mode: nil, undoAvailable: true))
         // 13c 1B (A10): the redo stack is the second app-scope gate.
         contexts.append(CapabilityContext(mode: nil, redoAvailable: true))

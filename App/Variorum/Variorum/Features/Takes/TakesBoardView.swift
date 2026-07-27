@@ -38,6 +38,8 @@ struct TakesBoardView: View {
     @State private var diffPresentation: TakesDiffPresentation?
     /// 13b 1b: the routed-command registration's lifecycle token.
     @State private var commandToken: UUID?
+    /// 13c 2B: the takes-board ATTACHMENT token (the availability half).
+    @State private var attachToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -138,6 +140,11 @@ struct TakesBoardView: View {
             // The routed-command channel (P-4): a registered handler by
             // composition, not a notification observer.
             commandToken = session.commandRouter.registerHandler { handleRouted($0) }
+            // …and the AVAILABILITY half (13c 2B, Stage 4 lesson 2): the
+            // board says it is here, so the take family is live wherever it
+            // mounts — including the book spread's takes page, where there
+            // is no post detail to carry `mode == .takes`.
+            attachToken = session.commandRouter.attachTakesBoard()
         }
         .onChange(of: themeSettings.followTheScroll) { _, new in
             model.followTheScroll = new
@@ -148,6 +155,9 @@ struct TakesBoardView: View {
         .onDisappear {
             if let commandToken {
                 session.commandRouter.unregisterHandler(commandToken)
+            }
+            if let attachToken {
+                session.commandRouter.detachTakesBoard(attachToken)
             }
             model.teardown()
         }
