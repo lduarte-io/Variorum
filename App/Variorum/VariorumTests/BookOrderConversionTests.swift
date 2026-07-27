@@ -191,6 +191,41 @@ struct BookOrderConversionTests {
         }
     }
 
+    /// 13c K6 review, K2 (the face half — red-on-old by behavioral revert:
+    /// drop the `order:` forwarding in `BookStructureModel.convertToCurated`
+    /// and the memberships land in the STORED order, failing the assertion).
+    /// The core half's pin is `conversionUnderAViewOrderOverrideFreezesThe-
+    /// OrderSheIsLookingAt` (SmartConversionTests); this one pins the door
+    /// the book view actually calls. The one line left unpinned is BookView's
+    /// sheet closure passing `model.viewOrder` — stated in the fix record.
+    @Test func theNavigatorConversionFreezesTheOrderSheIsBrowsing() async throws {
+        try await withBooksWorld { session, db in
+            let tag = try session.operations.createTag(name: "work")
+            let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
+            let reading = try session.operations.createReading(
+                name: "collected", kind: .smart, querySpec: spec)
+            var postIDs: [String] = []
+            for i in 0..<3 {
+                let post = try session.operations.createPost(title: "p\(i)")
+                _ = try session.operations.applyTag(tag.id, toPost: post.id)
+                postIDs.append(post.id)
+            }
+
+            // She is browsing newest-first through the A31 override.
+            let looking = Queries.ReadingOrder(field: .createdAt, direction: .desc)
+            let structure = BookStructureModel(session: session, readingID: reading.id)
+            let converted = await structure.convertToCurated(
+                keepCollecting: false, collectingName: nil, order: looking)
+            #expect(converted)
+
+            let frozen = try await db.read { [id = reading.id] in
+                try Queries.assembleReading($0, readingID: id)
+            }
+            #expect(frozen.map(\.postID) == [postIDs[2], postIDs[1], postIDs[0]],
+                    "the conversion froze the order she was browsing, not the stored pair")
+        }
+    }
+
     @Test func theShelfReportsWhatConversionDidRatherThanGoingQuiet() async throws {
         try await withBooksWorld { session, _ in
             let tag = try session.operations.createTag(name: "work")

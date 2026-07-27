@@ -163,9 +163,19 @@ struct BookView: View {
                 ) { keepCollecting, collectingName in
                     let followUp = conversionFollowUp
                     Task {
+                        // K2 (13c K6 review): the sheet promises "the order
+                        // you're looking at them" — with an A31 override on,
+                        // that is the override, so it rides the conversion.
                         let converted = await structure.convertToCurated(
                             keepCollecting: keepCollecting,
-                            collectingName: collectingName)
+                            collectingName: collectingName,
+                            order: model.viewOrder)
+                        // FROZEN is the book's order now — drop the override
+                        // so the menu stops claiming a separate way of
+                        // looking (the "Save as This Book's Order" door's own
+                        // rule; the content is identical at this instant, so
+                        // nothing on screen moves).
+                        if converted { model.viewOrder = nil }
                         // P-2: the door performs the act she asked for —
                         // conversion was the step on the way, not the point.
                         if converted, followUp == .createChapter {

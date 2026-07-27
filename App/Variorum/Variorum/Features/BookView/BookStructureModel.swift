@@ -253,13 +253,21 @@ final class BookStructureModel {
     /// Convert, then finish the act she asked for. Returns true on success
     /// so the caller can run the follow-up (P-2's choreography: "+ new
     /// chapter" on a smart book converts AND opens the chapter prompt).
-    func convertToCurated(keepCollecting: Bool, collectingName: String?) async -> Bool {
+    ///
+    /// `order` (13c K6 review, K2): the A31 view-order override the book
+    /// view is browsing through, so the conversion freezes the order she is
+    /// actually LOOKING at — the offer sheet's own promise. nil = the
+    /// stored order (the shelf door, where no override exists).
+    func convertToCurated(
+        keepCollecting: Bool, collectingName: String?,
+        order: Queries.ReadingOrder? = nil
+    ) async -> Bool {
         do {
             let readingID = readingID
             _ = try await session.runner.run { ops in
                 try ops.convertSmartReadingToCurated(
                     readingID, keepCollecting: keepCollecting,
-                    collectingName: collectingName)
+                    collectingName: collectingName, order: order)
             }
             lastError = nil
             return true
