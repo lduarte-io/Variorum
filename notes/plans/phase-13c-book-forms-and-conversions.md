@@ -2232,6 +2232,26 @@ instead, one line for her to confirm. Ambiguity ⇒ stop and report.
 is CONFIRMED for 13d** ("we should build A22 properly in 13d") — the
 13d plan's row carries it.
 
+**A47b, her design question (2026-07-27, verbatim):** *"should we just
+stop trimming the whitespace at the end of blocks? that seems to be the
+source of this issue on some level (though obviously the fact that the
+newlines no longer exist but are rendered as a large block is the
+bigger issue). still, I'm kind of curious what our approach is there
+and if we should fix it."* Answered directly (the architect's reply is
+the record of the approach): block ENDS are never trimmed (I4 +
+the 2026-07-12 durability ruling — her 5 deleted blank lines had been
+stored faithfully); the trim lives at exactly two edges — the OPEN
+TAIL (whitespace-only tail content never mints) and the leading/
+trailing blank lines of BULK-ENTERED material. The recommendation
+given: keep the edge rules (the iOS accrual defect is the proof of the
+pollution class they prevent), build A22 as the real answer to her
+need, and fix the FELT bug regardless — typed tail whitespace must
+never look durable and then silently vanish at a later teardown (the
+surface-vs-store disagreement class). **Her ruling is deliberately NOT
+taken now** — it is the 13d design sitting's (the A22/A11/A15 cluster),
+with 1G's Q2 verdict as an input (whether the edge-trim even caused
+her 259).
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
