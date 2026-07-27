@@ -681,77 +681,11 @@ struct OutlineWritingSurfaceTests {
     }
 }
 
-/// 13b Stage 4, Batch 4F (S4-9, ledger N31): the reading-PROGRESS brain —
-/// model-driven over the POST LIST (the Phase 6 memo's ruling: never live
-/// text/pixel geometry), sticky across transition frames. 13c 2B moved the
-/// page brain's tests to the spread's own suite below; this one keeps the
-/// brain Read's flow sub-mode is the remaining candidate consumer for (2C's
-/// call — see `BookViewModel`).
-@MainActor
-@Suite("Reading progress brain (13b 4F, S4-9)", .serialized)
-struct BookProgressBrainTests {
-    private func pump(_ seconds: TimeInterval = 0.05) {
-        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
-    }
-
-    private func settle(
-        _ window: NSWindow, _ hosting: NSView,
-        until predicate: () -> Bool, maxTurns: Int = 40
-    ) async {
-        for _ in 0..<maxTurns {
-            hosting.layoutSubtreeIfNeeded()
-            window.layoutIfNeeded()
-            window.displayIfNeeded()
-            pump(0.02)
-            await Task.yield()
-            try? await Task.sleep(for: .milliseconds(20))
-            if predicate() { return }
-        }
-    }
-
-    @Test func theProgressBrainIsPureModelDrivenAndSticky() async throws {
-        try await withBookWorld(posts: 5) { session, db, readingID, postIDs in
-            let model = BookViewModel(session: session, readingID: readingID)
-            #expect(model.readingProgress == nil, "an unadopted book shows nothing")
-            model.adopt(try await db.read { [readingID] in
-                try Queries.assembleReading($0, readingID: readingID, limit: 300)
-            })
-
-            // Before any visibility report: position 1 (the top).
-            #expect(model.readingProgress?.position == 1)
-            #expect(model.readingProgress?.total == 5)
-
-            // The FURTHEST visible post is the position (post domain,
-            // never pixels).
-            model.noteVisible(postIDs[0], true)
-            model.noteVisible(postIDs[1], true)
-            #expect(model.readingProgress?.position == 2)
-            #expect(model.readingProgress?.fraction == 0.4)
-
-            // Scrolling on: 1 leaves, 3 arrives (index 2 visible too).
-            model.noteVisible(postIDs[0], false)
-            model.noteVisible(postIDs[2], true)
-            #expect(model.readingProgress?.position == 3)
-
-            // STICKY: a transition frame with zero reports keeps the last
-            // position instead of snapping to nothing.
-            model.noteVisible(postIDs[1], false)
-            model.noteVisible(postIDs[2], false)
-            #expect(model.readingProgress?.position == 3)
-
-            // A foreign id (a stale report after entries changed) counts
-            // for nothing.
-            model.noteVisible("not-a-post", true)
-            #expect(model.readingProgress?.position == 3)
-
-            // The pure half directly: last page = 100%.
-            let position = BookViewModel.progressPosition(
-                visible: [postIDs[4]], entries: model.entries, previous: nil)
-            #expect(position == 5)
-        }
-    }
-
-}
+// (The 13b 4F reading-progress-brain suite lived here until the 13c K6
+// review, K4: the brain ended Stage 2 with zero production callers — 2A
+// removed its face, 2B/2C declined it — and its own recorded rule was
+// "deleted rather than kept warm on speculation." The brain and this
+// suite went together; see `BookViewModel`'s note.)
 
 /// 13c Batch 2B (A43/A44): the BOOK mode — a two-up spread whose pages are
 /// whole posts, editable in Write or the takes stack, with ONE live editor

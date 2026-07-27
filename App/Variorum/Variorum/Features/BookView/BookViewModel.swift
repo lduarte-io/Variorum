@@ -159,68 +159,15 @@ final class BookViewModel {
         return entries[index]
     }
 
-    // MARK: - Reading progress (13b 4F — S4-9(1), N31: "it needs a
-    // progress bar"). MODEL-DRIVEN per the Phase 6 memo's ruling: the
-    // domain is the POST LIST, never live text/pixel geometry — the view
-    // reports which posts' content is on screen (SwiftUI scroll
-    // visibility, one boolean per realized row) and the brain answers
-    // "you are at post k of n" from the entry order alone. Cost ∝
-    // realized rows (P1); nothing here reads TK2 geometry.
-    //
-    // 13c 2A: OUTLINE no longer has a consumer — her A6 ruling removed
-    // its whole bottom inset, progress bar included ("it seems a bit
-    // buggy… remove it fully for now"), and the per-row visibility
-    // reporting went with it rather than costing work for a face that
-    // isn't drawn. If the outline bar ever returns, her observed
-    // bugginess gets investigated FIRST.
-    //
-    // 13c 2B, stated because 2A's record asked whether the spread would
-    // pick this up: **it does not, and should not.** The Book spread's
-    // position is EXACTLY known (`spreadLeftIndex` — a post-list index,
-    // not an observation of what happens to be on screen), so its bottom
-    // bar reads it directly and no row reports visibility. This brain
-    // answers a different question — "how far down a CONTINUOUS scroll of
-    // posts are you" — which only Read's flow sub-mode still asks. If 2C
-    // does not adopt it, it has no caller left and should be deleted
-    // there rather than kept warm on speculation.
-
-    /// The posts whose CONTENT view is currently on screen (the card, or
-    /// the expanded body — one tracked view per row).
-    private(set) var visiblePosts: Set<String> = []
-    /// The sticky progress position (1-based): the FURTHEST visible post.
-    /// Sticky so a transition frame with zero reports (row swap, mode
-    /// flip) never snaps the bar to nothing.
-    private(set) var progressPosition: Int?
-
-    func noteVisible(_ postID: String, _ visible: Bool) {
-        if visible {
-            visiblePosts.insert(postID)
-        } else {
-            visiblePosts.remove(postID)
-        }
-        progressPosition = Self.progressPosition(
-            visible: visiblePosts, entries: entries, previous: progressPosition)
-    }
-
-    /// The pure half (pinned): the furthest visible entry's 1-based
-    /// position; `previous` when nothing reports (sticky); nil only
-    /// before anything was ever visible.
-    nonisolated static func progressPosition(
-        visible: Set<String>, entries: [Queries.ReadingEntry], previous: Int?
-    ) -> Int? {
-        let indexByID = Dictionary(
-            uniqueKeysWithValues: entries.enumerated().map { ($0.element.postID, $0.offset) })
-        let furthest = visible.compactMap { indexByID[$0] }.max()
-        if let furthest { return furthest + 1 }
-        return previous
-    }
-
-    /// The bar's rendering: position, total, and the filled fraction.
-    var readingProgress: (position: Int, total: Int, fraction: Double)? {
-        guard !entries.isEmpty else { return nil }
-        let position = min(progressPosition ?? 1, entries.count)
-        return (position, entries.count, Double(position) / Double(entries.count))
-    }
+    // The 13b 4F reading-progress brain (`noteVisible` / `progressPosition`
+    // / `readingProgress`) lived here until the 13c K6 review (K4). 2A's A6
+    // ruling removed its only face and the per-row visibility reporting;
+    // 2B's spread reads `spreadLeftIndex` exactly; 2C's paginated Read has
+    // its own page domain — so it ended the stage with ZERO callers, and
+    // its own recorded rule was "deleted rather than kept warm on
+    // speculation." If an outline progress bar ever returns, her observed
+    // bugginess is investigated FIRST (her A6 words), and the brain's shape
+    // is one git checkout behind this comment (and in the 13b 4F record).
 
     // MARK: - The SPREAD's page brain (13b 4F's page = a POST, made TWO-UP
     // at 13c 2B — her direction: "basically like [today's] Pages but with
