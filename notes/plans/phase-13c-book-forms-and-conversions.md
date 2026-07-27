@@ -2077,6 +2077,45 @@ own runs this sitting.
 
 ## Architect adjudications
 
+### Batch 2E — ACCEPTED (2026-07-27); STAGE 2 IS BUILT — the end-of-phase Fable cold review runs next
+
+**Verified before accepting:** Mac **780/135 green by my own run**; core
+untouched coherent by construction (zero `Sources/` lines in the
+range); tree clean, both commits present; QUESTIONS #47 exists
+appended. Zero `Sync/` lines; zero schema.
+
+**Adjudicated:**
+
+1. **The pure pre-pass shape — ACCEPTED, and it is the right one:**
+   `segments` byte-unchanged with all eight 4C honesty pins standing is
+   exactly how a filter should compose with a hard-won composition —
+   nothing re-derived, nothing re-proven.
+2. **Mooting the kin-less-peer PROVISIONAL instead of re-ruling the OFF
+   placement — ACCEPTED:** she asked for a setting, not a placement
+   change; spending a ruling she never made would have been invention.
+   4C's alternatives stay live in #47's yes/no.
+3. **The live-ring release-not-refuse call — ACCEPTED** on the P-2
+   ground (refusing a view toggle because you happen to be typing is
+   lecture-and-redirect), with REVERT C proving the flush load-bearing.
+4. **#47(c) — default OFF — flagged as the likeliest to flip:** her
+   "would make the pane feel more usable" reads plausibly as
+   default-ON. One line either way; hers.
+
+**Environment trap ELEVATED from 2E's deviations (binding on every
+later session, incl. the review and fix passes):** a filename-shaped
+`-only-testing:` argument that matches no TYPE reports
+`** TEST SUCCEEDED **` over ZERO tests — swift-testing suites are
+addressed by type name, and one file can hold several. **The
+`✔ Test run with N tests` line is the only proof a suite ran**; never
+accept a SUCCEEDED without it. (The traps section's "confirm the Test
+run with N tests line" rule now has its concrete failure mode.)
+
+**Stage 2 counts at build-complete: core 881/100 · Mac 780/135 ·
+mobile 14/4.** The K6 review — ONE Fable cold review over the combined
+1F + 2A–2E diff (`0ef4d59..` this point), `REVIEW_PROMPT.md` verbatim,
+zero framing — runs next; its findings land here repo-first before any
+fix session sees them; the refresh and closeout follow it.
+
 ### Batch 2D — ACCEPTED (2026-07-27); the dead-door finding matters beyond this batch
 
 **Verified before accepting:** core **881/100** and Mac **772/135**,
