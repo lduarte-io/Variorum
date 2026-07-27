@@ -2077,6 +2077,48 @@ own runs this sitting.
 
 ## Architect adjudications
 
+### Batch 2A — ACCEPTED (2026-07-27); the R106 flip is the ratify walk's first stop
+
+**Verified before accepting:** Mac **741/130 green by my own run**; core
+unchanged coherent by construction (`git show --stat`: zero `Sources/`
+lines); working tree clean, both commits present; **zero stale
+`ViewMode` references** (the both-cases rename did its job — grep
+confirms no `.book`/`.pages` enum use survives); the 2A touches to
+`PaneSurface.swift` and `EditorTextView.swift` read in full — both are
+the `inlineSurfaceInset` named-constant extraction only, and **1F's
+convergence logic is untouched**.
+
+**The judgment calls, adjudicated:**
+
+1. **Posts-open-by-default (the R106 reversal for this surface) —
+   ACCEPTED as PROVISIONAL, and it is the right call on her own words.**
+   R106 ruled a *navigation* surface; A39 makes Outline a *writing*
+   surface, and "literally looks like write mode… posts are collapsible"
+   cannot mean content hidden by default — you cannot write in what you
+   cannot see. The card survives as the collapsed form and collapse-all
+   is one click. **QUESTIONS #43(a) is the first stop on her next
+   ratify walk**, flagged as a reversal rather than smuggled.
+2. **The "already true" architectural finding — ACCEPTED, with the
+   review asked to re-derive it.** The batch argues Outline's editable
+   surface IS the one full-document editor under `BookViewModel`'s
+   single focus authority (13b 3E's fold), so adding a parallel
+   authority would itself have violated P-3 — and it pinned both halves
+   (the one-ring inheritance; `commitTake` via `writeEditorAttached`)
+   instead of writing ceremony code. That reasoning is sound and the
+   restraint is correct; because it is a *claim about existing
+   machinery*, the end-of-phase Fable reviewer is explicitly asked to
+   re-derive it cold rather than inherit it (it is in the batch's
+   ladder foci).
+3. **The A6 removal taking the per-row visibility reporting with it —
+   ACCEPTED** (work per realized row for a face that is not drawn); the
+   scrub/progress brains stay pure and pinned for 2B/2C, and her
+   "investigate the bugginess first if ever re-added" is carried in
+   code.
+
+**Worth naming:** the DEBUG materialization counter becoming
+load-bearing (452 → bounded realizations on a 150-post book) is exactly
+the Phase 13 round-3 lesson applied *before* a reviewer had to find it.
+
 ### Batch 1F — ACCEPTED (2026-07-27); the persistence fix stands, the birth rides the end-of-phase review
 
 **Verified before accepting:** the diff read in full (one hook + one
