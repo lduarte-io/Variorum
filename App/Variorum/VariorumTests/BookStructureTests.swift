@@ -90,7 +90,9 @@ struct BookStructureModelTests {
             id: "r", name: "orbit", kind: .curated, createdAt: Date(), updatedAt: Date())
         var finished = open
         finished.locked = true
-        #expect(BookStructureModel.defaultMode(for: open) == .book)
+        // 13c 2A: a WORKING book opens into OUTLINE — the surface it is
+        // written on (A39); the case rename is `.book` → `.outline`.
+        #expect(BookStructureModel.defaultMode(for: open) == .outline)
         #expect(BookStructureModel.defaultMode(for: finished) == .read)
     }
 }

@@ -228,7 +228,9 @@ final class EditorTextView: NSTextView {
         let textView = EditorTextView(usingTextLayoutManager: true)
         precondition(textView.textLayoutManager != nil, "TK2 opt-in failed at construction")
 
-        textView.textContainerInset = NSSize(width: 8, height: 8)
+        textView.textContainerInset = NSSize(
+            width: EditorTypography.inlineSurfaceInset,
+            height: EditorTypography.inlineSurfaceInset)
         textView.isEditable = true
         textView.isSelectable = true
         textView.isRichText = false

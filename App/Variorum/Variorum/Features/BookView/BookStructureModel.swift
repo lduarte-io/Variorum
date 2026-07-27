@@ -22,11 +22,27 @@ final class BookStructureModel {
     @ObservationIgnored let session: AppSession
     let readingID: String
 
-    /// 13b 4F (S4-9(2), N31): `.pages` joins — the Kindle-style paged view
-    /// (page = a post, vertical scroll within, a bottom horizontal scrub),
-    /// BESIDE the existing views per her letter ("love the existing book
-    /// reading view, I think we need those other 2 as well").
-    enum ViewMode { case book, pages, read }
+    /// The book's three modes. 13c Batch 2A (her 2026-07-23/24 direction):
+    /// the picker reads **Outline · Book · Read**, and the cases are named
+    /// for what each surface IS rather than for what it was called before:
+    ///
+    /// - `.outline` — the continuous vertical scroll, now the book's
+    ///   WRITING surface (A39: "literally looks like write mode but has the
+    ///   chapter headings and the posts are collapsible"). This was `.book`.
+    /// - `.spread` — the picker's **"Book"**: the two-up spread where each
+    ///   page is a whole scrollable POST. Today it is 13b 4F's single-page
+    ///   Kindle view; Batch 2B makes it two-up. This was `.pages`.
+    /// - `.read` — the reading flow (Batch 2C pairs it with true
+    ///   pagination). Unchanged.
+    ///
+    /// **Why `.spread` and not `.book`** (Batch 2A judgment call 1): the
+    /// picker's "Book" now names the surface the old `.book` case did NOT
+    /// name, so reusing the identifier would let every stale reference —
+    /// in code, in a rebased branch, in a future session reading an older
+    /// batch record — compile silently against the wrong surface. Renaming
+    /// BOTH cases out of the collision makes every stale reference a
+    /// compile error instead.
+    enum ViewMode { case outline, spread, read }
 
     private(set) var reading: Reading?
     private(set) var sections: [ReadingSection] = []
@@ -36,7 +52,7 @@ final class BookStructureModel {
     private(set) var deletedSections: [ReadingSection] = []
     private(set) var assignments: [String: String] = [:]
     private(set) var lastError: String?
-    var mode: ViewMode = .book
+    var mode: ViewMode = .outline
     /// Set exactly once from the first observed reading row (a finished
     /// book OPENS into the reading flow — R2; pinned).
     private var modeSeeded = false
@@ -82,9 +98,10 @@ final class BookStructureModel {
     }
 
     /// R2: a FINISHED book is nothing but the text — it opens into the
-    /// reading flow; a working book opens into the book view.
+    /// reading flow; a working book opens into OUTLINE, which is where the
+    /// book is written (13c 2A, A39).
     nonisolated static func defaultMode(for reading: Reading) -> ViewMode {
-        reading.locked ? .read : .book
+        reading.locked ? .read : .outline
     }
 
     /// Chapters apply to curated books; smart/stamp-sorted books keep the

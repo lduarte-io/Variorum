@@ -373,7 +373,11 @@ struct BookFocusFoldTests {
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
 
-            #expect(!model.isExpanded(postIDs[0]), "cards by default (R106)")
+            // 13c 2A (A39, PROVISIONAL — QUESTIONS #43(a)): Outline is the
+            // book's WRITING surface, so a post reads OPEN and collapse is
+            // the deliberate act. Batch 12's R106 card default was the
+            // other way round, when this was a book *screen*.
+            #expect(model.isExpanded(postIDs[0]), "posts read open — this is where the book is written")
             model.focus(postIDs[0], caret: 5)
             #expect(model.isExpanded(postIDs[0]), "focus implies expansion")
             #expect(model.focusedPostID == postIDs[0])
@@ -394,11 +398,42 @@ struct BookFocusFoldTests {
             // Collapse-all correctness (D1's second half): everything back
             // to cards, focus released — no survivor.
             model.collapseAll()
-            #expect(model.expandedPosts.isEmpty, "collapse all collapses ALL")
+            #expect(model.collapsedPosts == Set(postIDs), "collapse all collapses ALL")
+            #expect(postIDs.allSatisfy { !model.isExpanded($0) })
             #expect(model.focusedPostID == nil)
 
             model.expandAll()
-            #expect(model.expandedPosts == Set(postIDs))
+            #expect(model.collapsedPosts.isEmpty)
+            #expect(postIDs.allSatisfy { model.isExpanded($0) })
+        }
+    }
+
+    /// 13c 2A: tracking the COLLAPSED side is what makes "open by default"
+    /// hold for arrivals — a post minted into the book (or pulled in by a
+    /// tag, or landed by sync) after a collapse-all is OPEN when it
+    /// appears, with nothing to seed. The expanded-set shape could not do
+    /// this without a second rule about who seeds new entries.
+    @Test func aPostThatArrivesAfterCollapseAllIsOpen() async throws {
+        try await withBookWorld(posts: 2) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            let assembled = try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            }
+            model.adopt(assembled)
+            model.collapseAll()
+            #expect(postIDs.allSatisfy { !model.isExpanded($0) })
+
+            // A third post joins the book (the "+ new post in this book"
+            // door's shape — the observation re-delivers).
+            let fresh = try session.operations.createPost(title: "born inside")
+            _ = try session.operations.newBlock(in: fresh.id, text: "written straight into the book.")
+            try session.operations.addPostToReading(fresh.id, to: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+
+            #expect(model.isExpanded(fresh.id), "a post that arrives after a collapse-all is open")
+            #expect(postIDs.allSatisfy { !model.isExpanded($0) }, "the deliberate collapse survives")
         }
     }
 
@@ -435,6 +470,213 @@ struct BookFocusFoldTests {
             #expect(countLiveEditors(in: hosting) == 0,
                     "collapsing the focused post really collapses it (the editor released)")
             #expect(model.focusedPostID == nil)
+        }
+    }
+}
+
+/// 13c Batch 2A (A39 · A6 · the picker rename): OUTLINE becomes the book's
+/// WRITING surface. Her words: *"a proper 'write' mode for the whole book -
+/// like literally looks like write mode but has the chapter headings and
+/// the posts are collapsible."*
+///
+/// What these pin, and why each one is here rather than assumed:
+/// - the picker's three modes and the working-book default (the rename);
+/// - Outline carries NO bottom chrome (A6 — RED on the pre-2A code, where
+///   the `Slider` and `ProgressView` were a `safeAreaInset`);
+/// - the prose column is WRITE'S OWN MEASURE, measured off the realized
+///   text surface rather than restated from the constant;
+/// - P3 holds with posts OPEN by default — the counter pin, load-bearing
+///   in a way it was not when every row was a small card;
+/// - Stage 4 lesson 2: the surface joins `commitTake`'s availability AND
+///   a mounted Outline consumes `.commit` (the N5 class, per surface).
+@MainActor
+@Suite("Outline — the book's writing surface (13c 2A)", .serialized)
+struct OutlineWritingSurfaceTests {
+    private func pump(_ seconds: TimeInterval = 0.05) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    private func settle(
+        _ window: NSWindow, _ hosting: NSView,
+        until predicate: () -> Bool, maxTurns: Int = 40
+    ) async {
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump(0.02)
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(20))
+            if predicate() { return }
+        }
+    }
+
+    /// Hosts a book in a wide window and hands the body to `body`.
+    private func withHostedBook<T>(
+        posts: Int, width: CGFloat = 1100, height: CGFloat = 800,
+        _ body: @MainActor (
+            AppSession, AppDatabase, _ readingID: String, _ postIDs: [String],
+            _ window: NSWindow, _ hosting: NSHostingView<BookView>,
+            _ model: BookViewModel
+        ) async throws -> T
+    ) async throws -> T {
+        try await withBookWorld(posts: posts) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: width, height: height),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: BookView(session: session, readingID: readingID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: width, height: height)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            return try await body(session, db, readingID, postIDs, window, hosting, model)
+        }
+    }
+
+    @Test func theBookOpensIntoOutlineAndTheModesAreOutlineBookRead() {
+        // The rename, at the one place it is decided: a working book opens
+        // on the surface it is WRITTEN on; a finished one still opens into
+        // the reading flow (R2, untouched).
+        let open = Reading(
+            id: "r", name: "orbit", kind: .curated, createdAt: Date(), updatedAt: Date())
+        var finished = open
+        finished.locked = true
+        #expect(BookStructureModel.defaultMode(for: open) == .outline)
+        #expect(BookStructureModel.defaultMode(for: finished) == .read)
+        // Three modes, no fourth (her ruling: "the book's three modes stay
+        // three"). CaseIterable is deliberately not conformed — this is the
+        // totality statement.
+        let modes: [BookStructureModel.ViewMode] = [.outline, .spread, .read]
+        #expect(Set(modes.map(String.init(describing:))).count == 3)
+    }
+
+    /// A6, red-on-old by behavioral revert: restoring the `safeAreaInset`
+    /// block puts an `NSSlider` (and a progress indicator) back in the
+    /// hierarchy and this fails. Her ruling covered BOTH controls — "it
+    /// makes no sense to have a horizontal scrollbar on a vertical page"
+    /// and "it seems a bit buggy… remove it fully for now".
+    @Test func outlineCarriesNoBottomChrome() async throws {
+        try await withHostedBook(posts: 6) { _, _, _, _, window, hosting, _ in
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
+            func count<V: NSView>(_ type: V.Type, in view: NSView) -> Int {
+                var n = view is V ? 1 : 0
+                for sub in view.subviews { n += count(type, in: sub) }
+                return n
+            }
+            #expect(count(NSSlider.self, in: hosting) == 0,
+                    "no jump slider — a horizontal scrollbar on a vertical page")
+            #expect(count(NSProgressIndicator.self, in: hosting) == 0,
+                    "no progress bar — she ruled it out fully, bugginess unchased")
+        }
+    }
+
+    /// A39's "literally looks like write mode", measured: the text that
+    /// lands in Outline sits on the SAME prose measure the detail editor
+    /// gives a post (R9 — margins are sacred). Measured off the realized
+    /// text surface, not restated from the constant, so a column-frame
+    /// regression fails here.
+    @Test func outlineProseSitsOnWritesOwnMeasure() async throws {
+        try await withHostedBook(posts: 3, width: 1400) { _, _, _, _, window, hosting, _ in
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
+            var widths: [CGFloat] = []
+            func walk(_ v: NSView) {
+                if let read = v as? ReadPostTextView, read.bounds.width > 0 {
+                    widths.append(read.bounds.width - 2 * read.textContainerInset.width)
+                }
+                for s in v.subviews { walk(s) }
+            }
+            walk(hosting)
+            #expect(!widths.isEmpty, "posts rendered")
+            for width in widths {
+                #expect(abs(width - EditorTypography.maxColumnWidth) < 2,
+                        "Outline's prose measure is Write's: \(width) vs \(EditorTypography.maxColumnWidth)")
+            }
+            // …and the column is bounded even though the window is 1400
+            // wide — text never runs to the window edge (R9).
+            #expect(BookView.proseColumn < 1400)
+        }
+    }
+
+    /// P3 with posts OPEN by default. The Phase 13 round-3 MAJOR was this
+    /// surface's sibling shipping as a plain `VStack`; the default flip
+    /// makes virtualization load-bearing here for the first time (every
+    /// realized row is now a TK2 text surface, not a small card).
+    /// Red-on-old by behavioral revert: `LazyVStack` → `VStack` in
+    /// `outlineBody` materializes all 150 rows on open.
+    @Test func outlineVirtualizesItsRowsWithPostsOpenByDefault() async throws {
+        try await withBookWorld(posts: 1) { session, _, readingID, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt((0..<150).map {
+                Queries.ReadingEntry(
+                    postID: "p\($0)", title: "t\($0)", entryDate: nil, sectionPath: nil)
+            })
+            #expect(model.isExpanded("p0"), "open by default — the counted rows are prose rows")
+            BookOutlineMaterialization.count = 0
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: BookView(session: session, readingID: readingID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 600)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { BookOutlineMaterialization.count > 0 })
+            await settle(window, hosting, until: { false }, maxTurns: 4)
+
+            let materialized = BookOutlineMaterialization.count
+            #expect(materialized > 0, "visible rows rendered")
+            #expect(materialized < 75,
+                    "a 150-post book must not materialize its whole extent on open: \(materialized) rows")
+        }
+    }
+
+    /// Stage 4 lesson 2, half one (pure): the book's inline editor context
+    /// — a post open with NO post-detail mode, an attached Write editor —
+    /// reaches `commitTake` and the take family. This is the availability
+    /// arm A39's surface inherits by BEING the full-document editor rather
+    /// than a new pane kind; naming it here means a future narrowing of
+    /// `takeFamily` fails on Outline's behalf.
+    @Test func outlineJoinsCommitTakeAndTheTakeFamilysAvailability() {
+        let inline = CapabilityContext(mode: nil, writeEditorAttached: true)
+        #expect(CapabilityRegistry.availability(.commitTake, in: inline) == .act)
+        for id: CapabilityID in [
+            .newTake, .blankTake, .chooseTake, .archiveTake, .showTakes,
+            .insertBlockBelow, .deleteBlock, .blockComments, .callout, .divide,
+        ] {
+            #expect(CapabilityRegistry.availability(id, in: inline) == .act,
+                    "\(id) must act where the book's editor is attached")
+        }
+    }
+
+    /// Stage 4 lesson 2, half two (behavioral): a mounted Outline with a
+    /// focused post CONSUMES `.commit`. The N5 class is "the door is
+    /// advertised and the keystroke falls through to nothing" — consumption
+    /// is exactly its negation, and it is what a new editable surface has
+    /// to earn per surface.
+    @Test func aMountedOutlineConsumesTheCommitCommand() async throws {
+        try await withHostedBook(posts: 3) { session, _, _, postIDs, window, hosting, model in
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
+            #expect(!session.commandRouter.dispatch(.commit, speakingWhenUnhandled: false),
+                    "read-cheap only: nothing has claimed ⌘S yet")
+            model.focus(postIDs[0], caret: 0)
+            await settle(window, hosting, until: { countLiveEditors(in: hosting) == 1 })
+            #expect(countLiveEditors(in: hosting) == 1, "the focused post's editor mounted")
+            #expect(session.commandRouter.dispatch(.commit, speakingWhenUnhandled: false),
+                    "⌘S reaches the book's editor — the N5 class closed on this surface")
         }
     }
 }

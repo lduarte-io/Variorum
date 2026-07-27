@@ -106,6 +106,15 @@ final class BookViewModel {
     // visibility, one boolean per realized row) and the brain answers
     // "you are at post k of n" from the entry order alone. Cost ∝
     // realized rows (P1); nothing here reads TK2 geometry.
+    //
+    // 13c 2A: OUTLINE no longer has a consumer — her A6 ruling removed
+    // its whole bottom inset, progress bar included ("it seems a bit
+    // buggy… remove it fully for now"), and the per-row visibility
+    // reporting went with it rather than costing work for a face that
+    // isn't drawn. The brain stays: it is pure and pinned, the Book
+    // spread and Read's paginated sub-mode both KEEP a bottom bar, and
+    // batches 2B/2C own those. If the outline bar ever returns, her
+    // observed bugginess gets investigated FIRST.
 
     /// The posts whose CONTENT view is currently on screen (the card, or
     /// the expanded body — one tracked view per row).
@@ -217,11 +226,23 @@ final class BookViewModel {
     /// first).
     private(set) var caretSeed: Int?
     private(set) var fanSeed: String?
-    /// Posts showing content (read-cheap or live) instead of their card.
-    private(set) var expandedPosts: Set<String> = []
+    /// The posts folded shut (13c 2A — A39: Outline is the book's WRITING
+    /// surface, so a post reads OPEN and COLLAPSE is the deliberate act;
+    /// batch 12's R106 default was the other way round, when this surface
+    /// was a book *screen* rather than a place to write. PROVISIONAL —
+    /// QUESTIONS #43).
+    ///
+    /// Tracking the collapsed side rather than the expanded one is what
+    /// makes the default hold for free: a post that arrives later — minted
+    /// by "+ new post in this book", pulled in by a tag, landed by sync —
+    /// is open the moment it appears, with nothing to seed.
+    ///
+    /// Session/view state, never persisted: this model's lifetime is the
+    /// open book's (QUESTIONS #43(b)).
+    private(set) var collapsedPosts: Set<String> = []
 
     func isExpanded(_ postID: String) -> Bool {
-        expandedPosts.contains(postID)
+        !collapsedPosts.contains(postID)
     }
 
     /// Focus a post (nil = release): the focused post is always expanded.
@@ -229,19 +250,19 @@ final class BookViewModel {
         caretSeed = caret
         fanSeed = fanBlock
         focusedPostID = postID
-        if let postID { expandedPosts.insert(postID) }
+        if let postID { collapsedPosts.remove(postID) }
     }
 
-    /// Expand to the read tier (the card's disclosure).
+    /// Unfold a collapsed post (the card's disclosure).
     func expand(_ postID: String) {
-        expandedPosts.insert(postID)
+        collapsedPosts.remove(postID)
     }
 
     /// D1: collapsing a post collapses it — focused included. Focus is
     /// RELEASED (the live editor unmounts; its teardown flushes pending
     /// text through the per-post coordinator, the Stage 1a machinery).
     func collapse(_ postID: String) {
-        expandedPosts.remove(postID)
+        collapsedPosts.insert(postID)
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
@@ -250,14 +271,17 @@ final class BookViewModel {
     }
 
     /// D1's collapse-all half: everything back to cards, focus released.
+    /// Scoped to the entries in hand — a post that arrives afterwards is
+    /// open, which is the writing surface's default and not a survivor of
+    /// this gesture.
     func collapseAll() {
-        expandedPosts.removeAll()
+        collapsedPosts = Set(entries.map(\.postID))
         focusedPostID = nil
         caretSeed = nil
         fanSeed = nil
     }
 
     func expandAll() {
-        expandedPosts.formUnion(entries.map(\.postID))
+        collapsedPosts.removeAll()
     }
 }

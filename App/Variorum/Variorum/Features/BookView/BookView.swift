@@ -24,10 +24,11 @@ struct BookView: View {
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
-    /// `initiallyExpanded` (batch 12, R106): posts render as collapsed
-    /// CARDS by default; tests that assert on rendered post content seed
-    /// the expansion set here (13b 3E: expansion lives on the MODEL now —
-    /// the one focus authority; the seed lands there).
+    /// `initiallyExpanded`: an explicit un-collapse seed. Since 13c 2A a
+    /// post reads OPEN by default in Outline (the model tracks the
+    /// COLLAPSED set), so this is now a no-op for posts nobody collapsed —
+    /// kept because it still says exactly what it does, and because a
+    /// caller that seeds a collapsed set will want its twin.
     init(
         session: AppSession, readingID: String, readingName: String? = nil,
         model: BookViewModel? = nil,
@@ -46,8 +47,6 @@ struct BookView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
-    @State private var scrubFraction: Double = 0
-    @State private var scrubLabel: String?
     @State private var newChapterPresented = false
     @State private var chapterNameField = ""
     @State private var renameChapterTarget: ReadingSection?
@@ -57,17 +56,23 @@ struct BookView: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// Outline's prose column (13c 2A): Write's own measure. The contained
+    /// text surfaces carry `inlineSurfaceInset` on each side, so the text
+    /// itself lands on exactly `EditorTypography.maxColumnWidth`.
+    static let proseColumn =
+        EditorTypography.maxColumnWidth + 2 * EditorTypography.inlineSurfaceInset
+
     var body: some View {
         HStack(spacing: 0) {
             navigator
             Divider().overlay(tokens.line)
             switch structure.mode {
-            case .book:
-                bookBody
-            case .pages:
-                // 13b 4F (S4-9(2), N31): the Kindle-style paged view —
-                // page = a post, one page mounted at a time (P3), the
-                // bottom scrub over the same model-driven post domain.
+            case .outline:
+                outlineBody
+            case .spread:
+                // The picker's "Book" (13c 2A's rename): 13b 4F's paged
+                // view — page = a post, one page mounted at a time (P3).
+                // Batch 2B makes it the two-up spread.
                 PagedBookView(session: session, model: model, structure: structure)
             case .read:
                 ReadingFlowView(
@@ -77,7 +82,7 @@ struct BookView: View {
                         ? structure.grouped(entries: model.entries)
                         : [(nil, model.entries)],
                     onWake: { postID in
-                        structure.mode = .book
+                        structure.mode = .outline
                         model.focus(postID)
                     })
             }
@@ -131,13 +136,15 @@ struct BookView: View {
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
                 HStack(spacing: 8) {
-                    // 13b 4F (S4-9): three view modes now — the scroll
-                    // book, the paged book, the reading flow.
+                    // 13c 2A (her 2026-07-23/24 direction): the three modes
+                    // read OUTLINE · BOOK · READ — outline is where the book
+                    // is written (A39), book is the post-per-page spread,
+                    // read is the reading flow.
                     Picker("", selection: Binding(
                         get: { structure.mode },
                         set: { structure.mode = $0 })) {
-                        Text(tokens.chromeLabel("Book")).tag(BookStructureModel.ViewMode.book)
-                        Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ViewMode.pages)
+                        Text(tokens.chromeLabel("Outline")).tag(BookStructureModel.ViewMode.outline)
+                        Text(tokens.chromeLabel("Book")).tag(BookStructureModel.ViewMode.spread)
                         Text(tokens.chromeLabel("Read")).tag(BookStructureModel.ViewMode.read)
                     }
                     .pickerStyle(.segmented)
@@ -170,7 +177,7 @@ struct BookView: View {
                                     // chapter (the flow view shows it too);
                                     // while PAGING, flip to the chapter's
                                     // first page (13b 4F).
-                                    if structure.mode == .pages {
+                                    if structure.mode == .spread {
                                         if let first = structure
                                             .grouped(entries: model.entries)
                                             .first(where: { $0.section?.id == section.id })?
@@ -222,10 +229,10 @@ struct BookView: View {
                                     // read-cheap (13b 4F — the calm
                                     // default; a click in the page
                                     // upgrades to the live editor).
-                                    if structure.mode == .pages {
+                                    if structure.mode == .spread {
                                         model.openPage(post: entry.postID)
                                     } else {
-                                        structure.mode = .book
+                                        structure.mode = .outline
                                         model.focus(entry.postID)
                                         scrollTarget = "page-\(entry.postID)"
                                     }
@@ -243,7 +250,7 @@ struct BookView: View {
                                                 .font(tokens.small.weight(.bold))
                                                 .foregroundStyle(tokens.accent)
                                         }
-                                        Text(entryTitle(entry))
+                                        Text(outlineEntryTitle(entry))
                                             .font(tokens.small)
                                             .foregroundStyle(
                                                 navigatorMarks(entry)
@@ -253,7 +260,10 @@ struct BookView: View {
                                     .padding(.leading, group.section != nil ? 10 : 0)
                                 }
                                 .buttonStyle(.plain)
-                                .contextMenu { postChapterMenu(entry) }
+                                .contextMenu {
+                                    outlineChapterMenu(
+                                        structure: structure, postID: entry.postID)
+                                }
                             }
                         }
                         // The end drop zone: drag a chapter past the last
@@ -374,32 +384,32 @@ struct BookView: View {
         }
     }
 
-    @ViewBuilder
-    private func postChapterMenu(_ entry: Queries.ReadingEntry) -> some View {
-        if structure.reading?.kind == .curated {
-            Menu("Chapter") {
-                ForEach(structure.sections, id: \.id) { section in
-                    Button(section.name) {
-                        Task { await structure.assign(entry.postID, to: section.id) }
-                    }
-                }
-                Divider()
-                Button("None") {
-                    Task { await structure.assign(entry.postID, to: nil) }
-                }
-            }
-        }
-    }
 
-    // MARK: - The book body (chapters + read-cheap posts + one live editor)
+    // MARK: - OUTLINE: the book's writing surface (13c 2A — A39)
+    //
+    // Her words: *"i also feel like I need more of a proper 'write' mode for
+    // the whole book - like literally looks like write mode but has the
+    // chapter headings and the posts are collapsible."* And the finding that
+    // gives it weight (A45): she wanted sub-takes, refused the idea herself,
+    // and diagnosed the cause — the BOOK level had never been a writing
+    // surface, so the only natural place to compose was inside one post.
+    // So this is not a decorated list: it is Write's measure, Write's
+    // typography, chapter headings inline, and one live editor that migrates
+    // exactly as it does everywhere else (P3).
+    //
+    // What is NOT here, deliberately: no second liveness mechanism (the
+    // focused post mounts the ONE full-document editor, `BookViewModel` is
+    // the single focus authority — 13b 3E's fold), no in-place TK2 text
+    // folding (collapse is view state — TEXTKIT2 §3; AppSpec §12), and no
+    // bottom chrome (A6).
 
-    private var bookBody: some View {
+    private var outlineBody: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     // Batch 12 (her mockup reference): the book's TITLE
-                    // heads the content column, aligned with the post
-                    // cards — never floating in rail-side dead space.
+                    // heads the content column, aligned with the posts —
+                    // never floating in rail-side dead space.
                     VStack(alignment: .leading, spacing: 2) {
                         Text(tokens.chromeLabel(readingName ?? model.readingName ?? "book"))
                             .font(tokens.title)
@@ -408,10 +418,10 @@ struct BookView: View {
                             Text(tokens.chromeLabel(bookMetaLine))
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.muted)
-                            // Batch 12: posts render COLLAPSED by default —
-                            // cards, not content; these are the all-doors.
-                            // 13b 3E (D1): collapse-all really collapses
-                            // ALL — the focused post's editor releases too.
+                            // 13c 2A: posts read OPEN here — this is where
+                            // the book is written. "collapse all" folds the
+                            // whole book back to cards in one click (13b 3E
+                            // D1: it releases the focused post's editor too).
                             Button(tokens.chromeLabel("expand all")) {
                                 model.expandAll()
                             }
@@ -422,7 +432,7 @@ struct BookView: View {
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         }
                     }
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 18)
                     if model.entries.isEmpty {
                         Text("This book has no posts yet.")
                             .foregroundStyle(tokens.muted)
@@ -432,10 +442,13 @@ struct BookView: View {
                             if let section = group.section {
                                 chapterHeader(section)
                             } else {
+                                // UNFILED trails the chapters (ratified,
+                                // QUESTIONS #26(b)) — the grouping brain's
+                                // order, rendered, never re-decided here.
                                 Text(tokens.chromeLabel("unfiled"))
-                                    .font(tokens.small)
+                                    .font(tokens.heading)
                                     .foregroundStyle(tokens.muted)
-                                    .padding(.top, 12)
+                                    .padding(.top, 28)
                             }
                             ForEach(group.entries, id: \.postID) { entry in
                                 postRow(entry)
@@ -445,9 +458,12 @@ struct BookView: View {
                     } else {
                         ForEach(Array(model.entries.enumerated()), id: \.element.postID) { i, entry in
                             if let section = model.sectionHeader(at: i) {
+                                // Smart books keep tag-path sectioning
+                                // (`grouping_tag_id`) — same heading voice.
                                 Text(section)
-                                    .font(tokens.heading)
-                                    .padding(.top, 12)
+                                    .font(tokens.title)
+                                    .foregroundStyle(tokens.accent)
+                                    .padding(.top, 28)
                             }
                             postRow(entry)
                         }
@@ -494,12 +510,17 @@ struct BookView: View {
                         }
                     }
                 }
-                // R9's measure holds (760pt) — but the column is LEFT-
-                // ANCHORED beside the navigator now (batch 12, her mockup
-                // reference: "there shouldn't be so much open space to the
-                // left"; centering left a rail-to-title gulf on wide
-                // windows).
-                .frame(maxWidth: 760, alignment: .leading)
+                // 13c 2A: WRITE'S OWN MEASURE, at book scale (A39's
+                // "literally looks like write mode"; R9 — margins are
+                // sacred). The detail editor centers an
+                // `EditorTypography.maxColumnWidth` prose column; both text
+                // tiers in this column (the inline editor and the read
+                // surface) carry the same 8pt container inset, so a column
+                // of maxColumn + 2×inset puts this book's prose on exactly
+                // the measure Write puts a post's on. It stays LEFT-ANCHORED
+                // beside the navigator (batch 12, her mockup reference:
+                // "there shouldn't be so much open space to the left").
+                .frame(maxWidth: Self.proseColumn, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 40)
                 .padding(.vertical, 20)
@@ -509,47 +530,17 @@ struct BookView: View {
                 withAnimation { proxy.scrollTo(target, anchor: .top) }
                 scrollTarget = nil
             }
-            .safeAreaInset(edge: .bottom) {
-                // BOOK-SCRUB (Phase 11, A5 — the Phase 6 memo's ruling):
-                // MODEL-DRIVEN — the post list is the scrubber's domain.
-                if model.entries.count > 1 {
-                    VStack(spacing: 2) {
-                        // 13b 4F (S4-9(1), N31): the PROGRESS BAR — where
-                        // you are in the book, over the same post-list
-                        // domain ("post 12 of 50 · 24%"); the slider
-                        // below stays the JUMP control.
-                        if let progress = model.readingProgress {
-                            HStack(spacing: 8) {
-                                ProgressView(value: progress.fraction)
-                                    .progressViewStyle(.linear)
-                                    .tint(tokens.accent)
-                                Text(tokens.chromeLabel(
-                                    "post \(progress.position) of \(progress.total) · \(Int((progress.fraction * 100).rounded()))%"))
-                                    .font(tokens.small)
-                                    .foregroundStyle(tokens.muted)
-                                    .lineLimit(1)
-                            }
-                        }
-                        Slider(value: Binding(
-                            get: { scrubFraction },
-                            set: { fraction in
-                                scrubFraction = fraction
-                                if let target = model.scrubTarget(fraction: fraction) {
-                                    scrubLabel = scrubTitle(target)
-                                    proxy.scrollTo("page-\(target.postID)", anchor: .top)
-                                }
-                            }), in: 0...1)
-                        if let scrubLabel {
-                            Text(scrubLabel)
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 4)
-                    .background(.bar)
-                }
-            }
+            // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
+            // bottom inset is gone — the `Slider` jump control ("it makes
+            // no sense to have a horizontal scrollbar on a vertical page")
+            // AND the progress bar above it ("it seems a bit buggy… remove
+            // it fully for now, I'll add it later if I feel inclined").
+            // If it is ever re-added, the bugginess she saw is investigated
+            // FIRST — an observed defect parked by removal, not chased.
+            // Outline ends as a clean vertical scroll + the navigator.
+            // The model's scrub/progress brains stay (pure, pinned): the
+            // Book spread and Read's paginated sub-mode both KEEP a bottom
+            // bar, and 2B/2C are their owners.
         }
     }
 
@@ -567,14 +558,18 @@ struct BookView: View {
         }
         HStack(spacing: 6) {
             Text("⠿")
+                .font(tokens.small)
                 .foregroundStyle(tokens.faint)
                 .help("Drag to reorder this chapter — here or in the navigator "
                     + "(right-click for Move Up / Move Down)")
+            // 13c 2A (A39: "has the chapter headings"): a chapter reads as
+            // a HEADING in the book's own voice — the title face, with real
+            // air above it — not as a chrome row above a list.
             Text(tokens.chromeLabel(section.name))
-                .font(tokens.heading)
+                .font(tokens.title)
                 .foregroundStyle(tokens.accent)
         }
-        .padding(.top, 16)
+        .padding(.top, 28)
         .id("chapter-\(section.id)")
         .contextMenu { chapterMenu(section) }
         .draggable(section.id)
@@ -618,20 +613,11 @@ struct BookView: View {
     @State private var bodyChapterDropTarget: String?
     @State private var bodyChapterDropAtEnd = false
 
-    private func entryTitle(_ entry: Queries.ReadingEntry) -> String {
-        entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
-    }
-
     /// The navigator's "you are here": the focused post — and, while
     /// paging, the current page (13b 4F).
     private func navigatorMarks(_ entry: Queries.ReadingEntry) -> Bool {
         model.focusedPostID == entry.postID
-            || (structure.mode == .pages && model.currentPage?.postID == entry.postID)
-    }
-
-    private func scrubTitle(_ entry: Queries.ReadingEntry) -> String {
-        let index = model.entries.firstIndex { $0.postID == entry.postID } ?? 0
-        return "Page \(index + 1) of \(model.entries.count) — \(entryTitle(entry))"
+            || (structure.mode == .spread && model.currentPage?.postID == entry.postID)
     }
 
     /// Batch 12: kind + extent at a glance under the title.
@@ -642,42 +628,140 @@ struct BookView: View {
         return parts.joined(separator: " · ")
     }
 
-    /// Batch 12 (her ruling): a post shows as a collapsed CARD until
-    /// expanded — "you shouldn't see the content within a post on the book
-    /// screen unless you click something." 13b 3E (D1): expansion + focus
-    /// live on the MODEL now, ONE authority — the focused post is expanded
-    /// because `focus` insists, and `collapse` releases focus, so the old
-    /// force-expand disjunct (the D1 mechanism) is gone.
-    @ViewBuilder
+    /// One post in the outline (13c 2A — extracted from four inline
+    /// builders so the row has an INIT the virtualization counter can ride,
+    /// the `ReadingFlowView` precedent; P-9's split rides along).
     private func postRow(_ entry: Queries.ReadingEntry) -> some View {
-        // 13b 4F (S4-9(1)): the row's CONTENT view (card, or expanded
-        // body — exactly one tracked view per row) reports its scroll
-        // visibility into the model's progress brain. Model-driven per
-        // the Phase 6 ruling: the report is one boolean per realized row;
-        // progress is derived from the POST LIST, never pixel geometry.
+        OutlinePostRow(
+            session: session, model: model, structure: structure,
+            entry: entry, tokens: tokens)
+    }
+}
+
+#if DEBUG
+/// 13c 2A's virtualization pin support (the `ReadingFlowMaterialization`
+/// precedent): counts `OutlinePostRow` materializations so the P3 pin can
+/// assert the `LazyVStack` defers off-viewport rows. Load-bearing HERE in a
+/// way it was not before: posts render OPEN by default now, so an
+/// unvirtualized outline would realize a text surface per post in the book.
+@MainActor
+enum BookOutlineMaterialization {
+    static var count = 0
+}
+#endif
+
+/// One post in Outline: its heading, and either its prose (read-cheap, or
+/// THE one live editor when focused) or — when deliberately collapsed —
+/// batch 12's card.
+///
+/// 13c 2A: posts render OPEN by default here (`BookViewModel` tracks the
+/// COLLAPSED set), because this is the book's writing surface. Collapse is
+/// the deliberate act, and it is pure view state — never in-place text
+/// folding inside a live TK2 editor (TEXTKIT2 §3; AppSpec §12).
+///
+/// 13b 3E (D1): expansion + focus live on the MODEL — ONE authority. The
+/// focused post is expanded because `focus` insists, and `collapse`
+/// releases focus, so the old force-expand disjunct is gone.
+private struct OutlinePostRow: View {
+    let session: AppSession
+    let model: BookViewModel
+    let structure: BookStructureModel
+    let entry: Queries.ReadingEntry
+    let tokens: VoiceTokens
+
+    init(
+        session: AppSession, model: BookViewModel, structure: BookStructureModel,
+        entry: Queries.ReadingEntry, tokens: VoiceTokens
+    ) {
+        self.session = session
+        self.model = model
+        self.structure = structure
+        self.entry = entry
+        self.tokens = tokens
+        #if DEBUG
+        BookOutlineMaterialization.count += 1
+        #endif
+    }
+
+    var body: some View {
         if model.isExpanded(entry.postID) {
-            postHeader(entry, expanded: true)
-            postBody(entry)
-                .padding(.bottom, 16)
-                .onScrollVisibilityChange(threshold: 0.05) { visible in
-                    model.noteVisible(entry.postID, visible)
-                }
+            VStack(alignment: .leading, spacing: 6) {
+                postHeader
+                postBody
+            }
+            .padding(.bottom, 22)
         } else {
-            collapsedPostCard(entry)
+            collapsedPostCard
                 .padding(.bottom, 10)
-                .onScrollVisibilityChange(threshold: 0.05) { visible in
-                    model.noteVisible(entry.postID, visible)
-                }
         }
     }
 
-    /// The collapsed card (her referenced mockup: title, excerpt, meta —
-    /// bordered, aligned with the book title). 13b 3E (N22 — her ruling:
-    /// "clicking on the post should bring you to it, not just the smaller
-    /// open button"): the card BODY opens the post in the full editor; the
-    /// ▸ disclosure is the expand-in-place door. Each target does what it
-    /// looks like.
-    private func collapsedPostCard(_ entry: Queries.ReadingEntry) -> some View {
+    /// The post's heading in the book's own voice (13c 2A): the title reads
+    /// as a title; the doors — collapse, and out into the full editor —
+    /// recede to quiet chrome beside it, because this is a page she writes
+    /// on, not a catalog row.
+    private var postHeader: some View {
+        HStack(spacing: 6) {
+            // 13b 3E (D1): the ONE collapse door — it releases focus too,
+            // so collapsing the post you're typing in actually collapses it.
+            Button("▾") { model.collapse(entry.postID) }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help("Collapse this post back to its card")
+            Text(outlineEntryTitle(entry))
+                .font(tokens.heading)
+                .foregroundStyle(tokens.ink)
+            if let date = entry.entryDate {
+                Text(date)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+            }
+            // Sitting 9 batch 7: the door OUT of the book into the post's
+            // full editor (modes, takes, lenses — everything).
+            Button(tokens.chromeLabel("open ↗")) {
+                NotificationCenter.default.post(
+                    name: .variorumOpenPost, object: nil,
+                    userInfo: ["postID": entry.postID])
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .help("Open this post in the full editor (Write · Takes · Lenses · …)")
+        }
+        .padding(.top, 10)
+        .id("page-\(entry.postID)")  // the navigator's landing anchor
+        .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
+    }
+
+    @ViewBuilder
+    private var postBody: some View {
+        if model.focusedPostID == entry.postID {
+            // THE one live editor (P3 by construction: a single focused id;
+            // it is the full-document editor, so every routed act — ⌘S,
+            // divide, callout, comments — reaches this surface through the
+            // capability registry's attached-editor arm, exactly as in
+            // Write. Stage 4 lesson 2 holds here without a second handler.)
+            EditorView(
+                session: session, postID: entry.postID, inline: true,
+                caretSeed: model.caretSeed, fanSeed: model.fanSeed)
+                .id(entry.postID)
+        } else {
+            ReadPostView(
+                session: session, postID: entry.postID,
+                onFocusRequest: { offset in
+                    model.focus(entry.postID, caret: offset)
+                },
+                onBadgeTap: { blockID in
+                    // Interpretation 1 (PROVISIONAL): focus FIRST, then the
+                    // fan panel opens on the one live surface.
+                    model.focus(entry.postID, fanBlock: blockID)
+                })
+                .id("read-\(entry.postID)")
+        }
+    }
+
+    /// The collapsed card (batch 12's ruling, preserved as the COLLAPSED
+    /// form — 13c 2A changed only which state is the default). 13b 3E
+    /// (N22): the card BODY opens the post in the full editor; the ▸
+    /// disclosure unfolds it in place. Each target does what it looks like.
+    private var collapsedPostCard: some View {
         Button {
             NotificationCenter.default.post(
                 name: .variorumOpenPost, object: nil,
@@ -695,8 +779,8 @@ struct BookView: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .help("Expand this post in place — read it right here")
-                    Text(entryTitle(entry))
+                    .help("Unfold this post in place — write in it right here")
+                    Text(outlineEntryTitle(entry))
                         .font(tokens.body.weight(.semibold))
                         .foregroundStyle(tokens.ink)
                     if let date = entry.entryDate {
@@ -724,65 +808,38 @@ struct BookView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Click to open this post in the full editor; ▸ expands it in place")
-        .id("page-\(entry.postID)")  // the scrubber's landing anchor
-        .contextMenu { postChapterMenu(entry) }
+        .help("Click to open this post in the full editor; ▸ unfolds it here")
+        .id("page-\(entry.postID)")  // the navigator's landing anchor
+        .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
     }
+}
 
-    private func postHeader(_ entry: Queries.ReadingEntry, expanded: Bool = false) -> some View {
-        HStack(spacing: 6) {
-            if expanded {
-                // 13b 3E (D1): the ONE collapse door — releases focus too
-                // (the model's rule), so collapsing the post you're typing
-                // in actually collapses it.
-                Button("▾") { model.collapse(entry.postID) }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help("Collapse this post back to its card")
+/// A post's chapter-filing menu — ONE definition, two callers (the
+/// navigator's rows and the outline's own rows). Curated books only:
+/// chapters are a curated-reading concept (QUESTIONS #25(a)).
+@MainActor
+@ViewBuilder
+private func outlineChapterMenu(
+    structure: BookStructureModel, postID: String
+) -> some View {
+    if structure.reading?.kind == .curated {
+        Menu("Chapter") {
+            ForEach(structure.sections, id: \.id) { section in
+                Button(section.name) {
+                    Task { await structure.assign(postID, to: section.id) }
+                }
             }
-            Text(entryTitle(entry))
-                .font(tokens.body.weight(.semibold))
-            if let date = entry.entryDate {
-                Text(date)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+            Divider()
+            Button("None") {
+                Task { await structure.assign(postID, to: nil) }
             }
-            // Sitting 9 batch 7: the door OUT of the book into the post's
-            // full editor (modes, takes, lenses — everything).
-            Button(tokens.chromeLabel("open ↗")) {
-                NotificationCenter.default.post(
-                    name: .variorumOpenPost, object: nil,
-                    userInfo: ["postID": entry.postID])
-            }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-            .help("Open this post in the full editor (Write · Takes · Lenses · …)")
-        }
-        .padding(.top, 4)
-        .id("page-\(entry.postID)")  // the scrubber's landing anchor
-        .contextMenu { postChapterMenu(entry) }
-    }
-
-    @ViewBuilder
-    private func postBody(_ entry: Queries.ReadingEntry) -> some View {
-        if model.focusedPostID == entry.postID {
-            // The ONE live editor (P3 by construction: a single focused id).
-            EditorView(
-                session: session, postID: entry.postID, inline: true,
-                caretSeed: model.caretSeed, fanSeed: model.fanSeed)
-                .id(entry.postID)
-        } else {
-            ReadPostView(
-                session: session, postID: entry.postID,
-                onFocusRequest: { offset in
-                    model.focus(entry.postID, caret: offset)
-                },
-                onBadgeTap: { blockID in
-                    // Interpretation 1 (PROVISIONAL): focus FIRST, then the
-                    // fan panel opens on the one live surface.
-                    model.focus(entry.postID, fanBlock: blockID)
-                })
-                .id("read-\(entry.postID)")
         }
     }
+}
+
+/// A reading entry's display title — shared by every book surface's rows.
+private func outlineEntryTitle(_ entry: Queries.ReadingEntry) -> String {
+    entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
 }
 
 /// Batch 12 — the collapsed card's excerpt + meta line (her referenced

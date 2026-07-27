@@ -349,7 +349,7 @@ extension PaneTextView {
     /// The read tier's configuration (non-editable always; the container
     /// sizes it; selection + plain-click per the ratified read contract).
     static func makeReadSurface() -> PaneTextView {
-        makeSurface(inset: 8, allowsUndo: false)
+        makeSurface(inset: EditorTypography.inlineSurfaceInset, allowsUndo: false)
     }
 
     /// A take pane's configuration (live/read toggled by the composer).

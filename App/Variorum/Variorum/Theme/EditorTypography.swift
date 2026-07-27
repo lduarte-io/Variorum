@@ -75,6 +75,13 @@ nonisolated enum EditorTypography {
     /// The floor gutter: even a narrow window keeps real air (the TextEdit
     /// anti-pattern, named in R9).
     static let minGutter: CGFloat = 28
+    /// The text-container inset carried by the CONTAINED text surfaces —
+    /// the inline (book) editor and the read tier — whose prose column is
+    /// bounded by their SwiftUI frame rather than by their own gutter rule.
+    /// Named (13c 2A) because a composer that wants Write's exact measure
+    /// must size its column to `maxColumnWidth + 2 * inlineSurfaceInset`,
+    /// and that arithmetic was previously a literal in three places.
+    static let inlineSurfaceInset: CGFloat = 8
 
     /// The horizontal text-container inset that centers a `maxColumn`-wide
     /// prose column in `viewWidth`, never dropping below `minGutter`.
