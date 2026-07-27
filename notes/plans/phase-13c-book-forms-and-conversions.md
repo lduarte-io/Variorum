@@ -757,7 +757,7 @@ are this phase's opening batch.
 | A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c — SHIPPED (Batch 2B).** The two-up spread built with it: page = a whole scrollable post, ◀ ▶ turning the leaf (two at once) beside the ◁ ▷ one-post nudge, bottom bar kept, no slider. The ACTIVE page mounts `TakesBoardView` or the inline Write editor; its sibling stays read-cheap and the ring migrates on click — one live editor in the app, still (the two-boards-two-authorities finding is in the batch record). One spread-level form control, PROVISIONAL — QUESTIONS #44 |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
 | A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. Her diagnostic was right end to end: 1A measured the mechanism (a 3,000-word block guessing 4,964 pt against 4,597 pt real), 1C measured the remedy, **1E built it (PROVISIONAL, QUESTIONS #39)** — measured in a real window at 7,837 → 7,300 pt, with the document giving back the same 537 pt. | **13c-friction — ADDRESSED (Batch 1E)** |
-| A47 | **The take-card gap — added live 2026-07-27 (sitting record below), verbatim:** *"that large open space at the end of a take, without further newlines to click into bug? it still seems present… now the large open gap isn't going away when i click into other blocks, which is good because it's less annoying, but the fact that it exists is still annoying."* Screenshot on record: the TAKES view (stack style), post "Things I want to do before Brazil", a take card with ~60 visible words and a large (~550 pt) un-clickable empty region below the caret INSIDE the card; status bar `blk 28/31 · 52204DF` and **`805w take · 1,727w post`** — a counter-vs-visible-text discrepancy the investigation must explain. This is a PANE surface, explicitly OUTSIDE 1E's detail-editor scope, and it challenges 1C's "panes never carry an estimate" clean-bill claim. Her directive: Fable finds and fixes it FIRST, before Stage 2. **OUTCOME (Batch 1F, 2026-07-27): FIXED at the traced persistence mechanism — the pane frame was a past exact measurement with NO correction path (every remeasure trigger change-gated; the heal one-directional), now closed by the BOTH-SIDES convergence law on `PaneSurface` (same-width layout passes re-check frame-vs-measurement and republish on divergence), red-on-old by behavioral revert (546.0 pt frame held over 293.0 pt of text on the pre-fix code). 1C's clean bill HOLDS (measurement proven exact everywhere; hypothesis 3 refuted); hypothesis 1 refuted by the read-only store (zero trailing newlines; text unchanged since Jul 24); the 805w-vs-60 discrepancy resolved (the screenshot showed the one ~800-word take's TAIL above the void). The BIRTH event is recorded UNIDENTIFIED (launch-adjacent, recurring; candidate table + kills in the batch record) — the fix makes any birth self-heal within one layout pass. Full record: "Batch 1F" under Batch records.** | **13c — Batch 1F DONE (Fable)** |
+| A47 | **The take-card gap — added live 2026-07-27 (sitting record below), verbatim:** *"that large open space at the end of a take, without further newlines to click into bug? it still seems present… now the large open gap isn't going away when i click into other blocks, which is good because it's less annoying, but the fact that it exists is still annoying."* Screenshot on record: the TAKES view (stack style), post "Things I want to do before Brazil", a take card with ~60 visible words and a large (~550 pt) un-clickable empty region below the caret INSIDE the card; status bar `blk 28/31 · 52204DF` and **`805w take · 1,727w post`** — a counter-vs-visible-text discrepancy the investigation must explain. This is a PANE surface, explicitly OUTSIDE 1E's detail-editor scope, and it challenges 1C's "panes never carry an estimate" clean-bill claim. Her directive: Fable finds and fixes it FIRST, before Stage 2. **OUTCOME (Batch 1F, 2026-07-27): FIXED at the traced persistence mechanism — the pane frame was a past exact measurement with NO correction path (every remeasure trigger change-gated; the heal one-directional), now closed by the BOTH-SIDES convergence law on `PaneSurface` (same-width layout passes re-check frame-vs-measurement and republish on divergence), red-on-old by behavioral revert (546.0 pt frame held over 293.0 pt of text on the pre-fix code). 1C's clean bill HOLDS (measurement proven exact everywhere; hypothesis 3 refuted); hypothesis 1 refuted by the read-only store (zero trailing newlines; text unchanged since Jul 24); the 805w-vs-60 discrepancy resolved (the screenshot showed the one ~800-word take's TAIL above the void). The BIRTH event is recorded UNIDENTIFIED (launch-adjacent, recurring; candidate table + kills in the batch record) — the fix makes any birth self-heal within one layout pass. Full record: "Batch 1F" under Batch records.** **A47b (2026-07-27, ~15:25): the void SURVIVED the 1F build — Batch 1G traced TWO more real gaps, both fixed + revert-red-pinned (`f285c84`): production delivers ZERO layout passes to an idle card (the check had no trigger — R3-4 one layer up, now fired by scroll-end/click/liveness-transition occasions), and the heal's equal-value state write was a SwiftUI NO-OP when the frame diverged with the state already right (now the frame lever pulls the AppKit frame directly). The 264 chars that left her take the same day were identified to the byte (her last two prose paragraphs + separators, deleted BY HER under the deceptive rendering — laid-out-but-undrawn text; no automatic remover exists, pinned by `TakePaneDurabilityTests`) and RESTORED byte-exact via `restoreCommit` under her authorization, the 3,997 state insured by a manual commit first. `/Applications` refreshed per her "when this issue is fixed". Full record: "Batch 1G" under the A47b section.** | **13c — Batch 1F + 1G DONE (Fable)** |
 | A46 | **The DEAD CLICK** — her Q4 answer, verbatim: *"clicking does nothing at all - it couldn't move your cursor into the phantom space and the down arrow couldn't move you down either. nothing was actually there."* Queued as batch 1C. | **13c-friction — INVESTIGATED (Batch 1C): NOT A BUG.** Measured through the real event route: the phantom IS the editor's surface, the click reaches it, and the caret moves — to the document END. It cannot enter the phantom because no text is there, which is her sentence exactly. Down-arrow already agreed correct. **Nothing fixed; characterization pins landed** (`PhantomSpaceTests`) and the weight moves to memo Q3 (option E, now measured). One genuinely un-routed **6 pt** strip at the bottom of every scroll view found and recorded — **AppKit's, reproduced on a vanilla `NSTextView`** — pinned at size so this class can't grow unnoticed |
 | A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c — SHIPPED (Batch 2A).** Outline is the book's writing surface: Write's OWN prose measure (measured off the realized text surface, not restated — the pre-2A 760pt column was 64pt wider than Write's), chapter headings in the book's voice with real air, the post heading's chrome receded, and posts reading OPEN by default (the model tracks the COLLAPSED set — PROVISIONAL, QUESTIONS #43). The pre-bound architecture held WITHOUT a second mechanism, and that is the batch's main finding: Outline's editable surface IS the full-document editor, so it inherits the one-live-ring contract from `BookViewModel`'s single focus authority (13b 3E's fold) and `commitTake`'s availability from the registry's attached-editor arm — both now NAMED by pins rather than inherited silently. P3 pinned by a DEBUG materialization counter, load-bearing for the first time now that every realized row is a text surface |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
@@ -2251,6 +2251,295 @@ surface-vs-store disagreement class). **Her ruling is deliberately NOT
 taken now** — it is the 13d design sitting's (the A22/A11/A15 cluster),
 with 1G's Q2 verdict as an input (whether the edge-trim even caused
 her 259).
+
+### Batch 1G — A47b answered: two more real gaps in the heal, the 264 characters identified and RESTORED (2026-07-27, post-closeout)
+
+**Commits:** `f285c84` (the fix + its three pins + the durability
+characterization pin) · the record commit carrying this section, the
+A47 ledger update, and the 13d A22/A11 notes. **Counts:** core
+**`✔ Test run with 882 tests in 100 suites`** (untouched — zero
+`Sources/VariorumCore/` lines, coherent by construction) · Mac
+**`✔ Test run with 786 tests in 135 suites`** (was 782/134: +3 pins in
+`TakePaneMeasureTests`, +1 new suite `TakePaneDurabilityTests`) ·
+tutorial suites re-run explicitly by type:
+**`✔ Test run with 49 tests in 7 suites`** (P-6). Zero
+`Sources/VariorumCore/Sync/` lines; no schema. **Diff scope:** 3 files —
+`Surface/PaneSurface.swift` (the occasion wires + the frame lever +
+observation counters), `VariorumTests/TakePaneMeasureTests.swift`
+(three 1G pins + the 1F pin's falsified comment corrected),
+`VariorumTests/TakePaneDurabilityTests.swift` (new, characterization).
+**Her store:** read-only throughout the investigation (`mode=ro` /
+`immutable=1`); the ONE authorized write (the restore below) ran behind
+two fresh WAL-safe backups at verified zero-instance windows. Her app
+was never running during any write or build.
+
+#### Q1 — WHY THE 1F HEAL DID NOT FIRE: the top suspect confirmed in refined form, plus a second gap the suspect was hiding
+
+**The census (the experiment the brief demanded, run in the REAL
+mounted `TakesBoardView` and a standalone host, with new
+pass-counters on `PaneTextView`):** an idle, already-laid-out card
+receives **ZERO layout passes** from clicks, selections, scroll-wheel
+events, ring migrations, blur, or two seconds of idle run loop — the
+counters stay frozen through every phase. `layout()` runs only on
+frame-size changes and explicit `needsLayout`, and nothing in her
+15:04–15:25 usage (clicking, highlighting, scrolling — her words)
+produces either. So the 1F divergence check, riding `layout()` alone,
+**never ran in the shipped app for exactly the situations she was in**
+— R3-4's class one layer up, precisely as the brief suspected: the 1F
+pin drives `needsLayout = true` by hand at its line 164 (its comment
+even claimed clicks/ring-moves/scrolls deliver such passes — falsified
+by the census, corrected on the pin).
+
+**The refinement that matters:** the suspect's LITERAL form ("no pass
+ever arrives") is only half true — the 1F stand-in construction
+self-heals on the fixed build (a storage edit's `endEditing` queues
+its own layout pass; both E1 experiments watched it heal in the real
+board). What does NOT self-deliver a pass is a divergence born
+without leaving layout dirt — and the hunt for how that could happen
+exposed **GAP 2, which the starvation was hiding: the heal's remedy
+can be a NO-OP.** The check's only corrective action was a height
+publish — a SwiftUI state write. When the frame diverges while the
+state ALREADY holds the measured value (a frame application dropped
+by SwiftUI mid-update — the exact hazard class `PanePublisher` was
+built around, MINOR-D), the equal-value write invalidates nothing:
+**the check fires forever and heals nothing.** Demonstrated by pin
+and revert: with the lever removed, a 250 pt frame-vs-measurement
+divergence survived the check running repeatedly (the REVERT-1 red).
+This shape also composes into a coherent birth story for her card —
+a tall→short correction during the launch storm (the 1F candidate
+table's transient) whose short re-frame was dropped, every later
+re-publish an equal-value no-op — though the birth itself remains
+honestly UNIDENTIFIED (unchanged from 1F; no construction I drove
+reproduced it, and I do not claim it).
+
+**What shipped (both gaps closed, one component — P-3):**
+
+1. **Production occasions.** `PaneTextView` fires the divergence check
+   on three USER-EVENT wires: `NSScrollView.didEndLiveScrollNotification`
+   of the enclosing scroll view (registered at `viewDidMoveToWindow`;
+   the census verified the real board's panes DO sit in an
+   NSScrollView — SwiftUI's `HostingScrollView`), a click on the pane
+   (`mouseDown`), and a LIVENESS TRANSITION (her "clicking into other
+   blocks", verbatim — the one event a stale card reliably receives).
+   Transition-gated and event-driven: cost is one warm pane-scale
+   measurement per user event (the cost class 1F already accepted per
+   layout pass), zero at rest.
+2. **The frame lever.** `PanePublisher`'s convergence chase goes
+   both-sided (`abs(rendered − height) > slack`, replacing the
+   short-only chase) and gains `applyFrame`: a chase turn that still
+   renders divergent pulls the AppKit frame DIRECTLY to the measured
+   height — on a deferred main-queue turn, never inside a SwiftUI
+   update. SwiftUI's next layout re-imposes the same value, so the two
+   authorities agree instead of fighting.
+
+**The termination argument, extended explicitly (the 1F foci's ask):**
+occasions are discrete user events a height publish can never cause;
+the check publishes only on divergence; a corrective publish/lever
+re-frames the view to the measurement, and the next layout pass's own
+divergence branch measures equal and stays silent; the lever fires
+only inside the budgeted chase (`healTurnBudget`, unchanged at 3) and
+moves the frame toward the value the state holds — no oscillation is
+possible because only one side ever moves. The composer-capped
+compositions (the rail's ScrollView-wrapped cards) are unaffected for
+1F's recorded reason — their pane bounds equal their measurement
+inside the cap.
+
+**What heals her on-screen card:** any scroll-gesture end, any click
+on it, or any ring move — the events her session is made of.
+**The stated falsifier:** a void that survives scrolling and clicking
+ON THIS BUILD would mean a third mechanism (the one candidate left
+standing: `usageBoundsForTextContainer` itself mis-measuring under
+`ensureLayout` on her live instance — 1C proved it exact in every
+driven state, so I did not modify the measurement brain on an
+unproven theory). That report, if it comes, points the next session
+at `PaneMeasurement` with a precise target.
+
+#### Q2 — WHAT REMOVED THE 264 CHARACTERS: identified to the byte, and the automatic-removal theory is dead
+
+**The store archaeology (the WAL held every write of her session —
+main db last checkpointed 11:12; replayed commit-by-commit by pairing
+the db with progressively truncated WAL copies, all on scratch copies,
+her store untouched):**
+
+| Local time | working_text | Δ | What |
+|---|---|---|---|
+| (since Jul 24) | 4,261 · 50 nl | — | her text, stable through the 15:02 backup |
+| 15:24:50.661 | 4,262 · trail 1 | **+1** | one Return typed at the end |
+| 15:24:51.482 | 4,261 · trail 0 | **−1** | …and removed, 821 ms later |
+| 15:25 | — | — | her screenshot: highlight over the void's upper ~250 pt |
+| 15:26:12.160 | 3,999 · trail 2 | **−262** | **her highlight deletion** — "\nin addition…everywhere. " |
+| 15:26:14.562 | 3,997 · trail 0 | −2 | her second delete: the last two blank lines |
+| 15:26:16.453 | 4,006 · trail 9 | **+9** | nine Returns typed at the end |
+| 15:26:19.180 | 3,997 · trail 0 | **−9** | …removed, 2.73 s later — **byte-identical** to the 15:26:14 state |
+
+**The 264 characters, exactly:** the take's LAST TWO PROSE PARAGRAPHS
+plus their ordinary separators — `\n\n\n` + *"in addition to the tabs
+of open notes at the left, maybe you should be able to star like up
+to 5 of them so they just always are there on the left. maybe be able
+to star books? or just individual notes?"* + `\n\n` + *"need to change
+the wording from post to note everywhere. "* (trailing space
+included). They are her OWN intake notes — the A29 stars idea and the
+K5 post→note sweep. The current text was a verified strict
+byte-prefix of the 10:12:45 commit; the removal was exactly the
+trailing 264 bytes.
+
+**Verdict on her hypothesis (a) — CONFIRMED:** her selection covered
+more than it visually showed. The morning capture's "~60 visible
+words" WERE these paragraphs rendering normally; at 15:25 the same
+rows photographed as blank while remaining selectable (the store
+proves characters existed at those positions — she selected and
+deleted them one minute later believing them newlines; there were
+never 5 standalone blank lines to delete — the 5 newlines were the
+paragraphs' own separators). The deletion was HERS and the rendering
+state deceived her — laid-out-but-undrawn text, the A47 state's
+second face.
+
+**Verdict on hypothesis (b) — NO automatic path exists, and the
+ground is now pinned:** the app-wide sweep found no whitespace trim
+anywhere in the pane/autosave path (every `trimmingCharacters` call
+is names/labels/queries; the only content-level whitespace rules are
+`SegmentationRules`' ratified bulk-entry edge-run drop and the
+open-tail whitespace-only-never-mints guard — `idleMintTail` and
+`finalizeWork` both `guard !tail.allSatisfy(\.isWhitespace)` — which
+never touch an existing block). The E2 experiment typed nine real
+Returns into the live take card in the real mounted board: they
+survive autosave (stored byte-exact), ring migration, projection
+adoption, and teardown — now the permanent characterization pin
+`TakePaneDurabilityTests` (labelled as such; it documents correct
+behavior and guards the forbidden class). The −1/−9 removals were
+therefore her own editing — and the −9's byte-identical revert 2.73 s
+after typing is the exact signature of ⌘Z over a coalesced Return
+burst (or a held ⌫); with the tail rendering invisibly, typing that
+produced no visible change and being backed out is the coherent
+reading. **No I4/durability violation occurred in the takes path;
+nothing is dismissed without the pin that would catch it.**
+
+**The one AUTHORIZED "removal" her original narrative fits:** typed
+newlines at the very END OF THE POST (past the last block, in Write)
+are open-tail entry — whitespace-only tails never mint and evaporate
+at teardown, by the ratified Phase 7 rules, WITHOUT ever reaching the
+store (consistent with her text being byte-stable July 24 → 15:24
+while she remembers building room "out of newlines" that "must've
+been removed somehow"). That surface-vs-store disagreement — room
+that looks durable and silently vanishes — is exactly the A22 input;
+recorded in the 13d plan's A22/A11 rows, built there, not here.
+
+#### The RESTORE — executed per her authorization (2026-07-27, ~16:33)
+
+The 259 non-newline characters are REAL PROSE → restore authorized.
+Executed through ORDINARY operations via a scratch VariorumCore
+executable (never ad-hoc row edits), behind the A1 rail: fresh
+WAL-safe backups `variorum-backup-2026-07-27-223147.sqlite` (pre) and
+`…-223415.sqlite` (post-restore, pre-refresh), both `integrity_check`
+ok; zero instances verified immediately before the write; preconditions
+re-checked INSIDE the tool (len 3,997 / commit 4,261 / strict-prefix —
+abort on any drift). **(1)** `commit(kind: .manual)` — the current
+3,997 state preserved as insurance ("A47b insurance (2026-07-27)…"),
+so today's state stays one restore away forever; **(2)**
+`restoreCommit` back to the 10:12:45 auto-commit — the §9 door whose
+semantics ARE this act, byte-exact by construction. Verified read-only
+after: working_text 4,261 chars / 50 newlines ending "…everywhere. ";
+2 commits on the variant; ONE ordinary outbox row (the restore rides
+ordinary sync to the mirror on her next signed-in round).
+**A judgment call flagged for her, not hidden:** her follow-up asked
+for "the missing 264 characters" restored while the coordinator's
+instruction said "her deliberate 5-blank-line deletion still applied"
+— the two are INCOMPATIBLE with the actual bytes (the 5 newlines ARE
+the restored paragraphs' own separators; subtracting them would fuse
+"takes" into "in addition…"). Her explicit sentence was honored: the
+264 restored VERBATIM (= the known-good 10:12 state she wrote). If
+she still wants the gap above "in addition" one blank line tighter,
+it is a one-second ordinary edit in the app.
+
+#### The `/Applications` REFRESH — executed under her authorization ("when this issue is fixed")
+
+Release built from `f285c84` (fix landed, suites green, both reverts
+red-verified); zero instances at build start AND immediately before
+the copy; installed via `ditto`; signature verified
+*[removed for publication]*
+build against the restored store.
+
+#### Red-on-old evidence — by behavioral revert, checksum-restored (`shasum -c` OK after each)
+
+| Revert applied | RED observed |
+|---|---|
+| **REVERT 1 — the frame lever removed** (the chase restored to 1F's short-only form, no `applyFrame`) | `aFrameTheStateCannotMoveIsHealedByTheFrameLever` FAILED — the 250 pt frame-vs-measurement divergence survived the check firing (the equal-value no-op, demonstrated); occasion pins stayed green (wires intact — clean attribution) |
+| **REVERT 2 — the occasion wires removed** (scroll-end observer, click hook, liveness transition, install wiring; lever kept) | `productionOccasionsRunTheDivergenceCheck` FAILED both arms (`convergenceChecksRun` frozen at 2 through the posted scroll-end and the driven click) and `aLivenessTransitionRunsTheDivergenceCheck` FAILED (`occasionsFired` frozen at 0 through the in-place liveness flip); pin A stayed green (lever intact) |
+
+**Pin honesty, recorded because it cost two iterations:** the first
+two occasion-pin constructions asserted a HEAL and stayed GREEN with
+the wires deleted — incidental harness machinery (SwiftUI observing a
+directly-set child frame; TK2's deferred storage-edit invalidation)
+delivered layout passes that healed via the 1F branch + the lever.
+Exactly R3-4's recorded first-version trap. The shipped pins take
+R3-4's final MECHANICAL form — wire-fired and check-ran counters
+(`occasionsFired` / `convergenceChecksRun`, the funnel
+`fireConvergenceOccasion()`), asserted synchronously — and the pins'
+comments say why. The durability pin is CHARACTERIZATION and says so
+in its header (correct behavior documented; no red-on-old owed).
+
+#### Numbered judgment calls
+
+1. **The restore-verbatim call** (flagged above — her sentence over
+   the instruction's letter, because the letter was incompatible with
+   the actual bytes; ambiguity resolved toward the only coherent
+   reading rather than stopping, since her "I would restore the
+   missing 264 characters" is itself unambiguous).
+2. **The −9 attributed to her own editing** on the strength of: no
+   automatic path in code (swept), none under experiment (E2, now
+   pinned), the byte-identical-revert signature, and the timeline
+   (2.73 s). Honestly bounded: I cannot distinguish ⌘Z from held-⌫
+   from here, and her testimony ("it must've been removed somehow")
+   most plausibly refers to the open-tail episode, which never touched
+   this block's store.
+3. **The measurement brain untouched.** The converged-but-mismeasured
+   theory (usage bounds wrong under ensureLayout on her live instance)
+   would defeat the check silently — but 1C measured it exact in every
+   driven state and no experiment here contradicted that; modifying
+   the ONE brain on an unproven theory fails the hallucination guard.
+   Recorded with its falsifier instead.
+4. **The scratch hunt suite (`A47bHuntTests`) deleted after use**, per
+   the 1F precedent; its census numbers and refutations are recorded
+   here; E2 graduated into the permanent durability pin instead of
+   dying with the suite.
+5. **No QUESTIONS entry:** nothing new product-flavored — the restore
+   and refresh ran under her explicit same-day authorizations; the
+   whitespace-approach ruling is already deliberately parked for 13d
+   (the section above); the one flagged judgment call (1) is hers to
+   reverse cheaply if she disagrees.
+
+#### Deviations
+
+- **The A47b brief's Q1 experiment order was honored** (starvation
+  first, by experiment, in the real composition); its top suspect was
+  CONFIRMED in refined form rather than whole — the refinement (GAP 2)
+  is the more load-bearing finding, and the record says which is
+  which.
+- **One permission-classifier denial** (a compound heredoc+build
+  command for the restore tool) — re-done through ordinary file
+  writes + a plain build; no workaround of intent.
+- **No lookup subagent used** — every question was answerable by the
+  repo, the store, or measurement.
+- The full-suite run line, quoted: core
+  `✔ Test run with 882 tests in 100 suites` · Mac
+  `✔ Test run with 786 tests in 135 suites` · tutorial
+  `✔ Test run with 49 tests in 7 suites`.
+
+#### Ladder foci suggested for this batch (1G)
+
+Whether the occasion set is complete for panes that never sit in a
+scroll view and never host clicks (the TOC's expanded rows compose
+the same surface — do they idle the same way?); whether the frame
+lever can fight a composer that DELIBERATELY frames a pane away from
+its measurement (the capped-rail argument says no — a reviewer should
+try to break it); whether `didEndLiveScrollNotification` actually
+posts from SwiftUI's `HostingScrollView` on real trackpad gestures
+(the pin drives the notification wire itself — a live-app observation
+would close this; recorded as the one production assumption the
+harness cannot prove); and whether the durability pin should also
+cover the WRITE editor's mid-post block-end newlines (the takes path
+is pinned; Write's autosave path was code-swept but not
+experiment-pinned).
 
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
