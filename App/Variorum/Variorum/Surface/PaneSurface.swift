@@ -24,6 +24,15 @@
 //  stale class the width/string/font gates could never re-trigger on,
 //  and the heal — which only chases a SHORT frame — could never shrink)
 //  self-heals on the next pass instead of persisting for the pane's life.
+//  Since 13c 1G (A47b — the void SURVIVED the 1F build) the check also
+//  has PRODUCTION TRIGGERS and a REMEDY THAT CANNOT NO-OP: the census
+//  proved clicks/scrolls/idle deliver zero layout passes to an idle card
+//  (the 1F branch alone never ran), so scroll-end, clicks, and liveness
+//  transitions fire the check as user-event occasions; and because an
+//  equal-value @State write is a SwiftUI no-op (a dropped frame
+//  application left the state right and the frame wrong — the publisher's
+//  own mid-update class), the heal's chase now pulls the AppKit frame
+//  directly on a divergent turn (the frame lever).
 //
 //  Why a full-document `ensureLayout` is legitimate HERE (ladder round 3,
 //  NIT-A — verified P1-safe, not a violation): every composer of this
@@ -103,6 +112,17 @@ final class PanePublisher {
     /// nil ⇒ the pane is gone; publishing stops.
     private var measure: (() -> CGFloat?)?
     private var renderedHeight: (() -> CGFloat?)?
+    /// 13c 1G (A47b): the FRAME LEVER. The heal's only remedy used to be a
+    /// height @State write — and when the state ALREADY holds the measured
+    /// value while the rendered frame does not (a frame application dropped
+    /// by SwiftUI: the same mid-update hazard this publisher exists for),
+    /// an equal-value @State write invalidates nothing and the frame never
+    /// moves — a heal that fires forever and heals nothing (her void, on
+    /// the 1F build). A chase turn that still renders divergent now applies
+    /// the frame DIRECTLY to the view (deferred turn — never inside a
+    /// SwiftUI update); SwiftUI's next layout re-imposes the same value, so
+    /// the two authorities agree instead of fighting.
+    private var applyFrame: ((CGFloat) -> Void)?
     private var writeHeight: ((CGFloat) -> Void)?
     private var writeCanary: ((String) -> Void)?
     private let schedule: Scheduler
@@ -117,12 +137,14 @@ final class PanePublisher {
     init(
         measure: @escaping () -> CGFloat?,
         renderedHeight: @escaping () -> CGFloat?,
+        applyFrame: ((CGFloat) -> Void)? = nil,
         writeHeight: @escaping (CGFloat) -> Void,
         writeCanary: @escaping (String) -> Void,
         schedule: @escaping Scheduler = { work in DispatchQueue.main.async(execute: work) }
     ) {
         self.measure = measure
         self.renderedHeight = renderedHeight
+        self.applyFrame = applyFrame
         self.writeHeight = writeHeight
         self.writeCanary = writeCanary
         self.schedule = schedule
@@ -149,6 +171,7 @@ final class PanePublisher {
     func invalidate() {
         measure = nil
         renderedHeight = nil
+        applyFrame = nil
         writeHeight = nil
         writeCanary = nil
         pendingCanary = nil
@@ -176,10 +199,14 @@ final class PanePublisher {
         }
         writeHeight?(height)
         // The convergence check: what does the pane actually RENDER? While
-        // it renders short of its text, the write did not take — try again
-        // until the budget is spent.
+        // it disagrees with the measurement — in EITHER direction (13c 1G:
+        // the short-only chase left a tall frame terminal) — the write did
+        // not take: pull the frame itself (the lever; an equal-value state
+        // write is a SwiftUI no-op, so the state alone cannot move it) and
+        // try again until the budget is spent.
         let rendered = renderedHeight?() ?? height
-        if rendered + Self.convergenceSlack < height, healTurnsLeft > 0 {
+        if abs(rendered - height) > Self.convergenceSlack, healTurnsLeft > 0 {
+            applyFrame?(height)
             scheduleTurn()
         } else {
             healTurnsLeft = 0
@@ -243,12 +270,66 @@ final class PaneTextView: NSTextView {
     /// (programmatic landings), honored at attach.
     var claimsKeyboardOnAttach = false
 
+    /// 13c 1G (A47b): the PRODUCTION occasions for the divergence check.
+    /// The 1F check rides `layout()` — and the 1G census proved production
+    /// delivers NO layout passes to an idle, already-laid-out card: clicks,
+    /// selections, scrolls, and idle set no `needsLayout` (counters frozen
+    /// through every driven phase), so a divergence born without leaving
+    /// layout dirt behind starved forever — her void, still present on the
+    /// 1F build; the 1F pin drove the pass by hand (R3-4's class one layer
+    /// up). Three USER-EVENT wires now fire the same check: the enclosing
+    /// scroll view's end-of-live-scroll, a click on the pane, and a
+    /// liveness transition (her "clicking into other blocks", verbatim).
+    /// Termination: each occasion is a discrete user event that a height
+    /// publish can never cause, the check publishes only on divergence,
+    /// and the corrective publish's own layout pass measures equal and
+    /// stays silent.
+    var onConvergenceOccasion: (() -> Void)?
+    /// Observation seam (the R3-4 pin-honesty lesson, applied here on day
+    /// one): every occasion funnels through `fireConvergenceOccasion()`,
+    /// so a pin can assert the WIRE fired — a heal alone can be satisfied
+    /// by an incidental layout pass and proves nothing about the wire.
+    private(set) var occasionsFired = 0
+    /// …and the check itself counts its runs (the coordinator notes each
+    /// execution), so a pin can assert wire → check without depending on a
+    /// heal that incidental machinery could satisfy.
+    private(set) var convergenceChecksRun = 0
+
+    func fireConvergenceOccasion() {
+        occasionsFired += 1
+        onConvergenceOccasion?()
+    }
+
+    func noteConvergenceCheck() {
+        convergenceChecksRun += 1
+    }
+
+    private weak var observedScrollView: NSScrollView?
+
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         if claimsKeyboardOnAttach, let window {
             claimsKeyboardOnAttach = false
             window.makeFirstResponder(self)
         }
+        observeEnclosingScrollView()
+    }
+
+    private func observeEnclosingScrollView() {
+        if let observed = observedScrollView {
+            NotificationCenter.default.removeObserver(
+                self, name: NSScrollView.didEndLiveScrollNotification, object: observed)
+            observedScrollView = nil
+        }
+        guard window != nil, let scrollView = enclosingScrollView else { return }
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(enclosingScrollDidEndLiveScroll(_:)),
+            name: NSScrollView.didEndLiveScrollNotification, object: scrollView)
+        observedScrollView = scrollView
+    }
+
+    @objc private func enclosingScrollDidEndLiveScroll(_ note: Notification) {
+        fireConvergenceOccasion()
     }
     /// Fires when layout gives the view a NEW width (batch 12 — the
     /// clipped-take fix's trigger; width-gated so height publishes can't
@@ -270,6 +351,14 @@ final class PaneTextView: NSTextView {
     /// the view to the measurement, and the next pass measures equal.
     var onLayoutPass: (() -> Void)?
     private var lastLaidOutWidth: CGFloat = -1
+    /// Observation seams (13c 1G — A47b): how many layout passes this view
+    /// has actually received, by branch. The 1F fix's trigger question is
+    /// "does production ever deliver a same-width pass to an idle card?" —
+    /// these counters are how a test asks the REAL composition instead of
+    /// driving `needsLayout` by hand (the R3-4 lesson, applied to the pin
+    /// one layer up).
+    private(set) var widthPassesRun = 0
+    private(set) var sameWidthPassesRun = 0
     /// Test seam (the N2 pin): the last canary message the surface
     /// PUBLISHED for rendering — proves the fire→render wiring without
     /// walking SwiftUI internals. Written only by the surface coordinator.
@@ -283,17 +372,20 @@ final class PaneTextView: NSTextView {
         super.layout()
         if bounds.width != lastLaidOutWidth {
             lastLaidOutWidth = bounds.width
+            widthPassesRun += 1
             onWidthChange?()
         } else {
             // Same width: the divergence check (A47). A width pass already
             // remeasures unconditionally, so the two branches never double
             // a measurement in one pass.
+            sameWidthPassesRun += 1
             onLayoutPass?()
         }
     }
 
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)  // the selection tracking loop runs first
+        defer { fireConvergenceOccasion() }  // 13c 1G: a click is an occasion
         guard selectedRange().length == 0 else { return }
         let point = convert(event.locationInWindow, from: nil)
         onPlainClick?(characterIndexForInsertion(at: point))
@@ -545,8 +637,15 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// literal. A click-focused pane is already first responder (the
         /// claim is a no-op); read transitions never claim.
         func noteLiveness(_ live: Bool) {
+            let was = wasLive
             defer { wasLive = live }
-            guard live, !wasLive, let view else { return }
+            // 13c 1G: a liveness TRANSITION (either direction) is a
+            // convergence occasion — "clicking into other blocks" moves the
+            // ring, and the stale card's live→read flip is the one event it
+            // reliably receives. Transition-gated so ordinary read→read
+            // updates cost nothing.
+            if live != was { view?.fireConvergenceOccasion() }
+            guard live, !was, let view else { return }
             if let window = view.window {
                 window.makeFirstResponder(view)
             } else {
@@ -566,6 +665,15 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                     return max(PaneMeasurement.height(of: view), 24)
                 },
                 renderedHeight: { [weak view] in view?.bounds.height },
+                // 13c 1G (A47b): the frame lever — a chase turn that still
+                // renders divergent pulls the AppKit frame itself, because
+                // an equal-value state write cannot (see PanePublisher; the
+                // F1 walk keeps SwiftUI's property wrappers out of this
+                // coordinator, comments included).
+                applyFrame: { [weak view] height in
+                    guard let view, view.frame.height != height else { return }
+                    view.setFrameSize(NSSize(width: view.frame.width, height: height))
+                },
                 writeHeight: publishHeight,
                 // N2: the canary message is PUBLISHED into the rendered
                 // banner (it used to land in a private var nothing read).
@@ -581,6 +689,11 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // so a stale frame — in EITHER direction — self-heals on the
             // next pass instead of persisting until a width/text/font event.
             view.onLayoutPass = { [weak self] in self?.reconvergeIfDiverged() }
+            // 13c 1G (A47b): the PRODUCTION occasions — scroll-end, clicks,
+            // and liveness transitions run the same check, because the 1G
+            // census proved those events deliver NO layout passes at all
+            // (the 1F branch alone was production-inert for an idle card).
+            view.onConvergenceOccasion = { [weak self] in self?.reconvergeIfDiverged() }
             canary.onFire = { [weak self] message in
                 self?.publisher?.publishCanary(message)
             }
@@ -634,8 +747,16 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// fire it: the capped wrapper is a ScrollView AROUND the pane
         /// (the rail's tall cards), so the pane's own bounds still equal
         /// its measurement inside.
+        ///
+        /// 13c 1G (A47b): also fired by the user-event OCCASIONS (scroll
+        /// end, click, liveness transition) — production delivers no
+        /// layout passes to an idle card, so `layout()` alone never ran
+        /// this in the shipped app; and the corrective publish now rides
+        /// the publisher's frame lever, so a divergence the state cannot
+        /// move (the equal-value no-op) still heals.
         func reconvergeIfDiverged() {
             guard let view, publisher != nil else { return }
+            view.noteConvergenceCheck()
             let measured = max(PaneMeasurement.height(of: view), 24)
             if abs(view.bounds.height - measured) > PanePublisher.convergenceSlack {
                 remeasure()

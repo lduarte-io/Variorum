@@ -13,9 +13,17 @@
 //
 
 import AppKit
+import Combine
 import SwiftUI
 import Testing
 @testable import Variorum
+
+/// Sync pump callable from async pins (`RunLoop.run(until:)` is barred in
+/// async contexts; a sync hop is the suite-wide pattern).
+@MainActor
+private func pumpMain(_ seconds: TimeInterval = 0.03) {
+    RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+}
 
 @MainActor
 struct TakePaneMeasureTests {
@@ -159,13 +167,244 @@ struct TakePaneMeasureTests {
         pane.textStorage?.addAttributes([.paragraphStyle: narrow], range: full)
         pane.textStorage?.endEditing()
 
-        // An ordinary same-width layout pass — the only kind of event her
-        // stable void ever received (clicks, ring moves, scrolls).
+        // A same-width layout pass, DRIVEN BY HAND. (Corrected at 1G: the
+        // original comment here claimed clicks/ring moves/scrolls deliver
+        // this kind of pass — the 1G census proved they deliver NONE, which
+        // is why her void survived the 1F build. This pin holds the LAW for
+        // whenever a pass does arrive; the 1G pins below hold the
+        // production TRIGGERS and the remedy's frame lever.)
         pane.needsLayout = true
         settle()
 
         let measured = PaneMeasurement.height(of: pane)
         #expect(abs(pane.bounds.height - measured) <= 3,
                 "the frame re-converges to the current measurement on the next layout pass (frame \(pane.bounds.height) vs measured \(measured)) — on the pre-fix code it stays at \(tall) forever")
+    }
+
+    // MARK: - 13c Batch 1G (A47b): the void survived the 1F build
+
+    /// Shared host for the 1G pins: a pane mounted inside a real SwiftUI
+    /// ScrollView (so `enclosingScrollView` resolves, as it does under the
+    /// real TakesBoardView — verified by the 1G census), converged, then
+    /// corrupted into the state her card was in.
+    @MainActor
+    private struct StarvedPaneHost {
+        let window: NSWindow
+        let host: NSHostingController<AnyView>
+        let pane: PaneTextView
+        let converged: CGFloat
+
+        static func mount() async -> StarvedPaneHost? {
+            let text = (1...12).map { "paragraph number \($0) of honest prose" }
+                .joined(separator: "\n")
+            let host = NSHostingController(
+                rootView: AnyView(ScrollView { PaneSurfaceView(text: text, isLive: false) }))
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+                styleMask: [.borderless], backing: .buffered, defer: false)
+            window.contentViewController = host
+            host.view.frame = NSRect(x: 0, y: 0, width: 400, height: 500)
+            func findPane(_ view: NSView) -> PaneTextView? {
+                if let pane = view as? PaneTextView { return pane }
+                for sub in view.subviews {
+                    if let found = findPane(sub) { return found }
+                }
+                return nil
+            }
+            for _ in 0..<8 {
+                host.view.layoutSubtreeIfNeeded()
+                pumpMain()
+                await Task.yield()
+            }
+            guard let pane = findPane(host.view) else { return nil }
+            let converged = pane.bounds.height
+            guard abs(converged - PaneMeasurement.height(of: pane)) <= 3 else { return nil }
+            return StarvedPaneHost(
+                window: window, host: host, pane: pane, converged: converged)
+        }
+
+        /// STAND-IN 1 (pin A — the frame side): the frame diverges while
+        /// the height @State does NOT — the dropped-frame-application shape
+        /// (SwiftUI dropped the re-frame; the state and the measurement
+        /// agree; every re-publish of the same value is a no-op).
+        /// Constructed by resizing the NSView directly. A labelled STAND-IN,
+        /// as 1F's was: it reproduces the terminal STATE, not the (still
+        /// unidentified) birth.
+        func corruptFrameSide() {
+            pane.setFrameSize(NSSize(width: pane.frame.width, height: converged + 250))
+            swallowLayoutDirt()
+        }
+
+        /// Production's starved card owes no pass to anyone (the 1G
+        /// census); dirt left by the corruption's own mechanics would
+        /// deliver an incidental pass that heals via the 1F branch — a pin
+        /// satisfied by the wrong wire (the R3-4 first-version trap, hit
+        /// and fixed here twice).
+        private func swallowLayoutDirt() {
+            var view: NSView? = pane
+            while let current = view {
+                current.needsLayout = false
+                view = current.superview
+            }
+        }
+
+        func settle() async {
+            for _ in 0..<6 {
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                pumpMain()
+                await Task.yield()
+            }
+        }
+
+        var healed: Bool {
+            abs(pane.bounds.height - PaneMeasurement.height(of: pane)) <= 3
+        }
+
+        func dismantle() {
+            window.contentViewController = nil
+        }
+    }
+
+    /// 1G pin A — the REMEDY (red-on-old by behavioral revert: remove the
+    /// publisher's `applyFrame` lever / the both-sided chase): when the
+    /// frame diverges while the @State already holds the measured value,
+    /// the pre-1G heal's only remedy was an equal-value @State write — a
+    /// SwiftUI no-op — so the check FIRED (a hand-driven pass, as in the
+    /// 1F pin) and healed NOTHING, forever. The lever pulls the AppKit
+    /// frame itself on a divergent chase turn.
+    @Test func aFrameTheStateCannotMoveIsHealedByTheFrameLever() async {
+        guard let harness = await StarvedPaneHost.mount() else {
+            Issue.record("the scroll-hosted pane did not mount converged")
+            return
+        }
+        defer { harness.dismantle() }
+        harness.corruptFrameSide()
+        #expect(!harness.healed, "the corruption took (frame \(harness.pane.bounds.height))")
+        // Drive ONE layout pass by hand (the 1F trigger, known to fire the
+        // check): on pre-1G code the check runs, publishes the equal value,
+        // SwiftUI ignores it, and the frame never moves.
+        harness.pane.needsLayout = true
+        await harness.settle()
+        #expect(harness.healed,
+                "the frame lever heals a divergence the state cannot move (frame \(harness.pane.bounds.height) vs measured \(PaneMeasurement.height(of: harness.pane)))")
+    }
+
+    /// 1G pin B — the TRIGGER WIRES (red-on-old by behavioral revert:
+    /// remove the occasion wires): production delivers NO layout passes to
+    /// an idle card (the 1G census: counters frozen through idle, clicks,
+    /// scrolls), so the 1F branch alone never ran in the shipped app —
+    /// R3-4's class one layer up. This pin takes R3-4's final MECHANICAL
+    /// form deliberately: it asserts the wire fires and the check runs
+    /// (both counters, synchronously — no settle between drive and
+    /// assert), because every heal-shaped construction we tried was
+    /// eventually satisfied by incidental harness machinery (SwiftUI
+    /// geometry observation; TK2's deferred invalidation) — the R3-4
+    /// first-version trap, hit twice and recorded in the 1G record. The
+    /// heal CAPABILITY is pin A's (red-verified against the lever revert);
+    /// this pin owns the wires: scroll-end on the ENCLOSING scroll view
+    /// (the production registration) and a click on the pane.
+    @Test func productionOccasionsRunTheDivergenceCheck() async {
+        guard let harness = await StarvedPaneHost.mount() else {
+            Issue.record("the scroll-hosted pane did not mount converged")
+            return
+        }
+        defer { harness.dismantle() }
+        guard let scrollView = harness.pane.enclosingScrollView else {
+            Issue.record("no enclosing scroll view — the occasion wire has no host")
+            return
+        }
+
+        // Occasion 1 — scroll end (the notification IS the production
+        // wire; posting it drives the registered observer synchronously).
+        let checksBeforeScroll = harness.pane.convergenceChecksRun
+        NotificationCenter.default.post(
+            name: NSScrollView.didEndLiveScrollNotification, object: scrollView)
+        #expect(harness.pane.convergenceChecksRun > checksBeforeScroll,
+                "scroll-end ran the divergence check (checks \(harness.pane.convergenceChecksRun))")
+
+        // Occasion 2 — a click on the pane (post the up first so the
+        // tracking loop returns; the occasion fires as mouseDown unwinds).
+        let checksBeforeClick = harness.pane.convergenceChecksRun
+        let mid = harness.pane.convert(NSPoint(x: 20, y: 20), to: nil)
+        func mouse(_ type: NSEvent.EventType) -> NSEvent? {
+            NSEvent.mouseEvent(
+                with: type, location: mid, modifierFlags: [],
+                timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: harness.window.windowNumber, context: nil,
+                eventNumber: 1, clickCount: 1, pressure: 1)
+        }
+        if let down = mouse(.leftMouseDown), let up = mouse(.leftMouseUp) {
+            // Drive the production override directly: the wire under test
+            // is PaneTextView.mouseDown's occasion, not AppKit hit-testing
+            // (window.sendEvent hit-tests unreliably in an unordered hosted
+            // window). The up is queued first so the tracking loop returns.
+            harness.window.postEvent(up, atStart: false)
+            harness.pane.mouseDown(with: down)
+        }
+        #expect(harness.pane.convergenceChecksRun > checksBeforeClick,
+                "a click ran the divergence check (checks \(harness.pane.convergenceChecksRun))")
+
+        // A converged pane's checks publish nothing (the termination
+        // argument's silent side, observed): the frame still equals the
+        // measurement after both occasions.
+        #expect(harness.healed, "occasions on a converged pane stay silent")
+    }
+
+    /// 1G pin C — the LIVENESS occasion: the ring migrating onto (or off)
+    /// a pane runs the check — her card's one reliable event was exactly
+    /// "clicking into other blocks". Same mechanical form as pin B; the
+    /// occasion counter carries the red (a SwiftUI settle can deliver
+    /// incidental layout passes that bump the CHECK counter on any code).
+    @Test func aLivenessTransitionRunsTheDivergenceCheck() async {
+        let text = (1...12).map { "paragraph number \($0) of honest prose" }
+            .joined(separator: "\n")
+        final class FlipModel: ObservableObject { @Published var live = false }
+        struct FlipHost: View {
+            let text: String
+            @ObservedObject var model: FlipModel
+            var body: some View {
+                ScrollView { PaneSurfaceView(text: text, isLive: model.live) }
+            }
+        }
+        let flip = FlipModel()
+        let host = NSHostingController(
+            rootView: FlipHost(text: text, model: flip))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        host.view.frame = NSRect(x: 0, y: 0, width: 400, height: 500)
+        defer { window.contentViewController = nil }
+        func findPane(_ view: NSView) -> PaneTextView? {
+            if let pane = view as? PaneTextView { return pane }
+            for sub in view.subviews {
+                if let found = findPane(sub) { return found }
+            }
+            return nil
+        }
+        func settle() async {
+            for _ in 0..<6 {
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                pumpMain()
+                await Task.yield()
+            }
+        }
+        await settle()
+        guard let pane = findPane(host.view) else {
+            Issue.record("no pane mounted")
+            return
+        }
+        let occasionsBefore = pane.occasionsFired
+        // The ring arrives (a real SwiftUI liveness flip → updateNSView →
+        // noteLiveness transition → the occasion) — an IN-PLACE update on
+        // the same mounted pane.
+        flip.live = true
+        await settle()
+        #expect(pane.occasionsFired > occasionsBefore,
+                "the liveness WIRE fired (occasions \(pane.occasionsFired))")
+        #expect(abs(pane.bounds.height - PaneMeasurement.height(of: pane)) <= 3,
+                "the pane stays converged through the transition")
     }
 }
