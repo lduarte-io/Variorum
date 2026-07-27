@@ -753,8 +753,8 @@ are this phase's opening batch.
 | A37 | EPUB library — read-only books, highlights auto-appending to a "favorite quotes" note with quote marks, dash, author, title | unslotted row |
 | A38 | "a variorum mobile app that's quite robust and easy to use" | 15 |
 | A42 | **A thorough, beautiful, robust MOBILE app** — added live 2026-07-25, moving Phase 15's material up. Shapes floated and deliberately NOT chosen (hers to rule at the mobile design sitting): a Write-like base · drag-left/right on blocks for their complex menus · a small take button · **or** takes-in-stack-only with expand/shrink. Continues R58; puts CoreDescription pillar 8's "no variant/fan gestures there" in tension — an explicit vision-doc delta, hers to make | **RULED 2026-07-25 — mobile gets its OWN PLAN, decided separately** (she declined all three in-sequence slots; Phase 15's row superseded, an unslotted first-class project row in its place, `notes/plans/mobile-app-plan.md`). The pillar 8 delta is applied — the option text she chose is quoted in the "Further author direction" section. *(Row corrected at the ladder's round 3 beside R3-2: it still read "her call pending" a day after she made the call — the R2-2 class, and the same section this finding was about.)* |
-| A43 | **All book views more editable** — *"chapters / posts with blocks within are genuinely helpful concepts."* Extends A39 beyond Outline; scope (Outline + Book, or all three incl. Read) is her call | **13c — the OUTLINE half is SHIPPED (Batch 2A)**, and it was already true before it: the focused post has mounted the full editor inline since Phase 10. What 2A added is that the surface around it now looks and behaves like a place to write in — posts open, Write's measure, headings. The BOOK half is 2B's (A44's stack/Write forms); READ stays a reading surface by her own A43 ruling |
-| A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
+| A43 | **All book views more editable** — *"chapters / posts with blocks within are genuinely helpful concepts."* Extends A39 beyond Outline; scope (Outline + Book, or all three incl. Read) is her call | **13c — SHIPPED as she ruled it: OUTLINE (Batch 2A) + BOOK (Batch 2B); READ stays a reading surface.** Outline's half was already half-true before 2A (the focused post has mounted the full editor inline since Phase 10) and 2A made the surface around it look and behave like a place to write. 2B made Book's pages editable in either form (A44) with ONE live editor across the spread |
+| A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c — SHIPPED (Batch 2B).** The two-up spread built with it: page = a whole scrollable post, ◀ ▶ turning the leaf (two at once) beside the ◁ ▷ one-post nudge, bottom bar kept, no slider. The ACTIVE page mounts `TakesBoardView` or the inline Write editor; its sibling stays read-cheap and the ring migrates on click — one live editor in the app, still (the two-boards-two-authorities finding is in the batch record). One spread-level form control, PROVISIONAL — QUESTIONS #44 |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
 | A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. Her diagnostic was right end to end: 1A measured the mechanism (a 3,000-word block guessing 4,964 pt against 4,597 pt real), 1C measured the remedy, **1E built it (PROVISIONAL, QUESTIONS #39)** — measured in a real window at 7,837 → 7,300 pt, with the document giving back the same 537 pt. | **13c-friction — ADDRESSED (Batch 1E)** |
 | A47 | **The take-card gap — added live 2026-07-27 (sitting record below), verbatim:** *"that large open space at the end of a take, without further newlines to click into bug? it still seems present… now the large open gap isn't going away when i click into other blocks, which is good because it's less annoying, but the fact that it exists is still annoying."* Screenshot on record: the TAKES view (stack style), post "Things I want to do before Brazil", a take card with ~60 visible words and a large (~550 pt) un-clickable empty region below the caret INSIDE the card; status bar `blk 28/31 · 52204DF` and **`805w take · 1,727w post`** — a counter-vs-visible-text discrepancy the investigation must explain. This is a PANE surface, explicitly OUTSIDE 1E's detail-editor scope, and it challenges 1C's "panes never carry an estimate" clean-bill claim. Her directive: Fable finds and fixes it FIRST, before Stage 2. **OUTCOME (Batch 1F, 2026-07-27): FIXED at the traced persistence mechanism — the pane frame was a past exact measurement with NO correction path (every remeasure trigger change-gated; the heal one-directional), now closed by the BOTH-SIDES convergence law on `PaneSurface` (same-width layout passes re-check frame-vs-measurement and republish on divergence), red-on-old by behavioral revert (546.0 pt frame held over 293.0 pt of text on the pre-fix code). 1C's clean bill HOLDS (measurement proven exact everywhere; hypothesis 3 refuted); hypothesis 1 refuted by the read-only store (zero trailing newlines; text unchanged since Jul 24); the 805w-vs-60 discrepancy resolved (the screenshot showed the one ~800-word take's TAIL above the void). The BIRTH event is recorded UNIDENTIFIED (launch-adjacent, recurring; candidate table + kills in the batch record) — the fix makes any birth self-heal within one layout pass. Full record: "Batch 1F" under Batch records.** | **13c — Batch 1F DONE (Fable)** |
@@ -4248,3 +4248,276 @@ recorded rather than rotting, and that 2B/2C actually pick it up.
 **(6) Arrivals**: `collapseAll` snapshots `entries`, so a post arriving
 afterwards is open — pinned as intended behavior, but a reviewer should
 decide whether "collapse all" ought to mean "and stay collapsed."
+
+### Batch 2B — BOOK: the two-up spread, editable (A43 · A44)
+
+**Commit:** one — `89219a3` (the build, its pins, the suite reorganization;
+the ledger rows, QUESTIONS #44 and this record follow in the record commit).
+**No schema change; zero `Sources/VariorumCore/` lines, therefore zero
+`Sources/VariorumCore/Sync/` lines** — which is why the core count is
+unchanged by construction rather than by luck.
+**Counts:** core **858/98 → 858/98** · Mac **741/130 → 745/131** (one new
+suite; +6 tests in it, −2 retired from the old paged suite) · mobile
+**builds clean** (`xcodebuild build -scheme VariorumMobile`), 14/4 untouched.
+**Diff scope:** 10 files + one rename — `PagedBookView.swift` →
+`SpreadBookView.swift` (rewritten), `BookViewModel.swift` (the spread
+brain), `BookView.swift` (the `.spread` branch + the navigator's spread
+doors), `Capability.swift` / `CapabilityRegistry.swift` /
+`CommandRouter.swift` / `TakesBoardView.swift` (the availability half),
+`BookViewTests.swift` / `CapabilityRegistryTests.swift` /
+`TutorialWalkTests.swift`.
+**Her instance:** `pgrep` clean at batch open and throughout — no Release
+build, no `/Applications` refresh, nothing quit. The login session read
+LOCKED (`CGSSessionScreenIsLocked` = 1) and the Mac runner nonetheless ran
+normally, hosted-window suites included — recorded because Stage 4 lesson 9
+predicts a pre-connection hang under lock and it did **not** materialize
+here (probed with a control suite first rather than assumed either way).
+
+#### THE HEADLINE: "one live editor" stopped being a slogan here, and that decided the architecture
+
+A44 asks for two editing forms on a two-up spread, which reads as "make both
+pages editable." Built naively that is: each page mounts its own form. Traced
+before building, that shape breaks two things at once, and neither is
+cosmetic:
+
+- **Two `PaneTextAuthority` owners.** The one-live-ring invariant is
+  structural *inside* one authority (`livePane` is a single optional — 4C
+  extended it across post CONTEXTS precisely so one authority could span
+  several posts). Two mounted `TakesBoardView`s own two `TakesViewModel`s and
+  therefore two authorities, and nothing in the app would prevent two live
+  rings. That is the batch-14 two-rings defect class, re-opened by
+  composition.
+- **Two routed-command handlers.** `CommandRouter.dispatch` walks handlers
+  **LIFO — last mounted wins**. With two boards up, ⌘S and every take act
+  would reach whichever board SwiftUI happened to mount last, not the one
+  under her hands. The N5/D3 class, delivered by geometry.
+
+So the spread does what every other surface in the app does and reuses the
+**existing** authority: `BookViewModel.focusedPostID`, the book surface's
+single focus authority since 13b 3E folded `BookFocusState` away — the same
+one Outline uses. ONE page is active; it mounts the chosen form; its sibling
+renders `ReadPostView` and upgrades on click, which is how the ring migrates
+between the pages. **Each page is editable; only one is editable at a time**,
+and that is P3's letter rather than a compromise with it. It is also what
+makes two whole posts affordable at once.
+
+Stated plainly because it is the claim a reviewer should attack: **no new
+liveness mechanism was added, and the alternative was rejected on a traced
+mechanism, not on taste.** Both halves are pinned — the ring migration
+behaviorally, and the two-boards shape by the revert that produces two live
+editors.
+
+#### What shipped
+
+**1 — the two-up spread.** `HStack { left · spine · right }`; each page is a
+whole post inside its own `ScrollView`, capped at `BookView.proseColumn`
+(Write's measure) and never flowing into its neighbour. Book paginates by
+**post**; Read paginates by **text** — the distinction is now in the file
+header where 2C will read it.
+
+**2 — the flip family, as ruled.** `◀ ▶` **turn the leaf** (two posts at
+once — the DEFAULT), `◁ ▷` **nudge by one** (her *"half arrow button or
+something"*), arrows too. ONE enablement rule behind all four:
+`BookViewModel.canMove(by:leftIndex:count:)` — *a move that reveals no post
+you cannot already see is refused*. That is what makes the last leaf honest:
+from pages 4–5 of 5 there is no live "next" that re-shows page 5.
+
+**3 — the blank leaf.** An odd book (or a nudge onto the last post) shows one
+page and a quiet "end of the book", never a post wrapped round from the other
+end. A one-post book turns nowhere, both directions.
+
+**4 — the bottom bar KEPT, the slider GONE.** Flip controls, a text page line
+("pages 3–4 of 40 — <left> · <right>") read straight off `spreadLeftIndex`,
+and the form picker. Deliberately TEXT and not a `ProgressView`: she ruled
+the book's progress bar out for now, and a spread whose position is exactly
+known does not need one to say where it is. The slider's removal is the
+brief's instruction and sits against her own S4-9(2) ask — flagged to her as
+QUESTIONS #44(c) rather than quietly executed; nothing was lost, since the
+navigator's post list performs the same model-driven jump.
+
+**5 — the two editing forms (A44).** The active page mounts either
+`TakesBoardView` (the takes stack, which brings its own scrolling and its own
+bottom bar, so it is never wrapped in the page's `ScrollView`) or the inline
+full-document `EditorView`. One spread-level control in the bar, PROVISIONAL
+(#44(a)).
+
+**6 — the availability half of Stage 4 lesson 2, which the spread exposed as
+a genuine gap.** The Write form inherits `commitTake` through the
+attached-editor arm — 2A's proof, unchanged. The TAKES form did **not**:
+`takeFamily` reads `ctx.mode == .takes`, and `activeMode` is nil in a book
+(no `PostDetailView` is mounted), so the whole take family — ⌘S included —
+would have greyed out over a mounted, fully working board whose handler was
+registered. Traced, not assumed, and verified RED. **`mode == .takes` was
+only ever a PROXY for "a takes board is mounted"**, and the proxy stopped
+being true the moment a board could mount outside a post detail. The fix
+reports the truth the registry actually needs: `CapabilityContext.
+takesBoardAttached`, wired exactly like `writeEditorAttached`, set by the
+board itself in the `onAppear`/`onDisappear` it already had. Token-SET rather
+than a flag, for the reason `registerDetail` uses tokens: an arriving board's
+`onAppear` can precede the departing one's `onDisappear`.
+
+**7 — renamed out of the collision** (2A's discipline, same reason):
+`pagedIndex` → `spreadLeftIndex`, `currentPage` → `leftPage`/`rightPage`,
+`openPage`/`flipPage`/`seedPageFromFocus` → `openSpread`/`turnLeaf`/
+`nudgeSpread`/`showPost`/`seedSpreadFromFocus`, `PagedBookView` →
+`SpreadBookView`. Every one of those names changed MEANING (from "the page"
+to "the left page of the spread"), so a stale reference is now a compile
+error rather than a silent mismeaning — which is exactly what it did: the
+first build after the model change failed on the two stale call sites and on
+nothing else.
+
+#### Traced: why focus is released on a turn but KEPT on a nudge
+
+The old rule was "flipping away from a live page releases focus", which was
+unambiguous when a page was the only page. On a spread it has to be stated
+against the SPREAD: focus is released when the focused post is no longer one
+of the two visible pages. The consequence is the right one and worth naming —
+**a nudge that carries your live page along keeps your caret** (that is the
+whole point of the nudge: re-pair without losing your place), while a turn
+that leaves it behind releases it and the editor's teardown flushes pending
+text through the per-post coordinator, exactly as before. Pinned both ways.
+
+#### Red-on-old evidence — stated plainly as red-on-old vs characterization
+
+**This is a FEATURE batch: no bug was fixed, so no pin is owed under the
+hallucination guard.** Four of the six pins are nonetheless RED on an
+alternative implementation and were verified by **behavioral revert**, each
+restored byte-identical by `shasum -c` (three source files checksummed before
+the first revert and re-verified after every restore); the rest are
+characterization and say so.
+
+| Pin | Class | Revert applied | Observed RED |
+|---|---|---|---|
+| `theSpreadRealizesTwoPagesNotTheBook` | **red-on-old** | the two-page `HStack` → `ForEach(model.entries)` | **60 read surfaces** on a 60-post book (bound is 2); the page-materialization counter and the content assertions fail with it |
+| `theRingMigratesBetweenPagesAndOnlyOnePageIsEverLive` | **red-on-old** | `isActive` → `true` (the naive "both pages editable" architecture) | **2 live editors**, 0 read surfaces — the exact P3 violation the architecture exists to prevent |
+| `theSpreadKeepsItsBarWithFormsAndNoSlider` | **red-on-old** | 4F's `Slider` restored into the bar | **1 `NSSlider`** back in the hierarchy |
+| `bothSpreadFormsJoinTheTakeFamilysAvailability` | **red-on-old** | `\|\| ctx.takesBoardAttached` removed from `takeFamily` | `commitTake` → **`.unavailable`** in the takes-form context, and five more family acts with it |
+| `aMountedSpreadConsumesTheCommitCommandInEitherForm` | **red-on-old** (same revert) | as above | `CapabilityRegistry.isEnabled(.commitTake, …)` **false** over a board that was attached and consuming ⌘S — the N5 shape exactly: the act works, the door is grey |
+| `theSpreadBrainPairsTurnsNudgesAndClamps` | **characterization** | — | new behavior; it states the pairing/turn/nudge/refusal rules so a future change has to break a test to break them |
+
+#### The visual loop (P-7)
+
+A throwaway capture suite rendered the spread into a real 1500×900 window and
+was **deleted after use** (the 1F/2A precedent). It read right: two titled
+pages either side of a spine, the flip family greying correctly at the covers,
+the page line centred, the form picker at the trailing end; the takes form
+mounts the real board — style/wash/expand-all header, the live ring, the fan
+badge, "+ new block", its own bottom bar — with the facing page still calm
+prose; the last leaf shows one page and "end of the book". Three observations
+recorded, none acted on:
+**(i)** with the takes form up, the board's own bottom bar sits directly above
+the spread's flip bar — legible, but two bars deep; a **Design & UI review**
+item, not a defect.
+**(ii)** `TakesBottomBar`'s "newlines make blocks: on" capsule **clips its
+label** at half-window width — pre-existing chrome (the `b6dae25` lineLimit
+class's cousin), newly reachable because 2B is the first surface to put the
+board in a half-width container. Deliberately NOT fixed here: it is the Takes
+tab's chrome, touching its layout risks every takes surface, and the honest
+owner is the **Design & UI review** row. Named as a ladder focus so the
+reviewer sees it was seen.
+**(iii)** a page whose post carries a fan measures slightly narrower than one
+that doesn't (the read tier's badge gutter) — pre-existing `ReadPostView`
+behavior, visible for the first time because two pages now sit side by side
+for comparison.
+*(Sandbox note, unchanged from 2A: the test host cannot write to the
+scratchpad — `NSTemporaryDirectory()` lands in
+`~/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/`, and the files are
+copied out from there.)*
+
+#### Numbered judgment calls / PROVISIONALs
+
+1. **ONE spread-level Write | Takes control, in the bottom bar —
+   PROVISIONAL, QUESTIONS #44(a).** Her sentence is *"the editing forms
+   offered in the … view"*, so the view offers them. Alternatives recorded
+   with what each would change: **per page** (a control in each page header —
+   costs a second control and begs "what does Takes mean on the page that
+   isn't active"); **per post**, reusing `PostDetailView.rememberedMode` — the
+   most attractive alternative, since a post would then present the same way
+   everywhere, but a click in the book would quietly rewrite how that post
+   opens in its own editor, which she did not ask for; **global** `@AppStorage`
+   across books. Not persisted, matching the collapse-state call (#43(b)).
+2. **Only the ACTIVE page mounts an editing form.** The headline's finding.
+   The alternative (both pages live) needs one authority shared across two
+   boards plus routing that knows which board a command means — a real build,
+   named for her at #44(b) rather than assumed unwanted.
+3. **The jump slider removed — the brief's instruction, flagged because it
+   sits against her own S4-9(2) ask.** #44(c) carries both sentences and the
+   ~15-line road back; `scrubIndex` is kept and still pinned.
+4. **Arrows are CONDITIONAL key equivalents** — withdrawn entirely while a
+   page holds the live editor. A permanent `◀`/`▶` equivalent is checked
+   before the responder chain and would steal arrow keys from her typing;
+   `.onKeyPress` was the other candidate and needs `.focusable()` on the
+   container, which risks the live editor's first-responder handoff for no
+   gain. ⌥←/⌥→ nudge on the same condition (⌃⌘← and ⌥⌘← are both already
+   taken by the take/fan pagers). #44(d).
+5. **`showPost` never re-shuffles a spread that already shows the post** —
+   jumping to what you are reading must not move the pairing you are looking
+   at. Otherwise the requested post takes the LEFT page.
+6. **A blank leaf, never a wrapped page**, and the enablement rule that goes
+   with it ("a move that reveals nothing is refused"). The alternative —
+   clamping the left index so the last spread is always full — was rejected:
+   it makes the last turn land on a pairing she did not ask for.
+7. **The page line is TEXT, not a `ProgressView`.** She ruled the book's
+   progress bar out ("it seems a bit buggy… remove it fully for now") and a
+   spread knows its position exactly.
+8. **`takesBoardAttached` added to the registry context rather than the
+   spread registering itself as a post DETAIL.** The detail route was
+   genuinely attractive — it would have given `.actElsewhere(.write)`
+   fire-and-DO for structural gestures in the takes form for free — but
+   `registerDetail` also claims `activePostID`/`activeMode`, which the sidebar
+   rail reads as "the mounted post detail", and `requestMode` would then hand
+   the spread modes it cannot host. Reporting the one fact the registry needs
+   was the smaller and truer change. **Consequence, recorded rather than
+   hidden:** in the takes form, structural gestures (divide/extract/merge)
+   read `.unavailable` rather than `.actElsewhere(.write)`, because the
+   spread has no mode-switch choreography to offer — the honest road is the
+   form picker or "open ↗". Same family as QUESTIONS #41 (A9's deferral).
+9. **The progress/visibility brain (`noteVisible`) is still uncalled**, and
+   2A's record asked whether 2B would adopt it. It should not: the spread's
+   position is exact, so reporting per-row visibility would be work for an
+   answer already known. Recorded in the model so 2C decides deliberately —
+   if Read's flow sub-mode does not adopt it, it has no caller and should be
+   deleted there.
+
+#### Deviations
+
+- **None from the brief.** Every ruled item built as written (page = whole
+  post, turn-the-leaf default + one-post nudge, arrows, bottom bar kept, no
+  horizontal scrollbar, both forms, one live ring, P3 realization,
+  model-driven navigation).
+- **No lookup subagent used** — nothing external was in question.
+- **P-6:** `TutorialWalkTests` green inside the full Mac run (745/131); its
+  paged walk was updated to the spread vocabulary (same promises: the domain
+  reaches the last page, the last cover clamps, the navigator jumps), and it
+  gained one assertion — the last leaf's blank half.
+- **P-1:** nothing new is declared, and nothing new needed declaring. The
+  spread's own affordances (flip controls, the form picker) are surface-local
+  under Stage 4 lesson 10; the acts its pages offer are already-routed and
+  reach them through the mounted form. What DID change is a declared act's
+  availability *rule*, which is the registry's own data — the walk is green
+  unchanged, and its sampled context space gained the new axis.
+
+#### Ladder foci suggested for this batch (2B)
+
+**(1) The one-active-page architecture is the thing to argue with** —
+judgment call 2 and the headline. A reviewer should test whether "both pages
+editable at once" is really blocked by the two mechanisms named (authority
+ownership; handler LIFO) or whether a cheaper shape exists, and whether the
+shipped behavior satisfies A44's letter. **(2) `takesBoardAttached`** — is
+adding a context axis right, or should the spread have registered as a detail
+(judgment call 8)? Check especially the consequence: structural gestures are
+`.unavailable` in the takes form, where in a post detail they would be
+`.actElsewhere(.write)`. **(3) The attachment's lifecycle** — the token SET
+is meant to survive SwiftUI's mount-before-unmount ordering; try to make
+`takesBoardAttached` stick true after every board is gone, or false while one
+is up. **(4) The conditional arrow shortcuts** (judgment call 4) — verify a
+key equivalent really is withdrawn the instant a page goes live, and that
+nothing else in `BookView` (the navigator) wanted arrows. **(5) The slider
+removal** (#44(c)) — is the navigator genuinely an equal jump door for a
+40-post book? **(6) The takes board inside a HALF-WIDTH container**: the
+visual loop found `TakesBottomBar`'s density pill clipping there, and the
+board's internal 680 pt article measure plus its margin rail were designed
+for a full window — worth a look at what else compresses badly. **(7) The
+retired paged suite**: check that nothing the old
+`thePagedViewRealizesExactlyOnePageAndFlipsContent` guarded went unguarded —
+its successors are the two hosted spread pins.
