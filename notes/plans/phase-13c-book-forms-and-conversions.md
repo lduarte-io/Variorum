@@ -2077,6 +2077,48 @@ own runs this sitting.
 
 ## Architect adjudications
 
+### Batch 2C — ACCEPTED (2026-07-27); the addressing insight is the batch's spine, and the field guide re-seed joins the closeout obligations
+
+**Verified before accepting:** core **861/99** and Mac **760/134**, both
+green by my own runs; tree clean, four commits with the core query in
+its own commit (`211a942` — the model-change convention honored);
+QUESTIONS #45 exists appended; **`Queries.blockExtents` read myself** —
+the SQL genuinely mirrors `renderPost`'s fallback (chosen requires
+live + active + on-this-block, else the live default; `(position, id)`
+sort; the Phase 5 injection discipline; bounded-window chunking), and
+its doc comment says why `renderedLength`'s looser COALESCE was NOT
+reused. Zero `Sync/` lines; no schema.
+
+**Adjudicated:**
+
+1. **The (post, page-in-post) address rule — ACCEPTED, and it is the
+   batch's best reasoning:** with a page-number address the two tiers
+   cannot coexist (an estimate correction reflows the page under her);
+   with the pair address a measurement moves the LABEL, never the
+   content. Judgment call 1 (every post starts a new page — against the
+   brief's lean) follows from it and is honestly filed as #45(b), the
+   first push-back candidate.
+2. **The lazy-slicing correction — ACCEPTED with approval:** the first
+   build paginated whole posts on arrival; the batch's own cost test
+   caught the 1.67 s single-giant-block shape (her A3/A41 terrain) and
+   the fix bounds slicing by pages actually walked. The ~30 ms deep-turn
+   residual inside a 25k-word single block is recorded, not hidden.
+3. **#45(c) — the scrubber staying on Read while 2B removed it on
+   Book — ACCEPTED as flagged:** the two surfaces now show her BOTH
+   answers to the #44(c) family question, which is the both-ways-testing
+   method she herself has asked for on open items. Her one ruling can
+   unify them.
+4. **The red-on-old table correction (`f0cdb38`) — noted with
+   approval:** executing the reverts corrected two RED numbers written
+   from reasoning; the correction is its own commit rather than a quiet
+   amendment.
+
+**CLOSEOUT OBLIGATION RECORDED (do not lose):** 2C edited the field
+guide's books lesson (stale since 2A's rename, repaired + a new walk
+act). Per the standing rule, **lesson content edits stale the REAL
+store's seeded field guide — the phase closeout must re-seed it via the
+product door behind the A1 rail.**
+
 ### Batch 2B — ACCEPTED (2026-07-27); #44(c) is a genuine push-back candidate on her walk
 
 **Verified before accepting:** Mac **745/131 green by my own run**; core
