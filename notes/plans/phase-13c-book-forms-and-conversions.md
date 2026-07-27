@@ -719,7 +719,7 @@ are this phase's opening batch.
 | A3 | Whitespace phantom — paragraphs of empty space with nothing in them; vanish on scroll, return when you're over them | **13c-friction — ADDRESSED (Batch 1E, PROVISIONAL).** 1A traced it to TK2's own height estimate (not our bug, no public API to correct it) and 1C measured the only remedy; 1E built it — the block the viewport reaches is laid out once, and the phantom under it goes. Behind a cap, a once-per-block bound, a floor, and a KILL SWITCH; memo Q3 is still hers, now on felt evidence — QUESTIONS #39 |
 | A4 | Editor jumps when one block is taller than the screen; the empty space below isn't clickable as newlines | **13c-friction — JUMPING FIXED (Batch 1A: two real defects, revert-verified); the un-clickable half was A46, which 1C proved is not a bug (the space is the editor's and the caret does move — there is just no text there); the space itself goes with 1E** |
 | A5 | "the callouts don't have the spacing on their color right" | 13d |
-| A6 | Book bottom inset — horizontal scrollbar on a vertical page; buggy progress bar | 13c (already ruled: remove both) |
+| A6 | Book bottom inset — horizontal scrollbar on a vertical page; buggy progress bar | **13c — SHIPPED (Batch 2A).** Outline's ENTIRE `safeAreaInset` is gone, both controls, exactly as ruled; the per-row scroll-visibility reporting that fed the bar went with it rather than costing work for a face that isn't drawn. Red-on-old: restoring the inset puts an `NSSlider` and an `NSProgressIndicator` back in the hierarchy and the pin fails. The model's scrub/progress brains STAY (pure, pinned) — Book and Read both keep a bottom bar and 2B/2C own them. If the bar ever returns, her observed bugginess is investigated FIRST |
 | A7 | Backspace won't delete an empty block — "especially when there's an empty block right at the start of the post" | **13c-friction — SHIPPED (Batch 1B)** |
 | A8 | No ability to delete / archive empty blocks at all | **13c-friction — DELETE SHIPPED (Batch 1B); ARCHIVE deliberately not built, QUESTIONS #33(c)** |
 | A9 | "i desperately need divide in takes mode" | **DEFERRED to 13d — recorded, not silent (13c Stage 1 ladder, R2-2).** K2 put it in the friction batch and no batch brief ever covered it; the fix pass sized it honestly and it is NOT the registry-declaration shape the sitting assumed. Divide from Takes works today via fire-and-DO (the bottom-bar door carries her to Write with the caret placed and runs it there); acting NATIVELY needs a structural planning path for Takes plus the W ceremony mountable outside `EditorSurfaceController` — materially larger than a declaration plus wiring, and out of scope for a ladder fix pass. Owner **13d**; QUESTIONS #41 |
@@ -753,13 +753,13 @@ are this phase's opening batch.
 | A37 | EPUB library — read-only books, highlights auto-appending to a "favorite quotes" note with quote marks, dash, author, title | unslotted row |
 | A38 | "a variorum mobile app that's quite robust and easy to use" | 15 |
 | A42 | **A thorough, beautiful, robust MOBILE app** — added live 2026-07-25, moving Phase 15's material up. Shapes floated and deliberately NOT chosen (hers to rule at the mobile design sitting): a Write-like base · drag-left/right on blocks for their complex menus · a small take button · **or** takes-in-stack-only with expand/shrink. Continues R58; puts CoreDescription pillar 8's "no variant/fan gestures there" in tension — an explicit vision-doc delta, hers to make | **RULED 2026-07-25 — mobile gets its OWN PLAN, decided separately** (she declined all three in-sequence slots; Phase 15's row superseded, an unslotted first-class project row in its place, `notes/plans/mobile-app-plan.md`). The pillar 8 delta is applied — the option text she chose is quoted in the "Further author direction" section. *(Row corrected at the ladder's round 3 beside R3-2: it still read "her call pending" a day after she made the call — the R2-2 class, and the same section this finding was about.)* |
-| A43 | **All book views more editable** — *"chapters / posts with blocks within are genuinely helpful concepts."* Extends A39 beyond Outline; scope (Outline + Book, or all three incl. Read) is her call | **13c** |
+| A43 | **All book views more editable** — *"chapters / posts with blocks within are genuinely helpful concepts."* Extends A39 beyond Outline; scope (Outline + Book, or all three incl. Read) is her call | **13c — the OUTLINE half is SHIPPED (Batch 2A)**, and it was already true before it: the focused post has mounted the full editor inline since Phase 10. What 2A added is that the surface around it now looks and behaves like a place to write in — posts open, Write's measure, headings. The BOOK half is 2B's (A44's stack/Write forms); READ stays a reading surface by her own A43 ruling |
 | A44 | **Book mode offers TWO editing forms** — the takes STACK and normal WRITE, as the presentation choice for each full-post page in the flipping two-up spread. Instruction, not question | **13c** |
 | A45 | **The "sub-takes" finding** — a use-level diagnosis, not a feature request; I7 stands. Raises A39's priority and reframes A21 as a repair tool (see the section above) | **finding — informs 13c** |
 | A41 | **The long-block phantom gap** — added live 2026-07-25: an extreme gap below a single long block *"even if there was nothing to indicate that whitespace should be there (i.e. I copied in a long message with no whitespace at the end)"*. **Merged with A3 + A4 as ONE class** (see the section above); her no-trailing-whitespace test eliminates the content explanation and points the investigation at long-block HEIGHT. Her diagnostic was right end to end: 1A measured the mechanism (a 3,000-word block guessing 4,964 pt against 4,597 pt real), 1C measured the remedy, **1E built it (PROVISIONAL, QUESTIONS #39)** — measured in a real window at 7,837 → 7,300 pt, with the document giving back the same 537 pt. | **13c-friction — ADDRESSED (Batch 1E)** |
 | A47 | **The take-card gap — added live 2026-07-27 (sitting record below), verbatim:** *"that large open space at the end of a take, without further newlines to click into bug? it still seems present… now the large open gap isn't going away when i click into other blocks, which is good because it's less annoying, but the fact that it exists is still annoying."* Screenshot on record: the TAKES view (stack style), post "Things I want to do before Brazil", a take card with ~60 visible words and a large (~550 pt) un-clickable empty region below the caret INSIDE the card; status bar `blk 28/31 · 52204DF` and **`805w take · 1,727w post`** — a counter-vs-visible-text discrepancy the investigation must explain. This is a PANE surface, explicitly OUTSIDE 1E's detail-editor scope, and it challenges 1C's "panes never carry an estimate" clean-bill claim. Her directive: Fable finds and fixes it FIRST, before Stage 2. **OUTCOME (Batch 1F, 2026-07-27): FIXED at the traced persistence mechanism — the pane frame was a past exact measurement with NO correction path (every remeasure trigger change-gated; the heal one-directional), now closed by the BOTH-SIDES convergence law on `PaneSurface` (same-width layout passes re-check frame-vs-measurement and republish on divergence), red-on-old by behavioral revert (546.0 pt frame held over 293.0 pt of text on the pre-fix code). 1C's clean bill HOLDS (measurement proven exact everywhere; hypothesis 3 refuted); hypothesis 1 refuted by the read-only store (zero trailing newlines; text unchanged since Jul 24); the 805w-vs-60 discrepancy resolved (the screenshot showed the one ~800-word take's TAIL above the void). The BIRTH event is recorded UNIDENTIFIED (launch-adjacent, recurring; candidate table + kills in the batch record) — the fix makes any birth self-heal within one layout pass. Full record: "Batch 1F" under Batch records.** | **13c — Batch 1F DONE (Fable)** |
 | A46 | **The DEAD CLICK** — her Q4 answer, verbatim: *"clicking does nothing at all - it couldn't move your cursor into the phantom space and the down arrow couldn't move you down either. nothing was actually there."* Queued as batch 1C. | **13c-friction — INVESTIGATED (Batch 1C): NOT A BUG.** Measured through the real event route: the phantom IS the editor's surface, the click reaches it, and the caret moves — to the document END. It cannot enter the phantom because no text is there, which is her sentence exactly. Down-arrow already agreed correct. **Nothing fixed; characterization pins landed** (`PhantomSpaceTests`) and the weight moves to memo Q3 (option E, now measured). One genuinely un-routed **6 pt** strip at the bottom of every scroll view found and recorded — **AppKit's, reproduced on a vanilla `NSTextView`** — pinned at size so this class can't grow unnoticed |
-| A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c** |
+| A39 | **A book-level WRITE mode** — added live 2026-07-25, verbatim: *"i also feel like I need more of a proper 'write' mode for the whole book - like literally looks like write mode but has the chapter headings and the posts are collapsible. that would be nice."* **Book-shaped ⇒ 13c.** *Open at record time and asked at the sitting: whether this IS what Outline should become (today's continuous vertical scroll, renamed per her 7/23–24 direction) or a FIFTH surface beside it.* **Architectural notes recorded now:** "looks like write mode" means an EDITABLE book-level surface, so Stage 4 lessons 1–2 bind — it adopts `PaneTextAuthority`'s one-live-ring contract (never a second liveness mechanism) and joins `commitTake`'s availability with a `.commit` handler. "Collapsible" follows the block-TOC precedent: collapse is session/view state, **never in-place text folding inside a live TK2 editor** (TEXTKIT2 §3; AppSpec §12's standing rule). Virtualized per P3 like the reading flow (the 13 round-3 MAJOR's lesson). | **13c — SHIPPED (Batch 2A).** Outline is the book's writing surface: Write's OWN prose measure (measured off the realized text surface, not restated — the pre-2A 760pt column was 64pt wider than Write's), chapter headings in the book's voice with real air, the post heading's chrome receded, and posts reading OPEN by default (the model tracks the COLLAPSED set — PROVISIONAL, QUESTIONS #43). The pre-bound architecture held WITHOUT a second mechanism, and that is the batch's main finding: Outline's editable surface IS the full-document editor, so it inherits the one-live-ring contract from `BookViewModel`'s single focus authority (13b 3E's fold) and `commitTake`'s availability from the registry's attached-editor arm — both now NAMED by pins rather than inherited silently. P3 pinned by a DEBUG materialization counter, load-bearing for the first time now that every realized row is a text surface |
 | A40 | **Callout coloration** — added live 2026-07-25, verbatim: *"the coloration wasn't working super well on the callout posts and i didn't like that i couldn't see it in write."* Supersedes/absorbs A5's spacing half. **Two readings, NOT guessed between — asked at the sitting:** (i) the frame renders in Write but the colour/spacing looks wrong, or (ii) the frame does not render in Write AT ALL — which would contradict the standing claim that callouts "show up consistently on the editor, the read tier, and the book views" and would be a genuine rendering defect on the surface callouts are *set from*. Trace before fixing (hallucination guard). | **13c-friction** (joins A13(a)'s parity work — same surface, same batch) |
 
 **Not this repo** (acknowledged, deliberately unscoped here): storage
@@ -3987,3 +3987,222 @@ is acceptable evidence for this fix class or the reviewer can drive the
 real birth (the launch-transient-width suspect: first-render width
 before the restored frame applies — undriven here); and whether the
 3 pt slack is the right both-sides tolerance.
+
+### Batch 2A — OUTLINE becomes the book's writing surface (A39 · A6 · the rename)
+
+**Commit:** one — `681851e` (the build, its pins, the ledger rows and this
+record follow in the record commit). **No schema change; zero
+`Sources/VariorumCore/` lines, therefore zero `Sources/VariorumCore/Sync/`
+lines** — which is also why the core count is unchanged by construction
+rather than by luck.
+**Counts:** core **858/98 → 858/98** · Mac **734/129 → 741/130** (one new
+suite, seven new tests) · mobile **builds clean** (`xcodebuild build
+-scheme VariorumMobile`), 14/4 untouched.
+**Diff scope:** 8 files — `BookStructureModel.swift` (the mode rename),
+`BookView.swift` (the picker, the inset removal, the writing surface, the
+row extraction), `BookViewModel.swift` (expanded → COLLAPSED set),
+`EditorTypography.swift` (+`inlineSurfaceInset`), `EditorTextView.swift`
+and `PaneSurface.swift` (that literal's two other homes),
+`BookViewTests.swift` / `BookStructureTests.swift` (the pins).
+**Her instance:** `pgrep` at batch open showed her Release build live
+(PID 15640, DerivedData path) — never touched, never quit; no Release
+build, no `/Applications` refresh from this batch. It had exited by the
+suite run. *(The orchestrator's pinned mid-phase refresh landed in
+parallel at `e5c3a80` and deliberately excludes this batch — correct: 2A
+is unadjudicated until the end-of-phase review.)*
+
+#### THE HEADLINE: the pre-bound architecture held, and the work that was left was the LOOK
+
+A39's ledger row pre-bound four things (adopt the one-live-ring contract ·
+join `commitTake` + register a `.commit` handler · collapse is view state ·
+virtualize per P3). Reading the code first, **three of the four were
+already true and one had never been named**, and that changes what this
+batch is: not "wire a new editable surface" but "make an already-editable
+surface look and behave like the place a book gets written."
+
+- **The one-live-ring contract:** Outline's live surface is
+  `EditorView(inline: true)` — the FULL-DOCUMENT editor, which the
+  constitution's own application note says is never absorbed into the pane
+  surface. Its liveness authority is `BookViewModel.focusedPostID`, a
+  single optional, which 13b 3E installed as this surface's one focus
+  authority when it folded `BookFocusState` away. There was no second
+  mechanism to avoid adding, and adding a `PaneTextAuthority` beside it
+  would have BEEN the second mechanism.
+- **`commitTake` + a `.commit` handler:** both already reached, through the
+  registry's `writeEditorAttached` arm (`takeFamily`'s first line) and
+  `EditorView.handleRouted`'s `case .commit`. Unnamed, though — the
+  attached-editor context existed only as an unlabelled row in the
+  registry walk's context list. It is now named by two pins (below), so a
+  future narrowing of `takeFamily` fails on Outline's behalf.
+- **Collapse as view state, never TK2 folding:** already true; preserved
+  exactly, and the inversion did not go near the editor.
+- **Virtualization:** the `LazyVStack` was there, but the counter pin was
+  NOT, and the default flip is what makes it matter (below).
+
+Stated plainly because it is the kind of claim a reviewer should distrust:
+**nothing here earned Stage 4 lesson 2 by writing new code; it earned it by
+proving the surface already satisfies it.**
+
+#### What shipped
+
+**1 — the picker: `Outline · Book · Read`.** `ViewMode` renamed
+`.book → .outline` and `.pages → .spread`; `defaultMode` follows (a working
+book opens into Outline, a finished one still into Read — R2 untouched).
+Both cases moved out of the collision deliberately (judgment call 1).
+
+**2 — Outline's bottom inset, gone entirely (A6).** The `Slider` and the
+`ProgressView` both, as she ruled. The `.onScrollVisibilityChange`
+reporting that fed the bar went with it — it cost work per realized row for
+a face that is no longer drawn (P1 hygiene). The model's `noteVisible` /
+`progressPosition` / `readingProgress` brains STAY: pure, pinned, and both
+2B (Book keeps its bottom bar) and 2C (Read's paginated sub-mode keeps
+one) will want them. A comment in the model says so, so they don't read as
+dead code. **Her instruction is carried in the code comment**: if the bar
+ever returns, the bugginess she saw is investigated FIRST.
+
+**3 — Outline as the writing surface.**
+- **Write's own measure.** The column was 760pt, which put 744pt of prose
+  on screen — **64pt wider than Write's 680**. It is now
+  `EditorTypography.maxColumnWidth + 2 × inlineSurfaceInset`, so the text
+  lands on exactly Write's measure. `inlineSurfaceInset` is a NEW named
+  constant in the typography home, replacing a literal `8` that lived in
+  three places (`makeInlineEditor`, `makeReadSurface`, and the arithmetic
+  a composer has to do) — the drift this batch would otherwise have added
+  a fourth copy to. Left-anchoring is untouched (batch 12's ruling).
+- **Chapter headings read as headings** — the title face, accented, 28pt of
+  air above, the drag handle quietened to `small`/`faint`. Same for the
+  smart-book tag-path headers and the "unfiled" group, so the three
+  sectioning stories look like one thing.
+- **The post heading recedes**: title at `heading`, and both doors (▾ and
+  "open ↗") demoted from `.primary` to `.quiet`. A loud button on every
+  post is catalog chrome; this is a page.
+- **Posts read OPEN by default** — the model now tracks the **COLLAPSED**
+  set (judgment call 2 and PROVISIONAL 1).
+- **`OutlinePostRow` extracted** from four inline builders, so the row has
+  an `init` the materialization counter can ride (the `ReadingFlowView`
+  precedent) — P-9's split rides along, and `BookView` shed ~100 lines of
+  row rendering.
+
+#### Traced: why the COLLAPSED set rather than seeding the expanded one
+
+Inverting the set is not cosmetic. With an EXPANDED set, "open by default"
+needs a rule about who seeds arrivals — and arrivals are ordinary here: the
+"+ new post in this book" door mints one, a tag pulls one into a smart
+book, sync lands one. Every such rule has a silent-miss class (the seeding
+site that nobody updated), which is the shape of the bug this app keeps
+finding. Tracking the collapsed side makes the default hold with **no
+seeding site at all**: a post nobody collapsed is open because it is not in
+the set. Pinned directly (`aPostThatArrivesAfterCollapseAllIsOpen`): after a
+collapse-all, a post added to the book arrives OPEN while the deliberate
+collapse survives on the others.
+
+#### Red-on-old evidence — stated plainly as red-on-old vs characterization
+
+**This is a FEATURE batch: no bug was fixed, so no pin is owed under the
+hallucination guard.** Three pins are nonetheless RED on the pre-2A code
+and were verified by behavioral revert, each restored byte-identical by
+`shasum -c`; three are characterization and say so.
+
+| Pin | Class | Revert applied | Observed RED |
+|---|---|---|---|
+| `outlineProseSitsOnWritesOwnMeasure` | **red-on-old** | column back to `760` | prose measured **744.0 pt** vs Write's 680 — off by 64 at every realized surface |
+| `outlineVirtualizesItsRowsWithPostsOpenByDefault` | **red-on-old** | `LazyVStack` → `VStack` | **452 row materializations** on a 150-post book's first layout (bound is 75) |
+| `outlineCarriesNoBottomChrome` | **red-on-old** | the `safeAreaInset` restored | 1 `NSSlider` + 1 `NSProgressIndicator` back in the hierarchy |
+| `aPostThatArrivesAfterCollapseAllIsOpen` | **red-on-old by construction** (the old default was collapsed; the assertion is the flipped semantics) | — | not separately driven |
+| `aMountedOutlineConsumesTheCommitCommand` | **characterization** | — | passes on the pre-2A code too — Outline already mounted the editor. It names Stage 4 lesson 2's behavioral half so a future change has to break a test to break it |
+| `outlineJoinsCommitTakeAndTheTakeFamilysAvailability` | **characterization** | — | same: the availability arm already held; this names it |
+| `theBookOpensIntoOutlineAndTheModesAreOutlineBookRead` | **rename** | — | does not compile on the old code (that is the rename's point) |
+
+#### The visual loop (P-7)
+
+A throwaway capture suite rendered Outline into a real 1280×900 window and
+was **deleted after use** (the 1F precedent), its findings here: both
+states read right — open, the book is chapter headings and prose in a
+bounded column with quiet per-post chrome; collapsed, batch 12's card view
+returns exactly. Two observations recorded, neither acted on:
+**(i)** a stored blank line inside a post renders as real vertical space in
+Outline (the 2026-07-12 spacing ruling, visible and correct — worth knowing
+before 2C paginates the same text); **(ii)** on SHORT posts the collapsed
+card is nearly as tall as the open post, so collapsing buys little there —
+a taste item, routed to the **Design & UI review** row, not fixed.
+*(Sandbox note for future visual loops: the test host cannot write to the
+scratchpad — `NSTemporaryDirectory()` lands in
+`~/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/`, and the file is
+copied out from there.)*
+
+#### Numbered judgment calls / PROVISIONALs
+
+1. **The `ViewMode` cases renamed OUT of the collision** (`.book →
+   .outline`, `.pages → .spread`) rather than shifting `.book` onto the new
+   meaning. Alternatives: (a) shift `.book` to name the spread and add
+   `.outline` — matches the picker exactly, but every stale `.book` in a
+   rebased branch, a revert, or a future session's reading of an older
+   batch record compiles **silently against the wrong surface**; (b) change
+   labels only and keep `.book`/`.pages` — the code then says the opposite
+   of the UI for the whole of 2B. Chosen: rename both, so a stale reference
+   is a compile error. Cost: the enum says `.spread` where the picker says
+   "Book" — carried in a doc comment on the case.
+2. **Outline opens with posts OPEN — PROVISIONAL, QUESTIONS #43(a). This
+   reverses R106 for this surface**, and it is the one thing in the batch
+   that contradicts a recorded ruling of hers, so it is flagged rather than
+   buried: batch 12's *"you shouldn't see the content within a post on the
+   book screen unless you click something"* was ruled when this was a book
+   *screen*. Grounds for flipping it here: her own A39 word is
+   *"collapsible"*; *"literally looks like write mode"* is not a page of
+   cards; and the batch brief says outright *"build it as the place she
+   writes a book, not as a decorated list."* Her card design is untouched
+   and one "collapse all" away — which is the cheapness that made
+   PROVISIONAL-and-continue the right posture rather than stalling.
+3. **Collapse state stays session/view-scoped, not persisted** — QUESTIONS
+   #43(b). Persisting it per book is a `lens`-flavored design question
+   ("is a folded book a saved way of looking?") and inventing it would be
+   product behavior.
+4. **A collapsed post keeps batch 12's CARD unchanged** — QUESTIONS #43(c).
+   The one-line folded heading (or the `tocHandle` first-sentence rule)
+   was considered and not taken: it discards a design she reacted well to.
+5. **`chromeLabel` left ON the chapter heading**, so terminal voice still
+   lowercases her chapter names. It reads oddly for authored text in a
+   prose column, but the terminal idiom is R1's and app-wide, and changing
+   it is an unforced taste call. Recorded, not taken — a Design & UI review
+   item if it bothers her.
+6. **The progress/scrub BRAINS kept** though Outline no longer calls them
+   (the alternative — delete them — would delete work 2B and 2C need, and
+   she ruled out the FACE, not the arithmetic).
+7. **`BookView.init(initiallyExpanded:)` kept** as an explicit un-collapse
+   seed. It is now a no-op for posts nobody collapsed; it still says
+   exactly what it does, and every existing caller compiles and passes
+   unmodified.
+
+#### Deviations
+
+- **None from the brief's three items or their order.** Item 3's binding
+  list was verified item by item against the code before building, which
+  is what turned the batch from wiring into looks (the headline).
+- **No lookup subagent used** — nothing external was in question.
+- **P-6:** `TutorialWalkTests` green inside the full Mac run (741/130).
+- **P-1:** nothing new is declared, and nothing new needed declaring — the
+  acts this surface offers are either already-routed (they reach it through
+  the attached editor) or surface-local under Stage 4 lesson 10 (the mode
+  picker, the collapse chevrons, expand/collapse-all, the chapter doors).
+  The registry walk is green unchanged.
+
+#### Ladder foci suggested for this batch (2A)
+
+**(1) The R106 reversal is the thing to argue with** — judgment call 2 is a
+deliberate contradiction of a recorded author ruling, made under the
+autonomy grant. A reviewer should test whether the grounds hold or whether
+this should have been held for her. **(2) The `.spread` naming**: does a
+third vocabulary (picker "Book" / enum `.spread` / her prose "two-up
+spread") cost more than the collision it avoids — and check that no
+reference to the old `.book`/`.pages` meaning survives anywhere in prose
+records that a future session would read as code. **(3) The measure claim**:
+`outlineProseSitsOnWritesOwnMeasure` asserts within 2 pt off the REALIZED
+read surfaces — check it would still bite if the live inline editor (not
+the read tier) diverged, since the pin walks `ReadPostTextView` only.
+**(4) The materialization bound (75 of 150)** — is it tight enough to catch
+a partial regression, given 452 was the unvirtualized number? **(5) The
+kept brains**: `noteVisible` now has no caller in the app; confirm that is
+recorded rather than rotting, and that 2B/2C actually pick it up.
+**(6) Arrivals**: `collapseAll` snapshots `entries`, so a post arriving
+afterwards is open — pinned as intended behavior, but a reviewer should
+decide whether "collapse all" ought to mean "and stay collapsed."
