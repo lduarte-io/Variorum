@@ -2157,6 +2157,44 @@ orchestrator's, after verification).
   untraced — the hallucination guard holds), K8 (the architect's own
   correction, already landed in `9eec274`).
 
+## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
+
+**Final counts, verified by the architect's own runs: core 882/100 ·
+Mac 782/134 · mobile 14/4** (from 858/98 · 733/129 · 14/4 at Stage 2
+open; from 817/96 · 652/123 · 11/4 at phase open). Zero
+`Sources/VariorumCore/Sync/` lines across the whole phase; **zero
+schema change** — the mirror stays at lockstep marker 4 and no §12
+event occurred.
+
+**What Stage 2 delivered** (batch records above; the K6 review section
+holds the findings + fix pass): **1F** the take-card gap's both-sides
+convergence law (her live A47 report; birth honestly unidentified, a
+recorded unknown) · **2A** Outline as the book's writing surface + the
+`Outline · Book · Read` picker + A6's inset removal · **2B** the
+editable two-up Book spread with A44's two forms + the
+`takesBoardAttached` registry truth · **2C** Read's true two-page
+pagination on the (post, page-in-post) identity address +
+`Queries.blockExtents` · **2D** the N38 smart→curated conversion
+(shape A, PROVISIONAL) + A31's order faces (the dead-door
+resurrection) · **2E** Compare's related-blocks-only toggle (the 4C
+kin-less-peer PROVISIONAL mooted). The K6 review (ONE Fable round per
+her ruling) found 2 MAJOR / 3 MINOR / 3 NIT — all agreed, K1–K5 fixed
+by the reviewer and verified by the architect, K6f/K7 record-only.
+
+**THE END-OF-PHASE REFRESH EXECUTED (2026-07-27, 15:04 local):**
+`/Applications/Variorum.app` rebuilt Release from HEAD (all work
+adjudicated + reviewed), installed at a verified zero-instance window,
+*[removed for publication]*
+fresh WAL-safe A1 backup (`variorum-backup-2026-07-27-210243.sqlite`,
+`integrity_check` ok). No schema change ⇒ no marker concern.
+
+**Open with the author (the handoff's checklist carries these):** the
+ratify walk **QUESTIONS #29–#47**; the **field-guide re-seed** (2C
+revised the books lesson — one "Restore Tutorial" run from ⌘K, her
+confirm required); the 1F birth + K6f/K7 residuals (recorded); and the
+next-phase choice (13d per the letter order, or 13f/13g per her K4
+ranking — cast at kickoff either way).
+
 ## Architect adjudications
 
 ### The K6 fix pass — ACCEPTED (2026-07-27); THE REVIEW IS CLOSED
