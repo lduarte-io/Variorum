@@ -57,6 +57,13 @@ extension Operations {
     ///   into hand-shape (the second half of her sentence).
     /// - `collectingName`: that book's name; blank/nil defaults to
     ///   `"<name> (collecting)"`.
+    /// - `order` *(13c K6 review, K2)*: the A31 view-order override the
+    ///   caller's surface is currently LOOKING through, if any. "The order
+    ///   she is looking at" stopped being synonymous with the stored sort
+    ///   the moment A31 shipped a read-time override on the same surface —
+    ///   a conversion that ignored it froze an order she was not looking
+    ///   at, silently (the mismatch surfaced only when she later dropped
+    ///   the override). nil = the book's stored order, exactly as before.
     ///
     /// ONE transaction: a refusal part-way leaves no half-converted book.
     ///
@@ -64,9 +71,11 @@ extension Operations {
     /// #46 with what the alternative would have changed:
     ///
     /// - **Materialization order is what she currently SEES**, frozen: the
-    ///   assembly runs with the book's own sort, and `sort_field` then flips
-    ///   to `manual` so nothing moves at the moment of conversion (memo Q4's
-    ///   lean — the point of converting is hand-shape).
+    ///   assembly runs with the book's own sort — or the caller's active
+    ///   A31 view-order override (`order:`), which is what "currently sees"
+    ///   means when one is on — and `sort_field` then flips to `manual` so
+    ///   nothing moves at the moment of conversion (memo Q4's lean — the
+    ///   point of converting is hand-shape).
     /// - **The extent cap is honored**: `assembleReading` applies
     ///   `max_posts`, so a capped smart book materializes exactly the posts
     ///   it was displaying. What-you-see-is-what-you-keep, and it is also
@@ -93,7 +102,8 @@ extension Operations {
     public func convertSmartReadingToCurated(
         _ readingID: String,
         keepCollecting: Bool = false,
-        collectingName: String? = nil
+        collectingName: String? = nil,
+        order: Queries.ReadingOrder? = nil
     ) throws -> SmartConversionResult {
         let now = date.now
         let (result, preImage): (SmartConversionResult, SmartConversionPreImage) =
@@ -107,8 +117,11 @@ extension Operations {
                 }
 
                 // What she is looking at, in the order she is looking at it
-                // — the book's own assembly, never a second ordering brain.
-                let entries = try Queries.assembleReading(db, readingID: readingID)
+                // — the book's own assembly (through the caller's view-order
+                // override, when one is active), never a second ordering
+                // brain.
+                let entries = try Queries.assembleReading(
+                    db, readingID: readingID, order: order)
                 var membershipIDs: [String] = []
                 for entry in entries {
                     guard try liveMembership(

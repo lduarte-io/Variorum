@@ -88,6 +88,51 @@ struct SmartConversionTests {
         }
     }
 
+    /// 13c K6 review, K2 (MAJOR — red-on-old by behavioral revert: drop the
+    /// `order:` forwarding inside `convertSmartReadingToCurated` and the
+    /// minted rows land in the STORED order, failing both halves below).
+    ///
+    /// The mechanism the fix closes: A31's view-order override and the
+    /// conversion shipped in the same batch, on the same surface — so "the
+    /// order she is looking at" can differ from the stored sort, and a
+    /// conversion that read only the stored pair froze an order she was NOT
+    /// looking at. The offer sheet's own sentence ("Its current N posts
+    /// stay, in the order you're looking at them") was false exactly then,
+    /// and the mismatch surfaced only later, when dropping the override
+    /// reordered the book under her.
+    @Test func conversionUnderAViewOrderOverrideFreezesTheOrderSheIsLookingAt() throws {
+        try withOperations { ops, db in
+            let (reading, posts, _) = try smartBookWithTaggedPosts(ops, count: 3)
+            // Stored order: created ASC (the smart-manual fallback) — what
+            // every reader sees until she saves something else.
+            let stored = try db.read {
+                try Queries.assembleReading($0, readingID: reading.id)
+            }
+            #expect(stored.map(\.postID) == [posts[0].id, posts[1].id, posts[2].id])
+
+            // She is LOOKING through the A31 override: newest first.
+            let looking = Queries.ReadingOrder(field: .createdAt, direction: .desc)
+            let seen = try db.read { [id = reading.id] in
+                try Queries.assembleReading($0, readingID: id, order: looking)
+            }
+            #expect(seen.map(\.postID) == [posts[2].id, posts[1].id, posts[0].id],
+                    "non-vacuity: the override order differs from the stored one")
+
+            try ops.convertSmartReadingToCurated(reading.id, order: looking)
+
+            // The rows freeze the order she SAW, not the stored pair.
+            let rows = try liveMemberships(db, reading.id)
+            #expect(rows.map(\.postId) == seen.map(\.postID))
+
+            // …and the converted book (manual, no override) now READS in
+            // that same order — nothing moves when the override drops.
+            let after = try db.read {
+                try Queries.assembleReading($0, readingID: reading.id)
+            }
+            #expect(after.map(\.postID) == seen.map(\.postID))
+        }
+    }
+
     @Test func theSpecAndTheGroupingTagRideTheRowAsProvenanceAndKeepWorking() throws {
         try withOperations { ops, db in
             let root = try ops.createTag(name: "life")
