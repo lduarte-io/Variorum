@@ -2077,6 +2077,40 @@ own runs this sitting.
 
 ## Architect adjudications
 
+### Batch 2D — ACCEPTED (2026-07-27); the dead-door finding matters beyond this batch
+
+**Verified before accepting:** core **881/100** and Mac **772/135**,
+both green by my own runs; tree clean, three commits with the core op
+in its own commit; QUESTIONS #46 exists appended; the deleted
+`ReadingsSection` is genuinely unreferenced (grep: only documentary
+comments remain); `convertSmartReadingToCurated` lives in its own core
+file. Zero `Sync/` lines; zero schema — the batch confirmed shape A's
+zero-schema claim in code rather than trusting the memo, which is the
+right posture.
+
+**Adjudicated:**
+
+1. **Shape A as PROVISIONAL — ACCEPTED** per the autonomy grant's
+   explicit instruction; the five rulings + A31's two calls are #46,
+   each with its alternative stated.
+2. **The A31 finding — the shipped app had NO reachable door to change
+   a book's order at all** (the machinery shipped Phase 2; its only
+   face died unreferenced at Phase 13's IA rework). Fixed by
+   relocation into the navigator, dead view deleted. **The CLASS is
+   worth the end-of-phase reviewer's attention:** shipped-machinery /
+   dead-door is exactly the 9d and capability-matrix family — ladder
+   focus 5's "whether a third surface still dead-ends" is adopted, and
+   the reviewer should sweep for other Phase-13-IA-orphaned faces.
+3. **The named-saved-orders half correctly NOT built** — stored order
+   profiles are a §12 lockstep event; the stop-and-report bound held
+   (no stop was needed because the sentence she wrote is covered
+   without schema; the fuller shape is recorded for her).
+4. **The navigator first-character clip — ACCEPTED with approval for
+   the pin discipline:** the first pin (on the control's frame) passed
+   on pre-fix code and was DISCARDED for a rendered-pixels pin that
+   goes red honestly. That is the hallucination guard applied to one's
+   own evidence.
+
 ### Batch 2C — ACCEPTED (2026-07-27); the addressing insight is the batch's spine, and the field guide re-seed joins the closeout obligations
 
 **Verified before accepting:** core **861/99** and Mac **760/134**, both
