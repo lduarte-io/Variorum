@@ -172,6 +172,12 @@ struct TakesBoardView: View {
                 Task { await model.saveCurrentChoicesAsLens(name: name) }
             }
         }
+        .sheet(item: $model.divideWCeremony) { state in
+            // 13d Batch 3 (A9): the take ceremony mounts HERE — a fanned
+            // block's divide never leaves this view. Any dismissal other
+            // than Divide is a cancel; no rows are touched by opening.
+            DivideWSheet(ceremony: model.ceremony, presented: state)
+        }
     }
 
     /// The board keeps the density inputs on the model (one paging brain —
@@ -191,7 +197,10 @@ struct TakesBoardView: View {
             handleTakesCommand(takes)
             return true
         case .structural(let act):
-            model.moveToWriteAndRun(.structural(act))
+            // 13d Batch 3 (A9): DIVIDE acts natively here; the other three
+            // keep the carry choreography. One model door so this handler,
+            // the Lenses handler and the bar cannot drift.
+            model.runStructuralDoor(act)
             return true
         case .deleteInEveryTake:
             model.moveToWriteAndRun(.deleteInEveryTake)
@@ -915,10 +924,9 @@ struct TakesBoardView: View {
     }
 
     private func paneKeyIsLive(slot: Queries.RenderedBlock, take: Variant) -> Bool {
-        model.authority.isLive(
+        model.isPaneLive(
             TakesViewModel.PaneKey(
-                columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id),
-            sealed: model.projection.sealed)
+                columnID: Self.fanColumnID, blockID: slot.blockID, variantID: take.id))
     }
 
     private func focusPane(slot: Queries.RenderedBlock, take: Variant) {

@@ -186,7 +186,12 @@ struct CapabilityRegistryTests {
     // MARK: - The named D3/N5 cells, as availability facts
 
     @Test func structuralActsFireAndDoFromTakesAndLenses() {
-        for id in [CapabilityID.divide, .extract, .makeBlock, .merge, .deleteInEveryTake] {
+        // 13d Batch 3 (A9): DIVIDE left this list — it acts NATIVELY on
+        // both boards now, so asserting the carry here would assert a
+        // retired flow. A RULED CHANGE (her #41), not a bug fix; the
+        // native cell is pinned in `TakesDivideTests`. The other four are
+        // untouched — scope was divide only.
+        for id in [CapabilityID.extract, .makeBlock, .merge, .deleteInEveryTake] {
             #expect(CapabilityRegistry.availability(id, in: CapabilityContext(mode: .takes))
                     == .actElsewhere(.write), "\(id) acts from Takes (D3)")
             #expect(CapabilityRegistry.availability(id, in: CapabilityContext(mode: .lenses))
@@ -194,6 +199,14 @@ struct CapabilityRegistryTests {
             #expect(CapabilityRegistry.availability(id, in: CapabilityContext(mode: nil))
                     == .unavailable, "\(id) is honestly grey with no post open")
         }
+        // Divide's own cell, stated here too so this table stays the one
+        // place a reader learns what each structural verb does in Takes.
+        #expect(CapabilityRegistry.availability(.divide, in: CapabilityContext(mode: .takes))
+                == .act, "divide acts natively in Takes (A9)")
+        #expect(CapabilityRegistry.availability(.divide, in: CapabilityContext(mode: .lenses))
+                == .act, "…and in Lenses — the shared-model precedent")
+        #expect(CapabilityRegistry.availability(.divide, in: CapabilityContext(mode: nil))
+                == .unavailable, "divide is honestly grey with no post open")
     }
 
     @Test func commitActsWhereverAdvertisedAndNowhereElse() {

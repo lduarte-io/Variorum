@@ -120,6 +120,12 @@ struct LensesBoardView: View {
                 Task { await model.renameLens(prompt.lensID, to: name) }
             }
         }
+        .sheet(item: $model.divideWCeremony) { state in
+            // 13d Batch 3 (A9): the take ceremony mounts HERE — a fanned
+            // block's divide never leaves this view. Any dismissal other
+            // than Divide is a cancel; no rows are touched by opening.
+            DivideWSheet(ceremony: model.ceremony, presented: state)
+        }
     }
 
     /// The Lenses routed-command handler (13b 1b): the take family as
@@ -131,7 +137,10 @@ struct LensesBoardView: View {
             handleTakesCommand(takes)
             return true
         case .structural(let act):
-            model.moveToWriteAndRun(.structural(act))
+            // 13d Batch 3 (A9): the shared model machinery, same as Takes
+            // — divide native, the rest carried (the deleteBlock/callout
+            // precedent: a native door lands in BOTH handlers).
+            model.runStructuralDoor(act)
             return true
         case .deleteInEveryTake:
             model.moveToWriteAndRun(.deleteInEveryTake)

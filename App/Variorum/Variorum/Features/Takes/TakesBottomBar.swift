@@ -44,8 +44,8 @@ struct TakesBottomBar: View {
     /// bottomBar-doored structural set, in gesture order).
     static let structuralBar: [(title: String, act: StructuralAct, help: String)] = [
         ("Divide", .divide,
-         "Cut the block you're in at your cursor — in Write, carried there for you; "
-         + "a block with several takes opens the take ceremony"),
+         "Cut the block you're in at your cursor, right here — a block with "
+         + "several takes opens the take ceremony without leaving this view"),
         ("Extract", .extract,
          "Pull your selected span out into its own block — in Write, carried there for you"),
         ("Make Block", .makeBlock,
@@ -301,7 +301,7 @@ struct TakesBottomBar: View {
     @ViewBuilder private var gestureCluster: some View {
         ForEach(Self.structuralBar, id: \.title) { door in
             Button(tokens.chromeLabel(door.title)) {
-                model.moveToWriteAndRun(.structural(door.act))
+                model.runStructuralDoor(door.act)
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             .help(door.help)

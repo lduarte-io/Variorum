@@ -184,7 +184,7 @@ struct WriteTakesPanel: View {
                 }
                 PaneSurfaceView(
                     text: model.liveText(take),
-                    isLive: model.authority.isLive(key, sealed: model.projection.sealed),
+                    isLive: model.isPaneLive(key),
                     tokens: tokens,
                     role: "panel", variantID: take.id,
                     onFocusRequest: { model.focus(key) },

@@ -2306,6 +2306,11 @@ final class EditorViewModel {
         // enabled the gesture could not have seen it.
         case .blockCarriesUnshownText:
             return "That block isn't empty after all — it carries a take or a note that isn't shown here. Nothing was deleted."
+        case .fannedBlock:
+            // 13d Batch 3: the same refusal Write can reach when a take
+            // lands between the plan and the operation (R1-3's
+            // every-refusal-readable class).
+            return "This block has more than one take now — divide it again and the take ceremony will open, so each take gets its own cut."
         case .divideSideWouldBeEmpty:
             return "Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end."
         case .mergedBlockWouldHaveNoTake:

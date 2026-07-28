@@ -98,8 +98,19 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
 
     /// The surface's liveness answer — and its adopt guard: a live pane's
     /// surface is buffer-authoritative and must never be clobbered with
-    /// projection text. A sealed post has no live pane (viewing isn't
-    /// authoring).
+    /// projection text.
+    ///
+    /// `sealed` is the SUPPRESSION argument, and it has carried more than
+    /// one reason since 13d Batch 3: a sealed post has no live pane
+    /// (viewing isn't authoring), and a pane whose post is mid-structural-
+    /// flight is frozen the same way — a keystroke arriving between a
+    /// flush and its operation would autosave pre-operation text back over
+    /// the rows the operation just wrote. Callers with more than one
+    /// reason compose them into a NAMED local (`let frozen = sealed ||
+    /// structuralInFlight`) so no reader mistakes the disjunction for a
+    /// seal; `TakesViewModel.isPaneLive` is the worked example. The
+    /// parameter keeps its name deliberately — renaming it would churn a
+    /// heavily-pinned surface for a comment's worth of clarity.
     func isLive(_ pane: PaneKey, sealed: Bool = false) -> Bool {
         livePane == pane && !sealed
     }

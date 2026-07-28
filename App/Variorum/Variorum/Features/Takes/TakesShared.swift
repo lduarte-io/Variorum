@@ -41,7 +41,7 @@ struct TakesCellView: View {
                 columnID: column.id, blockID: slot.blockID, variantID: resolved.variantID)
             PaneSurfaceView(
                 text: resolved.text,
-                isLive: model.authority.isLive(key, sealed: model.projection.sealed),
+                isLive: model.isPaneLive(key),
                 tokens: tokens,
                 role: role, variantID: resolved.variantID,
                 onFocusRequest: { model.focus(key) },

@@ -210,6 +210,51 @@ final class TakesViewModel {
     /// The buffer overlay, forwarded (pins and cells read it).
     var liveBuffers: [String: String] { authority.buffers }
 
+    /// ONE structural act lands at a time on this surface (13d Batch 3 —
+    /// Write's `structuralInFlight` shape, its board twin). Taken
+    /// synchronously at the door BEFORE any await; released in a `defer`.
+    ///
+    /// It does two jobs, and the second is a correctness job, not tidiness:
+    /// a second divide refuses visibly (including ⌘⇧D under the open
+    /// ceremony sheet, since key equivalents stay live under a
+    /// window-modal sheet — the Phase 9 round-3 MINOR), AND the panes
+    /// FREEZE for the flight. Without the freeze, a keystroke landing
+    /// between the flush and the op records the block's PRE-divide text
+    /// into autosave, whose debounce then writes that whole text back over
+    /// the half `ops.divide` just truncated — the second half would live in
+    /// the source block AND the new one. That is the forbidden
+    /// text-duplication class `runStructural` names, and Write closes it
+    /// with `textView.isEditable = false`; this is the same close.
+    /// Settable internally, deliberately: in production only
+    /// `divideFocused` and `runDivideW` write it (both immediately around
+    /// their awaits), but the freeze is a rule about what a pane may do
+    /// DURING a flight, and a pin that cannot stage a flight cannot check
+    /// it — the `adopt`/`divideWorld` precedent (internal so tests drive
+    /// the state deterministically rather than racing it).
+    var structuralInFlight = false
+
+    /// The take ceremony, mounted on THIS board (13d Batch 3, A9): a
+    /// fanned block's divide opens the same sheet Write opens, in place.
+    @ObservationIgnored private(set) lazy var ceremony = DivideWCeremony(host: self)
+
+    /// The sheet's `.sheet(item:)` binding — the ceremony's own state,
+    /// forwarded so the boards bind to the model like every other sheet.
+    var divideWCeremony: DivideWCeremony.State? {
+        get { ceremony.state }
+        set { ceremony.state = newValue }
+    }
+
+    /// Pane liveness with BOTH of this surface's suppression reasons
+    /// folded in (13d Batch 3): a sealed post has no live pane (viewing
+    /// isn't authoring), and a pane whose post is mid-structural-flight is
+    /// frozen the same way. The authority still answers "which pane is
+    /// live" — this composes the reasons before asking it, exactly as
+    /// `sealed:` already did, so no second liveness mechanism exists (P-3).
+    func isPaneLive(_ key: PaneKey) -> Bool {
+        let frozen = projection.sealed || structuralInFlight
+        return authority.isLive(key, sealed: frozen)
+    }
+
     // MARK: - Lifecycle
 
     func start() async {
@@ -1103,6 +1148,177 @@ final class TakesViewModel {
         choreography.moveToWriteAndRun(act)
     }
 
+    // MARK: - The structural doors (13d Batch 3, A9)
+
+    /// THE structural door for both boards: divide acts NATIVELY here;
+    /// extract, make-block and merge keep the carry choreography. One
+    /// entry point so the three call sites (the Takes handler, the Lenses
+    /// handler, the bottom bar's buttons) cannot drift into three answers
+    /// — the sediment class this phase's constitution names.
+    func runStructuralDoor(_ act: StructuralAct) {
+        switch act {
+        case .divide:
+            Task { await divideFocused() }
+        case .extract, .makeBlock, .merge:
+            moveToWriteAndRun(.structural(act))
+        }
+    }
+
+    /// A9, verbatim: *"i desperately need divide in takes mode"* — divide
+    /// WITHOUT leaving Takes. An unfanned block takes a plain divide at the
+    /// pane caret; a fanned block opens the take ceremony right here, its
+    /// cut seeded from the take the caret is actually in.
+    ///
+    /// The verdict is `StructuralGesturePlanner`'s — the SAME brain Write's
+    /// door consults, handed a single-entry world over the take the caret
+    /// sits in. The seal refusal, the gap refusal, the locked-take refusal
+    /// and the S4-22 word-rule snap all come back from it, byte-identical
+    /// to Write's (pinned as such: `theTakesPlanAndWritesPlanAgree`).
+    func divideFocused() async {
+        guard !structuralInFlight else {
+            speak("Another structural change is still landing.")
+            return
+        }
+        guard let slot = commandTargetSlot else {
+            speak("Click into a block first — divide cuts the block you're in.")
+            return
+        }
+        guard let seed = seedTakeForDivide(slot: slot) else {
+            speak("This block has no renderable take to divide.")
+            return
+        }
+        structuralInFlight = true
+        guard let prepared = await prepareDivide(slot: slot, seed: seed) else {
+            structuralInFlight = false  // it already spoke
+            return
+        }
+        switch prepared.plan {
+        case .divide(_, let blockID, let cut):
+            // The act runs with the panes still FROZEN — that window is
+            // exactly what the latch exists for.
+            await runDivide(blockID: blockID, cut: cut)
+            structuralInFlight = false
+        case .divideW(_, let blockID, let activeCut):
+            // The ceremony opens IN PLACE — no mode switch (A9's whole
+            // point). The latch releases FIRST: the sheet is window-modal
+            // and its confirm is its own flight, which re-takes the latch
+            // (Write's arrangement exactly — opening the ceremony has
+            // never been a flight there either). Holding it across the
+            // sheet would drop the live ring for as long as she reads.
+            structuralInFlight = false
+            await ceremony.open(
+                blockID: blockID, seedVariantID: prepared.seedTakeID, seedCut: activeCut)
+        case .refusal(let refusal):
+            structuralInFlight = false
+            speak(RefusalCopy.message(for: refusal))
+        default:
+            // The remaining plans are span gestures the divide command
+            // never returns; nothing here can act on them.
+            structuralInFlight = false
+            speak(RefusalCopy.message(for: .nothingToDo))
+        }
+    }
+
+    /// Flush, read the fan from the STORE, and plan. Returns nil having
+    /// SPOKEN when it cannot get that far.
+    private func prepareDivide(
+        slot: Queries.RenderedBlock, seed: (variantID: String, caret: Int)
+    ) async -> (plan: StructuralGesturePlanner.Plan, seedTakeID: String)? {
+        // Flush FIRST: the op validates against the store, and the plan
+        // snaps against what she SEES — after the flush those are the same
+        // text. A refused flush keeps its text pending (Phase 7 MAJOR 1)
+        // and stops the act, the one-act-one-contract rule 13c R2-6
+        // established for this surface's other native door.
+        guard await flushPendingText() else { return nil }
+        // THE FORK IS READ FROM THE STORE, not from `projection.fans`
+        // (13d Batch 3, ruled — batch 2's precedent): the takes projection
+        // is deliberately frozen while any buffer is dirty, so a plan-time
+        // arity is an enablement hint and never an authorization. Batch 2's
+        // revert D is the receipt for what a projection-read fan guard
+        // costs — it ate a take that had just arrived.
+        let fan: [Variant]
+        do {
+            fan = try await session.database.read { db in
+                try Queries.blockFan(db, blockID: slot.blockID)
+            }
+        } catch {
+            statusMessage = Self.message(for: error)
+            return nil
+        }
+        let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
+        guard let seedTake = liveActive.first(where: { $0.id == seed.variantID })
+                ?? liveActive.first
+        else {
+            speak("This block's takes changed — try the divide again.")
+            return nil
+        }
+        let plan = StructuralGesturePlanner.plan(
+            .divideAtCursor,
+            selection: NSRange(location: seed.caret, length: 0),
+            world: divideWorld(slot: slot, take: seedTake, arity: liveActive.count))
+        return (plan, seedTake.id)
+    }
+
+    /// The take the caret is in, and where the caret is within it. The
+    /// carried-caret rule is the choreographer's own, reused: a reported
+    /// selection counts only when it belongs to the focused pane's take
+    /// (a stale selection from a pane she has left names nothing). With no
+    /// caret the offset is 0, and divide there refuses "nothing to divide"
+    /// — which is exactly what the carry door does today, so this is
+    /// parity rather than invention.
+    private func seedTakeForDivide(
+        slot: Queries.RenderedBlock
+    ) -> (variantID: String, caret: Int)? {
+        guard let variantID = focusedPane?.variantID ?? slot.variantID else { return nil }
+        guard let selection = paneSelection, selection.variantID == variantID else {
+            return (variantID, 0)
+        }
+        return (variantID, selection.range.location)
+    }
+
+    /// A single-entry world over the take the caret is in — the planner is
+    /// pure over a tiling, and one take IS a one-entry tiling. `tailLength:
+    /// nil` because a board has no open tail; `editable` is the take's own
+    /// lock (a locked take refuses a plain divide and permits the ceremony,
+    /// which copies — the Phase 3 op semantics the planner already encodes).
+    /// Internal, not private, so the PARITY PIN can drive it: constraint
+    /// 1's one-brain claim is enforced by test, never by comment
+    /// (`theTakesWorldAndWritesWorldPlanAlike`).
+    func divideWorld(
+        slot: Queries.RenderedBlock, take: Variant, arity: Int
+    ) -> StructuralGesturePlanner.World {
+        let text = authority.text(variantID: take.id, storeText: take.workingText)
+        return StructuralGesturePlanner.World(
+            index: BlockRangeIndex(
+                entries: [BlockRangeIndex.Entry(
+                    blockID: slot.blockID,
+                    variantID: take.id,
+                    length: text.utf16.count,
+                    editable: !take.locked)],
+                tailLength: nil),
+            fanArities: [arity],
+            sealed: projection.sealed,
+            textAt: { _ in text })
+    }
+
+    /// The plain divide's act. The board shows the successors through its
+    /// ORDINARY projection path — the observation fires and `adopt` runs
+    /// (it lands rather than defers precisely because the flush left the
+    /// buffer clean), so there is no bespoke re-render here. The ring goes
+    /// to the SUCCESSOR, mirroring Write's caret rule for this gesture.
+    private func runDivide(blockID: String, cut: Int) async {
+        statusMessage = nil
+        do {
+            let result: Operations.DivideResult = try await session.runner.run { ops in
+                try ops.divide(blockID, cut: cut)
+            }
+            choreography.parkFocus(onVariant: result.variant.id)
+            statusMessage = "Block divided — ⌥⌘Z undoes it."
+        } catch {
+            statusMessage = Self.message(for: error)
+        }
+    }
+
     /// D3's third leg — the add-block door, NATIVE in Takes/Lenses: an
     /// empty block mints at the post's end and its pane takes the ring the
     /// moment its slot arrives ("just start typing", literally).
@@ -1648,5 +1864,64 @@ final class TakesViewModel {
     /// kept as a forward so every pin and call site reads unchanged.
     static func message(for error: Error) -> String {
         OpsRefusalCopy.message(for: error)
+    }
+}
+
+// MARK: - DivideWCeremonyHost (13d Batch 3, A9)
+
+/// The take ceremony mounts on a board exactly as it mounts in Write —
+/// same state machine, same disciplines (one flight before any await,
+/// drift-refresh at confirm, cancel-inert, I10-at-birth). What differs is
+/// only what this protocol names: how the surface flushes, and how the
+/// divide runs.
+extension TakesViewModel: DivideWCeremonyHost {
+    var ceremonyDatabase: AppDatabase { session.database }
+
+    /// The board's pending-text contract — identical to `deleteFocusedBlock`'s
+    /// (13c R2-6: one declared act, one contract, however many doors).
+    func flushPendingText() async -> Bool {
+        await autosave.flushNow()
+        guard !autosave.isDirty else {
+            speak("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return false
+        }
+        return true
+    }
+
+    var structuralFlightInProgress: Bool { structuralInFlight }
+
+    /// The confirm's act — its OWN flight, exactly as `runStructural` is
+    /// Write's (the ceremony's pre-await guard reads the latch and this
+    /// takes it afterwards, so there is no self-refusal). The ring goes to
+    /// the FIRST successor, mirroring Write's caret rule for the W confirm.
+    func runDivideW(blockID: String, cuts: [String: Int]) async -> Bool {
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+        statusMessage = nil
+        do {
+            let result: Operations.DivideWResult = try await session.runner.run { ops in
+                try ops.divideW(blockID, cuts: cuts)
+            }
+            if let landing = result.first.variants.first {
+                choreography.parkFocus(onVariant: landing.id)
+            }
+            statusMessage = "Divided into takes — ⌥⌘Z undoes it."
+            return true
+        } catch {
+            statusMessage = Self.message(for: error)
+            return false
+        }
+    }
+
+    func speakCeremonyStatus(_ message: String) {
+        speak(message)
+    }
+
+    func speakCeremonyRefusal(_ message: String) {
+        speak(message)
+    }
+
+    func speakCeremonyError(_ error: Error) {
+        statusMessage = Self.message(for: error)
     }
 }

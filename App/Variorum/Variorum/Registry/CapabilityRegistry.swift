@@ -30,6 +30,22 @@ nonisolated enum CapabilityRegistry {
         }
     }
 
+    /// DIVIDE, alone among the structural verbs, acts NATIVELY on the
+    /// takes/lenses boards since 13d Batch 3 (her A9: *"i desperately need
+    /// divide in takes mode"*). The block it cuts and the take it seeds
+    /// from are both things a board knows, and the ceremony mounts there —
+    /// so there is nothing left for the choreography to carry. Extract,
+    /// Make Block and Merge keep `structural` unchanged: they are span
+    /// gestures over a whole document's tiling, which a board does not
+    /// have (scope is divide-only, by the batch's own brief).
+    private static let divideAvailability: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        if ctx.writeEditorAttached || ctx.takesBoardAttached { return .act }
+        switch ctx.mode {
+        case .write, .takes, .lenses: return .act
+        default: return .unavailable
+        }
+    }
+
     /// The take family: native wherever takes are editable (Write's caret
     /// block, the Takes/Lenses boards, any attached editor — pool scraps
     /// included).
@@ -96,9 +112,9 @@ nonisolated enum CapabilityRegistry {
         Capability(
             id: .divide, verb: "Divide Block at Cursor", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
-            shortcutLabel: "⌘⇧D", takesAccess: .moveAndExecute,
+            shortcutLabel: "⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a post — open one first.",
-            availability: structural),
+            availability: divideAvailability),
         Capability(
             id: .extract, verb: "Extract Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],

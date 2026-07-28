@@ -107,6 +107,13 @@ nonisolated enum OpsRefusalCopy {
             // switch so any future door onto `deleteBlock(requiring:)`
             // inherits real words rather than the raw dump (the R1-3
             // class).
+            // 13d Batch 3 (A9): reachable the moment divide has a door
+            // on a board — the fan is read from the store and the op
+            // re-checks it inside its own transaction, so a take arriving
+            // in that window refuses HERE. It dumped the raw enum before.
+            case .fannedBlock:
+                return "This block has more than one take now — divide it again "
+                    + "and the take ceremony will open, so each take gets its own cut."
             case .blockCarriesUnshownText:
                 return "That block isn't empty after all — it carries a take or "
                     + "a note that isn't shown here. Nothing was deleted."

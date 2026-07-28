@@ -242,7 +242,7 @@ struct TakesLandingTests {
 @MainActor
 @Suite("Fire-and-DO move-and-execute (13b 1b, D3)")
 struct MoveAndExecuteTests {
-    @Test func divideFromTakesParksTheIntentAndSwitchesToWrite() async throws {
+    @Test func extractFromTakesParksTheIntentAndSwitchesToWrite() async throws {
         try await withSessionWorld { session, db in
             let post = try session.operations.createPost(title: "d3")
             let minted = try session.operations.newBlock(
@@ -258,12 +258,16 @@ struct MoveAndExecuteTests {
                 columnID: TakesViewModel.takesMainColumnID,
                 blockID: minted.block.id, variantID: minted.variant.id))
 
-            model.moveToWriteAndRun(.structural(.divide))
+            // 13d Batch 3: this pin exercises the CHOREOGRAPHY, and it
+            // uses EXTRACT because divide stopped carrying — it acts
+            // natively on the board now (A9). The machinery is unchanged;
+            // only the sample act moved off a retired flow.
+            model.moveToWriteAndRun(.structural(.extract))
             await poll { session.commandRouter.pendingWriteIntent != nil }
 
             let intent = try #require(session.commandRouter.pendingWriteIntent)
             #expect(intent.blockID == minted.block.id)
-            #expect(intent.followUp == .structural(.divide))
+            #expect(intent.followUp == .structural(.extract))
             #expect(modes == [.write], "the choreography switched modes, visibly")
             // The D3 lecture is DEAD — not reworded (its copy was also
             // factually wrong for Divide).
@@ -271,17 +275,22 @@ struct MoveAndExecuteTests {
         }
     }
 
-    @Test func aParkedDivideIntentLandsAndDividesEndToEnd() async throws {
+    @Test func aParkedExtractIntentLandsAndExtractsEndToEnd() async throws {
         try await withSessionWorld { session, db in
             let post = try session.operations.createPost(title: "landing")
             let minted = try session.operations.newBlock(
                 in: post.id, text: "First sentence here. Second sentence here.")
             // The choreography's parked half: what Takes leaves behind.
+            // 13d Batch 3: this pin exercises the CHOREOGRAPHY, and it
+            // uses EXTRACT because divide stopped carrying — it acts
+            // natively on the board now (A9). The machinery is unchanged;
+            // only the sample act moved off a retired flow.
             session.commandRouter.pendingWriteIntent = WriteIntent(
                 postID: post.id,
                 blockID: minted.block.id,
-                offsetInBlock: 21,  // inside "Second…" — snaps to the boundary
-                followUp: .structural(.divide))
+                offsetInBlock: 21,  // "Second sentence here." — a suffix span
+                selectionLength: 21,
+                followUp: .structural(.extract))
 
             // The arriving Write editor (the mode switch mounts one).
             let model = EditorViewModel(session: session, postID: post.id)
@@ -304,7 +313,7 @@ struct MoveAndExecuteTests {
                 ((try? db.read { try Queries.renderPost($0, containerID: post.id) })?.count ?? 0) == 2
             }
             let after = try await db.read { try Queries.renderPost($0, containerID: post.id) }
-            #expect(after.count == 2, "the carried divide LANDED — a real cut, not a lecture")
+            #expect(after.count == 2, "the carried extract LANDED — a real cut, not a lecture")
             #expect(after.first?.text == "First sentence here.")
             #expect(after.dropFirst().first?.text == "Second sentence here.")
         }
@@ -541,7 +550,11 @@ struct StaleWriteIntentTests {
             model.notePaneSelection(
                 variantID: minted.variant.id, range: NSRange(location: 21, length: 0))
 
-            model.moveToWriteAndRun(.structural(.divide))
+            // 13d Batch 3: this pin exercises the CHOREOGRAPHY, and it
+            // uses EXTRACT because divide stopped carrying — it acts
+            // natively on the board now (A9). The machinery is unchanged;
+            // only the sample act moved off a retired flow.
+            model.moveToWriteAndRun(.structural(.extract))
             // The refused switch SPEAKS (the mismatch branch was a silent
             // door inside the anti-silent-door machinery) …
             await poll {
@@ -588,9 +601,14 @@ struct StaleWriteIntentTests {
             let postQ = try session.operations.createPost(title: "innocent-bystander")
             _ = try session.operations.newBlock(in: postQ.id, text: "Q's only block.")
 
+            // 13d Batch 3: this pin exercises the CHOREOGRAPHY, and it
+            // uses EXTRACT because divide stopped carrying — it acts
+            // natively on the board now (A9). The machinery is unchanged;
+            // only the sample act moved off a retired flow.
             session.commandRouter.pendingWriteIntent = WriteIntent(
                 postID: postP.id, blockID: mintedP.block.id,
-                offsetInBlock: 21, followUp: .structural(.divide))
+                offsetInBlock: 21, selectionLength: 21,
+                followUp: .structural(.extract))
 
             // An editor for a DIFFERENT post mounts (book-inline/pool
             // shape — no detail registration involved).
@@ -628,7 +646,7 @@ struct StaleWriteIntentTests {
             _ = session.commandRouter.registerDetail(
                 postID: "p", mode: .takes) { _ in }
             session.commandRouter.pendingWriteIntent = WriteIntent(
-                postID: "p", blockID: nil, followUp: .structural(.divide))
+                postID: "p", blockID: nil, followUp: .structural(.extract))
             session.commandRouter.pendingTakesLanding = .bloom(postID: "p", blockID: "b")
             _ = session.commandRouter.registerDetail(
                 postID: "q", mode: .takes) { _ in }
@@ -653,7 +671,7 @@ struct StaleWriteIntentTests {
             _ = session.commandRouter.registerDetail(
                 postID: "s", mode: .takes) { _ in }
             session.commandRouter.pendingWriteIntent = WriteIntent(
-                postID: "s", blockID: nil, followUp: .structural(.divide))
+                postID: "s", blockID: nil, followUp: .structural(.extract))
             _ = session.commandRouter.registerDetail(
                 postID: "s", mode: .write) { _ in }
             #expect(session.commandRouter.pendingWriteIntent != nil,
@@ -723,7 +741,11 @@ struct StaleWriteIntentTests {
             model.notePaneSelection(
                 variantID: minted.variant.id, range: NSRange(location: 21, length: 0))
 
-            model.moveToWriteAndRun(.structural(.divide))
+            // 13d Batch 3: this pin exercises the CHOREOGRAPHY, and it
+            // uses EXTRACT because divide stopped carrying — it acts
+            // natively on the board now (A9). The machinery is unchanged;
+            // only the sample act moved off a retired flow.
+            model.moveToWriteAndRun(.structural(.extract))
             await poll { session.commandRouter.pendingWriteIntent != nil }
             #expect(modes == [.write], "the request succeeded — the round began")
 
