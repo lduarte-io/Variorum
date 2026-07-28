@@ -221,13 +221,66 @@ its ruling's shape (none should), STOP on that item and return with a
 proposal — the implementer-proposes-architect-rules door — rather than
 designing past the ruling.
 
-### Batch 2 — #34, backspace-merge at a texted seam (brief authored when batch 1 lands)
+### Batch 2 — #34, backspace-merge at a texted seam (fresh Opus implementer; self-contained)
 
-Ruled (ii) at the walk: backspace at a seam between two texted blocks
-MERGES when neither block has takes; refuses-and-speaks when either
-does. Planner + merge wiring + pins; the §14 delta lands with it.
-Pairs with A12's warning question (a sitting item). Brief follows
-batch 1's acceptance.
+**The ruling (13c ratify walk, 2026-07-27 — QUESTIONS #34, option
+(ii); the verbatim record is the 13c plan's "THE RATIFY WALK"
+section):** backspace at a seam between two TEXTED blocks **MERGES
+when NEITHER block has takes**, and **refuses-and-speaks when either
+does**. The AppSpec §14 delta lands with this batch.
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §9's merge / mergeCeremony / deleteBlock-precondition
+entries; §14's 13c Stage 1 delta, item (3) — the A7 carve's record);
+THIS plan file; `notes/QUESTIONS.md` #34 (the full option context) and
+#40/#42 (the carve's adjacent rulings — their behavior must NOT
+change); the 13c plan's Batch 1B record + the ladder findings the §14
+delta names (the precondition story); then the code: the seam-deletion
+path the A7 carve rides (`StructuralGesturePlanner` and the editor's
+separator-deletion handling) and the merge gesture path.
+
+**The shape (bind to this; STOP and propose before deviating):**
+
+1. **The seam-deletion vocabulary gains one case; nothing existing
+   moves.** Precedence at a deleted inter-block separator: (1) the A7
+   carve exactly as shipped — empty block, nothing unshown → delete;
+   its guarded refusals (#40/#42's rulings) untouched; (2) NEW — both
+   neighbors TEXTED, neither fanned → the ordinary binary MERGE of the
+   two neighbors; (3) NEW — both texted, either side fanned →
+   refuse-and-speak: the fan named, the explicit merge door pointed
+   at.
+2. **"Has takes" = the same condition `mergeCeremony` uses to decide
+   instant-vs-ceremony** (a live fan on either side). Backspace-merge
+   fires exactly where merge itself would be instant, and never where
+   it would open a ceremony — ONE rule, no second fan test invented. A
+   keystroke must never fold a fan and never open a sheet.
+3. **The merge IS the ordinary merge operation** through the standing
+   gesture path (`runStructural`'s one-flight door; the differential
+   seam path; `MergeJoin` — never a re-derived join; undo AND redo
+   riding the standing registration). Caret lands at the join per the
+   standing merge caret rule. Sealed post, locked variant: fire the
+   op, deliver its real refusal (P-2) — invent nothing.
+4. **Directional coverage = the A7 carve's, exactly** — whatever
+   separator-deletion gestures the carve accepts today (backspace at a
+   block's start; forward-delete at the previous block's end, if the
+   carve accepts it), the merge case accepts identically. Parity with
+   the shipped carve, not invention; record which gestures that turned
+   out to be.
+5. **The §14 delta:** one AppSpec §14 shipped-semantics addition
+   recording the ruled second exception to the cross-block
+   destructive-edit refusal line (the A7 carve is the first) — HER
+   ruling, quoted, nothing beyond it. The orchestrator reviews the
+   delta text at adjudication before it stands.
+6. **Pins:** red-on-old for the merge case (pre-change, that keystroke
+   does nothing — verify the red by behavioral revert, not by
+   construction alone); refusal pins for the fanned case; the A7
+   carve's cannot-widen pins and #40/#42's shipped behavior run
+   UNCHANGED and green.
+
+Loop, records, constraints: identical to Batch 1's — the standing
+loop, full suites with quoted "Test run with N tests" lines, batch
+record appended under "Batch records", commit per convention, never
+`/Applications`, never `Sources/VariorumCore/Sync/`, never push.
 
 ## Batch records
 
@@ -420,6 +473,54 @@ is worth nothing.
   while Read scrubs by PAGE, so the two bars now look alike and mean
   slightly different things; is that the right reading of her one rule?
   (4) whether the moved page line costs more than it buys.
+
+#### Batch 1 — ACCEPTED (2026-07-27 late evening; the successor orchestrator's adjudication)
+
+**Counts by my own runs** (not the implementer's): core `✔ Test run
+with 882 tests in 100 suites passed after 31.242 seconds` · Mac
+`✔ Test run with 790 tests in 135 suites passed after 88.133 seconds`
+— both match the record's claims exactly; tree clean at `8c07717`.
+
+**Load-bearing diffs read:** the set inversion is COMPLETE (zero
+`collapsedPosts` references remain anywhere in `App/`; every consumer
+routes through `isExpanded()`; focus-implies-expansion now rides an
+insert — same semantics, D1 preserved); the scrubber is model-driven
+(`spreadScrubFraction` the exact inverse of `scrubIndex`'s mapping,
+landing through `openSpread` so focus-release is inherited),
+disabled-not-hidden on one-post books, and the bar's chrome text keeps
+`lineLimit(1)` (P-8's b6dae25 class held); Compare's flip is one
+default plus honest doc comments recording both the ruling and 2E's
+superseded reasoning; the QUESTIONS #43/#44/#45/#47 annotations are
+bracketed RULED-markers that preserve the original prose with the
+entries staying OPEN as wholes — the right R1-2 drift-avoidance shape,
+and the closeout still owns their disposition. The de-hollowed ring
+pins verified in the diff: they now drive a real false→true
+transition, and revert C's 5-issue red shows the family discriminates.
+
+**Review focus (3) adjudicated NOW, the rest ride:** Book scrubbing by
+POST while Read's Pages scrubs by PAGE is the ruling's own letter —
+her #44(c)/#45(c) ruling was about PRESENCE on both horizontal
+surfaces; Book's jump domain has been the post list since S4-9(2) and
+2B ("40 posts are 40 pages"), and Read's page domain is its own
+brief's §4. No re-read needed; foci (1), (2), (4) stay listed for the
+end-of-phase Fable review.
+
+**The disclosed `git checkout` incident:** accepted as recorded — one
+file, self-caught, restored and PROVEN byte-identical by the
+pre-revert checksum, no other file touched, and the record names the
+rule it broke. The pre-revert checksum discipline is what made the
+recovery provable; noted as the practice every future revert pass
+should copy. No further action.
+
+**Revert D's lesson endorsed:** a round-trip arm alone did not
+discriminate the thumb's denominator; the both-ends arm does. That is
+the guard working as designed — the pin was strengthened BEFORE the
+fix was trusted.
+
+**Judgment calls 1–7 all endorsed** — in particular call 3 (keeping
+the virtualization pin's HARDER claim by expanding everything rather
+than letting the collapsed default cheapen it) and call 7 (annotate,
+never resolve, QUESTIONS). Batch 2 (#34) proceeds.
 
 ## Verification
 
