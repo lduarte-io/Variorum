@@ -21,10 +21,13 @@ the 2026-07-27 K6 cast (Fable orchestrator · Opus implementers · ONE
 Fable cold review — 2 MAJOR / 3 MINOR / 3 NIT, all fixed or
 record-only). Her handoff: **`notes/handoffs/phase-13c-handoff.md`**,
 checklist at the top (open the app; the walk; the one-click field-guide
-re-seed; the next-phase choice). **The next phase is hers to pick at
-kickoff:** 13d by the letter order, or 13f/13g per her K4 big-rock
-ranking — `notes/plans/phase-13d-refusal-ergonomics-floor.md` is
-authored and paste-ready either way; cast decided at kickoff as always.
+re-seed; the next-phase choice). **13d WAS KICKED OFF by the author
+2026-07-27 evening** at the ratify walk's tail (cast, her ruling:
+**Fable orchestrator · Opus implementers · one Fable cold review at
+phase end** — the K6 shape carried forward);
+`notes/plans/phase-13d-refusal-ergonomics-floor.md` carries the
+kickoff, her four fresh walk rulings as batch 1 + #34, and the rolled
+walk items.
 Phase 12 still follows the real-use window; the Design & UI review row
 remains re-runnable (Stage 2's new surfaces shipped machine-verified
 with only per-batch visual loops — a full propose-only sweep has not

@@ -1,10 +1,38 @@
 # Phase 13d — the refusal & ergonomics floor
 
-**Status:** authored just-in-time at the 13c closeout (2026-07-27), per
-the standing ritual. **NOT started — the author kicks it off**, and she
-may equally choose 13f (workspace) or 13g (formatting) first per her K4
-big-rock ranking; nothing here presumes the order. Cast decided at
-kickoff (CLAUDE.md model policy: "decided at each kickoff").
+**Status: KICKED OFF by the author 2026-07-27 evening**, at the tail of
+the 13c ratify walk — her words: *"I think after this we're also fully
+done with 13c and ready to go into 13d. Also - let's keep the
+implementation to Orchestrator Fable, implementer Opus, and cold review
+at the end fable."* **CAST (her ruling): Fable orchestrator · fresh
+Opus implementer per batch · ONE Fable cold review at phase end** — the
+13c K6 shape carried forward. Runs under `/architect-phase` (the
+sitting-heavy walk items below want it).
+
+## Ruled at the 13c walk — BATCH 1 (build first; all three are her fresh rulings)
+
+1. **#43(a) — Outline opens COLLAPSED** (her overturn of the shipped
+   PROVISIONAL): posts render as cards by default; expand what you work
+   on. Flip the default (the 2A model tracks the collapsed set — invert
+   or seed), update the pins, keep "expand all"/"collapse all".
+2. **#44(c)/#45(c) — the scrubber returns to Book's spread** beside the
+   leaf-turn controls (the 2B removal reverses); Read's Pages keeps its
+   own. Model-driven domain as everywhere (Stage 4 lesson 8).
+3. **#47(c) — Compare's related-blocks-only defaults ON**; the toggle
+   reveals the full posts. Flip + pin update (the 2E narrowness pins
+   must still hold).
+
+**#34 (backspace-merge when neither block has takes, refuse-and-speak
+when either does) is ruled and builds in this phase as its own batch**
+— planner + merge wiring + pins; the §14 delta lands with it.
+
+## Rolled from the 13c walk to THIS phase's sittings (open with her)
+
+#29–#33, #36, #37, #38, #42, the minor sub-calls of #43–#47, #46's
+five conversion rulings, the C3 block-extent memo's Parts 1/3, and the
+long-content-panes memo's §6 — the QUESTIONS walk ledger (end of
+`notes/QUESTIONS.md`) is the checklist. Resolved gates: #34, #39, #40,
+#41, #43(a), #45(b) — see the 13c plan's walk record.
 
 ## Kickoff message (paste-ready for the orchestrator/coordinator the author invokes)
 
