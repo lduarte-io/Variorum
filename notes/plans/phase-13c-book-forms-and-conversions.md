@@ -2870,6 +2870,24 @@ installed 19:27 local, signature verified. Her daily-drive build now
 carries the full A47 family: the phantom fix, the frame law + its
 production triggers, and the render heal.
 
+## THE RATIFY WALK — 2026-07-27 evening (author-attended; rulings land here as they come)
+
+Preface from her, before the walk: *"it seems to be working correctly
+for now! so I think that it's fine for now"* — the A47c stabilized
+build, felt working in real use.
+
+**Batch 1 (the behavior-changers):**
+- **#34 — RULED (ii):** backspace at a texted seam MERGES when neither
+  block has takes; refuses-and-speaks when either does. Builds in 13d
+  (its gate is now open); §14 delta when it ships.
+- **#40 — RATIFIED AS SHIPPED:** a named/callout empty block still
+  deletes; undo/tray restore it whole.
+- **#41 — RULED, her words:** *"it should be done in 13d but wherever
+  in 13d is fine"* — carry-to-Write stands until then; no promotion to
+  13d's top.
+- **#39 — RATIFIED AS SHIPPED, on felt evidence:** the phantom fix
+  stays default-ON with its cap/floor and kill switch.
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
