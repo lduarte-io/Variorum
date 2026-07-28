@@ -282,6 +282,84 @@ loop, full suites with quoted "Test run with N tests" lines, batch
 record appended under "Batch records", commit per convention, never
 `/Applications`, never `Sources/VariorumCore/Sync/`, never push.
 
+### Batch 3 — A9: divide NATIVELY in Takes (fresh Opus implementer; PROPOSAL GATE inside)
+
+**The ruling (QUESTIONS #41, the 13c ratify walk):** native
+divide-in-Takes lands in 13d — her words, *"it should be done in 13d
+but wherever in 13d is fine."* The carry-to-Write door is the shipped
+stopgap she accepted until this batch lands.
+
+**Scope: DIVIDE ONLY.** The other carried gestures (extract,
+make-block, merge, delete-in-every-take) KEEP the carry choreography —
+A9's words are "divide natively"; nothing else moves in this batch.
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §9's divide/divideW entries with S4-22's cut/parking
+rules; OverallModel §7); THIS plan file; `notes/QUESTIONS.md` #41; the
+13c plan's "Environment traps"; the two 13b memos
+(`notes/plans/phase-13b-memo-w-ceremony.md`, `…-memo-merge.md` — the
+ruled ceremony semantics); then the code: `StructuralGesturePlanner`,
+`EditorSurfaceController`'s divide/W path (`runStructural`, the
+ceremony state, `DivideWSheet`, `CutPropagation`),
+`TakesChoreographer` (the carry this replaces — its caret-transfer
+comment records the W-memo reading), `TakesBoardView` /
+`TakesViewModel` / `TakesBottomBar`, and `PaneTextAuthority`.
+
+**Binding constraints:**
+
+1. **ONE planner brain.** The divide verdict Takes consults is
+   `StructuralGesturePlanner`'s — extracted or parameterized as
+   needed, never a sibling planner. The Takes divide door's registry
+   declaration (P-1) updates from carry-choreography to native act;
+   availability stays data.
+2. **ONE snap brain.** `BoundarySnapping` + the S4-22 rules
+   (word-edge floor, gentle settle, both-end parking in the ceremony)
+   — byte-identical to Write's door.
+3. **The ceremony-sheet disciplines bind wherever the sheet mounts**
+   (Stage 4 lesson 5): one-flight guard before any await,
+   drift-refresh against the CURRENT fans at confirm, cancel-inert,
+   honest confirm blockers, I10-at-birth (`divideSideWouldBeEmpty`).
+4. **P-3 holds.** The full-document editor is not absorbed; the pane
+   surface stays the one pane component; anything liveness-shaped
+   routes through `PaneTextAuthority` — never a second mechanism.
+5. **The two cases:** an UNFANNED block takes a plain `divide` at the
+   pane caret (the one take is the text). A FANNED block opens the W
+   ceremony IN Takes — the cut pre-seeded from the take the caret
+   actually sits in, `CutPropagation` seeding the rest (the recorded
+   W-memo reading; note this is a small generalization of Write's
+   seed-from-chosen, since a Takes caret may sit in a non-chosen
+   pane — name it in the record).
+6. **Fire-and-DO:** the door acts in place — no mode switch; refusals
+   are the operation's own, spoken; the seal refuses through the
+   standing guards.
+7. **Undo/redo ride the standing ops registration** — nothing new.
+8. **The board shows the successors through its ordinary projection
+   path** — no bespoke re-render.
+
+**THE PROPOSAL GATE (binding — the in-batch design fork is the
+architect's, the 4E pattern):** BEFORE building the ceremony-mount
+half, investigate and append a short PROPOSAL to this file under your
+batch record heading covering: (a) where the ceremony state machine
+will live and what is extracted from `EditorSurfaceController`
+(parity-by-forwards where names move); (b) how the sheet mounts on
+the Takes board; (c) what serves as the ONE-flight door for a
+Takes-native structural act and how it relates to `runStructural`;
+(d) how the confirm's apply and the board's refresh compose. Then
+STOP and report to the orchestrator; the build proceeds on the
+orchestrator's ruling. The unfanned plain-divide half may be built
+before the gate ONLY if it needs none of (a)–(d) beyond trivial
+wiring — say which it was either way.
+
+Loop, records, constraints: identical to batches 1–2 — checksums
+before every revert; batch 2's adopted rule binds (a pin whose red
+state changes an array's length must not subscript it); full suites
+with quoted "Test run with N tests" lines; batch record appended;
+commits per convention (an extraction/move may be its own commit);
+never `/Applications`, never `Sources/VariorumCore/Sync/`, never
+push. Baselines to match-or-beat: core 882/100 · Mac 808/136 · mobile
+14/4 (untouched unless `Shared/` is touched — run it and say so if
+so).
+
 ## Batch records
 
 *(Implementers append here — one record per batch: changes, files,
@@ -741,6 +819,53 @@ run to produce.
   undo label — the keystroke and the gesture now share it, so her undo
   menu cannot tell her which door she used; deliberate (it IS the same
   act), but worth a second opinion.
+
+#### Batch 2 — ACCEPTED (2026-07-27 night; the orchestrator's adjudication)
+
+**Counts by my own runs:** core `✔ Test run with 882 tests in 100
+suites passed after 31.064 seconds` · Mac `✔ Test run with 808 tests
+in 136 suites passed after 90.155 seconds` — both match the record's
+claims exactly; tree clean at `ac2074f`.
+
+**The §14 delta REVIEWED and it STANDS** (the brief reserved this to
+the orchestrator): her ruling quoted verbatim, option (ii) named as
+what she was shown, the second-named-exception framing correct and its
+grounds distinguished from A7's, the supersession of the Stage 1
+delta's closing sentence exactly right (that sentence said the
+question was live; the walk answered it), and the shape section states
+only what shipped. No §9 edit is the correct call — the keystroke is a
+door onto the existing `merge` operation, and §9 describes operations.
+
+**Load-bearing diffs read:** the `interEntrySeparatorPair` extraction
+gives both carves ONE geometry with the A7 walk byte-unchanged (its
+pins run untouched); mutual exclusivity is structural, pinned by the
+every-offset walk with a non-vacuity arm; the fan authorization reads
+the STORE at run time through `liveActiveFans` — the ⌘⇧M door's own
+threshold read, shared by name — which is the 13c R3-1 lesson applied
+at the right level, and revert D (exactly the mid-burst pin red, the
+ordinary fanned pins green because they reload) is the receipt that
+the pin discriminates the two readings. Locked-takes-merge is parity
+with the explicit gesture's Phase 3 op semantics, not an invention;
+the seal refuses upstream at `adoptHeader`.
+
+**Judgment calls 1–8 all endorsed.** Call 3 (the "Blocks joined —
+⌥⌘Z undoes it." line) endorsed as LOAD-BEARING, not chatter: ⌘Z
+cannot reverse a structural act (the rewrite clears text-undo by
+design), so the line names the only door that can — its taste half
+joins the sitting bundle beside review focus (2). Call 5's parity and
+call 7's no-§9-edit reasoning are exactly right.
+
+**The pin-crash incident accepted as recorded**, and its rule is
+ADOPTED for the phase: *a pin whose red state changes an array's
+length must not subscript it* — a trapped pin destroys the evidence
+the revert exists to produce. The clean re-run's numbers stand.
+
+**The read-then-act window: recorded, deliberately not closed.** It is
+the same sub-ms window the explicit door has carried since 13b 4B; the
+ops-level close (`merge(_:requiring:)`, the `BlockDeletionPrecondition`
+pattern's merge twin) is real work past this brief and is left for the
+end-of-phase review to weigh — foci (1)–(4) all ride. Batch 3 (A9)
+proceeds.
 
 ## Verification
 
