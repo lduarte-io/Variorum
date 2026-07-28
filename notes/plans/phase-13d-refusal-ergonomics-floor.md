@@ -1713,6 +1713,271 @@ built until the gate closes — including B1, which is design, not a
 "trivial half" (the trivial halves are (a), (c), (d), (e), where the
 answer was *build nothing* and the trace is the deliverable).
 
+#### BUILT — the other four items (A14 · A16 · A23 · A24)
+
+**Counts, by my own runs:** core `✔ Test run with 887 tests in 101 suites
+passed after 29.234 seconds` (**882/100 → 887/101**: A16's core suite) ·
+Mac `✔ Test run with 852 tests in 142 suites passed after 89.289 seconds`
+(**831/137 → 852/142**: five new suites — the A15 trace's 6, A14's 3,
+A16's face 2, A23's 4, A24's 6 = 21) · mobile `✔ Test run with 14 tests in
+4 suites passed after 0.246 seconds` (**14/4** — RUN, not assumed: A16's
+setter lands under `Sources/`, which the mobile target links). Tutorial
+spine green on its own run first: `✔ Test run with 49 tests in 7 suites`
+(all seven `Tutorial*Tests` types by TYPE name — the 2E trap).
+**Zero schema change; zero `Sources/VariorumCore/Sync/` lines.**
+
+**Her instance:** her real-store build was LIVE throughout (`pgrep` → PID
+54248, `/Applications/Variorum.app/…`). Never quit, never touched; no
+Release build, no `/Applications` refresh, no store touched.
+
+**Lock-flag exception #3:** the flag read **1** for this whole batch and
+the Mac runner worked normally, probed first with a control suite
+(`WCutPlacementTests`, `✔ Test run with 9 tests in 1 suite`) per 2C's
+precedent. Stage 4 lesson 9's prediction failed a third time; keep the
+probe, not the prediction.
+
+**Three commits:** `0932e09` the core setter + read (A16's half under
+`Sources/`), `7a4ca38` the four app-side items and their pins, and the
+earlier `8233753` the A15 trace + proposal.
+
+##### A14 — ⌘⇧⏎ mints a new block
+
+**THE COLLISION SWEEP'S RESULT: ⌘⇧⏎ is FREE.** Swept across the whole
+keyboard family — `EditorCommands.keyEquivalent` (the one place shortcut
+labels are wired), every `.keyboardShortcut` call site in `Variorum/` and
+`Shared/`, every `NSMenuItem` key equivalent, and the two
+`performKeyEquivalent` overrides. The only Return chord in the app is
+**⌘⏎ = Choose Take**; the `.defaultAction` shortcuts are plain Return
+inside modal sheets; `EditorTextView.performKeyEquivalent` intercepts only
+⌘S. No collision, so the item did not need its stop-and-report door.
+
+**The one real decision, and it is a judgment call, not a ruling:
+⌘⇧⏎ SUPERSEDES ⌥⌘N rather than joining it.** The act
+(`insertBlockBelow`, 13b 4D) already carried ⌥⌘N, which the brief did not
+account for. The registry has ONE `shortcutLabel` per capability by
+design, a SwiftUI menu item carries ONE key equivalent, and the R73/R91/R93
+mandate is that every shortcut is a menu item — so keeping both would have
+meant either a duplicate row in the Block menu or an undeclared key living
+outside the registry, and both are the legibility failure the mandate
+exists to prevent. Her intake asked for ⌘⇧⏎ *while the act already had a
+shortcut*, which reads as the existing key not serving her. The act keeps
+four doors (menu, bottom bar, palette, and now this key). **Flagged for
+her walk: if she wants ⌥⌘N back, that is a registry alias concept — a
+design change, not a batch's call.**
+
+It also reads beside A15, which is why the pair is coherent: **⇧⏎ stays in
+the block, ⌘⇧⏎ makes a new one** — the two Enter-flavoured keys her intake
+describes side by side.
+
+**The copy swept with it** (batch 1's judgment call 6 — prose that
+contradicts the shipped surface is a regression): the Takes/Lenses bar's
+insert button, Write's CommitBar help, the ⌘/ shortcut dictionary, BOTH
+`SegmentationFaceCopy` notes that name the split doors, and a
+`TutorialWalkTests` comment. `⌥⌘N` now appears in the tree only in the
+comment recording its supersession.
+
+##### A16 — the GLOBAL `one_block` face (N34's deferred half)
+
+13b's 4D record named the blocker exactly — *"no public
+`default_segmentation` setter exists; `upsertSetting` is
+Operations-internal"* — so the build is that setter
+(`Operations.setDefaultSegmentation`), its read
+(`Queries.defaultSegmentation`, `.paragraph` on absent/garbage), and a face.
+**No segmentation semantics moved**: the value has been consulted by
+`containerHeader.effectiveSegmentation` since Phase 7 and `one_block` has
+been entry-wide since S4-21.
+
+The face is a **Settings ▸ Appearance ▸ "Writing"** section — its own
+section because it is the one setting on that pane that is SYNCED (document
+semantics), and its copy says so where its neighbours say "This Mac only".
+It offers exactly two modes; **sentence segmentation is deliberately not
+offered**, because type-time crystallization is paragraph-granular in every
+mode (the ratified 2026-07-06 rule), so a sentence choice would name a
+behaviour the editor does not have. A tiny bounded observation over the
+`setting` table (the ThemeStore pattern) keeps the picker honest against
+another device.
+
+**The honesty half, which this batch OWNS because this batch creates it.**
+4D deliberately mapped the per-post chip's "on" to per-post NIL —
+*inherit* — "so a future global one_block choice stays honored". That
+future is now: under a global `one_block`, turning a post's chip on clears
+its override and the post **still does not mint**, while the shipped note
+said *"Newlines make blocks again in this post"*. The door still acts; it
+just needed to say what acting means. Both bars now pick their note from
+what the post EFFECTIVELY does after the write (`SegmentationFaceCopy
+.note(asked:effectivelyMints:)`), Takes reusing its existing
+`refreshSegmentation`, Write adding one bounded header read because its
+`header` observation may not have delivered yet. **Per-post override
+semantics are untouched** — this is copy, not mapping.
+
+##### A23 — the paragraph-gap setting
+
+A `ParagraphGap` choice in Settings ▸ Appearance ▸ Editor, stored in
+`UserDefaults` beside the hover handles (S4-19) and the phantom kill switch
+(13c 1E) — **nowhere in the schema**, so `renderedText`, export and the
+bridge are byte-untouched (pinned, including zero outbox rows and unchanged
+`updated_at` stamps across a toggle).
+
+Two shaping decisions:
+
+- **ADDITIVE, not absolute.** "Paragraph-tall" adds a whole line of the
+  prose font ON TOP of the standard gap. An absolute "one line" would have
+  been *smaller* than the shipped gap whenever inline comments are on
+  (which already adds 22pt of room) — i.e. a setting that silently does
+  nothing in a state she can be in.
+- **Read at style-construction time, not cached.** `EditorDocument
+  .baseParagraphStyle` reads `ParagraphGap.current` directly rather than
+  going through `EditorTypography.current`. Every surface rebuilds that
+  style, so there is no global to keep in sync and no ordering hazard
+  between the setting changing and a surface re-styling.
+
+Two reach points were needed and both are the EXISTING mechanism, never a
+second one: `EditorSurfaceChrome` gained the value so the app's one
+"presentation moved, re-apply it" `Equatable` gate notices a gap change (a
+gap moves no font, so the font test alone could never see it), and the pane
+representable's voice-adopt branch gained the paragraph-spacing half of the
+same question. **`PagePaginator`'s own spacing constants were deliberately
+NOT touched** — those measure Read's true pagination, whose address is
+(post, page-in-post) identity, and moving them would move her reading
+position for a presentation setting.
+
+##### A24 — spellcheck levels, and the two things the pins FOUND
+
+Three levels (off · check while typing · check and correct), applied
+through one write-gated `apply(to:)` at every TK2 surface factory and on
+the live update paths. Coarse by TEXTKIT2 §3's warning; the default is the
+full-document editor's shipped posture, so a Mac that never opens Settings
+sees no change there.
+
+**Finding 1 — the §3 crash pairing was ONE SETTING AWAY, and the pin found
+it rather than confirming a precaution.** I wrote
+`theHighestLevelNeverEnablesTheCompletionHalfOfTheCrashPairing` expecting
+it to pass trivially, on the belief (which I had also written into the
+file's header) that "nothing in the app turns automatic completion on". It
+FAILED on all three surfaces: `isAutomaticTextCompletionEnabled` is **TRUE
+by default** on every NSTextView here. So shipping A24's higher levels
+without more would have put every writing surface into exactly the pairing
+§3 records as crashing NSTextView — *continuous spell checking + the
+word-completion popover*. The fix: completion is OFF whenever checking is
+ON, and restored to AppKit's default at `.off`, so a round trip through the
+setting leaves the surface where it began (pinned). The header comment that
+carried my wrong belief was corrected in the same pass.
+
+**Finding 2 — Write and the take boards disagreed about autocorrect, and
+had since the pane surface was built.** `PaneTextView.makeSurface` never
+set the spelling flags, and a bare NSTextView carries
+`isAutomaticSpellingCorrectionEnabled = TRUE` — so her prose in take panes
+was being autocorrected while Write's explicitly was not ("the author's
+prose should not be silently rewritten", Phase 7's comment). The setting
+unifies every surface on Write's posture, which **changes take-pane
+behaviour at the default level** — deliberately, and recorded here rather
+than buried. "Check and correct" is now the deliberate way to ask for the
+other behaviour. **Flagged for her walk.**
+
+The §3 class is also exercised as far as the harness reaches: a real
+window, a real editing session at the highest level over deliberately
+misspelled prose, selections, the store round-trip, and the fallback canary
+silent. What the harness cannot reach — whether the popover itself
+misbehaves under real key input — is recorded for the Design & UI review's
+screenshot drive, not claimed.
+
+##### Pins — every one named
+
+| Pin | Change | Why |
+|---|---|---|
+| `ReturnKeyTraceTests` (NEW suite, 6) | new | A15's trace, machine-verified: the ⏎/⇧⏎ dispatch fact, Control-Return's contrast, and the four contexts' behaviour today |
+| `GlobalSegmentationDefaultTests` (NEW core suite, 5) | new | A16's setter/read: seed, round trip, upsert-never-duplicates, outbox row, absent/garbage, the global-vs-override rule, and the inherit mapping the copy speaks about |
+| `NewBlockShortcutTests` (NEW suite, 3) | new | A14's declaration, **the collision sweep made permanent**, and the retired key's absence from the copy that named it |
+| `GlobalSegmentationFaceTests` (NEW suite, 2) | new | the honest note, pure and then end to end through Write's own setter |
+| `ParagraphGapTests` (NEW suite, 4) | new | the default, the additive rule, **no stored/exported byte moves**, and the chrome gate noticing a gap change |
+| `SpellcheckLevelTests` (NEW suite, 6) | new | the default on every surface (+ the measured AppKit divergence), the level→flags map, the write gate, birth-under-a-level, **the §3 pairing and its round trip**, and a real hosted session at the highest level |
+
+Nothing existing was renamed, re-pointed or weakened: the four items are
+additions plus one declared-key change, and no shipped pin asserted that
+key.
+
+##### Guard-revert evidence (five source files checksummed first; `shasum -c` OK after every restore)
+
+| Revert | Applied | Observed RED |
+|---|---|---|
+| **A** — the §3 completion guard removed from `apply` | `EditorBehaviorSettings` | **1 pin, 4 issues** — every surface (editor, inline, pane) and the round-trip arm report completion still ON under continuous checking: the crash pairing, reproduced |
+| **B** — panes never adopt the level (the pre-batch pane world) | `PaneSurface.makeSurface` | **3 pins** — the pane carries autocorrect ON at the default level, does not follow a level it was born under, and keeps completion on at the top level |
+| **C** — `paragraphTall` adds nothing | `EditorBehaviorSettings` | **1 pin, 3 issues** — extra 0.0 where 16.0 is right; the gap identical (7.0 vs 7.0) across both settings |
+| **D** — the note reverted to the unconditional `mintOnNote` | `OpsRefusalCopy` | **2 pins** — the pure mapping AND the end-to-end Write chip both speak *"Newlines make blocks again in this post"* under a global one_block, which is the lie the fix exists to stop |
+| **E** — A14's key back to ⌥⌘N | `EditorCommands` | **1 pin, 2 issues** — character `n` where Return is right, modifiers 24 (⌥⌘) where 18 (⇧⌘) is right |
+
+**One disclosed deviation in the revert pass, and its proof.** Restoring
+revert A, I also corrected the file's header comment in the same edit (it
+still claimed the app "has never enabled" automatic completion — the belief
+finding 1 falsified), so the post-restore checksum for
+`EditorBehaviorSettings.swift` did NOT match its pre-revert value. The
+functional restore was verified by reading the restored `apply` body back,
+the file was re-checksummed, and every subsequent revert/restore matched
+exactly. Recorded because a mismatched checksum should never pass without
+an explanation.
+
+##### Judgment calls
+
+1. **⌘⇧⏎ supersedes ⌥⌘N** rather than joining it (the A14 section's
+   reasoning). The alternative — a registry alias concept — is a design
+   change; flagged for her walk either way.
+2. **A16's honesty note was built even though the brief said per-post
+   override semantics are untouched.** It touches COPY, not mapping, and
+   the case it speaks about only becomes reachable because this batch made
+   the global settable — so leaving it would have been shipping a door that
+   lies, created by my own item.
+3. **A23 is additive, not absolute** (the reasoning above): the absolute
+   reading is invisible in a shipped state.
+4. **A23 reads the setting at style-construction time**, so no global
+   needs synchronizing and no ordering hazard exists.
+5. **`PagePaginator` deliberately untouched** — Read's pagination address
+   is identity, and a presentation setting must not move her page.
+6. **A24 turns COMPLETION off with checking on**, rather than leaving the
+   §3 pairing to chance or adding a fourth level for it. The §3 warning is
+   the reason the item is coarse; honoring it in the mechanism rather than
+   in a comment is the point.
+7. **A24's default unifies panes onto Write's posture**, changing take-pane
+   autocorrect. The alternative — preserving each surface's accidental
+   default — would have made "off" mean two different things on two
+   surfaces, which is what a *setting* exists to stop. Flagged.
+8. **A24 rides `EditorSurfaceChrome`** rather than getting its own
+   re-application mechanism: the chrome's `Equatable` gate is the app's ONE
+   "this surface's presentation moved" door, and a second door beside it is
+   what P-3 forbids.
+
+##### Deviations
+
+- **None from the brief's five items' shapes**, and no schema change
+  anywhere (A16 writes an existing `setting` row; A23/A24 are
+  `UserDefaults`). No item wanted a schema change, so that stop-door was
+  not needed; A14's collision stop-door was not needed either.
+- **A15 is deliberately unbuilt**, gate open, per the brief.
+- **No lookup subagent used** — the one external fact in question (what
+  macOS binds Shift-Return to) was answered from the system's own
+  `StandardKeyBinding.dict` and then re-verified by running real key events.
+- **No visual loop** (P-7's screenshot half): three of the four items are
+  Settings rows and a key equivalent; the fourth (A23) is genuinely visual,
+  and what a human eye would add — whether "a blank line's worth" is the
+  right amount of air in each voice — is routed to the standing **Design &
+  UI review** row rather than claimed.
+
+##### PENDING / for the orchestrator
+
+- **Nothing unverified.** All three suites were run by me, run lines quoted.
+- **A15 awaits the ruling** (the proposal above).
+- **Two things to put in front of her at the walk:** (1) ⌥⌘N is retired —
+  one line to restore if she wants it, but properly it wants a registry
+  alias concept; (2) take panes no longer autocorrect at the default level,
+  which is a change to what she has been living with.
+- **For the end-of-phase Fable review, suggested foci:** (1) the
+  supersession call on ⌥⌘N — right call, or should the registry grow
+  aliases? (2) A23's additive rule and its interaction with the
+  inline-comment gap — does the combined gap read as intended in both
+  voices? (3) whether `EditorSurfaceChrome` carrying two non-voice settings
+  is the right home or a bag forming (P-9's smell, deliberately weighed:
+  it already carried `inlineComments`). (4) A24's grammar-checking
+  coupling — riding the "check while typing" level was my call, not hers.
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →
