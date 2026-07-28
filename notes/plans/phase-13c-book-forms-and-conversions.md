@@ -2888,6 +2888,19 @@ build, felt working in real use.
 - **#39 — RATIFIED AS SHIPPED, on felt evidence:** the phantom fix
   stays default-ON with its cap/floor and kill switch.
 
+**Batch 2 (the book surfaces' taste calls):**
+- **#43(a) — OVERTURNED:** Outline opens with posts **COLLAPSED** —
+  R106's letter extends to the writing surface after all; expand what
+  you work on. (The shipped PROVISIONAL flips; a build change with its
+  pins — the walk's fix round.)
+- **#44(c)/#45(c) — RULED: scrubber on BOTH** — Book's spread gets its
+  jump scrubber back beside the leaf-turn controls; Read's Pages keeps
+  its own. (Build change — the 2B removal reverses.)
+- **#45(b) — RATIFIED AS SHIPPED:** every post starts a new page; the
+  immovable (post, page-in-post) address stands.
+- **#47(c) — RULED: default ON** — Compare opens related-blocks-only;
+  the toggle reveals the full posts. (One-line flip + pin.)
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
