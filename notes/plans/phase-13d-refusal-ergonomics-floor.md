@@ -522,6 +522,226 @@ the virtualization pin's HARDER claim by expanding everything rather
 than letting the collapsed default cheapen it) and call 7 (annotate,
 never resolve, QUESTIONS). Batch 2 (#34) proceeds.
 
+### Batch 2 — #34, backspace-merge at a texted seam
+
+**Counts, by my own runs:** core `✔ Test run with 882 tests in 100 suites
+passed after 29.177 seconds` (**882/100** — the baseline exactly; **zero
+`Sources/` lines** in the diff, so unchanged by construction) · Mac
+`✔ Test run with 808 tests in 136 suites passed after 89.908 seconds`
+(**790/135 → 808/136**: the new `SeamMergeTests` suite's 18 pins; the one
+1B pin the ruling reverses was rewritten in place, not added). Tutorial
+spine green on its own run first: `✔ Test run with 49 tests in 7 suites`
+(all seven `Tutorial*Tests` types by TYPE name — the 2E trap).
+**Mobile untouched by construction:** every file here is under
+`Variorum/` (Mac) or `VariorumTests/`; nothing in `Shared/` or
+`VariorumMobile/`. 14/4 stands unrun. Zero schema, zero
+`Sources/VariorumCore/Sync/` lines.
+
+**Her instance:** her real-store build was LIVE throughout (`pgrep` →
+PID 54248, `/Applications/Variorum.app/…`). Never quit, never touched;
+no Release build, no `/Applications` refresh, no store touched. Mac
+suites ran beside it on the Debug host (4G).
+
+**Diff scope — 6 files:** `BlockRangeIndex.swift` (the shared separator
+geometry + `textedSeamPair`) · `EditorSurfaceController.swift` (the plan,
+the run, the refusal copy, the shared fan read) · `EditorViewModel.swift`
+(the routing branch + two forwards) · `SeamMergeTests.swift` (NEW, 18
+pins) · `BlockDeletionAndRedoTests.swift` (the one reversed pin) ·
+`notes/AppSpec.md` + `notes/QUESTIONS.md` (the canon delta, its own
+commit).
+
+#### The precedence vocabulary, as built
+
+At a deleted **inter-entry separator** (the one range shape that belongs
+to no block, which is why it reaches `.refuse(.crossesBlockBoundary)` at
+all), `shouldChangeText` now asks three questions in this order:
+
+1. **A7's carve** — a neighbour that is empty on the surface, unfanned,
+   editable, carrying nothing unshown → that block is deleted, with the
+   authorization re-read inside `deleteBlock`'s own transaction.
+   **Byte-unchanged by this batch**, guards and all; #40's named/callout
+   reading and #42's redo refusal are untouched and their pins run green.
+2. **NEW — the seam merge** — both neighbours texted, neither carrying a
+   live active fan → the ordinary binary `merge`.
+3. **NEW — the seam refusal** — both texted, either side fanned → the
+   fan is named and ⌘⇧M pointed at. Nothing is written.
+
+…and only then the two standing cross-block plans (merge-then-edit, the
+visible-take edit), which cannot see this range anyway — both collect
+targets by INTERSECTION, and a lone separator intersects nothing (pinned
+here as well as in 1B).
+
+**1 and 2 are mutually exclusive BY CONSTRUCTION**, not by ordering: one
+requires a zero-length neighbour, the other requires neither. Pinned by
+walking every offset of a `["", "alpha", "beta", ""]` document and
+asserting at most one of them ever answers — with a non-vacuity arm
+showing both are reachable in that same document.
+
+**One small refactor rather than a second walk:** both now consult
+`BlockRangeIndex.interEntrySeparatorPair(deleting:isDeletion:)` — the ONE
+geometric question ("which pair does this separator sit between?"),
+extracted from `emptyBlockDeletion`'s body with its behaviour unchanged
+(same guards, same walk, same both-empty tie-break; 1B's carve pins run
+untouched and green). Two hand-walked copies of the tiling would have
+been the sediment class this phase's constitution names.
+
+#### "Has takes" — one rule, and where it is read
+
+The condition is the **merge ceremony's own instant-vs-ceremony
+threshold** (S4-23 ruling 4): *any live ACTIVE fan on either side*.
+`openMergeCeremony` and the seam keystroke now call ONE helper
+(`liveActiveFans`) — the ⌘⇧M door's truth read, shared by name, not a
+second fan test. So the keystroke fires exactly where merge would be
+instant and refuses exactly where merge would open the sheet.
+
+**It is read at RUN time, from the STORE — deliberately not at plan
+time from `model.slots`, and this is the batch's one real design
+decision.** The projection engine freezes `slots` for the whole of a
+typing burst (`EditorProjectionPolicy.decide` → `.deferUntilClean` while
+the buffer is dirty, and autosave's debounce re-arms on every keystroke).
+That freeze is exactly what the 13c ladder's R3-1 finding was about one
+door over: a plan-time guard reading it is an enablement hint, never an
+authorization. A7 could move its authorization into the operation
+(`BlockDeletionPrecondition`); merge has no such parameter, and adding
+one would be core surgery well past this brief — so the honest available
+authorization point is the run's own truth read, which is also the read
+the explicit gesture already trusts. `planSeamMerge` therefore asks about
+GEOMETRY and liveness only and is stale-blind on purpose (pinned as
+such). **The pin that makes this real is
+`aFanArrivingWhileSheIsTypingStillStopsTheMerge`**, the direct mirror of
+1B's `aCommentArrivingWhileSheIsTypingStillStopsTheCarve`: it drives the
+frozen projection deliberately (no `reload()`), and guard-revert D shows
+it is the ONLY pin that discriminates the two readings.
+
+#### Point 4 — the parity answer
+
+**The carve accepts any DELETION (empty replacement) of exactly one
+inter-entry separator, whatever gesture proposed it**, and the merge case
+accepts identically — because it is the same range, not because three
+wirings were kept in step. Concretely that is: **backspace at a block's
+start** · **forward-delete at the previous block's end** · **selecting
+the separator character and deleting (or cutting) it**. All three propose
+`(separatorOffset, 1) → ""`. Each is pinned end to end. What neither
+accepts, unchanged: a replacement (typing over the seam), a range longer
+or shorter than the one separator, a range starting or ending inside a
+block, the TAIL separator (that is `closeTail`'s, and `verdict` answers
+it before this branch is ever reached), and a single-block or empty post.
+
+#### What the merge IS (nothing invented)
+
+`runInstantMerge` — the same body the ⌘⇧M gesture runs, reached
+unchanged: `runStructural`'s one-flight door (flush first, non-editable
+for the flight, store-led rewrite), `ops.merge`, `MergeJoin.canon`'s
+single space at the join, the differential `.merge` seam edit, the caret
+at the join, ONE undo entry labelled **"Merge"**, and 1B's redo half
+riding the same registration (do → undo → redo pinned). A **sealed post**
+never reaches the act: `adoptHeader` makes the surface non-editable, so
+the keystroke is not even proposed (pinned at the mechanism, plus the
+model's own spoken refusal). A **locked take** deliberately does NOT
+refuse — merge copies rendered texts and never edits a buffer, so the
+explicit gesture allows it and parity is the rule for this door too.
+
+#### Pins — every one named
+
+| Pin | Change | Why |
+|---|---|---|
+| `backspaceBetweenTwoBLOCKSWITHTEXTStillREFUSES` (1B) | **rewritten + renamed** → `theCarveStillNeverNamesASeamBetweenTwoBLOCKSWITHTEXT`; the behavioural half moves to the new suite, the narrowness half stays | the ruled flip — that keystroke is no longer a refusal. Recorded as a RULED CHANGE, not a bug fix |
+| `SeamMergeTests` (NEW suite, 18) | new | the ruling: geometry, six cannot-widen arms, mutual exclusion, the three gestures end to end, the two fanned refusals, the copy, the mid-burst staleness pin, the seal, and A7-still-wins-at-an-empty-neighbour |
+
+Everything else in `BlockDeletionAndRedoTests` — the nine cannot-widen
+pins, the archived-take and comment guards, #40's named/callout
+PROVISIONAL, #42's redo refusal, the A8 door, the redo family — ran
+UNCHANGED and green.
+
+#### Guard-revert evidence (checksums taken first; `shasum -c` OK after every restore)
+
+| Revert | Applied | Observed RED |
+|---|---|---|
+| **A** — the routing branch unwired (`else if false, let seam = …`): the exact pre-ruling world, where that keystroke did nothing | `EditorViewModel.shouldChangeText` | **6 pins, 15 issues** — the store keeps `["alpha","beta"]`, the surface keeps the separator, the undo stack stays empty, the caret never moves, and the message reverts to the generic cross-block refusal copy. **Her reported behaviour, reproduced exactly** |
+| **C** — the fan guard removed (`count >= 1`), everything else intact | `runSeamMerge` | **3 pins, 12 issues** — a fanned seam MERGED (`["alpha beta"]`), an undo entry appeared, and the refusal copy became "Blocks joined". The guard is what stands between a keystroke and a folded fan |
+| **D** — the fan read taken from `model.slots` instead of the store (a plan-time-style guard, the tempting shape) | `runSeamMerge` | **exactly 1 pin, 5 issues** — `aFanArrivingWhileSheIsTypingStillStopsTheMerge` alone goes red (the two ordinary fanned pins stay GREEN, because they `reload()`): the merged block ate "beta" AND the take that had just arrived on it. This is the pin that earns the design |
+
+**One incident, recorded because the guard is what caught it.** Revert C's
+first run CRASHED the test process (`Index out of range`) and truncated
+the run's evidence — the trap was in MY pin, not the code: it subscripted
+`after[1]` after asserting `after.count == 2`, so in the reverted world
+(where the blocks merged) the subscript trapped before the remaining
+expectations could record. Fixed by reading through `first` /
+`dropFirst().first`, the suite re-verified green, and revert C re-run for
+clean evidence (the table's numbers are the clean run). Worth keeping as
+a rule: **a pin whose red state changes an array's length must not
+subscript it** — a trapped pin destroys the very evidence the revert was
+run to produce.
+
+#### Judgment calls
+
+1. **The fan is read from the store at run time, not from the projection
+   at plan time** (the section above). The alternative — a fast plan-time
+   arity guard like the `.merge` door's — would have been a *second* fan
+   test, and a stale one; revert D is the receipt.
+2. **The plan does not carry the fanned case as a variant.** It answers
+   "is this a texted seam at all"; the run answers "may it merge". One
+   place asks about takes, which is what point 2's "no second fan test"
+   means in practice.
+3. **A successful join SPEAKS** ("Blocks joined — ⌥⌘Z undoes it."),
+   following A7's carve rather than merge's silence. Load-bearing, not
+   chatter: a structural act just landed from an ordinary keystroke, and
+   ⌘Z cannot take it back (the structural rewrite clears the text-undo
+   stack by design), so the line names the door that can. If she finds it
+   noisy it is one line to make transient or drop — flagged for her walk.
+4. **`runInstantMerge` gained a `@discardableResult` Bool** so the seam
+   path can speak only when the merge actually landed. No behaviour
+   change to the ⌘⇧M door.
+5. **Locked takes merge** (parity with the explicit gesture, above)
+   rather than inventing a keystroke-only refusal.
+6. **The refusal names WHICH side carries the fan** (above / below /
+   both) rather than a generic "this seam has takes" — the same instinct
+   as `speakAboutMergedFans`, which names the road rather than gesturing
+   at it.
+7. **No §9 edit.** The seam keystroke is a DOOR onto the existing `merge`
+   operation, and §9 describes operations; the reach change is §14's
+   business, which is where the brief put it. The §14 delta names the
+   Stage 1 delta sentence it supersedes rather than rewriting that
+   paragraph (batch 1's annotate-don't-rewrite shape, endorsed).
+8. **`QUESTIONS.md` #34 annotated, not resolved** — a bracketed "BUILT
+   13d batch 2" marker inside the existing ANSWERED status; the entry's
+   disposition stays the closeout's.
+
+#### Deviations
+
+- **None from the brief's six points.** The shape bound; nothing turned
+  out materially different from the brief's description, so the
+  stop-and-propose door was not needed.
+- **One in-scope refactor beyond the literal shape:** the shared
+  `interEntrySeparatorPair` extraction and the shared `liveActiveFans`
+  read. Both are the "ONE brain" discipline the brief's own points 1 and
+  2 ask for, and neither changes existing behaviour (the carve's pins and
+  the ceremony's pins run unchanged).
+- **No lookup subagent used** — nothing external was in question.
+- **No visual loop** (P-7's screenshot half): there is no new pixel in
+  this batch — a keystroke that previously did nothing now runs an
+  existing operation, and its two visible outcomes (the joined text, the
+  status line) are observed by hosted pins at the layer where they can
+  fail.
+
+#### PENDING / for the orchestrator
+
+- **Nothing unverified.** Both full suites were run by me, run lines
+  quoted above.
+- **For the end-of-phase Fable review, suggested foci:** (1) the read-
+  then-act window — `liveActiveFans` reads, then `runStructural` flushes
+  and merges, so a take born in that sub-ms window still folds away; it
+  is the SAME window the explicit ⌘⇧M door has had since 13b 4B (its
+  threshold read precedes its own confirm), so closing it means a
+  `merge(_:requiring:)` precondition at the ops layer, deliberately not
+  invented here — is that the right line? (2) the status line on every
+  join (judgment call 3) — right call or noise? (3) whether any other
+  surface reaches a seam keystroke (I found none: seams exist only in the
+  full-document editor; take panes are single-block). (4) the `Merge`
+  undo label — the keystroke and the gesture now share it, so her undo
+  menu cannot tell her which door she used; deliberate (it IS the same
+  act), but worth a second opinion.
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →

@@ -409,25 +409,32 @@ struct BlockDeletionAndRedoTests {
         }
     }
 
-    @Test func backspaceBetweenTwoBLOCKSWITHTEXTStillREFUSES() async throws {
-        // THE decisive carve-cannot-widen pin, and it corrects an
-        // assumption worth recording: a BARE seam backspace between two
-        // TEXTED blocks has always refused — the ratified "a cross-seam
-        // delete just works" covers a SELECTION that spans text, and both
-        // cross-block plans collect by intersection, which a lone separator
-        // has none of. So the range shape A7 carves is the one shape that
-        // did NOTHING before, and the carve changes behaviour for exactly
-        // the empty-block case and nothing else. Joining two texted blocks
-        // remains the explicit merge gesture (⌘⇧M).
+    /// THE decisive carve-cannot-widen pin — and its *behavioural* half was
+    /// superseded by her ruling, so the pin keeps the half that is this
+    /// suite's job and hands the other half over by name.
+    ///
+    /// **What it recorded (13c 1B, and still true):** a bare seam backspace
+    /// between two TEXTED blocks intersects neither neighbour, so both
+    /// cross-block plans return nil for it and A7's carve never names it —
+    /// the range shape A7 carves is the one shape that did NOTHING before,
+    /// and the carve changed behaviour for the empty-block case only.
+    ///
+    /// **What changed (13d batch 2, QUESTIONS #34 option (ii)):** that
+    /// keystroke is no longer a refusal — it MERGES when neither block has
+    /// takes. A ruled flip, not a bug fix. The behaviour now lives in
+    /// `SeamMergeTests`; what stays here is the carve's own narrowness: it
+    /// still does not name a texted seam, and the block that owns that seam
+    /// is a different act entirely.
+    @Test func theCarveStillNeverNamesASeamBetweenTwoBLOCKSWITHTEXT() async throws {
         try await withEditor(seedBlocks: ["alpha", "beta"]) { harness in
-            harness.replace(NSRange(location: 5, length: 1), with: "")
-            await harness.flush()
-            let unchanged = try harness.storeSlots().compactMap(\.text)
-            #expect(unchanged == ["alpha", "beta"],
-                    "two texted blocks are untouched — the carve never widened to them")
-            #expect(harness.documentText == "alpha\nbeta")
-            #expect(harness.session.undoStack.depth == 0, "nothing structural happened")
-            #expect(harness.model.statusMessage?.isEmpty == false, "and the refusal SPEAKS")
+            let separator = NSRange(location: 5, length: 1)
+            #expect(harness.model.index.emptyBlockDeletion(
+                replacing: separator, isDeletion: true) == nil,
+                "the carve never widened to texted blocks")
+            #expect(harness.model.planEmptyBlockDeletion(
+                range: separator, replacement: "") == nil)
+            // …and the act that DOES own that seam is the seam merge (#34).
+            #expect(harness.model.planSeamMerge(range: separator, replacement: "") != nil)
         }
     }
 

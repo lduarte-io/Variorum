@@ -675,6 +675,17 @@ final class EditorViewModel {
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runEmptyBlockDeletion(empty)
                 }
+            } else if let seam = planSeamMerge(range: range, replacement: replacement) {
+                // 13d batch 2 (#34, her ruling (ii)): the same range shape,
+                // with TEXT on both sides — backspace joins the paragraphs
+                // when neither block has takes, and says why when either
+                // does. Mutually exclusive with the carve above (one needs an
+                // empty neighbour, this needs neither) and invisible to the
+                // two plans below (both collect by intersection, and a lone
+                // separator intersects nothing) — pinned.
+                scheduleCrossBlockCompound { [weak self] in
+                    await self?.runSeamMerge(seam)
+                }
             } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runCrossBlockEdit(compound)
@@ -1083,6 +1094,18 @@ final class EditorViewModel {
     /// A8's Write door (the Block menu / the bar / ⌘K).
     func deleteCaretBlock() async {
         await structural.deleteCaretBlock()
+    }
+
+    // MARK: - 13d batch 2 (#34) — backspace at a texted seam
+
+    typealias SeamMerge = EditorSurfaceController.SeamMerge
+
+    func planSeamMerge(range: NSRange, replacement: String) -> SeamMerge? {
+        structural.planSeamMerge(range: range, replacement: replacement)
+    }
+
+    func runSeamMerge(_ plan: SeamMerge) async {
+        await structural.runSeamMerge(plan)
     }
 
     /// The merge-then-edit compound (the controller's).

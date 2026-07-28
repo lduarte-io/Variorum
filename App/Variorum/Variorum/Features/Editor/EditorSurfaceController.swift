@@ -384,9 +384,10 @@ final class EditorSurfaceController {
     /// The everyday instant merge — today's exact `.merge` body, byte-
     /// unchanged (13b 4B moved it behind the ceremony threshold; unfanned
     /// pairs and the stale-projection fallthrough land here).
+    @discardableResult
     private func runInstantMerge(
         leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
-    ) async {
+    ) async -> Bool {
         let trailingLength = model.index.entries[trailingIndex].length
         // #11c (the sitting ruling, 2026-07-13): merge on fanned blocks
         // SPEAKS about what it does to the fan.
@@ -400,6 +401,7 @@ final class EditorSurfaceController {
                 seam: .merge(leadingIndex: leadingIndex, mergedID: result.block.id))
         }
         if landed { speakAboutMergedFans(otherTakes) }
+        return landed
     }
 
     // MARK: - Insert block below (13b Stage 4, 4D — N28/S4-13)
@@ -574,12 +576,9 @@ final class EditorSurfaceController {
             return
         }
         do {
-            let (firstFan, secondFan) = try await model.session.database.read { db in
-                (try Queries.blockFan(db, blockID: leadingID)
-                    .filter { $0.deletedAt == nil && $0.status == .active },
-                 try Queries.blockFan(db, blockID: trailingID)
-                    .filter { $0.deletedAt == nil && $0.status == .active })
-            }
+            // The threshold read, shared with the seam keystroke since 13d
+            // batch 2 — ONE fan rule, one place (#34's point 2).
+            let (firstFan, secondFan) = try await liveActiveFans(leadingID, trailingID)
             guard firstFan.count > 1 || secondFan.count > 1 else {
                 await runInstantMerge(
                     leadingIndex: leadingIndex, trailingIndex: trailingIndex,
@@ -1181,6 +1180,126 @@ final class EditorSurfaceController {
         }
         if landed {
             model.showStatus("Empty block deleted — ⌥⌘Z undoes it.")
+        }
+    }
+
+    // MARK: - #34 (13d batch 2): backspace at a TEXTED seam
+
+    /// The pair a seam keystroke would join. Geometry + liveness only — the
+    /// fan question is `runSeamMerge`'s, on the store (see below).
+    struct SeamMerge: Sendable, Equatable {
+        let leadingIndex: Int
+        let trailingIndex: Int
+        let leadingBlockID: String
+        let trailingBlockID: String
+    }
+
+    /// Her QUESTIONS #34 ruling (13c ratify walk, 2026-07-27), option (ii):
+    /// **backspace at a seam between two TEXTED blocks MERGES when NEITHER
+    /// block has takes, and refuses-and-speaks when either does.** The second
+    /// named exception to the ratified cross-block destructive-edit refusal —
+    /// A7's empty-block carve (13c 1B) is the first, and this one is granted
+    /// on a different argument: not *"there is no text to lose"* but *"basic
+    /// text should behave like basic text"*, her own words at #34.
+    ///
+    /// The precedence at a deleted inter-block separator, in order:
+    /// 1. **A7's carve** — an empty neighbour with nothing unshown: the block
+    ///    goes (exactly as shipped; its guards and #40/#42's rulings are
+    ///    untouched by this batch);
+    /// 2. **this** — both neighbours texted, neither fanned: the ordinary
+    ///    binary MERGE of the two, through the standing gesture path;
+    /// 3. **this, refusing** — both texted, either side fanned: the fan is
+    ///    named and the explicit door pointed at. A keystroke must never fold
+    ///    a fan away, and must never open a sheet.
+    ///
+    /// What this plan deliberately does NOT decide is the fan. There is
+    /// exactly ONE fan rule in the app — the merge ceremony's own threshold
+    /// (S4-23 ruling 4: any live active fan on either side opens the
+    /// ceremony) — and it is read from the STORE, never from `model.slots`,
+    /// which the projection engine deliberately freezes for the length of a
+    /// typing burst. That freeze is what the 13c ladder's R3-1 finding was
+    /// about, one door over: a plan-time guard reading it is an enablement
+    /// hint, never an authorization. Here the authorization is the run's
+    /// truth read, and a fan arriving mid-burst therefore stops the merge
+    /// (pinned).
+    ///
+    /// Locked takes deliberately do NOT refuse: merge COPIES the rendered
+    /// texts and never edits a buffer, so the explicit gesture allows them
+    /// (Phase 3 op semantics, `StructuralGesturePlanner.merge`) and parity is
+    /// the rule for this door too. A sealed post never reaches here —
+    /// `shouldChangeText` refuses at the seal before any plan runs.
+    func planSeamMerge(range: NSRange, replacement: String) -> SeamMerge? {
+        guard replacement.isEmpty,
+              let (leading, trailing) = model.index.textedSeamPair(
+                deleting: range, isDeletion: true)
+        else { return nil }
+        let entries = model.index.entries
+        // A gap slot has nothing to merge (the planner's `.gapSlot` refusal);
+        // by geometry a gap is length 0 and so is never a texted seam, but
+        // the pair the merge gesture requires is stated here rather than
+        // inferred.
+        guard entries[leading].variantID != nil, entries[trailing].variantID != nil
+        else { return nil }
+        return SeamMerge(
+            leadingIndex: leading, trailingIndex: trailing,
+            leadingBlockID: entries[leading].blockID,
+            trailingBlockID: entries[trailing].blockID)
+    }
+
+    /// Fires exactly where the explicit merge gesture would be INSTANT, and
+    /// refuses exactly where it would open the ceremony — one rule, read
+    /// once, from the store.
+    func runSeamMerge(_ plan: SeamMerge) async {
+        do {
+            let (leadingFan, trailingFan) = try await liveActiveFans(
+                plan.leadingBlockID, plan.trailingBlockID)
+            guard leadingFan.count == 1, trailingFan.count == 1 else {
+                model.refuseFeedback(
+                    Self.seamFanRefusal(leading: leadingFan.count, trailing: trailingFan.count))
+                return
+            }
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+        let landed = await runInstantMerge(
+            leadingIndex: plan.leadingIndex, trailingIndex: plan.trailingIndex,
+            leadingID: plan.leadingBlockID, trailingID: plan.trailingBlockID)
+        if landed {
+            // Load-bearing, not chatter (A7's carve set the shape): a
+            // structural act landed from an ordinary keystroke, and ⌘Z — the
+            // text stack — cannot take it back (the structural rewrite clears
+            // it by design). The line names the door that can.
+            model.showStatus("Blocks joined — ⌥⌘Z undoes it.")
+        }
+    }
+
+    /// Names the fan and points at the door that can fold it deliberately —
+    /// the ⌘⇧M ceremony, where the takes are paired by hand (S4-23).
+    static func seamFanRefusal(leading: Int, trailing: Int) -> String {
+        let subject: String
+        switch (leading > 1, trailing > 1) {
+        case (true, true): subject = "Both blocks at this seam have takes"
+        case (true, false): subject = "The block above has takes"
+        default: subject = "The block below has takes"
+        }
+        return subject
+            + " — backspace won't fold a fan away. Use Merge Blocks (⌘⇧M) to pair the takes yourself."
+    }
+
+    /// The merge ceremony's threshold read, shared by the ⌘⇧M door and the
+    /// seam keystroke (S4-23 ruling 4): a merge is INSTANT when neither side
+    /// carries a live ACTIVE fan and opens the ceremony when either does.
+    /// From the store — never `model.slots`, which is deliberately stale
+    /// while the editor is busy.
+    private func liveActiveFans(
+        _ leadingID: String, _ trailingID: String
+    ) async throws -> (leading: [Variant], trailing: [Variant]) {
+        try await model.session.database.read { db in
+            (try Queries.blockFan(db, blockID: leadingID)
+                .filter { $0.deletedAt == nil && $0.status == .active },
+             try Queries.blockFan(db, blockID: trailingID)
+                .filter { $0.deletedAt == nil && $0.status == .active })
         }
     }
 

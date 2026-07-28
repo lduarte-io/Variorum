@@ -208,20 +208,62 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
     /// preferring the block after would delete the very block the caret
     /// sits in and never converge under repeated presses.
     func emptyBlockDeletion(replacing range: NSRange, isDeletion: Bool) -> Int? {
+        guard let (before, after) = interEntrySeparatorPair(deleting: range, isDeletion: isDeletion)
+        else { return nil }
+        if entries[before].length == 0 { return before }
+        if entries[after].length == 0 { return after }
+        return nil
+    }
+
+    /// The ONE geometric question both seam carves ask: *which pair of
+    /// entries does this proposed edit's separator sit between?*
+    ///
+    /// Answers only for a **deletion** (never a replacement — typing over a
+    /// seam is a different gesture) of **exactly one INTER-ENTRY separator**.
+    /// The tail's separator is deliberately outside the loop: it is the
+    /// `closeTail` verdict's business, and neither carve may steal it.
+    ///
+    /// Extracted at 13d batch 2 so the empty-block carve (A7) and the
+    /// texted-seam merge (#34) read the same geometry rather than two
+    /// hand-walked copies of it — the ONE-brain discipline the snap and join
+    /// rules already follow. `emptyBlockDeletion`'s behaviour is unchanged by
+    /// the extraction (same guards, same walk, same both-empty tie-break).
+    func interEntrySeparatorPair(
+        deleting range: NSRange, isDeletion: Bool
+    ) -> (before: Int, after: Int)? {
         guard isDeletion, range.length == 1, entries.count >= 2 else { return nil }
-        // Only the INTER-ENTRY separators — the tail's separator is the
-        // `closeTail` verdict's business, not this one.
         var location = 0
         for k in 0..<(entries.count - 1) {
             location += entries[k].length
-            if location == range.location {
-                if entries[k].length == 0 { return k }
-                if entries[k + 1].length == 0 { return k + 1 }
-                return nil
-            }
+            if location == range.location { return (k, k + 1) }
             location += 1  // the separator itself
         }
         return nil
+    }
+
+    // MARK: - #34 (13d batch 2): the texted seam
+
+    /// Phase 13d, batch 2 — her QUESTIONS #34 ruling, option (ii): backspace
+    /// at a seam between two **TEXTED** blocks MERGES when neither block has
+    /// takes, and refuses-and-speaks when either does. Her own principle is
+    /// what carried it: *"there is no other writing editor where you can
+    /// select a bunch of text, hit delete, and it doesn't delete… if your
+    /// text looks like basic text with no variants, it should behave like
+    /// basic text."*
+    ///
+    /// This is the geometry half only: the pair of entries a single-separator
+    /// deletion would join, when **both** carry text. An empty neighbour is
+    /// A7's carve, never this — the two are mutually exclusive by
+    /// construction (one requires a zero-length neighbour, the other requires
+    /// neither), which is why `shouldChangeText` can run them in sequence.
+    /// The fan rule (instant-vs-ceremony) is deliberately NOT here: it is the
+    /// merge gesture's own threshold, read from the store at run time where
+    /// it cannot be a stale projection (`EditorSurfaceController.runSeamMerge`).
+    func textedSeamPair(deleting range: NSRange, isDeletion: Bool) -> (Int, Int)? {
+        guard let (before, after) = interEntrySeparatorPair(deleting: range, isDeletion: isDeletion),
+              entries[before].length > 0, entries[after].length > 0
+        else { return nil }
+        return (before, after)
     }
 
     // MARK: - Mutations (applied AFTER the change, per the verdict)
