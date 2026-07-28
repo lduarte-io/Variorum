@@ -2277,6 +2277,329 @@ her untaken trimming ruling, the rolled walk items, #48) and then the
 ONE Fable cold review at phase end (her kickoff cast ruling) over the
 combined diff. The install refresh is HELD for her word as always.
 
+### Batch 5 — the sitting's builds (#37(iii) · A12 · the idle-voice line · A22 · A11)
+
+**Counts, by my own runs:** core `✔ Test run with 901 tests in 101 suites
+passed after 29.852 seconds` (**887/101 → 901/101**: +14, all into existing
+suites — BoundarySnapping +1, StructuralDivide +3, UndoStack +4,
+ContainerOperations +4, BridgeDailyBook +2) · Mac `✔ Test run with 873 tests
+in 145 suites passed after 93.646 seconds` (**858/143 → 873/145**: the two
+new suites `TypewriterRoomTests` (8) and `DestructiveUndoWarningTests` (5),
+plus one pin each in `PaneSurfaceTests` and `StructuralGestureTests`) ·
+mobile `✔ Test run with 14 tests in 4 suites passed after 0.246 seconds`
+(**14/4** — RUN, not assumed: items 1 and 5 land under `Sources/`, and one
+mobile pin is a ruled flip). Tutorial spine green on its own run:
+`✔ Test run with 49 tests in 7 suites passed after 12.126 seconds` (all
+seven `Tutorial*Tests` types by TYPE name — the 2E trap). **Zero schema
+change; zero `Sources/VariorumCore/Sync/` lines.**
+
+**Her instance:** closed for the whole batch (`pgrep` → nothing at
+`/Applications/Variorum.app/…`, checked at open and at close, as her
+sitting said). No Release build, no `/Applications` refresh, no store
+touched. Lock flag 0.
+
+**Diff scope — 8 source files + 4 canon/test-support files + 2 new suites:**
+core `BoundarySnapping.swift` · `Operations+Container.swift` ·
+`Operations+Appearance.swift` · `Operations+UndoInverses.swift` ·
+`Operations+Structural.swift` · `Operations+TakeEdits.swift` ·
+`UndoStack.swift` · `Bridge/BridgeEngine.swift`; app
+`EditorTextView.swift` · `PaneSurface.swift` · `ShellActions.swift` ·
+`BookStructureModel.swift` · `TutorialSeeder.swift` ·
+`EntryListViewModel.swift` (mobile); canon `notes/AppSpec.md` +
+`notes/QUESTIONS.md`.
+
+#### Item 1 — #37(iii): the ensure half moves INTO the shared door
+
+The create-and-pin block left `JournalBooks.openToday` entirely and became
+`insertDailyJournalBook` inside `shelveInDailyJournalBook`. All four doors
+now share ONE rule with no residue at ⌘J — which the guard revert proves
+mechanically rather than by inspection (revert B reds ⌘J's own suite, five
+tests, because its book now comes from the shared door).
+
+**The one design decision inside it: WHERE the creation runs.** The ordinary
+path stays a READ (a designation exists on every round after the first);
+only its absence opens a `database.write`, and that write RE-READS the
+designation inside the writer before minting. GRDB serializes writers, so
+two doors racing the very first entry cannot mint two Journal books — the
+same hazard Phase 13's Stage B review closed for ⌘J by moving its read
+inside the runner, closed here at the one place all four doors share. A book
+minted in that transaction can carry no membership row, so `decided` is
+false by construction rather than by a second query.
+
+**`noDailyBook` is REMOVED from `DailyBookShelving`**, not left unreachable:
+the ruling makes it impossible, and a case that can never be returned is the
+drift class R1-2 punished. The three call sites lost their branch; two of
+them (the bridge's note, the phone's note) lost copy that now describes
+nothing.
+
+**What creation deliberately does NOT do:** replace a book she designated. A
+FINISHED, FULL or SMART daily book keeps its own status and wording — those
+are her states, and answering them by minting a second Journal beside hers
+would be inventing product behavior. Pinned
+(`creationNeverReplacesABookSheDesignated`,
+`aDecidedPairIsLeftAloneAndTheCreationNeverSecondGuessesHer`).
+
+**Two internal db-level helpers** (`setDailyJournalBook(_:_:)`,
+`setShelfPinned(_:_:pinned:)`) so the in-transaction path shares the ONE
+implementation with the public ops instead of copying it — the public doors
+now forward.
+
+**The §9 delta (the orchestrator's to review):** the superseded PROVISIONAL
+sentence is quoted where it stood, her ruling is quoted, the retirement of
+`noDailyBook` is stated, and the never-replaces-her-book limit is written
+down as part of the rule rather than left to the code.
+
+#### Item 2 — A12: the destructive-undo warning, at her definition exactly
+
+**The condition is asked ONCE.** `Operations.wouldInsure(currentText:
+preImage:dirty:)` is the predicate `revertStructural` already computed inline
+to decide the fourth quiet auto-commit; it is now a named static that BOTH
+the commit and the warning consult, so the dialog and the insurance can never
+disagree about what the class is.
+
+**The warning is DATA, not a per-site decision.** `UndoStack.Entry` gains
+`insuring: [TextPreImage]` — the same values the inverse hands
+`revertStructural` — and `register` takes it with a default of empty. Every
+entry that restores no buffer (deleteBlock, moveBlock, reorder, merge, the
+W, poolDragCopy…) is silent BY CONSTRUCTION rather than because someone
+remembered to say so; exactly three ops pass it (`extract`, `divide`,
+`editTakesAtomically`), because exactly three restore buffers. A compound
+folds its legs' arrays, so Make Block warns for both divides as one act.
+
+**It is asked at the door, against the store as it is NOW** — an entry
+becomes warnable the moment she edits the buffer and stops being warnable the
+moment she commits it, and neither event touches the stack. `insuranceTargets`
+never throws and never writes: a store hiccup degrades to "no warning", never
+to a blocked undo, because the insurance itself rides inside the undo's own
+transaction (pinned: `theWarningNeverChangesWhatTheUndoDoes`).
+
+`ShellActions.structuralUndo(confirm:)` follows `openTutorial`'s precedent —
+injectable decision, NSAlert default — and the copy names what would be set
+aside AND where it goes (the take's history). Cancel speaks and touches
+nothing.
+
+**THE FINDING THIS ITEM PRODUCED, recorded because it cost an hour and is
+the kind of thing that repeats:** the tutorial spine HUNG. The field guide's
+own "the two undos" lesson has a pin that types after a divide and then
+undoes — which is precisely the insurance class — so the default NSAlert ran
+`runModal()` in a test host and waited forever. Three consequences, all
+landed: the pin answers the confirm (a ruled change, named below); the
+doc comment now says a headless caller in the class MUST pass `confirm:`;
+and **the lesson's PROSE was corrected** — it said the app "quietly keeps a
+savepoint" and told her to press ⌥⌘Z and look in history, which is no longer
+what she will see. It now says the app ASKS FIRST, that saying yes keeps the
+savepoint anyway, and that every other structural undo stays silent. *(This
+adds one more stale lesson to the standing field-guide re-seed obligation —
+still one "Restore Tutorial" run.)*
+
+#### Item 3 — the idle-voice-switch render restore (panes memo §6 item 5)
+
+One call — `context.coordinator.restoreRenderTier()` — on the font/gap
+re-attribution branch, plus the small internal method it needs (the render
+half of the A47c occasion, without the geometry half, coalesced by the same
+latch). That branch IS the memo's edge 3: a full-range `addAttributes` with
+no user event behind it, which is exactly the write A47c traced as stranding
+a tail-scrolled pane's rendering surfaces, and the occasion heals cannot
+reach an idle card. Pinned at the A47c seam (`renderRestoresRun`) with a
+non-vacuity arm proving the re-attribution really ran.
+
+**One test-craft fact worth carrying:** the deferred restore is a
+`DispatchQueue.main.async` block, and in this test host such a block only
+drains when the main actor YIELDS — `RunLoop.main.run(until:)` alone left it
+pending and the pin read zero. The pin now pumps and yields (the
+`TakePaneMeasureTests` shape).
+
+#### Item 4 — A22: typewriter room, and the mechanism the pins REJECTED
+
+Her ruling: ~one viewport-page of scrollable allowance below the last line,
+ALWAYS ON, Write's full-document editor only, and a click in the room lands
+the caret at the end of the text. Shipped as
+`TypewriterScrollView` + `TypewriterClipView` in the editor's own stack, with
+the arithmetic pure (`TypewriterRoom.height(viewport:lineHeight:)` — a
+viewport LESS ONE LINE, so at maximum scroll her last line sits at the top
+rather than one pixel above it).
+
+**The mechanism was chosen by measurement, and the FIRST choice was wrong —
+this is the batch's most important record.** `contentInsets.bottom` was built
+first and measured beautifully: clip height exactly unchanged (400.0 →
+400.0), scroll range extended by exactly the room (2406.5 → 2700.5), and the
+vertical scroller reflecting the extra range (knobProportion 0.1425 →
+0.1290, which the alternative does not do). **It also broke clicking into her
+own text.** With the inset set, every point below the top ~17 pt of the
+viewport hit-tested to an AppKit backdrop view — at depths where her prose
+was VISIBLY DRAWN (measured both ways in the same run: `ink: true`, hit
+wrong). AppKit lays a backdrop over the inset region and the document keeps
+drawing through it, so the failure is invisible until you click. **13c 1C's
+dead-strip tripwire is what caught it** — the pin written to fire "if this
+class ever grows from a sliver into a band of page" fired at 483 pt. The
+shipped mechanism is an `NSClipView.constrainBoundsRect` allowance: same
+scroll range, no view added, hit testing untouched.
+
+**Recorded cost of the switch, for her walk:** the vertical scroller's knob
+does not cover the room (AppKit sizes it from the document rect), so the room
+is reached by ordinary scrolling — wheel, trackpad, keyboard — not by
+dragging the knob to the very bottom.
+
+**The click had to be built too, and a pin found that as well.** The room is
+covered by no view (NSClipView hit-tests transparently past its document), so
+a click there reached nothing and left the caret where it was. My first
+reading of the probe said otherwise — it had mistaken a pre-existing
+end-of-text selection for the click's work; resetting the selection first is
+what exposed it. `hitTest` now claims exactly the region below the document
+(never a scroller, never the document), and `mouseDown` answers with the text
+view's OWN `characterIndexForInsertion`, which for a point past every line IS
+the end — the same behaviour batch 1C measured for the phantom, which is what
+her "the room is space, not paper" asks for.
+
+**The room is ALLOWANCE, never content** — pinned: no stored byte, no export
+byte, no outbox row moves, and the ratified edge-trimming rules are
+byte-untouched (a whitespace-only tail still mints no block; the leading run
+still attaches as ordinary content — the room replaces the NEED to type them,
+it does not change what typing them does). It composes with the phantom heal
+for free: the heal re-frames the text view, and the room is measured from the
+VIEWPORT and simply sits below whatever height that leaves — `LongBlockLayout`
+never learns this exists, so the stop-and-propose door was not needed.
+
+**Honestly unpinned, stated:** AppKit's own delivery of a synthesized
+mouse-down could not be driven in this test host (`NSApp.sendEvent` and
+`window.sendEvent` both leave the caret untouched, with the hit test already
+answering correctly), so the click pin asserts the hit test AND invokes the
+handler the hit test selects. What is unpinned is AppKit's routing, not our
+code.
+
+#### Item 5 — A11: the blank line divides into the FIRST half
+
+Landed in `BoundarySnapping.seamTrimmedHalves`, which the trace confirmed is
+the ONE halving function every divide door consults (plain `divide`,
+`divideW`'s per-take cuts) — so the ceremony inherits it with no second
+implementation, and the stop-and-propose door was not needed. The rule is the
+standing k−1 ownership rule, applied to the seam run both trims drop:
+`"para1\n\npara2"` cut at the blank yields `("para1\n", "para2")`, the
+editor's single-`"\n"` separator re-creates the rest, and **her page does not
+change at all** — pinned at the surface (`aDivideAtABlankLineLeavesTheSurface
+ExactlyAsItWas`) and through `renderedText` (round-trips byte-identical).
+
+k = 1 (the ordinary paragraph cut) and a seam with no newline are
+byte-unchanged. An EMPTY first half gains nothing — an edge run has no
+preceding piece to own it (`bulkSegments`' own rule), so the ops layer's
+empty-half refusal keeps refusing exactly what it did.
+
+**Composes with the differential editor path unchanged:** the first half is
+still a strict PREFIX of the old text, which is what `StructuralSeamEdit`'s
+retained-byte guard requires; a divide at a blank line now rewrites the
+surface to the same bytes it already had (and re-brackets the attributes),
+which is the point.
+
+**The sibling class found and deliberately NOT widened, for the
+orchestrator/her walk:** `extract` drops the same blank. Its `.suffix` case
+trims the head, so extracting a trailing paragraph after a blank line leaves
+`"para1"` where the same ownership rule would say `"para1\n"`; the `.prefix`
+case is subtler still (the newline would have to ride on the MINTED block,
+since that is the preceding piece). Her ruling names divide, she reported
+divide, and extract's shipped semantics are pinned in several places — so it
+is recorded here rather than changed under cover of an A11 build.
+
+##### Pins — every change named
+
+| Pin | Change | Why |
+|---|---|---|
+| `seamTrimmingDropsTheSeparatorFromBothHalves` | **rewritten + renamed** → `seamTrimmingGivesTheBlankLineToTheFirstHalf`; gains k=1 and k=3 arms | the ruled flip (A11) |
+| `theSeamRunIsOwnedTheSameFromEitherSideOfTheCut` | **NEW** | a cut before / inside / after the newline run describes ONE seam and must own it identically; mixed whitespace normalizes |
+| `aCutInsideEdgeWhitespaceLeavesAnEmptyHalf` | gains a leading-run arm | A11's cannot-widen edge: an empty first half gains no newline |
+| `divideExactRows` · `divideFeedsChurn` | **updated** (first half `"Para one.\n"`, churn 11 → 10) | the ruled flip, at the op |
+| `aDivideAtABlankLineKeepsTheBlankAndRoundTrips` · `aDivideAtAPlainNewlineIsUnchangedByTheBlankLineRule` · `theCeremonysPerTakeCutsInheritTheBlankLineRule` | **NEW (3)** | her report; the unchanged ordinary case; the ONE-brain claim as a test |
+| `aDivideAtABlankLineLeavesTheSurfaceExactlyAsItWas` | **NEW** (Mac) | her report at the surface where she made it |
+| `withNoDesignatedBookTheBodyStillLandsAndTheRoundSaysWhy` | **rewritten + renamed** → `withNoDesignatedBookTheLandingCreatesAndPinsTheJournalBook` | #37 OVERTURNED; the pin asserted the superseded PROVISIONAL |
+| `aDanglingDesignationLandsAndSaysWhy` | **rewritten + renamed** → `aDanglingDesignationGetsAFreshJournalBook` | same ruling; a dangling designation reads as none |
+| `aSecondLandingJoinsTheBookTheFirstOneCreated` · `creationNeverReplacesABookSheDesignated` | **NEW (2)** | the ensure is once, not per landing; the cannot-widen edge |
+| `shelvingCreatesDesignatesAndPinsTheJournalBookOnFirstUse` · `shelvingEnsuresOnceNoMatterHowManyDoorsCallIt` · `aDecidedPairIsLeftAloneAndTheCreationNeverSecondGuessesHer` · `shelvingStillNeverThrows` | **NEW (4, core op level)** | the ruling at the op the four doors share |
+| `theCaptureMintIsNeverBlockedByShelving` (mobile) | **updated second half** | ruled flip: the phone's capture now lands IN the Journal book; the never-blocked half is untouched |
+| `theWarningFiresExactlyOnTheInsuranceClass` · `everyOtherStructuralUndoIsSilent` · `aCompoundWarnsForEveryLegItWouldRestore` · `theWarningNeverChangesWhatTheUndoDoes` | **NEW (4)** | A12's "only", both halves, and that the question is never a gate |
+| `DestructiveUndoWarningTests` (NEW suite, 5) | new | the DOOR: it asks, obeys a cancel, never interrupts an ordinary undo, leaves redo alone, and its copy names what is set aside |
+| `structuralUndoInsuresTextTypedAfterTheAct` (tutorial) | **updated** — answers the confirm | ruled change: that act IS the insurance class, which is what the lesson teaches |
+| `aGapOrVoiceChangeRestoresTheRenderTierWithNoUserEvent` | **NEW** | the panes memo's edge 3 |
+| `TypewriterRoomTests` (NEW suite, 8) | new | the room's arithmetic, its allowance, its resize follow + change gate, the click, Write-only scope, zero stored bytes with the trimming rules intact, the jump, **and `theRoomNeverStealsAClickOverHerText`** |
+| `aClickInThePhantomLandsTheCaretAtTheDocumentEnd` (13c 1C) | **probe moved to the phantom's midpoint**; the helper's hit-test conversion corrected | construction, not behaviour: the fixed 20 pt probe landed inside AppKit's own non-routing sliver once the room changed where the scroll settles |
+| `theDeadStripAtTheBottomOfTheScrollViewStaysASliver` (13c 1C) | **re-scoped**: "dead" = routes to NEITHER the text view nor the room | the room is not dead space; the pin's job (a band of page must never stop routing) is preserved exactly, and it is what caught the inset mechanism |
+
+##### Guard-revert evidence (checksums taken first; `shasum -c` OK after every restore)
+
+| Revert | Applied | Observed RED |
+|---|---|---|
+| **A** — the k−1 rule removed (the exact pre-A11 body) | `seamTrimmedHalves` | **6 pins, 10 issues** across two suites — the blank vanishes from both halves at the Domain level, at the op, in the ceremony, in the round trip, and the churn arithmetic moves. Her report, reproduced |
+| **B** — the creation unwired (`return .refused(…)` before the write) | `shelveInDailyJournalBook` | **6 pins** in core (no book minted; the notes speak the retired wording) **plus 5 in the Mac's `JournalBooksTests`** — the second half is the proof that ⌘J genuinely delegates rather than keeping a copy |
+| **C** — `pendingUndoWarning` always nil (the pre-A12 world) | `UndoStack` | **2 core pins, 4 issues** + the door's own pin: the confirm is never asked and the undo runs straight through |
+| **D** — the render restore removed from the font/gap branch | `PaneSurface` | 1 pin: restores stay at 0 through a real re-attribution — the memo's edge 3, un-healed |
+| **E** — the room switched off (the pre-A22 world) | `TypewriterScrollView` | **3 pins, 7 issues** — no allowance, no resize response, the room point is not even inside the viewport, and the click's hit test finds nothing |
+| **F** — the room's `hitTest` claim removed (room on, nothing claims it) | `TypewriterScrollView` | exactly 1 pin: the room hit-tests to `NSVisualEffectView` — the discriminating revert for the half that had to be BUILT |
+| **G** — the room claims the whole viewport (a room that steals clicks over her text) | `isInRoom` | **3 pins across two suites** — `theRoomNeverStealsAClickOverHerText` (four depths), the phantom click, and the room pin's own over-text arm. This is the revert that proves the new guard discriminates the defect the inset mechanism actually had |
+
+##### Judgment calls
+
+1. **`noDailyBook` REMOVED rather than left unreachable.** A public case that
+   can never be returned is the drift class; removing it made the compiler
+   walk the three call sites for me.
+2. **The creation's double-checked write** (fast read, then a re-read inside
+   the writer) rather than a single write on every call: the ordinary path
+   stays read-only, and the mint-two-books race is closed by GRDB's writer
+   serialization rather than by a lock nobody would find.
+3. **`insuring:` is DATA with a default, not a required parameter.** `redo:`
+   is required because a missing redo is a silent hole in a feature; a
+   missing `insuring` is *correct* for every op that restores no buffer,
+   which is most of them. The three that do restore are the three that pass
+   it.
+4. **The A12 dialog names the count, not the takes.** "One take has been
+   edited since" — naming which takes would mean rendering block/take
+   identity in an alert, and the count is what decides her answer.
+5. **The tutorial lesson's prose was corrected** rather than left describing
+   a quiet undo she no longer has (batch 1's judgment call 6, applied to a
+   lesson this batch changed the behaviour of).
+6. **A22's mechanism switched after measurement**, and the rejected one is
+   written up in the code rather than deleted — a future session reading
+   "why not just use contentInsets?" gets the answer with numbers.
+7. **The room is a viewport LESS ONE LINE.** A literal viewport would let the
+   last line scroll one pixel out of reach; the line comes from the font's
+   own metrics, never `NSLayoutManager.defaultLineHeight` (TK1 — TEXTKIT2 §4).
+8. **Extract's blank-line sibling recorded, not built** (item 5's section).
+
+##### Deviations
+
+- **None from the brief's five items**, and neither stop-and-propose door was
+  needed: A22's mechanism touches neither the heal path nor `LongBlockLayout`,
+  and A11's mechanism IS the seam-trim function.
+- **Three pins in files this batch did not own were changed** — the two 13c 1C
+  characterization pins (construction + re-scoping, above) and one tutorial
+  pin (answers the confirm). Each is named with its reason; none weakens what
+  it was written to catch, and the 1C dead-strip pin in particular kept its
+  teeth (it is what caught the inset defect).
+- **No lookup subagent used** — the one external question (what
+  `contentInsets` does to hit testing) was answered by measuring the real
+  thing, twice.
+- **No visual loop** (P-7's screenshot half): the room is the one genuinely
+  visual item, and what a human eye would add — whether a viewport-less-a-line
+  of air below the last line FEELS right — is hers at the walk, not mine to
+  claim.
+
+##### PENDING / for the orchestrator
+
+- **Nothing unverified.** All three suites plus the tutorial spine were run by
+  me, run lines quoted above.
+- **For her walk (three one-liners):** (1) the room is reached by scrolling,
+  not by dragging the scroller knob to the bottom — a consequence of the
+  mechanism the pins forced; (2) A12's dialog wording ("One take has been
+  edited since… it is committed first, so you can bring it back from the
+  take's history"); (3) extract at a blank line still drops it — the A11
+  sibling, deliberately unbuilt.
+- **The field-guide re-seed obligation gains one more stale lesson** ("the two
+  undos" — still one "Restore Tutorial" run).
+- **For the end-of-phase Fable review, suggested foci:** (1) the A22
+  mechanism story — is `constrainBoundsRect` the right final answer, and is
+  the scroller-knob cost acceptable? (2) `insuring:`'s defaulted parameter —
+  right call, or should it be required like `redo:`? (3) the A12 modal's
+  reach: any OTHER headless caller of `structuralUndo` that could hang (I
+  found only the tutorial pin; the palette and menu doors are user-facing).
+  (4) whether extract should inherit A11 after all.
+
 ## THE 13D SITTING — 2026-07-28 (author-attended; the agenda below was walked in four question batches; rulings verbatim-faithful)
 
 Her opening: *"ok, you can give me the questions, my live app is closed,
