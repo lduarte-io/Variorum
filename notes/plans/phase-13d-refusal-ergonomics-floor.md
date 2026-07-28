@@ -1202,6 +1202,226 @@ await, drift-refresh at confirm, cancel-inert, I10-at-birth), the
 S4-22 snap rules byte-identical, checksums before reverts, the
 array-subscript pin rule, full suites with quoted run lines.
 
+#### BUILT — the batch record
+
+**Counts, by my own runs:** core `✔ Test run with 882 tests in 100 suites
+passed after 29.989 seconds` (**882/100** — the baseline exactly; **zero
+`Sources/` lines** in the diff, so unchanged by construction rather than by
+luck) · Mac `✔ Test run with 831 tests in 137 suites passed after 90.205
+seconds` (**808/136 → 831/137**: the new `TakesDivideTests` suite's 23
+pins). Tutorial spine green on its own run first: `✔ Test run with 49 tests
+in 7 suites` (all seven `Tutorial*Tests` types by TYPE name — the 2E trap).
+**Mobile untouched by construction, not by assumption:** every file in the
+diff is under `Variorum/` (Mac) or `VariorumTests/`; nothing in `Shared/`
+or `VariorumMobile/`. 14/4 stands unrun. Zero schema, zero
+`Sources/VariorumCore/Sync/` lines.
+
+**Her instance:** her real-store build was LIVE throughout (`pgrep` → PID
+54248, `/Applications/Variorum.app/…`). Never quit, never touched; no
+Release build, no `/Applications` refresh, no store touched.
+
+**One environment note, because it contradicts a standing lesson and 13c
+already recorded the exception once:** the lock flag read **1** for this
+whole batch (`CGSSessionScreenIsLocked` = 1), and the Mac runner worked
+normally anyway — probed with a control suite (`WCutPlacementTests`, `✔
+Test run with 9 tests in 1 suite`) before anything was trusted to it, per
+2C's precedent. Stage 4 lesson 9's prediction (the runner hangs
+pre-connection under a locked session) did not hold here either; the
+lesson now has its second recorded exception.
+
+**Two commits.** `ef63399` the extraction, `517c5c7` the feature.
+
+##### Commit 1 — the extraction (`ef63399`), and its parity proof
+
+`DivideWCeremony` + `DivideWCeremonyHost` (new file) take the W ceremony's
+state machine out of `EditorSurfaceController`; the controller conforms by
+forwarding, with `runDivideW` = the byte-unchanged `runStructural { ops
+.divideW }` (seam nil). `DivideWSheet` is parameterized on the ceremony
+object rather than `EditorViewModel`. **The bar the ruling set was met
+mechanically: ZERO test edits, and the full Mac suite green at 808/136 —
+the exact pre-extraction baseline.**
+
+One deviation from the proposal's letter, and it is a parity fix: the host
+protocol has **seven** members, not six. The busy-door guard used
+`model.refuseFeedback` (status **plus a beep**); routing it through
+`speakCeremonyStatus` would have silently dropped the beep, so
+`speakCeremonyRefusal` exists and each host uses its own refusal voice —
+Write beeps because Write's structural refusals beep, a board speaks
+because its refusals speak. A member for a behaviour is cheaper than a
+behaviour change nobody asked for.
+
+`EditorSurfaceController.legalCutPositions` survives as a static forward
+because `WCutPlacementTests` addresses it there — parity-by-forwards
+applies to statics too.
+
+##### Commit 2 — the feature (`517c5c7`)
+
+**The one planner brain, made checkable.** `TakesViewModel.divideWorld`
+builds a single-entry `BlockRangeIndex` over the take the caret sits in
+(`tailLength: nil` — a board has no open tail; `editable: !take.locked`)
+and hands it to the existing `StructuralGesturePlanner.plan(
+.divideAtCursor, …)`. Seal, gap, locked-take, the S4-22 word-rule snap and
+the `.divide`/`.divideW` fork all come back from that one call.
+
+**The store-read fork (ruled).** `prepareDivide` flushes, reads the block's
+live active fan from the STORE, and hands THAT arity to the planner.
+Revert B is the receipt (below).
+
+**The flight latch, and the freeze it exists for.** `structuralInFlight`
+is taken synchronously at the door, released explicitly per branch:
+the plain divide runs frozen; the ceremony branch **releases before
+opening the sheet**, because the sheet is window-modal and its confirm is
+its own flight — Write's arrangement exactly (opening the ceremony has
+never been a flight there either), and holding it across the sheet would
+drop her live ring for as long as she reads. `runDivideW` takes it again.
+
+**Rider 1 — THE TRIGGER, written where a future session will find it:**
+*if any composition ever mounts a Write editor and a takes/lenses board on
+ONE post with structural doors on both sides — `WriteTakesPanel` growing a
+divide door is the concrete case — this model-local latch MUST move to a
+post-keyed shared authority (the `AppSession.mergeJoinMemory` /
+`tutorialDoorInFlight` precedent), because two surfaces over one post can
+then interleave a flush and an op.* Today the only such coexistence is
+`WriteTakesPanel`, which has no divide door.
+
+**Rider 2 — naming honesty without API churn:** `PaneTextAuthority
+.isLive`'s `sealed:` parameter keeps its name; its doc comment now names
+BOTH suppression reasons, and `TakesViewModel.isPaneLive` composes `let
+frozen = projection.sealed || structuralInFlight` as a named local before
+asking. Three `TakesViewModel`-hosted call sites route through it
+(`TakesShared`, `TakesBoardView`, `WriteTakesPanel`).
+
+**(e), named as precedent-following rather than scope growth:** divide is
+native in **both** boards. Takes and Lenses share one `TakesViewModel`,
+and every native door since 13b — `insertBlockBelowFocused` (4D),
+`deleteFocusedBlock` (13c 1B), `applyCallout` (13c R2-2) — is a model
+method both handlers call. A Takes-only door would have been the first
+place the two boards disagree.
+
+**One door, three call sites:** `runStructuralDoor(_:)` forks divide →
+native, the other three → the carry, and the Takes handler, the Lenses
+handler and the bottom bar all call it, so they cannot drift into three
+answers.
+
+**Diff scope — 12 files + 1 new suite:** `DivideWCeremony.swift` (new) ·
+`DivideWSheet.swift` · `EditorSurfaceController.swift` ·
+`EditorViewModel.swift` · `EditorView.swift` · `TakesViewModel.swift` ·
+`TakesBoardView.swift` · `LensesBoardView.swift` · `TakesBottomBar.swift` ·
+`TakesShared.swift` · `WriteTakesPanel.swift` · `CapabilityRegistry.swift` ·
+`OpsRefusalCopy.swift` · `PaneTextAuthority.swift` (doc only) ·
+`TakesDivideTests.swift` (new) · `CommandRoutingTests.swift` ·
+`CapabilityRegistryTests.swift`.
+
+##### Pins — every change named
+
+| Pin | Change | Why |
+|---|---|---|
+| `TakesDivideTests` (NEW suite, 23) | new | the ruling: the parity pin, the store-read fork, both cases end to end, the seed generalization, the refusals, the latch's two jobs, the registry cells, and divide-only scope |
+| `theTakesWorldAndWritesWorldPlanAlike` | **NEW — the gate's binding addition** | every caret × both arities through Write's world and the board's: same verdict class AND same snapped cut, with a non-vacuity arm showing the domain really contains several classes |
+| `structuralActsFireAndDoFromTakesAndLenses` (13b) | **divide REMOVED from its loop; its native cell asserted in the same test** | a RULED FLIP (#41), not a bug fix — the table stays the one place a reader learns each verb's Takes cell |
+| `divideFromTakesParksTheIntentAndSwitchesToWrite` | **renamed + re-pointed** → `extractFromTakesParksTheIntentAndSwitchesToWrite` | the choreography pin survives; the retired narration goes |
+| `aParkedDivideIntentLandsAndDividesEndToEnd` | **renamed + re-pointed** → `aParkedExtractIntentLandsAndExtractsEndToEnd` (the parcel gains a `selectionLength`, since extract is a span gesture) | same |
+| `aRefusedModeSwitchClearsTheParkedIntentAndNothingEverRuns` | re-pointed, **both** its sample acts (the `moveToWriteAndRun` call and the hand-parked parcel) | same |
+| `theDetailLifecycleClearsStaleParkedIntents` | re-pointed, **both** its hand-parked parcels | same |
+| `aCompetingModeSwitchAbortsTheRoundAndClearsTheParkedIntent` | re-pointed | same |
+
+**Count correction, stated rather than buried:** the proposal said "six"
+`CommandRoutingTests` sites; the honest count is **seven occurrences across
+five tests**, all re-pointed, and `structural(.divide)` now appears zero
+times in that file (asserted at edit time).
+
+##### Guard-revert evidence (four source files checksummed first; `shasum -c` OK after every restore)
+
+| Revert | Applied | Observed RED |
+|---|---|---|
+| **A** — the door unwired: `case .divide` falls in with the other three and CARRIES (the exact pre-A9 world) | `runStructuralDoor` | **1 pin** — `theDivideDoorNeverParksAWriteIntent`: the block is not divided (1 slot where 2 is right). Only one, and honestly so: the other pins drive `divideFocused()` directly, so the DOOR-level pin is the one that discriminates the routing change |
+| **B** — the fork read from `projection.fans` instead of the store (the tempting shape) | `prepareDivide` | **exactly 1 pin** — `theForkIsReadFromTheStoreNotTheFrozenProjection`: no ceremony opened. The batch-2 revert-D signature exactly (the ordinary fanned pins stay green because they `reload()`). The block was NOT cut, because `ops.divide`'s own in-transaction guard threw `fannedBlock` — which is precisely why (d2)'s copy was owed |
+| **C** — the pane freeze removed (latch still guards a second divide) | `isPaneLive` | **1 pin** — `thePanesFreezeForTheFlight`: the pane stays live through the flight, which is the keystroke window that resurrects a divided half |
+| **D** — the ceremony seeded from the CHOSEN take (Write's old derivation) | the `.divideW` branch | **1 pin, 3 issues** — `theCeremonySeedsFromTheTakeTheCaretIsIn_notTheChosenOne`: wrong seed id, the caret's take not pre-marked, and its cut nil. The one generalization, discriminated |
+
+##### Three pins I got wrong before the code did — recorded, because the guard is what caught them
+
+The suite failed on first run with four issues, and **three were my
+expectations, not the build**:
+
+1. I asserted a caret of 0 REFUSES with "nothing to divide". It does not:
+   **snap-and-proceed** (the ratified 2026-07-06 contract, item 2) settles
+   0 onto the nearest INTERIOR word edge and divides near the start — and
+   that is *exactly* what the carry door produced, since
+   `moveToWriteAndRun` sets `offsetInBlock = carried?.location ?? 0` and
+   Write plans the same command at the same offset. So the parity I claimed
+   holds, but through the opposite behaviour; inventing a refusal to match
+   my pin would have been inventing product behaviour. The pin now asserts
+   the real thing and is renamed for it, and a separate pin reaches
+   `.nothingToDo` honestly (a one-word block has no interior boundary).
+2. The same pin then failed by ONE character: divide **seam-trims** (the
+   Phase 3 ratification), so the first half is not `text[..<cut]`. It now
+   compares through `BoundarySnapping.seamTrimmedHalves` — the op's own
+   halving function — rather than re-deriving the arithmetic.
+3. `extractMakeBlockAndMergeStillCarryToWrite` read "no carry" for the
+   wrong reason: with no registered detail, `requestMode` refuses and
+   CLEARS the parking (the round-1 MAJOR's half-a rule). It now registers
+   one, so the pin tests the carry rather than the refusal path.
+
+##### Judgment calls
+
+1. **A seventh host member for the beep** (above) — parity of the refusal
+   voice over a tidy member count.
+2. **The latch releases before the sheet opens**, and `runDivideW` takes it
+   again. Write's arrangement; the alternative drops the live ring for as
+   long as she reads the sheet.
+3. **`structuralInFlight` is internal-settable**, with the reason in its
+   doc comment: the freeze is a rule about what a pane may do DURING a
+   flight, and a pin that cannot stage a flight cannot check it without
+   racing it. The `adopt` / `divideWorld` precedent (internal so tests
+   drive state deterministically). In production only two methods write it.
+4. **`divideWorld` is internal** for the same reason — constraint 1's
+   one-brain claim is enforced by test or it is a comment (the ruling's
+   own words).
+5. **The plain divide speaks** ("Block divided — ⌥⌘Z undoes it."),
+   following batch 2's seam-merge line and A7's carve rather than Write's
+   silence: a structural act just landed from a board door and ⌘Z cannot
+   take it back. If she finds it noisy it is one line — flagged for her
+   walk beside batch 2's judgment call 3.
+6. **No caret ⇒ divide at the block start**, kept rather than "fixed"
+   (finding 1 above). It is Write's behaviour, and the friction it may
+   cause is a product question, not a bug — flagged for her walk.
+7. **`fannedBlock` copy in BOTH homes** (`OpsRefusalCopy` and the editor's
+   own switch): the ruling named both, and revert B proved the refusal is
+   genuinely reachable rather than theoretical.
+
+##### Deviations
+
+- **None from the ruling.** Every point built as ruled; the one departure
+  from the PROPOSAL's letter (seven host members, not six) is judgment
+  call 1 and is a parity preservation.
+- **No lookup subagent used** — nothing external was in question.
+- **No visual loop** (P-7's screenshot half): the new pixel is an existing
+  sheet mounted on a board. What a human eye would add is whether the
+  ceremony sheet reads well over the takes board rather than over the Write
+  editor — routed to the standing **Design & UI review** row rather than
+  claimed.
+
+##### PENDING / for the orchestrator
+
+- **Nothing unverified.** Both full suites were run by me, run lines quoted
+  above.
+- **A layering consequence worth a second opinion, recorded not acted on:**
+  the Takes feature now reaches into the Editor feature for
+  `StructuralGesturePlanner`, `BlockRangeIndex` and `RefusalCopy`. That is
+  the direct consequence of the ruled one-brain constraint (a sibling
+  planner was the alternative and is worse), but the tidy end state is the
+  `OpsRefusalCopy` precedent: the structural-gesture vocabulary is shared
+  vocabulary and belongs in the shared layer. Deliberately NOT moved in a
+  divide-only batch.
+- **For the end-of-phase Fable review, suggested foci:** (1) the latch's
+  release-before-the-sheet seam — is the window between release and
+  `ceremony.open`'s own flush genuinely harmless? (2) judgment calls 5 and
+  6 (the status line; divide-at-block-start with no caret) — right calls or
+  friction? (3) the layering note above. (4) whether `WriteTakesPanel`
+  should be the trigger's first customer — it now composes `isPaneLive`,
+  so it would inherit the freeze for free if its model ever ran a flight.
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →
