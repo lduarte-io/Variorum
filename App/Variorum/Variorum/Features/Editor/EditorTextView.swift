@@ -42,12 +42,23 @@ final class EditorTextView: NSTextView {
         return body()
     }
 
-    /// SHIFT-Return exactly: Return (or keypad Enter) with shift and
-    /// NOTHING else. Control-Return keeps its own `insertLineBreak:`
-    /// binding untouched, ⌥⏎ keeps `insertNewlineIgnoringFieldEditor:`,
-    /// and ⌘⇧⏎ is A14's menu key — none of them are this gesture.
+    /// SHIFT-Return exactly: Return (or keypad Enter) with shift and no
+    /// other MEANING-BEARING modifier. Control-Return keeps its own
+    /// `insertLineBreak:` binding untouched, ⌥⏎ keeps
+    /// `insertNewlineIgnoringFieldEditor:`, and ⌘⇧⏎ is A14's menu key —
+    /// none of them are this gesture.
+    ///
+    /// The mask is the four modifiers that DISTINGUISH gestures, not the
+    /// whole device-independent word (13d cold review, F-2): AppKit sets
+    /// `.capsLock` on every key event while caps lock is LATCHED and
+    /// `.numericPad`/`.function` on every keypad key — state and hardware
+    /// flags, not meaning. Testing for exactly-shift across the whole word
+    /// made ⇧⏎ silently not-the-gesture with caps lock on (the tail opened
+    /// as if plain ⏎ — a ruled gesture reading as a dead key), and made
+    /// the keypad-Enter arm below unreachable from real hardware.
     nonisolated static func isSoftNewlineKey(_ event: NSEvent) -> Bool {
-        guard event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .shift
+        let meaningful: NSEvent.ModifierFlags = [.shift, .command, .control, .option]
+        guard event.modifierFlags.intersection(meaningful) == .shift
         else { return false }
         let characters = event.charactersIgnoringModifiers ?? ""
         return characters == "\r" || characters == "\u{3}"
@@ -313,9 +324,12 @@ final class EditorTextView: NSTextView {
 /// the trimming rules STAY exactly as ratified, and the room is the real
 /// answer — ALWAYS ON, no setting.
 ///
-/// **The room is ALLOWANCE, never content.** It is `contentInsets.bottom` on
-/// the scroll view: zero bytes stored, zero text written, `renderedText`,
-/// export and the bridge byte-untouched, and the document itself unchanged —
+/// **The room is ALLOWANCE, never content.** It is a scroll allowance the
+/// clip view grants past the document's end (`TypewriterClipView
+/// .constrainBoundsRect` — NOT `contentInsets`, which was measured and
+/// rejected; the story below): zero bytes stored, zero text written,
+/// `renderedText`, export and the bridge byte-untouched, and the document
+/// itself unchanged —
 /// which is also why it composes with the phantom heal for free (13c 1E lays
 /// out one long block at a time and re-frames the text view; the room is
 /// measured from the VIEWPORT and simply sits below whatever height that

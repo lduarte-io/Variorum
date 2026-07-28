@@ -186,7 +186,9 @@ private struct AppearancePane: View {
             do {
                 try await session.runner.run { try $0.setDefaultSegmentation(segmentation) }
             } catch {
-                segmentationNote = String(describing: error)
+                // Readable words, never the raw enum dump (the R1-3 class —
+                // 13d cold review, F-9).
+                segmentationNote = OpsRefusalCopy.message(for: error)
             }
         }
     }

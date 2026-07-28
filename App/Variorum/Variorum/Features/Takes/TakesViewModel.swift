@@ -1249,8 +1249,12 @@ final class TakesViewModel {
             return nil
         }
         let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
+        // The seed must still BE in the live fan (13d cold review, F-3):
+        // when the caret's take has vanished (archived/deleted by sync or a
+        // sibling surface mid-race), refuse-and-speak exactly as Write's
+        // door does — a fallback to some other live take silently divided a
+        // take she was never in, at a caret offset from the one that died.
         guard let seedTake = liveActive.first(where: { $0.id == seed.variantID })
-                ?? liveActive.first
         else {
             speak("This block's takes changed — try the divide again.")
             return nil

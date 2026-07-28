@@ -660,13 +660,17 @@ final class EditorViewModel {
         // B2: inside an OPEN tail there is no block to stay in yet, so the
         // tail becomes one first — the ratified idle-mint, fired ~2 s early
         // (her ruling accepts the keystroke-visible boundary) — and the
-        // newline then lands in the block that just became. A tail with
-        // nothing mintable (the never-mints whitespace class) takes the
-        // ordinary path below, where the leading-run attachment already
-        // makes a tail newline the preceding block's content.
+        // newline then lands in the block that just became, AT THE
+        // KEYSTROKE'S OWN OFFSET (13d cold review F-1: the mint changes no
+        // surface byte, so the caret's position survives it — a mid-tail
+        // ⇧⏎ lands its newline at the caret, never at the document end).
+        // A tail with nothing mintable (the never-mints whitespace class)
+        // takes the ordinary path below, where the leading-run attachment
+        // already makes a tail newline the preceding block's content.
         if softNewline, case .tail = verdict, mintableTail {
+            let location = range.location
             scheduleCrossBlockCompound { [weak self] in
-                await self?.runSoftNewlineInTail()
+                await self?.runSoftNewlineInTail(at: location)
             }
             return false
         }
@@ -854,34 +858,44 @@ final class EditorViewModel {
     /// rides free and stays pinned where it always was: the trailing
     /// partial paragraph is included, a whitespace-only tail never mints,
     /// the in-flight/marked-text skips still apply, and resumed typing
-    /// extends the result. Then the newline is re-played at the document
-    /// end through the ORDINARY editing path with the soft flag raised, so
-    /// it reaches exactly the verdict the keystroke would have reached had
-    /// the tail not been in the way.
+    /// extends the result. Then the newline is re-played AT THE
+    /// KEYSTROKE'S OWN OFFSET through the ORDINARY editing path with the
+    /// soft flag raised, so it reaches exactly the verdict the keystroke
+    /// would have reached had the tail not been in the way — the mint
+    /// converts the tail to a block without moving a surface byte, so the
+    /// caret's offset survives it (13d cold review F-1: re-playing at the
+    /// document END instead displaced a mid-tail ⇧⏎'s newline — and her
+    /// caret — past everything she had typed after it).
     ///
-    /// Where the mint closed the tail that verdict is `.block(last)` and
-    /// the newline is block content immediately. Where the mint kept a
-    /// newline run open (a tail that already ended in blank lines — the
-    /// k−1 rule), the re-play is an ordinary `.tail` edit and the standing
-    /// leading-run attachment folds it into the preceding block instead;
-    /// both roads end with the newline as block content, which is the
-    /// contract.
+    /// Where the mint closed the tail that verdict is `.block(…)` and the
+    /// newline is block content immediately, at the caret. Where the mint
+    /// kept a newline run open (a tail that already ended in blank lines —
+    /// the k−1 rule) and the offset sits in that run, the re-play is an
+    /// ordinary `.tail` edit and the standing leading-run attachment folds
+    /// it into the preceding block instead; both roads end with the
+    /// newline as block content, which is the contract.
     ///
-    /// The one degradation, recorded rather than papered over: if
-    /// `idleMintTail` SKIPS this tick (a structural gesture in flight, or
-    /// an IME composition open — it re-arms the clock instead), the tail
-    /// is still open when the newline is re-played, so ⇧⏎ behaves as ⏎
-    /// there. Rare, and the honest alternative would be inventing a
-    /// blocking wait on someone else's flight.
-    private func runSoftNewlineInTail() async {
+    /// The one degradation, recorded rather than papered over (wording
+    /// corrected at the 13d cold review, F-7): if `idleMintTail` SKIPS
+    /// this tick (a structural gesture in flight, or an IME composition
+    /// open — it re-arms the clock instead), the re-play finds the tail
+    /// still open and mintable and RE-ENTERS the B2 fork, so the newline
+    /// is re-scheduled — a bounded retry chained through the cross-block
+    /// compound queue that lands the moment the mint stops skipping,
+    /// never a plain-⏎ tail insertion. Rare, self-terminating, and the
+    /// honest alternative would be inventing a blocking wait on someone
+    /// else's flight.
+    private func runSoftNewlineInTail(at location: Int) async {
         guard mintableTail else { return }
         idleMintTail()
         await awaitMintSettle()
         guard let textView else { return }
-        let end = index.documentLength
-        textView.setSelectedRange(NSRange(location: end, length: 0))
+        // Clamped as a belt only — the mint moves no surface byte, so the
+        // captured offset is still the same text position it named.
+        let target = min(location, index.documentLength)
+        textView.setSelectedRange(NSRange(location: target, length: 0))
         textView.withSoftNewline {
-            textView.insertText("\n", replacementRange: NSRange(location: end, length: 0))
+            textView.insertText("\n", replacementRange: NSRange(location: target, length: 0))
         }
     }
 

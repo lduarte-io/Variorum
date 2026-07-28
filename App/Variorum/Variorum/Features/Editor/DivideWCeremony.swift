@@ -29,9 +29,11 @@ import Observation
 import VariorumCore
 
 /// What the ceremony needs from whatever surface mounts it. Deliberately
-/// six members: the store, the surface's pending-text contract, the
-/// one-flight door, the act, and the two voices. A host that can answer
-/// these can mount the ceremony; nothing else about Write is required.
+/// seven members: the store, the surface's pending-text contract, the
+/// one-flight door, the act, and the three voices (status, refusal,
+/// error — refusal is its own member so the busy-door beep survived the
+/// extraction; batch 3's judgment call 1). A host that can answer these
+/// can mount the ceremony; nothing else about Write is required.
 @MainActor
 protocol DivideWCeremonyHost: AnyObject {
     var ceremonyDatabase: AppDatabase { get }

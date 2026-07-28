@@ -3020,3 +3020,71 @@ failing-runner seam; clarity class).
   cost-∝-corpus path anywhere touched (the A12 read is ≤3 variant
   fetches; A16's observation is bounded; the room is O(1); the board
   divide reads one fan).
+
+### The round-1 fix pass (same reviewer, same session — the 13c K6 precedent)
+
+**Fixed: F-1, F-2, F-3 (each with a red-on-old pin verified by behavioral
+revert), F-4, F-6, F-7, F-9 (doc/copy, traced + justified, no pin owed).
+Recorded, deliberately not fixed: F-5 (the QUESTIONS ledger walk is the
+closeout's own duty — fixing it here would pre-empt the closeout's
+disposition wording) and F-8 (SPECULATIVE by its own label — no failing
+pin could exist for a state I10 forbids).**
+
+**Diff scope — 6 files:** `EditorViewModel.swift` (F-1: the B2 fork
+captures `range.location`; `runSoftNewlineInTail(at:)` re-plays at it,
+clamped as a belt — the mint moves no surface byte, so the offset survives;
+F-7's degradation wording corrected in the same doc block) ·
+`EditorTextView.swift` (F-2: `isSoftNewlineKey` masks to the four
+meaning-bearing modifiers; F-4: the room header's lead paragraph now names
+the shipped `constrainBoundsRect` allowance and points at the
+rejected-mechanism story instead of asserting `contentInsets`) ·
+`TakesViewModel.swift` (F-3: the `?? liveActive.first` fallback dropped —
+a vanished seed joins the existing takes-changed refusal, Write's posture)
+· `DivideWCeremony.swift` (F-6: seven members, three voices) ·
+`AppSettingsView.swift` (F-9: the catch routes through
+`OpsRefusalCopy.message(for:)`) · `ReturnKeyTraceTests.swift` +
+`TakesDivideTests.swift` (the three pins).
+
+**Pins added (3):**
+
+| Pin | Suite | What it discriminates |
+|---|---|---|
+| `shiftReturnMidTailLandsTheNewlineAtTheCaretNotTheEnd` | `SoftNewlineTests` | F-1 — the ruling's equality bar at a MID-tail caret: `["alpha", "beta\n more"]` with the caret at `caret+1`, vs the pre-fix `["alpha", "beta more\n"]` with the caret at the end |
+| `capsLockAndKeypadFlagsDoNotDefeatTheSoftGesture` | `SoftNewlineTests` | F-2 — ⇧⏎ under a latched caps lock, and shift+keypad-Enter as real hardware reports it (`.numericPad`/`.function` on the event); the ⌘/⌥ exclusions asserted unchanged in the same pin |
+| `aVanishedSeedTakeRefusesInsteadOfDividingAnotherTake` | `TakesDivideTests` | F-3 — the caret's take archived behind the frozen projection: refuse-and-speak vs the pre-fix silent divide of the surviving take |
+
+No pin subscripts an array whose length its red state changes (the batch-2
+adopted rule): every store comparison is whole-array equality or
+`first`-shaped.
+
+**Guard-revert evidence (three source files checksummed BEFORE the revert
+pass; `shasum -c` OK — all three byte-identical — after every restore):**
+
+| Revert | Applied | Observed RED |
+|---|---|---|
+| **R1** — `runSoftNewlineInTail` re-targets `index.documentLength` (the exact pre-fix body) | `EditorViewModel` | **exactly 1 pin, 2 issues** — store `["alpha","beta more\n"]`, selection 16 where 11 (caret+1) is right; the seven other A15 pins GREEN (they drive end-of-tail carets, which is why the hole shipped unpinned) |
+| **R2** — the whole-word `.deviceIndependentFlagsMask` test restored | `EditorTextView` | **exactly 1 pin, 2 issues** — the caps-lock event (flags 0x30000) and the keypad event (flags 0xa20000) both rejected; every other exclusion pin green |
+| **R3** — `?? liveActive.first` restored | `TakesViewModel` | **exactly 1 pin, 2 issues** — no takes-changed message, and the store reads `["Alpha beta","gamma delta."]`: the surviving take CUT, silently — F-3's mechanism reproduced verbatim |
+
+**Verification (after all fixes + restores):** tutorial spine
+`✔ Test run with 49 tests in 7 suites passed after 11.949 seconds` (all
+Tutorial* TYPES by name — and the 2E trap bit once first: a 7-name guess
+matched only 4 suites and the run line exposed it at 28/4, exactly the
+trap's recorded shape; re-run with the real type list) · core
+`✔ Test run with 901 tests in 101 suites passed after 29.261 seconds`
+(**901/101** — baseline exactly; zero `Sources/` lines in the fix pass) ·
+Mac `✔ Test run with 876 tests in 145 suites passed after 93.402 seconds`
+(**873/145 → 876/145**: the three pins, no new suite) · mobile
+`✔ Test run with 14 tests in 4 suites passed after 0.244 seconds`
+(**14/4** — untouched by the fixes; run anyway). Her instance: no Variorum
+process was live at any point in the review or fix pass (`pgrep` empty at
+open); no Release build, no `/Applications` refresh, no store touched,
+zero `Sources/VariorumCore/Sync/` lines.
+
+**Left for the closeout, restated:** F-5 (walk the QUESTIONS ledger — #48,
+#38, #42, #31, #33, #36, the #43–#47 sub-calls, #46's five + A31's two,
+and the two memos all ruled at the 2026-07-28 sitting but still marked
+OPEN); F-8 stands recorded; the B5-f2 residual (a future buffer-restoring
+op that forgets `insuring:` ships a silent destructive undo — the coupling
+to watch is "an inverse that passes `restoringTexts` non-empty should have
+passed `insuring`").

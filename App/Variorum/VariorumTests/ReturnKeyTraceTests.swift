@@ -336,6 +336,38 @@ struct SoftNewlineTests {
         #expect(EditorTextView.isSoftNewlineKey(soft), "non-vacuity: shift alone IS the gesture")
     }
 
+    /// 13d cold review F-2 (red-on-old): STATE and HARDWARE flags are not
+    /// meaning. AppKit sets `.capsLock` on every key event while caps lock
+    /// is LATCHED, and `.numericPad`/`.function` on every keypad key — so
+    /// an exactly-shift test over the whole device-independent word made
+    /// ⇧⏎ silently not-the-gesture with caps lock on (the tail opened as
+    /// if plain ⏎, a dead key with nothing spoken) and made the keypad-
+    /// Enter arm unreachable from real hardware (judgment call 4's claim
+    /// was true only of the tests' synthesized events). The mask is now
+    /// the four meaning-bearing modifiers.
+    @Test func capsLockAndKeypadFlagsDoNotDefeatTheSoftGesture() throws {
+        func event(
+            _ flags: NSEvent.ModifierFlags, _ chars: String, keyCode: UInt16
+        ) -> NSEvent {
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: flags,
+                timestamp: 0, windowNumber: 0, context: nil,
+                characters: chars, charactersIgnoringModifiers: chars,
+                isARepeat: false, keyCode: keyCode)!
+        }
+        // ⇧⏎ while caps lock is latched.
+        #expect(EditorTextView.isSoftNewlineKey(
+            event([.shift, .capsLock], "\r", keyCode: 36)))
+        // Shift + keypad Enter, as real hardware reports it.
+        #expect(EditorTextView.isSoftNewlineKey(
+            event([.shift, .numericPad, .function], "\u{3}", keyCode: 76)))
+        // …while the meaning-bearing exclusions stand exactly as before.
+        #expect(!EditorTextView.isSoftNewlineKey(
+            event([.shift, .command], "\r", keyCode: 36)))
+        #expect(!EditorTextView.isSoftNewlineKey(
+            event([.shift, .option, .capsLock], "\r", keyCode: 36)))
+    }
+
     // MARK: B2 — inside an open tail
 
     /// ⇧⏎ in an open tail mints the tail (the ratified idle-mint, ~2 s
@@ -390,6 +422,41 @@ struct SoftNewlineTests {
         #expect(viaSoftReturn == viaIdleMint, "the ruling's equality bar")
         #expect(viaSoftReturn == ["alpha", "beta\ngamma"],
                 "the tail became a block and the soft newline is inside it")
+    }
+
+    /// 13d cold review F-1 (red-on-old): ⇧⏎ with the caret MID-tail lands
+    /// the newline AT THE CARET — never at the document end. The tail is
+    /// the standing state while she composes the trailing paragraph, so
+    /// "type a sentence, arrow back, ⇧⏎" is ordinary fresh writing; the
+    /// pre-fix code discarded the keystroke's offset and re-played the
+    /// newline at `documentLength`, displacing it — and her caret — past
+    /// everything she had typed after it. The bar is the ruling's own
+    /// equality: idle-mint-then-⇧⏎ at this caret is a mid-BLOCK content
+    /// newline at this caret.
+    @Test func shiftReturnMidTailLandsTheNewlineAtTheCaretNotTheEnd() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            plainReturn(h, window: hosted.window)   // opens the tail
+            h.textView.insertText("beta more", replacementRange: h.textView.selectedRange())
+            #expect(h.model.hasOpenTail)
+
+            // Arrow back: the caret sits after "beta", MID-tail.
+            let caret = (h.documentText as NSString).length - (" more" as NSString).length
+            h.textView.setSelectedRange(NSRange(location: caret, length: 0))
+            softReturn(h, window: hosted.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta\n more"],
+                    "the newline lands at the caret, not the document end")
+            #expect(h.textView.selectedRange().location == caret + 1,
+                    "…and the caret stays where she was typing")
+            #expect(!h.model.hasOpenTail, "the tail minted — B2's contract holds mid-tail too")
+        }
     }
 
     /// A whitespace-only tail is the ratified never-mints class, so ⇧⏎

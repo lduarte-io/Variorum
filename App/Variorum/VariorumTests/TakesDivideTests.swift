@@ -520,6 +520,37 @@ struct TakesDivideTests {
         }
     }
 
+    /// 13d cold review F-3 (red-on-old): when the take the caret was in
+    /// has VANISHED from the live fan (archived by sync or a sibling
+    /// surface, behind the frozen projection), the door refuses and
+    /// speaks — Write's posture exactly (`DivideWCeremony.open`'s
+    /// takes-changed line) — rather than silently dividing a take she was
+    /// never in at a caret offset from the one that died. The pre-fix
+    /// fallback (`?? liveActive.first`) did exactly that.
+    @Test func aVanishedSeedTakeRefusesInsteadOfDividingAnotherTake() async throws {
+        try await withBoard(seedBlocks: ["Alpha beta gamma delta."]) { board in
+            let slot = try #require(try board.slots().first)
+            let chosen = try #require(slot.variantID)
+            board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
+
+            // A second take exists, and the CARET's take is then archived —
+            // both behind the frozen projection (no reload; the staleness
+            // is the point).
+            _ = try board.session.operations.branchVariant(slot.blockID, from: chosen)
+            try board.session.operations.archiveVariant(chosen)
+
+            await board.model.divideFocused()
+
+            #expect(board.model.statusMessage?.contains("takes changed") == true,
+                    "the vanished seed refuses and speaks — Write's posture")
+            #expect(board.model.divideWCeremony == nil, "no ceremony over a guessed seed")
+            try board.reload()
+            let texts = try board.slots().compactMap(\.text)
+            #expect(texts == ["Alpha beta gamma delta."],
+                    "nothing was cut — the surviving take is untouched")
+        }
+    }
+
     @Test func withNoBlockInReachItSaysWhereToClick() async throws {
         try await withBoard(seedBlocks: ["Alpha beta gamma.", "Delta epsilon zeta."]) { board in
             #expect(board.model.commandTargetSlot == nil, "two blocks, nothing focused")
