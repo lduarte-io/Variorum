@@ -1135,6 +1135,73 @@ board sheet mount · (c) the model-local latch + pane freeze (vs the
 session-shared latch) · (d1) store-read fork vs plan-time parity · (d2)
 the `fannedBlock` copy · (e) Lenses parity.**
 
+#### THE ARCHITECT'S RULING on the Batch 3 proposal (2026-07-27 night — the gate closes; BUILD)
+
+**The gate answer is accepted** — one build; the plain-divide half
+genuinely needed (c), and shipping a door that acts sometimes is the
+D3 class, correctly refused.
+
+- **(a) APPROVED as proposed.** The extraction + six-member host
+  protocol, `EditorSurfaceController` conforming by byte-unchanged
+  forwards, parity-by-forwards on every moved name — the bar is the
+  skill's 3C bar: every existing pin compiles and passes UNMODIFIED,
+  and zero test edits is the parity proof. The extraction may be its
+  own commit before the feature commit.
+- **(b) APPROVED as proposed.** The sheet re-parameterized to the
+  ceremony object; Write's mount unchanged; both boards mount
+  `.sheet(item:)`. In place, no mode switch — that is A9.
+- **(c) APPROVED — the MODEL-LOCAL latch, not the session-shared
+  one.** The traced duplication hazard is real and the pane freeze
+  rides the EXISTING liveness mechanism, which is what P-3 demands.
+  The session-shared alternative buys nothing today and would touch
+  the most heavily pinned structural path in a divide-only batch —
+  correctly not taken. **Two riders:** (1) RECORD THE TRIGGER in the
+  batch record: if any composition ever mounts Write and a
+  takes/lenses board on ONE post with structural doors on both sides
+  (`WriteTakesPanel` growing a divide door is the concrete case), the
+  latch MUST move to a post-keyed shared authority — write that
+  sentence down so the future session finds it beside the code it
+  indicts. (2) NAMING HONESTY without API churn: do not rename the
+  authority's `sealed:` parameter (churn on a heavily-pinned
+  surface); instead update `isLive`'s doc comment to name BOTH
+  suppression reasons (a sealed post has no live pane; a pane whose
+  post is mid-structural-flight is frozen the same way), and pass a
+  named local (`let frozen = sealed || structuralInFlight`) at the
+  call sites so no reader mistakes the disjunction for a seal.
+- **(d) APPROVED as proposed** — the `deleteFocusedBlock` apply shape,
+  the ordinary projection refresh (the flush-leaves-it-clean reasoning
+  is right), Write's caret rule mirrored through the existing
+  `parkFocus(onVariant:)`, undo and redo untouched on the ops
+  registration.
+- **(d1) RULED: the STORE-READ fork.** Batch 2's precedent is the
+  precedent precisely because revert D proved the projection reading
+  eats takes; a plan-time arity stays an enablement hint, never an
+  authorization. The planner remains the one brain, handed
+  `fanArities` from the fresh read.
+- **(d2) APPROVED** — `case .fannedBlock` in `OpsRefusalCopy` + the
+  editor's switch (the R1-3 every-refusal-readable class).
+- **(e) RULED: NATIVE IN BOTH.** The shared-model precedent (every
+  native door since 13b lands in both handlers) makes the per-mode
+  split the invention here, not the parity — a Takes-only door would
+  be the first place the two boards disagree, and nobody ruled that
+  asymmetry. Name it in the batch record as precedent-following, not
+  scope growth.
+- **The synthetic single-entry World: APPROVED, with ONE ADDITION
+  (binding).** The one-brain claim gets a PARITY PIN, not an
+  assertion: identical block text + caret + fan arity driven through
+  the Takes door's plan and Write's door's plan must produce the same
+  verdict class AND the same snapped cut offset. Constraint 1 is
+  enforced by test or it is a comment.
+- **The six `CommandRoutingTests` re-points to `.extract`: APPROVED**
+  — the machinery pin survives, the retired narration goes; each named
+  individually in the batch record.
+
+**Proceed to build.** Everything else in the brief binds as written —
+the ceremony disciplines at the new mount (one-flight before any
+await, drift-refresh at confirm, cancel-inert, I10-at-birth), the
+S4-22 snap rules byte-identical, checksums before reverts, the
+array-subscript pin rule, full suites with quoted run lines.
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →
