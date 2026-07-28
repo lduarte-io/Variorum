@@ -53,6 +53,18 @@ extension Queries {
         return settings
     }
 
+    /// The DOCUMENT-GLOBAL segmentation default (13d batch 4 — A16's read
+    /// half; the setter is `Operations.setDefaultSegmentation`). Absent or
+    /// unrecognized reads as `.paragraph` — the schema's own seed and the
+    /// same fallback `containerHeader` has applied since Phase 7, stated
+    /// once here so the settings face and the editor can never disagree
+    /// about what "unset" means.
+    public static func defaultSegmentation(_ db: Database) throws -> Segmentation {
+        try String
+            .fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'default_segmentation'")
+            .flatMap(Segmentation.init(rawValue:)) ?? .paragraph
+    }
+
     /// The shelf's pin list (R38), in pin order. Malformed JSON reads as
     /// no pins (fail-open — pins are presentation, never truth).
     public static func shelfPins(_ db: Database) throws -> [String] {

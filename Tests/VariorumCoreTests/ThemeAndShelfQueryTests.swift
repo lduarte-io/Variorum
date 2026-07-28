@@ -345,3 +345,105 @@ struct ShelfQueryTests {
         }
     }
 }
+
+/// 13d batch 4 (A16 — N34's deferred GLOBAL half). Her row: the
+/// newline-makes-a-block setting reachable beyond the per-post chip. 13b's
+/// 4D record named the exact blocker — *"no public `default_segmentation`
+/// setter exists; `upsertSetting` is Operations-internal"* — so this suite
+/// pins the setter and its read, and above all pins that NOTHING about
+/// segmentation's meaning moved: the value has been consulted by
+/// `containerHeader` since Phase 7, and the per-post override still wins.
+@Suite("Global segmentation default (13d A16)")
+struct GlobalSegmentationDefaultTests {
+    @Test func theSeededDefaultIsParagraphAndReadsThroughTheQuery() throws {
+        try withOperations { _, db in
+            let seeded = try db.read { try Queries.defaultSegmentation($0) }
+            #expect(seeded == .paragraph)
+        }
+    }
+
+    @Test func theSetterRoundTripsUpsertsInPlaceAndReachesTheOutbox() throws {
+        try withOperations { ops, db in
+            try ops.setDefaultSegmentation(.oneBlock)
+            let off = try db.read { try Queries.defaultSegmentation($0) }
+            #expect(off == .oneBlock)
+            try ops.setDefaultSegmentation(.paragraph)
+            let on = try db.read { try Queries.defaultSegmentation($0) }
+            #expect(on == .paragraph)
+            // Upsert-only, never duplicated (AppSpec §7's setting class)…
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'default_segmentation'") == 1)
+            // …and synced like every other document-semantics setting.
+            #expect(try db.outboxContains("setting", "default_segmentation"))
+        }
+    }
+
+    @Test func anAbsentOrGarbageValueReadsAsParagraph() throws {
+        try withOperations { _, db in
+            try db.write {
+                try $0.execute(
+                    sql: "DELETE FROM setting WHERE key = 'default_segmentation'")
+            }
+            let absent = try db.read { try Queries.defaultSegmentation($0) }
+            #expect(absent == .paragraph)
+            try db.write {
+                try $0.execute(sql: """
+                    INSERT INTO setting (key, value)
+                    VALUES ('default_segmentation', 'stanza')
+                    """)
+            }
+            let garbage = try db.read { try Queries.defaultSegmentation($0) }
+            #expect(garbage == .paragraph)
+        }
+    }
+
+    /// The whole point of the setting, and the reason it needed no
+    /// semantics work: `containerHeader.effectiveSegmentation` has resolved
+    /// per-post override → this setting → `.paragraph` since Phase 7.
+    @Test func theGlobalGovernsPostsWithoutAnOverrideAndNeverThoseWithOne() throws {
+        try withOperations { ops, db in
+            let inherits = try ops.createPost(title: "inherits")
+            let pinned = try ops.createPost(title: "pinned")
+            try ops.setSegmentationDefault(pinned.id, segmentation: .paragraph)
+
+            func mode(_ id: String) throws -> Segmentation? {
+                try db.read { try Queries.containerHeader($0, containerID: id) }?
+                    .effectiveSegmentation
+            }
+            let inheritsBefore = try mode(inherits.id)
+            let pinnedBefore = try mode(pinned.id)
+            #expect(inheritsBefore == .paragraph)
+            #expect(pinnedBefore == .paragraph)
+
+            try ops.setDefaultSegmentation(.oneBlock)
+            let inheritsAfter = try mode(inherits.id)
+            let pinnedAfter = try mode(pinned.id)
+            #expect(inheritsAfter == .oneBlock, "no override ⇒ the global governs")
+            #expect(pinnedAfter == .paragraph, "an override still wins — untouched")
+        }
+    }
+
+    /// The consequence the app's copy has to speak about (13d batch 4's
+    /// honesty fix): under a global `one_block`, the per-post chip's "on"
+    /// writes NIL — 4D's deliberate inherit mapping — and the post still
+    /// does not mint. The mapping is pinned here so the app's note can be
+    /// pinned against it rather than against a guess.
+    @Test func turningAPostBackOnUnderAGlobalOneBlockStillInherits() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "p")
+            try ops.setDefaultSegmentation(.oneBlock)
+            try ops.setSegmentationDefault(post.id, segmentation: .paragraph)
+            let overridden = try db.read {
+                try Queries.containerHeader($0, containerID: post.id)
+            }?.effectiveSegmentation
+            #expect(overridden == .paragraph)
+
+            // The chip's "on" = clear the override.
+            try ops.setSegmentationDefault(post.id, segmentation: nil)
+            let inherited = try db.read {
+                try Queries.containerHeader($0, containerID: post.id)
+            }?.effectiveSegmentation
+            #expect(inherited == .oneBlock)
+        }
+    }
+}

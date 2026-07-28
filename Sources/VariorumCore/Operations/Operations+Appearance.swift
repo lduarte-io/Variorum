@@ -52,6 +52,29 @@ extension Operations {
         }
     }
 
+    /// The DOCUMENT-GLOBAL segmentation default (`default_segmentation` —
+    /// AppSpec §7's seed, 'paragraph'): what fresh text does in every post
+    /// that carries no per-post override. 13d batch 4 (her A16); 13b's 4D
+    /// built the per-post face and recorded the exact blocker for this one
+    /// — "no public `default_segmentation` setter exists; `upsertSetting`
+    /// is Operations-internal". This is that setter and nothing more.
+    ///
+    /// **No semantics change, anywhere.** The value has been read since
+    /// Phase 7 (`Queries.containerHeader.effectiveSegmentation` resolves
+    /// per-post override → this setting → `.paragraph`), and `one_block`
+    /// has always been ENTRY-WIDE — typing and paste alike (S4-21's
+    /// ratification). Per-post `segmentation_default` is untouched and
+    /// still wins where it is set.
+    ///
+    /// Synced document semantics like every other `setting` row
+    /// (upsert-only, never tombstoned, ordinary outbox ride — the
+    /// fan_style class).
+    public func setDefaultSegmentation(_ segmentation: Segmentation) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "default_segmentation", value: segmentation.rawValue)
+        }
+    }
+
     // MARK: - Shelf pins (R38)
 
     /// Pins a book to the shelf's top (appended to pin order); unpinning
