@@ -159,6 +159,29 @@ final class BookViewModel {
         return entries[index]
     }
 
+    /// The SPREAD's scrub position as a track fraction — the inverse of
+    /// `scrubIndex` over the same domain, so the thumb sits exactly where
+    /// releasing it would land (round-tripped for every index by
+    /// `theSpreadScrubberRidesThePostListAndRoundTrips`).
+    var spreadScrubFraction: Double {
+        guard entries.count > 1 else { return 0 }
+        return Double(spreadLeftIndex) / Double(entries.count - 1)
+    }
+
+    /// The scrubber's landing on the spread (13d batch 1, her #44(c)/#45(c)
+    /// ruling — scrubbers on BOTH horizontal surfaces): the scrubbed POST
+    /// takes the LEFT page, and the ring is released exactly as any other
+    /// jump releases it. The domain is the POST LIST, never live TK2
+    /// geometry — the Phase 6 memo's model-driven ruling, Stage 4 lesson 8,
+    /// which is also why this reuses `scrubIndex` rather than minting a
+    /// second mapping.
+    func scrubSpread(fraction: Double) {
+        guard let index = Self.scrubIndex(fraction: fraction, count: entries.count) else {
+            return
+        }
+        openSpread(leftIndex: index)
+    }
+
     // The 13b 4F reading-progress brain (`noteVisible` / `progressPosition`
     // / `readingProgress`) lived here until the 13c K6 review (K4). 2A's A6
     // ruling removed its only face and the per-row visibility reporting;
@@ -313,23 +336,32 @@ final class BookViewModel {
     /// first).
     private(set) var caretSeed: Int?
     private(set) var fanSeed: String?
-    /// The posts folded shut (13c 2A — A39: Outline is the book's WRITING
-    /// surface, so a post reads OPEN and COLLAPSE is the deliberate act;
-    /// batch 12's R106 default was the other way round, when this surface
-    /// was a book *screen* rather than a place to write. PROVISIONAL —
-    /// QUESTIONS #43).
+    /// The posts unfolded — Outline opens with its posts COLLAPSED.
     ///
-    /// Tracking the collapsed side rather than the expanded one is what
-    /// makes the default hold for free: a post that arrives later — minted
-    /// by "+ new post in this book", pulled in by a tag, landed by sync —
-    /// is open the moment it appears, with nothing to seed.
+    /// **The author's ruling at the 13c ratify walk, 2026-07-27 (QUESTIONS
+    /// #43(a), option (a)): OVERTURNED.** 2A shipped this surface with
+    /// posts OPEN (PROVISIONAL, flagged as a reversal of R106); she ruled
+    /// the other way — *"you shouldn't see the content within a post on the
+    /// book screen unless you click something"* extends to the writing
+    /// surface after all. A post renders as batch 12's card; expanding is
+    /// the deliberate act, and "expand all" opens the whole book in one
+    /// click.
+    ///
+    /// **The SET's sense inverted WITH the default, and that is not
+    /// cosmetic.** 2A tracked the collapsed side for a traced reason: the
+    /// default must hold for a post that ARRIVES — minted by "+ new post in
+    /// this book", pulled in by a tag, landed by sync — with no seeding
+    /// site to forget (the silent-miss class this app keeps finding). Under
+    /// collapsed-by-default the identical argument points the other way: a
+    /// post nobody expanded is collapsed because it is not in the set.
+    /// Pinned directly (`aPostThatArrivesAfterExpandAllIsCollapsed`).
     ///
     /// Session/view state, never persisted: this model's lifetime is the
-    /// open book's (QUESTIONS #43(b)).
-    private(set) var collapsedPosts: Set<String> = []
+    /// open book's (QUESTIONS #43(b), untouched by the flip).
+    private(set) var expandedPosts: Set<String> = []
 
     func isExpanded(_ postID: String) -> Bool {
-        !collapsedPosts.contains(postID)
+        expandedPosts.contains(postID)
     }
 
     /// Focus a post (nil = release): the focused post is always expanded.
@@ -337,19 +369,20 @@ final class BookViewModel {
         caretSeed = caret
         fanSeed = fanBlock
         focusedPostID = postID
-        if let postID { collapsedPosts.remove(postID) }
+        if let postID { expandedPosts.insert(postID) }
     }
 
-    /// Unfold a collapsed post (the card's disclosure).
+    /// Unfold a collapsed post (the card's disclosure) — the deliberate act
+    /// this surface opens needing (#43(a)).
     func expand(_ postID: String) {
-        collapsedPosts.remove(postID)
+        expandedPosts.insert(postID)
     }
 
     /// D1: collapsing a post collapses it — focused included. Focus is
     /// RELEASED (the live editor unmounts; its teardown flushes pending
     /// text through the per-post coordinator, the Stage 1a machinery).
     func collapse(_ postID: String) {
-        collapsedPosts.insert(postID)
+        expandedPosts.remove(postID)
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
@@ -357,18 +390,21 @@ final class BookViewModel {
         }
     }
 
-    /// D1's collapse-all half: everything back to cards, focus released.
-    /// Scoped to the entries in hand — a post that arrives afterwards is
-    /// open, which is the writing surface's default and not a survivor of
-    /// this gesture.
+    /// D1's collapse-all half: everything back to cards, focus released —
+    /// which under #43(a) is the surface's own default state, reached in one
+    /// click from anywhere.
     func collapseAll() {
-        collapsedPosts = Set(entries.map(\.postID))
+        expandedPosts.removeAll()
         focusedPostID = nil
         caretSeed = nil
         fanSeed = nil
     }
 
+    /// Open the whole book at once. Scoped to the entries in hand — a post
+    /// that arrives afterwards is COLLAPSED, which is the default and not a
+    /// survivor of this gesture (the mirror of what collapse-all used to
+    /// carry, and the reason the set tracks this side; see `expandedPosts`).
     func expandAll() {
-        collapsedPosts.removeAll()
+        expandedPosts = Set(entries.map(\.postID))
     }
 }

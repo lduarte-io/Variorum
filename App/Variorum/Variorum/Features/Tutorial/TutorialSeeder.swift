@@ -599,12 +599,13 @@ enum TutorialSeeder {
             + "is no relationship here\u{201D} — the two just sit plainly side by "
             + "side, no blanks, no colors.",
 
-            "\u{201C}Related blocks only\u{201D} goes one step further: it hides every "
+            "Compare OPENS with \u{201C}related blocks only\u{201D} on: it hides every "
             + "block lineage has nothing to say about, leaving just the "
             + "material that connects across the columns. Nothing is moved or "
-            + "deleted — it is a way of LOOKING, and one click back. Turn it "
-            + "on against an unrelated post and it tells you there is nothing "
-            + "to show, rather than showing you nothing.",
+            + "deleted — it is a way of LOOKING, and one click back: turn the "
+            + "chip off to read the posts whole. Against an unrelated post it "
+            + "tells you there is nothing to show, rather than showing you "
+            + "nothing.",
 
             "Outlines live here too: press \u{201C}make outline post\u{201D} in "
             + "Compare's header and the app mints a linked condensation — "

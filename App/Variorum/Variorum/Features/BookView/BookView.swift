@@ -24,11 +24,10 @@ struct BookView: View {
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
-    /// `initiallyExpanded`: an explicit un-collapse seed. Since 13c 2A a
-    /// post reads OPEN by default in Outline (the model tracks the
-    /// COLLAPSED set), so this is now a no-op for posts nobody collapsed —
-    /// kept because it still says exactly what it does, and because a
-    /// caller that seeds a collapsed set will want its twin.
+    /// `initiallyExpanded`: an explicit expand seed. Load-bearing again
+    /// since her #43(a) ruling (13d batch 1) — Outline opens COLLAPSED, so
+    /// a caller (or a pin) that needs prose on screen must expand what it
+    /// means to read, exactly as she does.
     init(
         session: AppSession, readingID: String, readingName: String? = nil,
         model: BookViewModel? = nil,
@@ -629,10 +628,10 @@ struct BookView: View {
                             Text(tokens.chromeLabel(bookMetaLine))
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.muted)
-                            // 13c 2A: posts read OPEN here — this is where
-                            // the book is written. "collapse all" folds the
-                            // whole book back to cards in one click (13b 3E
-                            // D1: it releases the focused post's editor too).
+                            // Her #43(a) ruling (13d batch 1): the book opens
+                            // as CARDS and "expand all" opens it whole in one
+                            // click; "collapse all" folds it back (13b 3E D1:
+                            // it releases the focused post's editor too).
                             Button(tokens.chromeLabel("expand all")) {
                                 model.expandAll()
                             }
@@ -862,14 +861,14 @@ enum BookOutlineMaterialization {
 }
 #endif
 
-/// One post in Outline: its heading, and either its prose (read-cheap, or
-/// THE one live editor when focused) or — when deliberately collapsed —
-/// batch 12's card.
+/// One post in Outline: batch 12's card until it is deliberately expanded,
+/// and then its prose (read-cheap, or THE one live editor when focused).
 ///
-/// 13c 2A: posts render OPEN by default here (`BookViewModel` tracks the
-/// COLLAPSED set), because this is the book's writing surface. Collapse is
-/// the deliberate act, and it is pure view state — never in-place text
-/// folding inside a live TK2 editor (TEXTKIT2 §3; AppSpec §12).
+/// Her #43(a) ruling (13d batch 1) put the CARD back as the default here —
+/// 2A's open-by-default was PROVISIONAL and she overturned it; `expand` is
+/// the deliberate act (the model tracks the EXPANDED set). Either way it is
+/// pure view state — never in-place text folding inside a live TK2 editor
+/// (TEXTKIT2 §3; AppSpec §12).
 ///
 /// 13b 3E (D1): expansion + focus live on the MODEL — ONE authority. The
 /// focused post is expanded because `focus` insists, and `collapse`
@@ -969,8 +968,8 @@ private struct OutlinePostRow: View {
         }
     }
 
-    /// The collapsed card (batch 12's ruling, preserved as the COLLAPSED
-    /// form — 13c 2A changed only which state is the default). 13b 3E
+    /// The collapsed card (batch 12's ruling — and, since her #43(a) ruling
+    /// at the 13c walk, this surface's DEFAULT form again). 13b 3E
     /// (N22): the card BODY opens the post in the full editor; the ▸
     /// disclosure unfolds it in place. Each target does what it looks like.
     private var collapsedPostCard: some View {

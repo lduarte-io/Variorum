@@ -373,11 +373,15 @@ struct BookFocusFoldTests {
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
 
-            // 13c 2A (A39, PROVISIONAL — QUESTIONS #43(a)): Outline is the
-            // book's WRITING surface, so a post reads OPEN and collapse is
-            // the deliberate act. Batch 12's R106 card default was the
-            // other way round, when this was a book *screen*.
-            #expect(model.isExpanded(postIDs[0]), "posts read open — this is where the book is written")
+            // Her #43(a) ruling (13c ratify walk, 2026-07-27 — 13d batch 1
+            // builds it): Outline opens with its posts COLLAPSED. 2A's
+            // open-by-default was PROVISIONAL and she OVERTURNED it, so
+            // R106's letter holds on the writing surface too; expanding is
+            // the deliberate act.
+            #expect(!model.isExpanded(postIDs[0]),
+                    "posts open as cards — expanding is the deliberate act (#43(a))")
+            model.expand(postIDs[0])
+            #expect(model.isExpanded(postIDs[0]), "…and the disclosure opens it")
             model.focus(postIDs[0], caret: 5)
             #expect(model.isExpanded(postIDs[0]), "focus implies expansion")
             #expect(model.focusedPostID == postIDs[0])
@@ -398,30 +402,32 @@ struct BookFocusFoldTests {
             // Collapse-all correctness (D1's second half): everything back
             // to cards, focus released — no survivor.
             model.collapseAll()
-            #expect(model.collapsedPosts == Set(postIDs), "collapse all collapses ALL")
+            #expect(model.expandedPosts.isEmpty, "collapse all collapses ALL")
             #expect(postIDs.allSatisfy { !model.isExpanded($0) })
             #expect(model.focusedPostID == nil)
 
             model.expandAll()
-            #expect(model.collapsedPosts.isEmpty)
+            #expect(model.expandedPosts == Set(postIDs), "expand all opens the book in hand")
             #expect(postIDs.allSatisfy { model.isExpanded($0) })
         }
     }
 
-    /// 13c 2A: tracking the COLLAPSED side is what makes "open by default"
-    /// hold for arrivals — a post minted into the book (or pulled in by a
-    /// tag, or landed by sync) after a collapse-all is OPEN when it
-    /// appears, with nothing to seed. The expanded-set shape could not do
-    /// this without a second rule about who seeds new entries.
-    @Test func aPostThatArrivesAfterCollapseAllIsOpen() async throws {
+    /// 2A's traced argument, INVERTED with her #43(a) ruling and still the
+    /// same argument: the set tracks whichever side is NOT the default, so
+    /// the default holds for arrivals with no seeding site to forget. A post
+    /// minted into the book (or pulled in by a tag, or landed by sync) after
+    /// an expand-all is COLLAPSED when it appears, while the deliberate
+    /// expansions survive. (Under the old collapsed-set shape this was the
+    /// mirror test — a post arriving after collapse-all was open.)
+    @Test func aPostThatArrivesAfterExpandAllIsCollapsed() async throws {
         try await withBookWorld(posts: 2) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
             let assembled = try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             }
             model.adopt(assembled)
-            model.collapseAll()
-            #expect(postIDs.allSatisfy { !model.isExpanded($0) })
+            model.expandAll()
+            #expect(postIDs.allSatisfy { model.isExpanded($0) })
 
             // A third post joins the book (the "+ new post in this book"
             // door's shape — the observation re-delivers).
@@ -432,8 +438,10 @@ struct BookFocusFoldTests {
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
 
-            #expect(model.isExpanded(fresh.id), "a post that arrives after a collapse-all is open")
-            #expect(postIDs.allSatisfy { !model.isExpanded($0) }, "the deliberate collapse survives")
+            #expect(!model.isExpanded(fresh.id),
+                    "a post that arrives after an expand-all is collapsed — the default, unseeded")
+            #expect(postIDs.allSatisfy { model.isExpanded($0) },
+                    "the deliberate expansion survives")
         }
     }
 
@@ -512,8 +520,14 @@ struct OutlineWritingSurfaceTests {
     }
 
     /// Hosts a book in a wide window and hands the body to `body`.
+    ///
+    /// `expanded` defaults TRUE and is load-bearing since her #43(a) ruling:
+    /// Outline opens as cards, so a pin that measures PROSE has to expand
+    /// the book first — the same deliberate act she performs. Pass `false`
+    /// to observe the default state itself.
     private func withHostedBook<T>(
         posts: Int, width: CGFloat = 1100, height: CGFloat = 800,
+        expanded: Bool = true,
         _ body: @MainActor (
             AppSession, AppDatabase, _ readingID: String, _ postIDs: [String],
             _ window: NSWindow, _ hosting: NSHostingView<BookView>,
@@ -525,6 +539,7 @@ struct OutlineWritingSurfaceTests {
             model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
+            if expanded { model.expandAll() }
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: width, height: height),
                 styleMask: [.titled], backing: .buffered, defer: false)
@@ -606,20 +621,46 @@ struct OutlineWritingSurfaceTests {
         }
     }
 
-    /// P3 with posts OPEN by default. The Phase 13 round-3 MAJOR was this
-    /// surface's sibling shipping as a plain `VStack`; the default flip
-    /// makes virtualization load-bearing here for the first time (every
-    /// realized row is now a TK2 text surface, not a small card).
+    /// HER #43(a) RULING, at the surface: the book opens as CARDS. Prose
+    /// reaches the screen only where she expands, and "expand all" opens it
+    /// whole. RED on the pre-13d code, where a hosted Outline mounted a read
+    /// surface per visible post the moment it appeared.
+    @Test func outlineOpensWithItsPostsCollapsed() async throws {
+        try await withHostedBook(posts: 6, expanded: false) { _, _, _, _, window, hosting, model in
+            // Cards render (the excerpt is SwiftUI Text), so let the layout
+            // settle rather than waiting on a surface that must not appear.
+            await settle(window, hosting, until: { false }, maxTurns: 8)
+            #expect(countReadSurfaces(in: hosting) == 0,
+                    "cards, not prose — nothing shows a post's content until she asks")
+            #expect(countLiveEditors(in: hosting) == 0, "and nothing is live")
+
+            // The deliberate act, and prose arrives.
+            model.expandAll()
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
+            #expect(countReadSurfaces(in: hosting) > 0, "expand all opens the book")
+
+            // …and collapse-all returns exactly the state it opened in.
+            model.collapseAll()
+            await settle(window, hosting, until: { countReadSurfaces(in: hosting) == 0 })
+            #expect(countReadSurfaces(in: hosting) == 0)
+        }
+    }
+
+    /// P3 with every post OPEN — the harder half of the claim, kept from 2A
+    /// even though the default is now the cheap one. The Phase 13 round-3
+    /// MAJOR was this surface's sibling shipping as a plain `VStack`.
     /// Red-on-old by behavioral revert: `LazyVStack` → `VStack` in
     /// `outlineBody` materializes all 150 rows on open.
-    @Test func outlineVirtualizesItsRowsWithPostsOpenByDefault() async throws {
+    @Test func outlineVirtualizesItsRowsEvenWithEveryPostExpanded() async throws {
         try await withBookWorld(posts: 1) { session, _, readingID, _ in
             let model = BookViewModel(session: session, readingID: readingID)
             model.adopt((0..<150).map {
                 Queries.ReadingEntry(
                     postID: "p\($0)", title: "t\($0)", entryDate: nil, sectionPath: nil)
             })
-            #expect(model.isExpanded("p0"), "open by default — the counted rows are prose rows")
+            #expect(!model.isExpanded("p0"), "collapsed by default (#43(a))")
+            model.expandAll()
+            #expect(model.isExpanded("p0"), "…expanded here, so the counted rows are prose rows")
             BookOutlineMaterialization.count = 0
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 900, height: 600),
@@ -952,16 +993,81 @@ struct SpreadBookViewTests {
     }
 
     /// Her bottom-bar ruling, both halves: the bar STAYS here (unlike
-    /// Outline, A6) and carries the form picker — and there is NO horizontal
-    /// scrollbar, the complaint that removed Outline's. Red-on-old by
-    /// behavioral revert: restoring 4F's `Slider` puts an `NSSlider` back.
-    @Test func theSpreadKeepsItsBarWithFormsAndNoSlider() async throws {
+    /// Outline, A6) and carries the form picker — AND the jump scrubber,
+    /// which she ruled back at the 13c walk (#44(c)/#45(c): scrubbers on
+    /// BOTH horizontal surfaces; Read's Pages pin is `PagedReadTests`'
+    /// slider count, and Outline's zero-chrome pin above is the vertical
+    /// case her A6 complaint was actually about). RED on the pre-13d code,
+    /// which rendered no slider at all.
+    @Test func theSpreadKeepsItsBarWithFormsAndTheJumpScrubber() async throws {
         try await withHostedSpread(posts: 6) { _, _, window, hosting, _ in
             await settle(window, hosting, until: { countReadSurfaces(in: hosting) >= 2 })
-            #expect(count(NSSlider.self, in: hosting) == 0,
-                    "no jump slider — no horizontal scrollbar on the spread")
+            #expect(count(NSSlider.self, in: hosting) == 1,
+                    "the jump scrubber is back beside the leaf-turn controls")
             #expect(count(NSSegmentedControl.self, in: hosting) == 1,
                     "the bar's Write | Takes form picker is rendered (A44)")
+        }
+    }
+
+    /// The scrubber's BRAIN: model-driven over the post list, never live TK2
+    /// geometry (the Phase 6 memo's ruling, Stage 4 lesson 8). The landing
+    /// post takes the LEFT page; the thumb's fraction round-trips through the
+    /// same mapping, so it sits exactly where releasing it lands; and the
+    /// jump behaves like every other jump (focus released when it leaves).
+    @Test func theSpreadScrubberRidesThePostListAndRoundTrips() async throws {
+        try await withBookWorld(posts: 5) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+
+            model.scrubSpread(fraction: 1)
+            #expect(model.leftPage?.postID == postIDs[4], "the far end lands on the last post")
+            model.scrubSpread(fraction: 0)
+            #expect(model.leftPage?.postID == postIDs[0])
+            model.scrubSpread(fraction: 0.5)
+            #expect(model.leftPage?.postID == postIDs[2], "half the track, half the book")
+            model.scrubSpread(fraction: 7)
+            #expect(model.spreadLeftIndex == 4, "clamped above")
+            model.scrubSpread(fraction: -3)
+            #expect(model.spreadLeftIndex == 0, "clamped below")
+
+            // The thumb reaches BOTH ends of its track — the arm that
+            // discriminates, since several fraction formulas round-trip but
+            // only this one puts the last page at the track's end (an
+            // `i / count` thumb stops short of it, forever).
+            model.openSpread(leftIndex: 0)
+            #expect(model.spreadScrubFraction == 0, "the first page sits at the track's start")
+            model.openSpread(leftIndex: model.entries.count - 1)
+            #expect(model.spreadScrubFraction == 1, "…and the last page at its end")
+
+            // The thumb never lies: reading the fraction back and scrubbing
+            // to it lands on the same page, for every page of the book.
+            for index in 0..<model.entries.count {
+                model.openSpread(leftIndex: index)
+                let fraction = model.spreadScrubFraction
+                #expect(
+                    BookViewModel.scrubIndex(fraction: fraction, count: model.entries.count)
+                        == index,
+                    "fraction \(fraction) must land back on page \(index)")
+            }
+
+            // A scrub that carries the live page keeps its ring; one that
+            // leaves it behind releases it — `openSpread`'s standing rule,
+            // inherited rather than re-implemented.
+            model.openSpread(leftIndex: 0)
+            model.focus(postIDs[1])
+            model.scrubSpread(fraction: 0.25)  // lands post 1 on the LEFT page
+            #expect(model.spreadLeftIndex == 1)
+            #expect(model.focusedPostID == postIDs[1], "the live page came along")
+            model.scrubSpread(fraction: 1)
+            #expect(model.focusedPostID == nil, "scrubbing away releases the ring")
+
+            // An empty book scrubs nowhere.
+            model.adopt([])
+            model.scrubSpread(fraction: 0.5)
+            #expect(model.spreadLeftIndex == 0)
+            #expect(model.spreadScrubFraction == 0)
         }
     }
 

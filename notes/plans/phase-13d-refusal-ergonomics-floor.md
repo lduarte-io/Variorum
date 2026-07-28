@@ -234,6 +234,193 @@ batch 1's acceptance.
 *(Implementers append here — one record per batch: changes, files,
 pins named, counts by own runs, PENDING marks.)*
 
+### Batch 1 — the three ruled walk flips (#43(a) · #44(c)/#45(c) · #47(c))
+
+**Counts, by my own runs:** core `✔ Test run with 882 tests in 100 suites
+passed after 28.582 seconds` (**882/100** — the baseline exactly; zero
+`Sources/` lines, so unchanged by construction rather than by luck) · Mac
+`✔ Test run with 790 tests in 135 suites passed after 87.783 seconds`
+(**788/135 → 790/135**: +2 tests, no new suite). **Mobile untouched by
+construction, not by assumption** — the mobile target's
+`fileSystemSynchronizedGroups` are `VariorumMobile/` + `Shared/`, and every
+file here is under `Variorum/` (Mac) or `VariorumTests/`; 14/4 stands
+unrun. **Zero schema, zero `Sources/VariorumCore/` lines, zero
+`Sources/VariorumCore/Sync/` lines.** Tutorial spine green on its own run
+before the full suites: `✔ Test run with 49 tests in 7 suites` (all seven
+`Tutorial*Tests` types — addressed by TYPE name, the 2E trap).
+
+**Her instance:** her real-store build was LIVE throughout (`pgrep` →
+PID 54248, `/Applications/Variorum.app/…`). Never quit, never touched; no
+Release build, no `/Applications` refresh, no store touched. Mac suites ran
+beside it on the Debug host as 4G established. Login session unlocked
+(`CGSSessionScreenIsLocked` = 0), so the runner behaved normally.
+
+**Diff scope — 7 files:** `BookViewModel.swift` (the expansion set's sense
++ the spread's scrub position) · `BookView.swift` (Outline's comments and
+the `initiallyExpanded` doc) · `SpreadBookView.swift` (the scrubber in the
+flip bar) · `CompareBoardView.swift` (one default) · `TutorialSeeder.swift`
+(one lesson paragraph) · `BookViewTests.swift` / `CompareBoardTests.swift`
+(the pins).
+
+#### Item 1 — #43(a): Outline opens COLLAPSED
+
+**The set was INVERTED rather than seeded, and the choice is 2A's own
+argument pointed the other way.** 2A tracked the COLLAPSED set for a traced
+reason: a post that ARRIVES (minted by "+ new post in this book", pulled in
+by a tag, landed by sync) must take the default with no seeding site to
+forget — the silent-miss class. Seeding a collapsed set on every arrival
+would have re-introduced exactly that site. Tracking `expandedPosts`
+instead makes collapsed-by-default hold for free: a post nobody expanded is
+collapsed because it is not in the set. Everything else about the surface
+is untouched — the card is batch 12's, expand/collapse-all both stay, focus
+still implies expansion, collapse still releases focus (13b 3E's D1), and
+collapse state is still session/view-scoped (#43(b) unchanged).
+
+One consequence worth naming: `BookView.init(initiallyExpanded:)` is
+load-bearing again (2A had recorded it as a no-op), and it is what the
+hosted pins that measure PROSE now use — the same deliberate act she makes.
+
+#### Item 2 — #44(c)/#45(c): the jump scrubber returns to Book's spread
+
+Face work, as 2B's record predicted: the brain (`scrubIndex`) was still
+there and still pinned. What was added is the position half —
+`BookViewModel.spreadScrubFraction` (the thumb) and `scrubSpread(fraction:)`
+(the landing, which delegates to `openSpread`, so the focus-release rule is
+inherited rather than re-implemented). **The domain is the POST LIST** —
+`scrubIndex`'s own mapping, reused rather than a second one minted (Stage 4
+lesson 8; never live TK2 geometry). The scrubbed post takes the LEFT page.
+
+Layout: the slider sits between the nudge controls, i.e. **beside the
+leaf-turn controls**, and the page line moved from the bar's centre to its
+trailing end — the arrangement Read's Pages bar already uses, so the two
+horizontal surfaces read as one thing, which is the point of her
+one-rule-for-both ruling. Nothing else in the bar changed (flip family,
+enablement rule, form picker, the conditional arrow shortcuts).
+
+#### Item 3 — #47(c): Compare's related-blocks-only defaults ON
+
+One default (`var relatedOnly = true`) plus its doc comment. **The filter's
+SEMANTICS are untouched** — the pre-pass, the kinship notion, the
+per-column note, the whole-board honesty state, the filter-OFF placement
+and the live-ring release are 2E's, byte for byte, and every 2E composition
+pin runs unchanged. The unrelated-pair consequence (the honesty line greets
+her first) was in front of her when she ruled; nothing about that copy
+changed.
+
+**One in-scope prose correction, flagged rather than buried:** the field
+guide's Compare lesson said *"Turn it on against an unrelated post…"*,
+which the flip makes untrue of what she'll see. It now reads "Compare OPENS
+with 'related blocks only' on… turn the chip off to read the posts whole",
+keeping the promise the walk act asserts (`TutorialLookingActsTests`'
+`compareHonestyHoldsOnTheLessonsOwnContent`, green). **This stales the
+seeded field guide further — it adds nothing new to the standing re-seed
+obligation** already on her checklist from 13c (one "Restore Tutorial" run).
+
+#### Pin changes — every one named
+
+| Pin | Change | Why |
+|---|---|---|
+| `focusImpliesExpansionAndCollapseReleasesFocus` | **flipped** — asserts collapsed-at-open, adds the `expand` arm; set assertions read `expandedPosts` | the ruled default |
+| `aPostThatArrivesAfterCollapseAllIsOpen` | **renamed + inverted** → `aPostThatArrivesAfterExpandAllIsCollapsed` | the same traced arrival argument, mirrored with the set |
+| `outlineOpensWithItsPostsCollapsed` | **NEW** (hosted) | the ruling itself: zero read surfaces at open, prose on expand-all, cards again on collapse-all |
+| `outlineVirtualizesItsRowsWithPostsOpenByDefault` | **renamed** → `…EvenWithEveryPostExpanded`; asserts the collapsed default, then expands | keeps 2A's HARDER P3 claim (prose rows, not cheap cards) instead of quietly weakening it with the default |
+| `withHostedBook` (helper) | gains `expanded: Bool = true`, calling `expandAll()` | hosted pins that measure prose must expand first; `expanded: false` observes the default |
+| `theSpreadKeepsItsBarWithFormsAndNoSlider` | **renamed + inverted** → `theSpreadKeepsItsBarWithFormsAndTheJumpScrubber` (1 `NSSlider`, 1 `NSSegmentedControl`) | the ruled return |
+| `theSpreadScrubberRidesThePostListAndRoundTrips` | **NEW** (pure/model) | the landing, the clamps, the thumb's two ends, the round-trip, the focus-release inheritance, the empty book |
+| `relatedOnlyHidesTheUnrelatedColumnAndTheBoardSaysSo` | **flipped** — opens filtered; the unfiltered board is now reached by turning the chip OFF (2E's OFF side still pinned, in the same test) | the ruled default |
+| `turningOnRelatedOnlyReleasesARingItHidesAndLandsTheText` | turns the chip OFF first, then on | a set that doesn't CHANGE the value never runs the release guard — without this the pin would have gone hollow under the new default |
+| `relatedOnlyLeavesARingItDoesNotHideAlone` | same off-then-on for its first arm | same reason (its second arm already did) |
+
+Unchanged and re-run green: all 13 `CompareCompositionTests` (the filter is
+pure and its semantics didn't move), `outlineCarriesNoBottomChrome` (Outline
+still carries no slider — her A6 complaint was a horizontal control on a
+VERTICAL page, and this batch does not touch that), `PagedReadTests`' Read
+slider count (the other half of "scrubbers on BOTH").
+
+#### Guard-revert evidence (three source files checksummed first; `shasum -c` OK after every restore)
+
+**Class statement:** these are RULED FLIPS and one new capability, not bug
+fixes — no pin is owed under the hallucination guard. Four surgical reverts
+were run anyway, because a flipped pin that would also pass on the old code
+is worth nothing.
+
+| Revert | Pins that went RED | Observed |
+|---|---|---|
+| **A** — `isExpanded` returns `true` for anything (the pre-13d open-by-default sense) | `outlineOpensWithItsPostsCollapsed` · `focusImpliesExpansionAndCollapseReleasesFocus` · `aPostThatArrivesAfterExpandAllIsCollapsed` · `outlineVirtualizesItsRowsEvenWithEveryPostExpanded` | **4 pins, 7 issues** — chiefly **4 read surfaces** in a hosted 6-post Outline where 0 is right (the ruling, at the surface) |
+| **B** — the `Slider` removed from the flip bar (2B's shipped bar) | `theSpreadKeepsItsBarWithFormsAndTheJumpScrubber` | 1 issue: **0 `NSSlider`** where 1 is right |
+| **C** — `relatedOnly = false` (2E's default) | `relatedOnlyHidesTheUnrelatedColumnAndTheBoardSaysSo` | 5 issues: not filtered at open, the stranger's free row present, `peerHasBlocks == [true, true]`, 3 rows where 2 are right |
+| **D** — `spreadScrubFraction` divides by `count` instead of `count − 1` | `theSpreadScrubberRidesThePostListAndRoundTrips` | **First run: GREEN — and that was the useful result.** An `i / count` thumb round-trips exactly as well, so the round-trip arm alone did not discriminate; the pin gained the arm that does (the thumb must reach BOTH ends of the track) and revert D then read **0.8 where 1.0 is right** — the last page never reaching the track's end |
+
+#### Judgment calls
+
+1. **Invert the set, don't seed it** (item 1's headline). The brief left the
+   choice open; this is the one that keeps 2A's traced arrival argument
+   true instead of trading it away.
+2. **`expandAll()` stays scoped to the entries in hand**, the exact mirror
+   of what `collapseAll` carried before — so a post arriving after an
+   expand-all is collapsed (the default), not a survivor of the gesture.
+   Pinned. The alternative (expand-all as a sticky mode) would be a new
+   third state nobody ruled.
+3. **`outlineVirtualizesItsRows…` kept its harder claim** by expanding
+   everything rather than accepting the now-cheaper default. Letting it
+   count cards would have quietly retired the Phase 13 round-3 MAJOR's
+   guard.
+4. **The page line moved to the bar's trailing end** to give the scrubber
+   the flexible middle (a centred text between two `Spacer`s cannot share a
+   row with a flexible slider). Recorded because it is the one visual
+   change in the bar beyond the control she asked for; it makes Book's bar
+   match Read's Pages bar, which is the ruling's own spirit.
+5. **The scrubber is `.disabled` on a one-post book**, not hidden — the
+   flip controls in the same bar disable rather than disappear, and one bar
+   should not speak two grammars.
+6. **The Compare lesson's paragraph was corrected** (above) rather than
+   left describing an act she no longer has to perform. P-6 reading:
+   tutorial prose that contradicts the shipped surface is a regression.
+7. **`QUESTIONS.md` annotated, not resolved:** the four ruled sub-calls
+   (#43(a), #44(c), #45(c), #47(c)) now carry a one-line "RULED … — BUILT
+   13d batch 1" marker pointing at the 13c walk record, because leaving
+   "SHIPPED — PROVISIONAL" text describing the opposite of the code is the
+   drift class 13c's R1-2 punished. The entries stay OPEN as wholes (their
+   minor sub-calls are rolled to this phase's sittings), and nothing was
+   renumbered or removed — that remains the closeout's call.
+
+#### Deviations
+
+- **None from the brief's three items.** Nothing else was built; no item
+  turned out bigger than its ruling's shape, so the stop-and-propose door
+  was not needed.
+- **One self-inflicted incident, recorded because the rule exists for
+  exactly it.** While restoring guard-revert B I ran
+  `git checkout Variorum/Features/BookView/SpreadBookView.swift` — the
+  environment's "never `git checkout` over uncommitted work" line — which
+  discarded that file's three uncommitted edits (header, slider, page
+  line). No other file was touched; the edits were re-applied from context
+  and the file verified **byte-identical to the pre-revert checksum**, so
+  nothing was lost and the proof is mechanical rather than my say-so. The
+  checksums taken before the revert pass are what made that provable.
+- **No lookup subagent used** — nothing external was in question.
+- **No visual loop this batch** (P-7's screenshot half): the three changes
+  are a default, a control's presence, and a default; the hosted pins
+  observe all three at the layer where they can fail. The one thing a human
+  eye would add is whether the bar reads well with the scrubber in its
+  middle — routed to the standing **Design & UI review** row rather than
+  claimed.
+
+#### PENDING / for the orchestrator
+
+- **Nothing unverified in this batch.** Both full suites were run by me,
+  with their run lines quoted above.
+- The **field-guide re-seed** obligation (hers, standing since 13c) now has
+  one more stale lesson behind it; still one "Restore Tutorial" run.
+- **For the end-of-phase Fable review, suggested foci:** (1) the set
+  inversion — is the arrival argument really symmetric, and is there a
+  caller that assumed "not in the set ⇒ open"? (2) `withHostedBook`'s
+  `expanded: true` default — does it hide any pin that should be observing
+  the collapsed state? (3) the scrubber's domain — Book scrubs by POST
+  while Read scrubs by PAGE, so the two bars now look alike and mean
+  slightly different things; is that the right reading of her one rule?
+  (4) whether the moved page line costs more than it buys.
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →

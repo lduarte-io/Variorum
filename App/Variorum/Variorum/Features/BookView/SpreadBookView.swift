@@ -18,8 +18,13 @@
 //  button or something"*) that nudges the spread by ONE post, so a turn that
 //  splits two posts she wanted side by side can be re-paired. Arrows
 //  navigate too. The bottom bar STAYS here (unlike Outline, where A6 removed
-//  it); the jump SLIDER does not — no horizontal scrollbar (the navigator's
-//  post list is the jump door, and it is model-driven).
+//  it), and it carries the JUMP SCRUBBER: 2B removed the slider on the
+//  brief's instruction, flagged the conflict with her own S4-9(2) ask as
+//  QUESTIONS #44(c), and she RULED it back at the 13c ratify walk
+//  (#44(c)/#45(c), 2026-07-27) — scrubbers on BOTH horizontal surfaces,
+//  Book's spread and Read's Pages; Outline keeps none, because her A6
+//  complaint was a horizontal control on a VERTICAL page. Its domain is the
+//  POST LIST like every other jump here, never live TK2 geometry.
 //
 //  EDITABLE, in TWO forms (A44, her instruction: *"stack view + the normal
 //  write view should be the editing forms offered"*): the ACTIVE page shows
@@ -111,7 +116,7 @@ struct SpreadBookView: View {
         }
     }
 
-    // MARK: - The bottom bar (KEPT here by ruling — no slider)
+    // MARK: - The bottom bar (KEPT here by ruling — WITH the jump scrubber)
 
     @ViewBuilder
     private var flipBar: some View {
@@ -127,12 +132,22 @@ struct SpreadBookView: View {
                     .keyboardShortcut(flipShortcut(.leftArrow, .option))
                     .disabled(!canMove(-1))
                     .help("Nudge back by ONE post — re-pair the two pages (⌥←)")
-                Spacer()
-                Text(tokens.chromeLabel(pageLine))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                Spacer()
+                // THE JUMP SCRUBBER — back beside the leaf-turn controls by
+                // her ruling (#44(c)/#45(c), 13c ratify walk): one rule for
+                // both horizontal surfaces, so Book carries a scrubber like
+                // Read's Pages does. (Outline still carries none — her A6
+                // complaint was a horizontal control on a VERTICAL page.)
+                // The domain is the POST LIST: 40 posts are 40 pages, however
+                // long any of them is (Stage 4 lesson 8).
+                Slider(
+                    value: Binding(
+                        get: { model.spreadScrubFraction },
+                        set: { model.scrubSpread(fraction: $0) }),
+                    in: 0...1)
+                    .frame(minWidth: 120, maxWidth: 460)
+                    .disabled(model.entries.count < 2)
+                    .help("Jump through the book — the scrub domain is the "
+                        + "post list, one page per post")
                 Button("▷") { model.nudgeSpread(by: 1) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .keyboardShortcut(flipShortcut(.rightArrow, .option))
@@ -143,6 +158,15 @@ struct SpreadBookView: View {
                     .keyboardShortcut(flipShortcut(.rightArrow, []))
                     .disabled(!canMove(2))
                     .help("Turn the leaf on — two posts at once (→)")
+                Spacer(minLength: 12)
+                // The page line reads TRAILING now that the scrubber holds
+                // the bar's flexible middle — the arrangement Read's Pages
+                // bar already uses, so the two horizontal surfaces read as
+                // one thing (the point of her one-rule-for-both ruling).
+                Text(tokens.chromeLabel(pageLine))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
                 Divider().frame(height: 14).overlay(tokens.line)
                 // A44 — the page you write in shows Write, or the takes
                 // stack. ONE control for the spread: the forms are what the

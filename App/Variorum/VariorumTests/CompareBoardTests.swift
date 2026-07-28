@@ -600,10 +600,12 @@ struct CompareViewModelTests {
         }
     }
 
-    /// 13c Batch 2E (C4): the filter, ON THE BOARD. Default OFF; turning it
-    /// on leaves only the kin rows, and the unrelated column reports itself
-    /// empty rather than sitting blank (the mixed case — the version twin is
-    /// related, the stranger is not).
+    /// 13c Batch 2E (C4): the filter, ON THE BOARD — and since her #47(c)
+    /// ruling (13c ratify walk, built 13d batch 1) it is what Compare OPENS
+    /// with. Only the kin rows compose, and the unrelated column reports
+    /// itself empty rather than sitting blank (the mixed case — the version
+    /// twin is related, the stranger is not); turning the chip OFF reveals
+    /// the full posts, which is 2E's byte-unchanged behavior.
     @Test func relatedOnlyHidesTheUnrelatedColumnAndTheBoardSaysSo() async throws {
         try await withCompareWorld { session, db in
             let world = try await makeWorld(session)
@@ -612,15 +614,7 @@ struct CompareViewModelTests {
             try await adoptFresh(
                 model, db, anchor: world.anchor, peers: [world.twin, world.stranger])
 
-            #expect(!model.relatedOnly, "a filter that HIDES material is reached for, not default")
-            let unfiltered = model.display
-            #expect(unfiltered.rows.contains { row in
-                if case .free = row { return true }
-                return false
-            }, "unfiltered, the stranger's block flows in a free row")
-            #expect(unfiltered.peerHasBlocks == [true, true])
-
-            model.relatedOnly = true
+            #expect(model.relatedOnly, "Compare opens filtered — her #47(c) ruling")
             let filtered = model.display
             #expect(filtered.isFiltered)
             #expect(!filtered.rows.isEmpty, "the twin's kin rows survive")
@@ -635,6 +629,17 @@ struct CompareViewModelTests {
             // Every anchor block of the twin pair is kin, so the filter
             // costs the related comparison nothing.
             #expect(filtered.rows.count == model.projection.anchor.slots.count)
+
+            // …and the chip still reveals the whole posts — 2E's OFF side,
+            // byte-unchanged by the default flip.
+            model.relatedOnly = false
+            let unfiltered = model.display
+            #expect(!unfiltered.isFiltered)
+            #expect(unfiltered.rows.contains { row in
+                if case .free = row { return true }
+                return false
+            }, "unfiltered, the stranger's block flows in a free row")
+            #expect(unfiltered.peerHasBlocks == [true, true])
             model.teardown()
         }
     }
@@ -653,6 +658,11 @@ struct CompareViewModelTests {
             try await adoptFresh(
                 model, db, anchor: world.anchor, peers: [world.twin, world.stranger])
 
+            // The board now OPENS filtered (#47(c)), so the transition this
+            // pin is about starts from the chip turned OFF — which is also
+            // the real sequence: she reads the posts whole, types, then
+            // reaches for the filter.
+            model.relatedOnly = false
             let strangerSlot = model.projection.peers[world.stranger]!.slots[0]
             let strangerKey = PaneTextAuthority.PaneKey(
                 columnID: "compare-\(world.stranger)", blockID: strangerSlot.blockID,
@@ -693,6 +703,10 @@ struct CompareViewModelTests {
                 columnID: "compare-\(world.twin)", blockID: twinSlot.blockID,
                 variantID: twinSlot.variantID!, context: world.twin)
             model.focus(twinKey)
+            // Off, then on: the default is ON now (#47(c)), and a set that
+            // doesn't CHANGE the value never runs the release guard — so
+            // driving the real transition is what keeps this pin honest.
+            model.relatedOnly = false
             model.relatedOnly = true
             #expect(model.authority.isLive(twinKey),
                     "the twin's blocks are all kin — the ring is not hidden, so it stays")

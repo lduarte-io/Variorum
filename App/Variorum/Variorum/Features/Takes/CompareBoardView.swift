@@ -134,13 +134,22 @@ final class CompareViewModel {
     /// feel more usable"*). SESSION-LOCAL view state exactly like the two
     /// toggles above — a reading posture, never persisted, no schema.
     ///
-    /// **Default OFF**, deliberately: a filter that HIDES material should be
-    /// reached for, not arrived in. With it on by default, opening Compare
-    /// against an unrelated post would land on nothing but the honesty line,
-    /// and against a version twin it changes nothing (every block is kin) —
-    /// so ON-by-default buys nothing where it helps and confuses where it
-    /// doesn't. One line to flip (QUESTIONS #47).
-    var relatedOnly = false {
+    /// **Default ON — the author's ruling at the 13c ratify walk,
+    /// 2026-07-27 (QUESTIONS #47(c)).** 2E shipped it OFF on the reasoning
+    /// that a filter which HIDES material should be reached for rather than
+    /// arrived in; she ruled the other way, which reads her original
+    /// sentence straight (*"that would make the pane feel more usable"* —
+    /// the usable state is the filtered one). Compare therefore opens
+    /// showing only what lineage connects, and the chip reveals the full
+    /// posts.
+    ///
+    /// The recorded consequence, which was in front of her when she ruled:
+    /// against an UNRELATED post the board now greets her with the honesty
+    /// line ("there is no relationship here…") before the prose — the way
+    /// out named in the same breath. Nothing else about the filter changed:
+    /// its SEMANTICS, the per-column note, the filter-OFF placement and the
+    /// live-ring release are 2E's, byte for byte.
+    var relatedOnly = true {
         didSet {
             guard relatedOnly != oldValue else { return }
             releaseLivePaneIfFilteredAway()
