@@ -2659,6 +2659,187 @@ long-take pressure valve, but the layer must handle long takes
 gracefully regardless — she must never be forced to restructure to
 dodge a renderer.
 
+### A47c session — the draw gap TRACED to one mechanism and stabilized; the memo written (2026-07-27, FABLE)
+
+**Commits:** `3eb8fe3` (the stabilization + both pins) · the record
+commit carrying this section and the memo
+(`notes/plans/phase-13d-memo-long-content-panes.md`). **Counts:** core
+**`✔ Test run with 882 tests in 100 suites`** (untouched — zero
+`Sources/` lines, coherent by construction) · Mac
+**`✔ Test run with 788 tests in 135 suites`** (was 786/135: +2 A47c
+pins in `TakePaneMeasureTests`) · tutorial suites re-run explicitly by
+TYPE: **`✔ Test run with 49 tests in 7 suites`** (P-6) · mobile 14/4
+untouched (the diff is Mac-target-only). Zero
+`Sources/VariorumCore/Sync/` lines; no schema. **Diff scope:** 2
+files — `Surface/PaneSurface.swift` (the change-gated style + the
+check's render half + the restore counter),
+`VariorumTests/TakePaneMeasureTests.swift` (pins A and B).
+**Her instance:** never running during the session (`pgrep` empty at
+open and at every build window); her real store never opened — this
+trace needed no store read. **No Release build; the `/Applications`
+refresh is HELD for her word**, per the brief.
+
+#### THE HEADLINE: one mechanism, fully traced — the unguarded full-range `textColor` write strands TK2's rendering surfaces on a tail-scrolled pane, and nothing ever rebuilt them
+
+The trace ran in the REAL mounted `TakesBoardView` (the 1G census
+method) with two new instruments: **pixel truth** (compositing the
+window's CURRENT layer contents via `CALayer.render(in:)` — a destroyed
+rendering surface shows as blank; nothing is force-redrawn) and a
+**fragment-surface census** (TK2 draws a pane through per-fragment
+child surfaces — `_NSTextContentView` under
+`_NSTextRenderingSurfacesGroupView` — created ONLY for the viewport
+region; their frames say exactly which regions are drawn). The chain,
+each link measured:
+
+1. **The kill.** On a tail-scrolled ~800-word pane (676×2,753 pt,
+   frame exact per 1F/1G), a full-range storage attribute write
+   destroys the rendering surfaces above the pane's tail — 14 → 6,
+   keeping only the last ~274 pt — while `viewportBounds` stays
+   CORRECT and the measurement stays exact. The state is
+   laid-out-but-undrawn: selectable, measurable, blank — **her worst
+   case verbatim ("except for two lines at the bottom"), and the state
+   behind 1G's deletion deception.**
+2. **The permanence.** Nothing rebuilds the surfaces: `needsDisplay`
+   is powerless (the surfaces are the unit of drawing, not the backing
+   store), 12+ natural runloop turns deliver nothing, clicking back in
+   delivers nothing. A real scroll heals (TK2's own viewport layout) —
+   her observed "scrolling up made it disappear."
+3. **The production trigger, bisected at the tail:** `applyStyle` ran
+   `view.textColor = ink` on EVERY `updateNSView` — measurement,
+   `isEditable`, first-responder moves, and selection all proved
+   innocent; the textColor write kills (surfaces 14 → 6 on the driven
+   call). Every click, ring move, and projection delivery was a fresh
+   full-range write on every tokened pane.
+4. **The heal, measured:** ONE
+   `textViewportLayoutController.layoutViewport()` call rebuilds the
+   surfaces for the actual viewport completely (6 → 14, full ink).
+5. **Why no earlier session saw it:** the minimal standalone
+   composition (1F/1C's replica method) does NOT reproduce the strand
+   — driven storage rewrites, invalidations, and textColor writes all
+   self-heal there; the strand is real-board-composition-dependent.
+   The 1G census method (real board) plus pixel truth was the
+   combination that caught it.
+
+**The architect's pre-trace reading, tested:** confirmed in substance —
+this IS the laid-out-but-undrawn root behind 1G's deception, it
+predates 1F/1G, and the 1G occasions did make it fire visibly (every
+occasion's SwiftUI re-render ran the killing write). One correction to
+the reading's letter: the viewport NOTION was never stale and the 1G
+frame lever needed no display invalidation — the gap was the render
+tier itself, below both.
+
+#### What shipped (both halves at the ONE component — completing the accepted 1F/1G mechanism, nothing architectural)
+
+1. **The change-gate** (`PaneTextView.appliedInk`): `applyStyle`
+   writes ink/`drawsBackground` ONLY on change — same ink ⇒ zero
+   writes of any kind. The everyday trigger is dead; a REAL voice/ink
+   switch still writes, as it should.
+2. **The check's RENDER half:**
+   `reconvergeIfDiverged(restoreRender:)` — the 1G occasions (click ·
+   scroll-end · liveness transition) now also schedule ONE coalesced
+   deferred `layoutViewport()`, rebuilding any stranded render tier.
+   Deferred because inside `updateNSView` the liveness occasion fires
+   BEFORE the killing write (a synchronous restore would lose the
+   race); occasion-GATED for termination — occasions are discrete user
+   events a viewport layout can never cause, while layout passes stay
+   geometry-only because a viewport layout CAN queue a layout pass.
+   Counter seam `renderRestoresRun` (the R3-4 mechanical form). Cost:
+   one viewport-bounded warm pass per occasion burst, zero at rest
+   (P1).
+
+**End-to-end on the fixed build:** her exact gesture (tail-scrolled
+long card → click the other block → click back) shows NO strand at any
+step; a deliberately re-created strand (direct `invalidateLayout`)
+heals at the next occasion; quiescence verified (checks 6 → 6,
+same-width passes 2 → 2 over 12 idle turns — no ping-pong).
+
+#### Red-on-old evidence — by behavioral revert, checksum-restored (`shasum -c` OK after each)
+
+| Revert applied | RED observed |
+|---|---|
+| **REVERT 1 — the render half removed** (the `scheduleRenderRestore()` call dropped from the check; counters kept so the pin compiles) | `aStrandedRenderTierIsRebuiltByAConvergenceOccasion` FAILED both arms: `renderRestoresRun` stayed 0 through the fired occasion AND the healed-ink assertion read 0 inked bands — the strand constructed, geometry exact, occasion fired, nothing healed (clean attribution: the strand and non-vacuity arms stayed green) |
+| **REVERT 2 — the change-gate removed** (applyStyle restored to the pre-A47c unguarded writes) | `anUnchangedInkUpdateNeverRewritesTheStorage` FAILED: 3 liveness-flip updates = **3 full-range storage edits** counted via `NSTextStorage.didProcessEditing`, with `occasionsFired` proving the updates genuinely reached `updateNSView` |
+
+**Pin honesty, recorded because it cost an iteration (R3-4 again):**
+pin B's FIRST version drove a sibling-state tick and stayed GREEN under
+revert 2 — SwiftUI's fine-grained invalidation never delivered the
+update to the pane, so the pin was hollow. Rebuilt around liveness
+flips with `occasionsFired` as the proof-of-update arm, red verified
+against the live revert before the fix was restored. Pin A carries a
+deliberate OS-drift sensitivity, stated in its doc comment: its STRAND
+assertion fails if a macOS update ever fixes the TK2 cull — TEXTKIT2
+§5's re-verify posture as a tripwire, so the mechanism is retired
+deliberately, never silently.
+
+#### The memo (P-5) — written, nothing from it built
+
+`notes/plans/phase-13d-memo-long-content-panes.md`: the trace's facts
+as foundation; the layer's contract whole; the edges enumerated (all
+ten pane compositions, caret-in-cap, selection-across-cap, the
+full-range-invalidation class, extreme-take measurement cost, R25's
+cadence, §5 drift); four options costed — (a) the S4-31b capped card
+generalized · (b) a live-wired TK2 viewport (priced out by TEXTKIT2
+§2) · (c) a CoreText read tier (the deep escape hatch; costs selection
+parity and presses P-3) · (d) the stabilized status quo (landed).
+**Recommendation: (d) now, (a) pre-approved as 13d's build if her use
+asks for it** — with the threshold and the article-cell question as her
+rulings (the memo's §6 decision list). The A45 note is carried in the
+memo's own words: the cap, if ruled, is a presentation bound, never a
+nudge to restructure.
+
+#### Numbered judgment calls
+
+1. **Both stabilization halves landed, not one.** The gate alone
+   leaves every OTHER full-range invalidation (voice switch, string
+   adoption) able to strand permanently; the restore alone leaves the
+   every-update kill flashing on every click. Together they are
+   trigger-death plus self-repair — both are completions of the
+   accepted 1F/1G mechanism at the one component, and the mandate's
+   example ("a viewport nudge TK2 needs") names the second literally.
+2. **The restore is occasion-gated, not layout-pass-gated** — the
+   termination argument mirrors 1G's own (user events cannot be caused
+   by the mechanism they trigger); a layout-pass-fired restore could
+   ping-pong at runloop rate.
+3. **The idle-voice-switch residual recorded, not fixed:** a font
+   re-attribution while a scrolled card is idle can still strand until
+   the next user event. One line (a restore after the font-swap
+   branch) if her use ever surfaces it — memo ruling 5.
+4. **The scratch hunt suite (`A47cHuntTests`, 13 experiments) deleted
+   after use** per the 1F/1G precedent; every census number and
+   refutation is recorded here and in the memo; the durable checks
+   graduated into the two pins.
+5. **No QUESTIONS entry:** the stabilization changes no visible
+   behavior except removing the defect; every product-flavored edge is
+   deliberately in the memo's §6 decision list for her walk.
+
+#### Deviations
+
+- **The 2E false-green trap fired and was caught in this session:**
+  `-only-testing:VariorumTests/TutorialWalkTests` reported
+  `** TEST SUCCEEDED **` over **ZERO tests** — `TutorialWalkTests` is a
+  FILE of seven `@Suite` types, not a type. The seven type names were
+  run explicitly (`✔ Test run with 49 tests in 7 suites`). The traps
+  section's rule now has a second concrete instance.
+- **No lookup subagent used** — every question was answerable by
+  measurement in the real composition, and was measured.
+- The full-suite lines, quoted: core
+  `✔ Test run with 882 tests in 100 suites` · Mac
+  `✔ Test run with 788 tests in 135 suites` · tutorial (explicit types)
+  `✔ Test run with 49 tests in 7 suites`.
+
+#### Ladder foci suggested for this session's diff
+
+Whether the render restore should also ride the two remaining
+full-range invalidation sites (the font-swap branch and the read-pane
+string adoption) rather than waiting for the next user event — the
+recorded residual; whether pin A's deliberate OS-drift sensitivity is
+the right posture or should soften to a skip-with-record; whether the
+change-gate's `NSColor` equality holds across every token path (pin B
+pins terminal-light; study/dark inks ride the same conversion but are
+not separately pinned); and 1G's still-unresolved focus — whether the
+TOC's expanded rows idle the same way (they compose the same surface
+but sit in a different scroll composition).
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
