@@ -1713,6 +1713,47 @@ built until the gate closes — including B1, which is design, not a
 "trivial half" (the trivial halves are (a), (c), (d), (e), where the
 answer was *build nothing* and the trace is the deliverable).
 
+##### THE ARCHITECT'S RULING on A15 (2026-07-27 night — the gate closes; BUILD OPTION B, both halves)
+
+**B is ruled, whole.** The one-sentence contract — *⇧⏎ ends with the
+caret inside a real block and the newline as that block's content* —
+is her ask satisfied without provenance memory, and the argument
+against A is the risk register's own: a live soft-offset set rebased
+through every tail edit, partial mint, reconcile and attach, handed to
+a deliberately provenance-free Domain rule, is the text-loss class
+this project has paid for twice. B1-only fails the D3 class exactly as
+stated; B2′ fails P-2. **B2's early mint is ACCEPTED as a
+keystroke-visible act**: it is the ratified idle-mint fired
+deliberately ~2 s early — same mechanism, same result as waiting, and
+the boundary it makes visible is one the clock would have made anyway.
+
+**Three riders, binding:**
+
+1. **B2 is the idle-mint's OWN code path, never a re-implementation** —
+   the same forced-mint call the 2 s clock and teardown make, so the
+   whole ratified mint story (trailing-partial inclusion, the
+   never-mints whitespace class, resumed-typing-extends) rides free
+   and stays pinned where it always was.
+2. **State PRECISELY in the batch record what undo offers after a ⇧⏎
+   mint, with PARITY to the idle-mint's existing story as the bar** —
+   whatever ⌥⌘Z does (or does not do) after the 2 s clock's mint is
+   exactly what it does after ⇧⏎'s; invent nothing in either
+   direction, and do not claim ⌥⌘Z in the record unless the pin shows
+   it.
+3. **The keyDown flag is narrow and self-clearing:** shift+Return
+   only (Control-Return's `insertLineBreak:` untouched), reset on
+   every keystroke path — no sticky state; pin that a ⇧⏎ followed by
+   a plain ⏎ behaves as two different keys.
+
+**Pins owed:** (b1) end-to-end — ⇧⏎ at the exact document end lands
+the newline inside the last block, no tail opens, subsequent typing
+extends; (b2) end-to-end — ⇧⏎ in an open tail mints-and-stays, the
+final block structure equal to idle-mint-then-type; the
+whitespace-only tail's ordinary path; rider 3's two-keys pin; and the
+trace suite stays green as the already-stays contexts' cannot-change
+pins. The early-mint consequence joins the bundled walk entry at the
+batch's acceptance.
+
 #### BUILT — the other four items (A14 · A16 · A23 · A24)
 
 **Counts, by my own runs:** core `✔ Test run with 887 tests in 101 suites
