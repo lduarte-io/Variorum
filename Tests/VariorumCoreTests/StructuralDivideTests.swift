@@ -40,9 +40,10 @@ struct StructuralDivideTests {
 
             let result = try ops.divide(a.block.id, cut: 11)
 
-            // A keeps identity as the seam-trimmed first half.
+            // A keeps identity as the seam-trimmed first half — and, since
+            // 13d's A11 ruling, the blank line's k−1 newline with it.
             #expect(try db.fetchString(
-                "SELECT working_text FROM variant WHERE id = ?", [a.variant.id]) == "Para one.")
+                "SELECT working_text FROM variant WHERE id = ?", [a.variant.id]) == "Para one.\n")
             #expect(try db.deletedAt("block", a.block.id) == nil)
             #expect(try db.deletedAt("container_block", a.placement.id) == nil)
 
@@ -161,6 +162,65 @@ struct StructuralDivideTests {
         }
     }
 
+    /// **A11 (author ruling, 13d sitting 2026-07-28) — her report, at the
+    /// op level:** dividing on an empty line used to drop the blank from
+    /// BOTH halves ("it lands nowhere"). The blank belongs to the FIRST
+    /// half, and the proof that this is the RIGHT owner is the round trip:
+    /// `renderedText` reproduces the pre-divide text byte-for-byte, because
+    /// the conditional join completes a left block already ending in a
+    /// newline with exactly one more.
+    @Test func aDivideAtABlankLineKeepsTheBlankAndRoundTrips() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let full = "Para one.\n\nPara two."
+            let a = try ops.newBlock(in: post.id, text: full)
+            #expect(try db.read { try Queries.renderedText($0, containerID: post.id) } == full)
+
+            let result = try ops.divide(a.block.id, cut: 11)
+
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [a.variant.id]) == "Para one.\n")
+            #expect(result.variant.workingText == "Para two.")
+            // The document she reads is unchanged by the cut.
+            #expect(try db.read { try Queries.renderedText($0, containerID: post.id) } == full)
+        }
+    }
+
+    /// …and the ordinary one-newline cut is byte-unchanged by A11 — the
+    /// separator is the whole of that seam, so nothing is owned.
+    @Test func aDivideAtAPlainNewlineIsUnchangedByTheBlankLineRule() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "Para one.\nPara two.")
+
+            let result = try ops.divide(a.block.id, cut: 10)
+
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [a.variant.id]) == "Para one.")
+            #expect(result.variant.workingText == "Para two.")
+        }
+    }
+
+    /// The ONE cut brain: the ceremony's per-take cuts inherit A11 without
+    /// a second implementation (`divideW` calls the same halving function).
+    @Test func theCeremonysPerTakeCutsInheritTheBlankLineRule() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "Take one A.\n\nTake one B.")
+            let second = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.autosave(second.id, text: "Take two A.\n\n\nTake two B.", charDelta: 0)
+
+            let result = try ops.divideW(a.block.id, cuts: [
+                a.variant.id: 13,   // "Take one A.\n\n | Take one B."
+                second.id: 14,      // k = 3 → two newlines stay
+            ])
+
+            #expect(result.first.variants.map(\.workingText) == ["Take one A.\n", "Take two A.\n\n"])
+            #expect(result.second.variants.map(\.workingText) == ["Take one B.", "Take two B."])
+            _ = db
+        }
+    }
+
     @Test func divideFeedsChurn() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
@@ -171,13 +231,14 @@ struct StructuralDivideTests {
             #expect(touchedAtMint != nil)
 
             _ = try ops.divide(a.block.id, cut: 11)
-            // The seam-trimmed first half drops 11 chars (20 → 9): churn
-            // accumulates 11 against the 20-char baseline (11/20 < 0.8) —
+            // The seam-trimmed first half drops 10 chars (20 → 10, the blank
+            // line's k−1 newline staying with it since A11): churn
+            // accumulates 10 against the 20-char baseline (10/20 < 0.8) —
             // divide visibly feeds churn without restamping.
             #expect(try db.fetchString(
                 "SELECT last_touched_at FROM container WHERE id = ?", [post.id]) != touchedAtMint)
             #expect(try db.fetchInt(
-                "SELECT churn_accumulator FROM container WHERE id = ?", [post.id]) == 11)
+                "SELECT churn_accumulator FROM container WHERE id = ?", [post.id]) == 10)
         }
     }
 

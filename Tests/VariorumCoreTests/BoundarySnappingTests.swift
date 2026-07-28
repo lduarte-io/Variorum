@@ -269,14 +269,49 @@ struct BoundarySnappingTests {
 
     // MARK: Seam-trimmed halves
 
-    @Test func seamTrimmingDropsTheSeparatorFromBothHalves() {
+    /// 13d batch 5 (A11 — a RULED FLIP, not a bug fix): the seam's newlines
+    /// are the author's spacing, and the standing k−1 ownership rule gives
+    /// them to the FIRST half. `"Para one.\n\nPara two."` is k = 2, so one
+    /// newline stays behind — and the editor's single-`"\n"` separator
+    /// re-creates the other, which is why her blank line survives the cut.
+    @Test func seamTrimmingGivesTheBlankLineToTheFirstHalf() {
         let halves = BoundarySnapping.seamTrimmedHalves("Para one.\n\nPara two.", cutAtUTF16: 11)
-        #expect(halves?.first == "Para one.")
+        #expect(halves?.first == "Para one.\n")
         #expect(halves?.second == "Para two.")
+
+        // k = 1 (the ordinary paragraph cut) keeps NOTHING — byte-unchanged
+        // from the pre-ruling behaviour, because the separator is the whole
+        // of that seam.
+        let single = BoundarySnapping.seamTrimmedHalves("Para one.\nPara two.", cutAtUTF16: 10)
+        #expect(single?.first == "Para one.")
+        #expect(single?.second == "Para two.")
+
+        // k = 3 → two stay; k = 0 (a mid-sentence cut) → nothing changes.
+        let triple = BoundarySnapping.seamTrimmedHalves("A\n\n\nB", cutAtUTF16: 4)
+        #expect(triple?.first == "A\n\n")
+        #expect(triple?.second == "B")
 
         let sentence = BoundarySnapping.seamTrimmedHalves("One. Two.", cutAtUTF16: 5)
         #expect(sentence?.first == "One.")
         #expect(sentence?.second == "Two.")
+    }
+
+    /// The seam is what BOTH trims drop, so a cut placed before the newlines
+    /// and one placed after them describe the same seam and own it the same
+    /// way — otherwise "where exactly you clicked in the blank line" would
+    /// change what the halves hold.
+    @Test func theSeamRunIsOwnedTheSameFromEitherSideOfTheCut() {
+        for cut in [9, 10, 11] {  // before the run, inside it, after it
+            let halves = BoundarySnapping.seamTrimmedHalves(
+                "Para one.\n\nPara two.", cutAtUTF16: cut)
+            #expect(halves?.first == "Para one.\n")
+            #expect(halves?.second == "Para two.")
+        }
+        // Mixed whitespace normalizes to pure newlines, exactly as
+        // `bulkSegments` normalizes a blank line carrying stray spaces.
+        let mixed = BoundarySnapping.seamTrimmedHalves("A \n \n B", cutAtUTF16: 6)
+        #expect(mixed?.first == "A\n")
+        #expect(mixed?.second == "B")
     }
 
     @Test func seamTrimmingTouchesOnlyTheSeam() {
@@ -297,5 +332,13 @@ struct BoundarySnappingTests {
         let halves = BoundarySnapping.seamTrimmedHalves("   Hello", cutAtUTF16: 2)
         #expect(halves?.first == "")
         #expect(halves?.second == "Hello")
+
+        // A11's cannot-widen edge: an EMPTY first half gains no newline, so
+        // a cut the ops layer refuses today still trims to nothing and is
+        // still refused. An edge run has no preceding piece to own it —
+        // `bulkSegments`' own rule.
+        let leadingRun = BoundarySnapping.seamTrimmedHalves("\n\nHello", cutAtUTF16: 2)
+        #expect(leadingRun?.first == "")
+        #expect(leadingRun?.second == "Hello")
     }
 }

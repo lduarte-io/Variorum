@@ -432,4 +432,133 @@ struct UndoStackTests {
             #expect(stack.depth == 1)
         }
     }
+
+    // MARK: A12 — the destructive-undo warning's INPUT (13d batch 5)
+    //
+    // The author's ruling, 2026-07-28: warn ONLY when the undo would discard
+    // text edited since the operation — the fourth quiet auto-commit
+    // occasion's own class — and stay silent for every other structural
+    // undo. These pins hold both halves of that "only".
+
+    @Test func theWarningFiresExactlyOnTheInsuranceClass() throws {
+        try withOperations { _, _ in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+
+            try ops.divide(a.block.id, cut: 12)
+            // Nothing edited since: the undo would restore a buffer that is
+            // still exactly the op's own output. Silent.
+            #expect(stack.pendingUndoWarning(with: ops) == nil)
+
+            // She edits the first half — NOW the undo would set that writing
+            // aside, and the door must ask.
+            try ops.autosave(a.variant.id, text: "First half, rewritten.", charDelta: 6)
+            #expect(stack.pendingUndoWarning(with: ops)
+                == UndoStack.PendingUndoWarning(label: "Divide", bufferCount: 1))
+
+            // Committing it takes it OUT of the class: nothing would be
+            // discarded that history does not already hold.
+            try ops.commit(a.variant.id)
+            #expect(stack.pendingUndoWarning(with: ops) == nil)
+
+            // Typing again puts it back — the question is asked against the
+            // store as it is now, never cached at registration.
+            try ops.autosave(a.variant.id, text: "First half, rewritten twice.", charDelta: 6)
+            #expect(stack.pendingUndoWarning(with: ops)?.bufferCount == 1)
+
+            // And editing back to the pre-image is not the class either:
+            // there is nothing to set aside.
+            try ops.autosave(a.variant.id, text: "First half. Second half.", charDelta: 4)
+            #expect(stack.pendingUndoWarning(with: ops) == nil)
+        }
+    }
+
+    @Test func everyOtherStructuralUndoIsSilent() throws {
+        try withOperations { _, _ in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "alpha")
+            let b = try ops.newBlock(in: post.id, text: "beta")
+
+            // A merge RESTORES no buffer (its sources are released whole),
+            // so it can discard nothing — silent by construction, even with
+            // both sources edited to the hilt beforehand.
+            try ops.merge(a.block.id, b.block.id)
+            #expect(stack.pendingUndoWarning(with: ops) == nil)
+
+            // The same for the delete/move/reorder family.
+            let c = try ops.newBlock(in: post.id, text: "gamma")
+            try ops.deleteBlock(c.block.id)
+            #expect(stack.pendingUndoWarning(with: ops) == nil)
+
+            // An empty stack asks nothing.
+            stack.removeAll()
+            #expect(stack.pendingUndoWarning(with: ops) == nil)
+        }
+    }
+
+    /// The warning speaks for the WHOLE compound (Make Block from Selection
+    /// is two divides and one entry), and the count is the buffers, not the
+    /// legs.
+    @Test func aCompoundWarnsForEveryLegItWouldRestore() throws {
+        try withOperations { _, _ in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "one. two. three.")
+
+            // The SECOND leg's restore target is the block the FIRST leg
+            // minted (it is the one whose buffer that divide truncated) —
+            // not the block the second leg mints, which is a fresh row undo
+            // tombstones rather than restores. My first draft of this pin
+            // edited the wrong variant and read 1 where 2 was right; the
+            // pin was wrong, the code was not.
+            let middle = try stack.withCompound(label: "Make Block", operations: ops) {
+                let first = try ops.divide(a.block.id, cut: 5)     // "one." | "two. three."
+                _ = try ops.divide(first.block.id, cut: 5)         // "two." | "three."
+                return first
+            }
+            #expect(stack.depth == 1)
+            #expect(stack.pendingUndoWarning(with: ops) == nil)
+
+            try ops.autosave(a.variant.id, text: "one, rewritten.", charDelta: 5)
+            #expect(stack.pendingUndoWarning(with: ops)
+                == UndoStack.PendingUndoWarning(label: "Make Block", bufferCount: 1))
+
+            // Both legs' buffers count — the compound is ONE act to her.
+            try ops.autosave(middle.variant.id, text: "two, rewritten.", charDelta: 6)
+            #expect(stack.pendingUndoWarning(with: ops)?.bufferCount == 2)
+        }
+    }
+
+    /// The warning is a QUESTION, never a gate: the undo itself is unchanged
+    /// and still insures what it overwrites (the fourth occasion), so a
+    /// door that skipped the ask can lose nothing.
+    @Test func theWarningNeverChangesWhatTheUndoDoes() throws {
+        try withOperations { ops, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            try ops.divide(a.block.id, cut: 12)
+            try ops.autosave(a.variant.id, text: "First half, rewritten.", charDelta: 6)
+
+            _ = stack.pendingUndoWarning(with: ops)   // asked
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM commit_point WHERE variant_id = ?", [a.variant.id]) == 0)
+
+            try stack.undo(with: ops)
+            // The insurance commit rides the undo's own transaction, not the
+            // question: the set-aside text is one restore away.
+            #expect(try db.fetchString(
+                "SELECT text FROM commit_point WHERE variant_id = ?", [a.variant.id])
+                == "First half, rewritten.")
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [a.variant.id])
+                == "First half. Second half.")
+        }
+    }
 }

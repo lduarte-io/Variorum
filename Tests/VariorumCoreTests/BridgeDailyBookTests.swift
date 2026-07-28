@@ -118,26 +118,58 @@ struct BridgeDailyBookTests {
 
     // MARK: The landing is never blocked (every refusal speaks)
 
-    /// No designated daily book (PROVISIONAL, QUESTIONS #37): the body lands
-    /// regardless — the doctrine outranks tidiness — and the round SAYS why
-    /// the entry is not on the shelf, instead of leaving her to find it in
-    /// the Pool with no explanation.
-    @Test func withNoDesignatedBookTheBodyStillLandsAndTheRoundSaysWhy() async throws {
+    /// **13d batch 5 — QUESTIONS #37 OVERTURNED to option (iii)** (author,
+    /// 2026-07-28: *"the fragments entries should arrive as part of
+    /// Journal"*). A RULED FLIP: this pin asserted the superseded
+    /// PROVISIONAL (land, skip, say why, mint nothing). With no designation
+    /// the landing now CREATES AND PINS the Journal book — ⌘J's first-press
+    /// shape, made shared — and the round says nothing, because there is
+    /// nothing to explain.
+    @Test func withNoDesignatedBookTheLandingCreatesAndPinsTheJournalBook() async throws {
         try await withBridge { bridge in
             _ = try await bridge.server.fragmentsAppWrites(
                 userID: bridge.config.userID, day: "2026-07-09",
-                body: "Nowhere to shelve this.", updatedAt: bridge.fragmentsStamp(0))
+                body: "Nowhere to shelve this — until now.",
+                updatedAt: bridge.fragmentsStamp(0))
 
             let report = try await bridge.engine.pullAndLand()
 
             #expect(report.created == 1)
-            #expect(try bridge.rendered(day: "2026-07-09") == "Nowhere to shelve this.")
-            #expect(report.notes.count == 1)
-            #expect(report.notes.first?.contains("2026-07-09") == true)
-            #expect(report.notes.first?.contains("no daily journal book is designated") == true)
-            // No book was minted on her shelf by a headless round.
-            #expect(try bridge.db.fetchInt(
-                "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL") == 0)
+            #expect(try bridge.rendered(day: "2026-07-09") == "Nowhere to shelve this — until now.")
+            #expect(report.notes.isEmpty)
+
+            // Exactly ONE book, and it is the ⌘J door's own shape.
+            let books = try await bridge.db.read { db in
+                try Reading.fetchAll(db, sql: "SELECT * FROM reading WHERE deleted_at IS NULL")
+            }
+            #expect(books.count == 1)
+            #expect(books.first?.name == Operations.defaultDailyJournalBookName)
+            #expect(books.first?.kind == .curated)
+            #expect(books.first?.profile == "journal")
+            #expect(books.first?.sortField == .entryDate)
+            // Designated, pinned, and holding the day.
+            #expect(try await bridge.db.read { try Queries.dailyJournalBookID($0) } == books.first?.id)
+            #expect(try await bridge.db.read { try Queries.shelfPins($0) }
+                == [books.first?.id].compactMap { $0 })
+            #expect(try memberships(bridge, book: books.first?.id ?? "").count == 1)
+        }
+    }
+
+    /// …and a SECOND landing on another day joins that book rather than
+    /// minting a second one (the create is an ensure, not a per-landing act).
+    @Test func aSecondLandingJoinsTheBookTheFirstOneCreated() async throws {
+        try await withBridge { bridge in
+            for (i, day) in ["2026-07-09", "2026-07-10"].enumerated() {
+                _ = try await bridge.server.fragmentsAppWrites(
+                    userID: bridge.config.userID, day: day,
+                    body: "Day \(i).", updatedAt: bridge.fragmentsStamp(i))
+                _ = try await bridge.engine.pullAndLand()
+            }
+            let books = try await bridge.db.read { db in
+                try Reading.fetchAll(db, sql: "SELECT * FROM reading WHERE deleted_at IS NULL")
+            }
+            #expect(books.count == 1)
+            #expect(try memberships(bridge, book: books.first?.id ?? "").count == 2)
         }
     }
 
@@ -185,11 +217,13 @@ struct BridgeDailyBookTests {
     }
 
     /// A designation dangling at a DELETED book reads as none (the fallback
-    /// class, `Queries.dailyJournalBookID`) — land and say so, never throw.
-    @Test func aDanglingDesignationLandsAndSaysWhy() async throws {
+    /// class, `Queries.dailyJournalBookID`) — so #37(iii) treats it exactly
+    /// like no designation at all: a fresh Journal book, created and pinned.
+    /// (Another RULED FLIP: this pin asserted the "say why" note.)
+    @Test func aDanglingDesignationGetsAFreshJournalBook() async throws {
         try await withBridge { bridge in
-            let book = try designateDailyBook(bridge)
-            try bridge.ops.deleteReading(book)
+            let dead = try designateDailyBook(bridge)
+            try bridge.ops.deleteReading(dead)
 
             _ = try await bridge.server.fragmentsAppWrites(
                 userID: bridge.config.userID, day: "2026-07-09",
@@ -198,7 +232,35 @@ struct BridgeDailyBookTests {
 
             #expect(report.created == 1)
             #expect(try bridge.rendered(day: "2026-07-09") == "The book is gone.")
-            #expect(report.notes.first?.contains("no daily journal book is designated") == true)
+            #expect(report.notes.isEmpty)
+            let liveBooks = try await bridge.db.read { db in
+                try Reading.fetchAll(db, sql: "SELECT * FROM reading WHERE deleted_at IS NULL")
+            }
+            #expect(liveBooks.count == 1)
+            #expect(liveBooks.first?.id != dead)
+            #expect(try memberships(bridge, book: liveBooks.first?.id ?? "").count == 1)
+        }
+    }
+
+    /// **The cannot-widen edge of the creation, and it is the one that
+    /// matters:** a book she DESIGNATED and then finished / filled / made
+    /// smart is a deliberate state, and creation must never answer it by
+    /// minting a second Journal beside hers. Those three paths keep their
+    /// statuses and their notes (pinned above); this asserts the count.
+    @Test func creationNeverReplacesABookSheDesignated() async throws {
+        try await withBridge { bridge in
+            let book = try designateDailyBook(bridge)
+            try bridge.ops.lockReading(book)
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: bridge.config.userID, day: "2026-07-09",
+                body: "Landed against a finished book.",
+                updatedAt: bridge.fragmentsStamp(0))
+            let report = try await bridge.engine.pullAndLand()
+
+            #expect(report.notes.first?.contains("finished") == true)
+            #expect(try bridge.db.fetchInt(
+                "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL") == 1)
+            #expect(try memberships(bridge, book: book).isEmpty)
         }
     }
 

@@ -133,13 +133,47 @@ public enum BoundarySnapping {
     /// edge, or splits a grapheme. Either half may come back empty (the text
     /// around the cut was all whitespace) — the operations layer refuses
     /// those cuts.
+    ///
+    /// **The blank line belongs to the FIRST half (author ruling, 13d
+    /// sitting 2026-07-28 — ledger A11).** Her report: dividing on an empty
+    /// line put the blank line NOWHERE. The seam run's newlines are not the
+    /// separator alone — they are the author's spacing, and the standing
+    /// ownership rule (the 2026-07-12 spacing ruling, QUESTIONS #12 option
+    /// (a); `SegmentationRules.bulkSegments` / `crystallizedBoundary`) says
+    /// where they live: **k newlines between two pieces store k−1 trailing
+    /// newlines on the preceding piece**, because the editor's single-`"\n"`
+    /// separator re-creates the last. So `"para1\n\npara2"` cut at the blank
+    /// yields `("para1\n", "para2")` — the surface reproduces the blank line
+    /// byte-for-byte and `renderedText` round-trips it (the conditional join:
+    /// a left block already ending in a newline completes with ONE more).
+    /// k = 1 (the ordinary paragraph cut) keeps 0 and is byte-unchanged, as
+    /// is a seam with no newline at all (a mid-sentence cut).
+    ///
+    /// ONE rule everywhere: this is the only halving function the divide
+    /// doors consult (plain `divide`, `divideW`'s per-take cuts), so the
+    /// ceremony inherits it without a second implementation. A first half
+    /// that trims to EMPTY gains nothing — an edge run has no preceding
+    /// piece to own it (`bulkSegments`' own edge-run rule), and the ops
+    /// layer's empty-half refusal must keep refusing exactly what it did.
     public static func seamTrimmedHalves(
         _ text: String, cutAtUTF16 cut: Int
     ) -> (first: String, second: String)? {
         guard cut > 0, cut < text.utf16.count,
               let index = graphemeIndex(atUTF16: cut, in: text)
         else { return nil }
-        return (trimTrailing(text[..<index]), trimLeading(text[index...]))
+        let head = text[..<index]
+        let tail = text[index...]
+        let first = trimTrailing(head)
+        let second = trimLeading(tail)
+        guard !first.isEmpty else { return (first, second) }
+        // The seam run is everything both trims dropped, on both sides of
+        // the cut — a cut placed before the newlines and one placed after
+        // them describe the SAME seam and must own it identically.
+        let droppedBefore = head.reversed().prefix { $0.isWhitespace }
+        let droppedAfter = tail.prefix { $0.isWhitespace }
+        let newlines = droppedBefore.count(where: \.isNewline)
+            + droppedAfter.count(where: \.isNewline)
+        return (first + String(repeating: "\n", count: max(0, newlines - 1)), second)
     }
 
     // MARK: - UTF-16 ↔ String.Index (the one unit-conversion door)

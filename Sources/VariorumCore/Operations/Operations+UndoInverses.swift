@@ -130,6 +130,43 @@ extension Operations {
         let postOpText: String
     }
 
+    /// **The insurance question, asked ONCE (13d batch 5 — ledger A12).**
+    /// True when restoring this pre-image would overwrite a buffer the
+    /// author edited SINCE the structural operation — the case the fourth
+    /// quiet auto-commit occasion insures (OverallModel §3). `revertStructural`
+    /// consults it to decide the commit; `UndoStack.pendingUndoWarning`
+    /// consults the same predicate to decide the author's confirm, so the
+    /// dialog and the commit can never disagree about what the class IS.
+    ///
+    /// Unchanged buffers (still the op's own output) and buffers already
+    /// back at the pre-image are not the class; neither is a diverged buffer
+    /// whose divergence is already committed (`dirty == false`) — nothing
+    /// would be set aside that a commit does not already hold.
+    static func wouldInsure(currentText: String, preImage: TextPreImage, dirty: Bool) -> Bool {
+        currentText != preImage.text && currentText != preImage.postOpText && dirty
+    }
+
+    /// The variants a structural undo over `preImages` would insure, right
+    /// now — the A12 warning's whole input. **Never throws and never
+    /// writes:** it is asked on the way to a dialog, and a store hiccup must
+    /// degrade to "no warning" (the undo itself still insures — the commit
+    /// is inside `revertStructural`'s transaction, not here), never to a
+    /// blocked undo. A variant that has since died or been re-pointed
+    /// answers no: `revertStructural` would refuse or skip it.
+    func insuranceTargets(_ preImages: [TextPreImage]) -> [String] {
+        guard !preImages.isEmpty else { return [] }
+        return (try? database.read { db in
+            try preImages.compactMap { preImage -> String? in
+                guard let variant = try Variant.fetchOne(db, key: preImage.variantID),
+                      variant.deletedAt == nil
+                else { return nil }
+                return Self.wouldInsure(
+                    currentText: variant.workingText, preImage: preImage,
+                    dirty: try isDirty(db, variant)) ? preImage.variantID : nil
+            }
+        }) ?? []
+    }
+
     /// A freshly minted block as the structural op made it, for
     /// `revertStructural`: variantID → working_text at mint time, so undo
     /// can tell an untouched mint (vanishes as if never made) from one the
@@ -180,7 +217,9 @@ extension Operations {
                 try ensurePlacementUnlocked(db, blockID: variant.blockId)
                 try ensureEditable(variant)
                 guard variant.workingText != preImage.text else { continue }
-                if variant.workingText != preImage.postOpText, try isDirty(db, variant) {
+                if Self.wouldInsure(
+                    currentText: variant.workingText, preImage: preImage,
+                    dirty: try isDirty(db, variant)) {
                     // The buffer diverged after the structural op and the
                     // restore is about to overwrite it: insure first — the
                     // fourth quiet auto-commit occasion, mirroring

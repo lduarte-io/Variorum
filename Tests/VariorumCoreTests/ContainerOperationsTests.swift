@@ -232,4 +232,94 @@ struct ContainerOperationsTests {
             }
         }
     }
+
+
+    // MARK: The daily journal book's ensure (13d batch 5 — QUESTIONS #37(iii))
+    //
+    // The author's ruling, 2026-07-28: *"the fragments entries should arrive
+    // as part of Journal"*. The ensure half — create-and-pin included — now
+    // lives HERE, in the door all four surfaces share, so the ⌘J door has no
+    // creation residue of its own.
+
+    @Test func shelvingCreatesDesignatesAndPinsTheJournalBookOnFirstUse() throws {
+        try withOperations { ops, db in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-28")
+
+            let outcome = ops.shelveInDailyJournalBook(entry.container.id)
+
+            guard case .shelved(let bookID) = outcome else {
+                Issue.record("expected .shelved, got \(outcome)")
+                return
+            }
+            let book = try #require(try db.read { try Queries.reading($0, id: bookID) })
+            #expect(book.name == Operations.defaultDailyJournalBookName)
+            #expect(book.kind == .curated)
+            #expect(book.profile == "journal")
+            #expect(book.sortField == .entryDate)
+            #expect(book.sortDir == .asc)
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == bookID)
+            #expect(try db.read { try Queries.shelfPins($0) } == [bookID])
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM reading_post WHERE deleted_at IS NULL") == 1)
+            // The creation rides the outbox like any row it writes.
+            #expect(try db.outboxContains("reading", bookID))
+        }
+    }
+
+    @Test func shelvingEnsuresOnceNoMatterHowManyDoorsCallIt() throws {
+        try withOperations { ops, db in
+            for day in ["2026-07-26", "2026-07-27", "2026-07-28"] {
+                let entry = try ops.createOrOpenJournalEntry(entryDate: day)
+                _ = ops.shelveInDailyJournalBook(entry.container.id)
+                // …and a second call for the same day changes nothing.
+                #expect(ops.shelveInDailyJournalBook(entry.container.id) == .alreadyDecided)
+            }
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL") == 1)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM reading_post WHERE deleted_at IS NULL") == 3)
+        }
+    }
+
+    /// The rule the creation must not run over: a pair she DECIDED stays
+    /// decided, and a decided pair needs no book at all. (Cannot-widen.)
+    @Test func aDecidedPairIsLeftAloneAndTheCreationNeverSecondGuessesHer() throws {
+        try withOperations { ops, db in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-28")
+            guard case .shelved(let bookID) = ops.shelveInDailyJournalBook(entry.container.id) else {
+                Issue.record("expected the first call to shelve")
+                return
+            }
+            try ops.removePostFromReading(entry.container.id, from: bookID)
+
+            #expect(ops.shelveInDailyJournalBook(entry.container.id) == .alreadyDecided)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL") == 1)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE deleted_at IS NULL") == 0)
+
+            // A book she designated and FINISHED keeps its own status — the
+            // ensure never answers a deliberate state by minting a second
+            // Journal beside hers.
+            try ops.lockReading(bookID)
+            let other = try ops.createOrOpenJournalEntry(entryDate: "2026-07-29")
+            #expect(ops.shelveInDailyJournalBook(other.container.id) == .bookFinished)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL") == 1)
+        }
+    }
+
+    /// It still NEVER throws — the landing outranks tidiness. A dead post is
+    /// the sharpest case: the creation happens, then the membership refuses,
+    /// and the caller gets a phrase rather than an error.
+    @Test func shelvingStillNeverThrows() throws {
+        try withOperations { ops, db in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-28")
+            try ops.deleteContainer(entry.container.id)
+
+            let outcome = ops.shelveInDailyJournalBook(entry.container.id)
+            guard case .refused(let reason) = outcome else {
+                Issue.record("expected .refused, got \(outcome)")
+                return
+            }
+            #expect(reason == "the entry is no longer there")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE deleted_at IS NULL") == 0)
+        }
+    }
 }

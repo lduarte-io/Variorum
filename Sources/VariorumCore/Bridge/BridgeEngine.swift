@@ -238,11 +238,13 @@ public struct BridgeEngine: Sendable {
     ///
     /// The RULES live once, in `Operations.shelveInDailyJournalBook` (never
     /// throws; a decided pair — live or tombstoned membership — is left
-    /// alone; no designated book is reported, never invented), shared with
-    /// the phone's capture door so the class cannot recur one door at a
-    /// time. What is bridge-specific is only the WORDING: a landing that
-    /// could not shelve says so on the round's own note surface, which the
-    /// status row already renders as "needs attention".
+    /// alone; **with no book designated the Journal book is CREATED and
+    /// pinned**, the author's 13d ruling on QUESTIONS #37, in her words
+    /// *"the fragments entries should arrive as part of Journal"*), shared
+    /// with the phone's capture door and ⌘J so the class cannot recur one
+    /// door at a time. What is bridge-specific is only the WORDING: a
+    /// landing that could not shelve says so on the round's own note
+    /// surface, which the status row already renders as "needs attention".
     private func ensureDailyBookMembership(day: String) async -> String? {
         let postID: String?
         do {
@@ -266,10 +268,6 @@ public struct BridgeEngine: Sendable {
         switch Operations().shelveInDailyJournalBook(postID) {
         case .shelved, .alreadyDecided:
             return nil
-        case .noDailyBook:
-            return Self.unshelvedNote(
-                day: day,
-                because: "no daily journal book is designated — open Today's Entry (⌘J), or pick one with a book's “Use as Daily Journal”")
         case .bookFinished:
             return Self.unshelvedNote(
                 day: day,

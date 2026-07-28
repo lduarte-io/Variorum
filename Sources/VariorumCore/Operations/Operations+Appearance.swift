@@ -83,18 +83,27 @@ extension Operations {
     public func setShelfPinned(_ readingID: String, pinned: Bool) throws {
         try database.write { db in
             _ = try liveReading(db, readingID)
-            var pins = try Queries.shelfPins(db)
-            if pinned {
-                guard !pins.contains(readingID) else { return }
-                pins.append(readingID)
-            } else {
-                guard pins.contains(readingID) else { return }
-                pins.removeAll { $0 == readingID }
-            }
-            let encoder = JSONEncoder()
-            let json = String(decoding: try encoder.encode(pins), as: UTF8.self)
-            try upsertSetting(db, key: "shelf_pins", value: json)
+            try setShelfPinned(db, readingID, pinned: pinned)
         }
+    }
+
+    /// The pin write itself, at db level, so a caller already inside a write
+    /// transaction shares the ONE implementation instead of copying it
+    /// (13d batch 5 — the daily book's create-and-pin ensure). The liveness
+    /// check stays with the public door: an in-transaction caller has just
+    /// inserted the reading it is pinning.
+    func setShelfPinned(_ db: Database, _ readingID: String, pinned: Bool) throws {
+        var pins = try Queries.shelfPins(db)
+        if pinned {
+            guard !pins.contains(readingID) else { return }
+            pins.append(readingID)
+        } else {
+            guard pins.contains(readingID) else { return }
+            pins.removeAll { $0 == readingID }
+        }
+        let encoder = JSONEncoder()
+        let json = String(decoding: try encoder.encode(pins), as: UTF8.self)
+        try upsertSetting(db, key: "shelf_pins", value: json)
     }
 
     /// Designates THE daily journal book (Phase 13 B3, PROVISIONAL — the
@@ -103,8 +112,14 @@ extension Operations {
     public func setDailyJournalBook(_ readingID: String) throws {
         try database.write { db in
             _ = try liveReading(db, readingID)
-            try upsertSetting(db, key: "daily_journal_book", value: readingID)
+            try setDailyJournalBook(db, readingID)
         }
+    }
+
+    /// The designation write at db level — same reason as `setShelfPinned`'s
+    /// twin above (13d batch 5).
+    func setDailyJournalBook(_ db: Database, _ readingID: String) throws {
+        try upsertSetting(db, key: "daily_journal_book", value: readingID)
     }
 
     /// The designated daily book, read THROUGH the operations seam so the

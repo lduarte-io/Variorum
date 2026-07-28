@@ -79,9 +79,6 @@ extension Operations {
         /// Nothing to do: the pair is already decided — a LIVE membership
         /// (shelved) or a TOMBSTONED one (the author took it off the shelf).
         case alreadyDecided
-        /// No daily journal book is designated, or the designation dangles
-        /// at a deleted book (the fallback class).
-        case noDailyBook
         /// The daily book is finished (`reading.locked`).
         case bookFinished
         /// The daily book is at its `max_posts` cap.
@@ -111,19 +108,30 @@ extension Operations {
     ///
     /// This is that half, made shared so the class cannot recur one door at
     /// a time. Callers: the Fragments bridge's landing half
-    /// (`BridgeEngine.pullAndLand`) and the phone's capture door
-    /// (`EntryListViewModel.open(on:)`). ⌘J keeps its own inline version
-    /// because it additionally CREATES and pins the book on first use — a
-    /// deliberate difference, not a fork: creating a book is an act only a
-    /// button press she pressed may take (PROVISIONAL, QUESTIONS #37).
+    /// (`BridgeEngine.pullAndLand`), the phone's capture door
+    /// (`EntryListViewModel.open(on:)`), and ⌘J / "Today's Entry"
+    /// (`JournalBooks.openToday`).
     ///
-    /// Three rules, each deliberate:
+    /// **The ENSURE is whole here (author ruling, 13d sitting 2026-07-28 —
+    /// QUESTIONS #37 OVERTURNED to option (iii); her words: "the fragments
+    /// entries should arrive as part of Journal").** With no daily journal
+    /// book designated — or a designation dangling at a deleted book, which
+    /// reads the same way — this door now CREATES AND PINS the Journal book
+    /// exactly as ⌘J's first press always did, and ⌘J delegates its whole
+    /// ensure here. The superseded shape (create-and-pin at the ⌘J door
+    /// only, every other door landing bookless and saying so) was a
+    /// PROVISIONAL, and its reasoning — "minting a book on her shelf is an
+    /// act only a button press she pressed may take" — is the half she
+    /// overturned: a Fragments day IS a journal entry, and the journal is
+    /// where it belongs whichever door carried it.
+    ///
+    /// Three rules, each deliberate and each UNCHANGED by that ruling:
     ///
     /// - **NEVER THROWS, so it can never block a mint or a landing.** It
     ///   returns what happened; the caller words it. "Nothing typed in
     ///   either app can be permanently lost" outranks tidiness, so a
-    ///   finished book, a full book, a smart book, a dangling designation
-    ///   and any unexpected error all report rather than propagate.
+    ///   finished book, a full book, a smart book, a failed creation and
+    ///   any unexpected error all report rather than propagate.
     /// - **Never re-shelves what she took off the shelf.** ANY membership
     ///   row for the pair — live or tombstoned — means the pair is already
     ///   decided, so a headless round can never undo a deliberate
@@ -132,23 +140,34 @@ extension Operations {
     ///   no membership row of any kind gets shelved whenever a door reaches
     ///   it again, which is how entries that landed bookless before this
     ///   existed find their way onto the shelf.
+    ///
+    /// What creation does NOT do: it never replaces a book she designated.
+    /// A FINISHED, FULL or SMART daily book keeps its own status and its own
+    /// wording — those are her deliberate states (the bounded-notebook
+    /// flow's expected end among them), and answering them by minting a
+    /// second Journal beside the first would be inventing product behavior.
     @discardableResult
     public func shelveInDailyJournalBook(_ postID: String) -> DailyBookShelving {
         do {
-            let plan: (bookID: String, decided: Bool)? = try database.read { db in
-                guard let bookID = try Queries.dailyJournalBookID(db) else { return nil }
-                let decided = try Bool.fetchOne(
-                    db,
-                    sql: """
-                        SELECT EXISTS (
-                          SELECT 1 FROM reading_post
-                          WHERE reading_id = ? AND post_id = ?
-                        )
-                        """,
-                    arguments: [bookID, postID]) ?? false
-                return (bookID, decided)
+            // The ordinary path stays a READ (a designation exists on every
+            // round after the first). Only its absence opens a write, and
+            // that write re-reads inside the writer — GRDB serializes
+            // writers, so two doors racing the very first entry cannot mint
+            // two Journal books (the same hazard the Stage B review's
+            // read-inside-the-runner fix closed for ⌘J, closed here at the
+            // one place all four doors now share).
+            let plan: (bookID: String, decided: Bool)
+            if let existing = try database.read({ try Self.shelvingPlan($0, postID: postID) }) {
+                plan = existing
+            } else {
+                plan = try database.write { db in
+                    if let raced = try Self.shelvingPlan(db, postID: postID) { return raced }
+                    let book = try insertDailyJournalBook(db)
+                    // A book minted in this transaction can carry no
+                    // membership row, so nothing is decided about the pair.
+                    return (book.id, false)
+                }
             }
-            guard let plan else { return .noDailyBook }
             guard !plan.decided else { return .alreadyDecided }
             _ = try addPostToReading(postID, to: plan.bookID)
             return .shelved(readingID: plan.bookID)
@@ -165,6 +184,49 @@ extension Operations {
         } catch {
             return .refused(Self.residualReason(error))
         }
+    }
+
+    /// The name a freshly created daily journal book takes (13d batch 5:
+    /// the constant moves here with the creation it names — the Mac's
+    /// `JournalBooks` forwards to it so the two can never drift).
+    public static let defaultDailyJournalBookName = "Journal"
+
+    /// The shelving question, asked once: which book is designated, and is
+    /// this pair already decided (ANY membership row — live or tombstoned)?
+    /// nil ⇒ no live designation. Used from the read path AND re-used inside
+    /// the writer, so the race re-check cannot ask a different question.
+    private static func shelvingPlan(
+        _ db: Database, postID: String
+    ) throws -> (bookID: String, decided: Bool)? {
+        guard let bookID = try Queries.dailyJournalBookID(db) else { return nil }
+        let decided = try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (
+                  SELECT 1 FROM reading_post
+                  WHERE reading_id = ? AND post_id = ?
+                )
+                """,
+            arguments: [bookID, postID]) ?? false
+        return (bookID, decided)
+    }
+
+    /// Creates, designates and pins the daily journal book — the ⌘J door's
+    /// long-standing first-press shape, moved here whole by the author's
+    /// #37(iii) ruling. Same reading (curated, `profile: "journal"`, sorted
+    /// by `entry_date` ascending), same designation, same shelf pin; all
+    /// three in the CALLER's transaction so a partial state cannot exist.
+    private func insertDailyJournalBook(_ db: Database) throws -> Reading {
+        let now = date.now
+        let book = Reading(
+            id: newID(), ownerId: currentOwnerID(),
+            name: Self.defaultDailyJournalBookName, kind: .curated,
+            profile: "journal", sortField: .entryDate, sortDir: .asc,
+            createdAt: now, updatedAt: now)
+        try book.insert(db)
+        try setDailyJournalBook(db, book.id)
+        try setShelfPinned(db, book.id, pinned: true)
+        return book
     }
 
     /// The residual bucket's wording (13c Stage 1 ladder, R1-3). Both

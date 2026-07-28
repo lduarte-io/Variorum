@@ -128,7 +128,9 @@ extension Operations {
                     restoringTexts: [sourcePreImage],
                     untombstoningBlocks: [.init(result.block.id, [result.variant])],
                     releasingPlacementRows: [])
-            })
+            },
+            // A12: the source buffer this undo would restore.
+            insuring: [sourcePreImage])
         return result
     }
 
@@ -219,7 +221,9 @@ extension Operations {
                     restoringTexts: [sourcePreImage],
                     untombstoningBlocks: [.init(result.block.id, [result.variant])],
                     releasingPlacementRows: [])
-            })
+            },
+            // A12: the source buffer this undo would restore.
+            insuring: [sourcePreImage])
         return result
     }
 

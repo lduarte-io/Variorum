@@ -45,6 +45,28 @@ public final class UndoStack: @unchecked Sendable {
         /// the redo stack — redo is strictly LIFO, so an entry that cannot
         /// be re-applied is never skipped over.
         let redo: ((Operations) throws -> Void)?
+        /// The buffer pre-images this entry's inverse would RESTORE (13d
+        /// batch 5 — A12). The same values the inverse passes to
+        /// `revertStructural`, carried as DATA so the warning can be asked
+        /// before the act. Empty for every entry that restores no buffer
+        /// (deleteBlock, moveBlock, reorder, merge, the W…): those can
+        /// discard nothing, so they are silent by construction rather than
+        /// by a per-site decision.
+        let insuring: [Operations.TextPreImage]
+    }
+
+    /// What the NEXT undo would set aside — A12's whole input (author
+    /// ruling, 13d sitting: warn ONLY on the insurance class).
+    public struct PendingUndoWarning: Equatable, Sendable {
+        /// The entry's label ("Divide"), for the dialog's question.
+        public let label: String
+        /// How many buffers carry text edited since the operation.
+        public let bufferCount: Int
+
+        public init(label: String, bufferCount: Int) {
+            self.label = label
+            self.bufferCount = bufferCount
+        }
     }
 
     private let lock = NSLock()
@@ -104,11 +126,13 @@ public final class UndoStack: @unchecked Sendable {
     func register(
         label: String,
         inverse: @escaping (Operations) throws -> Void,
-        redo: ((Operations) throws -> Void)?
+        redo: ((Operations) throws -> Void)?,
+        insuring: [Operations.TextPreImage] = []
     ) {
         let collected: Bool = lock.withLock {
             nextID += 1
-            let entry = Entry(id: nextID, label: label, inverse: inverse, redo: redo)
+            let entry = Entry(
+                id: nextID, label: label, inverse: inverse, redo: redo, insuring: insuring)
             redoEntries.removeAll()
             if compoundCollector != nil {
                 compoundCollector?.append(entry)
@@ -188,7 +212,11 @@ public final class UndoStack: @unchecked Sendable {
                             try entry.inverse(ops)
                         }
                     },
-                    redo: compoundRedo)
+                    redo: compoundRedo,
+                    // A12: a compound insures whatever its legs would — the
+                    // composed Make Block gesture's two divides are one act
+                    // to her, so its warning must speak for both.
+                    insuring: collected.flatMap(\.insuring))
             }
             return result
         } catch {
@@ -203,6 +231,29 @@ public final class UndoStack: @unchecked Sendable {
             }
             throw error
         }
+    }
+
+    /// **A12 (author ruling, 13d sitting 2026-07-28): what the next undo
+    /// would DISCARD** — nil when it would discard nothing, which is every
+    /// case but one. The one: an undo whose buffer restore would overwrite
+    /// text edited since the operation (the fourth quiet auto-commit
+    /// occasion's own condition, `Operations.wouldInsure`). Her ruling was
+    /// exactly this class and no wider: *"every other structural undo stays
+    /// silent"*.
+    ///
+    /// Asked at the door, against the store as it is NOW — an entry sitting
+    /// on the stack becomes warnable the moment she edits the buffer and
+    /// stops being warnable the moment she commits it, and neither event
+    /// touches the stack. Never throws (`insuranceTargets` degrades to "no
+    /// warning"): the confirm is a courtesy, and the insurance commit that
+    /// makes the discard recoverable rides inside the undo's own
+    /// transaction, not here.
+    public func pendingUndoWarning(with operations: Operations) -> PendingUndoWarning? {
+        guard let entry = lock.withLock({ entries.last }), !entry.insuring.isEmpty
+        else { return nil }
+        let targets = operations.insuranceTargets(entry.insuring)
+        guard !targets.isEmpty else { return nil }
+        return PendingUndoWarning(label: entry.label, bufferCount: targets.count)
     }
 
     /// Runs the newest inverse (LIFO) and removes it on success; a failed

@@ -89,7 +89,10 @@ extension Operations {
                     restoringTexts: preImages,
                     untombstoningBlocks: [],
                     releasingPlacementRows: [])
-            })
+            },
+            // A12: the buffers this undo would restore — the same values,
+            // carried as data so the warning can be asked before the act.
+            insuring: preImages)
         return preImages.count
     }
 }
