@@ -2731,6 +2731,67 @@ the QUESTIONS entries and the two memos:
 7. **The install refresh** — at her word, zero-instance + fresh A1
    backup as always.
 
+## The cold review — ACCEPTED; PHASE CLOSEOUT (2026-07-28)
+
+**The review's round 1 is ACCEPTED** (findings `814e7c0` · fixes
+`29d5e37` · the F-5 correction `2c44d9f` — findings recorded BEFORE
+fixes, per the discipline): 1 MAJOR / 4 MINOR / 4 NIT. The MAJOR
+(F-1: ⇧⏎ with the caret MID-tail displaced the newline and caret to
+the document end — the B2 fork discarded the keystroke's own offset,
+and the batch pins had only ever driven end-of-tail carets) is a real
+catch of exactly the reviewer-shaped kind: the shipped equality bar
+was violated at an offset domain the builder never sampled. F-2
+(capsLock/numericPad defeating the soft-key mask on real hardware),
+F-3 (the board divide's silent seed fallback — now Write's refusal
+posture, the parity constraint's letter), F-4/F-6/F-7/F-9 (doc + copy
+honesty) all fixed with exactly-discriminating reverts; F-5 mooted by
+the orchestrator's own mid-review sweep; F-8 record-only under the
+hallucination guard (SPECULATIVE — no pin could go red). The
+reviewer's own 2E-trap near-miss (a 7-name spine guess matching 4
+suites, exposed by the run line) is the run-line rule's third catch
+this phase. **No new BLOCKER/MAJOR arose from the fixes themselves**
+— under the ladder's own rule the review CLOSES at round 1.
+
+**FINAL COUNTS, verified by the orchestrator's own runs at HEAD
+`2c44d9f`: core 901 tests in 101 suites · Mac 876 tests in 145 suites
+· mobile 14 tests in 4 suites — all green** (from 882/100 · 788/135 ·
+14/4 at phase open). Zero schema change (mirror stays at lockstep
+marker 4); zero `Sources/VariorumCore/Sync/` lines; the tutorial
+spine green throughout (12 lessons; the re-seed obligation is the
+author's one product-door act).
+
+**What the phase shipped, in one paragraph:** the 13c walk's three
+ruled flips (Outline collapsed · the Book scrubber returned ·
+Compare related-only ON) — #34's texted-seam backspace-merge with the
+§14 delta (merge exactly where the explicit door is instant; the
+store-read fan authorization) — A9's native divide in Takes AND
+Lenses (the W ceremony extracted behind a host protocol, mounting in
+place, seeded from the caret's own take; the exhaustive one-brain
+parity pin) — the typing-ergonomics floor (⌘⇧⏎ · ⇧⏎ option B on the
+idle-mint's own path · the global one_block face · the additive
+paragraph-tall gap · coarse spellcheck with the crash-pairing guard)
+— and the sitting's five (the Journal book self-creates at every
+door · A12's insurance-class warning · the idle-voice render restore
+· A22's always-on typewriter room on a constrainBoundsRect allowance
+· A11's blank-line-to-first-half in the one seam brain). The sitting
+ruled EVERY open item; QUESTIONS #29–#48 are all ANSWERED (#32 alone
+stays open, routed to the Design & UI review row); the two 13c memos
+are fully dispositioned, with the long-content-panes option (a)
+PRE-APPROVED evidence-gated for any future phase.
+
+**Standing notes for successors:** the panes option (a) pre-approval
+(defaults: ~1.5× screen threshold, fan cards only, focus un-caps);
+the Takes→Editor shared-vocabulary layering note (the one-brain
+constraint's consequence — the tidy end state is the OpsRefusalCopy
+precedent, a candidate cleanup for any phase that touches the
+planner next); `insuring:`'s recorded residual (a future
+buffer-restoring op that forgets the parameter ships a silent
+destructive undo — the review's focus-2 answer); extract's A11
+sibling (her one-liner, on the handoff); the scroller-knob nuance
+(the room is reached by scrolling — Design & UI review material);
+the mobile scheme's OS 26.2 destination note; lock-flag exceptions
+#2/#3 (keep the probe, not the prediction).
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →
@@ -2738,7 +2799,7 @@ full suites, counts confirmed by the "Test run with N tests" line —
 never a bare SUCCEEDED). Phase-end: the review shape the author sets at
 kickoff. Red-on-old absolute; the hallucination guard binds; every
 PROVISIONAL to `notes/QUESTIONS.md` (append, never renumber — next
-free number at authoring time: #48).
+free number at authoring time: #49).
 
 ## Environment
 
