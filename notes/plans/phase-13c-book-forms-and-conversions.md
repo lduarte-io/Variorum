@@ -2840,6 +2840,32 @@ not separately pinned); and 1G's still-unresolved focus — whether the
 TOC's expanded rows idle the same way (they compose the same surface
 but sit in a different scroll composition).
 
+### A47c — ACCEPTED (2026-07-27 evening); the refresh is HELD for her word
+
+**Verified by my own runs: core 882/100 · Mac 788/135 green**; tree
+clean, both commits present; the stabilization diff read — the
+change-gate (`appliedInk`, same ink ⇒ zero writes) and the render half
+(occasion-scheduled, coalesced, one `layoutViewport()`) are both at the
+ONE component, both completions of the accepted 1F/1G mechanism,
+nothing architectural. **The trace's letter-level correction of my
+pre-trace reading is accepted as the better fact:** the viewport notion
+was never stale and the frame lever needed no display invalidation —
+the killer was the unguarded full-range `textColor` write on every
+`updateNSView`, destroying TK2's per-fragment rendering surfaces above
+a tail-scrolled pane's viewport (her "two lines at the bottom",
+mechanism-exact). Pin B's first hollow version caught and rebuilt on
+the record (the R3-4 discipline, self-applied). The 2E false-green trap
+fired once more and was caught by the run-line rule — the trap section
+earns its keep.
+
+**The memo** (`notes/plans/phase-13d-memo-long-content-panes.md`) is
+written per P-5 with the trace as its foundation — four options costed,
+recommendation (d) stabilized-status-quo now with (a) the capped card
+pre-approvable for 13d; **its §6 rulings are HERS** and join the walk
+list. **The `/Applications` refresh is HELD**: her "refresh when this
+issue is fixed" authorization named A47b's issue, and A47c is a new
+one — her word (or her closing the app and saying so) releases it.
+
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
 **Final counts, verified by the architect's own runs: core 882/100 ·
