@@ -21,6 +21,46 @@ final class EditorTextView: NSTextView {
     /// verdict isn't the tail, per Phase 7's MAJOR-3 fix).
     private(set) var isPasting = false
 
+    /// 13d batch 4 (A15, ruled option B — rider 3): TRUE only while a
+    /// SHIFT-Return keystroke's own text insertion is running, and while
+    /// the model deliberately re-plays one. Never sticky: the only writer
+    /// is `withSoftNewline`, whose `defer` clears it on every path — the
+    /// exact shape `isPasting` already uses on this class.
+    ///
+    /// It exists because AppKit gives ⇧⏎ NO binding of its own: both keys
+    /// dispatch `insertNewline:` and both type a plain LF (traced and
+    /// pinned in `ReturnKeyTraceTests`), so the ONLY place the two can be
+    /// told apart is the key event itself.
+    private(set) var isSoftNewline = false
+
+    /// Runs `body` with the soft-newline flag raised. The keystroke path
+    /// uses it; so does the model's deliberate re-play after a B2 mint,
+    /// which must reach the same verdict the keystroke would have.
+    func withSoftNewline<T>(_ body: () -> T) -> T {
+        isSoftNewline = true
+        defer { isSoftNewline = false }
+        return body()
+    }
+
+    /// SHIFT-Return exactly: Return (or keypad Enter) with shift and
+    /// NOTHING else. Control-Return keeps its own `insertLineBreak:`
+    /// binding untouched, ⌥⏎ keeps `insertNewlineIgnoringFieldEditor:`,
+    /// and ⌘⇧⏎ is A14's menu key — none of them are this gesture.
+    nonisolated static func isSoftNewlineKey(_ event: NSEvent) -> Bool {
+        guard event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .shift
+        else { return false }
+        let characters = event.charactersIgnoringModifiers ?? ""
+        return characters == "\r" || characters == "\u{3}"
+    }
+
+    override func keyDown(with event: NSEvent) {
+        guard Self.isSoftNewlineKey(event) else {
+            super.keyDown(with: event)
+            return
+        }
+        withSoftNewline { super.keyDown(with: event) }
+    }
+
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
 

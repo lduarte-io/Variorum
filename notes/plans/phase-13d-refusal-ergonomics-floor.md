@@ -1754,6 +1754,126 @@ trace suite stays green as the already-stays contexts' cannot-change
 pins. The early-mint consequence joins the bundled walk entry at the
 batch's acceptance.
 
+##### BUILT — A15, option B, both halves
+
+**Counts, by my own runs:** core `✔ Test run with 887 tests in 101 suites
+passed after 29.161 seconds` (**887/101** — unchanged, zero `Sources/`
+lines in this half) · Mac `✔ Test run with 858 tests in 143 suites passed
+after 90.972 seconds` (**852/142 → 858/143**: the new `SoftNewlineTests`
+suite's 6; the trace suite stays at 6 because its one changed pin was
+REWRITTEN, not added). Tutorial spine green on its own run first:
+`✔ Test run with 49 tests in 7 suites`. **Mobile untouched by
+construction, not by assumption** — this half's only source files are
+`Features/Editor/EditorTextView.swift` and `EditorViewModel.swift`, both
+under `Variorum/` (Mac); the mobile target synchronizes `VariorumMobile/`
++ `Shared/` only. Its earlier same-batch run stands: 14/4. Zero schema,
+zero `Sources/VariorumCore/Sync/` lines.
+
+**Diff scope — 3 files:** `EditorTextView.swift` (the keystroke flag) ·
+`EditorViewModel.swift` (the verdict fork + the tail path) ·
+`ReturnKeyTraceTests.swift` (the new suite + the one rewritten trace pin).
+
+**The whole build, in the contract's own sentence:** ⇧⏎ ends with the
+caret inside a real block and the newline as that block's content.
+
+- **Rider 3 — the flag.** `EditorTextView.isSoftNewline`, written ONLY by
+  `withSoftNewline`, whose `defer` clears it on every path — deliberately
+  the exact shape `isPasting` has used on this class since Phase 9, so it
+  is a precedent rather than a new mechanism. `keyDown` raises it for
+  SHIFT-Return alone: `isSoftNewlineKey` requires the modifier set to be
+  EXACTLY `.shift` and the character to be `\r` or keypad `\u{3}`, so
+  Control-Return keeps `insertLineBreak:`, ⌥⏎ keeps
+  `insertNewlineIgnoringFieldEditor:`, and ⌘⇧⏎ stays A14's menu key.
+- **B1 — the verdict.** `shouldChangeText` withholds
+  `replacementIsSingleNewline` for a soft newline. That parameter has
+  exactly ONE consumer (the open-tail gesture), so the change is surgical:
+  at the exact document end the verdict falls through containment to
+  `.block(last)`. Mid-block, tail-interior and `one_block` never consult
+  it, which is why the three already-stays contexts could not move — and
+  their trace pins ran unchanged and green, which is the guarantee stated
+  as a test rather than as a claim.
+- **B2 — the tail (rider 1).** A soft newline whose verdict is `.tail`
+  with a MINTABLE tail refuses the keystroke and schedules the standing
+  compound, which calls **`idleMintTail()` itself** — the very call the
+  2 s clock makes — awaits `awaitMintSettle()`, and re-plays the newline
+  at the document end inside `withSoftNewline`. Nothing about minting is
+  re-implemented, so the ratified story rides free and stays pinned where
+  it always was: trailing-partial inclusion, the never-mints whitespace
+  class, the in-flight/marked-text skips, resumed-typing-extends.
+- **"Mintable" is asked ONCE.** `mintableTail` states the guard
+  `idleMintTail` and `finalizeWork` already apply
+  (`hasOpenTail && !tailText.allSatisfy(\.isWhitespace)`), so the B2 fork
+  and the mint cannot disagree about what mints.
+- **Both roads end in block content.** Where the mint CLOSED the tail the
+  re-play is `.block(last)` directly; where it kept a newline run open (a
+  tail that already ended in blank lines — the k−1 rule) the re-play is an
+  ordinary `.tail` edit and the standing leading-run attachment folds it
+  into the preceding block. Neither is new machinery.
+
+**RIDER 2 — what undo offers after a ⇧⏎ mint, MEASURED, not claimed.**
+The pin `undoAfterASoftReturnMintMatchesTheIdleMintExactly` drives both
+roads and reads `session.undoStack` on each. The measurement:
+**depth 0, topLabel nil — on BOTH roads.** So a crystallization mint
+registers NO structural undo entry at all, by the clock or by ⇧⏎, and
+**⌥⌘Z offers nothing new after either.** That is the parity the rider
+demanded, and it is stated at exactly the strength the pin supports: the
+bar was "whatever the idle-mint's story is", the idle-mint's story is
+"nothing", and ⇧⏎ matches it exactly. The pin asserts the equality AND
+the concrete values, so a future change to either road breaks it. *(Why
+it is nothing, for the reader: segmentation minting is the machinery
+doing its job, not an author gesture — `finishMint`'s compensating
+deletions already run through an explicitly undo-stack-free `Operations`
+for the same reason. No claim is made here about text undo or the tray;
+neither was measured.)*
+
+**Pins — every change named**
+
+| Pin | Change | Why |
+|---|---|---|
+| `SoftNewlineTests` (NEW suite, 6) | new | B1 end-to-end (no tail, typing extends the same block); rider 3's two-keys pin; the modifier discrimination incl. Control-Return; B2 end-to-end **against the idle-mint-then-type road, asserted EQUAL** (the ruling's bar); the whitespace-only tail's ordinary path; the undo parity with its measured values |
+| `writeAtTheDocumentEndOpensTheTailUnderBothReturns` | **rewritten + renamed** → `onlyPlainReturnOpensTheTailAtTheDocumentEnd` | THE ONE trace pin the build changes. It asserted the pre-A15 world (both keys open the tail); it now asserts the ruled split, with ⏎'s half byte-unchanged. A RULED FLIP, named as such — the flip's behaviour is `SoftNewlineTests`' |
+| the other five trace pins | **UNCHANGED, green** | the cannot-change guarantee the ruling asked for: (a) mid-block, (c) `one_block`, (d) take panes, the dispatch fact, and Control-Return all ran untouched |
+
+**Guard-revert evidence (two source files checksummed first; `shasum -c`
+OK after every restore)**
+
+| Revert | Applied | Observed RED |
+|---|---|---|
+| **F** — the soft flag never reaches the verdict (the exact pre-A15 world) | `EditorViewModel.shouldChangeText` | **4 pins, 7 issues** — the tail opens under ⇧⏎, "beta\nmore" never forms, the two-keys pin collapses, and B2's equality bar fails. Her reported behaviour, reproduced |
+| **G** — B1 only, the B2 fork removed (the variant the ruling REJECTED) | `EditorViewModel.shouldChangeText` | **exactly 1 pin, 2 issues** — B1's pins stay green while B2's equality bar reads `["alpha","beta"]` where `["alpha","beta\ngamma"]` is right: the "gamma" typed after the soft newline landed in a still-open tail and never reached the block. **The D3 class the ruling named, reproduced mechanically** |
+| **I** — the flag made STICKY (rider 3's `defer` removed) | `EditorTextView.withSoftNewline` | **1 pin, 3 issues** — the flag is still raised after the keystroke, so the FOLLOWING plain ⏎ behaves as a soft one: no tail opens and the block reads `"alpha\n\n"` where `"alpha\n"` is right |
+
+**No revert for rider 1**, and the reason is stated rather than skipped:
+"the mint is the idle-mint's own call" is an architectural constraint, and
+the only available revert (calling `crystallizeIfNeeded(forcedKind:)`
+directly) would behave identically, so it could not discriminate. It is
+verified by reading the diff — `runSoftNewlineInTail` calls
+`idleMintTail()` and nothing else — and the ratified mint story's own
+existing pins ARE its coverage, which is the point of the rider.
+
+**Judgment calls**
+
+1. **`withSoftNewline` is a scoped body, not a settable flag** — the
+   `isPasting` shape. Rider 3 forbids sticky state, and a scope with a
+   `defer` cannot leak one even on a throw; revert I is the receipt.
+2. **The model's re-play goes through `withSoftNewline` too**, rather
+   than through a second private code path. The re-played newline must
+   reach the same verdict the keystroke would have; sharing the flag is
+   how it does that without a parallel mechanism.
+3. **The degradation under a skipped mint is recorded, not papered
+   over:** if `idleMintTail` skips its tick (a structural gesture in
+   flight, or an open IME composition — it re-arms the clock instead),
+   the tail is still open when the newline is re-played, so ⇧⏎ behaves as
+   ⏎ there. The honest alternative would be inventing a blocking wait on
+   someone else's flight; the doc comment says so at the code.
+4. **Keypad Enter counts as the gesture** (`\u{3}`), because macOS's own
+   `StandardKeyBinding.dict` binds it identically to Return; excluding it
+   would have made the same physical act mean two things.
+
+**Deviations:** none from the ruling. All five owed pins landed plus the
+modifier-discrimination pin; the trace suite's cannot-change contexts are
+green and untouched.
+
 #### BUILT — the other four items (A14 · A16 · A23 · A24)
 
 **Counts, by my own runs:** core `✔ Test run with 887 tests in 101 suites
@@ -2004,12 +2124,18 @@ an explanation.
 
 ##### PENDING / for the orchestrator
 
-- **Nothing unverified.** All three suites were run by me, run lines quoted.
-- **A15 awaits the ruling** (the proposal above).
-- **Two things to put in front of her at the walk:** (1) ⌥⌘N is retired —
+- **Nothing unverified.** All three suites were run by me, run lines quoted
+  (the batch's final numbers are A15's: core **887/101** · Mac **858/143**
+  · mobile **14/4**).
+- **A15 is BUILT** to the ruling, both halves — its record is the section
+  above; the gate is closed.
+- **Three things to put in front of her at the walk:** (1) ⌥⌘N is retired —
   one line to restore if she wants it, but properly it wants a registry
   alias concept; (2) take panes no longer autocorrect at the default level,
-  which is a change to what she has been living with.
+  which is a change to what she has been living with; (3) **A15's early
+  mint** — ⇧⏎ while typing fresh text at the end of a post makes a block
+  right then (~2 s before the clock would have), which the ruling accepted
+  as a keystroke-visible act and which she will SEE.
 - **For the end-of-phase Fable review, suggested foci:** (1) the
   supersession call on ⌥⌘N — right call, or should the registry grow
   aliases? (2) A23's additive rule and its interaction with the

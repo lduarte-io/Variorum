@@ -644,10 +644,32 @@ final class EditorViewModel {
             return false
         }
         guard let replacement else { return true } // attribute-only
+        // 13d batch 4 (A15, ruled option B): a SOFT newline — ⇧⏎ — never
+        // opens the tail. `replacementIsSingleNewline` has exactly ONE
+        // consumer (the open-tail gesture), so withholding it here is the
+        // whole of B1: at the exact document end the verdict falls through
+        // containment to `.block(last)` and the newline becomes the last
+        // block's content, caret inside it. Every other context is
+        // unchanged by construction — mid-block, tail-interior and
+        // `one_block` never consult the parameter at all.
+        let softNewline = replacement == "\n" && textView?.isSoftNewline == true
         let verdict = index.verdict(
             replacing: range,
-            replacementIsSingleNewline: replacement == "\n",
+            replacementIsSingleNewline: replacement == "\n" && !softNewline,
             segmentation: header?.effectiveSegmentation ?? .paragraph)
+        // B2: inside an OPEN tail there is no block to stay in yet, so the
+        // tail becomes one first — the ratified idle-mint, fired ~2 s early
+        // (her ruling accepts the keystroke-visible boundary) — and the
+        // newline then lands in the block that just became. A tail with
+        // nothing mintable (the never-mints whitespace class) takes the
+        // ordinary path below, where the leading-run attachment already
+        // makes a tail newline the preceding block's content.
+        if softNewline, case .tail = verdict, mintableTail {
+            scheduleCrossBlockCompound { [weak self] in
+                await self?.runSoftNewlineInTail()
+            }
+            return false
+        }
         switch verdict {
         case .refuse(.indexDesync):
             // The index no longer describes the storage: recover from the
@@ -814,6 +836,52 @@ final class EditorViewModel {
             guard (try? await tailIdleSleep(tailIdleDebounce)) != nil else { return }
             guard !Task.isCancelled else { return }
             self?.idleMintTail()
+        }
+    }
+
+    /// Whether the open tail holds anything the ratified rules would mint —
+    /// the SAME guard `idleMintTail` and `finalizeWork` apply (a
+    /// whitespace-only tail never mints). Read by A15's B2 fork so the two
+    /// can never disagree about what "mintable" means.
+    var mintableTail: Bool {
+        hasOpenTail && !tailText.allSatisfy(\.isWhitespace)
+    }
+
+    /// 13d batch 4 (A15, ruled option B, rider 1): ⇧⏎ inside an open tail.
+    ///
+    /// The mint is `idleMintTail()` ITSELF — the very call the 2 s clock
+    /// makes — never a re-implementation, so the whole ratified mint story
+    /// rides free and stays pinned where it always was: the trailing
+    /// partial paragraph is included, a whitespace-only tail never mints,
+    /// the in-flight/marked-text skips still apply, and resumed typing
+    /// extends the result. Then the newline is re-played at the document
+    /// end through the ORDINARY editing path with the soft flag raised, so
+    /// it reaches exactly the verdict the keystroke would have reached had
+    /// the tail not been in the way.
+    ///
+    /// Where the mint closed the tail that verdict is `.block(last)` and
+    /// the newline is block content immediately. Where the mint kept a
+    /// newline run open (a tail that already ended in blank lines — the
+    /// k−1 rule), the re-play is an ordinary `.tail` edit and the standing
+    /// leading-run attachment folds it into the preceding block instead;
+    /// both roads end with the newline as block content, which is the
+    /// contract.
+    ///
+    /// The one degradation, recorded rather than papered over: if
+    /// `idleMintTail` SKIPS this tick (a structural gesture in flight, or
+    /// an IME composition open — it re-arms the clock instead), the tail
+    /// is still open when the newline is re-played, so ⇧⏎ behaves as ⏎
+    /// there. Rare, and the honest alternative would be inventing a
+    /// blocking wait on someone else's flight.
+    private func runSoftNewlineInTail() async {
+        guard mintableTail else { return }
+        idleMintTail()
+        await awaitMintSettle()
+        guard let textView else { return }
+        let end = index.documentLength
+        textView.setSelectedRange(NSRange(location: end, length: 0))
+        textView.withSoftNewline {
+            textView.insertText("\n", replacementRange: NSRange(location: end, length: 0))
         }
     }
 

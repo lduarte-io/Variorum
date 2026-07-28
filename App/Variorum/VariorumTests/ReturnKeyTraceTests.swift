@@ -157,27 +157,46 @@ struct ReturnKeyTraceTests {
 
     // MARK: - (b) Write, at the document end in PARAGRAPH mode
 
-    /// Both keys OPEN THE TAIL at the exact document end (the ratified
-    /// Phase 7 gesture — "Enter at the exact document end is the gesture
-    /// that opens the tail"). This is the ONE context where a Return leads
-    /// toward a block boundary, and it is where A15's real half lives.
-    @Test func writeAtTheDocumentEndOpensTheTailUnderBothReturns() async throws {
-        for shift in [false, true] {
-            try await withEditor(seedBlocks: ["alpha"]) { h in
-                let hosted = Self.host(try #require(h.textView.enclosingScrollView))
-                defer { hosted.teardown() }
-                hosted.window.makeFirstResponder(h.textView)
+    /// THE ONE CONTEXT THE BUILD CHANGED. Before A15 both keys opened the
+    /// tail here (the ratified Phase 7 gesture — "Enter at the exact
+    /// document end is the gesture that opens the tail"), and this pin
+    /// asserted exactly that; the ruled build split them, so it now
+    /// asserts the split. **⏎ still opens the tail — untouched** — and
+    /// ⇧⏎ declines it, which is B1. Recorded as a RULED FLIP, not a bug
+    /// fix; the flip's own end-to-end behaviour is `SoftNewlineTests`'.
+    @Test func onlyPlainReturnOpensTheTailAtTheDocumentEnd() async throws {
+        // ⏎: the ratified gesture, byte-unchanged.
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let hosted = Self.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
 
-                let end = (h.documentText as NSString).length
-                h.textView.setSelectedRange(NSRange(location: end, length: 0))
-                h.textView.keyDown(
-                    with: Self.returnEvent(shift: shift, windowNumber: hosted.window.windowNumber))
+            let end = (h.documentText as NSString).length
+            h.textView.setSelectedRange(NSRange(location: end, length: 0))
+            h.textView.keyDown(
+                with: Self.returnEvent(shift: false, windowNumber: hosted.window.windowNumber))
 
-                #expect(h.model.hasOpenTail)
-                #expect(h.model.index.entries.count == 1)
-                // Nothing minted yet — the tail is surface-only.
-                #expect(try h.storeSlots().map(\.text) == ["alpha"])
-            }
+            #expect(h.model.hasOpenTail)
+            #expect(h.model.index.entries.count == 1)
+            // Nothing minted yet — the tail is surface-only.
+            let stored = try h.storeSlots().map(\.text)
+            #expect(stored == ["alpha"])
+        }
+        // ⇧⏎: no tail; the newline is the last block's content (A15/B1).
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let hosted = Self.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            let end = (h.documentText as NSString).length
+            h.textView.setSelectedRange(NSRange(location: end, length: 0))
+            h.textView.keyDown(
+                with: Self.returnEvent(shift: true, windowNumber: hosted.window.windowNumber))
+            await h.flush()
+
+            #expect(!h.model.hasOpenTail)
+            let stored = try h.storeSlots().map(\.text)
+            #expect(stored == ["alpha\n"])
         }
     }
 
@@ -229,5 +248,219 @@ struct ReturnKeyTraceTests {
             #expect(spy.commands == ["insertNewline:"])
             #expect(view.string == "alpha\n")
         }
+    }
+}
+
+// MARK: - A15 BUILT (the architect's ruling: option B, both halves)
+
+/// The contract in one sentence: **⇧⏎ ends with the caret inside a real
+/// block and the newline as that block's content.** No provenance memory
+/// anywhere — a newline that is block content the moment it exists can
+/// never become a segmentation boundary (I4 is absolute; crystallization
+/// never touches existing blocks).
+@MainActor
+@Suite("A15 — shift-Return stays in the block (13d batch 4)", .serialized)
+struct SoftNewlineTests {
+    private func softReturn(_ h: EditorHarness, window: NSWindow) {
+        h.textView.keyDown(
+            with: ReturnKeyTraceTests.returnEvent(shift: true, windowNumber: window.windowNumber))
+    }
+
+    private func plainReturn(_ h: EditorHarness, window: NSWindow) {
+        h.textView.keyDown(
+            with: ReturnKeyTraceTests.returnEvent(shift: false, windowNumber: window.windowNumber))
+    }
+
+    // MARK: B1 — the exact document end, no open tail
+
+    /// ⇧⏎ at the document end lands the newline INSIDE the last block, no
+    /// tail opens, and typing afterwards extends that same block.
+    @Test func shiftReturnAtTheDocumentEndStaysInTheLastBlock() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
+            let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            softReturn(h, window: hosted.window)
+            #expect(!h.model.hasOpenTail, "B1: the open-tail gesture is declined")
+            #expect(h.model.index.entries.count == 2)
+
+            // …and typing after it extends the SAME block, never a new one.
+            h.textView.insertText("more", replacementRange: h.textView.selectedRange())
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta\nmore"])
+            #expect(!h.model.hasOpenTail)
+        }
+    }
+
+    /// Rider 3's two-keys pin: the flag is per-keystroke and self-clearing,
+    /// so ⇧⏎ then plain ⏎ behave as two different keys in the same breath.
+    @Test func softThenPlainReturnBehaveAsTwoDifferentKeys() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            softReturn(h, window: hosted.window)
+            #expect(!h.model.hasOpenTail, "⇧⏎ stayed in the block")
+            #expect(!h.textView.isSoftNewline, "the flag cleared with the keystroke")
+
+            plainReturn(h, window: hosted.window)
+            #expect(h.model.hasOpenTail, "⏎ still opens the tail — nothing stuck")
+            await h.flush()
+            let stored = try h.storeSlots().map(\.text)
+            #expect(stored == ["alpha\n"], "the soft newline is the block's content")
+        }
+    }
+
+    /// Control-Return keeps AppKit's own `insertLineBreak:` — the soft
+    /// gesture claims SHIFT-Return and nothing else (rider 3).
+    @Test func controlReturnIsNotTheSoftGesture() throws {
+        let view = EditorTextView.makeEditor().textView
+        let hosted = ReturnKeyTraceTests.host(view)
+        defer { hosted.teardown() }
+        for flags in [NSEvent.ModifierFlags.control, [.command, .shift], [.option, .shift], []] {
+            let event = NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: flags,
+                timestamp: 0, windowNumber: hosted.window.windowNumber, context: nil,
+                characters: "\r", charactersIgnoringModifiers: "\r",
+                isARepeat: false, keyCode: 36)!
+            #expect(!EditorTextView.isSoftNewlineKey(event))
+        }
+        let soft = ReturnKeyTraceTests.returnEvent(
+            shift: true, windowNumber: hosted.window.windowNumber)
+        #expect(EditorTextView.isSoftNewlineKey(soft), "non-vacuity: shift alone IS the gesture")
+    }
+
+    // MARK: B2 — inside an open tail
+
+    /// ⇧⏎ in an open tail mints the tail (the ratified idle-mint, ~2 s
+    /// early) and the newline lands in the block that just became — and
+    /// the FINAL STRUCTURE equals idle-mint-then-type, which is the
+    /// ruling's own equality bar.
+    @Test func shiftReturnInATailMintsAndStaysAndMatchesTheIdleMintPath() async throws {
+        // (i) the ⇧⏎ road.
+        var viaSoftReturn: [String?] = []
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            plainReturn(h, window: hosted.window)   // opens the tail
+            h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
+            #expect(h.model.hasOpenTail)
+
+            softReturn(h, window: hosted.window)
+            await h.flush()
+            h.textView.insertText("gamma", replacementRange: h.textView.selectedRange())
+            await h.flush()
+            viaSoftReturn = try h.storeSlots().map(\.text)
+        }
+
+        // (ii) the road the 2 s clock would have taken: mint, then type.
+        var viaIdleMint: [String?] = []
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            plainReturn(h, window: hosted.window)
+            h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
+            h.model.idleMintTail()
+            await h.flush()
+            // The newline the soft key would have typed, then the word.
+            h.textView.setSelectedRange(
+                NSRange(location: h.model.index.documentLength, length: 0))
+            h.textView.withSoftNewline {
+                h.textView.insertText("\n", replacementRange: h.textView.selectedRange())
+            }
+            h.textView.insertText("gamma", replacementRange: h.textView.selectedRange())
+            await h.flush()
+            viaIdleMint = try h.storeSlots().map(\.text)
+        }
+
+        #expect(viaSoftReturn == viaIdleMint, "the ruling's equality bar")
+        #expect(viaSoftReturn == ["alpha", "beta\ngamma"],
+                "the tail became a block and the soft newline is inside it")
+    }
+
+    /// A whitespace-only tail is the ratified never-mints class, so ⇧⏎
+    /// takes the ORDINARY path there — where the standing leading-run
+    /// attachment already makes the newline the preceding block's content.
+    @Test func aWhitespaceOnlyTailTakesTheOrdinaryPath() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            plainReturn(h, window: hosted.window)  // an EMPTY open tail
+            #expect(h.model.hasOpenTail)
+            #expect(!h.model.mintableTail, "nothing mintable — the never-mints class")
+
+            softReturn(h, window: hosted.window)
+            await h.flush()
+            // No block was minted; the newline is the preceding block's
+            // trailing content (the k−1 attachment, unchanged).
+            let stored = try h.storeSlots().map(\.text)
+            #expect(stored == ["alpha\n"])
+            #expect(h.model.index.entries.count == 1)
+        }
+    }
+
+    // MARK: Rider 2 — what undo offers, MEASURED, with idle-mint parity
+
+    /// Rider 2: whatever ⌥⌘Z offers after the 2 s clock's mint is exactly
+    /// what it offers after a ⇧⏎ mint. This pin MEASURES both rather than
+    /// claiming either — the batch record quotes what it found.
+    @Test func undoAfterASoftReturnMintMatchesTheIdleMintExactly() async throws {
+        func undoStateAfterSoftReturn() async throws -> (depth: Int, label: String?) {
+            try await withEditor(seedBlocks: ["alpha"]) { h in
+                let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+                defer { hosted.teardown() }
+                hosted.window.makeFirstResponder(h.textView)
+                h.textView.setSelectedRange(
+                    NSRange(location: (h.documentText as NSString).length, length: 0))
+                plainReturn(h, window: hosted.window)
+                h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
+                softReturn(h, window: hosted.window)
+                await h.flush()
+                return (h.session.undoStack.depth, h.session.undoStack.topLabel)
+            }
+        }
+        func undoStateAfterIdleMint() async throws -> (depth: Int, label: String?) {
+            try await withEditor(seedBlocks: ["alpha"]) { h in
+                let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+                defer { hosted.teardown() }
+                hosted.window.makeFirstResponder(h.textView)
+                h.textView.setSelectedRange(
+                    NSRange(location: (h.documentText as NSString).length, length: 0))
+                plainReturn(h, window: hosted.window)
+                h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
+                h.model.idleMintTail()
+                await h.flush()
+                return (h.session.undoStack.depth, h.session.undoStack.topLabel)
+            }
+        }
+        let soft = try await undoStateAfterSoftReturn()
+        let idle = try await undoStateAfterIdleMint()
+        #expect(soft.depth == idle.depth, "PARITY: the same undo story, both roads")
+        #expect(soft.label == idle.label)
+        // …and what that story IS, pinned rather than narrated: a
+        // crystallization mint — by the clock or by ⇧⏎ — registers NO
+        // structural undo entry at all. Segmentation is the machinery
+        // doing its job, not an author gesture, so ⌥⌘Z offers nothing new
+        // after either road. The record states exactly this and no more.
+        #expect(soft.depth == 0)
+        #expect(soft.label == nil)
     }
 }
