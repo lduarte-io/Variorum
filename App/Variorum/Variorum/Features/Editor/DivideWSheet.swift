@@ -20,19 +20,22 @@ import SwiftUI
 import VariorumCore
 
 struct DivideWSheet: View {
-    let model: EditorViewModel
+    /// 13d Batch 3 (A9): the sheet is parameterized on the CEREMONY, not
+    /// on Write's view model — that is what lets a takes board mount the
+    /// same sheet in place. Every rule it shows is the ceremony's.
+    let ceremony: DivideWCeremony
     /// The presentation snapshot (`.sheet(item:)` captures the value once);
     /// rendering always prefers the LIVE ceremony state on the observable
-    /// model, so marks and cut placements re-render.
-    let presented: EditorViewModel.DivideWCeremonyState
+    /// object, so marks and cut placements re-render.
+    let presented: DivideWCeremony.State
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @State private var activeTakeID: String?
     @FocusState private var keyboardFocused: Bool
 
-    private var state: EditorViewModel.DivideWCeremonyState {
-        model.divideWCeremony ?? presented
+    private var state: DivideWCeremony.State {
+        ceremony.state ?? presented
     }
 
     private var tokens: VoiceTokens {
@@ -67,10 +70,10 @@ struct DivideWSheet: View {
             }
 
             HStack {
-                Button("Cancel") { model.cancelDivideW() }
+                Button("Cancel") { ceremony.cancel() }
                     .keyboardShortcut(.cancelAction)
                 Spacer()
-                Button("Divide") { model.confirmDivideW() }
+                Button("Divide") { Task { await ceremony.confirm() } }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!state.canConfirm)
             }
@@ -89,12 +92,12 @@ struct DivideWSheet: View {
     // MARK: - Rows
 
     @ViewBuilder
-    private func takeRow(_ take: EditorViewModel.WTake) -> some View {
+    private func takeRow(_ take: DivideWCeremony.WTake) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Toggle(isOn: Binding(
                 get: { take.marked },
                 set: { _ in
-                    model.toggleWTake(take.id)
+                    ceremony.toggleTake(take.id)
                     if activeTakeID == take.id { activeTakeID = nil }
                 })
             ) {
@@ -143,7 +146,7 @@ struct DivideWSheet: View {
     }
 
     @ViewBuilder
-    private func placementNote(_ take: EditorViewModel.WTake) -> some View {
+    private func placementNote(_ take: DivideWCeremony.WTake) -> some View {
         if take.parkedAtEnd {
             Text("✂ parked at the end — this whole take rides into the first block.")
                 .font(.caption2)
@@ -166,7 +169,7 @@ struct DivideWSheet: View {
 
     private func placeCut(takeID: String, cut: Int) {
         activeTakeID = takeID
-        model.placeWCut(takeID: takeID, cut: cut)
+        ceremony.placeCut(takeID: takeID, cut: cut)
     }
 
     // MARK: - Keyboard (←/→ word · ⌥←/→ sentence · ⇥ takes)
@@ -219,7 +222,7 @@ struct DivideWSheet: View {
 /// sentence/newline slots — the gentle settle's visual half). Cost is
 /// bounded by the take's word count — fan-scale, never corpus-scale.
 private struct WCutFlow: View {
-    let take: EditorViewModel.WTake
+    let take: DivideWCeremony.WTake
     let tokens: VoiceTokens
     let place: (Int) -> Void
 

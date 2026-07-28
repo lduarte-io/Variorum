@@ -126,7 +126,7 @@ struct EditorView: View {
         .sheet(item: $model.divideWCeremony) { state in
             // The W ceremony (Phase 9, contract item 3): one sheet; any
             // dismissal other than Confirm is a cancel — no rows touched.
-            DivideWSheet(model: model, presented: state)
+            DivideWSheet(ceremony: model.divideWCeremonyController, presented: state)
         }
         .sheet(item: $model.mergeCeremony) { state in
             // The merge ceremony (13b Stage 4, 4B — the W's mirror,

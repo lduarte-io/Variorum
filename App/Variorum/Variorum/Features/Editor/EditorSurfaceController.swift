@@ -55,11 +55,20 @@ final class EditorSurfaceController {
 
     // MARK: - Moved observable state (forwarded by the model)
 
+    /// The W ceremony's state machine — LIFTED OUT at 13d Batch 3 (A9) so
+    /// a takes board can mount the same sheet; this controller is one of
+    /// its two hosts. Everything below forwards, so every view binding and
+    /// pin reads exactly as it did.
+    @ObservationIgnored private(set) lazy var ceremony = DivideWCeremony(host: self)
+
     /// A divide invoked on a fanned block routes here: the W ceremony's ONE
     /// sheet (contract item 3). Non-nil = the sheet is up; the live editor
     /// is untouched for the ceremony's whole duration; cancel sets nil with
     /// no rows touched; confirm funnels back through the structural door.
-    var divideWCeremony: DivideWCeremonyState?
+    var divideWCeremony: DivideWCeremonyState? {
+        get { ceremony.state }
+        set { ceremony.state = newValue }
+    }
 
     var crossBlockMakeConfirm: CrossBlockMakeState?
 
@@ -73,71 +82,16 @@ final class EditorSurfaceController {
     /// directed proof that the differential path lands safely).
     @ObservationIgnored private(set) var differentialOracleMisses = 0
 
-    struct DivideWCeremonyState: Equatable, Identifiable {
-        let blockID: String
-        /// The rendered variant at invoke time — pre-marked, its cut
-        /// pre-placed at the gesture's snapped position.
-        let activeVariantID: String?
-        var takes: [WTake]
-        var id: String { blockID }
+    // The W ceremony's state types moved to `DivideWCeremony` (13d Batch
+    // 3); typealiases keep every `EditorSurfaceController.X` and
+    // `EditorViewModel.X` reference — views and pins — unchanged.
+    typealias DivideWCeremonyState = DivideWCeremony.State
+    typealias WTake = DivideWCeremony.WTake
 
-        /// Confirm gates on the WHOLE rule, with the reason spoken (13b 4A,
-        /// the architect's precision): every marked take placed, AND each
-        /// successor block born with at least one take — if every checked
-        /// take parks at one end, the other block would be takeless (I10).
-        /// nil = confirmable. The op's `divideSideWouldBeEmpty` is the belt
-        /// behind this gate.
-        var confirmBlocker: String? {
-            let marked = takes.filter(\.marked)
-            if marked.isEmpty {
-                return "Check at least one take to carry the cut through."
-            }
-            if marked.contains(where: { $0.cut == nil }) {
-                return "Place the ✂ in every checked take — drag it, click a spot, or use ←/→ (⇥ moves between takes)."
-            }
-            if !marked.contains(where: { !$0.parkedAtEnd }) {
-                return "Every checked take rides whole into the first block — the second block would be born without a take. Split at least one, or park one at its start."
-            }
-            if !marked.contains(where: { !$0.parkedAtStart }) {
-                return "Every checked take rides whole into the second block — the first block would be born without a take. Split at least one, or park one at its end."
-            }
-            return nil
-        }
-
-        var canConfirm: Bool { confirmBlocker == nil }
-
-        var markedCuts: [String: Int] {
-            Dictionary(uniqueKeysWithValues: takes.compactMap { take in
-                guard take.marked, let cut = take.cut else { return nil }
-                return (take.variant.id, cut)
-            })
-        }
-    }
-
-    struct WTake: Equatable, Identifiable {
-        let variant: Variant
-        var marked: Bool
-        /// The cut carried through this take (UTF-16, any legal word-rule
-        /// position of its text INCLUDING 0 and the end — parking, S4-22) —
-        /// pre-seeded by string-context matching, freely adjusted; nil =
-        /// unseeded (no unique match) until placed.
-        var cut: Int?
-        /// The legal cut positions in this take's text under the ruled
-        /// WORD rule, ends included (the parking slots) — the click/drag/
-        /// keyboard targets. Empty exactly when the take's text is empty
-        /// (0 and the end coincide: nothing to place — uncheck it).
-        let boundaries: [Int]
-        var id: String { variant.id }
-
-        /// Parking (S4-22 ruling 2): at the very end ⇒ the whole take
-        /// rides into the FIRST block; at the very start ⇒ the SECOND.
-        var parkedAtEnd: Bool {
-            cut != nil && cut == variant.workingText.utf16.count
-                && !variant.workingText.isEmpty
-        }
-        var parkedAtStart: Bool {
-            cut == 0 && !variant.workingText.isEmpty
-        }
+    /// Forward (13d Batch 3): the legal-cut rule lives with the ceremony
+    /// now; `WCutPlacementTests` addresses it here.
+    nonisolated static func legalCutPositions(of text: String) -> [Int] {
+        DivideWCeremony.legalCutPositions(of: text)
     }
 
     // MARK: - Projection → surface (the executors; the DECISION lives in
@@ -1797,195 +1751,79 @@ final class EditorSurfaceController {
         model.updateCaretContext()
     }
 
-    // MARK: - The W ceremony (Step 6, contract item 3)
+    // MARK: - The W ceremony — the host conformance + forwards
+    // (13d Batch 3: the state machine lives in `DivideWCeremony` so a
+    // takes board can mount the same sheet; every body below is either a
+    // forward or the host contract, and every pre-move pin runs unchanged
+    // through them.)
 
-    /// Builds the one-sheet ceremony state: the block's live ACTIVE fan as
-    /// a checklist (the rendered take pre-marked with the gesture's snapped
-    /// cut — nil when its text has no interior word edge; the ceremony
-    /// still opens and parking covers it, 13b 4A), per-take cut proposals
-    /// by string-context matching, per-take legal cut positions under the
-    /// ruled WORD rule (ends included — the parking slots). The buffer
-    /// flushes first so every take's stored text — what the sheet shows
-    /// and the op will cut — matches the surface. No rows are touched by
-    /// opening.
+    /// The rendered take of `blockID` on THIS surface — Write's seed. The
+    /// full-document editor shows the CHOSEN take, so "the take you are
+    /// looking at" and "the chosen take" are one sentence here; a takes
+    /// board names its own seed (that is the generalization A9 needed).
     private func openDivideWCeremony(blockID: String, activeCut: Int?) async {
-        await model.autosave.flushNow()
-        guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
-            return
-        }
-        let activeVariantID = model.index.entries.first { $0.blockID == blockID }?.variantID
-        do {
-            let fan = try await model.session.database.read { db in
-                try Queries.blockFan(db, blockID: blockID)
-            }
-            let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
-            guard liveActive.count > 1,
-                  let activeTake = liveActive.first(where: { $0.id == activeVariantID })
-            else {
-                // The fan changed under us (sync race): re-plan next invoke.
-                model.showStatus("This block's takes changed — try the divide again.")
-                return
-            }
-            let takes = liveActive.map { variant in
-                WTake(
-                    variant: variant,
-                    marked: variant.id == activeTake.id,
-                    cut: variant.id == activeTake.id
-                        ? activeCut
-                        : activeCut.flatMap {
-                            CutPropagation.propose(
-                                activeCut: $0,
-                                activeText: activeTake.workingText,
-                                targetText: variant.workingText)
-                        },
-                    boundaries: Self.legalCutPositions(of: variant.workingText))
-            }
-            divideWCeremony = DivideWCeremonyState(
-                blockID: blockID, activeVariantID: activeTake.id, takes: takes)
-        } catch {
-            model.showOperationError(error)
-        }
-    }
-
-    /// A take's placeable cut positions: the ruled WORD rule's full set —
-    /// word edges, sentence ends, newlines, AND both ends (0 = start
-    /// parking, the end = end parking; S4-22 ruling 2). Empty text answers
-    /// [] — its two ends coincide, so there is nothing to place (the memo's
-    /// "uncheck it" case, and the one genuinely-empty message left).
-    nonisolated static func legalCutPositions(of text: String) -> [Int] {
-        guard !text.isEmpty else { return [] }
-        return BoundarySnapping.boundaries(in: text, granularity: .word)
+        let seed = model.index.entries.first { $0.blockID == blockID }?.variantID
+        await ceremony.open(blockID: blockID, seedVariantID: seed, seedCut: activeCut)
     }
 
     func toggleWTake(_ takeID: String) {
-        guard var state = divideWCeremony,
-              let i = state.takes.firstIndex(where: { $0.id == takeID }) else { return }
-        state.takes[i].marked.toggle()
-        divideWCeremony = state
+        ceremony.toggleTake(takeID)
     }
 
     func placeWCut(takeID: String, cut: Int) {
-        guard var state = divideWCeremony,
-              let i = state.takes.firstIndex(where: { $0.id == takeID }),
-              state.takes[i].boundaries.contains(cut) else { return }
-        state.takes[i].cut = cut
-        divideWCeremony = state
+        ceremony.placeCut(takeID: takeID, cut: cut)
     }
 
     /// Cancel does nothing — no rows were touched by the ceremony.
     func cancelDivideW() {
-        divideWCeremony = nil
+        ceremony.cancel()
     }
 
     func confirmDivideWCeremony() async {
-        guard let state = divideWCeremony, state.canConfirm else { return }
-        // The one-flight door, checked synchronously BEFORE the drift
-        // check's await (review round 3, MINOR): a gesture can be mid-
-        // flight while the sheet is up (menu key equivalents stay live
-        // under a window-modal sheet) — refuse visibly and KEEP the
-        // ceremony and its cuts; `runStructural`'s own self-guard is the
-        // belt behind this.
-        guard !structuralInFlight else {
-            model.refuseFeedback("Another structural change is still landing.")
-            return
+        await ceremony.confirm()
+    }
+}
+
+// MARK: - DivideWCeremonyHost (13d Batch 3)
+
+extension EditorSurfaceController: DivideWCeremonyHost {
+    var ceremonyDatabase: AppDatabase { model.session.database }
+
+    /// Write's pending-text contract, unchanged: flush, and a REFUSED
+    /// flush (which keeps its text pending — Phase 7 MAJOR 1) stops the
+    /// act rather than running an op against a store the surface
+    /// disagrees with.
+    func flushPendingText() async -> Bool {
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return false
         }
-        let cuts = state.markedCuts
-        let blockID = state.blockID
-        // The sheet may have sat open while a sync round landed edits to
-        // the takes (review round 2, MINOR): cuts were placed against the
-        // SNAPSHOT texts, and cutting the current store at those offsets
-        // would land a well-formed but wrong-position cut, silently. Verify
-        // every marked take against the CURRENT store first; on any drift,
-        // refresh the ceremony (marks kept, cuts re-seeded) instead.
-        do {
-            let fan = try await model.session.database.read { db in
-                try Queries.blockFan(db, blockID: blockID)
-            }
-            let liveActive = fan.filter { $0.deletedAt == nil && $0.status == .active }
-            let drifted = state.takes.filter(\.marked).contains { snapshot in
-                guard let current = liveActive.first(where: { $0.id == snapshot.id })
-                else { return true }  // a marked take vanished (deleted/archived remotely)
-                return current.workingText != snapshot.variant.workingText
-            }
-            if drifted {
-                refreshDivideWCeremony(from: state, liveActive: liveActive)
-                return
-            }
-        } catch {
-            model.showOperationError(error)
-            return
-        }
-        // Accepted residual (review round 3, NIT — same class as the
-        // ceremony-open flush→fetch window): the drift check above is
-        // check-then-act — a sync apply committing in the ms between that
-        // read and the op below still lands a stale-offset cut. A true fix
-        // needs op-level expected-text preconditions (a core change this
-        // phase has no cause to make); the cut stays well-formed,
-        // recoverable by undo, and the window is delivery-cadence narrow.
-        // Recorded in the closeout's residuals.
-        let landed = await runStructural { ops in
+        return true
+    }
+
+    var structuralFlightInProgress: Bool { structuralInFlight }
+
+    /// The confirm's act: `runStructural` exactly as before — seam nil, so
+    /// the W confirm re-renders fully from the store (the permanent shape
+    /// for ceremonial acts; author, 2026-07-07).
+    func runDivideW(blockID: String, cuts: [String: Int]) async -> Bool {
+        await runStructural { ops in
             let result = try ops.divideW(blockID, cuts: cuts)
-            // seam nil: the W confirm re-renders fully from the store —
-            // the permanent shape for ceremonial acts (author, 2026-07-07).
             return StructuralOutcome(
                 caretBlockID: result.first.block.id, caretOffset: 0, seam: nil)
         }
-        // The sheet dismisses only when the cut LANDED — a refusal (busy
-        // door, op error) keeps the ceremony and its cuts for the author.
-        if landed {
-            divideWCeremony = nil
-        }
     }
 
-    /// Rebuilds the ceremony over the CURRENT fan: marks survive by take
-    /// identity, unchanged takes keep their placed cuts, changed takes get
-    /// re-seeded cuts (the active take's cut re-snapped into its new text;
-    /// others re-proposed from it via string-context matching). The author
-    /// reviews and confirms again — nothing is cut on a drifted snapshot.
-    private func refreshDivideWCeremony(
-        from state: DivideWCeremonyState, liveActive: [Variant]
-    ) {
-        guard liveActive.count > 1,
-              let activeCurrent = liveActive.first(where: { $0.id == state.activeVariantID })
-        else {
-            // The fan itself dissolved (a single take remains, or the
-            // rendered take died): the ceremony no longer applies.
-            divideWCeremony = nil
-            model.showStatus("This block's takes changed — try the divide again.")
-            return
-        }
-        let previous = Dictionary(uniqueKeysWithValues: state.takes.map { ($0.id, $0) })
-        let previousActive = previous[activeCurrent.id]
-        let activeCut: Int? = {
-            guard let cut = previousActive?.cut else { return nil }
-            if previousActive?.variant.workingText == activeCurrent.workingText { return cut }
-            return StructuralGesturePlanner.snapToInteriorBoundary(
-                cut, in: activeCurrent.workingText)
-        }()
-        let takes = liveActive.map { variant -> WTake in
-            let old = previous[variant.id]
-            let cut: Int?
-            if variant.id == activeCurrent.id {
-                cut = activeCut
-            } else if old?.variant.workingText == variant.workingText, let kept = old?.cut {
-                cut = kept
-            } else if let activeCut {
-                cut = CutPropagation.propose(
-                    activeCut: activeCut,
-                    activeText: activeCurrent.workingText,
-                    targetText: variant.workingText)
-            } else {
-                cut = nil
-            }
-            return WTake(
-                variant: variant,
-                marked: old?.marked ?? false,
-                cut: cut,
-                boundaries: Self.legalCutPositions(of: variant.workingText))
-        }
-        divideWCeremony = DivideWCeremonyState(
-            blockID: state.blockID, activeVariantID: activeCurrent.id, takes: takes)
-        model.showStatus("This block's takes changed while the sheet was open — the cuts were re-proposed; review before dividing.")
+    func speakCeremonyStatus(_ message: String) {
+        model.showStatus(message)
+    }
+
+    func speakCeremonyRefusal(_ message: String) {
+        model.refuseFeedback(message)
+    }
+
+    func speakCeremonyError(_ error: Error) {
+        model.showOperationError(error)
     }
 }

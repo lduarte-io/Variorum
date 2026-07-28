@@ -1289,8 +1289,10 @@ final class EditorViewModel {
         structural.cancelDivideW()
     }
 
-    func confirmDivideW() {
-        Task { await confirmDivideWCeremony() }
+    /// The ceremony object the sheet is parameterized on (13d Batch 3):
+    /// Write's mount hands this over instead of the whole view model.
+    var divideWCeremonyController: DivideWCeremony {
+        structural.ceremony
     }
 
     func confirmDivideWCeremony() async {
