@@ -2600,6 +2600,47 @@ is recorded here rather than changed under cover of an A11 build.
   found only the tutorial pin; the palette and menu doors are user-facing).
   (4) whether extract should inherit A11 after all.
 
+#### Batch 5 — ACCEPTED (2026-07-28; the orchestrator's adjudication)
+
+**Counts by my own runs, all three suites:** core `✔ Test run with 901
+tests in 101 suites passed after 43.632 seconds` · Mac `✔ Test run
+with 873 tests in 145 suites passed after 98.627 seconds` · mobile
+`✔ Test run with 14 tests in 4 suites passed after 0.262 seconds` —
+all matching the record; tree clean at `0a29e60`. (A burst of stale
+SourceKit diagnostics against two test files was checked against the
+source — both symbols exist — and refuted by the runs.)
+
+**The §9 canon delta REVIEWED and it STANDS:** her ruling quoted, the
+superseded PROVISIONAL sentence quoted where it stood, the
+dangling-designation reading stated, and the never-replaces limit —
+creation never touches a FINISHED/FULL/SMART book she designated,
+because answering her deliberate states by minting a second Journal
+would be inventing product behavior. Exactly her ruling, nothing
+beyond.
+
+**The A22 mechanism story is P-7 working:** the first mechanism
+(`contentInsets`) measured perfectly and was WRONG — clicks below the
+top ~17 pt missed the text at depth, and 13c 1C's dead-strip tripwire
+pin fired at 483 pt, which is precisely what that pin was built to
+catch. The shipped `constrainBoundsRect` allowance + the narrow
+`hitTest` claim carry their own guard
+(`theRoomNeverStealsAClickOverHerText`, revert-discriminated). The
+scroller-knob nuance (the room is reached by scrolling, not by
+dragging the knob) is recorded for her and joins the Design & UI
+review row's material.
+
+**The tutorial-spine hang was the spine doing its job** — the field
+guide's insurance lesson met A12's modal and held; the `confirm:` seam
+plus the corrected lesson prose are right, and the re-seed obligation
+grows by one lesson (still ONE "Restore Tutorial" run).
+
+**Extract's blank-line sibling: correctly NOT widened** — her ruling
+named divide; extending it silently would be scope growth. Recorded
+as a one-line question on the handoff checklist (review focus 4
+weighs it too). The three 13c-owned pin changes are accepted on their
+named reasons; the review re-checks them cold. **The phase's build
+work is COMPLETE — the ONE Fable cold review runs next.**
+
 ## THE 13D SITTING — 2026-07-28 (author-attended; the agenda below was walked in four question batches; rulings verbatim-faithful)
 
 Her opening: *"ok, you can give me the questions, my live app is closed,
