@@ -92,8 +92,13 @@ struct PhantomSpaceTests {
     /// Returns the view the click actually landed on.
     private func click(_ window: NSWindow, _ view: NSView, at point: CGPoint) -> NSView? {
         let inWindow = view.convert(point, to: nil)
+        // `hitTest` takes a point in the RECEIVER'S SUPERVIEW space. This
+        // used to convert into the content view's OWN space, which on a
+        // titled window is a titlebar's worth off — harmless while the text
+        // view covered everything below the last line, and exposed the
+        // moment 13d's typewriter room put something else down there.
         let target = window.contentView?.hitTest(
-            window.contentView!.convert(inWindow, from: nil))
+            window.contentView!.superview!.convert(inWindow, from: nil))
         func event(_ type: NSEvent.EventType) -> NSEvent? {
             NSEvent.mouseEvent(
                 with: type, location: inWindow, modifierFlags: [],
@@ -136,7 +141,19 @@ struct PhantomSpaceTests {
                     "the reproduction needs empty space below the last line")
 
             textView.setSelectedRange(NSRange(location: 0, length: 0))
-            let target = click(window, textView, at: CGPoint(x: 380, y: bottomOfText + 20))
+            // Probe the MIDDLE of the phantom rather than a fixed 20 pt
+            // below the last line: the phantom's own bottom few points are
+            // AppKit's non-routing sliver (this suite's
+            // `theBottomStripIsAppKitsNotOurs`), and 13d's typewriter room
+            // changed where the scroll settles, which put the old fixed
+            // probe inside it. A construction detail — the BEHAVIOUR under
+            // test is unchanged, and the room is provably not a variable in
+            // it (`TypewriterRoomTests.theRoomNeverStealsAClickOverHerText`
+            // holds the general form).
+            let phantom = textView.frame.height - bottomOfText
+            #expect(phantom > 8, "the reproduction needs a phantom to click in (\(phantom) pt)")
+            let probe = CGPoint(x: 380, y: bottomOfText + phantom / 2)
+            let target = click(window, textView, at: probe)
             #expect(target === textView,
                     "the phantom belongs to the editor — a click there must reach it, not fall through to the scroll view's background")
             #expect(textView.selectedRange().location == (textView.string as NSString).length,
@@ -144,10 +161,20 @@ struct PhantomSpaceTests {
         }
     }
 
-    /// The one region that genuinely does not route to the text view: a thin
-    /// strip at the very bottom of the scroll view. Pinned at its measured
-    /// size — if this class ever grows into the "paragraphs of empty space"
-    /// A46 described, this fails first (P-7).
+    /// The one region that genuinely does not route ANYWHERE: a thin strip
+    /// at the very bottom of the scroll view. Pinned at its measured size —
+    /// if this class ever grows into the "paragraphs of empty space" A46
+    /// described, this fails first (P-7).
+    ///
+    /// **13d batch 5 (A22) re-scoped what "dead" means, and the re-scoping
+    /// is the point.** Below the last line there are now TWO regions: the
+    /// phantom (inside the document — the text view's) and the typewriter
+    /// room (below it — the scroll view's, which lands the caret at the end
+    /// of the text). Both ROUTE, so neither is dead; what this walks for is
+    /// the strip that routes to neither. The un-re-scoped version of this
+    /// pin fired at 483 pt the moment the room shipped — which is exactly
+    /// what it was written to do, and it caught a real defect in the room's
+    /// first mechanism on the way (see `TypewriterScrollView`).
     @Test func theDeadStripAtTheBottomOfTheScrollViewStaysASliver() async throws {
         try await withEditor(seedBlocks: ["alpha beta", "gamma delta"]) { h in
             let (scrollView, window) = try mount(h, height: 500)
@@ -156,18 +183,22 @@ struct PhantomSpaceTests {
             let clip = scrollView.contentView.bounds
 
             // Walk up from the bottom of the visible rect until a point
-            // routes to the text view.
+            // routes somewhere that acts on it.
             var dead: CGFloat = 0
             while dead < clip.height {
                 let point = CGPoint(x: 380, y: clip.maxY - dead - 0.5)
                 let inWindow = textView.convert(point, to: nil)
                 let hit = window.contentView?.hitTest(
-                    window.contentView!.convert(inWindow, from: nil))
-                if hit === textView { break }
+                    window.contentView!.superview!.convert(inWindow, from: nil))
+                if hit === textView || hit === scrollView { break }
                 dead += 1
             }
             #expect(dead <= 8,
                     "the un-routed strip at the bottom of the editor is \(dead) pt — a sliver above the commit bar, never a readable band of page")
+
+            // (That the ROOM itself routes and lands the caret is
+            // `TypewriterRoomTests`' — here the short document fills the
+            // viewport, so the room sits below the visible area entirely.)
         }
     }
 

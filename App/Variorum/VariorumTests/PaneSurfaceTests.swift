@@ -76,6 +76,61 @@ struct PaneSurfaceTests {
         window.contentViewController = nil
     }
 
+    /// **13d batch 5 — the long-content-panes memo, §6 item 5 (her "Accept
+    /// all"): the idle-voice-switch residual.** The memo's edge 3: a
+    /// full-range invalidation with NO user event behind it — a voice switch,
+    /// or (since A23) a paragraph-gap change — re-attributes the whole
+    /// storage, which is exactly the write A47c traced as destroying a
+    /// tail-scrolled pane's rendering surfaces. The occasion heals (click,
+    /// scroll-end, ring move) cannot reach an idle card, so the branch now
+    /// re-asserts the render tier itself. Pinned at the mechanism the A47c
+    /// experiment established (`renderRestoresRun`), which is the same seam
+    /// its own pins use.
+    @Test func aGapOrVoiceChangeRestoresTheRenderTierWithNoUserEvent() async throws {
+        let saved = UserDefaults.standard.string(forKey: ParagraphGap.settingKey)
+        defer {
+            if let saved {
+                UserDefaults.standard.set(saved, forKey: ParagraphGap.settingKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: ParagraphGap.settingKey)
+            }
+        }
+        UserDefaults.standard.set(ParagraphGap.standard.rawValue, forKey: ParagraphGap.settingKey)
+
+        let host = NSHostingController(
+            rootView: PaneSurfaceView(
+                text: (1...40).map { "Paragraph \($0) of a long take." }.joined(separator: "\n\n"),
+                isLive: false)
+                .frame(width: 400))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 600),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        host.view.layoutSubtreeIfNeeded()
+        pump(6)
+
+        let pane = try #require(findPane(host.view))
+        let spacingBefore = pane.defaultParagraphStyle?.paragraphSpacing ?? -1
+        let restoresBefore = pane.renderRestoresRun
+
+        // The invalidation, with no click, no scroll and no ring move.
+        UserDefaults.standard.set(
+            ParagraphGap.paragraphTall.rawValue, forKey: ParagraphGap.settingKey)
+        // The restore is DEFERRED to the next main-queue turn (by design —
+        // inside updateNSView the write that kills has not happened yet), and
+        // in this host such a turn only runs when the main actor yields.
+        for _ in 0..<6 { pump(1); await Task.yield() }
+        host.view.layoutSubtreeIfNeeded()
+        for _ in 0..<6 { pump(1); await Task.yield() }
+
+        #expect((pane.defaultParagraphStyle?.paragraphSpacing ?? -1) > spacingBefore,
+                "non-vacuity: the full-range re-attribution really ran")
+        #expect(pane.renderRestoresRun > restoresBefore,
+                "…and it re-asserted the render tier (restores \(restoresBefore) → \(pane.renderRestoresRun)) — without this the memo's edge 3 leaves a scrolled card blank until she clicks")
+
+        window.contentViewController = nil
+    }
+
     @Test func theMeasurementBrainMatchesTheRenderedPaneHeight() async throws {
         // The ONE measurement brain (P-3): a mounted pane's rendered
         // height equals PaneMeasurement's answer at the same width — the

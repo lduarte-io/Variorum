@@ -339,17 +339,27 @@ struct EntryListTests {
         try await withMobileWorld { session, db in
             let model = EntryListViewModel(session: session)
 
-            // No daily journal book designated at all.
+            // No daily journal book designated at all. 13d batch 5 (author
+            // ruling, QUESTIONS #37 → option (iii)): the shared door now
+            // CREATES AND PINS the Journal book rather than reporting its
+            // absence, so a phone capture arrives IN the journal like every
+            // other door's entry. A RULED FLIP of this pin's second half —
+            // its first half (the mint is never blocked) is untouched, which
+            // is what it is really for.
             let postID = try #require(await model.open(on: "2026-07-07"))
             #expect(try await db.read { db in
                 try String.fetchOne(
                     db, sql: "SELECT id FROM container WHERE id = ?", arguments: [postID])
             } == postID, "the entry always opens")
-            #expect(model.lastError?.contains("journal book") == true)
-            // And no book was invented on her shelf by a capture tap.
+            #expect(model.lastError == nil, "nothing to explain — it is on the shelf")
             #expect(try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL")
-            } == 0)
+            } == 1, "the Journal book was created and pinned by the shared ensure")
+            #expect(try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM reading_post WHERE post_id = ? AND deleted_at IS NULL
+                    """, arguments: [postID])
+            } == 1, "…and the day's entry is in it")
 
             // The finished / full / other-refusal wordings all speak.
             #expect(EntryListViewModel.shelvingNote(.shelved(readingID: "r")) == nil)

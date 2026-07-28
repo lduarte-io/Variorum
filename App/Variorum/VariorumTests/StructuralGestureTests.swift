@@ -37,6 +37,29 @@ struct StructuralRewriteDoorTests {
         }
     }
 
+    /// **A11 (author ruling, 13d sitting 2026-07-28) — her report, at the
+    /// surface where she made it:** dividing ON an empty line used to drop
+    /// the blank line from both halves, so the cut visibly ATE a line of her
+    /// spacing. With the k−1 ownership rule at the seam, the blank belongs to
+    /// the first half and the editor's own single-`"\n"` separator re-creates
+    /// the rest — so the surface she is looking at does not change at all.
+    @Test func aDivideAtABlankLineLeavesTheSurfaceExactlyAsItWas() async throws {
+        try await withEditor(seedBlocks: ["Para one.\n\nPara two.", "Anchor."]) { h in
+            let surfaceBefore = h.documentText
+            h.textView.setSelectedRange(NSRange(location: 11, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)
+
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == ["Para one.\n", "Para two.", "Anchor."],
+                    "the blank line is the FIRST half's k−1 trailing newline")
+            #expect(h.documentText == surfaceBefore,
+                    "…and her page is byte-identical — the blank line never went anywhere")
+            try expectStoreMatchesView(h)
+            #expect(h.session.undoStack.topLabel == "Divide")
+        }
+    }
+
     @Test func extractPrefixMintsBeforeTheSourceAndCaretLandsThere() async throws {
         try await withEditor(seedBlocks: ["Intro clause. Middle stays here. Tail sentence."]) { h in
             // Sloppy prefix selection (mid-word ends): snaps to 0..<14.

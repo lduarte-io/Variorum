@@ -1413,8 +1413,13 @@ struct TutorialStructureActsTests {
             try await session.runner.run { ops in
                 try ops.autosave(sourceVariant, text: "words typed after the divide", charDelta: 28)
             }
-            // …then undo the structure.
-            ShellActions(session: session, shell: ShellRouter()).structuralUndo()
+            // …then undo the structure. 13d batch 5 (A12): THIS is the one
+            // undo that now asks first — it is the insurance class by
+            // construction, which is exactly what the lesson teaches. A
+            // RULED change to a shipped pin: the act is unchanged, the door
+            // asks before it runs, and a headless caller answers.
+            ShellActions(session: session, shell: ShellRouter())
+                .structuralUndo(confirm: { _ in true })
             await poll {
                 ((try? db.read { try Queries.renderPost($0, containerID: lesson) })?.count ?? 0)
                     == before.count

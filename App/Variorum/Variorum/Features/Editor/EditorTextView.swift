@@ -209,6 +209,12 @@ final class EditorTextView: NSTextView {
 
     /// Builds the spike-proven editor stack. The precondition is the TK2
     /// opt-in guarantee; the canary guards the rest of the session.
+    ///
+    /// 13d batch 5 (A22): the scroll view is a `TypewriterScrollView`, so
+    /// Write's full-document editor always carries about a viewport-page of
+    /// room below the last line. The inline editor deliberately does NOT —
+    /// it has no scroll view of its own (it lives in the book view's), and
+    /// her ask and the A47b story are both about the POST editor.
     static func makeEditor() -> (scrollView: NSScrollView, textView: EditorTextView) {
         let textView = EditorTextView(usingTextLayoutManager: true)
         precondition(textView.textLayoutManager != nil, "TK2 opt-in failed at construction")
@@ -254,7 +260,8 @@ final class EditorTextView: NSTextView {
         textView.registerForDraggedTypes(
             textView.registeredDraggedTypes + [poolBlockType])
 
-        let scrollView = NSScrollView()
+        let scrollView = TypewriterScrollView()
+        scrollView.contentView = TypewriterClipView()
         scrollView.hasVerticalScroller = true
         scrollView.documentView = textView
         return (scrollView, textView)
@@ -294,6 +301,163 @@ final class EditorTextView: NSTextView {
         textView.registerForDraggedTypes(
             textView.registeredDraggedTypes + [poolBlockType])
         return textView
+    }
+}
+
+/// **TYPEWRITER ROOM — A22 (author ruling, 13d sitting 2026-07-28).**
+/// Her ask, from the A47b sitting: *let me scroll into a page of empty space
+/// so I can keep typing high on the screen.* She had been building that room
+/// BY HAND out of typed newlines at the end of a post — which the ratified
+/// edge rules never store (a whitespace-only open tail never mints), so it
+/// looked durable and silently evaporated. Her ruling settled both halves:
+/// the trimming rules STAY exactly as ratified, and the room is the real
+/// answer — ALWAYS ON, no setting.
+///
+/// **The room is ALLOWANCE, never content.** It is `contentInsets.bottom` on
+/// the scroll view: zero bytes stored, zero text written, `renderedText`,
+/// export and the bridge byte-untouched, and the document itself unchanged —
+/// which is also why it composes with the phantom heal for free (13c 1E lays
+/// out one long block at a time and re-frames the text view; the room is
+/// measured from the VIEWPORT and simply sits below whatever height that
+/// leaves — the heal's law is untouched, and `LongBlockLayout` never learns
+/// this exists).
+///
+/// **The mechanism was CHOSEN BY MEASUREMENT, and the first choice was
+/// wrong** (13d batch 5, macOS 26.4.1 — the whole story, because it is the
+/// kind of thing a future session would otherwise "simplify" back):
+///
+/// - `NSScrollView.contentInsets.bottom` was built first, and on the numbers
+///   it looked ideal: a 300 pt bottom inset left the clip's height exactly
+///   unchanged (400.0 → 400.0), extended the constrained scroll range by
+///   exactly 300 (2406.5 → 2700.5), and made the vertical scroller reflect
+///   the extra range (knobProportion 0.1425 → 0.1290). **It also broke
+///   clicking into her own text.** Measured on the mounted editor: with the
+///   inset set, everything below the top ~17 pt of the viewport hit-tested
+///   to an AppKit backdrop view — at depths where her prose was VISIBLY
+///   DRAWN (ink present, hit test wrong). AppKit lays a backdrop over the
+///   inset region; the document still draws through it, so the failure is
+///   invisible until you click. 13c 1C's dead-strip tripwire — written to
+///   fire "if this class ever grows from a sliver into a band of page" — is
+///   what caught it.
+/// - So the room is an `NSClipView.constrainBoundsRect` allowance instead:
+///   the same measured scroll range, no view added, no hit testing touched.
+///   **Recorded cost:** the vertical scroller's knob does not cover the room
+///   (AppKit sizes it from the document rect), so the room is reached by
+///   ordinary scrolling — wheel, trackpad, keyboard — not by dragging the
+///   knob to the very bottom. Flagged for her walk rather than hidden.
+///
+/// **The click had to be BUILT, and a pin is what found that out too.** The
+/// room is covered by no view — `NSClipView` hit-tests transparently outside
+/// its document — so a click there reached nothing at all and left the caret
+/// where it was (measured, after a first reading that had mistaken a
+/// pre-existing end-of-text selection for the click's work). Her ruling —
+/// *a click in the room lands the caret at the end of the text* — is honoured
+/// by claiming exactly that region in `hitTest` and answering with the text
+/// view's OWN insertion-point arithmetic, which is what a click in the
+/// phantom does (batch 1C).
+@MainActor
+final class TypewriterScrollView: NSScrollView {
+    /// Off ⇒ byte-identical to a plain NSScrollView (nothing is written).
+    var typewriterRoomEnabled = true
+
+    /// The allowance the clip currently grants, in points.
+    var typewriterRoom: CGFloat { (contentView as? TypewriterClipView)?.room ?? 0 }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        updateTypewriterRoom()
+    }
+
+    override func layout() {
+        super.layout()
+        updateTypewriterRoom()
+    }
+
+    /// Is `point` (this view's own coordinates) in the ROOM — over the
+    /// viewport, below everything the document draws, and not on a scroller?
+    private func isInRoom(_ point: NSPoint) -> Bool {
+        guard typewriterRoomEnabled, typewriterRoom > 0,
+              let document = documentView, contentView.frame.contains(point)
+        else { return false }
+        for scroller in [verticalScroller, horizontalScroller] {
+            if let scroller, !scroller.isHidden, scroller.frame.contains(point) { return false }
+        }
+        let inClip = convert(point, to: contentView)
+        return inClip.y > document.frame.maxY
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        // Only the room is claimed, and only when it is genuinely below the
+        // document: everything else — her text, the scrollers — falls
+        // through to AppKit untouched. (`super` answers nil in the room,
+        // which is why the click needed claiming at all.)
+        if isInRoom(convert(point, from: superview)) { return self }
+        return super.hitTest(point)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        let local = convert(event.locationInWindow, from: nil)
+        guard isInRoom(local), let textView = documentView as? NSTextView else {
+            super.mouseDown(with: event)
+            return
+        }
+        window?.makeFirstResponder(textView)
+        // The text view's own arithmetic, so the room behaves exactly like
+        // the space below the last line always has: the nearest insertion
+        // point, which for a point past every line IS the end.
+        let inText = textView.convert(event.locationInWindow, from: nil)
+        let offset = textView.characterIndexForInsertion(at: inText)
+        textView.setSelectedRange(NSRange(location: offset, length: 0))
+    }
+
+    /// CHANGE-GATED (the A47c discipline): a same-value pass writes nothing,
+    /// so this cannot chase its own layout — and the room is computed from
+    /// the viewport, which the allowance does not move, so it converges in
+    /// one pass.
+    func updateTypewriterRoom() {
+        guard let clip = contentView as? TypewriterClipView else { return }
+        let room = typewriterRoomEnabled
+            ? TypewriterRoom.height(
+                viewport: clip.bounds.height,
+                lineHeight: TypewriterRoom.lineHeight(of: EditorDocument.baseFont))
+            : 0
+        guard abs(clip.room - room) > 0.5 else { return }
+        clip.room = room
+    }
+}
+
+/// The room itself: scrolling may go `room` points past the document's end.
+/// Nothing else changes — no view is added, no frame is inset, and hit
+/// testing over the document is untouched (which the `contentInsets`
+/// candidate could not say).
+@MainActor
+final class TypewriterClipView: NSClipView {
+    var room: CGFloat = 0
+
+    override func constrainBoundsRect(_ proposedBounds: NSRect) -> NSRect {
+        var rect = super.constrainBoundsRect(proposedBounds)
+        guard room > 0, let document = documentView, isFlipped else { return rect }
+        let maxY = max(0, document.frame.height + room - rect.height)
+        rect.origin.y = min(max(proposedBounds.origin.y, 0), maxY)
+        return rect
+    }
+}
+
+/// The room's arithmetic, pure (so the rule is pinned, not just observed).
+nonisolated enum TypewriterRoom {
+    /// About one viewport-page (her words), **less one line of prose** — so
+    /// at the very bottom of the scroll the last line of her text sits at
+    /// the top of the window rather than one pixel above it. Without that
+    /// subtraction the maximum scroll puts the text entirely out of view,
+    /// which is room she can't type into.
+    static func height(viewport: CGFloat, lineHeight: CGFloat) -> CGFloat {
+        max(0, viewport - max(0, lineHeight))
+    }
+
+    /// One line of a font, from the font's own metrics — never
+    /// `NSLayoutManager.defaultLineHeight` (a TK1 API; TEXTKIT2 §4 rule 2).
+    static func lineHeight(of font: NSFont) -> CGFloat {
+        (font.ascender - font.descender + font.leading).rounded(.up)
     }
 }
 

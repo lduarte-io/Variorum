@@ -538,10 +538,13 @@ enum TutorialSeeder {
             + "at the bottom of the window.",
 
             "If a structural undo would overwrite words you typed AFTER the "
-            + "act, the app quietly keeps a savepoint of your newer text "
-            + "first — insurance, so nothing typed is ever more than one "
-            + "restore away. Try it: divide the block above, type a few words "
-            + "into the FIRST half, press \u{2325}\u{2318}Z, then look in history.",
+            + "act, the app ASKS FIRST — that is the one undo that sets "
+            + "writing aside, so it is the one that stops to check. Say yes "
+            + "and a savepoint of your newer text is kept anyway: insurance, "
+            + "so nothing typed is ever more than one restore away. Every "
+            + "other structural undo stays silent. Try it: divide the block "
+            + "above, type a few words into the FIRST half, press "
+            + "\u{2325}\u{2318}Z, answer the question, then look in history.",
         ])
 
         // ——————————————————————————— ways of looking ———————————————————————

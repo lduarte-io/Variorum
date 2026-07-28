@@ -84,10 +84,33 @@ struct ShellActions {
 
     /// ⌥⌘Z (N4): the structural undo executes AND reports through the
     /// mode-independent status surface — never into a nil editor.
-    func structuralUndo() {
+    ///
+    /// **A12 (author ruling, 13d sitting 2026-07-28) — the destructive-undo
+    /// warning, at exactly her definition:** the confirm fires ONLY when the
+    /// undo would discard text edited since the operation (the insurance
+    /// class — `UndoStack.pendingUndoWarning`). Every other structural undo
+    /// stays silent, and redo is untouched. `confirm` is the injectable seam
+    /// (the `openTutorial` precedent) so the DECISION is pinnable without an
+    /// NSAlert.
+    ///
+    /// **A headless caller in the insurance class MUST pass `confirm:`** —
+    /// the default runs a modal alert, which in a test host waits forever
+    /// (found exactly that way: the tutorial's own insurance pin hung the
+    /// spine until it answered).
+    func structuralUndo(confirm: ((UndoStack.PendingUndoWarning) -> Bool)? = nil) {
         let undoStack = session.undoStack  // Sendable; the closure must not capture the session
         Task { @MainActor in
             do {
+                let warning = try await session.runner.run { ops in
+                    undoStack.pendingUndoWarning(with: ops)
+                }
+                if let warning {
+                    let approved = confirm?(warning) ?? Self.confirmDiscardingUndo(warning)
+                    guard approved else {
+                        status.speak("Undo cancelled — nothing changed.")
+                        return
+                    }
+                }
                 let label = try await session.runner.run { ops in
                     try undoStack.undo(with: ops)
                 }
@@ -260,6 +283,36 @@ struct ShellActions {
                 status.speak("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }
         }
+    }
+
+    /// A12's dialog: it names what would be SET ASIDE and says where it
+    /// goes. Plain words, exact scope — the tutorial confirm's shape.
+    /// (Copy is static and pure so a pin can read it without a window.)
+    nonisolated static func discardingUndoQuestion(
+        _ warning: UndoStack.PendingUndoWarning
+    ) -> String {
+        "Undo \(warning.label)?"
+    }
+
+    nonisolated static func discardingUndoDetail(
+        _ warning: UndoStack.PendingUndoWarning
+    ) -> String {
+        let subject = warning.bufferCount == 1
+            ? "One take has been edited since" : "\(warning.bufferCount) takes have been edited since"
+        return "\(subject) — undoing puts back the text as it was BEFORE the "
+            + "\(warning.label.lowercased()), so that writing is set aside. "
+            + "It is committed first, so you can bring it back from the take's "
+            + "history (⌘S's list) at any time."
+    }
+
+    @MainActor
+    private static func confirmDiscardingUndo(_ warning: UndoStack.PendingUndoWarning) -> Bool {
+        let alert = NSAlert()
+        alert.messageText = discardingUndoQuestion(warning)
+        alert.informativeText = discardingUndoDetail(warning)
+        alert.addButton(withTitle: "Undo")
+        alert.addButton(withTitle: "Cancel")
+        return alert.runModal() == .alertFirstButtonReturn
     }
 
     /// The spoken confirm (brief decision 6): plain words, exact scope.

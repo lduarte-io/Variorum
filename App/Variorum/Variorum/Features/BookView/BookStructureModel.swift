@@ -388,7 +388,11 @@ final class BookStructureModel {
 /// entry — the journal lives on the shelf as ordinary membership (R38 +
 /// R50). PROVISIONAL shape, QUESTIONS bundle.
 enum JournalBooks {
-    nonisolated static let defaultDailyBookName = "Journal"
+    /// 13d batch 5 (#37(iii)): the name lives with the CREATION, which is
+    /// now the shared core door's — this forwards so nothing drifts.
+    nonisolated static var defaultDailyBookName: String {
+        Operations.defaultDailyJournalBookName
+    }
 
     /// The door's outcome: the entry ALWAYS opens; `note` speaks when the
     /// membership half couldn't happen (Stage B review round 2, MAJOR 2:
@@ -408,26 +412,18 @@ enum JournalBooks {
         // "Journal" books).
         return try await session.runner.run { ops in
             let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
-            // CREATE-AND-PIN stays here, and only here: minting a book on
-            // her shelf is the act only a button press she pressed may take
-            // (QUESTIONS #37 — it is why this door is deliberately not the
-            // shared helper wholesale).
-            if try ops.dailyJournalBookID() == nil {
-                let book = try ops.createReading(
-                    name: defaultDailyBookName, kind: .curated, profile: "journal",
-                    sortField: .entryDate, sortDir: .asc)
-                try ops.setDailyJournalBook(book.id)
-                try ops.setShelfPinned(book.id, pinned: true)
-            }
-            // …and the ENSURE half delegates to the one implementation
-            // (13c Stage 1 ladder, R1-4). This door used to call
+            // The ENSURE half — CREATE-AND-PIN INCLUDED — delegates WHOLLY
+            // to the one implementation (13c Stage 1 ladder R1-4, completed
+            // by the author's 13d #37(iii) ruling). This door used to call
             // `addPostToReading` itself and catch `alreadyInReading`, which
             // fires on LIVE rows only — so a membership she had deliberately
             // removed (a tombstoned row) was invisible here and ⌘J silently
             // put the entry back on the shelf, while the bridge and the
-            // phone correctly left it alone. "Any membership row, live or
-            // tombstoned, means the pair is already decided" is ONE rule, and
-            // now it really is one.
+            // phone correctly left it alone. Then create-and-pin stayed
+            // behind as the ONE residue, on the reasoning that minting a
+            // book is a button-press-only act — which she overturned: the
+            // bridge's days belong in Journal too. So all four doors share
+            // one rule with nothing left at this one.
             var bookName = defaultDailyBookName
             func namedBook() -> String {
                 (try? ops.dailyJournalBookName() ?? nil) ?? bookName
@@ -459,10 +455,10 @@ enum JournalBooks {
                     note: "Today's entry opened, but “\(bookName)” is a smart book — "
                         + "it collects by query and can't hold entries. Pick a curated "
                         + "book with Use as Daily Journal.")
-            case .noDailyBook, .refused:
-                // Unreachable in the ordinary path (the branch above
-                // guarantees a designation); a race gets a speaking note
-                // rather than a silent miss.
+            case .refused:
+                // The shared door creates a book where none is designated,
+                // so only a race or a store failure reaches here — and it
+                // gets a speaking note rather than a silent miss.
                 return Outcome(
                     postID: entry.container.id,
                     note: "Today's entry opened, but it wasn't added to a daily "

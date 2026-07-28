@@ -99,8 +99,10 @@ final class EntryListViewModel {
     /// exact day. It now runs the SAME shared second half the bridge does
     /// (`Operations.shelveInDailyJournalBook`: never throws, so it can never
     /// block the mint; a decided pair — live or tombstoned membership — is
-    /// left exactly as she left it; a missing designation is reported, never
-    /// invented). The entry ALWAYS opens; only the note changes.
+    /// left exactly as she left it; with NO book designated the Journal book
+    /// is created and pinned — the author's 13d ruling on QUESTIONS #37,
+    /// which retired the "reported, never invented" shape at every door).
+    /// The entry ALWAYS opens; only the note changes.
     func open(on entryDate: String) async -> String? {
         do {
             let opened: (postID: String, shelving: Operations.DailyBookShelving) =
@@ -125,8 +127,6 @@ final class EntryListViewModel {
         switch shelving {
         case .shelved, .alreadyDecided:
             return nil
-        case .noDailyBook:
-            return "Entry saved. It isn't in a journal book yet — pick a daily journal on the Mac."
         case .bookFinished:
             return "Entry saved. Your daily journal book is finished, so it wasn't added — reopen it on the Mac."
         case .bookAtCapacity:

@@ -634,6 +634,16 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 storage.endEditing()
             }
             context.coordinator.remeasure()
+            // 13d batch 5 (the long-content-panes memo §6 item 5 — her
+            // "Accept all"): THIS branch is the memo's edge 3, the
+            // full-range invalidation class that has no user event behind
+            // it. The `addAttributes` above is exactly the write A47c
+            // traced as destroying a tail-scrolled pane's rendering
+            // surfaces — and a voice or gap switch can land while she sits
+            // idle on a scrolled card, where the occasion heals (click,
+            // scroll-end, ring move) cannot reach it. Re-assert the render
+            // tier on the same deferred turn the occasions use.
+            context.coordinator.restoreRenderTier()
         }
         // The buffer is authoritative while live: a projection may lag the
         // keystroke; never clobber the surface under the caret. Read panes
@@ -851,6 +861,16 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 remeasure()
             }
             if restoreRender { scheduleRenderRestore() }
+        }
+
+        /// The render half alone, for a full-range invalidation that is NOT
+        /// a user occasion (13d batch 5: the font/gap re-attribution — the
+        /// memo's edge 3). Geometry is already handled there by the
+        /// remeasure beside it, so this asks only for the drawing.
+        /// Coalesced by the same latch, so a burst of updates is one pass.
+        func restoreRenderTier() {
+            guard view != nil, publisher != nil else { return }
+            scheduleRenderRestore()
         }
 
         private var renderRestoreScheduled = false
