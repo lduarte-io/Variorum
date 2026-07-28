@@ -1458,9 +1458,17 @@ final class EditorViewModel {
             try await session.runner.run { [postID] ops in
                 try ops.setSegmentationDefault(postID, segmentation: mint ? nil : .oneBlock)
             }
-            showStatus(mint
-                ? SegmentationFaceCopy.mintOnNote
-                : SegmentationFaceCopy.mintOffNote)
+            // 13d batch 4 (A16): read the EFFECTIVE mode back before
+            // speaking — turning ON writes per-post nil, and under a global
+            // one_block that still doesn't mint, so `mintOnNote` would lie.
+            // A direct read (not `header`, whose observation may not have
+            // delivered yet), bounded by one container.
+            let effective = try? await session.database.read { [postID] db in
+                try Queries.containerHeader(db, containerID: postID)?.effectiveSegmentation
+            }
+            showStatus(SegmentationFaceCopy.note(
+                asked: mint,
+                effectivelyMints: (effective ?? nil) != .oneBlock))
         } catch {
             showOperationError(error)
         }

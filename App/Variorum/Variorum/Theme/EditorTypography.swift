@@ -101,17 +101,36 @@ struct EditorSurfaceChrome: Equatable {
     let voice: ThemeVoice
     let dark: Bool
     let inlineComments: Bool
+    /// 13d batch 4 (A23/A24): the two this-Mac editor-behaviour settings
+    /// ride the chrome value NOT because they are "chrome" in the voice
+    /// sense, but because the chrome's `Equatable` gate is the app's ONE
+    /// "this surface's presentation moved, re-apply it" mechanism — and a
+    /// second mechanism beside it is exactly what P-3 forbids. A gap change
+    /// moves no font, so without this the gate would never notice it.
+    let paragraphGap: ParagraphGap
+    let spellcheck: SpellcheckLevel
 
-    init(voice: ThemeVoice, dark: Bool, inlineComments: Bool) {
+    init(
+        voice: ThemeVoice, dark: Bool, inlineComments: Bool,
+        paragraphGap: ParagraphGap = .standard,
+        spellcheck: SpellcheckLevel = .off
+    ) {
         self.voice = voice
         self.dark = dark
         self.inlineComments = inlineComments
+        self.paragraphGap = paragraphGap
+        self.spellcheck = spellcheck
     }
 
-    init(tokens settings: Queries.ThemeSettings, dark: Bool) {
+    init(
+        tokens settings: Queries.ThemeSettings, dark: Bool,
+        paragraphGap: ParagraphGap = .standard,
+        spellcheck: SpellcheckLevel = .off
+    ) {
         self.init(
             voice: settings.voice, dark: dark,
-            inlineComments: settings.inlineComments)
+            inlineComments: settings.inlineComments,
+            paragraphGap: paragraphGap, spellcheck: spellcheck)
     }
 
     var tokens: VoiceTokens { .resolve(voice: voice, dark: dark) }
@@ -139,6 +158,7 @@ extension NSTextView {
         backgroundColor = chrome.paper
         textColor = chrome.ink
         insertionPointColor = chrome.caret
+        chrome.spellcheck.apply(to: self)  // A24 — write-gated inside
         font = EditorDocument.baseFont
         defaultParagraphStyle = EditorDocument.baseParagraphStyle
         typingAttributes = EditorDocument.baseAttributes

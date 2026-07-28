@@ -793,7 +793,7 @@ struct TutorialWritingActsTests {
     }
 
     /// 13b 4D (N28's second half — S4-13 editor parity, the lesson's own
-    /// promise): ⌥⌘N mints an empty block RIGHT UNDER the one you're in,
+    /// promise): ⌘⇧⏎ mints an empty block RIGHT UNDER the one you're in,
     /// and the cursor lands in it — Write and Takes alike.
     @Test func newBlockBelowMintsUnderTheFocusedBlockInBothEditors() async throws {
         try await withTutorialWorld { session, db, bookID in

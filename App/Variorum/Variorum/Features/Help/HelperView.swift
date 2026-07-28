@@ -66,7 +66,7 @@ struct HelperView: View {
             ("⌘⇧E", "extract the selection into its own block"),
             ("⌘⇧K", "make a block from the selection"),
             ("⌘⇧M", "merge blocks"),
-            ("⌥⌘N", "new block below the one you're in (Write and Takes alike)"),
+            ("⌘⇧⏎", "new block below the one you're in (Write and Takes alike)"),
         ]),
         ShortcutGroup(title: "Navigation", items: [
             ("⌘1 – ⌘6", "post modes: Write · Takes · Lenses · Compare · Blocks · Canvas"),

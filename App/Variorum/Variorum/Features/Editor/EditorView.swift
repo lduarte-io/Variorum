@@ -56,8 +56,15 @@ struct EditorView: View {
         themeStore?.settings ?? Queries.ThemeSettings()
     }
 
+    /// 13d batch 4 (A23/A24): this Mac's editor-behaviour settings ride
+    /// the chrome, so a change re-applies through the one chrome gate.
+    @AppStorage(ParagraphGap.settingKey) private var paragraphGap = ParagraphGap.standard
+    @AppStorage(SpellcheckLevel.settingKey) private var spellcheck = SpellcheckLevel.off
+
     private var chrome: EditorSurfaceChrome {
-        EditorSurfaceChrome(tokens: themeSettings, dark: scheme == .dark)
+        EditorSurfaceChrome(
+            tokens: themeSettings, dark: scheme == .dark,
+            paragraphGap: paragraphGap, spellcheck: spellcheck)
     }
 
     private var chromeTokens: VoiceTokens {

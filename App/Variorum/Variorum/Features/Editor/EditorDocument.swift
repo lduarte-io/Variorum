@@ -45,9 +45,18 @@ nonisolated enum EditorDocument {
     /// every paragraph (intra-block newlines and seams alike) reveals
     /// nothing. The size rides the voice's font (and widens uniformly when
     /// inline comments are on — EditorTypography's letter).
+    ///
+    /// 13d batch 4 (A23): plus this Mac's `ParagraphGap` choice, read HERE
+    /// rather than cached in `EditorTypography.current` — every surface
+    /// rebuilds this style, so reading at construction means there is no
+    /// global to keep in sync and no ordering hazard between the setting
+    /// changing and a surface re-styling. Still per-PARAGRAPH, still stored
+    /// nowhere.
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
-        style.paragraphSpacing = EditorTypography.current.paragraphSpacing
+        let typography = EditorTypography.current
+        style.paragraphSpacing = typography.paragraphSpacing
+            + ParagraphGap.current.extraSpacing(for: typography.font)
         return style
     }
 

@@ -195,7 +195,7 @@ struct CommitBar: View {
             Task { await model.insertBlockBelowCaret() }
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-        .help("New Block Below (⌥⌘N) — an empty block right under the one you're in; type straight into it")
+        .help("New Block Below (⌘⇧⏎) — an empty block right under the one you're in; type straight into it")
         // 13c 1B (A8): the delete door, beside the insert door it mirrors.
         Button(tokens.chromeLabel("− block")) {
             Task { await model.deleteCaretBlock() }

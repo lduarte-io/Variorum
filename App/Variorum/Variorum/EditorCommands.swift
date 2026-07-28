@@ -71,7 +71,12 @@ struct EditorCommands: Commands {
         case .commitTake: ("s", .command)
         case .structuralUndo: ("z", [.command, .option])
         case .structuralRedo: ("z", [.command, .option, .shift])
-        case .insertBlockBelow: ("n", [.command, .option])
+        // 13d batch 4 (A14, her row verbatim: "⌘⇧Enter = new block").
+        // ⌘⇧⏎ SUPERSEDES the 13b-4D ⌥⌘N: one act declares one key (P-1),
+        // every shortcut is a menu item (R73/R91/R93), and the sweep found
+        // ⌘⇧⏎ free. It reads beside A15: ⇧⏎ stays in the block, ⌘⇧⏎ makes
+        // a new one — the Enter-flavoured pair her intake describes.
+        case .insertBlockBelow: (.return, [.command, .shift])
         case .divide: ("d", [.command, .shift])
         case .extract: ("e", [.command, .shift])
         case .makeBlock: ("k", [.command, .shift])
@@ -196,7 +201,7 @@ struct EditorCommands: Commands {
             // under the caret/focused block, NATIVE in Write and Takes
             // alike (her editor-parity ruling); the caret/ring lands in it.
             Button(verb(.insertBlockBelow)) { actions?.dispatch(.insertBlockBelow) }
-                .keyboardShortcut("n", modifiers: [.command, .option])
+                .keyboardShortcut(.return, modifiers: [.command, .shift])
                 .disabled(!enabled(.insertBlockBelow))
 
             // 13c 1B (A8): the delete door where she writes — `deleteBlock`

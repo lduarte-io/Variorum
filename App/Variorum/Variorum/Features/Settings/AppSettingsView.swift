@@ -11,6 +11,7 @@
 //  lives here too — the manager is where you look at tags.
 //
 
+import GRDB  // AsyncValueObservation iteration (the ThemeStore pattern)
 import SwiftUI
 import VariorumCore
 
@@ -27,7 +28,7 @@ struct AppSettingsView: View {
 
     var body: some View {
         TabView {
-            AppearancePane(theme: theme)
+            AppearancePane(session: session, theme: theme)
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
             TagManagerPane(session: session, tags: tags)
                 .tabItem { Label("Tags", systemImage: "tag") }
@@ -41,6 +42,7 @@ struct AppSettingsView: View {
 // MARK: - Appearance (B1's settings, faced)
 
 private struct AppearancePane: View {
+    let session: AppSession
     let theme: ThemeStore
     /// 13b 4D (S4-19, her ruling): hover-revealed drag handles in Write —
     /// default ON; OFF = the fully clean surface. LOCAL (this Mac's
@@ -52,6 +54,17 @@ private struct AppearancePane: View {
     /// ruling on the posture; LOCAL like the hover-handle setting (this is
     /// one Mac's editor behaviour, not document semantics).
     @AppStorage(LongBlockLayout.settingKey) private var longBlockLayout = true
+    /// 13d batch 4 (A23): the paragraph-gap choice. LOCAL like its two
+    /// neighbours above — one Mac's editor look, not document semantics,
+    /// and stored nowhere in the schema (no export/bridge byte moves).
+    @AppStorage(ParagraphGap.settingKey) private var paragraphGap = ParagraphGap.standard
+    /// 13d batch 4 (A24): spellcheck level, coarse by TEXTKIT2 §3's warning.
+    @AppStorage(SpellcheckLevel.settingKey) private var spellcheck = SpellcheckLevel.off
+    /// 13d batch 4 (A16): the DOCUMENT-GLOBAL segmentation default — the
+    /// one setting on this pane that is synced, because it changes what
+    /// entry DOES to the store rather than how one Mac looks.
+    @State private var defaultSegmentation: Segmentation = .paragraph
+    @State private var segmentationNote: String?
 
     var body: some View {
         Form {
@@ -100,10 +113,82 @@ private struct AppearancePane: View {
                     Text("Margin grid").tag(FanStyle.marginGrid)
                     Text("Slot split").tag(FanStyle.slotSplit)
                 }
+                // 13d batch 4 (A23): the paragraph gap. Pure presentation
+                // over the 2026-07-12 ruling's presentation half — uniform
+                // and per-PARAGRAPH, never per-seam (§12: boundaries stay
+                // invisible at rest).
+                Picker("Space between paragraphs", selection: $paragraphGap) {
+                    Text("Standard").tag(ParagraphGap.standard)
+                    Text("A blank line's worth").tag(ParagraphGap.paragraphTall)
+                }
+                Text("Air after every paragraph — inside a block and between blocks alike, so block boundaries stay invisible at rest. Purely how it looks: nothing is stored, and exports are byte-identical either way. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                // 13d batch 4 (A24): coarse by design — TEXTKIT2 §3 records
+                // continuous checking + the completion popover crashing
+                // NSTextView, so three levels and no finer.
+                Picker("Spellchecking", selection: $spellcheck) {
+                    Text("Off").tag(SpellcheckLevel.off)
+                    Text("Check while typing").tag(SpellcheckLevel.checkWhileTyping)
+                    Text("Check and correct").tag(SpellcheckLevel.checkAndCorrect)
+                }
+                Text("Off (the default): no underlines; Edit ▸ Spelling and Grammar still checks on demand. Check while typing: red underlines as you go. Check and correct: macOS also fixes what it is confident about. Applies to every writing surface — Write, takes, comparisons. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            // 13d batch 4 (A16 — N34's deferred GLOBAL half): document
+            // semantics, so it is SYNCED, and it says so. Per-post settings
+            // still win where they are set.
+            Section("Writing") {
+                Picker(SegmentationFaceCopy.globalTitle, selection: Binding(
+                    get: { defaultSegmentation },
+                    set: { setDefaultSegmentation($0) })) {
+                    Text(SegmentationFaceCopy.globalParagraph).tag(Segmentation.paragraph)
+                    Text(SegmentationFaceCopy.globalOneBlock).tag(Segmentation.oneBlock)
+                }
+                Text(SegmentationFaceCopy.globalHelp)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if let segmentationNote {
+                    Text(segmentationNote)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .formStyle(.grouped)
         .padding(8)
+        // A tiny bounded observation over the `setting` table (the
+        // ThemeStore pattern) — so a change made on another device shows
+        // here, and the picker never drifts from the store.
+        .task {
+            do {
+                for try await value in session.database.observe({ db in
+                    try Queries.defaultSegmentation(db)
+                }) {
+                    defaultSegmentation = value
+                }
+            } catch {}
+        }
+    }
+
+    /// The write goes through the runner like every other setting write
+    /// (the ThemeStore setters' shape); the observation above carries the
+    /// new value back, so the picker never holds an optimistic guess.
+    private func setDefaultSegmentation(_ segmentation: Segmentation) {
+        guard segmentation != defaultSegmentation else { return }
+        segmentationNote = segmentation == .oneBlock
+            ? SegmentationFaceCopy.globalMintOffNote
+            : SegmentationFaceCopy.globalMintOnNote
+        Task {
+            do {
+                try await session.runner.run { try $0.setDefaultSegmentation(segmentation) }
+            } catch {
+                segmentationNote = String(describing: error)
+            }
+        }
     }
 }
 

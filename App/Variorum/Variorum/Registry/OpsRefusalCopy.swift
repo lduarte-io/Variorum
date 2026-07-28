@@ -29,21 +29,71 @@ nonisolated enum SegmentationFaceCopy {
     /// re-segment).
     static let mintOffNote =
         "Newlines now stay inside the block in this post — typing and pasting "
-        + "won't make new blocks; Divide (⌘⇧D) or New Block Below (⌥⌘N) split "
+        + "won't make new blocks; Divide (⌘⇧D) or New Block Below (⌘⇧⏎) split "
         + "deliberately. Existing blocks are untouched."
     static let mintOnNote =
         "Newlines make blocks again in this post — each finished paragraph "
         + "becomes its own block as you type past it, and pasted paragraphs "
         + "arrive as blocks. Existing blocks are untouched."
 
+    /// 13d batch 4 (A16): the note a post speaks when it is turned back ON
+    /// and the DOCUMENT-GLOBAL default is itself `one_block`. Turning the
+    /// chip on writes per-post NIL — "inherit" (4D's recorded mapping, kept
+    /// deliberately so a global one_block choice stays honored) — so under
+    /// a global OFF the post keeps behaving as OFF, and `mintOnNote` would
+    /// be a lie. The door still acts (it really does clear the override);
+    /// it just says what that means (P-2). Only reachable BECAUSE this
+    /// batch made the global settable, which is why this batch owns it.
+    static let mintOnInheritsOffNote =
+        "This post now follows your global setting — and that is currently "
+        + "\"newlines don't make blocks\", so newlines still stay inside the "
+        + "block here. Change it in Settings ▸ Appearance ▸ Writing."
+
+    /// The ONE place either bar picks a note: what was ASKED for versus
+    /// what the post now EFFECTIVELY does. Both callers re-read the header
+    /// before asking, so this can never speak past a stale projection.
+    static func note(asked mint: Bool, effectivelyMints: Bool) -> String {
+        guard mint else { return mintOffNote }
+        return effectivelyMints ? mintOnNote : mintOnInheritsOffNote
+    }
+
     /// The chip's hover help (both bars).
     static let help =
         "ON (the standard): each finished paragraph becomes its own block as "
         + "you type past it; pasted paragraphs arrive as blocks. OFF (opt-in): "
         + "newlines stay INSIDE the block — typing and pasting never make "
-        + "blocks in this post; Divide (⌘⇧D) or New Block Below (⌥⌘N) split "
+        + "blocks in this post; Divide (⌘⇧D) or New Block Below (⌘⇧⏎) split "
         + "deliberately. Governs future entry only — existing blocks never "
-        + "re-segment. Per post."
+        + "re-segment. Per post — ON means "
+        + "\"follow the global setting\" (Settings ▸ Appearance ▸ Writing)."
+
+    // MARK: - The GLOBAL face (13d batch 4 — A16 / N34's deferred half)
+
+    /// The Settings picker's label and its two offered modes. Sentence
+    /// segmentation is deliberately NOT offered: type-time crystallization
+    /// is paragraph-granular in EVERY mode (the ratified 2026-07-06 rule),
+    /// so a sentence choice here would name a behaviour the editor does not
+    /// have. `bulkSegments(.sentence)` stays reachable where it always was.
+    static let globalTitle = "Newlines make blocks"
+    static let globalParagraph = "On — each paragraph becomes its own block"
+    static let globalOneBlock = "Off — newlines stay inside the block"
+
+    static let globalHelp =
+        "The default for every post that has no setting of its own. ON (the "
+        + "standard): a finished paragraph becomes its own block as you type "
+        + "past it, and pasted paragraphs arrive as blocks. OFF: newlines "
+        + "stay inside the block everywhere — Divide (⌘⇧D) or New Block "
+        + "Below (⌘⇧⏎) split deliberately. Governs future entry only; "
+        + "existing blocks never re-segment, and a post with its own setting "
+        + "keeps it. Synced to all your devices."
+
+    static let globalMintOnNote =
+        "Newlines make blocks by default again. Existing blocks are "
+        + "untouched, and posts with their own setting keep it."
+    static let globalMintOffNote =
+        "Newlines now stay inside the block by default — typing and pasting "
+        + "won't make new blocks. Existing blocks are untouched, and posts "
+        + "with their own setting keep it."
 }
 
 /// 13b 4F (N36 — S4-28.1): the per-post word-target face's shared

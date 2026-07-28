@@ -98,7 +98,7 @@ struct TakesBottomBar: View {
                 model.requestTakeLabel(variantID: variantID)
             }
             Divider()
-            Button("＋ New block below this one (⌥⌘N)") {
+            Button("＋ New block below this one (⌘⇧⏎)") {
                 // 13b 4D (N28/S4-13): insert-below, native — an empty block
                 // mints right under the block you're in and its pane takes
                 // the ring. The Takes trap's second half closes here.

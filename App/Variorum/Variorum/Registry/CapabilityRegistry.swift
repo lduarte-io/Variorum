@@ -153,7 +153,14 @@ nonisolated enum CapabilityRegistry {
         Capability(
             id: .insertBlockBelow, verb: "New Block Below", scope: .block,
             doors: [.menuBar, .bottomBar, .palette],
-            shortcutLabel: "⌥⌘N", takesAccess: .native,
+            // 13d batch 4 (A14): ⌘⇧⏎, superseding 13b 4D's ⌥⌘N. Her row is
+            // "⌘⇧Enter = new block"; the collision sweep found the chord
+            // free (⌘⏎ is Choose Take; nothing else binds Return with a
+            // modifier). One act, one declared key — the registry has no
+            // alias concept, and giving one act two keys would mean either
+            // a duplicate menu row or an undeclared key, both of which the
+            // legibility mandate refuses.
+            shortcutLabel: "⌘⇧⏎", takesAccess: .native,
             unavailableNote: "Blocks are born inside a post — open one first.",
             availability: takeFamily),  // the one named rule, not a copy
         // 13c 1B (A8 — her item: "I don't seem to have the ability to

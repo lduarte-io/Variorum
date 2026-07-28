@@ -429,6 +429,11 @@ final class PaneTextView: NSTextView {
         view.defaultParagraphStyle = EditorDocument.baseParagraphStyle
         view.typingAttributes = EditorDocument.baseAttributes
         view.allowsUndo = allowsUndo
+        // 13d batch 4 (A24): panes join the setting. Before this they set
+        // NEITHER flag and inherited NSTextView's defaults, so the take
+        // boards and the full-document editor could disagree about spelling
+        // — one setting, every TK2 surface.
+        SpellcheckLevel.current.apply(to: view)
         return view
     }
 }
@@ -505,6 +510,12 @@ struct PaneSurfaceView: View {
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     @State private var height: CGFloat = 24
     @State private var canaryMessage: String?
+    /// 13d batch 4 (A23/A24): the two this-Mac editor-behaviour settings.
+    /// Held HERE so a change in the Settings window invalidates every
+    /// mounted pane immediately (a bare `UserDefaults` read at update time
+    /// would only land on the next unrelated redraw).
+    @AppStorage(SpellcheckLevel.settingKey) private var spellcheck = SpellcheckLevel.off
+    @AppStorage(ParagraphGap.settingKey) private var paragraphGap = ParagraphGap.standard
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -523,6 +534,7 @@ struct PaneSurfaceView: View {
                 text: text, isLive: isLive, height: $height, canaryMessage: $canaryMessage,
                 ink: tokens.map { NSColor($0.ink) },
                 role: role, variantID: variantID,
+                spellcheck: spellcheck, paragraphGap: paragraphGap,
                 onFocusRequest: onFocusRequest, onEdit: onEdit,
                 onSelectionChange: onSelectionChange, menuItems: menuItems)
                 // EXACT height, not a floor (13b 3F, AD-7): an
@@ -555,6 +567,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var ink: NSColor?
     var role: String
     var variantID: String?
+    /// 13d batch 4 (A23/A24) — carried as values (not read from defaults
+    /// inside the representable) so SwiftUI knows an update is due.
+    var spellcheck: SpellcheckLevel = .off
+    var paragraphGap: ParagraphGap = .standard
     var onFocusRequest: (() -> Void)?
     var onEdit: ((String) -> Void)?
     var onSelectionChange: ((NSRange) -> Void)?
@@ -578,6 +594,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         view.variorumMenu = menuItems
         applyStyle(to: view)
         applyIdentity(to: view)
+        spellcheck.apply(to: view)  // A24
         view.string = text
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
@@ -594,10 +611,18 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.noteLiveness(isLive)
         applyStyle(to: view)
         applyIdentity(to: view)
+        spellcheck.apply(to: view)  // A24 — write-gated, so a same-level
+                                    // update writes nothing at all
         // A voice switch changes the ONE global typography (C1's
         // EditorTypography); live-adopt it so open panes re-font without
         // reconstruction (an ordinary storage write, never §3 attributes).
-        if view.font != EditorDocument.baseFont {
+        // 13d batch 4 (A23): a paragraph-GAP change moves no font, so the
+        // font test alone could never notice it — the style test is the
+        // second half of the same "our base attributes moved" question, and
+        // the re-attribution below is exactly what a gap change needs.
+        if view.font != EditorDocument.baseFont
+            || view.defaultParagraphStyle?.paragraphSpacing
+                != EditorDocument.baseParagraphStyle.paragraphSpacing {
             view.font = EditorDocument.baseFont
             view.defaultParagraphStyle = EditorDocument.baseParagraphStyle
             view.typingAttributes = EditorDocument.baseAttributes

@@ -1093,9 +1093,12 @@ final class TakesViewModel {
         }
         await refreshSegmentation()
         if statusMessage == nil {
-            statusMessage = mint
-                ? SegmentationFaceCopy.mintOnNote
-                : SegmentationFaceCopy.mintOffNote
+            // 13d batch 4 (A16): the refresh has just re-read the EFFECTIVE
+            // mode, so the note describes what the post now does rather than
+            // what was asked for — turning ON under a global one_block
+            // clears the override and still doesn't mint.
+            statusMessage = SegmentationFaceCopy.note(
+                asked: mint, effectivelyMints: newlinesMintBlocks)
         }
     }
 

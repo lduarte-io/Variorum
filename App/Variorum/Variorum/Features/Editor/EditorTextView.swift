@@ -199,15 +199,15 @@ final class EditorTextView: NSTextView {
         textView.typingAttributes = EditorDocument.baseAttributes
         // Substitutions rewrite text behind the caret; keep the surface
         // literal (they would also route through the edit pipeline, but the
-        // author's prose should not be silently rewritten). Spell checking
-        // stays available via the Edit menu; continuous checking defaults
-        // off pending the §3 completion-popover crash class — the diagnostic
-        // toggle the plan calls for.
+        // author's prose should not be silently rewritten).
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.isAutomaticTextReplacementEnabled = false
-        textView.isAutomaticSpellingCorrectionEnabled = false
-        textView.isContinuousSpellCheckingEnabled = false
+        // Spell checking: 13d batch 4 (A24) makes the level a setting. The
+        // DEFAULT is byte-identical to what shipped here before — both flags
+        // off, spelling reachable via Edit ▸ Spelling and Grammar — so a
+        // Mac that never opens Settings behaves exactly as it did.
+        SpellcheckLevel.current.apply(to: textView)
 
         // Pool drags land here too (Phase 10 Step 7) — additive, never
         // replacing the text types NSTextView registers for itself.
@@ -250,8 +250,7 @@ final class EditorTextView: NSTextView {
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.isAutomaticTextReplacementEnabled = false
-        textView.isAutomaticSpellingCorrectionEnabled = false
-        textView.isContinuousSpellCheckingEnabled = false
+        SpellcheckLevel.current.apply(to: textView)  // A24 (default = off)
         textView.registerForDraggedTypes(
             textView.registeredDraggedTypes + [poolBlockType])
         return textView
