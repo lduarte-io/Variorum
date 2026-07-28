@@ -360,6 +360,102 @@ push. Baselines to match-or-beat: core 882/100 · Mac 808/136 · mobile
 14/4 (untouched unless `Shared/` is touched — run it and say so if
 so).
 
+### Batch 4 — the typing-ergonomics floor: A14 · A15 · A16 · A23 · A24 (fresh Opus implementer; ONE PROPOSAL GATE on A15's tail half)
+
+Five ledger rows from her 2026-07-25 intake (the K3 roadmap's 13d
+column). Four are mechanical against recorded decisions; A15 carries
+the phase's one genuine design edge and is GATED.
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §7's segmentation-trigger note + the §14 deltas for
+2026-07-06/07 Phase 7 rulings — the open tail, idle-mint, Enter-at-end
+— and 2026-07-12's spacing ruling, both halves); THIS plan file
+(batches 1–3's records show the form; their adopted rules bind); the
+13c plan's "Environment traps"; in
+`notes/plans/phase-13b-make-it-work.md`: the 4D batch record's N34
+note (A16's recorded blocker) and the S4-14/S4-21 one_block rulings;
+`notes/TEXTKIT2_NOTES.md` §3 (the spell-check crash warning that
+scopes A24). Then the code each item names.
+
+**The items:**
+
+1. **A14 — ⌘⇧⏎ mints a new block.** Her row verbatim: *"⌘⇧Enter = new
+   block"*. The ACT already exists (`insertBlockBelowFocused` — 13b
+   4D, native in Write, Takes and Lenses); this is its SHORTCUT door:
+   one registry declaration (P-1 — the shortcut rides the act's
+   standing availability; every shortcut a menu item, the R73/R91/R93
+   legibility mandate; the Shortcuts & Dictionary helper picks it up
+   from the registry). CHECK COLLISIONS FIRST across the standing
+   keyboard family (menu key equivalents + registry shortcuts) and
+   record the sweep's result in the batch record; if ⌘⇧⏎ is taken,
+   STOP and report rather than picking a substitute — the key is her
+   ask.
+2. **A15 — shift-Enter stays in the block, Takes AND Write — TRACE
+   FIRST, THEN THE GATE.** Her row verbatim: *"Shift-Enter staying in
+   the block in BOTH editors"*. Step one is a TRACE, recorded in the
+   batch record BEFORE any design: what Enter and ⇧Enter each do
+   TODAY in (a) Write mid-block, (b) Write's open tail (paragraph
+   mode), (c) Write under `one_block`, (d) a Takes/Lenses pane, (e)
+   the quick-entry bar if it accepts newlines. Where the two keys
+   already both stay (I4 — mid-block newlines are content), record
+   that and build nothing. The REAL half is wherever Enter leads to a
+   block boundary (the open tail's crystallization; any pane behavior
+   that isn't stay): propose the minimal mechanism that makes ⇧⏎ a
+   guaranteed stay-in-this-block newline there — and note the
+   constraint that makes this a design edge: crystallization's
+   boundary detection is a pure Domain function over TEXT, newlines
+   are content (I4), and the store records no keystroke provenance —
+   so any "this newline is soft" memory must live in EDITOR SESSION
+   state over the un-minted tail (the tail is surface-only until it
+   mints), never in the schema, and the minted result must be
+   indistinguishable from typed content afterward. **Append the
+   proposal to this file under your batch record heading, STOP on
+   this item, and report** — the other four items may be built while
+   A15 waits; the gate closes on the orchestrator's ruling.
+3. **A16 — the GLOBAL `one_block` face (N34).** Her row: the
+   newline-makes-a-block setting reachable in Takes too — 13b 4D
+   recorded the blocker as "one small core setter away"; read that
+   record first. Build the small core setter for the document-global
+   `default_segmentation` setting (the `setting` table row is SYNCED
+   document semantics — §7's seeds; upsert-only, ordinary outbox
+   ride) + its Settings face; per-post `segmentation_default`
+   override semantics are UNTOUCHED. Entry-wide semantics per
+   S4-14/S4-21 (paste included) come from the existing machinery —
+   this is a face + setter, not a segmentation change.
+4. **A23 — the paragraph-tall gap setting.** Pure presentation over
+   the 2026-07-12 ruling's presentation half (the uniform
+   per-PARAGRAPH gap — never per-seam; §12's boundaries-invisible
+   reasoning rides it): a Settings → Appearance face offering the
+   standing gap and a paragraph-tall option. Stored NOWHERE in the
+   schema (an app-local appearance setting beside the phantom kill
+   switch — follow that face's precedent); `renderedText`, export,
+   and the bridge are byte-untouched (pin that no store write occurs
+   on toggle).
+5. **A24 — spellcheck levels, COARSE.** Her row: *"different levels
+   of spellchecking"*. TEXTKIT2 §3's warning scopes this: continuous
+   spell check + the completion popover has crashed TK2 — keep it
+   coarse (off · check-while-typing · check+correction — three
+   levels, no finer), a Settings face applying to the TK2 editing
+   surfaces through their existing configuration point, default =
+   today's shipped behavior (record what that IS as part of the
+   trace). Exercise the crash class in a hosted pin as far as the
+   harness allows; what the harness cannot reach is recorded for the
+   Design & UI review's screenshot drive, not claimed.
+
+**Binding for all five:** P-1 (doors/settings declared where the
+registry reaches them; surface-local faces recorded, not declared —
+Stage 4 lesson 10); refusals speak (P-2); no schema change anywhere
+in this batch (if any item seems to want one, STOP — that is a §12
+lockstep event and never a batch's call); the loop, records, and
+constraints exactly as batches 1–3 (checksums before reverts; the
+array-subscript pin rule; full suites with quoted "Test run with N
+tests" lines; batch record appended; commits per convention — one per
+item is fine if the diffs read cleaner; never `/Applications`, never
+`Sources/VariorumCore/Sync/`, never push). Baselines to
+match-or-beat: core 882/100 · Mac 831/137 · mobile 14/4 (A16's setter
+touches core — if any diff lands under `Sources/` or `Shared/`, run
+the affected suites and quote their lines).
+
 ## Batch records
 
 *(Implementers append here — one record per batch: changes, files,
@@ -1421,6 +1517,63 @@ expectations, not the build**:
   friction? (3) the layering note above. (4) whether `WriteTakesPanel`
   should be the trigger's first customer — it now composes `isPaneLive`,
   so it would inherit the freeze for free if its model ever ran a flight.
+
+#### Batch 3 — ACCEPTED (2026-07-27 night; the orchestrator's adjudication)
+
+**Counts by my own runs:** core `✔ Test run with 882 tests in 100
+suites passed after 32.582 seconds` · Mac `✔ Test run with 831 tests
+in 137 suites passed after 90.652 seconds` — both match the record's
+claims; tree clean at `113a1ff`.
+
+**Spot-checks run, all clean:** `structural(.divide)` appears ZERO
+times in `CommandRoutingTests` (the re-point claim, verified by my own
+grep); the parity pin (`theTakesWorldAndWritesWorldPlanAlike`) is
+exactly the ruling's binding addition — EXHAUSTIVE over every caret ×
+both arities, full plan equality (the snapped cut rides the plan
+value), with a real non-vacuity arm; rider 2's `let frozen =
+projection.sealed || structuralInFlight` named local and the
+authority's two-reason doc comment both landed as ruled.
+
+**The one deviation from the proposal's letter (the seventh host
+member) is ENDORSED** — the busy-door refusal keeps its voice per
+host (Write beeps, a board speaks); routing it through the status
+voice would have silently changed shipped behavior, which is exactly
+what parity-by-forwards exists to prevent. The count correction
+(seven occurrences across five tests, not six) is the record working
+honestly.
+
+**The caret-0 finding is the guard working in the RIGHT direction:**
+the pin asserted a refusal; reality is snap-and-proceed (the ratified
+2026-07-06 contract, item 2), and the carry door produced the same
+landing — so the parity claim holds through the opposite behavior,
+and inventing a refusal to match the pin would have been inventing
+product behavior. Judgment calls 5 and 6 (the "Block divided" status
+line; divide-at-block-start with no caret) join the SITTING BUNDLE
+beside batch 2's status-line call — all three are one-line changes on
+her word, and all three describe standing-or-parity behavior, not
+inventions.
+
+**The latch's release-before-the-sheet arrangement is endorsed** — it
+is Write's own arrangement (opening the ceremony has never been a
+flight), the sheet's drift-refresh-at-confirm discipline covers edits
+made while it is open, and holding the latch across a window-modal
+sheet would freeze her live ring for as long as she reads. Focus (1)
+still rides the end-of-phase review.
+
+**The layering note is recorded and adopted as a phase-closeout
+consideration:** the Takes→Editor reach for the planner/index/refusal
+vocabulary is the ruled one-brain constraint's direct consequence; the
+tidy end state (shared vocabulary → the shared layer, the
+`OpsRefusalCopy` precedent) is a candidate small cleanup for the
+end-of-phase review to endorse or the closeout to re-own — not built
+mid-phase.
+
+**The second lock-flag exception recorded:** Stage 4 lesson 9's
+probe-first discipline held (a control suite before anything was
+trusted); the lesson's prediction failed again. Future sessions keep
+the probe, not the prediction. A9 is DELIVERED — #41's "carry stands
+until then" clause is now moot. Batch 4 (the typing-ergonomics
+floor) proceeds.
 
 ## Verification
 
