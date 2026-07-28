@@ -2862,9 +2862,13 @@ earns its keep.
 written per P-5 with the trace as its foundation — four options costed,
 recommendation (d) stabilized-status-quo now with (a) the capped card
 pre-approvable for 13d; **its §6 rulings are HERS** and join the walk
-list. **The `/Applications` refresh is HELD**: her "refresh when this
-issue is fixed" authorization named A47b's issue, and A47c is a new
-one — her word (or her closing the app and saying so) releases it.
+list. **The `/Applications` refresh RAN at her word** ("go ahead and
+install it", 2026-07-27 evening): fresh WAL-safe backup
+(`variorum-backup-2026-07-28-012524.sqlite`, `integrity_check` ok),
+Release built from HEAD (`7004301`), zero instances at build AND copy,
+installed 19:27 local, signature verified. Her daily-drive build now
+carries the full A47 family: the phantom fix, the frame law + its
+production triggers, and the render heal.
 
 ## STAGE 2 CLOSEOUT — 2026-07-27 (the phase's committed scope is DELIVERED; the author's walk remains)
 
