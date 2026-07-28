@@ -456,6 +456,80 @@ match-or-beat: core 882/100 · Mac 831/137 · mobile 14/4 (A16's setter
 touches core — if any diff lands under `Sources/` or `Shared/`, run
 the affected suites and quote their lines).
 
+### Batch 5 — the sitting's builds: #37(iii) · A12 · the idle-voice line · A22 · A11 (fresh Opus implementer; the phase's LAST build batch)
+
+Five items, every one RULED at the 2026-07-28 sitting (the sitting
+record above is the binding text). **Read IN FULL:** `CLAUDE.md` + the
+canon it loads (AppSpec §9's `shelveInDailyJournalBook` +
+`createOrOpenJournalEntry` entries, the QUESTIONS #26(a) daily-book
+record, the §14 2026-07-12 spacing ruling and Phase 3 seam-trimming
+delta); THIS plan file (the sitting record; batches 1–4's records +
+adopted rules); the 13c plan's "Environment traps" + its Batch 1D
+record (the bridge shelving build) + the A47b/A47c sections and
+`notes/plans/phase-13d-memo-long-content-panes.md` §3 (anyone touching
+`PaneSurface`/`LongBlockLayout` reads them first — binding);
+`notes/plans/phase-13c-memo-block-extent.md` Part 2 (the phantom fix
+A22 must compose with).
+
+1. **#37(iii) — the ensure half moves INTO the shared door.** With NO
+   daily journal book designated (or a designation dangling at a dead
+   book), `shelveInDailyJournalBook` now CREATES AND PINS the Journal
+   book exactly as ⌘J's first press does — ⌘J then delegates its
+   whole ensure to the shared door, so the bridge landing, the
+   phone's capture, and ⌘J share ONE rule with no creation residue at
+   the ⌘J door. Unchanged and binding: the op NEVER throws (a landing is
+   never blocked — return what happened); the already-decided rule
+   (any membership row, live or tombstoned) is untouched; the
+   finished/full-book paths keep their statuses and wording. The §9
+   canon delta lands with this item (the "It never creates a book"
+   PROVISIONAL sentence superseded by her ruling, quoted) — the
+   orchestrator reviews it at adjudication. Core change ⇒ core tests;
+   run all three suites.
+2. **A12 — the destructive-undo warning, her definition exactly:**
+   the confirm fires ONLY when the undo would discard text edited
+   since the operation (the fourth-occasion insurance class — the
+   condition the undo path already computes to decide the quiet
+   auto-commit); every other structural undo stays silent; redo
+   untouched. The dialog names what would be set aside and that the
+   insurance commit preserves it. Pins: fires exactly on the class,
+   silent otherwise, cancel leaves everything untouched.
+3. **The idle-voice-switch render fix** — the panes memo §6 item 5's
+   one-line restore on the font-swap branch (edge 3 in the memo's §3);
+   pinned.
+4. **A22 — typewriter room, RULED shape:** ~one viewport-page of
+   scrollable allowance below the last line, ALWAYS ON, Write's
+   full-document editor only (Outline/Book/Read/panes untouched — her
+   ask and the A47b story are the post editor); a click in the room
+   lands the caret at the end of the text. The room is ALLOWANCE,
+   never content: zero store bytes (pin via row/byte counts +
+   renderedText), the edge-trimming rules byte-untouched, the hybrid
+   jump and scroll-restore still land text correctly with room below,
+   and it composes with the phantom heal (room applies below HEALED
+   geometry; the heal's law untouched). TK2 discipline binds (inset/
+   allowance-level mechanism; never TK1 APIs). **STOP-and-propose if
+   the mechanism must modify the heal path or `LongBlockLayout`** —
+   otherwise build.
+5. **A11 — the blank line divides into the FIRST half:** dividing at
+   an empty line today drops the blank from both halves (her report:
+   it lands NOWHERE). Ruled: the standing k−1 ownership rule applies
+   at divide — "para1\n\npara2" cut at the blank yields first half
+   "para1\n" (k−1 trailing) and second "para2"; the editor separator
+   re-creates the last newline, so the SURFACE reproduces the blank
+   line byte-for-byte and `renderedText` round-trips. Land it in the
+   ONE cut brain (the seam-trimming function every divide door
+   consults — plain divide, the ceremony's per-take cuts, extract
+   edges), red-on-old pinned on her report. **STOP-and-propose if the
+   trace shows the mechanism is NOT the seam-trim function.**
+
+Loop, records, constraints: batches 1–4's exactly (checksums; the
+array-subscript pin rule; tutorial spine; FULL suites with quoted
+"Test run with N tests" lines — all three, since items 1 and 5 touch
+core; mobile destination = iPhone 17 family/16e). Baselines to
+match-or-beat: core 887/101 · Mac 858/143 · mobile 14/4. Never
+`/Applications`, never `Sources/VariorumCore/Sync/`, never push.
+Append the batch record; commit per convention (canon may be its own
+commit).
+
 ## Batch records
 
 *(Implementers append here — one record per batch: changes, files,
@@ -2203,7 +2277,70 @@ her untaken trimming ruling, the rolled walk items, #48) and then the
 ONE Fable cold review at phase end (her kickoff cast ruling) over the
 combined diff. The install refresh is HELD for her word as always.
 
-## The 13d sitting agenda (bundled; nothing here gates the shipped batches)
+## THE 13D SITTING — 2026-07-28 (author-attended; the agenda below was walked in four question batches; rulings verbatim-faithful)
+
+Her opening: *"ok, you can give me the questions, my live app is closed,
+and we can close the phase out."* Every agenda item was ruled; the
+phase closes after one final build batch, the Fable review, and the
+ritual.
+
+**RATIFIED AS SHIPPED (her picks of the recommended option, except
+where quoted):** **#48** all seven build calls ("Keep all seven") ·
+**#33(a–e)** and **#36** (inside her words: *"aside from that, these
+seem fine"*) · **#43(b)(c) · #44(a)(b)(d) · #45(a)(d)(e)** + the
+callout-as-indent page note · **#46 all five + A31's two** ("Ratify
+all seven") · **#47(a)(d)** + the filter-OFF placement, and
+**#47(b)** after asking *"what does a version link alone doesn't make
+blocks related? like if one *post* is a version of the other htey
+aren't related? or if a block is a verison of another block they
+aren't related?"* — answered (the mark is post-level, one anchor edge,
+no block correspondences; no user-facing block-version mark exists)
+and then RULED "Keep as shipped" · **#38** "Leave it — no timer"
+(revisit with Phase 12's dirty-day remedy) · **#42** "Keep the
+refusal" · **#31** A21 "Leave at 13e" · **the block-extent memo
+Q1/Q2/Q5** "Accept all three" (tight callouts + the new gap setting
+for room; seam centred CONFIRMED; inline comments keep UNIFORM
+airiness — **A5 is DISPOSITIONED as addressed**) · **the
+long-content-panes memo §6** "Accept all" (hold the landed
+stabilization; **option (a) PRE-APPROVED, evidence-gated** — defaults
+recorded: ~1.5× screen threshold, fan cards only, focus un-caps; the
+(c) escape hatch stays bookmarked unbuilt).
+
+**OVERTURNED / NEW RULINGS (batch 5 builds these):**
+
+1. **#37 OVERTURNED to option (iii)** — her words: *"the fragments
+   entries should arrive as part of Journal"*. A Fragments landing
+   with NO daily journal book designated now CREATES AND PINS the
+   Journal book exactly as ⌘J's first press does — the ensure half
+   moves into the shared door so all four doors truly share one rule.
+   This supersedes §9's "It never creates a book (PROVISIONAL,
+   QUESTIONS #37)" sentence; the canon delta lands with the build.
+2. **A12 RULED + build now:** warn ONLY on the insurance-class undo —
+   an undo that would discard text edited since the operation (the
+   case the fourth quiet auto-commit occasion insures). Every other
+   structural undo stays silent.
+3. **The panes memo's one-line idle-voice-switch render fix builds
+   now** (§6 item 5's "add it" arm — her Accept-all).
+4. **A22 RULED + build now:** REAL typewriter room — about one
+   viewport-page of scrollable space below the last line, **ALWAYS
+   ON** (no setting), a click in the room lands the caret at the end
+   of the text ("the room is space, not paper"). **The edge-trimming
+   rules stay exactly as ratified** (whitespace-only tails never
+   mint) — her A47b "should we just stop trimming?" question is now
+   RULED: no; the room is the real answer.
+5. **A11 RULED + build now:** divide on an empty line — the blank
+   line belongs to the FIRST half (the standing k−1 trailing-newline
+   ownership rule, one rule everywhere).
+
+**NEXT PHASE: 13f — Workspace** (her K4 "soonest" rank; the closeout
+authors its plan; its kickoff stays hers). Nothing rolls to it from
+13d — every 13d scope row is now built, building in batch 5, or
+dispositioned (A5 addressed; A21 stays 13e).
+
+**Install refresh authorized by context** (her app is closed, her
+words above) — executes at the closeout behind the standing A1 rail.
+
+## The 13d sitting agenda (bundled; nothing here gates the shipped batches — WALKED IN FULL at the sitting above)
 
 One list, so the sitting runs off one section — the detail lives in
 the QUESTIONS entries and the two memos:
