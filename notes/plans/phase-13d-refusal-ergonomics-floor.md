@@ -2749,3 +2749,274 @@ real store; suite-level `-only-testing` only, with the run-line proof;
 zsh `pipestatus`; never a custom build configuration; the sandboxed
 test host's scratchpad limitation; the worktree-must-be-named-
 `variorum` SPM note from the 13c refresh record).
+
+## The 13d cold review — round 1 findings (2026-07-28, fresh Fable reviewer, REVIEW_PROMPT.md verbatim, zero framing)
+
+Reviewed: the combined diff `99c5ecb..472a9bc` (all 21 phase commits), read
+whole; the plan file's five batch records + acceptances + the sitting record;
+the canon deltas (AppSpec §9/§14, QUESTIONS) checked against the code; the
+batch records' suggested review foci each addressed below. Severity-ranked;
+each finding carries its traced mechanism. Recorded BEFORE any fix, per the
+review protocol.
+
+### Findings
+
+**[MAJOR] F-1 · `EditorViewModel.swift:667` (the B2 fork) + `:876`
+(`runSoftNewlineInTail`) · ⇧⏎ with the caret MID-tail displaces the newline
+— and the caret — to the document end.** The fork discards the keystroke's
+`range` entirely; `runSoftNewlineInTail` re-plays the newline at
+`index.documentLength` after the mint, having first moved the selection
+there. The `.tail` verdict covers EVERY offset inside the tail region
+(`BlockRangeIndex.verdict`'s containment arm), and the open tail is the
+STANDING state while she composes the trailing paragraph — it closes only
+when the next paragraph begins, at the 2 s idle mint, or at teardown — so
+"type a sentence, arrow back a few words, press ⇧⏎" hits this in ordinary
+fresh writing. Concretely: tail `"beta more"`, caret after `"beta"`, ⇧⏎ →
+the store reads `["alpha", "beta more\n"]` with the caret teleported past
+`"more"`, where the ruling's own equality bar (rider 2's road: idle-mint,
+then ⇧⏎ at that same caret — a mid-BLOCK content newline) gives
+`["alpha", "beta\n more"]` with the caret after the newline. The shipped
+pins never drive a mid-tail caret (`shiftReturnInATailMintsAndStays…` sets
+the selection to the end before every soft return), so the equality bar was
+proven only at the one offset where the two answers coincide. This is not
+the ruled "appends" shape doing its job — the ruling's contract sentence is
+*"⇧⏎ ends with the caret inside a real block and the newline as that
+block's content"*, and a displaced newline is not the caret's content.
+**Fix:** capture `range.location` at the keystroke, re-play at it (clamped
+to the post-mint document length — the mint changes no surface byte, so the
+offset survives). Red-on-old pin: mid-tail caret, equality against the
+idle-mint-then-⇧⏎-at-that-caret road.
+
+**[MINOR] F-2 · `EditorTextView.swift:49` (`isSoftNewlineKey`) · the
+modifier test defeats the gesture under caps lock and makes the keypad
+branch dead on real hardware.** The guard requires
+`modifierFlags.intersection(.deviceIndependentFlagsMask) == .shift` —
+EXACTLY shift and nothing else in the whole device-independent word. Two
+flags AppKit sets that carry no meaning for this distinction break it: (a)
+`.capsLock` is set on every key event while caps lock is LATCHED, so ⇧⏎
+with caps lock on is silently not the gesture — the tail opens as if plain
+⏎, a ruled gesture that reads as a dead key (the exact class this phase's
+floor exists to kill), with nothing spoken; (b) `.numericPad` (with
+`.function`) rides every keypad key event, so the explicit `"\u{3}"` keypad-
+Enter arm — judgment call 4's "keypad Enter counts as the gesture" — is
+unreachable from real hardware; it passes only for the tests' synthesized
+events, which set `[.shift]` alone. **Fix:** intersect with the four
+meaning-bearing modifiers (`[.shift, .command, .control, .option]`) and
+require exactly `.shift` — Control-⏎/⌥⏎/⌘⇧⏎ exclusions all survive
+(each intersects to more than `.shift`). Red-on-old unit pins for both
+flags.
+
+**[MINOR] F-3 · `TakesViewModel.swift:1253` (`prepareDivide`) · the seed
+fallback `?? liveActive.first` silently re-targets the divide when the
+caret's take has vanished from the live fan.** The fresh store read is the
+authorization (ruled, batch 3 d1) — but when the seed take (the focused
+pane's, or the slot's rendered take) is no longer in `liveActive`
+(archived/deleted by sync or a sibling surface mid-race), the fallback
+substitutes `liveActive.first` and proceeds: with one other take left the
+block DIVIDES that take immediately, at a word-snapped offset derived from
+a caret that was never in it — no sheet, no refusal, no mention. Write's
+door in the identical state refuses and speaks (`DivideWCeremony.open`'s
+"This block's takes changed — try the divide again"; the pre-extraction
+`openDivideWCeremony` did the same), and `prepareDivide` itself speaks that
+exact line when the fan is EMPTY — the fallback is the one arm that
+neither speaks nor matches Write. It appears in neither the proposal nor
+the batch record, in a batch whose binding constraint 1 was byte-parity
+with Write's door. Undoable, race-narrow — but a silent act on a take she
+was not in. **Fix:** drop the fallback; the vanished-seed case joins the
+existing takes-changed refusal (Write's posture exactly). Red-on-old pin:
+archive the focused take behind the frozen projection, `divideFocused`,
+expect refusal + store untouched (old code cuts the surviving take).
+
+**[MINOR] F-4 · `EditorTextView.swift:316` (TypewriterScrollView header
+doc) · the room's summary paragraph states the REJECTED mechanism as the
+shipped one.** "*The room is ALLOWANCE, never content. It is
+`contentInsets.bottom` on the scroll view: …*" — but the mechanism story
+two paragraphs down records `contentInsets.bottom` as measured-wrong (the
+hit-test-eating backdrop; the 1C tripwire fired at 483 pt) and the shipped
+mechanism is the `NSClipView.constrainBoundsRect` allowance. The comment's
+own stated purpose is to stop a future session "simplifying" the mechanism
+back; its lead paragraph currently instructs exactly that regression. Doc
+fix, no pin (clarity class; the degradation is a reader re-introducing the
+click defect the tripwire caught).
+
+**[MINOR — record-only, the closeout's to execute] F-5 ·
+`notes/QUESTIONS.md` · the ledger lags the 2026-07-28 sitting.** The
+sitting record (this file) rules #48 ("Keep all seven"), #38 ("Leave it —
+no timer"), #42 ("Keep the refusal"), #31, #33(a–e), #36, the #43–#47
+minor sub-calls, #46's five + A31's two, and the two memos — yet the
+QUESTIONS entries still read "Status: OPEN" for every one of them, while
+#37 (ruled at the SAME sitting) was annotated ANSWERED by batch 5. A fresh
+session walking the ledger re-asks ruled questions — the R1-2 drift class
+this phase cites in its own records. The batch convention ("annotate,
+never resolve — disposition is the closeout's") explains restraint, but
+the #37 asymmetry shows the sitting's rulings reached the ledger
+selectively. Named here so the closeout ritual cannot miss it; deliberately
+NOT fixed by the reviewer — the ledger walk's wording is the closeout's
+own duty.
+
+**[NIT] F-6 · `DivideWCeremony.swift` (host-protocol doc) · "Deliberately
+six members" — seven ship.** The batch record corrected the count (the
+seventh member, `speakCeremonyRefusal`, is judgment call 1's beep parity);
+the doc comment kept the six and its "two voices" undercounts three. Doc
+fix.
+
+**[NIT] F-7 · `EditorViewModel.swift:873` (`runSoftNewlineInTail` doc) ·
+the degradation claim "⇧⏎ behaves as ⏎ there" is mechanically wrong.** If
+`idleMintTail` skips (structural flight / IME), the re-play runs inside
+`withSoftNewline`, so a still-open mintable tail re-enters the B2 fork and
+RE-SCHEDULES (chained cross-block compounds) until the mint lands — a
+bounded, self-terminating retry, never a plain-⏎ tail insertion. The
+behavior is fine; the record of it isn't. Corrected inside F-1's diff.
+
+**[NIT — record-only, SPECULATIVE] F-8 · `EditorSurfaceController.swift:1212/:1233`
+(`runSeamMerge` / `seamFanRefusal`) · the degenerate zero-active-fan block
+would refuse with the wrong words.** The keystroke guard requires both
+counts `== 1` while the ceremony threshold it claims to share is
+`> 1 || > 1` — for a (hypothetical) live block with zero live active
+takes the keystroke refuses "The block below has takes" where ⌘⇧M would
+run the instant merge. Unreachable for live blocks (I10, the §7 repairs,
+and `renderPost`'s active-take resolution all forbid the state), so no
+failing-on-old pin could exist; labeled speculative and recorded, per the
+prompt's own honesty rule.
+
+**[NIT] F-9 · `AppSettingsView.swift:189` (`setDefaultSegmentation` catch)
+· a failed write surfaces `String(describing: error)`** — the raw-dump
+class the phase's own R1-3 discipline (and this very diff's `fannedBlock`
+copy) exists to kill. One line through `OpsRefusalCopy.message(for:)`; no
+pin (the path needs a failing store write, unreachable without a
+failing-runner seam; clarity class).
+
+### The batch records' suggested foci, each answered
+
+- **B1-f1 (set inversion):** complete — zero `collapsedPosts` references
+  survive anywhere in `App/`; every consumer routes through `isExpanded()`.
+  No caller assumes "not in the set ⇒ open".
+- **B1-f2 (`withHostedBook expanded: true`):** correct — the hosted pins
+  that expand are measuring PROSE; the ruling's own pin
+  (`outlineOpensWithItsPostsCollapsed`) observes the default via
+  `expanded: false`. Nothing hides.
+- **B1-f3/f4:** adjudicated at acceptance (post-domain vs page-domain is
+  the ruling's letter); the page line is the Design & UI review row's.
+- **B2-f1 (read-then-act window):** agree with recorded-not-closed — it is
+  the ⌘⇧M door's own standing window; the eventual close is the
+  `merge(_:requiring:)` precondition twin, a core change nothing here
+  justifies. **B2-f2:** ruled at the sitting (#48a, keep). **B2-f3:** no
+  other surface reaches a seam keystroke — panes are single-block by
+  construction (`divideWorld`'s one-entry tiling is the same fact from the
+  other side). **B2-f4:** the shared "Merge" undo label is the same act
+  through the same op; right.
+- **B3-f1 (latch release-before-sheet):** covered — the confirm's own
+  flush + drift-refresh + re-take close the window the release opens; an
+  edit made while the sheet sits open is exactly what the drift check
+  exists for. **B3-f2:** ruled at the sitting (#48b/c, keep). **B3-f3
+  (layering):** the closeout consideration stands as adopted; right not to
+  move mid-phase. **B3-f4:** `WriteTakesPanel` already composes
+  `isPaneLive`, so it inherits the freeze the day its model runs a flight;
+  the trigger sentence is where it belongs.
+- **B4-f1 (⌥⌘N):** ruled at the sitting (#48d, keep). **B4-f2 (A23 ×
+  inline comments):** visual; the Design & UI review row's. **B4-f3
+  (`EditorSurfaceChrome` as a bag):** acceptable — every field is "how
+  this surface presents", and the one-gate rule (P-3/P-8) is worth more
+  than a purer struct; watch it at the next addition. **B4-f4 (grammar
+  rides checkWhileTyping):** right coarse mapping — same underline
+  vocabulary, and a fourth level is the fineness §3 warns off.
+- **B5-f1 (A22 mechanism):** `constrainBoundsRect` is the right final
+  answer on the evidence; the scroller-knob cost is honestly recorded and
+  hers to weigh. F-4 is the STORY's one defect, not the mechanism's.
+  **B5-f2 (`insuring:` defaulted):** the right call — empty is the CORRECT
+  value for the many no-buffer-restoring ops (silence by construction),
+  where `redo: nil` is a meaningful choice a site must make. The residual,
+  recorded: a FUTURE buffer-restoring op that forgets to pass `insuring`
+  ships a silent destructive undo, and the existing pins (written against
+  the three current ops) would not catch it — the coupling to watch is
+  "any inverse that passes `restoringTexts` non-empty should have passed
+  `insuring`". **B5-f3 (A12 modal reach):** grep confirms the tutorial pin
+  was the only headless caller in the insurance class; the remaining bare
+  `structuralUndo()` calls (four tutorial walks, one routing pin) never
+  edit a buffer post-op before undoing, and the doc comment now warns the
+  class. **B5-f4 (extract inherits A11):** correctly unbuilt — her ruling
+  named divide; the one-line question sits on the handoff checklist where
+  it belongs.
+
+### Clean bill (load-bearing things specifically checked and found solid)
+
+- **A11's one cut brain:** `seamTrimmedHalves` is the only halving
+  implementation; `divide` and `divideW` both consult it (the ceremony
+  inheritance pinned); the k−1 arithmetic is the 2026-07-12 rule's letter;
+  CRLF is safe by construction (a `"\r\n"` is ONE `Character`, so
+  `count(where: \.isNewline)` counts it once — grapheme clustering answers
+  the class before it opens); mixed-whitespace normalization and the
+  either-side-of-the-cut equivalence are pinned; the empty-first-half edge
+  keeps the ops layer's refusal; `renderedText` round-trips byte-identical
+  (op-level pin) and the surface pin holds byte-identity at the editor.
+- **#37(iii):** the double-checked write (fast read → `database.write`
+  with an in-writer re-read) genuinely closes the two-doors-race under
+  GRDB's writer serialization; `insertDailyJournalBook` is field-parity
+  with the retired ⌘J creation (same reading shape, designation + pin in
+  ONE transaction); the never-replaces guard is pinned both ways;
+  `noDailyBook` is fully retired (zero references repo-wide); the catch
+  mapping preserves never-throws; ⌘J's delegation is proven by revert B's
+  second half (its own suite red when the shared door is unwired).
+- **A12:** `wouldInsure` is consulted by BOTH the warning and
+  `revertStructural`'s insurance commit (one predicate, line-verified);
+  `insuring` rides the entry as data, compounds fold legs, and exactly the
+  three buffer-restoring ops pass it; `insuranceTargets` never throws and
+  never writes; the warning read cannot change what the undo does
+  (pinned); the tutorial lesson's prose was corrected WITH the behavior.
+- **#34:** the precedence (carve → merge → refusal) is mutually exclusive
+  by construction and pinned by the every-offset walk with non-vacuity;
+  `interEntrySeparatorPair` is a behavior-preserving extraction (the A7
+  walk byte-unchanged, its pins untouched); the fan authorization is the
+  store read at run time through the ⌘⇧M door's own `liveActiveFans` —
+  the R3-1 lesson at the right level, with revert D discriminating the
+  projection reading; the sealed post refuses upstream at `adoptHeader`;
+  locked-takes-merge is Phase 3 op parity, not invention; the three
+  gesture directions all reduce to the same one-separator deletion.
+- **A9:** the ceremony extraction is verbatim (state machine, confirm
+  gate, drift refresh, cancel-inert compared line-against-line with the
+  removed controller code); parity-by-forwards held (zero test edits at
+  the extraction commit); the one-brain parity pin is EXHAUSTIVE (every
+  caret × both arities, full plan equality including the snapped cut, with
+  a non-vacuity arm); the flight latch + pane freeze ride the existing
+  liveness authority — no second mechanism (P-3), all three `isPaneLive`
+  call sites verified; the registry flip is declared and pinned; the
+  store-read fork's revert B reproduced batch 2's signature exactly.
+- **A14/A15/A16/A23/A24:** the chord sweep is a permanent pin
+  (`noTwoCapabilitiesClaimTheSameChord`); `replacementIsSingleNewline` has
+  exactly ONE consumer (verified in `verdict`), so B1 is surgical as
+  claimed; the trace suite's already-stays contexts ran unchanged; A16's
+  setter/read are upsert-only, outbox-riding, `.paragraph`-fallback
+  matching `containerHeader`, sentence deliberately not offered (the
+  ratified paragraph-granularity rule); A23 is per-paragraph (never
+  per-seam), read at style-construction, additive, with `PagePaginator`
+  untouched (Read's identity address unmoved) and the no-stored-byte pin
+  including outbox rows; A24's default is byte-identical on the full
+  editor, the §3 completion pairing is forced off with checking on and
+  restored at `.off` (round-trip pinned), and the pane unification is
+  recorded and ruled (#48e).
+- **A22:** the allowance stores zero bytes (pinned with row/outbox/export
+  counts); the room formula converges geometrically (at max scroll the
+  last line sits at the viewport top; short posts get exactly what the
+  geometry needs — `doc.height + room − clip.height` clamps to nothing
+  when nothing is needed); the 1C dead-strip pin kept its teeth (it is
+  what caught the inset mechanism) and its re-scope preserves the
+  routes-nowhere claim; `hitTest` claims exactly the room (over-text theft
+  revert-discriminated); the phantom-probe change is genuinely a
+  construction fix (`hitTest` takes superview-space — the old conversion
+  was a titlebar off).
+- **Batch 1:** the set inversion is complete and the arrival argument
+  survives mirrored (pinned); `expandAll` scoped to entries in hand;
+  the scrubber is model-driven (post list), `disabled` not hidden on
+  one-post books, the thumb reaches both track ends (the de-hollowed
+  revert-D pin); Compare's flip is one default with 2E's semantics
+  byte-untouched (13 composition tests unchanged).
+- **Canon:** the §9 `shelveInDailyJournalBook` rewrite, §14's #34 delta,
+  and the QUESTIONS #34/#37/#41/#43(a)/#44(c)/#45(c)/#47(c) annotations
+  each read accurately against the shipped code, quote her rulings, and
+  preserve superseded text in place (the R1-2 shape).
+- **Boundaries:** zero `Sources/VariorumCore/Sync/` lines in the whole
+  range; zero schema change (marker stays 4); the mobile pin flip matches
+  the #37 ruling with its never-blocked half untouched; no new
+  cost-∝-corpus path anywhere touched (the A12 read is ≤3 variant
+  fetches; A16's observation is bounded; the room is O(1); the board
+  divide reads one fan).
