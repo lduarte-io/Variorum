@@ -2779,6 +2779,15 @@ stays open, routed to the Design & UI review row); the two 13c memos
 are fully dispositioned, with the long-content-panes option (a)
 PRE-APPROVED evidence-gated for any future phase.
 
+**THE CLOSEOUT REFRESH EXECUTED (2026-07-28):**
+`/Applications/Variorum.app` rebuilt Release from HEAD `eb22765` (all
+work adjudicated + reviewed), installed at a VERIFIED zero-instance
+window (her app closed, her word at the sitting), signature confirmed
+*[removed for publication]*
+backup (`variorum-backup-2026-07-28-083305.sqlite`,
+`integrity_check` ok). No schema change ⇒ no marker concern. The
+field-guide re-seed stays HER product-door act (handoff item 2).
+
 **Standing notes for successors:** the panes option (a) pre-approval
 (defaults: ~1.5× screen threshold, fan cards only, focus un-caps);
 the Takes→Editor shared-vocabulary layering note (the one-brain
