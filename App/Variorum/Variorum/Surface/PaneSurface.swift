@@ -270,6 +270,16 @@ final class PaneTextView: NSTextView {
     /// (programmatic landings), honored at attach.
     var claimsKeyboardOnAttach = false
 
+    /// 13c A47c: the last ink applyStyle wrote, so an update with the SAME
+    /// ink writes nothing. `NSTextView.textColor`'s setter re-attributes
+    /// the ENTIRE storage, and the A47c trace proved that full-range write
+    /// — running unguarded on EVERY updateNSView — destroys the rendering
+    /// surfaces above the tail of a tail-scrolled long pane (14 → 6 in the
+    /// real board; the draw gap's production trigger). Styling is now
+    /// change-gated, so the write survives only where it means something
+    /// (a real voice/ink switch).
+    var appliedInk: NSColor?
+
     /// 13c 1G (A47b): the PRODUCTION occasions for the divergence check.
     /// The 1F check rides `layout()` — and the 1G census proved production
     /// delivers NO layout passes to an idle, already-laid-out card: clicks,
@@ -302,6 +312,16 @@ final class PaneTextView: NSTextView {
 
     func noteConvergenceCheck() {
         convergenceChecksRun += 1
+    }
+
+    /// 13c A47c: how many deferred RENDER RESTORES (viewport re-layouts —
+    /// the check's render half) have run. The R3-4 observation seam: a pin
+    /// asserts the wire fired AND the restore ran, never only a heal that
+    /// incidental machinery could satisfy.
+    private(set) var renderRestoresRun = 0
+
+    func noteRenderRestore() {
+        renderRestoresRun += 1
     }
 
     private weak var observedScrollView: NSScrollView?
@@ -602,10 +622,19 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
 
     private func applyStyle(to view: PaneTextView) {
         if let ink {
+            // 13c A47c: CHANGE-GATED. The unguarded `textColor` write was
+            // the draw gap's production trigger — a full-range storage
+            // attribute write on every SwiftUI update, which on a
+            // tail-scrolled long pane destroys the rendering surfaces
+            // above the tail (laid-out-but-undrawn; the 1G deception's
+            // root). Same ink ⇒ no write of any kind.
+            guard view.appliedInk != ink else { return }
+            view.appliedInk = ink
             view.drawsBackground = false
             view.textColor = ink
             view.insertionPointColor = ink
         } else {
+            view.appliedInk = nil
             view.drawsBackground = true
         }
     }
@@ -688,12 +717,21 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // 13c 1F (A47): same-width layout passes re-check convergence,
             // so a stale frame — in EITHER direction — self-heals on the
             // next pass instead of persisting until a width/text/font event.
-            view.onLayoutPass = { [weak self] in self?.reconvergeIfDiverged() }
+            // Geometry only: a layout pass can be CAUSED by the render
+            // restore below, so it must never schedule one (termination).
+            view.onLayoutPass = { [weak self] in
+                self?.reconvergeIfDiverged(restoreRender: false)
+            }
             // 13c 1G (A47b): the PRODUCTION occasions — scroll-end, clicks,
             // and liveness transitions run the same check, because the 1G
             // census proved those events deliver NO layout passes at all
             // (the 1F branch alone was production-inert for an idle card).
-            view.onConvergenceOccasion = { [weak self] in self?.reconvergeIfDiverged() }
+            // 13c A47c: occasions ALSO restore the render tier — they are
+            // discrete user events a viewport layout can never cause, so
+            // the restore cannot loop by construction.
+            view.onConvergenceOccasion = { [weak self] in
+                self?.reconvergeIfDiverged(restoreRender: true)
+            }
             canary.onFire = { [weak self] message in
                 self?.publisher?.publishCanary(message)
             }
@@ -754,12 +792,54 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// this in the shipped app; and the corrective publish now rides
         /// the publisher's frame lever, so a divergence the state cannot
         /// move (the equal-value no-op) still heals.
-        func reconvergeIfDiverged() {
+        ///
+        /// 13c A47c (the DRAW GAP — the check's RENDER half): geometry was
+        /// only half of what an occasion must re-assert. TK2 draws a pane
+        /// through per-fragment RENDERING SURFACES created by viewport
+        /// layout — and the A47c trace proved a full-range storage
+        /// attribute write on a tail-scrolled long pane DESTROYS the
+        /// surfaces above the tail and nothing rebuilds them: the
+        /// viewportBounds stay correct, `needsDisplay` is powerless (the
+        /// surfaces are the unit of drawing, not the backing store), and
+        /// idle delivers nothing — text that is laid out, measured exact,
+        /// and selectable renders BLANK except its last lines, permanently
+        /// (her four screenshots; 1G's deletion deception was this same
+        /// state's first appearance). `layoutViewport()` rebuilds the
+        /// surfaces for the ACTUAL viewport completely — measured
+        /// empirically (surfaces 6 → 14, full ink, one call). So a
+        /// convergence OCCASION now also restores the render tier, on a
+        /// DEFERRED turn: inside updateNSView the liveness occasion fires
+        /// BEFORE the style write that kills (the order in updateNSView),
+        /// so a synchronous restore would lose the race; the next
+        /// main-queue turn runs after the whole update. Occasion-gated for
+        /// termination: occasions are discrete user events (click,
+        /// scroll-end, ring move) that a viewport layout can never cause;
+        /// layout passes deliberately keep restoreRender false because a
+        /// viewport layout CAN queue a layout pass. Cost: one coalesced
+        /// viewport-bounded pass per occasion burst — the region on
+        /// screen, warm (P1's letter), zero at rest.
+        func reconvergeIfDiverged(restoreRender: Bool) {
             guard let view, publisher != nil else { return }
             view.noteConvergenceCheck()
             let measured = max(PaneMeasurement.height(of: view), 24)
             if abs(view.bounds.height - measured) > PanePublisher.convergenceSlack {
                 remeasure()
+            }
+            if restoreRender { scheduleRenderRestore() }
+        }
+
+        private var renderRestoreScheduled = false
+
+        private func scheduleRenderRestore() {
+            guard !renderRestoreScheduled else { return }
+            renderRestoreScheduled = true
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.renderRestoreScheduled = false
+                guard let view = self.view, self.publisher != nil,
+                      view.window != nil else { return }
+                view.textLayoutManager?.textViewportLayoutController.layoutViewport()
+                view.noteRenderRestore()
             }
         }
     }

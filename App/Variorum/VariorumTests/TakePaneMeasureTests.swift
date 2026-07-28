@@ -408,3 +408,308 @@ struct TakePaneMeasureTests {
                 "the pane stays converged through the transition")
     }
 }
+
+// MARK: - 13c A47c (the draw gap): the render tier
+
+import CoreGraphics
+import Dependencies
+import VariorumCore
+
+extension TakePaneMeasureTests {
+    /// Compact pixel truth for the render-tier pins: composite the
+    /// window's CURRENT layer contents (CALayer.render(in:) uses existing
+    /// backing stores/surfaces — a destroyed rendering surface shows as
+    /// blank; nothing is force-redrawn), then report, band by band, where
+    /// ink exists inside the pane's visible rect.
+    @MainActor
+    private func inkBands(of pane: NSView, in window: NSWindow, bands: Int) -> [Bool]? {
+        guard let contentView = window.contentView, let layer = contentView.layer else { return nil }
+        let scale = window.backingScaleFactor
+        let width = Int(contentView.frame.width * scale)
+        let height = Int(contentView.frame.height * scale)
+        guard width > 0, height > 0,
+              let ctx = CGContext(
+                data: nil, width: width, height: height,
+                bitsPerComponent: 8, bytesPerRow: 0,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue)
+        else { return nil }
+        ctx.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+        ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        ctx.scaleBy(x: scale, y: scale)
+        ctx.translateBy(x: 0, y: contentView.frame.height)
+        ctx.scaleBy(x: 1, y: -1)
+        layer.render(in: ctx)
+        guard let image = ctx.makeImage(),
+              let data = image.dataProvider?.data as Data? else { return nil }
+        let rectInWindow = pane.convert(pane.visibleRect, to: nil)
+        guard rectInWindow.width > 0, rectInWindow.height > 0 else { return nil }
+        let scaleX = CGFloat(image.width) / contentView.frame.width
+        let scaleY = CGFloat(image.height) / contentView.frame.height
+        let x0 = max(0, Int(rectInWindow.minX * scaleX))
+        let x1 = min(image.width, Int(rectInWindow.maxX * scaleX))
+        let yTop = contentView.frame.height - rectInWindow.maxY
+        let y0 = max(0, Int(yTop * scaleY))
+        let y1 = min(image.height, Int((yTop + rectInWindow.height) * scaleY))
+        guard x1 > x0, y1 > y0 else { return nil }
+        let bpr = image.bytesPerRow
+        let bpp = image.bitsPerPixel / 8
+        var result: [Bool] = []
+        let bandHeight = max(1, (y1 - y0) / bands)
+        for band in 0..<bands {
+            let by0 = y0 + band * bandHeight
+            let by1 = min(by0 + bandHeight, y1)
+            var dark = false
+            for y in stride(from: by0, to: by1, by: 2) where !dark {
+                for x in stride(from: x0, to: x1, by: 2) {
+                    let offset = y * bpr + x * bpp
+                    guard offset + 3 < data.count else { continue }
+                    if data[offset + 1] < 128, data[offset + 2] < 128, data[offset + 3] < 128 {
+                        dark = true
+                        break
+                    }
+                }
+            }
+            result.append(dark)
+        }
+        return result
+    }
+
+    /// 13c A47c pin A — RED-ON-OLD by behavioral revert (remove the
+    /// render half from `reconvergeIfDiverged` — the
+    /// `scheduleRenderRestore()` call): a convergence occasion must
+    /// re-assert BOTH authorities, geometry AND drawnness.
+    ///
+    /// The class (traced in the A47c session, real mounted board): TK2
+    /// draws a pane through per-fragment RENDERING SURFACES created by
+    /// viewport layout. A full-range storage attribute write on a
+    /// tail-scrolled long pane (production trigger: the pre-A47c
+    /// unguarded `textColor` write on every updateNSView) DESTROYS the
+    /// surfaces above the pane's tail and nothing rebuilds them —
+    /// viewportBounds stays CORRECT, `needsDisplay` is powerless (the
+    /// surfaces are the unit of drawing), idle delivers nothing. Text
+    /// that is laid out, measured exact, and selectable renders BLANK
+    /// except its last lines, permanently — her four A47c screenshots,
+    /// and the state behind 1G's deletion deception.
+    ///
+    /// The pin drives the REAL trigger (a same-value textColor write —
+    /// deliberately NOT through applyStyle, whose change-gate is pin B's
+    /// subject) on the REAL mounted TakesBoardView, asserts the strand
+    /// (top-of-viewport bands blank while the measurement stays exact —
+    /// laid-out-but-undrawn, both halves), then fires the occasion wire
+    /// and asserts the deferred viewport re-layout rebuilt the drawing
+    /// (ink back + the restore counter — the R3-4 mechanical form).
+    ///
+    /// If a macOS update ever fixes the underlying TK2 cull, the STRAND
+    /// assertion fails first — that is TEXTKIT2 §5's re-verify posture
+    /// working: re-run the A47c experiments and retire the mechanism
+    /// deliberately, never silently.
+    @Test func aStrandedRenderTierIsRebuiltByAConvergenceOccasion() async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 47))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let longText = (1...28).map { i in
+                "Paragraph \(i). " + Array(
+                    repeating: "honest prose words keep flowing along the measured line and wrap",
+                    count: 4
+                ).joined(separator: " ") + "."
+            }.joined(separator: "\n\n")
+            let (postID, longVariantID): (String, String) = try {
+                let post = try session.operations.createPost(title: "a47c pin A")
+                let long = try session.operations.newBlock(in: post.id, text: longText)
+                _ = try session.operations.newBlock(
+                    in: post.id, text: "a short neighbor block of one line")
+                return (post.id, long.variant.id)
+            }()
+
+            let model = TakesViewModel(session: session, postID: postID)
+            let observing = Task { await model.start() }
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 760),
+                styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                observing.cancel()
+                model.teardown()
+                window.orderOut(nil)
+            }
+            let hosting = NSHostingView(
+                rootView: TakesBoardView(session: session, postID: postID, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 760)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<40 where model.projection.slots.isEmpty {
+                pumpMain(0.05)
+                await Task.yield()
+            }
+            for _ in 0..<8 {
+                window.layoutIfNeeded(); window.displayIfNeeded(); pumpMain(); await Task.yield()
+            }
+            func findPane(_ view: NSView) -> PaneTextView? {
+                if let pane = view as? PaneTextView,
+                   pane.identifier?.rawValue.contains(longVariantID) == true { return pane }
+                for sub in view.subviews {
+                    if let found = findPane(sub) { return found }
+                }
+                return nil
+            }
+            guard let long = findPane(hosting) else {
+                Issue.record("the long pane did not mount")
+                return
+            }
+            @MainActor func turns(_ n: Int) async {
+                for _ in 0..<n { pumpMain(0.05); await Task.yield() }
+            }
+            // Deterministic tail scroll (verified; the board's own scroll
+            // restoration can eat an early attempt).
+            let paneH = long.frame.height
+            var attempts = 0
+            while long.visibleRect.minY < paneH - 800, attempts < 8 {
+                attempts += 1
+                _ = long.scrollToVisible(NSRect(x: 0, y: paneH - 600, width: 10, height: 600))
+                await turns(3)
+                window.layoutIfNeeded(); window.displayIfNeeded()
+                pumpMain()
+            }
+            guard long.visibleRect.minY > paneH - 800 else {
+                Issue.record("could not scroll the long pane to its tail after \(attempts) attempts")
+                return
+            }
+            await turns(4)
+
+            let bands = 12
+            guard let baseline = inkBands(of: long, in: window, bands: bands) else {
+                Issue.record("pixel capture unavailable")
+                return
+            }
+            let topHalf = bands / 2
+            #expect(baseline.prefix(topHalf).filter { $0 }.count >= topHalf - 1,
+                    "the construction is meaningful: the visible tail region is DRAWN at baseline (\(baseline))")
+
+            // THE KILL — the traced class trigger, driven directly.
+            long.textColor = long.textColor ?? .labelColor
+            await turns(6)
+            guard let stranded = inkBands(of: long, in: window, bands: bands) else {
+                Issue.record("pixel capture unavailable after the kill")
+                return
+            }
+            let measured = PaneMeasurement.height(of: long)
+            #expect(abs(long.bounds.height - measured) <= 3,
+                    "the strand is laid-out-but-UNDRAWN: geometry stays exact (frame \(long.bounds.height) vs measured \(measured))")
+            #expect(stranded.prefix(topHalf).allSatisfy { !$0 },
+                    "the kill stranded the render tier: the upper visible bands are blank (\(stranded)) — if this fails, the TK2 cull no longer reproduces on this OS; re-run the A47c experiments before touching the mechanism")
+
+            // THE OCCASION — the funnel wire, exactly what a click /
+            // scroll-end / ring move fires in production.
+            let restoresBefore = long.renderRestoresRun
+            let occasionsBefore = long.occasionsFired
+            long.fireConvergenceOccasion()
+            await turns(6)
+            #expect(long.occasionsFired > occasionsBefore, "the wire fired")
+            #expect(long.renderRestoresRun > restoresBefore,
+                    "the deferred render restore RAN (restores \(long.renderRestoresRun)) — the mechanical half; on pre-A47c code the occasion measures geometry and never touches the render tier")
+            guard let healed = inkBands(of: long, in: window, bands: bands) else {
+                Issue.record("pixel capture unavailable after the occasion")
+                return
+            }
+            #expect(healed.prefix(topHalf).filter { $0 }.count >= topHalf - 1,
+                    "the occasion rebuilt the drawing: the upper visible bands hold ink again (\(healed))")
+        }
+    }
+
+    /// 13c A47c pin B — RED-ON-OLD by behavioral revert (remove the
+    /// change-gate from `applyStyle`): an updateNSView pass whose ink is
+    /// UNCHANGED must not write the storage at all. The unguarded
+    /// `textColor` write was the draw gap's production trigger — a
+    /// full-range attribute edit on EVERY SwiftUI update of every tokened
+    /// pane (every click, every ring move), each one a fresh chance to
+    /// strand a tail-scrolled long pane's render tier.
+    ///
+    /// Mechanical form, R3-4's lesson applied to this pin's own first
+    /// version (which drove a sibling-state tick that SwiftUI's
+    /// fine-grained invalidation never delivered to the pane — green on
+    /// the unguarded code, i.e. hollow): the update is driven through a
+    /// LIVENESS FLIP, and `occasionsFired` growing is the proof the
+    /// update actually reached updateNSView; the storage-edit count is
+    /// the subject.
+    @Test func anUnchangedInkUpdateNeverRewritesTheStorage() async {
+        final class Flip: ObservableObject { @Published var live = false }
+        struct Host: View {
+            let text: String
+            let tokens: VoiceTokens
+            @ObservedObject var flip: Flip
+            var body: some View {
+                PaneSurfaceView(
+                    text: text, isLive: flip.live, tokens: tokens,
+                    role: "article", variantID: "pinB")
+                    .frame(width: 400)
+            }
+        }
+        let flip = Flip()
+        let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        let host = NSHostingController(
+            rootView: Host(
+                text: "paragraph one of honest prose\n\nparagraph two keeps flowing",
+                tokens: tokens, flip: flip))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 500),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        host.view.frame = NSRect(x: 0, y: 0, width: 420, height: 500)
+        defer { window.contentViewController = nil }
+        func findPane(_ view: NSView) -> PaneTextView? {
+            if let pane = view as? PaneTextView { return pane }
+            for sub in view.subviews {
+                if let found = findPane(sub) { return found }
+            }
+            return nil
+        }
+        for _ in 0..<6 {
+            host.view.layoutSubtreeIfNeeded()
+            pumpMain()
+            await Task.yield()
+        }
+        guard let pane = findPane(host.view), let storage = pane.textStorage else {
+            Issue.record("no pane mounted")
+            return
+        }
+        #expect(pane.textColor != nil, "the FIRST styling applied the ink")
+
+        let edits = LockIsolated(0)
+        let observer = NotificationCenter.default.addObserver(
+            forName: NSTextStorage.didProcessEditingNotification,
+            object: storage, queue: nil) { _ in
+            edits.withValue { $0 += 1 }
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        // Drive updates that PROVABLY reach updateNSView: liveness flips
+        // (each transition bumps occasionsFired — the non-vacuity proof).
+        let occasionsBefore = pane.occasionsFired
+        for _ in 0..<3 {
+            flip.live.toggle()
+            for _ in 0..<2 {
+                host.view.layoutSubtreeIfNeeded()
+                pumpMain()
+                await Task.yield()
+            }
+        }
+        #expect(pane.occasionsFired > occasionsBefore,
+                "the updates actually reached updateNSView (occasions \(pane.occasionsFired))")
+        #expect(edits.value == 0,
+                "same-ink updateNSView passes made ZERO storage edits (counted \(edits.value)) — on pre-A47c code every pass re-attributed the whole storage through the textColor setter")
+    }
+}
