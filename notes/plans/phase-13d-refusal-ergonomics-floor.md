@@ -1575,6 +1575,144 @@ the probe, not the prediction. A9 is DELIVERED — #41's "carry stands
 until then" clause is now moot. Batch 4 (the typing-ergonomics
 floor) proceeds.
 
+### Batch 4 — the typing-ergonomics floor (A14 · A15 · A16 · A23 · A24)
+
+#### A15 — THE TRACE (step one, before any design), and THE PROPOSAL (gate open)
+
+**Gate answer up front: the gate IS needed, but it is much narrower than
+the brief allowed for.** Four of the five contexts already keep both
+keys inside the block, and the trace proves it by running REAL key
+events rather than by reading code. Exactly ONE context does not, and it
+is the one the brief predicted: **Write's open tail**.
+
+##### The trace, machine-verified (`VariorumTests/ReturnKeyTraceTests.swift`, 6 pins)
+
+The trace drives real `NSEvent` key-downs (keyCode 36) through a real
+window, a real first responder, and AppKit's own
+`keyDown → interpretKeyEvents → StandardKeyBinding.dict` path — because
+the question is what the KEY does, not what the pipeline does with a
+string (`insertText`, which every other editor pin uses, would have
+answered a different question).
+
+**The dispatch fact everything else follows from: ⇧⏎ and ⏎ are THE SAME
+KEY to AppKit.** macOS's `StandardKeyBinding.dict` binds `\r` →
+`insertNewline:` and gives Shift-Return **no binding of its own**, so the
+shift falls away; the pin observes `["insertNewline:"]` for both and a
+plain LF (never U+2028) in the storage. Control-Return is the one Return
+variant bound differently (`insertLineBreak:`) — recorded so the negative
+space is on the record too. **Consequence: there is no "soft return" key
+here to give a different meaning to — any distinction must be made by
+the app, by inspecting the modifier in `keyDown`.**
+
+| # | Context | ⏎ today | ⇧⏎ today | A15 work |
+|---|---|---|---|---|
+| (a) | Write, mid-block | newline is block CONTENT (I4); verdict `.block` | identical | **none** — already "stays" |
+| (b1) | Write, exact document end, no open tail, paragraph mode | verdict `.openTail` — **the tail opens** (the ratified Phase 7 gesture) | identical | **THE REAL HALF** |
+| (b2) | Write, inside an OPEN tail | verdict `.tail`; the newline becomes a crystallization boundary as soon as a later non-blank segment exists (`SegmentationRules.crystallizedBoundary` splits at EVERY newline, not only blank lines) | identical | **THE REAL HALF** |
+| (c) | Write under `one_block` | `verdict` excludes `.oneBlock` from the open-tail gesture, so the newline is content of the last block | identical | **none** — already "stays" |
+| (d) | A Takes / Lenses pane | a pane is single-block by construction: `insertNewline:` → content → `onEdit` → autosave | identical | **none** — already "stays" |
+| (e) | The quick-entry bar | `TextField(axis: .vertical)` + `.onSubmit` — ⏎ mints and opens the post (the bar's own hint says so) | SwiftUI's multiline-field grammar puts the literal newline here | **none** — and see the honesty note below |
+
+**(e) is a READING, not a measurement — stated as such.** The field is
+SwiftUI's, the grammar is SwiftUI's, and hosting it to drive key events
+would test SwiftUI rather than Variorum. What is certain from the code:
+the bar *does* accept newlines (`axis: .vertical`, `lineLimit(1...4)`)
+and ⏎ is claimed by `.onSubmit`. If ⇧⏎ there ever fails to insert a
+newline, that is a SwiftUI-grammar report for her walk, not a Variorum
+mechanism — routed, not claimed.
+
+**One fact discovered mid-trace that shapes the proposal** (and is not
+obvious from the brief): `attachLeadingTailRunIfNeeded` already means a
+newline typed into an **empty** open tail is transferred to the
+preceding block as trailing CONTENT on the next crystallize pass (the
+2026-07-12 k−1 rule, Phase 10 round-1 MAJOR-2's fix). So today's ⏎⏎ at a
+document end already puts one newline INSIDE the last block. Only the
+FIRST ⏎ (which opens the tail) and a ⏎ typed after real tail text behave
+as boundaries.
+
+##### The constraint, restated in the terms the code actually imposes
+
+Crystallization is a pure Domain function over TEXT
+(`SegmentationRules`); newlines are content (I4); the store records no
+keystroke provenance; and the tail is surface-only until it mints. So
+"this newline was soft" can only live in editor SESSION state over the
+un-minted tail — and whatever is minted must afterwards be
+indistinguishable from typed content.
+
+##### PROPOSAL — option B, "⇧⏎ always lands the newline inside a real block" (RECOMMENDED)
+
+One sentence describes the whole feature: **⇧⏎ ends with the caret
+inside a real block and the newline as that block's content.** It needs
+**no provenance memory at all** — not one offset, not one set — because
+a newline that is block content the moment it exists can never become a
+segmentation boundary (I4 is absolute; crystallization never touches
+existing blocks).
+
+Two halves:
+
+- **B1 — the flag (small).** `EditorTextView.keyDown` notes that this
+  keystroke was Return-with-shift; `EditorViewModel.shouldChangeText`
+  passes `replacementIsSingleNewline: false` for it. The open-tail
+  gesture is the ONLY consumer of that parameter, so the effect is
+  surgical: at the exact document end the verdict falls through
+  containment to `.block(last)` and the newline becomes the last block's
+  content, caret inside the block, subsequent typing extending it. Every
+  other context is unchanged by construction (mid-block, tail-interior
+  and `one_block` never consult the flag). Refusals stay the ops layer's:
+  a locked/gap last entry refuses and speaks exactly as it does today.
+- **B2 — the tail (the part that needs your ruling).** Inside an open
+  tail there is no block to stay in yet, so ⇧⏎ **mints the tail as it
+  stands and then appends the newline to the block that just became**:
+  refuse the raw keystroke, schedule a compound (the
+  `scheduleCrossBlockCompound` shape batches 1B/2 already use) that runs
+  the **existing** forced `.idle(.paragraph)` mint — the same call the
+  2 s idle clock and teardown already make, minting the trailing partial
+  paragraph and closing the tail — then inserts `"\n"` into the resulting
+  last block through the ordinary path. A tail with **nothing mintable**
+  (empty or whitespace-only — the ratified never-mints class) takes the
+  ordinary tail edit instead, where the leading-run attachment already
+  makes the newline block content.
+
+**Why B2 mints rather than remembers.** Minting invents nothing: it is
+the ratified idle-mint, fired deliberately 2 s early, and the author has
+already ratified that a tail becomes a block *including its trailing
+partial paragraph*. The alternative (A, below) has to keep a live set of
+"soft" offsets correct through every tail insert and delete, every
+partial mint, the apply-time reconciler, the leading-run attachment, and
+the idle/teardown paths — and hand it to a pure Domain function that
+deliberately takes no such parameter. That is the text-loss class this
+project has paid for twice.
+
+**Named consequence, so it is ruled and not discovered:** pressing ⇧⏎
+while typing fresh text at the end of a post makes a block right then.
+Recoverable and ordinary (⌥⌘Z; the block is the one the newline lives
+in), but it IS a visible act on a keystroke.
+
+##### The alternatives, stated honestly
+
+- **A — the soft-offset memory (the "true" soft return).** `EditorViewModel`
+  keeps a set of UTF-16 offsets in the tail where a soft newline sits,
+  rebased on every tail edit and every partial mint, and crystallization
+  skips boundaries at those offsets — which means either a new parameter
+  on `SegmentationRules.crystallizedBoundary` (a core change to a pure
+  rule that is deliberately provenance-free) or masking the character
+  before planning and restoring it after (a text-mutating hack on the one
+  path that must never lose bytes). Gives the truest behaviour: the tail
+  stays open, nothing mints early. Costs the most risk, in the exact
+  place the project's risk register points at.
+- **B1-only.** Build the flag, leave the tail alone. Smallest diff — but
+  the tail is open for most of the time she is typing fresh prose, so
+  ⇧⏎ would stay-in-the-block sometimes and not others: a door that acts
+  sometimes, which is the D3 class P-2 retired. Not recommended.
+- **B2′ — refuse-and-speak in the tail** ("this text isn't a block yet").
+  Honest, needs nothing, helps nobody. Considered, rejected under P-2.
+
+**Awaiting the ruling on: B vs A vs B1-only; and, if B, whether B2's
+early mint is acceptable as a keystroke-visible act.** Nothing of A15 is
+built until the gate closes — including B1, which is design, not a
+"trivial half" (the trivial halves are (a), (c), (d), (e), where the
+answer was *build nothing* and the trace is the deliverable).
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →
