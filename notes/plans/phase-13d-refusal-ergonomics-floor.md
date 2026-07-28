@@ -3088,3 +3088,18 @@ OPEN); F-8 stands recorded; the B5-f2 residual (a future buffer-restoring
 op that forgets `insuring:` ships a silent destructive undo — the coupling
 to watch is "an inverse that passes `restoringTexts` non-empty should have
 passed `insuring`").
+
+### Post-fix correction to F-5 (same session, on the record)
+
+**F-5 is MOOT — and it was already being fixed while the review read.**
+The finding was recorded against the review range's end state (`472a9bc`),
+where the ledger genuinely lagged the sitting. Commit `a284c06` ("13d
+closeout: the QUESTIONS sweep") landed from the orchestrator DURING this
+review's reading pass, before the findings commit, and does exactly what
+F-5 asked the closeout to do: every rolled walk item's status is ANSWERED
+in place per the sitting's rulings (#48 "Keep all seven" · #38 "leave it,
+no timer" · #42 "KEEP the refusal" · #29/#30/#31/#33/#36 and the #43–#47
+sub-calls verified in the sweep's diff), with #32 alone left open by
+design (routed to the Design & UI review row). The #37-vs-the-rest
+asymmetry the finding named was a snapshot of a sweep in flight, not a
+hole. Nothing further is owed on F-5.
