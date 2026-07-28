@@ -867,6 +867,274 @@ pattern's merge twin) is real work past this brief and is left for the
 end-of-phase review to weigh — foci (1)–(4) all ride. Batch 3 (A9)
 proceeds.
 
+### Batch 3 — A9: divide NATIVELY in Takes
+
+#### THE PROPOSAL (gate open — nothing built yet; awaiting the orchestrator's ruling)
+
+**Gate answer first: the unfanned plain-divide half was NOT built before
+the gate, and could not honestly have been.** It needs (c) — the flight
+latch and the pane freeze — for *correctness*, not polish (the traced
+mechanism is in (c) below), and it needs the same registry flip and door
+wiring the ceremony half needs. Shipping it alone would leave `.divide`
+declared `.native` in Takes while the FANNED case — which in Takes is the
+ordinary case — had no native path, i.e. a door that acts sometimes and
+lectures otherwise: the exact D3 class P-2 retired. So: one build, after
+the ruling.
+
+##### What I found about the current coupling (the survey the gate is for)
+
+The W ceremony's state machine is **already almost surface-independent**.
+`EditorSurfaceController` lines 1800–1990 hold `DivideWCeremonyState` /
+`WTake` / `openDivideWCeremony` / `toggleWTake` / `placeWCut` /
+`cancelDivideW` / `confirmDivideWCeremony` / `refreshDivideWCeremony`, and
+what they actually touch is only:
+
+1. `model.autosave.flushNow()` + the `isDirty` refusal — the **per-post**
+   coordinator (`session.autosave(forPost:)`), which `TakesViewModel`
+   already holds (same object, same post);
+2. `model.session.database.read { Queries.blockFan(...) }` — plain store
+   reads;
+3. speech (`showStatus` / `showOperationError` / `refuseFeedback`);
+4. `structuralInFlight` — one read, as the confirm's pre-await guard;
+5. `runStructural { ops.divideW(blockID, cuts:) }` — the ONE genuinely
+   Write-shaped thing (flush → freeze the TK2 view → `awaitMintSettle` →
+   op → re-fetch `renderPost` → rewrite the full-document surface).
+
+Only (5) is Write's. (1)–(4) exist in both surfaces already. **One
+Write-specific coupling is real and must be generalized**: the seed take
+is derived from Write's own index —
+`model.index.entries.first { $0.blockID == blockID }?.variantID`, i.e.
+*the chosen take* — and the sheet then refuses to open unless that take is
+in the live fan. In Takes the caret may sit in a **non-chosen** pane, so
+the seed must be a parameter. That is the "small generalization" the brief
+names, and it is one argument, not a redesign.
+
+`DivideWSheet` touches the model at exactly five points:
+`divideWCeremony` (read), `toggleWTake`, `placeWCut`, `cancelDivideW`,
+`confirmDivideW`. Everything else in that file (`WCutFlow`,
+`CutFlowLayout`, `WCutPlacement`) is already pure over `WTake`.
+
+Two more facts the survey turned up, both load-bearing below:
+
+- **`ops.divide` refuses a fanned block inside its own transaction**
+  (`OperationError.fannedBlock`), and `openDivideWCeremony` already
+  re-reads the fan and bails when it finds fewer than two live active
+  takes. So *both* forks are already honest against a stale arity — but
+  neither has app copy for `fannedBlock` (the editor's switch and
+  `OpsRefusalCopy` both fall through to a raw enum dump). See (d).
+- **Takes and Lenses share ONE `TakesViewModel`.** Every native
+  block-scoped door built since 13b — `insertBlockBelowFocused`,
+  `deleteFocusedBlock` (13c 1B/A8), `applyCallout` (13c R2-2/A13(a)) —
+  is a model method both `TakesBoardView.handleRouted` and
+  `LensesBoardView.handleRouted` call. See (e).
+
+##### (a) Where the ceremony state machine lives, and what is extracted
+
+**Extract `DivideWCeremony`** — a new `@MainActor @Observable final class`
+in `Features/Editor/` (feature-side by design: storage-coupled code stays
+with the feature, the Stage 1b judgment call) owning `state:
+DivideWCeremonyState?` and the whole machine: `open(blockID:
+seedVariantID:seedCut:)`, `toggle`, `place`, `cancel`, `confirm`, the
+drift check and `refresh`. `DivideWCeremonyState` and `WTake` move with
+it, unchanged.
+
+It reaches its host through ONE small protocol — the four things above,
+named honestly:
+
+```swift
+@MainActor protocol DivideWCeremonyHost: AnyObject {
+    var database: AppDatabase { get }
+    func flushPendingText() async -> Bool      // false ⇒ refused, text pending
+    var structuralFlightInProgress: Bool { get }
+    func runDivideW(blockID: String, cuts: [String: Int]) async -> Bool
+    func speak(_ message: String)
+    func speakError(_ error: Error)
+}
+```
+
+`EditorSurfaceController` conforms by forwarding — `runDivideW` is
+`runStructural { ops.divideW(...) }` with the existing `seam: nil` full
+re-render, byte-unchanged. `TakesViewModel` conforms with its own runner
+(see (c)).
+
+**Parity-by-forwards, so every existing pin and view reads unchanged:**
+`EditorSurfaceController.divideWCeremony` becomes a get/set forward to
+`ceremony.state`; `toggleWTake` / `placeWCut` / `cancelDivideW` /
+`confirmDivideWCeremony` forward; `EditorViewModel`'s existing forwards
+and its `DivideWCeremonyState` / `WTake` typealiases re-point. Every
+`StructuralGestureTests` / `GestureSoakTests` call site
+(`h.model.divideWCeremony`, `h.model.toggleWTake`, …) compiles and passes
+untouched — that is the batch contract, exactly as N10's move was.
+
+*Alternative considered and rejected:* leave the machine on
+`EditorSurfaceController` and have Takes drive it through a hidden
+EditorViewModel. That mounts a full-document editor nobody sees to run a
+sheet — P-3's "the full-document editor is never absorbed", inverted.
+
+##### (b) How the sheet mounts on the Takes board
+
+`DivideWSheet` is re-parameterized from `model: EditorViewModel` to
+`ceremony: DivideWCeremony` (observable, so live marks/cuts still
+re-render; `presented:` stays the `.sheet(item:)` snapshot). Then:
+
+- `EditorView` keeps `.sheet(item: $model.divideWCeremony)` **unchanged**
+  (the model's forwarding property is already a get/set computed) and
+  passes `model.divideWCeremonyController`.
+- `TakesBoardView` and `LensesBoardView` each add
+  `.sheet(item: $model.divideWCeremony)` beside their existing diff/lens
+  sheets, passing the model's own ceremony.
+
+The board's own sheet mount means the ceremony opens **in place** — no
+mode switch, which is the whole of A9 (constraint 6).
+
+##### (c) The ONE-flight door for a Takes-native structural act — and a correctness finding
+
+**The finding, traced, because it decides this point.** In Write,
+`runStructural` sets `textView.isEditable = false` for the flight and the
+comment says why: *"a stale whole-buffer autosave after a divide would
+resurrect the moved half — the forbidden text-duplication class."* A
+Takes pane has exactly the same shape: a keystroke between the flush and
+the op calls `paneEdited` → `autosave.record(variantID:text:)` with the
+**pre-divide full text**, and when that debounce fires it writes the whole
+old text back into the source variant — which `ops.divide` has just
+truncated. Result: the second half lives in block A *and* in the new block
+C. So a Takes-native divide needs its panes frozen for the flight; this is
+not defensive tidiness.
+
+**Proposed:** a `structuralInFlight` latch on `TakesViewModel` (observable),
+taken synchronously at the door before any await, released in a `defer` —
+Write's shape. It does two jobs: it refuses a second divide (including the
+sheet-confirm-vs-⌘⇧D race Write's round-3 MINOR closed, since key
+equivalents stay live under a window-modal sheet), and it **freezes the
+panes** by folding into liveness: a new `TakesViewModel.isPaneLive(_ key:)`
+returning `authority.isLive(key, sealed: projection.sealed ||
+structuralInFlight)`, used at the three `TakesViewModel`-hosted call sites
+(`TakesShared.swift:44`, `TakesBoardView.swift:918`,
+`WriteTakesPanel.swift:187`). `PaneSurface` already does
+`view.isEditable = isLive`, so the freeze is the existing mechanism, not a
+new one — **P-3 holds**: the authority still answers "which pane is live";
+the model composes its suspension reasons before asking, exactly as it
+already composes `sealed`. No `PaneTextAuthority` API change.
+
+*The alternative, named because it is the stricter one:* a **post-keyed
+latch on `AppSession`** (the `mergeJoinMemory` / `tutorialDoorInFlight`
+precedent) shared with `runStructural`, so Write and Takes hold literally
+one door per post. I do **not** recommend it for this batch: the only way
+a Write flight and a Takes pane coexist for one post today is
+`WriteTakesPanel` (Write's own take panel, which has no divide door), so
+the shared latch buys nothing today while costing a change to
+`runStructural` — the most heavily pinned structural path in the app — in
+a divide-only batch. Say the word and it is a small, separable follow-on.
+
+##### (d) How the confirm's apply and the board's refresh compose
+
+**The apply.** `TakesViewModel.runDivideW` is the `deleteFocusedBlock`
+shape with the flight latch added: take the latch → `await
+autosave.flushNow()` → `guard !autosave.isDirty` (else speak the standing
+"Unsaved changes couldn't be written…" — 13c R2-6's one-act-one-contract
+rule) → `session.runner.run { ops.divideW(blockID, cuts:) }` → park focus
+→ release. Undo **and** redo ride the ops layer's own registration
+untouched (constraint 7); nothing new is registered anywhere.
+
+**The refresh is the board's ordinary projection path** (constraint 8):
+the observation fires, `adopt` runs — and it lands rather than deferring
+precisely because the flush left the buffer clean. No bespoke re-render,
+no `renderPost` fetch, no seam derivation. That asymmetry with Write is
+the point: Write must rewrite a TK2 document; a board just re-renders its
+slots.
+
+**Focus after the act, mirroring Write's caret rule exactly rather than
+inventing one:** plain divide → the successor (`result.variant.id`, Write
+puts the caret at the successor's start); the ceremony → the FIRST
+successor (`result.first.variants.first`, Write's `caretBlockID:
+result.first.block.id`). Delivered through the existing
+`choreography.parkFocus(onVariant:)`, which already focuses a minted
+variant's pane when its slot arrives (the insert-below handover).
+
+**Two sub-calls inside this point that are genuinely yours:**
+
+- **(d1) Where the fanned/unfanned fork is decided.** I propose the
+  **batch-2 precedent: read the block's live active fan from the STORE at
+  run time**, after the flush, not from `projection.fans` at plan time —
+  the Takes projection is deliberately frozen while any buffer is dirty
+  (`adopt`'s `isDirty` defer), so a plan-time arity is an enablement hint,
+  never an authorization, and this is the same reading batch 2's revert D
+  earned. It costs *nothing*: `openDivideWCeremony` already makes that
+  exact read, so the fork consumes a read the ceremony path needs anyway.
+  The planner is still the ONE brain — it is handed `fanArities` from that
+  fresh read instead of from the projection (constraint 1 is about *which*
+  planner, and there is only one). *The alternative* is parity-with-Write
+  staleness (plan-time arity + honest `fannedBlock` copy); it is one line
+  either way, and (d2) covers it regardless.
+- **(d2) `fannedBlock` gets app copy.** Whichever fork rule you pick, the
+  window can still close between the read and the op, and today both copy
+  paths dump the raw enum. One `case .fannedBlock` in `OpsRefusalCopy` (the
+  shared home; the R1-3 class) + the editor's switch. Small, and it is the
+  kind of thing that only ever shows up in front of her.
+
+##### How the planner stays ONE brain (constraint 1), concretely
+
+`TakesViewModel` builds a **synthetic single-entry `World`** over the take
+the caret is in and calls the existing
+`StructuralGesturePlanner.plan(.divideAtCursor, selection:world:)`:
+`BlockRangeIndex(entries: [Entry(blockID:, variantID:, length: take text,
+editable: !take.locked)], tailLength: nil)`, `fanArities: [live active fan
+count]`, `sealed: projection.sealed`, `textAt: { the take's
+buffer-overlaid text }`. Nothing is re-implemented and nothing is
+parameterized: the seal refusal, the gap refusal, the locked-take refusal,
+the word-rule snap (`snapToInteriorBoundary` → `BoundarySnapping.settle`,
+constraint 2) and the `.divide`/`.divideW` fork all come back from the one
+planner, byte-identical to Write's door. (`touchesTailRegion` is inert with
+`tailLength: nil` — a board has no open tail.)
+
+**The caret:** `paneSelection.range.location`, counted only when its
+`variantID` is the focused pane's — the choreographer's own existing rule,
+reused. With no caret the offset is 0 and divide refuses "nothing to
+divide", which is **exactly what the carry door does today** (it lands at
+offset 0 in Write); parity, not invention.
+
+##### (e) Lenses parity — the one scope question I am raising rather than assuming
+
+Takes and Lenses share the model, and every native door since 13b has gone
+into **both** handlers. `.divide` becoming `.native` also has a registry
+consequence: `CapabilityRegistryTests.takesIsNeverBehindWrite` asserts
+`.native` ⇒ `availability(.takes) == .act`, so `.divide` leaves the shared
+`structural` closure for its own (extract/makeBlock/merge/deleteInEveryTake
+keep theirs untouched — scope is divide-only). **I propose native in BOTH**
+(two identical `handleRouted` lines; the alternative — native in Takes,
+carry in Lenses — is a per-mode split that would need its own justification
+and would be the first door where the two boards disagree). A9's words are
+"divide in takes mode"; Lenses riding along is the shipped pattern, not an
+extension of scope. Your call.
+
+##### Door wiring (P-1) and the pins that change
+
+One model entry point `runStructuralDoor(_ act: StructuralAct)` forks
+divide → native, the other three → `moveToWriteAndRun` unchanged, and all
+three call sites use it (`TakesBoardView.handleRouted`,
+`LensesBoardView.handleRouted`, `TakesBottomBar` line 304) so they cannot
+drift. The bar's Divide help string loses "in Write, carried there for
+you". Registry: `.divide` gains `takesAccess: .native` + its own
+availability.
+
+Pins: a new suite for the native path (unfanned end-to-end, the ceremony
+opening in place seeded from a NON-chosen pane, the seal/lock/no-caret
+refusals, the flight latch refusing a second divide, the pane freeze, the
+successors arriving by ordinary projection, undo→redo). Existing:
+`CommandRoutingTests`'s choreography pins call `moveToWriteAndRun`
+*directly* and would keep passing — but six of them use `.divide` as their
+sample act, which after this batch describes behaviour that no longer
+exists at that door. I propose re-pointing those to `.extract` (which
+genuinely still carries) rather than deleting them: the machinery pin
+survives and stops narrating a retired flow (batch 1's judgment call 6 /
+batch 2's annotate-don't-contradict discipline). Named individually in the
+batch record.
+
+**Awaiting the ruling on: (a) the extraction + host protocol · (b) the
+board sheet mount · (c) the model-local latch + pane freeze (vs the
+session-shared latch) · (d1) store-read fork vs plan-time parity · (d2)
+the `fannedBlock` copy · (e) Lenses parity.**
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →
