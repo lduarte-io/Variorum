@@ -2145,6 +2145,91 @@ an explanation.
   it already carried `inlineComments`). (4) A24's grammar-checking
   coupling — riding the "check while typing" level was my call, not hers.
 
+#### Batch 4 — ACCEPTED IN FULL (2026-07-28 early; the orchestrator's adjudication of both halves)
+
+**Counts by my own runs, both passes:** after the four items — core
+`✔ Test run with 887 tests in 101 suites` · Mac `✔ Test run with 852
+tests in 142 suites` · mobile `✔ Test run with 14 tests in 4 suites`
+(RUN, not assumed — A16 touched `Sources/`); after A15 — core
+`✔ 887/101` unchanged · Mac `✔ Test run with 858 tests in 143 suites
+passed after 90.177 seconds`. All green; tree clean at `b419ca1`.
+
+**The A16 core diff read closely (the phase's first `Sources/`
+change):** exactly the 13b 4D blocker's shape — a setter over the
+existing `upsertSetting` (synced document semantics, the fan_style
+class), a read with the stated `.paragraph` fallback matching
+`containerHeader`'s standing resolution, zero semantics change,
+per-post override untouched. Endorsed.
+
+**A15's build verified against the ruling's riders line by line:**
+the scoped `withSoftNewline` defer-clears on every path (the
+`isPasting` precedent — rider 3, with the two-keys pin and revert I
+proving non-stickiness); B1 withholds `replacementIsSingleNewline`
+whose ONE consumer is the tail gesture; B2's fork calls
+`idleMintTail()` ITSELF behind the shared `mintableTail` guard
+(rider 1 — and the no-revert justification for it is SOUND: an
+equivalent-behavior revert cannot discriminate, and the mint story's
+own pins are the coverage, which is the rider's point). **Rider 2's
+measurement corrected the proposal's own claim:** a crystallization
+mint registers NO structural undo entry by either road — the
+proposal's "⌥⌘Z-recoverable" was wrong, the pin measured it, and the
+record now claims parity at exactly the strength the measurement
+supports. That is rider 2 doing precisely what it was written to do.
+**Revert G is the ruling's own rejection reproduced mechanically**
+(B1-only leaves the word after a soft newline in a still-open tail —
+the D3 class red on exactly one pin).
+
+**The ⌘⇧⏎-supersedes-⌥⌘N call, A24's two found-not-confirmed
+defaults, A23's additive rule, and A15's early mint are all ENDORSED
+as built and BUNDLED for her** — QUESTIONS **#48** now carries the
+seven one-line calls from batches 2–4 in one entry, so the walk reads
+them in one place. The permanent no-two-capabilities-share-a-chord
+pin and the A24 crash-pairing guard are exactly P-7's find-it-first
+posture. Third lock-flag exception recorded (probe-first held again).
+
+**Environment note adopted for the phase:** the mobile scheme's
+OS 26.2 simulators are the iPhone 17 family + 16e — "iPhone 16" fails
+with exit 70, and the orchestrator's own first mobile attempt proved
+the quoted-run-line rule catches it (grep swallowed the failure;
+`pipestatus` and the missing run line exposed it). Mobile runs name
+an existing destination and quote the line.
+
+**BATCH 4 CLOSES THE PHASE'S AUTONOMOUS BUILD FLOOR.** Built across
+batches 1–4: the three walk flips · #34's seam merge + its §14 delta ·
+A9 native divide with the ceremony extraction · A14 ⌘⇧⏎ · A15 ⇧⏎
+option B · A16's global face · A23 · A24. What remains is
+SITTING-GATED (A5 via #29, A11, A12's definition, A22's design with
+her untaken trimming ruling, the rolled walk items, #48) and then the
+ONE Fable cold review at phase end (her kickoff cast ruling) over the
+combined diff. The install refresh is HELD for her word as always.
+
+## The 13d sitting agenda (bundled; nothing here gates the shipped batches)
+
+One list, so the sitting runs off one section — the detail lives in
+the QUESTIONS entries and the two memos:
+
+1. **#48** — the seven one-line build calls from batches 2–4 (status
+   lines · no-caret divide · ⌥⌘N · spellcheck defaults · additive gap
+   · ⇧⏎'s early mint).
+2. **The rolled 13c walk items** — #29 (the C3 memo's Parts 1/3 —
+   gates A5's real scope), #30–#33, #36, #37, #38, #42, the minor
+   sub-calls of #43–#47, #46's five conversion rulings, and the
+   long-content-panes memo's §6.
+3. **A12's definition** — which structural undos warn ("undo of a mint
+   that had post-op edits" is the recorded candidate).
+4. **A22's design** — typewriter room as REAL enterable space,
+   composing with the phantom fix; her "should we just stop trimming
+   edges?" question from the 13c A47b sitting, ruling deliberately
+   untaken until now.
+5. **A11** — divide on an empty line and what the blank line IS (the
+   1G ownership rule is the recorded input; likely interacts with 4's
+   ruling).
+6. **The field-guide re-seed confirm** (one "Restore Tutorial" run —
+   stale since 13c's 2C, plus batch 1's Compare paragraph and batch
+   4's copy touches).
+7. **The install refresh** — at her word, zero-instance + fresh A1
+   backup as always.
+
 ## Verification
 
 Per-batch: the standing loop (build → pins → the tutorial spine green →
