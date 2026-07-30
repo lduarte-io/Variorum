@@ -340,6 +340,18 @@ struct FindAndReplaceTests {
     /// Deterministic by construction: a `Task { @MainActor }` created from
     /// main-actor code cannot run until the current synchronous work yields,
     /// so the edit below lands strictly between the plan and its application.
+    ///
+    /// **Layering since the cold review's fix pass (F-1):** the substring
+    /// VALVE in `applyFindReplace` now catches an ordinary drift BEFORE this
+    /// guard — the bytes at the drifted range no longer match what the finder
+    /// approved, so the range is skipped-and-counted and the guard is never
+    /// reached in this choreography. The guard remains the BELT for the one
+    /// shape the valve cannot see: byte-identical text whose BLOCK membership
+    /// moved (a structural change landing in the window). The discriminating
+    /// reverts therefore changed with the valve: valve alone removed → the
+    /// in-block drift pin below goes red while this one stays green; valve
+    /// AND guard removed → THIS pin goes red (its original red state,
+    /// re-verified at the fix pass).
     @Test func aPlannedMatchThatDriftsAcrossASeamRefusesInsteadOfMerging() async throws {
         try await withEditor(seedBlocks: ["aaaaaa foo", "bbb"]) { h in
             try await withFindPasteboard {
@@ -383,6 +395,56 @@ struct FindAndReplaceTests {
                 #expect(store.count == 2,
                         "STILL TWO BLOCKS — the drifted range refused instead of merging")
                 #expect(store == ["aaa foo", "bbb"], "and nothing was rewritten")
+            }
+        }
+    }
+
+    /// **Cold review F-1 (MAJOR) — RED ON THE PRE-FIX CODE, and the red state
+    /// is silent text corruption.** The same deferred window as the drift pin
+    /// above, but the drifted range stays INSIDE one block: on the pre-fix
+    /// code the only re-check was the document-length bound, so the
+    /// replacement applied to whatever characters sat at those offsets NOW —
+    /// text that never matched the search, silently rewritten and autosaved.
+    /// The substring valve skips it and the one final line counts it.
+    @Test func aPlannedMatchThatDriftsInsideABlockIsSkippedNotMisapplied() async throws {
+        try await withEditor(seedBlocks: ["aaaaaa foo bar"]) { h in
+            try await withFindPasteboard {
+                let (scrollView, window) = try mount(h)
+                defer { window.orderOut(nil) }
+
+                // Plan the replacement of " foo" at {6,4}.
+                let board = NSPasteboard(name: .find)
+                board.clearContents()
+                board.setString(" foo", forType: .string)
+                finderAction(.showReplaceInterface, on: h.textView)
+                pump()
+                let fields = editableFields(in: scrollView.findBarView)
+                #expect(fields.count >= 2, "the bar's own two fields")
+                fields[0].stringValue = " foo"
+                fields[1].stringValue = "BAR"
+                for field in fields.prefix(2) {
+                    field.sendAction(field.action, to: field.target)
+                }
+                pump()
+                finderAction(.replaceAll, on: h.textView)
+                // NO pump: the deferred application has not run yet.
+
+                // Shorten the block by exactly 3, so the planned {6,4} slides
+                // to different IN-BLOCK text: "aaa foo bar", where {6,4}
+                // covers "o ba" — a range the length bound accepts and the
+                // seam guard never sees. The pre-fix code replaced it,
+                // yielding "aaa foBARr".
+                h.replace(NSRange(location: 0, length: 3), with: "")
+
+                await h.model.findReplaceTask?.value
+                pump()
+                await h.flush()
+
+                let store = try h.storeSlots().map { $0.text ?? "" }
+                #expect(store == ["aaa foo bar"],
+                        "the drifted range is SKIPPED — never applied to the text now there")
+                #expect(h.model.statusMessage?.contains("moved before") == true,
+                        "and the one final line counts what moved: \(h.model.statusMessage ?? "nil")")
             }
         }
     }
@@ -536,6 +598,42 @@ struct FindAndReplaceTests {
                 "the two never read as rivals: one searches the library, one the post")
     }
 
+    // MARK: - The Edit menu itself (cold review F-5 — the probe, kept as a pin)
+
+    /// **F-5's decisive fact, measured in the test host — which IS the real
+    /// app with its real SwiftUI-built main menu.** The finding: SwiftUI's
+    /// standard `.textEditing` block may ship its own system Find submenu,
+    /// which the batch's collision sweep (over the app's OWN
+    /// `keyboardShortcut(` declarations) could never see; if present, Edit
+    /// would carry TWO Find submenus with five duplicated keys, the system
+    /// one bypassing the registry's gating. This walks the REAL Edit menu,
+    /// prints it whole for the record, and pins exactly one Find submenu —
+    /// so a future SwiftUI default change fails a test instead of quietly
+    /// doubling her menu.
+    @Test func theEditMenuCarriesExactlyOneFindSubmenu() throws {
+        let mainMenu = try #require(NSApp.mainMenu,
+                                    "the test host runs the real app, menu included")
+        let edit = try #require(
+            mainMenu.items.first { $0.title == "Edit" }?.submenu,
+            "the Edit menu exists")
+        for item in edit.items {
+            let kids = item.submenu?.items
+                .filter { !$0.isSeparatorItem }
+                .map { "\($0.title)\($0.keyEquivalent.isEmpty ? "" : " ⌘\($0.keyEquivalent)")" }
+                .joined(separator: " · ") ?? ""
+            print("F-5 Edit ▸ \(item.isSeparatorItem ? "————" : item.title)"
+                + (item.submenu == nil ? "" : "  [\(kids)]"))
+        }
+        let findSubmenus = edit.items.filter { $0.submenu != nil && $0.title == "Find" }
+        #expect(findSubmenus.count == 1,
+                """
+                the Edit menu carries exactly ONE Find submenu \
+                (saw \(findSubmenus.count)) — a second would be the system \
+                .textEditing block's, with five duplicated key equivalents \
+                routing performTextFinderAction: around the registry
+                """)
+    }
+
     // MARK: - The gate's pure half
 
     @Test func theCountingRefusalNamesEveryCause() {
@@ -546,7 +644,24 @@ struct FindAndReplaceTests {
         #expect(FindReplaceGate.refusal(total: 2, blockers: [.unsyncedBlock])
             == "Nothing was replaced — 1 of 2 matches can't be: 1 is in an unsynced block.")
         #expect(FindReplaceGate.refusal(single: .crossesBlockBoundary).contains("⌘⇧M"))
+        // Cold review F-6: a desync or a still-forming paragraph carries its
+        // OWN cause — never the cross-boundary copy, never the ⌘⇧M advice
+        // (merging is the wrong way out of either).
+        #expect(FindReplaceGate.refusal(total: 3, blockers: [.editorResyncing, .stillFormingParagraph])
+            == "Nothing was replaced — 2 of 3 matches can't be: "
+            + "1 is in text still re-syncing, 1 touches the paragraph still being written.")
+        #expect(!FindReplaceGate.refusal(single: .editorResyncing).contains("⌘⇧M"))
+        #expect(!FindReplaceGate.refusal(single: .editorResyncing).contains("block boundary"))
+        #expect(!FindReplaceGate.refusal(single: .stillFormingParagraph).contains("⌘⇧M"))
         #expect(FindReplaceGate.replaced(1) == "Replaced 1 match.")
         #expect(FindReplaceGate.replaced(4) == "Replaced 4 matches.")
+        // F-1 + F-7: the ONE apply-time completion voice.
+        #expect(FindReplaceGate.completion(applied: 3, moved: 0, blocked: 0)
+            == "Replaced 3 matches.")
+        #expect(FindReplaceGate.completion(applied: 2, moved: 1, blocked: 0)
+            == "Replaced 2 of 3 — 1 moved before it could be.")
+        #expect(FindReplaceGate.completion(applied: 1, moved: 2, blocked: 1)
+            == "Replaced 1 of 4 — 2 moved before they could be, "
+            + "1 can no longer be replaced where it landed.")
     }
 }

@@ -116,22 +116,20 @@ struct DivideCeremonyCostTests {
             defer { window.orderOut(nil); window.close() }
 
             BoundaryScanCount.reset()
-            CutFlowRealization.slotViews = 0
             await mountSheet(window, ceremony, state)
             let scans = BoundaryScanCount.current
-            let slotViews = CutFlowRealization.slotViews
-            print("L1 mount: \(scans) scans · \(slotViews) per-slot view elements")
+            print("L1 mount: \(scans) scans")
 
+            // (The batch's `slotViews == 0` companion assertion was DELETED at
+            // the cold review's fix pass — F-3: nothing in production ever
+            // incremented that counter, so it was a tripwire that could not
+            // fire. The per-slot-view bound is carried by this scan assertion
+            // plus the one-brain geometry: re-introducing per-slot views would
+            // re-introduce per-slot derivation, which THIS counts.)
             #expect(scans == 0,
                     """
                     rendering the sheet must perform NO full-text scans (\(scans)) — \
                     the shipped sheet ran one per slot per body pass, per marked take
-                    """)
-            #expect(slotViews == 0,
-                    """
-                    the flow must not realize a view element per legal cut position \
-                    (\(slotViews)) — the shipped one built a Button + ZStack + \
-                    GeometryReader + hover tracker for each, measured twice per pass
                     """)
         }
     }
@@ -147,17 +145,15 @@ struct DivideCeremonyCostTests {
             let target = try #require(take.boundaries.dropFirst(20).first)
 
             BoundaryScanCount.reset()
-            CutFlowRealization.slotViews = 0
             ceremony.placeCut(takeID: take.id, cut: target)
             hosting.needsLayout = true
             await settle(window, hosting)
             let scans = BoundaryScanCount.current
-            print("L1 place: \(scans) scans · \(CutFlowRealization.slotViews) per-slot view elements")
+            print("L1 place: \(scans) scans")
 
             #expect(ceremony.state?.takes.first?.cut == target, "the cut really moved")
             #expect(scans == 0,
                     "a click or keystroke must perform NO full-text scans (\(scans))")
-            #expect(CutFlowRealization.slotViews == 0)
         }
     }
 
@@ -210,6 +206,70 @@ struct DivideCeremonyCostTests {
             #expect(hits > 100, "non-vacuity: the queries resolved")
             #expect(scans == 0,
                     "dragging consults cached geometry only (\(scans) scans)")
+        }
+    }
+
+    /// **Cold review F-2 (fix pass) — RED ON THE PRE-FIX CODE** (verified by
+    /// behavioral revert of the `onChange` key alone: rebuilding on
+    /// `take.flow.count` instead of `take.flow`). A confirm-time drift
+    /// refresh rebuilds a take's flow from CHANGED store text under the SAME
+    /// take id, telling her "review before dividing" — and a token-count-
+    /// preserving edit (a word swapped for a word) left the Canvas drawing
+    /// the OLD words while cuts and clicks resolved against them: stale
+    /// review, dead or mispointed clicks. The drawn geometry must follow the
+    /// refreshed flow; `CutFlowRealization.rebuilds` (production-bumped in
+    /// `WCutFlow.rebuild()`) is the instrument, and the mount assertion below
+    /// doubles as its non-vacuity pin.
+    @Test func aDriftRefreshWithTheSameTokenCountRedrawsTheFlow() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            // Two takes; the seed take is marked with its cut at the caret.
+            let slots = try h.storeSlots()
+            let first = try #require(slots.first)
+            let second = try h.session.operations.branchVariant(
+                first.blockID, from: try #require(first.variantID))
+            try h.session.operations.autosave(
+                second.id, text: "A wholly different second take of this block.",
+                charDelta: 0)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(location: 15, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor)
+            let state = try #require(h.model.divideWCeremony)
+            let ceremony = h.model.divideWCeremonyController
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 700, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer { window.orderOut(nil); window.close() }
+            let hosting = await mountSheet(window, ceremony, state)
+            #expect(CutFlowRealization.rebuilds > 0,
+                    "the instrument's own non-vacuity: mounting rebuilt at all")
+
+            // The marked seed take's text changes in the STORE with the SAME
+            // token count — "omega" swapped for "OMEGA".
+            let seed = try #require(ceremony.state?.takes.first { $0.marked })
+            try h.session.operations.autosave(
+                seed.variant.id, text: "First alpha. First OMEGA.", charDelta: 0)
+
+            let before = CutFlowRealization.rebuilds
+            await ceremony.confirm()  // drift detected → refresh, sheet stays up
+            hosting.needsLayout = true
+            await settle(window, hosting)
+
+            let refreshed = try #require(
+                ceremony.state?.takes.first { $0.id == seed.id },
+                "the refresh kept the ceremony open on the same takes")
+            #expect(refreshed.variant.workingText.contains("OMEGA"),
+                    "non-vacuity: the drift refresh really re-read the store")
+            #expect(refreshed.flow.count == seed.flow.count,
+                    "non-vacuity: the token count is preserved — a count-keyed rebuild sees nothing")
+            #expect(CutFlowRealization.rebuilds > before,
+                    """
+                    the drawn geometry follows the refreshed text — on the \
+                    pre-fix key (flow.count) the Canvas kept drawing the OLD \
+                    words she was asked to review
+                    """)
         }
     }
 

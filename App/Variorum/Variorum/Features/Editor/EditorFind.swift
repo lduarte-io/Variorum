@@ -72,6 +72,13 @@ nonisolated enum FindReplaceGate {
         case crossesBlockBoundary
         case lockedTake
         case unsyncedBlock
+        /// Cold review F-6: `.indexDesync` must not wear the cross-boundary
+        /// copy (nor its ⌘⇧M advice — merging is the wrong way out of a
+        /// desync; recovery re-renders from the store on its own).
+        case editorResyncing
+        /// Cold review F-6: the open-tail verdicts (`.openTail`/`.closeTail`)
+        /// are about the paragraph still being written, not a block seam.
+        case stillFormingParagraph
     }
 
     /// The counting refusal (the ruled ALL-OR-NOTHING outcome): nothing is
@@ -84,7 +91,9 @@ nonisolated enum FindReplaceGate {
     }
 
     /// The single-match refusal — one match, one honest reason, and the way
-    /// out named (⌘⇧M is the merge gesture the boundary case points at).
+    /// out named (⌘⇧M is the merge gesture the boundary case points at —
+    /// and ONLY that case: F-6, a desync or a still-forming paragraph must
+    /// never be advised into a merge).
     static func refusal(single blocker: Blocker) -> String {
         switch blocker {
         case .crossesBlockBoundary:
@@ -94,11 +103,35 @@ nonisolated enum FindReplaceGate {
             "That match is in a locked take — branch it or unlock it to edit."
         case .unsyncedBlock:
             "That match is in a block that hasn't fully synced; it is read-only for now."
+        case .editorResyncing:
+            "That match is in text the editor is re-syncing — try again in a moment."
+        case .stillFormingParagraph:
+            "That match touches the paragraph still being written — it becomes "
+                + "a block once typing pauses; try again then."
         }
     }
 
     static func replaced(_ count: Int) -> String {
         count == 1 ? "Replaced 1 match." : "Replaced \(count) matches."
+    }
+
+    /// **The apply-time completion, ONE voice (cold review F-1 + F-7):** when
+    /// everything approved was applied it says so; when some approved matches
+    /// could no longer be applied — the text MOVED in the deferred window
+    /// (the substring valve), or the door refused where they now land (the
+    /// belt) — the one final line carries the whole outcome, so nothing is
+    /// reported by a message that another message then overwrites.
+    static func completion(applied: Int, moved: Int, blocked: Int) -> String {
+        let total = applied + moved + blocked
+        guard moved > 0 || blocked > 0 else { return replaced(applied) }
+        var causes: [String] = []
+        if moved > 0 {
+            causes.append("\(moved) moved before \(moved == 1 ? "it" : "they") could be")
+        }
+        if blocked > 0 {
+            causes.append("\(blocked) can no longer be replaced where \(blocked == 1 ? "it" : "they") landed")
+        }
+        return "Replaced \(applied) of \(total) — " + causes.joined(separator: ", ") + "."
     }
 
     /// "2 cross a block boundary, 1 is in a locked take" — only the causes
@@ -107,10 +140,14 @@ nonisolated enum FindReplaceGate {
         let boundary = blockers.count { $0 == .crossesBlockBoundary }
         let locked = blockers.count { $0 == .lockedTake }
         let unsynced = blockers.count { $0 == .unsyncedBlock }
+        let resyncing = blockers.count { $0 == .editorResyncing }
+        let forming = blockers.count { $0 == .stillFormingParagraph }
         var parts: [String] = []
         if boundary > 0 { parts.append("\(boundary) cross\(boundary == 1 ? "es" : "") a block boundary") }
         if locked > 0 { parts.append("\(locked) \(locked == 1 ? "is" : "are") in a locked take") }
         if unsynced > 0 { parts.append("\(unsynced) \(unsynced == 1 ? "is" : "are") in an unsynced block") }
+        if resyncing > 0 { parts.append("\(resyncing) \(resyncing == 1 ? "is" : "are") in text still re-syncing") }
+        if forming > 0 { parts.append("\(forming) touch\(forming == 1 ? "es" : "") the paragraph still being written") }
         return parts.joined(separator: ", ")
     }
 }
@@ -160,9 +197,18 @@ extension EditorViewModel {
                 blockers.append(.lockedTake)
             case .refuse(.readOnlySlot):
                 blockers.append(.unsyncedBlock)
-            case .refuse(.crossesBlockBoundary), .refuse(.indexDesync),
-                 .openTail, .closeTail:
+            case .refuse(.crossesBlockBoundary):
                 blockers.append(.crossesBlockBoundary)
+            case .refuse(.indexDesync):
+                // F-6: a desync is not a boundary — its copy must not
+                // recommend a merge.
+                blockers.append(.editorResyncing)
+            case .openTail, .closeTail:
+                // F-6: the tail verdicts are about the paragraph still
+                // being written. (`.openTail` needs a zero-length newline
+                // insertion, unreachable from a replace — kept for the
+                // compiler's exhaustiveness, honest if it ever fires.)
+                blockers.append(.stillFormingParagraph)
             }
         }
         guard blockers.isEmpty else {
@@ -179,7 +225,25 @@ extension EditorViewModel {
         // rewriting storage here would be re-entrant. The same reason
         // `shouldChangeText` defers its cross-block compounds: refuse now,
         // reproduce the exact intent on the next turn.
-        let plan = zip(ranges, paddedStrings(strings, to: ranges.count)).map { ($0, $1) }
+        //
+        // **The substring VALVE (cold review F-1, MAJOR):** capture what each
+        // approved range MATCHES right now. The R-A race proves text can move
+        // in the deferred window (any already-queued main-actor work runs
+        // first), and a bounds check alone would let a drifted-but-in-block
+        // range replace whatever sits at those offsets NOW — silent
+        // wrong-text replacement. A range is applied only if it still holds
+        // the text the finder matched; otherwise it is SKIPPED AND COUNTED.
+        // The all-or-nothing gate above is untouched: it speaks for
+        // everything it can see; the valve covers only what moves AFTER
+        // approval.
+        let snapshot = textView.string as NSString
+        let plan = zip(ranges, paddedStrings(strings, to: ranges.count)).map {
+            range, replacement in
+            (range: range,
+             replacement: replacement,
+             expected: range.upperBound <= snapshot.length
+                ? snapshot.substring(with: range) : nil)
+        }
         findReplaceTask = Task { @MainActor [weak self] in
             self?.applyFindReplace(plan, in: textView)
         }
@@ -195,32 +259,50 @@ extension EditorViewModel {
     /// Applies the replacements through the editor's ORDINARY input path —
     /// LAST MATCH FIRST, so every earlier offset is still valid — under ONE
     /// undo group, so a Replace All undoes as the single act she performed.
+    ///
+    /// **Two layers of protection against the deferred window (F-1):** the
+    /// substring VALVE — a range is applied only if it still holds the exact
+    /// text the finder matched at gate time (a drifted range is skipped and
+    /// counted, never applied to whatever sits there now) — and, behind it,
+    /// the `isFindReplacing` flag as the BELT for the one shape the valve
+    /// cannot see: byte-identical text whose BLOCK membership moved (a
+    /// structural change landing in the window), which `shouldChangeText`
+    /// then refuses instead of merging.
     private func applyFindReplace(
-        _ plan: [(range: NSRange, replacement: String)], in textView: EditorTextView
+        _ plan: [(range: NSRange, replacement: String, expected: String?)],
+        in textView: EditorTextView
     ) {
         let manager = textView.undoManager
         manager?.beginUndoGrouping()
         var applied = 0
-        for (range, replacement) in plan.sorted(by: { $0.range.location > $1.range.location }) {
-            // Re-checked against the CURRENT index, not the plan's snapshot:
-            // between the gate and here the store may have delivered a
-            // projection. A stale range must refuse, never merge.
-            guard range.upperBound <= index.documentLength else { continue }
-            let allowed = textView.withFindReplace {
-                textView.shouldChangeText(in: range, replacementString: replacement)
+        var moved = 0    // the valve: the range no longer holds its match
+        var blocked = 0  // the belt: the door refused where it now lands
+        for item in plan.sorted(by: { $0.range.location > $1.range.location }) {
+            let current = textView.string as NSString
+            guard item.range.upperBound <= current.length,
+                  let expected = item.expected,
+                  current.substring(with: item.range) == expected else {
+                moved += 1
+                continue
             }
-            guard allowed else { continue }
+            let allowed = textView.withFindReplace {
+                textView.shouldChangeText(in: item.range, replacementString: item.replacement)
+            }
+            guard allowed else {
+                blocked += 1
+                continue
+            }
             textView.withFindReplace {
-                textView.replaceCharacters(in: range, with: replacement)
+                textView.replaceCharacters(in: item.range, with: item.replacement)
                 textView.didChangeText()
             }
             applied += 1
         }
         manager?.endUndoGrouping()
-        showStatus(
-            applied == plan.count
-                ? FindReplaceGate.replaced(applied)
-                : "Replaced \(applied) of \(plan.count) — the rest moved before they could be.")
+        // ONE voice (F-7): the final line carries the whole outcome —
+        // any mid-loop belt refusal is deliberately superseded by it.
+        showStatus(FindReplaceGate.completion(
+            applied: applied, moved: moved, blocked: blocked))
         findReplaceTask = nil
     }
 }

@@ -282,6 +282,17 @@ final class EditorTextView: NSTextView {
     /// fires for typing, paste and delete but NOT for clicks or arrow keys,
     /// so a click near the bottom of the page never makes the view jump.
     override func didChangeText() {
+        // Cold review F-8 (pin-confirmed red): a content change RETIRES the
+        // own-output echo filter. `appliedHeight` exists to suppress AppKit
+        // handing our own room-inclusive output back BETWEEN edits (the
+        // measured compounding); after an edit, a proposal that happens to
+        // equal it is a FRESH proposal and must be adopted, or the stale
+        // `proposedHeight` silently eats the room until the next differing
+        // proposal. Clearing here scopes the filter to exactly the interval
+        // where suppression is provably right. (Projection-driven storage
+        // rewrites don't route this hook — recorded residual; they re-propose
+        // differing heights in practice, which the filter admits anyway.)
+        appliedHeight = 0
         super.didChangeText()
         (enclosingScrollView as? TypewriterScrollView)?.keepCaretClearance(in: self)
     }

@@ -47,6 +47,73 @@ struct TypewriterRoomTests {
         #expect(line > 0)
     }
 
+    // MARK: The own-output echo × a content change (cold review F-8)
+
+    /// **F-8's collision pin (the adjudicated pin-first protocol).** The
+    /// `setFrameSize` funnel filters AppKit handing our own room-inclusive
+    /// output back (`appliedHeight` — without it the room COMPOUNDED, the
+    /// measured 1,007 pt two-line post). The filter's blind spot: a genuinely
+    /// FRESH proposal that happens to equal the last applied height would be
+    /// misread as an echo, leaving `proposedHeight` stale and the room
+    /// silently eaten until the next differing proposal.
+    ///
+    /// **Honestly labelled: the coincidence is FABRICATED here.** TK2's
+    /// estimate-driven proposals cannot be made to land on a prior applied
+    /// height within ±0.5 pt deterministically through real input, so this
+    /// pin drives the funnel's arithmetic directly: a content change
+    /// (`didChangeText` — the fix's hook, which real typing/paste/delete and
+    /// the find-replace loop all route) followed by a proposal at exactly the
+    /// applied height. The contract pinned: **after a content change, an
+    /// equal-height proposal is never mistaken for our own echo** — the
+    /// filter only ever suppresses echoes between edits, where suppression is
+    /// provably right.
+    @Test func aContentChangeRetiresTheOwnOutputEcho() async throws {
+        let (scrollView, textView) = EditorTextView.makeEditor()
+        let typewriter = try #require(scrollView as? TypewriterScrollView)
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView = scrollView
+        scrollView.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
+        textView.string = (1...120)
+            .map { "Paragraph \($0) with some words in it." }.joined(separator: "\n")
+        window.layoutIfNeeded()
+        pump()
+
+        #expect(typewriter.typewriterRoom > 100, "the room is on")
+        let applied = textView.frame.height
+        let clip = scrollView.contentView.bounds.height
+        #expect(applied > clip * 2, "tall case: the frame is genuinely room-inclusive")
+
+        // PHASE 1 — between edits, the filter FIRES: an equal-height call is
+        // our own echo and must be suppressed (this is the anti-compounding
+        // half; without it a two-line post measured 1,007 pt).
+        textView.setFrameSize(NSSize(width: textView.frame.width, height: applied))
+        let afterEcho = textView.frame.height
+        print("F-8: applied \(applied) · after echo-call \(afterEcho)")
+        #expect(afterEcho == applied,
+                "between edits the equal-height call is filtered as our echo")
+
+        // PHASE 2 — after a content change, the SAME call is a fresh
+        // proposal: the edit AppKit just applied (the fix's hook)…
+        textView.didChangeText()
+        // …then the coincident proposal at exactly the applied height.
+        textView.setFrameSize(NSSize(width: textView.frame.width, height: applied))
+        let afterFresh = textView.frame.height
+        print("F-8: after content change + equal-height call \(afterFresh)")
+        pump(1)
+
+        // Fresh treatment: proposedHeight adopts `applied`, and the room is
+        // re-granted past it (tall case: applied − inset + room > applied).
+        #expect(afterFresh > applied + 100,
+                """
+                after a content change an equal-height proposal is a FRESH \
+                proposal — the frame re-grants the room past it \
+                (frame \(afterFresh) vs applied \(applied)); \
+                mistaking it for our echo leaves the room silently eaten
+                """)
+    }
+
     // MARK: The room, mounted
 
     /// The mechanism, measured rather than asserted: the scroll view carries

@@ -20,15 +20,21 @@ import SwiftUI
 import VariorumCore
 
 #if DEBUG
-/// **The L1 bound's other half** (QoL round 2026-07-29): how many PER-SLOT
-/// view elements the cut flow realizes. The shipped flow built one
-/// `Button`+`ZStack`+`onHover`+`help`+`GeometryReader` per legal cut position —
-/// ~3,000 of them for a 3,000-word take, each measured twice per layout pass.
-/// The rebuilt flow draws instead, so this must stay at zero: a tripwire, and
-/// its zero IS the assertion (the `CanvasCardMaterialization` precedent).
+/// **The flow's rebuild instrument** (reworked at the cold review's fix pass,
+/// F-2/F-3). The batch shipped this as a `slotViews` counter that NOTHING in
+/// production ever incremented — a tripwire that could not fire on any
+/// regression, so its `== 0` assertions were green over nothing (F-3; the
+/// invoked `CanvasCardMaterialization` precedent is production-bumped, which
+/// is what makes ITS zero an assertion). The per-slot-view bound is carried
+/// by the scan assertions plus the one-brain geometry; the vacuous
+/// assertions are gone.
+///
+/// `rebuilds` is real: `WCutFlow.rebuild()` bumps it in production code, and
+/// the F-2 pin uses it to prove a drift refresh re-derives the drawn
+/// geometry (the count-preserving staleness class).
 @MainActor
 enum CutFlowRealization {
-    static var slotViews = 0
+    static var rebuilds = 0
 }
 #endif
 
@@ -318,7 +324,13 @@ private struct WCutFlow: View {
             rebuild()
         }
         .onChange(of: take.id) { rebuild() }
-        .onChange(of: take.flow.count) { rebuild() }
+        // The WHOLE flow, not its count (cold review F-2, pin-verified red on
+        // the count key): a confirm-time drift refresh rebuilds this take
+        // from CHANGED store text under the SAME id, and a token-count-
+        // preserving edit left the Canvas drawing the OLD words while cuts
+        // and clicks resolved against them. `FlowItem` is `Equatable`; the
+        // comparison is O(tokens) per change — no text scan.
+        .onChange(of: take.flow) { rebuild() }
         .onContinuousHover { phase in
             switch phase {
             case .active(let point): hovered = geometry.nearestSlot(to: point)
@@ -354,6 +366,9 @@ private struct WCutFlow: View {
     }
 
     private func rebuild() {
+        #if DEBUG
+        CutFlowRealization.rebuilds += 1
+        #endif
         geometry = CutFlowGeometry.make(
             flow: take.flow, strong: take.strongBoundaries,
             width: width, font: Self.flowFont)
