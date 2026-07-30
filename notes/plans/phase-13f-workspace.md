@@ -478,3 +478,269 @@ item and return with a proposal.
 ## Batch records
 
 *(Implementers append here — one record per batch.)*
+
+### Batch 1 — the opening friction batch (W7 · W8 · W9 · W12 BUILT; **W11 STOPPED with a trace**); commits `2f01988` · `e3c09d1` · `8b2ff48`
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 903
+tests in 102 suites passed after 30.194 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 939 tests in 152 suites passed after 136.438 seconds`
+(`xcodebuild_exit=0`) · tutorial spine on its own run, by TYPE name
+(`TutorialBookShapeTests` + `TutorialDoorTests`): `✔ Test run with 14
+tests in 2 suites passed after 4.308 seconds`. From the batch's
+baselines (903/102 · 933/151 · 14/4): **+6 Mac tests, +1 suite**; core
+byte-unchanged. **Mobile deliberately NOT run** — zero `Sources/` and
+zero `Shared/` lines (verified by `git status`), so the loop's own
+condition for running it is unmet; the round's 14/4 stands.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point (`pgrep` checked at
+open; the discipline held throughout). Two pre-existing uncommitted
+author files (`notes/DetailedPlanForPhases.md`,
+*[removed for publication]*
+was staged by explicit path.
+
+#### W12 — the scrap drag into a post (BUG; traced, then measured)
+
+**The mechanism, measured on macOS 26.5.2 before anything changed.**
+AppKit's destination sequence is `draggingEntered` → `draggingUpdated` →
+**`prepareForDragOperation`** → `performDragOperation`, and a `false`
+from the THIRD step ENDS it — the fourth is never sent. `EditorTextView`
+overrode the first, second and fourth (all correct, all reachable in
+isolation) and **never the third**, and `NSTextView`'s own
+implementation answers **false** for a pasteboard carrying only
+`io.lduarte.variorum.poolblock`. Probe output, both editor variants:
+`entered/updated = .copy`, `prepare = false`, and with the gate
+overridden the pool branch runs and consumes. So the drag showed the
+copy cursor the whole way in and then did nothing — her report exactly,
+and nothing to do with `poolDragCopy`, the payload, the pool listing, or
+the ScrapsPanel.
+
+Ruled OUT by measurement on the way (recorded so nobody re-walks them):
+`isEditable`/`isRichText` writes do NOT drop a custom registered drag
+type (`updateDragTypeRegistration` was the first suspect — probed
+through a full window lifecycle, the type survives every write), and the
+payload/registration halves were already pinned green.
+
+**Fix:** one override — `prepareForDragOperation` answers true for the
+pool type, else `super`. At the level the contract lives; no bypass.
+
+**THE PIN-GAP, and it is the transferable part:** every shipped
+pool-drag pin drove `performDragOperation` (or `model.poolDrop`)
+DIRECTLY, skipping the gate AppKit does not skip — a green suite over a
+feature that could not be used. New pin
+`theWholeAppKitDropSequenceReachesThePoolBranch` drives all four steps
+against the real text views from `makeEditor()` and `makeInlineEditor()`.
+
+**Revert W12-A** (checksummed; `shasum -c` OK after restore): the
+override deleted ⇒ the new pin fails at exactly the prepare assertion in
+BOTH variants (2 issues) and every other pin in the suite stays green.
+
+Recorded with it: **SwiftUI's hosting drop path calls PRIVATE selectors
+on the dragging info** (`_lastDragDestinationOperation` — measured by
+crash), so a hand-rolled `NSDraggingInfo` can drive an `NSTextView`
+destination and can **never** drive a `.dropDestination`. That asymmetry
+is why W11's half below is honestly unpinnable.
+
+#### W11 — chapter reordering: **STOPPED, per the brief's own escape**
+
+Her report: *"there's a small bug with manual book order - i haven't
+been able to move the chapters in between the posts (which did used to
+work)."* The brief's instruction: trace to a concrete mechanism BEFORE
+any fix; if the trace lands on a DESIGN conflict rather than a defect,
+STOP and report. **It lands on one, and there is no defect I can prove.**
+
+**What I verified, at every layer I can drive:**
+
+1. **The operations layer is correct.** A throwaway core probe ran
+   `reorderSection` through the exact `InsertPosition`s the two doors
+   emit — `.after(next)` / `.before(previous)` — and the section order
+   round-tripped ["I","II","III"] → ["II","I","III"] → back → ["I","III","II"].
+   (Probe deleted; not shipped.)
+2. **The model door is pinned green and untouched.**
+   `BookStructureTests.chapterDragDropsBeforeTargetOrAtTheEnd` drives
+   `moveChapter(_:before:)` incl. the end zone, the no-op edges and a
+   foreign payload.
+3. **The drag machinery is BYTE-IDENTICAL to the build she confirmed
+   worked.** `git show <commit>:BookView.swift | grep draggable|dropDestination`
+   across `23b0c12` (13b 3E N21, where she reported the dots "make me
+   feel like it should be draggable and it isn't" and they were made
+   draggable) → `2492ac0` → `681851e` → `f9cf009` → `8c07717` → HEAD:
+   the same two sites in the navigator and the same two in the body, at
+   shifting line numbers and nothing else. No regression exists in this
+   code.
+
+**What the trace DOES show — the reach and the semantics:**
+
+- A chapter's ONLY drop targets are (a) another chapter's header and
+  (b) a 14 pt end zone. Everything between two chapters — every post
+  row, every gap — is not a target. Dropping A on B means "A goes
+  BEFORE B", so **moving a chapter DOWN one slot has no target at all
+  unless a third chapter follows it**; with two chapters the only way
+  down is the 14 pt strip at the very end of the book. That alone
+  produces "I haven't been able to move the chapters."
+- Since 13c 2A the space between two chapter headings in the Outline
+  BODY is a whole post's prose (and since 13d batch 1, a card), so the
+  targets shrank against everything around them. The body header also
+  carries no `.contentShape(Rectangle())`, so its hit area is the
+  glyphs, not the row — the navigator's is a `Button` and takes the row.
+- **And the literal reading of her words is not expressible in the
+  model:** a chapter's `position` orders chapters among chapters, and
+  posts belong to chapters by `reading_post.section_id` assignment.
+  "A chapter in between the posts" has no meaning to place — deciding
+  what dropping a chapter between post 3 and post 4 SHOULD do (re-anchor
+  it before that post's chapter? split the chapter? re-assign the posts
+  below it?) is inventing product behavior.
+
+**Why I did not fix the reach half anyway:** the hallucination guard.
+Every candidate fix here is a drag-geometry change, and the drag route
+into SwiftUI cannot be driven in this host (measured above — the private
+selector), so nothing I could ship would carry a red-on-old pin. A fix
+without a pin, on an item whose diagnosis is a product question, is
+exactly the class the guard exists to refuse.
+
+**For the orchestrator / her:** the cheap, invention-free half is an
+explicit **"Move Down"/"Move Up" pair that already exists in the chapter
+context menu** (`chapterMenu` — verified correct at the ops layer
+above); if her drag keeps failing, the honest first answer is that those
+menu items work today and the drag's targets are too few. The design
+question — should a chapter be droppable anywhere between posts, and
+what would that mean — is hers.
+
+#### W9 — the ceremony's cut ticks (a ruled flip, not a bug fix)
+
+Rendering only. The tick at every legal cut position is gone; the hover
+highlight went with it (it was one of those lines, thickened, and its
+only consumer was the tick — a hover tracker that changes nothing on
+screen is state churn per mouse move, 13d judgment call 1's class).
+
+Everything the slots DO is untouched and that is what keeps this a
+rendering change: `slotWidth` still puts the gap between two words (so
+the wrap arithmetic and every cached geometry are byte-identical),
+`nearestSlot` still resolves clicks and drags, `isStrong` still gives
+sentence ends and newlines their extra catch, `slotFrame` still places
+the ✂.
+
+**PIN CHANGES: none.** No pin asserted a tick's presence (the flow is
+drawn in a `Canvas`), so all 15 pins across `DivideCeremonyCostTests` +
+`WCutPlacementTests` pass **UNMODIFIED** — the parity proof a ruled flip
+wants.
+
+#### W8 — carousel adopts slot split's natural height + shorten-drag
+
+Her ruling extends the QoL round's supersession of S4-31b/N40 to
+carousel; that round scoped it to slot split deliberately and pinned
+carousel's 110 as CHARACTERIZATION. `carouselBloom` is now byte-for-byte
+`slotSplitBloom`'s composition. **The rail strip is UNTOUCHED** (she
+named carousel only; its pin passes unmodified).
+
+**Judgment call, recorded:** the height store is SHARED with slot split
+(the same `takesSlotHeights.<postID>` key, the same per-block entry). It
+is one question, one geometry (both go through `pagedTakesRow` →
+`containerRelativeFrame` at the same `beneathCount`) and one natural
+height; two stores would give a block two remembered heights with
+nothing on screen to say which she set. The `TakesViewMemory`
+decode-compat trap is respected by construction — nothing was added to
+that struct.
+
+**PIN CHANGES, every one named:**
+- `carouselKeepsTheRuledFixedCardHeight` → **`carouselShowsALongTakeAtFullLength`**
+  — a DELIBERATE FLIP: inverted, not deleted (same measurement, opposite
+  expectation), and its `measuredHeightWrites == 0` half flips with it
+  (carousel subscribes to the measurement seam now, because it sizes a
+  wrapper).
+- **+ `aShortenedCarouselSlotReEntersTheInCardScroll`** (new, red on old).
+- **`paneMeasurementIsIndependentOfCapping` REWORKED**: it compared
+  carousel (capped) against slot split (uncapped), and this ruling made
+  both arms the same state — it would have gone on passing while
+  asserting nothing. The capped arm is now made by SHORTENING (the only
+  way a card is capped at all now), so T4's "the cap saved DRAW, not
+  LAYOUT" is under test again.
+- Unchanged and passing: `theRailShortBlockStripKeepsItsOneCardHeight`,
+  every slot-split pin, the seam settle + deferral pins.
+
+**Revert W8-A** (checksummed, restored byte-identical): carousel back to
+`railCardHeight` ⇒ exactly the two carousel pins red (3 + 1 issues),
+slot split and the rail green. **A green revert got a stronger arm
+first:** the drag pin originally dragged to the FLOOR — which IS
+`railCardHeight`, indistinguishable from the retired fixed height, so it
+passed on the reverted code. It drags to 400 now, a height the
+pre-ruling code cannot produce.
+
+#### W7 — the typewriter room on the takes board
+
+**It is NOT a fourth A22 mechanism, and that is the design point.**
+Write's room is a scroll allowance on an `NSTextView`'s document frame —
+three mechanisms to get right, because an allowance is invisible to half
+the input paths. The board's article is an ordinary SwiftUI
+`ScrollView`, so the room is ordinary **content extent**: a clear box
+below the last row, which the wheel, trackpad, knob and paging all reach
+by construction. There is no allowance to be blind to. The HEIGHT is the
+shared brain (`TypewriterRoom.height` — viewport less one line), so the
+two surfaces feel alike and neither can drift.
+
+**The click-lands-focus half rides the board's existing focus path**, so
+the brief's STOP condition was not reached: `focusWithCaretAtEnd` →
+`focus` → the authority. P-3 holds — exactly one live pane, one liveness
+authority. The caret half is a new single-purpose seam on the pane
+surface: a monotonic token meaning "put your caret at the end", inert at
+zero, **baselined at construction so a remount never acts on its own**,
+and applied only to a pane liveness already reached. It cannot become a
+second liveness mechanism (it moves a caret INSIDE a pane; it never
+decides which pane is live), and the room is its only caller —
+`TakesCellView`'s parameter defaults to 0, so Lenses, Compare, the TOC
+and the book surfaces read exactly as before.
+
+Target selection: the LAST slot's shown take, in the article column —
+except under a slot-split bloom, which replaces the article cell, where
+it is the fan namespace (the same branch `articleRow` itself takes).
+
+**New suite `TakesRoomTests` (4):** the room inside the article scroll
+view's `documentRect` **and inside the scroller's own maximum travel**
+(the knob path A22 was specifically blind to); the landing's ring +
+caret; **ZERO STORE BYTES** (blocks and text byte-identical before and
+after — A22's "allowance, never content", pinned); the seam inert
+without a request.
+
+**Reverts** (checksummed, restored byte-identical): **W7-A** the room
+removed ⇒ the extent pin red with the numbers stated (`document 328` =
+the rows alone, vs `rows + room = 831`), caret pins green · **W7-B** the
+caret request never applied ⇒ exactly the landing pin red (`{0,0}` vs
+`{47,0}`).
+
+**Two non-vacuity findings, both found by a pin FAILING** (kept because
+either would have made a hollow green pin):
+1. **A live pane's caret already sits at its text end** — AppKit puts it
+   there when `string` is set. Asserting "end" on a fresh pane proves
+   nothing, so the landing pin puts the caret at 0 first and the
+   inert-seam pin parks it at 3.
+2. **The board lands its own ring at mount**, so "nothing is live
+   before the click" was simply false; the pin asserts the ring MOVES to
+   the last block instead, which is the stronger claim anyway.
+
+#### Environment traps (new this batch)
+
+1. **`scrollPageDown:` on a hosted SwiftUI `ScrollView`'s document view
+   does not return in this test host** — a 7-minute run produced no
+   output and had to be killed; bisected to that one call. The
+   reachability claim rides `documentRect` + the scroller's maximum
+   travel instead, which is the number the knob is computed from. (Note
+   the shape: it reads exactly like the batch-1 `timeout`-binary trap —
+   a hang that is really a tool.)
+2. **`NSDraggingInfo` fakes cannot drive SwiftUI drops** — the hosting
+   path sends `_lastDragDestinationOperation` (private) and the process
+   terminates on the unrecognized selector. AppKit destinations
+   (`NSTextView` and friends) are drivable; `.dropDestination` is not.
+3. zsh applies history modifiers inside double quotes, so
+   `git show "$c:App/…"` silently becomes `$c:A` + `pp/…`. Assign the
+   path to a variable first (`p=App/…; git show "$c:$p"`).
+
+#### For the orchestrator
+
+- **W11 needs her**, not a patch — the trace and the two candidate
+  readings are above.
+- **PENDING, deliberately:** nothing. No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- Her walk will notice, beyond the four rulings: a carousel bloom now
+  has a grab bar under it exactly as slot split does, and its cards can
+  be tall enough to change how a fanned block reads at rest; and the
+  takes board can now scroll past its last block, which it never could.
