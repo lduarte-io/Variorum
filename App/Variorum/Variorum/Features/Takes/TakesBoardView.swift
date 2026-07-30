@@ -70,7 +70,10 @@ struct TakesBoardView: View {
     /// "a little bit wider and show the option better"; height stays the
     /// batch-7 uniform rule — "2 high" is literally two card-heights).
     static let railCardWidth: CGFloat = 250
-    static let railCardHeight: CGFloat = 110
+    /// The card height lives on the geometry brain now (QoL batch 2 — the
+    /// reserve arithmetic and the drag clamps all need it); this forward
+    /// keeps every call site and pin reading unchanged.
+    static let railCardHeight: CGFloat = TakesBoardLayout.railCardHeight
 
     /// R74: the rail's reserved width follows the chosen column count.
     private var marginRailWidth: CGFloat {
@@ -78,12 +81,17 @@ struct TakesBoardView: View {
     }
 
     /// R74's vertical room, HONEST about the fan (13b 3F, AD-7's other
-    /// half): the row reserves what the tallest visible column can
-    /// actually hold — min(cards, rows) high — steady across ◀ ▶ pages,
-    /// never an empty reserve below a 1-take fan.
-    private func gridReservedHeight(cardCount: Int, rowsPerColumn: Int) -> CGFloat {
-        let rows = min(max(cardCount, 1), rowsPerColumn)
-        return CGFloat(rows) * Self.railCardHeight + CGFloat(max(rows - 1, 0)) * 6
+    /// half): the row reserves what the tallest column can actually hold —
+    /// steady across ◀ ▶ pages, never an empty reserve below a 1-take fan.
+    ///
+    /// QoL batch 2 (L4): the arithmetic moved to the geometry brain and
+    /// now sums ACTUAL card heights bounded by the cap instead of uniform
+    /// 110s. The max is taken over ALL columns, not the visible page —
+    /// that is what preserves the steadiness property through the change
+    /// to variable heights. With no measurements in yet it returns exactly
+    /// what the old uniform arithmetic did.
+    private func gridReservedHeight(takes: [Variant], rowsPerColumn: Int) -> CGFloat {
+        model.reservedRailHeight(takes: takes, rowsPerColumn: rowsPerColumn)
     }
 
     init(session: AppSession, postID: String, model: TakesViewModel? = nil) {
@@ -594,14 +602,69 @@ struct TakesBoardView: View {
     /// with no way to reach the third — the count must match what blooms).
     private func carouselBloom(slot: Queries.RenderedBlock) -> some View {
         let takes = model.projection.fans[slot.blockID] ?? []
-        return pagedTakesRow(takes: takes, slot: slot, pageKey: slot.blockID)
+        // Carousel keeps the RULED fixed strip height (S4-31b/N40) — the
+        // supersession is slot split's alone.
+        return pagedTakesRow(
+            takes: takes, slot: slot, pageKey: slot.blockID,
+            cardHeight: Self.railCardHeight, reportsHeight: false)
             .padding(.leading, 24)
     }
 
     /// SLOT SPLIT: the fanned slot divides into an equal split in-flow.
+    ///
+    /// QoL batch 2 (L3, her report: *"on the slot split mode it's limited
+    /// in height - you shoudl be able to see it at full length for that
+    /// mode i think. maybe the height of the block should even be
+    /// draggable?"*). The cards render at their NATURAL full height by
+    /// default — `cardHeight: nil` — and a stored height (her drag) puts
+    /// them back into the existing `capped` in-card-scroll machinery.
+    /// **This supersedes S4-31b's one-fixed-strip-height rule FOR SLOT
+    /// SPLIT ONLY**; carousel and the rail keep it byte-unchanged.
     private func slotSplitBloom(slot: Queries.RenderedBlock) -> some View {
         let takes = model.projection.fans[slot.blockID] ?? []
-        return pagedTakesRow(takes: takes, slot: slot, pageKey: slot.blockID)
+        return VStack(alignment: .leading, spacing: 0) {
+            pagedTakesRow(
+                takes: takes, slot: slot, pageKey: slot.blockID,
+                cardHeight: model.slotHeight(slot.blockID), reportsHeight: true)
+            slotHeightHandle(slot: slot)
+        }
+    }
+
+    /// L3's shorten-drag: the bloom's bottom edge, on the Canvas
+    /// `resizeGrip` precedent (live offset while dragging, clamped commit
+    /// on end, LOCAL memory per block). Dragging back down to the slot's
+    /// natural height restores full length, so undoing a shorten is the
+    /// same gesture — the double-click door is the explicit twin.
+    private func slotHeightHandle(slot: Queries.RenderedBlock) -> some View {
+        let shortened = model.slotHeight(slot.blockID) != nil
+        return HStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(shortened ? tokens.accent.opacity(0.55) : tokens.faint)
+                .frame(width: 44, height: 3)
+            if shortened {
+                Text(tokens.chromeLabel("shortened — double-click for full length"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 5)
+        .contentShape(Rectangle())
+        .onHover { inside in
+            if inside { NSCursor.resizeUpDown.push() } else { NSCursor.pop() }
+        }
+        .help("Drag to shorten this block's takes (remembered on this Mac); "
+            + "drag back down — or double-click — for full length")
+        .gesture(
+            DragGesture(minimumDistance: 2)
+                .onChanged { value in
+                    model.beginSlotDrag(slot.blockID)
+                    model.slotDragChanged(slot.blockID, translation: value.translation.height)
+                }
+                .onEnded { value in
+                    model.slotDragEnded(slot.blockID, translation: value.translation.height)
+                })
+        .onTapGesture(count: 2) { model.resetSlotHeight(slot.blockID) }
     }
 
     /// MARGIN GRID's rail (R24 + R74): a SHORT fanned block's cards render
@@ -640,7 +703,7 @@ struct TakesBoardView: View {
                     .frame(
                         minHeight: rowsPerColumn > 1
                             ? gridReservedHeight(
-                                cardCount: takes.count, rowsPerColumn: rowsPerColumn)
+                                takes: takes, rowsPerColumn: rowsPerColumn)
                             : 0,
                         alignment: .top)
                 // Batch 12 (her "i can't make a new take"): the growth
@@ -676,15 +739,23 @@ struct TakesBoardView: View {
                     ForEach(Array(columns.enumerated()), id: \.offset) { i, column in
                         VStack(spacing: 6) {
                             ForEach(column, id: \.id) { take in
-                                // Batch 7: UNIFORM card height — "2 high"
-                                // is literally two card-heights. 13b 3F
-                                // (N23) + 4D (N40): ONE fixed card height,
-                                // the content SCROLLS in place — the whole
-                                // take reachable, the strip never jumping.
-                                takeMiniPane(take: take, slot: slot, capped: true)
+                                // QoL batch 2 (L4, her report: the margin
+                                // note is "sticky note sized which isn't
+                                // that helpful for long blocks"): the card
+                                // GROWS with its content to the RULED cap
+                                // (330 = three card-heights) and scrolls
+                                // inside beyond it. Below the cap nothing
+                                // is clipped and nothing is padded — a
+                                // one-line take stays a sticky note.
+                                // "n high" still means n cards per column
+                                // (the chunking above is untouched); only
+                                // the pixel arithmetic is variable now.
+                                takeMiniPane(
+                                    take: take, slot: slot, capped: true,
+                                    reportsHeight: true)
                                     .frame(
                                         width: Self.railCardWidth,
-                                        height: Self.railCardHeight,
+                                        height: model.marginCardHeight(variantID: take.id),
                                         alignment: .topLeading)
                                     .clipped()
                             }
@@ -716,8 +787,17 @@ struct TakesBoardView: View {
     /// card is exactly one card-height and its content scrolls within, so
     /// the strip never changes height as takes differ or pages turn (the
     /// recorded #28(b) clip cost dissolves into the in-card scroll).
+    ///
+    /// QoL batch 2 (L3): `cardHeight` FORKS the two callers without
+    /// forking the view tree — `frame(height:)` already takes a `CGFloat?`,
+    /// so carousel's modifier chain is byte-identical to before (nil is
+    /// slot split's full-length default, and `.clipped()` over a natural
+    /// frame clips nothing). `reportsHeight` subscribes ONLY the
+    /// compositions that size a wrapper, so carousel's invalidation
+    /// profile is untouched too.
     private func pagedTakesRow(
-        takes: [Variant], slot: Queries.RenderedBlock, pageKey: String
+        takes: [Variant], slot: Queries.RenderedBlock, pageKey: String,
+        cardHeight: CGFloat?, reportsHeight: Bool
     ) -> some View {
         // Offsets live on the MODEL (13b 1a, AD-2's companion move): one
         // paging brain for carousel, slot split, and the rail — and the
@@ -728,8 +808,10 @@ struct TakesBoardView: View {
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: 6) {
                     ForEach(takes, id: \.id) { take in
-                        takeMiniPane(take: take, slot: slot, capped: true)
-                            .frame(height: Self.railCardHeight, alignment: .topLeading)
+                        takeMiniPane(
+                            take: take, slot: slot, capped: cardHeight != nil,
+                            reportsHeight: reportsHeight)
+                            .frame(height: cardHeight, alignment: .topLeading)
                             .clipped()
                             .containerRelativeFrame(
                                 .horizontal, count: max(beneathCount, 1), span: 1,
@@ -883,7 +965,8 @@ struct TakesBoardView: View {
     /// no width. `capped` (the rail's fixed-height cards): the content
     /// SCROLLS in place, so no part of the take is unreachable (N23).
     private func takeMiniPane(
-        take: Variant, slot: Queries.RenderedBlock, capped: Bool = false
+        take: Variant, slot: Queries.RenderedBlock, capped: Bool = false,
+        reportsHeight: Bool = false
     ) -> some View {
         let isChosen = take.id == slot.variantID
         return TakeCardFrame(isChosen: isChosen, tokens: tokens) {
@@ -894,22 +977,31 @@ struct TakesBoardView: View {
                         Task { await model.choose(blockID: slot.blockID, variantID: take.id) }
                     })
                 if capped {
-                    ScrollView(.vertical) { miniPaneSurface(take: take, slot: slot) }
+                    ScrollView(.vertical) {
+                        miniPaneSurface(take: take, slot: slot, reportsHeight: reportsHeight)
+                    }
                 } else {
-                    miniPaneSurface(take: take, slot: slot)
+                    miniPaneSurface(take: take, slot: slot, reportsHeight: reportsHeight)
                 }
             }
         }
     }
 
-    private func miniPaneSurface(take: Variant, slot: Queries.RenderedBlock) -> some View {
+    private func miniPaneSurface(
+        take: Variant, slot: Queries.RenderedBlock, reportsHeight: Bool = false
+    ) -> some View {
         PaneSurfaceView(
             text: model.liveText(take),
             isLive: paneKeyIsLive(slot: slot, take: take),
             tokens: tokens,
             role: "mini", variantID: take.id,
             onFocusRequest: { focusPane(slot: slot, take: take) },
-            onEdit: { model.paneEdited(variantID: take.id, newText: $0) })
+            onEdit: { model.paneEdited(variantID: take.id, newText: $0) },
+            // QoL batch 2: ONLY margin grid and slot split subscribe — the
+            // two compositions that size a wrapper around the pane.
+            onMeasuredHeight: reportsHeight
+                ? { model.notePaneMeasuredHeight(variantID: take.id, height: $0) }
+                : nil)
     }
 
     // MARK: - Small helpers

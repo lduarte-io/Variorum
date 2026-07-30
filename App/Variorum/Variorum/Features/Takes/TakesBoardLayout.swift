@@ -113,6 +113,13 @@ final class TakesBoardLayout {
     /// split); every other pane leaves this untouched.
     private var measuredTextHeights: [String: CGFloat] = [:]
 
+    /// Observation seam (the 1G `occasionsFired` precedent — a plain
+    /// counter, not DEBUG-gated): how many deliveries actually CHANGED
+    /// state, i.e. how many board invalidations this seam has caused. The
+    /// settle pin asserts it stops growing; the carousel parity pin
+    /// asserts it never moves at all there.
+    @ObservationIgnored private(set) var measuredHeightWrites = 0
+
     func measuredTextHeight(_ variantID: String) -> CGFloat? {
         measuredTextHeights[variantID]
     }
@@ -124,6 +131,7 @@ final class TakesBoardLayout {
         if let existing = measuredTextHeights[variantID], abs(existing - height) <= 0.5 {
             return
         }
+        measuredHeightWrites += 1
         measuredTextHeights[variantID] = height
     }
 

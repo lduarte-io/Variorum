@@ -1530,6 +1530,10 @@ final class TakesViewModel {
         board.noteMeasuredTextHeight(variantID, height)
     }
 
+    /// The seam's observation counter — board invalidations caused by
+    /// measured-height deliveries (the settle + carousel-parity pins).
+    var measuredHeightWrites: Int { board.measuredHeightWrites }
+
     /// L4: a margin-grid card's height — its content, capped at 330.
     func marginCardHeight(variantID: String) -> CGFloat {
         TakesBoardLayout.marginCardHeight(
