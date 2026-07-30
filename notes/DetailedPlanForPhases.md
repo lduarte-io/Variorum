@@ -8,7 +8,24 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ OUT-OF-BAND QoL ROUND CLOSED 2026-07-30 — the next kickoff is the
+**→ PHASE 13F (WORKSPACE) — ACTIVE from 2026-07-30, kicked off by the
+author herself under `/architect-phase`.** Plan + the binding kickoff
+record: `notes/plans/phase-13f-workspace.md` (its "THE KICKOFF
+SITTING — 2026-07-30" section holds her intake verbatim: the QoL feel
+walk's verdicts and three fresh rulings — typewriter room on Takes ·
+carousel gets slot split's natural-height + drag · the ceremony's cut
+ticks go — two traced-first bugs (chapter reorder between posts;
+scrap drag-into-post dead), the smart-book identity direction that
+reopens N38 toward shape B (design memo owed), the naming/"Snippets"
+questions feeding the K5 sweep, and the back-navigation want designed
+beside A27). Her roadmap instruction executed the same sitting: three
+unslotted rows added below (whole-library search · grammar/
+spellcheck · more export options). Cast: pending her confirmation at
+the opening sitting (recommended default = the 13d/QoL shape). Design
+sitting IN PROGRESS.
+
+*(Superseded pointer, kept for the thread:)* **OUT-OF-BAND QoL ROUND
+CLOSED 2026-07-30 — the next kickoff is the
 AUTHOR'S: Phase 13f (Workspace), plan paste-ready at
 `notes/plans/phase-13f-workspace.md`; her walk list is at
 `notes/handoffs/qol-round-2026-07-29-handoff.md` (checklist at top).**
@@ -276,6 +293,9 @@ combined feel pass still owed.)*
 | 13g | **Formatting, lists & checkboxes** (K3; her other soonest — K4) | Text can look like text | Ledger rows A33–A34 — bold, italics, sizes, some markdown; **and the list/checkbox maker she added live** (hyphens, `[]`, bullets). **Opens with a design sitting**: markdown-as-content (zero schema, export free, sidesteps the broken `NSTextList`) vs. real attributed runs (schema + editor-core work) is an architectural fork and hers to rule | Whichever fork: `renderedText`/export/bridge semantics pinned unchanged; TEXTKIT2 §5 re-verified | pending |
 | 13h | **The LLM folder bridge** (K3) | Her prose is reachable from a folder without giving up block identity | Ledger rows A35–A36 — a post ⇄ `.md` file in a folder, openable by path, edits landing back through ordinary operations; markdown folder import mapping folders to chapters/books. **The Fragments bridge's proven shape pointed at a folder instead of a table** — real work, not new architecture (S5 guards the landings) | Nothing typed on either side is ever lost; round-trip byte stability per the 11b import pins | pending |
 | — | **EPUB library & highlights** (author intake 2026-07-25, ledger A37) | Her own books and fanfiction live in the app, and highlights become writing | Read-only epubs in their own area (Mac + mobile), a highlighting layer, and highlights pulled into a post — her stated shape: a highlight auto-appended to a "favorite quotes" note with quotation marks, a dash, the author's name and the book title. One or several posts linked to a book, to make book reviews easier | Source files untouched (the 11b reference-panel discipline); still never a knowledge base | pending — **unslotted** (wanted, ranked behind workspace + formatting at K4) |
+| — | **Whole-library text search** (author, 2026-07-30 at the 13f kickoff — her words: *"a phase dealing with searching through text more thoroughly for the whole library will have to be considered (LOTS of potential technical implementations there, we'll probably handle that after the existing 13 phases, I think that subdivisions for searching books / posts / etc. will be valuable)"*) | Body-text search across the whole corpus, with scoped subdivisions | Full-corpus body search (`Queries.searchCatalog` today reads titles/names/scrap prefixes only); scope subdivisions (books / posts / etc.); the technical fork (FTS5 vs sweep vs index) is this row's own design sitting. The KnownIssues find&replace row's library-search half lands here | P1 discipline at corpus scale; her slotting word: after the existing 13 phases | pending — **unslotted by her design** |
+| — | **Grammar & spellchecking** (author, 2026-07-30 at the 13f kickoff: *"we'll need a phase for dealing with grammar / spellchecking / etc."*) | A real proofing story beyond 13d's coarse levels | Builds on 13d's spellcheck levels (A24) + the QoL round's noted missing "Spelling and Grammar" menu; scope at its kickoff | TEXTKIT2 §3's crash-pairing guard binds anything continuous | pending — **unslotted by her design** |
+| — | **More export options** (author, 2026-07-30 at the 13f kickoff: *"and more export options in the future"*) | The export family grows | Beyond 11b's `.md`/basic-PDF/bulk tiers; composes with the Phase 14 typographic-PDF and variorum-edition rows rather than duplicating them; scope at its kickoff | Exports stay one-way projections on `renderedText` semantics | pending — **unslotted by her design** |
 | 14 | **Accounts & multi-tenant** | Commercial shape | Multi-tenant hardening of 9c's auth (per-user isolation at commercial scale, account provisioning for non-author users — the single-user auth core moved to 9c, author 2026-07-07); **"variorum edition" full-fidelity export; server privacy/E2EE decision** (author 2026-07-06); sketch: `notes/plans/phase-14-brief.md` | Isolation tests; existing single-user data migrates cleanly | pending |
 | 15 | ~~**iOS full surface**~~ — **SUPERSEDED 2026-07-25** by the standalone mobile row below (author ruling: mobile gets "its own plan, decided separately", not a numbered slot) | — | The row's material moves to `notes/plans/mobile-app-plan.md`; `phase-15-brief.md` survives as history, its "no fan gestures" framing superseded | — | **superseded** |
 | — | **Variorum for iPhone — a real app** (author ruling 2026-07-25, replacing Phase 15's row) | *"a thorough implementation of the app that is beautiful and easy to use"* — an app she actually works in, not capture-plus | Its own plan is WRITTEN and paste-ready (`notes/plans/mobile-app-plan.md`, kickoff message at the top); it opens with an author-attended design sitting. **Takes ARE included on mobile** (CoreDescription pillar 8's no-fan-gestures line superseded by her explicit ruling; completes R58's lean). Her floated interaction shapes are recorded UNCHOSEN in `notes/plans/mobile-app-plan.md`, which also carries what binds, the open questions, and the inherited iOS trailing-newline defect | Same core + sync (a second client, never a second model); Release install per the A4 fence | pending — **unslotted by her design** (she declined all three in-sequence slots offered; it starts at her word) |
