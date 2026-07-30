@@ -8,7 +8,27 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ Phase 13d CLOSED 2026-07-28 — the next kickoff is the AUTHOR'S:
+**→ OUT-OF-BAND QoL ROUND ACTIVE 2026-07-29** (the 9d precedent — the
+author opened it herself under `/architect-phase`: *"a quick round of
+bug fixes and some extra functionality outside of a pure phase"*).
+Plan + ledger + sitting rulings:
+**`notes/plans/qol-round-2026-07-29.md`** — six items from her daily
+use: the divide-ceremony beachball on long blocks (traced: per-slot
+full-text sentence scans in the sheet's render path) + the ceremony
+checkbox's legibility; the 13d typewriter room proven UNREACHABLE
+through real input paths (green pins drove only the internal API — the
+pin-gap is recorded); slot split going full-length + draggable
+(**S4-31b's fixed strip height superseded FOR SLOT SPLIT ONLY** —
+carousel/rail keep it); margin-grid cards growing to a cap with
+in-card scroll (R74 density stays); and in-post find & replace over
+the chosen text (⌘F on Write; the takes-aware replace + whole-library
+search recorded as future scope — KnownIssues row, owner 13e). Cast,
+her ruling: the 13d shape — Fable orchestrator · fresh Opus
+implementer per batch · ONE Fable cold review at the round's end. No
+schema change anywhere in the round. **Phase 13f (Workspace) remains
+the next full phase, untouched.**
+
+*(Standing pointer beneath, unchanged:)* **Phase 13d CLOSED 2026-07-28 — the next kickoff is the AUTHOR'S:
 Phase 13f (Workspace), her pick at the 13d sitting; its plan is
 paste-ready at `notes/plans/phase-13f-workspace.md`.** 13d ran
 compressed and complete in ONE orchestrator session under the ruled
