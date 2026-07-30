@@ -1,4 +1,48 @@
 import Foundation
+#if DEBUG
+/// **DEBUG-only: how many full-text boundary scans have run ON THIS THREAD**
+/// (QoL round 2026-07-29, L1 — her report: *"the take divider isn't working
+/// properly — on a long block, i get the spinning rainbow circle"*).
+///
+/// A scan is O(the take's text) and allocates: `sentenceBoundaries` builds an
+/// `Array(text)` plus an offsets array before walking it. The divide
+/// ceremony's sheet was running one PER SLOT per body pass, and ~2 per
+/// candidate per drag sample, which is the beachball. The bound is pinned by
+/// test now.
+///
+/// **Two design points, both learned by being wrong first.**
+///
+/// 1. The counter lives HERE, on the scanner, not on an app-side wrapper —
+///    the shipped code calls `boundaries` directly, so a wrapper's counter
+///    would read zero on the pre-fix code and every bound pin would be hollow.
+/// 2. It is THREAD-LOCAL, not global. A global counter was written first and
+///    its own instrument pin caught it immediately: suites run in parallel and
+///    other tests scan on other threads, so the count was already wrong by 1
+///    within three calls. Thread-local also sharpens what the pins can claim —
+///    "the render path performs no scans" becomes literally checkable on the
+///    thread the render happens on, and work deliberately moved OFF the main
+///    thread is visibly not counted there.
+///
+/// Standing environment law: DEBUG oracles exist only under the configuration
+/// named exactly "Debug" — never add a custom one.
+public enum BoundaryScanCount {
+    private static let key = "io.lduarte.variorum.boundaryScanCount"
+
+    /// Scans on the CALLING thread since its last `reset()`.
+    public static var current: Int {
+        (Thread.current.threadDictionary[key] as? Int) ?? 0
+    }
+
+    public static func reset() {
+        Thread.current.threadDictionary[key] = 0
+    }
+
+    static func bump() {
+        let dictionary = Thread.current.threadDictionary
+        dictionary[key] = ((dictionary[key] as? Int) ?? 0) + 1
+    }
+}
+#endif
 
 /// Boundary detection and cutting for the structural operations (AppSpec §9,
 /// OverallModel §7) — pure functions over one variant's text, no GRDB.
@@ -53,6 +97,9 @@ public enum BoundarySnapping {
     /// unions are kept explicit so the containment holds by construction,
     /// never by hoping the scanners agree.
     public static func boundaries(in text: String, granularity: Granularity) -> [Int] {
+        #if DEBUG
+        BoundaryScanCount.bump()
+        #endif
         var set: Set<Int> = [0, text.utf16.count]
         set.formUnion(paragraphBoundaries(in: text))
         if granularity == .sentence || granularity == .word {

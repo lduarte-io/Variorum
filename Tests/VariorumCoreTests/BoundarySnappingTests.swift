@@ -342,3 +342,38 @@ struct BoundarySnappingTests {
         #expect(leadingRun?.second == "Hello")
     }
 }
+
+#if DEBUG
+/// **The INSTRUMENT'S OWN PIN** (QoL round 2026-07-29, L1). The ceremony's
+/// scan bound is asserted with `BoundaryScanCount`, so a green bound pin could
+/// just as easily mean the counter is broken. This is what makes the other
+/// pins mean something.
+@Suite("BoundaryScanCount — the L1 bound's instrument", .serialized)
+struct BoundaryScanCountTests {
+    /// Thread-local by design: a GLOBAL counter was written first and this
+    /// very pin caught it — suites run in parallel, so other tests' scans on
+    /// other threads had already miscounted it by one within three calls.
+    @Test func theCounterCountsEveryScanAndResets() {
+        BoundaryScanCount.reset()
+        #expect(BoundaryScanCount.current == 0)
+        _ = BoundarySnapping.boundaries(in: "One. Two three.", granularity: .word)
+        #expect(BoundaryScanCount.current == 1)
+        _ = BoundarySnapping.boundaries(in: "One. Two three.", granularity: .sentence)
+        _ = BoundarySnapping.boundaries(in: "", granularity: .paragraph)
+        #expect(BoundaryScanCount.current == 3, "every granularity is a full walk")
+        BoundaryScanCount.reset()
+        #expect(BoundaryScanCount.current == 0)
+    }
+
+    /// `settle` scans too (it needs the strong set) — stated, because the
+    /// ceremony's own budget has to account for the snapping it does at open.
+    @Test func settlingAlsoCostsAScan() {
+        let text = "One. Two three."
+        let interior = BoundarySnapping.boundaries(in: text, granularity: .word)
+            .filter { $0 != 0 && $0 != text.utf16.count }
+        BoundaryScanCount.reset()
+        _ = BoundarySnapping.settle(5, in: text, among: interior)
+        #expect(BoundaryScanCount.current == 1)
+    }
+}
+#endif
