@@ -744,3 +744,52 @@ either would have made a hollow green pin):
   has a grab bar under it exactly as slot split does, and its cards can
   be tall enough to change how a fanned block reads at rest; and the
   takes board can now scroll past its last block, which it never could.
+
+#### Batch 1 — ACCEPTED (2026-07-30; the orchestrator's adjudication)
+
+**Counts by my own runs** (not the implementer's): core `✔ Test run
+with 903 tests in 102 suites passed` · Mac `✔ Test run with 939 tests
+in 152 suites passed` — both match the record's claims exactly; tree
+clean at `7f03d8b` except the author's own two uncommitted files
+(hers, untouched by every commit — staged-by-explicit-path verified).
+
+**Load-bearing diffs read:** W12's fix is ONE override at the level
+the AppKit contract lives (`prepareForDragOperation` answers true for
+the pool type, else super) — no bypass, and the new four-step
+full-sequence pin closes the recorded pin-gap (every old pool-drag pin
+drove step four directly; the suite was green over a feature that
+could not be used — the QoL round's pin-gap lesson recurring in a
+second input family, now pinned at the real path). W9's zero-pin-change
+parity is the ruled-flip proof done right. W8's flip is named
+pin-by-pin, and the strengthened drag arm (to 400, a height the
+pre-ruling code cannot produce — after the floor-drag arm passed green
+on the reverted code) is the guard working as designed; the SHARED
+height store judgment call is ENDORSED (one geometry, one natural
+height, one question — two stores would give a block two remembered
+heights with nothing on screen to disambiguate) and flagged for the
+end-of-phase Fable review. W7's not-a-fourth-mechanism design is
+ENDORSED — content extent on a SwiftUI ScrollView is reachable by
+construction, exactly the class of simplicity A22's three mechanisms
+never had available; the caret-request seam is baselined at
+construction and inert at zero, and it moves a caret INSIDE a pane
+without ever deciding liveness, so P-3 holds.
+
+**The W11 STOP is ACCEPTED as the brief's escape working:** three
+layers verified sound (ops probe round-trip; the pinned model door;
+drag machinery byte-identical across every commit since she confirmed
+it working), the reach analysis is concrete (two targets only — a
+chapter header and a 14 pt end zone; a two-chapter book cannot move a
+chapter down by drag at all), and the literal ask ("a chapter in
+between the posts") is genuinely inexpressible in the
+assignment-based chapter model — deciding what that drop MEANS is
+hers. The unpinnable-SwiftUI-drag measurement (private selector,
+crash-verified) makes any drag-geometry fix un-red-pinnable; the
+guard was applied correctly. → HER RULING via the sitting (question
+posed 2026-07-30).
+
+**New environment traps endorsed into the standing record** (the
+hosted-ScrollView `scrollPageDown:` hang; NSDraggingInfo fakes never
+drive `.dropDestination`; the zsh history-modifier `git show` trap).
+
+**Ledger:** W7 BUILT · W8 BUILT · W9 BUILT · W12 BUILT (all
+adjudicated) · W11 → awaiting her ruling.
