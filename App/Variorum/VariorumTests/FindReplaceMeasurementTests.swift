@@ -30,54 +30,21 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
-/// Records every delegate edit-gate call the real pipeline receives, then
-/// forwards to the production delegate unchanged.
+/// Records the delegate edit-gate calls AppKit makes — on a PLAIN text view,
+/// so what it characterizes is AppKit's own shape.
 @MainActor
-final class EditGateSpy: NSObject, NSTextViewDelegate {
-    struct MultiCall { let ranges: [NSRange]; let strings: [String]? }
-
-    let inner: EditorSurfaceDelegate
-    private(set) var singleCalls: [(range: NSRange, replacement: String?)] = []
-    private(set) var multiCalls: [MultiCall] = []
-
-    init(inner: EditorSurfaceDelegate) {
-        self.inner = inner
-    }
+final class GateRecorder: NSObject, NSTextViewDelegate {
+    var singleCalls: [NSRange] = []
+    var multiCalls: [[NSRange]] = []
 
     func textView(
         _ textView: NSTextView,
         shouldChangeTextIn affectedCharRange: NSRange,
         replacementString: String?
     ) -> Bool {
-        singleCalls.append((affectedCharRange, replacementString))
-        return inner.textView(
-            textView, shouldChangeTextIn: affectedCharRange,
-            replacementString: replacementString)
+        singleCalls.append(affectedCharRange)
+        return true
     }
-
-    func textView(
-        _ textView: NSTextView,
-        shouldChangeTextInRanges affectedRanges: [NSValue],
-        replacementStrings: [String]?
-    ) -> Bool {
-        multiCalls.append(MultiCall(
-            ranges: affectedRanges.map(\.rangeValue), strings: replacementStrings))
-        return inner.textView(
-            textView, shouldChangeTextInRanges: affectedRanges,
-            replacementStrings: replacementStrings)
-    }
-
-    func textViewDidChangeSelection(_ notification: Notification) {
-        inner.textViewDidChangeSelection(notification)
-    }
-}
-
-/// M1b's gate: says YES to everything, so the measurement sees what AppKit
-/// does on the far side of an approval. Wired to a BARE text view — no model,
-/// no index, nothing that can crash before the facts print.
-@MainActor
-final class AlwaysYesDelegate: NSObject, NSTextViewDelegate {
-    var multiCalls: [[NSRange]] = []
 
     func textView(
         _ textView: NSTextView,
@@ -186,65 +153,74 @@ struct FindReplaceMeasurementTests {
         return out
     }
 
-    // MARK: - M1 + M2 — the delivery shape, and whether our delegate sees it
+    // MARK: - M1 + M2 — the delivery shape, characterized on APPKIT ITSELF
 
-    @Test func m1m2_replaceAllDeliveryShapeAndDelegateReach() async throws {
-        try await withEditor(seedBlocks: [
-            "the foo sits here", "another foo lives here", "a third foo at the end",
-        ]) { h in
-            try withFindPasteboard {
-                let (scrollView, window) = try mount(h)
-                defer { window.orderOut(nil) }
+    /// **CHARACTERIZATION OF APPKIT, deliberately on a PLAIN `NSTextView`.**
+    ///
+    /// These two facts are about what AppKit does, not about what Variorum
+    /// does — and since the batch shipped, `EditorTextView` answers the
+    /// finder's client question with NO, so the app's own surface never lets
+    /// AppKit get this far. Instrumenting our subclass would therefore
+    /// measure our interception, which is not the claim. A plain text view
+    /// keeps the claim honest: *if these fail, AppKit changed.*
+    ///
+    /// M1 — Replace All asks ONE question about ALL its ranges. That is what
+    /// forces the ruled ALL-OR-NOTHING shape: a single boolean cannot apply
+    /// some matches and refuse others.
+    /// M2 — the delegate IS consulted, which is why the SHIPPED editor's
+    /// `count != 1` door silently refused every Replace All (the text below
+    /// is unchanged after the gesture — Part 0.3, on the real find path).
+    @Test func m1m2_appKitAsksOneBatchedQuestionAndOurDelegateAnswersIt() throws {
+        try withFindPasteboard {
+            let scrollView = NSScrollView()
+            let textView = NSTextView(usingTextLayoutManager: true)
+            textView.isEditable = true
+            textView.string = "the foo sits here\nanother foo lives here\na third foo at the end"
+            textView.usesFindBar = true
+            scrollView.documentView = textView
+            let recorder = GateRecorder()
+            textView.delegate = recorder
 
-                let spy = EditGateSpy(inner: h.surfaceDelegate)
-                h.textView.delegate = spy
-                h.textView.usesFindBar = true
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 700, height: 400),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.contentView = NSView(frame: NSRect(x: 0, y: 0, width: 700, height: 400))
+            scrollView.frame = NSRect(x: 0, y: 0, width: 700, height: 400)
+            window.contentView?.addSubview(scrollView)
+            window.makeKeyAndOrderFront(nil)
+            window.layoutIfNeeded()
+            pump()
+            window.makeFirstResponder(textView)
+            defer { window.orderOut(nil) }
 
-                setSearchString("foo")
-                finderAction(.showReplaceInterface, on: h.textView)
-                pump()
-
-                let bar = scrollView.findBarView
-                let controls = barControls(bar)
-                print("M1/M2 findBarView: \(bar.map { String(describing: type(of: $0)) } ?? "nil")")
-                print("M1/M2 bar text controls: \(controls)")
-
-                // Drive the bar's own fields, then fire Replace All the way a
-                // click on its button does.
-                for field in textFields(in: bar) {
-                    print("M1/M2 field \(type(of: field)) placeholder=\(field.placeholderString ?? "-")")
+            setSearchString("foo")
+            finderAction(.showReplaceInterface, on: textView)
+            pump()
+            let fields = textFields(in: scrollView.findBarView)
+            print("M1/M2 bar fields: \(fields.map { (type(of: $0), $0.placeholderString ?? "-") })")
+            if fields.count >= 2 {
+                fields[0].stringValue = "foo"
+                fields[1].stringValue = "BAR"
+                for field in fields.prefix(2) {
+                    field.sendAction(field.action, to: field.target)
                 }
-                let fields = textFields(in: bar)
-                if fields.count >= 2 {
-                    fields[0].stringValue = "foo"
-                    fields[1].stringValue = "BAR"
-                    // Let the finder observe the fields the way typing does.
-                    for field in fields.prefix(2) {
-                        field.sendAction(field.action, to: field.target)
-                    }
-                    pump()
-                }
-
-                let before = h.textView.string
-                finderAction(.replaceAll, on: h.textView)
                 pump()
-                let after = h.textView.string
-
-                print("M1 singleCalls=\(spy.singleCalls.count) "
-                    + "multiCalls=\(spy.multiCalls.count) "
-                    + "multiRangeCounts=\(spy.multiCalls.map(\.ranges.count))")
-                print("M1 singleRanges=\(spy.singleCalls.map { NSStringFromRange($0.range) }) "
-                    + "replacements=\(spy.singleCalls.map { $0.replacement ?? "nil" })")
-                print("M1 text before=\(before.debugDescription)")
-                print("M1 text  after=\(after.debugDescription)")
-                print("M2 delegateSawTheReplace="
-                    + "\(spy.singleCalls.count + spy.multiCalls.count > 0)")
-
-                // A measurement, not an assertion: the run's PRINTED output is
-                // the deliverable. This keeps the suite green while the facts
-                // are recorded.
-                #expect(Bool(true))
             }
+
+            recorder.multiCalls.removeAll()
+            recorder.singleCalls.removeAll()
+            finderAction(.replaceAll, on: textView)
+            pump()
+
+            print("M1 multiCalls=\(recorder.multiCalls.count) "
+                + "rangeCounts=\(recorder.multiCalls.map(\.count)) "
+                + "singleCalls=\(recorder.singleCalls.count)")
+
+            #expect(recorder.multiCalls.count == 1, "ONE question…")
+            // …about ALL of its ranges.
+            #expect(recorder.multiCalls.first?.count == 3)
+            #expect(recorder.singleCalls.isEmpty, "never as per-match single-range calls")
         }
     }
 
@@ -282,7 +258,16 @@ struct FindReplaceMeasurementTests {
                 print("M2b responds(\(name)) = "
                     + "\(h.textView.responds(to: NSSelectorFromString(name)))")
             }
-            #expect(Bool(true))
+            // CHARACTERIZATION: NSTextView answers the client selectors
+            // privately (which is why our own implementation shadows rather
+            // than overrides one), and implements NEITHER half of the
+            // search-boundary pair — the rejected `stringAtIndex` alternative
+            // would have meant writing both from scratch.
+            #expect(h.textView.responds(
+                to: NSSelectorFromString("shouldReplaceCharactersInRanges:withStrings:")))
+            #expect(!h.textView.responds(
+                to: NSSelectorFromString("stringAtIndex:effectiveRange:endsWithSearchBoundary:")))
+            #expect(!h.textView.responds(to: NSSelectorFromString("stringLength")))
         }
     }
 
@@ -301,11 +286,14 @@ struct FindReplaceMeasurementTests {
     /// where nothing can crash before it prints.
     @Test func m1b_howTheApprovedReplacementsReachTheStorage() throws {
         try withFindPasteboard {
-            let (scrollView, textView) = EditorTextView.makeEditor()
+            let scrollView = NSScrollView()
+            let textView = NSTextView(usingTextLayoutManager: true)
+            textView.isEditable = true
+            scrollView.documentView = textView
             textView.string = "the foo sits here\nanother foo lives here\na third foo at the end"
             let recorder = StorageEditRecorder()
             textView.textStorage?.delegate = recorder
-            let permissive = AlwaysYesDelegate()
+            let permissive = GateRecorder()
             textView.delegate = permissive
             textView.usesFindBar = true
 
@@ -354,7 +342,18 @@ struct FindReplaceMeasurementTests {
             print("M1b storageEdits(count=\(recorder.edits.count))="
                 + "\(recorder.edits.map { (NSStringFromRange($0.range), $0.delta) })")
             print("M1b surface=\(textView.string.debugDescription)")
-            #expect(Bool(true))
+            // **THE FACT THE WHOLE DESIGN TURNS ON.** An approved Replace All
+            // reaches the storage as ONE transaction spanning every match —
+            // across block seams — which our block-routed pipeline can only
+            // read as a desync. If a future AppKit applies them separately,
+            // this fails and the shadow in `EditorTextView` can be revisited.
+            #expect(recorder.edits.count == 1,
+                    "ONE coalesced storage transaction, not one per match")
+            let edited = try #require(recorder.edits.first)
+            #expect(edited.range.length > 40,
+                    "spanning from the first match to the last — across seams")
+            #expect(textView.string
+                == "the BAR sits here\nanother BAR lives here\na third BAR at the end")
         }
     }
 
@@ -380,7 +379,10 @@ struct FindReplaceMeasurementTests {
             manager.undo()
             print("M3 after two undos:    \(h.textView.string.debugDescription)")
             print("M3 original:           \(before.debugDescription)")
-            #expect(Bool(true))
+            // CHARACTERIZATION: NSTextView coalesces adjacent replacements
+            // into ONE undo group. Recorded because it is why a Replace All
+            // undoes as the single act she performed.
+            #expect(h.textView.string == before, "one undo restored both")
         }
     }
 
@@ -422,7 +424,14 @@ struct FindReplaceMeasurementTests {
             print("M4 clip   \(clip0) -> \(clip1) -> \(clip2)")
             print("M4 room   \(room0) -> \(room1) -> \(room2)")
             print("M4 frame  \(frame0) -> \(frame1) -> \(frame2)")
-            #expect(Bool(true))
+            // CHARACTERIZATION + the cross-batch guard: the bar is real
+            // (32 pt, visible) and yet the clip, the room and the document
+            // frame are all untouched — batch 1's compounding hazard does not
+            // materialize on this new re-tiling occasion.
+            #expect(barVisible)
+            #expect(frame1 == frame0)
+            #expect(frame2 == frame0)
+            #expect(room1 == room0)
         }
     }
 }

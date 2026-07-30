@@ -68,9 +68,18 @@ struct HelperView: View {
             ("⌘⇧M", "merge blocks"),
             ("⌘⇧⏎", "new block below the one you're in (Write and Takes alike)"),
         ]),
+        // QoL batch 3 (L6): the in-post find family. Deliberately its own
+        // group and deliberately worded against ⌘K's row below — one searches
+        // the library, the other searches the post you are in.
+        ShortcutGroup(title: "Find in a post", items: [
+            ("⌘F", "find text in the post you're in (the chosen takes)"),
+            ("⌥⌘F", "find and replace in this post"),
+            ("⌘G / ⇧⌘G", "next / previous match"),
+            ("⌘E", "search for whatever is selected"),
+        ]),
         ShortcutGroup(title: "Navigation", items: [
             ("⌘1 – ⌘6", "post modes: Write · Takes · Lenses · Compare · Blocks · Canvas"),
-            ("⌘K", "find anything — posts, books, blocks, commands"),
+            ("⌘K", "find anything — posts, books, blocks, commands (not body text)"),
             ("⌘N", "new post"),
             ("⌘J", "today's journal entry"),
             ("⌘,", "settings (voice, seams, takes options, tags)"),

@@ -322,6 +322,71 @@ struct FindAndReplaceTests {
         }
     }
 
+    /// **THE STRONGER ARM (the standing rule: a revert that goes green earns
+    /// one).** The first cut of R-A — deleting the `isFindReplacing` guard in
+    /// `shouldChangeText` — left every pin GREEN, because the gate's
+    /// pre-check refuses a cross-seam match before anything is applied, so
+    /// nothing ever reached the guard. That made the guard look like
+    /// unreachable defensive code (13d judgment call 1's drift class), and
+    /// the honest choice was to either delete it or REACH it.
+    ///
+    /// It is reachable, and this is the race it exists for: the gate plans
+    /// against the document as it stands, then defers (it is inside AppKit's
+    /// finder call — rewriting storage there would be re-entrant). If the
+    /// text moves in that window, a range checked as in-block can straddle a
+    /// seam by the time it is applied. Without the guard, `shouldChangeText`
+    /// hands that range to `planCrossBlockEdit` and MERGES her blocks.
+    ///
+    /// Deterministic by construction: a `Task { @MainActor }` created from
+    /// main-actor code cannot run until the current synchronous work yields,
+    /// so the edit below lands strictly between the plan and its application.
+    @Test func aPlannedMatchThatDriftsAcrossASeamRefusesInsteadOfMerging() async throws {
+        try await withEditor(seedBlocks: ["aaaaaa foo", "bbb"]) { h in
+            try await withFindPasteboard {
+                let (scrollView, window) = try mount(h)
+                defer { window.orderOut(nil) }
+
+                // Plan the replacement of " foo" at {6,4} — the tail of block
+                // 0. The leading space matters: after the shift below the range
+                // has to cover TEXT ON BOTH SIDES of the seam, not just the
+                // separator, or `planCrossBlockEdit` declines on its own
+                // `touched.count >= 2` guard and the merge it would perform is
+                // never even reached (the first sharpening of this arm).
+                let board = NSPasteboard(name: .find)
+                board.clearContents()
+                board.setString(" foo", forType: .string)
+                finderAction(.showReplaceInterface, on: h.textView)
+                pump()
+                let fields = editableFields(in: scrollView.findBarView)
+                #expect(fields.count >= 2, "the bar's own two fields")
+                fields[0].stringValue = " foo"
+                fields[1].stringValue = "BAR"
+                for field in fields.prefix(2) {
+                    field.sendAction(field.action, to: field.target)
+                }
+                pump()
+                finderAction(.replaceAll, on: h.textView)
+                // NO pump: the deferred application has not run yet.
+
+                // Shorten block 0 by exactly 3, so the planned {6,4} now
+                // straddles the seam: "aaa foo\nbbb", where {6,4} covers
+                // "o\nbb" — block 0's last character, the separator, and two
+                // characters of block 1. That is the shape `planCrossBlockEdit`
+                // accepts, and merges.
+                h.replace(NSRange(location: 0, length: 3), with: "")
+
+                await h.model.findReplaceTask?.value
+                pump()
+                await h.flush()
+
+                let store = try h.storeSlots().map { $0.text ?? "" }
+                #expect(store.count == 2,
+                        "STILL TWO BLOCKS — the drifted range refused instead of merging")
+                #expect(store == ["aaa foo", "bbb"], "and nothing was rewritten")
+            }
+        }
+    }
+
     // MARK: - Pin 7 — CHARACTERIZATION (green on both sides): the flag does not leak
 
     /// The proof that pin 6 changed find-replace and NOTHING else: a TYPED
