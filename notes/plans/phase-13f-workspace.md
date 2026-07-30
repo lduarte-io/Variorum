@@ -321,3 +321,160 @@ export options** (*"and more export options in the future"*).
 | W17 (A32) | Infinite-scroll editor idea | exploratory — sitting material, not committed |
 | W18 | QoL-handoff standing items (field-guide re-seed; extract-blank-line one-liner) | hers / carried |
 | W19 | Kickoff sweep: the `theShellRedoActionRunsThroughTheRunnerAndReports` flaky pin (KnownIssues row owned by 13f) | trace when in that code — kickoff-sweep item |
+
+### Sitting rulings — round 1 (2026-07-30, question batch 1)
+
+1. **CAST RULED: the 13d/QoL shape** — Fable orchestrator · a fresh
+   Opus implementer per batch · ONE Fable cold review at phase end.
+2. **OPENING FRICTION BATCH: YES, all five** — W11 + W12 (traced
+   first) and the three ruled QoL follow-ons W7/W8/W9 build first,
+   while the design sitting continues. (The rail strip stays
+   UNTOUCHED in W8 — she named carousel only; offered and not
+   contradicted.)
+3. **W16 back-navigation: DESIGN + BUILD IN 13F** — her pick of the
+   recommended option; back-nav and Compare's click-through are
+   designed WITH tabs as one navigation model.
+4. **W15 RULED: "Blocks" → "Snippets"** — UI string only, rides the
+   K5 sweep batch.
+
+Ledger updates: W7/W8/W9/W11/W12 → batch 1 (opening friction batch);
+W15 → RULED, sweep batch; W16 → committed scope, designed with W3.
+
+### Sitting rulings — round 2 (2026-07-30, question batch 2: the window model)
+
+1. **W1/A25 — TWO PANES in v1, with a standing architecture rider,
+   hers verbatim:** *"I think two panes is the right choice for v1,
+   but I would make a note for the future that free tiling is on my
+   desire list. It's not worth it at this exact moment, but make sure
+   the architecture isn't going down a road closed to that because it
+   would be nice in the future."* → BINDING: the pane/workspace
+   architecture must not foreclose free tiling (no two-pane
+   assumptions baked into the liveness authority, tab routing, or
+   layout state). Free tiling joins the desire list, unslotted.
+2. **W3/A27 — per-window tab strip, IN THE SIDEBAR, hers verbatim:**
+   *"I'm fine with the per-window tab strip but i don't think it
+   should be above the editor - i like the clean look there. i'd use
+   the free space that's underneath 'library / shelf / pool /
+   blocks' for now"* → open-note tabs render as a sidebar section
+   below the four standing sections ("for now" — placement
+   revisitable); ⌘⇧1…9 jumps by position; the editor chrome stays
+   clean.
+3. **W2/A26 — BOTH window kinds** (her pick of the recommendation):
+   File ▸ New Window = a full app window; "Open in New Window" on a
+   note = a lightweight note-only window. ONE live editor across all
+   windows — the liveness authority extends, never a second
+   mechanism.
+4. **W16 — history + named back chip, WITH a collapse door, hers
+   verbatim:** *"I think that you should be able to collapse the
+   named back chip if you want - I like how clean the editor looks
+   right now."* → per-pane history (⌘[ / ⌘]) + the "← <origin>" chip,
+   chip collapsible; Compare's peer post opens through the same
+   history.
+
+### Sitting rulings — round 3 (2026-07-30, question batch 3)
+
+1. **W4/A28 — stars = a synced `setting` list + a Starred sidebar
+   section** (her pick of the recommendation; the `shelf_pins`
+   precedent — ZERO schema, no §12 event): up to 5 notes or books,
+   star/unstar via context menu + ⌘K, section at the sidebar's top.
+2. **W5/A29 — the quick note is a FLOATING MINI-WINDOW** (her pick):
+   global shortcut / menu-bar door; typing mints an ordinary bookless
+   note (Pool lists it); the sticky face shows no takes machinery;
+   the note persists when the window closes.
+3. **W14 — THE WORD IS "NOTE"** (her pick): the K5 sweep proceeds
+   post→note, UI strings only, plus the ruled Blocks→"Snippets"
+   rename (W15).
+4. **W13 — smart-book identity gets ITS OWN NEW PHASE, hers
+   verbatim:** *"i would make a new phase with a short brief on what
+   you know about the shape of the problem (whatever the next unused
+   letter in the 13 series is I suppose), i'll just handle it fully
+   in another phase. i haven't really thought through it a lot yet."*
+   → **Phase 13i** (the next unused letter — 13b–13h exist) with a
+   short problem-shape brief, authored this sitting:
+   `notes/plans/phase-13i-smart-book-identity-brief.md`. Nothing
+   built; the brief binds nothing beyond her recorded words.
+
+### Batch 1 brief — the opening friction batch: W7 · W8 · W9 · W11 · W12 (fresh Opus implementer; self-contained)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads; THIS plan file (the constitution, THE KICKOFF SITTING, the
+sitting rulings above); the 13c plan's **"Environment traps"** section
+(binding — instance discipline, run-line proof, `pipestatus`, no
+custom build configurations, checksums before reverts); in
+`notes/plans/qol-round-2026-07-29.md`: the batch records for the
+**divide-ceremony drawn geometry brain** (W9's target), the
+**typewriter room third mechanism** (W7's Write-side precedent), and
+**slot split's drag + view-memory storage** (W8's grammar — including
+the recorded `TakesViewMemory` decode-compat trap: adding a Codable
+field silently resets stored view memory); the 13d plan's batch-5 A22
+record. Then the code each item names.
+
+**The items:**
+
+1. **W7 — the typewriter-room option on TAKES (her ruling).** Write's
+   room is the QoL round's grow-the-document mechanism on the
+   full-document editor; the Takes board needs its OWN room —
+   scrollable allowance below the board's content (~one viewport
+   page, matching Write's feel), reachable through REAL input paths
+   (the pin-gap lesson is standing law: pin via scroller/knob paths,
+   not internal APIs). A click in the room should land focus at the
+   end of the LAST take pane's text (the A22 "room is space the caret
+   can enter" doctrine). P-3 binds: no second liveness mechanism — if
+   the click-lands-focus half can't ride the board's existing focus
+   path simply, STOP and propose that half. Zero store bytes (pin).
+2. **W8 — carousel adopts slot split's natural-height + shorten-drag
+   (her ruling; SUPERSEDES the QoL round's carousel-keeps-110
+   scoping).** Same grammar as slot split: natural full height by
+   default, the grab bar pulls shorter with in-place scroll, drag
+   back to natural = full again, double-click resets, heights
+   remembered per block in the SAME local view-memory family (respect
+   the decode-compat trap — follow the storage shape slot split
+   shipped). The QoL round's carousel-byte-unchanged pins flip
+   DELIBERATELY — name every pin change in the batch record. **The
+   rail strip is UNTOUCHED** (she named carousel only).
+3. **W9 — remove the ceremony's cut tick marks (her ruling,
+   verbatim: "we don't need all those lines to show where you can
+   cut - I feel like it's pretty clear that it only jumps to in
+   between words").** Rendering only: the tick affordance goes; the
+   snap rule, the ✂ slot, click/drag/arrow behavior, checkbox
+   semantics all byte-unchanged (their pins run green unmodified). A
+   ruled flip, not a bug fix — update only pins that assert tick
+   presence, and name them.
+4. **W11 — BUG, TRACE FIRST: chapter reordering between posts.** Her
+   report verbatim: *"i haven't been able to move the chapters in
+   between the posts (which did used to work)."* Trace the chapter
+   reorder path (the book navigator's chapter drag/reorder,
+   `reorderSection`, and the surfaces 13d batch 1 / 13c 2A–2D
+   touched) to a concrete mechanism BEFORE any fix; red-on-current
+   pin; fix; revert-verify. If the trace lands on a DESIGN conflict
+   (e.g. an order-override interaction) rather than a defect, STOP
+   and report — that is a product question, not a patch.
+5. **W12 — BUG, TRACE FIRST: scrap drag-into-post dead.** Her report
+   verbatim: *"trying to drag a standalone block into a post is just
+   not working."* The sidebar scraps (Blocks/Snippets section) drag
+   into an open post — `poolDragCopy`'s face (Phase 10; ⌥-drag
+   carries the fan). Same discipline: mechanism → red pin → fix →
+   revert-verify. If the drop path died with a newer surface (the
+   pane surface, registry routing), trace to the seam and fix at the
+   seam's level, not with a bypass.
+
+**Loop (binding):** build → pins (red-on-old verified by behavioral
+revert for W11/W12; checksums before every revert) → the tutorial
+spine green on its own run (`Tutorial*Tests` by TYPE name) → full
+suites: core `swift test` from the repo root, Mac from `App/Variorum/`
+— quote the "Test run with N tests" line (the ONLY proof; zsh
+`pipestatus`); run mobile ONLY if `Sources/` or `Shared/` is touched
+(destination: the iPhone 17-family/16e note). **Baselines to
+match-or-beat: core 903/102 · Mac 933/151 · mobile 14/4.** Append
+your batch record to THIS file under "Batch records" (changes, files,
+every pin change named, counts by your own runs, PENDING marks).
+Commit per convention with the standing trailer (one commit per item
+is fine if the diffs read cleaner). **Never** refresh `/Applications`
+(installs at her word only), never touch `Sources/VariorumCore/Sync/`,
+never push, never `git checkout` over uncommitted work. If any item
+turns out materially bigger than its ruling's shape, STOP on that
+item and return with a proposal.
+
+## Batch records
+
+*(Implementers append here — one record per batch.)*

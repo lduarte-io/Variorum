@@ -20,9 +20,20 @@ reopens N38 toward shape B (design memo owed), the naming/"Snippets"
 questions feeding the K5 sweep, and the back-navigation want designed
 beside A27). Her roadmap instruction executed the same sitting: three
 unslotted rows added below (whole-library search · grammar/
-spellcheck · more export options). Cast: pending her confirmation at
-the opening sitting (recommended default = the 13d/QoL shape). Design
-sitting IN PROGRESS.
+spellcheck · more export options). **The opening sitting ran the same
+day and RULED the core design** (three question batches; rulings
+verbatim in the plan file): cast = the 13d/QoL shape (Fable
+orchestrator · fresh Opus implementer per batch · ONE Fable cold
+review) · friction batch first (her two bugs + three QoL follow-on
+rulings) · two panes v1 with free tiling on the desire list and the
+architecture forbidden to foreclose it · the tab strip in the
+SIDEBAR's free space, ⌘⇧1…9 · both window kinds (full app + note-only)
+· back-nav = per-pane history + a COLLAPSIBLE named chip, built in 13f
+· stars = a synced `setting` list (the shelf_pins precedent, zero
+schema) + a Starred section · the quick note = a floating mini-window
+minting a bookless note · the word is "NOTE" (K5 sweep proceeds) +
+"Blocks"→"Snippets" · smart-book identity → NEW ROW 13i with its
+brief. Batch 1 (friction) spawned 2026-07-30.
 
 *(Superseded pointer, kept for the thread:)* **OUT-OF-BAND QoL ROUND
 CLOSED 2026-07-30 — the next kickoff is the
@@ -292,6 +303,7 @@ combined feel pass still owed.)*
 | 13f | **Workspace** (K3; one of her two soonest — K4) | More than one thing on screen, and the app calls them notes | Ledger rows A25–A30, A32 — two posts side by side in one window; several windows / a split window; tabs of open notes with ⌘⇧1…; starred notes; the quick-note sticky format; **the `post` → `note` UI-string sweep (K5 — strings only; `container.kind='post'` and the canon docs keep the model term)**; the infinite-scroll editor idea | P3 holds across windows (ONE live editor, `PaneTextAuthority`); no second liveness mechanism | pending |
 | 13g | **Formatting, lists & checkboxes** (K3; her other soonest — K4) | Text can look like text | Ledger rows A33–A34 — bold, italics, sizes, some markdown; **and the list/checkbox maker she added live** (hyphens, `[]`, bullets). **Opens with a design sitting**: markdown-as-content (zero schema, export free, sidesteps the broken `NSTextList`) vs. real attributed runs (schema + editor-core work) is an architectural fork and hers to rule | Whichever fork: `renderedText`/export/bridge semantics pinned unchanged; TEXTKIT2 §5 re-verified | pending |
 | 13h | **The LLM folder bridge** (K3) | Her prose is reachable from a folder without giving up block identity | Ledger rows A35–A36 — a post ⇄ `.md` file in a folder, openable by path, edits landing back through ordinary operations; markdown folder import mapping folders to chapters/books. **The Fragments bridge's proven shape pointed at a folder instead of a table** — real work, not new architecture (S5 guards the landings) | Nothing typed on either side is ever lost; round-trip byte stability per the 11b import pins | pending |
+| 13i | **Smart-book identity** (author, 2026-07-30 at the 13f kickoff sitting — her direction: smart books keep constantly updating from tags; touching one (post limit, lock, chapter name, manual reorder, "etc") makes it "a particular named book" that CAN keep auto-adding — the hybrid the N38 memo called shape B) | A book can be hand-shaped and still collecting — without the union surprising anyone | Brief: `notes/plans/phase-13i-smart-book-identity-brief.md` (the problem's shape + the knots needing her rulings: the departed-match question, order interleaving of arrivals, what the capacity gate counts, which acts flip identity, storage/§12, the shipped conversion door's fate). Opens with a design sitting; her words: "i'll just handle it fully in another phase. i haven't really thought through it a lot yet" | The friction doctrine binds (rulings before build); any schema need is a §12 lockstep event | pending — **slotted at her word** |
 | — | **EPUB library & highlights** (author intake 2026-07-25, ledger A37) | Her own books and fanfiction live in the app, and highlights become writing | Read-only epubs in their own area (Mac + mobile), a highlighting layer, and highlights pulled into a post — her stated shape: a highlight auto-appended to a "favorite quotes" note with quotation marks, a dash, the author's name and the book title. One or several posts linked to a book, to make book reviews easier | Source files untouched (the 11b reference-panel discipline); still never a knowledge base | pending — **unslotted** (wanted, ranked behind workspace + formatting at K4) |
 | — | **Whole-library text search** (author, 2026-07-30 at the 13f kickoff — her words: *"a phase dealing with searching through text more thoroughly for the whole library will have to be considered (LOTS of potential technical implementations there, we'll probably handle that after the existing 13 phases, I think that subdivisions for searching books / posts / etc. will be valuable)"*) | Body-text search across the whole corpus, with scoped subdivisions | Full-corpus body search (`Queries.searchCatalog` today reads titles/names/scrap prefixes only); scope subdivisions (books / posts / etc.); the technical fork (FTS5 vs sweep vs index) is this row's own design sitting. The KnownIssues find&replace row's library-search half lands here | P1 discipline at corpus scale; her slotting word: after the existing 13 phases | pending — **unslotted by her design** |
 | — | **Grammar & spellchecking** (author, 2026-07-30 at the 13f kickoff: *"we'll need a phase for dealing with grammar / spellchecking / etc."*) | A real proofing story beyond 13d's coarse levels | Builds on 13d's spellcheck levels (A24) + the QoL round's noted missing "Spelling and Grammar" menu; scope at its kickoff | TEXTKIT2 §3's crash-pairing guard binds anything continuous | pending — **unslotted by her design** |
