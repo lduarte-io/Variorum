@@ -134,6 +134,64 @@ struct PoolDragTests {
         }
     }
 
+    /// **13f W12 — RED ON THE PRE-FIX CODE** (her report: *"trying to drag a
+    /// standalone block into a post is just not working"*).
+    ///
+    /// Every other pin in this suite drives `performDragOperation` — or the
+    /// model door under it — DIRECTLY. AppKit does not: it sends
+    /// `draggingEntered` → `draggingUpdated` → **`prepareForDragOperation`** →
+    /// `performDragOperation`, and stops at a `false` from the third.
+    /// `NSTextView`'s own `prepareForDragOperation` answers false for a
+    /// pasteboard carrying only the pool type, so the pool branch was dead
+    /// through every real drag while the suite stayed green. This pin drives
+    /// the WHOLE sequence — the batch-1 input-path rule applied to the drop
+    /// path.
+    ///
+    /// DISCRIMINATING REVERT: delete `EditorTextView.prepareForDragOperation`
+    /// ⇒ this fails at the prepare step (and the drop never runs), while every
+    /// other pin in the suite still passes.
+    @MainActor
+    @Test func theWholeAppKitDropSequenceReachesThePoolBranch() async throws {
+        for (label, textView) in [
+            ("full editor", EditorTextView.makeEditor().1),
+            ("inline editor", EditorTextView.makeInlineEditor()),
+        ] {
+            textView.frame = NSRect(x: 0, y: 0, width: 400, height: 300)
+            textView.string = "alpha\nbeta"
+            var landed: (blockID: String, offset: Int, includeFan: Bool)?
+            textView.onPoolDrop = { blockID, offset, includeFan in
+                landed = (blockID, offset, includeFan)
+                return true
+            }
+
+            let pasteboard = NSPasteboard(
+                name: NSPasteboard.Name("io.lduarte.variorum.tests.pooldrag.\(label)"))
+            pasteboard.clearContents()
+            pasteboard.setData(Data("scrap-1".utf8), forType: EditorTextView.poolBlockType)
+            let info = FakePoolDraggingInfo(pasteboard: pasteboard)
+
+            #expect(textView.registeredDraggedTypes.contains(EditorTextView.poolBlockType),
+                    "\(label): the destination accepts the pool type at all")
+            #expect(textView.draggingEntered(info) == .copy,
+                    "\(label): entering with a scrap shows the copy cursor")
+            #expect(textView.draggingUpdated(info) == .copy,
+                    "\(label): …and keeps showing it")
+            #expect(textView.prepareForDragOperation(info),
+                    """
+                    \(label): AppKit's THIRD step — on the pre-fix code \
+                    NSTextView answered false here and performDragOperation \
+                    was never sent, so the copy cursor promised a drop that \
+                    could not happen
+                    """)
+            #expect(textView.performDragOperation(info),
+                    "\(label): the drop is consumed")
+            #expect(landed?.blockID == "scrap-1",
+                    "\(label): …by the POOL branch, carrying the scrap's id")
+            #expect(landed?.includeFan == false,
+                    "\(label): no ⌥ held ⇒ the rendered take only")
+        }
+    }
+
     @Test func theDragPayloadIsTheBlockIDNeverTheText() async throws {
         let provider = PoolViewModel.dragProvider(blockID: "block-123")
         #expect(provider.registeredTypeIdentifiers
@@ -153,6 +211,49 @@ struct PoolDragTests {
         #expect(String(data: data, encoding: .utf8) == "block-123",
                 "the payload is the ID; the text copy is the operation's (review focus 6)")
     }
+}
+
+/// The minimum an `NSDraggingInfo` must be to drive an `NSView` destination's
+/// own four-step sequence (13f W12). Deliberately AppKit-only: SwiftUI's
+/// hosting drop path calls PRIVATE selectors on the dragging info
+/// (`_lastDragDestinationOperation` — measured), so a fake like this can drive
+/// an NSTextView destination and can never drive a `.dropDestination`. That
+/// asymmetry is why this pin exists here and why the chapter-drag half of the
+/// same class stays honestly unpinnable.
+private final class FakePoolDraggingInfo: NSObject, NSDraggingInfo {
+    private let pasteboard: NSPasteboard
+    init(pasteboard: NSPasteboard) { self.pasteboard = pasteboard }
+    var draggingDestinationWindow: NSWindow? { nil }
+    var draggingSourceOperationMask: NSDragOperation { [.copy, .generic] }
+    /// Inside "alpha\nbeta" — any point over the text; the offset the branch
+    /// derives from it is `characterIndexForInsertion`'s, not this pin's claim.
+    var draggingLocation: NSPoint { NSPoint(x: 12, y: 12) }
+    var draggedImageLocation: NSPoint { .zero }
+    var draggedImage: NSImage? { nil }
+    var draggingPasteboard: NSPasteboard { pasteboard }
+    var draggingSource: Any? { nil }
+    var draggingSequenceNumber: Int { 1 }
+    func slideDraggedImage(to screenPoint: NSPoint) {}
+    func enumerateDraggingItems(
+        options: NSDraggingItemEnumerationOptions, for view: NSView?,
+        classes classArray: [AnyClass],
+        searchOptions: [NSPasteboard.ReadingOptionKey: Any],
+        using block: @escaping (NSDraggingItem, Int, UnsafeMutablePointer<ObjCBool>) -> Void
+    ) {}
+    var numberOfValidItemsForDrop: Int {
+        get { 1 }
+        set {}
+    }
+    var draggingFormation: NSDraggingFormation {
+        get { .default }
+        set {}
+    }
+    var animatesToDestination: Bool {
+        get { false }
+        set {}
+    }
+    var springLoadingHighlight: NSSpringLoadingHighlight { .none }
+    func resetSpringLoading() {}
 }
 
 // MARK: - 13b Stage 3, Batch 3D (N19): every pool is reachable

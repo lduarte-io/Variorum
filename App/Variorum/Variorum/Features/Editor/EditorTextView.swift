@@ -333,6 +333,30 @@ final class EditorTextView: NSTextView {
         return super.draggingUpdated(sender)
     }
 
+    /// **13f W12 — the drop's missing gate, and the whole of her "dragging a
+    /// standalone block into a post is just not working".**
+    ///
+    /// AppKit's destination sequence is `draggingEntered` → `draggingUpdated`
+    /// → **`prepareForDragOperation`** → `performDragOperation`, and a `false`
+    /// from the third step ENDS it: `performDragOperation` is never sent. This
+    /// class answered `.copy` from the first two (so the drag looked droppable
+    /// the whole way) and routed the pool branch in the fourth — but never
+    /// overrode the third, and `NSTextView`'s own implementation answers
+    /// **false** for a pasteboard carrying only `poolBlockType` (measured on
+    /// macOS 26.5.2: entered/updated = `.copy`, prepare = `false`). So the pool
+    /// branch was unreachable through a real drag: copy cursor all the way in,
+    /// then nothing — exactly her report.
+    ///
+    /// Why the shipped suite was green over it: every pool-drag pin drove
+    /// `performDragOperation` (or `model.poolDrop`) directly, skipping the gate
+    /// AppKit does not skip. The batch-1 rule restated — *a pin for a feature
+    /// reached by input must be driven through an input path* — so the new pin
+    /// runs the whole four-step sequence.
+    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        if poolBlockID(on: sender.draggingPasteboard) != nil { return true }
+        return super.prepareForDragOperation(sender)
+    }
+
     /// Text drops route through the same bulk-entry flag as paste
     /// (contract item 7 — resolves Phase 7's deferred PROVISIONAL as the
     /// author decided 2026-07-06). AppKit plumbing only: the routing lives
