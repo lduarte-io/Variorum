@@ -130,7 +130,35 @@ final class DivideWCeremony {
         /// keyboard targets. Empty exactly when the take's text is empty
         /// (0 and the end coincide: nothing to place — uncheck it).
         let boundaries: [Int]
+        /// The STRONG positions among them — sentence ends, newlines and the
+        /// two text edges. Derived ONCE here (QoL round L1): the sheet used to
+        /// re-derive this with a full sentence scan of the take's text once
+        /// PER SLOT per body pass, and ~2 per candidate per drag sample, which
+        /// is the beachball she reported.
+        let strongBoundaries: Set<Int>
+        /// The take's text as the alternating slot/token sequence the sheet
+        /// draws. Also derived once here, for the same reason.
+        let flow: [WCutPlacement.FlowItem]
         var id: String { variant.id }
+
+        /// ONE derivation per take: the legal cuts, the strong subset and the
+        /// draw/hit-test flow all come from the take's text here, at
+        /// construction, and nothing downstream re-derives them.
+        /// `nonisolated` so `open`'s derivation can run OFF the main actor —
+        /// the whole point of doing it once per take is that the gesture never
+        /// blocks the UI on scanning.
+        nonisolated init(variant: Variant, marked: Bool, cut: Int?, text: String) {
+            self.variant = variant
+            self.marked = marked
+            self.cut = cut
+            let boundaries = DivideWCeremony.legalCutPositions(of: text)
+            self.boundaries = boundaries
+            let strong = Set(
+                BoundarySnapping.boundaries(in: text, granularity: .sentence))
+            self.strongBoundaries = strong.intersection(boundaries)
+                .union([0, text.utf16.count].filter { boundaries.contains($0) })
+            self.flow = WCutPlacement.flowItems(text: text, boundaries: boundaries)
+        }
 
         /// Parking (S4-22 ruling 2): at the very end ⇒ the whole take
         /// rides into the FIRST block; at the very start ⇒ the SECOND.
@@ -168,20 +196,26 @@ final class DivideWCeremony {
                 host.speakCeremonyStatus("This block's takes changed — try the divide again.")
                 return
             }
-            let takes = liveActive.map { variant in
-                WTake(
-                    variant: variant,
-                    marked: variant.id == seedTake.id,
-                    cut: variant.id == seedTake.id
-                        ? seedCut
-                        : seedCut.flatMap {
-                            CutPropagation.propose(
-                                activeCut: $0,
-                                activeText: seedTake.workingText,
-                                targetText: variant.workingText)
-                        },
-                    boundaries: Self.legalCutPositions(of: variant.workingText))
-            }
+            // The per-take derivation — boundaries, the strong set, the flow,
+            // and the propagated proposals — is real O(text) work per take, so
+            // it runs OFF the main actor (QoL round L1). Opening the ceremony
+            // on four long takes must never block the UI on scanning.
+            let takes = await Task.detached(priority: .userInitiated) {
+                liveActive.map { variant in
+                    WTake(
+                        variant: variant,
+                        marked: variant.id == seedTake.id,
+                        cut: variant.id == seedTake.id
+                            ? seedCut
+                            : seedCut.flatMap {
+                                CutPropagation.propose(
+                                    activeCut: $0,
+                                    activeText: seedTake.workingText,
+                                    targetText: variant.workingText)
+                            },
+                        text: variant.workingText)
+                }
+            }.value
             state = State(
                 blockID: blockID, activeVariantID: seedTake.id, takes: takes)
         } catch {
@@ -206,6 +240,22 @@ final class DivideWCeremony {
               let i = current.takes.firstIndex(where: { $0.id == takeID }) else { return }
         current.takes[i].marked.toggle()
         state = current
+    }
+
+    /// **HER RULING (2026-07-29, selection: "Check it").** A click on a take's
+    /// ROW: an UNCHECKED take is checked (and aimed at); a checked take is only
+    /// aimed at. Before this, a click on an unchecked row did nothing at all —
+    /// a silent dead click, the fire-and-DO class (P-2), and plausibly why the
+    /// checkbox and the `›` marker read to her as one control.
+    ///
+    /// It lives here rather than in the row's `onTapGesture` so the rule is one
+    /// sentence in one place and can be pinned without driving SwiftUI's
+    /// gesture machinery. Returns the take to aim the arrow keys at.
+    @discardableResult
+    func rowTapped(_ takeID: String) -> String? {
+        guard let take = state?.takes.first(where: { $0.id == takeID }) else { return nil }
+        if !take.marked { toggleTake(takeID) }
+        return takeID
     }
 
     func placeCut(takeID: String, cut: Int) {
@@ -318,7 +368,7 @@ final class DivideWCeremony {
                 variant: variant,
                 marked: old?.marked ?? false,
                 cut: cut,
-                boundaries: Self.legalCutPositions(of: variant.workingText))
+                text: variant.workingText)
         }
         state = State(
             blockID: current.blockID, activeVariantID: seedCurrent.id, takes: takes)

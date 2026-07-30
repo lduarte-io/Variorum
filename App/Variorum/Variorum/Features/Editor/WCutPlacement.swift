@@ -33,10 +33,15 @@ nonisolated enum WCutPlacement {
     /// newlines, and both text ends (the parking slots), intersected with
     /// the take's legal boundaries. Falls back to a word step when no
     /// strong boundary lies in that direction beyond the current cut.
+    /// **QoL round 2026-07-29 (L1): `strong` is passed in, not derived.** This
+    /// used to run a full sentence scan of the take's text on every ⌥←/→
+    /// keypress; the take carries its strong set now (`WTake.strongBoundaries`,
+    /// derived once when the ceremony opens). Pure parameterization — same
+    /// values, same results — and the ONE existing-test signature change in
+    /// the batch.
     static func sentenceStep(
-        from cut: Int?, in text: String, boundaries: [Int], forward: Bool
+        from cut: Int?, strong: Set<Int>, boundaries: [Int], forward: Bool
     ) -> Int? {
-        let strong = Set(BoundarySnapping.boundaries(in: text, granularity: .sentence))
         let strongBoundaries = boundaries.filter { strong.contains($0) }
         return wordStep(from: cut, boundaries: strongBoundaries, forward: forward)
             ?? wordStep(from: cut, boundaries: boundaries, forward: forward)

@@ -19,6 +19,19 @@
 import SwiftUI
 import VariorumCore
 
+#if DEBUG
+/// **The L1 bound's other half** (QoL round 2026-07-29): how many PER-SLOT
+/// view elements the cut flow realizes. The shipped flow built one
+/// `Button`+`ZStack`+`onHover`+`help`+`GeometryReader` per legal cut position —
+/// ~3,000 of them for a 3,000-word take, each measured twice per layout pass.
+/// The rebuilt flow draws instead, so this must stay at zero: a tripwire, and
+/// its zero IS the assertion (the `CanvasCardMaterialization` precedent).
+@MainActor
+enum CutFlowRealization {
+    static var slotViews = 0
+}
+#endif
+
 struct DivideWSheet: View {
     /// 13d Batch 3 (A9): the sheet is parameterized on the CEREMONY, not
     /// on Write's view model — that is what lets a takes board mount the
@@ -45,10 +58,20 @@ struct DivideWSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Divide into takes").font(.headline)
-            Text("Each checked take carries its own cut — drag the ✂, click between words, or use ←/→ (⌥ jumps by sentence, ⇥ moves between takes). Park the ✂ at a take's very end to keep it whole on the first block, at its start for the second. Unmarked takes stay on the original block; the divide is reversible (⌥⌘Z).")
+            // L2 (QoL round 2026-07-29), her words: *"it's not really clear to
+            // me what selecting the take button below is supposed to do? just
+            // split that take as well?"* — yes, exactly, and the surface never
+            // said so. These two sentences are the two halves of what a check
+            // MEANS; the per-row captions repeat them where she is looking.
+            Text("**Check the takes that should be cut.** Each checked take carries its own \u{2702}, and its two halves become the two new blocks' takes. **An unchecked take is not cut and goes into neither new block** — it stays whole on the original, which the divide keeps.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(6)
+                .lineLimit(5)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Place a cut by dragging the \u{2702}, clicking between words, or \u{2190}/\u{2192} (\u{2325} by sentence, \u{21E5} moves between takes). Park it at a take's very end to send that whole take into the first block, at its start for the second. **\u{203A}** marks the take the arrow keys are aimed at. The divide is reversible (\u{2325}\u{2318}Z).")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
 
             ScrollView {
@@ -132,6 +155,10 @@ struct DivideWSheet: View {
                     placementNote(take)
                 }
             } else {
+                Text("Not cut — stays whole on the original block, in neither new one.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
                 Text(take.variant.workingText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -141,7 +168,13 @@ struct DivideWSheet: View {
         .padding(.vertical, 2)
         .contentShape(Rectangle())
         .onTapGesture {
-            if take.marked { activeTakeID = take.id }
+            // HER RULING (2026-07-29, selection: "Check it"): clicking an
+            // UNCHECKED take's row checks it and aims the arrows there. It
+            // used to do nothing at all — a silent dead click, the
+            // fire-and-DO class (P-2), and plausibly why the checkbox and the
+            // \u{203A} marker read as one control to her. A checked row keeps
+            // its existing aim-the-arrows behaviour.
+            activeTakeID = ceremony.rowTapped(take.id)
         }
     }
 
@@ -195,7 +228,7 @@ struct DivideWSheet: View {
             let next: Int?
             if press.modifiers.contains(.option) {
                 next = WCutPlacement.sentenceStep(
-                    from: take.cut, in: take.variant.workingText,
+                    from: take.cut, strong: take.strongBoundaries,
                     boundaries: take.boundaries, forward: forward)
             } else {
                 next = WCutPlacement.wordStep(
@@ -213,190 +246,116 @@ struct DivideWSheet: View {
     }
 }
 
-// MARK: - The cut flow (words + slots + the draggable ✂)
+// MARK: - The cut flow (DRAWN, not built — QoL round 2026-07-29, L1)
 
 /// A marked take's text as a wrapping flow of word tokens with a placeable
 /// slot at every legal cut position — the ✂ sits at the current cut, slots
-/// click to jump, and a drag anywhere in the flow glides the ✂ between
-/// word edges (nearest slot, row-first, with a small extra catch for
-/// sentence/newline slots — the gentle settle's visual half). Cost is
-/// bounded by the take's word count — fan-scale, never corpus-scale.
+/// click to jump, and a drag glides the ✂ between word edges (nearest slot,
+/// row-first, with a small extra catch for sentence/newline slots — the gentle
+/// settle's visual half).
+///
+/// **It DRAWS the flow instead of building one, and that is the L1 fix.** The
+/// shipped version realized a `Button` + `ZStack` + hover tracker + `help` +
+/// `GeometryReader` per legal cut position and a `Text` per word — measured at
+/// 2,766 view elements for three 400-word takes, each measured twice per
+/// layout pass, with a `PreferenceKey` round-trip writing `@State` from inside
+/// layout (the publish-during-update class, P-8) — and on top of that it
+/// re-ran a full sentence scan of the take's text once PER SLOT, because
+/// `strongSlots` was a computed property read inside the `ForEach`. Measured:
+/// 4,149 scans and 6.3 s for ONE mount, 1,383 scans and 8.7 s for ONE click;
+/// at her real scale (four 3,000-word takes) a single click did not complete
+/// inside a 600-second test timeout. That is the spinning rainbow she
+/// reported.
+///
+/// Now: one `Canvas`, one `CutFlowGeometry` cached per (take, width), and the
+/// pointer resolving against the same frames the drawing uses — one brain, so
+/// drawing and hit-testing cannot disagree, which the three-mechanism version
+/// could never promise.
 private struct WCutFlow: View {
     let take: DivideWCeremony.WTake
     let tokens: VoiceTokens
     let place: (Int) -> Void
 
-    @State private var slotFrames: [Int: CGRect] = [:]
+    @State private var geometry = CutFlowGeometry()
+    @State private var width: CGFloat = 0
+    @State private var hovered: Int?
 
-    private var spaceName: String { "wcutflow-\(take.id)" }
-
-    private var strongSlots: Set<Int> {
-        Set(BoundarySnapping.boundaries(
-            in: take.variant.workingText, granularity: .sentence))
-    }
+    private static let flowFont = NSFont.preferredFont(forTextStyle: .callout)
 
     var body: some View {
-        let items = WCutPlacement.flowItems(
-            text: take.variant.workingText, boundaries: take.boundaries)
-        CutFlowLayout(lineSpacing: 4) {
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                switch item {
-                case .slot(let boundary):
-                    CutSlotView(
-                        isCut: take.cut == boundary,
-                        isStrong: strongSlots.contains(boundary),
-                        tokens: tokens
-                    ) {
-                        place(boundary)
-                    }
-                    .background(GeometryReader { geo in
-                        Color.clear.preference(
-                            key: SlotFramesKey.self,
-                            value: [boundary: geo.frame(in: .named(spaceName))])
-                    })
-                case .token(let text, let breaksLineAfter):
-                    Text(text)
-                        .font(.callout)
-                        .foregroundStyle(tokens.ink)
-                        .fixedSize()
-                        .lineLimit(1)
-                        .layoutValue(key: CutFlowLayout.BreaksLineAfter.self,
-                                     value: breaksLineAfter)
-                }
+        Canvas(opaque: false) { context, _ in
+            for token in geometry.tokens {
+                context.draw(
+                    Text(token.text).font(.callout).foregroundStyle(tokens.ink),
+                    at: CGPoint(x: token.frame.minX, y: token.frame.midY),
+                    anchor: .leading)
+            }
+            for slot in geometry.slots where slot.boundary != take.cut {
+                let height: CGFloat = slot.isStrong ? 13 : 9
+                let isHovered = hovered == slot.boundary
+                let mark = CGRect(
+                    x: slot.frame.midX - (isHovered ? 1.25 : 0.75),
+                    y: slot.frame.midY - height / 2,
+                    width: isHovered ? 2.5 : 1.5,
+                    height: height)
+                context.fill(
+                    Path(roundedRect: mark, cornerRadius: 1),
+                    with: .color(isHovered
+                        ? tokens.accent.opacity(0.8)
+                        : (slot.isStrong ? tokens.muted.opacity(0.6) : tokens.line)))
+            }
+            if let cut = take.cut, let frame = geometry.slotFrame(for: cut) {
+                context.draw(
+                    Text("✂").font(.system(size: 13)).foregroundStyle(tokens.accent),
+                    at: CGPoint(x: frame.midX, y: frame.midY),
+                    anchor: .center)
             }
         }
-            .coordinateSpace(name: spaceName)
-            .onPreferenceChange(SlotFramesKey.self) { slotFrames = $0 }
-            .gesture(
-                DragGesture(minimumDistance: 4, coordinateSpace: .named(spaceName))
-                    .onChanged { drag in
-                        guard let nearest = nearestSlot(to: drag.location),
-                              nearest != take.cut else { return }
-                        place(nearest)
-                    })
-            .padding(6)
-            .background(
-                RoundedRectangle(cornerRadius: 4).fill(tokens.wash.opacity(0.35)))
-    }
-
-    /// Nearest slot to a drag location: row-first (the slot whose line the
-    /// pointer is on wins), then horizontal distance, with a few extra
-    /// points of catch for strong (sentence/newline/end) slots — the
-    /// gentle settle, geometrically.
-    private func nearestSlot(to point: CGPoint) -> Int? {
-        slotFrames.min { a, b in score(a, point) < score(b, point) }?.key
-    }
-
-    private func score(_ entry: (key: Int, value: CGRect), _ point: CGPoint) -> CGFloat {
-        let frame = entry.value
-        let dy = abs(point.y - frame.midY)
-        let dx = abs(point.x - frame.midX)
-        let pull: CGFloat = strongSlots.contains(entry.key) ? 4 : 0
-        // Rows are ~18pt tall: a full row of vertical distance outweighs
-        // any horizontal distance within a row.
-        return dy * 100 + max(0, dx - pull)
-    }
-}
-
-private struct CutSlotView: View {
-    let isCut: Bool
-    let isStrong: Bool
-    let tokens: VoiceTokens
-    let place: () -> Void
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: place) {
-            ZStack {
-                if isCut {
-                    Text("✂")
-                        .font(.system(size: 13))
-                        .foregroundStyle(tokens.accent)
-                } else {
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(hovering
-                            ? tokens.accent.opacity(0.8)
-                            : (isStrong ? tokens.muted.opacity(0.6) : tokens.line))
-                        .frame(width: hovering ? 2.5 : 1.5,
-                               height: isStrong ? 13 : 9)
-                }
-            }
-            .frame(width: isCut ? 18 : 9, height: 18)
-            .contentShape(Rectangle())
+        .frame(height: max(geometry.size.height, CutFlowGeometry.slotHeight))
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { newWidth in
+            guard abs(newWidth - width) > 0.5 else { return }
+            width = newWidth
+            rebuild()
         }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .help(isCut
-            ? "The cut lands here — drag to move it"
-            : "Click to place the cut here")
-    }
-}
-
-private struct SlotFramesKey: PreferenceKey {
-    static let defaultValue: [Int: CGRect] = [:]
-    static func reduce(value: inout [Int: CGRect], nextValue: () -> [Int: CGRect]) {
-        value.merge(nextValue()) { $1 }
-    }
-}
-
-/// A wrapping flow layout for slot/token runs: items lay out left to
-/// right, wrap at the proposed width, and a token flagged `BreaksLineAfter`
-/// forces the next item onto a new line (outline takes keep their visible
-/// line structure). Bounded by the take's token count.
-private struct CutFlowLayout: Layout {
-    var lineSpacing: CGFloat = 3
-
-    struct BreaksLineAfter: LayoutValueKey {
-        static let defaultValue = false
-    }
-
-    func sizeThatFits(
-        proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
-    ) -> CGSize {
-        let maxWidth = proposal.width ?? 560
-        var x: CGFloat = 0, y: CGFloat = 0, rowHeight: CGFloat = 0, widest: CGFloat = 0
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if x > 0, x + size.width > maxWidth {
-                x = 0
-                y += rowHeight + lineSpacing
-                rowHeight = 0
-            }
-            x += size.width
-            rowHeight = max(rowHeight, size.height)
-            widest = max(widest, x)
-            if subview[BreaksLineAfter.self] {
-                x = 0
-                y += rowHeight + lineSpacing
-                rowHeight = 0
+        .onChange(of: take.id) { rebuild() }
+        .onChange(of: take.flow.count) { rebuild() }
+        .onContinuousHover { phase in
+            switch phase {
+            case .active(let point): hovered = geometry.nearestSlot(to: point)
+            case .ended: hovered = nil
             }
         }
-        return CGSize(width: proposal.width ?? widest, height: y + rowHeight)
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { drag in
+                    guard let nearest = geometry.nearestSlot(to: drag.location),
+                          nearest != take.cut else { return }
+                    place(nearest)
+                })
+        .padding(6)
+        .background(RoundedRectangle(cornerRadius: 4).fill(tokens.wash.opacity(0.35)))
+        .accessibilityElement()
+        .accessibilityLabel(Text(take.variant.label ?? "take"))
+        .accessibilityValue(Text(accessibilityValue))
+        .accessibilityHint(Text("Drag, click, or use the arrow keys to move the cut."))
     }
 
-    func placeSubviews(
-        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
-    ) {
-        let maxWidth = bounds.width
-        var x: CGFloat = 0, y: CGFloat = 0, rowHeight: CGFloat = 0
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if x > 0, x + size.width > maxWidth {
-                x = 0
-                y += rowHeight + lineSpacing
-                rowHeight = 0
-            }
-            subview.place(
-                at: CGPoint(x: bounds.minX + x, y: bounds.minY + y),
-                anchor: .topLeading,
-                proposal: ProposedViewSize(size))
-            x += size.width
-            rowHeight = max(rowHeight, size.height)
-            if subview[BreaksLineAfter.self] {
-                x = 0
-                y += rowHeight + lineSpacing
-                rowHeight = 0
-            }
-        }
+    /// The minimal accessibility story the ruling asked for "if cheap": one
+    /// element per take, naming it and where its cut sits. **Recorded known
+    /// limitation:** a drawn flow cannot expose a slot per cut position as its
+    /// own element, and three thousand of them would not be usable if it did —
+    /// the keyboard family (←/→, ⌥←/→, ⇥) is the accessible placement path.
+    private var accessibilityValue: String {
+        guard let cut = take.cut else { return "no cut placed" }
+        if take.parkedAtEnd { return "whole take goes to the first block" }
+        if take.parkedAtStart { return "whole take goes to the second block" }
+        let index = take.boundaries.firstIndex(of: cut).map { $0 + 1 } ?? 0
+        return "cut at position \(index) of \(take.boundaries.count)"
+    }
+
+    private func rebuild() {
+        geometry = CutFlowGeometry.make(
+            flow: take.flow, strong: take.strongBoundaries,
+            width: width, font: Self.flowFont)
     }
 }

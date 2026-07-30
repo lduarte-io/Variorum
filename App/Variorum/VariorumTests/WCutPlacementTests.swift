@@ -39,15 +39,22 @@ struct WCutPlacementTests {
         #expect(WCutPlacement.wordStep(from: nil, boundaries: [], forward: true) == nil)
     }
 
+    /// **UPDATED at the QoL round (2026-07-29, L1) — the ONE existing-test
+    /// signature change in the batch, and a pure parameterization.**
+    /// `sentenceStep` used to derive the strong set itself with a full
+    /// sentence scan of the take's text, on every ⌥←/→ keypress; the take
+    /// carries that set now. Same inputs, same values, same expectations —
+    /// the set below is exactly what the function used to compute.
     @Test func sentenceStepsJumpBetweenStrongBoundaries() {
+        let strong = Set(BoundarySnapping.boundaries(in: text, granularity: .sentence))
         // From the plain word edge 9: ⌥→ jumps to the end (15), ⌥← to the
         // sentence start 5 — the word edge itself is skipped.
         #expect(WCutPlacement.sentenceStep(
-            from: 9, in: text, boundaries: boundaries, forward: true) == 15)
+            from: 9, strong: strong, boundaries: boundaries, forward: true) == 15)
         #expect(WCutPlacement.sentenceStep(
-            from: 9, in: text, boundaries: boundaries, forward: false) == 5)
+            from: 9, strong: strong, boundaries: boundaries, forward: false) == 5)
         #expect(WCutPlacement.sentenceStep(
-            from: 5, in: text, boundaries: boundaries, forward: false) == 0)
+            from: 5, strong: strong, boundaries: boundaries, forward: false) == 0)
     }
 
     @Test func tabCyclesTheCheckedTakesAndWraps() {
