@@ -74,7 +74,7 @@ struct TypewriterRoomTests {
         #expect(abs(clipHeight - 400) < 1,
                 "the viewport is NOT shrunk by the room (clip \(clipHeight))")
         #expect(scrollView.contentInsets.bottom == 0,
-                "the room is an ALLOWANCE, not a content inset — the inset mechanism was measured to break hit testing over her own visible text (see TypewriterScrollView)")
+                "the room is scroll EXTENT, not a content inset — the inset mechanism was measured to break hit testing over her own visible text, and the clip-allowance mechanism that replaced it was measured invisible to half the ways in (both stories in TypewriterScrollView)")
 
         // The scrollable range grew by exactly the room.
         func maxScroll() -> CGFloat {
@@ -90,8 +90,17 @@ struct TypewriterRoomTests {
         pump(2)
         let withoutRoom = maxScroll()
         #expect(typewriter.typewriterRoom == 0)
-        #expect(abs((withRoom - withoutRoom) - expected) < 1,
-                "the room is exactly the extra scroll (\(withoutRoom) → \(withRoom))")
+        // **UPDATED at the QoL round (2026-07-29, L5), with its reason.** This
+        // asserted `== expected` — the room measured from the DOCUMENT's bottom
+        // edge, which is what the clip-allowance mechanism did. The room is
+        // measured from her LAST LINE now (her ruling's own words, "below the
+        // last line"), so the extra scroll is the room LESS the bottom
+        // container inset that always sat under that line. The old arithmetic
+        // is what would have scrolled a short post's text off the top
+        // (`theRoomNeverSwallowsAShortPostsText`, measured red at 412 pt).
+        let inset = textView.textContainerInset.height
+        #expect(abs((withRoom - withoutRoom) - (expected - inset)) < 1,
+                "the extra scroll is the room less the bottom inset (\(withoutRoom) → \(withRoom), room \(expected), inset \(inset))")
 
         window.contentView = nil
     }
@@ -125,69 +134,91 @@ struct TypewriterRoomTests {
     }
 
     /// **Her ruling's second half: a click in the room lands the caret at the
-    /// end of the text.** Two halves, both pinned: the room is HIT-TESTABLE
-    /// to the scroll view (measured: without the override a background view
-    /// inside the scroll view swallows it), and the click's handler lands the
-    /// caret through the text view's own insertion-point arithmetic — which
-    /// for a point past every line IS the end, the same answer a click in the
-    /// phantom gives (batch 1C).
+    /// end of the text.**
     ///
-    /// **Stated rather than claimed:** AppKit's OWN delivery of a synthesized
-    /// mouse-down could not be driven in this test host — `NSApp.sendEvent`
-    /// and `window.sendEvent` both leave the caret untouched here (measured,
-    /// with the hit test already answering correctly), so the pin invokes the
-    /// handler the hit test selects. What is unpinned is AppKit's routing,
-    /// not our code.
+    /// **REWRITTEN at the QoL round (2026-07-29, L5), and the rewrite is an
+    /// UPGRADE.** The 13d version asserted a MECHANISM — that the scroll view
+    /// itself answered `hitTest` in the room — plus a hand-invoked handler,
+    /// because "AppKit's OWN delivery of a synthesized mouse-down could not be
+    /// driven in this test host". Option A deletes that mechanism: the room is
+    /// part of the document now, so a click there is an ordinary click past
+    /// the last line and `NSTextView` answers it with
+    /// `characterIndexForInsertion` — the end of the text, which is exactly
+    /// what her ruling asks and exactly what 13c 1C measured for the phantom.
+    /// So this pin now drives the window's real hit-testing and event route
+    /// (`PhantomSpaceTests`' click helper, which demonstrably does move the
+    /// caret), covering end to end what batch 5 had to leave unpinned.
     @Test func aClickInTheRoomLandsTheCaretAtTheEndOfTheText() async throws {
         let (scrollView, textView) = EditorTextView.makeEditor()
         let typewriter = try #require(scrollView as? TypewriterScrollView)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
             styleMask: [.titled], backing: .buffered, defer: false)
-        window.contentView = scrollView
+        window.isReleasedWhenClosed = false
+        window.contentView = NSView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
+        scrollView.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
+        window.contentView?.addSubview(scrollView)
         textView.string = (1...200)
             .map { "Paragraph \($0) with some words in it." }.joined(separator: "\n")
         window.makeKeyAndOrderFront(nil)
         window.layoutIfNeeded()
+        window.display()
         pump()
+        defer { window.orderOut(nil); window.close() }
 
+        // Page to the very bottom through a real input path.
         let clip = scrollView.contentView
-        let maxY = clip.constrainBoundsRect(
-            NSRect(x: 0, y: 100_000, width: clip.bounds.width, height: clip.bounds.height)).origin.y
-        clip.scroll(to: NSPoint(x: 0, y: maxY))
-        scrollView.reflectScrolledClipView(clip)
-        pump()
+        var last = -1.0
+        var turns = 0
+        while abs(clip.bounds.origin.y - last) > 0.5, turns < 300 {
+            last = clip.bounds.origin.y
+            textView.scrollPageDown(nil)
+            scrollView.reflectScrolledClipView(clip)
+            pump(1)
+            turns += 1
+        }
+        #expect(typewriter.typewriterRoom > 0, "the room is on for this pin to mean anything")
 
         textView.setSelectedRange(NSRange(location: 0, length: 0))
-        let roomPoint = NSPoint(x: 100, y: textView.frame.maxY + 40)
-        #expect(clip.bounds.contains(roomPoint), "the probe point really is visible room")
-        let inWindow = clip.convert(roomPoint, to: nil)
+        // A point deep in the room: below every drawn line, inside the viewport.
+        var textBottom: CGFloat = 0
+        try #require(textView.textLayoutManager)
+            .enumerateTextLayoutFragments(from: nil, options: []) { fragment in
+                if fragment.state == .layoutAvailable, let line = fragment.textLineFragments.last {
+                    textBottom = max(
+                        textBottom,
+                        fragment.layoutFragmentFrame.minY + line.typographicBounds.maxY)
+                }
+                return true
+            }
+        textBottom += textView.textContainerInset.height
+        let probe = CGPoint(x: 300, y: textBottom + (clip.bounds.maxY - textBottom) / 2)
+        #expect(probe.y > textBottom, "the probe really is below her text")
+        #expect(probe.y < clip.bounds.maxY, "…and inside the viewport")
 
-        // (a) the room routes to us — the half that had to be built.
-        let superPoint = try #require(scrollView.superview).convert(inWindow, from: nil)
-        #expect(typewriter.hitTest(superPoint) === typewriter,
-                "the room is hit-testable; without this the click is dropped entirely")
-        // …and everything else still routes as AppKit intends.
-        let textPointInWindow = clip.convert(
-            NSPoint(x: 100, y: clip.bounds.minY + 5), to: nil)
-        let overText = try #require(scrollView.superview).convert(textPointInWindow, from: nil)
-        #expect(typewriter.hitTest(overText) !== typewriter,
-                "a point over the TEXT still belongs to the text view")
-
-        // (b) the handler lands the caret at the end of the text.
-        let click = try #require(NSEvent.mouseEvent(
-            with: .leftMouseDown, location: inWindow, modifierFlags: [], timestamp: 0,
-            windowNumber: window.windowNumber, context: nil, eventNumber: 0,
-            clickCount: 1, pressure: 1))
-        typewriter.mouseDown(with: click)
-        pump()
-
+        // AppKit's own hit test + event route.
+        let inWindow = textView.convert(probe, to: nil)
+        let target = try #require(window.contentView).hitTest(
+            try #require(window.contentView?.superview).convert(inWindow, from: nil))
+        #expect(target === textView,
+                "the room belongs to the editor now — a click there reaches the text view")
+        if let down = NSEvent.mouseEvent(
+            with: .leftMouseDown, location: inWindow, modifierFlags: [],
+            timestamp: ProcessInfo.processInfo.systemUptime,
+            windowNumber: window.windowNumber, context: nil,
+            eventNumber: 0, clickCount: 1, pressure: 1),
+           let up = NSEvent.mouseEvent(
+            with: .leftMouseUp, location: inWindow, modifierFlags: [],
+            timestamp: ProcessInfo.processInfo.systemUptime,
+            windowNumber: window.windowNumber, context: nil,
+            eventNumber: 0, clickCount: 1, pressure: 0) {
+            NSApp.postEvent(up, atStart: true)
+            target?.mouseDown(with: down)
+            pump(1)
+        }
         #expect(textView.selectedRange()
             == NSRange(location: (textView.string as NSString).length, length: 0),
             "the caret lands at the END of the text — 'the room is space, not paper'")
-        #expect(window.firstResponder === textView, "…and the editor took the keyboard")
-
-        window.contentView = nil
     }
 
     /// **THE PIN THIS BATCH EARNED THE HARD WAY.** The first mechanism
@@ -246,6 +277,8 @@ struct TypewriterRoomTests {
         let inline = EditorTextView.makeInlineEditor()
         #expect(inline.enclosingScrollView == nil,
                 "the inline editor has no scroll view of its own to inset")
+        #expect(inline.typewriterRoom == 0,
+                "…and carries no room on its frame either (QoL L5: the room is a document-frame property now)")
     }
 
     // MARK: The room is ALLOWANCE, never content

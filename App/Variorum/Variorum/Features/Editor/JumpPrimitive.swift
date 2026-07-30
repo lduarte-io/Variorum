@@ -117,6 +117,15 @@ enum JumpPrimitive {
         // conversion `refreshDecorations` applies.)
         let containerOriginY = Double(textView.textContainerOrigin.y)
         let docHeight = textView.frame.height
+        // QoL round 2026-07-29 (L5): the typewriter room is part of the
+        // document now, so the scroll RANGE includes it — which is what lets a
+        // jump put the LAST block at the viewport top instead of clamping a
+        // viewport short of it (measured: 1,431 units short before this).
+        // The proportional ESTIMATE deliberately excludes the room: the room
+        // holds no text, so counting it would bias every guess downward. With
+        // no room the two are the same number and the behaviour is unchanged.
+        let room = Double((textView as? EditorTextView)?.typewriterRoom ?? 0)
+        let textHeight = max(1, Double(docHeight) - room)
         let maxScroll = Double(max(0, docHeight - clip.bounds.height))
         let docLength = contentManager.offset(
             from: contentManager.documentRange.location,
@@ -136,7 +145,7 @@ enum JumpPrimitive {
         // 1. Proportional estimate → 2. single-fragment ensureLayout →
         // 3. bounded scroll correction. The closure scrolls to the loop's
         // proposed top, then measures the target fragment there.
-        let estimate = Double(clamped) / Double(docLength) * Double(docHeight)
+        let estimate = Double(clamped) / Double(docLength) * textHeight
         _ = JumpCorrectionLoop.run(
             initialTop: estimate,
             maxScroll: maxScroll
