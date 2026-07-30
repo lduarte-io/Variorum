@@ -33,6 +33,9 @@ struct TakesCellView: View {
     /// Surface identity for tests/soaks ("article" on the takes board's
     /// main cell; the default elsewhere).
     var role: String = "cell"
+    /// 13f W7: forwarded to the pane, defaulted OFF so every host but the
+    /// takes board's article column reads exactly as before.
+    var caretToEndToken: Int = 0
     let onDiff: (TakesDiffPresentation) -> Void
 
     var body: some View {
@@ -51,7 +54,8 @@ struct TakesCellView: View {
                     // fire-and-DO landing brings into Write.
                     model.notePaneSelection(variantID: resolved.variantID, range: range)
                 },
-                menuItems: { menuSpecs(resolved: resolved) })
+                menuItems: { menuSpecs(resolved: resolved) },
+                caretToEndToken: caretToEndToken)
                 .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
                 .overlay(alignment: .topLeading) {
                     // Batch 9 (R103, her ruling): a take deleted down to

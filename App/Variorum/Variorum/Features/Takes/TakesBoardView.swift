@@ -442,8 +442,62 @@ struct TakesBoardView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 18)
+                if !model.projection.slots.isEmpty {
+                    typewriterRoom(viewport: proxy.size.height)
+                }
             }
         }
+    }
+
+    /// **13f W7 — HER RULING (2026-07-30):** *"the whitespace underneath works
+    /// great on write — i would also like to have that whitespace option on
+    /// takes."* A22's room, on the board.
+    ///
+    /// **The mechanism is the board's own, and simpler than Write's, because
+    /// the surfaces are not alike.** Write's room is a scroll allowance on an
+    /// `NSTextView`'s document frame, and it took A22 three mechanisms to get
+    /// there (the QoL round's record: the first two were unreachable through
+    /// the scroller knob, ⌘↓, jumps and the width-reflow restore). The board's
+    /// article is an ordinary SwiftUI `ScrollView`, so the room is ordinary
+    /// CONTENT EXTENT — a clear box below the last row. Every input path
+    /// reaches it by construction: wheel, trackpad, the scroller knob, ⇟, ⌘↓.
+    /// There is no allowance to be blind to, which is exactly why this is not
+    /// a fourth A22 mechanism.
+    ///
+    /// The HEIGHT is the shared brain — `TypewriterRoom.height`, the same
+    /// viewport-less-one-line arithmetic Write uses, so the two surfaces feel
+    /// the same and neither can drift from the other.
+    ///
+    /// **Zero store bytes.** The room is space, never content: no block, no
+    /// variant, no newline. A22's letter, pinned.
+    private func typewriterRoom(viewport: CGFloat) -> some View {
+        Color.clear
+            .frame(
+                height: TypewriterRoom.height(
+                    viewport: viewport,
+                    lineHeight: TypewriterRoom.lineHeight(of: EditorDocument.baseFont)))
+            .contentShape(Rectangle())
+            .onTapGesture { landInTheRoom() }
+            .accessibilityHidden(true)
+    }
+
+    /// A click in the room lands the ring on the LAST block's shown take, with
+    /// the caret at its end — A22's "the room is space the caret can enter",
+    /// said in the board's vocabulary. It rides the standing focus door
+    /// (`focusWithCaretAtEnd` → `focus` → the authority), so P-3 holds: still
+    /// exactly one live pane, still one liveness authority.
+    private func landInTheRoom() {
+        guard let slot = model.projection.slots.last,
+              let resolved = model.resolvedTake(column: mainColumn, slot: slot)
+        else { return }
+        // A slot-split bloom REPLACES the article cell with fan cards, so the
+        // last block's pane lives in the fan namespace there (the same branch
+        // `articleRow` takes).
+        let splitBloomed = model.isBloomed(slot)
+            && model.projection.fanStyle == .slotSplit && slot.hasFan
+        model.focusWithCaretAtEnd(TakesViewModel.PaneKey(
+            columnID: splitBloomed ? Self.fanColumnID : mainColumn.id,
+            blockID: slot.blockID, variantID: resolved.variantID))
     }
 
     /// Whether the margin rail is part of the composition RIGHT NOW (13b
@@ -554,7 +608,11 @@ struct TakesBoardView: View {
         let noteWidth = min(150, max(commentRoom - 16, 24))
         return TakesCellView(
             model: model, tokens: tokens, slot: slot, column: mainColumn,
-            tinted: false, role: "article", onDiff: { diffPresentation = $0 })
+            tinted: false, role: "article",
+            // 13f W7: the room's landing — nonzero only for the pane it named.
+            caretToEndToken: model.resolvedTake(column: mainColumn, slot: slot)
+                .map { model.caretToEndToken(forVariant: $0.variantID) } ?? 0,
+            onDiff: { diffPresentation = $0 })
             .padding(2)
             .background(washed && markChangingBlock ? tokens.wash : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -605,14 +663,26 @@ struct TakesBoardView: View {
     /// CAROUSEL: the WHOLE fan as cards, chosen included and marked
     /// (Sitting 9 batch 7: filtering chosen out made "⑂3" show two cards
     /// with no way to reach the third — the count must match what blooms).
+    ///
+    /// **13f W8 — HER RULING (2026-07-30):** *"the longer slot split look
+    /// works great and I like that it's draggable — but carousel needs the
+    /// same treatment."* So carousel now renders at NATURAL FULL HEIGHT by
+    /// default with the same shorten-drag, from the same per-block memory:
+    /// byte-for-byte `slotSplitBloom`'s composition. **This extends the QoL
+    /// round's supersession of S4-31b/N40 to carousel** — the round scoped it
+    /// to slot split and pinned carousel's 110 as CHARACTERIZATION; her ruling
+    /// retires that scoping and the pin flips with it.
+    ///
+    /// **The rail strip is deliberately untouched** — she named carousel only.
     private func carouselBloom(slot: Queries.RenderedBlock) -> some View {
         let takes = model.projection.fans[slot.blockID] ?? []
-        // Carousel keeps the RULED fixed strip height (S4-31b/N40) — the
-        // supersession is slot split's alone.
-        return pagedTakesRow(
-            takes: takes, slot: slot, pageKey: slot.blockID,
-            cardHeight: Self.railCardHeight, reportsHeight: false)
-            .padding(.leading, 24)
+        return VStack(alignment: .leading, spacing: 0) {
+            pagedTakesRow(
+                takes: takes, slot: slot, pageKey: slot.blockID,
+                cardHeight: model.slotHeight(slot.blockID), reportsHeight: true)
+            slotHeightHandle(slot: slot)
+        }
+        .padding(.leading, 24)
     }
 
     /// SLOT SPLIT: the fanned slot divides into an equal split in-flow.
@@ -640,6 +710,13 @@ struct TakesBoardView: View {
     /// on end, LOCAL memory per block). Dragging back down to the slot's
     /// natural height restores full length, so undoing a shorten is the
     /// same gesture — the double-click door is the explicit twin.
+    ///
+    /// 13f W8: carousel shares this handle AND the same per-block store.
+    /// Deliberate — it is one question ("how tall should this block's take
+    /// cards be"), asked of one geometry (both styles size the same
+    /// `pagedTakesRow` cards against the same `beneathCount`) with one natural
+    /// height. Two stores would give a block two remembered heights with
+    /// nothing on screen to say which one she set.
     private func slotHeightHandle(slot: Queries.RenderedBlock) -> some View {
         let shortened = model.slotHeight(slot.blockID) != nil
         return HStack(spacing: 6) {
@@ -1006,7 +1083,10 @@ struct TakesBoardView: View {
             // two compositions that size a wrapper around the pane.
             onMeasuredHeight: reportsHeight
                 ? { model.notePaneMeasuredHeight(variantID: take.id, height: $0) }
-                : nil)
+                : nil,
+            // 13f W7: the room's landing reaches a fan card too — a
+            // slot-split bloom on the last block has no article cell.
+            caretToEndToken: model.caretToEndToken(forVariant: take.id))
     }
 
     // MARK: - Small helpers

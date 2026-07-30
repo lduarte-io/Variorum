@@ -523,6 +523,17 @@ struct PaneSurfaceView: View {
     /// is nil and nothing changes, carousel's invalidation profile
     /// included.
     var onMeasuredHeight: ((CGFloat) -> Void)?
+    /// **13f W7 — the takes room's landing.** A monotonic token: when it
+    /// CHANGES while this pane is mounted, the pane puts its caret at the END
+    /// of its text. Zero (the default) is "nobody is asking", and a pane
+    /// adopts whatever the token is at construction as its baseline, so a
+    /// remount never re-places a caret on its own.
+    ///
+    /// It is NOT a liveness mechanism and cannot become one (P-3): the
+    /// authority alone decides which pane is live, this only says where the
+    /// caret sits inside a pane that liveness already reached. Nothing but
+    /// the takes board's room click sets it.
+    var caretToEndToken: Int = 0
     @State private var height: CGFloat = 24
     @State private var canaryMessage: String?
     /// 13d batch 4 (A23/A24): the two this-Mac editor-behaviour settings.
@@ -552,7 +563,8 @@ struct PaneSurfaceView: View {
                 spellcheck: spellcheck, paragraphGap: paragraphGap,
                 onFocusRequest: onFocusRequest, onEdit: onEdit,
                 onSelectionChange: onSelectionChange, menuItems: menuItems,
-                onMeasuredHeight: onMeasuredHeight)
+                onMeasuredHeight: onMeasuredHeight,
+                caretToEndToken: caretToEndToken)
                 // EXACT height, not a floor (13b 3F, AD-7): an
                 // NSViewRepresentable ACCEPTS a tall proposal, so in any
                 // composition whose row is taller than the text (the margin
@@ -592,6 +604,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var onSelectionChange: ((NSRange) -> Void)?
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     var onMeasuredHeight: ((CGFloat) -> Void)?
+    var caretToEndToken: Int = 0
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -626,6 +639,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         view.string = text
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
+        // 13f W7: adopt the CURRENT token as the baseline — a pane born while
+        // a request is outstanding must not act on it (a remount is not a
+        // click).
+        context.coordinator.adoptCaretToEndBaseline(caretToEndToken)
         context.coordinator.remeasure()
         return view
     }
@@ -682,6 +699,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             view.string = text
             context.coordinator.remeasure()
         }
+        // 13f W7: last, so the text above is settled before the caret is
+        // placed against it.
+        context.coordinator.applyCaretToEndIfRequested(caretToEndToken, in: view)
     }
 
     private func applyStyle(to view: PaneTextView) {
@@ -746,6 +766,26 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             } else {
                 view.claimsKeyboardOnAttach = true
             }
+        }
+
+        /// 13f W7: the last caret-to-end token this pane acted on.
+        private var lastCaretToEndToken = 0
+
+        func adoptCaretToEndBaseline(_ token: Int) {
+            lastCaretToEndToken = token
+        }
+
+        /// Put the caret at the end of the pane's text when the composer's
+        /// token moves. Live panes only — a read pane's selection is not a
+        /// caret, and asking one to hold a caret would be the second liveness
+        /// mechanism P-3 forbids.
+        func applyCaretToEndIfRequested(_ token: Int, in view: PaneTextView) {
+            guard token != lastCaretToEndToken else { return }
+            lastCaretToEndToken = token
+            guard token > 0, view.isEditable else { return }
+            let end = (view.string as NSString).length
+            view.setSelectedRange(NSRange(location: end, length: 0))
+            view.scrollRangeToVisible(NSRange(location: end, length: 0))
         }
 
         func install(

@@ -203,38 +203,82 @@ struct TakesCardHeightTests {
         }
     }
 
-    // MARK: - PARITY (green on both sides — labelled CHARACTERIZATION):
-    // carousel and the rail's short-block strip keep the RULED 110
+    // MARK: - 13f W8 — CAROUSEL joins slot split (her 2026-07-30 ruling);
+    // the rail's short-block strip still keeps the RULED 110
 
-    /// **CHARACTERIZATION — green before and after, by design.** The
-    /// sitting superseded S4-31b's one-fixed-strip-height rule FOR SLOT
-    /// SPLIT ONLY; carousel keeps it. Nothing in the suite pinned
-    /// carousel's height before this batch (`railCardHeight` and the
-    /// literal 110 appeared in ZERO test files), so the rule it keeps was
-    /// unguarded — this pin is that guard, created here.
+    /// **13f W8 — A DELIBERATELY FLIPPED PIN.** This was
+    /// `carouselKeepsTheRuledFixedCardHeight`, a CHARACTERIZATION pin the QoL
+    /// round created to guard the scoping it chose: S4-31b superseded for slot
+    /// split ONLY, carousel byte-unchanged at 110. Her ruling —
+    /// *"carousel needs the same treatment"* — retires that scoping, so the
+    /// pin is inverted rather than deleted: the same measurement, the opposite
+    /// expectation, and the rule it now guards is that carousel and slot split
+    /// answer identically.
     ///
-    /// Measured semantically, not by a constant we chose: a capped card
-    /// wraps its pane in a vertical ScrollView, so the pane's NEAREST
-    /// scroll ancestor is that in-card clip and its height is the card's
-    /// text room. Uncapping removes the wrapper entirely, which is exactly
-    /// what the slot-split pin below asserts.
-    @Test func carouselKeepsTheRuledFixedCardHeight() async throws {
+    /// Measured semantically, not by a constant we chose: a capped card wraps
+    /// its pane in a vertical ScrollView, so an uncapped card is one with NO
+    /// such wrapper — the pane's nearest scroll ancestor is the strip, and the
+    /// strip is at least as tall as the take's full measured height.
+    ///
+    /// DISCRIMINATING REVERT: pass `Self.railCardHeight` for carousel in
+    /// `carouselBloom` ⇒ this fails and the slot-split pin below still passes.
+    @Test func carouselShowsALongTakeAtFullLength() async throws {
         try await withBoard(style: .carousel, takes: 2, paragraphs: 14) { hosting, _, model, _ in
             guard let card = cardPanes(in: hosting).first,
-                  let clip = scrollAncestors(of: card, upTo: hosting).first else {
-                Issue.record("no carousel card / no in-card clip")
+                  let nearest = scrollAncestors(of: card, upTo: hosting).first else {
+                Issue.record("no carousel card mounted")
                 return
             }
             let measured = PaneMeasurement.height(of: card)
             #expect(measured > 500, "the fixture take is genuinely long (\(measured))")
-            #expect(clip.bounds.height <= TakesBoardLayout.railCardHeight,
-                    "carousel's card still caps at one card-height (clip \(clip.bounds.height))")
+            #expect(scrollAncestors(of: card, upTo: hosting).count == 2,
+                    "the in-card vertical clip is GONE — the card is the take's full height")
+            #expect(nearest.bounds.height >= measured,
+                    "the strip holds the take at full length (strip \(nearest.bounds.height) vs take \(measured)) — carousel showed 110 pt before her ruling")
+            // The seam's other half, flipped with it: carousel SUBSCRIBES to
+            // measured heights now, because it sizes a wrapper (the drag's
+            // natural-height clamp needs the measurement slot split needs).
+            #expect(model.measuredHeightWrites > 0,
+                    "the measurement seam reaches the board in carousel now (saw \(model.measuredHeightWrites))")
+        }
+    }
+
+    /// **13f W8 — RED ON THE PRE-RULING CODE** (no drag existed on carousel).
+    /// Her ruling's second half: the same shorten-drag, from the SAME
+    /// per-block memory — a block shortened in one style reads shortened in
+    /// the other, which is the recorded intent, not an accident.
+    ///
+    /// DISCRIMINATING REVERT: pass `Self.railCardHeight` for carousel in
+    /// `carouselBloom` ⇒ the dragged-to height stops reaching the cards and
+    /// they sit at 110 again.
+    ///
+    /// **The drag lands at an INTERMEDIATE height (400), deliberately.** The
+    /// first version of this pin dragged to the floor — and the floor IS
+    /// `railCardHeight`, so it passed on the reverted code too: a floored card
+    /// and a fixed-110 card are the same picture. Dragging to 400 is a height
+    /// the pre-ruling code cannot produce (the standing "a green revert gets a
+    /// stronger arm" rule, applied where the revert found it).
+    @Test func aShortenedCarouselSlotReEntersTheInCardScroll() async throws {
+        try await withBoard(style: .carousel, takes: 2, paragraphs: 14) {
+            hosting, window, model, fixture in
+            model.board.slotDragEnded(
+                fixture.blockID, translation: -500, naturalHeight: 900)
+            #expect(model.slotHeight(fixture.blockID) == 400,
+                    "the drag committed at 400 — between the floor and natural")
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            guard let card = cardPanes(in: hosting).first,
+                  let clip = scrollAncestors(of: card, upTo: hosting).first else {
+                Issue.record("no card / no clip after shortening")
+                return
+            }
             #expect(scrollAncestors(of: card, upTo: hosting).count == 3,
-                    "carousel keeps its in-card vertical clip inside the strip inside the article")
-            // The seam's other parity half: carousel subscribes to NOTHING,
-            // so its invalidation profile is untouched by this batch.
-            #expect(model.measuredHeightWrites == 0,
-                    "no measured-height delivery reaches the board in carousel (saw \(model.measuredHeightWrites))")
+                    "the in-card vertical clip is BACK — the existing capped machinery")
+            #expect(clip.bounds.height > TakesBoardLayout.railCardHeight,
+                    "…at the height SHE chose, not the retired fixed one (clip \(clip.bounds.height))")
+            #expect(clip.bounds.height <= 400,
+                    "…and bounded by it (clip \(clip.bounds.height))")
+            #expect(PaneMeasurement.height(of: card) > 500,
+                    "and the whole take is still there, reachable by scrolling in the card")
         }
     }
 
@@ -605,21 +649,41 @@ struct TakesCardHeightTests {
     /// `ensureLayout` per pane either way, so uncapping adds drawn area and
     /// scroll extent — never new layout work. If this ever fails, the P1
     /// argument for L3 has changed and the batch record's claim is stale.
+    ///
+    /// **13f W8 — REWORKED, because her ruling made the old comparison
+    /// vacuous.** It measured carousel (capped) against slot split (uncapped);
+    /// with carousel uncapped too, both arms became the same state and the pin
+    /// would have gone on passing while asserting nothing. The capped arm is
+    /// now made by SHORTENING — the only way a card is capped at all after her
+    /// ruling — so the claim under test is unchanged and the comparison is
+    /// real again.
     @Test func paneMeasurementIsIndependentOfCapping() async throws {
-        var byStyle: [FanStyle: CGFloat] = [:]
-        for style in [FanStyle.carousel, .slotSplit] {
-            try await withBoard(style: style, takes: 2, paragraphs: 14) { hosting, _, _, _ in
-                guard let card = cardPanes(in: hosting).first else {
-                    Issue.record("\(style): no card")
-                    return
-                }
-                byStyle[style] = PaneMeasurement.height(of: card)
+        var uncapped: CGFloat?
+        var capped: CGFloat?
+        try await withBoard(style: .slotSplit, takes: 2, paragraphs: 14) {
+            hosting, window, model, fixture in
+            guard let card = cardPanes(in: hosting).first else {
+                Issue.record("no card")
+                return
             }
+            uncapped = PaneMeasurement.height(of: card)
+            // Cap it the only way a card is capped now: her shorten-drag.
+            model.board.slotDragEnded(
+                fixture.blockID, translation: -10_000, naturalHeight: 900)
+            #expect(model.slotHeight(fixture.blockID) == TakesBoardLayout.railCardHeight,
+                    "non-vacuity: the card really is capped in the second arm")
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            guard let after = cardPanes(in: hosting).first else {
+                Issue.record("no card after shortening")
+                return
+            }
+            capped = PaneMeasurement.height(of: after)
         }
-        guard let capped = byStyle[.carousel], let uncapped = byStyle[.slotSplit] else {
+        guard let capped, let uncapped else {
             Issue.record("missing measurements")
             return
         }
+        #expect(uncapped > 500, "non-vacuity: the fixture take is genuinely long")
         #expect(abs(capped - uncapped) <= 1,
                 "the same take measures the same capped (\(capped)) or not (\(uncapped))")
     }

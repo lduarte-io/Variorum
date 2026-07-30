@@ -391,6 +391,31 @@ final class TakesViewModel {
         Task { await autosave.flushNow() }
     }
 
+    // MARK: - 13f W7 — the takes room's landing
+
+    /// The variant whose pane should take the caret at the END of its text,
+    /// and the monotonic token that says "asked again". Only the board's
+    /// typewriter-room click writes these; a pane compares the token it is
+    /// handed against the one it last acted on.
+    private(set) var caretToEndVariantID: String?
+    private(set) var caretToEndCounter = 0
+
+    /// Focus a pane AND ask it for its caret at the text end — the room's
+    /// whole gesture. It rides `focus` (the ONE authority door, migration
+    /// flush and all); the caret half is a message to the pane that focus
+    /// already reached, never a second way to be live (P-3).
+    func focusWithCaretAtEnd(_ pane: PaneKey) {
+        caretToEndVariantID = pane.variantID
+        caretToEndCounter += 1
+        focus(pane)
+    }
+
+    /// What a pane rendering `variantID` is handed. Zero for every pane the
+    /// room did not name, so nothing else in the board ever sees a change.
+    func caretToEndToken(forVariant variantID: String) -> Int {
+        caretToEndVariantID == variantID ? caretToEndCounter : 0
+    }
+
     /// A live pane's keystroke: the buffer is authoritative while dirty;
     /// the edit lands in exactly THAT take's working_text (visible-not-
     /// chosen is real and editable — durable, synced).
