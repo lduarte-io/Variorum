@@ -250,6 +250,11 @@ extension EditorView {
             return true
         case .pageFan:
             return false  // fan pages live on the Takes board
+        case .find(let action):
+            // QoL batch 3 (L6): the find bar lives in THIS editor's own scroll
+            // view. The inline book/spread/pool editor owns none, so it
+            // declines and the router speaks the declared note (P-2).
+            return model.performFind(action)
         }
     }
 }

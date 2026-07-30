@@ -139,6 +139,10 @@ final class AppSession {
         commandRouter.speak = { status.speak($0) }
         let editorRouter = self.editorRouter
         commandRouter.writeEditorAttached = { editorRouter.active != nil }
+        // QoL batch 3 (L6): the find family needs the editor that owns a
+        // scroll view — the inline book/spread/pool editors attach with
+        // `scrollView: nil` and must never render the find doors enabled.
+        commandRouter.writeEditorOwnsScrollView = { editorRouter.active?.scrollView != nil }
         commandRouter.undoAvailable = { menuState.topLabel != nil }
         commandRouter.redoAvailable = { menuState.topRedoLabel != nil }
         #endif

@@ -30,6 +30,12 @@ struct CapabilityRegistryTests {
         }
         contexts.append(CapabilityContext(mode: nil))
         contexts.append(CapabilityContext(mode: nil, writeEditorAttached: true))  // book/pool editor
+        // QoL batch 3 (L6): the post detail's own editor — the one surface
+        // that owns a scroll view, and therefore the only one the find family
+        // can act on. Without this context the walk's
+        // `noActIsUnavailableInEveryContext` could never see them act.
+        contexts.append(CapabilityContext(
+            mode: .write, writeEditorAttached: true, writeEditorOwnsScrollView: true))
         // 13c 2B: a takes board mounted OUTSIDE a post detail (the book
         // spread's takes page) — the context in which `mode` says nothing
         // and the board's own attachment is the truth.
@@ -75,9 +81,17 @@ struct CapabilityRegistryTests {
         // 13c R2-2 (A13(a)): `.callout` LEFT this list — the frame is the
         // BLOCK's and takes share it (R16/R27), so it declares
         // `takesAccess: .native` like every other block-scoped editing act.
+        // QoL batch 3 (L6) — a NAMED parity exception, ruled at the batch's
+        // proposal gate. The find family joins the `.previousBlock` family:
+        // these are FULL-DOCUMENT surface acts, and Takes is not "behind
+        // Write" here because the takes-aware find/replace does not exist on
+        // ANY surface — it is her L6 rider's recorded future scope (owner
+        // 13e). The moment it is built, these declarations gain a real
+        // `takesAccess` and leave this list.
         let exempt: Set<CapabilityID> = [
             .previousBlock, .nextBlock, .exportCaretBlock, .switchMode,
             .renameLens, .tagBlock,
+            .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {

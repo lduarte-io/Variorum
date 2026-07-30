@@ -243,6 +243,11 @@ struct TakesBoardView: View {
         case .pageFan(let delta):
             model.pageFocusedFan(by: delta)
             return true
+        case .find:
+            // QoL batch 3 (L6): v1 finds across the POST's text, which is the
+            // full-document editor's surface; a take card is one take. The
+            // router speaks the declared note (13e owns the takes-aware act).
+            return false
         }
     }
 

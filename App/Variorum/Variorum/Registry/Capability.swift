@@ -61,10 +61,31 @@ nonisolated enum CalloutEdit: Equatable, Sendable {
     case toggle
 }
 
+/// The in-post FIND family (QoL round 2026-07-29, batch 3 — her L6:
+/// *"we need to ship some kind of text find and replace … at least of the
+/// chosen text, because i noticed myself reaching for that and not having
+/// it"*). Registry-side, in the app's own vocabulary: the Editor feature maps
+/// these onto `NSTextFinder.Action`, and the registry never imports AppKit —
+/// the `StructuralAct` → `StructuralGesturePlanner.Command` layering, same
+/// reason (features consume the shared layer, never the reverse).
+///
+/// Deliberately distinct from `findAnything` (⌘K, the palette): that searches
+/// the LIBRARY's titles and names; this searches the TEXT of the post you are
+/// in, over its chosen takes. The takes-aware find/replace and whole-library
+/// body search are recorded future scope (owner 13e), per her L6 rider.
+nonisolated enum FindAction: String, Sendable, CaseIterable {
+    case show          // ⌘F — the find bar
+    case showReplace   // ⌥⌘F — the find bar with its replace field
+    case next          // ⌘G
+    case previous      // ⇧⌘G
+    case useSelection  // ⌘E — search for what's selected
+}
+
 /// Everything the menu bar / palette / bars route to "whichever post
 /// surface is mounted". One channel, exhaustively typed — a surface handler
 /// switches over this and the compiler keeps the four handlers complete.
 nonisolated enum RoutedCommand: Equatable, Sendable {
+    case find(FindAction)  // QoL batch 3 (L6)
     case takes(TakesCommand)
     case structural(StructuralAct)
     case deleteInEveryTake
@@ -144,6 +165,23 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// editor, the book view's inline editor, or a pool's scraps editor) —
     /// structural gestures can act directly.
     var writeEditorAttached = false
+    /// The attached Write editor owns ITS OWN scroll view — i.e. it is the
+    /// post detail's full-document editor, not the book/spread/pool inline
+    /// one (QoL batch 3, L6).
+    ///
+    /// Why this is a separate fact from `writeEditorAttached` and not a
+    /// refinement of it: the inline editors have no scroll view of their own,
+    /// but they are mounted INSIDE SwiftUI `ScrollView`s, which are
+    /// `NSScrollView`-backed and conform to `NSTextFinderBarContainer` — so
+    /// "there is no find bar there" is something that has to be ENFORCED, not
+    /// assumed. Without this field the find doors would render enabled over a
+    /// book page and either do nothing or mount a bar above every post on the
+    /// spread (the enabled-into-nil class the registry exists to kill).
+    ///
+    /// Exactly the shape and the reason of 13c 2B's `takesBoardAttached`:
+    /// enablement must track the surface that actually acts, never the
+    /// container it used to live in.
+    var writeEditorOwnsScrollView = false
     /// A TAKES BOARD is mounted somewhere (13c 2B). Inside a post detail
     /// `mode == .takes` already says this; the BOOK SPREAD's takes page
     /// mounts the same board with no detail around it, so the board reports
@@ -232,6 +270,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case sealPost
     // Write-editor-scoped doors the menu renders
     case previousBlock, nextBlock, blockComments, callout, exportCaretBlock
+    // In-post find & replace (QoL batch 3 — L6). FIVE declarations rather
+    // than one submenu-owning act: four of the five carry a KEY, and four
+    // undeclared keys sitting in the one place keys are declared is exactly
+    // P-1's collision-drift class.
+    case findInPost, findNext, findPrevious, findAndReplace, useSelectionForFind
     // Modes + app scope
     case switchMode
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary

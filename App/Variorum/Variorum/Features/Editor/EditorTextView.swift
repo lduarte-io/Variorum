@@ -72,6 +72,56 @@ final class EditorTextView: NSTextView {
         withSoftNewline { super.keyDown(with: event) }
     }
 
+    /// **QoL batch 3 (L6) — TRUE only while a FIND-BAR replacement is being
+    /// applied**, and only ever by `EditorFind`'s own application loop. Never
+    /// sticky: the single writer is `withFindReplace`, whose `defer` clears it
+    /// on every path — the exact shape `isPasting` and `isSoftNewline` already
+    /// use on this class.
+    ///
+    /// It exists for ONE decision: a cross-block edit with a replacement does
+    /// not refuse on this editor — it routes to `planCrossBlockEdit`, which
+    /// MERGES the blocks (the ratified 2026-07-09 merge-then-edit, made for a
+    /// deliberate hand-made selection). A find-driven replacement must never
+    /// restructure her post, so under this flag the cross-block arm speaks
+    /// instead of planning.
+    private(set) var isFindReplacing = false
+
+    func withFindReplace<T>(_ body: () -> T) -> T {
+        isFindReplacing = true
+        defer { isFindReplacing = false }
+        return body()
+    }
+
+    /// The find bar's replacements, handed to the model (which pre-checks
+    /// every range and then re-drives them through the ordinary input path).
+    var onFindReplace: (([NSRange], [String]) -> Void)?
+
+    /// **`NSTextFinderClient.shouldReplaceCharactersInRanges:withStrings:`,
+    /// answered NO — always — and deliberately.**
+    ///
+    /// `NSTextView` implements this selector privately and declares no
+    /// `NSTextFinderClient` conformance, so there is no visible method to
+    /// override and no `super` to call; this implementation shadows the
+    /// private one for our subclass. That is a documented, public PROTOCOL
+    /// method, not private API, and the shadowing is the point:
+    ///
+    /// > *"Before a replace operation is performed, NSTextFinder calls the
+    /// > first method to determine if a replacement should take place. If it
+    /// > returns NO, then the characters in the given ranges will not be
+    /// > replaced."* — `NSTextFinder.h`
+    ///
+    /// We say NO because MEASUREMENT (M1b, 26.5.2) showed AppKit applies an
+    /// approved Replace All as ONE coalesced storage transaction spanning
+    /// every match — `{4, 48}` across two block seams for three matches —
+    /// which our block-routed pipeline can only read as a desync (it crashed
+    /// the measurement outright). The replacements are re-driven one at a
+    /// time by `EditorFind`, through the same path typing takes.
+    @objc(shouldReplaceCharactersInRanges:withStrings:)
+    func shouldReplaceCharactersForFinder(_ ranges: [NSValue], with strings: [String]) -> Bool {
+        onFindReplace?(ranges.map(\.rangeValue), strings)
+        return false
+    }
+
     /// ⌘S — commit the caret block's variant (AppSpec §9 commit shortcut).
     var onCommitShortcut: (() -> Void)?
 
@@ -387,6 +437,19 @@ final class EditorTextView: NSTextView {
         // off, spelling reachable via Edit ▸ Spelling and Grammar — so a
         // Mac that never opens Settings behaves exactly as it did.
         SpellcheckLevel.current.apply(to: textView)
+        // QoL batch 3 (L6): in-post find & replace. The bar lives in the
+        // ENCLOSING SCROLL VIEW (`NSScrollView` is an
+        // `NSTextFinderBarContainer`), which is why only this editor gets it:
+        // `makeInlineEditor` below has no scroll view of its own, and the
+        // book/spread scroll view it sits inside is not its to hang a bar in.
+        //
+        // Incremental searching stays OFF in v1 (ruled): live match
+        // highlighting is the per-range rendering-attributes family
+        // TEXTKIT2_NOTES §3 flags as unreliable, and it is the one part of the
+        // find UI the Phase 6 spike never exercised. A named, revisitable
+        // limitation, not an oversight.
+        textView.usesFindBar = true
+        textView.isIncrementalSearchingEnabled = false
 
         // Pool drags land here too (Phase 10 Step 7) — additive, never
         // replacing the text types NSTextView registers for itself.

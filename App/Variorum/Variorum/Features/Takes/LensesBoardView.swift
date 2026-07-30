@@ -172,6 +172,11 @@ struct LensesBoardView: View {
             return true
         case .pageFan:
             return false  // fan pages live on the Takes board
+        case .find:
+            // QoL batch 3 (L6): find is the full-document editor's — a lens
+            // column is one take's pane, not the post's text. Declining lets
+            // the router speak the declared note rather than a per-site copy.
+            return false
         }
     }
 

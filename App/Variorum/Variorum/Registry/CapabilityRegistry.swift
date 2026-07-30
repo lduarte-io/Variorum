@@ -103,6 +103,18 @@ nonisolated enum CapabilityRegistry {
         ctx.writeEditorAttached ? .act : .unavailable
     }
 
+    /// The FIND family (QoL batch 3 — L6): the post detail's full-document
+    /// Write editor, which is the one surface that owns a scroll view for the
+    /// bar to live in. Strictly narrower than `writeEditor` above — see
+    /// `CapabilityContext.writeEditorOwnsScrollView` for why the inline
+    /// book/spread/pool editors must be excluded by a fact rather than by
+    /// hope. Takes/Lenses/read surfaces are deliberately out of v1: a find
+    /// ACROSS the post has no meaning on a per-take pane, and the takes-aware
+    /// find/replace is her L6 rider's recorded future scope (owner 13e).
+    private static let findFamily: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        ctx.writeEditorOwnsScrollView ? .act : .unavailable
+    }
+
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
 
     // MARK: - The table
@@ -413,6 +425,46 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Put the caret in a block to export it.",
             availability: writeEditor),
 
+        // MARK: In-post find & replace (QoL batch 3 — her L6)
+        //
+        // `takesAccess: nil` and a named place in the registry-walk exemption
+        // set, beside `.previousBlock`/`.nextBlock`/`.exportCaretBlock`: these
+        // are full-document SURFACE acts, and Takes is not "behind Write"
+        // here — the takes-aware act does not exist yet anywhere (13e's
+        // recorded future scope, her own L6 rider). The verbs say "in Post"
+        // so nothing reads as a rival to ⌘K's "Find Anything…", which
+        // searches the library's titles and names and never body text.
+        Capability(
+            id: .findInPost, verb: "Find in Post…", scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: "⌘F", takesAccess: nil,
+            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            availability: findFamily),
+        Capability(
+            id: .findAndReplace, verb: "Find and Replace…", scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: "⌥⌘F", takesAccess: nil,
+            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            availability: findFamily),
+        Capability(
+            id: .findNext, verb: "Find Next", scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: "⌘G", takesAccess: nil,
+            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            availability: findFamily),
+        Capability(
+            id: .findPrevious, verb: "Find Previous", scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: "⇧⌘G", takesAccess: nil,
+            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            availability: findFamily),
+        Capability(
+            id: .useSelectionForFind, verb: "Use Selection for Find", scope: .post,
+            doors: [.menuBar],
+            shortcutLabel: "⌘E", takesAccess: nil,
+            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            availability: findFamily),
+
         // MARK: Modes + app scope
         Capability(
             id: .switchMode, verb: "Switch Mode (⌘1–⌘6)", scope: .post,
@@ -530,6 +582,14 @@ nonisolated enum CapabilityRegistry {
         case .comments: id = .blockComments
         case .callout: id = .callout
         case .pageFan: id = .pageFanBack
+        case .find(let action):
+            switch action {
+            case .show: id = .findInPost
+            case .showReplace: id = .findAndReplace
+            case .next: id = .findNext
+            case .previous: id = .findPrevious
+            case .useSelection: id = .useSelectionForFind
+            }
         }
         return capability(id).unavailableNote
     }

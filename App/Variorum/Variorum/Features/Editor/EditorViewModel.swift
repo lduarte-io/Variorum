@@ -257,6 +257,11 @@ final class EditorViewModel {
     @ObservationIgnored var tailIdleSleep: @Sendable (Duration) async throws -> Void =
         { try await Task.sleep(for: $0) }
     @ObservationIgnored private var tailIdleTask: Task<Void, Never>?
+    /// QoL batch 3 (L6): the deferred find-replace application (we are inside
+    /// AppKit's finder call when the gate runs — rewriting storage there would
+    /// be re-entrant). Exposed so tests can await it deterministically, the
+    /// `pendingCrossBlockTask` precedent.
+    @ObservationIgnored var findReplaceTask: Task<Void, Never>?
 
     var hasOpenTail: Bool { index.tailLength != nil }
 
@@ -291,6 +296,15 @@ final class EditorViewModel {
         canary.onFire = { [weak self] message in self?.canaryMessage = message }
         canary.arm(for: textView)
         textView.onCommitShortcut = { [weak self] in self?.commitCaretVariant() }
+        // QoL batch 3 (L6): the find bar's replacements arrive here. Only the
+        // editor that owns a scroll view has a bar at all, so the hook is
+        // wired only there — the inline book/spread/pool editor never sees a
+        // finder, and leaving it nil says so.
+        if scrollView != nil {
+            textView.onFindReplace = { [weak self] ranges, strings in
+                self?.gateFindReplace(ranges: ranges, strings: strings)
+            }
+        }
         textView.structuralMenuItems = { [weak self] in self?.contextMenuItems() ?? [] }
         session.editorRouter.active = self
         if let pending = pendingProjection {
@@ -692,6 +706,18 @@ final class EditorViewModel {
             // ruled deviation: two blocks, NOT a join). Locked/gap/tail
             // spans keep the speaking refusal.
             pendingVerdict = nil
+            // QoL batch 3 (L6) — THE SAFETY CORE, and it runs before every
+            // planner: a FIND-DRIVEN replacement never restructures the post.
+            // Below this line a cross-block edit MERGES blocks
+            // (`planCrossBlockEdit`, the ratified 2026-07-09 merge-then-edit)
+            // — ratified for a deliberate hand-made selection, never for a
+            // machine-driven sweep. `EditorFind` pre-checks every range, so
+            // reaching here under the flag means the text moved underneath a
+            // checked range; it refuses and says so.
+            if textView?.isFindReplacing == true {
+                refuseFeedback(FindReplaceGate.refusal(single: .crossesBlockBoundary))
+                return false
+            }
             // 13c 1B (A7): the empty-block carve runs FIRST — its range is
             // exactly one separator, which touches no entry at all, so the
             // two plans below can never see it (pinned). Deleting an EMPTY

@@ -197,6 +197,10 @@ final class CommandRouter {
     /// EditorRouter; reads its observable `active`, so menu enablement
     /// tracks it).
     @ObservationIgnored var writeEditorAttached: () -> Bool = { false }
+    /// Whether that editor owns its own scroll view — the post detail's
+    /// full-document editor, never the book/spread/pool inline one (QoL batch
+    /// 3, L6; see `CapabilityContext.writeEditorOwnsScrollView`).
+    @ObservationIgnored var writeEditorOwnsScrollView: () -> Bool = { false }
     /// Whether the structural undo stack has an entry (wired to the undo
     /// menu state).
     @ObservationIgnored var undoAvailable: () -> Bool = { false }
@@ -209,6 +213,7 @@ final class CommandRouter {
         CapabilityContext(
             mode: activeMode,
             writeEditorAttached: writeEditorAttached(),
+            writeEditorOwnsScrollView: writeEditorOwnsScrollView(),
             takesBoardAttached: takesBoardAttached,
             undoAvailable: undoAvailable(),
             redoAvailable: redoAvailable())

@@ -57,6 +57,7 @@ struct EditorCommands: Commands {
         .previousTake, .nextTake, .archiveTake, .saveChoicesAsLens,
         .closeAllTakes, .pageFanBack, .pageFanForward,
         .previousBlock, .nextBlock, .blockComments, .callout,
+        .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
     ]
 
@@ -100,6 +101,14 @@ struct EditorCommands: Commands {
         // submenu could never be a key.
         case .callout: ("c", [.command, .option])
         case .toggleSeams: ("b", [.command, .shift])
+        // QoL batch 3 (L6): the standard Find family, whole. The collision
+        // sweep over every `keyboardShortcut(` in the app found all five free
+        // (nearest neighbours: ⌘⇧E extract, ⌘K find anything, ⌘⇧K make block).
+        case .findInPost: ("f", .command)
+        case .findAndReplace: ("f", [.command, .option])
+        case .findNext: ("g", .command)
+        case .findPrevious: ("g", [.command, .shift])
+        case .useSelectionForFind: ("e", .command)
         case .helper: ("/", .command)
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
         default: nil
@@ -162,6 +171,37 @@ struct EditorCommands: Commands {
             }
             .keyboardShortcut("z", modifiers: [.command, .option, .shift])
             .disabled(session?.undoMenuState.topRedoLabel == nil)
+        }
+        // QoL batch 3 (her L6): the standard Edit ▸ Find submenu — the one
+        // slot in this file's menu map that was empty. Deliberately NOT ⌘K's
+        // neighbour: "Find Anything…" searches the library's titles and
+        // names, this searches the TEXT of the post you are in.
+        //
+        // Every item is registry-declared with its own key (P-1), and every
+        // one of them is honestly grey wherever no full-document Write editor
+        // owns a scroll view — which is every surface except the post
+        // detail's own editor (the book/spread/pool inline editors have no
+        // bar of their own to show).
+        CommandGroup(after: .pasteboard) {
+            Menu("Find") {
+                Button(verb(.findInPost)) { actions?.dispatch(.find(.show)) }
+                    .keyboardShortcut("f", modifiers: .command)
+                    .disabled(!enabled(.findInPost))
+                Button(verb(.findAndReplace)) { actions?.dispatch(.find(.showReplace)) }
+                    .keyboardShortcut("f", modifiers: [.command, .option])
+                    .disabled(!enabled(.findAndReplace))
+                Divider()
+                Button(verb(.findNext)) { actions?.dispatch(.find(.next)) }
+                    .keyboardShortcut("g", modifiers: .command)
+                    .disabled(!enabled(.findNext))
+                Button(verb(.findPrevious)) { actions?.dispatch(.find(.previous)) }
+                    .keyboardShortcut("g", modifiers: [.command, .shift])
+                    .disabled(!enabled(.findPrevious))
+                Divider()
+                Button(verb(.useSelectionForFind)) { actions?.dispatch(.find(.useSelection)) }
+                    .keyboardShortcut("e", modifiers: .command)
+                    .disabled(!enabled(.useSelectionForFind))
+            }
         }
         // The structural gestures' menu-bar door (Phase 9, contract item 1;
         // rewired 13b 1b): enablement is the REGISTRY's — in Write the
