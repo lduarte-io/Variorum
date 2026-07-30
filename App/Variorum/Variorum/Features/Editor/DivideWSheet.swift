@@ -284,7 +284,6 @@ private struct WCutFlow: View {
 
     @State private var geometry = CutFlowGeometry()
     @State private var width: CGFloat = 0
-    @State private var hovered: Int?
 
     private static let flowFont = NSFont.preferredFont(forTextStyle: .callout)
 
@@ -296,20 +295,20 @@ private struct WCutFlow: View {
                     at: CGPoint(x: token.frame.minX, y: token.frame.midY),
                     anchor: .leading)
             }
-            for slot in geometry.slots where slot.boundary != take.cut {
-                let height: CGFloat = slot.isStrong ? 13 : 9
-                let isHovered = hovered == slot.boundary
-                let mark = CGRect(
-                    x: slot.frame.midX - (isHovered ? 1.25 : 0.75),
-                    y: slot.frame.midY - height / 2,
-                    width: isHovered ? 2.5 : 1.5,
-                    height: height)
-                context.fill(
-                    Path(roundedRect: mark, cornerRadius: 1),
-                    with: .color(isHovered
-                        ? tokens.accent.opacity(0.8)
-                        : (slot.isStrong ? tokens.muted.opacity(0.6) : tokens.line)))
-            }
+            // 13f W9 — HER RULING (2026-07-30): *"I also think we don't need
+            // all those lines to show where you can cut - I feel like it's
+            // pretty clear that it only jumps to in between words."* The tick
+            // mark at every legal cut position is gone, and the hover
+            // highlight with it (it was one of those lines, thickened).
+            //
+            // RENDERING ONLY. The slots still exist in the geometry and still
+            // do all their work: `slotWidth` is what puts the gap between two
+            // words (so the flow's wrap arithmetic and every cached layout are
+            // byte-unchanged), `nearestSlot` still resolves clicks and drags
+            // against the same frames, `isStrong` still gives sentence ends and
+            // newlines their extra catch, and `slotFrame(for:)` still places
+            // the ✂. Snap rule, keyboard steps, parking and checkbox semantics
+            // are all untouched — their pins run unmodified.
             if let cut = take.cut, let frame = geometry.slotFrame(for: cut) {
                 context.draw(
                     Text("✂").font(.system(size: 13)).foregroundStyle(tokens.accent),
@@ -331,12 +330,12 @@ private struct WCutFlow: View {
         // and clicks resolved against them. `FlowItem` is `Equatable`; the
         // comparison is O(tokens) per change — no text scan.
         .onChange(of: take.flow) { rebuild() }
-        .onContinuousHover { phase in
-            switch phase {
-            case .active(let point): hovered = geometry.nearestSlot(to: point)
-            case .ended: hovered = nil
-            }
-        }
+        // 13f W9: `onContinuousHover` went with the ticks — its ONLY consumer
+        // was the hovered tick's highlight, and a hover tracker that changes
+        // nothing on screen is state churn per mouse move (13d judgment call
+        // 1's dead-code class). Clicking and dragging are unaffected: both
+        // resolve through `nearestSlot` on the gesture below, which never read
+        // the hover.
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { drag in
