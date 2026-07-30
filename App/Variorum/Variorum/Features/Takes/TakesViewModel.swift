@@ -41,6 +41,7 @@ final class TakesViewModel {
         self.session = session
         self.postID = postID
         self.defaults = defaults
+        self.board = TakesBoardLayout(postID: postID, defaults: defaults)
         // 13b 1a (N3): the ONE per-post coordinator (shared with the Write
         // editor and the TOC on the same post). The quit door covers it at
         // the session scope — this surface no longer registers itself.
@@ -80,7 +81,11 @@ final class TakesViewModel {
     /// the P-9 decomposition's seam 1): expansion, paging, follow-the-
     /// scroll visibility, density. Every pre-move property/method name is
     /// forwarded below, so views and pins read unchanged.
-    @ObservationIgnored let board = TakesBoardLayout()
+    ///
+    /// QoL batch 2: constructed in `init` now, because L3's slot heights
+    /// are LOCAL VIEW MEMORY and need the post identity + the injected
+    /// defaults a property initializer cannot see.
+    @ObservationIgnored let board: TakesBoardLayout
     /// The cross-surface choreography (seam 2): move-and-execute parking,
     /// the carried pane selection, landing consumption. Lazy so the
     /// composition can reference `self`.
@@ -1514,6 +1519,59 @@ final class TakesViewModel {
     /// R24's strip exception, one brain with the board's chunking.
     func railRowsPerColumn(slotText: String?) -> Int {
         board.railRowsPerColumn(slotText: slotText)
+    }
+
+    // MARK: - Card heights (QoL batch 2, L3 · L4) — the board's, forwarded
+
+    /// The RULED measurement seam's sink: a take pane's measured text
+    /// height, delivered on a deferred turn (never inside a SwiftUI
+    /// update). Equality-gated on the board, so a converged card is silent.
+    func notePaneMeasuredHeight(variantID: String, height: CGFloat) {
+        board.noteMeasuredTextHeight(variantID, height)
+    }
+
+    /// L4: a margin-grid card's height — its content, capped at 330.
+    func marginCardHeight(variantID: String) -> CGFloat {
+        TakesBoardLayout.marginCardHeight(
+            measuredText: board.measuredTextHeight(variantID))
+    }
+
+    /// L4: the rail's reserved vertical room — actual heights bounded by
+    /// the cap, maxed over ALL columns so ◀ ▶ never move the article.
+    func reservedRailHeight(takes: [Variant], rowsPerColumn: Int) -> CGFloat {
+        TakesBoardLayout.reservedRailHeight(
+            cardTextHeights: takes.map { board.measuredTextHeight($0.id) },
+            rowsPerColumn: rowsPerColumn)
+    }
+
+    /// L3: the height this block's slot-split cards render at — `nil` =
+    /// full length (the ruled default).
+    func slotHeight(_ blockID: String) -> CGFloat? {
+        board.slotHeight(blockID, naturalHeight: naturalSlotHeight(blockID))
+    }
+
+    /// The tallest card this block's fan would render at full length —
+    /// the drag's ceiling, and the "past it ⇒ full length" snap.
+    func naturalSlotHeight(_ blockID: String) -> CGFloat? {
+        board.naturalSlotHeight(
+            variantIDs: (projection.fans[blockID] ?? []).map(\.id))
+    }
+
+    func beginSlotDrag(_ blockID: String) {
+        board.beginSlotDrag(blockID, naturalHeight: naturalSlotHeight(blockID))
+    }
+
+    func slotDragChanged(_ blockID: String, translation: CGFloat) {
+        board.slotDragChanged(blockID, translation: translation)
+    }
+
+    func slotDragEnded(_ blockID: String, translation: CGFloat) {
+        board.slotDragEnded(
+            blockID, translation: translation, naturalHeight: naturalSlotHeight(blockID))
+    }
+
+    func resetSlotHeight(_ blockID: String) {
+        board.resetSlotHeight(blockID)
     }
 
     nonisolated static func railPageKey(_ blockID: String) -> String {

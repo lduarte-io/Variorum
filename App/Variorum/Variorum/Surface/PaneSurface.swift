@@ -508,6 +508,21 @@ struct PaneSurfaceView: View {
     var onSelectionChange: ((NSRange) -> Void)?
     /// 13b 1b (AD-4): the pane's Variorum context-menu items.
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
+    /// QoL batch 2 (L3/L4 — the RULED measurement seam): the pane's
+    /// MEASURED content height, for a composer that must size a wrapper
+    /// around it. A second consumer of the ONE publish door (P-3), never a
+    /// second measurement brain — and deliberately the MEASURED height,
+    /// not a rendered one: a geometry sink reports what the composition
+    /// already imposed, which is circular for "how tall does this want to
+    /// be" the moment a cap exists. Delivered on a deferred turn (see
+    /// `Coordinator.deliverMeasuredHeight`), so a composer's model write
+    /// can never land inside a SwiftUI update.
+    ///
+    /// Only the two compositions that SIZE a wrapper subscribe (margin
+    /// grid always; slot split for its drag clamp) — everywhere else this
+    /// is nil and nothing changes, carousel's invalidation profile
+    /// included.
+    var onMeasuredHeight: ((CGFloat) -> Void)?
     @State private var height: CGFloat = 24
     @State private var canaryMessage: String?
     /// 13d batch 4 (A23/A24): the two this-Mac editor-behaviour settings.
@@ -536,7 +551,8 @@ struct PaneSurfaceView: View {
                 role: role, variantID: variantID,
                 spellcheck: spellcheck, paragraphGap: paragraphGap,
                 onFocusRequest: onFocusRequest, onEdit: onEdit,
-                onSelectionChange: onSelectionChange, menuItems: menuItems)
+                onSelectionChange: onSelectionChange, menuItems: menuItems,
+                onMeasuredHeight: onMeasuredHeight)
                 // EXACT height, not a floor (13b 3F, AD-7): an
                 // NSViewRepresentable ACCEPTS a tall proposal, so in any
                 // composition whose row is taller than the text (the margin
@@ -575,15 +591,27 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var onEdit: ((String) -> Void)?
     var onSelectionChange: ((NSRange) -> Void)?
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
+    var onMeasuredHeight: ((CGFloat) -> Void)?
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> PaneTextView {
         let view = PaneTextView.makeTakeSurface()
         view.delegate = context.coordinator
+        context.coordinator.onMeasuredHeight = onMeasuredHeight
         context.coordinator.install(
             view: view,
-            publishHeight: { height = max($0, 24) },
+            publishHeight: { [weak coordinator = context.coordinator] measured in
+                let resolved = max(measured, 24)
+                height = resolved
+                // QoL batch 2: the composer's copy leaves on a DEFERRED
+                // turn — this closure runs inside SwiftUI updates (the
+                // width-gated layout hook, updateNSView's adopt-remeasure),
+                // which is exactly the mid-update hazard `PanePublisher`
+                // exists for. A composer writing an @Observable model here
+                // would re-open it one layer out.
+                coordinator?.deliverMeasuredHeight(resolved)
+            },
             publishCanary: { canaryMessage = $0 })
         context.coordinator.onEdit = onEdit
         view.onPlainClick = { [weak coordinator = context.coordinator] _ in
@@ -606,6 +634,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.onEdit = onEdit
         context.coordinator.onFocusRequest = onFocusRequest
         context.coordinator.onSelectionChange = onSelectionChange
+        context.coordinator.onMeasuredHeight = onMeasuredHeight
         view.variorumMenu = menuItems
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
@@ -688,6 +717,8 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         var onEdit: ((String) -> Void)?
         var onFocusRequest: (() -> Void)?
         var onSelectionChange: ((NSRange) -> Void)?
+        /// QoL batch 2 (L3/L4): the composer's measured-height sink.
+        var onMeasuredHeight: ((CGFloat) -> Void)?
         private weak var view: PaneTextView?
         /// The ONE publish door (round-3 MINOR-D/E/F). Nothing in this
         /// coordinator writes SwiftUI state except through it.
@@ -778,6 +809,49 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             publisher?.invalidate()
             publisher = nil
             view = nil
+            onMeasuredHeight = nil
+            pendingMeasuredHeight = nil
+        }
+
+        // MARK: - The measured-height sink (QoL batch 2 — L3/L4)
+
+        /// The last height handed to the composer, so a re-publish of the
+        /// same measurement costs nothing at all (the publisher re-writes
+        /// its height on every convergence turn; an @Observable model on
+        /// the other end would re-render the board for each one).
+        private var deliveredMeasuredHeight: CGFloat?
+        private var pendingMeasuredHeight: CGFloat?
+
+        /// Hand the composer this pane's measured content height on the
+        /// NEXT main-queue turn. Deferred for the same reason
+        /// `scheduleRenderRestore` is (and on the same latch): the publish
+        /// this rides can fire inside a SwiftUI update, and a composer's
+        /// model write there is the dropped/undefined-write class.
+        /// Coalesced — a burst of publishes delivers once, with the last
+        /// value — and equality-gated, so a converged pane goes silent.
+        ///
+        /// Termination: a height delivery can change only the composer's
+        /// WRAPPER height. The pane's measurement is width-driven and its
+        /// width is fixed by the card, so a delivery can never change the
+        /// next measurement — the sequence reaches a fixed point and stops.
+        func deliverMeasuredHeight(_ height: CGFloat) {
+            guard onMeasuredHeight != nil else { return }
+            if let delivered = deliveredMeasuredHeight, abs(delivered - height) <= 0.5 {
+                return
+            }
+            let hadPending = pendingMeasuredHeight != nil
+            pendingMeasuredHeight = height
+            guard !hadPending else { return }
+            DispatchQueue.main.async { [weak self] in
+                guard let self, let pending = self.pendingMeasuredHeight else { return }
+                self.pendingMeasuredHeight = nil
+                guard let sink = self.onMeasuredHeight else { return }
+                if let delivered = self.deliveredMeasuredHeight, abs(delivered - pending) <= 0.5 {
+                    return
+                }
+                self.deliveredMeasuredHeight = pending
+                sink(pending)
+            }
         }
 
         func textDidChange(_ notification: Notification) {

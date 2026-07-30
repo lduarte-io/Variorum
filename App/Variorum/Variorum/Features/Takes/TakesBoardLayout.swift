@@ -28,6 +28,199 @@ import VariorumCore
 @MainActor
 @Observable
 final class TakesBoardLayout {
+    // MARK: - Card geometry (QoL round 2026-07-29, batch 2 — L3 · L4)
+
+    /// The take card's ruled height (13b 3F/4D — N40/S4-31b: ONE fixed
+    /// strip height, the content scrolling in place). It lives HERE now
+    /// because the reserve arithmetic and the drag clamps below all need
+    /// it; `TakesBoardView.railCardHeight` forwards, so every existing
+    /// call site and pin reads unchanged.
+    nonisolated static let railCardHeight: CGFloat = 110
+    /// The gap between stacked cards in a rail column.
+    nonisolated static let cardGap: CGFloat = 6
+
+    /// L4's RULED cap: a margin-grid card grows with its content to
+    /// **three card-heights** and scrolls inside beyond that. Her report:
+    /// *"even when there is a long block, the margin grid note is sticky
+    /// note sized which isn't that helpful for long blocks."*
+    ///
+    /// Why 330 and not more (the ruling's derivation, kept where the
+    /// constant lives): the unit is the one R74's density option already
+    /// speaks — "n high" is literally n card-heights — and at `gridRows`
+    /// 3 the tallest column lands near one viewport (~1,000 pt), so every
+    /// density setting stays usable; a 4× cap would make "3 high" taller
+    /// than most screens and quietly kill a shipped option. It takes the
+    /// prose visible in a margin card from ~4 lines to ~18.
+    nonisolated static let marginCardCapHeight: CGFloat = 330
+
+    /// A card's non-text furniture: `TakeCardFrame`'s 5 + 5 vertical
+    /// padding plus the choose header's line (~16 pt). Used only to turn a
+    /// pane's MEASURED text height into the card height around it.
+    nonisolated static let cardChromeHeight: CGFloat = 26
+
+    /// L4: a margin card's height — its content, bounded by the cap, never
+    /// below the sticky-note height. `nil` (no measurement yet) is the
+    /// first-bloom state and resolves to exactly today's fixed height, so
+    /// the card never starts wrong, only settles taller.
+    nonisolated static func marginCardHeight(measuredText: CGFloat?) -> CGFloat {
+        guard let measuredText else { return railCardHeight }
+        return min(max(measuredText + cardChromeHeight, railCardHeight), marginCardCapHeight)
+    }
+
+    /// L4's reserve, reworked from uniform rows × 110 to ACTUAL card
+    /// heights bounded by the cap (the ruling's item 6).
+    ///
+    /// The max is taken over ALL columns, never the visible page — that is
+    /// what keeps the reserve **page-independent**, so the article does not
+    /// jump as ◀ ▶ turn (13b 3F's steadiness property, preserved through
+    /// the change to variable heights). With no measurements yet it
+    /// degrades to `min(cards, rows) × 110 + gaps`, which is byte-identical
+    /// to the arithmetic it replaces.
+    nonisolated static func reservedRailHeight(
+        cardTextHeights: [CGFloat?], rowsPerColumn: Int
+    ) -> CGFloat {
+        let rows = max(rowsPerColumn, 1)
+        guard !cardTextHeights.isEmpty else { return railCardHeight }
+        var tallest: CGFloat = 0
+        for start in stride(from: 0, to: cardTextHeights.count, by: rows) {
+            let column = cardTextHeights[start..<min(start + rows, cardTextHeights.count)]
+            let height = column.reduce(CGFloat(0)) { $0 + marginCardHeight(measuredText: $1) }
+                + CGFloat(max(column.count - 1, 0)) * cardGap
+            tallest = max(tallest, height)
+        }
+        return tallest
+    }
+
+    /// L3's drag clamp (the `CanvasBoardGeometry.clampedSize` precedent —
+    /// a pure function, pinned without hosting).
+    ///
+    /// Floor: one card-height — below a sticky note the in-card scroll is
+    /// useless. Ceiling: the slot's NATURAL height, and a drag that
+    /// reaches it returns `nil` — full length — so pulling the handle back
+    /// down is how she undoes a shorten, not a menu item she has to find.
+    nonisolated static func clampedSlotHeight(
+        _ proposed: CGFloat, naturalHeight: CGFloat?
+    ) -> CGFloat? {
+        if let naturalHeight, proposed >= naturalHeight - 1 { return nil }
+        return max(proposed, railCardHeight)
+    }
+
+    // MARK: - Measured card heights (QoL batch 2 — the RULED seam)
+
+    /// variantID → the pane's measured TEXT height, delivered by
+    /// `PaneSurfaceView.onMeasuredHeight` on a deferred turn. Only the two
+    /// compositions that size a wrapper subscribe (margin grid, slot
+    /// split); every other pane leaves this untouched.
+    private var measuredTextHeights: [String: CGFloat] = [:]
+
+    func measuredTextHeight(_ variantID: String) -> CGFloat? {
+        measuredTextHeights[variantID]
+    }
+
+    /// Equality-gated: a re-published identical measurement must not
+    /// re-render the board. (The pane's own sink gates too; this is the
+    /// second half of the same discipline, on the observable side.)
+    func noteMeasuredTextHeight(_ variantID: String, _ height: CGFloat) {
+        if let existing = measuredTextHeights[variantID], abs(existing - height) <= 0.5 {
+            return
+        }
+        measuredTextHeights[variantID] = height
+    }
+
+    /// A slot's NATURAL height: the tallest card its fan would render at
+    /// full length. `nil` until some pane has measured — the drag's
+    /// ceiling is simply absent until then.
+    func naturalSlotHeight(variantIDs: [String]) -> CGFloat? {
+        let heights = variantIDs.compactMap { measuredTextHeights[$0] }
+        guard let tallest = heights.max() else { return nil }
+        return tallest + Self.cardChromeHeight
+    }
+
+    // MARK: - Slot heights (L3: "maybe the height of the block should
+    // even be draggable?") — LOCAL view memory, the Canvas precedent
+
+    /// blockID → the height she pulled this block's takes down to. Absent
+    /// ⇒ FULL LENGTH (L3's ruled default for slot split). Persisted per
+    /// post under its OWN defaults key, never synced.
+    ///
+    /// Why its own key and not a field on `TakesViewMemory`: that struct is
+    /// decoded with `try?`, and Swift's synthesized `init(from:)` requires
+    /// every key regardless of a property's default — so a new field would
+    /// make every already-stored memory fail to decode and silently reset
+    /// her column arrangements and alignment lock. (Adopted as a standing
+    /// note for any future `TakesViewMemory` change.)
+    private(set) var slotHeights: [String: CGFloat] = [:]
+    /// The live drag, before it commits (the Canvas `resizeOffsets` shape).
+    private var slotDragBaselines: [String: CGFloat] = [:]
+    private var slotDragOffsets: [String: CGFloat] = [:]
+
+    @ObservationIgnored private var postID: String?
+    @ObservationIgnored private var defaults: UserDefaults = .standard
+
+    init(postID: String? = nil, defaults: UserDefaults = .standard) {
+        self.postID = postID
+        self.defaults = defaults
+        loadSlotHeights()
+    }
+
+    static let slotHeightsKeyPrefix = "takesSlotHeights."
+
+    private var slotHeightsKey: String? {
+        postID.map { Self.slotHeightsKeyPrefix + $0 }
+    }
+
+    private func loadSlotHeights() {
+        guard let slotHeightsKey,
+              let raw = defaults.dictionary(forKey: slotHeightsKey) as? [String: Double]
+        else { return }
+        slotHeights = raw.mapValues { CGFloat($0) }
+    }
+
+    private func saveSlotHeights() {
+        guard let slotHeightsKey else { return }
+        defaults.set(slotHeights.mapValues { Double($0) }, forKey: slotHeightsKey)
+    }
+
+    /// The height this block's take cards render at: `nil` = full length.
+    /// A drag in flight shows live, clamped exactly as it will commit.
+    func slotHeight(_ blockID: String, naturalHeight: CGFloat? = nil) -> CGFloat? {
+        guard let offset = slotDragOffsets[blockID] else { return slotHeights[blockID] }
+        let baseline = slotDragBaselines[blockID]
+            ?? slotHeights[blockID] ?? naturalHeight ?? Self.railCardHeight
+        return Self.clampedSlotHeight(baseline + offset, naturalHeight: naturalHeight)
+    }
+
+    func beginSlotDrag(_ blockID: String, naturalHeight: CGFloat?) {
+        guard slotDragBaselines[blockID] == nil else { return }
+        slotDragBaselines[blockID] =
+            slotHeights[blockID] ?? naturalHeight ?? Self.railCardHeight
+    }
+
+    func slotDragChanged(_ blockID: String, translation: CGFloat) {
+        slotDragOffsets[blockID] = translation
+    }
+
+    func slotDragEnded(_ blockID: String, translation: CGFloat, naturalHeight: CGFloat?) {
+        let baseline = slotDragBaselines[blockID]
+            ?? slotHeights[blockID] ?? naturalHeight ?? Self.railCardHeight
+        if let clamped = Self.clampedSlotHeight(baseline + translation, naturalHeight: naturalHeight) {
+            slotHeights[blockID] = clamped
+        } else {
+            slotHeights.removeValue(forKey: blockID)
+        }
+        slotDragOffsets.removeValue(forKey: blockID)
+        slotDragBaselines.removeValue(forKey: blockID)
+        saveSlotHeights()
+    }
+
+    /// "Full length" — the Canvas `resetSize` door.
+    func resetSlotHeight(_ blockID: String) {
+        slotHeights.removeValue(forKey: blockID)
+        slotDragOffsets.removeValue(forKey: blockID)
+        slotDragBaselines.removeValue(forKey: blockID)
+        saveSlotHeights()
+    }
+
     // MARK: - Follow-the-scroll (Phase 13 C2, R25)
 
     /// R25 — follow-the-scroll as a takes-viewing OPTION in all modes.
