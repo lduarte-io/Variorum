@@ -2095,3 +2095,53 @@ view-memory family; never synced, never schema), spoken in the host's
 standing status/toast voice. Batch 5. The P-5 legibility signal is
 thereby answered at all three layers: the in-line (W20), the wired
 ascent (W20), and the moment-of-edit note (W22).
+
+### Sitting rulings — round 10 (2026-07-30, the ascent's details + the diverge compound + the finish question)
+
+Her message recorded verbatim-faithful in four parts; parses stated so
+they can be corrected rather than trusted:
+
+1. **The chip chooser's ordering, hers:** *"prioritizing manually
+   adjusted books over smartbooks where it was auto added in the chip
+   selector maybe, or what book you were most recently in or
+   something"* (both floated, neither firm). **Shaping (architect,
+   overturnable):** curated books before smart in the chooser; within
+   each group the session's most-recently-visited floats to the top;
+   the visible in-line names the TOP pick (+"& N more"). Rides W20.
+2. **"the books it is in = the places you can navigate to" —
+   RATIFIED** (smart matches included; derived membership IS
+   membership, #26(h)).
+3. **W21 confirmed as understood:** *"does that mean we are added
+   something where clicking between outline/book/read carries your
+   place?"* — YES; that is exactly W21.
+4. **W23 (new row) — the DIVERGE-FOR-THIS-BOOK compound, hers:**
+   *"'duplicate as version' should be a button you can click, not
+   just an FYI (it seems a bit annoying to get the FYI but not have a
+   button that nicely duplicates it as version and deletes the
+   original for you all in one go - accessible from a menu maybe…)"*
+   **Parse (stated):** "deletes the original" = removes the original
+   from THIS book only — the copy takes the original's exact slot
+   here; the original lives on in its other books and the library
+   (deleting it globally would gut them; the standing chip "remove"
+   wording's own rule). Composition: `duplicateAsVersion` +
+   membership swap at position — standing ops, no new operation. The
+   W22 first-edit note CARRIES the button; a menu door serves later
+   times. Under a FINISHED book it refuses honestly (membership
+   frozen — #25's letter). Batch 5.
+5. **The finish/content question, hers verbatim:** *"what happens
+   when a book is locked with a post in multiple places inside of it?
+   i think it auto makes a version of it and deletes the original,
+   right? because you can't lock it and have it be in other places
+   unless you want to be annoyed. i guess we could support 'this post
+   is locked everywhere' but that seems kinda frustrating and
+   weird."* **The model fact, verified at the ops layer and told to
+   her:** NOTHING auto-forks today — `lockReading` freezes
+   STRUCTURE only (membership/order/chapters/extents); member posts'
+   CONTENT stays live, and an edit made anywhere (another book, the
+   library — single-book posts included) shows inside the finished
+   book. Her instinct is a real finding about what "finished" MEANS
+   for content; her floated mechanism (auto-fork at lock) and her
+   rejected pole ("locked everywhere… frustrating and weird") are
+   recorded. The edges need enumeration before any build
+   (single-book posts are library-editable too; unlock semantics; do
+   forks arrive sealed) — slotting question posed to her.
