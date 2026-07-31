@@ -1974,3 +1974,96 @@ fallback is to hoist it to the window and point it at the focused pane.
 
 **STOPPING HERE per the gate.** Item 0 is built, committed and green;
 items 1–3 proceed on the orchestrator's ruling of (a)–(d).
+
+### Sitting rulings — round 8 (2026-07-30, the post→book ascent + the model re-explained)
+
+Her opening, verbatim (recorded whole — it names the phase's real
+finding): *"even if you navigated there some other way, there's gotta
+be a way from a post/note to see what books it is present in and see
+it in the full context of any of those books. I think the reason that
+it's been hard to use post / notes is because there isn't a natural
+way to step back up into the book. … if you try to edit a post that's
+in multiple different books, it gets mutated into it's own copy? …
+I'm conflicted - I love the book as a looser collection of posts and
+the pointers, but how do I keep a door open from post -> book despite
+that?"*
+
+**Answered on the record:** editing NEVER copies (R31/R35 — membership
+is not ownership; `duplicateAsVersion` is the one deliberate
+divergence door; re-explained to her and landed). **THE TRACE
+FINDING (W20):** `MembershipChip` lists the post's books as clickable
+links wired to an `onOpenBook` closure — which is **passed nowhere at
+the chip's one mount** (`PostDetailView:86`): clicking a book name
+has done NOTHING since Phase 13 shipped. The designed ascent door is
+a dead affordance — the fire-and-DO class, and precisely her "no
+natural way to step back up."
+
+**Her rulings:**
+1. **The ascent = chip + visible in-line, HIDEABLE**, hers verbatim:
+   *"i think that chip + visible in line is good, but I think that
+   you should be able to hide it somehow (even if just with a
+   keyboard command). i love our uncluttered interface"* → shaped as
+   ONE context bar: the batch-3 back chip and the "in <book(s)>"
+   line share the bar and FOLD TOGETHER (one collapse, one
+   keyboard/menu toggle — never two hiding mechanisms); the popover's
+   links get wired (fire-and-DO: open the book REVEALED at this
+   post, the batch-2 reveal grammar; history pushed so ⌘[ returns).
+   No dedicated go-to-book shortcut (her middle pick); ⌘K reaches
+   the act by name.
+2. **Lands into the book's REMEMBERED mode, revealed — CONDITIONED
+   on cross-mode continuity**, hers verbatim: *"the remembered mode
+   is fine as long as there's a quick way to get from wherever you
+   are in read to that same point in book or outline - which I think
+   there is? if you click over does it move where you are? or offer
+   that as an option?"* → CHECKED: it does NOT exist today — the
+   mode picker sets `structure.mode` with no position carry; each
+   mode keeps its own place. **W21 (new row): switching Outline ·
+   Book · Read carries the CURRENT POST across** (Read's current
+   post → the spread anchored on it → Outline revealed at it) — the
+   "quick way" her condition names, built as the default behavior of
+   the click-over.
+
+**Ledger adds:** W20 — the ascent door (wire the chip links + the
+in-books half of the foldable context bar + reveal-at-post) · W21 —
+cross-mode position carry inside books. Both: batch 5.
+
+### THE ARCHITECT'S RULING on the Batch 4 proposal (2026-07-30 — the gate closes; BUILD items 1–3)
+
+**(a) APPROVED as proposed** — the pane COLLECTION on
+`WorkspaceModel` (`panes`/`selections`/`focusedPane`/`splitFractions`,
+nothing paired or left/right-named — the free-tiling rider in the
+state shape) with `RootView.selection` becoming a computed Binding
+over the focused pane's entry, keeping batch 3's ONE recording point
+complete by construction.
+**(b) APPROVED — the MOUNT rule** (the focused pane mounts the live
+surface; an unfocused note pane renders `ReadPostView` with its
+standing click-to-focus door; an unfocused book blurs via its OWN
+focus authority). The four-singletons-need-no-change audit is the
+evidence the shape is right; the named alternative (both live, a
+third liveness disjunct) is REJECTED for the reason proposed — it
+multiplies exactly what P-3 exists to prevent. The recorded cost (an
+unfocused pane whose remembered mode is Takes shows read prose until
+focused) goes to her walk's visual list.
+**(c) VERDICT ACCEPTED — the flight latch stays model-local — on TWO
+CONDITIONS, both to be pinned, not assumed:** (1) the
+unrepresentability itself (under the mount rule, two door-bearing
+surfaces on ONE post cannot co-mount — a pin that fails if the mount
+rule is ever loosened); (2) the unmount-mid-flight path (the
+pre-existing path gaining a new trigger — pinned as proposed). The
+recorded edge (a book pane on P beside a note pane on P) is dead
+under (b) and the record says so; if any future batch adopts (b)'s
+alternative, the latch moves to a post-keyed shared authority FIRST.
+**(d) APPROVED** — per-pane: chip, masthead-when-focused, quiet name
+line when not (the difference IS the focus signal); per-window:
+sidebar, toast, palette; the References/Scraps inspector stays
+per-pane in v1 on the visual list, hoisting-to-the-window the
+recorded fallback.
+**The two findings:** `ShellRouter` shared across `WindowGroup`
+windows → **batch 5's FIRST item** (per-window router/workspace
+before any second window ships; nothing in batch 4 depends on it).
+`splitFractions` in workspace state (pinnable, N-pane-shaped):
+approved.
+
+Item 0 (insertion order + drag-reorder) is ACCEPTED pending my own
+runs at the batch's end — its pin flips are named and the
+ordinals-do-not-shuffle pin is the property her ruling bought.
