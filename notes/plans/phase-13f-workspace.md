@@ -2161,3 +2161,253 @@ book-lock design goes to 13i's sitting** (knot 10 in its brief —
 edges: lock-implies-finish?, unlock semantics, fork permanence,
 naming the two states so "finished"/"locked" stop blurring — the
 word-blur that produced this very round is part of the design).
+
+### Batch 4 (cont.) — items 1–3 BUILT: THE SPLIT (W1/A25) + P-3 across panes + per-pane history
+
+**Counts, by my own runs at build-complete:** Mac `✔ Test run with 1003
+tests in 165 suites passed after 133.692 seconds` (`mac_exit=0`) · core
+`✔ Test run with 906 tests in 102 suites passed after 29.172 seconds`
+(`swift_exit=0`) · the tutorial spine on its OWN run, by TYPE name
+(`TutorialBookShapeTests` · `TutorialDoorTests` ·
+`TutorialWritingActsTests` · `TutorialTakesActsTests` ·
+`TutorialStructureActsTests` · `TutorialLookingActsTests` ·
+`TutorialLibraryActsTests`): `✔ Test run with 49 tests in 7 suites passed
+after 12.069 seconds`. From the batch's baselines (906/102 · 987/159 —
+987 being item 0's own result): **+16 Mac tests, +6 suites**; core
+byte-unchanged. **Mobile deliberately NOT run** — zero `Sources/` and
+zero `Shared/` lines (verified by `git status`), so the loop's own
+condition is unmet; the phase's 14/4 stands.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point (`pgrep` by path at open
+and at close). Every commit staged by explicit path; nothing under
+`notes/` outside this record was touched (sitting round 8 landed in the
+file while I built and is untouched above). Commits: `34ad7f7` (item 0)
+· `0fe1bb3` (the proposal) · `07d9f58` (items 1–3).
+
+#### The shape, and why it is this one
+
+The gate approved the MOUNT RULE, and the thing worth carrying forward is
+that **it is not a new mechanism — it is the condition under which the
+old ones stay correct.**
+
+`PaneTextAuthority` enforces exactly-one-live-ring, and it enforces it
+INSIDE one authority. Every authority owner (`TakesViewModel`, Compare's
+model, `CanvasViewModel`, `BlockTOCView`) and every routed-command
+handler (`EditorView`, `TakesBoardView`, `LensesBoardView`,
+`CompareBoardView`, `CanvasView`) is mounted by a detail host. So the
+whole extension is: **exactly the focused pane mounts a live surface.**
+The unfocused panes render read-cheap —
+
+- a **note** as `ReadPostView`, whose standing `onFocusRequest` migrates
+  the ring and seeds the caret (byte-for-byte the Book spread's sibling
+  page, and it keeps the ratified read-tier select+copy);
+- a **book** through `BookViewModel.liveFocusedPostID` — its OWN single
+  focus authority (13b 3E's fold) answering nil for a second REASON,
+  never a second mechanism. `focusedPostID` itself is untouched, so a
+  pane regaining focus restores exactly what she was editing;
+- **every list surface** unchanged, because a list owns no authority and
+  registers no handler (audited, not assumed).
+
+**The evidence the shape is right:** `CommandRouter`'s single detail
+registration, its LIFO handler stack and `EditorRouter.active` needed
+**no change at all**. The rejected alternative (both panes live, a third
+disjunct beside `sealed || structuralInFlight`) would have needed the
+flag threaded into five surfaces AND a pane-keyed rewrite of all three.
+
+#### State — the free-tiling rider in the shape, not in a comment
+
+`panes: [PaneID]` · `selections: [PaneID: SidebarSelection]` ·
+`focusedPane` · `splitFractions: [Double]` (DIVIDER positions, so a drag
+edits one number and three panes need no new shape). Nothing is a pair;
+nothing is named left or right. `WorkspaceModel.maximumPanes` is a **CAP
+on a collection** — her two-panes-in-v1 ruling — so raising it is all
+free tiling needs here.
+
+`RootView.selection` became a computed **Binding over the focused pane's
+entry**. That one change is what makes a sidebar click target the focused
+pane *by construction*, with no new routing; and a row click inside an
+UNFOCUSED list pane focuses and navigates in ONE click, because each
+pane's sub-views get their own pane-aware `onOpen`.
+
+#### Her round-7.3 rule, at ONE door
+
+*"definitely not two live side by sides - we already offer that for one
+note."* `select()` refuses a note another pane shows, focuses that pane,
+and the shell speaks a sentence naming **Lenses** and **Compare**. Three
+asks reach it — Open Beside on a shown note, ordinary navigation (sidebar
+/ ⌘K / ⌘⇧n), and "beside itself" — so **no new door can bypass it**. A
+scraps container counts as a note (it opens a detail host too); the
+shelf, the library and a book do not, because two panes on the shelf is
+nobody's confusion.
+
+#### A FINDING, fixed at the door rather than at the caller
+
+**Adopting and recording had come apart.** Batch 3 put the one recording
+point in the shell's `onChange(of: selection)`, which was complete while
+there was one pane and one selection. With panes, `openBeside` set a
+selection *without* seeding the new pane's history — so a fresh pane
+showed no chip, silently. That is batch 3's own shell-mount finding
+recurring one level down (a wiring that fails by showing nothing).
+
+`select()` now records the arrival itself, so the claim upgrades from
+"the shell's onChange records" to "**the one adoption door records**" —
+which cannot be bypassed by a door that writes a selection directly. The
+shell's `onChange` stays as a harmless net (re-visiting the current
+destination is a no-op by construction). *Found by my own model pins
+failing, before any of this reached a window.*
+
+#### Doors (P-1)
+
+`CapabilityID.openBeside` — `[.menuBar, .contextMenu]` — and
+`.closeSplit` — `[.menuBar]`; both **app-scope stack gates**, the
+`undoAvailable` shape rather than a mode gate, so each is honestly grey
+exactly when it could only refuse. The note-row menu is ONE grammar
+rendered by three surfaces (the Open strip, the Library catalog, the
+Pool), so `SidebarView.contextMenuCapabilities` declares it once for the
+family. The **menu's** Open Beside picks the most recently opened note no
+pane is showing — item 0's `recency` at its second job, which is the
+whole reason order and membership were separated.
+
+Deliberately **no new key equivalents**: the mandate is that every
+shortcut is a menu item, not that every menu item is a shortcut, and a
+new ⌘-chord here would have wanted its own collision sweep for no ruling
+that asked for it. Recorded so it can be added at her word.
+
+#### Item 3 — per-pane history, landed at the model
+
+`WorkspaceModel.history()` now defaults to the **focused** pane. That one
+default is where the gate's "focused-pane refinement" landed: ⌘[ / ⌘] and
+the registry's `canNavigateBack` / `canNavigateForward` closures became
+focus-aware **without a line changing at either end**. Each pane carries
+its own chip (`PaneHost`), and closing a pane takes its trail with it.
+
+#### THE GATE'S CONDITION (c) — both halves PINNED, not assumed
+
+**(1) The unrepresentability, asserted where it BITES.**
+`aSplitWindowMountsExactlyOneDetailAndOneCommandHandler` mounts a real
+split in a real window (two real posts, the batch-3 hosting precedent)
+and asserts the three app-scoped singletons still see ONE: `handlerCount
+== 1` with two panes on screen, and `activePostID` following the FOCUSED
+pane rather than the last-mounted one, across a focus migration in both
+directions. The pure half (`PaneMount.liveCount == 1` for every
+collection 1…5 and every focus) sits beside it, plus the corner that
+makes it mean anything about the running app — `WorkspaceModel.focus`
+refuses a non-member, so `focusedPane` is always in `panes`.
+
+**Revert R4-A (the mount rule loosened to always `.live`) turns it red
+with `handlerCount → 2` and `activePostID → the wrong post` — which IS
+the LIFO misrouting hazard `SpreadBookView` names, reproduced live.**
+That is the pin the gate asked for: loosen the rule and it fails.
+
+**(2) The unmount-mid-flight path.**
+`aDetailUnmountingUnderAFocusMigrationStillLandsItsText`: clicking the
+other pane makes this one read-cheap, which unmounts its detail — a path
+that already existed (a sidebar click during a ceremony does it) but that
+the split gives a NEW trigger. The backstop is `teardown()`'s
+`finalizeWork`, which flushes through the post's own autosave coordinator
+while holding the model alive. Premise-asserted first (the buffer is
+dirty and NOT yet in the store), so the pin cannot pass vacuously.
+
+**The latch verdict therefore STANDS as ruled: it stays model-local.**
+The recorded edge (a book pane focused on post P beside a note pane on P)
+is dead under the mount rule and the pins say why.
+
+#### Pins — every change named
+
+**New suite `PaneSplitTests` (16 tests in 6 suites):** `PaneMountTests`
+(2) the unrepresentability as arithmetic + the model's focus invariant ·
+`PaneLayoutTests` (2) even fractions/widths incl. three panes, and the
+drag that can never swallow a pane · `PaneSplitModelTests` (6) open
+beside · **the same-note rule at all three doors** · close-split deleting
+nothing · per-pane trails with the keys following focus · the Open Beside
+candidate · the cap re-using the other pane · `PaneBookBlurTests` (1) the
+book's half, including its one-click pane claim · `PaneSplitDoorTests` (3)
+the declarations and their grey, the shell's one refusal voice, **and the
+hosted unrepresentability pin** · `PaneUnmountTests` (1) condition (c)(2).
+
+**Pins MODIFIED — two, both in the registry walk, each the new
+declarations' own requirement:** `sampledContexts` **+1 context** (the
+split's two gates — the same app-scope stack-gate family as undo, redo
+and the workspace) and `theContextMenusRenderExactlyTheDeclaredContextDoors`
+**+ `SidebarView.contextMenuCapabilities`**. Everything else passes
+UNMODIFIED, including every other registry-walk assertion — the parity
+proof that the two new declarations are additions, not adjustments.
+
+**The registry walk earned its existence again:** it caught both new
+doors as declared-but-not-rendered before any behavioural suite did.
+
+**Reverts (`shasum -a 256` before each; all three files restored and
+verified OK before the next):**
+- **R4-A** the mount rule loosened ⇒ the pure pin red across every pane
+  count AND the hosted pin red with `handlerCount → 2`, `activePostID →
+  the wrong post`.
+- **R4-B** the same-note guard dropped at the adoption door ⇒ exactly its
+  arms red (the note lands in BOTH panes). Discriminating: `openBeside`'s
+  own guard is separate and its arm stayed green, which is the right
+  shape — two doors, two guards, two arms.
+- **R4-C** the divider clamp dropped ⇒ the swallow pin red on all three
+  arms (both edges and the neighbour-clamped middle).
+- **R4-D** the book's blur ignored ⇒ the book pin red.
+
+#### Judgment calls, recorded so they can be overturned rather than trusted
+
+1. **A `.pool` counts as a note for the same-note rule** but NOT for the
+   Open strip. The rule is about two detail hosts on one container, which
+   `PoolDetailView` is; the strip's notes-only scope (round 7.2) is a
+   different question and is untouched.
+2. **Unfocused panes have no click-catcher overlay.** A note pane uses
+   `ReadPostView`'s own focus door (which preserves the ratified read-tier
+   select+copy); list panes focus through their row clicks; a book through
+   `onPaneFocusRequest`. An overlay would have cost either the selection
+   or a second click. The residue: a click on genuinely empty chrome in an
+   unfocused pane does not focus it — visual-verification item 4.
+3. **`BookViewModel.onPaneFocusRequest` rides the MODEL, not the views.**
+   `model.focus(...)` has twelve call sites; one line at the model covers
+   all of them, and no view had to learn that panes exist.
+4. **The quiet name line IS the focus signal** (the gate's (d)), so an
+   unfocused pane reads as a pane rather than needing a border or a tint.
+5. **`closeSplit` closes the FOCUSED pane**, not "the second one" — which
+   is what generalizes to N panes, and with two panes is exactly "close
+   the split".
+6. **No new key equivalents** (above), so no collision sweep was owed and
+   none was run.
+
+#### VISUAL-VERIFICATION-ONLY — for her walk and the Design & UI review row
+
+Everything that DECIDES anything above is pinned. These are look-and-feel
+halves and **no claim is made that they were tested:**
+
+1. That the divider drags comfortably and its 9 pt grab strip is findable
+   (and that the resize cursor appears over it).
+2. That the split's two panes read as two panes — the quiet name line on
+   the unfocused one against the masthead on the focused one.
+3. **The gate's recorded cost:** an unfocused pane whose remembered mode
+   is Takes shows read-cheap PROSE until clicked, then snaps to its board.
+   (The Book spread has shipped with exactly this since 13c.)
+4. That clicking anywhere sensible in an unfocused pane focuses it — the
+   real doors are wired (read-tier click, row clicks, book post clicks),
+   but empty chrome is not.
+5. **The inspector** (References / Scraps) stays per-pane in v1 per the
+   ruling; `.inspector` is designed for a `NavigationSplitView` column and
+   nesting one inside an `HStack` pane is UNVERIFIED. Fallback recorded:
+   hoist it to the window, pointed at the focused pane.
+6. That "Open Beside" reads right in all three row menus, and that the
+   same-note refusal is legible when it fires.
+7. That a book in an unfocused pane still reads well with nothing live in
+   it, and that regaining focus restores the page she was editing.
+8. That the strip's rows really drag to reorder (item 0's half, carried).
+
+#### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **Nothing exceeded its ruling's shape**, so no item stopped.
+- **Batch 5's first item stands as ruled** and nothing here depends on
+  it: `ShellRouter` is App-level `@State`, so a second `WindowGroup`
+  window would share this workspace. The state shapes are ready for it
+  (they are per-workspace, and a workspace is per-router).
+- Her walk will notice, beyond the split itself: the detail pane's
+  chrome is unchanged with one pane open (the name line only appears
+  when a split exists), and a book or a list beside her is fully
+  browsable while nothing in it is live.
