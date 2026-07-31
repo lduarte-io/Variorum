@@ -1696,3 +1696,281 @@ works in `notes/`, touch nothing of hers; never `/Applications`,
 never `Sources/VariorumCore/Sync/`, never push; no schema;
 STOP-and-propose beyond a ruling's shape). **Baselines to
 match-or-beat: core 906/102 · Mac 982/159 · mobile 14/4.**
+
+### Batch 4 — the two-pane SPLIT (W1/A25) + the strip's ordering flip
+
+#### Item 0 — BUILT and committed (`34ad7f7`), ahead of the gate as the brief allows
+
+Her round-7.1 ruling, both halves. **ORDER and MEMBERSHIP became two
+questions:** order is INSERTION order (a new note joins the END like a
+browser tab; re-opening one already in the strip leaves it exactly where
+it sits), membership stays RECENCY's (at the tracked bound the
+least-recently-*opened* note leaves, never the oldest row — a note she
+keeps returning to must not be evicted for having been opened first), and
+the manual reorder is the `onMove` convention's arithmetic guarded to the
+shown rows, leaving recency untouched because rearranging the strip is not
+using a note.
+
+**What the flip BUYS, pinned as the property it is:** ⌘⇧n is a stable
+address. Batch 3's judgment call 2 flagged the shuffle to her rather than
+deciding it ("⌘⇧1 is always the note you are already in"); the new pin
+`theOrdinalsDoNotShuffleAsSheMovesBetweenNotes` wanders between three
+notes and asserts every key still addresses what it addressed.
+
+**RULED PIN FLIPS, each named on its own face:**
+`openingMovesANoteToTheFrontWithoutDuplicating` →
+`openingAppendsInInsertionOrderAndNeverMovesAnOpenNote` ·
+`returningToANoteMovesItToTheFrontOfTheStrip` →
+`returningToANoteLeavesTheStripsOrderExactlyWhereItWas` (which keeps the
+"arriving IS opening" claim, moved onto `recency`, where it is now true) ·
+`theOrdinalsCoverExactlyTheShownRows`' first/last arms ·
+`closingARowRemovesOnlyThatRowAndNothingElse`' reopen arm ·
+`arrivingRecordsBothTheTrailAndTheStrip` ·
+`theShellDoorsRouteTheRightDestination` (flipped AND grown a
+⌘⇧1-still-addresses-p1 arm). **NEW pins (5):** the stable ordinals · the
+bound paid by recency not row age · the reorder arithmetic (multi-row +
+out-of-range inert) · the reorder's reach stopping at the strip · the
+model's pass-through.
+
+**Reverts, `shasum -a 256` before each, all restored OK:** **I0-A**
+(move-to-front) ⇒ red across **all three** suites — the whole flip
+discriminated · **I0-B** (the destination's pre-move shift dropped — the
+classic `onMove` mistake) ⇒ red on exactly the arithmetic's downward arms ·
+**I0-C** (the bound paid by the oldest row) ⇒ red on exactly the membership
+pin, 3 issues, everything else green. **A GREEN REVERT GOT A STRONGER ARM
+FIRST:** `theReorderStaysInsideTheShownRows` only checked the first row,
+which I0-B leaves alone; it now asserts where the dragged row LANDS
+(`shown.last`), and the revert then discriminates.
+
+**Counts by my own runs at item 0:** Mac `✔ Test run with 987 tests in 159
+suites passed after 134.494 seconds` (`mac_exit=0`; from 982/159 — **+5**,
+exactly the new pins) · core `✔ Test run with 906 tests in 102 suites
+passed after 29.497 seconds` (`swift_exit=0`; byte-unchanged) · tutorial
+spine on its OWN run by TYPE name `✔ Test run with 49 tests in 7 suites
+passed after 12.191 seconds`. Mobile deliberately NOT run — zero
+`Sources/` and zero `Shared/` lines.
+
+**Visual-verification-only from item 0:** that a sidebar row really drags
+to reorder inside the `List` (the batch-1 measurement stands — SwiftUI's
+drop route cannot be driven in this host), and that held-still ordinals
+read better under her hand than shuffling ones did.
+
+---
+
+#### THE PROPOSAL (the gate) — traced before building items 1–3
+
+Everything below is measured from the code, not assumed. The load-bearing
+discovery is that **this exact problem was already solved once, in this
+app, with its reasons written down** — `SpreadBookView`'s header comment
+(13c 2B) records why the Book spread mounts a live surface on ONE page and
+renders its sibling read-cheap, and the brief's own item 2 points at it
+("the ring migrating on click exactly as the Book spread does"). The
+proposal is that shape, generalized to panes.
+
+##### The four app-scoped singletons a second pane meets
+
+| What | Shape today | Consequence for a split |
+|---|---|---|
+| `CommandRouter.detailToken` / `activePostID` / `activeMode` / `applyMode` | **ONE** detail registration (`PostDetailView.onAppear`) | Two mounted details ⇒ the second overwrites the first; ⌘1–⌘6 and the sidebar rail address whichever mounted LAST, not the focused one |
+| `CommandRouter.handlers` | a **LIFO** stack; `dispatch` walks it reversed | Two mounted surfaces ⇒ every routed act (⌘S, every structural and take door) reaches the last-mounted surface — the N5/D3 class `SpreadBookView` names |
+| `EditorRouter.active` | a **single** `weak var` | Two Write editors ⇒ `writeEditorAttached` / `writeEditorOwnsScrollView` describe the wrong one |
+| `AppSession.autosave(forPost:)` | already a **per-post registry** | Correct as-is for two panes on two posts — nothing to change |
+
+Two panes are only safe if **at most one of them mounts a live surface at
+a time.** That is not a rule I am adding on top; it is the condition under
+which the machinery that already exists keeps being correct.
+
+##### (a) How selection/router state becomes per-pane
+
+**Recommended — a pane COLLECTION on `WorkspaceModel`, with the focused
+pane's selection projected into the shell's existing binding:**
+
+```
+panes:          [PaneID]                     // ordered; 1 today, 2 with a split, N later
+selections:     [PaneID: SidebarSelection]
+focusedPane:    PaneID
+splitFractions: [Double]                     // count == panes.count - 1
+```
+
+Nothing is a pair and nothing is named left/right — **the free-tiling
+rider, honored in the state shape** exactly as batch 3 honored it for
+history. `histories` is already `[PaneID: NavigationHistory]`, so item 3
+is a second key and nothing else.
+
+`RootView.selection` stops being `@State` and becomes a **computed
+`Binding` over `workspace.selections[workspace.focusedPane]`**. That single
+change buys three things with no new routing: the sidebar's
+`List(selection:)` keeps working unchanged; **a sidebar click targets the
+focused pane by construction** (it writes through the binding); and the
+one `onChange(of: selection)` recording point batch 3 built keeps being
+complete — it just records into the focused pane's history.
+
+What stays WINDOW-scoped: the Open strip (already ratified as the
+window's — batch 3's pane-keys pin asserts both panes' notes are open
+notes), `ShellRouter.pendingSelection` (a request; it lands in the focused
+pane), the palette, the status toast.
+
+*The alternative, named:* leave `RootView.selection` as the primary pane's
+and give secondary panes a note id each. Smaller, but asymmetric — pane 0
+could hold anything and pane 1 only notes — which is precisely the shape
+the free-tiling rider asks me not to bake in. I do not recommend it.
+
+##### (b) Where the one-live-ring extension lands — the exact seams
+
+**It lands as a MOUNT rule, and therefore on NO new seam at all.** This is
+the part I want ruled explicitly, because "no new mechanism" here means
+*literally none*:
+
+- `PaneTextAuthority.livePane` is a single optional and the one-ring
+  invariant is enforced INSIDE one authority. Authority owners today:
+  `TakesViewModel`, `CompareBoardView`'s model, `CanvasViewModel`,
+  `BlockTOCView` — **all four are mounted only by `PostDetailView` /
+  `PoolDetailView`** (verified by grep).
+- Command handlers are registered by exactly five views — `EditorView`,
+  `TakesBoardView`, `LensesBoardView`, `CompareBoardView`, `CanvasView` —
+  **all inside those same detail hosts, or inside `BookView`'s pages**.
+- **Every list surface** (Shelf, Library, Pool, Blocks area, Folder,
+  Recovery) registers no handler and owns no authority. They are already
+  read-cheap in P-3's sense; nothing needs doing to them.
+
+So: **only the focused pane mounts its full surface. Unfocused panes
+render read-cheap**, per destination kind:
+
+- a note (`.post` / `.pool`) → **`ReadPostView`**, whose
+  `onFocusRequest(offset)` already focuses-and-seeds-the-caret. This is
+  byte-for-byte the Book spread's sibling page.
+- a **book** → `BookView` with `paneIsFocused: false`, which calls its own
+  **`BookViewModel.focus(nil)`** — the book surface's existing single focus
+  authority (13b 3E's fold), so no page mounts an editor. One threaded
+  boolean, zero new concepts.
+- everything else → unchanged (harmless by the audit above).
+
+Consequence, and it is the evidence the shape is right: **the four
+singletons in the table need no changes whatsoever.** One detail
+registers, one handler stack entry exists, one editor is active. The
+`registerDetail` token guard already survives SwiftUI running the
+arriving `onAppear` before the departing `onDisappear`, which is exactly
+the ordering a focus migration produces.
+
+The registry's three workspace closures gain the focused-pane refinement
+batch 3 predicted — `canNavigateBack/Forward` read
+`workspace.history(workspace.focusedPane)`, `openNoteCount` stays
+window-scoped. Two lines, in the one place batch 3 cut for it.
+
+*The alternative, named and NOT recommended:* mount full details in both
+panes and suppress liveness in the unfocused one via a third disjunct
+beside `sealed || structuralInFlight`. It needs the flag threaded into
+five surfaces, AND a pane-keyed rewrite of the single-detail registration,
+the LIFO stack and `EditorRouter.active` — it multiplies exactly the
+mechanisms P-3 exists to prevent, to buy a mode rail on a pane she is not
+using.
+
+**The cost I am NOT hiding:** an unfocused note pane shows read-cheap
+prose even when its remembered mode is Takes, and snaps to its board on
+click; focusing re-mounts the detail (its `.task`s re-run — the ordinary
+open cost she already pays on every navigation). The Book spread has
+shipped with precisely this since 13c.
+
+##### (c) THE FLIGHT-LATCH VERDICT — **it does NOT need to move**, on this shape, and here is the trace
+
+The 13d trigger sentence fires when "any composition mounts Write and a
+takes/lenses board on ONE post with structural doors on both sides." The
+hazard's mechanism (13d batch 3, traced there): a keystroke between the
+flush and the op records the PRE-op text into the post's autosave
+coordinator, and the debounce writes the old text back over rows the
+operation just wrote — the forbidden text-duplication class. The
+coordinator is **per post**, so the hazard needs **two door-bearing
+surfaces on ONE post**.
+
+1. **Every structural act is a `RoutedCommand.structural(_)`** dispatched
+   through `ShellActions.dispatch` → `CommandRouter.dispatch` → the LIFO
+   handler stack. The menu, the palette, the bars, the sidebar and the
+   strip do not act — they dispatch. **So a "strip/sidebar door firing at
+   a pane's post mid-ceremony" cannot bypass the mounted surface's own
+   latch**; it can only reach a mounted handler, and each of the five
+   handler-registering surfaces guards its entry (`EditorSurfaceController
+   .runStructural`'s one-flight door; `TakesViewModel.runStructuralDoor`'s
+   `guard !structuralInFlight`).
+2. **Under the one-live-mount rule, exactly one door-bearing surface is
+   mounted per window at any moment.** Two structural doors on one post is
+   therefore unrepresentable — not guarded against, *unrepresentable*.
+3. **Her same-note rule (round 7.3) removes the case independently**: the
+   two panes never hold the same note.
+
+**The one edge I want on the record either way**, because rule 3 alone
+does not cover it: pane A showing a BOOK whose focused post is P, pane B
+showing note P. That is one post from two surfaces, and the same-note rule
+as worded speaks about opening a note "already showing in the other pane"
+— a post inside a book is arguably showing. Under the one-live-mount rule
+this is dead (the book blurs when unfocused). **If the orchestrator rules
+the alternative in (b) instead, this pair becomes reachable and the latch
+MUST move to a post-keyed shared authority** — the `AppSession
+.mergeJoinMemory` / `tutorialDoorInFlight` precedent 13d already named as
+the stricter option. I would then do it at the authority, not with a flag,
+and it would be this batch's work.
+
+**A related hazard that is NOT new but gains a new trigger:** clicking the
+other pane unmounts the focused pane's detail, and a detail can unmount
+mid-flight. That path exists today (a sidebar click during a ceremony does
+it), and the backstops exist too (`EditorView.onDisappear →
+model.teardown()`, the per-post coordinator's flush). The split adds a
+*trigger*, not a *path*. I propose pinning it rather than assuming it, and
+I will report if the pin finds anything.
+
+##### (d) The second pane's chrome
+
+**Per pane:** the back chip (her ruling; batch 3 built it "in the SHELL,
+above the detail" precisely because "where did I come from" is the PANE's
+fact — it moves inside the pane container unchanged, one per pane, each
+reading its own `PaneID`); the detail content, which for a focused note
+brings its own masthead (title · membership chip · Scraps · References)
+for free; and for an UNFOCUSED note pane a quiet one-line name header
+reading `workspace.label(for:)`, so a pane is never anonymous. The
+difference between a full masthead and a thin name line then *is* the
+focus signal, which I would rather have than a border.
+
+**Per window:** the sidebar — including the **mode rail**, which reads
+`commandRouter.activeMode` and is therefore the focused pane's *by
+construction* under the mount rule, with no new wiring; the status toast
+(one presentation, AD-14); the ⌘K palette; the account sheet.
+
+**The one risk I cannot settle from here:** the References/Scraps
+**inspector** lives inside `PostDetailView` and is therefore per-pane, but
+`.inspector` is designed for a `NavigationSplitView` column and nesting one
+inside an `HStack` pane is unverified. I propose keeping it per-pane in v1
+and putting it on the visual-verification list; if it misbehaves the
+fallback is to hoist it to the window and point it at the focused pane.
+
+##### Two findings for the record, neither blocking this batch
+
+1. **`ShellRouter` is App-level `@State` on `VariorumApp`, so it is shared
+   by every `WindowGroup` window.** Batch 3's "per-window router =
+   per-window workspace" holds for the SPLIT (one window) but is **not yet
+   true for W2/A26's several windows** — a second window would today share
+   one workspace, one Open strip and one history. W2's batch must give the
+   scene its own router; the state shapes proposed here are already ready
+   for it (they are per-workspace, and a workspace is per-router).
+2. **`splitFractions` as pure arithmetic rather than `HSplitView`.** A
+   hand-drawn divider over `GeometryReader` keeps the fraction in workspace
+   state, which makes it pinnable and generalizes to N panes; `HSplitView`
+   owns its geometry privately and is two-pane-shaped in practice.
+
+##### What I would build on a ruling, in order
+
+1. `WorkspaceModel`'s pane collection + `focusedPane` + `splitFractions`
+   (pure, pinned: open-beside, the same-note refusal, close-split, focus
+   migration, fraction clamping).
+2. `RootView`'s detail column becomes `ForEach(workspace.panes)` with a
+   `PaneHost` (chip + content + the focused/read-cheap fork) and a
+   draggable divider.
+3. The doors: `CapabilityID.openBeside` + `closeSplit` (registry-declared,
+   `.contextMenu` on note rows where the registry reaches them + a View
+   menu door), with the same-note refusal copy naming **Lenses** and
+   **Compare** as the same-note side-by-side surfaces (her round-7.3
+   wording).
+4. `BookView`'s `paneIsFocused` thread → `focus(nil)`.
+5. The three registry closures' focused-pane refinement.
+6. The unmount-mid-flight pin from (c).
+
+**STOPPING HERE per the gate.** Item 0 is built, committed and green;
+items 1–3 proceed on the orchestrator's ruling of (a)–(d).
