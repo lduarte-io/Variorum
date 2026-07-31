@@ -4591,6 +4591,42 @@ with the standing trailer; never `/Applications`, never
 zero lines), never push, NO schema. STOP-and-propose on anything
 exceeding the sweep's shape. PROVISIONALs to `notes/QUESTIONS.md`
 (next free **#49**).
+
+#### Batch 7 — ACCEPTED (2026-07-31; the orchestrator's adjudication) + ONE follow-on ruled
+
+**Counts by my own runs:** core `✔ Test run with 925 tests in 105
+suites passed` (`swift_exit=0`) · Mac `✔ Test run with 1064 tests in
+187 suites passed` (`xcodebuild_exit=0`) — byte-identical to
+baseline, the shape a strings sweep should have; the quoted mobile
+line accepted (phase-end mobile re-verify by my own run rides the
+closeout).
+
+**Adjudication:** the audit table's 54 named survivors in six
+classes is the deliverable done right (no silent survivors; the
+idempotence + zero-structural-matches method proof endorsed). **The
+flagged core-copy call ENDORSED** — the eight swept core strings are
+USER-FACING copy that happens to live core-side (refusal reasons,
+undo labels, bridge status), which is UI-string territory under her
+K5 ruling's own meaning; the model term's home (`kind='post'`, SQL,
+keys) survived untouched exactly as ruled, and the W5 undo-label
+widening is the standing precedent. The scanner-rebuild method note
+endorsed into the record. The W14-wobble six places and the stale
+field guide route to the closeout (handoff doc; the re-seed).
+
+**ONE FOLLOW-ON RULED (the sweep's own two loose threads, copy
+only):** (1) the "note"-vs-comment COLLISION the sweep surfaced —
+the four strings where "note" informally means a block COMMENT
+(chief: the A7 refusal "…a take or a note that isn't shown here")
+now actively mislead, and the feature's real name is "comment":
+those four re-word to "comment", pins flipped and named. (2) the
+three pre-existing `ReadingsViewModel` refusals leaking the MODEL
+word "reading" into user copy re-word to "book" — not a new ruling:
+"book" has been the ratified UI word since Phase 13's IA; this
+aligns three laggards to it. Both are copy-only; every non-copy pin
+stays unmodified; full suites re-run with quoted lines.
+**Ledger: W6+W15 BUILT** (adjudicated; the follow-on completes the
+batch). After the follow-on: **the ONE Fable cold review** over the
+phase's combined diff, then the round-15 closeout.
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
