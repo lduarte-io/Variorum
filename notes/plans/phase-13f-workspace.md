@@ -3544,3 +3544,118 @@ byte-identical):**
 - Her walk will notice, beyond the two items: every book row in the chip
   now offers a one-click diverge, and the first-edit note carries a
   button naming the book it would act on.
+
+#### Batch 5 (continuation) — ACCEPTED (2026-07-31; the orchestrator's adjudication — batch 5 CLOSES)
+
+**Counts by my own runs:** core `✔ Test run with 916 tests in 104
+suites passed` (`swift_exit=0`) · Mac `✔ Test run with 1030 tests in
+175 suites passed` (`xcodebuild_exit=0`) — both match the record's
+claims exactly; the quoted mobile line accepted per the standing
+rule (phase-end re-verify owed).
+
+**Load-bearing diff read:** `Operations+Diverge.swift` is the ruled
+shape done right — ONE `database.write` with the membership guards
+inlined (the `newPostInReading` pattern, stated with its
+nested-transaction reason), the undo entry registered with BOTH
+halves on do-time ids, and `revertDiverge`/`reapplyDiverge` as
+guarded exact-row tombstone flips (a FINISHED-meanwhile refusal
+keeps the entry for retry). Revert W23-B reproducing the half-undo
+this operation exists to prevent is the discrimination the ruling
+demanded.
+
+**The four flagged calls, adjudicated:** **(1) the chip-row deviation
+ENDORSED** — her round-10 "accessible from a menu maybe…" was hedged
+by her own word, the trace is sound (a menu door has neither target
+nor context; the chip's rows have carried per-book acts since Phase
+13), and R118 parity is literally true via the masthead. **Routed to
+her walk:** the door lives on the chip's book rows; the menu door is
+one declaration away at her word. **(2) capacity un-gated ENDORSED**
+— the swap is net-zero and the ratified extent gate refuses ADDS;
+pinned rather than silently true. **(3) the button's target rule
+ENDORSED** — one rule reducing to "the book you came from", nil when
+every membership is derived so the note never offers an act that
+could only refuse (P-2 at a status offer). **(4) the smart-book
+refusal's own sentence ENDORSED** — a road, not a wall, pinned equal
+to `ChipRefusals` elsewhere.
+
+**Ledger: W23 BUILT · W22 COMPLETE · W24 BUILT — batch 5 closes
+whole.** Remaining build rows: W2/A26 (batch 5b, next) · W4 stars ·
+W5 sticky · W6+W15 the sweep · W17 exploratory (sitting material) ·
+W18 hers · W19 rider (rides 5b). The four visual items join her walk
+list.
+
+### Batch 5b brief — the WINDOWS build (W2/A26 + the per-window router; fresh Opus implementer; self-contained; builds THE RULED PROPOSAL)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §4/§12; §14's deltas); THIS plan file WHOLE — the
+constitution (P-3/P-4 are this batch's law), THE KICKOFF SITTING,
+sitting rounds 1–13 (round 2 item 3 = both window kinds; round 13
+item 1 = same-note ACROSS WINDOWS ALLOWED — her ruling), batch 4's
+record (the split's shape you extend), batch 5's records (the seams
+it left clean), **"THE PROPOSAL (item 5's gate)" — your design, and
+"THE ARCHITECT'S RULINGS" — your contract: (a)–(e) as ruled, nothing
+re-litigated**; the 13c plan's "Environment traps" (binding); the
+batch 1–5 environment traps (chief: `build-for-testing` before every
+`test-without-building` revert run; the hosted-ScrollView hang; the
+zsh `git show` trap).
+
+**Build order (BINDING, the ruling's letter):**
+
+1. **The per-window router/workspace + `WindowRegistry` + the
+   key-window mount gate**, with the ruling's THREE condition pins,
+   none assumed: (i) the window-scale singleton-unrepresentability
+   pin — the R4-A shape with TWO hosted windows (`handlerCount`
+   stays 1; `activePostID` follows the KEY window across a key
+   migration in both directions); (ii) the window-switch
+   unmount-mid-flight pin (the teardown/flush backstop at window
+   scale, premise-asserted like batch 4's); (iii) **the sticky-key
+   deactivation pin** — the key-ness input is LAST-KNOWN-KEY, never
+   literal keyWindow-now: app deactivation (resign with no successor
+   window) unmounts and remounts NOTHING. Also pin what batch 3
+   promised: two windows hold INDEPENDENT workspaces (own Open
+   strip, own histories, own context-bar state). Restoration
+   behavior recorded as ruled: nothing persists; a restored window
+   returns to the shelf (a named behavior for her walk, never a
+   silent surprise).
+2. **The two window kinds and their doors:** File ▸ New Window rides
+   `WindowGroup`'s standard item, undeclared (the ruled reason on
+   the record); "Open in New Window" is ONE registry declaration on
+   the note-row family (`.contextMenu`, joining
+   `SidebarView.contextMenuCapabilities` beside `.openBeside`),
+   calling `openWindow(id: "variorum-note", value: postID)`. The
+   note-only window carries the detail + the context bar and LACKS
+   sidebar/strip/split; every app-scope act resolves honestly grey
+   there through the EXISTING gates (your own (d) table — if any
+   act turns out NOT to resolve honestly through an existing gate,
+   that is a STOP-and-propose, not a new rule). **Same-note across
+   windows is ALLOWED (her round-13 ruling)** — build no
+   cross-window refusal; the WITHIN-window pane rule stays
+   byte-unchanged, its pins passing unmodified.
+
+**The W19 rider (binding):** if your router refactor's diff reaches
+the shell-redo status-delivery path
+(`theShellRedoActionRunsThroughTheRunnerAndReports`'s machinery),
+trace its timing THEN — the hallucination guard binds, never an
+untraced patch; if untouched, say so and leave it.
+
+**Pin honesty:** pane/window/key arithmetic pure and pinned
+(red-on-old by behavioral revert; checksums; `build-for-testing`
+first); the hosted pins as far as the host can drive real windows
+(batch 4 hosted a real split — extend that precedent; where key-ness
+or scene plumbing is genuinely undrivable, record the visual halves
+honestly for her walk). What only a hand can verify (window feel,
+restoration, the note-only chrome) goes on the
+visual-verification-only list.
+
+**Loop, records, constraints — identical to batch 5's:** tutorial
+spine by TYPE name; full suites with quoted "Test run with N tests"
+lines (core from the root, Mac from `App/Variorum/`; mobile only if
+`Sources/` or `Shared/` is touched). **Baselines to match-or-beat:
+core 916/104 · Mac 1030/175 · mobile 14/4.** Append your batch
+record under "Batch records"; commit by explicit path with the
+standing trailer (the author's parallel session works in `notes/` —
+touch nothing of hers); never `/Applications`, never
+`Sources/VariorumCore/Sync/`, never push, never `git checkout` over
+uncommitted work, NO schema. STOP-and-propose on anything exceeding
+the ruling's shape. Every PROVISIONAL to `notes/QUESTIONS.md`
+(append, never renumber; next free number **#49**).
