@@ -2067,3 +2067,19 @@ approved.
 Item 0 (insertion order + drag-reorder) is ACCEPTED pending my own
 runs at the batch's end — its pin flips are named and the
 ordinals-do-not-shuffle pin is the property her ruling bought.
+
+### Sitting round 9 — OPEN (2026-07-30): her copy-on-edit memory vs R31/R35
+
+Her message, verbatim: *"honestly, wait. I thought that earlier we
+decided that editing a post SHOULD always mutate it into a copy? i
+thought that's how the app is working right now?"* — The record was
+pulled and shown to her (R31 sitting 4 + her own sitting-5 verbatim
+confirmation; the R31 record itself diagnosed this exact memory reach
+in 2026-07-17: what the memory reaches for is the BLOCK rule —
+pool-drag copies + lineage — and the version family). The app today
+edits THE post everywhere (no copy-on-edit exists anywhere in the
+ops layer). Her ruling on whether R31/R35 stand or reopen: PENDING —
+recorded when she answers. NOTED as a P-5 signal regardless: this
+confusion has now surfaced three times (sitting 4, today's round 8,
+now) — the rule's UI legibility is the under-served half; W20's
+visible in-line is part of the answer.
