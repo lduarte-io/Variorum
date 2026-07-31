@@ -2708,3 +2708,24 @@ processes are named the same thing too."*
 
 **Ledger add:** W24 — extract widens A11 (RULED; rider on batch 5's
 continuation). **Rename offer:** OPEN with her.
+
+**Round 12 addendum — the rename RULED, and the safe-to-run fact
+confirmed to her.** Her words, verbatim: *"oh so that's not even an
+issue right now? i can run my app at the same time? i'd say yes,
+please give them the variorum dev display name, that would be
+helpful."* → **(1)** Confirmed to her: yes — running her app beside
+building phases has been safe by construction since 13b 4G
+(2026-07-22); the one residue is the flashing test-host windows
+during suite runs, harmless and now about to be labeled. **(2) W25
+(new ledger row) — RULED: the Mac app target's DEBUG configuration
+gains a "Variorum Dev" display name** (display string only —
+`PRODUCT_NAME`/paths/bundle ids untouched, so the 4G identity split
+and the path-based instance discipline are unmoved; Release
+byte-untouched; the mobile target out of scope — her pain is the Mac
+Dock). **Execution: an orchestrator environment act at batch 5's
+acceptance seam** (the round-12 clean-seam rule — it touches the
+project file, never mid-batch). Verification owed at execution: the
+built Debug host's Info.plist carries the name; the Release config
+block is byte-identical; one full Mac suite green after the change;
+the instance-discipline greps re-checked (path unchanged by
+construction).
