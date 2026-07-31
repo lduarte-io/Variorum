@@ -541,3 +541,86 @@ struct MultiBookEditNoteTriggerTests {
         }
     }
 }
+
+// MARK: - W23: the diverge doors (13f batch 5's continuation)
+
+@MainActor
+@Suite("Diverge for this book — the doors (13f W23)")
+struct DivergeDoorTests {
+    private func book(_ id: String, _ name: String, _ kind: ReadingKind) -> Reading {
+        let now = Date(timeIntervalSince1970: 1_782_864_000)
+        return Reading(id: id, name: name, kind: kind, createdAt: now, updatedAt: now)
+    }
+
+    /// The declaration: a `.surface` act on the chip's book rows, for the
+    /// same reason `.openPeerPost` is one — the target is the row you point
+    /// at, so nothing has to guess which book she meant.
+    @Test func theDoorIsDeclaredAsASurfaceActOnThePostsChip() {
+        let capability = CapabilityRegistry.capability(.divergeForBook)
+        #expect(capability.scope == .post)
+        #expect(capability.doors == [.surface])
+        #expect(capability.availability(CapabilityContext(mode: .write)) == .act)
+        #expect(capability.availability(CapabilityContext(mode: nil)) == .unavailable,
+                "no post open ⇒ no chip ⇒ honestly unavailable")
+        #expect(MembershipChip.surfaceCapabilities.contains(.divergeForBook),
+                "declared ⇔ rendered — the walk's union covers the rest")
+    }
+
+    /// The words, in one place so both doors say the same thing: what the
+    /// act does, what it did, and the ONE refusal that needs its own
+    /// sentence (a smart book has no membership row to swap).
+    @Test func theCopyNamesTheBookTheUndoAndTheTagRoad() {
+        #expect(DivergeCopy.buttonLabel(book: "Orbit").contains("Orbit"))
+        #expect(DivergeCopy.help(book: "Orbit").contains("original stays"))
+
+        let done = DivergeCopy.done(book: "Orbit")
+        #expect(done.contains("Orbit"))
+        #expect(done.contains("\u{2325}\u{2318}Z"), "the ratified undo grammar")
+
+        let smart = DivergeCopy.refusal(
+            for: OperationError.wrongReadingKind(id: "r", expected: .curated), book: "Dreams")
+        #expect(smart.contains("tags"), "it names the tag road rather than staying silent")
+        #expect(smart.contains("Duplicate as Version"))
+        // Everything else falls through to the standing chip wording.
+        #expect(DivergeCopy.refusal(for: OperationError.lockedReading(id: "r"), book: "Orbit")
+                == ChipRefusals.message(
+                    for: OperationError.lockedReading(id: "r"), bookName: "Orbit"))
+    }
+
+    /// The note's TARGET rule (her round-10 item 4, W22's button): the first
+    /// CURATED book in the chooser's order — which is the book she came from
+    /// whenever she came from one, because arriving floats it.
+    @Test func theNotesButtonTargetsTheFirstCuratedBookInTheChoosersOrder() {
+        let books = [
+            book("s1", "Alpha smart", .smart),
+            book("c1", "Zeta curated", .curated),
+            book("c2", "Beta curated", .curated),
+        ]
+        #expect(MultiBookEditNote.divergeTarget(books, recentlyVisited: [])?.id == "c2",
+                "no recency ⇒ the chooser's plain order")
+        #expect(MultiBookEditNote.divergeTarget(books, recentlyVisited: ["c1"])?.id == "c1",
+                "the book she came from floats and takes the button")
+        #expect(MultiBookEditNote.divergeTarget(books, recentlyVisited: ["s1"])?.id == "c2",
+                "a recent SMART book never takes it — it could only refuse")
+        #expect(MultiBookEditNote.divergeTarget(
+            [book("s1", "Only smart", .smart), book("s2", "Also smart", .smart)],
+            recentlyVisited: []) == nil,
+                "every membership derived ⇒ the note speaks with NO button")
+    }
+
+    /// A status item may carry ONE door, and carrying one changes nothing
+    /// about the ones that don't (every existing `speak` call is unchanged).
+    @Test func aStatusNoteCanCarryOneDoor() {
+        let center = StatusCenter()
+        center.speak("plain")
+        #expect(center.current?.action == nil)
+
+        let fired = LockIsolated(0)
+        center.speak("offer", action: StatusCenter.Item.Action(
+            label: "Do it", perform: { fired.withValue { $0 += 1 } }))
+        let action = try? #require(center.current?.action)
+        #expect(action?.label == "Do it")
+        action?.perform()
+        #expect(fired.value == 1)
+    }
+}

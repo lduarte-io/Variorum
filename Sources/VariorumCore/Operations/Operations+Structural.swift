@@ -72,19 +72,45 @@ extension Operations {
                 let context = try placedContext(db, blockID: blockID)
                 try ensureEditable(context.rendered)
                 let text = context.rendered.workingText
+                // The span's shape, and its GRAPHEME ALIGNMENT — the halves
+                // below are taken by UTF-16 offset now (13f W24), so the
+                // range's own validation is what keeps a cut off the middle
+                // of an emoji. Kept as a check, not a binding.
                 guard let kind = BoundarySnapping.extractableSpan(span, in: text),
-                      let indices = BoundarySnapping.graphemeRange(span, in: text)
+                      BoundarySnapping.graphemeRange(span, in: text) != nil
                 else { throw OperationError.spanNotExtractable(blockID: blockID) }
 
-                let spanText = BoundarySnapping.trimmed(text[indices])
+                // 13f W24 (her round-12 ruling: WIDEN A11 TO EXTRACT).
+                // Extract's seam is a seam like any other, so it consults the
+                // ONE seam-trim brain instead of trimming both sides away:
+                // **the piece BEFORE the seam owns the blank line**, exactly
+                // as a divide's first half does. The span's inner edge IS the
+                // cut, so `seamTrimmedHalves` expresses extract with no second
+                // implementation — and its guards are already satisfied here
+                // (`extractableSpan` proves content on the far side, so the
+                // cut is interior; `graphemeRange` proves alignment).
+                //
+                // The OUTER edges keep their standing treatment — the span
+                // trims both of its own ends as before, the source's far edge
+                // is untouched as before — so the only byte that moves is the
+                // seam's, which is the ruling.
+                let spanText: String
                 let remainder: String
                 let insertAt: InsertPosition
                 switch kind {
                 case .prefix:
-                    remainder = BoundarySnapping.trimLeading(text[indices.upperBound...])
+                    guard let halves = BoundarySnapping.seamTrimmedHalves(
+                        text, cutAtUTF16: span.upperBound)
+                    else { throw OperationError.spanNotExtractable(blockID: blockID) }
+                    spanText = BoundarySnapping.trimLeading(Substring(halves.first))
+                    remainder = halves.second
                     insertAt = .before(blockID)
                 case .suffix:
-                    remainder = BoundarySnapping.trimTrailing(text[..<indices.lowerBound])
+                    guard let halves = BoundarySnapping.seamTrimmedHalves(
+                        text, cutAtUTF16: span.lowerBound)
+                    else { throw OperationError.spanNotExtractable(blockID: blockID) }
+                    remainder = halves.first
+                    spanText = BoundarySnapping.trimTrailing(Substring(halves.second))
                     insertAt = .after(blockID)
                 }
 
