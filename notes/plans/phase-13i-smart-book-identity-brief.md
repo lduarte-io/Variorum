@@ -75,11 +75,21 @@ named the knots that need HER rulings, not defaults:
 6. **What happens to the shipped conversion door and the
    "(collecting)" offer** — superseded, kept as the escape hatch, or
    recast as the identity flip itself?
-7. **Her W11 bug report may be adjacent:** *"i haven't been able to
-   move the chapters in between the posts (which did used to work)"*
-   — 13f's opening batch traces it; if the trace lands on a
-   design-level conflict with ordering overrides rather than a
-   defect, its finding feeds THIS phase.
+7. **Her W11 bug report was adjacent, and its trace fed this brief:**
+   13f's opening batch traced *"i haven't been able to move the
+   chapters in between the posts"* to a REACH problem (too few drop
+   targets — fixed in 13f batch 2, chapters still ordering among
+   chapters) plus a genuine semantics question, recorded as knot 8.
+   Her 13f round-4 ruling also added post-drag-to-chapter (built in
+   13f on the standing `assignPostToSection` op).
+8. **The DIVIDER reading of chapter drag (from the W11 sitting,
+   2026-07-30):** should dropping a chapter HEADING between two posts
+   move the BREAK — posts re-binning to the chapters around the new
+   position? That reads chapters as dividers over one ordered post
+   list, where the model deliberately made them assignment targets
+   (R28 — memberships point at chapters; dangling = unsectioned). A
+   divider reading would derive assignment from position — a real
+   semantics change wanting this phase's sitting, not a drag patch.
 
 ## What binds
 

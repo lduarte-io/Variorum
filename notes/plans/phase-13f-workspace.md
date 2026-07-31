@@ -793,3 +793,93 @@ drive `.dropDestination`; the zsh history-modifier `git show` trap).
 
 **Ledger:** W7 BUILT · W8 BUILT · W9 BUILT · W12 BUILT (all
 adjudicated) · W11 → awaiting her ruling.
+
+### Sitting rulings — round 4 (2026-07-30, after batch 1's adjudication)
+
+1. **W11 RULED, hers verbatim:** *"i think we should fix the reach,
+   but it should also be possible to pick up a post and move it to
+   another chapter."* → TWO halves build in batch 2: (a) the
+   chapter-drag REACH fix (chapters keep reordering among chapters;
+   generous targets — whole-row hit areas, gap targets so a
+   two-chapter book can move a chapter down; a drop between posts
+   snaps to the nearest chapter boundary); (b) **post-drag-to-chapter**
+   — a post row is draggable onto a chapter (assignment via the
+   standing `assignPostToSection` op + ordering via the standing
+   position machinery; no new semantics). The DIVIDER reading of
+   chapter drag (a heading drop between posts re-binning them) is
+   recorded as a knot in the 13i brief for that phase's sitting.
+2. **W10 RULED: copy + lineage door** — the ceremony's unchecked-take
+   line and the completion/status copy NAME where the original goes
+   (Library ▸ Recovery; ⌥⌘Z), AND successors gain a "Show Original
+   Block" door riding the existing `derived_from` edge.
+
+### Batch 2 brief — W10 (both halves) + W11 (both halves) (fresh Opus implementer; self-contained)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §9's divide/divideW/`assignPostToSection`/
+`reorderSection` entries; §12); THIS plan file (constitution, THE
+KICKOFF SITTING, sitting rulings 1–4, batch 1's record — its W11
+trace IS your starting map, and its environment traps bind: the
+hosted-ScrollView `scrollPageDown:` hang, NSDraggingInfo fakes never
+driving `.dropDestination`, the zsh `git show` history-modifier trap);
+the 13c plan's "Environment traps" section (binding); the QoL round's
+ceremony batch record (the copy-on-the-controls grammar W10a extends).
+
+**The items:**
+
+1. **W10a — the ceremony copy names the destination.** The
+   unchecked-take semantics line (QoL round: "unchecked = stays whole
+   on the original block, in neither successor") gains where the
+   original GOES: Library ▸ Recovery, and ⌥⌘Z undoes. The
+   divide-completion status line (the 13d "Block divided — ⌥⌘Z undoes
+   it." grammar) says it too when a W-divide released an original
+   with unchecked takes. Fit the existing copy grammar; no new
+   mechanism.
+2. **W10b — the "Show Original Block" lineage door.** On a block
+   whose `derived_from` edge (divide/divideW/merge origin) points at
+   an ancestor with NO live placement: a context-menu door (registry-
+   declared, P-1 — the `.surface`/`.contextMenu` conventions) that
+   navigates to the Recovery surface and reveals that block
+   (scroll-to/highlight per the surface's existing affordances; if
+   reveal needs NEW plumbing beyond navigation + selection, keep it
+   to navigation and record the gap rather than inventing). P-2:
+   fire-and-DO; a block with no such ancestor renders no door.
+3. **W11a — the chapter-drag reach fix.** Per her ruling: whole-row
+   hit areas on chapter headers (`.contentShape(Rectangle())` — the
+   batch-1 trace named the glyph-only body header), drop targets in
+   the gaps between chapters (meaning "before the next chapter" /
+   "to the end"), so a TWO-chapter book can move a chapter down; a
+   drop between posts snaps to the nearest chapter boundary.
+   Semantics UNCHANGED — chapters reorder among chapters via the
+   pinned `moveChapter`/`reorderSection` path. **The pin honesty
+   rule from batch 1 binds:** the SwiftUI drag route is unpinnable in
+   this host (measured — private selector), so pin at the MODEL
+   layer (any new target-resolution logic as pure functions with
+   their own pins) and RECORD what is visual-verification-only for
+   her walk / the Design & UI review row. No un-tested claim.
+4. **W11b — post-drag-to-chapter.** A post row (Outline body +
+   the navigator list — wherever post rows render in a chaptered
+   book) is draggable onto a chapter header or between posts of
+   another chapter: assignment = `assignPostToSection`, position =
+   the standing fractional-index machinery; a drop under a LOCKED
+   reading fires the op and delivers its real refusal (P-2 — the
+   locked reading freezes assign, #25(b)). Registry-declared.
+   Model-layer resolution logic pure + pinned; the drag route's
+   visual half recorded as above. If the surface turns out to need
+   a second drag payload type colliding with the standing post/block
+   payloads, STOP and propose.
+
+**Loop (binding), identical to batch 1's:** trace → build → pins
+(red-on-old by behavioral revert where a pin CAN go red; checksums
+before every revert; the model-layer honesty rule above) → tutorial
+spine green by TYPE name → full suites with quoted "Test run with N
+tests" lines (core from the root, Mac from `App/Variorum/`; mobile
+only if `Sources/`/`Shared/` is touched). **Baselines to
+match-or-beat: core 903/102 · Mac 939/152 · mobile 14/4.** Append
+your batch record under "Batch records"; commit per convention with
+the standing trailer, staging by EXPLICIT PATH ONLY (two author
+files sit uncommitted in the tree — `notes/DetailedPlanForPhases.md`
+*[removed for publication]*
+`/Applications`, never `Sources/VariorumCore/Sync/`, never push,
+never `git checkout` over uncommitted work, no schema. STOP and
+propose if any item exceeds its ruling's shape.
