@@ -1160,3 +1160,131 @@ claim is made that they were tested:**
   status line and the helper now spell the recovery path identically
   (same words, one source); and a chapter heading in Outline highlights
   across its whole row when something is dragged over it.
+
+#### Batch 2 — ACCEPTED (2026-07-30; the orchestrator's adjudication)
+
+**Counts by my own runs** (not the implementer's): core `✔ Test run
+with 906 tests in 102 suites passed` · Mac `✔ Test run with 958 tests
+in 154 suites passed` — both match the record's claims exactly; the
+implementer's quoted mobile line (14/4, run because `Sources/` was
+touched) is accepted, and mobile re-verifies by my own run at phase
+end per the standing rule.
+
+**Load-bearing diffs read:** the core query is live-row disciplined
+(deleted_at guards on edge, origin and placement; the `NOT EXISTS`
+live-placement clause is the door's whole meaning and revert W10b-A
+proved both its pins discriminate) with cost bounded to the post's
+placements; W11's `BookDrag` prefix payload follows the standing
+`lens-move:` precedent and is strictly safer than the bare id it
+replaces; the reach fix leaves `chapterDragDropsBeforeTargetOrAtTheEnd`
+and every ceremony pin UNMODIFIED — the parity proof.
+
+**The three flagged calls, adjudicated:**
+1. **The recovery-path wording deviation ENDORSED** — the brief's
+   "Library ▸ Recovery" was MY error (an internal case name, not a
+   door the author can find); the implementer corrected to the app's
+   real grammar (`Library → Archived & Deleted → Unplaced blocks`),
+   which is also the merge ceremony's shipped sentence. The deviation
+   discipline working exactly as intended.
+2. **The `RecoveryPath` fold ENDORSED** — one name, many readers is
+   the anti-drift shape this phase's own kickoff finding (W10) exists
+   to buy; the two standing pins over that copy pass unmodified.
+3. **Building the reveal ENDORSED** — within the escape's intent
+   (stock consume-pattern + `scrollTo` + row mark; no new highlight
+   subsystem); navigation without saying WHICH block would have left
+   the findability finding standing.
+
+Also endorsed: the two green-reverts-got-stronger-arms events (the
+guard applied before trust, twice), and the `assembleReading`
+orders-by-chapter finding — carried into the 13i brief as knot 9 the
+same sitting. **The six visual-verification-only items** route to her
+walk and the standing Design & UI review row (recorded in the batch
+record; nothing about them is claimed tested).
+
+**Ledger:** W10 BUILT (both halves) · W11 BUILT (both halves) — all
+four adjudicated. Remaining build rows: W1/W2 (split + windows),
+W3+W16 (batch 3, briefed), W4 stars, W5 sticky, W6+W15 the sweep,
+W17/A32 exploratory.
+
+### Batch 3 brief — the navigation core: the Open-notes strip (W3/A27) + back-navigation (W16) (fresh Opus implementer; self-contained; spawn AFTER batch 2's acceptance)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §12; §14's 13c/13d deltas); THIS plan file — the
+constitution, THE KICKOFF SITTING, sitting rulings rounds 1–5 (round
+2 items 2 and 4 are YOUR two rulings), batch 1's and batch 2's
+records (their environment traps bind; batch 2's P-4 broadcast
+pattern for reveal/navigation is the precedent you extend); the 13c
+plan's "Environment traps" (binding); the 13d batch-4 record's A14
+item (the ⌘⇧ collision-sweep precedent and the registry shortcut
+grammar).
+
+**The rulings you build to (hers, recorded above):** the per-window
+tab strip lives in the SIDEBAR's free space under Shelf · Library ·
+Pool · Blocks (*"i'd use the free space that's underneath … for
+now"*); ⌘⇧1…9 jumps; back-navigation is per-pane history (⌘[ / ⌘])
+plus a named "← <origin>" chip that is COLLAPSIBLE (*"I like how
+clean the editor looks right now"*); Compare's peer post becomes
+click-through-to-open riding the same history.
+
+**The items:**
+
+1. **The Open section (the tab strip's sidebar form).** A fifth
+   sidebar section below the standing four, listing the window's
+   OPEN notes: opening a note (from any door — shelf, library, pool,
+   ⌘K, a book, Compare's new click-through) adds it / moves it to
+   recency; rows close individually (closing never deletes anything
+   — pure view state); SESSION-scoped per window (the view-local
+   state precedent — nothing persists, nothing syncs). Cap the list
+   visibly (a "…" truncation row per the bounded-windows discipline)
+   — pick a sane cap and record it. Section header word: "Open"
+   (a UI string; the K5 sweep batch may re-touch it — do NOT rename
+   anything else, the sweep is not yours).
+2. **⌘⇧1…⌘⇧9 jump to the nth open note.** Registry-declared (P-1;
+   every shortcut a menu item — the R73/R91/R93 legibility mandate;
+   the Shortcuts helper picks them up from the registry). **RUN THE
+   COLLISION SWEEP FIRST** (the 13d batch-4 precedent): menu key
+   equivalents + registry shortcuts for ⌘⇧ digits; record the
+   sweep's result in the batch record; if any digit is taken, STOP
+   and report rather than substituting.
+3. **Per-pane navigation history + the back chip.** A history stack
+   keyed by PANE (today exactly one detail pane exists — build the
+   key from day one so batch 4's split inherits it; the free-tiling
+   rider binds: no two-pane assumptions). Every open-note navigation
+   pushes; ⌘[ / ⌘] walk back/forward (COLLISION SWEEP these too —
+   record what ⌘[/⌘] mean anywhere today); the chip renders "←
+   <origin title>" when the pane arrived from somewhere, is
+   COLLAPSIBLE per her ruling (a chevron collapse; collapsed state
+   session-scoped; collapsed = a small glyph, never zero door), and
+   P-8's chrome rules bind (`lineLimit(1)` on the title — the
+   b6dae25 class). History is view state: it never persists, never
+   syncs, and holds IDs only (never copies of text — the standing
+   state rule).
+4. **Compare's click-through.** The peer post's header becomes an
+   open door (fire-and-DO: opens the post in the ordinary editor,
+   pushing history so ⌘[ returns to Compare's board). Registry-
+   declared where the registry reaches it; the 2E/board records
+   name the surfaces.
+
+**Shape constraints:** P-4 — navigation decisions land in the
+shell/router by composition (batch 2's `RootView` precedent), never
+derived from broadcasts by listeners; P-3 untouched — opening notes
+migrates the ONE live editor exactly as today; P-9 — the history
+stack is its own small type with its own pure pins, not a view-model
+appendage. NO schema, no `Sync/`, and the K5 sweep batch owns every
+rename — touch no standing strings beyond the new section's own.
+
+**Pin honesty:** the history stack, recency ordering, cap/truncation,
+and chip-state logic are PURE and fully pinned (red-on-old by
+behavioral revert; checksums); ⌘⇧n routing pins at the registry/
+dispatch layer (the 13d A14 precedent). What only a hand can verify
+(the strip's look in the sidebar, chip collapse feel) goes on the
+visual-verification-only list for her walk / the Design & UI review
+row.
+
+**Loop, records, constraints:** identical to batches 1–2 (tutorial
+spine by TYPE name; full suites with quoted "Test run with N tests"
+lines; mobile only if `Sources/`/`Shared/` is touched; batch record
+appended; commits by explicit path with the standing trailer; never
+`/Applications`, never push; STOP-and-propose on anything exceeding
+a ruling's shape). Baselines to match-or-beat: **core 906/102 · Mac
+958/154 · mobile 14/4.**

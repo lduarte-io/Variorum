@@ -90,6 +90,14 @@ named the knots that need HER rulings, not defaults:
    (R28 — memberships point at chapters; dangling = unsectioned). A
    divider reading would derive assignment from position — a real
    semantics change wanting this phase's sitting, not a drag patch.
+9. **A mechanism fact for knot 2, found at 13f batch 2 (revert
+   W11b-A running green):** `assembleReading` already orders a
+   chaptered curated book BY CHAPTER (`ORDER BY (s.id IS NULL),
+   s.position, s.id, rp.position`) — assignment alone lands a post at
+   its new chapter's top when moving down; membership position only
+   has to be written moving up (else the post lands at the chapter's
+   END). Any hybrid's arrival-interleaving rule composes with this
+   ordering, not with a flat position list.
 
 ## What binds
 
