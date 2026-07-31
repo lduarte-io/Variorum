@@ -4037,3 +4037,367 @@ never `git checkout` over uncommitted work, NO schema.
 STOP-and-propose on anything exceeding a ruling's shape. Every
 PROVISIONAL to `notes/QUESTIONS.md` (append, never renumber; next
 free number **#49**).
+
+### Batch 6 — W4 STARS **BUILT**; W5's PROPOSAL appended (the gate); commit `c70c762`
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 925
+tests in 105 suites passed after 28.982 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 1052 tests in 184 suites passed after 137.940 seconds`
+(`mac_exit=0`) · mobile `✔ Test run with 14 tests in 4 suites passed after
+0.242 seconds` (`mobile_exit=0`) · the tutorial spine on its OWN run, by
+TYPE name (`TutorialBookShapeTests` · `TutorialDoorTests` ·
+`TutorialWritingActsTests` · `TutorialTakesActsTests` ·
+`TutorialStructureActsTests` · `TutorialLookingActsTests` ·
+`TutorialLibraryActsTests`): `✔ Test run with 49 tests in 7 suites passed
+after 12.015 seconds`. From the batch's baselines (916/104 · 1041/181 ·
+14/4): **+9 core tests, +1 suite · +11 Mac tests, +3 suites**; mobile
+byte-unchanged. **Mobile WAS run** — `Sources/` carries four files this
+batch, so the loop's own condition is met.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point (`pgrep` by path at open
+and at close). ONE commit, staged by explicit path; nothing under `notes/`
+outside this record was touched.
+
+#### W4 — stars, on the `shelf_pins` precedent
+
+Her round-3 ruling, and the shape it picked is the whole reason it is
+small: **ZERO schema, no §12 lockstep event.** One `setting` row named
+`'starred'` holds a canonical JSON array of keys in star order — plain
+metadata CAS, so a two-device star race converges to either list and never
+to corruption, exactly as pins have since R38.
+
+**The core owns every decision, and three rules sit visibly in
+`setStarred`'s body:**
+
+1. **Star time is the order** — a new star is APPENDED.
+2. **THE CAP REFUSES** (`starLimitReached(limit:)`) rather than silently
+   evicting her oldest star, and the refusal NAMES un-starring as the road
+   (P-2 — the door fires and says what to do instead).
+3. **EVERY WRITE SELF-HEALS**: it persists exactly what `Queries.starred`
+   returns — live targets only.
+
+**Rule 3 is the load-bearing one, and it is what makes rule 2 honest.** The
+READ RULE is that a star whose note or book is dead renders NOTHING (the
+`dailyJournalBookID` fallback class). Without the self-heal a ghost star
+would go on spending one of her five slots — and the refusal's only road
+(un-star) has NO DOOR for a row that renders nothing, so she would be
+stuck at four stars with no way to see why. **Revert W4-B reproduces
+exactly that**: `theCapCountsOnlyWhatSheCanSee` fails with
+`starLimitReached`, live.
+
+**The app adds no second rule.** `StarTargeting` is the pure target rule (a
+note or a book; the shelf, the library, the pool, a scraps container and a
+tag folder are PLACES); ONE `StarDoor` value reaches all four row surfaces
+so the menu's word is derived once; names come from
+`WorkspaceNaming.label`, so a starred untitled note reads "Untitled"
+exactly as it does in the Open strip and the back chip rather than growing
+a second fallback.
+
+**The doors (P-1):** `CapabilityID.toggleStar`, app scope,
+`[.contextMenu, .palette]` — the note-row family (`SidebarView
+.contextMenuCapabilities`: the Open strip, the Library catalog, the Pool)
+plus the shelf's BOOK rows from their own new
+`ShelfView.contextMenuCapabilities`, plus ⌘K by name. **No key
+equivalent** and therefore no collision sweep owed: her ruling named a menu
+and the palette, and inventing a chord would owe a sweep no ruling asked
+for (batch 4's precedent). The ⌘K gate (`canStarCurrent`) governs the
+PALETTE door only — a row carries its own target, which is the standing
+`.diffAgainstChosen` / `.showOriginBlock` split, stated in the
+declaration so nobody later reads the ungated rows as an oversight.
+
+**The Starred section** sits at the sidebar's TOP (her placement), renders
+only when something is starred, and its rows are ordinary tagged `List`
+rows — so a click navigates through the shell's own selection, the `›`
+marker lands on the current one for free, and a book row goes to the book
+while a note row goes to the note, with no new routing at all. Each row
+carries the un-star door twice (a trailing ★ button and the context menu),
+the Open strip's ✕ shape.
+
+#### Judgment calls, recorded so they can be overturned rather than trusted
+
+1. **The stored key uses the MODEL's word** (`post:` / `reading:`), never
+   the UI's. K5's sweep is UI-STRINGS-ONLY and can never reach a stored
+   value, so this keeps the ratified vocabulary unmuddied on both sides;
+   the grammar is also the app's own (`WorkspaceModel`'s title keys, the
+   `book-chapter:` / `lens-move:` payloads). Pinned, so a later rename
+   cannot quietly reach it.
+2. **ONE list across both kinds, capped at 5 TOTAL** — her ruling says "5
+   notes or books", and one list is what makes "star time is the order"
+   expressible at all. Two lists would need two caps and an interleaving
+   rule she never asked for.
+3. **Success is QUIET; only refusals speak.** Every other toggle in this
+   registry is quiet (seams, the context bar, shelf pins), and the Starred
+   section gaining or losing the row IS the feedback. The one place this is
+   arguable is ⌘K, where the palette has just closed and her eye is in the
+   editor — flagged rather than decided.
+4. **The ⌘K door reads the store rather than the observed model.**
+   `ShellActions` holds `session` + `shell` by design and threading a view
+   model into it would widen the shell's testable executor for one row. The
+   DECISION is still the operation's in both paths (`setStarred`); only the
+   source of "is it starred right now" differs, and a racing star from
+   another device makes it a redundant no-op at worst.
+5. **A star is not archived-aware.** An ARCHIVED note keeps its star and
+   its row (archive is kept-but-out-of-ambient-view, and a star is exactly
+   an explicit non-ambient pointer). Only a tombstone removes it. Stated
+   because the Phase 4 ambient ratification could be read either way.
+6. **The sync-straggler corner, named not hidden:** the self-heal drops any
+   entry whose target is not live *locally*, which includes a row that has
+   not ARRIVED yet — so a star made on another device, whose note is still
+   in flight, would be dropped if she stars something else in that window.
+   One rule beats two here (stars are presentation, never truth — the
+   `shelfPins` fail-open class), the loss is one presentation row, and the
+   road back is one click. Distinguishing "tombstoned" from "not yet
+   arrived" is one extra query if the architect prefers it.
+
+#### Pins — every change named
+
+**New core suite `StarsTests` (9):** star time + idempotence + the outbox
+ride · the cap's refusal and the un-star road out · **the read rule AND
+the self-heal** (the stored list still carries the dead entries until the
+next write, which is what makes the healing observable) · the cap counting
+only what she can see · un-star + a no-op writing NOTHING · malformed JSON
+and unreadable entries reading as none, with the readable ones around them
+surviving · starring something dead, absent, or a scraps container ·
+an untitled note carrying no name so the app's one brain names it · the
+stored key's model word round-tripping.
+
+**New Mac suites (3, 11 tests):** `StarTargetingTests` (4) the target rule
+over every destination kind, the row's navigation round trip, the row word,
+and the cap refusal reaching her in words · `StarDeclarationTests` (3) the
+declaration, its honest grey, and all four renderers · `StarActingTests`
+(4) both doors acting end to end against a real store, the sixth star
+SPEAKING with nothing evicted, and a deleted note leaving the section by
+itself.
+
+**Pins MODIFIED — two, both in the registry walk, each the new
+declaration's own requirement:** `sampledContexts` **+1 context** (the star
+gate gets its OWN context rather than a field on one of the three
+workspace lines, because it is not a stack gate — it asks what the pane is
+SHOWING; without it `.toggleStar` would read `.unavailable` everywhere the
+walk looks, the same hole the find family and the navigation core each
+opened) and `theContextMenusRenderExactlyTheDeclaredContextDoors` **+
+`ShelfView.contextMenuCapabilities`**. (Mechanical, not a claim change:
+`PostDetailAndPanelTests`' `SidebarView` construction gains the new
+`stars:` argument.) **Everything else passes UNMODIFIED**, including every
+other registry-walk assertion — the parity proof that `.toggleStar` is an
+addition, not an adjustment.
+
+**The registry walk earned its existence again:** it caught the missing
+sampled context before any behavioural suite did, exactly as it caught
+batch 4's two declared-but-not-rendered doors.
+
+**Reverts (`shasum -a 256` before each; both files restored and verified
+OK before the next; `build-for-testing` → `test-without-building` every
+time, per the standing stale-product trap):**
+
+- **W4-A** the cap guard deleted ⇒ **2 issues on exactly the cap pin** (no
+  error thrown; the sixth star lands), every other pin green.
+- **W4-B** the self-heal deleted (the write persists the STORED list) ⇒
+  **2 issues**: the heal pin, and `theCapCountsOnlyWhatSheCanSee` failing
+  with `starLimitReached` — **the ghost-star bug this rule exists to
+  prevent, reproduced.**
+- **W4-C** the read rule's liveness filter deleted ⇒ **3 core issues** AND,
+  after a rebuild, the Mac section pin red (`isStarred` still true for a
+  deleted note) — the rule discriminated at both layers.
+- **W4-D** stars prepended instead of appended ⇒ **6 issues across 4
+  pins**: star time is not a comment.
+
+#### VISUAL-VERIFICATION-ONLY — for her walk and the Design & UI review row
+
+Everything that DECIDES anything above is pinned. These are look-and-feel
+halves and **no claim is made that they were tested:**
+
+1. That the Starred section reads right at the sidebar's TOP, above
+   Shelf · Library · Pool · Blocks, and that appearing only when something
+   is starred feels like discovery rather than a jump.
+2. That the trailing ★ button reads as "un-star" and does not fight the
+   row's own click-to-navigate (the Open strip's ✕ pairing, one row down).
+3. That the cap's refusal is legible when it fires, and that five feels
+   like the right number under her hand.
+4. That "Star"/"Unstar" reads better on the rows than the registry's own
+   "Toggle Star" does in ⌘K (judgment call 3's other half).
+5. That a starred BOOK row and a starred NOTE row are distinguishable at a
+   glance in the one list (today only the name distinguishes them).
+
+---
+
+#### THE PROPOSAL (W5's gate) — the QUICK NOTE, traced and MEASURED before building
+
+Her round-3 ruling: *a FLOATING MINI-WINDOW; global shortcut / menu-bar
+door; typing mints an ordinary bookless note (the Pool lists it); the
+sticky face shows NO takes machinery; the note persists when the window
+closes.*
+
+**Four measurements led this, and two of them changed what I would build.**
+They lead because one of them contradicts an assumption in the brief.
+
+| # | Measured | How |
+|---|---|---|
+| 1 | **SwiftUI's own floating window level exists at our target** — `Window(id:) { }.windowLevel(.floating).windowResizability(.contentSize).defaultWindowPlacement { }` type-checks clean at `arm64-apple-macos26.0`, zero warnings | `swiftc -typecheck` probe against BOTH the CLT SDK and Xcode's MacOSX26.2 SDK |
+| 2 | **`MenuBarExtra` is available** at the same target, same probe, zero warnings | as above |
+| 3 | **Carbon `RegisterEventHotKey` is present and NOT deprecated** in the macOS 26.2 SDK — annotated `AVAILABLE_MAC_OS_X_VERSION_10_0_AND_LATER`, no `DEPRECATED` macro; its own header Discussion says "Registers a **global hot key**" | read from `…/MacOSX26.2.sdk/…/HIToolbox.framework/…/CarbonEvents.h:15484`; the probe links its whole call shape with zero warnings |
+| 4 | **⌘⇧N is FREE** | the standing sweep: `EditorCommands.keyEquivalent` (36 chords), every `.keyboardShortcut(` call site in `Variorum/` + `Shared/`, every `NSMenuItem` key equivalent (all empty strings), the one `performKeyEquivalent` override (⌘S). No `n` chord carries shift; the nearest neighbour is ⌘N New Post, which is exactly the right neighbour |
+
+##### (a) THE WINDOW — and the one place I would deviate from the brief
+
+**The floating half is settled by measurement 1: a third SCENE, no NSPanel
+bridge.** `Window("Quick Note", id: …)` — singleton, like the helper
+window, because there is one sticky pad — with `.windowLevel(.floating)`
+and `.windowResizability(.contentSize)`. The `NSPanel`/`NSHostingView`
+bridge that this used to require pre-macOS-15 buys nothing at our
+deployment target and would be a second window mechanism beside the two
+`WindowGroup`s batch 5b just landed.
+
+**What I would deviate on is the FACE, and it is the gate's real
+question.** The brief says *"the mini editor takes the live ring while
+key, P-3 on the standing authority"*. I propose the opposite, and it is
+simpler rather than weaker:
+
+- **RECOMMENDED — shape 1, CAPTURE-THEN-MINT.** The sticky holds a plain
+  SwiftUI text field (the `QuickEntryBar` face), **no TK2 surface, no
+  block identity, no live ring at all**, and the text becomes a note
+  through the standing mint below. **P-3 then holds trivially rather than
+  carefully**: the quick note never mounts a text surface, so there is
+  nothing for it to be live *with* — no authority, no handler, no
+  `EditorRouter.active`. It also answers "the sticky face shows NO takes
+  machinery" by construction instead of by stripping a face down.
+  *The cost, stated:* it is a CAPTURE surface, not an editor — no blocks
+  or takes while typing, and re-summoning gives a fresh sticky rather than
+  the last note. That is what a sticky note IS, and the minted note opens
+  in the full editor the moment she wants more.
+- **The alternative — shape 2, a real mini editor** mounting the standing
+  pane surface on a minted post and taking the ring while key. Costs: the
+  post must be MINTED BEFORE the surface exists, so every summon she
+  abandons leaves a blank note in the Pool (R29's surface fills with
+  ghosts — the exact opposite of what the Pool is for); and "no takes
+  machinery" becomes a stripped-down face to build and keep stripped. I do
+  not recommend it, but the brief's sentence points at it, so it is the
+  architect's to re-read.
+
+**Key-ness under 5b's mount rule — I recommend it REGISTERS**, as
+`WindowRegistry.Kind.quickNote` (a third case; `Kind` is read only by
+`navigationTargetID`'s three `== .full` comparisons, so a new case is
+additive and broadcasts skip it by construction — verified by grep).
+Registering means that while the sticky is key the app has **zero** live
+surfaces, and every app-scope act goes honestly grey **through the gates
+that already exist** — `handlerCount` 0 greys ⌘S and the editing family,
+`openNoteCount` 0 greys ⌘⇧1–9, and so on: the note-only window's story
+exactly, not one new availability rule.
+*The cost, stated plainly:* each summon unmounts and re-mounts her main
+window's detail (its `.task`s re-run; her pending text flushes through the
+per-post coordinator — the safe direction, and the same backstop batch 4's
+condition-(c)(2) pin covers). **The alternative — not registering — is
+worse and I want the reason on the record:** her main editor would stay
+live in a non-key window, so ⌘S pressed while she is looking at the sticky
+would commit a take in a note she is not looking at. That is precisely the
+"menu gates answering for the wrong window" defect batch 5b found and
+fixed; I will not re-open it for a summon cost.
+
+##### (b) THE DOORS — one is free, the other is permission-shaped, and I am STOPPING on it
+
+**RECOMMENDED for v1: a MENU-BAR EXTRA + the app-global chord ⌘⇧N.** Her
+ruling names both a global shortcut and a menu-bar door, and the menu-bar
+door is a genuine reach-it-from-anywhere door: `MenuBarExtra` sits in the
+menu bar whatever app is frontmost, needs **no entitlement and no TCC
+permission**, and adds no dependency. ⌘⇧N (measurement 4) reaches it
+instantly whenever Variorum is frontmost, and reads right beside ⌘N — ⌘N
+makes a note, ⌘⇧N pops the sticky. Both are registry-declared; the chord
+joins the key table under the standing pin.
+*The one taste consequence for her:* a permanent Variorum glyph appears in
+her menu bar. It is a visible product change, so it goes to her, not to me.
+
+**A TRUE SYSTEM-WIDE HOTKEY — one that fires while another app is
+frontmost — is a SEPARATE, LATER step, and here is exactly why.** There
+are three mechanisms and only one is viable:
+
+| Mechanism | Verdict |
+|---|---|
+| `NSEvent.addGlobalMonitorForEvents` for `.keyDown` | **Requires Accessibility (TCC)** — Apple's own guide: *"it may only monitor key events if accessibility is enabled or if the application is trusted for accessibility."* Permission-shaped |
+| `CGEventTap` | Requires the **Input Monitoring** TCC permission. Permission-shaped |
+| Carbon `RegisterEventHotKey` | Present and NOT deprecated in our SDK (measurement 3); reported to need **no** TCC permission and to be sandbox- and App-Store-compatible. **But that no-permission claim is UNCONFIRMED against any primary Apple source** — the lookup could not find it stated in Apple documentation, and there is a reported macOS 15 sandbox regression (FB15168205) for Option-only/Option+Shift chords |
+
+**So: STOPPING on this half, per the brief's own instruction.** Whether a
+Carbon hotkey registration produces a permission prompt on HER machine can
+only be settled by running it there, and a TCC prompt is an author-machine
+act — never something I work around or assume away. I also cannot reach
+for `KeyboardShortcuts`/`MASShortcut`: **a new third-party dependency is
+an author-only call** (CLAUDE.md), and neither is needed anyway, since
+their underlying API is the Carbon one above.
+**My recommendation: ship v1 on the menu-bar extra + ⌘⇧N** — which is her
+ruling's own second-listed door, costs nothing and risks nothing — and put
+the system-wide hotkey to her as a small, separable follow-on with the
+measurement above in hand.
+
+##### (c) THE MINT PATH — the standing quick-entry grammar, unchanged
+
+The face mints through **exactly `QuickEntryBar.submit()`'s body**:
+`session.runner.run { ops in try ops.importPost(title: nil, text:) }`.
+Traced, and every property her ruling names falls out of it:
+
+- **Untitled** — `title: nil`, so the app's one naming brain reads it
+  "Untitled" everywhere.
+- **Typed text segments as CONTENT** — `importPost` runs
+  `SegmentationRules.bulkSegments` under the document-global setting, so
+  the 2026-07-12 spacing ruling and the `one_block` face ride free and
+  the sticky needs no segmentation rule of its own.
+- **Bookless, so the POOL lists it** — it takes no `addPostToReading`, and
+  `Queries.poolPosts` is exactly the bookless live posts (R29; pinned by
+  `poolPostsAreExactlyTheBooklessLivePosts`).
+- **An empty sticky mints NOTHING** — `importPost` throws `emptyImport`
+  on whitespace-only text, so an abandoned summon cannot litter the Pool.
+- **"The note persists when the window closes"** — ⏎ mints (the R3
+  grammar), AND a non-empty sticky mints on close, so nothing typed is
+  lost. **Two small questions I would rather have ruled than guess:**
+  does ⏎ CLOSE the sticky or clear it and stay (a pad you keep writing
+  on)? And should the minted note OPEN in the main window, as
+  `QuickEntryBar` does, or stay quietly in the Pool — a sticky that yanks
+  her out of what she was doing is the opposite of a quick note, so my
+  leaning is: stay quiet, and speak one line naming the Pool.
+- **One recorded wrinkle, not a blocker:** `importPost` registers its undo
+  entry with the label **"Import"**, so the menu would read "Undo Import"
+  after a sticky. Widening that label to a parameter is a one-line core
+  change if the architect wants the menu to say what she did.
+
+##### What I would build on a ruling, in order
+
+1. The scene: `Window(id:)` + `.windowLevel(.floating)` +
+   `.windowResizability(.contentSize)`, registering as
+   `WindowRegistry.Kind.quickNote`.
+2. The face: the `QuickEntryBar` grammar, mint on ⏎ and on close.
+3. The doors: `CapabilityID.quickNote` — `MenuBarExtra` + ⌘⇧N (the chord
+   into the key table under the standing collision pin) + a File-menu
+   item, all from ONE declaration.
+4. Pins: the mint's properties (bookless ⇒ Pool; empty mints nothing;
+   segmentation rides the standing rule) end to end against a real store;
+   the registry declaration and its doors; the key-table collision pin
+   re-run with ⌘⇧N in it; and the app-scale mount invariant extended to a
+   registered `.quickNote` window (the R5b-A shape).
+
+**STOPPING HERE per the gate.** W4 is built, committed and green; W5
+proceeds on the architect's ruling of (a)–(c) — and the system-wide-hotkey
+half stays stopped on her machine act regardless of how (a) and (c) are
+ruled.
+
+#### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **W4 is BUILT and adjudicable**; **W5 is STOPPED at its gate**, with one
+  half (the true system-wide hotkey) stopped on an AUTHOR-MACHINE act
+  rather than on a ruling — that half stays stopped whatever is ruled
+  about the window and the face.
+- **The one deviation I am asking to be ruled on, stated plainly:** the
+  brief presumes the sticky is a mini EDITOR taking the live ring; I
+  propose it is a CAPTURE surface with no text surface at all, and the
+  reasoning is in (a) so it can be overturned rather than merely trusted.
+- **W19 rider: NOT FIRED.** This batch touched no part of the shell-redo
+  status-delivery path (`ShellActions.structuralRedo`, `ShellRouter`,
+  `StatusCenter`, `OperationsRunner` — verified in the diff; the one
+  `ShellActions` addition is the star's palette body).
+  `theShellRedoActionRunsThroughTheRunnerAndReports` passed in the full Mac
+  run. Left where it is; its KnownIssues row stands.
+- Her walk will notice, beyond the Starred section itself: every note row
+  in the app (the Open strip, the Library catalog, the Pool) and every
+  book row on the shelf carries a new star door, and ⌘K types "Toggle
+  Star".
