@@ -3383,3 +3383,164 @@ unmoved BY CONSTRUCTION (`PRODUCT_NAME` untouched, so the process
 path is byte-identical — only the Dock/app-switcher label changes).
 The Dock now tells her which "Variorum" is hers. **Ledger: W25
 DONE.**
+
+#### Batch 5 (continuation) — W23 (ruled shape 1) + the W22 button + W24; the windows half NOT taken (5b's, as ruled)
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 916
+tests in 104 suites passed after 28.558 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 1030 tests in 175 suites passed after 134.044 seconds`
+(`mac_exit=0`) · mobile `✔ Test run with 14 tests in 4 suites passed
+after 0.262 seconds` (`mobile_exit=0`) · the tutorial spine on its OWN
+run by TYPE name: `✔ Test run with 49 tests in 7 suites passed after
+12.000 seconds`. From the continuation's baselines (906/102 · 1026/174 ·
+14/4): **+10 core tests, +2 suites · +4 Mac tests, +1 suite**; mobile
+byte-unchanged. **Mobile WAS run** — `Sources/` carries three files.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point. Every commit staged by
+explicit path; nothing under `notes/` outside this record was touched
+(rounds 12–13, the acceptance, the rulings and W25 all landed while I
+built and are untouched above). Commits: `5c8e9cf` (W23 + the W22
+button) · `b9a93ec` (W24). Built on the tree as W25 left it.
+
+##### W23 — the composite, as ruled
+
+`divergePostForReading(_:in:)` in a new `Operations+Diverge.swift`. ONE
+write composing the standing paths: `copyPost`'s body (the
+`duplicateAsVersion` copy exactly), a membership row for the copy at the
+ORIGINAL'S OWN `position` and `section_id`, and the original's row
+tombstoned. The public membership ops each open their own
+`database.write`, so a composite cannot call them without nesting
+transactions — it inlines their guards and their writes instead, which is
+`newPostInReading`'s standing pattern. **No new semantics: exactly the
+rows the standing paths write.** `copyPost` widened private → internal
+for its one new caller, with the reason in its doc.
+
+**The undo entry is the whole reason this is an operation**, and the file
+says so where a future session will read it: inverse = the original's row
+out of its tombstone (its position and chapter were never rewritten, so
+this is a tombstone flip, not a re-computation) + the copy's membership
+tombstoned + the copy tombstoned; redo = the same three rows the other
+way. Exact-row on do-time ids, so undo↔redo ping-pongs (13c 1B's
+contract). Refusal buckets are the standing ones (a book deleted
+meanwhile ⇒ quiet; FINISHED meanwhile ⇒ throws, entry stays for retry).
+
+**Two calls recorded so they can be overturned rather than trusted:**
+
+1. **CAPACITY IS NOT GATED, deliberately** — the swap is net-zero (one
+   membership in, one out), so `addPostToReading`'s at-capacity refusal
+   would refuse an act that does not grow the book. Stated in the op's
+   doc and PINNED (`aBookAtItsPostCapCanStillDiverge`), rather than left
+   silently true.
+2. **THE DOOR IS THE CHIP'S BOOK ROW, not a menu item — a deviation from
+   the brief's wording, stated.** A menu door needs a target and a
+   context fact neither the shell nor the `CommandRouter` has (the pane's
+   books are per-pane view state, resolved in `PaneHost`'s own `.task`),
+   and its target would still have had to guess which book she meant. The
+   chip's rows are where per-book acts already live — it has carried a
+   per-book "remove" since Phase 13 — so the target is the row she points
+   at. Declared `.surface`, the `.openPeerPost` class. **R118 parity is
+   `.native` and LITERALLY true rather than an exemption:** the chip is
+   in the post detail's MASTHEAD, which renders above every mode, so
+   Takes reaches the door without a mode switch exactly as Write does.
+   (The menu door remains one declaration away if she wants it; the
+   ambiguity, not the effort, is why it is not there.)
+
+The smart-book refusal has its own sentence because the generic one would
+have been a dead end: *"'<book>' collects by its tags, so there is no
+membership to move — a copy would only appear there if it carried the
+same tags. Duplicate as Version, then tag the copy."* Everything else
+falls through to the standing `ChipRefusals` wording, pinned as equal to
+it.
+
+##### The W22 button — completed
+
+`StatusCenter.Item` gains an optional `Action` (label + closure); the
+toast renders it and **dismisses as it acts** — an offer that survives
+being taken reads as a question nobody answered. Every existing `speak`
+call and every pin over them is unchanged (the parameter is defaulted).
+
+**The target rule, extracted so it is pinnable:**
+`MultiBookEditNote.divergeTarget` = the first CURATED book in the
+chooser's own order. That is ONE rule which reduces to *"the book you
+came from"* whenever there is one, because arriving at a book floats it
+to the top of that order (W20's recency) — and it answers nil when every
+membership is derived, so the note speaks WITHOUT a button rather than
+offering an act that could only refuse (P-2, at a status offer). It sits
+on the type rather than inside the trigger's closure for the reason
+`MembershipChip.ascend` does. The window's recency reaches the app-global
+session through one closure (`AppSession.recentBookIDs`, the
+`openNoteCount` idiom), wired in `wireWorkspace`.
+
+##### W24 — extract joins A11
+
+**The change is that extract stops having its own rule.** Its span has an
+inner edge, and that edge IS a cut — so `seamTrimmedHalves` expresses
+extract with no second implementation: a PREFIX span is the first half
+and owns the k−1 newlines; a SUFFIX span is the second half, so the
+SOURCE owns them. "The piece before the seam owns the blank" holds in
+both directions, which is A11 verbatim rather than a parallel to it. The
+guards were already satisfied at that call site and the code now says why
+(`extractableSpan` proves content on the far side, so the cut is
+interior; `graphemeRange` proves alignment — kept as a CHECK now that the
+halves are taken by offset). **The outer edges are untouched**: the span
+still trims both of its own ends and the source's far edge is still left
+alone, so exactly one byte class moved.
+
+##### Pins — every change named
+
+**New core suites (2):** `DivergeForBookTests` (6) — the exact slot + the
+original keeping its other books and its own life · the copy being a full
+version copy · **the undo↔redo round trip** (same membership row id, same
+position, same chapter) · the three refusals · the at-capacity swap · the
+assembly rendering the copy where the original stood. `ExtractSeamTests`
+(4) — her ruling in BOTH directions on one text · the ordinary seams
+byte-unchanged (the parity half) · **extract and divide agreeing on the
+same three-newline seam** (the one-rule claim made testable rather than
+asserted) · the outer edges unmoved.
+
+**Grown Mac suite:** `BookAscentTests` **+ `DivergeDoorTests` (4)** — the
+declaration and its honest grey · the copy (button label, ⌥⌘Z, the tag
+road, and the fall-through equal to `ChipRefusals`) · the target rule
+incl. the all-derived nil · a status note carrying one door.
+
+**Pins MODIFIED — one:** the registry walk's surface union gains
+`MembershipChip.surfaceCapabilities` (the new declaration's own
+requirement). Everything else passes UNMODIFIED.
+
+**Reverts (`shasum -a 256` before each; both files restored and verified
+byte-identical):**
+- **W23-A** the copy lands at the END with no chapter ⇒ **6 issues across
+  three pins** — slot, chapter, redo's exactness, and the assembly's
+  position.
+- **W23-B** the inverse never revives the original ⇒ exactly the
+  round-trip pin red: **the half-undo this operation exists to prevent,
+  reproduced.**
+- **W24-A** the pre-ruling extract (both sides trimmed away) ⇒ **5 issues
+  across 3 pins**, including the extract-vs-divide agreement pin — the
+  one that would catch a second implementation drifting apart later.
+
+##### VISUAL-VERIFICATION-ONLY — for her walk
+
+1. That the chip's book row reads well with THREE controls now (the book
+   name, "diverge", "remove") and does not crowd at a long book name.
+2. That "diverge" is legible as an act rather than as a label — and that
+   its outcome sentence lands where she is looking.
+3. That the first-edit note's button reads as an offer rather than as a
+   warning's consequence, and that dismissing-as-it-acts feels right.
+4. That the smart-book refusal reads as a road rather than as a wall.
+
+##### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **One deviation flagged above** (the chip row instead of a menu item),
+  with its reasoning, so it can be overturned rather than merely trusted.
+- **The windows half was NOT taken** — it is 5b's, per the ruling and my
+  own recommendation. Nothing here touches the router, the shell's
+  wiring, or `PaneMount`, so 5b begins on a clean seam.
+- **W19 rider: still not fired.** This continuation touched no part of
+  the shell-redo status path; it fires for 5b's router refactor.
+- Her walk will notice, beyond the two items: every book row in the chip
+  now offers a one-click diverge, and the first-edit note carries a
+  button naming the book it would act on.
