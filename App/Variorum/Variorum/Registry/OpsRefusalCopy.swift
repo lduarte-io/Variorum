@@ -164,6 +164,14 @@ nonisolated enum OpsRefusalCopy {
             case .fannedBlock:
                 return "This block has more than one take now — divide it again "
                     + "and the take ceremony will open, so each take gets its own cut."
+            // 13f batch 6 (W4): the star cap, refusing honestly rather than
+            // evicting her oldest star. The refusal NAMES the road, which
+            // is the whole reason the cap is a refusal and not a silent
+            // drop (P-2 — a door that fires and says what to do instead).
+            case .starLimitReached(let limit):
+                return "You can star \(limit) things at a time — un-star one in the "
+                    + "\(StarCopy.sectionHeader) list at the top of the sidebar, and "
+                    + "this can take its place."
             case .blockCarriesUnshownText:
                 return "That block isn't empty after all — it carries a take or "
                     + "a note that isn't shown here. Nothing was deleted."

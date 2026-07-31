@@ -74,6 +74,91 @@ extension Queries {
         return (try? JSONDecoder().decode([String].self, from: Data(json.utf8))) ?? []
     }
 
+    // MARK: - Stars (13f W4)
+
+    /// One starred row, ready to render: what it points at and the name it
+    /// wears. `name` is the STORED title — nil where the row has none, so
+    /// the app's ONE naming brain (`WorkspaceNaming.label`) supplies
+    /// "Untitled"/"Book" exactly as it does for every other chrome label,
+    /// instead of a second fallback growing here.
+    public struct StarredItem: Equatable, Sendable {
+        public let target: StarTarget
+        public let name: String?
+
+        public init(target: StarTarget, name: String?) {
+            self.target = target
+            self.name = name
+        }
+    }
+
+    /// The starred notes and books, in STAR ORDER (star time — her ruling's
+    /// insertion order), each with its display name.
+    ///
+    /// **THE READ RULE, stated once and pinned:** a star whose target is not
+    /// a LIVE note or book renders NOTHING — a deleted, archived-to-death or
+    /// never-arrived target is simply absent from this list, the
+    /// `dailyJournalBookID` fallback class. Unreadable entries and malformed
+    /// JSON read as no stars (fail-open: stars are presentation, never
+    /// truth — the `shelfPins` rule).
+    ///
+    /// The list's SELF-HEAL is the write side's: `Operations.setStarred`
+    /// persists exactly what this returns, so a dead entry disappears from
+    /// the stored value the next time she stars or un-stars anything — which
+    /// is also what keeps the cap counting only what she can see.
+    ///
+    /// Cost is bounded by the cap (`Operations.starLimit`), not by the
+    /// corpus: at most five ids, resolved in two indexed reads.
+    public static func starred(_ db: Database) throws -> [StarredItem] {
+        let targets = try starredTargets(db)
+        guard !targets.isEmpty else { return [] }
+
+        /// One indexed read per kind, keyed by id. The placeholder idiom is
+        /// `PageExtents`' (the repo's one shape for an `IN` list).
+        func names(_ ids: [String], from table: String, titleColumn: String,
+                   filter: String) throws -> [String: String?] {
+            guard !ids.isEmpty else { return [:] }
+            let placeholders = Array(repeating: "?", count: ids.count).joined(separator: ",")
+            let rows = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT id, \(titleColumn) AS name FROM \(table)
+                    WHERE id IN (\(placeholders)) \(filter) AND deleted_at IS NULL
+                    """,
+                arguments: StatementArguments(ids))
+            return Dictionary(
+                rows.map { ($0["id"] as String, $0["name"] as String?) },
+                uniquingKeysWith: { first, _ in first })
+        }
+
+        let posts = try names(
+            targets.filter { $0.kind == .post }.map(\.id),
+            from: "container", titleColumn: "title", filter: "AND kind = 'post'")
+        let readings = try names(
+            targets.filter { $0.kind == .reading }.map(\.id),
+            from: "reading", titleColumn: "name", filter: "")
+
+        return targets.compactMap { target in
+            let table = target.kind == .post ? posts : readings
+            // `table[id]` is `String??` — the OUTER optional answers "is it
+            // live", the inner one "does it have a title". Only the outer
+            // one decides whether the row renders.
+            guard let name = table[target.id] else { return nil }
+            return StarredItem(target: target, name: name)
+        }
+    }
+
+    /// The stored star list, decoded but NOT liveness-filtered. Internal:
+    /// the write side needs it to tell a no-op write from a self-healing
+    /// one, and nothing else should ever see a star whose target is gone.
+    static func starredTargets(_ db: Database) throws -> [StarTarget] {
+        guard let json = try String.fetchOne(
+            db, sql: "SELECT value FROM setting WHERE key = 'starred'")
+        else { return [] }
+        let keys = (try? JSONDecoder().decode([String].self, from: Data(json.utf8))) ?? []
+        var seen = Set<StarTarget>()
+        return keys.compactMap(StarTarget.init(key:)).filter { seen.insert($0).inserted }
+    }
+
     /// The designated daily journal book, when one exists (Phase 13 B3,
     /// PROVISIONAL). A dangling id (book deleted) reads as none — the
     /// fallback class.

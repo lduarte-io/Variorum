@@ -211,6 +211,13 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// most recently opened note no pane shows. False ⇒ Open Beside is
     /// honestly grey rather than a menu item that can only refuse.
     var canOpenBeside = false
+    /// The focused pane is showing a NOTE or a BOOK — i.e. a thing a star
+    /// can point at (13f batch 6 — W4). The shelf, the library, the pool
+    /// and the recovery surface are places, so ⌘K's Toggle Star is honestly
+    /// grey there. Only the ⌘K door reads this: the ROW doors carry their
+    /// own target and apply the per-target condition themselves (the
+    /// `.diffAgainstChosen` / `.showOriginBlock` split, P-2).
+    var canStarCurrent = false
 }
 
 // MARK: - The capability declaration
@@ -319,6 +326,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // deliberately has NO declaration: it is a system-standard File item
     // and nothing else in this registry duplicates one (the ruled reason).
     case openInNewWindow
+    // 13f batch 6 — W4's STARS (her round-3 ruling). ONE act, two door
+    // families: the note-row menu (the `.openBeside` family — the Open
+    // strip, the Library catalog, the Pool), the shelf's book rows, and
+    // ⌘K by name. No key: her ruling named a menu and the palette, and an
+    // invented chord would owe a collision sweep no ruling asked for.
+    case toggleStar
     // The peer column's open door in Compare (her W16 second half: *"in
     // compare … you should be able to click on the post you're comparing
     // it with"*). A `.surface` act — its target is the column you point at.

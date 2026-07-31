@@ -15,6 +15,11 @@ import UniformTypeIdentifiers
 import VariorumCore
 
 struct ShelfView: View {
+    /// The REGISTRY capabilities this view's book menu renders (P-1's walk).
+    /// The menu's other items (Rename…, Finish, Delete Book…) are the
+    /// shelf's own book-management vocabulary and were never registry acts.
+    static let contextMenuCapabilities: [CapabilityID] = [.toggleStar]
+
     let session: AppSession
     let model: ShelfViewModel
     let readings: ReadingsViewModel
@@ -22,6 +27,10 @@ struct ShelfView: View {
     let onOpen: (SidebarSelection) -> Void
     /// The dated home's door (R38: the journal lives on the shelf).
     let onTodaysEntry: () -> Void
+    /// 13f batch 6 (W4): the star door on the BOOK rows — her ruling's
+    /// "notes or books", so the shelf renders the same act the note-row
+    /// family does, from the same declaration.
+    var starDoor: StarDoor? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -268,6 +277,15 @@ struct ShelfView: View {
         let pinned = model.pins.contains(reading.id)
         Button(pinned ? "Unpin from Shelf Top" : "Pin to Shelf Top") {
             Task { await model.setPinned(reading.id, pinned: !pinned) }
+        }
+        // 13f batch 6 (W4): starring a BOOK. Deliberately beside pinning,
+        // which is its nearest neighbour and its clearest contrast — a pin
+        // orders THIS list, a star lifts the book out of it to the
+        // sidebar's top.
+        if let starDoor {
+            Button(starDoor.title(for: .reading(reading.id))) {
+                starDoor.toggle(.reading(reading.id))
+            }
         }
         Button("Rename…") {
             nameField = reading.name

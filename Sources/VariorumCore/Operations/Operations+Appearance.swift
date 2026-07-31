@@ -106,6 +106,87 @@ extension Operations {
         try upsertSetting(db, key: "shelf_pins", value: json)
     }
 
+    // MARK: - Stars (13f W4)
+
+    /// How many things may be starred at once — her ruling's number.
+    /// Public so a face can name it without re-stating it (and so the
+    /// refusal below carries it rather than hard-coding a word).
+    public static let starLimit = 5
+
+    /// Star or un-star a note or a book (13f W4 — her round-3 ruling).
+    /// Stars are a synced `setting` list in STAR ORDER, exactly the
+    /// `shelf_pins` shape: ZERO schema, no §12 lockstep event, plain
+    /// metadata CAS.
+    ///
+    /// Three rules, all of them visible in the body:
+    ///
+    /// 1. **Star time is the order** — a new star is APPENDED, so the
+    ///    section reads in the order she starred things.
+    /// 2. **THE CAP REFUSES HONESTLY** (`starLimitReached`) rather than
+    ///    silently dropping the oldest star. P-2: the door fires and
+    ///    delivers the operations layer's real refusal, and the refusal
+    ///    names un-starring as the road (`OpsRefusalCopy`).
+    /// 3. **EVERY WRITE SELF-HEALS.** It rewrites the list `Queries.starred`
+    ///    would return — i.e. live targets only — so a star whose note or
+    ///    book was deleted disappears from the stored value the next time
+    ///    she stars anything. That is what keeps the CAP honest: it counts
+    ///    exactly the stars she can see, never ghosts she cannot un-star.
+    ///
+    /// Idempotent both ways, and a write that changes nothing writes
+    /// nothing — no `updated_at`, no outbox row (the identity-metadata
+    /// convention `setBlockName` established).
+    public func setStarred(_ target: StarTarget, starred: Bool) throws {
+        try database.write { db in
+            let stored = try Queries.starredTargets(db)
+            // The live list — and the ONE rule the read side states, so the
+            // cap and the section can never disagree about what is starred.
+            var next = try Queries.starred(db).map(\.target)
+            if starred {
+                if !next.contains(target) {
+                    guard try starTargetIsLive(db, target) else {
+                        throw target.kind == .post
+                            ? OperationError.containerNotFound(id: target.id)
+                            : OperationError.readingNotFound(id: target.id)
+                    }
+                    guard next.count < Self.starLimit else {
+                        throw OperationError.starLimitReached(limit: Self.starLimit)
+                    }
+                    next.append(target)
+                }
+            } else {
+                next.removeAll { $0 == target }
+            }
+            // Un-starring a target that has since died is not a no-op: the
+            // list still loses it here, because `next` is already the
+            // pruned one. The guard is on the VALUE, so nothing is written
+            // when nothing changed.
+            guard next != stored else { return }
+            let json = String(decoding: try JSONEncoder().encode(next.map(\.key)), as: UTF8.self)
+            try upsertSetting(db, key: "starred", value: json)
+        }
+    }
+
+    /// Is this star's target a live note or book? The `liveReading` guard's
+    /// shape, over the two kinds a star can point at.
+    private func starTargetIsLive(_ db: Database, _ target: StarTarget) throws -> Bool {
+        switch target.kind {
+        case .post:
+            return try Bool.fetchOne(
+                db,
+                sql: """
+                    SELECT EXISTS (
+                      SELECT 1 FROM container
+                      WHERE id = ? AND kind = 'post' AND deleted_at IS NULL)
+                    """,
+                arguments: [target.id]) ?? false
+        case .reading:
+            return try Bool.fetchOne(
+                db,
+                sql: "SELECT EXISTS (SELECT 1 FROM reading WHERE id = ? AND deleted_at IS NULL)",
+                arguments: [target.id]) ?? false
+        }
+    }
+
     /// Designates THE daily journal book (Phase 13 B3, PROVISIONAL — the
     /// R50 binding's Mac shape: "Today's Entry" ensures membership here;
     /// the one-entry-per-day rule stays the DAILY door's and is untouched).

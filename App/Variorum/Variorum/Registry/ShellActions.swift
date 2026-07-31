@@ -326,6 +326,43 @@ struct ShellActions {
         return alert.runModal() == .alertFirstButtonReturn
     }
 
+    /// ⌘K's Toggle Star (13f batch 6, W4 — her ruling's "+ ⌘K by name"
+    /// half): it stars the thing the FOCUSED pane is showing. The rule for
+    /// what that is lives in `StarTargeting`, pure and pinned, because the
+    /// palette's target is a rule and a rule inside a closure is one no
+    /// test can keep.
+    ///
+    /// The menu/palette door is grey where nothing starrable is open (the
+    /// registry's `canStarCurrent`), so the guard below is reachable only by
+    /// a race — and it speaks rather than returning silently, the
+    /// `exportCaretBlock` shape. Success is deliberately QUIET: the Starred
+    /// section at the sidebar's top gains or loses the row, which is the
+    /// same feedback every other toggle in this file gives (seams, the
+    /// context bar, shelf pins).
+    func toggleStarForCurrent() {
+        guard let target = StarTargeting.target(for: shell.workspace.focusedSelection) else {
+            status.speak(CapabilityRegistry.capability(.toggleStar).unavailableNote)
+            return
+        }
+        Task { @MainActor in
+            do {
+                // Read-then-act, like every toggle here: the store is the
+                // truth and the DECISION is the operation's (order, cap,
+                // self-heal). A racing star from another device makes this
+                // a redundant no-op at worst — `setStarred` is idempotent
+                // both ways.
+                let starred = try await session.database.read { db in
+                    try Queries.starred(db).contains { $0.target == target }
+                }
+                try await session.runner.run { ops in
+                    try ops.setStarred(target, starred: !starred)
+                }
+            } catch {
+                status.speak(OpsRefusalCopy.message(for: error))
+            }
+        }
+    }
+
     /// Flip the global seam setting (R42 — a synced document setting).
     func toggleSeams() {
         Task { @MainActor in
@@ -355,6 +392,8 @@ struct ShellActions {
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
         // 13f batch 5 (W20 b): the context bar's fold, typeable.
         .toggleContextBar,
+        // 13f batch 6 (W4): her ruling's "+ ⌘K by name" half.
+        .toggleStar,
     ]
 
     /// Palette rows for the act capabilities: title = the registry verb,
@@ -390,6 +429,7 @@ struct ShellActions {
         case .saveChoicesAsLens: return { dispatch(.takes(.saveLens)) }
         case .toggleSeams: return { toggleSeams() }
         case .toggleContextBar: return { shell.toggleContextBar() }
+        case .toggleStar: return { toggleStarForCurrent() }
         case .restoreTutorial: return { restoreTutorial() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without

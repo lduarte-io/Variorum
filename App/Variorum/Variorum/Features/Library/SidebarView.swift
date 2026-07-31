@@ -65,7 +65,12 @@ struct SidebarView: View {
     /// three surfaces render it — the Open strip's rows here, the Library
     /// catalog's post rows, and the Pool's — all through the same shell
     /// callback, so one declaration covers the family.
-    static let contextMenuCapabilities: [CapabilityID] = [.openBeside, .openInNewWindow]
+    static let contextMenuCapabilities: [CapabilityID] = [
+        .openBeside, .openInNewWindow,
+        // 13f batch 6 (W4): the star door joins the note-row grammar, so
+        // all three renderers get it from ONE declaration.
+        .toggleStar,
+    ]
 
     let session: AppSession
     let model: LibraryViewModel
@@ -75,6 +80,12 @@ struct SidebarView: View {
     /// window's OPEN notes render as a fifth section, below the standing
     /// four and below the contextual "this post" rail.
     let workspace: WorkspaceModel
+    /// 13f batch 6 (W4, her round-3 ruling): the STARRED section at the
+    /// sidebar's top. Store state, not window state — it is synced and both
+    /// windows show the same five.
+    let stars: StarsModel
+    /// The star door, for this view's note rows AND its Starred rows.
+    var starDoor: StarDoor?
     @Binding var selection: SidebarSelection?
     /// 13f batch 4 (W1/A25): "Open Beside" on an Open-strip row — the
     /// split's door where the window's open notes already live.
@@ -109,6 +120,55 @@ struct SidebarView: View {
                     .fontWeight(.bold)
             }
             Text(tokens.chromeLabel(title))
+        }
+    }
+
+    /// 13f batch 6 (W4) — the STARRED section, at the sidebar's TOP (her
+    /// ruling's placement). Rows are ordinary tagged List rows, exactly as
+    /// the Open strip's are, so a click navigates through the shell's own
+    /// selection and the `›` marker lands on the current one for free — a
+    /// book row goes to the book, a note row to the note. It renders only
+    /// when something is starred, so an unused feature costs no chrome.
+    @ViewBuilder
+    private var starredSection: some View {
+        if !stars.items.isEmpty {
+            Section {
+                ForEach(stars.items, id: \.target) { item in
+                    let destination = StarTargeting.selection(for: item.target)
+                    HStack(spacing: 4) {
+                        Text(StarCopy.glyph)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.accent)
+                        markedTitle(
+                            WorkspaceNaming.label(for: destination, titles: stars.titles),
+                            destination)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        Spacer(minLength: 0)
+                        if let starDoor {
+                            // The un-star door on the row itself (her ruling:
+                            // "un-star anywhere") — the Open strip's ✕ shape.
+                            Button(StarCopy.glyph) { starDoor.toggle(item.target) }
+                                .buttonStyle(.plain)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                                .help(StarCopy.rowHelp)
+                        }
+                    }
+                    .tag(destination)
+                    .contextMenu {
+                        if let starDoor {
+                            Button(starDoor.title(for: item.target)) {
+                                starDoor.toggle(item.target)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                Text(tokens.chromeLabel(StarCopy.sectionHeader))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
         }
     }
 
@@ -153,6 +213,11 @@ struct SidebarView: View {
                                 onOpenInNewWindow(noteID)
                             }
                         }
+                        if let starDoor {
+                            Button(starDoor.title(for: .post(noteID))) {
+                                starDoor.toggle(.post(noteID))
+                            }
+                        }
                         Button("Close") { workspace.closeNote(noteID) }
                     }
                 }
@@ -187,6 +252,7 @@ struct SidebarView: View {
 
     var body: some View {
         List(selection: $selection) {
+            starredSection
             Section {
                 // Batch 7/8 (her audit: "there's no little › to show the
                 // way … it being a color ›") — the R1 selection-marker

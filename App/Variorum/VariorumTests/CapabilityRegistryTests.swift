@@ -54,6 +54,14 @@ struct CapabilityRegistryTests {
         // needs a note to put beside, the other needs a split to close.
         contexts.append(CapabilityContext(
             mode: nil, openNoteCount: 2, paneCount: 2, canOpenBeside: true))
+        // 13f batch 6 (W4): the STAR gate. Its own context rather than a
+        // field on one of the three above, because it is not a stack gate:
+        // it asks what the focused pane is SHOWING (a note or a book), and
+        // the three workspace gates ask how deep a stack is. Without it
+        // `.toggleStar` would read `.unavailable` everywhere the walk looks
+        // — the same hole the find family and the navigation core each
+        // opened before their own contexts joined.
+        contexts.append(CapabilityContext(mode: nil, canStarCurrent: true))
         return contexts
     }
 
@@ -167,6 +175,9 @@ struct CapabilityRegistryTests {
             .union(TakesCellView.contextMenuCapabilities)
             .union(LensesBoardView.columnMenuCapabilities)  // 13b 3D: renameLens
             .union(SidebarView.contextMenuCapabilities)  // 13f batch 4: the note rows
+            // 13f batch 6 (W4): the shelf's BOOK rows render the star door
+            // from their own declaration — the fourth renderer of one act.
+            .union(ShelfView.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 

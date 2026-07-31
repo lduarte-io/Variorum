@@ -221,6 +221,9 @@ final class CommandRouter {
     /// gate's focused-pane refinement, landed where batch 3 cut for it.
     @ObservationIgnored var paneCount: () -> Int = { 1 }
     @ObservationIgnored var canOpenBeside: () -> Bool = { false }
+    /// 13f batch 6 (W4): is the focused pane showing a thing a star can
+    /// point at? Wired the same way, to the KEY window's workspace.
+    @ObservationIgnored var canStarCurrent: () -> Bool = { false }
 
     // MARK: - Context assembly
 
@@ -236,7 +239,8 @@ final class CommandRouter {
             canNavigateBack: canNavigateBack(),
             canNavigateForward: canNavigateForward(),
             paneCount: paneCount(),
-            canOpenBeside: canOpenBeside())
+            canOpenBeside: canOpenBeside(),
+            canStarCurrent: canStarCurrent())
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {

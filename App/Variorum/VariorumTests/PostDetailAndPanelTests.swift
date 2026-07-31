@@ -200,6 +200,7 @@ struct SidebarSmokeTests {
                     session: session, model: LibraryViewModel(session: session),
                     pool: PoolViewModel(session: session),
                     workspace: WorkspaceModel(),  // 13f batch 3: the Open strip's state
+                    stars: StarsModel(session: session),  // 13f batch 6: the Starred section
                     selection: selection,
                     postMode: PostMode.takes.rawValue)
                     .environment(ThemeStore(session: session)))

@@ -69,6 +69,12 @@ final class WorkspaceModel {
     /// only for rendering. Navigation state itself never holds text.
     private(set) var titles: [String: String] = [:]
 
+    /// What the FOCUSED pane is showing — the shell's selection binding and
+    /// every app-scope act that needs "the thing she is looking at" (13f
+    /// batch 6: ⌘K's Toggle Star and its registry gate) read this one
+    /// accessor rather than re-deriving the pair.
+    var focusedSelection: SidebarSelection? { selections[focusedPane] }
+
     /// A pane's history — **the FOCUSED pane's by default** (13f batch 4,
     /// item 3). Making the default focus-aware is where the gate's
     /// "focused-pane refinement" landed: the registry's `canNavigateBack` /

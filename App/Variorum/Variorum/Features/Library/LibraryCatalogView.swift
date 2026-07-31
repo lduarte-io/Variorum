@@ -128,6 +128,8 @@ struct LibraryCatalogView: View {
     var onOpenBeside: ((String) -> Void)? = nil
     /// 13f batch 5b (W2/A26): the note-only window's row door.
     var onOpenInNewWindow: ((String) -> Void)? = nil
+    /// 13f batch 6 (W4): the star door, from the one note-row grammar.
+    var starDoor: StarDoor? = nil
     /// 13b Stage 2 ladder, MINOR-D6: the tutorial door routes through the
     /// shell's fire-and-DO act (`ShellActions.openTutorial` — failures
     /// speak; the old inline `try?` swallowed them silently while the
@@ -372,6 +374,9 @@ struct LibraryCatalogView: View {
             Button("Open") { onOpen(.post(hit.id)) }
             if let onOpenBeside {
                 Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(hit.id) }
+            }
+            if let starDoor {
+                Button(starDoor.title(for: .post(hit.id))) { starDoor.toggle(.post(hit.id)) }
             }
             if let onOpenInNewWindow {
                 Button(CapabilityRegistry.capability(.openInNewWindow).verb) {

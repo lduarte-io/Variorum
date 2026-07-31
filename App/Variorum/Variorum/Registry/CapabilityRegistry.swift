@@ -572,6 +572,20 @@ nonisolated enum CapabilityRegistry {
             doors: [.contextMenu],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // 13f batch 6 — W4's STARS (her round-3 ruling: *"up to 5 notes or
+        // books, star/unstar via context menu + ⌘K, section at the
+        // sidebar's top"*). The gate governs the ⌘K door ONLY: at the shelf
+        // or the library there is nothing to star, so a palette row there
+        // could only refuse. The ROW doors are not gated by it — a row
+        // carries its own target, which is the standing
+        // `.diffAgainstChosen` / `.showOriginBlock` split (the CONTEXT rule
+        // is the registry's; the per-TARGET condition is the surface's).
+        Capability(
+            id: .toggleStar, verb: StarCopy.verb, scope: .app,
+            doors: [.contextMenu, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: StarCopy.unavailableNote,
+            availability: { ctx in ctx.canStarCurrent ? .act : .unavailable }),
         // Her W16 second half. A `.surface` door on the peer column's own
         // header — the `.unarchiveTake` class: the target is the thing you
         // are pointing at, so no routed context command exists. The CONTEXT

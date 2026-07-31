@@ -37,6 +37,10 @@ struct RootView: View {
     @State private var catalog: LibraryCatalogModel
     @State private var poolPosts: PoolPostsModel
     @State private var palette: PaletteModel
+    /// 13f batch 6 (W4): the starred notes and books. STORE state, not
+    /// window state — it is synced, so every window shows the same five;
+    /// each window observes it for itself, exactly as it does the library.
+    @State private var stars: StarsModel
     @State private var paletteOpen = false
     /// Sitting 9 (R94): the bridge row's auth-shaped failures open the
     /// account sheet from right there.
@@ -76,6 +80,16 @@ struct RootView: View {
         openWindow(id: EditorCommands.noteWindowGroupID, value: noteID)
     }
 
+    /// 13f batch 6 (W4): ONE door value, handed to every surface that
+    /// renders the star act (the Open strip, the Library catalog, the Pool,
+    /// the shelf's book rows) — so the menu's word is derived in one place
+    /// and the four cannot drift apart.
+    private var starDoor: StarDoor {
+        StarDoor(
+            isStarred: { stars.isStarred($0) },
+            toggle: { target in Task { await stars.toggle(target) } })
+    }
+
     init(
         session: AppSession, services: AppServices? = nil,
         router: ShellRouter = ShellRouter(), windows: WindowRegistry = WindowRegistry()
@@ -92,6 +106,7 @@ struct RootView: View {
         _catalog = State(initialValue: LibraryCatalogModel(session: session))
         _poolPosts = State(initialValue: PoolPostsModel(session: session))
         _palette = State(initialValue: PaletteModel(session: session))
+        _stars = State(initialValue: StarsModel(session: session))
         _theme = State(initialValue: ThemeStore(session: session))
     }
 
@@ -99,7 +114,8 @@ struct RootView: View {
         NavigationSplitView {
             SidebarView(
                 session: session, model: library, pool: pool,
-                workspace: router.workspace, selection: selectionBinding,
+                workspace: router.workspace, stars: stars, starDoor: starDoor,
+                selection: selectionBinding,
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
                 // 13b 1b: the rail's marker reads the router's observable
@@ -220,6 +236,7 @@ struct RootView: View {
         .task { await tags.start() }
         .task { await readings.start() }
         .task { await pool.start() }
+        .task { await stars.start() }
         .onAppear {
             windows.register(windowID, router: router, kind: .full)
             wirePaletteCommands()
@@ -288,6 +305,11 @@ struct RootView: View {
         session.commandRouter.canOpenBeside = {
             windows.activeRouter?.workspace.openBesideCandidate != nil
         }
+        // 13f batch 6 (W4): ⌘K's Toggle Star gate — is the key window's
+        // focused pane showing a thing a star can point at?
+        session.commandRouter.canStarCurrent = {
+            StarTargeting.target(for: windows.activeRouter?.workspace.focusedSelection) != nil
+        }
         // 13f batch 5 (W22's button): the first-edit note names its target
         // book by the chooser's own order, and that order floats what she
         // has visited — which lives per window, so it reads the key one too.
@@ -302,9 +324,7 @@ struct RootView: View {
     /// What the FOCUSED pane shows. The sidebar binds to this, so a sidebar
     /// click targets the focused pane by construction and batch 3's ONE
     /// recording point below stays complete without knowing panes exist.
-    private var selection: SidebarSelection? {
-        router.workspace.selections[router.workspace.focusedPane]
-    }
+    private var selection: SidebarSelection? { router.workspace.focusedSelection }
 
     private var selectionBinding: Binding<SidebarSelection?> {
         Binding(
@@ -430,7 +450,8 @@ struct RootView: View {
             ShelfView(
                 session: session, model: shelf, readings: readings,
                 onOpen: openHere,
-                onTodaysEntry: { openToday(in: pane) })
+                onTodaysEntry: { openToday(in: pane) },
+                starDoor: starDoor)
         case .library:
             LibraryCatalogView(
                 session: session, model: catalog, library: library, tags: tags,
@@ -438,6 +459,7 @@ struct RootView: View {
                 onOpenBlock: { picked, blockID in open(picked, blockID: blockID, in: pane) },
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
+                starDoor: starDoor,
                 // MINOR-D6: the one fire-and-DO tutorial door (failures speak).
                 onOpenTutorial: { ShellActions(session: session, shell: router).openTutorial() })
         case .poolPosts:
@@ -446,7 +468,8 @@ struct RootView: View {
                 readings: readings, tags: tags,
                 onOpen: openHere,
                 onOpenBeside: { router.openBeside(.post($0)) },
-                onOpenInNewWindow: openInNewWindow)
+                onOpenInNewWindow: openInNewWindow,
+                starDoor: starDoor)
         case .blocks:
             // Batch 12: the Blocks AREA — standalone blocks live and are
             // born here (the sidebar rows retired).

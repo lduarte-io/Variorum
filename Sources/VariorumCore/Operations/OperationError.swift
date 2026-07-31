@@ -173,6 +173,13 @@ public enum OperationError: Error, Equatable, Sendable {
     /// `restoreSection` addressed a chapter that is not deleted.
     case sectionNotDeleted(id: String)
 
+    // Stars (13f W4 — her round-3 ruling: "up to 5 notes or books").
+    /// The star list is full. Refused rather than silently evicting the
+    /// oldest star: a cap she cannot see acting on its own would be the
+    /// one outcome she never asked for, and the refusal names un-starring
+    /// as the road (P-2 — the door fires and speaks).
+    case starLimitReached(limit: Int)
+
     // Smart collection (taste checkpoint, Sitting 9 — R98).
     /// The smart reading's filter cannot be satisfied by tagging (date
     /// bounds, a profile mismatch, an archived post, a malformed spec, or
