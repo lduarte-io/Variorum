@@ -311,6 +311,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // are app-scope stack gates like the navigation family: one needs a
     // note to put beside, the other needs a split to close.
     case openBeside, closeSplit
+    // 13f batch 5b — W2/A26's second window kind (her round-2 ruling: *File
+    // ▸ New Window = a full app window; "Open in New Window" on a note = a
+    // lightweight note-only window*). ONE declaration on the note-row
+    // family, exactly as `.openBeside` is — the Open strip, the Library
+    // catalog and the Pool all render it from here. `File ▸ New Window`
+    // deliberately has NO declaration: it is a system-standard File item
+    // and nothing else in this registry duplicates one (the ruled reason).
+    case openInNewWindow
     // The peer column's open door in Compare (her W16 second half: *"in
     // compare … you should be able to click on the post you're comparing
     // it with"*). A `.surface` act — its target is the column you point at.

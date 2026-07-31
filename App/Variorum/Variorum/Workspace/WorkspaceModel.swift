@@ -237,6 +237,20 @@ final class WorkspaceModel {
         return destination
     }
 
+    /// **The NOTE-ONLY window's one destination** (13f batch 5b, the
+    /// architect's ruling (d)): set what the pane shows and record
+    /// *nothing* — no history, no Open strip, no book recency.
+    ///
+    /// That silence is the whole mechanism behind the ruling's promise that
+    /// every app-scope act "resolves honestly grey there through the
+    /// EXISTING gates". With no visit recorded, `openNoteCount` is 0 (⌘⇧1–9
+    /// grey), `canNavigateBack/Forward` are false (⌘[ / ⌘] grey),
+    /// `openBesideCandidate` is nil (Open Beside grey) and `panes.count` is
+    /// 1 (Close Split grey) — four honest greys and not one new rule.
+    func showOnly(_ destination: SidebarSelection) {
+        selections[focusedPane] = destination
+    }
+
     /// Closes an Open row. Pure view state: the note is untouched, and it
     /// returns to the strip the next time it is opened.
     func closeNote(_ id: String) {

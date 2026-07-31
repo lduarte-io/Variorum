@@ -17,8 +17,18 @@ struct RootView: View {
     /// Session services (Phase 8) — nil for the first frames until the root
     /// `.task` starts them; the footer appears when ready.
     let services: AppServices?
-    /// Menu-command routing (⌘N/⌘J/⌘K — Phase 13 B2).
-    let router: ShellRouter
+    /// 13f batch 5b (W2/A26): the app's register of open windows and the ONE
+    /// authority on which is key. This window reads two things from it — is
+    /// it the key window (the mount gate) and is it the navigation target
+    /// (the app-wide broadcasts) — and writes one: its own registration.
+    let windows: WindowRegistry
+    /// Menu-command routing (⌘N/⌘J/⌘K — Phase 13 B2), and since 13f batch 3
+    /// this window's WORKSPACE. **Owned here since batch 5b**: it used to be
+    /// App-level `@State`, which every `WindowGroup` window shared — one
+    /// Open strip, one set of histories, one fold, for all of them.
+    @State private var router: ShellRouter
+    /// This window's identity in the registry. Minted once per window.
+    @State private var windowID = UUID()
     @State private var library: LibraryViewModel
     @State private var tags: TagsViewModel
     @State private var readings: ReadingsViewModel
@@ -56,11 +66,24 @@ struct RootView: View {
     @State private var theme: ThemeStore
     @Environment(\.openSettings) private var openSettings
     @Environment(\.colorScheme) private var scheme
+    /// 13f batch 5b: "Open in New Window" on a note row.
+    @Environment(\.openWindow) private var openWindow
 
-    init(session: AppSession, services: AppServices? = nil, router: ShellRouter = ShellRouter()) {
+    /// The note-row door's one body, handed to the three surfaces that
+    /// render the note-row menu (the Open strip, the Library catalog, the
+    /// Pool) — ONE declaration, three renderers, exactly as `.openBeside`.
+    private func openInNewWindow(_ noteID: String) {
+        openWindow(id: EditorCommands.noteWindowGroupID, value: noteID)
+    }
+
+    init(
+        session: AppSession, services: AppServices? = nil,
+        router: ShellRouter = ShellRouter(), windows: WindowRegistry = WindowRegistry()
+    ) {
         self.session = session
         self.services = services
-        self.router = router
+        self.windows = windows
+        _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
         _readings = State(initialValue: ReadingsViewModel(session: session))
@@ -78,6 +101,7 @@ struct RootView: View {
                 session: session, model: library, pool: pool,
                 workspace: router.workspace, selection: selectionBinding,
                 onOpenBeside: { router.openBeside(.post($0)) },
+                onOpenInNewWindow: openInNewWindow,
                 // 13b 1b: the rail's marker reads the router's observable
                 // mode truth (the broadcast-derived shadow is retired).
                 postMode: (session.commandRouter.activeMode ?? .takes).rawValue)
@@ -114,6 +138,15 @@ struct RootView: View {
                 }
         }
         .environment(theme)
+        // 13f batch 5b: AppKit's own key events, reported to the registry —
+        // the ONE place key-ness is decided (and it is sticky there: a
+        // resign never un-keys, so ⌘-tabbing to another app does not tear
+        // this window's live surface down).
+        .background {
+            WindowKeyReporter(
+                onWindow: { windows.attach($0, to: windowID) },
+                onKey: { windows.noteKey(windowID) })
+        }
         .sheet(isPresented: $accountSheetShown) {
             if let services {
                 AccountView(services: services)
@@ -144,7 +177,7 @@ struct RootView: View {
         // Sitting 9 (R67): surfaces hand the shell a post to open (the
         // chip's "Open the Copy", and any future minted-post moment).
         .onReceive(NotificationCenter.default.publisher(for: .variorumOpenPost)) { note in
-            guard let id = note.userInfo?["postID"] as? String else { return }
+            guard let id = note.userInfo?["postID"] as? String, claimBroadcast() else { return }
             router.pendingSelection = .post(id)
         }
         // 13f W10b: "Show Original Block" — the surface names the block, the
@@ -152,7 +185,7 @@ struct RootView: View {
         .onReceive(
             NotificationCenter.default.publisher(for: .variorumRevealUnplacedBlock)
         ) { note in
-            guard let id = note.userInfo?["blockID"] as? String else { return }
+            guard let id = note.userInfo?["blockID"] as? String, claimBroadcast() else { return }
             revealUnplacedBlockID = id
             router.pendingSelection = .recovery
         }
@@ -163,7 +196,8 @@ struct RootView: View {
             NotificationCenter.default.publisher(for: .variorumOpenBookAtPost)
         ) { note in
             guard let bookID = note.userInfo?["bookID"] as? String,
-                  let postID = note.userInfo?["postID"] as? String
+                  let postID = note.userInfo?["postID"] as? String,
+                  claimBroadcast()
             else { return }
             openBook(bookID, at: postID, in: router.workspace.focusedPane)
         }
@@ -187,9 +221,34 @@ struct RootView: View {
         .task { await readings.start() }
         .task { await pool.start() }
         .onAppear {
+            windows.register(windowID, router: router, kind: .full)
             wirePaletteCommands()
             wireWorkspace()
         }
+        .onDisappear { windows.unregister(windowID) }
+    }
+
+    /// Whether THIS window mounts the live surface (13f batch 5b): the pane
+    /// rule, gated on the window being key. Sticky key-ness, so an app
+    /// switch changes nothing (`WindowRegistry`).
+    private var windowIsKey: Bool { windows.isKey(windowID) }
+
+    /// **Who acts on an app-wide navigation broadcast.** Those notifications
+    /// (`.variorumOpenPost`, `.variorumRevealUnplacedBlock`,
+    /// `.variorumOpenBookAtPost`) reach every window that listens, so with a
+    /// second window on screen ONE click would navigate both — P-4's own
+    /// class, arriving the moment windows do. The registry names a single
+    /// target: the key window when it can navigate, otherwise the most
+    /// recently key FULL window (a note-only window navigates nowhere, so
+    /// making the rule "is key" would have turned a book link clicked there
+    /// into a dead door — exactly what W20 exists to kill).
+    ///
+    /// A window that acts while it is NOT the one she is looking at raises
+    /// itself, so the thing she asked for arrives in front of her.
+    private func claimBroadcast() -> Bool {
+        guard windows.isNavigationTarget(windowID) else { return false }
+        if !windowIsKey { windows.bringForward(windowID) }
+        return true
     }
 
     /// 13f batch 3: the navigation core's two wirings, both idempotent.
@@ -204,23 +263,38 @@ struct RootView: View {
     /// nothing, so the very first back chip she could want would be the
     /// one that never appeared.
     private func wireWorkspace() {
-        let workspace = router.workspace
-        session.commandRouter.openNoteCount = { workspace.openNotes.ids.count }
-        session.commandRouter.canNavigateBack = { workspace.history().canGoBack }
-        session.commandRouter.canNavigateForward = { workspace.history().canGoForward }
+        // 13f batch 5b: the closures read the KEY WINDOW's workspace through
+        // the registry, not this window's. That is the whole per-window fix
+        // at the menu's end: the `CommandRouter` is the APP's, so with two
+        // windows open the last one to appear used to win every gate — Back,
+        // Forward and ⌘⇧n would answer for a window she was not in. Reading
+        // the registry makes this wiring IDEMPOTENT across windows: whoever
+        // runs it last installs the same closures.
+        let windows = self.windows
+        session.commandRouter.openNoteCount = {
+            windows.activeRouter?.workspace.openNotes.ids.count ?? 0
+        }
+        session.commandRouter.canNavigateBack = {
+            windows.activeRouter?.workspace.history().canGoBack ?? false
+        }
+        session.commandRouter.canNavigateForward = {
+            windows.activeRouter?.workspace.history().canGoForward ?? false
+        }
         // 13f batch 4: the split's two facts, and the router's own voice.
         // `history()` now defaults to the FOCUSED pane, so the two
         // navigation closures above became focus-aware without changing —
         // the gate's refinement, landed at the model.
-        session.commandRouter.paneCount = { workspace.panes.count }
-        session.commandRouter.canOpenBeside = { workspace.openBesideCandidate != nil }
+        session.commandRouter.paneCount = { windows.activeRouter?.workspace.panes.count ?? 1 }
+        session.commandRouter.canOpenBeside = {
+            windows.activeRouter?.workspace.openBesideCandidate != nil
+        }
         // 13f batch 5 (W22's button): the first-edit note names its target
         // book by the chooser's own order, and that order floats what she
-        // has visited — which lives here, per window.
-        session.recentBookIDs = { workspace.recentBookIDs }
+        // has visited — which lives per window, so it reads the key one too.
+        session.recentBookIDs = { windows.activeRouter?.workspace.recentBookIDs ?? [] }
         let status = session.status
         router.speak = { status.speak($0) }
-        workspace.visit(selection ?? .shelf)
+        router.workspace.visit(selection ?? .shelf)
     }
 
     // MARK: - Selection, per pane (13f batch 4 — the gate's (a))
@@ -315,12 +389,14 @@ struct RootView: View {
     }
 
     private func paneHost(_ pane: PaneID, split: Bool, tokens: VoiceTokens) -> some View {
-        // THE MOUNT RULE, consulted as the one fork (13f batch 4, gate (b)):
-        // exactly the focused pane mounts a live surface — an authority
+        // THE MOUNT RULE, consulted as the one fork (13f batch 4, gate (b);
+        // 13f batch 5b's key-window gate on the same fork): exactly one
+        // pane, in exactly one WINDOW, mounts a live surface — an authority
         // owner, a routed-command handler, a live editor. Everything else
         // renders read-cheap, which is why the app-scoped singletons that
-        // assume one detail keep being correct.
-        let live = PaneMount.kind(of: pane, focused: router.workspace.focusedPane) == .live
+        // assume one detail keep being correct with two windows open.
+        let live = PaneMount.kind(
+            of: pane, focused: router.workspace.focusedPane, windowIsKey: windowIsKey) == .live
         return PaneHost(
             tokens: tokens, session: session, workspace: router.workspace, pane: pane,
             focused: live, split: split,
@@ -361,6 +437,7 @@ struct RootView: View {
                 onOpen: openHere,
                 onOpenBlock: { picked, blockID in open(picked, blockID: blockID, in: pane) },
                 onOpenBeside: { router.openBeside(.post($0)) },
+                onOpenInNewWindow: openInNewWindow,
                 // MINOR-D6: the one fire-and-DO tutorial door (failures speak).
                 onOpenTutorial: { ShellActions(session: session, shell: router).openTutorial() })
         case .poolPosts:
@@ -368,7 +445,8 @@ struct RootView: View {
                 session: session, model: poolPosts, library: library,
                 readings: readings, tags: tags,
                 onOpen: openHere,
-                onOpenBeside: { router.openBeside(.post($0)) })
+                onOpenBeside: { router.openBeside(.post($0)) },
+                onOpenInNewWindow: openInNewWindow)
         case .blocks:
             // Batch 12: the Blocks AREA — standalone blocks live and are
             // born here (the sidebar rows retired).

@@ -71,8 +71,24 @@ nonisolated enum PaneMount {
         case readCheap
     }
 
-    static func kind(of pane: PaneID, focused: PaneID) -> Kind {
-        pane == focused ? .live : .readCheap
+    /// **13f batch 5b — the KEY-WINDOW gate, on this same fork** (the
+    /// architect's ruling (b)). The rule reads: *exactly one pane, in
+    /// exactly one window, mounts a live surface.* A second window would
+    /// otherwise give the app two live surfaces, and every consequence the
+    /// pane-level audit relies on — ONE detail registration behind ⌘1–⌘6
+    /// and the sidebar rail, ONE entry in the LIFO handler stack behind ⌘S
+    /// and every structural act, ONE `EditorRouter.active` — would break at
+    /// app scale in exactly the way `SpreadBookView` names.
+    ///
+    /// `windowIsKey` defaults to true so that this remains ONE fork rather
+    /// than two: every batch-4 pin over the pane rule reads unchanged (the
+    /// parity proof that the window gate is an addition, not an
+    /// adjustment), and callers who know about windows pass the input.
+    ///
+    /// The key-ness handed in here is `WindowRegistry`'s **sticky**
+    /// last-known-key, never a literal `keyWindow`-now — see that file.
+    static func kind(of pane: PaneID, focused: PaneID, windowIsKey: Bool = true) -> Kind {
+        windowIsKey && pane == focused ? .live : .readCheap
     }
 
     /// How many panes mount a live surface. **ONE**, for any pane
@@ -80,8 +96,32 @@ nonisolated enum PaneMount {
     /// on, stated as arithmetic so a pin can hold it. If this ever answers
     /// more than one, the flight latch must move to a post-keyed shared
     /// authority BEFORE that ships (the batch-4 gate ruling, condition c).
-    static func liveCount(panes: [PaneID], focused: PaneID) -> Int {
-        panes.filter { kind(of: $0, focused: focused) == .live }.count
+    static func liveCount(panes: [PaneID], focused: PaneID, windowIsKey: Bool = true) -> Int {
+        panes.filter { kind(of: $0, focused: focused, windowIsKey: windowIsKey) == .live }.count
+    }
+
+    /// One window's state, for the app-scale count below. A struct rather
+    /// than a tuple so the arithmetic reads the same way the pins do.
+    struct WindowState: Equatable, Sendable {
+        let panes: [PaneID]
+        let focused: PaneID
+        let isKey: Bool
+
+        init(panes: [PaneID], focused: PaneID, isKey: Bool) {
+            self.panes = panes
+            self.focused = focused
+            self.isKey = isKey
+        }
+    }
+
+    /// **The app-scale invariant**: across every open window, exactly one
+    /// pane mounts a live surface — because `WindowRegistry`'s key is
+    /// sticky, so exactly one window is key whenever any window is open.
+    static func liveCount(across windows: [WindowState]) -> Int {
+        windows.reduce(0) { total, window in
+            total + liveCount(
+                panes: window.panes, focused: window.focused, windowIsKey: window.isKey)
+        }
     }
 }
 

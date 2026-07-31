@@ -126,6 +126,8 @@ struct LibraryCatalogView: View {
     var onOpenBlock: ((SidebarSelection, String) -> Void)? = nil
     /// 13f batch 4 (W1/A25): the split's row door.
     var onOpenBeside: ((String) -> Void)? = nil
+    /// 13f batch 5b (W2/A26): the note-only window's row door.
+    var onOpenInNewWindow: ((String) -> Void)? = nil
     /// 13b Stage 2 ladder, MINOR-D6: the tutorial door routes through the
     /// shell's fire-and-DO act (`ShellActions.openTutorial` — failures
     /// speak; the old inline `try?` swallowed them silently while the
@@ -370,6 +372,11 @@ struct LibraryCatalogView: View {
             Button("Open") { onOpen(.post(hit.id)) }
             if let onOpenBeside {
                 Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(hit.id) }
+            }
+            if let onOpenInNewWindow {
+                Button(CapabilityRegistry.capability(.openInNewWindow).verb) {
+                    onOpenInNewWindow(hit.id)
+                }
             }
             Button("Rename…") {
                 renameTitle = hit.title == "Untitled" ? "" : hit.title

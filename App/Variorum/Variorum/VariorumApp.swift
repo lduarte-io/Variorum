@@ -21,17 +21,27 @@ struct VariorumApp: App {
     @NSApplicationDelegateAdaptor(VariorumAppDelegate.self) private var appDelegate
     @State private var bootstrap = AppBootstrap()
     @State private var services: AppServices?
-    /// Phase 13 (B2): the menu-command routing channel (⌘N/⌘J/⌘K).
-    @State private var router = ShellRouter()
+    /// 13f batch 5b (W2/A26): the router is per-WINDOW now — it lives inside
+    /// `RootView`, so each window has its own workspace (its own Open strip,
+    /// its own histories, its own context-bar fold). What the app keeps is
+    /// the register of open windows and the one authority on which is key;
+    /// the menu bar reads its active router from here. (Batch 4's recorded
+    /// finding: an App-level `@State` router was shared by every
+    /// `WindowGroup` window — nothing could ship a second window before
+    /// this moved.)
+    @State private var windows = WindowRegistry()
 
     var body: some Scene {
         // Batch 7: a sane fresh-window size (the oversized-window report —
         // an inherited frame taller than the screen made the shelf's
         // bottom bars and the navigator's doors invisible).
-        WindowGroup {
+        //
+        // 13f batch 5b: the group gains an id so File ▸ New Window can open
+        // another one by name.
+        WindowGroup(id: EditorCommands.mainWindowGroupID) {
             switch bootstrap.state {
             case .ready(let session):
-                RootView(session: session, services: services, router: router)
+                RootView(session: session, services: services, windows: windows)
                     .onAppear { appDelegate.session = session }
                     .task {
                         guard services == nil else { return }
@@ -58,8 +68,27 @@ struct VariorumApp: App {
         }
         .defaultSize(width: 1240, height: 840)
         .commands {
-            EditorCommands(bootstrap: bootstrap, router: router)
+            EditorCommands(bootstrap: bootstrap, windows: windows)
         }
+        // 13f batch 5b (W2/A26 — her round-2 ruling: BOTH window kinds).
+        // The lightweight NOTE-ONLY window: one note, its detail and its
+        // context bar, and deliberately no sidebar, no Open strip and no
+        // split. Every app-scope act is honestly grey there through the
+        // gates that already exist (see `WorkspaceModel.showOnly`).
+        WindowGroup(id: EditorCommands.noteWindowGroupID, for: String.self) { $postID in
+            switch (bootstrap.state, postID) {
+            case (.ready(let session), .some(let postID)):
+                NoteWindowView(session: session, windows: windows, postID: postID)
+            case (.failed(let error), _):
+                StoreFailureView(error: error) { bootstrap.retry() }
+            default:
+                // No note handed over (a restored window whose value did not
+                // come back): honest, not a blank pane.
+                Text("Open a note from the main window.")
+                    .padding(24)
+            }
+        }
+        .defaultSize(width: 760, height: 720)
         // Sitting 9 (R73/R91): the shortcut helper + dictionary window
         // (⌘/, Help menu, the status bars' "?").
         Window("Shortcuts & Dictionary", id: "variorum-helper") {

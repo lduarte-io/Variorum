@@ -65,7 +65,7 @@ struct SidebarView: View {
     /// three surfaces render it — the Open strip's rows here, the Library
     /// catalog's post rows, and the Pool's — all through the same shell
     /// callback, so one declaration covers the family.
-    static let contextMenuCapabilities: [CapabilityID] = [.openBeside]
+    static let contextMenuCapabilities: [CapabilityID] = [.openBeside, .openInNewWindow]
 
     let session: AppSession
     let model: LibraryViewModel
@@ -79,6 +79,9 @@ struct SidebarView: View {
     /// 13f batch 4 (W1/A25): "Open Beside" on an Open-strip row — the
     /// split's door where the window's open notes already live.
     var onOpenBeside: ((String) -> Void)?
+    /// 13f batch 5b (W2/A26): "Open in New Window" — the lightweight
+    /// note-only window, from the same note-row menu as Open Beside.
+    var onOpenInNewWindow: ((String) -> Void)?
     /// Batch 14: the open post's current mode (the rail's › marker) —
     /// broadcast by PostDetailView, tracked by the shell.
     var postMode: String = PostDetailView.Mode.takes.rawValue
@@ -144,6 +147,11 @@ struct SidebarView: View {
                     .contextMenu {
                         if let onOpenBeside {
                             Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }
+                        }
+                        if let onOpenInNewWindow {
+                            Button(CapabilityRegistry.capability(.openInNewWindow).verb) {
+                                onOpenInNewWindow(noteID)
+                            }
                         }
                         Button("Close") { workspace.closeNote(noteID) }
                     }

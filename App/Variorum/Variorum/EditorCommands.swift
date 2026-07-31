@@ -20,9 +20,17 @@ import VariorumCore
 
 struct EditorCommands: Commands {
     let bootstrap: AppBootstrap
-    /// Phase 13 (B2): the shell routing channel — ⌘N/⌘J/⌘K land in
-    /// RootView through this.
-    let router: ShellRouter
+    /// 13f batch 5b (W2/A26): the menu bar is attached to the SCENE, not to
+    /// a window, so it cannot hold one window's router any more — it asks
+    /// the registry which window is key. Every door below that touches a
+    /// workspace (⌘[, ⌘], ⌘⇧1–9, Open Beside, Close Split, the context-bar
+    /// fold) therefore acts on the window she is actually in.
+    let windows: WindowRegistry
+
+    /// The key window's routing channel — nil only before any window has
+    /// registered (the first frames), where every door is already disabled
+    /// on `session == nil` or its registry gate.
+    private var router: ShellRouter? { windows.activeRouter }
 
     private var session: AppSession? {
         if case .ready(let session) = bootstrap.state { return session }
@@ -30,7 +38,8 @@ struct EditorCommands: Commands {
     }
 
     private var actions: ShellActions? {
-        session.map { ShellActions(session: $0, shell: router) }
+        guard let session, let router else { return nil }
+        return ShellActions(session: session, shell: router)
     }
 
     /// Registry-driven enablement (P-1: gating is data). Reads the
@@ -145,10 +154,27 @@ struct EditorCommands: Commands {
             Button(verb(.todaysEntry)) { actions?.todaysEntry() }
                 .keyboardShortcut("j", modifiers: .command)
                 .disabled(session == nil)
+            Divider()
+            // 13f batch 5b (W2/A26) — File ▸ New Window, the full-app kind.
+            //
+            // The architect's ruling (e) is that this rides `WindowGroup`'s
+            // system-standard item, undeclared. **MEASURED at build time
+            // (macOS 26.5.2, the running Debug app's File menu enumerated
+            // through System Events): that item is NOT there** — this very
+            // group is `replacing: .newItem`, which is the group SwiftUI
+            // places its automatic New Window item in, and ⌘N was taken for
+            // New Post here since R41. So the standard item is restored
+            // explicitly, in the place it belongs, and still UNDECLARED —
+            // the ruled reason (nothing in the registry duplicates a
+            // standard File item) is honored exactly. No key equivalent:
+            // ⌘N is New Post's, and inventing a chord would owe a collision
+            // sweep no ruling asked for (batch 4's precedent).
+            Button("New Window") { openWindow(id: Self.mainWindowGroupID) }
+                .disabled(session == nil)
         }
         // ⌘K (R15, ratified): find anything — posts, books, commands.
         CommandGroup(after: .sidebar) {
-            Button(verb(.findAnything)) { router.paletteRequested = true }
+            Button(verb(.findAnything)) { router?.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(session == nil)
         }
@@ -382,15 +408,15 @@ struct EditorCommands: Commands {
             // the platform's own keys. Every door in this file is honestly
             // grey where it cannot act: at the shelf, with nothing visited
             // yet, Back is grey rather than a key that does nothing.
-            Button(verb(.navigateBack)) { router.goBack() }
+            Button(verb(.navigateBack)) { router?.goBack() }
                 .keyboardShortcut("[", modifiers: .command)
                 .disabled(!enabled(.navigateBack))
-            Button(verb(.navigateForward)) { router.goForward() }
+            Button(verb(.navigateForward)) { router?.goForward() }
                 .keyboardShortcut("]", modifiers: .command)
                 .disabled(!enabled(.navigateForward))
             // 13f batch 5 (W20 b): the context bar's ONE fold, beside the
             // navigation it belongs to (the bar's back half IS ⌘[).
-            Button(verb(.toggleContextBar)) { router.toggleContextBar() }
+            Button(verb(.toggleContextBar)) { router?.toggleContextBar() }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
                 .disabled(session == nil)
             Divider()
@@ -401,10 +427,10 @@ struct EditorCommands: Commands {
             // read `workspace.openNotes.shown`, in the same order.
             Menu(verb(.openNote)) {
                 ForEach(
-                    Array(router.workspace.openNotes.shown.enumerated()), id: \.element
+                    Array((router?.workspace.openNotes.shown ?? []).enumerated()), id: \.element
                 ) { index, noteID in
-                    Button(router.workspace.label(for: .post(noteID))) {
-                        router.openNote(ordinal: index + 1)
+                    Button(router?.workspace.label(for: .post(noteID)) ?? "") {
+                        router?.openNote(ordinal: index + 1)
                     }
                     .keyboardShortcut(
                         KeyEquivalent(Character("\(index + 1)")), modifiers: [.command, .shift])
@@ -418,9 +444,9 @@ struct EditorCommands: Commands {
             // is what a split is FOR after coming from somewhere; the row
             // doors put the row you point at. Both refuse in one voice
             // when the note is already showing (round 7.3).
-            Button(verb(.openBeside)) { router.openBesideMostRecent() }
+            Button(verb(.openBeside)) { router?.openBesideMostRecent() }
                 .disabled(!enabled(.openBeside))
-            Button(verb(.closeSplit)) { router.closeSplit() }
+            Button(verb(.closeSplit)) { router?.closeSplit() }
                 .disabled(!enabled(.closeSplit))
             Divider()
         }
@@ -440,6 +466,10 @@ struct EditorCommands: Commands {
     }
 
     @Environment(\.openWindow) private var openWindow
+
+    /// The two `WindowGroup` ids the app opens by name (13f batch 5b).
+    static let mainWindowGroupID = "variorum-main"
+    static let noteWindowGroupID = "variorum-note"
 
     /// The callout emoji prompt (her sitting-3 reference wore "💡").
     /// 13c R2-2: the prompt gathers the glyph and the ROUTER delivers it,

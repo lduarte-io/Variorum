@@ -559,6 +559,19 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "There's no split to close — this window shows one note.",
             availability: { ctx in ctx.paneCount > 1 ? .act : .unavailable }),
+        // 13f batch 5b — the note-only window (her round-2 ruling: both
+        // window kinds). `always`, and that is the honest declaration
+        // rather than a missing gate: the door is rendered ONLY on a note
+        // ROW, so its target always exists, and a window can always be
+        // opened. The CONTEXT rule is trivial here and the per-TARGET
+        // condition is the row's — the `.diffAgainstChosen` /
+        // `.showOriginBlock` split (P-2), stated so nobody later reads the
+        // `always` as an oversight.
+        Capability(
+            id: .openInNewWindow, verb: "Open in New Window", scope: .app,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
         // Her W16 second half. A `.surface` door on the peer column's own
         // header — the `.unarchiveTake` class: the target is the thing you
         // are pointing at, so no routed context command exists. The CONTEXT

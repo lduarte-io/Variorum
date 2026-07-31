@@ -94,6 +94,8 @@ struct PoolPostsView: View {
     let onOpen: (SidebarSelection) -> Void
     /// 13f batch 4 (W1/A25): the split's row door.
     var onOpenBeside: ((String) -> Void)? = nil
+    /// 13f batch 5b (W2/A26): the note-only window's row door.
+    var onOpenInNewWindow: ((String) -> Void)? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -187,6 +189,11 @@ struct PoolPostsView: View {
             Button("Open") { onOpen(.post(item.postID)) }
             if let onOpenBeside {
                 Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(item.postID) }
+            }
+            if let onOpenInNewWindow {
+                Button(CapabilityRegistry.capability(.openInNewWindow).verb) {
+                    onOpenInNewWindow(item.postID)
+                }
             }
             Button("Duplicate as Version") {
                 Task { await library.duplicateAsVersion(postID: item.postID) }
