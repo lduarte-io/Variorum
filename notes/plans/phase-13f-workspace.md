@@ -4467,6 +4467,43 @@ backstop; loss is bounded by one summon and the record says so).
 the sticky registers "Quick Note" so the menu says what she did.
 Build order as proposed; pins as proposed including the app-scale
 mount invariant extended to a registered `.quickNote` window.
+
+### Sitting round 15 (2026-07-31) — HER CLOSEOUT DIRECTIVE: the phase closes FULLY; the walkthrough rides the NEXT phase's opening
+
+Her message, verbatim: *"excellent. go ahead and finish the closeout
+of this phase fully - leave the things for me to walk through in a
+doc for the start of the next phase (which I think will be 13h ? or
+13? whichever one it is, write the plan for that phase and direct
+that phase to talk to me about the walkthrough and thoes items. I
+just want a fully closed out phase and next phase plan authored
+rather than gating on my walkthrough"*
+
+**Parsed and binding:**
+1. **13f closes FULLY, gating on nothing of hers.** The remaining arc
+   runs to completion: W5's build (in flight) → its acceptance → the
+   K5 sweep batch (W6+W15, the LAST build batch) → the ONE Fable
+   cold review (the ruled cast) → the full closeout ritual,
+   INCLUDING the `/Applications` refresh behind the A1 rail at a
+   verified zero-instance window (her round-12 ruling already
+   expects the walk to happen "after my app is refreshed").
+2. **The walkthrough items land in the author handoff**
+   (`notes/handoffs/phase-13f-handoff.md`, her checklist at the
+   top): every batch's visual-verification-only list, the QoL-round
+   standing items she still carries, the W26 hotkey offer, and the
+   taste flags routed to her all phase (the app-global toast, the
+   chip-row diverge door, the collapsed-card landing, etc.).
+3. **The next phase is 13G, by her own round-5 ruling** — *"so 13g
+   will be next, you'll author that phase's plan during your
+   closeout, and leave a note for 13g to author 13e"* — her "which I
+   think will be 13h ? or 13?" defers to the record by its own
+   "whichever one it is". **13g's plan is authored at this closeout**
+   with an explicit directive: **13g OPENS by talking to her about
+   the 13f walkthrough doc alongside its own reserved opening
+   design sitting** (the markdown fork), and 13g's closeout authors
+   13e's plan (the round-5 note carried forward).
+4. The R48-precedent taste conversation for this phase's surfaces
+   therefore rides 13g's opening sitting, anchored on the handoff
+   doc — never dropped, never gating.
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
