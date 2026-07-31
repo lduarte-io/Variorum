@@ -2411,3 +2411,20 @@ halves and **no claim is made that they were tested:**
   chrome is unchanged with one pane open (the name line only appears
   when a split exists), and a book or a list beside her is fully
   browsable while nothing in it is live.
+
+### Sitting round 11 (2026-07-30) — the tag-surface ask
+
+Her words, verbatim: *"do we have an easy way to add a new tag on a
+post right now? a quick and intuitive area where you can see the
+posts at a high level and remove / add them? i don't know which phase
+it should go in if not but i do want that. not this one though"* —
+**Answered: it EXISTS** — the Library catalog IS the R46 addable
+batch-tagging surface (tags column, per-row "+" adding inline, one
+tag to many posts; Pool likewise; taxonomy management in Settings per
+R52). She was pointed at it for her walk. **If it fails her hands:**
+the ask is recorded as a **13e kickoff candidate** (the
+management-hands family; her "not this one" honored). **Pattern
+noted on the record:** the third built-but-unfound door surfaced
+today (the ascent chip W20, the divide original W10, now this) — the
+standing Design & UI review row is the owner of that class, and its
+first run after 13f is the recommended slot.
