@@ -4504,6 +4504,93 @@ rather than gating on my walkthrough"*
 4. The R48-precedent taste conversation for this phase's surfaces
    therefore rides 13g's opening sitting, anchored on the handoff
    doc — never dropped, never gating.
+
+#### Batch 6 (W5) — ACCEPTED (2026-07-31; the orchestrator's adjudication — batch 6 CLOSES whole)
+
+**Counts by my own runs:** core `✔ Test run with 925 tests in 105
+suites passed` (`swift_exit=0`) · Mac `✔ Test run with 1064 tests in
+187 suites passed` (`xcodebuild_exit=0`) — both match the record's
+claims exactly; the quoted mobile line accepted per the standing
+rule.
+
+**Load-bearing diffs read:** the pad's header carries every ruling
+where a future session will read it (capture-not-editor with both
+consequences stated; the three mint triggers; the quiet landing);
+the `importPost` label widening is a defaulted parameter leaving
+every existing pin byte-identical — the parity proof done right.
+**The batch's finding ENDORSED as its best work:** revert W5-B
+passing green on the first attempt was the
+promise-in-a-view-closure class reproduced in the very file whose
+header cites it, and the implementer fixed the DESIGN rather than
+the pin (`QuickNotePad` extracted with one clear-first body; W5-B
+then red with 5 issues) — the green-revert discipline applied at the
+level it should bite. The beyond-the-letter extraction is GRANTED
+retroactively for exactly that reason. The no-`Kind`-specific-logic
+property (the pad excluded from navigation and liveness by what it
+IS, not by rules written about it) endorsed. **Ledger: W5 BUILT —
+batch 6 closes whole.** The six visual items (chief: the menu-bar
+glyph really summoning from another app) join her walk doc.
+Remaining: **batch 7 = the K5 sweep (W6+W15), the LAST build batch**
+→ the ONE Fable cold review → the closeout per round 15.
+
+### Batch 7 brief — the K5 SWEEP: W6 (`post` → "note") + W15 ("Blocks" → "Snippets") (fresh Opus implementer; self-contained; UI STRINGS ONLY; the phase's LAST build batch)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads; THIS plan file WHOLE — the constitution, THE KICKOFF SITTING
+(her W14 wobble verbatim — including the chapter-of-notes phrasing
+she pre-flagged as "a little weird"; the walk re-judges it), sitting
+rulings rounds 1–15 (round 3.3: THE WORD IS "NOTE"; round 1.4:
+"Blocks" → "Snippets"; her K5 ruling: **UI STRINGS ONLY —
+`container.kind='post'` and the canon docs keep the model term**),
+every batch record (batch 6's W4 judgment call 1 is the class rule:
+stored/model words are NEVER touched); the 13c plan's "Environment
+traps" (binding).
+
+**The sweep's law — what changes and what NEVER does:**
+
+1. **CHANGES: user-facing UI strings only**, in BOTH app targets
+   (mobile is a UI too — its suite runs): menu items ("New Post" →
+   "New Note"), buttons, section headers, refusal/status copy,
+   palette entries, tooltips, helper/Shortcuts copy, empty-state
+   text, alert wording. "Blocks" — **the R44 SIDEBAR scraps
+   section only** — becomes "Snippets" (her verbatim reason: "more
+   for reusable blocks that you can drag into any post"). The
+   in-post **mode tab "Blocks" (the block-TOC view) is NOT the
+   sidebar section and is NOT renamed** — her W15 named "the
+   'Blocks' pool"; the block vocabulary itself stays ("I like
+   blocks for how direct of a word it is").
+2. **NEVER CHANGES:** `container.kind='post'` and every model/API
+   identifier; stored keys, `UserDefaults` keys, pasteboard types,
+   notification names, log subsystems (the W4 stored-key class —
+   sweep-proof by design, pinned there); type/file/function names
+   (not strings); the canon docs under `notes/`; the JOURNAL
+   vocabulary ("entry", "Today's Entry" — the journal's own words,
+   not the post word); the Fragments-bridge wire/contract strings.
+3. **The audit table is the deliverable's spine:** grep-audit every
+   user-facing string carrying "post"/"Post" across both targets;
+   the batch record carries the table — each occurrence SWEPT or
+   SURVIVING with its reason (model term, journal word, dev-facing,
+   etc.). No silent survivors. Pins asserting old copy flip
+   deliberately, each named; the registry walk and every
+   non-copy pin must pass UNMODIFIED (a strings sweep that moves
+   behavior has exceeded its shape — STOP).
+4. **Tutorial/field-guide lesson content:** where lesson SOURCE text
+   teaches the old word, sweep it — and RECORD that the real
+   store's seeded field guide goes stale (the closeout's re-seed
+   note; the standing rule). The tutorial spine must stay green —
+   if a lesson pin asserts swept copy, it flips with the lesson,
+   named.
+
+**Loop, records, constraints — identical to batch 6's:** tutorial
+spine by TYPE name; full suites with quoted "Test run with N tests"
+lines; mobile RUNS (its strings are in scope). **Baselines to
+match-or-beat: core 925/105 · Mac 1064/187 · mobile 14/4.** Append
+your batch record under "Batch records"; commit by explicit path
+with the standing trailer; never `/Applications`, never
+`Sources/VariorumCore/Sync/` (a sweep has no business there —
+zero lines), never push, NO schema. STOP-and-propose on anything
+exceeding the sweep's shape. PROVISIONALs to `notes/QUESTIONS.md`
+(next free **#49**).
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
