@@ -3659,3 +3659,263 @@ touch nothing of hers); never `/Applications`, never
 uncommitted work, NO schema. STOP-and-propose on anything exceeding
 the ruling's shape. Every PROVISIONAL to `notes/QUESTIONS.md`
 (append, never renumber; next free number **#49**).
+
+### Batch 5b — SEVERAL WINDOWS (W2/A26): the per-window router + `WindowRegistry` + the key-window gate, then both window kinds; commit `246065c`
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 916
+tests in 104 suites passed after 28.991 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 1041 tests in 181 suites passed after 137.593 seconds`
+(`mac_exit=0`) · the tutorial spine on its OWN run, by TYPE name
+(`TutorialBookShapeTests` · `TutorialDoorTests` ·
+`TutorialWritingActsTests` · `TutorialTakesActsTests` ·
+`TutorialStructureActsTests` · `TutorialLookingActsTests` ·
+`TutorialLibraryActsTests`): `✔ Test run with 49 tests in 7 suites passed
+after 11.836 seconds`. From the batch's baselines (916/104 · 1030/175 ·
+14/4): **+11 Mac tests, +6 suites**; core byte-unchanged. **Mobile
+deliberately NOT run** — zero `Sources/` and zero `Shared/` lines
+(verified by `git status`: every change sits under
+`App/Variorum/Variorum{,Tests}/`), so the loop's own condition is unmet;
+the phase's 14/4 stands.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point (`pgrep` by path at open
+and at close; login session unlocked, probed not predicted). ONE commit,
+staged by explicit path; nothing under `notes/` outside this record was
+touched. **Why one commit and not two:** `VariorumApp` mounts
+`NoteWindowView` and `RootView` carries lines from both halves, so any
+file-level split would have left a commit that does not build — worse
+than a single honest one.
+
+#### Two MEASUREMENTS made before anything was written
+
+Both changed what got built, so they lead.
+
+1. **This test host cannot make a window key.** `NSApp.isActive` is
+   false in the XCTest host, `makeKeyAndOrderFront(_:)` leaves
+   `isKeyWindow` false for every window, and **no `didBecomeKey` fires at
+   all** (probed with two real `NSWindow`s before any design was fixed).
+   Consequences, both load-bearing: the registry needed a FALLBACK for
+   "nothing has been key yet" — which is a real state in the app too, and
+   without which every batch-4 hosted pin would have gone red — and the
+   hosted pins drive the chain by **posting AppKit's own
+   `didBecomeKey`/`didResignKey` for a real hosted window**, which is the
+   exact notification a click posts. What no pin here covers is AppKit's
+   own posting of it under a real hand; that is on the visual list,
+   stated rather than claimed.
+2. **File ▸ New Window does not exist today.** Measured, not reasoned:
+   the Debug app was launched and its File menu enumerated through System
+   Events — `New Post · Today's Entry · — · — · Close · Close All ·
+   Commit Take · — · Import Files… · — · Export Library… · Export Block
+   as Markdown…`. No New Window item. The cause is this app's own
+   `CommandGroup(replacing: .newItem)`: that is the group SwiftUI places
+   its automatic New Window item in, and ⌘N was taken for New Post at
+   R41. (The dev-store instance was quit afterwards; her real-store app
+   was never running.)
+
+#### Item 1 — the per-window router, the registry, the key gate
+
+**What moved, and what deliberately did not.** `ShellRouter` is
+`RootView`'s own `@State` now; `AppSession`, `AppServices`, `ThemeStore`'s
+owner and the capability registry stay exactly where they were. The app
+keeps ONE new object, `WindowRegistry`, because two things are genuinely
+app-wide and must still find the right window: the SCENE-attached menu
+bar (`EditorCommands` reads `activeRouter`), and the mount gate.
+
+**The gate is one input on the fork that already existed.**
+`PaneMount.kind(of:focused:windowIsKey:)` — the ruling's (b), literally:
+*exactly one pane, in exactly one window, mounts a live surface.*
+`windowIsKey` is **defaulted true**, which is deliberate: it keeps this
+ONE fork rather than two, and every batch-4 pane pin reads UNMODIFIED —
+the parity proof that the window gate is an addition, not an adjustment.
+`PaneMount.WindowState` + `liveCount(across:)` state the app-scale
+invariant as arithmetic.
+
+**The key is STICKY, with no resign door at all** (the ruling's condition
+3). The registry's `keyOrder` moves only when a window becomes key or
+when the key window unregisters. The header says why in the file, and
+revert R5b-B shows what a resign door costs.
+
+**TWO problems the second window creates, fixed at the level they live
+at — neither was in the proposal, and both would have shipped as
+defects:**
+
+1. **The menu's gates answered for the wrong window.** `CommandRouter` is
+   the APP's, and batch 3 wired its workspace closures (`openNoteCount`,
+   `canNavigateBack/Forward`, `paneCount`, `canOpenBeside`, plus
+   `session.recentBookIDs`) to *a* window's workspace in `onAppear` —
+   with two windows, last-appear wins, so Back / Forward / ⌘⇧n would
+   answer for a window she is not in. They read `windows.activeRouter`
+   now, which additionally makes `wireWorkspace` **idempotent across
+   windows**: whoever runs it last installs the same closures.
+2. **One broadcast navigated BOTH windows.** `.variorumOpenPost`,
+   `.variorumRevealUnplacedBlock` and `.variorumOpenBookAtPost` are
+   posted to the whole app and every full window listens — P-4's own
+   class, arriving the moment windows do. `RootView.claimBroadcast()`
+   admits exactly one, and the rule is **not** `isKey`: it is
+   `WindowRegistry.navigationTargetID` — the key window when it can
+   navigate, else the most recently key FULL window. That second clause
+   is what keeps a book link clicked in a NOTE-ONLY window from being a
+   dead door, which is precisely the class W20 was built to kill; a
+   window that acts while it is not the one she is looking at raises
+   itself (`bringForward`), so what she asked for arrives in front of
+   her.
+
+#### Item 2 — both window kinds
+
+**File ▸ New Window** — a plain, UNDECLARED `Button` in the `.newItem`
+group calling `openWindow(id: "variorum-main")` (the main group gained an
+id). **This is a deviation from the ruling's wording** ("rides
+`WindowGroup`'s standard item") and it is flagged as one — but the
+measurement above shows the standard item is not there to ride, and the
+ruled REASON (nothing in the registry duplicates a standard File item) is
+honored exactly: it is still undeclared, still in the standard place.
+**No key equivalent**: ⌘N is New Post's, and inventing a chord would owe
+a collision sweep no ruling asked for (batch 4's precedent). One
+declaration away at her word.
+
+**"Open in New Window"** — `CapabilityID.openInNewWindow`, app scope,
+`[.contextMenu]`, rendered by the note-row family through
+`SidebarView.contextMenuCapabilities` (the Open strip, the Library
+catalog, the Pool — ONE declaration, three renderers, exactly as
+`.openBeside`). Its availability is `always`, and the file says why so
+nobody later reads it as a missing gate: the door is rendered only on a
+note ROW, so its target always exists — the `.diffAgainstChosen` /
+`.showOriginBlock` split (P-2).
+
+**The note-only window** carries the detail + the context bar and lacks
+sidebar, strip and split. Its workspace is set with **`showOnly`, which
+records NOTHING** — no history, no Open strip, no book recency — and that
+silence IS the mechanism behind the ruling's promise: `openNoteCount` 0,
+`canNavigateBack/Forward` false, `openBesideCandidate` nil, `panes.count`
+1 give four honest greys through the gates that already exist, and **not
+one new availability rule was written for this window.** Everything
+editing-scoped (⌘S, the structural and take families, find) works there
+exactly as in the main window, because it routes through the app's
+`CommandRouter` and this window mounts the live detail whenever it is
+key. Note-only HISTORY is not in v1 as ruled; the workspace is there and
+one line would give it one.
+
+**Same-note across windows is ALLOWED** (her round-13 ruling): no
+cross-window refusal machinery exists, and the WITHIN-window pane rule is
+byte-unchanged — every batch-4 same-note pin passes unmodified.
+
+#### Pins — every change named
+
+**New suite `WindowsTests` (11 tests in 6 suites):** `WindowRegistryTests`
+(2) the sticky key + the fallback + the key leaving with its window · the
+navigation target across full/note-only windows · `PaneMountWindowTests`
+(2) the app-scale invariant for 1–3 windows and every key, the no-key
+state counting ZERO, and a focused pane in a non-key window being
+read-cheap (the gate is AND, not OR) · `NoteOnlyWindowTests` (2) the four
+honest greys read through the SAME registry gates, with two editing acts
+still enabled beside them · the door's declaration ⇔ rendering ·
+`IndependentWorkspaceTests` (1) two strips, two trails, two folds — the
+claim batch 3 made and batch 4 found false for windows ·
+`TwoWindowMountTests` (3) **the ruling's conditions (1) and (3)** plus the
+menu-gates/broadcast pin · `WindowUnmountTests` (1) **condition (2)**.
+
+**Pins MODIFIED: NONE.** Every registry-walk assertion passes unmodified
+— `.openInNewWindow` grows BOTH sides of
+`theContextMenusRenderExactlyTheDeclaredContextDoors` by construction,
+declares no menu-bar door, no shortcut label and no `takesAccess` (app
+scope), and is reachable in every sampled context. That is the parity
+proof for a batch that added a capability, a scene and a mount input.
+
+**Reverts (`shasum -a 256` before each; all four files restored and
+verified OK before the next; `build-for-testing` → `test-without-building`
+every time, per the standing stale-product trap):**
+
+- **R5b-A** the key gate removed from `PaneMount.kind` ⇒ **13 issues**:
+  `handlerCount → 2` with two windows on screen and `activePostID → the
+  wrong post` — **the LIFO misrouting hazard reproduced live at window
+  scale**, the R4-A shape one level up, which is exactly what condition
+  (1) asked for. Batch 4's own `PaneMountTests` stayed GREEN (the pane
+  rule is untouched by the revert) — discriminating in both directions.
+- **R5b-B** a resign door added to the registry and wired to
+  `didResignKey` (the literal keyWindow-now reading, in mechanism form)
+  ⇒ **3 issues**: after an app deactivation `activePostID → nil` and
+  `handlerCount → 0` — the live surface torn down and nothing remounted,
+  **the teardown/flush storm condition (3) exists to prevent**. The other
+  two hosted pins stayed green.
+- **R5b-C** `wireWorkspace` bound to its own window's workspace again ⇒
+  the menu answers `openNoteCount → 0` while the key window has a note
+  open. (Discriminating under EITHER window's appear order: whichever
+  window wins, one of the pin's two arms is wrong.)
+- **R5b-D** `claimBroadcast` always true ⇒ one broadcast navigates BOTH
+  windows — window A jumped to the other window's post.
+- **R5b-E** `showOnly` replaced by an ordinary `select` ⇒ the note-only
+  window's strip fills and ⌘⇧1–9 lights up: the honest greys become
+  dishonest.
+
+#### Judgment calls, recorded so they can be overturned rather than trusted
+
+1. **File ▸ New Window is an explicit undeclared button**, not the
+   standard item — because the standard item is measurably absent (above).
+   The alternative (`CommandGroup(after: .newItem)`, letting SwiftUI's own
+   item back) would put a second ⌘N in the File menu.
+2. **The broadcast target is `navigationTargetID`, not `isKey`.** The
+   `isKey` reading is simpler and I rejected it for one concrete reason: a
+   book link in a note-only window would then reach nobody. The cost of my
+   choice is that the book opens in the main window, which raises itself —
+   visual item 5.
+3. **`bringForward` raises the acting window.** One line, and without it
+   the act above happens somewhere she cannot see. Uses the `NSWindow` the
+   key reporter already hands over.
+4. **Each window builds its own view models** (`LibraryViewModel`, the
+   catalog, the pool, `ThemeStore` …), since they are `RootView` `@State`.
+   That is the honest meaning of per-window state and it is bounded by the
+   window count; the alternative (hoisting eight observations to the app)
+   is a bigger change than this ruling asked for.
+5. **The status toast renders in every window**, because `StatusCenter` is
+   app-global and each window overlays it. A refusal fired in one window is
+   therefore visible in both. Left as-is deliberately: the alternative is
+   per-window status, which is a real design question and hers.
+6. **Note-only windows never listen to navigation broadcasts** — they
+   navigate nowhere, so listening could only produce a request they cannot
+   honor.
+
+#### VISUAL-VERIFICATION-ONLY — for her walk and the Design & UI review row
+
+Everything that DECIDES anything above is pinned. These are the halves
+this host cannot drive, and **no claim is made that they were tested:**
+
+1. That AppKit's real become-key (a click on a window) actually reaches
+   the reporter — the pins post the notification AppKit posts; nobody has
+   watched a click do it. **The whole windows feature rests on this one
+   wire**, so it is the first thing to try: click between two windows and
+   watch the live editor follow.
+2. That ⌘-tabbing to another app and back leaves the live surface exactly
+   as it was (the sticky key, in her hands).
+3. That File ▸ New Window appears where a Mac user expects it, and that
+   the second window opens at the shelf (RESTORATION, as ruled: nothing
+   persists — a relaunched window returns to the shelf; a named behavior,
+   not a bug).
+4. That "Open in New Window" reads right in all three row menus, and that
+   the note-only window's chrome (context bar over the detail, no sidebar)
+   feels lightweight rather than truncated.
+5. That clicking a book link in a NOTE-ONLY window — which opens the book
+   in the main window and raises it — reads as helpful rather than as a
+   surprise.
+6. That the status toast appearing in both windows is tolerable (judgment
+   call 5).
+7. That two windows on the SAME note read well (her round-13 ruling
+   allows it) — one live, one showing read-cheap prose.
+
+#### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **Nothing exceeded the ruling's shape**, so nothing stopped. The two
+  places the build went beyond the proposal's letter (the broadcast
+  target; the explicit New Window button) are both flagged above with
+  their measurements and reasoning.
+- **W19 rider: NOT FIRED.** The refactor moved WHO HOLDS the router, never
+  the redo status-delivery path — `ShellActions.swift`, `ShellRouter.swift`,
+  `StatusCenter.swift` and `OperationsRunner.swift` are all UNTOUCHED
+  (verified by `git status`). `theShellRedoActionRunsThroughTheRunnerAndReports`
+  passed in both full Mac runs today. Left where it is, as the brief
+  instructs; its KnownIssues row stands.
+- Her walk will notice, beyond the windows themselves: the File menu has a
+  New Window item for the first time; note rows carry a second window door
+  beside Open Beside; and with two windows open the menu bar's Back /
+  Forward / Open Notes answer for the window she is actually in.
