@@ -1304,3 +1304,274 @@ folder-editor shape beside the row's standing bridge shape; the two
 poles + the sitting questions; nothing decided — her uncertainty
 preserved). The master plan's 13h row points at it and carries the
 opens-with-the-conversation flag. 13g-before-13h affirmed.
+
+### Batch 3 — the navigation core: the Open strip (W3/A27) + back-navigation (W16), ALL FOUR BUILT
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 906
+tests in 102 suites passed after 30.138 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 982 tests in 159 suites passed after 133.846 seconds`
+(`xcodebuild_exit=0`) · the tutorial spine on its OWN run, by TYPE name
+(`TutorialBookShapeTests` · `TutorialDoorTests` · `TutorialWritingActsTests`
+· `TutorialTakesActsTests` · `TutorialStructureActsTests` ·
+`TutorialLookingActsTests` · `TutorialLibraryActsTests`): `✔ Test run with
+49 tests in 7 suites passed after 11.944 seconds`. From the batch's
+baselines (906/102 · 958/154 · 14/4): **+24 Mac tests, +5 suites**; core
+byte-unchanged. **Mobile deliberately NOT run** — zero `Sources/` and zero
+`Shared/` lines (verified by `git status`), so the loop's own condition for
+running it is unmet; the phase's 14/4 stands.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point (`pgrep` by path at open and
+at close). Every commit staged by explicit path; nothing under `notes/`
+outside this record was touched (sitting round 6 landed in the file while I
+built and is untouched above).
+
+#### THE COLLISION SWEEPS — both clean, and one is now permanent
+
+**⌘⇧1…⌘⇧9: FREE.** **⌘[ and ⌘]: FREE.** Swept, per the 13d A14 precedent,
+across the whole keyboard family: `EditorCommands.keyEquivalent` (the ONE
+table where keys are declared), every `.keyboardShortcut(` call site in
+`Variorum/` and `Shared/`, every `NSMenuItem` key equivalent, and the two
+`performKeyEquivalent` overrides.
+
+- No digit is bound with ⇧ anywhere. The nearest neighbours are the post
+  modes' **⌘1–⌘6** (plain command, `CommandGroup(before: .toolbar)`), which
+  is also why the family reads right beside them in the same menu group.
+- No bracket character is bound anywhere in the app at all. Every other
+  `.keyboardShortcut` outside the key table is `.defaultAction` /
+  `.cancelAction` inside a sheet, or the book views' bare arrow keys; the
+  one `performKeyEquivalent` override intercepts ⌘S and nothing else.
+- Neither item needed its stop-and-report door.
+
+**Made permanent** (`theKeyTableHasNoCollisionsAndTheNavigationKeysAreOurs`):
+the pin walks the whole key table asserting **no two capabilities share a
+chord** — it is a standing sweep for every key anyone adds next, not just
+mine — and then that ⌘[ / ⌘] are ours and that **no ⌘⇧⟨digit⟩ appears in the
+table at all** (the family wires per ordinal in the menu, which is where the
+row's identity lives). The table was already collision-free; it stays that
+way by test now.
+
+#### 1. The Open section — the tab strip's sidebar form
+
+Her ruling was placement as much as feature (*"i don't think it should be
+above the editor - i like the clean look there. i'd use the free space
+that's underneath 'library / shelf / pool / blocks' for now"*), so the strip
+is a fifth `List` Section and the editor chrome is byte-untouched.
+
+- **Rows are ordinary tagged List rows** (`.tag(SidebarSelection.post(id))`),
+  which buys three things for free and with no new mechanism: clicking a row
+  navigates through the shell's own selection, the `›` selection marker lands
+  on the current note by the R1 idiom already there, and the row participates
+  in the same keyboard/accessibility behaviour as Shelf · Library · Pool ·
+  Blocks. The trailing edge carries the row's own **⌘⇧n**, so the key is
+  legible without opening a menu, and a **✕** that closes the ROW.
+- **Caps, recorded: 9 shown · 12 tracked · truncation row beyond.** The nine
+  is not arbitrary — it is exactly ⌘⇧1…⌘⇧9, chosen so the two numbers cannot
+  drift apart (every visible row carries a key; no key reaches a row she
+  cannot see; the pin states that equality). The tracked list is deeper so
+  closing a row PROMOTES the next most recent into view instead of leaving a
+  hole, and the *"…N more open"* row is the bounded-windows discipline's
+  visible marker — never a silent cut.
+- **Session-scoped per window by construction:** the state hangs off
+  `ShellRouter`, which is the shell's own object, so batch 4's second window
+  gets its own the moment it gets its own router. Nothing persists, nothing
+  syncs, and the strip holds **ids only** — the titles are resolved for
+  display and never stored in navigation state.
+
+#### 2. ⌘⇧1…⌘⇧9 — one declaration, a key per row
+
+`CapabilityID.openNote` is ONE registry declaration for the whole family,
+which is exactly what `switchMode` is for ⌘1–⌘6 — and the same walk
+exemption, widened from a single-id guard to a named `ordinalFamilies` set.
+The menu renders a **submenu of the open notes BY NAME**, each row carrying
+its ordinal key, so every shortcut is a menu item (R73/R91/R93) and the keys
+and the sidebar rows **cannot disagree: both read
+`workspace.openNotes.shown`, in the same order.**
+
+With nothing open the submenu is honestly grey (`openNoteCount > 0`) — the
+`undoAvailable`/`redoAvailable` shape, a stack gate rather than a mode gate.
+A key that could only ever be dead is not a key here.
+
+#### 3. Per-pane history + the collapsible back chip
+
+**The whole recording is ONE line in the shell**, and that is the design:
+every door in the app already funnels through `RootView`'s selection — the
+shelf, the library, the pool, ⌘K, a book's `.variorumOpenPost` broadcast,
+Compare's new click-through, the strip itself — so `onChange(of: selection)`
+makes the history and the Open list complete **by construction** rather than
+by instrumenting each door and hoping the next one remembers. P-4 exactly:
+the doors name a destination, the shell decides what it means.
+
+- **Keyed by `PaneID` from day one** (the free-tiling rider): a dictionary,
+  never a pair of stacks, never "left/right". A second pane's history is
+  already independent — pinned, today, with two keys.
+- **The re-entrancy problem is solved by arithmetic, not a flag.** ⌘[ sets
+  `current` itself and the shell then reports that arrival back — so `visit`
+  no-ops on an unchanged destination and the forward future survives. A flag
+  would have to be cleared on every path SwiftUI might or might not take;
+  revert **W16-A** shows precisely what its absence costs (⌘] stops working
+  after ⌘[).
+- **The chip lives in the SHELL, above the detail** — not in
+  `PostDetailView` — because "where did I come from" is the PANE's fact. One
+  chip therefore serves a post, a book, a folder and the recovery surface,
+  and Write's masthead is untouched. It renders only when the pane arrived
+  from somewhere, so a cold launch at the shelf shows nothing at all.
+- **Collapse, per her ruling** (*"I like how clean the editor looks right
+  now"*): the fold chevron is present in BOTH states, so collapsing is never
+  a one-way door — collapsed reads `← ›`, two small glyphs, and the arrow
+  still goes back. `lineLimit(1)` + a bounded frame on the name (P-8's
+  b6dae25 class). Collapse state is session-scoped, per window.
+
+#### 4. Compare's click-through
+
+Her second W16 half (*"in compare … you should be able to click on the post
+you're comparing it with"*). The peer column's header gains an **Open**
+button beside Mark as Versions / Diff, declared as
+`CapabilityID.openPeerPost` — a `.surface` act (its target is the column you
+point at: the `.unarchiveTake` class), with `CompareBoardView` joining the
+walk's surface-door union.
+
+It **fires the existing `.variorumOpenPost` channel** rather than navigating
+itself (P-4), which is also what makes the ruling's own promise true without
+a line of extra code: opening the peer pushes the anchor post onto the
+pane's history, and ⌘[ returns to it in Compare **because per-post mode
+memory reopens it there.**
+
+#### Judgment calls, recorded so they can be overturned rather than trusted
+
+1. **The strip tracks POSTS only.** Books, folders, the pool and the
+   recovery surface are destinations (they get history and the chip) but not
+   *notes*. Her row says "tabs of open notes"; W14 ruled the word is "note".
+2. **Recency ordering is the brief's letter** — *"adds it / moves it to
+   recency"* — and it has a consequence worth her eye: **⌘⇧1 is always the
+   note you are already in**, and the ordinals shuffle as she moves (browser
+   tabs are insertion-ordered instead). Built as briefed, flagged, not
+   deviated from.
+3. **The section renders LAST**, below the contextual "this post" rail. With
+   no post open that is literally "the free space underneath the four"; with
+   one open, the rail keeps the placement she ruled in 13's batch 14 and the
+   strip sits under it. The alternative displaced a ruled placement.
+4. **`SidebarSelection` became `nonisolated`.** The target defaults to
+   MainActor isolation, which isolates even a plain value enum's synthesized
+   `Equatable` — and the pure types compare destinations away from any actor
+   so they can be pinned as the arithmetic they are. Widening, not narrowing;
+   the registry layer's own value types are declared exactly this way.
+5. **Titles are one-shot reads keyed on what is shown** (the shipped
+   `PostTitleLabel` precedent), not a held observation per row. **The known
+   corner:** renaming a note elsewhere does not live-update its strip row
+   until the shown set or its order next changes — which any navigation does.
+   A held per-row observation is the alternative if she ever notices it.
+6. **Closing the row of the note you are looking at** removes the row and
+   leaves the note on screen. There is no "close the pane" concept until
+   batch 4's windows, and navigating away on a close would be a bigger
+   surprise than a missing row.
+7. **`.openPeerPost` joins the takes-parity exemption** with the
+   `.switchMode` reason: it is a NAVIGATION act, not an editing one — no
+   surface is behind another because no surface edits anything.
+8. **The registry context reads the workspace through a closure**
+   (`openNoteCount` / `canNavigateBack` / `canNavigateForward`, the
+   `undoAvailable` idiom), wired by the shell to ITS window's workspace.
+   That closure is where batch 4's focused-window refinement lands, and
+   nothing else has to change for it.
+
+#### Pins — every change named
+
+**New suite `WorkspaceNavigationTests` (24 tests in 5 suites):**
+`NavigationHistoryTests` (4) the trail, the round trip, the forward future,
+the bound · `OpenNotesTests` (4) recency without duplication, closing one
+row, the ordinals' reach, the bound + the truncation number ·
+`WorkspaceNamingTests` (3) every destination kind names itself, unresolved
+still reads as what it is, the chip's one sentence · `WorkspaceModelTests`
+(7) recording both halves, the back-walk idempotence end to end, the
+free-tiling pane keys, chip state, **closing a row never touches the store**
+(a real store: the container is still live and titled afterwards), title
+resolution for post and book · `NavigationDoorsTests` (6) the permanent
+collision sweep, declared ⇔ rendered, grey-where-it-cannot-act, the shell
+doors' destinations, a pane with nowhere to go asking for nothing, and the
+**shell-mount pin** (below).
+
+**Pins MODIFIED — four, all in the registry walk, each a widening the new
+declarations require:**
+- `sampledContexts` **+1 context** (the workspace gates — the third family
+  of app-scope stack gates beside undo and redo; without it the navigation
+  core would read `.unavailable` everywhere the walk looks, exactly as the
+  find family did before its own context joined).
+- `everyEditingCapabilityDeclaresItsTakesAccess` — exempt set **+
+  `.openPeerPost`**, with the reason stated in the test.
+- `everyShortcutLabelHasExactlyOneKeyWiring` — the `.switchMode` guard
+  becomes a named `ordinalFamilies` set (**+ `.openNote`**).
+- `theSurfacesRenderExactlyTheDeclaredSurfaceActs` — union **+
+  `CompareBoardView.surfaceCapabilities`**.
+- (Mechanical, not a claim change: `PostDetailAndPanelTests`' `SidebarView`
+  construction gains the new `workspace:` argument.)
+
+**Everything else passes UNMODIFIED**, including every other registry-walk
+assertion — the parity proof that the four new declarations are additions,
+not adjustments.
+
+**Reverts (checksummed with `shasum -a 256` before each; every file restored
+and verified OK before the next):**
+- **W3-A** — `opened` loses its move-to-front dedupe ⇒ **2 pins red** (the
+  pure recency pin and the model's return-to-a-note pin). Exactly
+  discriminating.
+- **W3-B** — `id(atOrdinal:)` reads the tracked list instead of the shown
+  rows. **A GREEN REVERT GOT A STRONGER ARM FIRST:** with exactly nine notes
+  open the two readings are the same list, so nothing could tell them apart.
+  The bound pin now overfills the strip and asserts `id(atOrdinal: 10) ==
+  nil` — a state the wrong reading cannot produce — and the revert then ran
+  **red** (`→ "p8"`).
+- **W16-A** — `visit` loses its no-op guard ⇒ **4 issues across 3 suites**
+  (pure, model, and shell door): the shell's report of a back-walk destroys
+  the forward future. The whole re-entrancy design, discriminated at three
+  layers.
+- **W16-B** — a new navigation stops clearing the forward future ⇒ the
+  browser-rule pin red.
+- **W16-C** — `WorkspaceModel.visit` ignores its `pane:` argument ⇒ **4
+  issues**: the free-tiling rider's pin, red.
+- **W16-D** — the shell's `wireWorkspace()` call removed ⇒ **3 issues**: no
+  seed and no wiring.
+
+**The shell-mount pin, and why it exists.** Two halves live in the VIEW and
+no pure pin could ever catch them, and both fail SILENTLY: the registry
+context must be wired to this window's workspace (unwired, Back / Forward /
+Open Notes are grey forever, because the router's defaults answer "no" to
+everything), and the pane's history must be SEEDED with what the window is
+already showing (`onChange` never fires for an initial value — unseeded, the
+first click out of the shelf pushes nothing, so **the very first back chip
+she could want is the one that never appears**). `RootView` is mounted in a
+real window and both are asserted; revert W16-D is its red.
+
+#### VISUAL-VERIFICATION-ONLY — for her walk and the Design & UI review row
+
+Everything that DECIDES anything above is pinned. These are look-and-feel
+halves, and **no claim is made that they were tested:**
+
+1. That the Open section sits where she meant it, and reads well BELOW the
+   contextual "this post" rail when a post is open.
+2. That the row's ✕ hit target does not fight the row's own
+   click-to-navigate, and that the ⌘⇧n label at the trailing edge reads as
+   quiet signage rather than noise.
+3. That the *"…N more open"* row reads as signage and not as a dead row.
+4. That the collapsed chip (`← ›`) still reads as a door, and that the
+   expanded chip does not crowd the masthead beneath it.
+5. That the chip's bar height and divider feel "clean" in both voices, light
+   and dark (her whole reason for wanting the fold).
+6. That Compare's new **Open** button sits comfortably beside Mark as
+   Versions / Diff and does not crowd the peer picker.
+
+#### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **Nothing exceeded its ruling's shape**, so no item stopped. The one place
+  a stop was pre-authorised (a taken ⌘⇧ digit or bracket) did not arise —
+  both sweeps came back clean.
+- **Two things her walk will notice beyond the four items:** the detail pane
+  now grows a thin chip bar the moment she navigates anywhere from the shelf
+  (and never before), and the sidebar gains a fifth section that appears the
+  first time a note is opened and never empties itself again inside a
+  session.
+- **For batch 4 (windows/split), three seams are already cut:** `PaneID` is
+  a dictionary key, not a pair; the workspace hangs off `ShellRouter`, so a
+  per-window router is a per-window workspace; and the registry's three
+  workspace closures are the single place a focused-window rule has to land.
