@@ -4806,6 +4806,59 @@ deltas, KnownIssues edits, the master plan closeout, the author
 handoff (her walkthrough doc), the `/Applications` refresh + field
 guide re-seed, and the 13g plan execute as the closeout's remaining
 acts, each recorded in its own artifact.
+
+### THE CLOSEOUT EXECUTED (2026-07-31) — the refresh, and the windowless-launch investigation the smoke walk forced
+
+**The refresh, per the A1 rail:** zero instances verified (`pgrep`
+by path); WAL-safe backup
+`variorum-backup-2026-07-31-100302.sqlite` (`sqlite3 .backup`;
+`integrity_check` ok); Release built from HEAD (all work
+adjudicated + reviewed); installed to `/Applications`; signature
+*[removed for publication]*
+Release carries NO display-name override — "Variorum Dev" is
+Debug-only, exactly as W25 ruled.
+
+**THE SMOKE WALK FOUND THE 13B OBSERVATION AND CHARACTERIZED IT —
+it is NOT a 13f regression (proven), and it now has a mechanism:**
+launching the app via the `openApplication` path (`open`, and
+plausibly some real-world launches) presents **ZERO windows** —
+menus alive, no window on ANY Space (CGWindowList census, not AX —
+recorded vantage trap: System Events' AX window count reads the
+CURRENT Space only and reported 0 even with a window live on
+another). Reproduced on: the installed Release (real store, twice,
+incl. after a clean quit), the Debug host (dev store), a
+FRESH-saved-state launch (state cleared — restoration is NOT the
+mechanism), a DIAGNOSTIC build with every 13f scene removed
+(checksummed revert after — the 13f scenes are NOT the mechanism),
+and **the PRE-13F build itself** (worktree at `2f01988^`, isolated
+DerivedData — the decisive arm: the behavior PRE-DATES this phase;
+it is the 13b handoff's "windowless-launch observation" under
+controlled reproduction at last). **The recovery door: the REOPEN
+Apple event** (what a real Dock click sends a running app) mints
+the main window immediately — proven on both the pre-13f host and
+the installed Release — which is why her daily use never blocked
+on it. **A sibling found with it: QUIT FROM THE WINDOWLESS STATE
+DOES NOT COMPLETE** (AppleScript quit returns "User canceled";
+the menu's Quit lands and the process stays; resolved by SIGTERM
+with the backup in hand, store `integrity_check` ok after) — while
+quit WITH a window present completes cleanly (verified twice, both
+builds). Untraced beyond this characterization — the hallucination
+guard binds; **KnownIssues row added, owner 13g's kickoff sweep**
+(beside the flaky pin; the two may even be neighbors — both are
+shell/lifecycle timing).
+
+**The field-guide re-seed: HANDED TO HER, deliberately.** The
+Restore Tutorial menu item was probed live (it exists, with its
+confirmation ellipsis), but the automated session cannot reach her
+window's Space via AX — a confirmation sheet would be unclickable,
+and blind-confirming a dialog on her REAL store is exactly what
+this orchestrator refuses to do. Her handoff's checklist item 0
+carries the one click (Help ▸ Restore Tutorial ▸ confirm), with
+the launch note beside it. **The closeout is otherwise COMPLETE:**
+canon deltas committed; master plan sealed; KnownIssues current;
+the handoff + the 13g plan authored; the phase finals verified
+core 926/105 · Mac 1068/188 · mobile 14/4; the worktree and every
+diagnostic artifact cleaned; the tree clean.
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle

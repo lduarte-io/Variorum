@@ -15,10 +15,18 @@ records, acceptances, the cold review).
 
 **0. Housekeeping first**
 - [ ] `/Applications/Variorum.app` was refreshed at the closeout
-      behind a fresh backup — just launch it. (If the field-guide
-      re-seed line below says PENDING, press **Help ▸ Restore
-      Tutorial** once — 76+ tutorial sentences teach the new
-      "note" vocabulary.)
+      behind a fresh backup (`variorum-backup-2026-07-31-100302`,
+      integrity ok). **If it launches with NO window: click the
+      Dock icon once — that mints it.** (A pre-existing launch
+      quirk the closeout finally characterized — not new to this
+      phase; KnownIssues row, owner 13g's kickoff sweep. If a
+      windowless copy ever refuses to quit, that's its sibling —
+      same row.)
+- [ ] **Press Help ▸ Restore Tutorial once and confirm** — 76+
+      tutorial sentences teach the new "note" vocabulary. (The
+      closeout probed the door but deliberately would not
+      blind-confirm a dialog on your real store from an automated
+      session — this one click is yours.)
 - [ ] Notice the Dock/⌘-tab while a future phase builds: the test
       host now reads **"Variorum Dev"**; yours reads "Variorum"
       (your W25 ruling, live).
@@ -154,6 +162,11 @@ note-only-window silent ⌘N) + 2 MINOR + 3 NIT.
 
 ## Field-guide re-seed status
 
-RECORDED AT CLOSEOUT EXECUTION — see the plan file's final
-closeout record for whether the re-seed ran at the refresh or
-awaits your one Help ▸ Restore Tutorial click (checklist item 0).
+**AWAITS YOUR ONE CLICK (checklist item 0).** The closeout launched
+the refreshed app, found the Restore Tutorial door live, and
+stopped exactly where it should: your window sits on a Space the
+automated session cannot reach, so its confirmation dialog was
+unclickable — and blind-confirming a dialog on your real store is
+a line this process does not cross. Full record (including the
+windowless-launch investigation the smoke walk produced): the plan
+file's "THE CLOSEOUT EXECUTED" section.
