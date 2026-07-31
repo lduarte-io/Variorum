@@ -245,7 +245,7 @@ struct TakesBottomBar: View {
         // the routed ⌘⇧' and this button share `requestComments`).
         Button(tokens.chromeLabel("comments")) { model.requestComments() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
-            .help("The block's comments — working notes on a block, never per-take (⌘⇧')")
+            .help("The block's comments — working remarks on a block, never per-take (⌘⇧')")
         Button(tokens.chromeLabel(
             model.projection.entryDate.map { "date: \($0)" } ?? "set date…")) {
             pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()

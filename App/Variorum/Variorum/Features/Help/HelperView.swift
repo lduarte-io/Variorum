@@ -182,7 +182,7 @@ struct HelperView: View {
          "A block wearing a colored frame (Block ▸ Callout). Presentation only — "
          + "exports as a quote block; the text is untouched."),
         ("comment",
-         "A working note on a BLOCK (never on a single take): \"take 1 is better but "
+         "A working remark on a BLOCK (never on a single take): \"take 1 is better but "
          + "take 2's ending…\". Margin cards by default; deleted comments stay "
          + "recoverable."),
         ("pool / scraps",

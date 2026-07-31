@@ -39,7 +39,7 @@ struct ManageReadingPostsSheet: View {
                     // Round 1, NIT: reorder writes `position`, which a
                     // stamp-sorted assembly doesn't display — hide the
                     // silent no-op instead of offering it.
-                    Text("Ordered by the reading's sort — manual reorder applies in Manual order.")
+                    Text("Ordered by the book's sort — manual reorder applies in Manual order.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

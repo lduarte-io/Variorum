@@ -174,7 +174,7 @@ nonisolated enum OpsRefusalCopy {
                     + "this can take its place."
             case .blockCarriesUnshownText:
                 return "That block isn't empty after all — it carries a take or "
-                    + "a note that isn't shown here. Nothing was deleted."
+                    + "a comment that isn't shown here. Nothing was deleted."
             default:
                 return "Refused: \(error)"
             }

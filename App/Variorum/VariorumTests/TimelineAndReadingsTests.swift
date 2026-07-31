@@ -176,7 +176,7 @@ struct TimelineAndReadingsTests {
 
             // Refusal copy: adding a duplicate speaks.
             await model.addPost(b.id, to: id)
-            #expect(model.lastError?.contains("already in this reading") == true)
+            #expect(model.lastError?.contains("already in this book") == true)
         }
     }
 }

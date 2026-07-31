@@ -5119,3 +5119,110 @@ surprise.
   fourth area is called **Snippets** now while the in-note mode tab is
   still **Blocks** (deliberate, her brief's letter), and the tutorial she
   already has seeded will not agree with the app until she re-seeds it.
+
+#### Batch 7 (follow-on) — the ruled copy fixes: "comment" where it means a comment · "book" where it said "reading"
+
+**Counts, by my own runs:** core `✔ Test run with 925 tests in 105 suites
+passed after 28.706 seconds` (`swift_exit=0`) · Mac `✔ Test run with 1064
+tests in 187 suites passed after 139.116 seconds` (`mac_exit=0`) · mobile
+`✔ Test run with 14 tests in 4 suites passed after 0.256 seconds`
+(`mobile_exit=0`) · the tutorial spine on its OWN run, by TYPE name:
+`✔ Test run with 49 tests in 7 suites passed after 12.095 seconds`. All
+four **byte-identical to the batch's baselines** again.
+
+**Eight files, eleven lines, all copy.** ZERO `Sources/` lines (the A7
+refusal is app-side only — core carries the error CASE
+`blockCarriesUnshownText`, never its wording, verified by grep), zero
+`Sync/`, no schema. The structural-context grep over the diff
+(`forKey:` · `Notification.Name(` · `userInfo:` · `columnID:` · `.id("`)
+is empty, as it was for the sweep.
+
+##### Half 1 — the collision: "comment" where the string means a comment
+
+Four strings, five sites. The rule I applied, stated because it is what
+makes the set consistent: **where a string NAMES the feature, the word is
+"comment"; where a string DEFINES it, "comment" would be circular, so the
+gloss becomes "remark"** — a plain English word that is not a Variorum
+noun and therefore cannot collide with anything the way "note" now does.
+
+| Site | Was | Now |
+|---|---|---|
+| `OpsRefusalCopy` 177 + `EditorViewModel` 2484 (the A7 refusal, one sentence in two places) | "…it carries a take or **a note** that isn't shown here." | "…it carries a take or **a comment** that isn't shown here." |
+| `TakesBottomBar` 248 | "The block's comments — working **notes** on a block, never per-take (⌘⇧')" | "…working **remarks** on a block…" |
+| `CommitBar` 127 | "The caret block's comments — working **notes** on a block, never per-take" | "…working **remarks** on a block…" |
+| `HelperView` 185 (the dictionary's **"comment"** headword) | "A working **note** on a BLOCK (never on a single take)…" | "A working **remark** on a BLOCK…" |
+
+The A7 pair is the one the ruling called chief, and it is the one where
+"comment" is not a euphemism but the literal truth: the guard it speaks
+for is `blockCarriesUnshownText`, which fires on a live `block_comment`
+row. Before the sweep "a note" was merely vague there; after it, it named
+the wrong object. One word, and the refusal says what actually stopped it.
+
+##### Half 2 — "book" where three refusals still said "reading"
+
+The three the ruling named, in `ReadingsViewModel`:
+
+- `.alreadyInReading` — "That note is already in this **reading**." → "…in this **book**."
+- `.readingAtCapacity` — "This **reading** is at its note limit." → "This **book** is at its note limit."
+- `.postNotInReading` — "That note isn't in this **reading**." → "…in this **book**."
+
+They were the last three of that switch still using the model word: the
+two `.wrongReadingKind` arms beside them already read "hand-shaped book"
+and "smart books", which is how the laggards were visible at all.
+
+##### TWO MORE of the identical class, applied and FLAGGED for reversal
+
+The ruling named three because **my batch-7 record named three, and my
+record was incomplete** — the same incompleteness that produced this
+follow-on. Rather than leave the same shape behind a second time, I
+applied the ruling's own reason to the two other model-word leaks and am
+flagging both so either can be reverted in one line:
+
+1. **`ReadingsViewModel` 138, `.lockedReading`** — "This **reading** is
+   locked — unlock it first." → "This **book** is locked…". It sits three
+   lines above the three that were ruled, in the same switch, leaking the
+   same word. **What I deliberately did NOT touch is "locked":** that word
+   carries the finished-vs-locked blur her own round-10 addendum routed to
+   **13i** ("naming the two states so 'finished'/'locked' stop blurring"),
+   and picking a side here would be answering a question she assigned to
+   another phase. "Reading"→"book" is correct under either resolution.
+2. **`ReadingViews` 42** — "Ordered by the **reading's** sort — manual
+   reorder applies in Manual order." → "the **book's** sort". Same leak,
+   different file, so strictly outside the ruling's named location.
+
+**Swept the whole app for this class while I was in it**, so the record is
+complete this time: every other user-facing "reading" is the ordinary
+English word, not the model term — the tutorial's *"reading a note"*,
+*"were reading"*, *"READ is for reading only"*, the lens literally NAMED
+*"the other reading"* (and `LensesBoardView`'s "open another reading
+beside this one", which is that lens's own idiom), and Canvas's "click
+cards in reading order". None of those is a leak and none was touched.
+
+##### Pins — one flip, named; everything else unmodified
+
+**`TimelineAndReadingsTests` 179** — `contains("already in this reading")`
+→ `contains("already in this book")`. That is the ONLY pin in either
+suite that asserted any of these eleven lines (the three greps that look
+like hits on the collision strings are a test's own message prose and two
+doc comments about `block_comment`, not assertions of shipped copy).
+
+**Pins MODIFIED beyond that one: NONE** — the registry walk, the tutorial
+spine, the A7 carve's own guard pins (`BlockDeletionAndRedoTests`, which
+drives the OPERATION and its precondition, never the wording), and every
+pin from batches 1–7 pass unmodified. Same parity proof, same reason as
+the sweep: copy moved, behavior did not.
+
+No revert was run, for the sweep's own recorded reason — these are ruled
+re-wordings, not bug-class fixes, and reverting one would only prove that
+"comment" is not "note".
+
+##### For the orchestrator
+
+- **PENDING: nothing.** No PROVISIONAL (`notes/QUESTIONS.md` untouched,
+  next free **#49**). **STOPPED here** as instructed — the phase-end cold
+  review follows.
+- **Two flagged widenings above**, each one line, each with its reasoning
+  so it can be overturned rather than merely trusted.
+- **One thing left deliberately for 13i, not for the review:** the
+  `.lockedReading` refusal still says "locked" where the shelf says
+  "finished". Recorded, not fixed.

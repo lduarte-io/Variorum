@@ -2481,7 +2481,7 @@ final class EditorViewModel {
         // projection is deliberately frozen while typing, so the guards that
         // enabled the gesture could not have seen it.
         case .blockCarriesUnshownText:
-            return "That block isn't empty after all — it carries a take or a note that isn't shown here. Nothing was deleted."
+            return "That block isn't empty after all — it carries a take or a comment that isn't shown here. Nothing was deleted."
         case .fannedBlock:
             // 13d Batch 3: the same refusal Write can reach when a take
             // lands between the plan and the operation (R1-3's

@@ -124,7 +124,7 @@ struct CommitBar: View {
             }
         Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
-            .help("The caret block's comments — working notes on a block, never per-take")
+            .help("The caret block's comments — working remarks on a block, never per-take")
         Button(tokens.chromeLabel(
             model.header?.entryDate.map { "date: \($0)" } ?? "set date…")) {
             pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
