@@ -4397,6 +4397,76 @@ ruled.
   `ShellActions` addition is the star's palette body).
   `theShellRedoActionRunsThroughTheRunnerAndReports` passed in the full Mac
   run. Left where it is; its KnownIssues row stands.
+
+#### Batch 6 (W4) — ACCEPTED (2026-07-31; the orchestrator's adjudication)
+
+**Counts by my own runs:** core `✔ Test run with 925 tests in 105
+suites passed` (`swift_exit=0`) · Mac `✔ Test run with 1052 tests in
+184 suites passed` (`xcodebuild_exit=0`) — both match the record's
+claims exactly; the quoted mobile line accepted per the standing rule.
+
+**Adjudication:** the op-body design ENDORSED — order/cap/self-heal
+as ONE core rule set, with revert W4-B reproducing the ghost-star
+bug the heal exists to prevent (a star whose target died silently
+spending a slot she has no door to free); the registry walk catching
+the missing sampled context before any behavioral suite is the walk
+earning its existence again. **All six judgment calls adjudicated:**
+(1) the stored key on the MODEL's word (`post:`/`reading:`) ENDORSED
+and exactly right — the K5 sweep can never reach it, pinned; (6) the
+sync-straggler corner ACCEPTED AS RECORDED — one rule beats two
+(stars are presentation, the loss is one row in a rare race, the
+road back is a click; the `shelf_pins` precedent carries the same
+shape), with the tombstoned-vs-absent distinction one query away at
+her word; (2)–(5) endorsed as recorded. **Ledger: W4 BUILT** and
+adjudicated.
+
+### Sitting round 14 (2026-07-31, question batch — W5's four product edges, each her pick of the recommendation)
+
+1. **The menu-bar icon: YES** — a permanent Variorum glyph in the
+   menu bar is the summon-from-anywhere door (permission-free);
+   ⌘⇧N and a File-menu item ride beside it.
+2. **⏎ IS A NEWLINE; CLOSING FILES IT** — the sticky is a free-typing
+   multi-line pad; the note mints on close (⌘⏎ files explicitly
+   too); one summon = one note; an empty sticky mints nothing.
+3. **AFTER MINTING: STAY QUIET** — the note sits in the Pool; one
+   status line names where it went; the main window never navigates.
+4. **THE TRUE SYSTEM-WIDE HOTKEY: v1 SHIPS WITHOUT IT** — a recorded
+   follow-up with the research in hand (the Carbon measurement in
+   W5's proposal; unconfirmed no-permission claim; settling it is a
+   her-machine act, tried whenever she likes). **Ledger add: W26** —
+   the system-wide-hotkey follow-up, an author-attended act at her
+   word; the closeout handoff carries the offer.
+
+### THE ARCHITECT'S RULING on W5's gate (2026-07-31 — the gate closes; BUILD)
+
+**(a) SHAPE 1 (capture-then-mint) APPROVED — the deviation is
+GRANTED and the brief stands corrected:** the brief's "mini editor
+takes the live ring" sentence was MY presumption, not her ruling —
+her words ("typing mints an ordinary bookless note") read MORE
+literally under shape 1, shape 2's abandoned-summon blank mints
+would fill the exact surface the Pool exists to drain, and "no takes
+machinery" holds by construction instead of by stripping. The
+REGISTRATION half approved as proposed (`WindowRegistry.Kind
+.quickNote`; while the sticky is key the app has ZERO live surfaces
+and every app-scope act greys honestly through existing gates —
+refusing to re-open the 5b menu-gates defect is exactly right; the
+summon's unmount/remount cost recorded as the safe direction).
+**(b) v1 doors as SHE ruled (round 14):** `MenuBarExtra` + ⌘⇧N +
+the File-menu item from ONE declaration; the chord joins the key
+table under the standing collision pin. The system-wide hotkey is
+W26, not this batch.
+**(c) THE MINT PATH APPROVED with her rulings folded in:** the
+`importPost` grammar exactly as traced; ⏎ = newline, mint on close
++ ⌘⏎ (her round-14.2), quiet landing + one status line naming the
+Pool (14.3); **the QUIT path is part of the item** — a non-empty
+sticky at app quit mints through the standing quit-finalize family,
+pinned (the capture-scale analog of the open tail's teardown
+backstop; loss is bounded by one summon and the record says so).
+**The "Undo Import" label: the one-line core widening APPROVED** —
+`importPost`'s undo label becomes a parameter (default "Import");
+the sticky registers "Quick Note" so the menu says what she did.
+Build order as proposed; pins as proposed including the app-scale
+mount invariant extended to a registered `.quickNote` window.
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
