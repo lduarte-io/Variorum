@@ -4748,6 +4748,64 @@ the ruling, R1-4 at the shared entry; every fix with a red-on-old
 pin verified by behavioral revert; full suites re-run with quoted
 lines; the fix record appended below; the review closes at round 1
 on the orchestrator's verification.**
+
+### The fix pass — ACCEPTED; THE REVIEW CLOSES AT ROUND 1 (2026-07-31, the orchestrator's verification)
+
+**Counts by my OWN runs at fix-complete — the PHASE FINALS:** core
+`✔ Test run with 926 tests in 105 suites passed` (`swift_exit=0`) ·
+Mac `✔ Test run with 1068 tests in 188 suites passed`
+(`mac_exit=0`) · mobile `✔ Test run with 14 tests in 4 suites
+passed` (`mobile_exit=0` — **the phase-end mobile re-verify owed
+since batch 5 is DISCHARGED by this run**). Growth from pre-review
+(925/105 · 1064/187): exactly the four new fix pins; pins modified:
+none.
+
+**All four fixes accepted on their reverts:** R11-A prints the
+empty-note bug live (`rendered → []`) while the pre-existing
+round-trip pin stays green — the discrimination proof it could
+never see this; R12-A reproduces both wrong states (the wrong
+pane's trail popped; the durable dead key); R13-A reproduces the
+silent mint live in a hosted window; R14-A shows the copy missing
+the summoning keystrokes. **The one flagged widening ENDORSED:**
+Help ▸ Restore Tutorial routing with Open the Tutorial is the same
+class by the same mechanism (both navigate via `pendingSelection`),
+and leaving one member of a fixed class unfixed is the recurrence
+pattern the constitution names. The guard-then-restore sub-ms
+window on `reapplyDiverge` is recorded honestly (the
+`shelveInDailyJournalBook` R2-10 class — stated, unpinnable,
+accepted). **The review CLOSES at round 1** (the 13d/K6 shape her
+ruled cast names: one cold review, the reviewer implementing its
+confirmed findings; no new BLOCKER/MAJOR arose in the fix pass).
+R1-5/R1-7/R1-8 execute in the closeout below.
+
+## THE 13F CLOSEOUT (2026-07-31) — final ledger, every row dispositioned
+
+| Row | Disposition |
+|---|---|
+| W1/A25 (split) · W2/A26 (windows) · W3/A27 (strip+⌘⇧n) | BUILT (batches 4/5b/3), reviewed |
+| W4 (stars) · W5 (quick note) | BUILT (batch 6), reviewed |
+| W6+W15 (the K5 sweep; "note" · "Snippets") | BUILT (batch 7 + follow-on), reviewed |
+| W7 (takes room) · W8 (carousel) · W9 (cut ticks) | BUILT (batch 1) |
+| W10 (divide-W findability) · W11 (chapter reach + post-drag) · W12 (scrap drag) | BUILT (batches 1–2) |
+| W13 (smart-book identity) | → Phase 13i (her round-3 ruling; brief exists) |
+| W14 ("note") | RULED round 3; the sweep built it |
+| W16 (back-nav + Compare click-through) | BUILT (batch 3) |
+| W17/A32 (infinite-scroll idea) | **Disposition (R1-5's ask): EXPLORATORY, UNCOMMITTED** — her verbatim jot preserved in the kickoff sitting; answered to her at round 16's exchange (the narrow reading is now cheap atop W21/history); carried to the 13g sitting's discretion, committed nowhere |
+| W18 (QoL standing items) | extract one-liner CLOSED by W24; the field-guide re-seed executes below (or lands on her checklist) |
+| W19 (shell-redo flaky pin) | rider never fired (verified per batch); the KnownIssues row RE-OWNS to 13g as a kickoff-sweep item |
+| W20 (ascent) · W21 (carry) · W22 (first-edit note) · W23 (diverge compound) · W24 (extract joins A11) | BUILT (batch 5 + continuation), reviewed (R1-1/R1-4 fixed) |
+| W25 ("Variorum Dev") | EXECUTED at the batch-5 seam |
+| W26 (system-wide hotkey) | her-word follow-up; on the handoff checklist |
+
+**No schema change anywhere in the phase — the mirror stays at
+lockstep marker 4. Zero `Sources/VariorumCore/Sync/` lines
+(review-verified over the whole phase diff). `notes/QUESTIONS.md`
+untouched all phase — next free number stays #49; #32 remains the
+only open entry, routed to the Design & UI review row.** Canon
+deltas, KnownIssues edits, the master plan closeout, the author
+handoff (her walkthrough doc), the `/Applications` refresh + field
+guide re-seed, and the 13g plan execute as the closeout's remaining
+acts, each recorded in its own artifact.
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
