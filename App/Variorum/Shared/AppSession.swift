@@ -90,7 +90,33 @@ final class AppSession {
         _ = quitFinalize.register { [weak coordinator] in
             await coordinator?.flushNow()
         }
+        // 13f batch 5 (W22 — her round-9 ruling): the first-edit note is
+        // wired HERE because this registry is the one place that knows both
+        // halves — which post an edit belongs to, and that every surface
+        // editing it shares this coordinator. A per-surface hook would have
+        // been four hooks and a fifth to forget.
+        coordinator.onFirstEdit = { [weak self] in
+            self?.noteMultiBookEdit(postID)
+        }
         return coordinator
+    }
+
+    /// W22's body: flag first (so the common case costs a `UserDefaults`
+    /// read and nothing else), then ONE membership read off the main thread
+    /// (P2), then the sentence — once, ever. Writes no store bytes.
+    private func noteMultiBookEdit(_ postID: String) {
+        guard !MultiBookEditNote.hasBeenSeen() else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let count = (try? await self.database.read { db in
+                try Queries.readingsContaining(db, postID: postID).count
+            }) ?? 0
+            guard MultiBookEditNote.shouldSpeak(
+                bookCount: count, seen: MultiBookEditNote.hasBeenSeen())
+            else { return }
+            MultiBookEditNote.markSeen()
+            self.status.speak(MultiBookEditNote.sentence(bookCount: count))
+        }
     }
 
     /// 13b Stage 4, Batch 4B (S4-23 ruling 3): the merge ceremony's

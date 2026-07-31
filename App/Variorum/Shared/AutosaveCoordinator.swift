@@ -46,6 +46,14 @@ final class AutosaveCoordinator {
     /// cue to apply a deferred projection. (Single-owner form; see above.)
     var onSettled: (@MainActor () -> Void)?
 
+    /// 13f batch 5 (W22): fires ONCE per coordinator, at the first edit
+    /// recorded for its post — whichever surface made it, because every
+    /// editing surface on a post shares this one instance (the N3 boundary).
+    /// The owner (`AppSession.autosave(forPost:)`) knows the post; this only
+    /// knows that something was typed, which is all the trigger needs.
+    var onFirstEdit: (@MainActor () -> Void)?
+    private var firstEditFired = false
+
     // Phase 13b Stage 1a (N3): ONE coordinator per open post means SEVERAL
     // surfaces (Write editor, takes board, Write takes panel, block TOC)
     // listen at once — multicast observers beside the single-owner
@@ -96,6 +104,10 @@ final class AutosaveCoordinator {
     /// Records the latest text for a variant plus this edit's cost;
     /// keystroke bursts coalesce into the newest text and the summed cost.
     func record(variantID: String, text: String, charDelta: Int) {
+        if !firstEditFired {
+            firstEditFired = true
+            onFirstEdit?()
+        }
         var entry = pending[variantID] ?? Pending(text: "", charDelta: 0)
         entry.text = text
         entry.charDelta += charDelta
