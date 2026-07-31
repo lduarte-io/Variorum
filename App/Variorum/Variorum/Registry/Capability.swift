@@ -259,6 +259,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case previousTake, nextTake, archiveTake, saveChoicesAsLens, closeAllTakes
     case pageFanBack, pageFanForward
     case divergeHere, diffAgainstChosen
+    // 13f W10b: the lineage door back to a RELEASED original (block scope,
+    // rendered only where one exists — P-2)
+    case showOriginBlock
     // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
     case unarchiveTake, labelTake, renameLens
     // Scrap tagging (13b 4D — N32(c)/S4-15: the one canvas-only door grows

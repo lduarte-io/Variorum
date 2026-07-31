@@ -204,7 +204,10 @@ struct LibraryCatalogView: View {
                     .foregroundStyle(tokens.muted)
                 Spacer()
                 Menu {
-                    Button("Archived & Deleted") { onOpen(.recovery) }
+                    // 13f W10a: the label reads from `RecoveryPath`, which is
+                    // also what the copy pointing here says — one name, so
+                    // the sentence and the door can never drift apart.
+                    Button(RecoveryPath.menuLabel) { onOpen(.recovery) }
                     // 13b Stage 2: the old entrance points at the tutorial
                     // BOOK (find-or-seed, then open) — via the shell's one
                     // fire-and-DO door (MINOR-D6: never a silent `try?`).

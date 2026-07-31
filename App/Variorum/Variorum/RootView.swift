@@ -36,6 +36,9 @@ struct RootView: View {
     /// target block rides beside the selection and seeds the opened
     /// editor's caret (cleared on ordinary navigation).
     @State private var blockTarget: BlockTarget?
+    /// 13f W10b: the released original the lineage door asked to see; the
+    /// recovery surface reveals it and consumes the request.
+    @State private var revealUnplacedBlockID: String?
 
     struct BlockTarget: Equatable {
         let containerID: String
@@ -123,6 +126,15 @@ struct RootView: View {
             guard let id = note.userInfo?["postID"] as? String else { return }
             router.pendingSelection = .post(id)
         }
+        // 13f W10b: "Show Original Block" — the surface names the block, the
+        // SHELL decides the destination (P-4). One place, both editors.
+        .onReceive(
+            NotificationCenter.default.publisher(for: .variorumRevealUnplacedBlock)
+        ) { note in
+            guard let id = note.userInfo?["blockID"] as? String else { return }
+            revealUnplacedBlockID = id
+            router.pendingSelection = .recovery
+        }
         .onChange(of: router.paletteRequested) { _, requested in
             guard requested else { return }
             paletteOpen = true
@@ -196,9 +208,11 @@ struct RootView: View {
                 initialBlockID: target(for: poolID))
                 .id("\(poolID)#\(target(for: poolID) ?? "")")
         case .recovery:
-            RecoveryView(session: session, library: library) { postID in
-                selection = .post(postID)
-            }
+            RecoveryView(
+                session: session, library: library,
+                openPost: { postID in selection = .post(postID) },
+                revealBlockID: revealUnplacedBlockID,
+                onRevealConsumed: { revealUnplacedBlockID = nil })
         }
     }
 
@@ -238,7 +252,7 @@ struct RootView: View {
             ("Go to Shelf", { [self] in selection = .shelf }),
             ("Go to Library", { [self] in selection = .library }),
             ("Go to Pool", { [self] in selection = .poolPosts }),
-            ("Archived & Deleted", { [self] in selection = .recovery }),
+            (RecoveryPath.menuLabel, { [self] in selection = .recovery }),
             // 13b Stage 2: the old modes-tutorial entrance points at the
             // one tutorial BOOK (find-or-seed, then open — fire-and-DO).
             ("Open the Tutorial — \(TutorialSeeder.bookName)", { actions.openTutorial() }),

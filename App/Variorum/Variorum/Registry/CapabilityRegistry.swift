@@ -339,6 +339,23 @@ nonisolated enum CapabilityRegistry {
                 default: return .unavailable
                 }
             }),
+        // 13f W10b (her sitting question: *"how do I even see the original
+        // one?"*). A divide-W preserves block A whole and RELEASES it; a
+        // merge releases both sources. The successors carry a `derived_from`
+        // edge straight at them, and nothing in the app had ever walked it —
+        // the only road back was knowing that Library → Archived & Deleted
+        // lists unplaced blocks. This is that edge, as a door.
+        //
+        // Like `.diffAgainstChosen`, the CONTEXT rule is a mode rule and the
+        // per-target condition is the surface's: the menu item renders only
+        // on a block whose origin is live and unplaced (P-2 — a door that
+        // could never act is not rendered, not rendered-and-grey).
+        Capability(
+            id: .showOriginBlock, verb: "Show Original Block", scope: .block,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Released originals are listed under Library → Archived & Deleted.",
+            availability: takeFamily),
 
         // MARK: Commit + undo
         Capability(

@@ -69,10 +69,17 @@ struct DivideWSheet: View {
             // split that take as well?"* — yes, exactly, and the surface never
             // said so. These two sentences are the two halves of what a check
             // MEANS; the per-row captions repeat them where she is looking.
-            Text("**Check the takes that should be cut.** Each checked take carries its own \u{2702}, and its two halves become the two new blocks' takes. **An unchecked take is not cut and goes into neither new block** — it stays whole on the original, which the divide keeps.")
+            // 13f W10a (her sitting question): the line said an unchecked take
+            // "stays whole on the original" and stopped there — *"but how do I
+            // even see the original one?"* It now NAMES where the original
+            // goes, in the merge ceremony's own established grammar (that
+            // sheet has always spelled this road out for its stay-behind
+            // takes; the divide's half of the same sentence was simply
+            // missing). `RecoveryPath` is the shared name.
+            Text(.init(DivideWCeremony.checklistExplainer))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(5)
+                .lineLimit(6)
                 .fixedSize(horizontal: false, vertical: true)
             Text("Place a cut by dragging the \u{2702}, clicking between words, or \u{2190}/\u{2192} (\u{2325} by sentence, \u{21E5} moves between takes). Park it at a take's very end to send that whole take into the first block, at its start for the second. **\u{203A}** marks the take the arrow keys are aimed at. The divide is reversible (\u{2325}\u{2318}Z).")
                 .font(.caption)
@@ -161,10 +168,13 @@ struct DivideWSheet: View {
                     placementNote(take)
                 }
             } else {
-                Text("Not cut — stays whole on the original block, in neither new one.")
+                // 13f W10a: the per-row caption names the destination too —
+                // it is where she was actually looking when she asked.
+                Text(DivideWCeremony.uncheckedRowNote)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(take.variant.workingText)
                     .font(.caption)
                     .foregroundStyle(.secondary)

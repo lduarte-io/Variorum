@@ -1158,6 +1158,15 @@ final class TakesViewModel {
         statusMessage = message
     }
 
+    /// 13f W10b — the lineage door's act, identical to Write's: the surface
+    /// names the block, the SHELL decides where that lands (P-4).
+    func revealOriginBlock(_ blockID: String) {
+        NotificationCenter.default.post(
+            name: .variorumRevealUnplacedBlock, object: nil,
+            userInfo: ["blockID": blockID])
+        speak("Showing the original block in \(RecoveryPath.surface).")
+    }
+
     // MARK: - Fire-and-DO (13b 1b, R115/R118 — the D3 lecture's replacement)
 
     /// The block a routed command acts on: the pane you're in; on a

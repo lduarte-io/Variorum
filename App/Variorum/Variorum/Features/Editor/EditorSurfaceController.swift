@@ -330,9 +330,9 @@ final class EditorSurfaceController {
         model.showTransientStatus(
             otherTakes == 1
                 ? "Merged the visible takes — 1 other take stays with the released block "
-                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes)."
+                    + "(\(RecoveryPath.unplacedBlocks); ⌥⌘Z undoes)."
                 : "Merged the visible takes — \(otherTakes) other takes stay with the released blocks "
-                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes).")
+                    + "(\(RecoveryPath.unplacedBlocks); ⌥⌘Z undoes).")
     }
 
     /// The everyday instant merge — today's exact `.merge` body, byte-
@@ -700,9 +700,9 @@ final class EditorSurfaceController {
         model.showTransientStatus(
             count == 1
                 ? "Merged — 1 take stays with the released blocks in lineage "
-                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes)."
+                    + "(\(RecoveryPath.unplacedBlocks); ⌥⌘Z undoes)."
                 : "Merged — \(count) takes stay with the released blocks in lineage "
-                    + "(Library → Archived & Deleted → Unplaced blocks; ⌥⌘Z undoes).")
+                    + "(\(RecoveryPath.unplacedBlocks); ⌥⌘Z undoes).")
     }
 
     /// Rebuilds the ceremony over the CURRENT fans: carries survive by

@@ -136,6 +136,18 @@ struct TakesCellView: View {
                     left: chosenText, right: resolved.text))
             })
         }
+        // 13f W10b: the road back to the RELEASED original — rendered only on
+        // a block that has one (P-2), which is why it sits behind the same
+        // kind of per-target condition as "Diff against chosen" above. This
+        // is the answer to her sitting question where she asked it: looking
+        // at a divide's successor takes.
+        if let originID = model.projection.unplacedOrigins[slot.blockID]?.first {
+            specs.append(.init(
+                title: CapabilityRegistry.capability(.showOriginBlock).verb
+            ) {
+                model.revealOriginBlock(originID)
+            })
+        }
         if let fan = model.projection.fans[slot.blockID], fan.count > 1 {
             specs.append(.init(
                 title: "Show take",
@@ -156,6 +168,7 @@ struct TakesCellView: View {
     static let contextMenuCapabilities: [CapabilityID] = [
         .newTake, .blankTake, .chooseTake, .divergeHere, .archiveTake, .diffAgainstChosen,
         .labelTake,
+        .showOriginBlock,  // 13f W10b — rendered only where an origin exists
     ]
 }
 

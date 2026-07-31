@@ -75,8 +75,8 @@ struct MergeCeremonySheet: View {
                     }
                     if state.stayBehindCount > 0 {
                         Text(state.stayBehindCount == 1
-                            ? "1 unpaired take will stay with its released block in lineage (Library → Archived & Deleted → Unplaced blocks)."
-                            : "\(state.stayBehindCount) unpaired takes will stay with their released blocks in lineage (Library → Archived & Deleted → Unplaced blocks).")
+                            ? "1 unpaired take will stay with its released block in lineage (\(RecoveryPath.unplacedBlocks))."
+                            : "\(state.stayBehindCount) unpaired takes will stay with their released blocks in lineage (\(RecoveryPath.unplacedBlocks)).")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .lineLimit(3)

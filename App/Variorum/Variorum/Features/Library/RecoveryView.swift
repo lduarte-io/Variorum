@@ -15,6 +15,37 @@ import Observation
 import SwiftUI
 import VariorumCore
 
+/// **The ONE place the recovery surface's user-facing path is spelled**
+/// (13f W10a/W10b). Her sitting question was a FINDABILITY finding — the
+/// ceremony told her a block "stays whole on the original" and never said
+/// where the original goes — so copy elsewhere in the app now names this
+/// door. Every name here is read by the door that renders it (the Library
+/// menu item, the palette row, this view's section header) as well as by
+/// the copy that points at it, so the sentence and the label cannot drift
+/// apart: rename one and the other follows.
+///
+/// It is deliberately NOT the word "Recovery": `SidebarSelection.recovery`
+/// is the internal case name, and no surface has ever shown it — copy that
+/// named it would send her looking for a door that does not exist.
+nonisolated enum RecoveryPath {
+    /// The Library ⋯ menu's item, and the palette row.
+    static let menuLabel = "Archived & Deleted"
+    /// The section within it that lists divide-W/merge leftovers.
+    static let unplacedSection = "Unplaced blocks"
+    /// The arrow is the shipped copy's own (`\u{2192}`, as the merge
+    /// ceremony and the helper already write it) — one voice, not a new one.
+    static var surface: String { "Library \u{2192} \(menuLabel)" }
+    static var unplacedBlocks: String { "\(surface) \u{2192} \(unplacedSection)" }
+}
+
+extension Notification.Name {
+    /// 13f W10b: "show me the released original" — a SIGNAL (which block),
+    /// never a decision (where it lands). `RootView` composes the navigation,
+    /// exactly as it does for `.variorumOpenPost` (P-4).
+    static let variorumRevealUnplacedBlock =
+        Notification.Name("variorumRevealUnplacedBlock")
+}
+
 /// The unplaced-blocks observation's value (nonisolated — it hops executors).
 nonisolated struct UnplacedListing: Equatable, Sendable {
     var blocks: [Queries.UnplacedBlock]
@@ -156,19 +187,54 @@ struct RecoveryView: View {
     let session: AppSession
     let library: LibraryViewModel
     var openPost: (String) -> Void
+    /// 13f W10b: the block the "Show Original Block" door asked to see —
+    /// scrolled to and marked on arrival, then consumed (the
+    /// `router.pendingSelection` one-shot pattern).
+    var revealBlockID: String?
+    var onRevealConsumed: () -> Void = {}
     @State private var model: RecoveryViewModel
+    @State private var revealed: String?
 
     init(
         session: AppSession, library: LibraryViewModel,
-        openPost: @escaping (String) -> Void
+        openPost: @escaping (String) -> Void,
+        revealBlockID: String? = nil,
+        onRevealConsumed: @escaping () -> Void = {}
     ) {
         self.session = session
         self.library = library
         self.openPost = openPost
+        self.revealBlockID = revealBlockID
+        self.onRevealConsumed = onRevealConsumed
         _model = State(initialValue: RecoveryViewModel(session: session))
     }
 
     var body: some View {
+        ScrollViewReader { proxy in
+            list
+                // The reveal waits for the row to EXIST: the unplaced
+                // observation starts with this view, so a reveal requested
+                // during navigation would otherwise scroll to nothing. Keyed
+                // on both the request and the listing, so whichever lands
+                // second still performs it.
+                .onChange(of: revealTrigger, initial: true) { _, _ in
+                    guard let revealBlockID,
+                          model.unplaced.contains(where: { $0.blockID == revealBlockID })
+                    else { return }
+                    revealed = revealBlockID
+                    withAnimation { proxy.scrollTo(revealBlockID, anchor: .center) }
+                    onRevealConsumed()
+                }
+        }
+    }
+
+    /// The request + the listing's identity: either arriving completes the
+    /// reveal (pure, so the ordering rule is readable and testable).
+    private var revealTrigger: String {
+        "\(revealBlockID ?? "-")#\(model.unplaced.count)"
+    }
+
+    private var list: some View {
         List {
             Section("Archived") {
                 if model.archived.isEmpty {
@@ -190,7 +256,7 @@ struct RecoveryView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Section("Unplaced blocks") {
+            Section(RecoveryPath.unplacedSection) {
                 // §12's utility view: live blocks no container points at
                 // (released to lineage by divide-W/merge, or a restore that
                 // lost its home). A cheap query worth having as a safety
@@ -212,6 +278,11 @@ struct RecoveryView: View {
                         }
                         .fixedSize()
                     }
+                    // 13f W10b: the block the lineage door sent her to is
+                    // MARKED, so a long list still answers "which one".
+                    .listRowBackground(
+                        revealed == item.blockID
+                            ? Color.accentColor.opacity(0.18) : Color.clear)
                 }
                 if model.unplacedTruncated {
                     Text("Showing the \(RecoveryViewModel.window) most recently touched unplaced blocks — older ones aren't listed.")

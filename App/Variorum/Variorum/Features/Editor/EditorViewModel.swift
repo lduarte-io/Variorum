@@ -67,6 +67,10 @@ final class EditorViewModel {
     }
     private(set) var caretBlockID: String?
     private(set) var caretVariantID: String?
+    /// 13f W10b — blockID → its RELEASED originals (live, unplaced), from
+    /// `Queries.unplacedOrigins`. Empty for an ordinary post; the "Show
+    /// Original Block" door reads it synchronously at menu-build time.
+    private(set) var unplacedOriginsByBlock: [String: [String]] = [:]
     /// 9d — the caret block's user-facing number (1-based, current order,
     /// derived at read time, never stored) and the post's block count.
     private(set) var caretOrdinal: Int?
@@ -320,6 +324,24 @@ final class EditorViewModel {
             group.addTask { await self.observeSlots() }
             group.addTask { await self.observePresentations() }
             group.addTask { await self.observeComments() }
+            group.addTask { await self.observeUnplacedOrigins() }
+        }
+    }
+
+    /// 13f W10b: blockID → the RELEASED originals it was derived from. Read
+    /// as a MAP, live, exactly like presentations and comments — a menu
+    /// builder runs synchronously and must never touch the store (P2), and
+    /// the fact changes on structural writes the surface already observes.
+    private func observeUnplacedOrigins() async {
+        do {
+            for try await value in session.database.observe({ [postID] db in
+                try Queries.unplacedOrigins(db, inContainer: postID)
+            }) {
+                adoptUnplacedOrigins(value)
+            }
+        } catch is CancellationError {
+        } catch {
+            statusMessage = "Lineage observation failed: \(error)"
         }
     }
 
@@ -360,6 +382,20 @@ final class EditorViewModel {
     func adoptComments(_ value: [String: [BlockDecor.CommentBrief]]) {
         commentsByBlock = value
         refreshDecorations()
+    }
+
+    /// Internal so tests drive the lineage door without an observation.
+    func adoptUnplacedOrigins(_ value: [String: [String]]) {
+        unplacedOriginsByBlock = value
+    }
+
+    /// The released original the caret block's own `derived_from` edge points
+    /// at, when it has one that is live and unplaced (13f W10b). Deterministic
+    /// (the query sorts) and nil for every ordinary block, which is what keeps
+    /// the door off ordinary blocks.
+    var caretBlockOriginID: String? {
+        guard let caretBlockID else { return nil }
+        return unplacedOriginsByBlock[caretBlockID]?.first
     }
 
     /// Teardown: persist what only the editor knows (open tail, scroll
@@ -1445,6 +1481,7 @@ final class EditorViewModel {
     /// asserted against the contextMenu door set's Write half).
     nonisolated static let contextMenuCapabilities: [CapabilityID] = [
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake, .showTakes,
+        .showOriginBlock,  // 13f W10b — rendered only where an origin exists
     ]
 
     func contextMenuItems() -> [EditorTextView.StructuralMenuItem] {
@@ -1461,7 +1498,7 @@ final class EditorViewModel {
                 self?.performGesture(command)
             }
         }
-        return [
+        var items = [
             item("Divide Block at Cursor", .divideAtCursor),
             item("Extract Selection", .extractSelection),
             item("Make Block from Selection", .makeBlockFromSelection),
@@ -1476,6 +1513,29 @@ final class EditorViewModel {
                 self?.openCaretFan()
             },
         ]
+        // 13f W10b: the lineage door, rendered ONLY on a block whose own
+        // `derived_from` edge points at a live, unplaced original (P-2 — a
+        // door that could never act is not rendered at all). Ordinary blocks
+        // see the menu exactly as before.
+        if let originID = caretBlockOriginID {
+            items.append(.init(
+                title: CapabilityRegistry.capability(.showOriginBlock).verb, enabled: true
+            ) { [weak self] in
+                self?.revealOriginBlock(originID)
+            })
+        }
+        return items
+    }
+
+    /// Fire-and-DO (P-2): navigate to the recovery surface and reveal the
+    /// released original there. The BROADCAST carries the signal — which
+    /// block she asked to see — and the shell decides where that lands
+    /// (P-4; the `.variorumOpenPost` precedent, one level up).
+    func revealOriginBlock(_ blockID: String) {
+        NotificationCenter.default.post(
+            name: .variorumRevealUnplacedBlock, object: nil,
+            userInfo: ["blockID": blockID])
+        showStatus("Showing the original block in \(RecoveryPath.surface).")
     }
 
     private func refreshGestureAvailability() {

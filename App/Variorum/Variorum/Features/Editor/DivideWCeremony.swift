@@ -322,8 +322,52 @@ final class DivideWCeremony {
         // The sheet dismisses only when the cut LANDED — a refusal (busy
         // door, op error) keeps the ceremony and its cuts for the author.
         if landed {
+            // 13f W10a (her sitting question, verbatim: *"it says … it stays
+            // whole on the original one, but how do I even see the original
+            // one?"*). The ceremony always said WHAT happens to an unchecked
+            // take and never WHERE the block carrying it goes — so the answer
+            // rides the completion, in the ratified `⌥⌘Z undoes it` grammar.
+            // Spoken through the host's own status voice: Write shows it in
+            // the toast, a board in its status line, no new mechanism.
+            if let note = Self.releasedOriginalNote(
+                uncheckedTakes: current.takes.count(where: { !$0.marked })) {
+                host.speakCeremonyStatus(note)
+            }
             state = nil
         }
+    }
+
+    // MARK: - Copy (13f W10a — pinned, never read off a screenshot)
+
+    /// The sheet's checklist explainer. It lives here, beside the completion
+    /// note, because the two sentences make ONE promise — what an unchecked
+    /// take does, and where the block carrying it ends up — and her sitting
+    /// question was exactly the half that was missing.
+    nonisolated static var checklistExplainer: String {
+        "**Check the takes that should be cut.** Each checked take carries "
+            + "its own \u{2702}, and its two halves become the two new blocks' "
+            + "takes. **An unchecked take is not cut and goes into neither new "
+            + "block** — it stays whole on the original block, which the divide "
+            + "keeps and releases to \(RecoveryPath.unplacedBlocks)."
+    }
+
+    /// The per-row caption under an unchecked take — the same answer where
+    /// she was actually looking when she asked.
+    nonisolated static var uncheckedRowNote: String {
+        "Not cut — stays whole on the original block, which waits in "
+            + "\(RecoveryPath.surface)."
+    }
+
+    /// The completion's destination sentence — pure, so the copy is pinned
+    /// rather than read off a screenshot. `nil` when every take was checked:
+    /// the original is still released (the W always preserves A whole), but
+    /// it carries nothing she wasn't shown, and a note on every divide would
+    /// be noise where the ruling asked for an answer.
+    nonisolated static func releasedOriginalNote(uncheckedTakes: Int) -> String? {
+        guard uncheckedTakes > 0 else { return nil }
+        let takes = uncheckedTakes == 1 ? "1 uncut take" : "\(uncheckedTakes) uncut takes"
+        return "Divided — the original block kept \(takes) and waits in "
+            + "\(RecoveryPath.unplacedBlocks). \u{2325}\u{2318}Z undoes the divide."
     }
 
     /// Rebuilds the ceremony over the CURRENT fan: marks survive by take
