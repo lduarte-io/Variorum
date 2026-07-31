@@ -83,6 +83,124 @@ struct BookStructureModelTests {
         #expect(withEmpty[0].entries.isEmpty, "an empty chapter is a visible place to file into")
     }
 
+    // MARK: - 13f W11: the drop resolvers (pure)
+    //
+    // THE PIN-HONESTY NOTE, and it governs everything below: batch 1 measured
+    // that the SwiftUI drag route cannot be driven in this test host (the
+    // hosting drop path sends the private `_lastDragDestinationOperation`, and
+    // the process terminates on the unrecognized selector). So the DECISIONS a
+    // drop makes live here, as pure functions over the same grouped
+    // presentation the view renders, and they are pinned exhaustively. What is
+    // NOT pinned — and is named as visual-verification-only in the batch
+    // record — is the geometry: whether a target's hit area really covers its
+    // row, and whether the pointer really reaches the end zone.
+
+    private func twoChapterBook() -> (
+        groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])],
+        one: String, two: String
+    ) {
+        let sections = [
+            section("s1", "I", position: "a"),
+            section("s2", "II", position: "b"),
+        ]
+        let groups = BookStructureModel.grouped(
+            entries: [entry("p1"), entry("p2"), entry("p3"), entry("p4")],
+            sections: sections,
+            assignments: ["p1": "s1", "p2": "s1", "p3": "s2", "p4": "s2"])
+        return (groups, "s1", "s2")
+    }
+
+    @Test func theDragPayloadDiscriminatesChaptersFromPostsAndRefusesForeigners() {
+        typealias Drag = BookStructureModel.BookDrag
+        #expect(Drag.decode(Drag.chapter("s1").payload) == .chapter("s1"))
+        #expect(Drag.decode(Drag.post("p1").payload) == .post("p1"))
+        #expect(Drag.chapter("x").payload != Drag.post("x").payload,
+                "the same id means two different things — the prefix is why")
+        // Every other drag in the app is a bare id or a differently-prefixed
+        // one; none of them may act on a book's structure.
+        for foreign in ["s1", "p1", "lens-move:b1", "", "book-chapterish:s1"] {
+            #expect(Drag.decode(foreign) == nil, "\(foreign)")
+        }
+    }
+
+    /// HER SCENARIO, as a resolution table: *"i haven't been able to move the
+    /// chapters in between the posts."* With two chapters, "before" was the
+    /// only meaning a drop could carry, so moving one DOWN had no target
+    /// except a 14 pt strip at the very end of the book. A post row is a
+    /// target now, and it snaps to the nearest chapter boundary.
+    @Test func aChapterDroppedBetweenPostsSnapsToTheNearestBoundary() {
+        let book = twoChapterBook()
+        func target(_ site: BookStructureModel.ChapterDropSite) -> String? {
+            BookStructureModel.chapterDropTarget(site, groups: book.groups)
+        }
+        // The shipped meanings, unchanged.
+        #expect(target(.chapter(book.two)) == book.two)
+        #expect(target(.gapBefore(book.two)) == book.two, "the gap means the same thing")
+        #expect(target(.end) == nil)
+        // Top half of a chapter → that chapter's own boundary.
+        #expect(target(.post("p1")) == book.one)
+        #expect(target(.post("p3")) == book.two)
+        // Bottom half → the boundary BELOW: the next chapter's…
+        #expect(target(.post("p2")) == book.two)
+        // …and, in the LAST chapter, the end — which is exactly how a
+        // two-chapter book moves its first chapter down.
+        #expect(target(.post("p4")) == nil)
+        // A post nobody knows, and an unfiled post (unfiled trails every
+        // chapter, so its boundary IS the end).
+        #expect(target(.post("nowhere")) == nil)
+        let withUnfiled = BookStructureModel.grouped(
+            entries: [entry("p1"), entry("p9")],
+            sections: [section("s1", "I", position: "a")],
+            assignments: ["p1": "s1"])
+        #expect(BookStructureModel.chapterDropTarget(
+            .post("p9"), groups: withUnfiled) == nil)
+    }
+
+    /// A one-post chapter has no "halves" — the row is both, and the rule
+    /// must still answer something reachable (its own boundary).
+    @Test func aSingleRowChapterResolvesToItsOwnBoundary() {
+        let groups = BookStructureModel.grouped(
+            entries: [entry("p1"), entry("p2")],
+            sections: [
+                section("s1", "I", position: "a"),
+                section("s2", "II", position: "b"),
+            ],
+            assignments: ["p1": "s1", "p2": "s2"])
+        #expect(BookStructureModel.chapterDropTarget(.post("p1"), groups: groups) == "s1")
+        #expect(BookStructureModel.chapterDropTarget(.post("p2"), groups: groups) == "s2")
+    }
+
+    /// W11b's decision half: what a POST drop writes.
+    @Test func aPostDropPlansItsChapterAndItsAnchor() {
+        let book = twoChapterBook()
+        func plan(
+            _ site: BookStructureModel.PostDropSite, _ dragged: String,
+            reposition: Bool = true
+        ) -> BookStructureModel.PostDropPlan? {
+            BookStructureModel.postDropPlan(
+                site, dragged: dragged, groups: book.groups, reposition: reposition)
+        }
+        // Onto a chapter header: join it, at its top.
+        #expect(plan(.chapter(book.two), "p1")
+                == BookStructureModel.PostDropPlan(sectionID: "s2", before: "p3"))
+        // Onto another post: join ITS chapter, above it.
+        #expect(plan(.post("p4"), "p1")
+                == BookStructureModel.PostDropPlan(sectionID: "s2", before: "p4"))
+        // Onto itself: nothing at all.
+        #expect(plan(.post("p1"), "p1") == nil)
+        // Onto the chapter it already heads: no self-anchor (the reorder
+        // would be a no-op against its own row).
+        #expect(plan(.chapter(book.two), "p3")
+                == BookStructureModel.PostDropPlan(sectionID: "s2", before: nil))
+        // Out of every chapter.
+        #expect(plan(.unfiled, "p1")
+                == BookStructureModel.PostDropPlan(sectionID: nil, before: nil))
+        // Under a stamp sort the stored order is NOT what she is looking at,
+        // so the drop files the post and leaves the order alone.
+        #expect(plan(.post("p4"), "p1", reposition: false)
+                == BookStructureModel.PostDropPlan(sectionID: "s2", before: nil))
+    }
+
     @Test func aFinishedBookOpensIntoTheReadingFlow() {
         // R2's letter: a finished book opens here by default and shows
         // nothing but the text.
@@ -405,6 +523,221 @@ struct JournalBooksTests {
             try await refresh()
             #expect(structure.sections.map(\.name) == ["I", "II", "III"])
             #expect(structure.lastError == nil)
+        }
+    }
+}
+
+// MARK: - 13f W11: the drops, end to end through the store
+
+/// Her W11 ruling, verbatim: *"i think we should fix the reach, but it should
+/// also be possible to pick up a post and move it to another chapter."* The
+/// resolvers above decide; these pins prove the decisions reach the ratified
+/// operations and nothing else — `reorderSection`, `assignPostToSection`,
+/// `reorderReadingPost`, each already pinned in core.
+@MainActor
+@Suite("Book drag & drop, end to end (13f W11)")
+struct BookDropTests {
+    /// A curated book: chapters I and II, posts p1..p4 filed two apiece.
+    @MainActor
+    private struct Book {
+        let session: AppSession
+        let database: AppDatabase
+        let structure: BookStructureModel
+        let readingID: String
+        var sections: [String]
+        var posts: [String]
+
+        func refresh() async throws -> [Queries.ReadingEntry] {
+            let (snapshot, entries) = try await database.read { [readingID] db in
+                (BookStructureModel.Snapshot(
+                    reading: try Queries.reading(db, id: readingID),
+                    sections: try Queries.readingSections(db, readingID: readingID),
+                    deletedSections: try Queries.deletedReadingSections(db, readingID: readingID),
+                    assignments: try Queries.sectionAssignments(db, readingID: readingID)),
+                 try Queries.assembleReading(db, readingID: readingID))
+            }
+            structure.adopt(snapshot)
+            return entries
+        }
+    }
+
+    private func withBook<T>(
+        _ body: @MainActor (Book) async throws -> T
+    ) async throws -> T {
+        try await withShellSession2 { session, db in
+            let (readingID, sections, posts) = try await session.runner.run { ops in
+                let reading = try ops.createReading(name: "orbit", kind: .curated)
+                let one = try ops.createSection(in: reading.id, name: "I")
+                let two = try ops.createSection(in: reading.id, name: "II")
+                var posts: [String] = []
+                for i in 1...4 {
+                    let post = try ops.createPost(title: "p\(i)")
+                    _ = try ops.addPostToReading(post.id, to: reading.id)
+                    try ops.assignPostToSection(
+                        post.id, in: reading.id, section: i <= 2 ? one.id : two.id)
+                    posts.append(post.id)
+                }
+                return (reading.id, [one.id, two.id], posts)
+            }
+            let book = Book(
+                session: session, database: db,
+                structure: BookStructureModel(session: session, readingID: readingID),
+                readingID: readingID, sections: sections, posts: posts)
+            _ = try await book.refresh()
+            return try await body(book)
+        }
+    }
+
+    /// THE SCENARIO SHE REPORTED, end to end: two chapters, and the first one
+    /// moves DOWN — by a drop on a post in the second chapter's lower half,
+    /// which before this batch was not a target at all.
+    @Test func aTwoChapterBookMovesItsFirstChapterDownByDroppingOnAPost() async throws {
+        try await withBook { book in
+            let entries = try await book.refresh()
+            #expect(book.structure.sections.map(\.name) == ["I", "II"])
+            await book.structure.moveChapter(
+                book.sections[0], onto: .post(book.posts[3]), entries: entries)
+            _ = try await book.refresh()
+            #expect(book.structure.sections.map(\.name) == ["II", "I"],
+                    "the drop resolved to the end and the chapter moved")
+            #expect(book.structure.lastError == nil)
+        }
+    }
+
+    @Test func aPostDropFilesItIntoTheOtherChapterAndLandsWhereItWasDropped() async throws {
+        try await withBook { book in
+            var entries = try await book.refresh()
+            let before = entries.map(\.postID)
+            // p1 (chapter I) dropped on p4 (chapter II): it joins II, above p4.
+            await book.structure.filePost(
+                book.posts[0], onto: .post(book.posts[3]),
+                entries: entries, reposition: true)
+            entries = try await book.refresh()
+
+            #expect(book.structure.assignments[book.posts[0]] == book.sections[1],
+                    "assignPostToSection did the filing")
+            let after = entries.map(\.postID)
+            let landed = try #require(after.firstIndex(of: book.posts[0]))
+            #expect(after[landed + 1] == book.posts[3],
+                    "…and reorderReadingPost put it directly above the post she dropped on")
+            #expect(after != before, "the order really moved")
+            #expect(Set(after) == Set(before))
+            #expect(book.structure.lastError == nil)
+        }
+    }
+
+    /// The post moves UPWARD, and that direction is the whole point of the
+    /// pin. `assembleReading` already orders a chaptered book by chapter, so
+    /// a post moving DOWN into a later chapter lands at that chapter's top
+    /// for free — assignment alone does it, and an assertion written that way
+    /// asserts nothing (revert W11b-A ran GREEN on exactly that shape before
+    /// this was rewritten). Moving UP is where the membership position has to
+    /// be written: without it the post lands at the chapter's END.
+    @Test func aPostDroppedOnAChapterHeaderLandsAtThatChaptersTop() async throws {
+        try await withBook { book in
+            var entries = try await book.refresh()
+            let before = entries.map(\.postID)
+            // p4 — the LAST post of chapter II — dropped on chapter I's header.
+            let moved = book.posts[3]
+            let chapterOneFirst = try #require(
+                book.structure.grouped(entries: entries)
+                    .first { $0.section?.id == book.sections[0] }?.entries.first?.postID)
+            #expect(before.firstIndex(of: moved)! > before.firstIndex(of: chapterOneFirst)!,
+                    "it starts BELOW the chapter it is about to join")
+
+            await book.structure.filePost(
+                moved, onto: .chapter(book.sections[0]),
+                entries: entries, reposition: true)
+            entries = try await book.refresh()
+
+            #expect(book.structure.assignments[moved] == book.sections[0])
+            let after = entries.map(\.postID)
+            #expect(after.first == moved, "it landed at the chapter's TOP, not its end")
+            let landed = try #require(after.firstIndex(of: moved))
+            #expect(after[landed + 1] == chapterOneFirst)
+            #expect(Set(after) == Set(before), "nothing joined or left the book")
+        }
+    }
+
+    /// P-2 at the drop: a FINISHED book fires the operation and delivers its
+    /// real refusal (#25(b) — a locked reading freezes chapter structure and
+    /// assignment), never a silent no-op and never a lecture.
+    @Test func aDropOnAFinishedBookSpeaksTheOperationsOwnRefusal() async throws {
+        try await withBook { book in
+            let entries = try await book.refresh()
+            try await book.session.runner.run { [readingID = book.readingID] ops in
+                try ops.lockReading(readingID)
+            }
+            _ = try await book.refresh()
+
+            await book.structure.filePost(
+                book.posts[0], onto: .chapter(book.sections[1]),
+                entries: entries, reposition: true)
+            let postRefusal = try #require(book.structure.lastError)
+            #expect(postRefusal.contains("locked"), "\(postRefusal)")
+            #expect(book.structure.assignments[book.posts[0]] == book.sections[0],
+                    "nothing moved")
+
+            await book.structure.moveChapter(
+                book.sections[0], onto: .end, entries: entries)
+            let chapterRefusal = try #require(book.structure.lastError)
+            #expect(chapterRefusal.contains("locked"), "\(chapterRefusal)")
+            _ = try await book.refresh()
+            #expect(book.structure.sections.map(\.name) == ["I", "II"])
+        }
+    }
+
+    /// The dispatcher: one entry point, two payload kinds, and a foreign
+    /// payload refused rather than guessed at.
+    @Test func theDropDispatcherRoutesByPayloadKindAndRefusesForeignOnes() async throws {
+        try await withBook { book in
+            let entries = try await book.refresh()
+            typealias Drag = BookStructureModel.BookDrag
+
+            #expect(book.structure.acceptDrop(
+                ["a bare id from somewhere else"],
+                chapter: .end, post: .unfiled,
+                entries: entries, viewOrder: nil) == false)
+            #expect(book.structure.acceptDrop(
+                [], chapter: .end, post: .unfiled,
+                entries: entries, viewOrder: nil) == false)
+            _ = try await book.refresh()
+            #expect(book.structure.sections.map(\.name) == ["I", "II"])
+            #expect(book.structure.assignments[book.posts[0]] == book.sections[0])
+
+            #expect(book.structure.acceptDrop(
+                [Drag.chapter(book.sections[0]).payload],
+                chapter: .end, post: .unfiled,
+                entries: entries, viewOrder: nil) == true)
+            // The act runs in a Task the dispatcher spawns; settle it.
+            for _ in 0..<200 where book.structure.sections.first?.name != "II" {
+                try await Task.sleep(for: .milliseconds(5))
+                _ = try await book.refresh()
+            }
+            #expect(book.structure.sections.map(\.name) == ["II", "I"])
+        }
+    }
+
+    /// Position is only written when position is what she is LOOKING at: a
+    /// stamp-sorted book files the post and leaves the stored manual order
+    /// alone (writing an order she cannot see would be an invisible edit).
+    @Test func repositioningFollowsWhateverOrderTheBookIsRenderedIn() async throws {
+        try await withBook { book in
+            _ = try await book.refresh()
+            #expect(book.structure.repositionsOnDrop(viewOrder: nil) == true,
+                    "a fresh curated book is manual")
+            #expect(book.structure.repositionsOnDrop(
+                viewOrder: Queries.ReadingOrder(field: .entryDate, direction: .asc)) == false,
+                    "an A31 view override decides what she is looking at")
+
+            try await book.session.runner.run { [readingID = book.readingID] ops in
+                try ops.setReadingSort(readingID, field: .createdAt, direction: .asc)
+            }
+            _ = try await book.refresh()
+            #expect(book.structure.repositionsOnDrop(viewOrder: nil) == false)
+            #expect(book.structure.repositionsOnDrop(
+                viewOrder: Queries.ReadingOrder(field: .manual, direction: .asc)) == true,
+                    "…and an override back to manual makes position visible again")
         }
     }
 }

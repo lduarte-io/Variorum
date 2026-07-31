@@ -219,6 +219,220 @@ final class BookStructureModel {
         await run { try $0.assignPostToSection(postID, in: self.readingID, section: sectionID) }
     }
 
+    // MARK: - Drag & drop in a chaptered book (13f W11 — her ruling)
+
+    /// Her W11 ruling, verbatim: *"i think we should fix the reach, but it
+    /// should also be possible to pick up a post and move it to another
+    /// chapter."*
+    ///
+    /// Batch 1's trace found no defect in the chapter drag — the machinery is
+    /// byte-identical to the build she confirmed working — but found that a
+    /// chapter's only drop targets were another chapter's HEADER (glyph-wide,
+    /// in the body) and a 14 pt strip at the very bottom of the book. With two
+    /// chapters, moving one DOWN had no target at all unless she found that
+    /// strip. So the fix is reach: more targets, bigger targets, and a
+    /// resolution rule for the ones that are not chapter headers.
+    ///
+    /// **The semantics are UNCHANGED.** Everything below resolves to the
+    /// `moveChapter(_:before:)` / `assignPostToSection` doors that already
+    /// existed and are already pinned; nothing here decides what a drop MEANS
+    /// beyond "which existing anchor is nearest".
+    ///
+    /// The payload discriminates by prefix — the `LensesBoardView.dragPayload`
+    /// precedent — because a chaptered book now drags TWO kinds of thing over
+    /// the same drop targets, and a bare id could not tell them apart. It is
+    /// still one `String` transferable, so no new payload type meets the
+    /// standing post/block drags.
+    nonisolated enum BookDrag: Equatable, Sendable {
+        case chapter(String)
+        case post(String)
+
+        private static let chapterPrefix = "book-chapter:"
+        private static let postPrefix = "book-post:"
+
+        var payload: String {
+            switch self {
+            case .chapter(let id): return Self.chapterPrefix + id
+            case .post(let id): return Self.postPrefix + id
+            }
+        }
+
+        /// A payload from anywhere else in the app (a scrap, a catalog hit, a
+        /// lens block) decodes to nil and the drop is refused — strictly
+        /// better than the bare-id era, where a foreign string reached the
+        /// model and was rejected only by an id lookup.
+        static func decode(_ raw: String) -> BookDrag? {
+            if raw.hasPrefix(chapterPrefix) {
+                return .chapter(String(raw.dropFirst(chapterPrefix.count)))
+            }
+            if raw.hasPrefix(postPrefix) {
+                return .post(String(raw.dropFirst(postPrefix.count)))
+            }
+            return nil
+        }
+    }
+
+    /// Where a CHAPTER was dropped.
+    nonisolated enum ChapterDropSite: Equatable, Sendable {
+        /// A chapter's own header row — "before this chapter" (the shipped
+        /// meaning, unchanged).
+        case chapter(String)
+        /// The gap immediately above a chapter's heading — the same meaning,
+        /// with a target of its own so a chapter is reachable without hitting
+        /// its heading exactly.
+        case gapBefore(String)
+        /// A post row. Snaps to the NEAREST chapter boundary.
+        case end
+        case post(String)
+    }
+
+    /// Resolves a chapter drop to the `before:` anchor `moveChapter` takes
+    /// (nil = the end of the chapter order).
+    ///
+    /// "Nearest boundary" is measured in ROWS, not pixels: a post in the top
+    /// half of its chapter takes the boundary above it, one in the bottom half
+    /// the boundary below. Rows are what the model knows, and the alternative
+    /// — geometry — would put the rule in a place no test can reach.
+    nonisolated static func chapterDropTarget(
+        _ site: ChapterDropSite,
+        groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    ) -> String? {
+        switch site {
+        case .end:
+            return nil
+        case .chapter(let id), .gapBefore(let id):
+            return id
+        case .post(let postID):
+            guard let index = groups.firstIndex(where: { group in
+                group.entries.contains { $0.postID == postID }
+            }) else { return nil }
+            let group = groups[index]
+            // Unfiled trails every chapter, so a drop there means the end.
+            guard let section = group.section else { return nil }
+            let row = group.entries.firstIndex { $0.postID == postID } ?? 0
+            if row * 2 < group.entries.count { return section.id }
+            // The boundary BELOW this chapter: the next chapter's, or the end.
+            let next = groups[(index + 1)...].first { $0.section != nil }
+            return next?.section?.id
+        }
+    }
+
+    /// Where a POST was dropped.
+    nonisolated enum PostDropSite: Equatable, Sendable {
+        /// A chapter's header — file it there, at that chapter's top.
+        case chapter(String)
+        /// Another post's row — file it into that post's chapter, above it.
+        case post(String)
+        /// The "unfiled" heading (or the book's tail): out of every chapter.
+        case unfiled
+    }
+
+    /// What a post drop writes: the chapter it joins, and the membership
+    /// anchor it lands above. `before == nil` leaves the book's order alone.
+    nonisolated struct PostDropPlan: Equatable, Sendable {
+        var sectionID: String?
+        var before: String?
+    }
+
+    /// `nil` = nothing to do (a post dropped on itself).
+    ///
+    /// `reposition` is false unless POSITION is what orders the book on
+    /// screen: under a stamp sort the stored manual order is not what she is
+    /// looking at, and silently rewriting it from a drop would edit an order
+    /// she cannot see. The chapter half of the drop always happens — that is
+    /// what her ruling asked for.
+    nonisolated static func postDropPlan(
+        _ site: PostDropSite, dragged postID: String,
+        groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])],
+        reposition: Bool
+    ) -> PostDropPlan? {
+        switch site {
+        case .unfiled:
+            return PostDropPlan(sectionID: nil, before: nil)
+        case .chapter(let sectionID):
+            let first = groups
+                .first { $0.section?.id == sectionID }?
+                .entries.first?.postID
+            return PostDropPlan(
+                sectionID: sectionID,
+                before: (reposition && first != postID) ? first : nil)
+        case .post(let targetID):
+            guard targetID != postID else { return nil }
+            let group = groups.first { group in
+                group.entries.contains { $0.postID == targetID }
+            }
+            return PostDropPlan(
+                sectionID: group?.section?.id,
+                before: reposition ? targetID : nil)
+        }
+    }
+
+    /// True when a drop should also reposition the membership — i.e. the book
+    /// is rendering in its stored MANUAL order (no view-local override, or an
+    /// override that is itself manual).
+    func repositionsOnDrop(viewOrder: Queries.ReadingOrder?) -> Bool {
+        (viewOrder?.field ?? reading?.sortField ?? .manual) == .manual
+    }
+
+    /// The chapter drag's one door, site-shaped (13f W11a).
+    func moveChapter(
+        _ sectionID: String, onto site: ChapterDropSite,
+        entries: [Queries.ReadingEntry]
+    ) async {
+        await moveChapter(
+            sectionID,
+            before: Self.chapterDropTarget(site, groups: grouped(entries: entries)))
+    }
+
+    /// **ONE brain behind every drop target in a chaptered book** (13f W11):
+    /// decode the payload, dispatch to the door that owns that KIND of drag.
+    /// Each SITE says what a chapter means there and what a post means there;
+    /// nothing re-derives semantics, and an undecodable payload (a scrap, a
+    /// catalog hit, a lens block) is refused rather than guessed at.
+    ///
+    /// It lives on the model rather than in a view because two views host
+    /// post rows — the navigator and Outline's own body — and a dispatcher
+    /// copied into both is the class of drift P-1 exists to kill.
+    @discardableResult
+    func acceptDrop(
+        _ items: [String],
+        chapter chapterSite: ChapterDropSite, post postSite: PostDropSite,
+        entries: [Queries.ReadingEntry], viewOrder: Queries.ReadingOrder?
+    ) -> Bool {
+        guard let raw = items.first, let drag = BookDrag.decode(raw) else { return false }
+        switch drag {
+        case .chapter(let sectionID):
+            Task { await moveChapter(sectionID, onto: chapterSite, entries: entries) }
+        case .post(let postID):
+            let reposition = repositionsOnDrop(viewOrder: viewOrder)
+            Task {
+                await filePost(
+                    postID, onto: postSite, entries: entries, reposition: reposition)
+            }
+        }
+        return true
+    }
+
+    /// The post drag's one door (13f W11b): assignment through the standing
+    /// `assignPostToSection`, order through the standing
+    /// `reorderReadingPost` — no new semantics, and a LOCKED book refuses
+    /// through the operation itself, spoken (P-2; QUESTIONS #25(b)).
+    func filePost(
+        _ postID: String, onto site: PostDropSite,
+        entries: [Queries.ReadingEntry], reposition: Bool
+    ) async {
+        guard let plan = Self.postDropPlan(
+            site, dragged: postID, groups: grouped(entries: entries),
+            reposition: reposition)
+        else { return }
+        await run { [readingID] ops in
+            try ops.assignPostToSection(postID, in: readingID, section: plan.sectionID)
+            if let before = plan.before {
+                try ops.reorderReadingPost(postID, in: readingID, to: .before(before))
+            }
+        }
+    }
+
     // MARK: - Book settings (the navigator's third leg — R43)
 
     func setFinished(_ finished: Bool) async {

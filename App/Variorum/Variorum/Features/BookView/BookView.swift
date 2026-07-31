@@ -305,14 +305,16 @@ struct BookView: View {
                                     }
                                 }
                                 .buttonStyle(.plain)
+                                // 13f W11a: the whole ROW is the target, not
+                                // the glyphs (the batch-1 reach trace).
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
                                 .contextMenu { chapterMenu(section) }
-                                .draggable(section.id)
+                                .draggable(BookStructureModel.BookDrag.chapter(section.id).payload)
                                 .dropDestination(for: String.self) { items, _ in
-                                    guard let dragged = items.first else { return false }
-                                    Task {
-                                        await structure.moveChapter(dragged, before: section.id)
-                                    }
-                                    return true
+                                    acceptDrop(
+                                        items, chapter: .chapter(section.id),
+                                        post: .chapter(section.id))
                                 } isTargeted: { targeted in
                                     if targeted {
                                         chapterDropTarget = section.id
@@ -375,14 +377,41 @@ struct BookView: View {
                                     .padding(.leading, group.section != nil ? 10 : 0)
                                 }
                                 .buttonStyle(.plain)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
                                 .contextMenu {
                                     outlineChapterMenu(
                                         structure: structure, postID: entry.postID)
                                 }
+                                // 13f W11: a post row DRAGS (her ruling —
+                                // "pick up a post and move it to another
+                                // chapter") and RECEIVES (a chapter dropped
+                                // between posts snaps to the nearest chapter
+                                // boundary — W11a's reach half).
+                                .draggable(
+                                    BookStructureModel.BookDrag.post(entry.postID).payload)
+                                .dropDestination(for: String.self) { items, _ in
+                                    acceptDrop(
+                                        items, chapter: .post(entry.postID),
+                                        post: .post(entry.postID))
+                                } isTargeted: { targeted in
+                                    if targeted {
+                                        postDropTarget = entry.postID
+                                    } else if postDropTarget == entry.postID {
+                                        postDropTarget = nil
+                                    }
+                                }
+                                .overlay(alignment: .top) {
+                                    if postDropTarget == entry.postID {
+                                        Rectangle().fill(tokens.ring).frame(height: 2)
+                                    }
+                                }
                             }
                         }
                         // The end drop zone: drag a chapter past the last
-                        // one to land it at the end (R19).
+                        // one to land it at the end (R19). 13f W11a: taller,
+                        // because with TWO chapters this strip was the ONLY
+                        // way to move one down and it was 14 pt of nothing.
                         if structure.chaptersActive, structure.reading?.kind == .curated {
                             if chapterDropAtEnd {
                                 Rectangle()
@@ -390,14 +419,11 @@ struct BookView: View {
                                     .frame(height: 2)
                             }
                             Color.clear
-                                .frame(height: 14)
+                                .frame(height: 28)
+                                .frame(maxWidth: .infinity)
                                 .contentShape(Rectangle())
                                 .dropDestination(for: String.self) { items, _ in
-                                    guard let dragged = items.first else { return false }
-                                    Task {
-                                        await structure.moveChapter(dragged, before: nil)
-                                    }
-                                    return true
+                                    acceptDrop(items, chapter: .end, post: .unfiled)
                                 } isTargeted: { chapterDropAtEnd = $0 }
                         }
                     }
@@ -780,15 +806,20 @@ struct BookView: View {
                 .foregroundStyle(tokens.accent)
         }
         .padding(.top, 28)
+        // 13f W11a — THE REACH FIX, at the site batch 1's trace named: the
+        // body header carried no `contentShape`, so its target was the
+        // GLYPHS (the navigator's is a `Button` and takes its row). It is now
+        // the full-width row INCLUDING the 28 pt of air above it, which is
+        // the gap between one chapter's last post and the next chapter's
+        // heading — the "target in the gap" her ruling asked for, without a
+        // second view to keep in sync.
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .id("chapter-\(section.id)")
         .contextMenu { chapterMenu(section) }
-        .draggable(section.id)
+        .draggable(BookStructureModel.BookDrag.chapter(section.id).payload)
         .dropDestination(for: String.self) { items, _ in
-            guard let dragged = items.first else { return false }
-            Task {
-                await structure.moveChapter(dragged, before: section.id)
-            }
-            return true
+            acceptDrop(items, chapter: .chapter(section.id), post: .chapter(section.id))
         } isTargeted: { targeted in
             if targeted {
                 bodyChapterDropTarget = section.id
@@ -796,6 +827,20 @@ struct BookView: View {
                 bodyChapterDropTarget = nil
             }
         }
+    }
+
+    /// Every drop target in this view routes through the model's one
+    /// dispatcher (13f W11); the view only says what a chapter and a post
+    /// MEAN at this spot.
+    @MainActor
+    private func acceptDrop(
+        _ items: [String],
+        chapter chapterSite: BookStructureModel.ChapterDropSite,
+        post postSite: BookStructureModel.PostDropSite
+    ) -> Bool {
+        structure.acceptDrop(
+            items, chapter: chapterSite, post: postSite,
+            entries: model.entries, viewOrder: model.viewOrder)
     }
 
     /// The body's end drop zone (N21's twin of the navigator's R19 zone).
@@ -808,20 +853,23 @@ struct BookView: View {
                     .frame(height: 2)
             }
             Color.clear
-                .frame(height: 14)
+                // 13f W11a: 14 → 44. In the BODY this strip sits after a
+                // whole book's prose and was the only "put this chapter
+                // last" target there is; a two-chapter book had nowhere else
+                // to go. Empty space at the end of a scroll costs nothing.
+                .frame(height: 44)
+                .frame(maxWidth: .infinity)
                 .contentShape(Rectangle())
                 .dropDestination(for: String.self) { items, _ in
-                    guard let dragged = items.first else { return false }
-                    Task {
-                        await structure.moveChapter(dragged, before: nil)
-                    }
-                    return true
+                    acceptDrop(items, chapter: .end, post: .unfiled)
                 } isTargeted: { bodyChapterDropAtEnd = $0 }
         }
     }
 
     @State private var bodyChapterDropTarget: String?
     @State private var bodyChapterDropAtEnd = false
+    /// 13f W11: the navigator's post-row drop indicator.
+    @State private var postDropTarget: String?
 
     /// The navigator's "you are here": the focused post — and, in the
     /// SPREAD, BOTH pages on screen (13b 4F; 13c 2B — a spread shows two
@@ -894,17 +942,37 @@ private struct OutlinePostRow: View {
         #endif
     }
 
+    /// 13f W11: this row's drop indicator (a chapter or a post is hovering).
+    @State private var dropTargeted = false
+
     var body: some View {
         if model.isExpanded(entry.postID) {
             VStack(alignment: .leading, spacing: 6) {
-                postHeader
+                // The HEADER is the handle, not the prose: an expanded post
+                // shows a live editor or a read-cheap text surface, and a
+                // drag over those would fight selection. Its title row is
+                // where "pick up this post" belongs.
+                postHeader.bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                 postBody
             }
             .padding(.bottom, 22)
         } else {
             collapsedPostCard
+                .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                 .padding(.bottom, 10)
         }
+    }
+
+    /// 13f W11 — the row's own drag/drop contract, shared by both forms
+    /// (collapsed card and expanded header) through `bookDropRow`.
+    fileprivate var dragPayload: String {
+        BookStructureModel.BookDrag.post(entry.postID).payload
+    }
+
+    fileprivate func accept(_ items: [String]) -> Bool {
+        structure.acceptDrop(
+            items, chapter: .post(entry.postID), post: .post(entry.postID),
+            entries: model.entries, viewOrder: model.viewOrder)
     }
 
     /// The post's heading in the book's own voice (13c 2A): the title reads
@@ -1022,6 +1090,29 @@ private struct OutlinePostRow: View {
         .help("Click to open this post in the full editor; ▸ unfolds it here")
         .id("page-\(entry.postID)")  // the navigator's landing anchor
         .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
+    }
+}
+
+private extension View {
+    /// 13f W11 — one modifier, both of an outline row's forms: the row drags
+    /// (its post) and receives (a chapter snapping to the nearest boundary,
+    /// or another post filing into this one's chapter). The insertion bar is
+    /// the same grammar the chapter drag has used since R19.
+    func bookDropRow(
+        _ row: OutlinePostRow, targeted: Binding<Bool>, tokens: VoiceTokens
+    ) -> some View {
+        self
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .draggable(row.dragPayload)
+            .dropDestination(for: String.self) { items, _ in
+                row.accept(items)
+            } isTargeted: { targeted.wrappedValue = $0 }
+            .overlay(alignment: .top) {
+                if targeted.wrappedValue {
+                    Rectangle().fill(tokens.ring).frame(height: 2)
+                }
+            }
     }
 }
 
