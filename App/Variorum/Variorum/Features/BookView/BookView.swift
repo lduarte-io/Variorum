@@ -19,6 +19,12 @@ struct BookView: View {
     let session: AppSession
     let readingID: String
     var readingName: String?
+    /// 13f batch 4 (the MOUNT rule): whether this book's PANE is focused.
+    /// Defaults true, so every pre-split call site reads unchanged.
+    var paneFocused: Bool = true
+    /// Focusing a post inside an UNFOCUSED pane claims the pane first, so
+    /// one click both takes the pane and opens the post.
+    var onPaneFocusRequest: (() -> Void)?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
 
@@ -32,11 +38,15 @@ struct BookView: View {
         session: AppSession, readingID: String, readingName: String? = nil,
         model: BookViewModel? = nil,
         structure: BookStructureModel? = nil,
-        initiallyExpanded: Set<String> = []
+        initiallyExpanded: Set<String> = [],
+        paneFocused: Bool = true,
+        onPaneFocusRequest: (() -> Void)? = nil
     ) {
         self.session = session
         self.readingID = readingID
         self.readingName = readingName
+        self.paneFocused = paneFocused
+        self.onPaneFocusRequest = onPaneFocusRequest
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
         for postID in initiallyExpanded { resolved.expand(postID) }
         _model = State(initialValue: resolved)
@@ -113,6 +123,15 @@ struct BookView: View {
         // a post-fetch sort would sort the first N of the OLD order).
         .task(id: model.viewOrder) { await model.start() }
         .task { await structure.start() }
+        // 13f batch 4: the pane's focus reaches the book's own focus
+        // authority. `onChange` alone would miss the initial value, and a
+        // book that mounts into an unfocused pane must not bring a live
+        // editor with it.
+        .onAppear {
+            model.paneFocused = paneFocused
+            model.onPaneFocusRequest = onPaneFocusRequest
+        }
+        .onChange(of: paneFocused) { _, focused in model.paneFocused = focused }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? structure.lastError {
                 Text(error)
@@ -1011,7 +1030,11 @@ private struct OutlinePostRow: View {
 
     @ViewBuilder
     private var postBody: some View {
-        if model.focusedPostID == entry.postID {
+        // 13f batch 4: `liveFocusedPostID`, not `focusedPostID` — a book in
+        // an unfocused PANE mounts no live editor (the mount rule). The
+        // reading position itself is untouched, so regaining focus restores
+        // exactly what she was editing.
+        if model.liveFocusedPostID == entry.postID {
             // THE one live editor (P3 by construction: a single focused id;
             // it is the full-document editor, so every routed act — ⌘S,
             // divide, callout, comments — reaches this surface through the

@@ -92,6 +92,8 @@ struct PoolPostsView: View {
     let readings: ReadingsViewModel
     let tags: TagsViewModel
     let onOpen: (SidebarSelection) -> Void
+    /// 13f batch 4 (W1/A25): the split's row door.
+    var onOpenBeside: ((String) -> Void)? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -183,6 +185,9 @@ struct PoolPostsView: View {
         .draggable(item.postID)
         .contextMenu {
             Button("Open") { onOpen(.post(item.postID)) }
+            if let onOpenBeside {
+                Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(item.postID) }
+            }
             Button("Duplicate as Version") {
                 Task { await library.duplicateAsVersion(postID: item.postID) }
             }

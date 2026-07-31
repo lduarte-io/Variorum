@@ -68,7 +68,11 @@ struct SpreadBookView: View {
     /// every key it needs and the reading posture keeps its page turns.
     private func flipShortcut(_ key: KeyEquivalent, _ modifiers: EventModifiers)
         -> KeyboardShortcut? {
-        model.focusedPostID == nil ? KeyboardShortcut(key, modifiers: modifiers) : nil
+        // 13f batch 4: and never from an UNFOCUSED pane — a key equivalent
+        // is checked before the responder chain, so a spread sitting beside
+        // the pane she is typing in would otherwise steal the arrow keys.
+        model.paneFocused && model.focusedPostID == nil
+            ? KeyboardShortcut(key, modifiers: modifiers) : nil
     }
 
     var body: some View {
@@ -258,7 +262,9 @@ private struct SpreadPage: View {
         #endif
     }
 
-    private var isActive: Bool { model.focusedPostID == entry.postID }
+    /// 13f batch 4: the pane's focus folds in through `liveFocusedPostID` —
+    /// a spread in an unfocused pane mounts no editable page.
+    private var isActive: Bool { model.liveFocusedPostID == entry.postID }
 
     var body: some View {
         VStack(spacing: 0) {

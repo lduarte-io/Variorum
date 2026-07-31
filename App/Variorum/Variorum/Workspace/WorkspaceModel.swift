@@ -26,6 +26,32 @@ final class WorkspaceModel {
     /// Per-PANE history (W16), keyed from day one — the free-tiling rider.
     private(set) var histories: [PaneID: NavigationHistory] = [:]
 
+    // MARK: - The panes (13f batch 4, W1/A25 — the SPLIT)
+
+    /// Her v1 ruling: *"I think two panes is the right choice for v1, but I
+    /// would make a note for the future that free tiling is on my desire
+    /// list… make sure the architecture isn't going down a road closed to
+    /// that."* So this is a CAP on a collection, never the collection's
+    /// shape: raising it is the only edit free tiling needs here.
+    static let maximumPanes = 2
+
+    /// The window's panes, in visual order. A collection from day one —
+    /// never a pair, never left/right.
+    private(set) var panes: [PaneID] = [.primary]
+    /// What each pane shows. The shell's selection binding reads and writes
+    /// the FOCUSED pane's entry, which is what makes a sidebar click target
+    /// the focused pane by construction.
+    private(set) var selections: [PaneID: SidebarSelection] = [.primary: .shelf]
+    /// The pane under her hands — and, by `PaneMount`, the only one that
+    /// mounts a live surface.
+    private(set) var focusedPane: PaneID = .primary
+    /// Divider positions (see `PaneLayout`); empty while one pane exists.
+    private(set) var splitFractions: [Double] = []
+
+    /// Mints pane keys that never collide with a closed pane's (a reused
+    /// key would inherit its history).
+    private var paneSequence = 0
+
     /// Her ruling: *"you should be able to collapse the named back chip if
     /// you want."* Session state, per window; never persisted.
     var backChipCollapsed = false
@@ -34,8 +60,122 @@ final class WorkspaceModel {
     /// only for rendering. Navigation state itself never holds text.
     private(set) var titles: [String: String] = [:]
 
-    func history(_ pane: PaneID = .primary) -> NavigationHistory {
-        histories[pane] ?? NavigationHistory()
+    /// A pane's history — **the FOCUSED pane's by default** (13f batch 4,
+    /// item 3). Making the default focus-aware is where the gate's
+    /// "focused-pane refinement" landed: the registry's `canNavigateBack` /
+    /// `canNavigateForward` closures the shell wired in batch 3 call
+    /// `history()`, so they became focus-aware without a line changing at
+    /// either end, and ⌘[ / ⌘] act on the focused pane for the same reason.
+    func history(_ pane: PaneID? = nil) -> NavigationHistory {
+        histories[pane ?? focusedPane] ?? NavigationHistory()
+    }
+
+    // MARK: - The split's acts
+
+    /// What adopting a destination did.
+    enum SelectionOutcome: Equatable {
+        case adopted
+        /// Her round-7.3 rule fired: the note is already showing in another
+        /// pane, so focus moved there instead and the caller SPEAKS.
+        case focusedExistingPane(PaneID)
+    }
+
+    /// Which pane already shows this destination — notes only (two panes on
+    /// the shelf is nobody's confusion; two panes on one note is the thing
+    /// she ruled out).
+    func paneShowing(_ destination: SidebarSelection) -> PaneID? {
+        guard destination.noteID != nil else { return nil }
+        return panes.first { selections[$0] == destination }
+    }
+
+    /// Adopt a destination into a pane — the ONE door every navigation goes
+    /// through, so the same-note rule cannot be bypassed by adding a door.
+    ///
+    /// **It RECORDS the arrival itself** (13f batch 4). Batch 3 put the one
+    /// recording point in the shell's `onChange(of: selection)`, which was
+    /// complete while there was one pane and one selection; with panes,
+    /// adopting and recording are two writes that must not come apart —
+    /// a pane whose history is never seeded shows no chip, silently. The
+    /// shell's `onChange` stays as a harmless net (re-visiting the current
+    /// destination is a no-op by construction).
+    @discardableResult
+    func select(_ destination: SidebarSelection, in pane: PaneID? = nil) -> SelectionOutcome {
+        let pane = pane ?? focusedPane
+        if let existing = paneShowing(destination), existing != pane {
+            focusedPane = existing
+            return .focusedExistingPane(existing)
+        }
+        selections[pane] = destination
+        focusedPane = pane
+        visit(destination, in: pane)
+        return .adopted
+    }
+
+    enum OpenBesideOutcome: Equatable {
+        case opened(PaneID)
+        /// Already showing somewhere (including the pane you are in — the
+        /// "open this note beside itself" ask, which is the same refusal).
+        case focusedExistingPane(PaneID)
+    }
+
+    /// "Open Beside": the note goes into a pane that is not the focused
+    /// one, minting a second pane if there is room and re-using the other
+    /// pane once the cap is reached (the browser-split behaviour).
+    @discardableResult
+    func openBeside(_ destination: SidebarSelection) -> OpenBesideOutcome {
+        if let existing = paneShowing(destination) {
+            focusedPane = existing
+            return .focusedExistingPane(existing)
+        }
+        if panes.count < Self.maximumPanes {
+            paneSequence += 1
+            let pane = PaneID("pane-\(paneSequence)")
+            panes.append(pane)
+            splitFractions = PaneLayout.evenFractions(paneCount: panes.count)
+            select(destination, in: pane)
+            return .opened(pane)
+        }
+        // At the cap the note lands in the pane you are NOT in (the browser
+        // split's behaviour) — her two-panes-in-v1 ruling is a CAP on a
+        // collection, so raising it is all free tiling needs here.
+        let target = panes.first { $0 != focusedPane } ?? focusedPane
+        select(destination, in: target)
+        return .opened(target)
+    }
+
+    /// Close the FOCUSED pane, folding the window back. Nothing is deleted
+    /// and nothing is written — a pane is view state, like a row of the
+    /// Open strip. Focus lands on the neighbour it sat beside.
+    @discardableResult
+    func closeSplit() -> Bool {
+        guard panes.count > 1, let index = panes.firstIndex(of: focusedPane) else { return false }
+        let closing = panes.remove(at: index)
+        selections.removeValue(forKey: closing)
+        histories.removeValue(forKey: closing)
+        splitFractions = PaneLayout.evenFractions(paneCount: panes.count)
+        focusedPane = panes[min(index, panes.count - 1)]
+        return true
+    }
+
+    /// The ring migrates on click (item 2). A pane that is not in the
+    /// collection is ignored rather than becoming a focus nobody renders —
+    /// `focusedPane` is always a member, which is what makes
+    /// `PaneMount.liveCount` answer exactly one.
+    func focus(_ pane: PaneID) {
+        guard panes.contains(pane) else { return }
+        focusedPane = pane
+    }
+
+    func setSplitFraction(at index: Int, to value: Double) {
+        splitFractions = PaneLayout.moving(splitFractions, divider: index, to: value)
+    }
+
+    /// The note the View menu's Open Beside would use: the most recently
+    /// OPENED note no pane is showing. This is item 0's `recency` at its
+    /// second job — order is hers to arrange, recency answers "which one
+    /// did she mean". nil ⇒ the menu door is honestly grey.
+    var openBesideCandidate: String? {
+        openNotes.recency.first { paneShowing(.post($0)) == nil }
     }
 
     // MARK: - Recording (the shell calls exactly one of these)
@@ -47,15 +187,18 @@ final class WorkspaceModel {
     /// already current (which is how ⌘[ / ⌘] avoid a re-entrancy flag),
     /// while the recency touch still runs — arriving IS opening, however
     /// you got there.
-    func visit(_ destination: SidebarSelection, in pane: PaneID = .primary) {
+    func visit(_ destination: SidebarSelection, in pane: PaneID? = nil) {
+        let pane = pane ?? focusedPane
         var history = self.history(pane)
         history.visit(destination)
         histories[pane] = history
         if case .post(let id) = destination { openNotes.opened(id) }
     }
 
-    /// ⌘[ — the destination to navigate to, or nil.
-    func goBack(in pane: PaneID = .primary) -> SidebarSelection? {
+    /// ⌘[ — the destination to navigate to, or nil. Acts on the FOCUSED
+    /// pane (item 3).
+    func goBack(in pane: PaneID? = nil) -> SidebarSelection? {
+        let pane = pane ?? focusedPane
         var history = self.history(pane)
         let destination = history.goBack()
         histories[pane] = history
@@ -63,7 +206,8 @@ final class WorkspaceModel {
     }
 
     /// ⌘] — the mirror.
-    func goForward(in pane: PaneID = .primary) -> SidebarSelection? {
+    func goForward(in pane: PaneID? = nil) -> SidebarSelection? {
+        let pane = pane ?? focusedPane
         var history = self.history(pane)
         let destination = history.goForward()
         histories[pane] = history
@@ -95,7 +239,11 @@ final class WorkspaceModel {
         let origins = histories
             .sorted { $0.key.raw < $1.key.raw }
             .compactMap { $0.value.origin }
-        return openNotes.ids.map { SidebarSelection.post($0) } + origins
+        // …plus what each pane is SHOWING (13f batch 4): an unfocused pane
+        // wears a quiet name line instead of the detail's masthead, and a
+        // pool pane's name is in neither of the other two lists.
+        let showing = panes.compactMap { selections[$0] }
+        return openNotes.ids.map { SidebarSelection.post($0) } + origins + showing
     }
 
     /// A stable key for `.task(id:)` — re-resolves when the set OR the

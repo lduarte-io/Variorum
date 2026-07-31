@@ -27,7 +27,6 @@ struct RootView: View {
     @State private var catalog: LibraryCatalogModel
     @State private var poolPosts: PoolPostsModel
     @State private var palette: PaletteModel
-    @State private var selection: SidebarSelection? = .shelf
     @State private var paletteOpen = false
     /// Sitting 9 (R94): the bridge row's auth-shaped failures open the
     /// account sheet from right there.
@@ -68,7 +67,8 @@ struct RootView: View {
         NavigationSplitView {
             SidebarView(
                 session: session, model: library, pool: pool,
-                workspace: router.workspace, selection: $selection,
+                workspace: router.workspace, selection: selectionBinding,
+                onOpenBeside: { router.openBeside(.post($0)) },
                 // 13b 1b: the rail's marker reads the router's observable
                 // mode truth (the broadcast-derived shadow is retired).
                 postMode: (session.commandRouter.activeMode ?? .takes).rawValue)
@@ -89,24 +89,7 @@ struct RootView: View {
                     }
                 }
         } detail: {
-            VStack(spacing: 0) {
-                // 13f batch 3 (W16): the road back, above whatever the pane
-                // is showing — one chip for every destination kind, because
-                // "where did I come from" is the PANE's fact, not the
-                // post's. Absent when the pane arrived from nowhere.
-                if let origin = router.workspace.history().origin {
-                    BackChip(
-                        tokens: theme.tokens(for: scheme),
-                        originLabel: router.workspace.label(for: origin),
-                        collapsed: router.workspace.backChipCollapsed,
-                        onBack: { router.goBack() },
-                        onToggleCollapse: {
-                            router.workspace.backChipCollapsed.toggle()
-                        })
-                    Divider().overlay(theme.tokens(for: scheme).line)
-                }
-                detail
-            }
+            paneRow
                 // 13b 1b (AD-14): the ONE status/refusal presentation —
                 // every transient outcome (refusals, undo reports, routed
                 // speech) renders HERE, mode- and surface-independent,
@@ -135,7 +118,7 @@ struct RootView: View {
         }
         .onChange(of: router.pendingSelection) { _, pending in
             guard let pending else { return }
-            selection = pending
+            adopt(pending, in: router.workspace.focusedPane)
             router.pendingSelection = nil
         }
         // 13f batch 3 (W3/A27 + W16): ONE place records that a navigation
@@ -205,77 +188,242 @@ struct RootView: View {
         session.commandRouter.openNoteCount = { workspace.openNotes.ids.count }
         session.commandRouter.canNavigateBack = { workspace.history().canGoBack }
         session.commandRouter.canNavigateForward = { workspace.history().canGoForward }
+        // 13f batch 4: the split's two facts, and the router's own voice.
+        // `history()` now defaults to the FOCUSED pane, so the two
+        // navigation closures above became focus-aware without changing —
+        // the gate's refinement, landed at the model.
+        session.commandRouter.paneCount = { workspace.panes.count }
+        session.commandRouter.canOpenBeside = { workspace.openBesideCandidate != nil }
+        let status = session.status
+        router.speak = { status.speak($0) }
         workspace.visit(selection ?? .shelf)
     }
 
+    // MARK: - Selection, per pane (13f batch 4 — the gate's (a))
+
+    /// What the FOCUSED pane shows. The sidebar binds to this, so a sidebar
+    /// click targets the focused pane by construction and batch 3's ONE
+    /// recording point below stays complete without knowing panes exist.
+    private var selection: SidebarSelection? {
+        router.workspace.selections[router.workspace.focusedPane]
+    }
+
+    private var selectionBinding: Binding<SidebarSelection?> {
+        Binding(
+            get: { router.workspace.selections[router.workspace.focusedPane] },
+            set: { picked in
+                guard let picked else { return }
+                adopt(picked, in: router.workspace.focusedPane)
+            })
+    }
+
+    /// The ONE door a destination enters a pane through — so her round-7.3
+    /// rule (a split never shows one note twice) cannot be bypassed by
+    /// adding a door, and is spoken in one voice wherever it fires.
+    private func adopt(_ destination: SidebarSelection, in pane: PaneID) {
+        switch router.workspace.select(destination, in: pane) {
+        case .adopted:
+            break
+        case .focusedExistingPane:
+            session.status.speak(
+                WorkspaceNaming.sameNoteNote(router.workspace.label(for: destination)))
+        }
+    }
+
+    /// A navigation door belonging to a particular pane: it focuses that
+    /// pane and navigates it in one click, which is how a row click inside
+    /// an UNFOCUSED list pane does the obvious thing.
+    private func opener(_ pane: PaneID) -> (SidebarSelection) -> Void {
+        { destination in adopt(destination, in: pane) }
+    }
+
+    // MARK: - The pane row (W1/A25)
+
+    private var paneRow: some View {
+        let panes = router.workspace.panes
+        let tokens = theme.tokens(for: scheme)
+        return GeometryReader { geo in
+            HStack(spacing: 0) {
+                let widths = PaneLayout.widths(
+                    total: max(geo.size.width - Self.dividerWidth * CGFloat(panes.count - 1), 0),
+                    fractions: router.workspace.splitFractions)
+                ForEach(Array(panes.enumerated()), id: \.element) { index, pane in
+                    if index > 0 {
+                        paneDivider(index: index - 1, rowWidth: geo.size.width, tokens: tokens)
+                    }
+                    paneHost(pane, split: panes.count > 1, tokens: tokens)
+                        .frame(width: panes.count > 1 ? widths[index] : nil)
+                        .frame(maxWidth: panes.count > 1 ? nil : .infinity)
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .coordinateSpace(name: Self.paneRowSpace)
+    }
+
+    private static let dividerWidth: CGFloat = 1
+    private static let paneRowSpace = "variorum-pane-row"
+
+    /// The draggable seam. Its arithmetic is `PaneLayout`'s (clamped so a
+    /// drag can never swallow a pane); the drag itself is AppKit's and is
+    /// on the visual-verification list.
+    private func paneDivider(index: Int, rowWidth: CGFloat, tokens: VoiceTokens) -> some View {
+        Rectangle()
+            .fill(tokens.line)
+            .frame(width: Self.dividerWidth)
+            .overlay {
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: 9)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(coordinateSpace: .named(Self.paneRowSpace))
+                            .onChanged { value in
+                                guard rowWidth > 0 else { return }
+                                router.workspace.setSplitFraction(
+                                    at: index, to: value.location.x / rowWidth)
+                            })
+                    .onHover { inside in
+                        if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
+                    }
+            }
+            .help("Drag to resize the panes")
+    }
+
+    private func paneHost(_ pane: PaneID, split: Bool, tokens: VoiceTokens) -> some View {
+        // THE MOUNT RULE, consulted as the one fork (13f batch 4, gate (b)):
+        // exactly the focused pane mounts a live surface — an authority
+        // owner, a routed-command handler, a live editor. Everything else
+        // renders read-cheap, which is why the app-scoped singletons that
+        // assume one detail keep being correct.
+        let live = PaneMount.kind(of: pane, focused: router.workspace.focusedPane) == .live
+        return PaneHost(
+            tokens: tokens, workspace: router.workspace, pane: pane,
+            focused: live, split: split,
+            onBack: {
+                router.workspace.focus(pane)
+                router.goBack(in: pane)
+            },
+            onToggleCollapse: { router.workspace.backChipCollapsed.toggle() },
+            onFocus: { router.workspace.focus(pane) }
+        ) {
+            paneDetail(router.workspace.selections[pane], pane: pane, live: live)
+        }
+    }
+
+    /// What ONE pane shows. `live` is `PaneMount`'s verdict: the focused
+    /// pane mounts the full surface, the others render read-cheap — a NOTE
+    /// as `ReadPostView` (whose standing click-to-focus door migrates the
+    /// ring, exactly the Book spread's sibling page), a BOOK through its
+    /// own focus authority, and every list surface unchanged, because a
+    /// list owns no authority and registers no handler.
     @ViewBuilder
-    private var detail: some View {
+    private func paneDetail(
+        _ selection: SidebarSelection?, pane: PaneID, live: Bool
+    ) -> some View {
+        let openHere = opener(pane)
         switch selection {
         case .shelf, nil:
             ShelfView(
                 session: session, model: shelf, readings: readings,
-                onOpen: { selection = $0 },
-                onTodaysEntry: { openToday() })
+                onOpen: openHere,
+                onTodaysEntry: { openToday(in: pane) })
         case .library:
             LibraryCatalogView(
                 session: session, model: catalog, library: library, tags: tags,
-                onOpen: { selection = $0 },
-                onOpenBlock: { picked, blockID in open(picked, blockID: blockID) },
+                onOpen: openHere,
+                onOpenBlock: { picked, blockID in open(picked, blockID: blockID, in: pane) },
+                onOpenBeside: { router.openBeside(.post($0)) },
                 // MINOR-D6: the one fire-and-DO tutorial door (failures speak).
                 onOpenTutorial: { ShellActions(session: session, shell: router).openTutorial() })
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts, library: library,
                 readings: readings, tags: tags,
-                onOpen: { selection = $0 })
+                onOpen: openHere,
+                onOpenBeside: { router.openBeside(.post($0)) })
         case .blocks:
             // Batch 12: the Blocks AREA — standalone blocks live and are
             // born here (the sidebar rows retired).
             BlocksAreaView(session: session, model: pool) { poolID in
-                selection = .pool(poolID)
+                openHere(.pool(poolID))
             }
         case .post(let postID):
-            // Phase 11 (A3): the mode switcher — Write / Takes / Compare
-            // over one post, one store.
-            PostDetailView(
-                session: session, postID: postID,
-                initialBlockID: target(for: postID))
-                // a different post (or block landing) is a different editor
-                .id("\(postID)#\(target(for: postID) ?? "")")
+            if live {
+                // Phase 11 (A3): the mode switcher — Write / Takes / Compare
+                // over one post, one store.
+                PostDetailView(
+                    session: session, postID: postID,
+                    initialBlockID: target(for: postID))
+                    // a different post (or block landing) is a different editor
+                    .id("\(postID)#\(target(for: postID) ?? "")")
+            } else {
+                readCheapNote(postID, pane: pane)
+            }
         case .tag(let tagID):
             FolderView(session: session, tagID: tagID) { postID in
-                selection = .post(postID)
+                openHere(.post(postID))
             }
             .id(tagID)
         case .reading(let readingID):
-            BookView(session: session, readingID: readingID)
+            // The book blurs through its OWN single focus authority
+            // (`BookViewModel.focusedPostID`, 13b 3E's fold) when its pane
+            // is not focused — a second reason for one mechanism to answer
+            // nil, never a second mechanism.
+            BookView(
+                session: session, readingID: readingID, paneFocused: live,
+                onPaneFocusRequest: { router.workspace.focus(pane) })
                 .id(readingID)
         case .pool(let poolID):
-            // A scraps container ("Blocks") opens in the ordinary detail
-            // editor (the ratified Phase 10 shape); the canvas is its
-            // second face (Phase 11, A7).
-            PoolDetailView(
-                session: session, poolID: poolID,
-                initialBlockID: target(for: poolID))
-                .id("\(poolID)#\(target(for: poolID) ?? "")")
+            if live {
+                // A scraps container ("Blocks") opens in the ordinary detail
+                // editor (the ratified Phase 10 shape); the canvas is its
+                // second face (Phase 11, A7).
+                PoolDetailView(
+                    session: session, poolID: poolID,
+                    initialBlockID: target(for: poolID))
+                    .id("\(poolID)#\(target(for: poolID) ?? "")")
+            } else {
+                readCheapNote(poolID, pane: pane)
+            }
         case .recovery:
             RecoveryView(
                 session: session, library: library,
-                openPost: { postID in selection = .post(postID) },
+                openPost: { postID in openHere(.post(postID)) },
                 revealBlockID: revealUnplacedBlockID,
                 onRevealConsumed: { revealUnplacedBlockID = nil })
         }
     }
 
+    /// An unfocused note pane: the read tier, in its own scroll (the read
+    /// view is content-sized and never brings one — the `SpreadPage`
+    /// precedent), with its click-to-focus door pointed at this pane.
+    private func readCheapNote(_ containerID: String, pane: PaneID) -> some View {
+        ScrollView {
+            ReadPostView(
+                session: session, postID: containerID,
+                onFocusRequest: { _ in router.workspace.focus(pane) },
+                onBadgeTap: { _ in router.workspace.focus(pane) })
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 14)
+        }
+        .id("pane-read-\(containerID)")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(theme.tokens(for: scheme).surface)
+    }
+
     /// Navigation with an optional caret-precise block landing (Stage C).
-    private func open(_ picked: SidebarSelection, blockID: String?) {
+    private func open(
+        _ picked: SidebarSelection, blockID: String?, in pane: PaneID? = nil
+    ) {
         switch (picked, blockID) {
         case (.post(let id), .some(let block)), (.pool(let id), .some(let block)):
             blockTarget = BlockTarget(containerID: id, blockID: block)
         default:
             blockTarget = nil
         }
-        selection = picked
+        adopt(picked, in: pane ?? router.workspace.focusedPane)
     }
 
     private func target(for containerID: String) -> String? {
@@ -284,10 +432,10 @@ struct RootView: View {
 
     /// The dated home's door (R38: the journal lives on the shelf;
     /// `JournalBooks.openToday` carries the ensure-membership half).
-    private func openToday() {
+    private func openToday(in pane: PaneID? = nil) {
         Task {
             if let id = await library.openJournalEntry() {
-                selection = .post(id)
+                adopt(.post(id), in: pane ?? router.workspace.focusedPane)
             }
         }
     }
@@ -300,10 +448,11 @@ struct RootView: View {
     private func wirePaletteCommands() {
         let actions = ShellActions(session: session, shell: router)
         var rows: [(title: String, action: @MainActor () -> Void)] = [
-            ("Go to Shelf", { [self] in selection = .shelf }),
-            ("Go to Library", { [self] in selection = .library }),
-            ("Go to Pool", { [self] in selection = .poolPosts }),
-            (RecoveryPath.menuLabel, { [self] in selection = .recovery }),
+            ("Go to Shelf", { [self] in adopt(.shelf, in: router.workspace.focusedPane) }),
+            ("Go to Library", { [self] in adopt(.library, in: router.workspace.focusedPane) }),
+            ("Go to Pool", { [self] in adopt(.poolPosts, in: router.workspace.focusedPane) }),
+            (RecoveryPath.menuLabel,
+                { [self] in adopt(.recovery, in: router.workspace.focusedPane) }),
             // 13b Stage 2: the old modes-tutorial entrance points at the
             // one tutorial BOOK (find-or-seed, then open — fire-and-DO).
             ("Open the Tutorial — \(TutorialSeeder.bookName)", { actions.openTutorial() }),

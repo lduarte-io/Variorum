@@ -39,6 +39,91 @@ nonisolated struct PaneID: Hashable, Sendable {
     static let primary = PaneID("primary")
 }
 
+// MARK: - The mount rule (13f batch 4, item 2 — P-3 across panes)
+
+/// WHAT A PANE MOUNTS — and the whole of P-3's extension to panes, as one
+/// pure decision rather than a new mechanism.
+///
+/// **Why this is the entire extension** (traced at the batch-4 gate, ruled
+/// approved): `PaneTextAuthority` already enforces exactly-one-live-ring,
+/// and it enforces it INSIDE one authority. Every authority owner
+/// (`TakesViewModel`, Compare's model, `CanvasViewModel`, `BlockTOCView`)
+/// and every routed-command handler (`EditorView`, `TakesBoardView`,
+/// `LensesBoardView`, `CompareBoardView`, `CanvasView`) is mounted by a
+/// detail host. So two panes are safe exactly when at most ONE of them
+/// mounts a live surface — at which point the app-scoped singletons that
+/// assume one detail (`CommandRouter`'s single detail registration, its
+/// LIFO handler stack, `EditorRouter.active`) keep being correct with no
+/// change at all. That is `SpreadBookView`'s shape (13c 2B, where the
+/// reasons are written out), generalized from two pages to N panes.
+///
+/// The alternative — both panes live, liveness suppressed by a third
+/// disjunct beside `sealed || structuralInFlight` — was named and REJECTED
+/// at the gate: it needs the flag threaded into five surfaces AND a
+/// pane-keyed rewrite of all three singletons, which multiplies exactly
+/// what P-3 exists to prevent.
+nonisolated enum PaneMount {
+    enum Kind: Equatable, Sendable {
+        /// Mounts the full detail surface: authority owner, command
+        /// handler, live editor.
+        case live
+        /// Renders read-cheap — no authority, no handler, no live editor.
+        case readCheap
+    }
+
+    static func kind(of pane: PaneID, focused: PaneID) -> Kind {
+        pane == focused ? .live : .readCheap
+    }
+
+    /// How many panes mount a live surface. **ONE**, for any pane
+    /// collection and any focus — the invariant the split's safety rests
+    /// on, stated as arithmetic so a pin can hold it. If this ever answers
+    /// more than one, the flight latch must move to a post-keyed shared
+    /// authority BEFORE that ships (the batch-4 gate ruling, condition c).
+    static func liveCount(panes: [PaneID], focused: PaneID) -> Int {
+        panes.filter { kind(of: $0, focused: focused) == .live }.count
+    }
+}
+
+// MARK: - Pane layout (the divider's arithmetic)
+
+/// Where the dividers sit. Fractions are DIVIDER POSITIONS in `0...1`,
+/// ascending, one per divider — so a drag edits exactly one number and the
+/// shape generalizes to N panes without becoming a left/right pair (the
+/// free-tiling rider).
+nonisolated enum PaneLayout {
+    /// No pane may be dragged below this share of the row. A pane you
+    /// cannot see is a pane you cannot click back out of.
+    static let minimumFraction = 0.15
+
+    /// Evenly-spaced dividers for a pane count — what a fresh split gets.
+    static func evenFractions(paneCount: Int) -> [Double] {
+        guard paneCount > 1 else { return [] }
+        return (1..<paneCount).map { Double($0) / Double(paneCount) }
+    }
+
+    /// Pane widths across `total`, given the dividers' positions.
+    static func widths(total: CGFloat, fractions: [Double]) -> [CGFloat] {
+        let bounds = [0.0] + fractions + [1.0]
+        guard total > 0 else { return Array(repeating: 0, count: bounds.count - 1) }
+        return (0..<(bounds.count - 1)).map { CGFloat(bounds[$0 + 1] - bounds[$0]) * total }
+    }
+
+    /// Move one divider, clamped so its two neighbours both keep at least
+    /// `minimumFraction` — the drag can never swallow a pane.
+    static func moving(
+        _ fractions: [Double], divider index: Int, to value: Double
+    ) -> [Double] {
+        guard fractions.indices.contains(index) else { return fractions }
+        let lower = (index == 0 ? 0 : fractions[index - 1]) + minimumFraction
+        let upper = (index == fractions.count - 1 ? 1 : fractions[index + 1]) - minimumFraction
+        guard lower <= upper else { return fractions }
+        var out = fractions
+        out[index] = min(max(value, lower), upper)
+        return out
+    }
+}
+
 // MARK: - Per-pane history (W16)
 
 /// One pane's visit history — the ⌘[ / ⌘] stacks and the back chip's
@@ -246,4 +331,22 @@ nonisolated enum WorkspaceNaming {
     static func backLabel(origin: String) -> String { "\u{2190} \(origin)" }
 
     static func backHelp(origin: String) -> String { "Back to \(origin) (\u{2318}[)" }
+
+    // MARK: - The split (13f batch 4, W1/A25)
+
+    /// **The same-note refusal** — her sitting ruling, round 7.3: *"opening
+    /// a note already showing in the other pane could move you there …
+    /// definitely not two live side by sides - we already offer that for
+    /// one note."* The definite half binds, so the split never shows one
+    /// note twice; the shipped shape is her first-listed reading (focus the
+    /// pane that has it) and this is what it SAYS while doing so — naming
+    /// the two surfaces that ARE the same-note side-by-side answer.
+    static func sameNoteNote(_ name: String) -> String {
+        "\u{201c}\(name)\u{201d} is already open in the other pane — a split never shows "
+            + "one note twice. To see one note side by side, use Lenses or Compare."
+    }
+
+    /// What "Open Beside" is called, in one place, so the menu door, the
+    /// row doors and the refusal all wear the same word.
+    static let openBesideVerb = "Open Beside"
 }

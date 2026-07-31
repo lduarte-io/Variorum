@@ -521,6 +521,25 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2318}]", takesAccess: nil,
             unavailableNote: "Nothing to go forward to — you haven't gone back.",
             availability: { ctx in ctx.canNavigateForward ? .act : .unavailable }),
+        // 13f batch 4 — the SPLIT (her W1/A25 ruling). The menu door puts
+        // the most recently opened OTHER note beside this one; the row
+        // doors (`.contextMenu`) put the row you point at. Both refuse the
+        // same way when the note is already showing, because her round-7.3
+        // rule is one rule with one voice: a split never shows one note
+        // twice, and Lenses/Compare are the same-note surfaces.
+        Capability(
+            id: .openBeside, verb: WorkspaceNaming.openBesideVerb, scope: .app,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "There's no other open note to put beside this one yet — "
+                + "open a second note and it can sit alongside.",
+            availability: { ctx in ctx.canOpenBeside ? .act : .unavailable }),
+        Capability(
+            id: .closeSplit, verb: "Close Split", scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "There's no split to close — this window shows one note.",
+            availability: { ctx in ctx.paneCount > 1 ? .act : .unavailable }),
         // Her W16 second half. A `.surface` door on the peer column's own
         // header — the `.unarchiveTake` class: the target is the thing you
         // are pointing at, so no routed context command exists. The CONTEXT

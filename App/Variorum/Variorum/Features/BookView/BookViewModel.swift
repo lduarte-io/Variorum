@@ -364,8 +364,28 @@ final class BookViewModel {
         expandedPosts.contains(postID)
     }
 
+    /// 13f batch 4 (the MOUNT rule): whether this book's PANE is the
+    /// focused one. A book in an unfocused pane mounts no live surface —
+    /// and it does so through the book's OWN single focus authority below,
+    /// which is a second REASON for one mechanism to answer nil, never a
+    /// second mechanism (P-3).
+    var paneFocused = true
+
+    /// The post that may mount a live surface. Every liveness read goes
+    /// through this; `focusedPostID` stays the book's reading position, so
+    /// a pane regaining focus restores exactly what it was editing.
+    var liveFocusedPostID: String? { paneFocused ? focusedPostID : nil }
+
+    /// Set by the shell when this book sits in a pane: focusing a post
+    /// inside an unfocused pane asks for the PANE first, so one click both
+    /// claims the pane and opens the post (13f batch 4).
+    @ObservationIgnored var onPaneFocusRequest: (() -> Void)?
+
     /// Focus a post (nil = release): the focused post is always expanded.
     func focus(_ postID: String?, caret: Int? = nil, fanBlock: String? = nil) {
+        // One line covers all twelve call sites — the reason this rides the
+        // model rather than being threaded through the views.
+        if postID != nil, !paneFocused { onPaneFocusRequest?() }
         caretSeed = caret
         fanSeed = fanBlock
         focusedPostID = postID

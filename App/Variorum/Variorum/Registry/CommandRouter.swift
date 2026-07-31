@@ -215,6 +215,12 @@ final class CommandRouter {
     @ObservationIgnored var openNoteCount: () -> Int = { 0 }
     @ObservationIgnored var canNavigateBack: () -> Bool = { false }
     @ObservationIgnored var canNavigateForward: () -> Bool = { false }
+    /// 13f batch 4 — the split's two facts, wired the same way. These read
+    /// the FOCUSED pane's world (the navigation pair does too, since
+    /// `WorkspaceModel.history()` now defaults to the focused pane) — the
+    /// gate's focused-pane refinement, landed where batch 3 cut for it.
+    @ObservationIgnored var paneCount: () -> Int = { 1 }
+    @ObservationIgnored var canOpenBeside: () -> Bool = { false }
 
     // MARK: - Context assembly
 
@@ -228,7 +234,9 @@ final class CommandRouter {
             redoAvailable: redoAvailable(),
             openNoteCount: openNoteCount(),
             canNavigateBack: canNavigateBack(),
-            canNavigateForward: canNavigateForward())
+            canNavigateForward: canNavigateForward(),
+            paneCount: paneCount(),
+            canOpenBeside: canOpenBeside())
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {

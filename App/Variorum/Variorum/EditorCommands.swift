@@ -61,6 +61,8 @@ struct EditorCommands: Commands {
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
         .openNote, .navigateBack, .navigateForward,
+        // 13f batch 4 (W1/A25): the split's.
+        .openBeside, .closeSplit,
     ]
 
     /// The SwiftUI key wiring per shortcut-labeled capability — the walk
@@ -397,6 +399,17 @@ struct EditorCommands: Commands {
                 }
             }
             .disabled(!enabled(.openNote))
+            Divider()
+            // 13f batch 4 (W1/A25 — her two-panes ruling): the split's
+            // keyboard-reachable doors. Open Beside from here means "put
+            // the most recently opened OTHER note beside this one", which
+            // is what a split is FOR after coming from somewhere; the row
+            // doors put the row you point at. Both refuse in one voice
+            // when the note is already showing (round 7.3).
+            Button(verb(.openBeside)) { router.openBesideMostRecent() }
+                .disabled(!enabled(.openBeside))
+            Button(verb(.closeSplit)) { router.closeSplit() }
+                .disabled(!enabled(.closeSplit))
             Divider()
         }
         // ⌘/ — the shortcut helper + dictionary (Sitting 9, R73/R91).

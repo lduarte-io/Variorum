@@ -50,6 +50,10 @@ struct CapabilityRegistryTests {
         // its own context joined.
         contexts.append(CapabilityContext(
             mode: nil, openNoteCount: 3, canNavigateBack: true, canNavigateForward: true))
+        // 13f batch 4 (W1/A25): the SPLIT's gates, the same family — one
+        // needs a note to put beside, the other needs a split to close.
+        contexts.append(CapabilityContext(
+            mode: nil, openNoteCount: 2, paneCount: 2, canOpenBeside: true))
         return contexts
     }
 
@@ -162,6 +166,7 @@ struct CapabilityRegistryTests {
         let rendered = Set(EditorViewModel.contextMenuCapabilities)
             .union(TakesCellView.contextMenuCapabilities)
             .union(LensesBoardView.columnMenuCapabilities)  // 13b 3D: renameLens
+            .union(SidebarView.contextMenuCapabilities)  // 13f batch 4: the note rows
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 

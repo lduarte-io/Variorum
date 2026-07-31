@@ -43,9 +43,30 @@ nonisolated enum SidebarSelection: Hashable {
     case pool(String)
     /// The archived + deleted recovery surfaces (⌘K / Library-reachable).
     case recovery
+
+    /// The container this destination OPENS IN A DETAIL SURFACE, if any —
+    /// the thing her same-note rule is about (13f batch 4, round 7.3).
+    ///
+    /// A scraps container counts alongside a post deliberately: `.pool`
+    /// opens `PoolDetailView`, so two panes on one pool would be two detail
+    /// hosts on one container — the exact shape the rule forbids. The Open
+    /// STRIP still tracks `.post` only (ratified round 7.2); that is a
+    /// different question from what may be shown twice.
+    var noteID: String? {
+        switch self {
+        case .post(let id), .pool(let id): return id
+        case .shelf, .library, .poolPosts, .blocks, .recovery, .tag, .reading: return nil
+        }
+    }
 }
 
 struct SidebarView: View {
+    /// The NOTE-ROW context menu's declared acts (P-1's walk). One grammar,
+    /// three surfaces render it — the Open strip's rows here, the Library
+    /// catalog's post rows, and the Pool's — all through the same shell
+    /// callback, so one declaration covers the family.
+    static let contextMenuCapabilities: [CapabilityID] = [.openBeside]
+
     let session: AppSession
     let model: LibraryViewModel
     let pool: PoolViewModel
@@ -55,6 +76,9 @@ struct SidebarView: View {
     /// four and below the contextual "this post" rail.
     let workspace: WorkspaceModel
     @Binding var selection: SidebarSelection?
+    /// 13f batch 4 (W1/A25): "Open Beside" on an Open-strip row — the
+    /// split's door where the window's open notes already live.
+    var onOpenBeside: ((String) -> Void)?
     /// Batch 14: the open post's current mode (the rail's › marker) —
     /// broadcast by PostDetailView, tracked by the shell.
     var postMode: String = PostDetailView.Mode.takes.rawValue
@@ -117,6 +141,12 @@ struct SidebarView: View {
                             .help("Close this row — the note itself is untouched")
                     }
                     .tag(SidebarSelection.post(noteID))
+                    .contextMenu {
+                        if let onOpenBeside {
+                            Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }
+                        }
+                        Button("Close") { workspace.closeNote(noteID) }
+                    }
                 }
                 // Her ruling's second half: *"maybe they're draggable /
                 // reorderable manually like browser tabs as well though?

@@ -204,6 +204,13 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     var canNavigateBack = false
     /// …and somewhere to go forward to.
     var canNavigateForward = false
+    /// How many panes the window shows (13f batch 4 — W1/A25). >1 ⇒ a
+    /// split exists, which is exactly when Close Split can act.
+    var paneCount = 1
+    /// There is a note the split could put beside the current one — the
+    /// most recently opened note no pane shows. False ⇒ Open Beside is
+    /// honestly grey rather than a menu item that can only refuse.
+    var canOpenBeside = false
 }
 
 // MARK: - The capability declaration
@@ -295,6 +302,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // one declaration for ⌘1–⌘6 — a family of ordinal keys wired per index
     // by the menu, with every one of them a menu item (R73/R91/R93).
     case openNote, navigateBack, navigateForward
+    // 13f batch 4 — the SPLIT (her W1/A25 ruling, two panes in v1). Both
+    // are app-scope stack gates like the navigation family: one needs a
+    // note to put beside, the other needs a split to close.
+    case openBeside, closeSplit
     // The peer column's open door in Compare (her W16 second half: *"in
     // compare … you should be able to click on the post you're comparing
     // it with"*). A `.surface` act — its target is the column you point at.

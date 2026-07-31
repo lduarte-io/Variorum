@@ -54,4 +54,34 @@ final class ShellRouter {
             pendingSelection = .post(id)
         }
     }
+
+    // MARK: - The split's doors (13f batch 4, W1/A25)
+
+    /// Speech lands in the StatusCenter — wired by the shell, exactly as
+    /// `CommandRouter.speak` is, so the router never reaches for a session.
+    @ObservationIgnored var speak: ((String) -> Void)?
+
+    /// "Open Beside" for a NAMED note (the row doors) — and the ONE place
+    /// her round-7.3 refusal is spoken, so the menu door and every row door
+    /// say the same sentence.
+    func openBeside(_ destination: SidebarSelection) {
+        switch workspace.openBeside(destination) {
+        case .opened:
+            break  // the pane appeared; nothing to say
+        case .focusedExistingPane:
+            speak?(WorkspaceNaming.sameNoteNote(workspace.label(for: destination)))
+        }
+    }
+
+    /// The menu door: the most recently opened note no pane is showing.
+    /// Grey when there is none (the registry's `canOpenBeside`), so this is
+    /// reachable only by a race — and a race should not speak.
+    func openBesideMostRecent() {
+        guard let id = workspace.openBesideCandidate else { return }
+        openBeside(.post(id))
+    }
+
+    func closeSplit() {
+        _ = workspace.closeSplit()
+    }
 }
