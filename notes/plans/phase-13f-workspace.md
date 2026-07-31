@@ -3238,3 +3238,130 @@ build of the windows half plus its pins. **My recommendation: give the
 ruled windows build to a FRESH session** (the standing cutover
 discipline), and give W23's short build to whichever session runs next —
 it is small enough either way.
+
+#### Batch 5 (items 1–4) — ACCEPTED (2026-07-31; the orchestrator's adjudication)
+
+**Counts by my own runs** (not the implementer's): core `✔ Test run
+with 906 tests in 102 suites passed` (`swift_exit=0`) · Mac `✔ Test
+run with 1026 tests in 174 suites passed` (`xcodebuild_exit=0`) —
+both match the record's claims exactly; the quoted mobile line (14/4,
+run because `Shared/` was touched) is accepted, with mobile's
+re-verify by my own run owed at phase end per the standing rule.
+
+**Load-bearing diffs read:** W20's fix deletes the optional closure
+rather than filling it in — `MembershipChip.ascend` is a NAMED
+broadcast and `RootView` decides (P-4; the batch-2 lesson applied to
+a closure), which is the right level for the fire-and-DO class that
+produced the bug; W22's hook lands at `AutosaveCoordinator.record`
+(`firstEditFired` once per instance) wired at
+`AppSession.autosave(forPost:)` — the ONE place knowing both halves,
+flag-first so the common case is a defaults read; W21's
+`BookAnchor.currentPost` is pure over facts the surfaces already
+hold, every arm falling back to a standing anchor rather than nil.
+The five reverts' discrimination is endorsed from the record
+(W20-A reproducing the dead link live is the batch's proof done
+right). **The stale-product trap is endorsed into the standing
+record** (every revert = `build-for-testing` →
+`test-without-building`; a green revert on a stale binary reads as a
+hollow pin and invites weakening a good one — the dangerous
+direction, now named).
+
+**Judgment calls adjudicated:** the remembered-mode discrepancy was
+rightly FLAGGED, not decided — it went to her (round 13 below); the
+Read ▸ Scroll gap is ENDORSED as recorded behavior (the consequence
+of her own A6 removal ruling; pinned; on her walk list); ⌘⇧I ENDORSED
+(sweep-verified free; the muscle-memory half is her walk's); W22
+shipping without the button ENDORSED as the honest interim (the
+button lands with W23's build, below); the chooser's
+curated-before-smart shaping was mine (round 10) and stays hers to
+overturn at the walk. **Ledger: W21 BUILT · W20 BUILT · W22 BUILT**
+(all adjudicated) · W23 ruled below · W19 rider correctly not fired.
+
+### Sitting round 13 (2026-07-31, question batch — the two flagged product calls)
+
+1. **Same-note ACROSS WINDOWS: ALLOW** (her pick of the
+   recommendation). A note may show in two windows — two views of one
+   document, the standing Mac idiom; only ONE is ever live (the mount
+   rule guarantees it everywhere). The round-7.3 pane rule stands
+   untouched WITHIN each window; no cross-window refusal machinery is
+   built. This closes the proposal's flagged item (c).
+2. **Book mode memory: LANDING + CARRY IS ENOUGH** (her pick). The
+   ascent lands at the book's opening mode revealed at her post; any
+   other mode is one carried click away (W21). R2's ratified "a
+   finished book opens into the reading flow" stands whole; no
+   per-book mode memory is built. The round-8 "remembered mode"
+   wording is satisfied at this shape; the walk re-opens it only if
+   her hands disagree.
+
+### THE ARCHITECT'S RULINGS — W23's undo shape + the windows gate (2026-07-31; the gate closes)
+
+**W23 RULED: shape 1 — the thin operations-layer composite**
+(`divergePostForReading`-shaped: ONE transaction composing exactly
+the standing paths; ONE undo entry whose inverse AND redo are built
+from do-time pre-images — the original membership's `position` and
+`section_id`, the copy's id). The round-10 "standing ops, no new
+operation" sentence was MY compression and it meant no new
+SEMANTICS — this adds none; what it buys is the honest undo entry,
+and a half-undo presented as a whole one is the forbidden class the
+implementer was right to stop on. CLAUDE.md's own rule cuts the same
+way: every mutation flows through the transactional operations API,
+so the composite belongs in Operations, not in a view. Shape 2
+(the mixed compound) REJECTED for the implementer's own reason; §9's
+entry lands at the closeout ritual per convention. Everything else
+about W23 builds exactly as the batch record states (exact-slot swap
+incl. `section_id`; curated-only with the honest smart refusal
+naming the tag road; the finished-book refusal; the W22 note gains
+its button — `StatusCenter.Item`'s optional action).
+
+**The windows proposal, ruled (a)–(e):**
+- **(a) APPROVED as proposed** — the router moves INTO `RootView`;
+  a tiny app-level `WindowRegistry` (`[UUID: ShellRouter]` +
+  `keyWindowID`) read by `EditorCommands` through one computed
+  `activeRouter` (the CommandRouter pattern one level up); the
+  keyed-app-level alternative REJECTED for the free-tiling-rider
+  reason as proposed. Restoration behavior APPROVED as recorded:
+  nothing persists in v1 — a restored window returns to the shelf;
+  goes on her walk list as a named behavior, not a bug.
+- **(b) APPROVED — the key-window mount gate on the SAME fork**
+  (`PaneMount.kind` gains the window's key-ness): exactly one pane,
+  in exactly one window, mounts a live surface; the both-live
+  alternative REJECTED (batch 4's reason at window scale). **THREE
+  CONDITIONS, all pinned, not assumed:** (1) the window-scale
+  singleton-unrepresentability pin — the R4-A shape with TWO hosted
+  windows (`handlerCount` stays 1; `activePostID` follows the KEY
+  window across a key migration in both directions); (2) the
+  window-switch unmount-mid-flight pin (the teardown/flush backstop
+  at window scale, premise-asserted like batch 4's); (3) **the
+  deactivation edge — the key-ness input must be STICKY
+  (last-known-key), never literal keyWindow-now:** ⌘-tabbing to
+  another APP resigns key with no successor window, and a literal
+  reading would unmount the live surface on every app switch — a
+  teardown/flush storm the split never had. Pin: app deactivation
+  (resign with no new key window) unmounts and remounts NOTHING.
+- **(c) RULED BY HER** (round 13): windows are NOT subject to the
+  same-note rule. Nothing cross-window is built for it.
+- **(d) APPROVED as proposed** — the note-only window carries the
+  detail + the context bar and lacks sidebar/strip/split; the
+  honest-grey resolution table endorsed (the registry earning its
+  existence). Note-only history NOT in v1 (back/forward honestly
+  grey there); the one-line widening recorded for her word.
+- **(e) APPROVED** — the parameterized
+  `WindowGroup(id:"variorum-note", for: String.self)`; File ▸ New
+  Window rides the system-standard item undeclared (nothing else in
+  the registry duplicates a standard File item — endorsed with the
+  reason); "Open in New Window" is ONE registry declaration on the
+  note-row family. **Build order BINDING: (1) the per-window
+  router/workspace + `WindowRegistry` + the key-window gate with its
+  three condition pins; then (2) the two window kinds and their
+  doors. Nothing of (2) before (1).** The W19 rider carries: if the
+  refactor's diff reaches the shell-redo status path, its timing is
+  traced then.
+
+**Continuation plan:** the CURRENT implementer session takes **W23
+(ruled shape 1) + W24 (the extract rider, round 12) + the W22
+button completion** — small, and its context serves them — then
+stops for acceptance. **The WINDOWS build goes to a FRESH session
+(batch 5b)** on the ruled proposal, per its own recommendation and
+the standing cutover discipline; 5b's brief is THE PROPOSAL plus the
+rulings above plus the standing loop — spawned after the
+continuation's acceptance, never concurrently.
