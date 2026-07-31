@@ -2471,3 +2471,180 @@ tags face — see/add/remove from the note itself), with the note that
 the W20 context bar ("in <book>") is its natural home when built:
 books and tags are the two halves of "where does this live." Her
 "not this one though" continues to govern the slotting.
+
+### ORCHESTRATOR RESUMED — the successor session (2026-07-30); cutover state VERIFIED
+
+Per the role handoff (`notes/plans/phase-13f-orchestrator-handoff.md`):
+preflight reading complete (this file WHOLE; the handoff; the 13c
+plan's "Environment traps"; the 13d closeout's "Standing notes for
+successors"; `notes/QUESTIONS.md` — #32 the only open entry, next
+free number **#49**). **Cutover state verified by my OWN runs, not
+trusted:** tree clean at `0e2eb2d`, nothing in flight, no running
+instances (`pgrep` by path), session unlocked; core `✔ Test run with
+906 tests in 102 suites passed` (`swift_exit=0`) · Mac `✔ Test run
+with 1003 tests in 165 suites passed` (`xcodebuild_exit=0`) — both
+match batch 4's acceptance exactly. Mobile's re-verify stays owed at
+phase end (the standing 14/4). Batch 5 proceeds on the queue the
+cutover recorded.
+
+### Batch 5 brief — windows (the per-window router + W2/A26, PROPOSAL GATE inside) + the books-ascent family (W21 · W20 · W22 · W23) (fresh Opus implementer; self-contained)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §4/§12; §14's 13c/13d deltas; §9's
+`duplicateAsVersion`/`addPostToReading`/`removePostFromReading`/
+`assignPostToSection` entries); THIS plan file WHOLE — the
+constitution (P-3 and P-4 are this batch's law), THE KICKOFF SITTING,
+sitting rulings rounds 1–11 (round 2 item 3 = both window kinds;
+rounds 8–10 = the ascent family's rulings, HER VERBATIM WORDS —
+build to them, not to my compressions below), batches 1–4's records +
+acceptances (batch 2's P-4 reveal grammar and batch 4's proposal +
+the architect's gate ruling are your precedents; batch 4's "For the
+orchestrator" note names the ShellRouter finding you fix first); the
+13c plan's "Environment traps" (binding); the batch 1–4 environment
+traps (the hosted-ScrollView `scrollPageDown:` hang; `NSDraggingInfo`
+fakes never drive `.dropDestination`; the zsh `git show`
+history-modifier trap).
+
+**Build order:** items 1–4 (the books family) FIRST, in the order
+given (W21 before W20 — W20's landing consumes W21's anchoring
+brain); then append THE PROPOSAL (item 5's gate) and STOP — the
+windows build proceeds only on the architect's ruling. If your
+context is running long when the gate closes, SAY SO in your report:
+the windows build can go to a fresh session on the ruled proposal
+(the standing cutover discipline) rather than to a degraded one.
+
+**The items:**
+
+1. **W21 — cross-mode position carry in books (round 8 ruling 2;
+   round 10 item 3 confirms).** Switching `Outline · Book · Read`
+   carries the CURRENT POST across — verified ABSENT today (the
+   picker just sets `structure.mode`). Build ONE anchoring brain —
+   "land mode M revealed at post P" — with per-mode landings:
+   Outline scrolls to the post's row/card (posts open COLLAPSED per
+   the #43(a) ruling — reveal means scroll-to, never a silent
+   auto-expand; record if auto-expand feels wanted, for her walk);
+   Book anchors the spread so P's page is showing (the standing
+   leaf/nudge machinery); Read's scroll face scrolls to P, its Pages
+   face opens P's first page (the (post, page-in-post) identity
+   address). "Current post" per mode = what the mode already knows
+   (the live/focused page, else the reading address, else the
+   topmost visible post) — trace what each mode tracks before
+   inventing state. The carry is the DEFAULT behavior of the mode
+   click-over ("if you click over does it move where you are?" —
+   her condition, answered YES). Arithmetic pure and pinned;
+   red-on-old by behavioral revert.
+2. **W20 — the ascent door (round 8 ruling 1; round 10 items 1–2).**
+   Three halves, ONE bar: **(a)** wire `MembershipChip.onOpenBook` —
+   VERIFY the round-8 trace yourself first (the closure is passed
+   nowhere at its one `PostDetailView` mount; clicking a book name
+   has done nothing since Phase 13) — fire-and-DO: open that book
+   REVEALED at this post via item 1's brain, landing in the book's
+   REMEMBERED mode (round 8's condition, satisfied by W21); history
+   pushed through the ONE adoption door (batch 4's `select()`
+   records) so ⌘[ returns. P-4: the chip posts a notification with
+   (book, post) — the batch-2 `.variorumRevealUnplacedBlock`
+   precedent — and `RootView` decides; the surface never navigates
+   itself. **(b)** the "in <book>" IN-LINE joins the batch-3 back
+   chip as ONE foldable context bar: one collapse state, one fold —
+   never two hiding mechanisms (her ruling verbatim: chip + visible
+   in-line, hideable "even if just with a keyboard command") — with
+   ONE registry-declared toggle act (menu item + a key: sweep the
+   chord FIRST per the standing key-table pin; pick a defensible
+   free chord and record it). The in-line names the TOP pick +
+   "& N more". **(c)** the chooser (the chip popover's list) orders
+   CURATED BEFORE SMART, session's most-recently-visited floating
+   within each group (round 10 item 1 — architect shaping, hers to
+   overturn on the walk); smart matches ARE listed (round 10 item 2:
+   derived membership IS membership, #26(h)). NO dedicated
+   go-to-book shortcut (her middle pick); ⌘K reaches the act by
+   name. P-8 binds on the bar (`lineLimit(1)`, bounded frames).
+3. **W22 — the first-edit note (round 9's ruling).** ONE-TIME EVER
+   (an app-local seen flag — the local view-memory family, never
+   synced, never schema): the first time she edits a post that
+   appears in 2+ books, the host's standing status/toast voice says
+   editing here edits it everywhere and names the door (the ruled
+   copy grammar: "editing here edits it everywhere — Duplicate as
+   Version to diverge"), and CARRIES the W23 button (round 10 item
+   4). Trigger mechanics: on a live pane's FIRST dirty change for a
+   post, flag unset → one indexed membership-count read (off-main,
+   P2; never per-keystroke) → speak if ≥2 and set the flag. Zero
+   store bytes (pin).
+4. **W23 — diverge-for-this-book (round 10 item 4; the parse is
+   stated there so it can be corrected, not trusted).** The
+   compound: `duplicateAsVersion` + membership swap at position —
+   the copy takes the original's EXACT slot in THIS book (position
+   AND chapter assignment `section_id` — the exact-slot letter,
+   pinned); the original lives on in its other books and the
+   library. CURATED books only — a smart-book target refuses
+   honestly (derived membership has no row to swap; the refusal
+   names the tag road; 13i owns that design). Under a FINISHED book
+   the op fires and delivers its real refusal (#25's letter — P-2).
+   Doors: the W22 note carries the button; a registry-declared menu
+   door serves later times (post scope; renders when the post has
+   ≥2 book memberships — the note's own condition; the ≥1 widening
+   recorded for her walk). Target-book binding: the pane's
+   arrived-from book when history shows one, else the W20 chooser
+   grammar with nothing new invented — if that composition does not
+   fall out cleanly, STOP and propose that half. UNDO: trace what
+   each leg registers today; prefer ONE compound entry via the
+   standing machinery if the legs carry exact-row inverses; if they
+   do not, STOP and propose the honest shape (nothing here is
+   unrecoverable either way — the re-add door and the tray both
+   exist — but the story must be recorded, never implied).
+5. **THE WINDOWS HALF — PROPOSAL GATE (binding; the batch-4
+   pattern). Investigate and append a PROPOSAL under your batch
+   record; then STOP.** Nothing of items 5a–5b builds before the
+   architect's ruling. The proposal must cover, traced from code and
+   not assumed: **(a)** the per-window router/workspace shape —
+   `ShellRouter` is App-level `@State` on `VariorumApp`, shared by
+   every `WindowGroup` window (batch 4's recorded finding; NOTHING
+   ships a second window before this is fixed): what moves to
+   per-scene state, what stays app-global (`AppSession`, theme,
+   registry), and what window restoration does to session-scoped
+   workspace state (record the behavior, don't guess); **(b)** the
+   cross-WINDOW liveness extension — today's mount rule gives ONE
+   live surface per window; two windows would give the app two.
+   Trace `CommandRouter` (single detail registration, LIFO
+   handlers), `EditorRouter.active`, and menu/⌘-key routing under
+   TWO windows, and propose what "ONE live editor across all
+   windows" (her round-2 ruling) means mechanically — the landing
+   spot must be ON the standing authority seams, never a second
+   mechanism (P-3; key-window-gated mounting is the obvious
+   candidate — verify it against the singletons, don't assume it);
+   **(c)** the same-note rule ACROSS windows (round 7.3 ruled panes;
+   a note-only window on P while the main window navigates to P is
+   the same class one level up) — propose the extension, and FLAG
+   IT if your trace makes it product-flavored rather than
+   structural; **(d)** the note-only window's chrome ("Open in New
+   Window" = a lightweight note-only window, her round-2 pick):
+   what it carries (chip? masthead? inspector?), what it
+   deliberately lacks (sidebar, strip), how ⌘⇧n/⌘[/registry
+   contexts resolve there; **(e)** the scene architecture (how the
+   note-only `WindowGroup` is parameterized; the doors — File ▸
+   New Window is the full-app kind, "Open in New Window" is a
+   registry-declared act on note rows). **On the ruling, build:**
+   the per-window router/workspace FIRST, then both window kinds.
+   **W19 rider:** if the router refactor's diff touches the
+   shell-redo status-delivery path
+   (`theShellRedoActionRunsThroughTheRunnerAndReports`'s flaky
+   machinery — the KnownIssues row this phase owns), trace its
+   timing THEN (the hallucination guard binds — trace, never an
+   untraced patch); if untouched, say so and leave it.
+
+**Loop, records, constraints — identical to batches 1–4:** trace →
+build → pins (red-on-old by behavioral revert where a pin CAN go
+red; checksums before every revert; the model-layer honesty rule for
+anything the SwiftUI drag/window route makes unpinnable — list the
+visual halves honestly) → the tutorial spine green on its OWN run by
+TYPE name → full suites with quoted "Test run with N tests" lines
+(core from the repo root, Mac from `App/Variorum/`; mobile ONLY if
+`Sources/` or `Shared/` is touched — the iPhone 17-family/16e
+destination note). **Baselines to match-or-beat: core 906/102 · Mac
+1003/165 · mobile 14/4.** Append your batch record under "Batch
+records"; commit per convention with the standing trailer, staging
+by EXPLICIT PATH ONLY (the author's parallel session works in
+`notes/` — touch nothing of hers). Never `/Applications`, never
+`Sources/VariorumCore/Sync/`, never push, never `git checkout` over
+uncommitted work, NO schema. STOP-and-propose on anything exceeding
+a ruling's shape. Every PROVISIONAL to `notes/QUESTIONS.md` (append,
+never renumber; next free number **#49**).
