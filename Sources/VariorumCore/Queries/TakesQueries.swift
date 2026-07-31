@@ -27,12 +27,20 @@ extension Queries {
         /// seal already reads.
         public var profile: Profile?
         public var entryDate: String?
+        /// 13f W10b — blockID → the RELEASED originals it was derived from
+        /// (live, unplaced; `Queries.unplacedOrigins`). Absent = no such
+        /// origin, so the "Show Original Block" door isn't rendered there
+        /// (P-2). It rides the projection rather than a fourth observation
+        /// because the board already re-reads on exactly the writes that
+        /// change it (a divide-W or merge lands new slots).
+        public var unplacedOrigins: [String: [String]]
 
         public init(
             slots: [RenderedBlock] = [], fans: [String: [Variant]] = [:],
             lenses: [Lens] = [], lensSelections: [String: [String: String]] = [:],
             fanStyle: FanStyle = .stack, sealed: Bool = false,
-            profile: Profile? = nil, entryDate: String? = nil
+            profile: Profile? = nil, entryDate: String? = nil,
+            unplacedOrigins: [String: [String]] = [:]
         ) {
             self.slots = slots
             self.fans = fans
@@ -42,6 +50,7 @@ extension Queries {
             self.sealed = sealed
             self.profile = profile
             self.entryDate = entryDate
+            self.unplacedOrigins = unplacedOrigins
         }
     }
 
@@ -63,7 +72,8 @@ extension Queries {
             fanStyle: try fanStyle(db),
             sealed: header?["locked"] ?? false,
             profile: (header?["profile"] as String?).flatMap(Profile.init(rawValue:)),
-            entryDate: header?["entry_date"])
+            entryDate: header?["entry_date"],
+            unplacedOrigins: try unplacedOrigins(db, inContainer: containerID))
     }
 
     /// blockID → the block's live ACTIVE fan in fan order, for a set of

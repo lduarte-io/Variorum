@@ -54,6 +54,53 @@ extension Queries {
         return all.filter { placed.contains($0.blockID) }
     }
 
+    /// **The released originals a post's blocks came from** (13f W11/W10b —
+    /// her sitting question: *"it says … it stays whole on the original one,
+    /// but how do I even see the original one?"*).
+    ///
+    /// For every live block placed in `containerID`, the blocks its OWN
+    /// `derived_from` edges point at (direct edges only — the block's own
+    /// origin, not its whole ancestry) that are live but have **no live
+    /// placement**: exactly the divide-W preserved-whole A and the merge's
+    /// released B/C, i.e. the `unplacedBlocks` safety-net population reached
+    /// FROM the successor that replaced it. Blocks with no such origin are
+    /// absent from the map, so a surface renders no door for them (P-2).
+    ///
+    /// Several origins are possible and normal — a merge releases BOTH
+    /// sources, so A′ has two — and the ids come back sorted so the pick is
+    /// deterministic on every device.
+    ///
+    /// Cost: one indexed pass over the post's placements (the `renderPost`
+    /// class, and it rides the same projections), never the corpus.
+    public static func unplacedOrigins(
+        _ db: Database, inContainer containerID: String
+    ) throws -> [String: [String]] {
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT cb.block_id AS block_id, origin.id AS origin_id
+                FROM container_block cb
+                JOIN edge e
+                  ON e.source_block_id = cb.block_id
+                 AND e.type = 'derived_from' AND e.deleted_at IS NULL
+                JOIN block origin
+                  ON origin.id = e.target_block_id AND origin.deleted_at IS NULL
+                WHERE cb.container_id = :post AND cb.deleted_at IS NULL
+                  AND NOT EXISTS (
+                    SELECT 1 FROM container_block placed
+                    WHERE placed.block_id = origin.id AND placed.deleted_at IS NULL)
+                ORDER BY cb.block_id, origin.id
+                """,
+            arguments: ["post": containerID])
+        var map: [String: [String]] = [:]
+        for row in rows {
+            let blockID: String = row["block_id"]
+            let originID: String = row["origin_id"]
+            map[blockID, default: []].append(originID)
+        }
+        return map
+    }
+
     /// The block's `version_of` peers ("two versions of an article", usable
     /// across posts — I8: comparison is a view over edges). Undirected: the
     /// operations layer stores the pair canonically, and the read matches

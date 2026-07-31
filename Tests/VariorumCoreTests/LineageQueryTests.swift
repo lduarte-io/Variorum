@@ -162,6 +162,74 @@ struct LineageQueryTests {
         }
     }
 
+    // MARK: - Released originals (13f W10b)
+
+    /// Her sitting question, as a query: after a divide-W the original block
+    /// is preserved whole and RELEASED, and nothing on the successors pointed
+    /// at it. Both successors now name it.
+    @Test func aDivideWsSuccessorsNameTheReleasedOriginal() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "One alpha. One omega.")
+            let second = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.autosave(second.id, text: "Two alpha. Two omega.", charDelta: 0)
+            let result = try ops.divideW(a.block.id, cuts: [a.variant.id: 11])
+
+            let origins = try db.read { try Queries.unplacedOrigins($0, inContainer: post.id) }
+            #expect(origins[result.first.block.id] == [a.block.id])
+            #expect(origins[result.second.block.id] == [a.block.id])
+            // …and the original itself is exactly what the safety net lists.
+            let unplaced = try db.read { try Queries.unplacedBlocks($0) }
+            #expect(unplaced.map(\.blockID) == [a.block.id])
+            _ = second
+        }
+    }
+
+    /// A merge releases BOTH sources, so the merged block names two — sorted,
+    /// so the door's pick is the same on every device.
+    @Test func aMergedBlockNamesBothReleasedSources() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let b = try ops.newBlock(in: post.id, text: "left")
+            let c = try ops.newBlock(in: post.id, text: "right", at: .end)
+            let merged = try ops.merge(b.block.id, c.block.id)
+
+            let origins = try db.read { try Queries.unplacedOrigins($0, inContainer: post.id) }
+            #expect(origins[merged.block.id] == [b.block.id, c.block.id].sorted())
+            #expect(origins.count == 1, "only the merged block has released origins")
+        }
+    }
+
+    /// The map is a PLACEMENT question, not a lineage one: an ordinary
+    /// in-place divide leaves A placed, so neither half offers the door —
+    /// and re-placing a released original retires it too (P-2: a door that
+    /// can't act isn't rendered).
+    @Test func aStillPlacedOriginNeverOffersTheDoor() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "First part. Second part.")
+            let divided = try ops.divide(a.block.id, cut: 11)  // A survives, placed
+            #expect(try db.read {
+                try Queries.unplacedOrigins($0, inContainer: post.id)
+            }.isEmpty)
+            _ = divided
+
+            // Now release A the W way, then place it back into a pool.
+            let second = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.autosave(second.id, text: "Other take.", charDelta: 0)
+            let w = try ops.divideW(a.block.id, cuts: [a.variant.id: 6])
+            #expect(try db.read {
+                try Queries.unplacedOrigins($0, inContainer: post.id)
+            }[w.first.block.id] == [a.block.id])
+
+            let pool = try ops.createPool(title: "scraps")
+            _ = try ops.placeBlock(a.block.id, in: pool.id, at: .end)
+            #expect(try db.read {
+                try Queries.unplacedOrigins($0, inContainer: post.id)
+            }.isEmpty, "a re-placed original is reachable where it lives — no recovery door")
+        }
+    }
+
     // MARK: - Diff inputs
 
     @Test func diffPairReturnsBothBuffersVerbatim() throws {
