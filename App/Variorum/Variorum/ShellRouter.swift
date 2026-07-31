@@ -41,14 +41,25 @@ final class ShellRouter {
     /// ⌘[ — walk the active pane back. Silent when there is nowhere to go:
     /// the menu item is grey exactly then (the registry's `canNavigateBack`),
     /// so this can only be reached by a race, and a race should not speak.
-    func goBack(in pane: PaneID = .primary) {
+    ///
+    /// **`nil` = the FOCUSED pane (13f cold review, R1-2 — the fix).** The
+    /// default used to be `.primary`, which pinned the model's focus-aware
+    /// default shut: with a split's second pane focused, the menu's gate
+    /// (`canNavigateBack` — the focused pane's) enabled while the keystroke
+    /// popped the PRIMARY pane's trail and the popped destination was then
+    /// adopted into the FOCUSED pane — the wrong pane's history mutated and
+    /// the wrong destination navigated; and after closing the split from
+    /// the primary pane, ⌘[/⌘] were permanently inert (the `.primary` key
+    /// left with its pane) while the menu stayed enabled — a durable dead
+    /// key. The chip passes its own pane explicitly, as before.
+    func goBack(in pane: PaneID? = nil) {
         if let destination = workspace.goBack(in: pane) {
             pendingSelection = destination
         }
     }
 
     /// ⌘] — the mirror.
-    func goForward(in pane: PaneID = .primary) {
+    func goForward(in pane: PaneID? = nil) {
         if let destination = workspace.goForward(in: pane) {
             pendingSelection = destination
         }

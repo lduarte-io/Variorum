@@ -42,6 +42,25 @@ struct EditorCommands: Commands {
         return ShellActions(session: session, shell: router)
     }
 
+    /// **The CREATION/palette acts' executor** (13f cold review, R1-3):
+    /// ⌘N, ⌘J, the tutorial doors and ⌘K land on the window that can SHOW
+    /// their result (`WindowRegistry.creationRouter()` — the
+    /// `navigationTargetID` precedent, raised), never on a note-only or
+    /// quick-note window's router, which has no consumer for a
+    /// `pendingSelection` or a palette request. A method, not a property:
+    /// `creationRouter()` raises, and only a chosen act may do that.
+    private func creationActions() -> ShellActions? {
+        guard let session, let router = windows.creationRouter() else { return nil }
+        return ShellActions(session: session, shell: router)
+    }
+
+    /// The trio's honest grey: false only when NO full window exists —
+    /// nothing could ever show the act's result there (P-2's letter; the
+    /// note-only-key case stays ENABLED and lands via `creationActions()`).
+    private var canReachCreationTarget: Bool {
+        session != nil && windows.hasNavigationTarget
+    }
+
     /// Registry-driven enablement (P-1: gating is data). Reads the
     /// router's observable context, so the menu tracks mode/editor/undo
     /// changes.
@@ -155,12 +174,16 @@ struct EditorCommands: Commands {
     var body: some Commands {
         // Phase 13 (B2): ⌘N = New Post (R41) + the dated home's shortcut.
         CommandGroup(replacing: .newItem) {
-            Button(verb(.newPost)) { actions?.newPost() }
+            // 13f cold review R1-3: the creation acts land on the window
+            // that can SHOW what they mint (raised) — with a note-only or
+            // quick-note window key, `actions` used to mint into a router
+            // nobody watches (a silent store write behind an enabled key).
+            Button(verb(.newPost)) { creationActions()?.newPost() }
                 .keyboardShortcut("n", modifiers: .command)
-                .disabled(session == nil)
-            Button(verb(.todaysEntry)) { actions?.todaysEntry() }
+                .disabled(!canReachCreationTarget)
+            Button(verb(.todaysEntry)) { creationActions()?.todaysEntry() }
                 .keyboardShortcut("j", modifiers: .command)
-                .disabled(session == nil)
+                .disabled(!canReachCreationTarget)
             Divider()
             // 13f batch 5b (W2/A26) — File ▸ New Window, the full-app kind.
             //
@@ -186,10 +209,13 @@ struct EditorCommands: Commands {
                 .disabled(session == nil)
         }
         // ⌘K (R15, ratified): find anything — posts, books, commands.
+        // 13f cold review R1-3: the palette opens in the window that HAS
+        // one (raised) — a note-only or quick-note window's router had no
+        // palette to open, so ⌘K there was an enabled dead key.
         CommandGroup(after: .sidebar) {
-            Button(verb(.findAnything)) { router?.paletteRequested = true }
+            Button(verb(.findAnything)) { windows.creationRouter()?.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
-                .disabled(session == nil)
+                .disabled(!canReachCreationTarget)
         }
         CommandGroup(after: .saveItem) {
             // N5 (13b 1b): ⌘S acts wherever advertised — the mounted
@@ -471,10 +497,15 @@ struct EditorCommands: Commands {
             Button(verb(.helper)) { openWindow(id: "variorum-helper") }
                 .keyboardShortcut("/", modifiers: .command)
             Divider()
-            Button("Open the Tutorial") { actions?.openTutorial() }
-                .disabled(session == nil)
-            Button(verb(.restoreTutorial)) { actions?.restoreTutorial() }
-                .disabled(session == nil)
+            // 13f cold review R1-3: both tutorial doors navigate via
+            // `pendingSelection`, so they land where a shell can adopt it —
+            // the ruling named Open the Tutorial; Restore is the identical
+            // class one line below (the batch-7 follow-on discipline:
+            // applied with the class, flagged so it can be reversed).
+            Button("Open the Tutorial") { creationActions()?.openTutorial() }
+                .disabled(!canReachCreationTarget)
+            Button(verb(.restoreTutorial)) { creationActions()?.restoreTutorial() }
+                .disabled(!canReachCreationTarget)
         }
     }
 

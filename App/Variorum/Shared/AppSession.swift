@@ -142,15 +142,34 @@ final class AppSession {
         }
     }
 
+    /// **THE SHARED DIVERGE ENTRY — both W23 doors ride it** (13f cold
+    /// review, R1-4: the first-edit note's button and the chip's book row).
+    /// It flushes the post's pending buffer FIRST, so the copy carries what
+    /// she just typed: the note's trigger fires at the FIRST dirty
+    /// keystroke, so its offer arrives exactly when the buffer is
+    /// guaranteed unflushed — and `copyPost` reads `working_text` rows, so
+    /// a click inside the debounce minted a book copy missing the very
+    /// keystrokes that summoned it. The insure-before-copy doctrine
+    /// (structural undo's auto-commit, `applyBridgeLanding`, the lock
+    /// family), applied to the copy door that is offered at the dirty
+    /// moment. The pre-existing 11a copy doors (`duplicateAsVersion` /
+    /// `promoteLens`) are deliberately untouched — that class goes to
+    /// KnownIssues at the closeout (the orchestrator's ruling).
+    func divergeForBook(_ postID: String, in bookID: String) async throws
+        -> Operations.DivergeResult {
+        await autosave(forPost: postID).flushNow()
+        return try await runner.run { ops in
+            try ops.divergePostForReading(postID, in: bookID)
+        }
+    }
+
     /// The note's button, acting: the ONE operation, reported in the ONE
     /// status voice (the button's own toast is already dismissed by then).
     private func divergeFromNote(_ postID: String, in book: Reading) {
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
-                _ = try await self.runner.run { ops in
-                    try ops.divergePostForReading(postID, in: book.id)
-                }
+                _ = try await self.divergeForBook(postID, in: book.id)
                 self.status.speak(DivergeCopy.done(book: book.name))
             } catch {
                 self.status.speak(DivergeCopy.refusal(for: error, book: book.name))

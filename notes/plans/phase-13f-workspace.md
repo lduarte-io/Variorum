@@ -5347,3 +5347,119 @@ re-wordings, not bug-class fixes, and reverting one would only prove that
 - **One thing left deliberately for 13i, not for the review:** the
   `.lockedReading` refusal still says "locked" where the shelf says
   "finished". Recorded, not fixed.
+
+## THE 13F COLD REVIEW — the reviewer's FIX PASS (2026-07-31, same session, per the coordinator's authorization and the standing cross-model flow; R1-1…R1-4 as ruled, R1-5/R1-7/R1-8 record-only for the closeout)
+
+**Counts, by my own runs at fix-complete:** core `✔ Test run with 926
+tests in 105 suites passed after 31.641 seconds` (+1 — the R1-1 pin) ·
+Mac `✔ Test run with 1068 tests in 188 suites passed after 139.411
+seconds` (+4 tests, +1 suite — the R1-2/R1-3/R1-4 pins;
+`CreationTargetTests` is the new suite) · mobile `✔ Test run with 14
+tests in 4 suites passed after 0.243 seconds` (byte-unchanged;
+`Sources/` was touched by R1-1, so it ran) · the tutorial spine on its
+OWN run by TYPE name: `✔ Test run with 49 tests in 7 suites passed
+after 13.055 seconds`. **No schema. Zero `Sync/` lines. No Release
+build, no `/Applications` refresh.** Every revert ran
+`build-for-testing` → `test-without-building` (the standing
+stale-product trap), with `shasum -a 256` before and a verified
+byte-identical restore after each.
+
+### R1-1 — `reapplyDiverge` revives the copy through `restoreContainer` (+ R1-6 folded)
+
+`Operations+Diverge.swift`: the redo half is now a guarded composite on
+`reapplyMintedContainer`'s exact shape — read the guards (book deleted ⇒
+quiet; FINISHED ⇒ throws, entry stays), then `restoreContainer(copyID)`
+when the copy is still dead (the exact-stamp cascade restore — the
+inverse's tombstone CASCADED, and flipping only the container row left a
+live but EMPTY note whose text no surface listed), then the two
+membership flips. The composite's guard-then-restore window is recorded
+in the doc as the headless sub-ms class. R1-6's double fetch in
+`revertDiverge` folded (one fetch serves guard and flip).
+
+- **Pin `redoRevivesTheCopysContentNotJustItsRow`** (core,
+  `DivergeAndExtractSeamTests`): after diverge → undo → redo, the copy
+  RENDERS ("Alpha beta.", no gap), 1 live placement, 2 live variants
+  (the whole fan).
+- **Revert R11-A** (the pre-fix container-flip-only mechanism) ⇒ **4
+  issues on exactly the new pin**, printing the bug live: `rendered →
+  []`, `placements → 0`, `variants → 0` — the live-but-empty note. The
+  existing round-trip pin stayed GREEN under the revert, which is the
+  proof it could never see this. Restored, `shasum -c` OK.
+
+### R1-2 — the router's ⌘[/⌘] walk the FOCUSED pane
+
+`ShellRouter.swift`: `goBack`/`goForward` take `PaneID? = nil`, passed
+through to `WorkspaceModel`'s focus-aware default (the old `.primary`
+default pinned it shut). The chip's explicit-pane calls are unchanged.
+
+- **Pin `theMenuKeysWalkTheFocusedPanesTrailThroughTheRouter`** (Mac,
+  `PaneSplitModelTests`), two arms: a split with the second pane focused
+  (⌘[ walks the FOCUSED trail; the primary's never moves) and the
+  closed-primary-pane survivor (⌘] still works — the durable-dead-key
+  state).
+- **Revert R12-A** (the `.primary` defaults restored) ⇒ **3 issues on
+  exactly the new pin**: `pendingSelection → .shelf` (the primary's
+  trail popped and adopted into the focused pane),
+  `history(.primary).current → .shelf` (the wrong pane's history
+  mutated), and arm 2's `pendingSelection → nil` (the dead key). Every
+  other pin in the suite green. Restored, checksum OK.
+
+### R1-3 — the creation/palette acts land where they can be shown
+
+`WindowRegistry.creationRouter()` (a METHOD — the raise is a side
+effect, and menu rendering must never trigger it) returns the
+`navigationTargetID`'s router, raising that window when it is not the
+active one (the `claimBroadcast` shape); `hasNavigationTarget` is the
+side-effect-free grey gate. `EditorCommands`: ⌘N, ⌘J and ⌘K route
+through it (`creationActions()`), `.disabled` only when NO full window
+exists — the note-only/quick-note-key case stays ENABLED and lands in
+the full window, per the ruling's fire-and-DO letter. **One same-class
+widening, flagged:** Help ▸ Restore Tutorial routes with Open the
+Tutorial (the ruling named the latter; both navigate via
+`pendingSelection` — the batch-7 follow-on discipline, one line to
+reverse).
+
+- **Pins** (Mac, new suite `CreationTargetTests`): the pure rule
+  (quick-note-only registry ⇒ nil + grey; note-only KEY beside a full
+  window ⇒ the FULL router) and the hosted red-on-old arm — a real
+  hosted `RootView` window, a note-only entry made key, the ⌘N menu
+  body driven through the seam ⇒ the full window's shell ADOPTS the
+  minted note, the note-only router receives nothing, ⌘K never touches
+  the palette-less router.
+- **Revert R13-A** (`creationRouter` = `activeRouter`, the pre-fix
+  semantics as a mechanism) ⇒ **3 issues across both pins**, chief: the
+  hosted arm's `"the full window never adopted the minted note"` — the
+  silent mint reproduced live. `WindowRegistryTests` stayed green
+  (discriminating). Restored, checksum OK.
+
+### R1-4 — the diverge doors flush before copying
+
+`AppSession.divergeForBook(_:in:)` is the SHARED entry both W23 doors
+now ride (the first-edit note's button via `divergeFromNote`; the
+chip's book row via `MembershipChip.diverge`): it runs
+`autosave(forPost:).flushNow()` before the operation, so the copy
+carries what she just typed — the note's trigger fires at the FIRST
+dirty keystroke, so its offer arrives exactly when the buffer is
+guaranteed unflushed. **The pre-existing 11a copy doors
+(`duplicateAsVersion`/`promoteLens`) are deliberately untouched** — that
+class is the closeout's KnownIssues row, per the ruling.
+
+- **Pin `aDivergeCarriesThePendingUnflushedText`** (Mac,
+  `DivergeDoorTests`): premise-asserted (the store has NOT seen the
+  pending edit), then the shared entry, then the copy renders the
+  pending text.
+- **Revert R14-A** (the flush removed) ⇒ **1 issue on exactly the new
+  pin**: `copyText → "Alpha beta."` — the copy missing the keystrokes
+  that summoned the offer. Restored, checksum OK.
+
+### For the orchestrator
+
+- **R1-5 / R1-7 / R1-8 untouched** (record-only; the W19 KnownIssues
+  re-own and the W17 disposition are the closeout's, per the ruling).
+- **Pins MODIFIED: none.** All four fixes land as additions; every
+  pre-fix pin passes unmodified (the full-suite runs above are the
+  parity proof).
+- **One flagged widening** (Restore Tutorial joining R1-3's routing),
+  stated with its reasoning above so it can be reversed in one line.
+- **Context state:** this reviewer session is long but sound —
+  the fix pass is complete and verified; nothing is in flight.

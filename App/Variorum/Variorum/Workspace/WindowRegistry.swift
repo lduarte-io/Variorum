@@ -142,6 +142,33 @@ final class WindowRegistry {
 
     func isNavigationTarget(_ id: UUID) -> Bool { navigationTargetID == id }
 
+    /// **Where a CREATION or palette act lands** (13f cold review, R1-3 —
+    /// the fix). ⌘N / ⌘J / the tutorial doors mint-or-open and then
+    /// navigate via `pendingSelection`; ⌘K opens the palette. A note-only
+    /// or quick-note window consumes NEITHER (no shell, no palette), so
+    /// routing them to `activeRouter` while one of those was key minted
+    /// real store rows into a router nobody watches — a silent store write
+    /// behind an enabled key, and ⌘K a fully dead one. The rule is the
+    /// `navigationTargetID` precedent: the act lands in a window that CAN
+    /// show its result, and that window raises itself when it is not the
+    /// one she is looking at (the `claimBroadcast` shape).
+    ///
+    /// A METHOD, not a property, deliberately: the raise is a side effect,
+    /// and menu RENDERING must never trigger it — only a chosen act does.
+    /// nil ⇔ no full window exists; `hasNavigationTarget` is the
+    /// side-effect-free gate the menu's grey reads.
+    func creationRouter() -> ShellRouter? {
+        guard let id = navigationTargetID else { return nil }
+        if id != activeWindowID { bringForward(id) }
+        return entries[id]?.router
+    }
+
+    /// The side-effect-free half of `creationRouter()`: may a creation or
+    /// palette act land anywhere at all? False only when no full window
+    /// exists — the one state where greying is the honest answer, because
+    /// nothing could ever show the act's result.
+    var hasNavigationTarget: Bool { navigationTargetID != nil }
+
     /// Raise a window that just acted on a broadcast it did not have focus
     /// for — so "open this book" from a note-only window puts the book in
     /// front of her rather than behind.

@@ -608,6 +608,47 @@ struct DivergeDoorTests {
                 "every membership derived ⇒ the note speaks with NO button")
     }
 
+    /// **THE COLD REVIEW'S R1-4 PIN (red on the pre-fix code).** The
+    /// diverge doors are OFFERED at the first dirty keystroke (the note's
+    /// trigger fires from `record`), so the shared entry
+    /// (`AppSession.divergeForBook`) flushes the post's pending buffer
+    /// before copying — without the flush, a click inside the debounce
+    /// minted a book copy missing the very keystrokes that summoned the
+    /// offer (`copyPost` reads `working_text` rows; the insure-before-copy
+    /// doctrine).
+    @Test func aDivergeCarriesThePendingUnflushedText() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "shared")
+            let block = try session.operations.newBlock(in: post.id, text: "Alpha beta.")
+            let book = try session.operations.createReading(name: "Orbit", kind: .curated)
+            try session.operations.addPostToReading(post.id, to: book.id)
+
+            // The bug's exact state: the edit is PENDING in the shared
+            // coordinator's debounce, not yet in the store.
+            session.autosave(forPost: post.id).record(
+                variantID: block.variant.id, text: "Alpha beta. NEW", charDelta: 4)
+            let stored = try await db.read { db in
+                try Queries.renderPost(db, containerID: post.id).first?.text
+            }
+            #expect(stored == "Alpha beta.",
+                    "the premise: the store has not seen the edit yet")
+
+            let result = try await session.divergeForBook(post.id, in: book.id)
+            let copyText = try await db.read { db in
+                try Queries.renderPost(db, containerID: result.copy.post.id).first?.text
+            }
+            #expect(copyText == "Alpha beta. NEW",
+                    "the copy carries what she just typed — the flush ran first")
+        }
+    }
+
     /// A status item may carry ONE door, and carrying one changes nothing
     /// about the ones that don't (every existing `speak` call is unchanged).
     @Test func aStatusNoteCanCarryOneDoor() {

@@ -259,13 +259,13 @@ struct MembershipChip: View {
     }
 
     /// 13f W23 — the compound, at the door that names its book. The op is
-    /// ONE transaction with ONE undo entry; this only reports.
+    /// ONE transaction with ONE undo entry; this only reports. It rides the
+    /// SHARED entry (13f cold review, R1-4): the post's pending buffer is
+    /// flushed first, so the copy carries what she just typed.
     private func diverge(for book: Reading) {
         Task {
             do {
-                let result = try await session.runner.run { [postID] ops in
-                    try ops.divergePostForReading(postID, in: book.id)
-                }
+                let result = try await session.divergeForBook(postID, in: book.id)
                 duplicatedPostID = result.copy.post.id
                 status = DivergeCopy.done(book: book.name)
             } catch {

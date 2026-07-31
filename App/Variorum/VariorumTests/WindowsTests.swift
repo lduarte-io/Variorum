@@ -517,3 +517,114 @@ struct WindowUnmountTests {
         }
     }
 }
+
+// MARK: - THE COLD REVIEW'S R1-3 PIN
+
+@MainActor
+@Suite("Creation acts land where they can be shown (13f cold review R1-3)")
+struct CreationTargetTests {
+    /// The pure rule: the creation router is the navigation TARGET's — the
+    /// key full window, else the most recent full one — and nil (with the
+    /// menu's grey gate false) exactly when no full window exists, the one
+    /// state where nothing could ever show the act's result.
+    @Test func theCreationRouterIsTheNavigationTargetsAndGreysOnlyWithNoFullWindow() {
+        let registry = WindowRegistry()
+        let pad = UUID(), full = UUID(), note = UUID()
+        let padRouter = ShellRouter()
+        let fullRouter = ShellRouter()
+        let noteRouter = ShellRouter()
+
+        registry.register(pad, router: padRouter, kind: .quickNote)
+        registry.noteKey(pad)
+        #expect(!registry.hasNavigationTarget, "no full window — the honest grey")
+        #expect(registry.creationRouter() == nil)
+
+        registry.register(full, router: fullRouter, kind: .full)
+        registry.register(note, router: noteRouter, kind: .noteOnly)
+        registry.noteKey(note)
+        #expect(registry.isKey(note), "the note-only window is the one she is looking at")
+        #expect(registry.hasNavigationTarget)
+        #expect(registry.creationRouter() === fullRouter,
+                "the act lands on the FULL window's router, never the key note-only's")
+    }
+
+    /// **Red on the pre-fix code.** With a note-only window KEY, ⌘N used to
+    /// run through `activeRouter` — a real Untitled note was minted and its
+    /// `pendingSelection` landed on a router with NO consumer (neither the
+    /// note-only window nor the pad watches one): a silent store write
+    /// behind an enabled key. This drives the exact seam the menu's
+    /// one-line bodies call (`creationRouter()` → `ShellActions.newPost`)
+    /// against a real hosted full window, and asserts the full window's
+    /// shell ADOPTS the minted note while the note-only router receives
+    /// nothing.
+    @Test func newPostWithANoteOnlyWindowKeyLandsInTheFullWindow() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 9))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let registry = WindowRegistry()
+            let fullRouter = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1100, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.contentView = NSHostingView(
+                rootView: RootView(
+                    session: session, services: nil, router: fullRouter, windows: registry))
+            window.orderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(until: { registry.count == 1 })
+
+            let noteOnlyRouter = ShellRouter()
+            let noteOnlyID = UUID()
+            registry.register(noteOnlyID, router: noteOnlyRouter, kind: .noteOnly)
+            registry.noteKey(noteOnlyID)
+            #expect(registry.isKey(noteOnlyID), "the note-only window is key — the bug's state")
+
+            // ⌘N's menu body, exactly (EditorCommands.creationActions()):
+            guard let target = registry.creationRouter() else {
+                Issue.record("no creation target with a full window open")
+                return
+            }
+            ShellActions(session: session, shell: target).newPost()
+
+            await settle(until: {
+                if case .post = fullRouter.workspace.selections[.primary] { return true }
+                return false
+            })
+            guard case .post(let minted)? = fullRouter.workspace.selections[.primary] else {
+                Issue.record("the full window never adopted the minted note")
+                return
+            }
+            let live = try await db.read { db in
+                try Bool.fetchOne(
+                    db,
+                    sql: "SELECT EXISTS (SELECT 1 FROM container WHERE id = ? AND deleted_at IS NULL)",
+                    arguments: [minted])
+            }
+            #expect(live == true, "the minted note is real — and now visible")
+            #expect(noteOnlyRouter.pendingSelection == nil,
+                    "nothing landed on the note-only router")
+
+            // ⌘K's body: the palette request goes to a window that HAS a
+            // palette; the note-only router's flag is never touched.
+            registry.creationRouter()?.paletteRequested = true
+            #expect(noteOnlyRouter.paletteRequested == false,
+                    "⌘K never reaches the palette-less window")
+        }
+    }
+
+    private func settle(until condition: @MainActor () -> Bool) async {
+        for _ in 0..<400 where !condition() {
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+    }
+}

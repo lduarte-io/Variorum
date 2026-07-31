@@ -230,6 +230,45 @@ struct PaneSplitModelTests {
         #expect(workspace.history(second).current == .post("b"))
     }
 
+    /// **THE COLD REVIEW'S R1-2 PIN (red on the pre-fix code).** The menu's
+    /// ⌘[ / ⌘] go through the ROUTER, whose old `.primary` default pinned
+    /// the model's focus-aware default shut. Two arms, both real states:
+    /// with a split's second pane focused, `router.goBack()` popped the
+    /// PRIMARY pane's trail (and the popped destination was then adopted
+    /// into the FOCUSED pane — wrong pane mutated, wrong destination
+    /// navigated); and after closing the split from the primary pane, the
+    /// keys were permanently inert in the surviving pane while the menu
+    /// stayed enabled — a durable dead key.
+    @Test func theMenuKeysWalkTheFocusedPanesTrailThroughTheRouter() {
+        let router = ShellRouter()
+        let workspace = router.workspace
+        workspace.visit(.shelf)
+        workspace.select(.post("a"))
+        guard case .opened(let second) = workspace.openBeside(.post("b")) else {
+            Issue.record("setup")
+            return
+        }
+        workspace.select(.post("c"), in: second)
+
+        // Arm 1: the split, second pane focused — ⌘[ walks the FOCUSED trail.
+        #expect(workspace.focusedPane == second)
+        router.goBack()
+        #expect(router.pendingSelection == .post("b"),
+                "⌘[ walked the focused pane's trail, not the primary's")
+        #expect(workspace.history(.primary).current == .post("a"),
+                "the primary pane's trail never moved")
+        router.pendingSelection = nil
+
+        // Arm 2: close the split FROM the primary pane — the survivor's
+        // keys keep working (the `.primary` key left with its pane).
+        workspace.focus(.primary)
+        #expect(workspace.closeSplit())
+        #expect(workspace.focusedPane == second, "focus landed on the survivor")
+        router.goForward()  // arm 1's walk-back left a forward future
+        #expect(router.pendingSelection == .post("c"),
+                "⌘] still works in the surviving pane")
+    }
+
     @Test func theOpenBesideCandidateIsTheMostRecentNoteNoPaneIsShowing() {
         let workspace = WorkspaceModel()
         #expect(workspace.openBesideCandidate == nil, "nothing open — the door is grey")

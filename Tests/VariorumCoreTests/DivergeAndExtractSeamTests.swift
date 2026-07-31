@@ -148,6 +148,52 @@ struct DivergeForBookTests {
         }
     }
 
+    /// **THE COLD REVIEW'S R1-1 PIN (red on the pre-fix code).** Redo must
+    /// bring the copy back WITH ITS CONTENT, not just its rows in the book:
+    /// the undo's tombstone CASCADED (placements, blocks, variants — all
+    /// stamped with the container's `deleted_at`), and a redo that flipped
+    /// only the container row left a live but EMPTY note where her text
+    /// was, the text stranded in rows no surface lists. The fix routes the
+    /// revival through `restoreContainer`'s exact-stamp cascade restore —
+    /// `reapplyMintedContainer`'s own shape.
+    @Test func redoRevivesTheCopysContentNotJustItsRow() throws {
+        let stack = UndoStack()
+        try withOperations { _, db in
+            let ops = Operations(undoStack: stack)
+            let w = try world(ops)
+            let result = try ops.divergePostForReading(w.post, in: w.book)
+            _ = try stack.undo(with: ops)
+            _ = try stack.redo(with: ops)
+
+            let rendered = try db.read { db in
+                try Queries.renderPost(db, containerID: result.copy.post.id)
+            }
+            #expect(!rendered.isEmpty, "the redone copy renders its blocks")
+            #expect(rendered.first?.text == "Alpha beta.",
+                    "…and they carry her text, not a gap")
+            let (placements, variants) = try db.read { db in
+                (try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [result.copy.post.id]) ?? 0,
+                 try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM variant v
+                        JOIN container_block cb ON cb.block_id = v.block_id
+                        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                          AND v.deleted_at IS NULL
+                        """,
+                    arguments: [result.copy.post.id]) ?? 0)
+            }
+            #expect(placements == 1, "the placement came back with the container")
+            #expect(variants == 2, "the whole fan came back — every row, not just the container's")
+        }
+    }
+
     /// The three refusals, each the ops layer's own.
     @Test func itRefusesSmartBooksFinishedBooksAndNonMembers() throws {
         try withOperations { ops, _ in

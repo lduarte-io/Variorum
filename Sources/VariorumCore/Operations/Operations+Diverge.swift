@@ -141,16 +141,17 @@ extension Operations {
         copyID: String, copyMembershipID: String, originalMembershipID: String
     ) throws {
         try database.write { db in
-            guard let membership = try ReadingPost.fetchOne(db, key: copyMembershipID),
-                  let reading = try Reading.fetchOne(db, key: membership.readingId),
+            // ONE fetch serves the guard and the flip (13f cold review,
+            // R1-6 — the row was fetched twice for no reason).
+            guard var copyRow = try ReadingPost.fetchOne(db, key: copyMembershipID),
+                  let reading = try Reading.fetchOne(db, key: copyRow.readingId),
                   reading.deletedAt == nil
             else { return }
             guard !reading.locked else {
-                throw OperationError.lockedReading(id: membership.readingId)
+                throw OperationError.lockedReading(id: copyRow.readingId)
             }
             let now = date.now
-            if var copyRow = try ReadingPost.fetchOne(db, key: copyMembershipID),
-               copyRow.deletedAt == nil {
+            if copyRow.deletedAt == nil {
                 copyRow.deletedAt = now
                 try copyRow.update(db)
             }
@@ -174,26 +175,50 @@ extension Operations {
 
     /// The RE-APPLY (13c 1B's contract: exact-row, never a re-run of the
     /// forward operation — re-running would mint a fresh copy with fresh
-    /// UUIDs and strand the inverse's captured ids). The same three rows
-    /// flip back the other way.
+    /// UUIDs and strand the inverse's captured ids).
+    ///
+    /// **The copy comes back through `restoreContainer` (13f cold review,
+    /// R1-1 — the fix).** The inverse's tombstone CASCADED: the copy's
+    /// placements, blocks and variants all died with the container's exact
+    /// stamp (`cascade_container_tombstone`), and no dead→live cascade
+    /// exists — restores are the operations layer's. Flipping only the
+    /// container row therefore left a live but EMPTY note in the book, its
+    /// text stranded in rows no surface lists (cascade victims are excluded
+    /// from the tray by the stamp rule; the recovery list shows deleted
+    /// containers, and this one was live). `restoreContainer`'s exact-stamp
+    /// cascade contract is precisely the reverse of what the inverse wrote —
+    /// the same reason `reapplyMintedContainer` rides it. It revives the
+    /// copy's MEMBERSHIP row too (the inverse stamped it with the same
+    /// `now`); the flip below covers the copy that was independently
+    /// restored meanwhile, whose membership carries this entry's stamp but
+    /// whose container does not.
+    ///
+    /// Like `reapplyMintedContainer`, this is a guarded composite rather
+    /// than one transaction (`restoreContainer` opens its own write); the
+    /// guard-then-restore window is the headless sub-ms class, recorded
+    /// rather than papered over.
     func reapplyDiverge(
         copyID: String, copyMembershipID: String, originalMembershipID: String
     ) throws {
-        try database.write { db in
+        // Guards first, read-only: a book deleted meanwhile ⇒ obsolete,
+        // quiet (its cascade already took the memberships); FINISHED
+        // meanwhile ⇒ throws, so the entry stays on the stack for a retry.
+        let copyStillDead: Bool? = try database.read { db in
             guard let membership = try ReadingPost.fetchOne(db, key: copyMembershipID),
                   let reading = try Reading.fetchOne(db, key: membership.readingId),
                   reading.deletedAt == nil
-            else { return }
+            else { return nil }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: membership.readingId)
             }
+            return try Container.fetchOne(db, key: copyID)?.deletedAt != nil
+        }
+        guard let copyStillDead else { return }
+        if copyStillDead {
+            try restoreContainer(copyID)
+        }
+        try database.write { db in
             let now = date.now
-            if var container = try Container.fetchOne(db, key: copyID),
-               container.deletedAt != nil {
-                container.deletedAt = nil
-                container.updatedAt = now
-                try container.update(db)
-            }
             if var originalRow = try ReadingPost.fetchOne(db, key: originalMembershipID),
                originalRow.deletedAt == nil {
                 originalRow.deletedAt = now
