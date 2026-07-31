@@ -3365,3 +3365,21 @@ stops for acceptance. **The WINDOWS build goes to a FRESH session
 the standing cutover discipline; 5b's brief is THE PROPOSAL plus the
 rulings above plus the standing loop — spawned after the
 continuation's acceptance, never concurrently.
+
+### W25 EXECUTED (2026-07-31, the orchestrator's environment act at the batch-5 acceptance seam — as ruled at round 12's addendum)
+
+ONE line in the Mac app target's **Debug** config block only
+(`INFOPLIST_KEY_CFBundleDisplayName = "Variorum Dev";` — anchored
+inside the block carrying `io.lduarte.Variorum.debug`). **Every
+recorded verification ran:** the diff is exactly that one insertion
+(zero Release-block lines — checked); the built Debug host's
+Info.plist reads `CFBundleDisplayName = Variorum Dev` under
+`io.lduarte.Variorum.debug` (PlistBuddy on the DerivedData product);
+her installed `/Applications` app is untouched (NO display-name key,
+identifier `io.lduarte.Variorum` — read directly); the full Mac
+suite on the renamed build: `✔ Test run with 1026 tests in 174
+suites passed` (`exit=0`); the instance-discipline greps are
+unmoved BY CONSTRUCTION (`PRODUCT_NAME` untouched, so the process
+path is byte-identical — only the Dock/app-switcher label changes).
+The Dock now tells her which "Variorum" is hers. **Ledger: W25
+DONE.**
