@@ -2461,3 +2461,13 @@ the standing context rule). The successor's role file:
 `notes/plans/phase-13f-orchestrator-handoff.md` (paste-ready kickoff
 at its top; batch 5's queue and every ruling live in THIS file's
 rounds 1–11). Nothing is in flight; the tree is clean at this commit.
+
+**Round 11 addendum (her follow-up: "does it exist within the post?")
+— checked in code: NO.** `applyTag`'s reachable surfaces are exactly
+Library, Pool, and the Folder/tags views; `PostDetailView` carries no
+tags face — inside a note her tags are invisible and untouchable.
+Recorded as the SECOND HALF of the 13e kickoff candidate (an in-post
+tags face — see/add/remove from the note itself), with the note that
+the W20 context bar ("in <book>") is its natural home when built:
+books and tags are the two halves of "where does this live." Her
+"not this one though" continues to govern the slotting.
