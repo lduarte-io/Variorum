@@ -4508,3 +4508,195 @@ rather than gating on my walkthrough"*
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
   Star".
+
+### Batch 6 (continuation) — W5 THE QUICK NOTE, BUILT to the gate's ruling; commit `34a96b2`
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 925
+tests in 105 suites passed after 29.007 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 1064 tests in 187 suites passed after 137.776 seconds`
+(`mac_exit=0`) · mobile `✔ Test run with 14 tests in 4 suites passed after
+0.239 seconds` (`mobile_exit=0`) · the tutorial spine on its OWN run, by
+TYPE name: `✔ Test run with 49 tests in 7 suites passed after 12.047
+seconds`. From W4's state (925/105 · 1052/184 · 14/4): **+12 Mac tests, +3
+suites**; core and mobile byte-unchanged (the core's one change is the
+label parameter, whose behaviour every existing import pin already covers
+— they pass unmodified, which is the parity proof for a defaulted
+parameter). **Mobile WAS run** — `Sources/` carries the widening.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point. ONE commit, staged by
+explicit path.
+
+#### The shape, and the measurement that settled it
+
+**The pad CAPTURES; it does not edit** (the gate's approved deviation).
+There is no TK2 surface, no block identity and no live ring, so **P-3 is
+not extended here — it is simply not engaged**, and "no takes machinery"
+is true by construction rather than by keeping a face stripped. The cost
+is stated in the file where it lives: an abandoned summon keeps nothing,
+and re-summoning gives a fresh pad.
+
+**The floating half needed no bridge.** Measured before writing:
+`.windowLevel(.floating)` + `.windowResizability(.contentSize)`
+type-check clean at `arm64-apple-macos26.0` against BOTH the CLT and
+Xcode 26.2 SDKs — so the pad is a third SCENE (a singleton `Window`,
+because there is one pad), not an `NSPanel` bridge, and no second window
+mechanism joins the two groups 5b landed.
+
+**Registration, as ruled:** a new `WindowRegistry.Kind.quickNote`. While
+the pad is key the app mounts **ZERO live surfaces**, so ⌘S and the whole
+editing family go honestly grey through the gates that already exist —
+and no menu act can reach a window she is not looking at. `Kind` is read
+only by `navigationTargetID`'s `== .full` comparisons, so the pad is
+never a navigation target by construction, inheriting the note-only rule
+without a line of new logic.
+
+#### Her round-14 edges, each built
+
+**⏎ IS A NEWLINE** — the field carries no `.onSubmit` at all, which is the
+whole implementation of that ruling. **Closing files it · ⌘⏎ files it
+explicitly · QUIT files it** through the standing `quitFinalize` family
+(the architect's ruling (c) — the capture-scale analog of the open tail's
+teardown backstop). **One summon = one note**, because all three triggers
+share one body that CLEARS FIRST — so close-after-⌘⏎ and quit-after-close
+mint nothing. **An empty pad mints nothing** at any door (`importPost`'s
+own `emptyImport` rule, stated on the button's grey so it never fires into
+a refusal). **The landing stays QUIET** — one status line naming the Pool;
+the main window never navigates.
+
+The mint rides `importPost` exactly as the R3 quick-entry bar does, so
+untitled, segments-as-content (the 2026-07-12 spacing ruling rides free)
+and bookless-so-the-Pool-lists-it (R29) all come from the standing
+grammar rather than from a second rule here.
+
+#### THE FIRST REVERT FOUND A REAL HOLE AND CHANGED THE DESIGN
+
+This is the part worth carrying forward. The three triggers were
+originally the view's own lifecycle hooks — and **revert W5-B (deleting
+the close path) passed GREEN**, because no pin could drive an
+`onDisappear`. That is precisely the failure this file's own header warns
+about (a promise made inside a view's closure is one no test can keep —
+the `MembershipChip.ascend` lesson, W20), reproduced by me in the file
+that cites it.
+
+**The fix was the design, not the pin:** the text and its three triggers
+moved onto a small `QuickNotePad` type, each trigger a named call. The
+view now holds only the hooks that call them. W5-B then went red with 5
+issues, and the pad's clear-first composition became pinnable as the
+property it is.
+
+#### Doors — ONE declaration, three renderers
+
+`CapabilityID.quickNote`, app scope, `always` (a pad can be summoned from
+anywhere at any time; it takes no target and reads no context):
+**`MenuBarExtra`** (her round-14.1 — the permission-free
+summon-from-anywhere door), **⌘⇧N**, and a **File-menu item**, plus ⌘K by
+name.
+
+**THE COLLISION SWEEP: ⌘⇧N is FREE** — swept per the standing precedent
+across `EditorCommands.keyEquivalent` (36 chords), every
+`.keyboardShortcut(` call site in `Variorum/` and `Shared/`, every
+`NSMenuItem` key equivalent (all empty strings) and the one
+`performKeyEquivalent` override (⌘S). No `n` chord carries shift; the
+nearest neighbour is ⌘N New Post, which is the right neighbour — ⌘N makes
+a note, ⌘⇧N pops the pad.
+
+**A new `Capability.Door` case, `.menuBarExtra`, with its own walk
+assertion.** The extra is a genuinely different door from `.menuBar` (it
+exists whatever app is frontmost), and declaring it means a second row
+added to the extra later cannot go undeclared — P-1's letter rather than a
+convenient silence.
+
+#### Judgment calls, recorded so they can be overturned rather than trusted
+
+1. **`QuickNotePad` is its own type** rather than view state. Forced by the
+   revert above, and it is the honest shape: two of the three triggers are
+   lifecycle hooks no test can reach.
+2. **The palette door asks the SHELL for the window**
+   (`ShellRouter.quickNoteRequested`, the `paletteRequested` precedent),
+   because `ShellActions` holds no `openWindow`. P-4: the door names what
+   it wants, the shell decides what that means.
+3. **A `Window`, not a `WindowGroup`** — one pad, so every door opens the
+   same one rather than stacking pads.
+4. **The pad registers a router it barely uses** (for `speak` and so the
+   registry's entry shape is uniform). The alternative — an optional
+   router on `Entry` — would make every reader handle a nil case for one
+   window kind.
+5. **No `Kind`-specific logic anywhere.** The pad is excluded from
+   navigation by `navigationTargetID`'s existing `== .full` test, and
+   mounts nothing live because it has no panes at all — both consequences
+   of what it IS, not rules written about it.
+
+#### Pins — every change named
+
+**New suite `QuickNoteTests` (12 tests in 3 suites, +1 walk):**
+`QuickNoteMintTests` (5) — the bookless note the Pool lists · the typed
+text segmenting and keeping its spacing · **the three triggers each driven
+directly, with one-summon-one-note** · an empty pad minting nothing at any
+door · the undo entry saying "Quick Note" while still undoing AND redoing
+the whole mint · the quit backstop (premise-asserted, and finalizing twice
+still mints exactly one). `QuickNoteDoorTests` (3) — one declaration
+carrying all three doors · the collision sweep with ⌘⇧N in the table (it
+walks the WHOLE table for collisions, so it guards every future key too) ·
+the palette row asking the shell. `QuickNoteWindowTests` (2) — **zero live
+surfaces while the pad is key**, and the live surface handed straight back
+when it closes · the pad never a navigation target.
+
+**Pins MODIFIED: NONE.** The walk GAINS an assertion
+(`theMenuBarExtraRendersExactlyTheDeclaredExtraDoors`) for the new door
+kind, and every existing assertion — including every `importPost` pin
+across core, which the defaulted label parameter leaves byte-identical —
+passes unmodified. That is the parity proof for a batch that added a
+capability, a scene, a window kind and a door kind.
+
+**Reverts (`shasum -a 256` before each; all files restored and verified
+OK; `build-for-testing` → `test-without-building` every time):**
+- **W5-A** `importPost` ignores its `undoLabel` ⇒ 2 issues, the menu
+  reading "Undo Import".
+- **W5-B** closing loses the pad ⇒ **5 issues** — and, before the
+  redesign, ZERO (see above; the hole and its fix are the batch's finding).
+- **W5-C** the quit path files nothing ⇒ 3 issues, the pad's text gone.
+- **W5-D** the pad treated as a navigable window ⇒ 2 issues, a broadcast
+  landing in a window that navigates nowhere.
+
+#### VISUAL-VERIFICATION-ONLY — for her walk and the Design & UI review row
+
+Everything that DECIDES anything above is pinned. These are the halves
+this host cannot drive (batch 5b's measurement: it cannot make a window
+key), and **no claim is made that they were tested:**
+
+1. **That the menu-bar glyph really summons the pad from another app** —
+   the door her round-14.1 ruling is about, and the one wire no pin here
+   watches. First thing to try.
+2. That the pad really floats above the main window, and that its size and
+   the `square.and.pencil` glyph read as a sticky rather than as clutter.
+3. That ⌘⇧N reaches it from inside the app, and that ⌘⏎ files it under her
+   hand (the button's grey is pinned; the chord's delivery is AppKit's).
+4. That closing the pad by its red button — not by ⌘⏎ — really files what
+   she typed (the model call is pinned; the `onDisappear` wiring is not).
+5. That her main editor's unmount/remount on each summon is not felt (the
+   recorded cost of registering; the same cost a second window already
+   pays since 5b).
+6. That the one status line naming the Pool lands where she can see it
+   while the pad is key.
+
+#### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **Nothing exceeded the rulings' shape**, so nothing stopped. The one
+  place I went beyond the proposal's letter — extracting `QuickNotePad`
+  out of the view — was forced by a green revert and is recorded above
+  with its reasoning.
+- **W26 (the true system-wide hotkey) is untouched**, as her round-14.4
+  ruling directs; the Carbon measurement in W5's proposal stays the record
+  it consults.
+- **W19 rider: NOT FIRED.** Neither W4 nor W5 touched the shell-redo
+  status-delivery path (`ShellActions.structuralRedo`, `ShellRouter`'s
+  redo wiring, `StatusCenter`, `OperationsRunner`); the one `ShellRouter`
+  addition is the quick note's request flag, and
+  `theShellRedoActionRunsThroughTheRunnerAndReports` passed in both full
+  Mac runs. Left where it is; its KnownIssues row stands.
+- Her walk will notice, beyond the pad itself: the menu bar gains a
+  Variorum glyph, the File menu gains a Quick Note item beside New Window,
+  and ⌘K types both "Quick Note" and "Toggle Star".
