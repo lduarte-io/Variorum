@@ -2083,3 +2083,15 @@ recorded when she answers. NOTED as a P-5 signal regardless: this
 confusion has now surfaced three times (sitting 4, today's round 8,
 now) — the rule's UI legibility is the under-served half; W20's
 visible in-line is part of the answer.
+
+**Round 9 CLOSED — her ruling: "Stands + first-edit note."** R31/R35
+stand exactly as decided 2026-07-17 (editing a post edits THE post in
+every book; `duplicateAsVersion` the one deliberate divergence door)
+— AND the first time she edits a post that appears in 2+ books, a
+one-time quiet note says so and names the door ("editing here edits
+it everywhere — Duplicate as Version to diverge"). **W22 (new row):**
+the first-edit note — one-time via an app-local seen flag (the local
+view-memory family; never synced, never schema), spoken in the host's
+standing status/toast voice. Batch 5. The P-5 legibility signal is
+thereby answered at all three layers: the in-line (W20), the wired
+ascent (W20), and the moment-of-edit note (W22).
