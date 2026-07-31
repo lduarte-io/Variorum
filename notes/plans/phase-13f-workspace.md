@@ -4651,6 +4651,103 @@ One pin flip, named. **The phase's BUILD WORK IS COMPLETE** — every
 committed ledger row BUILT or dispositioned. Next: the ONE Fable
 cold review (REVIEW_PROMPT.md verbatim, zero framing), then the
 round-15 closeout ritual.
+
+## THE 13F COLD REVIEW — round 1 findings (2026-07-31, fresh Fable reviewer, REVIEW_PROMPT.md verbatim, zero framing; recorded BEFORE any fix per the protocol; adjudications inline)
+
+The reviewer verified counts by its own runs (core 925/105 · Mac
+1064/187, matching), confirmed zero `Sync/`/`Persistence/` lines
+across the phase diff, and returned 3 MAJOR / 2 MINOR / 3 NIT plus
+a deliberate clean bill (its full clean-bill list covers the mount
+rule's condition-not-mechanism claim, the WindowRegistry, the
+same-note one-door enforcement, stars' CAS safety, the sweep's
+protected classes by its own greps, the quick-note triggers, W24's
+one-brain claim, and the nine registry declarations).
+
+**[MAJOR] R1-1 · `Operations+Diverge.swift:179–204` — redo of an
+undone diverge revives the copy's CONTAINER only; the copy's blocks/
+variants stay tombstoned (the revert's cascade stamped them), so
+after diverge → ⌥⌘Z → ⇧⌥⌘Z the book shows a live but EMPTY note,
+the text stranded in rows no surface reaches.** Violates the 13c 1B
+redo contract ("do → undo → redo returns the store to the post-do
+rows"); the module's own `reapplyMintedContainer` routes through
+`restoreContainer` for exactly this reason. The shipped pins assert
+membership rows only after redo — the gap is real. **ADJUDICATION:
+AGREED — fix via the exact-stamp `restoreContainer` path (the
+`reapplyMintedContainer` shape; `stillDead` guard; the
+locked-reading refusal kept); red-on-old pin asserting the copy's
+placements/variants live (or `renderPost` non-empty) after redo.**
+
+**[MAJOR] R1-2 · `ShellRouter.swift:44–55` — the menu's ⌘[ / ⌘]
+pass the router's own explicit `.primary` default into the model,
+so the model's focus-aware default never engages: the gate reads
+the FOCUSED pane, the keystroke acts on the PRIMARY one.** Wrong
+states traced: a focused second pane navigates to a destination
+popped from the OTHER pane's trail (its forward future destroyed);
+after closing the primary pane, ⌘[/⌘] are durably inert while
+enabled (the D3 dead-key class). The batch-4 "focus-aware without a
+line changing" claim is FALSE at the router; the router-level pin
+never leaves the single-pane state. **ADJUDICATION: AGREED — the
+router's `goBack`/`goForward` take `PaneID? = nil` passed through;
+red-on-old pin at the router in a real split (fails now: pops
+primary's trail).**
+
+**[MAJOR] R1-3 · `EditorCommands` + `ShellActions` + the note-only/
+quick-note windows — with one of those windows key, ⌘N SILENTLY
+MINTS a store row into a router nobody consumes (once per press);
+⌘J the same; ⌘K is an enabled dead key; Help ▸ Open Tutorial the
+same class.** Falsifies 5b's "every app-scope act resolves honestly
+grey" claim for the creation/palette trio — the P-2 class in its
+worst variant (a silent store write). **ADJUDICATION: AGREED — and
+the fix is RULED (the reviewer offered fixer's-choice): route the
+trio through the `navigationTargetID` precedent — the act lands in
+a window that CAN show it, which raises itself (the W20-class
+behavior already shipped for book links; fire-and-DO over greying —
+⌘N while the pad is key should still make a note, visibly). ⌘K
+opens the target window's palette, raised. Red-on-old pin: hosted
+note-only-key state, menu-path `newPost` → a full window adopted
+the post or the act refused (fails now: row minted, nothing
+navigates).**
+
+**[MINOR] R1-4 · `AppSession.divergeFromNote` — the first-edit
+note's diverge button copies the STORE at the guaranteed-dirty
+moment (`onFirstEdit` fires at the first unflushed keystroke), so
+the book's copy can lack the very keystrokes that summoned the
+offer.** **ADJUDICATION: AGREED — `flushNow()` the post's
+coordinator before the compound, placed at the SHARED entry so both
+W23 doors (the note's button and the chip row) are covered;
+red-on-old pin: pending unflushed text → perform → the copy carries
+it. The PRE-EXISTING sibling class (the 11a `duplicateAsVersion`/
+`promoteLens` doors copy without flushing; three ladders never
+flagged it; the debounce-window loss is recoverable from the
+original) is NOT this fix's scope — recorded at the closeout as a
+KnownIssues row owned by 13e (the version family's neighborhood).**
+
+**[MINOR] R1-5 · the KnownIssues shell-redo flaky row names 13f as
+owner and the phase ends without tracing it (every batch's rider
+correctly reported the path untouched — the ROW is the residue);
+W17/A32 needs an explicit disposition line.** **ADJUDICATION:
+AGREED — closeout bookkeeping, the orchestrator's: the row re-owns
+to 13g as a kickoff-sweep item (the same shape 13f inherited); W17
+gets its disposition in the closeout (exploratory, uncommitted,
+carried to the 13g sitting's discretion).**
+
+**[NIT] R1-6 · `revertDiverge` double-fetches the copy-membership
+row — fold into R1-1's fix.** AGREED.
+**[NIT] R1-7 · an untitled scraps container's chrome fallback reads
+"Snippets", the sidebar AREA's word — "← Snippets" can read
+ambiguously.** AGREED record-only → her walk doc, beside the W14
+wobble items.
+**[NIT] R1-8 · ⌘⇧N renders as a key equivalent in two scenes (File
+menu + the MenuBarExtra row) — no misroute reachable; cosmetic.**
+AGREED record-only, stated so a future sweep doesn't read it as a
+collision.
+
+**Fix pass: the REVIEWER implements its confirmed findings in its
+own session (the 13d/K6 precedent) — R1-1 (+R1-6), R1-2, R1-3 per
+the ruling, R1-4 at the shared entry; every fix with a red-on-old
+pin verified by behavioral revert; full suites re-run with quoted
+lines; the fix record appended below; the review closes at round 1
+on the orchestrator's verification.**
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
