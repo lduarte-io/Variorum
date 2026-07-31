@@ -118,3 +118,18 @@ conversion rulings + A31's two, all ratified 2026-07-28) ·
 `notes/plans/phase-13f-workspace.md` THE KICKOFF SITTING (W13's
 verbatim record + the round-3 ruling creating this phase) · AppSpec §9
 `convertSmartReadingToCurated`.
+10. **BOOK-LOCK — the missing second book state (from the 13f sitting,
+    round 10, 2026-07-30):** "finished" (`reading.locked`) freezes
+    STRUCTURE only and exists; text-immutability at book level does
+    not exist (the per-post seal seals everywhere — her rejected
+    "locked everywhere" pole). Her floated shape, recorded: locking a
+    book auto-diverges SHARED posts (the 13f W23 diverge-for-this-book
+    compound per post — the version copy takes the slot here and is
+    SEALED; the original stays live elsewhere) and seals single-book
+    members directly (which also stops library-edit drift). Edges for
+    the sitting: does lock imply finish; what unlock does (unseal
+    members? the forks are permanent); do the forks' takes seal (the
+    seal already says yes); and the NAMING of the two states — her own
+    finished/locked word-blur in this round is evidence the shelf must
+    distinguish them. Her ruling: this knot is 13i's ("13i's sitting",
+    2026-07-30).

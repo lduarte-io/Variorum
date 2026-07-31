@@ -2145,3 +2145,19 @@ they can be corrected rather than trusted:
    recorded. The edges need enumeration before any build
    (single-book posts are library-editable too; unlock semantics; do
    forks arrive sealed) — slotting question posed to her.
+
+**Round 10 addendum — her clarification + the slotting ruling:** her
+words: *"I guess I said 'finished' but I really meant 'locked', where
+it can't be edited anymore. how does that change the question? or
+does it not?"* — Answered on the record: it sharpens it. TWO book
+states, only one existing: FINISHED (`reading.locked` — structure
+frozen, text alive) exists; BOOK-LOCK (text immutability at book
+level) does NOT exist — the only can't-edit machinery is the per-post
+seal, which seals everywhere (her rejected pole). Her floated shape
+IS the missing state's design: lock-the-book = auto-diverge shared
+posts (W23's compound per post; the copy sealed here, the original
+live elsewhere) + seal single-book members directly. **RULED: the
+book-lock design goes to 13i's sitting** (knot 10 in its brief —
+edges: lock-implies-finish?, unlock semantics, fork permanence,
+naming the two states so "finished"/"locked" stop blurring — the
+word-blur that produced this very round is part of the design).
