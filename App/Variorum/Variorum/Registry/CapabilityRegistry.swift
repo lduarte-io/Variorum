@@ -489,6 +489,51 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌘1–6", takesAccess: nil,
             unavailableNote: "Open a post first — the modes live inside a post.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
+        // MARK: The navigation core (13f batch 3 — W3/A27 + W16)
+        //
+        // Her two rulings, as registry facts. The strip lives in the
+        // SIDEBAR (*"i'd use the free space that's underneath 'library /
+        // shelf / pool / blocks' for now"*) and the keys reach it; back and
+        // forward walk the pane's own history.
+        //
+        // App scope, `takesAccess: nil`: these are WORKSPACE acts, not
+        // editing acts — no surface is behind another, exactly as `newPost`
+        // and `findAnything` are nobody's mode's property. Their gates are
+        // STACK gates (the `structuralUndo`/`structuralRedo` shape), never
+        // mode gates: a door that could only be a dead key is grey.
+        Capability(
+            id: .openNote, verb: "Open Notes (\u{2318}\u{21e7}1\u{2013}9)", scope: .app,
+            doors: [.menuBar],
+            // One label for the family; the menu wires a key per ordinal
+            // (the `switchMode` precedent, and the same walk exemption).
+            shortcutLabel: "\u{2318}\u{21e7}1\u{2013}9", takesAccess: nil,
+            unavailableNote: "No notes are open yet — open one and it joins the Open list.",
+            availability: { ctx in ctx.openNoteCount > 0 ? .act : .unavailable }),
+        Capability(
+            id: .navigateBack, verb: "Back", scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2318}[", takesAccess: nil,
+            unavailableNote: "Nothing to go back to — this is where you started.",
+            availability: { ctx in ctx.canNavigateBack ? .act : .unavailable }),
+        Capability(
+            id: .navigateForward, verb: "Forward", scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2318}]", takesAccess: nil,
+            unavailableNote: "Nothing to go forward to — you haven't gone back.",
+            availability: { ctx in ctx.canNavigateForward ? .act : .unavailable }),
+        // Her W16 second half. A `.surface` door on the peer column's own
+        // header — the `.unarchiveTake` class: the target is the thing you
+        // are pointing at, so no routed context command exists. The CONTEXT
+        // rule is Compare's (the board is the only place a peer column
+        // exists); the per-column condition — a peer is actually picked —
+        // is the surface's, the `.diffAgainstChosen` split (P-2).
+        Capability(
+            id: .openPeerPost, verb: "Open", scope: .post,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Peer columns live on the Compare board (\u{2318}4).",
+            availability: { ctx in ctx.mode == .compare ? .act : .unavailable }),
+
         Capability(
             id: .newPost, verb: "New Post", scope: .app,
             doors: [.menuBar, .palette],

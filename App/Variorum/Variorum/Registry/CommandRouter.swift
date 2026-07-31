@@ -206,6 +206,15 @@ final class CommandRouter {
     @ObservationIgnored var undoAvailable: () -> Bool = { false }
     /// Whether the structural REDO stack has an entry (13c 1B — A10).
     @ObservationIgnored var redoAvailable: () -> Bool = { false }
+    /// The workspace facts behind the navigation core (13f batch 3): how
+    /// many notes the window has open, and whether its active pane can walk
+    /// back / forward. Wired by the SHELL to its own `WorkspaceModel` —
+    /// the workspace is per-window state and this router is the app's, so
+    /// the closure is what keeps the two straight (and is where batch 4's
+    /// focused-window refinement lands, without a type here changing).
+    @ObservationIgnored var openNoteCount: () -> Int = { 0 }
+    @ObservationIgnored var canNavigateBack: () -> Bool = { false }
+    @ObservationIgnored var canNavigateForward: () -> Bool = { false }
 
     // MARK: - Context assembly
 
@@ -216,7 +225,10 @@ final class CommandRouter {
             writeEditorOwnsScrollView: writeEditorOwnsScrollView(),
             takesBoardAttached: takesBoardAttached,
             undoAvailable: undoAvailable(),
-            redoAvailable: redoAvailable())
+            redoAvailable: redoAvailable(),
+            openNoteCount: openNoteCount(),
+            canNavigateBack: canNavigateBack(),
+            canNavigateForward: canNavigateForward())
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {

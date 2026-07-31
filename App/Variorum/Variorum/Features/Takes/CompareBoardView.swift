@@ -756,6 +756,11 @@ final class CompareViewModel {
 // MARK: - The board
 
 struct CompareBoardView: View {
+    /// 13f batch 3 (W16): the peer column's OPEN door — a `.surface` act
+    /// (its target is the column you point at), declared here and walked
+    /// like every other surface door (declared ⇔ rendered).
+    static let surfaceCapabilities: [CapabilityID] = [.openPeerPost]
+
     let session: AppSession
     let postID: String
     @State private var model: CompareViewModel
@@ -974,6 +979,21 @@ struct CompareBoardView: View {
                     }
                     Button("Diff") { presentDiff(peerID) }
                         .help("Line diff of the two posts' rendered text — savable to a file")
+                    // 13f batch 3 (W16, her ruling: *"in compare … you
+                    // should be able to click on the post you're comparing
+                    // it with"*). Fire-and-DO: it OPENS the post in the
+                    // ordinary editor. The board names a destination and
+                    // the SHELL decides what that means (P-4 — the
+                    // `.variorumOpenPost` channel this app already
+                    // speaks), which is also what puts Compare on the
+                    // pane's history: ⌘[ comes straight back here.
+                    Button(CapabilityRegistry.capability(.openPeerPost).verb) {
+                        NotificationCenter.default.post(
+                            name: .variorumOpenPost, object: nil,
+                            userInfo: ["postID": peerID])
+                    }
+                    .help("Open this post on its own — \u{2318}[ comes straight back to "
+                        + "this comparison")
                 }
                 if model.face(for: peerID)?.sealed == true {
                     Text(tokens.chromeLabel("sealed — read-only"))

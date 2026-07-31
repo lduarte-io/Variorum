@@ -67,7 +67,8 @@ struct RootView: View {
     var body: some View {
         NavigationSplitView {
             SidebarView(
-                session: session, model: library, pool: pool, selection: $selection,
+                session: session, model: library, pool: pool,
+                workspace: router.workspace, selection: $selection,
                 // 13b 1b: the rail's marker reads the router's observable
                 // mode truth (the broadcast-derived shadow is retired).
                 postMode: (session.commandRouter.activeMode ?? .takes).rawValue)
@@ -88,7 +89,24 @@ struct RootView: View {
                     }
                 }
         } detail: {
-            detail
+            VStack(spacing: 0) {
+                // 13f batch 3 (W16): the road back, above whatever the pane
+                // is showing — one chip for every destination kind, because
+                // "where did I come from" is the PANE's fact, not the
+                // post's. Absent when the pane arrived from nowhere.
+                if let origin = router.workspace.history().origin {
+                    BackChip(
+                        tokens: theme.tokens(for: scheme),
+                        originLabel: router.workspace.label(for: origin),
+                        collapsed: router.workspace.backChipCollapsed,
+                        onBack: { router.goBack() },
+                        onToggleCollapse: {
+                            router.workspace.backChipCollapsed.toggle()
+                        })
+                    Divider().overlay(theme.tokens(for: scheme).line)
+                }
+                detail
+            }
                 // 13b 1b (AD-14): the ONE status/refusal presentation —
                 // every transient outcome (refusals, undo reports, routed
                 // speech) renders HERE, mode- and surface-independent,
@@ -119,6 +137,17 @@ struct RootView: View {
             guard let pending else { return }
             selection = pending
             router.pendingSelection = nil
+        }
+        // 13f batch 3 (W3/A27 + W16): ONE place records that a navigation
+        // happened — every door in the app already funnels through this
+        // selection (shelf, library, pool, ⌘K, a book's open-post
+        // broadcast, Compare's new click-through, the Open strip itself),
+        // so the history and the Open list are complete by construction
+        // rather than by instrumenting each door. P-4 exactly: the doors
+        // name a destination, the shell decides what it means.
+        .onChange(of: selection) { _, current in
+            guard let current else { return }
+            router.workspace.visit(current)
         }
         // Sitting 9 (R67): surfaces hand the shell a post to open (the
         // chip's "Open the Copy", and any future minted-post moment).
@@ -154,7 +183,29 @@ struct RootView: View {
         .task { await tags.start() }
         .task { await readings.start() }
         .task { await pool.start() }
-        .onAppear { wirePaletteCommands() }
+        .onAppear {
+            wirePaletteCommands()
+            wireWorkspace()
+        }
+    }
+
+    /// 13f batch 3: the navigation core's two wirings, both idempotent.
+    ///
+    /// (1) The registry context reads THIS window's workspace — the
+    /// workspace is per-window state and the command router is the app's,
+    /// so a closure is what keeps the two straight (the `undoAvailable`
+    /// idiom); batch 4's focused-window refinement lands here and nowhere
+    /// else. (2) The pane's history is SEEDED with what it is already
+    /// showing, because `onChange` never fires for an initial value — and
+    /// without the seed the first click out of the shelf would push
+    /// nothing, so the very first back chip she could want would be the
+    /// one that never appeared.
+    private func wireWorkspace() {
+        let workspace = router.workspace
+        session.commandRouter.openNoteCount = { workspace.openNotes.ids.count }
+        session.commandRouter.canNavigateBack = { workspace.history().canGoBack }
+        session.commandRouter.canNavigateForward = { workspace.history().canGoForward }
+        workspace.visit(selection ?? .shelf)
     }
 
     @ViewBuilder

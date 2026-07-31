@@ -43,6 +43,13 @@ struct CapabilityRegistryTests {
         contexts.append(CapabilityContext(mode: nil, undoAvailable: true))
         // 13c 1B (A10): the redo stack is the second app-scope gate.
         contexts.append(CapabilityContext(mode: nil, redoAvailable: true))
+        // 13f batch 3 (W3/A27 + W16): the WORKSPACE gates — the third
+        // family of app-scope stack gates, beside undo and redo. Without
+        // this context the navigation core would be `.unavailable`
+        // everywhere the walk looks, exactly as the find family was before
+        // its own context joined.
+        contexts.append(CapabilityContext(
+            mode: nil, openNoteCount: 3, canNavigateBack: true, canNavigateForward: true))
         return contexts
     }
 
@@ -88,10 +95,16 @@ struct CapabilityRegistryTests {
         // ANY surface — it is her L6 rider's recorded future scope (owner
         // 13e). The moment it is built, these declarations gain a real
         // `takesAccess` and leave this list.
+        // 13f batch 3 (W16): `.openPeerPost` joins the `.switchMode` half of
+        // this list — a NAVIGATION act, not an editing one. It opens a post;
+        // no surface is behind another because no surface edits anything
+        // here. (Its two siblings, `.openNote` and the back/forward pair,
+        // are app-scoped and never reach this loop at all.)
         let exempt: Set<CapabilityID> = [
             .previousBlock, .nextBlock, .exportCaretBlock, .switchMode,
             .renameLens, .tagBlock,
             .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
+            .openPeerPost,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {
@@ -162,13 +175,20 @@ struct CapabilityRegistryTests {
             .union(BlocksAreaView.surfaceCapabilities)
             .union(ScrapsPanel.surfaceCapabilities)
             .union(CanvasView.surfaceCapabilities)
+            // 13f batch 3 (W16): Compare's peer-column open door.
+            .union(CompareBoardView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
     @Test func everyShortcutLabelHasExactlyOneKeyWiring() {
+        // The two ORDINAL FAMILIES declare one label and wire a key per
+        // index in the menu (⌘1–⌘6 per mode; 13f batch 3's ⌘⇧1–9 per open
+        // note). Their per-index wiring is pinned by
+        // `theOpenNoteKeysCoverExactlyTheShownRows` and the mode row itself.
+        let ordinalFamilies: Set<CapabilityID> = [.switchMode, .openNote]
         for capability in CapabilityRegistry.all {
             guard capability.doors.contains(.menuBar), capability.shortcutLabel != nil,
-                  capability.id != .switchMode  // ⌘1–⌘6, wired per mode
+                  !ordinalFamilies.contains(capability.id)
             else { continue }
             #expect(EditorCommands.keyEquivalent(for: capability.id) != nil,
                     "\(capability.id) declares \(capability.shortcutLabel!) and the menu wires it")

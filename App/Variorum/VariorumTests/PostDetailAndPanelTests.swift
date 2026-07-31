@@ -198,7 +198,9 @@ struct SidebarSmokeTests {
             let hosting = NSHostingView(
                 rootView: SidebarView(
                     session: session, model: LibraryViewModel(session: session),
-                    pool: PoolViewModel(session: session), selection: selection,
+                    pool: PoolViewModel(session: session),
+                    workspace: WorkspaceModel(),  // 13f batch 3: the Open strip's state
+                    selection: selection,
                     postMode: PostMode.takes.rawValue)
                     .environment(ThemeStore(session: session)))
             hosting.frame = NSRect(x: 0, y: 0, width: 260, height: 600)

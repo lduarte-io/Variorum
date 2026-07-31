@@ -195,6 +195,15 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     var undoAvailable = false
     /// The structural REDO stack has an entry (13c 1B — A10).
     var redoAvailable = false
+    /// How many notes the window has OPEN (13f batch 3 — W3/A27). The
+    /// `undoAvailable` shape: an app-scope act gated on a stack, not on a
+    /// mode. Zero ⇒ the Open Notes menu is honestly grey, because ⌘⇧1 with
+    /// nothing open can only ever be a dead key.
+    var openNoteCount = 0
+    /// The active pane has somewhere to go back to (13f batch 3 — W16).
+    var canNavigateBack = false
+    /// …and somewhere to go forward to.
+    var canNavigateForward = false
 }
 
 // MARK: - The capability declaration
@@ -280,6 +289,16 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case findInPost, findNext, findPrevious, findAndReplace, useSelectionForFind
     // Modes + app scope
     case switchMode
+    // 13f batch 3 — the NAVIGATION core (her W3/A27 + W16 rulings): the
+    // window's open notes and the pane's back/forward. `openNote` is ONE
+    // declaration for the whole ⌘⇧1…⌘⇧9 family, exactly as `switchMode` is
+    // one declaration for ⌘1–⌘6 — a family of ordinal keys wired per index
+    // by the menu, with every one of them a menu item (R73/R91/R93).
+    case openNote, navigateBack, navigateForward
+    // The peer column's open door in Compare (her W16 second half: *"in
+    // compare … you should be able to click on the post you're comparing
+    // it with"*). A `.surface` act — its target is the column you point at.
+    case openPeerPost
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

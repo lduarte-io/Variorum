@@ -59,6 +59,8 @@ struct EditorCommands: Commands {
         .previousBlock, .nextBlock, .blockComments, .callout,
         .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
+        // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
+        .openNote, .navigateBack, .navigateForward,
     ]
 
     /// The SwiftUI key wiring per shortcut-labeled capability — the walk
@@ -110,7 +112,17 @@ struct EditorCommands: Commands {
         case .findPrevious: ("g", [.command, .shift])
         case .useSelectionForFind: ("e", .command)
         case .helper: ("/", .command)
+        // 13f batch 3 (W16). THE COLLISION SWEEP'S RESULT: ⌘[ and ⌘] are
+        // FREE — swept across this table, every `.keyboardShortcut(` call
+        // site in `Variorum/` and `Shared/`, every `NSMenuItem`
+        // keyEquivalent (all empty strings), and the one
+        // `performKeyEquivalent` override (⌘S only). No bracket character
+        // is bound anywhere in the app, and they are the platform's own
+        // back/forward idiom.
+        case .navigateBack: ("[", .command)
+        case .navigateForward: ("]", .command)
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
+        case .openNote: nil  // ⌘⇧1–⌘⇧9, wired per ordinal below
         default: nil
         }
     }
@@ -356,6 +368,35 @@ struct EditorCommands: Commands {
                     .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
                     .disabled(!enabled(.switchMode))
             }
+            Divider()
+            // 13f batch 3 (W16 — her ruling): the pane's back/forward, on
+            // the platform's own keys. Every door in this file is honestly
+            // grey where it cannot act: at the shelf, with nothing visited
+            // yet, Back is grey rather than a key that does nothing.
+            Button(verb(.navigateBack)) { router.goBack() }
+                .keyboardShortcut("[", modifiers: .command)
+                .disabled(!enabled(.navigateBack))
+            Button(verb(.navigateForward)) { router.goForward() }
+                .keyboardShortcut("]", modifiers: .command)
+                .disabled(!enabled(.navigateForward))
+            Divider()
+            // 13f batch 3 (W3/A27): the Open strip's keys. ONE submenu
+            // holding the window's open notes BY NAME, each with its
+            // ordinal key — so every shortcut is a menu item (R73/R91/R93)
+            // and the keys and the sidebar rows can never disagree: both
+            // read `workspace.openNotes.shown`, in the same order.
+            Menu(verb(.openNote)) {
+                ForEach(
+                    Array(router.workspace.openNotes.shown.enumerated()), id: \.element
+                ) { index, noteID in
+                    Button(router.workspace.label(for: .post(noteID))) {
+                        router.openNote(ordinal: index + 1)
+                    }
+                    .keyboardShortcut(
+                        KeyEquivalent(Character("\(index + 1)")), modifiers: [.command, .shift])
+                }
+            }
+            .disabled(!enabled(.openNote))
             Divider()
         }
         // ⌘/ — the shortcut helper + dictionary (Sitting 9, R73/R91).
