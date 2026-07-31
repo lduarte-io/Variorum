@@ -1288,3 +1288,19 @@ appended; commits by explicit path with the standing trailer; never
 `/Applications`, never push; STOP-and-propose on anything exceeding
 a ruling's shape). Baselines to match-or-beat: **core 906/102 · Mac
 958/154 · mobile 14/4.**
+
+### Sitting rulings — round 6 (2026-07-30, the 13h note)
+
+Her words, verbatim: *"yeah i like 13g before 13h. I think make a note
+for 13h that I'm going to need to have a longer design conversation
+about what this really looks like for a folder of markdown files - I
+imagine they stay markdown and i'm only exposing an editor, and then
+if they want to become variorum posts that's a deliberate step to
+convert the markdown into a variorum post? I do agree that it would be
+helpful in luring users away from Obsidian. I think I'll just need to
+decide more at that step to be honest"* → RECORDED as
+`notes/plans/phase-13h-folder-design-note.md` (her floated
+folder-editor shape beside the row's standing bridge shape; the two
+poles + the sitting questions; nothing decided — her uncertainty
+preserved). The master plan's 13h row points at it and carries the
+opens-with-the-conversation flag. 13g-before-13h affirmed.
