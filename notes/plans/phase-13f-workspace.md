@@ -2428,3 +2428,36 @@ noted on the record:** the third built-but-unfound door surfaced
 today (the ascent chip W20, the divide original W10, now this) — the
 standing Design & UI review row is the owner of that class, and its
 first run after 13f is the recommended slot.
+
+#### Batch 4 — ACCEPTED (2026-07-30; the orchestrator's adjudication — the session's cutover seam)
+
+**Counts by my own runs:** core `✔ Test run with 906 tests in 102
+suites passed` · Mac `✔ Test run with 1003 tests in 165 suites
+passed` — both match the record's claims exactly (987/159 → 1003/165:
++16, +6 suites over item 0's state). **Load-bearing evidence read:**
+the mount rule ships as the CONDITION under which the standing
+mechanisms stay correct, not a new mechanism — and the proof
+endorsed: `CommandRouter`'s single detail registration, its LIFO
+stack, and `EditorRouter.active` needed ZERO change. **The gate's
+condition (c) pins verified in the record:** the hosted
+singleton-unrepresentability pin goes red under revert R4-A with
+`handlerCount → 2` and the wrong `activePostID` — the LIFO
+misrouting hazard reproduced live, exactly what the condition
+demanded; the unmount pin is premise-asserted. **The adoption-door
+finding endorsed as the batch's best catch:** `openBeside` seeding
+the new pane's history at the ONE adoption door (`select()` records
+the arrival itself) upgrades batch 3's shell-recording claim to
+unbypassable — found by the implementer's own pins before any window
+showed the silent no-chip state. The free-tiling rider held in the
+state shape (pane collection; a Binding over the focused entry).
+The acknowledged costs stand recorded for her walk (unfocused
+Takes-mode pane reads as prose until clicked; the nested `.inspector`
+unverified with hoisting as fallback — both on the visual list).
+**Ledger: W1 BUILT** (the split, adjudicated) · item 0's strip flip
+BUILT · W2 (windows) heads batch 5 behind the per-window router fix.
+
+**CUTOVER:** this orchestrator session ends at this seam (~500k —
+the standing context rule). The successor's role file:
+`notes/plans/phase-13f-orchestrator-handoff.md` (paste-ready kickoff
+at its top; batch 5's queue and every ruling live in THIS file's
+rounds 1–11). Nothing is in flight; the tree is clean at this commit.
