@@ -91,8 +91,27 @@ struct PagedReadView: View {
         .safeAreaInset(edge: .bottom) { flipBar }
         .task {
             pages.appearance = appearance
-            pages.seed(fromFocus: model.focusedPostID)
+            // 13f W21: a mode switch's landing outranks the book's focus —
+            // it IS where she was in the mode she just left. `consumeReveal`
+            // before `adopt` so a later delivery cannot re-land it.
+            let landing = model.pendingReveal
+            if landing != nil { model.consumeReveal() }
+            pages.seed(fromFocus: landing ?? model.focusedPostID)
             await pages.adopt(entries: model.entries, chapterOpeners: chapterOpeners)
+            model.notePagedAnchor(pages.currentPostID)
+        }
+        // 13f W21: a reveal arriving while Pages is already on screen.
+        .onChange(of: model.pendingReveal) { _, reveal in
+            guard let reveal else { return }
+            model.consumeReveal()
+            pages.showPost(reveal)
+        }
+        // 13f W21 — THE REPORT, not a decision: the paginated reader owns
+        // its own model, so its (post, page-in-post) address has to travel
+        // one step to be readable by the carry. Leaving Read ▸ Pages then
+        // lands the next mode on the post she was actually reading.
+        .onChange(of: pages.currentPostID) { _, postID in
+            model.notePagedAnchor(postID)
         }
         .onChange(of: model.entries.map(\.postID)) { _, _ in
             Task { await pages.adopt(entries: model.entries, chapterOpeners: chapterOpeners) }

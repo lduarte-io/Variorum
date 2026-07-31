@@ -310,6 +310,13 @@ final class PagedReadModel {
         Task { await realize() }
     }
 
+    /// 13f W21: the post the reader is ON — the address's own post, which is
+    /// this surface's answer to "where are you in the book". Read by the
+    /// view and reported up to `BookViewModel` so a mode switch can carry it.
+    var currentPostID: String? {
+        entries.indices.contains(position.postIndex) ? entries[position.postIndex].postID : nil
+    }
+
     /// Enter where she was: the post the book model holds focus on.
     func seed(fromFocus postID: String?) {
         guard let postID, let target = entries.firstIndex(where: { $0.postID == postID })

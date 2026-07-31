@@ -25,6 +25,12 @@ struct BookView: View {
     /// Focusing a post inside an UNFOCUSED pane claims the pane first, so
     /// one click both takes the pane and opens the post.
     var onPaneFocusRequest: (() -> Void)?
+    /// 13f W20(a) — THE ASCENT: the shell asks this book to open AT a post
+    /// (the membership chip's link, wired at last). One-shot; the landing
+    /// itself is W21's brain, so the ascent lands in whatever mode the book
+    /// opens in, revealed.
+    var revealPostID: String?
+    var onRevealConsumed: (() -> Void)?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
 
@@ -40,13 +46,17 @@ struct BookView: View {
         structure: BookStructureModel? = nil,
         initiallyExpanded: Set<String> = [],
         paneFocused: Bool = true,
-        onPaneFocusRequest: (() -> Void)? = nil
+        onPaneFocusRequest: (() -> Void)? = nil,
+        revealPostID: String? = nil,
+        onRevealConsumed: (() -> Void)? = nil
     ) {
         self.session = session
         self.readingID = readingID
         self.readingName = readingName
         self.paneFocused = paneFocused
         self.onPaneFocusRequest = onPaneFocusRequest
+        self.revealPostID = revealPostID
+        self.onRevealConsumed = onRevealConsumed
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
         for postID in initiallyExpanded { resolved.expand(postID) }
         _model = State(initialValue: resolved)
@@ -110,7 +120,9 @@ struct BookView: View {
                         onWake: { postID in
                             structure.mode = .outline
                             model.focus(postID)
-                        })
+                        },
+                        reveal: model.pendingReveal,
+                        onRevealLanded: { model.consumeReveal() })
                 case .pages:
                     PagedReadView(session: session, model: model, structure: structure)
                 }
@@ -130,8 +142,12 @@ struct BookView: View {
         .onAppear {
             model.paneFocused = paneFocused
             model.onPaneFocusRequest = onPaneFocusRequest
+            takeAscentRequest()
         }
         .onChange(of: paneFocused) { _, focused in model.paneFocused = focused }
+        // 13f W20(a): the ascent's request, taken once — whether this book
+        // was already open (onChange) or opened by the ascent (onAppear).
+        .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? structure.lastError {
                 Text(error)
@@ -222,7 +238,7 @@ struct BookView: View {
                     // read is the reading flow.
                     Picker("", selection: Binding(
                         get: { structure.mode },
-                        set: { structure.mode = $0 })) {
+                        set: { switchMode(to: $0) })) {
                         Text(tokens.chromeLabel("Outline")).tag(BookStructureModel.ViewMode.outline)
                         Text(tokens.chromeLabel("Book")).tag(BookStructureModel.ViewMode.spread)
                         Text(tokens.chromeLabel("Read")).tag(BookStructureModel.ViewMode.read)
@@ -268,7 +284,7 @@ struct BookView: View {
                 if structure.mode == .read {
                     Picker("", selection: Binding(
                         get: { structure.readForm },
-                        set: { structure.readForm = $0 })) {
+                        set: { switchReadForm(to: $0) })) {
                         Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
                         Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
                     }
@@ -546,6 +562,39 @@ struct BookView: View {
         }
     }
 
+    /// 13f W20(a) — the ascent, adopted. The shell's one-shot request becomes
+    /// this book's landing (W21's slot), so "open the book at this post"
+    /// needs no second mechanism: it is the same reveal a mode switch parks,
+    /// consumed by whichever surface the book opens in.
+    private func takeAscentRequest() {
+        guard let revealPostID else { return }
+        model.requestReveal(revealPostID)
+        onRevealConsumed?()
+    }
+
+    // MARK: - W21 — the mode click-over CARRIES your place
+
+    /// Her round-8 condition, answered YES: *"if you click over does it move
+    /// where you are?"* The DEPARTING mode is the one that knows where she
+    /// is, so the place is captured before the mode changes and parked as a
+    /// landing the arriving surface consumes (`BookAnchor` holds the rule;
+    /// `BookViewModel` holds the slot; each surface performs its own
+    /// landing, because "reveal" means something different on a scroll, a
+    /// spread and a page domain).
+    private func switchMode(to newMode: BookStructureModel.ViewMode) {
+        guard newMode != structure.mode else { return }
+        model.carryPlace(from: structure.mode, readForm: structure.readForm)
+        structure.mode = newMode
+    }
+
+    /// Read's two faces are a mode switch by any other name — the same
+    /// carry, so Scroll ↔ Pages keeps her place too.
+    private func switchReadForm(to newForm: BookStructureModel.ReadForm) {
+        guard newForm != structure.readForm else { return }
+        model.carryPlace(from: structure.mode, readForm: structure.readForm)
+        structure.readForm = newForm
+    }
+
     // MARK: - The order control (13c 2D — A31)
 
     /// *"see a book either by its saved custom order or by an attribute
@@ -785,6 +834,20 @@ struct BookView: View {
                 withAnimation { proxy.scrollTo(target, anchor: .top) }
                 scrollTarget = nil
             }
+            // 13f W21 — OUTLINE'S LANDING. Both halves are needed and for
+            // different reasons: `onAppear` catches the arrival (this body
+            // mounts only after the mode has already changed, so the carry's
+            // request predates the view), `onChange` catches a reveal that
+            // arrives while Outline is already on screen (W20's ascent into
+            // a book that is open).
+            //
+            // Reveal is SCROLL-TO and never an auto-expand: posts open
+            // collapsed by her #43(a) ruling, and the card carries the same
+            // `page-<id>` anchor the expanded header does, so a collapsed
+            // post is revealed exactly as well as an open one. (If she wants
+            // the arrival unfolded, that is a ruling, not a fix.)
+            .onAppear { landOutlineReveal(proxy) }
+            .onChange(of: model.pendingReveal) { _, _ in landOutlineReveal(proxy) }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes
             // no sense to have a horizontal scrollbar on a vertical page")
@@ -797,6 +860,15 @@ struct BookView: View {
             // Book spread and Read's paginated sub-mode both KEEP a bottom
             // bar, and 2B/2C are their owners.
         }
+    }
+
+    /// Outline's half of W21's landing: scroll to the requested post and
+    /// consume the request. Nothing else moves — no focus, no expansion.
+    private func landOutlineReveal(_ proxy: ScrollViewProxy) {
+        guard let postID = model.pendingReveal else { return }
+        model.consumeReveal()
+        guard model.entries.contains(where: { $0.postID == postID }) else { return }
+        withAnimation { proxy.scrollTo("page-\(postID)", anchor: .top) }
     }
 
     /// 13b 3E (N21 — her "the dots … make me feel like it should be

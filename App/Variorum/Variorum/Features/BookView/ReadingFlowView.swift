@@ -24,6 +24,11 @@ struct ReadingFlowView: View {
     let grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
     /// Wake this post for editing (back in the book view).
     let onWake: (String) -> Void
+    /// 13f W21: the post a mode switch (or W20's ascent) asked this surface
+    /// to land on. Defaults nil, so every pre-existing call site is unchanged.
+    var reveal: String?
+    /// …and the acknowledgement, so the request is consumed exactly once.
+    var onRevealLanded: (() -> Void)?
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -38,6 +43,26 @@ struct ReadingFlowView: View {
     }
 
     var body: some View {
+        ScrollViewReader { proxy in
+            column
+                // 13f W21 — the flow's LANDING half. (Its reporting half
+                // does not exist: this surface tracks no scroll position,
+                // and per-row visibility reporting is the machinery 13c 2A
+                // deleted on her A6 ruling. Leaving the scroll therefore
+                // carries the book's standing anchor — `BookAnchor`'s header
+                // states it, and the batch record lists it for her walk.)
+                .onAppear { land(proxy) }
+                .onChange(of: reveal) { _, _ in land(proxy) }
+        }
+    }
+
+    private func land(_ proxy: ScrollViewProxy) {
+        guard let reveal else { return }
+        onRevealLanded?()
+        withAnimation { proxy.scrollTo("flow-\(reveal)", anchor: .top) }
+    }
+
+    private var column: some View {
         ScrollView {
             VStack(spacing: 0) {
                 // LAZY (P3 — round 3 MAJOR): rows materialize near the
@@ -62,6 +87,7 @@ struct ReadingFlowView: View {
                             FlowPostView(
                                 session: session, entry: entry, page: page,
                                 onWake: { onWake(entry.postID) })
+                                .id("flow-\(entry.postID)")  // W21's landing anchor
                         }
                     }
                     Text("· · ·")

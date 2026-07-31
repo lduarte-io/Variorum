@@ -427,4 +427,61 @@ final class BookViewModel {
     func expandAll() {
         expandedPosts = Set(entries.map(\.postID))
     }
+
+    // MARK: - W21 — the book's PLACE, carried across a mode switch
+    //
+    // The rule is `BookAnchor`'s (pure); this holds the two facts the rule
+    // needs that are not already mine, and the ONE landing request the
+    // arriving surface consumes. Nothing here decides anything.
+
+    /// Read ▸ Pages' address, REPORTED by the paginated reader (it owns its
+    /// own model, so its place has to travel one step to be readable here).
+    private(set) var pagedAnchorPostID: String?
+    /// Where the book was last carried to — the fallback for a surface that
+    /// tracks no position (Read ▸ Scroll; see `BookAnchor`'s header).
+    private(set) var standingAnchorPostID: String?
+    /// The post a mode switch asked the ARRIVING surface to land on. One
+    /// slot, consumed by whichever surface mounts — never a queue, because a
+    /// book shows exactly one mode at a time.
+    private(set) var pendingReveal: String?
+
+    /// The paginated reader's report (not a decision — the address is its).
+    func notePagedAnchor(_ postID: String?) {
+        pagedAnchorPostID = postID
+    }
+
+    /// The facts `BookAnchor` reads, assembled from my own state.
+    var anchorPlace: BookAnchor.Place {
+        BookAnchor.Place(
+            focusedPostID: focusedPostID,
+            spreadPostIDs: spreadEntries.map(\.postID),
+            pagedPostID: pagedAnchorPostID,
+            standingPostID: standingAnchorPostID)
+    }
+
+    /// THE CARRY (her round-8 ruling): capture where the DEPARTING mode is
+    /// and ask the arriving one to land there. Called by the mode picker
+    /// BEFORE the mode changes — the departing mode is the one that knows.
+    ///
+    /// A place it cannot name leaves both slots alone: a book with nothing
+    /// focused and nothing read has no place to carry, and clearing the
+    /// standing anchor there would throw away the last one she had.
+    func carryPlace(from mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm) {
+        guard let post = BookAnchor.currentPost(
+            mode: mode, readForm: readForm, place: anchorPlace)
+        else { return }
+        standingAnchorPostID = post
+        pendingReveal = post
+    }
+
+    /// An outside door (W20's ascent) asking this book to open AT a post.
+    func requestReveal(_ postID: String) {
+        standingAnchorPostID = postID
+        pendingReveal = postID
+    }
+
+    /// The arriving surface took the landing. Idempotent.
+    func consumeReveal() {
+        pendingReveal = nil
+    }
 }

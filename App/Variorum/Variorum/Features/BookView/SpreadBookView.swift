@@ -92,7 +92,23 @@ struct SpreadBookView: View {
             }
         }
         .safeAreaInset(edge: .bottom) { flipBar }
-        .onAppear { model.seedSpreadFromFocus() }
+        .onAppear {
+            model.seedSpreadFromFocus()
+            landReveal()
+        }
+        // 13f W21: a reveal arriving while the spread is already on screen
+        // (W20's ascent into an open book).
+        .onChange(of: model.pendingReveal) { _, _ in landReveal() }
+    }
+
+    /// THE SPREAD'S HALF of W21's landing. `showPost` is the standing jump
+    /// and its standing rule holds unchanged: a post already on the spread
+    /// is left exactly where it is, so arriving at a page you are already
+    /// reading never re-shuffles the pairing.
+    private func landReveal() {
+        guard let postID = model.pendingReveal else { return }
+        model.consumeReveal()
+        model.showPost(postID)
     }
 
     // MARK: - A page (a whole post, contained)
