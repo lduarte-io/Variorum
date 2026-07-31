@@ -26,6 +26,12 @@ final class ShellRouter {
     /// ⌘K — the palette open request (R15: every buried capability
     /// typeable).
     var paletteRequested = false
+    /// 13f batch 6 (W5): the quick note's palette door. A window cannot be
+    /// opened from `ShellActions` (which holds no `openWindow`), so this is
+    /// a REQUEST the shell adopts — the `paletteRequested` precedent
+    /// exactly, and P-4's shape: the door names what it wants, the shell
+    /// decides what that means.
+    var quickNoteRequested = false
 
     /// 13f batch 3: the window's open notes + per-pane back/forward.
     let workspace = WorkspaceModel()

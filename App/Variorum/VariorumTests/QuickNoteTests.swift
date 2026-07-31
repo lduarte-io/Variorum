@@ -1,0 +1,369 @@
+//
+//  QuickNoteTests.swift
+//  VariorumTests
+//
+//  Phase 13f, batch 6 — W5's pins (her round-3 ruling and her round-14
+//  edges, built to the architect's gate ruling).
+//
+//  The sticky is a CAPTURE surface, so what there is to pin is exactly:
+//  what a summon BECOMES (the standing `importPost` grammar, bookless, in
+//  the Pool, never empty, saying "Quick Note" in the undo menu), WHEN it
+//  mints (⌘⏎, close, and quit — never ⏎, which is a newline), the doors'
+//  declaration, and the two window-level facts the pad is subject to (it
+//  registers, and while it is key the app has ZERO live surfaces).
+//
+//  What is deliberately NOT claimed: how the floating pad LOOKS or FEELS,
+//  and that the menu-bar glyph really summons it under a real hand — the
+//  batch record's visual-verification list carries those (this host cannot
+//  make a window key, batch 5b's measurement).
+//
+
+import Dependencies
+import Foundation
+import GRDB
+import SwiftUI
+import Testing
+import VariorumCore
+@testable import Variorum
+
+// MARK: - What a summon becomes
+
+@MainActor
+@Suite("The quick note's mint (13f W5)")
+struct QuickNoteMintTests {
+    /// Her ruling's whole promise in one pin: *"typing mints an ordinary
+    /// bookless note (the Pool lists it)"*.
+    @Test func aFiledPadIsAnOrdinaryBooklessNoteThePoolLists() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // Minting blocks means fractional-index jitter (the standing
+            // harness idiom for any test that writes through Operations).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let id = await QuickNoteMint.file(
+                "A thought worth keeping.", session: session)
+            let noteID = try #require(id)
+
+            let (header, pool, books) = try await db.read { db in
+                (try Queries.containerHeader(db, containerID: noteID),
+                 try Queries.poolPosts(db, limit: 50).map(\.postID),
+                 try Queries.readingsContaining(db, postID: noteID))
+            }
+            #expect(header?.title == nil, "untitled — the app's one brain names it")
+            #expect(pool.contains(noteID), "R29: bookless means the Pool lists it")
+            #expect(books.isEmpty, "it joins no book")
+            // And it stays QUIET beyond one line naming where it went.
+            #expect(session.status.current?.text == QuickNoteCopy.filedNote)
+        }
+    }
+
+    /// The typed text is CONTENT, segmented by the standing rule — so the
+    /// sticky needs no segmentation rule of its own and the 2026-07-12
+    /// spacing ruling rides free.
+    @Test func theTypedTextSegmentsByTheStandingRuleAndKeepsItsSpacing() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // Minting blocks means fractional-index jitter (the standing
+            // harness idiom for any test that writes through Operations).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            // ⏎ is a NEWLINE here (her round-14.2), so a multi-paragraph pad
+            // is the ordinary case rather than the exotic one.
+            let typed = "First thought.\n\nSecond thought."
+            let noteID = try #require(
+                await QuickNoteMint.file(typed, session: session))
+            let rendered = try await db.read { db in
+                try Queries.renderedText(db, containerID: noteID)
+            }
+            #expect(rendered == typed, "what she typed is what the note says")
+        }
+    }
+
+    /// One summon = one note, and an empty pad mints NOTHING (her
+    /// round-14.2) — so an abandoned summon cannot litter the Pool.
+    @Test func anEmptyPadMintsNothingAtAnyDoor() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // Minting blocks means fractional-index jitter (the standing
+            // harness idiom for any test that writes through Operations).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            for pad in ["", "   ", "\n\n", " \n \t "] {
+                #expect(!QuickNoteMint.mints(pad), "the button is grey for \(pad.debugDescription)")
+                #expect(await QuickNoteMint.file(pad, session: session) == nil)
+            }
+            let posts = try await db.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container") ?? -1
+            }
+            #expect(posts == 0, "not one note was minted")
+            #expect(session.status.current == nil, "and nothing was said about it")
+        }
+    }
+
+    /// The undo entry says what she DID (the approved label widening) —
+    /// "Undo Quick Note", never "Undo Import".
+    @Test func theUndoEntrySaysQuickNoteAndStillUndoesTheWholeMint() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // Minting blocks means fractional-index jitter (the standing
+            // harness idiom for any test that writes through Operations).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let noteID = try #require(
+                await QuickNoteMint.file("Jotted.", session: session))
+            #expect(session.undoStack.topLabel == QuickNoteCopy.undoLabel)
+            #expect(EditorCommands.undoMenuTitle(for: session.undoStack.topLabel)
+                    == "Undo Quick Note")
+
+            // The label is the ONLY thing that changed: the entry still
+            // undoes the whole mint, and redo still puts it back.
+            let undoStack = session.undoStack
+            _ = try await session.runner.run { ops in try undoStack.undo(with: ops) }
+            #expect(try await db.read { db in
+                try Queries.containerHeader(db, containerID: noteID)
+            } == nil, "undo tombstones the minted note")
+            _ = try await session.runner.run { ops in try undoStack.redo(with: ops) }
+            #expect(try await db.read { db in
+                try Queries.containerHeader(db, containerID: noteID)
+            } != nil, "and redo brings it back")
+        }
+    }
+
+    /// **THE THREE MINT TRIGGERS, each driven directly** (her round-14.2:
+    /// ⏎ is a newline; closing files it; ⌘⏎ files it explicitly) — and the
+    /// property that makes them compose: ONE SUMMON = ONE NOTE.
+    ///
+    /// This pin exists because revert W5-B passed green without it: with
+    /// the triggers inside the view's lifecycle hooks, deleting the close
+    /// path broke nothing a test could see. The pad is its own type for
+    /// exactly that reason.
+    @Test func closingAndCommandReturnEachFileExactlyOneNotePerSummon() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            func poolCount() async throws -> Int {
+                try await db.read { db in try Queries.poolPosts(db, limit: 50).count }
+            }
+
+            // CLOSING FILES IT.
+            let closed = QuickNotePad(session: session)
+            closed.text = "Closed without filing."
+            #expect(await closed.close() != nil)
+            var count = try await poolCount()
+            #expect(count == 1)
+
+            // ⌘⏎ FILES IT — and the close that FOLLOWS mints nothing, which
+            // is what "one summon = one note" means in practice.
+            let filed = QuickNotePad(session: session)
+            filed.text = "Filed on purpose."
+            #expect(await filed.fileExplicitly() != nil)
+            count = try await poolCount()
+            #expect(count == 2)
+            #expect(!filed.mints, "the pad cleared itself")
+            #expect(await filed.close() == nil, "closing after ⌘⏎ mints no second note")
+            count = try await poolCount()
+            #expect(count == 2)
+
+            // An abandoned EMPTY summon leaves nothing behind at any door.
+            let empty = QuickNotePad(session: session)
+            #expect(await empty.close() == nil)
+            #expect(await empty.fileExplicitly() == nil)
+            count = try await poolCount()
+            #expect(count == 2, "an abandoned empty summon leaves nothing behind")
+        }
+    }
+
+    /// THE QUIT PATH (the architect's ruling (c)): a non-empty pad at app
+    /// quit files itself through the standing quit-finalize family — the
+    /// capture-scale analog of the open tail's teardown backstop.
+    @Test func aNonEmptyPadFilesItselfAtQuit() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // Minting blocks means fractional-index jitter (the standing
+            // harness idiom for any test that writes through Operations).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            // The registration the view makes on appear, driven directly —
+            // the same closure body, over the same pad type.
+            let pad = QuickNotePad(session: session)
+            pad.text = "Something I would have lost."
+            let token = session.quitFinalize.register { @MainActor in
+                await pad.finalizeAtQuit()
+            }
+            // Premise: nothing is in the store yet, so this cannot pass
+            // vacuously.
+            #expect(try await db.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container") ?? -1
+            } == 0)
+
+            await session.quitFinalize.finalizeAll()
+            let pool = try await db.read { db in try Queries.poolPosts(db, limit: 50) }
+            #expect(pool.count == 1, "the pad she never filed is in the Pool")
+            #expect(!pad.mints, "and the pad cleared, so a second quit hop mints nothing")
+            await session.quitFinalize.finalizeAll()
+            let afterTwice = try await db.read { db in try Queries.poolPosts(db, limit: 50).count }
+            #expect(afterTwice == 1, "finalizing twice still mints exactly one note")
+
+            session.quitFinalize.unregister(token)
+            #expect(session.quitFinalize.isEmpty)
+        }
+    }
+}
+
+// MARK: - The doors (P-1)
+
+@MainActor
+@Suite("The quick note's doors (13f W5)")
+struct QuickNoteDoorTests {
+    @Test func oneDeclarationCarriesAllThreeDoors() {
+        let capability = CapabilityRegistry.capability(.quickNote)
+        #expect(capability.doors == [.menuBar, .menuBarExtra, .palette],
+                "her round-14.1 ruling: the menu-bar extra, ⌘⇧N's menu item, and ⌘K")
+        #expect(capability.scope == .app)
+        // `always`, and honestly: a pad can be summoned from anywhere at
+        // any time — it takes no target and reads no context.
+        for context in [CapabilityContext(mode: nil), CapabilityContext(mode: .write)] {
+            #expect(capability.availability(context) == .act)
+        }
+        // The three renderers.
+        #expect(EditorCommands.menuRendered.contains(.quickNote))
+        #expect(QuickNoteMenuBarContent.menuBarExtraCapabilities == [.quickNote])
+        #expect(ShellActions.paletteActs.contains(.quickNote))
+    }
+
+    /// THE COLLISION SWEEP, re-run with ⌘⇧N in the table (the standing pin
+    /// walks the whole table; this states the batch's own result).
+    @Test func theQuickNoteChordIsOursAndTheTableStaysCollisionFree() {
+        var seen: [String: CapabilityID] = [:]
+        for capability in CapabilityRegistry.all {
+            guard let (key, modifiers) = EditorCommands.keyEquivalent(for: capability.id)
+            else { continue }
+            let chord = "\(key.character)-\(modifiers.rawValue)"
+            #expect(seen[chord] == nil,
+                    "\(capability.id) collides with \(seen[chord]?.rawValue ?? "") on \(chord)")
+            seen[chord] = capability.id
+        }
+        let chord = try? #require(EditorCommands.keyEquivalent(for: .quickNote))
+        #expect(chord?.0 == "n")
+        #expect(chord?.1 == [.command, .shift])
+        // Its neighbour is untouched: ⌘N still makes a note.
+        #expect(EditorCommands.keyEquivalent(for: .newPost)?.1 == .command)
+    }
+
+    /// ⌘K's row asks the SHELL for the window (P-4: the door names what it
+    /// wants; the shell decides what that means), because `ShellActions`
+    /// holds no `openWindow`.
+    @Test func thePaletteRowRequestsTheWindowThroughTheShell() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // Minting blocks means fractional-index jitter (the standing
+            // harness idiom for any test that writes through Operations).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let shell = ShellRouter()
+            let actions = ShellActions(session: session, shell: shell)
+            #expect(!shell.quickNoteRequested)
+
+            let row = try #require(
+                actions.paletteEntries().first { $0.title == QuickNoteCopy.verb })
+            row.action()
+            #expect(shell.quickNoteRequested, "the shell was asked for the pad")
+        }
+    }
+}
+
+// MARK: - The pad as a WINDOW
+
+@MainActor
+@Suite("The quick note's window (13f W5)")
+struct QuickNoteWindowTests {
+    /// The gate's registration ruling, as arithmetic: while the pad is key
+    /// the app mounts ZERO live surfaces — which is what makes ⌘S and the
+    /// whole editing family go honestly grey through the gates that
+    /// already exist, and what keeps a menu act from reaching a window she
+    /// is not looking at (the 5b defect, refused re-entry).
+    @Test func whileThePadIsKeyTheAppHasNoLiveSurface() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // Minting blocks means fractional-index jitter (the standing
+            // harness idiom for any test that writes through Operations).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            _ = session
+            let windows = WindowRegistry()
+            let main = UUID()
+            let pad = UUID()
+            windows.register(main, router: ShellRouter(), kind: .full)
+            windows.noteKey(main)
+
+            // Before the pad: the main window mounts exactly one.
+            let mainWindow = { (key: Bool) in
+                PaneMount.WindowState(panes: [.primary], focused: .primary, isKey: key)
+            }
+            #expect(PaneMount.liveCount(across: [mainWindow(windows.isKey(main))]) == 1)
+
+            // The pad opens and takes key. It has NO panes at all — it
+            // mounts no text surface — so the app's live count is ZERO.
+            windows.register(pad, router: ShellRouter(), kind: .quickNote)
+            windows.noteKey(pad)
+            #expect(windows.isKey(pad))
+            #expect(!windows.isKey(main))
+            #expect(PaneMount.liveCount(across: [mainWindow(windows.isKey(main))]) == 0,
+                    "the main window's pane is read-cheap while the pad is key")
+
+            // Closing the pad hands the live surface straight back — the
+            // sticky key's own behaviour, no new rule.
+            windows.unregister(pad)
+            #expect(windows.isKey(main))
+            #expect(PaneMount.liveCount(across: [mainWindow(windows.isKey(main))]) == 1)
+        }
+    }
+
+    /// The pad navigates nowhere, so an app-wide navigation broadcast must
+    /// never land in it — the `.noteOnly` rule, inherited by construction.
+    @Test func thePadIsNeverANavigationTarget() {
+        let windows = WindowRegistry()
+        let main = UUID()
+        let pad = UUID()
+        windows.register(main, router: ShellRouter(), kind: .full)
+        windows.register(pad, router: ShellRouter(), kind: .quickNote)
+        windows.noteKey(main)
+        windows.noteKey(pad)
+        #expect(windows.isKey(pad), "it IS key…")
+        #expect(windows.navigationTargetID == main, "…and still never the target")
+        #expect(!windows.isNavigationTarget(pad))
+    }
+}

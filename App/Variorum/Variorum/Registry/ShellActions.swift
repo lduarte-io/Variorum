@@ -394,6 +394,8 @@ struct ShellActions {
         .toggleContextBar,
         // 13f batch 6 (W4): her ruling's "+ ⌘K by name" half.
         .toggleStar,
+        // 13f batch 6 (W5): the quick note, typeable like every other door.
+        .quickNote,
     ]
 
     /// Palette rows for the act capabilities: title = the registry verb,
@@ -430,6 +432,7 @@ struct ShellActions {
         case .toggleSeams: return { toggleSeams() }
         case .toggleContextBar: return { shell.toggleContextBar() }
         case .toggleStar: return { toggleStarForCurrent() }
+        case .quickNote: return { shell.quickNoteRequested = true }
         case .restoreTutorial: return { restoreTutorial() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without

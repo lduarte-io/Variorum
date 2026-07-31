@@ -89,6 +89,33 @@ struct VariorumApp: App {
             }
         }
         .defaultSize(width: 760, height: 720)
+        // 13f batch 6 (W5 — her round-3 ruling: a FLOATING MINI-WINDOW).
+        // A SINGLETON `Window`, because there is one pad; floating, so it
+        // stays above the writing it is a note about. Measured before it
+        // was written: `.windowLevel(.floating)` type-checks clean at
+        // macOS 26 against both SDKs, so this needs no `NSPanel` bridge and
+        // therefore no second window mechanism beside the two groups above.
+        //
+        // It is a CAPTURE surface — no text surface of its own, so P-3 is
+        // not extended here, it is simply not engaged (see QuickNoteView).
+        Window(QuickNoteCopy.verb, id: EditorCommands.quickNoteWindowGroupID) {
+            if case .ready(let session) = bootstrap.state {
+                QuickNoteView(session: session, windows: windows)
+            } else {
+                Text("Open the main window first.")
+                    .padding(24)
+            }
+        }
+        .defaultSize(width: 340, height: 260)
+        .windowLevel(.floating)
+        .windowResizability(.contentSize)
+        // Her round-14.1 ruling: YES to the menu-bar icon — the
+        // summon-from-anywhere door, and the permission-free one (the true
+        // system-wide hotkey is out of v1 by her round-14.4 ruling; ledger
+        // row W26). It opens the same one pad the other two doors do.
+        MenuBarExtra(QuickNoteCopy.verb, systemImage: "square.and.pencil") {
+            QuickNoteMenuBarContent()
+        }
         // Sitting 9 (R73/R91): the shortcut helper + dictionary window
         // (⌘/, Help menu, the status bars' "?").
         Window("Shortcuts & Dictionary", id: "variorum-helper") {

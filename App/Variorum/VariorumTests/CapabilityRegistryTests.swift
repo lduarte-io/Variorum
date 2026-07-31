@@ -170,6 +170,15 @@ struct CapabilityRegistryTests {
         #expect(rendered == CapabilityRegistry.doored(.bottomBar))
     }
 
+    /// 13f batch 6 (W5): the MENU-BAR EXTRA's door table — the status item
+    /// that reaches her from any app (her round-14.1 ruling). Same
+    /// declared ⇔ rendered assertion as the four routed tables, so a row
+    /// added to the extra later cannot go undeclared.
+    @Test func theMenuBarExtraRendersExactlyTheDeclaredExtraDoors() {
+        #expect(Set(QuickNoteMenuBarContent.menuBarExtraCapabilities)
+                == CapabilityRegistry.doored(.menuBarExtra))
+    }
+
     @Test func theContextMenusRenderExactlyTheDeclaredContextDoors() {
         let rendered = Set(EditorViewModel.contextMenuCapabilities)
             .union(TakesCellView.contextMenuCapabilities)

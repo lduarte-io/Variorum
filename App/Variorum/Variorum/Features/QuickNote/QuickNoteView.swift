@@ -1,0 +1,280 @@
+//
+//  QuickNoteView.swift
+//  Variorum (Mac)
+//
+//  Phase 13f, W5 — THE QUICK NOTE (her sitting ruling, round 3: *a FLOATING
+//  MINI-WINDOW; global shortcut / menu-bar door; typing mints an ordinary
+//  bookless note (the Pool lists it); the sticky face shows NO takes
+//  machinery; the note persists when the window closes*).
+//
+//  ── IT IS A CAPTURE SURFACE, NOT AN EDITOR (the gate's ruling (a)) ───────
+//  There is no TK2 surface here, no block identity, no live ring — a plain
+//  SwiftUI text field, and the text becomes a note through the standing
+//  quick-entry grammar when she is done. Two things fall out of that, and
+//  they are the reason the shape was chosen over a mini editor:
+//
+//  1. **P-3 holds trivially rather than carefully.** The sticky mounts no
+//     text surface, so there is nothing for it to be live *with*: no
+//     authority, no routed-command handler, no `EditorRouter.active`. The
+//     one-live-ring invariant is not extended here; it is simply not
+//     engaged.
+//  2. **"No takes machinery" holds by construction**, not by stripping a
+//     face down and keeping it stripped.
+//
+//  The cost, stated where it lives: a summon she abandons keeps nothing,
+//  and re-summoning gives a fresh pad rather than the last note. That is
+//  what a sticky IS — the minted note opens in the full editor the moment
+//  she wants more of it.
+//
+//  ── WHEN IT MINTS (her round-14.2 ruling) ───────────────────────────────
+//  **⏎ IS A NEWLINE** — the pad is free-typing and multi-line. The note
+//  mints on **CLOSE**, on **⌘⏎** (filing it explicitly), and at **QUIT**
+//  (the architect's ruling (c): the capture-scale analog of the open tail's
+//  teardown backstop — loss is bounded by one summon, and this is what
+//  bounds it). ONE SUMMON = ONE NOTE, and an empty sticky mints nothing.
+//
+//  ── AND IT STAYS QUIET (her round-14.3) ─────────────────────────────────
+//  The note sits in the Pool; one status line names where it went; the main
+//  window never navigates. A sticky that yanks her out of what she was
+//  doing is the opposite of a quick note.
+//
+
+import SwiftUI
+import VariorumCore
+
+/// THE PAD ITSELF — the text and its three mint triggers, OUT of the view.
+///
+/// This is not ceremony: the triggers are `close`, `⌘⏎` and `quit`, and two
+/// of the three are SwiftUI/AppKit lifecycle hooks that no test can drive.
+/// Left inside the view they would be exactly the promise this file's own
+/// header warns about (the `MembershipChip.ascend` lesson, W20) — and the
+/// first revert proved it: deleting the close path left every pin green.
+/// Here each trigger is a named call the pins drive directly, and the view
+/// holds nothing but the hooks that call them.
+@MainActor
+@Observable
+final class QuickNotePad {
+    @ObservationIgnored let session: AppSession
+    var text = ""
+
+    init(session: AppSession) { self.session = session }
+
+    /// Is there anything to file? The button's grey reads this, so it can
+    /// never fire into `emptyImport`.
+    var mints: Bool { QuickNoteMint.mints(text) }
+
+    /// ⌘⏎ — file it explicitly. The pad clears, so the `close` that follows
+    /// finds nothing and ONE SUMMON STILL MINTS ONE NOTE (her round-14.2).
+    @discardableResult
+    func fileExplicitly() async -> String? { await take() }
+
+    /// CLOSING FILES IT (her round-14.2). Idempotent by the same clearing.
+    @discardableResult
+    func close() async -> String? { await take() }
+
+    /// QUIT (the architect's ruling (c)): a non-empty pad at app quit files
+    /// itself — the capture-scale analog of the open tail's teardown
+    /// backstop, and what bounds the loss to one summon.
+    @discardableResult
+    func finalizeAtQuit() async -> String? { await take() }
+
+    /// The one body all three share: take the text, clear the pad, file it.
+    /// Clearing FIRST is what makes the three triggers compose — close
+    /// follows ⌘⏎, and quit can follow either, and none of them can mint a
+    /// second note from the same summon.
+    private func take() async -> String? {
+        let text = self.text
+        self.text = ""
+        return await QuickNoteMint.file(text, session: session)
+    }
+}
+
+struct QuickNoteView: View {
+    let session: AppSession
+    let windows: WindowRegistry
+
+    /// Its own router — registered so the mount gate and the menu's gates
+    /// answer for this window while it is key (see `onAppear`).
+    @State private var router = ShellRouter()
+    @State private var windowID = UUID()
+    @State private var theme: ThemeStore
+    @State private var pad: QuickNotePad
+    /// The quit-finalize registration (the architect's ruling (c)).
+    @State private var quitToken: UUID?
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.dismiss) private var dismiss
+
+    init(session: AppSession, windows: WindowRegistry) {
+        self.session = session
+        self.windows = windows
+        _theme = State(initialValue: ThemeStore(session: session))
+        _pad = State(initialValue: QuickNotePad(session: session))
+    }
+
+    var body: some View {
+        let tokens = theme.tokens(for: scheme)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(tokens.chromeLabel(QuickNoteCopy.header))
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+            // A plain multi-line field: ⏎ types a newline (her ruling), so
+            // this deliberately carries NO `.onSubmit`.
+            TextEditor(text: $pad.text)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .scrollContentBackground(.hidden)
+                .background(tokens.surface)
+                .overlay(alignment: .topLeading) {
+                    if pad.text.isEmpty {
+                        Text(tokens.chromeLabel(QuickNoteCopy.placeholder))
+                            .font(tokens.body)
+                            .foregroundStyle(tokens.faint)
+                            .padding(.top, 8)
+                            .padding(.leading, 5)
+                            .allowsHitTesting(false)
+                    }
+                }
+            HStack {
+                // `lineLimit` beside a hint in non-scrolling chrome — P-8's
+                // b6dae25 class.
+                Text(tokens.chromeLabel(QuickNoteCopy.hint))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Button(QuickNoteCopy.fileVerb) { fileAndClose() }
+                    .keyboardShortcut(.return, modifiers: .command)
+                    .disabled(!pad.mints)
+            }
+        }
+        .padding(14)
+        .frame(minWidth: 300, minHeight: 220)
+        .background(tokens.room)
+        .environment(theme)
+        .background {
+            WindowKeyReporter(
+                onWindow: { windows.attach($0, to: windowID) },
+                onKey: { windows.noteKey(windowID) })
+        }
+        .task { await theme.start() }
+        .onAppear {
+            // Registered like every other window (the gate's ruling): while
+            // the sticky is key the app has ZERO live surfaces, so ⌘S and
+            // the whole editing family go honestly grey through the gates
+            // that already exist — and no act can reach a window she is not
+            // looking at (the 5b menu-gates defect, refused re-entry).
+            windows.register(windowID, router: router, kind: .quickNote)
+            let status = session.status
+            router.speak = { status.speak($0) }
+            // THE QUIT PATH: a non-empty pad at app quit files itself.
+            let pad = self.pad
+            quitToken = session.quitFinalize.register { @MainActor in
+                await pad.finalizeAtQuit()
+            }
+        }
+        .onDisappear {
+            windows.unregister(windowID)
+            if let quitToken { session.quitFinalize.unregister(quitToken) }
+            // CLOSING FILES IT (her ruling). The window is already going, so
+            // this rides the pad rather than this view's lifetime.
+            let pad = self.pad
+            Task { @MainActor in await pad.close() }
+        }
+    }
+
+    private func fileAndClose() {
+        // ⌘⏎ files explicitly. `onDisappear` runs next, finds an empty pad,
+        // and mints nothing — one summon, one note.
+        let pad = self.pad
+        Task { @MainActor in
+            await pad.fileExplicitly()
+            dismiss()
+        }
+    }
+}
+
+// MARK: - The mint (the standing quick-entry grammar)
+
+/// WHAT A SUMMON BECOMES. Pure decision + one standing call, kept out of
+/// the view so the rule is pinnable: a view's closure is a promise no test
+/// can keep (the `MembershipChip.ascend` lesson, W20).
+@MainActor
+enum QuickNoteMint {
+    /// Whether this pad has anything to file. The same rule `importPost`
+    /// enforces (`emptyImport` on whitespace-only text), stated here so the
+    /// button can be honestly grey rather than firing into a refusal.
+    nonisolated static func mints(_ text: String) -> Bool {
+        !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// File the pad as an ordinary BOOKLESS note and say where it went.
+    ///
+    /// It rides `importPost` exactly as the R3 quick-entry bar does, so
+    /// every property her ruling names comes from the standing grammar
+    /// rather than from a second rule here: untitled; the typed text
+    /// SEGMENTS as content under the document-global setting (the
+    /// 2026-07-12 spacing ruling and the `one_block` face ride free); and
+    /// it joins no book, which is exactly what puts it in the Pool (R29).
+    ///
+    /// The undo entry says **"Quick Note"** — the label parameter this item
+    /// added to `importPost`, so the menu says what she did.
+    @discardableResult
+    static func file(_ text: String, session: AppSession) async -> String? {
+        guard mints(text) else { return nil }
+        do {
+            let result = try await session.runner.run { ops in
+                try ops.importPost(
+                    title: nil, text: text, undoLabel: QuickNoteCopy.undoLabel)
+            }
+            // Her round-14.3: STAY QUIET. One line naming where it went —
+            // the main window never navigates.
+            session.status.speak(QuickNoteCopy.filedNote)
+            return result.container.id
+        } catch {
+            session.status.speak(
+                "\(QuickNoteCopy.refusedPrefix) \(OpsRefusalCopy.message(for: error))")
+            return nil
+        }
+    }
+}
+
+// MARK: - The menu-bar door (her round-14.1)
+
+/// The `MenuBarExtra`'s contents — the summon-from-anywhere door. It is a
+/// menu rather than a window-style extra deliberately: clicking it opens
+/// the ONE pad the other two doors open, so all three are the same act.
+struct QuickNoteMenuBarContent: View {
+    /// The REGISTRY acts this extra renders (P-1's walk) — so its contents
+    /// are declared ⇔ rendered exactly like every other door surface's.
+    static let menuBarExtraCapabilities: [CapabilityID] = [.quickNote]
+
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Button(QuickNoteCopy.summonVerb) {
+            openWindow(id: EditorCommands.quickNoteWindowGroupID)
+        }
+        .keyboardShortcut("n", modifiers: [.command, .shift])
+    }
+}
+
+// MARK: - Vocabulary
+
+nonisolated enum QuickNoteCopy {
+    /// The registry's ONE verb — the menu-bar extra, ⌘⇧N and the File-menu
+    /// item all wear it.
+    static let verb = "Quick Note"
+    /// The menu-bar row's own words (the extra's title is the app's glyph,
+    /// so its one row says what pressing it does).
+    static let summonVerb = "New Quick Note"
+    static let header = "quick note"
+    static let placeholder = "jot it down — it lands in the Pool"
+    /// ⏎ is a NEWLINE here (her ruling), so the hint says the two things
+    /// that are not obvious: how to file, and where it goes.
+    static let hint = "⏎ new line · ⌘⏎ files it · closing files it too"
+    static let fileVerb = "File It"
+    /// The undo entry's words — "Undo Quick Note", never "Undo Import".
+    static let undoLabel = "Quick Note"
+    static let filedNote = "Filed in the Pool — a bookless note, ready when you are."
+    static let refusedPrefix = "The quick note wasn't filed:"
+}

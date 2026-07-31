@@ -572,6 +572,22 @@ nonisolated enum CapabilityRegistry {
             doors: [.contextMenu],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // 13f batch 6 — W5's QUICK NOTE. `always`, and honestly so: a pad
+        // can be summoned from anywhere at any time — that is the whole
+        // feature. It takes no target and reads no context.
+        Capability(
+            id: .quickNote, verb: QuickNoteCopy.verb, scope: .app,
+            doors: [.menuBar, .menuBarExtra, .palette],
+            // THE COLLISION SWEEP'S RESULT (13f batch 6): ⌘⇧N is FREE —
+            // swept across `EditorCommands.keyEquivalent` (36 chords),
+            // every `.keyboardShortcut(` call site in `Variorum/` and
+            // `Shared/`, every `NSMenuItem` key equivalent (all empty
+            // strings) and the one `performKeyEquivalent` override (⌘S).
+            // No `n` chord carries shift; the nearest neighbour is ⌘N New
+            // Post, which is exactly the right neighbour — ⌘N makes a
+            // note, ⌘⇧N pops the pad.
+            shortcutLabel: "\u{2318}\u{21e7}N", takesAccess: nil,
+            unavailableNote: "", availability: always),
         // 13f batch 6 — W4's STARS (her round-3 ruling: *"up to 5 notes or
         // books, star/unstar via context menu + ⌘K, section at the
         // sidebar's top"*). The gate governs the ⌘K door ONLY: at the shelf

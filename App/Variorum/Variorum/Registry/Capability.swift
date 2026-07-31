@@ -237,6 +237,14 @@ nonisolated struct Capability: Identifiable, Sendable {
     /// routed door tables.
     enum Door: Sendable, Hashable, CaseIterable {
         case menuBar, contextMenu, bottomBar, palette, surface
+        /// 13f batch 6 (W5): the MENU-BAR EXTRA — the status-item door
+        /// that reaches her whatever app is frontmost (her round-14.1
+        /// ruling). Deliberately distinct from `.menuBar`, which is the
+        /// app's own menu bar and only exists while Variorum is
+        /// frontmost; the walk asserts declared ⇔ rendered for this one
+        /// too, so a second row appearing in the extra later cannot go
+        /// undeclared.
+        case menuBarExtra
     }
 
     /// R118 — TAKES PARITY, part of the declaration: how the Takes surface
@@ -332,6 +340,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // ⌘K by name. No key: her ruling named a menu and the palette, and an
     // invented chord would owe a collision sweep no ruling asked for.
     case toggleStar
+    // 13f batch 6 — W5's QUICK NOTE (her round-3 ruling, and round 14's
+    // four edges). ONE declaration behind three doors: the menu-bar extra
+    // (her round-14.1 — the summon-from-anywhere door, permission-free),
+    // ⌘⇧N, and a File-menu item. The TRUE system-wide hotkey is out of v1
+    // by her ruling (round 14.4 — ledger row W26).
+    case quickNote
     // The peer column's open door in Compare (her W16 second half: *"in
     // compare … you should be able to click on the post you're comparing
     // it with"*). A `.surface` act — its target is the column you point at.

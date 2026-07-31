@@ -57,6 +57,14 @@ final class WindowRegistry {
     enum Kind: Equatable, Sendable {
         case full
         case noteOnly
+        /// 13f batch 6 (W5): the floating QUICK NOTE pad. It mounts no text
+        /// surface at all, so while it is key the app has ZERO live
+        /// surfaces — which is the point: ⌘S and the whole editing family
+        /// go honestly grey through the gates that already exist, and no
+        /// menu act can reach a window she is not looking at. It navigates
+        /// nowhere, so `navigationTargetID` skips it exactly as it skips a
+        /// note-only window.
+        case quickNote
     }
 
     struct Entry {

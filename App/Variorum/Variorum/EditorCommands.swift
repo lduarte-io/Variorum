@@ -74,6 +74,8 @@ struct EditorCommands: Commands {
         .openBeside, .closeSplit,
         // 13f batch 5 (W20 b): the context bar's fold.
         .toggleContextBar,
+        // 13f batch 6 (W5): the quick note's File-menu door.
+        .quickNote,
     ]
 
     /// The SwiftUI key wiring per shortcut-labeled capability — the walk
@@ -139,6 +141,11 @@ struct EditorCommands: Commands {
         // app (same five places swept as ⌘[/⌘] were). It reads as the
         // "info about where I am" bar, which is what the bar says.
         case .toggleContextBar: ("i", [.command, .shift])
+        // 13f batch 6 (W5). THE COLLISION SWEEP'S RESULT: ⌘⇧N is FREE (the
+        // same five places swept as ⌘[/⌘] and ⌘⇧I were). It reads beside
+        // its neighbour rather than against it: ⌘N makes a note, ⌘⇧N pops
+        // the quick-note pad.
+        case .quickNote: ("n", [.command, .shift])
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
         case .openNote: nil  // ⌘⇧1–⌘⇧9, wired per ordinal below
         default: nil
@@ -170,6 +177,12 @@ struct EditorCommands: Commands {
             // ⌘N is New Post's, and inventing a chord would owe a collision
             // sweep no ruling asked for (batch 4's precedent).
             Button("New Window") { openWindow(id: Self.mainWindowGroupID) }
+                .disabled(session == nil)
+            // 13f batch 6 (W5) — the quick note's File-menu door, one of the
+            // three her round-14.1 ruling names (the menu-bar extra and
+            // ⌘⇧N are the others). ONE declaration renders all three.
+            Button(verb(.quickNote)) { openWindow(id: Self.quickNoteWindowGroupID) }
+                .keyboardShortcut("n", modifiers: [.command, .shift])
                 .disabled(session == nil)
         }
         // ⌘K (R15, ratified): find anything — posts, books, commands.
@@ -470,6 +483,9 @@ struct EditorCommands: Commands {
     /// The two `WindowGroup` ids the app opens by name (13f batch 5b).
     static let mainWindowGroupID = "variorum-main"
     static let noteWindowGroupID = "variorum-note"
+    /// 13f batch 6 (W5): the floating quick-note pad — a SINGLETON window
+    /// (`Window`, not `WindowGroup`), because there is one pad.
+    static let quickNoteWindowGroupID = "variorum-quicknote"
 
     /// The callout emoji prompt (her sitting-3 reference wore "💡").
     /// 13c R2-2: the prompt gathers the glyph and the ROUTER delivers it,

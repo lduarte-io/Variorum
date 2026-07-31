@@ -222,6 +222,14 @@ struct RootView: View {
             paletteOpen = true
             router.paletteRequested = false
         }
+        // 13f batch 6 (W5): ⌘K's quick-note row. The pad is a singleton
+        // window, so this opens the same one the menu-bar extra, ⌘⇧N and
+        // the File-menu item open.
+        .onChange(of: router.quickNoteRequested) { _, requested in
+            guard requested else { return }
+            openWindow(id: EditorCommands.quickNoteWindowGroupID)
+            router.quickNoteRequested = false
+        }
         // Phase 13 C1: the voice's text-surface half — keep the one global
         // typography current so surfaces created LATER materialize in the
         // right voice (open surfaces re-style through their own chrome

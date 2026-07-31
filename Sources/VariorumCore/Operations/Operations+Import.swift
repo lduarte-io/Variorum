@@ -30,8 +30,17 @@ extension Operations {
     /// stamp rule): touch + churn accumulate per minted block, exactly as
     /// N `newBlock` calls would. Undo tombstones the minted post
     /// (`restoreContainer` stays the recovery door — the copy-op pattern).
+    ///
+    /// **`undoLabel` (13f batch 6, W5 — the architect's ruling):** the undo
+    /// entry's words, defaulted to this door's own name. It is a parameter
+    /// and not a constant because the QUICK NOTE mints through exactly this
+    /// path, and "Undo Import" is not what she did — a menu that says
+    /// "Undo Quick Note" says what happened. Nothing else about the entry
+    /// changes: same inverse, same redo, same recovery door.
     @discardableResult
-    public func importPost(title: String?, text: String) throws -> ImportResult {
+    public func importPost(
+        title: String?, text: String, undoLabel: String = "Import"
+    ) throws -> ImportResult {
         let result: ImportResult = try database.write { db in
             let mode = try globalSegmentation(db)
             let segments = SegmentationRules.bulkSegments(text, mode: mode)
@@ -41,7 +50,7 @@ extension Operations {
             return ImportResult(container: post, blockIDs: blockIDs, createdContainer: true)
         }
         undoStack?.register(
-            label: "Import",
+            label: undoLabel,
             inverse: { try $0.revertMintedContainer(result.container.id) },
             redo: { try $0.reapplyMintedContainer(result.container.id) })
         return result
