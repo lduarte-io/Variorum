@@ -4627,6 +4627,30 @@ stays unmodified; full suites re-run with quoted lines.
 **Ledger: W6+W15 BUILT** (adjudicated; the follow-on completes the
 batch). After the follow-on: **the ONE Fable cold review** over the
 phase's combined diff, then the round-15 closeout.
+
+#### Batch 7 follow-on — ACCEPTED (2026-07-31; batch 7 closes whole — THE BUILD PHASE ENDS)
+
+**Counts by my own runs:** core `✔ Test run with 925 tests in 105
+suites passed` (`swift_exit=0`) · Mac `✔ Test run with 1064 tests in
+187 suites passed` (`xcodebuild_exit=0`) — byte-identical to
+baseline, as a copy follow-on must be.
+
+**Adjudication:** the name-vs-define rule ENDORSED as a set
+("comment" where a string NAMES the feature; "remark" where it
+DEFINES it — circularity avoided with a word that is not a Variorum
+noun), and the A7 pair is the one that mattered: the refusal now
+states the literal truth of the guard it speaks for. **The two
+EXTRA same-class applications GRANTED retroactively** — the ruling
+named three only because the batch record had named three, and the
+class-completeness discipline (sweep the class whole when it recurs
+adjacent, with the whole-app audit proving closure) is exactly the
+constitution's own rule; the restraint on "locked" is RIGHT (that
+word's finished-vs-locked blur is 13i's question by her round-10
+addendum, and "reading"→"book" is correct under either resolution).
+One pin flip, named. **The phase's BUILD WORK IS COMPLETE** — every
+committed ledger row BUILT or dispositioned. Next: the ONE Fable
+cold review (REVIEW_PROMPT.md verbatim, zero framing), then the
+round-15 closeout ritual.
 - Her walk will notice, beyond the Starred section itself: every note row
   in the app (the Open strip, the Library catalog, the Pool) and every
   book row on the shelf carries a new star door, and ⌘K types "Toggle
