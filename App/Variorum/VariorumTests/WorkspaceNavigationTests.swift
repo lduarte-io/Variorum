@@ -400,11 +400,14 @@ struct WorkspaceModelTests {
         #expect(Set(workspace.openNotes.ids) == ["p1", "p2"])
     }
 
+    /// 13f batch 5 (W20 b): the chip's collapse became the WHOLE context
+    /// bar's — one fold for the back half and the "in <book>" half together,
+    /// per her ruling. A mechanical rename here; the claim is unchanged.
     @Test func theChipStateIsSessionStateAndStartsShowing() {
         let workspace = WorkspaceModel()
-        #expect(!workspace.backChipCollapsed, "expanded by default — it is a name, unfolded")
-        workspace.backChipCollapsed = true
-        #expect(workspace.backChipCollapsed)
+        #expect(!workspace.contextBarCollapsed, "expanded by default — it is a name, unfolded")
+        workspace.contextBarCollapsed = true
+        #expect(workspace.contextBarCollapsed)
     }
 
     /// Her guarantee, at the layer that could break it: closing a row is

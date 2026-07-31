@@ -7,25 +7,31 @@
 //
 //  The chrome split is the gate's ruling (d):
 //
-//  - **Per pane:** the back chip (batch 3 put it in the shell rather than
-//    in `PostDetailView` precisely because "where did I come from" is the
-//    PANE's fact — it moves in here unchanged, one per pane, each reading
-//    its own `PaneID`), and — when the pane is NOT focused — a quiet name
-//    line, because a focused pane brings its own masthead and an unfocused
-//    one would otherwise be anonymous. **The difference between a full
-//    masthead and a thin name line IS the focus signal**, which is a better
-//    thing to have than a border.
+//  - **Per pane:** the CONTEXT BAR (batch 3 put the back chip in the shell
+//    rather than in `PostDetailView` precisely because "where did I come
+//    from" is the PANE's fact; batch 5 gave it its second half — "in
+//    <book>" — for the same reason, and the two fold as ONE bar), and —
+//    when the pane is NOT focused — a quiet name line, because a focused
+//    pane brings its own masthead and an unfocused one would otherwise be
+//    anonymous. **The difference between a full masthead and a thin name
+//    line IS the focus signal**, which is a better thing to have than a
+//    border.
 //  - **Per window** (and therefore not here): the sidebar, the status
 //    toast, the ⌘K palette.
 //
 //  Nothing in this file decides anything: the mount fork is `PaneMount`'s
-//  and the shell's, and the chip's arithmetic is `NavigationHistory`'s.
+//  and the shell's, the chip's arithmetic is `NavigationHistory`'s, and the
+//  books' order is `BookChooserOrder`'s.
 //
 
 import SwiftUI
+import VariorumCore
 
 struct PaneHost<Content: View>: View {
     let tokens: VoiceTokens
+    /// 13f batch 5 (W20 b): the bar's "in <book>" half needs one read, and
+    /// this is the only chrome that knows which note the pane holds.
+    let session: AppSession
     let workspace: WorkspaceModel
     let pane: PaneID
     /// True for exactly one pane (`PaneMount.liveCount`), and the reason
@@ -38,17 +44,38 @@ struct PaneHost<Content: View>: View {
     let onBack: () -> Void
     let onToggleCollapse: () -> Void
     let onFocus: () -> Void
+    /// The ascent (W20 a): open this book, revealed at this note.
+    let onOpenBook: (String, String) -> Void
     @ViewBuilder let content: () -> Content
+
+    /// The pane note's books, ordered. A ONE-SHOT read keyed on what is
+    /// shown (the shipped `PostTitleLabel` / `MembershipChip` precedent) and
+    /// deliberately NOT a held observation: `readingsContaining` walks every
+    /// smart book's filter, and a held one would re-run that sweep at
+    /// autosave rate on a table autosave writes (P1). The recorded corner:
+    /// adding or removing a book elsewhere does not re-title this line until
+    /// the pane's note next changes.
+    @State private var books: [Reading] = []
+
+    /// The note this pane holds, if it holds one (a scraps container counts
+    /// — it is a container with memberships like any other).
+    private var noteID: String? { workspace.selections[pane]?.noteID }
 
     var body: some View {
         VStack(spacing: 0) {
-            if let origin = workspace.history(pane).origin {
-                BackChip(
-                    tokens: tokens,
-                    originLabel: workspace.label(for: origin),
-                    collapsed: workspace.backChipCollapsed,
-                    onBack: onBack,
-                    onToggleCollapse: onToggleCollapse)
+            let bar = ContextBar(
+                tokens: tokens,
+                originLabel: workspace.history(pane).origin.map { workspace.label(for: $0) },
+                books: books,
+                collapsed: workspace.contextBarCollapsed,
+                onBack: onBack,
+                onOpenTopBook: {
+                    guard let noteID, let top = books.first else { return }
+                    onOpenBook(top.id, noteID)
+                },
+                onToggleCollapse: onToggleCollapse)
+            if bar.hasContent {
+                bar
                 Divider().overlay(tokens.line)
             }
             if split, !focused, let selection = workspace.selections[pane] {
@@ -57,6 +84,18 @@ struct PaneHost<Content: View>: View {
             }
             content()
         }
+        .task(id: noteID) { await loadBooks() }
+    }
+
+    private func loadBooks() async {
+        guard let noteID else {
+            books = []
+            return
+        }
+        let found = (try? await session.database.read { db in
+            try Queries.readingsContaining(db, postID: noteID)
+        }) ?? []
+        books = BookChooserOrder.ordered(found, recentlyVisited: workspace.recentBookIDs)
     }
 
     /// The quiet name line an unfocused pane wears in place of a masthead.

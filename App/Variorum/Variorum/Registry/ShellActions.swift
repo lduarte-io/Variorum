@@ -353,6 +353,8 @@ struct ShellActions {
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
+        // 13f batch 5 (W20 b): the context bar's fold, typeable.
+        .toggleContextBar,
     ]
 
     /// Palette rows for the act capabilities: title = the registry verb,
@@ -387,6 +389,7 @@ struct ShellActions {
         case .chooseTake: return { dispatch(.takes(.choose)) }
         case .saveChoicesAsLens: return { dispatch(.takes(.saveLens)) }
         case .toggleSeams: return { toggleSeams() }
+        case .toggleContextBar: return { shell.toggleContextBar() }
         case .restoreTutorial: return { restoreTutorial() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without

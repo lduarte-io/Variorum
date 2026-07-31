@@ -302,6 +302,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // one declaration for ⌘1–⌘6 — a family of ordinal keys wired per index
     // by the menu, with every one of them a menu item (R73/R91/R93).
     case openNote, navigateBack, navigateForward
+    // 13f batch 5 — W20(b)'s fold. Her ruling: the ascent's in-line and the
+    // back chip are ONE bar with ONE hiding mechanism, *"even if just with a
+    // keyboard command"*. App scope, always available: a bar you cannot see
+    // is exactly when you most want the key that brings it back.
+    case toggleContextBar
     // 13f batch 4 — the SPLIT (her W1/A25 ruling, two panes in v1). Both
     // are app-scope stack gates like the navigation family: one needs a
     // note to put beside, the other needs a split to close.

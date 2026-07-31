@@ -534,6 +534,25 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "There's no other open note to put beside this one yet — "
                 + "open a second note and it can sit alongside.",
             availability: { ctx in ctx.canOpenBeside ? .act : .unavailable }),
+        // 13f batch 5 (W20 b) — the context bar's ONE fold. Her ruling:
+        // *"i think that chip + visible in line is good, but I think that
+        // you should be able to hide it somehow (even if just with a
+        // keyboard command). i love our uncluttered interface"* — so the
+        // back half and the "in <book>" half hide TOGETHER, through one act
+        // with one key. `always`, deliberately: the door's whole job is to
+        // bring back a bar that is not on screen, so greying it out where
+        // the bar is hidden would be the one state it must work in.
+        Capability(
+            id: .toggleContextBar, verb: WorkspaceNaming.contextBarVerb, scope: .app,
+            doors: [.menuBar, .palette],
+            // THE COLLISION SWEEP'S RESULT (13f batch 5): ⌘⇧I is FREE —
+            // swept across `EditorCommands.keyEquivalent`, every
+            // `.keyboardShortcut(` call site in `Variorum/` and `Shared/`,
+            // every `NSMenuItem` key equivalent (all empty strings) and the
+            // one `performKeyEquivalent` override (⌘S). No `i` chord of any
+            // modifier combination is bound anywhere in the app.
+            shortcutLabel: "\u{2318}\u{21e7}I", takesAccess: nil,
+            unavailableNote: "", availability: always),
         Capability(
             id: .closeSplit, verb: "Close Split", scope: .app,
             doors: [.menuBar],

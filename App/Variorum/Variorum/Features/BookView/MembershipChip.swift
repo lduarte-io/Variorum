@@ -22,7 +22,11 @@ import VariorumCore
 struct MembershipChip: View {
     let session: AppSession
     let postID: String
-    var onOpenBook: ((String) -> Void)?
+    /// 13f W20(c): the session's recently-visited books, most recent first —
+    /// the chooser floats them within their group (her round-10 shaping).
+    /// Defaults empty, so curated-before-smart alone orders a chip mounted
+    /// without a workspace (a pin, a future embedding).
+    var recentBookIDs: [String] = []
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -61,11 +65,21 @@ struct MembershipChip: View {
                         .font(.callout.weight(.semibold))
                     ForEach(books, id: \.id) { book in
                         HStack(spacing: 6) {
+                            // 13f W20(a) — THE ASCENT, wired. This link has
+                            // rendered since Phase 13 and done NOTHING: it
+                            // called an OPTIONAL closure that its one mount
+                            // (`PostDetailView`) never passed. The optional is
+                            // gone rather than filled in, because a door whose
+                            // reach depends on a caller remembering to hand it
+                            // one is the fire-and-DO class that produced the
+                            // bug. It names a destination; the shell decides
+                            // what that means (P-4).
                             Button(book.name) {
                                 popoverShown = false
-                                onOpenBook?(book.id)
+                                MembershipChip.ascend(bookID: book.id, postID: postID)
                             }
                             .buttonStyle(.link)
+                            .help("Open “\(book.name)” at this post")
                             Spacer()
                             Button("remove") { remove(from: book) }
                                 .buttonStyle(.borderless)
@@ -145,11 +159,26 @@ struct MembershipChip: View {
         }
     }
 
+    /// 13f W20(a) — THE ASCENT, as a named call rather than a closure body,
+    /// for the reason batch 2 moved the ceremony's sentences out of `Text`
+    /// literals: **a promise made inside a view's closure is a promise no
+    /// test can keep.** This one is pinned.
+    static func ascend(bookID: String, postID: String) {
+        NotificationCenter.default.post(
+            name: .variorumOpenBookAtPost, object: nil,
+            userInfo: ["bookID": bookID, "postID": postID])
+    }
+
     private func refresh() async {
         let membership = (try? await session.database.read { [postID] db in
             try Queries.readingsContaining(db, postID: postID)
         }) ?? []
-        books = membership
+        // 13f W20(c): the chooser's order is hers (round 10) — curated
+        // before smart, most-recently-visited floating inside each group.
+        // Smart matches ARE listed: derived membership IS membership
+        // (round 10 item 2, #26(h)), and `readingsContaining` has always
+        // returned them.
+        books = BookChooserOrder.ordered(membership, recentlyVisited: recentBookIDs)
         let memberIDs = Set(membership.map(\.id))
         let all = ((try? await session.database.read { db in
             try Queries.readings(db)
@@ -253,4 +282,10 @@ enum ChipRefusals {
 extension Notification.Name {
     /// A surface asks the shell to open a post (RootView routes it).
     static let variorumOpenPost = Notification.Name("variorumOpenPost")
+
+    /// 13f W20(a) — THE ASCENT: a surface asks the shell to open a BOOK,
+    /// revealed at a post (`userInfo`: `bookID`, `postID`). P-4 exactly —
+    /// the surface names a destination, `RootView` decides what it means
+    /// (the `.variorumRevealUnplacedBlock` precedent, batch 2).
+    static let variorumOpenBookAtPost = Notification.Name("variorumOpenBookAtPost")
 }

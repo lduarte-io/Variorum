@@ -63,6 +63,8 @@ struct EditorCommands: Commands {
         .openNote, .navigateBack, .navigateForward,
         // 13f batch 4 (W1/A25): the split's.
         .openBeside, .closeSplit,
+        // 13f batch 5 (W20 b): the context bar's fold.
+        .toggleContextBar,
     ]
 
     /// The SwiftUI key wiring per shortcut-labeled capability — the walk
@@ -123,6 +125,11 @@ struct EditorCommands: Commands {
         // back/forward idiom.
         case .navigateBack: ("[", .command)
         case .navigateForward: ("]", .command)
+        // 13f batch 5 (W20 b). THE COLLISION SWEEP'S RESULT: ⌘⇧I is FREE —
+        // no `i` chord of any modifier combination is bound anywhere in the
+        // app (same five places swept as ⌘[/⌘] were). It reads as the
+        // "info about where I am" bar, which is what the bar says.
+        case .toggleContextBar: ("i", [.command, .shift])
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
         case .openNote: nil  // ⌘⇧1–⌘⇧9, wired per ordinal below
         default: nil
@@ -381,6 +388,11 @@ struct EditorCommands: Commands {
             Button(verb(.navigateForward)) { router.goForward() }
                 .keyboardShortcut("]", modifiers: .command)
                 .disabled(!enabled(.navigateForward))
+            // 13f batch 5 (W20 b): the context bar's ONE fold, beside the
+            // navigation it belongs to (the bar's back half IS ⌘[).
+            Button(verb(.toggleContextBar)) { router.toggleContextBar() }
+                .keyboardShortcut("i", modifiers: [.command, .shift])
+                .disabled(session == nil)
             Divider()
             // 13f batch 3 (W3/A27): the Open strip's keys. ONE submenu
             // holding the window's open notes BY NAME, each with its

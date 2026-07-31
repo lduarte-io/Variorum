@@ -84,4 +84,12 @@ final class ShellRouter {
     func closeSplit() {
         _ = workspace.closeSplit()
     }
+
+    // MARK: - The context bar's fold (13f batch 5, W20 b)
+
+    /// ⌘⇧I — her *"even if just with a keyboard command"*. ONE act for the
+    /// whole bar: the back half and the "in <book>" half fold together.
+    func toggleContextBar() {
+        workspace.contextBarCollapsed.toggle()
+    }
 }

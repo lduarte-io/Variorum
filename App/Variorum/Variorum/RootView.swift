@@ -38,6 +38,15 @@ struct RootView: View {
     /// 13f W10b: the released original the lineage door asked to see; the
     /// recovery surface reveals it and consumes the request.
     @State private var revealUnplacedBlockID: String?
+    /// 13f W20(a) — THE ASCENT: the post a book was asked to open AT. One
+    /// shot, keyed by book so a stale request can never land in another
+    /// book (the `blockTarget` guard's shape).
+    @State private var bookAscent: BookAscent?
+
+    struct BookAscent: Equatable {
+        let bookID: String
+        let postID: String
+    }
 
     struct BlockTarget: Equatable {
         let containerID: String
@@ -146,6 +155,17 @@ struct RootView: View {
             guard let id = note.userInfo?["blockID"] as? String else { return }
             revealUnplacedBlockID = id
             router.pendingSelection = .recovery
+        }
+        // 13f W20(a) — THE ASCENT: the membership chip names a book and a
+        // post; the SHELL decides that this means "navigate to the book,
+        // and hand it the post to land on" (P-4, the W10b precedent).
+        .onReceive(
+            NotificationCenter.default.publisher(for: .variorumOpenBookAtPost)
+        ) { note in
+            guard let bookID = note.userInfo?["bookID"] as? String,
+                  let postID = note.userInfo?["postID"] as? String
+            else { return }
+            openBook(bookID, at: postID, in: router.workspace.focusedPane)
         }
         .onChange(of: router.paletteRequested) { _, requested in
             guard requested else { return }
@@ -298,14 +318,17 @@ struct RootView: View {
         // assume one detail keep being correct.
         let live = PaneMount.kind(of: pane, focused: router.workspace.focusedPane) == .live
         return PaneHost(
-            tokens: tokens, workspace: router.workspace, pane: pane,
+            tokens: tokens, session: session, workspace: router.workspace, pane: pane,
             focused: live, split: split,
             onBack: {
                 router.workspace.focus(pane)
                 router.goBack(in: pane)
             },
-            onToggleCollapse: { router.workspace.backChipCollapsed.toggle() },
-            onFocus: { router.workspace.focus(pane) }
+            onToggleCollapse: { router.workspace.contextBarCollapsed.toggle() },
+            onFocus: { router.workspace.focus(pane) },
+            // 13f W20(a): the bar's in-line ascends exactly like the chip's
+            // link does — one shell decision, two doors.
+            onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) }
         ) {
             paneDetail(router.workspace.selections[pane], pane: pane, live: live)
         }
@@ -354,7 +377,8 @@ struct RootView: View {
                 // over one post, one store.
                 PostDetailView(
                     session: session, postID: postID,
-                    initialBlockID: target(for: postID))
+                    initialBlockID: target(for: postID),
+                    recentBookIDs: router.workspace.recentBookIDs)
                     // a different post (or block landing) is a different editor
                     .id("\(postID)#\(target(for: postID) ?? "")")
             } else {
@@ -372,7 +396,11 @@ struct RootView: View {
             // nil, never a second mechanism.
             BookView(
                 session: session, readingID: readingID, paneFocused: live,
-                onPaneFocusRequest: { router.workspace.focus(pane) })
+                onPaneFocusRequest: { router.workspace.focus(pane) },
+                // 13f W20(a): the ascent's landing, handed to the book it
+                // named and to no other.
+                revealPostID: bookAscent?.bookID == readingID ? bookAscent?.postID : nil,
+                onRevealConsumed: { bookAscent = nil })
                 .id(readingID)
         case .pool(let poolID):
             if live {
@@ -411,6 +439,15 @@ struct RootView: View {
         .id("pane-read-\(containerID)")
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.tokens(for: scheme).surface)
+    }
+
+    /// 13f W20(a) — the ascent, decided in ONE place. Both doors (the
+    /// masthead chip's link and the context bar's in-line) name a book and a
+    /// post; this parks the landing and navigates through the ONE adoption
+    /// door, so the pane's history is pushed and ⌘[ returns to the note.
+    private func openBook(_ bookID: String, at postID: String, in pane: PaneID) {
+        bookAscent = BookAscent(bookID: bookID, postID: postID)
+        adopt(.reading(bookID), in: pane)
     }
 
     /// Navigation with an optional caret-precise block landing (Stage C).

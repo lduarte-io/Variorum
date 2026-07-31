@@ -54,7 +54,16 @@ final class WorkspaceModel {
 
     /// Her ruling: *"you should be able to collapse the named back chip if
     /// you want."* Session state, per window; never persisted.
-    var backChipCollapsed = false
+    ///
+    /// 13f batch 5 (W20 b): ONE collapse for the WHOLE context bar — the
+    /// back half and the "in <book>" half fold together, because her ruling
+    /// asked for one hideable bar and never for two hiding mechanisms.
+    var contextBarCollapsed = false
+
+    /// The books visited THIS SESSION, most recent first — the chooser's
+    /// float (her round-10 shaping, W20 c). View state like everything else
+    /// here: never persisted, never synced, ids only.
+    private(set) var recentBookIDs: [String] = []
 
     /// Display names for the ids on screen — resolved from the store, held
     /// only for rendering. Navigation state itself never holds text.
@@ -193,7 +202,21 @@ final class WorkspaceModel {
         history.visit(destination)
         histories[pane] = history
         if case .post(let id) = destination { openNotes.opened(id) }
+        // W20(c): visiting a book floats it in the chooser. Recorded HERE,
+        // in the one recording point, for the same reason the strip is —
+        // every door already funnels through it, so nothing has to remember.
+        if case .reading(let id) = destination {
+            recentBookIDs.removeAll { $0 == id }
+            recentBookIDs.insert(id, at: 0)
+            if recentBookIDs.count > Self.recentBookBound {
+                recentBookIDs.removeLast(recentBookIDs.count - Self.recentBookBound)
+            }
+        }
     }
+
+    /// A session trail, not a history: bounded so it cannot grow with the
+    /// corpus (the bounded-windows discipline applied to view state).
+    static let recentBookBound = 20
 
     /// ⌘[ — the destination to navigate to, or nil. Acts on the FOCUSED
     /// pane (item 3).

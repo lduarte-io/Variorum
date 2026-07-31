@@ -25,6 +25,11 @@ struct PostDetailView: View {
     /// Stage C: a caret-precise landing (palette/Library block hits) —
     /// the Write editor opens with its caret seeded at this block.
     var initialBlockID: String? = nil
+    /// 13f W20(c): the window's recently-visited books, most recent first —
+    /// the membership chip's chooser floats them inside their group (her
+    /// round-10 shaping). Defaults empty: curated-before-smart alone orders
+    /// a detail mounted without a workspace (a pin, a future embedding).
+    var recentBookIDs: [String] = []
 
     /// The mode vocabulary moved to the Registry layer (13b 1b — the
     /// capability table declares per-mode availability); the alias keeps
@@ -83,7 +88,9 @@ struct PostDetailView: View {
                     PostTitleLabel(session: session, postID: postID, tokens: tokens)
                     // Phase 13 (B3, R35): the membership indicator — now
                     // the es path line ("~/orbit") + the add/diverge door.
-                    MembershipChip(session: session, postID: postID)
+                    MembershipChip(
+                        session: session, postID: postID,
+                        recentBookIDs: recentBookIDs)
                 }
                 Spacer()
                 Button("Scraps", systemImage: "square.on.square.dashed") {

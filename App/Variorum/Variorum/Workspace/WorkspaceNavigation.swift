@@ -349,4 +349,20 @@ nonisolated enum WorkspaceNaming {
     /// What "Open Beside" is called, in one place, so the menu door, the
     /// row doors and the refusal all wear the same word.
     static let openBesideVerb = "Open Beside"
+
+    // MARK: - The ascent + the bar's own fold (13f batch 5, W20)
+
+    /// The in-line's help. It names what the click DOES (the top book, at
+    /// this note) and where the rest are — the chip is the chooser.
+    ///
+    /// Takes a NAME and a COUNT rather than the rows themselves: this
+    /// vocabulary stays free of the core's model types, exactly as `label`
+    /// takes a title map rather than containers.
+    static func ascentHelp(topBook: String, count: Int) -> String {
+        let open = "Open \u{201c}\(topBook)\u{201d} at this note"
+        return count <= 1 ? open : open + " — the title's chip lists all \(count)"
+    }
+
+    /// The fold's own act, named once (menu item + palette row).
+    static let contextBarVerb = "Toggle Context Bar"
 }
