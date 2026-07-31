@@ -896,3 +896,267 @@ markdown dual-mode inclination) AND carries an explicit note that
 that point (the remaining 13-series rows then: 13h, 13i). The
 release-strategy files stay uncommitted for HER session to commit —
 this phase's commits keep staging by explicit path around them.
+
+### Batch 2 — W10 (both halves) + W11 (both halves), ALL BUILT
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 906
+tests in 102 suites passed after 29.511 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 958 tests in 154 suites passed after 134.031 seconds`
+(`xcodebuild_exit=0`) · mobile `✔ Test run with 14 tests in 4 suites
+passed after 0.219 seconds` (`mobile_exit=0`) · the tutorial spine on
+its OWN run, by TYPE name (`TutorialBookShapeTests` · `TutorialDoorTests`
+· `TutorialWritingActsTests` · `TutorialTakesActsTests` ·
+`TutorialStructureActsTests` · `TutorialLookingActsTests` ·
+`TutorialLibraryActsTests`): `✔ Test run with 49 tests in 7 suites
+passed after 12.159 seconds`. From the batch's baselines (903/102 ·
+939/152 · 14/4): **+3 core tests · +19 Mac tests, +2 suites**; mobile
+byte-unchanged. **Mobile WAS run** — `Sources/` carries two files this
+batch, so the loop's condition is met.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point (`pgrep` by path at open
+and at close). HEAD moved under me mid-batch — her own three notes
+commits (`f3b5251` · `db1cf12` · `11a8a0e`) landed while I built, so the
+two "uncommitted author files" the brief names are now hers and
+committed; every commit here still staged by explicit path, and nothing
+under `notes/` outside this record was touched.
+
+#### W10a — the ceremony names where the original goes
+
+Her question was a findability finding, and the missing half was one
+sentence in three places. All three now say it, and — the part that
+makes it a fix rather than a patch — they say it by reading ONE name.
+
+- **`RecoveryPath`** (new, in `RecoveryView.swift`): `menuLabel` ·
+  `unplacedSection` · `surface` · `unplacedBlocks`. The **doors that
+  render those labels read it too** — the Library ⋯ menu item, the ⌘K
+  palette row, and this view's own section header — so the sentence and
+  the label cannot drift apart.
+- The sheet's two sentences moved OUT of `Text` literals into
+  `DivideWCeremony.checklistExplainer` / `.uncheckedRowNote`, for one
+  reason: **a promise made in a `Text` literal is a promise no test can
+  keep.** They are pinned now.
+- The completion speaks: `DivideWCeremony.releasedOriginalNote(
+  uncheckedTakes:)`, spoken through the host's own status voice from
+  `confirm()` — Write's toast, a board's status line, **no new
+  mechanism**. `nil` when every take was checked (the original is still
+  released, but nothing she wasn't shown rode away, and a note on every
+  divide is noise where the ruling asked for an answer).
+
+**DEVIATION FROM THE BRIEF'S WORDING, deliberate:** the brief says
+"Library ▸ Recovery". **No surface in this app has ever shown the word
+"Recovery"** — `SidebarSelection.recovery` is an internal case name, and
+the door she can actually find reads **"Archived & Deleted"** under
+Library's ⋯ menu, with an **"Unplaced blocks"** section inside it. Copy
+naming a door that does not exist would defeat the entire item, so the
+shipped copy is `Library → Archived & Deleted → Unplaced blocks` — which
+is ALSO the grammar the merge ceremony has spelled out for its
+stay-behind takes since 13b (arrow character included). The divide's
+half of that same sentence was simply missing.
+
+**Judgment call — a small scope-adjacent fold, and why:** the five
+PRE-EXISTING sites that already spell this path (the merge ceremony
+sheet, `EditorSurfaceController`'s two merge-status pairs, the helper's
+lineage paragraph) now read `RecoveryPath` too. Without it the "one
+name" claim in the new type's own doc comment would be false the day it
+shipped. Zero behaviour change, proven: the two existing pins that
+assert this copy (`MergeCeremonySheetTests`'
+`confirmingThePrePairedSheetReproducesTheInstantOutcome` and
+`BoundaryFluidityTests`' `mergeOnFannedBlocksSpeaksAboutTheFan`, both
+asserting `status.contains("Unplaced blocks")`) pass **UNMODIFIED**.
+
+#### W10b — the "Show Original Block" lineage door
+
+The road back from a successor to the block it came from. The edge has
+existed since Phase 3 and nothing had ever walked it.
+
+- **Core: `Queries.unplacedOrigins(_:inContainer:)`** — for each live
+  block placed in a post, the blocks its OWN `derived_from` edges point
+  at (DIRECT edges: the block's own origin, not its ancestry) that are
+  live and **have no live placement**. Sorted, so the pick is
+  deterministic on every device; several origins are normal (a merge
+  releases both sources). Cost is one indexed pass over the post's
+  placements — the `renderPost` class, and it rides the same projections.
+- **Reach, both editors, one field each:** the takes board reads it off
+  `Queries.TakesProjection.unplacedOrigins` (a new field on the
+  projection it already re-reads on exactly the writes that change it);
+  Write gets `observeUnplacedOrigins`, the third per-block map beside
+  presentations and comments, because **a menu builder runs
+  synchronously and must never touch the store** (P2).
+- **Registry:** `CapabilityID.showOriginBlock` — block scope,
+  `[.contextMenu]`, `takesAccess: .native` (R118 — Write is not
+  privileged), availability `takeFamily`. Rendered ONLY where an origin
+  exists, the `.diffAgainstChosen` precedent exactly: the CONTEXT rule is
+  the registry's, the per-TARGET condition is the surface's (P-2).
+- **P-4 at the act:** invoking posts `.variorumRevealUnplacedBlock` with
+  the block id and speaks; `RootView` decides that means `.recovery`
+  (the `.variorumOpenPost` precedent, one level up). The surface never
+  navigates itself.
+
+**Judgment call — I built the REVEAL, not just the navigation.** The
+brief's escape ("if reveal needs NEW plumbing beyond navigation +
+selection, keep it to navigation and record the gap") was aimed at
+inventing a highlight subsystem. What shipped is stock SwiftUI and no
+new concept: a one-shot reveal id on the shell (the
+`router.pendingSelection` consume pattern), a `ScrollViewReader`
+`scrollTo`, and a `listRowBackground` mark on the row. Navigating to an
+unbounded list of unplaced blocks *without* saying which one would have
+left the findability finding exactly where it was.
+
+#### W11a — the chapter-drag REACH fix
+
+Batch 1's trace stands: **no defect exists in the chapter drag**, and
+this batch did not invent one. The pinned model door
+(`chapterDragDropsBeforeTargetOrAtTheEnd`) passes **UNMODIFIED** — the
+parity proof that the semantics are untouched. What changed is reach.
+
+- **The body's chapter header was glyph-only** (batch 1 named it): it now
+  carries `.frame(maxWidth: .infinity)` + `.contentShape(Rectangle())`,
+  so the target is the full-width row **including its 28 pt of top air**
+  — which IS the gap between one chapter's last post and the next
+  chapter's heading. That is the "target in the gap" her ruling asked
+  for, with no second view to keep in sync. The navigator's rows got the
+  same treatment.
+- **Post rows are chapter drop targets now**, resolving to the NEAREST
+  chapter boundary — and that is what actually answers her report: with
+  two chapters, "before" was the only meaning a drop could carry, so
+  moving one DOWN had no target at all. Dropping it on a post in the
+  second chapter's lower half now resolves to the end.
+- The end zones grew (navigator 14 → 28; the Outline body's 14 → 44,
+  where it sits after a whole book's prose).
+
+**"Nearest" is measured in ROWS, not pixels** — a post in the top half of
+its chapter takes the boundary above, the bottom half the boundary below.
+Rows are what the model knows; geometry would put the rule where no test
+can reach it.
+
+#### W11b — post-drag-to-chapter
+
+`BookStructureModel.filePost` — assignment through the standing
+`assignPostToSection`, order through the standing `reorderReadingPost`,
+**no new semantics and no new operation**. A FINISHED book fires the op
+and delivers its real refusal (#25(b)), pinned.
+
+**The payload question the brief said to STOP on — resolved WITHOUT a
+stop, and here is the reasoning.** A chaptered book now drags two kinds
+of thing over the same targets, and the shipped payload was a bare
+`section.id`. `BookStructureModel.BookDrag` discriminates by PREFIX
+(`book-chapter:` / `book-post:`) — the `LensesBoardView.dragPayload`
+(`lens-move:`) precedent, already in the app. It is still ONE `String`
+transferable, so **no new payload type meets the standing post/block
+drags**, and it is strictly safer than before: a foreign payload (a
+scrap, a catalog hit, a lens block) now decodes to nil and is refused,
+where the bare-id era let it reach the model and relied on an id lookup
+to reject it.
+
+**Position is written only when position is what she is LOOKING at**
+(`repositionsOnDrop(viewOrder:)`: the A31 view override, else the
+reading's stored `sort_field`, must be `.manual`). Under a stamp sort the
+drop still files the post — that is her ruling — but rewriting a stored
+manual order she cannot see would be an invisible edit.
+
+**Judgment call — where the drag SOURCE lives.** Navigator post rows drag
+whole-row; in the Outline body the expanded post's HEADER and the
+collapsed CARD drag, and the prose does not (an expanded post shows a
+live editor or a read-cheap surface, and a drag over those would fight
+selection). `Button` + `.buttonStyle(.plain)` + `.draggable` is not a
+guess: it is the exact construct the navigator's chapter rows have used
+since 13b 3E, and her own report confirms those rows' clicks work.
+
+#### THE FINDING WORTH CARRYING FORWARD
+
+**`assembleReading` already orders a chaptered curated book BY CHAPTER**
+(`ORDER BY (s.id IS NULL), s.position, s.id, rp.position`). Consequence
+for anyone touching book order: a post moving DOWN into a later chapter
+lands at that chapter's top **for free**, from assignment alone — so a
+pin written on that direction asserts nothing about repositioning. Found
+by revert W11b-A running GREEN on exactly that shape; the pin was
+rewritten to move a post UPWARD, where the membership position has to be
+written or it lands at the chapter's END.
+
+#### Pins — every change named
+
+**New suites (2):**
+- **`OriginBlockDoorTests` (9)** — W10 whole: the sheet's two sentences
+  name the path · the completion is conditional, singular/plural honest
+  and carries ⌥⌘Z · a real three-take ceremony confirm SPEAKS the
+  destination · an all-checked confirm keeps the ratified completion
+  byte-for-byte · the registry declaration · a real divide-W gives BOTH
+  successors the door and it names A · **a plain divide's successor gets
+  NO door** (the placement rule, at the surface) · the broadcast + speech
+  · the board's projection carries the origins and its door acts.
+- **`BookDropTests` (6)** — W11 end to end: **her two-chapter
+  down-move** · a post drop files AND lands where it was dropped · a
+  header drop lands at the chapter's TOP (moving upward) · a FINISHED
+  book speaks the op's own refusal for both drag kinds · the dispatcher
+  routes by payload kind and refuses foreigners · repositioning follows
+  the rendered order.
+
+**Grown existing suites (2):**
+- `BookStructureModelTests` **+4**: the payload codec · the
+  nearest-boundary table (her scenario as a table) · a one-row chapter ·
+  the post-drop plan table.
+- `LineageQueryTests` (core) **+3**: a divide-W's successors name the
+  released original · a merged block names BOTH sources, sorted · a
+  still-placed origin never offers the door (and a re-placed one retires
+  it).
+
+**Pins MODIFIED: none.** `chapterDragDropsBeforeTargetOrAtTheEnd`,
+`MergeCeremonySheetTests`, `BoundaryFluidityTests` and every ceremony pin
+pass unmodified — the parity proof for a reach fix and a copy fold.
+
+**Reverts (checksummed with `shasum -a 256`; every file restored and
+verified OK before the next):**
+- **W10a-A** — the sheet's sentence stops at "the original" and the
+  completion never speaks ⇒ **3 W10a pins red (9 issues)**, the 5 W10b
+  pins green. Exactly discriminating.
+- **W10b-A** — the query's `NOT EXISTS (live placement)` clause deleted
+  ⇒ core `aStillPlacedOriginNeverOffersTheDoor` red (2 issues) and Mac
+  `aPlainDividesSuccessorGetsNoDoorBecauseItsOriginIsStillOnThePage` red
+  (2 issues). **A GREEN REVERT GOT A STRONGER ARM FIRST:** on its first
+  run the Mac suite passed the revert entirely — the door pins only ever
+  exercised blocks with no origin at all — so the plain-divide arm was
+  added before the work was trusted.
+- **W11a-A** — the nearest-boundary rule loses its bottom half ⇒ the
+  boundary table red on exactly the two bottom-half rows, and **her
+  two-chapter down-move end-to-end pin red**.
+- **W11b-A** — `filePost` files but never repositions ⇒ both order pins
+  red. Same story as W10b-A: the header-drop pin passed the revert until
+  it was rewritten to move a post upward (the `assembleReading` finding
+  above).
+
+#### VISUAL-VERIFICATION-ONLY — for her walk and the Design & UI review row
+
+Batch 1 measured that the SwiftUI drag route cannot be driven in this
+host (the hosting path sends the private `_lastDragDestinationOperation`
+and the process terminates on the unrecognized selector). Every DECISION
+below it is pinned at the model layer; **these halves are not, and no
+claim is made that they were tested:**
+
+1. That a chapter header's hit area really covers its row and its 28 pt
+   of top air (W11a's core reach change).
+2. That the enlarged end zones (28 pt navigator / 44 pt body) are
+   comfortably reachable with a chapter in hand.
+3. That the post rows' insertion bars appear where expected while
+   dragging, in both the navigator and the Outline body.
+4. That dragging from a collapsed card / an expanded post header does not
+   interfere with that row's click (the construct is the navigator's
+   proven one, but this pairing is new).
+5. That the Recovery surface really SCROLLS to the revealed block and
+   that its row mark reads clearly in both voices, light and dark.
+6. That the sheet's longer explainer still fits its `lineLimit(6)` at the
+   sheet's 560 pt minimum width without truncation.
+
+#### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **Nothing exceeded its ruling's shape**, so no item stopped. The one
+  place the brief invited a STOP (a colliding drag payload) resolved
+  inside the existing prefix precedent — reasoning above, so it can be
+  overturned rather than merely trusted.
+- Her walk will notice, beyond the four items: the divide ceremony's
+  header paragraph is one line longer; the merge ceremony, the merge
+  status line and the helper now spell the recovery path identically
+  (same words, one source); and a chapter heading in Outline highlights
+  across its whole row when something is dragged over it.
