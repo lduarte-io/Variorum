@@ -3919,3 +3919,121 @@ this host cannot drive, and **no claim is made that they were tested:**
   New Window item for the first time; note rows carry a second window door
   beside Open Beside; and with two windows open the menu bar's Back /
   Forward / Open Notes answer for the window she is actually in.
+
+#### Batch 5b — ACCEPTED (2026-07-31; the orchestrator's adjudication)
+
+**Counts by my own runs:** core `✔ Test run with 916 tests in 104
+suites passed` (`swift_exit=0`) · Mac `✔ Test run with 1041 tests in
+181 suites passed` (`xcodebuild_exit=0`) — both match the record's
+claims exactly; the mobile-not-run condition verified in the diff
+stat (zero `Sources/`, zero `Shared/` lines).
+
+**Load-bearing diff read:** `WindowRegistry` is the ruled shape with
+its reasons IN the file (the sticky key has NO resign path — the
+condition-3 header; the never-key fallback carries its measurement);
+the mount gate is ONE input on the EXISTING fork with `windowIsKey`
+defaulted true, which is why every batch-4 pane pin reads unmodified
+— the parity proof done the same way twice. All three ruling
+conditions are pinned and their reverts discriminate (R5b-A = the
+LIFO hazard live at window scale; R5b-B = the deactivation teardown
+storm, reproduced by building the literal-key reading as a
+mechanism).
+
+**The flagged calls, adjudicated:** **(1) the explicit New Window
+button ENDORSED** — the deviation is from the ruling's WORDING and
+the measurement is decisive (the standard item does not exist;
+`CommandGroup(replacing: .newItem)` — R41's ⌘N — replaced the group
+SwiftUI puts it in); the ruled REASON holds (undeclared, standard
+place); the two-⌘N alternative rightly rejected. **(2) the
+`navigationTargetID` broadcast rule ENDORSED** — the `isKey` reading
+would make a book link in a note-only window a dead door (the exact
+class W20 killed), and the two defects it fixed (menu gates
+answering for the last-appeared window; one broadcast navigating
+both) are the P-4 class arriving WITH windows, caught before any
+window shipped. **(3) `bringForward` ENDORSED** (an act she cannot
+see is worse than a raised window; visual item 5 carries the taste
+half). **(4) per-window view models ENDORSED** (the honest meaning
+of per-window state, bounded by the window count; the standing
+observation bounds ride each copy). **(5) the app-global status
+toast LEFT AS-IS, routed to her walk** (visual item 6) — per-window
+status is a real design question and hers. **(6) note-only windows
+never listening ENDORSED** (a listener that could only mint
+unhonorable requests). The one-commit call endorsed (a file-level
+split would not build).
+
+**Ledger: W2/A26 BUILT** (both window kinds on the per-window
+architecture) — adjudicated. **W19 rider correctly not fired** (the
+status path untouched, verified in the diff; the KnownIssues row
+stands). The seven visual items — chief among them the one wire no
+pin can watch (a real click's become-key reaching the reporter) —
+join her walk list. Remaining build rows: **W4 stars + W5 quick-note
+(batch 6, briefed below) · W6+W15 the K5 sweep (batch 7, LAST)**;
+W17 stays exploratory sitting material; then the phase-end cold
+review and the closeout.
+
+### Batch 6 brief — W4 STARS + W5 the QUICK NOTE (fresh Opus implementer; self-contained; PROPOSAL GATE on W5's window/door mechanism)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §7's `setting` table + §9; §12; §14's deltas); THIS
+plan file WHOLE — the constitution, THE KICKOFF SITTING, sitting
+rulings rounds 1–13 (round 3 items 1–2 are YOUR two rulings — build
+to her words), batches 1–5b's records + acceptances (5b's
+`WindowRegistry`/mount-gate machinery is what W5's window composes
+with; the batch-2 P-4 broadcast grammar; the standing environment
+traps, chief: `build-for-testing` before every revert run); the 13c
+plan's "Environment traps" (binding).
+
+**The items:**
+
+1. **W4 — STARS (her round-3 ruling, verbatim shape):** a synced
+   `setting` list — the `shelf_pins` precedent, ZERO schema, no §12
+   event — holding up to **5** starred things, notes or books.
+   Star/unstar via context menu on note rows AND book rows
+   (registry-declared; the note-row family via
+   `SidebarView.contextMenuCapabilities`, the shelf's book rows via
+   their own surface's declaration) + ⌘K by name. A **Starred
+   section at the sidebar's TOP**; rows navigate through the shell's
+   ordinary selection exactly as the Open strip's do (books to the
+   book, notes to the note). The CAP refuses honestly at the 6th —
+   fire-and-DO: the refusal names un-star as the road (P-2; never a
+   silently missing door). Star order = star time (insertion);
+   un-star anywhere (the section's rows carry it too). The `setting`
+   value syncs (upsert-only, the shelf_pins class) — tombstoned/
+   deleted targets render nothing and self-heal on next write (state
+   the read rule; pin it). Pure list arithmetic pinned red-on-old.
+2. **W5 — the QUICK NOTE (her round-3 ruling: a FLOATING
+   MINI-WINDOW; global shortcut / menu-bar door; typing mints an
+   ordinary bookless note — the Pool lists it; the sticky face shows
+   NO takes machinery; the note persists when the window closes).**
+   **PROPOSAL GATE FIRST on the mechanism half — investigate and
+   append a short proposal, then STOP for the architect's ruling,
+   covering:** (a) the WINDOW: what "floating" rides (a third
+   `WindowGroup` vs an `NSPanel`-class window; its level, its
+   key-ness under 5b's mount rule — the mini editor takes the live
+   ring while key, P-3 on the standing authority, never a second
+   mechanism; what `WindowRegistry.Kind` it registers as); (b) the
+   DOORS: what "global shortcut" can honestly mean (an app-global
+   chord — sweep it — vs a system-wide hotkey and what that
+   requires; whether a menu-bar STATUS ITEM is in scope or the
+   File-menu door suffices for v1), with a recommendation and costs
+   stated; (c) the MINT path: the sticky face mints through the
+   standing quick-entry grammar (#26(e) — untitled, typed text
+   segments as content, bookless so the Pool lists it, R29) — name
+   the exact path it rides. **The face half (a mini editing surface,
+   no takes machinery, note persists on close) builds after the
+   ruling with the window half.** If the system-wide hotkey needs
+   anything permission-shaped, that is an author-machine act — STOP
+   on that half and record it; never work around it.
+
+**Loop, records, constraints — identical to batch 5b's:** tutorial
+spine by TYPE name; full suites with quoted "Test run with N tests"
+lines; mobile only if `Sources/` or `Shared/` is touched.
+**Baselines to match-or-beat: core 916/104 · Mac 1041/181 · mobile
+14/4.** Append your batch record under "Batch records"; commit by
+explicit path with the standing trailer (the author's parallel
+session works in `notes/` — touch nothing of hers); never
+`/Applications`, never `Sources/VariorumCore/Sync/`, never push,
+never `git checkout` over uncommitted work, NO schema.
+STOP-and-propose on anything exceeding a ruling's shape. Every
+PROVISIONAL to `notes/QUESTIONS.md` (append, never renumber; next
+free number **#49**).
