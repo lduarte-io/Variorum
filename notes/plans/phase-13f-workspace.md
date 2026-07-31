@@ -2729,3 +2729,512 @@ built Debug host's Info.plist carries the name; the Release config
 block is byte-identical; one full Mac suite green after the change;
 the instance-discipline greps re-checked (path unchanged by
 construction).
+
+### Batch 5 — the books-ascent family: W21 · W20 · W22 BUILT; **W23 STOPPED with a proposal**; the windows PROPOSAL appended (items 1–4 + item 5's gate)
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 906
+tests in 102 suites passed after 29.166 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 1026 tests in 174 suites passed after 135.317 seconds`
+(`mac_exit=0`) · mobile `✔ Test run with 14 tests in 4 suites passed
+after 0.318 seconds` (`mobile_exit=0`) · the tutorial spine on its OWN
+run, by TYPE name (`TutorialBookShapeTests` · `TutorialDoorTests` ·
+`TutorialWritingActsTests` · `TutorialTakesActsTests` ·
+`TutorialStructureActsTests` · `TutorialLookingActsTests` ·
+`TutorialLibraryActsTests`): `✔ Test run with 49 tests in 7 suites
+passed after 12.025 seconds`. From the batch's baselines (906/102 ·
+1003/165 · 14/4): **+23 Mac tests, +9 suites**; core byte-unchanged.
+**Mobile WAS run** — `Shared/` carries two files this batch
+(`AppSession.swift`, `AutosaveCoordinator.swift`), so the loop's own
+condition is met.
+
+**No schema. Zero `Sync/` lines. No Release build, no `/Applications`
+refresh.** Her app was not running at any point (`pgrep` by path at open
+and at close; login session unlocked, probed not predicted). Every commit
+staged by explicit path; nothing under `notes/` outside this record was
+touched. Commits: `67ee0ff` (W21) · `96ee7f1` (W20) · `1532112` (W22).
+
+#### W21 — the mode click-over carries your place
+
+Her round-8 condition, verbatim: *"the remembered mode is fine as long as
+there's a quick way to get from wherever you are in read to that same
+point in book or outline - which I think there is? if you click over does
+it move where you are?"* **Verified absent myself before building:** the
+picker's setter was `structure.mode = $0` and nothing else; each of
+Outline · Book · Read kept its own place.
+
+**The brain is PURE and invents no state**, which is the design point.
+`BookAnchor.currentPost` is ONE rule over facts the surfaces already
+hold: Outline's place is the book's focused post; Book's is its spread's
+LEFT page, unless the focused post is ON the spread (the page under her
+hands keeps its claim — the `adopt` anchor rule restated); Read ▸ Pages'
+is the reader's own (post, page-in-post) address. Every arm falls back to
+a STANDING anchor rather than to nil, because a carry that lands nowhere
+is indistinguishable from a carry that never happened.
+
+**THE ONE FACT NO SURFACE HOLDS, stated rather than invented.** Read ▸
+Scroll (`ReadingFlowView`) tracks no scroll position, and per-row
+visibility reporting is exactly the machinery 13c 2A deleted on her A6
+ruling (*"it seems a bit buggy… remove it fully for now"*). So **leaving
+the scroll carries where she ARRIVED**, not where she scrolled to. It is
+pinned as behaviour so it can never become a silent surprise, and it is
+on the visual list for her walk — if she wants the scroll's own position,
+that is a ruling about re-adding a subsystem she asked to have removed.
+
+Landings, one parked request consumed by whichever surface mounts:
+Outline scrolls to `page-<id>` (**reveal is scroll-to, NEVER an
+auto-expand** — her #43(a) ruling; the collapsed CARD carries the same
+anchor, so a collapsed post is revealed as well as an open one); Book
+calls the standing `showPost`; Read ▸ Pages seeds/jumps its address **and
+reports it back**, which is what makes leaving it carry at all; Read ▸
+Scroll gains a `ScrollViewReader` and per-post anchors. Scroll ↔ Pages
+carries too — Read's two faces are a mode switch by another name.
+
+#### W20 — the ascent
+
+**(a) THE TRACE, verified myself first (the brief required it).**
+`MembershipChip` renders a post's books as clickable links wired to
+`onOpenBook` — an **optional** closure — and `PostDetailView:86` (its ONE
+mount, grep-confirmed across the whole app) passed nothing. **Clicking a
+book name has done nothing since Phase 13 shipped.** The optional is
+DELETED rather than filled in: a door whose reach depends on a caller
+remembering to hand it one is the fire-and-DO class that produced the
+bug. The act is a NAMED call (`MembershipChip.ascend`) that broadcasts —
+the batch-2 lesson applied to a closure: *a promise made inside a view's
+closure is a promise no test can keep.* P-4 holds: the door names (book,
+post), `RootView` decides that means "navigate to the book and hand it
+the post to land on", through the ONE adoption door — so history is
+pushed and ⌘[ returns to the note, pinned end to end in a real window.
+The landing is W21's slot; no second mechanism exists.
+
+**RECORDED DISCREPANCY, deliberately not papered over.** Her round-8
+ruling says the ascent lands in the book's *remembered* mode. **Books
+have no per-book mode memory:** `BookStructureModel.mode` is seeded once
+per open from `defaultMode(for:)` (finished ⇒ Read, else Outline). So it
+lands in the mode the book OPENS in, revealed. Adding per-book memory
+would supersede R2's ratified *"a finished book opens into the reading
+flow"* — a product call, and hers.
+
+**(b) ONE bar, ONE fold.** Her ruling: *"i think that chip + visible in
+line is good, but I think that you should be able to hide it somehow
+(even if just with a keyboard command). i love our uncluttered
+interface."* Batch 3's `BackChip` becomes `ContextBar` carrying both
+halves under ONE collapse state and ONE chevron — **never two hiding
+mechanisms**. Collapsed, BOTH halves stay doors as glyphs (a fold that
+removes the road back is a one-way door). It renders only when it has
+something to say, so a cold launch at the shelf is byte-unchanged. The
+bar lives per PANE, for batch 3's own reason: "where did I come from" and
+"what is this inside of" are both the PANE's facts, so one bar serves a
+post, a book, a folder and the recovery surface alike and Write's
+masthead stays untouched.
+
+**THE COLLISION SWEEP — result: ⌘⇧I is FREE.** Swept per the 13d A14 /
+batch-3 precedent across `EditorCommands.keyEquivalent`, every
+`.keyboardShortcut(` call site in `Variorum/` and `Shared/`, every
+`NSMenuItem` key equivalent (all empty strings) and the one
+`performKeyEquivalent` override (⌘S only): **no `i` chord of any modifier
+combination is bound anywhere in the app.** The act is declared `always`
+— a door whose whole job is to bring back a bar that is not on screen
+must never be grey in the one state it exists for.
+
+**(c) The chooser** (her round-10 shaping, architect-shaped and hers to
+overturn): curated before smart, the session's most-recently-visited
+floating INSIDE each group, name+id breaking ties so the order is total
+and device-independent. **Smart matches are LISTED** — derived membership
+IS membership (round 10 ruling 2, #26(h)); `readingsContaining` has
+always returned them, verified in the query. ONE pure rule with TWO
+readers (the popover and the in-line), so the sentence under the title
+and the list it opens cannot disagree about which book comes first. Book
+recency rides the ONE recording point (`visit`), bounded at 20.
+
+#### W22 — the first-edit note
+
+Wired at `AppSession.autosave(forPost:)` because that registry is the one
+place that knows BOTH halves — which post an edit belongs to, and that
+every editing surface on that post shares one coordinator (the N3
+boundary). A per-surface hook would have been four hooks and a fifth to
+forget, which is the class W20 had just finished finding. The coordinator
+gains one `onFirstEdit`, fired once per instance.
+
+The three ruled properties, all pinned: **ONE TIME EVER** (an app-local
+seen flag — never synced, never schema); **NEVER PER-KEYSTROKE** (flag
+first, so the common case is a `UserDefaults` read; the membership count
+is read at most once per opened post, off-main, and never again once the
+note has been said); **ZERO STORE BYTES** (variant / commit_point /
+sync_outbox counts equal before and after). The count is
+`readingsContaining`'s deliberately — the same "books it is in" the chip
+and the bar use, so the sentence cannot claim a number the chip
+contradicts.
+
+**PENDING, deliberately:** her round-10 item 4 asked this note to CARRY
+the W23 button. W23 is stopped (below), so the note ships naming the door
+that exists and works today — the chip's own **Duplicate as Version** —
+and gains the button when W23 is ruled. `StatusCenter.Item` carries text
+only; adding an optional action to it is the small chrome addition W23's
+build would make.
+
+#### W23 — **STOPPED**, per the brief's own escape, with the honest shapes
+
+The brief's instruction, verbatim: *"UNDO: trace what each leg registers
+today; prefer ONE compound entry via the standing machinery if the legs
+carry exact-row inverses; if they do not, STOP and propose the honest
+shape."* **They do not, and the gap cannot be closed with standing
+machinery.** The trace:
+
+| Leg | Registers today |
+|---|---|
+| `duplicateAsVersion` | **YES** — `revertMintedContainer` + its redo |
+| `addPostToReading` | **no entry** |
+| `assignPostToSection` | **no entry** |
+| `removePostFromReading` | **no entry** |
+
+(Verified by grepping every `undoStack?.register` site in
+`Sources/VariorumCore/Operations/`: not one reading-membership op
+registers. `Operations+ReadingConversion` does, which is why the
+smart→curated conversion round-trips.)
+
+**The consequence, concretely.** Wrapped in `withCompound`, the entry's
+inverse would be the mint's alone: ⌥⌘Z un-mints the copy — whose
+membership cascades away with its container — and **leaves the ORIGINAL
+still removed from the book**. The book ends up missing that post
+entirely, with a menu item that says "Undo Diverge" having apparently
+done it. That is a half-undo presented as a whole one, which is exactly
+what the instruction refuses. Everything is recoverable by hand (the
+chip's Add to Book), but the SLOT and the chapter assignment are not.
+
+**Why I cannot simply give the membership legs an inverse:**
+`UndoStack.register` is **internal** to `VariorumCore` (only
+`@testable` callers reach it), so the app layer cannot register a
+composed inverse; and letting a view register arbitrary inverses would
+put a business rule in the frontend, which CLAUDE.md forbids for the same
+reason the operations layer exists.
+
+**Three honest shapes, with a recommendation:**
+
+1. **(RECOMMENDED) A thin composite in the operations layer** —
+   `divergePostForReading(post:in:)`: ONE transaction-composed act
+   calling exactly the standing paths, registering ONE entry whose
+   inverse and redo are built from do-time pre-images (the original's
+   membership `position` and `section_id`; the copy's id). Undo becomes
+   complete and redoable; the act reads as one thing because it is one
+   thing. **The cost, stated plainly: it is a NEW OPERATION, and the
+   round-10 shaping said "standing ops, no new operation."** That
+   sentence was about not needing new *semantics* — this adds none — but
+   it is the architect's to re-read, which is why I stopped rather than
+   deciding it myself. Touches `Sources/`, so mobile runs; no schema.
+2. **The mixed compound** — build as briefed, `withCompound`, and record
+   in the plan and in the door's help that ⌥⌘Z reverses the copy only.
+   Cheapest; ships today; leaves the half-undo real. I do not recommend
+   it: the state it leaves (a book silently short one post) is worse than
+   the thing the button saves her.
+3. **No undo entry at all** — not reachable: `duplicateAsVersion` always
+   registers its own, and a collected entry cannot be dropped.
+
+Everything else about W23 is unblocked and unambiguous — the exact-slot
+swap (position AND `section_id`), curated-only with an honest refusal
+naming the tag road for a smart target, the finished-book refusal firing
+the op and delivering `lockedReading` (#25's letter, P-2), and the two
+doors (the W22 note's button; a registry-declared menu door rendered at
+≥2 memberships). **On a ruling of shape 1 or 2, W23 is a short build.**
+
+#### Pins — every change named
+
+**New suite `BookAscentTests` (23 tests in 9 suites):**
+`BookAnchorTests` (1) the whole mode/form table incl. every fallback and
+the honest nil · `BookCarryTests` (7) the carry from each mode at the
+model, the empty carry that keeps the last place, consume-exactly-once,
+and the spread's real landing · `PagedAnchorReportTests` (1) the reader's
+report following its address · `BookChooserOrderTests` (3) her order,
+its totality, the in-line's three shapes · `ContextBarTests` (1) the
+bar's presence in all four combinations, collapsed included ·
+`AscentDoorTests` (4) the broadcast, the fold's declaration/key/doors/
+always-availability, the toggle, book recency + its bound ·
+`AscentRoutingTests` (1) the shell's whole decision in a real window ·
+`MultiBookEditNoteRuleTests` (2) both trigger conditions + the ruled copy
+· `MultiBookEditNoteTriggerTests` (3) once-only across two variants, the
+end-to-end speech with ZERO STORE BYTES, and the one-book note that says
+nothing while KEEPING the note owed.
+
+**Pins MODIFIED — one, mechanical:**
+`WorkspaceNavigationTests.theChipStateIsSessionStateAndStartsShowing`
+reads `contextBarCollapsed` (the rename that made the two halves fold
+together). The claim is unchanged. **Everything else passes UNMODIFIED**,
+including every registry-walk assertion — the parity proof that
+`.toggleContextBar` is an addition, not an adjustment (it needed no new
+sampled context, being `always`).
+
+**Reverts (`shasum -a 256` before each; all four files restored and
+verified byte-identical afterwards):**
+- **W21-A** the carry ignores the mode and reads focus ⇒ exactly the
+  spread and paged arms red (`nil` vs `"p2"`; `"p0"` vs `"p1"`);
+  outline, flow and consume stay green. Discriminating.
+- **W21-B** `consumeReveal` never clears ⇒ the once-only pin red, twice.
+- **W20-A** `ascend` reaches nobody (the pre-batch state) ⇒ the broadcast
+  pin red AND the hosted routing pin red **with the pane still on the
+  post** — the dead link reproduced live.
+- **W20-B** the curated-before-smart clause deleted ⇒ both order arms
+  red.
+- **W22-A** `record` announces nothing ⇒ the coordinator pin red (0 vs 1)
+  and the end-to-end pin red (nothing spoken).
+
+#### Environment traps (new this batch)
+
+1. **`xcodebuild test-without-building` after an edit runs the STALE
+   product** — my first revert (W21-A) came back GREEN and looked like a
+   hollow pin; it was a stale binary. Every revert since is
+   `build-for-testing` → `test-without-building`. Worth stating because
+   the failure mode is the dangerous direction: a revert that silently
+   passes reads as "the pin proves nothing" and invites weakening a good
+   pin.
+2. `WorkspaceNavigation` is deliberately free of `VariorumCore` types
+   (its `label` takes a title map, not containers) — a helper there that
+   takes `[Reading]` fails to compile rather than importing the core into
+   the navigation vocabulary. Take a name and a count instead.
+
+#### VISUAL-VERIFICATION-ONLY — for her walk and the Design & UI review row
+
+Everything that DECIDES anything above is pinned. These are look-and-feel
+halves and **no claim is made that they were tested** (batch 1's
+measurement stands: this host cannot drive SwiftUI's hosted scroll/drag
+paths):
+
+1. That Outline really SCROLLS to the carried post — and whether landing
+   on a **collapsed card** reads right, or whether she wants the arrival
+   unfolded (a ruling, not a fix).
+2. That Read ▸ Scroll really scrolls to the carried post on arrival.
+3. **The recorded gap:** leaving Read ▸ Scroll carries where she
+   ARRIVED, not where she scrolled to — the flow tracks no position.
+4. That the context bar reads as ONE bar rather than two chips, in both
+   voices, light and dark, and that its collapsed form (`←` + a book
+   glyph + the chevron) still reads as two doors.
+5. That the "in <book> & N more" line does not crowd the back chip on a
+   narrow pane, and truncates gracefully when a book has a long name.
+6. That ⌘⇧I feels right for the fold (and that it collides with nothing
+   in her muscle memory — the sweep proves only that the app binds it
+   nowhere).
+7. That the chip's book link now visibly ascends, landing on the right
+   post, and that the book it opens is the mode she expects (the
+   remembered-mode discrepancy above).
+8. That the first-edit note reads as help rather than as a warning, and
+   fires at a moment that feels like the right one.
+
+#### For the orchestrator
+
+- **W23 needs a ruling**, not a patch — the three shapes and the
+  recommendation are above. It is the only item that stopped.
+- **PENDING, deliberately: nothing else.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **W19 rider: the shell-redo flaky pin's machinery was NOT touched**
+  (`ShellActions.structuralRedo` and its status delivery are outside this
+  batch's diff, verified). Left alone as the brief instructs. The rider
+  fires again if the windows refactor lands on the router.
+- Her walk will notice, beyond the four items: a thin bar above the
+  editor now says what book the note is in (and folds with ⌘⇧I); the
+  book's mode picker keeps her place; and the very first time she edits a
+  note that lives in two books, the app says so once.
+
+---
+
+#### THE PROPOSAL (item 5's gate) — the WINDOWS half, traced before building
+
+Everything below is measured from the code. **The headline: the split's
+mount rule generalizes to windows almost unchanged, but ONE thing must
+move first — `ShellRouter` is App-level `@State` and therefore SHARED by
+every `WindowGroup` window.** Batch 4 recorded this; I confirmed it at
+`VariorumApp.swift:25`, where `@State private var router = ShellRouter()`
+is created once on the `App` and handed to every `RootView` the group
+mints.
+
+##### (a) The per-window router/workspace shape
+
+**Recommended: the router moves INTO the window's root view, and the app
+keeps only what is genuinely app-global.**
+
+```
+per WINDOW  (moves):  ShellRouter — pendingSelection · paletteRequested ·
+                      workspace (panes, selections, focusedPane,
+                      splitFractions, histories, openNotes,
+                      contextBarCollapsed, recentBookIDs, titles)
+app-GLOBAL  (stays):  AppBootstrap · AppSession (store, operations,
+                      runner, undoStack, commandRouter, status,
+                      editorRouter, per-post autosave registry,
+                      quitFinalize) · AppServices (sync/bridge/backup) ·
+                      ThemeStore
+```
+
+The mechanism: `RootView` already takes `router:` with a defaulted
+`ShellRouter()`, and already owns eight `@State` view models. Making the
+router one more `@State` **created inside `RootView`** is a two-line
+change at the type level. The obstacle is exactly one: **`EditorCommands`
+holds `let router: ShellRouter`** and is attached to the scene, not to a
+window — the menu bar needs *the key window's* router. Two candidate
+resolutions, and I recommend the first:
+
+1. **A tiny app-level `WindowRegistry`** (`[UUID: ShellRouter]` plus
+   `keyWindowID`), written by each `RootView` on appear / on becoming
+   key, read by `EditorCommands` through one computed `activeRouter`.
+   This is the `CommandRouter`/`EditorRouter` pattern one level up — a
+   session-scoped object holding registrations, with the same token
+   discipline that already survives SwiftUI's arriving-before-departing
+   ordering.
+2. Keep the router app-level and key it internally by window id. Fewer
+   moving parts, but every workspace read becomes "which window?" at the
+   call site — the asymmetry the free-tiling rider asks me not to bake
+   in, one level up.
+
+**Window restoration, recorded rather than guessed:** SwiftUI restores
+`WindowGroup` windows on relaunch, and **every piece of workspace state
+is session-scoped by ruling** (batch 3: nothing persists, nothing syncs).
+So a restored window comes back showing its `.shelf` default with an
+empty strip and no history. That is consistent with the rulings but it is
+a *behaviour* — if she expects a restored window to reopen its notes,
+that is a new ruling about persistence, not a bug. I propose recording it
+and NOT persisting anything in v1.
+
+##### (b) Cross-window liveness — the mount rule, one level up
+
+The four app-scoped singletons the split had to respect are unchanged and
+are exactly the ones two windows would break (audited by grep, not
+assumed):
+
+| What | Shape | Writers |
+|---|---|---|
+| `CommandRouter.detailToken` / `activePostID` / `activeMode` / `applyMode` | ONE registration | `PostDetailView.onAppear` (the only site) |
+| `CommandRouter.handlers` | a LIFO stack | `EditorView`, `TakesBoardView`, `LensesBoardView`, `CompareBoardView`, `CanvasView` |
+| `EditorRouter.active` | a single `weak var` | `EditorViewModel` (set on attach, nil'd on teardown) |
+| `AppSession.autosave(forPost:)` | already per-post | correct as-is |
+
+Two windows each mounting a live detail ⇒ the second overwrites the
+first's registration, the handler stack holds two entries and **every
+routed act (⌘S, every structural and take door) reaches the
+last-mounted surface rather than the key window's** — the LIFO
+misrouting hazard `SpreadBookView` names, which revert R4-A already
+reproduces live inside one window.
+
+**Recommendation: extend the mount rule with a KEY-WINDOW gate, on the
+same seam and with no new mechanism.** `PaneMount.kind(of:focused:)` is
+already the one fork the shell consults; it gains the window's key-ness
+as a second input, so the rule reads: **exactly one pane, in exactly one
+window, mounts a live surface.** Concretely, `RootView` observes
+`NSWindow.didBecomeKeyNotification` / `didResignKey` for its own window
+and passes `windowIsKey` into the same fork it already calls. Every
+consequence the split's audit relied on then holds unchanged at app
+scope: ONE detail registration, ONE handler stack entry, ONE
+`EditorRouter.active`.
+
+**The cost, stated:** clicking from window A into window B unmounts A's
+detail and mounts B's — the same re-mount cost a pane focus migration
+already pays, and the same teardown/flush backstop
+(`EditorView.onDisappear → model.teardown() → finalizeWork`) that batch
+4's condition-(c)(2) pin covers. **I propose pinning it at window scale
+too** rather than assuming the pane-scale pin transfers.
+
+**The alternative I do NOT recommend** is the one batch 4 already
+rejected one level down: let both windows mount live surfaces and make
+the three singletons window-keyed. It multiplies exactly what P-3 exists
+to prevent, and it would additionally require the flight latch to move to
+a post-keyed shared authority (13d's trigger sentence), because two
+windows CAN hold one post.
+
+##### (c) The same-note rule across windows — **FLAGGED as product-flavoured**
+
+Round 7.3 ruled panes: *"opening a note already showing in the other pane
+could move you there … definitely not two live side by sides - we already
+offer that for one note."* The structural half transfers exactly (under
+(b) only one window is live, so "two live side by sides" is
+unrepresentable across windows too, for free). **What does NOT transfer
+is the refusal**: `WorkspaceModel.paneShowing` is per-workspace, so a
+second window has no idea the first is showing that note, and answering
+"is this note open in another window" needs the `WindowRegistry` from
+(a).
+
+And the question underneath is hers, not structural: **a second WINDOW on
+the same note is a thing people deliberately want** (two views of one
+document is the oldest Mac idiom there is), where a second PANE on it was
+the thing she ruled out. Her wording — "the other pane" — does not reach
+windows. **I recommend asking her**, and propose as the default until she
+rules: **windows are NOT subject to the same-note rule** (the structural
+danger is already dead under (b); the refusal would forbid something the
+platform makes natural). Flagged, not decided.
+
+##### (d) The note-only window's chrome
+
+Her round-2 pick: *File ▸ New Window* = a full app window; *"Open in New
+Window"* on a note = a lightweight note-only window.
+
+**Carries:** the note's own detail (`PostDetailView` — masthead, mode
+row, inspector), and the **context bar** (its back half is honestly empty
+in a fresh note-only window; its "in <book>" half is exactly as useful
+there as anywhere, and W20 already renders the bar only when it has
+something to say — so this needs no special case).
+**Deliberately lacks:** the sidebar (and therefore the Open strip), the
+split, the shelf/library/pool destinations. A note-only window shows ONE
+note, which is what makes it lightweight.
+
+**How the app-scope acts resolve there** — this is the part worth ruling
+explicitly, because "grey" and "absent" are different answers:
+- **⌘⇧1…9 (Open Notes):** the strip is the full window's. In a note-only
+  window `openNoteCount` reads 0, so the family is **honestly grey** by
+  the registry's existing gate. No new rule.
+- **⌘[ / ⌘] (back/forward):** a note-only window has one destination and
+  no history, so both are **honestly grey** by the existing gate. If she
+  wants a note-only window to accumulate history it would need its own
+  workspace, which (a)'s shape gives it for free — one line, if ruled.
+- **Open Beside / Close Split:** `paneCount` is 1 and `canOpenBeside` is
+  false ⇒ grey. Correct as-is.
+- **Everything editing-scoped** (⌘S, the structural and take families,
+  find) works exactly as in the main window, because it routes through
+  `CommandRouter` and this window mounts the live detail when it is key.
+
+So the note-only window needs **no new capability declarations and no new
+availability rules** — every app-scope act is already gated on a stack
+whose count is honestly zero there. That is the registry earning its
+existence again.
+
+##### (e) The scene architecture
+
+```swift
+WindowGroup { … }                                   // the full app window (today's)
+WindowGroup(id: "variorum-note", for: String.self) { $postID in … }   // note-only
+```
+
+The parameterized group is the standard shape and the app already uses
+its unparameterized sibling twice (`variorum-helper`, `Settings`), so the
+`openWindow(id:value:)` idiom is in place (`@Environment(\.openWindow)`
+is already used in three files). Doors:
+
+- **File ▸ New Window** — the full-app kind. `WindowGroup`'s own default
+  New Window item does this for free once the router is per-window; I
+  propose relying on it rather than declaring a capability for a
+  system-standard menu item (nothing else in the registry duplicates a
+  standard File-menu item).
+- **"Open in New Window"** — a **registry-declared** act on note rows
+  (`.contextMenu`, joining `SidebarView.contextMenuCapabilities` beside
+  `.openBeside`, so the Open strip, the Library catalog and the Pool all
+  render it from ONE declaration), app scope, gated on there being a note
+  to open. It calls `openWindow(id: "variorum-note", value: postID)`.
+
+**Two things I would build in this order on a ruling:** (1) the
+per-window router/workspace + `WindowRegistry` + the key-window mount
+gate, with its pins (the singleton-unrepresentability pin extended to two
+hosted windows — the R4-A shape at window scale); then (2) the two window
+kinds and their doors. **Nothing of (2) is safe before (1).**
+
+##### The W19 rider
+
+The router refactor in (a) **would** touch `ShellRouter` and the shell's
+wiring, but not `ShellActions.structuralRedo` or its status delivery —
+which is where `theShellRedoActionRunsThroughTheRunnerAndReports`'s
+flakiness lives. This batch touched neither. If the ruled refactor's diff
+reaches that path, its timing gets traced then (the hallucination guard);
+otherwise it stays where it is.
+
+**STOPPING HERE per the gate.** Items 1–3 are built, committed and green;
+W23 awaits a ruling on its undo shape; items 5a–5b proceed on the
+architect's ruling of (a)–(e).
+
+**Context note (the brief asked):** my context is comfortable but no
+longer short — roughly two thirds through the window I would want for a
+build of the windows half plus its pins. **My recommendation: give the
+ruled windows build to a FRESH session** (the standing cutover
+discipline), and give W23's short build to whichever session runs next —
+it is small enough either way.
