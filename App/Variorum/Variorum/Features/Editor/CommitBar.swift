@@ -113,10 +113,10 @@ struct CommitBar: View {
             model.toggleSeal()
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens))
-        .help("A sealed post is frozen — nothing under it changes until unsealed")
+        .help("A sealed note is frozen — nothing under it changes until unsealed")
         Button(tokens.chromeLabel("tags…")) { tagsShown = true }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
-            .help("The post's tags — apply or remove them right here")
+            .help("The note's tags — apply or remove them right here")
             .sheet(isPresented: $tagsShown) {
                 TagAssignmentSheet(
                     session: model.session, postID: model.postID,
@@ -201,7 +201,7 @@ struct CommitBar: View {
             Task { await model.deleteCaretBlock() }
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-        .help("Delete Block — removes the block you're in; ⌥⌘Z undoes it, ⇧⌥⌘Z redoes it, and it waits in this post's deleted-blocks tray")
+        .help("Delete Block — removes the block you're in; ⌥⌘Z undoes it, ⇧⌥⌘Z redoes it, and it waits in this note's deleted-blocks tray")
         gestureButton("Takes", available: model.gestureAvailability.takes,
                       action: model.openCaretFan)
     }
@@ -254,7 +254,7 @@ struct CommitBar: View {
         // R11: the post total, always ambient (incremental — never a
         // whole-document walk per keystroke).
         if let total = model.postWordCount {
-            parts.append("\(total.formatted())w in post")
+            parts.append("\(total.formatted())w in note")
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }

@@ -19,7 +19,7 @@ import VariorumCore
 final class EntryListViewModel {
     enum Scope: String, CaseIterable, Sendable {
         case journal = "Journal"
-        case all = "All posts"
+        case all = "All notes"
     }
 
     private let session: AppSession

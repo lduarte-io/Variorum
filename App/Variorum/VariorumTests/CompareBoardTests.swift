@@ -557,7 +557,7 @@ struct CompareViewModelTests {
                  try Queries.renderPost(db, containerID: world.twin).map(\.blockID))
             }
             await model.moveBlock(twinBlock, inPost: world.anchor, before: nil)
-            #expect(model.statusMessage?.contains("its own post") == true,
+            #expect(model.statusMessage?.contains("its own note") == true,
                     "the refusal speaks")
             let after = try await db.read { db in
                 (try Queries.renderPost(db, containerID: world.anchor).map(\.blockID),

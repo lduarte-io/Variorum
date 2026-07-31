@@ -117,7 +117,7 @@ struct ShelfView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("A book holds a hand-picked, ordered post list; a smart book collects by filter; a journal book holds dated entries.")
+            Text("A book holds a hand-picked, ordered note list; a smart book collects by filter; a journal book holds dated entries.")
         }
         .alert(
             "Rename Book",
@@ -259,7 +259,7 @@ struct ShelfView: View {
         if reading.kind == .smart {
             parts.append("smart")
         } else {
-            parts.append("\(book.postCount) posts")
+            parts.append("\(book.postCount) notes")
             if book.sectionCount > 0 { parts.append("\(book.sectionCount) ch") }
         }
         if let progress = model.progress(for: book) {
@@ -292,7 +292,7 @@ struct ShelfView: View {
             renameTarget = reading
         }
         if reading.kind == .curated {
-            Button("Manage Posts…") { manageTarget = reading }
+            Button("Manage Notes…") { manageTarget = reading }
         } else {
             Button("Edit Filter…") { smartTarget = reading }
             // 13c 2D (C2/N38): the DELIBERATE conversion door, beside the
@@ -341,9 +341,9 @@ struct ShelfView: View {
 
     private var hintBar: some View {
         HStack {
-            Text(tokens.chromeLabel("⌘K — find anything: posts, books, commands"))
+            Text(tokens.chromeLabel("⌘K — find anything: notes, books, commands"))
             Spacer()
-            Text(tokens.chromeLabel("⌘J today · ⌘N new post"))
+            Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
         }
         .font(tokens.small)
         .foregroundStyle(tokens.faint)
@@ -392,12 +392,12 @@ struct BookExtentSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Length & Extent — “\(reading.name)”").font(.headline)
-            Text("A word target shows progress on the shelf; at its end, extend it or start a new book. The post cap refuses further adds when full. Blank clears.")
+            Text("A word target shows progress on the shelf; at its end, extend it or start a new book. The note cap refuses further adds when full. Blank clears.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Form {
                 TextField("Word target (e.g. 10000)", text: $wordTargetField)
-                TextField("Post cap (max posts)", text: $maxPostsField)
+                TextField("Note cap (max notes)", text: $maxPostsField)
             }
             if let parseError {
                 Text(parseError).font(.caption).foregroundStyle(.red)

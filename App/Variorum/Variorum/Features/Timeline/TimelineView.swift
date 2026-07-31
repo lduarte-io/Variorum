@@ -24,7 +24,7 @@ final class TimelineViewModel {
         case entryDate = "Entry date"
         case lastTouched = "Last touched"
         case lastMajorRevision = "Major revision"
-        case library = "All posts"
+        case library = "All notes"
         var id: String { rawValue }
     }
 

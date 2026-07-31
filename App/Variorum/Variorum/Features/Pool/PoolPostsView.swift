@@ -115,7 +115,7 @@ struct PoolPostsView: View {
                     .font(tokens.heading)
                     .foregroundStyle(tokens.accent)
                 Text(tokens.chromeLabel(
-                    "\(model.posts.count) posts in no book — most things belong in one"))
+                    "\(model.posts.count) notes in no book — most things belong in one"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                 Spacer()
@@ -128,7 +128,7 @@ struct PoolPostsView: View {
                     row(item)
                 }
                 if model.posts.isEmpty {
-                    Text(tokens.chromeLabel("Every post lives in a book. The pool is empty."))
+                    Text(tokens.chromeLabel("Every note lives in a book. The pool is empty."))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                 }

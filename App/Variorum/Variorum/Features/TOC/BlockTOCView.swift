@@ -230,8 +230,8 @@ final class BlockTOCViewModel {
         await run { ops in try ops.moveBlock(blockID, to: poolID, at: .end) }
         if statusMessage == nil {
             let name = (poolTitle?.isEmpty == false) ? "\u{201C}\(poolTitle!)\u{201D}" : "the pool"
-            statusMessage = "Moved to \(name) — the block LEFT this post (a block lives in "
-                + "one place; its takes went with it). Find it in Blocks; ⌥⌘Z brings it back."
+            statusMessage = "Moved to \(name) — the block LEFT this note (a block lives in "
+                + "one place; its takes went with it). Find it in Snippets; ⌥⌘Z brings it back."
         }
     }
 
@@ -387,7 +387,7 @@ struct BlockTOCView: View {
                     Divider()
                     // 13b 4D (N32(a)): the honest title — it MOVES the
                     // block out of this post (I2), never a copy.
-                    Menu("Move out to a pool (leaves this post)") {
+                    Menu("Move out to a pool (leaves this note)") {
                         ForEach(model.pools, id: \.id) { pool in
                             Button(pool.title ?? "Untitled pool") {
                                 Task {

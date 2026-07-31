@@ -27,7 +27,7 @@ struct EntryEditorView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 if model.isSealed {
-                    Text("This post is locked — reading only.")
+                    Text("This note is locked — reading only.")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
@@ -41,7 +41,7 @@ struct EntryEditorView: View {
             }
             .padding()
         }
-        .navigationTitle(model.entryDate ?? "Post")
+        .navigationTitle(model.entryDate ?? "Note")
         .navigationBarTitleDisplayMode(.inline)
         .task { await model.loadOnce() }
         .task { await model.start() }

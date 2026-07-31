@@ -46,7 +46,7 @@ enum TutorialSeeder {
     /// accept-and-document per the architect's recorded call).
     nonisolated static let replaceQuestion = "Restore the tutorial?"
     nonisolated static let replaceDetail =
-        "This replaces the tutorial with a fresh copy: every post tagged exactly "
+        "This replaces the tutorial with a fresh copy: every note tagged exactly "
         + "\u{201C}\(tagName)\u{201D}, every pool named \u{201C}\(scrapPoolTitle)\u{201D}, and every book "
         + "named \u{201C}\(bookName)\u{201D} are deleted and re-seeded. Nothing else is touched."
 
@@ -222,7 +222,7 @@ enum TutorialSeeder {
 
         _ = try lesson(welcome, "start here", [
             "Welcome. This book is Variorum teaching itself with itself: you are "
-            + "reading a post, inside a chapter, inside a book on your shelf — the "
+            + "reading a note, inside a chapter, inside a book on your shelf — the "
             + "same objects everything you write will live in. Each lesson asks you "
             + "to actually do the thing it describes, right here in its own text.",
 
@@ -244,22 +244,22 @@ enum TutorialSeeder {
 
         _ = try lesson(welcome, "getting around", [
             "The sidebar has four places. SHELF is home: your books, and a dashed "
-            + "box that reads \u{201C}new post — just start typing\u{201D} — type a first line "
-            + "there and \u{23CE} mints a post and opens it. LIBRARY is everything, "
-            + "searchable, with a List and a Timeline view. POOL holds posts that "
-            + "belong to no book yet. BLOCKS holds loose scraps — pieces of text "
-            + "that aren't posts at all.",
+            + "box that reads \u{201C}new note — just start typing\u{201D} — type a first line "
+            + "there and \u{23CE} mints a note and opens it. LIBRARY is everything, "
+            + "searchable, with a List and a Timeline view. POOL holds notes that "
+            + "belong to no book yet. SNIPPETS holds loose scraps — pieces of text "
+            + "that aren't notes at all.",
 
-            "\u{2318}K finds anything: posts, books, blocks, and commands — type a few "
-            + "letters and \u{23CE} opens the hit. \u{2318}N makes a new post from anywhere. "
+            "\u{2318}K finds anything: notes, books, blocks, and commands — type a few "
+            + "letters and \u{23CE} opens the hit. \u{2318}N makes a new note from anywhere. "
             + "\u{2318}J opens today's journal entry — the journal is its own daily "
             + "notebook on the shelf.",
 
             // 13b 4D (S4-20): the first-open default is WRITE now; the
             // per-post memory is worth teaching in the same breath.
-            "A post opens into one of six modes — the tabs read Write \u{B7} Takes \u{B7} "
+            "A note opens into one of six modes — the tabs read Write \u{B7} Takes \u{B7} "
             + "Lenses \u{B7} Compare \u{B7} Blocks \u{B7} Canvas, and \u{2318}1 through \u{2318}6 "
-            + "switch between them. A post opens in Write the first time — the "
+            + "switch between them. A note opens in Write the first time — the "
             + "plain full page; after that it remembers the mode you left it in. "
             + "The rest of this book visits each mode where it earns its keep.",
 
@@ -273,7 +273,7 @@ enum TutorialSeeder {
         _ = try lesson(writing, "blocks & typing", [
             "Everything you write is made of BLOCKS — paragraph-sized pieces with "
             + "permanent identity. You never manage them while drafting: switch to "
-            + "Write (\u{2318}1), click at the very end of this post, and type a few "
+            + "Write (\u{2318}1), click at the very end of this note, and type a few "
             + "paragraphs. Each paragraph quietly becomes its own block as you "
             + "type past it. No gesture, no ceremony.",
 
@@ -284,16 +284,16 @@ enum TutorialSeeder {
             + "only ever change when you ask (divide, merge, extract — the "
             + "structure chapter). Prefer to place every boundary yourself? The "
             + "bottom bar's \u{201C}newlines make blocks\u{201D} switch turns the automatic "
-            + "minting off for one post — then typing and pasting stay inside "
+            + "minting off for one note — then typing and pasting stay inside "
             + "the block, and only Divide or New Block Below make new ones.",
 
-            "Boundaries are invisible at rest, on purpose: a post reads as calm, "
+            "Boundaries are invisible at rest, on purpose: a note reads as calm, "
             + "seamless prose. When you want to see the seams, press \u{2318}\u{21E7}B — "
             + "dotted lines appear between blocks, everywhere, until you press it "
             + "again.",
 
             "The bottom bar keeps quiet count for you: which block your cursor is "
-            + "in, and the word counts — the take you're in, and the whole post.",
+            + "in, and the word counts — the take you're in, and the whole note.",
         ])
 
         let shaping = try lesson(writing, "shaping blocks", [
@@ -311,7 +311,7 @@ enum TutorialSeeder {
             + "Below) mints an empty block right under the one you're in and "
             + "puts your cursor in it — Write and Takes alike; the block \u{25BE} "
             + "menu in the bottom bar also has \u{FF0B} New block at the end of the "
-            + "post. Either way, just keep typing.",
+            + "note. Either way, just keep typing.",
 
             "A block can carry a NAME — a handle for finding it, never printed in "
             + "the prose. This block wears one: open the Blocks tab (\u{2318}5) and "
@@ -357,9 +357,9 @@ enum TutorialSeeder {
 
         let choosing = try lesson(takes, "choosing & the board", [
             "Takes are for trying; CHOOSING is deciding. The take with the "
-            + "\u{2713} is what the post actually says — \u{201C}visible is what you're "
-            + "looking at; chosen is what the post is.\u{201D} \u{2318}\u{23CE} chooses the take "
-            + "you're in; nothing else changes the post.",
+            + "\u{2713} is what the note actually says — \u{201C}visible is what you're "
+            + "looking at; chosen is what the note is.\u{201D} \u{2318}\u{23CE} chooses the take "
+            + "you're in; nothing else changes the note.",
 
             "The block below carries four takes of one sentence, ready for "
             + "practice. Open its fan (\u{2318}\u{21E7}T), step through them with \u{2303}\u{2318}\u{2190} "
@@ -550,8 +550,8 @@ enum TutorialSeeder {
         // ——————————————————————————— ways of looking ———————————————————————
 
         let lenses = try lesson(looking, "lenses", [
-            "A LENS is a saved way of LOOKING at a post: for each block, which "
-            + "take to show. It never changes the post — \u{201C}a lens is the same "
+            "A LENS is a saved way of LOOKING at a note: for each block, which "
+            + "take to show. It never changes the note — \u{201C}a lens is the same "
             + "structure with different choices.\u{201D} Lenses mode (\u{2318}3) is their "
             + "home: full-text columns side by side.",
 
@@ -562,43 +562,43 @@ enum TutorialSeeder {
             + "on any cell re-pick that block's take; \u{1F4BE} saves your current "
             + "picks as a new lens.",
 
-            "\u{2713} Make this the post ADOPTS a column: the post's chosen takes "
+            "\u{2713} Make this the note ADOPTS a column: the note's chosen takes "
             + "become what it shows. Adopting swaps, never destroys — the "
             + "outgoing chosen is auto-saved as a lens named \u{201C}chosen until "
             + "(today)\u{201D}, so you can always swap back.",
         ])
         let lensAlt1 = try take(on: lenses.blocks[0],
             "A LENS is a bookmark on your choices: it remembers, for every block, which "
-            + "take you'd show — without moving the post an inch. Lenses mode (\u{2318}3) lays "
+            + "take you'd show — without moving the note an inch. Lenses mode (\u{2318}3) lays "
             + "such readings out as columns.")
         let lensAlt2 = try take(on: lenses.blocks[2],
-            "\u{2713} Make this the post is the one door from looking to being: adopt, and the "
-            + "column's picks become the post's chosen takes. The old chosen is kept as "
+            "\u{2713} Make this the note is the one door from looking to being: adopt, and the "
+            + "column's picks become the note's chosen takes. The old chosen is kept as "
             + "\u{201C}chosen until (today)\u{201D} — swaps, never destroys.")
         let lens = try ops.createLens(post: lenses.post.id, name: "the other reading")
         _ = try ops.setLensChoice(lens: lens.id, block: lenses.blocks[0].block.id, variant: lensAlt1.id)
         _ = try ops.setLensChoice(lens: lens.id, block: lenses.blocks[2].block.id, variant: lensAlt2.id)
 
         let versions = try lesson(looking, "compare & versions", [
-            "A VERSION is a different POST related to this one — \u{201C}a version is "
+            "A VERSION is a different NOTE related to this one — \u{201C}a version is "
             + "a different structure.\u{201D} Two gestures share the word: MARK AS "
-            + "VERSIONS just draws a link between two existing posts; DUPLICATE "
+            + "VERSIONS just draws a link between two existing notes; DUPLICATE "
             + "AS VERSION mints a whole copy (takes and all) and draws the link "
             + "in one gesture. Mark = connect, duplicate = copy + connect.",
 
             "This lesson already has a version twin — it was duplicated when "
-            + "the book was seeded. Open Compare (\u{2318}4): the posts sit side "
+            + "the book was seeded. Open Compare (\u{2318}4): the notes sit side "
             + "by side, related blocks tied by lineage — and every pane is "
             + "EDITABLE. Click into either column and type: the edit lands in "
-            + "that post, and the one live ring moves wherever you click, "
-            + "across posts. Drag a block's \u{28FF} handle to reorder it — each "
-            + "column reorders its own post only.",
+            + "that note, and the one live ring moves wherever you click, "
+            + "across notes. Drag a block's \u{28FF} handle to reorder it — each "
+            + "column reorders its own note only.",
 
-            "Compare is honest about relationships. \u{201C}Follow this post's "
+            "Compare is honest about relationships. \u{201C}Follow this note's "
             + "order\u{201D} arranges the other columns beside their related blocks "
             + "(display only — nothing moves); lineage colors mark the "
             + "families, and rails appear only where a real relationship "
-            + "exists. Compare against an unrelated post and it says \u{201C}there "
+            + "exists. Compare against an unrelated note and it says \u{201C}there "
             + "is no relationship here\u{201D} — the two just sit plainly side by "
             + "side, no blanks, no colors.",
 
@@ -606,20 +606,20 @@ enum TutorialSeeder {
             + "block lineage has nothing to say about, leaving just the "
             + "material that connects across the columns. Nothing is moved or "
             + "deleted — it is a way of LOOKING, and one click back: turn the "
-            + "chip off to read the posts whole. Against an unrelated post it "
+            + "chip off to read the notes whole. Against an unrelated note it "
             + "tells you there is nothing to show, rather than showing you "
             + "nothing.",
 
-            "Outlines live here too: press \u{201C}make outline post\u{201D} in "
+            "Outlines live here too: press \u{201C}make outline note\u{201D} in "
             + "Compare's header and the app mints a linked condensation — "
-            + "first sentence per block — and opens it beside this post, "
+            + "first sentence per block — and opens it beside this note, "
             + "registered point by point. And the Diff sheet now has "
             + "Save\u{2026} — the whole diff as a plain-text file, ready to hand "
             + "to an AI agent.",
 
-            "Unmark deletes only the connection — both posts stay exactly as "
+            "Unmark deletes only the connection — both notes stay exactly as "
             + "they are. The library's right-click menu has Duplicate as "
-            + "Version for any post, any time.",
+            + "Version for any note, any time.",
         ])
         let twin = try ops.duplicateAsVersion(versions.post.id)
         // A distinct title (walk finding): the copy inherits the lesson's
@@ -630,39 +630,39 @@ enum TutorialSeeder {
 
         _ = try lesson(looking, "blocks \u{B7} canvas", [
             "Two more ways of looking, each a different traversal of the same "
-            + "post — nothing is ever copied into a view. (Outlining lives in "
-            + "Compare now: an outline is just a related post beside its "
-            + "draft — the previous lesson's \u{201C}make outline post\u{201D}.)",
+            + "note — nothing is ever copied into a view. (Outlining lives in "
+            + "Compare now: an outline is just a related note beside its "
+            + "draft — the previous lesson's \u{201C}make outline note\u{201D}.)",
 
             // 13b 4D (N39 + N32(a)): positional moves + the honest
             // move-out-to-a-pool consequence, taught where the doors live.
-            "BLOCKS (\u{2318}5) is the post as a table of contents: one row per "
+            "BLOCKS (\u{2318}5) is the note as a table of contents: one row per "
             + "block, named where you set names, first sentence where you "
             + "didn't. Rows reorder with \u{2191} \u{2193} — or skip the dragging: the "
             + "row's \u{22EF} menu has Move to top, Move to bottom, and Move to "
             + "block #\u{2026}, where you type the position you want out of the "
-            + "total post. A row expands to edit in place — handy in a long "
-            + "post. Move out to a pool does what it says: the block LEAVES "
-            + "this post and becomes a scrap there (a block lives in one "
+            + "total note. A row expands to edit in place — handy in a long "
+            + "note. Move out to a pool does what it says: the block LEAVES "
+            + "this note and becomes a scrap there (a block lives in one "
             + "place; \u{2325}\u{2318}Z brings it back).",
 
             // 13b 4E (N30/S4-7): the canvas package, taught whole.
             "CANVAS (\u{2318}6) scatters the blocks as sticky-note cards. They open "
             + "in a tidy grid until you arrange them; drag a card by its \u{2823} "
-            + "header — arrangement is yours and is remembered, the post's order "
+            + "header — arrangement is yours and is remembered, the note's order "
             + "doesn't move — and resize it from the corner grip. Click into a "
             + "card and type: edits land on the take the card is showing. The "
             + "little number in a card's corner is the block's place in the "
-            + "post's current order.",
+            + "note's current order.",
 
             "The canvas has one door back into order: \u{201C}order by clicking\u{201D}. "
-            + "Click cards in the order the post should read — each shows its "
+            + "Click cards in the order the note should read — each shows its "
             + "number as you go — then Apply once: the numbered cards lead the "
-            + "post and everything else keeps its relative order after them "
+            + "note and everything else keeps its relative order after them "
             + "(\u{2325}\u{2318}Z undoes; Cancel changes nothing). \u{201C}Fit all\u{201D} shows every "
             + "card at once — bigger boards open a read-only overview; click any "
             + "card to land back on it. The \u{2039} \u{203A} switcher on a card flips "
-            + "which take you're viewing (\u{201C}viewing — not what the post "
+            + "which take you're viewing (\u{201C}viewing — not what the note "
             + "shows\u{201D}); choosing stays a separate, deliberate \u{2713}.",
         ])
 
@@ -685,15 +685,15 @@ enum TutorialSeeder {
             + "visible in the panel and can be brought back — the feature is "
             + "deliberately never skimpy.",
 
-            "TAGS organize posts (and blocks) without moving them: hierarchical "
+            "TAGS organize notes (and blocks) without moving them: hierarchical "
             + "paths like life/goals/2024, applied from the tags\u{2026} door in the "
             + "bottom bar. The tag manager lives in Settings (\u{2318},), where a "
             + "tag can also be promoted into a smart book that collects "
             + "everything wearing it.",
 
-            "Full disclosure: every lesson post wears the \u{201C}tutorial\u{201D} tag — "
+            "Full disclosure: every lesson note wears the \u{201C}tutorial\u{201D} tag — "
             + "that is exactly how Help \u{25B8} Restore Tutorial\u{2026} finds what to "
-            + "replace. Your own posts never wear it unless you put it there; "
+            + "replace. Your own notes never wear it unless you put it there; "
             + "everything else on your shelf is invisible to the restore.",
         ])
         _ = try ops.addBlockComment(
@@ -701,17 +701,17 @@ enum TutorialSeeder {
             text: "a comment lives in the margin — about the block, never inside its text")
 
         _ = try lesson(library, "books & the shelf", [
-            "You are inside a BOOK right now: an ordered collection of posts "
-            + "with real chapters. A post can live in MANY books at once — "
-            + "membership is not ownership, and adding a post to a book never "
+            "You are inside a BOOK right now: an ordered collection of notes "
+            + "with real chapters. A note can live in MANY books at once — "
+            + "membership is not ownership, and adding a note to a book never "
             + "moves or copies it.",
 
             "The chapter list on the left is workable: \u{FF0B} new chapter, "
             + "right-click a chapter to rename, move, or delete it, and drag "
             + "the \u{28FF} dots — in the list or on the page's chapter headings — "
-            + "to reorder chapters. \u{FF0B} new post mints a post right inside "
-            + "the book. Posts show as collapsed cards: clicking a card opens "
-            + "the post in the full editor; its \u{25B8} expands it in place, "
+            + "to reorder chapters. \u{FF0B} new note mints a note right inside "
+            + "the book. Notes show as collapsed cards: clicking a card opens "
+            + "the note in the full editor; its \u{25B8} expands it in place, "
             + "right here.",
 
             // 13b 4F (S4-9), rewritten at 13c 2A/2B/2C: the three modes and
@@ -719,10 +719,10 @@ enum TutorialSeeder {
             // this paragraph still described the pre-2A vocabulary.)
             "Three views of a book share the toggle at the top. OUTLINE is "
             + "this scroll, and it is where a book gets WRITTEN: chapter "
-            + "headings, posts you can collapse, and the same editor you "
-            + "write a post in. BOOK is a two-page spread — each page is one "
-            + "whole post, and the page you are in is editable as Write or "
-            + "as its takes; \u{25C0} \u{25B6} turn the leaf two posts at a "
+            + "headings, notes you can collapse, and the same editor you "
+            + "write a note in. BOOK is a two-page spread — each page is one "
+            + "whole note, and the page you are in is editable as Write or "
+            + "as its takes; \u{25C0} \u{25B6} turn the leaf two notes at a "
             + "time, and \u{25C1} \u{25B7} nudge by one so you can re-pair. "
             + "READ is for reading only, in two faces: SCROLL, the whole "
             + "book as one calm continuous page, and PAGES, real book pages "
@@ -734,7 +734,7 @@ enum TutorialSeeder {
             + "Length & Extent\u{2026}, or the \u{2713} finished face): finishing freezes "
             + "membership and order, reversibly. A book can also carry a word "
             + "target — this one wears one, so its shelf row shows progress. "
-            + "A single post can wear its own target too: click the word "
+            + "A single note can wear its own target too: click the word "
             + "counts in the editor's bottom bar. Targets are a measure, "
             + "never a wall. And deleting a book is recoverable: Library \u{25B8} "
             + "Archived & Deleted lists deleted books with a Restore door — "
@@ -742,25 +742,25 @@ enum TutorialSeeder {
         ])
 
         let scraps = try lesson(library, "pool & scraps", [
-            "Not everything starts as a post. The POOL (sidebar) holds posts "
-            + "that belong to no book yet — drafts in waiting. BLOCKS (sidebar) "
-            + "holds SCRAPS: loose blocks that aren't posts at all — "
+            "Not everything starts as a note. The POOL (sidebar) holds notes "
+            + "that belong to no book yet — drafts in waiting. SNIPPETS (sidebar) "
+            + "holds SCRAPS: loose blocks that aren't notes at all — "
             + "overheard lines, stray sentences, one-liners you'll want later.",
 
             "A pool named \u{201C}tutorial scraps\u{201D} was seeded for you with two "
-            + "scraps — the Blocks area's pool menu switches between pools, so "
-            + "look for it there. To drag one into a post: open any lesson in "
-            + "Write (\u{2318}1) and press the scraps button in the post's top-right "
+            + "scraps — the Snippets area's pool menu switches between pools, so "
+            + "look for it there. To drag one into a note: open any lesson in "
+            + "Write (\u{2318}1) and press the scraps button in the note's top-right "
             + "corner (beside References). The scraps sit beside the page — "
             + "drag one in, and it lands as a COPY with lineage back to the "
             + "scrap, which stays in its pool. Hold \u{2325} while dragging and the "
             + "whole fan rides the copy, takes and all (the second scrap has "
             + "two, to try exactly that).",
 
-            "The Blocks area's own dashed box mints scraps: type, \u{23CE}, and the "
+            "The Snippets area's own dashed box mints scraps: type, \u{23CE}, and the "
             + "line is kept as a standalone block. Drag pieces out as your "
             + "drafts want them — copy out is the only direction, so the pool "
-            + "never tangles with your posts.",
+            + "never tangles with your notes.",
 
             // 13b 4D (N32(b)/(c) — S4-8/S4-15): scraps are individual
             // items; the pools-vs-tags distinction said plainly.
@@ -785,7 +785,7 @@ enum TutorialSeeder {
             "the second take of the scrap — riding along on an \u{2325}-drag.")
 
         _ = try lesson(library, "export — it's all yours", [
-            "Your work is always yours to take out. Any post exports as "
+            "Your work is always yours to take out. Any note exports as "
             + "Markdown or PDF from the library's right-click Export menu; a "
             + "block exports alone via File \u{25B8} Export Block as Markdown\u{2026}; a "
             + "book exports as one document — its chapters as headings, this "
@@ -801,18 +801,18 @@ enum TutorialSeeder {
         ])
 
         let sealed = try lesson(library, "the seal", [
-            "This post is SEALED — marked complete. Everything under a sealed "
-            + "post refuses to change: typing, new takes, commits, divides, "
+            "This note is SEALED — marked complete. Everything under a sealed "
+            + "note refuses to change: typing, new takes, commits, divides, "
             + "all of it, until you unseal.",
 
             "Try to break it. Press \u{2318}S to commit, or \u{2318}\u{21E7}D to divide — each "
             + "attempt is answered OUT LOUD at the bottom of the window: the "
-            + "app tells you the post is sealed rather than doing nothing. "
+            + "app tells you the note is sealed rather than doing nothing. "
             + "Typing simply finds the text read-only. A door that can't act "
             + "tells you why, never nothing.",
 
             "The seal is reversible and gentle: the unseal door sits right in "
-            + "the bottom bar. Unseal this post, change a word, seal it again "
+            + "the bottom bar. Unseal this note, change a word, seal it again "
             + "(seal, same place). Sealing quietly commits any unsaved takes "
             + "first — the guard insures exactly what it protects.",
         ])
@@ -828,15 +828,15 @@ enum TutorialSeeder {
             + "basic text, it behaves like basic text.",
 
             "THREAD ONE PIECE: when one block is the question, fan it. Takes "
-            + "hold the attempts side by side; \u{2713} picks what the post says; a "
-            + "lens remembers a whole set of picks without touching the post. "
+            + "hold the attempts side by side; \u{2713} picks what the note says; a "
+            + "lens remembers a whole set of picks without touching the note. "
             + "The block below has a spare take to practice on.",
 
             "The keeper's logbook recorded weather, oil, and wicks — never "
             + "once the keeper.",
 
             "FORK THE PIECE: when the STRUCTURE should differ — a rearranged "
-            + "argument, a different opening — duplicate the post as a version "
+            + "argument, a different opening — duplicate the note as a version "
             + "and let the two grow apart, linked and comparable. \u{201C}A lens is "
             + "the same structure with different choices; a version is a "
             + "different structure; promote is the bridge.\u{201D}",

@@ -47,32 +47,32 @@ extension Operations {
             if post.archivedAt != nil {
                 throw OperationError.smartFilterUnsatisfiable(
                     readingID: readingID,
-                    reason: "this post is archived — books don't show archived posts; "
+                    reason: "this note is archived — books don't show archived notes; "
                         + "unarchive it first")
             }
             if let profile = spec.profile, post.profile?.rawValue != profile {
                 throw OperationError.smartFilterUnsatisfiable(
                     readingID: readingID,
-                    reason: "it collects \(profile) posts — this post isn't one, "
+                    reason: "it collects \(profile) notes — this note isn't one, "
                         + "and adding can't change that")
             }
             if spec.entryDateFrom != nil || spec.entryDateTo != nil {
                 guard let day = post.entryDate else {
                     throw OperationError.smartFilterUnsatisfiable(
                         readingID: readingID,
-                        reason: "it collects posts by their entry date — this post has "
+                        reason: "it collects notes by their entry date — this note has "
                             + "no entry date; set one first (set date…)")
                 }
                 if let from = spec.entryDateFrom, day < from {
                     throw OperationError.smartFilterUnsatisfiable(
                         readingID: readingID,
-                        reason: "it collects posts dated \(from) or later — "
+                        reason: "it collects notes dated \(from) or later — "
                             + "this one is dated \(day)")
                 }
                 if let to = spec.entryDateTo, day > to {
                     throw OperationError.smartFilterUnsatisfiable(
                         readingID: readingID,
-                        reason: "it collects posts dated \(to) or earlier — "
+                        reason: "it collects notes dated \(to) or earlier — "
                             + "this one is dated \(day)")
                 }
             }

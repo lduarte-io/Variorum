@@ -28,11 +28,11 @@ nonisolated enum SegmentationFaceCopy {
     /// segmentation governs FUTURE entry — existing blocks never
     /// re-segment).
     static let mintOffNote =
-        "Newlines now stay inside the block in this post — typing and pasting "
+        "Newlines now stay inside the block in this note — typing and pasting "
         + "won't make new blocks; Divide (⌘⇧D) or New Block Below (⌘⇧⏎) split "
         + "deliberately. Existing blocks are untouched."
     static let mintOnNote =
-        "Newlines make blocks again in this post — each finished paragraph "
+        "Newlines make blocks again in this note — each finished paragraph "
         + "becomes its own block as you type past it, and pasted paragraphs "
         + "arrive as blocks. Existing blocks are untouched."
 
@@ -45,7 +45,7 @@ nonisolated enum SegmentationFaceCopy {
     /// it just says what that means (P-2). Only reachable BECAUSE this
     /// batch made the global settable, which is why this batch owns it.
     static let mintOnInheritsOffNote =
-        "This post now follows your global setting — and that is currently "
+        "This note now follows your global setting — and that is currently "
         + "\"newlines don't make blocks\", so newlines still stay inside the "
         + "block here. Change it in Settings ▸ Appearance ▸ Writing."
 
@@ -62,9 +62,9 @@ nonisolated enum SegmentationFaceCopy {
         "ON (the standard): each finished paragraph becomes its own block as "
         + "you type past it; pasted paragraphs arrive as blocks. OFF (opt-in): "
         + "newlines stay INSIDE the block — typing and pasting never make "
-        + "blocks in this post; Divide (⌘⇧D) or New Block Below (⌘⇧⏎) split "
+        + "blocks in this note; Divide (⌘⇧D) or New Block Below (⌘⇧⏎) split "
         + "deliberately. Governs future entry only — existing blocks never "
-        + "re-segment. Per post — ON means "
+        + "re-segment. Per note — ON means "
         + "\"follow the global setting\" (Settings ▸ Appearance ▸ Writing)."
 
     // MARK: - The GLOBAL face (13d batch 4 — A16 / N34's deferred half)
@@ -79,20 +79,20 @@ nonisolated enum SegmentationFaceCopy {
     static let globalOneBlock = "Off — newlines stay inside the block"
 
     static let globalHelp =
-        "The default for every post that has no setting of its own. ON (the "
+        "The default for every note that has no setting of its own. ON (the "
         + "standard): a finished paragraph becomes its own block as you type "
         + "past it, and pasted paragraphs arrive as blocks. OFF: newlines "
         + "stay inside the block everywhere — Divide (⌘⇧D) or New Block "
         + "Below (⌘⇧⏎) split deliberately. Governs future entry only; "
-        + "existing blocks never re-segment, and a post with its own setting "
+        + "existing blocks never re-segment, and a note with its own setting "
         + "keeps it. Synced to all your devices."
 
     static let globalMintOnNote =
         "Newlines make blocks by default again. Existing blocks are "
-        + "untouched, and posts with their own setting keep it."
+        + "untouched, and notes with their own setting keep it."
     static let globalMintOffNote =
         "Newlines now stay inside the block by default — typing and pasting "
-        + "won't make new blocks. Existing blocks are untouched, and posts "
+        + "won't make new blocks. Existing blocks are untouched, and notes "
         + "with their own setting keep it."
 }
 
@@ -106,7 +106,7 @@ nonisolated enum WordTargetFaceCopy {
     /// The word-count label's hover help (both bars) — it names the quiet
     /// door: clicking the counts opens the target setter.
     static let help =
-        "Word counts — click to set a word target for this post. "
+        "Word counts — click to set a word target for this note. "
         + "A target shows progress here; it is a measure, never a wall."
     static let fieldPrompt = "Word target (blank = none)"
     static let parseError = "Targets are plain positive numbers (e.g. 5000) — nothing was changed."
@@ -127,13 +127,13 @@ nonisolated enum OpsRefusalCopy {
         if let error = error as? OperationError {
             switch error {
             case .lockedPost:
-                return "This post is sealed — unseal it to change takes or choices."
+                return "This note is sealed — unseal it to change takes or choices."
             case .archivedVariant:
                 return "That take is archived — unarchive it first."
             case .lockedVariant:
                 return "That take is locked — unlock it or branch a new take."
             case .versionLinkNotFound:
-                return "These two posts aren't marked as versions — nothing to unmark."
+                return "These two notes aren't marked as versions — nothing to unmark."
             // 13b Stage 4 ladder round 1, MINOR-2: the two Stage 4 doors
             // that spoke raw enum dumps get app words. `readingNotDeleted`
             // is the recovery door's double-click/raced-restore path;
@@ -149,7 +149,7 @@ nonisolated enum OpsRefusalCopy {
             // layer refuses non-positive targets/caps typed nowhere the
             // ONE `ExtentInput.parse` rule now guards.
             case .invalidExtent:
-                return "A word target or post cap must be a positive number — "
+                return "A word target or note cap must be a positive number — "
                     + "nothing was changed."
             // 13c Stage 1 ladder, R3-1: the empty-block carve's
             // authorization, re-checked inside the tombstone's own

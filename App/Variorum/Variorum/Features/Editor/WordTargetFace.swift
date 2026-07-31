@@ -50,7 +50,7 @@ struct WordTargetFace: View {
         .help(WordTargetFaceCopy.help)
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Word target — this post").font(.headline)
+                Text("Word target — this note").font(.headline)
                 TextField(WordTargetFaceCopy.fieldPrompt, text: $field)
                     .frame(width: 220)
                     .onSubmit { save() }

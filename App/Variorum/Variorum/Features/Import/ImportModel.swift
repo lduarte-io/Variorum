@@ -241,7 +241,7 @@ final class ImportModel {
         if imported > 0 {
             switch destination {
             case .library:
-                parts.append("Imported \(imported) post\(imported == 1 ? "" : "s").")
+                parts.append("Imported \(imported) note\(imported == 1 ? "" : "s").")
             case .pool:
                 parts.append("Added to the pool.")
             }

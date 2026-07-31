@@ -412,7 +412,7 @@ final class EditorSurfaceController {
             return
         }
         await runDeleteBlock(blockID, entryIndex: index, note:
-            "Block deleted — ⌥⌘Z undoes it, and it waits in this post's deleted-blocks tray.")
+            "Block deleted — ⌥⌘Z undoes it, and it waits in this note's deleted-blocks tray.")
     }
 
     /// The one delete-block body both doors use: the menu/bar act above and
@@ -1455,7 +1455,7 @@ final class EditorSurfaceController {
     /// One transaction, one undo compound, insurance-committed.
     func deleteInEveryTake() async {
         guard model.header?.locked != true else {
-            model.refuseFeedback("This post is sealed — unlock it to edit.")
+            model.refuseFeedback("This note is sealed — unlock it to edit.")
             return
         }
         guard let selection = model.textView?.selectedRange(), selection.length > 0 else {

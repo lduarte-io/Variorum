@@ -61,7 +61,7 @@ struct ImportFacesTests {
 
             await importer.importFiles([url], into: .library)
             #expect(importer.lastError == nil)
-            #expect(importer.lastReport == "Imported 1 post.")
+            #expect(importer.lastReport == "Imported 1 note.")
 
             let posts = try await session.database.read { try Queries.library($0) }
             #expect(posts.count == 1)
@@ -94,7 +94,7 @@ struct ImportFacesTests {
             }
             await importer.importFiles([first, second, binary], into: .library)
             let report = importer.lastReport ?? ""
-            #expect(report.contains("Imported 2 posts."))
+            #expect(report.contains("Imported 2 notes."))
             #expect(report.contains("(not plain text)"))
             let count = try await session.database.read {
                 try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post'")
@@ -127,7 +127,7 @@ struct ImportFacesTests {
                 for url in urls { try? FileManager.default.removeItem(at: url) }
             }
             await importer.importFiles(urls, into: .library)
-            #expect(importer.lastReport == "Imported 3 posts.")
+            #expect(importer.lastReport == "Imported 3 notes.")
 
             // ONE drop gesture = ONE compound entry: a single undo unwinds
             // every imported post, and nothing is left on the stack.
@@ -190,7 +190,7 @@ struct ImportFacesTests {
             #expect(live == 3)
 
             // ONE drop = ONE aggregated report and ONE undo entry.
-            #expect(importer.lastReport == "Imported 3 posts.")
+            #expect(importer.lastReport == "Imported 3 notes.")
             let stack = session.undoStack
             let label = try await session.runner.run { ops in
                 try stack.undo(with: ops)

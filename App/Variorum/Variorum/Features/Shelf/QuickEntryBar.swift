@@ -41,7 +41,7 @@ struct QuickEntryBar: View {
             ZStack(alignment: .topLeading) {
                 if entryText.isEmpty {
                     HStack(spacing: 6) {
-                        Text(tokens.chromeLabel("new post — just start typing · ⏎ opens it"))
+                        Text(tokens.chromeLabel("new note — just start typing · ⏎ opens it"))
                             .font(tokens.body)
                             .foregroundStyle(tokens.faint)
                         if tokens.showsBlockCursor && !entryFocused {
@@ -106,7 +106,7 @@ struct QuickEntryBar: View {
                 }
                 onOpen(.post(result.container.id))
             } catch {
-                lastError = "New post refused: \(error)"
+                lastError = "New note refused: \(error)"
             }
         }
     }

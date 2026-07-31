@@ -76,7 +76,7 @@ struct CommandRouterTests {
             let applied = session.commandRouter.requestMode(.takes)
             #expect(!applied)
             #expect(session.status.current?.text
-                    == "Open a post first — the modes live inside a post.")
+                    == "Open a note first — the modes live inside a note.")
         }
     }
 
@@ -126,7 +126,7 @@ struct CommandRouterTests {
             // Nothing mounted: the registry's honest note speaks.
             #expect(!session.commandRouter.dispatch(.takes(.branch)))
             #expect(session.status.current?.text
-                    == "Takes grow on a block inside a post — open one first.")
+                    == "Takes grow on a block inside a note — open one first.")
 
             var hits: [String] = []
             let bottom = session.commandRouter.registerHandler { _ in
@@ -846,7 +846,7 @@ struct SealDoorTests {
             let actions = ShellActions(session: session, shell: ShellRouter())
             actions.toggleSeal()
             #expect(session.status.current?.text
-                    == "Sealing acts on an open post — open one first.")
+                    == "Sealing acts on an open note — open one first.")
         }
     }
 }

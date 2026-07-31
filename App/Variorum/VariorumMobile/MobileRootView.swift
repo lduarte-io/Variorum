@@ -30,7 +30,7 @@ struct MobileRootView: View {
             EntryListView(model: model) { postID in
                 path.append(postID)
             }
-            .navigationTitle(model.scope == .journal ? "Journal" : "All posts")
+            .navigationTitle(model.scope == .journal ? "Journal" : "All notes")
             .navigationDestination(for: String.self) { postID in
                 EntryEditorView(session: session, postID: postID, router: captureRouter)
             }

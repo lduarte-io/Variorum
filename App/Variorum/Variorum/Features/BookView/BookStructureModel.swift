@@ -538,7 +538,7 @@ final class BookStructureModel {
                                 + "a new daily journal (Use as Daily Journal).")
                     } catch OperationError.readingAtCapacity {
                         return (entry.container.id,
-                                "Today's entry opened, but this book is at its post cap — "
+                                "Today's entry opened, but this book is at its note cap — "
                                 + "it wasn't added. Extend the cap in the book's settings.")
                     }
                     return (entry.container.id, nil)
@@ -659,7 +659,7 @@ enum JournalBooks {
                 bookName = namedBook()
                 return Outcome(
                     postID: entry.container.id,
-                    note: "Today's entry opened, but “\(bookName)” is at its post cap — "
+                    note: "Today's entry opened, but “\(bookName)” is at its note cap — "
                         + "it wasn't added. Extend the cap or start a new daily journal "
                         + "(Use as Daily Journal in a book's shelf menu).")
             case .wrongKind:

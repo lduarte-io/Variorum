@@ -108,7 +108,7 @@ struct TakesCellView: View {
                 }
             },
             .init(
-                title: "✓ Choose this take (the post shows it)",
+                title: "✓ Choose this take (the note shows it)",
                 enabled: slot.variantID != resolved.variantID
             ) {
                 Task { await model.choose(blockID: slot.blockID, variantID: resolved.variantID) }

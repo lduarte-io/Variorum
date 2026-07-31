@@ -69,7 +69,7 @@ struct ScrapsPanel: View {
             Text(tokens.chromeLabel(
                 "drag a scrap into the page — it lands as a copy with lineage; "
                 + "the scrap stays here. ⌥-drag carries its whole fan. "
-                + "Drops land where you can type: Write, or a book's open post."))
+                + "Drops land where you can type: Write, or a book's open note."))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -82,7 +82,7 @@ struct ScrapsPanel: View {
                     }
                     if model.items.isEmpty {
                         Text(tokens.chromeLabel(
-                            "No scraps in this pool — the Blocks area (sidebar) mints them."))
+                            "No scraps in this pool — the Snippets area (sidebar) mints them."))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                             .padding(.vertical, 16)

@@ -48,7 +48,7 @@ struct HelperView: View {
             ("⌘T", "new take (starts as a copy of what's shown)"),
             ("⌥⌘T", "new blank take (not chosen until you ✓ it)"),
             ("⇧⌥⌘T", "new blank take AND choose it — the power gesture"),
-            ("⌘⏎", "choose the take you're in (the post shows it)"),
+            ("⌘⏎", "choose the take you're in (the note shows it)"),
             ("⌃⌘← / ⌃⌘→", "step through a block's takes"),
             ("⌘⇧A", "archive the take you're in"),
             ("⌘⇧L", "save current choices as a lens"),
@@ -71,16 +71,16 @@ struct HelperView: View {
         // QoL batch 3 (L6): the in-post find family. Deliberately its own
         // group and deliberately worded against ⌘K's row below — one searches
         // the library, the other searches the post you are in.
-        ShortcutGroup(title: "Find in a post", items: [
-            ("⌘F", "find text in the post you're in (the chosen takes)"),
-            ("⌥⌘F", "find and replace in this post"),
+        ShortcutGroup(title: "Find in a note", items: [
+            ("⌘F", "find text in the note you're in (the chosen takes)"),
+            ("⌥⌘F", "find and replace in this note"),
             ("⌘G / ⇧⌘G", "next / previous match"),
             ("⌘E", "search for whatever is selected"),
         ]),
         ShortcutGroup(title: "Navigation", items: [
-            ("⌘1 – ⌘6", "post modes: Write · Takes · Lenses · Compare · Blocks · Canvas"),
-            ("⌘K", "find anything — posts, books, blocks, commands (not body text)"),
-            ("⌘N", "new post"),
+            ("⌘1 – ⌘6", "note modes: Write · Takes · Lenses · Compare · Blocks · Canvas"),
+            ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
+            ("⌘N", "new note"),
             ("⌘J", "today's journal entry"),
             ("⌘,", "settings (voice, seams, takes options, tags)"),
             ("⌘/", "this helper"),
@@ -120,39 +120,39 @@ struct HelperView: View {
     private static let entries: [(term: String, definition: String)] = [
         ("block",
          "The atomic unit — a paragraph-sized piece of writing with permanent identity. "
-         + "Nothing owns blocks; posts and books just point at them."),
+         + "Nothing owns blocks; notes and books just point at them."),
         ("take",
          "One alternative text for a block. A block can hold many takes side by side — "
          + "the fan. Most blocks live with exactly one."),
         ("chosen",
-         "The take the post actually uses. \"Chosen is what the post is.\" Everything "
+         "The take the note actually uses. \"Chosen is what the note is.\" Everything "
          + "else is a way of looking. ✓ is the one gesture that moves it."),
         ("fan / bloom",
          "A block's set of takes (the fan); opening it on screen is a bloom. "
          + "⌘⇧T opens and closes; ⎋ closes them all."),
         ("lens",
-         "A saved way of LOOKING at a post: for each block, which take to show. A lens "
-         + "never changes the post — ✓ (adopt) and ⧉ (promote) are the only doors out. "
+         "A saved way of LOOKING at a note: for each block, which take to show. A lens "
+         + "never changes the note — ✓ (adopt) and ⧉ (promote) are the only doors out. "
          + "Unnamed lenses (\"Lens 1\") are the ones you haven't kept yet."),
         ("arranging vs writing",
          "Two ways to start a lens column: ARRANGE picks among takes that already exist "
          + "(mints nothing); WRITE mints a fresh take on every block — a full rewrite "
          + "pass beside the original."),
-        ("adopt (✓ make this the post)",
-         "The post's chosen takes become what this lens/column shows. Adopting SWAPS, "
+        ("adopt (✓ make this the note)",
+         "The note's chosen takes become what this lens/column shows. Adopting SWAPS, "
          + "never destroys: the old chosen is auto-saved as a lens named "
          + "\"chosen until <date>\", so you can always swap back."),
-        ("promote (⧉ make this a post)",
-         "A new post minted from a lens or column, linked to the original as a version. "
+        ("promote (⧉ make this a note)",
+         "A new note minted from a lens or column, linked to the original as a version. "
          + "\"Promote is the bridge\" from a way of looking to a thing of its own."),
         ("version",
-         "A different POST related to this one. Two gestures share the word, and they do "
+         "A different NOTE related to this one. Two gestures share the word, and they do "
          + "different things: MARK AS VERSIONS is a CONNECTION ONLY — it draws a link "
-         + "between two posts that already exist; nothing is copied, neither post changes; "
+         + "between two notes that already exist; nothing is copied, neither note changes; "
          + "the link just lets Compare pair them. DUPLICATE AS VERSION is a COPY — it mints "
-         + "a whole new post (takes and all) and draws that same link in one gesture. "
+         + "a whole new note (takes and all) and draws that same link in one gesture. "
          + "Rule of thumb: mark = connect, duplicate = copy + connect. UNMARK deletes only "
-         + "the connection — both posts stay exactly as they are."),
+         + "the connection — both notes stay exactly as they are."),
         ("divide / the take ceremony",
          "Divide cuts a block in two at your cursor (⌘⇧D — works from Takes too; the "
          + "app carries you to Write and cuts). When the block has SEVERAL takes, each "
@@ -173,10 +173,10 @@ struct HelperView: View {
          "An immutable savepoint of one take (⌘S). Commits are append-only — "
          + "restoring one never erases another."),
         ("seal",
-         "A post marked complete: everything under it refuses edits until unsealed. "
+         "A note marked complete: everything under it refuses edits until unsealed. "
          + "Reversible; nothing is ever locked away for good."),
         ("seam",
-         "The dotted line between blocks (⌘⇧B). Off by default — at rest a post reads "
+         "The dotted line between blocks (⌘⇧B). Off by default — at rest a note reads "
          + "as seamless prose."),
         ("callout",
          "A block wearing a colored frame (Block ▸ Callout). Presentation only — "
@@ -186,13 +186,13 @@ struct HelperView: View {
          + "take 2's ending…\". Margin cards by default; deleted comments stay "
          + "recoverable."),
         ("pool / scraps",
-         "The Pool holds posts that belong to no book yet. Blocks (scraps) holds loose "
+         "The Pool holds notes that belong to no book yet. Snippets (scraps) holds loose "
          + "pieces — drag one into a draft and it lands as a copy with lineage."),
         ("book / reading",
-         "An ordered collection of posts (curated by hand, or smart — collected by "
-         + "tags). A post can live in many books at once; membership is not ownership."),
+         "An ordered collection of notes (curated by hand, or smart — collected by "
+         + "tags). A note can live in many books at once; membership is not ownership."),
         ("canvas",
-         "A spatial VIEW on a post — arrange its blocks like sticky notes. The ‹ › "
+         "A spatial VIEW on a note — arrange its blocks like sticky notes. The ‹ › "
          + "switcher just changes what a card shows; choosing is a separate, deliberate "
          + "gesture."),
     ]
@@ -201,8 +201,8 @@ struct HelperView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 // Her ratified sentence — the map everything else hangs off.
-                Text("Visible is what you're looking at; chosen is what the post is; "
-                    + "a lens is a saved way of looking; a version is a different post.")
+                Text("Visible is what you're looking at; chosen is what the note is; "
+                    + "a lens is a saved way of looking; a version is a different note.")
                     .font(.callout.weight(.semibold))
                     .foregroundStyle(tokens.accent)
                     .fixedSize(horizontal: false, vertical: true)

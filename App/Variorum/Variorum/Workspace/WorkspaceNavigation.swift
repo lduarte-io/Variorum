@@ -350,10 +350,10 @@ nonisolated enum WorkspaceNaming {
         case .shelf: return "Shelf"
         case .library: return "Library"
         case .poolPosts: return "Pool"
-        case .blocks: return "Blocks"
+        case .blocks: return "Snippets"
         case .recovery: return RecoveryPath.menuLabel
         case .post(let id): return resolved(id, in: titles) ?? "Untitled"
-        case .pool(let id): return resolved(id, in: titles) ?? "Blocks"
+        case .pool(let id): return resolved(id, in: titles) ?? "Snippets"
         case .reading(let id): return resolved(id, in: titles) ?? "Book"
         case .tag(let id): return resolved(id, in: titles) ?? "Tag"
         }

@@ -280,7 +280,7 @@ struct SidebarView: View {
                 // sidebar, finally literal. The inline scrap rows are
                 // gone ("way too crowded"); the area page holds them.
                 Label {
-                    markedTitle("Blocks", .blocks)
+                    markedTitle("Snippets", .blocks)
                 } icon: {
                     Image(systemName: "square.on.square")
                 }
@@ -322,7 +322,7 @@ struct SidebarView: View {
                         .help("\(m.rawValue) (⌘\((PostDetailView.Mode.allCases.firstIndex(of: m) ?? 0) + 1))")
                     }
                 } header: {
-                    Text(tokens.chromeLabel("this post"))
+                    Text(tokens.chromeLabel("this note"))
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
                 }
@@ -349,7 +349,7 @@ struct SidebarView: View {
         }
         .toolbar {
             ToolbarItem {
-                Button("New Post", systemImage: "square.and.pencil") {
+                Button("New Note", systemImage: "square.and.pencil") {
                     Task {
                         if let id = await model.createPost() {
                             selection = .post(id)

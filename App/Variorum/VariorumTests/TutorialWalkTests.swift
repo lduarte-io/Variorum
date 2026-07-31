@@ -1515,7 +1515,7 @@ struct TutorialLookingActsTests {
             }
             // The lesson's prose PROMISES the door's new home.
             let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
-            #expect(prose.contains("make outline post"),
+            #expect(prose.contains("make outline note"),
                     "the compare lesson teaches the outline door")
             #expect(prose.contains("there is no relationship here"),
                     "the honesty line is promised where compare is taught")
@@ -1904,7 +1904,7 @@ struct TutorialLibraryActsTests {
             // ⌘S on the sealed post: the operation's REAL refusal, spoken.
             await model.commitFocusedTake()
             #expect(session.status.current?.text
-                    == "This post is sealed — unseal it to change takes or choices.",
+                    == "This note is sealed — unseal it to change takes or choices.",
                     "the refusal lands in the one status presentation — that's the lesson")
 
             // Unseal (the bar's door), change a word, seal again. The real

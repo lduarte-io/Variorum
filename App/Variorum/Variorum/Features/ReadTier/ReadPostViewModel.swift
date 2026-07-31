@@ -130,7 +130,7 @@ final class ReadPostViewModel {
             }
         } catch is CancellationError {
         } catch {
-            canaryMessage = "Post observation failed: \(error)"
+            canaryMessage = "Note observation failed: \(error)"
         }
     }
 

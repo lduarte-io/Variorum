@@ -90,7 +90,7 @@ struct WriteTakesPanel: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             if model.projection.sealed {
-                Text("Sealed post — takes are viewable; choosing and new takes are frozen.")
+                Text("Sealed note — takes are viewable; choosing and new takes are frozen.")
                     .font(.caption)
                     .foregroundStyle(tokens.muted)
             }
@@ -112,7 +112,7 @@ struct WriteTakesPanel: View {
                             }
                         }
                     } else {
-                        Text("This block is no longer in the post.")
+                        Text("This block is no longer in the note.")
                             .foregroundStyle(tokens.muted)
                     }
                 }
@@ -163,7 +163,7 @@ struct WriteTakesPanel: View {
                     }
                     .controlSize(.mini)
                     .disabled(isChosen)
-                    .help("Choose this take — the post shows it (everywhere); ⌘⏎")
+                    .help("Choose this take — the note shows it (everywhere); ⌘⏎")
                     Menu("⋯") {
                         Button("Archive") { Task { await model.archiveTake(take.id) } }
                         Button("Label…") {
@@ -245,7 +245,7 @@ struct WriteTakesPanel: View {
                         blockID: blockID, preferredColumnID: column.id)
                 }
             }
-            .help("The power gesture: a blank take that becomes the post's text right now (⇧⌥⌘T)")
+            .help("The power gesture: a blank take that becomes the note's text right now (⇧⌥⌘T)")
         }
         .buttonStyle(.plain)
         .font(tokens.small)

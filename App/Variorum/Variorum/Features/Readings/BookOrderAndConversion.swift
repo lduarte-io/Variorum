@@ -167,17 +167,17 @@ struct SmartConversionOfferSheet: View {
     }
 
     private var explanation: String {
-        let posts = memberCount == 1 ? "1 post" : "\(memberCount) posts"
+        let posts = memberCount == 1 ? "1 note" : "\(memberCount) notes"
         let opener: String
         switch followUp {
         case .createChapter:
-            opener = "Chapters need a book that holds its posts by hand — a smart "
+            opener = "Chapters need a book that holds its notes by hand — a smart "
                 + "book's membership is its filter's answer, so there is nothing for "
                 + "a chapter to hold on to. Converting fixes that."
         case .none:
             opener = "A smart book collects by its filter. A hand-shaped book holds "
-                + "the posts you put in it — so it can have chapters, an order you "
-                + "drag, and a post cap."
+                + "the notes you put in it — so it can have chapters, an order you "
+                + "drag, and a note cap."
         }
         return opener
             + "\n\nIts current \(posts) stay, in the order you're looking at them. "

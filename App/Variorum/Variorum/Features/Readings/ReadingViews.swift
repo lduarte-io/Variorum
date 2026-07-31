@@ -33,7 +33,7 @@ struct ManageReadingPostsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Posts in “\(reading.name)”").font(.headline)
+            Text("Notes in “\(reading.name)”").font(.headline)
             List {
                 if reading.sortField != .manual {
                     // Round 1, NIT: reorder writes `position`, which a
@@ -62,11 +62,11 @@ struct ManageReadingPostsSheet: View {
                     }
                 }
                 if members.isEmpty {
-                    Text("No posts yet.").foregroundStyle(.secondary)
+                    Text("No notes yet.").foregroundStyle(.secondary)
                 }
             }
             .frame(minHeight: 180)
-            Menu("Add Post…") {
+            Menu("Add Note…") {
                 ForEach(candidates.filter { item in
                     !members.contains { $0.postID == item.postID }
                 }, id: \.postID) { item in
@@ -128,7 +128,7 @@ struct SmartSpecSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Filter for “\(reading.name)”").font(.headline)
-            Text("Posts must match every field; empty fields don't constrain.")
+            Text("Notes must match every field; empty fields don't constrain.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Form {

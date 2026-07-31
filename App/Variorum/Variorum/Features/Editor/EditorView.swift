@@ -83,7 +83,7 @@ struct EditorView: View {
                     .textSelection(.enabled)
             }
             if model.header?.locked == true {
-                Text(chromeTokens.chromeLabel("sealed post — read-only"))
+                Text(chromeTokens.chromeLabel("sealed note — read-only"))
                     .font(chromeTokens.small)
                     .foregroundStyle(chromeTokens.muted)
                     .padding(4)

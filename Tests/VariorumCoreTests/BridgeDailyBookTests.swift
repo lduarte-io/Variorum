@@ -212,7 +212,8 @@ struct BridgeDailyBookTests {
             #expect(try bridge.rendered(day: "2026-07-09") == "Landed against a full book.")
             #expect(try memberships(bridge, book: book).map(\.postID) == [filler.id])
             #expect(report.notes.count == 1)
-            #expect(report.notes.first?.contains("post cap") == true)
+            // 13f batch 7 (the K5 sweep): the note's wording swept post→note.
+            #expect(report.notes.first?.contains("note cap") == true)
         }
     }
 

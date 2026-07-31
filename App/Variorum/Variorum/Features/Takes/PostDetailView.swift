@@ -105,7 +105,7 @@ struct PostDetailView: View {
                 }
                 .labelStyle(.iconOnly)
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help("Show the post's references (sources beside the draft)")
+                .help("Show the note's references (sources beside the draft)")
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
             .frame(maxWidth: .infinity)
@@ -224,10 +224,10 @@ struct PostDetailView: View {
                     .frame(maxWidth: 380, alignment: .leading)
             }
             .buttonStyle(.plain)
-            .help("The post's name — click to rename")
+            .help("The note's name — click to rename")
             .popover(isPresented: $editing, arrowEdge: .bottom) {
                 HStack {
-                    TextField("Post name", text: $draft)
+                    TextField("Note name", text: $draft)
                         .frame(width: 240)
                         .onSubmit { rename() }
                     Button("Rename") { rename() }

@@ -174,7 +174,7 @@ extension EditorViewModel {
     func gateFindReplace(ranges: [NSRange], strings: [String]) {
         guard let textView else { return }
         guard header?.locked != true else {
-            refuseFeedback("This post is sealed — unlock it to edit.")
+            refuseFeedback("This note is sealed — unlock it to edit.")
             return
         }
         guard !ranges.isEmpty else { return }

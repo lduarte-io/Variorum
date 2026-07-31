@@ -225,7 +225,7 @@ extension Operations {
                 post: outline, blockCopies: blockCopies, versionEdge: versionEdge)
         }
         undoStack?.register(
-            label: "Make Outline Post",
+            label: "Make Outline Note",
             inverse: { try $0.revertMintedContainer(result.post.id) },
             redo: { try $0.reapplyMintedContainer(result.post.id) })
         return result
@@ -393,7 +393,7 @@ extension Operations {
             try copyPost(db, sourceID: postID, chosenPicks: picks, carryFans: carryFans)
         }
         undoStack?.register(
-            label: "Make Into a Post",
+            label: "Make Into a Note",
             inverse: { try $0.revertMintedContainer(result.post.id) },
             redo: { try $0.reapplyMintedContainer(result.post.id) })
         return result

@@ -147,7 +147,7 @@ struct CommandPaletteView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TextField(tokens.chromeLabel("Find anything — posts, books, commands…"),
+            TextField(tokens.chromeLabel("Find anything — notes, books, commands…"),
                       text: Binding(get: { model.query }, set: { value in
                           model.query = value
                           Task { await model.refresh() }

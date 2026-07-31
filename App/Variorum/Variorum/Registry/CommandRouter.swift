@@ -96,7 +96,7 @@ final class CommandRouter {
     /// mismatch branch was a silent door inside the anti-silent-door
     /// machinery). Shared with the pins.
     static let staleModeRequestNote =
-        "The open post changed — that request no longer applies."
+        "The open note changed — that request no longer applies."
 
     /// Routes a mode switch to the mounted detail. `postID` targets a
     /// specific post (the sidebar rail); nil addresses whichever detail is

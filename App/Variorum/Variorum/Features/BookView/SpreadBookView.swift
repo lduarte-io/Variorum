@@ -79,7 +79,7 @@ struct SpreadBookView: View {
         VStack(spacing: 0) {
             if model.spreadEntries.isEmpty {
                 Spacer()
-                Text("This book has no posts yet.")
+                Text("This book has no notes yet.")
                     .foregroundStyle(tokens.muted)
                 Spacer()
             } else {
@@ -146,12 +146,12 @@ struct SpreadBookView: View {
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .keyboardShortcut(flipShortcut(.leftArrow, []))
                     .disabled(!canMove(-2))
-                    .help("Turn the leaf back — two posts at once (←)")
+                    .help("Turn the leaf back — two notes at once (←)")
                 Button("◁") { model.nudgeSpread(by: -1) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .keyboardShortcut(flipShortcut(.leftArrow, .option))
                     .disabled(!canMove(-1))
-                    .help("Nudge back by ONE post — re-pair the two pages (⌥←)")
+                    .help("Nudge back by ONE note — re-pair the two pages (⌥←)")
                 // THE JUMP SCRUBBER — back beside the leaf-turn controls by
                 // her ruling (#44(c)/#45(c), 13c ratify walk): one rule for
                 // both horizontal surfaces, so Book carries a scrubber like
@@ -167,17 +167,17 @@ struct SpreadBookView: View {
                     .frame(minWidth: 120, maxWidth: 460)
                     .disabled(model.entries.count < 2)
                     .help("Jump through the book — the scrub domain is the "
-                        + "post list, one page per post")
+                        + "note list, one page per note")
                 Button("▷") { model.nudgeSpread(by: 1) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .keyboardShortcut(flipShortcut(.rightArrow, .option))
                     .disabled(!canMove(1))
-                    .help("Nudge on by ONE post — re-pair the two pages (⌥→)")
+                    .help("Nudge on by ONE note — re-pair the two pages (⌥→)")
                 Button("▶") { model.turnLeaf(by: 1) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .keyboardShortcut(flipShortcut(.rightArrow, []))
                     .disabled(!canMove(2))
-                    .help("Turn the leaf on — two posts at once (→)")
+                    .help("Turn the leaf on — two notes at once (→)")
                 Spacer(minLength: 12)
                 // The page line reads TRAILING now that the scrubber holds
                 // the bar's flexible middle — the arrangement Read's Pages
@@ -201,7 +201,7 @@ struct SpreadBookView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 150)
                 .help("How the page you're writing in presents itself — the ordinary "
-                    + "Write editor, or that post's takes")
+                    + "Write editor, or that note's takes")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
@@ -320,7 +320,7 @@ private struct SpreadPage: View {
                     userInfo: ["postID": entry.postID])
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help("Open this post in the full editor (Write · Takes · Lenses · …)")
+            .help("Open this note in the full editor (Write · Takes · Lenses · …)")
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)

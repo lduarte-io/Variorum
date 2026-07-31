@@ -248,7 +248,7 @@ struct BlockTOCTests {
             // consequence on success; her S4-8a confusion was exactly a
             // silent success — the old `== nil` pinned the silence).
             await model.moveToPool(blockID, poolID: poolID, poolTitle: "scraps")
-            #expect(model.statusMessage?.contains("LEFT this post") == true,
+            #expect(model.statusMessage?.contains("LEFT this note") == true,
                     "the move speaks the I2 consequence and the road back")
             let pool = try await db.read { try Queries.poolListing($0, poolID: poolID) }
             #expect(pool.map(\.block.blockID) == [blockID],

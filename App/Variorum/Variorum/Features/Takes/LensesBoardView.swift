@@ -82,7 +82,7 @@ struct LensesBoardView: View {
             // there, the b6dae25 class); the board renders state banners
             // only.
             if model.projection.sealed {
-                Text("Sealed post — takes are viewable; choosing and new takes are frozen.")
+                Text("Sealed note — takes are viewable; choosing and new takes are frozen.")
                     .font(.caption)
                     .padding(4)
                     .frame(maxWidth: .infinity)
@@ -276,12 +276,12 @@ struct LensesBoardView: View {
     @ViewBuilder
     private var addColumnMenuItems: some View {
         Button("New lens — arrange existing takes") { model.addScratchColumn() }
-            .help("A fresh way of looking that starts as a mirror of the post. "
+            .help("A fresh way of looking that starts as a mirror of the note. "
                 + "Flip any block to a take that already exists — nothing new is written.")
         Button("New lens — write new takes") {
             Task { await model.addWriteColumn() }
         }
-        .help("A fresh take on EVERY block, branched from what the post shows — "
+        .help("A fresh take on EVERY block, branched from what the note shows — "
             + "a full rewrite pass beside the original. New takes are written.")
         if !model.projection.lenses.isEmpty {
             Divider()
@@ -331,7 +331,7 @@ struct LensesBoardView: View {
                 .strokeBorder(
                     tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
         .padding(10)
-        .help("A column is a way of looking, not a copy — open the post's chosen "
+        .help("A column is a way of looking, not a copy — open the note's chosen "
             + "takes, a saved lens, or a fresh one, side by side with this column")
     }
 
@@ -456,7 +456,7 @@ struct LensesBoardView: View {
         Text("⠿")
             .font(tokens.small)
             .foregroundStyle(tokens.faint)
-            .help("Drag to reorder this block — one post, one order: every column moves together")
+            .help("Drag to reorder this block — one note, one order: every column moves together")
             .draggable(Self.dragPayload(blockID: blockID))
     }
 
@@ -534,7 +534,7 @@ struct LensesBoardView: View {
     /// slots swap — click the name to replace this column's occupant).
     private func slotPicker(_ column: TakesColumn) -> some View {
         Menu {
-            Button("Chosen (the post)") { model.replaceColumnWithChosen(column.id) }
+            Button("Chosen (the note)") { model.replaceColumnWithChosen(column.id) }
             if !model.projection.lenses.isEmpty {
                 Divider()
                 ForEach(model.projection.lenses, id: \.id) { lens in
@@ -562,12 +562,12 @@ struct LensesBoardView: View {
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
-        .help("Replace this column with a different lens, the post itself, or a new lens")
+        .help("Replace this column with a different lens, the note itself, or a new lens")
     }
 
     private func columnTitle(_ column: TakesColumn) -> String {
         switch column.kind {
-        case .main: return "Chosen (the post)"
+        case .main: return "Chosen (the note)"
         case .scratch: return column.name ?? "Lens"
         case .lens(let id):
             return model.projection.lenses.first { $0.id == id }?.name ?? "Lens"
@@ -583,39 +583,39 @@ struct LensesBoardView: View {
             switch column.kind {
             case .main:
                 Menu("⧉ Duplicate as Version") {
-                    Button("A full copy of this post, linked as a version") {
+                    Button("A full copy of this note, linked as a version") {
                         Task { await model.promoteColumn(column.id) }
                     }
                 }
-                .help("Copies the post exactly as it is — takes and all — into a new linked post")
+                .help("Copies the note exactly as it is — takes and all — into a new linked note")
             case .scratch:
                 adoptDoor(column)
-                Menu("⧉ Make this a post") {
-                    Button("New post from this column (takes ride)") {
+                Menu("⧉ Make this a note") {
+                    Button("New note from this column (takes ride)") {
                         Task { await model.promoteColumn(column.id, carryFans: true) }
                     }
-                    Button("New post, only what this column shows") {
+                    Button("New note, only what this column shows") {
                         Task { await model.promoteColumn(column.id, carryFans: false) }
                     }
                     Divider()
-                    Button("New post — and keep this as a lens too") {
+                    Button("New note — and keep this as a lens too") {
                         Task { await model.promoteColumn(column.id, keepAsLens: true) }
                     }
                 }
-                .help("A new linked post whose text is what this column shows — no lens required (direct promote)")
+                .help("A new linked note whose text is what this column shows — no lens required (direct promote)")
                 Button("💾") { lensNamePrompt = LensPrompt(columnID: column.id) }
                     .help("Keep this way of looking: save it as a named lens")
             case .lens(let lensID):
                 adoptDoor(column)
-                Menu("⧉ Make this a post") {
-                    Button("New post from this lens (takes ride)") {
+                Menu("⧉ Make this a note") {
+                    Button("New note from this lens (takes ride)") {
                         Task { await model.promoteColumn(column.id, carryFans: true) }
                     }
-                    Button("New post, only what this lens shows") {
+                    Button("New note, only what this lens shows") {
                         Task { await model.promoteColumn(column.id, carryFans: false) }
                     }
                 }
-                .help("A new linked post whose text is what this lens shows")
+                .help("A new linked note whose text is what this lens shows")
                 Menu("⋯") {
                     Button("Rename lens…") {
                         // 13b Stage 3 (3D — N6): `renameLens` (core since
@@ -641,10 +641,10 @@ struct LensesBoardView: View {
     }
 
     private func adoptDoor(_ column: TakesColumn) -> some View {
-        Button("✓ Make this the post") {
+        Button("✓ Make this the note") {
             Task { await model.adoptColumn(column.id) }
         }
-        .help("The post's chosen takes become this column's — and the old chosen is "
+        .help("The note's chosen takes become this column's — and the old chosen is "
             + "kept automatically as a lens (“chosen until …”), so you can always swap back")
     }
 
@@ -653,8 +653,8 @@ struct LensesBoardView: View {
     private var footerRule: some View {
         ChromeNotice(
             tokens: tokens,
-            text: "Columns are ways of looking at the same post. Nothing here changes the post "
-                + "except ✓ (make this the post) and ⧉ (make a new post). Typing edits the take "
+            text: "Columns are ways of looking at the same note. Nothing here changes the note "
+                + "except ✓ (make this the note) and ⧉ (make a new note). Typing edits the take "
                 + "you're in — the same take, everywhere it appears.")
             .padding(.horizontal, 24)
             .padding(.vertical, 6)

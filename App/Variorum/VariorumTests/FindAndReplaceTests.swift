@@ -593,7 +593,7 @@ struct FindAndReplaceTests {
         #expect(CapabilityRegistry.capability(.useSelectionForFind).shortcutLabel == "⌘E")
         #expect(EditorCommands.keyEquivalent(for: .findInPost)?.0 == "f")
         #expect(EditorCommands.keyEquivalent(for: .findNext)?.0 == "g")
-        #expect(CapabilityRegistry.capability(.findInPost).verb == "Find in Post…")
+        #expect(CapabilityRegistry.capability(.findInPost).verb == "Find in Note…")
         #expect(CapabilityRegistry.capability(.findAnything).verb == "Find Anything…",
                 "the two never read as rivals: one searches the library, one the post")
     }

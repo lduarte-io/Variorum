@@ -275,7 +275,7 @@ public struct BridgeEngine: Sendable {
         case .bookAtCapacity:
             return Self.unshelvedNote(
                 day: day,
-                because: "the daily journal book is at its post cap — extend the cap in the book's settings")
+                because: "the daily journal book is at its note cap — extend the cap in the book's settings")
         case .wrongKind:
             return Self.unshelvedNote(
                 day: day,

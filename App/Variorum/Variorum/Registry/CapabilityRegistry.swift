@@ -125,37 +125,37 @@ nonisolated enum CapabilityRegistry {
             id: .divide, verb: "Divide Block at Cursor", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧D", takesAccess: .native,
-            unavailableNote: "Dividing happens inside a post — open one first.",
+            unavailableNote: "Dividing happens inside a note — open one first.",
             availability: divideAvailability),
         Capability(
             id: .extract, verb: "Extract Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧E", takesAccess: .moveAndExecute,
-            unavailableNote: "Extracting happens inside a post — open one first.",
+            unavailableNote: "Extracting happens inside a note — open one first.",
             availability: structural),
         Capability(
             id: .makeBlock, verb: "Make Block from Selection", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧K", takesAccess: .moveAndExecute,
-            unavailableNote: "Making a block happens inside a post — open one first.",
+            unavailableNote: "Making a block happens inside a note — open one first.",
             availability: structural),
         Capability(
             id: .merge, verb: "Merge Blocks", scope: .block,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧M", takesAccess: .moveAndExecute,
-            unavailableNote: "Merging happens inside a post — open one first.",
+            unavailableNote: "Merging happens inside a note — open one first.",
             availability: structural),
         Capability(
             id: .deleteInEveryTake, verb: "Delete in Every Take", scope: .block,
             doors: [.menuBar, .contextMenu],
             shortcutLabel: nil, takesAccess: .moveAndExecute,
-            unavailableNote: "Delete in Every Take works on a selection inside a post.",
+            unavailableNote: "Delete in Every Take works on a selection inside a note.",
             availability: structural),
         Capability(
-            id: .addBlockAtEnd, verb: "New Block at End of Post", scope: .block,
+            id: .addBlockAtEnd, verb: "New Block at End of Note", scope: .block,
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Blocks are born inside a post — open one first.",
+            unavailableNote: "Blocks are born inside a note — open one first.",
             availability: takeFamily),  // NIT-3: the one named rule, not a copy
         // 13b 4D (N28's second half — the Takes trap's insert door; S4-13:
         // editor parity, native in BOTH Write and Takes by construction).
@@ -173,7 +173,7 @@ nonisolated enum CapabilityRegistry {
             // a duplicate menu row or an undeclared key, both of which the
             // legibility mandate refuses.
             shortcutLabel: "⌘⇧⏎", takesAccess: .native,
-            unavailableNote: "Blocks are born inside a post — open one first.",
+            unavailableNote: "Blocks are born inside a note — open one first.",
             availability: takeFamily),  // the one named rule, not a copy
         // 13c 1B (A8 — her item: "I don't seem to have the ability to
         // delete / archive empty blocks?"). `deleteBlock` has existed in
@@ -189,7 +189,7 @@ nonisolated enum CapabilityRegistry {
             id: .deleteBlock, verb: "Delete Block", scope: .block,
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Blocks live inside a post — open one first.",
+            unavailableNote: "Blocks live inside a note — open one first.",
             availability: takeFamily),  // the one named rule, not a copy
 
         // MARK: The take family (take scope)
@@ -197,7 +197,7 @@ nonisolated enum CapabilityRegistry {
             id: .showTakes, verb: "Show Takes", scope: .take,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘⇧T", takesAccess: .native,
-            unavailableNote: "Takes live inside a post — open one first.",
+            unavailableNote: "Takes live inside a note — open one first.",
             availability: { ctx in
                 if ctx.mode == .lenses { return .actElsewhere(.takes) }  // blooms live in Takes — GO there
                 return takeFamily(ctx)
@@ -206,49 +206,49 @@ nonisolated enum CapabilityRegistry {
             id: .newTake, verb: "New Take (Branch)", scope: .take,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌘T", takesAccess: .native,
-            unavailableNote: "Takes grow on a block inside a post — open one first.",
+            unavailableNote: "Takes grow on a block inside a note — open one first.",
             availability: takeFamily),
         Capability(
             id: .blankTake, verb: "New Blank Take", scope: .take,
             doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌥⌘T", takesAccess: .native,
-            unavailableNote: "Takes grow on a block inside a post — open one first.",
+            unavailableNote: "Takes grow on a block inside a note — open one first.",
             availability: takeFamily),
         Capability(
             id: .blankTakeAsChosen, verb: "New Blank Take as Chosen", scope: .take,
             doors: [.menuBar, .bottomBar],
             shortcutLabel: "⇧⌥⌘T", takesAccess: .native,
-            unavailableNote: "Takes grow on a block inside a post — open one first.",
+            unavailableNote: "Takes grow on a block inside a note — open one first.",
             availability: takeFamily),
         Capability(
             id: .chooseTake, verb: "Choose This Take", scope: .take,
             doors: [.menuBar, .contextMenu, .palette],
             shortcutLabel: "⌘⏎", takesAccess: .native,
-            unavailableNote: "Choosing happens among a block's takes — open a post first.",
+            unavailableNote: "Choosing happens among a block's takes — open a note first.",
             availability: takeFamilyPlusCanvas),
         Capability(
             id: .previousTake, verb: "Previous Take", scope: .take,
             doors: [.menuBar],
             shortcutLabel: "⌃⌘←", takesAccess: .native,
-            unavailableNote: "Stepping through takes happens inside a post.",
+            unavailableNote: "Stepping through takes happens inside a note.",
             availability: takeFamilyPlusCanvas),
         Capability(
             id: .nextTake, verb: "Next Take", scope: .take,
             doors: [.menuBar],
             shortcutLabel: "⌃⌘→", takesAccess: .native,
-            unavailableNote: "Stepping through takes happens inside a post.",
+            unavailableNote: "Stepping through takes happens inside a note.",
             availability: takeFamilyPlusCanvas),
         Capability(
             id: .archiveTake, verb: "Archive Take", scope: .take,
             doors: [.menuBar, .contextMenu],
             shortcutLabel: "⌘⇧A", takesAccess: .native,
-            unavailableNote: "Archiving acts on the take you're in — open a post first.",
+            unavailableNote: "Archiving acts on the take you're in — open a note first.",
             availability: takeFamily),
         Capability(
             id: .saveChoicesAsLens, verb: "Save Choices as Lens…", scope: .post,
             doors: [.menuBar, .palette],
             shortcutLabel: "⌘⇧L", takesAccess: .native,
-            unavailableNote: "Lenses save a post's choices — open a post first.",
+            unavailableNote: "Lenses save a note's choices — open a note first.",
             availability: takeFamily),
         Capability(
             id: .closeAllTakes, verb: "Close All Takes (Esc)", scope: .take,
@@ -288,7 +288,7 @@ nonisolated enum CapabilityRegistry {
             id: .labelTake, verb: "Label Take…", scope: .take,
             doors: [.contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Labels live on a take inside a post — open one first.",
+            unavailableNote: "Labels live on a take inside a note — open one first.",
             availability: takeFamily),
         // 13b Stage 3 (3D — T5/N6): `renameLens` (core since 11a) gets its
         // door on the Lenses column header. Lens machinery's ONE home is
@@ -362,7 +362,7 @@ nonisolated enum CapabilityRegistry {
             id: .commitTake, verb: "Commit Take", scope: .take,
             doors: [.menuBar, .bottomBar, .palette],
             shortcutLabel: "⌘S", takesAccess: .native,
-            unavailableNote: "Nothing to commit here — ⌘S commits a take inside a post.",
+            unavailableNote: "Nothing to commit here — ⌘S commits a take inside a note.",
             availability: takeFamilyPlusEditableBoards),  // 13b 4D: + compare; 4E: + canvas
         Capability(
             id: .structuralUndo, verb: "Undo Structural Change", scope: .app,
@@ -385,10 +385,10 @@ nonisolated enum CapabilityRegistry {
 
         // MARK: Post scope
         Capability(
-            id: .sealPost, verb: "Seal / Unseal Post", scope: .post,
+            id: .sealPost, verb: "Seal / Unseal Note", scope: .post,
             doors: [.bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Sealing acts on an open post — open one first.",
+            unavailableNote: "Sealing acts on an open note — open one first.",
             // Round-1 MINOR-1: the attached-editor arm — a book-inline or
             // pool editor (mode nil, editor attached) seals through its
             // own routed handler; the rule must say so.
@@ -414,7 +414,7 @@ nonisolated enum CapabilityRegistry {
             id: .blockComments, verb: "Comments…", scope: .block,
             doors: [.menuBar, .bottomBar],
             shortcutLabel: "⌘⇧'", takesAccess: .native,
-            unavailableNote: "Comments live on a block — open a post first.",
+            unavailableNote: "Comments live on a block — open a note first.",
             // The bars' block menus carry the door in Write/Takes/Lenses.
             availability: takeFamily),  // NIT-3: the one named rule, not a copy
         // 13c Stage 1 ladder, R2-2 — her A13(a), ruled into the friction
@@ -430,7 +430,7 @@ nonisolated enum CapabilityRegistry {
             id: .callout, verb: "Callout", scope: .block,
             doors: [.menuBar],
             shortcutLabel: "⌥⌘C", takesAccess: .native,
-            unavailableNote: "Callout frames go on a block — open a post first.",
+            unavailableNote: "Callout frames go on a block — open a note first.",
             availability: takeFamilyPlusCompare),
         Capability(
             id: .exportCaretBlock, verb: "Export Block as Markdown…", scope: .block,
@@ -452,34 +452,34 @@ nonisolated enum CapabilityRegistry {
         // so nothing reads as a rival to ⌘K's "Find Anything…", which
         // searches the library's titles and names and never body text.
         Capability(
-            id: .findInPost, verb: "Find in Post…", scope: .post,
+            id: .findInPost, verb: "Find in Note…", scope: .post,
             doors: [.menuBar],
             shortcutLabel: "⌘F", takesAccess: nil,
-            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
         Capability(
             id: .findAndReplace, verb: "Find and Replace…", scope: .post,
             doors: [.menuBar],
             shortcutLabel: "⌥⌘F", takesAccess: nil,
-            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
         Capability(
             id: .findNext, verb: "Find Next", scope: .post,
             doors: [.menuBar],
             shortcutLabel: "⌘G", takesAccess: nil,
-            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
         Capability(
             id: .findPrevious, verb: "Find Previous", scope: .post,
             doors: [.menuBar],
             shortcutLabel: "⇧⌘G", takesAccess: nil,
-            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
         Capability(
             id: .useSelectionForFind, verb: "Use Selection for Find", scope: .post,
             doors: [.menuBar],
             shortcutLabel: "⌘E", takesAccess: nil,
-            unavailableNote: "Find works in the post editor — open a post in Write (⌘1).",
+            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
 
         // MARK: Modes + app scope
@@ -487,7 +487,7 @@ nonisolated enum CapabilityRegistry {
             id: .switchMode, verb: "Switch Mode (⌘1–⌘6)", scope: .post,
             doors: [.menuBar],
             shortcutLabel: "⌘1–6", takesAccess: nil,
-            unavailableNote: "Open a post first — the modes live inside a post.",
+            unavailableNote: "Open a note first — the modes live inside a note.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
         // MARK: The navigation core (13f batch 3 — W3/A27 + W16)
         //
@@ -632,11 +632,11 @@ nonisolated enum CapabilityRegistry {
             id: .divergeForBook, verb: DivergeCopy.verb, scope: .post,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
-            unavailableNote: "Diverging happens inside a post — open one first.",
+            unavailableNote: "Diverging happens inside a note — open one first.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
 
         Capability(
-            id: .newPost, verb: "New Post", scope: .app,
+            id: .newPost, verb: "New Note", scope: .app,
             doors: [.menuBar, .palette],
             shortcutLabel: "⌘N", takesAccess: nil,
             unavailableNote: "", availability: always),

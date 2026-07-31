@@ -218,13 +218,13 @@ struct CanvasView: View {
                     .lineLimit(1)
                 Button("Apply order") { Task { await model.applyOrder() } }
                     .disabled(model.orderSequence.isEmpty)
-                    .help("The numbered cards lead the post in click order; "
+                    .help("The numbered cards lead the note in click order; "
                         + "everything else keeps its relative order after them (⌥⌘Z undoes)")
                 Button("Cancel") { model.cancelOrderMode() }
             } else {
                 Button("order by clicking…") { model.enterOrderMode() }
-                    .help("Click cards in the order the post should read — "
-                        + "one confirm reorders the post; the spatial arrangement never moves")
+                    .help("Click cards in the order the note should read — "
+                        + "one confirm reorders the note; the spatial arrangement never moves")
             }
 
             Spacer()
@@ -438,7 +438,7 @@ private struct CanvasCardView: View {
                 .foregroundStyle(tokens.muted)
             if model.viewedDiffersFromChosen(blockID: blockID) {
                 // R88's marker: this card is a WAY OF LOOKING right now.
-                Text("viewing — not what the post shows")
+                Text("viewing — not what the note shows")
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
@@ -535,7 +535,7 @@ private struct CanvasCardView: View {
                 Text("\(ordinal)")
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
-                    .help("Block \(ordinal) of the post's current order")
+                    .help("Block \(ordinal) of the note's current order")
             }
         }
     }
@@ -565,7 +565,7 @@ private struct CanvasCardView: View {
                 if model.viewedDiffersFromChosen(blockID: blockID) {
                     // The ONE careful gesture (R88): viewing never chooses;
                     // this does, and says so.
-                    Button("✓ choose this take (the post shows it)") {
+                    Button("✓ choose this take (the note shows it)") {
                         Task { await model.chooseViewedTake(blockID: blockID) }
                     }
                     .buttonStyle(.plain)
@@ -649,7 +649,7 @@ private struct CanvasCardView: View {
         ]
         if model.viewedDiffersFromChosen(blockID: blockID) {
             items.append(PaneTextView.MenuItemSpec(
-                title: "✓ Choose this take (the post shows it)",
+                title: "✓ Choose this take (the note shows it)",
                 action: { [model, blockID] in
                     Task { await model.chooseViewedTake(blockID: blockID) }
                 }))

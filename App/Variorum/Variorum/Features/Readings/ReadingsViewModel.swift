@@ -137,18 +137,18 @@ final class ReadingsViewModel {
         case .lockedReading:
             return "This reading is locked — unlock it first."
         case .alreadyInReading:
-            return "That post is already in this reading."
+            return "That note is already in this reading."
         case .readingAtCapacity:
-            return "This reading is at its post limit."
+            return "This reading is at its note limit."
         case .wrongReadingKind(_, let expected):
             // 13c 2D: the message used to state the CURATED direction only,
             // which read as nonsense on the conversion door's refusal (a
             // curated book asked to convert throws `expected: .smart`).
             return expected == .smart
                 ? "That's already a hand-shaped book — only smart books convert."
-                : "Only hand-shaped (curated) books hold a post list you pick by hand."
+                : "Only hand-shaped (curated) books hold a note list you pick by hand."
         case .postNotInReading:
-            return "That post isn't in this reading."
+            return "That note isn't in this reading."
         default:
             return "The operation was refused: \(op)"
         }

@@ -617,7 +617,7 @@ final class TakesViewModel {
         guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return }
         switch columns[index].kind {
         case .main:
-            statusMessage = "The main column shows the post's chosen takes — use ✓ to change them."
+            statusMessage = "The main column shows the note's chosen takes — use ✓ to change them."
         case .scratch:
             columns[index].picks[blockID] = variantID
             saveMemory()
@@ -779,7 +779,7 @@ final class TakesViewModel {
             let preservation: Lens
             switch column.kind {
             case .main:
-                statusMessage = "This column IS the post — nothing to adopt."
+                statusMessage = "This column IS the note — nothing to adopt."
                 return
             case .lens(let lensID):
                 preservation = try await session.runner.run { ops in
@@ -792,7 +792,7 @@ final class TakesViewModel {
                 }
             }
             statusMessage =
-                "Adopted — the post now shows this column. The old chosen is kept as the lens “\(preservation.name)”."
+                "Adopted — the note now shows this column. The old chosen is kept as the lens “\(preservation.name)”."
         } catch {
             statusMessage = Self.message(for: error)
         }
@@ -828,7 +828,7 @@ final class TakesViewModel {
                     return result
                 }
                 statusMessage =
-                    "Made a new post — “\(promoted.post.title ?? "untitled")” is now its own post, linked as a version."
+                    "Made a new note — “\(promoted.post.title ?? "untitled")” is now its own note, linked as a version."
             } catch {
                 statusMessage = Self.message(for: error)
             }
@@ -1439,7 +1439,7 @@ final class TakesViewModel {
                 choreography.parkFocus(onVariant: variantID)
             }
             statusMessage =
-                "Block deleted — ⌥⌘Z undoes it, and it waits in this post's deleted-blocks tray."
+                "Block deleted — ⌥⌘Z undoes it, and it waits in this note's deleted-blocks tray."
         } catch {
             statusMessage = Self.message(for: error)
         }
@@ -1690,8 +1690,8 @@ final class TakesViewModel {
                 // NIT-R2-C: without a chosen-showing column the act
                 // succeeds with nothing visible — a silent success is
                 // against fire-and-speak, so say where it went.
-                speak("Chosen \u{2014} the post now shows the new blank take; "
-                    + "add a \u{201C}Chosen (the post)\u{201D} column to see it here.")
+                speak("Chosen \u{2014} the note now shows the new blank take; "
+                    + "add a \u{201C}Chosen (the note)\u{201D} column to see it here.")
                 return
             }
             focus(PaneKey(columnID: main.id, blockID: blockID, variantID: variantID))
@@ -1904,7 +1904,7 @@ final class TakesViewModel {
             return
         }
         await choose(blockID: pane.blockID, variantID: pane.variantID)
-        if statusMessage == nil { statusMessage = "✓ chosen — the post shows this take everywhere." }
+        if statusMessage == nil { statusMessage = "✓ chosen — the note shows this take everywhere." }
     }
 
     /// ⌘⇧T — toggle the focused (or first fanned) block's bloom.

@@ -222,7 +222,7 @@ final class EntryEditorViewModel {
 
     func focus(_ slot: Queries.RenderedBlock) {
         guard !isSealed else {
-            lastError = "This post is locked — unlock it on the Mac to edit."
+            lastError = "This note is locked — unlock it on the Mac to edit."
             return
         }
         guard let variantID = slot.variantID, let text = slot.text else { return }
@@ -239,7 +239,7 @@ final class EntryEditorViewModel {
     func setDraft(_ newText: String) {
         guard newText != draftText else { return }
         guard !isSealed else {
-            lastError = "This post is locked — unlock it on the Mac to edit."
+            lastError = "This note is locked — unlock it on the Mac to edit."
             return
         }
         draftText = newText

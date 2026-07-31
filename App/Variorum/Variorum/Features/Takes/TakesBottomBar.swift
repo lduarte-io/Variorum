@@ -110,7 +110,7 @@ struct TakesBottomBar: View {
                 // live, native (R118 parity with Write's bar).
                 Task { await model.deleteFocusedBlock() }
             }
-            Button("＋ New block at the end of the post") {
+            Button("＋ New block at the end of the note") {
                 // D3's third leg (13b 1b): native — the minted block's
                 // pane takes the ring; typing continues instantly.
                 Task { await model.addBlockAtEnd() }
@@ -234,10 +234,10 @@ struct TakesBottomBar: View {
             Task { await model.toggleSeal() }
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens))
-        .help("A sealed post is frozen — nothing under it changes until unsealed")
+        .help("A sealed note is frozen — nothing under it changes until unsealed")
         Button(tokens.chromeLabel("tags…")) { tagsShown = true }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
-            .help("The post's tags — apply or remove them right here")
+            .help("The note's tags — apply or remove them right here")
         // 13b 4D (N35 + S4-33, her rider verbatim: "the comments button
         // should be there in takes the way it is in write, on the bottom
         // bar") — parity of PROMINENCE, not just existence: the same
@@ -344,7 +344,7 @@ struct TakesBottomBar: View {
         // per projection, incremental) — the bar re-renders per keystroke
         // (it reads the observed authority) and must never re-enumerate
         // every slot's full text each time.
-        parts.append("\(model.postWordCount.formatted())w post")
+        parts.append("\(model.postWordCount.formatted())w note")
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 

@@ -83,7 +83,7 @@ struct FolderView: View {
                 .font(.headline)
                 .padding(8)
             if model.posts.isEmpty {
-                Text("No posts carry this tag yet.")
+                Text("No notes carry this tag yet.")
                     .foregroundStyle(.secondary)
                     .padding(8)
                 Spacer()
@@ -105,7 +105,7 @@ struct FolderView: View {
                         .buttonStyle(.plain)
                     }
                     if model.truncated {
-                        Text("Showing the \(FolderViewModel.window) most recently touched posts with this tag — older ones aren't listed.")
+                        Text("Showing the \(FolderViewModel.window) most recently touched notes with this tag — older ones aren't listed.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

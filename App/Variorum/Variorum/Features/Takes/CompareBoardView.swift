@@ -551,7 +551,7 @@ final class CompareViewModel {
         if let postID,
            postID == anchorPostID
                || peerSlots.contains(where: { $0.postID == postID && $0.id != slotID }) {
-            statusMessage = "That post is already open in this compare."
+            statusMessage = "That note is already open in this compare."
             return
         }
         if peerSlots[index].postID != postID {
@@ -587,7 +587,7 @@ final class CompareViewModel {
               face.slots.contains(where: { $0.blockID == blockID })
         else {
             statusMessage =
-                "Order drags stay within one post here — each column reorders its own post."
+                "Order drags stay within one note here — each column reorders its own note."
             return
         }
         if let targetBlockID {
@@ -615,8 +615,8 @@ final class CompareViewModel {
             if followAnchorOrder, postID != anchorPostID,
                projection.kinship[postID]?[blockID] != nil {
                 statusMessage =
-                    "Reordered. This column is following the first post's order right now — "
-                    + "the new order shows with \u{201C}follow this post's order\u{201D} off."
+                    "Reordered. This column is following the first note's order right now — "
+                    + "the new order shows with \u{201C}follow this note's order\u{201D} off."
             }
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
@@ -654,7 +654,7 @@ final class CompareViewModel {
                 }
                 if !self.hasLineage(peerID) {
                     self.statusMessage =
-                        "Marked as versions — a connection, nothing copied. These posts share "
+                        "Marked as versions — a connection, nothing copied. These notes share "
                         + "no lineage, so they align only loosely: side by side, each in its own order."
                 }
             } catch {
@@ -672,7 +672,7 @@ final class CompareViewModel {
                     try ops.unmarkPostsAsVersions(anchorPostID, peerID)
                 }
                 self.statusMessage =
-                    "Unmarked — the posts are no longer versions of each other (both untouched; re-mark any time)."
+                    "Unmarked — the notes are no longer versions of each other (both untouched; re-mark any time)."
             } catch {
                 self.statusMessage = OpsRefusalCopy.message(for: error)
             }
@@ -857,12 +857,12 @@ struct CompareBoardView: View {
         HStack(spacing: 8) {
             VoicedChip(
                 tokens: tokens,
-                text: model.followAnchorOrder ? "follow this post's order: on" : "follow this post's order: off",
+                text: model.followAnchorOrder ? "follow this note's order: on" : "follow this note's order: off",
                 on: model.followAnchorOrder
             ) { model.followAnchorOrder.toggle() }
                 .help("On: the other columns arrange themselves to sit beside their related "
-                    + "blocks, in this post's order (display only — nothing is moved). "
-                    + "Off: every column flows in its own post's order.")
+                    + "blocks, in this note's order (display only — nothing is moved). "
+                    + "Off: every column flows in its own note's order.")
             VoicedChip(
                 tokens: tokens,
                 text: model.lineageColorsOn ? "lineage colors: on" : "lineage colors: off",
@@ -878,20 +878,20 @@ struct CompareBoardView: View {
                 on: model.relatedOnly
             ) { model.relatedOnly.toggle() }
                 .help("On: every column shows only the blocks lineage connects across these "
-                    + "posts — the unrelated stretches are hidden. Nothing is moved or "
+                    + "notes — the unrelated stretches are hidden. Nothing is moved or "
                     + "deleted; this is a way of looking. Off: every block shows.")
             Spacer()
-            Button(tokens.chromeLabel("make outline post")) {
+            Button(tokens.chromeLabel("make outline note")) {
                 Task { await model.makeOutlinePost() }
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
             .help("A linked copy named \u{201C}outline of \u{2026}\u{201D} — each block starts as this "
-                + "post's first sentence per block; it opens beside the post here, "
+                + "note's first sentence per block; it opens beside the note here, "
                 + "registered block-by-block (R99 — the retired Outline tab's power, re-homed)")
             if model.peerSlots.count < 3 {
-                Button(tokens.chromeLabel("+ post")) { model.addPeerSlot() }
+                Button(tokens.chromeLabel("+ note")) { model.addPeerSlot() }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet, font: tokens.mono))
-                    .help("Open another post beside these (compare holds up to four)")
+                    .help("Open another note beside these (compare holds up to four)")
             }
         }
         .controlSize(.small)
@@ -904,7 +904,7 @@ struct CompareBoardView: View {
     private func columnHeaders(_ display: CompareViewModel.Display) -> some View {
         HStack(alignment: .top, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(model.projection.anchor.title ?? "This post")
+                Text(model.projection.anchor.title ?? "This note")
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
                 if model.projection.anchor.sealed {
@@ -941,15 +941,15 @@ struct CompareBoardView: View {
                     get: { slot.postID },
                     set: { model.setPeer(slotID: slot.id, postID: $0) })
                 ) {
-                    Text("Choose a post…").tag(String?.none)
+                    Text("Choose a note…").tag(String?.none)
                     if !model.projection.versionPeers.isEmpty {
-                        Section("Versions of this post") {
+                        Section("Versions of this note") {
                             ForEach(model.projection.versionPeers, id: \.self) { id in
                                 Text(peerTitle(id)).tag(String?.some(id))
                             }
                         }
                     }
-                    Section("Recent posts") {
+                    Section("Recent notes") {
                         ForEach(model.peerCandidates, id: \.postID) { item in
                             Text(item.title?.isEmpty == false ? item.title! : "Untitled")
                                 .tag(String?.some(item.postID))
@@ -961,7 +961,7 @@ struct CompareBoardView: View {
                 Button("✕") { model.removePeerSlot(slot.id) }
                     .buttonStyle(.plain)
                     .foregroundStyle(tokens.muted)
-                    .help("Close this column (the post itself is untouched)")
+                    .help("Close this column (the note itself is untouched)")
             }
             if let peerID = slot.postID {
                 relationshipLine(peerID)
@@ -969,16 +969,16 @@ struct CompareBoardView: View {
                     if model.isVersionPeer(peerID) {
                         Button("Unmark") { model.unmarkVersions(peerID) }
                             .help("These two stop being versions of each other — the link deletes, "
-                                + "both posts stay exactly as they are (Sitting 9, R60)")
+                                + "both notes stay exactly as they are (Sitting 9, R60)")
                     } else {
                         Button("Mark as Versions") { model.markAsVersions(peerID) }
-                            .help("Says 'these two posts are versions of the same piece' — a "
+                            .help("Says 'these two notes are versions of the same piece' — a "
                                 + "connection, not a copy. Blocks align side-by-side where LINEAGE "
-                                + "connects them; two unrelated posts you hand-link only pair "
+                                + "connects them; two unrelated notes you hand-link only pair "
                                 + "loosely. Unmarkable any time.")
                     }
                     Button("Diff") { presentDiff(peerID) }
-                        .help("Line diff of the two posts' rendered text — savable to a file")
+                        .help("Line diff of the two notes' rendered text — savable to a file")
                     // 13f batch 3 (W16, her ruling: *"in compare … you
                     // should be able to click on the post you're comparing
                     // it with"*). Fire-and-DO: it OPENS the post in the
@@ -992,7 +992,7 @@ struct CompareBoardView: View {
                             name: .variorumOpenPost, object: nil,
                             userInfo: ["postID": peerID])
                     }
-                    .help("Open this post on its own — \u{2318}[ comes straight back to "
+                    .help("Open this note on its own — \u{2318}[ comes straight back to "
                         + "this comparison")
                 }
                 if model.face(for: peerID)?.sealed == true {
@@ -1006,11 +1006,11 @@ struct CompareBoardView: View {
                 // covers the version-linked-but-lineage-less peer, whose
                 // header says "versions" and would otherwise sit blank.
                 if filteredEmpty {
-                    Text(tokens.chromeLabel("related blocks only — nothing from this post"))
+                    Text(tokens.chromeLabel("related blocks only — nothing from this note"))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
-                        .help("Lineage connects none of this post's blocks to the first "
-                            + "post's, so the filter leaves this column empty. Turn "
+                        .help("Lineage connects none of this note's blocks to the first "
+                            + "note's, so the filter leaves this column empty. Turn "
                             + "\u{201C}related blocks only\u{201D} off to see it whole.")
                 }
             }
@@ -1024,7 +1024,7 @@ struct CompareBoardView: View {
             Text(tokens.chromeLabel("there is no relationship here"))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
-                .help("No lineage and no version link connects these posts — they render "
+                .help("No lineage and no version link connects these notes — they render "
                     + "plainly side by side, each in its own order, no rails, no blanks.")
         } else if model.isVersionPeer(peerID), !model.hasLineage(peerID) {
             Text(tokens.chromeLabel("versions · no shared lineage — loose alignment"))
@@ -1044,9 +1044,9 @@ struct CompareBoardView: View {
     private var emptyState: some View {
         VStack(spacing: 8) {
             Spacer()
-            Text("Pick a post to compare against — version peers appear first.")
+            Text("Pick a note to compare against — version peers appear first.")
                 .foregroundStyle(tokens.muted)
-            Text("Or mint an outline of this post — it opens right here, beside it.")
+            Text("Or mint an outline of this note — it opens right here, beside it.")
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
             Spacer()
@@ -1064,7 +1064,7 @@ struct CompareBoardView: View {
             Text(tokens.chromeLabel("there is no relationship here"))
                 .foregroundStyle(tokens.muted)
             Text("\u{201C}Related blocks only\u{201D} is on, and lineage connects nothing "
-                + "across these posts — so there is nothing to show. Turn it off to read "
+                + "across these notes — so there is nothing to show. Turn it off to read "
                 + "them side by side.")
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
@@ -1166,7 +1166,7 @@ struct CompareBoardView: View {
                   let payload = Self.parseDragPayload(raw) else { return false }
             guard payload.postID == zonePostID else {
                 model.speak(
-                    "Order drags stay within one post here — each column reorders its own post.")
+                    "Order drags stay within one note here — each column reorders its own note.")
                 return false
             }
             Task {
@@ -1188,8 +1188,8 @@ struct CompareBoardView: View {
         guard let peer = model.face(for: peerID) else { return }
         let anchor = model.projection.anchor
         diffPresentation = TakesDiffPresentation(
-            leftTitle: anchor.title ?? "this post",
-            rightTitle: peer.title ?? "other post",
+            leftTitle: anchor.title ?? "this note",
+            rightTitle: peer.title ?? "other note",
             left: Queries.joinRenderedTexts(
                 anchor.slots.compactMap(\.text).filter { !$0.isEmpty }),
             right: Queries.joinRenderedTexts(
@@ -1228,7 +1228,7 @@ private struct CompareCellView: View {
                     Text("⠿")
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
-                        .help("Drag to reorder this block within its own post")
+                        .help("Drag to reorder this block within its own note")
                         .draggable(CompareBoardView.dragPayload(
                             postID: postID, blockID: slot.blockID))
                     VStack(alignment: .leading, spacing: 2) {
@@ -1264,7 +1264,7 @@ private struct CompareCellView: View {
                       let payload = CompareBoardView.parseDragPayload(raw) else { return false }
                 guard payload.postID == postID else {
                     model.speak(
-                        "Order drags stay within one post here — each column reorders its own post.")
+                        "Order drags stay within one note here — each column reorders its own note.")
                     return false
                 }
                 Task {
@@ -1307,8 +1307,8 @@ private struct CompareCellView: View {
                     .controlSize(.mini)
                     .disabled(take.id == chosenVariantID)
                     .help(take.id == chosenVariantID
-                        ? "The post shows this take"
-                        : "Choose this take — the post shows it everywhere")
+                        ? "The note shows this take"
+                        : "Choose this take — the note shows it everywhere")
                     PaneSurfaceView(
                         text: model.liveText(take),
                         isLive: model.authority.isLive(key, sealed: sealed),

@@ -304,14 +304,14 @@ struct PromoteTagsSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Promote to Book").font(.headline)
-            Text("Creates a smart book on the shelf collecting posts by these tags. The tags stay on the posts.")
+            Text("Creates a smart book on the shelf collecting notes by these tags. The tags stay on the notes.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text(tagPaths.map { "#\($0)" }.joined(separator: "  "))
                 .font(.callout)
             TextField("Book name", text: $name)
             if tagPaths.count > 1 {
-                Picker("Posts must carry", selection: $joinAll) {
+                Picker("Notes must carry", selection: $joinAll) {
                     Text("any of these tags (OR)").tag(false)
                     Text("all of these tags (AND)").tag(true)
                 }

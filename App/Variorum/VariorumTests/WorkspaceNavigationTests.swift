@@ -289,7 +289,7 @@ struct WorkspaceNamingTests {
         #expect(WorkspaceNaming.label(for: .shelf, titles: titles) == "Shelf")
         #expect(WorkspaceNaming.label(for: .library, titles: titles) == "Library")
         #expect(WorkspaceNaming.label(for: .poolPosts, titles: titles) == "Pool")
-        #expect(WorkspaceNaming.label(for: .blocks, titles: titles) == "Blocks")
+        #expect(WorkspaceNaming.label(for: .blocks, titles: titles) == "Snippets")
         // The recovery surface reads its ONE name (13f W10a's RecoveryPath)
         // — copy that invented a second word would send her to a door that
         // does not exist.

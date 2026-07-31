@@ -180,7 +180,7 @@ final class ShelfViewModel {
             lastError = nil
             let posts = result.membershipIDs.count
             var report = "“\(result.reading.name)” is a hand-shaped book now — "
-                + "\(posts) post\(posts == 1 ? "" : "s") kept, in the order you had them."
+                + "\(posts) note\(posts == 1 ? "" : "s") kept, in the order you had them."
             if let fresh = result.collectingReading {
                 report += " “\(fresh.name)” keeps collecting the filter."
             }
@@ -220,7 +220,7 @@ final class ShelfViewModel {
         } catch let error as OperationError {
             if case .alreadyInReading = error { return }
             if case .smartFilterUnsatisfiable(_, let reason) = error {
-                lastError = "That book can't take this post: \(reason)"
+                lastError = "That book can't take this note: \(reason)"
             } else {
                 lastError = ReadingsViewModel.message(error)
             }

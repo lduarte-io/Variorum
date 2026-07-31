@@ -80,7 +80,7 @@ struct PagedReadView: View {
         VStack(spacing: 0) {
             if model.entries.isEmpty {
                 Spacer()
-                Text("This book has no posts yet.")
+                Text("This book has no notes yet.")
                     .foregroundStyle(tokens.muted)
                 Spacer()
             } else {

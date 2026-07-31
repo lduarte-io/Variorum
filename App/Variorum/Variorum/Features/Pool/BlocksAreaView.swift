@@ -81,7 +81,7 @@ struct BlocksAreaView: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(tokens.path(["Blocks"]))
+            Text(tokens.path(["Snippets"]))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
             Text(tokens.chromeLabel("· \(model.items.count) blocks · standalone scraps"))
@@ -146,7 +146,7 @@ struct BlocksAreaView: View {
             }
         }
         .help("Drag into an open editor to copy it in (⌥ carries the whole fan); "
-            + "click to open the Blocks editor; right-click to tag "
+            + "click to open the Snippets editor; right-click to tag "
             + "(tags are labels — the pool it lives in is its container)")
     }
 

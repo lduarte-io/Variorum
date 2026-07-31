@@ -84,7 +84,7 @@ final class CommentsPanelModel {
         } catch let error as OperationError {
             switch error {
             case .lockedPost:
-                statusMessage = "This post is sealed — unseal it to change comments."
+                statusMessage = "This note is sealed — unseal it to change comments."
             case .invalidCommentText:
                 statusMessage = "A comment needs some text."
             default:

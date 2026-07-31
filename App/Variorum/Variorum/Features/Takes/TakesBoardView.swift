@@ -108,7 +108,7 @@ struct TakesBoardView: View {
             // auto-dismiss; the board renders state banners only.
             if model.projection.sealed {
                 Text(tokens.chromeLabel(
-                    "sealed post — takes are viewable; choosing and new takes are frozen"))
+                    "sealed note — takes are viewable; choosing and new takes are frozen"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .padding(4)
@@ -361,19 +361,19 @@ struct TakesBoardView: View {
 
             Spacer()
 
-            VoicedMenu(tokens: tokens, label: "post actions", role: .primary) {
+            VoicedMenu(tokens: tokens, label: "note actions", role: .primary) {
                 Button("Write new takes on every block") {
                     Task { await model.writeNewTakesEverywhere() }
                 }
-                .help("A fresh take on every block, branched from what the post shows — "
+                .help("A fresh take on every block, branched from what the note shows — "
                     + "a full rewrite pass. See them in each block's fan, or side by side in Lenses.")
                 Button("Save choices as lens…") { lensNamePrompt = true }
-                    .help("Keep the post's current takes as a named way of looking (a lens) — "
+                    .help("Keep the note's current takes as a named way of looking (a lens) — "
                         + "you can bring it back or compare against it in Lenses")
                 Button("Duplicate as Version") { Task { await model.duplicateAsVersion() } }
-                    .help("A full copy of this post — takes and all — as a new post, linked as a version")
+                    .help("A full copy of this note — takes and all — as a new note, linked as a version")
             }
-            .help("The rare whole-post acts: a rewrite pass, saving choices as a lens, "
+            .help("The rare whole-note acts: a rewrite pass, saving choices as a lens, "
                 + "duplicating as a version")
         }
         // Batch 14 (her alignment ask): the control line shares the
@@ -435,7 +435,7 @@ struct TakesBoardView: View {
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
                         .fixedSize()
-                        .help("A new block at the end of the post — type right into it")
+                        .help("A new block at the end of the note — type right into it")
                     }
                 }
                 .frame(maxWidth: articleMeasure, alignment: .leading)
@@ -1142,8 +1142,8 @@ struct TakeChooseHeader: View {
         .buttonStyle(.plain)
         .disabled(isChosen)
         .help(isChosen
-              ? "The post shows this take (everywhere)"
-              : "Choose this take — the post shows it (everywhere); ⌘⏎ from the keyboard")
+              ? "The note shows this take (everywhere)"
+              : "Choose this take — the note shows it (everywhere); ⌘⏎ from the keyboard")
     }
 }
 

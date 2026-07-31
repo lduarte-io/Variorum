@@ -312,7 +312,7 @@ struct RecoveryView: View {
                             Task { await model.restoreReading(reading.id) }
                         }
                         .help("The book comes back whole — chapters and membership included; "
-                            + "posts deleted separately stay in Recently Deleted below")
+                            + "notes deleted separately stay in Recently Deleted below")
                     }
                 }
                 if model.deletedReadingsTruncated {

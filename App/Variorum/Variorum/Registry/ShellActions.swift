@@ -75,7 +75,7 @@ struct ShellActions {
                         try ops.lockPost(postID)
                     }
                 }
-                status.speak(sealed ? "Unsealed." : "Sealed — the post is read-only until unsealed.")
+                status.speak(sealed ? "Unsealed." : "Sealed — the note is read-only until unsealed.")
             } catch {
                 status.speak(OpsRefusalCopy.message(for: error))
             }
@@ -150,7 +150,7 @@ struct ShellActions {
                 }
                 shell.pendingSelection = .post(post.id)
             } catch {
-                status.speak("New post failed: \(error)")
+                status.speak("New note failed: \(error)")
             }
         }
     }

@@ -54,14 +54,14 @@ struct MembershipChip: View {
                 .foregroundStyle(books.count > 1 ? tokens.accent : tokens.muted)
         }
         .buttonStyle(.borderless)
-        .help("Which books hold this post — add it to one, or diverge a copy")
+        .help("Which books hold this note — add it to one, or diverge a copy")
         .popover(isPresented: $popoverShown, arrowEdge: .bottom) {
             VStack(alignment: .leading, spacing: 8) {
                 if books.isEmpty {
-                    Text("This post is in no book — it lives in the Pool.")
+                    Text("This note is in no book — it lives in the Pool.")
                         .font(.callout)
                 } else {
-                    Text("This post appears in \(books.count) book\(books.count == 1 ? "" : "s"):")
+                    Text("This note appears in \(books.count) book\(books.count == 1 ? "" : "s"):")
                         .font(.callout.weight(.semibold))
                     ForEach(books, id: \.id) { book in
                         HStack(spacing: 6) {
@@ -79,7 +79,7 @@ struct MembershipChip: View {
                                 MembershipChip.ascend(bookID: book.id, postID: postID)
                             }
                             .buttonStyle(.link)
-                            .help("Open “\(book.name)” at this post")
+                            .help("Open “\(book.name)” at this note")
                             Spacer()
                             // 13f W23 — DIVERGE FOR THIS BOOK, on the row
                             // that names the book. Rendered on every book
@@ -96,7 +96,7 @@ struct MembershipChip: View {
                                 .buttonStyle(.borderless)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                                .help("Take this post out of “\(book.name)” (the post itself is untouched)")
+                                .help("Take this note out of “\(book.name)” (the note itself is untouched)")
                         }
                     }
                 }
@@ -118,8 +118,8 @@ struct MembershipChip: View {
                     .fixedSize()
                 }
                 Divider()
-                Text("Editing here edits the post everywhere it appears. "
-                    + "To make a separate post that can diverge:")
+                Text("Editing here edits the note everywhere it appears. "
+                    + "To make a separate note that can diverge:")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -127,7 +127,7 @@ struct MembershipChip: View {
                 Button("Duplicate as Version") {
                     duplicate()
                 }
-                .help("A full copy — takes and all — as a new post, linked to this one as a version")
+                .help("A full copy — takes and all — as a new note, linked to this one as a version")
                 if let status {
                     Text(status)
                         .font(.caption)
@@ -219,7 +219,7 @@ struct MembershipChip: View {
                     : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
             } catch let error as OperationError {
                 if case .smartFilterUnsatisfiable(_, let reason) = error {
-                    status = "“\(book.name)” can't take this post: \(reason)"
+                    status = "“\(book.name)” can't take this note: \(reason)"
                 } else {
                     status = ChipRefusals.message(for: error, bookName: book.name)
                 }
@@ -250,7 +250,7 @@ struct MembershipChip: View {
                 try await session.runner.run { [postID] ops in
                     try ops.removePostFromReading(postID, from: book.id)
                 }
-                status = "Removed from “\(book.name)” — the post itself is untouched."
+                status = "Removed from “\(book.name)” — the note itself is untouched."
             } catch {
                 status = ChipRefusals.message(for: error, bookName: book.name)
             }
@@ -282,7 +282,7 @@ struct MembershipChip: View {
                     try ops.duplicateAsVersion(postID)
                 }
                 duplicatedPostID = result.post.id
-                status = "Duplicated — the copy is its own post now (in the Pool until you shelve it)."
+                status = "Duplicated — the copy is its own note now (in the Pool until you shelve it)."
             } catch {
                 status = ChipRefusals.message(for: error, bookName: nil)
             }
@@ -308,7 +308,7 @@ nonisolated enum DivergeCopy {
     static func buttonLabel(book: String) -> String { "Diverge for \u{201c}\(book)\u{201d}" }
 
     static func help(book: String) -> String {
-        "Make a copy that can diverge and put it in \u{201c}\(book)\u{201d} in this post's "
+        "Make a copy that can diverge and put it in \u{201c}\(book)\u{201d} in this note's "
             + "place — the original stays in its other books and in the library"
     }
 
@@ -340,11 +340,11 @@ nonisolated enum ChipRefusals {
         case .lockedReading:
             return "\(book) is finished — reopen it (its settings) to change what's in it."
         case .readingAtCapacity:
-            return "\(book) is at its post cap — extend the cap in its settings."
+            return "\(book) is at its note cap — extend the cap in its settings."
         case .alreadyInReading:
-            return "This post is already in \(book)."
+            return "This note is already in \(book)."
         case .lockedPost:
-            return "This post is sealed — unseal it first."
+            return "This note is sealed — unseal it first."
         default:
             return "Refused: \(error)"
         }

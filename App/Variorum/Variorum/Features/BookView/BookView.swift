@@ -503,7 +503,7 @@ struct BookView: View {
                               structure.reading?.locked != true {
                         // Sitting 9 (R62/R75): "it needs to be easy to make
                         // a post inside of a book" — the non-journal door.
-                        Button(tokens.chromeLabel("+ new post")) {
+                        Button(tokens.chromeLabel("+ new note")) {
                             Task {
                                 if let id = await structure.newPost() {
                                     model.focus(id)
@@ -513,7 +513,7 @@ struct BookView: View {
                         .buttonStyle(.borderless)
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
-                        .help("A new post born inside this book — no drag needed")
+                        .help("A new note born inside this book — no drag needed")
                     }
                 }
                 if structure.reading?.kind == .smart {
@@ -543,7 +543,7 @@ struct BookView: View {
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
                         .help("Chapters need a hand-shaped book — this offers to "
-                            + "convert, keeping every post it has collected.")
+                            + "convert, keeping every note it has collected.")
                     }
                     // Batch 6 legibility: a smart book's derived membership
                     // is DESIGNED (#25a) — but absent-and-silent read as
@@ -551,7 +551,7 @@ struct BookView: View {
                     // non-scrolling chrome — the window-min class.)
                     ChromeNotice(
                         tokens: tokens,
-                        text: "smart book — it collects posts by its tags. Tag a post "
+                        text: "smart book — it collects notes by its tags. Tag a note "
                             + "anywhere and it appears here.",
                         lines: 6)
                 }
@@ -738,7 +738,7 @@ struct BookView: View {
                     }
                     .padding(.bottom, 18)
                     if model.entries.isEmpty {
-                        Text("This book has no posts yet.")
+                        Text("This book has no notes yet.")
                             .foregroundStyle(tokens.muted)
                     }
                     if structure.chaptersActive {
@@ -773,7 +773,7 @@ struct BookView: View {
                         }
                     }
                     if model.truncated {
-                        Text("Showing the first \(BookViewModel.entryWindow) posts — "
+                        Text("Showing the first \(BookViewModel.entryWindow) notes — "
                             + "the rest of this book isn't loaded yet "
                             + "(windowing arrives with Phase 12).")
                             .font(tokens.small)
@@ -798,7 +798,7 @@ struct BookView: View {
                             .foregroundStyle(tokens.accent)
                             .padding(.top, 12)
                         } else if structure.reading?.kind == .curated {
-                            Button(tokens.chromeLabel("+ new post in this book")) {
+                            Button(tokens.chromeLabel("+ new note in this book")) {
                                 Task {
                                     if let id = await structure.newPost() {
                                         model.focus(id)
@@ -810,7 +810,7 @@ struct BookView: View {
                             .font(tokens.small)
                             .foregroundStyle(tokens.accent)
                             .padding(.top, 12)
-                            .help("A new post born inside this book — no drag needed")
+                            .help("A new note born inside this book — no drag needed")
                         }
                     }
                 }
@@ -974,7 +974,7 @@ struct BookView: View {
     private var bookMetaLine: String {
         var parts: [String] = [structure.reading?.kind == .smart ? "smart book" : "book"]
         if structure.sections.count > 0 { parts.append("\(structure.sections.count) chapters") }
-        parts.append("\(model.entries.count) posts")
+        parts.append("\(model.entries.count) notes")
         return parts.joined(separator: " · ")
     }
 
@@ -1076,7 +1076,7 @@ private struct OutlinePostRow: View {
             // so collapsing the post you're typing in actually collapses it.
             Button("▾") { model.collapse(entry.postID) }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help("Collapse this post back to its card")
+                .help("Collapse this note back to its card")
             Text(outlineEntryTitle(entry))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
@@ -1093,7 +1093,7 @@ private struct OutlinePostRow: View {
                     userInfo: ["postID": entry.postID])
             }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help("Open this post in the full editor (Write · Takes · Lenses · …)")
+            .help("Open this note in the full editor (Write · Takes · Lenses · …)")
         }
         .padding(.top, 10)
         .id("page-\(entry.postID)")  // the navigator's landing anchor
@@ -1153,7 +1153,7 @@ private struct OutlinePostRow: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .help("Unfold this post in place — write in it right here")
+                    .help("Unfold this note in place — write in it right here")
                     Text(outlineEntryTitle(entry))
                         .font(tokens.body.weight(.semibold))
                         .foregroundStyle(tokens.ink)
@@ -1169,7 +1169,7 @@ private struct OutlinePostRow: View {
                             userInfo: ["postID": entry.postID])
                     }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                    .help("Open this post in the full editor (Write · Takes · Lenses · …)")
+                    .help("Open this note in the full editor (Write · Takes · Lenses · …)")
                 }
                 PostCardExcerpt(session: session, postID: entry.postID, tokens: tokens)
             }
@@ -1182,7 +1182,7 @@ private struct OutlinePostRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Click to open this post in the full editor; ▸ unfolds it here")
+        .help("Click to open this note in the full editor; ▸ unfolds it here")
         .id("page-\(entry.postID)")  // the navigator's landing anchor
         .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
     }
@@ -1297,7 +1297,7 @@ struct BookSettingsSheet: View {
             Form {
                 TextField("Name", text: $nameField)
                 TextField("Word target (blank = none)", text: $wordTargetField)
-                TextField("Post cap (blank = none)", text: $maxPostsField)
+                TextField("Note cap (blank = none)", text: $maxPostsField)
                 if let reading = structure.reading {
                     Toggle("Finished", isOn: Binding(
                         get: { reading.locked },

@@ -172,7 +172,7 @@ struct LibraryCatalogView: View {
             TagAssignmentSheet(session: session, postID: target.id, postTitle: target.title)
         }
         .alert(
-            "Rename Post",
+            "Rename Note",
             isPresented: Binding(
                 get: { renameTarget != nil },
                 set: { if !$0 { renameTarget = nil } }),
@@ -225,7 +225,7 @@ struct LibraryCatalogView: View {
                 .frame(width: 28)
             }
             HStack(spacing: 10) {
-                TextField(tokens.chromeLabel("Search books, posts, blocks…"),
+                TextField(tokens.chromeLabel("Search books, notes, blocks…"),
                           text: Binding(get: { model.query }, set: { value in
                               model.query = value
                               Task { await model.search() }
@@ -247,7 +247,7 @@ struct LibraryCatalogView: View {
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 160)
                 if selectedPosts.count > 1 {
-                    Menu(tokens.chromeLabel("Tag \(selectedPosts.count) posts")) {
+                    Menu(tokens.chromeLabel("Tag \(selectedPosts.count) notes")) {
                         ForEach(tags.tags, id: \.id) { tag in
                             Button(tag.path) {
                                 let ids = Array(selectedPosts)
@@ -284,7 +284,7 @@ struct LibraryCatalogView: View {
                 }
             }
             if let posts = grouped[.post], !posts.isEmpty {
-                Section(tokens.chromeLabel("Posts")) {
+                Section(tokens.chromeLabel("Notes")) {
                     ForEach(posts, id: \.id) { hit in
                         postRow(hit)
                             .tag(hit.id)

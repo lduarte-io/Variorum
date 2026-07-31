@@ -525,7 +525,7 @@ final class EditorViewModel {
             }
         } catch is CancellationError {
         } catch {
-            statusMessage = "Post observation failed: \(error)"
+            statusMessage = "Note observation failed: \(error)"
         }
     }
 
@@ -690,7 +690,7 @@ final class EditorViewModel {
     func shouldChangeText(in range: NSRange, replacement: String?) -> Bool {
         guard !suppressEditProcessing else { return true }
         if header?.locked == true {
-            refuseFeedback("This post is sealed — unlock it to edit.")
+            refuseFeedback("This note is sealed — unlock it to edit.")
             return false
         }
         guard let replacement else { return true } // attribute-only
@@ -1604,7 +1604,7 @@ final class EditorViewModel {
                     try await session.runner.run { [postID] ops in
                         try ops.lockPost(postID)
                     }
-                    showStatus("Sealed — the post is read-only until unsealed.")
+                    showStatus("Sealed — the note is read-only until unsealed.")
                 }
             } catch {
                 showOperationError(error)
@@ -1680,7 +1680,7 @@ final class EditorViewModel {
     /// consumed (a sealed post refuses visibly).
     func poolDrop(blockID: String, atOffset offset: Int, includeFan: Bool) -> Bool {
         guard header?.locked != true else {
-            refuseFeedback("This post is sealed — unlock it to add to it.")
+            refuseFeedback("This note is sealed — unlock it to add to it.")
             return true  // consumed: never fall through to a text insert
         }
         let insert = insertPosition(forOffset: offset)
@@ -2466,12 +2466,12 @@ final class EditorViewModel {
             return "Operation failed: \(error)"
         }
         switch opError {
-        case .lockedPost: return "This post is sealed — unlock it first."
+        case .lockedPost: return "This note is sealed — unlock it first."
         case .lockedVariant: return "This take is locked — branch or unlock it."
         case .lastActiveVariant:
             return "A block keeps at least one take — delete the block instead."
         case .variantIsChosen:
-            return "This take is shown in the post — choose another take first."
+            return "This take is shown in the note — choose another take first."
         case .archivedVariant: return "This take is archived — unarchive it first."
         case .bufferChangedSinceGesture:
             return "The text changed while that gesture was landing — nothing was altered; try it again on the current text."

@@ -243,7 +243,7 @@ struct BookOrderConversionTests {
             #expect(model.lastError == nil)
             let report = try #require(model.lastReport)
             #expect(report.contains("hand-shaped book now"))
-            #expect(report.contains("2 posts kept"))
+            #expect(report.contains("2 notes kept"))
             #expect(report.contains("still #work"))
         }
     }

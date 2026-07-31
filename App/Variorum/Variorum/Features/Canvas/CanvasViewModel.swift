@@ -462,7 +462,7 @@ final class CanvasViewModel {
             }
             viewPicks.removeValue(forKey: blockID)
             saveViewMemory()
-            statusMessage = "✓ chosen — the post shows this take everywhere now."
+            statusMessage = "✓ chosen — the note shows this take everywhere now."
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }
@@ -584,7 +584,7 @@ final class CanvasViewModel {
     /// of after the clicking).
     func enterOrderMode() {
         guard !sealed else {
-            statusMessage = "This post is sealed — order stays frozen until it's unsealed."
+            statusMessage = "This note is sealed — order stays frozen until it's unsealed."
             return
         }
         blur()  // the ring rests while ordering; clicks mean sequence now
@@ -649,7 +649,7 @@ final class CanvasViewModel {
                 }
             }
             let count = sequence.count
-            statusMessage = "Ordered — \(count) card\(count == 1 ? "" : "s") lead the post now (⌥⌘Z undoes)."
+            statusMessage = "Ordered — \(count) card\(count == 1 ? "" : "s") lead the note now (⌥⌘Z undoes)."
             orderMode = false
             orderSequence = []
         } catch {

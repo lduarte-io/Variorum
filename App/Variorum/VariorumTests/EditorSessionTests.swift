@@ -700,7 +700,7 @@ struct FanFlowTests {
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(1))
             }
-            #expect(h.model.statusMessage?.contains("shown in the post") == true)
+            #expect(h.model.statusMessage?.contains("shown in the note") == true)
             // The store refused: the variant is still there.
             let surviving = try h.storeSlots()
             try #require(!surviving.isEmpty)
