@@ -76,6 +76,12 @@ final class WorkspaceModel {
         openNotes.close(id)
     }
 
+    /// The strip's manual reorder (her round-7 ruling) — session-only, per
+    /// window, never a setting and never persisted.
+    func moveOpenNotes(fromOffsets source: IndexSet, toOffset destination: Int) {
+        openNotes.move(fromOffsets: source, toOffset: destination)
+    }
+
     // MARK: - Titles (display only)
 
     /// The destinations whose names are on screen right now: the strip's

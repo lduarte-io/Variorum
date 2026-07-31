@@ -5,10 +5,20 @@
 //  Phase 13f, batch 3 — the NAVIGATION core's pins (her W3/A27 + W16
 //  rulings). Everything that DECIDES anything here is pure arithmetic over
 //  ids, and it is pinned as arithmetic: the per-pane history's trail, the
-//  Open strip's recency and bounds, the ordinal keys' reach, and the names
-//  the chip and the strip wear. The routing half pins at the registry /
-//  shell-door layer (the 13d A14 precedent), including the COLLISION SWEEP
-//  MADE PERMANENT.
+//  Open strip's order, membership and bounds, the ordinal keys' reach, and
+//  the names the chip and the strip wear. The routing half pins at the
+//  registry / shell-door layer (the 13d A14 precedent), including the
+//  COLLISION SWEEP MADE PERMANENT.
+//
+//  **Batch 4, item 0 — the RULED ORDERING FLIP** (her sitting round 7.1:
+//  *"insertion order, maybe they're draggable / reorderable manually like
+//  browser tabs as well though? session only, not a setting"*). The strip's
+//  ORDER pins are deliberately inverted here — batch 3 shipped recency for
+//  both order and membership, and flagged the consequence to her rather
+//  than deciding it; she ruled. Each flipped pin says so on its face, and
+//  the new pins cover what the flip BUYS (stable ordinals), what it must
+//  NOT cost (recency still decides who leaves at the bound), and the
+//  reorder arithmetic her second half asks for.
 //
 //  What is deliberately NOT claimed here: how the strip LOOKS in the
 //  sidebar and how the chip's fold FEELS — those are on the batch record's
@@ -92,17 +102,44 @@ struct NavigationHistoryTests {
 
 // MARK: - The pure Open list (W3/A27)
 
-@Suite("Open notes (13f batch 3, W3/A27)")
+@Suite("Open notes (13f batch 3, W3/A27; ordering flipped 13f batch 4, round 7.1)")
 struct OpenNotesTests {
-    @Test func openingMovesANoteToTheFrontWithoutDuplicating() {
+    /// **A RULED FLIP** (her sitting round 7.1: *"insertion order"*).
+    /// Batch 3's pin here read `["c","b","a"]` and "re-opening MOVES";
+    /// both are deliberately inverted — the strip is a row of browser tabs
+    /// now, not a most-recent list.
+    @Test func openingAppendsInInsertionOrderAndNeverMovesAnOpenNote() {
         var open = OpenNotes()
         open.opened("a")
         open.opened("b")
         open.opened("c")
-        #expect(open.ids == ["c", "b", "a"], "most recent first")
+        #expect(open.ids == ["a", "b", "c"], "insertion order — a new note joins the END")
 
         open.opened("a")
-        #expect(open.ids == ["a", "c", "b"], "re-opening MOVES, never duplicates")
+        #expect(open.ids == ["a", "b", "c"],
+                "re-opening leaves the row exactly where it sits (the ruled flip)")
+        // Recency still moved, and it answers only one question — eviction.
+        #expect(open.recency.first == "a")
+    }
+
+    /// The point of the flip, stated as the property it buys: a note's
+    /// ⌘⇧n is a STABLE ADDRESS across navigation. Batch 3's judgment call
+    /// 2 flagged exactly this ("⌘⇧1 is always the note you are already in,
+    /// and the ordinals shuffle as she moves"), and she ruled it out.
+    @Test func theOrdinalsDoNotShuffleAsSheMovesBetweenNotes() {
+        var open = OpenNotes()
+        open.opened("a")
+        open.opened("b")
+        open.opened("c")
+        let addresses = (1...3).map { open.id(atOrdinal: $0) }
+        #expect(addresses == ["a", "b", "c"])
+
+        // Wander: back to a, over to c, back to a again.
+        open.opened("a")
+        open.opened("c")
+        open.opened("a")
+        #expect((1...3).map { open.id(atOrdinal: $0) } == addresses,
+                "every key still addresses the note it addressed before")
     }
 
     @Test func closingARowRemovesOnlyThatRowAndNothingElse() {
@@ -111,19 +148,22 @@ struct OpenNotesTests {
         open.opened("b")
         open.close("a")
         #expect(open.ids == ["b"])
+        #expect(open.recency == ["b"], "the two lists hold the same set, always")
         open.close("nobody")
         #expect(open.ids == ["b"], "closing something absent is inert")
-        // …and it is not a delete: the same note opens straight back.
+        // …and it is not a delete: the same note opens straight back — at
+        // the END now (the ruled flip; batch 3's pin expected ["a","b"]).
         open.opened("a")
-        #expect(open.ids == ["a", "b"])
+        #expect(open.ids == ["b", "a"])
     }
 
     @Test func theOrdinalsCoverExactlyTheShownRows() {
         var open = OpenNotes()
         for i in 1...OpenNotes.visibleCap { open.opened("p\(i)") }
-        // Most recent first, so the LAST opened is ⌘⇧1.
-        #expect(open.id(atOrdinal: 1) == "p\(OpenNotes.visibleCap)")
-        #expect(open.id(atOrdinal: OpenNotes.visibleCap) == "p1")
+        // Insertion order, so the FIRST opened is ⌘⇧1 (batch 3's pin read
+        // the other way round — the ruled flip).
+        #expect(open.id(atOrdinal: 1) == "p1")
+        #expect(open.id(atOrdinal: OpenNotes.visibleCap) == "p\(OpenNotes.visibleCap)")
         #expect(open.id(atOrdinal: 0) == nil)
         #expect(open.id(atOrdinal: OpenNotes.visibleCap + 1) == nil,
                 "no key reaches past the strip")
@@ -138,6 +178,7 @@ struct OpenNotesTests {
         var open = OpenNotes()
         for i in 1...(OpenNotes.trackedCap + 5) { open.opened("p\(i)") }
         #expect(open.ids.count == OpenNotes.trackedCap, "the session memory's bound")
+        #expect(open.recency.count == OpenNotes.trackedCap, "and it stays in step")
         #expect(open.shown.count == OpenNotes.visibleCap)
         #expect(open.hiddenCount == OpenNotes.trackedCap - OpenNotes.visibleCap,
                 "the truncation row's number — never a silent cut")
@@ -150,13 +191,89 @@ struct OpenNotesTests {
         #expect(open.id(atOrdinal: OpenNotes.visibleCap + 1) == nil,
                 "⌘⇧n stops at the strip, never at the session memory")
 
-        // Closing a shown row PROMOTES the next most recent into view,
+        // Closing a shown row PROMOTES the next tracked note into view,
         // which is the whole reason the tracked list is deeper than the
         // shown one.
         let promoted = open.ids[OpenNotes.visibleCap]
         open.close(open.shown[0])
         #expect(open.shown.contains(promoted))
         #expect(open.hiddenCount == OpenNotes.trackedCap - OpenNotes.visibleCap - 1)
+    }
+
+    /// The half of her ruling that is NOT insertion order: **membership is
+    /// recency's**. A note opened first but returned to often must survive
+    /// the bound, and one opened later and never revisited must be the one
+    /// that goes.
+    @Test func theBoundIsPaidByTheLeastRecentlyOpenedNoteNotTheOldestRow() {
+        var open = OpenNotes()
+        for i in 1...OpenNotes.trackedCap { open.opened("p\(i)") }
+        // Keep returning to the FIRST row; never touch the second again.
+        open.opened("p1")
+        // One more note than the bound allows.
+        open.opened("fresh")
+
+        #expect(open.ids.contains("p1"),
+                "the oldest ROW survives, because she keeps opening it")
+        #expect(!open.ids.contains("p2"),
+                "the least-recently-opened note is the one that leaves")
+        #expect(open.ids.count == OpenNotes.trackedCap)
+        #expect(open.recency.count == OpenNotes.trackedCap, "both lists shed it")
+        // And it left the ORDER without disturbing anything around it.
+        #expect(open.ids.first == "p1")
+        #expect(open.ids.last == "fresh", "the new note is still at the END")
+    }
+
+    /// Her ruling's second half — the manual reorder, in the `onMove`
+    /// convention (`destination` is a PRE-move index). The drag route
+    /// itself is AppKit's inside the List and is visual-verification-only;
+    /// this is the arithmetic under it.
+    @Test func theManualReorderMovesRowsAndTheKeysFollowThem() {
+        var open = OpenNotes()
+        for id in ["a", "b", "c", "d"] { open.opened(id) }
+
+        // Drag "d" to the front.
+        open.move(fromOffsets: IndexSet(integer: 3), toOffset: 0)
+        #expect(open.ids == ["d", "a", "b", "c"])
+        #expect(open.id(atOrdinal: 1) == "d", "⌘⇧1 follows the row she dragged")
+
+        // Downward: a pre-move destination PAST the moved row lands it
+        // after the rows it passed (the convention's shift).
+        open.move(fromOffsets: IndexSet(integer: 0), toOffset: 3)
+        #expect(open.ids == ["a", "b", "d", "c"])
+
+        // A multi-row drag keeps the moved rows' relative order.
+        open.move(fromOffsets: IndexSet([0, 2]), toOffset: 4)
+        #expect(open.ids == ["b", "c", "a", "d"])
+
+        // Reordering is NOT using a note: recency is untouched, so the
+        // bound still falls where it fell before.
+        #expect(open.recency == ["d", "c", "b", "a"])
+
+        // Out-of-range asks are inert rather than crashing or clamping
+        // into a surprise.
+        let before = open.ids
+        open.move(fromOffsets: IndexSet(integer: 99), toOffset: 0)
+        open.move(fromOffsets: IndexSet(integer: 0), toOffset: 99)
+        #expect(open.ids == before)
+    }
+
+    /// The reorder's reach stops at the STRIP: offsets are the shown rows',
+    /// and a hidden note cannot be dragged into or out of view.
+    @Test func theReorderStaysInsideTheShownRows() {
+        var open = OpenNotes()
+        for i in 1...OpenNotes.trackedCap { open.opened("p\(i)") }
+        let before = open.ids
+        // The first hidden row's index — beyond the strip.
+        open.move(fromOffsets: IndexSet(integer: OpenNotes.visibleCap), toOffset: 0)
+        #expect(open.ids == before, "an offset past the strip is inert")
+
+        open.move(fromOffsets: IndexSet(integer: 0), toOffset: OpenNotes.visibleCap)
+        #expect(open.ids.first == "p2", "a drag to the strip's own end still works")
+        // The arm that DISCRIMINATES where it lands — added because the
+        // first-row check alone passed revert I0-B (a drag that overshot by
+        // one still leaves "p2" in front). The dragged row must end up on
+        // the strip, as its LAST row, not past it into the hidden tail.
+        #expect(open.shown.last == "p1", "…and it lands ON the strip, not past its edge")
     }
 }
 
@@ -213,7 +330,8 @@ struct WorkspaceModelTests {
         #expect(workspace.history().origin == .reading("book"))
         #expect(workspace.openNotes.ids == ["p1"], "only NOTES join the Open strip")
         workspace.visit(.post("p2"))
-        #expect(workspace.openNotes.ids == ["p2", "p1"])
+        // Insertion order since her round-7 ruling (batch 3 read ["p2","p1"]).
+        #expect(workspace.openNotes.ids == ["p1", "p2"])
         // A book, a folder and the shelf are destinations, never rows.
         #expect(!workspace.openNotes.ids.contains("book"))
     }
@@ -232,15 +350,32 @@ struct WorkspaceModelTests {
         #expect(workspace.goForward() == .post("p1"))
     }
 
-    @Test func returningToANoteMovesItToTheFrontOfTheStrip() {
+    /// **A RULED FLIP** (round 7.1). Batch 3's pin here was
+    /// `returningToANoteMovesItToTheFrontOfTheStrip`; her ruling is that it
+    /// must NOT move. Arriving is still opening — the note is still touched
+    /// for the bound's sake — but the strip holds still under her.
+    @Test func returningToANoteLeavesTheStripsOrderExactlyWhereItWas() {
         let workspace = WorkspaceModel()
         workspace.visit(.post("p1"))
         workspace.visit(.post("p2"))
-        #expect(workspace.openNotes.ids == ["p2", "p1"])
+        #expect(workspace.openNotes.ids == ["p1", "p2"])
         _ = workspace.goBack()
         workspace.visit(.post("p1"))  // the shell's report of the walk back
         #expect(workspace.openNotes.ids == ["p1", "p2"],
-                "arriving IS opening, however you got there")
+                "the rows do not shuffle — her ruled flip")
+        #expect(workspace.openNotes.recency.first == "p1",
+                "arriving IS opening, however you got there — for the BOUND")
+    }
+
+    /// The reorder reaches the strip through the model (the sidebar's
+    /// `onMove` calls exactly this).
+    @Test func theModelPassesAManualReorderThrough() {
+        let workspace = WorkspaceModel()
+        workspace.visit(.post("p1"))
+        workspace.visit(.post("p2"))
+        workspace.visit(.post("p3"))
+        workspace.moveOpenNotes(fromOffsets: IndexSet(integer: 2), toOffset: 0)
+        #expect(workspace.openNotes.ids == ["p3", "p1", "p2"])
     }
 
     /// THE FREE-TILING RIDER (her ruling, round 2: *"make sure the
@@ -413,8 +548,14 @@ struct NavigationDoorsTests {
         router.workspace.visit(.post("p1"))
 
         router.workspace.visit(.post("p2"))
+        // p1 was opened first, so it keeps ⌘⇧1 and p2 takes ⌘⇧2 (batch 3's
+        // pin read the other way — the ruled insertion-order flip, 7.1).
         router.openNote(ordinal: 2)
-        #expect(router.pendingSelection == .post("p1"), "⌘⇧2 = the second SHOWN row")
+        #expect(router.pendingSelection == .post("p2"), "⌘⇧2 = the second SHOWN row")
+        router.pendingSelection = nil
+        router.openNote(ordinal: 1)
+        #expect(router.pendingSelection == .post("p1"),
+                "and ⌘⇧1 still addresses the note it addressed before p2 opened")
         router.pendingSelection = nil
         router.openNote(ordinal: 7)
         #expect(router.pendingSelection == nil, "a key past the strip does nothing")

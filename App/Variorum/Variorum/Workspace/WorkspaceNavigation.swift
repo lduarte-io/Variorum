@@ -102,36 +102,95 @@ nonisolated struct NavigationHistory: Equatable {
 
 // MARK: - The window's open notes (W3/A27)
 
-/// The Open strip's list: the notes this window has open, most recent
-/// first. A note enters by being OPENED — from any door (shelf, library,
-/// pool, ⌘K, a book, Compare's click-through) — and leaves only when its
-/// row is closed or it falls off the session bound.
+/// The Open strip's list: the notes this window has open, in the order
+/// they were opened. A note enters by being OPENED — from any door (shelf,
+/// library, pool, ⌘K, a book, Compare's click-through) — and leaves only
+/// when its row is closed or it falls off the session bound.
+///
+/// **ORDER and MEMBERSHIP are two different questions** (her ruling, sitting
+/// round 7.1: *"insertion order, maybe they're draggable / reorderable
+/// manually like browser tabs as well though? session only, not a
+/// setting"*). Batch 3 shipped recency for both, and the consequence was
+/// flagged to her rather than decided: the ordinals shuffled as she moved,
+/// so ⌘⇧1 was always the note she was already in. Since her ruling:
+///
+/// - **Order is INSERTION order** — a new note joins at the END, like a
+///   browser tab, and re-opening one already in the strip leaves it exactly
+///   where it sits. That is what makes ⌘⇧n a stable address instead of a
+///   moving one, and it is the whole point of the flip.
+/// - **Membership is still RECENCY's** — when the tracked list is full the
+///   LEAST-RECENTLY-OPENED note leaves, never the oldest-inserted one. A
+///   note she keeps returning to must not be evicted merely for having been
+///   opened first.
+/// - **Manual reorder is hers**, session-only and never a setting.
 nonisolated struct OpenNotes: Equatable {
     /// Rows the strip SHOWS — and exactly the reach of ⌘⇧1…⌘⇧9, chosen so
     /// the two numbers cannot drift: every visible row carries a key, and
     /// no key points at a row she cannot see.
     static let visibleCap = 9
     /// The session memory BEHIND the strip. Larger than what is shown so
-    /// closing a row promotes the next most recent note instead of leaving
-    /// a hole, and so the strip can say honestly that more are open (the
-    /// bounded-windows discipline: a truncation marker, never a silent cut).
+    /// closing a row promotes the next note instead of leaving a hole, and
+    /// so the strip can say honestly that more are open (the bounded-windows
+    /// discipline: a truncation marker, never a silent cut).
     static let trackedCap = 12
 
-    /// Container ids, most recently opened first. IDs only — the titles
-    /// are resolved for display and never stored here.
+    /// Container ids in STRIP ORDER — insertion order, moved only by an
+    /// explicit manual reorder and never by navigation. IDs only; the
+    /// titles are resolved for display and never stored here.
     private(set) var ids: [String] = []
 
-    /// Insert-or-move-to-front (her brief's letter: opening "adds it /
-    /// moves it to recency").
+    /// The same set, most-recently-opened first. It answers exactly ONE
+    /// question — who leaves when the tracked list is full — and never
+    /// touches what the strip shows or what ⌘⇧n addresses.
+    private(set) var recency: [String] = []
+
+    /// Opening a note: it joins the END of the strip if it is new, and it
+    /// becomes the most recent either way. An already-open note does NOT
+    /// move — that is the ruled flip.
     mutating func opened(_ id: String) {
-        ids.removeAll { $0 == id }
-        ids.insert(id, at: 0)
-        if ids.count > Self.trackedCap { ids.removeLast(ids.count - Self.trackedCap) }
+        recency.removeAll { $0 == id }
+        recency.insert(id, at: 0)
+        guard !ids.contains(id) else { return }
+        ids.append(id)
+        evictBeyondTheBound()
     }
 
     /// Closing a row closes a ROW. Nothing is deleted.
     mutating func close(_ id: String) {
         ids.removeAll { $0 == id }
+        recency.removeAll { $0 == id }
+    }
+
+    /// The manual reorder (her ruling's second half), in the `onMove`
+    /// convention: `destination` is an index in the PRE-move list.
+    ///
+    /// Offsets are the SHOWN rows' — and because `shown` is a prefix of
+    /// `ids`, they are `ids`' own indices, so there is no mapping table
+    /// that could go stale. Recency is untouched: rearranging the strip is
+    /// not using a note.
+    mutating func move(fromOffsets source: IndexSet, toOffset destination: Int) {
+        let limit = shown.count
+        guard source.allSatisfy({ $0 >= 0 && $0 < limit }),
+            destination >= 0, destination <= limit
+        else { return }
+        let moving = source.sorted().map { ids[$0] }
+        guard !moving.isEmpty else { return }
+        // The insertion point shifts left by however many moved rows sat
+        // before it, because `destination` is stated in pre-move terms.
+        let before = source.filter { $0 < destination }.count
+        var out = ids
+        out.removeAll { moving.contains($0) }
+        out.insert(contentsOf: moving, at: min(max(destination - before, 0), out.count))
+        ids = out
+    }
+
+    /// The bound, paid by the least-recently-opened note (never by the
+    /// oldest-inserted one — membership is recency's question).
+    private mutating func evictBeyondTheBound() {
+        while ids.count > Self.trackedCap, let victim = recency.last {
+            ids.removeAll { $0 == victim }
+            recency.removeAll { $0 == victim }
+        }
     }
 
     var shown: [String] { Array(ids.prefix(Self.visibleCap)) }

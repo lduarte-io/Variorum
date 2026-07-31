@@ -94,7 +94,7 @@ struct SidebarView: View {
         let shown = workspace.openNotes.shown
         if !shown.isEmpty {
             Section {
-                ForEach(Array(shown.enumerated()), id: \.element) { index, noteID in
+                ForEach(shown, id: \.self) { noteID in
                     HStack(spacing: 4) {
                         markedTitle(workspace.label(for: .post(noteID)), .post(noteID))
                             .lineLimit(1)
@@ -102,8 +102,12 @@ struct SidebarView: View {
                         Spacer(minLength: 0)
                         // The ordinal its key carries — so ⌘⇧n is legible
                         // without opening a menu (the R73/R91/R93 mandate's
-                        // spirit at the surface that owns the list).
-                        Text(tokens.chromeLabel("\u{2318}\u{21e7}\(index + 1)"))
+                        // spirit at the surface that owns the list). Since
+                        // her round-7 ruling the strip is insertion-ordered,
+                        // so this number is a STABLE address: it stops
+                        // shuffling as she moves between notes.
+                        Text(tokens.chromeLabel(
+                            "\u{2318}\u{21e7}\((shown.firstIndex(of: noteID) ?? 0) + 1)"))
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)
                         Button("\u{2715}") { workspace.closeNote(noteID) }
@@ -114,17 +118,26 @@ struct SidebarView: View {
                     }
                     .tag(SidebarSelection.post(noteID))
                 }
+                // Her ruling's second half: *"maybe they're draggable /
+                // reorderable manually like browser tabs as well though?
+                // session only, not a setting."* The arithmetic is pinned;
+                // the drag route itself is AppKit's inside the List and is
+                // on the visual-verification list.
+                .onMove { source, destination in
+                    workspace.moveOpenNotes(fromOffsets: source, toOffset: destination)
+                }
                 // The bounded-windows discipline: a visible marker, never a
                 // silent cut. The hidden notes are still open — closing a
-                // row promotes the next most recent into view.
+                // row promotes the next one into view.
                 if workspace.openNotes.hiddenCount > 0 {
                     Text(tokens.chromeLabel(
                         "\u{2026}\(workspace.openNotes.hiddenCount) more open"))
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
-                        .help("More notes are open than this list shows (the newest "
-                            + "\(OpenNotes.visibleCap) appear here, and \u{2318}\u{21e7}1\u{2013}9 "
-                            + "reach them). Close a row and the next one appears.")
+                        .help("More notes are open than this list shows (the first "
+                            + "\(OpenNotes.visibleCap) in the order you opened them appear "
+                            + "here, and \u{2318}\u{21e7}1\u{2013}9 reach them; drag a row to "
+                            + "reorder). Close a row and the next one appears.")
                 }
             } header: {
                 Text(tokens.chromeLabel(WorkspaceNaming.openSectionHeader))
