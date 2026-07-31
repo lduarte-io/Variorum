@@ -1,0 +1,218 @@
+//
+//  Operations+Diverge.swift
+//  VariorumCore
+//
+//  Phase 13f, batch 5 (W23) — DIVERGE FOR THIS BOOK, her round-10 ruling:
+//
+//  > *"'duplicate as version' should be a button you can click, not just an
+//  > FYI (it seems a bit annoying to get the FYI but not have a button that
+//  > nicely duplicates it as version and deletes the original for you all in
+//  > one go - accessible from a menu maybe…)"*
+//
+//  The architect's parse, ratified: **"deletes the original" means removes it
+//  from THIS BOOK only.** The copy takes the original's exact slot here — its
+//  `position` AND its chapter assignment — and the original lives on in its
+//  other books and in the library. Deleting it globally would gut them, which
+//  is the standing chip "remove" wording's own rule.
+//
+//  ── WHY THIS IS AN OPERATION AND NOT AN APP-LAYER COMPOSITION ────────────
+//  The batch's stop-and-propose found the reason. `duplicateAsVersion`
+//  registers an exact-row inverse; **no reading-membership op registers
+//  anything** (`addPostToReading` / `assignPostToSection` /
+//  `removePostFromReading` are all in the no-undo-entry class). Composed at
+//  the app layer under `withCompound`, the resulting entry's inverse would be
+//  the mint's alone: undo would un-mint the copy and leave the ORIGINAL still
+//  removed from the book — a half-undo presented as a whole one, and a book
+//  silently short one post. `UndoStack.register` is internal to this module,
+//  so the app cannot supply the missing inverse, and a view that supplied one
+//  would be holding a business rule (CLAUDE.md). So the composite lives here,
+//  where every mutation belongs, and registers ONE entry whose inverse AND
+//  redo are built from do-time pre-images. **It adds no new SEMANTICS** — it
+//  writes exactly the rows the standing paths write.
+//
+//  Composition note (the standing pattern, `newPostInReading`'s): the public
+//  membership ops each open their own `database.write`, so a composite cannot
+//  call them without nesting transactions. It inlines their guards and their
+//  writes instead — same rules, one transaction.
+//
+
+import Foundation
+import GRDB
+
+extension Operations {
+    /// What a diverge minted and moved, for callers and the row-level pins.
+    public struct DivergeResult: Equatable, Sendable {
+        /// The fresh version-post — the one this book shows from now on.
+        public let copy: PostCopyResult
+        /// The membership row minted for the copy, at the original's slot.
+        public let copyMembershipID: String
+        /// The original's membership row, now tombstoned (undo revives it).
+        public let originalMembershipID: String
+    }
+
+    /// Diverge `postID` for `readingID`: mint a full version copy, give it the
+    /// original's EXACT slot in this book (position and `section_id`), and
+    /// take the original out of this book — one transaction, one undo entry.
+    ///
+    /// **Refusals, all the standing ones, delivered as the ops layer's own:**
+    /// a SMART book refuses (`wrongReadingKind`) — derived membership has no
+    /// row to swap, and the road there is the tag, which 13i owns; a FINISHED
+    /// book refuses (`lockedReading` — membership is frozen, #25's letter); a
+    /// post that is not in the book refuses (`postNotInReading`).
+    ///
+    /// **Capacity is deliberately NOT gated.** The swap is net-zero — one
+    /// membership in, one out — so `addPostToReading`'s at-capacity refusal
+    /// would refuse an act that does not grow the book. Recorded rather than
+    /// silently true.
+    ///
+    /// The copy is the `duplicateAsVersion` copy exactly (whole live fans,
+    /// archived takes riding with statuses preserved, commits never copied,
+    /// parent trees remapped, block names and presentations copied, per-block
+    /// `derived_from` edges plus ONE `version_of` anchor); tags, references
+    /// and lenses do not ride, as in every copy.
+    @discardableResult
+    public func divergePostForReading(
+        _ postID: String, in readingID: String
+    ) throws -> DivergeResult {
+        let result: DivergeResult = try database.write { db in
+            let reading = try liveReading(db, readingID)
+            guard reading.kind == .curated else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .curated)
+            }
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: readingID)
+            }
+            guard var original = try liveMembership(db, postID: postID, readingID: readingID)
+            else {
+                throw OperationError.postNotInReading(postID: postID, readingID: readingID)
+            }
+
+            let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+
+            // THE EXACT SLOT: the copy inherits the original's position and
+            // its chapter. Position is copied verbatim rather than computed —
+            // `(position, id)` is the sort key, and the original's row leaves
+            // in this same transaction, so nothing is ever ambiguous.
+            let now = date.now
+            let membership = ReadingPost(
+                id: newID(), readingId: readingID, postId: copy.post.id,
+                position: original.position,
+                sectionId: original.sectionId,
+                createdAt: now)
+            try membership.insert(db)
+
+            original.deletedAt = now
+            try original.update(db)
+
+            return DivergeResult(
+                copy: copy, copyMembershipID: membership.id,
+                originalMembershipID: original.id)
+        }
+        let copyID = result.copy.post.id
+        let copyMembershipID = result.copyMembershipID
+        let originalMembershipID = result.originalMembershipID
+        undoStack?.register(
+            label: "Diverge for This Book",
+            inverse: {
+                try $0.revertDiverge(
+                    copyID: copyID, copyMembershipID: copyMembershipID,
+                    originalMembershipID: originalMembershipID)
+            },
+            redo: {
+                try $0.reapplyDiverge(
+                    copyID: copyID, copyMembershipID: copyMembershipID,
+                    originalMembershipID: originalMembershipID)
+            })
+        return result
+    }
+
+    // MARK: - The two halves of the undo entry
+
+    /// The inverse: the original comes back to its own row (it still carries
+    /// its position and chapter — nothing ever rewrote them), the copy's
+    /// membership goes, and the copy itself is tombstoned. Exact-row on
+    /// do-time ids, like every inverse in this layer.
+    ///
+    /// Refusal buckets, the standing ones: a book deleted meanwhile ⇒
+    /// obsolete, quiet (its cascade already took the memberships); a book
+    /// FINISHED meanwhile ⇒ throws, so the entry stays on the stack for a
+    /// retry after un-finishing.
+    func revertDiverge(
+        copyID: String, copyMembershipID: String, originalMembershipID: String
+    ) throws {
+        try database.write { db in
+            guard let membership = try ReadingPost.fetchOne(db, key: copyMembershipID),
+                  let reading = try Reading.fetchOne(db, key: membership.readingId),
+                  reading.deletedAt == nil
+            else { return }
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: membership.readingId)
+            }
+            let now = date.now
+            if var copyRow = try ReadingPost.fetchOne(db, key: copyMembershipID),
+               copyRow.deletedAt == nil {
+                copyRow.deletedAt = now
+                try copyRow.update(db)
+            }
+            // The original's row revives with its slot intact — the swap
+            // never rewrote its position or its `section_id`, which is what
+            // makes this a tombstone flip rather than a re-computation.
+            if var originalRow = try ReadingPost.fetchOne(db, key: originalMembershipID),
+               originalRow.deletedAt != nil,
+               try postIsLive(db, originalRow.postId) {
+                originalRow.deletedAt = nil
+                try originalRow.update(db)
+            }
+            if var container = try Container.fetchOne(db, key: copyID),
+               container.deletedAt == nil {
+                container.deletedAt = now
+                container.updatedAt = now
+                try container.update(db)
+            }
+        }
+    }
+
+    /// The RE-APPLY (13c 1B's contract: exact-row, never a re-run of the
+    /// forward operation — re-running would mint a fresh copy with fresh
+    /// UUIDs and strand the inverse's captured ids). The same three rows
+    /// flip back the other way.
+    func reapplyDiverge(
+        copyID: String, copyMembershipID: String, originalMembershipID: String
+    ) throws {
+        try database.write { db in
+            guard let membership = try ReadingPost.fetchOne(db, key: copyMembershipID),
+                  let reading = try Reading.fetchOne(db, key: membership.readingId),
+                  reading.deletedAt == nil
+            else { return }
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: membership.readingId)
+            }
+            let now = date.now
+            if var container = try Container.fetchOne(db, key: copyID),
+               container.deletedAt != nil {
+                container.deletedAt = nil
+                container.updatedAt = now
+                try container.update(db)
+            }
+            if var originalRow = try ReadingPost.fetchOne(db, key: originalMembershipID),
+               originalRow.deletedAt == nil {
+                originalRow.deletedAt = now
+                try originalRow.update(db)
+            }
+            if var copyRow = try ReadingPost.fetchOne(db, key: copyMembershipID),
+               copyRow.deletedAt != nil, try postIsLive(db, copyRow.postId) {
+                copyRow.deletedAt = nil
+                try copyRow.update(db)
+            }
+        }
+    }
+
+    /// `restoreReading`'s live-parent guard, shared: a live membership row
+    /// pointing at a dead post helps nobody.
+    private func postIsLive(_ db: Database, _ postID: String) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: "SELECT EXISTS (SELECT 1 FROM container WHERE id = ? AND deleted_at IS NULL)",
+            arguments: [postID]) ?? false
+    }
+}

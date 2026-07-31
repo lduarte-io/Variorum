@@ -571,6 +571,26 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Peer columns live on the Compare board (\u{2318}4).",
             availability: { ctx in ctx.mode == .compare ? .act : .unavailable }),
+        // 13f batch 5 — W23. Her round-10 item 4: *"'duplicate as version'
+        // should be a button you can click, not just an FYI … that nicely
+        // duplicates it as version and deletes the original for you all in
+        // one go."* A `.surface` act on the membership chip's BOOK ROW: the
+        // target is the book you point at, which is what makes "this book"
+        // unambiguous where a routed menu command would have had to guess.
+        // The CONTEXT rule is "a post is open" (the chip lives in its
+        // masthead); the per-ROW condition is the surface's — the
+        // `.diffAgainstChosen` / `.showOriginBlock` split (P-2).
+        // R118 parity is `.native` and it is LITERALLY true rather than an
+        // exemption: the chip lives in the post detail's MASTHEAD, which
+        // renders above every mode — so Takes reaches this door without a
+        // mode switch, exactly as Write does. Write is not privileged here
+        // because no mode owns the masthead.
+        Capability(
+            id: .divergeForBook, verb: DivergeCopy.verb, scope: .post,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Diverging happens inside a post — open one first.",
+            availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
 
         Capability(
             id: .newPost, verb: "New Post", scope: .app,

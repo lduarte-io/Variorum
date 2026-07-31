@@ -576,7 +576,12 @@ extension Operations {
     /// The one copy machine both operations share — they differ ONLY in
     /// `chosenPicks` (nil = the source's own chosen; a map = the lens's
     /// effective picks overlaying it) and `carryFans`.
-    private func copyPost(
+    /// Internal (not private) since 13f batch 5: `divergePostForReading`
+    /// composes THIS copy inside its own transaction — the whole point of
+    /// W23 is that the copy and the membership swap are one act, so the
+    /// copy body cannot be reached through `duplicateAsVersion` (which
+    /// opens its own write and registers its own undo entry).
+    func copyPost(
         _ db: Database, sourceID: String, chosenPicks: [String: String]?, carryFans: Bool
     ) throws -> PostCopyResult {
         let source = try livePost(db, sourceID)

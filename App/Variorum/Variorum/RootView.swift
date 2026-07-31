@@ -214,6 +214,10 @@ struct RootView: View {
         // the gate's refinement, landed at the model.
         session.commandRouter.paneCount = { workspace.panes.count }
         session.commandRouter.canOpenBeside = { workspace.openBesideCandidate != nil }
+        // 13f batch 5 (W22's button): the first-edit note names its target
+        // book by the chooser's own order, and that order floats what she
+        // has visited — which lives here, per window.
+        session.recentBookIDs = { workspace.recentBookIDs }
         let status = session.status
         router.speak = { status.speak($0) }
         workspace.visit(selection ?? .shelf)

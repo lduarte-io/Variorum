@@ -81,6 +81,17 @@ struct MembershipChip: View {
                             .buttonStyle(.link)
                             .help("Open “\(book.name)” at this post")
                             Spacer()
+                            // 13f W23 — DIVERGE FOR THIS BOOK, on the row
+                            // that names the book. Rendered on every book
+                            // row, smart included: a smart target REFUSES
+                            // honestly and names the tag road (her ruled
+                            // shape — silence where the row looks actionable
+                            // is the confusion, not the tidiness).
+                            Button("diverge") { diverge(for: book) }
+                                .buttonStyle(.borderless)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .help(DivergeCopy.help(book: book.name))
                             Button("remove") { remove(from: book) }
                                 .buttonStyle(.borderless)
                                 .font(.caption)
@@ -158,6 +169,10 @@ struct MembershipChip: View {
         default: "in \(books.count) books"
         }
     }
+
+    /// The `.surface` acts this chip renders (P-1's declared ⇔ rendered
+    /// walk): W23's per-book diverge door lives on the book rows here.
+    static let surfaceCapabilities: [CapabilityID] = [.divergeForBook]
 
     /// 13f W20(a) — THE ASCENT, as a named call rather than a closure body,
     /// for the reason batch 2 moved the ceremony's sentences out of `Text`
@@ -243,6 +258,23 @@ struct MembershipChip: View {
         }
     }
 
+    /// 13f W23 — the compound, at the door that names its book. The op is
+    /// ONE transaction with ONE undo entry; this only reports.
+    private func diverge(for book: Reading) {
+        Task {
+            do {
+                let result = try await session.runner.run { [postID] ops in
+                    try ops.divergePostForReading(postID, in: book.id)
+                }
+                duplicatedPostID = result.copy.post.id
+                status = DivergeCopy.done(book: book.name)
+            } catch {
+                status = DivergeCopy.refusal(for: error, book: book.name)
+            }
+            await refresh()
+        }
+    }
+
     private func duplicate() {
         Task {
             do {
@@ -258,9 +290,49 @@ struct MembershipChip: View {
     }
 }
 
+/// 13f W23's words, in one place — the act's label, its help, what it says
+/// when it lands, and the one refusal that needs its own sentence.
+///
+/// It lives beside `ChipRefusals` for the same reason that type does: a
+/// promise made in a `Text` literal is a promise no test can keep, and both
+/// of W23's doors (this chip's row and the first-edit note's button) must
+/// say the same thing about the same act.
+/// `nonisolated` for the reason the registry layer's own value types are
+/// (batch 3 judgment call 4): the capability table is nonisolated and reads
+/// `verb` from here, and pure string mapping has no actor to belong to.
+nonisolated enum DivergeCopy {
+    static let verb = "Diverge for This Book"
+
+    /// The note's button names the book, because the note fires where she is
+    /// writing and the book is not otherwise on screen.
+    static func buttonLabel(book: String) -> String { "Diverge for \u{201c}\(book)\u{201d}" }
+
+    static func help(book: String) -> String {
+        "Make a copy that can diverge and put it in \u{201c}\(book)\u{201d} in this post's "
+            + "place — the original stays in its other books and in the library"
+    }
+
+    static func done(book: String) -> String {
+        "Diverged — \u{201c}\(book)\u{201d} holds the copy now, in the same place; the "
+            + "original is untouched elsewhere. \u{2325}\u{2318}Z undoes it."
+    }
+
+    /// A SMART book has no membership row to swap: its posts arrive by tag,
+    /// so the road there is the tag. 13i owns that design; this says so
+    /// rather than pretending or staying silent.
+    static func refusal(for error: Error, book: String) -> String {
+        if let error = error as? OperationError, case .wrongReadingKind = error {
+            return "\u{201c}\(book)\u{201d} collects by its tags, so there is no membership to "
+                + "move — a copy would only appear there if it carried the same tags. "
+                + "Duplicate as Version, then tag the copy."
+        }
+        return ChipRefusals.message(for: error, bookName: book)
+    }
+}
+
 /// Readable refusal copy for the chip's doors (the "Refused: error(…)"
 /// class retired — Sitting 9, R93).
-enum ChipRefusals {
+nonisolated enum ChipRefusals {
     static func message(for error: Error, bookName: String?) -> String {
         guard let error = error as? OperationError else { return String(describing: error) }
         let book = bookName.map { "“\($0)”" } ?? "that book"

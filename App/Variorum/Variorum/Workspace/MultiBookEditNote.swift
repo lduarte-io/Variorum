@@ -26,6 +26,7 @@
 //
 
 import Foundation
+import VariorumCore
 
 nonisolated enum MultiBookEditNote {
     /// The local flag's key (the `postMode.<id>` family's neighbour).
@@ -44,6 +45,21 @@ nonisolated enum MultiBookEditNote {
     /// conditions, in one place so the trigger site cannot drift from them.
     static func shouldSpeak(bookCount: Int, seen: Bool) -> Bool {
         !seen && bookCount >= 2
+    }
+
+    /// W23's target for the note's button: the first CURATED book in the
+    /// chooser's own order. ONE rule that reduces to "the book you came
+    /// from" in exactly the case that matters, because arriving at a book
+    /// floats it to the top of that order — and nil where every membership
+    /// is derived, so the note speaks WITHOUT a button rather than offering
+    /// an act that could only refuse (P-2, at a status offer).
+    ///
+    /// It lives here rather than inside the trigger's closure for the reason
+    /// `MembershipChip.ascend` does: a promise made inside a closure is a
+    /// promise no test can keep.
+    static func divergeTarget(_ books: [Reading], recentlyVisited: [String]) -> Reading? {
+        BookChooserOrder.ordered(books, recentlyVisited: recentlyVisited)
+            .first { $0.kind == .curated }
     }
 
     static func hasBeenSeen(_ defaults: UserDefaults = .standard) -> Bool {

@@ -24,6 +24,20 @@ final class StatusCenter {
     struct Item: Equatable {
         let id: UUID
         let text: String
+        /// 13f batch 5 (W23 + her round-10 item 4): a note may carry ONE
+        /// door. Her words: *"it seems a bit annoying to get the FYI but not
+        /// have a button that nicely duplicates it as version and deletes the
+        /// original for you all in one go"* — so a status item can be an
+        /// offer, not only an announcement. Optional by default, so every
+        /// existing `speak` call and every pin over them is unchanged.
+        var action: Action?
+
+        struct Action: Equatable {
+            let label: String
+            let perform: @MainActor () -> Void
+
+            static func == (lhs: Action, rhs: Action) -> Bool { lhs.label == rhs.label }
+        }
     }
 
     private(set) var current: Item?
@@ -32,10 +46,10 @@ final class StatusCenter {
     @ObservationIgnored var dismissAfter: Duration = .seconds(6)
     @ObservationIgnored private var dismissTask: Task<Void, Never>?
 
-    func speak(_ text: String) {
+    func speak(_ text: String, action: Item.Action? = nil) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        let item = Item(id: UUID(), text: trimmed)
+        let item = Item(id: UUID(), text: trimmed, action: action)
         current = item
         dismissTask?.cancel()
         dismissTask = Task { [weak self, dismissAfter] in

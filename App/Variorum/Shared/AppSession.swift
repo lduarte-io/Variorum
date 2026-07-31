@@ -101,21 +101,60 @@ final class AppSession {
         return coordinator
     }
 
+    /// The window's recently-visited books, most recent first — wired by the
+    /// shell to ITS workspace (the `openNoteCount` idiom: the workspace is
+    /// per-window state and this session is the app's, so a closure is what
+    /// keeps the two straight). W22's button reads it to name its target.
+    @ObservationIgnored var recentBookIDs: () -> [String] = { [] }
+
     /// W22's body: flag first (so the common case costs a `UserDefaults`
     /// read and nothing else), then ONE membership read off the main thread
     /// (P2), then the sentence — once, ever. Writes no store bytes.
+    ///
+    /// 13f batch 5: the note CARRIES W23's door (her round-10 item 4 — *"not
+    /// just an FYI"*). The target is the first CURATED book in the chooser's
+    /// own order, which is ONE rule that reduces to "the book you came from"
+    /// in exactly the case that matters, because arriving at a book floats it
+    /// to the top of that order. No curated book (every membership derived)
+    /// ⇒ the note speaks without a button rather than guessing a target.
     private func noteMultiBookEdit(_ postID: String) {
         guard !MultiBookEditNote.hasBeenSeen() else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
-            let count = (try? await self.database.read { db in
-                try Queries.readingsContaining(db, postID: postID).count
-            }) ?? 0
+            let books = (try? await self.database.read { db in
+                try Queries.readingsContaining(db, postID: postID)
+            }) ?? []
             guard MultiBookEditNote.shouldSpeak(
-                bookCount: count, seen: MultiBookEditNote.hasBeenSeen())
+                bookCount: books.count, seen: MultiBookEditNote.hasBeenSeen())
             else { return }
             MultiBookEditNote.markSeen()
-            self.status.speak(MultiBookEditNote.sentence(bookCount: count))
+            let target = MultiBookEditNote.divergeTarget(
+                books, recentlyVisited: self.recentBookIDs())
+            self.status.speak(
+                MultiBookEditNote.sentence(bookCount: books.count),
+                action: target.map { book in
+                    StatusCenter.Item.Action(
+                        label: DivergeCopy.buttonLabel(book: book.name),
+                        perform: { [weak self] in
+                            self?.divergeFromNote(postID, in: book)
+                        })
+                })
+        }
+    }
+
+    /// The note's button, acting: the ONE operation, reported in the ONE
+    /// status voice (the button's own toast is already dismissed by then).
+    private func divergeFromNote(_ postID: String, in book: Reading) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await self.runner.run { ops in
+                    try ops.divergePostForReading(postID, in: book.id)
+                }
+                self.status.speak(DivergeCopy.done(book: book.name))
+            } catch {
+                self.status.speak(DivergeCopy.refusal(for: error, book: book.name))
+            }
         }
     }
 

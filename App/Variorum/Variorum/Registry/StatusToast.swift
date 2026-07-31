@@ -24,6 +24,18 @@ struct StatusToast: View {
                 .lineLimit(4)  // LOAD-BEARING (b6dae25 class)
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
+            // 13f batch 5 (W23 / her round-10 item 4): a note that names a
+            // door can BE the door. The button dismisses as it acts — an
+            // offer that stays on screen after it is taken reads as a
+            // question that was never answered.
+            if let action = item.action {
+                Button(action.label) {
+                    onDismiss()
+                    action.perform()
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .fixedSize()
+            }
             Button("✕", action: onDismiss)
                 .buttonStyle(.plain)
                 .font(tokens.small)

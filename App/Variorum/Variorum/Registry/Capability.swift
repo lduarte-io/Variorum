@@ -315,6 +315,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // compare … you should be able to click on the post you're comparing
     // it with"*). A `.surface` act — its target is the column you point at.
     case openPeerPost
+    // 13f batch 5 — W23's DIVERGE FOR THIS BOOK (her round-10 item 4). A
+    // `.surface` act for the same reason `.openPeerPost` is one: its target
+    // is the BOOK ROW you point at in the membership chip, so no routed
+    // context command could name it without guessing which book she meant.
+    case divergeForBook
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

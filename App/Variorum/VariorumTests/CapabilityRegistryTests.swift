@@ -182,6 +182,8 @@ struct CapabilityRegistryTests {
             .union(CanvasView.surfaceCapabilities)
             // 13f batch 3 (W16): Compare's peer-column open door.
             .union(CompareBoardView.surfaceCapabilities)
+            // 13f batch 5 (W23): the membership chip's per-book diverge door.
+            .union(MembershipChip.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 
