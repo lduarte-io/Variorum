@@ -1575,3 +1575,124 @@ halves, and **no claim is made that they were tested:**
   a dictionary key, not a pair; the workspace hangs off `ShellRouter`, so a
   per-window router is a per-window workspace; and the registry's three
   workspace closures are the single place a focused-window rule has to land.
+
+#### Batch 3 — ACCEPTED (2026-07-30; the orchestrator's adjudication)
+
+**Counts by my own runs:** core `✔ Test run with 906 tests in 102
+suites passed` · Mac `✔ Test run with 982 tests in 159 suites passed`
+— both match the record's claims exactly. **Load-bearing diffs read:**
+the Workspace module is P-9 done right (pure `WorkspaceNavigation`
+types + a thin model, 24 pins of arithmetic); the one-line
+`onChange(of: selection)` recording point is the P-4 shape (doors
+name destinations, the shell decides); the permanent key-table
+collision pin is a standing asset beyond this batch; the shell-mount
+pin closes exactly the silent-failure pair a pure pin cannot see
+(unwired closures; unseeded history). All eight judgment calls
+ENDORSED — (2) was rightly flagged rather than decided and went to
+her (round 7 below); (5)'s stale-title corner is recorded and
+acceptable at strip cadence. The four registry-walk widenings are
+each the declaration's own requirement, named in the tests.
+**Ledger:** W3+W16 BUILT and adjudicated; the strip's ordering flip
+rides batch 4 (round 7).
+
+### Sitting rulings — round 7 (2026-07-30, question batch 4: the batch-3 flags + the split's same-note rule)
+
+1. **The Open strip goes INSERTION-ORDERED, with session-only manual
+   drag-reorder, hers verbatim:** *"insertion order, maybe they're
+   draggable / reorderable manually like browser tabs as well though?
+   session only, not a setting"* → build both (the "maybe" recorded
+   as written — the reorder is hers to walk); recency still decides
+   MEMBERSHIP; ⌘⇧n reads the stable order. Rides batch 4.
+2. **Strip tracks notes only: RATIFIED as built.**
+3. **The split NEVER shows the same note twice, hers verbatim:**
+   *"opening a note already showing in the other pane could move you
+   there or it could just open 'lenses' or 'compare' or something
+   instead - that already is a mode, just not going to be this mode.
+   definitely not two live side by sides - we already offer that for
+   one note"* → the DEFINITE half binds (no same-note split, ever);
+   the shipped shape is her first-listed reading — focus the
+   existing pane and SPEAK, the copy naming Lenses/Compare as the
+   same-note side-by-side surfaces (her "could open lenses instead"
+   floated alternative recorded here, one door-swap away if she
+   prefers it on the walk).
+
+### Batch 4 brief — the two-pane SPLIT (W1/A25) + the strip's ruled ordering flip (fresh Opus implementer; PROPOSAL GATE inside)
+
+**Read IN FULL before touching code:** `CLAUDE.md` + the canon it
+loads (AppSpec §4/§12; §14's deltas); THIS plan file WHOLE — the
+constitution (P-3 is this batch's law), THE KICKOFF SITTING, sitting
+rulings rounds 1–7 (round 2 item 1 = two panes + the FREE-TILING
+RIDER; round 7 = your ordering flip and the same-note rule), batches
+1–3's records + acceptances (batch 3's "three seams are already cut"
+note is your map: `PaneID` dictionary keys; workspace-per-router; the
+three registry closures as the focused-pane landing spot); the 13c
+plan's "Environment traps" (binding); the 13d plan's batch 3 record
+(the flight-latch trigger sentence and the one-flight door) and the
+13f plan's own "Binding constraints" section (the latch note names
+A25 as a likely first customer — CHECK BEFORE BUILDING).
+
+**The items:**
+
+0. **The strip's ruled flip (round 7.1):** insertion order (recency
+   keeps deciding membership; closing still promotes from the tracked
+   list) + session-only manual drag-reorder of the shown rows. Ruled
+   flip — the recency-order pins flip DELIBERATELY, named; new pins
+   for stable ordinals and the reorder arithmetic (pure, red-on-old).
+1. **The split itself:** ONE window shows TWO panes side by side, two
+   DIFFERENT notes, each an ordinary detail surface with its own
+   per-post mode memory. Doors (registry-declared, P-1): an "Open
+   Beside" act on note rows (sidebar/strip/library contexts as the
+   registry reaches them) + a View-menu door + a close-split door.
+   The divider is draggable; layout state is session/window view
+   state (IDs only). **The same-note rule (round 7.3):** opening a
+   note already showing in the other pane FOCUSES that pane and
+   speaks; the copy names Lenses/Compare for same-note side-by-side.
+2. **P-3 across panes — the batch's core:** exactly ONE live editor
+   across both panes, the ring migrating on click exactly as the
+   Book spread does; the un-focused pane renders read-cheap. The
+   liveness extension lands ON `PaneTextAuthority` / the standing
+   authority seams — NEVER a second mechanism. The registry's three
+   workspace closures gain the focused-pane refinement (batch 3's
+   recorded seam); every capability resolves against the FOCUSED
+   pane's context.
+3. **Per-pane history/chip:** each pane keys its own history (the
+   `PaneID` dictionary already holds this — wire the second key);
+   ⌘[ / ⌘] act on the FOCUSED pane; each pane carries its own chip.
+4. **THE FLIGHT-LATCH CHECK (binding, BEFORE building):** the 13d
+   batch-3 latch is model-local; the 13f constraints note names A25
+   as its likely first trigger. With the same-note rule the two
+   panes hold two different posts — VERIFY whether any composition
+   this batch creates can mount structural doors on ONE post from
+   two surfaces (including strip/sidebar doors firing at a pane's
+   post mid-ceremony). Record the verdict with its trace either way;
+   if the latch must move to a post-keyed shared authority, that IS
+   this batch's work — do it at the authority, not with a flag.
+
+**THE PROPOSAL GATE (binding — the 13d batch-3/4E pattern):** BEFORE
+building items 1–3, investigate and append a short PROPOSAL under
+your batch record heading covering: (a) how selection/router state
+becomes per-pane (today `ShellRouter` holds ONE selection — what
+splits, what stays window-scoped, how the sidebar's click targets
+the focused pane); (b) how the one-live-ring extension lands on the
+standing authority (name the exact seams); (c) the latch verdict
+from item 4; (d) what the second pane's chrome is (chip, mode rail,
+inspector — what renders per pane vs per window). Then STOP and
+report; the build proceeds on the orchestrator's ruling. Item 0 may
+be built before the gate (it needs none of (a)–(d)).
+
+**Pin honesty:** pane/selection/focus arithmetic pure and pinned
+(red-on-old by behavioral revert; checksums); the one-live-ring
+invariant pinned at the authority layer (the standing exactly-one-
+live pins extend); what only a hand can verify (divider feel, the
+split's look, focus clicks) goes on the visual-verification-only
+list. The hosted-ScrollView and SwiftUI-drop traps from batches 1–3
+stand.
+
+**Loop, records, constraints:** identical to batches 1–3 (tutorial
+spine by TYPE name; full suites with quoted "Test run with N tests"
+lines; mobile only if `Sources/`/`Shared/` is touched; batch record
+appended; commits by explicit path — the author's parallel session
+works in `notes/`, touch nothing of hers; never `/Applications`,
+never `Sources/VariorumCore/Sync/`, never push; no schema;
+STOP-and-propose beyond a ruling's shape). **Baselines to
+match-or-beat: core 906/102 · Mac 982/159 · mobile 14/4.**
