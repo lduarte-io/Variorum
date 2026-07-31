@@ -883,3 +883,16 @@ files sit uncommitted in the tree — `notes/DetailedPlanForPhases.md`
 `/Applications`, never `Sources/VariorumCore/Sync/`, never push,
 never `git checkout` over uncommitted work, no schema. STOP and
 propose if any item exceeds its ruling's shape.
+
+### Sitting rulings — round 5 (2026-07-30, the sequencing ruling)
+
+Her words: *"i'll have that session commit it. … so 13g will be next,
+you'll author that phase's plan during your closeout, and leave a
+note for 13g to author 13e. and then I guess I'll choose what's after
+13e."* → RULED: **13f → 13g → 13e**, then her choice. The 13f
+closeout authors 13g's plan (from the standing 13g row + her recorded
+markdown dual-mode inclination) AND carries an explicit note that
+**13g's closeout authors 13e's plan**. What follows 13e is chosen at
+that point (the remaining 13-series rows then: 13h, 13i). The
+release-strategy files stay uncommitted for HER session to commit —
+this phase's commits keep staging by explicit path around them.
