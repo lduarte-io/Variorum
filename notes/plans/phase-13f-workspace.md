@@ -2648,3 +2648,63 @@ by EXPLICIT PATH ONLY (the author's parallel session works in
 uncommitted work, NO schema. STOP-and-propose on anything exceeding
 a ruling's shape. Every PROVISIONAL to `notes/QUESTIONS.md` (append,
 never renumber; next free number **#49**).
+
+### Sitting round 12 (2026-07-30, the successor orchestrator's first round) — the walk deferral · the extract one-liner RULED (W24) · the process-name overlap answered
+
+Her message, verbatim: *"I'll just wait until this phase is done and
+then I'll do a walkthrough of all the items together after my app is
+refreshed. what's the extract one-liner? I typically can't open the
+app and do quality gradings while phases are building because the
+processes are named the same thing too."*
+
+1. **The walk: DEFERRED TO PHASE END — her ruling.** All standing
+   walk material — the batches' visual-verification-only lists (1–4
+   so far, plus what later batches add), the QoL-handoff standing
+   items, W10's copy in the field — bundles into the phase-end
+   handoff and is walked ONCE, on the refreshed `/Applications`
+   build (the closeout refresh precedes her walk, behind the A1 rail
+   at a verified zero-instance window at her word).
+2. **The extract one-liner ANSWERED, then RULED — W24 (new ledger
+   row): WIDEN A11 TO EXTRACT** (her pick of the recommendation,
+   posed via the question tool at this round). The 13d closeout's
+   recorded "extract's identical drop … deliberately not widened —
+   her call pending" is now called: the ONE seam-trim brain treats
+   extract's seam like divide's — a blank line at the boundary
+   survives on the piece before the seam, byte-for-byte, instead of
+   extract's silent drop. Builds THIS phase: a Domain-level change +
+   a red-on-old pin; slotted as a rider on batch 5's windows
+   continuation (or the next batch if that session's context runs
+   long); `Sources/` is touched, so the mobile suite runs with it.
+   The 13d/QoL-handoff standing one-liner closes when it ships.
+3. **The process-name overlap — her concern, verbatim:** *"i talked
+   to claude about this earlier and i had the impression that the
+   issue was greater than just the test host? like the bundle that
+   it is with? i feel like there might be a greater overlap issue
+   than just the name, it didn't seem so trivial previously"* —
+   **VERIFIED against the 13b 4G record and the live project file:
+   her memory is of the PRE-4G world, and it was accurate THEN.**
+   Until 13b batch 4G (2026-07-22) the Debug test host shared her
+   app's bundle id, and RunningBoard keys one-instance-per-login-
+   session on bundle identity — the test host and her live app were
+   structurally ONE app to macOS (the 9d-era Runningboard-error-5
+   trap; test writes to `.standard` landed in HER defaults domain).
+   4G split it with one line (pbxproj:627 — Debug-only
+   `io.lduarte.Variorum.debug`; Release byte-untouched at :661,
+   verified today): its own sandbox container (it cannot even read
+   hers), its own defaults domain, the dev-store fence structurally
+   stronger, and the proof runs included a full suite green BESIDE
+   her live real-store instance. **What remains shared today is
+   exactly the NAME** (two "Variorum"s in the Dock/app switcher)
+   plus the flashing test-host windows during runs. Told to her with
+   the facts: her real app is safe to use while batches run (the 4G
+   unlock is the standing design; installs happen only at verified
+   zero-instance windows at her word) — what mid-phase use cannot do
+   is grade the NEW items, which reach her installed build only at
+   the closeout refresh, so her defer-to-one-walk plan is exactly
+   the designed flow. **The Debug-only display-name rename
+   ("Variorum Dev") stands OFFERED, not taken** — her word rules it;
+   if taken it lands at a clean seam (it touches the project file,
+   never mid-batch), with the instance-discipline greps re-checked.
+
+**Ledger add:** W24 — extract widens A11 (RULED; rider on batch 5's
+continuation). **Rename offer:** OPEN with her.
