@@ -4787,3 +4787,299 @@ key), and **no claim is made that they were tested:**
 - Her walk will notice, beyond the pad itself: the menu bar gains a
   Variorum glyph, the File menu gains a Quick Note item beside New Window,
   and ⌘K types both "Quick Note" and "Toggle Star".
+
+### Batch 7 — THE K5 SWEEP: W6 (`post` → "note") + W15 ("Blocks" → "Snippets"), BUILT — the phase's last build batch
+
+**Counts, by my own runs at build-complete:** core `✔ Test run with 925
+tests in 105 suites passed after 28.753 seconds` (`swift_exit=0`) · Mac
+`✔ Test run with 1064 tests in 187 suites passed after 138.813 seconds`
+(`mac_exit=0`) · mobile `✔ Test run with 14 tests in 4 suites passed after
+0.282 seconds` (`mobile_exit=0`) · the tutorial spine on its OWN run, by
+TYPE name (`TutorialBookShapeTests` · `TutorialDoorTests` ·
+`TutorialWritingActsTests` · `TutorialTakesActsTests` ·
+`TutorialStructureActsTests` · `TutorialLookingActsTests` ·
+`TutorialLibraryActsTests`): `✔ Test run with 49 tests in 7 suites passed
+after 12.154 seconds`. From the batch's baselines (925/105 · 1064/187 ·
+14/4): **every count byte-identical**, which is the shape a strings sweep
+should have — no test was added, none was deleted, and the sixteen that
+changed changed only the words they assert. **Mobile WAS run** — its
+strings are in scope and `Sources/` carries three files.
+
+**No schema. Zero `Sync/` lines** (verified by `git diff --stat --
+Sources/VariorumCore/Sync/`: empty — a sweep has no business there).
+**No Release build, no `/Applications` refresh.** Her app was not running
+at any point (`pgrep` by path at open and at close). Every commit staged
+by explicit path; nothing under `notes/` outside this record was touched.
+
+#### How the sweep was made (the method IS the audit)
+
+A hand-written pass over ~370 strings is a pass that misses some. So the
+sweep is a **Swift string-literal scanner** — it walks each line tracking
+`"` and `\( … )` depth, skips `//` and `/* */` comments and `"""` blocks,
+and replaces `post` → `note` **on word boundaries, OUTSIDE interpolations
+only**. Everything about it is a decision I can show you:
+
+- **Interpolations are copied verbatim**, so a Swift identifier inside a
+  string can never be renamed. This is not theoretical: the first, naive
+  version of the scanner split `"\(posts) post\(posts == 1 ? "" : "s")
+  kept…"` at its NESTED quote and rewrote the *variable* `posts` in the
+  ternary — code that would not have compiled. Found before anything was
+  written to disk; the scanner was rewritten to handle nested literals
+  inside interpolations, and that case now reads
+  `"\(posts) note\(posts == 1 ? "" : "s") kept…"` with the identifier
+  untouched.
+- **The word boundary does the model-term protection almost by itself.**
+  `postID`, `postMode.`, `post_id`, `poolPosts`, `variorumOpenPost` all
+  fail `\bpost\b` because the next character is a word character — so the
+  structural strings survive by the rule, not by a list I had to remember.
+  Only **four** literals needed an explicit deny: `"POST"` (the HTTP
+  method), `"post-"` (the palette's id prefix), `"book-post:"` (the
+  chapter/note drag payload discriminator), and `"post:\(id)"`
+  (`WorkspaceModel`'s title key — batch 6's W4 judgment call 1 in the
+  other direction, and it is pinned there).
+- **Proof it is complete: the sweep is IDEMPOTENT.** Re-running it over
+  the swept tree reports `0 literal changes in 0 files`.
+- **Proof it touched no structure:** `git diff` over both app targets and
+  `Sources/` contains **zero** added lines matching `forKey:` ·
+  `Notification.Name(` · `userInfo:` · `columnID:` · `.id("` ·
+  `defaultsKeyPrefix`.
+
+#### THE AUDIT TABLE
+
+**SWEPT — 369 user-facing literals** (361 app-target across 51 files, in
+both targets; 8 in core — the flagged call below), plus **12 sites for
+W15**. Per-file swept counts, app targets:
+
+`TutorialSeeder` 76 · `CompareBoardView` 39 · `CapabilityRegistry` 33 ·
+`HelperView` 27 · `LensesBoardView` 23 · `MembershipChip` 15 · `BookView`
+15 · `OpsRefusalCopy` 13 · `TakesBoardView` 9 · `TakesViewModel` 8 ·
+`SpreadBookView` 8 · `ShelfView` 7 · `CanvasView` 7 · `EditorViewModel` 6
+· `BookOrderAndConversion` 5 · `TakesBottomBar` · `ReadingViews` ·
+`ReadingsViewModel` · `LibraryCatalogView` · `WriteTakesPanel` ·
+`CommitBar` 4 each · `PostDetailView` · `CanvasViewModel` 3 each ·
+`EntryEditorViewModel` · `EntryEditorView` · `ShellActions` ·
+`BlockTOCView` · `ShelfViewModel` · `QuickEntryBar` · `AppSettingsView` ·
+`PoolPostsView` · `SidebarView` · `FolderView` · `EditorSurfaceController`
+· `BookStructureModel` 2 each · `MobileRootView` · `EntryListViewModel` ·
+`CommandRouter` · `TimelineView` · `TakesShared` · `ReadPostViewModel` ·
+`ScrapsPanel` · `RecoveryView` · `ImportModel` · `WordTargetFace` ·
+`RefusalCopy` · `EditorView` · `EditorFind` · `CommentsPanel` ·
+`CommandPalette` · `PagedReadView` 1 each.
+
+What that reaches, in her hands: **⌘N is "New Note"** and the shelf's
+bottom bar reads *"new note — just start typing"*; the registry's verbs
+(`Seal / Unseal Note` · `Find in Note…` · `New Block at End of Note`) and
+**every one of its ~25 `unavailableNote` refusals**; the sealed-note
+refusals in all seven surfaces that speak them; the membership chip, the
+book faces (`+ new note`, `This book has no notes yet.`, `Note cap`), the
+Compare header (`+ note`, `make outline note`, `follow this note's
+order`), the Lenses menus (`⧉ Make this a note`, `✓ Make this the note`),
+Canvas, the palette's placeholder, Library's `Notes` section and
+`Rename Note`, the Pool's empty state, the helper's dictionary and
+shortcut list, the tutorial's entire prose, and **mobile's four strings**
+(`All notes`, the two locked-note refusals, the `Note` navigation-title
+fallback).
+
+**SURVIVING — every one, with its reason.** Nothing is silent.
+
+*App targets — structural (the model term, by the rule):* `RootView` 196,
+215 (`postID` userInfo key) · `RootView` 496, `PostDetailView` 120 (view
+`.id` anchors) · `WorkspaceModel` 302 (`poolPosts` title-map key), 305
+(`post:\(id)` **stored** key — the W4 class, pinned there) ·
+`CompareBoardView` 786 (`compare-move:` drag payload), 993 (userInfo),
+1220, 1301 (column ids) · `PostDetailView` 47, 200 (`postMode.` —
+`UserDefaults`), 123/129/135/140/145 (view ids) · `LibraryCatalogView` 499
+(`post_id`, a SQL column) · `SidebarView` 322 (interpolated
+`PostDetailView.Mode` — code, not text) · `BookStructureModel` 251
+(`book-post:` payload prefix) · `BookView` 389, 871, 1099, 1130, 1186
+(scroll anchors), 1093, 1142, 1169 (userInfo) · `MembershipChip` 145, 184
+(userInfo), **356, 362 (`Notification.Name` strings)** · `PagedReadModel`
+260, 341 · `ReadingFlowView` 90 · `SpreadBookView` 320, 338, 359, 368 ·
+`CommandPalette` 121 (`post-` id prefix) · `AuthSession` 353, 465
+(`"POST"`, HTTP) · `TagViews` 39, `CompareBoardView` 698,
+`BookOrderAndConversion` 183 (the word appears only inside an
+interpolation). Three `"""` blocks were skipped whole: two SQL
+(`PostDetailView` 191, `LibraryCatalogView` 488) and
+`HelperCheatSheet.summary`, which carries the word nowhere.
+
+*Core — deliberately untouched:* `AppearanceQueries` 135 ·
+`ReadingAssembly` 298 · `ShelfQueries` 93, 239 · `SmartCollect` 143 (SQL
+`kind = 'post'` — **`container.kind='post'` is her K5 ruling's own named
+exception**) · `Lineage` 94, 154 (SQL named-argument keys) ·
+`FragmentsTransport` 333 and `SupabaseTransport` 157 (`"POST"`, HTTP —
+and the latter is inside `Sync/`, which this batch never opens).
+
+*Six literals that WERE swept and still contain "post":* `TakesBottomBar`
+347 · `TakesViewModel` 831 · `LibraryCatalogView` 250 · `ShelfView` 262 ·
+`ShelfViewModel` 183 · `PoolPostsView` 118 — in each, the residue is a
+Swift identifier inside `\( … )` (`postWordCount`, `promoted.post.title`,
+`selectedPosts.count`, `book.postCount`, `posts`, `model.posts.count`).
+Listed so a future grep for "post" does not read them as misses.
+
+#### W15 — "Blocks" → "Snippets", and what deliberately stayed
+
+Twelve sites, hand-applied, because this rename is context-dependent in a
+way a regex cannot be: **the same word names three different things.**
+
+*SWEPT (the R44 sidebar scraps AREA — one destination, three renderers
+plus the copy that points at it):* `SidebarView` 283 (the sidebar row) ·
+`WorkspaceNavigation` 353 (`WorkspaceNaming.label` — the back chip, the
+Open strip, the Starred section) and 356 (an untitled scraps container's
+fallback name) · `BlocksAreaView` 84 (the area page's own heading) and
+149 · `ScrapsPanel` 85 · `BlockTOCView` 234 ("Find it in Snippets") ·
+`HelperView` 189 · `TutorialSeeder` 250, 746, 751, 760. The three
+renderers move together for the batch-2 `RecoveryPath` reason: copy that
+names a door by a word the door no longer wears is the defect W10 existed
+to fix.
+
+*NOT SWEPT, each with its reason:* **`PostMode.blocks = "Blocks"`** — the
+in-post mode tab, and its raw value is ALSO the per-note mode memory's
+stored string (`postMode.<id>`), so renaming it would both contradict her
+brief and strand every remembered Blocks tab · the tutorial's mode-tab
+sentences (`Lenses · Compare · Blocks · Canvas`; "the Blocks tab (⌘5)";
+"BLOCKS (⌘5) is the note as a table of contents"; the lesson titled
+`blocks · canvas`) and `HelperView` 81 · **`LibraryCatalogView` 295's
+`Section("Blocks")`** — the search-hit KIND beside Books and Notes; I
+checked `Queries.searchCatalog` and it returns **named blocks anywhere**,
+not just scraps, so this really is the block kind (flagged for her walk
+below) · every plural-of-block string everywhere (`Merge Blocks`,
+`Order Blocks`, `Unplaced blocks`, `Deleted blocks (the tray)`,
+`related blocks only`, `No blocks yet…`, the seam settings, the ceremony
+copy). **The block vocabulary itself is untouched by design** — her own
+words: *"I like blocks for how direct of a word it is."*
+
+#### The one judgment call, flagged so it can be overturned
+
+**I swept EIGHT user-facing strings in `Sources/VariorumCore`, which the
+brief's law located in "BOTH app targets".** The reasoning, stated so the
+orchestrator can reverse it cheaply (it is eight strings in three files):
+
+- The brief's own enumeration of what changes names **"refusal/status
+  copy"** and **"menu items"**, and these are exactly that:
+  `Operations+SmartCollect`'s five smart-book refusal reasons are the
+  sentences she reads when a book won't take a note, and
+  `Operations+Versions`' two undo labels are what the Edit menu says
+  ("Undo Make Outline Post" → "Undo Make Outline Note"). The precedent is
+  this phase's own: batch 6's W5 gate APPROVED a one-line core widening of
+  `importPost`'s undo label for precisely this reason — the menu should
+  say what she did.
+- `BridgeEngine`'s "at its post cap" note is the eighth; it reaches her
+  through the bridge status row.
+- Leaving them would have made the sweep visibly partial in her hands,
+  which is the opposite of "no silent survivors".
+- **Nothing model-shaped moved with them:** the same three files' SQL
+  `kind = 'post'` literals and named-argument keys are in the surviving
+  list above, and `Sync/` was never opened.
+
+#### Pins — every change named, and the parity proof
+
+**Sixteen assertions flipped, ALL of them copy, each named:**
+
+*Core (1):* `BridgeDailyBookTests.aFullDailyBookNeverBlocksTheLanding` —
+`"post cap"` → `"note cap"` (the flip carries a comment naming this
+batch).
+
+*Mac (15):* `BlockTOCTests` "LEFT this post" ·
+`BookOrderConversionTests` "2 posts kept" · `CommandRoutingTests` ×3 (the
+mode, takes and seal `unavailableNote`s) · `CompareBoardTests` "its own
+post" · `EditorSessionTests` "shown in the post" · `FindAndReplaceTests`
+`.findInPost.verb` · `ImportFacesTests` ×4 ("Imported N post(s)") ·
+`TutorialWalkTests` ×2 ("make outline post"; the sealed-note refusal) ·
+`WorkspaceNavigationTests` `label(for: .blocks)` → `"Snippets"`.
+
+**Pins MODIFIED beyond those: NONE.** In particular **the whole registry
+walk passes UNMODIFIED** — `sampledContexts`, the declared⇔rendered
+unions, the shortcut-label and takes-access assertions, the permanent
+key-table collision pin, and every door pin from batches 1–6. So does the
+tutorial spine, every hosted window/pane pin, `PostDetailAndPanelTests`'
+mode row (`["Write", "Takes", "Lenses", "Compare", "Blocks", "Canvas"]` —
+untouched, which is the mode tab's survival asserted rather than assumed),
+and every `importPost` pin in core. **That is the parity proof this batch
+owes: a strings sweep that moved behavior would have shown up here, and
+nothing did.**
+
+**No reverts were run, deliberately, and the reason is the rule:** the
+hallucination guard asks for a red-on-old pin per BUG-CLASS fix, and this
+batch fixes no bug — it applies two ruled renames. The equivalent
+discipline for a ruled flip is the one batch 1's W9 established (zero pin
+changes = the parity proof), and it is met here in the stronger available
+form: *every* non-copy pin passes unmodified, the sweep is idempotent, and
+the structural-string grep over the diff is empty. Reverting a rename
+would only prove that the old word is not the new word.
+
+#### For her walk — the W14 wobble, in the exact places she pre-flagged
+
+Her kickoff words: *"saying that several 'notes' make up a chapter seems
+a little weird."* The sweep does not soften that anywhere; it makes it
+literal. **Where it now reads that way, so the walk can re-judge it:**
+
+1. The tutorial's welcome: *"you are reading a note, inside a chapter,
+   inside a book on your shelf"* (`TutorialSeeder` 225).
+2. The books lesson: *"You are inside a BOOK right now: an ordered
+   collection of notes with real chapters. A note can live in MANY books
+   at once…"* and *"＋ new note mints a note right inside the book. Notes
+   show as collapsed cards…"* (703–714).
+3. The shelf's own explainer: *"A book holds a hand-picked, ordered note
+   list…"* (`ShelfView` 120).
+4. The helper's dictionary entry for BOOK: *"An ordered collection of
+   notes (curated by hand, or smart…). A note can live in many books at
+   once."* (`HelperView` 192).
+5. The smart→curated conversion sentence: *"Chapters need a book that
+   holds its notes by hand…"* and *"…the notes you put in it — so it can
+   have chapters, an order you drag, and a note cap."*
+   (`BookOrderAndConversion` 174/179).
+6. Every book surface's empty state: *"This book has no notes yet."*
+   (`BookView`, `SpreadBookView`, `PagedReadView`) and the reading
+   manager's *"Notes in “<book>”"*.
+
+If it still reads wrong to her, the alternatives are wording, not
+architecture (a book's members could be called "entries" or "pieces" in
+book context only) — and it costs one more sweep of a much smaller set.
+
+#### A collision worth her eye (found by the sweep, not caused by it)
+
+**"note" now means two things in the UI.** It is the container (this
+sweep), and it is already the informal word for a block COMMENT:
+*"A working note on a BLOCK (never on a single take)"* (`HelperView` 185),
+*"The block's comments — working notes on a block"* (`TakesBottomBar` 248,
+`CommitBar` 127), and the A7 refusal *"it carries a take or a note that
+isn't shown here"* (`OpsRefusalCopy` 177, `EditorViewModel` 2484). The
+comment feature's own NAME is "comment" everywhere, so nothing is
+mislabeled — but that last refusal now reads ambiguously in a way it did
+not before. Left alone deliberately (changing it is a wording call, and
+her walk is the place for it); recorded so it is never discovered as a
+surprise.
+
+#### Two more things the sweep surfaced, recorded not fixed
+
+1. **"reading" still leaks into the UI in three refusals** —
+   `ReadingsViewModel`: *"That note is already in this reading."*,
+   *"This reading is at its note limit."*, *"That note isn't in this
+   reading."* The user-facing word for a `reading` has been "book" since
+   Phase 13; this is a pre-existing miss, not this batch's, and it is out
+   of the K5 sweep's scope (post→note only). One line each whenever it is
+   wanted.
+2. **The `/Applications` build's seeded field guide goes STALE.** The
+   tutorial's lesson text is written into her store when the guide is
+   seeded, so the 76 swept sentences in `TutorialSeeder` reach her only on
+   a **re-seed** ("Restore Tutorial"). Her installed guide will keep
+   saying "post" until she runs it. This is the standing rule (13c/13d
+   both recorded it); the closeout's re-seed note owns it.
+
+#### For the orchestrator
+
+- **PENDING, deliberately: nothing.** No PROVISIONAL was created, so
+  `notes/QUESTIONS.md` is untouched (next free number stays **#49**).
+- **Nothing exceeded the sweep's shape**, so nothing stopped — no
+  behavior moved, no schema, no `Sync/`, and every non-copy pin is
+  unmodified. **The one call to adjudicate is the core-copy sweep above**
+  (eight strings, three files, reversible in a minute).
+- **W19 rider: not applicable** — this batch touched no code at all, only
+  string contents; `ShellActions`, `ShellRouter`, `StatusCenter` and
+  `OperationsRunner` carry no diff, and
+  `theShellRedoActionRunsThroughTheRunnerAndReports` passed in the full
+  Mac run. Its KnownIssues row stands.
+- Her walk will notice, beyond the two words themselves: the sidebar's
+  fourth area is called **Snippets** now while the in-note mode tab is
+  still **Blocks** (deliberate, her brief's letter), and the tutorial she
+  already has seeded will not agree with the app until she re-seeds it.
