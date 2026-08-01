@@ -57,7 +57,14 @@ enum TutorialSeeder {
     /// seed (or a seed that drifts out of the plan) is a red test, and the
     /// scripted screenshot walk drives this same list.
     nonisolated static let plan: [(chapter: String, lessons: [String])] = [
-        ("welcome", ["start here", "getting around"]),
+        // 13g L1 (WT-1): "the workspace" JOINS the plan. Phase 13f built
+        // windows, the split, the Open list, history, stars and the quick
+        // note — and no lesson taught any of it, so her walkthrough ended
+        // at *"i don't even konw how to get to any of the things that built
+        // last phase."* It sits second, right after "getting around", where
+        // the sidebar has just been introduced and the next honest question
+        // is "can I see two of these at once".
+        ("welcome", ["start here", "getting around", "the workspace"]),
         ("writing", ["blocks & typing", "shaping blocks"]),
         ("takes", ["your first take", "choosing & the board", "keeping takes safe"]),
         ("structure", ["divide", "the take ceremony", "extract & make block",
@@ -268,6 +275,54 @@ enum TutorialSeeder {
             + "same text wear both faces.",
         ])
 
+        // 13g L1 (WT-1): the workspace lesson — everything Phase 13f built,
+        // taught where a reader meets it. Every act named here is a shipped,
+        // registry-declared door; the ⌘/ helper's "Windows & panes" group is
+        // the same list in key form.
+        _ = try lesson(welcome, "the workspace", [
+            "One window can show TWO notes at once. Right-click any note row \u{25B8} "
+            + "\u{201C}Open Beside\u{201D} and it opens in a second pane next to this one; "
+            + "View \u{25B8} Open Beside does the same with the note you had open most "
+            + "recently. Drag the seam between them to resize, and View \u{25B8} Close "
+            + "Split folds back to one.",
+
+            "Only ONE pane writes at a time. Click into a pane and it becomes the live "
+            + "one \u{2014} its text is the text you type in; the other reads quietly "
+            + "beside it. That is deliberate, and it is what keeps a note with ten "
+            + "thousand words as quick as an empty one. A split never shows the same "
+            + "note twice: to see ONE note two ways, that is what Lenses (\u{2318}3) and "
+            + "Compare (\u{2318}4) are for.",
+
+            "Whole WINDOWS too: File \u{25B8} New Window opens another full window, with "
+            + "its own sidebar, its own Open list and its own trail. Right-click a note "
+            + "row \u{25B8} \u{201C}Open in New Window\u{201D} opens just that note, sidebar-less, "
+            + "for when one piece deserves its own screen.",
+
+            "The sidebar keeps an OPEN list of the notes this window has open, in the "
+            + "order you opened them \u{2014} \u{2318}\u{21E7}1 through \u{2318}\u{21E7}9 jump "
+            + "straight to them, drag the rows to rearrange, and \u{2715} closes a ROW "
+            + "and nothing else (the note is untouched). \u{2318}[ and \u{2318}] walk back "
+            + "and forward through where this pane has been, like a browser.",
+
+            "Above the page sits the CONTEXT BAR: \u{2190} where you came from, and the "
+            + "book this note lives in \u{2014} click that and the book opens at this very "
+            + "note. It starts folded to its two small glyphs so the page stays clean; "
+            + "\u{2318}\u{21E7}I, or the chevron, unfolds it.",
+
+            "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
+            + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to five, "
+            + "meant for what you are in right now rather than as a filing system. And "
+            + "\u{2318}\u{21E7}N pops the QUICK NOTE: a small floating pad that stays above "
+            + "your writing, also reachable from the \u{270F}\u{FE0E} in the system menu bar "
+            + "while you are in another app entirely. Return there makes a new line, not "
+            + "a new note; close it (or \u{2318}\u{23CE}) and what you wrote is kept as a "
+            + "note in the Pool.",
+
+            "\u{2318}/ opens the Shortcuts & Dictionary helper, and its \u{201C}Windows & "
+            + "panes\u{201D} group is this whole lesson in key form \u{2014} including the "
+            + "doors that have no key and live in a menu instead.",
+        ])
+
         // ————————————————————————————— writing —————————————————————————————
 
         _ = try lesson(writing, "blocks & typing", [
@@ -307,7 +362,11 @@ enum TutorialSeeder {
             + "block — from Takes, the app carries you to Write and does it there.",
 
             // 13b 4D (N28/S4-13): the insert-below door joins the direct asks.
-            "New blocks can also be asked for directly: \u{2325}\u{2318}N (New Block "
+            // 13g L1: the KEY was stale — 13d batch 4 (A14) superseded ⌥⌘N
+            // with ⌘⇧⏎ and this lesson kept teaching the old chord. Same
+            // finding class as WT-1 (a discoverability surface that drifted
+            // out of the registry); the helper had already been corrected.
+            "New blocks can also be asked for directly: \u{2318}\u{21E7}\u{23CE} (New Block "
             + "Below) mints an empty block right under the one you're in and "
             + "puts your cursor in it — Write and Takes alike; the block \u{25BE} "
             + "menu in the bottom bar also has \u{FF0B} New block at the end of the "

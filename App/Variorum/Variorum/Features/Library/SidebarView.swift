@@ -285,11 +285,17 @@ struct SidebarView: View {
                     Image(systemName: "square.on.square")
                 }
                 .tag(SidebarSelection.blocks)
-            } header: {
-                Text(tokens.chromeLabel("Variorum"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
             }
+            // 13g L4 (WT-4), her walkthrough: *"i don't even konw if we need
+            // that empty whitespace that says Variorum at the top - let's
+            // try getting rid of it."* Shipped as a TRY — she keeps it or
+            // asks for it back on sight. It was a plain `Section` HEADER
+            // inside the List (never the window's drag area and never the
+            // traffic lights' clearance — those live in the title bar above
+            // this List), so removing it is a header removal and nothing
+            // else: the four areas keep their section, and the two headers
+            // that mean something (Starred, Open) still read as headers
+            // because they now name the only named sections there are.
             // Batch 14 (her ruling — supersedes the bottom mode line):
             // the post MODES live here, "in the same verticle pane as
             // shelf / library / pools, but with a separator so it's clear

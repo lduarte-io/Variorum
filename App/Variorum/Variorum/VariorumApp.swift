@@ -67,6 +67,44 @@ struct VariorumApp: App {
             }
         }
         .defaultSize(width: 1240, height: 840)
+        // 13g L3 + L4 (her WT-3 and WT-4, which the screenshot proved are
+        // ONE thing). Her words: *"i don't even konw if we need that empty
+        // whitespace that says Variorum at the top - let's try getting rid
+        // of it"* and *"the back bar should be flush with the top to match
+        // the bar at the bottom, which sits underneath the floating left
+        // pane."*
+        //
+        // MEASURED, not assumed (the Debug build, captured and zoomed): the
+        // sidebar's `Section` header — which the plan named as the source —
+        // renders NOTHING on macOS 26. The word she sees is the WINDOW
+        // TITLE, drawn in a band across the top of the DETAIL pane with a
+        // divider under it, and that band is exactly what stands between the
+        // window's top edge and the pane's first row. `.toolbar(removing:
+        // .title)` in `RootView` takes the word and the divider together, so
+        // the pane's own chrome — the context bar, when there is one — is
+        // the topmost thing in the detail. That is the flush edge her WT-3
+        // asks for, mirroring the status bar along the bottom.
+        //
+        // The strip that REMAINS above it is the window's toolbar row, and
+        // it is not empty: it carries the traffic lights, New Note and the
+        // sidebar toggle. `.unifiedCompact` is the shortest honest form of
+        // it — everything stays reachable and the band stops being taller
+        // than the things in it.
+        //
+        // TWO ATTEMPTS MEASURED AND REJECTED on the way here (screenshots in
+        // the batch record):
+        //   · `.ignoresSafeArea(.container, edges: .top)` on the detail — the
+        //     toolbar band is OPAQUE, so the pane's first row slid under it
+        //     and became unreadable. A worse bug than the whitespace.
+        //   · `.windowStyle(.hiddenTitleBar)` — captured before and after and
+        //     compared at the same key state: NO visible difference once the
+        //     title itself is removed. A modifier that changes window
+        //     behaviour and nothing on screen is not worth carrying.
+        //     (It also LOOKED like it un-floated the sidebar; the
+        //     discriminating capture — the ORIGINAL binary, not key — proved
+        //     the floating card is simply the KEY-WINDOW appearance. Recorded
+        //     because the wrong conclusion was one screenshot away.)
+        .windowToolbarStyle(.unifiedCompact)
         .commands {
             EditorCommands(bootstrap: bootstrap, windows: windows)
         }

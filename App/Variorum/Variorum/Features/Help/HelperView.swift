@@ -35,13 +35,28 @@ struct HelperView: View {
 
     // MARK: - Shortcuts
 
-    private struct ShortcutGroup: Identifiable {
+    struct ShortcutGroup: Identifiable {
         let title: String
         let items: [(keys: String, does: String)]
         var id: String { title }
     }
 
-    private static let groups: [ShortcutGroup] = [
+    /// **13g L1 (WT-1).** This list is HAND-MAINTAINED, and that is exactly
+    /// how the whole 13f workspace shipped invisible: the registry declared
+    /// every act (P-1 held), and no discoverability surface was extended, so
+    /// ⌘⇧1–9, ⌘[ / ⌘], ⌘⇧I and ⌘⇧N — plus ⇧⌥⌘Z, ⌥⌘C and the take-page keys
+    /// before them — existed and could not be found. Her report, verbatim:
+    /// *"i don't even konw how to get to any of the things that built last
+    /// phase."*
+    ///
+    /// It stays hand-maintained on purpose (the words are prose, in her
+    /// voice — a generated list would read like a key table), and
+    /// `HelperCoverageTests` is the drift guard that makes hand-maintenance
+    /// safe: every `shortcutLabel` the registry declares must appear here,
+    /// so an invisible shortcut is now a red test rather than a phase's
+    /// silent omission. A row may pair keys with " / " — the guard splits
+    /// on it and matches each token exactly.
+    static let groups: [ShortcutGroup] = [
         ShortcutGroup(title: "Takes", items: [
             ("⌘⇧T", "open/close takes at the block you're in"),
             ("⎋", "close all takes — back to the plain page"),
@@ -52,13 +67,16 @@ struct HelperView: View {
             ("⌃⌘← / ⌃⌘→", "step through a block's takes"),
             ("⌘⇧A", "archive the take you're in"),
             ("⌘⇧L", "save current choices as a lens"),
+            ("⌥⌘← / ⌥⌘→", "previous / next page of takes (on the Takes board)"),
         ]),
         ShortcutGroup(title: "Writing", items: [
             ("⌘S", "commit — an immutable savepoint of the take you're in"),
             ("⌘Z", "text undo (typing only)"),
             ("⌥⌘Z", "structural undo (splits, merges, moves — never text)"),
+            ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),
             ("⌃⌘↑ / ⌃⌘↓", "jump to the previous / next block"),
             ("⌘⇧'", "the block's comments"),
+            ("⌥⌘C", "callout frame on this block (again to remove it)"),
             ("⌘⇧B", "toggle block seams (dotted lines between blocks)"),
         ]),
         ShortcutGroup(title: "Structure", items: [
@@ -78,14 +96,49 @@ struct HelperView: View {
             ("⌘E", "search for whatever is selected"),
         ]),
         ShortcutGroup(title: "Navigation", items: [
-            ("⌘1 – ⌘6", "note modes: Write · Takes · Lenses · Compare · Blocks · Canvas"),
+            ("⌘1–6", "note modes: Write · Takes · Lenses · Compare · Blocks · Canvas"),
             ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
             ("⌘N", "new note"),
             ("⌘J", "today's journal entry"),
             ("⌘,", "settings (voice, seams, takes options, tags)"),
             ("⌘/", "this helper"),
         ]),
+        // 13g L1 (WT-1): the WORKSPACE — everything Phase 13f built, which
+        // until now had no entry on any surface she could read. The rows
+        // WITHOUT a chord are named by their MENU PATH, because the group's
+        // framing line above ("every shortcut here is also a menu item")
+        // means the reverse has to be findable too: a door with no key is
+        // still a door, and this is where she looks for it.
+        ShortcutGroup(title: "Windows & panes", items: [
+            ("⌘⇧1–9", "jump to the 1st–9th note in the sidebar's Open list"),
+            ("⌘[ / ⌘]", "back / forward, in the pane you're in"),
+            ("⌘⇧I", "show or fold the context bar (← where you came from · the book it's in)"),
+            ("⌘⇧N", "the quick note — a floating pad, from anywhere"),
+            ("View ▸ Open Beside", "put a second note beside this one (right-click a "
+                + "note row for that note; the menu takes the most recent other one)"),
+            ("View ▸ Close Split", "fold the window back to one pane"),
+            ("File ▸ New Window", "a second full window; right-click a note row ▸ "
+                + "Open in New Window for a note on its own"),
+            ("right-click ▸ \(StarCopy.verb)", "star a note or book — the Starred "
+                + "section sits at the sidebar's top (up to five); \u{2318}K has the "
+                + "same row"),
+        ]),
     ]
+
+    /// The keys this helper actually shows, as single tokens — a row may
+    /// pair two with `" / "`. The drift guard (13g L1) reads this.
+    ///
+    /// The separator is SPACE-slash-SPACE, not a bare slash: ⌘/ is itself a
+    /// shortcut (this helper's own), and a bare split turned it into "⌘" and
+    /// "" — caught by the guard on its first run, which is the guard doing
+    /// its job on the way in.
+    static var shortcutKeysShown: Set<String> {
+        Set(groups.flatMap(\.items).flatMap { item in
+            item.keys.components(separatedBy: " / ").map {
+                $0.trimmingCharacters(in: .whitespaces)
+            }
+        })
+    }
 
     private var shortcutsTab: some View {
         ScrollView {
@@ -195,6 +248,40 @@ struct HelperView: View {
          "A spatial VIEW on a note — arrange its blocks like sticky notes. The ‹ › "
          + "switcher just changes what a card shows; choosing is a separate, deliberate "
          + "gesture."),
+        // 13g L1 (WT-1): the 13f vocabulary. Her report was that she could
+        // not find any of it — a word she cannot look up is a feature she
+        // cannot ask for.
+        ("pane / the split",
+         "A window can show TWO notes side by side. Right-click a note row ▸ Open "
+         + "Beside puts that note in a second pane; View ▸ Open Beside takes the most "
+         + "recently opened other note. Drag the seam to resize; View ▸ Close Split "
+         + "folds back to one. Only ONE pane is live at a time — the one you clicked "
+         + "into is the one you type in, and the other reads quietly beside it. A "
+         + "split never shows one note twice; for that, use Lenses or Compare."),
+        ("window",
+         "Two kinds. File ▸ New Window opens another FULL window — its own sidebar, "
+         + "its own Open list, its own back trail. Right-click a note row ▸ Open in "
+         + "New Window opens just that note, with no sidebar. Every window shows the "
+         + "same store; the one you're in is the one that writes."),
+        ("the Open list",
+         "The sidebar's list of notes this window has open, in the order you opened "
+         + "them — ⌘⇧1 through ⌘⇧9 jump to them. Drag rows to rearrange; ✕ closes a "
+         + "ROW and nothing else (the note is untouched and comes back the next time "
+         + "you open it)."),
+        ("context bar",
+         "The thin line above a pane saying where you are: ← where you came from, and "
+         + "the book this note sits in (click it to open the book right at this note). "
+         + "It starts folded to its two glyphs; ⌘⇧I — or the chevron — unfolds it."),
+        ("star",
+         "A shortcut to a note or a book, pinned at the sidebar's top under "
+         + "\u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ "
+         + "\(StarCopy.verb), or the same row in ⌘K. Up to five: stars are meant to be "
+         + "the few things you're in right now, not a filing system."),
+        ("quick note",
+         "A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, or the "
+         + "✏︎ in the system menu bar (which reaches you from any app). Return makes a "
+         + "new line, not a new note; closing it (or ⌘⏎) keeps what you wrote as a new "
+         + "note in the Pool."),
     ]
 
     private var dictionaryTab: some View {

@@ -84,6 +84,14 @@ struct PaneHost<Content: View>: View {
             }
             content()
         }
+        // 13g L6 (WT-6): clicking ANYWHERE in an unfocused pane makes it the
+        // live one — the name line's promise, made true for every content
+        // surface at once rather than for the two that happened to carry
+        // their own door. A background, so it draws nothing and eats
+        // nothing; see `PaneFocusCatcher` for the trace and the reasoning.
+        .background {
+            PaneFocusCatcher(active: split && !focused, onFocus: onFocus)
+        }
         .task(id: noteID) { await loadBooks() }
     }
 
@@ -104,7 +112,8 @@ struct PaneHost<Content: View>: View {
     /// min-height probe).
     private func nameLine(_ selection: SidebarSelection) -> some View {
         HStack(spacing: 6) {
-            Text(tokens.chromeLabel(workspace.label(for: selection)))
+            Text(tokens.chromeLabel(WorkspaceNaming.paneLine(
+                workspace.label(for: selection), mode: heldMode(selection))))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
@@ -120,6 +129,25 @@ struct PaneHost<Content: View>: View {
         .background(tokens.surface)
         .contentShape(Rectangle())
         .onTapGesture(perform: onFocus)
-        .help("This pane is showing — click in it to write here")
+        .help(heldMode(workspace.selections[pane] ?? .shelf).map {
+            "This pane is holding \(WorkspaceNaming.paneLine("this note", mode: $0)) — "
+                + "click anywhere in it to write here, and it opens back into "
+                + "\($0.rawValue)"
+        } ?? "This pane is showing — click anywhere in it to write here")
+    }
+
+    /// 13g L5 (WT-5/F-4): the mode this pane is HOLDING, read from the very
+    /// source the pane restores from when it goes live again
+    /// (`PostDetailView.rememberedMode`, the per-note memory since S4-20).
+    ///
+    /// Deliberately NOT a second piece of state. A `modes[PaneID]` field
+    /// beside this one could disagree with what the detail actually restores
+    /// — and a mode row that lies is worse than no mode row. Reading the one
+    /// source makes "sticky" true by construction rather than by upkeep.
+    /// It is re-read whenever this line renders, which is whenever the pane
+    /// changes what it holds or which pane is live.
+    private func heldMode(_ selection: SidebarSelection) -> PostMode? {
+        guard case .post(let postID) = selection else { return nil }
+        return PostDetailView.rememberedMode(postID: postID)
     }
 }

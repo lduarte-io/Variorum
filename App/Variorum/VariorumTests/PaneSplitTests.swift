@@ -509,3 +509,148 @@ struct PaneUnmountTests {
         }
     }
 }
+
+// MARK: - 13g L6 (WT-6): the pane's own click-to-focus door
+
+/// **THE TRACE this suite pins closed** (her walkthrough, round 2): a pane's
+/// body-click focus door existed only where a CONTENT surface happened to
+/// carry one — the read tier (notes and scraps) and, partially, a book. The
+/// list surfaces (Shelf, Library, Pool, Snippets, a tag folder, the recovery
+/// surface) had none, so the only way to focus such a pane without ALSO
+/// navigating it was the name line. The door now belongs to the PANE, which
+/// is the level at which "either pane" can be true at all.
+///
+/// The decision is arithmetic over a rectangle — no "left", no "right" —
+/// because per-side reasoning is exactly what made the bug hard to see.
+@MainActor
+@Suite("Pane click-to-focus (13g L6, WT-6)")
+struct PaneFocusCatcherTests {
+    @Test func aClickInsideAnActivePaneClaimsItAndOneOutsideDoesNot() {
+        let pane = CGRect(x: 400, y: 0, width: 400, height: 600)
+        #expect(PaneFocusClick.shouldFocus(
+            clickInWindow: CGPoint(x: 500, y: 300), paneFrameInWindow: pane,
+            active: true, sameWindow: true))
+        #expect(!PaneFocusClick.shouldFocus(
+            clickInWindow: CGPoint(x: 100, y: 300), paneFrameInWindow: pane,
+            active: true, sameWindow: true), "the other pane's click is not ours")
+        // The FOCUSED pane installs nothing: a click there is already home.
+        #expect(!PaneFocusClick.shouldFocus(
+            clickInWindow: CGPoint(x: 500, y: 300), paneFrameInWindow: pane,
+            active: false, sameWindow: true))
+        // A click in ANOTHER window never moves this window's focus (the
+        // monitor is app-wide; the decision is not).
+        #expect(!PaneFocusClick.shouldFocus(
+            clickInWindow: CGPoint(x: 500, y: 300), paneFrameInWindow: pane,
+            active: true, sameWindow: false))
+    }
+
+    /// The WIRE: a real view in a real window, a real left mouse-down event,
+    /// the catcher's own monitor installed and removed with liveness, and
+    /// the monitor's real body — geometry conversion, window identity and
+    /// the active gate included. Red on the pre-13g code by construction:
+    /// no pane had a door of its own to install.
+    ///
+    /// The one step the host cannot deliver is `NSApp`'s dispatch: a
+    /// synthesized event pushed through `NSApp.sendEvent` never reaches a
+    /// local monitor (measured while writing this pin — the monitor sees
+    /// events coming off the event queue). So installation is asserted
+    /// through `isWatching` and the body is driven directly, which is the
+    /// honest pair; the untested step is AppKit calling a monitor it holds.
+    @Test func aClickInThePaneFiresTheDoorWithoutConsumingTheEvent() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+            styleMask: [.titled], backing: .buffered, defer: true)
+        let catcher = PaneFocusCatcherView(
+            frame: NSRect(x: 400, y: 0, width: 400, height: 600))
+        window.contentView?.addSubview(catcher)
+
+        var focused = 0
+        catcher.onFocus = { focused += 1 }
+        #expect(!catcher.isWatching, "nothing is watching until the pane goes read-cheap")
+        catcher.active = true
+        defer { catcher.remove() }
+        #expect(catcher.isWatching, "the unfocused pane installed its own door")
+
+        func click(at point: NSPoint) -> NSEvent? {
+            NSEvent.mouseEvent(
+                with: .leftMouseDown, location: point, modifierFlags: [],
+                timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: window.windowNumber, context: nil,
+                eventNumber: 0, clickCount: 1, pressure: 1)
+        }
+
+        guard let inside = click(at: NSPoint(x: 600, y: 300)),
+              let outside = click(at: NSPoint(x: 100, y: 300))
+        else {
+            Issue.record("could not synthesize a mouse event")
+            return
+        }
+
+        catcher.handleLocalMouseDown(inside)
+        #expect(catcher.focusRequests == 1, "the door claimed the click")
+        #expect(focused == 1, "…and the pane was asked for")
+
+        catcher.handleLocalMouseDown(outside)
+        #expect(catcher.focusRequests == 1, "a click in the sibling pane is not ours")
+
+        // Live again ⇒ the monitor comes down and the body goes inert; a
+        // click in the pane you are already in must change nothing.
+        catcher.active = false
+        #expect(!catcher.isWatching, "no monitor while the pane is live")
+        catcher.handleLocalMouseDown(inside)
+        #expect(catcher.focusRequests == 1)
+
+        // Leaving the window takes the monitor with it — no monitor outlives
+        // the pane that installed it.
+        catcher.active = true
+        #expect(catcher.isWatching)
+        catcher.removeFromSuperview()
+        #expect(!catcher.isWatching, "a pane that left the window stops watching")
+    }
+
+    /// It never becomes a hit-test target: the click it reports still
+    /// belongs to whatever is above it. This is the difference between this
+    /// and an overlay — an overlay would eat the read tier's caret offset
+    /// and every list row's first click.
+    @Test func theCatcherNeverIntercepts() {
+        let catcher = PaneFocusCatcherView(frame: NSRect(x: 0, y: 0, width: 10, height: 10))
+        #expect(catcher.hitTest(NSPoint(x: 5, y: 5)) == nil)
+    }
+}
+
+// MARK: - 13g L5 (WT-5/F-4): the unfocused pane says what it is holding
+
+@Suite("The unfocused pane's line (13g L5, WT-5)")
+struct PaneHeldModeTests {
+    /// Her report: *"it's a bit confusing to see it return to read ? or
+    /// write ? mode when you click away from it, if you were just in
+    /// takes."* The pane had not changed mode — it renders read-cheap, which
+    /// LOOKS like Write — so the fix at this layer is to say so.
+    @Test func aPaneNamesTheModeItIsHolding() {
+        #expect(WorkspaceNaming.paneLine("orbit", mode: .takes) == "orbit \u{00B7} takes")
+        #expect(WorkspaceNaming.paneLine("orbit", mode: .compare) == "orbit \u{00B7} compare")
+        // Where a mode is not a thing the pane has (the shelf, a book, a
+        // folder, a scraps container) the pane wears its name alone.
+        #expect(WorkspaceNaming.paneLine("Shelf", mode: nil) == "Shelf")
+    }
+
+    /// STICKY, and read from ONE source: the line names exactly what the
+    /// detail will restore, because both read the per-note memory. A second
+    /// piece of pane state could disagree — and a mode row that lies is
+    /// worse than none.
+    @MainActor
+    @Test func theLineAgreesWithWhatTheDetailWillRestore() {
+        let defaults = UserDefaults.standard
+        let postID = "pane-mode-\(UUID().uuidString)"
+        let key = "postMode.\(postID)"
+        defer { defaults.removeObject(forKey: key) }
+
+        #expect(PostDetailView.rememberedMode(postID: postID) == .write,
+                "an unvisited note opens in Write (S4-20)")
+        defaults.set(PostMode.takes.rawValue, forKey: key)
+        #expect(PostDetailView.rememberedMode(postID: postID) == .takes)
+        #expect(WorkspaceNaming.paneLine(
+            "orbit", mode: PostDetailView.rememberedMode(postID: postID))
+            == "orbit \u{00B7} takes")
+    }
+}

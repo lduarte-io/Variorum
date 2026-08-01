@@ -403,11 +403,16 @@ struct WorkspaceModelTests {
     /// 13f batch 5 (W20 b): the chip's collapse became the WHOLE context
     /// bar's — one fold for the back half and the "in <book>" half together,
     /// per her ruling. A mechanical rename here; the claim is unchanged.
-    @Test func theChipStateIsSessionStateAndStartsShowing() {
+    ///
+    /// **13g L2 (WT-2) flipped the default** — her ruling: *"the navigation
+    /// back and book icon should default to being collapsed, not expanded,
+    /// and you click to expand them."* This assertion is the pin, and it is
+    /// red on the pre-13g line (`= false`) by construction.
+    @Test func theChipStateIsSessionStateAndStartsCollapsed() {
         let workspace = WorkspaceModel()
-        #expect(!workspace.contextBarCollapsed, "expanded by default — it is a name, unfolded")
-        workspace.contextBarCollapsed = true
-        #expect(workspace.contextBarCollapsed)
+        #expect(workspace.contextBarCollapsed, "collapsed by default — her WT-2 ruling")
+        workspace.contextBarCollapsed = false
+        #expect(!workspace.contextBarCollapsed)
     }
 
     /// Her guarantee, at the layer that could break it: closing a row is

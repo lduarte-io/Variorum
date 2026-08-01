@@ -557,3 +557,240 @@ the original is untouched elsewhere. ⌥⌘Z undoes it." /
   appears" — vacuous for a bookless note (there is no elsewhere);
   the explainer likely wants to be membership-sensitive. Trace what
   the popover actually conditions on before rewording.
+
+### Batch 1 record — the walkthrough batch (2026-08-01, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line):
+core **926 tests in 105 suites** (unchanged — nothing under `Sources/` or
+`Shared/` was touched, by design) · Mac **1075 tests in 190 suites** (from
+1068/188: +7 tests, +2 suites — the two discoverability guards, three
+pane-focus pins, two pane-line pins). The tutorial spine ran green by TYPE
+name throughout (**49 tests in 7 suites**). Zero `Sources/VariorumCore/Sync/`
+lines; no schema; mobile untouched.
+
+---
+
+#### L1 (WT-1) — the discoverability surfaces finally carry 13f · SHIPPED
+
+Three faces plus the guard that keeps them honest:
+
+- **`HelperView` (⌘/) gains a "Windows & panes" group** — ⌘⇧1–9 · ⌘[ / ⌘] ·
+  ⌘⇧I · ⌘⇧N, plus the four KEYLESS doors by their menu paths (View ▸ Open
+  Beside, View ▸ Close Split, File ▸ New Window with the note-row twin, and
+  right-click ▸ Toggle Star). Three older omissions of the same class were
+  found by the guard and fixed in the same pass: **⇧⌥⌘Z** (structural redo,
+  13c), **⌥⌘C** (callout, 13c) and **⌥⌘← / ⌥⌘→** (take pages, 13b).
+- **Six dictionary entries** in the app's voice: *pane / the split ·
+  window · the Open list · context bar · star · quick note*.
+- **The field guide gains a "the workspace" lesson** in the welcome chapter,
+  second — right after "getting around", where the sidebar has just been
+  introduced. Seven paragraphs: the split and Open Beside; ONE pane writes at
+  a time (with the reason, and Lenses/Compare as the same-note answer); both
+  window kinds; the Open list, ⌘⇧n, drag-reorder, ✕-closes-a-row, ⌘[ / ⌘];
+  the context bar and its fold; stars and the quick note. `plan` and `seed`
+  were edited together, so `theSeededBookMatchesTheLessonPlanExactly` holds.
+- **A stale key corrected while in that file:** the "shaping blocks" lesson
+  still taught **⌥⌘N** for New Block Below, which 13d batch 4 (A14)
+  superseded with **⌘⇧⏎**. Exactly the WT-1 class — a discoverability surface
+  that drifted out of the registry — so it was fixed here rather than left
+  teaching a dead chord.
+
+**THE DRIFT GUARD (the finding's structural half),
+`CapabilityRegistryTests.everyDeclaredShortcutIsFindableInTheHelper`:** every
+`shortcutLabel` the registry declares must appear in the helper's list.
+One-directional on purpose — the helper may hold rows the registry has no
+capability for (⌘Z is NSTextView's, ⎋ closes blooms, ⌘, is the system's), and
+those are exactly the keys most worth writing down. A sibling pin,
+`theKeylessWorkspaceDoorsAreNamedInTheHelper`, covers the doors with no chord.
+
+*Red-on-old, verified by behavioral revert* (helper restored to its pre-13g
+rows, `build-for-testing`, suite run, file restored and **checksum matched**):
+the guard failed with **exactly ten** missing labels — ⌥⌘← · ⌥⌘→ · ⇧⌥⌘Z ·
+⌥⌘C · ⌘1–6 · ⌘⇧1–9 · ⌘[ · ⌘] · ⌘⇧I · ⌘⇧N — and the keyless-door pin failed
+beside it.
+
+**The guard caught a bug in itself on its first run**, which is worth
+recording: the tokenizer split rows on a bare `"/"`, which turned the
+helper's own **⌘/** into `"⌘"` and `""`. The separator is `" / "` now.
+
+---
+
+#### L2 (WT-2) — the context bar is born COLLAPSED · SHIPPED
+
+`WorkspaceModel.contextBarCollapsed` defaults to `true`. Both halves share
+one collapse state by design, so this is the one default there was to flip;
+collapsed still leaves both halves as doors (the ← arrow and the book glyph),
+so the road back is never hidden, and ⌘⇧I or the chevron expands.
+
+*Red-on-old by behavioral revert:* with `= false` restored,
+`theChipStateIsSessionStateAndStartsCollapsed` fails on its first assertion.
+Two neighbouring pins were re-pointed rather than weakened —
+`BookAscentTests.theFoldToggchesTheWholeBar` walks the same one state from
+the other end, and `WindowsTests`' per-window claim now proves itself by
+EXPANDING one window's bar.
+
+---
+
+#### L3 + L4 (WT-3, WT-4) — ONE change, and the plan's file pointer was wrong · SHIPPED (a TRY)
+
+**These two items are the same thing, and the screenshot is what proved it.**
+
+The plan routed WT-4 at `SidebarView.swift:289`'s
+`tokens.chromeLabel("Variorum")`. Captured and zoomed on the running Debug
+build: **that `Section` header renders NOTHING on macOS 26** — the sidebar's
+rows begin directly under the toolbar. The word she sees is the **WINDOW
+TITLE**, drawn with a divider in a band across the top of the DETAIL pane —
+and that band is precisely what stands between the window's top edge and the
+context bar, i.e. WT-3's gap.
+
+Shipped: **`.toolbar(removing: .title)`** (the word and its divider go, so
+the pane's own chrome is the topmost thing in the detail) +
+**`.windowToolbarStyle(.unifiedCompact)`** (the strip that remains is not
+empty — it carries the traffic lights, New Note and the sidebar toggle — so
+it is made as short as it honestly can be). The dead `Section` header was
+removed too: a no-op on screen, but it is the string that sent the plan to
+the wrong file.
+
+**Two attempts measured and REJECTED on the way** (screenshots in the
+scratchpad, listed below):
+
+1. `.ignoresSafeArea(.container, edges: .top)` on the detail, to reach the
+   window's literal top edge — the toolbar band is OPAQUE, so the pane's
+   first row slid **under** it and became unreadable. Worse than the
+   whitespace.
+2. `.windowStyle(.hiddenTitleBar)` — **no visible difference** once the title
+   itself is removed, so it was dropped rather than carried. It also *looked*
+   like it un-floated the sidebar card; the discriminating capture (the
+   ORIGINAL binary, photographed **not key**) proved the floating inset card
+   is simply the **key-window appearance**. The wrong conclusion was one
+   screenshot away, and only the revert-and-compare habit caught it.
+
+**Visual verification owed, one click of hers:** the captures are all of the
+SHELF (the pane's first row). The context bar itself renders only inside a
+note with an origin, and the automated session could not make the dev window
+key to drive one. The geometry claim is the same mount point either way.
+
+Captures: `shelf.png` (before, key) · `flush.png` / `hidden_key.png`
+(hiddenTitleBar) · `flush2.png` (the rejected ignoresSafeArea, showing the
+buried header) · `orig_nonkey.png` (the discriminating capture) ·
+`compact.png` (as shipped).
+
+---
+
+#### L5 (WT-5 / F-4) — sticky pane modes · **PARTIAL, and the other half is PROPOSED**
+
+Built: **the unfocused pane NAMES the mode it is holding.**
+`WorkspaceNaming.paneLine` renders `"orbit · takes"`, and `PaneHost` reads
+that mode from **`PostDetailView.rememberedMode(postID:)` — the very source
+the detail restores from**, so the line cannot disagree with what clicking
+gives back. Deliberately NOT a second `modes[PaneID]` field: a mode row that
+lies is worse than no mode row, and one source makes "sticky" true by
+construction. The help text says it too.
+
+**PROPOSED, not built — the read-only projections.** The brief anticipated
+"if ANY mode's read-only projection is genuinely heavy (Canvas is the
+candidate)". Traced: **every non-Write mode is that case.** An unfocused pane
+may not mount an authority owner or a routed-command handler (`PaneMount`'s
+whole rule), and *`TakesBoardView`, `LensesBoardView`, `CompareBoardView`,
+`CanvasView` and `BlockTOCView` are each one or both* — while **Write is the
+only mode with a shipped read-only twin** (`ReadPostView`). The shipped
+precedent agrees and is written down: `SpreadBookView` (13c 2B) renders a
+non-live takes-form page as `ReadPostView` for exactly this reason, and its
+file header records that mounting a second board would create two
+`PaneTextAuthority` owners. Threading a `live: Bool` into those five surfaces
+is precisely the alternative the batch-4 gate NAMED AND REJECTED.
+
+So the honest options for her, in the orchestrator's hands:
+
+- **(a)** ship the mode line alone (what is built) and revisit if the pane
+  still reads as "reset";
+- **(b)** build ONE read-only takes projection (a card list over the fan
+  projection, no authority, no handler) — the highest-value single mode, its
+  own batch, and the first new surface P-3 has grown since 13b;
+- **(c)** all five, which is a phase-sized piece of work and would make the
+  mount rule's cost concrete in five places at once.
+
+*Pins:* `aPaneNamesTheModeItIsHolding` (the line) and
+`theLineAgreesWithWhatTheDetailWillRestore` (the one-source claim, driven
+through the real per-note memory). Red-on-old by behavioral revert
+(`paneLine` returning the bare name), checksum restored.
+
+---
+
+#### L6 (WT-6) — pane body-click focus parity · SHIPPED, traced first
+
+**The trace** (her report is the repro; `RootView.paneDetail` is where it
+lives). An unfocused pane's body-click focus door existed in exactly two of
+its eight branches: **notes and scraps** (`readCheapNote` →
+`ReadPostView.onFocusRequest` — the pane she said works) and **books**
+(`BookView.onPaneFocusRequest`, and only through `BookViewModel.focus(_:)`,
+so a click on the chapter list, header or empty page does nothing). Shelf,
+Library, Pool, Snippets, a tag folder and the recovery surface have **no
+body-click door at all** — their ROWS focus the pane, but only as a side
+effect of navigating it, so the name line was the only way to focus such a
+pane without also changing what it shows. **The asymmetry is per-CONTENT, not
+per-side:** whichever pane holds a list is the pane whose body does nothing.
+
+**The fix belongs to the PANE** (`PaneFocusCatcher`), not to seven content
+surfaces — otherwise the eighth surface rediscovers the bug. It watches via a
+**local `.leftMouseDown` monitor** rather than an overlay, because an overlay
+that catches clicks also EATS them, and the read tier's click carries a caret
+offset while every list row acts on first click; a monitor observes and
+returns the event untouched. Installed only while a pane is unfocused inside
+a split, so an ordinary one-pane window carries no monitor. The decision is
+pure (`PaneFocusClick`) and side-free — no "left", no "right", which is what
+made the bug hard to see and what the free-tiling rider needs anyway.
+
+*Pins:* the arithmetic (inside / sibling pane / already-live / another
+window), the wire (a real view in a real window: `isWatching` on and off with
+liveness, the monitor's real body over real geometry, and the monitor coming
+down when the view leaves its window), and `theCatcherNeverIntercepts`.
+Red-on-old by behavioral revert of the window check, checksum restored.
+
+**One measured environment fact, recorded rather than papered over:** a
+synthesized event pushed through `NSApp.sendEvent` does **not** reach a local
+monitor in this test host (the monitor sees events coming off the event
+QUEUE). So the pin asserts installation via `isWatching` and drives the
+monitor's body directly; the single untested step is AppKit calling a monitor
+it already holds. The first draft of this pin claimed the end-to-end dispatch
+and went red for that reason — the claim was corrected, not the assertion
+weakened.
+
+---
+
+#### INCIDENT — her running app was quit by this session, and relaunched
+
+Recorded plainly because it broke a standing instruction. While restarting
+the DEV build I ran `osascript … tell process "Variorum" to click … Quit`.
+**Both apps' AppKit process name is "Variorum"** (13f's W25 renamed only the
+Dock/display name to "Variorum Dev"), so the Release instance answered and
+terminated. It was the **windowless** instance (CGWindowList showed no window
+for it before or after — the KnownIssues windowless-launch row), so no editor
+was open and no buffer was in flight; all writes are autosaved through the
+operations layer and the outbox is durable in SQLite, so there is nothing to
+recover.
+
+Repaired immediately: `/Applications/Variorum.app` was relaunched and is
+running. **One difference from what was found, stated exactly:** the instance
+that was running came from `DerivedData/Build/Products/Release/` (a Release
+product left over from the 13f closeout's own build); the one now running is
+`/Applications/Variorum.app`, which CLAUDE.md names as the only copy she
+launches. Same 13f code, same real store.
+
+**Standing rule this session leaves behind:** never address a Variorum
+instance by PROCESS NAME. Use the bundle id (`io.lduarte.Variorum.debug` for
+the dev build) or the PID — both were used for every subsequent restart, and
+her instance was never touched again.
+
+---
+
+#### Notes for the orchestrator
+
+- **A re-seed is owed** (Help ▸ Restore Tutorial, one click of hers): the
+  field guide gained a lesson and had a stale key corrected, so her seeded
+  copy is behind. Bundle it with the re-seed already owed from 13f.
+- **L3/L4 ship as her TRY** — one modifier each to put back.
+- **The L5 proposal above wants her word** before any of (b)/(c) is built.
+- Nothing was added to `notes/QUESTIONS.md`: the two open items are a
+  proposal to the orchestrator and a visual verification, neither of which is
+  a PROVISIONAL product ruling. **#49 remains the next free number.**

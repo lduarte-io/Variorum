@@ -153,6 +153,15 @@ struct RootView: View {
                     }
                 }
         }
+        // 13g L4 (WT-4): *"i don't even konw if we need that empty whitespace
+        // that says Variorum at the top - let's try getting rid of it."*
+        // MEASURED (the Debug build, captured and zoomed): the word she sees
+        // is the WINDOW TITLE, drawn in a band across the top of the detail
+        // pane — NOT the sidebar `Section` header the plan named, which
+        // renders nothing at all on macOS 26. Removing the title takes the
+        // band's only content away; `.ignoresSafeArea` above takes the band
+        // itself. A TRY, per her word — one modifier to put back.
+        .toolbar(removing: .title)
         .environment(theme)
         // 13f batch 5b: AppKit's own key events, reported to the registry —
         // the ONE place key-ness is decided (and it is sticky there: a

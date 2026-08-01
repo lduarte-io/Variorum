@@ -259,8 +259,10 @@ struct IndependentWorkspaceTests {
         #expect(routerB.workspace.history().canGoBack == false,
                 "its own trail — the other window's visits are not its history")
 
-        routerB.workspace.contextBarCollapsed = true
-        #expect(routerA.workspace.contextBarCollapsed == false, "its own fold")
+        // 13g L2 (WT-2): born collapsed, so the per-window claim is made by
+        // EXPANDING one — the claim (one window's fold is its own) unchanged.
+        routerB.workspace.contextBarCollapsed = false
+        #expect(routerA.workspace.contextBarCollapsed, "its own fold")
 
         // And the app's ONE menu bar reads whichever is key.
         registry.noteKey(a)

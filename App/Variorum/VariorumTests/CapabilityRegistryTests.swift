@@ -222,6 +222,53 @@ struct CapabilityRegistryTests {
         }
     }
 
+    // MARK: - THE DISCOVERABILITY GUARD (13g L1 — WT-1)
+
+    /// **Every shortcut the registry declares is findable in the helper.**
+    ///
+    /// The finding this pins closed (her 13f walkthrough, verbatim: *"i
+    /// don't even konw how to get to any of the things that built last
+    /// phase"*): Phase 13f declared its whole workspace in the registry —
+    /// P-1 held, every door existed and worked — and extended NEITHER
+    /// discoverability surface. ⌘⇧1–9, ⌘[ / ⌘], ⌘⇧I and ⌘⇧N were real keys
+    /// with no entry anywhere she could read, and so were ⇧⌥⌘Z, ⌥⌘C and the
+    /// take-page keys from earlier phases. The registry walk could not see
+    /// it, because the helper's list is hand-written prose and nothing tied
+    /// the two together.
+    ///
+    /// This is that tie. It is RED on the pre-13g helper by construction —
+    /// exactly ten declared labels were missing from it — and it makes the
+    /// legibility mandate (R73/R91/R93) a property of the build rather than
+    /// a thing each phase has to remember.
+    ///
+    /// One-directional on purpose: the helper may hold rows the registry has
+    /// no capability for (⌘Z is NSTextView's, ⎋ closes blooms, ⌘, is the
+    /// system's Settings item), and those are exactly the keys she most
+    /// needs written down.
+    @Test func everyDeclaredShortcutIsFindableInTheHelper() {
+        let shown = HelperView.shortcutKeysShown
+        for capability in CapabilityRegistry.all {
+            guard let label = capability.shortcutLabel else { continue }
+            #expect(shown.contains(label),
+                    "\(capability.id) declares \(label) — the helper (⌘/) must show it")
+        }
+    }
+
+    /// The rows without a chord are doors too, and the helper's own framing
+    /// line ("every shortcut here is also a menu item") only tells half the
+    /// truth unless the keyless doors are reachable from here as well. These
+    /// four are the 13f workspace's keyless doors — the ones she looked for
+    /// and could not find.
+    @Test func theKeylessWorkspaceDoorsAreNamedInTheHelper() {
+        let rows = HelperView.groups.flatMap(\.items)
+        for door in [
+            WorkspaceNaming.openBesideVerb, "Close Split", "New Window", StarCopy.verb,
+        ] {
+            #expect(rows.contains { $0.keys.contains(door) || $0.does.contains(door) },
+                    "the helper names the \(door) door")
+        }
+    }
+
     // MARK: - The routed fallback speech is honest copy
 
     @Test func everyRoutedCommandHasAnUnhandledNote() {

@@ -58,7 +58,15 @@ final class WorkspaceModel {
     /// 13f batch 5 (W20 b): ONE collapse for the WHOLE context bar — the
     /// back half and the "in <book>" half fold together, because her ruling
     /// asked for one hideable bar and never for two hiding mechanisms.
-    var contextBarCollapsed = false
+    ///
+    /// **13g L2 (WT-2) — it is born COLLAPSED.** Her walkthrough ruling:
+    /// *"i think that the navigation back and book icon should default to
+    /// being collapsed, not expanded, and you click to expand them."* The
+    /// two halves share one collapse state by design, so this is the one
+    /// default there is to flip. Collapsed still leaves BOTH halves as
+    /// doors (the arrow and the book glyph — `ContextBar`), so the road
+    /// back is never hidden; ⌘⇧I or the fold expands.
+    var contextBarCollapsed = true
 
     /// The books visited THIS SESSION, most recent first — the chooser's
     /// float (her round-10 shaping, W20 c). View state like everything else

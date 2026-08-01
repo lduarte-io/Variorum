@@ -337,13 +337,16 @@ struct AscentDoorTests {
 
     /// …and it toggles ONE state, so the two halves can never hide
     /// separately (her ruling: never two hiding mechanisms).
+    ///
+    /// 13g L2 (WT-2): the bar is born COLLAPSED now, so the toggle walks
+    /// the same one state from the other end.
     @Test func theFoldToggchesTheWholeBar() {
         let router = ShellRouter()
-        #expect(!router.workspace.contextBarCollapsed)
-        router.toggleContextBar()
         #expect(router.workspace.contextBarCollapsed)
         router.toggleContextBar()
         #expect(!router.workspace.contextBarCollapsed)
+        router.toggleContextBar()
+        #expect(router.workspace.contextBarCollapsed)
     }
 
     /// Visiting a book floats it in the chooser — recorded at the ONE

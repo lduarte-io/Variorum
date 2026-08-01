@@ -405,4 +405,25 @@ nonisolated enum WorkspaceNaming {
 
     /// The fold's own act, named once (menu item + palette row).
     static let contextBarVerb = "Toggle Context Bar"
+
+    // MARK: - The unfocused pane's own line (13g L5 — WT-5)
+
+    /// What an UNFOCUSED pane calls itself. Her report: *"it's a bit
+    /// confusing to see it return to read ? or write ? mode when you click
+    /// away from it, if you were just in takes."*
+    ///
+    /// A pane that loses liveness renders read-cheap, and read-cheap looks
+    /// like Write — so a pane she left in Takes read as a pane that had
+    /// silently changed mode. It had not: the mode is remembered per note
+    /// and comes straight back when the pane goes live again. This line is
+    /// that fact, SAID: the pane names the mode it is holding, so the change
+    /// on screen reads as "showing quietly" instead of "reset".
+    ///
+    /// `mode` is nil where a mode is not a thing the pane has (the shelf, a
+    /// book, a tag folder, the scraps container), and then the pane wears
+    /// its name alone, exactly as before.
+    static func paneLine(_ name: String, mode: PostMode?) -> String {
+        guard let mode else { return name }
+        return "\(name) \u{00B7} \(mode.rawValue.lowercased())"
+    }
 }
