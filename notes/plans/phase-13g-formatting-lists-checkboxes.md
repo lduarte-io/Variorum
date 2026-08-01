@@ -3183,3 +3183,41 @@ explicit `Calendar` — which is also the evidence that the local-day decision i
   authors 13e's plan (L16 — W26, the windowless capture-first row,
   the note-window clip row, and the tripwire's A47c sweep all
   named for 13e).
+
+### Round 7 — 2026-08-01, from her phone (the refresh authorized; the close un-gated)
+
+Her message, verbatim:
+
+> go ahead and close my app and do the second refresh (or do that
+> after the cold review ladder). I'm using RC on my phone for this
+> prompt so I can't close it myself or do the checks right now but
+> I don't think we should gate the cold review ladder and phase
+> close on the hand checks - I can always address those later and
+> you can make a note at the start of 13e to remind me of those
+> checks (not gate on them). also, after 13e what's left in the 13
+> phases? there's one of these phases that has a fragments part as
+> well I think (around the joint login via a stargazing account or
+> something of the sort).
+
+**Dispositions:**
+
+- **R7-1: the second refresh EXECUTED NOW at her instruction** —
+  her app closed BY THE ORCHESTRATOR at her explicit word (the
+  never-touch rule's one exception is her own authorization),
+  addressed by BUNDLE ID (`io.lduarte.Variorum`, the batch-1
+  standing rule), graceful quit; zero instances verified; fresh
+  WAL-safe backup; Release build → `/Applications`; relaunched for
+  her return. The standard closeout refresh still follows the
+  ladder IF the ladder changes code.
+- **R7-2 (RULED): the cold review ladder and the phase close are
+  NOT GATED on her hand-checks** — her words: "I can always
+  address those later and you can make a note at the start of 13e
+  to remind me of those checks (not gate on them)." The 13e plan
+  this closeout authors OPENS with a reminder note (never a gate):
+  the two hand-checks (⌘B in a take pane; the Read-scroll link
+  click), the look/feel calls (bundle items i–v), and the #49–#52
+  walk — all hers at leisure, the 13c/13f precedent (a phase
+  closes with its walk riding the next opening).
+- **Her roadmap question answered in the reply** (no ruling): the
+  Fragments/joint-login work she remembers is Phase 14a (suite
+  identity — the neutral stargazing account), not a 13-family row.
