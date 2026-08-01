@@ -2140,3 +2140,41 @@ launches.
   `/Applications/Variorum.app`, one on-screen window) and at the end, unchanged.
   The worktree and its isolated DerivedData were removed; `git worktree list`
   shows only the repo.
+
+### Orchestrator acceptance — batch 5, the kickoff sweep (2026-08-01)
+
+- **Commit `d5546ba` verified by own inspection:** test code and
+  records ONLY (four test files + the two notes files) — exactly
+  what "the defect is the pin's, not the door's" should look like.
+  No product code, no schema, zero `Sync/` lines.
+- **Counts by the orchestrator's OWN runs:** Mac "Test run with
+  1121 tests in 194 suites passed" — the claim matched exactly.
+  Core untouched by construction (nothing under `Sources/` in the
+  diff) — the standing own-run 986/108 is the acceptance number;
+  mobile not owed.
+- **Trace (i) ACCEPTED — the flaky-pin row RESOLVED:** the
+  mechanism (the stacks move under the lock strictly before the
+  actor-hop continuation speaks the status) traced across three
+  files, made deterministic by holding the real window open, red
+  on the old polling shape on EVERY run; the 32-assertion sweep's
+  three latent siblings fixed the same way. KnownIssues row
+  removed — verified gone.
+- **Trace (ii) ACCEPTED — deepened, honestly not closed:** 32
+  launches / six arms / two trees / zero windowless, every census
+  CGWindowList-by-PID; the ruled-out space (incl. the
+  13f-closeout tree itself — the behaviour is NOT tree-borne) and
+  the three surviving candidates recorded on the row; re-owned to
+  **13e's kickoff sweep, capture-first** (sample → census →
+  lsappinfo → timed quit → only then the Dock click); L16 carries
+  the duty beside W26. The locked-session caveat (every arm ran
+  under `CGSSessionScreenIsLocked = 1`; the unlocked opposite
+  untested) is on the row where it belongs.
+- **Batch 5 ACCEPTED. The overnight autonomous arc is COMPLETE** —
+  batches 1–5 shipped and accepted, counts core 986/108 · Mac
+  1121/194 · mobile 14/4 · spine 50/7, all orchestrator-own-run.
+  Everything further waits on the author: the morning bundle
+  (items i–ix + the L5 word), the #49/#50 walks, any
+  sitting-driven batches, then the ONE Fable cold review
+  (standard ladder), the TEXTKIT2 §5 re-run (L15), and the
+  closeout that authors 13e's plan (L16 — W26 + the windowless
+  capture-first item both named).
