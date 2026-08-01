@@ -2416,3 +2416,101 @@ continue non-gating, next free QUESTIONS number **#51**;
 STOP-and-report anything gating; batch record appended here;
 commit per convention, explicit paths; never push; never
 `/Applications`).
+
+### Round 6 — 2026-08-01 (the four nods; question-tool batch, answers verbatim-faithful)
+
+- **R6-1 (RULED): tag chips live on the TOP BAR** — colored tag
+  cards with a stable per-tag color (the block-tint precedent), +
+  opens a popover with autocomplete, ✕ removes; tags leave the
+  bottom bar entirely.
+- **R6-2 (RULED): the bottom bar regroups as TWO slide-out groups**
+  (she picked the previewed shape): flat = block 1/16 · block ▾ ·
+  + take · commit ⌘S · note ▾ · comments · newlines-make-blocks ·
+  word counts · ?; **block ▾** slides out Divide · Extract · Make
+  Block · Merge · + Below · − Block; **note ▾** slides out history
+  · seal · set date…; tags gone (R6-1).
+- **R6-3 (RULED, with her refinement — verbatim):** "I think a
+  display rule is fine - but maybe it should be preserved on
+  export? someone might be frustrated exporting a note with a date
+  they see as a title and then their exported note says
+  'Untitled'." → the DISPLAY RULE ships, and it EXTENDS TO EXPORT
+  SURFACES: ONE `displayTitle` brain (title, else the note's date)
+  serves views AND every export surface that would otherwise emit
+  "Untitled" (filenames — already dated since 11b's ratified
+  shapes, verify; reading-export section headings; the bulk
+  manifest). `renderedText`/body semantics are UNTOUCHED (titles
+  have never been body content); this is a projection rule
+  applied consistently, not a join-brain change.
+- **R6-4 (RULED): quicknotes auto-tag + self-creating smart book**
+  — every quick note mints with the `quicknote` tag; the FIRST
+  creates the smart "Quicknotes" book keyed to that tag (the
+  #37(iii) Journal self-creation precedent; a designated/dangling
+  check the same way); removing the tag leaves the book by smart
+  membership's own semantics.
+
+## Batch 7 brief — the nod set (a FRESH Opus implementer; self-contained; SPAWNS ONLY AFTER BATCH 6's ACCEPTANCE)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM —
+rounds 5–6 hold the rulings you build (R5-8/R5-9/R5-10/R5-13 as
+ruled in R6-1…R6-4); the constitution binds; the "Environment
+traps" section of `notes/plans/phase-13c-book-forms-and-conversions.md`
+(binding) PLUS the batch-1 standing rule (bundle id or PID only —
+NEVER process name; her running real-store instance is never
+touched); `notes/TEXTKIT2_NOTES.md` §1/§3.
+
+**Scope — four ruled items:**
+
+- **(1) R6-1 tag chips:** colored chips on the top context bar;
+  stable per-tag color derived from the tag path (the `BlockTint`
+  stable-color discipline — same tag, same color, no re-ripple);
+  + → popover with autocomplete over existing tags (creating new
+  ones through the standing tag ops); ✕ removes (ordinary
+  removeTag); the bottom bar's tags… door RETIRES (registry doors
+  updated — P-1; the ⌘K/menu tag doors stay). Both voices, light
+  and dark; chrome fixedSize texts carry lineLimit (P-8).
+- **(2) R6-2 the bottom bar regroup**, exactly the previewed
+  shape: flat row = block 1/16 · block ▾ · + take · commit ⌘S ·
+  note ▾ · comments · newlines-make-blocks toggle · word counts ·
+  ?; block ▾ slides out Divide · Extract · Make Block · Merge ·
+  + Below · − Block; note ▾ slides out history · seal · set date….
+  Doors render FROM the registry (P-1 — the groups are door
+  placement, not new gating); every act keeps its shortcut and
+  menu-bar door; the slide-out is honest chrome (no hidden
+  gating). Registry-walk stays green by construction.
+- **(3) R6-3 the untitled-date display rule + its export half:**
+  ONE `displayTitle(title, date) -> String` brain (pure; the
+  note's date where the title is empty — decide and pin the date
+  source: `entry_date` where set, else `created_at`'s date, stated
+  in the record) serving: every view surface that renders
+  "Untitled" today, AND the export surfaces — VERIFY the 11b
+  dated/titled filename shape first (it may already comply), then
+  route reading-export section headings and the bulk manifest's
+  titles through the same brain. `renderedText` and body semantics
+  BYTE-UNTOUCHED (the join-brain rule); the 11b export pins must
+  hold — if any pin encodes "Untitled" literally, the pin's
+  updated expectation is part of the record, not silently edited.
+  Renaming edits the real title exactly as today; the date is
+  never written into `container.title`.
+- **(4) R6-4 quicknotes:** the quick-note mint applies the
+  `quicknote` tag (through ordinary applyTag inside the mint's
+  standing flow — check `importPost`'s transaction shape; the tag
+  application may ride after the mint in the same gesture, stated
+  honestly in the record); the FIRST quick note ensures the smart
+  "Quicknotes" book exists (kind smart, query = tag `quicknote`,
+  shelf; the #37(iii) designated-or-dangling self-creation
+  precedent — never replacing a book she made; a `setting` key for
+  the designation, the daily-journal pattern). Removing the tag
+  leaves the book by derivation — pin it.
+
+**Suites:** `Sources/` may be touched (the displayTitle brain's
+home is Domain/Queries-side; the quicknote ensure) ⇒ if so, ALL
+THREE at batch end; counts quoted from your own "Test run with N
+tests" lines against the baselines batch 6's acceptance records.
+Tutorial spine green by TYPE name — and if any lesson/helper
+wording references the bottom bar's old shape, update it WITH the
+walk test (the WT-1 class: discoverability surfaces move with the
+doors). The loop as always (red-on-old by behavioral revert with
+checksums; PROVISIONAL-and-continue non-gating, QUESTIONS next
+free number per the file at your read time; STOP-and-report
+anything gating; batch record appended here; commit per
+convention; never push; never `/Applications`).
