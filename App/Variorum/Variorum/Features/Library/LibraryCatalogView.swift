@@ -21,7 +21,10 @@ import VariorumCore
 @Observable
 final class LibraryCatalogModel {
     enum Scope: String, CaseIterable { case all, books, posts, blocks }
-    enum Mode: String, CaseIterable { case list, timeline }
+    /// 13g batch 6 (R5-6): `notes` joins as a THIRD view mode — her
+    /// Apple-Notes-shaped list (title · date · the first bit of text · the
+    /// book it's in). A mode beside the others, never a replacement.
+    enum Mode: String, CaseIterable { case list, notes, timeline }
 
     @ObservationIgnored let session: AppSession
     var scope: Scope = .all
@@ -32,6 +35,11 @@ final class LibraryCatalogModel {
     var query = ""
     private(set) var hits: [Queries.CatalogHit] = []
     private(set) var postTags: [String: [String]] = [:]
+    /// 13g R5-6: postID → the note card's read-time extras (snippet +
+    /// books). Loaded ONLY in `.notes` mode and only for the hits on
+    /// screen — the same bounded-to-what-is-listed discipline as
+    /// `postTags`.
+    private(set) var noteCards: [String: NoteCards.Card] = [:]
     private(set) var lastError: String?
     /// Generation-stamped adoption (round 2, MINOR — the Phase 8 ruling):
     /// per-keystroke tasks are unordered; only the NEWEST read may land.
@@ -53,9 +61,9 @@ final class LibraryCatalogModel {
             }
             guard generation == searchGeneration else { return }  // stale
             hits = filtered(all)
-            await loadTagChips(
-                for: hits.filter { $0.kind == .post }.map(\.id),
-                generation: generation)
+            let postIDs = hits.filter { $0.kind == .post }.map(\.id)
+            await loadTagChips(for: postIDs, generation: generation)
+            await loadNoteCards(for: postIDs, generation: generation)
             lastError = nil
         } catch {
             guard generation == searchGeneration else { return }
@@ -94,6 +102,39 @@ final class LibraryCatalogModel {
             guard generation == searchGeneration else { return }
             lastError = String(describing: error)
         }
+    }
+
+    /// 13g R5-6: the note cards' read-time extras. Costs NOTHING outside
+    /// `.notes` mode (a mode she is not in must not pay for it), and inside
+    /// it costs two grouped reads over the hits already on screen — the
+    /// `loadTagChips` shape exactly, generation guard included, because a
+    /// second suspension point can otherwise land a stale query's cards
+    /// (the round-3 MINOR that taught this file the rule).
+    func loadNoteCards(for postIDs: [String], generation: Int) async {
+        guard mode == .notes, !postIDs.isEmpty else {
+            if generation == searchGeneration, mode != .notes || postIDs.isEmpty {
+                noteCards = [:]
+            }
+            return
+        }
+        do {
+            let cards = try await session.database.read { db in
+                try NoteCards.load(db, postIDs: postIDs)
+            }
+            guard generation == searchGeneration else { return }
+            noteCards = cards
+        } catch {
+            guard generation == searchGeneration else { return }
+            lastError = String(describing: error)
+        }
+    }
+
+    /// The view calls this when the MODE changes (a mode switch does not
+    /// re-run the search, and switching INTO notes must fill the cards).
+    func refreshNoteCards() async {
+        await loadNoteCards(
+            for: hits.filter { $0.kind == .post }.map(\.id),
+            generation: searchGeneration)
     }
 
     /// R46: the addable tags surface — apply one tag to MANY posts inline.
@@ -155,6 +196,7 @@ struct LibraryCatalogView: View {
             Divider().overlay(tokens.line)
             switch model.mode {
             case .list: listBody
+            case .notes: notesBody
             case .timeline:
                 TimelineView(session: session) { postID in
                     onOpen(.post(postID))
@@ -168,6 +210,9 @@ struct LibraryCatalogView: View {
         }
         .background(tokens.surface)
         .task { await model.search() }
+        // 13g R5-6: switching INTO notes fills the cards; switching out
+        // clears them, so a mode she is not in holds no derived text.
+        .task(id: model.mode) { await model.refreshNoteCards() }
         .sheet(item: $tagSheetTarget) { target in
             TagAssignmentSheet(session: session, postID: target.id, postTitle: target.title)
         }
@@ -242,10 +287,11 @@ struct LibraryCatalogView: View {
                 .frame(maxWidth: 280)
                 Picker("", selection: Binding(get: { model.mode }, set: { model.mode = $0 })) {
                     Text(tokens.chromeLabel("List")).tag(LibraryCatalogModel.Mode.list)
+                    Text(tokens.chromeLabel("Notes")).tag(LibraryCatalogModel.Mode.notes)
                     Text(tokens.chromeLabel("Timeline")).tag(LibraryCatalogModel.Mode.timeline)
                 }
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 160)
+                .frame(maxWidth: 230)
                 if selectedPosts.count > 1 {
                     Menu(tokens.chromeLabel("Tag \(selectedPosts.count) notes")) {
                         ForEach(tags.tags, id: \.id) { tag in
@@ -332,6 +378,66 @@ struct LibraryCatalogView: View {
         .background(tokens.surface)
     }
 
+    /// 13g batch 6 (R5-6) — the Apple-Notes-shaped list: title · date ·
+    /// the first bit of text · the book it's in, per her screenshot. NOTES
+    /// ONLY (books and blocks have no snippet to show and belong to the
+    /// List mode's sections); a `LazyVStack` so the rows cost what is drawn.
+    private var notesBody: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                let posts = model.hits.filter { $0.kind == .post }
+                ForEach(posts, id: \.id) { hit in
+                    noteCard(hit)
+                    Divider().overlay(tokens.line.opacity(0.6))
+                }
+                if posts.isEmpty {
+                    Text(tokens.chromeLabel("No notes match."))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .padding(24)
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+        .background(tokens.surface)
+    }
+
+    private func noteCard(_ hit: Queries.CatalogHit) -> some View {
+        let card = model.noteCards[hit.id] ?? NoteCards.Card()
+        return VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(hit.title)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                if let date = hit.detail {
+                    Text(tokens.chromeLabel(date))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+                if !card.books.isEmpty {
+                    Text(tokens.chromeLabel(card.books.joined(separator: " · ")))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent.opacity(0.85))
+                        .lineLimit(1)
+                }
+            }
+            Text(card.snippet.isEmpty ? "No text yet" : card.snippet)
+                .font(tokens.small)
+                .foregroundStyle(card.snippet.isEmpty ? tokens.faint : tokens.muted)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(.vertical, 9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture { onOpen(.post(hit.id)) }
+        .contextMenu { postRowMenu(hit) }
+        .help("Open this note")
+    }
+
     private func postRow(_ hit: Queries.CatalogHit) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(hit.title)
@@ -370,69 +476,75 @@ struct LibraryCatalogView: View {
         .contentShape(Rectangle())
         .onTapGesture { onOpen(.post(hit.id)) }
         .draggable(hit.id)
-        .contextMenu {
-            Button("Open") { onOpen(.post(hit.id)) }
-            if let onOpenBeside {
-                Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(hit.id) }
+        .contextMenu { postRowMenu(hit) }
+    }
+
+    /// 13g R5-6: ONE note-row menu, two renderers (the List mode's row and
+    /// the Notes mode's card) — the `.openBeside` shape, so the two lists
+    /// can never offer different doors on the same note.
+    @ViewBuilder
+    private func postRowMenu(_ hit: Queries.CatalogHit) -> some View {
+        Button("Open") { onOpen(.post(hit.id)) }
+        if let onOpenBeside {
+            Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(hit.id) }
+        }
+        if let starDoor {
+            Button(starDoor.title(for: .post(hit.id))) { starDoor.toggle(.post(hit.id)) }
+        }
+        if let onOpenInNewWindow {
+            Button(CapabilityRegistry.capability(.openInNewWindow).verb) {
+                onOpenInNewWindow(hit.id)
             }
-            if let starDoor {
-                Button(starDoor.title(for: .post(hit.id))) { starDoor.toggle(.post(hit.id)) }
-            }
-            if let onOpenInNewWindow {
-                Button(CapabilityRegistry.capability(.openInNewWindow).verb) {
-                    onOpenInNewWindow(hit.id)
+        }
+        Button("Rename…") {
+            renameTitle = hit.title == "Untitled" ? "" : hit.title
+            renameTarget = hit.id
+        }
+        Button("Tags…") {
+            tagSheetTarget = .init(id: hit.id, title: hit.title)
+        }
+        Divider()
+        // version_of DOOR 1 (Phase 11 A2's TWO-door ratification —
+        // round 2, MAJOR 5: dropped in the sidebar→Library move,
+        // restored verbatim; the same op door 2 emits).
+        Menu("Mark as Versions with") {
+            ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
+                Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
+                    Task { await library.markAsVersions(hit.id, other.postID) }
                 }
             }
-            Button("Rename…") {
-                renameTitle = hit.title == "Untitled" ? "" : hit.title
-                renameTarget = hit.id
-            }
-            Button("Tags…") {
-                tagSheetTarget = .init(id: hit.id, title: hit.title)
-            }
-            Divider()
-            // version_of DOOR 1 (Phase 11 A2's TWO-door ratification —
-            // round 2, MAJOR 5: dropped in the sidebar→Library move,
-            // restored verbatim; the same op door 2 emits).
-            Menu("Mark as Versions with") {
-                ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
-                    Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
-                        Task { await library.markAsVersions(hit.id, other.postID) }
-                    }
+        }
+        // Sitting 9 (R60/R68): the inverse door beside the mark — an
+        // unlinked pick speaks its refusal instead of silently no-oping.
+        Menu("Unmark Versions with") {
+            ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
+                Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
+                    Task { await library.unmarkVersions(hit.id, other.postID) }
                 }
             }
-            // Sitting 9 (R60/R68): the inverse door beside the mark — an
-            // unlinked pick speaks its refusal instead of silently no-oping.
-            Menu("Unmark Versions with") {
-                ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
-                    Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
-                        Task { await library.unmarkVersions(hit.id, other.postID) }
-                    }
-                }
+        }
+        Button("Duplicate as Version") {
+            Task { await library.duplicateAsVersion(postID: hit.id) }
+        }
+        Divider()
+        // The per-post export doors (Phase 11b B1's ratified context-
+        // menu shapes — round 2, MAJOR 5: restored).
+        Menu("Export") {
+            Button("Markdown…") { exportPost(hit, includeVariants: false) }
+            Button("Markdown with Takes…") { exportPost(hit, includeVariants: true) }
+            Button("PDF…") { exportPostPDF(hit) }
+        }
+        Divider()
+        Button("Archive") {
+            Task {
+                await library.archive(postID: hit.id)
+                await model.search()
             }
-            Button("Duplicate as Version") {
-                Task { await library.duplicateAsVersion(postID: hit.id) }
-            }
-            Divider()
-            // The per-post export doors (Phase 11b B1's ratified context-
-            // menu shapes — round 2, MAJOR 5: restored).
-            Menu("Export") {
-                Button("Markdown…") { exportPost(hit, includeVariants: false) }
-                Button("Markdown with Takes…") { exportPost(hit, includeVariants: true) }
-                Button("PDF…") { exportPostPDF(hit) }
-            }
-            Divider()
-            Button("Archive") {
-                Task {
-                    await library.archive(postID: hit.id)
-                    await model.search()
-                }
-            }
-            Button("Delete", role: .destructive) {
-                Task {
-                    await library.delete(postID: hit.id)
-                    await model.search()
-                }
+        }
+        Button("Delete", role: .destructive) {
+            Task {
+                await library.delete(postID: hit.id)
+                await model.search()
             }
         }
     }
@@ -476,6 +588,98 @@ struct LibraryCatalogView: View {
 
 /// One grouped tag-chip load shared by the Library and the Pool (round 2
 /// NIT: the per-post loops were N round trips each).
+/// 13g batch 6 (R5-6) — the Apple-Notes-shaped row's two read-time extras.
+///
+/// Her ask: *"I also want to make a different view in the library that is
+/// more similar to the apple notes view where you can see the first little
+/// bit of text."*
+///
+/// NOTHING IS STORED (the no-denormalization rule): the snippet is derived
+/// on every read from the blocks themselves, and the books come from the
+/// membership rows. Both are **bounded twice** — to the posts already
+/// listed (the catalog's own limit), and, for the snippet, to each post's
+/// FIRST FEW BLOCKS via a window function, so a 10,000-block note costs the
+/// same as a three-block one (P1: cost ∝ what is listed, never ∝ the note).
+///
+/// Two honest simplifications, recorded rather than hidden:
+///   · the snippet resolves `chosen → default` and requires that variant to
+///     be live; the editor's full read-time rule ALSO falls back when the
+///     chosen take is archived. A snippet that goes to the next block in
+///     that corner is a display aid behaving conservatively, not a second
+///     rendering brain — `renderPost` remains the one that matters;
+///   · the books are CURATED memberships. A smart book's membership is
+///     derived by walking its filter, which is what the membership chip does
+///     for ONE note and must not be done for forty rows (the `PaneHost`
+///     one-shot's stated reason).
+enum NoteCards {
+    struct Card: Equatable {
+        var snippet: String = ""
+        var books: [String] = []
+    }
+
+    /// How many leading blocks a snippet may consult before giving up.
+    nonisolated static let blockWindow = 3
+    /// How much text a snippet may carry (the row shows ~2 lines).
+    nonisolated static let snippetLimit = 220
+
+    nonisolated static func load(
+        _ db: Database, postIDs: [String]
+    ) throws -> [String: Card] {
+        let json = String(
+            decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8),
+            as: UTF8.self)
+        var result: [String: Card] = [:]
+
+        let snippets = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT post_id, text FROM (
+                  SELECT cb.container_id AS post_id,
+                         substr(COALESCE(v.working_text, ''), 1, \(snippetLimit)) AS text,
+                         ROW_NUMBER() OVER (
+                           PARTITION BY cb.container_id ORDER BY cb.position, cb.id
+                         ) AS n
+                  FROM container_block cb
+                  JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                  LEFT JOIN variant v
+                    ON v.id = COALESCE(cb.chosen_variant_id, b.default_variant_id)
+                   AND v.deleted_at IS NULL
+                  WHERE cb.deleted_at IS NULL
+                    AND cb.container_id IN (SELECT value FROM json_each(?))
+                ) WHERE n <= \(blockWindow)
+                ORDER BY post_id, n
+                """,
+            arguments: [json])
+        for row in snippets {
+            let postID: String = row["post_id"]
+            guard result[postID]?.snippet.isEmpty ?? true else { continue }
+            let text = (row["text"] as String? ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !text.isEmpty else {
+                result[postID, default: Card()].snippet = ""
+                continue
+            }
+            result[postID, default: Card()].snippet = text
+        }
+
+        let books = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT rp.post_id AS post_id, r.name AS name
+                FROM reading_post rp
+                JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
+                WHERE rp.deleted_at IS NULL
+                  AND rp.post_id IN (SELECT value FROM json_each(?))
+                ORDER BY rp.post_id, r.name
+                """,
+            arguments: [json])
+        for row in books {
+            result[row["post_id"] as String, default: Card()].books.append(row["name"])
+        }
+        return result
+    }
+}
+
 enum TagChips {
     nonisolated static func load(
         _ db: Database, postIDs: [String]

@@ -197,11 +197,32 @@ nonisolated enum BlockDecor {
         return (end, last.frame.maxY + 2)
     }
 
-    /// Whether the right gutter is wide enough for margin comment CARDS;
+    /// Whether a comment gutter is wide enough for margin comment CARDS;
     /// below this the margin presentation degrades to the count badge.
-    static func gutterFitsCards(viewWidth: CGFloat, textRight: CGFloat) -> Bool {
-        viewWidth - textRight >= 150
+    ///
+    /// 13g batch 6 (R5-3): the gutter handed in is the LEFT one now — her
+    /// ruling, verbatim: *"i also think comments should appear on the left
+    /// since there's so much machinery going on on the right already."* The
+    /// threshold is unchanged; only which margin is measured moved, which is
+    /// why this takes a plain width rather than deriving one side's.
+    static func gutterFitsCards(width: CGFloat) -> Bool {
+        width >= 150
     }
+
+    /// Where a left-margin comment card sits, given the text's left edge.
+    /// The drag handles own the lane at `textLeft - 22` (see
+    /// `renderHandles`), so a card stops short of it rather than under it.
+    static func leftCardRect(textLeft: CGFloat, blockTop: CGFloat, blockHeight: CGFloat)
+        -> CGRect
+    {
+        let width = min(210, max(0, textLeft - Self.leftCardLane))
+        return CGRect(
+            x: max(0, textLeft - Self.leftCardLane - width), y: blockTop,
+            width: width, height: min(blockHeight + 24, 96))
+    }
+
+    /// The clearance a left card leaves for the drag-handle lane.
+    static let leftCardLane: CGFloat = 28
 }
 
 // MARK: - The callout palette (token NAMES → colors; R1 forbids stored values)
@@ -346,7 +367,6 @@ final class BlockDecorOverlayController {
         for handle in handleViews { handle.removeFromSuperview() }
         indicatorView?.removeFromSuperview()
         insertionBar?.removeFromSuperview()
-        addChip?.removeFromSuperview()
         seamViews = []
         calloutViews = []
         emojiLabels = []
@@ -354,8 +374,6 @@ final class BlockDecorOverlayController {
         handleViews = []
         indicatorView = nil
         insertionBar = nil
-        addChip = nil
-        addChipBlockID = nil
     }
 
     // MARK: Render
@@ -469,8 +487,8 @@ final class BlockDecorOverlayController {
             }
         }
         let inline = state.appearance.inlineComments
-        let fitsCards = BlockDecor.gutterFitsCards(
-            viewWidth: state.viewWidth, textRight: state.textRight)
+        // 13g R5-3: the LEFT gutter is the comment margin now.
+        let fitsCards = BlockDecor.gutterFitsCards(width: state.textLeft)
         pool(&commentCards, count: items.count, in: textView, below: false) {
             CommentCardView()
         }
@@ -491,84 +509,46 @@ final class BlockDecorOverlayController {
                     height: EditorTypography.inlineCommentSpacing - 4)
             } else if fitsCards {
                 // The margin card (R7's ruling — the round-2 mockup's
-                // mcmt): the right gutter, aligned to the block's top;
-                // nudged down when a fan badge holds the corner.
-                let width = min(210, state.viewWidth - state.textRight - 24)
-                let yNudge: CGFloat = state.fannedBlockIDs.contains(blockID) ? 22 : 0
+                // mcmt), moved to the LEFT margin by her R5-3 ruling and
+                // aligned to the block's top. The fan-badge Y NUDGE goes
+                // with the move: the badge holds the block's top-RIGHT
+                // corner, which is the collision she reported, and there is
+                // nothing to dodge on this side.
                 card.present(
                     text: tokens.commentPrefix + text,
                     tint: .clear, ink: NSColor(tokens.commentInk),
                     style: .marginCard(rule: NSColor(tokens.commentTint)))
-                card.frame = CGRect(
-                    x: state.textRight + 12, y: item.frame.frame.minY + yNudge,
-                    width: width,
-                    height: min(item.frame.frame.height + 24, 96))
+                card.frame = BlockDecor.leftCardRect(
+                    textLeft: state.textLeft,
+                    blockTop: item.frame.frame.minY,
+                    blockHeight: item.frame.frame.height)
             } else {
-                // Narrow gutter: the count badge — still a door.
+                // Narrow gutter: the count badge — still a door, and now on
+                // the same side as the cards it stands in for.
                 card.present(
                     text: "#\(item.briefs.count)",
                     tint: NSColor(tokens.commentTint), ink: NSColor(tokens.commentInk),
                     style: .badge)
-                let yNudge: CGFloat = state.fannedBlockIDs.contains(blockID) ? 20 : 0
                 card.frame = CGRect(
-                    x: max(state.textLeft, state.viewWidth - 40),
-                    y: item.frame.frame.minY + yNudge,
+                    x: max(2, state.textLeft - 36),
+                    y: item.frame.frame.minY,
                     width: 32, height: 16)
             }
         }
-        renderAddChip(state, tokens: tokens, in: textView, fitsCards: fitsCards)
     }
 
-    // MARK: The margin add-a-comment door (13b 4D — N35, the mockups' own
-    // margin grammar in its MINIMAL form)
-
-    private var addChip: CommentCardView?
-    /// Test seam: which block the add door currently offers (nil = none).
-    private(set) var addChipBlockID: String?
-
-    /// A quiet "+ //" in the comment gutter at the CARET block — exactly
-    /// where its margin card would sit — whenever the block has no
-    /// comments yet. Scoped deliberately small (the N35 disposition):
-    /// margin-card mode only (the gutter must fit cards; the inline
-    /// setting has its own strip grammar), the live editor only (the read
-    /// tier has no comments door), the caret block only (the calm margin
-    /// never grows a rail of + buttons). Clicking opens the block's
-    /// comments panel — the same door every comment face opens.
-    private func renderAddChip(
-        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView,
-        fitsCards: Bool
-    ) {
-        let caretID = state.caretBlockID
-        let eligible = onOpenComments != nil
-            && !state.appearance.inlineComments
-            && fitsCards
-        guard eligible, let caretID,
-              state.comments[caretID]?.isEmpty ?? true,
-              let frame = state.frames.first(where: { $0.blockID == caretID })
-        else {
-            addChip?.removeFromSuperview()
-            addChip = nil
-            addChipBlockID = nil
-            return
-        }
-        let chip = addChip ?? {
-            let chip = CommentCardView()
-            addChip = chip
-            return chip
-        }()
-        if chip.superview == nil { textView.addSubview(chip) }
-        addChipBlockID = caretID
-        chip.onClick = onOpenComments.map { open in { open(caretID) } }
-        chip.present(
-            text: "+ \(tokens.commentPrefix.trimmingCharacters(in: .whitespaces))",
-            tint: .clear, ink: NSColor(tokens.faint),
-            style: .badge)
-        chip.toolTip = "Add a comment on this block (⌘⇧')"
-        let yNudge: CGFloat = state.fannedBlockIDs.contains(caretID) ? 22 : 0
-        chip.frame = CGRect(
-            x: state.textRight + 12, y: frame.frame.minY + yNudge,
-            width: 44, height: 16)
-    }
+    // MARK: The margin add-a-comment door — RETIRED 13g batch 6 (R5-3)
+    //
+    // 13b 4D shipped a quiet "+ //" in the RIGHT gutter at the caret block
+    // (N35, answering "she couldn't find any way to leave a comment"). Her
+    // R5-3 ruling retires it, verbatim: *"stop showing the comment + to the
+    // right completely, it conflicts with the take icon"* — the fan badge
+    // holds that corner, and two things wanted the same pixels.
+    //
+    // What N35 was FOR is unchanged and still reachable: ⌘⇧' , the bottom
+    // bar's "comments" button, Block ▸ Comments, and — once a block carries
+    // one — its own card, now in the left margin. Nothing became a dead key;
+    // one crowded affordance went away.
 
     private func renderHandles(_ state: BlockDecor.State, in textView: NSTextView) {
         // Handles exist only where a drop door does (the read tier renders

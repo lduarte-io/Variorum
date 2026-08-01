@@ -388,6 +388,21 @@ struct RootView: View {
 
     // MARK: - The pane row (W1/A25)
 
+    /// 13g batch 6 (R5-5 — THE CRASH): the row NEVER frames itself to the
+    /// size the `GeometryReader` reports.
+    ///
+    /// The trace, in one sentence: `.inspector` is HOISTED to the enclosing
+    /// `NavigationSplitView`, so opening the masthead's Scraps/References
+    /// panel narrows the DETAIL COLUMN — the very size this reader reports —
+    /// and a child hard-framed to `geo.size` is then a stale, oversized child
+    /// fighting the animating split, which makes SwiftUI dirty its graph on
+    /// every pass and ask AppKit for another Update-Constraints-in-Window
+    /// pass until AppKit's own feedback guard throws
+    /// (*"marked as needing another Update Constraints in Window pass, but it
+    /// has already had more … passes than there are views in the window"*)
+    /// and `_crashOnException` kills the app. Reading `geo` is fine; feeding
+    /// it back as a hard frame is the loop. `.infinity` accepts whatever is
+    /// proposed THIS pass, so the row settles in one.
     private var paneRow: some View {
         let panes = router.workspace.panes
         let tokens = theme.tokens(for: scheme)
@@ -405,7 +420,7 @@ struct RootView: View {
                         .frame(maxWidth: panes.count > 1 ? nil : .infinity)
                 }
             }
-            .frame(width: geo.size.width, height: geo.size.height)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .coordinateSpace(name: Self.paneRowSpace)
     }
@@ -562,7 +577,28 @@ struct RootView: View {
     /// An unfocused note pane: the read tier, in its own scroll (the read
     /// view is content-sized and never brings one — the `SpreadPage`
     /// precedent), with its click-to-focus door pointed at this pane.
+    ///
+    /// 13g batch 6 (R5-1 — her L5 word, TAKES-FIRST): a pane she left in
+    /// TAKES keeps showing takes while it waits its turn, as a read-only
+    /// projection that owns no authority and registers no handler
+    /// (`ReadTakesView`). Lenses, Compare, Canvas and Blocks deliberately do
+    /// NOT get one — her words: *"i honestly don't think that lenses or
+    /// compare need to be a side by side mode option for now or potentially
+    /// ever"* — so they keep the mode LABEL and plain read text, which is
+    /// batch 1's (a). The mode read is `PostDetailView.rememberedMode`, the
+    /// same one source the pane's name line reads and the detail restores
+    /// from, so the three can never disagree.
+    @ViewBuilder
     private func readCheapNote(_ containerID: String, pane: PaneID) -> some View {
+        if ReadTakesView.holdsTakes(postID: containerID) {
+            ReadTakesView(session: session, postID: containerID)
+                .id("pane-takes-\(containerID)")
+        } else {
+            readCheapProse(containerID, pane: pane)
+        }
+    }
+
+    private func readCheapProse(_ containerID: String, pane: PaneID) -> some View {
         ScrollView {
             ReadPostView(
                 session: session, postID: containerID,

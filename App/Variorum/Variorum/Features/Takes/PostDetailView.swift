@@ -30,6 +30,13 @@ struct PostDetailView: View {
     /// round-10 shaping). Defaults empty: curated-before-smart alone orders
     /// a detail mounted without a workspace (a pin, a future embedding).
     var recentBookIDs: [String] = []
+    /// 13g batch 6 (R5-12), her ruling: *"i also think there should be a
+    /// small 'modes' thing in the upper right of a new window, so you can
+    /// still switch to write / takes / etc."* The main window's mode row
+    /// lives in the SIDEBAR (batch 14's ruling), and a note-only window has
+    /// no sidebar — so exactly the windows that lack the rail carry this,
+    /// and no window carries the modes twice.
+    var showsModeSwitcher = false
 
     /// The mode vocabulary moved to the Registry layer (13b 1b — the
     /// capability table declares per-mode availability); the alias keeps
@@ -93,6 +100,20 @@ struct PostDetailView: View {
                         recentBookIDs: recentBookIDs)
                 }
                 Spacer()
+                if showsModeSwitcher {
+                    // The same vocabulary the sidebar rail renders, in the
+                    // one chrome control that fits a masthead corner. It
+                    // writes the detail's OWN mode state — the same binding
+                    // `CommandRouter.requestMode` writes through, so ⌘1–⌘6
+                    // and this door can never disagree.
+                    VoicedMenu(tokens: tokens, label: mode.rawValue, role: .quiet) {
+                        ForEach(Mode.allCases, id: \.self) { m in
+                            Button(m.rawValue) { mode = m }
+                        }
+                    }
+                    .help("This note's mode — Write · Takes · Lenses · Compare · "
+                        + "Blocks · Canvas (⌘1–⌘6)")
+                }
                 Button("Scraps", systemImage: "square.on.square.dashed") {
                     inspectorPanel = inspectorPanel == .scraps ? nil : .scraps
                 }
@@ -203,6 +224,18 @@ struct PostDetailView: View {
     }
 
     /// R67 — the post's identity, always visible and renameable in place.
+    ///
+    /// 13g batch 6 (R5-7), her ruling verbatim: *"i also think that if you
+    /// click on 'Untitled' it lets you edit the text field there and then
+    /// rather than bringing up a smaller little window to edit."* The
+    /// popover is retired FROM THIS DOOR; the title becomes a text field in
+    /// its own place, in its own type, at the same measure — so the line
+    /// does not jump when it goes editable. Every OTHER rename door (the
+    /// sidebar row's, the shelf's) is untouched.
+    ///
+    /// ⏎ and losing focus both commit (an inline field with a hidden commit
+    /// key would lose typing); ⎋ restores the stored name. The write is the
+    /// same one operation it always was.
     private struct PostTitleLabel: View {
         let session: AppSession
         let postID: String
@@ -210,32 +243,54 @@ struct PostDetailView: View {
         @State private var title: String = ""
         @State private var editing = false
         @State private var draft = ""
+        @FocusState private var fieldFocused: Bool
+
+        /// One measure for both faces — the field must not resize the
+        /// masthead when it appears.
+        private let measure: CGFloat = 380
 
         var body: some View {
-            Button {
-                draft = title
-                editing = true
-            } label: {
-                Text(title.isEmpty ? "Untitled" : title)
-                    .font(tokens.title)
-                    .foregroundStyle(title.isEmpty ? tokens.muted : tokens.ink)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: 380, alignment: .leading)
-            }
-            .buttonStyle(.plain)
-            .help("The note's name — click to rename")
-            .popover(isPresented: $editing, arrowEdge: .bottom) {
-                HStack {
-                    TextField("Note name", text: $draft)
-                        .frame(width: 240)
+            Group {
+                if editing {
+                    TextField("Untitled", text: $draft)
+                        .textFieldStyle(.plain)
+                        .font(tokens.title)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(1)
+                        .focused($fieldFocused)
+                        .frame(maxWidth: measure, alignment: .leading)
                         .onSubmit { rename() }
-                    Button("Rename") { rename() }
-                        .keyboardShortcut(.defaultAction)
+                        .onExitCommand { cancel() }
+                        .onChange(of: fieldFocused) { _, focused in
+                            // Clicking away commits what she typed rather
+                            // than dropping it (the standing "nothing typed
+                            // is lost" posture, at chrome scale).
+                            if !focused, editing { rename() }
+                        }
+                        .task { fieldFocused = true }
+                } else {
+                    Text(title.isEmpty ? "Untitled" : title)
+                        .font(tokens.title)
+                        .foregroundStyle(title.isEmpty ? tokens.muted : tokens.ink)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: measure, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .onTapGesture { beginEditing() }
+                        .help("The note's name — click to rename it right here")
                 }
-                .padding(10)
             }
             .task(id: postID) { await refresh() }
+        }
+
+        private func beginEditing() {
+            draft = title
+            editing = true
+        }
+
+        private func cancel() {
+            editing = false
+            draft = title
         }
 
         private func refresh() async {
@@ -246,8 +301,10 @@ struct PostDetailView: View {
         }
 
         private func rename() {
+            guard editing else { return }
             editing = false
             let name = draft.trimmingCharacters(in: .whitespaces)
+            guard name != title else { return }
             Task {
                 try? await session.runner.run { [postID] ops in
                     try ops.renameContainer(postID, title: name.isEmpty ? nil : name)

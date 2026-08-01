@@ -79,7 +79,9 @@ struct NoteWindowView: View {
             }
         ) {
             if live {
-                PostDetailView(session: session, postID: postID)
+                // 13g R5-12: this window has no sidebar, so the mode row
+                // rides the masthead here (and only here).
+                PostDetailView(session: session, postID: postID, showsModeSwitcher: true)
                     .id(postID)
             } else {
                 ScrollView {
@@ -93,8 +95,6 @@ struct NoteWindowView: View {
             }
         }
         .environment(theme)
-        // AD-14's one status presentation, in this window too — a refusal
-        // fired here has to be visible here.
         .overlay(alignment: .bottom) {
             if let item = session.status.current {
                 StatusToast(
@@ -120,3 +120,47 @@ struct NoteWindowView: View {
         .onDisappear { windows.unregister(windowID) }
     }
 }
+
+// MARK: - R5-11, the clipped top: REPRODUCED AND TRACED, DELIBERATELY NOT
+// FIXED IN THIS BATCH (13g batch 6)
+//
+// Her report: *"opening in a new window seems to be working pretty well but
+// there is this bug where the top of it i couldn't scroll to (where it says
+// Untitled) and it was cut off."*
+//
+// REPRODUCED on HEAD, deterministically: open a note that is IN A BOOK (so
+// the context bar renders) in a note-only window — the masthead's title is
+// clipped along its top edge. Facts measured, so the next attempt starts
+// where this one stopped:
+//
+//   · it clips at 720 tall AND at 900, so it is NOT an overflow;
+//   · it clips at 760 wide and is clean at 800+ — but ONLY because the
+//     resize itself repairs it: back at 760 after a resize it is clean, and
+//     it stays clean forever. **Any resize is the repair**, which is exactly
+//     why she could not scroll to it;
+//   · the LAYOUT is correct and converges inside the first presentation —
+//     instrumented with `onGeometryChange` on the masthead's own frames
+//     (stderr): hstack 38 → 38 → **44**, title 23 → 23 → **29** — and the
+//     repairing resize emits **no new geometry at all**. The numbers are
+//     right; the picture is the first pass's;
+//   · a temporary red border on the masthead frame showed its top edge
+//     missing with the title above it — consistent with the whole subtree
+//     being CLIPPED near the window's top, not with a short frame (an
+//     earlier reading of that same capture said "short frame" and was
+//     wrong — recorded so it is not re-derived).
+//
+// THREE FIXES BUILT AND MEASURED WRONG, each reverted rather than shipped
+// (the hallucination guard: a fix that does not discriminate is not a fix):
+//   1. `.toolbar(removing: .title)` + `.unifiedCompact` here (batch 1's
+//      treatment for the main window) — the band went, the clip stayed;
+//   2. the masthead's `.firstTextBaseline` → `.center` — identical clip;
+//   3. a one-shot AppKit repaint after the window exists
+//      (`layoutSubtreeIfNeeded` + `setNeedsDisplay` + `displayIfNeeded` on
+//      the content view, next runloop turn) — identical clip at launch.
+//
+// What is still unexplained is what the resize invalidates that none of
+// those three do. The main window never shows this, and the one structural
+// difference is that its pane row is a `GeometryReader` that re-proposes.
+// ROUTED, with this trace, to 13e's kickoff sweep beside the
+// windowless-launch row — the same window/lifecycle first-layout family —
+// rather than patched on suspicion.

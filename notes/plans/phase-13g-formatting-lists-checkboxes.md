@@ -437,6 +437,8 @@ visibility, a display setting if ever wanted.
 | L14 | W26: the true global quick-note hotkey — SLOTTED to 13e's opening sitting (her round-4 ruling; supersedes round 2's later-in-13g reading) | → 13e |
 | L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | batch 2 / acceptance |
 | L15 | TEXTKIT2 §5 re-verify after the phase's editor work | closeout |
+| L18 | Batch 6 — her morning ruled set: R5-1 takes projection · R5-3 comments LEFT + the "+" retired · R5-4 "block 3/16" · **R5-5 THE CRASH (reproduced, traced to the pane row's geometry-fed-back frame under the hoisted inspector, fixed, verified)** · R5-6 the Notes list · R5-7 inline title · R5-12 the note-window modes switcher | **SHIPPED** (batch 6) |
+| L19 | R5-11 the note-only window's clipped top — REPRODUCED and TRACED (layout converges, pixels are the first pass's, any resize repairs it; three candidate fixes measured wrong and reverted) | **NOT FIXED** — KnownIssues row, owner **13e**'s kickoff sweep |
 | L16 | 13g's closeout AUTHORS 13e's plan (her standing instruction) — and that plan must NAME, in its kickoff/opening sitting: **W26** (the true global quick-note hotkey, her round-4 slot) and **the windowless-launch/quit-hang row** (re-owned to 13e's kickoff sweep at batch 5, capture-first — see that batch record) | closeout |
 
 ## Batch 1 brief — the walkthrough batch (a FRESH Opus implementer; self-contained)
@@ -2514,3 +2516,331 @@ checksums; PROVISIONAL-and-continue non-gating, QUESTIONS next
 free number per the file at your read time; STOP-and-report
 anything gating; batch record appended here; commit per
 convention; never push; never `/Applications`).
+
+### Batch 6 record — her morning list, the ruled set (2026-08-01, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on the
+final tree): core **986 tests in 108 suites passed** (unchanged — nothing under
+`Sources/` or `Shared/` was touched, by design) · Mac **1126 tests in 195
+suites**, with **ONE failure that is PRE-EXISTING ON HEAD** and is proven so
+below · mobile **NOT RUN and not owed** (`Sources/`/`Shared/` untouched;
+baseline 14/4 stands). The tutorial spine ran green by TYPE name on the final
+tree (**50 tests in 7 suites**). Zero `Sources/VariorumCore/Sync/` lines; no
+schema; nothing near `renderedText`, the export projections or the bridge's
+join brain (`git status --short` — the whole diff is `App/Variorum/` + notes).
+
+**THE ONE RED TEST, isolated rather than explained away:**
+`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion` fails
+on its **construction** assertion — *"the kill stranded the render tier"* —
+whose own message says what to do: *"if this fails, the TK2 cull no longer
+reproduces on this OS; re-run the A47c experiments before touching the
+mechanism."* **Proven pre-existing:** the whole batch was stashed (`git stash
+-u`), the tree rebuilt at HEAD, and that suite run alone — **it fails
+identically on a clean HEAD tree**. It passed at batch 5's acceptance earlier
+today, so what moved is the machine/OS state, not the code (this session ran
+UNLOCKED; batch 5's arms all ran under a locked login session). Recorded for
+the orchestrator; not touched by this batch, and no product code near it was
+edited.
+
+Scope was her round-5 ruled set — items (1)–(8) of the brief. **Nothing from
+the batch-7 nod set was started** (tag chips, the bottom-bar regroup, the
+untitled-date display rule, the quicknote tag/book), and no held look item was
+preempted.
+
+---
+
+#### (4) R5-5 — THE SHOW-SCRAPS CRASH · **REPRODUCED, TRACED, FIXED, VERIFIED**
+
+This is the batch's centre, so it is recorded first.
+
+**HER DOOR IS NOT THE ONE THE PLAN NAMED, and the correction matters.** The
+round-5 record routed this to *"the Snippets section door"* (the sidebar row).
+Clicking that on the Debug build does **not** crash — the Snippets area opens
+normally (captured). Her words were *"clicking on the 'show scraps button'"*,
+and the app has a button by that name: the **masthead's Scraps icon**, whose
+help text is *"Show the scraps beside the draft"*. Clicking THAT crashes
+deterministically. Her *"and nothing appears"* is the same sentence describing
+the panel that never arrived.
+
+**The reproduction, scripted and repeatable in ~90 s** (kept here so a future
+session does not rebuild it): launch the Debug build (`io.lduarte.Variorum.debug`,
+dev store) → File ▸ New Note → click the masthead's Scraps button. Crashes
+every time. It crashes in **Write, Takes and Blocks** modes; in **Canvas** it
+does not, and that arm is NOT a negative control — the capture shows the
+inspector never presented there at all. **References crashes identically**, so
+it is the inspector's PRESENTATION, not either panel's content.
+
+**THE EXCEPTION, read out of the running process rather than inferred.** The
+crash reports carry only AppKit/SwiftUI frames, so the app was run under `lldb`
+with a breakpoint on `objc_exception_throw` printing the exception:
+
+> *"The window has been marked as needing another Update Constraints in Window
+> pass, but it has already had more Update Constraints in Window passes than
+> there are views in the window."*
+
+That is AppKit's **update-constraints feedback-loop guard**, and it changes the
+diagnosis: this is not a single re-entrant publish, it is a **runaway** — the
+window is re-marked as needing constraints on every pass until the counter
+trips and `NSApplication _crashOnException` terminates the app.
+
+**THE MECHANISM, end to end.** `.inspector` applied inside a
+`NavigationSplitView` is **hoisted to the split view** — verified on screen: the
+panel opens as a THIRD COLUMN spanning the whole window height, not inside the
+pane. So opening it narrows the **detail column**, which is exactly the size
+`RootView.paneRow`'s `GeometryReader` reports. That row then fed the reported
+size straight back in as a hard frame:
+
+```swift
+GeometryReader { geo in HStack { … }.frame(width: geo.size.width, height: geo.size.height) }
+```
+
+`geo.size` is a layout OUTPUT and a graph VALUE. Feeding it back as a hard
+frame means the row's own size is derived from the previous pass's size — so
+while the animator drives `-[_NSObjectAnimator_NSSplitViewItem setCollapsed:]`
+inside a CATransaction commit (the crash stack's own frames), the oversized,
+stale child fights the shrinking column: each pass dirties the SwiftUI graph,
+`graphDidChange → NSHostingView.requestUpdate → setNeedsUpdateConstraints`
+asks the window for ANOTHER constraints pass *from inside its layout*, and the
+guard fires. Reading `geo` is fine; feeding it back as a hard frame is the loop.
+
+**The fix** is one modifier in `RootView.paneRow`: the row accepts what it is
+proposed *this* pass —
+`.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)` —
+instead of pinning itself to the last known size. The split's per-pane
+`.frame(width: widths[index])` is deliberately UNCHANGED: those widths are
+fractions summing to the row, a stale set overflows an HStack without pushing
+back on the parent (fixed children in an HStack overflow; they do not resize
+it), and the pane row is no longer the thing that reports a too-large size. The
+split was exercised with the fix and did not crash.
+
+**RED-ON-OLD, by behavioural revert, verified at the APP level** (the
+model-layer honesty rule, stated: this is a SwiftUI/AppKit layout crash and no
+headless pin can hold it — the reverts and their outcomes are the discriminating
+evidence):
+
+| Tree | Scripted repro | Outcome |
+|---|---|---|
+| HEAD (`RootView.swift` md5 `5c79cc393dfd523c3b1e2d681426333c`) | masthead Scraps, Write | **CRASH** (`Variorum-2026-08-01-152903.ips`, byte-identical `asiBacktrace` to her two) |
+| HEAD | masthead Scraps, Blocks mode | **CRASH** |
+| HEAD | masthead **References** | **CRASH** |
+| HEAD, under `lldb` | masthead Scraps | **CRASH** + the exception text above |
+| the frame removed (probe) | masthead Scraps | **survives**, panel opens (captured) |
+| **as shipped** | masthead Scraps, one pane | **survives**, panel opens |
+| **as shipped** | with the SPLIT open | **survives** |
+
+Her own two crash reports (`…145236.ips`, `…145237.ips`, `/Applications`, 14:52)
+were read directly and carry the identical `asiBacktrace`, so what was fixed is
+what happened to her.
+
+---
+
+#### (2) R5-3 — comments move LEFT; the right-hand "+" is retired · SHIPPED
+
+Her words: *"stop showing the comment + to the right completely, it conflicts
+with the take icon. I also think comments should appear on the left since
+there's so much machinery going on on the right already."* Both halves, in the
+ONE decoration layer that serves the live editor and the read tier:
+
+- **the margin cards move to the LEFT gutter** (`BlockDecor.leftCardRect`, a
+  pure function so the placement is pinnable): right-aligned toward the text,
+  stopping short of the drag-handle lane at `textLeft - 22` so the two
+  affordances that now share that margin cannot overlap;
+- **the fan-badge Y NUDGE goes with them.** It existed only to dodge the ⑂
+  badge in the top-RIGHT corner — which is the collision she reported — so on
+  the left there is nothing to dodge;
+- **the narrow-gutter count badge follows the cards** to the same side, and the
+  fit test now measures the LEFT gutter (`gutterFitsCards(width:)`, one plain
+  width instead of a right-side derivation);
+- **the N35 add-chip is DELETED**, not moved. Its three doors are untouched and
+  said so in the file: ⌘⇧' , the bottom bar's "comments", Block ▸ Comments.
+
+*Pins:* `aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane` (the
+arithmetic, including the shrink-rather-than-overflow case and the height cap)
+and `aCommentCardRendersInTheLeftMarginAndNoAddChipRemains` (the WIRE — a real
+`NSTextView`, the real controller, real frames; it replaces
+`theMarginOffersAddACommentAtTheCaretBlock`, whose entire subject was the
+retired door). **Red-on-old by behavioural revert:** placement restored to
+`state.textRight + 12` → the wire pin fails on BOTH x assertions (`maxX 862`
+vs `≤ 300` and `≤ 278`); file restored, `md5 5b90d668431415baf8d8415c56218b8d`
+matched.
+
+---
+
+#### (3) R5-4 — the block line reads "block 3/16" · SHIPPED
+
+`BlockLineLabel.caret(ordinal:of:)` — one pure function, because TWO bottom
+bars render this line (Write's `CommitBar`, Takes' `TakesBottomBar`) and a
+label she reads in both must not drift. The raw ID and the `blk` abbreviation
+are gone from both; `shortID` died with its last caller. The read-time ordinal
+machinery is 9d's and is untouched — only the rendered string changed.
+
+*Pin:* `theBlockLineNamesItsPlaceAndNothingElse`. **Red-on-old by behavioural
+revert** (the old `"blk \(ordinal) · <id>"` shape restored): fails on all five
+expectations; file restored, `md5 a999ebcf4f183df8ad2610aba5954d17` matched.
+Verified on screen too — the bottom bar reads `block 3/3`.
+
+---
+
+#### (5) R5-6 — the Apple-Notes-style Library list · SHIPPED
+
+A THIRD view mode beside List and Timeline (`Mode.notes`), rendering
+**title · date · the first bit of text · the book it is in**, one row per note,
+in a `LazyVStack` so the rows cost what is drawn.
+
+**Nothing is stored.** `NoteCards.load` derives both extras at read time
+(`TagChips.load`'s shape — two grouped queries over the posts already listed)
+and is **bounded twice**: to the hits on screen, and — for the snippet — to
+each note's first `blockWindow` (3) blocks via a SQL window function, so a
+10,000-block note costs what a three-block one does. The cards load **only in
+`.notes` mode** and clear when she leaves it, so a mode she is not in pays
+nothing; the generation guard is `loadTagChips`' verbatim (the round-3 MINOR
+that taught this file that a second suspension point can land a stale query's
+data). The note row's context MENU is now one declaration rendered by both
+lists (`postRowMenu`), so List and Notes cannot offer different doors.
+
+*Pins:* `noteCardsCarryTheFirstTextAndTheBooksItIsIn` and
+`theSnippetIsTheFirstBLOCKWithText` (skips a leading empty block; cut at
+`snippetLimit`; **does not hunt** past the block window). **Red-on-old by
+behavioural revert:** the first-non-empty guard dropped → both fail with the
+text that proves it (`"Second block."` and `"Later."` win instead of the
+opening); file restored, `md5 e0dae26f3cab03796a20975f24f3244c` matched.
+
+**Two build-time calls recorded rather than assumed** (QUESTIONS #51(c)/(d)):
+the books are CURATED memberships only (a smart book's membership is a filter
+walk — fine for the ONE note the membership chip serves, not for forty rows),
+and the snippet resolves `chosen → default` requiring that variant live, where
+the editor's full read-time rule also falls back on an ARCHIVED chosen. A
+snippet that moves to the next block in that corner is a display aid behaving
+conservatively; `renderPost` stays the one rendering brain.
+
+---
+
+#### (6) R5-7 — the title edits in place · SHIPPED
+
+The popover is retired **from that door** (every other rename door is
+untouched): the masthead title becomes a text field in its own place, in its
+own type, at the same 380 measure, so the line does not jump when it goes
+editable. ⏎ commits, ⎋ restores the stored name, and **losing focus commits**
+— an inline field with a hidden commit key would eat what she typed (the
+standing nothing-typed-is-lost posture, at chrome scale; QUESTIONS #51(e)).
+Same one operation as before; a no-op rename writes nothing.
+
+---
+
+#### (8) R5-12 — a modes switcher in the note-only window · SHIPPED, seen
+
+`PostDetailView.showsModeSwitcher` (default off) puts the mode vocabulary in
+the masthead's top right, and `NoteWindowView` is its only caller — so exactly
+the window that LACKS the sidebar rail carries it, and no window carries the
+modes twice. It writes the detail's own `mode` state, which is the same binding
+`CommandRouter.requestMode` writes through, so ⌘1–⌘6 and this door cannot
+disagree (not a second mechanism). **Verified on screen:** the note-only window
+shows `Write ▾` at the top right and the menu lists all six.
+
+---
+
+#### (1) R5-1 — the read-only TAKES projection · SHIPPED
+
+`ReadTakesView`: an unfocused pane whose remembered mode is Takes renders the
+fan as read-only cards — chosen marked, labels shown, blocks without a fan
+rendered as ordinary prose (a one-take card would be a box around every
+paragraph). It owns **no** `PaneTextAuthority`, registers **no** routed-command
+handler, mounts **no** TK2 surface and offers **no** gesture, so the mount rule
+is untouched and this cannot become a second liveness mechanism; clicking
+anywhere in the pane makes it live through batch 1's `PaneFocusCatcher` and the
+real board takes over in the mode it was already showing. It is the first
+read-only twin P-3 has grown since `ReadPostView`, built on the
+`SpreadBookView` precedent. P1: one read keyed on the note (the
+`PaneHost`/`PostTitleLabel` one-shot rule — a held observation on an unfocused
+pane would re-read at the LIVE pane's autosave rate) and a `LazyVStack`.
+
+**Lenses, Compare, Canvas and Blocks deliberately get none** — her words, and
+her uncertainty preserved ("potentially ever" is not "never"): those keep batch
+1's mode label and plain read prose.
+
+*Pin:* `onlyATakesPaneRendersTheTakesProjection` — Write (the first-open
+default) and all four others fall through. **Red-on-old by behavioural revert:**
+`holdsTakes` widened to `!= .write` → fails on the lenses/compare/blocks/canvas
+cases; file restored, `md5 c53f1391d755d4b53dbcbe47027d3876` matched.
+
+---
+
+#### (7) R5-11 — the note-only window's clipped top · **REPRODUCED AND TRACED; DELIBERATELY NOT FIXED**
+
+The one item this batch did not ship, recorded in full because the trace is
+most of the work and the next attempt should start from it (the same text is on
+the KnownIssues row and in `NoteWindowView.swift`).
+
+**Reproduced deterministically on HEAD**, and the condition the plan did not
+state is the one that matters: the note must be **IN A BOOK**, so the context
+bar renders. Then the masthead's title is clipped along its top edge, exactly
+as her screenshot showed.
+
+**Measured:**
+
+- it clips at **720 tall AND at 900** — never an overflow;
+- it clips at 760 wide and looks clean at 800+ — but only because **the resize
+  itself repairs it**: back at 760 afterwards it is clean, and stays clean.
+  **Any resize is the repair**, which is precisely why she could not scroll to
+  it;
+- the **layout is correct**. Instrumenting the masthead's own frames
+  (`onGeometryChange` → stderr) shows convergence inside the first
+  presentation: hstack **38 → 38 → 44**, title **23 → 23 → 29** — and the
+  repairing resize emits **no new geometry at all**. The numbers are right; the
+  picture is the first pass's;
+- a temporary red border on the masthead frame showed its top edge missing with
+  the title above it. **An earlier reading of that same capture said "short
+  frame" and was wrong** — the border was clipped too; it is the subtree being
+  cut near the window's top. Recorded so it is not re-derived.
+
+**Three fixes built and MEASURED WRONG, each reverted rather than shipped:**
+`.toolbar(removing: .title)` + `.unifiedCompact` on that window (batch 1's
+main-window treatment — the band went, the clip stayed); the masthead's
+`.firstTextBaseline` → `.center` (identical clip); and a one-shot AppKit
+repaint after the window exists (`layoutSubtreeIfNeeded` + `setNeedsDisplay` +
+`displayIfNeeded`, next runloop turn — identical clip at launch). What the
+resize invalidates that none of those do is the open question; the one
+structural difference from the main window is that its pane row is a
+`GeometryReader` that re-proposes. **ROUTED** to 13e's kickoff sweep beside the
+windowless-launch row — same window/lifecycle first-layout family — with this
+trace on the row.
+
+---
+
+#### What was LOOKED at, and what is still owed
+
+Captured on the running Debug build (scratchpad): the Snippets area opening
+without a crash; the crash arms; the scraps inspector open beside the editor
+after the fix; the note-only window with its `Write ▾` switcher and `block 3/3`
+line; the Library's **Notes** mode rendering its rows.
+
+**Owed, and stated plainly:** (a) the Notes mode's SNIPPET and BOOK columns
+were not seen with real content — the dev store's recent notes are all empty
+and neither a synthesized click nor an AX `set value` drives the SwiftUI search
+field; the data path is pinned instead. (b) A commented block's LEFT card was
+not photographed; its geometry is pinned through the real controller and a real
+text view. (c) The R5-11 arms above.
+
+**Housekeeping:** the reproduction runs left about a dozen empty "Untitled"
+notes in the DEV store (never hers). Her `/Applications` instance was not
+running at any point in this session (`pgrep` verified at the start), and no
+instance was ever addressed by process name — bundle id or PID only, the
+batch-1 standing rule.
+
+---
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` gains #51** — five build-time calls, bundled the way
+  #49 and #50 were. **#49 and #50 were not touched. #52 is now the next free
+  number.**
+- **KnownIssues gains ONE row** (R5-11, owner **13e**'s kickoff sweep, capture
+  of the full trace on the row). Nothing else added or removed.
+- **A proposal is owed on nothing** — every design fork this set raised is
+  either a #51 call or the R5-11 routing.
+- **The one red Mac test is pre-existing on HEAD and proven so** (stash-and-run
+  above). Its own message asks for the A47c experiments to be re-run before
+  anyone touches the mechanism; that is an orchestrator call, not this batch's.
+- **The plan's R5-5 routing was wrong about which door she meant** ("the
+  Snippets section door" vs the masthead's Scraps button). Corrected on the
+  record here; the ledger row says so too.

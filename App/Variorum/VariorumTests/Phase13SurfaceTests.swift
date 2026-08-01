@@ -155,8 +155,29 @@ struct BlockDecorGeometryTests {
     }
 
     @Test func narrowGuttersDegradeCardsToBadges() {
-        #expect(BlockDecor.gutterFitsCards(viewWidth: 1200, textRight: 900))
-        #expect(!BlockDecor.gutterFitsCards(viewWidth: 736, textRight: 708))
+        // 13g R5-3: the gutter measured is the LEFT one now (the cards
+        // moved there); the threshold itself is unchanged.
+        #expect(BlockDecor.gutterFitsCards(width: 300))
+        #expect(!BlockDecor.gutterFitsCards(width: 28))
+    }
+
+    /// 13g batch 6 (R5-3), her ruling: comments live in the LEFT margin.
+    /// The card stops short of the drag-handle lane rather than sitting
+    /// under it (`renderHandles` puts handles at `textLeft - 22`).
+    @Test func aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane() {
+        let rect = BlockDecor.leftCardRect(textLeft: 300, blockTop: 40, blockHeight: 30)
+        #expect(rect.maxX <= 300 - 22, "never under the drag handle")
+        #expect(rect.minX >= 0, "never off the left edge")
+        #expect(rect.maxX < 300, "left of the text, not over it")
+        #expect(rect.origin.y == 40, "aligned to the block's top")
+        // A generous margin gets the full card; a tight one shrinks rather
+        // than overflowing (the badge takes over below `gutterFitsCards`).
+        #expect(BlockDecor.leftCardRect(textLeft: 900, blockTop: 0, blockHeight: 20).width == 210)
+        let tight = BlockDecor.leftCardRect(textLeft: 160, blockTop: 0, blockHeight: 20)
+        #expect(tight.width < 210 && tight.minX >= 0)
+        // Tall blocks cap, so one comment never becomes a column.
+        #expect(
+            BlockDecor.leftCardRect(textLeft: 300, blockTop: 0, blockHeight: 800).height == 96)
     }
 
     @MainActor
@@ -314,14 +335,15 @@ struct CommentsAndReorderTests {
         }
     }
 
-    /// 13b 4D (N35 — the margin add-a-comment door, the mockups' grammar
-    /// in its minimal form): an uncommented CARET block offers a quiet
-    /// "+ //" exactly where its margin card would sit; a commented block's
-    /// card IS the door; inline mode, narrow gutters, and the read tier
-    /// offer none. RED ON OLD: pre-4D nothing rendered in the margin for
-    /// an uncommented block (the N35/S4-25 finding — she couldn't find any
-    /// way to leave a comment).
-    @Test func theMarginOffersAddACommentAtTheCaretBlock() async throws {
+    /// 13g batch 6 (R5-3), her ruling: *"stop showing the comment + to the
+    /// right completely, it conflicts with the take icon."* The 13b-4D N35
+    /// add-chip is RETIRED, and a commented block's card renders in the
+    /// LEFT margin instead. This replaces `theMarginOffersAddACommentAtThe
+    /// CaretBlock`, whose whole subject was the retired door.
+    ///
+    /// RED ON OLD: with the pre-R5-3 controller the card landed at
+    /// `textRight + 12` (x = 652 here), so both x assertions fail.
+    @Test func aCommentCardRendersInTheLeftMarginAndNoAddChipRemains() async throws {
         try await withEditor(seedBlocks: ["Alpha.", "Beta."]) { h in
             let controller = BlockDecorOverlayController(
                 textView: h.textView, onOpenComments: { _ in }, onMoveBlock: nil)
@@ -329,47 +351,29 @@ struct CommentsAndReorderTests {
             var state = BlockDecor.State()
             state.frames = [
                 .init(entryIndex: 0, blockID: "b0",
-                      frame: CGRect(x: 100, y: 0, width: 540, height: 30)),
+                      frame: CGRect(x: 300, y: 0, width: 340, height: 30)),
                 .init(entryIndex: 1, blockID: "b1",
-                      frame: CGRect(x: 100, y: 40, width: 540, height: 30)),
+                      frame: CGRect(x: 300, y: 40, width: 340, height: 30)),
             ]
             state.entryCount = 2
             state.viewWidth = 900
-            state.textLeft = 100
-            state.textRight = 640  // gutter 260 ≥ 150: margin cards fit
-
+            state.textLeft = 300  // a 300pt LEFT gutter: cards fit
+            state.textRight = 640
             state.caretBlockID = "b0"
-            controller.render(state)
-            #expect(controller.addChipBlockID == "b0",
-                    "the caret block's empty margin offers the + door")
-            state.caretBlockID = "b1"
-            controller.render(state)
-            #expect(controller.addChipBlockID == "b1", "the door follows the caret")
-
-            // A commented block's own card is the door — no second +.
             state.comments["b1"] = [.init(id: "c1", text: "a note")]
             controller.render(state)
-            #expect(controller.addChipBlockID == nil)
 
-            // Inline mode keeps the strip grammar — no margin +.
-            state.comments = [:]
-            state.appearance.inlineComments = true
-            controller.render(state)
-            #expect(controller.addChipBlockID == nil)
+            let cards = h.textView.subviews.compactMap { $0 as? CommentCardView }
+            #expect(cards.count == 1, "one comment, one card — and no add chip beside it")
+            let card = try #require(cards.first)
+            #expect(card.frame.maxX <= state.textLeft, "the card is LEFT of the text")
+            #expect(card.frame.maxX <= state.textLeft - 22, "clear of the drag-handle lane")
 
-            // A narrow gutter (badge territory) offers none.
-            state.appearance.inlineComments = false
-            state.viewWidth = 700  // gutter 60 < 150
-            controller.render(state)
-            #expect(controller.addChipBlockID == nil)
-
-            // The read tier (no comments door) never offers it.
-            let readOnly = BlockDecorOverlayController(
-                textView: h.textView, onOpenComments: nil, onMoveBlock: nil)
-            defer { readOnly.uninstall() }
-            state.viewWidth = 900
-            readOnly.render(state)
-            #expect(readOnly.addChipBlockID == nil)
+            // The caret block still has no comment, and nothing renders for
+            // it: the "+" door is gone, not moved (⌘⇧' and the bottom bar's
+            // "comments" button are its replacements, as they always were).
+            #expect(cards.allSatisfy { $0.frame.minY == 40 },
+                    "only the COMMENTED block draws in the margin")
         }
     }
 

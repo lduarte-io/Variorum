@@ -240,8 +240,9 @@ struct CommitBar: View {
         if model.caretBlockID != nil {
             // "block 6/23" (9d): the user-facing number is the current
             // order, derived at read time; the stable ID stays the identity.
-            let ordinal = model.caretOrdinal.map { "\($0)/\(model.blockCount)" } ?? "—"
-            return "blk \(ordinal) · \(shortID(model.caretBlockID))"
+            // 13g R5-4: the raw ID and the "blk" abbreviation are gone — one
+            // shared label so this bar and the Takes bar cannot drift.
+            return BlockLineLabel.caret(ordinal: model.caretOrdinal, of: model.blockCount)
         }
         if model.hasOpenTail { return "open tail" }
         return "—"
@@ -257,10 +258,6 @@ struct CommitBar: View {
             parts.append("\(total.formatted())w in note")
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
-    private func shortID(_ id: String?) -> String {
-        String((id ?? "").prefix(8))
     }
 
     /// "yyyy-MM-dd" → a local-calendar Date (the picker's seed). Pure and

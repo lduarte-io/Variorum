@@ -266,5 +266,19 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: OPEN — for the walk.**
 
-*(Next free number at authoring time: **#51**.)*
+51. **2026-08-01 · Phase 13g (batch 6) · YOUR MORNING RULING SET IS BUILT — five build-time calls, each one line to change.** Your round-5 rulings said WHAT: comments on the left with the right-hand "+" gone, "block 1/16" instead of the raw ID, an Apple-Notes-shaped Library list, inline title editing, a takes projection for the un-live pane, and a modes switcher in the note-only window. They did not say what a note-card row does with a note that is in three books, or what happens to a title you were typing when you click away — those are the calls below. **Nothing here needed a schema change or an operation.** The BINDING build record is the 13g plan's batch-6 record.
+
+    **(a) The retired "+" is not replaced.** Your words were *"stop showing the comment + to the right completely"*, so the margin's add-a-comment chip (13b 4D's N35) is gone rather than moved to the left with the cards. Leaving a comment is still ⌘⇧' , the bottom bar's "comments" button, or Block ▸ Comments — the three doors N35 was built beside. **The alternative:** the same chip, in the LEFT margin now that the take icon no longer contends for the space. One line.
+
+    **(b) A comment card's rule stays on the card's LEFT edge.** In the right margin the rule sat between the card and the page; on the left it now sits on the card's outer edge instead of the one facing your text. Classic marginalia points AT the line it annotates, so the other edge is arguably righter — but that is a look call and you have not made it. **The alternative:** flip the rule to the card's inner edge.
+
+    **(c) A note card names its CURATED books only.** A smart book's membership is derived by walking its filter, which is what the membership chip does for ONE note and must not be done for forty rows at once (P1). So a note that only matches a smart book shows no book on its row. **The alternative:** show smart membership too, and pay for it in the list.
+
+    **(d) A note card's snippet is the first block that HAS text, looking at most three blocks in.** A note that opens with a blank line shows the next block's words; a note whose first words are four blocks down shows nothing rather than being scanned for them (a snippet must cost the same on a 10,000-block note as on a three-block one). **The alternative:** a bigger window, or scan until text is found.
+
+    **(e) Clicking away from a title you are editing SAVES it; ⎋ cancels.** The little rename window is gone from that door, so there is no "Rename" button to press — ⏎ and losing focus both commit, because an inline field with a hidden commit key would eat what you typed. **The alternative:** clicking away cancels (safer against stray edits, worse against lost ones).
+
+    **Status: OPEN — for the walk.**
+
+*(Next free number at authoring time: **#52**.)*
 

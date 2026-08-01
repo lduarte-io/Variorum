@@ -328,7 +328,9 @@ struct TakesBottomBar: View {
         guard let pane = model.focusedPane,
               let index = model.projection.slots.firstIndex(where: { $0.blockID == pane.blockID })
         else { return "click into a take" }
-        return "blk \(index + 1)/\(model.projection.slots.count) · \(String(pane.blockID.prefix(8)))"
+        // 13g R5-4: her ruling — no raw ID, no "blk". ONE shared label with
+        // Write's bar (`BlockLineLabel`), so the two cannot drift.
+        return BlockLineLabel.caret(ordinal: index + 1, of: model.projection.slots.count)
     }
 
     private var wordCountLabel: String? {
