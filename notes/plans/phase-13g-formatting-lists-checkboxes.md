@@ -3145,3 +3145,41 @@ explicit `Calendar` — which is also the evidence that the local-day decision i
 - **Her instance was never touched:** no Variorum instance was addressed at all
   this batch (no app was launched — every claim here is a test claim), and
   nothing was addressed by process name.
+
+### Orchestrator acceptance — batch 7 (2026-08-01)
+
+- **Commit `713df35` verified by own inspection:** 38 files; the
+  `DisplayTitle` brain + suite present and committed (a stale
+  SourceKit index briefly flagged it — verified on disk and in the
+  commit stat; the build disagrees with the editor, and the build
+  is right). No `Sync/` lines; body/`renderedText` semantics
+  byte-untouched (title PRESENTATION only, as ruled); no schema.
+- **Counts by the orchestrator's OWN runs:** core "Test run with
+  1001 tests in 110 suites passed" · Mac "Test run with 1135 tests
+  in 196 suites failed … with 1 issue" — the ONE red is EXACTLY the
+  parked environment-gated tripwire (unlocked session), everything
+  else green · mobile "Test run with 14 tests in 4 suites passed"
+  — every implementer claim matched.
+- **The load-bearing R6-3 finding accepted:** ⌘N had STORED the
+  literal string "Untitled" as a real title — a nil/empty display
+  rule alone would have fixed none of her existing notes; the mint
+  now stores `nil` and `isAbsent` carries the legacy literals. The
+  11b filename verification: already compliant since 11b (dated
+  filenames); literal-"Untitled" notes now join them.
+- **The quicknote/Pool finding accepted as RIGHT-pins-updated:**
+  three 13f QuickNoteMintTests pins went red because a quick note
+  now lands in the smart Quicknotes book and `poolPosts` has
+  excluded smart-collected notes since 13f Stage B — the pins'
+  expectations updated ON THE RECORD with the mechanism stated;
+  the one-line alternative is #52(g), hers at the walk.
+- **#52 read** (seven calls, properly OPEN; #53 next free) — joins
+  the walk bundle. A re-seed is owed: ONE Restore-Tutorial click
+  now covers 13f + batches 1, 4 and 7.
+- **Batch 7 ACCEPTED.** All seven build batches of the phase are
+  shipped and accepted. Next: her refresh word (the install
+  carries batches 6–7 to `/Applications`), her look/feel calls +
+  the #49–#52 walk, then the ONE Fable cold review (standard
+  ladder), the TEXTKIT2 §5 re-run (L15), and the closeout that
+  authors 13e's plan (L16 — W26, the windowless capture-first row,
+  the note-window clip row, and the tripwire's A47c sweep all
+  named for 13e).
