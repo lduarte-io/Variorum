@@ -2844,3 +2844,34 @@ batch-1 standing rule.
 - **The plan's R5-5 routing was wrong about which door she meant** ("the
   Snippets section door" vs the masthead's Scraps button). Corrected on the
   record here; the ledger row says so too.
+
+### Orchestrator acceptance — batch 6 (2026-08-01)
+
+- **Commit `0893dfb` verified by own inspection:** 14 files, App
+  target + tests + records; no `Sources/`/`Shared/` (core/mobile
+  untouched by construction), no `Sync/`, no schema.
+- **Counts by the orchestrator's OWN runs:** Mac "Test run with
+  1126 tests in 195 suites failed … with 1 issue" — the ONE red is
+  EXACTLY the recorded environment-gated tripwire
+  (`aStrandedRenderTierIsRebuiltByAConvergenceOccasion`, same
+  assertion), now parked as a KnownIssues row (owner 13e's kickoff
+  sweep, the lock-state covariate + the pin's own A47c directive
+  on the row — added at this acceptance). Everything else green;
+  core 986/108 and mobile 14/4 stand by construction; spine 50/7
+  per the implementer's run.
+- **The crash fix ACCEPTED at its lldb-read mechanism** (the
+  masthead Scraps/References inspector hoisted to the split; the
+  pane row's GeometryReader feeding reported size back as a hard
+  frame — the row now accepts what it is proposed; app-level
+  red-on-old with byte-identical `.ips`, the model-layer honesty
+  rule properly invoked). The plan's routing corrected on the
+  record: her "show scraps button" is the MASTHEAD's Scraps icon,
+  not the sidebar's Snippets row.
+- **R5-11 accepted as an honest non-fix** — three candidate fixes
+  built, measured wrong, and REVERTED (the guard working);
+  KnownIssues row with the full instrumentation record, owner
+  13e's kickoff sweep.
+- **#51 read** (five build-time calls, properly OPEN; #52 next
+  free) — joins the walk bundle. The dev-store repro residue
+  (~a dozen empty Untitled notes) noted; harmless, dev store only.
+- **Batch 6 ACCEPTED.** Batch 7 (the round-6 nod set) spawns now.
