@@ -421,13 +421,13 @@ visibility, a display setting if ever wanted.
 
 | # | Item | Status |
 |---|------|--------|
-| L1 | WT-1 discoverability: helper "workspace" group + dictionary entries + field-guide workspace lesson + the shortcut drift-guard walk test | batch 1 |
-| L2 | WT-2: context bar defaults COLLAPSED | batch 1 |
-| L3 | WT-3: back/context bar flush with the window top (the bottom bar's model) | batch 1 |
-| L4 | WT-4: the sidebar "Variorum" chrome label removed (a TRY — she keeps/reverts on sight) | batch 1 |
-| L5 | WT-5/F-4: sticky pane modes | batch 1 |
-| L6 | WT-6: pane body-click focus parity (TRACE the left-pane asymmetry first) | batch 1 |
-| L7 | The markdown foundation: pure Domain tokenizer + the dimmed-marker editing face (F-1/F-2) | batch 2 |
+| L1 | WT-1 discoverability: helper "Windows & panes" group + dictionary entries + field-guide workspace lesson + the shortcut drift-guard walk test (found ten missing labels, three pre-13f) | **SHIPPED** (batch 1) |
+| L2 | WT-2: context bar defaults COLLAPSED | **SHIPPED** (batch 1) |
+| L3 | WT-3: back/context bar flush with the window top — proved ONE change with L4 (the window title's band WAS the gap) | **SHIPPED** (batch 1; her TRY) |
+| L4 | WT-4: the "Variorum" whitespace removed — corrected on the record: it was the WINDOW TITLE, not the sidebar label (`.toolbar(removing: .title)` + `.unifiedCompact`) | **SHIPPED** (batch 1; her TRY) |
+| L5 | WT-5/F-4: sticky pane modes — mode line SHIPPED; the read-only projections PROPOSED (every non-Write mode is heavy; her word bundled for the morning sitting, orchestrator recommends (b) takes-first) | **PARTIAL** (batch 1) |
+| L6 | WT-6: pane body-click focus parity — traced per-CONTENT (2 of 8 branches had the door); the pane-owned `PaneFocusCatcher` | **SHIPPED** (batch 1) |
+| L7 | The markdown foundation: pure Domain tokenizer + the dimmed-marker editing face (F-1/F-2) | batch 2 (spawning) |
 | L8 | Insertion faces: ⌘B/⌘I/toolbar + registry declarations (formatting acts are acts) | batch 2/3 |
 | L9 | Lists + checkboxes incl. click-to-toggle (ordinary edit; seal refuses honestly) | batch 2/3 |
 | L10 | Links (F-5): styled + ⌘-click in editors; fully rendered + plain-click in Read | batch 3 |
@@ -794,3 +794,114 @@ her instance was never touched again.
 - Nothing was added to `notes/QUESTIONS.md`: the two open items are a
   proposal to the orchestrator and a visual verification, neither of which is
   a PROVISIONAL product ruling. **#49 remains the next free number.**
+
+### Orchestrator acceptance — batch 1 (2026-08-01)
+
+- **Commit `f0534ad` verified by own inspection:** 15 files, scoped
+  exactly as claimed — App target + tests + this plan's record only;
+  no `Sources/`, no `Shared/`, no schema, zero `Sync/` lines.
+  Load-bearing diffs read: the L3/L4 scene modifiers (measured-not-
+  assumed record with two rejected attempts and the discriminating
+  not-key capture), the L6 `PaneFocusCatcher` (pane-owned local
+  monitor, observe-never-consume, split-only installation), the L1
+  drift guard + keyless-door pin.
+- **Counts:** implementer's own runs core 926/105 · Mac 1075/190 ·
+  spine 49/7. **Orchestrator's own acceptance run of the Mac suite:
+  "Test run with 1075 tests in 190 suites passed" — the claim
+  matches exactly.** Core is unchanged by construction (no
+  `Sources/` diff) — the sitting-open own-run (926/105) stands as
+  the acceptance number. Mobile baseline own-run launched at
+  acceptance (iPhone 16e), ahead of batch 2's `Sources/` work.
+- **The INCIDENT accepted as recorded** — honest, repaired, and
+  verified by this session's own `pgrep`: exactly one instance
+  running, `/Applications/Variorum.app` (PID at check: 24191).
+  **BINDING FOR EVERY LATER BATCH BRIEF (the incident's standing
+  rule):** never address a Variorum instance by PROCESS NAME —
+  bundle id (`io.lduarte.Variorum.debug` for the dev build) or PID
+  only; both builds share the AppKit process name "Variorum".
+- **Ledger:** L1 SHIPPED · L2 SHIPPED · L3+L4 SHIPPED as ONE change
+  (her TRY — keep/revert on sight; the WT-4 file pointer corrected
+  on the record: the whitespace was the WINDOW TITLE, not the
+  sidebar label) · L5 PARTIAL (mode line shipped; projections
+  PROPOSED — adjudication below) · L6 SHIPPED (traced first).
+
+**L5 adjudication (architect):** the implementer's trace is ACCEPTED
+— every non-Write mode is an authority owner and/or routed-command
+handler; Write alone has a read-only twin; threading `live:` flags
+through five surfaces is the alternative a prior gate named and
+rejected. F-4 stands as HER ruling; what changed is its COST, and a
+newfound constraint on a settled design goes to her (the skill's
+rule), never silently re-scoped. **BUNDLED for the morning sitting
+with the orchestrator's recommendation: (b) — build the read-only
+TAKES projection as its own batch.** Takes is the mode her complaint
+named ("if you were just in takes"), it is the highest-value single
+projection, and it walks the P-3 extension road one surface at a
+time; (a) stands meanwhile (the pane names its mode); (c) — all
+five — is offered honestly at its phase-sized cost.
+
+**THE MORNING BUNDLE (held for her, nothing improvised):** the L5
+word ((a) hold / **(b) takes-first, recommended** / (c) all five);
+ONE Restore-Tutorial click covering both owed re-seeds (13f's
+vocabulary + batch 1's workspace lesson and key correction); the
+L3/L4 look on sight (keep, or one modifier each to put back); the
+incident relayed plainly; the WT-4 correction FYI.
+
+## Batch 2 brief — the markdown foundation (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM
+(sitting rounds 1–4 are the author's rulings — F-1…F-5 govern this
+batch; the P-1…P-9 constitution binds); the "Environment traps"
+section of `notes/plans/phase-13c-book-forms-and-conversions.md`
+(binding) PLUS batch 1's standing addition: **never address a
+Variorum instance by process name — bundle id or PID only**;
+`notes/TEXTKIT2_NOTES.md` §1 and §3 — this batch must never touch
+`NSTextList`, and §3's per-range rendering-attributes warning
+governs mechanism choice below.
+
+**Scope: L7 ONLY** — the tokenizer + the dimmed-marker editing
+face. NOT in this batch (they build ON it): insertion faces +
+registry acts (L8), checkbox click-toggle & list ergonomics (L9),
+link opening (L10), Read-mode full rendering (L11).
+
+- **(i) The tokenizer — a pure Domain function**
+  (`Sources/VariorumCore/Domain/`, suggested `MarkdownSyntax.swift`):
+  text → spans; each span = kind + marker range(s) + content range,
+  **UTF-16 offsets** (the structural API's unit — grapheme-validated,
+  the `BoundarySnapping` discipline). The v1 vocabulary EXACTLY
+  (F-3): `**bold**` · `*italic*` · `#`/`##`/`###` headings (line
+  start) · `- ` bullets (line start) · `- [ ]` / `- [x]` checkboxes
+  (line start) · `~~strikethrough~~` · `` `inline code` `` ·
+  `[text](url)`. **Line-scoped scanning** — a span never crosses a
+  newline. Unclosed markers are plain text. No nesting resolution
+  in v1 beyond a documented first-match rule. Exhaustive edge tests
+  in the Domain suite: unclosed, adjacent, mid-word `*`, empty
+  content, marker-only lines, checkbox with/without trailing text,
+  URLs containing parens — DECIDE each and pin the decision.
+- **(ii) The editing face:** dimmed markers + styled content on the
+  EDITING surfaces (the full-document editor and the pane read
+  tier). **Display == stored, BYTE-FOR-BYTE, always** (F-2 and
+  F-5's surface rule): attributes only — the string never changes.
+  Mechanism: real FONT/COLOR attributes on the text storage /
+  attributed string — deliberately NOT TK2 per-range rendering
+  attributes (§3's unreliable class). Headings style at line level,
+  code monospace, markers dimmed via the muted token color; all
+  colors/fonts through the voice tokens (P-8), both voices, light
+  and dark. **P1: re-scan scope ∝ the edited paragraph(s) on every
+  keystroke path — never the document; measure and state the
+  keystroke cost in the record.** Styling is PASSIVE in this batch:
+  clicks, caret, selection, and every structural gesture are
+  byte-untouched.
+- **`renderedText` / export / the bridge: ZERO lines** — the join
+  brain is untouched by F-1's letter (syntax is content); do not
+  add semantics anywhere near it.
+- **Mobile runs at batch end** (`Sources/` is touched): the iPhone
+  17-family/16e destination note (13f plan). Full suites + the
+  tutorial spine by TYPE name, counts quoted from your own "Test
+  run with N tests" lines. Baselines to match-or-beat: core 926/105
+  · Mac 1075/190 · mobile 14/4.
+- The loop as batch 1 ran it: red-on-old pins by behavioral revert
+  with checksums; PROVISIONAL-and-continue for non-gating ambiguity
+  (recorded); STOP-and-report for anything gating or exceeding a
+  ruling's shape; append the batch record here; commit per
+  convention; never push; never `/Applications`; her running
+  real-store instance is never touched.
