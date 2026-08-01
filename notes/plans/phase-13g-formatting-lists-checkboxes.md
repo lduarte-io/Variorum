@@ -846,6 +846,22 @@ vocabulary + batch 1's workspace lesson and key correction); the
 L3/L4 look on sight (keep, or one modifier each to put back); the
 incident relayed plainly; the WT-4 correction FYI.
 
+*Extended at batch 2's acceptance (look/register items, deliberately
+not invented overnight):* **(i)** inline code is INVISIBLE in the
+terminal voice (terminal prose is already monospaced, so only the
+dimmed backticks distinguish it — a tint is the obvious fix; no
+tint was ruled); **(ii)** a CHECKED checkbox's text is styled
+exactly like an unchecked one (dimming or strike-through is what
+most apps do — F-3 ruled the vocabulary, not the register);
+**(iii)** indented list items are unstyled (the column-0 rule) —
+nested lists need her word on how indentation should read;
+**(iv)** an OFFER, not built: a visible formatting toolbar/bar
+(her "native-looking tools/buttons") beyond batch 3's Format menu
++ shortcuts + context menu — chrome restraint says menu-first,
+her call; **(v)** list ERGONOMICS (does ⏎ at the end of a list
+line continue the list with a fresh `- `?) — unruled, and it
+changes what typing does, so it waits for her word.
+
 ## Batch 2 brief — the markdown foundation (a FRESH Opus implementer; self-contained)
 
 **Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM
@@ -1119,3 +1135,81 @@ renders are the honest look samples.
   not styled (line-leading constructs must start at column 0). Nested lists will
   need that rule widened, deliberately and with her word on how indentation
   should read.
+
+### Orchestrator acceptance — batch 2 (2026-08-01)
+
+- **Commit `b46b4a6` verified by own inspection:** 11 files, scoped
+  exactly as the brief demanded — the Domain tokenizer + its test
+  suite, the styling theme file + face tests, the editor/pane/read
+  wiring, this plan's record. No `Sync/` lines, nothing near
+  `renderedText`/export/the join brain (file list confirms), no
+  schema.
+- **Counts by the orchestrator's OWN runs:** core "Test run with
+  946 tests in 106 suites passed" · Mac "Test run with 1088 tests
+  in 191 suites passed" · mobile "Test run with 14 tests in 4
+  suites passed" — every implementer claim (946/106 · 1088/191 ·
+  14/4 · spine 49/7) matched exactly. **Batch 2 ACCEPTED.**
+- The tokenizer's edge-decision table, the four discriminating
+  reverts, the measured flat ~150 µs worst keystroke, and the
+  refuted-and-corrected fast-path claim are accepted as recorded.
+- The two look items + the L9 limitation are routed to THE MORNING
+  BUNDLE (extended above, items i–v); nothing invented overnight.
+
+## Batch 3 brief — the formatting acts (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM
+(rounds 1–4 = the rulings F-1…F-5; the P-1…P-9 constitution binds;
+batch 2's record defines the tokenizer API you build on); the
+"Environment traps" section of
+`notes/plans/phase-13c-book-forms-and-conversions.md` (binding) PLUS
+the batch-1 standing rule: **never address a Variorum instance by
+process name — bundle id or PID only**; `notes/TEXTKIT2_NOTES.md`
+§1/§3 (no `NSTextList`, ever; no TK2 per-range rendering
+attributes).
+
+**Scope: L8 + L9's ruled half (click-to-toggle) ONLY.** NOT in this
+batch — held for her morning word, do not preempt: the checked-box
+text register, indented/nested list styling, ⏎-continues-a-list
+ergonomics, any visible formatting toolbar (menu/shortcut/context
+doors only), links behavior (L10), Read-mode rendering (L11).
+
+- **L8 — the insertion faces.** The edit COMPUTATION is pure Domain
+  (`Sources/VariorumCore/Domain/`, e.g. `MarkdownEditing`):
+  wrap/unwrap toggles for `**` `*` `~~` `` ` `` over a selection
+  (consult `MarkdownSyntax.spans` to decide wrapped-ness — never
+  regex guessing; ⌘B on `**sel**` UNWRAPS), empty-selection insert
+  with caret-between, and line-level prefix toggles for headings
+  (#/##/###), `- ` bullets, and `- [ ]` checkboxes at the caret's
+  line(s), the column-0 rule respected. Tests in the Domain suite
+  for every shape. The FACE: registry declarations (P-1 — verb,
+  scope, doors, availability = a live editing surface, honest
+  refusal copy), a **Format menu** + context-menu entries +
+  shortcuts. **Collision-sweep every chord before binding it** (the
+  13f pattern — sweep `EditorCommands.keyEquivalent`, every
+  `.keyboardShortcut(` in `Variorum/` and `Shared/`, `NSMenuItem`
+  equivalents; record the sweep's result in the registry comment;
+  ⌘B/⌘I are the natural candidates IF free; anything not free ships
+  menu-first, recorded). The drift guard will force the helper rows
+  — that is it working; add them with the chords. All edits ride
+  the ORDINARY editing pipeline (autosave, churn, text undo); seal
+  and variant locks refuse through the standing surfaces
+  (fire-and-speak, P-2).
+- **L9's toggle:** a click exactly on a checkbox's BOX (the
+  tokenizer's box range — `markers[1]`, already carried) in a LIVE
+  editing surface toggles `- [ ]` ↔ `- [x]` as one ordinary edit
+  (caret preserved; text undo works; sealed refuses honestly). The
+  read tier's standing click-to-focus is untouched: first click
+  focuses (as today), the click on the live surface toggles. State
+  the chosen hit-test mechanism in the record; it must not eat
+  ordinary caret clicks (the batch-1 `PaneFocusCatcher`
+  observe-don't-consume lesson is the reference shape).
+- **Suites:** `Sources/` is touched (the Domain functions) ⇒ ALL
+  THREE run at batch end, counts quoted from your own "Test run
+  with N tests" lines. Baselines to match-or-beat: core 946/106 ·
+  Mac 1088/191 · mobile 14/4. Tutorial spine green by TYPE name.
+- The loop as batches 1–2 ran it: red-on-old by behavioral revert
+  with checksums; PROVISIONAL-and-continue non-gating (recorded;
+  product PROVISIONALs to `notes/QUESTIONS.md`, #49 next free);
+  STOP-and-report anything gating; batch record appended here;
+  commit per convention, explicit paths; never push; never
+  `/Applications`; her real-store instance never touched.
