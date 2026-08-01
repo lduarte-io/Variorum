@@ -80,9 +80,15 @@ struct DestructiveUndoWarningTests {
             try await divideThenEdit(h)
 
             actions.structuralUndo(confirm: { _ in true })
-            await settle { h.session.undoStack.depth == 0 }
+            // 13g batch 5: settle on the LAST signal in the chain. The stack
+            // moves inside the runner's actor hop; the status is spoken only
+            // after the door's main-actor continuation resumes, so waiting on
+            // `depth == 0` can exit before the report exists (the traced
+            // shell-redo flake, same door, same window).
+            await settle { h.session.status.current?.text.contains("Undid") == true }
 
             #expect(try h.storeSlots().compactMap(\.text) == ["First sentence. Second one."])
+            #expect(h.session.undoStack.depth == 0)
             #expect(h.session.status.current?.text.contains("Undid") == true)
             // The set-aside writing is one restore away — the fourth quiet
             // auto-commit occasion, unchanged by the warning.
@@ -127,9 +133,12 @@ struct DestructiveUndoWarningTests {
             await settle { h.session.undoStack.redoDepth == 1 }
 
             actions.structuralRedo()
-            await settle { h.session.undoStack.redoDepth == 0 }
+            // Same rule as above: the report is the last signal, so it is
+            // the one to wait on.
+            await settle { h.session.status.current?.text.contains("Redid") == true }
             let slots = try h.storeSlots().compactMap(\.text)
             #expect(slots == ["First sentence.", "Second one."])
+            #expect(h.session.undoStack.redoDepth == 0)
             #expect(h.session.status.current?.text.contains("Redid") == true)
         }
     }

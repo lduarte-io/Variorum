@@ -433,11 +433,11 @@ visibility, a display setting if ever wanted.
 | L10 | Links (F-5): ⌘-click opens in editors (+ the missing Add Link act); fully rendered + plain-click in Read | **SHIPPED** (batch 4) |
 | L11 | Read mode full markdown rendering (the F-5 surface rule; pagination measures the transformed text, addresses stay identity) | **SHIPPED** (batch 4 — both faces) |
 | L12 | Helper/tutorial coverage for formatting + the re-seed note | **SHIPPED** (batch 4 — ONE Restore-Tutorial click now covers 13f + batches 1 and 4) |
-| L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | batch 5 (spawning) |
+| L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | **SHIPPED** (batch 5) — flaky pin **RESOLVED** (mechanism traced, fixed at source, 3 latent siblings swept, deterministic pin); windowless **NOT REPRODUCED in 32 launches / 6 arms / 2 trees** — row DEEPENED and re-owned to **13e's kickoff sweep** (L16 must carry it) |
 | L14 | W26: the true global quick-note hotkey — SLOTTED to 13e's opening sitting (her round-4 ruling; supersedes round 2's later-in-13g reading) | → 13e |
 | L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | batch 2 / acceptance |
 | L15 | TEXTKIT2 §5 re-verify after the phase's editor work | closeout |
-| L16 | 13g's closeout AUTHORS 13e's plan (her standing instruction) | closeout |
+| L16 | 13g's closeout AUTHORS 13e's plan (her standing instruction) — and that plan must NAME, in its kickoff/opening sitting: **W26** (the true global quick-note hotkey, her round-4 slot) and **the windowless-launch/quit-hang row** (re-owned to 13e's kickoff sweep at batch 5, capture-first — see that batch record) | closeout |
 
 ## Batch 1 brief — the walkthrough batch (a FRESH Opus implementer; self-contained)
 
@@ -1878,3 +1878,265 @@ rather than closed. DO NOT patch on suspicion.
   KnownIssues rows updated to match reality (resolved, or deepened
   with the new trace); commit per convention, explicit paths;
   never push; never `/Applications`.
+
+### Batch 5 record — the kickoff sweep (2026-08-01, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on the
+final tree): core **986 tests in 108 suites** (unchanged — nothing under
+`Sources/` or `Shared/` was touched, by design) · Mac **1121 tests in 194
+suites** (from 1117/193: **+4 tests, +1 suite** — one new redo pin and the
+three-pin quit-door characterization suite) · mobile **NOT RUN and not owed**
+(`Sources/`/`Shared/` untouched; baseline 14/4 stands). The tutorial spine ran
+green by TYPE name on the final tree (**50 tests in 7 suites**). Zero
+`Sources/VariorumCore/Sync/` lines; no schema; **the whole diff is test code** —
+`git status --short` shows four files, all under `VariorumTests/`.
+
+**This was an INVESTIGATION batch and it ends with one trace CLOSED and one
+trace OPEN.** Trace (i) found its mechanism, fixed it at the source, and left a
+deterministic pin. Trace (ii) did not reproduce in **32 launches across six
+arms and two trees**; what it produced is a ruled-out space, two refuted
+hypotheses with arithmetic, a characterization suite, and a reproduction
+toolkit — the row is DEEPENED and re-owned, not closed. No line of product
+code was written on suspicion.
+
+---
+
+#### (i) THE SHELL-REDO FLAKY PIN — mechanism found, fixed, deterministically pinned · **RESOLVED**
+
+**The mechanism, traced by reading the three files it spans** (`ShellActions`
+→ `OperationsRunner` → `UndoStack`), then proved by measurement below:
+
+`ShellActions.structuralRedo()` fires a detached `Task { @MainActor }`. Inside
+it, the re-apply runs through `session.runner.run { … }` — `OperationsRunner`
+is an **actor**, so that is a hop OFF the main thread. `UndoStack.redo(with:)`
+runs the re-apply, then moves BOTH stacks under its `NSLock`, then calls
+`notifyChange()`, then returns. Only after that return does the door's
+continuation resume ON THE MAIN ACTOR and call `status.speak("Redid: …")`.
+
+So the two signals are strictly ordered:
+
+| Signal | Where it becomes true |
+|---|---|
+| `stack.redoDepth == 0` / `stack.depth == 1` | inside `UndoStack.redo`, on the runner's thread |
+| the store shows the re-applied rows | same place, one step earlier |
+| `status.current?.text == "Redid: …"` | **later** — after the actor hop back to the main actor |
+
+The pin polled `redoDepth != 0` and asserted the STATUS. `redoDepth` is read
+under the same lock the mutation takes, so it flips the instant the runner
+mutates — and the poll loop's own 1 ms wake can land in the window between
+that flip and the door's main-actor continuation. Under a busy main actor (a
+full parallel suite run — exactly where the one recorded failure happened,
+2026-07-30) the window widens. **The defect is the PIN's, not the door's:**
+the door does the right thing in the right order, and the report is a
+transient toast; nothing about the product changed or needed to.
+
+**Organic reproduction: ATTEMPTED AND FAILED, and that is recorded rather than
+skipped** — 27 runs of `BlockDeletionAndRedoTests`, all green: 15 idle, then 12
+with 16 spinning workers on 12 cores (load average verified above 30). The
+window is microseconds wide; a shotgun will not find it.
+
+**Deterministic reproduction — hold the window open.** `notifyChange()` fires
+on the mutating thread, INSIDE `redo(with:)`, after both stacks have moved and
+before the call returns. So a change observer that sleeps blocks the runner,
+which blocks the door's continuation, while `redoDepth` already reads 0. That
+is the same window at 150 ms instead of a few microseconds — no product change,
+no fake seam, the real ordering. The new pin
+`theRedoReportArrivesAfterTheStackHasAlreadyMoved` installs it for exactly one
+act and takes it down again.
+
+**RED-ON-OLD, by behavioural revert, verified:** with the new pin's wait
+replaced by the OLD polling shape (`for _ in 0..<2000 where stack.redoDepth != 0`)
+and everything else untouched, the run is
+
+> `✘ Test theRedoReportArrivesAfterTheStackHasAlreadyMoved() recorded an issue at BlockDeletionAndRedoTests.swift:641:13: Expectation failed: (harness.session.status.current?.text.contains("Redid") → false) == true`
+> `✘ Test run with 29 tests in 1 suite failed after 0.289 seconds with 1 issue.`
+
+— exactly discriminating (one test, one expectation, the other 28 green), and
+it failed on EVERY execution rather than on one in thirty. File restored and
+`shasum -a 256` matched the pre-revert value
+(`BlockDeletionAndRedoTests.swift` → `2cb3577f815d0a249244144595ca509c99883ee7ba864fdf16681e3c35e22789`).
+The revert is recorded as a `DISCRIMINATING REVERT` doc comment on the pin, the
+house convention, so a future reader can re-run it.
+
+**The fix, and the rule it encodes: poll the LAST signal in the chain, never an
+earlier one.** `theShellRedoActionRunsThroughTheRunnerAndReports` now waits on
+the status it asserts (`settleUntilRedoIsReported`, a bounded async poll — the
+standing never-a-sync-RunLoop-pump rule) and then asserts the stack, the store
+and the report together.
+
+**THE SWEEP — three latent siblings of the same class, found and fixed.** The
+mechanism is "an act whose store/stack effect lands inside `runner.run` and
+whose report lands after it", so every pin that waits on the early signal and
+asserts the late one is the same bug asleep. Swept all 32 `status.current`
+assertions in `VariorumTests/`; four were in the class, three of them latent:
+
+| Pin | Waited on | Asserted | Now waits on |
+|---|---|---|---|
+| `BlockDeletionAndRedoTests.theShellRedoActionRunsThroughTheRunnerAndReports` | `redoDepth == 0` | "Redid" | the status |
+| `DestructiveUndoWarningTests.redoNeverAsks` | `redoDepth == 0` | "Redid" | the status |
+| `DestructiveUndoWarningTests.approvingRunsTheOrdinaryUndoWithItsInsuranceIntact` | `depth == 0` | "Undid" | the status |
+| `CommandRoutingTests.sealFromAHandlerLessModeActsWithoutAWrongRefusalFlash` | the STORE (`locked == true`, written inside `runner.run`) | "Sealed" | the status |
+
+In each case the stack/store assertion was KEPT, moved after the wait — so the
+pins prove strictly more than before, not less.
+
+**Deliberately NOT changed, each checked rather than assumed:**
+`StarDoorTests.theSixthStarSpeaksTheOperationsOwnRefusal` (`StarsModel.toggle`
+is `async` and speaks INSIDE the awaited call, so the caller's `await` covers
+it); `CommandRoutingTests.sealWithNoPostOpenStillSpeaksTheHonestNote`
+(`toggleSeal`'s no-post branch speaks synchronously, before any `Task`);
+`TutorialWalkTests`' restore pin (`shell.pendingSelection` and `status.speak`
+are adjacent main-actor statements with no suspension between them). Three
+ruled-out candidates are three pins not churned.
+
+**Stability check after the fix:** 8 consecutive runs of the three touched
+suites, all green (36/3 each time).
+
+---
+
+#### (ii) THE WINDOWLESS LAUNCH + THE QUIT-FROM-WINDOWLESS HANG — **NOT REPRODUCED; the row is DEEPENED, not closed**
+
+**32 launches. Zero windowless. Six arms, two trees.** Every launch was
+censused with `CGWindowListCopyWindowInfo([.optionAll], …)` filtered by PID —
+`.optionAll`, so windows on other Spaces and off-screen windows are counted
+(the 13f record's vantage trap is about AX, and it is avoided by construction
+here; a throwaway `census` tool built for this batch prints layer, on-screen
+flag, alpha and bounds per window). All arms on the **DEBUG** build
+(`io.lduarte.Variorum.debug`, dev store); her `/Applications` instance was
+never addressed, and every instance was identified by PATH or PID, never by
+process name (the batch-1 standing rule).
+
+| Arm | Launches | Windowless |
+|---|---|---|
+| `open <path>` (current tree) | 7 | 0 |
+| `NSWorkspace.openApplication`, `activates = true` | 2 | 0 |
+| `NSWorkspace.openApplication`, `activates = false` | 2 | 0 |
+| `open` under heavy scheduling pressure (20 spinners on 12 cores, load avg 33) | 8 | 0 |
+| a SECOND instance of the same bundle id (`open` then `open -n`) | 2 | 0 |
+| **the 13f-CLOSEOUT TREE ITSELF** (worktree at `74ddf48`, Debug, isolated DerivedData) | 6 | 0 |
+| latency trials (below) | 5 | 0 |
+
+**The worktree arm is the one that matters most, and it is the batch's
+strongest single result.** The tree the 13f closeout tested — commit `74ddf48`,
+the phase's sealing commit — built Debug into its own DerivedData and launched
+six times, presents a window every time. So the behaviour is **not a property
+of the tree**: 13g's batch-1 window changes (`.toolbar(removing: .title)`,
+`.windowToolbarStyle(.unifiedCompact)`, the dead sidebar `Section`) did not
+"fix" it, and the 13f-closeout Debug arm does not reproduce today either. What
+varies is the environment or the state, not the code.
+
+**Two hypotheses REFUTED with measurement, not argument:**
+
+1. **"The census ran too early — the window is merely late."** Measured
+   launch-to-first-window on the Debug build over five trials:
+   **+0.58, +0.58, +0.60 s** to the first layer-0 window, **+0.54, +0.83 s** to
+   the first ON-SCREEN one. A census at three seconds — let alone the seven this
+   batch used — cannot miss it.
+2. **"A large store blocks the main thread before any window exists."** This one
+   was worth taking seriously: `AppBootstrap` opens the store SYNCHRONOUSLY in
+   the App struct's `@State` initializer, so nothing can present until it
+   returns. But the arithmetic kills it: the dev store this batch measured
+   against is **36 MB** and still reaches a window in 0.6 s, while her real
+   store — read-only `ls`, never opened — is **4.5 MB**, an order of magnitude
+   smaller. Her launch cannot be slower than the one measured.
+
+**Read-side results (a ruled-out candidate is a result):**
+
+- **Nothing in the app closes, hides or orders out a window.** Swept
+  `Variorum/` and `Shared/` for `dismissWindow`, `.close()`, `orderOut`,
+  `setIsVisible`, `NSApp.hide`, `handlesExternalEvents`, `isRestorable`,
+  `restorationBehavior`: every hit is an `openWindow` door or the quick-note
+  pad's own model call. There is no code path that could suppress the main
+  window.
+- **The saved-state directory for the Debug build is EMPTY** even after clean
+  quits (`NSQuitAlwaysKeepsWindows` is unset ⇒ close-windows-on-quit), so
+  restoration is not in play on this build at all — consistent with 13f's own
+  fresh-state arm.
+- **THE QUIT DOOR IS RULED OUT for the windowless-LAUNCH state, and this is
+  now pinned** (`VariorumTests/QuitDoorTests.swift`, three tests). Reading
+  `VariorumAppDelegate.applicationShouldTerminate` against
+  `AppSession`: the quit registry gains an entry **per OPENED POST**
+  (`AppSession.autosave(forPost:)` registers one), not at session birth — and a
+  windowless launch never ran `RootView.onAppear`, so the delegate holds no
+  session at all. Both facts land in the same branch: `pendingEditor == nil`
+  and `registry?.isEmpty != false` ⇒ **`.terminateNow`, synchronously, with no
+  Task and nothing awaited.** The app's own quit door cannot be what leaves
+  such a process alive.
+
+**Surviving candidates, stated as candidates:**
+
+- **The `.terminateLater` road has no deadline.** Once ANY post has been opened,
+  the door returns `.terminateLater` and replies from a `Task` that awaits the
+  focused editor's finalize and every registered flush. A flush that never
+  returns wedges ⌘Q forever, with no timeout and no fallback. This does NOT
+  explain a windowless *launch* (no post was opened), but it does fit a
+  windowless state reached by CLOSING windows in a session that had been used —
+  which is a different road to the same look. Pinned by its precondition
+  (`openingOnePostPutsTheDoorOnTheAsynchronousRoad`); deliberately NOT driven,
+  because driving it would call `NSApp.reply(toApplicationShouldTerminate:)`
+  inside the test host and a pin must not be able to quit the runner. **No fix
+  was written**: no concrete hanging flush was traced, and a deadline added on
+  suspicion is exactly what the hallucination guard forbids.
+- **One measured oddity, recorded because it is a real datum and unexplained:**
+  `tell application id "io.lduarte.Variorum.debug" to close every window`
+  returned **"AppleEvent timed out (-1712)"** and the window stayed open, while
+  `quit` on the same instance answered in **0.08 s** and the process died. So
+  the app answers the `quit` event promptly and does not answer the standard
+  suite's `close`. Whether that is SwiftUI's standard-suite coverage or
+  something in this app is unknown; it is the nearest live thread to 13f's
+  sibling observation and the first thing a next attempt should pull.
+- **Environment/state**, which is where the evidence now points: something about
+  the machine's or the instance's state at the 13f closeout, not the code. What
+  differed and could not be re-created here: the screen was **locked** for every
+  measurement in this batch (the window appeared anyway, so lock is not the
+  trigger — but its opposite could not be tested), Spaces arrangement and the
+  frontmost app could not be varied, and the **RELEASE configuration is out of
+  reach in this session by design**: `StoreLocation.resolve()` gives a release
+  build `.real` with no opt-out, so launching one would put a second writer on
+  her live store while her instance runs. Not done, and not to be done while
+  her app is up.
+
+**THE REPRODUCTION TOOLKIT, so the next session does not rebuild it.** Two
+throwaway Swift tools were written for this batch (kept out of the repo — each
+is ~20 lines and reproduced by this description): a **census** —
+`CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID)`, filter by PID,
+print `layer / onscreen / alpha / bounds / name` per window plus a total; and a
+**launcher** — `NSWorkspace.shared.openApplication(at:configuration:)` with
+`activates` switchable. Never AX, never `pgrep` by name.
+
+**WHAT THE NEXT ATTEMPT SHOULD DO, and it is the opposite of what this one
+did:** stop trying to summon it. A cold reproduction has now failed 32 times
+across two trees and six arms. **Capture it the next time it occurs** — the
+state is recognizable from outside (a running Variorum with no window on any
+Space) and the recovery (a Dock click) is one gesture away, so the sequence is:
+`sample <pid> 5` FIRST (a stack of every thread answers "is the main thread
+blocked, and in what" in one shot), then the CGWindowList census, then
+`lsappinfo info -only StatusLabel,pid <pid>`, then try `quit` and time it, and
+only then click the Dock. That capture is worth more than another thirty cold
+launches.
+
+---
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` untouched — #51 remains the next free number.** Nothing
+  in this batch is a product ruling; the two dispositions are a fixed pin and a
+  deepened row.
+- **KnownIssues, both rows updated to match reality:** the shell-redo flaky row
+  is **REMOVED** (resolved — mechanism traced, fixed at its source, three latent
+  siblings fixed with it, a deterministic pin left behind); the windowless row
+  is **REWRITTEN** with this batch's ruled-out space and capture-first
+  instruction, and **re-owned to 13e's kickoff sweep** (a phase number — never a
+  blank owner; the same hand-off shape 13f used to give it to 13g). **L16's
+  closeout duty inherits it:** the 13e plan this phase's closeout authors must
+  name it beside W26.
+- **No product code was touched.** The whole diff is `VariorumTests/`: three
+  pins re-pointed, one new pin, one new three-pin characterization suite. If a
+  reviewer wants the shortest possible reading, it is
+  `BlockDeletionAndRedoTests.swift`'s two redo tests and
+  `QuitDoorTests.swift`.
+- **No visual loop was run** — this batch adds no pixels.
+- **Her instance was never touched:** verified by PID at the start (24191,
+  `/Applications/Variorum.app`, one on-screen window) and at the end, unchanged.
+  The worktree and its isolated DerivedData were removed; `git worktree list`
+  shows only the repo.

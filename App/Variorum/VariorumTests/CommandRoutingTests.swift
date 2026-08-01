@@ -823,11 +823,12 @@ struct SealDoorTests {
             #expect(session.status.current == nil,
                     "no wrong refusal flash — the quiet dispatch left speech to the outcome")
 
-            await poll {
-                (try? db.read { db in
-                    try Queries.containerHeader(db, containerID: post.id)?.locked
-                }) == true
-            }
+            // 13g batch 5: poll the LAST signal in the chain. `lockPost`
+            // lands inside `session.runner.run` — an actor hop — and the
+            // status is spoken only after the door's main-actor continuation
+            // resumes, so a poll on the STORE can exit before the report
+            // exists (the traced shell-redo flake, same shape).
+            await poll { session.status.current?.text.contains("Sealed") == true }
             let sealed = try await db.read { db in
                 try Queries.containerHeader(db, containerID: post.id)?.locked
             }

@@ -560,6 +560,20 @@ struct BlockDeletionAndRedoTests {
         }
     }
 
+    /// **13g batch 5 — the kickoff sweep's flaky-pin fix. Poll the LAST
+    /// signal in the chain, never an earlier one.**
+    ///
+    /// This pin failed once in a full suite run (2026-07-30, QoL batch 2:
+    /// "Redid" never reached the status text) and was clean on every run
+    /// since. The traced mechanism is the PIN's, not the door's:
+    /// `ShellActions.structuralRedo` runs the re-apply inside
+    /// `session.runner.run` — an actor hop off the main thread — and
+    /// `UndoStack.redo` moves BOTH stacks under its lock and returns
+    /// BEFORE the door's `Task { @MainActor }` continuation can resume and
+    /// call `status.speak`. So `redoDepth == 0` becomes true strictly
+    /// earlier than the status this test asserts, and a poll that exits on
+    /// the stack can land inside that window. `theRedoReportArrivesAfterTheStackHasAlreadyMoved`
+    /// below holds the window open on purpose and proves it.
     @Test func theShellRedoActionRunsThroughTheRunnerAndReports() async throws {
         try await withEditor(seedBlocks: ["alpha", "beta"]) { harness in
             let actions = ShellActions(session: harness.session, shell: ShellRouter())
@@ -573,10 +587,8 @@ struct BlockDeletionAndRedoTests {
             #expect(stack.redoDepth == 1)
 
             actions.structuralRedo()
-            for _ in 0..<2000 where stack.redoDepth != 0 {
-                await Task.yield()
-                try? await Task.sleep(for: .milliseconds(1))
-            }
+            await settleUntilRedoIsReported(harness)
+
             #expect(stack.redoDepth == 0)
             #expect(stack.depth == 1)
             let afterRedo = try harness.storeSlots().compactMap(\.text)
@@ -585,6 +597,57 @@ struct BlockDeletionAndRedoTests {
             // The outcome REPORTS — mode-independently, through the one
             // status surface (N4's letter, applied to the new door).
             #expect(harness.session.status.current?.text.contains("Redid") == true)
+        }
+    }
+
+    /// **The mechanism, held open so it is deterministic** (13g batch 5).
+    ///
+    /// `UndoStack.notifyChange()` fires on the MUTATING thread, inside
+    /// `redo(with:)`, *after* both stacks have moved and *before* the call
+    /// returns — so blocking it blocks the runner, and therefore blocks the
+    /// door's main-actor continuation, while `redoDepth` already reads 0.
+    /// That is exactly the flake's window, at 150 ms instead of a few
+    /// microseconds. Under the fixed polling this pin is green; under the
+    /// old polling (exit as soon as `redoDepth == 0`) it fails on the
+    /// status expectation every single run.
+    ///
+    /// DISCRIMINATING REVERT: replace `settleUntilRedoIsReported` with
+    /// `for _ in 0..<2000 where stack.redoDepth != 0 { … }` ⇒ RED here,
+    /// green everywhere else.
+    @Test func theRedoReportArrivesAfterTheStackHasAlreadyMoved() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { harness in
+            let actions = ShellActions(session: harness.session, shell: ShellRouter())
+            let stack = harness.session.undoStack
+
+            harness.textView.setSelectedRange(NSRange(location: 0, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.deleteCaretBlock()
+            await harness.flush()
+            try await harness.session.runner.run { ops in _ = try stack.undo(with: ops) }
+            #expect(stack.redoDepth == 1)
+
+            // Widen the real window; installed only for this one act.
+            stack.setChangeObserver { Thread.sleep(forTimeInterval: 0.15) }
+            defer { stack.setChangeObserver(nil) }
+
+            actions.structuralRedo()
+            await settleUntilRedoIsReported(harness)
+
+            #expect(stack.redoDepth == 0, "the stacks moved")
+            #expect(stack.depth == 1)
+            #expect(harness.session.status.current?.text.contains("Redid") == true,
+                    "and the report still arrives, however late the door's continuation is")
+        }
+    }
+
+    /// Bounded async poll on the ASSERTED signal (the standing async-poll
+    /// rule — never a sync RunLoop pump). 4 s of headroom, because the pin
+    /// above deliberately delays the door by 150 ms.
+    private func settleUntilRedoIsReported(_ harness: EditorHarness) async {
+        for _ in 0..<4000
+        where harness.session.status.current?.text.contains("Redid") != true {
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(1))
         }
     }
 }
