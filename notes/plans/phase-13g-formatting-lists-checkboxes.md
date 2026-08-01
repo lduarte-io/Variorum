@@ -433,7 +433,7 @@ visibility, a display setting if ever wanted.
 | L10 | Links (F-5): ⌘-click opens in editors (+ the missing Add Link act); fully rendered + plain-click in Read | **SHIPPED** (batch 4) |
 | L11 | Read mode full markdown rendering (the F-5 surface rule; pagination measures the transformed text, addresses stay identity) | **SHIPPED** (batch 4 — both faces) |
 | L12 | Helper/tutorial coverage for formatting + the re-seed note | **SHIPPED** (batch 4 — ONE Restore-Tutorial click now covers 13f + batches 1 and 4) |
-| L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | sweep batch |
+| L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | batch 5 (spawning) |
 | L14 | W26: the true global quick-note hotkey — SLOTTED to 13e's opening sitting (her round-4 ruling; supersedes round 2's later-in-13g reading) | → 13e |
 | L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | batch 2 / acceptance |
 | L15 | TEXTKIT2 §5 re-verify after the phase's editor work | closeout |
@@ -1795,3 +1795,86 @@ look. The revert then failed cleanly, which is what a red-on-old pin is for.
 - **No visual loop was run.** The new pixels are Read's two faces, and the
   honest way to look at them is in her own book with her own voice — a
   screenshot of a synthetic page would tell her less than one press of ⌘5 will.
+
+### Orchestrator acceptance — batch 4 (2026-08-01)
+
+- **Commit `a9ca0d2` verified by own inspection:** 22 files, scoped
+  as briefed — `MarkdownRendering` (pure Domain transform) + suite,
+  the paginator's two-strings-from-one-decisions shape (App-side;
+  NOTHING under `Queries/`/`Bridge/`/export paths — name-list
+  confirmed), `MarkdownLink`'s one-place scheme rule, Add Link in
+  the wrap family, the formatting lesson + helper ceiling pin, the
+  #50 QUESTIONS bundle (read in full — six calls, properly OPEN;
+  #51 next free). No `Sync/` lines, no schema.
+- **Counts by the orchestrator's OWN runs:** core "Test run with
+  986 tests in 108 suites passed" · Mac "Test run with 1117 tests
+  in 193 suites passed" · mobile "Test run with 14 tests in 4
+  suites passed" — every implementer claim (986/108 · 1117/193 ·
+  14/4 · spine 50/7) matched exactly. **Batch 4 ACCEPTED.**
+- The CoreText origin-space finding (line origins relative to the
+  frame PATH's bounding box — caught by the deliberately-
+  discriminating half of its own pin), the five reverts, and the
+  house bounds guard on both derived-range write sites are accepted
+  as recorded.
+- **Morning bundle extended:** **(viii)** #50's walk (links + Read's
+  six calls); **(ix)** a second hand-check — click a link in Read's
+  SCROLL face (whether SwiftUI's link dispatch wins against the
+  row's wake-the-post tap; benign either way, one line to move the
+  gesture if not); and the note that item (ii), the checked-box
+  register, now has a SECOND surface to answer for (Read's ☑ line).
+
+## Batch 5 brief — the kickoff sweep (a FRESH Opus implementer; self-contained; INVESTIGATION-FIRST)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM
+(the constitution binds; the batch records tell you what this phase
+has already touched); the "Environment traps" section of
+`notes/plans/phase-13c-book-forms-and-conversions.md` (binding)
+PLUS the batch-1 standing rule (bundle id `io.lduarte.Variorum.debug`
+or PID only — NEVER process name; the author's real-store instance
+is NEVER touched, quit, killed, or sent events); the TWO
+`notes/KnownIssuesAndTechDebt.md` rows this batch owns (the
+shell-redo flaky pin; the windowless-launch + quit-from-windowless
+rows) VERBATIM; and the 13f plan's "THE CLOSEOUT EXECUTED" section
+(`notes/plans/phase-13f-workspace.md`) — the windowless
+investigation's full prior record, including the AX-reads-the-
+current-Space-only vantage trap (use CGWindowList for window
+censuses, never AX counts).
+
+**Scope: L13 — two traces. The hallucination guard binds HARD:**
+no fix without a self-traced concrete mechanism; a trace that does
+not conclude is recorded honestly (what was tried, what was ruled
+out, the surviving candidates) and the KnownIssues row is updated
+rather than closed. DO NOT patch on suspicion.
+
+- **(i) The shell-redo flaky pin**
+  (`theShellRedoActionRunsThroughTheRunnerAndReports`, 13c-era
+  shell-redo status machinery): trace the status-delivery TIMING.
+  One recorded failure (2026-07-30, "Redid" never reached the
+  status text), clean on every run since — so REPRODUCE FIRST if
+  you can (a loop of the suite / induced scheduling pressure); if
+  the mechanism is found, fix it with a DETERMINISTIC red-on-old
+  pin (the flake reproduced reliably under the pin's conditions);
+  if not, record the ruled-out space and leave the row updated.
+- **(ii) The windowless launch + quit-from-windowless hang** (the
+  `openApplication` path presents ZERO windows on any Space;
+  REOPEN mints the window — the standing recovery; quit from
+  windowless does not complete, clean with a window, verified
+  twice at the 13f closeout): trace the mechanism INSIDE the app —
+  scene presentation vs. launch-event handling. Work on the DEBUG
+  build (dev store, `io.lduarte.Variorum.debug`) launched by the
+  `openApplication` path; CGWindowList for censuses; her instance
+  untouched. A fix (e.g. an explicit window-ensure on launch, or
+  whatever the trace actually supports) lands only WITH the traced
+  mechanism and a pin/procedure that discriminates; otherwise the
+  characterization is deepened on the row.
+- **Suites:** likely App-target only; if `Sources/`/`Shared/` is
+  touched, mobile runs too. Full suites at batch end regardless,
+  counts quoted. Baselines to match-or-beat: core 986/108 · Mac
+  1117/193 · mobile 14/4. Tutorial spine green by TYPE name.
+- The loop: red-on-old by behavioral revert where a pin CAN go red
+  (lifecycle timing may honestly be procedure-verified — say so
+  explicitly, the model-layer honesty rule); batch record appended
+  here (the traces in full — a ruled-out candidate is a result);
+  KnownIssues rows updated to match reality (resolved, or deepened
+  with the new trace); commit per convention, explicit paths;
+  never push; never `/Applications`.
