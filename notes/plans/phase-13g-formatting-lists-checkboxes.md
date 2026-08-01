@@ -2178,3 +2178,241 @@ launches.
   (standard ladder), the TEXTKIT2 §5 re-run (L15), and the
   closeout that authors 13e's plan (L16 — W26 + the windowless
   capture-first item both named).
+
+### Round 5 — 2026-08-01, her morning (the L5 word; a new roadmap row; her ergonomics list; one crash)
+
+Her message, verbatim:
+
+> hi, i closed my app so you can refresh it. but i'm kind of curious
+> - what do you mean hold with the shipped mode-label? for the stick
+> pane modes ruling? I think that having a takes projection first
+> would be fine - i honestly don't think that lenses or compare need
+> to be a side by side mode option for now or potentially ever.
+> takes is more of a main editing space so it's more important to
+> see that rpeserved. i'm also ready to hear the questions out. i
+> think that i also need you to add something to the plan / roadmap
+> for a new phase 13 phase where I handle the deletion of items
+> better. I think that some kind of "true delete" should be added
+> for posts (going to a Trash for 30 days before really deleting),
+> because I already have posts in my library i don't want to have.
+> that seems like an obvious pre-ship feature. and also, I think
+> that you need to be able to see the archived blocks (or deleted
+> blocks) that are associated with a particular post, because just
+> going to the library you get a little lost. separately from that
+> phase, there are a couple little ergonomic improvements that I
+> want: 1. stop showing the comment + to the right completely, it
+> conflicts with the take icon. I also think comments should appear
+> on the left since there's so much machinery going on on the right
+> already. 2: stop showing the actual ID of the block (1R3D9145 as
+> an example), and rather than blk, show "block 1/1". there's also
+> a bug where clicking on the "show scraps button" just fully
+> crashed the application and nothing appears. I have that variorum
+> stack trace of the crash if you need it. I also want to make a
+> different view in the library that is more similar to the apple
+> notes view where you can see the first little bit of text:
+> [screenshot — the Apple Notes list: title, date, snippet, folder].
+> I also think that if you click on "Untitled" it lets you edit the
+> text field there and then rather than bringing up a smaller
+> little window to edit. I also want better ergonomics on the tags
+> - I'm open to suggestions on how to achieve that, but I like it
+> when there are little tag cards that are different colors and
+> it's easier to add and remove them and they might belong on the
+> top bar. I also feel like the bottom bar is looking a little bit
+> overly crowded - i'm open to suggestions on how to handle this
+> honestly but i feel like not all of these items are needed? I'm
+> thinking something where there could be groupings on the bottom
+> of settings and clicking on them brings all the options out in a
+> slide - almost like tab groups in a brwoser? so there could be a
+> block menu for divide, extract, make block, and merge. (fast
+> users will use the hotkeys if they want). I think newlines make
+> blocks earns its place, I think the takes button earns its place.
+> i think tags should move anyway. i think +below and -block should
+> maybe be in a block meny? again, I'm overall open to suggestions
+> on this but I feel like it looks just a little bit cluttered.
+> I'll have to do the look / feel calls after I have the updated
+> app. I also think that we should maybe just make "Untitled" save
+> with the actual date as the name - I think it looks nicer and
+> then even if someone never titles things, it's more of a log look
+> than 500 untitled things. it looks nice in the journal to click
+> into it and see the dates but then you click on the journal and
+> it's untitled - i do think you sohuld be able to rename it from
+> the date, but auto date name is better than just "Untitled" I
+> think. i don't want the title to feel too forced - belonging in a
+> book should be enough for most small notes, but Untitled looks
+> ugly. opening in a new window seems to be working pretty well but
+> there is this bug where the top of it i couldn't scroll to (where
+> it says Untitled) and it was cut off [screenshot — the note-only
+> window, title clipped under the context bar]. I also think there
+> should be a small "modes" thing in the upper right of a new
+> window, so you can still switch to write / takes / etc. i also
+> like the idea of quicknotes automatically adding a quicknote tag
+> and there being a smart "quicknotes" book that's just based on
+> tag, so if you remove the tag it leaves the book.
+
+**Dispositions, point by point:**
+
+- **The refresh: EXECUTED this round** — zero instances verified,
+  fresh WAL-safe backup `variorum-backup-2026-08-01-211545`
+  (integrity ok), Release build → `/Applications`.
+- **The mode-label question: ANSWERED** (batch 1's interim — the
+  un-live pane shows a small line naming the mode it holds while
+  still rendering plain read text; "hold" meant keep only that).
+- **R5-1 (RULED — the L5 word): (b) TAKES-FIRST.** Her words:
+  "having a takes projection first would be fine - i honestly
+  don't think that lenses or compare need to be a side by side
+  mode option for now or potentially ever. takes is more of a main
+  editing space so it's more important to see that rpeserved."
+  The read-only TAKES projection builds (batch 6); Lenses/Compare
+  (and Canvas/Blocks) projections are DELIBERATELY NOT BUILT — her
+  uncertainty preserved ("potentially ever" is not "never"): an
+  un-live pane in those modes keeps the mode label + read text.
+- **R5-2 (NEW ROADMAP ROW, her instruction): the DELETION phase**
+  — added to the master plan as row 13j (her words on the row):
+  a "true delete" for posts — a TRASH holding 30 days before
+  really deleting ("an obvious pre-ship feature"; she already has
+  library posts she doesn't want) — and per-POST visibility of the
+  archived/deleted blocks associated with a particular post ("just
+  going to the library you get a little lost"). Recorded
+  interaction for its kickoff sitting: physical purge is the
+  Tombstone-GC KnownIssues row's territory (sync-aware horizon,
+  owner 12) — the two must be designed together, not separately.
+- **R5-3 (RULED, ergonomics): the comment "+" on the right goes
+  ENTIRELY** (conflicts with the take icon) **and comments move to
+  the LEFT margin** ("so much machinery going on on the right
+  already"). Batch 6.
+- **R5-4 (RULED, ergonomics): the block line drops the raw ID and
+  "blk" — it reads "block 1/1".** Batch 6.
+- **R5-5 (BUG, crash — trace IN HAND):** clicking "show scraps"
+  (the Snippets section door) crashes the app. The orchestrator
+  pulled both `.ips` reports from her DiagnosticReports directly
+  (2026-08-01 14:52:36/37, the /Applications 13f build): an
+  NSException thrown from AppKit's
+  `_postWindowNeedsUpdateConstraints` DURING `NSHostingView.layout`
+  (a SwiftUI `graphDidChange → setNeedsUpdate` re-entry inside the
+  layout pass — the update-constraints feedback-loop guard;
+  `NSApplication _crashOnException` terminates). The same FAMILY as
+  the b6dae25 chrome-layout class. Batch 6 traces the concrete view
+  on HEAD (the repro is her click) and fixes with a red-on-old pin.
+- **R5-6 (RULED, build): the Apple-Notes-style Library list view**
+  — a view mode showing title · date · the first bit of text ·
+  book, per her screenshot. Snippet derived READ-TIME and BOUNDED
+  (never stored — the no-denormalization rule; cost ∝ listed rows,
+  the windowed-observation discipline). Batch 6.
+- **R5-7 (RULED, build): inline title editing** — clicking
+  "Untitled" (or a title) edits in place; the little rename window
+  retires from that path. Batch 6.
+- **R5-8 (PROPOSAL WANTED, hers to nod): tag ergonomics** — she
+  likes colored tag cards, easier add/remove, "might belong on the
+  top bar". Orchestrator proposal offered this round (chips on the
+  context bar with stable per-path colors, popover add with
+  autocomplete, ✕ removes; tags leave the bottom bar). Held for
+  her word.
+- **R5-9 (PROPOSAL WANTED, hers to nod): the bottom bar regroup**
+  — her direction: grouped slide-outs ("like tab groups in a
+  brwoser"); a block menu for divide/extract/make block/merge
+  (+below/−block "maybe"); newlines-make-blocks EARNS ITS PLACE;
+  the takes button EARNS ITS PLACE; "tags should move anyway."
+  Orchestrator proposal offered this round. Held for her word.
+- **Look/feel calls (bundle items i–v): DEFERRED by her** until
+  the refreshed app is in hand. Carried.
+- **R5-10 (PROPOSAL WANTED, hers to nod): untitled notes show
+  their DATE** — her want: "auto date name is better than just
+  'Untitled'"; renameable from the date; titles never forced.
+  Orchestrator recommends the DISPLAY-RULE shape (untitled renders
+  its date everywhere; `title` stays NULL — fixes every EXISTING
+  untitled note for free, no denormalized copies) over
+  stamp-title-at-creation. Held for her word.
+- **R5-11 (BUG): the note-only window's top is unreachable** — the
+  title area can't be scrolled to, cut off (her screenshot, the
+  13f build). Batch 6 traces on HEAD (the L3/L4 title-band change
+  may interact — verify, not assume).
+- **R5-12 (RULED, build): a small MODES switcher in the note-only
+  window's top right** (write/takes/etc. reachable there). Batch 6.
+- **R5-13 (RULED in direction, details to nod): quick notes
+  auto-tag `quicknote`; a smart "Quicknotes" book keyed on the tag**
+  ("if you remove the tag it leaves the book" — exactly smart
+  membership's semantics). Self-creation shape offered for her nod
+  (the #37(iii) Journal precedent). Batch 7 on her word.
+
+**Routing:** batch 6 (spawning this round) = R5-1's takes
+projection + R5-3 + R5-4 + R5-5 crash + R5-6 + R5-7 + R5-11 +
+R5-12. Batch 7 (after her nods) = R5-8 tags + R5-9 bottom bar +
+R5-10 date display + R5-13 quicknote book. The #49/#50 walk was
+delivered in the same reply; defaults stand unless she flags.
+
+## Batch 6 brief — her morning list, the ruled set (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM —
+round 5 is the ruling set you build (R5-1, R5-3…R5-7, R5-11,
+R5-12); the P-1…P-9 constitution binds; the "Environment traps"
+section of `notes/plans/phase-13c-book-forms-and-conversions.md`
+(binding) PLUS the batch-1 standing rule (bundle id
+`io.lduarte.Variorum.debug` or PID only — NEVER process name; the
+author's real-store instance is likely RUNNING and is never
+touched); `notes/TEXTKIT2_NOTES.md` §1/§3.
+
+**Scope — eight ruled items; nothing from the batch-7 nod set
+(tags, bottom bar, date display, quicknote book):**
+
+- **(1) R5-1 — the read-only TAKES projection** (her L5 word:
+  takes-first; Lenses/Compare/Canvas/Blocks projections
+  deliberately NOT built). An un-live pane whose remembered mode is
+  Takes renders a read-only card list over the fan projection — NO
+  authority owner, NO routed-command handler (the `SpreadBookView`
+  → `ReadPostView` precedent is the shape; batch 1's L5 record
+  names the constraint set). Dimmed/read styling; click behavior
+  unchanged (the pane's body click focuses — batch 1's
+  `PaneFocusCatcher` already owns that). P3: exactly one live
+  surface, ever — the projection extends nothing beside
+  `PaneTextAuthority`. P1: cost ∝ visible cards.
+- **(2) R5-3 — comments move LEFT; the right-side comment "+"
+  goes entirely** (it conflicts with the take icon). The margin
+  comment presentation renders on the LEFT margin; the standing
+  comment doors (the bottom-bar/menu/shortcut doors, ⌘⇧')
+  remain — this is a PLACEMENT change, not a doors change.
+- **(3) R5-4 — the block line reads "block 1/16"**, no raw ID, no
+  "blk". (The read-time ordinal machinery is 9d's; only the
+  rendered string changes.)
+- **(4) R5-5 — the show-scraps CRASH.** Trace in hand (round 5's
+  record): her click on the Snippets door threw an NSException
+  from `_postWindowNeedsUpdateConstraints` DURING
+  `NSHostingView.layout` — a SwiftUI update re-entering the layout
+  pass (the update-constraints feedback-loop guard;
+  `_crashOnException` terminated the app; both `.ips` reports are
+  in her DiagnosticReports, 2026-08-01 14:52). REPRODUCE on the
+  Debug build first (click the Snippets section door), trace the
+  concrete view/state-publish, fix at the mechanism (the
+  mid-view-update `@State` publish class from 13b's gate is the
+  known family), red-on-old pin by behavioral revert where the
+  harness allows — else the model-layer honesty rule, stated.
+- **(5) R5-6 — the Apple-Notes-style Library list view**: a
+  Library view-mode offering title · date · the first snippet of
+  text · book membership per row (her screenshot in round 5).
+  Snippet derived READ-TIME, BOUNDED (first ~2 lines' worth of the
+  first block(s); never stored — the no-denormalization rule), and
+  windowed like every Library observation (the P1 discipline; the
+  bounded-windows marker rules apply). A view MODE beside the
+  existing list — not a replacement.
+- **(6) R5-7 — inline title editing**: clicking "Untitled" (or the
+  title) in the note header edits IN PLACE; the small rename
+  window retires from that path (other rename doors untouched).
+- **(7) R5-11 — the note-only window's unreachable top**: her
+  screenshot (13f build) shows the title area cut off and
+  unscrollable under the context bar. Trace on HEAD FIRST — the
+  batch-1 L3/L4 title-band change touched this neighborhood;
+  verify whether it fixed, moved, or kept the defect, then fix
+  with a pin.
+- **(8) R5-12 — a small MODES switcher in the note-only window's
+  top right** (Write · Takes · … reachable there; the registry's
+  mode acts are the source — render from the registry, P-1).
+
+**Suites:** App-target expected; if `Sources/`/`Shared/` is
+touched, mobile runs. Full suites at batch end, counts quoted from
+your own "Test run with N tests" lines. Baselines to
+match-or-beat: core 986/108 · Mac 1121/194 · mobile 14/4. Tutorial
+spine green by TYPE name. The loop as batches 1–5 ran it
+(red-on-old by behavioral revert with checksums; PROVISIONAL-and-
+continue non-gating, next free QUESTIONS number **#51**;
+STOP-and-report anything gating; batch record appended here;
+commit per convention, explicit paths; never push; never
+`/Applications`).
