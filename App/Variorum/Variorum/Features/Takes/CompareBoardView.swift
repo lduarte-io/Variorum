@@ -951,7 +951,7 @@ struct CompareBoardView: View {
                     }
                     Section("Recent notes") {
                         ForEach(model.peerCandidates, id: \.postID) { item in
-                            Text(item.title?.isEmpty == false ? item.title! : "Untitled")
+                            Text(item.displayTitle)
                                 .tag(String?.some(item.postID))
                         }
                     }

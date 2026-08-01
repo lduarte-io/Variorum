@@ -497,7 +497,10 @@ struct LibraryCatalogView: View {
             }
         }
         Button("Rename…") {
-            renameTitle = hit.title == "Untitled" ? "" : hit.title
+            // 13g batch 7 (R6-3): a hit's `title` is already the display
+            // answer, so a note showing its DATE must not seed the field
+            // with that date — she would be naming it after itself.
+            renameTitle = hit.storedTitle ?? ""
             renameTarget = hit.id
         }
         Button("Tags…") {
@@ -509,7 +512,7 @@ struct LibraryCatalogView: View {
         // restored verbatim; the same op door 2 emits).
         Menu("Mark as Versions with") {
             ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
-                Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
+                Button(other.displayTitle) {
                     Task { await library.markAsVersions(hit.id, other.postID) }
                 }
             }
@@ -518,7 +521,7 @@ struct LibraryCatalogView: View {
         // unlinked pick speaks its refusal instead of silently no-oping.
         Menu("Unmark Versions with") {
             ForEach(library.posts.filter { $0.postID != hit.id }, id: \.postID) { other in
-                Button(other.title?.isEmpty == false ? other.title! : "Untitled") {
+                Button(other.displayTitle) {
                     Task { await library.unmarkVersions(hit.id, other.postID) }
                 }
             }
@@ -579,10 +582,12 @@ struct LibraryCatalogView: View {
     }
 
     private func exportFileName(_ hit: Queries.CatalogHit) -> String {
+        // 13g batch 7 (R6-3): the hit's name is already the display brain's
+        // answer, so the date case needs no second test here — a note with
+        // no name exports as its date, which is what the bulk manifest has
+        // named it since 11b.
         let title = Queries.sanitizedFilename(hit.title)
-        if !title.isEmpty, hit.title != "Untitled" { return title }
-        if let day = hit.detail, !day.isEmpty { return day }
-        return "Untitled"
+        return title.isEmpty ? DisplayTitle.placeholder : title
     }
 }
 

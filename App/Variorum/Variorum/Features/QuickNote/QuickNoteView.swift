@@ -222,13 +222,29 @@ enum QuickNoteMint {
     static func file(_ text: String, session: AppSession) async -> String? {
         guard mints(text) else { return nil }
         do {
-            let result = try await session.runner.run { ops in
-                try ops.importPost(
+            // 13g batch 7 (her R6-4): the mint and the FILING ride ONE runner
+            // turn, so nothing can interleave between the note existing and
+            // the note being a quick note. They are two calls rather than one
+            // transaction — `fileAsQuicknote` says why on its own face — and
+            // the filing NEVER THROWS, so the capture is never at risk from
+            // the shelf's bookkeeping.
+            let (result, filing) = try await session.runner.run { ops in
+                let result = try ops.importPost(
                     title: nil, text: text, undoLabel: QuickNoteCopy.undoLabel)
+                return (result, ops.fileAsQuicknote(result.container.id))
             }
             // Her round-14.3: STAY QUIET. One line naming where it went —
-            // the main window never navigates.
-            session.status.speak(QuickNoteCopy.filedNote)
+            // the main window never navigates. It names the BOOK when the
+            // filing worked, because that is now where she will look for it;
+            // a refusal keeps the Pool wording, which stays true either way
+            // (a quick note is bookless in the curated sense — the smart
+            // book COLLECTS it, and the Pool lists bookless notes).
+            switch filing {
+            case .filed, .alreadyTagged:
+                session.status.speak(QuickNoteCopy.filedNote)
+            case .refused(let reason):
+                session.status.speak("\(QuickNoteCopy.filedNote) (\(reason))")
+            }
             return result.container.id
         } catch {
             session.status.speak(
@@ -268,13 +284,18 @@ nonisolated enum QuickNoteCopy {
     /// so its one row says what pressing it does).
     static let summonVerb = "New Quick Note"
     static let header = "quick note"
-    static let placeholder = "jot it down — it lands in the Pool"
+    static let placeholder = "jot it down — it lands in Quicknotes"
     /// ⏎ is a NEWLINE here (her ruling), so the hint says the two things
     /// that are not obvious: how to file, and where it goes.
     static let hint = "⏎ new line · ⌘⏎ files it · closing files it too"
     static let fileVerb = "File It"
     /// The undo entry's words — "Undo Quick Note", never "Undo Import".
     static let undoLabel = "Quick Note"
-    static let filedNote = "Filed in the Pool — a bookless note, ready when you are."
+    /// 13g batch 7 (R6-4): the quick note now wears the `quicknote` tag and
+    /// the smart **Quicknotes** book collects it — so the line names the
+    /// shelf it can be found on, and NOT the Pool: the Pool lists what no
+    /// book holds, and a collected note is held (Stage B's MAJOR 3 — derived
+    /// membership counts). One untag puts it back there.
+    static let filedNote = "Filed in Quicknotes — tagged #quicknote."
     static let refusedPrefix = "The quick note wasn't filed:"
 }

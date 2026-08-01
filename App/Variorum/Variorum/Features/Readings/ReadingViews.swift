@@ -45,7 +45,7 @@ struct ManageReadingPostsSheet: View {
                 }
                 ForEach(Array(members.enumerated()), id: \.element.postID) { i, entry in
                     HStack {
-                        Text(entry.title?.isEmpty == false ? entry.title! : "Untitled")
+                        Text(entry.displayTitle)
                         Spacer()
                         if reading.sortField == .manual {
                             Button("↑") { move(entry.postID, up: true) }
@@ -70,7 +70,7 @@ struct ManageReadingPostsSheet: View {
                 ForEach(candidates.filter { item in
                     !members.contains { $0.postID == item.postID }
                 }, id: \.postID) { item in
-                    Button(item.title?.isEmpty == false ? item.title! : "Untitled") {
+                    Button(item.displayTitle) {
                         Task {
                             await model.addPost(item.postID, to: reading.id)
                             await refresh()

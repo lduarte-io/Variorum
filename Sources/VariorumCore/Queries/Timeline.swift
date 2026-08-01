@@ -11,9 +11,33 @@ extension Queries {
         public let postID: String
         public let title: String?
         public let entryDate: String?
+        /// The note's stored `created_at` stamp — carried ONLY so
+        /// `displayTitle` can fall back to the day it was written (13g batch
+        /// 7, R6-3). Optional with a nil default so every existing caller
+        /// (tests included) compiles unchanged and degrades to exactly the
+        /// entry-date-else-"Untitled" behaviour it had before.
+        public let createdAt: String?
         /// The value of the ordering stamp for this row — feeds the next
         /// page's cursor.
         public let stamp: String
+
+        public init(
+            postID: String, title: String?, entryDate: String?,
+            createdAt: String? = nil, stamp: String
+        ) {
+            self.postID = postID
+            self.title = title
+            self.entryDate = entryDate
+            self.createdAt = createdAt
+            self.stamp = stamp
+        }
+
+        /// What this note is CALLED on screen (13g batch 7, R6-3) — the one
+        /// brain, asked lazily so a listing pays only for the rows it draws
+        /// (the stamp parse is per rendered row, never per fetched row).
+        public var displayTitle: String {
+            DisplayTitle.note(title: title, entryDate: entryDate, createdAt: createdAt)
+        }
     }
 
     /// What a timeline is keyed on. Posts missing the chosen stamp are not
@@ -49,7 +73,8 @@ extension Queries {
         let dir = direction == .desc ? "DESC" : "ASC"
         let comparator = direction == .desc ? "<" : ">"
         var sql = """
-            SELECT id AS post_id, title AS title, entry_date AS entry_date, \(column) AS stamp
+            SELECT id AS post_id, title AS title, entry_date AS entry_date,
+                   created_at AS created_at, \(column) AS stamp
             FROM container
             WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
               AND \(column) IS NOT NULL
@@ -105,7 +130,7 @@ extension Queries {
         var arguments: [(any DatabaseValueConvertible)?] = []
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
-                   \(sort.expression) AS stamp
+                   created_at AS created_at, \(sort.expression) AS stamp
             FROM container
             WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
             """
@@ -158,7 +183,7 @@ extension Queries {
     public static func archivedPosts(_ db: Database, limit: Int? = nil) throws -> [TimelineItem] {
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
-                   archived_at AS stamp
+                   created_at AS created_at, archived_at AS stamp
             FROM container
             WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NOT NULL
             ORDER BY archived_at DESC, id DESC
@@ -182,7 +207,7 @@ extension Queries {
     public static func deletedPosts(_ db: Database, limit: Int? = nil) throws -> [TimelineItem] {
         var sql = """
             SELECT id AS post_id, title AS title, entry_date AS entry_date,
-                   deleted_at AS stamp
+                   created_at AS created_at, deleted_at AS stamp
             FROM container
             WHERE kind = 'post' AND deleted_at IS NOT NULL
             ORDER BY deleted_at DESC, id DESC
@@ -201,6 +226,7 @@ extension Queries {
             postID: row["post_id"],
             title: row["title"],
             entryDate: row["entry_date"],
+            createdAt: row["created_at"],
             stamp: row["stamp"])
     }
 }

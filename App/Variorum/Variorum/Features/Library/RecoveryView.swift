@@ -361,7 +361,7 @@ struct RecoveryView: View {
 
     private func title(_ item: Queries.TimelineItem) -> some View {
         HStack(spacing: 6) {
-            Text(item.title?.isEmpty == false ? item.title! : "Untitled")
+            Text(item.displayTitle)
             if let date = item.entryDate {
                 Text(date).font(.caption).foregroundStyle(.secondary)
             }

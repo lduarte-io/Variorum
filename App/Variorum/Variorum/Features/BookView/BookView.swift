@@ -1235,8 +1235,10 @@ private func outlineChapterMenu(
 }
 
 /// A reading entry's display title — shared by every book surface's rows.
+/// 13g batch 7 (R6-3): the ONE display brain — title, else the note's
+/// date. Kept as a named helper only so the call sites read the same.
 private func outlineEntryTitle(_ entry: Queries.ReadingEntry) -> String {
-    entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
+    entry.displayTitle
 }
 
 /// Batch 12 — the collapsed card's excerpt + meta line (her referenced

@@ -504,8 +504,9 @@ enum TutorialSeeder {
             + "append; nothing ever overwrites one.",
 
             "Try it here: click into this paragraph, change a few words, press "
-            + "\u{2318}S, then press history in the bottom bar. Your savepoint is "
-            + "listed; Restore loads any savepoint back into the take — and "
+            + "\u{2318}S, then open note \u{25BE} in the bottom bar and press "
+            + "History. Your savepoint is listed; Restore loads any savepoint "
+            + "back into the take — and "
             + "committing again just adds another.",
 
             "The block below has a spare take to practice ARCHIVING on. Click "
@@ -535,8 +536,9 @@ enum TutorialSeeder {
             "This block holds two thoughts and they deserve two blocks. Put your "
             + "cursor right before this second sentence and press \u{2318}\u{21E7}D.",
 
-            "From Takes, the same door WORKS — press \u{2318}\u{21E7}D there, or the Divide "
-            + "button in the bottom bar, and watch the app do the carrying: it "
+            "From Takes, the same door WORKS — press \u{2318}\u{21E7}D there, or Divide "
+            + "in the bottom bar's block \u{25BE} group, and watch the app do the "
+            + "carrying: it "
             + "switches to Write, lands your cursor where you were, and cuts. "
             + "That visible carry is a feature, not a trick — every structure "
             + "gesture in Takes travels the same way.",
@@ -801,10 +803,14 @@ enum TutorialSeeder {
             + "deliberately never skimpy.",
 
             "TAGS organize notes (and blocks) without moving them: hierarchical "
-            + "paths like life/goals/2024, applied from the tags\u{2026} door in the "
-            + "bottom bar. The tag manager lives in Settings (\u{2318},), where a "
-            + "tag can also be promoted into a smart book that collects "
-            + "everything wearing it.",
+            + "paths like life/goals/2024. A note wears them as little coloured "
+            + "cards on the CONTEXT BAR at the top of its pane \u{2014} \u{FF0B} adds one "
+            + "(type it; \u{201C}/\u{201D} nests, and a name that doesn't exist yet is "
+            + "made), \u{2715} takes one off. Every tag keeps its own colour "
+            + "everywhere. Fold the bar with \u{2318}\u{21E7}I and the cards become one "
+            + "\u{FF03} door with the count. The tag manager lives in Settings "
+            + "(\u{2318},), where a tag can also be promoted into a smart book "
+            + "that collects everything wearing it.",
 
             "Full disclosure: every lesson note wears the \u{201C}tutorial\u{201D} tag — "
             + "that is exactly how Help \u{25B8} Restore Tutorial\u{2026} finds what to "
@@ -926,9 +932,9 @@ enum TutorialSeeder {
             + "Typing simply finds the text read-only. A door that can't act "
             + "tells you why, never nothing.",
 
-            "The seal is reversible and gentle: the unseal door sits right in "
-            + "the bottom bar. Unseal this note, change a word, seal it again "
-            + "(seal, same place). Sealing quietly commits any unsaved takes "
+            "The seal is reversible and gentle: the unseal door sits in the "
+            + "bottom bar's note \u{25BE} group. Unseal this note, change a word, "
+            + "seal it again (same place). Sealing quietly commits any unsaved takes "
             + "first — the guard insures exactly what it protects.",
         ])
         try ops.lockPost(sealed.post.id)

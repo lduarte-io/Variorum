@@ -370,7 +370,8 @@ private struct SpreadPage: View {
     }
 }
 
-/// A page's display title — the book surfaces' shared rule.
+/// A page's display title — the book surfaces' shared rule (13g batch 7,
+/// R6-3: the ONE display brain).
 private func spreadEntryTitle(_ entry: Queries.ReadingEntry) -> String {
-    entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
+    entry.displayTitle
 }

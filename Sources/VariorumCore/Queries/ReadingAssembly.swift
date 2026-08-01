@@ -31,18 +31,33 @@ extension Queries {
         /// in EMPTY chapters — names have no uniqueness (AppSpec §7).
         public let sectionID: String?
 
+        /// The note's stored `created_at` stamp — carried ONLY so
+        /// `displayTitle` can fall back to the day it was written (13g
+        /// batch 7, R6-3). Defaults nil, so every caller and test that
+        /// builds an entry by hand degrades to exactly the
+        /// entry-date-else-"Untitled" behaviour it had before.
+        public let createdAt: String?
+
         /// Public so view layers and tests can build projections directly
         /// (the RenderedBlock precedent). `sectionID` defaults nil so
         /// pre-13b callers construct unchanged.
         public init(
             postID: String, title: String?, entryDate: String?,
-            sectionPath: String?, sectionID: String? = nil
+            sectionPath: String?, sectionID: String? = nil, createdAt: String? = nil
         ) {
             self.postID = postID
             self.title = title
             self.entryDate = entryDate
             self.sectionPath = sectionPath
             self.sectionID = sectionID
+            self.createdAt = createdAt
+        }
+
+        /// What this note is CALLED on screen and in an export heading (13g
+        /// batch 7, R6-3) — the ONE display brain, asked lazily so a book's
+        /// assembly pays only for the rows a face draws.
+        public var displayTitle: String {
+            DisplayTitle.note(title: title, entryDate: entryDate, createdAt: createdAt)
         }
     }
 
@@ -259,6 +274,7 @@ extension Queries {
                 : stampOrder(sortField, sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
+                       c.created_at AS created_at,
                        s.name AS section_path, s.id AS section_id
                 FROM reading_post rp
                 JOIN container c
@@ -281,6 +297,7 @@ extension Queries {
                 : stampOrder(sortField, sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
+                       c.created_at AS created_at,
                        \(sectionSelect) AS section_path, NULL AS section_id
                 FROM reading_post rp
                 JOIN container c
@@ -309,6 +326,7 @@ extension Queries {
                 : stampOrder(sortField, sortDir)
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
+                       c.created_at AS created_at,
                        \(sectionSelect) AS section_path, NULL AS section_id
                 FROM container c
                 WHERE \(conditions.joined(separator: " AND "))
@@ -335,7 +353,8 @@ extension Queries {
                     title: row["title"],
                     entryDate: row["entry_date"],
                     sectionPath: row["section_path"],
-                    sectionID: row["section_id"])
+                    sectionID: row["section_id"],
+                    createdAt: row["created_at"])
             }
     }
 

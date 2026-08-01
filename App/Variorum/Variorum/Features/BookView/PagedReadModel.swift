@@ -354,8 +354,9 @@ final class PagedReadModel {
         return Double(number - 1) / Double(max(1, index.totalPages - 1))
     }
 
-    /// A page's display title — the book surfaces' shared rule.
+    /// A page's display title — the book surfaces' shared rule (13g batch
+    /// 7, R6-3: the ONE display brain).
     static func pageTitle(_ entry: Queries.ReadingEntry) -> String {
-        entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? "Untitled")
+        entry.displayTitle
     }
 }

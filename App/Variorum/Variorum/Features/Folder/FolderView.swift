@@ -94,7 +94,7 @@ struct FolderView: View {
                             openPost(item.postID)
                         } label: {
                             HStack {
-                                Text(item.title?.isEmpty == false ? item.title! : "Untitled")
+                                Text(item.displayTitle)
                                 if let date = item.entryDate {
                                     Text(date).font(.caption).foregroundStyle(.secondary)
                                 }

@@ -142,6 +142,19 @@ struct HelperView: View {
                 + "section sits at the sidebar's top (up to five); \u{2318}K has the "
                 + "same row"),
         ]),
+        // 13g batch 7 (R6-1/R6-2): the two things that MOVED. Her round-1
+        // finding was that a door which moves without a line here is a door
+        // she cannot find — so the tag chips and the bar's two groups get
+        // their rows the same day they ship.
+        ShortcutGroup(title: "The note's bars", items: [
+            ("tag cards (top bar)", "a note's tags live on the context bar as coloured "
+                + "cards: \u{FF0B} adds one (type it — \u{201C}/\u{201D} nests), \u{2715} takes it "
+                + "off. Folded (\u{2318}\u{21E7}I) they become one \u{FF03} door with the count"),
+            ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
+                + "\u{FF0B} new block below · \u{2212} delete this block"),
+            ("note \u{25BE} (bottom bar)", "history (savepoints) · seal / unseal · the "
+                + "note's date"),
+        ]),
     ]
 
     /// The keys this helper actually shows, as single tokens — a row may
@@ -263,6 +276,18 @@ struct HelperView: View {
         ("book / reading",
          "An ordered collection of notes (curated by hand, or smart — collected by "
          + "tags). A note can live in many books at once; membership is not ownership."),
+        // 13g batch 7 (R6-1): the word for the cards she asked for.
+        ("tag",
+         "A hierarchical label (life/goals/2024) applied to a note or a block — never a "
+         + "place, so tagging moves nothing. On a note they show as coloured cards on "
+         + "the context bar; \u{FF0B} adds, \u{2715} removes, and a tag keeps its colour "
+         + "everywhere. Settings (\u{2318},) manages the whole taxonomy and can promote "
+         + "a tag into a smart book."),
+        // 13g batch 7 (R6-4): quick notes now file themselves.
+        ("quicknote (the tag)",
+         "Every quick note is tagged \u{201C}quicknote\u{201D}, and the smart book "
+         + "\u{201C}Quicknotes\u{201D} collects the tag — so take the tag off and the note "
+         + "leaves that book, because smart membership is just the tag."),
         ("canvas",
          "A spatial VIEW on a note — arrange its blocks like sticky notes. The ‹ › "
          + "switcher just changes what a card shows; choosing is a separate, deliberate "

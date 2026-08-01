@@ -439,6 +439,7 @@ visibility, a display setting if ever wanted.
 | L15 | TEXTKIT2 §5 re-verify after the phase's editor work | closeout |
 | L18 | Batch 6 — her morning ruled set: R5-1 takes projection · R5-3 comments LEFT + the "+" retired · R5-4 "block 3/16" · **R5-5 THE CRASH (reproduced, traced to the pane row's geometry-fed-back frame under the hoisted inspector, fixed, verified)** · R5-6 the Notes list · R5-7 inline title · R5-12 the note-window modes switcher | **SHIPPED** (batch 6) |
 | L19 | R5-11 the note-only window's clipped top — REPRODUCED and TRACED (layout converges, pixels are the first pass's, any resize repairs it; three candidate fixes measured wrong and reverted) | **NOT FIXED** — KnownIssues row, owner **13e**'s kickoff sweep |
+| L20 | Batch 7 — the round-6 nod set: R6-1 tag chips on the top bar (tags leave the bottom bar) · R6-2 the bottom bar's `block ▾` / `note ▾` groups · R6-3 the untitled-date display rule + its export half (the 11b filename shape VERIFIED already compliant) · R6-4 quicknote tag + the self-creating smart book (**consequence, recorded: a quick note is now in Quicknotes and NOT in the Pool** — #52(g)) | **SHIPPED** (batch 7) |
 | L16 | 13g's closeout AUTHORS 13e's plan (her standing instruction) — and that plan must NAME, in its kickoff/opening sitting: **W26** (the true global quick-note hotkey, her round-4 slot) and **the windowless-launch/quit-hang row** (re-owned to 13e's kickoff sweep at batch 5, capture-first — see that batch record) | closeout |
 
 ## Batch 1 brief — the walkthrough batch (a FRESH Opus implementer; self-contained)
@@ -2875,3 +2876,272 @@ batch-1 standing rule.
   free) — joins the walk bundle. The dev-store repro residue
   (~a dozen empty Untitled notes) noted; harmless, dev store only.
 - **Batch 6 ACCEPTED.** Batch 7 (the round-6 nod set) spawns now.
+
+### Batch 7 record — the nod set (2026-08-01, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on the
+final tree): core **1001 tests in 110 suites passed** (from 986/108: +15 tests, +2
+suites — the display brain and the quicknote shelf) · Mac **1135 tests in 196
+suites**, with **the ONE recorded environment-gated red and nothing else** (see
+below; from 1126/195: +9 tests, +1 suite) · mobile **14 tests in 4 suites passed**
+(unchanged; run because `Sources/` was touched). The tutorial spine ran green by
+TYPE name on the final tree (**50 tests in 7 suites**). Zero
+`Sources/VariorumCore/Sync/` lines; no schema; **`renderedText`, the export BODY
+projections and the bridge's join brain are byte-untouched** — the only export
+lines this batch wrote are the reading heading's and the manifest's FILENAME, both
+title presentation.
+
+**THE ONE RED, as briefed:** `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+— the parked environment-gated tripwire with its own KnownIssues row (it fails on
+UNLOCKED login sessions; this session ran unlocked). It failed on its construction
+assertion, identically to batch 6's record, and nothing in this batch is anywhere
+near it. Every other test passed.
+
+---
+
+#### (1) R6-1 — TAG CHIPS ON THE TOP BAR · SHIPPED
+
+Her ask, round 5: *"I like it when there are little tag cards that are different
+colors and it's easier to add and remove them and they might belong on the top
+bar."*
+
+**Where they live:** the CONTEXT BAR — a third half beside the back chip and the
+ascent, in `ContextBar`, fed by `PaneHost` exactly as `books` is (a one-shot read
+keyed on the pane's note, never a held observation on a table autosave writes).
+So they ride the note-only window for free, and the split for free, because the
+bar is the PANE's chrome.
+
+- **`NoteTagChips`** — a card per tag: the tag's path (hierarchy stays SURFACED,
+  R45), a `✕` that removes it, and a `＋` that opens the adder popover.
+- **`TagChipColor`** — the colour is `BlockTint.stableHash` over the tag's PATH
+  (the 9d stable-colour family). Same tag, same colour, in every note and across
+  launches; applying a new tag never re-ripples the ones already there. Chosen
+  over an index into a palette for exactly that reason.
+- **`TagChipAdder`** — types-to-apply with autocomplete: case-insensitive
+  substring over paths, already-applied dropped, capped at 8 so a whole taxonomy
+  never becomes a scroll in a popover. **It adds NO tag semantics:** ⏎ calls the
+  SHIPPED `TagAssignmentViewModel.applyTypedPath` (13b 3D's N24), so the
+  hierarchy walk, the per-segment creation and the already-applied-is-a-no-op
+  rule are the one implementation the sheet has always used. `✕` is `removeTag`,
+  nothing more.
+- **It folds with the bar** (build-time call, #52(d)): collapsed — the default
+  since WT-2 — the cards become ONE `＃` door carrying the count, the bar's own
+  grammar where every half keeps a glyph so a fold is never a one-way door.
+- **`hasContent` widened:** a pane holding a NOTE now always renders the bar,
+  because the `＋` has to exist before there is a tag to show. A pane holding a
+  PLACE (shelf, library, book, recovery) renders no tag half at all — P-2.
+- **The bottom bar's `tags…` door RETIRED from both bars** (R6-1's letter). It
+  was never a registry capability, so no declaration changed; every OTHER tag
+  door is untouched (the Library row's Tags…, the Pool's, Settings' manager).
+
+*Pins:* `aTagsColourIsItsOwnAndNeverRipples` (the stable-hash claim, stated as
+arithmetic rather than as a tautology), `theAdderSuggestsWhatSheHasNotAlreadyApplied`
+(the pure filter, five shapes), `aNotePaneAlwaysCarriesTheBarBecauseTheTagDoorLivesThere`,
+and the WIRE (`theChipDoorsApplyAndRemoveThroughTheStandingOps`, through a real
+store).
+
+---
+
+#### (2) R6-2 — THE BOTTOM BAR REGROUPS · SHIPPED, exactly the previewed shape
+
+Her ask: *"i feel like the bottom bar is looking a little bit overly crowded …
+something where there could be groupings … clicking on them brings all the
+options out in a slide - almost like tab groups in a brwoser."*
+
+Both bars now read as ONE grammar:
+
+| | flat row | `block ▾` | `note ▾` |
+|---|---|---|---|
+| **Write** (`CommitBar`) | block 1/16 · block ▾ · Takes · commit ⌘S · note ▾ · comments · newlines chip · counts · ? | Divide · Extract · Make Block · Merge · ＋ Below · − Block | History · Seal/Unseal · Set date… |
+| **Takes** (`TakesBottomBar`) | block 3/16 · block ▾ · ＋ take · commit ⌘S · note ▾ · comments · newlines chip · counts · ? | (its existing take/block items) **+ Divide · Extract · Make Block · Merge** | History · Seal/Unseal · Set date… |
+
+**Nothing lost an act.** Both `renderedCapabilities` statics are byte-unchanged,
+so `theBottomBarsRenderExactlyTheDeclaredBarDoors` still proves declared ⇔
+rendered; every act keeps its shortcut and its menu-bar door, and every row
+invokes the same call its button did (fire-and-DO intact, P-2). The date picker's
+popover is anchored on the `note ▾` menu rather than on a row — a menu item
+cannot host one.
+
+**The one behavioural change, recorded rather than smuggled (#52(f)):** the four
+structural rows no longer DIM by the planner's verdict. A menu row cannot carry
+that opacity; they fire and speak instead — which is exactly what the Takes bar's
+own block menu has done since 13b.
+
+*Pin:* `everyDoorTheGroupsSwallowedIsStillDeclaredByItsBar` — names the six acts
+that moved into `block ▾` and the seal that moved into `note ▾`, so a future edit
+that quietly drops one from a menu fails with its name, and re-asserts the union
+against `CapabilityRegistry.doored(.bottomBar)`.
+
+---
+
+#### (3) R6-3 — THE UNTITLED-DATE DISPLAY RULE, AND ITS EXPORT HALF · SHIPPED
+
+**ONE brain: `Sources/VariorumCore/Domain/DisplayTitle.swift`** — pure, no GRDB,
+no AppKit. `note(title:entryDate:createdAt:)` = the title as stored, else the
+note's date, else "Untitled".
+
+**THE VERIFICATION THE BRIEF ASKED FOR, done first: the 11b filename shape
+ALREADY COMPLIED.** `bulkExportManifest` has named posts `<date> <title>.md` since
+11b, and an untitled post has been named by its DATE ALONE (`2026-07-11.md`) ever
+since — the ratified convention never emitted "Untitled" for a note. Pinned as
+found (`theBulkManifestNamesAnUntitledNoteByItsDateAlone`). The one thing that
+changed there is (a) below.
+
+**THE DATE SOURCE, PINNED (#52(b)):** `entry_date` where set, else the LOCAL
+calendar day of `created_at`. Local rather than the stamp's own leading ten
+characters, and this is the decision worth stating: `entry_date` is written by
+`JournalDay.dayString` over `Calendar.current`, so a UTC slice beside it would
+mean a different KIND of day in the same slot — a note written after early
+evening would read a day late. `DisplayTitle.day(fromStamp:)` parses with the
+canonical formatter (never a second date brain) and returns nil rather than a
+guess on anything unparseable. *(The bulk manifest's ORDER BY keeps its UTC
+`substr` — it decides sequence, not names.)*
+
+**THE LOAD-BEARING HALF (#52(a)): the literal `"Untitled"` counts as NO TITLE.**
+Until this batch `⌘N` and the shell's New Note stored the literal string as a real
+title (`createPost(title: "Untitled")`), so her library's untitled notes are
+TITLED, not nameless — a rule keyed on nil/empty alone would have fixed none of
+the "500 untitled things" she was looking at. Two moves: the mint now stores
+`nil`, and `DisplayTitle.isAbsent` treats the literal as absent so the notes
+already in her store are carried too. The app has read the literal as a
+placeholder since 11b (`exportFileName`'s `hit.title != "Untitled"`); this makes
+that reading the one rule instead of one site's habit.
+
+**Where it is wired** — every surface that rendered "Untitled" for a NOTE:
+
+1. `TimelineItem.displayTitle` and `ReadingEntry.displayTitle` — computed, so a
+   listing pays the stamp parse only for rows it draws (P1); both structs gained
+   a `createdAt` stamp with a nil DEFAULT, so every existing caller and test
+   compiles unchanged and degrades to the old behaviour. Six SELECTs widened.
+   That one change carries the Timeline, Folder, Recovery, Compare peer picker,
+   Pool, Readings, Book/Spread/Paged surfaces at once.
+2. `Queries.noteDisplayTitle(db, id:)` — the single-note read, feeding
+   `WorkspaceModel.resolveTitles` (so the pane line, the back chip, the Open
+   strip and a star all say one thing) and the masthead.
+3. `Queries.searchCatalog` — the ⌘K hit's name, computed eagerly (bounded
+   row-set). `CatalogHit` gained `storedTitle` for the ONE caller that must not
+   confuse a DISPLAYED date with a name she typed: the rename door's seed.
+4. `Export.exportReading`'s per-note heading (her refinement) and
+   `bulkExportManifest`'s filename.
+5. `PostDetailView.PostTitleLabel` — shows the display name, EDITS the stored
+   one (the draft seeds from `title`, never from `displayed`, and the date rides
+   as the field's prompt), so clicking a date and typing names the note instead
+   of renaming it after itself.
+
+**`WorkspaceNaming.label`'s "Untitled" fallbacks are UNTOUCHED** and now fire only
+for their original case — an id that resolves to no row at all. A POOL with no
+title is still "Untitled": pools have no date, and her ruling was about notes.
+
+---
+
+#### (4) R6-4 — QUICKNOTES TAG + THE SELF-CREATING SMART BOOK · SHIPPED
+
+Her ruling: *"quicknotes automatically adding a quicknote tag and there being a
+smart 'quicknotes' book that's just based on tag, so if you remove the tag it
+leaves the book."*
+
+**The whole feature is two STANDING things pointed at each other**, which is why
+it needs no schema and no new semantics: an ordinary post tag, and an ordinary
+SMART book whose predicate is that tag. **"Removing the tag leaves the book" is
+not a rule anyone wrote** — it is what smart membership has always meant — and
+`theBookCOLLECTSTheTagAndRemovingTheTagLEAVESIt` pins exactly that, including the
+proof that NO membership row exists in either direction.
+
+`Operations.fileAsQuicknote(_:)`, on `shelveInDailyJournalBook`'s shape and for
+its reasons:
+
+- **NEVER THROWS.** The note is already minted and durable when this runs, so a
+  shelf failure must report rather than take the capture with it.
+- **Self-creates on the #37(iii) precedent** — no designation, or one dangling at
+  a deleted book (which reads the same way), mints + designates + pins. A LIVE
+  designation is never replaced: a book she renamed stays hers.
+- **READ-THEN-ACT, not one transaction**, stated on its own face: each ensure
+  re-reads inside its own writer (GRDB serializes writers) so two pads filed in
+  the same instant cannot mint two tags or two books.
+- Setting key `quicknote_book`; `Queries.quicknotesBookID` is the daily book's
+  twin, and the two now share ONE designation read.
+
+The app side: `QuickNoteMint.file` runs the mint and the filing in ONE runner turn.
+
+**A REAL CONSEQUENCE THE FULL RUN SURFACED, and it is not papered over
+(#52(g)): a quick note is now in Quicknotes and NOT in the Pool.** Three 13f
+`QuickNoteMintTests` pins went red on the full suite, and they were RIGHT to:
+`Queries.poolPosts` has excluded smart-collected posts since Stage B's MAJOR 3
+(*promote-tags-to-book must DRAIN the pool — derived membership counts as being
+in a book*), so giving quick notes a smart book takes them out of the Pool by the
+ratified semantics of both surfaces. Handled by tracing it rather than by
+loosening a pin:
+
+- the three pins' expectations were UPDATED **on the record** (each carries the
+  reason in place) — the first now asserts the new truth in both directions (in
+  Quicknotes, not in the Pool, and still zero curated rows), and the two counting
+  pins count MINTED NOTES, which is what they always meant;
+- `QuickNoteCopy.filedNote` and the pad's placeholder were corrected: the line
+  said "and the Pool", which had become false the moment the book existed;
+- the alternative — exempting the Quicknotes book from the Pool's drain, one line
+  — is in #52(g) for her.
+
+---
+
+#### Discoverability rode WITH the doors (the WT-1 class, as briefed)
+
+Every surface that named a moved door was updated in the same commit:
+
+- **The field guide:** the tags lesson now teaches the coloured cards on the
+  context bar (`＋` / `✕`, the per-tag colour, the folded `＃`), the commits
+  lesson sends her to `note ▾` for History, the divide lesson to `block ▾`, and
+  the seal lesson to `note ▾`. `plan` and `seed` are edited together, so
+  `theSeededBookMatchesTheLessonPlanExactly` holds — and only BODY text changed,
+  never a lesson title.
+- **The helper (⌘/):** a new **"The note's bars"** group naming the three things
+  that moved (tag cards · `block ▾`'s six · `note ▾`'s three), plus dictionary
+  entries for **tag** and **quicknote (the tag)**.
+- **A RE-SEED IS OWED** — one press of Help ▸ Restore Tutorial…, whenever she
+  next opens the app. It now covers 13f + batches 1, 4 and 7.
+
+---
+
+#### Red-on-old pins — TEN behavioural reverts, each verified and checksum-restored
+
+| # | Revert | Result |
+|---|---|---|
+| A | drop `\|\| trimmed == placeholder` from `DisplayTitle.isAbsent` | RED across 5 tests / 8 issues, every one naming "Untitled" — the literal-placeholder claim exactly. `DisplayTitle.swift` → `840994e2540b9b716e2bb57adc82ca39` |
+| B | drop the `createdAt:` argument from `Queries.noteDisplayTitle`'s call into the brain | RED, exactly discriminating: the bare and legacy notes read "Untitled" instead of their day; 9 other tests green. `TakesQueries.swift` → `48d4fdb20b8f45dced1e0e4c45a42801` |
+| C | restore `Export`'s retired private `displayTitle` in front of the reading heading | RED: the exported note is headed "Untitled" again. `Export.swift` → `7a19821cd767644088c32f83d48ce2db` |
+| D | mint the quicknotes book `kind: .curated` instead of `.smart` | RED on 3 tests: a curated book collects nothing, because membership would have to be a row somebody wrote. `Operations+Quicknote.swift` → `6136dad630d5f4df0d6f6d6e07ed071b` |
+| E | drop the liveness clause from the designation read | RED: the second filing hands back the DELETED book's id (and then `readingNotFound` on the rename). `AppearanceQueries.swift` → `6d7074a476ad8ed0c505acd9c7460f10` |
+| F | key `TagChipColor.hue` on `String.hashValue` instead of `BlockTint.stableHash` | RED with both numbers (0.2805 vs 0.4222) — the per-process seed is exactly why 9d wrote its own hash. `NoteTagChips.swift` → `41900c05f5727c7312b62a2483b08da0` |
+| G | drop `\|\| tagFace != nil` from `ContextBar.hasContent` | RED: a bookless note reached directly loses its tag door entirely. `ContextBar.swift` → `44f4acd82b89e101800c19d41f2c2440` |
+| H | put `Queries.containerTitle` back in `resolveTitles`' `.post` arm | RED: the pane line/back chip/Open strip say "Untitled" for both the bare and the legacy note. `WorkspaceModel.swift` → `b8d68f2297aca10b3cd7bdc5c0e7dd2d` |
+| I | drop the `ops.fileAsQuicknote(...)` call from `QuickNoteMint.file` | RED: no tag, no book — the note lands exactly as it did before this batch. `QuickNoteView.swift` → `351b7c252d70d6d0b4a03b3afc4eaa50` |
+| J | restore `createPost(title: "Untitled")` in the mint | RED: the store keeps the word again. `LibraryViewModel.swift` → `3b5e5448c5ffe206bb537b667abed1b8` |
+
+Each file was restored and its `md5` matched the pre-revert value above. All ten
+are recorded as `DISCRIMINATING REVERT` doc comments on their pins (the house
+convention) so a future reader can re-run them.
+
+**One trap this batch hit and is worth carrying:** the fixture clock's
+`2026-07-01T00:00:00Z` is **2026-06-30** in a negative-offset zone, so a pin
+asserting a created-day literal would pass only in the timezone it was written
+in. Every date pin derives its expectation through `JournalDay` or passes an
+explicit `Calendar` — which is also the evidence that the local-day decision in
+(3) is doing real work rather than being a preference.
+
+---
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` gains #52** — seven build-time calls, bundled the way
+  #49–#51 were. **#49, #50 and #51 were not touched. #53 is now the next free
+  number.**
+- **No proposal is owed.** The one design fork that arose — the quick note
+  leaving the Pool — is a CONSEQUENCE of two ratified rules meeting, so it is
+  recorded as #52(g) with its one-line alternative rather than decided here.
+- **KnownIssues: nothing added, nothing removed.** The one red Mac test is the
+  parked environment-gated tripwire that already has a row.
+- **No visual loop was run.** The new pixels are the tag cards and the two
+  slide-out menus; the honest way to look at them is in her own note with her own
+  voice, and she has the app. The geometry claims that can be pinned are pinned.
+- **Her instance was never touched:** no Variorum instance was addressed at all
+  this batch (no app was launched — every claim here is a test claim), and
+  nothing was addressed by process name.

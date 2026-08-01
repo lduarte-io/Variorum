@@ -15,9 +15,6 @@ struct CommitBar: View {
     @State private var pickedDate = Date()
     /// N15: the bar's measured width — the one-row/two-row switch.
     @State private var barWidth: CGFloat = 0
-    /// Batch 12 — the tags door ("so unclear how you're supposed to add
-    /// tags"): the post's tag sheet, right in the status line.
-    @State private var tagsShown = false
     @Environment(\.openWindow) private var openWindow
     // Phase 13 C1 (R11): the status line wears the voice; the word counts
     // are PROMINENT (the terminal mockup's liked idiom).
@@ -50,17 +47,26 @@ struct CommitBar: View {
             // (lineLimit(1) truncation), so ViewThatFits judged the
             // one-row arrangement as "fitting" at any width and never
             // fell through — the flexible-children gotcha, seen live.
+            // 13g batch 7 (her ruling R6-2, from round 5: *"i feel like the
+            // bottom bar is looking a little bit overly crowded … something
+            // where there could be groupings on the bottom of settings and
+            // clicking on them brings all the options out in a slide - almost
+            // like tab groups in a brwoser"*): the flat row keeps exactly
+            // what she named — the block line, `block ▾`, the take door,
+            // commit, `note ▾`, comments, newlines-make-blocks, the counts
+            // and `?` — and the rest slide out of the two groups. The doors
+            // are the SAME registry ids in the same numbers; only where they
+            // are rendered moved (`renderedCapabilities` is unchanged, and
+            // the registry walk proves it).
             Group {
                 if barWidth > 0, barWidth < 1080 {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 10) {
                             identityCluster
-                            StatusDot(tokens: tokens)
-                            postCluster
                             Spacer()
                         }
                         HStack(spacing: 10) {
-                            gestureCluster
+                            postCluster
                             Spacer()
                             trailingCluster
                         }
@@ -70,8 +76,6 @@ struct CommitBar: View {
                         identityCluster
                         StatusDot(tokens: tokens)
                         postCluster
-                        StatusDot(tokens: tokens)
-                        gestureCluster
                         Spacer()
                         trailingCluster
                     }
@@ -88,54 +92,77 @@ struct CommitBar: View {
         }
     }
 
-    /// Caret identity + the take acts (commit, history).
+    /// The flat row's block half: where you are, the block group, and the
+    /// take door she said earns its place.
     @ViewBuilder private var identityCluster: some View {
         Text(tokens.chromeLabel(caretLabel))
             .font(tokens.small)
             .foregroundStyle(tokens.muted)
             .lineLimit(1)
+        blockMenu
+        gestureButton("Takes", available: model.gestureAvailability.takes,
+                      action: model.openCaretFan)
         Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .disabled(model.caretVariantID == nil || model.header?.locked == true)
             .help("An immutable savepoint of the take under the caret")
-        Button(tokens.chromeLabel(model.commitList == nil ? "history" : "hide history")) {
-            model.toggleCommitHistory()
-        }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens))
-        .disabled(model.caretVariantID == nil && model.commitList == nil)
-        .help("The caret take's savepoints — restore any of them")
     }
 
-    /// The post lifecycle faces (Phase 10 Step 8): the seal toggle, tags,
-    /// comments, and Mac-side entry-date editing live with the open post.
-    @ViewBuilder private var postCluster: some View {
-        Button(tokens.chromeLabel(model.header?.locked == true ? "unseal" : "seal")) {
-            model.toggleSeal()
-        }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens))
-        .help("A sealed note is frozen — nothing under it changes until unsealed")
-        Button(tokens.chromeLabel("tags…")) { tagsShown = true }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens))
-            .help("The note's tags — apply or remove them right here")
-            .sheet(isPresented: $tagsShown) {
-                TagAssignmentSheet(
-                    session: model.session, postID: model.postID,
-                    postTitle: model.header?.title)
+    /// **block ▾** (R6-2): the structural gestures plus the two block-scoped
+    /// mints, one slide-out. Fire-and-DO is unchanged — every row invokes the
+    /// same call its button did, so a refusal still speaks (P-2). What is
+    /// deliberately gone is the per-door DIMMING by the planner's verdict:
+    /// a menu row cannot carry it, and the Takes bar's own block menu has
+    /// shipped enabled-and-speaking since 13b (QUESTIONS #52).
+    private var blockMenu: some View {
+        VoicedMenu(tokens: tokens, label: "block") {
+            Button("Divide") { model.divideAtCursor() }
+            Button("Extract") { model.extractSelection() }
+            Button("Make Block") { model.makeBlockFromSelection() }
+            Button("Merge") { model.mergeBlocks() }
+            Divider()
+            Button("＋ New block below this one (⌘⇧⏎)") {
+                Task { await model.insertBlockBelowCaret() }
             }
+            Button("− Delete this block") {
+                Task { await model.deleteCaretBlock() }
+            }
+        }
+        .help("Everything block-scoped: divide, extract, make block, merge, and the two block mints")
+    }
+
+    /// The flat row's note half: `note ▾`, comments, and the newlines chip.
+    @ViewBuilder private var postCluster: some View {
+        noteMenu
         Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
             .help("The caret block's comments — working remarks on a block, never per-take")
-        Button(tokens.chromeLabel(
-            model.header?.entryDate.map { "date: \($0)" } ?? "set date…")) {
-            pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
-            datePickerShown = true
-        }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens))
-        .popover(isPresented: $datePickerShown, content: datePickerPopover)
         // 13b 4D (N34 — S4-14/S4-21): the one_block face's Write half — an
         // in-view setting chip over the Phase-1 machinery; the header
         // observation keeps `effectiveSegmentation` (and this chip) live.
         newlinesChip
+    }
+
+    /// **note ▾** (R6-2): history, the seal, the entry date. The date
+    /// picker's popover is anchored on the MENU rather than on a row —
+    /// a menu item cannot host one.
+    private var noteMenu: some View {
+        VoicedMenu(tokens: tokens, label: "note") {
+            Button(model.commitList == nil ? "History" : "Hide history") {
+                model.toggleCommitHistory()
+            }
+            .disabled(model.caretVariantID == nil && model.commitList == nil)
+            Button(model.header?.locked == true ? "Unseal" : "Seal") {
+                model.toggleSeal()
+            }
+            Divider()
+            Button(model.header?.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
+                pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
+                datePickerShown = true
+            }
+        }
+        .help("The note itself: its savepoints, its seal, its date")
+        .popover(isPresented: $datePickerShown, content: datePickerPopover)
     }
 
     /// The one_block chip (its truth is the observed header).
@@ -173,37 +200,6 @@ struct CommitBar: View {
                 }
             }
             .padding(12)
-    }
-
-    /// The gesture button bar (9d — the fourth door): dimmed by the
-    /// planner's verdict but ALWAYS clickable — a refused click speaks
-    /// its refusal instead of going silent.
-    @ViewBuilder private var gestureCluster: some View {
-        gestureButton("Divide", available: model.gestureAvailability.divide,
-                      action: model.divideAtCursor)
-        gestureButton("Extract", available: model.gestureAvailability.extract,
-                      action: model.extractSelection)
-        gestureButton("Make Block", available: model.gestureAvailability.makeBlock,
-                      action: model.makeBlockFromSelection)
-        gestureButton("Merge", available: model.gestureAvailability.merge,
-                      action: model.mergeBlocks)
-        // 13b 4D (N28/S4-13): insert-below — an empty block right under the
-        // caret block, the caret landing in it (parity with the Takes bar's
-        // block-menu door). Fire-and-speak: no caret block ⇒ the refusal
-        // speaks; a sealed post refuses through the op.
-        Button(tokens.chromeLabel("＋ below")) {
-            Task { await model.insertBlockBelowCaret() }
-        }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-        .help("New Block Below (⌘⇧⏎) — an empty block right under the one you're in; type straight into it")
-        // 13c 1B (A8): the delete door, beside the insert door it mirrors.
-        Button(tokens.chromeLabel("− block")) {
-            Task { await model.deleteCaretBlock() }
-        }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-        .help("Delete Block — removes the block you're in; ⌥⌘Z undoes it, ⇧⌥⌘Z redoes it, and it waits in this note's deleted-blocks tray")
-        gestureButton("Takes", available: model.gestureAvailability.takes,
-                      action: model.openCaretFan)
     }
 
     /// 13b 1b (AD-14): the transient status line moved to the ONE shell

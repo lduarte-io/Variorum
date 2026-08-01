@@ -57,9 +57,25 @@ struct PaneHost<Content: View>: View {
     /// the pane's note next changes.
     @State private var books: [Reading] = []
 
+    /// 13g batch 7 (R6-1): the note's tags and the live taxonomy behind the
+    /// `＋`. Same one-shot discipline as `books` and for the same reason —
+    /// a held observation on `post_tag` would re-read at write rate; this
+    /// re-reads when the pane's note changes and after her own add/remove,
+    /// which are the only two ways it moves from here.
+    @State private var tags: [Tag] = []
+    @State private var allTags: [Tag] = []
+
     /// The note this pane holds, if it holds one (a scraps container counts
     /// — it is a container with memberships like any other).
     private var noteID: String? { workspace.selections[pane]?.noteID }
+
+    /// Only a NOTE wears tags. A pane at the shelf, the library, a book or
+    /// the recovery surface gets no tag half at all (P-2: a door that cannot
+    /// act in its context isn't rendered).
+    private var notePostID: String? {
+        guard case .post(let id) = workspace.selections[pane] else { return nil }
+        return id
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -68,6 +84,12 @@ struct PaneHost<Content: View>: View {
                 originLabel: workspace.history(pane).origin.map { workspace.label(for: $0) },
                 books: books,
                 collapsed: workspace.contextBarCollapsed,
+                tagFace: notePostID.map { postID in
+                    ContextBar.TagFace(
+                        tags: tags, allTags: allTags,
+                        onApply: { path in apply(path, to: postID) },
+                        onRemove: { tag in remove(tag, from: postID) })
+                },
                 onBack: onBack,
                 onOpenTopBook: {
                     guard let noteID, let top = books.first else { return }
@@ -93,6 +115,51 @@ struct PaneHost<Content: View>: View {
             PaneFocusCatcher(active: split && !focused, onFocus: onFocus)
         }
         .task(id: noteID) { await loadBooks() }
+        .task(id: notePostID) { await loadTags() }
+    }
+
+    // MARK: - The tag half (13g batch 7, R6-1)
+
+    private func loadTags() async {
+        guard let postID = notePostID else {
+            tags = []
+            allTags = []
+            return
+        }
+        let read = try? await session.database.read { db in
+            (applied: try Queries.postTags(db, postID: postID),
+             all: try Queries.allTags(db))
+        }
+        tags = read?.applied ?? []
+        allTags = read?.all ?? []
+    }
+
+    /// Applying a typed path goes through the SHIPPED type-to-create door
+    /// (`TagAssignmentViewModel.applyTypedPath`, 13b 3D's N24), so the
+    /// hierarchy walk, the per-segment creation and the
+    /// already-applied-is-a-no-op rule are the one implementation the sheet
+    /// has always used — this face adds no tag semantics of its own.
+    private func apply(_ path: String, to postID: String) {
+        let model = TagAssignmentViewModel(session: session, postID: postID)
+        Task {
+            if await model.applyTypedPath(path) == nil, let error = model.lastError {
+                session.status.speak(error)
+            }
+            await loadTags()
+        }
+    }
+
+    private func remove(_ tag: Tag, from postID: String) {
+        Task {
+            do {
+                try await session.runner.run { ops in
+                    try ops.removeTag(tag.id, fromPost: postID)
+                }
+            } catch {
+                session.status.speak(TagsViewModel.message(error))
+            }
+            await loadTags()
+        }
     }
 
     private func loadBooks() async {

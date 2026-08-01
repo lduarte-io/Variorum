@@ -36,7 +36,7 @@ struct TagAssignmentSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Tags for “\(postTitle?.isEmpty == false ? postTitle! : "Untitled")”")
+            Text("Tags for “\(postTitle?.isEmpty == false ? postTitle! : DisplayTitle.placeholder)”")
                 .font(.headline)
             // N24 — her words: "freely type tags in to a book, not just
             // select from already created tags." ⏎ applies; missing tags

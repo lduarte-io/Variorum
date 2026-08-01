@@ -240,7 +240,15 @@ struct PostDetailView: View {
         let session: AppSession
         let postID: String
         let tokens: VoiceTokens
+        /// The STORED title — "" where the note has none. It is what the
+        /// rename field edits and what a no-op rename compares against.
         @State private var title: String = ""
+        /// 13g batch 7 (R6-3): what the masthead SHOWS — the stored title,
+        /// else the note's date, from core's one display brain. Held beside
+        /// `title` rather than derived here, because the date it may carry
+        /// belongs to the store's row and never to this view. Empty only
+        /// while the first read is in flight.
+        @State private var displayed: String = DisplayTitle.placeholder
         @State private var editing = false
         @State private var draft = ""
         @FocusState private var fieldFocused: Bool
@@ -252,7 +260,7 @@ struct PostDetailView: View {
         var body: some View {
             Group {
                 if editing {
-                    TextField("Untitled", text: $draft)
+                    TextField(displayed, text: $draft)
                         .textFieldStyle(.plain)
                         .font(tokens.title)
                         .foregroundStyle(tokens.ink)
@@ -269,7 +277,7 @@ struct PostDetailView: View {
                         }
                         .task { fieldFocused = true }
                 } else {
-                    Text(title.isEmpty ? "Untitled" : title)
+                    Text(displayed)
                         .font(tokens.title)
                         .foregroundStyle(title.isEmpty ? tokens.muted : tokens.ink)
                         .lineLimit(1)
@@ -284,6 +292,10 @@ struct PostDetailView: View {
         }
 
         private func beginEditing() {
+            // The DRAFT is the stored name, never the shown date: clicking a
+            // date and typing must name the note, not rename it after
+            // itself (13g batch 7, R6-3). The date rides as the field's
+            // prompt so the line still reads as it did.
             draft = title
             editing = true
         }
@@ -294,10 +306,14 @@ struct PostDetailView: View {
         }
 
         private func refresh() async {
-            title = (try? await session.database.read { [postID] db in
-                try String.fetchOne(
-                    db, sql: "SELECT title FROM container WHERE id = ?", arguments: [postID])
-            }) ?? ""
+            let read = try? await session.database.read { [postID] db in
+                (stored: try Queries.containerTitle(db, id: postID),
+                 shown: try Queries.noteDisplayTitle(db, id: postID))
+            }
+            title = read?.stored ?? ""
+            // A note that is gone keeps the placeholder rather than going
+            // blank — the chrome's own fallback, as everywhere else.
+            displayed = read?.shown ?? DisplayTitle.placeholder
         }
 
         private func rename() {

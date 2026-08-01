@@ -163,8 +163,22 @@ extension Queries {
     /// PROVISIONAL). A dangling id (book deleted) reads as none — the
     /// fallback class.
     public static func dailyJournalBookID(_ db: Database) throws -> String? {
+        try designatedBookID(db, key: "daily_journal_book")
+    }
+
+    /// The designated QUICKNOTES book (13g batch 7 — her R6-4). The daily
+    /// book's twin in every respect, including the dangling rule: an id
+    /// pointing at a deleted book reads as none, which is exactly what lets
+    /// `ensureQuicknotesBook` mint a fresh one rather than resurrect a book
+    /// she threw away.
+    public static func quicknotesBookID(_ db: Database) throws -> String? {
+        try designatedBookID(db, key: "quicknote_book")
+    }
+
+    /// The one designation read (the `setting` key → a LIVE reading id).
+    private static func designatedBookID(_ db: Database, key: String) throws -> String? {
         guard let id = try String.fetchOne(
-            db, sql: "SELECT value FROM setting WHERE key = 'daily_journal_book'")
+            db, sql: "SELECT value FROM setting WHERE key = ?", arguments: [key])
         else { return nil }
         let live = try Bool.fetchOne(
             db,

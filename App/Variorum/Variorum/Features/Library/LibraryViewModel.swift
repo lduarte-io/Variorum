@@ -71,7 +71,10 @@ final class LibraryViewModel {
     func createPost() async -> String? {
         do {
             let post = try await session.runner.run { ops in
-                try ops.createPost(title: "Untitled")
+                // 13g batch 7 (R6-3): NO stored placeholder. A note with no name has
+                // a NULL title, and `DisplayTitle` shows its date — a title she
+                // never typed was never hers.
+                try ops.createPost(title: nil)
             }
             return post.id
         } catch {

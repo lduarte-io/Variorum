@@ -332,7 +332,15 @@ final class WorkspaceModel {
             var tagPaths: [String: String]?
             for subject in subjects {
                 switch subject {
-                case .post(let id), .pool(let id):
+                case .post(let id):
+                    // 13g batch 7 (R6-3): the map carries the DISPLAY name,
+                    // so the pane line, the back chip, the Open strip and a
+                    // star all say the same thing without re-deriving it.
+                    // `WorkspaceNaming`'s per-kind fallbacks stay for the one
+                    // case they were always for — an id that resolves to no
+                    // row at all.
+                    if let title = try Queries.noteDisplayTitle(db, id: id) { out[id] = title }
+                case .pool(let id):
                     if let title = try Queries.containerTitle(db, id: id) { out[id] = title }
                 case .reading(let id):
                     if let reading = try Queries.reading(db, id: id) { out[id] = reading.name }

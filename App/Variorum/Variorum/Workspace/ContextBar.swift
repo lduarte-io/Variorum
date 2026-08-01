@@ -44,20 +44,43 @@ struct ContextBar: View {
     /// the chip's list cannot disagree about which book comes first.
     let books: [Reading]
     let collapsed: Bool
+    /// 13g batch 7 (R6-1): the THIRD half — the note's tags, as coloured
+    /// cards. Present only when the pane holds a NOTE; a pane at the shelf
+    /// or in a book has no tags to wear, so it renders none.
+    var tagFace: TagFace? = nil
     let onBack: () -> Void
     /// The ascent: open the top book, revealed at this note.
     let onOpenTopBook: () -> Void
     let onToggleCollapse: () -> Void
 
-    /// Nothing to say ⇒ no bar. A pane at the shelf, or a note in no book
-    /// reached directly, keeps exactly the chrome it had before this existed.
-    var hasContent: Bool { originLabel != nil || !books.isEmpty }
+    /// Everything the tag half needs, bundled so the bar stays a pure
+    /// presentation of what it is handed (the `books` shape).
+    struct TagFace {
+        var tags: [Tag]
+        var allTags: [Tag]
+        var onApply: (String) -> Void
+        var onRemove: (Tag) -> Void
+    }
+
+    /// Nothing to say ⇒ no bar. A pane at the shelf keeps exactly the chrome
+    /// it had before this existed. **A note now always has something to
+    /// say** — its tags, even when it has none yet, because the `＋` is the
+    /// door her ruling moved here (R6-1); that is a deliberate widening of
+    /// this rule and the reason a bookless note reached directly now carries
+    /// a bar.
+    var hasContent: Bool { originLabel != nil || !books.isEmpty || tagFace != nil }
 
     var body: some View {
         if hasContent {
             HStack(spacing: 6) {
                 if let originLabel { backHalf(originLabel) }
                 if let line = BookChooserOrder.inLine(books) { booksHalf(line) }
+                if let tagFace {
+                    NoteTagChips(
+                        tokens: tokens, tags: tagFace.tags, allTags: tagFace.allTags,
+                        collapsed: collapsed,
+                        onApply: tagFace.onApply, onRemove: tagFace.onRemove)
+                }
                 fold
                 Spacer(minLength: 0)
             }

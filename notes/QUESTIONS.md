@@ -280,5 +280,23 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: OPEN — for the walk.**
 
-*(Next free number at authoring time: **#52**.)*
+52. **2026-08-01 · Phase 13g (batch 7) · YOUR ROUND-6 NOD SET IS BUILT — seven build-time calls, each one line to change.** Your rulings R6-1…R6-4 said tag cards on the top bar, the bottom bar's two slide-out groups, the untitled-date display rule *"preserved on export"*, and quicknotes auto-tagged into a smart book. They did not say what happens to a note you deliberately NAMED "Untitled", or which day an undated note shows, or whether a quick note still sits in the Pool — those are the calls below. **Nothing here needed a schema change**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain: a title has never been body content. The BINDING build record is the 13g plan's batch-7 record.
+
+    **(a) The literal word "Untitled" counts as NO TITLE — which is what fixes the notes already in your library.** Until this batch ⌘N and File ▸ New Note actually STORED the string "Untitled" as a real title, so your "500 untitled things" are titled, not nameless: a rule keyed only on blank titles would have fixed none of them. The mint now stores nothing at all, and the display rule treats the literal as absent so the existing ones show their dates too. **The consequence:** a note you deliberately named "Untitled" renders its date instead. **The alternative:** only blank titles count, plus a one-time sweep that REWRITES those rows — which writes to every one of your notes to fix a display problem.
+
+    **(b) An undated note shows the day it was WRITTEN, in your calendar.** The chain is: your title, else the note's `entry_date` if it has one, else the local calendar day of `created_at`, else "Untitled" (still reachable, just rare). Local, not UTC, because `entry_date` beside it has always been a local calendar day — a UTC slice would read a day LATER for anything written after early evening. **The alternative:** a prettier format ("August 1, 2026") instead of `2026-08-01`. It is one line; `2026-08-01` was chosen because it matches what the journal, the export filenames and the date picker already say.
+
+    **(c) EXPORT says the same thing — filenames already did.** Your refinement is built: a reading export heads an untitled note with its date, not with "Untitled". Worth knowing, because it means the ratified 11b convention already agreed with you: a bulk export has named untitled notes by their date alone since 11b (`2026-07-11.md`), and the only thing that changed is that notes carrying the literal "Untitled" now join them instead of exporting as `2026-07-11 Untitled.md`. **A POOL with no name is still "Untitled"** — a pool has no date, and your ruling was about notes.
+
+    **(d) The tag cards FOLD with the rest of the top bar.** Collapsed (which is the default since your WT-2 ruling) the cards become one `＃` door with the count — the bar's own grammar, where every half keeps a glyph so folding is never a one-way door. **The alternative:** the cards stay visible even when the bar is folded, since they are the thing you asked to see. One line.
+
+    **(e) The chips show the FULL PATH (`life/goals/2024`), truncated if long.** Hierarchy stays surfaced (R45), and the colour is keyed on the whole path — so `life/goals` and `work/goals` are different cards in different colours. **The alternative:** show the leaf only (`2024`) and put the path in the tooltip; shorter cards, less obvious nesting.
+
+    **(f) The block ▾ items no longer DIM by the planner's verdict.** On the flat row, Divide/Extract/Make Block/Merge faded when they could not act; a menu row cannot carry that, so they are plain rows that FIRE and speak their refusal — which is exactly what the Takes bar's own block menu has done since 13b. Nothing lost an act; every door is still declared and the registry walk proves it. **The alternative:** disable them instead, which trades a spoken reason for a grey word.
+
+    **(g) A quick note is now in QUICKNOTES and NOT in the Pool.** Your R6-4 gave every quick note the `quicknote` tag and gave that tag a smart book — and the Pool has excluded smart-collected notes since the 13-B review (promoting tags to a book must DRAIN the pool). So the pad's note lands on the shelf instead of in the Pool, and its status line says so. It is still bookless in the *curated* sense — no membership row exists — so removing the tag puts it straight back in the Pool. **The alternative:** exempt the Quicknotes book from the Pool's drain, so quick notes sit in both. One line.
+
+    **Status: OPEN — for the walk.**
+
+*(Next free number at authoring time: **#53**.)*
 

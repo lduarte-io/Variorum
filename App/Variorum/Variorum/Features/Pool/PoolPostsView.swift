@@ -150,7 +150,7 @@ struct PoolPostsView: View {
 
     private func row(_ item: Queries.TimelineItem) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(item.title?.isEmpty == false ? item.title! : (item.entryDate ?? "Untitled"))
+            Text(item.displayTitle)
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
             HStack(spacing: 4) {

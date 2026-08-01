@@ -146,7 +146,9 @@ struct ShellActions {
         Task { @MainActor in
             do {
                 let post = try await session.runner.run { ops in
-                    try ops.createPost(title: "Untitled")
+                    // 13g batch 7 (R6-3): NULL, not the placeholder — see
+                    // `LibraryViewModel.createPost`.
+                    try ops.createPost(title: nil)
                 }
                 shell.pendingSelection = .post(post.id)
             } catch {

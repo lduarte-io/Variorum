@@ -152,8 +152,10 @@ extension Queries {
     // MARK: - Reading export
 
     /// A reading as ONE Markdown document: `# <name>`, then the assembled
-    /// posts in reading order — each under a heading (title, else entry
-    /// date, else "Untitled"). When the book has live CHAPTERS (curated
+    /// posts in reading order — each under a heading, which is the ONE
+    /// display brain's answer since 13g batch 7 (her R6-3 export
+    /// refinement): the note's title, else its date, else "Untitled".
+    /// When the book has live CHAPTERS (curated
     /// only — Phase 13b 3B, N13) or groups by a tag root, a section
     /// heading precedes each section's posts (posts drop one heading level
     /// so the hierarchy reads). The chapter path renders EXACTLY the book
@@ -202,7 +204,12 @@ extension Queries {
                 pieces.append("## \(group.heading ?? "Ungrouped")")
             }
             for entry in group.entries {
-                let title = displayTitle(entry.title, entryDate: entry.entryDate)
+                // 13g batch 7 (R6-3, her export refinement verbatim: *"maybe
+                // it should be preserved on export? someone might be
+                // frustrated exporting a note with a date they see as a
+                // title and then their exported note says 'Untitled'"*) —
+                // the ONE display brain, the same answer the masthead gives.
+                let title = entry.displayTitle
                 pieces.append(grouped ? "### \(title)" : "## \(title)")
                 let body = try exportPost(db, postID: entry.postID)
                 if !body.isEmpty {
@@ -213,11 +220,6 @@ extension Queries {
         return joinRenderedTexts(pieces)
     }
 
-    private static func displayTitle(_ title: String?, entryDate: String?) -> String {
-        if let title, !title.isEmpty { return title }
-        if let entryDate, !entryDate.isEmpty { return entryDate }
-        return "Untitled"
-    }
 
     // MARK: - Bulk export (the whole library, ONE gesture)
 
@@ -272,8 +274,7 @@ extension Queries {
         let posts = try Row.fetchAll(
             db,
             sql: """
-                SELECT id, title, entry_date,
-                       substr(created_at, 1, 10) AS created_day,
+                SELECT id, title, entry_date, created_at,
                        archived_at
                 FROM container
                 WHERE kind = 'post' AND deleted_at IS NULL
@@ -282,10 +283,23 @@ extension Queries {
         for post in posts {
             let id: String = post["id"]
             let entryDate: String? = post["entry_date"]
-            let createdDay: String = post["created_day"]
-            let date = entryDate ?? createdDay
+            let stamp: String? = post["created_at"]
+            // 13g batch 7 (R6-3): the date half is the display brain's own
+            // date — same precedence this filename convention has had since
+            // 11b, now derived in ONE place, on the LOCAL calendar day (the
+            // kind of day `entry_date` beside it always was). The listing's
+            // ORDER BY keeps its UTC slice: it decides sequence, not names.
+            let date = (entryDate?.isEmpty == false ? entryDate : nil)
+                ?? DisplayTitle.day(fromStamp: stamp)
+                ?? String((stamp ?? "").prefix(10))
             let rawTitle: String? = post["title"]
-            let title = sanitizedFilename(rawTitle ?? "")
+            // The placeholder counts as no title (`DisplayTitle.isAbsent`),
+            // so a note she never named — including one carrying the literal
+            // "Untitled" the pre-13g mint stored — is named by its date
+            // alone, exactly as the ratified 11b shape already did for a
+            // NULL title.
+            let title = DisplayTitle.isAbsent(rawTitle)
+                ? "" : sanitizedFilename(rawTitle ?? "")
             let base = title.isEmpty ? date : "\(date) \(title)"
             let archivedAt: String? = post["archived_at"]
             let folder = archivedAt != nil ? "Archived/" : ""

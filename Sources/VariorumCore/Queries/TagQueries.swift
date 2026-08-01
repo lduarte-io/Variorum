@@ -74,7 +74,7 @@ extension Queries {
         }
         var sql = """
             SELECT DISTINCT c.id AS post_id, c.title AS title,
-                   c.entry_date AS entry_date,
+                   c.entry_date AS entry_date, c.created_at AS created_at,
                    COALESCE(c.last_touched_at, c.created_at) AS stamp
             FROM post_tag app
             JOIN container c ON c.id = app.post_id AND c.deleted_at IS NULL
@@ -89,7 +89,8 @@ extension Queries {
             .map { row in
                 TimelineItem(
                     postID: row["post_id"], title: row["title"],
-                    entryDate: row["entry_date"], stamp: row["stamp"])
+                    entryDate: row["entry_date"], createdAt: row["created_at"],
+                    stamp: row["stamp"])
             }
     }
 

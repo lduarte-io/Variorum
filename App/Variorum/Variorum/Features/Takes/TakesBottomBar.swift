@@ -22,10 +22,6 @@ struct TakesBottomBar: View {
     @State private var history: [CommitPoint] = []
     /// N15's class: the bar's measured width — the one/two-row switch.
     @State private var barWidth: CGFloat = 0
-    /// Batch 12 (her "we need a block menu"): the tags sheet the status
-    /// line opens. (The comments sheet is model-driven since 13b 1b — the
-    /// routed ⌘⇧' door and the menu item share `commentsRequest`.)
-    @State private var tagsShown = false
     @Environment(\.openWindow) private var openWindow
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -116,6 +112,14 @@ struct TakesBottomBar: View {
                 Task { await model.addBlockAtEnd() }
             }
             Divider()
+            // 13g batch 7 (R6-2): the four structural doors moved OFF the
+            // flat row and INTO this group — her "block menu for divide,
+            // extract, make block, and merge". Same `runStructuralDoor`
+            // call, so fire-and-DO's whole choreography is unchanged.
+            ForEach(Self.structuralBar, id: \.title) { door in
+                Button(door.title) { model.runStructuralDoor(door.act) }
+            }
+            Divider()
             Button("Comments… (⌘⇧')") {
                 model.requestComments()
             }
@@ -140,17 +144,20 @@ struct TakesBottomBar: View {
             // class): the bar is ADAPTIVE by MEASURED width — one row
             // where it fits, two where it doesn't (never mid-word wraps,
             // never a page-wide truncation parade).
+            // 13g batch 7 (R6-2): the same two slide-out groups Write's bar
+            // grew — `block ▾` and `note ▾` — so the two bars read as one
+            // grammar. Every declared door is still rendered here
+            // (`renderedCapabilities` unchanged; the registry walk proves
+            // it); only the placement moved.
             Group {
                 if barWidth > 0, barWidth < 1080 {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 10) {
                             takeCluster
-                            StatusDot(tokens: tokens)
-                            postCluster
                             Spacer()
                         }
                         HStack(spacing: 10) {
-                            gestureCluster
+                            postCluster
                             Spacer()
                             trailingCluster
                         }
@@ -160,8 +167,6 @@ struct TakesBottomBar: View {
                         takeCluster
                         StatusDot(tokens: tokens)
                         postCluster
-                        StatusDot(tokens: tokens)
-                        gestureCluster
                         Spacer()
                         trailingCluster
                     }
@@ -180,9 +185,6 @@ struct TakesBottomBar: View {
             set: { model.commentsRequest = $0 })
         ) { target in
             CommentsPanel(session: model.session, blockID: target.blockID)
-        }
-        .sheet(isPresented: $tagsShown) {
-            TagAssignmentSheet(session: model.session, postID: model.postID, postTitle: nil)
         }
         .sheet(item: Binding(
             get: { model.takeLabelRequest },
@@ -223,21 +225,12 @@ struct TakesBottomBar: View {
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
         .disabled(model.projection.sealed)
         .help("An immutable savepoint of the take you're in")
-        Button(tokens.chromeLabel("history")) { Task { await openHistory() } }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens))
-            .help("The focused take's savepoints — restore any of them")
     }
 
-    /// The post-level doors (seal, tags, entry date).
+    /// The flat row's note half: `note ▾`, comments, and the newlines chip
+    /// (13g batch 7, R6-2 — Write's bar's grammar, here).
     @ViewBuilder private var postCluster: some View {
-        Button(tokens.chromeLabel(model.projection.sealed ? "unseal" : "seal")) {
-            Task { await model.toggleSeal() }
-        }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens))
-        .help("A sealed note is frozen — nothing under it changes until unsealed")
-        Button(tokens.chromeLabel("tags…")) { tagsShown = true }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens))
-            .help("The note's tags — apply or remove them right here")
+        noteMenu
         // 13b 4D (N35 + S4-33, her rider verbatim: "the comments button
         // should be there in takes the way it is in write, on the bottom
         // bar") — parity of PROMINENCE, not just existence: the same
@@ -246,12 +239,40 @@ struct TakesBottomBar: View {
         Button(tokens.chromeLabel("comments")) { model.requestComments() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
             .help("The block's comments — working remarks on a block, never per-take (⌘⇧')")
-        Button(tokens.chromeLabel(
-            model.projection.entryDate.map { "date: \($0)" } ?? "set date…")) {
-            pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
-            datePickerShown = true
+        // 13b 4D (N34 — S4-14/S4-21): the one_block face — an in-view
+        // setting chip (the wash-chip class, recorded not declared) over
+        // the Phase-1 machinery; the honest consequence speaks on toggle.
+        // Refresh rides the bar at projection cadence (a segmentation
+        // change alone never moves the takes projection — the setter
+        // refreshes itself; an external change catches up next projection).
+        VoicedChip(
+            tokens: tokens,
+            text: model.newlinesMintBlocks
+                ? SegmentationFaceCopy.chipOn : SegmentationFaceCopy.chipOff,
+            on: model.newlinesMintBlocks
+        ) {
+            let mint = model.newlinesMintBlocks
+            Task { await model.setNewlinesMintBlocks(!mint) }
         }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens))
+        .task(id: model.projection) { await model.refreshSegmentation() }
+        .help(SegmentationFaceCopy.help)
+    }
+
+    /// **note ▾** (R6-2): history, the seal, the entry date — Write's bar's
+    /// group, with the take's own history in the history slot.
+    private var noteMenu: some View {
+        VoicedMenu(tokens: tokens, label: "note") {
+            Button("History") { Task { await openHistory() } }
+            Button(model.projection.sealed ? "Unseal" : "Seal") {
+                Task { await model.toggleSeal() }
+            }
+            Divider()
+            Button(model.projection.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
+                pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
+                datePickerShown = true
+            }
+        }
+        .help("The note itself: this take's savepoints, its seal, its date")
         .popover(isPresented: $datePickerShown) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Entry date").font(.headline)
@@ -274,37 +295,6 @@ struct TakesBottomBar: View {
                 }
             }
             .padding(12)
-        }
-        // 13b 4D (N34 — S4-14/S4-21): the one_block face — an in-view
-        // setting chip (the wash-chip class, recorded not declared) over
-        // the Phase-1 machinery; the honest consequence speaks on toggle.
-        // Refresh rides the bar at projection cadence (a segmentation
-        // change alone never moves the takes projection — the setter
-        // refreshes itself; an external change catches up next projection).
-        VoicedChip(
-            tokens: tokens,
-            text: model.newlinesMintBlocks
-                ? SegmentationFaceCopy.chipOn : SegmentationFaceCopy.chipOff,
-            on: model.newlinesMintBlocks
-        ) {
-            let mint = model.newlinesMintBlocks
-            Task { await model.setNewlinesMintBlocks(!mint) }
-        }
-        .task(id: model.projection) { await model.refreshSegmentation() }
-        .help(SegmentationFaceCopy.help)
-    }
-
-    /// The structural gestures, present and ACTING (13b 1b — R115/R118:
-    /// fire-and-DO replaces the retired lecture): each door performs the
-    /// one mode-switch choreography — Write, caret landed in your block,
-    /// gesture run; on a fanned block Divide opens the take ceremony.
-    @ViewBuilder private var gestureCluster: some View {
-        ForEach(Self.structuralBar, id: \.title) { door in
-            Button(tokens.chromeLabel(door.title)) {
-                model.runStructuralDoor(door.act)
-            }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help(door.help)
         }
     }
 

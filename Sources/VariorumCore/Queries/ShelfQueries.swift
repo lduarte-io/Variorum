@@ -199,7 +199,7 @@ extension Queries {
         return try Row.fetchAll(
             db,
             sql: """
-                SELECT id, title, entry_date,
+                SELECT id, title, entry_date, created_at,
                        COALESCE(last_touched_at, created_at) AS stamp
                 FROM container c
                 WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
@@ -211,7 +211,8 @@ extension Queries {
         ).map {
             TimelineItem(
                 postID: $0["id"], title: $0["title"],
-                entryDate: $0["entry_date"], stamp: $0["stamp"])
+                entryDate: $0["entry_date"], createdAt: $0["created_at"],
+                stamp: $0["stamp"])
         }
     }
 
@@ -253,7 +254,15 @@ extension Queries {
         public enum Kind: Sendable { case book, post, block }
         public let kind: Kind
         public let id: String
+        /// What the hit is CALLED — for a post this is the display brain's
+        /// answer since 13g batch 7 (title, else its date), never the raw
+        /// column.
         public let title: String
+        /// The raw stored title, for the one caller that must not confuse a
+        /// DISPLAYED date with a name she typed: the rename door's seed
+        /// (13g batch 7 — seeding "2026-08-01" would have her naming a note
+        /// after itself). nil ⇒ the note has no stored name.
+        public let storedTitle: String?
         public let detail: String?
         /// Block hits: the HOME container's id + kind — a block result must
         /// be able to NAVIGATE (round 2, MINOR: dead palette rows violated
@@ -263,11 +272,13 @@ extension Queries {
 
         public init(
             kind: Kind, id: String, title: String, detail: String?,
+            storedTitle: String? = nil,
             homeContainerID: String? = nil, homeIsPool: Bool = false
         ) {
             self.kind = kind
             self.id = id
             self.title = title
+            self.storedTitle = storedTitle
             self.detail = detail
             self.homeContainerID = homeContainerID
             self.homeIsPool = homeIsPool
@@ -312,7 +323,7 @@ extension Queries {
         let posts = try Row.fetchAll(
             db,
             sql: """
-                SELECT id, title, entry_date FROM container
+                SELECT id, title, entry_date, created_at FROM container
                 WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
                   AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')
                 ORDER BY COALESCE(last_touched_at, created_at) DESC, id DESC
@@ -320,11 +331,16 @@ extension Queries {
                 """,
             arguments: [trimmed, like, like, limitPerKind])
         hits += posts.map {
+            // 13g batch 7 (R6-3): the hit's name is the ONE display brain's
+            // answer — this row-set is bounded by `limitPerKind`, so it is
+            // computed eagerly rather than lazily like a listing's.
             CatalogHit(
                 kind: .post, id: $0["id"],
-                title: ($0["title"] as String?)?.isEmpty == false
-                    ? $0["title"]! : (($0["entry_date"] as String?) ?? "Untitled"),
-                detail: $0["entry_date"])
+                title: DisplayTitle.note(
+                    title: $0["title"], entryDate: $0["entry_date"],
+                    createdAt: $0["created_at"]),
+                detail: $0["entry_date"],
+                storedTitle: DisplayTitle.isAbsent($0["title"]) ? nil : $0["title"])
         }
 
         // Blocks: named blocks anywhere + pool scraps by first-line handle.

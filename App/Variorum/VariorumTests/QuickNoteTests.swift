@@ -48,14 +48,28 @@ struct QuickNoteMintTests {
                 "A thought worth keeping.", session: session)
             let noteID = try #require(id)
 
-            let (header, pool, books) = try await db.read { db in
+            let (header, pool, books, curated) = try await db.read { db in
                 (try Queries.containerHeader(db, containerID: noteID),
                  try Queries.poolPosts(db, limit: 50).map(\.postID),
-                 try Queries.readingsContaining(db, postID: noteID))
+                 try Queries.readingsContaining(db, postID: noteID),
+                 try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM reading_post WHERE post_id = ?",
+                    arguments: [noteID]))
             }
             #expect(header?.title == nil, "untitled — the app's one brain names it")
-            #expect(pool.contains(noteID), "R29: bookless means the Pool lists it")
-            #expect(books.isEmpty, "it joins no book")
+            // 13g batch 7 (R6-4) — THIS EXPECTATION LEGITIMATELY CHANGED, and
+            // the change is recorded in the batch record rather than made
+            // quietly. Her ruling put every quick note under the `quicknote`
+            // tag and gave that tag a SMART book, and the Pool has excluded
+            // smart-collected posts since Stage B's MAJOR 3 (promote-tags-to-
+            // book must DRAIN the pool — derived membership counts as being
+            // in a book). So a filed pad is now in Quicknotes and NOT in the
+            // Pool. It is still bookless in the CURATED sense — no membership
+            // row exists — which is what keeps it one untag away from the
+            // Pool again.
+            #expect(!pool.contains(noteID), "a quick note is collected, so the Pool lets it go")
+            #expect(books.map(\.name) == [Operations.defaultQuicknoteBookName])
+            #expect(curated == 0, "collected by a predicate, never by a row")
             // And it stays QUIET beyond one line naming where it went.
             #expect(session.status.current?.text == QuickNoteCopy.filedNote)
         }
@@ -162,15 +176,27 @@ struct QuickNoteMintTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
         } operation: { @MainActor in
             let session = AppSession(database: db)
-            func poolCount() async throws -> Int {
-                try await db.read { db in try Queries.poolPosts(db, limit: 50).count }
+            // 13g batch 7 (R6-4): these counts mean "how many notes did the
+            // pad mint", and the Pool stopped being a proxy for that when
+            // quick notes joined the smart Quicknotes book (see
+            // `aFiledPadIsAnOrdinaryBooklessNoteThePoolLists`). Counting live
+            // posts says exactly what the pin always meant.
+            func noteCount() async throws -> Int {
+                try await db.read { db in
+                    try Int.fetchOne(
+                        db,
+                        sql: """
+                            SELECT COUNT(*) FROM container
+                            WHERE kind = 'post' AND deleted_at IS NULL
+                            """) ?? -1
+                }
             }
 
             // CLOSING FILES IT.
             let closed = QuickNotePad(session: session)
             closed.text = "Closed without filing."
             #expect(await closed.close() != nil)
-            var count = try await poolCount()
+            var count = try await noteCount()
             #expect(count == 1)
 
             // ⌘⏎ FILES IT — and the close that FOLLOWS mints nothing, which
@@ -178,18 +204,18 @@ struct QuickNoteMintTests {
             let filed = QuickNotePad(session: session)
             filed.text = "Filed on purpose."
             #expect(await filed.fileExplicitly() != nil)
-            count = try await poolCount()
+            count = try await noteCount()
             #expect(count == 2)
             #expect(!filed.mints, "the pad cleared itself")
             #expect(await filed.close() == nil, "closing after ⌘⏎ mints no second note")
-            count = try await poolCount()
+            count = try await noteCount()
             #expect(count == 2)
 
             // An abandoned EMPTY summon leaves nothing behind at any door.
             let empty = QuickNotePad(session: session)
             #expect(await empty.close() == nil)
             #expect(await empty.fileExplicitly() == nil)
-            count = try await poolCount()
+            count = try await noteCount()
             #expect(count == 2, "an abandoned empty summon leaves nothing behind")
         }
     }
@@ -222,11 +248,24 @@ struct QuickNoteMintTests {
             } == 0)
 
             await session.quitFinalize.finalizeAll()
-            let pool = try await db.read { db in try Queries.poolPosts(db, limit: 50) }
-            #expect(pool.count == 1, "the pad she never filed is in the Pool")
+            // 13g batch 7 (R6-4): counted as notes, not as Pool rows — a
+            // filed pad is now collected by the smart Quicknotes book, and
+            // the Pool lists only what no book holds.
+            func notes() async throws -> Int {
+                try await db.read { db in
+                    try Int.fetchOne(
+                        db,
+                        sql: """
+                            SELECT COUNT(*) FROM container
+                            WHERE kind = 'post' AND deleted_at IS NULL
+                            """) ?? -1
+                }
+            }
+            let minted = try await notes()
+            #expect(minted == 1, "the pad she never filed became a note")
             #expect(!pad.mints, "and the pad cleared, so a second quit hop mints nothing")
             await session.quitFinalize.finalizeAll()
-            let afterTwice = try await db.read { db in try Queries.poolPosts(db, limit: 50).count }
+            let afterTwice = try await notes()
             #expect(afterTwice == 1, "finalizing twice still mints exactly one note")
 
             session.quitFinalize.unregister(token)

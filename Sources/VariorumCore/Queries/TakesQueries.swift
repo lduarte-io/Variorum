@@ -118,6 +118,20 @@ extension Queries {
             db, sql: "SELECT title FROM container WHERE id = ?", arguments: [id])
     }
 
+    /// **What ONE note is called on screen** (13g batch 7, R6-3) — the
+    /// display brain over the row, for the chrome that names a single note
+    /// (the masthead, the pane line, the back chip, the Open strip, a star).
+    /// nil where the row is gone; those callers already have their own
+    /// per-kind fallback and must keep it.
+    public static func noteDisplayTitle(_ db: Database, id: String) throws -> String? {
+        guard let row = try Row.fetchOne(
+            db, sql: "SELECT title, entry_date, created_at FROM container WHERE id = ?",
+            arguments: [id])
+        else { return nil }
+        return DisplayTitle.note(
+            title: row["title"], entryDate: row["entry_date"], createdAt: row["created_at"])
+    }
+
     /// The fan-style setting ('fan_style'; default .stack — the recorded
     /// build-time call).
     public static func fanStyle(_ db: Database) throws -> FanStyle {
