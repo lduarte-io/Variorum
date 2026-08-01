@@ -430,9 +430,9 @@ visibility, a display setting if ever wanted.
 | L7 | The markdown foundation: pure Domain tokenizer + the dimmed-marker editing face (F-1/F-2) | **SHIPPED** (batch 2) |
 | L8 | Insertion faces: ⌘B/⌘I + the Format menu + context submenu + registry declarations (formatting acts are acts) — the visible TOOLBAR is the morning bundle's item (iv), unbuilt | **SHIPPED** (batch 3) |
 | L9 | Lists + checkboxes incl. click-to-toggle (ordinary edit; seal refuses honestly) — the RULED half shipped; the checked-box register, indented/nested styling and ⏎-continues-a-list stay held for her word (bundle items ii/iii/v) | **PARTIAL** (batch 3) |
-| L10 | Links (F-5): styled + ⌘-click in editors; fully rendered + plain-click in Read | batch 3 |
-| L11 | Read mode full markdown rendering (the F-5 surface rule) | batch 3 |
-| L12 | Helper/tutorial coverage for formatting + the re-seed note | late batch |
+| L10 | Links (F-5): ⌘-click opens in editors (+ the missing Add Link act); fully rendered + plain-click in Read | batch 4 (spawning) |
+| L11 | Read mode full markdown rendering (the F-5 surface rule; pagination measures the transformed text, addresses stay identity) | batch 4 (spawning) |
+| L12 | Helper/tutorial coverage for formatting + the re-seed note | batch 4 (spawning) |
 | L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | sweep batch |
 | L14 | W26: the true global quick-note hotkey — SLOTTED to 13e's opening sitting (her round-4 ruling; supersedes round 2's later-in-13g reading) | → 13e |
 | L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | batch 2 / acceptance |
@@ -861,6 +861,16 @@ nested lists need her word on how indentation should read;
 her call; **(v)** list ERGONOMICS (does ⏎ at the end of a list
 line continue the list with a fresh `- `?) — unruled, and it
 changes what typing does, so it waits for her word.
+
+*Extended at batch 3's acceptance:* **(vi)** `notes/QUESTIONS.md`
+**#49** — batch 3's nine build-time calls (multi-line wrap
+per-line; lead-replaces-lead; the every-piece toggle rule; blank
+lines; the `****` caret gesture; ⌘B/⌘I only, five menu-first; the
+box's hit-target width; Checklist-mints-unchecked; no palette
+rows), each one line to change — the walk reads them in one place;
+**(vii)** ONE HAND-CHECK the pins cannot reach: press ⌘B while the
+keyboard is in a take pane (AppKit routing a menu key equivalent to
+a first responder inside a board is the last unpinnable inch).
 
 ## Batch 2 brief — the markdown foundation (a FRESH Opus implementer; self-contained)
 
@@ -1435,3 +1445,88 @@ convention (`TakesCardHeightTests`), so a future reader can re-run them.
   and the registry on real contexts, but the last inch — AppKit routing a menu key
   equivalent to a first responder inside a board — is the one step no headless pin
   reaches.
+
+### Orchestrator acceptance — batch 3 (2026-08-01)
+
+- **Commit `2d69230` verified by own inspection:** 14 files, scoped
+  as briefed — `MarkdownEditing` (pure Domain) + its suite, the
+  `MarkdownActs` face + registry declarations + Format menu doors,
+  the checkbox hit-test on both surface kinds, the helper rows the
+  drift guard forced, the #49 QUESTIONS bundle, this plan's record.
+  No `Sync/` lines, nothing near the join brain, no schema. The #49
+  entry read in full — nine calls, each stated with its
+  alternative, properly OPEN for the walk; #50 next free.
+- **Counts by the orchestrator's OWN runs:** core "Test run with
+  970 tests in 107 suites passed" · Mac "Test run with 1100 tests
+  in 192 suites passed" · mobile "Test run with 14 tests in 4
+  suites passed" — every implementer claim (970/107 · 1100/192 ·
+  14/4 · spine 49/7) matched exactly. **Batch 3 ACCEPTED.**
+- The five discriminating reverts, the sweep's ⌘B/⌘I-only outcome,
+  and the first-responder targeting (revert D proving ⌘B would have
+  typed `****` into the rename field) are accepted as recorded.
+- Morning bundle extended: #49's walk (vi) + the take-pane ⌘B
+  hand-check (vii).
+
+## Batch 4 brief — links, Read rendering & the formatting lesson (a FRESH Opus implementer; self-contained)
+
+**Read first, in full:** `CLAUDE.md`; this plan file TOP TO BOTTOM
+(rounds 1–4 = the rulings; F-5's surface rule GOVERNS this batch;
+the constitution binds; batch 2's record defines the tokenizer,
+batch 3's the acts); the "Environment traps" section of
+`notes/plans/phase-13c-book-forms-and-conversions.md` (binding)
+PLUS the batch-1 standing rule (never address a Variorum instance
+by process name — bundle id or PID only);
+`notes/TEXTKIT2_NOTES.md` §1/§3.
+
+**Scope: L10 + L11 + L12.** Still NOT in this batch — held for her
+word, do not preempt: the checked-box register, indented/nested
+lists, ⏎-continues-a-list, any visible toolbar, any change to the
+#49 calls.
+
+- **L10 — links behave (F-5's letter).** EDITING surfaces: ⌘-click
+  on a link span (the tokenizer already carries the `url` range)
+  opens the URL — `http`/`https` only in v1 (anything else is
+  inert; PROVISIONAL, record it); a plain click stays a caret
+  click, byte-untouched. Hover may show the URL as help text where
+  cheap — optional, not owed. **Add the missing insertion act:**
+  Format ▸ Add Link (registry-declared like batch 3's acts;
+  menu-first, no chord unless the sweep gives one freely):
+  selection → `[selection]()` with the caret between the parens;
+  no selection → `[]()` caret in the brackets. Same pure-Domain
+  computation discipline as `MarkdownEditing` (extend it, with
+  tests).
+- **L11 — Read mode renders markdown FULLY FORMATTED** (the F-5
+  surface rule: display ≠ stored is safe exactly where no editing
+  gesture maps clicks to offsets — Read is A43's reading surface).
+  A PURE presentation transform in Domain: markdown → (display
+  text, style runs, link map), tested on its own; markers hidden,
+  headings/bold/italic/strike/code/lists/checkboxes styled, links
+  plain-click openable. Apply it to the book's Read mode — BOTH
+  faces (scroll and pages). **Pagination stays honest:** page
+  slicing/extents measure the TRANSFORMED text (the (post,
+  page-in-post) IDENTITY address rule from 13c K1 is untouchable —
+  addresses never become indexes), and the transform runs lazily
+  per rendered block (P1: cost ∝ what renders). Checkboxes in Read
+  are DISPLAY ONLY (no toggling — Read edits nothing). If any
+  other read-only surface tempts you (reading flow etc.), STATE
+  where the transform could apply later — build only Read's two
+  faces.
+- **L12 — the formatting lesson + helper completeness.** The field
+  guide gains a formatting lesson (the markdown vocabulary, ⌘B/⌘I,
+  the Format menu, checkbox clicking, links incl. ⌘-click vs
+  Read's plain click; `plan` and `seed` edited together so the
+  walk test holds). The helper's formatting rows complete (the
+  drift guard is the floor, not the ceiling — Add Link joins its
+  keyless kin). NOTE in the record: this stales the seeded guide
+  again; her ONE owed Restore-Tutorial click covers everything
+  (13f + batches 1 and 4).
+- **Suites:** `Sources/` is touched ⇒ ALL THREE at batch end,
+  counts quoted from your own "Test run with N tests" lines.
+  Baselines to match-or-beat: core 970/107 · Mac 1100/192 · mobile
+  14/4. Tutorial spine green by TYPE name.
+- The loop as batches 1–3 ran it: red-on-old by behavioral revert
+  with checksums; PROVISIONAL-and-continue non-gating (recorded;
+  product PROVISIONALs to `notes/QUESTIONS.md`, next free **#50**);
+  STOP-and-report anything gating; batch record appended here;
+  commit per convention, explicit paths; never push; never
+  `/Applications`; her real-store instance never touched.
