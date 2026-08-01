@@ -430,9 +430,9 @@ visibility, a display setting if ever wanted.
 | L7 | The markdown foundation: pure Domain tokenizer + the dimmed-marker editing face (F-1/F-2) | **SHIPPED** (batch 2) |
 | L8 | Insertion faces: ⌘B/⌘I + the Format menu + context submenu + registry declarations (formatting acts are acts) — the visible TOOLBAR is the morning bundle's item (iv), unbuilt | **SHIPPED** (batch 3) |
 | L9 | Lists + checkboxes incl. click-to-toggle (ordinary edit; seal refuses honestly) — the RULED half shipped; the checked-box register, indented/nested styling and ⏎-continues-a-list stay held for her word (bundle items ii/iii/v) | **PARTIAL** (batch 3) |
-| L10 | Links (F-5): ⌘-click opens in editors (+ the missing Add Link act); fully rendered + plain-click in Read | batch 4 (spawning) |
-| L11 | Read mode full markdown rendering (the F-5 surface rule; pagination measures the transformed text, addresses stay identity) | batch 4 (spawning) |
-| L12 | Helper/tutorial coverage for formatting + the re-seed note | batch 4 (spawning) |
+| L10 | Links (F-5): ⌘-click opens in editors (+ the missing Add Link act); fully rendered + plain-click in Read | **SHIPPED** (batch 4) |
+| L11 | Read mode full markdown rendering (the F-5 surface rule; pagination measures the transformed text, addresses stay identity) | **SHIPPED** (batch 4 — both faces) |
+| L12 | Helper/tutorial coverage for formatting + the re-seed note | **SHIPPED** (batch 4 — ONE Restore-Tutorial click now covers 13f + batches 1 and 4) |
 | L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | sweep batch |
 | L14 | W26: the true global quick-note hotkey — SLOTTED to 13e's opening sitting (her round-4 ruling; supersedes round 2's later-in-13g reading) | → 13e |
 | L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | batch 2 / acceptance |
@@ -1530,3 +1530,268 @@ lists, ⏎-continues-a-list, any visible toolbar, any change to the
   STOP-and-report anything gating; batch record appended here;
   commit per convention, explicit paths; never push; never
   `/Applications`; her real-store instance never touched.
+
+### Batch 4 record — links, Read rendering & the formatting lesson (2026-08-01, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on the
+final tree): core **986 tests in 108 suites** (from 970/107: +16 tests, +1 suite —
+the reading transform, plus the link act's pins in the existing editing suite) ·
+Mac **1117 tests in 193 suites** (from 1100/192: +17 tests, +1 suite — Read's rendering, the link click, the helper ceiling and the lesson pin) · mobile **14 tests in 4 suites** (unchanged) (run because `Sources/` was touched). The
+tutorial spine ran green by TYPE name on the final tree (**50 tests in 7 suites**, from 49/7 — the formatting lesson's own pin). Zero
+`Sources/VariorumCore/Sync/` lines; no schema; **zero lines anywhere near
+`renderedText`, the export projections or the bridge's join brain** — verified by
+`git status --short` (nothing under `Queries/`, `Operations/`, `Bridge/` or
+`Features/Export`).
+
+Scope was **L10 + L11 + L12**. Deliberately NOT started, per the brief: the
+checked-box register, indented/nested list styling, ⏎-continues-a-list, any
+visible toolbar, and every #49 call (untouched — #50 is a new bundle beside it,
+never an edit to that one).
+
+---
+
+#### (i) L10 — links behave
+
+**Three surfaces open links and they had to agree**, so there is ONE rule, ONE
+guard and ONE door: `App/…/Features/Formatting/MarkdownLink.swift`.
+
+**The scheme rule, v1: `http` and `https` only** (a build-time call — QUESTIONS
+#50(a)). A link's target is ordinary text she typed, and a click must not hand an
+arbitrary scheme to `NSWorkspace`: `file:` reaches the disk and the custom-scheme
+space is every other app on the machine. Anything else is **INERT** — it still
+renders as a link (the syntax is what it is) and the click simply does nothing,
+so it behaves like the ordinary click it visually was. *(Measured while pinning
+it, and recorded because it changes what the allowlist is actually load-bearing
+for: `file:`, `mailto:` and `javascript:` are refused by the HOST check alone —
+they have no host. What only the allowlist refuses is a well-formed
+`ftp://…`/`vscode://…`, so the scheme pin's discriminating cases are those.)*
+
+**⌘-click on the editing surfaces.** `MarkdownActs.openLink(at:in:)` +
+`isLinkClick(_:)`, asked before `super.mouseDown` on both surface kinds
+(`EditorTextView`, `PaneTextView`) for the same reason the checkbox click is:
+`super.mouseDown` runs AppKit's selection-tracking loop and there is no "after"
+in which to decline. The gesture is ⌘ alone, one click — so it never competes
+with the plain caret click, the checkbox toggle, a double-click's word selection
+or a ⇧-click's selection extension.
+
+**Deliberately NOT gated on `isEditable`** (QUESTIONS #50(f)): opening a link is
+not an edit, so the read tier and a sealed note follow one exactly like a live
+editor does. That is the honest line — what made the modifier necessary was that
+a plain click on an editing surface is already spoken for (it places the caret,
+and the read tier's click SEEDS that caret's offset), not that the surface can be
+written to. The lookup itself is a pure core function (`MarkdownEditing.link(inLines:at:)`),
+and the whole SPAN counts — `(url)` included — because the dimmed address is
+visibly part of the link and this gesture carries a modifier.
+
+**The missing act.** Links were ruled IN at the sitting and shipped in batch 2
+with a FACE but no DOOR: the only way to make one was to type the brackets.
+`.formatAddLink` is now a registry capability like batch 3's seven, rendered by
+the Format menu and the context submenu from the one `MarkdownActs.rows` table.
+The edit computation is `MarkdownEditing`'s, and it joins the WRAP family rather
+than becoming a third shape — a link's markers are simply asymmetric (`[` and
+`]()`), so everything the family already decided applies unchanged: wrapped-ness
+is read from the tokenizer, the toggle clears when the piece already carries it,
+the selection's whitespace is trimmed. Three calls it needed of its own, all in
+#50: the caret lands in the PARENS after a wrap and in the BRACKETS after the
+caret gesture (c); it takes only the line the selection STARTS on (c); and on an
+existing link it REMOVES the link with its address (d), which is the family's own
+toggle rule and one ⌘Z from undone.
+
+**The chord: none, and the sweep is the reason.** The platform's own add-link
+chord is ⌘K, bound to Find Anything since Phase 13 (R15) — the one key a reader
+would guess is the one key that is taken, and re-pointing it at a text act would
+break the app's most-used door. Menu-first, beside the other five keyless acts
+(#50(e) offers her one). The registry comment carries the sweep's reasoning.
+
+---
+
+#### (ii) L11 — Read renders markdown fully formatted
+
+**The transform is PURE and lives in Domain**
+(`Sources/VariorumCore/Domain/MarkdownRendering.swift`): text in, a DISPLAY
+STRING plus semantic runs and per-line styles out. It never returns a font, a
+colour or a point size — those are the app's, from the voice tokens (P-8) — and
+it never writes anything. One tokenizer scan, one walk; cost ∝ what it is handed,
+which is what lets both faces get P1 by rendering only what they draw.
+
+**The shape, exactly:**
+
+| Out | What it is |
+|---|---|
+| `text` | the display string — markers removed, list leads SUBSTITUTED |
+| `runs` | ascending, disjoint character runs: `Emphasis` (bold/italic/strikethrough/code) + an optional `url` |
+| `lines` | every line in order (blank ones included), each with a `LineStyle`: body · heading(1…3) · bullet · checkbox(checked:) |
+| `links` | the runs carrying a `url` — a reading surface's hit map |
+
+**Two decisions worth naming.** Line leads are **substituted**, not merely hidden
+(`- ` → `• `, `- [ ]` → `☐`, `- [x]` → `☑` — QUESTIONS #50(b)): a bullet list
+rendered without bullets reads as loose lines, which is not what "fully
+formatted" means. And a checkbox in Read is **display only** — Read has no
+editing gesture at all (her A43 ruling), so there is nothing to toggle and
+nothing was wired.
+
+**Everything the tokenizer already decided is inherited verbatim** rather than
+re-decided: line-scoped by law (so nothing crosses a newline, and on an editor
+surface nothing can cross a block seam), column-0 leads (so an indented list item
+is still unstyled in v1 — the known limitation nested lists will need her word
+to widen), the one nesting exception (`# **Big**` composes: a heading style AND a
+bold run), and UTF-16 offsets that never split a grapheme.
+
+**The PAGED face** (`PageComposer.compose`). The walk now builds **TWO strings
+from ONE set of decisions**: the stored `body` — the ratified projection, still
+pinned byte-equal to `Queries.renderedText`, which is what makes it the drift
+guard on the join conditional — and the DISPLAY string the page draws. The join
+is read off the STORED text (renderedText's own rule) and applied to both, so
+there is still exactly one decision about separators.
+
+**The transform runs PER BLOCK**, and that is the load-bearing choice. It is
+equivalent to rendering the joined body (the transform is line-scoped and the
+joins are line breaks), and it keeps every block's DISPLAY range known without a
+mapping table — which matters because the callout indent rides those ranges, and
+the display is now a DIFFERENT LENGTH from the stored text. That is the one real
+arithmetic hazard this batch introduced, and its pin is the batch's sharpest
+(revert D below).
+
+**Pagination measures the TRANSFORMED text** — the framesetter is built over the
+composed attributed string, so a page's visible range is a range of what is
+drawn. **The 13c K1 address rule is untouched by construction:** a page is still
+named `(post, page-in-post)`, `PageIndex.Position` is unchanged, and nothing here
+is an index into a projection. What the transform does move is the ESTIMATE:
+`PageEstimator` reads `Queries.blockExtents`' stored character counts, which now
+slightly over-count a marker-heavy post. That is what the calibration loop is
+for (it corrects from measured posts), and it is exactly the "estimates revise,
+content never regresses" contract the domain was built on — recorded rather than
+chased.
+
+**The paged leaf's plain click.** A page is a `CTFrame` drawn into a view, so
+there is no link handling to inherit: `PageFrameNSView.mouseDown` asks
+`characterIndex(at:)`, which undoes the page's scale and asks CoreText itself
+(`CTLineGetStringIndexForPosition` on the line the point landed in), then looks
+the index up in the post's link map. **A real defect was found here by its own
+pin** — see revert E.
+
+**The SCROLL face** (`ReadingFlowView`). `FlowParagraph.paragraphs(of:)` renders
+the post's projection once per realized row (inside the `LazyVStack`'s own task,
+so the cost stays ∝ what materialized) and builds an `AttributedString` per
+display line **by CONCATENATION** rather than by indexing — the runs are
+ascending and disjoint, so walking them is exact and no `AttributedString.Index`
+arithmetic can drift against UTF-16 offsets that came from elsewhere. Emphasis
+rides as `inlinePresentationIntent` (SwiftUI's own markdown path), a heading is a
+size, a list line sits in, and a link becomes a real `.link` attribute so
+SwiftUI's `Text` opens it on a plain click — through an `OpenURLAction` carrying
+the same scheme guard, so an address the app will not follow simply carries no
+link attribute at all. The flow keeps its own paragraph rule unchanged: blank
+display lines are dropped (the paged reader is the face that keeps stored spacing
+byte for byte).
+
+**One inch no headless pin reaches, and it is recorded rather than claimed:**
+whether SwiftUI dispatches a link tap ahead of the enclosing "wake this post"
+tap gesture on the flow's row. The failure mode if it does not is benign — the
+click wakes the post for editing instead of opening the address, which is the
+surface's standing behaviour — but it is a hand-check.
+
+---
+
+#### (iii) L12 — the formatting lesson, and the helper's ceiling
+
+**The field guide gains "formatting"**, third in the WRITING chapter — after the
+two lessons that teach what a block IS, because the vocabulary is about what a
+line of text looks like. `plan` and `seed` were edited together, so
+`theSeededBookMatchesTheLessonPlanExactly` holds.
+
+**The lesson is written IN the vocabulary it teaches**, which under F-1 means its
+stored text literally IS the syntax the reader is being shown: `**markdown**`
+renders bold with dim stars, `## Headings are sizes` is a heading, three `- `
+lines are a list, `- [ ]` and `- [x]` are boxes she can click, and
+`[like this](https://apple.com)` is a link. Its last paragraph sends her to READ
+and tells her what she will see there — and the pin follows her
+(`theFormattingLessonIsWrittenInTheVocabularyItTeaches`): the same text, rendered
+for reading, carries none of those spans' markers, shows `☐`/`☑` and `•`, and
+yields the apple.com link.
+
+**The helper's rows complete:** Format ▸ Add Link joins its keyless kin, and a
+row states BOTH click rules — ⌘-click in a writing surface, plain click in Read
+— because they differ by surface and cannot be inferred from a menu. A
+dictionary entry for **link** says the same thing in prose, including the one
+place the app deliberately shows something other than what is stored.
+
+**And the guard above the guard.** The registry drift guard (L1) is the FLOOR: it
+can only see acts that declare a chord, and six of these eight deliberately don't
+— so a keyless door would be exactly as invisible as the whole 13f workspace was,
+which is WT-1's finding. `theHelperNamesEveryFormattingDoorIncludingTheKeylessOnes`
+is the ceiling: every formatting capability's verb must be findable in the
+helper, case-insensitively (the helper writes in prose, and prose is the point of
+a hand-written list).
+
+**A RE-SEED IS OWED — and her ONE Restore-Tutorial click now covers everything:**
+13f's vocabulary, batch 1's workspace lesson and stale-key correction, and this
+batch's formatting lesson. One press of Help ▸ Restore Tutorial…, whenever she
+next opens the app.
+
+---
+
+#### Red-on-old pins — five behavioural reverts, each verified and checksum-restored
+
+| # | Revert | Result |
+|---|---|---|
+| A | `PageComposer.compose` appends the RAW block text to `display` (the pre-batch behaviour: the page draws the stored text) | RED: `thePageDrawsTheRenderedTextWhileTheBodyStaysTheStoredProjection` fails on its first expectation — the page shows `# A heading` and `**bold**` again. Four more L11 pins fall with it, which is the honest blast radius of the claim |
+| B | drop `act.wrapsFirstLineOnly` from `MarkdownEditing.plan`'s line filter | RED: `addLinkTakesOnlyTheLineTheSelectionSTARTSOn` fails — a two-line selection mints `[one]()\n[two]()`, two empty links, only one of which could hold the caret. The other 28 core pins stay green |
+| C | drop `openableSchemes.contains(scheme)` from `MarkdownLink.openable` | RED on BOTH sides: `onlyHttpAndHttpsAddressesAreOpenable` (`ftp://x.test/a` and `vscode://open` become openable) and `aFlowLinkIsClickableOnlyWhenItsSchemeIsOne` (an `ftp:` address becomes a live clickable link on a reading surface) |
+| D | compute the block ranges from the STORED offsets (`let start = (composed as NSString).length`, as it was before this batch) | RED, exactly discriminating: `aCalloutStaysOnItsOwnBlockAfterAnEarlierBlockShortens` fails (the frame lands nowhere) and `theLinkMapNamesTheWordsItCoversEvenBehindATitle` loses the second link entirely |
+| E | use `origins[i]` directly instead of rebasing onto the frame path's bounding box | RED: `aPointOnThePageResolvesToTheCharacterUnderIt` fails — a click on the first word resolves INTO the link |
+
+Each file was restored and its `md5` matched the pre-revert value
+(`MarkdownRendering.swift` is new this batch; `PagePaginator.swift` →
+`b2e3b8e0139d92d0cd66d21305bc432a`, `MarkdownEditing.swift` →
+`7de8fdfb2bf65d60307fcbff680033f8`, `MarkdownLink.swift` →
+`765c2d5015a4ee09e5094172fa0b70d3`, `PagedReadView.swift` →
+`a8aefa1ccf54e9b7843efd61e4a7ef37`). All five are recorded as
+`DISCRIMINATING REVERT` doc comments on their pins, the house convention, so a
+future reader can re-run them.
+
+**Revert E was not hypothetical, and this is the batch's one real finding.** The
+first draft of `characterIndex(at:)` compared `CTFrameGetLineOrigins`' output
+directly against a point in the page's coordinate space. It is wrong:
+**CoreText reports line origins relative to the frame PATH's bounding box**, not
+to the page — so a click on the first word of a page resolved to the SEVENTH
+character, and every link hit would have been off by the page's own margin. The
+pin that caught it is the deliberately-discriminating half of the same test ("a
+point at the line's left edge lands BEFORE the link"), added because a hit-test
+pin that only asserts "some point finds the link" is satisfied by a sweep over a
+wrong coordinate space. Fixed by rebasing onto `CTFrameGetPath(...).boundingBoxOfPath`,
+which asks the frame rather than assuming the geometry.
+
+**Two hygiene guards added while reverting, and why they are not decoration.**
+Revert D's first execution took the TEST HOST DOWN instead of failing a pin: an
+out-of-range range reached `addAttribute` (an `NSRangeException`) and, in the
+pin, an out-of-range `NSString.substring`. Both write sites now carry the same
+bounds guard every other attribute write in the app carries
+(`MarkdownStyling.write`'s rule) — they cannot fire while the ranges are computed
+on the string they name, and what they prevent is a crash rather than a wrong
+look. The revert then failed cleanly, which is what a red-on-old pin is for.
+
+---
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` gains #50** — six build-time calls, bundled the way #49
+  was, each one line to change. **#49 was not touched.** **#51 is now the next
+  free number.**
+- **No proposal is owed**: no design fork emerged that F-5 did not answer. The
+  two that came closest are recorded as #50(c) (links act on one line) and
+  #50(d) (Add Link removes an existing link) rather than built both ways.
+- **The morning bundle's items (ii)/(iii)/(iv)/(v) are still UNTOUCHED and still
+  hers** — the checked-box text register, indented/nested list styling, the
+  visible toolbar offer, and whether ⏎ continues a list. This batch deliberately
+  did not preempt any of them; note that (ii) now has a second surface to answer
+  for, since a checked box in Read is a `☑` glyph whose TEXT is styled like any
+  other line.
+- **One hand-check, for whenever the app is next open:** click a link in a book's
+  Read ▸ scroll face. The paged face's click is pinned through real CoreText
+  geometry; the flow's rides SwiftUI's own link dispatch, and whether it wins
+  against the row's "wake this post" tap gesture is the one inch no headless pin
+  reaches. (If it loses, the click wakes the post — benign, and one line to fix
+  by moving the wake gesture.)
+- **No visual loop was run.** The new pixels are Read's two faces, and the
+  honest way to look at them is in her own book with her own voice — a
+  screenshot of a synthetic page would tell her less than one press of ⌘5 will.

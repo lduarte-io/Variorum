@@ -254,7 +254,8 @@ struct MarkdownEditingTests {
     @Test func editsComeBackAscendingAndDisjoint() {
         let text = "one\ntwo\nthree"
         for act: MarkdownEditing.Act in [
-            .bold, .italic, .strikethrough, .code, .heading(level: 2), .bullet, .checkbox,
+            .bold, .italic, .strikethrough, .code, .link,
+            .heading(level: 2), .bullet, .checkbox,
         ] {
             let edits = plan(act, text, 0..<13).edits
             for (a, b) in zip(edits, edits.dropFirst()) {
@@ -284,6 +285,68 @@ struct MarkdownEditingTests {
         let family = range(of: "👩‍👩‍👧", in: text)
         let bold = plan(.bold, text, family)
         #expect(applied(bold, to: text) == "hi **👩‍👩‍👧** there")
+    }
+
+    // MARK: - Links (13g batch 4, L10 — the Add Link act)
+
+    /// The act her brief names: a selection becomes `[selection]()` with the
+    /// caret in the PARENS, because the words are already written and the
+    /// ADDRESS is what the next keystroke supplies.
+    @Test func addLinkWrapsTheSelectionAndLeavesTheCaretInTheParens() {
+        let text = "read the notes later"
+        let link = plan(.link, text, range(of: "the notes", in: text))
+        #expect(applied(link, to: text) == "read [the notes]() later")
+        #expect(selected(link, in: text) == "read [the notes](|) later")
+    }
+
+    /// With nothing selected the caret lands in the BRACKETS instead — the
+    /// text is what she is about to type.
+    @Test func addLinkWithNoSelectionLeavesTheCaretInTheBrackets() {
+        let text = "read  later"
+        let link = plan(.link, text, 5..<5)
+        #expect(applied(link, to: text) == "read []() later")
+        #expect(selected(link, in: text) == "read [|]() later")
+        #expect(link.edits.count == 1, "one edit, so the plan stays disjoint")
+    }
+
+    /// The family's ruled toggle, applied to links: the act on a piece that
+    /// is ALREADY a link removes it — and the whole `](url)` goes with the
+    /// brackets, because a URL belongs to the link it named. (⌘Z puts it
+    /// back, like every other formatting act.)
+    @Test func addLinkOnAnExistingLinkREMOVESItWithItsAddress() {
+        let text = "read [the notes](https://x.test/a) later"
+        let inside = plan(.link, text, range(of: "notes", in: text))
+        #expect(applied(inside, to: text) == "read the notes later")
+
+        // …and selecting the WHOLE link, markers included, does the same.
+        let whole = plan(.link, text, range(of: "[the notes](https://x.test/a)", in: text))
+        #expect(applied(whole, to: text) == "read the notes later")
+    }
+
+    /// DISCRIMINATING REVERT: drop `act.wrapsFirstLineOnly` from `plan`'s
+    /// line filter and this fails — a two-line selection mints TWO empty
+    /// links (`[one]()\n[two]()`), and only one of them could hold the caret.
+    ///
+    /// **Links act on ONE line** — a build-time call (QUESTIONS #50), and the
+    /// one place the link act deliberately parts company with the emphasis
+    /// four: `**a**\n**b**` is two useful bolds, but two EMPTY links from one
+    /// gesture are junk and only one of them could hold the caret.
+    @Test func addLinkTakesOnlyTheLineTheSelectionSTARTSOn() {
+        let text = "one\ntwo"
+        let link = plan(.link, text, 0..<7)
+        #expect(applied(link, to: text) == "[one]()\ntwo")
+
+        // The contrast, pinned beside it so the difference is deliberate.
+        let bold = plan(.bold, text, 0..<7)
+        #expect(applied(bold, to: text) == "**one**\n**two**")
+    }
+
+    /// A caret JUST OUTSIDE a link starts a new one rather than removing the
+    /// old — the same adjacency rule the emphasis four keep.
+    @Test func aCaretJustAfterALinkStartsANewOne() {
+        let text = "see [docs](https://x.test)"
+        let link = plan(.link, text, 26..<26)
+        #expect(applied(link, to: text) == "see [docs](https://x.test)[]()")
     }
 
     // MARK: - P1: the scan is the LINES, never the note

@@ -426,6 +426,15 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
                at: convert(event.locationInWindow, from: nil), in: self) {
             return
         }
+        // 13g batch 4 (L10): ⌘-click follows a link. Asked before `super`
+        // for the same reason the checkbox is, and consumed only when a link
+        // actually opened — an inert address falls through to the ordinary
+        // click it looked like.
+        if MarkdownActs.isLinkClick(event),
+           MarkdownActs.openLink(
+               at: convert(event.locationInWindow, from: nil), in: self) {
+            return
+        }
         super.mouseDown(with: event)
     }
 

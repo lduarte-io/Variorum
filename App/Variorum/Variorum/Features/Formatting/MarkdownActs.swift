@@ -70,6 +70,10 @@ enum MarkdownActs {
         Row(id: .formatItalic, act: .italic),
         Row(id: .formatStrikethrough, act: .strikethrough),
         Row(id: .formatCode, act: .code),
+        // 13g batch 4 (L10): the act batch 3 could not have — links were
+        // ruled IN (F-5) but had no insertion door, so the only way to make
+        // one was to type the brackets.
+        Row(id: .formatAddLink, act: .link),
         Row(id: .formatHeading, act: nil, children: [
             ("Heading 1", .heading(level: 1)),
             ("Heading 2", .heading(level: 2)),
@@ -92,6 +96,7 @@ enum MarkdownActs {
     /// the drift class P-1 exists to kill.
     nonisolated static let contextMenuCapabilities: [CapabilityID] = [
         .formatBold, .formatItalic, .formatStrikethrough, .formatCode,
+        .formatAddLink,
         .formatHeading, .formatBulletList, .formatChecklist,
     ]
 
@@ -223,6 +228,49 @@ enum MarkdownActs {
             textView.setSelectedRange(selection)
         }
         return true
+    }
+
+    // MARK: - L10: the ⌘-click that opens a link
+
+    /// **⌘-click on a link opens it** (her ruling F-5, answering her own
+    /// question: *"do you mean click handling in the read mode…?"* — both,
+    /// and they differ). On an EDITING surface a plain click has a job
+    /// already: it places the caret, and the read-cheap tier's click seeds
+    /// that caret's offset. So the modifier IS the wiring she was told the
+    /// "face work" was; Read, which has no caret and no gestures, opens on a
+    /// plain click instead (`PageFrameNSView`, `ReadingFlowView`).
+    ///
+    /// Deliberately NOT gated on `isEditable`: opening a link is not an edit,
+    /// so a sealed note and the read tier follow one exactly like a live
+    /// editor does. And deliberately gated on the SCHEME (`MarkdownLink`) —
+    /// an inert address consumes nothing, so the click stays the ordinary
+    /// click it looked like.
+    static func openLink(at point: NSPoint, in textView: NSTextView) -> Bool {
+        guard let url = linkAddress(at: point, in: textView) else { return false }
+        return MarkdownLink.open(url)
+    }
+
+    /// The address under a point, or nil. Split out from `openLink` so the
+    /// GEOMETRY (point → index → span) can be pinned through a real laid-out
+    /// surface without a test launching a browser — the same seam the
+    /// checkbox click's pure decision gives it.
+    static func linkAddress(at point: NSPoint, in textView: NSTextView) -> String? {
+        let string = textView.string as NSString
+        guard string.length > 0 else { return nil }
+        let index = textView.characterIndexForInsertion(at: point)
+        guard index >= 0, index <= string.length else { return nil }
+        let lines = string.lineRange(for: NSRange(location: index, length: 0))
+        return MarkdownEditing.link(
+            inLines: string.substring(with: lines), at: index - lines.location)
+    }
+
+    /// Was this click the link gesture? ⌘ alone, one click — kept here so
+    /// both surface kinds ask the same question rather than each spelling
+    /// out a modifier mask (the `toggleCheckbox` pairing, same reasoning).
+    static func isLinkClick(_ event: NSEvent) -> Bool {
+        event.clickCount == 1
+            && event.modifierFlags.intersection([.command, .option, .control, .shift])
+                == .command
     }
 
     // MARK: - The context-menu door

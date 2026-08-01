@@ -291,6 +291,44 @@ struct TutorialBookShapeTests {
             #expect(!peers.isEmpty, "the compare lesson ships with a linked twin")
         }
     }
+
+    /// **The formatting lesson demonstrates itself** (13g L12). Its prose is
+    /// written IN the vocabulary it teaches — which under F-1 means the
+    /// lesson's stored text literally IS the syntax the reader is shown — and
+    /// the last paragraph sends her to Read, so the pin follows her there:
+    /// the same text, rendered for reading, carries no markers at all.
+    @Test func theFormattingLessonIsWrittenInTheVocabularyItTeaches() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let formatting = try await db.read {
+                try lessonID($0, bookID: bookID, "formatting")
+            }
+            let stored = try await db.read {
+                try Queries.renderedText($0, containerID: formatting)
+            }
+            for syntax in ["**markdown**", "*italic*", "~~struck out~~", "`inline code`",
+                           "## Headings are sizes", "- Lists are lines", "- [ ] And a checkbox",
+                           "- [x] CLICK the box", "[like this](https://apple.com)"] {
+                #expect(stored.contains(syntax), "the lesson shows \(syntax) by BEING it")
+            }
+
+            // …and Read shows her the other face (F-5's surface rule). The
+            // assertions name the SPANS rather than the characters, because
+            // a lesson ABOUT markdown also talks about markers in prose
+            // ("a line that starts with #, ## or ###"), and those are
+            // ordinary words the transform must leave exactly alone.
+            let rendered = MarkdownRendering.render(stored)
+            for span in ["**markdown**", "*italic*", "~~struck out~~", "`inline code`",
+                         "## Headings are sizes", "- [ ] And a checkbox",
+                         "[like this](https://apple.com)"] {
+                #expect(!rendered.text.contains(span), "Read hides \(span.debugDescription)")
+            }
+            #expect(rendered.text.contains("Headings are sizes"))
+            #expect(rendered.text.contains("\u{2022} Lists are lines"))
+            #expect(rendered.text.contains("\u{2610} And a checkbox"))
+            #expect(rendered.text.contains("\u{2611} CLICK the box"))
+            #expect(rendered.links.contains { $0.url == "https://apple.com" })
+        }
+    }
 }
 
 // MARK: - The doors (seeding is a product door)

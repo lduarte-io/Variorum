@@ -22,8 +22,11 @@ import VariorumCore
 @Suite("Markdown formatting acts (13g batch 3 — L8/L9)")
 struct MarkdownActsTests {
 
+    /// In the DECLARED ORDER — the rendered-submenu pin compares its rows
+    /// against this list, so the order is part of the claim. (13g batch 4:
+    /// `.formatAddLink` joins after Inline Code.)
     private static let allFormatting: [CapabilityID] = [
-        .formatBold, .formatItalic, .formatStrikethrough, .formatCode,
+        .formatBold, .formatItalic, .formatStrikethrough, .formatCode, .formatAddLink,
         .formatHeading, .formatBulletList, .formatChecklist,
     ]
 
@@ -45,8 +48,8 @@ struct MarkdownActsTests {
         #expect(EditorCommands.keyEquivalent(for: .formatBold)?.1 == .command)
         #expect(EditorCommands.keyEquivalent(for: .formatItalic)?.0 == "i")
         #expect(EditorCommands.keyEquivalent(for: .formatItalic)?.1 == .command)
-        for id in [CapabilityID.formatStrikethrough, .formatCode, .formatHeading,
-                   .formatBulletList, .formatChecklist] {
+        for id in [CapabilityID.formatStrikethrough, .formatCode, .formatAddLink,
+                   .formatHeading, .formatBulletList, .formatChecklist] {
             #expect(CapabilityRegistry.capability(id).shortcutLabel == nil,
                     "\(id) ships menu-first — no chord was ruled and none was invented")
         }
@@ -245,6 +248,108 @@ struct MarkdownActsTests {
         #expect(MarkdownActs.toggleCheckbox(at: onBox, in: pane) == false,
                 "her ruling's letter: first click focuses, as today")
         #expect(pane.string == "- [ ] milk")
+    }
+
+    /// **The helper names every formatting door, keyless ones included**
+    /// (13g L12). The registry drift guard is the FLOOR — it can only see
+    /// acts that declare a chord, and five of these eight deliberately don't
+    /// — so a door with no key would be exactly as invisible as the whole
+    /// 13f workspace was (WT-1's finding). This is the ceiling.
+    @Test func theHelperNamesEveryFormattingDoorIncludingTheKeylessOnes() {
+        let rows = HelperView.groups.flatMap(\.items)
+        for id in Self.allFormatting {
+            // Case-insensitively: the helper writes in PROSE ("bold — wraps
+            // the selection…"), and prose is the point of a hand-written
+            // list. What is asserted is that the door is findable.
+            let verb = CapabilityRegistry.capability(id).verb
+            #expect(rows.contains {
+                $0.keys.localizedCaseInsensitiveContains(verb)
+                    || $0.does.localizedCaseInsensitiveContains(verb)
+            }, "the helper (⌘/) names the \(verb) door")
+        }
+        // …and the two click rules, which differ by surface and so cannot be
+        // inferred from the menu at all.
+        #expect(rows.contains { $0.keys.contains("⌘-click") })
+    }
+
+    // MARK: - L10: the link click (13g batch 4)
+
+    /// **The scheme guard.** A link's target is ordinary text she typed, and
+    /// a click must not hand an arbitrary scheme to the workspace: `file:`
+    /// reaches the disk and the custom-scheme space is every other app on the
+    /// machine. v1 opens `http`/`https` and nothing else — an inert address
+    /// still RENDERS as a link (the syntax is what it is) and simply does
+    /// nothing when clicked.
+    ///
+    /// DISCRIMINATING REVERT: drop `openableSchemes.contains(scheme)` from
+    /// `MarkdownLink.openable` and the whole second list below turns
+    /// openable — `file:///etc/passwd` included.
+    @Test func onlyHttpAndHttpsAddressesAreOpenable() {
+        for raw in [
+            "https://apple.com", "http://example.test/a?b=c#d",
+            "  https://apple.com  ", "https://x.test/a_(b)",
+        ] {
+            #expect(MarkdownLink.openable(raw) != nil, "\(raw)")
+        }
+        for raw in [
+            "file:///etc/passwd", "mailto:a@b.test", "javascript:alert(1)",
+            "ftp://x.test/a", "vscode://open", "https://", "", "   ", "not a url at all",
+        ] {
+            #expect(MarkdownLink.openable(raw) == nil, "\(raw)")
+        }
+    }
+
+    @Test func theLinkGestureIsCommandClickAndNothingElse() {
+        func event(_ modifiers: NSEvent.ModifierFlags, clicks: Int = 1) -> NSEvent {
+            NSEvent.mouseEvent(
+                with: .leftMouseDown, location: .zero, modifierFlags: modifiers,
+                timestamp: 0, windowNumber: 0, context: nil,
+                eventNumber: 0, clickCount: clicks, pressure: 1)!
+        }
+        #expect(MarkdownActs.isLinkClick(event(.command)))
+        // A plain click places the caret (and may toggle a checkbox); every
+        // other modifier belongs to selection or to the system.
+        #expect(!MarkdownActs.isLinkClick(event([])))
+        #expect(!MarkdownActs.isLinkClick(event([.command, .shift])))
+        #expect(!MarkdownActs.isLinkClick(event(.option)))
+        #expect(!MarkdownActs.isLinkClick(event(.command, clicks: 2)))
+    }
+
+    /// The WIRE, through a real surface's own geometry: a point over a link
+    /// resolves to its address, a point over ordinary text resolves to none.
+    /// `linkAddress` rather than `openLink` deliberately — the pin exercises
+    /// point → index → span without a test launching a browser.
+    @Test func aPointOverALinkResolvesToItsAddressAndNowhereElseDoes() throws {
+        let window = Self.window()
+        defer { window.close() }
+        let text = "see [the docs](https://x.test/a) now"
+        let pane = Self.livePane(text, in: window)
+
+        let onWord = try #require(
+            Self.point(inCharacterRange: 6..<12, of: pane),
+            "a point over the link's own words")
+        #expect(MarkdownActs.linkAddress(at: onWord, in: pane) == "https://x.test/a")
+
+        // The dimmed `(url)` is visibly part of the link, so it opens too —
+        // unlike the checkbox click, this gesture carries a modifier and
+        // competes with nothing.
+        let onAddress = try #require(Self.point(inCharacterRange: 20..<28, of: pane))
+        #expect(MarkdownActs.linkAddress(at: onAddress, in: pane) == "https://x.test/a")
+
+        let outside = try #require(Self.point(inCharacterRange: 0..<3, of: pane))
+        #expect(MarkdownActs.linkAddress(at: outside, in: pane) == nil)
+    }
+
+    /// Opening a link is NOT an edit, so a read pane and a sealed editor
+    /// follow one exactly like a live editor does (the checkbox click is the
+    /// opposite: it writes, so it is gated on `isEditable`).
+    @Test func aREADPaneFollowsALinkEvenThoughItRefusesEveryEdit() throws {
+        let window = Self.window()
+        defer { window.close() }
+        let pane = Self.livePane("see [the docs](https://x.test/a) now", in: window)
+        pane.isEditable = false
+        let onWord = try #require(Self.point(inCharacterRange: 6..<12, of: pane))
+        #expect(MarkdownActs.linkAddress(at: onWord, in: pane) == "https://x.test/a")
     }
 
     // MARK: - The context-menu door

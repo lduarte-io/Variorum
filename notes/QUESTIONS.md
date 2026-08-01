@@ -250,4 +250,21 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: OPEN — for the walk.**
 
-*(Next free number at authoring time: **#50**.)*
+50. **2026-08-01 · Phase 13g (batch 4) · LINKS AND READ'S SECOND FACE — six build-time calls, each one line to change.** Your ruling F-5 said links are in, that a writing surface opens them on ⌘-click, and that READ renders markdown fully formatted with markers hidden and a plain click opening a link. It did not say which ADDRESSES the app will follow, what a rendered bullet looks like, or what "Add Link" does to a selection that spans three paragraphs — those are the calls below. **Nothing here needed a schema change or an operation**, and nothing here touches `renderedText`, export, or the Fragments bridge: the stored text is untouched and Read simply draws it differently. The BINDING build record is the 13g plan's batch-4 record.
+
+    **(a) A click follows `http` and `https` addresses ONLY; anything else is INERT.** It still LOOKS like a link (the syntax is what it is) and clicking it simply does nothing. **Why:** a link's target is ordinary text you typed, and the app must not hand an arbitrary scheme to the system on a click — `file:` reaches the disk and the custom-scheme space is every other app on the machine. **The alternative:** open anything the system can open, or open anything after a confirm. One line, and the allowlist is a set you can add to.
+
+    **(b) A rendered bullet is `•`, and a rendered checkbox is `☐` / `☑`.** Read SUBSTITUTES the lead rather than merely hiding it — a bullet list that rendered without bullets would read as loose lines, which is not what "fully formatted" means. **The alternative:** hide the lead entirely, or keep the hyphen. And a checked box in Read is only a box: **Read never toggles one**, because Read has no editing gesture at all (your A43 ruling). Ticking happens where you write.
+
+    **(c) "Add Link" acts on ONE line — the line the selection STARTS on.** The emphasis acts wrap each line of a multi-line selection (that was #49(a), and `**one**` / `**two**` are both real), but three EMPTY links from one gesture are junk and only one of them could hold the cursor the act exists to place. **The alternative:** one link per line, or refuse a multi-line selection and say why.
+
+    **(d) "Add Link" on text that is ALREADY a link REMOVES the link, address and all.** It is the same toggle rule as every other formatting act (#49(c)) — and ⌘Z puts it back, exactly like unbolding. **The alternative:** refuse, or jump the cursor into the existing address to edit it. Worth knowing because the act is named "Add".
+
+    **(e) Add Link ships MENU-FIRST, with no chord.** The platform's own link chord is ⌘K, which this app has bound to Find Anything since Phase 13 (R15) — the one key a reader would guess is the one key that is taken, and re-pointing ⌘K at a text act would break the most-used door in the app. No second candidate is standard enough to be obvious. **Say the word and it gets one.**
+
+    **(f) ⌘-click opens a link on EVERY text surface, including a read pane and a sealed note.** Opening a link is not an edit, so editability is beside the point; what mattered was that a plain click is already spoken for (it places the cursor, and in the read tier it seeds the cursor for the editor). **A consequence worth seeing on the page:** a link's `(address)` is part of the link to a ⌘-click, not just its words — the dimmed address is visibly part of the thing, and unlike the checkbox click this gesture carries a modifier and competes with nothing.
+
+    **Status: OPEN — for the walk.**
+
+*(Next free number at authoring time: **#51**.)*
+

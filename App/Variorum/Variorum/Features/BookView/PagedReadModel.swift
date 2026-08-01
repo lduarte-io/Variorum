@@ -257,6 +257,11 @@ final class PagedReadModel {
         let postID: String
         let pageNumber: Int
         let frame: CTFrame?
+        /// 13g batch 4 (L10): this post's links, in composed-string offsets.
+        /// The whole post's, not the page's — a `CTFrame` reports absolute
+        /// string indices, so filtering here would only be a second place to
+        /// get the arithmetic wrong.
+        var links: [PageLink] = []
         var id: String { "\(postID)#\(address.pageInPost)" }
     }
 
@@ -272,7 +277,8 @@ final class PagedReadModel {
             let postID = entries[address.postIndex].postID
             return Leaf(
                 address: address, postID: postID, pageNumber: number,
-                frame: paginators[postID]?.frame(forPage: address.pageInPost))
+                frame: paginators[postID]?.frame(forPage: address.pageInPost),
+                links: paginators[postID]?.composed.links ?? [])
         }
     }
 

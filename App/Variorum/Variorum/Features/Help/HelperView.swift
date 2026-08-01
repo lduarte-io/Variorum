@@ -98,6 +98,12 @@ struct HelperView: View {
             ("Format ▸ Heading", "heading 1, 2 or 3 — the line gains #, ## or ###"),
             ("Format ▸ Bullet List", "the line becomes \"- item\""),
             ("Format ▸ Checklist", "the line becomes \"- [ ] item\" — click the box to tick it"),
+            // 13g batch 4 (L10): the link act and BOTH of its click rules,
+            // which differ by surface and so have to be written down.
+            ("Format ▸ Add Link", "[text](address) around the selection, cursor in the "
+                + "parentheses ready for the address"),
+            ("⌘-click a link", "opens it — in a writing surface, where a plain click "
+                + "places the cursor; in Read a plain click opens it"),
         ]),
         // QoL batch 3 (L6): the in-post find family. Deliberately its own
         // group and deliberately worded against ⌘K's row below — one searches
@@ -304,6 +310,14 @@ struct HelperView: View {
          + "(\"- [x] \"); that is an ordinary edit, so ⌘Z takes it back and a "
          + "sealed note refuses it. Format ▸ Checklist makes one from the "
          + "line you're on."),
+        // 13g batch 4 (L10/L11): the link, and the one place the app shows
+        // you something other than exactly what is stored.
+        ("link",
+         "Written in the text as [words](address) — Format \u{25B8} Add Link puts the "
+         + "brackets around your selection. While you're WRITING you see the whole "
+         + "thing and \u{2318}-click follows it (a plain click has to place the cursor). "
+         + "In a book's READ mode there is nothing to type, so the markers are hidden, "
+         + "the words read as a link, and a plain click opens it."),
         ("quick note",
          "A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, or the "
          + "✏︎ in the system menu bar (which reaches you from any app). Return makes a "

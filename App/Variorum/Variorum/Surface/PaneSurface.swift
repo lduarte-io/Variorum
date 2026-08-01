@@ -427,6 +427,16 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
             fireConvergenceOccasion()  // 13c 1G: a click is an occasion
             return
         }
+        // 13g batch 4 (L10): ⌘-click follows a link — on a READ pane too,
+        // because opening a link is not an edit (the read tier is where she
+        // does most of her reading, and its plain click is already spoken
+        // for: it seeds the editor's caret).
+        if MarkdownActs.isLinkClick(event),
+           MarkdownActs.openLink(
+               at: convert(event.locationInWindow, from: nil), in: self) {
+            fireConvergenceOccasion()  // 13c 1G: a click is an occasion
+            return
+        }
         super.mouseDown(with: event)  // the selection tracking loop runs first
         defer { fireConvergenceOccasion() }  // 13c 1G: a click is an occasion
         guard selectedRange().length == 0 else { return }

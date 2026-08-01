@@ -219,7 +219,7 @@ private struct PageLeafView: View {
             if let leaf {
                 PageFrameView(
                     frame: leaf.frame, pageNumber: leaf.pageNumber, scale: scale,
-                    geometry: geometry, meta: appearance.meta)
+                    geometry: geometry, meta: appearance.meta, links: leaf.links)
             } else {
                 Text("end of the book")
                     .font(.system(size: 11, design: .serif))
@@ -239,6 +239,7 @@ private struct PageFrameView: NSViewRepresentable {
     let scale: CGFloat
     let geometry: PageGeometry
     let meta: NSColor
+    var links: [PageLink] = []
 
     func makeNSView(context: Context) -> PageFrameNSView {
         #if DEBUG
@@ -259,6 +260,7 @@ private struct PageFrameView: NSViewRepresentable {
         view.scale = scale
         view.geometry = geometry
         view.meta = meta
+        view.links = links
         view.needsDisplay = true
     }
 }
@@ -271,6 +273,8 @@ final class PageFrameNSView: NSView {
     var scale: CGFloat = 1
     var geometry = PageGeometry.standard
     var meta: NSColor = .tertiaryLabelColor
+    /// 13g batch 4 (L10): this post's links, in composed-string offsets.
+    var links: [PageLink] = []
     /// The range this leaf draws — read by the pins, so "what is on this
     /// page" is inspectable without a text view.
     var visibleRange: NSRange {
@@ -280,6 +284,64 @@ final class PageFrameNSView: NSView {
     }
 
     override var isOpaque: Bool { false }
+
+    // MARK: - L10: a PLAIN click opens a link
+
+    /// **Read opens links on a plain click** — her ruling F-5's other half.
+    /// It can, because Read has no competing gesture at all: no caret to
+    /// place, no selection to drag, nothing editable. (A writing surface is
+    /// the opposite, which is why ⌘-click is the gesture there.)
+    ///
+    /// The index comes from CoreText itself — `CTLineGetStringIndexForPosition`
+    /// on the line the point landed in — so the hit test is answered by the
+    /// engine that laid the page out, exactly as `PagePaginator`'s header
+    /// argues page BREAKS must be.
+    override func mouseDown(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        if let index = characterIndex(at: point),
+           let link = links.first(where: {
+               $0.range.location <= index && index < $0.range.upperBound
+           }),
+           MarkdownLink.open(link.url) {
+            return
+        }
+        super.mouseDown(with: event)
+    }
+
+    /// The composed-string index under a point in this view's coordinates,
+    /// or nil where the point is off the text. The view is unflipped, and
+    /// `draw` scales by `scale` before drawing the frame — so undoing that
+    /// scale puts the point in the page's own coordinate space, which is the
+    /// frame's.
+    func characterIndex(at point: NSPoint) -> Int? {
+        guard let ctFrame, scale > 0 else { return nil }
+        let inPage = CGPoint(x: point.x / scale, y: point.y / scale)
+        guard let lines = CTFrameGetLines(ctFrame) as? [CTLine], !lines.isEmpty
+        else { return nil }
+        var origins = [CGPoint](repeating: .zero, count: lines.count)
+        CTFrameGetLineOrigins(ctFrame, CFRange(location: 0, length: 0), &origins)
+        // **Line origins are relative to the frame path's BOUNDING BOX**, not
+        // to the page — so they have to be rebased before they can be
+        // compared with a point in the page's own space. (Measured, not
+        // assumed: the first draft compared them directly and a click on the
+        // first word resolved to the seventh character. The pin that caught
+        // it asserts a point at the line's left edge lands BEFORE the link.)
+        let box = CTFrameGetPath(ctFrame).boundingBoxOfPath
+        for (i, line) in lines.enumerated() {
+            var ascent: CGFloat = 0
+            var descent: CGFloat = 0
+            var leading: CGFloat = 0
+            let width = CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading))
+            let origin = CGPoint(x: origins[i].x + box.minX, y: origins[i].y + box.minY)
+            let bounds = CGRect(
+                x: origin.x, y: origin.y - descent, width: width, height: ascent + descent)
+            guard bounds.contains(inPage) else { continue }
+            let index = CTLineGetStringIndexForPosition(
+                line, CGPoint(x: inPage.x - origin.x, y: 0))
+            return index == kCFNotFound ? nil : index
+        }
+        return nil
+    }
 
     override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }

@@ -88,6 +88,8 @@ struct EditorCommands: Commands {
         .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
         // 13g batch 3 (L8): the Format menu.
         .formatBold, .formatItalic, .formatStrikethrough, .formatCode,
+        // 13g batch 4 (L10): the Add Link door.
+        .formatAddLink,
         .formatHeading, .formatBulletList, .formatChecklist,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
@@ -462,6 +464,10 @@ struct EditorCommands: Commands {
                 .disabled(!enabled(.formatStrikethrough))
             Button(verb(.formatCode)) { actions?.applyFormat(.code) }
                 .disabled(!enabled(.formatCode))
+            // 13g batch 4 (L10): the insertion door for the links F-5 ruled
+            // in. Keyless by the sweep's verdict (⌘K is Find Anything).
+            Button(verb(.formatAddLink)) { actions?.applyFormat(.link) }
+                .disabled(!enabled(.formatAddLink))
 
             Divider()
 

@@ -47,6 +47,12 @@ public enum MarkdownEditing {
     /// selection, and LINE LEADS at a line's first character.
     public enum Act: Equatable, Sendable {
         case bold, italic, strikethrough, code
+        /// `[text](url)` — 13g batch 4 (L10). It joins the WRAP family rather
+        /// than being its own thing: its markers are simply asymmetric, and
+        /// everything the family already decided (read wrapped-ness from the
+        /// tokenizer, toggle-clears-when-every-piece-carries-it, trim the
+        /// selection's whitespace) is what a link wants too.
+        case link
         /// `#`, `##`, `###` — clamped to 1…3, because F-3 names three sizes
         /// and `####` is plain text to the tokenizer.
         case heading(level: Int)
@@ -54,13 +60,14 @@ public enum MarkdownEditing {
         case checkbox
 
         /// The syntax characters an inline act wraps with; nil for the line
-        /// family.
-        var wrapMarker: String? {
+        /// family. Asymmetric for links, symmetric for the emphasis four.
+        var wrapMarkers: (open: String, close: String)? {
             switch self {
-            case .bold: "**"
-            case .italic: "*"
-            case .strikethrough: "~~"
-            case .code: "`"
+            case .bold: ("**", "**")
+            case .italic: ("*", "*")
+            case .strikethrough: ("~~", "~~")
+            case .code: ("`", "`")
+            case .link: ("[", "]()")
             case .heading, .bullet, .checkbox: nil
             }
         }
@@ -71,8 +78,20 @@ public enum MarkdownEditing {
             case .italic: .italic
             case .strikethrough: .strikethrough
             case .code: .code
+            case .link: .link
             case .heading, .bullet, .checkbox: nil
             }
+        }
+
+        /// **Links act on ONE line** (13g batch 4, a build-time call —
+        /// QUESTIONS #50): a multi-line selection is trimmed to the line it
+        /// STARTS on. The emphasis four wrap each line, because `**one**` and
+        /// `**two**` are both wanted and both real; three EMPTY links from
+        /// one gesture are junk, and only one of them could hold the caret
+        /// the act exists to place.
+        var wrapsFirstLineOnly: Bool {
+            if case .link = self { return true }
+            return false
         }
 
         /// The characters a line act puts at the line's start; nil for the
@@ -84,7 +103,7 @@ public enum MarkdownEditing {
                 String(repeating: "#", count: min(max(level, 1), 3)) + " "
             case .bullet: "- "
             case .checkbox: "- [ ] "
-            case .bold, .italic, .strikethrough, .code: nil
+            case .bold, .italic, .strikethrough, .code, .link: nil
             }
         }
 
@@ -160,10 +179,12 @@ public enum MarkdownEditing {
         // `MarkdownScanCount` (DEBUG) is what makes it checkable.
         let spans = MarkdownSyntax.spans(in: text)
 
-        if let marker = act.wrapMarker, let kind = act.wrapKind {
+        if let markers = act.wrapMarkers, let kind = act.wrapKind {
             return wrapPlan(
-                marker: marker, kind: kind, chars: chars, offsets: offsets,
-                spans: spans, lines: affected, selection: sel)
+                markers: markers, kind: kind, chars: chars, offsets: offsets,
+                spans: spans,
+                lines: act.wrapsFirstLineOnly ? Array(affected.prefix(1)) : affected,
+                selection: sel)
         }
         return leadPlan(act, spans: spans, chars: chars, offsets: offsets,
                         lines: affected, selection: sel)
@@ -184,6 +205,26 @@ public enum MarkdownEditing {
             let box = span.markers[1]
             guard box.lowerBound < insertionIndex, insertionIndex < box.upperBound else { continue }
             return Edit(range: box, replacement: checked ? "[ ]" : "[x]")
+        }
+        return nil
+    }
+
+    /// **L10's ⌘-click (13g batch 4):** the ADDRESS of the link an offset
+    /// falls in, or nil where there is none — the pure decision an editing
+    /// surface asks before it consumes a modified click.
+    ///
+    /// The whole SPAN counts, `(url)` included, deliberately: the dimmed
+    /// address is visibly part of the link, and unlike the checkbox click
+    /// (which competes with an ordinary caret click and so must be strict)
+    /// this gesture carries a modifier and competes with nothing.
+    public static func link(inLines text: String, at offset: Int) -> String? {
+        let ns = text as NSString
+        for span in MarkdownSyntax.spans(in: text) {
+            guard case .link = span.kind, let url = span.url,
+                  span.range.lowerBound <= offset, offset <= span.range.upperBound
+            else { continue }
+            return ns.substring(with: NSRange(
+                location: url.lowerBound, length: url.count))
         }
         return nil
     }
@@ -228,11 +269,11 @@ public enum MarkdownEditing {
     }
 
     private static func wrapPlan(
-        marker: String, kind: MarkdownSyntax.Kind,
+        markers: (open: String, close: String), kind: MarkdownSyntax.Kind,
         chars: [Character], offsets: [Int], spans: [MarkdownSyntax.Span],
         lines: [Line], selection sel: Range<Int>
     ) -> Plan {
-        let markerLength = marker.utf16.count
+        let openLength = markers.open.utf16.count
         var pieces: [Piece] = []
 
         for line in lines {
@@ -267,36 +308,56 @@ public enum MarkdownEditing {
 
         if allWrapped {
             for piece in pieces {
-                guard let span = piece.enclosing, span.markers.count == 2 else { continue }
+                guard let span = piece.enclosing, span.markers.count >= 2 else { continue }
+                // The trailing run is everything from the closing marker to
+                // the span's end — `**` for the emphasis four, and the whole
+                // `](url)` for a link, whose URL goes with the link it named.
+                let last = span.markers[span.markers.count - 1]
                 edits.append(Edit(range: span.markers[0], replacement: ""))
-                edits.append(Edit(range: span.markers[1], replacement: ""))
+                edits.append(Edit(
+                    range: span.markers[1].lowerBound..<last.upperBound, replacement: ""))
             }
         } else {
             for piece in pieces where piece.enclosing == nil {
                 if piece.range.isEmpty {
                     // The caret gesture: both markers at once, caret between
-                    // them — she has asked for bold and is about to type it.
+                    // them — she has asked for bold (or for a link) and is
+                    // about to type it.
                     edits.append(Edit(
-                        range: piece.range, replacement: marker + marker))
+                        range: piece.range, replacement: markers.open + markers.close))
                 } else {
                     edits.append(Edit(
                         range: piece.range.lowerBound..<piece.range.lowerBound,
-                        replacement: marker))
+                        replacement: markers.open))
                     edits.append(Edit(
                         range: piece.range.upperBound..<piece.range.upperBound,
-                        replacement: marker))
+                        replacement: markers.close))
                 }
             }
         }
         edits.sort { ($0.range.lowerBound, $0.range.upperBound) < ($1.range.lowerBound, $1.range.upperBound) }
 
-        // The caret gesture lands BETWEEN the markers; everything else keeps
-        // the text it was over selected (the opening marker pushes the start,
-        // the closing one does not pull the end).
+        // Where the selection lands. Three shapes, in the order they are
+        // decided:
+        //   * the CARET gesture — between the two markers just inserted;
+        //   * a LINK just made — inside its empty parens, which is the whole
+        //     point of the act (she has the text, she needs to paste the
+        //     address);
+        //   * everything else — the text stays selected (the opening marker
+        //     pushes the start, the closing one does not pull the end).
         let selectionAfter: Range<Int>
         if edits.count == 1, edits[0].range.isEmpty,
-           edits[0].replacement == marker + marker {
-            let caret = edits[0].range.lowerBound + markerLength
+           edits[0].replacement == markers.open + markers.close {
+            // `**|**`, and `[|]()` — past the OPENING marker either way,
+            // which is where the next keystroke belongs in both.
+            let caret = edits[0].range.lowerBound + openLength
+            selectionAfter = caret..<caret
+        } else if !allWrapped, kind == .link, let close = edits.last, close.range.isEmpty,
+                  close.replacement == markers.close {
+            // `[text](|)` — the close marker landed at the piece's end; the
+            // caret sits inside its parens, because the text is already
+            // written and the ADDRESS is what she is about to supply.
+            let caret = close.range.lowerBound + openLength + markers.close.utf16.count - 1
             selectionAfter = caret..<caret
         } else {
             selectionAfter = map(sel.lowerBound, through: edits, bias: .right)

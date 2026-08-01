@@ -65,7 +65,10 @@ enum TutorialSeeder {
         // the sidebar has just been introduced and the next honest question
         // is "can I see two of these at once".
         ("welcome", ["start here", "getting around", "the workspace"]),
-        ("writing", ["blocks & typing", "shaping blocks"]),
+        // 13g L12: "formatting" joins WRITING, after the two lessons that
+        // teach what a block IS — the vocabulary is about what a line of
+        // text LOOKS like, so it belongs after blocks and before takes.
+        ("writing", ["blocks & typing", "shaping blocks", "formatting"]),
         ("takes", ["your first take", "choosing & the board", "keeping takes safe"]),
         ("structure", ["divide", "the take ceremony", "extract & make block",
                        "merge", "the two undos"]),
@@ -387,6 +390,59 @@ enum TutorialSeeder {
         try ops.setBlockPresentation(
             shaping.blocks[4].block.id,
             BlockPresentation(color: "blue", emoji: "\u{1F4A1}"))
+
+        // 13g L12 (F-1…F-5): FORMATTING. Every paragraph below is written in
+        // the vocabulary it teaches, so the lesson demonstrates itself the
+        // moment it is seeded — and because storage IS markdown, the prose
+        // here is literally the syntax the reader is being shown.
+        _ = try lesson(writing, "formatting", [
+            "Formatting in Variorum is **markdown**, and that is not a detail of "
+            + "the implementation \u{2014} it is the whole design. What you see is "
+            + "exactly what is saved: two stars around a word ARE the bold. The "
+            + "editor styles the word and dims the stars, so the page reads "
+            + "cleanly while the text stays plain characters you could open in any "
+            + "editor on earth. Nothing about a formatted note is locked in, and an "
+            + "export is already markdown because it was never anything else.",
+
+            "The vocabulary is small on purpose: **bold** (\u{2318}B), *italic* "
+            + "(\u{2318}I), ~~struck out~~, and `inline code`. The last two live in "
+            + "the FORMAT menu, which also carries every act below \u{2014} and "
+            + "right-clicking in any writing surface offers the same rows under "
+            + "\u{201C}Format\u{201D}. Try it: select these three words and press "
+            + "\u{2318}B. Press it again to take the bold off; the act reads what is "
+            + "already there rather than blindly adding.",
+
+            "## Headings are sizes",
+
+            "A line that starts with #, ## or ### is a heading \u{2014} those three, "
+            + "and nothing else. Put your cursor on this line and use Format "
+            + "\u{25B8} Heading \u{25B8} 2 to see it happen; the line above is "
+            + "already one. Setting a lead REPLACES whatever lead the line had, so "
+            + "a heading becomes a bullet in one press rather than becoming a "
+            + "bullet with a stray # in it.",
+
+            "- Lists are lines that start with \"- \"",
+            "- Format \u{25B8} Bullet List makes one from the line you're on",
+            "- Select several lines and it makes them all into a list",
+
+            "- [ ] And a checkbox is a list item with a box: \"- [ ] \"",
+            "- [x] CLICK the box to tick it \u{2014} that is an ordinary edit, so "
+            + "\u{2318}Z takes it back and a sealed note refuses it",
+
+            "Links are written [like this](https://apple.com). Format \u{25B8} Add "
+            + "Link wraps your selection in the brackets and leaves the cursor "
+            + "inside the parentheses, ready for the address. In a writing surface "
+            + "a plain click has to place your cursor, so \u{2318}-CLICK follows a "
+            + "link instead.",
+
+            "Now the one place the app shows you something other than what is "
+            + "stored. Open this book in READ mode (the Outline \u{B7} Book \u{B7} "
+            + "Read row above) and look at this lesson again: the markers are gone, "
+            + "the headings are sizes, the list has bullets, the boxes are boxes, "
+            + "and a link is just the words \u{2014} a plain click opens it, because "
+            + "Read has no cursor to place. Read is for reading; everywhere you can "
+            + "write, you see the text exactly as it is saved.",
+        ])
 
         // ————————————————————————————— takes ———————————————————————————————
 

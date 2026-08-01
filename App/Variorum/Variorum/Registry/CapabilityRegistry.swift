@@ -545,6 +545,19 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
+        // 13g batch 4 (L10). MENU-FIRST, and the sweep is why: the platform's
+        // own "add link" chord is ⌘K, which this app has bound to Find
+        // Anything since Phase 13 (R15) — the one chord a reader would guess
+        // is the one chord that is taken, and re-pointing ⌘K to serve a text
+        // act would break the app's most-used door. No second candidate is
+        // standard enough to be obvious, so it ships beside the other five
+        // keyless acts (QUESTIONS #50 offers her one).
+        Capability(
+            id: .formatAddLink, verb: "Add Link", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
         // ONE declaration owning a submenu of three sizes — the `.callout`
         // shape. Headings ARE sizes (F-3: arbitrary per-span sizes are not
         // markdown-expressible), so 1/2/3 are shades of one act rather than

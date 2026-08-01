@@ -318,6 +318,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // act itself is a capability.
     case formatBold, formatItalic, formatStrikethrough, formatCode
     case formatHeading, formatBulletList, formatChecklist
+    // 13g batch 4 (L10): links were ruled IN at the sitting (F-5) and shipped
+    // in batch 2 with a face but no DOOR — the only way to make one was to
+    // type the brackets. This is the door.
+    case formatAddLink
     // Modes + app scope
     case switchMode
     // 13f batch 3 — the NAVIGATION core (her W3/A27 + W16 rulings): the

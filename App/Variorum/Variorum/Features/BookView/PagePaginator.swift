@@ -35,15 +35,33 @@ import CoreText
 import Foundation
 import VariorumCore
 
+/// One clickable link on a page: the range in the COMPOSED string, and the
+/// address it opens (13g batch 4 — L10/L11).
+struct PageLink: Equatable {
+    let range: NSRange
+    let url: String
+}
+
 /// One post, composed for the page: the attributed prose plus the plain
 /// string it renders (kept so tests can pin it against `renderedText`).
 struct ComposedPost {
     let attributed: NSAttributedString
     /// The BODY as plain text — exactly `Queries.renderedText`'s projection.
+    ///
+    /// **This is the STORED text, markers and all**, and it stays that way
+    /// deliberately: it is the drift guard on the join conditional
+    /// (`theComposedBodyIsTheRatifiedProjection` pins it byte-equal to
+    /// `Queries.renderedText`). What the page DRAWS is `attributed`, which
+    /// since 13g batch 4 carries the RENDERED face — markers hidden, per her
+    /// F-5 surface rule, because Read has no editing gesture that maps a
+    /// click to a text offset.
     let body: String
     /// The characters of opening chrome (chapter opener + title) prepended
     /// before the body, so a caller can map back into the projection.
     let chromeLength: Int
+    /// Every link on this post's pages, in composed-string offsets — the map
+    /// a plain click hit-tests against (13g batch 4, L10).
+    var links: [PageLink] = []
 }
 
 enum PageComposer {
@@ -116,16 +134,50 @@ enum PageComposer {
         // becomes a real drift guard on this conditional instead of a
         // tautology. The blank-take skip is `renderedText`'s own rule — a
         // chosen-but-empty take contributes nothing, not even a join.
+        // 13g batch 4 (L11): the walk now builds TWO strings from ONE set of
+        // decisions — the stored `body` (the ratified projection, and the
+        // drift guard on this conditional) and the DISPLAY string the page
+        // draws, which is the same text with its markdown rendered. The
+        // transform is line-scoped, so rendering per block and joining is
+        // identical to rendering the joined body — and doing it per block is
+        // what keeps every block's DISPLAY range known without a mapping
+        // table (the callout indent rides those ranges).
         var ranges: [(blockID: String, range: NSRange)] = []
+        var runs: [(range: NSRange, run: MarkdownRendering.Run)] = []
+        var lineStyles: [(range: NSRange, style: MarkdownRendering.LineStyle)] = []
+        var links: [PageLink] = []
         var composed = ""
+        var display = ""
         for slot in slots {
             guard let text = slot.text, !text.isEmpty else { continue }
             if !composed.isEmpty {
-                composed += composed.hasSuffix("\n") ? "\n" : Queries.blockJoinSeparator
+                // ONE decision, two strings: the join is read off the STORED
+                // text (renderedText's own rule) and applied to both.
+                let separator = composed.hasSuffix("\n") ? "\n" : Queries.blockJoinSeparator
+                composed += separator
+                display += separator
             }
-            let start = (composed as NSString).length
             composed += text
-            ranges.append((slot.blockID, NSRange(location: start, length: (text as NSString).length)))
+            let start = (display as NSString).length
+            let rendered = MarkdownRendering.render(text)
+            display += rendered.text
+            let length = (rendered.text as NSString).length
+            ranges.append((slot.blockID, NSRange(location: start, length: length)))
+            for run in rendered.runs {
+                runs.append((
+                    NSRange(location: start + run.range.lowerBound, length: run.range.count), run))
+                if let url = run.url {
+                    links.append(PageLink(
+                        range: NSRange(
+                            location: start + run.range.lowerBound, length: run.range.count),
+                        url: url))
+                }
+            }
+            for line in rendered.lines where line.style != .body {
+                lineStyles.append((
+                    NSRange(location: start + line.range.lowerBound, length: line.range.count),
+                    line.style))
+            }
         }
         let body = composed
 
@@ -134,14 +186,23 @@ enum PageComposer {
         plainStyle.paragraphSpacing = typography.lineSpacing
         plainStyle.hyphenationFactor = 0.9
         let bodyString = NSMutableAttributedString(
-            string: body,
+            string: display,
             attributes: [
                 .font: typography.body, .foregroundColor: ink,
                 .paragraphStyle: plainStyle,
             ])
         for (blockID, range) in ranges {
             guard let presentation = presentations[blockID],
-                  presentation.kind == BlockPresentation.calloutKind
+                  presentation.kind == BlockPresentation.calloutKind,
+                  // Bounds-guarded like every other attribute write in the
+                  // app (`MarkdownStyling.write`'s rule): the ranges above
+                  // are computed on the very string being written, so this
+                  // can only fire if that ever stops being true — and the
+                  // failure it prevents is an NSRangeException, i.e. a crash
+                  // rather than a wrong look. (Measured: a revert that
+                  // computed these ranges on the STORED offsets took the
+                  // test host down instead of failing a pin.)
+                  range.length > 0, range.upperBound <= bodyString.length
             else { continue }
             let style = NSMutableParagraphStyle()
             style.lineSpacing = typography.lineSpacing
@@ -152,8 +213,105 @@ enum PageComposer {
             style.tailIndent = -22
             bodyString.addAttribute(.paragraphStyle, value: style, range: range)
         }
+        // The rendered face: paragraph facts first (a heading's size, a list
+        // line's hanging indent), then the character runs on top, so a bold
+        // word inside a heading keeps the heading's size.
+        for (range, style) in lineStyles {
+            applyLineStyle(style, to: bodyString, range: range, typography: typography)
+        }
+        for (range, run) in runs {
+            applyRun(run, to: bodyString, range: range, typography: typography, ink: ink)
+        }
         result.append(bodyString)
-        return ComposedPost(attributed: result, body: body, chromeLength: chromeLength)
+        // Shifted past the chrome, and BOUNDS-GUARDED for the same reason the
+        // callout indent is: these ranges are computed on the very string
+        // they name, so the guard can only fire if that stops being true —
+        // and what it prevents is a caller's `substring` raising rather than
+        // a link landing on the wrong words.
+        let displayLength = (display as NSString).length
+        return ComposedPost(
+            attributed: result, body: body, chromeLength: chromeLength,
+            links: links.compactMap { link in
+                guard link.range.length > 0, link.range.upperBound <= displayLength
+                else { return nil }
+                return PageLink(
+                    range: NSRange(
+                        location: link.range.location + chromeLength, length: link.range.length),
+                    url: link.url)
+            })
+    }
+
+    // MARK: - The rendered face (13g batch 4 — L11)
+
+    /// A heading is a SIZE (F-3), a list line is a hanging indent so a
+    /// wrapped item lines up under its own words. Both are paragraph facts,
+    /// which is exactly how the transform models them.
+    private static func applyLineStyle(
+        _ style: MarkdownRendering.LineStyle, to string: NSMutableAttributedString,
+        range: NSRange, typography: PageTypography
+    ) {
+        guard range.length > 0, range.upperBound <= string.length else { return }
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.setParagraphStyle(
+            string.attribute(.paragraphStyle, at: range.location, effectiveRange: nil)
+                as? NSParagraphStyle ?? .default)
+        switch style {
+        case .body:
+            return
+        case .heading(let level):
+            let scale: CGFloat = level == 1 ? 1.6 : (level == 2 ? 1.35 : 1.15)
+            let size = (typography.body.pointSize * scale).rounded()
+            let descriptor = typography.body.fontDescriptor.withSymbolicTraits(
+                typography.body.fontDescriptor.symbolicTraits.union(.bold))
+            let font = NSFont(descriptor: descriptor, size: size)
+                ?? NSFont(descriptor: typography.body.fontDescriptor, size: size)
+                ?? typography.body
+            string.addAttribute(.font, value: font, range: range)
+            paragraph.paragraphSpacingBefore = typography.lineSpacing * 2
+        case .bullet, .checkbox:
+            let indent = (" " as NSString)
+                .size(withAttributes: [.font: typography.body]).width * 2.5
+            paragraph.firstLineHeadIndent += indent
+            paragraph.headIndent += indent * 2
+        }
+        string.addAttribute(.paragraphStyle, value: paragraph, range: range)
+    }
+
+    private static func applyRun(
+        _ run: MarkdownRendering.Run, to string: NSMutableAttributedString,
+        range: NSRange, typography: PageTypography, ink: NSColor
+    ) {
+        guard range.length > 0, range.upperBound <= string.length else { return }
+        let existing = string.attribute(.font, at: range.location, effectiveRange: nil)
+            as? NSFont ?? typography.body
+        var traits = existing.fontDescriptor.symbolicTraits
+        if run.emphasis.contains(.bold) { traits.insert(.bold) }
+        if run.emphasis.contains(.italic) { traits.insert(.italic) }
+        if run.emphasis.contains(.code) {
+            string.addAttribute(
+                .font,
+                value: NSFont.monospacedSystemFont(ofSize: existing.pointSize, weight: .regular),
+                range: range)
+        } else if traits != existing.fontDescriptor.symbolicTraits {
+            let descriptor = existing.fontDescriptor.withSymbolicTraits(traits)
+            string.addAttribute(
+                .font, value: NSFont(descriptor: descriptor, size: existing.pointSize) ?? existing,
+                range: range)
+        }
+        if run.emphasis.contains(.strikethrough) {
+            string.addAttribute(
+                .strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: range)
+            string.addAttribute(.strikethroughColor, value: ink, range: range)
+        }
+        if run.url != nil {
+            // A page is drawn by CoreText, which has no link handling of its
+            // own — the colour is the affordance and `ComposedPost.links` is
+            // the hit map (`PageFrameNSView.mouseDown`).
+            string.addAttribute(.foregroundColor, value: NSColor.linkColor, range: range)
+            string.addAttribute(
+                .underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
+            string.addAttribute(.underlineColor, value: NSColor.linkColor, range: range)
+        }
     }
 }
 
