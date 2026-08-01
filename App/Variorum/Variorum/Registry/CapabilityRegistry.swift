@@ -115,6 +115,21 @@ nonisolated enum CapabilityRegistry {
         ctx.writeEditorOwnsScrollView ? .act : .unavailable
     }
 
+    /// The FORMATTING family (13g batch 3 — L8): wherever text is edited.
+    ///
+    /// Broader than the take family on purpose, and the breadth is a fact
+    /// rather than a hope: every post mode hosts a live editable surface —
+    /// Write's editor, the Takes/Lenses/Compare boards' panes (4C/4D),
+    /// Canvas's cards (4E) and the Blocks TOC's expanded row — and the
+    /// attached-editor / attached-board arms cover the book-inline, spread and
+    /// pool editors that carry no mode at all. Whatever surface holds the
+    /// keyboard is a surface ⌘B can act on, which is exactly why the door
+    /// should not be grey there.
+    private static let editableText: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        ctx.writeEditorAttached || ctx.takesBoardAttached || ctx.mode != nil
+            ? .act : .unavailable
+    }
+
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
 
     // MARK: - The table
@@ -481,6 +496,77 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "⌘E", takesAccess: nil,
             unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
+
+        // MARK: Formatting (13g batch 3 — L8, her rulings F-1…F-3)
+        //
+        // Markdown-as-content: these acts insert and remove SYNTAX
+        // CHARACTERS in the ordinary text, through the ordinary input path.
+        // There is no operation behind them and no schema — under F-1 the
+        // markers ARE the text — so their refusals are the editor pipeline's
+        // own (a seal, a locked take), spoken where they are found.
+        //
+        // `takesAccess: .native` and it is literally true: the act runs on
+        // whichever surface holds the keyboard, so Takes formats right there
+        // and Write is not privileged (R118).
+        //
+        // **THE COLLISION SWEEP'S RESULT (13g batch 3):** ⌘B and ⌘I are FREE
+        // — swept across `EditorCommands.keyEquivalent` (41 chords), every
+        // `.keyboardShortcut(` call site in `Variorum/` and `Shared/`, every
+        // `NSMenuItem` key equivalent (all empty strings), the one
+        // `performKeyEquivalent` override (⌘S) and the one `keyDown` override
+        // (⇧⏎). No bare-⌘ letter chord binds `b` or `i`; their shifted
+        // neighbours ⌘⇧B (block seams) and ⌘⇧I (context bar) are the right
+        // neighbours to have — the same letter, the plainer gesture. The
+        // other five ship MENU-FIRST, deliberately: her ruling named bold and
+        // italic, no platform chord for strikethrough/code/headings/lists is
+        // standard enough to be obvious, and an invented chord would owe a
+        // sweep no ruling asked for (13f batch 4's precedent).
+        Capability(
+            id: .formatBold, verb: "Bold", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: "⌘B", takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
+        Capability(
+            id: .formatItalic, verb: "Italic", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: "⌘I", takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
+        Capability(
+            id: .formatStrikethrough, verb: "Strikethrough", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
+        Capability(
+            id: .formatCode, verb: "Inline Code", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
+        // ONE declaration owning a submenu of three sizes — the `.callout`
+        // shape. Headings ARE sizes (F-3: arbitrary per-span sizes are not
+        // markdown-expressible), so 1/2/3 are shades of one act rather than
+        // three acts, and none of them could honestly carry a key.
+        Capability(
+            id: .formatHeading, verb: "Heading", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
+        Capability(
+            id: .formatBulletList, verb: "Bullet List", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
+        Capability(
+            id: .formatChecklist, verb: "Checklist", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
 
         // MARK: Modes + app scope
         Capability(

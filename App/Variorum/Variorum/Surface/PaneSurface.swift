@@ -216,7 +216,7 @@ final class PanePublisher {
 
 // MARK: - The text view
 
-final class PaneTextView: NSTextView {
+final class PaneTextView: NSTextView, MarkdownFormattable {
     /// A click that created no selection — the click-to-focus gesture, with
     /// the clicked UTF-16 offset (the read tier seeds the editor's caret
     /// from it; take panes ignore the value).
@@ -238,12 +238,23 @@ final class PaneTextView: NSTextView {
 
     override func menu(for event: NSEvent) -> NSMenu? {
         let inherited = super.menu(for: event)
-        guard let items = variorumMenu?(), !items.isEmpty else { return inherited }
+        let items = variorumMenu?() ?? []
+        // 13g batch 3 (L8): the same formatting rows the full-document
+        // editor offers, from the same builder — a live pane is a writing
+        // surface, and a read one honestly has no Format submenu (P-2).
+        let format = MarkdownActs.formatMenuItem(for: self)
+        guard !items.isEmpty || format != nil else { return inherited }
         let menu = inherited ?? NSMenu()
-        for (i, item) in items.enumerated() {
-            menu.insertItem(Self.makeMenuItem(for: item), at: i)
+        var at = 0
+        for item in items {
+            menu.insertItem(Self.makeMenuItem(for: item), at: at)
+            at += 1
         }
-        menu.insertItem(NSMenuItem.separator(), at: items.count)
+        if let format {
+            menu.insertItem(format, at: at)
+            at += 1
+        }
+        menu.insertItem(NSMenuItem.separator(), at: at)
         return menu
     }
 
@@ -404,6 +415,18 @@ final class PaneTextView: NSTextView {
     }
 
     override func mouseDown(with event: NSEvent) {
+        // 13g batch 3 (L9): a click ON a checkbox's box toggles it, and is
+        // asked BEFORE `super` because `super.mouseDown` runs AppKit's
+        // selection-tracking loop. Only a LIVE pane is editable, so a read
+        // pane's click still falls through to click-to-focus exactly as
+        // before — her ruling's letter ("first click focuses, as today").
+        if event.clickCount == 1,
+           event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty,
+           MarkdownActs.toggleCheckbox(
+               at: convert(event.locationInWindow, from: nil), in: self) {
+            fireConvergenceOccasion()  // 13c 1G: a click is an occasion
+            return
+        }
         super.mouseDown(with: event)  // the selection tracking loop runs first
         defer { fireConvergenceOccasion() }  // 13c 1G: a click is an occasion
         guard selectedRange().length == 0 else { return }

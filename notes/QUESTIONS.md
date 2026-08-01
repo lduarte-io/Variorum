@@ -223,3 +223,31 @@ Format per entry: **date · phase · question · options considered · PROVISION
 Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#39** KEEP AS SHIPPED · **#40** KEEP AS SHIPPED · **#41** 13d, ordinary order · **#43(a)** OVERTURNED (Outline opens COLLAPSED — 13d batch 1 flips it) · **#44(c)/#45(c)** scrubber on BOTH (Book's returns — 13d batch 1) · **#45(b)** RATIFIED (post-per-page stands) · **#47(c)** default ON (13d batch 1). **Rolled to the 13d kickoff/design sitting at her word** ("after this we're fully done with 13c"): #29–#33, #36, #37, #38, #42, the minor sub-calls of #43–#47, #46's five, and the two memos' remaining rulings (C3 Parts 1/3; long-content-panes §6). #30 is substantially superseded by #45/#46's dispositions; #32 stays routed to the Design & UI review row.
 
 **THE 13D SITTING CLOSED THE ROLL (2026-07-28 — the BINDING record is the 13d plan's "THE 13D SITTING" section):** every rolled item above is now ANSWERED in place (per-entry statuses updated) — ratifications across #29/#30/#31/#33/#36/#38/#42/#43–#48 and both memos; **#37 OVERTURNED to (iii)** (the shared door creates the Journal book — built 13d batch 5 with the §9 delta); the panes memo's option (a) PRE-APPROVED evidence-gated. The ONLY entry left open above this line is **#32** (the jump-landing taste call), which stays routed to the standalone Design & UI review row by design. Next free number at authoring time: **#49**.
+
+---
+
+## Phase 13g (2026-08-01) — batch 3's build-time calls, bundled for the sitting
+
+49. **2026-08-01 · Phase 13g (batch 3) · THE FORMATTING ACTS ARE BUILT — nine build-time calls, each one line to change, bundled so the walk reads them in one place.** Your rulings F-1…F-3 said what the vocabulary is (bold · italic · strikethrough · inline code · `#`/`##`/`###` · `- ` bullets · `- [ ]` checkboxes) and that storage is markdown-as-content. They did not say what ⌘B does to a selection that spans three paragraphs, or what happens when you bullet a line that is already a heading — those are the calls below. **Nothing here needed a schema change or an operation**: a formatting act is an ordinary edit through the ordinary typing path, which is why the whole thing is reversible with ⌘Z and refuses under a seal without a line of new refusal code. The BINDING build record is the 13g plan's batch-3 record.
+
+    **(a) ⌘B on a selection that crosses lines wraps EACH LINE separately.** `**one**\n**two**`, not `**one\ntwo**`. **Why:** the tokenizer is line-scoped by law (batch 2's ruling — it is also what keeps markdown from ever disagreeing with block identity), so a single pair of markers around a multi-line selection would be *literal stars on screen* — visible junk, silently. **The alternative:** REFUSE a multi-line wrap and say why. That is more conservative and more annoying; per-line is what the format can actually express. One rule to flip.
+
+    **(b) Setting a line lead REPLACES whatever lead the line had.** Bullet on `# Title` gives `- Title`, not `- # Title`. **Why:** the three line kinds are mutually exclusive to the tokenizer, so stacking them would make the `#` read as literal text inside a bullet. **The alternative:** refuse to change a heading into a list item.
+
+    **(c) The toggle CLEARS only when EVERY affected line/piece already carries the act.** Select one bulleted line and one bare one, press Bullet List: both end up bulleted. Press it again: both clear. **The alternative:** flip each line independently (which never converges to a tidy list).
+
+    **(d) A blank line inside a multi-line selection is left alone — but a LONE blank line is bulleted.** Bulleting across a paragraph gap doesn't put a `- ` in the gap; putting the caret on an empty line and pressing Bullet List starts the list, which is the everyday gesture.
+
+    **(e) ⌘B with no selection inserts `****` and puts the caret between the markers** (the "turn bold on and type" gesture) rather than doing nothing. Note the consequence you will see: until you type something between them, `****` is literal text on screen — the tokenizer treats empty content as literal, which is batch 2's pinned decision and not something this batch changed.
+
+    **(f) ⌘B and ⌘I are the only chords; the other five ship MENU-FIRST (Format ▸ …).** The collision sweep found ⌘B and ⌘I free, and they are the platform's own emphasis keys (their shifted neighbours ⌘⇧B block seams and ⌘⇧I context bar read as the heavier gesture on the same letter). For strikethrough, inline code, headings and the two list acts, no platform chord is standard enough to be obvious, and inventing one would owe a sweep no ruling asked for. **Say the word and any of them gets a key** — the helper (⌘/) already lists all seven, the keyless ones by their menu path.
+
+    **(g) Clicking a checkbox's box toggles it, and the hit target is the box's middle two characters.** A click yields a boundary position, so accepting the box's outer edges would also catch clicks half a character outside it — i.e. it would steal a caret you aimed at the text. The trade is that the target is about two characters wide. **The alternative:** widen it to the whole `- [ ] ` lead (bigger target, and clicking just before the box no longer places a caret there).
+
+    **(h) Format ▸ Checklist always makes an UNCHECKED box.** Checking is the click. (And a CHECKED line is still a checkbox to the act, so pressing Checklist on `- [x] milk` removes the box rather than unchecking it.)
+
+    **(i) The Format menu is enabled in every note mode — Write, Takes, Lenses, Compare, Blocks and Canvas — and in the book/spread/pool editors.** Every one of them hosts a live editable surface, so greying the door there would be a lie. What it does NOT have is a ⌘K palette row: seven formatting rows in the command palette read as clutter beside "New Note" and "Merge Blocks". One line if you want them there.
+
+    **Status: OPEN — for the walk.**
+
+*(Next free number at authoring time: **#50**.)*

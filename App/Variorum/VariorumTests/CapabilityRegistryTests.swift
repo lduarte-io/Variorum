@@ -187,6 +187,10 @@ struct CapabilityRegistryTests {
             // 13f batch 6 (W4): the shelf's BOOK rows render the star door
             // from their own declaration — the fourth renderer of one act.
             .union(ShelfView.contextMenuCapabilities)
+            // 13g batch 3 (L8): the Format submenu, built ONCE and inserted
+            // by both text-surface kinds — so the declaration lives with the
+            // builder rather than in each surface.
+            .union(MarkdownActs.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 

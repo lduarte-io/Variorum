@@ -86,6 +86,19 @@ struct HelperView: View {
             ("⌘⇧M", "merge blocks"),
             ("⌘⇧⏎", "new block below the one you're in (Write and Takes alike)"),
         ]),
+        // 13g batch 3 (L8): the formatting acts. The two chords her ruling
+        // named, plus the five menu-first doors by their MENU PATH — the
+        // group's framing line ("every shortcut here is also a menu item")
+        // has to read both ways, and these are doors with no key.
+        ShortcutGroup(title: "Formatting", items: [
+            ("⌘B", "bold — wraps the selection in ** ** (again to take it off)"),
+            ("⌘I", "italic — the same, with * *"),
+            ("Format ▸ Strikethrough", "~~like this~~"),
+            ("Format ▸ Inline Code", "`like this`"),
+            ("Format ▸ Heading", "heading 1, 2 or 3 — the line gains #, ## or ###"),
+            ("Format ▸ Bullet List", "the line becomes \"- item\""),
+            ("Format ▸ Checklist", "the line becomes \"- [ ] item\" — click the box to tick it"),
+        ]),
         // QoL batch 3 (L6): the in-post find family. Deliberately its own
         // group and deliberately worded against ⌘K's row below — one searches
         // the library, the other searches the post you are in.
@@ -277,6 +290,20 @@ struct HelperView: View {
          + "\u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ "
          + "\(StarCopy.verb), or the same row in ⌘K. Up to five: stars are meant to be "
          + "the few things you're in right now, not a filing system."),
+        // 13g batch 3 (L8/L9): the formatting vocabulary. Storage is
+        // markdown-as-content (F-1), so the words she needs are the ones the
+        // TEXT uses — not a set of hidden styles.
+        ("markdown",
+         "How formatting is STORED: as ordinary characters in your text. "
+         + "**bold** is really two stars, a heading really starts with #. The "
+         + "editor styles them and dims the markers, but what you see is "
+         + "exactly what is saved — which is why an export is already "
+         + "markdown, and why nothing about a formatted note is locked in."),
+        ("checkbox",
+         "A line starting \"- [ ] \" — a to-do. CLICK the box to tick it "
+         + "(\"- [x] \"); that is an ordinary edit, so ⌘Z takes it back and a "
+         + "sealed note refuses it. Format ▸ Checklist makes one from the "
+         + "line you're on."),
         ("quick note",
          "A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, or the "
          + "✏︎ in the system menu bar (which reaches you from any app). Return makes a "

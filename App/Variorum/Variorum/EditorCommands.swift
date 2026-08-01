@@ -86,6 +86,9 @@ struct EditorCommands: Commands {
         .closeAllTakes, .pageFanBack, .pageFanForward,
         .previousBlock, .nextBlock, .blockComments, .callout,
         .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
+        // 13g batch 3 (L8): the Format menu.
+        .formatBold, .formatItalic, .formatStrikethrough, .formatCode,
+        .formatHeading, .formatBulletList, .formatChecklist,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
         .openNote, .navigateBack, .navigateForward,
@@ -145,6 +148,15 @@ struct EditorCommands: Commands {
         case .findNext: ("g", .command)
         case .findPrevious: ("g", [.command, .shift])
         case .useSelectionForFind: ("e", .command)
+        // 13g batch 3 (L8). THE COLLISION SWEEP'S RESULT: ⌘B and ⌘I are FREE
+        // (the same five places swept as ⌘[/⌘], ⌘⇧I and ⌘⇧N were, plus the
+        // one `keyDown` override). They are the platform's own emphasis keys,
+        // and their shifted neighbours — ⌘⇧B block seams, ⌘⇧I context bar —
+        // read as the heavier gesture on the same letter rather than against
+        // it. The other five formatting acts ship menu-first (see the
+        // registry's declaration comment for why).
+        case .formatBold: ("b", .command)
+        case .formatItalic: ("i", .command)
         case .helper: ("/", .command)
         // 13f batch 3 (W16). THE COLLISION SWEEP'S RESULT: ⌘[ and ⌘] are
         // FREE — swept across this table, every `.keyboardShortcut(` call
@@ -432,6 +444,40 @@ struct EditorCommands: Commands {
             Button(verb(.toggleSeams)) { actions?.toggleSeams() }
                 .keyboardShortcut("b", modifiers: [.command, .shift])
                 .disabled(session == nil)
+        }
+        // 13g batch 3 (L8) — the FORMAT menu, her rulings F-1…F-3. Every item
+        // inserts or removes ordinary SYNTAX CHARACTERS through the ordinary
+        // input path (`MarkdownActs`), on whichever surface holds the
+        // keyboard; nothing here writes a row. Honestly grey where no note is
+        // open, and honest-speaking where one is open but nothing editable
+        // holds the keyboard.
+        CommandMenu("Format") {
+            Button(verb(.formatBold)) { actions?.applyFormat(.bold) }
+                .keyboardShortcut("b", modifiers: .command)
+                .disabled(!enabled(.formatBold))
+            Button(verb(.formatItalic)) { actions?.applyFormat(.italic) }
+                .keyboardShortcut("i", modifiers: .command)
+                .disabled(!enabled(.formatItalic))
+            Button(verb(.formatStrikethrough)) { actions?.applyFormat(.strikethrough) }
+                .disabled(!enabled(.formatStrikethrough))
+            Button(verb(.formatCode)) { actions?.applyFormat(.code) }
+                .disabled(!enabled(.formatCode))
+
+            Divider()
+
+            // The three sizes are shades of ONE act (F-3: headings ARE the
+            // sizes markdown can express), so they live in a submenu under
+            // one declaration — the callout menu's shape.
+            Menu(verb(.formatHeading)) {
+                ForEach(MarkdownActs.headingRows, id: \.title) { row in
+                    Button(row.title) { actions?.applyFormat(row.act) }
+                }
+            }
+            .disabled(!enabled(.formatHeading))
+            Button(verb(.formatBulletList)) { actions?.applyFormat(.bullet) }
+                .disabled(!enabled(.formatBulletList))
+            Button(verb(.formatChecklist)) { actions?.applyFormat(.checkbox) }
+                .disabled(!enabled(.formatChecklist))
         }
         // ⌘1–⌘6 — the post modes (routed 13b 1b: composition, not a
         // broadcast — with no post open the items are honestly grey; a

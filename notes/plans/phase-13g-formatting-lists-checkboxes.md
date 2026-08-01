@@ -428,8 +428,8 @@ visibility, a display setting if ever wanted.
 | L5 | WT-5/F-4: sticky pane modes — mode line SHIPPED; the read-only projections PROPOSED (every non-Write mode is heavy; her word bundled for the morning sitting, orchestrator recommends (b) takes-first) | **PARTIAL** (batch 1) |
 | L6 | WT-6: pane body-click focus parity — traced per-CONTENT (2 of 8 branches had the door); the pane-owned `PaneFocusCatcher` | **SHIPPED** (batch 1) |
 | L7 | The markdown foundation: pure Domain tokenizer + the dimmed-marker editing face (F-1/F-2) | **SHIPPED** (batch 2) |
-| L8 | Insertion faces: ⌘B/⌘I/toolbar + registry declarations (formatting acts are acts) | batch 2/3 |
-| L9 | Lists + checkboxes incl. click-to-toggle (ordinary edit; seal refuses honestly) | batch 2/3 |
+| L8 | Insertion faces: ⌘B/⌘I + the Format menu + context submenu + registry declarations (formatting acts are acts) — the visible TOOLBAR is the morning bundle's item (iv), unbuilt | **SHIPPED** (batch 3) |
+| L9 | Lists + checkboxes incl. click-to-toggle (ordinary edit; seal refuses honestly) — the RULED half shipped; the checked-box register, indented/nested styling and ⏎-continues-a-list stay held for her word (bundle items ii/iii/v) | **PARTIAL** (batch 3) |
 | L10 | Links (F-5): styled + ⌘-click in editors; fully rendered + plain-click in Read | batch 3 |
 | L11 | Read mode full markdown rendering (the F-5 surface rule) | batch 3 |
 | L12 | Helper/tutorial coverage for formatting + the re-seed note | late batch |
@@ -1213,3 +1213,225 @@ doors only), links behavior (L10), Read-mode rendering (L11).
   STOP-and-report anything gating; batch record appended here;
   commit per convention, explicit paths; never push; never
   `/Applications`; her real-store instance never touched.
+
+### Batch 3 record — the formatting acts (2026-08-01, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on the
+final tree): core **970 tests in 107 suites** (from 946/106: +24 tests, +1 suite —
+the edit computations) · Mac **1100 tests in 192 suites** (from 1088/191: +12
+tests, +1 suite — the faces) · mobile **14 tests in 4 suites** (unchanged; run
+because `Sources/` was touched). The tutorial spine ran green by TYPE name on the
+final tree (**49 tests in 7 suites**). Zero `Sources/VariorumCore/Sync/` lines; no
+schema; **zero lines anywhere near `renderedText`, the export projections or the
+bridge's join brain** — verified by `git status --short` (nothing under
+`Queries/`, `Operations/`, `Bridge/` or `Features/Export`).
+
+Scope was **L8 + L9's ruled click-to-toggle half**. Deliberately NOT started, per
+the brief: the checked-box text register, indented/nested list styling,
+⏎-continues-a-list, any visible formatting toolbar, links behaviour (L10) and
+Read-mode full rendering (L11).
+
+---
+
+#### (i) The edit computations — `Sources/VariorumCore/Domain/MarkdownEditing.swift`
+
+A pure Domain function beside the tokenizer, no GRDB and no AppKit. It answers
+ONE question — *given this text and this selection, which characters change and
+where does the selection land?* — and returns a `Plan` of ascending, disjoint
+`Edit`s plus the resulting selection. It never touches a text view, a store or an
+operation.
+
+**The caller passes WHOLE LINES, not the document** (`plan(_:inLines:selection:)`).
+That is the `MarkdownStyling.restyle` shape, and it buys the two things this batch
+rests on:
+
+1. **P1** — ⌘B costs the lines it touches, never the note (measured below);
+2. **no formatting act can restructure a note** — every edit sits inside one line,
+   and a line sits inside one block (blocks are joined on the surface by a single
+   `"\n"`, so a seam always terminates a line). The editor's cross-block arm,
+   which MERGES blocks (the ratified 2026-07-09 merge-then-edit, made for a
+   deliberate hand-made selection), is therefore **unreachable by construction** —
+   where `EditorFind` has to pre-check every range for exactly this, this gets it
+   for free. Pinned end-to-end through the real pipeline
+   (`aFormattingActAcrossABlockSeamNeverRestructuresTheNote`: two blocks in, two
+   blocks out, both bulleted in the STORE).
+
+**Every product-flavoured decision, and its pin** (all nine are also in
+`notes/QUESTIONS.md` **#49**, one line each to overturn):
+
+| Decision | Why | Pin |
+|---|---|---|
+| **Wrapped-ness is READ from `MarkdownSyntax.spans`**, never guessed | ⌘B on `**sel**` unwraps; so does a caret inside the bold word. A regex would have to re-derive the flanking rule, the empty-content rule and the no-nesting rule the tokenizer already owns | `theActUNWRAPSWhatIsAlreadyWrapped` |
+| A caret **just OUTSIDE** a span (right after `**bold**`) does NOT unwrap it | Typing on and pressing ⌘B must start the next bold, not silently undo the last word's | `aCaretJUSTOUTSIDEASpanStartsNewEmphasisInsteadOfUndoingTheOld` |
+| A multi-line wrap wraps **each line** | The tokenizer is line-scoped by law, so one pair of markers around a multi-line selection would be literal stars on screen — silently wrong output beats no output only if you never look | `aMultiLineSelectionWrapsEACHLineAndSkipsTheBlankOnes` |
+| **Toggle = clear only when EVERY affected piece/line already carries the act** — ONE rule for both families | The alternative (flip each independently) never converges to a tidy list | `aMultiLineSelectionUnwrapsOnlyWhenEVERYPieceIsWrapped`, `aMultiLineLeadClearsOnlyWhenEVERYLineCarriesIt` |
+| Setting a line lead **REPLACES** whatever lead the line had | The three line kinds are mutually exclusive to the tokenizer; prefixing would make `- # Title`, whose `#` reads as literal text | `settingALeadREPLACESWhateverLeadTheLineHad` |
+| A selection's **surrounding whitespace is trimmed** before wrapping | A double-click-drag routinely picks up the trailing space, and wrapping it breaks the flanking rule — the markers would be literal | `aSelectionsSurroundingWhitespaceIsNotWrapped` |
+| A **blank line inside** a multi-line selection is skipped; a **lone** blank line is not | Bulleting the gap between paragraphs is nobody's intent; "caret on an empty line, start a list" is the everyday gesture | `aBlankLineInsideAMultiLineSelectionKeepsItsShape` |
+| A selection **ending exactly at a line's first character** does not reach that line | Selecting "abc\n" bullets one line, not two | `aSelectionEndingAtALinesFirstCharacterDoesNotReachThatLine` |
+| The **caret gesture** inserts `****` with the caret between, and never a silent no-op (a whitespace-only selection falls back to it) | She asked for bold and is about to type it | `aCaretGestureInsertsBothMarkersAndSitsBetweenThem`, `aWhitespaceOnlySelectionFallsBackToTheCaretGesture` |
+| Heading levels are **clamped to 1…3** | F-3 names three sizes and `####` is plain text to the tokenizer — a caller must never mint invisible syntax | `headingLevelsAreClampedToTheThreeTheTokenizerReads` |
+| A **checkbox is born UNCHECKED**, and a CHECKED line is still a checkbox to the act | Checking is the click (L9), not the insertion | `aLineLeadTogglesOffWhenItIsAlreadyExactlyThatLead` |
+| Offsets are UTF-16 and never split a grapheme; an out-of-range selection **clamps** rather than trapping | The structural API's unit, and the same discipline the tokenizer keeps | `offsetsAreUTF16AndSurviveGraphemesWiderThanOne`, `anOutOfRangeSelectionIsClampedRatherThanTrapping` |
+
+---
+
+#### (ii) The faces — `App/Variorum/Variorum/Features/Formatting/MarkdownActs.swift`
+
+**A formatting act is an ordinary edit, applied through the ordinary input path:**
+`shouldChangeText` → `replaceCharacters` → `didChangeText`, the exact trio typing
+takes and the one `EditorFind` re-drives its replacements through. So the Write
+editor's delegate routes the verdict, updates `BlockRangeIndex`, records autosave
+and churn, and **refuses under a seal in its own words with no new refusal code**;
+a pane's coordinator restyles its edited lines and hands the text to its board's
+autosave. Nothing writes a row; no operation was added; no schema. Pinned all the
+way into the store (`boldRidesTheOrdinaryPipelineAllTheWayIntoTheStore`,
+`theCheckboxActMakesAListLineFromTheCaretsOwnLine`,
+`aSealedNoteRefusesFormattingWithoutTouchingAByte`).
+
+Edits are applied **LAST FIRST** (every earlier offset stays valid — the SDK's own
+reason for the finder's reverse ordering) under **ONE undo group**, so ⌘Z takes
+back the act rather than half of it (`anActIsONEUndoStep`, driven through a real
+window because an `NSTextView` finds its undo manager through the responder
+chain — a windowless surface has none, which is how the first draft of that pin
+went red).
+
+**THE TARGET IS THE FIRST RESPONDER, and it must be OURS.** A menu key acts on the
+key window's first responder when it is a `MarkdownFormattable` — the marker
+protocol the two surface kinds opt into and nothing else does. This is **not** a
+second liveness mechanism (P-3): it decides nothing about which pane is live, it
+asks who currently holds the keyboard, which liveness has already decided (a live
+pane makes itself first responder; `PaneTextAuthority` stays the only authority).
+The narrowness is load-bearing rather than tidy — **a rename field, the ⌘K search
+field and the quick-note pad are all editable `NSTextView`s**, and without the
+protocol check ⌘B would have typed `****` into them
+(`theTargetIsOneOfOurSurfacesAndOnlyOneOfOurs`, revert-verified). Where there is
+no such surface the door SPEAKS (`MarkdownActs.noTargetNote`) instead of being a
+dead key (P-2).
+
+**THE COLLISION SWEEP** (the 13f pattern, five places): `EditorCommands.keyEquivalent`
+(41 chords) · every `.keyboardShortcut(` call site in `Variorum/` and `Shared/`
+(67, incl. `.defaultAction`/`.cancelAction` and the two arrow-key pagers) · every
+`NSMenuItem` key equivalent (both are `""`) · the one `performKeyEquivalent`
+override (⌘S) · the one `keyDown` override (⇧⏎). **Result: ⌘B and ⌘I are FREE.**
+No bare-⌘ letter chord binds `b` or `i`; their shifted neighbours ⌘⇧B (block
+seams) and ⌘⇧I (context bar) are the right neighbours to have — the same letter,
+the heavier gesture. **The final chords: ⌘B Bold · ⌘I Italic, and nothing else.**
+Strikethrough, Inline Code, Heading, Bullet List and Checklist ship **menu-first**
+and deliberately keyless: no platform chord for them is standard enough to be
+obvious, and inventing one would owe a sweep no ruling asked for (13f batch 4's
+precedent). The registry comment carries the sweep; QUESTIONS #49(f) offers her
+keys for any of them.
+
+**The doors:** a top-level **Format** menu (Bold · Italic · Strikethrough · Inline
+Code — divider — Heading ▸ 1/2/3 · Bullet List · Checklist) and the SAME rows as a
+**"Format" submenu in the context menu of both text-surface kinds**, built once by
+`MarkdownActs.formatMenuItem(for:)` so the two can never drift. The submenu is
+rendered **only where the surface can be edited** — a read pane and a sealed
+editor simply do not have it (P-2), pinned. Deliberately no ⌘K palette rows (seven
+formatting rows would read as clutter beside "New Note"; QUESTIONS #49(i)).
+
+**Availability is `editableText`** — `writeEditorAttached || takesBoardAttached ||
+mode != nil`, i.e. every note mode plus the book/spread/pool editors and a board
+mounted outside a detail. Broader than the take family, and the breadth is a FACT:
+Write's editor, the Takes/Lenses/Compare panes (4C/4D), Canvas's cards (4E) and
+the Blocks TOC's expanded row are all live editable surfaces, so greying the door
+there would be a lie. `takesAccess: .native` is literally true — the act runs on
+whichever surface holds the keyboard, so Write is not privileged (R118).
+
+**Discoverability rode WITH the build, which is WT-1's whole lesson:** the drift
+guard forced the helper rows the moment ⌘B was declared, and the helper's
+"Formatting" group names all seven doors — the two chords, and the five by their
+menu path — plus dictionary entries for **markdown** (why what she sees is what is
+saved, and why an export is already markdown) and **checkbox**.
+
+---
+
+#### (iii) L9's click — the hit-test mechanism, and why it cannot eat a caret click
+
+**Mechanism: an early return in `mouseDown`, on both surface kinds, gated on a
+pure decision.** The surface asks `MarkdownActs.toggleCheckbox(at:in:)` BEFORE
+calling `super.mouseDown` — because `super.mouseDown` runs AppKit's
+selection-tracking loop and there is no "after" in which to decline — and the
+answer is no unless:
+
+- the surface is **editable** (a read pane and a sealed editor are not, so their
+  clicks fall straight through to the standing click-to-focus — her ruling's
+  letter, "first click focuses, as today"; pinned);
+- the click is a **single click with no modifiers** (a double-click still selects
+  a word; ⌘-click stays free for L10's link opening);
+- the click's insertion index lands **STRICTLY INSIDE** the box's three
+  characters.
+
+That last rule is the one that keeps it honest, and it is why the decision is a
+pure Domain function rather than an inline comparison. A click yields a BOUNDARY
+index, so `boxStart` and `boxEnd` are also produced by clicks on the half
+character *outside* the box; accepting them would let a click aimed at the text
+toggle a box instead. The trade, stated: the target is about two characters wide.
+Pinned on both sides — the arithmetic in the core suite (indices 2 and 5 return
+nil, 3 and 4 toggle) and the WIRE in the Mac suite through a real surface's own
+geometry (`aClickONTheBoxTogglesItAndACaretClickIsNeverEaten` finds its click
+points by asking the laid-out view what `characterIndexForInsertion` says, so the
+pin exercises point → index → hit test rather than re-deriving it from a font
+metric).
+
+The toggle itself is **three characters for three** (`[ ]` ↔ `[x]`), so every
+offset in the note survives and the caret simply goes back where it was — pinned.
+It rides the same ordinary path as everything else, so ⌘Z takes it back and a
+sealed note refuses it.
+
+This is the batch-1 `PaneFocusCatcher` lesson in its other form: that one
+**observes and never consumes** because it has no target of its own; this one
+**consumes exactly when it has one**.
+
+---
+
+#### The measured P1 cost
+
+`theDoorScansTheLinesItTouchesAndNotTheNote` drives ⌘B into a **15,600-character**
+note through the real editor and asserts the scanner walked **fewer than 500**
+UTF-16 units — the planned line plus the face's own line rescans. Measured on the
+shipped code: well inside the bound. With the door handed the whole document
+instead (revert A below) the same run scans **15,725**.
+
+---
+
+#### Red-on-old pins — five behavioural reverts, each verified and checksum-restored
+
+| # | Revert | Result |
+|---|---|---|
+| A | `MarkdownActs.apply` hands `MarkdownEditing.plan` the WHOLE document instead of `lineRange(for:)`'s substring | RED, exactly discriminating: `theDoorScansTheLinesItTouchesAndNotTheNote` fails with **15,725 scanned vs < 500**; the other 11 pins stay green |
+| B | `checkboxToggle`'s strict bounds relaxed to `<=` / `<=` | RED: `aClickInsideTheBoxTogglesItAndNowhereElseDoes` fails on BOTH boundary expectations (indices 2 and 5 toggle) |
+| C | drop `.reversed()` from `apply`'s edit loop | RED on three pins, with the text it produces: `"say **th**is now"` and `"- on- e\ntwo"` — every edit after the first lands at an offset the first one moved |
+| D | drop `view is MarkdownFormattable` from `target(in:)` | RED: `theTargetIsOneOfOurSurfacesAndOnlyOneOfOurs` fails — a plain editable `NSTextView` (what every field editor in the app is) becomes a legitimate ⌘B target |
+| E | `wrapPlan`'s `allSatisfy` → `contains` | RED: `aMultiLineSelectionUnwrapsOnlyWhenEVERYPieceIsWrapped` fails — one bold line and one bare one would UNWRAP the bold instead of bolding the bare |
+
+Each file was restored and its `md5` matched the pre-revert value
+(`MarkdownActs.swift` → `b1c8f4cec53585ce23820eac37808351`;
+`MarkdownEditing.swift` → `0fcbfe75c6d5210e48cdb76b0cf42bf0`). All five are
+recorded as `DISCRIMINATING REVERT` doc comments on their pins, the house
+convention (`TakesCardHeightTests`), so a future reader can re-run them.
+
+---
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` gains #49** — nine build-time product calls, bundled the
+  way #48 was, each one line to change. **#50 is now the next free number.**
+- **No proposal is owed**: no design fork emerged that the rulings did not answer.
+  The two that came closest are recorded as #49(a) (per-line multi-line wrap vs
+  refusing) and #49(g) (the hit target's width) rather than built both ways.
+- **The morning bundle's items (ii)/(iii)/(v) are UNTOUCHED and still hers** — the
+  checked-box text register, indented/nested list styling, and whether ⏎ at the end
+  of a list line continues the list. (iv), the visible toolbar, is likewise
+  unbuilt: this batch shipped the menu, the context submenu and the two chords,
+  which is what the brief scoped.
+- **No visual loop was run.** This batch adds acts, not looks: the only new pixels
+  are menu rows and a context submenu, and the face those acts produce is batch
+  2's, already looked at. The checkbox click has no appearance of its own.
+- **One thing a reviewer should check by hand when the app is next open** (it is
+  pinned by geometry, not by a real AppKit click): pressing ⌘B while the keyboard
+  is in a take pane. The pins drive `MarkdownActs.apply` on a real `PaneTextView`
+  and the registry on real contexts, but the last inch — AppKit routing a menu key
+  equivalent to a first responder inside a board — is the one step no headless pin
+  reaches.

@@ -12,7 +12,7 @@
 import AppKit
 
 @MainActor
-final class EditorTextView: NSTextView {
+final class EditorTextView: NSTextView, MarkdownFormattable {
     /// Set while a bulk-entry-classed insertion is being applied — a
     /// clipboard PASTE or a text DROP (author-ratified contract item 7,
     /// Phase 9: a drop into the open tail is bulk entry exactly like paste —
@@ -387,9 +387,15 @@ final class EditorTextView: NSTextView {
 
     override func menu(for event: NSEvent) -> NSMenu? {
         let inherited = super.menu(for: event)
-        guard let items = structuralMenuItems?(), !items.isEmpty else { return inherited }
+        let items = structuralMenuItems?() ?? []
+        // 13g batch 3 (L8): the formatting door, rendered only where the
+        // surface can be edited (P-2). Built by `MarkdownActs` so this menu
+        // and the panes' offer exactly the same rows.
+        let format = MarkdownActs.formatMenuItem(for: self)
+        guard !items.isEmpty || format != nil else { return inherited }
         let menu = inherited ?? NSMenu()
-        for (i, item) in items.enumerated() {
+        var at = 0
+        for item in items {
             let menuItem = NSMenuItem(
                 title: item.title,
                 action: #selector(StructuralMenuTrampoline.fire(_:)),
@@ -397,10 +403,30 @@ final class EditorTextView: NSTextView {
             let trampoline = StructuralMenuTrampoline(enabled: item.enabled, action: item.action)
             menuItem.target = trampoline
             menuItem.representedObject = trampoline  // retains it for the menu's life
-            menu.insertItem(menuItem, at: i)
+            menu.insertItem(menuItem, at: at)
+            at += 1
         }
-        menu.insertItem(NSMenuItem.separator(), at: items.count)
+        if let format {
+            menu.insertItem(format, at: at)
+            at += 1
+        }
+        menu.insertItem(NSMenuItem.separator(), at: at)
         return menu
+    }
+
+    /// **L9's checkbox click (13g batch 3).** Asked BEFORE `super`, because
+    /// `super.mouseDown` runs AppKit's selection-tracking loop and there is
+    /// no "after" in which to decline; it answers no unless the click landed
+    /// strictly inside a box's three characters, so an ordinary caret click
+    /// is never eaten (`MarkdownActs.toggleCheckbox` carries the reasoning).
+    override func mouseDown(with event: NSEvent) {
+        if event.clickCount == 1,
+           event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty,
+           MarkdownActs.toggleCheckbox(
+               at: convert(event.locationInWindow, from: nil), in: self) {
+            return
+        }
+        super.mouseDown(with: event)
     }
 
     override func paste(_ sender: Any?) {

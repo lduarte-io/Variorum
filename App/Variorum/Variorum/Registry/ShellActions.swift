@@ -363,6 +363,25 @@ struct ShellActions {
         }
     }
 
+    /// **The FORMAT menu's door (13g batch 3 — L8).** It acts on whichever of
+    /// our text surfaces holds the keyboard, which is what "format what I am
+    /// writing" means; `MarkdownActs.target` is the rule, and it is
+    /// deliberately narrow — a rename field or the ⌘K search field is an
+    /// editable `NSTextView` too, and must never receive `****` from a key.
+    ///
+    /// Fire-and-DO (P-2): where there is no such surface the door SPEAKS
+    /// rather than being a dead key. The menu item is already grey with no
+    /// note open (the registry's `editableText`), so this refusal covers the
+    /// real case — a note IS open, and the keyboard is somewhere else (a
+    /// sidebar row, the shelf, a read pane).
+    func applyFormat(_ act: MarkdownEditing.Act) {
+        guard let textView = MarkdownActs.target(in: NSApp.keyWindow) else {
+            status.speak(MarkdownActs.noTargetNote)
+            return
+        }
+        MarkdownActs.apply(act, to: textView)
+    }
+
     /// Flip the global seam setting (R42 — a synced document setting).
     func toggleSeams() {
         Task { @MainActor in

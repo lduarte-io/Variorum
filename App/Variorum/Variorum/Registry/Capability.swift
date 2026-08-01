@@ -309,6 +309,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // undeclared keys sitting in the one place keys are declared is exactly
     // P-1's collision-drift class.
     case findInPost, findNext, findPrevious, findAndReplace, useSelectionForFind
+    // 13g batch 3 (L8/L9) — the FORMATTING acts over markdown-as-content
+    // (her rulings F-1…F-3). SEVEN declarations rather than one submenu-owning
+    // act, for the find family's reason: two of them carry a KEY, and an
+    // undeclared key in the one place keys are declared is P-1's collision-
+    // drift class. `.formatHeading` alone owns a submenu (Heading 1/2/3) —
+    // the `.callout` shape, where the sizes are the act's shades and only the
+    // act itself is a capability.
+    case formatBold, formatItalic, formatStrikethrough, formatCode
+    case formatHeading, formatBulletList, formatChecklist
     // Modes + app scope
     case switchMode
     // 13f batch 3 — the NAVIGATION core (her W3/A27 + W16 rulings): the
