@@ -94,6 +94,13 @@ nonisolated enum EditorDocument {
             }
             result.append(NSAttributedString(string: tail, attributes: base))
         }
+        // 13g batch 2 (L7, F-2): the markdown editing face. ATTRIBUTES ONLY —
+        // `result.string` is untouched, so the index built above still tiles
+        // the surface exactly. Applied HERE, at the one materialization every
+        // surface's full render goes through (this editor and the read tier),
+        // so a future surface inherits the face by construction rather than by
+        // remembering to ask for it. Text with no markdown writes nothing.
+        MarkdownStyling.style(result)
         return (result, index)
     }
 

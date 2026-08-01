@@ -246,7 +246,12 @@ struct RootView: View {
         .onChange(of: theme.settings) { _, settings in
             EditorTypography.current = EditorTypography.resolve(
                 voice: settings.voice, inlineComments: settings.inlineComments)
+            adoptMarkdownPalette()
         }
+        // 13g batch 2 (L7): the markdown face's palette follows the voice AND
+        // the appearance — the second is why it needs its own hook (the
+        // settings value does not move when the Mac switches to dark).
+        .onChange(of: scheme) { _, _ in adoptMarkdownPalette() }
         .task { await theme.start() }
         .task { await library.start() }
         .task { await library.startJournal() }
@@ -258,8 +263,17 @@ struct RootView: View {
             windows.register(windowID, router: router, kind: .full)
             wirePaletteCommands()
             wireWorkspace()
+            adoptMarkdownPalette()
         }
         .onDisappear { windows.unregister(windowID) }
+    }
+
+    /// 13g batch 2 (L7): keep the markdown face's two colors on the current
+    /// voice + appearance. The full-document editor's chrome application sets
+    /// the same value; both writers resolve from the same tokens, so a surface
+    /// created before either one still materializes in the right register.
+    private func adoptMarkdownPalette() {
+        MarkdownStyling.palette = MarkdownStyling.Palette(tokens: theme.tokens(for: scheme))
     }
 
     /// Whether THIS window mounts the live surface (13f batch 5b): the pane

@@ -155,6 +155,9 @@ extension NSTextView {
         // The one global typography updates FIRST so every subsequent
         // surface write (materialization, differential) agrees.
         EditorTypography.current = chrome.typography
+        // 13g batch 2 (L7): the markdown face's two colors ride the same
+        // resolution — one voice, one dimmed marker, everywhere.
+        MarkdownStyling.palette = MarkdownStyling.Palette(tokens: chrome.tokens)
         backgroundColor = chrome.paper
         textColor = chrome.ink
         insertionPointColor = chrome.caret
@@ -167,6 +170,12 @@ extension NSTextView {
             storage.addAttributes(
                 EditorDocument.baseAttributes,
                 range: NSRange(location: 0, length: storage.length))
+            // 13g batch 2 (L7): the base refresh above (and the `textColor`
+            // write before it) flatten the markdown face — re-derive it in the
+            // NEW voice, in the same transaction. Whole-document is right
+            // here and only here: a voice switch is a rare, deliberate
+            // gesture whose whole point is that everything re-fonts.
+            MarkdownStyling.style(storage)
             storage.endEditing()
         }
     }

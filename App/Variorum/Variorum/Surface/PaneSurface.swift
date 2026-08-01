@@ -637,6 +637,11 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         applyIdentity(to: view)
         spellcheck.apply(to: view)  // A24
         view.string = text
+        // 13g batch 2 (L7): a pane wears the same dimmed-marker face as the
+        // editors (F-2/F-5). Whole-pane is P1-clean here for the reason this
+        // file already states about layout: a pane's "document" is ONE take
+        // or one post-read by construction.
+        if let storage = view.textStorage { MarkdownStyling.style(storage) }
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
         // 13f W7: adopt the CURRENT token as the baseline — a pane born while
@@ -677,6 +682,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 storage.addAttributes(
                     EditorDocument.baseAttributes,
                     range: NSRange(location: 0, length: storage.length))
+                // 13g batch 2 (L7): the base refresh flattens the markdown
+                // face; re-derive it in the same transaction, in the new voice.
+                MarkdownStyling.style(storage)
                 storage.endEditing()
             }
             context.coordinator.remeasure()
@@ -697,6 +705,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // isLive contract.)
         if !isLive, view.string != text {
             view.string = text
+            // 13g batch 2 (L7): a fresh string carries only typing
+            // attributes — the face is re-derived over the adopted text.
+            if let storage = view.textStorage { MarkdownStyling.style(storage) }
             context.coordinator.remeasure()
         }
         // 13f W7: last, so the text above is settled before the caret is
@@ -717,6 +728,11 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             view.drawsBackground = false
             view.textColor = ink
             view.insertionPointColor = ink
+            // 13g batch 2 (L7): `textColor` flattens every foreground the
+            // markdown face applied — re-derive it against the NEW ink. Rides
+            // the same change gate, so this is as rare as the write it
+            // repairs, and text without markdown still writes nothing.
+            if let storage = view.textStorage { MarkdownStyling.style(storage) }
         } else {
             view.appliedInk = nil
             view.drawsBackground = true
@@ -894,8 +910,34 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             }
         }
 
+        /// 13g batch 2 (L7): records where a live pane's keystroke will land
+        /// so the markdown face can rescan the LINES it touched rather than
+        /// the whole pane — the same P1 discipline the full-document editor
+        /// keeps, on the surface kind that has no storage delegate of its own.
+        /// It observes and never gates: the verdict is always the default.
+        private var pendingEditRange: NSRange?
+
+        func textView(
+            _ textView: NSTextView,
+            shouldChangeTextIn affectedCharRange: NSRange,
+            replacementString: String?
+        ) -> Bool {
+            pendingEditRange = NSRange(
+                location: affectedCharRange.location,
+                length: (replacementString as NSString?)?.length ?? 0)
+            return true
+        }
+
         func textDidChange(_ notification: Notification) {
             guard let view else { return }
+            if let storage = view.textStorage {
+                // No recorded range (an edit that reached the storage by some
+                // other path) falls back to the caret's own lines — still
+                // scoped, never the pane.
+                MarkdownStyling.restyle(
+                    storage, range: pendingEditRange ?? view.selectedRange())
+            }
+            pendingEditRange = nil
             onEdit?(view.string)
             remeasure()
         }

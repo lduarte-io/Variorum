@@ -224,9 +224,15 @@ final class ReadPostViewModel {
             storage.replaceCharacters(in: range, with: newText)
             var attributes = EditorDocument.baseAttributes
             attributes[EditorDocument.blockIDAttribute] = new[i].blockID
-            storage.setAttributes(
-                attributes,
-                range: NSRange(location: range.location, length: (newText as NSString).length))
+            let replaced = NSRange(
+                location: range.location, length: (newText as NSString).length)
+            storage.setAttributes(attributes, range: replaced)
+            // 13g batch 2 (L7): the reset above drops the markdown face over
+            // the replaced slot — re-derive it, lines-scoped. The read-cheap
+            // tier wears the SAME dimmed-marker face as the editors (F-5's
+            // surface rule: its click seeds a caret offset, so display must
+            // equal stored here too).
+            MarkdownStyling.restyle(storage, range: replaced)
             storage.endEditing()
             differentialUnitsReplaced += range.length + (newText as NSString).length
             edited = true

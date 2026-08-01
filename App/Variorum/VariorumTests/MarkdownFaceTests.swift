@@ -1,0 +1,356 @@
+//
+//  MarkdownFaceTests.swift
+//  VariorumTests
+//
+//  Phase 13g batch 2 (L7): the dimmed-marker editing face (F-2/F-5) over the
+//  markdown-as-content storage (F-1).
+//
+//  The pins are organized around the three claims the face makes:
+//    1. DISPLAY == STORED, byte for byte — on the pure materialization and
+//       through the REAL NSTextView pipeline, against the store;
+//    2. the face is ATTRIBUTES ONLY, and text with no markdown is written to
+//       ZERO times (so prose behaves exactly as it did before this batch);
+//    3. the rescan is ∝ the edited paragraph(s), never the document (P1).
+//
+
+import AppKit
+import Dependencies
+import Foundation
+import SwiftUI
+import Testing
+import VariorumCore
+@testable import Variorum
+
+@MainActor
+private func withVoice<T>(
+    _ voice: ThemeVoice = .terminal, _ body: () throws -> T
+) rethrows -> T {
+    let savedTypography = EditorTypography.current
+    let savedPalette = MarkdownStyling.palette
+    defer {
+        EditorTypography.current = savedTypography
+        MarkdownStyling.palette = savedPalette
+    }
+    EditorTypography.current = EditorTypography.resolve(voice: voice, inlineComments: false)
+    MarkdownStyling.palette = MarkdownStyling.Palette(
+        tokens: VoiceTokens.resolve(voice: voice, dark: false))
+    return try body()
+}
+
+private func font(_ text: NSAttributedString, at offset: Int) -> NSFont? {
+    text.attribute(.font, at: offset, effectiveRange: nil) as? NSFont
+}
+
+private func color(_ text: NSAttributedString, at offset: Int) -> NSColor? {
+    text.attribute(.foregroundColor, at: offset, effectiveRange: nil) as? NSColor
+}
+
+private func isBold(_ text: NSAttributedString, at offset: Int) -> Bool {
+    font(text, at: offset)?.fontDescriptor.symbolicTraits.contains(.bold) ?? false
+}
+
+@MainActor
+@Suite("The markdown editing face (13g batch 2, L7)")
+struct MarkdownFaceTests {
+
+    // MARK: - 1. Display == stored
+
+    @Test func materializationStylesWITHOUTMovingASingleByte() {
+        withVoice {
+            let source = "# Title\nsay **this** and `that`\n- [x] done"
+            let (text, index) = EditorDocument.materialize([slot("a", text: source)])
+            // THE invariant (F-2). Not "roughly" — exactly.
+            #expect(text.string == source)
+            #expect(text.length == (source as NSString).length)
+            // And the block index still tiles the surface it was built for.
+            #expect(index.range(ofEntryAt: 0)
+                == NSRange(location: 0, length: (source as NSString).length))
+            #expect(EditorDocument.blockID(at: 0, in: text) == "a")
+            #expect(EditorDocument.blockID(at: text.length - 1, in: text) == "a")
+        }
+    }
+
+    @Test func aMarkdownHeavySessionLeavesTheStoreAndTheViewIdentical() async throws {
+        try await withEditor(seedBlocks: ["plain opening"]) { h in
+            h.type("\n- [ ] a **task** with a [link](https://x.test/a(b))", at: 13)
+            h.type(" and `code`")
+            await h.flush()
+            // The store holds exactly the characters the surface shows — the
+            // whole point of F-1 + F-2 together.
+            try expectStoreMatchesView(h)
+            let slots = try h.storeSlots()
+            #expect(slots.map(\.text) == [
+                "plain opening\n- [ ] a **task** with a [link](https://x.test/a(b)) and `code`",
+            ])
+            // The face is really on (this is not a no-op test).
+            let storage = try #require(h.textView.textStorage)
+            let boldAt = (h.documentText as NSString).range(of: "task").location
+            #expect(isBold(storage, at: boldAt))
+        }
+    }
+
+    // MARK: - 2. Attributes only, and nothing at all for plain prose
+
+    /// DISCRIMINATING REVERT: delete `MarkdownStyling.restyle`'s
+    /// `guard !spans.isEmpty || !applied.isEmpty else { return false }`.
+    /// Verified RED (both `== false` expectations fail; the whole rest of the
+    /// suite stays green).
+    @Test func proseWithNoMarkdownIsNEVERWrittenTo() {
+        withVoice {
+            let plain = NSTextStorage(
+                string: "Just ordinary prose, with a hyphen-word and 2 * 3 arithmetic.",
+                attributes: EditorDocument.baseAttributes)
+            let before = NSAttributedString(attributedString: plain)
+            // The face must not touch the storage of a note that carries no
+            // markdown — the honest default, and what keeps the A47c
+            // full-range-write class away from ordinary typing. (Measured
+            // while writing this: an empty begin/endEditing pair posts no
+            // `processEditing`, so the counter below is a standing property
+            // rather than the discriminator — the returned `false` is.)
+            let edits = LockIsolated(0)
+            let token = NotificationCenter.default.addObserver(
+                forName: NSTextStorage.didProcessEditingNotification,
+                object: plain, queue: nil
+            ) { _ in edits.withValue { $0 += 1 } }
+            defer { NotificationCenter.default.removeObserver(token) }
+
+            #expect(MarkdownStyling.style(plain) == false, "the zero-write fast path")
+            #expect(plain.isEqual(to: before),
+                    "not one attribute moved — prose behaves exactly as it did before 13g")
+
+            // And on the incremental door too.
+            #expect(MarkdownStyling.restyle(plain, range: NSRange(location: 5, length: 3)) == false)
+            #expect(plain.isEqual(to: before))
+            #expect(edits.value == 0, "no layout pass came out of prose")
+        }
+    }
+
+    @Test func markersDimAndContentTakesItsFace() {
+        withVoice {
+            let storage = NSTextStorage(
+                string: "a **bold** and *slanted* and ~~cut~~ and `mono`",
+                attributes: EditorDocument.baseAttributes)
+            #expect(MarkdownStyling.style(storage) == true)
+            let marker = MarkdownStyling.palette.marker
+            let string = storage.string as NSString
+
+            let bold = string.range(of: "**bold**").location
+            #expect(color(storage, at: bold) == marker, "the opening ** is dimmed")
+            #expect(isBold(storage, at: bold + 2))
+            #expect(color(storage, at: bold + 2) != marker, "the WORD is not dimmed")
+
+            let italic = string.range(of: "*slanted*").location
+            #expect(color(storage, at: italic) == marker)
+            #expect(font(storage, at: italic + 1)?.fontDescriptor.symbolicTraits
+                .contains(.italic) == true)
+
+            let struck = string.range(of: "~~cut~~").location
+            #expect(storage.attribute(.strikethroughStyle, at: struck + 2, effectiveRange: nil)
+                as? Int == NSUnderlineStyle.single.rawValue)
+            #expect(storage.attribute(.strikethroughStyle, at: struck, effectiveRange: nil) == nil,
+                    "the markers themselves are not struck through")
+
+            let code = string.range(of: "`mono`").location
+            #expect(font(storage, at: code + 1)?.fontDescriptor.symbolicTraits
+                .contains(.monoSpace) == true)
+        }
+    }
+
+    @Test func aLinkColorsItsTextAndDimsItsURL() {
+        withVoice {
+            let storage = NSTextStorage(
+                string: "see [the notes](https://x.test/a) now",
+                attributes: EditorDocument.baseAttributes)
+            #expect(MarkdownStyling.style(storage) == true)
+            let string = storage.string as NSString
+            let open = string.range(of: "[the notes]").location
+            #expect(color(storage, at: open) == MarkdownStyling.palette.marker, "[")
+            #expect(color(storage, at: open + 1) == MarkdownStyling.palette.link, "the text")
+            let url = string.range(of: "https://x.test/a").location
+            #expect(color(storage, at: url) == MarkdownStyling.palette.marker,
+                    "F-5: text link-colored, the (url) dimmed")
+        }
+    }
+
+    @Test func headingsRenderAsSizesAndComposeWithInlineFaces() {
+        withVoice {
+            let storage = NSTextStorage(
+                string: "# A **Big** title", attributes: EditorDocument.baseAttributes)
+            #expect(MarkdownStyling.style(storage) == true)
+            let base = EditorDocument.baseFont
+            let string = storage.string as NSString
+
+            #expect(color(storage, at: 0) == MarkdownStyling.palette.marker, "the # is dimmed")
+            #expect(font(storage, at: 0)?.pointSize == base.pointSize,
+                    "the marker keeps the base size")
+            let titleAt = string.range(of: "A ").location
+            let headingSize = try? #require(font(storage, at: titleAt)?.pointSize)
+            #expect((headingSize ?? 0) > base.pointSize, "headings ARE sizes (F-3)")
+
+            // Composition: the bold inside the heading is bold AND still the
+            // heading's size — the styler derives from what is already there.
+            let boldAt = string.range(of: "Big").location
+            #expect(isBold(storage, at: boldAt))
+            #expect(font(storage, at: boldAt)?.pointSize == headingSize)
+        }
+    }
+
+    @Test func listsAndCheckboxesDimTheirLeadAndLeaveTheItemAsProse() {
+        withVoice {
+            let storage = NSTextStorage(
+                string: "- milk\n- [x] eggs", attributes: EditorDocument.baseAttributes)
+            #expect(MarkdownStyling.style(storage) == true)
+            let marker = MarkdownStyling.palette.marker
+            #expect(color(storage, at: 0) == marker, "the bullet's hyphen")
+            #expect(color(storage, at: 2) != marker, "the item reads as prose")
+            let string = storage.string as NSString
+            let box = string.range(of: "[x]").location
+            #expect(color(storage, at: box) == marker)
+            #expect(color(storage, at: box + 4) != marker, "eggs")
+            // NSTextList is never invoked (TEXTKIT2 §1/§3) — a list is text.
+            let paragraph = storage.attribute(.paragraphStyle, at: 0, effectiveRange: nil)
+                as? NSParagraphStyle
+            #expect(paragraph?.textLists.isEmpty ?? true)
+        }
+    }
+
+    /// DISCRIMINATING REVERT: skip `MarkdownStyling.restyle`'s clear loop
+    /// (`for (sub, value) in applied`). Verified RED — the stale bold and the
+    /// stale marker colour survive the syntax's deletion.
+    @Test func removingTheSyntaxRESTORESTheProseFaceExactly() {
+        withVoice {
+            // The clear half: a face applied and then un-applied must leave
+            // the storage where it started, or stale bold accumulates as she
+            // edits.
+            let plain = "say this now"
+            let pristine = NSTextStorage(
+                string: plain, attributes: EditorDocument.baseAttributes)
+            pristine.addAttribute(
+                .foregroundColor, value: NSColor.systemBrown,
+                range: NSRange(location: 0, length: pristine.length))
+            let reference = NSAttributedString(attributedString: pristine)
+
+            let storage = NSTextStorage(
+                string: "say **this** now", attributes: EditorDocument.baseAttributes)
+            storage.addAttribute(
+                .foregroundColor, value: NSColor.systemBrown,
+                range: NSRange(location: 0, length: storage.length))
+            #expect(MarkdownStyling.style(storage) == true)
+            #expect(color(storage, at: 4) == MarkdownStyling.palette.marker)
+
+            // Now the writer deletes the two marker pairs.
+            storage.replaceCharacters(in: NSRange(location: 10, length: 2), with: "")
+            storage.replaceCharacters(in: NSRange(location: 4, length: 2), with: "")
+            #expect(storage.string == plain)
+            #expect(MarkdownStyling.restyle(
+                storage, range: NSRange(location: 4, length: 0)) == true)
+
+            #expect(storage.isEqual(to: reference),
+                    "the surface's own ink came back, not a guessed one")
+            #expect(storage.attribute(
+                MarkdownStyling.faceAttribute, at: 4, effectiveRange: nil) == nil)
+        }
+    }
+
+    @Test func theFaceFollowsAVoiceSwitch() {
+        withVoice {
+            let (text, _) = EditorDocument.materialize([slot("a", text: "a **bold** word")])
+            let view = EditorTextView.makeEditor().textView
+            view.textStorage?.setAttributedString(text)
+
+            view.applyVoiceChrome(EditorSurfaceChrome(
+                voice: .study, dark: false, inlineComments: false))
+            let storage = try? #require(view.textStorage)
+            #expect(storage?.string == "a **bold** word", "still byte-identical")
+            #expect(EditorDocument.baseFont.familyName == "Iowan Old Style")
+            let boldAt = 4
+            #expect(font(storage ?? text, at: boldAt)?.familyName == "Iowan Old Style")
+            #expect(isBold(storage ?? text, at: boldAt), "re-derived, not lost to the base refresh")
+            #expect(color(storage ?? text, at: 2)
+                == NSColor(VoiceTokens.studyLight.muted), "the new voice's dimmed marker")
+        }
+    }
+
+    // MARK: - 3. P1 — the rescan is ∝ the edited paragraph(s)
+
+    /// DISCRIMINATING REVERT: in `MarkdownStyling.restyle`, replace the
+    /// `string.lineRange(for:)` expansion with the whole storage
+    /// (`NSRange(location: 0, length: length)`). Verified RED — 15,600 units
+    /// scanned per keystroke instead of 79.
+    @Test func aKeystrokeRescansItsOWNLinesAndNotTheNote() async throws {
+        // 400 paragraphs inside ONE block (I4: newlines are content), so the
+        // surface is a genuinely long document and the edit is deep inside it.
+        let line = "lorem ipsum dolor sit amet consectetur"
+        let long = Array(repeating: line, count: 400).joined(separator: "\n")
+        try await withEditor(seedBlocks: [long]) { h in
+            let documentLength = (h.documentText as NSString).length
+            #expect(documentLength > 10_000)
+
+            let target = (line.utf16.count + 1) * 200 + 5   // inside paragraph 201
+            MarkdownScanCount.reset()
+            h.type("*", at: target)
+            let scanned = MarkdownScanCount.current
+
+            // The pin: one keystroke walks its own line (plus at most the
+            // next, which the range widening pulls in) — never the note.
+            #expect(scanned > 0, "the face really ran")
+            // Exactly the edited line and the one after it (the range widening
+            // pulls the follower in, so a Return inside `**bold**` restyles
+            // both halves) — plus the single character just typed.
+            #expect(scanned <= 2 * (line.utf16.count + 1) + 1,
+                    "P1: cost ∝ the edited paragraph(s), not the document")
+            #expect(scanned < documentLength / 50)
+        }
+    }
+
+    @Test func theFaceRidesTheRealKeystrokePipelineAndKeepsBlockIdentity() async throws {
+        try await withEditor(seedBlocks: ["one", "two"]) { h in
+            h.type("**loud**", at: 3)           // end of block a
+            await h.flush()
+            let storage = try #require(h.textView.textStorage)
+            #expect(h.documentText == "one**loud**\ntwo")
+            #expect(isBold(storage, at: 5))
+            // Identity survives the face: every character of block a still
+            // carries a's ID, and the store agrees with the view.
+            #expect(EditorDocument.blockID(at: 5, in: storage) == h.model.index.entries[0].blockID)
+            try expectStoreMatchesView(h)
+        }
+    }
+
+    /// DISCRIMINATING REVERT: in `MarkdownSyntax.spans(in:)`, drop
+    /// `|| chars[index].isNewline` from the line walk. Verified RED — the
+    /// opener in block one closes in block two and the face crosses the seam.
+    @Test func aSpanCanNeverCrossABlockSEAM() async throws {
+        // The editor joins blocks with a single "\n", and the tokenizer is
+        // line-scoped — so an opener in one block and a closer in the next
+        // can never style across the boundary. Markdown and block identity
+        // cannot disagree.
+        try await withEditor(seedBlocks: ["start **here", "and end** later"]) { h in
+            let storage = try #require(h.textView.textStorage)
+            #expect(h.documentText == "start **here\nand end** later")
+            for offset in 0..<storage.length {
+                #expect(storage.attribute(
+                    MarkdownStyling.faceAttribute, at: offset, effectiveRange: nil) == nil,
+                    "no face at \(offset) — nothing matched across the seam")
+            }
+        }
+    }
+
+    @Test func theFaceSurvivesAStructuralSeamEdit() async throws {
+        // A divide rewrites the surface through `applySeamEdit`, which resets
+        // the replaced span to base attributes — the face must be re-derived
+        // there or a split note loses its formatting until the next full
+        // render.
+        try await withEditor(seedBlocks: ["first part. **second** part."]) { h in
+            let cut = (h.documentText as NSString).range(of: "**second**").location
+            _ = try h.session.operations.divide(
+                h.model.index.entries[0].blockID, cut: cut)
+            try h.reload()
+            await h.flush()
+            let storage = try #require(h.textView.textStorage)
+            let boldAt = (h.documentText as NSString).range(of: "second").location
+            #expect(isBold(storage, at: boldAt))
+            try expectStoreMatchesView(h)
+        }
+    }
+}

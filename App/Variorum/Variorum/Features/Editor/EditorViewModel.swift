@@ -628,6 +628,15 @@ final class EditorViewModel {
                 storage.removeAttribute(EditorDocument.blockIDAttribute, range: run.range)
             }
         }
+        // 13g batch 2 (L7): the `setAttributes` above resets the replaced span
+        // to base, so the markdown face over those lines is re-derived here.
+        // Attributes only — the seam edit's own bytes are already in place and
+        // are not touched.
+        MarkdownStyling.restyle(
+            storage,
+            range: NSRange(
+                location: edit.replaceRange.location,
+                length: (edit.replacement as NSString).length))
         storage.endEditing()
         suppressEditProcessing = false
     }
@@ -839,6 +848,15 @@ final class EditorViewModel {
             // AppKit path outside the policed ones). The store is truth:
             // drop local bookkeeping and re-render from the projection.
             desyncRecovery()
+        }
+        // 13g batch 2 (L7, F-2): the markdown face follows the keystroke,
+        // scoped to the LINES the edit touched — P1's letter, pinned by
+        // `MarkdownScanCount`. Attribute-only, so it moves no byte and
+        // registers nothing with NSTextView's undo; and the delegate's
+        // `.editedCharacters` guard means these attribute edits cannot
+        // re-enter here.
+        if let storage = textView?.textStorage {
+            MarkdownStyling.restyle(storage, range: editedRange)
         }
         updateCaretContext()
     }

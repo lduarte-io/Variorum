@@ -427,7 +427,7 @@ visibility, a display setting if ever wanted.
 | L4 | WT-4: the "Variorum" whitespace removed — corrected on the record: it was the WINDOW TITLE, not the sidebar label (`.toolbar(removing: .title)` + `.unifiedCompact`) | **SHIPPED** (batch 1; her TRY) |
 | L5 | WT-5/F-4: sticky pane modes — mode line SHIPPED; the read-only projections PROPOSED (every non-Write mode is heavy; her word bundled for the morning sitting, orchestrator recommends (b) takes-first) | **PARTIAL** (batch 1) |
 | L6 | WT-6: pane body-click focus parity — traced per-CONTENT (2 of 8 branches had the door); the pane-owned `PaneFocusCatcher` | **SHIPPED** (batch 1) |
-| L7 | The markdown foundation: pure Domain tokenizer + the dimmed-marker editing face (F-1/F-2) | batch 2 (spawning) |
+| L7 | The markdown foundation: pure Domain tokenizer + the dimmed-marker editing face (F-1/F-2) | **SHIPPED** (batch 2) |
 | L8 | Insertion faces: ⌘B/⌘I/toolbar + registry declarations (formatting acts are acts) | batch 2/3 |
 | L9 | Lists + checkboxes incl. click-to-toggle (ordinary edit; seal refuses honestly) | batch 2/3 |
 | L10 | Links (F-5): styled + ⌘-click in editors; fully rendered + plain-click in Read | batch 3 |
@@ -905,3 +905,217 @@ link opening (L10), Read-mode full rendering (L11).
   ruling's shape; append the batch record here; commit per
   convention; never push; never `/Applications`; her running
   real-store instance is never touched.
+
+### Batch 2 record — the markdown foundation (2026-08-01, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on
+the final tree): core **946 tests in 106 suites** (from 926/105: +20 tests,
++1 suite — the tokenizer) · Mac **1088 tests in 191 suites** (from 1075/190:
++13 tests, +1 suite — the face) · mobile **14 tests in 4 suites** (unchanged;
+run because `Sources/` was touched). The tutorial spine ran green by TYPE name
+on the final tree (**49 tests in 7 suites**). Zero `Sources/VariorumCore/Sync/`
+lines; no schema; **zero lines anywhere near `renderedText`, the export
+projections or the bridge's join brain** — verified by `git diff --name-only`.
+
+Scope was **L7 only**. L8 (insertion faces + registry acts), L9 (checkbox
+toggling and list ergonomics), L10 (link opening) and L11 (Read-mode full
+rendering) were deliberately not started; the pieces they need — a span's
+marker ranges, a checkbox's box range, a link's URL range — are on the
+tokenizer's `Span` already, so they compose without re-deriving anything.
+
+---
+
+#### (i) The tokenizer — `Sources/VariorumCore/Domain/MarkdownSyntax.swift`
+
+A pure Domain function, no GRDB and no AppKit: `spans(in:) -> [Span]`, UTF-16
+offsets accumulated per grapheme cluster (so every range is grapheme-aligned by
+construction, the `BoundarySnapping` discipline), plus `Span.shifted(by:)` — the
+rebasing door a line-scoped rescan needs — and a DEBUG `MarkdownScanCount`
+thread-local counter placed **on the scanner itself**, for the reason
+`BoundaryScanCount` records: a counter on an app-side wrapper would read zero
+against the pre-fix code and every P1 pin built on it would be hollow.
+
+The v1 vocabulary is exactly F-3 and nothing more: `**bold**` · `*italic*` ·
+`~~strikethrough~~` · `` `code` `` · `[text](url)` · `#`/`##`/`###` ·
+`- ` bullets · `- [ ]`/`- [x]` checkboxes.
+
+**Every decision, pinned:**
+
+| Decision | Why | Pin |
+|---|---|---|
+| **Line-scoped by law** — a span never crosses a newline | Two things ride it: the per-paragraph rescan (P1), and — because the editor joins blocks with a single `"\n"` — **a span can never cross a BLOCK SEAM**, so markdown and block identity can never disagree | `aSpanNeverCrossesANewline` (core) · `aSpanCanNeverCrossABlockSEAM` (Mac, through the real editor) |
+| A line-leading construct must start at the line's **first character** (no CommonMark 0–3 space tolerance) | "It starts the line or it is text" is a rule a writer can hold in her head; an indented line silently becoming a heading is not. *Consequence L9 will meet: indented (nested) list items are not styled in v1* | `headingsRunOneToThreeAndNeedTheirSpace` (`"  # indented"`) |
+| `####`+ is plain text | F-3 names three sizes; a fourth can never appear by accident | same |
+| `#hashtag` (no space) is plain | — | same |
+| `"# "` / `"- "` / `"- [ ]"` alone = the construct with EMPTY content | She has typed the marker and is about to type the words; the face should appear when she commits to it, not one word later | same + `bulletsAreTheHyphenAndNothingElse`, `checkboxes…` |
+| **`- ` is the only bullet** (`* ` is NOT) | `*` at a line start collides with italic; one unambiguous list marker beats CommonMark parity here. Her words were "hyphens, [], bullets" | `bulletsAreTheHyphenAndNothingElse` |
+| `- [X]` reads as checked; `- []`, `- [?]`, `- [x]text` degrade to a **bullet**, never to nothing | The list keeps its shape while she types | `checkboxesReadBothStatesAndFallBackToBulletsWhenMalformed` |
+| Checkbox `markers[1]` IS the box | L9's toggle rewrites exactly that range | same |
+| **Minimal flanking rule** for `*`, `**`, `~~`: an opener may not be followed by whitespace, a closer may not be preceded by it | Kills `2 * 3 * 4` — the one false positive a prose writer actually hits — for two comparisons per candidate | `theFlankingRuleKeepsArithmeticArithmetic` |
+| Code has NO flanking rule | Backticks legitimately wrap spaces and operators; CommonMark agrees | `boldItalicStrikeAndCodeCarry…` |
+| **All inline spans require non-empty content** — `****`, `` `` ``, `[](u)`, `[t]()` are literal | ONE rule across the family instead of five; a link to nowhere is not a link | `emptyContentIsAlwaysLiteral` |
+| Unclosed openers are plain text, and scanning advances **one grapheme** | `**a*b*` still finds the italic — pinned because the advance-by-one rule is what makes it true | `unclosedMarkersArePlainText`, `aFailedBoldStillLetsTheItalicInsideItMatch` |
+| Mid-word emphasis allowed (`a*b*c`) | CommonMark does, and `un*bloody*likely` is a thing writers type | `midWordEmphasisIsAllowed` |
+| Link text does **not** nest (first `]` closes it) — `[a[b]](u)` is plain | A nesting parser buys nothing prose uses | `unclosedMarkersArePlainText` + the shape pins |
+| Link URL parens are **balanced** — `[a](https://x/Foo_(bar))` links the whole address | Wikipedia-shaped addresses are the everyday case a first-`)` scan gets wrong | `aURLMayCONTAINParentheses` |
+| **No nesting: a span's content is not rescanned** (the documented first-match rule) | `` `*a*` `` is one code span; `**a *b* c**` is one bold span | `aSpansContentIsNotRescanned` |
+| **The ONE exception: a line-leading span's content IS inline-scanned** | `# **Big**` and `- [ ] **task**` are what a writer means. Spans come back in APPLICATION ORDER (leading first), so a styler composes them | `aLineLeadingSpansContentIS_inlineScanned` |
+| Offsets are UTF-16 and never split a grapheme | The structural API's unit; emoji and ZWJ sequences pinned | `offsetsAreUTF16AndNeverSplitAGrapheme` |
+
+Plus structural pins: inline spans are pairwise disjoint and ascending, every
+marker/content range sits inside its span's range (`inlineSpansNeverOverlapAndAscend`),
+`shifted(by:)` moves every range together, and the scan counter's own arithmetic
+is pinned on the scanner (`theScannerCountsExactlyWhatItWasHanded`).
+
+---
+
+#### (ii) The editing face — `App/Variorum/Variorum/Theme/MarkdownStyling.swift`
+
+**Display == stored, BYTE FOR BYTE.** The file writes only ATTRIBUTES; it never
+inserts, removes or replaces a character on any surface. That is what leaves
+the app's riskiest machinery (AppSpec §15 risk 1) untouched by formatting —
+`BlockRangeIndex`, crystallization, the differential structural rewrite,
+autosave, find and every gesture read exactly the offsets they always read.
+
+**Mechanism: real text-storage font/colour attributes, never TK2 per-range
+RENDERING attributes** (TEXTKIT2 §3's unreliable class), and **`NSTextList` is
+never invoked** (§1/§3) — a list is text lines, which is exactly what F-1 buys.
+
+**Where it is wired** — at the small set of places base attributes are written,
+so a future surface inherits the face rather than having to ask for it:
+
+1. `EditorDocument.materialize` — the ONE materialization both full-render paths
+   go through (the full-document editor and the read tier);
+2. `EditorViewModel.storageDidEdit` — the keystroke path, lines-scoped;
+3. `EditorViewModel.applySeamEdit` — structural seam edits reset the replaced
+   span to base, so the face is re-derived there (pinned: a divide keeps its
+   bold);
+4. `ReadPostViewModel.applyDifferential` — the read tier's per-slot replace;
+5. `NSTextView.applyVoiceChrome` — the voice switch's full-range base refresh;
+6. `PaneSurface` — the ink write, both string adopts, the font/gap branch, and
+   live typing (a new `shouldChangeTextIn` **recorder**, which observes and
+   never gates, so a pane rescans its edited lines rather than the pane);
+7. `RootView` — the palette follows the voice AND the appearance.
+
+**The palette** (marker = `tokens.muted`, link = `tokens.accent`) is a global
+written on the main thread, exactly mirroring `EditorTypography.current` and for
+the same stated reason: threading a palette through `materialize`, both surface
+kinds and every pane composer is the divergent-private-copy class this app has
+already paid for twice. Before any voice has been applied it falls back to the
+system's secondary/link colours — deliberately NOT a copied token literal.
+
+**The clear path is a capture-and-restore, not a guess.** A styled range carries
+`faceAttribute`, whose VALUE is the prose foreground colour that was there
+(`NSNull` = "there was none", which is the state `materialize` produces). Panes
+take their ink per-view from tokens, the editor takes it from its chrome, and
+the read tier may carry none — so remembering beats guessing, and un-styling
+restores the surface's own ink whatever it is.
+
+**The zero-write fast path.** Text with no markdown and no previously applied
+face writes NOTHING — not one attribute call. Prose without syntax therefore
+behaves byte-identically to how it did before this batch, which is the honest
+default and keeps the A47c full-range-write class away from ordinary typing.
+
+*Honesty note, measured while pinning it:* an empty `beginEditing`/`endEditing`
+pair posts no `processEditing`, so what the guard actually saves is the scan and
+the enumeration (~16 µs on a 15k-character note), **not** a layout pass. The
+first draft of the pin's comment claimed the invalidation; the claim was
+corrected rather than the assertion weakened, and the file header says so.
+
+**The measured keystroke cost** (this session's own runs, warm, 500 samples,
+median / p95, on the real editor's storage):
+
+| What | Cost |
+|---|---|
+| A keystroke on a line with NO markdown, in a 15,599-character note (the fast path) | **16.1 µs / 16.5 µs** |
+| A keystroke on a line CARRYING five spans (the full write path) | **148 µs / 153 µs** |
+| The same, doc 7,859 → 31,259 → 124,859 chars | **149 / 150 / 152 µs — flat** |
+| A whole-document `style()` once, 15,599 chars (the full-render door only) | 6.2 ms |
+
+So the worst keystroke is ~1 % of a 16 ms frame, and it is flat in note size on
+BOTH halves — the scan (pinned by `MarkdownScanCount`) and the attribute writes
+(measured across a 16× document-size sweep).
+
+**P1 is pinned structurally, not by a clock:** `aKeystrokeRescansItsOWNLinesAndNotTheNote`
+drives a real keystroke into a 15,600-character note and asserts the scanner
+walked **79** UTF-16 units — the edited line plus the one after it (the range
+widening pulls the follower in, so a Return inside `**bold**` restyles both
+halves) plus the character just typed.
+
+---
+
+#### Red-on-old pins — four behavioural reverts, each verified and checksum-restored
+
+| # | Revert | Result |
+|---|---|---|
+| A | `restyle`'s `string.lineRange(for:)` expansion → the whole storage | RED, exactly discriminating: `aKeystrokeRescansItsOWNLinesAndNotTheNote` fails with **15,600 scanned vs 79**; the other 12 pins stay green |
+| B | skip `restyle`'s clear loop (`for (sub, value) in applied`) | RED: `removingTheSyntaxRESTORESTheProseFaceExactly` fails — the stale bold and stale marker colour survive the syntax's deletion |
+| C | delete the `guard !spans.isEmpty \|\| !applied.isEmpty` fast-path guard | RED: `proseWithNoMarkdownIsNEVERWrittenTo` fails on both `== false` expectations |
+| D | drop `\|\| chars[index].isNewline` from the tokenizer's line walk | RED on BOTH sides: core `aSpanNeverCrossesANewline` (all three cases match across the newline) and Mac `aSpanCanNeverCrossABlockSEAM` (the face crosses the block seam) |
+
+Each file was restored and its `md5` matched the pre-revert value
+(`MarkdownSyntax.swift` → `1e1d0a737c4c858afa53be102ef25316`). The reverts are
+recorded as `DISCRIMINATING REVERT` doc comments on the four pins, the house
+convention (`TakesCardHeightTests`), so a future reader can re-run them.
+
+---
+
+#### What was LOOKED at (an offscreen render, not her app)
+
+A throwaway harness rendered the vocabulary through the real
+`EditorTextView` + `applyVoiceChrome` + the face and wrote PNGs (the test host
+is sandboxed, so they went to the Debug container's `tmp` and were copied to
+the session scratchpad; the harness itself was removed before the final runs —
+it is ~25 lines and trivially re-created). **Her running instance was never
+touched**; instances were checked by PATH throughout and only
+`/Applications/Variorum.app` (PID 24191) was ever seen.
+
+What the light renders show, and they look right: dimmed `#`/`##`/`###` with the
+heading text stepping up in size; `**bold**` bold with faint stars; `*italic*`
+oblique; `~~struck out~~` struck through **with the markers not struck**; a
+green (terminal) / blue (study) link text with a dimmed `(url)`; dimmed `- `,
+`[ ]` and `[x]` leads with the items reading as ordinary prose; and
+`2 * 3 * 4` and `hyphen-word` left completely alone.
+
+**Two look items for the orchestrator to bundle (deliberately NOT invented into
+code, and NOT `QUESTIONS.md` entries — neither is a shipped PROVISIONAL product
+ruling; #49 remains the next free number):**
+
+1. **`` `inline code` `` is invisible in the TERMINAL voice.** The face gives
+   code the monospaced system font, and the terminal voice's prose is already
+   monospaced — so only the dimmed backticks distinguish it (the render
+   confirms it). In the study voice it reads clearly. A tint or a background
+   would fix it, but neither was ruled, and inventing a colour would be
+   inventing product behaviour. Cheap either way.
+2. **A CHECKED checkbox's text is styled exactly like an unchecked one.**
+   Dimming it, or striking it through, is the obvious candidate and is what
+   most apps do — but F-3 ruled the vocabulary, not the register, and L9 (the
+   click-to-toggle batch) is the natural place to ask her.
+
+**One measured environment fact, recorded so a future session does not chase
+it:** in the OFFSCREEN dark render the prose reads near-black on black, because
+runs carrying no `.foregroundColor` draw with a default that `cacheDisplay`
+resolves against the wrong appearance (setting `view.appearance` explicitly did
+not change it). This is **unchanged by this batch by construction** —
+`materialize` has never written a foreground colour, and the face only ADDS
+colours to markers and links — and the on-screen app is unaffected. The light
+renders are the honest look samples.
+
+---
+
+#### Notes for the orchestrator
+
+- **Nothing was added to `notes/QUESTIONS.md`** — the two open items above are
+  taste questions for her sitting bundle, not shipped PROVISIONAL rulings.
+  **#49 remains the next free number.**
+- **No proposal is owed** — no design fork emerged that the brief did not
+  answer. L8–L11 build on the `Span` shape as it stands.
+- **A test-parallelism property, pre-existing and inherited:** the face's pins
+  read `EditorTypography.current`, a shared global that `Phase13SurfaceTests`
+  also mutates (with save/restore, as these do). Full suites are green and the
+  window is small, but if a marker-colour or heading-size pin ever flakes, that
+  is the first place to look — no new machinery was invented for it.
+- **One inherited limitation worth carrying into L9:** indented list items are
+  not styled (line-leading constructs must start at column 0). Nested lists will
+  need that rule widened, deliberately and with her word on how indentation
+  should read.
