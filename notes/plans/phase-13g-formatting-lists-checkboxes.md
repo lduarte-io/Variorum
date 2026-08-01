@@ -434,7 +434,8 @@ visibility, a display setting if ever wanted.
 | L11 | Read mode full markdown rendering (the F-5 surface rule) | batch 3 |
 | L12 | Helper/tutorial coverage for formatting + the re-seed note | late batch |
 | L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | sweep batch |
-| L14 | W26: the true global quick-note hotkey — author-attended, later in phase (her round-2 word) | HELD for her |
+| L14 | W26: the true global quick-note hotkey — SLOTTED to 13e's opening sitting (her round-4 ruling; supersedes round 2's later-in-13g reading) | → 13e |
+| L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | batch 2 / acceptance |
 | L15 | TEXTKIT2 §5 re-verify after the phase's editor work | closeout |
 | L16 | 13g's closeout AUTHORS 13e's plan (her standing instruction) | closeout |
 
@@ -500,3 +501,59 @@ is touched — L1–L6 should not); zsh `pipestatus`; never
 `git checkout` over uncommitted work; never push; commit per
 convention with the batch record appended to this plan file
 (point-by-point, PENDING-marked if verification is still owed).
+
+*(Orchestrator note, 2026-08-01: baselines verified by own runs —
+core 926/105, Mac 1068/188, both green; batch 1's fresh Opus
+implementer spawned the same night. Mobile's own-run verification
+is owed before the first `Sources/`/`Shared/`-touching batch.)*
+
+### Round 4 — 2026-08-01, before bed (W26 slotted; the diverge verdict + a wording finding)
+
+Her message, verbatim:
+
+> ok excellent. just give W26 to a particular phase in the not yet
+> run 13 phases - wherever makes sense, so that i'm sure to land on
+> it again. i'm going to bed, excited to wake up in the morning!
+> the diverge chip works I think but the difference between the
+> duplicate as version and open the copy buttons is confusing -
+> what is the difference ? i'd update the text on that for clearer
+> wording but it seems good
+
+With a screenshot of the membership-chip popover showing, stacked:
+"This note is in no book — it lives in the Pool." / [Add to Book ▾]
+/ "Editing here edits the note everywhere it appears. To make a
+separate note that can diverge:" / [Duplicate as Version] /
+"Diverged — \"my book :)\" holds the copy now, in the same place;
+the original is untouched elsewhere. ⌥⌘Z undoes it." /
+[Open the Copy].
+
+**Dispositions, point by point:**
+
+- **W26 SLOTTED (her ruling): → PHASE 13E's OPENING SITTING** — the
+  soonest not-yet-run 13-phase (her 13f round-5 sequencing makes
+  13e next after 13g), so she is sure to land on it again. L14
+  updated; **L16 now carries the duty**: the 13e plan this phase's
+  closeout authors MUST name W26 in its kickoff/opening sitting
+  (the true system-wide quick-note hotkey — author-attended; the
+  researched one question is whether macOS prompts; the Carbon
+  research lives in the 13f plan file). The master plan's 13e row
+  gains the item the same turn, so the slot survives any disruption
+  to this phase's closeout.
+- **Diverge: verdict good** — "the diverge chip works I think."
+- **WT-7 (FINDING → RULING, wording): "Duplicate as Version" vs
+  "Open the Copy" read as competing alternatives.** They are two
+  different MOMENTS, not two options: "Duplicate as Version" is the
+  standing divergence DOOR (R31/R35 — it mints a fresh linked copy
+  of this note, now); "Open the Copy" is the RECEIPT of the diverge
+  she already ran (it navigates to the copy that act placed in
+  "my book :)" — it mints nothing). Her ruling: "i'd update the
+  text on that for clearer wording but it seems good." ROUTED as
+  L17 — a wording pass making the receipt read as a receipt (tied
+  to the past act and naming its book, e.g. the button carrying the
+  book name) and the door read as an act. RECORDED BESIDE IT, for
+  the same pass to VERIFY rather than assume (the hallucination
+  guard): in her screenshot the note is in NO book, yet the
+  explainer reads "Editing here edits the note everywhere it
+  appears" — vacuous for a bookless note (there is no elsewhere);
+  the explainer likely wants to be membership-sensitive. Trace what
+  the popover actually conditions on before rewording.
