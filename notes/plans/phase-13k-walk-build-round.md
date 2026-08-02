@@ -1497,3 +1497,35 @@ one), her screenshot's own "←" and "›" characters, the system `book` and
 - **ALL TWELVE LEDGER ROWS ARE NOW SHIPPED. The build is complete;
   the phase moves to the LADDER** — one cold review over the
   combined diff, fresh reviewer, `notes/REVIEW_PROMPT.md` verbatim.
+
+### Round 4 (2026-08-02 — her flick on the batch-3 screenshot set; three look rulings + one question answered)
+
+Her verdict: "i think overall it looks good though." The rulings,
+her words quoted; BUILD HELD until review round 1 lands so the
+ladder's diff stays clean, then landed as the look-fix continuation:
+
+- **R4-1 — the forward door's glyph:** the › "kind of looks like
+  it's expanding the tags. i think it should just be replaced with
+  an arrow like the back one -> for better clarity and a clearer
+  match" — the chevron becomes a right ARROW mirroring ←.
+- **R4-2 — chips hug their text:** "i don't like how the tags have
+  so much whitespace in them, it's like goals and just very
+  stretched out. i think the tag chip should fit to the length of
+  the tag" — the chip fits its content; whatever fixed/min width
+  stretched it goes.
+- **R4-3 — boxier chips (EXPERIMENT framing preserved):** "i also
+  think that it shouldn't be such rounded pill shape - i want to
+  experiment with having a boxier look around it (maybe still with
+  rounded corners, but a little more box like)" — the pill radius
+  drops to a small-radius box as the new default, AND the
+  continuation delivers a propose-only radius-variant screenshot
+  set (e.g. sharp / 2–3pt / 4–5pt) for her to pick from.
+- **Her question ("what is it going to do if it's in multiple
+  books?... what did we decide?") — answered from the shipped
+  record:** several books ⇒ a plain CLICK drops the list (there is
+  no "the one" to open); exactly one ⇒ click goes straight to it;
+  ⌘-click shows the list in EVERY arity (its distinct value is the
+  one-book case); "the book you were just in" is the ← door's job
+  (per-pane history). Her floated alternative — click = the
+  most-recently-visited containing book, modifier = the list —
+  is recorded as an OPEN option, hers on a word; not built.
