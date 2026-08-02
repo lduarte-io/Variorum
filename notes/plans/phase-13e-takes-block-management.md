@@ -34,6 +34,41 @@ with her at the opening sitting, none of it gates anything:
 - **One click:** Help ▸ Restore Tutorial (covers 13f + 13g's
   lessons + the review's corrections), if not already pressed.
 
+## Author additions (2026-08-01 evening, the lean-docs housekeeping session — direction-level, for the opening sitting)
+
+Recorded the evening after 13g closed, her uncertainty preserved;
+the sitting walks these BESIDE the reminder note above (same rule:
+reminders and directions, nothing gates):
+
+- **Two 13g checks already VERIFIED by her, on the record:** ⌘B in
+  a take pane — "bold in takes works well" — and the
+  masthead-inspector crash "is gone now." (The Read-scroll link
+  click remains open.)
+- **The context/navigation bar should ALWAYS be the compact icon
+  row** (her screenshot on file: ← · book icon · # · ›). Her
+  words: "the collapsing and growing in that bar is a little
+  annoying to me," and "i actually don't think that the spelled
+  out *back arrow* is a need."
+- **A FORWARD affordance beside back:** "after you just went back,
+  i feel like you should be able to go forward." (⌘] shipped at
+  13f; the bar itself offers no forward door — the greyed chevron
+  is the natural candidate.)
+- **"In xyz book" → a BOOK ICON:** click brings you to the book
+  when there is exactly one; "command click on lets you see the
+  list of books (or there's a dropdown if there's several books it
+  could be in)."
+- **Tags MAYBE move from the top bar to the context-bar area** —
+  "i think it might look better there than in the top bar"; she is
+  "sensitive to not wanting the header bar to be too crowded" and
+  explicitly "a little conflicted on if tags belong there." A
+  sitting call, deliberately NOT pre-decided.
+- **E1 rider (callouts):** the right-click context menu carries
+  the Format submenu but NO Callout submenu — Callout lives in the
+  menu-bar Block menu (+ ⌥⌘C), and she went looking for it in the
+  right-click and reasonably didn't find it (2026-08-01). E1's
+  swatches/real-emoji-picker work should hang the right-click door
+  too.
+
 ## Kickoff message (paste-ready for the orchestrator/coordinator the author invokes)
 
 > You are running Variorum Phase 13e under the shape the author
