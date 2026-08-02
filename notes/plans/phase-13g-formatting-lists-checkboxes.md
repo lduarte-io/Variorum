@@ -3221,3 +3221,186 @@ Her message, verbatim:
 - **Her roadmap question answered in the reply** (no ruling): the
   Fragments/joint-login work she remembers is Phase 14a (suite
   identity — the neutral stargazing account), not a 13-family row.
+
+### Cold review — round 1 (2026-08-02, Fable; findings committed BEFORE fixes)
+
+**Scope reviewed:** the phase's combined diff `74ddf48..HEAD` (85 files),
+this plan file top to bottom, the canon docs, and the code under
+`Sources/` and `App/` the phase touched. **Counts by this reviewer's OWN
+runs on HEAD before any fix:** core "Test run with 1001 tests in 110
+suites passed" · Mac "Test run with 1135 tests in 196 suites failed …
+with 1 issue" — the ONE red isolated by a solo suite run and confirmed
+to be EXACTLY the parked environment-gated tripwire
+(`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+its own KnownIssues row; this session ran unlocked) · mobile "Test run
+with 14 tests in 4 suites passed". The plan carries no "Review foci"
+section; the standing prompt alone governs.
+
+#### Findings, severity-ranked
+
+**R1-1 · MAJOR · notes/plans/phase-13g-formatting-lists-checkboxes.md
+(ledger L17) + App/Variorum/Variorum/Features/BookView/MembershipChip.swift
+· A RULED item was DROPPED — L17 (her WT-7 wording ruling) was never
+built, and the ledger row misstates its route.** The mechanism, traced:
+her round-4 ruling ("i'd update the text on that for clearer wording but
+it seems good") was ROUTED as L17 with a recorded direction — the
+diverge RECEIPT ("Open the Copy") must read as a receipt of the past
+act, "tied to the past act and naming its book, e.g. the button carrying
+the book name"; the DOOR ("Duplicate as Version") as an act; and the
+pass must VERIFY what the "Editing here edits the note everywhere it
+appears" explainer conditions on (suspected vacuous on a bookless note).
+The ledger's status column says "batch 2 / acceptance" — but batch 2's
+brief scoped "L7 ONLY", no batch record or acceptance ever mentions L17,
+and `git log 74ddf48..HEAD -- …/MembershipChip.swift` is EMPTY: the file
+was not touched once all phase. The explainer verification duty confirms
+the suspicion: the sentence renders UNCONDITIONALLY in the popover body
+(no membership gate — read at MembershipChip.swift:121), so a bookless
+note (including the ORIGINAL right after a diverge moved it out of its
+only book — exactly her screenshot's state) reads "everywhere it
+appears" with no elsewhere in sight; and the receipt button is the bare
+"Open the Copy" for both the diverge and the plain duplicate, naming no
+book and no act. Severity rationale: the material impact is wording, but
+a ruling of hers shipped with NO disposition — neither built, nor
+honestly held for her word — and a ledger row that claims a route that
+never happened is the drift class this phase's own WT-1 finding exists
+to kill. **Disposition: FIXED by this reviewer** (the fix record below)
+— built to the recorded ruling's letter, nothing invented beyond it.
+
+**R1-2 · MINOR · App/Variorum/Variorum/Features/Help/HelperView.swift:350
++ App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:322 · Two
+discoverability surfaces teach a landing that batch 7 made FALSE — the
+WT-1 drift class, on the phase that named it.** The mechanism: batch 7
+(R6-4) files every quick note under the `quicknote` tag into the smart
+Quicknotes book, and `Queries.poolPosts` has excluded smart-collected
+posts since 13f Stage B — so a quick note is NOT in the Pool (the batch
+record and #52(g) say so, and `QuickNoteCopy.filedNote`/the pad's
+placeholder were corrected). But the helper's "quick note" DICTIONARY
+entry and the field guide's WORKSPACE lesson (batch 1's, seeded verbatim
+into her store) both still end "…what you wrote is kept as a note in the
+Pool." Batch 7's discoverability pass updated the tags/commits/divide/
+seal lessons and added the "quicknote (the tag)" entry, but missed the
+two surfaces describing the quick note's own landing — the exact class
+her round-1 report opened the phase with. (Two stale comments ride
+along: QuickNoteView.swift:37 and :217 still describe the Pool landing.)
+**Disposition: FIXED** — both surfaces now name Quicknotes with the
+one-untag road back to the Pool; `plan`/`seed` edited together so the
+walk test holds; NOTE: this stales the seeded guide again — her ONE owed
+Restore-Tutorial click (13f + batches 1, 4, 7) covers it, nothing new
+for her to do.
+
+**R1-3 · MINOR · App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift
+(QuickNoteMint.file) · The filing REFUSAL arm speaks the SUCCESS wording
+— and contradicts its own comment.** The mechanism: `fileAsQuicknote`
+returns `.refused(reason)` when the tag/book ensure or the apply fails
+(the note itself is safely minted); the switch then speaks
+`"\(QuickNoteCopy.filedNote) (\(reason))"` — i.e. "Filed in Quicknotes —
+tagged #quicknote. (the quicknotes shelf could not be reached)". The
+claim is false precisely when it is spoken: the note carries NO tag, is
+in NO smart book, and IS in the Pool. The comment four lines above says
+"a refusal keeps the Pool wording, which stays true either way" — the
+code does not do what its comment says (filedNote itself was rewritten
+to the Quicknotes wording for every arm). **Disposition: FIXED** — the
+refusal arm gets its own wording brain (`QuickNoteCopy.refusedFilingLine`,
+pure so it pins): the note is kept, it is in the Pool, and the reason
+rides along; the comment now matches the code.
+
+**R1-4 · NIT · App/Variorum/Variorum/Features/BookView/ReadingFlowView.swift
+(FlowPostView `.help`) · The one note-naming surface left outside the
+R6-3 display brain.** `entry.title?.isEmpty == false ? entry.title! :
+(entry.entryDate ?? "")` — an untitled, undated note gets an EMPTY
+tooltip where every sibling surface now shows its date. Outside batch
+7's letter (this spot rendered "" rather than "Untitled", so the sweep's
+grep missed it), but it is the display brain's question asked the old
+way. **Disposition: FIXED** (one line, `entry.displayTitle`; the brain
+itself is pinned by `DisplayTitleTests` — clarity class, mechanism
+stated, no separate pin owed).
+
+**R1-5 · NIT · record-only · The batch-6 record's archived-chosen
+characterization of the Notes-mode snippet is imprecise.** The record
+(and the #51(d) neighborhood) says the snippet "resolves chosen →
+default requiring that variant live … a snippet that moves to the next
+block in that corner". Precisely: the SQL joins on
+`v.id = COALESCE(chosen, default) AND v.deleted_at IS NULL` — a
+TOMBSTONED chosen reads as empty and the snippet moves on (as recorded),
+but an ARCHIVED-and-live chosen MATCHES, so the snippet shows the
+archived take's text where `renderPost` would fall back to the default
+take. A display aid diverging in a corner both records already class as
+a simplification; recorded here precisely so the next reader is not
+misled. No code change.
+
+**R1-6 · NIT · record-only (a look item for her bundle) ·
+`ReadTakesView`'s cards render raw markdown markers unstyled.** The
+takes projection shows `**bold**` as plain undimmed text. Display ==
+stored holds (no F-5 violation — the surface neither edits nor maps
+clicks to offsets), but it is the one text surface wearing NEITHER face.
+A look call, hers; routed to the 13e reminder note's look/feel bundle,
+not fixed by fiat.
+
+Nothing here routes to `notes/QUESTIONS.md`: R1-1's fix implements a
+ruling she already made; R1-6 is a look offer, not a shipped PROVISIONAL.
+**#53 remains the next free number.**
+
+#### Clean bill (checked specifically, found solid)
+
+- **F-1/F-2's one invariant:** `MarkdownStyling` writes ATTRIBUTES only —
+  no code path inserts/removes a character; pinned byte-for-byte
+  (`materializationStylesWITHOUTMovingASingleByte`,
+  `aMarkdownHeavySessionLeavesTheStoreAndTheViewIdentical`) and the
+  zero-write fast path honestly scoped (its comment claims the scan, not
+  a layout pass).
+- **The line-scoped law and its two consequences:** a span never crosses
+  a newline (core pin) nor a block SEAM (Mac pin through the real
+  editor); the edit computations take whole lines, so the cross-block
+  merge arm is unreachable by construction — pinned INTO THE STORE (two
+  blocks in, two blocks out, both bulleted).
+- **TEXTKIT2 discipline:** no `NSTextList` anywhere; the face is real
+  text-storage font/color attributes, never TK2 per-range rendering
+  attributes; the §5 re-run (L15) is properly still owed at closeout.
+- **P1:** keystroke rescan ∝ edited lines, pinned STRUCTURALLY
+  (`MarkdownScanCount` lives on the scanner, 79 units on a 15.6k-char
+  note; ⌘B < 500); measured costs flat across a 16× document sweep.
+- **The join brain and the bridge:** `renderedText`, `exportPost`,
+  `joinRenderedTexts` and everything under `Bridge/` are byte-untouched
+  by the diff; the paged Read face builds TWO strings from ONE decision
+  set with the stored body still pinned equal to `renderedText`
+  (`theComposedBodyIsTheRatifiedProjection`); the only export lines are
+  title PRESENTATION, which R6-3 explicitly ordered.
+- **Zero `Sources/VariorumCore/Sync/` lines; ZERO schema** (no
+  Persistence/migration files in the diff; mirror stays at marker 4);
+  the quicknote book is settings + standing ops only, its designation
+  read sharing ONE implementation with the daily book, liveness clause
+  pinned (revert E).
+- **The 13c K1 address rule:** Read's pagination measures the
+  TRANSFORMED text but a page's name stays `(post, page-in-post)`
+  identity; the estimator's marker-heavy over-count is honestly recorded
+  as calibration territory.
+- **The registry walks:** the eight formatting capabilities declared
+  with doors and sweep-verified chords (⌘B/⌘I confirmed free by reading
+  `EditorCommands.keyEquivalent`); declared ⇔ rendered still proven for
+  both bottom bars after the R6-2 regroup
+  (`theBottomBarsRenderExactlyTheDeclaredBarDoors`,
+  `everyDoorTheGroupsSwallowedIsStillDeclaredByItsBar`); the helper
+  drift guard + keyless-door + formatting-ceiling pins are real and
+  honestly one-directional.
+- **R6-3's load-bearing halves:** the mint stores `nil`; the literal
+  "Untitled" reads as absent (carrying her existing rows); the date is
+  the LOCAL calendar day matching `entry_date`'s kind of day, with the
+  timezone-honest test discipline (fixture-clock trap recorded); the
+  rename door seeds from `storedTitle`, never the displayed date.
+- **The R5-5 crash fix:** the traced mechanism (a `GeometryReader`'s
+  reported size fed back as a hard frame fighting the hoisted
+  inspector's animating split) is coherent and the fix is the minimal
+  correct one (accept the proposed size); the app-level red-on-old with
+  byte-identical `.ips` is the model-layer honesty rule properly
+  invoked.
+- **Batch 5's flaky-pin fix:** poll-the-LAST-signal is the right
+  mechanism; the window-holding deterministic pin is real (green in this
+  reviewer's full run) and the three sibling re-points strengthen the
+  pins (store/stack assertions kept, moved after the wait).
+- **The mount rule:** `ReadTakesView` owns no authority, registers no
+  handler, mounts no TK2 surface; `PaneFocusCatcher` observes and never
+  consumes; `MarkdownFormattable` targeting is not a second liveness
+  mechanism (it asks who holds the keyboard, which liveness decided).
+- **QUESTIONS hygiene:** #49–#52 appended, properly OPEN for her walk,
+  each call one line to change; KnownIssues rows all carry named owners
+  (13e), per the R2-7 owner rule.
