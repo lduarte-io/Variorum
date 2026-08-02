@@ -60,7 +60,7 @@ struct PagedReadView: View {
     private var appearance: PagedReadModel.PageAppearance {
         PagedReadModel.PageAppearance(
             ink: NSColor(page.ink), chapterInk: NSColor(page.chapterInk),
-            meta: NSColor(page.pageMeta))
+            meta: NSColor(page.pageMeta), codeTint: NSColor(page.codeTint))
     }
 
     /// Which posts OPEN a chapter — the only structural input pagination

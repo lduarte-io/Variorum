@@ -51,6 +51,15 @@ struct VoiceTokens {
     /// Comment surfaces (R7).
     let commentTint: Color
     let commentInk: Color
+    /// **13k K10 — the inline-code chip.** Her ruling (sitting round 2, Q2):
+    /// a faint per-voice TINTED CHIP hugging exactly the `` `code` `` span,
+    /// never block-wide — the geometry is what keeps it visibly distinct
+    /// from a callout frame, and the colour is deliberately NEUTRAL to the
+    /// voice's own room rather than a member of the callout palette's five
+    /// pastels. (It also fixes a batch-2 look finding: in the TERMINAL voice
+    /// the prose is already monospaced, so before this only the dimmed
+    /// backticks distinguished code at all.)
+    let codeTint: Color
 
     // MARK: Type
     let body: Font
@@ -123,6 +132,7 @@ extension VoiceTokens {
         ring: Color(hex: 0x3F7FD6),
         commentTint: Color(hex: 0xF6F3E2),
         commentInk: Color(hex: 0x7A6F45),
+        codeTint: Color(hex: 0xE9EBE2),
         body: .system(size: 14, design: .monospaced),
         title: .system(size: 19, weight: .semibold, design: .monospaced),
         heading: .system(size: 15, weight: .semibold, design: .monospaced),
@@ -153,6 +163,7 @@ extension VoiceTokens {
         ring: Color(hex: 0x5B93DE),
         commentTint: Color(hex: 0x1C1910),
         commentInk: Color(hex: 0xB3A25F),
+        codeTint: Color(hex: 0x1E211E),
         body: .system(size: 14, design: .monospaced),
         title: .system(size: 19, weight: .semibold, design: .monospaced),
         heading: .system(size: 15, weight: .semibold, design: .monospaced),
@@ -184,6 +195,7 @@ extension VoiceTokens {
         ring: Color(hex: 0xB0713A),
         commentTint: Color(hex: 0xFBF5E2),
         commentInk: Color(hex: 0x6D5F3E),
+        codeTint: Color(hex: 0xF2EDE1),
         body: .custom("Iowan Old Style", size: 16, relativeTo: .body),
         title: .custom("Iowan Old Style", size: 21, relativeTo: .title2).weight(.semibold),
         heading: .custom("Iowan Old Style", size: 16, relativeTo: .headline).weight(.semibold),
@@ -215,6 +227,7 @@ extension VoiceTokens {
         ring: Color(hex: 0xD29A64),
         commentTint: Color(hex: 0x201C12),
         commentInk: Color(hex: 0xB3A25F),
+        codeTint: Color(hex: 0x241F18),
         body: .custom("Iowan Old Style", size: 16, relativeTo: .body),
         title: .custom("Iowan Old Style", size: 21, relativeTo: .title2).weight(.semibold),
         heading: .custom("Iowan Old Style", size: 16, relativeTo: .headline).weight(.semibold),
@@ -237,6 +250,11 @@ struct ReadingPageTokens {
     let ink: Color
     let chapterInk: Color
     let pageMeta: Color
+    /// 13k K10: the reading page's inline-code chip. The page's identity is
+    /// deliberately VOICE-INDEPENDENT (R2 — only the room around it follows
+    /// the voice), so its chip is the paper's own warm neutral rather than
+    /// either voice's.
+    let codeTint: Color
     let serif: Font
     let serifTitle: Font
 
@@ -245,6 +263,7 @@ struct ReadingPageTokens {
         ink: Color(hex: 0x2A2620),
         chapterInk: Color(hex: 0xA49681),
         pageMeta: Color(hex: 0xC2BCB0),
+        codeTint: Color(hex: 0xF3EEE0),
         serif: .system(size: 16, design: .serif),
         serifTitle: .system(size: 25, weight: .semibold, design: .serif))
 
@@ -253,6 +272,7 @@ struct ReadingPageTokens {
         ink: Color(hex: 0xE3DCD0),
         chapterInk: Color(hex: 0x8D8371),
         pageMeta: Color(hex: 0x6B6456),
+        codeTint: Color(hex: 0x241F18),
         serif: .system(size: 16, design: .serif),
         serifTitle: .system(size: 25, weight: .semibold, design: .serif))
 }

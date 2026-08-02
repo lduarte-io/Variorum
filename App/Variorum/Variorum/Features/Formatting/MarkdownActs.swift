@@ -126,6 +126,30 @@ enum MarkdownActs {
         return view
     }
 
+    /// **THE door every non-context-menu face fires** — the menu bar's (via
+    /// `ShellActions.applyFormat`) and, since 13k K7, the bottom bars'
+    /// formatting toolbar.
+    ///
+    /// It exists so the toolbar is not a second brain (P-1): find the surface
+    /// holding the keyboard, act on it, and where there is none SPEAK the one
+    /// declared note rather than being a dead button (P-2). The context menu
+    /// keeps its own door because it already knows its surface — a right-click
+    /// names the view it happened in.
+    /// `window` defaults to the key window — the door's real input. It is a
+    /// PARAMETER only so a pin can drive it: a headless test host's window is
+    /// not `NSApp.keyWindow`, and a door whose target could not be named in a
+    /// test would have to be trusted rather than proven.
+    static func fire(
+        _ act: MarkdownEditing.Act, status: StatusCenter,
+        in window: NSWindow? = NSApp.keyWindow
+    ) {
+        guard let textView = target(in: window) else {
+            status.speak(noTargetNote)
+            return
+        }
+        apply(act, to: textView)
+    }
+
     // MARK: - Applying
 
     /// Runs `act` on `textView` through the ordinary input path. Returns

@@ -525,27 +525,34 @@ nonisolated enum CapabilityRegistry {
         // italic, no platform chord for strikethrough/code/headings/lists is
         // standard enough to be obvious, and an invented chord would owe a
         // sweep no ruling asked for (13f batch 4's precedent).
+        //
+        // **13k K7 — the `.bottomBar` door** (her ruling: *"i think the
+        // formatting toolbar should be added to the bottom … i think other
+        // users would need it though"*). All EIGHT carry it, rendered by
+        // `FormatBar` in BOTH bottom bars: the acts are `takesAccess:
+        // .native`, so a toolbar in Write's bar and not in the boards' would
+        // privilege Write exactly where R118 says it must not be.
         Capability(
             id: .formatBold, verb: "Bold", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: "⌘B", takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
         Capability(
             id: .formatItalic, verb: "Italic", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: "⌘I", takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
         Capability(
             id: .formatStrikethrough, verb: "Strikethrough", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
         Capability(
             id: .formatCode, verb: "Inline Code", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
@@ -558,7 +565,7 @@ nonisolated enum CapabilityRegistry {
         // keyless acts (QUESTIONS #50 offers her one).
         Capability(
             id: .formatAddLink, verb: "Add Link", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
@@ -568,19 +575,19 @@ nonisolated enum CapabilityRegistry {
         // three acts, and none of them could honestly carry a key.
         Capability(
             id: .formatHeading, verb: "Heading", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
         Capability(
             id: .formatBulletList, verb: "Bullet List", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
         Capability(
             id: .formatChecklist, verb: "Checklist", scope: .block,
-            doors: [.menuBar, .contextMenu],
+            doors: [.menuBar, .contextMenu, .bottomBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),

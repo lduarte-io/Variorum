@@ -1474,6 +1474,27 @@ final class TakesViewModel {
     /// move the keyboard, so `commandTargetSlot` would still name whichever
     /// card was last focused and the frame would land on the wrong block.
     /// nil keeps the routed door's long-standing behaviour byte-for-byte.
+    /// **13k K9 — the frame a block's takes region wears**, or nil where the
+    /// block is plain.
+    ///
+    /// Her instruction was *"callouts are supposed to be added to take mode
+    /// as well"*: the door has routed from the boards since 13c R2-2, but
+    /// the FRAME drew only in Write's `BlockDecor` overlay, so setting one
+    /// here changed nothing you could see. The ruled shape is ONE frame
+    /// around the block's whole takes region — one block, one frame, takes
+    /// inside it (R16/R27's letter: the frame is the BLOCK's and its takes
+    /// share it, which is exactly why it is never per-card).
+    ///
+    /// The `kind` check is the same fail-open rule the editor's overlay
+    /// applies: a future non-callout presentation kind draws nothing here
+    /// rather than being drawn as a callout.
+    func calloutFrame(_ blockID: String) -> BlockPresentation? {
+        guard let presentation = projection.presentations[blockID],
+              presentation.kind == BlockPresentation.calloutKind
+        else { return nil }
+        return presentation
+    }
+
     func applyCallout(_ edit: CalloutEdit, blockID: String? = nil) async {
         guard let target = blockID ?? commandTargetSlot?.blockID else {
             speak("Click into a block first — the frame goes on the block you're in.")

@@ -55,15 +55,21 @@ nonisolated enum MarkdownStyling {
         let marker: NSColor
         /// A link's TEXT (F-5: "text link-colored, the `(url)` dimmed").
         let link: NSColor
+        /// **13k K10 — the inline-code CHIP** (her ruling: a faint per-voice
+        /// tint hugging exactly the span, never block-wide).
+        let codeTint: NSColor
 
-        init(marker: NSColor, link: NSColor) {
+        init(marker: NSColor, link: NSColor, codeTint: NSColor) {
             self.marker = marker
             self.link = link
+            self.codeTint = codeTint
         }
 
         @MainActor
         init(tokens: VoiceTokens) {
-            self.init(marker: NSColor(tokens.muted), link: NSColor(tokens.accent))
+            self.init(
+                marker: NSColor(tokens.muted), link: NSColor(tokens.accent),
+                codeTint: NSColor(tokens.codeTint))
         }
 
         /// Before any voice has been applied (a bare test host, a surface
@@ -73,7 +79,12 @@ nonisolated enum MarkdownStyling {
         /// with the first chrome application, which is the same posture
         /// `VoiceTokens.fallback(for:)` already takes.
         static var systemFallback: Palette {
-            Palette(marker: .secondaryLabelColor, link: .linkColor)
+            Palette(
+                marker: .secondaryLabelColor, link: .linkColor,
+                // A real system faint fill, for the same reason the other two
+                // are system colours here: a copied token literal would be
+                // the duplicate-palette class P-8 forbids.
+                codeTint: .unemphasizedSelectedTextBackgroundColor)
         }
     }
 
@@ -152,6 +163,10 @@ nonisolated enum MarkdownStyling {
         for (sub, value) in applied {
             storage.addAttribute(.font, value: base, range: sub)
             storage.removeAttribute(.strikethroughStyle, range: sub)
+            // 13k K10: the code chip is written over the face's own ranges,
+            // so the clear that owns those ranges owns the chip too — a
+            // backtick deleted mid-word must not leave a tinted ghost.
+            storage.removeAttribute(.backgroundColor, range: sub)
             if let color = value as? NSColor {
                 storage.addAttribute(.foregroundColor, value: color, range: sub)
             } else {
@@ -179,6 +194,23 @@ nonisolated enum MarkdownStyling {
     private static func apply(
         _ span: MarkdownSyntax.Span, to storage: NSMutableAttributedString, restore: Any
     ) {
+        // 13k K10 — THE CODE CHIP, first, over the WHOLE span (backticks
+        // included) so it reads as one object: the markers are part of the
+        // thing she typed, and a chip that stopped at them would leave two
+        // dimmed ticks floating outside their own tint. Hugging the span is
+        // also exactly what keeps it distinguishable from a callout frame,
+        // which wraps a whole block — her ruling's "never block-wide".
+        //
+        // A background is written on the STORAGE like every other attribute
+        // this file writes (never a TK2 rendering attribute — TEXTKIT2 §3),
+        // and it hugs the glyph run by construction: no geometry, nothing to
+        // keep in sync with layout.
+        if case .code = span.kind {
+            let whole = nsRange(span.range)
+            if whole.length > 0, whole.upperBound <= storage.length {
+                storage.addAttribute(.backgroundColor, value: palette.codeTint, range: whole)
+            }
+        }
         // Markers first, so a later span's content can read the font a
         // line-leading span left behind (a bold inside a heading composes).
         for marker in span.markers {

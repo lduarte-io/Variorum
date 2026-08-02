@@ -34,13 +34,28 @@ extension Queries {
         /// because the board already re-reads on exactly the writes that
         /// change it (a divide-W or merge lands new slots).
         public var unplacedOrigins: [String: [String]]
+        /// 13k K9 — blockID → the block's CALLOUT FRAME, for the boards to
+        /// draw (her instruction: *"callouts are supposed to be added to
+        /// take mode as well"*; the ruled shape is ONE frame around the
+        /// block's whole takes region — one block, one frame, takes inside
+        /// it, R16/R27's letter). Absent = a plain block; malformed JSON is
+        /// absent too (the fail-open presentation doctrine).
+        ///
+        /// It rides the projection rather than a fifth observation for the
+        /// reason `unplacedOrigins` does: the board already re-reads on
+        /// exactly the writes that change it (`updateBlockPresentation`
+        /// writes the block row this projection already joins), and the
+        /// read is the one Write's editor has always made
+        /// (`blockPresentations`, cost ∝ the post).
+        public var presentations: [String: BlockPresentation]
 
         public init(
             slots: [RenderedBlock] = [], fans: [String: [Variant]] = [:],
             lenses: [Lens] = [], lensSelections: [String: [String: String]] = [:],
             fanStyle: FanStyle = .stack, sealed: Bool = false,
             profile: Profile? = nil, entryDate: String? = nil,
-            unplacedOrigins: [String: [String]] = [:]
+            unplacedOrigins: [String: [String]] = [:],
+            presentations: [String: BlockPresentation] = [:]
         ) {
             self.slots = slots
             self.fans = fans
@@ -51,6 +66,7 @@ extension Queries {
             self.profile = profile
             self.entryDate = entryDate
             self.unplacedOrigins = unplacedOrigins
+            self.presentations = presentations
         }
     }
 
@@ -73,7 +89,10 @@ extension Queries {
             sealed: header?["locked"] ?? false,
             profile: (header?["profile"] as String?).flatMap(Profile.init(rawValue:)),
             entryDate: header?["entry_date"],
-            unplacedOrigins: try unplacedOrigins(db, inContainer: containerID))
+            unplacedOrigins: try unplacedOrigins(db, inContainer: containerID),
+            // 13k K9: the SAME read Write's decoration layer makes, so the
+            // two surfaces can never disagree about which blocks are framed.
+            presentations: try blockPresentations(db, containerID: containerID))
     }
 
     /// blockID → the block's live ACTIVE fan in fan order, for a set of

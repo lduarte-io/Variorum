@@ -64,6 +64,9 @@ final class PagedReadModel {
         var ink: NSColor
         var chapterInk: NSColor
         var meta: NSColor
+        /// 13k K10: the inline-code chip (the reading page's own warm
+        /// neutral — the page is voice-independent by R2).
+        var codeTint: NSColor = .unemphasizedSelectedTextBackgroundColor
         static let fallback = PageAppearance(
             ink: .textColor, chapterInk: .secondaryLabelColor, meta: .tertiaryLabelColor)
     }
@@ -217,7 +220,7 @@ final class PagedReadModel {
                 slots: projection.slots, presentations: projection.presentations,
                 title: entry.map(PagedReadModel.pageTitle), chapter: chapterOpeners[postID],
                 typography: typography, ink: appearance.ink,
-                chapterInk: appearance.chapterInk)
+                chapterInk: appearance.chapterInk, codeTint: appearance.codeTint)
             return PagePaginator(composed: composed, contentRect: geometry.contentRect)
         } catch is CancellationError {
             return nil

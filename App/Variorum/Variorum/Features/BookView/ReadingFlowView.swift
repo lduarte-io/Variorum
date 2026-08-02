@@ -183,7 +183,9 @@ private struct FlowPostView: View {
                 let slots = try Queries.renderPost(db, containerID: id)
                 return Queries.joinRenderedTexts(slots.compactMap(\.text))
             }
-            paragraphs = FlowParagraph.paragraphs(of: text ?? "")
+            // 13k K10: the page's own code chip rides in (the reading page
+            // is voice-independent — R2).
+            paragraphs = FlowParagraph.paragraphs(of: text ?? "", codeTint: page.codeTint)
         }
     }
 }
@@ -198,7 +200,9 @@ struct FlowParagraph: Equatable {
     /// blank display lines are DROPPED (the surface has its own spacing —
     /// the paged reader is the face that keeps stored spacing byte for
     /// byte). What is new is that each surviving line arrives rendered.
-    static func paragraphs(of source: String) -> [FlowParagraph] {
+    /// `codeTint` is 13k K10's chip; nil (the default) keeps every existing
+    /// caller and pin composing exactly as it did.
+    static func paragraphs(of source: String, codeTint: Color? = nil) -> [FlowParagraph] {
         let rendered = MarkdownRendering.render(source)
         let ns = rendered.text as NSString
         var result: [FlowParagraph] = []
@@ -223,7 +227,7 @@ struct FlowParagraph: Equatable {
                 attributed += AttributedString(
                     ns.substring(with: NSRange(
                         location: run.range.lowerBound, length: run.range.count)),
-                    attributes: container(for: run))
+                    attributes: container(for: run, codeTint: codeTint))
                 cursor = run.range.upperBound
             }
             if cursor < line.range.upperBound {
@@ -235,13 +239,20 @@ struct FlowParagraph: Equatable {
         return result
     }
 
-    private static func container(for run: MarkdownRendering.Run) -> AttributeContainer {
+    private static func container(
+        for run: MarkdownRendering.Run, codeTint: Color? = nil
+    ) -> AttributeContainer {
         var attributes = AttributeContainer()
         var intent: InlinePresentationIntent = []
         if run.emphasis.contains(.bold) { intent.insert(.stronglyEmphasized) }
         if run.emphasis.contains(.italic) { intent.insert(.emphasized) }
         if run.emphasis.contains(.strikethrough) { intent.insert(.strikethrough) }
-        if run.emphasis.contains(.code) { intent.insert(.code) }
+        if run.emphasis.contains(.code) {
+            intent.insert(.code)
+            // The chip, hugging exactly the run — Read hides the backticks,
+            // so here the run IS the span (13k K10).
+            if let codeTint { attributes.backgroundColor = codeTint }
+        }
         if !intent.isEmpty { attributes.inlinePresentationIntent = intent }
         // SwiftUI renders a `.link` attribute as a clickable link and routes
         // the click through the environment's `OpenURLAction` — which is

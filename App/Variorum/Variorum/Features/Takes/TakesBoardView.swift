@@ -569,6 +569,9 @@ struct TakesBoardView: View {
                     .frame(width: marginRailWidth, alignment: .topLeading)
             }
         }
+        .modifier(TakesCalloutFrame(
+            presentation: model.calloutFrame(slot.blockID),
+            tokens: tokens, dark: scheme == .dark))
     }
 
     /// The fan door as a CORNER BADGE (13b 3F — the D2 ledger row's second

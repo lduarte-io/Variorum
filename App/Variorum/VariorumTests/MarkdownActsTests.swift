@@ -35,7 +35,10 @@ struct MarkdownActsTests {
     @Test func theFormattingActsAreDeclaredWithTheirDoorsAndTheirTwoChords() {
         for id in Self.allFormatting {
             let capability = CapabilityRegistry.capability(id)
-            #expect(capability.doors == [.menuBar, .contextMenu])
+            // 13k K7: the `.bottomBar` door joined the two — her formatting
+            // toolbar. The expectation is UPDATED rather than loosened: the
+            // door list is the claim, and this batch changed it deliberately.
+            #expect(capability.doors == [.menuBar, .contextMenu, .bottomBar])
             #expect(capability.scope == .block)
             #expect(capability.takesAccess == .native,
                     "\(id) acts on whichever surface holds the keyboard — Takes included")

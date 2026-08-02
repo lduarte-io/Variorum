@@ -27,12 +27,17 @@ struct CommitBar: View {
 
     /// The registry ids this bar renders (13b 1b — walk-asserted with the
     /// Takes bar's against the bottomBar door set).
-    static let renderedCapabilities: [CapabilityID] = [
-        .commitTake, .sealPost, .blockComments, .divide, .extract, .makeBlock,
-        .merge, .showTakes,
-        .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
-        .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
-    ]
+    static var renderedCapabilities: [CapabilityID] {
+        [
+            .commitTake, .sealPost, .blockComments, .divide, .extract, .makeBlock,
+            .merge, .showTakes,
+            .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
+            .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
+        ]
+        // 13k K7: the formatting toolbar's own eight, from ITS table (the
+        // cluster is rendered here, so its doors are declared here).
+        + FormatBar.renderedCapabilities
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -131,7 +136,9 @@ struct CommitBar: View {
         .help("Everything block-scoped: divide, extract, make block, merge, and the two block mints")
     }
 
-    /// The flat row's note half: `note ▾`, comments, and the newlines chip.
+    /// The flat row's note half: `note ▾`, comments, the newlines chip — and
+    /// (13k K7) the formatting toolbar, which sits with them because it acts
+    /// on the text of the note you are writing.
     @ViewBuilder private var postCluster: some View {
         noteMenu
         Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
@@ -141,6 +148,8 @@ struct CommitBar: View {
         // in-view setting chip over the Phase-1 machinery; the header
         // observation keeps `effectiveSegmentation` (and this chip) live.
         newlinesChip
+        StatusDot(tokens: tokens)
+        FormatBar(tokens: tokens, status: model.session.status)
     }
 
     /// **note ▾** (R6-2): history, the seal, the entry date. The date

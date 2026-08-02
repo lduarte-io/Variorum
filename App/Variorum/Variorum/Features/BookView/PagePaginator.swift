@@ -94,7 +94,10 @@ enum PageComposer {
         slots: [Queries.RenderedBlock],
         presentations: [String: BlockPresentation],
         title: String?, chapter: String?,
-        typography: PageTypography, ink: NSColor, chapterInk: NSColor
+        typography: PageTypography, ink: NSColor, chapterInk: NSColor,
+        // 13k K10: the reading page's inline-code chip. Defaulted so every
+        // existing caller and pin composes exactly as it did.
+        codeTint: NSColor? = nil
     ) -> ComposedPost {
         let result = NSMutableAttributedString()
         if let chapter, !chapter.isEmpty {
@@ -220,7 +223,9 @@ enum PageComposer {
             applyLineStyle(style, to: bodyString, range: range, typography: typography)
         }
         for (range, run) in runs {
-            applyRun(run, to: bodyString, range: range, typography: typography, ink: ink)
+            applyRun(
+                run, to: bodyString, range: range, typography: typography, ink: ink,
+                codeTint: codeTint)
         }
         result.append(bodyString)
         // Shifted past the chrome, and BOUNDS-GUARDED for the same reason the
@@ -279,7 +284,8 @@ enum PageComposer {
 
     private static func applyRun(
         _ run: MarkdownRendering.Run, to string: NSMutableAttributedString,
-        range: NSRange, typography: PageTypography, ink: NSColor
+        range: NSRange, typography: PageTypography, ink: NSColor,
+        codeTint: NSColor?
     ) {
         guard range.length > 0, range.upperBound <= string.length else { return }
         let existing = string.attribute(.font, at: range.location, effectiveRange: nil)
@@ -292,6 +298,12 @@ enum PageComposer {
                 .font,
                 value: NSFont.monospacedSystemFont(ofSize: existing.pointSize, weight: .regular),
                 range: range)
+            // 13k K10: the chip, hugging exactly the code run. Read hides the
+            // backticks (F-5), so here the run IS the span — which is why the
+            // editing face tints markers and this one has none to tint.
+            if let codeTint {
+                string.addAttribute(.backgroundColor, value: codeTint, range: range)
+            }
         } else if traits != existing.fontDescriptor.symbolicTraits {
             let descriptor = existing.fontDescriptor.withSymbolicTraits(traits)
             string.addAttribute(

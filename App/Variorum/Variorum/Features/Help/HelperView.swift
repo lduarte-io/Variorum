@@ -104,6 +104,11 @@ struct HelperView: View {
                 + "parentheses ready for the address"),
             ("⌘-click a link", "opens it — in a writing surface, where a plain click "
                 + "places the cursor; in Read a plain click opens it"),
+            // 13k K7: the toolbar is a THIRD door onto the same eight acts,
+            // and a door nobody is told about is the WT-1 finding all over
+            // again — so the bar is named here beside the menu paths.
+            ("the bottom bar", "B · I · S · ` · link · H · • · ☐ — the same eight acts "
+                + "as the Format menu, on the text you're writing in"),
         ]),
         // QoL batch 3 (L6): the in-post find family. Deliberately its own
         // group and deliberately worded against ⌘K's row below — one searches

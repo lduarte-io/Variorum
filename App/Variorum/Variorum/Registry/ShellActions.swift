@@ -376,12 +376,10 @@ struct ShellActions {
     /// note open (the registry's `editableText`), so this refusal covers the
     /// real case — a note IS open, and the keyboard is somewhere else (a
     /// sidebar row, the shelf, a read pane).
+    /// 13k K7: the body moved onto `MarkdownActs.fire` so the bottom bars'
+    /// formatting toolbar fires the SAME door rather than a copy of it.
     func applyFormat(_ act: MarkdownEditing.Act) {
-        guard let textView = MarkdownActs.target(in: NSApp.keyWindow) else {
-            status.speak(MarkdownActs.noTargetNote)
-            return
-        }
-        MarkdownActs.apply(act, to: textView)
+        MarkdownActs.fire(act, status: status)
     }
 
     /// Flip the global seam setting (R42 — a synced document setting).

@@ -28,13 +28,19 @@ struct TakesBottomBar: View {
 
     /// The registry ids this bar renders (walk-asserted with CommitBar's
     /// against the bottomBar door set).
-    static let renderedCapabilities: [CapabilityID] = [
-        .newTake, .blankTake, .blankTakeAsChosen, .addBlockAtEnd, .blockComments,
-        .commitTake, .sealPost, .divide, .extract, .makeBlock, .merge,
-        .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
-        .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
-        .deleteBlock,  // 13c 1B (A8): the block menu's delete door
-    ]
+    static var renderedCapabilities: [CapabilityID] {
+        [
+            .newTake, .blankTake, .blankTakeAsChosen, .addBlockAtEnd, .blockComments,
+            .commitTake, .sealPost, .divide, .extract, .makeBlock, .merge,
+            .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
+            .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
+            .deleteBlock,  // 13c 1B (A8): the block menu's delete door
+        ]
+        // 13k K7: the formatting toolbar rides BOTH bars — the acts are
+        // `takesAccess: .native`, so Write must not be the only surface with
+        // visible formatting doors (R118).
+        + FormatBar.renderedCapabilities
+    }
 
     /// The structural doors the bar renders (registry-walk-asserted: the
     /// bottomBar-doored structural set, in gesture order).
@@ -256,6 +262,10 @@ struct TakesBottomBar: View {
         }
         .task(id: model.projection) { await model.refreshSegmentation() }
         .help(SegmentationFaceCopy.help)
+        // 13k K7: the formatting toolbar, in the same slot Write's bar gives
+        // it — one grammar across the two bars (R6-2's whole point).
+        StatusDot(tokens: tokens)
+        FormatBar(tokens: tokens, status: model.session.status)
     }
 
     /// **note ▾** (R6-2): history, the seal, the entry date — Write's bar's
