@@ -40,6 +40,12 @@ Recorded the evening after 13g closed, her uncertainty preserved;
 the sitting walks these BESIDE the reminder note above (same rule:
 reminders and directions, nothing gates):
 
+*(2026-08-02 addendum: the bar/nav bundle, BOTH callout riders, and
+the code tint moved to PHASE 13K — ledger rows K11/K6/K9/K10,
+`notes/plans/phase-13k-walk-build-round.md`, opened by her at the
+session's tail. The E1 pickers, W26, and the kickoff sweep STAY
+here.)*
+
 - **Two 13g checks already VERIFIED by her, on the record:** ⌘B in
   a take pane — "bold in takes works well" — and the
   masthead-inspector crash "is gone now." (The Read-scroll link
@@ -106,22 +112,28 @@ QUESTIONS.md's status lines carry the same record:
   HELD** on her question — what walking smart filters costs, and
   whether a journal entry shows "Journal" (YES — the daily book is
   curated, real membership rows) and a quicknote shows
-  "Quicknotes" (NO today — smart membership is derived). Ruling
-  pending.
+  "Quicknotes" (NO today — smart membership is derived). **→ RULED
+  at the 13k kickoff, same session: SHOW smart books on cards ("you
+  still have to choose to deliberately create a smart book") —
+  13k K4.**
 - **#52(a) OVERTURNED — BUILD ITEM:** the literal-"Untitled"
   clause RETIRES; only a BLANK/nil title counts as no title, and a
   note literally named "Untitled" shows "Untitled" again. NO
   sweep: "i can delete them or rename them myself, there aren't
-  that many of them." The ⌘N nil-mint half STANDS.
+  that many of them." The ⌘N nil-mint half STANDS. **→ 13k K1.**
 - **#52(c) HELD** on her question ("they still have a date they
   were created at, right?") — correct: a pool (the Snippets
   container) carries `created_at`, just never `entry_date`; the
-  shipped call scoped the date-title rule to notes. Whether a
-  nameless pool shows its created day is hers; one line either
-  way.
+  shipped call scoped the date-title rule to notes. **→ RULED at
+  the 13k kickoff: nameless pools SHOW their created day ("i think
+  that would be helpful") — 13k K2.**
 - **#52(g) RATIFIED in her words:** "a quicknote should be in
   quicknotes, it goes to the pool if you delete that tag."
-- **#52 (b)(d)(e)(f) NOT YET WALKED** — still open for her flick.
+- **#52 (b)(d)(e)(f) — WALKED at the 13k kickoff:** (b) RATIFIED
+  (`2026-08-01`, "easier to scan than august 1, 2026"); (d) FLIPPED
+  — tag cards DEFAULT VISIBLE, folding a deliberate choice (13k
+  K12); (e) FLIPPED — chips show LEAF ONLY (13k K3); (f) RATIFIED
+  ("block menu rows fire and speak is good i think").
 - **Checked-off text RULED:** "the checkbox shouldn't change the
   line visibly - just let it be checked off with no other changes"
   — the box flip (`- [x]` / ☑) is the whole signal; no dim, no
@@ -146,11 +158,15 @@ QUESTIONS.md's status lines carry the same record:
 - **Hand-checks:** "i'll do these other handchecks later in time"
   — the Read-scroll link click stays open, ungated.
 
-**The BUILD ITEMS (toolbar-at-bottom · #52(a)'s retirement ·
-Tab-indent + the unindent door · ⏎ continuation · the takes-callout
-rendering rider above · the code tint once she rules it) land at
-13e's kickoff or an out-of-band round at her word — nothing was
-built from the housekeeping session itself.**
+**SUPERSEDED THE SAME SESSION — HER WORD CAME: every build item
+above, plus the bar/nav bundle and both callout riders from the
+author-additions section and the smart-membership / pool-date /
+leaf-chip / tags-visible rulings, is now PHASE 13K**
+(`notes/plans/phase-13k-walk-build-round.md`, opened by her at the
+session's tail under `/architect-phase`, ledger rows K1–K12).
+**W26, the kickoff-sweep rows, the E1 pickers, and the 13e ledger
+proper STAY HERE — she kicks 13e off after 13k closes** ("let's get
+these items done though and then i'll kick off 13e").
 
 ## Kickoff message (paste-ready for the orchestrator/coordinator the author invokes)
 

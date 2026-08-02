@@ -10,6 +10,35 @@
 
 *(Moved verbatim from the master plan's "Current phase" section, in the order they sat there — newest first, per that section's convention, back through Phase 13b, then the standing Phase 12 deferral paragraphs and the early out-of-band records. The ACTIVE pointer always lives in `notes/DetailedPlanForPhases.md`.)*
 
+*(Superseded pointer, kept for the thread — the ACTIVE pointer until 13k opened 2026-08-02:)*
+
+**→ PHASE 13G CLOSED 2026-08-01 — the next kickoff is the AUTHOR'S:
+Phase 13e (Takes & block management), her 13f round-5 sequencing;
+its plan is paste-ready at
+`notes/plans/phase-13e-takes-block-management.md` and OPENS with
+her REMINDER NOTE (the 13g hand-checks, look/feel calls, and the
+#49–#52 walk — reminders, never gates, per her round-7 ruling),
+then W26 (the system-wide quick-note hotkey, author-attended),
+then the four-row kickoff sweep.** 13g ran start to finish in ONE
+orchestrator session in ONE day: the markdown fork RULED and built
+(markdown-as-content · the dimmed-marker face, display==stored ·
+the full v1 vocabulary · Read fully formatted), her 13f
+walkthrough's findings all closed (headline: the discoverability
+DRIFT GUARD), her two live rounds shipped same-day (the
+masthead-inspector crash fixed at its lldb-read mechanism; sticky
+pane modes takes-first at her word; tag chips; the two-group
+bottom bar; date titles; quicknotes), NEW ROW 13j (Deletion & the
+Trash) added at her instruction, and the ONE Fable cold review
+closed at round 2 (1 MAJOR — a dropped routing, owned and built —
+zero new findings at round 2). Final counts **core 1001/110 · Mac
+1139/197** (one recorded environment-gated tripwire red on
+unlocked sessions — KnownIssues row, 13e's A47c re-run) **· mobile
+14/4 · spine 51/7**; NO schema (marker 4); zero `Sync/` lines; the
+§5 spike re-run clean on 26.5.2. Three `/Applications` refreshes
+at her word, each behind a fresh A1 backup. The closeout log below
+has the paragraph; 13e's closeout authors the next plan (13h · 13i
+· 13j at her word).
+
 *(Superseded pointer, kept for the thread:)* **PHASE 13F CLOSED 2026-07-31 — the next kickoff is the AUTHOR'S:
 Phase 13g (Formatting, lists & checkboxes), her round-5 sequencing
 ruling (13f → 13g → 13e, then her choice); its plan is paste-ready at

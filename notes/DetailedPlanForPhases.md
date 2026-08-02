@@ -8,32 +8,29 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ PHASE 13G CLOSED 2026-08-01 — the next kickoff is the AUTHOR'S:
-Phase 13e (Takes & block management), her 13f round-5 sequencing;
-its plan is paste-ready at
-`notes/plans/phase-13e-takes-block-management.md` and OPENS with
-her REMINDER NOTE (the 13g hand-checks, look/feel calls, and the
-#49–#52 walk — reminders, never gates, per her round-7 ruling),
-then W26 (the system-wide quick-note hotkey, author-attended),
-then the four-row kickoff sweep.** 13g ran start to finish in ONE
-orchestrator session in ONE day: the markdown fork RULED and built
-(markdown-as-content · the dimmed-marker face, display==stored ·
-the full v1 vocabulary · Read fully formatted), her 13f
-walkthrough's findings all closed (headline: the discoverability
-DRIFT GUARD), her two live rounds shipped same-day (the
-masthead-inspector crash fixed at its lldb-read mechanism; sticky
-pane modes takes-first at her word; tag chips; the two-group
-bottom bar; date titles; quicknotes), NEW ROW 13j (Deletion & the
-Trash) added at her instruction, and the ONE Fable cold review
-closed at round 2 (1 MAJOR — a dropped routing, owned and built —
-zero new findings at round 2). Final counts **core 1001/110 · Mac
-1139/197** (one recorded environment-gated tripwire red on
-unlocked sessions — KnownIssues row, 13e's A47c re-run) **· mobile
-14/4 · spine 51/7**; NO schema (marker 4); zero `Sync/` lines; the
-§5 spike re-run clean on 26.5.2. Three `/Applications` refreshes
-at her word, each behind a fresh A1 backup. The closeout log below
-has the paragraph; 13e's closeout authors the next plan (13h · 13i
-· 13j at her word).
+**→ PHASE 13K ACTIVE from 2026-08-02 — opened by the AUTHOR HERSELF
+at the housekeeping session's tail, under `/architect-phase` with
+full phase discipline at her word ("let's bring real phase
+discipline to these issues"). Plan + ledger + kickoff record:
+`notes/plans/phase-13k-walk-build-round.md`.** Scope: the session's
+accumulated rulings become built behavior — the #52(a) untitled
+retirement · nameless pools' created-day display · leaf-only tag
+chips · SMART-book membership on note cards (measurement-first, her
+reversal of #51(c)) · ⏎ list continuation · the right-click callout
+door · the bottom-bar formatting toolbar · Tab-indented lists ·
+callout frames rendering in Take mode · the code tint · the compact
+context/nav bar (forward chevron · book icon · tags placement) with
+tag cards default-visible. The bar bundle and riders were PULLED
+from 13e's additions at her word; **W26 and the kickoff sweep STAY
+at 13e, which she kicks off after 13k closes** ("let's get these
+items done though and then i'll kick off 13e"). Cast: Fable
+architect/orchestrator · fresh Opus implementer per batch · ONE
+Fable cold review at phase end (the recent standing shape, adopted
+unless she redirects). Baselines at open: core 1001/110 · Mac
+1139/197 (the parked tripwire red) · mobile 14/4 · spine 51/7; NO
+schema expected anywhere in the phase. The #49–#52 walk ran early
+at the same sitting — all four bundles ANSWERED (QUESTIONS.md's
+status lines + the 13e plan's walk section carry the verdicts).
 
 *(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
 
@@ -70,6 +67,7 @@ has the paragraph; 13e's closeout authors the next plan (13h · 13i
 | 13h | **The LLM folder bridge** (K3) | Her prose is reachable from a folder without giving up block identity | Ledger rows A35–A36 — a post ⇄ `.md` file in a folder, openable by path, edits landing back through ordinary operations; markdown folder import mapping folders to chapters/books. **The Fragments bridge's proven shape pointed at a folder instead of a table** — real work, not new architecture (S5 guards the landings). **Design note (author, 2026-07-30 at the 13f sitting): the phase OPENS with the longer design conversation she named** — `notes/plans/phase-13h-folder-design-note.md` holds her verbatim floated shape (files STAY markdown, only an editor exposed; becoming a variorum post is a DELIBERATE conversion step) beside this row's standing bridge shape; her closing word: "I'll just need to decide more at that step to be honest." Sequencing hers the same sitting: 13g before 13h. *(Second design input the same day, from the release-strategy conversation — `notes/release-and-v1-strategy.md` §9: the ADJACENT MCP-door direction, inclination-level — an MCP server projected from the capability registry; AI writes as takes/comments through operations, insure-first; reads SCOPED by grants (share-from-app + TCC-style consent, journals excluded from "always", an "open book" switch for the trusting end); local LLMs first-class via the same server. Whether the MCP door is this phase's scope or its own row is the kickoff's call.)* | Nothing typed on either side is ever lost; round-trip byte stability per the 11b import pins | pending |
 | 13i | **Smart-book identity** (author, 2026-07-30 at the 13f kickoff sitting — her direction: smart books keep constantly updating from tags; touching one (post limit, lock, chapter name, manual reorder, "etc") makes it "a particular named book" that CAN keep auto-adding — the hybrid the N38 memo called shape B) | A book can be hand-shaped and still collecting — without the union surprising anyone | Brief: `notes/plans/phase-13i-smart-book-identity-brief.md` (the problem's shape + the knots needing her rulings: the departed-match question, order interleaving of arrivals, what the capacity gate counts, which acts flip identity, storage/§12, the shipped conversion door's fate). Opens with a design sitting; her words: "i'll just handle it fully in another phase. i haven't really thought through it a lot yet" | The friction doctrine binds (rulings before build); any schema need is a §12 lockstep event | pending — **slotted at her word** |
 | 13j | **Deletion & the Trash** (author, 2026-08-01 at the 13g opening sitting's round 5 — her instruction: "add something to the plan / roadmap for a new phase 13 phase where I handle the deletion of items better") | Deleting actually gets rid of things — safely | Her two named wants, verbatim-faithful: **(1)** "some kind of 'true delete' should be added for posts (going to a Trash for 30 days before really deleting), because I already have posts in my library i don't want to have. that seems like an obvious pre-ship feature"; **(2)** "you need to be able to see the archived blocks (or deleted blocks) that are associated with a particular post, because just going to the library you get a little lost" — a per-POST recovery surface. Opens with a design sitting: the 30-day-then-really-delete half IS a physical purge, so it must be designed WITH the Tombstone-GC KnownIssues row (sync-aware horizon, owner 12) — one design, not two; S2 (deletes are tombstones) bends only by that design, never by a shortcut | Purge never strands a sync peer (the horizon rule); restore surfaces stay honest through the Trash window; a pre-ship gate candidate per her words | pending — **slotted at her word** |
+| 13k | **The walk's build round** (opened by the author 2026-08-02 at the housekeeping session's tail — the #49–#52 walk's rulings + the session's design directions, with real phase discipline at her word) | The walk's rulings become built behavior | Ledger K1–K12 (`notes/plans/phase-13k-walk-build-round.md`): the literal-"Untitled" retirement · nameless pools' created day · leaf-only tag chips · smart-book membership on note cards (measurement-first) · ⏎ list continuation · the right-click callout door · the bottom-bar formatting toolbar · Tab-indented lists + the unindent door · callout frames in Take mode · the code tint · the compact context/nav bar (forward · book icon · tags placement) with tag cards default-visible | ONE cold-review ladder at phase end; the tutorial spine green every batch; red-on-old absolute; NO schema anywhere in the phase | **active** |
 | — | **EPUB library & highlights** (author intake 2026-07-25, ledger A37) | Her own books and fanfiction live in the app, and highlights become writing | Read-only epubs in their own area (Mac + mobile), a highlighting layer, and highlights pulled into a post — her stated shape: a highlight auto-appended to a "favorite quotes" note with quotation marks, a dash, the author's name and the book title. One or several posts linked to a book, to make book reviews easier | Source files untouched (the 11b reference-panel discipline); still never a knowledge base | pending — **unslotted** (wanted, ranked behind workspace + formatting at K4) |
 | — | **Whole-library text search** (author, 2026-07-30 at the 13f kickoff — her words: *"a phase dealing with searching through text more thoroughly for the whole library will have to be considered (LOTS of potential technical implementations there, we'll probably handle that after the existing 13 phases, I think that subdivisions for searching books / posts / etc. will be valuable)"*) | Body-text search across the whole corpus, with scoped subdivisions | Full-corpus body search (`Queries.searchCatalog` today reads titles/names/scrap prefixes only); scope subdivisions (books / posts / etc.); the technical fork (FTS5 vs sweep vs index) is this row's own design sitting. The KnownIssues find&replace row's library-search half lands here | P1 discipline at corpus scale; her slotting word: after the existing 13 phases | pending — **unslotted by her design** |
 | — | **Grammar & spellchecking** (author, 2026-07-30 at the 13f kickoff: *"we'll need a phase for dealing with grammar / spellchecking / etc."*) | A real proofing story beyond 13d's coarse levels | Builds on 13d's spellcheck levels (A24) + the QoL round's noted missing "Spelling and Grammar" menu; scope at its kickoff | TEXTKIT2 §3's crash-pairing guard binds anything continuous | pending — **unslotted by her design** |
