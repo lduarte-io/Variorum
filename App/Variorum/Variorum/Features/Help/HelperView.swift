@@ -143,8 +143,12 @@ struct HelperView: View {
         // still a door, and this is where she looks for it.
         ShortcutGroup(title: "Windows & panes", items: [
             ("⌘⇧1–9", "jump to the 1st–9th note in the sidebar's Open list"),
-            ("⌘[ / ⌘]", "back / forward, in the pane you're in — the ← and › on the "
-                + "context bar are the same two doors"),
+            // 13k round 2 (R2-1): the glyphs are INTERPOLATED from the bar's
+            // own constants, so this row can never again describe a door the
+            // bar stopped wearing (it read "← and ›" after R4-1 shipped →).
+            ("⌘[ / ⌘]", "back / forward, in the pane you're in — the "
+                + "\(ContextBarDoors.backGlyph) and \(ContextBarDoors.forwardGlyph) "
+                + "on the context bar are the same two doors"),
             ("⌘⇧I", "show or fold this note's tag cards (the ＃ on the context bar does "
                 + "it too, and the choice sticks)"),
             ("⌘⇧N", "the quick note — a floating pad, from anywhere"),

@@ -280,7 +280,7 @@ final class WorkspaceModel {
     /// unstable key restarts the read for no reason (and, worse, reads as a
     /// change when nothing changed).
     var titleSubjects: [SidebarSelection] {
-        // 13k K11: the FORWARD destination joins the origins — the bar's ›
+        // 13k K11: the FORWARD destination joins the origins — the bar's →
         // names where it lands, and a name that never resolves reads
         // "Untitled" for every note (`WorkspaceNaming`'s last-resort
         // fallback, which exists for ids with no row at all).

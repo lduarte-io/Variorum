@@ -526,7 +526,7 @@ struct NavigationDoorsTests {
         #expect(openNote.shortcutLabel == "\u{2318}\u{21e7}1\u{2013}9")
         // **13k K11 UPDATED THIS EXPECTATION, deliberately and on the
         // record:** back and forward gained a `.surface` door — the context
-        // bar's ← and ›. The claim itself is unchanged (every one of these
+        // bar's ← and →. The claim itself is unchanged (every one of these
         // is a declared menu item); what changed is that two of them are now
         // ALSO rendered on a surface, and the walk
         // (`theSurfacesRenderExactlyTheDeclaredSurfaceActs`) is what holds

@@ -1853,3 +1853,64 @@ doc/copy class, the reviewer fixes its own per the standing flow):
   reads the constants.
 - **R2-3 NIT:** the glyph pin's "one place apart" comment vs the
   correct `+2` assertion — fix the comment.
+
+### Round 2 — THE FIX PASS (2026-08-02, the round-2 reviewer's own session, per the standing flow; the phase's LAST code)
+
+All three accepted findings implemented. Doc/copy class throughout —
+zero behavior lines; the one BEHAVIOR-ADJACENT change is that the
+helper's ⌘[/⌘] row now reads the bar's own constants.
+
+- **R2-1 · FIXED, both surfaces.** (a) The helper row INTERPOLATES
+  `ContextBarDoors.backGlyph`/`forwardGlyph` — the proposed
+  structural fix, so this row can never again describe a door the
+  bar stopped wearing. **The substring pin WAS added (the stated
+  call — it is honest and red-on-old):**
+  `ContextBarDoorsTests.theHelpersHistoryRowTeachesTheBarsOwnGlyphs`
+  — the row exists, teaches `forwardGlyph`, and never contains the
+  retired chevron. (b) The field guide's workspace-lesson sentence
+  rewritten to the SHIPPED bar: the constant four-door row, ← → as
+  ⌘[/⌘]'s faces, the book glyph's at-this-note ascent, ＃ (and ⌘⇧I)
+  folding the TAG CARDS — which start visible and whose fold sticks
+  (K11/K12/R4-1's letter; one string swapped for one string, the
+  lesson's paragraph count untouched). **The seed change stales the
+  REAL store's seeded field guide — covered by the author's
+  already-owed Restore-Tutorial click (13g R1-2's precedent: plan
+  and seed move together); the closeout carries this line.**
+- **R2-2 · FIXED.** The enumerated internal › comment sites swept —
+  `CapabilityRegistry.swift` (the half-swept comment's first line),
+  `WorkspaceModel.swift`, `WorkspaceNavigation.swift` (doc pair
+  now mirrors "←"/"→"), `BookAscentTests`, `CapabilityRegistryTests`,
+  `WorkspaceNavigationTests`, and THREE sites in
+  `ContextBarShapeTests` — the two enumerated plus one more the
+  completeness grep surfaced ("because the › is a door", the
+  hasContent test's doc), fixed with the rest. **Deliberately
+  UNTOUCHED and recorded so no later sweep "fixes" them:** the `›`
+  selection-marker idiom (R1 — SidebarView, VoiceTokens, palette),
+  the ‹ › take-switcher grammar, and the historical quotes that
+  NAME the retired chevron as retired (ContextBarDoors' doc, the
+  glyph pin's doc, the helper row's own fix comment).
+- **R2-3 · FIXED.** The comment now matches its assertion: two code
+  points apart, U+2191 ↑ between them.
+
+**Red-on-old — ONE discriminating revert, verified and
+checksum-restored:** the helper row put back to its pre-fix copy →
+`theHelpersHistoryRowTeachesTheBarsOwnGlyphs` RED on exactly its
+second and third expectations (`does.contains(forwardGlyph) → false`;
+`does.contains("\u{203A}") → true` — the retired chevron found by
+name), every other test in the suite GREEN — the revert is exactly
+the helper row. `HelperView.swift` md5
+`11df9dded75cb6add6b192aa0e504149` matched after restore; the suite
+re-run green (`Test run with 6 tests in 1 suite passed`).
+
+**Counts, this session's own runs (sequenced, foreground):**
+core `Test run with 1034 tests in 114 suites passed` (unchanged —
+zero `Sources/` lines in this fix diff) · Mac `Test run with 1191
+tests in 208 suites failed after 144.872 seconds with 1 issue` —
+the one issue BY IDENTITY:
+`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+(the recorded environment-gated tripwire; NOT patched, per its
+KnownIssues row); 1190 → 1191 is the one new pin · spine `Test run
+with 51 tests in 7 suites passed` (by TYPE name — the seeder
+rewrite rode it green) · mobile NOT run, correctly: all nine
+touched files live under `App/Variorum/`. Zero schema; zero
+`Sync/` lines; projection bodies byte-untouched.

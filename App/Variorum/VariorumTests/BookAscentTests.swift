@@ -309,7 +309,7 @@ struct ContextBarTests {
         #expect(bar(origin: "Orbit", books: []).hasContent, "the back door alone")
         #expect(bar(origin: nil, books: [book("Orbit")]).hasContent, "the ascent alone")
         #expect(bar(origin: "Shelf", books: [book("Orbit")]).hasContent)
-        // 13k K11: a pane that has only gone BACK still has a bar — the ›
+        // 13k K11: a pane that has only gone BACK still has a bar — the →
         // is a door now, so "somewhere to go forward" is something to say.
         #expect(bar(origin: nil, books: [], forward: "Orbit").hasContent)
         // …and a note always has one (13g R6-1's widening, unchanged).

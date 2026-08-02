@@ -640,7 +640,7 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2318}\u{21e7}1\u{2013}9", takesAccess: nil,
             unavailableNote: "No notes are open yet — open one and it joins the Open list.",
             availability: { ctx in ctx.openNoteCount > 0 ? .act : .unavailable }),
-        // 13k K11: both gain a `.surface` door — the context bar's ← and ›.
+        // 13k K11: both gain a `.surface` door — the context bar's ← and →.
         // The ← has been on the bar since 13f (as a spelled-out chip) and
         // was never declared there; the → is new with her ruling (*"after
         // you just went back, i feel like you should be able to go

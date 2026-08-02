@@ -189,8 +189,8 @@ nonisolated struct NavigationHistory: Equatable {
     /// and therefore nothing on screen).
     var origin: SidebarSelection? { back.last }
 
-    /// Where "›" leads — the mirror of `origin`, added by 13k K11 when the
-    /// forward chevron became a real door. Same shape for the same reason:
+    /// Where "→" leads — the mirror of `origin`, added by 13k K11 when the
+    /// forward glyph became a real door. Same shape for the same reason:
     /// the bar names its destination in the tooltip, and a name needs a
     /// destination to read.
     var next: SidebarSelection? { forward.last }

@@ -307,10 +307,17 @@ enum TutorialSeeder {
             + "and nothing else (the note is untouched). \u{2318}[ and \u{2318}] walk back "
             + "and forward through where this pane has been, like a browser.",
 
-            "Above the page sits the CONTEXT BAR: \u{2190} where you came from, and the "
-            + "book this note lives in \u{2014} click that and the book opens at this very "
-            + "note. It starts folded to its two small glyphs so the page stays clean; "
-            + "\u{2318}\u{21E7}I, or the chevron, unfolds it.",
+            // 13k round 2 (R2-1, the WT-1 class): this sentence taught the
+            // PRE-K11 bar (born folded, a chevron to unfold) — retired by
+            // K11/K12 and R4-1. The lesson now teaches the shipped bar: the
+            // constant four-door icon row, tag cards visible by default,
+            // the ＃ (and ⌘⇧I) folding the CARDS, never the bar.
+            "Above the page sits the CONTEXT BAR \u{2014} always the same four doors: "
+            + "\u{2190} and \u{2192} walk back and forward through where this pane has "
+            + "been (\u{2318}[ and \u{2318}] are the same doors), the book glyph opens "
+            + "the book this note lives in at this very note, and \u{FF03} folds the "
+            + "note's tag cards away and back (\u{2318}\u{21E7}I too \u{2014} they "
+            + "start visible, and the choice sticks).",
 
             "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
             + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to five, "

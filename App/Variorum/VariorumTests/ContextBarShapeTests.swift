@@ -68,10 +68,28 @@ struct ContextBarDoorsTests {
         #expect(ContextBarDoors.forwardGlyph != "\u{203A}",
                 "the chevron is retired — it read as the ＃'s expander")
         // The mirror, stated as the relation rather than as two literals:
-        // both are arrows from the same Unicode block, one place apart.
+        // both are arrows from the same Unicode block, two code points
+        // apart (U+2191 ↑ sits between them — R2-3 corrected this comment
+        // to match the assertion it annotates).
         let back = ContextBarDoors.backGlyph.unicodeScalars.first!.value
         let forward = ContextBarDoors.forwardGlyph.unicodeScalars.first!.value
         #expect(forward == back + 2, "← and → are the mirrored pair of one block")
+    }
+
+    /// **R2-1's drift guard (13k round 2):** the helper's ⌘[/⌘] row now
+    /// INTERPOLATES the bar's own glyph constants, so the prose and the bar
+    /// cannot disagree again. RED ON THE PRE-FIX COPY: the row read "the ←
+    /// and › on the context bar" — the chevron R4-1 retired — so the second
+    /// expectation failed and the third found the retired glyph by name.
+    @MainActor
+    @Test func theHelpersHistoryRowTeachesTheBarsOwnGlyphs() {
+        let row = HelperView.groups.flatMap(\.items)
+            .first { $0.keys.contains("\u{2318}[") }
+        #expect(row != nil, "the ⌘[ / ⌘] row exists in the helper")
+        #expect(row?.does.contains(ContextBarDoors.forwardGlyph) == true,
+                "the row teaches the glyph the bar actually wears")
+        #expect(row?.does.contains("\u{203A}") == false,
+                "…and never the retired chevron")
     }
 
     /// The ＃ carries the count only when the cards are hidden — unfolded,
@@ -84,7 +102,7 @@ struct ContextBarDoorsTests {
     }
 
     /// The bar renders when the pane has anything to say — and a pane that
-    /// has only gone BACK now qualifies, because the › is a door.
+    /// has only gone BACK now qualifies, because the → is a door.
     @Test func theBarRendersWheneverThePaneHasAnythingToSay() {
         #expect(!ContextBarDoors.hasContent(
             isNote: false, canBack: false, canForward: false, bookCount: 0),
@@ -237,7 +255,7 @@ struct TagChipFitTests {
 @Suite("The forward door's destination (13k K11)")
 struct ForwardDestinationTests {
     /// `next` is `origin`'s mirror — what ⌘] would open, and therefore what
-    /// the › names in its tooltip.
+    /// the → names in its tooltip.
     @Test func nextNamesWhereForwardLands() {
         var history = NavigationHistory()
         history.visit(.shelf)
@@ -276,6 +294,6 @@ struct ForwardDestinationTests {
         #expect(workspace.history().next == .reading("b1"))
         #expect(workspace.history().origin == nil, "nothing behind the pane now")
         #expect(workspace.titleSubjects.contains(.reading("b1")),
-                "the › names the book it lands on, so the book's title is resolved")
+                "the → names the book it lands on, so the book's title is resolved")
     }
 }
