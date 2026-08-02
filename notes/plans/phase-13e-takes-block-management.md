@@ -81,9 +81,15 @@ reminders and directions, nothing gates):
   should have their own tint - i'll rule on that" — the
   inline-code look/feel item above, hers to rule at the walk.
   (Recording note: v1's vocabulary has inline `` `code` `` SPANS
-  only — fenced ``` blocks are not in F-3; if her ruling wants
-  whole-block code, that is a vocabulary addition to raise, not
-  silently assume.)
+  only — fenced ``` blocks are not in F-3.)
+- **Fenced ``` code blocks: WANTED, LATER — her word, 2026-08-02:**
+  "oh i do want a fenced ``` code block later i think but it
+  doesn't have to be in the immediate plans." Direction-level, NOT
+  13e scope; the opening sitting slots where it lands (a
+  vocabulary addition to F-3 — line-scoped fences would be the
+  I4-clean shape — riding whatever formatting follow-up next
+  opens). Recorded here so it is not lost; uncertainty ("i think")
+  preserved.
 
 ## Kickoff message (paste-ready for the orchestrator/coordinator the author invokes)
 
