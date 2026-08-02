@@ -151,10 +151,10 @@ The phase's rulings all landed in that session, recorded same-turn:
 | K5 | **⏎ list continuation:** ⏎ at the end of a texted list line mints the next lead (`- ` or `- [ ]`); ⏎ on an EMPTY list item removes the lead and exits the list. Ordinary edits through the ordinary input path — ⏎'s ratified STRUCTURAL semantics (open-tail at document end; one_block's newlines-don't-mint; A15's ⇧⏎) are byte-untouched: continuation only adds lead TEXT where the newline landed. Edges the build must pin: document-end open tail; one_block mode; sealed/locked refusal rides the edit path; ⌘Z ungroups cleanly (newline+lead undo together) | 1 | pending |
 | K6 | **The right-click Callout door:** the editor context menu gains the Callout submenu beside Format (today it lives only in the menu-bar Block menu + ⌥⌘C; she went looking for it in the right-click — 2026-08-01). Registry-declared (P-1); same routed transform as every other door (13c R2-2's letter) | 1 | pending |
 | K7 | **The formatting toolbar — BOTTOM BAR** (*"i think the formatting toolbar should be added to the bottom - if i decide it's too cluttered later i'll remove it then, i think other users would need it though"*): the seven formatting acts as visible buttons riding the bottom bar's standing two-group grammar; every button the SAME registry act as the menu (P-1 — no second brain) | 2 | pending |
-| K8 | **Indented/nested lists — Tab indents** (*"we should allow indented lists and it should happen when you click tab"*): a vocabulary extension — the line-scoped tokenizer's column-0 rule widens to leading-space list lines (Domain: `MarkdownSyntax`/`MarkdownRendering`; face + Read rendering follow; display==stored holds byte-for-byte). UNINDENT door: ⇧Tab + Format ▸ Indent/Outdent rows PROPOSED to her (she knows ⌘[ is taken; she floated *"maybe if you click in it's an option?"*) — **ruling pending (sitting Q3)** | 2 | pending |
-| K9 | **Callout frames RENDER in Take mode** (her 2026-08-01 instruction: *"callouts are supposed to be added to take mode as well"*) — today the frame draws only in Write's `BlockDecor` overlay; the setting door already routes from the boards (13c R2-2). Shape — one frame around the block's whole takes region vs per-card tint vs header badge — **ruling pending (sitting Q4)** | 2 | pending |
-| K10 | **The code tint** (*"code blocks should have their own tint - i'll rule on that"* — inline `` `code` `` SPANS; fenced blocks are wanted-later, NOT here) — **ruling pending (sitting Q2)**; whatever she rules, the geometry stays visibly distinct from callout frames (span-hugging, never block-wide) | 2 | pending |
-| K11 | **The context/nav bar redesign** (pulled from the 13e additions): ALWAYS the compact icon row — her screenshot: ← · book · ＃ · › — no spelled-out back chip, no collapse/grow (*"the collapsing and growing in that bar is a little annoying to me"*); the › chevron becomes a REAL forward door (⌘]'s face — *"after you just went back, i feel like you should be able to go forward"*); "in xyz book" becomes a BOOK ICON (click = the book when exactly one; *"command click on lets you see the list of books (or there's a dropdown if there's several books it could be in)"*); tags placement — **ruling pending (sitting Q1)** | 3 | pending |
+| K8 | **Indented/nested lists — Tab indents** (*"we should allow indented lists and it should happen when you click tab"*): a vocabulary extension — the line-scoped tokenizer's column-0 rule widens to leading-space list lines (Domain: `MarkdownSyntax`/`MarkdownRendering`; face + Read rendering follow; display==stored holds byte-for-byte). UNINDENT door: ⇧Tab + Format ▸ Indent/Outdent rows PROPOSED to her (she knows ⌘[ is taken; she floated *"maybe if you click in it's an option?"*) — **RULED, round 2: ⇧Tab + Format ▸ Indent/Outdent rows** | 2 | pending |
+| K9 | **Callout frames RENDER in Take mode** (her 2026-08-01 instruction: *"callouts are supposed to be added to take mode as well"*) — today the frame draws only in Write's `BlockDecor` overlay; the setting door already routes from the boards (13c R2-2). Shape — **RULED, round 2: ONE frame around the block's whole takes region** (one block, one frame, takes inside it — R16/R27's letter) | 2 | pending |
+| K10 | **The code tint** (*"code blocks should have their own tint - i'll rule on that"* — inline `` `code` `` SPANS; fenced blocks are wanted-later, NOT here) — **RULED, round 2: a faint per-voice TINTED CHIP hugging exactly the span** (never block-wide — visibly distinct from callout frames); specific swatches proposed at the batch's visual loop for her flick | 2 | pending |
+| K11 | **The context/nav bar redesign** (pulled from the 13e additions): ALWAYS the compact icon row — her screenshot: ← · book · ＃ · › — no spelled-out back chip, no collapse/grow (*"the collapsing and growing in that bar is a little annoying to me"*); the › chevron becomes a REAL forward door (⌘]'s face — *"after you just went back, i feel like you should be able to go forward"*); "in xyz book" becomes a BOOK ICON (click = the book when exactly one; *"command click on lets you see the list of books (or there's a dropdown if there's several books it could be in)"*); tags placement — **RULED, round 2: the leaf-only chips ride the compact row beside ← book ›, VISIBLE at rest; ＃ is the deliberate fold/unfold door** | 3 | pending |
 | K12 | **Tag cards DEFAULT VISIBLE** (#52(d) flipped: *"tag cards should fold into the bar if you deliberately choose that but it should default to visible"*) — folding becomes a deliberate, sticky user choice, not the bar's default state; reconciled with K11 by the Q1 ruling | 3 | pending |
 
 ## Batch structure (one FRESH Opus implementer per batch, strictly sequential)
@@ -187,10 +187,26 @@ All of "THE KICKOFF RECORD" is round 1; her verdicts are in the
 ledger rows and the 13e plan's walk section. Recorded same-turn,
 repo-first.
 
-### Round 2 (pending — the question batch: Q1 tags/bar · Q2 code tint · Q3 unindent · Q4 takes-frame shape)
+### Round 2 (2026-08-02, same sitting — the question batch ANSWERED; all four on the recommended option)
 
-Asked at the kickoff sitting (she is present). Rulings land here
-verbatim when she answers; batches 2–3 gate on them.
+- **Q1 (tags & the bar):** CHIPS BESIDE THE ICONS — the leaf-only
+  colored chips ride the compact row next to ← book ›, VISIBLE at
+  rest; the ＃ icon is the deliberate fold/unfold door. (Resolves
+  her 2026-08-01 conflictedness: tags DO move to the bar, in the
+  visible-by-default form her #52(d) ruling requires.) → K11/K12.
+- **Q2 (code tint):** a TINTED CHIP BEHIND THE SPAN — faint,
+  per-voice, hugging exactly the code span; never block-wide (the
+  geometry stays visibly distinct from callout frames). Specific
+  swatches PROPOSED AT THE BATCH's visual loop for her flick
+  (propose-only on the look details). → K10.
+- **Q3 (unindent):** ⇧TAB + Format ▸ Indent/Outdent menu rows
+  (the platform pair; the ⌘[ conflict never arises). → K8.
+- **Q4 (takes frame):** ONE FRAME AROUND THE FAN — the callout
+  frame (color + emoji) wraps the block's whole takes region; one
+  block, one frame, takes inside it (R16/R27's letter). → K9.
+
+Batches 2 and 3 are UNBLOCKED; they spawn sequentially after
+batch 1 closes (one implementer at a time, the standing cap).
 
 ## Batch records
 
