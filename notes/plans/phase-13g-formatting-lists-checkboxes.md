@@ -3504,3 +3504,36 @@ name, **51 tests in 7 suites** (from 50/7 — the workspace-lesson pin
 joined it). **The round is CLOSED at round 1 from this reviewer's side:
 every finding fixed with a discriminating revert-verified pin, or
 honestly record-only.**
+
+### Orchestrator acceptance — cold review round 1 (2026-08-01)
+
+- **Commits `846c970` (findings, committed before fixes) +
+  `7474343` (fixes) verified by own inspection:** 9 files in the
+  fix pass, scoped to the findings (the chip, quick-note surfaces,
+  the two teaching surfaces, the flow tooltip, pins, records).
+- **Counts by the orchestrator's OWN runs:** core "Test run with
+  1001 tests in 110 suites passed" · Mac "Test run with 1139 tests
+  in 197 suites failed … with 1 issue" — the one red confirmed BY
+  IDENTITY via a solo suite run (the parked tripwire, same test,
+  same assertion). Mobile untouched by the fix pass (App-only
+  diff); 14/4 stands. Every reviewer claim matched.
+- **R1-1 accepted with the orchestrator's own accountability on
+  the record:** the dropped L17 was an ORCHESTRATION miss — the
+  ledger said "batch 2 / acceptance" but no brief ever carried it;
+  the ladder caught exactly the class it exists to catch. The fix
+  is the round-4 disposition's letter, nothing invented.
+- **R1-6 (raw markers in ReadTakesView) routed to the 13e
+  reminder-note bundle** beside the look items, per round 7's
+  no-gate ruling. R1-2's re-seed note folds into the ONE owed
+  Restore-Tutorial click.
+- **Process note (the quoted-run-line rule, this time on the
+  orchestrator):** the round-1 acceptance Mac run was launched
+  from the repo root FOUR times in a row (a repeated-command loop;
+  cwd does not persist for backgrounded `cd` compounds) before
+  being rewritten with an explicit `-project` path — which is
+  cwd-independent and is the shape this orchestrator will use for
+  every remaining run. No wrong number was ever recorded (the
+  stray runs were killed, exit 144, none produced a counted line).
+- **Round 1 ACCEPTED. Round 2 spawns now** — a FRESH cold
+  reviewer re-reviewing the fixes and what they touched (the
+  ladder's real-pass rule; new BLOCKER/MAJOR ⇒ round 3, cap 3).
