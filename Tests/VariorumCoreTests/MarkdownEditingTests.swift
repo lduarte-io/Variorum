@@ -364,3 +364,81 @@ struct MarkdownEditingTests {
                 "one scan, of exactly the text handed in")
     }
 }
+
+/// **13k K5 — what ⏎ does on a list line** (her ruling: *⏎ at the end of a
+/// texted list line mints the next lead; ⏎ on an EMPTY list item removes the
+/// lead and exits the list*).
+///
+/// The rule is deliberately a VERDICT, not a plan: the continuation half
+/// hands back a LEAD for the caller to insert AFTER the ratified newline has
+/// landed, precisely so the newline itself stays the single typed `"\n"`
+/// every structural rule keys on (the open-tail gesture at the document end,
+/// `one_block`'s newlines-don't-mint, A15's ⇧⏎, the idle-mint).
+@Suite("The ⏎ list rule (13k K5)")
+struct MarkdownReturnKeyTests {
+    private func verdict(_ line: String, at offset: Int) -> MarkdownEditing.ReturnKey {
+        MarkdownEditing.returnKey(inLines: line, at: offset)
+    }
+
+    @Test func aTextedBulletMintsTheNextBullet() {
+        #expect(verdict("- milk", at: 6) == .continueList(lead: "- "))
+    }
+
+    /// A continued checklist item is born UNCHECKED — the same call
+    /// `Act.checkbox` makes (QUESTIONS #49(h): checking is the click).
+    @Test func aTextedChecklistItemMintsAnUNCHECKEDBox() {
+        #expect(verdict("- [ ] milk", at: 10) == .continueList(lead: "- [ ] "))
+        #expect(verdict("- [x] milk", at: 10) == .continueList(lead: "- [ ] "))
+    }
+
+    /// The exit half — the ONE case where ⏎ is consumed and no newline is
+    /// inserted at all. The range is exactly the LEAD: anything past it is
+    /// text she typed and stays.
+    @Test func anEmptyListItemExitsTheListByLosingItsLead() {
+        #expect(verdict("- ", at: 2) == .exitList(lead: 0..<2))
+        #expect(verdict("- [ ]", at: 5) == .exitList(lead: 0..<5))
+        #expect(verdict("- [ ] ", at: 6) == .exitList(lead: 0..<6))
+        // Whitespace is not content — an item with only spaces in it is
+        // still an empty item, and only the lead goes.
+        #expect(verdict("- [ ]   ", at: 8) == .exitList(lead: 0..<6))
+    }
+
+    /// **The caret must be at the line's END** — her ruling's letter. A caret
+    /// mid-item splits the item without leading the remainder; widening this
+    /// is one comparison (a recorded build-time call).
+    @Test func onlyACaretAtTheLinesEndContinuesOrExits() {
+        #expect(verdict("- milk", at: 0) == .ordinary)
+        #expect(verdict("- milk", at: 3) == .ordinary)
+        #expect(verdict("- ", at: 1) == .ordinary)
+    }
+
+    /// A heading is not a list. Her ruling names the two list leads, and a
+    /// second `# ` under every heading is nobody's intent.
+    @Test func headingsAndPlainProseAreOrdinary() {
+        #expect(verdict("# Title", at: 7) == .ordinary)
+        #expect(verdict("## Title", at: 8) == .ordinary)
+        #expect(verdict("plain prose", at: 11) == .ordinary)
+        #expect(verdict("", at: 0) == .ordinary)
+        // The tokenizer's column-0 law holds here too: an indented line is
+        // not a list line in v1 (13g batch 2's recorded limitation).
+        #expect(verdict("  - milk", at: 8) == .ordinary)
+        // `*` is not a bullet (13g batch 2: it collides with italic).
+        #expect(verdict("* milk", at: 6) == .ordinary)
+    }
+
+    /// The rule reads the caret's OWN line when handed several, and answers
+    /// in the offsets it was handed (the `checkboxToggle` shape).
+    @Test func offsetsComeBackRelativeToTheTextHandedIn() {
+        let two = "- milk\n- "
+        #expect(verdict(two, at: 6) == .continueList(lead: "- "))
+        #expect(verdict(two, at: 9) == .exitList(lead: 7..<9))
+    }
+
+    /// Emphasis inside the item does not disturb the verdict — a line-leading
+    /// span's content IS inline-scanned (13g batch 2's one exception), and
+    /// the leading span still covers the whole line.
+    @Test func anItemCarryingEmphasisStillContinues() {
+        #expect(verdict("- **bold** milk", at: 15) == .continueList(lead: "- "))
+        #expect(verdict("- [ ] `code`", at: 12) == .continueList(lead: "- [ ] "))
+    }
+}

@@ -271,7 +271,9 @@ struct RecoveryView: View {
                         Spacer()
                         Menu("Place in pool") {
                             ForEach(model.pools, id: \.id) { pool in
-                                Button(pool.title ?? "Untitled pool") {
+                                // 13k K2: the pool's own name, or the day it
+                                // was created — the one display brain.
+                                Button(PoolNaming.title(pool)) {
                                     Task { await model.place(blockID: item.blockID, into: pool.id) }
                                 }
                             }

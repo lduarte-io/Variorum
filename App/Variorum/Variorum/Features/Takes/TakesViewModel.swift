@@ -1469,15 +1469,20 @@ final class TakesViewModel {
     /// where the door was first hung (R118). Same target rule as every
     /// other block-scoped act here, and the ONE shared transform. Sealed
     /// posts refuse through the op, spoken.
-    func applyCallout(_ edit: CalloutEdit) async {
-        guard let slot = commandTargetSlot else {
+    /// `blockID` names the target EXPLICITLY where the caller knows it —
+    /// 13k K6's card right-click does, and it has to: a right-click does not
+    /// move the keyboard, so `commandTargetSlot` would still name whichever
+    /// card was last focused and the frame would land on the wrong block.
+    /// nil keeps the routed door's long-standing behaviour byte-for-byte.
+    func applyCallout(_ edit: CalloutEdit, blockID: String? = nil) async {
+        guard let target = blockID ?? commandTargetSlot?.blockID else {
             speak("Click into a block first — the frame goes on the block you're in.")
             return
         }
         statusMessage = nil
         do {
             try await session.runner.run { ops in
-                try ops.updateBlockPresentation(slot.blockID) {
+                try ops.updateBlockPresentation(target) {
                     CalloutEditRule.apply(edit, to: $0)
                 }
             }

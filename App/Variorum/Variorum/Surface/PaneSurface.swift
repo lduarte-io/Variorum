@@ -276,6 +276,40 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
         return menuItem
     }
 
+    /// 13k K5 — TRUE only while a SHIFT-Return keystroke's own insertion is
+    /// running, exactly as `EditorTextView.isSoftNewline` is and for the
+    /// same measured reason (AppKit dispatches `insertNewline:` for BOTH
+    /// keys, so the event is the only place they differ). A pane has no
+    /// structural semantics to protect — it exists here so a soft break
+    /// inside a list item does not sprout a second bullet, which is the one
+    /// thing the two surfaces should agree on.
+    private(set) var isSoftNewline = false
+
+    override func keyDown(with event: NSEvent) {
+        guard EditorTextView.isSoftNewlineKey(event) else {
+            super.keyDown(with: event)
+            return
+        }
+        isSoftNewline = true
+        defer { isSoftNewline = false }
+        super.keyDown(with: event)
+    }
+
+    /// **13k K5 — ⏎ continues a list**, through the one shared door. A
+    /// pane's newline is ordinary text (no open tail, no crystallization),
+    /// so the only thing this adds is the lead — and it adds it exactly the
+    /// way the full-document editor does, so a list reads the same wherever
+    /// she is typing (R118: Write is never privileged over Takes).
+    override func insertNewline(_ sender: Any?) {
+        guard !isSoftNewline else {
+            super.insertNewline(sender)
+            return
+        }
+        MarkdownActs.insertNewlineContinuingLists(in: self) {
+            super.insertNewline(sender)
+        }
+    }
+
     /// 13b 1b (N9's keyboard half): a pane that goes LIVE should hold the
     /// keyboard — set when liveness arrives before the view has a window
     /// (programmatic landings), honored at attach.

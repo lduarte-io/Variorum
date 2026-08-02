@@ -310,6 +310,17 @@ final class EditorViewModel {
             }
         }
         textView.structuralMenuItems = { [weak self] in self?.contextMenuItems() ?? [] }
+        // 13k K6: the right-click callout door. It runs the SAME
+        // `applyCallout` the routed menu-bar command runs — the caret block's
+        // frame, through `updateBlockPresentation` — so there is one
+        // transform and one refusal, and the rows come from the one
+        // vocabulary (`CalloutMenu`).
+        textView.calloutMenuItem = { [weak self] in
+            guard let self else { return nil }
+            return CalloutMenu.menuItem { edit in
+                Task { await self.applyCallout(edit) }
+            }
+        }
         session.editorRouter.active = self
         if let pending = pendingProjection {
             pendingProjection = nil
@@ -1500,6 +1511,7 @@ final class EditorViewModel {
     nonisolated static let contextMenuCapabilities: [CapabilityID] = [
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake, .showTakes,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
+        .callout,  // 13k K6 — the submenu this surface inserts beside Format
     ]
 
     func contextMenuItems() -> [EditorTextView.StructuralMenuItem] {

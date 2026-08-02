@@ -425,16 +425,25 @@ struct EditorCommands: Commands {
             // Compare set it where she is, instead of the door reaching
             // into Write's editor and silently doing nothing anywhere
             // else. ⌥⌘C toggles.
-            Menu(verb(.callout)) {
-                Button("Toggle Callout") { actions?.dispatch(.callout(.toggle)) }
-                    .keyboardShortcut("c", modifiers: [.command, .option])
-                Divider()
-                ForEach(CalloutPalette.names, id: \.self) { name in
-                    Button(name.capitalized) { actions?.dispatch(.callout(.color(name))) }
+            // 13k K6: the rows come from `CalloutMenu` now, so the menu bar,
+            // the editor's right-click and a take pane's right-click cannot
+            // offer different words (P-1's one-declaration rule; the
+            // `MarkdownActs.headingRows` precedent).
+            Menu(CalloutMenu.title) {
+                ForEach(Array(CalloutMenu.rows.enumerated()), id: \.offset) { index, row in
+                    if row.isSeparator {
+                        Divider()
+                    } else if row.promptsForEmoji {
+                        Button(row.title) { promptCalloutEmoji() }
+                    } else if let edit = row.edit {
+                        Button(row.title) { actions?.dispatch(.callout(edit)) }
+                            // ⌥⌘C rides the toggle row, exactly as before.
+                            .keyboardShortcut(
+                                edit == .toggle
+                                    ? KeyboardShortcut("c", modifiers: [.command, .option])
+                                    : nil)
+                    }
                 }
-                Divider()
-                Button("Emoji…") { promptCalloutEmoji() }
-                Button("Remove Callout") { actions?.dispatch(.callout(.color(nil))) }
             }
             // Round-1 MINOR-3: the ONE enablement idiom — the registry's
             // declared availability (now the take family plus Compare).
@@ -583,16 +592,10 @@ struct EditorCommands: Commands {
             }
             return
         }
-        let alert = NSAlert()
-        alert.messageText = "Callout Emoji"
-        alert.informativeText = "A leading glyph for this callout (leave empty for none)."
-        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        alert.accessoryView = field
-        alert.addButton(withTitle: "Set")
-        alert.addButton(withTitle: "Cancel")
-        if alert.runModal() == .alertFirstButtonReturn {
-            actions.dispatch(.callout(.emoji(field.stringValue)))
-        }
+        // 13k K6: the alert itself moved to `CalloutMenu`, so the right-click
+        // door and this one ask the same question.
+        guard let glyph = CalloutMenu.promptEmoji() else { return }
+        actions.dispatch(.callout(.emoji(glyph)))
     }
 
     /// Pure label derivation, tested directly ("Undo Divide", "Undo

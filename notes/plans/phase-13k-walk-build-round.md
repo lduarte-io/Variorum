@@ -144,6 +144,10 @@ The phase's rulings all landed in that session, recorded same-turn:
 
 | Row | Item (ruling, her words where quoted) | Batch | Status |
 |-----|----------------------------------------|-------|--------|
+*(Batch 1 status, 2026-08-02: **K1 K2 K3 K5 K6 SHIPPED**; **K4 stopped at its
+proposal gate** — mechanism + measurements in the batch-1 record below, wiring
+awaits the architect's ruling.)*
+
 | K1 | **The #52(a) retirement:** literal "Untitled" is a TITLE again — only a BLANK/nil title counts as no title; NO sweep (*"i can delete them or rename them myself"*); the ⌘N nil-mint half STANDS (new notes still store no title and show dates until named) | 1 | pending |
 | K2 | **Nameless pools show their created day** (*"i think pools can show their created day, i think that would be helpful"*) — the `DisplayTitle` chain gains the pool's `created_at` local-day fallback; pools still have no `entry_date` | 1 | pending |
 | K3 | **Tag chips display LEAF ONLY** (*"chips should show leaf only"*) — the #52(e) alternative as ruled: leaf shown, full path in the tooltip, color stays keyed on the WHOLE path (two different `…/goals` stay distinct colors) | 1 | pending |
@@ -212,3 +216,310 @@ batch 1 closes (one implementer at a time, the standing cap).
 
 *(appended per batch by the implementer, verified by the architect —
 counts by the architect's own runs at every acceptance)*
+
+### Batch 1 record — the fully-ruled set (2026-08-02, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on
+the final tree): core **1010 tests in 111 suites** (from 1001/110: +9 tests,
++1 suite — the ⏎ rule) · Mac **1157 tests in 200 suites** (from 1139/197:
++18 tests, +3 suites) **with the ONE recorded environment-gated red**
+(`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion` —
+this session ran on an UNLOCKED login session, the covariate its KnownIssues
+row names; NOT patched, per that row's own instruction that no patch is
+allowed without re-running the A47c experiments 13e owns) · mobile **14 tests
+in 4 suites** (run because `Sources/` was touched) · the tutorial spine
+**51 tests in 7 suites**, green, by TYPE name. **NO schema; zero
+`Sources/VariorumCore/Sync/` lines; zero lines near `renderedText`, the
+export BODY projections or the bridge's join brain** — the only export edit
+is a FILENAME (K2) and a heading rule (K1), both title-side.
+
+**K4 STOPPED AT ITS PROPOSAL GATE as briefed** — mechanism designed and
+MEASURED, nothing wired. The proposal and its numbers are the last section
+below.
+
+---
+
+#### K1 — the literal "Untitled" is a TITLE again · SHIPPED
+
+`DisplayTitle.isAbsent` loses its `|| trimmed == placeholder` clause and
+nothing else: **blank means blank** (nil, empty, whitespace-only). The two
+halves she left standing are untouched — the ⌘N/New Note mint still stores
+`nil` (13g's other half; `NodSetTests.aNewNoteIsMintedWithNoTitleAtAll`
+unchanged and green), and **no sweep runs anywhere**, per her words *"i can
+delete them or rename them myself"*.
+
+Because the rule lives in ONE brain, the retirement reached every surface at
+once: the chrome map, the Library listing, the ⌘K catalog's hit name and its
+`storedTitle` (so the rename door seeds "Untitled" again rather than a date),
+the timeline/folder/recovery/book listings, and the two export sites.
+
+**The 13g export expectations were re-verified against the new rule, as the
+brief required, and TWO were updated on the record** (both stated in QUESTIONS
+#53(k)):
+
+| Pin | Was | Now |
+|---|---|---|
+| `DisplayTitleTests.theBulkManifestNamesAnUntitledNoteByItsDateAlone` (renamed `…NamesANamelessNoteByItsDateAlone`) | a literal-"Untitled" note exported as `2026-07-11.md` | it exports as `2026-07-11 Untitled.md`; a NAMELESS note still exports as `2026-07-12.md` — the ratified 11b convention, unchanged |
+| `NodSetTests.theChromeNamesAnUntitledNoteByItsDate` | the chrome said the legacy note's date | the chrome says "Untitled" |
+
+`aReadingExportHeadsAnUntitledNoteWithItsDateNotWithUntitled` needed no change
+— it exercises a genuinely nameless note, which is the case her refinement was
+about.
+
+**Red-on-old (REVERT A, verified):** putting `|| trimmed == placeholder` back
+turns `onlyABLANKTitleCountsAsAbsent` red on its 4th/5th/last expectations AND
+takes the four downstream pins with it (the store read, the library listing,
+the catalog hit, the manifest) — each reporting the OLD rule's answer by name.
+`DisplayTitle.swift` restored, md5 `bf08a0f595c52f32b510caec1038f1e6` matched.
+
+---
+
+#### K2 — a nameless POOL shows the day it was created · SHIPPED
+
+`DisplayTitle` gains `pool(title:createdAt:)` (and its raw-stamp twin), sharing
+ONE private `named(_:day:)` with the note rule so a third surface cannot invent
+a fourth precedence. The chain is one link shorter than a note's on purpose: a
+pool row leaves the post-specific columns NULL (AppSpec §7), so there is no
+`entry_date` to consult and the fallback is `created_at`'s LOCAL calendar day
+— the same KIND of day `entry_date` is everywhere else (13g's stated reason,
+pinned again here with a Tokyo/UTC case).
+
+Wired at every surface that named a pool: `Queries.poolDisplayTitle` (the
+`noteDisplayTitle` twin) feeding `WorkspaceModel.resolveTitles`' `.pool` arm;
+`PoolNaming.title` (the Blocks area's label and its picker); `RecoveryView`'s
+"Place in pool" menu, which now routes through `PoolNaming` instead of its own
+`?? "Untitled pool"`; and `bulkExportManifest`'s `Pools/` filename (#53(j) —
+the display brain lives in core exactly so the download says what the app
+said). `PoolNaming`'s remaining literal is "no pool", which is the one case it
+now covers: there is no pool at all.
+
+**Red-on-old (REVERT B, verified):** pointing `poolDisplayTitle` at
+`containerTitle`'s bare column read turns
+`onePoolsDisplayTitleComesFromTheStoreThroughTheSameBrain` red (nil vs the
+day). **REVERT C (verified):** dropping the display brain from the export
+filename turns `poolExportsRenderScrapsInPoolOrderWithCollisionHandling` red
+with `Pools/Untitled.md`. Both files restored, md5s matched
+(`3f5eb0dc98eca9ceb76eb66254072901`, `4f9e7e2bdb3a99f173575db587c5b9c0`).
+
+---
+
+#### K3 — tag chips show the LEAF · SHIPPED
+
+`TagChipLabel.leaf(of:)` — a pure four-line rule beside `TagChipColor`, keyed
+on the PATH rather than read off `tag.name`, deliberately: the chip already has
+one input, and putting the label rule next to the colour rule is what makes
+**"the label narrows, the colour does not"** readable in one place. A
+degenerate path (empty, trailing `/`) reads as itself — a chip is never blank.
+
+The full path stays in the chip's tooltip (`.help("Tagged \(tag.path)")`, which
+already said it), in the folded glyph's tooltip, in the `＋` adder's suggestion
+rows (#53(i) — the adder is a chooser over the taxonomy) and in Settings'
+manager. Hierarchy stays surfaced (R45) everywhere except the chip's own face,
+which is what she asked for.
+
+**Red-on-old (REVERT I, verified):** keying `TagChipColor.hue` on the leaf
+turns `theCOLOURStaysKeyedOnTheWHOLEPath` red with `life/goals` and
+`work/goals` at the identical hue `0.9527…`. File restored, md5
+`d211afa0919778d3b63b96e4aa68e861` matched.
+
+---
+
+#### K5 — ⏎ continues a list · SHIPPED
+
+**The one safety claim, and it is structural rather than careful:** the
+continuation NEVER PLANS THE NEWLINE. `super.insertNewline(_:)` runs exactly
+as it always did, so the ratified structural semantics see the same single
+typed `"\n"` they have always seen — the open-tail gesture at the document
+end, `one_block`'s newlines-don't-mint, the idle-mint, and every refusal — and
+the lead is a SECOND ordinary insertion at the caret the newline left, through
+the same `shouldChangeText` → `replaceCharacters` → `didChangeText` trio
+typing takes. (Planning `"\n- "` as one replacement would have made
+`verdict(replacing:replacementIsSingleNewline:)` stop recognising the
+keystroke — that is the reason the Domain function returns a LEAD and not an
+edit.)
+
+- **Domain:** `MarkdownEditing.ReturnKey` + `returnKey(inLines:at:)` — the
+  `checkboxToggle` shape (whole lines in, offsets relative to them). Three
+  verdicts: `.ordinary`, `.continueList(lead:)`, `.exitList(lead:)`.
+- **Face:** `MarkdownActs.insertNewlineContinuingLists(in:ordinary:)`, taking
+  the surface's own `super` call as a closure, plus `listReturn(in:)` which
+  rebases the Domain's line offsets into the note's.
+- **Doors:** `EditorTextView.insertNewline` and `PaneTextView.insertNewline`
+  (#53(f) — R118 parity; the pane gained the same `isSoftNewline` keyDown
+  latch `EditorTextView` has carried since 13d, reusing its
+  `isSoftNewlineKey` decision).
+- **The lead lands only if the newline did** — a refused ⏎ leaves the storage
+  byte-identical and leading a line that was never created would be inventing
+  text (the length check is the guard).
+- **The exit half is the ONE place the keystroke is consumed**: no newline at
+  all, just the lead of an empty item going away — an in-line edit that can
+  never touch a seam.
+
+The build-time calls are #53(a)–(f): end-of-line only, ⇧⏎ excluded, headings
+excluded, continued checkboxes born unchecked, the exit deleting exactly the
+lead, and the pane parity.
+
+**Red-on-old, four reverts, each verified and checksum-restored:**
+
+| # | Revert | Result |
+|---|---|---|
+| D | drop the `.continueList` arm's lead insertion | RED on the four continuation pins (`aTextedBulletMintsTheNextLead`, `aTextedChecklistItemMintsAnUncheckedBox`, `theDocumentEndTailGestureStillFires…`, `oneBlockKeepsBothTheNewlineAndTheLead…`); the exit, ⇧⏎, sealed and prose pins stay GREEN — exactly discriminating |
+| E | the `.exitList` arm falls through to `ordinary()` | RED: `anEmptyListItemExitsTheListWithoutMakingALine` (`"- milk\n- \n"` — the empty item survives) + the pane's own arm |
+| F | drop the `isSoftNewline` guard from `EditorTextView.insertNewline` | RED: `shiftReturnNeverContinuesTheList` — ⇧⏎ starts sprouting bullets |
+| G | drop the `beginUndoGrouping`/`endUndoGrouping` pair | **GREEN — the pin does NOT discriminate it, and that is recorded rather than claimed** (below) |
+
+**REVERT G, the honest one.** The brief named "⌘Z ungroups cleanly" as an edge
+to pin, and the pin is green — but removing the explicit undo group leaves it
+green too, because `NSUndoManager.groupsByEvent` is on by default and both
+edits happen inside ONE key event, so AppKit's own per-event group already
+holds them. The explicit group is therefore **redundant today**. It is kept
+deliberately (it states the intent where the two edits are made, and does not
+depend on an AppKit default staying true), and the pin's doc comment now says
+exactly this instead of claiming a red it did not get — the hallucination
+guard's rule applied to my own work. `MarkdownActs.swift` restored, md5
+`a311dd044954e7dd863ef880b27b85a5` matched; `EditorTextView.swift` md5
+`c8864a76274554df9d1a98aeed45e5e2`.
+
+**What the pins cover beyond the two halves:** the document-end tail gesture
+still fires and the lead lands in the TAIL as ordinary tail text (nothing
+minted, surface-only — byte-identical to the ratified gesture); `one_block`
+keeps both the newline and the lead as content; a SEALED note refuses the
+whole keystroke without touching a byte, with no new refusal code; plain prose
+is untouched; and the pane does all three.
+
+---
+
+#### K6 — the right-click Callout door · SHIPPED
+
+`CalloutMenu` declares the submenu's rows ONCE (toggle · the five palette
+colours · Emoji… · Remove) and owns the emoji `NSAlert`, and **three doors now
+render from it**: the menu bar's Block ▸ Callout (refactored to read the rows,
+⌥⌘C still on the toggle row), `EditorTextView.menu(for:)` beside Format, and a
+take card's context menu via `TakesShared.menuSpecs`. The registry declaration
+gains `.contextMenu`; both renderers declare `.callout` in their own
+`contextMenuCapabilities`, so the walk's union covers it and a future edit that
+drops one fails by name.
+
+**The act is unchanged** — every row runs the same `applyCallout`
+(`updateBlockPresentation` on the block, 13c R2-2's routed transform). Two
+build-time calls: #53(g) (the card's right-click carries it too; Compare's
+panes have no Variorum menu at all today and are untouched) and **#53(h)**,
+which was a real hazard rather than a preference: a right-click does not move
+the keyboard, so `TakesViewModel.applyCallout`'s `commandTargetSlot` would have
+framed whichever card was last FOCUSED. It gained an optional explicit
+`blockID:` (defaulting nil = the long-standing behaviour, so the routed door is
+byte-unchanged) and the card menu passes its own `slot.blockID`.
+
+**Red-on-old (REVERT H, verified):** dropping the `calloutMenuItem` wiring from
+`EditorViewModel.attach` turns `theEditorsRightClickCarriesTheCalloutSubmenu`
+red at its `#require` — a Format submenu and no Callout one, which is exactly
+the state she reported. File restored, md5
+`0c8fd7e526e7cb5aa1b946fe9a95186b` matched.
+
+---
+
+#### K4 — THE PROPOSAL GATE (mechanism + measurements; NOTHING WIRED)
+
+**The question.** Her ruling reverses #51(c): the Library's Notes cards must
+name SMART books too. The shipped comment says why they did not — *"a smart
+book's membership is derived by walking its filter, which is what the
+membership chip does for ONE note and must not be done for forty rows (P1)"*.
+Her ground for reversing it: *"the number of specifically defined smart books
+you have is probably small, no? you still have to choose to deliberately create
+a smart book."*
+
+**The proposed mechanism.** `NoteCards.load` already runs two grouped reads
+bounded to the listed post ids. Add a THIRD: **one statement per live SMART
+book, restricted to the page**, i.e. `Queries.readingsContaining`'s per-post
+probe generalised from one post to the page, reusing `smartMatchSQL` (the ONE
+predicate implementation the assembly, the Pool and the chip already share):
+
+```sql
+SELECT j.value AS post_id
+FROM json_each(?) j                       -- the page's ids
+CROSS JOIN container c ON c.id = j.value
+ AND c.deleted_at IS NULL AND c.archived_at IS NULL AND c.kind = 'post'
+WHERE <the spec's own conditions>          -- smartMatchSQL, verbatim
+```
+
+**`CROSS JOIN` is load-bearing, and the measurement is what found it.** With
+the natural `c.id IN (SELECT value FROM json_each(?))` shape SQLite chooses
+`idx_container_kind` as the driver and **scans every post in the corpus** —
+measured 4× slower at 10× corpus, i.e. NOT flat, exactly the P1 violation the
+shipped comment feared. `CROSS JOIN` is SQLite's own join-order directive: the
+page drives, the container is a PK seek. Plan, verified:
+
+```
+|--SCAN j VIRTUAL TABLE INDEX 1:
+|--SEARCH c USING INDEX sqlite_autoindex_container_1 (id=?)
+`--CORRELATED SCALAR SUBQUERY 1
+   |--SEARCH pt USING INDEX idx_post_tag_post (post_id=?)
+   `--SEARCH t USING INDEX sqlite_autoindex_tag_1 (id=?)
+```
+
+**The measurements** (this session's own runs; `sqlite3` over a COPY of the
+DEV store — her real store was never opened — and over a 10× clone of it built
+in the scratchpad; 200 reps per figure, ms per PAGE LOAD = all books):
+
+| page | books | 235 posts (design corpus) | 2,170 posts (10×) |
+|---|---|---|---|
+| 40 | 1 | **0.05 ms** | 0.05 ms |
+| 40 | 5 | 0.20 ms | 0.25 ms |
+| 40 | 10 | 0.45 ms | 0.50 ms |
+| 40 | 25 | 1.10 ms | 1.20 ms |
+| 200 (the listing's real window) | 1 | **0.15 ms** | 0.20 ms |
+| 200 | 5 | 0.80 ms | 0.85 ms |
+| 200 | 10 | 1.60 ms | 1.80 ms |
+| 200 | 25 | 4.15 ms | 4.30 ms |
+
+**Flat in corpus at every point** (10× the posts, the same cost — that is the
+P1 claim, delivered by the join order rather than hoped for), and **linear in
+smart-book count**, which is her own ground for the ruling. For scale: the
+existing curated-books read costs **0.05 ms** per page load on the same corpus,
+and this is a ONE-SHOT read on entering `.notes` mode or changing the listing —
+never per keystroke, never per scroll.
+
+**Her real numbers today: 1 smart book, 235 live posts → 0.15 ms.** No cap and
+no async fill is warranted by the measurement; both were on the table and both
+would be machinery for a cost that does not exist. If the architect wants a
+guard anyway, the honest one is a **book-count cap with an honest "+k more"**
+rather than a corpus check, because corpus size is provably not the variable.
+
+**Recorded corner for the wiring pass:** a `tagsAll` spec costs one EXISTS
+probe per conjunct per row, so a 4-tag AND book costs ~4× a 1-tag book. Still
+flat in corpus; worth a line in the wiring's comment.
+
+**Proposed diff, when the architect rules (est. ~60 lines + pins):**
+`Queries.smartBookMembership(_:postIDs:) -> [String: [String]]` beside
+`readingsContaining` in `ShelfQueries.swift` (post id → smart book names, live
+smart books only, `smartMatchSQL` reused verbatim, malformed spec skipped
+fail-closed exactly as `assembleReading` does); `NoteCards.load` calls it and
+merges into `Card.books` (curated first, then smart, each alphabetical — or
+one merged sort, a look call); the shipped `NoteCards` doc comment's
+"the books are CURATED memberships" paragraph rewritten to state the new rule
+and its measured cost; pins for (i) a note matching only a smart book naming
+it, (ii) an ARCHIVED note matching no smart book (the ambient-view rule
+`readingsContaining` already keeps), (iii) the read staying bounded to the page
+— the `MarkdownScanCount` idea in SQL form is a row-count assertion — and (iv)
+the curated half byte-unchanged.
+
+---
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` gains #53** — eleven build-time calls, each one line
+  to change, properly OPEN. **#54 is now the next free number.**
+- **K4 is the only owed decision**; everything else in the batch is ruled and
+  built.
+- **One inherited red, recorded at every run:** the `TakePaneMeasureTests`
+  tripwire on unlocked sessions. Its KnownIssues row forbids a patch without
+  re-running the A47c experiments (13e's kickoff sweep owns them), so it was
+  left exactly as found.
+- **No visual loop was run.** The batch's only new pixels are a submenu (menu
+  rows) and a shorter chip label; the callout submenu's own look is the menu
+  bar's, unchanged.
+- **One thing a reviewer should check by hand when the app is next open** (it
+  is pinned through real key events and a real `menu(for:)`, but the last inch
+  is AppKit's): right-clicking inside a take CARD and setting a colour, to see
+  the frame land on the card you clicked rather than the one you last typed in
+  (#53(h)).

@@ -22,10 +22,16 @@ import SwiftUI
 import VariorumCore
 
 /// Shared pool-title grammar (the picker in the Blocks area + this panel).
+///
+/// 13k K2 (her ruling — *"i think pools can show their created day, i think
+/// that would be helpful"*): a nameless pool is named by the day it was
+/// created, through the ONE display brain rather than a local literal. With
+/// no pool at all there is still nothing to name, which is the only case the
+/// old "untitled pool" wording now covers.
 enum PoolNaming {
     static func title(_ pool: Container?) -> String {
-        let title = pool?.title?.trimmingCharacters(in: .whitespaces) ?? ""
-        return title.isEmpty ? "untitled pool" : title
+        guard let pool else { return "no pool" }
+        return DisplayTitle.pool(title: pool.title, createdAt: pool.createdAt)
     }
 }
 

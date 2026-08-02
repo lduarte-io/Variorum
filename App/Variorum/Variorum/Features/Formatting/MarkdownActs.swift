@@ -230,6 +230,80 @@ enum MarkdownActs {
         return true
     }
 
+    // MARK: - K5: ⏎ continues a list
+
+    /// **The ⏎ door** (13k K5, her ruling), shared by both text-surface
+    /// kinds so a list behaves the same wherever she is typing.
+    ///
+    /// `ordinary` is the caller's own `super.insertNewline(_:)` — THE
+    /// RATIFIED KEYSTROKE, invoked unchanged. That is the whole safety
+    /// claim: the open-tail gesture at the document end, `one_block`'s
+    /// newlines-don't-mint, the idle-mint and every refusal all see the
+    /// same single typed `"\n"` they always saw, because this never plans
+    /// the newline itself. What it adds is a SECOND ordinary insertion of
+    /// lead text at the caret the newline left, through the same trio
+    /// (`shouldChangeText` → `replaceCharacters` → `didChangeText`) typing
+    /// takes — so a sealed note, a locked take and a desynced index all
+    /// refuse it in their own words with no new refusal code.
+    ///
+    /// The two edits ride ONE undo group, so ⌘Z takes back the keystroke
+    /// she pressed rather than half of it (`apply`'s rule, same reason).
+    ///
+    /// **The lead is only inserted if the newline actually landed** — a
+    /// refused ⏎ leaves the storage byte-identical, and leading a line that
+    /// was never created would be inventing text.
+    static func insertNewlineContinuingLists(
+        in textView: NSTextView, ordinary: () -> Void
+    ) {
+        switch listReturn(in: textView) {
+        case .ordinary:
+            ordinary()
+
+        case .exitList(let lead):
+            // The ONE place the keystroke is consumed: no newline at all,
+            // just the lead of an item with nothing in it going away.
+            let range = NSRange(location: lead.lowerBound, length: lead.count)
+            guard textView.shouldChangeText(in: range, replacementString: "") else { return }
+            textView.replaceCharacters(in: range, with: "")
+            textView.didChangeText()
+
+        case .continueList(let lead):
+            let undoManager = textView.undoManager
+            undoManager?.beginUndoGrouping()
+            defer { undoManager?.endUndoGrouping() }
+            let before = (textView.string as NSString).length
+            ordinary()
+            guard (textView.string as NSString).length == before + 1 else { return }
+            let caret = textView.selectedRange()
+            guard caret.length == 0, caret.location != NSNotFound,
+                  textView.shouldChangeText(in: caret, replacementString: lead)
+            else { return }
+            textView.replaceCharacters(in: caret, with: lead)
+            textView.didChangeText()
+        }
+    }
+
+    /// The caret line's verdict, in the surface's own offsets. A selection
+    /// (⏎ replacing a range) is deliberately ordinary — the ruling is about
+    /// a caret at the end of a line.
+    static func listReturn(in textView: NSTextView) -> MarkdownEditing.ReturnKey {
+        guard textView.isEditable else { return .ordinary }
+        let string = textView.string as NSString
+        let selection = textView.selectedRange()
+        guard selection.length == 0, selection.location != NSNotFound,
+              selection.location <= string.length
+        else { return .ordinary }
+        let lines = string.lineRange(for: selection)
+        let verdict = MarkdownEditing.returnKey(
+            inLines: string.substring(with: lines),
+            at: selection.location - lines.location)
+        // The Domain answers in the LINE's offsets; the surface acts in the
+        // note's (the `apply`/`toggleCheckbox` rebasing, same shape).
+        guard case .exitList(let lead) = verdict else { return verdict }
+        return .exitList(
+            lead: (lines.location + lead.lowerBound)..<(lines.location + lead.upperBound))
+    }
+
     // MARK: - L10: the ⌘-click that opens a link
 
     /// **⌘-click on a link opens it** (her ruling F-5, answering her own

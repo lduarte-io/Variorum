@@ -341,7 +341,10 @@ final class WorkspaceModel {
                     // row at all.
                     if let title = try Queries.noteDisplayTitle(db, id: id) { out[id] = title }
                 case .pool(let id):
-                    if let title = try Queries.containerTitle(db, id: id) { out[id] = title }
+                    // 13k K2: a nameless pool reads as the day it was
+                    // created, so the pane line, the back chip and the Open
+                    // strip say what the Blocks area's picker says.
+                    if let title = try Queries.poolDisplayTitle(db, id: id) { out[id] = title }
                 case .reading(let id):
                     if let reading = try Queries.reading(db, id: id) { out[id] = reading.name }
                 case .tag(let id):

@@ -160,6 +160,29 @@ struct TakesCellView: View {
                     }
                 }))
         }
+        // 13k K6: the CALLOUT submenu — the same rows the menu bar and
+        // Write's right-click offer, from the one vocabulary
+        // (`CalloutMenu.rows`). The frame is the BLOCK's and takes share it
+        // (R16/R27), so a card's right-click is a legitimate place to set
+        // it; the act is the board's own `applyCallout`, i.e. the same
+        // routed transform 13c R2-2 gave every other door.
+        specs.append(.init(
+            title: CalloutMenu.title,
+            children: CalloutMenu.rows.compactMap { row in
+                guard !row.isSeparator else { return nil }  // specs carry no dividers
+                if row.promptsForEmoji {
+                    return .init(title: row.title) {
+                        guard let glyph = CalloutMenu.promptEmoji() else { return }
+                        Task {
+                            await model.applyCallout(.emoji(glyph), blockID: slot.blockID)
+                        }
+                    }
+                }
+                guard let edit = row.edit else { return nil }
+                return .init(title: row.title) {
+                    Task { await model.applyCallout(edit, blockID: slot.blockID) }
+                }
+            }))
         return specs
     }
 
@@ -169,6 +192,7 @@ struct TakesCellView: View {
         .newTake, .blankTake, .chooseTake, .divergeHere, .archiveTake, .diffAgainstChosen,
         .labelTake,
         .showOriginBlock,  // 13f W10b — rendered only where an origin exists
+        .callout,  // 13k K6 — the frame door where the takes are
     ]
 }
 

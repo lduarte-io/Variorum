@@ -307,9 +307,15 @@ struct ExportProjectionTests {
 
             let manifest = try db.read { try Queries.bulkExportManifest($0) }
             let poolFiles = manifest.filter { $0.relativePath.hasPrefix("Pools/") }
+            // 13k K2: a nameless pool is named by the day it was created,
+            // here as well as in the app — the ONE display brain serves the
+            // export half too (13g R6-3's reason, applied to pools).
+            let untitledDay = try #require(
+                DisplayTitle.day(fromStamp: DateFormatter.variorumISO8601.string(
+                    from: untitled.createdAt)))
             #expect(poolFiles.map(\.relativePath) == [
                 "Pools/Ideas.md",
-                "Pools/Untitled.md",
+                "Pools/\(untitledDay).md",
                 "Pools/ideas \(twin.id.prefix(8)).md",
             ])
             #expect(poolFiles[0].contents == "First scrap.\n\nSecond scrap.")

@@ -313,9 +313,14 @@ extension Queries {
         // listing (`Queries.pools`, created_at order); contents are the
         // ordinary container projection — scraps in pool order.
         for pool in try pools(db) {
-            let base = sanitizedFilename(pool.title ?? "")
+            // 13k K2 (her ruling): a nameless pool is named by the day it
+            // was created, in the app AND here — the display brain serves
+            // both, which is why it lives in core (13g R6-3's reason,
+            // applied to the surface #52(c) had left out).
+            let base = sanitizedFilename(
+                DisplayTitle.pool(title: pool.title, createdAt: pool.createdAt))
             let path = uniquePath(
-                base: "Pools/\(base.isEmpty ? "Untitled" : base)",
+                base: "Pools/\(base.isEmpty ? DisplayTitle.placeholder : base)",
                 id: pool.id, used: &usedPaths)
             files.append(ExportFile(
                 relativePath: path,

@@ -441,9 +441,13 @@ nonisolated enum CapabilityRegistry {
         // only by an accident of where the door was first hung (R118).
         // ⌥⌘C toggles; the submenu's colours/emoji/remove route the same
         // way. `takesAccess: .native` — Takes sets the frame right there.
+        // 13k K6 — the RIGHT-CLICK door joins them. Her report, 2026-08-01:
+        // she went looking for callouts in the context menu and they were
+        // not there. One declaration edit plus the rows `CalloutMenu`
+        // already owns; the transform is unchanged (13c R2-2's letter).
         Capability(
             id: .callout, verb: "Callout", scope: .block,
-            doors: [.menuBar],
+            doors: [.menuBar, .contextMenu],
             shortcutLabel: "⌥⌘C", takesAccess: .native,
             unavailableNote: "Callout frames go on a block — open a note first.",
             availability: takeFamilyPlusCompare),

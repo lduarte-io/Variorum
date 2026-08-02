@@ -132,6 +132,19 @@ extension Queries {
             title: row["title"], entryDate: row["entry_date"], createdAt: row["created_at"])
     }
 
+    /// **What ONE POOL is called on screen** (13k K2 — her ruling: a
+    /// nameless pool shows the day it was created). The `noteDisplayTitle`
+    /// twin, one link shorter because a pool has no `entry_date`; nil where
+    /// the row is gone, so the chrome's per-kind fallback still covers the
+    /// one case it was always for.
+    public static func poolDisplayTitle(_ db: Database, id: String) throws -> String? {
+        guard let row = try Row.fetchOne(
+            db, sql: "SELECT title, created_at FROM container WHERE id = ?",
+            arguments: [id])
+        else { return nil }
+        return DisplayTitle.pool(title: row["title"], createdAtStamp: row["created_at"])
+    }
+
     /// The fan-style setting ('fan_style'; default .stack — the recorded
     /// build-time call).
     public static func fanStyle(_ db: Database) throws -> FanStyle {

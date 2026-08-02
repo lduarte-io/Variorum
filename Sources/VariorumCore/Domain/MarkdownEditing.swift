@@ -209,6 +209,80 @@ public enum MarkdownEditing {
         return nil
     }
 
+    // MARK: - K5: what ⏎ does on a list line
+
+    /// **The ⏎ rule on a LIST line** (13k K5 — her ruling: *⏎ at the end of
+    /// a texted list line mints the next lead; ⏎ on an EMPTY list item
+    /// removes the lead and exits the list*).
+    ///
+    /// ── WHAT THIS DELIBERATELY IS NOT ───────────────────────────────────
+    /// It is **not** a change to what ⏎ MEANS. The ratified structural
+    /// semantics — the open-tail gesture at the document end, `one_block`'s
+    /// newlines-don't-mint, A15's ⇧⏎, the idle-mint — all key on a single
+    /// typed `"\n"`, and the continuation half leaves that keystroke
+    /// completely alone: the newline goes in exactly as it always did, and
+    /// the lead is a SECOND ordinary insertion of ordinary text at the
+    /// caret the newline left behind. (Planning the two as one `"\n- "`
+    /// replacement would have made the open-tail gesture stop recognising
+    /// its own keystroke — the reason this returns a lead rather than an
+    /// edit.)
+    ///
+    /// The exit half is the one place the keystroke is CONSUMED, and it
+    /// inserts no newline at all: it deletes the lead of an item with
+    /// nothing in it, which is an ordinary in-line edit that can never
+    /// touch a seam.
+    public enum ReturnKey: Equatable, Sendable {
+        /// Nothing list-shaped here — ⏎ is exactly the keystroke it was.
+        case ordinary
+        /// A texted list line: once the newline has landed, insert this.
+        case continueList(lead: String)
+        /// An EMPTY list item: delete this range (its lead) and insert NO
+        /// newline. UTF-16, relative to the text handed in.
+        case exitList(lead: Range<Int>)
+    }
+
+    /// The unchecked checkbox lead a continued checklist gets — never a
+    /// checked one, the same call `Act.checkbox` makes (QUESTIONS #49(h):
+    /// *Format ▸ Checklist always makes an UNCHECKED box; checking is the
+    /// click*).
+    static let continuedCheckboxLead = "- [ ] "
+    static let continuedBulletLead = "- "
+
+    /// `text` is the caret's LINE (the `checkboxToggle` shape — whole lines
+    /// in, offsets relative to them); `offset` is the caret within it.
+    ///
+    /// **The caret must be at the line's END** — her ruling's letter ("⏎ at
+    /// the END of a texted list line"). Mid-item ⏎ therefore splits the item
+    /// without leading the remainder, which is the conservative reading;
+    /// widening it is one comparison (recorded as a build-time call).
+    ///
+    /// **Headings do not continue.** Her ruling names the two list leads
+    /// (`- ` and `- [ ]`); a heading is not a list, and a second `# ` after
+    /// every heading is nobody's intent.
+    public static func returnKey(inLines text: String, at offset: Int) -> ReturnKey {
+        for span in MarkdownSyntax.spans(in: text) {
+            let lead: String
+            switch span.kind {
+            case .bullet: lead = continuedBulletLead
+            case .checkbox: lead = continuedCheckboxLead
+            case .heading, .bold, .italic, .strikethrough, .code, .link: continue
+            }
+            // A line-leading span covers its whole line, so its upper bound
+            // IS the line's end.
+            guard offset == span.range.upperBound else { continue }
+            let ns = text as NSString
+            let content = ns.substring(with: NSRange(
+                location: span.content.lowerBound, length: span.content.count))
+            if content.trimmingCharacters(in: .whitespaces).isEmpty {
+                // Empty item ⇒ exit. Exactly the LEAD goes; anything she
+                // typed past it (stray spaces) is hers and stays.
+                return .exitList(lead: span.range.lowerBound..<span.content.lowerBound)
+            }
+            return .continueList(lead: lead)
+        }
+        return .ordinary
+    }
+
     /// **L10's ⌘-click (13g batch 4):** the ADDRESS of the link an offset
     /// falls in, or nil where there is none — the pure decision an editing
     /// surface asks before it consumes a modified click.

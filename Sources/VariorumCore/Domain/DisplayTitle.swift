@@ -37,24 +37,26 @@ public enum DisplayTitle {
 
     /// Is this stored title ABSENT, for display purposes?
     ///
-    /// Empty and whitespace-only are obvious. **The literal `"Untitled"`
-    /// counts too**, and that is the load-bearing half: until this batch,
-    /// `⌘N` and the shell's New Note stored the literal string `"Untitled"`
-    /// as a real title (`createPost(title: "Untitled")`), so her library's
-    /// existing untitled notes are titled, not nameless — a rule keyed on
-    /// nil/empty alone would have fixed none of the "500 untitled things"
-    /// she was looking at. The mint stores `nil` from this batch on, and
-    /// this test is what carries the ones already in her store.
+    /// **Blank means blank, and nothing else** — nil, empty, whitespace-only.
     ///
-    /// The app has treated the literal as a placeholder since Phase 11b
-    /// (`LibraryCatalogView.exportFileName`'s `hit.title != "Untitled"`);
-    /// this makes that reading the one rule instead of one site's habit.
-    /// Deliberately a build-time call (QUESTIONS #52): a note she
-    /// deliberately NAMES "Untitled" renders its date instead.
+    /// ── THE 13k K1 RETIREMENT (her ruling, 2026-08-02) ───────────────────
+    /// 13g batch 7 shipped a wider test: the literal string `"Untitled"`
+    /// ALSO counted as absent, because `⌘N` and the shell's New Note had
+    /// been STORING that literal as a real title, so her library's "500
+    /// untitled things" were titled rather than nameless and a nil-only
+    /// rule would have carried none of them. She walked the consequence
+    /// (QUESTIONS #52(a) — *a note you deliberately named "Untitled"
+    /// renders its date instead*) and OVERTURNED it: **"i can delete them
+    /// or rename them myself"**. A name she typed is a name.
+    ///
+    /// What that leaves standing, deliberately: the mint still stores
+    /// `nil` (13g's other half — new notes are genuinely nameless and show
+    /// their date), and **NO SWEEP EVER RUNS** — the legacy rows keep the
+    /// literal title they were given, and she edits or deletes them by
+    /// hand. Nothing is rewritten to fix a display problem.
     public static func isAbsent(_ title: String?) -> Bool {
         guard let title else { return true }
-        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty || trimmed == placeholder
+        return title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     /// The note's name for display: its title, else its DATE, else the
@@ -71,9 +73,53 @@ public enum DisplayTitle {
         title: String?, entryDate: String?, createdAt stamp: String? = nil,
         calendar: Calendar = .current
     ) -> String {
+        named(title) {
+            if let entryDate, !entryDate.isEmpty { return entryDate }
+            return day(fromStamp: stamp, calendar: calendar)
+        }
+    }
+
+    /// **What a POOL is called on screen** (13k K2 — her ruling, 2026-08-02:
+    /// *"i think pools can show their created day, i think that would be
+    /// helpful"*).
+    ///
+    /// The same chain as a note, one link shorter: **a pool has no
+    /// `entry_date`** (the column is a post concept — a pool row leaves the
+    /// post-specific columns NULL, AppSpec §7), so a nameless pool falls
+    /// straight to the day it was CREATED. This supersedes the 13g reading
+    /// recorded at QUESTIONS #52(c) — *"A POOL with no name is still
+    /// 'Untitled' — a pool has no date, and your ruling was about notes"* —
+    /// which she overturned by pointing out that a pool does have one date
+    /// worth showing.
+    ///
+    /// Same discipline as the note rule: a DISPLAY answer, never a write.
+    /// `container.title` is untouched, and the export half asks this same
+    /// question so a downloaded folder says what the app said.
+    public static func pool(
+        title: String?, createdAt date: Date?, calendar: Calendar = .current
+    ) -> String {
+        named(title) {
+            date.map { JournalDay.dayString(from: $0, calendar: calendar) }
+        }
+    }
+
+    /// The pool rule over a RAW STORED STAMP — the same rule, for the
+    /// callers that read the column rather than a decoded row (the export
+    /// manifest, the single-pool chrome read). Parsed with the canonical
+    /// formatter, exactly like `day(fromStamp:)`.
+    public static func pool(
+        title: String?, createdAtStamp stamp: String?, calendar: Calendar = .current
+    ) -> String {
+        named(title) { day(fromStamp: stamp, calendar: calendar) }
+    }
+
+    /// The one shape both rules share: the stored name if there is one,
+    /// else whatever date the caller's chain produces, else the
+    /// placeholder. Written once so a third surface cannot invent a fourth
+    /// precedence.
+    private static func named(_ title: String?, day: () -> String?) -> String {
         if !isAbsent(title), let title { return title }
-        if let entryDate, !entryDate.isEmpty { return entryDate }
-        if let day = day(fromStamp: stamp, calendar: calendar) { return day }
+        if let day = day() { return day }
         return placeholder
     }
 

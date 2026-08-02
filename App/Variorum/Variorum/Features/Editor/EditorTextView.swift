@@ -72,6 +72,28 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         withSoftNewline { super.keyDown(with: event) }
     }
 
+    /// **13k K5 — ⏎ continues a list.** The keystroke itself is untouched:
+    /// `super.insertNewline` runs exactly as it always did (so the open-tail
+    /// gesture at the document end, `one_block`'s newlines-don't-mint, the
+    /// idle-mint and every refusal see the same single `"\n"`), and the lead
+    /// is a second ordinary insertion afterwards — see
+    /// `MarkdownActs.insertNewlineContinuingLists`.
+    ///
+    /// **⇧⏎ is excluded, deliberately.** A15 ruled it a DIFFERENT gesture (a
+    /// newline that always lands inside a real block), it is the one AppKit
+    /// cannot tell apart on its own, and a soft break inside a list item is
+    /// exactly where a second bullet would be wrong. Its behaviour stays
+    /// byte-identical.
+    override func insertNewline(_ sender: Any?) {
+        guard !isSoftNewline else {
+            super.insertNewline(sender)
+            return
+        }
+        MarkdownActs.insertNewlineContinuingLists(in: self) {
+            super.insertNewline(sender)
+        }
+    }
+
     /// **QoL batch 3 (L6) — TRUE only while a FIND-BAR replacement is being
     /// applied**, and only ever by `EditorFind`'s own application loop. Never
     /// sticky: the single writer is `withFindReplace`, whose `defer` clears it
@@ -385,6 +407,12 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
 
     var structuralMenuItems: (() -> [StructuralMenuItem])?
 
+    /// 13k K6 — the CALLOUT submenu's route out of this surface. The view
+    /// model supplies it (it owns the caret block and the routed dispatch);
+    /// nil ⇒ no callout rows, which is the state before an editor is
+    /// attached.
+    var calloutMenuItem: (() -> NSMenuItem?)?
+
     override func menu(for event: NSEvent) -> NSMenu? {
         let inherited = super.menu(for: event)
         let items = structuralMenuItems?() ?? []
@@ -392,7 +420,11 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         // surface can be edited (P-2). Built by `MarkdownActs` so this menu
         // and the panes' offer exactly the same rows.
         let format = MarkdownActs.formatMenuItem(for: self)
-        guard !items.isEmpty || format != nil else { return inherited }
+        // 13k K6: the callout door, beside Format — where she went looking
+        // for it. Same routed transform as the menu bar's, same words
+        // (`CalloutMenu` declares them once).
+        let callout = calloutMenuItem?()
+        guard !items.isEmpty || format != nil || callout != nil else { return inherited }
         let menu = inherited ?? NSMenu()
         var at = 0
         for item in items {
@@ -408,6 +440,10 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         }
         if let format {
             menu.insertItem(format, at: at)
+            at += 1
+        }
+        if let callout {
+            menu.insertItem(callout, at: at)
             at += 1
         }
         menu.insertItem(NSMenuItem.separator(), at: at)

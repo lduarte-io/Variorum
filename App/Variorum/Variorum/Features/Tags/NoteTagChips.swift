@@ -33,6 +33,28 @@
 import SwiftUI
 import VariorumCore
 
+/// **What a chip SAYS** — her ruling K3 (13k, 2026-08-02, overturning the
+/// 13g build-time call at QUESTIONS #52(e)): *"chips should show leaf
+/// only"*, the alternative that entry offered — shorter cards, the full path
+/// in the tooltip.
+///
+/// Keyed on the PATH rather than read off `tag.name` deliberately: the chip
+/// already has exactly one input, and the colour beside it is keyed on the
+/// whole path (`TagChipColor`), so the two rules read together — **the label
+/// narrows, the colour does not**. `life/goals` and `work/goals` therefore
+/// both say "goals" and stay two different colours, which is the whole point
+/// of leaving the colour alone. Hierarchy stays surfaced (R45) in the
+/// tooltip, in the adder's suggestions, and in the tag manager.
+nonisolated enum TagChipLabel {
+    /// The last segment of a hierarchical path. A path with no separator is
+    /// its own leaf; a degenerate path (empty, or trailing "/") reads as
+    /// itself rather than as nothing — a chip must never be blank.
+    static func leaf(of path: String) -> String {
+        guard let last = path.split(separator: "/").last else { return path }
+        return String(last)
+    }
+}
+
 /// The stable per-tag colour (the `LineageStripe` rule, keyed on path).
 nonisolated enum TagChipColor {
     /// Hue in 0..<1 from the tag's path. Same path, same hue, always.
@@ -83,12 +105,13 @@ struct NoteTagChips: View {
         }
     }
 
-    /// One card: the tag's own colour, its path (hierarchy stays SURFACED —
-    /// R45), and the ✕ that takes it off this note.
+    /// One card: the tag's own colour (keyed on the WHOLE path), its LEAF
+    /// (her K3 ruling — the path rides the tooltip), and the ✕ that takes it
+    /// off this note.
     private func chip(_ tag: Tag) -> some View {
         let tint = TagChipColor.color(forPath: tag.path, dark: scheme == .dark)
         return HStack(spacing: 3) {
-            Text(tokens.chromeLabel(tag.path))
+            Text(tokens.chromeLabel(TagChipLabel.leaf(of: tag.path)))
                 .font(tokens.small)
                 .foregroundStyle(tint)
                 .lineLimit(1)

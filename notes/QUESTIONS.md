@@ -298,5 +298,35 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: ANSWERED IN FULL (2026-08-02, completed at the 13k kickoff): (a) OVERTURNED — the literal-"Untitled" clause retires, only a BLANK title counts, NO sweep ("i can delete them or rename them myself"), the ⌘N nil-mint stays — 13k K1; (b) RATIFIED ("i think 2026-08-01 is fine, easier to scan than august 1, 2026"); (c) RULED — nameless pools SHOW their created day ("i think that would be helpful") — 13k K2; (d) FLIPPED — tag cards DEFAULT VISIBLE, folding a deliberate choice ("tag cards should fold into the bar if you deliberately choose that but it should default to visible") — 13k K12, reconciled with the bar redesign K11; (e) FLIPPED — chips show LEAF ONLY — 13k K3; (f) RATIFIED ("block menu rows fire and speak is good i think"); (g) RATIFIED ("a quicknote should be in quicknotes, it goes to the pool if you delete that tag"). Record: the 13e plan's walk section + the 13k plan's ledger.**
 
-*(Next free number at authoring time: **#53**.)*
+---
+
+## Phase 13k (2026-08-02) — batch 1's build-time calls, bundled for the sitting
+
+53. **2026-08-02 · Phase 13k (batch 1) · THE FULLY-RULED SET IS BUILT — eleven build-time calls, each one line to change, bundled the way #49–#52 were.** Your rulings K1–K6 said WHAT: the literal "Untitled" is a title again, nameless pools show their created day, chips show the leaf, ⏎ continues a list, and the right-click gets a Callout door. They did not say what ⏎ does in the MIDDLE of a list item, or whether a take card's right-click should carry the callout too — those are the calls below. **Nothing here needed a schema change or an operation**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain. The BINDING build record is the 13k plan's batch-1 record.
+
+    **(a) ⏎ continues a list ONLY when the caret is at the line's END.** Your ruling's letter ("⏎ at the end of a texted list line"). So a ⏎ in the *middle* of `- milk and bread` splits the item and the second half gets no bullet. **The alternative:** continue wherever the caret is inside the item, which is what Notes and Bear do — one comparison to widen.
+
+    **(b) ⇧⏎ never continues a list.** It is A15's own gesture (a newline that always lands inside a real block), it is the one key AppKit cannot tell apart on its own, and a soft break inside an item is exactly where a second bullet would be wrong. **The alternative:** treat it like ⏎.
+
+    **(c) HEADINGS do not continue.** Your ruling names the two list leads (`- ` and `- [ ]`); a second `# ` under every heading is nobody's intent. **The alternative:** continue headings too.
+
+    **(d) A continued checklist item is born UNCHECKED**, even from a checked one — the same rule Format ▸ Checklist follows (#49(h): checking is the click).
+
+    **(e) The exit deletes exactly the LEAD.** ⏎ on `- ` empties the line; ⏎ on `- [ ]   ` (spaces you typed past the box) leaves those spaces behind, because they are text and only the lead is the list. **The alternative:** clear the whole line.
+
+    **(f) ⏎ continues lists in a TAKE PANE as well as in Write.** A list should read the same wherever you are typing (R118 — Write is never privileged over Takes). A pane has no structural semantics at all, so this adds nothing but the lead. **The alternative:** Write only.
+
+    **(g) The right-click Callout door rides BOTH the Write editor and a take card.** Your K6 said "the editor context menu"; the frame is the BLOCK's and takes share it (R16/R27), so the card's menu is a legitimate place for it and 13c R2-2's whole lesson was that Write was privileged only by where a door was first hung. **Compare's panes are untouched** — they carry no Variorum context menu at all today, only Format. **The alternative:** Write's right-click only.
+
+    **(h) A card's callout acts on the block you RIGHT-CLICKED**, not on the block that last held the keyboard. A right-click does not move the keyboard, so the routed door's "the block you're in" would have named the wrong card. Worth knowing because the menu-bar door still means the focused block, and on a board those can now differ.
+
+    **(i) The `＋` popover's suggestions still show FULL paths.** Chips narrowed to the leaf (your ruling), but the adder is a chooser over the taxonomy — picking between `life/goals` and `work/goals` needs both words. Hierarchy also stays surfaced in the chip's tooltip and in Settings' manager. **The alternative:** leaves there too.
+
+    **(j) A nameless pool's EXPORT filename follows the same rule** — `Pools/2026-07-21.md` rather than `Pools/Untitled.md`. The display brain lives in core precisely so a downloaded folder says what the app said (your 13g refinement, applied to the surface #52(c) had left out).
+
+    **(k) K1 changes ONE export-facing thing, stated rather than smuggled:** a note whose stored title IS the literal "Untitled" exports as `<date> Untitled.md` again, because that string is a name now. Nameless notes are unaffected — they have been named by their date alone since 11b. **And no sweep runs anywhere**, per your ruling.
+
+    **Status: OPEN — the sitting's walk.**
+
+*(Next free number at authoring time: **#54**.)*
 

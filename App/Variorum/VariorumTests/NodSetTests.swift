@@ -192,18 +192,25 @@ struct NodSetTests {
 
     /// The chrome's ONE naming map now carries the DISPLAY name, so the pane
     /// line, the back chip, the Open strip and a star all say the same thing
-    /// — and an untitled note says its date instead of "Untitled".
+    /// — and a NAMELESS note says its date instead of "Untitled".
+    ///
+    /// **UPDATED at 13k K1** (her ruling, 2026-08-02, overturning #52(a)):
+    /// a note whose stored title IS the literal "Untitled" is TITLED, and
+    /// the chrome says so. Only a blank title is absent now, and no sweep
+    /// rewrites the legacy rows — *"i can delete them or rename them
+    /// myself"*.
     ///
     /// DISCRIMINATING REVERT: put `Queries.containerTitle` back in
-    /// `WorkspaceModel.resolveTitles`' `.post` arm and the second and third
-    /// expectations fail with "Untitled".
+    /// `WorkspaceModel.resolveTitles`' `.post` arm and the second
+    /// expectation fails with nil→"Untitled".
     @Test func theChromeNamesAnUntitledNoteByItsDate() async throws {
         try await withStore { db, session in
             let named = try await session.runner.run { ops in
                 try ops.createPost(title: "Real name")
             }
             let bare = try await session.runner.run { ops in try ops.createPost(title: nil) }
-            // The pre-13g mint's literal, exactly as it sits in her store.
+            // The pre-13g mint's literal, exactly as it sits in her store —
+            // a NAME since K1, and the chrome reads it as one.
             let legacy = try await session.runner.run { ops in
                 try ops.createPost(title: "Untitled")
             }
@@ -220,7 +227,7 @@ struct NodSetTests {
 
             #expect(workspace.label(for: .post(named.id)) == "Real name")
             #expect(workspace.label(for: .post(bare.id)) == day)
-            #expect(workspace.label(for: .post(legacy.id)) == day)
+            #expect(workspace.label(for: .post(legacy.id)) == "Untitled")  // K1
             // An id that resolves to no row at all keeps the per-kind
             // fallback that was always there.
             #expect(workspace.label(for: .post("gone")) == "Untitled")
