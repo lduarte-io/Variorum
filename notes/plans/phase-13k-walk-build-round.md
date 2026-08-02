@@ -154,10 +154,10 @@ continuation; both halves are in the batch-1 record below.)*
 | K4 | **Note cards show SMART-book membership too** — her ruling reverses the shipped curated-only #51(c). Mechanism is MEASUREMENT-FIRST under P1: smart books are few and deliberately created (her ground); bounded per-row evaluation (per-note tags + profile + entry_date vs each smart spec), measured at design-corpus scale with a corpus-scale guard (cap or async fill) if the numbers say so. **IN-BATCH PROPOSAL GATE:** the implementer proposes mechanism + measurements BEFORE wiring; the architect rules | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
 | K5 | **⏎ list continuation:** ⏎ at the end of a texted list line mints the next lead (`- ` or `- [ ]`); ⏎ on an EMPTY list item removes the lead and exits the list. Ordinary edits through the ordinary input path — ⏎'s ratified STRUCTURAL semantics (open-tail at document end; one_block's newlines-don't-mint; A15's ⇧⏎) are byte-untouched: continuation only adds lead TEXT where the newline landed. Edges the build must pin: document-end open tail; one_block mode; sealed/locked refusal rides the edit path; ⌘Z ungroups cleanly (newline+lead undo together) | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
 | K6 | **The right-click Callout door:** the editor context menu gains the Callout submenu beside Format (today it lives only in the menu-bar Block menu + ⌥⌘C; she went looking for it in the right-click — 2026-08-01). Registry-declared (P-1); same routed transform as every other door (13c R2-2's letter) | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
-| K7 | **The formatting toolbar — BOTTOM BAR** (*"i think the formatting toolbar should be added to the bottom - if i decide it's too cluttered later i'll remove it then, i think other users would need it though"*): the seven formatting acts as visible buttons riding the bottom bar's standing two-group grammar; every button the SAME registry act as the menu (P-1 — no second brain) | 2 | pending |
-| K8 | **Indented/nested lists — Tab indents** (*"we should allow indented lists and it should happen when you click tab"*): a vocabulary extension — the line-scoped tokenizer's column-0 rule widens to leading-space list lines (Domain: `MarkdownSyntax`/`MarkdownRendering`; face + Read rendering follow; display==stored holds byte-for-byte). UNINDENT door: ⇧Tab + Format ▸ Indent/Outdent rows PROPOSED to her (she knows ⌘[ is taken; she floated *"maybe if you click in it's an option?"*) — **RULED, round 2: ⇧Tab + Format ▸ Indent/Outdent rows** | 2 | pending |
-| K9 | **Callout frames RENDER in Take mode** (her 2026-08-01 instruction: *"callouts are supposed to be added to take mode as well"*) — today the frame draws only in Write's `BlockDecor` overlay; the setting door already routes from the boards (13c R2-2). Shape — **RULED, round 2: ONE frame around the block's whole takes region** (one block, one frame, takes inside it — R16/R27's letter) | 2 | pending |
-| K10 | **The code tint** (*"code blocks should have their own tint - i'll rule on that"* — inline `` `code` `` SPANS; fenced blocks are wanted-later, NOT here) — **RULED, round 2: a faint per-voice TINTED CHIP hugging exactly the span** (never block-wide — visibly distinct from callout frames); specific swatches proposed at the batch's visual loop for her flick | 2 | pending |
+| K7 | **The formatting toolbar — BOTTOM BAR** (*"i think the formatting toolbar should be added to the bottom - if i decide it's too cluttered later i'll remove it then, i think other users would need it though"*): the seven formatting acts as visible buttons riding the bottom bar's standing two-group grammar; every button the SAME registry act as the menu (P-1 — no second brain) | 2 | **SHIPPED** (`1324def`) |
+| K8 | **Indented/nested lists — Tab indents** (*"we should allow indented lists and it should happen when you click tab"*): a vocabulary extension — the line-scoped tokenizer's column-0 rule widens to leading-space list lines (Domain: `MarkdownSyntax`/`MarkdownRendering`; face + Read rendering follow; display==stored holds byte-for-byte). UNINDENT door: ⇧Tab + Format ▸ Indent/Outdent rows PROPOSED to her (she knows ⌘[ is taken; she floated *"maybe if you click in it's an option?"*) — **RULED, round 2: ⇧Tab + Format ▸ Indent/Outdent rows** | 2 | **SHIPPED** (the continuation) |
+| K9 | **Callout frames RENDER in Take mode** (her 2026-08-01 instruction: *"callouts are supposed to be added to take mode as well"*) — today the frame draws only in Write's `BlockDecor` overlay; the setting door already routes from the boards (13c R2-2). Shape — **RULED, round 2: ONE frame around the block's whole takes region** (one block, one frame, takes inside it — R16/R27's letter) | 2 | **SHIPPED** (`1324def`) |
+| K10 | **The code tint** (*"code blocks should have their own tint - i'll rule on that"* — inline `` `code` `` SPANS; fenced blocks are wanted-later, NOT here) — **RULED, round 2: a faint per-voice TINTED CHIP hugging exactly the span** (never block-wide — visibly distinct from callout frames); specific swatches proposed at the batch's visual loop for her flick | 2 | **SHIPPED** (`1324def`) |
 | K11 | **The context/nav bar redesign** (pulled from the 13e additions): ALWAYS the compact icon row — her screenshot: ← · book · ＃ · › — no spelled-out back chip, no collapse/grow (*"the collapsing and growing in that bar is a little annoying to me"*); the › chevron becomes a REAL forward door (⌘]'s face — *"after you just went back, i feel like you should be able to go forward"*); "in xyz book" becomes a BOOK ICON (click = the book when exactly one; *"command click on lets you see the list of books (or there's a dropdown if there's several books it could be in)"*); tags placement — **RULED, round 2: the leaf-only chips ride the compact row beside ← book ›, VISIBLE at rest; ＃ is the deliberate fold/unfold door** | 3 | pending |
 | K12 | **Tag cards DEFAULT VISIBLE** (#52(d) flipped: *"tag cards should fold into the bar if you deliberately choose that but it should default to visible"*) — folding becomes a deliberate, sticky user choice, not the bar's default state; reconciled with K11 by the Q1 ruling | 3 | pending |
 
@@ -652,10 +652,11 @@ the curated half byte-unchanged.
 ### Batch 2 record — the formatting set (2026-08-02, a fresh Opus implementer)
 
 **Counts, from this session's own runs** (the "Test run with N tests" line, on
-the final tree): core **1019 tests in 113 suites** passed (from 1016/112: +3
-tests, +1 suite — the callout projection) · Mac **1169 tests in 202 suites**
-(from 1160/201: +9 tests, +1 suite — the formatting-surfaces suite) **with the
-ONE recorded environment-gated red**
+the final tree, AFTER K8's build): core **1032 tests in 114 suites** passed
+(from 1016/112: +16 tests, +2 suites — the callout projection and the nested
+lists) · Mac **1176 tests in 203 suites** (from 1160/201: +16 tests, +2 suites
+— the formatting surfaces and the nesting doors) **with the ONE recorded
+environment-gated red**
 (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
 confirmed BY IDENTITY; NOT patched, per its KnownIssues row's own instruction
 that no patch is allowed without re-running the A47c experiments 13e owns) ·
@@ -680,8 +681,11 @@ data points now pointing opposite ways. Recorded rather than re-theorized: the
 A47c re-run 13e owns is the only honest way to settle it, and this is one more
 reason it is owed.
 
-**K8 stopped at its proposal gate as briefed** — the proposal is the last
-section of this record, and nothing of it was built.
+**K8 stopped at its proposal gate as briefed, was RULED on all six calls
+(the "Architect adjudications on batch 2" section), and was BUILT in the
+continuation.** Both halves are recorded below: the proposal as it stood at
+the gate, and the build with its own six reverts. *The counts above are the
+FINAL (post-K8) ones.*
 
 ---
 
@@ -1018,16 +1022,126 @@ decisions above and a red-on-old revert per behaviour.
 
 ---
 
+
+---
+
+#### K8 — indented (nested) lists · SHIPPED (the continuation, after the architect's rulings)
+
+**Built to the six rulings exactly** (the "Architect adjudications on batch 2"
+section above): two-space unit · spaces-AND-tabs tokenizer, `tabs +
+floor(spaces/2)`, uncapped and LIST-ONLY · Read indents per level with one
+glyph, clamped at 6 where it DRAWS · the checkbox target unchanged in kind ·
+⏎ on an empty NESTED item OUTDENTS FIRST · `.formatIndent`/`.formatOutdent`
+keyless with helper prose.
+
+**THE CONSEQUENCE, STATED PLAINLY** (the architect's rider — it also rides the
+author handoff): **zero stored bytes change anywhere, and yet a line in an
+EXISTING note that already begins with spaces + `- ` now renders as a list
+item where it used to render as prose.** It is a change to what the app DRAWS,
+never to what it saved; it is her ruling's intent; and it is the one thing
+about this row she could trip over without being told.
+
+**The Domain half** (`Sources/VariorumCore/Domain/`):
+
+- **`MarkdownSyntax`** — the LIST lead may now be preceded by a run of spaces
+  and tabs; `Span.indentLevel` carries the level and the run joins
+  `markers[0]`, because it is part of the lead. That last choice is what makes
+  everything downstream cheap: a reading surface that substitutes the lead
+  strips the indent for free, `markers[1]` is still exactly the checkbox's
+  box, and `leadPlan`'s "the lead is `line.start..<content.lowerBound`" needed
+  no new arithmetic. **The widening is LIST-ONLY**, so 13g batch 2's shipped
+  heading rule ("it starts the line or it is text") is untouched and its pin
+  stays green on its own terms. Two small public constants ride with it —
+  `indentUnit` (the ruled two spaces) and `leadingWhitespace(of:)` — so the
+  acts and the ⏎ continuation cannot disagree about what a level is.
+- **`MarkdownEditing`** — `Act.indent`/`.outdent` join the enum (so they ride
+  `MarkdownActs.apply` and `ShellActions.applyFormat` unchanged, rather than
+  becoming a third kind of thing), planned by `indentPlan`: every affected
+  LIST line moves by exactly one unit; a heading, a paragraph or a blank line
+  is left alone; an outdent at level 0 emits nothing. **An EMPTY plan is the
+  signal the keystroke was not ours** — that is the whole mechanism behind
+  "Tab outside a list is byte-unchanged". `ReturnKey` gains `.outdentItem`,
+  and `.continueList`'s lead now carries the line's own indent (read from the
+  text, so a tab-indented item keeps its TAB — nothing here rewrites her
+  whitespace).
+- **`MarkdownRendering`** — `Line.indentLevel` (uncapped) plus
+  `maxDrawnIndentLevel = 6`, the one place both Read faces read the clamp
+  from.
+
+**The app half:** `MarkdownActs.indentLists(_:in:ordinary:)` — the K5 door's
+shape exactly, where the ratified keystroke runs untouched unless the plan is
+non-empty — behind `insertTab`/`insertBacktab` overrides on BOTH surface kinds
+(R118: a list behaves the same wherever she is typing). The Format menu and
+the context submenu gain the two rows from `MarkdownActs.indentRows`, a
+SECOND table beside `rows` and deliberately so: `FormatBar` reads `rows`, so
+the nesting acts stay OFF the bottom bar's toolbar (Tab is the primary door
+and the bar she already called crowded is eight wide) — and the split is
+walk-enforced, since these two carry no `.bottomBar` door. Read's paged face
+steps the hanging indent per level; the flow's row indents per level; both
+clamp at the shared constant.
+
+**Why the two acts carry no `shortcutLabel`, stated because it looks like an
+omission:** the registry walk (`everyShortcutLabelHasExactlyOneKeyWiring`)
+requires a menu key equivalent for every menu-doored capability that declares
+one — and binding ⇥ as a menu key equivalent takes Tab away from every control
+in the app. So the keys live where ⏎'s lives (the surfaces' own overrides) and
+the ⌘/ helper carries BOTH doors in prose, which is the only guard a keyless
+act can have (WT-1's lesson, pinned by `theHelperNamesTabAndTheMenuRows`).
+
+**THREE shipped expectations were updated deliberately, each on the record**
+(the K1 class — the pin's claim changed because this batch changed it):
+
+| Pin | Was | Now |
+|---|---|---|
+| `MarkdownEditingTests.headingsAndPlainProseAreOrdinary` | `verdict("  - milk") == .ordinary` (the column-0 law) | `== .continueList(lead: "  - ")`; an indented HEADING case was ADDED, since that half of the old claim survives |
+| `MarkdownRenderingTests.anIndentedLeadIsNotALead` (renamed `anIndentedLIST_leadIsALeadNowAndAnIndentedHeadingIsStillNot`) | an indented `- ` renders as body text | it renders as a nested bullet, level 1; the indented `# ` in the same fixture is STILL body |
+| `MarkdownActsTests.theFormatSubmenuIsRenderedOnlyWhereTheSurfaceCanBeEdited` | the submenu's titles == the eight verbs | == the eight, a separator, and the two nesting verbs (the claim is unchanged: the rows ARE the registry's verbs in declared order) |
+
+**Red-on-old — SIX reverts, each verified and checksum-restored:**
+
+| # | Revert | Result |
+|---|---|---|
+| H | the tokenizer's indent scan goes (the shipped column-0 guard back) | RED across FOUR suites and exactly on the nested cases: `anIndentedCHECKBOXKeepsItsBoxAsMarkersOne` (no span at all), `continuingANestedItemStaysAtItsOwnLevel`, `anEmptyNESTEDItemOutdentsAndOnlyLevelZeroExits`, `readIsToldTheLevelAndTheIndentIsGoneFromWhatItDraws`, `theLineScopedLawSurvivesTheWidening`, and both updated pins — while every column-0 and heading expectation stays green |
+| I | `returnKey` drops the `indentLevel > 0` guard | RED: `anEmptyNESTEDItemOutdentsAndOnlyLevelZeroExits` reports `.exitList(0..<4)` where `.outdentItem(0..<2)` is owed — i.e. the revert IS the recorded alternative (#54(e)), which is why the pin discriminates the ruling rather than an accident |
+| J | `indentPlan` drops its list-lead guard | RED: `aNonListLineIsNEVERTouched` and `aSelectionIndentsTheListLinesItTouchesAndNothingElse` — Tab silently indents prose, the exact failure the byte-unchanged promise forbids |
+| K | `indentLists` always calls `ordinary()` | RED on both surfaces: `tabIndentsAndShiftTabOutdentsThroughTheRealKeystroke` produces `"- milk\t"` and `aTakePaneIndentsAndOutdentsTheSameWay` the same — the key types a tab into the list line |
+| L | `MarkdownRendering` stops carrying `span.indentLevel` | RED: every level reads 0 in both the new pin and the updated rendering pin, while the display TEXT stays right — the precise failure where Read draws a nest flush left with its spaces already gone |
+| M | `leadPlan` drops the indent preservation | RED: `settingALeadOnANestedItemKeepsTheIndentAndClearingRemovesIt` — Format ▸ Checklist on a nested bullet collapses it to the margin |
+
+Checksums matched after restore: `MarkdownSyntax.swift`
+`794c2b69b198634e92699be904d445f5` · `MarkdownEditing.swift`
+`df351e57d122f1832a82ae90ef8dc573` · `MarkdownRendering.swift`
+`b6fc6be177ddf655c59c7c41708fb5ec` · `MarkdownActs.swift`
+`ad16cdfe669bc582269607d114322163`.
+
+**What else the pins cover:** the checkbox toggle at depth (the box moved
+right, the strict-inside rule identical); whitespace-only lines and `"  -"`
+are never lists; a selection spanning list and prose lines moves only the list
+ones; a SEALED note refuses the indent in its own words with no new refusal
+code; a tab-indented item keeps its tab through a continuation; the line-scoped
+law (no span crosses a newline, therefore none crosses a block seam) still
+holds over indented text; and the registry pair is keyless, off the toolbar,
+and named in the helper.
+
+**One build-time call the ruling did not cover, added to #54 as (g)** — it
+did not exist when the proposal was written: re-leading a NESTED item keeps
+its indent (Format ▸ Checklist on an indented bullet gives an indented
+checkbox) while CLEARING a lead removes the indent with it (the line stops
+being a list, and a paragraph left indented by two orphan spaces is not what
+"clear" means). Strike it from #54 if the architect would rather it were not
+her call.
+
 #### Notes for the orchestrator
 
-- **`notes/QUESTIONS.md` is UNTOUCHED — #54 is still free.** The four
-  build-time calls this batch made are named in the record above as
-  #54(a)–(d); they are written into the bundle at the batch that CLOSES the
-  phase's questions, exactly as #53 was written once for batch 1, so the
-  entry lands complete rather than being edited twice. Say the word if you
-  want #54 opened now instead.
-- **K8 is the only owed decision.** K7, K9 and K10 are ruled, built, pinned
-  and committed (`1324def`).
+- **`notes/QUESTIONS.md` gains #54 — SEVEN build-time calls**, opened at the
+  architect's instruction: (a)–(d) as proposed, (e) the ⏎ outdent-first call
+  with its alternative, (f) Read's clamp and one-glyph look with the
+  alternating alternate, and (g) — new from K8's build, flagged for the
+  architect to strike if it should not be hers — re-leading a nested item
+  keeps its indent while clearing removes it. **#55 is now the next free
+  number.**
+- **Nothing is owed.** K7, K9 and K10 shipped at `1324def`; K8 shipped in the
+  continuation to the architect's six rulings.
 - **No visual loop was run** — the reasoning and the full swatch table are in
   the K10 section, with three alternates per voice as a propose-only set.
 - **Two hand-checks for the next open app**, both named above: the toolbar

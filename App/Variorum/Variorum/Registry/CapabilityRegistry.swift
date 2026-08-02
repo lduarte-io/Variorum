@@ -591,6 +591,27 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
+        // **13k K8 — nesting** (her ruling: *"we should allow indented lists
+        // and it should happen when you click tab"*; sitting Q3: ⇧Tab + these
+        // two rows). NO `.bottomBar` door, deliberately: Tab and ⇧Tab are the
+        // primary door and K7's toolbar is already eight wide. NO
+        // `shortcutLabel`, also deliberately: the walk would then require a
+        // menu key equivalent (`everyShortcutLabelHasExactlyOneKeyWiring`),
+        // and binding ⇥ as one would steal Tab app-wide — so the keys live in
+        // the surfaces' `insertTab`/`insertBacktab`, where ⏎'s lives, and the
+        // ⌘/ helper carries both doors in prose instead.
+        Capability(
+            id: .formatIndent, verb: "Indent", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
+        Capability(
+            id: .formatOutdent, verb: "Outdent", scope: .block,
+            doors: [.menuBar, .contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Formatting acts on the text you're writing — open a note first.",
+            availability: editableText),
 
         // MARK: Modes + app scope
         Capability(

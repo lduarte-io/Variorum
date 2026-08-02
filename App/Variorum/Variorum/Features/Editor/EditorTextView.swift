@@ -10,6 +10,7 @@
 //
 
 import AppKit
+import VariorumCore
 
 @MainActor
 final class EditorTextView: NSTextView, MarkdownFormattable {
@@ -92,6 +93,19 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         MarkdownActs.insertNewlineContinuingLists(in: self) {
             super.insertNewline(sender)
         }
+    }
+
+    /// **13k K8 — Tab indents a list line, ⇧Tab outdents it** (her ruling +
+    /// sitting Q3). Outside a list line — and that includes a selection no
+    /// list line touches — `super` runs and the key is byte-for-byte what it
+    /// has always been, because `MarkdownActs.indentLists` acts ONLY when the
+    /// plan is non-empty.
+    override func insertTab(_ sender: Any?) {
+        MarkdownActs.indentLists(MarkdownEditing.Act.indent, in: self) { super.insertTab(sender) }
+    }
+
+    override func insertBacktab(_ sender: Any?) {
+        MarkdownActs.indentLists(MarkdownEditing.Act.outdent, in: self) { super.insertBacktab(sender) }
     }
 
     /// **QoL batch 3 (L6) — TRUE only while a FIND-BAR replacement is being

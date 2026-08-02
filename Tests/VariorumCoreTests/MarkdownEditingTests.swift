@@ -419,9 +419,13 @@ struct MarkdownReturnKeyTests {
         #expect(verdict("## Title", at: 8) == .ordinary)
         #expect(verdict("plain prose", at: 11) == .ordinary)
         #expect(verdict("", at: 0) == .ordinary)
-        // The tokenizer's column-0 law holds here too: an indented line is
-        // not a list line in v1 (13g batch 2's recorded limitation).
-        #expect(verdict("  - milk", at: 8) == .ordinary)
+        // 13k K8 UPDATED THIS EXPECTATION DELIBERATELY. It read
+        // `verdict("  - milk", at: 8) == .ordinary` — the column-0 law, which
+        // this batch widened for LIST leads on her ruling. An indented list
+        // item is a list item now, and it continues at its own level.
+        #expect(verdict("  - milk", at: 8) == .continueList(lead: "  - "))
+        // What did NOT widen: an indented HEADING is still plain text.
+        #expect(verdict("  # Title", at: 9) == .ordinary)
         // `*` is not a bullet (13g batch 2: it collides with italic).
         #expect(verdict("* milk", at: 6) == .ordinary)
     }

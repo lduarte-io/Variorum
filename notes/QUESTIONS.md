@@ -330,5 +330,25 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: OPEN — the sitting's walk.**
 
-*(Next free number at authoring time: **#54**.)*
+54. **2026-08-02 · Phase 13k (batch 2) · THE FORMATTING SET IS BUILT — seven build-time calls, each one line to change, bundled the way #49–#53 were.** Your rulings K7–K10 said WHAT: the formatting toolbar goes in the bottom bar, callout frames render in Take mode, inline code gets its own tint, and Tab indents a list. They did not say whether a take card's frame should wrap each card or the whole fan (you ruled that one at the sitting), nor what ⏎ does on an empty item that is three levels deep — those are the calls below. **Nothing here needed a schema change or an operation**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain. The BINDING build record is the 13k plan's batch-2 record.
+
+    *(One thing that is NOT a call, stated here because you will SEE it: the nested-list widening means a line in an EXISTING note that already begins with spaces and a hyphen now renders as a list item where it used to render as prose. Zero stored bytes changed anywhere — it is what the app draws, not what it saved — and it is your ruling's intent. Your handoff says it too.)*
+
+    **(a) The toolbar carries EIGHT acts, not seven.** The ledger said "the seven formatting acts"; that count predates Add Link, which shipped in 13g batch 4. The bar renders the same eight the Format menu does, read from the one table both use — so rendering seven would have meant a second list that could drift. **The alternative:** drop any of them from the bar (it stays in the menu). One line.
+    
+    **(b) The take-mode frame renders in TAKE MODE only.** Lenses and Compare are untouched: their columns have no single "takes region" (Compare spans several notes at once), so a frame there would need a geometry nobody has ruled. Their callout DOORS are unchanged and still work — setting a frame from Lenses shows up in Write, Takes and Read. **The alternative:** decide what a frame means in a multi-column view, which is a design question rather than a line.
+
+    **(c) The code chip covers the BACKTICKS too, not just the words between them.** They are part of what you typed, and a tint that stopped short of them would leave two dimmed ticks floating outside their own chip. In READ the markers are hidden, so there the chip is exactly the words. **The alternative:** tint only the content on the writing surfaces, and live with the ticks outside it.
+
+    **(d) The reading page has its OWN code tint, not the voice's.** Read's paper and serif are deliberately voice-independent (only the room around the page follows the voice), so its chip is the paper's own warm neutral rather than terminal's or study's. **The alternative:** let the page's chip follow the voice, which would make Read's page slightly less its own thing.
+
+    **(e) ⏎ on an empty NESTED list item OUTDENTS it; only at the outermost level does it leave the list.** Your K5 ruling — "⏎ on an empty list item removes the lead and exits" — was made before nesting existed, and at the outermost level it is byte-identical to what you ruled. One level in, pressing ⏎ on the empty item moves it out one level and keeps the bullet, so "finish this sub-list and carry on with the parent" is two presses. It is what Notes, Bear, Obsidian and Notion all do. **The alternative:** the literal reading — one ⏎ leaves the list from any depth, dropping straight to plain text at the margin.
+
+    **(f) Read draws six levels of nesting at most, with the same bullet at every level.** The stored text is never clamped — nest twenty deep and the text says twenty — but a page is a fixed width, so what Read DRAWS stops stepping in at six. And a nested bullet is still `•`, not a different glyph per level: the editing surface shows `- ` at every level, and giving Read a second hierarchy language would make the two disagree. **The alternative:** alternating glyphs (`•` then `◦` then `▪`), the way an HTML list renders.
+
+    **(g) Turning a nested bullet into a nested checklist KEEPS its nesting; clearing the list lead removes it.** So Format ▸ Checklist on an indented bullet gives an indented checkbox, while pressing Bullet List again on that same line gives you plain text at the margin — because the line stops being a list at all, and a paragraph left indented by two orphan spaces is not what "clear" means. **The alternative:** keep the indent through the clear too.
+
+    **Status: OPEN — for the walk.**
+
+*(Next free number at authoring time: **#55**.)*
 

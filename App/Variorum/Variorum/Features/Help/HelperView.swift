@@ -109,6 +109,14 @@ struct HelperView: View {
             // again — so the bar is named here beside the menu paths.
             ("the bottom bar", "B · I · S · ` · link · H · • · ☐ — the same eight acts "
                 + "as the Format menu, on the text you're writing in"),
+            // 13k K8: BOTH doors in prose, because neither can carry a
+            // shortcut label — Tab must never become a menu key equivalent
+            // (it would be taken from every control in the app), so the
+            // registry's drift guard cannot see this pair and only the
+            // written line can.
+            ("Tab / ⇧Tab in a list", "indent / outdent the list item you're in "
+                + "(Format ▸ Indent and Format ▸ Outdent do the same); "
+                + "outside a list, Tab is the key it always was"),
         ]),
         // QoL batch 3 (L6): the in-post find family. Deliberately its own
         // group and deliberately worded against ⌘K's row below — one searches

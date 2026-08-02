@@ -76,12 +76,29 @@ public enum MarkdownRendering {
     public struct Line: Equatable, Sendable {
         public let range: Range<Int>
         public let style: LineStyle
+        /// **13k K8 — the list line's NESTING LEVEL** (0 for everything
+        /// else). The leading whitespace is part of the lead, so it is gone
+        /// from `text` and the level is how a reading surface knows to sit
+        /// the line in: an INDENT, never spaces (spaces would be a second
+        /// indent on top of the first).
+        ///
+        /// Uncapped here, deliberately — the transform reports what the text
+        /// says. A surface may CLAMP what it draws (ruled: Read clamps at 6,
+        /// so a runaway nest cannot push words off a fixed page); that is a
+        /// look decision and it lives with the look.
+        public let indentLevel: Int
 
-        public init(range: Range<Int>, style: LineStyle) {
+        public init(range: Range<Int>, style: LineStyle, indentLevel: Int = 0) {
             self.range = range
             self.style = style
+            self.indentLevel = indentLevel
         }
     }
+
+    /// The deepest level a reading surface DRAWS (ruled — the stored text is
+    /// never clamped). Here rather than in a view so both Read faces indent
+    /// alike.
+    public static let maxDrawnIndentLevel = 6
 
     /// The whole answer for one text.
     public struct Rendered: Equatable, Sendable {
@@ -161,7 +178,9 @@ public enum MarkdownRendering {
             display += rendered.text
             let lineLower = displayLength
             displayLength += rendered.text.utf16.count
-            lines.append(Line(range: lineLower..<displayLength, style: rendered.style))
+            lines.append(Line(
+                range: lineLower..<displayLength, style: rendered.style,
+                indentLevel: rendered.indentLevel))
             for run in rendered.runs {
                 runs.append(Run(
                     range: (run.range.lowerBound + lineLower)..<(run.range.upperBound + lineLower),
@@ -185,6 +204,7 @@ public enum MarkdownRendering {
         let text: String
         let runs: [Run]
         let style: LineStyle
+        var indentLevel: Int = 0
     }
 
     /// One replacement inside a line, in CHARACTER indices (so the walk that
@@ -200,6 +220,7 @@ public enum MarkdownRendering {
         from start: Int, to end: Int, spans: [MarkdownSyntax.Span]
     ) -> RenderedLine {
         var style = LineStyle.body
+        var indentLevel = 0
         var replacements: [Replacement] = []
 
         func replace(_ range: Range<Int>, with text: String) {
@@ -216,9 +237,14 @@ public enum MarkdownRendering {
                 for marker in span.markers { replace(marker, with: "") }
             case .bullet:
                 style = .bullet
+                // 13k K8: `markers[0]` is the INDENT + `"- "`, so substituting
+                // it strips the whitespace and the level rides `indentLevel`
+                // — the surface draws ONE indent, not spaces plus an indent.
+                indentLevel = span.indentLevel
                 for marker in span.markers { replace(marker, with: bulletLead) }
             case .checkbox(let checked):
                 style = .checkbox(checked: checked)
+                indentLevel = span.indentLevel
                 // `markers[0]` is the `"- "` lead and `markers[1]` is the box
                 // (the tokenizer's own split): the lead goes, the box becomes
                 // a glyph, and the ordinary space after it — which belongs to
@@ -297,7 +323,7 @@ public enum MarkdownRendering {
             runs.append(Run(range: from..<to, emphasis: emphasis, url: url))
         }
         runs.sort { $0.range.lowerBound < $1.range.lowerBound }
-        return RenderedLine(text: text, runs: runs, style: style)
+        return RenderedLine(text: text, runs: runs, style: style, indentLevel: indentLevel)
     }
 
     /// The character index a UTF-16 offset names (binary search — `offsets`

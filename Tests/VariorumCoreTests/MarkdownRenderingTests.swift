@@ -190,13 +190,18 @@ struct MarkdownRenderingTests {
         #expect(straddling.runs.isEmpty)
     }
 
-    /// The line-leading rule is column 0 exactly (batch 2's pinned decision),
-    /// and the transform inherits it verbatim rather than widening it — an
-    /// indented list item is not styled in v1, which is the known limitation
-    /// nested lists will need her word to change.
-    @Test func anIndentedLeadIsNotALead() {
+    /// **UPDATED BY 13k K8, deliberately and on the record.** This read
+    /// "an indented list item is not styled in v1, the known limitation
+    /// nested lists will need her word to change" — she gave that word, and
+    /// the tokenizer's column-0 law was widened for LIST leads only. So an
+    /// indented `- ` is a nested bullet now (its spaces substituted away with
+    /// the rest of the lead, the level carried on the line), and an indented
+    /// `# ` is STILL plain text — which is the half of the old claim that
+    /// survives, and the reason this pin keeps both lines.
+    @Test func anIndentedLIST_leadIsALeadNowAndAnIndentedHeadingIsStillNot() {
         let rendered = MarkdownRendering.render("  - indented\n  # not a heading")
-        #expect(rendered.text == "  - indented\n  # not a heading")
-        #expect(rendered.lines.allSatisfy { $0.style == .body })
+        #expect(rendered.text == "\u{2022} indented\n  # not a heading")
+        #expect(rendered.lines.map(\.style) == [.bullet, .body])
+        #expect(rendered.lines.map(\.indentLevel) == [1, 0])
     }
 }

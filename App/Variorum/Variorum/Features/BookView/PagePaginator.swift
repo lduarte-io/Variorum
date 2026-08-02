@@ -147,7 +147,7 @@ enum PageComposer {
         // table (the callout indent rides those ranges).
         var ranges: [(blockID: String, range: NSRange)] = []
         var runs: [(range: NSRange, run: MarkdownRendering.Run)] = []
-        var lineStyles: [(range: NSRange, style: MarkdownRendering.LineStyle)] = []
+        var lineStyles: [(range: NSRange, line: MarkdownRendering.Line)] = []
         var links: [PageLink] = []
         var composed = ""
         var display = ""
@@ -179,7 +179,7 @@ enum PageComposer {
             for line in rendered.lines where line.style != .body {
                 lineStyles.append((
                     NSRange(location: start + line.range.lowerBound, length: line.range.count),
-                    line.style))
+                    line))
             }
         }
         let body = composed
@@ -219,8 +219,8 @@ enum PageComposer {
         // The rendered face: paragraph facts first (a heading's size, a list
         // line's hanging indent), then the character runs on top, so a bold
         // word inside a heading keeps the heading's size.
-        for (range, style) in lineStyles {
-            applyLineStyle(style, to: bodyString, range: range, typography: typography)
+        for (range, line) in lineStyles {
+            applyLineStyle(line, to: bodyString, range: range, typography: typography)
         }
         for (range, run) in runs {
             applyRun(
@@ -252,9 +252,10 @@ enum PageComposer {
     /// wrapped item lines up under its own words. Both are paragraph facts,
     /// which is exactly how the transform models them.
     private static func applyLineStyle(
-        _ style: MarkdownRendering.LineStyle, to string: NSMutableAttributedString,
+        _ line: MarkdownRendering.Line, to string: NSMutableAttributedString,
         range: NSRange, typography: PageTypography
     ) {
+        let style = line.style
         guard range.length > 0, range.upperBound <= string.length else { return }
         let paragraph = NSMutableParagraphStyle()
         paragraph.setParagraphStyle(
@@ -274,10 +275,18 @@ enum PageComposer {
             string.addAttribute(.font, value: font, range: range)
             paragraph.paragraphSpacingBefore = typography.lineSpacing * 2
         case .bullet, .checkbox:
-            let indent = (" " as NSString)
-                .size(withAttributes: [.font: typography.body]).width * 2.5
-            paragraph.firstLineHeadIndent += indent
-            paragraph.headIndent += indent * 2
+            let space = (" " as NSString)
+                .size(withAttributes: [.font: typography.body]).width
+            // 13k K8: a NESTED item sits in one step per level. The step is
+            // the width of the `- ` lead the transform removed, so the page
+            // reproduces the nesting the stored text describes — and it is
+            // CLAMPED (ruled) so a runaway nest cannot push words off a
+            // fixed page, while the stored text stays uncapped.
+            let level = min(line.indentLevel, MarkdownRendering.maxDrawnIndentLevel)
+            let nest = space * 2 * CGFloat(level)
+            let indent = space * 2.5
+            paragraph.firstLineHeadIndent += indent + nest
+            paragraph.headIndent += indent * 2 + nest
         }
         string.addAttribute(.paragraphStyle, value: paragraph, range: range)
     }

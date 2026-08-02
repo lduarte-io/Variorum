@@ -369,9 +369,19 @@ struct MarkdownActsTests {
         pane.isEditable = true
         let item = try #require(MarkdownActs.formatMenuItem(for: pane))
         let submenu = try #require(item.submenu)
+        // 13k K8 UPDATED THIS EXPECTATION DELIBERATELY: the submenu now
+        // renders the eight acts, a separator, and the two NESTING rows
+        // (Tab / ⇧Tab's menu twins, which carry no chord and so would be
+        // invisible without a menu row). The claim is unchanged — the rows
+        // ARE the registry's verbs in the declared order — it simply has two
+        // more of them, and the separator is chrome rather than a row.
         #expect(submenu.items.map(\.title)
-                == Self.allFormatting.map { CapabilityRegistry.capability($0).verb },
+                == (MarkdownActs.rows + MarkdownActs.indentRows)
+                    .map { CapabilityRegistry.capability($0.id).verb }
+                    .enumerated()
+                    .flatMap { $0.offset == MarkdownActs.rows.count ? ["", $0.element] : [$0.element] },
                 "the rows are the registry's verbs, in the declared order")
+        #expect(submenu.items.filter { !$0.isSeparatorItem }.count == 10)
         let heading = try #require(submenu.items.first { $0.title == "Heading" })
         #expect(heading.submenu?.items.map(\.title) == ["Heading 1", "Heading 2", "Heading 3"])
     }

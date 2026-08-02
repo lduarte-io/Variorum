@@ -91,6 +91,8 @@ struct EditorCommands: Commands {
         // 13g batch 4 (L10): the Add Link door.
         .formatAddLink,
         .formatHeading, .formatBulletList, .formatChecklist,
+        // 13k K8: the nesting rows (Tab / ⇧Tab's menu twins).
+        .formatIndent, .formatOutdent,
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
         .openNote, .navigateBack, .navigateForward,
@@ -493,6 +495,16 @@ struct EditorCommands: Commands {
                 .disabled(!enabled(.formatBulletList))
             Button(verb(.formatChecklist)) { actions?.applyFormat(.checkbox) }
                 .disabled(!enabled(.formatChecklist))
+            Divider()
+            // 13k K8 (her ruling + sitting Q3): the nesting rows. Keyless
+            // BY DESIGN — Tab and ⇧Tab do this inside a list, and neither
+            // may become a menu key equivalent (it would steal Tab from
+            // every control in the app), so the rows say what they do and
+            // the helper names both doors in prose.
+            Button(verb(.formatIndent)) { actions?.applyFormat(.indent) }
+                .disabled(!enabled(.formatIndent))
+            Button(verb(.formatOutdent)) { actions?.applyFormat(.outdent) }
+                .disabled(!enabled(.formatOutdent))
         }
         // ⌘1–⌘6 — the post modes (routed 13b 1b: composition, not a
         // broadcast — with no post open the items are honestly grey; a

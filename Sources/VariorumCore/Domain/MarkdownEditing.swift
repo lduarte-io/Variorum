@@ -58,6 +58,12 @@ public enum MarkdownEditing {
         case heading(level: Int)
         case bullet
         case checkbox
+        /// **13k K8 — nesting.** Not a wrap and not a lead: they change a
+        /// list line's INDENT and touch nothing else. Her ruling gave Tab
+        /// the indent and sitting Q3 gave ⇧Tab + Format ▸ Indent/Outdent
+        /// the way back; the acts are here so both doors and the menu run
+        /// one computation.
+        case indent, outdent
 
         /// The syntax characters an inline act wraps with; nil for the line
         /// family. Asymmetric for links, symmetric for the emphasis four.
@@ -68,7 +74,7 @@ public enum MarkdownEditing {
             case .strikethrough: ("~~", "~~")
             case .code: ("`", "`")
             case .link: ("[", "]()")
-            case .heading, .bullet, .checkbox: nil
+            case .heading, .bullet, .checkbox, .indent, .outdent: nil
             }
         }
 
@@ -79,7 +85,7 @@ public enum MarkdownEditing {
             case .strikethrough: .strikethrough
             case .code: .code
             case .link: .link
-            case .heading, .bullet, .checkbox: nil
+            case .heading, .bullet, .checkbox, .indent, .outdent: nil
             }
         }
 
@@ -103,7 +109,7 @@ public enum MarkdownEditing {
                 String(repeating: "#", count: min(max(level, 1), 3)) + " "
             case .bullet: "- "
             case .checkbox: "- [ ] "
-            case .bold, .italic, .strikethrough, .code, .link: nil
+            case .bold, .italic, .strikethrough, .code, .link, .indent, .outdent: nil
             }
         }
 
@@ -179,6 +185,11 @@ public enum MarkdownEditing {
         // `MarkdownScanCount` (DEBUG) is what makes it checkable.
         let spans = MarkdownSyntax.spans(in: text)
 
+        if act == .indent || act == .outdent {
+            return indentPlan(
+                act, spans: spans, chars: chars, offsets: offsets,
+                lines: affected, selection: sel)
+        }
         if let markers = act.wrapMarkers, let kind = act.wrapKind {
             return wrapPlan(
                 markers: markers, kind: kind, chars: chars, offsets: offsets,
@@ -235,10 +246,24 @@ public enum MarkdownEditing {
         /// Nothing list-shaped here — ⏎ is exactly the keystroke it was.
         case ordinary
         /// A texted list line: once the newline has landed, insert this.
+        /// **13k K8: the lead CARRIES THE INDENT**, so a nested item's ⏎
+        /// continues at its own level instead of collapsing to column 0.
         case continueList(lead: String)
-        /// An EMPTY list item: delete this range (its lead) and insert NO
-        /// newline. UTF-16, relative to the text handed in.
+        /// An EMPTY list item at level 0: delete this range (its lead) and
+        /// insert NO newline. UTF-16, relative to the text handed in.
         case exitList(lead: Range<Int>)
+        /// **13k K8 — an EMPTY list item that is NESTED: OUTDENT FIRST.**
+        /// Delete this range (one indent unit) and insert no newline; the
+        /// item stays a list item, one level shallower, and a second ⏎ at
+        /// level 0 exits exactly as her K5 ruling says.
+        ///
+        /// Ruled (architect, 2026-08-02) as the platform standard extending
+        /// K5 — Notes, Bear, Obsidian and Notion all do this, "finish this
+        /// sub-list and continue the parent" is the everyday gesture, and
+        /// **at level 0 nothing she ruled changes at all**. The literal
+        /// alternative (exit straight to column 0 from any depth) is a
+        /// lettered call on QUESTIONS #54.
+        case outdentItem(unit: Range<Int>)
     }
 
     /// The unchecked checkbox lead a continued checklist gets — never a
@@ -260,6 +285,7 @@ public enum MarkdownEditing {
     /// (`- ` and `- [ ]`); a heading is not a list, and a second `# ` after
     /// every heading is nobody's intent.
     public static func returnKey(inLines text: String, at offset: Int) -> ReturnKey {
+        let ns = text as NSString
         for span in MarkdownSyntax.spans(in: text) {
             let lead: String
             switch span.kind {
@@ -270,15 +296,31 @@ public enum MarkdownEditing {
             // A line-leading span covers its whole line, so its upper bound
             // IS the line's end.
             guard offset == span.range.upperBound else { continue }
-            let ns = text as NSString
             let content = ns.substring(with: NSRange(
                 location: span.content.lowerBound, length: span.content.count))
+            // The line's own indent — the run inside `markers[0]`, before the
+            // `"- "`. Read from the text rather than rebuilt from the level,
+            // so a tab-indented item keeps its tab (this never rewrites her
+            // whitespace).
+            let indent = MarkdownSyntax.leadingWhitespace(of: ns.substring(with: NSRange(
+                location: span.range.lowerBound, length: span.range.count)))
+
             if content.trimmingCharacters(in: .whitespaces).isEmpty {
-                // Empty item ⇒ exit. Exactly the LEAD goes; anything she
-                // typed past it (stray spaces) is hers and stays.
-                return .exitList(lead: span.range.lowerBound..<span.content.lowerBound)
+                guard span.indentLevel > 0 else {
+                    // Level 0 ⇒ exit, exactly as her K5 ruling says. The LEAD
+                    // goes; anything she typed past it (stray spaces) is hers
+                    // and stays.
+                    return .exitList(lead: span.range.lowerBound..<span.content.lowerBound)
+                }
+                // Nested ⇒ outdent one level and stay a list item. One tab is
+                // one level; otherwise up to the two-space unit.
+                let unitLength = indent.hasPrefix("\t")
+                    ? 1
+                    : min(MarkdownSyntax.indentUnit.utf16.count, indent.utf16.count)
+                return .outdentItem(
+                    unit: span.range.lowerBound..<(span.range.lowerBound + unitLength))
             }
-            return .continueList(lead: lead)
+            return .continueList(lead: indent + lead)
         }
         return .ordinary
     }
@@ -500,12 +542,20 @@ public enum MarkdownEditing {
             if !written.isEmpty { targets = written }
         }
 
-        let leads: [(range: Range<Int>, matches: Bool)] = targets.map { line in
+        let leads: [(range: Range<Int>, matches: Bool, indent: String)] = targets.map { line in
             let span = spans.first { span in
                 span.range.lowerBound == line.start && isLineLeading(span.kind)
             }
+            // 13k K8: an indented list line's lead INCLUDES its indent, so
+            // re-leading it (bullet → checklist) must put the indent back or
+            // the nesting would silently collapse. Clearing removes the whole
+            // lead, indent and all — the line stops being a list, and a
+            // paragraph indented by two orphan spaces is not what "clear"
+            // means.
+            let indent = String(chars[line.charStart..<line.charEnd].prefix { $0 == " " || $0 == "\t" })
             return (line.start..<(span?.content.lowerBound ?? line.start),
-                    span.map { act.matches($0.kind) } ?? false)
+                    span.map { act.matches($0.kind) } ?? false,
+                    (span.map { isListLead($0.kind) } ?? false) ? indent : "")
         }
 
         // ONE rule for both families: every affected line already carries the
@@ -522,13 +572,71 @@ public enum MarkdownEditing {
                 edits.append(Edit(range: entry.range, replacement: ""))
             } else {
                 guard !entry.matches else { continue }  // already exactly this lead
-                edits.append(Edit(range: entry.range, replacement: lead))
+                edits.append(Edit(range: entry.range, replacement: entry.indent + lead))
             }
         }
 
         let selectionAfter = map(sel.lowerBound, through: edits, bias: .right)
             ..< map(sel.upperBound, through: edits, bias: .right)
         return Plan(edits: edits, selection: normalized(selectionAfter))
+    }
+
+    // MARK: - K8: the indent family
+
+    /// **Tab and ⇧Tab, as a plan** (13k K8, her ruling + sitting Q3).
+    ///
+    /// The rule is narrow on purpose: **only LIST lines move.** Every
+    /// affected line that carries a bullet or checkbox lead gains (or loses)
+    /// exactly one indent unit at its start; a heading, a paragraph, or a
+    /// blank line inside the selection is left alone. An outdent on a line
+    /// with no indent left is simply no edit for that line.
+    ///
+    /// **An EMPTY plan is the signal that the keystroke was not ours** — the
+    /// surface falls straight through to `super.insertTab`/`insertBacktab`,
+    /// so Tab outside a list is byte-for-byte the key it has always been
+    /// (the `insertNewlineContinuingLists` shape, same reasoning).
+    private static func indentPlan(
+        _ act: Act, spans: [MarkdownSyntax.Span],
+        chars: [Character], offsets: [Int], lines: [Line], selection sel: Range<Int>
+    ) -> Plan {
+        var edits: [Edit] = []
+        for line in lines {
+            guard spans.contains(where: { span in
+                span.range.lowerBound == line.start && isListLead(span.kind)
+            }) else { continue }
+
+            if act == .indent {
+                edits.append(Edit(
+                    range: line.start..<line.start, replacement: MarkdownSyntax.indentUnit))
+                continue
+            }
+            // Outdent: ONE unit off the front — a tab is one level, so it
+            // goes whole; otherwise up to two spaces (the ruled unit).
+            var index = line.charStart
+            var removed = 0
+            if index < line.charEnd, chars[index] == "\t" {
+                index += 1
+                removed = 1
+            } else {
+                while index < line.charEnd, chars[index] == " ",
+                      removed < MarkdownSyntax.indentUnit.count {
+                    index += 1
+                    removed += 1
+                }
+            }
+            guard removed > 0 else { continue }
+            edits.append(Edit(range: line.start..<offsets[index], replacement: ""))
+        }
+        let selectionAfter = map(sel.lowerBound, through: edits, bias: .right)
+            ..< map(sel.upperBound, through: edits, bias: .right)
+        return Plan(edits: edits, selection: normalized(selectionAfter))
+    }
+
+    private static func isListLead(_ kind: MarkdownSyntax.Kind) -> Bool {
+        switch kind {
+        case .bullet, .checkbox: true
+        case .heading, .bold, .italic, .strikethrough, .code, .link: false
+        }
     }
 
     private static func isLineLeading(_ kind: MarkdownSyntax.Kind) -> Bool {

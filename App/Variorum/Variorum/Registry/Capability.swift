@@ -322,6 +322,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // in batch 2 with a face but no DOOR — the only way to make one was to
     // type the brackets. This is the door.
     case formatAddLink
+    // 13k K8: nesting. Her ruling gave Tab the indent; sitting Q3 gave ⇧Tab
+    // and these two menu rows the way back. Declared like the keyless five,
+    // and deliberately WITHOUT a `shortcutLabel`: Tab is not a menu key
+    // equivalent and must never become one (⇥ as a menu chord would steal
+    // Tab from every control in the app), so the keys live where ⏎'s does —
+    // in the surfaces' own `insertTab`/`insertBacktab` overrides.
+    case formatIndent, formatOutdent
     // Modes + app scope
     case switchMode
     // 13f batch 3 — the NAVIGATION core (her W3/A27 + W16 rulings): the

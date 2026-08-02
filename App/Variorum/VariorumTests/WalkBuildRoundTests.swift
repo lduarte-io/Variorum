@@ -541,3 +541,202 @@ struct ListContinuationTests {
         #expect(view.string == "- milk\n")
     }
 }
+
+// MARK: - K8: Tab indents a list line
+
+/// **13k K8 — indented (nested) lists.** Her ruling: *"we should allow
+/// indented lists and it should happen when you click tab"*; sitting Q3 gave
+/// ⇧Tab and the two Format rows the way back.
+///
+/// The arithmetic is pinned in the core suite (`MarkdownNestedListTests`).
+/// What is pinned HERE is everything that only exists in the app: the two
+/// keys through real key events on both surface kinds, the promise that Tab
+/// OUTSIDE a list line is byte-for-byte the key it always was, the ordinary
+/// pipeline carrying the edit into the store, and the registry declarations
+/// (keyless, and NOT on the toolbar).
+@MainActor
+@Suite("K8 — Tab indents a list (13k)", .serialized)
+struct NestedListDoorTests {
+
+    private static func returnEvent(windowNumber: Int) -> NSEvent {
+        NSEvent.keyEvent(
+            with: .keyDown, location: .zero,
+            modifierFlags: [], timestamp: 0,
+            windowNumber: windowNumber, context: nil,
+            characters: "\r", charactersIgnoringModifiers: "\r",
+            isARepeat: false, keyCode: 36)!
+    }
+
+    private static func tabEvent(shift: Bool, windowNumber: Int) -> NSEvent {
+        NSEvent.keyEvent(
+            with: .keyDown, location: .zero,
+            modifierFlags: shift ? .shift : [], timestamp: 0,
+            windowNumber: windowNumber, context: nil,
+            characters: shift ? "\u{19}" : "\t",
+            charactersIgnoringModifiers: shift ? "\u{19}" : "\t",
+            isARepeat: false, keyCode: 48)!
+    }
+
+    private static func host(_ view: NSView) -> (window: NSWindow, teardown: () -> Void) {
+        let window = NSWindow(
+            contentRect: NSRect(x: 80, y: 80, width: 600, height: 400),
+            styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = view
+        window.makeKeyAndOrderFront(nil)
+        window.makeFirstResponder(view)
+        return (window, {
+            window.orderOut(nil)
+            window.close()
+        })
+    }
+
+    /// DISCRIMINATING REVERT: make `MarkdownActs.indentLists` always call
+    /// `ordinary()` and this fails — Tab types a tab character into the list
+    /// line instead of indenting it.
+    @Test func tabIndentsAndShiftTabOutdentsThroughTheRealKeystroke() async throws {
+        try await withEditor(seedBlocks: ["- milk"]) { h in
+            let hosted = Self.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(NSRange(location: 6, length: 0))
+            h.textView.keyDown(
+                with: Self.tabEvent(shift: false, windowNumber: hosted.window.windowNumber))
+            #expect(h.documentText == "  - milk")
+            h.textView.keyDown(
+                with: Self.tabEvent(shift: false, windowNumber: hosted.window.windowNumber))
+            #expect(h.documentText == "    - milk", "one unit per press")
+
+            h.textView.keyDown(
+                with: Self.tabEvent(shift: true, windowNumber: hosted.window.windowNumber))
+            #expect(h.documentText == "  - milk")
+            await h.flush()
+            // The ordinary pipeline all the way into the store — no operation,
+            // no schema: the spaces are ordinary content she typed.
+            #expect(try h.storeSlots().map(\.text) == ["  - milk"])
+        }
+    }
+
+    /// **The byte-unchanged promise, as a pin.** Outside a list line the key
+    /// is AppKit's own — here, the tab character it has always typed.
+    ///
+    /// DISCRIMINATING REVERT: drop `indentLists`' empty-plan fallthrough (act
+    /// unconditionally) and this fails — Tab would silently do nothing in
+    /// prose, which is a dead key in the one place the key already had a
+    /// meaning.
+    @Test func tabOutsideAListLineIsTheKeyItAlwaysWas() async throws {
+        try await withEditor(seedBlocks: ["ordinary prose"]) { h in
+            let hosted = Self.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(NSRange(location: 8, length: 0))
+            h.textView.keyDown(
+                with: Self.tabEvent(shift: false, windowNumber: hosted.window.windowNumber))
+            #expect(h.documentText == "ordinary\t prose",
+                    "AppKit's own insertTab — a literal tab, exactly as before")
+        }
+    }
+
+    /// A SEALED note refuses it in its own words, with no new refusal code —
+    /// the indent rides the same `shouldChangeText` verdict every other
+    /// formatting act does.
+    @Test func aSealedNoteRefusesTheIndentWithoutTouchingAByte() async throws {
+        try await withEditor(seedBlocks: ["- milk"]) { h in
+            _ = try h.session.operations.lockPost(h.postID)
+            try h.reload()
+            let hosted = Self.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            h.textView.setSelectedRange(NSRange(location: 6, length: 0))
+            h.textView.keyDown(
+                with: Self.tabEvent(shift: false, windowNumber: hosted.window.windowNumber))
+            await h.flush()
+            #expect(h.documentText == "- milk")
+            #expect(try h.storeSlots().map(\.text) == ["- milk"])
+        }
+    }
+
+    /// **⏎ at depth, through the real keystroke:** a nested item continues at
+    /// its own level, and an EMPTY nested item OUTDENTS before it exits (the
+    /// architect's ruling on this batch's proposal — at level 0 K5's ruling is
+    /// byte-identical, which the K5 suite above still pins).
+    @Test func returnAtDepthContinuesThenOutdentsThenExits() async throws {
+        try await withEditor(seedBlocks: ["- milk\n  - almond"]) { h in
+            let hosted = Self.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            let end = (h.documentText as NSString).length
+            h.textView.setSelectedRange(NSRange(location: end, length: 0))
+            let press = { h.textView.keyDown(
+                with: Self.returnEvent(windowNumber: hosted.window.windowNumber)) }
+
+            press()
+            #expect(h.documentText == "- milk\n  - almond\n  - ", "same level")
+            press()
+            #expect(h.documentText == "- milk\n  - almond\n- ", "outdent first")
+            press()
+            #expect(h.documentText == "- milk\n  - almond\n", "then exit")
+        }
+    }
+
+    /// R118 parity: a take pane does all of it too — a list behaves the same
+    /// wherever she is typing.
+    @Test func aTakePaneIndentsAndOutdentsTheSameWay() throws {
+        let view = PaneTextView.makeTakeSurface()
+        view.frame = NSRect(x: 0, y: 0, width: 400, height: 200)
+        view.isEditable = true
+        let hosted = Self.host(view)
+        defer { hosted.teardown() }
+        hosted.window.makeFirstResponder(view)
+
+        view.string = "- milk"
+        view.setSelectedRange(NSRange(location: 6, length: 0))
+        view.keyDown(with: Self.tabEvent(shift: false, windowNumber: hosted.window.windowNumber))
+        #expect(view.string == "  - milk")
+        view.keyDown(with: Self.tabEvent(shift: true, windowNumber: hosted.window.windowNumber))
+        #expect(view.string == "- milk")
+
+        // …and outside a list it is AppKit's key here too.
+        view.string = "prose"
+        view.setSelectedRange(NSRange(location: 5, length: 0))
+        view.keyDown(with: Self.tabEvent(shift: false, windowNumber: hosted.window.windowNumber))
+        #expect(view.string == "prose\t")
+    }
+
+    /// The declarations (P-1): keyless BY DESIGN, on the two menus, and
+    /// deliberately NOT on the bottom bar's toolbar.
+    @Test func theNestingActsAreDeclaredKeylessAndOffTheToolbar() {
+        for id in [CapabilityID.formatIndent, .formatOutdent] {
+            let capability = CapabilityRegistry.capability(id)
+            #expect(capability.doors == [.menuBar, .contextMenu])
+            #expect(!capability.doors.contains(.bottomBar),
+                    "\(id): Tab is the primary door; the bar is already eight wide")
+            #expect(capability.shortcutLabel == nil,
+                    "declaring ⇥ would force a menu key equivalent and steal Tab app-wide")
+            #expect(EditorCommands.keyEquivalent(for: id) == nil)
+            #expect(capability.takesAccess == .native)
+            #expect(!FormatBar.renderedCapabilities.contains(id))
+        }
+        #expect(MarkdownActs.indentRows.map(\.id) == [.formatIndent, .formatOutdent])
+        #expect(MarkdownActs.contextMenuCapabilities.contains(.formatIndent))
+        #expect(MarkdownActs.contextMenuCapabilities.contains(.formatOutdent))
+    }
+
+    /// The helper carries BOTH doors in prose — the registry's drift guard
+    /// cannot see a keyless act, so the written line is the only guard there
+    /// is (WT-1's lesson).
+    @Test func theHelperNamesTabAndTheMenuRows() {
+        let prose = HelperView.groups
+            .flatMap { $0.items }
+            .map { "\($0.0) \($0.1)" }
+            .joined(separator: "\n")
+            .lowercased()
+        #expect(prose.contains("indent"))
+        #expect(prose.contains("outdent"))
+        #expect(prose.contains("tab"))
+    }
+}

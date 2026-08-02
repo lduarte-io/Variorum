@@ -83,6 +83,17 @@ enum MarkdownActs {
         Row(id: .formatChecklist, act: .checkbox),
     ]
 
+    /// **13k K8 — the two nesting rows**, a SECOND table beside `rows` and
+    /// deliberately so: they are rendered by the Format menu and the context
+    /// submenu but NOT by the bottom bar's toolbar (`FormatBar` reads `rows`),
+    /// because Tab and ⇧Tab are the primary door and the bar she already
+    /// called crowded is eight wide. The split is walk-enforced — these two
+    /// declare `.menuBar` + `.contextMenu` and no `.bottomBar` door.
+    static let indentRows: [Row] = [
+        Row(id: .formatIndent, act: .indent),
+        Row(id: .formatOutdent, act: .outdent),
+    ]
+
     /// The heading submenu's rows — read by BOTH the menu bar and the
     /// context menu, so the two can never offer different sizes.
     static var headingRows: [(title: String, act: MarkdownEditing.Act)] {
@@ -98,6 +109,10 @@ enum MarkdownActs {
         .formatBold, .formatItalic, .formatStrikethrough, .formatCode,
         .formatAddLink,
         .formatHeading, .formatBulletList, .formatChecklist,
+        // 13k K8: the nesting rows ride the submenu too — Tab is the primary
+        // door, and a door with no chord that appears in no menu is the WT-1
+        // invisibility class.
+        .formatIndent, .formatOutdent,
     ]
 
     /// What the menu door says when a note is open but the keyboard is
@@ -286,10 +301,14 @@ enum MarkdownActs {
         case .exitList(let lead):
             // The ONE place the keystroke is consumed: no newline at all,
             // just the lead of an item with nothing in it going away.
-            let range = NSRange(location: lead.lowerBound, length: lead.count)
-            guard textView.shouldChangeText(in: range, replacementString: "") else { return }
-            textView.replaceCharacters(in: range, with: "")
-            textView.didChangeText()
+            deleteWithoutNewline(lead, in: textView)
+
+        case .outdentItem(let unit):
+            // 13k K8: an empty NESTED item outdents instead of exiting — the
+            // same consumed-keystroke shape, one indent unit instead of the
+            // whole lead. At level 0 the case above runs and her K5 ruling is
+            // byte-identical.
+            deleteWithoutNewline(unit, in: textView)
 
         case .continueList(let lead):
             let undoManager = textView.undoManager
@@ -304,6 +323,46 @@ enum MarkdownActs {
             else { return }
             textView.replaceCharacters(in: caret, with: lead)
             textView.didChangeText()
+        }
+    }
+
+    /// One ordinary deletion through the ordinary input path, no newline —
+    /// the shape both consuming ⏎ verdicts take.
+    private static func deleteWithoutNewline(_ range: Range<Int>, in textView: NSTextView) {
+        let ns = NSRange(location: range.lowerBound, length: range.count)
+        guard ns.length > 0, ns.upperBound <= (textView.string as NSString).length,
+              textView.shouldChangeText(in: ns, replacementString: "")
+        else { return }
+        textView.replaceCharacters(in: ns, with: "")
+        textView.didChangeText()
+    }
+
+    // MARK: - K8: Tab indents a list line, ⇧Tab outdents it
+
+    /// **The Tab door** (13k K8 — her ruling *"we should allow indented lists
+    /// and it should happen when you click tab"*, with sitting Q3's ⇧Tab as
+    /// the way back).
+    ///
+    /// **The safety claim is the K5 claim, in the same shape:** the keystroke
+    /// is only ours when the caret's own line (or, with a selection, some
+    /// affected line) is a LIST line. Everywhere else `ordinary` runs — the
+    /// surface's own `super.insertTab`/`insertBacktab`, byte-for-byte the key
+    /// it has always been — because an empty plan is exactly the signal that
+    /// no list line was touched.
+    ///
+    /// The edit itself rides `apply`, so it is an ordinary edit like every
+    /// other formatting act: autosave, churn, ⌘Z, and a sealed note's own
+    /// refusal, with no new refusal code.
+    static func indentLists(
+        _ act: MarkdownEditing.Act, in textView: NSTextView, ordinary: () -> Void
+    ) {
+        guard textView.isEditable, apply(act, to: textView) else {
+            // Not ours — or ours and REFUSED (a sealed note, a locked take,
+            // where the pipeline has already spoken). Either way the standing
+            // key runs, and on a surface that refuses an indent it refuses a
+            // tab character too, so nothing changes. Pinned both ways.
+            ordinary()
+            return
         }
     }
 
@@ -323,9 +382,16 @@ enum MarkdownActs {
             at: selection.location - lines.location)
         // The Domain answers in the LINE's offsets; the surface acts in the
         // note's (the `apply`/`toggleCheckbox` rebasing, same shape).
-        guard case .exitList(let lead) = verdict else { return verdict }
-        return .exitList(
-            lead: (lines.location + lead.lowerBound)..<(lines.location + lead.upperBound))
+        switch verdict {
+        case .exitList(let lead):
+            return .exitList(
+                lead: (lines.location + lead.lowerBound)..<(lines.location + lead.upperBound))
+        case .outdentItem(let unit):
+            return .outdentItem(
+                unit: (lines.location + unit.lowerBound)..<(lines.location + unit.upperBound))
+        case .ordinary, .continueList:
+            return verdict
+        }
     }
 
     // MARK: - L10: the ⌘-click that opens a link
@@ -380,7 +446,11 @@ enum MarkdownActs {
         guard textView is MarkdownFormattable, textView.isEditable else { return nil }
         let item = NSMenuItem(title: menuTitle, action: nil, keyEquivalent: "")
         let submenu = NSMenu(title: menuTitle)
-        for row in rows {
+        for row in rows + [nil] + indentRows.map(Optional.init) {
+            guard let row else {
+                submenu.addItem(.separator())
+                continue
+            }
             let capability = CapabilityRegistry.capability(row.id)
             if let act = row.act {
                 submenu.addItem(menuItem(

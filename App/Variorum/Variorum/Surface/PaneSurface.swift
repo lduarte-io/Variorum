@@ -310,6 +310,19 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
         }
     }
 
+    /// **13k K8 — Tab indents a list line, ⇧Tab outdents it** (her ruling +
+    /// sitting Q3). Outside a list line — and that includes a selection no
+    /// list line touches — `super` runs and the key is byte-for-byte what it
+    /// has always been, because `MarkdownActs.indentLists` acts ONLY when the
+    /// plan is non-empty.
+    override func insertTab(_ sender: Any?) {
+        MarkdownActs.indentLists(MarkdownEditing.Act.indent, in: self) { super.insertTab(sender) }
+    }
+
+    override func insertBacktab(_ sender: Any?) {
+        MarkdownActs.indentLists(MarkdownEditing.Act.outdent, in: self) { super.insertBacktab(sender) }
+    }
+
     /// 13b 1b (N9's keyboard half): a pane that goes LIVE should hold the
     /// keyboard — set when liveness arrives before the view has a window
     /// (programmatic landings), honored at attach.

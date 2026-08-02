@@ -195,6 +195,10 @@ private struct FlowPostView: View {
 struct FlowParagraph: Equatable {
     var text: AttributedString
     var style: MarkdownRendering.LineStyle
+    /// 13k K8: the list line's nesting level (0 elsewhere) — the leading
+    /// whitespace is gone from `text`, so the level is how the row knows to
+    /// sit in.
+    var indentLevel: Int = 0
 
     /// The flow's own paragraph rule, unchanged from before this batch:
     /// blank display lines are DROPPED (the surface has its own spacing —
@@ -234,7 +238,8 @@ struct FlowParagraph: Equatable {
                 attributed += AttributedString(ns.substring(with: NSRange(
                     location: cursor, length: line.range.upperBound - cursor)))
             }
-            result.append(FlowParagraph(text: attributed, style: line.style))
+            result.append(FlowParagraph(
+                text: attributed, style: line.style, indentLevel: line.indentLevel))
         }
         return result
     }
@@ -273,10 +278,13 @@ struct FlowParagraph: Equatable {
         }
     }
 
-    /// A list line sits in a little, so a list reads as a list.
+    /// A list line sits in a little, so a list reads as a list — and one
+    /// step further per NESTING level (13k K8), clamped like the paged
+    /// reader's so a runaway nest cannot walk off the page.
     var indent: CGFloat {
         switch style {
-        case .bullet, .checkbox: 16
+        case .bullet, .checkbox:
+            16 + 16 * CGFloat(min(indentLevel, MarkdownRendering.maxDrawnIndentLevel))
         case .body, .heading: 0
         }
     }

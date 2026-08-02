@@ -106,19 +106,40 @@ public enum MarkdownSyntax {
         public let content: Range<Int>
         /// Links only: the target's range.
         public let url: Range<Int>?
+        /// **13k K8 — the NESTING LEVEL of a list line** (0 everywhere else).
+        ///
+        /// Her ruling: *"we should allow indented lists and it should happen
+        /// when you click tab."* A leading whitespace run before `- ` makes
+        /// the line a NESTED list item; the run itself belongs to
+        /// `markers[0]` (it is part of the lead), so a reading surface that
+        /// substitutes the lead strips the indent for free and renders the
+        /// level as a hanging indent instead of as spaces.
+        ///
+        /// **The arithmetic (ruled):** a TAB counts as one level, spaces
+        /// count `floor(count / 2)` — two spaces per level, because that is
+        /// exactly the width of the `- ` lead, so a nested item's marker
+        /// lines up under its parent's first word and the text round-trips
+        /// as REAL nesting in any markdown renderer that sees an export or
+        /// the bridge's body. Uncapped: the stored text is the truth, and
+        /// refusing to read what she typed would be a lie (a reading
+        /// surface may clamp what it DRAWS — that is a look decision, not
+        /// this one).
+        public let indentLevel: Int
 
         public init(
             kind: Kind,
             range: Range<Int>,
             markers: [Range<Int>],
             content: Range<Int>,
-            url: Range<Int>? = nil
+            url: Range<Int>? = nil,
+            indentLevel: Int = 0
         ) {
             self.kind = kind
             self.range = range
             self.markers = markers
             self.content = content
             self.url = url
+            self.indentLevel = indentLevel
         }
 
         /// The same span read against a larger text — the rebasing door for
@@ -130,7 +151,8 @@ public enum MarkdownSyntax {
                 range: (range.lowerBound + delta)..<(range.upperBound + delta),
                 markers: markers.map { ($0.lowerBound + delta)..<($0.upperBound + delta) },
                 content: (content.lowerBound + delta)..<(content.upperBound + delta),
-                url: url.map { ($0.lowerBound + delta)..<($0.upperBound + delta) })
+                url: url.map { ($0.lowerBound + delta)..<($0.upperBound + delta) },
+                indentLevel: indentLevel)
         }
     }
 
@@ -183,11 +205,26 @@ public enum MarkdownSyntax {
         scanInline(chars, offsets, from: contentStart, to: end, into: &result)
     }
 
-    /// The line-leading kinds. **A construct must begin at the line's FIRST
-    /// character** — no leading-whitespace tolerance in v1 (CommonMark allows
-    /// up to three spaces; allowing it here would make an indented line
-    /// silently become a heading, and the rule "it starts the line or it is
-    /// text" is the one a writer can hold in her head).
+    /// The line-leading kinds.
+    ///
+    /// **A HEADING must begin at the line's FIRST character** — no
+    /// leading-whitespace tolerance (CommonMark allows up to three spaces;
+    /// allowing it here would make an indented line silently become a
+    /// heading, and "it starts the line or it is text" is the rule a writer
+    /// can hold in her head).
+    ///
+    /// **A LIST LEAD may be INDENTED** (13k K8, her ruling — *"we should
+    /// allow indented lists and it should happen when you click tab"*): a
+    /// leading run of spaces and tabs before `- ` nests the item, and the run
+    /// joins `markers[0]` because it is part of the lead. The widening is
+    /// deliberately LIST-ONLY, which is what keeps the heading rule above
+    /// exactly as it shipped.
+    ///
+    /// **The consequence, stated where it happens:** no stored byte changes
+    /// anywhere, but a line in an EXISTING note that already begins with
+    /// spaces + `- ` now renders as a list item where it used to render as
+    /// prose. That is the ruling's intent (author-approved with the
+    /// consequence named).
     private static func leadingSpan(
         _ chars: [Character], _ offsets: [Int], from start: Int, to end: Int
     ) -> (span: Span, contentIndex: Int)? {
@@ -215,40 +252,81 @@ public enum MarkdownSyntax {
                 markerEnd)
         }
 
+        // The indent run (13k K8): spaces and tabs only — a line holds no
+        // newline here, so this can never run past its own line.
+        var lead = start
+        while lead < end, chars[lead] == " " || chars[lead] == "\t" { lead += 1 }
+        let level = indentLevel(chars, from: start, to: lead)
+
         // Bullets and checkboxes both open with `"- "` (the HYPHEN is the
         // list marker — her words, "hyphens, [], bullets"). `*` is
         // deliberately NOT a bullet in v1: it would collide with italic at a
         // line's start, and one unambiguous list marker is worth more than
         // CommonMark parity here.
-        guard chars[start] == "-", start + 1 < end, chars[start + 1] == " " else { return nil }
+        guard lead < end, chars[lead] == "-", lead + 1 < end, chars[lead + 1] == " "
+        else { return nil }
 
         // Checkbox first — `- [ ] a` also matches the bullet shape.
-        if start + 4 < end, chars[start + 2] == "[", chars[start + 4] == "]",
-           let checked = boxState(chars[start + 3]),
-           start + 5 == end || chars[start + 5] == " " {
-            let boxEnd = start + 5
+        if lead + 4 < end, chars[lead + 2] == "[", chars[lead + 4] == "]",
+           let checked = boxState(chars[lead + 3]),
+           lead + 5 == end || chars[lead + 5] == " " {
+            let boxEnd = lead + 5
             // The single space after the box is ordinary text, not a marker.
             let contentIndex = min(boxEnd + 1, end)
             return (
                 Span(
                     kind: .checkbox(checked: checked),
                     range: offsets[start]..<offsets[end],
+                    // `markers[0]` is the INDENT + `"- "` — the whole lead, so
+                    // a surface that substitutes the lead strips the indent
+                    // for free and `markers[1]` is still exactly the box.
                     markers: [
-                        offsets[start]..<offsets[start + 2],
-                        offsets[start + 2]..<offsets[boxEnd],
+                        offsets[start]..<offsets[lead + 2],
+                        offsets[lead + 2]..<offsets[boxEnd],
                     ],
-                    content: offsets[contentIndex]..<offsets[end]),
+                    content: offsets[contentIndex]..<offsets[end],
+                    indentLevel: level),
                 contentIndex)
         }
 
-        let markerEnd = start + 2
+        let markerEnd = lead + 2
         return (
             Span(
                 kind: .bullet,
                 range: offsets[start]..<offsets[end],
                 markers: [offsets[start]..<offsets[markerEnd]],
-                content: offsets[markerEnd]..<offsets[end]),
+                content: offsets[markerEnd]..<offsets[end],
+                indentLevel: level),
             markerEnd)
+    }
+
+    /// The ruled arithmetic: a TAB is one level, spaces are `floor(n / 2)`,
+    /// and the two sum. An odd space count simply lands between levels —
+    /// which is what the stored text says, and this never rewrites it.
+    private static func indentLevel(_ chars: [Character], from: Int, to: Int) -> Int {
+        var tabs = 0
+        var spaces = 0
+        for index in from..<to where index < chars.count {
+            if chars[index] == "\t" { tabs += 1 } else { spaces += 1 }
+        }
+        return tabs + spaces / 2
+    }
+
+    /// **The indent UNIT the app inserts** (13k K8, ruled): two spaces per
+    /// level. Public because the editing acts and the ⏎ continuation both
+    /// build leads from it, and one constant is what keeps them agreeing.
+    public static let indentUnit = "  "
+
+    /// The leading whitespace of `text`'s first line — the run a continued
+    /// or re-led list item must carry so nesting survives the keystroke.
+    /// Pure, and it never looks past the first newline.
+    public static func leadingWhitespace(of text: String) -> String {
+        var result = ""
+        for char in text {
+            guard char == " " || char == "\t" else { break }
+            result.append(char)
+        }
+        return result
     }
 
     /// `" "` ⇒ unchecked, `x`/`X` ⇒ checked, anything else ⇒ not a box (so
