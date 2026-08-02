@@ -315,11 +315,16 @@ enum TutorialSeeder {
             "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
             + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to five, "
             + "meant for what you are in right now rather than as a filing system. And "
+            // 13g cold review R1-2: batch 7 (R6-4) moved the quick note's
+            // landing — tagged, into the smart Quicknotes book — and this
+            // sentence kept teaching the Pool. The WT-1 class, in the very
+            // lesson WT-1 minted.
             + "\u{2318}\u{21E7}N pops the QUICK NOTE: a small floating pad that stays above "
             + "your writing, also reachable from the \u{270F}\u{FE0E} in the system menu bar "
             + "while you are in another app entirely. Return there makes a new line, not "
             + "a new note; close it (or \u{2318}\u{23CE}) and what you wrote is kept as a "
-            + "note in the Pool.",
+            + "note, tagged \u{201C}quicknote\u{201D} \u{2014} the smart Quicknotes book on "
+            + "the shelf collects it, and taking the tag off sends it back to the Pool.",
 
             "\u{2318}/ opens the Shortcuts & Dictionary helper, and its \u{201C}Windows & "
             + "panes\u{201D} group is this whole lesson in key form \u{2014} including the "

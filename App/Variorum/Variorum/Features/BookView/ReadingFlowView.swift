@@ -169,7 +169,10 @@ private struct FlowPostView: View {
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })
-        .help(entry.title?.isEmpty == false ? entry.title! : (entry.entryDate ?? ""))
+        // 13g cold review R1-4: the ONE note-naming surface batch 7's sweep
+        // missed (it rendered "" rather than "Untitled", so the grep never
+        // saw it) — the display brain answers here like everywhere else.
+        .help(entry.displayTitle)
         .task(id: entry.postID) {
             // The rendered projection, split for display at paragraph
             // boundaries (renderedText semantics — chosen takes, blank

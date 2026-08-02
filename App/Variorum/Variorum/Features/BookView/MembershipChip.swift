@@ -40,6 +40,10 @@ struct MembershipChip: View {
     @State private var popoverShown = false
     @State private var status: String?
     @State private var duplicatedPostID: String?
+    /// 13g R1-1 (L17): which BOOK the last copy landed in — set by the
+    /// diverge (its receipt names the book), nil for a plain duplicate
+    /// (whose copy has no book to name).
+    @State private var copyBookName: String?
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -118,8 +122,14 @@ struct MembershipChip: View {
                     .fixedSize()
                 }
                 Divider()
-                Text("Editing here edits the note everywhere it appears. "
-                    + "To make a separate note that can diverge:")
+                // 13g cold review R1-1 (L17 — her WT-7 round-4 ruling,
+                // built at the review after the batches dropped it): the
+                // "everywhere it appears" sentence is said only where an
+                // elsewhere EXISTS. The round-4 record's own suspicion,
+                // verified: nothing gated this line, so a bookless note —
+                // including the ORIGINAL right after a diverge moved it out
+                // of its only book — read a claim with no referent.
+                Text(MembershipChip.explainerLine(bookCount: books.count))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -138,7 +148,13 @@ struct MembershipChip: View {
                 if let copy = duplicatedPostID {
                     // R67: landing in a brand-new post must be unmistakable
                     // — the copy is one click away, never hunted for.
-                    Button("Open the Copy") {
+                    // 13g R1-1 (L17's receipt half): the button reads as a
+                    // RECEIPT of the past act — the diverge's carries the
+                    // book that now holds the copy ("tied to the past act
+                    // and naming its book", the round-4 disposition's own
+                    // words); the plain duplicate's copy has no book, so
+                    // its receipt stays bare beside its own status line.
+                    Button(DivergeCopy.openCopyLabel(book: copyBookName)) {
                         popoverShown = false
                         NotificationCenter.default.post(
                             name: .variorumOpenPost, object: nil,
@@ -173,6 +189,21 @@ struct MembershipChip: View {
     /// The `.surface` acts this chip renders (P-1's declared ⇔ rendered
     /// walk): W23's per-book diverge door lives on the book rows here.
     static let surfaceCapabilities: [CapabilityID] = [.divergeForBook]
+
+    /// 13g cold review R1-1 (L17's explainer half — her WT-7 round-4
+    /// ruling): the lead-in above "Duplicate as Version", CONDITIONED on
+    /// membership. "Editing here edits the note everywhere it appears" is
+    /// R31/R35's truth exactly where the note HAS an elsewhere; a bookless
+    /// note gets the door's plain introduction instead, because a claim
+    /// with no referent reads as noise (the round-4 record's verified
+    /// suspicion). Pure and static for `ascend`'s reason: a promise made
+    /// inside a view's closure is a promise no test can keep.
+    static func explainerLine(bookCount: Int) -> String {
+        bookCount > 0
+            ? "Editing here edits the note everywhere it appears. "
+                + "To make a separate note that can diverge:"
+            : "To make a separate, linked copy of this note:"
+    }
 
     /// 13f W20(a) — THE ASCENT, as a named call rather than a closure body,
     /// for the reason batch 2 moved the ceremony's sentences out of `Text`
@@ -267,6 +298,7 @@ struct MembershipChip: View {
             do {
                 let result = try await session.divergeForBook(postID, in: book.id)
                 duplicatedPostID = result.copy.post.id
+                copyBookName = book.name  // 13g R1-1: the receipt names it
                 status = DivergeCopy.done(book: book.name)
             } catch {
                 status = DivergeCopy.refusal(for: error, book: book.name)
@@ -282,6 +314,7 @@ struct MembershipChip: View {
                     try ops.duplicateAsVersion(postID)
                 }
                 duplicatedPostID = result.post.id
+                copyBookName = nil  // 13g R1-1: a plain duplicate has no book to name
                 status = "Duplicated — the copy is its own note now (in the Pool until you shelve it)."
             } catch {
                 status = ChipRefusals.message(for: error, bookName: nil)
@@ -315,6 +348,16 @@ nonisolated enum DivergeCopy {
     static func done(book: String) -> String {
         "Diverged — \u{201c}\(book)\u{201d} holds the copy now, in the same place; the "
             + "original is untouched elsewhere. \u{2325}\u{2318}Z undoes it."
+    }
+
+    /// 13g cold review R1-1 (L17's receipt half — her WT-7 round-4 ruling:
+    /// the receipt reads as a receipt "tied to the past act and naming its
+    /// book"). The diverge's landing button carries the book that now holds
+    /// the copy; a plain duplicate's copy has no book, so its receipt stays
+    /// the bare "Open the Copy" beside its own status line.
+    static func openCopyLabel(book: String?) -> String {
+        guard let book else { return "Open the Copy" }
+        return "Open the Copy in \u{201c}\(book)\u{201d}"
     }
 
     /// A SMART book has no membership row to swap: its posts arrive by tag,

@@ -202,7 +202,10 @@ struct HelperView: View {
 
     // MARK: - Dictionary (the app's words, in hers)
 
-    private static let entries: [(term: String, definition: String)] = [
+    /// Non-private for the same reason `groups` is: the drift pins read it
+    /// (13g cold review R1-2 — a dictionary entry that teaches a landing
+    /// the code no longer performs is the WT-1 class in prose form).
+    static let entries: [(term: String, definition: String)] = [
         ("block",
          "The atomic unit — a paragraph-sized piece of writing with permanent identity. "
          + "Nothing owns blocks; notes and books just point at them."),
@@ -343,11 +346,15 @@ struct HelperView: View {
          + "thing and \u{2318}-click follows it (a plain click has to place the cursor). "
          + "In a book's READ mode there is nothing to type, so the markers are hidden, "
          + "the words read as a link, and a plain click opens it."),
+        // 13g cold review R1-2: the landing changed at batch 7 (R6-4) and
+        // this entry was the surface the sweep missed — it taught the Pool
+        // while the pad's own placeholder already said Quicknotes.
         ("quick note",
          "A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, or the "
          + "✏︎ in the system menu bar (which reaches you from any app). Return makes a "
          + "new line, not a new note; closing it (or ⌘⏎) keeps what you wrote as a new "
-         + "note in the Pool."),
+         + "note, tagged \u{201C}quicknote\u{201D} — the smart Quicknotes book on the "
+         + "shelf collects it, and taking the tag off sends it back to the Pool."),
     ]
 
     private var dictionaryTab: some View {

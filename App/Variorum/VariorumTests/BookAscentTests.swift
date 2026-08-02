@@ -590,6 +590,39 @@ struct DivergeDoorTests {
                     for: OperationError.lockedReading(id: "r"), bookName: "Orbit"))
     }
 
+    /// **L17 (her WT-7 round-4 ruling), built at the cold review (R1-1)
+    /// after the batches dropped it.** Two halves, both hers:
+    ///
+    /// - the RECEIPT reads as a receipt — "tied to the past act and naming
+    ///   its book" (the round-4 disposition's words): the diverge's landing
+    ///   button carries the book that now holds the copy, and the plain
+    ///   duplicate's (whose copy has no book) stays the bare receipt beside
+    ///   its own status line;
+    /// - the EXPLAINER conditions on membership: "everywhere it appears" is
+    ///   said only where an elsewhere exists; a bookless note — including
+    ///   the ORIGINAL right after a diverge moved it out of its only book,
+    ///   her screenshot's exact state — gets the door's plain lead-in.
+    ///
+    /// DISCRIMINATING REVERT (verified): make `openCopyLabel(book:)` return
+    /// the bare "Open the Copy" regardless ⇒ the first expectation fails;
+    /// make `explainerLine` return the "everywhere" sentence
+    /// unconditionally ⇒ the bookless expectation fails. Each restored,
+    /// checksum-matched.
+    @Test func theCopyReceiptNamesItsBookAndTheExplainerNeedsAnElsewhere() {
+        #expect(DivergeCopy.openCopyLabel(book: "my book :)")
+                == "Open the Copy in \u{201c}my book :)\u{201d}")
+        #expect(DivergeCopy.openCopyLabel(book: nil) == "Open the Copy",
+                "a plain duplicate's copy has no book to name")
+
+        #expect(!MembershipChip.explainerLine(bookCount: 0).contains("everywhere"),
+                "a bookless note has no elsewhere — the claim would be vacuous")
+        #expect(MembershipChip.explainerLine(bookCount: 0).contains("separate"),
+                "the door still gets its lead-in")
+        #expect(MembershipChip.explainerLine(bookCount: 2)
+                .contains("everywhere it appears"), "R31/R35's truth, where it IS true")
+        #expect(MembershipChip.explainerLine(bookCount: 2).contains("diverge"))
+    }
+
     /// The note's TARGET rule (her round-10 item 4, W22's button): the first
     /// CURATED book in the chooser's order — which is the book she came from
     /// whenever she came from one, because arriving floats it.

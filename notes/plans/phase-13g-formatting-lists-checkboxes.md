@@ -435,7 +435,7 @@ visibility, a display setting if ever wanted.
 | L12 | Helper/tutorial coverage for formatting + the re-seed note | **SHIPPED** (batch 4 — ONE Restore-Tutorial click now covers 13f + batches 1 and 4) |
 | L13 | The kickoff sweep: the shell-redo flaky pin trace + the windowless-launch/quit-hang characterization (both KnownIssues rows, owner 13g) | **SHIPPED** (batch 5) — flaky pin **RESOLVED** (mechanism traced, fixed at source, 3 latent siblings swept, deterministic pin); windowless **NOT REPRODUCED in 32 launches / 6 arms / 2 trees** — row DEEPENED and re-owned to **13e's kickoff sweep** (L16 must carry it) |
 | L14 | W26: the true global quick-note hotkey — SLOTTED to 13e's opening sitting (her round-4 ruling; supersedes round 2's later-in-13g reading) | → 13e |
-| L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | batch 2 / acceptance |
+| L17 | WT-7: the chip popover's wording pass — the diverge RECEIPT ("Open the Copy") must read as a receipt of the past act, the DOOR ("Duplicate as Version") as an act; verify what the "Editing here edits the note everywhere" explainer conditions on (vacuous on a bookless note) | **SHIPPED** (cold review round 1, R1-1 — the "batch 2 / acceptance" route never happened: batch 2 was scoped L7-only and `MembershipChip.swift` carried zero commits all phase; built at the review to the round-4 disposition's letter — the receipt names its book, the explainer conditions on membership) |
 | L15 | TEXTKIT2 §5 re-verify after the phase's editor work | closeout |
 | L18 | Batch 6 — her morning ruled set: R5-1 takes projection · R5-3 comments LEFT + the "+" retired · R5-4 "block 3/16" · **R5-5 THE CRASH (reproduced, traced to the pane row's geometry-fed-back frame under the hoisted inspector, fixed, verified)** · R5-6 the Notes list · R5-7 inline title · R5-12 the note-window modes switcher | **SHIPPED** (batch 6) |
 | L19 | R5-11 the note-only window's clipped top — REPRODUCED and TRACED (layout converges, pixels are the first pass's, any resize repairs it; three candidate fixes measured wrong and reverted) | **NOT FIXED** — KnownIssues row, owner **13e**'s kickoff sweep |
@@ -3404,3 +3404,103 @@ ruling she already made; R1-6 is a look offer, not a shipped PROVISIONAL.
 - **QUESTIONS hygiene:** #49–#52 appended, properly OPEN for her walk,
   each call one line to change; KnownIssues rows all carry named owners
   (13e), per the R2-7 owner rule.
+
+#### Fix records — cold review round 1 (the reviewer's own fixes, per the standing flow)
+
+**R1-1 (MAJOR) — L17 built to her round-4 disposition's letter.** Two
+pure wording brains so the promises are pinnable
+(`MembershipChip.ascend`'s stated reason — a promise inside a view's
+closure is a promise no test can keep):
+
+- `DivergeCopy.openCopyLabel(book:)` — the receipt: with a book,
+  `Open the Copy in “<book>”` (the diverge's landing button now carries
+  the book that holds the copy — the disposition's own example); nil —
+  the bare `Open the Copy` (a plain duplicate's copy has no book to
+  name, and its own status line sits beside it). The chip holds
+  `copyBookName` beside `duplicatedPostID` — set by `diverge(for:)`,
+  nil'd by `duplicate()`.
+- `MembershipChip.explainerLine(bookCount:)` — the explainer,
+  conditioned on membership: ≥1 book keeps "Editing here edits the note
+  everywhere it appears. To make a separate note that can diverge:"
+  (R31/R35's truth, said where it IS true); 0 books gets the door's
+  plain lead-in ("To make a separate, linked copy of this note:") —
+  the vacuous claim gone from exactly the state her screenshot showed
+  (the original, bookless right after its diverge).
+- The DOOR ("Duplicate as Version") keeps its standing name — what the
+  ruling wanted read-as-an-act is delivered by the receipt no longer
+  competing with it. The ledger's L17 row corrected on the record.
+
+*Pin:* `DivergeDoorTests.theCopyReceiptNamesItsBookAndTheExplainerNeedsAnElsewhere`.
+*Red-on-old by behavioral revert, twice, each exactly discriminating:*
+(A) `openCopyLabel` returning the bare receipt regardless → RED on the
+book expectation, the other 5 suite tests green; (B) `explainerLine`
+made unconditional → RED on the bookless expectation. Each restored,
+`MembershipChip.swift` md5 `f61b72a9528dc8387f20893abaf013af` matched
+both times. *The one un-pinned inch, stated:* the popover BODY wiring
+(the view calling the two brains) is SwiftUI popover content no
+headless pin reaches — one call site each, read in review.
+
+**R1-2 (MINOR) — the two discoverability surfaces now teach the real
+landing.** The helper's "quick note" dictionary entry and the field
+guide's workspace lesson both end at Quicknotes now — the tag, the
+smart book, and the one-untag road back to the Pool; `HelperView.entries`
+made non-private for the pin (the `groups` precedent); the two stale
+`QuickNoteView` header comments corrected with it. `plan`/`seed` moved
+together — only BODY text changed, `theSeededBookMatchesTheLessonPlanExactly`
+green throughout (verified under the revert too).
+
+*Pins:* `QuickNoteWordTests.theHelperDictionaryTeachesTheQuicknotesLanding`
+and `TutorialBookShapeTests.theWorkspaceLessonTeachesTheQuicknotesLanding`.
+*Red-on-old by behavioral revert:* (D) the pre-fix helper sentence
+restored → RED on both Quicknotes expectations, the refusal pin green
+beside it (`HelperView.swift` md5 `654a1bec63d794abc30cbf108acdcde9`
+restored-and-matched); (E) the pre-fix lesson sentence restored → RED
+on all three lesson expectations with the plan==seed walk GREEN (only
+body text moved — `TutorialSeeder.swift` md5
+`9e07eb09cc9ccc20070b0c433d295d7a` restored-and-matched).
+**A RE-SEED NOTE:** the workspace lesson's body changed again — her ONE
+owed Restore-Tutorial click (13f + batches 1, 4, 7) covers this too;
+nothing new for her to do.
+
+**R1-3 (MINOR) — the filing refusal speaks its own true line.**
+`QuickNoteCopy.refusedFilingLine(_:)`: "Kept as a note in the Pool —
+the Quicknotes filing didn't take: <reason>." — true at the moment it
+is spoken (the note is minted and durable, wears no tag, and the Pool
+lists it); `QuickNoteMint.file`'s refusal arm speaks it, and the
+comment that contradicted the code now matches it.
+
+*Pin:* `QuickNoteWordTests.aFilingRefusalNeverClaimsTheQuicknotesLanding`.
+*Red-on-old by behavioral revert:* (C) the pre-fix composition
+(`"\(filedNote) (\(reason))"`) restored → RED on three expectations,
+the helper pin green beside it (`QuickNoteView.swift` md5
+`3611bd7389e9e7fa44c59dc531b14f6e` restored-and-matched).
+
+**R1-4 (NIT) — the flow tooltip joins the display brain.**
+`FlowPostView`'s `.help` now reads `entry.displayTitle` — the clarity
+class (mechanism stated in the finding; the brain itself is pinned by
+`DisplayTitleTests`), no separate pin owed.
+
+**R1-5 / R1-6 — record-only, as found:** the snippet's archived-chosen
+precision note stands in the finding; ReadTakesView's faceless markers
+ride the 13e reminder note's look/feel bundle for her word (nothing
+built by fiat).
+
+**Scope of the fix pass:** five files under `App/Variorum/Variorum/`
++ three test files + this plan file. Zero `Sources/` lines (core and
+mobile stand by construction at this reviewer's own HEAD runs:
+1001/110 · 14/4); zero `Sync/` lines; no schema; `renderedText`/export/
+bridge untouched; her `/Applications` instance never addressed.
+
+**Final counts after the fix pass, this reviewer's own runs** (the "Test
+run with N tests" line): core **1001 tests in 110 suites passed**
+(untouched by the fixes — the HEAD own-run stands) · Mac **1139 tests in
+197 suites**, failing ONLY on the parked environment-gated tripwire
+(`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+— its own KnownIssues row; this session ran unlocked; +4 tests +1 suite
+over HEAD's 1135/196, exactly the four review pins and their one new
+suite) · mobile **14 tests in 4 suites passed** (untouched by the
+fixes — the HEAD own-run stands) · the tutorial spine green by TYPE
+name, **51 tests in 7 suites** (from 50/7 — the workspace-lesson pin
+joined it). **The round is CLOSED at round 1 from this reviewer's side:
+every finding fixed with a discriminating revert-verified pin, or
+honestly record-only.**

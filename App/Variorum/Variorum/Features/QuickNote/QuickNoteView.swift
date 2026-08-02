@@ -34,9 +34,10 @@
 //  bounds it). ONE SUMMON = ONE NOTE, and an empty sticky mints nothing.
 //
 //  ── AND IT STAYS QUIET (her round-14.3) ─────────────────────────────────
-//  The note sits in the Pool; one status line names where it went; the main
-//  window never navigates. A sticky that yanks her out of what she was
-//  doing is the opposite of a quick note.
+//  The note lands in the smart Quicknotes book (13g batch 7, R6-4 — tagged
+//  "quicknote"; one untag returns it to the Pool); one status line names
+//  where it went; the main window never navigates. A sticky that yanks her
+//  out of what she was doing is the opposite of a quick note.
 //
 
 import SwiftUI
@@ -214,7 +215,9 @@ enum QuickNoteMint {
     /// rather than from a second rule here: untitled; the typed text
     /// SEGMENTS as content under the document-global setting (the
     /// 2026-07-12 spacing ruling and the `one_block` face ride free); and
-    /// it joins no book, which is exactly what puts it in the Pool (R29).
+    /// it joins no CURATED book — since 13g batch 7 (R6-4) the filing tags
+    /// it and the smart Quicknotes book collects it (one untag returns it
+    /// to the Pool, R29's letter).
     ///
     /// The undo entry says **"Quick Note"** — the label parameter this item
     /// added to `importPost`, so the menu says what she did.
@@ -235,15 +238,16 @@ enum QuickNoteMint {
             }
             // Her round-14.3: STAY QUIET. One line naming where it went —
             // the main window never navigates. It names the BOOK when the
-            // filing worked, because that is now where she will look for it;
-            // a refusal keeps the Pool wording, which stays true either way
-            // (a quick note is bookless in the curated sense — the smart
-            // book COLLECTS it, and the Pool lists bookless notes).
+            // filing worked, because that is now where she will look for
+            // it; a REFUSAL speaks its own line (13g cold review R1-3):
+            // the note is minted and safe, wears no tag, and the Pool
+            // lists it — so the toast must not claim the Quicknotes
+            // landing that exactly did not happen.
             switch filing {
             case .filed, .alreadyTagged:
                 session.status.speak(QuickNoteCopy.filedNote)
             case .refused(let reason):
-                session.status.speak("\(QuickNoteCopy.filedNote) (\(reason))")
+                session.status.speak(QuickNoteCopy.refusedFilingLine(reason))
             }
             return result.container.id
         } catch {
@@ -297,5 +301,18 @@ nonisolated enum QuickNoteCopy {
     /// book holds, and a collected note is held (Stage B's MAJOR 3 — derived
     /// membership counts). One untag puts it back there.
     static let filedNote = "Filed in Quicknotes — tagged #quicknote."
+    /// 13g cold review R1-3: the FILING-refusal line. `filedNote` claims the
+    /// Quicknotes landing, which is exactly what a `.refused` outcome says
+    /// did NOT happen — the note is minted and durable, carries no tag, and
+    /// the Pool lists it (bookless is the Pool's definition). This line
+    /// stays true at the moment it is spoken and carries the reason.
+    ///
+    /// DISCRIMINATING REVERT (verified): return the pre-fix composition
+    /// (`"\(filedNote) (\(reason))"`) and
+    /// `aFilingRefusalNeverClaimsTheQuicknotesLanding` fails on its first
+    /// two expectations.
+    static func refusedFilingLine(_ reason: String) -> String {
+        "Kept as a note in the Pool — the Quicknotes filing didn't take: \(reason)."
+    }
     static let refusedPrefix = "The quick note wasn't filed:"
 }

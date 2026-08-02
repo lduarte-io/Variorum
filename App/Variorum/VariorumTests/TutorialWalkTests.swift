@@ -329,6 +329,35 @@ struct TutorialBookShapeTests {
             #expect(rendered.links.contains { $0.url == "https://apple.com" })
         }
     }
+
+    /// 13g cold review R1-2: **the workspace lesson teaches where a quick
+    /// note actually lands.** Batch 7 (R6-4) filed quick notes under the
+    /// `quicknote` tag into the smart Quicknotes book — and out of the Pool
+    /// (`poolPosts` excludes smart-collected notes, 13f Stage B) — but the
+    /// lesson batch 1 seeded kept teaching "…kept as a note in the Pool":
+    /// the WT-1 drift class, in the very lesson WT-1 minted, and in prose
+    /// the shortcut drift guard cannot see.
+    ///
+    /// DISCRIMINATING REVERT (verified): restore the lesson's pre-fix
+    /// sentence — this fails on the "Quicknotes" expectation while the
+    /// seeder's plan==seed walk stays green (only body text moved).
+    /// Restored, checksum-matched.
+    @Test func theWorkspaceLessonTeachesTheQuicknotesLanding() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let workspace = try await db.read {
+                try lessonID($0, bookID: bookID, "the workspace")
+            }
+            let stored = try await db.read {
+                try Queries.renderedText($0, containerID: workspace)
+            }
+            #expect(stored.contains("Quicknotes"),
+                    "the lesson names the smart book that collects the pad's note (R6-4)")
+            #expect(stored.contains("quicknote"),
+                    "…and the tag whose removal is the road back")
+            #expect(!stored.contains("kept as a note in the Pool"),
+                    "the pre-R6-4 landing claim is gone")
+        }
+    }
 }
 
 // MARK: - The doors (seeding is a product door)

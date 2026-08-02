@@ -406,3 +406,48 @@ struct QuickNoteWindowTests {
         #expect(!windows.isNavigationTarget(pad))
     }
 }
+
+// MARK: - The words stay true (13g cold review, round 1)
+
+/// 13g cold review R1-2/R1-3: batch 7 (R6-4) moved the quick note's landing
+/// — tagged, into the smart Quicknotes book, OUT of the Pool — and three
+/// word surfaces did not move with it. Two taught the old landing (the
+/// helper's "quick note" dictionary entry; the field guide's workspace
+/// lesson — the WT-1 drift class, in prose the shortcut guard cannot see),
+/// and the filing-REFUSAL toast spoke the SUCCESS wording ("Filed in
+/// Quicknotes … (reason)") precisely when the filing had not happened.
+@MainActor
+@Suite("The quick note's words stay true (13g cold review)")
+struct QuickNoteWordTests {
+    /// DISCRIMINATING REVERT (verified): return the pre-fix composition
+    /// (`"\(QuickNoteCopy.filedNote) (\(reason))"`) from
+    /// `refusedFilingLine` — the first two expectations fail; the helper
+    /// pin below stays green. Restored, checksum-matched.
+    @Test func aFilingRefusalNeverClaimsTheQuicknotesLanding() {
+        let line = QuickNoteCopy.refusedFilingLine("the quicknotes shelf could not be reached")
+        #expect(!line.contains(QuickNoteCopy.filedNote),
+                "the refusal must not wrap the success claim")
+        #expect(!line.contains("Filed in Quicknotes"))
+        #expect(line.contains("Pool"),
+                "where the note actually is — untagged and bookless")
+        #expect(line.contains("the quicknotes shelf could not be reached"),
+                "the reason rides along")
+        // …and the success line still claims exactly what it always did.
+        #expect(QuickNoteCopy.filedNote.contains("Quicknotes"))
+    }
+
+    /// DISCRIMINATING REVERT (verified): restore the pre-fix entry text
+    /// ("…keeps what you wrote as a new note in the Pool.") — this fails on
+    /// the "Quicknotes" expectation. Restored, checksum-matched.
+    @Test func theHelperDictionaryTeachesTheQuicknotesLanding() throws {
+        let entry = try #require(
+            HelperView.entries.first { $0.term == "quick note" },
+            "the dictionary keeps its quick-note entry")
+        #expect(entry.definition.contains("Quicknotes"),
+                "the entry names where the note actually lands (R6-4)")
+        #expect(entry.definition.contains("Pool"),
+                "…and the one-untag road back — the Pool is the consequence, not the landing")
+        #expect(!entry.definition.contains("as a new note in the Pool"),
+                "the pre-R6-4 claim is gone")
+    }
+}
