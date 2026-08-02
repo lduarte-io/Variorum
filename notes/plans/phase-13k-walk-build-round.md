@@ -1802,3 +1802,18 @@ project's offscreen dark renders resolve the wrong appearance).
   unchanged and her floated alternative stays OPEN, not built.
 - The round-2 reviewer sees this diff together with the fix pass, per the
   ladder's flow.
+
+### Fix pass + round-4 look continuation ACCEPTED (2026-08-02 — the architect's own runs, quoted)
+
+- core `Test run with 1034 tests in 114 suites passed` (the two
+  round-1 fix pins added)
+- Mac `Test run with 1190 tests in 208 suites failed after 144.533
+  seconds with 1 issue` — the tripwire BY IDENTITY, nothing else
+- Commits verified: `dfd200d` (the reviewer's five fixes) +
+  `7d0e24d` (her three flick rulings); tree clean throughout; the
+  refreshed 12-state screenshot set + the two radius-variant strips
+  delivered to her panel (the radius pick and code-chip swatch pick
+  ride her bundle).
+- **ROUND 2 SPAWNS** — a FRESH reviewer over the fixes and what
+  they touched, anchored on this ladder section's recorded
+  findings + dispositions, per the standing ladder rules.
