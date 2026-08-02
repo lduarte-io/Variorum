@@ -279,3 +279,14 @@ line; mobile when `Sources/`/`Shared/` is touched — iPhone 16e).
 Review shape: the author sets it at kickoff. **13e's closeout
 authors the next phase's plan** (her pick: 13h · 13i · 13j — or
 an unslotted row at her word).
+
+*(2026-08-02 addendum — PHASE 13K CLOSED: the #49–#55 walk is DONE
+except #54(d) — Read's chip voice-independence, her flick. The
+opening reminder note's remaining load is the 13k handoff checklist
+(`notes/handoffs/phase-13k-handoff.md`), W26, and the four-row
+kickoff sweep. Look/feel items RESOLVED by 13k: the inline-code
+tint (the chip), ⏎-continues-a-list (built, with nesting),
+the formatting toolbar (built, both bars), the checked-box register
+(ruled no-change). The A47c tripwire row now starts
+covariate-UNKNOWN — read its updated KnownIssues row before the
+re-run.)*

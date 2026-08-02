@@ -1914,3 +1914,51 @@ with 51 tests in 7 suites passed` (by TYPE name — the seeder
 rewrite rode it green) · mobile NOT run, correctly: all nine
 touched files live under `App/Variorum/`. Zero schema; zero
 `Sync/` lines; projection bodies byte-untouched.
+
+### Round 5 (2026-08-02 — the closeout sitting: her walk answers + the refresh authorization)
+
+- **#53 ANSWERED IN FULL** ("the rest of 53 i approve"; (l) "fine
+  for now" — and her what-is-a-book question CONFIRMED as **Phase
+  13i's** territory: the hybrid modified-smart-book identity is
+  exactly the shape-B design 13i's brief holds; her "Ideas, Ideas"
+  confusion answered — the hypothetical duplicate-name corner, one
+  curated + one smart book sharing a name). Her list-feel note
+  recorded verbatim in #53's status.
+- **#54 ANSWERED except (d)** ("the rest of 54 seems fine"); (g)
+  ratified in her words ("i think it should keep the nesting" —
+  which is the shipped behavior; the gesture is caret-on-line +
+  Format ▸ Checklist/the toolbar button); (d) held on her
+  warm-neutral question — explanation delivered, flick pending.
+- **#55 ANSWERED IN FULL** ("55: i approve all of these"); her two
+  clarifying questions (the undeclared ascent; the dropdown's two
+  doors) answered in #55's status line.
+- **"my app is closed and good to update"** — the refresh
+  authorization; executed below.
+
+## THE CLOSEOUT (EXECUTED 2026-08-02)
+
+- **Final counts (the architect's own final runs, quoted):** core
+  `Test run with 1034 tests in 114 suites passed` · Mac `Test run
+  with 1191 tests in 208 suites failed after 143.992 seconds with
+  1 issue` (the recorded tripwire BY IDENTITY — its lock-state
+  covariate REFUTED this phase, the KnownIssues row corrected) ·
+  mobile 14/4 (the round-2 reviewer's quoted run) · spine 51/7.
+- **The ledger: all TWELVE rows SHIPPED, none orphaned.** The two
+  proposal gates (K4, K8) both earned their cost on the record.
+- **Canon:** AppSpec §14 carries the 13k delta; the 13g delta
+  rolled to `AppSpecDeltaArchive.md` per the lean-docs rule.
+  Master plan: pointer swapped (the 13k-active pointer rolled to
+  the archive), the 13g closeout paragraph rolled, the 13k
+  paragraph written, the table row flipped done.
+- **KnownIssues:** the tripwire row corrected mid-phase; nothing
+  added; no orphans. **QUESTIONS:** #49–#55 all answered except
+  #54(d); #56 next free.
+- **The `/Applications` refresh EXECUTED at her word:** zero
+  instances verified before backup, build and copy; fresh WAL-safe
+  A1 backup `variorum-backup-2026-08-02-224558.sqlite`
+  (`integrity_check` ok); Release built from HEAD `8014f15`;
+  *[removed for publication]*
+  schema all phase ⇒ no lockstep-marker concern.
+- **Handoff:** `notes/handoffs/phase-13k-handoff.md` (her checklist
+  at top). **13e next, at her word** — its plan updated to point at
+  the walk's remainder. The phase is SEALED.

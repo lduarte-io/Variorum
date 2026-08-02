@@ -328,7 +328,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(l) A note card lists CURATED books first, then the smart ones that collect it — and a name in both halves shows once.** Curated first because a membership row is a decision you made and a smart match is one the filter made; each half is alphabetical within itself. Book names have no uniqueness, so "Ideas" curated + "Ideas" smart is reachable — a row reading "Ideas, Ideas" seemed worse than the rare ambiguity. **The alternative:** one merged alphabetical sort, or show both.
 
-    **Status: OPEN — the sitting's walk.**
+    **Status: ANSWERED 2026-08-02 (the closeout sitting): "the rest of 53 i approve" — (a)–(k) RATIFIED AS SHIPPED; (l) RATIFIED "fine for now," with her pointer honored: the deeper what-is-a-book questions (the hybrid modified-smart-book identity her message described) are PHASE 13i's — confirmed as the phase she was thinking of. Her list-feel note recorded: "i'll have to play with how the lists feel but i like the idea of leaving it easily and it's markdown anyway so not as annoying to add to as apple notes." Record: the 13k plan's round 5.**
 
 54. **2026-08-02 · Phase 13k (batch 2) · THE FORMATTING SET IS BUILT — seven build-time calls, each one line to change, bundled the way #49–#53 were.** Your rulings K7–K10 said WHAT: the formatting toolbar goes in the bottom bar, callout frames render in Take mode, inline code gets its own tint, and Tab indents a list. They did not say whether a take card's frame should wrap each card or the whole fan (you ruled that one at the sitting), nor what ⏎ does on an empty item that is three levels deep — those are the calls below. **Nothing here needed a schema change or an operation**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain. The BINDING build record is the 13k plan's batch-2 record.
 
@@ -348,7 +348,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(g) Turning a nested bullet into a nested checklist KEEPS its nesting; clearing the list lead removes it.** So Format ▸ Checklist on an indented bullet gives an indented checkbox, while pressing Bullet List again on that same line gives you plain text at the margin — because the line stops being a list at all, and a paragraph left indented by two orphan spaces is not what "clear" means. **The alternative:** keep the indent through the clear too.
 
-    **Status: OPEN — for the walk.**
+    **Status: ANSWERED 2026-08-02 (the closeout sitting) EXCEPT (d): "the rest of 54 seems fine" — (a)(b)(c)(e)(f) RATIFIED AS SHIPPED; (g) RATIFIED in her words ("i think it should keep the nesting") — the gesture is caret-on-the-indented-line + Format ▸ Checklist (or the bottom-bar button), which does exactly that. (d) HELD on her question ("what does this mean… Read's page has its own warm-neutral chip?") — explained: Read's paper page is deliberately voice-independent, so its code chip is the paper's own warm gray rather than the terminal/study tint; her flick pending. Record: the 13k plan's round 5.**
 
 55. **2026-08-02 · Phase 13k (batch 3) · THE BAR IS REBUILT — ten build-time calls, each one line to change, bundled the way #49–#54 were.** Your rulings K11 and K12 said WHAT: the context bar is always the compact icon row (← · book · ＃ · ›), the › is a real forward door, "in xyz book" becomes the book icon, and the tag cards show by default with ＃ as their deliberate fold. They did not say what ⌘⇧I should do once the bar has no fold left, or where the cards sit relative to the four icons — those are the calls below. **Nothing here needed a schema change or an operation**, nothing touches `renderedText`, the export BODY projections or the bridge's join brain, and the NAVIGATION under the bar is 13f's, byte-untouched (the history arithmetic, ⌘[ / ⌘], the W21 ascent). The BINDING build record is the 13k plan's batch-3 record.
 
@@ -372,7 +372,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(j) The ＃ is never grey**, even on a note with no tags — folding an empty card row is where the `＋` lives, so greying it would hide the only way to add a first tag. **The alternative:** grey it until the note has a tag, and reach the `＋` some other way.
 
-    **Status: OPEN — for the walk.**
+    **Status: ANSWERED 2026-08-02 (the closeout sitting): "55: i approve all of these" — (a)–(j) RATIFIED AS SHIPPED, including (i)'s undeclared ascent (the declare-it alternative stays one small line, 13e's if ever wanted). Her two clarifying questions answered on the record: the "book ascent not registry-declared" line means the open-the-book-at-this-note act was never entered in the internal capability catalog (it works; it just lacks a formal availability rule + refusal entry and the registry walk's coverage); the "dropdown's two doors" hand-check = plain click and ⌘-click on the book icon, whose modifier is read at the AppKit last inch tests cannot pin. Record: the 13k plan's round 5.**
 
 *(Next free number at authoring time: **#56**.)*
 
