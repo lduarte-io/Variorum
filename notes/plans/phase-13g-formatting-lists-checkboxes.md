@@ -3537,3 +3537,101 @@ honestly record-only.**
 - **Round 1 ACCEPTED. Round 2 spawns now** — a FRESH cold
   reviewer re-reviewing the fixes and what they touched (the
   ladder's real-pass rule; new BLOCKER/MAJOR ⇒ round 3, cap 3).
+
+### Cold review — round 2 (2026-08-01, Fable; a FRESH reviewer — the ladder's real-pass rule)
+
+**Scope re-reviewed:** the round-1 fix diff (`7474343`, 9 files) as
+fresh code, the findings record (`846c970`), every round-1 disposition
+against the code and the phase's rulings (the plan file read top to
+bottom; the round-4 sitting record is the L17 anchor), and the fixes'
+neighborhoods (`MembershipChip`/`DivergeCopy` + `MultiBookEditNote`,
+the quick-note word surfaces end to end incl.
+`Operations+Quicknote.fileAsQuicknote`, the seeder's plan/seed
+mechanism, `ReadingEntry.displayTitle` + `DisplayTitle`). **Counts by
+this reviewer's OWN runs on HEAD:** core "Test run with 1001 tests in
+110 suites passed" · Mac "Test run with 1139 tests in 197 suites
+failed … with 1 issue" — the ONE red confirmed BY IDENTITY as the
+parked environment-gated tripwire
+(`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+its own KnownIssues row; unlocked session) · mobile "Test run with 14
+tests in 4 suites passed" · all SEVEN tutorial-spine suites green
+inside the full Mac run.
+
+#### Verdicts, per round-1 disposition
+
+- **R1-1 (MAJOR, the dropped L17) — HOLDS.** The finding's premise
+  re-verified independently: `git log 74ddf48..846c970 --
+  MembershipChip.swift` is EMPTY (zero commits all phase before the
+  fix) and batch 2's brief says "Scope: L7 ONLY" — the ledger's old
+  "batch 2 / acceptance" route never happened; the row now says so.
+  The fix matches the round-4 disposition's letter: the receipt
+  (`DivergeCopy.openCopyLabel(book:)`) names the book the diverge
+  landed in, driven by `copyBookName` — set by `diverge(for:)`, nil'd
+  by `duplicate()`, both arms read coherent (a refusal leaves the
+  prior receipt pair untouched together); the explainer
+  (`MembershipChip.explainerLine(bookCount:)`) says "everywhere it
+  appears" only where an elsewhere exists — and `books` includes
+  smart matches (derived membership IS membership), so the claim is
+  true wherever it now renders. The pin discriminates by
+  construction (pure-string containment against exactly the pre-fix
+  behaviors) and is green in this reviewer's run. Neighborhood
+  checked: `MultiBookEditNote.sentence` speaks "everywhere" only at
+  `bookCount >= 2` (`shouldSpeak`) — never vacuous, consistent; no
+  other surface renders an "Open the Copy" receipt (grep-verified).
+  **The one judgment call, endorsed on the record:** the DOOR keeps
+  its standing "Duplicate as Version" name — the ruling's
+  door-read-as-an-act half is delivered by the receipt no longer
+  competing with it (the label is already an imperative act phrase,
+  and its `.help` states the act); the fix record says exactly this
+  rather than claiming more. Any further door wording is hers (the
+  look/feel bundle).
+- **R1-2 (MINOR, the quicknote-landing drift) — HOLDS.** Both
+  surfaces now teach the R6-4 landing with the one-untag road back;
+  every OTHER quick-note word surface swept independently and found
+  consistent (the pad's placeholder, the hint, the "quicknote (the
+  tag)" dictionary entry, the corrected `QuickNoteView` header
+  comments; `grep "in the Pool"` across app sources returns only
+  true claims). The plan==seed mechanism is sound by construction —
+  the plan holds chapter/lesson NAMES, bodies are seeded from the
+  one literal — so the walk stayed green while the body moved. Both
+  pins discriminate (the pre-fix texts lack "Quicknotes" and carry
+  the banned phrase); the workspace-lesson pin properly joined the
+  spine (7 suites, all green in the full run).
+- **R1-3 (MINOR, the refusal toast) — HOLDS.** `refusedFilingLine`'s
+  claims traced TRUE in every refusal arm reachable from its one
+  speaker: `QuickNoteMint.file` runs the mint and the filing in ONE
+  serialized runner turn, so nothing can interleave, and every
+  reachable `.refused` (tag/book ensure or apply failure) leaves the
+  note minted, untagged, bookless — exactly "kept, in the Pool", with
+  the reason carried. (The `quicknoteResidualReason` "the note is no
+  longer there" arm exists for other callers and is unreachable from
+  this speaker — noted, not a finding: no pin could go red on an
+  unreachable path.) The pin discriminates; the comment now matches
+  the code.
+- **R1-4 (NIT, the flow tooltip) — HOLDS.** `ReadingEntry.displayTitle`
+  routes to the ONE `DisplayTitle.note` brain (pinned by
+  `DisplayTitleTests`), and `assembleReading`'s SELECT carries
+  `created_at`, so the tooltip degrades date-ward, never to "".
+- **R1-5 / R1-6 (record-only) — HOLD as recorded.** No code change;
+  R1-6 rides the 13e reminder-note bundle per the acceptance.
+
+#### Revert & scope integrity, verified
+
+The four restore checksums in the round-1 fix record match this
+reviewer's own md5s of the committed files EXACTLY
+(`MembershipChip.swift f61b72a9…`, `HelperView.swift 654a1bec…`,
+`QuickNoteView.swift 3611bd73…`, `TutorialSeeder.swift 9e07eb09…`) —
+the revert dance left no residue; the working tree is clean. The fix
+pass is App + tests + plan only (stat-verified): zero `Sources/`
+lines, zero `Sync/` lines, no schema (no Persistence/ lines in the
+whole phase diff; `Bridge/` byte-untouched; the join-brain functions
+untouched), her `/Applications` instance never addressed by this
+round either. One extra truth check beyond round 1's: the
+plain-duplicate status's "in the Pool until you shelve it" stays TRUE
+even for a duplicate of a smart-collected quicknote, because
+`duplicateAsVersion` deliberately copies no tags (its doc states it;
+the copy is untagged and bookless).
+
+**NEW findings: NONE — at any severity.** No round 3 is owed.
+`notes/QUESTIONS.md` untouched (#53 remains the next free number).
+**THE LADDER CLOSES AT ROUND 2.**
