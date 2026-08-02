@@ -1148,6 +1148,14 @@ her call.
   button vs. first responder (K7), and a framed block in each of the four fan
   styles (K9 — the margin-grid case is the one where the frame grows to
   include the rail).
+- **Two acceptance runs of the full Mac suite were made** — one before and
+  one AFTER the record/QUESTIONS commit (`7906dd7`), because a comment was
+  edited between them and a quoted count must come from the tree that
+  shipped. Both landed identically: **1176/203 with only the tripwire**.
+- **Environment note for the next session:** running the mobile scheme and a
+  `-only-testing` spine pass CONCURRENTLY with the full Mac run makes the full
+  run take ~2× wall time (144 s → 148 s of test time, but several minutes of
+  contention before it reports). Run them in sequence.
 - **The spine's selector:** `-only-testing:VariorumTests/TutorialWalkTests`
   selects ZERO tests. The seven suites are types
   (`TutorialBookShapeTests`, `TutorialDoorTests`, `TutorialWritingActsTests`,
