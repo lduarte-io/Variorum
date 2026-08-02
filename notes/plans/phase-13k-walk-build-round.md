@@ -1201,3 +1201,26 @@ her call.
   refutation on its face; 13e's A47c re-run starts
   covariate-UNKNOWN. (Honest recording over re-theorizing —
   exactly right.)
+
+### Batch 2 ACCEPTED (2026-08-02 — the architect's own runs, quoted)
+
+- core `Test run with 1032 tests in 114 suites passed` (from
+  1016/112 at the batch's open)
+- Mac `Test run with 1176 tests in 203 suites failed after 143.705
+  seconds with 1 issue` — confirmed **BY IDENTITY**: the recorded
+  environment-gated tripwire (`TakePaneMeasureTests.aStranded…`),
+  on a LOCKED session — consistent with the refutation now on the
+  KnownIssues row's face. Every other suite green, the spine's 7
+  included.
+- spine `51 tests in 7 suites` and mobile `14 tests in 4 suites`
+  green by the implementer's quoted runs; the spine additionally
+  green inside the architect's own Mac full run.
+- Rows K7–K10 all SHIPPED (`1324def` + `7906dd7`, record
+  `f89c438`); ledger flipped.
+- **#54(g) STAYS** — the nested re-lead call is exactly the walk
+  register's class (product-flavored, one line either way, shipped
+  default defensible); recording it rather than swallowing it was
+  right. #54 stands at seven calls; #55 next free.
+- The two-identical-Mac-runs note reads as diligence, not
+  discrepancy; the concurrency-contention note stands (sequence
+  the suites next time).
