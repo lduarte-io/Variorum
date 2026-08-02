@@ -91,6 +91,67 @@ reminders and directions, nothing gates):
   opens). Recorded here so it is not lost; uncertainty ("i think")
   preserved.
 
+## THE WALK RAN EARLY — the housekeeping session, 2026-08-02 (rulings on the record; the opening sitting walks only what is marked HELD or NOT YET WALKED)
+
+She walked #49–#52 and the look/feel bundle in the housekeeping
+session, the evening after 13g closed. Verdicts, her words quoted;
+QUESTIONS.md's status lines carry the same record:
+
+- **#49 RATIFIED in full** ("49 all looks good") — all nine
+  formatting-act calls stand as shipped.
+- **#50 RATIFIED in full** ("i think 50 also all seems fine for
+  now"; on (a): "copy and pasting things still generally gives
+  you the https").
+- **#51 (a)(b)(d)(e) RATIFIED** ("51 seems fine to me"); **(c)
+  HELD** on her question — what walking smart filters costs, and
+  whether a journal entry shows "Journal" (YES — the daily book is
+  curated, real membership rows) and a quicknote shows
+  "Quicknotes" (NO today — smart membership is derived). Ruling
+  pending.
+- **#52(a) OVERTURNED — BUILD ITEM:** the literal-"Untitled"
+  clause RETIRES; only a BLANK/nil title counts as no title, and a
+  note literally named "Untitled" shows "Untitled" again. NO
+  sweep: "i can delete them or rename them myself, there aren't
+  that many of them." The ⌘N nil-mint half STANDS.
+- **#52(c) HELD** on her question ("they still have a date they
+  were created at, right?") — correct: a pool (the Snippets
+  container) carries `created_at`, just never `entry_date`; the
+  shipped call scoped the date-title rule to notes. Whether a
+  nameless pool shows its created day is hers; one line either
+  way.
+- **#52(g) RATIFIED in her words:** "a quicknote should be in
+  quicknotes, it goes to the pool if you delete that tag."
+- **#52 (b)(d)(e)(f) NOT YET WALKED** — still open for her flick.
+- **Checked-off text RULED:** "the checkbox shouldn't change the
+  line visibly - just let it be checked off with no other changes"
+  — the box flip (`- [x]` / ☑) is the whole signal; no dim, no
+  strikethrough, both faces. Matches what shipped — now ruled
+  rather than default.
+- **The formatting toolbar RULED IN — the BOTTOM bar — BUILD
+  ITEM:** "i think the formatting toolbar should be added to the
+  bottom - if i decide it's too cluttered later i'll remove it
+  then, i think other users would need it though."
+- **Indented/nested lists RULED IN — Tab indents — BUILD ITEM:**
+  "we should allow indented lists and it should happen when you
+  click tab." The UNINDENT door is open — she knows ⌘[ is taken
+  (per-pane back) and floated "maybe if you click in it's an
+  option?"; ⇧Tab (the platform pair) proposed to her, pending her
+  word.
+- **⏎ list continuation RULED IN — BUILD ITEM:** "enter at the end
+  of a list line should continue the list, and enter again should
+  take you out of the list" — ⏎ on a texted list line mints the
+  next lead; ⏎ on an EMPTY list item removes the lead and exits.
+  (Supersedes the shipped no-continuation default the look/feel
+  item flagged.)
+- **Hand-checks:** "i'll do these other handchecks later in time"
+  — the Read-scroll link click stays open, ungated.
+
+**The BUILD ITEMS (toolbar-at-bottom · #52(a)'s retirement ·
+Tab-indent + the unindent door · ⏎ continuation · the takes-callout
+rendering rider above · the code tint once she rules it) land at
+13e's kickoff or an out-of-band round at her word — nothing was
+built from the housekeeping session itself.**
+
 ## Kickoff message (paste-ready for the orchestrator/coordinator the author invokes)
 
 > You are running Variorum Phase 13e under the shape the author

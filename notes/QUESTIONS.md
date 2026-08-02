@@ -248,7 +248,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(i) The Format menu is enabled in every note mode — Write, Takes, Lenses, Compare, Blocks and Canvas — and in the book/spread/pool editors.** Every one of them hosts a live editable surface, so greying the door there would be a lie. What it does NOT have is a ⌘K palette row: seven formatting rows in the command palette read as clutter beside "New Note" and "Merge Blocks". One line if you want them there.
 
-    **Status: OPEN — for the walk.**
+    **Status: ANSWERED 2026-08-02 (the housekeeping-session walk): "49 all looks good" — all nine RATIFIED AS SHIPPED. Record: the 13e plan's walk section.**
 
 50. **2026-08-01 · Phase 13g (batch 4) · LINKS AND READ'S SECOND FACE — six build-time calls, each one line to change.** Your ruling F-5 said links are in, that a writing surface opens them on ⌘-click, and that READ renders markdown fully formatted with markers hidden and a plain click opening a link. It did not say which ADDRESSES the app will follow, what a rendered bullet looks like, or what "Add Link" does to a selection that spans three paragraphs — those are the calls below. **Nothing here needed a schema change or an operation**, and nothing here touches `renderedText`, export, or the Fragments bridge: the stored text is untouched and Read simply draws it differently. The BINDING build record is the 13g plan's batch-4 record.
 
@@ -264,7 +264,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(f) ⌘-click opens a link on EVERY text surface, including a read pane and a sealed note.** Opening a link is not an edit, so editability is beside the point; what mattered was that a plain click is already spoken for (it places the cursor, and in the read tier it seeds the cursor for the editor). **A consequence worth seeing on the page:** a link's `(address)` is part of the link to a ⌘-click, not just its words — the dimmed address is visibly part of the thing, and unlike the checkbox click this gesture carries a modifier and competes with nothing.
 
-    **Status: OPEN — for the walk.**
+    **Status: ANSWERED 2026-08-02: "i think 50 also all seems fine for now" — all six RATIFIED AS SHIPPED (her note on (a): copy-paste generally carries the https anyway). Record: the 13e plan's walk section.**
 
 51. **2026-08-01 · Phase 13g (batch 6) · YOUR MORNING RULING SET IS BUILT — five build-time calls, each one line to change.** Your round-5 rulings said WHAT: comments on the left with the right-hand "+" gone, "block 1/16" instead of the raw ID, an Apple-Notes-shaped Library list, inline title editing, a takes projection for the un-live pane, and a modes switcher in the note-only window. They did not say what a note-card row does with a note that is in three books, or what happens to a title you were typing when you click away — those are the calls below. **Nothing here needed a schema change or an operation.** The BINDING build record is the 13g plan's batch-6 record.
 
@@ -278,7 +278,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(e) Clicking away from a title you are editing SAVES it; ⎋ cancels.** The little rename window is gone from that door, so there is no "Rename" button to press — ⏎ and losing focus both commit, because an inline field with a hidden commit key would eat what you typed. **The alternative:** clicking away cancels (safer against stray edits, worse against lost ones).
 
-    **Status: OPEN — for the walk.**
+    **Status: PARTIALLY ANSWERED 2026-08-02: (a)(b)(d)(e) RATIFIED AS SHIPPED ("51 seems fine to me"); (c) HELD OPEN on her question — what walking smart filters costs, and whether Journal/Quicknotes show on cards (Journal DOES — the daily book is curated; Quicknotes does NOT — its membership is derived). Ruling pending. Record: the 13e plan's walk section.**
 
 52. **2026-08-01 · Phase 13g (batch 7) · YOUR ROUND-6 NOD SET IS BUILT — seven build-time calls, each one line to change.** Your rulings R6-1…R6-4 said tag cards on the top bar, the bottom bar's two slide-out groups, the untitled-date display rule *"preserved on export"*, and quicknotes auto-tagged into a smart book. They did not say what happens to a note you deliberately NAMED "Untitled", or which day an undated note shows, or whether a quick note still sits in the Pool — those are the calls below. **Nothing here needed a schema change**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain: a title has never been body content. The BINDING build record is the 13g plan's batch-7 record.
 
@@ -296,7 +296,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **(g) A quick note is now in QUICKNOTES and NOT in the Pool.** Your R6-4 gave every quick note the `quicknote` tag and gave that tag a smart book — and the Pool has excluded smart-collected notes since the 13-B review (promoting tags to a book must DRAIN the pool). So the pad's note lands on the shelf instead of in the Pool, and its status line says so. It is still bookless in the *curated* sense — no membership row exists — so removing the tag puts it straight back in the Pool. **The alternative:** exempt the Quicknotes book from the Pool's drain, so quick notes sit in both. One line.
 
-    **Status: OPEN — for the walk.**
+    **Status: PARTIALLY ANSWERED 2026-08-02: (a) OVERTURNED — the literal-"Untitled" clause retires (only a BLANK title counts as no title; her existing literal-"Untitled" rows are hers to rename or delete — "that's not a good enough reason"; the ⌘N nil-mint stays); (c) HELD on her pool-date question (a pool carries `created_at`, just never `entry_date` — whether a nameless pool shows its created day is hers); (g) RATIFIED in her words ("a quicknote should be in quicknotes, it goes to the pool if you delete that tag"); (b)(d)(e)(f) NOT YET WALKED — still open. Record: the 13e plan's walk section.**
 
 *(Next free number at authoring time: **#53**.)*
 
