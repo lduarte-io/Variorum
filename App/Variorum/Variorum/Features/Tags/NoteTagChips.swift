@@ -28,7 +28,7 @@
 //  Her ruling flipped #52(d): *"tag cards should fold into the bar if you
 //  deliberately choose that but it should default to visible."* So the
 //  cards render at rest, and the ＃ door that folds them is the CONTEXT
-//  BAR's — it belongs to the constant icon row (← · book · ＃ · ›), not to
+//  BAR's — it belongs to the constant icon row (← · book · ＃ · →), not to
 //  the variable-width run of chips it hides. This view therefore renders
 //  the cards and their `＋`, and nothing else: it is mounted only when they
 //  are showing.
@@ -59,6 +59,28 @@ nonisolated enum TagChipLabel {
     }
 }
 
+/// **What a chip is SHAPED like** — her round-4 ruling, after flicking the
+/// batch-3 captures: *"i also think that it shouldn't be such rounded pill
+/// shape - i want to experiment with having a boxier look around it (maybe
+/// still with rounded corners, but a little more box like)"*.
+///
+/// So the `Capsule` retires for a small-radius rounded box. The radius is a
+/// CONSTANT rather than a literal in the view for two reasons: the fill and
+/// the border must never disagree about the shape (they read the same value),
+/// and her framing was an EXPERIMENT — the variants below are what the
+/// capture harness renders for her to pick from, and picking one is editing
+/// a single number here.
+nonisolated enum TagChipShape {
+    /// The shipped default. Small enough to read as a box rather than a
+    /// pill (a pill at this chip's height would be ~9), large enough not to
+    /// look like a mistake at 2×.
+    static let cornerRadius: CGFloat = 3
+
+    /// The propose-only set, rendered side by side in the round-4 capture
+    /// strip: sharp · barely-eased · shipped · softest-still-boxy.
+    static let variants: [CGFloat] = [0, 2, 3, 5]
+}
+
 /// The stable per-tag colour (the `LineageStripe` rule, keyed on path).
 nonisolated enum TagChipColor {
     /// Hue in 0..<1 from the tag's path. Same path, same hue, always.
@@ -85,6 +107,9 @@ struct NoteTagChips: View {
     /// A typed path — applied (and created on the way) by the caller.
     let onApply: (String) -> Void
     let onRemove: (Tag) -> Void
+    /// R4-3: the shipped default, overridable so the capture harness can
+    /// render her radius variants without a second copy of the chip.
+    var cornerRadius: CGFloat = TagChipShape.cornerRadius
 
     @State private var adding = false
     @Environment(\.colorScheme) private var scheme
@@ -107,6 +132,18 @@ struct NoteTagChips: View {
     /// One card: the tag's own colour (keyed on the WHOLE path), its LEAF
     /// (her K3 ruling — the path rides the tooltip), and the ✕ that takes it
     /// off this note.
+    ///
+    /// **R4-2 — IT FITS ITS TEXT.** Her round-4 report: *"i don't like how
+    /// the tags have so much whitespace in them, it's like goals and just
+    /// very stretched out. i think the tag chip should fit to the length of
+    /// the tag."* The mechanism was one modifier: the label carried
+    /// `.frame(maxWidth: 150)`, and `maxWidth` in SwiftUI does not mean "cap
+    /// it" — it means *flexible, up to* — so in a row with space to spare a
+    /// five-character tag claimed all 150 points and the chip drew around
+    /// the claim. Removing the frame lets the `Text` ask for its ideal
+    /// width, which is what "fits the tag" is. Long tags are still safe:
+    /// `Text` compresses under a tight proposal and `truncationMode(.tail)`
+    /// is still what it does when it must.
     private func chip(_ tag: Tag) -> some View {
         let tint = TagChipColor.color(forPath: tag.path, dark: scheme == .dark)
         return HStack(spacing: 3) {
@@ -115,7 +152,6 @@ struct NoteTagChips: View {
                 .foregroundStyle(tint)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .frame(maxWidth: 150, alignment: .leading)
             Button {
                 onRemove(tag)
             } label: {
@@ -129,8 +165,12 @@ struct NoteTagChips: View {
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 1)
-        .background(tint.opacity(0.12), in: Capsule())
-        .overlay(Capsule().stroke(tint.opacity(0.45), lineWidth: 1))
+        // R4-3: ONE radius, read by both the fill and the border, so the
+        // box and its outline can never disagree.
+        .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: cornerRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(tint.opacity(0.45), lineWidth: 1))
         .help("Tagged \(tag.path)")
     }
 

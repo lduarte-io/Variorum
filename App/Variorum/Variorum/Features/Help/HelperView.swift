@@ -336,7 +336,7 @@ struct HelperView: View {
          "The thin line above a pane, always the same four doors: ← back, the book "
          + "this note sits in (click to open that book right at this note; ⌘-click, or "
          + "a click when it's in several, lists them), ＃ to fold the tag cards away "
-         + "and back, and › forward. A door with nowhere to go is greyed, not hidden — "
+         + "and back, and → forward. A door with nowhere to go is greyed, not hidden — "
          + "the row never changes shape. ⌘[ / ⌘] and ⌘⇧I are the same doors on the "
          + "keyboard."),
         ("star",

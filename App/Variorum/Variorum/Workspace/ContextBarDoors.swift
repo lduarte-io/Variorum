@@ -6,7 +6,7 @@
 //  functions, plus the one sticky preference the bar carries.
 //
 //  Her ruling K11: the bar is ALWAYS the compact icon row —
-//  **← · book · ＃ · ›** — *"the collapsing and growing in that bar is a
+//  **← · book · ＃ · →** — *"the collapsing and growing in that bar is a
 //  little annoying to me"* and *"it should always look like this"*. So the
 //  row's SHAPE is a constant, and every door in it is either live or
 //  honestly grey; nothing appears, disappears, or spells itself out.
@@ -33,6 +33,20 @@ nonisolated enum ContextBarDoors {
     enum Icon: Hashable, Sendable, CaseIterable {
         case back, book, tags, forward
     }
+
+    /// **R4-1 — the two navigation glyphs are a MIRRORED PAIR**, her
+    /// round-4 ruling after flicking the batch's captures: the forward
+    /// chevron *"kind of looks like it's expanding the tags. i think it
+    /// should just be replaced with an arrow like the back one -> for
+    /// better clarity and a clearer match"*.
+    ///
+    /// The chevron sat immediately beside the ＃, where a `›` is the
+    /// universal "unfold this" glyph — so it read as the tag door's twin
+    /// rather than as ←'s. They live here, together, precisely so the
+    /// mirror is a fact a pin can hold rather than two literals in a view
+    /// that could drift apart.
+    static let backGlyph = "\u{2190}"
+    static let forwardGlyph = "\u{2192}"
 
     /// **THE CONSTANT ROW.** A pane holding a NOTE wears all four; a pane
     /// holding a PLACE (the shelf, the library, a book, the recovery

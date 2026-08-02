@@ -43,7 +43,8 @@ struct PaneHost<Content: View>: View {
     /// before the split existed.
     let split: Bool
     let onBack: () -> Void
-    /// 13k K11: the › is a real forward door now — ⌘]'s face.
+    /// 13k K11: the → is a real forward door now — ⌘]'s face (R4-1
+    /// replaced the chevron: it read as the ＃'s expander).
     let onForward: () -> Void
     let onToggleTags: () -> Void
     let onFocus: () -> Void

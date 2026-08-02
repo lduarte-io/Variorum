@@ -1664,3 +1664,141 @@ re-run above carries only the tripwire. Recorded so the next
 session recognises the signature: this pin is
 environment-sensitive the same way the wall-clock perf pins are —
 if it reds while she is typing, re-run before believing it.
+
+### Round-4 look continuation (2026-08-02, the batch-3 implementer's own session, after the round-1 fix pass)
+
+Her three look rulings, built on current HEAD (`dfd200d` — the fix pass
+touched `MarkdownEditing`/`Export`/`TakesViewModel`, none of the bar's files;
+verified by `git log` on each before starting).
+
+**Counts, by this session's own runs, sequenced:** Mac **1190 tests in 208
+suites** (from 1187/207: +3 tests, +1 suite) **with the ONE recorded
+environment-gated red** —
+`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+confirmed BY IDENTITY, not patched · core **1034 tests in 114 suites** passed
+(unchanged by this diff — no `Sources/` line) · spine **51 tests in 7 suites**
+green. `PoolDragTests` did not fire this round. NO schema; zero `Sync/` lines;
+the diff is eleven files, every one under `App/Variorum/`.
+
+---
+
+#### R4-1 — the forward glyph becomes a right ARROW · SHIPPED
+
+Her ruling: the `›` *"kind of looks like it's expanding the tags. i think it
+should just be replaced with an arrow like the back one -> for better clarity
+and a clearer match"*.
+
+She diagnosed it exactly: the chevron sat immediately beside the ＃, and `›`
+is the universal *unfold-this* glyph — so it read as the tag door's twin
+rather than as ←'s. The pair now lives in `ContextBarDoors.backGlyph` /
+`forwardGlyph`, together, so the mirror is a fact rather than two literals in
+a view that could drift apart. The doc comments and the ⌘/ helper's dictionary
+entry follow the glyph (the bar is described in prose in three places; a
+picture that no longer matches its description is the WT-1 class).
+
+**The iconRow pin still proves the shape** — the row is `[.back, .book,
+.tags, .forward]` whatever the glyph is, which is exactly why the two claims
+are pinned separately.
+
+#### R4-2 — the chips FIT their text · SHIPPED
+
+Her report: *"i don't like how the tags have so much whitespace in them, it's
+like goals and just very stretched out. i think the tag chip should fit to
+the length of the tag."*
+
+**The mechanism, traced before touching anything:** the label carried
+`.frame(maxWidth: 150, alignment: .leading)`, and `maxWidth` in SwiftUI does
+not mean *capped at* — it means *flexible, up to*. In a row with space to
+spare (which the bar always has), a five-character tag therefore claimed all
+150 points and the chip drew its box around the claim. Removing the frame lets
+the `Text` ask for its ideal width, which is what "fits the tag" is; a long
+tag is still safe, because `Text` compresses under a tight proposal and
+`truncationMode(.tail)` is still what it does when it must.
+
+#### R4-3 — boxier chips, with her EXPERIMENT preserved · SHIPPED
+
+Her ruling: *"it shouldn't be such rounded pill shape - i want to experiment
+with having a boxier look around it (maybe still with rounded corners, but a
+little more box like)."*
+
+`Capsule` retires for `RoundedRectangle(cornerRadius:)` at **3pt**, read from
+`TagChipShape.cornerRadius` by BOTH the fill and the border so the box and its
+outline can never disagree. Her "experiment" framing is preserved literally:
+`TagChipShape.variants` is the propose-only set, the harness renders a strip
+of all four, and adopting a different one is editing one number.
+
+---
+
+#### Red-on-old — TWO reverts, both verified RED and checksum-restored
+
+| # | Revert | Result |
+|---|---|---|
+| H | `forwardGlyph` back to `"\u{203A}"` | RED on three expectations: it is not the arrow, it IS the retired chevron by name, and the mirror relation breaks (`8250` vs `8594`) |
+| I | `.frame(maxWidth: 150, alignment: .leading)` back on the label | RED: a **two-character** tag's chip reaches **192px** — and the long tag measures **192px too**, i.e. identical. That equality is her complaint, quantified |
+
+Checksums after restore: `ContextBarDoors.swift`
+`0f69d534cccdb299d897a268901c587b` · `NoteTagChips.swift`
+`1438a9c2cd6c571138d38455a17307b1` (both then edited further for the doc-glyph
+sweep and R4-3, so the shipped md5s differ — the restore points are what these
+name).
+
+**REVERT I's FIRST DRAFT WAS HOLLOW, and the reason is the finding.** The pin
+originally measured the chips' IDEAL width via `ImageRenderer` — and it stayed
+GREEN with the stretching frame restored. The mechanism is the same one the
+fix is about: `maxWidth` expands only under a WIDE proposal, and
+`ImageRenderer` proposes `nil`, under which a `maxWidth` frame simply returns
+its content's ideal width. The symptom exists only inside a wide container.
+So the pin was rebuilt to reproduce the bar's own layout — a 400pt row with a
+trailing `Spacer` — and then read the rightmost non-background pixel, which is
+where the ink actually stops. That version discriminates (192 vs 62), and the
+hollow first draft is recorded rather than quietly replaced: a pin that passes
+on both sides is exactly what the guard says to hunt for, and this is the
+second one this batch caught by RUNNING a pin rather than by reading it.
+
+**R4-3 carries no test pin, deliberately and on the record.** A corner radius
+is a look value: a pin on the constant would pass equally with the `Capsule`
+restored (the constant would simply go unread), which is the hollow class
+again. Its evidence is the capture strip, and its drift guard is structural —
+one constant, read by both the fill and the border.
+
+---
+
+#### THE SCREENSHOTS — 14 files, all REFRESHED, propose-only
+
+Directory (gitignored): **`notes/plans/phase-13k-batch3-screens/`**
+
+All twelve state captures were re-rendered so her record matches what ships
+(every one of them shows the new arrow; five of the six show the new chips):
+
+| file | state |
+|---|---|
+| `{terminal,study}-1-one-book-cards-visible.png` | one book · cards showing · ← live · → grey |
+| `{terminal,study}-2-several-books-forward-live.png` | three books · cards showing · BOTH arrows live |
+| `{terminal,study}-3-no-books-nothing-visited.png` | nothing visited, no books — ←, book and → all grey, same row shape |
+| `{terminal,study}-4-cards-folded-with-count.png` | the ＃ carrying `3`, cards folded away |
+| `{terminal,study}-5-untagged-note.png` | a note with no tags — the ＃ live, `＋` alone |
+| `{terminal,study}-6-a-place-not-a-note.png` | a PLACE (the shelf): ← and → only |
+
+**NEW — her R4-3 experiment set:**
+
+| file | what it shows |
+|---|---|
+| `terminal-R4-3-radius-variants.png` | the SAME bar four times — **0pt · 2pt · 3pt (SHIPPED) · 5pt** — each row labelled |
+| `study-R4-3-radius-variants.png` | the same strip in the study voice |
+
+Light only, for the reason the batch-3 record gives (13g batch 2: this
+project's offscreen dark renders resolve the wrong appearance).
+
+#### Notes for the orchestrator
+
+- **Nothing is owed.** R4-1/2/3 all shipped; the radius strip is delivered
+  propose-only and adopting a different row is a one-number edit
+  (`TagChipShape.cornerRadius`).
+- **QUESTIONS is untouched this round** — #55(h) already carries the look
+  calls, and these three ARE her rulings on that entry's subject matter
+  rather than new build-time calls. #56 is still next free.
+- **The multi-book click question** she asked at round 4 was answered from
+  the shipped record (round 4's own section); the shipped behaviour is
+  unchanged and her floated alternative stays OPEN, not built.
+- The round-2 reviewer sees this diff together with the fix pass, per the
+  ladder's flow.

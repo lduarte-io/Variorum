@@ -65,7 +65,7 @@ struct NoteWindowView: View {
         PaneHost(
             tokens: tokens, session: session, workspace: router.workspace, pane: .primary,
             focused: live, split: false,
-            // No history here (the ruling), so the ← and › are grey and
+            // No history here (the ruling), so the ← and → are grey and
             // neither can be reached. 13k K11 makes them VISIBLE-and-grey
             // rather than absent, which is the same honesty the window's
             // four app-scope greys already carry.

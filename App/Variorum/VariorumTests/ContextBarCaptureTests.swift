@@ -105,15 +105,66 @@ struct ContextBarCaptureTests {
         print("13k batch 3 captures: \(Self.outputDirectory.path)")
     }
 
+    /// **R4-3's EXPERIMENT STRIP — propose-only.** Her round-4 words: *"i
+    /// want to experiment with having a boxier look around it (maybe still
+    /// with rounded corners, but a little more box like)"*. The shipped
+    /// default is one of these; the strip exists so picking a different one
+    /// is a glance and a one-number edit (`TagChipShape.cornerRadius`).
+    ///
+    /// One image per voice, the SAME note in every row, so the only variable
+    /// down the strip is the radius.
+    @Test func captureTheChipRadiusVariants() throws {
+        try FileManager.default.createDirectory(
+            at: Self.outputDirectory, withIntermediateDirectories: true)
+        let one = [book("b1", "Orbit", .curated)]
+        let tags = [tag("life/goals"), tag("work"), tag("reading/2026")]
+
+        for (voiceName, tokens) in [
+            ("terminal", VoiceTokens.terminalLight), ("study", VoiceTokens.studyLight),
+        ] {
+            let strip = VStack(alignment: .leading, spacing: 10) {
+                ForEach(TagChipShape.variants, id: \.self) { radius in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(
+                            radius == TagChipShape.cornerRadius
+                                ? "\(Int(radius))pt — SHIPPED"
+                                : "\(Int(radius))pt")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(tokens.muted)
+                        ContextBar(
+                            tokens: tokens, originLabel: "Orbit", forwardLabel: "Field Notes",
+                            books: one,
+                            tagFace: .init(
+                                tags: tags, allTags: tags,
+                                onApply: { _ in }, onRemove: { _ in }),
+                            tagsFolded: false, chipCornerRadius: radius,
+                            onBack: {}, onForward: {}, onOpenBook: { _ in },
+                            onToggleTags: {})
+                            .frame(width: 520, alignment: .leading)
+                            .background(tokens.room)
+                    }
+                }
+            }
+            .padding(10)
+            .background(tokens.surface)
+            try writeImage(strip, to: "\(voiceName)-R4-3-radius-variants.png")
+        }
+    }
+
     /// One state, rendered at 2× on the voice's own room so the bar sits on
     /// the colour it sits on in the app.
     private func write(_ bar: ContextBar, tokens: VoiceTokens, to name: String) throws {
-        let renderer = ImageRenderer(
-            content: bar
+        try writeImage(
+            bar
                 .frame(width: 520, alignment: .leading)
                 .background(tokens.room)
                 .padding(8)
-                .background(tokens.surface))
+                .background(tokens.surface),
+            to: name)
+    }
+
+    private func writeImage(_ view: some View, to name: String) throws {
+        let renderer = ImageRenderer(content: view)
         renderer.scale = 2
         guard let image = renderer.nsImage,
               let tiff = image.tiffRepresentation,

@@ -12,7 +12,7 @@
 //  > *"the collapsing and growing in that bar is a little annoying to me"* …
 //  > *"it should always look like this"*
 //
-//  So the bar is ALWAYS **← · book · ＃ · ›** — four doors that never move,
+//  So the bar is ALWAYS **← · book · ＃ · →** — four doors that never move,
 //  each live or honestly grey, with the note's tag cards riding after them
 //  (K12: visible at rest; ＃ folds them, deliberately and stickily).
 //
@@ -21,7 +21,7 @@
 //  arithmetic, ⌘[ / ⌘], and the W21/membership ascent (the shell decides
 //  what a named destination means — P-4). What this file owns is the FACE:
 //  the back chip's spelled-out label is gone, the "in <book(s)>" sentence
-//  is gone into the book icon, the › is a real forward door where before
+//  is gone into the book icon, the → is a real forward door where before
 //  there was only a fold chevron, and the whole-bar collapse retires
 //  (13g's WT-2 born-collapsed default retires with it — there is nothing
 //  left to collapse).
@@ -49,7 +49,7 @@ struct ContextBar: View {
     /// the row is a constant). It names the destination in the tooltip;
     /// since K11 it is never spelled out on the bar.
     let originLabel: String?
-    /// Where ⌘] would go — nil ⇒ the › is grey. Her ruling: *"after you
+    /// Where ⌘] would go — nil ⇒ the → is grey. Her ruling: *"after you
     /// just went back, i feel like you should be able to go forward"*.
     let forwardLabel: String?
     /// The pane's note's books, already ORDERED (`BookChooserOrder`) — one
@@ -62,6 +62,11 @@ struct ContextBar: View {
     var tagFace: TagFace? = nil
     /// K12 — her deliberate, sticky choice (`TagChipsFold`).
     let tagsFolded: Bool
+    /// R4-3: the chips' corner radius. Defaulted, so every caller in the
+    /// app gets the shipped shape and only the capture harness ever names
+    /// one (her experiment framing — the variants are a picture, not a
+    /// setting).
+    var chipCornerRadius: CGFloat = TagChipShape.cornerRadius
     let onBack: () -> Void
     let onForward: () -> Void
     /// The ascent: open this book, revealed at this note.
@@ -129,7 +134,8 @@ struct ContextBar: View {
                 if let tagFace, chipsShown {
                     NoteTagChips(
                         tokens: tokens, tags: tagFace.tags, allTags: tagFace.allTags,
-                        onApply: tagFace.onApply, onRemove: tagFace.onRemove)
+                        onApply: tagFace.onApply, onRemove: tagFace.onRemove,
+                        cornerRadius: chipCornerRadius)
                         .padding(.leading, 6)
                 }
                 Spacer(minLength: 0)
@@ -158,7 +164,7 @@ struct ContextBar: View {
 
     private var backDoor: some View {
         Button(action: onBack) {
-            glyph(enabled: backEnabled) { Text("\u{2190}") }
+            glyph(enabled: backEnabled) { Text(ContextBarDoors.backGlyph) }
         }
         .buttonStyle(.plain)
         .disabled(!backEnabled)
@@ -167,7 +173,7 @@ struct ContextBar: View {
 
     private var forwardDoor: some View {
         Button(action: onForward) {
-            glyph(enabled: forwardEnabled) { Text("\u{203A}") }
+            glyph(enabled: forwardEnabled) { Text(ContextBarDoors.forwardGlyph) }
         }
         .buttonStyle(.plain)
         .disabled(!forwardEnabled)

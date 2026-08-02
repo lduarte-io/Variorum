@@ -642,7 +642,7 @@ nonisolated enum CapabilityRegistry {
             availability: { ctx in ctx.openNoteCount > 0 ? .act : .unavailable }),
         // 13k K11: both gain a `.surface` door — the context bar's ← and ›.
         // The ← has been on the bar since 13f (as a spelled-out chip) and
-        // was never declared there; the › is new with her ruling (*"after
+        // was never declared there; the → is new with her ruling (*"after
         // you just went back, i feel like you should be able to go
         // forward"*). Declaring both is what puts the bar's own doors under
         // the walk (`ContextBar.surfaceCapabilities`).

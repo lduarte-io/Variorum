@@ -14,7 +14,9 @@
 //  properties in `ContextBarTests` (BookAscentTests).
 //
 
+import AppKit
 import Foundation
+import SwiftUI
 import Testing
 import VariorumCore
 
@@ -49,6 +51,27 @@ struct ContextBarDoorsTests {
         #expect(ContextBarDoors.bookClick(bookCount: 1, commandHeld: true) == .list,
                 "her second door: ⌘-click sees it listed even when there is one")
         #expect(ContextBarDoors.bookClick(bookCount: 3, commandHeld: true) == .list)
+    }
+
+    /// **R4-1 — the two navigation glyphs are a MIRRORED PAIR.** Her
+    /// round-4 ruling: the forward chevron *"kind of looks like it's
+    /// expanding the tags… it should just be replaced with an arrow like
+    /// the back one"*. Sitting beside the ＃, a `›` is the universal
+    /// unfold glyph, so it read as the tag door's twin instead of ←'s.
+    ///
+    /// DISCRIMINATING REVERT: put `"\u{203A}"` back as `forwardGlyph` —
+    /// the second and third expectations fail (it is neither the mirror
+    /// nor an arrow), and the retired-chevron expectation fails by name.
+    @Test func theBackAndForwardGlyphsAreAMirroredPairOfArrows() {
+        #expect(ContextBarDoors.backGlyph == "\u{2190}", "←, unchanged")
+        #expect(ContextBarDoors.forwardGlyph == "\u{2192}", "→, her round-4 ruling")
+        #expect(ContextBarDoors.forwardGlyph != "\u{203A}",
+                "the chevron is retired — it read as the ＃'s expander")
+        // The mirror, stated as the relation rather than as two literals:
+        // both are arrows from the same Unicode block, one place apart.
+        let back = ContextBarDoors.backGlyph.unicodeScalars.first!.value
+        let forward = ContextBarDoors.forwardGlyph.unicodeScalars.first!.value
+        #expect(forward == back + 2, "← and → are the mirrored pair of one block")
     }
 
     /// The ＃ carries the count only when the cards are hidden — unfolded,
@@ -131,6 +154,82 @@ struct TagChipsFoldTests {
         #expect(TagChipsFold.folded() == !before)
         router.toggleTagChips()
         #expect(TagChipsFold.folded() == before)
+    }
+}
+
+@MainActor
+@Suite("The tag chip's own size (13k R4-2)")
+struct TagChipFitTests {
+    private func tag(_ path: String) -> VariorumCore.Tag {
+        let now = Date(timeIntervalSince1970: 1_782_864_000)
+        return VariorumCore.Tag(id: path, name: path, path: path, createdAt: now, updatedAt: now)
+    }
+
+    /// How far the chips' ink actually REACHES when the row has room to
+    /// spare — which is the quantity her report was about, and the one an
+    /// ideal-size measurement cannot see.
+    ///
+    /// **The first draft of this pin measured the ideal size and was
+    /// HOLLOW** — it stayed green with the stretching frame restored, and
+    /// the reason is the whole mechanism: `maxWidth` expands only under a
+    /// WIDE proposal, and `ImageRenderer` proposes `nil`, under which a
+    /// `maxWidth` frame returns its content's ideal width. So the symptom
+    /// only exists inside a wide container, and this reproduces the bar's
+    /// own layout (a wide row with a trailing `Spacer`) and then reads the
+    /// rightmost non-background pixel.
+    private func inkWidth(_ tags: [VariorumCore.Tag]) -> Int {
+        let renderer = ImageRenderer(
+            content: HStack(spacing: 0) {
+                NoteTagChips(
+                    tokens: .terminalLight, tags: tags, allTags: [],
+                    onApply: { _ in }, onRemove: { _ in })
+                Spacer(minLength: 0)
+            }
+            .frame(width: 400, height: 24)
+            .background(Color.white))
+        renderer.scale = 1
+        guard let image = renderer.nsImage,
+              let tiff = image.tiffRepresentation,
+              let rep = NSBitmapImageRep(data: tiff)
+        else { return 0 }
+        var rightmost = 0
+        for x in 0..<rep.pixelsWide {
+            for y in 0..<rep.pixelsHigh {
+                guard let color = rep.colorAt(x: x, y: y) else { continue }
+                // Anything meaningfully off white is chip ink (fill, border
+                // or glyph).
+                if color.redComponent < 0.97 || color.greenComponent < 0.97
+                    || color.blueComponent < 0.97 {
+                    rightmost = max(rightmost, x)
+                    break
+                }
+            }
+        }
+        return rightmost
+    }
+
+    /// **R4-2, measured rather than asserted by eye.** Her report: *"i
+    /// don't like how the tags have so much whitespace in them, it's like
+    /// goals and just very stretched out. i think the tag chip should fit
+    /// to the length of the tag."*
+    ///
+    /// The mechanism was `.frame(maxWidth: 150)` on the label — `maxWidth`
+    /// in SwiftUI means *flexible up to*, not *capped at*, so a
+    /// five-character tag claimed all 150 points. A chip that FITS is
+    /// therefore one whose width TRACKS its text, and that is what this
+    /// measures: a long tag must be substantially wider than a short one.
+    ///
+    /// DISCRIMINATING REVERT: put `.frame(maxWidth: 150, alignment:
+    /// .leading)` back on the label — the two-character chip stretches past
+    /// 150 points and the first expectation fails by a wide margin.
+    @Test func aChipsWidthTracksItsTagRatherThanAFixedFrame() {
+        let short = inkWidth([tag("ab")])
+        let long = inkWidth([tag("a-considerably-longer-tag-name")])
+        #expect(short < 100,
+                "a two-character tag hugs its text instead of claiming a fixed frame")
+        #expect(long > short + 40,
+                "…and a long tag draws a wide chip, so the width TRACKS the tag")
+        #expect(long < 400, "the row still fits — a long tag compresses rather than overflowing")
     }
 }
 

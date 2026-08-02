@@ -528,7 +528,7 @@ struct EditorCommands: Commands {
                 .disabled(!enabled(.navigateForward))
             // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards'
             // fold, beside the navigation it sits with on the bar (whose
-            // ← and › ARE ⌘[ and ⌘]).
+            // ← and → ARE ⌘[ and ⌘]).
             Button(verb(.toggleTagChips)) { router?.toggleTagChips() }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
                 .disabled(session == nil)
