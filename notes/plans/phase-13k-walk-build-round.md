@@ -1529,3 +1529,45 @@ ladder's diff stays clean, then landed as the look-fix continuation:
   (per-pane history). Her floated alternative — click = the
   most-recently-visited containing book, modifier = the list —
   is recorded as an OPEN option, hers on a word; not built.
+
+## THE REVIEW LADDER
+
+### Round 1 (2026-08-02 — fresh Fable cold reviewer, REVIEW_PROMPT verbatim, zero framing; its own runs matched every acceptance count, the tripwire confirmed by identity via a solo suite run)
+
+**1 MAJOR / 2 MINOR / 2 NIT, no BLOCKER.** Architect dispositions
+(all five ACCEPTED — each mechanism read and confirmed against the
+cited code):
+
+- **R1-MAJOR-1 · ACCEPTED, fix approved as proposed.** Format ▸
+  Heading on a NESTED list item mints `"  # milk"` — an indented
+  heading, which K8's own widening deliberately cannot read (the
+  phase's own pin proves `spans("  # …").isEmpty`) — so the act
+  turns a rendered list item into raw unstyled text. A genuine K8
+  regression (pre-K8 the same act minted a WORKING column-0
+  heading), reachable from all three heading doors; the batch pin
+  sampled checkbox↔bullet but never the heading arm. Fix: keep
+  `entry.indent` only when the NEW act is itself a list lead;
+  `.heading` takes the clearing rationale — restoring #49(b)'s
+  ratified replace-the-lead behavior, no new author call needed.
+  Red-on-old pin as sketched.
+- **R1-MINOR-1 · ACCEPTED.** The two outdent doors disagree on a
+  space-before-tab indent run (paste-only input): ⇧Tab removes one
+  space (drawn level unchanged — a dead keypress), the ⏎ door
+  removes the run's units. Fix: the ⇧Tab arm drops the computed
+  level by exactly one, mirroring the ⏎ door's unit rule; pinned
+  red-on-old.
+- **R1-MINOR-2 · ACCEPTED (doc-class).** Export.swift's comment
+  still teaches the RETIRED pre-K1 literal-"Untitled" rule at the
+  exact surface #53(k) names. Rewrite to K1's rule; no pin owed.
+- **R1-NIT-1 · ACCEPTED.** `applyCallout`'s doc block landed on
+  `calloutFrame` (K9's insertion point); split it back over the two
+  functions.
+- **R1-NIT-2 · ACCEPTED.** The batch-1 record's "#53 — eleven
+  calls" line predates (l); correct to twelve in place, marked as a
+  record correction.
+
+**Fix flow (the standing recent precedent — the reviewer implements
+its own confirmed findings):** the round-1 reviewer's fix pass runs
+FIRST; the round-4 look continuation (R4-1/2/3, held for a clean
+review diff) runs AFTER it; round 2 = a FRESH reviewer over both.
+One agent at a time throughout, per the standing cap.
