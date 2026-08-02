@@ -1,0 +1,147 @@
+# Phase 13e — Takes & block management
+
+**Status: PASTE-READY (authored at the 13g closeout, 2026-08-01,
+per the front-loaded-planning rule). The author kicks it off at her
+word.** Sequencing was HER 13f round-5 ruling: 13f → 13g → **13e**,
+then her choice (13h · 13i · 13j all pending at her word).
+**13e's closeout authors the NEXT phase's plan** (whichever she
+picks at that point — the standing ritual).
+
+## THE OPENING REMINDER NOTE (her 13g round-7 instruction — REMINDERS, NEVER GATES)
+
+Her words: *"you can make a note at the start of 13e to remind me
+of those checks (not gate on them)."* The note, in full — walk it
+with her at the opening sitting, none of it gates anything:
+
+- **Two hand-checks** (13g's last unpinnable inches): press ⌘B
+  while the keyboard is in a TAKE PANE (menu key-equivalent
+  routing to a board's first responder); click a link in Read's
+  SCROLL face (whether link dispatch beats the wake-the-post tap;
+  benign either way, one line to move the gesture if not).
+- **The #49–#52 walk** (`notes/QUESTIONS.md`): 32 build-time calls
+  from 13g's batches, each with a stated default and one line to
+  change.
+- **The look/feel bundle:** inline code invisible in the terminal
+  voice (a tint is the candidate fix); the CHECKED-box register
+  (Write's `- [x]` line AND Read's ☑ line — dim? strike?);
+  indented/nested list styling (the column-0 rule wants widening
+  with her word); the visible formatting-TOOLBAR offer (menu-first
+  shipped; the bar is hers); ⏎-continues-a-list (changes what
+  typing does — her word first); `ReadTakesView` cards' raw
+  undimmed markers (13g review NIT R1-6); the L3/L4 title-band
+  look (keep, or one modifier each back); #52(g) — quick notes
+  land in Quicknotes, not the Pool (the one-line alternative).
+- **One click:** Help ▸ Restore Tutorial (covers 13f + 13g's
+  lessons + the review's corrections), if not already pressed.
+
+## Kickoff message (paste-ready for the orchestrator/coordinator the author invokes)
+
+> You are running Variorum Phase 13e under the shape the author
+> picks at kickoff (`/architect-phase` has run every phase since
+> 13c; her recent cast: Fable orchestrator · a fresh Opus
+> implementer per batch · ONE Fable cold review at phase end,
+> standard ladder — confirm, never assume). Read IN FULL first:
+> `CLAUDE.md` + the canon it loads (AppSpec §14's 13g delta is the
+> latest state), this plan, `notes/handoffs/phase-13g-handoff.md`,
+> the 13g plan's F-1…F-5 rulings (formatting semantics you must
+> not regress), and the 13c plan's "Environment traps" (binding,
+> as every phase) PLUS the two 13g standing rules: never address a
+> Variorum instance by PROCESS NAME (bundle id
+> `io.lduarte.Variorum.debug` or PID only), and Mac test runs use
+> the cwd-independent `-project` invocation. Verify the baselines
+> with your own runs. Copy the P-1…P-9 constitution into this file
+> verbatim if running under `/architect-phase`. **OPEN WITH THE
+> AUTHOR-ATTENDED SITTING, in this order:** (1) **the REMINDER
+> NOTE above** — walk it with her, record verdicts as sitting
+> rounds, gate on nothing; (2) **W26 — the true system-wide
+> quick-note hotkey** (her 2026-08-01 slotting ruling: "so that
+> i'm sure to land on it again"): the author-attended test — the
+> researched one question is whether macOS prompts; the Carbon
+> research lives in the 13f plan file; (3) the **KICKOFF SWEEP**
+> (below); (4) scope confirmation from the ledger; (5) cast
+> confirmation.
+
+## Goal
+
+The fan and the block list get their missing hands (roadmap ruling
+K3, 2026-07-25).
+
+## The ledger at authoring time
+
+| # | Item | Source |
+|---|------|--------|
+| E1 | Colour swatches + a real emoji picker (callouts) | A13(b) |
+| E2 | Block-level multi-select and multi-delete | A17 |
+| E3 | ⌘-click merge selection in Takes | A18 |
+| E4 | Reorder takes (`fan_position` — pin like every other ordering) | A19 |
+| E5 | Move-a-take-into-a-block-below | A20 |
+| E6 | Copy-all-takes / takes-to-blocks — **doubles as the REPAIR TOOL for the sub-takes diagnosis** (13c's A45 finding: "my takes should've been blocks"; A21 reframed as the migration for work already shaped wrong) | A21 |
+| E7 | The 13c kickoff candidates SHE APPROVES (margin-hover comment grammar · canvas bank · synced card sizes) — offer at the sitting, build only her picks | 13c |
+| E8 | The 13f round-11 candidates: the tag-surface ask + the in-post tags face (composes with 13g's R6-1 chips — the chips are the top bar's; this is the fuller ask) | 13f |
+| E9 | The takes-aware find & replace half (the KnownIssues row: replace across a block's live takes — the Delete-in-Every-Take apply-and-report precedent is the aligned shape) | KnownIssues |
+| E10 | The 11a copy-doors flush alignment (duplicateAsVersion/promoteLens faces flush the pending buffer first — the diverge doors' shape; KnownIssues row) | KnownIssues |
+
+## THE KICKOFF SWEEP (owns four parked items; the hallucination guard binds hard)
+
+1. **The windowless launch + quit-from-windowless hang**
+   (KnownIssues row): 13g's sweep failed 32 cold reproductions
+   across six arms and two trees — **CAPTURE, DO NOT SUMMON**: the
+   next time the state occurs naturally, run `sample <pid> 5`
+   FIRST, then the CGWindowList census (by PID — AX reads the
+   current Space only), then `lsappinfo`, then time a `quit`, and
+   only then click the Dock. The row carries the full ruled-out
+   space and the three surviving candidates.
+2. **The note-only window's clipped top** (KnownIssues row): 13g
+   batch 6 reproduced it deterministically (a note IN A BOOK, so
+   the context bar renders), instrumented it (layout converges;
+   the pixels are the first pass's; any resize repairs it
+   permanently), and **built three fixes that all measured wrong**
+   — the row records them so nobody repeats them. The one
+   structural difference from the main window is the pane row's
+   re-proposing GeometryReader.
+3. **The A47c tripwire** (KnownIssues row):
+   `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+   fails on UNLOCKED sessions and passes locked — the pin's own
+   message directs re-running the 13c A47c experiments; run them
+   under BOTH lock states and disposition the pin from evidence.
+4. **The shell-redo pin's sibling sweep is DONE** (13g batch 5
+   resolved the row at its mechanism and swept all 32 status
+   assertions) — listed so the sweep doesn't re-open it.
+
+## Binding constraints
+
+- The P-1…P-9 constitution (copy in verbatim at kickoff under
+  `/architect-phase`); the registry grows to cover new doors.
+- 13g's F-1…F-5 formatting semantics are CANON (AppSpec §14's 13g
+  delta): display == stored on editing surfaces; the line-scoped
+  tokenizer law; Read's rendered face; the DisplayTitle brain.
+  E2/E5/E6 touch block/take structure — the markdown face must
+  survive every structural op (spans re-scan; nothing stored).
+- `fan_position` reordering (E4) is ordering like every other:
+  fractional-index keys, jitter, no rebalance (SyncSpec §8).
+- No schema without her explicit ruling (a §12 lockstep event,
+  mirror-first, her go — E7's "synced card sizes" is the one
+  candidate; STOP at the sitting if it firms).
+- No `Sources/VariorumCore/Sync/` lines without the standing rider.
+- Every PROVISIONAL to `notes/QUESTIONS.md` (append, never
+  renumber — **#49–#52 are OPEN for her walk**; next free number
+  at authoring time: **#53**).
+
+## Baselines at open (verify with your own runs)
+
+Core **1001/110** · Mac **1139/197** (the ONE recorded
+environment-gated tripwire red on unlocked sessions — its
+KnownIssues row; exactly that one red is the known state) · mobile
+**14/4** · tutorial spine **51/7** — the 13g finals, verified by
+that orchestrator's own runs 2026-08-01. No schema since v1_12;
+mirror at lockstep marker 4.
+
+## Verification
+
+Per-batch: the standing loop (build → red-on-old pins by
+behavioral revert with checksums → the tutorial spine green by
+TYPE name → full suites, counts by the "Test run with N tests"
+line; mobile when `Sources/`/`Shared/` is touched — iPhone 16e).
+Review shape: the author sets it at kickoff. **13e's closeout
+authors the next phase's plan** (her pick: 13h · 13i · 13j — or
+an unslotted row at her word).

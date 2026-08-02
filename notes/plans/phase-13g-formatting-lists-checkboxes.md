@@ -3635,3 +3635,45 @@ the copy is untagged and bookless).
 **NEW findings: NONE — at any severity.** No round 3 is owed.
 `notes/QUESTIONS.md` untouched (#53 remains the next free number).
 **THE LADDER CLOSES AT ROUND 2.**
+
+## THE CLOSEOUT (2026-08-01)
+
+- **Final counts (orchestrator's own runs):** core 1001/110 · Mac
+  1139/197 (the ONE tripwire red confirmed BY IDENTITY; its
+  KnownIssues row, owner 13e) · mobile 14/4 · tutorial spine 51/7.
+  NO schema all phase (mirror at marker 4); zero `Sync/` lines;
+  `renderedText`/export/the bridge's join brain byte-untouched
+  (re-verified by the round-2 reviewer over the whole phase diff).
+- **L15 DISCHARGED:** the TEXTKIT2 §5 spike re-run on macOS 26.5.2
+  — ZERO canary events whole-run
+  (`Spikes/TK2Spike/results-2026-08-01-macos26.5.2.log`, archived
+  beside the 26.4.1 and 2026-07-30 logs).
+- **Every ledger row dispositioned:** L1–L12 SHIPPED (L5 completed
+  by her L5 word + batch 6's takes projection; L9's held halves
+  ride the 13e reminder note); L13 the sweep (one row RESOLVED at
+  its mechanism, one DEEPENED → 13e capture-first); L14 → 13e (her
+  round-4 ruling); L15 discharged; L16 EXECUTED (the 13e plan
+  authored — the reminder note at its top, W26 at its opening
+  sitting, the four-row kickoff sweep); L17 BUILT at the review
+  (R1-1 — the dropped routing owned by the orchestrator on the
+  record). Rounds 5–6's rulings all shipped (batches 6–7) or held
+  exactly as ruled.
+- **The ladder:** closed at ROUND 2 — round 1: 1 MAJOR / 2 MINOR /
+  1 NIT fixed + 2 record-only, every fix red-on-old with
+  discriminating reverts; round 2 (fresh reviewer): ALL SIX
+  dispositions HOLD, ZERO new findings.
+- **QUESTIONS:** #49–#52 OPEN for her walk, riding 13e's opening
+  reminder note (her round-7 no-gate ruling); #53 next free.
+  **KnownIssues:** the shell-redo row RESOLVED and removed; the
+  windowless row deepened → 13e; the note-window-clip and A47c
+  rows added → 13e; the find&replace takes-half and 11a
+  copy-doors rows stay 13e's.
+- **Canon:** AppSpec §14's 13g delta (own commit `a285bac`).
+  **Handoff:** `notes/handoffs/phase-13g-handoff.md` (her
+  checklist at the top). **The 13e plan:**
+  `notes/plans/phase-13e-takes-block-management.md`, paste-ready.
+- **The final `/Applications` refresh executed at this closeout**
+  behind a fresh backup under her standing round-7 authorization
+  (review fixes included; relaunched for her).
+
+**THE PHASE IS SEALED.**
