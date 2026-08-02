@@ -648,3 +648,394 @@ the curated half byte-unchanged.
   eligible-destinations list, not simctl's.
 - Rows K1–K6 all SHIPPED (`cf06c91`, `042e11c`); statuses flipped
   in the ledger. Batch 2 spawns next (fresh implementer).
+
+### Batch 2 record — the formatting set (2026-08-02, a fresh Opus implementer)
+
+**Counts, from this session's own runs** (the "Test run with N tests" line, on
+the final tree): core **1019 tests in 113 suites** passed (from 1016/112: +3
+tests, +1 suite — the callout projection) · Mac **1169 tests in 202 suites**
+(from 1160/201: +9 tests, +1 suite — the formatting-surfaces suite) **with the
+ONE recorded environment-gated red**
+(`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+confirmed BY IDENTITY; NOT patched, per its KnownIssues row's own instruction
+that no patch is allowed without re-running the A47c experiments 13e owns) ·
+the **tutorial spine 51 tests in 7 suites**, green, by TYPE name (the seven
+`Tutorial*Tests` types — `-only-testing:VariorumTests/TutorialWalkTests`
+selects ZERO tests, since the file's suites are named per chapter; recorded so
+the next session does not mistake an empty selection for a green spine) ·
+mobile **14 tests in 4 suites** on the iPhone 17 Pro (run because `Sources/`
+was touched). **NO schema; zero `Sources/VariorumCore/Sync/` lines; zero lines
+near `renderedText`, the export BODY projections or the bridge's join brain**
+— verified by name-only diff (`git diff --name-only` touches no
+`Persistence/`, no `Server/`, no `Bridge/`, no `Features/Export`, and the one
+core file changed is `Queries/TakesQueries.swift`).
+
+**One observation that CORRECTS the record, and it belongs to 13e's sweep.**
+Batch 1 attributed the tripwire to an UNLOCKED login session, which is the
+covariate the KnownIssues row names. **This session's runs were all on a
+session reporting LOCKED** (`CGSSessionScreenIsLocked = 1`, checked before and
+after the full Mac run) **and the tripwire fired anyway.** So "unlocked
+sessions" is NOT the discriminator — the row's own covariate is refuted by two
+data points now pointing opposite ways. Recorded rather than re-theorized: the
+A47c re-run 13e owns is the only honest way to settle it, and this is one more
+reason it is owed.
+
+**K8 stopped at its proposal gate as briefed** — the proposal is the last
+section of this record, and nothing of it was built.
+
+---
+
+#### K7 — the formatting toolbar, in the bottom bar · SHIPPED
+
+`App/…/Features/Formatting/FormatBar.swift` — one small view, rendered by
+BOTH bars (`CommitBar.postCluster`, `TakesBottomBar.postCluster`).
+
+**Why both bars, stated because the ledger row said only "the bottom bar":**
+the eight acts are `takesAccess: .native` — they run on whichever surface holds
+the keyboard — so a visible formatting toolbar in Write's bar and not in the
+boards' would privilege Write in exactly the way R118 forbids, and the two
+bars have shared one grammar since R6-2. The registry walk enforces it either
+way: `theBottomBarsRenderExactlyTheDeclaredBarDoors` compares the UNION of the
+two bars' tables against the `.bottomBar` door set.
+
+**It renders EIGHT acts, not the ledger's "seven"** — the ledger's count
+predates 13g batch 4's Add Link, and `FormatBar.renderedCapabilities` is
+derived from `MarkdownActs.rows` rather than re-listed, so rendering seven of
+eight would have been a second list that could drift from the menus. (Build-
+time call, #54(a).)
+
+**The one-brain claim, made structural.** `ShellActions.applyFormat`'s body
+moved onto **`MarkdownActs.fire(_:status:in:)`**, and the bar's buttons call
+that — so the act, its refusal, its LAST-FIRST edit ordering, its single undo
+group and its first-responder targeting rule are literally the menu's. The
+context menu keeps its own door, deliberately: a right-click already knows the
+view it happened in. `fire` takes its window as a defaulted parameter
+(`NSApp.keyWindow`) for ONE reason — a headless test host's window is not the
+key window, and a door whose target cannot be named in a pin would have to be
+trusted instead of proven.
+
+**The face.** The bar's grammar is quiet clickable words (R101), so these are
+words set in the format they apply — a bold **B**, an italic *I*, a struck S, a
+monospaced backtick, "link", an `H ▾` menu carrying the three heading sizes,
+`•`, `☐`. Verbs and chords ride `.help` FROM the registry (so a tooltip can
+never claim a chord the capability does not declare), and the ⌘/ helper gains
+a row naming the bar beside the menu paths — WT-1's lesson applied to a door
+that would otherwise be discoverable only by looking at it.
+
+**Self-contained, because she said she may remove it:** the file, two call
+lines, the `.bottomBar` door on eight capabilities, one helper row. Nothing
+else knows it exists.
+
+**Red-on-old, two reverts, each verified and checksum-restored:**
+
+| # | Revert | Result |
+|---|---|---|
+| A | `FormatBar.renderedCapabilities` returns a hand-written subset (`.prefix(4)`) | RED, exactly discriminating: `theToolbarRendersEveryDeclaredFormattingActInOrder` fails on the list and on all four missing ids in BOTH bars, and the registry walk's `theBottomBarsRenderExactlyTheDeclaredBarDoors` fails with it — four declared bar doors unrendered |
+| B | `MarkdownActs.fire`'s no-target guard returns silently instead of speaking | RED: `theToolbarsButtonFiresTheMenusOwnDoorAndSpeaksWhenItCannot` fails on the status expectation — the door goes silent, which is the exact P-2 failure |
+
+`FormatBar.swift` md5 `3dcb484fe1c0190a7f1cf8bd1d47d3df`, `MarkdownActs.swift`
+md5 `cefeda936f5b217fa1c10bbfa6bdc785`, both matched after restore.
+
+**One thing a reviewer should check by hand when the app is next open** (it is
+pinned through a real window and a real first responder, but the last inch is
+AppKit's): pressing a toolbar button while the caret is in the editor, to see
+that clicking the button does not move first responder off the text surface.
+With Full Keyboard Access off — the default — an `NSButton` does not accept
+first responder on a click, so the keyboard stays where it was; and the
+failure mode if that is ever wrong is HONEST rather than silent (the door
+speaks `noTargetNote` instead of formatting the wrong thing).
+
+---
+
+#### K9 — callout frames render in Take mode · SHIPPED
+
+Her instruction was *"callouts are supposed to be added to take mode as
+well"*, and the finding underneath it is worth stating: the DOOR has routed
+from the boards since 13c R2-2, so setting a frame from a take card already
+wrote the right row — **and nothing the boards read carried the presentation
+at all**, so the act changed a row and nothing on the glass. This row is the
+read half.
+
+- **Core:** `Queries.TakesProjection` gains `presentations`, filled by
+  `blockPresentations` — the SAME query Write's decoration layer has always
+  used, so the two surfaces cannot disagree about which blocks are framed or
+  in what colour (pinned equal). It rides the projection rather than a fifth
+  observation for the reason `unplacedOrigins` does: the board already
+  re-reads on exactly the writes that change it, and the read is cost ∝ the
+  post.
+- **The model:** `TakesViewModel.calloutFrame(_:)` — the block's frame or nil,
+  with the same fail-open `kind` check the editor's overlay applies, so a
+  future non-callout presentation kind draws nothing rather than being drawn
+  as a callout.
+- **The face:** `TakesCalloutFrame` (a `ViewModifier`) wraps `articleRow`'s
+  WHOLE row — the article cell, its bloom in every fan style, and the margin
+  rail — because the ruled shape is one frame around the block's whole takes
+  region, and in margin grid the takes are out in the rail. An unframed block
+  takes the `else` branch, so its layout is byte-for-byte what it was.
+
+**Mechanism and P-8:** a SwiftUI background shape, never a TK2 rendering
+attribute (Write's own frame is an overlay VIEW for the same reason). The
+colour resolves through `CalloutPalette`, so a new palette colour reaches both
+surfaces at once. **R17's white gap is obtained from the layout rather than
+from arithmetic:** the article's `LazyVStack` spaces rows by 6 and the frame
+pads by 5, so two adjacent framed blocks keep a 6pt lane of surface between
+them — the same promise `BlockDecor.verticalPad` computes in Write.
+
+**Red-on-old, two reverts, each verified and checksum-restored:**
+
+| # | Revert | Result |
+|---|---|---|
+| C | drop `presentations:` from `Queries.takesProjection` | RED on all three core pins by name (the map reads `[:]` against the editor feed's real frame); the plain-block and slot expectations stay green — the revert is exactly the missing read. `TakesQueries.swift` md5 `0b14f16a1f600e997c320cfaa0e213e8` matched |
+| D | `calloutFrame` returns the raw presentation with no `kind` check | RED: `aFramedBlocksTakesRegionWearsItsFrameAndAPlainBlocksDoesNot` fails on the foreign-kind case (`someFutureKind` would be drawn as a callout). `TakesViewModel.swift` md5 `38cae7d25aece871142c2e62ea95fdec` matched |
+
+**Scope, stated as a build-time call (#54(b)):** the frame renders in **Take
+mode**, which is her instruction's letter and the ledger row's. Lenses and
+Compare are not touched — their columns have no single "takes region" (Compare
+spans posts), and inventing a frame geometry there would be inventing product
+behaviour. Their callout DOORS are unchanged and still work.
+
+---
+
+#### K10 — the inline-code chip · SHIPPED
+
+Her ruling: a faint per-voice TINTED CHIP hugging exactly the span, never
+block-wide, geometry visibly distinct from callout frames.
+
+- **The editing faces** (`MarkdownStyling`): one `.backgroundColor` over the
+  WHOLE span — backticks included, because they are part of what she typed and
+  a chip stopping short of them would leave two dimmed ticks floating outside
+  their own tint (#54(c)). It is an ordinary storage attribute like every
+  other attribute this file writes (never a TK2 rendering attribute), so it
+  **hugs the glyph run by construction** — no geometry, nothing to keep in
+  sync with layout, and display == stored is untouched (attributes only). The
+  clear loop removes it over the face's own ranges, so a deleted backtick
+  leaves no tinted ghost.
+- **Read's two faces:** the paged reader (`PagePaginator.applyRun`) and the
+  flow (`FlowParagraph.container`) tint the code RUN — Read hides the markers
+  (F-5), so there the run IS the span. Both take the tint as a DEFAULTED
+  parameter, so every existing caller and pin composes exactly as it did.
+- **The tokens:** `VoiceTokens.codeTint` in all four voices; and because the
+  reading page's identity is deliberately voice-independent (R2 — only the
+  room around it follows the voice), `ReadingPageTokens.codeTint` is the
+  page's own, not either voice's (#54(d)).
+
+**This also closes a recorded 13g look finding** (batch 2's item 1): in the
+TERMINAL voice the prose is already monospaced, so before this only the dimmed
+backticks distinguished code at all.
+
+**Red-on-old, three reverts, each verified and checksum-restored:**
+
+| # | Revert | Result |
+|---|---|---|
+| E | drop the `.backgroundColor` write from the face's `.code` branch | RED: `aCodeSpanCarriesTheChipAndTheProseAroundItCarriesNone` fails on all three span offsets; the font/marker pins stay green |
+| F | drop `removeAttribute(.backgroundColor, …)` from `restyle`'s clear loop | RED, exactly discriminating: `removingTheBackticksClearsTheChip` fails on all five offsets — the tint survives over text that is no longer code — and NOTHING else in the suite moves |
+| G | drop the paginator's `.backgroundColor` write | RED: `readsPagedFaceTintsTheCodeRunAndNothingElse` fails on the chip while its marker-hiding expectation stays green |
+
+`MarkdownStyling.swift` md5 `1edb202722fdf16b5f832cebeec8c436`,
+`PagePaginator.swift` md5 `2d3a7f0e62ad52c20b031ae38f631f61`, both matched
+after restore.
+
+##### THE SWATCHES — the default that shipped, and the alternates, PROPOSE-ONLY
+
+No visual loop was run (recorded honestly rather than implied): the only new
+pixels are a background behind a few characters and a wash behind a block, and
+13g batch 2's own record establishes that this project's offscreen dark
+renders resolve the wrong appearance — so a dark screenshot would have been
+misleading and a light one would have shown what the hex values already say.
+The numbers below are what she would flick, stated against the surface each
+chip actually sits on.
+
+**Shipped defaults** — each a NEUTRAL tint of the voice's own room, deliberately
+not a member of the callout palette's five pastels (blue · green · sand ·
+violet · rose), so the two never read as the same language:
+
+| where | surface it sits on | chip | the step |
+|---|---|---|---|
+| terminal light | `0xFBFBF7` | **`0xE9EBE2`** | a warm grey-green, ~7% down from the paper |
+| terminal dark | `0x0C0D0C` | **`0x1E211E`** | a lift to just past the `line` token (`0x242624`) |
+| study light | `0xFFFFFF` | **`0xF2EDE1`** | the study voice's own warm paper, ~6% down from white |
+| study dark | `0x14120F` | **`0x241F18`** | a warm lift, level with the voice's `card` (`0x1C1915`) |
+| reading page light | `0xFFFDF6` | **`0xF3EEE0`** | the page's paper, warmed |
+| reading page dark | `0x171511` | **`0x241F18`** | the same warm lift the study dark chip takes |
+
+**Alternates, for her flick (nothing is built for these — each is one hex per
+line):**
+
+1. **QUIETER (about half the step):** terminal light `0xF1F2EC` · terminal
+   dark `0x171A17` · study light `0xF8F4EC` · study dark `0x1D1913`. Reads as
+   a breath rather than a chip; the risk is that in the terminal voice it
+   under-shoots the very finding this row fixes.
+2. **STRONGER (about half again):** terminal light `0xE0E3D8` · terminal dark
+   `0x262A26` · study light `0xEDE5D3` · study dark `0x2C261D`. Unmistakable at
+   a glance; the risk is that a paragraph with several code spans starts to
+   look striped.
+3. **ACCENT-TINTED rather than neutral** (the voice's accent at ~8% over the
+   surface): terminal light `0xEDF3EF` · study light `0xEDF1F5`. Prettier and
+   more "of the voice"; the cost is that it moves toward the callout palette's
+   register, which is exactly the distinction her ruling asked us to keep — so
+   it is offered last.
+
+A fourth axis exists if she wants it and is deliberately unbuilt: a thin
+rounded outline instead of a fill. It is the one shape that cannot ride a text
+attribute (it needs geometry), so it would be an overlay pass over the code
+spans — real work, and worth naming only if the fill reads wrong to her.
+
+---
+
+#### K8 — THE PROPOSAL GATE (Tab-indented / nested lists; NOTHING BUILT)
+
+**The question.** Her ruling: *"we should allow indented lists and it should
+happen when you click tab"*, with sitting Q3 ruling the unindent door: **⇧Tab
++ Format ▸ Indent/Outdent menu rows**. This is the ONE row of the batch that
+extends the STORED vocabulary, because the tokenizer's shipped rule is that a
+line-leading construct must begin at the line's FIRST character — 13g batch 2
+recorded the consequence and named this as the widening that would need her
+word.
+
+**What follows is the proposal only. The architect rules; then the Domain half
+gets built.**
+
+**(1) THE INDENT UNIT — recommended: TWO SPACES per level.**
+
+Options weighed: two spaces · four spaces · a literal TAB character.
+
+- **Two spaces is exactly the width of the `- ` lead**, so a nested item's
+  marker lines up under its parent's first word — which is what an indented
+  list looks like, and what CommonMark's own content-column rule produces for
+  a `- ` list. It therefore round-trips as REAL nesting in every markdown
+  renderer that will ever see her exported `.md` or the bridge's pushed body.
+  (A checkbox parent behaves the same: its marker is still `- `; the `[ ]` is
+  content.)
+- **Four spaces** is the conservative universal, but it over-indents on screen
+  and, outside a list context, CommonMark reads four leading spaces as an
+  indented code block — a shape this app has no vocabulary for.
+- **A TAB character** makes the on-screen indent depend on the text view's tab
+  stops rather than on the text, which differs between the two voices' fonts
+  and is not something "display == stored" can promise anything about; and a
+  file mixing tabs and spaces becomes ambiguous to tokenize.
+
+**Recommendation: two spaces.** Tab-the-key always inserts the two-space unit.
+
+**(2) WHAT THE TOKENIZER READS — recommended: leading spaces AND tabs, level =
+tabs + floor(spaces / 2), UNCAPPED.**
+
+Reading tabs too costs ~3 lines and means a list pasted or imported from
+elsewhere (11b's import path) simply works; her own tabs are never rewritten,
+because the face only ever writes attributes. The alternative — spaces only —
+is simpler and leaves tab-indented imports rendering flat.
+
+**No cap on what is READ**, because the stored text is the truth and refusing
+to style text she typed would be a lie; an odd space count (three spaces) is
+legal and simply lands between levels, which is exactly what the stored text
+says. **The widening is deliberately LIST-ONLY:** `"  # heading"` stays plain
+text, so 13g batch 2's shipped pin (`headingsRunOneToThreeAndNeedTheirSpace`)
+stays green and honest — her ruling is about lists.
+
+**The consequence to state plainly: ZERO stored bytes change anywhere, but
+text that used to render as prose will start rendering as a list.** Any line
+in any existing note that already begins with spaces + `- ` becomes a styled,
+Read-formatted list item. That is the ruling's intent; it is named here
+because it is a change to what she will SEE in notes she wrote before it.
+
+**(3) DEPTH ON SCREEN — recommended: Read INDENTS per level, one glyph,
+clamped at 6 levels.**
+
+`MarkdownRendering.LineStyle.bullet`/`.checkbox` gain an indent level; Read
+strips the leading whitespace (it is part of the lead) and applies
+`level × indent` of hanging indent instead — otherwise the spaces AND the
+indent would both show. The glyph stays `•` / `☐` / `☑` at every level:
+alternating glyphs (`•` / `◦` / `▪`) would invent a second visual vocabulary
+and make Read disagree with the editing face, which shows `- ` at every level.
+The VISUAL indent clamps at 6 levels so a runaway nest cannot push text off a
+fixed page; the stored text is not clamped. *(Alternate for her: alternating
+glyphs. One table.)*
+
+**(4) THE CHECKBOX CLICK AT DEPTH — unchanged in kind, and that is the
+answer.** The hit test reads `span.markers[1]` (the box) and requires the
+insertion index STRICTLY inside it; indentation only moves that range right,
+and the tokenizer still splits the markers the same way (`markers[0]` = indent
++ `"- "`, `markers[1]` = the box). Nothing about the two-character target
+changes.
+
+**(5) TAB / ⇧TAB OUTSIDE A LIST LINE — byte-unchanged, by the K5 shape.**
+`insertTab`/`insertBacktab` are overridden on the two surface kinds and call
+`super` unless the caret's own line (or, with a selection, at least one
+affected line) is a list line — the exact
+`insertNewlineContinuingLists(in:ordinary:)` shape, where the ratified
+keystroke runs untouched and the new behaviour is a second ordinary edit.
+There is no `insertTab` override anywhere in the app today, so "unchanged"
+means AppKit's own behaviour, unchanged.
+
+Sub-decisions inside (5), each recommended:
+
+- **Caret OR selection.** With a caret, the caret's line indents wherever the
+  caret sits (indent is a line act, not an end-of-line act like ⏎). With a
+  selection, EVERY affected list line indents and non-list lines are left
+  alone — the `leadPlan` blank-line-skip precedent. If no affected line is a
+  list line, `super` runs and Tab does what it always did.
+- **⇧Tab at level 0 is a no-op that falls through to `super`** — there is no
+  indent to remove, and inventing a refusal for a key that has a standing
+  meaning would be worse than doing what it always did.
+- **THE ONE GENUINELY NEW CALL: what ⏎ does on an EMPTY *nested* item.** Her
+  K5 ruling — *"⏎ on an EMPTY list item removes the lead and exits the list"* —
+  was made when nesting did not exist, so it does not answer this. **Recommended:
+  OUTDENT FIRST** (⏎ on an empty level-2 item makes it a level-1 empty item;
+  ⏎ again at level 0 exits exactly as ruled today). It is the near-universal
+  convention (Notes, Bear, Obsidian, Notion), it makes "finish this sub-list
+  and continue the parent" a two-key flow, and it leaves her ruled behaviour
+  byte-identical at level 0. **The alternative** is the literal reading —
+  exit straight to a plain line at column 0 — which is one rule instead of
+  two but loses the parent list. *(And the continuation half must carry the
+  indent either way: ⏎ at the end of a nested item mints the next lead AT THE
+  SAME LEVEL, or nesting would collapse on every Return.)*
+
+**(6) THE MENU ROWS AND THEIR KEYS — recommended: two new capabilities,
+`.formatIndent` / `.formatOutdent`, declared with `.menuBar` + `.contextMenu`
+and `shortcutLabel: nil`.**
+
+Tab MUST NOT be declared as a shortcut label: the registry walk
+(`everyShortcutLabelHasExactlyOneKeyWiring`) would then require a menu key
+equivalent for it, and binding ⇥ as a menu key equivalent steals Tab from every
+control in the app. The keys live in the surfaces' `insertTab`/`insertBacktab`
+overrides, exactly as ⏎'s does. The discoverability guards are satisfied
+deliberately rather than incidentally: the helper's Formatting group gains a
+row stating both doors in prose ("Tab / ⇧Tab inside a list, or Format ▸
+Indent / Outdent"), which is what the formatting-door CEILING test
+(`theHelperNamesEveryFormattingDoorIncludingTheKeylessOnes`) requires.
+
+**Deliberately NOT proposed for the toolbar:** Indent/Outdent are not in
+K7's cluster — Tab and ⇧Tab are the primary door, and the bar she already
+called crowded is eight wide.
+
+**Estimated diff when ruled:** `MarkdownSyntax` (the leading-whitespace scan +
+`Span.indentLevel`, ~20 lines), `MarkdownEditing` (an indent/outdent plan +
+the indent-aware `ReturnKey` leads, ~40), `MarkdownRendering` (the level on
+the two list line styles + stripping the whitespace, ~15),
+`MarkdownActs` + the two surfaces (the `insertTab`/`insertBacktab` doors, ~40),
+two registry declarations + two menu rows + one helper row, and the two Read
+faces' indent arithmetic (~10 each) — plus pins on every one of the six
+decisions above and a red-on-old revert per behaviour.
+
+---
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` is UNTOUCHED — #54 is still free.** The four
+  build-time calls this batch made are named in the record above as
+  #54(a)–(d); they are written into the bundle at the batch that CLOSES the
+  phase's questions, exactly as #53 was written once for batch 1, so the
+  entry lands complete rather than being edited twice. Say the word if you
+  want #54 opened now instead.
+- **K8 is the only owed decision.** K7, K9 and K10 are ruled, built, pinned
+  and committed (`1324def`).
+- **No visual loop was run** — the reasoning and the full swatch table are in
+  the K10 section, with three alternates per voice as a propose-only set.
+- **Two hand-checks for the next open app**, both named above: the toolbar
+  button vs. first responder (K7), and a framed block in each of the four fan
+  styles (K9 — the margin-grid case is the one where the frame grows to
+  include the rail).
+- **The spine's selector:** `-only-testing:VariorumTests/TutorialWalkTests`
+  selects ZERO tests. The seven suites are types
+  (`TutorialBookShapeTests`, `TutorialDoorTests`, `TutorialWritingActsTests`,
+  `TutorialTakesActsTests`, `TutorialStructureActsTests`,
+  `TutorialLookingActsTests`, `TutorialLibraryActsTests`).
