@@ -612,10 +612,17 @@ struct LibraryCatalogView: View {
 ///     chosen take is archived. A snippet that goes to the next block in
 ///     that corner is a display aid behaving conservatively, not a second
 ///     rendering brain — `renderPost` remains the one that matters;
-///   · the books are CURATED memberships. A smart book's membership is
-///     derived by walking its filter, which is what the membership chip does
-///     for ONE note and must not be done for forty rows (the `PaneHost`
-///     one-shot's stated reason).
+///   · **the books are CURATED memberships PLUS the smart books that collect
+///     the note** (13k K4 — her ruling reversing the shipped curated-only
+///     card: *"the number of specifically defined smart books you have is
+///     probably small, no? you still have to choose to deliberately create a
+///     smart book"*). The earlier reading — that a smart walk "must not be
+///     done for forty rows" — was right about the OBVIOUS query and wrong
+///     about the necessary one: `Queries.smartBookMembership` drives from the
+///     PAGE (a `CROSS JOIN` over its ids, one statement per smart book) and
+///     is therefore ∝ books × rows on screen and FLAT in corpus, measured at
+///     10× and pinned on the plan. A 200-row page costs 0.15 ms at her one
+///     smart book, one-shot per listing load.
 enum NoteCards {
     struct Card: Equatable {
         var snippet: String = ""
@@ -680,6 +687,18 @@ enum NoteCards {
             arguments: [json])
         for row in books {
             result[row["post_id"] as String, default: Card()].books.append(row["name"])
+        }
+
+        // 13k K4: the smart half, through the ONE page-driven read. Curated
+        // names come FIRST (a membership row is a decision she made; a smart
+        // match is one the filter made), each half already in its own
+        // alphabetical order, and a name appearing in both halves shows ONCE
+        // — a card row reading "Ideas, Ideas" is worse than the rare
+        // ambiguity of two same-named books (a build-time call, #53(l)).
+        for (postID, names) in try Queries.smartBookMembership(db, postIDs: postIDs) {
+            var merged = result[postID, default: Card()].books
+            for name in names where !merged.contains(name) { merged.append(name) }
+            result[postID, default: Card()].books = merged
         }
         return result
     }

@@ -144,9 +144,9 @@ The phase's rulings all landed in that session, recorded same-turn:
 
 | Row | Item (ruling, her words where quoted) | Batch | Status |
 |-----|----------------------------------------|-------|--------|
-*(Batch 1 status, 2026-08-02: **K1 K2 K3 K5 K6 SHIPPED**; **K4 stopped at its
-proposal gate** — mechanism + measurements in the batch-1 record below, wiring
-awaits the architect's ruling.)*
+*(Batch 1 status, 2026-08-02: **K1 K2 K3 K4 K5 K6 ALL SHIPPED** — K4 stopped
+at its proposal gate, was APPROVED as proposed, and was wired in the
+continuation; both halves are in the batch-1 record below.)*
 
 | K1 | **The #52(a) retirement:** literal "Untitled" is a TITLE again — only a BLANK/nil title counts as no title; NO sweep (*"i can delete them or rename them myself"*); the ⌘N nil-mint half STANDS (new notes still store no title and show dates until named) | 1 | pending |
 | K2 | **Nameless pools show their created day** (*"i think pools can show their created day, i think that would be helpful"*) — the `DisplayTitle` chain gains the pool's `created_at` local-day fallback; pools still have no `entry_date` | 1 | pending |
@@ -220,9 +220,9 @@ counts by the architect's own runs at every acceptance)*
 ### Batch 1 record — the fully-ruled set (2026-08-02, a fresh Opus implementer)
 
 **Counts, from this session's own runs** (the "Test run with N tests" line, on
-the final tree): core **1010 tests in 111 suites** (from 1001/110: +9 tests,
-+1 suite — the ⏎ rule) · Mac **1157 tests in 200 suites** (from 1139/197:
-+18 tests, +3 suites) **with the ONE recorded environment-gated red**
+the final tree, AFTER K4's wiring): core **1016 tests in 112 suites** (from
+1001/110: +15 tests, +2 suites — the ⏎ rule and the smart-membership read) ·
+Mac **1160 tests in 201 suites** (from 1139/197: +21 tests, +4 suites) **with the ONE recorded environment-gated red**
 (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion` —
 this session ran on an UNLOCKED login session, the covariate its KnownIssues
 row names; NOT patched, per that row's own instruction that no patch is
@@ -233,9 +233,10 @@ in 4 suites** (run because `Sources/` was touched) · the tutorial spine
 export BODY projections or the bridge's join brain** — the only export edit
 is a FILENAME (K2) and a heading rule (K1), both title-side.
 
-**K4 STOPPED AT ITS PROPOSAL GATE as briefed** — mechanism designed and
-MEASURED, nothing wired. The proposal and its numbers are the last section
-below.
+**K4 stopped at its proposal gate as briefed, was APPROVED as proposed
+(architect adjudication 1, `284fa11`), and was WIRED in the continuation.**
+Both halves are recorded below: the gate's mechanism + measurements, and the
+wiring with its own reverts. *Counts above are the FINAL (post-wiring) ones.*
 
 ---
 
@@ -418,7 +419,66 @@ the state she reported. File restored, md5
 
 ---
 
-#### K4 — THE PROPOSAL GATE (mechanism + measurements; NOTHING WIRED)
+#### K4 — WIRED · SHIPPED (the continuation, after the architect's approval)
+
+**The approved mechanism, built exactly as proposed:**
+`Queries.smartBookMembership(_:postIDs:)` beside `readingsContaining` in
+`ShelfQueries.swift` — one statement per live SMART book, restricted to the
+page, reusing `smartMatchSQL` verbatim; **no cap, no async fill** (the
+book-count guard is recorded DECLINED — corpus size is provably not the
+variable). `NoteCards.load` merges it into `Card.books`, and the shipped
+"the books are CURATED memberships" paragraph is rewritten to state the new
+rule, why the earlier reading was right about the *obvious* query and wrong
+about the necessary one, and the measured cost.
+
+**The statement is split out as `smartMembershipSQL(_:)`** (internal, not
+public) for ONE reason: the P1 pin runs `EXPLAIN QUERY PLAN` over the REAL
+statement rather than a copy of it that could drift from what ships.
+
+**The P1 pin is the PLAN, not a clock — stated, since the architect left the
+call to me.** The gate's measurement already established the numbers; a
+timing pin would restate them noisily and flakily, while what *makes* them
+true is the join ORDER. So `thePAGEDrivesAndTheContainerIsAPrimaryKeySeek`
+asserts three things about the shipped statement's plan: the page is the
+outer loop (`SCAN j VIRTUAL TABLE …` first — SQLite names the ALIAS, which
+the pin's comment records), the container is reached by
+`sqlite_autoindex_container_1`, and `idx_container_kind` does **not** drive
+it. That is precisely the regression the gate caught, so the pin guards
+precisely it.
+
+**Red-on-old, two reverts, each verified and checksum-restored:**
+
+| # | Revert | Result |
+|---|---|---|
+| J | `smartMembershipSQL` rewritten to the `FROM container c WHERE c.id IN (SELECT value FROM json_each(?))` shape | RED on all three plan expectations — the plan drives from `SEARCH c USING INDEX idx_container_kind (kind=?)`, i.e. the measured corpus scan. `ShelfQueries.swift` restored, md5 `b943bf0c44e16ded8897ba3dddf7e6cc` matched |
+| K | drop the `smartBookMembership` merge from `NoteCards.load` | RED: `aCardNamesCuratedBooksFirstThenTheSmartOnesThatCollectIt` fails on the smart-only note (nil books) and the both-books note (`["hand-made"]` only). `LibraryCatalogView.swift` restored, md5 `5084231b9cdfc54586a5cb012c2e088b` matched |
+
+**What else the pins cover.** Core
+(`Tests/VariorumCoreTests/SmartBookMembershipTests.swift`, 6 tests): the page's
+notes name their books in the readings listing's own `(name, id)` order; **the
+bounded read AGREES with `readingsContaining` row for row** (otherwise the card
+and the membership chip would tell one note two different stories); an ARCHIVED
+note matches no smart book (the ambient-view rule, inherited rather than
+re-decided); a malformed spec is skipped fail-closed and an empty page reads as
+nothing; and a note NOT on the page is never reported, which is the whole point
+of the bound. Mac (`NoteCardSmartBooksTests`, 3 tests): the curated half is
+byte-unchanged, the smart half reaches the row, curated names come first, a
+name in both halves shows once, and the snippet half is untouched.
+
+**One build-time call added to the OPEN bundle — QUESTIONS #53(l):** curated
+first then smart, each alphabetical within itself, with a name appearing in
+both halves shown ONCE. Book names have no uniqueness (AppSpec §7), so "Ideas"
+curated + "Ideas" smart is reachable; a card row reading "Ideas, Ideas" seemed
+worse than the rare ambiguity. Alternatives (one merged sort; show both) are on
+the entry.
+
+**One implementation note worth keeping:** `Tag` is ALSO a Swift Testing type,
+so both new suites qualify `VariorumCore.Tag` in their tag-seeding helper. Cost
+me a compile; recorded so it costs the next session nothing.
+
+---
+
+#### K4 — THE PROPOSAL GATE (mechanism + measurements; the record as it stood at the gate)
 
 **The question.** Her ruling reverses #51(c): the Library's Notes cards must
 name SMART books too. The shipped comment says why they did not — *"a smart

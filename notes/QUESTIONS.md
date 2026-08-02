@@ -302,7 +302,7 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
 ## Phase 13k (2026-08-02) — batch 1's build-time calls, bundled for the sitting
 
-53. **2026-08-02 · Phase 13k (batch 1) · THE FULLY-RULED SET IS BUILT — eleven build-time calls, each one line to change, bundled the way #49–#52 were.** Your rulings K1–K6 said WHAT: the literal "Untitled" is a title again, nameless pools show their created day, chips show the leaf, ⏎ continues a list, and the right-click gets a Callout door. They did not say what ⏎ does in the MIDDLE of a list item, or whether a take card's right-click should carry the callout too — those are the calls below. **Nothing here needed a schema change or an operation**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain. The BINDING build record is the 13k plan's batch-1 record.
+53. **2026-08-02 · Phase 13k (batch 1) · THE FULLY-RULED SET IS BUILT — twelve build-time calls, each one line to change, bundled the way #49–#52 were.** Your rulings K1–K6 said WHAT: the literal "Untitled" is a title again, nameless pools show their created day, chips show the leaf, ⏎ continues a list, and the right-click gets a Callout door. They did not say what ⏎ does in the MIDDLE of a list item, or whether a take card's right-click should carry the callout too — those are the calls below. **Nothing here needed a schema change or an operation**, and nothing touches `renderedText`, the export BODY projections or the bridge's join brain. The BINDING build record is the 13k plan's batch-1 record.
 
     **(a) ⏎ continues a list ONLY when the caret is at the line's END.** Your ruling's letter ("⏎ at the end of a texted list line"). So a ⏎ in the *middle* of `- milk and bread` splits the item and the second half gets no bullet. **The alternative:** continue wherever the caret is inside the item, which is what Notes and Bear do — one comparison to widen.
 
@@ -325,6 +325,8 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
     **(j) A nameless pool's EXPORT filename follows the same rule** — `Pools/2026-07-21.md` rather than `Pools/Untitled.md`. The display brain lives in core precisely so a downloaded folder says what the app said (your 13g refinement, applied to the surface #52(c) had left out).
 
     **(k) K1 changes ONE export-facing thing, stated rather than smuggled:** a note whose stored title IS the literal "Untitled" exports as `<date> Untitled.md` again, because that string is a name now. Nameless notes are unaffected — they have been named by their date alone since 11b. **And no sweep runs anywhere**, per your ruling.
+
+    **(l) A note card lists CURATED books first, then the smart ones that collect it — and a name in both halves shows once.** Curated first because a membership row is a decision you made and a smart match is one the filter made; each half is alphabetical within itself. Book names have no uniqueness, so "Ideas" curated + "Ideas" smart is reachable — a row reading "Ideas, Ideas" seemed worse than the rare ambiguity. **The alternative:** one merged alphabetical sort, or show both.
 
     **Status: OPEN — the sitting's walk.**
 

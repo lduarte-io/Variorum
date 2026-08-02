@@ -248,6 +248,78 @@ extension Queries {
         return result.sorted { ($0.name, $0.id) < ($1.name, $1.id) }
     }
 
+    /// **The SMART books collecting each of a PAGE of posts** (13k K4 — her
+    /// ruling reversing the shipped #51(c) curated-only card: *"the number of
+    /// specifically defined smart books you have is probably small, no? you
+    /// still have to choose to deliberately create a smart book"*).
+    ///
+    /// `readingsContaining`'s per-post probe, generalised from ONE post to
+    /// the rows already on screen — same predicate (`smartMatchSQL`, the one
+    /// implementation the assembly, the Pool and the chip share), same
+    /// ambient-view rule (an ARCHIVED post matches no smart book), same
+    /// fail-closed handling of a malformed spec (skipped, never crash).
+    ///
+    /// ── WHY `CROSS JOIN`, AND WHY IT IS NOT A STYLE CHOICE ───────────────
+    /// The obvious shape — `WHERE c.id IN (SELECT value FROM json_each(?))` —
+    /// lets SQLite pick `idx_container_kind` as the driver and **scan every
+    /// post in the corpus** for each book. Measured at the 13k K4 gate: 4×
+    /// slower at 10× the corpus, i.e. cost ∝ corpus, which is exactly the P1
+    /// violation the shipped curated-only comment was right to fear.
+    /// `CROSS JOIN` is SQLite's own join-order directive: the PAGE drives and
+    /// the container is a primary-key seek, so the work is ∝ (books × rows on
+    /// screen) and FLAT in corpus — proven at 10× and pinned on the PLAN
+    /// (`smartMembershipSQL` exists so the pin reads the real statement).
+    ///
+    /// Measured at the gate (200 reps, ms per page load, all books): a
+    /// 200-row page costs 0.15 ms at one smart book and 4.15 ms at
+    /// twenty-five, unchanged at 10× the corpus. It is a ONE-SHOT read per
+    /// listing load — never per keystroke, never per scroll.
+    ///
+    /// Returns post id → the names of the smart books collecting it, in the
+    /// readings listing's own `(name, id)` order.
+    ///
+    /// *Recorded corner:* a `tagsAll` spec costs one EXISTS probe per
+    /// conjunct per row, so a four-tag AND book costs about four times a
+    /// one-tag book. Still flat in corpus.
+    public static func smartBookMembership(
+        _ db: Database, postIDs: [String]
+    ) throws -> [String: [String]] {
+        guard !postIDs.isEmpty else { return [:] }
+        let json = String(
+            decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8),
+            as: UTF8.self)
+        var result: [String: [String]] = [:]
+        for reading in try readings(db) where reading.kind == .smart {
+            guard let spec = decodeSpec(reading.querySpec) else { continue }
+            let statement = smartMembershipSQL(spec)
+            let ids = try String.fetchAll(
+                db, sql: statement.sql,
+                arguments: StatementArguments([json] + statement.arguments))
+            for id in ids { result[id, default: []].append(reading.name) }
+        }
+        return result
+    }
+
+    /// The page-driven membership statement for ONE spec — split out so the
+    /// P1 pin can run `EXPLAIN QUERY PLAN` over the REAL statement rather
+    /// than a copy of it that could drift away from what ships. The first
+    /// argument is always the page's ids as a JSON array.
+    static func smartMembershipSQL(
+        _ spec: SmartQuerySpec
+    ) -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
+        let match = smartMatchSQL(spec)
+        let conditions = (["c.deleted_at IS NULL", "c.archived_at IS NULL",
+                           "c.kind = 'post'"] + match.conditions)
+            .joined(separator: " AND ")
+        return (
+            """
+            SELECT j.value AS post_id
+            FROM json_each(?) j
+            CROSS JOIN container c ON c.id = j.value AND \(conditions)
+            """,
+            match.arguments)
+    }
+
     // MARK: - The catalog search (Library = EVERYTHING, R32; ⌘K's feed, R15)
 
     public struct CatalogHit: Equatable, Sendable {

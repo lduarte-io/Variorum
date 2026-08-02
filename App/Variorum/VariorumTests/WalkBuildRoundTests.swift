@@ -10,12 +10,39 @@
 //
 
 import AppKit
+import ConcurrencyExtras
+import Dependencies
 import Foundation
 import GRDB
 import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
+
+/// The house store harness (each suite file keeps its own — the
+/// `NodSetTests` / `MorningListTests` pattern).
+@MainActor
+private func withStore<T>(
+    _ body: @MainActor (AppDatabase, AppSession) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+    } operation: { @MainActor in
+        try await body(db, AppSession(database: db))
+    }
+}
 
 // MARK: - K3: a chip says the LEAF, and keeps the path's colour
 
@@ -52,6 +79,108 @@ struct TagChipLeafTests {
         // means (the 9d never-re-ripple family).
         #expect(TagChipColor.hue(forPath: "life/goals")
                 == TagChipColor.hue(forPath: "life/goals"))
+    }
+}
+
+// MARK: - K4: a note card names its smart books too
+
+/// Her ruling, 2026-08-02, reversing the shipped curated-only card
+/// (QUESTIONS #51(c)). The bounded read and its P1 plan pin live in core
+/// (`SmartBookMembershipTests`); this is the CARD — that the two halves reach
+/// the row, in the ruled order, with the curated half byte-unchanged.
+@MainActor
+@Suite("K4 — note cards name smart books (13k)")
+struct NoteCardSmartBooksTests {
+    /// `nonisolated` because it runs inside the ops runner's own closure.
+    /// `Tag` is also a Swift Testing type — qualify it, as the house does.
+    private nonisolated static func seedTag(
+        _ ops: Operations, path: String
+    ) throws -> VariorumCore.Tag {
+        var parent: VariorumCore.Tag?
+        for segment in path.split(separator: "/") {
+            parent = try ops.createTag(parent: parent?.id, name: String(segment))
+        }
+        return parent!
+    }
+
+    /// **RED on the pre-K4 code**, where `NoteCards.load` read `reading_post`
+    /// and nothing else.
+    ///
+    /// DISCRIMINATING REVERT (verified): drop the `smartBookMembership` merge
+    /// from `NoteCards.load` and this test fails on its second and third
+    /// expectations — the smart-only note names no book at all.
+    @Test func aCardNamesCuratedBooksFirstThenTheSmartOnesThatCollectIt() async throws {
+        try await withStore { db, session in
+            let (curatedOnly, smartOnly, both) = try await session.runner.run {
+                ops -> (String, String, String) in
+                let stars = try Self.seedTag(ops, path: "stars")
+                let hand = try ops.createReading(name: "hand-made", kind: .curated)
+                let smart = try ops.createReading(name: "starred", kind: .smart)
+                try ops.setReadingQuerySpec(
+                    smart.id,
+                    querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
+
+                let curatedOnly = try ops.createPost(title: "Curated")
+                try ops.addPostToReading(curatedOnly.id, to: hand.id)
+                let smartOnly = try ops.createPost(title: "Smart")
+                _ = try ops.applyTag(stars.id, toPost: smartOnly.id)
+                let both = try ops.createPost(title: "Both")
+                try ops.addPostToReading(both.id, to: hand.id)
+                _ = try ops.applyTag(stars.id, toPost: both.id)
+                return (curatedOnly.id, smartOnly.id, both.id)
+            }
+
+            let cards = try await db.read { database in
+                try NoteCards.load(
+                    database, postIDs: [curatedOnly, smartOnly, both])
+            }
+            // The curated half is byte-unchanged…
+            #expect(cards[curatedOnly]?.books == ["hand-made"])
+            // …the smart half now reaches the row…
+            #expect(cards[smartOnly]?.books == ["starred"])
+            // …and a note in both names the CURATED one first (a membership
+            // row is a decision she made; a smart match is the filter's).
+            #expect(cards[both]?.books == ["hand-made", "starred"])
+        }
+    }
+
+    /// A name appearing in BOTH halves shows once — a card row reading
+    /// "Ideas, Ideas" is worse than the rare ambiguity of two same-named
+    /// books (#53(l)). Names have no uniqueness (AppSpec §7), so this corner
+    /// is reachable.
+    @Test func aNameInBothHalvesShowsOnce() async throws {
+        try await withStore { db, session in
+            let postID = try await session.runner.run { ops -> String in
+                let stars = try Self.seedTag(ops, path: "stars")
+                let curated = try ops.createReading(name: "Ideas", kind: .curated)
+                let smart = try ops.createReading(name: "Ideas", kind: .smart)
+                try ops.setReadingQuerySpec(
+                    smart.id,
+                    querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
+                let post = try ops.createPost(title: "In both")
+                try ops.addPostToReading(post.id, to: curated.id)
+                _ = try ops.applyTag(stars.id, toPost: post.id)
+                return post.id
+            }
+            let cards = try await db.read { try NoteCards.load($0, postIDs: [postID]) }
+            #expect(cards[postID]?.books == ["Ideas"])
+        }
+    }
+
+    /// The snippet half is untouched by K4 — the card's other extra still
+    /// costs its bounded window and nothing more.
+    @Test func theSnippetHalfIsUnchanged() async throws {
+        try await withStore { db, session in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "Snippet")
+                _ = try ops.newBlock(in: post.id, text: "")
+                _ = try ops.newBlock(in: post.id, text: "The second block has words.")
+                return post.id
+            }
+            let cards = try await db.read { try NoteCards.load($0, postIDs: [postID]) }
+            #expect(cards[postID]?.snippet == "The second block has words.")
+            #expect(cards[postID]?.books.isEmpty == true)
+        }
     }
 }
 
