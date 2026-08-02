@@ -148,12 +148,12 @@ The phase's rulings all landed in that session, recorded same-turn:
 at its proposal gate, was APPROVED as proposed, and was wired in the
 continuation; both halves are in the batch-1 record below.)*
 
-| K1 | **The #52(a) retirement:** literal "Untitled" is a TITLE again — only a BLANK/nil title counts as no title; NO sweep (*"i can delete them or rename them myself"*); the ⌘N nil-mint half STANDS (new notes still store no title and show dates until named) | 1 | pending |
-| K2 | **Nameless pools show their created day** (*"i think pools can show their created day, i think that would be helpful"*) — the `DisplayTitle` chain gains the pool's `created_at` local-day fallback; pools still have no `entry_date` | 1 | pending |
-| K3 | **Tag chips display LEAF ONLY** (*"chips should show leaf only"*) — the #52(e) alternative as ruled: leaf shown, full path in the tooltip, color stays keyed on the WHOLE path (two different `…/goals` stay distinct colors) | 1 | pending |
-| K4 | **Note cards show SMART-book membership too** — her ruling reverses the shipped curated-only #51(c). Mechanism is MEASUREMENT-FIRST under P1: smart books are few and deliberately created (her ground); bounded per-row evaluation (per-note tags + profile + entry_date vs each smart spec), measured at design-corpus scale with a corpus-scale guard (cap or async fill) if the numbers say so. **IN-BATCH PROPOSAL GATE:** the implementer proposes mechanism + measurements BEFORE wiring; the architect rules | 1 | pending |
-| K5 | **⏎ list continuation:** ⏎ at the end of a texted list line mints the next lead (`- ` or `- [ ]`); ⏎ on an EMPTY list item removes the lead and exits the list. Ordinary edits through the ordinary input path — ⏎'s ratified STRUCTURAL semantics (open-tail at document end; one_block's newlines-don't-mint; A15's ⇧⏎) are byte-untouched: continuation only adds lead TEXT where the newline landed. Edges the build must pin: document-end open tail; one_block mode; sealed/locked refusal rides the edit path; ⌘Z ungroups cleanly (newline+lead undo together) | 1 | pending |
-| K6 | **The right-click Callout door:** the editor context menu gains the Callout submenu beside Format (today it lives only in the menu-bar Block menu + ⌥⌘C; she went looking for it in the right-click — 2026-08-01). Registry-declared (P-1); same routed transform as every other door (13c R2-2's letter) | 1 | pending |
+| K1 | **The #52(a) retirement:** literal "Untitled" is a TITLE again — only a BLANK/nil title counts as no title; NO sweep (*"i can delete them or rename them myself"*); the ⌘N nil-mint half STANDS (new notes still store no title and show dates until named) | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
+| K2 | **Nameless pools show their created day** (*"i think pools can show their created day, i think that would be helpful"*) — the `DisplayTitle` chain gains the pool's `created_at` local-day fallback; pools still have no `entry_date` | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
+| K3 | **Tag chips display LEAF ONLY** (*"chips should show leaf only"*) — the #52(e) alternative as ruled: leaf shown, full path in the tooltip, color stays keyed on the WHOLE path (two different `…/goals` stay distinct colors) | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
+| K4 | **Note cards show SMART-book membership too** — her ruling reverses the shipped curated-only #51(c). Mechanism is MEASUREMENT-FIRST under P1: smart books are few and deliberately created (her ground); bounded per-row evaluation (per-note tags + profile + entry_date vs each smart spec), measured at design-corpus scale with a corpus-scale guard (cap or async fill) if the numbers say so. **IN-BATCH PROPOSAL GATE:** the implementer proposes mechanism + measurements BEFORE wiring; the architect rules | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
+| K5 | **⏎ list continuation:** ⏎ at the end of a texted list line mints the next lead (`- ` or `- [ ]`); ⏎ on an EMPTY list item removes the lead and exits the list. Ordinary edits through the ordinary input path — ⏎'s ratified STRUCTURAL semantics (open-tail at document end; one_block's newlines-don't-mint; A15's ⇧⏎) are byte-untouched: continuation only adds lead TEXT where the newline landed. Edges the build must pin: document-end open tail; one_block mode; sealed/locked refusal rides the edit path; ⌘Z ungroups cleanly (newline+lead undo together) | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
+| K6 | **The right-click Callout door:** the editor context menu gains the Callout submenu beside Format (today it lives only in the menu-bar Block menu + ⌥⌘C; she went looking for it in the right-click — 2026-08-01). Registry-declared (P-1); same routed transform as every other door (13c R2-2's letter) | 1 | **SHIPPED** (`cf06c91` + `042e11c`) |
 | K7 | **The formatting toolbar — BOTTOM BAR** (*"i think the formatting toolbar should be added to the bottom - if i decide it's too cluttered later i'll remove it then, i think other users would need it though"*): the seven formatting acts as visible buttons riding the bottom bar's standing two-group grammar; every button the SAME registry act as the menu (P-1 — no second brain) | 2 | pending |
 | K8 | **Indented/nested lists — Tab indents** (*"we should allow indented lists and it should happen when you click tab"*): a vocabulary extension — the line-scoped tokenizer's column-0 rule widens to leading-space list lines (Domain: `MarkdownSyntax`/`MarkdownRendering`; face + Read rendering follow; display==stored holds byte-for-byte). UNINDENT door: ⇧Tab + Format ▸ Indent/Outdent rows PROPOSED to her (she knows ⌘[ is taken; she floated *"maybe if you click in it's an option?"*) — **RULED, round 2: ⇧Tab + Format ▸ Indent/Outdent rows** | 2 | pending |
 | K9 | **Callout frames RENDER in Take mode** (her 2026-08-01 instruction: *"callouts are supposed to be added to take mode as well"*) — today the frame draws only in Write's `BlockDecor` overlay; the setting door already routes from the boards (13c R2-2). Shape — **RULED, round 2: ONE frame around the block's whole takes region** (one block, one frame, takes inside it — R16/R27's letter) | 2 | pending |
@@ -175,8 +175,19 @@ continuation; both halves are in the batch-1 record below.)*
   idle-mint rulings are byte-sacred); K6 in
   `EditorTextView.menu(for:)` + the registry declaration. Every
   behavior change red-on-old; the spine rides every run.
-- **Batch 2 — the ruling-gated formatting set: K7 K8 K9 K10.**
-  Spawns only after sitting round 2's rulings land in this file.
+- **Batch 2 — the formatting set: K7 K8 K9 K10** (round 2's rulings
+  all in hand). **K8 carries an IN-BATCH PROPOSAL GATE like K4's**
+  — it is the one row that extends the STORED vocabulary: before
+  building the Domain half, the implementer proposes the exact
+  extension — the indent unit (spaces vs a tab character, and
+  width), depth semantics (unbounded vs capped), Read's rendering
+  of levels, the checkbox click-target at depth, and Tab/⇧Tab
+  behavior OUTSIDE list lines (which must stay byte-unchanged) —
+  and the architect rules before the build proceeds. **K10** ships
+  a defensible default swatch per voice and brings 2–3 alternates
+  as a PROPOSE-ONLY set for her flick (screenshots at the visual
+  loop). **K9** renders as an overlay (P-8: overlays, never
+  rendering attributes).
 - **Batch 3 — the bar: K11 K12.** Spawns after Q1's ruling; visual
   loop screenshots for her flick (propose-only on look details).
 - **The ladder:** ONE cold review at phase end over the combined
@@ -618,3 +629,22 @@ the curated half byte-unchanged.
 - **QUESTIONS #53 (eleven build-time calls) is OPEN and BUNDLED for
   her next sitting** — the away rule; nothing in it gates the
   remaining batches.
+
+### Batch 1 ACCEPTED (2026-08-02 — the architect's own runs, quoted)
+
+- core `Test run with 1016 tests in 112 suites passed` (from
+  1001/110 at open)
+- Mac `Test run with 1160 tests in 201 suites failed after 143.414
+  seconds with 1 issue` — the one issue confirmed **BY IDENTITY**:
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+  (the recorded environment-gated tripwire, unlocked session; NOT
+  patched, per its KnownIssues row). Every other suite green,
+  the tutorial spine's 7 suites included.
+- mobile `Test run with 14 tests in 4 suites passed` — on the
+  **iPhone 17 Pro** simulator: the iPhone 16 Pro destination is
+  silently INELIGIBLE on this runtime (OS 26.2 sims are the
+  eligible set) — the 13d destination-miss trap, caught again by
+  the quoted-run-line rule. Future sessions: pick from xcodebuild's
+  eligible-destinations list, not simctl's.
+- Rows K1–K6 all SHIPPED (`cf06c91`, `042e11c`); statuses flipped
+  in the ledger. Batch 2 spawns next (fresh implementer).
