@@ -1039,3 +1039,43 @@ decisions above and a red-on-old revert per behaviour.
   (`TutorialBookShapeTests`, `TutorialDoorTests`, `TutorialWritingActsTests`,
   `TutorialTakesActsTests`, `TutorialStructureActsTests`,
   `TutorialLookingActsTests`, `TutorialLibraryActsTests`).
+
+### Architect adjudications on batch 2 (2026-08-02, recorded before the continuation)
+
+- **Spot-verified:** `1324def` + `1ad3ee5` present, tree clean; own
+  core run `Test run with 1019 tests in 113 suites passed` matching
+  the implementer's line exactly; the own Mac full run rides at this
+  writing and lands with the acceptance.
+- **K8 RULED — all six calls as recommended, two with riders:**
+  1. **Indent unit: TWO SPACES per level** — approved; the
+     export-round-trip argument is exactly right, and both named
+     hazards (four-space = code block elsewhere; a tab character
+     breaks what display==stored can promise) are real.
+  2. **Tokenizer: spaces AND tabs, level = tabs + floor(spaces/2),
+     uncapped, LIST-ONLY widening** — approved INCLUDING the named
+     consequence: existing lines beginning spaces + `- ` start
+     rendering as lists. That is her ruling's intent, display-only,
+     zero stored bytes changed — and it RIDES THE AUTHOR HANDOFF
+     stated plainly so she sees it before she trips on it.
+  3. **Read: per-level indent, one glyph, visual clamp at 6**
+     (stored uncapped) — approved; the alternating-glyph look goes
+     to her as a propose-only ALTERNATE.
+  4. **Checkbox click-target at depth: unchanged in kind** —
+     approved.
+  5. **⏎ on an empty NESTED item: OUTDENT FIRST** — approved as the
+     platform standard, extending her K5 ruling (byte-identical at
+     level 0, so nothing she ruled changes); the literal
+     exit-to-column-0 alternative goes to her as a lettered call
+     (the PROVISIONAL class).
+  6. **`.formatIndent`/`.formatOutdent` with `shortcutLabel: nil`,
+     helper prose carrying both doors** — approved; declaring ⇥
+     would steal Tab app-wide.
+- **QUESTIONS #54: OPEN IT NOW** — the batch's four named calls
+  (a)–(d) plus (e) the ⏎ outdent-first call and (f) Read's
+  clamp/one-glyph look with its alternating alternate. The register
+  stays current; her walk stays one place.
+- **The tripwire covariate refutation is REAL and lands in
+  KnownIssues** — the row's lock-state theory now carries its own
+  refutation on its face; 13e's A47c re-run starts
+  covariate-UNKNOWN. (Honest recording over re-theorizing —
+  exactly right.)
