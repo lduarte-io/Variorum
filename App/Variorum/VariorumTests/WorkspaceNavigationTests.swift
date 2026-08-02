@@ -309,10 +309,25 @@ struct WorkspaceNamingTests {
         #expect(WorkspaceNaming.label(for: .post("p"), titles: ["p": ""]) == "Untitled")
     }
 
-    @Test func theChipSpeaksOnceAndTheHelpAgrees() {
-        #expect(WorkspaceNaming.backLabel(origin: "Field Notes") == "\u{2190} Field Notes")
+    /// **13k K11:** the spelled-out chip label (`backLabel`) retired with
+    /// the bar's old presentation — the arrow IS the door now — so the
+    /// origin's name moved into the help, and the forward door gained its
+    /// mirror. Both say why they are grey when they are, in the registry's
+    /// own words.
+    @Test func theTwoNavigationDoorsSpeakAndSayWhyTheyAreGrey() {
         #expect(WorkspaceNaming.backHelp(origin: "Field Notes")
                 == "Back to Field Notes (\u{2318}[)")
+        #expect(WorkspaceNaming.forwardHelp(destination: "Orbit")
+                == "Forward to Orbit (\u{2318}])")
+        #expect(WorkspaceNaming.backHelp(origin: nil)
+                == "Nothing to go back to — this is where you started")
+        #expect(WorkspaceNaming.forwardHelp(destination: nil)
+                == "Nothing to go forward to — you haven't gone back")
+        // The greys say what the registry says (one voice, two surfaces).
+        #expect(CapabilityRegistry.capability(.navigateBack).unavailableNote
+                == WorkspaceNaming.backHelp(origin: nil) + ".")
+        #expect(CapabilityRegistry.capability(.navigateForward).unavailableNote
+                == WorkspaceNaming.forwardHelp(destination: nil) + ".")
     }
 }
 
@@ -400,19 +415,22 @@ struct WorkspaceModelTests {
         #expect(Set(workspace.openNotes.ids) == ["p1", "p2"])
     }
 
-    /// 13f batch 5 (W20 b): the chip's collapse became the WHOLE context
-    /// bar's — one fold for the back half and the "in <book>" half together,
-    /// per her ruling. A mechanical rename here; the claim is unchanged.
+    /// **13k K11 retired the whole-bar collapse** — and this pin with it.
+    /// The workspace no longer holds a `contextBarCollapsed` (13f's session
+    /// state) and 13g's WT-2 born-collapsed default is gone: her ruling
+    /// made the bar a constant icon row (*"the collapsing and growing in
+    /// that bar is a little annoying to me"*). The one surviving fold is
+    /// the tag cards', which is a STICKY this-Mac preference rather than
+    /// window state — pinned in `ContextBarShapeTests`.
     ///
-    /// **13g L2 (WT-2) flipped the default** — her ruling: *"the navigation
-    /// back and book icon should default to being collapsed, not expanded,
-    /// and you click to expand them."* This assertion is the pin, and it is
-    /// red on the pre-13g line (`= false`) by construction.
-    @Test func theChipStateIsSessionStateAndStartsCollapsed() {
+    /// What this test now holds is the part of the old claim that survives:
+    /// a fresh workspace carries no navigation state at all.
+    @Test func aFreshWorkspaceHasNothingToGoBackTo() {
         let workspace = WorkspaceModel()
-        #expect(workspace.contextBarCollapsed, "collapsed by default — her WT-2 ruling")
-        workspace.contextBarCollapsed = false
-        #expect(!workspace.contextBarCollapsed)
+        #expect(!workspace.history().canGoBack)
+        #expect(!workspace.history().canGoForward)
+        #expect(workspace.history().origin == nil)
+        #expect(workspace.history().next == nil)
     }
 
     /// Her guarantee, at the layer that could break it: closing a row is
@@ -506,9 +524,21 @@ struct NavigationDoorsTests {
         let openNote = CapabilityRegistry.capability(.openNote)
         #expect(openNote.scope == .app, "a workspace act — no surface is behind another")
         #expect(openNote.shortcutLabel == "\u{2318}\u{21e7}1\u{2013}9")
+        // **13k K11 UPDATED THIS EXPECTATION, deliberately and on the
+        // record:** back and forward gained a `.surface` door — the context
+        // bar's ← and ›. The claim itself is unchanged (every one of these
+        // is a declared menu item); what changed is that two of them are now
+        // ALSO rendered on a surface, and the walk
+        // (`theSurfacesRenderExactlyTheDeclaredSurfaceActs`) is what holds
+        // that half.
+        #expect(openNote.doors == [.menuBar])
         for id in [CapabilityID.openNote, .navigateBack, .navigateForward] {
-            #expect(CapabilityRegistry.capability(id).doors == [.menuBar])
+            #expect(CapabilityRegistry.capability(id).doors.contains(.menuBar))
             #expect(EditorCommands.menuRendered.contains(id), "every shortcut is a menu item")
+        }
+        for id in [CapabilityID.navigateBack, .navigateForward] {
+            #expect(CapabilityRegistry.capability(id).doors == [.menuBar, .surface])
+            #expect(ContextBar.surfaceCapabilities.contains(id), "the bar's own icon")
         }
         // W16's Compare half: a surface door on the peer column.
         #expect(CapabilityRegistry.capability(.openPeerPost).doors == [.surface])

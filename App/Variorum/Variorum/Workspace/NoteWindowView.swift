@@ -65,10 +65,13 @@ struct NoteWindowView: View {
         PaneHost(
             tokens: tokens, session: session, workspace: router.workspace, pane: .primary,
             focused: live, split: false,
-            // No history here (the ruling), so the bar's back half never
-            // renders and this can never be reached.
+            // No history here (the ruling), so the ← and › are grey and
+            // neither can be reached. 13k K11 makes them VISIBLE-and-grey
+            // rather than absent, which is the same honesty the window's
+            // four app-scope greys already carry.
             onBack: {},
-            onToggleCollapse: { router.workspace.contextBarCollapsed.toggle() },
+            onForward: {},
+            onToggleTags: { router.toggleTagChips() },
             onFocus: {},
             // The ascent from a note-only window: it names the book, and the
             // app's navigation TARGET — a full window — opens it and raises

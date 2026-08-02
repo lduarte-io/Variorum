@@ -98,8 +98,8 @@ struct EditorCommands: Commands {
         .openNote, .navigateBack, .navigateForward,
         // 13f batch 4 (W1/A25): the split's.
         .openBeside, .closeSplit,
-        // 13f batch 5 (W20 b): the context bar's fold.
-        .toggleContextBar,
+        // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards' fold.
+        .toggleTagChips,
         // 13f batch 6 (W5): the quick note's File-menu door.
         .quickNote,
     ]
@@ -173,9 +173,9 @@ struct EditorCommands: Commands {
         case .navigateForward: ("]", .command)
         // 13f batch 5 (W20 b). THE COLLISION SWEEP'S RESULT: ⌘⇧I is FREE —
         // no `i` chord of any modifier combination is bound anywhere in the
-        // app (same five places swept as ⌘[/⌘] were). It reads as the
-        // "info about where I am" bar, which is what the bar says.
-        case .toggleContextBar: ("i", [.command, .shift])
+        // app (same five places swept as ⌘[/⌘] were). 13k K12 repointed it
+        // at the one fold her ruling kept: the note's tag cards.
+        case .toggleTagChips: ("i", [.command, .shift])
         // 13f batch 6 (W5). THE COLLISION SWEEP'S RESULT: ⌘⇧N is FREE (the
         // same five places swept as ⌘[/⌘] and ⌘⇧I were). It reads beside
         // its neighbour rather than against it: ⌘N makes a note, ⌘⇧N pops
@@ -526,9 +526,10 @@ struct EditorCommands: Commands {
             Button(verb(.navigateForward)) { router?.goForward() }
                 .keyboardShortcut("]", modifiers: .command)
                 .disabled(!enabled(.navigateForward))
-            // 13f batch 5 (W20 b): the context bar's ONE fold, beside the
-            // navigation it belongs to (the bar's back half IS ⌘[).
-            Button(verb(.toggleContextBar)) { router?.toggleContextBar() }
+            // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards'
+            // fold, beside the navigation it sits with on the bar (whose
+            // ← and › ARE ⌘[ and ⌘]).
+            Button(verb(.toggleTagChips)) { router?.toggleTagChips() }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
                 .disabled(session == nil)
             Divider()

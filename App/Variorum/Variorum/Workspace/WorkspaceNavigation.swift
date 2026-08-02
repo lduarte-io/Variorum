@@ -189,6 +189,12 @@ nonisolated struct NavigationHistory: Equatable {
     /// and therefore nothing on screen).
     var origin: SidebarSelection? { back.last }
 
+    /// Where "›" leads — the mirror of `origin`, added by 13k K11 when the
+    /// forward chevron became a real door. Same shape for the same reason:
+    /// the bar names its destination in the tooltip, and a name needs a
+    /// destination to read.
+    var next: SidebarSelection? { forward.last }
+
     /// Records an ordinary navigation, from ANY door.
     ///
     /// Re-visiting the current destination is a no-op, and that is what
@@ -366,11 +372,29 @@ nonisolated enum WorkspaceNaming {
         return title
     }
 
-    /// The chip's whole sentence — one place, so the help text and the
-    /// label cannot disagree.
-    static func backLabel(origin: String) -> String { "\u{2190} \(origin)" }
+    /// The back door's whole sentence — one place, so the tooltip and the
+    /// registry's own note cannot disagree.
+    ///
+    /// **13k K11:** the spelled-out chip label retires with the bar's old
+    /// presentation (the arrow is the door now), so `backLabel` is gone and
+    /// the ORIGIN moved into this help — where a name is still worth
+    /// having, because an arrow alone does not say where it lands. `nil` ⇒
+    /// the door is grey, and it says why (the registry's `unavailableNote`,
+    /// in the same words).
+    static func backHelp(origin: String?) -> String {
+        guard let origin else { return "Nothing to go back to \u{2014} this is where you started" }
+        return "Back to \(origin) (\u{2318}[)"
+    }
 
-    static func backHelp(origin: String) -> String { "Back to \(origin) (\u{2318}[)" }
+    /// 13k K11's second half — her words: *"after you just went back, i feel
+    /// like you should be able to go forward"*. The ⌘] act's face, and the
+    /// mirror of `backHelp` down to its grey sentence.
+    static func forwardHelp(destination: String?) -> String {
+        guard let destination else {
+            return "Nothing to go forward to \u{2014} you haven't gone back"
+        }
+        return "Forward to \(destination) (\u{2318}])"
+    }
 
     // MARK: - The split (13f batch 4, W1/A25)
 
@@ -392,19 +416,47 @@ nonisolated enum WorkspaceNaming {
 
     // MARK: - The ascent + the bar's own fold (13f batch 5, W20)
 
-    /// The in-line's help. It names what the click DOES (the top book, at
-    /// this note) and where the rest are — the chip is the chooser.
+    /// The book icon's help. **13k K11:** the icon IS the chooser now (the
+    /// spelled-out "in <book>" sentence retired into it), so the help says
+    /// what a click does at each of the three arities her ruling names —
+    /// one book opens, several list, none is grey.
     ///
     /// Takes a NAME and a COUNT rather than the rows themselves: this
     /// vocabulary stays free of the core's model types, exactly as `label`
     /// takes a title map rather than containers.
-    static func ascentHelp(topBook: String, count: Int) -> String {
-        let open = "Open \u{201c}\(topBook)\u{201d} at this note"
-        return count <= 1 ? open : open + " — the title's chip lists all \(count)"
+    static func ascentHelp(topBook: String?, count: Int) -> String {
+        guard count > 0, let topBook else { return "This note isn't in any book yet" }
+        if count == 1 {
+            return "Open \u{201c}\(topBook)\u{201d} at this note (\u{2318}-click to see it listed)"
+        }
+        return "This note is in \(count) books — click to pick one"
+    }
+
+    /// The dropdown's own line, so the icon's help and the list it opens
+    /// cannot disagree about how many books there are.
+    static func ascentListHeader(count: Int) -> String {
+        count == 1
+            ? "This note is in 1 book — open it at this note:"
+            : "This note is in \(count) books — open one at this note:"
+    }
+
+    /// 13k K12 — the ＃ door's two states. Her ruling made folding a
+    /// deliberate, sticky choice, so the door must say which way it goes.
+    static func tagsFoldHelp(folded: Bool) -> String {
+        folded
+            ? "Show this note's tag cards (\u{2318}\u{21e7}I)"
+            : "Fold this note's tag cards away (\u{2318}\u{21e7}I)"
     }
 
     /// The fold's own act, named once (menu item + palette row).
-    static let contextBarVerb = "Toggle Context Bar"
+    ///
+    /// **13k K11/K12 REPOINTED it.** ⌘⇧I used to fold the whole context
+    /// bar; the bar no longer folds — it is a constant icon row — and the
+    /// one fold her ruling kept is the tag cards', with ＃ as its icon
+    /// door. So the key becomes that door's keyboard twin rather than a
+    /// chord with nothing left to do. (The alternative — retiring ⌘⇧I
+    /// entirely — is on the walk register, QUESTIONS #55.)
+    static let tagChipsVerb = "Toggle Tag Cards"
 
     // MARK: - The unfocused pane's own line (13g L5 — WT-5)
 

@@ -143,8 +143,10 @@ struct HelperView: View {
         // still a door, and this is where she looks for it.
         ShortcutGroup(title: "Windows & panes", items: [
             ("⌘⇧1–9", "jump to the 1st–9th note in the sidebar's Open list"),
-            ("⌘[ / ⌘]", "back / forward, in the pane you're in"),
-            ("⌘⇧I", "show or fold the context bar (← where you came from · the book it's in)"),
+            ("⌘[ / ⌘]", "back / forward, in the pane you're in — the ← and › on the "
+                + "context bar are the same two doors"),
+            ("⌘⇧I", "show or fold this note's tag cards (the ＃ on the context bar does "
+                + "it too, and the choice sticks)"),
             ("⌘⇧N", "the quick note — a floating pad, from anywhere"),
             ("View ▸ Open Beside", "put a second note beside this one (right-click a "
                 + "note row for that note; the menu takes the most recent other one)"),
@@ -161,8 +163,10 @@ struct HelperView: View {
         // their rows the same day they ship.
         ShortcutGroup(title: "The note's bars", items: [
             ("tag cards (top bar)", "a note's tags live on the context bar as coloured "
-                + "cards: \u{FF0B} adds one (type it — \u{201C}/\u{201D} nests), \u{2715} takes it "
-                + "off. Folded (\u{2318}\u{21E7}I) they become one \u{FF03} door with the count"),
+                + "cards, showing by default: \u{FF0B} adds one (type it — "
+                + "\u{201C}/\u{201D} nests), \u{2715} takes it off. The \u{FF03} icon folds "
+                + "them away and back (\u{2318}\u{21E7}I does the same), and where you "
+                + "leave it is where it stays"),
             ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
                 + "\u{FF0B} new block below · \u{2212} delete this block"),
             ("note \u{25BE} (bottom bar)", "history (savepoints) · seal / unseal · the "
@@ -329,9 +333,12 @@ struct HelperView: View {
          + "ROW and nothing else (the note is untouched and comes back the next time "
          + "you open it)."),
         ("context bar",
-         "The thin line above a pane saying where you are: ← where you came from, and "
-         + "the book this note sits in (click it to open the book right at this note). "
-         + "It starts folded to its two glyphs; ⌘⇧I — or the chevron — unfolds it."),
+         "The thin line above a pane, always the same four doors: ← back, the book "
+         + "this note sits in (click to open that book right at this note; ⌘-click, or "
+         + "a click when it's in several, lists them), ＃ to fold the tag cards away "
+         + "and back, and › forward. A door with nowhere to go is greyed, not hidden — "
+         + "the row never changes shape. ⌘[ / ⌘] and ⌘⇧I are the same doors on the "
+         + "keyboard."),
         ("star",
          "A shortcut to a note or a book, pinned at the sidebar's top under "
          + "\u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ "

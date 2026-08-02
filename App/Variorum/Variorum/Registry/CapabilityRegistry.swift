@@ -640,15 +640,21 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2318}\u{21e7}1\u{2013}9", takesAccess: nil,
             unavailableNote: "No notes are open yet — open one and it joins the Open list.",
             availability: { ctx in ctx.openNoteCount > 0 ? .act : .unavailable }),
+        // 13k K11: both gain a `.surface` door — the context bar's ← and ›.
+        // The ← has been on the bar since 13f (as a spelled-out chip) and
+        // was never declared there; the › is new with her ruling (*"after
+        // you just went back, i feel like you should be able to go
+        // forward"*). Declaring both is what puts the bar's own doors under
+        // the walk (`ContextBar.surfaceCapabilities`).
         Capability(
             id: .navigateBack, verb: "Back", scope: .app,
-            doors: [.menuBar],
+            doors: [.menuBar, .surface],
             shortcutLabel: "\u{2318}[", takesAccess: nil,
             unavailableNote: "Nothing to go back to — this is where you started.",
             availability: { ctx in ctx.canNavigateBack ? .act : .unavailable }),
         Capability(
             id: .navigateForward, verb: "Forward", scope: .app,
-            doors: [.menuBar],
+            doors: [.menuBar, .surface],
             shortcutLabel: "\u{2318}]", takesAccess: nil,
             unavailableNote: "Nothing to go forward to — you haven't gone back.",
             availability: { ctx in ctx.canNavigateForward ? .act : .unavailable }),
@@ -665,17 +671,21 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "There's no other open note to put beside this one yet — "
                 + "open a second note and it can sit alongside.",
             availability: { ctx in ctx.canOpenBeside ? .act : .unavailable }),
-        // 13f batch 5 (W20 b) — the context bar's ONE fold. Her ruling:
-        // *"i think that chip + visible in line is good, but I think that
-        // you should be able to hide it somehow (even if just with a
-        // keyboard command). i love our uncluttered interface"* — so the
-        // back half and the "in <book>" half hide TOGETHER, through one act
-        // with one key. `always`, deliberately: the door's whole job is to
-        // bring back a bar that is not on screen, so greying it out where
-        // the bar is hidden would be the one state it must work in.
+        // 13f batch 5 (W20 b) — the fold, REPOINTED by 13k K11/K12. It hid
+        // the whole context bar; her 13k ruling retired that (*"the
+        // collapsing and growing in that bar is a little annoying to me"*)
+        // and kept exactly one fold — the TAG CARDS, visible by default,
+        // folded only if she deliberately chooses it. So this act is now
+        // the ＃ icon's keyboard twin, with the same key, and the bar's own
+        // door is declared alongside (`.surface`).
+        //
+        // `always`, deliberately and for the unchanged reason: the door's
+        // whole job is to bring back something that is not on screen, so
+        // greying it where the cards are hidden would fail in the one state
+        // it exists for.
         Capability(
-            id: .toggleContextBar, verb: WorkspaceNaming.contextBarVerb, scope: .app,
-            doors: [.menuBar, .palette],
+            id: .toggleTagChips, verb: WorkspaceNaming.tagChipsVerb, scope: .app,
+            doors: [.menuBar, .palette, .surface],
             // THE COLLISION SWEEP'S RESULT (13f batch 5): ⌘⇧I is FREE —
             // swept across `EditorCommands.keyEquivalent`, every
             // `.keyboardShortcut(` call site in `Variorum/` and `Shared/`,

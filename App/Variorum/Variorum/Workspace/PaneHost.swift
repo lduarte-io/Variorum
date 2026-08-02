@@ -10,7 +10,8 @@
 //  - **Per pane:** the CONTEXT BAR (batch 3 put the back chip in the shell
 //    rather than in `PostDetailView` precisely because "where did I come
 //    from" is the PANE's fact; batch 5 gave it its second half — "in
-//    <book>" — for the same reason, and the two fold as ONE bar), and —
+//    <book>" — for the same reason, and 13k K11 made both, plus the tag
+//    door and a real forward door, one constant icon row), and —
 //    when the pane is NOT focused — a quiet name line, because a focused
 //    pane brings its own masthead and an unfocused one would otherwise be
 //    anonymous. **The difference between a full masthead and a thin name
@@ -42,7 +43,9 @@ struct PaneHost<Content: View>: View {
     /// before the split existed.
     let split: Bool
     let onBack: () -> Void
-    let onToggleCollapse: () -> Void
+    /// 13k K11: the › is a real forward door now — ⌘]'s face.
+    let onForward: () -> Void
+    let onToggleTags: () -> Void
     let onFocus: () -> Void
     /// The ascent (W20 a): open this book, revealed at this note.
     let onOpenBook: (String, String) -> Void
@@ -65,6 +68,13 @@ struct PaneHost<Content: View>: View {
     @State private var tags: [Tag] = []
     @State private var allTags: [Tag] = []
 
+    /// 13k K12: her deliberate, sticky fold — this Mac's own preference,
+    /// read the way every other local UI setting in the app is read
+    /// (`writeHoverHandles`, the paragraph gap, the spellcheck level). Every
+    /// bar in every window observes the same key, so ⌘⇧I and the ＃ icon
+    /// move all of them at once.
+    @AppStorage(TagChipsFold.settingKey) private var tagsFolded = TagChipsFold.defaultFolded
+
     /// The note this pane holds, if it holds one (a scraps container counts
     /// — it is a container with memberships like any other).
     private var noteID: String? { workspace.selections[pane]?.noteID }
@@ -79,23 +89,26 @@ struct PaneHost<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            let history = workspace.history(pane)
             let bar = ContextBar(
                 tokens: tokens,
-                originLabel: workspace.history(pane).origin.map { workspace.label(for: $0) },
+                originLabel: history.origin.map { workspace.label(for: $0) },
+                forwardLabel: history.next.map { workspace.label(for: $0) },
                 books: books,
-                collapsed: workspace.contextBarCollapsed,
                 tagFace: notePostID.map { postID in
                     ContextBar.TagFace(
                         tags: tags, allTags: allTags,
                         onApply: { path in apply(path, to: postID) },
                         onRemove: { tag in remove(tag, from: postID) })
                 },
+                tagsFolded: tagsFolded,
                 onBack: onBack,
-                onOpenTopBook: {
-                    guard let noteID, let top = books.first else { return }
-                    onOpenBook(top.id, noteID)
+                onForward: onForward,
+                onOpenBook: { bookID in
+                    guard let noteID else { return }
+                    onOpenBook(bookID, noteID)
                 },
-                onToggleCollapse: onToggleCollapse)
+                onToggleTags: onToggleTags)
             if bar.hasContent {
                 bar
                 Divider().overlay(tokens.line)

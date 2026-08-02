@@ -158,8 +158,8 @@ continuation; both halves are in the batch-1 record below.)*
 | K8 | **Indented/nested lists — Tab indents** (*"we should allow indented lists and it should happen when you click tab"*): a vocabulary extension — the line-scoped tokenizer's column-0 rule widens to leading-space list lines (Domain: `MarkdownSyntax`/`MarkdownRendering`; face + Read rendering follow; display==stored holds byte-for-byte). UNINDENT door: ⇧Tab + Format ▸ Indent/Outdent rows PROPOSED to her (she knows ⌘[ is taken; she floated *"maybe if you click in it's an option?"*) — **RULED, round 2: ⇧Tab + Format ▸ Indent/Outdent rows** | 2 | **SHIPPED** (the continuation) |
 | K9 | **Callout frames RENDER in Take mode** (her 2026-08-01 instruction: *"callouts are supposed to be added to take mode as well"*) — today the frame draws only in Write's `BlockDecor` overlay; the setting door already routes from the boards (13c R2-2). Shape — **RULED, round 2: ONE frame around the block's whole takes region** (one block, one frame, takes inside it — R16/R27's letter) | 2 | **SHIPPED** (`1324def`) |
 | K10 | **The code tint** (*"code blocks should have their own tint - i'll rule on that"* — inline `` `code` `` SPANS; fenced blocks are wanted-later, NOT here) — **RULED, round 2: a faint per-voice TINTED CHIP hugging exactly the span** (never block-wide — visibly distinct from callout frames); specific swatches proposed at the batch's visual loop for her flick | 2 | **SHIPPED** (`1324def`) |
-| K11 | **The context/nav bar redesign** (pulled from the 13e additions): ALWAYS the compact icon row — her screenshot: ← · book · ＃ · › — no spelled-out back chip, no collapse/grow (*"the collapsing and growing in that bar is a little annoying to me"*); the › chevron becomes a REAL forward door (⌘]'s face — *"after you just went back, i feel like you should be able to go forward"*); "in xyz book" becomes a BOOK ICON (click = the book when exactly one; *"command click on lets you see the list of books (or there's a dropdown if there's several books it could be in)"*); tags placement — **RULED, round 2: the leaf-only chips ride the compact row beside ← book ›, VISIBLE at rest; ＃ is the deliberate fold/unfold door** | 3 | pending |
-| K12 | **Tag cards DEFAULT VISIBLE** (#52(d) flipped: *"tag cards should fold into the bar if you deliberately choose that but it should default to visible"*) — folding becomes a deliberate, sticky user choice, not the bar's default state; reconciled with K11 by the Q1 ruling | 3 | pending |
+| K11 | **The context/nav bar redesign** (pulled from the 13e additions): ALWAYS the compact icon row — her screenshot: ← · book · ＃ · › — no spelled-out back chip, no collapse/grow (*"the collapsing and growing in that bar is a little annoying to me"*); the › chevron becomes a REAL forward door (⌘]'s face — *"after you just went back, i feel like you should be able to go forward"*); "in xyz book" becomes a BOOK ICON (click = the book when exactly one; *"command click on lets you see the list of books (or there's a dropdown if there's several books it could be in)"*); tags placement — **RULED, round 2: the leaf-only chips ride the compact row beside ← book ›, VISIBLE at rest; ＃ is the deliberate fold/unfold door** | 3 | **SHIPPED** |
+| K12 | **Tag cards DEFAULT VISIBLE** (#52(d) flipped: *"tag cards should fold into the bar if you deliberately choose that but it should default to visible"*) — folding becomes a deliberate, sticky user choice, not the bar's default state; reconciled with K11 by the Q1 ruling | 3 | **SHIPPED** |
 
 ## Batch structure (one FRESH Opus implementer per batch, strictly sequential)
 
@@ -1241,3 +1241,238 @@ her call.
   ("like a single indented list item? I think that's fine
   realistically") — recorded on #54's preamble; it no longer needs
   the handoff's flag.
+
+### Batch 3 record — the bar (2026-08-02, a fresh Opus implementer; interrupted by the machine death and RESUMED)
+
+**Counts, from this session's own runs, ALL POST-CRASH** (every pre-death run
+is void by the resume brief, so every number below is from a run made after
+it): Mac **1187 tests in 207 suites** (from 1176/203: +11 tests, +4 suites)
+**with the ONE recorded environment-gated red** —
+`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+confirmed BY IDENTITY, NOT patched per its KnownIssues row · core **1032
+tests in 114 suites** passed (UNCHANGED — the batch touches no `Sources/`
+line) · the tutorial spine **51 tests in 7 suites**, green, by TYPE name.
+**Mobile was NOT run, and that is the honest call rather than an omission:**
+`git status --porcelain` shows zero `Sources/` paths, so the shared core the
+phone compiles is byte-identical to batch 2's — the batch is Mac chrome
+end to end.
+
+**NO schema; zero `Sources/VariorumCore/Sync/` lines; zero lines near
+`renderedText`, the export BODY projections or the bridge's join brain** —
+verified by name-only diff: every path is `App/Variorum/`, plus `.gitignore`.
+
+---
+
+#### THE MACHINE DEATH, and what it cost (recorded because the recovery is
+#### part of this batch's evidence)
+
+Her machine died mid-batch. **The working tree survived byte-for-byte** — all
+five load-bearing files matched the checksums this session had recorded
+before the death, the three new files were present, and the 12 captures were
+intact. What did NOT survive is every test RUN: two background jobs were
+in flight and their results are void.
+
+So the resume did the whole verification again from a clean build: the green
+baseline, **all seven discriminating reverts**, the captures, and the three
+suites. Nothing in this record rests on a pre-death run. One leftover process
+was found — an orphaned DerivedData **Debug** test host from the killed run
+(PATH-discriminated; not her real store, which was not running). Terminating
+it was refused by the permission system, and it turned out not to matter: the
+runner launched beside it and every suite ran clean. Recorded so the next
+session does not assume it must be cleared.
+
+**One thing the death actually proved.** The full Mac run made under a load
+average of ~44 (a VM, Spotlight indexing, and a wallpaper extension all
+competing) had FOUR reds: the tripwire plus three wall-clock budget pins —
+`BookViewTests.realizationCostStaysFlatAsTheReadingGrows`,
+`DivideCeremonyCostTests.openingDerivesOncePerTakeAndNeverOnTheMainThread`,
+and `EditorWindowSmokeTests.rewriteStrategyLatencies`. Before the crash those
+three were checked against **the PRE-BATCH tree** (`8642689`, by stash) and
+failed there identically, with worse numbers — so they were the machine, not
+the batch. The post-crash run at load ~4 confirms it: all three pass, and the
+final quoted run carries only the tripwire. *(The stash round-trip was
+verified by checksum on the way back; the stash list is empty.)*
+
+---
+
+#### K11 — the bar becomes the compact icon row · SHIPPED
+
+Her ruling, whole: **← · book · ＃ · ›**, always, with *"no collapse/grow"*
+and *"it should always look like this"*.
+
+**The shape is a VALUE, not four `if`s.** `ContextBarDoors.iconRow(isNote:)`
+returns the row and `ContextBar.renderedIcons` is what the body iterates —
+so "the row does not change with the state" is a claim a pin can hold, and a
+future edit that hides a door where it cannot act fails a test instead of
+quietly re-growing the bar. That is the whole reason a four-element array
+exists where a `ViewBuilder` would have done.
+
+- **The ← keeps its act and loses its words.** `WorkspaceNaming.backLabel`
+  (the spelled-out chip) is DELETED; the origin's name moved into the
+  tooltip, where a name is still worth having because an arrow alone does
+  not say where it lands. Nothing under it moved: `NavigationHistory`, ⌘[,
+  and `RootView`'s per-pane wiring are byte-unchanged.
+- **The › is a REAL forward door** (*"after you just went back, i feel like
+  you should be able to go forward"*) — ⌘]'s face, on the pane it sits above,
+  focusing that pane first exactly as the ← does, so the key and the icon can
+  never act on different panes. `NavigationHistory.next` joins `origin` as
+  its mirror, and the forward destination joins `WorkspaceModel.titleSubjects`
+  so its name RESOLVES (without that the tooltip reads "Untitled" for every
+  note — the fallback that exists for ids with no row at all).
+- **The "in xyz book" sentence became the BOOK ICON**, with her three
+  arities in one pure function (`ContextBarDoors.bookClick`): one book opens
+  it revealed at this note (the standing W21/membership ascent — reused, not
+  reimplemented: the same `.variorumOpenBookAtPost` broadcast the chip
+  posts), several open a dropdown, ⌘-click opens the dropdown either way, and
+  none leaves the icon **grey rather than gone**, which her ruling names
+  explicitly. `BookChooserOrder.inLine` is DELETED with the sentence it
+  wrote; the ORDER both readers share is untouched.
+- **The whole-bar collapse RETIRES**, and 13g's WT-2 born-collapsed default
+  with it: `WorkspaceModel.contextBarCollapsed` is gone, and there is nothing
+  left for it to mean.
+- **The bar's doors are now DECLARED** (P-1): `.navigateBack` and
+  `.navigateForward` gain a `.surface` door beside their menu one, and
+  `ContextBar.surfaceCapabilities` puts all three of the bar's acts under the
+  registry walk. The ASCENT is deliberately still undeclared — it never has
+  been, here or on the membership chip — and that is a lettered call
+  (#55(i)) rather than something this batch decided quietly.
+
+#### K12 — the tag cards show by default, and the fold sticks · SHIPPED
+
+Her ruling flipped #52(d): *"tag cards should fold into the bar if you
+deliberately choose that but it should default to visible."*
+
+- **The ＃ door MOVED into the bar.** It used to live inside `NoteTagChips`
+  as its folded glyph; it belongs to the constant icon row, not to the
+  variable-width run of chips it hides. `NoteTagChips` now renders cards and
+  their `＋`, and nothing else — it is mounted only when they show.
+- **The fold is STICKY, and it is a THIS-MAC preference** (`TagChipsFold`):
+  local `UserDefaults`, the class the hover handles, the paragraph gap and
+  the spellcheck level live in — never the schema, never synced. Views read
+  it through `@AppStorage`, which is why ⌘⇧I, the ＃ icon and a second
+  window's bar are ONE choice rather than three: `UserDefaults` is the state
+  and every reader observes it. `TagChipsFold.defaultFolded` is the single
+  statement of "visible by default"; the `@AppStorage` default reads it, so
+  the two cannot drift.
+- **⌘⇧I was REPOINTED, not retired** (#55(a)): the bar has no fold left, so
+  the key became the ＃'s keyboard twin — same chord, same always-available
+  rule, `.toggleContextBar` renamed `.toggleTagChips` and verbed "Toggle Tag
+  Cards" in the menu, ⌘K and the ⌘/ helper.
+- **The cards ride AFTER the icons** (#55(c)): chips vary in width, so
+  inside the cluster they would move the › every time she tags something —
+  the same complaint her ruling is about, one layer down.
+
+**A per-window claim was deliberately given up**, and it is worth saying
+plainly: 13f's `twoWindowsKeepTheirOwnStripHistoryAndFold` asserted that two
+windows fold independently. They no longer do — a sticky preference is shared
+by construction — so the test keeps its strip and history claims, loses the
+fold one, and is renamed. A choice that is per-window and forgotten at quit
+is not the deliberate choice she asked for.
+
+---
+
+#### Red-on-old — SEVEN reverts, each verified RED and checksum-restored, ALL RE-RUN AFTER THE CRASH
+
+| # | Revert | Result |
+|---|---|---|
+| A | `ContextBar.renderedIcons` filters `.back` out when there is no history (13f's own shape) | RED: `theIconRowIsTheSameFourDoorsWhateverTheState` — the cold row reads `[book, tags, forward]`. The PURE `iconRow` pin stays green, so the revert is exactly discriminating: it catches the VIEW's shape, which is the claim |
+| B | `bookClick` drops the `bookCount > 1` disjunct | RED: `oneBookOpensSeveralListAndCommandAlwaysLists` — three books `.open` where `.list` is owed |
+| C | `TagChipsFold.defaultFolded` = true | RED on both fold pins, five expectations — the cards would arrive folded, which is exactly the state her ruling flipped |
+| D | `ShellRouter.toggleTagChips` flips a local property instead of the preference | RED: `theKeyAndTheIconMoveTheSameOneChoice` — the key and the icon become two choices |
+| E | `WorkspaceModel.titleSubjects` drops the forward destination | RED: `theForwardDestinationJoinsTheTitlesWeResolve` — the book never resolves, so the › tooltip would say "Untitled" |
+| F | the three registry declarations lose `.surface` | RED on FOUR expectations across three suites — the walk, the fold's declaration, and the navigation-door pin |
+| G | `ContextBar.chipsShown` ignores `tagsFolded` | RED: `theHashDoorFoldsTheCardsAndNothingElse` — the ＃ stops folding anything |
+
+Checksums matched after every restore: `ContextBar.swift`
+`812e7adca450a651e591b9123a425e5b` · `ContextBarDoors.swift`
+`5984124bb90f3adf11b5e36e806957ba` · `ShellRouter.swift`
+`32967860df627e5201516a9498fd842d` · `WorkspaceModel.swift`
+`3c97639b12ad41b649182873450aeaca` · `CapabilityRegistry.swift`
+`0bb41ee0d2954edf7307ca5168457879`.
+
+**E is worth one more line, because its first draft was HOLLOW.** It went
+green under the revert: `titleSubjects` also carries what each pane is
+SHOWING, so the book resolved as the pane's own content and the pin proved
+nothing. The fix was to play out the shell's ADOPTION (`goBack` hands back a
+destination, `RootView` selects it) — which is also what the app does — and
+only then does the book appear through the forward door alone. Recorded
+because a pin that passes on both sides is exactly what the hallucination
+guard says to hunt for, and this one was found by running it rather than by
+reading it.
+
+**THREE shipped expectations were updated deliberately, each on the record**
+(the K1 class — the pin's claim changed because this batch changed it):
+
+| Pin | Was | Now |
+|---|---|---|
+| `WorkspaceNavigationTests.theChipStateIsSessionStateAndStartsCollapsed` (renamed `aFreshWorkspaceHasNothingToGoBackTo`) | the workspace's bar-collapse state, born collapsed (13g WT-2) | that state no longer exists; the surviving half of the claim is that a fresh workspace has no history at all |
+| `…theChipSpeaksOnceAndTheHelpAgrees` (renamed `theTwoNavigationDoorsSpeakAndSayWhyTheyAreGrey`) | `backLabel` + `backHelp` | both doors' help, INCLUDING their grey sentences, and that those sentences match the registry's own `unavailableNote` word for word |
+| `…theNavigationDoorsAreDeclaredAndRendered` | back/forward doors == `[.menuBar]` | `== [.menuBar, .surface]`, with the menu-item half of the claim unchanged for all three ids |
+
+…plus `BookAscentTests.theInLineNamesTheTopPickAndCountsTheRest`, which
+tested a function this batch DELETED; it is replaced by
+`theBooksWordsNowLiveOnTheIconsHelp`, pinning the words that took its place.
+
+---
+
+#### THE VISUAL LOOP — 12 captures, PROPOSE-ONLY
+
+Captured offscreen by `ContextBarCaptureTests` (a real `ContextBar`, rendered
+at 2× on the voice's own room) into a GITIGNORED directory:
+**`notes/plans/phase-13k-batch3-screens/`**
+
+| file | state |
+|---|---|
+| `{terminal,study}-1-one-book-cards-visible.png` | one book · cards showing · ← live · › grey |
+| `{terminal,study}-2-several-books-forward-live.png` | three books · cards showing · BOTH ← and › live |
+| `{terminal,study}-3-no-books-nothing-visited.png` | no books, nothing visited — ←, book and › ALL grey, and the row is the same shape as 1 and 2 (her ruling, visible) |
+| `{terminal,study}-4-cards-folded-with-count.png` | the ＃ carrying `3`, cards folded away |
+| `{terminal,study}-5-untagged-note.png` | a note with no tags — the ＃ live, the `＋` the only card-row content |
+| `{terminal,study}-6-a-place-not-a-note.png` | a PLACE (the shelf): ← and › only |
+
+**Two honest limits.** The captures are LIGHT ONLY — 13g batch 2 recorded
+that this project's offscreen dark renders resolve the wrong appearance, so a
+dark capture would mislead. And the book icon's DROPDOWN is a popover, which
+has no offscreen presentation; it is a hand-check below.
+
+The harness writes into the sandboxed test host's own temp directory and
+prints the path (the host cannot write to the repo, and `xcodebuild` does not
+forward an env var to it — both were tried first, and the file says so). The
+copy-out is one command, named in the file.
+
+**Look details ship at my judgment and are explicitly hers to re-rule**
+(#55(h)): plain glyphs with no capsule outlines (both pre-13k halves wore
+one), her screenshot's own "←" and "›" characters, the system `book` and
+`number` symbols, and the cards set off from the cluster by 6pt.
+
+---
+
+#### Hand-checks for the next open app (the last inch is AppKit's)
+
+1. **The book dropdown**, in both its doors: a plain click on a note in
+   several books, and a ⌘-click on a note in one. The three-way decision is
+   pinned pure; what is not is `NSEvent.modifierFlags` read inside a SwiftUI
+   button action.
+2. **The greys' tooltips.** SwiftUI's `.help` on a `.disabled` button is not
+   guaranteed to surface in AppKit; if a grey ← says nothing on hover, the
+   fix is to move the help onto a wrapper. The words themselves are pinned.
+3. **⌘⇧I with two windows open** — both bars should fold together now, which
+   is the deliberate consequence of the sticky preference (and the
+   per-window claim that was given up).
+
+#### Notes for the orchestrator
+
+- **`notes/QUESTIONS.md` gains #55 — TEN build-time calls**, properly OPEN.
+  **#56 is now the next free number.**
+- **Nothing is owed.** K11 and K12 both shipped; the ledger's statuses are
+  flipped in this commit.
+- **The tripwire's covariate stays UNKNOWN.** It fired again here; batch 2
+  already refuted the lock-state theory, and this batch adds nothing to the
+  theory and did not patch it. 13e's A47c re-run is still the only honest
+  road.
+- **Environment note for the next session:** the wall-clock budget pins
+  (`BookViewTests` realization, `DivideCeremonyCostTests` derivation,
+  `EditorWindowSmokeTests` rewrite latency) are LOAD-SENSITIVE — they fail
+  above roughly load-average 10 and pass below it. Check `uptime` before
+  quoting a full run, and if they are red, run them against HEAD before
+  believing them.

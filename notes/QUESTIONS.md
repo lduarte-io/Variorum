@@ -350,5 +350,29 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
 
     **Status: OPEN — for the walk.**
 
-*(Next free number at authoring time: **#55**.)*
+55. **2026-08-02 · Phase 13k (batch 3) · THE BAR IS REBUILT — ten build-time calls, each one line to change, bundled the way #49–#54 were.** Your rulings K11 and K12 said WHAT: the context bar is always the compact icon row (← · book · ＃ · ›), the › is a real forward door, "in xyz book" becomes the book icon, and the tag cards show by default with ＃ as their deliberate fold. They did not say what ⌘⇧I should do once the bar has no fold left, or where the cards sit relative to the four icons — those are the calls below. **Nothing here needed a schema change or an operation**, nothing touches `renderedText`, the export BODY projections or the bridge's join brain, and the NAVIGATION under the bar is 13f's, byte-untouched (the history arithmetic, ⌘[ / ⌘], the W21 ascent). The BINDING build record is the 13k plan's batch-3 record.
+
+    **(a) ⌘⇧I now folds the TAG CARDS.** It used to fold the whole bar, and your ruling retired that fold — so rather than leave a chord with nothing to do, it became the ＃ icon's keyboard twin (same key, same always-available rule, renamed "Toggle Tag Cards" in the menu and ⌘K). **The alternative:** retire ⌘⇧I entirely, which is one fewer chord and one fewer thing to remember.
+
+    **(b) The four-door row is a NOTE's row; a place wears two.** At the shelf, the library, inside a book or on the recovery surface there is no note, so there is no book icon and no ＃ — just ← and ›. Greying them there instead would render doors that could never act in that context (the standing P-2 rule). Inside a note the row never changes: a note in no books still HAS a book icon, greyed, exactly as you ruled. **The alternative:** four doors everywhere, two of them permanently dead at a place.
+
+    **(c) The cards ride AFTER the four icons, not between ＃ and ›.** Chips vary in number and width, so putting them inside the cluster would move the › every time you add a tag — the same growing-and-shrinking the ruling is about, one layer down. This way the icons are a fixed cluster you can aim at. **The alternative:** cards between ＃ and ›, next to their own door.
+
+    **(d) ⌘-click on a note in ONE book opens the list anyway** (a one-row dropdown), rather than behaving like a plain click. Your words gave ⌘-click the list; with one book the list has one row. **The alternative:** ⌘-click does nothing special when there is only one book.
+
+    **(e) The book dropdown is navigation only.** It lists the books and opens one at this note. Add-to-book, remove, and diverge stay on the masthead's membership chip, which is where they have always lived. **The alternative:** make the bar's dropdown the full chip, and have two of them.
+
+    **(f) The fold is a THIS-MAC preference, so it is shared and it sticks.** Every window's bar and every note read one stored choice, and it survives quitting — a deliberate choice that forgets itself is not a choice. It is stored where the hover handles and the paragraph gap are (local `UserDefaults`), never in the schema and never synced, so it does not travel to the phone. **The alternatives:** per-note, per-window, or a synced setting that follows you to every device.
+
+    **(g) A door with nowhere to go is visible and greyed, with a tooltip that says why** — "Nothing to go back to — this is where you started", in the menu's own words. **The alternative:** hide it, which is what the bar used to do and what made the row change shape.
+
+    **(h) The glyphs are your screenshot's own:** "←" and "›" as characters, the system book and ＃ symbols, all four plain — no capsule outlines (the old back chip and book chip both wore one). A look call, and captures of every state are in the batch record for your flick. **The alternative:** any of it, restyled.
+
+    **(i) The BOOK ASCENT is still not a declared capability.** Back, forward and the tag fold are now declared doors on the bar (so the registry walk covers them); opening a book at a note has never been declared — not here and not on the membership chip that has carried the same act since Phase 13. Declaring it would give it a formal availability rule and a written refusal. **The alternative:** declare it, which is a small addition and a slightly larger register.
+
+    **(j) The ＃ is never grey**, even on a note with no tags — folding an empty card row is where the `＋` lives, so greying it would hide the only way to add a first tag. **The alternative:** grey it until the note has a tag, and reach the `＋` some other way.
+
+    **Status: OPEN — for the walk.**
+
+*(Next free number at authoring time: **#56**.)*
 

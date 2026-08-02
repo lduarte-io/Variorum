@@ -12,9 +12,14 @@
 //  the session's most-recently-visited floats to the top.**
 //
 //  It is ONE pure rule with TWO readers — the chip's popover list and the
-//  context bar's in-line ("in <top pick> & N more") — because the sentence
-//  under the title and the list it opens must not disagree about which book
-//  comes first.
+//  context bar's book door (whose click opens the top pick and whose
+//  dropdown lists them all) — because the door and the list it opens must
+//  not disagree about which book comes first.
+//
+//  **13k K11 retired `inLine`**, the bar's spelled-out "in <top pick> & N
+//  more" sentence: her ruling replaced it with the book ICON, so there is
+//  no in-line left to write. The ORDER below is untouched and is what both
+//  readers still share.
 //
 //  Smart matches are LISTED, not filtered: derived membership IS membership
 //  (her round-10 ruling 2; QUESTIONS #26(h)), and "the books it is in" is
@@ -43,15 +48,5 @@ nonisolated enum BookChooserOrder {
             if a.name != b.name { return a.name < b.name }
             return a.id < b.id
         }
-    }
-
-    /// The context bar's one line: the top pick, plus how many others there
-    /// are. nil when the post is in no book — the bar says nothing rather
-    /// than saying "in no book", which is the masthead chip's job and not a
-    /// reason to grow chrome.
-    static func inLine(_ books: [Reading]) -> String? {
-        guard let first = books.first else { return nil }
-        if books.count == 1 { return "in \(first.name)" }
-        return "in \(first.name) & \(books.count - 1) more"
     }
 }

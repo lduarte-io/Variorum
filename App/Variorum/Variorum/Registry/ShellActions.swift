@@ -409,8 +409,9 @@ struct ShellActions {
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
-        // 13f batch 5 (W20 b): the context bar's fold, typeable.
-        .toggleContextBar,
+        // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards' fold,
+        // typeable.
+        .toggleTagChips,
         // 13f batch 6 (W4): her ruling's "+ ⌘K by name" half.
         .toggleStar,
         // 13f batch 6 (W5): the quick note, typeable like every other door.
@@ -449,7 +450,7 @@ struct ShellActions {
         case .chooseTake: return { dispatch(.takes(.choose)) }
         case .saveChoicesAsLens: return { dispatch(.takes(.saveLens)) }
         case .toggleSeams: return { toggleSeams() }
-        case .toggleContextBar: return { shell.toggleContextBar() }
+        case .toggleTagChips: return { shell.toggleTagChips() }
         case .toggleStar: return { toggleStarForCurrent() }
         case .quickNote: return { shell.quickNoteRequested = true }
         case .restoreTutorial: return { restoreTutorial() }

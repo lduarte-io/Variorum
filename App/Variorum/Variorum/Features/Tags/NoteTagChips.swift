@@ -23,11 +23,15 @@
 //  devices, and applying a new tag never re-ripples the colours of the ones
 //  already there (the never-re-ripple rule the tint mode was built on).
 //
-//  ── IT FOLDS WITH THE BAR ───────────────────────────────────────────────
-//  Collapsed (the default since WT-2) the chips become ONE glyph door
-//  carrying the count — the bar's own grammar, where every half keeps a
-//  glyph so a fold is never a one-way door. Recorded as a build-time call
-//  (QUESTIONS #52): always-visible chips are one line away.
+//  ── 13k K12: THE CARDS ARE VISIBLE BY DEFAULT, AND THE FOLD LEFT THIS
+//     FILE ────────────────────────────────────────────────────────────────
+//  Her ruling flipped #52(d): *"tag cards should fold into the bar if you
+//  deliberately choose that but it should default to visible."* So the
+//  cards render at rest, and the ＃ door that folds them is the CONTEXT
+//  BAR's — it belongs to the constant icon row (← · book · ＃ · ›), not to
+//  the variable-width run of chips it hides. This view therefore renders
+//  the cards and their `＋`, and nothing else: it is mounted only when they
+//  are showing.
 //
 
 import SwiftUI
@@ -78,7 +82,6 @@ struct NoteTagChips: View {
     /// that is not in it CREATES it (through the standing ops), which is
     /// `TagAssignmentViewModel.applyTypedPath`'s long-shipped behaviour.
     let allTags: [Tag]
-    let collapsed: Bool
     /// A typed path — applied (and created on the way) by the caller.
     let onApply: (String) -> Void
     let onRemove: (Tag) -> Void
@@ -88,12 +91,8 @@ struct NoteTagChips: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            if collapsed {
-                foldedGlyph
-            } else {
-                ForEach(tags, id: \.id) { chip($0) }
-                addDoor
-            }
+            ForEach(tags, id: \.id) { chip($0) }
+            addDoor
         }
         .popover(isPresented: $adding, arrowEdge: .bottom) {
             TagChipAdder(
@@ -146,31 +145,6 @@ struct NoteTagChips: View {
         }
         .buttonStyle(.plain)
         .help("Tag this note — type a path (“/” nests: life/goals)")
-    }
-
-    /// Folded: still a door, still says how many (the bar's own rule).
-    private var foldedGlyph: some View {
-        Button { adding = true } label: {
-            HStack(spacing: 2) {
-                Image(systemName: "number")
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                if !tags.isEmpty {
-                    Text(tokens.chromeLabel("\(tags.count)"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                }
-            }
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .overlay(Capsule().stroke(tokens.line, lineWidth: 1))
-            .contentShape(Capsule())
-        }
-        .buttonStyle(.plain)
-        .help(tags.isEmpty
-            ? "Tag this note"
-            : "Tagged \(tags.map(\.path).joined(separator: ", ")) — click to add another")
     }
 }
 

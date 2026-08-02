@@ -241,7 +241,7 @@ struct IndependentWorkspaceTests {
     /// Batch 4 found that was false for WINDOWS (the router was App-level
     /// `@State`, shared by the whole `WindowGroup`). This is the claim made
     /// true: two windows, two Open strips, two sets of histories, two folds.
-    @Test func twoWindowsKeepTheirOwnStripHistoryAndFold() {
+    @Test func twoWindowsKeepTheirOwnStripAndHistory() {
         let registry = WindowRegistry()
         let a = UUID(), b = UUID()
         let routerA = ShellRouter(), routerB = ShellRouter()
@@ -259,10 +259,14 @@ struct IndependentWorkspaceTests {
         #expect(routerB.workspace.history().canGoBack == false,
                 "its own trail — the other window's visits are not its history")
 
-        // 13g L2 (WT-2): born collapsed, so the per-window claim is made by
-        // EXPANDING one — the claim (one window's fold is its own) unchanged.
-        routerB.workspace.contextBarCollapsed = false
-        #expect(routerA.workspace.contextBarCollapsed, "its own fold")
+        // **13k K12 REMOVED THE FOLD FROM THIS CLAIM, deliberately.** The
+        // bar's whole-bar collapse retired with K11, and the one fold that
+        // survives — the tag cards' — is a STICKY this-Mac preference
+        // (`TagChipsFold`), not window state: her ruling made folding a
+        // deliberate choice, and a choice that is per-window and forgotten
+        // at quit is not one. So two windows now share ONE fold ON PURPOSE,
+        // and the per-window claim this test makes is about the strip and
+        // the history, which are unchanged.
 
         // And the app's ONE menu bar reads whichever is key.
         registry.noteKey(a)

@@ -470,7 +470,14 @@ struct RootView: View {
                 router.workspace.focus(pane)
                 router.goBack(in: pane)
             },
-            onToggleCollapse: { router.workspace.contextBarCollapsed.toggle() },
+            // 13k K11: the › is ⌘]'s face, on the pane it sits above —
+            // focus first, exactly as the ← does, so the key and the icon
+            // can never act on different panes.
+            onForward: {
+                router.workspace.focus(pane)
+                router.goForward(in: pane)
+            },
+            onToggleTags: { router.toggleTagChips() },
             onFocus: { router.workspace.focus(pane) },
             // 13f W20(a): the bar's in-line ascends exactly like the chip's
             // link does — one shell decision, two doors.

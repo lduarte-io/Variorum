@@ -208,6 +208,9 @@ struct CapabilityRegistryTests {
             .union(CompareBoardView.surfaceCapabilities)
             // 13f batch 5 (W23): the membership chip's per-book diverge door.
             .union(MembershipChip.surfaceCapabilities)
+            // 13k K11/K12: the context bar's own icon row — ← and › (the
+            // ⌘[ / ⌘] acts, wearing their faces) and the ＃ tag fold.
+            .union(ContextBar.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

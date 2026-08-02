@@ -102,11 +102,17 @@ final class ShellRouter {
         _ = workspace.closeSplit()
     }
 
-    // MARK: - The context bar's fold (13f batch 5, W20 b)
+    // MARK: - The tag cards' fold (13f batch 5's ⌘⇧I, repointed by 13k K12)
 
-    /// ⌘⇧I — her *"even if just with a keyboard command"*. ONE act for the
-    /// whole bar: the back half and the "in <book>" half fold together.
-    func toggleContextBar() {
-        workspace.contextBarCollapsed.toggle()
+    /// ⌘⇧I — the ＃ door's keyboard twin. **13k K11/K12:** the bar itself
+    /// no longer folds (it is a constant icon row), so this key now toggles
+    /// the one fold her ruling kept — the tag cards.
+    ///
+    /// It writes the STICKY preference rather than window state, which is
+    /// what makes the key and the ＃ icon (and a second window's bar) one
+    /// choice instead of three: `UserDefaults` is the state and every
+    /// reader is an `@AppStorage` observer of it.
+    func toggleTagChips() {
+        TagChipsFold.toggle()
     }
 }

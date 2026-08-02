@@ -117,9 +117,9 @@ struct NodSetTests {
     @Test func aNotePaneAlwaysCarriesTheBarBecauseTheTagDoorLivesThere() {
         func bar(tagFace: ContextBar.TagFace?) -> ContextBar {
             ContextBar(
-                tokens: .fallback(for: .light), originLabel: nil, books: [],
-                collapsed: false, tagFace: tagFace,
-                onBack: {}, onOpenTopBook: {}, onToggleCollapse: {})
+                tokens: .fallback(for: .light), originLabel: nil, forwardLabel: nil,
+                books: [], tagFace: tagFace, tagsFolded: false,
+                onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
         }
         #expect(!bar(tagFace: nil).hasContent, "a place has no tags")
         #expect(

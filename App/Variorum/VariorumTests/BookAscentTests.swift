@@ -255,14 +255,23 @@ struct BookChooserOrderTests {
         #expect(BookChooserOrder.ordered(twins, recentlyVisited: []).map(\.id) == ["a", "b"])
     }
 
-    /// The in-line's sentence: the top pick, and how many others.
-    @Test func theInLineNamesTheTopPickAndCountsTheRest() {
-        #expect(BookChooserOrder.inLine([]) == nil, "no books ⇒ no line, not 'in no book'")
-        #expect(BookChooserOrder.inLine([book("c", "Orbit", .curated)]) == "in Orbit")
-        #expect(BookChooserOrder.inLine([
-            book("c", "Orbit", .curated), book("d", "Field Notes", .curated),
-            book("e", "Dreams", .smart),
-        ]) == "in Orbit & 2 more")
+    /// **13k K11 retired the in-line** (`BookChooserOrder.inLine`, and this
+    /// pin with it): the bar's spelled-out "in <top pick> & N more" became
+    /// the book ICON, whose three arities are pinned by
+    /// `ContextBarDoors.bookClick` and whose words are
+    /// `WorkspaceNaming.ascentHelp`. The ORDER the sentence read from is
+    /// untouched, and is pinned by the three tests above.
+    @Test func theBooksWordsNowLiveOnTheIconsHelp() {
+        #expect(WorkspaceNaming.ascentHelp(topBook: nil, count: 0)
+                == "This note isn't in any book yet")
+        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", count: 1)
+                == "Open \u{201c}Orbit\u{201d} at this note (\u{2318}-click to see it listed)")
+        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", count: 3)
+                == "This note is in 3 books — click to pick one")
+        #expect(WorkspaceNaming.ascentListHeader(count: 1)
+                == "This note is in 1 book — open it at this note:")
+        #expect(WorkspaceNaming.ascentListHeader(count: 3)
+                == "This note is in 3 books — open one at this note:")
     }
 }
 
@@ -276,22 +285,77 @@ struct ContextBarTests {
         return Reading(id: name, name: name, kind: .curated, createdAt: now, updatedAt: now)
     }
 
-    private func bar(origin: String?, books: [Reading], collapsed: Bool = false) -> ContextBar {
+    /// 13k K11 rebuilt the bar's face: no `collapsed`, a real forward door,
+    /// and the tag fold as its own sticky preference. The claim below is
+    /// unchanged — this is the new call shape.
+    private func bar(
+        origin: String?, books: [Reading], forward: String? = nil, isNote: Bool = false,
+        tagsFolded: Bool = false
+    ) -> ContextBar {
         ContextBar(
-            tokens: .fallback(for: .light), originLabel: origin, books: books,
-            collapsed: collapsed, onBack: {}, onOpenTopBook: {}, onToggleCollapse: {})
+            tokens: .fallback(for: .light), originLabel: origin, forwardLabel: forward,
+            books: books,
+            tagFace: isNote
+                ? .init(tags: [], allTags: [], onApply: { _ in }, onRemove: { _ in })
+                : nil,
+            tagsFolded: tagsFolded,
+            onBack: {}, onForward: {}, onOpenBook: { _ in }, onToggleTags: {})
     }
 
     /// The bar exists exactly when it has something to say — a cold launch
     /// at the shelf keeps the chrome it had before this shipped.
     @Test func theBarRendersOnlyWhenItHasSomethingToSay() {
         #expect(!bar(origin: nil, books: []).hasContent)
-        #expect(bar(origin: "Orbit", books: []).hasContent, "the back half alone")
-        #expect(bar(origin: nil, books: [book("Orbit")]).hasContent, "the ascent half alone")
+        #expect(bar(origin: "Orbit", books: []).hasContent, "the back door alone")
+        #expect(bar(origin: nil, books: [book("Orbit")]).hasContent, "the ascent alone")
         #expect(bar(origin: "Shelf", books: [book("Orbit")]).hasContent)
-        // Collapsing never removes the bar — her ruling asked for tidiness,
-        // not for loss (both halves stay doors as glyphs).
-        #expect(bar(origin: "Shelf", books: [book("Orbit")], collapsed: true).hasContent)
+        // 13k K11: a pane that has only gone BACK still has a bar — the ›
+        // is a door now, so "somewhere to go forward" is something to say.
+        #expect(bar(origin: nil, books: [], forward: "Orbit").hasContent)
+        // …and a note always has one (13g R6-1's widening, unchanged).
+        #expect(bar(origin: nil, books: [], isNote: true).hasContent)
+    }
+
+    /// **13k K11 — THE ROW NEVER CHANGES SHAPE.** Her ruling: *"the
+    /// collapsing and growing in that bar is a little annoying to me"* …
+    /// *"it should always look like this"*. So a note's bar renders all
+    /// four doors whatever the state is, and the ones that cannot act are
+    /// GREY rather than gone.
+    ///
+    /// DISCRIMINATING REVERT: make `ContextBar.renderedIcons` drop `.back`
+    /// when `originLabel == nil` (13f's own shape, where the back half
+    /// rendered only with a history) — the first expectation fails.
+    @Test func theIconRowIsTheSameFourDoorsWhateverTheState() {
+        let cold = bar(origin: nil, books: [], isNote: true)
+        #expect(cold.renderedIcons == [.back, .book, .tags, .forward])
+        #expect(!cold.backEnabled && !cold.forwardEnabled && !cold.bookEnabled,
+                "all three greys, none of them absent")
+        let full = bar(
+            origin: "Shelf", books: [book("Orbit")], forward: "Field Notes", isNote: true)
+        #expect(full.renderedIcons == [.back, .book, .tags, .forward],
+                "the same four, in the same order")
+        #expect(full.backEnabled && full.forwardEnabled && full.bookEnabled)
+        // A pane holding a PLACE has no tags and no book (P-2: a door that
+        // can never act in its context isn't rendered) — a different rule
+        // from the greys INSIDE a note's row, and the reason the shelf's
+        // chrome is unchanged by the always-visible row.
+        #expect(bar(origin: "Shelf", books: []).renderedIcons == [.back, .forward])
+    }
+
+    /// **13k K12 — the ＃ folds the CARDS, and only the cards.** The icon
+    /// row is identical either way (that is K11), and a place never shows
+    /// cards because it has none.
+    ///
+    /// DISCRIMINATING REVERT: make `ContextBar.chipsShown` ignore
+    /// `tagsFolded` — the second expectation fails.
+    @Test func theHashDoorFoldsTheCardsAndNothingElse() {
+        let showing = bar(origin: nil, books: [], isNote: true)
+        let folded = bar(origin: nil, books: [], isNote: true, tagsFolded: true)
+        #expect(showing.chipsShown)
+        #expect(!folded.chipsShown)
+        #expect(folded.renderedIcons == showing.renderedIcons,
+                "folding the cards never changes the row — that is the whole ruling")
+        #expect(!bar(origin: "Shelf", books: []).chipsShown, "a place has no cards")
     }
 }
 
@@ -319,34 +383,29 @@ struct AscentDoorTests {
         #expect(received.value == [["bookID": "book-1", "postID": "post-9"]])
     }
 
-    /// The registry's fold: ONE act, two doors, one key — and available
-    /// everywhere, because the state it fixes is "the bar is hidden".
+    /// The registry's fold: ONE act, now THREE doors (the ＃ icon joined
+    /// the menu and the palette), one key — and available everywhere,
+    /// because the state it fixes is "the cards are hidden".
+    ///
+    /// **13k K11/K12 repointed it** from the whole bar to the tag cards;
+    /// the key, the scope and the always-availability are unchanged.
     @Test func theFoldIsOneDeclaredActWithOneKey() {
-        let capability = CapabilityRegistry.capability(.toggleContextBar)
+        let capability = CapabilityRegistry.capability(.toggleTagChips)
         #expect(capability.scope == .app)
-        #expect(capability.doors == [.menuBar, .palette])
+        #expect(capability.doors == [.menuBar, .palette, .surface])
+        #expect(capability.verb == WorkspaceNaming.tagChipsVerb)
         #expect(capability.shortcutLabel == "\u{2318}\u{21e7}I")
         #expect(capability.availability(CapabilityContext()) == .act,
-                "a door whose job is to bring a hidden bar back must never be grey")
-        let key = EditorCommands.keyEquivalent(for: .toggleContextBar)
+                "a door whose job is to bring hidden cards back must never be grey")
+        let key = EditorCommands.keyEquivalent(for: .toggleTagChips)
         #expect(key?.0 == "i")
         #expect(key?.1 == [.command, .shift])
-        #expect(EditorCommands.menuRendered.contains(.toggleContextBar))
-        #expect(ShellActions.paletteActs.contains(.toggleContextBar))
-    }
-
-    /// …and it toggles ONE state, so the two halves can never hide
-    /// separately (her ruling: never two hiding mechanisms).
-    ///
-    /// 13g L2 (WT-2): the bar is born COLLAPSED now, so the toggle walks
-    /// the same one state from the other end.
-    @Test func theFoldToggchesTheWholeBar() {
-        let router = ShellRouter()
-        #expect(router.workspace.contextBarCollapsed)
-        router.toggleContextBar()
-        #expect(!router.workspace.contextBarCollapsed)
-        router.toggleContextBar()
-        #expect(router.workspace.contextBarCollapsed)
+        #expect(EditorCommands.menuRendered.contains(.toggleTagChips))
+        #expect(ShellActions.paletteActs.contains(.toggleTagChips))
+        // The bar's own icon row declares all three of its doors, so the
+        // `.surface` walk covers them.
+        #expect(ContextBar.surfaceCapabilities
+                == [.navigateBack, .navigateForward, .toggleTagChips])
     }
 
     /// Visiting a book floats it in the chooser — recorded at the ONE
