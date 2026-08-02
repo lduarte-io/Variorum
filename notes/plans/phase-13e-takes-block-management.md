@@ -68,6 +68,22 @@ reminders and directions, nothing gates):
   right-click and reasonably didn't find it (2026-08-01). E1's
   swatches/real-emoji-picker work should hang the right-click door
   too.
+- **E1 rider 2 — callout frames in TAKE MODE (her instruction,
+  2026-08-01, later the same evening): "callouts are supposed to
+  be added to take mode as well."** Code fact at recording time:
+  the frame RENDERS only in Write's overlay (`BlockDecor`); the
+  Takes board's cards draw no frame, though canon says the frame
+  is the BLOCK's and its takes share it (R16/R27) and the SETTING
+  door already routes from Takes/Lenses/Compare (13c R2-2). The
+  sitting pins the exact shape (frame around the whole fan? per
+  card?) — the instruction itself is hers, on the record.
+- **Code-tint ruling INCOMING (same message):** "code blocks
+  should have their own tint - i'll rule on that" — the
+  inline-code look/feel item above, hers to rule at the walk.
+  (Recording note: v1's vocabulary has inline `` `code` `` SPANS
+  only — fenced ``` blocks are not in F-3; if her ruling wants
+  whole-block code, that is a vocabulary addition to raise, not
+  silently assume.)
 
 ## Kickoff message (paste-ready for the orchestrator/coordinator the author invokes)
 
