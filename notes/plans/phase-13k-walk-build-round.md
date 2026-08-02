@@ -523,3 +523,38 @@ the curated half byte-unchanged.
   is AppKit's): right-clicking inside a take CARD and setting a colour, to see
   the frame land on the card you clicked rather than the one you last typed in
   (#53(h)).
+
+### Architect adjudications on batch 1 (2026-08-02, recorded before the continuation)
+
+- **Batch 1 spot-verified by the architect's own runs:** commit
+  `cf06c91` whole, tree clean, `DisplayTitle.pool` present at its
+  claimed home; core re-run by the architect — `Test run with 1010
+  tests in 111 suites passed` — matching the implementer's quoted
+  line exactly. (A stale SourceKit index briefly flagged
+  `DisplayTitle.pool` missing in the tests; refuted by grep + the
+  green build.) Full Mac/mobile/spine own-runs ride the batch's
+  CLOSE, after K4's wiring.
+- **K4 WIRING: APPROVED as proposed.** The CROSS JOIN page-driven
+  shape is the mechanism (the measurement caught the IN-subquery
+  corpus scan — exactly the P1 class; the finding is the proposal
+  gate earning its cost). **No cap, no async fill** — flat-in-corpus
+  proven at 10×, her real scale measures 0.15 ms one-shot; the
+  book-count cap + "+k more" guard is RECORDED AS DECLINED (corpus
+  size is provably not the variable; revisit only on a real
+  profile). Standard discipline rides: red-on-old pins, the spine,
+  the batch record updated, final counts by own runs.
+- **The redundant explicit undo grouping (revert G green): KEEP.**
+  Stating intent beats leaning on `groupsByEvent`'s default — AppKit
+  defaults are precisely the kind of thing that shifts between
+  releases — and the pin's doc comment now says honestly that the
+  revert does not discriminate. Disposition: recorded, no change.
+  (The hallucination guard was followed to the letter: a
+  non-discriminating pin was REPORTED as such, not claimed.)
+- **K5/K6 riding the take panes: ENDORSED** — R118/13c-R2-2 parity
+  is the standing law ("every surface that knows which block you
+  are in"); the ledger's "the editor" wording was narrower than the
+  law, and the law wins. Compare's context-menu absence stays
+  untouched and unowned by this phase. Her eye rides #53's walk.
+- **QUESTIONS #53 (eleven build-time calls) is OPEN and BUNDLED for
+  her next sitting** — the away rule; nothing in it gates the
+  remaining batches.
