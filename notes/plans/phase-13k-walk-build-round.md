@@ -578,8 +578,11 @@ the curated half byte-unchanged.
 
 #### Notes for the orchestrator
 
-- **`notes/QUESTIONS.md` gains #53** — eleven build-time calls, each one line
-  to change, properly OPEN. **#54 is now the next free number.**
+- **`notes/QUESTIONS.md` gains #53** — twelve build-time calls *(RECORD
+  CORRECTION at the review round-1 fix pass, R1-NIT-2: this line said
+  "eleven" — written before K4's wiring added (l); the register itself has
+  always carried the right count)*, each one line to change, properly OPEN.
+  **#54 is now the next free number.**
 - **K4 is the only owed decision**; everything else in the batch is ruled and
   built.
 - **One inherited red, recorded at every run:** the `TakePaneMeasureTests`
@@ -1571,3 +1574,93 @@ its own confirmed findings):** the round-1 reviewer's fix pass runs
 FIRST; the round-4 look continuation (R4-1/2/3, held for a clean
 review diff) runs AFTER it; round 2 = a FRESH reviewer over both.
 One agent at a time throughout, per the standing cap.
+
+### Round 1 — THE FIX PASS (2026-08-02, the round-1 reviewer's own session, per the standing flow)
+
+All five confirmed findings implemented; every bug-class fix carries
+a red-on-old pin verified by behavioral revert; counts by this
+session's own runs.
+
+- **R1-MAJOR-1 · FIXED.** `leadPlan` gains the `actKeepsIndent` gate
+  (`act == .bullet || act == .checkbox`): the indent survives a
+  re-lead ONLY when the new act is itself a list lead, so Format ▸
+  Heading on a nested item now mints the working column-0 heading it
+  minted pre-K8 (#49(b)'s ratified replace-the-lead behavior at
+  every depth) instead of the unreadable `"  # milk"`. Pin:
+  `MarkdownNestedListTests.headingOnANestedItemDropsTheIndentAndMintsARealHeading`
+  — three depth cases (two-space, four-space+checkbox, tab), the
+  result proven a real heading to the one tokenizer, column 0
+  pinned byte-unchanged.
+- **R1-MINOR-1 · FIXED.** The two outdent doors now share ONE unit
+  rule — `MarkdownEditing.outdentUnitLength(ofIndent:)` (a leading
+  tab goes whole; otherwise up to one two-space unit off the front,
+  a second-position tab included) — extracted from the ⏎ door's
+  formula and now consulted by BOTH `indentPlan`'s outdent arm and
+  `returnKey`'s `.outdentItem`, so the `" \t"` dead-keypress class
+  cannot recur by construction. Every previously pinned outdent case
+  is byte-identical (the ⏎ door's values were already the shared
+  formula's; ⇧Tab's clean-run cases reproduce exactly, incl. the
+  single-stray-space removal). Pin:
+  `…aSpaceThenTabRunOutdentsByARealLevelThroughBothDoors`.
+  **One recorded limit, chosen rather than silent:** on a deeper
+  pathological run (`" \t "` — space·tab·space, level 2) the prefix
+  unit removes space+tab and drops TWO drawn levels — in BOTH doors
+  identically. Exact single-level arithmetic over arbitrary mixed
+  runs would need a level-aware loop that leaves odd residues on the
+  clean cases the shipped pins hold (`"    - [ ] "` →
+  `.outdentItem(0..<2)`); the shared-unit shape keeps every pinned
+  case byte-identical and kills the named dead press. Paste-only
+  input either way.
+- **R1-MINOR-2 · FIXED (doc-class, no pin owed).** `Export.swift`'s
+  bulk-manifest comment rewritten to K1's rule: only a BLANK title
+  is absent; the literal "Untitled" is a name and exports as
+  `<date> Untitled.md` (#53(k)); no sweep.
+- **R1-NIT-1 · FIXED.** The `TakesViewModel` doc block split back
+  over its two functions — `calloutFrame` keeps the K9 doc,
+  `applyCallout` regains its R2-2 doc plus the `blockID` paragraph.
+- **R1-NIT-2 · FIXED.** The batch-1 record's "#53 — eleven calls"
+  line corrected to twelve IN PLACE, visibly marked as a record
+  correction (point-in-time records get corrected visibly, never
+  silently rewritten).
+
+**Red-on-old — TWO reverts, each verified and checksum-restored:**
+
+| # | Revert | Result |
+|---|---|---|
+| A | drop the `actKeepsIndent` gate (restore the act-agnostic indent ternary) | RED on exactly the three heading expectations, each reporting the pre-fix output by name (`"  # milk"` · `"    ## milk"` · `"\t# milk"`); the list↔list cases (`settingALeadOnANestedItemKeepsTheIndentAndClearingRemovesIt`) and the column-0 expectation stay GREEN — the revert is exactly the heading arm |
+| B | restore the old space-only outdent loop in `indentPlan` | RED on exactly the ⇧Tab expectation (`"\t- milk"` — the space removed, the drawn level unchanged: the dead keypress itself); the ⏎-door and tab-first expectations stay GREEN — the revert is exactly the ⇧Tab arm |
+
+`MarkdownEditing.swift` md5 `afc78bcd7009c36a96c3ca56ce5cfa85`
+matched after BOTH restores; the nested-list suite re-run green
+(`Test run with 15 tests in 1 suite passed`).
+
+**Counts, this session's own runs (sequenced, load avg ~3):**
+core `Test run with 1034 tests in 114 suites passed` (from
+1032/114: +2 — the two round-1 pins) · Mac `Test run with 1187
+tests in 207 suites failed after 143.502 seconds with 1 issue` —
+the one issue confirmed **BY IDENTITY**:
+`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+(the recorded environment-gated tripwire; NOT patched, per its
+KnownIssues row), the tutorial spine's 7 suites green inside the
+run · mobile `Test run with 14 tests in 4 suites passed` (iPhone
+17 Pro — run because `Sources/` was touched). Scope: zero schema,
+zero `Sync/` lines, zero projection-body changes — the fix diff is
+`MarkdownEditing.swift`, one comment in `Export.swift`, a doc split
+in `TakesViewModel.swift`, two pins, and this plan file.
+
+**One transient on the record, refuted rather than shrugged off:**
+an EARLIER full Mac run during this pass landed with 3 issues — the
+tripwire plus
+`PoolDragTests.theWholeAppKitDropSequenceReachesThePoolBranch`
+(twice, `includeFan → true` where false is expected). Traced, not
+guessed: the pool-drop path reads the PHYSICAL keyboard
+(`NSEvent.modifierFlags.contains(.option)`,
+`EditorTextView.swift:407`), so a real ⌥ press on the machine
+during the 145-second run flips it — and the author is AT the
+machine today (the batch-3 quieter-scheduling note's exact class).
+The fix diff cannot reach that path; a solo re-run went green
+(`Test run with 6 tests in 1 suite passed`) and the clean full
+re-run above carries only the tripwire. Recorded so the next
+session recognises the signature: this pin is
+environment-sensitive the same way the wall-clock perf pins are —
+if it reds while she is typing, re-run before believing it.

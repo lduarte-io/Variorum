@@ -293,11 +293,13 @@ extension Queries {
                 ?? DisplayTitle.day(fromStamp: stamp)
                 ?? String((stamp ?? "").prefix(10))
             let rawTitle: String? = post["title"]
-            // The placeholder counts as no title (`DisplayTitle.isAbsent`),
-            // so a note she never named — including one carrying the literal
-            // "Untitled" the pre-13g mint stored — is named by its date
-            // alone, exactly as the ratified 11b shape already did for a
-            // NULL title.
+            // Only a BLANK title counts as no title (`DisplayTitle.isAbsent`
+            // — 13k K1's letter, her ruling: a name she typed is a name). So
+            // a note she never named is named by its date alone, exactly as
+            // the ratified 11b shape always did for a NULL title — while a
+            // legacy note whose stored title IS the literal "Untitled"
+            // exports as "<date> Untitled.md" again (#53(k), stated rather
+            // than smuggled; no sweep rewrites those rows).
             let title = DisplayTitle.isAbsent(rawTitle)
                 ? "" : sanitizedFilename(rawTitle ?? "")
             let base = title.isEmpty ? date : "\(date) \(title)"

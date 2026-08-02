@@ -312,11 +312,9 @@ public enum MarkdownEditing {
                     // and stays.
                     return .exitList(lead: span.range.lowerBound..<span.content.lowerBound)
                 }
-                // Nested ⇒ outdent one level and stay a list item. One tab is
-                // one level; otherwise up to the two-space unit.
-                let unitLength = indent.hasPrefix("\t")
-                    ? 1
-                    : min(MarkdownSyntax.indentUnit.utf16.count, indent.utf16.count)
+                // Nested ⇒ outdent one level and stay a list item — the ONE
+                // unit rule ⇧Tab's arm shares (`outdentUnitLength`).
+                let unitLength = outdentUnitLength(ofIndent: indent)
                 return .outdentItem(
                     unit: span.range.lowerBound..<(span.range.lowerBound + unitLength))
             }
@@ -542,20 +540,29 @@ public enum MarkdownEditing {
             if !written.isEmpty { targets = written }
         }
 
+        // 13k K8: an indented list line's lead INCLUDES its indent, so
+        // re-leading it (bullet → checklist) must put the indent back or
+        // the nesting would silently collapse. Clearing removes the whole
+        // lead, indent and all — the line stops being a list, and a
+        // paragraph indented by two orphan spaces is not what "clear"
+        // means.
+        //
+        // ROUND-1 FIX (13k cold review, MAJOR-1): the indent survives ONLY
+        // when the NEW act is itself a list lead. The widening is LIST-ONLY
+        // by ruling — a heading CANNOT be indented — so preserving the
+        // indent under `.heading` minted "  # milk": neither a heading nor
+        // a list, raw unstyled text, from a first-class menu act. Heading
+        // now takes the clearing rationale (the line stops being a list at
+        // all) and mints the working column-0 heading it minted pre-K8.
+        let actKeepsIndent = act == .bullet || act == .checkbox
         let leads: [(range: Range<Int>, matches: Bool, indent: String)] = targets.map { line in
             let span = spans.first { span in
                 span.range.lowerBound == line.start && isLineLeading(span.kind)
             }
-            // 13k K8: an indented list line's lead INCLUDES its indent, so
-            // re-leading it (bullet → checklist) must put the indent back or
-            // the nesting would silently collapse. Clearing removes the whole
-            // lead, indent and all — the line stops being a list, and a
-            // paragraph indented by two orphan spaces is not what "clear"
-            // means.
             let indent = String(chars[line.charStart..<line.charEnd].prefix { $0 == " " || $0 == "\t" })
             return (line.start..<(span?.content.lowerBound ?? line.start),
                     span.map { act.matches($0.kind) } ?? false,
-                    (span.map { isListLead($0.kind) } ?? false) ? indent : "")
+                    (actKeepsIndent && (span.map { isListLead($0.kind) } ?? false)) ? indent : "")
         }
 
         // ONE rule for both families: every affected line already carries the
@@ -610,22 +617,18 @@ public enum MarkdownEditing {
                     range: line.start..<line.start, replacement: MarkdownSyntax.indentUnit))
                 continue
             }
-            // Outdent: ONE unit off the front — a tab is one level, so it
-            // goes whole; otherwise up to two spaces (the ruled unit).
-            var index = line.charStart
-            var removed = 0
-            if index < line.charEnd, chars[index] == "\t" {
-                index += 1
-                removed = 1
-            } else {
-                while index < line.charEnd, chars[index] == " ",
-                      removed < MarkdownSyntax.indentUnit.count {
-                    index += 1
-                    removed += 1
-                }
-            }
+            // Outdent: ONE unit off the front, through the SAME rule the ⏎
+            // door's `.outdentItem` uses (13k cold review round 1, MINOR-1:
+            // this arm used to remove leading SPACES only, stopping at a
+            // tab — so on a pasted `" \t"` run ⇧Tab removed one space and
+            // the drawn level did not change, a visibly dead keypress,
+            // while ⏎ on the empty twin removed the run's unit and dropped
+            // a level. One rule, two doors — `outdentUnitLength`).
+            let indent = String(
+                chars[line.charStart..<line.charEnd].prefix { $0 == " " || $0 == "\t" })
+            let removed = outdentUnitLength(ofIndent: indent)
             guard removed > 0 else { continue }
-            edits.append(Edit(range: line.start..<offsets[index], replacement: ""))
+            edits.append(Edit(range: line.start..<offsets[line.charStart + removed], replacement: ""))
         }
         let selectionAfter = map(sel.lowerBound, through: edits, bias: .right)
             ..< map(sel.upperBound, through: edits, bias: .right)
@@ -637,6 +640,21 @@ public enum MarkdownEditing {
         case .bullet, .checkbox: true
         case .heading, .bold, .italic, .strikethrough, .code, .link: false
         }
+    }
+
+    /// **The ONE outdent unit — shared by BOTH outdent doors** (⇧Tab's
+    /// `indentPlan` arm and ⏎-on-an-empty-nested-item's `.outdentItem`),
+    /// extracted at the 13k cold review's round-1 fix pass (MINOR-1) so the
+    /// two can never disagree again: a leading TAB goes whole (one tab is
+    /// one level), otherwise up to one two-space unit of leading whitespace
+    /// comes off the front — INCLUDING a tab sitting second, because a
+    /// `" \t"` run is ONE drawn level and removing only the space would
+    /// change nothing the eye can see (the dead-keypress the finding named).
+    /// Characters, and for this ASCII run chars == UTF-16 units.
+    private static func outdentUnitLength(ofIndent indent: String) -> Int {
+        guard !indent.isEmpty else { return 0 }
+        if indent.hasPrefix("\t") { return 1 }
+        return min(MarkdownSyntax.indentUnit.count, indent.count)
     }
 
     private static func isLineLeading(_ kind: MarkdownSyntax.Kind) -> Bool {

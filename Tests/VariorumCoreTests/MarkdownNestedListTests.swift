@@ -131,6 +131,30 @@ struct MarkdownNestedListTests {
         #expect(applied(.outdent, "   - milk", 9..<9) == " - milk")
     }
 
+    /// **13k cold review round 1, MINOR-1 — RED ON THE PRE-FIX CODE.** The
+    /// two outdent doors now share ONE unit rule (`outdentUnitLength`). The
+    /// ⇧Tab arm used to remove leading SPACES only, stopping at a tab — so
+    /// on a pasted `" \t- x"` run (one drawn level: 1 tab + floor(1/2)
+    /// spaces) it removed the lone space and the drawn level did not move: a
+    /// visibly dead keypress, while ⏎ on the empty twin removed the whole
+    /// `" \t"` unit and dropped the level. Both doors now remove the same
+    /// unit, so the level genuinely drops.
+    ///
+    /// DISCRIMINATING REVERT (verified): restore the old space-only loop in
+    /// `indentPlan`'s outdent arm and the FIRST expectation fails with
+    /// `"\t- milk"` (level unchanged) while the ⏎-door expectation stays
+    /// green — the revert is exactly the ⇧Tab arm.
+    @Test func aSpaceThenTabRunOutdentsByARealLevelThroughBothDoors() {
+        #expect(applied(.outdent, " \t- milk", 8..<8) == "- milk",
+                "⇧Tab drops the drawn level — never a dead keypress")
+        #expect(verdict(" \t- ", at: 4) == .outdentItem(unit: 0..<2),
+                "the ⏎ door removes the same unit — one rule, two doors")
+        // The single-tab and pure-space cases are byte-unchanged (pinned
+        // above); the shared rule reproduces them exactly.
+        #expect(applied(.outdent, "\t - milk", 8..<8) == " - milk",
+                "tab-first still goes one whole tab")
+    }
+
     @Test func aNonListLineIsNEVERTouched() {
         for text in ["ordinary prose", "# a heading", "  # an indented heading", "", "   "] {
             #expect(plan(.indent, text, 0..<0).isEmpty,
@@ -157,6 +181,32 @@ struct MarkdownNestedListTests {
         #expect(applied(.checkbox, "  - milk", 8..<8) == "  - [ ] milk")
         #expect(applied(.bullet, "  - [ ] milk", 12..<12) == "  - milk")
         #expect(applied(.bullet, "  - milk", 8..<8) == "milk", "clearing takes the indent too")
+    }
+
+    /// **13k cold review round 1, MAJOR-1 — RED ON THE PRE-FIX CODE.** The
+    /// indent survives a re-lead ONLY when the new act is itself a list
+    /// lead. `leadPlan`'s preservation was act-agnostic, so Format ▸ Heading
+    /// on a nested item minted `"  # milk"` — an INDENTED heading, which the
+    /// LIST-ONLY widening deliberately cannot read (`anIndentedHEADINGIs
+    /// StillPlainText` proves it spans as nothing): neither a heading nor a
+    /// list, raw unstyled text, where the same act pre-K8 minted a WORKING
+    /// column-0 heading. Heading takes the clearing rationale instead — the
+    /// line stops being a list at all — restoring #49(b)'s ratified
+    /// replace-the-lead behavior at every depth.
+    ///
+    /// DISCRIMINATING REVERT (verified): drop the `actKeepsIndent` gate from
+    /// `leadPlan`'s indent ternary and the first two expectations fail with
+    /// `"  # milk"` / `"    ## milk"` while the list↔list cases above stay
+    /// green — the revert is exactly the heading arm.
+    @Test func headingOnANestedItemDropsTheIndentAndMintsARealHeading() {
+        #expect(applied(.heading(level: 1), "  - milk", 8..<8) == "# milk")
+        #expect(applied(.heading(level: 2), "    - [x] milk", 14..<14) == "## milk")
+        #expect(applied(.heading(level: 1), "\t- milk", 7..<7) == "# milk",
+                "a tab indent goes the same way — no construct can carry it")
+        // …and what it minted IS a heading to the one tokenizer.
+        #expect(spans("# milk").first?.kind == .heading(level: 1))
+        // Column 0 is byte-unchanged: the act still replaces the lead there.
+        #expect(applied(.heading(level: 1), "- milk", 6..<6) == "# milk")
     }
 
     // MARK: - ⏎ at depth

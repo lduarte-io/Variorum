@@ -1462,18 +1462,6 @@ final class TakesViewModel {
         commentsRequest = CommentsRequest(blockID: slot.blockID)
     }
 
-    /// 13c Stage 1 ladder, R2-2 (her A13(a) — *"callouts in Takes/Compare/
-    /// Lenses"*): the callout door where takes live, NATIVE. A frame is the
-    /// BLOCK's and takes share it (R16/R27), so the surface that knows
-    /// which block you are in can set it — Write was privileged only by
-    /// where the door was first hung (R118). Same target rule as every
-    /// other block-scoped act here, and the ONE shared transform. Sealed
-    /// posts refuse through the op, spoken.
-    /// `blockID` names the target EXPLICITLY where the caller knows it —
-    /// 13k K6's card right-click does, and it has to: a right-click does not
-    /// move the keyboard, so `commandTargetSlot` would still name whichever
-    /// card was last focused and the frame would land on the wrong block.
-    /// nil keeps the routed door's long-standing behaviour byte-for-byte.
     /// **13k K9 — the frame a block's takes region wears**, or nil where the
     /// block is plain.
     ///
@@ -1495,6 +1483,19 @@ final class TakesViewModel {
         return presentation
     }
 
+    /// 13c Stage 1 ladder, R2-2 (her A13(a) — *"callouts in Takes/Compare/
+    /// Lenses"*): the callout door where takes live, NATIVE. A frame is the
+    /// BLOCK's and takes share it (R16/R27), so the surface that knows
+    /// which block you are in can set it — Write was privileged only by
+    /// where the door was first hung (R118). Same target rule as every
+    /// other block-scoped act here, and the ONE shared transform. Sealed
+    /// posts refuse through the op, spoken.
+    ///
+    /// `blockID` names the target EXPLICITLY where the caller knows it —
+    /// 13k K6's card right-click does, and it has to: a right-click does not
+    /// move the keyboard, so `commandTargetSlot` would still name whichever
+    /// card was last focused and the frame would land on the wrong block.
+    /// nil keeps the routed door's long-standing behaviour byte-for-byte.
     func applyCallout(_ edit: CalloutEdit, blockID: String? = nil) async {
         guard let target = blockID ?? commandTargetSlot?.blockID else {
             speak("Click into a block first — the frame goes on the block you're in.")
