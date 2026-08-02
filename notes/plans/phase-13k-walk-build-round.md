@@ -1224,3 +1224,20 @@ her call.
 - The two-identical-Mac-runs note reads as diligence, not
   discrepancy; the concurrency-contention note stands (sequence
   the suites next time).
+
+### Round 3 (2026-08-02 — the author returns; the machine-death event)
+
+- **Her machine DIED mid-batch-3** (her report: "it looks like my
+  computer actually just died"). Damage assessment by the
+  architect: HEAD untouched at `8642689` (batch 2's acceptance),
+  ZERO commits lost; batch 3's in-progress work SURVIVED on disk
+  as ~15 uncommitted modified files on exactly the K11/K12 surface;
+  the implementer's task record died with the machine. Recovery:
+  the implementer resumed FROM ITS TRANSCRIPT with a
+  verify-don't-trust preamble — trust the FILES, not its memory;
+  every pre-death test run is void and re-runs; quieter sequential
+  test scheduling while she is at the machine.
+- **The K8 old-notes consequence is RATIFIED by her directly**
+  ("like a single indented list item? I think that's fine
+  realistically") — recorded on #54's preamble; it no longer needs
+  the handoff's flag.
