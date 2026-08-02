@@ -1817,3 +1817,39 @@ project's offscreen dark renders resolve the wrong appearance).
 - **ROUND 2 SPAWNS** — a FRESH reviewer over the fixes and what
   they touched, anchored on this ladder section's recorded
   findings + dispositions, per the standing ladder rules.
+
+### Round 2 (2026-08-02 — FRESH reviewer; the ladder's real-pass rule)
+
+**EVERY round-1 disposition HOLDS** — both red-on-old claims
+reproduced INDEPENDENTLY against the actual pre-fix tree (git
+archive of `68761ca` + the new pin files; failure signatures match
+the recorded reverts exactly, including which expectations stay
+green); the actKeepsIndent gate's blast radius proven exactly the
+heading×list-lead cell; the outdent formula equivalence verified on
+the whitespace alphabet; the R4 look continuation verified to its
+records (constants load-bearing, the hollow-first-draft
+self-corroborating, the no-pin R4-3 call endorsed as the correct
+hollow-class judgment). Own runs: core 1034/114 · Mac 1190/208
+(the tripwire BY IDENTITY, PoolDragTests green) · mobile 14/4.
+**ZERO new BLOCKER/MAJOR — no round 3 owed; THE LADDER CLOSES AT
+ROUND 2.**
+
+New findings, architect dispositions (all three ACCEPTED —
+doc/copy class, the reviewer fixes its own per the standing flow):
+
+- **R2-1 MINOR:** two teaching surfaces still describe the RETIRED
+  bar — the ⌘/ helper's ⌘[/⌘] row ("the ← and ›…", contradicting
+  the updated dictionary entry in the SAME file) and the field
+  guide's workspace lesson (the whole-bar fold + ⌘⇧I's old job +
+  the chevron — three retired claims in one sentence; the WT-1
+  class on the phase after the phase that named it, again). Fix as
+  proposed: interpolate `ContextBarDoors.backGlyph/forwardGlyph`
+  into the helper row (drift structurally impossible), rewrite the
+  seeder sentence to the K11/K12 bar — the seed change rides her
+  already-owed Restore-Tutorial click (the 13g R1-2 precedent:
+  plan and seed move together).
+- **R2-2 NIT:** the half-swept internal › comments (seven sites
+  enumerated) — sweep them; internal-only, every rendered glyph
+  reads the constants.
+- **R2-3 NIT:** the glyph pin's "one place apart" comment vs the
+  correct `+2` assertion — fix the comment.
