@@ -1476,3 +1476,24 @@ one), her screenshot's own "←" and "›" characters, the system `book` and
   above roughly load-average 10 and pass below it. Check `uptime` before
   quoting a full run, and if they are red, run them against HEAD before
   believing them.
+
+### Batch 3 ACCEPTED (2026-08-02 — the architect's own runs, quoted)
+
+- core `Test run with 1032 tests in 114 suites passed` (unchanged —
+  the batch is pure chrome/faces, zero `Sources/` lines)
+- Mac `Test run with 1187 tests in 207 suites failed after 146.043
+  seconds with 1 issue` — confirmed **BY IDENTITY**: the recorded
+  environment-gated tripwire, not patched. Every other suite green.
+- spine 51/7 green by the implementer's post-crash run and inside
+  the architect's Mac full run; mobile deliberately not run (zero
+  `Sources/` lines — stated, not skipped silently).
+- The machine-death recovery held end to end: tree byte-verified,
+  every cited run post-crash, the load-sensitive perf-red triple
+  checked against the PRE-batch tree (failing identically there —
+  not this batch's; `uptime` note recorded for future sessions).
+- Rows K11/K12 SHIPPED (`0a83c73`); the 12-state screenshot set
+  delivered to the author propose-only (9 rendered into her panel);
+  QUESTIONS #55 open with ten calls (#56 next free).
+- **ALL TWELVE LEDGER ROWS ARE NOW SHIPPED. The build is complete;
+  the phase moves to the LADDER** — one cold review over the
+  combined diff, fresh reviewer, `notes/REVIEW_PROMPT.md` verbatim.
