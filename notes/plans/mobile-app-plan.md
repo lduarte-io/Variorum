@@ -799,9 +799,84 @@ change** (the Mac diff is the parity move's mechanical split only).
 Commits: `6264049` (parity move) · `7316ae9` (editor core + tests);
 pushed to `origin mobile` at bout end with this record.
 
----
+## Stage 1, batch 1 — ACCEPTED (architect, 2026-08-03)
+
+Verified before accepting: the three commits inspected (diff scope —
+`Shared/EditorBrain/` + mobile Write feature + tests + the record; ONE
+Mac file, the forward-keeping `EditorDocument` split, covered by the
+implementer's own Mac/spine runs; zero `Sources/VariorumCore`, zero
+schema), the batch record read in full, and **mobile 38/11 re-confirmed
+by the architect's own run**. The four PROVISIONALs (P1–P4) join the
+stage-gate bundle beside LK5's ✓-finished note. **LK10 ASSIGNED to S2**
+(the badge's own batch brings the exclusion-rect gutter; the editor
+hosts it then — recorded against the batch-1 heads-up). The batch-1
+findings (the `UITextView` factory trap; the widened `editedRange`
+cost rule; the spine type-name selector) are machinery lessons carried
+in `notes/plans/mobile-architect-handoff.md`.
 
 ---
+
+## Stage 1, batch 2 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, IN FULL:** `CLAUDE.md` · this file (the run record M1–M14
++ LK1–LK11, the settled shape, the constitution, the environment traps,
+the Stage 0 gate record, the batch 1 brief + record + acceptance) ·
+`notes/plans/mobile-tk2-spike-memo.md` · AppSpec §14's 13k delta (the
+nested-lists law: Tab/⇧Tab two-space unit, list-only column-0 widening,
+drawn-indent clamp 6, ⏎ continuation/outdent rules, `actKeepsIndent`) ·
+the Mac's markdown brain IN CODE — locate and read
+`Theme/MarkdownStyling.swift` and the markdown-editing machinery (lead
+plans, ⏎ continuation, Tab/⇧Tab, the outdent unit — grep the Mac Editor
+feature; the 13g/13k pins name the law).
+
+**Objective (M11's first half):** the phone renders and TYPES the
+markdown vocabulary exactly as the Mac does — one brain, byte-identical
+stored outcomes.
+
+**Scope, batch 2:**
+1. **The markdown brain's parity availability** — the batch-1 pattern:
+   tokenizer/lead-plan/continuation/indent logic becomes ONE shared
+   brain both targets compile (split-with-forwards where a file is
+   platform-typed; per-platform attribute EMISSION stays thin and
+   view-side); ZERO test edits; core + Mac + spine green by your own
+   runs after the move.
+2. **Render on the mobile editor:** display == stored, dimmed markers,
+   headings/bold/italic/lists/checkboxes/nesting per the 13k law
+   (drawn-indent clamp 6; indented headings stay plain text), the
+   inline-code chip in `MobileEditorStyle`'s neutral values (the voice
+   pass is a later batch — L13's canon applies then). Styling must
+   NEVER mutate stored bytes — the identity audit and L9 pin stay green
+   throughout.
+3. **Typing behaviors through the one brain:** ⏎ list continuation
+   (end-of-line law; a continued checkbox is born unchecked; lead-only
+   exits; ⏎ on an empty nested item outdents first, exits at the
+   margin), Tab/⇧Tab nesting (two-space unit, the ONE shared outdent
+   unit), re-leading under `actKeepsIndent` (a heading act on a nested
+   item mints a working column-0 heading — the 13k MAJOR's law).
+4. **Checkbox tap-toggle:** a tap on the checkbox glyph toggles it — an
+   ordinary policed edit through the pipeline (never a storage bypass).
+5. **The keyboard bar's SIX formatting acts live** (B · I · # · •– ·
+   ☑ · ⇥ — LK8's eight minus ⑂ and ⋯, which arrive WITH their surfaces
+   in S2; a door that can never act isn't rendered, P-2 — recorded as
+   the application, not a deviation from LK8).
+6. **`MobileWalkTests` grows a markdown walk:** type a list → ⏎
+   continues → Tab nests → toggle a checkbox → a heading act at depth →
+   stored bytes byte-checked against the Mac brain's expected output →
+   canary silent, identity audit clean.
+
+**Explicitly NOT batch 2:** takes/badges/swipe/⑂ (S2), the edit-menu
+door (S2), ⋯ (with its menu), the voice-token pass (a later look-canon
+application batch), the app shape (S3), Read flow (S4).
+
+**Discipline:** exactly the batch-1 brief's — tests with every step;
+the environment traps bind; mobile + MobileWalkTests green at bout end
+by your own runs, AND core + Mac + spine by your own runs if anything
+shared moved (record exact counts; the spine needs the SEVEN suite TYPE
+names — the batch-1 record lists them); NO `Sources/VariorumCore`
+lines; NO schema; commit as you go with the standing trailer; push
+`origin mobile` at bout end; **append your batch record to this file**;
+ONE Sonnet lookup subagent at a time, external facts only. The ladder
+runs at STAGE end.
 
 ---
 
