@@ -24,6 +24,8 @@ public enum SegmentationRules {
     /// and the still-open remainder of the tail.
     public struct Crystallization: Equatable, Sendable {
         /// Trimmed text of the completed paragraph — the new block's text.
+        /// (Edge-trimmed by `trimmedPiece`: a LIST LEAD keeps its leading
+        /// indent — the K8 trim-law alignment, 2026-08-03.)
         public let blockText: String
         /// The suffix of the open tail after the paragraph's terminating
         /// newline; still not a block. May itself contain further completed
@@ -80,7 +82,7 @@ public enum SegmentationRules {
                 case .sentence:
                     blocks.append(contentsOf: sentences(in: String(line)))
                 default:
-                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    let trimmed = trimmedPiece(String(line))
                     if !trimmed.isEmpty { blocks.append(trimmed) }
                 }
             }
@@ -120,9 +122,45 @@ public enum SegmentationRules {
         else { return nil }
         let trailingRun = next - first - 1  // blank segments between = k−1 newlines
         return Crystallization(
-            blockText: segments[first].trimmingCharacters(in: .whitespaces)
+            blockText: trimmedPiece(String(segments[first]))
                 + String(repeating: "\n", count: trailingRun),
             remainingTail: segments[next...].joined(separator: "\n"))
+    }
+
+    // MARK: - The per-piece trim (ONE rule at both paragraph-mode doors)
+
+    /// The edge trim a segmented piece gets before it becomes a block —
+    /// consulted by BOTH doors (`bulkSegments`' paragraph arm and
+    /// `crystallizedBoundary`), so paste and type-time can never disagree.
+    ///
+    /// **The K8 alignment (the trim-law adjudication, mobile S1 batch 2 →
+    /// built batch 3, 2026-08-03):** the Phase 2 rule trimmed horizontal
+    /// whitespace off BOTH edges of every piece — a law that predates 13k
+    /// K8, under which leading indent on a LIST line is meaningful nesting
+    /// content (two spaces per level, Tab-typed). So a pasted nested list
+    /// flattened and a tail-typed nested item lost its depth at
+    /// crystallization, on both platforms. The ruling: **a piece whose
+    /// form is a LIST LEAD per the shared `MarkdownSyntax` law keeps its
+    /// leading horizontal whitespace; every other piece trims exactly as
+    /// before.** LIST-ONLY — the tokenizer's column-0 widening mirrored
+    /// precisely via `MarkdownSyntax.isListLead` (an indented heading or
+    /// prose line still trims; a lead the tokenizer would not read as a
+    /// list — exotic whitespace, `-x` without the space — still trims).
+    /// The trailing edge trims as it always did, list or not. Sentence
+    /// mode is deliberately untouched (the adjudication's own scope line;
+    /// recorded by test).
+    static func trimmedPiece(_ line: String) -> String {
+        guard MarkdownSyntax.isListLead(line) else {
+            return line.trimmingCharacters(in: .whitespaces)
+        }
+        // Keep the lead; trim the trailing edge exactly as `.whitespaces`
+        // always did.
+        var piece = Substring(line)
+        while let last = piece.last,
+              last.unicodeScalars.allSatisfy(CharacterSet.whitespaces.contains) {
+            piece.removeLast()
+        }
+        return String(piece)
     }
 
     // MARK: - Sentence scanning

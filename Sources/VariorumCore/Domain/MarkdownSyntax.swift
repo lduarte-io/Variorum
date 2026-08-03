@@ -317,6 +317,22 @@ public enum MarkdownSyntax {
     /// build leads from it, and one constant is what keeps them agreeing.
     public static let indentUnit = "  "
 
+    /// Whether `line`'s first line READS AS A LIST LEAD (bullet or
+    /// checkbox) per this law — the exact mirror of `leadingSpan`'s list
+    /// rule: an optional space/tab indent run, then `"- "` (a checkbox is
+    /// the bullet shape and matches for free).
+    ///
+    /// Public because the SEGMENTATION TRIM rule consults it (the mobile
+    /// S1 batch-2 trim-law adjudication, 2026-08-03: a segmented piece
+    /// that reads as a list lead KEEPS its leading indent — K8 made that
+    /// indent meaningful nesting content, and the Phase 2 trim predated
+    /// the vocabulary). Housing the predicate HERE, beside the tokenizer
+    /// it mirrors, is what keeps the two laws from ever drifting: the
+    /// widening is list-only in both places by construction.
+    public static func isListLead(_ line: String) -> Bool {
+        line.dropFirst(leadingWhitespace(of: line).count).hasPrefix("- ")
+    }
+
     /// The leading whitespace of `text`'s first line — the run a continued
     /// or re-led list item must carry so nesting survives the keystroke.
     /// Pure, and it never looks past the first newline.

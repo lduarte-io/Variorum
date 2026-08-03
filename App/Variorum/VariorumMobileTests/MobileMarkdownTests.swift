@@ -259,22 +259,19 @@ struct MobileMarkdownReturnTests {
         }
     }
 
-    @Test func tailCrystallizationTrimsLeadingIndent_recordedFinding() async throws {
-        // RECORDED FINDING (S1 batch 2) — documented, not blessed: a
-        // fresh-typed INDENTED list line at the OPEN TAIL loses its indent
-        // when the paragraph crystallizes. Mechanism:
-        // `SegmentationRules.crystallizedBoundary` (core, Phase 2 — pinned
-        // there: "horizontal whitespace trims off piece edges") trims the
-        // minted paragraph's edges, and that law predates 13k K8, which
-        // made LEADING indent meaningful on list lines. This is SHARED
-        // behavior — the Mac's tail takes the identical path — so the
-        // phone reproduces the Mac's law byte-for-byte (the one-brain
-        // rule holds); reconciling the Phase-2 trim with K8 is a CORE-law
-        // call the batch record carries to the architect. This test
-        // documents today's outcome so a future deliberate fix flips it
-        // KNOWINGLY (the Phase 5 concurrent-divide documentation pattern).
-        // Note the asymmetry it produces: the ⏎ continuation's lead keeps
-        // the indent (K8's letter), while the minted line lost its own.
+    @Test func tailCrystallizationKeepsAListLinesIndent_adjudicationPin() async throws {
+        // THE TRIM-LAW ADJUDICATION PIN (S1 batch 3 — the batch-2 recorded
+        // finding `tailCrystallizationTrimsLeadingIndent_recordedFinding`
+        // FLIPPED, exactly as that documentation test said a deliberate fix
+        // should). The architect's ruling: the Phase-2 trim aligns to 13k
+        // K8's own boundary — a segmented line whose form is a LIST LEAD
+        // per the shared `MarkdownSyntax` law KEEPS its leading horizontal
+        // whitespace (the indent is meaningful nesting content); every
+        // other line trims exactly as before. The batch-2 asymmetry is
+        // gone: the ⏎ continuation's lead kept the indent (K8's letter)
+        // and now the minted line keeps its own too. SHARED core law — the
+        // Mac's tail path inherits the same fix (its delta is enumerated
+        // in the batch-3 record).
         try await withEditorWorld { session, db in
             let post = try await session.runner.run { ops in
                 try ops.createPost(title: "trim", profile: .blog)
@@ -284,8 +281,30 @@ struct MobileMarkdownReturnTests {
             view.insertText("  - deep")
             view.insertText("\n")
             await model.awaitMintSettle()
-            #expect(view.textStorage.string == "- deep\n  - ")
-            #expect(try await storedBlockTexts(db, postID: post.id) == ["- deep"])
+            #expect(view.textStorage.string == "  - deep\n  - ")
+            #expect(try await storedBlockTexts(db, postID: post.id) == ["  - deep"])
+            #expect(model.identityAuditFailures == 0)
+        }
+    }
+
+    @Test func pastedNestedListKeepsItsIndent_adjudicationPin() async throws {
+        // The adjudication's second red-on-old duty: the BULK door. A
+        // pasted nested list used to flatten (every piece lost its lead at
+        // `bulkSegments`' Phase-2 trim); under the K8 alignment the stored
+        // bytes are the paste's own — space and tab indents, checkbox
+        // included — and the surface reproduces them exactly.
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "paste list", profile: .blog)
+            }
+            let (model, storage) = makeEditor(session, postID: post.id)
+            await model.loadOnce()
+            typeAtEnd(model, storage, "- milk\n  - eggs\n    - [ ] flour", isPaste: true)
+            await model.awaitMintSettle()
+            #expect(try await storedBlockTexts(db, postID: post.id)
+                    == ["- milk", "  - eggs", "    - [ ] flour"])
+            #expect(storage.string == "- milk\n  - eggs\n    - [ ] flour")
+            #expect(model.identityAuditFailures == 0)
         }
     }
 

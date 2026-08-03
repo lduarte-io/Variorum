@@ -24,6 +24,8 @@ struct SegmentationRulesTests {
         // Horizontal whitespace still trims off piece edges; the blank-line
         // run between the pieces (2 blank lines ⇒ k=3 ⇒ 2 trailing
         // newlines) persists; the trailing edge run still drops.
+        // (Since the 2026-08-03 trim-law adjudication this is the NON-LIST
+        // rule — a LIST LEAD keeps its leading indent; the K8 pins below.)
         let text = "  Leading spaces kept off.  \n   \n\nReal content.\n"
         #expect(SegmentationRules.bulkSegments(text, mode: .paragraph) == [
             "Leading spaces kept off.\n\n", "Real content.",
@@ -155,10 +157,70 @@ struct SegmentationRulesTests {
     }
 
     @Test func crystallizationTrimsTheMintedTextButPreservesTheTailVerbatim() {
+        // (The NON-LIST arm since the 2026-08-03 trim-law adjudication —
+        // list leads keep their indent; the K8 pins below.)
         let result = SegmentationRules.crystallizedBoundary(
             openTail: "  Padded paragraph.  \n  next with leading spaces")
         #expect(result == .init(
             blockText: "Padded paragraph.",
             remainingTail: "  next with leading spaces"))
+    }
+
+    // MARK: - The K8 trim alignment (the trim-law adjudication, 2026-08-03)
+    //
+    // The ruling (mobile S1 batch 2's recorded finding, adjudicated; built
+    // batch 3): a segmented piece whose form is a LIST LEAD per the shared
+    // `MarkdownSyntax` law KEEPS its leading horizontal whitespace — 13k K8
+    // made that indent meaningful nesting content, and the Phase 2 trim
+    // predated the vocabulary. Every other piece trims exactly as before;
+    // LIST-ONLY (the tokenizer's column-0 widening mirrored precisely);
+    // sentence mode deliberately untouched and recorded.
+
+    @Test func bulkParagraphKeepsAListLinesLeadingIndent() {
+        // The paste-nested-list rule at the core door: space AND tab
+        // indents survive; a checkbox is the bullet shape and matches too.
+        let text = "- milk\n  - eggs\n\t- [ ] flour"
+        #expect(SegmentationRules.bulkSegments(text, mode: .paragraph) == [
+            "- milk", "  - eggs", "\t- [ ] flour",
+        ])
+    }
+
+    @Test func listPiecesTrimTrailingEdgeAndComposeWithSpacing() {
+        // The kept lead composes with the 2026-07-12 spacing rule: the
+        // trailing edge still trims, and the k−1 blank-run content still
+        // rides the PRECEDING piece.
+        #expect(SegmentationRules.bulkSegments("  - a  \n\n  - b", mode: .paragraph) == [
+            "  - a\n", "  - b",
+        ])
+    }
+
+    @Test func indentedNonListLinesStillTrimExactlyAsBefore() {
+        // The widening is LIST-ONLY (the tokenizer's own boundary): an
+        // indented heading trims to a WORKING column-0 heading (#49(b)'s
+        // letter — an indented heading renders as plain text, so the trim
+        // is what makes it work); indented prose trims as always; `-x`
+        // without the space is not a list lead.
+        let text = "   # Title\n  prose line\n  -not a list"
+        #expect(SegmentationRules.bulkSegments(text, mode: .paragraph) == [
+            "# Title", "prose line", "-not a list",
+        ])
+    }
+
+    @Test func crystallizationKeepsAListLinesLeadingIndent() {
+        // The tail-typed nested item keeps its depth when it crystallizes
+        // (the batch-2 recorded finding's exact mechanism, fixed).
+        let result = SegmentationRules.crystallizedBoundary(
+            openTail: "  - deep\n  - next typ")
+        #expect(result == .init(blockText: "  - deep", remainingTail: "  - next typ"))
+    }
+
+    @Test func sentenceModeStillFlattensListShapedLines_recordedBoundary() {
+        // RECORDED, deliberately untouched (the adjudication's own scope
+        // line: "sentence mode untouched and recorded"): the sentence
+        // scanner's flush still trims list-shaped lines. A deliberate
+        // future change flips this KNOWINGLY (the documentation pattern).
+        #expect(SegmentationRules.bulkSegments("  - milk\n  - eggs", mode: .sentence) == [
+            "- milk", "- eggs",
+        ])
     }
 }
