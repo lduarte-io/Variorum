@@ -49,14 +49,28 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   whitespace trim predates 13k K8 — ruled aligned (list-lead lines keep
   leading indent at segmentation; everything else unchanged); the Mac
   inherits the fix; batch 3 builds it.
-- **Stage 1 batch 3 RUNNING** (spawned 2026-08-03; brief in the plan):
-  the trim-law fix (core Domain, own commit, superseded-pin handling) +
-  the look canon onto Write (VoiceTokens to the phone, the LK2
-  phone-local voice switch, per-voice markdown palette + bar). Batch 3
-  is Stage 1's LAST planned batch.
-- **The review ladder has NOT yet run** — it runs at STAGE 1's end over
-  the stage's combined diff (fresh cold reviewer, `notes/REVIEW_PROMPT.md`
-  verbatim, zero framing), after batch 3's acceptance.
+- **Stage 1 batch 3 SHIPPED + ACCEPTED** (commits `96a7f8b` · `a43aef4`
+  · `57d7492` · `4678778` · record `3e4d27e`; mobile 76/16 re-confirmed
+  by the architect's own run): the trim-law fix per the adjudication
+  (core Domain, revert-verified, superseded-pin sweep EMPTY, the Mac
+  inherits with zero test deltas), VoiceTokens to `Shared/Theme/`, the
+  LK2 phone-local voice switch, the Write surface styled to canon (R51
+  black pinned; hidden-Iowan finding). **Machinery lesson added: the
+  WRONG-CORE trap** — the pbxproj package reference had escaped to
+  `~/dev/variorum`; now `../..` (relative). Counts at S1 build-complete:
+  core 1039/114 · mobile 76/16 · Mac 1191/208 (tripwire only) · spine
+  51/7.
+- **THE STAGE 1 LADDER IS RUNNING — round 1 spawned** (target
+  `00d2c42..3e4d27e`; REVIEW_PROMPT verbatim; findings land repo-first
+  in the plan file before any fix session). Same-model flow: the
+  architect adjudicates against the spec; fixes go to a FRESH session
+  with traced mechanisms + revert-verified pins; round 2 re-reviews
+  fresh; hard cap three rounds.
+- **The stage gate after the ladder:** the author bundle is P1–P14 +
+  LK5's ✓-finished note + the seven batch-3 ladder flags; the feel
+  round is the gate's instrument for the styled surface (no visual
+  inspection has happened — machine-verified only); the first Release
+  install to her phone rides it (M14).
 - **The stage-gate author bundle so far:** batch 1's P1–P4 + LK5's
   ✓-finished-as-state PROVISIONAL; the device feel round (live
   autocorrect/dictation, loupe-under-pan — the memo's obligation 6);
