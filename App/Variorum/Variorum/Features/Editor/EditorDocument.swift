@@ -2,35 +2,22 @@
 //  EditorDocument.swift
 //  Variorum
 //
-//  Pure mapping between the store's rendered slots and the editor's text
-//  surface (Phase 7 Step 2).
-//
-//  Separator doctrine (decided once, tested — Phase 6 review note): blocks
-//  are joined by a single "\n" (author-confirmed interpretation 2a, a
-//  render-time artifact distinct from the renderedText projection's "\n\n"),
-//  and the separator character is owned by NEITHER neighboring block — it
-//  carries no block-ID attribute, and BlockRangeIndex excludes it from every
-//  block range. Attribute ownership and range math therefore agree by
-//  construction: the spike's boundary-membership accident cannot recur.
-//
-//  Empty takes render as empty slots (Phase 4 ratification): a zero-length
-//  range in the index. Zero-length ranges cannot carry attributes, so the
-//  index — not the attribute run — is the authority for edit routing; the
-//  attributes are the cross-check (and the AppSpec §4 "block IDs ride block
-//  ranges" mechanism the spike proved cheap).
+//  The Mac's platform half of `EditorDocument`. The pure mapping itself —
+//  the attribute key, the separator doctrine, `materializeCore`, and the
+//  reverse `blockID(at:in:)` — moved to `Shared/EditorBrain/
+//  EditorDocumentCore.swift` at the mobile project's Stage 1 batch 1 (the
+//  parity move), so both app targets compile ONE brain. This file keeps
+//  everything AppKit-flavored — the voice-resolved fonts, the paragraph
+//  gap, the markdown face — and preserves every pre-move name as a forward:
+//  `materialize(_:tail:)` is byte-for-byte the old behavior (core
+//  materialization with `baseAttributes`, then `MarkdownStyling.style`).
 //
 
 import AppKit
 import Foundation
 import VariorumCore
 
-nonisolated enum EditorDocument {
-    /// The custom attribute carrying block identity over block ranges.
-    static let blockIDAttribute = NSAttributedString.Key("io.lduarte.variorum.blockID")
-
-    /// The editor-surface separator between blocks (author-confirmed 2a).
-    static let separator = "\n"
-
+nonisolated extension EditorDocument {
     /// The one base font — voice-resolved since Phase 13 C1 (the editor
     /// surfaces get their voice in Stage C; `EditorTypography.current` is
     /// the single source every surface write shares).
@@ -67,49 +54,22 @@ nonisolated enum EditorDocument {
         [.font: baseFont, .paragraphStyle: baseParagraphStyle]
     }
 
-    /// Materializes the editable surface: blocks in position order joined by
-    /// the separator, block-ID attributes over each block's range, an
-    /// optional open tail (local-only fresh text) after a trailing separator.
-    /// Gap slots (missing block/variant, SyncSpec §5) render as empty
-    /// read-only slots — render gaps, never crash.
+    /// The pre-move materialization, exactly as it always behaved: the
+    /// shared core with this Mac's base attributes, then the markdown face.
+    ///
+    /// 13g batch 2 (L7, F-2): the markdown editing face. ATTRIBUTES ONLY —
+    /// the string bytes are untouched, so the index built by the core still
+    /// tiles the surface exactly. Applied HERE, at the one materialization
+    /// every Mac surface's full render goes through (this editor and the
+    /// read tier), so a future surface inherits the face by construction
+    /// rather than by remembering to ask for it. Text with no markdown
+    /// writes nothing.
     static func materialize(
         _ slots: [Queries.RenderedBlock],
         tail: String? = nil
     ) -> (text: NSAttributedString, index: BlockRangeIndex) {
-        let index = BlockRangeIndex(slots: slots, tail: tail)
-        let result = NSMutableAttributedString()
-        let base = baseAttributes
-        for (i, slot) in slots.enumerated() {
-            if i > 0 {
-                // The separator: base attributes only — owned by no block.
-                result.append(NSAttributedString(string: separator, attributes: base))
-            }
-            var attributes = base
-            attributes[blockIDAttribute] = slot.blockID
-            result.append(NSAttributedString(string: slot.text ?? "", attributes: attributes))
-        }
-        if let tail {
-            if !slots.isEmpty {
-                result.append(NSAttributedString(string: separator, attributes: base))
-            }
-            result.append(NSAttributedString(string: tail, attributes: base))
-        }
-        // 13g batch 2 (L7, F-2): the markdown editing face. ATTRIBUTES ONLY —
-        // `result.string` is untouched, so the index built above still tiles
-        // the surface exactly. Applied HERE, at the one materialization every
-        // surface's full render goes through (this editor and the read tier),
-        // so a future surface inherits the face by construction rather than by
-        // remembering to ask for it. Text with no markdown writes nothing.
+        let (result, index) = materializeCore(slots, tail: tail, base: baseAttributes)
         MarkdownStyling.style(result)
         return (result, index)
-    }
-
-    /// Reverse mapping: the block ID the attribute run reports at a character
-    /// offset (nil on separators, the tail, and out-of-range offsets).
-    /// Zero-length (empty) blocks cannot be seen this way — the index is the
-    /// authority; this is the cross-check direction.
-    static func blockID(at offset: Int, in text: NSAttributedString) -> String? {
-        guard offset >= 0, offset < text.length else { return nil }
-        return text.attribute(blockIDAttribute, at: offset, effectiveRange: nil) as? String
     }
 }
