@@ -878,6 +878,186 @@ lines; NO schema; commit as you go with the standing trailer; push
 ONE Sonnet lookup subagent at a time, external facts only. The ladder
 runs at STAGE end.
 
+## Stage 1, batch 2 — BATCH RECORD (implementer, 2026-08-03; commits `1a21024` + `32726b8`)
+
+**All six scope items shipped.** Per item:
+
+1. **The parity availability (`1a21024`)** — the FIRST finding shaped the
+   move: **the pure LAW was already shared** — `MarkdownSyntax` /
+   `MarkdownEditing` (tokenizer, lead plans, ⏎ verdict incl. the
+   outdent-first rule, the ONE `outdentUnitLength`, `actKeepsIndent`,
+   `checkboxToggle`) live in `Sources/VariorumCore/Domain`, compiled by
+   both targets since 13g/13k, and `MarkdownRendering.maxDrawnIndentLevel`
+   (the clamp-6) with them. What was platform-typed was the SURFACE
+   arithmetic and the styling algorithm, and those moved: **(a)**
+   `Shared/EditorBrain/MarkdownSurfaceDoors.swift` — the
+   line-lookup-and-rebase every door repeats (act plans → document-offset
+   edits + selection; the ⏎ verdict rebased; the checkbox 3-for-3; the
+   link address), Foundation-only, the EditorBrain no-UI-framework charter
+   intact; **(b)** `Shared/MarkdownFace/MarkdownFaceCore.swift` — the
+   13g/13k styling algorithm transplanted VERBATIM (face-attribute
+   clear/restore, chip-first over the whole span, markers-then-content
+   composition, the +1 line-widening, the zero-write fast path),
+   parameterized over caller-supplied base font + palette, with
+   conditional `NSFont`/`UIFont` typealiases **in its OWN `Shared/`
+   subfolder** — deliberately NOT in EditorBrain, whose charter forbids UI
+   frameworks (the one structural interpretation for the reviewer). The
+   Mac keeps every pre-move name as forwards (`MarkdownStyling` holds the
+   voice-token Palette + storage; `MarkdownActs.apply/listReturn/
+   toggleCheckbox/linkAddress` consume the shared doors with their
+   NSTextView trio unchanged). **ZERO test edits**; per-platform attribute
+   EMISSION stays thin and view-side exactly as the brief drew it.
+2. **Render (`32726b8`)** — the face at the three Mac-parallel hooks:
+   `renderFull` (full materialization → `MarkdownFace.style`, the
+   `EditorDocument.materialize` forward's shape), `storageDidEdit`
+   (line-scoped restyle following every keystroke — the Mac's exact hook;
+   the observer's `.editedCharacters` guard keeps attribute writes from
+   re-entering), `programmaticReplace` (re-derive after the base reset —
+   the `applySeamEdit` posture; rides the differential and mint paths).
+   Neutral values in `MobileEditorStyle.markdownPalette` (secondary
+   label / system link / `secondarySystemFill` chip — the Mac
+   systemFallback's iOS cousins; the voice pass is L13's). Display ==
+   stored byte-for-byte throughout; the identity audit and the L9 pin ran
+   green in every suite run. **Clamp-6 note for the reviewer:** the
+   editing face renders nesting as LITERAL STORED SPACES (display ==
+   stored) exactly as the Mac's Write editor does — the drawn-indent
+   clamp lives in shared `MarkdownRendering` and applies to
+   lead-substituting READING surfaces (S4's Read flow inherits it); no
+   editing surface on either platform clamps, so there is nothing to
+   clamp here.
+3. **Typing behaviors** — ⏎ via the `insertText` override (the honest iOS
+   intercept: software return, hardware return, and the tests' typing
+   proxy all arrive there; marked-text composition stays ordinary):
+   `MobileMarkdownActs.handleReturnKey` keeps the newline THE untouched
+   keystroke (`super.insertText("\n")`) with the lead a SECOND policed
+   insertion — the K5 doctrine's letter — and the exit/outdent halves
+   consume with policed deletions through the one shared unit; the
+   continuation pre-gates the newline so a sealed note refuses exactly
+   where the Mac's own delegate would. Hardware Tab/⇧Tab as
+   `UIKeyCommand`s (`wantsPriorityOverSystemBehavior`) sharing
+   `performTabKey`/`performShiftTabKey` with the bar's ⇥; empty plan =
+   the ordinary policed `"\t"` (the `indentLists` fallthrough shape).
+   Re-leading under `actKeepsIndent` is the shared brain's — pinned at
+   depth (heading act on a nested item mints the working column-0
+   heading; bullet→checklist keeps nesting).
+4. **Checkbox tap-toggle** — an ordinary policed 3-for-3 through the gate
+   (never a storage bypass): `MobileCheckboxTapRouter` decides
+   strictly-inside at `shouldReceive` (a tap anywhere else is never
+   consumed — the Mac's before-`super.mouseDown` claim in UIKit's
+   grammar), the caret goes back where it was, sealed notes consume the
+   tap and speak the refusal (the Mac's exact posture).
+5. **The bar's SIX live acts** — B · I · # · • · ☑ · ⇥ (LK8's eight minus
+   ⑂/⋯, which arrive WITH their surfaces in S2 — P-2's application, not a
+   deviation), every act firing `MobileMarkdownActs.apply` = pre-gate +
+   select + `insertText`/`deleteBackward` (UIKit's ordinary input path:
+   the storage delegate reports, the verdict routes, autosave/churn/
+   refusals for free — proven by the store-landing assertions).
+6. **The markdown walk (walk 3)** — type a list → ⏎ continues → the empty
+   item EXITS (K5) → Tab nests the minted item → the bar re-leads it as a
+   checklist (nesting survives) → the tap checks the box → the nested
+   continuation (a content newline, I4) → the heading act at depth mints
+   the column-0 heading → **stored bytes byte-checked**:
+   `["- milk", "  - [x] eggs\n# Title"]`, canary silent, audit clean,
+   zero desync, no refusal spoke.
+
+**BUG-CLASS FIX (traced, pinned, revert-verified):** the batch-1 iOS
+re-stamp took its EXTENT from the `didProcessEditing` report, and iOS
+attribute fixing WIDENS that report (the batch-1 measured wrinkle) —
+walk3 caught the widening CROSSING A BOUNDARY: a 2-char indent insert at
+a block's line start reported `+9`, the whole edited paragraph INCLUDING
+its terminating newline — the block SEPARATOR — which then wore an owner
+(diagnostic evidence: entries len 6/len 8, attribute runs `[7,+9]`; the
+DEBUG audit's fatal stop caught it, exactly its job). Fix:
+`restampProjection(over:)` re-derives the projection over the touched
+range FROM `BlockRangeIndex` (entry intersections gain their IDs;
+separators and the tail shed any) — extent from the AUTHORITY, so a
+widened report can only re-stamp what is true. O(entries) integer walk
+with early break, iOS-only (the Mac inherits, never re-stamps); the
+prefix-sum bisect is the recorded upgrade if corpus scale ever measures
+it. **Pin:** `aWidenedAttributeFixReportNeverPoisonsTheSeparator` — DIES
+at the identity audit on the pre-fix mechanism (revert-verified: the
+`.block` arm restored to the raw-report stamp → the pin run crashed;
+restored → full suite green).
+
+**RECORDED FINDING for the architect (documented, deliberately NOT
+fixed — core is out of batch scope):** a fresh-typed INDENTED list line
+at the OPEN TAIL loses its indent when the paragraph crystallizes.
+Mechanism: `SegmentationRules.crystallizedBoundary` (core, Phase 2 —
+pinned there: *"horizontal whitespace still trims off piece edges"*)
+trims the minted paragraph, and that law predates 13k K8, which made
+leading indent MEANINGFUL on list lines. **SHARED behavior — the Mac's
+tail path is byte-identical**, so the one-brain claim holds and the
+phone reproduces the Mac's law exactly; the asymmetry it produces (the ⏎
+continuation's lead KEEPS the indent while the minted line lost its own)
+is visible on both platforms when a nested list is typed fresh at a
+note's end. Reconciling the Phase-2 trim with K8 is a CORE-law call
+(`Sources/VariorumCore` + a pinned Phase-2 behavior = not this batch's to
+change); documented by
+`tailCrystallizationTrimsLeadingIndent_recordedFinding` (the Phase 5
+concurrent-divide documentation pattern) so a future deliberate fix flips
+it knowingly.
+
+**Also this batch (architecture, for the reviewer):** the
+UITextViewDelegate gate moved INTO the VM (`MobileEditorGateDelegate`,
+installed at `attach(textView:)`; the SwiftUI face's Coordinator retired)
+— every host of the surface polices identically, which is what let the
+walk tests exercise the real gate; the batch-1 keyboard-bar SHELL enum
+was replaced by `MobileKeyboardBarController` (its own file).
+
+**Counts, all by this implementer's own runs:**
+- **Mobile: 68 tests / 15 suites GREEN** (single run, zero relaunches;
+  batch-1's 38/11 intact within it) — final run after the revert-check
+  was restored. New: `MobileMarkdownRenderTests` (4, incl. the
+  `MarkdownScanCount` line-scope P1 pin), `MobileMarkdownReturnTests`
+  (10, incl. the trim-finding documentation), `MobileMarkdownActsTests`
+  (11, incl. the widen pin and the six-act bar walk),
+  `MobileCheckboxTapTests` (3, real laid-out geometry), walk 3.
+- **Shared-move verification (after commit `1a21024`, which is the ONLY
+  commit touching shared/Mac files): core 1034/114 GREEN · Mac 1191/208
+  with EXACTLY the one recorded environment-gated tripwire red, BY
+  IDENTITY (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  re-confirmed in isolation) · spine 51/7 GREEN** (the seven suite type
+  names). Commit `32726b8` touches only mobile-target files, so those
+  runs stand for the bout.
+
+**PROVISIONALs (for the stage-gate bundle):**
+- **P5:** the # button CYCLES (none→H1→H2→H3→clear) — one button where
+  the Mac has a three-child submenu; a selection cycles off its START
+  line's state.
+- **P6:** the bar's ⇥ carries both directions — tap indents, LONG-PRESS
+  outdents (the software keyboard has no Tab key, so ⇥ IS the phone's
+  Tab; outdent's other doors: hardware ⇧Tab and K8's ⏎-outdent-first).
+- **P7:** undo across the door edits is UIKit's own input-path
+  registration where the edits ride `insertText`/`deleteBackward`
+  (continuation leads, acts, toggles); no bespoke undo grouping was
+  added, and the phone's act-undo story (the Mac's one-group-per-act ⌘Z
+  contract) is deliberately deferred to a later batch with the editor's
+  broader undo review.
+- **P8:** hardware ⇧⏎ reaches the ⏎ door like any return — the phone has
+  no soft-newline story yet (batch-1's recorded absence); when it lands,
+  it must gain the Mac's ⇧⏎ exclusion.
+- **P9:** acts and the tap bail under marked text (mutating mid-IME
+  composition would rewrite the composition region — the idle-mint's
+  guard applied to the doors); the Mac has no such guard because AppKit's
+  acts run through NSTextView's own trio.
+
+**Deliberate absences (scope, not holes):** ⑂ and ⋯ on the bar (S2, with
+their surfaces); the edit-menu door (S2); the voice-token pass over the
+face palette (the look-canon application batch; values are neutral
+system colors); strikethrough/code/link ACTS on the bar (LK8's ruled
+eight has no such buttons — the vocabulary still RENDERS and types by
+hand; the Mac reaches those acts through menus the phone doesn't have
+yet — recorded for the stage gate rather than invented); no capability
+registry rows yet (the registry is a later-stage move; the bar's act
+table + walk assertion is the interim); the trim-finding's core fix
+(above — the architect's call).
+
+**NO `Sources/VariorumCore` lines; NO schema; NO Mac-side BEHAVIOR
+change** (the Mac diff is the forwards-keeping parity move only, covered
+by the recorded runs). Commits: `1a21024` (parity move) · `32726b8`
+(mobile markdown) · the record commit; pushed to `origin mobile` at bout
+end.
+
 ---
 
 ## Orientation
