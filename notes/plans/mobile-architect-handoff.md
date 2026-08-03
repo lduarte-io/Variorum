@@ -104,7 +104,7 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   device items + round-2's riders: marker z-order, ~26 pt badge target,
   ⑂-drift, second-tap focus, the sheet's keyboard constraint). Nothing
   gates S3.
-- **STAGE 3 IS RUNNING — batch 1 spawned** (brief in the plan: the
+- **STAGE 3 BUILD COMPLETE — batch 1 SHIPPED + ACCEPTED** (`e531f6d`/`774305e`; mobile **133/18** re-confirmed by the architect — the −14/+17 arithmetic accepted, Phase 8 tests retired WITH their surface; the KnownIssues trailing-newlines row RESOLVED by replacement, L9-cited; P27–P34 to the bundle, now P1–P34; ledger L4 DONE). **THE S3 LADDER IS RUNNING — round 1 spawned** (target `2ba90d7..774305e`; flag 1 — the retired-tests mapping — weighted). Then S4 (Read flow · comments/callouts · divide/merge doors) — the LAST build stage before the author's combined gate. *(Original spawn note, superseded:)* batch 1 spawned (brief in the plan: the
   shelf home with LK5 faces · Today through the shared daily door ·
   LK7 tabs · Library/search/bookless filter · the Phase 8 capture
   views RETIRE with the KnownIssues trailing-newlines row resolving in
