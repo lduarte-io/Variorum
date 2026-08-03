@@ -4769,7 +4769,12 @@ final full suite 169/24 GREEN):**
    anything else refuses naming the Mac. The mapping mirrors
    `propagatedCuts` exactly (every active take marked; the rendered
    take = the index entry's displayed variant — peek-aware, what she
-   sees).
+   sees). *(Record correction, S4 ladder fix pass — round-1 MINOR 1:
+   flag 3's defense of this interpretation claimed the phone's
+   auto-proceed "equals confirming the Mac's sheet untouched"; it does
+   not — an untouched confirm is a ONE-take W. See the correction
+   amended into flag 3 below; this interpretation's own
+   `propagatedCuts` equivalence is the true one and stands.)*
 5. **The seal pre-gate reads the projection's `isSealed`, which can
    lag one delivery** — the ops' `lockedPost` refusal is the belt, and
    the two paths WORD differently (pre-gate: "…to restructure."; the
@@ -4868,9 +4873,22 @@ ladder opens on the S4 diff; EVERYTHING it must weigh):**
 3. **The Mac-vs-phone fanned-divide difference** (interpretation 4):
    M10's ruled letter vs the Mac's always-ceremony plain-divide door.
    The phone auto-proceeds where the Mac would open the ceremony
-   PRE-SEEDED with the same proposals — the outcome equals confirming
+   PRE-SEEDED with the same proposals — ~~the outcome equals confirming
    the Mac's sheet untouched, which is the reading M10's words
-   ratified. Confirm against the ruling.
+   ratified~~ *(CORRECTED IN PLACE at the S4 ladder fix pass, per
+   round-1 MINOR 1: that equivalence claim is factually WRONG. The Mac
+   ceremony seeds `marked: variant.id == seedTake.id`
+   (DivideWCeremony.swift, the takes construction) — an UNTOUCHED
+   confirm marks ONLY the displayed take, so the other takes stay on A
+   as unmarked lineage and B/C are born with ONE-take fans: a DIFFERENT
+   store outcome from the phone's all-takes W. The TRUE equivalence —
+   verified line-for-line by the round-1 reviewer and re-traced at the
+   fix pass — is with the Mac's OWN #10 auto-proceed, `propagatedCuts`
+   (EditorSurfaceController.swift: the same store fan read, the same
+   displayed-take guard, the same all-takes unique-match loop), which
+   is exactly what M10's parenthetical names. The shipped BEHAVIOR is
+   faithful — only this record sentence was wrong.)*. Confirm against
+   the ruling.
 4. **The mirrors' drift class** (interpretation 3): FlowParagraph /
    MarkdownLink.openable / CalloutPalette+EditRule now have phone
    twins; a Mac-side change to any of them does not compile into the
@@ -5303,6 +5321,141 @@ with this review's Read-staleness addition.
   changes until she rules.
 - **Flag 11's addition joins the feel round** (Write→Read freshness on
   pop — speculative, device-only).
+
+---
+
+## Stage 4 review — round 1 FIX-PASS RECORD (fix session, 2026-08-03; commits `62d6553` · `1c99bfd` · `0916819` + the record commit, pushed)
+
+**Every adjudicated finding built exactly as ruled; every mechanism
+re-traced by this session's own hands before fixing (the hallucination
+guard); nothing refuted, nothing blocked.** Per finding:
+
+- **MAJOR 1 — FIXED (`62d6553`).** *Trace (own):* `delete(blockID:)`
+  ran `flushNow()` and proceeded UNCONDITIONALLY — no `isDirty`
+  re-check, no latch — while `AutosaveCoordinator.flushNow`'s pinned
+  failure posture puts a refused entry BACK into `pending` (`isDirty`
+  stays true), and `deleteBlock(.none)`'s only belt is
+  `ensurePlacementUnlocked` (re-read in `Operations+Deletion.swift` —
+  it does NOT refuse a locked take). So a refused flush followed by
+  Delete tombstoned the block with the store's stale text and the
+  cascade tombstoned the very variant the pending retry needed —
+  the typed bytes stranded outside surface, store, AND the tray's
+  copy, permanently. *Fix:* the delete act MOVED onto
+  `MobileStructuralController.deleteBlock(blockID:)` — the one-flight
+  latch + the `flushPendingText()` guard, its siblings' own three
+  lines (the Mac's delete rides `runStructural` with both); the menu
+  door keeps only the confirm seam and delegates
+  (`MobileBlockMenu.delete` → `structural.deleteBlock`); the tray-note
+  report and per-act refusal copy travel with the act, so every
+  existing menu pin passed byte-unmodified. The old comment's
+  tray-copy promise is now true. *Pin (red-on-old):*
+  `deleteRefusesWhenTheFlushItselfRefuses` — type into A's take, lock
+  that take through ops (the flush then refuses `lockedVariant`),
+  call delete; assert the contract's refusal copy, the block LIVE,
+  the bytes still pending, the stored take unchanged. *Revert
+  evidence:* sources restored to `731f414`, suite re-run on the built
+  tree — the pin fails with **2 issues** (`deletedAt` a real stamp;
+  the status line showing raw `variantNotFound(a1)` — the stranded
+  retry's face, the loss class made visible); every sibling green;
+  fixed sources restored, suite green 6/6, `git status` clean.
+
+- **MINOR 1 — RECORD CORRECTED (this commit; no code).** *Trace
+  (own):* `DivideWCeremony` seeds `marked: variant.id == seedTake.id`
+  — an untouched confirm marks ONLY the displayed take (one-take W;
+  unmarked takes stay on A), so flag 3's "equals confirming the Mac's
+  sheet untouched" was factually wrong; the phone marks EVERY active
+  take, and its true line-for-line mirror is the Mac's own
+  `propagatedCuts` (re-read side by side: same store fan read, same
+  displayed-take guard, same all-takes unique-match loop) — exactly
+  M10's parenthetical. *Fix:* flag 3's wrong sentence struck IN PLACE
+  with the correction (visible, attribution + the traced facts);
+  interpretation 4 gains a pointer note; the shipped behavior needed
+  nothing. No pin — a doc-class finding, justified as such.
+
+- **MINOR 2 — FIXED (`1c99bfd`).** *Trace (own):* divide bound
+  `(i, intra)`/`entry` BEFORE `flushPendingText()`'s suspension and
+  then read `viewText(range(ofEntryAt: i))` after it; merge read
+  `entries[i - 1].length` post-flush by the pre-flush index. Main-actor
+  work landing inside the await window re-tiles the index (the
+  deferred-delivery application the finding names; `notifySettled`
+  fires synchronously inside `flushNow` before the door's await
+  resumes — the deterministic seam). *Fix:* the post-flush re-verify
+  in BOTH doors — divide re-resolves `entryTouching(caret:)` after
+  the flush, refuses on blockID drift with the standing takes-changed
+  copy, and everything downstream (text, snap, editable, displayedID)
+  reads the FRESH entry; merge re-verifies both neighbors
+  (`entries[j]`/`entries[j-1]` against the pre-flush pair) and its
+  caret math reads the fresh index. *Pins (red-on-old), both driven
+  deterministically* through a test-registered `autosave.observe(
+  onSettled:)` that synchronously ingests a post-structural projection
+  inside `flushNow` — the honest mechanization of the racy window
+  (real deliveries defer and settle via `applyPendingIfClean`'s async
+  fresh read, which is exactly the main-actor work that can land
+  mid-suspension): `divideReVerifiesTheCaretsBlockAfterTheFlushWindow`
+  (a long lead block dies remotely mid-flush; the pre-fix door ACTED —
+  snapped the cut in the re-tiled entry's text and divided the
+  pre-flush block, store changed, no refusal) and
+  `mergeReVerifiesBothNeighborsAfterTheFlushWindow` (a block minted
+  remotely BETWEEN the pair mid-flush; the pre-fix door pushed the
+  stale pair into the op, whose adjacency belt caught it — the
+  demonstrated pre-fix degradation for merge is the RAW
+  `blocksNotAdjacent(...)` string surfaced to her instead of an honest
+  refusal; a silently-wrong merge is nearly unreachable past that
+  belt, recorded honestly). *Revert evidence:* `MobileStructural.swift`
+  restored to `62d6553` (MAJOR 1 in, MINOR 2 out), suite re-run on the
+  built tree — divide pin **3 issues** (nil status; texts changed;
+  placements changed), merge pin **1 issue** (the raw error string);
+  all ten siblings green; fixed source restored, 12/12 green, `git
+  status` clean. *Honest rarity, restated:* the trigger needs a remote
+  structural write landing in a sub-ms window on a phone-solo surface
+  (the R2-10 class the repo records elsewhere) — the hardening shipped
+  because it is one guard line, not because the window is wide. *One
+  recorded drive artifact:* the synthetic non-delivery ingest paints
+  the pre-flush store bytes onto the surface (a real delivery takes
+  `refetchFresh` and cannot), so the pins assert STORE state only.
+
+- **NIT 1 — FIXED (`0916819`).** *Trace (own):* the rename prompt's
+  seed was the mobile feature layer's only raw SQL (`String.fetchOne`
+  + a GRDB import annotated for exactly that); the read-side home is
+  `Queries`. *Fix:* the seed reads `Queries.blockTOC(db, post:)` — the
+  standing name-carrying read, cost ∝ the post (P1) — and the GRDB
+  import is gone; adding a narrower core helper was deliberately NOT
+  done (zero-core-lines is this pass's wall, and the standing read
+  suffices). No pin — cleanliness-class with the mechanism stated
+  (`promptRename`'s seed path was behaviorally untested before this
+  pass and remains so; `rename` itself stays pinned).
+
+- **NIT 2 — FIXED (`0916819`).** *Trace (own):* the meta's `total`
+  was `model.entries.count` — the OBSERVATION WINDOW (300 + probe),
+  so a truncated book read "note 3 of 300" as if 300 were the book.
+  *Fix:* the adjudication's honest-truncation arm — under truncation
+  the total renders as a FLOOR ("note 3 of 300+"), the view passing
+  `model.truncated` through; untruncated books are byte-unchanged.
+  The TRUE membership count was deliberately not built: no standing
+  corpus-flat read exists for a smart book's derived membership
+  (`bookshelf.postCount` counts curated `reading_post` rows only), so
+  counting truthfully means new query work — gate-bundle material
+  beside P36, not a NIT-sized review fix. *Pin:* the meta pin's
+  truncated arm (both chaptered and unsectioned); the existing
+  3-arg pins pass byte-unmodified over the defaulted parameter.
+
+**Counts, ALL by this session's own runs (iPhone 17 Pro / iOS 26.2):**
+- **Mobile: 172 tests / 24 suites GREEN** — the 169/24 baseline + this
+  pass's THREE pins (the MAJOR-1 delete guard · the MINOR-2 divide and
+  merge re-verifies); walks 1–8, the L9 pin, the identity audit, and
+  every liveness pin green in the run.
+- **Core / Mac / spine: NOT RUN, justified** — the diff
+  `731f414..HEAD` carries ZERO `Sources/VariorumCore`, ZERO `Shared/`,
+  ZERO Mac-side, ZERO schema, ZERO `Sync/`, ZERO pbxproj lines
+  (verified by name-list over the range; the whole diff is seven
+  mobile-target/test files), so the only-if-shared verification
+  condition never fired (the S2 fix-pass precedent).
+
+**Commits:** `62d6553` (MAJOR 1 + pin) · `1c99bfd` (MINOR 2 + two
+pins) · `0916819` (NIT 1 + NIT 2 + pin arm) · the record commit
+(MINOR 1's amendments + this record); pushed to `origin mobile` at
+bout end. Round 2 re-reviews these fixes; the anchors are this record
+and the adjudication above it.
 
 ---
 
