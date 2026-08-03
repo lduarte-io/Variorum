@@ -517,7 +517,7 @@ struct MobileTakesBrowserTests {
             // `deletingTheChosenTakeRefusesThroughTheOpsOwnGuard` and the
             // walk.)
             let i10Copy = "This is the block's only take — a block always keeps one. "
-                + "Deleting the whole block is a Mac gesture for now."
+                + "To remove it all, use Delete Block in the \u{22EF} menu."
             await model.takesBrowser.archive(variantID: seed.a2)
             #expect(model.statusMessage == i10Copy)
             #expect(try await variantStatus(db, variantID: seed.a2) == "active")
@@ -786,6 +786,11 @@ struct MobileTakesBrowserSurfaceTests {
                 suggestedActions: suggested))
             let titles = menu.children.compactMap { ($0 as? UIAction)?.title }
             #expect(titles == ["Copy", MobileEditMenu.takesTitle])
+            // S4: the Block submenu joins beside Takes… (the ⋯ menu's
+            // rows from the ONE builder — the flat Takes… item is
+            // byte-untouched; this assertion widened WITH the door).
+            #expect(menu.children.compactMap { ($0 as? UIMenu)?.title }
+                == [MobileEditMenu.blockTitle])
 
             // The brain resolves the range's block (boundary-tolerant).
             #expect(MobileEditMenu.takesTarget(
@@ -802,6 +807,7 @@ struct MobileTakesBrowserSurfaceTests {
                 emptySurface.textView, editMenuForTextIn: NSRange(location: 0, length: 0),
                 suggestedActions: suggested))
             #expect(tailMenu.children.compactMap { ($0 as? UIAction)?.title } == ["Copy"])
+            #expect(tailMenu.children.compactMap { ($0 as? UIMenu)?.title }.isEmpty)
             #expect(MobileEditMenu.takesTarget(
                 model: emptyModel, range: NSRange(location: 0, length: 0)) == nil)
         }

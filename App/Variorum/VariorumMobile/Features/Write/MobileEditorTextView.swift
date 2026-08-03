@@ -105,12 +105,22 @@ final class MobileEditorTextView: UITextView {
     /// The takes BROWSER's pixels (S2 batch 2 — the LK4 sheet-over-page)
     /// and the model back-reference the keyboard bar's ⑂ routes through.
     private(set) var takesBrowserView: MobileTakesBrowserView?
+    /// The block DECOR (S4 batch 1: callout frames + comment markers) and
+    /// the comments sheet's pixels — the S2 pattern's siblings.
+    private(set) var blockDecor: MobileBlockDecorController?
+    private(set) var commentsSheetView: MobileCommentsSheetView?
     private(set) weak var editorModel: MobileEditorViewModel?
 
     /// Wires the takes surface onto this view (called from
     /// `MobileEditorViewModel.attach(textView:)`).
     func installTakes(model: MobileEditorViewModel) {
         editorModel = model
+        // S4: the block decor FIRST — the takes chrome's exclusion
+        // assembly unions the decor's emoji gutters, so `refreshChrome`
+        // runs the decor before the chrome (the one-container-property
+        // composition; see MobileBlockDecor's header).
+        let decor = MobileBlockDecorController(textView: self, model: model)
+        blockDecor = decor
         let chrome = MobileTakesChromeController(textView: self, model: model)
         takesChrome = chrome
         let router = MobileTakesPanRouter(textView: self, model: model)
@@ -122,7 +132,7 @@ final class MobileEditorTextView: UITextView {
         model.takes.onPeekChanged = { [weak chrome] blockID in
             chrome?.peekDidChange(blockID)
         }
-        chrome.refresh()
+        refreshChrome()
         // S2 batch 2: the browser sheet (attaches itself over the page at
         // first open; the controller's onChanged drives every render).
         let browserView = MobileTakesBrowserView(textView: self, model: model)
@@ -130,6 +140,23 @@ final class MobileEditorTextView: UITextView {
         model.takesBrowser.onChanged = { [weak browserView] in
             browserView?.render()
         }
+        // S4: the comments sheet (the browser sheet's pattern — an
+        // overlay in the same screen; the controller's onChanged drives
+        // every render).
+        let commentsView = MobileCommentsSheetView(textView: self, model: model)
+        commentsSheetView = commentsView
+        model.comments.onChanged = { [weak commentsView] in
+            commentsView?.render()
+        }
+    }
+
+    /// The ONE chrome refresh door (S4): the decor publishes its emoji
+    /// exclusions first, then the takes chrome assembles the container's
+    /// one exclusion set (its own gutters + the decor's) and re-anchors
+    /// everything. Every content/geometry input axis routes here.
+    func refreshChrome(scope: MobileTakesChromeController.RefreshScope = .document) {
+        blockDecor?.refresh(scope: scope)
+        takesChrome?.refresh(scope: scope)
     }
 
     /// Scrolling and width changes both land here (UIScrollView lays out
@@ -141,7 +168,102 @@ final class MobileEditorTextView: UITextView {
     /// pass inside the refresh itself.
     override func layoutSubviews() {
         super.layoutSubviews()
-        takesChrome?.refresh(scope: .nearViewport)
+        refreshChrome(scope: .nearViewport)
+    }
+
+    // MARK: Chrome geometry (S4 — the ONE implementation both chrome
+    // controllers consult; moved here from the S2 chrome, move-only)
+
+    /// The current TK2 viewport as a character range, padded by one
+    /// viewport length each side — the `.nearViewport` band (the S2
+    /// MINOR-3 scope). nil ⇒ unavailable; callers treat everything near.
+    func nearViewportBand() -> NSRange? {
+        guard let tlm = textLayoutManager,
+              let cm = tlm.textContentManager,
+              let viewport = tlm.textViewportLayoutController.viewportRange
+        else { return nil }
+        let start = cm.offset(from: tlm.documentRange.location, to: viewport.location)
+        let end = cm.offset(from: tlm.documentRange.location, to: viewport.endLocation)
+        guard start >= 0, end >= start else { return nil }
+        let pad = max(end - start, 512)
+        let lower = max(start - pad, 0)
+        return NSRange(location: lower, length: (end + pad) - lower)
+    }
+
+    /// The first layout fragment at a surface offset (container coords),
+    /// with its first line's height — `.ensuresLayout` on exactly that
+    /// fragment (the hybrid-jump primitive's cost class).
+    func firstLineGeometry(
+        atOffset offset: Int
+    ) -> (fragmentMinY: CGFloat, firstLineHeight: CGFloat)? {
+        guard let tlm = textLayoutManager,
+              let cm = tlm.textContentManager,
+              let location = cm.location(tlm.documentRange.location, offsetBy: offset)
+        else { return nil }
+        var result: (CGFloat, CGFloat)?
+        tlm.enumerateTextLayoutFragments(from: location, options: [.ensuresLayout]) { frag in
+            result = (
+                frag.layoutFragmentFrame.minY,
+                frag.textLineFragments.first?.typographicBounds.height
+                    ?? frag.layoutFragmentFrame.height)
+            return false
+        }
+        return result
+    }
+
+    /// The union of a block range's fragment frames (container coords) —
+    /// the spike's `fragmentRects` shape.
+    func blockRectsUnion(range: NSRange) -> CGRect? {
+        guard let tlm = textLayoutManager,
+              let cm = tlm.textContentManager,
+              let start = cm.location(tlm.documentRange.location, offsetBy: range.location),
+              let end = cm.location(
+                tlm.documentRange.location, offsetBy: range.location + range.length)
+        else { return nil }
+        var union: CGRect?
+        tlm.enumerateTextLayoutFragments(from: start, options: [.ensuresLayout]) { frag in
+            if frag.rangeInElement.location.compare(end) != .orderedAscending,
+               range.length > 0 {
+                return false
+            }
+            let frame = frag.layoutFragmentFrame
+            union = union.map { $0.union(frame) } ?? frame
+            // A zero-length block lives inside one fragment — stop there.
+            return range.length > 0
+        }
+        return union
+    }
+
+    /// The END of a block range's LAST line (container coords): where the
+    /// text's final glyph run stops — the comment marker's anchor (S4).
+    func lastLineEnd(
+        range: NSRange
+    ) -> (x: CGFloat, lineMinY: CGFloat, lineHeight: CGFloat)? {
+        guard let tlm = textLayoutManager,
+              let cm = tlm.textContentManager,
+              let start = cm.location(tlm.documentRange.location, offsetBy: range.location),
+              let end = cm.location(
+                tlm.documentRange.location, offsetBy: range.location + range.length)
+        else { return nil }
+        var last: NSTextLayoutFragment?
+        tlm.enumerateTextLayoutFragments(from: start, options: [.ensuresLayout]) { frag in
+            if frag.rangeInElement.location.compare(end) != .orderedAscending,
+               range.length > 0 {
+                return false
+            }
+            last = frag
+            return range.length > 0
+        }
+        guard let last else { return nil }
+        let frame = last.layoutFragmentFrame
+        guard let line = last.textLineFragments.last else {
+            return (frame.maxX, frame.minY, frame.height)
+        }
+        let bounds = line.typographicBounds
+        return (
+            frame.minX + bounds.maxX,
+            frame.minY + bounds.minY,
+            bounds.height)
     }
 
     /// The bulk-entry hint (the Mac EditorTextView's exact shape): bulk

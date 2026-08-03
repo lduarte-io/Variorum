@@ -57,6 +57,12 @@ final class MobileEditorViewModel {
     /// The takes BROWSER's brain (S2 batch 2) — the second sibling: the
     /// sheet's state + the four M4 verbs live there; the VM only routes.
     @ObservationIgnored let takesBrowser: MobileTakesBrowserController
+    /// The S4 siblings (the NIT-3 law, carried): the comments sheet's
+    /// brain, the divide/merge doors, and the ⋯ block menu — the VM only
+    /// routes to each.
+    @ObservationIgnored let comments: MobileCommentsController
+    @ObservationIgnored let structural: MobileStructuralController
+    @ObservationIgnored let blockMenu: MobileBlockMenuController
 
     // MARK: - Observable UI state
 
@@ -75,6 +81,10 @@ final class MobileEditorViewModel {
 
     @ObservationIgnored private(set) var index = BlockRangeIndex(entries: [], tailLength: nil)
     @ObservationIgnored private(set) var slots: [Queries.RenderedBlock] = []
+    /// blockID → the block's callout frame (S4, M12 — the projection's
+    /// 13k K9 read). Adopted unconditionally at ingest like fans:
+    /// bookkeeping for the decor overlay, never surface bytes.
+    @ObservationIgnored private(set) var presentations: [String: BlockPresentation] = [:]
     @ObservationIgnored private(set) var tailText = ""
     @ObservationIgnored private(set) var header: Queries.ContainerHeader?
     @ObservationIgnored private(set) weak var textView: MobileEditorTextView?
@@ -142,8 +152,14 @@ final class MobileEditorViewModel {
         self.autosave = session.autosave(forPost: postID, debounce: debounce, sleep: sleep)
         self.takes = MobileTakesController(runner: session.runner)
         self.takesBrowser = MobileTakesBrowserController(runner: session.runner)
+        self.comments = MobileCommentsController(session: session)
+        self.structural = MobileStructuralController(session: session)
+        self.blockMenu = MobileBlockMenuController(session: session)
         takes.model = self
         takesBrowser.model = self
+        comments.model = self
+        structural.model = self
+        blockMenu.model = self
         // Multicast observers, never the single-owner closures: a shared
         // coordinator has several listeners (the Mac's own move for the
         // same reason) — a second same-post editor must not deafen the
@@ -218,6 +234,44 @@ final class MobileEditorViewModel {
         // S2: the takes chrome (badge/gutter/marker/pill) + the swipe-peek
         // pan ride the view; headless storage-only attaches run chromeless.
         textView.installTakes(model: self)
+        // S4: the ⋯ menu's prompt seams get their production plumbing
+        // (UIAlertController via the view's window; tests inject their
+        // own answers — the seam is the testable brain's edge).
+        if blockMenu.promptForText == nil {
+            blockMenu.promptForText = { [weak textView] title, message, current, completion in
+                guard let root = textView?.window?.rootViewController else {
+                    completion(nil)
+                    return
+                }
+                let alert = UIAlertController(
+                    title: title, message: message, preferredStyle: .alert)
+                alert.addTextField { $0.text = current }
+                alert.addAction(UIAlertAction(title: "Set", style: .default) { _ in
+                    completion(alert.textFields?.first?.text ?? "")
+                })
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                    completion(nil)
+                })
+                root.present(alert, animated: true)
+            }
+        }
+        if blockMenu.confirmDestructive == nil {
+            blockMenu.confirmDestructive = { [weak textView] title, message, actionTitle, completion in
+                guard let root = textView?.window?.rootViewController else {
+                    completion(false)
+                    return
+                }
+                let alert = UIAlertController(
+                    title: title, message: message, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: actionTitle, style: .destructive) { _ in
+                    completion(true)
+                })
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                    completion(false)
+                })
+                root.present(alert, animated: true)
+            }
+        }
     }
 
     /// The storage seam (tests attach a bare `NSTextStorage` — the VM's
@@ -265,6 +319,11 @@ final class MobileEditorViewModel {
             }
             adoptHeader(value.header)
             ingest(value.projection)
+        } catch is CancellationError {
+            // A push-then-immediate-pop cancels the screen's task mid-read
+            // (S3 ladder round 2, NIT — the MINOR-1 class): the surface is
+            // being torn down; stringifying the cancellation into the
+            // status line told her nothing true.
         } catch {
             statusMessage = String(describing: error)
         }
@@ -283,11 +342,15 @@ final class MobileEditorViewModel {
         // fans are bookkeeping, self-healing, never surface bytes). Only
         // the SLOT application carries MAJOR 3's delivery guard below.
         takes.adoptFans(projection.fans)
+        // S4: callout frames adopt the same way (decor bookkeeping).
+        presentations = projection.presentations
         applyProjection(takes.overlay(projection.slots), fromDelivery: fromDelivery)
-        textView?.takesChrome?.refresh()
+        textView?.refreshChrome()
         // S2 batch 2: an open browser re-renders its cards from the fresh
-        // fan state (and closes if its block left the surface).
+        // fan state (and closes if its block left the surface). S4: the
+        // comments sheet follows the same discipline.
         takesBrowser.projectionDidChange()
+        comments.projectionDidChange()
     }
 
     /// Teardown backstop: pending tail text mints (the idle plan — typed
@@ -362,7 +425,7 @@ final class MobileEditorViewModel {
             textView?.canaryCheckpointAfterMutation()
             // S2: the takes chrome restyles from the new voice's face —
             // and an open browser sheet re-renders in the new voice too.
-            textView?.takesChrome?.refresh()
+            textView?.refreshChrome()
             textView?.takesBrowserView?.render()
         }
         guard let storage, storage.length > 0 else { return }
@@ -471,7 +534,7 @@ final class MobileEditorViewModel {
         }
         auditIdentityProjection()
         textView?.canaryCheckpointAfterMutation()
-        textView?.takesChrome?.refresh()
+        textView?.refreshChrome()
     }
 
     /// Same block sequence, changed texts: replace only changed slots,
@@ -496,7 +559,7 @@ final class MobileEditorViewModel {
             textView?.undoManager?.removeAllActions()
         }
         auditIdentityProjection()
-        textView?.takesChrome?.refresh()
+        textView?.refreshChrome()
     }
 
     /// A deferred delivery settles by a FRESH read — the deferred value was
@@ -592,6 +655,17 @@ final class MobileEditorViewModel {
         takesBrowser.open(blockID: blockID)
     }
 
+    /// The comments sheet's doors (the ⋯ menu, the ●n marker) — S4.
+    func openComments(blockID: String) {
+        comments.open(blockID: blockID)
+    }
+
+    /// The ⋯ menu's target: the caret's block, boundary-tolerant. nil in
+    /// the open tail / gaps (the menu's doors speak or aren't offered).
+    func blockIDAtCaret() -> String? {
+        blockIDNearOffset(textView?.selectedRange.location ?? 0)
+    }
+
     /// The bar's ⑂: the caret's block, or an honest refusal — the open
     /// tail is not yet a block (PROVISIONAL wording, recorded).
     func openTakesBrowserAtCaret() {
@@ -657,7 +731,7 @@ final class MobileEditorViewModel {
         }
         auditIdentityProjection()
         textView?.canaryCheckpointAfterMutation()
-        textView?.takesChrome?.refresh()
+        textView?.refreshChrome()
     }
 
     // MARK: - Edit routing (the delegate entry points)
@@ -760,7 +834,7 @@ final class MobileEditorViewModel {
         // S2: badge/gutter/marker geometry follows every character edit
         // (the overlay-geometry law — every input axis; equality-gated
         // inside, so unchanged geometry writes nothing).
-        textView?.takesChrome?.refresh()
+        textView?.refreshChrome()
     }
 
     private func fallbackVerdict(editedRange: NSRange, delta: Int) -> BlockRangeIndex.Verdict {

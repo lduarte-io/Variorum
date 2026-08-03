@@ -505,7 +505,7 @@ struct MobileWalkTests {
             // instead — it runs FIRST in `deleteVariant`, the op's real
             // order, heard here too.)
             let i10Copy = "This is the block's only take — a block always keeps one. "
-                + "Deleting the whole block is a Mac gesture for now."
+                + "To remove it all, use Delete Block in the \u{22EF} menu."
             await model.takesBrowser.archive(variantID: mint.id)
             #expect(model.statusMessage == i10Copy)
             model.report(nil)

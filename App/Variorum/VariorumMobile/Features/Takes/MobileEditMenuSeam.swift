@@ -34,8 +34,14 @@ enum MobileEditMenu {
         model?.blockIDNearOffset(range.location)
     }
 
+    /// The extended edit menu's Block submenu title (S4 batch 1 — the ⋯
+    /// block menu's second door; M2's long-press reading widened).
+    static let blockTitle = "Block"
+
     /// The composed menu: the system's suggested actions, then Takes…
-    /// where a block resolves.
+    /// where a block resolves — and, since S4, the Block submenu (the ⋯
+    /// menu's same rows from the ONE builder, minus Takes…, which
+    /// already rides flat here).
     static func menu(
         model: MobileEditorViewModel?, range: NSRange, suggested: [UIMenuElement]
     ) -> UIMenu {
@@ -45,7 +51,10 @@ enum MobileEditMenu {
         let takes = UIAction(title: takesTitle) { [weak model] _ in
             model?.openTakesBrowser(blockID: blockID)
         }
-        return UIMenu(children: suggested + [takes])
+        let block = UIMenu(
+            title: blockTitle,
+            children: model.blockMenu.menuElements(blockID: blockID, includeTakes: false))
+        return UIMenu(children: suggested + [takes, block])
     }
 }
 

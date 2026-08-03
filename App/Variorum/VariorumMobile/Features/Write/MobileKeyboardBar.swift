@@ -31,12 +31,15 @@ import VariorumCore
 final class MobileKeyboardBarController: NSObject {
     private weak var textView: MobileEditorTextView?
 
-    /// The seven acts, in bar order — one table so the bar and any test
+    /// The eight acts, in bar order — one table so the bar and any test
     /// walk read the same truth (the registry-walk spirit; the real
-    /// capability registry is a later-stage move). ⑂ = Takes (S2 batch 2,
-    /// LK8's seventh; ⋯ stays out until its block menu exists — P-2).
+    /// capability registry is a later-stage move). ⑂ = Takes (S2 batch 2);
+    /// ⋯ = Block (S4 batch 1 — LK8's eighth JOINS with its block menu:
+    /// Takes… · Comments… · Callout ▸ · Name… · Divide · Merge · Delete;
+    /// P-2 satisfied now that the door can act).
     static let actLabels = [
         "Bold", "Italic", "Heading", "Bullet List", "Checklist", "Indent", "Takes",
+        "Block",
     ]
 
     init(textView: MobileEditorTextView) {
@@ -91,8 +94,42 @@ final class MobileKeyboardBarController: NSObject {
         items.append(indentItem(face: face))
         items.append(.flexibleSpace())
         items.append(act("⑂", "Takes", #selector(fireTakes)))
+        items.append(.flexibleSpace())
+        items.append(blockMenuItem(face: face))
         bar.items = items
         return bar
+    }
+
+    /// ⋯ — the block menu on the caret's block (S4 batch 1; LK8's eighth
+    /// act). A deferred menu rebuilt per open, so it always names the
+    /// CURRENT caret block; in the open tail it offers one honest
+    /// disabled line instead of a silent door (P-2's speaking form —
+    /// the bar's ⑂ refusal, menu-grammared).
+    private func blockMenuItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setTitle("⋯", for: .normal)
+        button.titleLabel?.font = face.chrome
+        button.setTitleColor(face.muted, for: .normal)
+        button.accessibilityLabel = "Block"
+        button.accessibilityIdentifier = "kbar.block"
+        button.showsMenuAsPrimaryAction = true
+        button.menu = UIMenu(children: [
+            UIDeferredMenuElement.uncached { [weak self] completion in
+                guard let model = self?.textView?.editorModel else {
+                    completion([])
+                    return
+                }
+                guard let blockID = model.blockIDAtCaret() else {
+                    completion([UIAction(
+                        title: "Tap into a block first — block acts live on blocks.",
+                        attributes: .disabled) { _ in }])
+                    return
+                }
+                completion(model.blockMenu.menuElements(
+                    blockID: blockID, includeTakes: true))
+            },
+        ])
+        return UIBarButtonItem(customView: button)
     }
 
     /// ⇥ needs a long-press (the outdent half), and a `UIBarButtonItem`

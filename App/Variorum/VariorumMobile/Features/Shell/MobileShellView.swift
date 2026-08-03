@@ -26,7 +26,12 @@ import VariorumCore
 /// Where the shell can navigate. `focus` on a note ⇒ raise the keyboard
 /// on arrival (the Today door's straight-into-typing invitation).
 enum MobileRoute: Hashable {
+    /// A book's front: the Read flow (S4, M8 — "a book opens into the
+    /// calm continuous column").
     case book(String)
+    /// The book's note LIST (the S3 screen) — reachable from the Read
+    /// page's "contents" door.
+    case bookList(String)
     case note(String, focus: Bool)
 }
 
@@ -117,19 +122,30 @@ struct MobileShellView: View {
     private func destination(_ route: MobileRoute, in owner: MobileTab) -> some View {
         switch route {
         case .book(let readingID):
+            // S4 (M8): a book opens into the READ flow; the note list is
+            // its "contents" door. Tapping into a note edits it in Write.
+            MobileReadView(
+                session: session, readingID: readingID, tokens: tokens,
+                onOpen: { push(.note($0, focus: false), in: owner) },
+                onList: { push(.bookList(readingID), in: owner) })
+        case .bookList(let readingID):
             MobileBookView(
                 session: session, readingID: readingID, tokens: tokens,
-                onOpen: { postID in
-                    if owner == .shelf {
-                        shelfPath.append(MobileRoute.note(postID, focus: false))
-                    } else {
-                        libraryPath.append(MobileRoute.note(postID, focus: false))
-                    }
-                })
+                onOpen: { push(.note($0, focus: false), in: owner) })
         case .note(let postID, let focus):
             MobileWriteScreen(
                 session: session, postID: postID, router: router,
                 beginEditing: focus, tab: owner)
+        }
+    }
+
+    /// One push door for the route builders — the OWNING stack's path,
+    /// never the visible tab's (the S3 BLOCKER wiring rule).
+    private func push(_ route: MobileRoute, in owner: MobileTab) {
+        if owner == .shelf {
+            shelfPath.append(route)
+        } else {
+            libraryPath.append(route)
         }
     }
 

@@ -120,7 +120,7 @@ final class MobileTakesChromeController {
         // block). nil band = full pass.
         var band: NSRange?
         if scope == .nearViewport, containerWidth == lastFullPassWidth {
-            band = nearViewportCharacterRange()
+            band = textView.nearViewportBand()
         } else {
             lastFullPassWidth = containerWidth
         }
@@ -146,7 +146,7 @@ final class MobileTakesChromeController {
                 exclusions.append(cached)
                 continue
             }
-            guard let line = firstLineGeometry(atOffset: range.location)
+            guard let line = textView.firstLineGeometry(atOffset: range.location)
             else { continue }
             lastGeometryResolvedBlockIDs.insert(slot.blockID)
             seen.insert(slot.blockID)
@@ -174,6 +174,10 @@ final class MobileTakesChromeController {
             badges[blockID] = nil
             exclusionByBlock[blockID] = nil
         }
+        // S4: the block decor's emoji gutters join the ONE exclusion
+        // assembly (one container property, one owner — the decor runs
+        // first in `refreshChrome`, so its rects are fresh here).
+        exclusions += textView.blockDecor?.currentEmojiExclusions ?? []
         exclusions.sort { ($0.minY, $0.minX) < ($1.minY, $1.minX) }
         if !rectsMatch(exclusions, currentExclusions) {
             currentExclusions = exclusions
@@ -190,7 +194,7 @@ final class MobileTakesChromeController {
                 peeked.insert(blockID)
                 continue
             }
-            guard let union = blockRectsUnion(range: range) else { continue }
+            guard let union = textView.blockRectsUnion(range: range) else { continue }
             lastGeometryResolvedBlockIDs.insert(blockID)
             peeked.insert(blockID)
             let marker = markers[blockID] ?? makeMarker(blockID: blockID)
@@ -219,7 +223,7 @@ final class MobileTakesChromeController {
                let content = model.takes.pillContent(blockID: pillBlockID),
                let range = model.rangeOfBlock(pillBlockID) {
                 if near(range) {
-                    guard let union = blockRectsUnion(range: range) else {
+                    guard let union = textView.blockRectsUnion(range: range) else {
                         hidePill()
                         return
                     }
@@ -239,23 +243,10 @@ final class MobileTakesChromeController {
         }
     }
 
-    /// The current TK2 viewport as a character range, padded by one
-    /// viewport length each side — the `.nearViewport` band (the
-    /// adjudicated MINOR-3 scope; "the TK2 viewport is queryable"). nil ⇒
-    /// unavailable, and the caller treats everything as near.
-    private func nearViewportCharacterRange() -> NSRange? {
-        guard let textView,
-              let tlm = textView.textLayoutManager,
-              let cm = tlm.textContentManager,
-              let viewport = tlm.textViewportLayoutController.viewportRange
-        else { return nil }
-        let start = cm.offset(from: tlm.documentRange.location, to: viewport.location)
-        let end = cm.offset(from: tlm.documentRange.location, to: viewport.endLocation)
-        guard start >= 0, end >= start else { return nil }
-        let pad = max(end - start, 512)
-        let lower = max(start - pad, 0)
-        return NSRange(location: lower, length: (end + pad) - lower)
-    }
+    // The band / fragment-geometry helpers moved to MobileEditorTextView
+    // at S4 batch 1 (move-only): the block decor consults the SAME
+    // implementations, so the two chrome controllers can never disagree
+    // about a rect.
 
     // MARK: Peek events (the controller's hook)
 
@@ -357,55 +348,6 @@ final class MobileTakesChromeController {
     }
 
     // MARK: Geometry
-
-    private struct FirstLine {
-        let fragmentMinY: CGFloat
-        let firstLineHeight: CGFloat
-    }
-
-    /// The first layout fragment at a surface offset (container coords),
-    /// with its first line's height — `.ensuresLayout` on exactly that
-    /// fragment (the hybrid-jump primitive's cost class).
-    private func firstLineGeometry(atOffset offset: Int) -> FirstLine? {
-        guard let textView,
-              let tlm = textView.textLayoutManager,
-              let cm = tlm.textContentManager,
-              let location = cm.location(tlm.documentRange.location, offsetBy: offset)
-        else { return nil }
-        var result: FirstLine?
-        tlm.enumerateTextLayoutFragments(from: location, options: [.ensuresLayout]) { frag in
-            result = FirstLine(
-                fragmentMinY: frag.layoutFragmentFrame.minY,
-                firstLineHeight: frag.textLineFragments.first?.typographicBounds.height
-                    ?? frag.layoutFragmentFrame.height)
-            return false
-        }
-        return result
-    }
-
-    /// The union of a block range's fragment frames (container coords) —
-    /// the spike's `fragmentRects` shape.
-    private func blockRectsUnion(range: NSRange) -> CGRect? {
-        guard let textView,
-              let tlm = textView.textLayoutManager,
-              let cm = tlm.textContentManager,
-              let start = cm.location(tlm.documentRange.location, offsetBy: range.location),
-              let end = cm.location(
-                tlm.documentRange.location, offsetBy: range.location + range.length)
-        else { return nil }
-        var union: CGRect?
-        tlm.enumerateTextLayoutFragments(from: start, options: [.ensuresLayout]) { frag in
-            if frag.rangeInElement.location.compare(end) != .orderedAscending,
-               range.length > 0 {
-                return false
-            }
-            let frame = frag.layoutFragmentFrame
-            union = union.map { $0.union(frame) } ?? frame
-            // A zero-length block lives inside one fragment — stop there.
-            return range.length > 0
-        }
-        return union
-    }
 
     private func rectsMatch(_ a: [CGRect], _ b: [CGRect]) -> Bool {
         guard a.count == b.count else { return false }

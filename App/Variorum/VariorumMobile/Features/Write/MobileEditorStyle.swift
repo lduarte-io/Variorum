@@ -84,6 +84,8 @@ nonisolated enum MobileEditorStyle {
         /// The chosen take's mark — the pill's ✓ (the Mac card grammar's
         /// "✓ chosen" color).
         let chosenMark: UIColor
+        /// Comment ink (R7's register) — the ●n marker's color (S4).
+        let commentInk: UIColor
         /// The markdown face's palette — the Mac `Palette(tokens:)`
         /// mapping verbatim: marker = muted, link = accent, chip =
         /// codeTint (13k K10's per-voice tint).
@@ -128,6 +130,7 @@ nonisolated enum MobileEditorStyle {
             takeTint = dynamic(\.takeTint)
             takeLine = dynamic(\.takeLine)
             chosenMark = dynamic(\.chosen)
+            commentInk = dynamic(\.commentInk)
             palette = MarkdownFace.Palette(
                 marker: dynamic(\.muted),
                 link: dynamic(\.accent),

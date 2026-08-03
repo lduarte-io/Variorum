@@ -366,10 +366,12 @@ final class MobileTakesBrowserController {
             return "This note is locked — unlock it on the Mac to \(act)."
         case .lastActiveVariant:
             // I10's letter: removing the last active take is not a take
-            // operation — it is deleting the block, which is a Mac
-            // gesture for now.
+            // operation — it is deleting the block. Since S4 batch 1 the
+            // phone HAS that door (the ⋯ menu), so the copy names it
+            // instead of the Mac (the S2 wording retired with the road
+            // it pointed down — a sanctioned copy update, pins flipped).
             return "This is the block's only take — a block always keeps one. "
-                + "Deleting the whole block is a Mac gesture for now."
+                + "To remove it all, use Delete Block in the ⋯ menu."
         case .variantIsChosen:
             // The chosen-slot guard (re-point first).
             return "This take is what the note shows — choose another take first, "
