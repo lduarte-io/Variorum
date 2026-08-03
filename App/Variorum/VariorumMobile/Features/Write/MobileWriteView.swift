@@ -21,34 +21,14 @@ struct MobileWriteView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> MobileWriteSurfaceView {
         let surface = MobileWriteSurfaceView()
-        surface.textView.delegate = context.coordinator
+        // The gate delegate is the VM's own since batch 2 (`attach` installs
+        // it) — the SwiftUI face carries no police of its own, so every host
+        // of the surface polices identically.
         model.attach(textView: surface.textView)
         return surface
     }
 
     func updateUIView(_ uiView: MobileWriteSurfaceView, context: Context) {}
-
-    func makeCoordinator() -> Coordinator { Coordinator(model: model) }
-
-    @MainActor
-    final class Coordinator: NSObject, UITextViewDelegate {
-        private let model: MobileEditorViewModel
-
-        init(model: MobileEditorViewModel) {
-            self.model = model
-        }
-
-        func textView(
-            _ textView: UITextView,
-            shouldChangeTextIn range: NSRange,
-            replacementText text: String
-        ) -> Bool {
-            model.shouldChangeText(
-                in: range,
-                replacement: text,
-                isPaste: (textView as? MobileEditorTextView)?.isPasting == true)
-        }
-    }
 }
 
 /// The Write screen: the surface + the one status voice. Reached via the

@@ -69,6 +69,11 @@ final class MobileEditorViewModel {
     @ObservationIgnored private(set) weak var textView: MobileEditorTextView?
     @ObservationIgnored private(set) var storage: NSTextStorage?
     @ObservationIgnored private var storageObserver: MobileStorageObserver?
+    /// The VM-OWNED UITextViewDelegate (batch 2): the gate lives with the
+    /// brain it polices, so every host of this surface — the SwiftUI face,
+    /// the walk tests' bare views — gets the SAME police with no wiring to
+    /// forget. `UITextView.delegate` is weak; this is the strong home.
+    @ObservationIgnored private var gateDelegate: MobileEditorGateDelegate?
     @ObservationIgnored private var ledger = EditorSurfaceLedger()
     @ObservationIgnored private var pendingVerdict: BlockRangeIndex.Verdict?
     /// The policed edit's EXACT cost (old + new UTF-16 lengths, captured at
@@ -124,9 +129,14 @@ final class MobileEditorViewModel {
         }
     }
 
-    /// Production attach: the text view's storage + the canary.
+    /// Production attach: the text view's storage + the canary + the gate
+    /// (batch 2: the delegate is the VM's own, so bare test views and the
+    /// SwiftUI face police identically).
     func attach(textView: MobileEditorTextView) {
         self.textView = textView
+        let gate = MobileEditorGateDelegate(model: self)
+        textView.delegate = gate
+        gateDelegate = gate
         textView.onCanaryFired = { [weak self] message in self?.canaryMessage = message }
         textView.armCanary()
         attach(storage: textView.textStorage)
@@ -271,6 +281,12 @@ final class MobileEditorViewModel {
         let caret = textView?.selectedRange
         let (attributed, newIndex) = EditorDocument.materializeCore(
             new, tail: tail, base: MobileEditorStyle.baseAttributes)
+        // Batch 2 (M11): the markdown face at the one full-materialization
+        // door — the Mac `EditorDocument.materialize` forward's exact shape.
+        // ATTRIBUTES ONLY; the index still tiles the bytes exactly.
+        MarkdownFace.style(
+            attributed, base: MobileEditorStyle.baseFont,
+            palette: MobileEditorStyle.markdownPalette)
         suppressEditProcessing = true
         storage.setAttributedString(attributed)
         suppressEditProcessing = false
@@ -385,19 +401,19 @@ final class MobileEditorViewModel {
             // THE iOS RE-STAMP (obligation 1): the inserted characters
             // arrived attribute-stripped; identity is re-derived from the
             // index, never inherited.
-            setBlockAttribute(index.entries[i].blockID, over: editedRange)
+            restampProjection(over: editedRange)
             recordAutosave(
                 entryIndex: i, editedRange: editedRange, delta: delta,
                 exactCost: exactCost)
         case .tail:
             index.applyTailEdit(lengthDelta: delta)
-            setBlockAttribute(nil, over: editedRange)
+            restampProjection(over: editedRange)
             syncTailText()
             crystallizeIfNeeded()
             armTailIdleMint()
         case .openTail:
             index.openTail()
-            setBlockAttribute(nil, over: editedRange)
+            restampProjection(over: editedRange)
             tailText = ""
         case .closeTail:
             index.closeTail()
@@ -408,6 +424,16 @@ final class MobileEditorViewModel {
             // UIKit path outside the policed ones). The store is truth:
             // drop local bookkeeping and re-render from the projection.
             desyncRecovery()
+        }
+        // Batch 2 (M11): the markdown face follows the keystroke, scoped to
+        // the LINES the edit touched — the Mac's exact hook (P1's letter,
+        // `MarkdownScanCount`-pinned). Attribute-only, so it moves no byte;
+        // the observer's `.editedCharacters` guard means these attribute
+        // writes cannot re-enter here.
+        if let storage {
+            MarkdownFace.restyle(
+                storage, range: editedRange, base: MobileEditorStyle.baseFont,
+                palette: MobileEditorStyle.markdownPalette)
         }
         auditIdentityProjection()
         textView?.canaryCheckpointAfterMutation()
@@ -690,6 +716,14 @@ final class MobileEditorViewModel {
         storage.setAttributes(
             attributes,
             range: NSRange(location: range.location, length: (newText as NSString).length))
+        // Batch 2: the `setAttributes` above reset the replaced span to
+        // base, so the markdown face over those lines is re-derived (the
+        // Mac `applySeamEdit`'s exact posture). Attributes only.
+        MarkdownFace.restyle(
+            storage,
+            range: NSRange(location: range.location, length: (newText as NSString).length),
+            base: MobileEditorStyle.baseFont,
+            palette: MobileEditorStyle.markdownPalette)
         storage.endEditing()
         suppressEditProcessing = false
         if caretToEndIfWasAtEnd, caretWasAtEnd, let textView {
@@ -704,6 +738,63 @@ final class MobileEditorViewModel {
             storage.addAttribute(EditorDocument.blockIDAttribute, value: blockID, range: range)
         } else {
             storage.removeAttribute(EditorDocument.blockIDAttribute, range: range)
+        }
+    }
+
+    /// **The boundary-safe re-stamp (batch 2 fix — the walk3 crash's
+    /// mechanism, traced):** re-derives the block-ID projection over every
+    /// character `range` touches FROM THE INDEX — entry intersections gain
+    /// their entry's ID; everything between and beyond (separators, the
+    /// tail) sheds any.
+    ///
+    /// Exists because iOS's `didProcessEditing` report may WIDEN the edited
+    /// range under attribute fixing (the batch-1 measured wrinkle) — and
+    /// walk3 caught the widening CROSSING A BOUNDARY: inserting 2 chars at
+    /// a block's line start reported `+9`, the whole edited paragraph
+    /// INCLUDING its terminating newline, which on this surface is the
+    /// SEPARATOR — so stamping the raw report gave the separator an owner
+    /// (diagnostic evidence: entries len 6/len 8, runs `[7,+9]`). Deriving
+    /// the stamp's EXTENT from the report was the bug; the index is the one
+    /// authority (memo obligation 1), and with the extent taken from it a
+    /// widened report can only ever RE-stamp what is already true.
+    ///
+    /// Cost: an integer walk over entries with an early break — O(entries)
+    /// worst case, entry-count not byte-count, and only on iOS's re-stamp
+    /// path (the Mac inherits attributes and never re-stamps). A prefix-sum
+    /// bisect is the recorded upgrade if a corpus-scale note ever measures
+    /// it; the audit's own DEBUG walk is already O(entries) per edit.
+    private func restampProjection(over range: NSRange) {
+        guard let storage else { return }
+        let start = max(0, range.location)
+        let end = min(range.upperBound, storage.length)
+        guard start < end else { return }
+
+        var location = 0
+        var covered = start
+        for entry in index.entries {
+            let entryRange = NSRange(location: location, length: entry.length)
+            location += entry.length + 1
+            if entryRange.location >= end { break }
+            let overlapStart = max(entryRange.location, start)
+            let overlapEnd = min(entryRange.upperBound, end)
+            guard overlapStart < overlapEnd else { continue }
+            // The gap before this entry (a separator) sheds any ID.
+            if overlapStart > covered {
+                storage.removeAttribute(
+                    EditorDocument.blockIDAttribute,
+                    range: NSRange(location: covered, length: overlapStart - covered))
+            }
+            storage.addAttribute(
+                EditorDocument.blockIDAttribute, value: entry.blockID,
+                range: NSRange(location: overlapStart, length: overlapEnd - overlapStart))
+            covered = overlapEnd
+        }
+        // Whatever remains (the tail region, trailing separators) is
+        // owned by no block.
+        if covered < end {
+            storage.removeAttribute(
+                EditorDocument.blockIDAttribute,
+                range: NSRange(location: covered, length: end - covered))
         }
     }
 
@@ -784,6 +875,31 @@ final class MobileEditorViewModel {
         case .indexDesync:
             "The editor lost track of block boundaries — reloading from the store."
         }
+    }
+}
+
+// MARK: - The gate delegate (batch 2)
+
+/// The UITextViewDelegate the VM installs at attach — the ONE gate every
+/// host shares (the SwiftUI face carries no gate of its own since batch 2).
+@MainActor
+final class MobileEditorGateDelegate: NSObject, UITextViewDelegate {
+    private weak var model: MobileEditorViewModel?
+
+    init(model: MobileEditorViewModel) {
+        self.model = model
+    }
+
+    func textView(
+        _ textView: UITextView,
+        shouldChangeTextIn range: NSRange,
+        replacementText text: String
+    ) -> Bool {
+        guard let model else { return true }
+        return model.shouldChangeText(
+            in: range,
+            replacement: text,
+            isPaste: (textView as? MobileEditorTextView)?.isPasting == true)
     }
 }
 

@@ -22,6 +22,17 @@ import UIKit
 nonisolated enum MobileEditorStyle {
     static var baseFont: UIFont { .preferredFont(forTextStyle: .body) }
 
+    /// The markdown face's phone palette (batch 2, M11) — the shared
+    /// `MarkdownFace` algorithm with NEUTRAL system values: the Mac
+    /// `systemFallback`'s iOS cousins (secondary label for dimmed markers,
+    /// the system link color, a faint system fill for the 13k K10 code
+    /// chip). PROVISIONAL like everything visual here: the voice pass (L13,
+    /// LK2's switch) replaces the VALUES; the algorithm is the shared one.
+    static var markdownPalette: MarkdownFace.Palette {
+        MarkdownFace.Palette(
+            marker: .secondaryLabel, link: .link, codeTint: .secondarySystemFill)
+    }
+
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
         // Uniform per-PARAGRAPH gap (the 2026-07-12 rule's letter);

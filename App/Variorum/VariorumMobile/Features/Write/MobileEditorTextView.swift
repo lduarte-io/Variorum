@@ -24,6 +24,7 @@
 //
 
 import UIKit
+import VariorumCore
 import os
 
 // MARK: - The checkpoint canary (obligation 2)
@@ -83,26 +84,17 @@ final class MobileFallbackCanary {
     }
 }
 
-// MARK: - The keyboard bar shell (obligation 4; M11's acts land later)
-
-@MainActor
-enum MobileKeyboardBar {
-    /// The 44 pt accessory bar that rides the keyboard — measured working
-    /// in the spike (item 6). Batch 1 ships the SHELL only; the formatting
-    /// acts (M11) land with the markdown batch.
-    static func makeShell() -> UIView {
-        let bar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: 44))
-        bar.autoresizingMask = [.flexibleWidth]
-        bar.items = [.flexibleSpace()]
-        return bar
-    }
-}
-
 // MARK: - The text view
 
 @MainActor
 final class MobileEditorTextView: UITextView {
     private let canary = MobileFallbackCanary()
+
+    /// The keyboard bar's acts controller + the checkbox tap's router —
+    /// retained here because `UIBarButtonItem` targets and gesture-recognizer
+    /// targets are held weakly (batch 2).
+    private var keyboardBarController: MobileKeyboardBarController?
+    private var checkboxRouter: MobileCheckboxTapRouter?
 
     /// The bulk-entry hint (the Mac EditorTextView's exact shape): bulk
     /// paste at the tail segments on entry (AppSpec §7); a paste routed
@@ -144,8 +136,81 @@ final class MobileEditorTextView: UITextView {
         view.keyboardDismissMode = .interactive
         view.typingAttributes = MobileEditorStyle.baseAttributes
         view.backgroundColor = .systemBackground
-        view.inputAccessoryView = MobileKeyboardBar.makeShell()
+
+        // Batch 2: the bar's six live acts (LK8 minus ⑂/⋯ per P-2) replace
+        // the batch-1 shell.
+        let barController = MobileKeyboardBarController(textView: view)
+        view.keyboardBarController = barController
+        view.inputAccessoryView = barController.makeBar()
+
+        // Batch 2: the checkbox tap-toggle. The router's `shouldReceive`
+        // decision means a tap anywhere but strictly inside a box is never
+        // consumed — ordinary caret taps proceed untouched.
+        let router = MobileCheckboxTapRouter(textView: view)
+        let tap = UITapGestureRecognizer(
+            target: router, action: #selector(MobileCheckboxTapRouter.handleTap(_:)))
+        tap.delegate = router
+        view.addGestureRecognizer(tap)
+        view.checkboxRouter = router
         return view
+    }
+
+    // MARK: The ⏎ door (13k K5/K8 on the phone — batch 2)
+
+    /// **⏎ continues a list.** The keystroke itself is untouched:
+    /// `super.insertText("\n")` runs exactly as it always did (so the
+    /// open-tail gesture, `one_block`'s newlines-don't-mint, the idle mint
+    /// and every refusal see the same single `"\n"`), and the lead is a
+    /// second ordinary policed insertion afterwards — see
+    /// `MobileMarkdownActs.handleReturnKey`. `insertText` is the honest iOS
+    /// intercept: the software keyboard's return, hardware Return, and the
+    /// tests' typing proxy all arrive here; marked-text composition stays
+    /// ordinary (committing a composition is not the list gesture).
+    ///
+    /// Known limit, recorded (the batch-1 deliberate absence carried): the
+    /// phone has no soft-newline ⇧⏎ story yet, so a hardware ⇧⏎ reaches
+    /// this door like any ⏎ — when the soft-newline gesture lands, it must
+    /// gain the Mac's ⇧⏎ exclusion.
+    override func insertText(_ text: String) {
+        if text == "\n", markedTextRange == nil {
+            MobileMarkdownActs.handleReturnKey(in: self) { super.insertText("\n") }
+            return
+        }
+        super.insertText(text)
+    }
+
+    // MARK: Tab / ⇧Tab (13k K8 — batch 2)
+
+    /// **The Tab door** — hardware Tab and the bar's ⇥ share it. A list
+    /// line indents (the shared brain's plan); everywhere else the key is
+    /// byte-for-byte what it has always been: one ordinary policed `"\t"`
+    /// (an empty plan is exactly the signal that no list line was touched —
+    /// the Mac `indentLists` shape).
+    @objc func performTabKey() {
+        guard isEditable else { return }
+        if MobileMarkdownActs.apply(.indent, to: self) { return }
+        guard MobileMarkdownActs.gateAllows(self, range: selectedRange, replacement: "\t")
+        else { return }
+        super.insertText("\t")
+    }
+
+    /// **The ⇧Tab door** — outdent through the ONE shared unit (the ⏎
+    /// door's `.outdentItem` shares it). Outside a list there is no
+    /// ordinary backtab character, so an empty plan does nothing — the
+    /// Mac's `insertBacktab` parity.
+    @objc func performShiftTabKey() {
+        guard isEditable else { return }
+        _ = MobileMarkdownActs.apply(.outdent, to: self)
+    }
+
+    override var keyCommands: [UIKeyCommand]? {
+        let tab = UIKeyCommand(
+            input: "\t", modifierFlags: [], action: #selector(performTabKey))
+        tab.wantsPriorityOverSystemBehavior = true
+        let backtab = UIKeyCommand(
+            input: "\t", modifierFlags: .shift, action: #selector(performShiftTabKey))
+        backtab.wantsPriorityOverSystemBehavior = true
+        return (super.keyCommands ?? []) + [tab, backtab]
     }
 
     // MARK: Canary forwards

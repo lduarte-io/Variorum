@@ -124,4 +124,94 @@ struct MobileWalkTests {
             #expect(!surface.textView.canaryFired)
         }
     }
+
+    /// Walk step 3 (S1 batch 2): the markdown vocabulary — type a list, ⏎
+    /// continues it, Tab nests, the bar re-leads, a tap toggles the box, a
+    /// heading act at depth mints a working column-0 heading — and the
+    /// STORED BYTES are byte-checked against the shared brain's law (the
+    /// Mac's own outcomes, per the one-brain rule).
+    @Test func walk3_markdownVocabularyByteStable() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "walk md", profile: .blog)
+            }
+            let model = MobileEditorViewModel(
+                session: session, postID: post.id,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            model.attach(textView: surface.textView)
+            await model.loadOnce()
+            let view = surface.textView
+            let bar = MobileKeyboardBarController(textView: view)
+
+            // A list is born; ⏎ continues it with the lead, twice; the
+            // second item crystallizes as she types past it.
+            view.insertText("- milk")
+            view.insertText("\n")
+            view.insertText("eggs")
+            view.insertText("\n")
+            await model.awaitMintSettle()
+            #expect(view.textStorage.string == "- milk\n- eggs\n- ")
+
+            // ⏎ on the EMPTY item exits the list (K5's letter — the
+            // consumed keystroke; the lead goes, no newline lands).
+            view.insertText("\n")
+            #expect(view.textStorage.string == "- milk\n- eggs\n")
+
+            // Tab nests the MINTED item (K8's two-space unit) — an
+            // ordinary in-block policed edit, as on the Mac.
+            view.selectedRange = NSRange(location: 13, length: 0) // end of "- eggs"
+            view.performTabKey()
+            #expect(view.textStorage.string == "- milk\n  - eggs\n")
+
+            // The bar re-leads it as a checklist — nesting survives
+            // (actKeepsIndent), and the born box is UNCHECKED.
+            bar.fireChecklist()
+            #expect(view.textStorage.string == "- milk\n  - [ ] eggs\n")
+
+            // A tap strictly inside the box checks it; the caret stays put.
+            surface.layoutIfNeeded()
+            let boxStart = ("- milk\n  - ".utf16.count)
+            guard let from = view.position(from: view.beginningOfDocument, offset: boxStart + 1),
+                  let to = view.position(from: view.beginningOfDocument, offset: boxStart + 2),
+                  let boxRange = view.textRange(from: from, to: to)
+            else {
+                Issue.record("no laid-out geometry for the box")
+                return
+            }
+            let rect = view.firstRect(for: boxRange)
+            #expect(MobileMarkdownActs.toggleCheckbox(
+                at: CGPoint(x: rect.midX, y: rect.midY), in: view))
+            #expect(view.textStorage.string == "- milk\n  - [x] eggs\n")
+
+            // ⏎ at the checked item's end continues at its own LEVEL,
+            // unchecked (K5+K8) — inside the block, a content newline (I4).
+            view.selectedRange = NSRange(location: 19, length: 0)
+            view.insertText("\n")
+            #expect(view.textStorage.string == "- milk\n  - [x] eggs\n  - [ ] \n")
+
+            // The heading act on the NESTED empty item mints a working
+            // COLUMN-0 heading (the 13k MAJOR's actKeepsIndent law).
+            bar.fireHeading()
+            #expect(view.textStorage.string == "- milk\n  - [x] eggs\n# \n")
+            view.insertText("Title")
+
+            // Teardown: the stored bytes are the law's, exactly (the
+            // nested continuation + heading were content edits of the
+            // second block; the trailing "\n" is the open empty tail's
+            // separator — a render artifact, stored nowhere).
+            await model.finish()
+            #expect(try await storedBlockTexts(db, postID: post.id)
+                    == ["- milk", "  - [x] eggs\n# Title"])
+            #expect(view.textStorage.string == "- milk\n  - [x] eggs\n# Title\n")
+
+            // Identity intact, canary silent, no refusal spoke.
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+            #expect(!view.canaryFired)
+            #expect(model.statusMessage == nil)
+        }
+    }
 }
