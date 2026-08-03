@@ -3929,6 +3929,264 @@ exactly these:
   into a testable sibling brain — the authority above is its natural
   home.
 
+## Stage 3 review — round 1 FIX-PASS RECORD (fix session, 2026-08-03; commits `2c06e63` · `8552436` · `7aa80ac` + the record commit, pushed)
+
+Every adjudicated fix built EXACTLY per the adjudication, each preceded
+by this session's OWN trace of the mechanism (the hallucination guard —
+all seven findings reproduced under trace; nothing refuted), each
+bug-class fix landed with a red-on-old pin verified by BEHAVIORAL REVERT
+(the pre-fix mechanism restored in place with the new plumbing kept, the
+pins watched fail with recorded issue counts, the fix restored, green
+re-confirmed). Commit map: BLOCKER + MAJOR 1 + MAJOR 2 + MINOR 2 =
+`2c06e63` (deliberately ONE commit — the adjudication makes them one
+mechanism, and all four live in the same `.task` wiring); MAJOR 3 =
+`8552436`; MINOR 1 + both NITs + the record amendment = `7aa80ac`.
+
+**BLOCKER — the ONE per-post coordinator + the phone liveness authority
+(commit `2c06e63`).** *Own trace:* both tab stacks alive (opacity is not
+removal — `onDisappear` never fires), each stack can push the SAME post;
+`MobileEditorViewModel.init` minted its OWN `AutosaveCoordinator`, so
+editor B's surface never saw A's pending text and B's whole-buffer
+record REPLACED A's pending entry from a stale base — arm (b)'s
+permanent `working_text` loss confirmed byte-for-byte (no commit, no
+conflict variant). Also traced: the hidden stack's editor RETAINED first
+responder across a tab switch (nothing resigned it), so the keyboard
+could keep typing into the hidden surface. *Fix, P-3's own shape as
+adjudicated:* **(1)** `AppSession.autosave(forPost:)` — the N3 boundary —
+HOISTED cross-platform (`Shared/AppSession.swift`; the Mac riders —
+quit-door registration, the W22 first-edit note — stay `#if os(macOS)`
+inside the one door; the door gains defaulted clock parameters applied
+only at MINT, which is what lets every existing mobile test construction
+compile UNMODIFIED); the mobile VM adopts it with the Mac's own
+multicast `observe()`/`stopObserving` pattern (a shared coordinator must
+never be deafened by a second surface's single-owner closure) plus a
+`teardown()` the screen calls at pop. **(2)** `MobileLivenessAuthority`
+(`Features/Shell/MobileLivenessAuthority.swift`, the `PaneTextAuthority`
+analog — flag 3's testable sibling brain): exactly ONE live editor
+anywhere; `standDown()` = read-tier (focus resigned via
+`endEditing(true)`, `isEditable = false`, and a gate liveness belt that
+refuses-and-speaks — PROVISIONAL wording "This note is live in your
+other tab."); `takeLiveness(_:refresh:)` is the explicit act — stand
+down others → flush the taker's (possibly shared) coordinator → refresh
+through the one projection door on re-entry → grant. The shell's
+per-stack `navigationDestination` passes the OWNING stack (never the
+visible-tab state — a hidden stack's screens re-render under the other
+tab); the tab doors call `tabDidBecomeVisible`. Standalone VMs (harness,
+preview) stay live by construction, so no pre-existing test changed
+meaning. *Pins:* `typingSurvivesTheTabSwitchRoundTrip_nothingLost` (the
+adjudicated script exactly: type in A → switch inside the debounce →
+type in B on the same post → the store holds BOTH edits; plus the
+one-coordinator identity, the stand-down belt, and B's surface carrying
+A's bytes) and `tabReEntryRefreshesTheStaleSurfaceBeforeThePen`.
+*Revert evidence (REVERT-A: per-VM coordinator restored + takeLiveness
+stripped to bare bookkeeping):* **4 issues** — B's surface the stale
+photograph ("Base."), **the store LOST A's edit (the forbidden
+outcome)**, the coordinator identity split, the re-entered surface
+stale; all 13 sibling tests in the two suites stayed green. Restored →
+green.
+
+**MAJOR 1 — the background flush covers every registered editor (commit
+`2c06e63`, FOLDED INTO the authority per the adjudication).** *Own
+trace:* `.task` set the router's single `activeEditor` slot once per
+screen lifetime; `onDisappear` nil'd it only when the popping screen was
+the registered one — arm (a): a second registration permanently
+shadowed the first; arm (b): a pop left the slot nil with a dirty
+editor open. *Fix:* the slot is RETIRED; `performBackgroundFlush(editors:)`
+targets `MobileLivenessAuthority.registered` — the authority's own
+bookkeeping, one mechanism, never a parallel slot (`flushAll()` runs
+every registered editor's `finish()`); the app's scene-phase handler
+re-pointed. *Pin:* `theBackgroundFlushCoversEveryRegisteredEditor_bothArms`
+(both traced arms in one test, two posts so the arms isolate
+registration semantics). *Revert evidence (REVERT-B: a temporary single
+weak slot wired into register/deregister; flushAll flushes only it):*
+**2 issues** — arm (a)'s earlier-registered editor unflushed AND arm
+(b)'s survivor uncovered after the pop; the single-editor
+`theBackgroundTransitionLandsPendingTextInTheStore` stayed GREEN on the
+slot — exactly the round-1 finding's "the re-pointed pin cannot see
+either arm", demonstrated. Restored → green.
+
+**MAJOR 2 — arrival before the infinite loops (commit `2c06e63`).**
+*Own trace:* `model.start()` is `withTaskGroup` over two `for try await`
+observation loops that end only at cancellation — the focus raise
+sequenced after it was dead code (reached as a no-op at view teardown);
+the Today door's "two taps to typing" did not function. *Fix:* the
+wiring order is now register → `arrive(focus:)` → `start()`, with
+`arrive` the extracted, pinnable arrival routine on the VM (`loadOnce()`
+then the focus raise); `start()`'s doc now states NEVER-RETURNS so
+nothing gets sequenced after it again. *Pin:*
+`arrivalRaisesFocusBeforeTheObservationLoops` — window-hosted (the S2
+`beginEditingRaisesKeyboardFocusOnTheCardEditor` harness pattern), with
+a BOUNDED wait so the pre-fix shape fails red instead of hanging.
+*Revert evidence (REVERT-C: `arrive` restored to the pre-fix ordering —
+focus behind `await start()`):* **1 issue** — focus never rose within
+the bounded wait; 4 siblings green. Restored → green. *Honest residue:*
+the `.task`'s three-line body is now policy-free (the brains are
+pinned); the SwiftUI-side ordering of `makeUIView` before `.task` is
+framework behavior the harness cannot drive — the S2 feel round's
+keyboard-rise check remains the device-side instrument (flag 3's
+"genuinely thin again" bar, met as the reviewer specified).
+
+**MAJOR 3 — clean-instant stale adoption: TRACED SHARED; the policy fix
+landed in `Shared/` and the FULL verification duty fired (commit
+`8552436`).** *The Mac-half trace, first-hand (traced, never assumed —
+the adjudication's demand):* `EditorViewModel.observeSlots`
+(`Features/Editor/EditorViewModel.swift:532–541`) applies deliveries
+DIRECTLY through the shared `EditorProjectionPolicy.decide`, which had
+no freshness input; the Mac's `applyPendingIfClean` (:686) re-reads
+fresh for the DEFERRED path only — its own comment names the class for
+that path and nothing covers the clean-instant one; no generation guard
+exists anywhere in the Mac composition (the retired Phase 8 capture VM
+was the ONLY surface carrying the clean-instant guarantee, and it was
+deleted at S3 batch 1). **Routing decision: the mechanism is genuinely
+shared → the fix lands at the policy in `Shared/EditorBrain/`, both VMs
+adopt it, a Mac-side pin is owed and landed, and the full verification
+duty runs (counts below).** *Fix:* `decide` gains `delivery: Bool =
+false` and the `.refetchFresh` arm — **a DELIVERY never takes a rewrite
+arm** (precedence: not-loaded ▸ busy ▸ forced[→refetch under a
+delivery, flag kept armed] ▸ echo[stays legal — matching means
+byte-identical, nothing rewritten] ▸ delivery-refetch ▸ same-sequence ▸
+full). Both VMs mark their observation loops `fromDelivery: true`;
+`.refetchFresh` holds the marker and settles through the ONE
+fresh-read path (`applyPendingIfClean`), now fenced by
+`storeWriteGeneration` — the retired VM's `readGeneration` restored:
+bumped at every flush settle (the multicast observer) and mint finish;
+a fresh read that STRADDLED a settle re-signals instead of adopting
+(converges when the store goes quiet). The `false` default is the
+design's load-bearing half: every direct/fresh drive keeps synchronous
+semantics, so **every pre-existing pin on both platforms passed
+UNMODIFIED**. Deliberately scoped OUT and recorded: mobile fan state
+still adopts unconditionally at `ingest` (the S2 posture — the card
+belt must see a remote lock the moment the delivery lands; fans are
+bookkeeping, never surface bytes), and the Mac structural flight's
+straddle corner keeps its existing busy-guard + flight-exit settle (the
+adjudicated class is the delivery photograph; growing the fence into
+the flight machinery would exceed the letter — named for round 2).
+*Pins:* mobile `aStaleDeliveryAtACleanInstantNeverRewritesTheSurface`
+(the adjudicated deterministic drive: stale photograph consumed
+post-flush as a delivery → surface AND ledger keep the flushed bytes,
+plus the stale-EMPTY analog — an empty delivery never blanks the
+surface); Mac `aStaleDeliveryAtACleanInstantNeverRewritesTheMacSurface`
+(the shared trace made executable, `withEditor` harness); policy
+`aDeliveryNeverTakesARewriteArm` (six-arm coverage incl. echo-legal,
+busy-defers, forced-under-delivery, initial-render-legal). *Revert
+evidence (REVERT-E: the policy's delivery arm removed — a single-point
+restore of the pre-fix arms for BOTH platforms):* mobile **6 issues**
+(surface reverted to "Base.", ledger overwritten, and the empty
+delivery BLANKED the surface — the retired double-mint class live on
+screen; 3 sibling projection tests green) · Mac **5 issues** (3
+policy-arm expectations + the Mac VM pin at both beats — the Mac
+surface regressed to "Base."; 5 sibling ledger/precedence tests green
+including the UNMODIFIED precedence pin). Restored → green both sides.
+*The retired clean-instant guarantee is hereby RESTORED BY NAME:*
+"every delivery is only a signal; the authoritative application is a
+FRESH read stamped with a generation" — now the shared policy's law on
+both platforms, not one retired VM's private discipline.
+
+**MINOR 1 — the Library search catch (commit `7aa80ac`).** *Own trace:*
+`.task(id: query)` cancels the in-flight search per keystroke and at
+the root's disappearance; GRDB 7's async `read` throws
+`CancellationError`; the catch lacked the filter its own file's
+sibling loops carry, lacked the Mac catalog catch's staleness guard,
+and never cleared on success — the red line sat under the Library
+until another error replaced it. *Fix:* `catch is CancellationError {}`
++ the `activeQuery == trimmed` guard on the error arm + `lastError =
+nil` on the success path (the Mac's exact posture). *Pin:*
+`aCancelledSearchNeverLandsAsAnError` (cancel the wrapping task before
+the read lands — deterministic: `Task.isCancelled` is set before the
+read schedules — then a landed search leaves no error). *Revert
+evidence (REVERT-F: the pre-fix catch restored):* **2 issues** —
+`CancellationError()` landed as the persistent line AND survived the
+successful follow-up search; 6 siblings green. Restored → green.
+
+**MINOR 2 — the voice flip through the authority (commit `2c06e63`) +
+the record corrected (commit `7aa80ac`).** *Own trace:* `setVoice`
+restyled only the single registered slot's storage; a second open
+editor kept the old voice's fonts under a new-voice masthead (chrome
+follows `router.voice`, storage does not). *Fix:* `setVoice` →
+`editors.applyVoiceChangeEverywhere()` — every registered editor,
+stood-down included (O(open note) each, ≤ one editor per tab, spent at
+a deliberate Settings flip). The batch-1 record's overbroad claim
+("an editor open in the OTHER tab follows a Settings flip — surface and
+masthead both") is amended IN PLACE, visibly, at its item 6. *Pin:*
+`aVoiceFlipReachesEveryRegisteredEditor` — verified against TWO editors
+per the adjudication, flip window await-free (the S1 MINOR-2
+discipline). *Revert evidence (REVERT-D: `live?.applyVoiceChange()` —
+the single-editor reach):* **1 issue** — the stood-down editor's
+storage kept terminal mono under the study flip; the single-editor
+voice pin stayed green (discrimination). Restored → green.
+
+**NIT 1 — fixed (commit `7aa80ac`):** `MobileVoicePreference`'s header
+no longer claims the masthead door; it names the Settings home and the
+authority-routed flip.
+
+**NIT 2 — fixed (commit `7aa80ac`):** `MobileShelfFaces.name` gains the
+`Reading` base (the ONE finished-state grammar) with the `ShelfBook`
+overload forwarding; `MobileBookView`'s header calls it instead of
+respelling — bytes identical by construction, one spelling left.
+
+**Sanctioned test edits, enumerated (everything else passed
+unmodified):** (1) `MobileShellTests.theVoiceFlipReaches…` — the
+retired `router.activeEditor = model` line became an authority
+registration (the adjudicated mechanism change); (2)
+`MobileShellTests.theBackgroundTransitionLandsPendingTextInTheStore` —
+re-pointed at `performBackgroundFlush(editors:)` over a registered
+authority (same setup, same assertions; the two-editor arms live in the
+new pin); (3) `MobileTakesTests`' `deliver` helper — COMMENT-ONLY
+(its fresh-application semantics are now the refetch path's settle;
+zero assertion changes); (4) the plan-file amendment at batch-1 item 6
+(MINOR 2's adjudicated duty). All eleven direct
+`MobileEditorViewModel(...)` test constructions, the whole S1/S2 pin
+population, and the Mac policy precedence pin compile and pass
+BYTE-UNMODIFIED — the session-door clock parameters and the
+`delivery=false` default were designed for exactly that.
+
+**Environment note (the recorded spine lesson, re-confirmed):**
+`-only-testing:VariorumMobileTests/MobileEditorTests` (a FILE name)
+selects zero Swift Testing tests — the projection suite's TYPE name
+(`MobileEditorProjectionTests`) selects; one interim revert run was
+repeated for it. And one `test-without-building` invocation mid-revert
+ran a stale binary (caught by the count, re-run with a build) — reverts
+verify only on BUILT trees.
+
+**Counts, all by this session's own runs (final tree):**
+- **Mobile (iPhone 17 Pro / iOS 26.2): 140 tests / 19 suites GREEN** —
+  the 133/18 baseline + this pass's SEVEN pins (5 liveness + the
+  MAJOR 3 drive + the search pin) + the one new suite;
+  `MobileWalkTests`, the L9 pin, and the identity audit green within
+  every run cited above.
+- **Core `swift test`: 1039 / 114 GREEN** (the S1 finals reproduced;
+  zero `Sources/VariorumCore` lines in this pass's diff).
+- **Mac: 1193 tests / 208 suites, EXACTLY ONE red** — the 13k/S1 baseline 1191/208 plus this pass's
+  TWO Mac-side tests, with EXACTLY the one recorded environment-gated
+  tripwire red BY IDENTITY
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`).
+- **Spine: 51 / 7 GREEN** (the seven tutorial suite TYPE names).
+
+**Boundaries:** NO schema; NO `Sources/VariorumCore` lines; NO
+`Sync/` lines; the `Shared/` diff is exactly MAJOR 3's adjudicated
+routing (`EditorProjectionEngine.swift`) plus the BLOCKER's adjudicated
+per-post-door hoist (`AppSession.swift` — named verbatim in the
+adjudication; Mac behavior byte-identical, riders preserved); the Mac
+diff is `EditorViewModel.swift`'s delivery marking + fence + the two
+new tests. No new dependencies. Commits `2c06e63` · `8552436` ·
+`7aa80ac` + the record commit, pushed to `origin mobile`.
+
+**Notes for the round-2 reviewer:** (1) the liveness belt's refusal
+wording is PROVISIONAL (gate-bundle class); (2) `noteLivenessGranted`
+defers to an OPEN takes browser (`isOpen`) — the sheet's page
+stand-down outranks the grant, and the browser's own Done restores
+editability (the stood-down-with-sheet-open corner heals through
+re-entry's grant path); (3) the authority holds weak entries and prunes
+nil editors at every door; (4) `flushAll` uses `finish()` (tail mint +
+attach + flush — the backstop shape a suspension wants), so a
+background flush can mint; that is the S1 teardown semantics applied to
+every open editor, deliberate; (5) MAJOR 3's `.initialRender` stays
+delivery-legal (nothing local exists to regress pre-load) and
+`forceFull` under a delivery keeps the flag armed — both pinned; (6)
+the generation fence bumps at flush-settle and mint-finish only — the
+Mac structural flight's read-straddle corner is deliberately outside
+the adjudication's letter and recorded here, not silently.
+
 ---
 
 ## Orientation
