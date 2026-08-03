@@ -81,6 +81,11 @@ final class SpikeBenchViewController: UIViewController, UITextViewDelegate,
     private(set) var lastKeyboardFrame: CGRect = .null
     private(set) var keyboardEvents: [String] = []
 
+    /// The fanned block's vertical center as a FRACTION of the text view's
+    /// visible height — published in the status so the UITest can aim its
+    /// swipe at the block. Cached after first layout.
+    private(set) var fanFraction: Double = -1
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -152,6 +157,18 @@ final class SpikeBenchViewController: UIViewController, UITextViewDelegate,
         refreshStatus()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if fanFraction < 0, textView.bounds.height > 0 {
+            let rects = fragmentRects(for: fannedBlockIndex, in: textView)
+            if !rects.isEmpty {
+                let union = rects.dropFirst().reduce(rects[0]) { $0.union($1) }
+                fanFraction = (union.midY - textView.contentOffset.y) / textView.bounds.height
+            }
+            refreshStatus()
+        }
+    }
+
     static func makeAccessoryBar() -> UIView {
         let bar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: 44))
         bar.items = [
@@ -172,6 +189,7 @@ final class SpikeBenchViewController: UIViewController, UITextViewDelegate,
         statusLabel.text =
             "peek=\(peekIndex) menu=\(lastEditMenuAction) menuCalls=\(editMenuDelegateCallCount) "
             + "offset=\(offset) edits=\(storageEdits.count) tk2=\(canary.alive ? 1 : 0) "
+            + String(format: "fanFrac=%.3f ", fanFraction)
             + "kbd=\(keyboardEvents.last ?? "none")"
     }
 
