@@ -275,17 +275,18 @@ K3, 2026-07-25).
   candidate; STOP at the sitting if it firms).
 - No `Sources/VariorumCore/Sync/` lines without the standing rider.
 - Every PROVISIONAL to `notes/QUESTIONS.md` (append, never
-  renumber — **#49–#52 are OPEN for her walk**; next free number
-  at authoring time: **#53**).
+  renumber — the #49–#55 walk is DONE except #54(d), per 13k's
+  record; next free number at 13k's close: **#56**).
 
 ## Baselines at open (verify with your own runs)
 
-Core **1001/110** · Mac **1139/197** (the ONE recorded
-environment-gated tripwire red on unlocked sessions — its
-KnownIssues row; exactly that one red is the known state) · mobile
-**14/4** · tutorial spine **51/7** — the 13g finals, verified by
-that orchestrator's own runs 2026-08-01. No schema since v1_12;
-mirror at lockstep marker 4.
+Core **1034/114** · Mac **1191/208** (the ONE recorded
+environment-gated tripwire red — covariate UNKNOWN since 13k
+refuted the lock-state theory; its KnownIssues row; exactly that
+one red is the known state) · mobile **14/4** · tutorial spine
+**51/7** — the 13k finals, verified by that architect's own runs
+2026-08-02, superseding the 13g figures this section carried at
+authoring time. No schema since v1_12; mirror at lockstep marker 4.
 
 ## Verification
 
@@ -307,3 +308,16 @@ the formatting toolbar (built, both bars), the checked-box register
 (ruled no-change). The A47c tripwire row now starts
 covariate-UNKNOWN — read its updated KnownIssues row before the
 re-run.)*
+
+*(2026-08-02 addendum 2, the post-13k conversation — SCOPE
+FULLNESS, her observation: "it seems very full now." The ledger
+runs E1–E11 plus the duplicate-book-name sitting item, and that is
+deliberately MORE than one phase must carry: the kickoff's step (4)
+scope confirmation is a REAL trim pass, not a formality. The
+architect should bring her a keep/defer split with a proposed batch
+order; the natural defer candidates if she wants it lighter are E8
+(the fuller tags face) and E9 (the takes-aware find & replace half
+— its KnownIssues row would be re-owned at the sitting, never left
+blank), both severable without touching the phase's core (E1–E6 +
+the sweep). Baselines and the QUESTIONS status line in this file
+were refreshed to the 13k finals the same day.)*
