@@ -586,6 +586,34 @@ does not gate the spike (project refs are random; display names rename freely).
     with the same OAuth-2.1-Server mechanics, and the org/Pro purchase stands
     down until she wants it.
 
+- **Round 0h (same sitting) — RULED: THE FLIP IS TAKEN.** Her words: "I like the
+  idea of variorum being the home for users better than fragments being the home
+  *[removed for publication]*
+  *[removed for publication]*
+  SUPERSEDED (recorded, never erased); R2's shape (A) AMENDS: **the VARIORUM
+  project is the suite's account home and OAuth 2.1 issuer** — "stargazing"
+  survives as the BRAND and the pages' front (plus the eventual custom domain),
+  not a separate project. The Pro-org purchase stands down (upgrade at her word,
+  when she wants it). **The four guardrails BIND:** allowlist now · Variorum
+  signups OFF until 14c's isolation · custom domain fronts the issuer before the
+  first non-author signup · the re-decide checkpoint before the first non-author
+  account is minted. Consequences: her migration collapses to adding a DIRECT
+  *[removed for publication]*
+  by construction; custom:fragments then retires); Variorum-the-app and mobile
+  sign in DIRECTLY to their own project (no OAuth hop — the 9c AuthSession
+  password grant, re-aimed); only OTHER apps (Fragments, future) ride the OAuth
+  flow. The issuer URL is therefore KNOWN TODAY
+  *[removed for publication]*
+  ask list went concrete in this round's commit. **Her table question answered
+  for the record: 14a creates NO new table** — `auth.users` already exists in
+  the Variorum project and already holds her; the family's new tables are 14b's
+  vault (wrapped keys + device enrollment, RLS'd, §12 lockstep) and 14c's
+  entitlement + the `setting` owner-scoping. The condensed family map with the
+  three Fragments touchpoints (#1 now: trust issuer / delegated sign-in / link
+  her user / retire native signup+password; #2 at 14b: journal-class E2EE + the
+  trim and empty-body asks; #3 at 14c: the entitlement check) was delivered
+  in-chat as her requested mental picture; TestFlight remains after the family.
+
 ## Ledger
 
 | # | Item | Status |

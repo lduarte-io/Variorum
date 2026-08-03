@@ -445,3 +445,26 @@ section; the sitting record is `notes/plans/phase-14a-suite-identity.md`):**
   its Fragments-project session through the stargazing issuer (one interactive flow
   per device, then the same persisted-session + refresh loop as today).
   `journal_entries` shape and key semantics stay frozen — ask #3 stands untouched.
+
+**AMENDMENT 2026-08-03 (round 0h — supersedes the "NEW neutral Supabase project"
+line above):** the suite account home is the **VARIORUM PROJECT itself** (her
+ruling; "stargazing" stays the brand and the pages' front — plus an eventual
+custom domain — never a separate project). Consequence: **the issuer URL is known
+*[removed for publication]*
+custom domain before any non-author signup. The concrete Fragments-side asks,
+ready to carry once the OAuth 2.1 Server is enabled there and Fragments is
+registered as a client (client id + page URLs delivered with them):
+1. Add the suite issuer as a trusted OIDC provider (`custom:stargazing`) and route
+   sign-in through the delegated PKCE flow (the same 9c-proven pairing, pointed
+   the other way).
+*[removed for publication]*
+   *[removed for publication]*
+   unlink/retire her email+password identity — single sign-in, no Fragments
+   password surviving.
+3. Retire the native signup surface: accounts are created at the suite from now
+   on — and suite signups stay OFF until Variorum's 14c isolation is built
+   (nobody-before-the-family, her sequencing ruling).
+4. `journal_entries` shape/keys stay frozen (standing ask #3, unchanged).
+5. Heads-up on the later touchpoints: **14b** = journal-class E2EE under the
+   shared key + the trim / empty-body-as-deletion relocations; **14c** = the
+   one-payment entitlement check. TestFlight opens after the family completes.
