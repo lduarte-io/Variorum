@@ -351,7 +351,7 @@
 			mainGroup = E1C2717F2FFC2F420084BEA6;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E1C271B22FFC2FB40084BEA6 /* XCLocalSwiftPackageReference "../../../variorum" */,
+				E1C271B22FFC2FB40084BEA6 /* XCLocalSwiftPackageReference "../.." */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E1C271892FFC2F420084BEA6 /* Products */;
@@ -981,9 +981,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E1C271B22FFC2FB40084BEA6 /* XCLocalSwiftPackageReference "../../../variorum" */ = {
+		E1C271B22FFC2FB40084BEA6 /* XCLocalSwiftPackageReference "../.." */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../../variorum;
+			relativePath = ../..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
