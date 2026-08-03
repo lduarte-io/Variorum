@@ -3525,6 +3525,27 @@ whole diff is mobile-target + this file + the KnownIssues row).
 Commits: `e531f6d` (the app shape + retirement + suites) · the record
 commit; pushed to `origin mobile` at bout end.
 
+## Stage 3, batch 1 — ACCEPTED; STAGE 3 BUILD COMPLETE — the ladder OPENS (architect, 2026-08-03)
+
+**Acceptance:** verified — scope inspected (mobile-target + this file +
+the sanctioned KnownIssues row edit; zero core/Shared/Mac/pbxproj/
+schema/`Sync/`), the batch record read, push confirmed, and **mobile
+133/18 re-confirmed by the architect's own run** (the −14/+17 test
+arithmetic accepted: the Phase 8 tests retired WITH their surface; the
+retired-tests mapping is ladder flag 1's to weigh). The KnownIssues
+trailing-newlines resolution ACCEPTED (resolved by replacement, the L9
+pin cited — the rule's letter: the closing record notes the
+resolution). P27–P34 join the gate bundle (now P1–P34). Ledger **L4
+DONE**.
+
+**THE STAGE 3 REVIEW LADDER — round 1 (fresh cold reviewer, spawned at
+this record):** target = **`2ba90d7..774305e`**; `REVIEW_PROMPT.md`
+VERBATIM, zero framing; anchors = the S3 batch record + its six flags
+(flag 1 — whether any retired capture-test class lacks a standing
+new-editor equivalent, stale-projection races sharpest — deserves the
+reviewer's particular weight). Findings repo-first; the same-model flow
+holds; hard cap three rounds.
+
 ---
 
 ## Orientation
