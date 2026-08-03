@@ -321,3 +321,13 @@ order; the natural defer candidates if she wants it lighter are E8
 blank), both severable without touching the phase's core (E1–E6 +
 the sweep). Baselines and the QUESTIONS status line in this file
 were refreshed to the 13k finals the same day.)*
+
+*(→ HER RULING, the same conversation — NO TRIM: "honestly i don't
+need to cut any items from 13e - we've had midphase handoffs before
+when necessary." The full ledger E1–E11 runs; step (4) scope
+confirmation returns to ordinary confirmation, and the pressure
+valve for a long phase is the standing one — fresh implementer
+sessions per batch and, if the orchestrator itself runs long, a
+mid-phase orchestrator handoff on the 13b context-degradation rule
+— never deferral. The defer-candidates sentence above is
+superseded.)*
