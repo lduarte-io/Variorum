@@ -5269,6 +5269,43 @@ with this review's Read-staleness addition.
 
 ---
 
+## Stage 4 review — round 1 ADJUDICATION (architect, 2026-08-03; the fix session spawns on this record)
+
+- **MAJOR 1 — AGREED; fix owed.** The Delete Block door gains the
+  flush-guard + `structuralInFlight` latch its siblings carry
+  (`MobileStructural.flushPendingText`'s own discipline — the Mac's
+  delete rides `runStructural` with both); red-on-old pin at the seams,
+  revert-verified. The comment's claim becomes true.
+- **MINOR 1 — AGREED; record correction only** (the fix session amends
+  interpretation 4 in place, visibly: the true equivalence is
+  `propagatedCuts`, not the untouched-confirm claim).
+- **MINOR 2 — AGREED; the one-line post-flush re-verify** (the R2-10
+  class; pin where drivable, else the honest-rarity record).
+- **NIT 1 — fix** (the raw SQL routes through the standing query
+  vocabulary). **NIT 2 — fix** (the page meta's "of N" reads the true
+  membership count, or names the truncation honestly — never a silent
+  window-as-book).
+- **Flag 1 — ADJUDICATED, the deviation STANDS as recorded** (verified
+  clean; the honesty + four-suite duty leave nothing owed). FORWARD
+  RULE, recorded so the discipline neither erodes nor blocks:
+  rename-only parity moves of PURE brain files into `Shared/EditorBrain`
+  are PRE-SANCTIONED for future batches (four-suite duty + record
+  enumeration required); every OTHER `Shared/` touch still
+  stops-and-reports.
+- **Flag 3's residual — TO THE GATE BUNDLE as Q-M2 (hers):** on the
+  Mac, a fanned block's plain divide opens the take ceremony (untouched
+  confirm divides only the SHOWN take); on the phone, per M10 + the #10
+  auto-proceed rule, a fanned divide AUTO-PROCEEDS through ALL takes on
+  unique match. A cross-platform semantic her rulings jointly created
+  but never explicitly compared. Shapes: (a) keep both as built; (b)
+  align the Mac's divide door to auto-proceed on unique match (#10's
+  own logic); (c) the phone defers to a ceremony-style choice. Nothing
+  changes until she rules.
+- **Flag 11's addition joins the feel round** (Write→Read freshness on
+  pop — speculative, device-only).
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
