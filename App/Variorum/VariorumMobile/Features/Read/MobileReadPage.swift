@@ -171,9 +171,15 @@ nonisolated enum MobileReadPage {
     }
 
     /// The centered page meta under every note — "note 3 of 9 · ii";
-    /// unsectioned notes carry no chapter numeral.
-    static func pageMeta(ordinal: Int, total: Int, chapterIndex: Int?) -> String {
-        let base = "note \(ordinal) of \(total)"
+    /// unsectioned notes carry no chapter numeral. Under the bounded
+    /// window's truncation the total is a FLOOR, and the meta says so —
+    /// "note 3 of 300+" — never a silent window-as-book (S4 ladder
+    /// NIT 2; the true membership count has no standing corpus-flat
+    /// read for smart books, so the honest floor is the fix).
+    static func pageMeta(
+        ordinal: Int, total: Int, chapterIndex: Int?, truncated: Bool = false
+    ) -> String {
+        let base = "note \(ordinal) of \(total)\(truncated ? "+" : "")"
         guard let chapterIndex, chapterIndex > 0 else { return base }
         return "\(base) · \(roman(chapterIndex))"
     }

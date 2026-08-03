@@ -110,6 +110,15 @@ struct MobileReadTests {
             == "note 3 of 9 · ii")
         #expect(MobileReadPage.pageMeta(ordinal: 3, total: 9, chapterIndex: nil)
             == "note 3 of 9")
+        // Under the bounded window's truncation the total is a FLOOR and
+        // the meta says so — never a silent window-as-book (S4 ladder
+        // NIT 2; the window count is not the book).
+        #expect(MobileReadPage.pageMeta(
+            ordinal: 3, total: 300, chapterIndex: 2, truncated: true)
+            == "note 3 of 300+ · ii")
+        #expect(MobileReadPage.pageMeta(
+            ordinal: 3, total: 300, chapterIndex: nil, truncated: true)
+            == "note 3 of 300+")
     }
 
     @Test func theAssemblyNumbersNotesAndChaptersInBookOrder() {

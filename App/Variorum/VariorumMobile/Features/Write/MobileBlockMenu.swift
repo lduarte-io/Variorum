@@ -29,7 +29,6 @@
 //
 
 import Foundation
-import GRDB // String.fetchOne (member import visibility)
 import UIKit
 import VariorumCore
 
@@ -167,12 +166,16 @@ final class MobileBlockMenuController {
     // MARK: - Name (the block's handle — `setBlockName`)
 
     func promptRename(blockID: String) {
-        guard promptForText != nil else { return }
+        guard promptForText != nil, let postID = model?.postID else { return }
         Task { [weak self] in
             guard let self else { return }
+            // The seed reads through the standing query vocabulary (S4
+            // ladder NIT 1 — the read-side home is `Queries`, never raw
+            // SQL in a feature controller): `blockTOC` is the standing
+            // name-carrying read, cost ∝ the post (P1).
             let current: String? = (try? await self.session.database.read { db in
-                try String.fetchOne(
-                    db, sql: "SELECT name FROM block WHERE id = ?", arguments: [blockID])
+                try Queries.blockTOC(db, post: postID)
+                    .first { $0.blockID == blockID }?.name
             }) ?? nil
             guard let promptForText = self.promptForText else { return }
             promptForText(

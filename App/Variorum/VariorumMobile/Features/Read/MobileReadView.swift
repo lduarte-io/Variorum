@@ -80,7 +80,8 @@ struct MobileReadView: View {
                         ForEach(chapter.notes, id: \.entry.postID) { slot in
                             MobileReadNoteView(
                                 session: session, slot: slot,
-                                total: model.entries.count, page: page,
+                                total: model.entries.count,
+                                truncated: model.truncated, page: page,
                                 onOpen: { onOpen(slot.entry.postID) })
                         }
                     }
@@ -131,6 +132,9 @@ private struct MobileReadNoteView: View {
     let session: AppSession
     let slot: MobileReadPage.NoteSlot
     let total: Int
+    /// The window truncated the book — the meta's "of N" is a floor and
+    /// says so (S4 ladder NIT 2).
+    let truncated: Bool
     let page: ReadingPageTokens
     let onOpen: () -> Void
 
@@ -154,7 +158,8 @@ private struct MobileReadNoteView: View {
                 Text(" ").font(page.serif)
             }
             Text(MobileReadPage.pageMeta(
-                ordinal: slot.ordinal, total: total, chapterIndex: slot.chapterIndex))
+                ordinal: slot.ordinal, total: total,
+                chapterIndex: slot.chapterIndex, truncated: truncated))
                 .font(.system(size: 11))
                 .foregroundStyle(page.pageMeta)
                 .frame(maxWidth: .infinity, alignment: .center)
