@@ -70,6 +70,20 @@ nonisolated enum MobileEditorStyle {
         let surface: UIColor
         let line: UIColor
         let accent: UIColor
+        /// Elevated cards — the peek pill's ground (S2: the LK6 pill).
+        let card: UIColor
+        /// The takes register's tint + line (R13's "takes read differently
+        /// than prose") — the peek marker's wash and edge bar (S2). The
+        /// ratified v1 mockup's `.peeked` values are exactly `takeTint`;
+        /// its edge bar is `takeLine` in terminal and the seam in study —
+        /// shipped as takeLine in BOTH voices (one token, the closest
+        /// reading; a look-round line to change if she wants the study
+        /// seam).
+        let takeTint: UIColor
+        let takeLine: UIColor
+        /// The chosen take's mark — the pill's ✓ (the Mac card grammar's
+        /// "✓ chosen" color).
+        let chosenMark: UIColor
         /// The markdown face's palette — the Mac `Palette(tokens:)`
         /// mapping verbatim: marker = muted, link = accent, chip =
         /// codeTint (13k K10's per-voice tint).
@@ -110,6 +124,10 @@ nonisolated enum MobileEditorStyle {
             surface = dynamic(\.surface)
             line = dynamic(\.line)
             accent = dynamic(\.accent)
+            card = dynamic(\.card)
+            takeTint = dynamic(\.takeTint)
+            takeLine = dynamic(\.takeLine)
+            chosenMark = dynamic(\.chosen)
             palette = MarkdownFace.Palette(
                 marker: dynamic(\.muted),
                 link: dynamic(\.accent),

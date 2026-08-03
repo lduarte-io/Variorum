@@ -296,4 +296,99 @@ struct MobileWalkTests {
             #expect(model.statusMessage == nil)
         }
     }
+
+    /// Walk step 5 (S2 batch 1 — the brief's scope item 6): takes on the
+    /// phone. A fanned block wears the ⑂ badge with its LK10 gutter; the
+    /// flip PEEKS in place with the store's bytes untouched; the marker
+    /// shows; typing edits the PEEKED take; ✓ chooses (the store's
+    /// chosen_variant changes — the Mac would follow); identity audit
+    /// clean, canary silent.
+    @Test func walk5_takesBadgePeekAndChoose() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "walk takes", profile: .blog)
+                let a = try ops.newBlock(in: post.id, text: "The chosen opening.", at: .end)
+                _ = try ops.newBlock(in: post.id, text: "A fanless second block.", at: .end)
+                let take = try ops.branchVariant(a.block.id, from: a.variant.id)
+                try ops.autosave(take.id, text: "The braver opening.", charDelta: 6)
+                return (postID: post.id, blockA: a.block.id, a1: a.variant.id, a2: take.id)
+            }
+            let model = MobileEditorViewModel(
+                session: session, postID: seed.postID,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            model.attach(textView: surface.textView)
+            await model.loadOnce()
+            surface.layoutIfNeeded()
+            let view = surface.textView
+            guard let chrome = view.takesChrome else {
+                Issue.record("takes chrome not installed")
+                return
+            }
+
+            // The fanned block wears ⑂ (count-free) and reserves its
+            // gutter; the fanless one wears and reserves nothing.
+            #expect(chrome.badgeView(for: seed.blockA) != nil)
+            #expect(view.textContainer.exclusionPaths.count == 1)
+            let storeBytesBefore = try await storedBlockTexts(db, postID: seed.postID)
+            #expect(storeBytesBefore == ["The chosen opening.", "A fanless second block."])
+
+            // SWIPE (the gesture's act): the peek flips in place — bytes
+            // in store untouched, the marker shows, ✓ offered.
+            model.takes.flip(blockID: seed.blockA, forward: true)
+            #expect(view.textStorage.string
+                    == "The braver opening.\nA fanless second block.")
+            #expect(try await storedBlockTexts(db, postID: seed.postID) == storeBytesBefore)
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT chosen_variant_id FROM container_block
+                        WHERE block_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [seed.blockA])
+            } == seed.a1)
+            #expect(model.takes.isPeeking(seed.blockA))
+            #expect(chrome.markerView(for: seed.blockA) != nil)
+            #expect(chrome.pillIsShowing)
+
+            // Typing edits the PEEKED take (everything visible in an
+            // editing surface is editable — R8/R23).
+            view.selectedRange = NSRange(
+                location: ("The braver opening." as NSString).length, length: 0)
+            view.insertText(" Braver still.")
+            await model.awaitMintSettle()
+            await model.autosave.flushNow()
+            #expect(try await storedText(db, variantID: seed.a2)
+                    == "The braver opening. Braver still.")
+            #expect(try await storedText(db, variantID: seed.a1) == "The chosen opening.")
+
+            // ✓ CHOOSES — the one committing act; the store's pointer
+            // moves and the peek ends (the display is truth now).
+            await model.takes.chooseDisplayed(blockID: seed.blockA)
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT chosen_variant_id FROM container_block
+                        WHERE block_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [seed.blockA])
+            } == seed.a2)
+            #expect(!model.takes.isPeeking(seed.blockA))
+            #expect(chrome.markerView(for: seed.blockA) == nil)
+
+            // Identity intact, canary silent, no refusal spoke; teardown
+            // lands the walk's bytes exactly.
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+            #expect(!view.canaryFired)
+            #expect(model.statusMessage == nil)
+            await model.finish()
+            #expect(try await storedBlockTexts(db, postID: seed.postID)
+                    == ["The braver opening. Braver still.", "A fanless second block."])
+        }
+    }
 }

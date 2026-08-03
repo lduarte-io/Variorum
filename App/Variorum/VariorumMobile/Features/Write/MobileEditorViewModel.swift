@@ -50,6 +50,10 @@ final class MobileEditorViewModel {
     private let session: AppSession
     let postID: String
     @ObservationIgnored let autosave: AutosaveCoordinator
+    /// The takes/peek brain (S2 batch 1) — a SIBLING object per the S1
+    /// ladder's binding NIT-3: the VM only routes (overlay at ingest, the
+    /// targeted display apply below); every takes decision lives there.
+    @ObservationIgnored let takes: MobileTakesController
 
     // MARK: - Observable UI state
 
@@ -125,6 +129,8 @@ final class MobileEditorViewModel {
         self.session = session
         self.postID = postID
         self.autosave = AutosaveCoordinator(runner: session.runner, debounce: debounce, sleep: sleep)
+        self.takes = MobileTakesController(runner: session.runner)
+        takes.model = self
         autosave.onError = { [weak self] error in
             self?.statusMessage = String(describing: error)
         }
@@ -144,6 +150,9 @@ final class MobileEditorViewModel {
         textView.onCanaryFired = { [weak self] message in self?.canaryMessage = message }
         textView.armCanary()
         attach(storage: textView.textStorage)
+        // S2: the takes chrome (badge/gutter/marker/pill) + the swipe-peek
+        // pan ride the view; headless storage-only attaches run chromeless.
+        textView.installTakes(model: self)
     }
 
     /// The storage seam (tests attach a bare `NSTextStorage` — the VM's
@@ -160,11 +169,11 @@ final class MobileEditorViewModel {
         }
     }
 
-    /// Runs for the editor's lifetime: header + slots, live.
+    /// Runs for the editor's lifetime: header + the takes projection, live.
     func start() async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.observeHeader() }
-            group.addTask { await self.observeSlots() }
+            group.addTask { await self.observeTakesProjection() }
         }
     }
 
@@ -172,14 +181,27 @@ final class MobileEditorViewModel {
     func loadOnce() async {
         do {
             let value = try await session.database.read { [postID] db in
-                (slots: try Queries.renderPost(db, containerID: postID),
+                (projection: try Queries.takesProjection(db, post: postID),
                  header: try Queries.containerHeader(db, containerID: postID))
             }
             adoptHeader(value.header)
-            applyProjection(value.slots)
+            ingest(value.projection)
         } catch {
             statusMessage = String(describing: error)
         }
+    }
+
+    /// THE ONE PROJECTION DOOR (S2): every store delivery — observation,
+    /// first load, settle-refetch, desync heal — lands here, so fan state
+    /// and slots are adopted from ONE coherent read (`Queries.
+    /// takesProjection` reads both in a single transaction) and every
+    /// applied projection passes the peek overlay. Slots-only callers
+    /// (tests driving `applyProjection` directly) bypass peeks by
+    /// construction — they hold none.
+    func ingest(_ projection: Queries.TakesProjection) {
+        takes.adoptFans(projection.fans)
+        applyProjection(takes.overlay(projection.slots))
+        textView?.takesChrome?.refresh()
     }
 
     /// Teardown backstop: pending tail text mints (the idle plan — typed
@@ -216,10 +238,10 @@ final class MobileEditorViewModel {
         }
     }
 
-    private func observeSlots() async {
+    private func observeTakesProjection() async {
         do {
-            for try await value in session.database.observePost(postID) {
-                applyProjection(value)
+            for try await value in session.database.observeTakes(postID) {
+                ingest(value)
             }
         } catch is CancellationError {
         } catch {
@@ -250,6 +272,8 @@ final class MobileEditorViewModel {
         defer {
             textView?.applyVoiceChrome()
             textView?.canaryCheckpointAfterMutation()
+            // S2: the takes chrome restyles from the new voice's face.
+            textView?.takesChrome?.refresh()
         }
         guard let storage, storage.length > 0 else { return }
         let full = NSRange(location: 0, length: storage.length)
@@ -347,6 +371,7 @@ final class MobileEditorViewModel {
         }
         auditIdentityProjection()
         textView?.canaryCheckpointAfterMutation()
+        textView?.takesChrome?.refresh()
     }
 
     /// Same block sequence, changed texts: replace only changed slots,
@@ -371,6 +396,7 @@ final class MobileEditorViewModel {
             textView?.undoManager?.removeAllActions()
         }
         auditIdentityProjection()
+        textView?.takesChrome?.refresh()
     }
 
     /// A deferred delivery settles by a FRESH read — the deferred value was
@@ -382,14 +408,97 @@ final class MobileEditorViewModel {
         Task { [weak self] in
             guard let self else { return }
             guard let fresh = try? await session.database.read({ [postID] in
-                try Queries.renderPost($0, containerID: postID)
+                try Queries.takesProjection($0, post: postID)
             }) else { return }
             guard !autosave.isDirty, !mintInFlight else {
-                pendingProjection = fresh
+                pendingProjection = fresh.slots
                 return
             }
-            applyProjection(fresh)
+            ingest(fresh)
         }
+    }
+
+    // MARK: - Takes routing (S2 batch 1 — the thin half; the brain is `takes`)
+
+    /// The slot bookkeeping for one block, as displayed (post-overlay).
+    func slot(for blockID: String) -> Queries.RenderedBlock? {
+        slots.first { $0.blockID == blockID }
+    }
+
+    /// The surface's own record of a variant's text (the ledger — what
+    /// THIS surface knows it holds, edits included, flushed or not). The
+    /// peek overlay resolves ledger-first so a just-edited take never
+    /// re-displays stale bytes.
+    func surfaceKnownText(variantID: String) -> String? {
+        ledger.textByVariant[variantID]
+    }
+
+    /// The status voice for sibling objects' refusals (the takes ✓ door).
+    func report(_ message: String) {
+        statusMessage = message
+    }
+
+    /// True while an input-method composition is in flight (the flip and
+    /// the idle mint share the bail — mutating mid-composition rewrites
+    /// the marked region).
+    var markedTextActive: Bool { textView?.markedTextRange != nil }
+
+    /// The block whose entry contains this surface offset (zero-length
+    /// entries match at their exact location; separators and the tail
+    /// belong to no block) — the pan router's hit-test half.
+    func blockID(atSurfaceOffset offset: Int) -> String? {
+        var location = 0
+        for entry in index.entries {
+            if entry.length == 0, offset == location { return entry.blockID }
+            if offset >= location, offset < location + entry.length { return entry.blockID }
+            location += entry.length + 1
+        }
+        return nil
+    }
+
+    /// One block's current surface range (nil when not on this surface).
+    func rangeOfBlock(_ blockID: String) -> NSRange? {
+        guard let i = index.entries.firstIndex(where: { $0.blockID == blockID })
+        else { return nil }
+        return index.range(ofEntryAt: i)
+    }
+
+    /// THE TARGETED DISPLAY APPLY (the flip's surface half): swap ONE
+    /// block's displayed slot in place — text via the ordinary
+    /// programmatic-replace door (block-ID attribute + markdown face ride
+    /// it), the index entry rebuilt surgically. Deliberately NOT a whole-
+    /// index rebuild from `slots`: other blocks may be DIRTY (typed,
+    /// unflushed), and their slot texts are stale photographs — only this
+    /// entry may move. Zero store writes by construction: nothing here
+    /// touches the ledger's dirty set, the autosave, or the database.
+    func displaySlot(_ slot: Queries.RenderedBlock, for blockID: String) {
+        guard let i = index.entries.firstIndex(where: { $0.blockID == blockID })
+        else { return }
+        let range = index.range(ofEntryAt: i)
+        let newText = slot.text ?? ""
+        if viewText(range) != newText {
+            programmaticReplace(range, with: newText, blockID: blockID)
+            // Undo entries recorded against the pre-flip surface would
+            // replay at stale offsets (the differential's own posture).
+            textView?.undoManager?.removeAllActions()
+        }
+        slots[i] = slot
+        var entries = index.entries
+        entries[i] = BlockRangeIndex.Entry(
+            blockID: slot.blockID,
+            variantID: slot.variantID,
+            length: (newText as NSString).length,
+            editable: !slot.isGap && !slot.variantLocked)
+        index = BlockRangeIndex(entries: entries, tailLength: index.tailLength)
+        // The ledger learns what the surface now shows for the DISPLAYED
+        // variant only — never a wholesale adopt, which would regress a
+        // dirty neighbor's recorded text to its stale slot photograph.
+        if let variantID = slot.variantID {
+            ledger.recordEdit(variantID: variantID, text: newText)
+        }
+        auditIdentityProjection()
+        textView?.canaryCheckpointAfterMutation()
+        textView?.takesChrome?.refresh()
     }
 
     // MARK: - Edit routing (the delegate entry points)
@@ -482,6 +591,10 @@ final class MobileEditorViewModel {
         }
         auditIdentityProjection()
         textView?.canaryCheckpointAfterMutation()
+        // S2: badge/gutter/marker geometry follows every character edit
+        // (the overlay-geometry law — every input axis; equality-gated
+        // inside, so unchanged geometry writes nothing).
+        textView?.takesChrome?.refresh()
     }
 
     private func fallbackVerdict(editedRange: NSRange, delta: Int) -> BlockRangeIndex.Verdict {
@@ -526,9 +639,9 @@ final class MobileEditorViewModel {
             guard let self else { return }
             await autosave.flushNow()
             if let fresh = try? await session.database.read({ [postID] in
-                try Queries.renderPost($0, containerID: postID)
+                try Queries.takesProjection($0, post: postID)
             }) {
-                applyProjection(fresh)
+                ingest(fresh)
             }
         }
     }

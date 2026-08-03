@@ -96,6 +96,39 @@ final class MobileEditorTextView: UITextView {
     private var keyboardBarController: MobileKeyboardBarController?
     private var checkboxRouter: MobileCheckboxTapRouter?
 
+    /// The takes chrome (S2 batch 1: ⑂ badge + LK10 gutter, peek marker,
+    /// the LK6 pill) and the M5 swipe-peek's pan router — retained here
+    /// like the checkbox router (gesture targets are weak). Installed by
+    /// the VM at attach; headless storage-only attaches never create them.
+    private(set) var takesChrome: MobileTakesChromeController?
+    private(set) var takesPanRouter: MobileTakesPanRouter?
+
+    /// Wires the takes surface onto this view (called from
+    /// `MobileEditorViewModel.attach(textView:)`).
+    func installTakes(model: MobileEditorViewModel) {
+        let chrome = MobileTakesChromeController(textView: self, model: model)
+        takesChrome = chrome
+        let router = MobileTakesPanRouter(textView: self, model: model)
+        let pan = UIPanGestureRecognizer(
+            target: router, action: #selector(MobileTakesPanRouter.handlePan(_:)))
+        pan.delegate = router
+        addGestureRecognizer(pan)
+        takesPanRouter = router
+        model.takes.onPeekChanged = { [weak chrome] blockID in
+            chrome?.peekDidChange(blockID)
+        }
+        chrome.refresh()
+    }
+
+    /// Scrolling and width changes both land here (UIScrollView lays out
+    /// on every content-offset tick) — the chrome re-anchors its overlays;
+    /// equality gates inside keep the steady state write-free, so this
+    /// cannot loop layout.
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        takesChrome?.refresh()
+    }
+
     /// The bulk-entry hint (the Mac EditorTextView's exact shape): bulk
     /// paste at the tail segments on entry (AppSpec §7); a paste routed
     /// into an existing block is a content edit and must not arm anything.
