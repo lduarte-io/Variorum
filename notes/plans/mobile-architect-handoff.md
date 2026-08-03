@@ -38,9 +38,25 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   Mac 1191/208 (the one recorded tripwire, by identity) · spine 51/7.
   The architect's acceptance note + the batch 2 brief follow the batch
   record in the plan file.
+- **Stage 1 batch 2 SHIPPED + ACCEPTED** (commits `1a21024` · `32726b8`
+  · record `42ec671`; mobile 68/15 re-confirmed by the architect's own
+  run): the markdown vocabulary through one shared brain (the pure law
+  was ALREADY in `VariorumCore/Domain` — what moved is surface
+  arithmetic + the styling algorithm into `Shared/`), the six-act bar,
+  checkbox tap, the widened-editedRange boundary bug fixed with a
+  revert-verified pin. **The TRIM-LAW ADJUDICATION is recorded in the
+  plan** (batch-2 acceptance section): `SegmentationRules`' Phase-2
+  whitespace trim predates 13k K8 — ruled aligned (list-lead lines keep
+  leading indent at segmentation; everything else unchanged); the Mac
+  inherits the fix; batch 3 builds it.
+- **Stage 1 batch 3 RUNNING** (spawned 2026-08-03; brief in the plan):
+  the trim-law fix (core Domain, own commit, superseded-pin handling) +
+  the look canon onto Write (VoiceTokens to the phone, the LK2
+  phone-local voice switch, per-voice markdown palette + bar). Batch 3
+  is Stage 1's LAST planned batch.
 - **The review ladder has NOT yet run** — it runs at STAGE 1's end over
   the stage's combined diff (fresh cold reviewer, `notes/REVIEW_PROMPT.md`
-  verbatim, zero framing).
+  verbatim, zero framing), after batch 3's acceptance.
 - **The stage-gate author bundle so far:** batch 1's P1–P4 + LK5's
   ✓-finished-as-state PROVISIONAL; the device feel round (live
   autocorrect/dictation, loupe-under-pan — the memo's obligation 6);
