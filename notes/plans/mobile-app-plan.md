@@ -36,6 +36,33 @@
 
 ---
 
+## Working environment (set up 2026-08-02 at the author's request — mobile runs PARALLEL to the Mac phases)
+
+- **This project runs in its own git worktree: `~/dev/variorum-mobile`,
+  branch `mobile`** (the same repo, a second working directory). Mac-side
+  phase work stays on `main` in `~/dev/variorum`; the two never edit the
+  same files on disk, and Xcode/SwiftPM build state (DerivedData,
+  `.build`) is per-directory, so parallel sessions and builds don't
+  collide. **Start mobile sessions IN the worktree.**
+- **No new Xcode project is needed:** `App/Variorum/Variorum.xcodeproj`
+  already carries the `VariorumMobile` target (+ `VariorumMobileTests` /
+  `VariorumMobileUITests`) from Phase 8. The design sitting decides
+  whether to reshape that target or ask the author for a fresh one
+  (project/target creation via the Xcode GUI is hers per CLAUDE.md).
+- **Merge discipline:** merge `main` → `mobile` regularly (pick up
+  Mac-side core changes early, while they're small); merge `mobile` →
+  `main` at milestones, at the author's word — never push to origin
+  without her. **`Sources/VariorumCore` is the shared spine:** keep
+  core-touching changes small and deliberate, and the standing rider
+  holds — anything in `Sources/VariorumCore/Sync/` is Fable work.
+- **The worktree isolates FILES, never the schema:** any schema change is
+  still a SyncSpec §12 lockstep event against the ONE shared mirror —
+  mirror-first, her explicit go — never a branch-local migration.
+- The A4 dev-store fence applies unchanged (a Debug build resolves the
+  dev store; her phone installs Release).
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a

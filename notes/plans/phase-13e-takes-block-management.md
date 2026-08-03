@@ -96,6 +96,22 @@ here.)*
   I4-clean shape — riding whatever formatting follow-up next
   opens). Recorded here so it is not lost; uncertainty ("i think")
   preserved.
+- **Post-13k addition (2026-08-02, the closeout conversation) —
+  DUPLICATE BOOK NAMES:** 13k K4's shown-once rule surfaced that
+  nothing stops a curated book and a smart book from both being
+  named "Ideas." Her words: *"i think that maybe being able to name
+  books the exact same thing is not the best? it seems a bit
+  confusing. i don't think it has to be a schema rule but maybe a UI
+  rule that you can't purposefully do that? I'm open to suggestions
+  there."* Fable's recorded recommendation for the sitting: a
+  DOOR-level guard, never schema — the create/rename doors refuse
+  (or warn on) a duplicate LIVE book name with honest wording. Schema
+  uniqueness would demand a SyncSpec §7 repair rule and a forced
+  rename for an offline name race; the door guard simply tolerates
+  that race (K4's shown-once display already absorbs a raced
+  collision gracefully). Exact shape — refuse vs warn, case
+  sensitivity, whether archived/finished books count — is the
+  sitting's.
 
 ## THE WALK RAN EARLY — the housekeeping session, 2026-08-02 (rulings on the record; the opening sitting walks only what is marked HELD or NOT YET WALKED)
 
@@ -214,6 +230,7 @@ K3, 2026-07-25).
 | E8 | The 13f round-11 candidates: the tag-surface ask + the in-post tags face (composes with 13g's R6-1 chips — the chips are the top bar's; this is the fuller ask) | 13f |
 | E9 | The takes-aware find & replace half (the KnownIssues row: replace across a block's live takes — the Delete-in-Every-Take apply-and-report precedent is the aligned shape) | KnownIssues |
 | E10 | The 11a copy-doors flush alignment (duplicateAsVersion/promoteLens faces flush the pending buffer first — the diverge doors' shape; KnownIssues row) | KnownIssues |
+| E11 | Declare the book-icon ascent ("open this book at this note") in the capability registry — availability rule, doors, refusal wording, registry-walk coverage. The 13k handoff residual (the door has worked since Phase 13, never declared); her 2026-08-02 call: "the registry should be kept up to date, and keeping the registry up to date should be part of the plan." Pure P-1 hygiene, nothing user-visible | 13k handoff |
 
 ## THE KICKOFF SWEEP (owns four parked items; the hallucination guard binds hard)
 

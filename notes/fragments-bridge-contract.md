@@ -374,3 +374,47 @@ preservation. NIT (fixed): the append-never-replace property gained its unit pin
 (`unrescuedBodyRecordsAppendNeverReplace` — a future bare-REPLACE simplification
 now goes red). Post-cap suite: **549 green in 62 suites — THE Phase 10 core
 baseline, final.**
+
+---
+
+## The 14a horizon — suite-identity heads-up (added 2026-08-02, the evening Fragments goes to TestFlight)
+
+**Why this section exists:** the author is finishing Fragments for TestFlight and asked
+what the suite-identity (Phase 14a) questions are, so tonight's build doesn't foreclose
+them. The recorded rulings this rests on (Variorum master plan rows 14a–14c +
+*[removed for publication]*
+for both apps, brand PROVISIONALLY stargazing; the Fragments-side conversation formally
+opens AT 14a; Fragments' E2EE is **journal-class ONLY** (14b, under the shared key — the
+rest of Fragments stays server-readable by design, its insights being the product); ONE
+sync payment covers both apps (14c).
+
+**What TestFlight does NOT need to wait for (nothing here blocks shipping tonight):**
+- **The bridge.** It is Variorum-side machinery over the standing asks above; Fragments
+  ships without any bridge work (the author's own call, 2026-08-02: "i don't think
+  fragments needs the bridge with variorum to ship").
+- **The neutral issuer / stargazing login pages.** Ship Fragments' current sign-in; 14a
+  re-points both apps at the suite account later.
+- **E2EE** (14b, after 14a's identity and key vault).
+
+**What the Fragments build should keep cheap tonight (so 14a is a re-point, not a rework):**
+1. **Keep auth in one seam.** Sign-in, session handling, and canonical-user derivation
+   should live in one module; nothing outside it should assume the current Supabase
+   project's auth is permanent.
+2. **Account migration is a 14a deliverable** — the author's account AND any
+   TestFlight-era tester accounts will need mapping onto suite accounts. The
+   canonical-user derivation (`user_settings.local_user_id`) already makes identity
+   re-mappable; keep it that way, and accept that early testers may face a one-time
+   re-link step.
+3. **Privacy-policy wording:** don't promise E2EE (not built yet), and don't promise
+   never-reads-your-data globally — the journal class gains E2EE at 14b while insights
+   stay server-readable by design. Word it so 14b *tightens* the policy rather than
+   contradicting it.
+4. **The journal satellite stays frozen** (ask #3 above) — no TestFlight-rush migration
+   should touch `journal_entries` shape or key semantics silently.
+
+**The genuine 14a questions (for the author, at 14a — none are tonight's):** issuer
+mechanics (a neutral project as OIDC issuer vs shared JWT secret — the 9c candidates,
+re-decided at suite level) · the brand (stargazing is provisional, her word) · the
+consent/sign-in pages on stargazing.tech (that repo's own agent builds them) · her own
+account's migration path · how the one-payment entitlement is checked from both apps
+(14c's build, but the account model should not preclude it).

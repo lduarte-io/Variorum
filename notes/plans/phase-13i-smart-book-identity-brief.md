@@ -25,6 +25,31 @@ an author-attended design sitting; cast at her kickoff, as always.
 > think making changes should mean it has to be a particular smart
 > book."
 
+## Her second direction (2026-08-02, the 13k-closeout conversation — book-scoped AUTO-TAG rules)
+
+> "i'm also thinking that in the future, i want to be able to make rules
+> so that items created within a book have a tag auto applied to them, so
+> that i can actually have different journal 'books' in variorum that for
+> a period of time, are all created with the same tag so i can have a
+> smart book, while they're still in the journal book overall. i think
+> that could even go in the phase 13 plans."
+
+Slotted HERE (recorded the same day, at Fable's suggestion with her
+message naming "the phase 13 plans") because it is the same
+what-is-a-book territory as the hybrid: it is R98's rule (adding a post
+to a SMART book applies the tag) generalized into a standing rule ON a
+book — including a CURATED one (her use case is the daily Journal book:
+entries keep landing in Journal AND carry, say, a period tag feeding a
+smart book). Knots it adds to the sitting's agenda: where the rule
+lives (a column on `reading` would be a §12 lockstep event); which
+doors apply it (mint-inside-the-book only — her word is "created
+within" — or also add/move-in, and the four daily doors of
+`shelveInDailyJournalBook`); the "for a period of time" half — does a
+rule expire, or does she just remove/replace it (and removing a rule
+presumably never untags what it already tagged); and composition with
+the hybrid's own collection so two rules cannot loop (a book whose rule
+feeds the very tag its own smart assembly collects on).
+
 ## What ships today (the baseline this phase would change)
 
 - **N38's shape A** (13c batch 2D, ratified at the 13d sitting via
