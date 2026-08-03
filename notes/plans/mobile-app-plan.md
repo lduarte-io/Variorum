@@ -4935,6 +4935,340 @@ feel round on her device over the complete app).
 
 ---
 
+## Stage 4 review — round 1 findings (cold reviewer, 2026-08-03)
+
+**Isolation statement:** zero implementation context; this review's
+picture was built from `REVIEW_PROMPT.md` (followed verbatim), the
+canon set, this file's rulings (M1–M14 · LK1–LK11 · the constitution ·
+all stage records), the combined diff `117cb88..85d6534` read in full,
+the Mac-side mirror sources read directly (`EditorSurfaceController` ·
+`DivideWCeremony` · `BlockDecor`/`CalloutMenu` · `ReadingFlowView` ·
+`MarkdownLink` · `Operations+Structural`), and all four suites re-run
+by this reviewer's own hands. No "Review foci" section exists for this
+stage; the batch record's ELEVEN flags served as the mandatory list
+and every one is dispositioned below.
+
+**Counts (this reviewer's own runs, iPhone 17 Pro / iOS 26.2 for
+mobile):** mobile **169/24 GREEN** · core **1039/114 GREEN** · Mac
+**1193/208 with EXACTLY ONE red, BY IDENTITY the recorded tripwire**
+(`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+— re-run in isolation; the name and the failing expectation
+`stranded.prefix(topHalf).allSatisfy { !$0 }` at
+TakePaneMeasureTests.swift:612 read from the run's own failure line) ·
+spine **51/7 GREEN** (the seven tutorial suite TYPE names). Every
+count matches the batch record's claims.
+
+### Findings (severity-ranked)
+
+- **[MAJOR 1] · `MobileBlockMenu.swift:218–232` (the Delete Block
+  door) · the door skips BOTH halves of the structural-act contract —
+  the post-flush dirty guard and the one-flight latch — and its own
+  comment claims the guarantee the code doesn't hold.** Evidence,
+  traced: `delete(blockID:)` runs `await model.autosave.flushNow()`
+  and proceeds UNCONDITIONALLY; the flush contract (quoted in this
+  batch's own `MobileStructural.flushPendingText`, 264–272, and the
+  Mac's `runStructural`, EditorSurfaceController.swift:1598–1623) is
+  that a REFUSED flush keeps its text pending with `isDirty == true` —
+  the Mac stops the act there ("never an op against a store the
+  surface disagrees with"), and so do the phone's divide/merge doors.
+  Concrete loss path: a dirty buffer whose flush refuses (e.g. the
+  displayed take locked remotely between the typing and the tap, or
+  any autosave write error) followed by Delete Block → `deleteBlock`
+  does NOT refuse on a locked take (the unrestricted `.none` door) →
+  the tombstone lands with the store's stale text → the surface heals
+  from the store → the typed bytes are gone from BOTH surface and
+  store, and the tray's copy — which the comment at line 220–221
+  promises "holds every typed byte" — lacks them. That is the
+  text-loss class the flush-first contract exists to kill. Second
+  half: the door runs outside `structuralInFlight` (deleteBlock IS a
+  structural op — it registers structural undo Mac-side and rides
+  `runStructural` there, line 420–428), so a delete can interleave a
+  divide/merge flight mid-await (store-safe via the ops' transactions;
+  surfaces raw `String(describing:)` errors and mis-landed carets).
+  Fix: route Delete Block through the structural controller's latch +
+  `flushPendingText()` guard (three existing lines). Red-on-old pin:
+  constructible at the seams — make the flush refuse (lock the take
+  through ops after typing at the storage seam), call `delete`, assert
+  a refusal and a live block; the pre-fix code tombstones.
+
+- **[MINOR 1] · batch record, interpretation 4 / flag 3's defense ·
+  the recorded equivalence claim is factually wrong (the BEHAVIOR is
+  faithful — see flag 3 below — but the justification in the record
+  will mislead a future reader).** Evidence: the record says the
+  phone's auto-proceed "equals confirming the Mac's sheet untouched."
+  It does not: the Mac ceremony seeds `marked: variant.id ==
+  seedTake.id` (DivideWCeremony.swift:205–216) — an UNTOUCHED confirm
+  marks ONLY the displayed take, so the other takes stay on A as
+  unmarked lineage and B/C are born with one-take fans. The phone maps
+  and marks EVERY active take (MobileStructural.swift:137–155), which
+  is a DIFFERENT store outcome. The true equivalence — verified
+  byte-for-byte — is with the Mac's OWN #10 auto-proceed
+  (`propagatedCuts`, EditorSurfaceController.swift:960–985: the same
+  store fan read, the same displayed-take guard, the same all-takes
+  unique-match loop, the same "placed by hand" copy), which is exactly
+  what M10's parenthetical names. Fix: a record correction (this
+  paragraph may serve); no code change. No test pin — a doc-class
+  finding, justified as such per the hallucination guard.
+
+- **[MINOR 2] · `MobileStructural.swift:77–99 (divide), 199–241
+  (merge)` · the caret's entry is resolved BEFORE the flush await and
+  the surface text is read AFTER it by pre-flush index `i` — a
+  delivery applying inside the await window can re-index the entries
+  and mis-address the cut.** Evidence, traced: `entryTouching(caret:)`
+  and `entry`/`blockID` bind pre-flush; `flushPendingText()` suspends
+  (and by clearing `isDirty` makes a deferred projection delivery
+  eligible to apply on the main actor during the suspension); `let
+  text = model.viewText(model.index.range(ofEntryAt: i))` (line 93)
+  and merge's `model.index.entries[i - 1].length` (line 241) then
+  trust the OLD position — a remote structural change landing in that
+  window makes position `i` a different block, so a cut snapped in one
+  block's text is applied to another block's ID (a legal-but-wrong
+  divide, not corruption — the ops validate everything else).
+  Honestly stated: the trigger needs a remote structural write inside
+  a sub-ms window on a phone-solo surface, the class the repo records
+  rather than fixes elsewhere (the R2-10 `shelveInDailyJournalBook`
+  precedent; the Mac's cross-block confirm guards it only because an
+  ALERT holds its window open at human scale). But here the hardening
+  is one line — re-verify `model.index.entries[i].blockID == blockID`
+  (and re-resolve `intra`) after the flush, refusing with the standing
+  "takes changed" copy on mismatch. Pinnable with a suspending
+  autosave seam that lands a structural change mid-flush.
+
+- **[NIT 1] · `MobileBlockMenu.swift:172–175` · the rename prompt
+  reads `block.name` by raw SQL inside a feature controller** (with a
+  `GRDB` import annotated for exactly this) — the read-side home is
+  `Queries`; every other store read in the new controllers goes
+  through one (`Queries.blockFan`, `Queries.blockComments`, …).
+  Cleanliness only; a one-line `Queries` helper (or reading the name
+  off the projection, which already carries block rows) removes the
+  only raw SQL in the mobile feature layer.
+
+- **[NIT 2] · `MobileReadView.swift:82/156` · the page meta's "of N"
+  counts the OBSERVATION WINDOW, not the book** — under the bounded
+  window a truncated book reads "note 3 of 300" as if 300 were the
+  whole. The truncation marker directly above discloses honestly, and
+  P36 already rides the gate bundle; recorded so the look round sees
+  it with eyes open.
+
+### The eleven ladder-attention flags, dispositioned
+
+1. **The parity move (WEIGHTED) — the mechanics VERIFIED CLEAN; the
+   deviation is real but the record is complete and the outcome is
+   what the exchange would have produced.** Verified by this reviewer:
+   the move is a 100%-similarity git rename (zero content bytes
+   changed — `git diff -M100%` shows pure renames; the diff's adds
+   mirror its deletes byte-for-byte); ZERO pbxproj lines; both the
+   `Variorum` and `VariorumMobile` targets carry `Shared` as a
+   `fileSystemSynchronizedGroup` (pbxproj lines 182–185, 252–254), so
+   the Mac compiles the same bytes from the new path and the mobile
+   target gains them — no membership hand-editing, no behavior seam.
+   Both files are Foundation+VariorumCore only ("no AppKit, no store"
+   by their own headers). The Mac suite reproduces its exact baseline
+   by this reviewer's own run (1193/208, tripwire-only), core
+   1039/114. The reasoning the implementer recorded is sound as far as
+   it goes: the brief's scope item 5 commands "shared
+   `CutPropagation`/`BoundarySnapping`" and M10's recorded answer
+   states "`CutPropagation` is shared pure Domain" — the plan already
+   believed the fact the move made true on disk. What the reasoning
+   cannot manufacture is the exchange itself: "a genuine shared need =
+   stop and report" is a process rule whose value is the architect's
+   pre-move look, and it did not happen. Adjudication input (the
+   architect rules): the honest note + the flag-first placement + the
+   full four-suite duty are exactly what the rule's spirit wants from
+   a deviation; this reviewer finds NOTHING beyond the record owed —
+   no revert, no further verification outstanding.
+2. **The book→Read re-route — FAITHFUL.** The shell diff routes
+   `.book` to `MobileReadView` with the contents door pushing the new
+   `.bookList` (owning-stack push per the S3 BLOCKER's wiring rule —
+   the new `push(_:in:)` helper); `MobileBookView` is byte-untouched;
+   no S3 shell/library test appears in the diff, confirming zero pins
+   asserted the destination VIEW. M8's synthesis line — "Books open
+   into the Read flow" — is BINDING and supports the route reading;
+   P35 correctly rides her feel round.
+3. **The Mac-vs-phone fanned divide (WEIGHTED) — the phone's reading
+   of M10 + #10 is FAITHFUL TO THE RULING'S LETTER; the residual
+   cross-platform difference is real but was created BY the ruling,
+   not by the implementer — with one record correction owed (MINOR 1).**
+   Measured against the letter: M10's recorded in-sitting precision
+   says, verbatim, "divide AUTO-PROCEEDS on a fanned block when the
+   cut lands uniquely in every take (the ratified #10 auto-proceed
+   rule; `CutPropagation` is shared pure Domain) and refuses exactly
+   where the Mac would open the W." The phone implements precisely
+   that, and its mapping is a line-for-line mirror of the Mac's own
+   `propagatedCuts` (verified side by side: store fan read →
+   `blockFan` already excludes tombstones, so the phone's extra
+   `deletedAt == nil` filter is harmless redundancy and the two agree;
+   the displayed-take-still-live F-3 guard; the unique-match loop over
+   every active take; interior-only proposals so parking never
+   auto-proceeds). The residual: the Mac's own plain-divide door on a
+   fanned block ALWAYS opens the ceremony (`case .divideW →
+   openDivideWCeremony`, EditorSurfaceController.swift:181–185), whose
+   untouched confirm divides only the displayed take — so the same
+   gesture on the same block yields a silent all-takes W on the phone
+   and a ceremony (defaulting to a one-take W) on the Mac. That
+   asymmetry is inherent in M10's "the phone inherits the Mac's own
+   no-ceremony paths" (the no-ceremony path IS the guided flow's
+   auto-proceed; the phone has no ceremony to open). Verdict: no code
+   change; the record's wrong equivalence sentence is MINOR 1; the
+   asymmetry belongs IN THE GATE BUNDLE stated plainly (QUESTIONS
+   material by flag 9's own pattern) so she rules on it with eyes
+   open rather than discovering it mid-writing.
+4. **The mirrors' drift class — AGREED, and the record's own
+   candidate ranking is right.** Verified against sources:
+   `MobileReadPage.paragraphs` ≡ `FlowParagraph.paragraphs` (transform
+   body and attribute container line-identical; one deliberate
+   divergence — serif heading base 16 vs the Mac's 15 — is P36's
+   recorded constant); `openableLink` ≡ `MarkdownLink.openable`
+   (identical guard, and BOTH sides gate at attribute time — inert
+   addresses carry no `.link` on either platform); `MobileCallout` ≡
+   `CalloutPalette`+`CalloutEditRule` (names, default, transform
+   semantics, and all ten hexes byte-identical; the menu vocabulary
+   matches `CalloutMenu.rows` exactly including the emoji prompt's
+   cancel-nil/empty-is-an-answer semantics). The `CalloutEditRule`
+   pair IS the strongest parity-move candidate: the Mac file's own
+   header calls it "the ONE callout transform" and there are now two
+   of it — pure Foundation over core's `BlockPresentation`, the exact
+   class the `Shared/EditorBrain` move covered (the hex tables stay
+   per-platform chrome either way). Recommend the move at 13e or the
+   gate's word, not as a review fix.
+5. **The seal pre-gate's stale window + wording split — CLEAR as
+   recorded.** The pre-gate reads the projection's `isSealed`
+   (one-delivery lag possible); the ops' `lockedPost` refusal is a
+   real belt on every door (verified in `refusalMessage` and pinned in
+   `divideRefusalsSpeakTheRefusalShapes` and the menu suite's sealed
+   pins); the wording split (generic "…to restructure." at the
+   pre-gate vs per-act at the belt) is honest and recorded.
+6. **The chrome-geometry hoist — VERIFIED move-only.** The chrome's
+   deleted helper bodies match the text view's added ones (modulo the
+   `FirstLine` struct→tuple spelling and the `textView` unwrap);
+   `lastLineEnd` is the one new primitive; no S2 chrome test appears
+   in the diff. The exclusion-composition ordering reasoning HOLDS:
+   the container's `exclusionPaths` keeps ONE owner (the takes
+   chrome's assembly unions `blockDecor?.currentEmojiExclusions` at
+   line ~177), and `refreshChrome` runs the decor first so its rects
+   are fresh at assembly time. One convergence note, no finding: a
+   NEW emoji gutter's first pass measures pre-exclusion layout — the
+   next layout pass re-fires `refreshChrome` and the equality gates
+   settle it; the "every input axis" law covers this by design.
+7. **The three sanctioned pin flips — VERIFIED, WAVED THROUGH.** The
+   bar pin's custom-count 1→2 with the comment updated (the recorded
+   six→seven precedent, now seven→eight); the I10 copy flipped at both
+   sites (browser suite + walk) naming the ⋯ door the batch built —
+   the S2 wording retired WITH the road it pointed down; the edit-menu
+   pin WIDENED to assert the Block submenu present in-block and absent
+   in-tail — strictly stronger than the old UIAction-only compactMap,
+   which would indeed have passed unmodified while under-asserting.
+8. **The Delete Block confirm seam — CLEAR as PROVISIONAL (P40), with
+   MAJOR 1's rider.** The product call (a phone-only destructive
+   confirm because the phone has no structural undo) is coherent and
+   hers to strike; the seam mechanics are sound (production plumbing
+   installed at attach, nil-seam headless path falls through to the
+   act). The door behind the confirm carries MAJOR 1's missing
+   guards — fix travels with that finding.
+9. **The comment-doubling corner — CONFIRMED as core travel
+   semantics, correctly not papered over.** Divide copies A's comments
+   to the successor; merge carries both sides' — the merged block
+   holds two copies. Mac-identical by the ops' own travel rules
+   (AppSpec §9); the walk asserts the divide-side counts and honestly
+   leaves the post-merge doubling unasserted. Gate-bundle material if
+   she trips; nothing to build.
+10. **The new chrome's perf posture — CLEAR with the standing
+    rider.** The decor rides the same equality-gated near-viewport
+    band as the takes chrome (verified: the shared `nearViewportBand`,
+    the cached-exclusion far path, equality-gated frame writes);
+    per-pass cost ∝ decorated blocks (times `rangeOfBlock`'s lookup);
+    the device round measures, per the recorded magnitude rider.
+11. **The device items — STAND, plus one addition from this
+    review.** To the recorded list (comments sheet under the real
+    keyboard, ●n tap target, the emoji gap's look, the Read page's
+    feel, the ⋯ menu's reach) add: **verify on device that a note
+    edited in Write shows its NEW text in the Read column on pop** —
+    the per-row `.task(id:)`/`@State` shape re-runs on re-appearance
+    in the mirrored Mac flow, but the LazyVStack wiring is
+    machine-unverified by the recorded S3 posture, and a stale-row
+    surprise here would read as data loss to her even though the store
+    is right. (SPECULATIVE as a bug — no mechanism traced; named as a
+    device-round check exactly because the harness cannot answer it.)
+
+### Clean bill (load-bearing things specifically checked, found solid)
+
+- **All four suites by this reviewer's own runs** — mobile 169/24 ·
+  core 1039/114 · Mac 1193/208 (the one red the tripwire BY IDENTITY,
+  from its own failure line in an isolated re-run) · spine 51/7.
+- **The diff's scope walls:** zero `Sources/VariorumCore` lines, zero
+  schema, zero `Sync/` lines, zero pbxproj lines; the `Shared/` diff
+  is exactly the two 100%-similarity renames; the Mac-side diff is
+  exactly their deletions.
+- **The #10 auto-proceed mirror** — line-for-line against
+  `propagatedCuts`, including the store-read discipline (13d), the
+  F-3 displayed-take guard, `blockFan`'s tombstone exclusion, and
+  interior-only proposals (a parking-eligible take refuses to the
+  Mac, matching `CutPropagation`'s "a proposal is a seed, never a
+  guess").
+- **`divideW` composition** — locked marked takes are legal (copied,
+  never edited) so the fanned path's missing `editable` pre-check is
+  CORRECT, matching the Mac ceremony; the single-take path's
+  `editable` pre-check is equally correct (plain divide edits A's
+  variant in place); caret lands on `result.first` both platforms.
+- **Merge's ceremony threshold** — BOTH fans read from the store
+  inside one `db.read`; a fan on either side refuses with the store
+  byte-untouched (pinned); the fanless path's canon-space join
+  round-trips byte-identically (walk 8's divide-then-merge-back);
+  released sources stay live in lineage (pinned).
+- **The refusal shapes** — every door speaks (sealed pre-gate + op
+  belt, locked take, no-legal-cut, first-block, gap/"hasn't synced",
+  tail/empty, in-flight), pinned byte-for-byte against the store
+  staying untouched.
+- **The callout path** — `updateBlockPresentation`'s read-modify-write
+  inside the op's transaction, store-byte pinned on canonical JSON
+  (color-keeps-emoji, emoji-keeps-color, empty-trims, toggle,
+  remove-to-NULL, the sealed refusal); the vocabulary drift pin holds
+  both doors to ONE builder.
+- **Comments** — full CRUD + restore through the standing ops; the
+  never-skimpy deleted section shipped (two standing queries + a
+  fold, exactly the brief's conditional); refresh-on-event with no
+  third observation loop (the projection's `block_comment` join
+  carries the deliveries); the sheet closes when its block leaves the
+  surface (pinned); the ●n marker is a real door (geometry + tap
+  pinned).
+- **The Read flow's Mac parity** — the transform and container are
+  the Mac's own; Read renders NO callout frames and no comment
+  markers, and `ReadingFlowView` contains zero presentation
+  references (the mirrored-absence claim verified, not assumed); the
+  per-note read is `renderPost` → `joinRenderedTexts` (the Mac flow's
+  exact read); P3 honored (LazyVStack, per-row lazy loads, never a
+  live editor in the column).
+- **The book→Read re-route's blast radius** — `MobileBookView`
+  byte-untouched; the owning-stack push rule kept; zero test edits
+  rode the re-route.
+- **The `loadOnce` cancellation filter** — the fix is the recorded
+  MINOR-1 class at its adjacent site, and its pin
+  (`aCancelledLoadOnceNeverLandsAsAnError`) drives the real
+  push-then-pop shape.
+- **KnownIssues hygiene** — the iOS trailing-blank-lines row was
+  resolved-by-replacement at S3 (removed at `774305e` with the L9 pin
+  guarding both directions) and the S3-adjudicated Mac takes-board
+  row (owner 13e) landed at `117cb88`; nothing this stage owned sits
+  unresolved.
+- **Walk 8** — a genuinely end-to-end spine step: chaptered book →
+  Read strings byte-checked → the real TK2 surface → comment (store +
+  count + marker geometry) → callout (store JSON + frame view) →
+  divide (halves + comment copy + frame inherit — the op's travel as
+  proof the door ran the real op) → merge back byte-identical →
+  identity audit 0, canary silent, teardown lands the bytes.
+
+**Verdict for the ladder:** ONE MAJOR (the Delete Block door's missing
+flush-guard + latch — fix is three existing lines plus a red-on-old
+pin), two MINORs (one record correction, one one-line hardening with
+an honest rarity statement), two NITs. Nothing here blocks the v1
+build's shape; flags 1 and 3 both close FAITHFUL with the corrections
+noted. After the fix pass, the gate bundle should carry: the
+Mac-vs-phone fanned-divide asymmetry (flag 3, stated plainly), the
+comment-doubling corner (flag 9), P35–P44, and the device-round list
+with this review's Read-staleness addition.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
