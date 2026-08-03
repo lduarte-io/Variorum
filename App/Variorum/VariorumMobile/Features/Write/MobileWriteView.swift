@@ -33,28 +33,43 @@ struct MobileWriteView: UIViewRepresentable {
 
 /// The Write screen: the surface under a voiced masthead (batch 3 — the
 /// look canon lands: the voice room, the title in the voice's title type,
-/// the LK2 switch door, status rows in the chrome register). Reached via
-/// the DEBUG door in batch 1; S3 gives it its real navigation home — and
-/// the switch door's real Settings home is S3's too (PROVISIONAL
-/// placement, recorded).
+/// status rows in the chrome register). Since S3 batch 1 this is THE
+/// app's editor (the shell pushes it for every note; the S1 DEBUG door
+/// retired): the shell router registers the active editor for the
+/// app-level background flush, `beginEditing` raises the keyboard on
+/// arrival (the Today door's straight-into-typing invitation), and the
+/// masthead's voice-switch door RETIRED to Settings (P11's placement —
+/// recorded; the shell router is the one voice authority, so an open
+/// surface follows a Settings flip via `applyVoiceChange`).
 struct MobileWriteScreen: View {
     @State private var model: MobileEditorViewModel
-    @State private var voice: ThemeVoice
+    /// The shell's voice authority; nil in harness/preview use, where the
+    /// stored preference read at init governs.
+    private let router: MobileShellRouter?
+    private let beginEditing: Bool
+    private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
 
-    init(session: AppSession, postID: String) {
+    init(
+        session: AppSession, postID: String,
+        router: MobileShellRouter? = nil, beginEditing: Bool = false
+    ) {
         _model = State(initialValue: MobileEditorViewModel(session: session, postID: postID))
-        // The stored phone voice governs from the first materialization —
-        // set BEFORE the surface exists (makeUIView runs later).
-        let stored = MobileVoicePreference.current()
+        self.router = router
+        self.beginEditing = beginEditing
+        // The live phone voice governs from the first materialization —
+        // set BEFORE the surface exists (makeUIView runs later). With a
+        // router the value is already authoritative (idempotent).
+        let stored = router?.voice ?? MobileVoicePreference.current()
         MobileEditorStyle.voice = stored
-        _voice = State(initialValue: stored)
+        fallbackVoice = stored
     }
 
     /// The SwiftUI chrome's tokens — dark rides the system scheme (R51's
-    /// black rooms come from the token layer's own dark values).
+    /// black rooms come from the token layer's own dark values). Reading
+    /// `router.voice` keeps the masthead live under a Settings flip.
     private var tokens: VoiceTokens {
-        .resolve(voice: voice, dark: scheme == .dark)
+        .resolve(voice: router?.voice ?? fallbackVoice, dark: scheme == .dark)
     }
 
     var body: some View {
@@ -62,9 +77,19 @@ struct MobileWriteScreen: View {
             .ignoresSafeArea(.keyboard) // the container's keyboardLayoutGuide owns avoidance
             .background(tokens.room.ignoresSafeArea())
             .safeAreaInset(edge: .top) { masthead }
-            .task { await model.start() }
+            .task {
+                router?.activeEditor = model
+                await model.start()
+                if beginEditing {
+                    // Today's invitation: typing starts the moment the
+                    // entry opens (a sealed note's gate still refuses and
+                    // speaks — raising focus never bypasses the police).
+                    model.textView?.becomeFirstResponder()
+                }
+            }
             .onDisappear {
                 let model = model
+                if router?.activeEditor === model { router?.activeEditor = nil }
                 Task { await model.finish() }
             }
     }
@@ -77,7 +102,6 @@ struct MobileWriteScreen: View {
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
-                voiceSwitch
             }
             if let canary = model.canaryMessage {
                 Text(canary).font(tokens.small).foregroundStyle(.red)
@@ -94,24 +118,5 @@ struct MobileWriteScreen: View {
         .padding(.horizontal)
         .padding(.bottom, 6)
         .background(tokens.room)
-    }
-
-    /// LK2's minimal switch door: the current voice's name in the chrome
-    /// register; tapping flips voice, preference, and the open surface.
-    private var voiceSwitch: some View {
-        Button {
-            let next: ThemeVoice = voice == .terminal ? .study : .terminal
-            voice = next
-            MobileVoicePreference.set(next)
-            MobileEditorStyle.voice = next
-            model.applyVoiceChange()
-        } label: {
-            Text(tokens.chromeLabel(voice == .terminal ? "Terminal" : "Study"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Voice")
-        .accessibilityHint("Switches between the terminal and study voices")
     }
 }

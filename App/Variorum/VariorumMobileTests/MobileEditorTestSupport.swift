@@ -4,9 +4,11 @@
 //
 //  Mobile Stage 1, batch 1 — the Write-true editor suite's harness. The
 //  Phase 8 `withMobileWorld` shape (deterministic dependencies over an
-//  in-memory store + a real AppSession), reused for the editor tests; the
-//  file-private original stays untouched in VariorumMobileTests.swift
-//  (`SeededGenerator` there is internal and is reused, not redeclared).
+//  in-memory store + a real AppSession), reused for the editor tests.
+//  Since S3 batch 1 this file also HOUSES `SeededGenerator`: the Phase 8
+//  capture surface retired with its test file (VariorumMobileTests.swift
+//  — its load-bearing pins re-pointed into MobileShellTests /
+//  MobileLibraryTests), so the shared generator moved here verbatim.
 //
 
 import Dependencies
@@ -16,6 +18,20 @@ import Testing
 import UIKit
 import VariorumCore
 @testable import VariorumMobile
+
+/// Deterministic RNG for fractional-index jitter (mirrors the core tests'
+/// SeededGenerator — SplitMix64).
+struct SeededGenerator: RandomNumberGenerator {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed }
+    mutating func next() -> UInt64 {
+        state &+= 0x9E3779B97F4A7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9
+        z = (z ^ (z >> 27)) &* 0x94D049BB133111EB
+        return z ^ (z >> 31)
+    }
+}
 
 /// A fresh in-memory world with deterministic dependencies and a real
 /// AppSession — the editor suite's twin of Phase 8's harness.

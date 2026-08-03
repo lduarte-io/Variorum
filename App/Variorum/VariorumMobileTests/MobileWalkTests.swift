@@ -532,4 +532,107 @@ struct MobileWalkTests {
                     == ["A third way.", "A steady second block."])
         }
     }
+
+    /// Walk step 7 (S3 batch 1 — the brief's scope item 7): the app
+    /// shape. Cold launch → the shelf renders (LK5 faces BYTE-CHECKED in
+    /// the live voice) → Today → type in the REAL editor → the entry
+    /// lands AND shelves into the daily book → Library search finds it →
+    /// back → the note reopens in the editor with the typed bytes.
+    @Test func walk7_shelfTodayLibraryColdLaunch() async throws {
+        try await withEditorWorld { session, db in
+            // The shelf she'd cold-launch onto: a tagged essays book, a
+            // finished book, a smart collector.
+            let seed = try await session.runner.run { ops -> (essays: String, poems: String) in
+                let essays = try ops.createReading(name: "Essays", kind: .curated)
+                let life = try ops.createTag(name: "life")
+                let goals = try ops.createTag(parent: life.id, name: "goals")
+                for index in 1...2 {
+                    let post = try ops.createPost(title: "essay \(index)")
+                    _ = try ops.addPostToReading(post.id, to: essays.id)
+                    _ = try ops.applyTag(goals.id, toPost: post.id)
+                }
+                let poems = try ops.createReading(name: "Poems", kind: .curated)
+                try ops.lockReading(poems.id)
+                _ = try ops.createReading(
+                    name: "reading notes", kind: .smart,
+                    querySpec: #"{"tags":["books"]}"#)
+                return (essays.id, poems.id)
+            }
+
+            // COLD LAUNCH: the shelf home observes and renders.
+            let shelf = MobileShelfViewModel(session: session)
+            let shelfObservation = Task { await shelf.start() }
+            defer { shelfObservation.cancel() }
+            for _ in 0..<2000 where shelf.books.count < 3 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            await shelf.refreshTags()
+
+            // LK5 faces, byte-checked in the LIVE voice (terminal — the
+            // harness default; chrome casing is the view's tokens).
+            let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+            let essays = try #require(shelf.books.first { $0.reading.id == seed.essays })
+            #expect(tokens.chromeLabel(shelf.rowName(for: essays)) == "essays")
+            #expect(tokens.chromeLabel(shelf.rowMeta(for: essays)) == "2 notes · #goals",
+                    "LK5: note count + tags lead")
+            let poems = try #require(shelf.books.first { $0.reading.id == seed.poems })
+            #expect(tokens.chromeLabel(shelf.rowName(for: poems)) == "poems ✓",
+                    "✓ finished is a STATE on the name")
+            let smart = try #require(shelf.books.first { $0.reading.kind == .smart })
+            #expect(tokens.chromeLabel(shelf.rowMeta(for: smart)) == "smart · #books")
+
+            // TODAY: create-or-open + the shared daily-book shelving door.
+            let todayID = try #require(await shelf.openToday(day: "2026-08-03"))
+            #expect(shelf.lastReport == nil, "a clean shelving says nothing")
+            let journalMembers = try await db.read { db in
+                try String.fetchAll(db, sql: """
+                    SELECT rp.post_id FROM reading_post rp
+                    JOIN reading r ON r.id = rp.reading_id AND r.profile = 'journal'
+                    WHERE rp.deleted_at IS NULL
+                    """)
+            }
+            #expect(journalMembers == [todayID],
+                    "the day's entry shelved into the (created-and-pinned) daily book")
+
+            // TYPE in the REAL editor (the walk-1 surface).
+            let model = MobileEditorViewModel(
+                session: session, postID: todayID,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            model.attach(textView: surface.textView)
+            await model.loadOnce()
+            surface.textView.insertText("Dear diary, the shelf works.")
+            await model.awaitMintSettle()
+            await model.finish()
+            #expect(try await storedBlockTexts(db, postID: todayID)
+                    == ["Dear diary, the shelf works."])
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+            #expect(!surface.textView.canaryFired)
+
+            // LIBRARY: the listing carries it; search finds it by its day
+            // (the one display brain names it).
+            let library = MobileLibraryViewModel(session: session)
+            let libraryObservation = Task { await library.startAll() }
+            defer { libraryObservation.cancel() }
+            for _ in 0..<2000 where !library.all.contains(where: { $0.postID == todayID }) {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(library.all.first?.postID == todayID, "newest first")
+            await library.search("2026-08-03")
+            let hit = try #require(library.hits?.first { $0.kind == .post && $0.id == todayID })
+            #expect(hit.title == "2026-08-03")
+            #expect(MobileLibraryViewModel.destination(for: hit)
+                    == .note(todayID, focus: false))
+
+            // BACK: the note reopens in a fresh editor with the bytes.
+            let (reopened, storage) = makeEditor(session, postID: todayID)
+            await reopened.loadOnce()
+            #expect(storage.string == "Dear diary, the shelf works.")
+        }
+    }
 }
