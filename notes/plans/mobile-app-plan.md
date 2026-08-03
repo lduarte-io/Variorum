@@ -3878,6 +3878,53 @@ name(for:)` and the header should call it rather than respell it.
 - **The KnownIssues resolution** (flag 6 above) and the L9 pin's
   bidirectional coverage.
 
+## Stage 3 review — round 1 ADJUDICATION (architect, 2026-08-03; the fix session spawns on this record)
+
+All findings adjudicated against the spec; the fix session (fresh) builds
+exactly these:
+
+- **BLOCKER — AGREED; the fix takes P-3's OWN shape.** Two halves,
+  BOTH required, delivered as ONE mechanism: (1) autosave routes through
+  the ONE per-post coordinator (`AppSession.autosave(forPost:)` — the
+  constitution's application note verbatim: both surface kinds consult
+  the ONE authority and the ONE per-post coordinator); (2) a PHONE
+  LIVENESS AUTHORITY (the `PaneTextAuthority` analog, a testable sibling
+  brain): exactly ONE live editor anywhere — the hidden stack's editor
+  STANDS DOWN (read-tier or detached), and taking liveness is an
+  explicit act through the authority. Red-on-old pin per the traced
+  loss (type in A → tab-switch inside the debounce → type in B → NOTHING
+  lost).
+- **MAJOR 1 (single-slot registration) — AGREED; FOLD INTO the
+  authority** — background-flush targets are the authority's own
+  bookkeeping, never a parallel slot (one mechanism, not two). Pin both
+  traced arms.
+- **MAJOR 2 (dead focus code) — AGREED** — restructure so wiring
+  completes before the infinite observation loops (mechanics the fix
+  session's); the two-taps-to-typing claim becomes TRUE and pinned
+  (the S2 window-hosted focus pattern).
+- **MAJOR 3 (clean-instant stale adoption) — AGREED AS TRACED ON
+  MOBILE; the Mac half is TRACED, never assumed:** if the Mac's
+  composition carries its own generation guard around the shared
+  engine, the fix is mobile-side composition (record the asymmetry); if
+  the mechanism is genuinely shared, the policy fix lands in `Shared/`
+  and FIRES THE FULL VERIFICATION DUTY (core + Mac + spine by own
+  runs). Either way: the deterministic mobile pin (drive
+  `applyProjection(stalePhotograph)` post-flush); a Mac-side pin iff
+  the Mac shares the mechanism. The retired clean-instant guarantee is
+  RESTORED by name in the record.
+- **MINOR 1 (search cancellation) — AGREED** (cancellation filter +
+  staleness guard + success-clear; pin).
+- **MINOR 2 (voice flip's reach) — AGREED; route the flip through the
+  authority** (with the BLOCKER fix there is exactly one live editor;
+  the overbroad record claim corrected in place, visibly).
+- **NIT 1 + NIT 2 — both fixed** (the stale header; the respelled
+  finished-face calls the one brain).
+- **Flag 3's directive BINDS the fix:** the shell wiring's policy pulls
+  into a testable sibling brain — the authority above is its natural
+  home.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
