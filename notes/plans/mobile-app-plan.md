@@ -191,6 +191,293 @@ session's own runs.)*
   sheet (view/add/edit/delete — existing ops); a commented block wears a
   small marker.
 
+### Sitting batch 4 — cast & device drops (2026-08-03)
+
+- **M13 — Cast: ALL-FABLE** (architect · a fresh implementer per batch ·
+  cold reviewers), her call — coherent with her recorded token-window lean
+  (mobile is the main Fable spend of her two windows to Aug 6).
+- **M14 — Device drops: Xcode Release installs now, TestFlight when
+  stable.** Early rounds install via the standing A4 procedure (Release via
+  Xcode, phone plugged in); once the app stabilizes she sets up the App
+  Store Connect record and later drops ride TestFlight (the Fragments
+  muscle is fresh).
+
+### Her mid-sitting directive (2026-08-03, arrived during plan authoring — STANDING for this project; verbatim)
+
+> *"it's your role to also make sure that phases are made at sensible
+> points so that all the machinery we have for catching errors - the
+> review ladders, writing tests, etc. all stays disciplined. while i do
+> want you to handle the creation of variorum mobile more autonomously
+> than i've been building variorum itself (I'm involved with basically
+> every design decision there), it is still important that we stay true
+> to that. also, do you think that the instructions are pretty clear for
+> what to build in the app? are you interested in building me html
+> mockups or do you think you have enough that going straight to the
+> swift would be better? I'm truly open either way."*
+
+Readings, recorded with the directive: **(1) Stage = phase discipline** —
+each stage closes with the full ladder, tests-with-every-step, red-on-old
+pins, and recorded counts before the next opens; the mobile acceptance
+spine (below) makes P-6 real on the phone. **(2) The autonomy
+calibration** — design ambiguities run PROVISIONAL-and-continue with her
+bundle at stage gates rather than per-decision asks; author-only calls
+remain hard stops. **(3) Mockups: BOTH, in parallel** (the architect's
+answer, hers to override): the instructions ARE clear for what to build —
+machinery goes straight to Swift (the spike first); the unruled part is
+the LOOK, so the architect builds HTML mockups of the four key surfaces
+as a parallel look track for her sittings (the Phase 13 mockup-canon
+precedent). Machinery never waits on the look track; gesture FEEL is
+judged on her device, not in HTML.
+
+**THE SITTING IS CLOSED (2026-08-03) — fourteen rulings M1–M14, recorded
+verbatim-faithful above.** The execution plan below is authored from them.
+The brief sections later in this file ("What she actually wants", the
+floated candidates, "What is already settled and BINDS") remain standing
+inputs; the "Suggested shape of the work" table and the "Open questions the
+plan-author inherits" list are **SUPERSEDED** by the sitting + this plan
+(kept as history; all five inherited questions answered or owned —
+1→M1/M5/M6/M9 · 2→M4 · 3→M7/M8 · 4→the built-ahead-of-13e statement below ·
+5→ledger row L9).
+
+---
+
+## The settled shape (the sitting's synthesis — BINDING; built from M1–M14)
+
+- **The editor: Write-true.** ONE continuous TK2 `UITextView` over the whole
+  note (M1), block IDs riding ranges via the shared pure identity core
+  (`BlockRangeIndex`, `EditorDocument`, crystallization/reconciler,
+  `BoundarySnapping`, `SegmentationRules` — kept platform-neutral since
+  Phase 9 for exactly this). Markdown-as-content renders styled, with the
+  13g typing behaviors and a compact keyboard toolbar (M11); autosave/churn
+  through the shared coordinators. The Mac's Write, on the phone's terms.
+- **Blocks.** The caret's block is always known. Doors: the extended iOS
+  text edit menu (M2's long-press reading), the focused block's ⋯, and the
+  keyboard bar. Callout frames render; comments are a block-menu sheet with
+  full CRUD and a small marker on commented blocks (M12).
+- **Takes.** Fanned blocks wear the badge; horizontal swipe flips takes IN
+  PLACE as a PEEK (M5/M6), sticky while the note is open with a visible
+  peeking marker (M9); ✓ — on the flip pill or in the browser — is the ONLY
+  act that chooses (`chooseVariant`); the takes browser (badge/expand)
+  carries the four verbs: choose · new take · edit any · archive/delete
+  (M4). Direction held open, never v1: simplified mobile LENSES from the
+  takes surface (M9's note) — the sticky peek is deliberately lens-shaped.
+- **Structural.** Divide + merge ship exactly where the Mac needs no
+  ceremony — divide auto-proceeds on unique match via shared
+  `CutPropagation`, fanless merge is instant; where the Mac would open a
+  ceremony the phone refuses and names the Mac (M10). Extract deliberately
+  absent from v1.
+- **The app.** Shelf-first (M7): the Books/shelf home with the Today's
+  Entry button (create-or-open, the notebook rule); tab bar **Shelf ·
+  Library**; Library = everything + search, bookless notes a filter (the
+  Pool's phone home). Books open into the Read flow (M8): the calm
+  continuous column, chapters, virtualized per P3; tap into a note to
+  write. The Phase 8 capture views RETIRE when their replacements land;
+  the bootstrap/session/sync shells carry over unchanged.
+- **Sync & store.** Unchanged Phase 8 machinery — the phone is a second
+  client of the one core + engine; the A4 fence holds; Release installs
+  (M14); **NO schema anywhere in v1** (a schema need is a SyncSpec §12
+  lockstep event — stop, mirror-first, her explicit go).
+
+**Built ahead of 13e (the inherited question 4, answered):** the takes
+browser's management verbs are v1-scoped to M4's four; 13e's Mac additions
+(reorder takes, move-take-into-block, copy-all/takes-to-blocks, takes-aware
+find&replace) are ADOPTED AFTER 13e lands rather than pre-built. The
+double-build risk is one additive second pass over the browser screen —
+accepted. The swipe/peek grammar and everything else above is phone-native
+and untouched by 13e.
+
+## The binding principles (the 13b constitution — copied verbatim per the `/architect-phase` skill; BINDING for every batch)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+*Application precisions carried with the constitution (13b's build record,
+binding the same way):* P-1's scope is the ROUTED vocabulary, grown
+incrementally (surface-local doors declare `.surface`, never mis-filed);
+P-3 keeps TWO deliberate surface kinds — the FULL-DOCUMENT editor is never
+absorbed into the pane surface, both kinds consult the ONE authority and
+the ONE per-post autosave coordinator, and any liveness extension extends
+the authority's one-live-ring contract ON the authority, never a second
+mechanism beside it; storage-coupled code lives feature-side; parity
+refactors keep every pre-move name as forwards so existing pins pass
+UNMODIFIED; every equality-gated sink delivers its stored state AT WIRE
+TIME, and overlay geometry refreshes trigger on EVERY input axis (storage
+edits, width reflows, the first post-layout pass). *Phone reading of P-3:*
+the continuous Write surface is the full-document kind (the Mac
+`EditorTextView`'s iOS cousin over the same shared brain); read tiers
+compose the pane pattern; ONE live editor per the P3 invariant — the
+phone gets no second liveness mechanism.
+
+## Execution plan — stages
+
+Fresh Fable implementer per batch (M13); the review ladder per stage over
+the combined diff; red-on-old absolute; every batch brief carries the
+environment-traps section below verbatim. **Each stage CLOSES like a
+phase** (her mid-sitting directive): the ladder runs, counts land in this
+file by own runs, findings get written dispositions, and the next stage's
+batch brief is authored before it opens. **The mobile acceptance spine
+(P-6's analog): from Stage 1, a scripted walk suite (`MobileWalkTests`)
+over the phone's happy paths — it grows with every stage, rides every
+batch run, and a broken walk step is a regression by definition.**
+Design ambiguities run PROVISIONAL-and-continue with her bundle at stage
+gates (the autonomy calibration); author-only calls remain hard stops.
+
+| Stage | What | Gate |
+|---|---|---|
+| 0 | **The TK2-on-iOS spike** (throwaway; the Phase 6 precedent). Prove on iOS 26.2: TK2 opt-in + the downgrade-canary story on `UITextView`; 50k-word scroll/height/jump/typing; **block-ID attribute survival under iOS-native mutations — autocorrect, dictation, predictive text** (the identity risk the Mac never had); the M5 horizontal-pan-over-block gesture coexisting with selection/scroll; edit-menu extension items; keyboard-avoidance reflow. Memo: `notes/plans/mobile-tk2-spike-memo.md` | Decision memo — the architect rules; any red flag goes to the author |
+| 1 | **The editor core** — the continuous Write surface composing the shared identity brain + autosave/churn + markdown render & typing behaviors + the keyboard bar (M1/M11); the trailing-newlines defect pinned dead (L9) | Ladder; her feel round on device |
+| 2 | **Takes** — badge, swipe-peek (sticky + marker), ✓, the browser with the four verbs; fanned divide/merge refusals (M4/M5/M6/M9/M10) | Ladder; her feel round |
+| 3 | **The app shape** — shelf home + Today button + Library/search + navigation + new-note minting; the Phase 8 capture views retire (M7) | Ladder |
+| 4 | **Read flow + comments/callouts + structural doors** (M8/M10/M12) | Ladder |
+| 5 | **Device hardening + the sync round with her** — real-device convergence, offline, the S5 conflict check (Phase 8's still-pending device items fold in); on-device performance | Her checklist |
+| — | **Design/beauty rounds** — iterative sittings with her over screenshots/TestFlight builds; the acceptance bar is hers (*"beautiful and easy to use"*) | Her acceptance |
+
+### The ledger
+
+| # | Item | Status |
+|---|---|---|
+| L1 | TK2-on-iOS spike + decision memo | **spawned 2026-08-03** |
+| L2 | Editor core (identity, autosave, markdown render, keyboard bar) | pending (S1) |
+| L3 | Takes surface (badge, swipe-peek, ✓, browser, four verbs) | pending (S2) |
+| L4 | Shelf home + Today + Library/search + nav; capture views retire | pending (S3) |
+| L5 | Read flow | pending (S4) |
+| L6 | Comments & callouts, view + edit | pending (S4) |
+| L7 | Divide/merge doors + ceremony refusals | pending (S4) |
+| L8 | Formatting typing behaviors + toolbar (split across S1/S4 at batch briefs) | pending |
+| L9 | iOS trailing-blank-lines defect — pinned dead in the new editor (accidental accrual vs the 2026-07-12 MEANINGFUL stored spacing — never a blanket trim; this row OWNS the KnownIssues entry) | pending (S1) |
+| L10 | Device round + sync soak (incl. Phase 8's pending device items) | pending (S5) |
+| L11 | Design/beauty rounds with her | pending (post-S5, iterative) |
+| L12 | 13e-vocabulary adoption (reorder/move/copy-all, takes-aware F&R) | deferred BY DESIGN — after 13e lands |
+| L13 | The look track: HTML mockups of the four key surfaces (shelf home · Write page with fanned block + peek pill · takes browser · Read flow) → her look sittings → the mobile styling canon S1–S4 build toward | in progress (the architect's own) |
+
+## Environment traps (mobile — carried verbatim into every batch brief)
+
+- Simulator destination: **iPhone 17 Pro / OS 26.2**
+  (`-destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'`).
+  The iPhone 16 sims on this machine are iOS 18.3 — BELOW the deployment
+  target; they resolve to nothing (the sitting's own trap).
+- Mobile tests: `xcodebuild test -project App/Variorum/Variorum.xcodeproj
+  -scheme VariorumMobile -destination …` from the repo root; confirm the
+  "Test run with N tests" line; zsh `pipestatus`.
+- The A4 fence: debug/simulator builds resolve the DEV store and never
+  sync — safe by construction; NEVER point a debug build at the real
+  store; her phone installs Release (M14).
+- Shared-core discipline: touch `Sources/VariorumCore` only deliberately
+  and small; before landing any shared-core change, verify core + Mac
+  suite + spine by own runs (13k finals: core 1034/114 · Mac 1191/208
+  with the recorded tripwire · spine 51/7); Mac tests run from
+  `App/Variorum/`. `Sources/VariorumCore/Sync/` is Fable work (moot under
+  the all-Fable cast, M13).
+- Worktree: merge `main` → `mobile` regularly; `mobile` → `main` at
+  milestones at her word; push `origin mobile` after commits.
+- NO schema in v1; a schema need is a SyncSpec §12 lockstep event
+  (mirror-first, her explicit go) — stop and report.
+- NEVER add a custom build configuration (the 4G trap — SPM deps build
+  Release under any configuration not named exactly "Debug", silently
+  stripping DEBUG-gated oracles).
+- Spike code is throwaway: it lands under
+  `App/Variorum/VariorumMobile/Spike/`, DEBUG-gated, and is deleted at
+  Stage 0's close (recorded in the ledger).
+
+## Stage 0 batch brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, in full:** `CLAUDE.md` · this file (`notes/plans/mobile-app-plan.md`)
+· `notes/TEXTKIT2_NOTES.md` · `notes/plans/phase-06-tk2-spike.md` (the Mac
+precedent — mirror its inventory shape and memo form). You work in the
+`~/dev/variorum-mobile` worktree on branch `mobile`.
+
+**Objective:** learn the TK2-on-iOS facts on iOS 26.2 BEFORE the editor is
+designed onto them. Throwaway spike, not production code.
+
+**The inventory (each item gets measurements + an adopt/fallback verdict):**
+1. **TK2 opt-in + downgrade canary:** construct `UITextView` TK2-explicitly;
+   find and pin the iOS analog of the Mac's `willSwitchToNSLayoutManager`
+   canary; enumerate any downgrade triggers hit.
+2. **Scale:** a 50k-word document — typing latency at the tail and middle,
+   scroll stability, height-estimate convergence, scroll-to-location
+   fidelity (the Phase 6 inventory, iOS edition).
+3. **Attribute survival under iOS-native mutations:** block-ID custom
+   attributes riding ranges through autocorrect replacements, dictation
+   insertions, predictive-text acceptances, and multi-stage (marked-text)
+   input. This is the identity risk the Mac never had — measure drift
+   honestly; it shapes Stage 1's reconciler.
+4. **The M5 gesture:** a horizontal pan recognizer scoped to a block's
+   fragment rects, coexisting with text selection, loupe, and vertical
+   scroll; a peek-overlay proof (swap displayed text for a block range
+   without storage writes).
+5. **Edit-menu extension:** custom block items on the iOS text edit menu
+   (`UIEditMenuInteraction`) — the M2 door's mechanism.
+6. **Keyboard:** avoidance/reflow behavior with a bottom accessory bar (the
+   M11 toolbar's home).
+
+**Deliverable:** `notes/plans/mobile-tk2-spike-memo.md` — per-item evidence
+and verdicts, exact OS/SDK/simulator cited, an overall
+adopt/fallback-per-item recommendation for the architect to rule on. Spike
+code committed under `App/Variorum/VariorumMobile/Spike/` (DEBUG-gated
+screen reachable from the debug root — mechanics your call), to be deleted
+at stage close.
+
+**Constraints:** no `Sources/VariorumCore` changes (a need = report back);
+no schema; no Mac-side touches; tests are not required for throwaway spike
+code — the canary + measurements are the evidence; the environment-traps
+section above binds; commit as you go with the standing trailer and push
+`origin mobile` at bout end. Lookup exception: at most ONE Sonnet lookup
+subagent at a time, EXTERNAL facts only (Apple docs, API signatures) —
+never delegate repo reading, never web-search directly yourself.
+
+---
+
 ---
 
 ## Orientation
