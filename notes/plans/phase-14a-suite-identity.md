@@ -532,6 +532,60 @@ does not gate the spike (project refs are random; display names rename freely).
     compounding with app count (lifecycle chaining, access hygiene, incident
     blast radius), which is her own future-apps instinct stated back.
 
+- **Round 0g (same sitting) — her third challenge lands: the architect's
+  recommendation FLIPS. RULING PENDING HERS.** Her words: "can't i transfer the
+  suite identity to something else later? … it seems like that is a manageable
+  issue. I guess I'm back to not being that convinced on anything other than
+  defense in depth or vibes that the login truly belongs separate from variorum …
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  - **Why the flip is reasoned, not capitulation — five facts are NEW since the
+    round-0c ruling:** (1) her sequencing ruling (NOBODY logs in before the whole
+    14 family, 14c's isolation included) eliminates every interim security window
+    the separate project guarded — by the time any stranger holds an account,
+    parent-join isolation is built and tested; (2) TestFlight waits, so there is
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    are weaker than the round-0c framing: `auth.users`/`auth.identities` are
+    ordinary Postgres rows in a schema she owns — dumpable between projects with
+    uids AND password hashes intact; sessions invalidate (everyone signs in
+    again) but nothing is lost; and a CUSTOM DOMAIN fronting the issuer before
+    the first stranger signs up makes even the issuer URL portable (verify the
+    OAuth-server iss-claim behavior at adoption time — flagged, not asserted);
+    (5) in-Variorum-as-issuer REMOVES her own migration entirely: her existing
+    *[removed for publication]*
+    byte-identical by construction, and the R3 re-map machinery stands down.
+  - **What honestly remains for the separate project, stated as what it is:**
+    the 14b vault-separation depth (real, but the vault is NEW data at 14b —
+    the separate-project option can be re-taken THEN at zero migration cost, so
+    the decision naturally re-opens at the 14b sitting); ops fate-sharing once
+    real users exist (modest, and Pro/reorganization is available then — org
+    moves are free); organizational tidiness at N apps (her word for it — vibes —
+    is fair at current scale). Also recorded: a PAUSED issuer breaks only NEW
+    sign-ins — existing native sessions refresh project-locally (the 9c
+    provider-tokens-ride-the-initial-exchange-only fact), so free-tier pause is
+    even softer than round 0c framed it.
+  *[removed for publication]*
+    (a) the RPC author-allowlist lands NOW regardless (config mistakes become
+    non-fatal); (b) Variorum-project signups stay OFF until 14c's isolation is
+    built and tested — already her ruling; (c) a custom domain fronts the issuer
+    BEFORE the first non-author signup (portability insurance, bought only when
+    needed); (d) a standing RE-DECIDE CHECKPOINT written into the plan: before
+    the first non-author account is ever minted, the separate-project question
+    gets one final look — at that moment it is still a one-user migration.
+  - **Unchanged by this re-decision, whatever she rules:** single sign-in with
+    the Fragments password retiring; the bridge going delegated; TestFlight
+    waiting for the family; mobile on the suite login from birth; the 14c
+    completeness sweep; the allowlist. The ONLY variables are which project
+    hosts the issuer + `auth.users`, and whether new money is spent now.
+  - If she takes the flip: round 0c's ruling is SUPERSEDED (recorded, never
+    erased), R2's shape (A) amends to "the Variorum project is the account home"
+    with the same OAuth-2.1-Server mechanics, and the org/Pro purchase stands
+    down until she wants it.
+
 ## Ledger
 
 | # | Item | Status |
