@@ -23,6 +23,11 @@ import VariorumCore
 func withEditorWorld<T>(
     _ body: @MainActor (AppSession, AppDatabase) async throws -> T
 ) async throws -> T {
+    // Batch 3: every world runs in the DEFAULT voice, deterministically —
+    // LK2's stored preference must never leak simulator state into byte/
+    // attribute expectations (voice-switch tests set and restore their
+    // own).
+    MobileEditorStyle.voice = .terminal
     let db = try AppDatabase.inMemory()
     let start = Date(timeIntervalSince1970: 1_782_864_000)
     let tick = LockIsolated(0)

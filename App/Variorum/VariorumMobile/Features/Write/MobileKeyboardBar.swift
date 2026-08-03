@@ -39,14 +39,35 @@ final class MobileKeyboardBarController: NSObject {
     }
 
     /// The 44 pt accessory bar riding the keyboard (spike item 6's measured
-    /// home), now with its acts live.
+    /// home), now with its acts live — and, since batch 3, styled by the
+    /// LIVE VOICE (the look canon's kbar: the voice surface with a hairline
+    /// top edge, act glyphs in the muted chrome ink, mono type in the
+    /// terminal voice / the system sans in study — the mockups' own chrome
+    /// rule). `MobileEditorTextView.applyVoiceChrome` rebuilds it at the
+    /// LK2 switch, so the values are read fresh per build.
     func makeBar() -> UIView {
+        let face = MobileEditorStyle.face
         let bar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: 44))
         bar.autoresizingMask = [.flexibleWidth]
+
+        let appearance = UIToolbarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = face.surface
+        appearance.shadowColor = face.line
+        bar.standardAppearance = appearance
+        bar.compactAppearance = appearance
+        bar.scrollEdgeAppearance = appearance
+        bar.tintColor = face.muted
+
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: face.chrome, .foregroundColor: face.muted,
+        ]
 
         func act(_ title: String, _ label: String, _ selector: Selector) -> UIBarButtonItem {
             let item = UIBarButtonItem(title: title, style: .plain, target: self, action: selector)
             item.accessibilityLabel = label
+            item.setTitleTextAttributes(titleAttributes, for: .normal)
+            item.setTitleTextAttributes(titleAttributes, for: .highlighted)
             return item
         }
 
@@ -62,16 +83,18 @@ final class MobileKeyboardBarController: NSObject {
             act("☑", "Checklist", #selector(fireChecklist)),
             .flexibleSpace(),
         ]
-        items.append(indentItem())
+        items.append(indentItem(face: face))
         bar.items = items
         return bar
     }
 
     /// ⇥ needs a long-press (the outdent half), and a `UIBarButtonItem`
     /// can't carry one — so it wraps a real button.
-    private func indentItem() -> UIBarButtonItem {
+    private func indentItem(face: MobileEditorStyle.Face) -> UIBarButtonItem {
         let button = UIButton(type: .system)
         button.setTitle("⇥", for: .normal)
+        button.titleLabel?.font = face.chrome
+        button.setTitleColor(face.muted, for: .normal)
         button.accessibilityLabel = "Indent"
         button.accessibilityHint = "Long-press to outdent"
         button.addTarget(self, action: #selector(fireIndent), for: .touchUpInside)

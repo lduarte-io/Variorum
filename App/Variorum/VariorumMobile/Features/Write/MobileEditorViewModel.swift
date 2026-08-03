@@ -59,6 +59,10 @@ final class MobileEditorViewModel {
     /// The canary's visible diagnostic (release posture — obligation 2).
     private(set) var canaryMessage: String?
     private(set) var isSealed = false
+    /// The masthead's name for the note (batch 3): the shared
+    /// `DisplayTitle` chain — the stored title, else the entry date (the
+    /// 13k K1 rule rides for free because the brain is core's).
+    private(set) var displayTitle: String?
 
     // MARK: - Editor internals (never observed)
 
@@ -226,6 +230,47 @@ final class MobileEditorViewModel {
     func adoptHeader(_ value: Queries.ContainerHeader?) {
         header = value
         isSealed = value?.locked ?? false
+        displayTitle = value.map {
+            DisplayTitle.note(title: $0.title, entryDate: $0.entryDate)
+        }
+    }
+
+    // MARK: - The voice switch (batch 3 — LK2's application to an OPEN surface)
+
+    /// Restyles the open surface to the (already switched) live voice —
+    /// **attributes only, never a character** (display == stored holds by
+    /// construction; the walk pins byte-identity across the switch). The
+    /// whole document re-bases: every face bookkeeping run is dropped, the
+    /// new voice's base font/ink/gap is laid over the full range (ADDS,
+    /// never `setAttributes` — the block-ID projection is untouched), and
+    /// the markdown face re-derives fresh with the new palette. O(open
+    /// note) — the same cost class as opening the note, spent only at a
+    /// deliberate settings flip, never a keystroke (recorded).
+    func applyVoiceChange() {
+        defer {
+            textView?.applyVoiceChrome()
+            textView?.canaryCheckpointAfterMutation()
+        }
+        guard let storage, storage.length > 0 else { return }
+        let full = NSRange(location: 0, length: storage.length)
+        storage.beginEditing()
+        // The face's bookkeeping remembers the OLD voice's restore colors —
+        // drop it wholesale; the base reset below is the true restore.
+        storage.removeAttribute(MarkdownFace.faceAttribute, range: full)
+        storage.removeAttribute(.backgroundColor, range: full)
+        storage.removeAttribute(.strikethroughStyle, range: full)
+        storage.addAttribute(.font, value: MobileEditorStyle.baseFont, range: full)
+        storage.addAttribute(
+            .foregroundColor, value: MobileEditorStyle.face.ink, range: full)
+        storage.addAttribute(
+            .paragraphStyle, value: MobileEditorStyle.baseParagraphStyle, range: full)
+        storage.endEditing()
+        // The fresh face (its own begin/endEditing; attribute-only, so the
+        // storage observer's `.editedCharacters` guard keeps it inert).
+        MarkdownFace.style(
+            storage, base: MobileEditorStyle.baseFont,
+            palette: MobileEditorStyle.markdownPalette)
+        auditIdentityProjection()
     }
 
     // MARK: - Projection → surface

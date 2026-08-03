@@ -6,38 +6,139 @@
 //  `EditorDocument.materializeCore` asks its caller for (the Mac's is
 //  `EditorDocument.baseAttributes` in Features/Editor/EditorDocument.swift).
 //
-//  Deliberately minimal: the mobile look (voices, LK2's switch, the styling
-//  canon) is the LOOK TRACK's (ledger L13) and lands with her sittings;
-//  batch 1 renders functional Dynamic-Type body text. The ONE presentation
-//  rule carried over is the Mac's ratified uniform paragraph gap
-//  (2026-07-12, QUESTIONS #12): spacing applied after EVERY paragraph —
-//  intra-block newlines and seams alike — so block boundaries stay
-//  invisible at rest (a gap only at seams would make every boundary
-//  inferable). PROVISIONAL size: a font-derived constant, the look track's
-//  to restyle.
+//  **Since S1 batch 3 this is the LOOK CANON's editor half** (L13 ruled at
+//  the look sittings; LK2's both-voices switch): the VALUES resolve from
+//  the shared `VoiceTokens` layer — the ONE canon both platforms carry
+//  (Shared/Theme) — per the phone's OWN stored voice
+//  (`MobileVoicePreference`). Feature code still never holds a literal
+//  color (P-8): every UIColor here is a dynamic derivation of a token, and
+//  DARK is the token layer's own dark values riding the system scheme
+//  (R51's fully black rooms — pinned by `MobileVoiceTests`).
+//
+//  Concurrency: `voice` follows the Mac `MarkdownStyling.palette` pattern
+//  exactly — written ONLY on the main thread (screen init + the switch
+//  door; tests pin it explicitly), read by main-thread surface writes.
+//  The per-voice faces are cached `static let`s so every read returns the
+//  SAME color/font objects (attribute equality in tests, zero rebuild
+//  cost per keystroke).
+//
+//  Typography values are the token layer's own (terminal mono 14 / study
+//  Iowan Old Style 16 — the Mac `EditorTypography.resolve` numbers),
+//  wrapped in `UIFontMetrics(.body)` so Dynamic Type scales them
+//  (identity at the default content size, so byte/attribute tests stay
+//  deterministic). PROVISIONAL sizes like everything visual: the mockup's
+//  phone frames hint slightly larger — her on-device feel round rules.
+//
+//  The uniform paragraph gap keeps the 2026-07-12 rule (spacing after
+//  EVERY paragraph — intra-block newlines and seams alike, so boundaries
+//  stay invisible at rest) at the Mac's OWN constant since this batch:
+//  0.5 × pointSize (EditorTypography's gap; batch 1's 0.35 stood in).
+//  The dotted-seam toggle is deliberately ABSENT — unruled for mobile.
 //
 
+import SwiftUI
 import UIKit
+import VariorumCore
 
 nonisolated enum MobileEditorStyle {
-    static var baseFont: UIFont { .preferredFont(forTextStyle: .body) }
+    // MARK: - The live voice
 
-    /// The markdown face's phone palette (batch 2, M11) — the shared
-    /// `MarkdownFace` algorithm with NEUTRAL system values: the Mac
-    /// `systemFallback`'s iOS cousins (secondary label for dimmed markers,
-    /// the system link color, a faint system fill for the 13k K10 code
-    /// chip). PROVISIONAL like everything visual here: the voice pass (L13,
-    /// LK2's switch) replaces the VALUES; the algorithm is the shared one.
-    static var markdownPalette: MarkdownFace.Palette {
-        MarkdownFace.Palette(
-            marker: .secondaryLabel, link: .link, codeTint: .secondarySystemFill)
+    /// The phone's live voice — LK2's preference, applied. Main-thread
+    /// written (screen init, the switch door, tests), main-thread read.
+    nonisolated(unsafe) private static var storedVoice: ThemeVoice = .terminal
+    static var voice: ThemeVoice {
+        get { storedVoice }
+        set { storedVoice = newValue }
     }
+
+    // MARK: - One voice's resolved editor face
+
+    /// The UIKit face of one voice: what the TK2 surface, the markdown
+    /// face, and the keyboard bar style with. Colors are DYNAMIC (light +
+    /// dark resolve from the token layer per the current trait — R51's
+    /// black rooms ride the system scheme with no re-render needed).
+    struct Face {
+        let body: UIFont
+        /// Chrome type (the keyboard bar's act titles): mono in the
+        /// terminal voice, the system sans in study — the mockups' own
+        /// chrome rule (`.s .chrome` is sans even though study prose is
+        /// serif).
+        let chrome: UIFont
+        let ink: UIColor
+        let muted: UIColor
+        let room: UIColor
+        let surface: UIColor
+        let line: UIColor
+        let accent: UIColor
+        /// The markdown face's palette — the Mac `Palette(tokens:)`
+        /// mapping verbatim: marker = muted, link = accent, chip =
+        /// codeTint (13k K10's per-voice tint).
+        let palette: MarkdownFace.Palette
+
+        init(voice: ThemeVoice) {
+            func dynamic(_ key: KeyPath<VoiceTokens, Color>) -> UIColor {
+                UIColor { traits in
+                    UIColor(VoiceTokens.resolve(
+                        voice: voice,
+                        dark: traits.userInterfaceStyle == .dark)[keyPath: key])
+                }
+            }
+            let metrics = UIFontMetrics(forTextStyle: .body)
+            switch voice {
+            case .terminal:
+                body = metrics.scaledFont(
+                    for: .monospacedSystemFont(ofSize: 14, weight: .regular))
+                chrome = .monospacedSystemFont(ofSize: 14, weight: .regular)
+            case .study:
+                // Iowan Old Style ships on iOS (pinned by
+                // `MobileVoiceTests`); the serif system design is the
+                // never-reached safety net — the Mac resolver's exact
+                // posture (R49: nothing bundled).
+                let serif = UIFont(name: "IowanOldStyle-Roman", size: 16)
+                    ?? UIFont(name: "Iowan Old Style", size: 16)
+                    ?? UIFont(
+                        descriptor: UIFont.systemFont(ofSize: 16).fontDescriptor
+                            .withDesign(.serif)
+                            ?? UIFont.systemFont(ofSize: 16).fontDescriptor,
+                        size: 16)
+                body = metrics.scaledFont(for: serif)
+                chrome = .systemFont(ofSize: 14)
+            }
+            ink = dynamic(\.ink)
+            muted = dynamic(\.muted)
+            room = dynamic(\.room)
+            surface = dynamic(\.surface)
+            line = dynamic(\.line)
+            accent = dynamic(\.accent)
+            palette = MarkdownFace.Palette(
+                marker: dynamic(\.muted),
+                link: dynamic(\.accent),
+                codeTint: dynamic(\.codeTint))
+        }
+    }
+
+    /// Cached once per voice — object-stable colors/fonts (see header).
+    static let terminalFace = Face(voice: .terminal)
+    static let studyFace = Face(voice: .study)
+
+    static var face: Face {
+        switch voice {
+        case .terminal: terminalFace
+        case .study: studyFace
+        }
+    }
+
+    // MARK: - The surface-write values (the pre-batch-3 names, kept)
+
+    static var baseFont: UIFont { face.body }
+
+    static var markdownPalette: MarkdownFace.Palette { face.palette }
 
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
-        // Uniform per-PARAGRAPH gap (the 2026-07-12 rule's letter);
-        // font-derived so Dynamic Type scales it. PROVISIONAL size (L13).
-        style.paragraphSpacing = (baseFont.pointSize * 0.35).rounded()
+        // Uniform per-PARAGRAPH gap (the 2026-07-12 rule's letter) at the
+        // Mac's own constant (EditorTypography: 0.5 × pointSize).
+        style.paragraphSpacing = (baseFont.pointSize * 0.5).rounded()
         return style
     }
 
@@ -47,7 +148,7 @@ nonisolated enum MobileEditorStyle {
     static var baseAttributes: [NSAttributedString.Key: Any] {
         [
             .font: baseFont,
-            .foregroundColor: UIColor.label,
+            .foregroundColor: face.ink,
             .paragraphStyle: baseParagraphStyle,
         ]
     }

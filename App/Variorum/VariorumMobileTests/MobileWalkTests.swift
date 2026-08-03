@@ -214,4 +214,81 @@ struct MobileWalkTests {
             #expect(model.statusMessage == nil)
         }
     }
+
+    /// Walk step 4 (S1 batch 3 — the brief's scope item 5): the LK2 voice
+    /// switch restyles the OPEN surface while every byte stays exactly
+    /// where it was — display == stored holds through the switch in both
+    /// directions, identity stays intact, and the face provably changes
+    /// (fonts and palette follow the voice).
+    @Test func walk4_voiceSwitchRestylesWithoutTouchingBytes() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "walk voice", profile: .blog)
+            }
+            let model = MobileEditorViewModel(
+                session: session, postID: post.id,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            model.attach(textView: surface.textView)
+            await model.loadOnce()
+            let view = surface.textView
+            let storage = view.textStorage
+
+            // A voiced document: heading, nested list (the trim law's kept
+            // indent riding the spine), inline code — pasted as bulk.
+            typeEdit(
+                model, storage,
+                range: NSRange(location: 0, length: 0),
+                replacement: "# Head\n\n- milk\n  - [ ] eggs\n\nwith `code` inline",
+                isPaste: true)
+            await model.awaitMintSettle()
+            await model.autosave.flushNow()
+            let surfaceBytes = storage.string
+            #expect(surfaceBytes == "# Head\n\n- milk\n  - [ ] eggs\n\nwith `code` inline")
+            let storedBytes = try await storedBlockTexts(db, postID: post.id)
+            #expect(storedBytes == ["# Head\n", "- milk", "  - [ ] eggs\n", "with `code` inline"])
+
+            let proseAt = (storage.string as NSString).range(of: "with").location
+            let terminalProse = storage.attribute(.font, at: proseAt, effectiveRange: nil) as? UIFont
+            #expect(terminalProse?.fontDescriptor.symbolicTraits.contains(.traitMonoSpace) == true)
+
+            // THE SWITCH → study. Attributes only; bytes byte-identical.
+            MobileEditorStyle.voice = .study
+            defer { MobileEditorStyle.voice = .terminal }
+            model.applyVoiceChange()
+            #expect(storage.string == surfaceBytes)
+            await model.autosave.flushNow()
+            #expect(try await storedBlockTexts(db, postID: post.id) == storedBytes)
+
+            // The face followed: study serif prose, the study palette's
+            // dimmed marker and code chip, study typing attributes.
+            let studyProse = storage.attribute(.font, at: proseAt, effectiveRange: nil) as? UIFont
+            #expect(studyProse?.familyName == "Iowan Old Style")
+            let marker = storage.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor
+            #expect(marker == MobileEditorStyle.studyFace.palette.marker)
+            let tickAt = (storage.string as NSString).range(of: "`code`").location
+            let chip = storage.attribute(.backgroundColor, at: tickAt, effectiveRange: nil) as? UIColor
+            #expect(chip == MobileEditorStyle.studyFace.palette.codeTint)
+            let typingFont = view.typingAttributes[.font] as? UIFont
+            #expect(typingFont?.familyName == "Iowan Old Style")
+
+            // And BACK — byte-identical again, the terminal face restored.
+            MobileEditorStyle.voice = .terminal
+            model.applyVoiceChange()
+            #expect(storage.string == surfaceBytes)
+            let backProse = storage.attribute(.font, at: proseAt, effectiveRange: nil) as? UIFont
+            #expect(backProse?.fontDescriptor.symbolicTraits.contains(.traitMonoSpace) == true)
+            #expect(storage.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor
+                    == MobileEditorStyle.terminalFace.palette.marker)
+
+            // Identity intact, canary silent, no refusal spoke — the
+            // switch is invisible to everything but the face.
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+            #expect(!view.canaryFired)
+            #expect(model.statusMessage == nil)
+        }
+    }
 }

@@ -134,14 +134,14 @@ final class MobileEditorTextView: UITextView {
         view.adjustsFontForContentSizeCategory = true
         view.alwaysBounceVertical = true
         view.keyboardDismissMode = .interactive
-        view.typingAttributes = MobileEditorStyle.baseAttributes
-        view.backgroundColor = .systemBackground
 
         // Batch 2: the bar's six live acts (LK8 minus ⑂/⋯ per P-2) replace
-        // the batch-1 shell.
+        // the batch-1 shell. Batch 3: chrome + bar resolve from the live
+        // voice (`applyVoiceChrome` styles both; the VM's
+        // `applyVoiceChange` re-invokes it at the switch).
         let barController = MobileKeyboardBarController(textView: view)
         view.keyboardBarController = barController
-        view.inputAccessoryView = barController.makeBar()
+        view.applyVoiceChrome()
 
         // Batch 2: the checkbox tap-toggle. The router's `shouldReceive`
         // decision means a tap anywhere but strictly inside a box is never
@@ -153,6 +153,24 @@ final class MobileEditorTextView: UITextView {
         view.addGestureRecognizer(tap)
         view.checkboxRouter = router
         return view
+    }
+
+    // MARK: Voice chrome (batch 3 — the look canon on the surface)
+
+    /// Applies the live voice's chrome to the view + its keyboard bar:
+    /// the room background (dark rides the dynamic colors — R51), the
+    /// accent caret/selection tint, the voice typing attributes, and a
+    /// freshly styled bar. Called at construction and by the VM's
+    /// `applyVoiceChange` (the LK2 switch).
+    func applyVoiceChrome() {
+        let face = MobileEditorStyle.face
+        backgroundColor = face.room
+        tintColor = face.accent
+        typingAttributes = MobileEditorStyle.baseAttributes
+        if let keyboardBarController {
+            inputAccessoryView = keyboardBarController.makeBar()
+            reloadInputViews()
+        }
     }
 
     // MARK: The ⏎ door (13k K5/K8 on the phone — batch 2)
