@@ -2406,6 +2406,30 @@ Mac-side or `Shared/` touches** (the whole diff is mobile-target).
 Commits: `005dec2` (the browser + doors + suites) · the record
 commit; pushed to `origin mobile` at bout end.
 
+## Stage 2, batch 2 — ACCEPTED; STAGE 2 BUILD COMPLETE — the ladder OPENS (architect, 2026-08-03)
+
+**Acceptance:** verified — diff scope inspected (mobile-target only:
+three new sibling-type files, thin VM/bar/view touches, tests, the
+record; zero shared, zero core, zero pbxproj), the batch record read,
+push state confirmed, and **mobile 123/20 re-confirmed by the
+architect's own run**. The overlay-not-modal presentation reading and
+the two sanctioned pin flips (P15's badge door; the six→seven bar pin)
+are ACCEPTED. The `deleteVariant` guard-order finding is CORRECTLY
+mirrored, never changed (core behavior, Mac-identical, pinned both
+ways). P20–P26 join the stage-gate bundle (now P1–P26 + LK5's rider +
+the missing-acts note). The eight ladder flags stand recorded for the
+reviewer's anchor; the sheet's missing keyboard-guide constraint joins
+the S2 feel round's device items.
+
+**THE STAGE 2 REVIEW LADDER — round 1 (fresh cold reviewer, spawned at
+this record):** review target = the stage's combined diff,
+**`c8174ed..40256ca`** (S2 batches 1–2 + the architect's records). The
+reviewer runs `notes/REVIEW_PROMPT.md` VERBATIM with zero framing; its
+anchors are this file's S2 batch records + the eight flags. Findings
+land repo-first in this file; the same-model flow holds (the architect
+adjudicates against the spec; fixes with traced mechanisms +
+revert-verified pins; round 2 re-reviews fresh; hard cap three).
+
 ---
 
 ## Orientation
