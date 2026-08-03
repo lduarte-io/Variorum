@@ -117,6 +117,16 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   autocorrect/dictation, loupe-under-pan — the memo's obligation 6);
   the first Release install to her phone at a milestone (M14).
 
+## THE v1 BUILD IS COMPLETE (2026-08-03) — the gate is with the author
+
+All four stages closed behind two-round ladders (the plan file's stage
+closeouts are the record; finals mobile 172/24 · core 1039/114 · Mac
+1193/208 tripwire-only · spine 51/7). The successor's whole job until
+her gate answers arrive: NOTHING builds; fold her rulings (the feel
+round's findings, Q-M1, Q-M2, any P1–P44 flips) into adjudicated fix
+batches with the standing discipline, then `mobile` → `main` at her
+word, then the look/beauty rounds at her pace.
+
 ## Machinery lessons (earned this run — do not relearn)
 
 - Simulator: **iPhone 17 family, most recent iOS runtime, always** (her
