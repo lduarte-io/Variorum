@@ -91,13 +91,27 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   recorded-only). Round 2 re-reviews the fixes when they land; the
   BLOCKER/MAJOR being round-1 findings does NOT force round 3 — only
   a NEW BLOCKER/MAJOR in round 2 does.**
-- **After the S2 ladder closes:** the stage gate to the author (the
-  bundle is now P1–P26 + LK5's rider + the missing-acts note; the feel
-  round covers BOTH stages' device items — live autocorrect/dictation,
-  loupe-under-pan, the sheet's keyboard constraint); then S3 (the app
-  shape: shelf home + Today + Library/search + nav; the Phase 8 capture
-  views retire there, which is also when the KnownIssues
-  trailing-newlines row resolves) per the stage table.
+- **STAGE 2 CLOSED** (closeout in the plan, 2026-08-03): the ladder
+  closed at round 2 — the fix pass landed all six adjudicated fixes
+  with revert-verified pins; round 2 = all seven HOLD (red-on-old
+  independently reproduced on the pre-fix tree, 6/6 discriminate), zero
+  new above NIT; mobile finals **130/20**. The round-2 NIT is
+  product-flavored and routed to the author as **Q-M1**
+  (branch-under-refused-flush: seed-from-ledger (a) vs refuse-the-door
+  (b); (a) noted spec-truer; NOTHING built until she rules).
+- **THE COMPLETE STAGE GATE IS WITH THE AUTHOR:** P1–P26 · LK5's rider
+  · the missing-bar-acts note · Q-M1 · the feel round (both stages'
+  device items + round-2's riders: marker z-order, ~26 pt badge target,
+  ⑂-drift, second-tap focus, the sheet's keyboard constraint). Nothing
+  gates S3.
+- **STAGE 3 IS RUNNING — batch 1 spawned** (brief in the plan: the
+  shelf home with LK5 faces · Today through the shared daily door ·
+  LK7 tabs · Library/search/bookless filter · the Phase 8 capture
+  views RETIRE with the KnownIssues trailing-newlines row resolving in
+  the batch record · the voice switch's Settings home · the
+  cold-launch walk). Batch 1 closes S3's planned scope; its ladder at
+  acceptance; then S4 (Read flow + comments/callouts + divide/merge
+  doors) per the stage table.
 - **The stage-gate author bundle so far:** batch 1's P1–P4 + LK5's
   ✓-finished-as-state PROVISIONAL; the device feel round (live
   autocorrect/dictation, loupe-under-pan — the memo's obligation 6);
