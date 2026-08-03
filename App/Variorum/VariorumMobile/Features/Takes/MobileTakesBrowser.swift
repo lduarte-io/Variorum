@@ -206,6 +206,15 @@ final class MobileTakesBrowserController {
         guard let model, let blockID = openBlockID,
               let displayed = model.slot(for: blockID)?.variantID
         else { return nil }
+        // FLUSH FIRST (S2 ladder round 1, MAJOR — the 13f R1-4 class): a
+        // copy door offered at a possibly-dirty moment must carry the
+        // keystrokes that summoned it. `branchVariant` copies
+        // `working_text` from the STORE, which lags the surface until the
+        // flush lands — without this, the source card showed the edited
+        // bytes (ledger-first) while the fresh "branch of this one" held
+        // older ones. Blank copies no text and needs nothing; ✓ repoints
+        // and reads no text (batch 1's interpretation 6 stands).
+        await model.autosave.flushNow()
         return await mint(verb: .branch) { ops in
             try ops.branchVariant(blockID, from: displayed)
         }
@@ -270,9 +279,21 @@ final class MobileTakesBrowserController {
     /// sealed/locked belt re-checked per keystroke, and the exact cost
     /// captured for the record (the VM gate's pattern).
     func cardGateAllows(range: NSRange, replacement: String) -> Bool {
-        guard let model, editingVariantID != nil else { return false }
+        guard let model, let variantID = editingVariantID else { return false }
         if model.isSealed {
             model.report("This note is locked — unlock it on the Mac to edit.")
+            return false
+        }
+        // The LOCKED half, made real (S2 ladder round 1, MINOR 1): a take
+        // locked WHILE its card is live — a remote lock arriving by
+        // delivery (fans adopt even when the slot apply defers) — refuses
+        // the NEXT keystroke here with the standing copy, instead of
+        // admitting text the flush can only refuse. Text typed BEFORE the
+        // lock stays pending (the coordinator's keep-pending posture) and
+        // the card keeps showing it ledger-first; refusing new keystrokes
+        // drops nothing.
+        if cards().first(where: { $0.variantID == variantID })?.isLocked == true {
+            model.report("This take is locked — branch it or unlock it on the Mac to edit.")
             return false
         }
         pendingCardCost = range.length + (replacement as NSString).length

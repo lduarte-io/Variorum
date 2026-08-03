@@ -262,6 +262,41 @@ struct MobileTakesBrowserTests {
         }
     }
 
+    @Test func branchDisplayedCarriesUnflushedEditsIntoTheCopy() async throws {
+        // The S2 ladder round-1 MAJOR's pin (the 13f R1-4 class): the
+        // door flushes BEFORE the mint, so the copy carries the
+        // keystrokes that summoned it. On the old code `branchVariant`
+        // copied the store's older bytes past the dirty buffer.
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // An unflushed in-page edit on the DISPLAYED (chosen) take —
+            // the debounce is held open by the injected sleep.
+            let edited = "First block, as chosen. Sharpened."
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: ("First block, as chosen." as NSString).length,
+                               length: 0),
+                replacement: " Sharpened."))
+            #expect(model.autosave.isDirty)
+            model.takesBrowser.open(blockID: seed.blockA)
+
+            let mint = await model.takesBrowser.branchDisplayed()
+            guard let mint else {
+                Issue.record("branch minted nothing")
+                return
+            }
+            // The copy holds the EDITED bytes — in the returned mint and
+            // in the store's row — and the source flushed them too.
+            #expect(mint.workingText == edited)
+            #expect(try await storedText(db, variantID: mint.id) == edited)
+            #expect(try await storedText(db, variantID: seed.a1) == edited)
+            #expect(mint.parentVariantId == seed.a1)
+        }
+    }
+
     @Test func blankMintsAnEmptyTakeAtTheFanEnd() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedFannedPost(session)
@@ -348,6 +383,61 @@ struct MobileTakesBrowserTests {
             #expect(model.takesBrowser.editingVariantID == nil)
             #expect(model.statusMessage
                     == "This take is locked — branch it or unlock it on the Mac to edit.")
+        }
+    }
+
+    @Test func aRemoteLockMidCardEditRefusesTheNextKeystrokeAndKeepsPendingText() async throws {
+        // The S2 ladder round-1 MINOR-1 pin: the belt's LOCKED half is
+        // real. A take locked while its card is live (a remote lock
+        // arriving by delivery) refuses the NEXT keystroke at the gate
+        // with the standing copy — the old code admitted every keystroke
+        // (seal-only belt) and the typed-after-lock text could never
+        // land. The keep-pending half: text typed BEFORE the lock stays
+        // pending through the gate refusal AND through the flush's own
+        // refusal — nothing typed is ever dropped.
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.takesBrowser.open(blockID: seed.blockA)
+
+            // A pending, unflushed card edit on a2 (the debounce is held
+            // open by the injected sleep).
+            model.takesBrowser.beginEditing(variantID: seed.a2)
+            let typed = "First block, the other way. Typed."
+            #expect(model.takesBrowser.cardGateAllows(
+                range: NSRange(location: 27, length: 0), replacement: " Typed."))
+            model.takesBrowser.cardTextDidChange(typed)
+            #expect(model.autosave.isDirty)
+
+            // The remote lock lands mid-edit; the delivery adopts the
+            // fresh fan (locked a2) even though the dirty buffer defers
+            // the slot apply — the live card now reads locked.
+            try await session.runner.run { ops in try ops.lockVariant(seed.a2) }
+            let fresh = try await db.read { [postID = model.postID] in
+                try Queries.takesProjection($0, post: postID)
+            }
+            model.ingest(fresh)
+
+            // The next keystroke refuses AT THE GATE, with the standing
+            // copy (red on old: the seal-only belt admitted it).
+            #expect(!model.takesBrowser.cardGateAllows(
+                range: NSRange(location: 34, length: 0), replacement: "x"))
+            #expect(model.statusMessage
+                    == "This take is locked — branch it or unlock it on the Mac to edit.")
+
+            // KEEP-PENDING: the pre-lock typed bytes survive the refusal —
+            // still the surface's record, still pending.
+            #expect(model.surfaceKnownText(variantID: seed.a2) == typed)
+            #expect(model.autosave.isDirty)
+
+            // Even the flush's own refusal (the op's lockedVariant) keeps
+            // them pending rather than dropping them; the store is safe.
+            await model.autosave.flushNow()
+            #expect(model.autosave.isDirty, "the refused entry stays pending")
+            #expect(model.surfaceKnownText(variantID: seed.a2) == typed)
+            #expect(try await storedText(db, variantID: seed.a2)
+                    == "First block, the other way.")
         }
     }
 
@@ -603,6 +693,40 @@ struct MobileTakesBrowserSurfaceTests {
             let menu = try #require((subview(chosenCard, "takes.card.menu") as? UIButton)?.menu)
             #expect(menu.children.compactMap { ($0 as? UIAction)?.title }
                     == ["Archive Take", "Delete Take"])
+        }
+    }
+
+    @Test func beginEditingRaisesKeyboardFocusOnTheCardEditor() async throws {
+        // The S2 ladder round-1 MINOR-2 pin, window-hosted (first
+        // responder needs a window): activating a card raises focus on
+        // the ONE card editor — one tap, not two. The on-device keyboard
+        // feel still rides the S2 feel round.
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, surface) = await makeBrowserSurface(session, postID: seed.postID)
+            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
+            window.addSubview(surface)
+            window.makeKeyAndVisible()
+            defer { window.isHidden = true }
+            guard let browserView = surface.textView.takesBrowserView else {
+                Issue.record("browser view not installed")
+                return
+            }
+
+            model.takesBrowser.open(blockID: seed.blockA)
+            #expect(!browserView.cardEditor.isFirstResponder)
+
+            model.takesBrowser.beginEditing(variantID: seed.a2)
+            #expect(browserView.cardEditor.isFirstResponder,
+                    "activation raises focus — typing lands instantly")
+
+            // Moving the live editor to another card keeps focus with it.
+            model.takesBrowser.beginEditing(variantID: seed.a1)
+            #expect(browserView.cardEditor.isFirstResponder)
+
+            // Done resigns (the standing detach posture).
+            await model.takesBrowser.close()
+            #expect(!browserView.cardEditor.isFirstResponder)
         }
     }
 
