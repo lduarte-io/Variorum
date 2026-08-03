@@ -635,4 +635,120 @@ struct MobileWalkTests {
             #expect(storage.string == "Dear diary, the shelf works.")
         }
     }
+
+    /// Walk step 8 (S4 batch 1 — the brief's scope item 7): open a book →
+    /// Read renders (chapters, paper strings) → tap into a note → add a
+    /// comment (marker appears) → set a callout (frame renders) → divide
+    /// the block (store rows checked) → merge back → bytes byte-checked →
+    /// identity audit clean, canary silent.
+    @Test func walk8_readCommentsCalloutDivideMerge() async throws {
+        try await withEditorWorld { session, db in
+            // A chaptered book: two chapters, three notes.
+            let seed = try await session.runner.run { ops -> (bookID: String, noteID: String) in
+                let book = try ops.createReading(name: "The Long Field", kind: .curated)
+                let one = try ops.createSection(in: book.id, name: "Openings")
+                let two = try ops.createSection(in: book.id, name: "Middles")
+                let n1 = try ops.createPost(title: "What the rain kept")
+                _ = try ops.newBlock(
+                    in: n1.id, text: "First sentence. Second sentence.", at: .end)
+                let n2 = try ops.createPost(title: "The letter")
+                _ = try ops.newBlock(in: n2.id, text: "A page can hold its breath.", at: .end)
+                let n3 = try ops.createPost(title: "The pause")
+                _ = try ops.newBlock(in: n3.id, text: "How long a person can live.", at: .end)
+                for id in [n1.id, n2.id, n3.id] {
+                    _ = try ops.addPostToReading(id, to: book.id)
+                }
+                try ops.assignPostToSection(n1.id, in: book.id, section: one.id)
+                try ops.assignPostToSection(n2.id, in: book.id, section: one.id)
+                try ops.assignPostToSection(n3.id, in: book.id, section: two.id)
+                return (book.id, n1.id)
+            }
+
+            // OPEN THE BOOK: the Read column's shape from the book's own
+            // observation + the pure page brains (LK9 byte-checked).
+            let book = MobileBookViewModel(session: session, readingID: seed.bookID)
+            let observation = Task { await book.start() }
+            defer { observation.cancel() }
+            for _ in 0..<2000 where book.entries.count < 3 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            let chapters = MobileReadPage.assemble(book.groupedRows)
+            #expect(chapters.map(\.caption) == ["I · OPENINGS", "II · MIDDLES"])
+            let slots = chapters.flatMap(\.notes)
+            #expect(slots.map(\.ordinal) == [1, 2, 3])
+            #expect(slots[0].entry.displayTitle == "What the rain kept")
+            #expect(MobileReadPage.pageMeta(
+                ordinal: slots[2].ordinal, total: book.entries.count,
+                chapterIndex: slots[2].chapterIndex) == "note 3 of 3 · ii")
+            // The page's rendered text — the Mac flow's exact read.
+            let rendered: String? = try await db.read { [id = seed.noteID] db in
+                let noteSlots = try Queries.renderPost(db, containerID: id)
+                return Queries.joinRenderedTexts(noteSlots.compactMap(\.text))
+            }
+            let paragraphs = MobileReadPage.paragraphs(of: rendered ?? "")
+            #expect(paragraphs.map { String($0.text.characters) }
+                == ["First sentence. Second sentence."])
+
+            // TAP INTO THE NOTE: the real TK2 editor (the walk-1 surface).
+            let model = MobileEditorViewModel(
+                session: session, postID: seed.noteID,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            model.attach(textView: surface.textView)
+            await model.loadOnce()
+            surface.layoutIfNeeded()
+            let blockID = try #require(model.index.entries.first?.blockID)
+
+            // ADD A COMMENT: the sheet's verb; the ●n marker appears.
+            model.openComments(blockID: blockID)
+            await model.comments.add("Keep the pause unspoken.")
+            #expect(model.comments.comments.map(\.text) == ["Keep the pause unspoken."])
+            #expect(model.slot(for: blockID)?.commentCount == 1)
+            model.comments.close()
+            surface.layoutIfNeeded()
+            surface.textView.refreshChrome()
+            let mark = try #require(
+                surface.textView.blockDecor?.commentMark(for: blockID) as? UIButton)
+            #expect(mark.title(for: .normal) == "●1")
+
+            // SET A CALLOUT: the ⋯ menu's verb; the frame renders.
+            await model.blockMenu.applyCallout(blockID: blockID, edit: .toggle)
+            #expect(model.presentations[blockID]?.color == "blue")
+            surface.textView.refreshChrome()
+            #expect(surface.textView.blockDecor?.frameView(for: blockID) != nil)
+
+            // DIVIDE at the sentence cut (store rows checked).
+            await model.structural.divide(atSurfaceCaret: 16)
+            #expect(model.statusMessage == nil)
+            #expect(try await storedBlockTexts(db, postID: seed.noteID)
+                == ["First sentence.", "Second sentence."])
+            #expect(model.index.entries.count == 2)
+            // The comment copied and the frame inherited (the op's travel).
+            let successorID = try #require(model.index.entries.last?.blockID)
+            #expect(model.slot(for: successorID)?.commentCount == 1)
+            #expect(model.presentations[successorID]?.color == "blue")
+
+            // MERGE BACK: a sentence cut restores EXACTLY (the canon
+            // join's own promise — bytes byte-checked).
+            let successorRange = try #require(model.rangeOfBlock(successorID))
+            await model.structural.mergeWithPrevious(
+                atSurfaceCaret: successorRange.location + 2)
+            #expect(model.statusMessage == nil)
+            #expect(try await storedBlockTexts(db, postID: seed.noteID)
+                == ["First sentence. Second sentence."])
+            #expect(model.index.entries.count == 1)
+            #expect(surface.textView.textStorage.string == "First sentence. Second sentence.")
+
+            // Identity intact, canary silent; teardown lands the bytes.
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+            #expect(!surface.textView.canaryFired)
+            await model.finish()
+            #expect(try await storedBlockTexts(db, postID: seed.noteID)
+                == ["First sentence. Second sentence."])
+        }
+    }
 }

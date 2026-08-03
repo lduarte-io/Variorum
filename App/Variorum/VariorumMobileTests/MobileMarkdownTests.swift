@@ -516,14 +516,15 @@ struct MobileMarkdownActsTests {
                 Issue.record("the bar is not a toolbar")
                 return
             }
-            // Seven act doors IN BAR ORDER (six titled items + the ⇥
-            // button): LK8's eight minus ⋯, whose block menu is S4's —
-            // ⑂ JOINED at S2 batch 2 WITH its surface (P-2's application,
-            // exactly as this pin's earlier six-act form recorded).
+            // Eight act doors IN BAR ORDER (six titled items + the ⇥ and
+            // ⋯ buttons): LK8's ruled eight, complete — ⑂ JOINED at S2
+            // batch 2, ⋯ at S4 batch 1 WITH its block menu (each door
+            // arriving WITH its surface, P-2's application; this pin's
+            // six- and seven-act forms recorded both arrivals in advance).
             let titled = (toolbar.items ?? []).filter { $0.action != nil }
             let custom = (toolbar.items ?? []).compactMap { $0.customView as? UIButton }
             #expect(titled.count == 6)
-            #expect(custom.count == 1)
+            #expect(custom.count == 2)
             // Order pinned over the ITEMS as laid out (the titled/custom
             // split can no longer read order — ⑂ rides after the ⇥
             // button).

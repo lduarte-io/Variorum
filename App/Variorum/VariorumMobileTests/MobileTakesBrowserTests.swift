@@ -807,7 +807,8 @@ struct MobileTakesBrowserSurfaceTests {
                 emptySurface.textView, editMenuForTextIn: NSRange(location: 0, length: 0),
                 suggestedActions: suggested))
             #expect(tailMenu.children.compactMap { ($0 as? UIAction)?.title } == ["Copy"])
-            #expect(tailMenu.children.compactMap { ($0 as? UIMenu)?.title }.isEmpty)
+            let tailSubmenus = tailMenu.children.compactMap { ($0 as? UIMenu)?.title }
+            #expect(tailSubmenus == [])
             #expect(MobileEditMenu.takesTarget(
                 model: emptyModel, range: NSRange(location: 0, length: 0)) == nil)
         }

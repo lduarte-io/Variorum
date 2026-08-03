@@ -1,0 +1,408 @@
+//
+//  MobileBlockMenuTests.swift
+//  VariorumMobileTests
+//
+//  Mobile Stage 4, batch 1 — the ⋯ block menu's brains: the one-builder
+//  vocabulary (two doors, zero drift), the callout transform through the
+//  standing op, Name, Delete Block, the comments controller's CRUD +
+//  never-skimpy deleted section, and the block decor's overlays (real
+//  laid-out geometry — the S2 chrome suite's pattern).
+//
+
+import Foundation
+import GRDB
+import Testing
+import UIKit
+import VariorumCore
+@testable import VariorumMobile
+
+// MARK: - Seeds & probes
+
+@MainActor
+private func seedTwoBlockPost(
+    _ session: AppSession
+) async throws -> (postID: String, blockA: String, a1: String, blockB: String, b1: String) {
+    try await session.runner.run { ops in
+        let post = try ops.createPost(title: "menu", profile: .blog)
+        let a = try ops.newBlock(in: post.id, text: "First block here.", at: .end)
+        let b = try ops.newBlock(in: post.id, text: "Second block here.", at: .end)
+        return (post.id, a.block.id, a.variant.id, b.block.id, b.variant.id)
+    }
+}
+
+@MainActor
+private func storedPresentation(_ db: AppDatabase, blockID: String) async throws -> String? {
+    try await db.read { db in
+        try String.fetchOne(
+            db, sql: "SELECT presentation FROM block WHERE id = ?", arguments: [blockID])
+    }
+}
+
+@MainActor
+private func storedName(_ db: AppDatabase, blockID: String) async throws -> String? {
+    try await db.read { db in
+        try String.fetchOne(
+            db, sql: "SELECT name FROM block WHERE id = ?", arguments: [blockID])
+    }
+}
+
+@MainActor
+private func liveCommentTexts(_ db: AppDatabase, blockID: String) async throws -> [String] {
+    try await db.read { db in
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT text FROM block_comment
+                WHERE block_id = ? AND deleted_at IS NULL
+                ORDER BY created_at, id
+                """,
+            arguments: [blockID])
+    }
+}
+
+@MainActor
+private func makeDecorSurface(
+    _ session: AppSession, postID: String
+) async -> (model: MobileEditorViewModel, surface: MobileWriteSurfaceView) {
+    let model = MobileEditorViewModel(
+        session: session, postID: postID,
+        sleep: { _ in throw CancellationError() })
+    model.tailIdleSleep = { _ in throw CancellationError() }
+    let surface = MobileWriteSurfaceView()
+    surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+    model.attach(textView: surface.textView)
+    await model.loadOnce()
+    surface.layoutIfNeeded()
+    return (model, surface)
+}
+
+// MARK: - The menu vocabulary
+
+@MainActor
+@Suite("Mobile block menu — the one builder (S4 batch 1)")
+struct MobileBlockMenuTests {
+    @Test func theTwoDoorsShareOneVocabulary() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // The bar's ⋯ renders the WHOLE row set (Takes… first).
+            let barElements = model.blockMenu.menuElements(
+                blockID: seed.blockA, includeTakes: true)
+            let barTitles = barElements.map(\.title)
+            #expect(barTitles == MobileBlockMenuController.rowTitles)
+
+            // The edit menu's Block submenu renders the SAME rows minus
+            // the flat Takes… item it already carries (one builder — the
+            // doors cannot drift).
+            let submenuElements = model.blockMenu.menuElements(
+                blockID: seed.blockA, includeTakes: false)
+            #expect(submenuElements.map(\.title)
+                == Array(MobileBlockMenuController.rowTitles.dropFirst()))
+
+            // The callout submenu's words are the Mac CalloutMenu's rows,
+            // mirrored (toggle · five colors · emoji · remove).
+            let callout = try #require(
+                barElements.first { $0.title == MobileBlockMenuController.calloutTitle }
+                    as? UIMenu)
+            #expect(callout.children.map(\.title)
+                == MobileBlockMenuController.calloutRowTitles)
+            #expect(MobileBlockMenuController.calloutRowTitles
+                == ["Toggle Callout", "Blue", "Green", "Sand", "Violet", "Rose",
+                    "Emoji…", "Remove Callout"])
+
+            // Delete is the destructive row (the card-⋯ grammar).
+            let delete = try #require(
+                barElements.first { $0.title == MobileBlockMenuController.deleteTitle }
+                    as? UIAction)
+            #expect(delete.attributes.contains(.destructive))
+        }
+    }
+
+    // MARK: Callout (M12 — the mirrored transform through the op)
+
+    @Test func calloutEditsWriteTheStoredFrameThroughTheOp() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Toggle ON: the default blue frame.
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .toggle)
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","kind":"callout"}"#)
+            // The projection follows (the decor's bookkeeping).
+            #expect(model.presentations[seed.blockA]?.color == "blue")
+
+            // A color keeps the emoji; an emoji keeps the color — the
+            // read-modify-write runs INSIDE the op's transaction.
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .emoji("🕯"))
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"blue","emoji":"🕯","kind":"callout"}"#)
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .color("sand"))
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"sand","emoji":"🕯","kind":"callout"}"#)
+
+            // An EMPTY emoji is a real answer — "no glyph" (the Mac
+            // prompt's semantics).
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .emoji(""))
+            #expect(try await storedPresentation(db, blockID: seed.blockA)
+                == #"{"color":"sand","kind":"callout"}"#)
+
+            // Remove: a plain block again (NULL, never "{}").
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .color(nil))
+            #expect(try await storedPresentation(db, blockID: seed.blockA) == nil)
+            #expect(model.presentations[seed.blockA] == nil)
+            // The neighbor never moved.
+            #expect(try await storedPresentation(db, blockID: seed.blockB) == nil)
+        }
+    }
+
+    @Test func calloutAndNameRefuseUnderASealedNote() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+
+            await model.blockMenu.applyCallout(blockID: seed.blockA, edit: .toggle)
+            #expect(model.statusMessage
+                == "This note is locked — unlock it on the Mac to change the callout.")
+            #expect(try await storedPresentation(db, blockID: seed.blockA) == nil)
+
+            await model.blockMenu.rename(blockID: seed.blockA, name: "handle")
+            #expect(model.statusMessage
+                == "This note is locked — unlock it on the Mac to name the block.")
+            #expect(try await storedName(db, blockID: seed.blockA) == nil)
+        }
+    }
+
+    // MARK: Name (the block's handle)
+
+    @Test func nameBlockSetsAndClearsThroughTheOp() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            await model.blockMenu.rename(blockID: seed.blockA, name: "the thesis")
+            #expect(try await storedName(db, blockID: seed.blockA) == "the thesis")
+            #expect(model.statusMessage == nil)
+
+            // Whitespace clears (the op's own trim-to-nil rule).
+            await model.blockMenu.rename(blockID: seed.blockA, name: "  ")
+            #expect(try await storedName(db, blockID: seed.blockA) == nil)
+        }
+    }
+
+    // MARK: Delete block (the tray stays Mac-side; flush-first)
+
+    @Test func deleteBlockTombstonesAndSpeaksTheTrayNote() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Unflushed typing lands FIRST (flush-first: the tray's copy
+            // of the block holds every typed byte).
+            let range = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: range.upperBound, length: 0),
+                     replacement: " Typed.")
+            await model.blockMenu.delete(blockID: seed.blockA)
+
+            #expect(model.statusMessage
+                == "Block deleted — it waits in this note's deleted-blocks tray on the Mac.")
+            let deletedAt = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT deleted_at FROM block WHERE id = ?",
+                    arguments: [seed.blockA])
+            }
+            #expect(deletedAt != nil)
+            // The flushed bytes rode into the tray.
+            #expect(try await storedText(db, variantID: seed.a1)
+                == "First block here. Typed.")
+            // The surface healed: one block left.
+            #expect(model.index.entries.map(\.blockID) == [seed.blockB])
+
+            // Under a seal the door refuses through the op, store safe.
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            await model.blockMenu.delete(blockID: seed.blockB)
+            #expect(model.statusMessage
+                == "This note is locked — unlock it on the Mac to delete the block.")
+            #expect(model.index.entries.map(\.blockID) == [seed.blockB])
+        }
+    }
+}
+
+// MARK: - Comments (M12)
+
+@MainActor
+@Suite("Mobile comments — CRUD + the never-skimpy deleted section (S4 batch 1)")
+struct MobileCommentsTests {
+    @Test func commentCRUDAndTheDeletedSectionThroughTheOps() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            model.openComments(blockID: seed.blockA)
+            #expect(model.comments.isOpen)
+            await model.comments.refresh()
+            #expect(model.comments.comments.isEmpty)
+
+            // ADD — stored verbatim; the slot's count follows (the ●n
+            // marker's brain).
+            await model.comments.add("First thought.")
+            await model.comments.add("Second thought.")
+            #expect(try await liveCommentTexts(db, blockID: seed.blockA)
+                == ["First thought.", "Second thought."])
+            #expect(model.comments.comments.map(\.text)
+                == ["First thought.", "Second thought."])
+            #expect(model.slot(for: seed.blockA)?.commentCount == 2)
+
+            // EDIT through the draft door.
+            let first = try #require(model.comments.comments.first)
+            model.comments.beginEditing(first.id)
+            await model.comments.submitDraft("First thought, sharpened.")
+            #expect(try await liveCommentTexts(db, blockID: seed.blockA)
+                == ["First thought, sharpened.", "Second thought."])
+            #expect(model.comments.editingID == nil)
+
+            // DELETE tombstones; the deleted list shows it (never
+            // skimpy); RESTORE revives it.
+            await model.comments.delete(first.id)
+            #expect(model.comments.comments.map(\.text) == ["Second thought."])
+            #expect(model.comments.deleted.map(\.text) == ["First thought, sharpened."])
+            #expect(model.slot(for: seed.blockA)?.commentCount == 1)
+            await model.comments.restore(first.id)
+            #expect(model.comments.comments.map(\.text)
+                == ["First thought, sharpened.", "Second thought."])
+            #expect(model.comments.deleted.isEmpty)
+            #expect(model.slot(for: seed.blockA)?.commentCount == 2)
+        }
+    }
+
+    @Test func commentRefusalsSpeakTheOpsOwnWords() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.openComments(blockID: seed.blockA)
+
+            // Whitespace-only refuses (the op's own guard, the Mac
+            // panel's words).
+            await model.comments.add("   ")
+            #expect(model.statusMessage == "A comment needs some text.")
+            #expect(try await liveCommentTexts(db, blockID: seed.blockA).isEmpty)
+
+            // The seal refuses writes; reading stays free.
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            await model.comments.add("Under seal.")
+            #expect(model.statusMessage
+                == "This note is locked — unlock it on the Mac to change comments.")
+            #expect(try await liveCommentTexts(db, blockID: seed.blockA).isEmpty)
+        }
+    }
+
+    @Test func theSheetClosesWhenItsBlockLeavesTheSurface() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            model.openComments(blockID: seed.blockA)
+            #expect(model.comments.isOpen)
+            try await session.runner.run { [blockID = seed.blockA] ops in
+                try ops.deleteBlock(blockID)
+            }
+            await model.refreshTakesFromStore()
+            #expect(!model.comments.isOpen)
+        }
+    }
+}
+
+// MARK: - The block decor (real laid-out geometry)
+
+@MainActor
+@Suite("Mobile block decor — callout frames + comment markers (S4 batch 1)")
+struct MobileBlockDecorTests {
+    @Test func aFramedBlockWearsOneWashAndAPlainBlockNothing() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            try await session.runner.run { [blockID = seed.blockA] ops in
+                try ops.setBlockPresentation(
+                    blockID, BlockPresentation(color: "sand", emoji: nil))
+            }
+            let (model, surface) = await makeDecorSurface(session, postID: seed.postID)
+            let decor = try #require(surface.textView.blockDecor)
+
+            let wash = try #require(decor.frameView(for: seed.blockA))
+            #expect(wash.superview === surface.textView)
+            // ONE frame around the block's whole region, BEHIND the text
+            // canvas (the overlay law — subview index 0's family).
+            #expect(surface.textView.subviews.firstIndex(of: wash)
+                .map { $0 <= 1 } == true)
+            #expect(wash.frame.width > 0 && wash.frame.height > 0)
+            // A plain block carries nothing.
+            #expect(decor.frameView(for: seed.blockB) == nil)
+            #expect(decor.emojiLabel(for: seed.blockA) == nil)
+            _ = model
+        }
+    }
+
+    @Test func theEmojiReservesALeadingGapAndRendersTheGlyph() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            try await session.runner.run { [blockID = seed.blockA] ops in
+                try ops.setBlockPresentation(
+                    blockID, BlockPresentation(color: "blue", emoji: "🕯"))
+            }
+            let (_, surface) = await makeDecorSurface(session, postID: seed.postID)
+            let decor = try #require(surface.textView.blockDecor)
+
+            let label = try #require(decor.emojiLabel(for: seed.blockA))
+            #expect(label.text == "🕯")
+            // The reserved leading gap (LK10's mechanism, mirrored): one
+            // exclusion at the line's start, published into the container's
+            // ONE exclusion set.
+            #expect(decor.currentEmojiExclusions.count == 1)
+            let gap = try #require(decor.currentEmojiExclusions.first)
+            #expect(gap.minX == 0)
+            #expect(gap.width > 0)
+            #expect(surface.textView.textContainer.exclusionPaths
+                .contains { $0.bounds == gap })
+        }
+    }
+
+    @Test func aCommentedBlockWearsItsCountAndTheTapOpensTheSheet() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            try await session.runner.run { [blockID = seed.blockA] ops in
+                _ = try ops.addBlockComment(to: blockID, text: "One.")
+                _ = try ops.addBlockComment(to: blockID, text: "Two.")
+            }
+            let (model, surface) = await makeDecorSurface(session, postID: seed.postID)
+            let decor = try #require(surface.textView.blockDecor)
+
+            let mark = try #require(decor.commentMark(for: seed.blockA) as? UIButton)
+            #expect(mark.title(for: .normal) == "●2")
+            // The uncommented neighbor carries nothing.
+            #expect(decor.commentMark(for: seed.blockB) == nil)
+
+            // The tap is a door (the badge grammar): the comments sheet
+            // opens on the block.
+            mark.sendActions(for: .touchUpInside)
+            #expect(model.comments.isOpen)
+            #expect(model.comments.openBlockID == seed.blockA)
+            #expect(surface.textView.commentsSheetView?.isHidden == false)
+        }
+    }
+}

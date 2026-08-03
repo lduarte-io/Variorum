@@ -1,0 +1,406 @@
+//
+//  MobileStructuralTests.swift
+//  VariorumMobileTests
+//
+//  Mobile Stage 4, batch 1 (M10) — the divide/merge doors: the Mac's own
+//  no-ceremony paths on the phone, refusals naming the Mac exactly where
+//  a ceremony would open there. Store-byte checks throughout (the ops
+//  are the Phase 3 tested substrate; these pins hold the DOOR's routing,
+//  gating, and refusal shapes). Plus the S3 round-2 NIT's pin (the
+//  loadOnce cancellation filter).
+//
+
+import Foundation
+import GRDB
+import Testing
+import UIKit
+import VariorumCore
+@testable import VariorumMobile
+
+// MARK: - Seeds & probes
+
+@MainActor
+private func seedProsePost(
+    _ session: AppSession, first: String = "Alpha beta. Gamma delta.",
+    second: String? = "Second block prose."
+) async throws -> (postID: String, blockA: String, a1: String, blockB: String?, b1: String?) {
+    try await session.runner.run { ops in
+        let post = try ops.createPost(title: "structural", profile: .blog)
+        let a = try ops.newBlock(in: post.id, text: first, at: .end)
+        if let second {
+            let b = try ops.newBlock(in: post.id, text: second, at: .end)
+            return (post.id, a.block.id, a.variant.id, b.block.id, b.variant.id)
+        }
+        return (post.id, a.block.id, a.variant.id, nil, nil)
+    }
+}
+
+@MainActor
+private func liveBlockTexts(_ db: AppDatabase, postID: String) async throws -> [String] {
+    try await storedBlockTexts(db, postID: postID)
+}
+
+@MainActor
+private func livePlacementBlockIDs(_ db: AppDatabase, postID: String) async throws -> [String] {
+    try await db.read { db in
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT block_id FROM container_block
+                WHERE container_id = ? AND deleted_at IS NULL
+                ORDER BY position, id
+                """,
+            arguments: [postID])
+    }
+}
+
+@MainActor
+private func activeFanTexts(_ db: AppDatabase, blockID: String) async throws -> [String] {
+    try await db.read { db in
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT working_text FROM variant
+                WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                ORDER BY fan_position, id
+                """,
+            arguments: [blockID])
+    }
+}
+
+@MainActor
+private func blockIsLive(_ db: AppDatabase, blockID: String) async throws -> Bool {
+    try await db.read { db in
+        try Bool.fetchOne(
+            db, sql: "SELECT deleted_at IS NULL FROM block WHERE id = ?",
+            arguments: [blockID]) ?? false
+    }
+}
+
+@MainActor
+@Suite("Mobile structural doors — divide/merge (S4 batch 1, M10)")
+struct MobileStructuralTests {
+    // MARK: Divide, the everyday in-place cut
+
+    @Test func divideSplitsASingleTakeBlockInPlace() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            // A comment + a callout ride the block — the op's travel
+            // rules (copies to the successor; the frame inherits) are
+            // the store-byte proof the door ran the REAL op.
+            try await session.runner.run { [blockID = seed.blockA] ops in
+                _ = try ops.addBlockComment(to: blockID, text: "note")
+                try ops.setBlockPresentation(
+                    blockID, BlockPresentation(color: "sand", emoji: nil))
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // The caret after "Alpha beta. " (offset 12 — a word start).
+            await model.structural.divide(atSurfaceCaret: 12)
+
+            #expect(model.statusMessage == nil)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 3)
+            #expect(placements.first == seed.blockA)
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["Alpha beta.", "Gamma delta.", "Second block prose."])
+            // The successor inherited the frame and a COPY of the comment.
+            let successor = placements[1]
+            let successorPresentation = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT presentation FROM block WHERE id = ?",
+                    arguments: [successor])
+            }
+            #expect(successorPresentation == #"{"color":"sand","kind":"callout"}"#)
+            let successorComments = try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM block_comment
+                        WHERE block_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [successor]) ?? 0
+            }
+            #expect(successorComments == 1)
+            // The surface healed to the store's shape.
+            #expect(model.index.entries.count == 3)
+            #expect(model.viewText(model.index.range(ofEntryAt: 0)) == "Alpha beta.")
+            #expect(model.viewText(model.index.range(ofEntryAt: 1)) == "Gamma delta.")
+        }
+    }
+
+    @Test func divideSnapsAMidWordCaretThroughTheOneSnapBrain() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Mid-"Gamma" (offset 15): the ruled word rule settles the
+            // cut onto a legal boundary — never a mid-word split.
+            await model.structural.divide(atSurfaceCaret: 15)
+            #expect(model.statusMessage == nil)
+            let texts = try await liveBlockTexts(db, postID: seed.postID)
+            #expect(texts.count == 3)
+            // Every stored half ends/starts at a word edge (no half of
+            // "Gamma" anywhere).
+            #expect(!texts[0].hasSuffix("Ga"))
+            #expect(texts[0] + " " + texts[1] == "Alpha beta. Gamma delta."
+                || texts[0] + texts[1] == "Alpha beta. Gamma delta.")
+        }
+    }
+
+    @Test func divideCarriesUnflushedTypingThroughTheFlush() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session, second: nil)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Type into the block; leave it UNFLUSHED (the harness clock
+            // never fires). The door's flush-first contract must carry
+            // these bytes into the halves.
+            let range = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: range.upperBound, length: 0),
+                     replacement: " Typed tail.")
+            #expect(model.autosave.isDirty)
+
+            await model.structural.divide(atSurfaceCaret: 12)
+            #expect(model.statusMessage == nil)
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["Alpha beta.", "Gamma delta. Typed tail."])
+        }
+    }
+
+    // MARK: Divide on a fanned block (the #10 auto-proceed / the refusal)
+
+    @Test func divideOnAFannedBlockAutoProceedsOnUniqueMatch() async throws {
+        try await withEditorWorld { session, db in
+            // The two takes AGREE within CutPropagation's context window
+            // around the cut (±16 UTF-16 units) and differ beyond it —
+            // the unique-match case the #10 rule auto-proceeds on.
+            let seed = try await seedProsePost(
+                session,
+                first: "Same beginning of the block here. Different ending number one.",
+                second: nil)
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                let take = try ops.branchVariant(blockID, from: a1)
+                try ops.autosave(
+                    take.id,
+                    text: "Same beginning of the block here. Different ending number two!",
+                    charDelta: 4)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // The cut at "Different" (offset 34) maps UNIQUELY into the
+            // other take by CutPropagation's context match — the Mac
+            // needs no ceremony, so the phone auto-proceeds (M10's
+            // letter): the W outcome through ops.divideW.
+            await model.structural.divide(atSurfaceCaret: 34)
+            #expect(model.statusMessage == nil)
+
+            // A is preserved WHOLE and released to lineage (its
+            // placement tombstoned, the block + both takes live).
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 2)
+            #expect(!placements.contains(seed.blockA))
+            #expect(try await blockIsLive(db, blockID: seed.blockA))
+            #expect(try await activeFanTexts(db, blockID: seed.blockA) == [
+                "Same beginning of the block here. Different ending number one.",
+                "Same beginning of the block here. Different ending number two!",
+            ])
+            // B's fan = the first halves; C's fan = the second halves —
+            // EVERY take carried through (the auto-proceed marks all).
+            #expect(try await activeFanTexts(db, blockID: placements[0]) == [
+                "Same beginning of the block here.",
+                "Same beginning of the block here.",
+            ])
+            #expect(try await activeFanTexts(db, blockID: placements[1]) == [
+                "Different ending number one.",
+                "Different ending number two!",
+            ])
+            #expect(model.index.entries.count == 2)
+        }
+    }
+
+    @Test func divideOnAFannedBlockRefusesNamingTheMacWhereATakeDoesNotMap() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(
+                session, first: "Shared start. Unique tail one.", second: nil)
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                let take = try ops.branchVariant(blockID, from: a1)
+                // NO shared context anywhere near the cut — the Mac
+                // would open the W ceremony here.
+                try ops.autosave(
+                    take.id, text: "Entirely different words in this take.",
+                    charDelta: 10)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let before = try await liveBlockTexts(db, postID: seed.postID)
+
+            await model.structural.divide(atSurfaceCaret: 14)
+
+            #expect(model.statusMessage
+                == "One of this block's takes needs its cut placed by hand — "
+                    + "that's the take ceremony, on the Mac for now.")
+            // The store is byte-untouched — a refusal, never a half-act.
+            #expect(try await liveBlockTexts(db, postID: seed.postID) == before)
+            #expect(try await livePlacementBlockIDs(db, postID: seed.postID)
+                == [seed.blockA])
+        }
+    }
+
+    @Test func divideRefusalsSpeakTheRefusalShapes() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session, second: nil)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // A one-word block: no legal interior cut.
+            let tiny = try await session.runner.run { [postID = seed.postID] ops in
+                try ops.newBlock(in: postID, text: "Word", at: .end)
+            }
+            await model.refreshTakesFromStore()
+            let tinyRange = try #require(model.rangeOfBlock(tiny.block.id))
+            await model.structural.divide(atSurfaceCaret: tinyRange.location + 2)
+            #expect(model.statusMessage
+                == "No legal cut spot for that here — cuts land between words, "
+                    + "at sentence ends, and at line breaks.")
+
+            // The open tail is not a block yet — a fresh note's typed
+            // tail (type-time crystallization mints the finished
+            // paragraph; the trailing text stays an open tail).
+            let fresh = try await session.runner.run { ops in
+                try ops.createPost(title: "tail", profile: .blog)
+            }
+            let (tailModel, tailStorage) = makeEditor(session, postID: fresh.id)
+            await tailModel.loadOnce()
+            typeAtEnd(tailModel, tailStorage, "Para one.\n")
+            typeAtEnd(tailModel, tailStorage, "Still typing the tail")
+            await tailModel.awaitMintSettle()
+            let tailStart = try #require(tailModel.index.tailRange?.location)
+            await tailModel.structural.divide(atSurfaceCaret: tailStart + 3)
+            #expect(tailModel.statusMessage
+                == "This text isn't a block yet — it becomes one moments after you pause typing.")
+
+            // A locked take (single) refuses — branch or unlock.
+            try await session.runner.run { [a1 = seed.a1] ops in
+                try ops.lockVariant(a1)
+            }
+            await model.refreshTakesFromStore()
+            await model.structural.divide(atSurfaceCaret: 12)
+            #expect(model.statusMessage
+                == "This take is locked — branch it or unlock it on the Mac to edit.")
+
+            // The seal outranks everything (the pre-gate's wording once
+            // the surface KNOWS the seal; the op's own lockedPost refusal
+            // is the belt for the stale-header window).
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            await model.loadOnce()
+            await model.structural.divide(atSurfaceCaret: 12)
+            #expect(model.statusMessage
+                == "This note is locked — unlock it on the Mac to restructure.")
+            _ = db
+        }
+    }
+
+    // MARK: Merge with previous
+
+    @Test func mergeJoinsFanlessNeighborsWithTheCanonSpace() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(
+                session, first: "First half.", second: "Second half.")
+            try await session.runner.run { [a = seed.blockA, b = seed.blockB!] ops in
+                _ = try ops.addBlockComment(to: a, text: "from A")
+                _ = try ops.addBlockComment(to: b, text: "from B")
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // The caret in block B; merge joins it with the block above.
+            let bRange = try #require(model.rangeOfBlock(seed.blockB!))
+            await model.structural.mergeWithPrevious(atSurfaceCaret: bRange.location + 3)
+
+            #expect(model.statusMessage == nil)
+            let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
+            #expect(placements.count == 1)
+            let merged = placements[0]
+            #expect(merged != seed.blockA && merged != seed.blockB)
+            // The canon join: a single space at the seam.
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["First half. Second half."])
+            // Both sources released to lineage, live.
+            #expect(try await blockIsLive(db, blockID: seed.blockA))
+            #expect(try await blockIsLive(db, blockID: seed.blockB!))
+            // A' carries BOTH sides' comments (copies).
+            let mergedComments = try await db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT text FROM block_comment
+                        WHERE block_id = ? AND deleted_at IS NULL
+                        ORDER BY created_at, id
+                        """,
+                    arguments: [merged])
+            }
+            #expect(Set(mergedComments) == ["from A", "from B"])
+            #expect(model.index.entries.count == 1)
+        }
+    }
+
+    @Test func mergeRefusesToTheMacCeremonyWhenEitherSideCarriesAFan() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(session)
+            try await session.runner.run { [blockID = seed.blockA, a1 = seed.a1] ops in
+                let take = try ops.branchVariant(blockID, from: a1)
+                try ops.autosave(take.id, text: "The other way entirely.", charDelta: 6)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            let before = try await liveBlockTexts(db, postID: seed.postID)
+
+            let bRange = try #require(model.rangeOfBlock(seed.blockB!))
+            await model.structural.mergeWithPrevious(atSurfaceCaret: bRange.location + 3)
+
+            #expect(model.statusMessage
+                == "One of these blocks has other takes — pairing takes into a "
+                    + "merge is the Mac's merge ceremony.")
+            #expect(try await liveBlockTexts(db, postID: seed.postID) == before)
+            #expect(try await livePlacementBlockIDs(db, postID: seed.postID).count == 2)
+        }
+    }
+
+    @Test func mergeOnTheFirstBlockRefusesHonestly() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedProsePost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            await model.structural.mergeWithPrevious(atSurfaceCaret: 3)
+            #expect(model.statusMessage
+                == "This is the note's first block — there's nothing above to merge with.")
+        }
+    }
+
+    // MARK: The S3 round-2 NIT's pin
+
+    @Test func aCancelledLoadOnceNeverLandsAsAnError() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedProsePost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+
+            // The push-then-immediate-pop shape: the screen's task is
+            // cancelled before the read lands — GRDB throws
+            // CancellationError, and the status line must NOT stringify
+            // a teardown into an error she can read.
+            let task = Task { await model.loadOnce() }
+            task.cancel()
+            await task.value
+            #expect(model.statusMessage == nil)
+        }
+    }
+}
