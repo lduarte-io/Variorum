@@ -5459,6 +5459,19 @@ and the adjudication above it.
 
 ---
 
+## Stage 4 fix pass — ACCEPTED by the architect (2026-08-03); round 2 spawns on this record
+
+Verified: scope mobile-only (seven files, zero core/Shared/Mac/pbxproj),
+the record read, push confirmed, **mobile 172/24 re-confirmed by the
+architect's own run**. The delete-act's move onto the structural
+controller (menu pins byte-unmodified) is the right shape; the
+true-membership-count deferral joins the gate bundle beside P36; the
+merge adjacency-belt honesty accepted. Round 2: a real pass over the
+fixes and what they touched; no new BLOCKER/MAJOR closes the FINAL
+ladder.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
