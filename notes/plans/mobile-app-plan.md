@@ -1205,7 +1205,12 @@ whole prior window. Rider: re-resolution under the corrected path bumped
 the workspace `Package.resolved`'s `swift-concurrency-extras` 1.4.0 →
 1.4.1 (a patch inside the already-declared range — no new dependency;
 every green run this bout used 1.4.1; the CLI's root `Package.resolved`
-is untouched).
+is untouched). *(Amended per round-1 MINOR 1: the same re-resolution
+ALSO bumped `xctest-dynamic-overlay` 1.10.1 → 1.11.0 — likewise inside
+its already-declared range, likewise no new dependency; the original
+rider under-enumerated. Both are transitive updates of long-declared
+point-free dependencies; the author-only new-dependency trigger does
+not apply.)*
 
 **Revert evidence (the trim fix):** deliberate behavioral revert — both
 doors restored to the old full trim — ran the core suite: EXACTLY the
@@ -1596,6 +1601,48 @@ at this severity survived a traced-mechanism test.)
   diff; the pbxproj change is exactly the wrong-core path fix; the
   Phase 8 capture views untouched; the spike outside the target as
   ruled.
+
+## Stage 1 review — round 1 DISPOSITIONS + the fix pass (architect at adjudication, 2026-08-03)
+
+Zero BLOCKER/MAJOR — the small fixes applied by the architect at
+adjudication (the skill's sanctioned class); every finding dispositioned:
+
+- **MINOR 1 — AGREED; doc fix applied.** The batch-3 `Package.resolved`
+  rider under-enumerated: `xctest-dynamic-overlay` 1.10.1 → 1.11.0 rode
+  the same re-resolution. The rider is amended in place, visibly marked;
+  both bumps are in-range transitive updates of long-declared
+  dependencies — the author-only new-dependency trigger does not apply.
+  No pin (doc class).
+- **MINOR 2 — AGREED AS NARROWED; fixed.** Both suites are `@MainActor`,
+  so the synchronous `surfaceWriteValuesFollowTheLiveVoice` was already
+  atomic (its flip window holds no suspension point — the mechanism
+  cannot occur there); the finding narrows to walk 4, whose `.study`
+  window held exactly ONE await (the mid-window flush). Fix: the flush +
+  stored-bytes check moved AFTER the round-trip restore — the flip
+  window is now await-free and MainActor-atomic; discrimination
+  preserved (a byte change under study still fails the synchronous
+  check at the flip; store damage from either switch still lands at the
+  moved flush-check against the pre-switch bytes). No red-on-old pin —
+  a test-hygiene fix of an unobserved interleaving hazard; a
+  deterministic pin would require constructing the race itself
+  (justification per the architectural-finding rule).
+- **NIT 1 — RECORDED, no code change.** The `"  - "` degenerate: kept
+  lead + the ruled trailing trim compose to `"  -"`, which reads as
+  plain text. Reachable only at a segmentation door (the editor's
+  ⏎-on-empty-item outdents instead); the stored bytes are the lawful
+  composition of the two arms; harmless. A one-line special case exists
+  if real use ever surfaces it.
+- **NIT 2 — FIXED.** `var characters` → `let` (`sentences(in:)`; the
+  compiler's own never-mutated proof; zero behavior).
+- **NIT 3 — ACCEPTED as binding advisory.** The S2 brief will require
+  the takes/swipe machinery to land as sibling types beside
+  `MobileEditorViewModel`, never as VM growth (the P-9 watch; the
+  `TakesViewModel` counterexample stands).
+
+Verification of the fix pass, by the architect's own runs:
+SegmentationRules **23/1 GREEN** (the `let` fix's suite) · mobile
+**76/16 GREEN** (walk 4's reordered flush included). **Round 2 spawns on
+the fixes and what they touched.**
 
 ---
 

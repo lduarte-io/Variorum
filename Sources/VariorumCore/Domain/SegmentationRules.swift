@@ -179,7 +179,7 @@ public enum SegmentationRules {
     private static func sentences(in text: String) -> [String] {
         var results: [String] = []
         var current = ""
-        var characters = Array(text)
+        let characters = Array(text)
         var index = 0
         while index < characters.count {
             let char = characters[index]

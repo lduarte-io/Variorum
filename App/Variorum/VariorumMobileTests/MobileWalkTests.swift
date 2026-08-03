@@ -259,8 +259,6 @@ struct MobileWalkTests {
             defer { MobileEditorStyle.voice = .terminal }
             model.applyVoiceChange()
             #expect(storage.string == surfaceBytes)
-            await model.autosave.flushNow()
-            #expect(try await storedBlockTexts(db, postID: post.id) == storedBytes)
 
             // The face followed: study serif prose, the study palette's
             // dimmed marker and code chip, study typing attributes.
@@ -278,6 +276,13 @@ struct MobileWalkTests {
             MobileEditorStyle.voice = .terminal
             model.applyVoiceChange()
             #expect(storage.string == surfaceBytes)
+            // Round-1 MINOR-2 fix: the flush rides AFTER the round-trip so
+            // the `.study` window holds NO suspension point — the process-
+            // global voice flip is MainActor-atomic against every other
+            // @MainActor test. Store damage from either switch still lands
+            // here, discriminated against the pre-switch storedBytes.
+            await model.autosave.flushNow()
+            #expect(try await storedBlockTexts(db, postID: post.id) == storedBytes)
             let backProse = storage.attribute(.font, at: proseAt, effectiveRange: nil) as? UIFont
             #expect(backProse?.fontDescriptor.symbolicTraits.contains(.traitMonoSpace) == true)
             #expect(storage.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? UIColor
