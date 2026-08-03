@@ -2056,6 +2056,91 @@ Mac-side or `Shared/` touches** (the whole diff is mobile-target).
 Commits: `ba6b2d9` (the takes surface + suites) · the record commit;
 pushed to `origin mobile` at bout end.
 
+## Stage 2, batch 1 — ACCEPTED (architect, 2026-08-03)
+
+Verified — diff scope inspected (mobile-target only: the two sibling-type
+files under `Features/Takes/`, thin VM/view/style touches, tests, the
+record; zero `Sources/VariorumCore`, zero `Shared/`, zero Mac-side, zero
+pbxproj — the only-if-shared verification condition correctly never
+fired), the batch record read, and **mobile 97/18 re-confirmed by the
+architect's own run**. The projection-overlay interpretation (the peek
+rides the render path because scope item 4's editability demands it;
+"zero storage writes" = zero STORE writes, pinned three ways including
+the outbox row count) is ACCEPTED as the correct reading of the brief.
+P15–P19 join the stage-gate bundle. The environment note joins the
+machinery lessons (per-test `-only-testing:` selectors silently select
+zero Swift Testing tests — suite-level only). Ledger L3: batch 1's half
+DONE (badge · swipe-peek · ✓); the browser + four verbs are batch 2's.
+
+---
+
+## Stage 2, batch 2 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, IN FULL:** `CLAUDE.md` · this file (the run record M1–M14
++ LK1–LK11, the constitution + application notes, the environment traps,
+the S1 records + ladder + closeout, the S2 batch 1 brief + RECORD +
+acceptance — batch 1's sibling types and P15's interim badge-tap door
+are your ground) · `notes/plans/mobile-tk2-spike-memo.md` item 5 (the
+edit-menu mechanism + its iOS-27 one-seam note) · the Mac's takes
+vocabulary in `App/Variorum/Variorum/Features/Takes/` (mirror the verb
+SEMANTICS and refusal shapes; never port AppKit) ·
+`Spikes/MobileMockups/mobile-look-v1.html` §3 (the RATIFIED
+sheet-over-page browser shape, LK4).
+
+**Objective:** the takes browser with all four ruled verbs (M4), and the
+remaining doors — the bar's ⑂ and the edit-menu item.
+
+**Scope, batch 2:**
+1. **The browser (LK4 — the ratified sheet-over-page):** the expand door
+   (badge tap repoints here — P15 retires; the pill stays the in-page
+   flip's face) opens a sheet over the dimmed page; take cards in fan
+   order (the v2 card grammar's phone cousin per the mockup: label row,
+   ✓-ringed chosen, the PEEKING state visible); Done closes; the sheet
+   follows the live voice.
+2. **The four verbs (M4), each through the standing ops with refusals
+   that speak:** ✓ CHOOSE on any card (`chooseVariant`); **NEW TAKE** —
+   branch-this-one (copy) and blank, the two Mac gestures
+   (`branchVariant` / `newBlankVariant`); **EDIT ANY TAKE** — a tapped
+   card upgrades to the ONE live editor (P3 — exactly one live pane
+   anywhere; the in-page editor stands down while a card is live; the
+   peeked/chosen autosave routing from batch 1 is the proven pattern);
+   **ARCHIVE / DELETE** under each card's ⋯ (`archiveVariant` /
+   `deleteVariant` — I10 guards the last take and the chosen-slot
+   RESTRICT class refuses through the ops' own errors; the refusal copy
+   is the op's real message). Recovery surfaces (deleted/archived take
+   resurrection) stay Mac-side in v1 — a DELIBERATE ABSENCE recorded
+   for the stage gate, not a hole.
+3. **The bar's ⑂ act JOINS** (LK8's seventh — opens the browser on the
+   caret's block; P-2 is satisfied now that the door can act). ⋯ stays
+   OUT (its block menu — callout/comment/name — is S4's; recorded).
+4. **The edit-menu door (M2; spike item 5):** the custom "Takes…" item
+   on the iOS text edit menu via
+   `textView(_:editMenuForTextIn:suggestedActions:)`, isolated behind
+   ONE seam (the iOS-27 deprecation note) — opens the browser on the
+   caret's block. Never a second `UIEditMenuInteraction`.
+5. **Structure per NIT 3 (BINDING):** the browser lands as sibling
+   types (a browser controller beside batch 1's takes controller); the
+   VM gains only routing.
+6. **Walk 6:** badge → the browser opens → blank take minted → edited
+   in the sheet → ✓ chosen → the OLD take archived → store rows
+   byte-checked at each step → the I10 refusal on the last live take
+   SPEAKS → Done → the page shows the new chosen text → identity audit
+   clean, canary silent.
+
+**Explicitly NOT batch 2:** ⋯/the block menu (S4-adjacent), divide/merge
+doors (S4), the app shape (S3), Read flow (S4), reorder/move/copy-all
+(L12 — after 13e).
+
+**Discipline:** the standing set verbatim — tests with every step; the
+environment traps bind (suite-level `-only-testing` only); mobile +
+walks green at bout end by your own runs (+ core/Mac/spine only if
+anything shared moves — none expected; a genuine core need = stop and
+report); NO schema; NO `Sources/VariorumCore/Sync/` lines; red-on-old
+for bug-class fixes; commit as you go with the standing trailer; push
+at bout end; **append your batch record to this file**; ONE Sonnet
+lookup at a time, external facts only. Batch 2 closes S2's planned
+scope — flag anything the stage-end ladder must weigh.
+
 ---
 
 ## Orientation
