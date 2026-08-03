@@ -2141,6 +2141,271 @@ at bout end; **append your batch record to this file**; ONE Sonnet
 lookup at a time, external facts only. Batch 2 closes S2's planned
 scope — flag anything the stage-end ladder must weigh.
 
+## Stage 2, batch 2 — BATCH RECORD (implementer, 2026-08-03; commit `005dec2` + the record commit)
+
+**All six scope items shipped.** Per item:
+
+1. **The browser (LK4)** — `MobileTakesBrowserView`
+   (`Features/Takes/MobileTakesBrowserView.swift`): the ratified mockup
+   §3 shape LITERALLY — dim over the page (ink-based 0.25 scrim, P-8),
+   the sheet from 120 pt down with 22 pt top corners, the shead
+   ("takes · block k of n" · done), take cards in fan order (meta row:
+   ✓-chosen state / peeking / take N · label · ✓ door · ⋯; body below;
+   the peeked card wears the in-page marker's takeTint/takeLine
+   grammar), the footer new-take row (+ new take · branch this one ⧉ ·
+   blank ○). Terminal lowercases its chrome, study keeps case; every
+   color/font resolves from `MobileEditorStyle.face` (the S1 flag-6
+   duty). **The presentation MECHANISM is an interpretation (#1
+   below):** an in-place OVERLAY over the page in the SAME screen — the
+   mockup's own geometry (`.dim` + `.sheet` are divs over the page, its
+   caption: "not a separate screen — the page stays visible behind
+   it") — never a UIKit modal, which also makes the sheet drivable by
+   the house harness. Done closes; a dim tap closes too (P25). The
+   sheet follows the live voice (re-rendered at `applyVoiceChange`).
+2. **The four verbs (M4)** — `MobileTakesBrowserController`
+   (`Features/Takes/MobileTakesBrowser.swift`), every verb a STANDING
+   op with its real refusal speaking: **✓ CHOOSE** on any card
+   (`chooseVariant`; success ends any peek on the block — the explicit
+   ✓ decides what the page shows, interpretation #4 — and the sealed
+   refusal speaks the batch-1 choose copy, pinned); **NEW TAKE** — the
+   two Mac gestures verbatim: branch-this-one (`branchVariant` from
+   the DISPLAYED take — peek-aware, P21) and blank (`newBlankVariant`);
+   minting NEVER chooses (R90, pinned) and the minted card goes LIVE
+   for editing (the Mac's ring-follow, the phone's reading); **EDIT ANY
+   TAKE** — a tapped card upgrades to THE one live editor: a single
+   reused plain `UITextView` (`cardEditor`, interpretation #6) that
+   MOVES between cards (pinned), gated at the door (sealed/locked
+   refuse with the standing copies BEFORE typing) and belt-gated per
+   keystroke; card edits route to the edited take's autosave through
+   the VM's ONE ledger (`recordTakeEdit` — the batch-1 variant-routed
+   pattern; the sheet and the in-page peek can never disagree on a
+   take's bytes, pinned); **ARCHIVE / DELETE** under each card's ⋯
+   (`archiveVariant`/`deleteVariant`) — I10 and the chosen-slot guard
+   heard through the ops' OWN errors, in phone words for the everyday
+   cases and the ops' words for the rest (P23). **Recovery surfaces
+   (archived/deleted take listing + resurrection) stay Mac-side — the
+   brief's DELIBERATE ABSENCE, recorded for the stage gate.** Verbs
+   each settle through `refreshTakesFromStore` (flush → ONE fresh
+   coherent read → ingest), so the browser is deterministic with or
+   without the observation; a block deleted elsewhere force-closes the
+   sheet (pinned).
+3. **The bar's ⑂ (LK8's seventh)** — joins after ⇥ (`actLabels` now
+   seven; ⋯ stays OUT until its block menu exists, S4 — P-2, recorded).
+   Opens the browser on the CARET's block via boundary-tolerant
+   resolution (`blockIDNearOffset` — a caret at a block's very end
+   rests on the separator seat and still resolves ITS block, pinned);
+   a fanless block opens too (the browser IS the fan-birth door — the
+   9d "Show Takes" chicken-and-egg, the phone's edition, pinned); the
+   open tail hears an honest refusal ("Tap into a block first — takes
+   live on blocks.", P23). The six-act bar pin FLIPPED to seven with
+   in-order label extraction (the sanctioned class — its own comment
+   named this batch).
+4. **The edit-menu door (M2; spike item 5)** — ONE seam file
+   (`Features/Takes/MobileEditMenuSeam.swift`): the documented iOS 26
+   delegate method (`textView(_:editMenuForTextIn:suggestedActions:)`)
+   implemented as an extension of the ONE gate delegate, returning
+   `UIMenu(children: suggested + [Takes…])` — NEVER a second
+   `UIEditMenuInteraction`. The item is offered exactly where a block
+   resolves (the tail/gap gets no item — P-2, pinned both ways); the
+   target brain (`MobileEditMenu.takesTarget`) is test-visible. The
+   iOS-27 note honored: mechanism + item + method all in the one file
+   (the successor API is a one-file swap). No deprecation warning
+   surfaced on the 26.2 SDK build (the memo's note was docs-level).
+5. **NIT-3 honored (binding)** — TWO new sibling types beside batch
+   1's: the browser controller (~330 lines, state + verbs + refusal
+   copy) and the browser view (~460 lines, pixels). The VM gained ONLY
+   routing (+71 lines): the `takesBrowser` composition, `ingest`'s
+   one-line `projectionDidChange` forward, `blockIDNearOffset`,
+   `openTakesBrowser(blockID:)`/`openTakesBrowserAtCaret()`,
+   `refreshTakesFromStore`, `recordTakeEdit`, and `report` widened to
+   `String?` (interpretation #9 — success clears the prior refusal,
+   the Mac `run()`'s posture; every existing call site compiles
+   unchanged). `MobileTakesController` gained two small doors the
+   browser consults (`chosenVariantID` originals-aware truth;
+   `endPeek`); the text view gained the browser-view retention + a
+   weak `editorModel` back-reference (the bar's route).
+6. **Walk 6** (`MobileWalkTests.walk6_takesBrowserFourVerbs`) — badge →
+   the sheet opens over the page (page stands down) → blank minted
+   (chosen untouched, the minted card live) → edited through the card
+   editor's own input path → ✓ chosen (the pointer moves; the Mac
+   would follow) → BOTH old takes archived → **store rows byte-checked
+   at every step** (texts per variant, chosen pointer, statuses) →
+   **the I10 refusal on the last live take SPEAKS** (the archive door;
+   the delete attempt hears the ops' chosen-slot guard first —
+   interpretation #5) → Done → the page shows the new chosen text →
+   identity audit 0, desync 0, canary silent → teardown lands exactly
+   the walk's bytes.
+
+**Counts, all by this implementer's own runs (iPhone 17 Pro / iOS
+26.2):** **mobile 123 tests / 20 suites GREEN** (single run, zero
+relaunches; batch 1's 97/18 intact within — the L9 pin and identity
+audit ran green in every suite run of the bout). New:
+`MobileTakesBrowserTests` (18, the brain headless) ·
+`MobileTakesBrowserSurfaceTests` (7, pixels + ⑂ + the edit menu) ·
+walk 6; the two flipped pins re-shaped in place. **Core / Mac / spine
+deliberately NOT run:** the bout's diff is mobile-target only
+(`git diff --stat` at commit: 12 files, all under
+`App/Variorum/VariorumMobile{,Tests}` — zero `Sources/VariorumCore`,
+zero `Shared/`, zero Mac-side, zero pbxproj), so the brief's
+only-if-shared condition never fired.
+
+**Discrimination evidence (no bug-class fixes this batch, so no
+red-on-old pins were owed; the 13k hollow-pin currency applied to the
+NEW pins — five deliberate mutations, each run against targeted
+suites, each caught, the tree byte-restored after (final `git diff`
+EMPTY against the batch commit; final full suite 123/20 GREEN):**
+- **A — browser ✓ decorative** (the op call removed; peek-end +
+  refresh kept): `chooseMovesThePointerAndEndsAnyPeek` red ×3 (pointer
+  unmoved, page unhealed, ring unmoved) + `chooseUnderASealedNote…`
+  red (nothing left to refuse) + walk 6 red ×3.
+- **B — card edits route to the CHOSEN take** (`cardTextDidChange`
+  re-pointed at the chosen): `cardEditsRouteToTheEditedTakeOnly` red
+  ×4 (a1 corrupted, a2 untouched, ledger/card stale) +
+  `aTappedCardHostsTheOneLiveEditor…` red ×3 + walk 6 red ×3.
+- **C — lifecycle refusals swallowed** (`report(nil)` in the catch):
+  `deletingTheChosenTakeRefuses…` + `theLastActiveTakeRefuses…_I10`
+  (×2) + `deletingALockedTakeRefuses…` + walk 6 (×2) all red.
+- **D — the badge tap left at P15** (showPill restored):
+  `theBadgeTapOpensTheBrowserNotThePill_P15Retired` (chrome) +
+  `theBadgeTapOpensTheBrowser_P15Retired` (browser) + walk 6, all red.
+- **E — the page never stands down** (`isEditable = false` dropped):
+  `theSheetOpensOverTheDimmedPage…` + `aTappedCardHostsTheOneLive…` +
+  walk 6, all red.
+
+**One traced FINDING, mirrored rather than papered over
+(interpretation #5):** `deleteVariant`'s guard ORDER — the chosen-slot
+guard (`variantIsChosen`) runs BEFORE I10's `lastActiveVariant`
+(`Operations+Deletion.swift`, `performDeleteVariant`), and a block's
+last remaining take is usually ALSO the pointer's target — so
+delete-on-a-last-chosen-take speaks the chosen-slot refusal, and I10
+through the DELETE door is reachable exactly when the pointer targets
+no live take (the chosen take archived → the slot renders the block
+default). The pins hear BOTH orders (`theLastActiveTakeRefuses…_I10`
+archives the chosen first, then hears I10 on both doors; the walk's
+delete beat hears the chosen-slot guard); the archive door speaks I10
+directly (no chosen guard exists there — archiving a chosen take is
+the ops' own read-time-fallback semantics, also pinned). This is the
+op's REAL refusal order per the brief's own "the refusal copy is the
+op's real message" — no copy was invented to make I10 win.
+
+**Interpretations for the cold reviewer:**
+1. **The sheet's presentation mechanism** — an in-place overlay in the
+   same screen, NOT a modal `UISheetPresentationController`: the
+   ratified mockup draws exactly this (absolute-positioned dim + sheet
+   over the page; "the page stays visible behind it"), batch 1's
+   overlay precedent applies, and the house harness can drive it.
+   System-sheet physics (drag-to-dismiss detents) is an S3/look-round
+   option if her feel round wants it (P20).
+2. **"The in-page editor stands down while a card is live"** shipped
+   as the stricter superset: it stands down while the sheet is OPEN
+   (the dim already blocks page touches; a live-but-covered page
+   editor would be a second liveness ambiguity) and is restored at
+   close — P22; pinned both transitions.
+3. **"Branch this one"** branches the page's DISPLAYED take (the
+   peeked take while peeking, else the shown chosen) — the coherent
+   "this one" (it is also what ✓ acts on) — P21; pinned both states.
+4. **A browser ✓ ends any peek on the block even when choosing a
+   DIFFERENT take than the peek** — the explicit ✓ is THE deciding
+   act; keeping a stale peek over a fresh explicit choice would show
+   neither truth nor decision (M6's unambiguity read into the
+   browser). Pinned (`chooseADifferentTakeThanThePeek…`). The batch-1
+   pill door (`chooseDisplayed`) is byte-untouched.
+5. The guard-order finding above.
+6. **The card editor is a plain `UITextView`** — one take's text, no
+   block index, no separators: the pane class. The TK2-explicit
+   construction + checkpoint canary guard the CONTINUOUS page surface
+   (P1's mechanism); a one-take card needs neither. Its delegate is
+   the browser view forwarding to the controller's gate (identity
+   pinned).
+7. **Verbs flush-then-refresh** (`refreshTakesFromStore`): the flush
+   serves DELIVERY ADOPTION (a dirty buffer would defer the ingest),
+   not the op — batch 1's interpretation 6 (✓ itself needs no flush)
+   stands uncontradicted.
+8. **The surface tests drive the card editor via `insertText` + an
+   explicit `textViewDidChange(_:)` call** — UIKit's delegate dispatch
+   for programmatic `insertText` is not contractual in the headless
+   harness; the wiring is pinned by delegate IDENTITY and the routing
+   by store-byte checks. A double-fire (if UIKit also dispatched)
+   records the same text twice — harmless by construction (same
+   bytes; churn approximate per SyncSpec §6).
+9. **`report(String)` → `report(String?)`** — the one batch-1 API
+   signature touched (success clears the prior refusal, the Mac
+   `run()` posture); every existing call site passes a non-optional
+   String and compiles unchanged.
+10. **The card ⋯ menu's actions and the dim-tap door are pinned by
+    presence/titles, not by invoking their `UIAction` handlers**
+    (UIKit exposes no public invoke); the verbs they call are pinned
+    directly, and mutation C shows the refusal path discriminates.
+
+**PROVISIONALs (P20–P26, for the stage-gate bundle; numbering
+continues batch 1's):**
+- **P20:** the sheet's mechanism + geometry — in-screen overlay, top
+  120 pt, 22 pt corners, ink-based 0.25 scrim, face.surface sheet /
+  face.card cards (look-track material; system-sheet physics an
+  option).
+- **P21:** "branch this one" = the DISPLAYED (peek-aware) take.
+- **P22:** the stand-down scope = the whole open-sheet window.
+- **P23:** the refusal wordings — the I10 copy ("This is the block's
+  only take — a block always keeps one. Deleting the whole block is a
+  Mac gesture for now."), the chosen-slot copy, the locked-take copy,
+  the per-verb sealed copies, and the bar's tail refusal.
+- **P24:** card grammar constants — 120 pt live-card editor height,
+  corner 10, edge bar 2.5, chrome 12/13, "(empty take)" placeholder —
+  all look-track.
+- **P25:** a tap on the dimmed page margin closes the sheet (the
+  sheet-over-page convention; the mockup drew no such door).
+- **P26:** the ⋯ menu's item titles ("Archive Take" / "Delete Take",
+  system menu register — not voice-cased chrome; the system edit
+  menu's "Takes…" item likewise).
+
+**Deliberate absences (scope, not holes):** recovery surfaces
+(archived/deleted take listing + resurrection) — Mac-side in v1 per
+the brief, RECORDED for the stage gate; archived takes never appear in
+the browser (the fan is active-only by definition — coherent with the
+same absence); ⋯/the block menu (S4), divide/merge doors (S4), the app
+shape (S3), Read flow (S4), reorder/move/copy-all (L12 — after 13e);
+**no keyboard-guide constraint on the sheet** (the browser view pins
+to the surface container's bounds; the software keyboard may cover
+lower cards while a card is live — a DEVICE feel-round item; the fix
+is one constraint if wanted); no capability-registry rows (the
+standing S1 posture); no visual inspection beyond machine-verified
+attributes (the 13b class — the S2 feel round is the instrument); the
+sheet is not driven by real touch (the card tap, ⋯ menu, dim tap ride
+gesture/menu machinery pinned at the wiring level; the S2 feel round
+covers finger-feel per the memo's obligation 6).
+
+**LADDER-ATTENTION FLAGS (batch 2 closes Stage 2's planned scope —
+the stage-end ladder opens on the S2 combined diff):**
+1. **The guard-order finding** (interpretation #5): the walk's brief
+   line "the I10 refusal on the last live take SPEAKS" is satisfied
+   through the archive door and delete's one true path — the ladder
+   should confirm this reading against the brief's "the refusal copy
+   is the op's real message" (an alternative would override the op's
+   order in copy, which this batch deliberately did not do).
+2. **The stand-down superset** (P22) vs the brief's "while a card is
+   live" letter.
+3. **The overlay-not-modal mechanism** (P20) — the LK4 ratified SHAPE
+   is honored literally; the mechanism is the recorded interpretation.
+4. **The two sanctioned pin flips** (P15's badge door; the six→seven
+   act bar pin) — both flips were named in advance by their own
+   records; verify and wave through (the S1 round-1 comment-only
+   class).
+5. **The keyboard-avoidance absence** on the sheet (device item).
+6. **VM growth +71 lines, all routing** (the P-9 watch): enumerate
+   against interpretation/item 5's list; the browser brains are
+   sibling files.
+7. **`report`'s optional widening** — one signature, zero call-site
+   edits; confirm no caller depended on non-nil semantics.
+8. **The S2 feel round** now covers BOTH batches' device items (the
+   swipe dominance/loupe feel from batch 1; the sheet's finger-feel,
+   card editing under the real keyboard, and the keyboard-over-cards
+   question from this batch).
+
+**NO `Sources/VariorumCore` lines; NO schema; NO `Sync/` lines; NO
+Mac-side or `Shared/` touches** (the whole diff is mobile-target).
+Commits: `005dec2` (the browser + doors + suites) · the record
+commit; pushed to `origin mobile` at bout end.
+
 ---
 
 ## Orientation
