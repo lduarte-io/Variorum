@@ -158,12 +158,16 @@ final class MobileTakesController {
             nextIndex = forward ? 0 : fan.count - 1
         }
         let next = fan[nextIndex]
-        // `current` is the RAW slot exactly when no peek exists yet.
-        let original = originals[blockID] ?? current
+        // `current` is the RAW slot exactly when no peek exists yet — and
+        // its `text` is a PHOTOGRAPH that lags the surface while the
+        // buffer is dirty, so both the capture and the restore resolve
+        // LEDGER-FIRST (S2 ladder round 1, BLOCKER — the peeked
+        // direction's own rule applied symmetrically).
+        let original = originals[blockID] ?? resolvedOriginal(current)
         if next.id == original.variantID {
             peeks[blockID] = nil
             originals[blockID] = nil
-            model.displaySlot(original, for: blockID)
+            model.displaySlot(resolvedOriginal(original), for: blockID)
         } else {
             peeks[blockID] = next.id
             originals[blockID] = original
@@ -233,6 +237,36 @@ final class MobileTakesController {
     }
 
     // MARK: - Helpers
+
+    /// The ORIGINAL (chosen-truth) rendering of one slot, resolved
+    /// LEDGER-FIRST — `peekedSlot`'s symmetric twin (S2 ladder round 1,
+    /// the BLOCKER fix). A slot's photographed `text` refreshes only at
+    /// adoption points (full render, differential, echo, `displaySlot`),
+    /// never per keystroke — so while the buffer is dirty the photograph
+    /// lags the surface, and capturing or restoring the chosen take from
+    /// it alone visibly reverts typed-but-unflushed bytes; typing on the
+    /// reverted base then flushes the stale text over the edit —
+    /// permanent loss, the forbidden outcome. The surface's own record
+    /// (`surfaceKnownText`) outranks the photograph at BOTH flip-capture
+    /// and flip-restore, exactly as it does for the peeked take.
+    private func resolvedOriginal(
+        _ slot: Queries.RenderedBlock
+    ) -> Queries.RenderedBlock {
+        guard let variantID = slot.variantID,
+              let known = model?.surfaceKnownText(variantID: variantID),
+              known != slot.text
+        else { return slot }
+        return Queries.RenderedBlock(
+            blockID: slot.blockID,
+            placementID: slot.placementID,
+            position: slot.position,
+            variantID: slot.variantID,
+            text: known,
+            activeVariantCount: slot.activeVariantCount,
+            liveVariantCount: slot.liveVariantCount,
+            commentCount: slot.commentCount,
+            variantLocked: slot.variantLocked)
+    }
 
     /// A peeked rendering of one slot: the block's placement identity with
     /// the PEEKED take's variant, text, and lock. The counts are the

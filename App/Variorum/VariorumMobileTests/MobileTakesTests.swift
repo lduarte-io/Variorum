@@ -186,6 +186,78 @@ struct MobileTakesTests {
         }
     }
 
+    @Test func anEditedChosenTakeSurvivesFlippingAwayAndBack() async throws {
+        // The S2 ladder round-1 BLOCKER's pin: the CHOSEN direction is
+        // ledger-first exactly like the peeked one. Type into the chosen
+        // take with the debounce held open (the injected sleep never
+        // fires), flip away and back — the surface AND the ledger hold
+        // the edited bytes (the old code restored the stale slot
+        // photograph and overwrote the ledger with it), and the flush
+        // lands them in the store.
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            let edited = "First block, as chosen. Typed."
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: ("First block, as chosen." as NSString).length,
+                               length: 0),
+                replacement: " Typed."))
+            #expect(model.autosave.isDirty)
+
+            // Away (onto the take) and back (onto chosen) — inside the
+            // debounce window, before any flush lands.
+            model.takes.flip(blockID: seed.blockA, forward: true)
+            #expect(storage.string.hasPrefix("First block, the other way."))
+            model.takes.flip(blockID: seed.blockA, forward: true)
+
+            // The surface and the surface's own truth record both hold
+            // the edited bytes — never the stale photograph.
+            #expect(storage.string.hasPrefix(edited))
+            #expect(model.surfaceKnownText(variantID: seed.a1) == edited)
+
+            await model.autosave.flushNow()
+            #expect(try await storedText(db, variantID: seed.a1) == edited)
+            #expect(model.identityAuditFailures == 0)
+        }
+    }
+
+    @Test func typingAfterAFlipRoundTripNeverLosesTheEarlierEdit() async throws {
+        // The BLOCKER's arm (b) — the permanent-loss shape: on the old
+        // code, typing onto the reverted base replaced the pending
+        // autosave entry with stale-based text and the earlier keystrokes
+        // vanished from `working_text` with no commit anywhere. Both
+        // edits must reach the store.
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: ("First block, as chosen." as NSString).length,
+                               length: 0),
+                replacement: " Typed."))
+            model.takes.flip(blockID: seed.blockA, forward: true)
+            model.takes.flip(blockID: seed.blockA, forward: true)
+
+            // Type again at block A's CURRENT end (wherever the round
+            // trip left it), then flush: the store holds BOTH edits.
+            let rangeA = try #require(model.rangeOfBlock(seed.blockA))
+            #expect(typeEdit(
+                model, storage,
+                range: NSRange(location: rangeA.location + rangeA.length, length: 0),
+                replacement: " More."))
+            await model.autosave.flushNow()
+
+            #expect(try await storedText(db, variantID: seed.a1)
+                    == "First block, as chosen. Typed. More.")
+            #expect(model.identityAuditFailures == 0)
+        }
+    }
+
     // MARK: Stickiness (M9)
 
     @Test func thePeekIsStickyAcrossDeliveries() async throws {
