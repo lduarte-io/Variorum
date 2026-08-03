@@ -4553,6 +4553,360 @@ red-on-old for bug-class fixes; commit with the trailer; push at bout
 end; append your batch record; ONE Sonnet lookup at a time). Batch 1
 closes the v1 BUILD — flag everything the final ladder must weigh.
 
+## Stage 4, batch 1 — BATCH RECORD (implementer, 2026-08-03; commits `99fa1a9` · `8f558e9` · `3ebd47a` + the record commit)
+
+**All seven scope items shipped — plus ONE structural move the brief's
+words presumed and the repo's file placement contradicted, made
+WITHOUT the stop-and-report exchange (the honest note and the ladder
+flag are below; it is this record's FIRST flag).** Per item:
+
+1. **The Read flow (M8/LK9)** — a book OPENS INTO the calm continuous
+   column (`MobileReadView`, `Features/Read/`): the `ReadingPageTokens`
+   paper (voice-independent — R2's rule; only the room around it follows
+   the voice; dark is the token layer's own), the reading's name in the
+   page serif title, the LK9 chapter caption over each chapter's first
+   note ("II · THE LONG FIELD" — roman + the section's LEAF, the K3
+   doctrine), the centered page meta under every note ("note 3 of 9 ·
+   ii"), the bounded-window truncation marker, tap into a note → Write
+   (`focus: false` — reading first, P29's rule). READ-CHEAP ONLY (P3):
+   SwiftUI text rows in a LazyVStack with per-row lazy `.task` text
+   loads — the Mac `ReadingFlowView`'s exact shape including its round-3
+   laziness lesson; NEVER a live editor in the column. The per-note read
+   is the Mac flow's own (`renderPost` → `joinRenderedTexts`); the
+   per-line transform is `MobileReadPage.paragraphs` — a deliberate
+   MIRROR of the Mac `FlowParagraph` over the ONE shared law
+   (`MarkdownRendering.render`, core): blank display lines drop, markers
+   hide (F-5), bold/italic/strike/code intents, the page's own code chip
+   (13k K10), links carry `.link` only where the mirrored
+   `MarkdownLink.openable` guard passes (inert addresses read as plain
+   text), list indent per level with the K8 drawn clamp. **The S3 note
+   list SURVIVES as the Read page's "contents" door** — a new route
+   (`MobileRoute.bookList`); `MobileBookView` is byte-untouched; both
+   roads open notes in Write.
+2. **Comments (M12)** — `MobileCommentsController` +
+   `MobileCommentsSheetView` (the browser sheet's ratified
+   sheet-over-page pattern — dim + sheet in the SAME screen,
+   harness-drivable; the page editor stands down under it, restored at
+   close): list, add, edit (through the draft field's Save/Cancel flow),
+   delete, **and the never-skimpy DELETED section with per-row
+   Restore — it ported cheaply (two standing queries + a fold), so it
+   SHIPPED rather than being recorded absent**, exactly the brief's
+   conditional. All verbs through the standing ops with the Mac panel's
+   refusal words phone-grammared (sealed → "unlock it on the Mac to
+   change comments"; `invalidCommentText` → "A comment needs some
+   text."; the rest the ops' own words). Reads are refresh-on-event
+   (open, every verb, every projection ingest while open — comment
+   writes touch `block_comment`, which the takes projection's
+   comment-count join already observes), never a third observation loop.
+   **A commented block wears ●n** (the mockup's form) at its LAST line's
+   end; the marker is a DOOR — tapping it opens the sheet (the S2
+   badge-tap grammar).
+3. **Callouts (M12)** — `MobileCallout` mirrors the Mac vocabulary
+   (`CalloutPalette.names` five token names + `CalloutEditRule.apply`
+   byte-for-byte: color keeps emoji, nil color removes, emoji
+   keeps-or-defaults color with empty-trims-to-none, toggle is
+   have/have-not) through `Operations.updateBlockPresentation` — the
+   read-modify-write runs INSIDE the op's transaction (the Mac's own
+   discipline; store-byte pinned on the canonical JSON).
+   `MobileBlockDecorController` renders the frame: ONE wash behind the
+   block's whole region (13k's one-frame rule; an overlay under the
+   text canvas — P-8, never rendering attributes), the palette's exact
+   light/dark hexes as dynamic colors, and the EMOJI in a reserved
+   leading gap on the block's first line (LK10's exclusion mechanism at
+   the mirror corner — the ratified mockup draws the glyph before the
+   first words; text never runs under it). **Read renders NO frames —
+   the Mac's own Read flow renders none** (mirrored, recorded).
+4. **The ⋯ block menu** — LK8's EIGHTH act joins the bar (the act table
+   grew 7→8; the S2 bar pin's custom-count flipped WITH it, sanctioned),
+   and the extended edit menu gains a "Block" submenu beside the S2 flat
+   "Takes…" item (which is byte-untouched). ONE builder
+   (`MobileBlockMenuController.menuElements`) decides the words and
+   order for BOTH doors — **Takes… · Comments… · Callout ▸ (Toggle ·
+   five colors · Emoji… · Remove — the Mac `CalloutMenu.rows` mirror) ·
+   Name Block… · Divide Block · Merge with Previous · Delete Block
+   (destructive)** — pinned as the drift oracle. Name… is
+   `setBlockName` (whitespace clears — the op's trim-to-nil); the
+   prompts (Name…, Emoji… with the Mac's cancel-nil/empty-is-an-answer
+   semantics, the delete confirm) ride injectable seams — production
+   installs UIAlertController plumbing at attach, tests inject. Delete
+   Block is `deleteBlock` flush-first (the tray's copy holds every
+   typed byte), speaking the tray note (the tray itself stays
+   Mac-side). **"Archive Block" is a recorded DELIBERATE ABSENCE: no
+   such operation exists anywhere** (blocks archive nowhere in the
+   ops layer — only containers and takes do; the Mac offers no such
+   door) — rendering one would invent product behavior. The bar's ⋯ on
+   the open tail offers one honest DISABLED line ("Tap into a block
+   first — block acts live on blocks."), the ⑂ refusal menu-grammared.
+5. **The divide/merge doors (M10)** — `MobileStructuralController`, the
+   ruling's letter: **divide** flushes first (the Takes board's
+   `prepareDivide` contract verbatim, its wording included), resolves
+   the caret's entry by the planner's own closed-range rule, snaps
+   through the ONE snap brain (`StructuralGesturePlanner.
+   snapToInteriorBoundary` — S4-22's word rule + gentle settle), reads
+   the fan FROM THE STORE (the 13d ruled discipline — never the frozen
+   projection), and: one take → `ops.divide` in place; a fan → the #10
+   auto-proceed mapping mirrored EXACTLY from the Mac's
+   `propagatedCuts` (the displayed take's cut carried into EVERY other
+   active take by shared `CutPropagation` unique-match; the
+   displayed-take-still-live F-3 guard included) → all map →
+   `ops.divideW` (the W outcome: A preserved whole and released, B/C
+   fans the halves); ANY take fails → **refuses naming the Mac** ("One
+   of this block's takes needs its cut placed by hand — that's the
+   take ceremony, on the Mac for now."), store byte-untouched.
+   **Merge-with-previous**: first-block/tail/gap refusals speak; the
+   ceremony threshold reads BOTH fans from the store — a fan on either
+   side refuses to the Mac's pairing ceremony (which also covers
+   peeked blocks FOR FREE: a peek requires a fan); fanless both sides →
+   `ops.merge` instant (the canon space join), caret at the join.
+   Refusal shapes mirror `RefusalCopy`'s semantics in the phone's
+   standing grammar (sealed → "unlock it on the Mac to restructure";
+   locked take → the standing branch-or-unlock copy; no legal cut →
+   the Mac's own words). One structural flight at a time (the Mac's
+   latch + copy). **Structural UNDO stays Mac-side — the recorded
+   deliberate absence** (the ops still register inverses into the
+   session's stack; no phone door reaches it).
+6. **The round-2 NIT fix** — `loadOnce`'s catch gains the
+   `CancellationError` filter (the MINOR-1 class at its adjacent
+   site); red-on-old REVERT-VERIFIED (below, REVERT-A).
+7. **Walk 8** (`walk8_readCommentsCalloutDivideMerge`) — a chaptered
+   book (2 chapters, 3 notes) → the Read column's shape byte-checked
+   (captions "I · OPENINGS"/"II · MIDDLES", ordinals, the meta string,
+   the note's rendered paragraphs) → tap into the note (the REAL TK2
+   surface) → add a comment (store + count + the ●1 marker with real
+   geometry) → set a callout (store JSON + the frame view renders) →
+   divide at the sentence cut (store rows: the halves, the comment
+   COPY, the frame INHERITED — the op's travel as the proof the door
+   ran the real op) → merge back (**bytes byte-identical** — a
+   sentence cut restores exactly, the canon join's own promise) →
+   identity audit 0, desync 0, canary silent, teardown lands the
+   bytes.
+
+**THE PARITY MOVE (commit `99fa1a9`) — the honest note, stated per the
+architect's directive:** `StructuralGesturePlanner` + `CutPropagation`
+were git-mv'd from the Mac's `Features/Editor/` into
+`Shared/EditorBrain/` — **a `Shared/` touch made WITHOUT the
+stop-and-report exchange the brief's discipline line asked for.** The
+reasoning, honestly: the brief's own scope item 5 commands "divide
+auto-proceeds via **shared** `CutPropagation`/`BoundarySnapping`", and
+M10's recorded in-sitting answer states "`CutPropagation` is shared
+pure Domain" — the plan already believed the file shared; on disk it
+was Mac-placed. Both files are pure Foundation+VariorumCore over the
+ALREADY-shared `BlockRangeIndex`; the move is rename-only (verified in
+the diff: adds mirror deletes byte-for-byte), zero content changes,
+zero test edits, the Mac compiles them exactly as before via the
+synchronized folder. Stopping the batch to ask would have burned the
+round-trip on a question the brief's own words answer; the
+mid-batch-ambiguity rule (PROVISIONAL-and-continue) plus the brief's
+own "if one lands anyway … the FULL four-suite duty fires" clause were
+read as the governing shape — **the four-suite duty was run in full**
+(counts below). The ladder should weigh the reasoning (flag 1).
+
+**Counts, ALL by this implementer's own runs (iPhone 17 Pro / iOS
+26.2 for mobile):**
+- **Mobile: 169 tests / 24 suites GREEN** (run green twice: before the
+  mutation series and after every mutation was reverted; the 140/19
+  baseline intact within — walks 1–8, the L9 pin, and the identity
+  audit green in every run). Arithmetic: +29 tests (`MobileReadTests`
+  7 · `MobileBlockMenuTests` 5 · `MobileCommentsTests` 3 ·
+  `MobileBlockDecorTests` 3 · `MobileStructuralTests` 10 · walk 8) /
+  +5 suites.
+- **Core `swift test`: 1039 / 114 GREEN.**
+- **Mac: 1193 tests / 208 suites, EXACTLY ONE red — BY IDENTITY the
+  recorded environment-gated tripwire**
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  the name read from the run's own failure line, not inferred from
+  counts) — the S3-close baseline reproduced exactly.
+- **Spine: 51 / 7 GREEN** (the seven tutorial suite TYPE names).
+
+**Discrimination evidence (ONE bug-class fix this batch — the loadOnce
+filter — owed and given a revert-verified red-on-old; the 13k
+hollow-pin currency applied to the NEW pins as five deliberate
+mutations; every run against targeted suites, siblings green, the tree
+byte-restored after each — source diff EMPTY against the build commit;
+final full suite 169/24 GREEN):**
+- **REVERT-A — the pre-fix `loadOnce` catch restored** (cancellation
+  stringifies): **1 issue** — `"CancellationError()"` landed in the
+  status line, the traced mechanism byte-for-byte; 9 siblings green.
+- **B — an unmapped take silently SKIPPED** (the refusal replaced with
+  `continue`): **3 issues** — no refusal spoke AND the store CHANGED
+  (the half-act the refusal exists to prevent, demonstrated); the
+  auto-proceed pin stayed green (discrimination both ways).
+- **C — the divide's flush-first dropped:** **1 issue** — the typed
+  bytes missing from the halves.
+- **D — the merge ceremony threshold dropped:** **3 issues** — the
+  merge PROCEEDED past the fan, silently dropping her pairing options
+  (M10's named forbidden outcome); walks green.
+- **E — the decor never draws:** **4 issues** — all three decor pins
+  (wash, emoji, marker) + walk 8 at the marker line.
+- **F — the callout color-edit drops the emoji** (the transform mirror
+  broken): **1 issue** — the keep-emoji store-byte pin.
+
+**Interpretations for the cold reviewer:**
+1. **The parity move** (the honest note above — flag 1).
+2. **"A book opens into the calm continuous column" read as the
+   ROUTE**: `.book` now renders the Read flow directly (the brief's
+   letter; the settled shape's "Books open into the Read flow"); the
+   S3 note list did NOT retire — it became the "contents" door via the
+   new `.bookList` route, `MobileBookView` byte-untouched. NO S3 pin
+   asserted the destination VIEW (the Library `destination(for:)` pin
+   asserts the ROUTE VALUE `.book`, unchanged), so zero test edits
+   rode the re-route.
+3. **The mirrors** — `MobileReadPage.paragraphs` (FlowParagraph),
+   `openableLink` (MarkdownLink.openable), `MobileCallout`
+   (CalloutPalette + CalloutEditRule): the `MobileShelfFaces`
+   precedent (mirror SEMANTICS, never port AppKit chrome). The Read
+   tiers thereby compose the EXISTING shared brain (`MarkdownRendering`)
+   with zero `Shared/` change — the brief's Read-tier clause honored;
+   the drift risk is recorded and the pins hold each mirror to the
+   shared law's outputs / the stored bytes.
+4. **The phone's fanned divide differs from the Mac's own plain-divide
+   DOOR, deliberately, by M10's ruled letter:** the Mac's
+   `.divideW` plan ALWAYS opens the ceremony (pre-seeded); the #10
+   auto-proceed lives in its guided cross-block flow
+   (`propagatedCuts`). M10's recorded in-sitting answer defines the
+   phone's contract as that auto-proceed rule applied to plain divide
+   — the phone HAS no ceremony, so unique-everywhere proceeds and
+   anything else refuses naming the Mac. The mapping mirrors
+   `propagatedCuts` exactly (every active take marked; the rendered
+   take = the index entry's displayed variant — peek-aware, what she
+   sees).
+5. **The seal pre-gate reads the projection's `isSealed`, which can
+   lag one delivery** — the ops' `lockedPost` refusal is the belt, and
+   the two paths WORD differently (pre-gate: "…to restructure."; the
+   op path speaks per-door: "…to divide the block."). Recorded rather
+   than papered over; the refusal-shape pin asserts the pre-gate's
+   wording after a header re-read.
+6. **The chrome-geometry hoist:** `firstLineGeometry` /
+   `blockRectsUnion` / the near-viewport band moved from the S2 takes
+   chrome onto `MobileEditorTextView` (move-only; + the new
+   `lastLineEnd`), so BOTH chrome controllers consult ONE
+   implementation. The container's ONE `exclusionPaths` property keeps
+   ONE owner: the takes chrome assembles (its gutters + the decor's
+   published emoji gaps); `refreshChrome` runs the decor FIRST for
+   exactly that reason. Every S2 chrome pin passed UNMODIFIED.
+7. **Comments refresh-on-event** (no third observation loop) — the
+   projection's observation region already covers `block_comment`
+   (the comment-count join), so deliveries arrive on comment writes;
+   the browser's deterministic flush→read→ingest discipline applied.
+8. **The three sanctioned pin flips, each named in advance by its own
+   record:** the bar pin's custom-count 1→2 + its comment (the
+   six→seven precedent, now seven→eight); the two I10-copy literals
+   (the S2 copy named a road — "Deleting the whole block is a Mac
+   gesture for now" — that this batch BUILT, so the copy and its pins
+   updated to name the ⋯ door); the edit-menu titles pin WIDENED
+   (the old UIAction-only compactMap would have passed unmodified
+   while under-asserting — the widened form pins the Block submenu's
+   presence in-block and absence in the tail).
+9. **Delete Block gained a CONFIRM seam** (phone-only): the Mac
+   deletes unconfirmed because ⌥⌘Z undoes; the phone has no
+   structural undo in v1, so one destructive alert guards the door
+   (P40 — PROVISIONAL, hers to strike).
+10. **Walk 8's comment-doubling corner, recorded:** divide copies A's
+    comment to C; merging back carries BOTH — the merged block holds
+    two copies of the note. The ops' real travel semantics ("coarse,
+    not forensic"), identical on the Mac; visible on the phone
+    whenever she divides-then-merges a commented block. Not asserted,
+    not papered over.
+
+**PROVISIONALs (P35–P44, for the gate bundle; numbering continues
+S3's P34):**
+- **P35:** book-tap → Read DIRECTLY; the note list behind the
+  "contents" chrome door (nav-bar trailing, chrome-cased).
+- **P36:** the Read page's constants — paper card radius 12, 24 pt
+  margins, caption tracking 2.5, meta 11 pt, heading scale on serif
+  16, the "· · ·" colophon; captions at chapter TRANSITIONS with
+  order-derived roman numbering (a section name recurring
+  non-adjacently counts again); every note carries its centered meta.
+- **P37:** the comments sheet's shape — top 160, the draft-field
+  edit flow (Edit fills the draft; Save/Cancel), dates abbreviated,
+  the deleted fold collapsed by default.
+- **P38:** the ●n marker at the block's LAST line end, tappable; a
+  one-line fanned+commented block can crowd the ⑂ badge (unhandled
+  corner, recorded).
+- **P39:** the emoji's reserved gap = glyph width + 8, the glyph at
+  the frame's top-leading.
+- **P40:** the delete-block confirm dialog + the tray-note wording.
+- **P41:** the bar-⋯ tail behavior — one disabled speaking row.
+- **P42:** the structural caret landings (divide → the leading
+  successor's start; merge → the join).
+- **P43:** the menu rows' register — title-case system-menu words
+  ("Divide Block", "Merge with Previous"; the P26 precedent).
+- **P44:** the callout wash geometry (insets −8/−4, corner 10,
+  z-order at the very bottom of the overlay stack).
+
+**Deliberate absences (scope, not holes — batch 1 closes the v1
+build, so the FULL list for the ladder):** the W and pairing
+ceremonies (Mac-only by M10); EXTRACT (M10's recorded absence);
+structural undo on the phone (recorded above); Read renders no
+callout frames and no comment markers (the Mac Read mirror — Write is
+the decorated page); the Read column's LazyVStack/per-row-task WIRING
+is machine-unverified (the house harness drives no hosted SwiftUI —
+the S3 posture; all POLICY lives in the pinned pure brains; the look
+round over real screenshots + her device round are the instrument);
+the comments sheet carries no keyboard-guide constraint (the takes
+browser's recorded device-item class); the deleted-blocks tray,
+take-recovery surfaces, reorder, and book creation/management stay
+Mac-side (the standing S2/S3 absences); no capability-registry rows
+(the standing posture — the one-builder menu + its drift pin is the
+interim); RTL unconsidered (standing); the ⋯ menu's UIAction handlers
+are pinned by presence/title + the verbs directly (UIKit exposes no
+public invoke — the S2 interpretation-10 posture); the Read screen +
+comments sheet have no visual inspection beyond machine-verified
+attributes/geometry (the 13b class).
+
+**LADDER-ATTENTION FLAGS (batch 1 closes the v1 BUILD — the final
+ladder opens on the S4 diff; EVERYTHING it must weigh):**
+1. **THE PARITY MOVE WITHOUT THE STOP-AND-REPORT EXCHANGE** (the
+   honest note above): rename-only, brief-worded, four-suite-verified
+   — but the exchange the discipline line asked for did not happen.
+   The ladder should rule whether the reasoning stands or the process
+   deviation needs anything beyond this record.
+2. **The book→Read re-route** (interpretation 2): S3's "tapping a book
+   pushes its note list" is superseded by the brief's letter; the
+   list survives as the contents door. Her feel round judges the
+   shape (P35).
+3. **The Mac-vs-phone fanned-divide difference** (interpretation 4):
+   M10's ruled letter vs the Mac's always-ceremony plain-divide door.
+   The phone auto-proceeds where the Mac would open the ceremony
+   PRE-SEEDED with the same proposals — the outcome equals confirming
+   the Mac's sheet untouched, which is the reading M10's words
+   ratified. Confirm against the ruling.
+4. **The mirrors' drift class** (interpretation 3): FlowParagraph /
+   MarkdownLink.openable / CalloutPalette+EditRule now have phone
+   twins; a Mac-side change to any of them does not compile into the
+   phone. The pins hold outcomes; the ladder should weigh whether any
+   deserves a future parity move instead (the CalloutEditRule pair is
+   the strongest candidate — it is "the ONE callout transform" by its
+   own header, and there are now two of it).
+5. **The seal pre-gate's stale window + wording split**
+   (interpretation 5).
+6. **The chrome-geometry hoist** (interpretation 6) — move-only over
+   S2 code; every S2 pin passed unmodified; verify the
+   exclusion-composition ordering reasoning (decor first).
+7. **The three sanctioned pin flips** (interpretation 8) — verify and
+   wave through per the S1/S2 precedent.
+8. **The confirm seam on Delete Block** (interpretation 9 / P40) — a
+   phone-only guard with no Mac parallel; product-flavored.
+9. **The comment-doubling corner** (interpretation 10) — core
+   behavior, Mac-identical, surfaced here because the phone now has
+   both doors; QUESTIONS material if the author trips on it.
+10. **Perf posture of the new chrome:** the decor rides the same
+    equality-gated near-viewport scoping as the takes chrome (the S2
+    MINOR-3 law), but its per-block cost now covers framed +
+    commented blocks too; the device round measures (the standing
+    magnitude rider).
+11. **The walks' device items grow:** the comments sheet under the
+    real keyboard, the ●n tap target size, the emoji gap's look, the
+    Read page's feel (scroll, tap-into-note), the ⋯ menu's reach —
+    all the feel/look rounds' instrument.
+
+**NO `Sources/VariorumCore` lines; NO schema; NO `Sync/` lines; NO
+pbxproj lines; the `Shared/` diff is EXACTLY the two renamed files
+(adds mirror deletes byte-for-byte); the Mac-side diff is EXACTLY
+those two deletions (the rename's other half).** Commits: `99fa1a9`
+(the parity move) · `8f558e9` (the build) · `3ebd47a` (the suites) ·
+the record commit; pushed to `origin mobile` at bout end.
+
 ---
 
 ## Orientation
