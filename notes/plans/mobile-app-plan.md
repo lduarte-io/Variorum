@@ -154,6 +154,43 @@ session's own runs.)*
   per P3); tapping into a note edits it in Write. The phone is the
   reading-in-bed surface; "real and robust" includes it.
 
+### Sitting batch 3 — peek rules, structural scope, formatting, comments/callouts (2026-08-03; rulings verbatim-faithful)
+
+- **M9 — Peek is STICKY WHILE THE NOTE IS OPEN**, ruled via her own words
+  (no option button; verbatim): *"sticky while the note is open makes more
+  sense to me - one day the mobile app might even be able to open a lens
+  (not in a separate lens tab, in an option on the takes page i think from
+  an overall menu or something, it would have to be simplified, but it's
+  godo to keep the machinery)"*. So: peeked takes stay displayed until the
+  note closes; a visible per-block peeking marker keeps chosen-vs-peeked
+  unambiguous; ✓ remains the only cross-device commitment. **Direction
+  recorded (not v1 scope): MOBILE LENSES SOMEDAY** — simplified, reached
+  from the takes surface / an overall menu, never a separate lens tab; keep
+  the machinery open to it (the sticky peek is deliberately lens-shaped).
+- **M10 — Structural scope: DIVIDE + MERGE ship in v1; ceremonies stay
+  Mac-only.** Her answer, verbatim: *"divide + merge with no ceremony means
+  you can't do it when you have multiple takes on merge, right? I think
+  that's fine honestly, this covers more of the accidental different blocks
+  case"*. Answered in-sitting, one precision on her reading: the phone
+  inherits the Mac's own no-ceremony paths — divide AUTO-PROCEEDS on a
+  fanned block when the cut lands uniquely in every take (the ratified #10
+  auto-proceed rule; `CutPropagation` is shared pure Domain) and refuses
+  exactly where the Mac would open the W; merge is instant when neither
+  side carries a fan and refuses to the Mac's pairing ceremony when one
+  does (the base op COULD join chosen takes, but silently dropping her
+  pairing options is exactly what the ceremony exists to prevent). Her
+  accidental-different-blocks case is fully covered (fanless/unique-match).
+  **Extract is deliberately NOT in v1** (recorded; trivially joinable later —
+  `BoundarySnapping` is shared).
+- **M11 — Formatting: FULL — render + typing behaviors + toolbar.** The 13g
+  vocabulary renders; ⏎ list continuation, checkbox tap-toggle, Tab/⇧Tab
+  nesting via keyboard accessory; a compact toolbar above the keyboard with
+  the core acts. The phone writes like the Mac writes.
+- **M12 — Comments & callouts: BOTH, view + edit.** Callout frames render
+  on the page (13k's one-frame rule); comments behind the block menu as a
+  sheet (view/add/edit/delete — existing ops); a commented block wears a
+  small marker.
+
 ---
 
 ## Orientation
