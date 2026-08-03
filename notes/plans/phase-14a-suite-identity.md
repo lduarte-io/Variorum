@@ -308,6 +308,42 @@ does not gate the spike (project refs are random; display names rename freely).
   *[removed for publication]*
   *[removed for publication]*
   *[removed for publication]*
+- **Round 0c (same sitting) — her challenge to the third project itself** ("how big
+  of a benefit is having the separate org rather than just a distinct table within
+  one of the existing ones? … i'd probably put the home in variorum though instead
+  of fragmnets and just not show users that it's within variorum. i'm a little
+  conflicted"). The architect's analysis, presented before her ruling (this would
+  AMEND R2 if taken):
+  *[removed for publication]*
+    *[removed for publication]*
+  - **Branding: conceded, not an argument** — the project ref is an opaque random
+    string; nobody can see "variorum" in the issuer URL, and a custom domain
+    (auth.stargazing.tech) can front it later either way.
+  - **"Could the table be moved later?" — the tables yes, trivially; THE ISSUER no.**
+    The sticky part is auth.users + the issuer URL baked into every app's provider
+    config and every user's identity claims. Extracting the account home later =
+    re-pointing every app + re-linking EVERY user who exists by then; doing the
+    separation now = migrating exactly one user (her). The debt grows with each
+    suite signup.
+  - **The concrete (non-purity) costs of home-inside-Variorum:** (1) the SIGNUPS
+    COLLISION — suite signups ON would mint authenticated Variorum-project users,
+    and the 9c BLOCKER's load-bearing guard (signups-off protects the eight
+    non-owner mirror tables = her whole prose corpus until 14c) dies; mitigable by
+    an 04-class RPC hardening (restrict sync_push/sync_pull to an author allowlist —
+    modest, testable, §12-adjacent, her go-ahead) or by DEFERRING suite signups to
+    14c. (2) BLAST-RADIUS COUPLING — 14b's E2EE mirror surgery and the suite's
+    sign-in would share one project; a mistake in the most delicate upcoming work
+    risks every app's login. (3) AUTO-PAUSE on free tier applies to the suite's
+    LOGIN (mitigated by her daily sync activity; real on absences).
+  *[removed for publication]*
+    the Variorum project, suite signups STAY OFF until 14c (the provisioning
+    deliverable slips there; Fragments keeps native signups for its testers and
+    runs dual sign-in meanwhile; her one account still proves the one-login goal).
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+  - **RULING:** *pending — the round-0c question.*
 
 ## Ledger
 
