@@ -66,6 +66,61 @@
 
 ---
 
+## RUN RECORD — the project OPENED 2026-08-03 (author-attended design sitting, in progress)
+
+**Status:** running under `/architect-phase`; this session is the architect/
+orchestrator. Preflight complete (SKILL.md + CLAUDE.md + this file + the canon
+set + `phase-08-ios-capture.md` + `phase-15-brief.md`); repo clean on `mobile`
+at `b3fbac3`, up to date with origin. Baselines by this session's own runs:
+**core 1034/114 VERIFIED** (matches the 13k closeout exactly); mobile 14/4
+re-running (the first attempt hit a simulator-destination resolution error,
+not a test failure — record updates when it lands). Mac 1191/208 + spine 51/7
+are Mac-side counts this project has not touched; they get their own
+verification before any shared-core change lands. The 13b constitution
+(P-1…P-9 + application notes) BINDS per the skill and is copied verbatim into
+this file when the execution-plan sections are authored at the sitting's
+close. Context updates since the brief was written, stated at the sitting:
+**13g LANDED** (markdown-as-content formatting is stored content the phone can
+render with no schema work), 13f landed the post→note UI-string sweep, 13k
+landed the compact nav bar + nested lists; **13e is still PENDING** — the
+take-management vocabulary it adds (reorder/move/copy-all) will grow after
+whatever take UI this project ships.
+
+### Sitting batch 1 — the interaction shape (2026-08-03; rulings verbatim-faithful)
+
+- **M1 — Base surface: WRITE-TRUE — one continuous editor** (the Mac
+  architecture on iOS: one TK2 `UITextView` over the whole note, block IDs
+  riding ranges via the shared pure identity core, kept AppKit-free for
+  exactly this). Her selection, notes verbatim: *"what are the differences in
+  capability? this seems better and more useful for a phone app, but can i
+  not still access the block i'm on?"* Answered in-sitting: block access is
+  fully preserved — the caret's block is always known, and badges/menus/takes
+  stay per-block; Write-true strictly dominates the block-focused alternative
+  on capability (cross-block selection, seamless typing; nothing lost); its
+  price is build cost + the TK2-on-iOS risk, de-risked by a throwaway spike
+  per the Phase 6 precedent. Ruling stands as her selection.
+- **M2 — Block doors: LONG-PRESS MENU ruled in; SWIPE selected but its
+  meaning deliberately REOPENED by her.** Verbatim: *"i think it will still
+  feel reasonably natural to swipe on a block because they're separate
+  paragraphs - i think a quicker way to bring the menu up matters as well,
+  but i'm a little conflicted because i think that swiping should maybe be
+  how you can quickly access other takes? i think i'm open to a huge variety
+  of ideas for how to accomplish this"* Implementation reading recorded (not
+  re-asked): inside an editable text view, "long-press → menu" ships as the
+  EXTENDED iOS text edit menu (custom block items on the native menu — zero
+  conflict with the system text gestures), beside whatever further doors
+  batch 2 settles.
+- **M3 — Takes shape: NO option selected** — she floated a new idea instead,
+  verbatim: *"i think swiping left and right for takes might also work
+  well"* — batch 2 brings composed gesture-grammar options.
+- **M4 — Take verbs: ALL FOUR cross in v1** — view + choose · new take ·
+  edit any take · archive/delete a take (each an existing tested operation;
+  the cost is UI surface, not model work). 13e's later Mac additions
+  (reorder/move/copy-all) are adoptable afterwards; the execution plan states
+  which parts are deliberately built ahead of 13e.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
