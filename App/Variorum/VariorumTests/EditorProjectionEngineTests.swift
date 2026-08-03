@@ -133,4 +133,67 @@ struct EditorProjectionEngineTests {
             loaded: true, busy: false, forceFull: false,
             matchesSurface: false, sameSequence: false) == .fullRender)
     }
+
+    /// Mobile S3 ladder, MAJOR 3 — the delivery arm: a DELIVERY may never
+    /// take a rewrite arm (a photograph of unknown age consumed at a clean
+    /// instant regressed surface + ledger to pre-flush bytes — the retired
+    /// Phase 8 clean-instant guarantee, restored at the policy).
+    @Test func aDeliveryNeverTakesARewriteArm() {
+        typealias P = EditorProjectionPolicy
+        // Non-matching delivery at a clean instant: a SIGNAL, both shapes.
+        #expect(P.decide(
+            loaded: true, busy: false, forceFull: false, delivery: true,
+            matchesSurface: false, sameSequence: true) == .refetchFresh)
+        #expect(P.decide(
+            loaded: true, busy: false, forceFull: false, delivery: true,
+            matchesSurface: false, sameSequence: false) == .refetchFresh)
+        // Echo adoption stays legal for deliveries (byte-identical to the
+        // surface — nothing is rewritten).
+        #expect(P.decide(
+            loaded: true, busy: false, forceFull: false, delivery: true,
+            matchesSurface: true, sameSequence: true) == .adoptEcho)
+        // Busy still defers deliveries (precedence unchanged above).
+        #expect(P.decide(
+            loaded: true, busy: true, forceFull: false, delivery: true,
+            matchesSurface: false, sameSequence: true) == .deferUntilClean)
+        // A forced heal under a delivery keeps its flag armed for the
+        // fresh read rather than rebuilding from the photograph.
+        #expect(P.decide(
+            loaded: true, busy: false, forceFull: true, delivery: true,
+            matchesSurface: false, sameSequence: true) == .refetchFresh)
+        // Not-loaded initial render stays delivery-legal (nothing local
+        // exists to regress before the first render).
+        #expect(P.decide(
+            loaded: false, busy: false, forceFull: false, delivery: true,
+            matchesSurface: false, sameSequence: false) == .initialRender)
+    }
+
+    /// The Mac half of MAJOR 3, pinned at the VM (the mechanism is
+    /// genuinely SHARED — `observeSlots` applied deliveries directly
+    /// through the same policy): a stale photograph consumed after a
+    /// flush settles must never rewrite the Mac surface either.
+    @Test func aStaleDeliveryAtACleanInstantNeverRewritesTheMacSurface() async throws {
+        try await withEditor(seedBlocks: ["Base."]) { harness in
+            try harness.reload()
+
+            // The photograph a delivery might carry: fetched BEFORE the edit.
+            let stale = try harness.storeSlots()
+
+            harness.type(" Typed", at: 5)
+            await harness.flush() // the clean instant; the store holds the typed bytes
+            #expect(harness.documentText == "Base. Typed")
+
+            // The stale photograph lands as a DELIVERY after the flush.
+            harness.model.applyProjection(stale, fromDelivery: true)
+            #expect(harness.documentText == "Base. Typed",
+                    "a delivery never rewrites the surface to pre-flush bytes")
+
+            // The signal settles by a fresh read (the flush's own echo).
+            for _ in 0..<100 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(harness.documentText == "Base. Typed")
+        }
+    }
 }

@@ -122,19 +122,39 @@ nonisolated enum EditorProjectionPolicy {
         case differential
         /// Structure changed: rebuild from the store, tail preserved.
         case fullRender
+        /// **A DELIVERY may never rewrite the surface** (mobile S3 ladder,
+        /// MAJOR 3 — the retired Phase 8 capture VM's clean-instant
+        /// guarantee, RESTORED for both platforms): an observation value
+        /// fetched BEFORE a flush can be CONSUMED after it settles — at
+        /// that clean instant it reads as a real change (non-matching,
+        /// same sequence) and the old `.differential` regressed surface
+        /// AND ledger to pre-flush bytes; a keystroke in the window then
+        /// flushed stale-based text over the newer store text. Deliveries
+        /// are SIGNALS: the caller holds the marker and settles by its
+        /// fresh-read path (`applyPendingIfClean`), whose value comes back
+        /// as non-delivery and takes the render arms below.
+        case refetchFresh
     }
 
     /// The precedence order IS the contract (pinned):
-    /// not-loaded ▸ busy ▸ forced ▸ echo ▸ same-sequence ▸ full.
+    /// not-loaded ▸ busy ▸ forced ▸ echo ▸ delivery-refetch ▸
+    /// same-sequence ▸ full. `delivery` marks a value that arrived from
+    /// an observation (a photograph of unknown age) rather than a fresh
+    /// authoritative read — echo adoption stays legal for it (matching
+    /// means byte-identical to the surface; nothing is rewritten), every
+    /// REWRITE arm demands freshness, and a forced heal under a delivery
+    /// keeps its flag armed for the fresh read.
     static func decide(
         loaded: Bool, busy: Bool, forceFull: Bool,
+        delivery: Bool = false,
         matchesSurface: @autoclosure () -> Bool,
         sameSequence: @autoclosure () -> Bool
     ) -> Decision {
         if !loaded { return .initialRender }
         if busy { return .deferUntilClean }
-        if forceFull { return .forcedFullRender }
+        if forceFull { return delivery ? .refetchFresh : .forcedFullRender }
         if matchesSurface() { return .adoptEcho }
+        if delivery { return .refetchFresh }
         if sameSequence() { return .differential }
         return .fullRender
     }

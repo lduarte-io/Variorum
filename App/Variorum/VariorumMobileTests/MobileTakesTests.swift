@@ -58,7 +58,11 @@ private func outboxCount(_ db: AppDatabase) async throws -> Int {
     }
 }
 
-/// One fresh coherent delivery, exactly as the observation would hand it in.
+/// One fresh coherent read, applied with fresh-read authority. (Since the
+/// S3 ladder's MAJOR 3, an observation DELIVERY is a signal that settles
+/// by exactly this fresh application — driving the fresh half directly
+/// keeps these pins deterministic; the delivery arm has its own pin in
+/// `MobileEditorTests`.)
 @MainActor
 private func deliver(_ model: MobileEditorViewModel, _ db: AppDatabase) async throws {
     let fresh = try await db.read { [postID = model.postID] in

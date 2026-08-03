@@ -48,10 +48,18 @@ final class EditorViewModel {
         self.autosave = session.autosave(forPost: postID)
         autosaveToken = autosave.observe(
             onError: { [weak self] error in self?.showOperationError(error) },
-            onSettled: { [weak self] in self?.applyPendingIfClean() })
+            onSettled: { [weak self] in
+                self?.storeWriteGeneration &+= 1
+                self?.applyPendingIfClean()
+            })
     }
 
     @ObservationIgnored private var autosaveToken: UUID?
+    /// The store-write freshness generation (mobile S3 ladder, MAJOR 3 —
+    /// the retired Phase 8 VM's `readGeneration` fence restored): bumped
+    /// whenever OUR writes settle (flush settle, mint finish), so a fresh
+    /// read that STRADDLED a settle is re-signaled instead of adopted.
+    @ObservationIgnored private var storeWriteGeneration = 0
 
     // MARK: - Observable UI state
 
@@ -532,7 +540,9 @@ final class EditorViewModel {
     private func observeSlots() async {
         do {
             for try await value in session.database.observePost(postID) {
-                applyProjection(value)
+                // A delivery is a SIGNAL, never surface-rewrite authority
+                // (mobile S3 ladder, MAJOR 3 — shared mechanism).
+                applyProjection(value, fromDelivery: true)
             }
         } catch is CancellationError {
         } catch {
@@ -545,7 +555,7 @@ final class EditorViewModel {
     /// Internal so tests can drive projections without the observation.
     /// The DECISION lives in `EditorProjectionPolicy` (13b 1a — the
     /// precedence order is pinned as pure code); this executes it.
-    func applyProjection(_ new: [Queries.RenderedBlock]) {
+    func applyProjection(_ new: [Queries.RenderedBlock], fromDelivery: Bool = false) {
         guard textView != nil else {
             pendingProjection = new
             return
@@ -560,6 +570,7 @@ final class EditorViewModel {
             // value through the settle machinery.
             busy: autosave.isDirty || mintInFlight || structuralInFlight,
             forceFull: forceFullRender,
+            delivery: fromDelivery,
             matchesSurface: ledger.matches(new, entries: index.entries),
             sameSequence: new.map(\.blockID) == index.entries.map(\.blockID))
         switch decision {
@@ -584,6 +595,15 @@ final class EditorViewModel {
             structural.applyDifferential(new)
         case .fullRender:
             structural.renderFull(new, preserveTail: true)
+        case .refetchFresh:
+            // Deliveries are SIGNALS (mobile S3 ladder, MAJOR 3 — the
+            // retired Phase 8 clean-instant guarantee restored): a value
+            // fetched before the flush that just settled would regress
+            // surface + ledger to pre-flush bytes. Hold the marker and
+            // settle by the ONE fresh-read path — the fresh value comes
+            // back as non-delivery and takes the render arms above.
+            pendingProjection = new
+            applyPendingIfClean()
         }
     }
 
@@ -692,6 +712,7 @@ final class EditorViewModel {
         // block to its pre-flush text (review round 1, MAJOR 2). Re-fetch:
         // the fresh projection includes our flush, so the echo check passes
         // and only genuinely external changes touch the view.
+        let generation = storeWriteGeneration
         Task { [weak self] in
             guard let self else { return }
             guard let fresh = try? await session.database.read({ [postID] in
@@ -699,6 +720,14 @@ final class EditorViewModel {
             }) else { return }
             guard !autosave.isDirty, !mintInFlight, !structuralInFlight else {
                 pendingProjection = fresh
+                return
+            }
+            guard generation == storeWriteGeneration else {
+                // A settle landed DURING the read (the value may predate
+                // its writes — MAJOR 3's fence): re-signal; the loop
+                // converges the moment the store goes quiet.
+                pendingProjection = fresh
+                applyPendingIfClean()
                 return
             }
             applyProjection(fresh)
@@ -1098,6 +1127,7 @@ final class EditorViewModel {
 
     private func finishMint(_ minted: [CrystallizationReconciler.MintedBlock], kind: CrystallizationPlanner.Kind) {
         mintInFlight = false
+        storeWriteGeneration &+= 1 // our mint's writes settled (MAJOR 3's fence)
         let outcome = CrystallizationReconciler.reconcile(
             minted: minted, currentTail: tailText, kind: kind)
 

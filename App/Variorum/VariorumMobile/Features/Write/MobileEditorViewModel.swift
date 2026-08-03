@@ -153,11 +153,18 @@ final class MobileEditorViewModel {
                 self?.statusMessage = String(describing: error)
             },
             onSettled: { [weak self] in
+                self?.storeWriteGeneration &+= 1
                 self?.applyPendingIfClean()
             })
     }
 
     @ObservationIgnored private var autosaveToken: UUID?
+
+    /// The store-write freshness generation (S3 ladder, MAJOR 3 — the
+    /// retired Phase 8 VM's `readGeneration` fence restored): bumped
+    /// whenever OUR writes settle (flush settle, mint finish), so a fresh
+    /// read that STRADDLED a settle is re-signaled instead of adopted.
+    @ObservationIgnored private var storeWriteGeneration = 0
 
     /// The screen's teardown (onDisappear): the S1 backstop lands pending
     /// work, then this surface stops listening to the SHARED coordinator
@@ -270,9 +277,13 @@ final class MobileEditorViewModel {
     /// applied projection passes the peek overlay. Slots-only callers
     /// (tests driving `applyProjection` directly) bypass peeks by
     /// construction — they hold none.
-    func ingest(_ projection: Queries.TakesProjection) {
+    func ingest(_ projection: Queries.TakesProjection, fromDelivery: Bool = false) {
+        // Fan state adopts UNCONDITIONALLY (the S2 posture — the card
+        // belt must see a remote lock the moment the delivery lands;
+        // fans are bookkeeping, self-healing, never surface bytes). Only
+        // the SLOT application carries MAJOR 3's delivery guard below.
         takes.adoptFans(projection.fans)
-        applyProjection(takes.overlay(projection.slots))
+        applyProjection(takes.overlay(projection.slots), fromDelivery: fromDelivery)
         textView?.takesChrome?.refresh()
         // S2 batch 2: an open browser re-renders its cards from the fresh
         // fan state (and closes if its block left the surface).
@@ -316,7 +327,9 @@ final class MobileEditorViewModel {
     private func observeTakesProjection() async {
         do {
             for try await value in session.database.observeTakes(postID) {
-                ingest(value)
+                // A delivery is a SIGNAL, never surface-rewrite authority
+                // (S3 ladder, MAJOR 3 — the shared policy's delivery arm).
+                ingest(value, fromDelivery: true)
             }
         } catch is CancellationError {
         } catch {
@@ -379,7 +392,7 @@ final class MobileEditorViewModel {
     /// Internal so tests drive projections without the observation. The
     /// DECISION is `EditorProjectionPolicy`'s (shared, pinned); this
     /// executes it.
-    func applyProjection(_ new: [Queries.RenderedBlock]) {
+    func applyProjection(_ new: [Queries.RenderedBlock], fromDelivery: Bool = false) {
         guard storage != nil else {
             pendingProjection = new
             return
@@ -388,6 +401,7 @@ final class MobileEditorViewModel {
             loaded: loaded,
             busy: autosave.isDirty || mintInFlight,
             forceFull: forceFullRender,
+            delivery: fromDelivery,
             matchesSurface: ledger.matches(new, entries: index.entries),
             sameSequence: new.map(\.blockID) == index.entries.map(\.blockID))
         switch decision {
@@ -408,6 +422,15 @@ final class MobileEditorViewModel {
             applyDifferential(new)
         case .fullRender:
             renderFull(new, preserveTail: true)
+        case .refetchFresh:
+            // Deliveries are SIGNALS (S3 ladder, MAJOR 3 — the retired
+            // Phase 8 clean-instant guarantee restored): a value fetched
+            // before the flush that just settled would regress surface +
+            // ledger to pre-flush bytes. Hold the marker and settle by
+            // the ONE fresh-read path — the fresh value comes back as
+            // non-delivery and takes the render arms above.
+            pendingProjection = new
+            applyPendingIfClean()
         }
     }
 
@@ -482,6 +505,7 @@ final class MobileEditorViewModel {
     func applyPendingIfClean() {
         guard !autosave.isDirty, !mintInFlight, pendingProjection != nil else { return }
         pendingProjection = nil
+        let generation = storeWriteGeneration
         Task { [weak self] in
             guard let self else { return }
             guard let fresh = try? await session.database.read({ [postID] in
@@ -489,6 +513,14 @@ final class MobileEditorViewModel {
             }) else { return }
             guard !autosave.isDirty, !mintInFlight else {
                 pendingProjection = fresh.slots
+                return
+            }
+            guard generation == storeWriteGeneration else {
+                // A settle landed DURING the read (the value may predate
+                // its writes — MAJOR 3's fence): re-signal; the loop
+                // converges the moment the store goes quiet.
+                pendingProjection = fresh.slots
+                applyPendingIfClean()
                 return
             }
             ingest(fresh)
@@ -893,6 +925,7 @@ final class MobileEditorViewModel {
         kind: CrystallizationPlanner.Kind
     ) {
         mintInFlight = false
+        storeWriteGeneration &+= 1 // our mint's writes settled (MAJOR 3's fence)
         let outcome = CrystallizationReconciler.reconcile(
             minted: minted, currentTail: tailText, kind: kind)
 

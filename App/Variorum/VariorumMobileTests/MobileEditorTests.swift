@@ -487,4 +487,60 @@ struct MobileEditorProjectionTests {
             _ = stays
         }
     }
+
+    /// S3 ladder, MAJOR 3 (the adjudicated deterministic drive): a stale
+    /// photograph CONSUMED at a clean instant — fetched before a flush,
+    /// delivered after it settles — must never rewrite surface or ledger;
+    /// the retired Phase 8 capture VM's clean-instant guarantee, restored
+    /// ("every delivery is only a signal; the authoritative application is
+    /// a fresh read").
+    @Test func aStaleDeliveryAtACleanInstantNeverRewritesTheSurface() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "clean instant", profile: .blog)
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (model, storage) = makeEditor(session, postID: post.id)
+            await model.loadOnce()
+
+            // The photograph a delivery might carry: fetched BEFORE the edit.
+            let stale = try await session.database.read { [postID = post.id] in
+                try Queries.renderPost($0, containerID: postID)
+            }
+
+            typeEdit(model, storage, range: NSRange(location: 5, length: 0), replacement: " Typed")
+            await model.autosave.flushNow() // the clean instant; the store holds the typed bytes
+
+            // The stale photograph lands as a DELIVERY after the flush —
+            // the round-1 window. Surface and ledger keep the flushed bytes.
+            model.applyProjection(stale, fromDelivery: true)
+            #expect(storage.string == "Base. Typed",
+                    "a delivery never rewrites the surface to pre-flush bytes")
+            #expect(model.surfaceKnownText(variantID: minted.variant.id) == "Base. Typed",
+                    "the ledger keeps the surface's truth record")
+
+            // The signal settles by a fresh read (the flush's own echo) —
+            // give the scheduled task a beat, then re-assert.
+            for _ in 0..<100 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(storage.string == "Base. Typed")
+            #expect(model.surfaceKnownText(variantID: minted.variant.id) == "Base. Typed")
+
+            // The stale-EMPTY analog (the retired double-mint pin's class):
+            // an empty photograph at a clean instant must not blank the
+            // just-written surface either.
+            model.applyProjection([], fromDelivery: true)
+            #expect(storage.string == "Base. Typed",
+                    "an empty delivery never blanks the surface")
+            for _ in 0..<100 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(storage.string == "Base. Typed")
+        }
+    }
 }
