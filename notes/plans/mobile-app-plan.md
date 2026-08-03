@@ -1058,6 +1058,100 @@ by the recorded runs). Commits: `1a21024` (parity move) · `32726b8`
 (mobile markdown) · the record commit; pushed to `origin mobile` at bout
 end.
 
+## Stage 1, batch 2 — ACCEPTED + the trim-law ADJUDICATION (architect, 2026-08-03)
+
+**Acceptance:** verified before accepting — commits and diff scope
+inspected (zero `Sources/VariorumCore`, zero schema; the two Mac files
+are the forwards-keeping seams, zero test edits, baselines verified by
+the implementer's recorded own runs), the batch record read, and
+**mobile 68/15 re-confirmed by the architect's own run**. P5–P9 join the
+stage-gate bundle.
+
+**THE TRIM-LAW RULING (the batch-2 recorded finding, adjudicated).**
+Mechanism re-traced by the architect first-hand:
+`SegmentationRules.bulkSegments` trims each segmented line with
+`trimmingCharacters(in: .whitespaces)` (and the crystallization boundary
+shares the doctrine) — a Phase 2 rule that PREDATES 13k K8, under which
+leading indent on LIST LINES is meaningful nesting content. So a pasted
+nested list flattens, and a tail-typed nested item loses its depth at
+crystallization — on BOTH platforms. **RULING: the trim law aligns to
+K8's own boundary — a segmented line whose trimmed form is a LIST LEAD
+(the shared `MarkdownSyntax` law) KEEPS its leading horizontal
+whitespace; every other line trims exactly as before.** List-only — the
+tokenizer's column-0 widening mirrored precisely; indented non-list
+lines (headings included) keep the old trim; sentence-mode behavior
+untouched and recorded. Spec basis: K8 is her ratified law and the newer
+one; the Phase 2 trim is an implementation rule that never contemplated
+this vocabulary; CLAUDE.md's align-implementation-to-spec duty applies.
+Duties riding the ruling: the fix lands in core `Domain` (NOT `Sync/` —
+in-mandate; small and deliberate per the worktree rule); red-on-old —
+the batch-2 recorded-finding test FLIPS into the pin, plus a
+paste-nested-list pin; any existing Phase 2 pin that literally asserts
+the old trim on LIST-shaped input is SUPERSEDED by this adjudication and
+updated citing it (enumerated in the batch record — the one sanctioned
+test-edit class); every trim site at a segmentation door gets the ONE
+rule (bulk + crystallization, sites enumerated). **The Mac inherits the
+fix** (pasted/tail-typed nested lists stop flattening there too) —
+reported to the author the same turn as this record.
+
+---
+
+## Stage 1, batch 3 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, IN FULL:** `CLAUDE.md` · this file (the run record M1–M14
++ LK1–LK11, the constitution, the environment traps, the Stage 0 gate
+record, batch 1 + 2 briefs/records/acceptances INCLUDING the trim-law
+adjudication directly above — it binds your item 1) ·
+`notes/plans/mobile-tk2-spike-memo.md` ·
+`App/Variorum/Variorum/Theme/VoiceTokens.swift` (the token layer — both
+voices + `ReadingPageTokens`) · `Spikes/MobileMockups/mobile-look-v1.html`
+and `-v2.html` (the RATIFIED look canon; the LK rulings say what is
+settled).
+
+**Objective:** (a) the trim-law fix per the adjudication; (b) the look
+canon lands on the Write surface — the phone stops being unstyled.
+
+**Scope, batch 3:**
+1. **The trim-law fix** (core `Domain`) EXACTLY per the adjudication
+   above — the rule, the pins, the superseded-pin handling, all four
+   suites green by your own runs (this batch touches core, so core +
+   Mac + spine are mandatory; the Mac-side behavior delta is EXPECTED
+   and enumerated in your record).
+2. **`VoiceTokens` availability to the phone** — the token layer is
+   SwiftUI (`Color`/`Font`, cross-platform); make it compile into the
+   mobile target via the established parity pattern (Mac-only chrome
+   consumers stay Mac-side; verify the fonts on iOS — Iowan Old Style
+   ships there; the mono face via the system monospaced design).
+3. **The phone-local voice switch (LK2):** a stored mobile preference —
+   both voices, deliberately NOT synced and NOT the Mac's setting; a
+   minimal switch door for now (the real Settings home is S3's —
+   PROVISIONAL placement, record it).
+4. **The Write surface styled to canon:** voice room/surface/ink +
+   title masthead; the markdown palette per voice (per-voice code-chip
+   tint, dimmed markers — the Mac's face); the paragraph gap per canon;
+   the keyboard bar restyled per voice (terminal's lowercase idioms).
+   Boundaries stay invisible at rest; the dotted-seam toggle is UNRULED
+   for mobile — record its absence as deliberate. Dark rides the token
+   layer's dark values on the system scheme (R51 black rooms); record
+   what ships.
+5. **The walk grows:** switch the voice → the face changes while stored
+   bytes stay byte-identical; the L9 pin and identity audit stay green
+   under styling.
+
+**Explicitly NOT batch 3:** takes/badges/swipe/⑂ (S2), ⋯/the edit-menu
+door (S2), the app shape/tab bar/shelf (S3 — LK7's text-only tab bar
+lands there), Read flow (S4).
+
+**Discipline:** the batch 1/2 brief's, verbatim — tests with every
+step; the environment traps bind; counts by your own runs (mobile +
+walk always; core + Mac + spine mandatory this batch); NO
+`Sources/VariorumCore/Sync/` lines; NO schema; red-on-old for every
+bug-class fix; commit as you go with the standing trailer; push
+`origin mobile` at bout end; **append your batch record to this file**;
+ONE Sonnet lookup subagent at a time, external facts only. The ladder
+runs at STAGE end — batch 3 is Stage 1's LAST planned batch, so flag
+anything you believe the ladder must weigh.
+
 ---
 
 ## Orientation
