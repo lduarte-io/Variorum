@@ -83,7 +83,10 @@ scope).
   tables' guard is procedural (signups-off) until 14c.
 - **The bridge's Fragments session is shape (c)** (ratified QUESTIONS #16): her
   Fragments email+password, direct, only the session persisted. It must SURVIVE her
-  account migration — the Fragments-project password identity stays.
+  account migration — the Fragments-project password identity stays. *(SUPERSEDED at
+  round 0f, 2026-08-03 — she ruled single sign-in with NO surviving Fragments
+  password: the password identity retires; the bridge's session becomes
+  stargazing-DELEGATED against the Fragments project, same persistence + refresh.)*
 - **The consent page:** spec `notes/fragments-consent-page-spec.md`; the production
   page NEVER shipped — any new-device sign-in still rides the LAN-interim spike page
   (9c RESIDUAL 1: `python3 -m http.server 3000` in `Spikes/AuthPairingSpike/`). This
@@ -475,6 +478,59 @@ does not gate the spike (project refs are random; display names rename freely).
   - The Fragments-side ask list drafted in-chat this round; it formalizes into
     `notes/fragments-bridge-contract.md` once she rules TestFlight timing and the
     neutral project exists (its issuer URL is the missing coordinate).
+
+- **Round 0f (same sitting) — single sign-in ABSOLUTE; the bridge goes delegated;
+  TestFlight stands down to after the family.** Her challenge, verbatim: "I don't
+  think I'll have a fragments email + password anymore, right? … I don't want the
+  bridge to rely on fragments email + password because that is exactly what we're
+  retiring."
+  - **RULED — single sign-in with NO surviving Fragments password.** The 9c
+    inheritance line ("the Fragments-project password identity stays") is
+    SUPERSEDED (annotated in place above): her Fragments USER survives — same uid
+    *[removed for publication]*
+    the stargazing identity links on, the email+password identity unlinks. One
+    identity everywhere (14b's encryption passphrase stays its own separate
+    secret by the standing wrap-secret ruling — it is not a second LOGIN).
+  - **The bridge under single sign-in (her "what will happen?"):** the bridge's
+    load-bearing need was never the password — it is A SESSION against the
+    Fragments project. Today that session is minted by password grant; after the
+    migration it is minted by the DELEGATED flow (Fragments' GoTrue trusts
+    custom:stargazing → mints its ordinary NATIVE session for her linked user).
+    Everything downstream is byte-identical: the persisted session, the
+    single-flight refresh, the journal_entries dialect, S5's conflict door. The
+    felt change: first sign-in per device is one interactive browser round (the
+    shared issuer session makes the second app's round near-silent); a dead
+    session pauses the bridge visibly and asks her to sign in — the standing
+    refuse-don't-guess posture, unchanged.
+  - **RULED — TestFlight WAITS for the family**, verbatim: "I'm just going to wait
+    to have the testers and testflight until this whole phase 14 and all of its
+    issues are resolved and fragments has its new answers / new id provider - i'm
+    not in THAT much of a hurry to open up testflight tbh, I'd rather just get
+    everything right, variorum mobile going with the correct login, the website
+    redirect on stargazing.tech or on planetlillian, my website neatly up, etc."
+    Round 0e's open ruling CLOSES on reading (ii)-and-beyond. Consequences: the
+    week's critical-path pressure retires (14a proceeds deliberately, 14b
+    promptly after; testers after that); the NEUTRAL project's signups toggle
+    stays OFF until tester opening (the provisioning machinery remains 14a's
+    deliverable — built and spike-tested; the toggle waits); **planetlillian.com
+    is recorded as a NEW candidate beside stargazing.tech for the login/consent
+    pages' home** (brand still PROVISIONAL) — noted to her that the PAGES' home
+    is dashboard-re-pointable later (not a one-way door; only the issuer PROJECT
+    is forever); **Variorum mobile builds against the neutral issuer from birth**
+    (her word this round — recorded for the mobile design sitting); the contract
+    file's 14a-horizon section updated in the same commit (the ship-native-
+    then-relink frame superseded; no tester account will ever exist natively).
+  - The vault-separation mechanics and the passport-office calibration answered
+    in-chat this round: the three-part E2EE shape (ciphertext on Variorum's
+    project / the passphrase-wrapped random data key in the vault / the
+    passphrase never leaving her devices) and the concrete difference —
+    cohabiting means ONE project dump (or one stolen backup) yields ciphertext +
+    wrapped key together, collapsing the story to passphrase strength alone;
+    separated means a Variorum dump is mathematically useless without a SECOND
+    independent compromise. The "how weird" answer: technically zero — 9c IS a
+    writing-app passport office today, proven fine at one user — organizationally
+    compounding with app count (lifecycle chaining, access hygiene, incident
+    blast radius), which is her own future-apps instinct stated back.
 
 ## Ledger
 

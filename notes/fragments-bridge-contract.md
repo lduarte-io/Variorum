@@ -418,3 +418,30 @@ re-decided at suite level) · the brand (stargazing is provisional, her word) ·
 consent/sign-in pages on stargazing.tech (that repo's own agent builds them) · her own
 account's migration path · how the one-payment entitlement is checked from both apps
 (14c's build, but the account model should not preclude it).
+
+**UPDATE 2026-08-03 (the 14a kickoff sitting, rounds 0d–0f — supersessions for this
+section; the sitting record is `notes/plans/phase-14a-suite-identity.md`):**
+
+- **TestFlight now WAITS — her ruling, verbatim:** *"I'm just going to wait to have
+  the testers and testflight until this whole phase 14 and all of its issues are
+  resolved and fragments has its new answers / new id provider - i'm not in THAT much
+  of a hurry to open up testflight tbh, I'd rather just get everything right."* And
+  separately: *"I don't want to have fragments native accounts."* Consequence: item 2's
+  "early testers may face a one-time re-link step" DISSOLVES — no tester account will
+  ever exist natively; testers arrive on suite (stargazing) accounts from day one,
+  after 14a's identity work + 14b's journal-class E2EE.
+- **Issuer mechanics RULED — shape (A):** a NEW neutral Supabase project is the suite's
+  account home and OIDC issuer (OAuth 2.1 Server); both app projects trust it as a
+  custom OIDC provider and keep minting their own native sessions. The Fragments-side
+  ask, when the project exists (its issuer URL is the missing coordinate): add the
+  neutral issuer as a trusted provider; route ALL sign-in — and signups, when they
+  open — through it; retire the native signup surface.
+- **Single sign-in RULED — the Fragments email+password identity RETIRES.** Her
+  Fragments USER survives (same uid, `journal_entries` rows untouched): the stargazing
+  identity links on, the password identity unlinks (or the deliberate re-map if that
+  final state is cleaner — the sitting's R3 posture). The one-seam auth module (item 1
+  above) is exactly what this rides on.
+- **The bridge's session goes DELEGATED:** it stops using email+password and obtains
+  its Fragments-project session through the stargazing issuer (one interactive flow
+  per device, then the same persisted-session + refresh loop as today).
+  `journal_entries` shape and key semantics stay frozen — ask #3 stands untouched.
