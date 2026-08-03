@@ -2764,6 +2764,160 @@ All eight flag verdicts ACCEPTED as returned (the guard-order mirror
 confirmed against the real op order; both pin flips verified
 sanctioned; the four feel-round riders join the gate bundle).
 
+## Stage 2 review — round 1 FIX-PASS RECORD (fix session, 2026-08-03; commits `2f824e7` · `398ae6e` · `4f4672c` · `e2f6550`, pushed)
+
+Every adjudicated fix built EXACTLY per the adjudication, each preceded
+by this session's OWN trace of the mechanism (the hallucination guard;
+all six reproduced — nothing refuted), each bug-class fix landed with a
+red-on-old pin verified by BEHAVIORAL REVERT (the pre-fix mechanism
+temporarily restored, the pin watched fail with recorded issue counts,
+the fix restored, green re-confirmed). Per finding:
+
+**BLOCKER — flip capture/restore go ledger-first (commit `2f824e7`).**
+*Own trace:* `slots[i]` is written ONLY at adoption points (`renderFull`
+/ `applyDifferential` / `adoptEcho` / `displaySlot`) — never per
+keystroke (`storageDidEdit` → `recordAutosave` writes ledger + autosave
+only) — so `flip`'s `originals[blockID] ?? current` captured a stale
+photograph and `displaySlot(original)` restored it AND overwrote the
+ledger's record for the chosen variant (`displaySlot`'s own
+`ledger.recordEdit`); typing on the reverted base then had
+`autosave.record` REPLACE the pending entry (whole-buffer text) —
+arm (b)'s permanent loss confirmed byte-for-byte. *Fix:*
+`resolvedOriginal(_:)` — `peekedSlot`'s symmetric twin (rebuilds the
+slot with `surfaceKnownText(variantID) ?? photograph`) — consulted at
+BOTH the capture (`originals[blockID] ?? resolvedOriginal(current)`)
+and the restore (`displaySlot(resolvedOriginal(original))`), per the
+adjudication's letter. The restore-side consult also heals `originals`
+staleness from any other road (e.g. a browser-card edit of the chosen
+take mid-peek; `overlay`'s refresh of `originals` from a DEFERRED
+delivery's stale raw slot). *Pins:*
+`anEditedChosenTakeSurvivesFlippingAwayAndBack` (the reviewer's exact
+specification: typed bytes on surface + in ledger post-round-trip, then
+flush → store) and `typingAfterAFlipRoundTripNeverLosesTheEarlierEdit`
+(arm (b): both edits reach `working_text`). *Revert evidence:* pre-fix
+mechanism restored → **3 issues** — surface reverted to the stale
+photograph, ledger overwritten (the specified red-on-old at BOTH), and
+the store LOST the earlier edit in arm (b); 13 sibling tests stayed
+green (the pins discriminate); fix restored → 15/15.
+
+**MAJOR — `branchDisplayed` flushes before the mint (commit
+`398ae6e`).** *Own trace:* `branchVariant` copies `source.workingText`
+from the STORE (`Operations+Variant.swift:153`); the only flush on the
+door's path was inside `refreshTakesFromStore`, AFTER `runner.run` —
+so the copy missed unflushed keystrokes while `cards()` showed them
+ledger-first on the source card. *Fix:* `await model.autosave.flushNow()`
+in `branchDisplayed` before `mint` — the 13f R1-4 shape; blank
+deliberately untouched (copies no text), ✓ deliberately untouched
+(batch-1 interpretation 6 stands, per the adjudication). *Pin:*
+`branchDisplayedCarriesUnflushedEditsIntoTheCopy` (unflushed in-page
+edit on the displayed take → branch → the returned mint AND its store
+row hold the edited bytes). *Revert evidence:* flush commented out →
+**2 issues** — stale bytes in `mint.workingText` and in the mint's
+store row (the source's own flush still landed after, exactly the
+"loss is the copy's completeness" framing); fix restored → 19/19.
+
+**MINOR 1 — the card gate's locked belt made real (commit `398ae6e`).**
+*Own trace:* `cardGateAllows` checked `model.isSealed` only; a take
+locked remotely mid-card-edit stays in `cards()` (fans adopt
+UNCONDITIONALLY in `ingest` even while the dirty buffer defers the slot
+apply), `projectionDidChange` resigns only on VANISH — so keystrokes
+were admitted that only the flush could refuse. *Fix:* the belt
+consults the live card's `isLocked` and refuses with the STANDING
+locked-take copy; it deliberately does NOT resign the editor (the page
+gate's own refuse-and-speak posture — the pre-lock text stays visible
+ledger-first on the card). *Pin:*
+`aRemoteLockMidCardEditRefusesTheNextKeystrokeAndKeepsPendingText` —
+the gate refusal red-on-old, PLUS the adjudicated keep-pending half
+asserted through BOTH refusals: the pre-lock bytes survive the gate
+refusal (ledger + `isDirty`) and the flush's own `lockedVariant`
+refusal (entry back in pending, store byte-safe). *Revert evidence:*
+belt short-circuited → **2 issues** — the post-lock keystroke admitted,
+no refusal spoke (the keep-pending assertions passed on old too, as
+expected — the coordinator's posture was never the defect); fix
+restored → green.
+
+**MINOR 2 — the card editor takes first responder on activation
+(commit `4f4672c`).** *Own trace:* grep confirms `becomeFirstResponder`
+appeared nowhere outside the Spike; the beginEditing → render →
+attachCardEditor chain seated an editable editor with no focus — the
+second tap the record's "typing instantly" denied. *Fix:* one
+`becomeFirstResponder()` on the ATTACH TRANSITION only (the
+`superview !== card` branch — never the per-render restyle), windowless
+no-op harmless. *Pin — DRIVABLE, better than the finding hoped:*
+`beginEditingRaisesKeyboardFocusOnTheCardEditor`, WINDOW-HOSTED
+(UIWindow + makeKeyAndVisible in the harness works): focus rises at
+activation, FOLLOWS the editor across a card move, resigns at Done.
+*Revert evidence:* call commented out → **2 issues** (no focus at
+activation, none at the move); fix restored → green. The on-device
+keyboard-feel rider (and its flag-5 interplay — the sheet's missing
+keyboard-guide constraint now bites more often) stands for the S2 feel
+round as adjudicated.
+
+**MINOR 3 — the per-tick chrome refresh scoped to the near viewport
+(commit `e2f6550`).** *Own trace:* `layoutSubviews` fires per
+content-offset tick and `refresh()` walked EVERY fanned block with
+`.ensuresLayout` (+ `blockRectsUnion` over every peeked block) — cost
+per tick ∝ the post's fanned+peeked blocks, forcing far-off-screen
+fragment layout against TK2's own laziness: the P-8 shape violation,
+confirmed. *Fix (the SHAPE, per the adjudication; magnitude stays the
+device round's):* `refresh(scope:)` — `.document` (default; every
+existing content/geometry call site unchanged) vs `.nearViewport` (the
+layoutSubviews hook): the TK2 viewport queried as a character band
+(`textViewportLayoutController.viewportRange`, padded one viewport
+length each side; unavailable ⇒ everything-near, the honest fallback),
+geometry forced ONLY for blocks intersecting it. Off-band chrome keeps
+its content-anchored frames (scrolling never moves subviews of the
+scroll view); off-band GUTTER EXCLUSIONS survive from a per-block cache
+(`exclusionByBlock`) — dropping one would reflow the document per tick,
+the trap the naive scoping would have built. A width change escalates
+the tick to a full pass (every rect moves); the equality gates are
+unchanged, so the steady state stays write-free. *Pin — the call shape
+proved DRIVABLE headless (viewportRange is real in the harness):*
+`perTickRefreshResolvesOnlyNearViewportGeometry` — a 61-block post
+(contentSize > 2000 pt over a 700 pt viewport), two fanned blocks near
+and far: the `.nearViewport` pass resolves ONLY the near block (test
+seam `lastGeometryResolvedBlockIDs`), the far badge and BOTH exclusions
+survive, and the `.document` pass resolves both. *Revert evidence:*
+band neutralized (the pre-fix everything-forced tick) → **1 issue** —
+the far block layout-forced on the tick; fix restored → 8/8.
+
+**NIT 1 — the pill's ✓ clears the prior refusal (commit `4f4672c`).**
+*Own trace:* `chooseDisplayed`'s success path lacked the browser verbs'
+`report(nil)` — the exact staleness the `String?` widening was built
+for. *Fix:* one `model?.report(nil)` on success. *Pin (cheap and
+discriminating, so pinned despite NIT class):*
+`aSuccessfulChooseClearsThePriorRefusal` — sealed refusal spoken →
+unseal → ✓ succeeds → message nil. *Revert evidence:* line removed →
+**1 issue** (the stale locked-note copy survived success); restored →
+green.
+
+**NIT 2 — untouched, as adjudicated** (recorded-only; nothing built).
+
+**Counts, all by this session's own runs (iPhone 17 Pro / iOS 26.2):
+full mobile suite 130 tests / 20 suites GREEN** (single run; the
+baseline 123/20 + this pass's SEVEN pins; MobileWalkTests, the L9 pin,
+and the identity audit all green within — walks 5/6 byte-checks
+untouched). **Core / Mac / spine deliberately not run:** the fix-pass
+diff (`4652e01..e2f6550`, 8 files, +464/−24) is mobile-target only —
+zero `Sources/VariorumCore`, zero `Shared/`, zero Mac-side, zero
+pbxproj, zero schema, zero `Sync/` — so the only-if-shared condition
+never fired. Commits pushed to `origin mobile`.
+
+*Notes for the round-2 reviewer:* (1) the BLOCKER fix deliberately did
+NOT touch `overlay`'s `originals[slot.blockID] = slot` refresh — a
+deferred delivery can still park a stale raw slot there, but the
+restore-side `resolvedOriginal` consult makes that staleness harmless
+(text is re-resolved ledger-first at the only point it is consumed);
+building a third consult into `overlay` would have exceeded the
+adjudication's letter. (2) MINOR 1's belt reads `cards()` per
+keystroke — cost ∝ the open block's fan (opt-in and rare), the same
+class as `cards()`' other per-render callers. (3) MINOR 3's
+`.document` default keeps every pre-existing `refresh()` call site
+byte-identical in behavior; the ONLY behavioral change is the
+layoutSubviews tick. (4) The pill's off-band arm leaves a visible pill
+untouched mid-scroll rather than hiding it — it fades on its own 2.4 s
+timer; judged the honest reading of "off-band chrome untouched".
+
 ---
 
 ## Orientation
