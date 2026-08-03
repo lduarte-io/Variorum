@@ -1152,6 +1152,237 @@ ONE Sonnet lookup subagent at a time, external facts only. The ladder
 runs at STAGE end — batch 3 is Stage 1's LAST planned batch, so flag
 anything you believe the ladder must weigh.
 
+## Stage 1, batch 3 — BATCH RECORD (implementer, 2026-08-03; commits `96a7f8b` · `a43aef4` · `57d7492` · `4678778` + the record commit)
+
+**All five scope items shipped — plus ONE environment fix the batch's own
+pins forced (the WRONG-CORE trap, below, the ladder's first flag).**
+
+**1 — THE TRIM-LAW FIX (`a43aef4`, the dedicated core commit).** Exactly
+per the adjudication: `SegmentationRules.trimmedPiece` is the ONE
+per-piece edge-trim rule, consulted by BOTH paragraph-mode doors — a
+piece that reads as a LIST LEAD keeps its leading horizontal whitespace
+and still trims its trailing edge; every other piece trims exactly as
+before. The predicate is the NEW `MarkdownSyntax.isListLead` (core
+Domain, housed beside the tokenizer it mirrors — space/tab indent run +
+`"- "`, checkboxes matching as the bullet shape — so the two laws cannot
+drift; made `public` to match its law-siblings `leadingWhitespace`/
+`indentUnit`). **The trim-site enumeration (the every-site duty):**
+(i) `bulkSegments`' paragraph arm — GETS the rule; (ii)
+`crystallizedBoundary` — GETS the rule; (iii) the sentence scanner's
+`flush` — UNTOUCHED per the adjudication's own scope line, recorded by
+`sentenceModeStillFlattensListShapedLines_recordedBoundary`; (iv)
+non-sites considered and left: `isBlank` (a test, not a trim),
+`MarkdownEditing.swift:308` (the ⏎ door's content-emptiness check —
+not a segmentation door), `DisplayTitle`'s absence test. Grep evidence:
+no other `trimmingCharacters` in Domain/Shared/mobile-app; the consumers
+(`CrystallizationPlanner`, `Operations+Import`, Mac `ImportModel`) hold
+NO local trims, so the fix propagates through the one law.
+**New pins (core `SegmentationRulesTests`, +5):** bulk keeps space AND
+tab leads (checkbox included) · the kept lead composes with the
+2026-07-12 k−1 spacing rule (trailing edge still trims) · indented
+NON-list lines (heading → working column-0 heading, prose, `-x`) still
+trim — the LIST-ONLY boundary · crystallization keeps the tail-typed
+nested item's depth · the sentence-mode flattening recorded. **Mobile:**
+the batch-2 documentation test FLIPPED into
+`tailCrystallizationKeepsAListLinesIndent_adjudicationPin` exactly as its
+own comment promised, plus `pastedNestedListKeepsItsIndent_adjudicationPin`
+at the bulk door.
+
+**THE WRONG-CORE ENVIRONMENT TRAP (`96a7f8b` — found BY the trim pins;
+every future worktree session depends on knowing it):** the pbxproj's
+local-package reference was `../../../variorum` — a path that ESCAPES the
+repo (project dir + `../../..` = `~/dev`, + `/variorum` = the MAIN
+checkout). In `~/dev/variorum` the two spellings coincide; in THIS
+worktree every app-target build (Mac suite, mobile suite, both apps)
+silently compiled `~/dev/variorum`'s `VariorumCore`. Discovered when the
+trim fix was in the worktree's core and the simulator run still
+flattened. Repointed to `../..` (the repo root): resolves IDENTICALLY in
+the main checkout — a no-op at merge — and correctly in every worktree.
+**Batches 1–2's recorded counts STAND:** `Sources/VariorumCore` was
+diffed between the two checkouts at discovery and the ONLY differing
+files were this batch's own two — the cores were byte-identical for the
+whole prior window. Rider: re-resolution under the corrected path bumped
+the workspace `Package.resolved`'s `swift-concurrency-extras` 1.4.0 →
+1.4.1 (a patch inside the already-declared range — no new dependency;
+every green run this bout used 1.4.1; the CLI's root `Package.resolved`
+is untouched).
+
+**Revert evidence (the trim fix):** deliberate behavioral revert — both
+doors restored to the old full trim — ran the core suite: EXACTLY the
+three keep-lead pins red with the flattened outputs
+(`["- milk", "- eggs", "- [ ] flour"]` · `["- a\n", "- b"]` · blockText
+`"- deep"`), the two boundary pins (indented-non-list, sentence-recorded)
+still green — the pins discriminate; restored → 23/23. The MOBILE pins'
+red-on-old is the ORGANIC run: the pre-path-fix simulator run compiled
+the main checkout's core — byte-identical to this branch's pre-fix law —
+and both adjudication pins failed with exactly the flattened outputs
+(`"- deep\n  - "` / the flattened triple); after the path fix, green. (No
+second deliberate mobile revert was run on top; stated so the ladder
+weighs the evidence as it is.)
+
+**Superseded-pin enumeration: the sanctioned class is EMPTY.** Sweep:
+every test file touching the two doors was enumerated
+(`SegmentationRulesTests` — both Phase-2 trim pins are PROSE-shaped, kept
+byte-unchanged, each gaining a COMMENT-ONLY clarification citing the
+adjudication (the only two test-file touches outside the mobile flip;
+zero assertions changed); `ImportOperationTests` — whitespace-only
+fixture; `BoundarySnappingTests` — none), plus a broad list-literal grep
+across all three test trees (hits only in tokenizer/editing/rendering/
+face/tutorial suites that never call the doors) and the seven Mac
+crystallization-adjacent files (zero list-shaped input). The ONE test
+asserting old-trim-on-list was the mobile recorded-finding test — flipped
+under its own separate duty.
+
+**Mac-delta enumeration (the EXPECTED inheritance; zero TEST deltas):**
+(1) bulk paste at the Mac tail: nested list lines keep their indent
+(previously flattened); (2) Mac type-time/idle/teardown crystallization:
+a tail-typed indented list line keeps its depth — the batch-2 asymmetry
+(continuation lead kept, minted line stripped) is gone; (3) markdown/text
+IMPORT (`Operations.importBlocks`, the 11b drop-in): imported nested list
+lines now store their indent; (4) sentence mode: unchanged everywhere;
+(5) the Mac SUITE: 1191/208 with only the recorded tripwire — NO Mac pin
+asserted the old trim on list-shaped input, so no test moved.
+
+**2 — VoiceTokens TO THE PHONE (`57d7492`):** `VoiceTokens.swift`
+(tokens + idioms + `ReadingPageTokens` + `Color(hex:)`) git-mv'd VERBATIM
+to `Shared/Theme/` — both targets compile the ONE canon via the
+synchronized-folder pattern (zero pbxproj edits, zero test edits, no
+forwards needed — the file's names are unchanged and the Mac's consumers
+are untouched; Mac build verified green after the move). **FINDING,
+measured:** Iowan Old Style on iOS 26.2 is a **HIDDEN system font** —
+absent from `UIFont.familyNames`, resolvable by PostScript name
+(`IowanOldStyle-Roman`), and the resolved font reports the real family.
+Pinned precisely (`MobileVoiceTests`); the serif-design fallback stays
+the never-reached net, and the pin is the tripwire if a future iOS pulls
+hidden-font resolution (LK1's re-verify-per-runtime discipline). The
+mono face rides the system monospaced design, pinned.
+
+**3 — LK2's SWITCH (`4678778`):** `MobileVoicePreference` — a
+phone-local `UserDefaults` store (the Mac ⌘⇧I sticky-fold precedent),
+deliberately NOT the synced `'theme_voice'` row; default terminal (the
+leading voice, R1). The door: a masthead text button in the chrome
+register (current voice's name; tap flips voice + preference + the open
+surface). The test harness pins every world to the terminal voice so
+LK2's store can never leak simulator state into byte/attribute
+expectations.
+
+**4 — THE WRITE SURFACE STYLED TO CANON (`4678778`):**
+`MobileEditorStyle` now resolves EVERY surface-write value from the
+shared `VoiceTokens` per the live voice — cached per-voice `Face`s
+(object-stable colors, the attribute-equality bar), DYNAMIC UIColors so
+dark rides the system scheme with the token layer's own dark values
+(**R51's fully black rooms pinned at the UIKit derivation, both
+voices**), the markdown palette per voice exactly as the Mac's
+`Palette(tokens:)` maps it (marker = muted, link = accent, the 13k K10
+per-voice code chip), typography at the token layer's own numbers
+(terminal mono 14 / study Iowan 16, `UIFontMetrics(.body)`-scaled for
+Dynamic Type — identity at default size, so tests stay deterministic),
+and the paragraph gap moved to the Mac's OWN 0.5×pointSize rule
+(`EditorTypography`'s constant; batch 1's 0.35 stood in). The view:
+`applyVoiceChrome` (room background, accent caret/selection tint, voice
+typing attributes, the bar rebuilt + `reloadInputViews`). The bar:
+voice surface + hairline top, muted act glyphs, mono chrome in terminal /
+sans in study (the mockups' own chrome rule — study chrome is sans even
+though study prose is serif). The masthead: the note's name via the
+shared `DisplayTitle` chain (the 13k K1 rule rides free) in the voice's
+title type on the voice room; status rows restyled into the chrome
+register (canary keeps red — a diagnostic, not chrome). **The switch on
+an OPEN note:** `applyVoiceChange` — ATTRIBUTES ONLY, never a character:
+face bookkeeping dropped wholesale, the new base laid over the full range
+with ADDs (the block-ID projection untouched), the markdown face
+re-derived fresh with the new palette. O(open note), the same cost class
+as opening the note, spent at a deliberate settings flip — never a
+keystroke (recorded; the Mac's theme adoption is the precedent).
+
+**5 — THE WALK GROWS (`4678778`):** walk 4 — paste a voiced document
+(heading · nested checkbox list riding the trim fix · inline code) →
+switch to study → **surface bytes byte-identical, stored bytes untouched
+after a flush, fonts/palette provably follow (Iowan prose, study marker +
+chip objects), typing attributes follow** → switch back → byte-identical
+again, terminal face restored; identity audit clean, canary silent, no
+refusal spoke. The L9 pin and identity audit ran green in every suite run
+of the bout (display == stored held throughout the styling work).
+
+**Counts, all by this implementer's own runs:**
+- **Core: 1039/114 GREEN** (1034 + the 5 trim pins), `swift test`.
+- **Mobile: 76/16 GREEN** (68 → 69 at the trim commit → 76 with
+  `MobileVoiceTests` (6) + walk 4; single runs, zero relaunches).
+- **Mac: 1191/208 with EXACTLY the one recorded environment-gated
+  tripwire red, BY IDENTITY**
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`)
+  — the 13k baseline reproduced; zero deltas from the trim fix.
+- **Spine: 51/7 GREEN** (the seven suite type names).
+
+**Interpretations for the cold reviewer:** (1) "whose trimmed form is a
+LIST LEAD" is implemented as the TOKENIZER'S OWN test (indent run +
+`"- "`), not literal trim-then-retest — identical for space/tab leads;
+for exotic whitespace (NBSP) the tokenizer mirror is the conservative
+reading (such a line would not RENDER as a list, so sparing its lead buys
+nothing) — the adjudication's "column-0 widening mirrored precisely"
+clause ruled between the readings. (2) "every other line trims exactly as
+before" read as: only the LEADING whitespace of a list lead is spared —
+its trailing edge trims as always. (3) The pbxproj fix is in-mandate as
+an environment-correctness fix without which the batch's pins could not
+test the batch's code; it is a no-op on main by construction. (4) The
+walk-4 paste drives the storage door (`typeEdit`, the house harness
+pattern) — the UIPasteboard path itself is batch 1's `isPasting` pin's.
+(5) `applyVoiceChange` deliberately re-derives the WHOLE face rather
+than patching colors: the face bookkeeping remembers restore colors of
+the OLD voice, so a partial patch is the stale-restore bug class.
+
+**PROVISIONALs (P10–P14, for the stage-gate bundle):**
+- **P10:** typography sizes — the token layer's own numbers (mono 14 /
+  Iowan 16), metrics-scaled; the mockups' phone frames hint slightly
+  larger; her on-device feel round rules.
+- **P11:** the switch door's form and placement (a masthead text button;
+  the real Settings home is S3's) and the terminal default.
+- **P12:** the accent caret/selection tint (`tintColor` = the voice
+  accent) — a canon application, not a literal ruling.
+- **P13:** the bar's chrome mapping — mono 14 terminal / sans 14 study,
+  glyph ink = muted (the mockup kbar's register).
+- **P14:** the masthead status rows keep functional coloring (canary
+  red) in the voice's small type — P4's placeholder carried, restyled
+  minimally.
+
+**Deliberate absences (scope, not holes):** the dotted-seam toggle
+(UNRULED for mobile — recorded per the brief); a phone-local dark
+override (dark rides the SYSTEM scheme with token dark values — what
+ships, recorded); ⑂/⋯ on the bar (S2, with their surfaces); the
+edit-menu door (S2); visual/screenshot verification of the styled
+surface (machine-verified attributes only — flagged below).
+
+**LADDER-ATTENTION FLAGS (batch 3 closes Stage 1's planned scope):**
+1. **The wrong-core trap** — the ladder should re-confirm the
+   batches-1–2-counts-stand reasoning (the byte-identical diff at
+   discovery) and note that MAIN receives the pbxproj fix at merge (a
+   no-op there). The class it kills: a parallel main-side core change
+   silently entering this worktree's app builds.
+2. **The tripwire** red reproduced by identity this run — covariate
+   UNKNOWN stands (13k's refutation); its owner is the 13e kickoff
+   sweep, not this project.
+3. **No visual inspection** of the styled Write surface this batch —
+   the 13b "machine-verified, never visually inspected" class; her
+   device feel round is the stage gate's instrument.
+4. **SourceKit warning, PRE-EXISTING:** `SegmentationRules.swift`
+   `sentences(in:)` `var characters` (never mutated; Phase 2 code,
+   `9fe1d7b`) — inside the sentence scanner the adjudication scoped
+   OUT; left untouched deliberately; a one-word fix if the ladder
+   wants it.
+5. **Two comment-only edits** on Phase-2 prose trim pins (enumerated
+   above) — zero assertions changed; verify and wave through.
+6. **S2 forward-duty:** the badge/peek/browser batches must style from
+   `MobileEditorStyle.face` / `VoiceTokens`, never literals (P-8) —
+   the face layer now exists for them.
+7. **The organic-vs-deliberate mobile revert evidence** (above) — the
+   ladder should judge whether the organic pre-fix-core run satisfies
+   red-on-old for the two mobile pins, or ask for a repeat.
+
+**NO `Sources/VariorumCore/Sync/` lines anywhere in the bout; NO schema;
+the Mac-side diff is the trim law (expected, enumerated) + the moved
+token file + the pbxproj path fix.** Commits: `96a7f8b` (environment) ·
+`a43aef4` (trim law + pins) · `57d7492` (token move) · `4678778` (the
+look canon) · the record commit; pushed to `origin mobile` at bout end.
+
 ---
 
 ## Orientation
