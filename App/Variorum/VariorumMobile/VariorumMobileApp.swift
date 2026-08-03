@@ -56,17 +56,19 @@ struct VariorumMobileApp: App {
             case .active:
                 services?.sync.triggerSync()
             case .background:
-                // The active editor's pending autosave lands in the STORE
-                // first (`onDisappear` never fires on whole-app
+                // EVERY registered editor's pending autosave lands in the
+                // STORE first (`onDisappear` never fires on whole-app
                 // backgrounding — the Phase 8 review-round-2 finding,
-                // carried to the new editor), then one sync round pushes
-                // it. If the device locks mid-round, file protection may
-                // cut the store off — the scheduler treats that exactly
-                // like being offline (round skipped, outbox intact, retry
-                // on next foreground).
-                let editor = shellRouter.activeEditor
+                // carried; the flush targets are the liveness authority's
+                // own bookkeeping since the S3 ladder's MAJOR 1, so a
+                // second open editor is covered too), then one sync round
+                // pushes it. If the device locks mid-round, file
+                // protection may cut the store off — the scheduler treats
+                // that exactly like being offline (round skipped, outbox
+                // intact, retry on next foreground).
+                let editors = shellRouter.editors
                 let sync = services?.sync
-                Task { await performBackgroundFlush(editor: editor, sync: sync) }
+                Task { await performBackgroundFlush(editors: editors, sync: sync) }
             default:
                 break
             }

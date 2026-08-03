@@ -66,7 +66,7 @@ struct MobileShellView: View {
 
     var body: some View {
         ZStack {
-            stack(path: $shelfPath) {
+            stack(path: $shelfPath, owner: .shelf) {
                 MobileShelfView(
                     model: shelfModel, tokens: tokens,
                     tabBar: { tabBar },
@@ -78,7 +78,7 @@ struct MobileShellView: View {
             .allowsHitTesting(tab == .shelf)
             .accessibilityHidden(tab != .shelf)
 
-            stack(path: $libraryPath) {
+            stack(path: $libraryPath, owner: .library) {
                 MobileLibraryView(
                     model: libraryModel, tokens: tokens,
                     tabBar: { tabBar },
@@ -97,27 +97,30 @@ struct MobileShellView: View {
     }
 
     /// One tab's navigation stack: a voiced root + the shared route
-    /// destinations.
+    /// destinations. `owner` is the STACK's identity, not the visible tab
+    /// (S3 ladder BLOCKER wiring: a hidden stack's screens re-render while
+    /// the other tab shows, so liveness registration must carry the
+    /// owning stack, never `tab`'s current value).
     private func stack<Root: View>(
-        path: Binding<NavigationPath>, @ViewBuilder root: () -> Root
+        path: Binding<NavigationPath>, owner: MobileTab, @ViewBuilder root: () -> Root
     ) -> some View {
         NavigationStack(path: path) {
             root()
                 .toolbar(.hidden, for: .navigationBar)
                 .navigationDestination(for: MobileRoute.self) { route in
-                    destination(route)
+                    destination(route, in: owner)
                 }
         }
     }
 
     @ViewBuilder
-    private func destination(_ route: MobileRoute) -> some View {
+    private func destination(_ route: MobileRoute, in owner: MobileTab) -> some View {
         switch route {
         case .book(let readingID):
             MobileBookView(
                 session: session, readingID: readingID, tokens: tokens,
                 onOpen: { postID in
-                    if tab == .shelf {
+                    if owner == .shelf {
                         shelfPath.append(MobileRoute.note(postID, focus: false))
                     } else {
                         libraryPath.append(MobileRoute.note(postID, focus: false))
@@ -125,7 +128,8 @@ struct MobileShellView: View {
                 })
         case .note(let postID, let focus):
             MobileWriteScreen(
-                session: session, postID: postID, router: router, beginEditing: focus)
+                session: session, postID: postID, router: router,
+                beginEditing: focus, tab: owner)
         }
     }
 
@@ -147,7 +151,14 @@ struct MobileShellView: View {
 
     private func tabDoor(_ label: String, _ target: MobileTab) -> some View {
         Button {
+            guard tab != target else { return }
             tab = target
+            // The liveness handoff (S3 ladder BLOCKER): the entering
+            // tab's editor takes the pen — the leaving tab's stands down;
+            // pending text lands and the taker re-reads fresh BEFORE its
+            // next keystroke can build on a stale photograph.
+            let editors = router.editors
+            Task { await editors.tabDidBecomeVisible(target) }
         } label: {
             Text(tokens.chromeLabel(label))
                 .font(tokens.small)

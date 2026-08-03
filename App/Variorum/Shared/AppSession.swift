@@ -47,6 +47,50 @@ final class AppSession {
     /// The Edit menu's window onto the undo stack (top label, live).
     let undoMenuState = UndoMenuState()
 
+    /// Phase 13b Stage 1a (N3), HOISTED cross-platform at the mobile S3
+    /// ladder (round-1 BLOCKER): ONE `AutosaveCoordinator` per open post.
+    /// Three Mac surfaces used to mint their own (Editor / Takes /
+    /// BlockTOC), so TWO debounced pipelines could run over one post at
+    /// once and flush a stale buffer OVER a newer one — the ordering was
+    /// luck. The S3 shell reproduced the same class on the phone (two
+    /// alive tab stacks, each able to hold the same post), so the door is
+    /// now both platforms': one coordinator per post makes the newest
+    /// text win structurally (one pending entry per variant).
+    /// Coordinators are session-cached (tiny; bounded by posts opened per
+    /// session). The clock parameters apply when the coordinator is
+    /// MINTED — the cache means later callers share the first caller's
+    /// clock, which is exactly what the test harness's deterministic
+    /// sleep needs; production callers pass nothing.
+    private var postAutosaves: [String: AutosaveCoordinator] = [:]
+
+    func autosave(
+        forPost postID: String,
+        debounce: Duration = .milliseconds(500),
+        sleep: @escaping @Sendable (Duration) async throws -> Void =
+            { try await Task.sleep(for: $0) }
+    ) -> AutosaveCoordinator {
+        if let existing = postAutosaves[postID] { return existing }
+        let coordinator = AutosaveCoordinator(
+            runner: runner, debounce: debounce, sleep: sleep)
+        postAutosaves[postID] = coordinator
+        #if os(macOS)
+        // The Mac-only riders: the quit door awaits every open post's
+        // coordinator, and the W22 first-edit note is wired here because
+        // this registry is the one place that knows both halves — which
+        // post an edit belongs to, and that every surface editing it
+        // shares this coordinator. (The phone has neither a quit door nor
+        // the multi-book note; its background flush rides the liveness
+        // authority's own bookkeeping.)
+        _ = quitFinalize.register { [weak coordinator] in
+            await coordinator?.flushNow()
+        }
+        coordinator.onFirstEdit = { [weak self] in
+            self?.noteMultiBookEdit(postID)
+        }
+        #endif
+        return coordinator
+    }
+
     #if os(macOS)
     /// The focused editor + per-post scroll anchors (text locations, never
     /// pixel offsets — the memo's restore rule). Menu commands route here.
@@ -71,35 +115,6 @@ final class AppSession {
     /// Phase 13b Stage 1b (AD-14): the ONE status/refusal presentation —
     /// transient outcomes land here and render as the shell's toast.
     let status = StatusCenter()
-
-    /// Phase 13b Stage 1a (N3): ONE `AutosaveCoordinator` per open post.
-    /// Three surfaces used to mint their own (Editor / Takes / BlockTOC),
-    /// so TWO debounced pipelines could run over one post at once (the
-    /// Write takes panel over the Write editor) and flush a stale buffer
-    /// OVER a newer one — the ordering was luck. One coordinator per post
-    /// makes the newest text win structurally (one pending entry per
-    /// variant). Coordinators are session-cached (tiny — a dictionary and
-    /// an armed task only while dirty; bounded by posts opened per
-    /// session) and each registers with the quit door exactly once.
-    private var postAutosaves: [String: AutosaveCoordinator] = [:]
-
-    func autosave(forPost postID: String) -> AutosaveCoordinator {
-        if let existing = postAutosaves[postID] { return existing }
-        let coordinator = AutosaveCoordinator(runner: runner)
-        postAutosaves[postID] = coordinator
-        _ = quitFinalize.register { [weak coordinator] in
-            await coordinator?.flushNow()
-        }
-        // 13f batch 5 (W22 — her round-9 ruling): the first-edit note is
-        // wired HERE because this registry is the one place that knows both
-        // halves — which post an edit belongs to, and that every surface
-        // editing it shares this coordinator. A per-surface hook would have
-        // been four hooks and a fifth to forget.
-        coordinator.onFirstEdit = { [weak self] in
-            self?.noteMultiBookEdit(postID)
-        }
-        return coordinator
-    }
 
     /// The window's recently-visited books, most recent first — wired by the
     /// shell to ITS workspace (the `openNoteCount` idiom: the workspace is

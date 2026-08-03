@@ -301,7 +301,9 @@ struct MobileShellTests {
 
             let router = MobileShellRouter(defaults: defaults)
             #expect(router.voice == .terminal, "the preference's default leads")
-            router.activeEditor = model
+            // S3 ladder (MINOR 2): the flip reaches editors through the
+            // liveness authority's registration set, never a single slot.
+            await router.editors.register(model, tab: .shelf)
 
             // The flip window: synchronous end to end.
             router.setVoice(.study)
@@ -330,6 +332,8 @@ struct MobileShellTests {
                 try ops.newBlock(in: post.id, text: "Quick entry", at: .end)
             }
             let (model, storage) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(model, tab: .shelf)
             await model.loadOnce()
 
             // Typed, debounce not yet fired (the harness clock never
@@ -340,8 +344,11 @@ struct MobileShellTests {
                 replacement: ", typed right before backgrounding")
             #expect(model.autosave.isDirty)
 
-            // The app-level background handler's exact routine.
-            await performBackgroundFlush(editor: model, sync: nil)
+            // The app-level background handler's exact routine (S3
+            // ladder MAJOR 1: the flush targets are the authority's own
+            // registration set; the two-editor arms ride
+            // `MobileLivenessTests`).
+            await performBackgroundFlush(editors: editors, sync: nil)
 
             #expect(try await storedText(db, variantID: minted.variant.id)
                     == "Quick entry, typed right before backgrounding",

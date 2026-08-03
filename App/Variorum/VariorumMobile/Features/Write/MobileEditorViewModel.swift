@@ -131,16 +131,69 @@ final class MobileEditorViewModel {
     ) {
         self.session = session
         self.postID = postID
-        self.autosave = AutosaveCoordinator(runner: session.runner, debounce: debounce, sleep: sleep)
+        // S3 ladder, round-1 BLOCKER: the ONE per-post coordinator (the N3
+        // boundary, the constitution's application note verbatim — "both
+        // surface kinds consult ... the ONE per-post autosave coordinator").
+        // A second editor on the same post — the shell's two alive tab
+        // stacks make one reachable — shares this instance, so two debounced
+        // pipelines can never race a stale flush over a newer one. The
+        // clock parameters apply only when this call MINTS the coordinator
+        // (the harness's deterministic sleep; production passes defaults).
+        self.autosave = session.autosave(forPost: postID, debounce: debounce, sleep: sleep)
         self.takes = MobileTakesController(runner: session.runner)
         self.takesBrowser = MobileTakesBrowserController(runner: session.runner)
         takes.model = self
         takesBrowser.model = self
-        autosave.onError = { [weak self] error in
-            self?.statusMessage = String(describing: error)
+        // Multicast observers, never the single-owner closures: a shared
+        // coordinator has several listeners (the Mac's own move for the
+        // same reason) — a second same-post editor must not deafen the
+        // first. Removed at `teardown()`.
+        autosaveToken = autosave.observe(
+            onError: { [weak self] error in
+                self?.statusMessage = String(describing: error)
+            },
+            onSettled: { [weak self] in
+                self?.applyPendingIfClean()
+            })
+    }
+
+    @ObservationIgnored private var autosaveToken: UUID?
+
+    /// The screen's teardown (onDisappear): the S1 backstop lands pending
+    /// work, then this surface stops listening to the SHARED coordinator
+    /// (which outlives any one surface — the Mac's exact posture).
+    func teardown() async {
+        await finish()
+        if let autosaveToken {
+            autosave.stopObserving(autosaveToken)
+            self.autosaveToken = nil
         }
-        autosave.onSettled = { [weak self] in
-            self?.applyPendingIfClean()
+    }
+
+    // MARK: - Liveness (S3 ladder BLOCKER — the authority's face on the VM)
+
+    /// Whether this surface holds the pen. Standalone surfaces (tests,
+    /// previews, a world with no shell) are live by construction; under
+    /// the shell, `MobileLivenessAuthority` is the ONE grantor.
+    @ObservationIgnored private(set) var isLive = true
+
+    /// Read-tier (P-3's "read panes"): focus resigned — a hidden stack's
+    /// editor must never keep the keyboard — editability off, and the
+    /// gate's liveness belt refusing whatever slips past both.
+    func standDown() {
+        isLive = false
+        textView?.endEditing(true)
+        textView?.isEditable = false
+    }
+
+    /// The pen back (only the authority calls this, after the flush —
+    /// and the refresh where one is owed — have landed). The open takes
+    /// browser keeps its own page stand-down: the sheet's dim is still
+    /// the surface in charge there.
+    func noteLivenessGranted() {
+        isLive = true
+        if !takesBrowser.isOpen {
+            textView?.isEditable = true
         }
     }
 
@@ -174,7 +227,21 @@ final class MobileEditorViewModel {
         }
     }
 
+    /// The screen's ARRIVAL routine (S3 ladder, MAJOR 2): everything that
+    /// must complete BEFORE the infinite observation loops — the
+    /// authoritative first load, then the Today door's focus raise
+    /// ("cold launch → typing in two taps", now true instead of dead code
+    /// sequenced after a `start()` that never returns).
+    func arrive(focus: Bool) async {
+        await loadOnce()
+        if focus {
+            textView?.becomeFirstResponder()
+        }
+    }
+
     /// Runs for the editor's lifetime: header + the takes projection, live.
+    /// NEVER RETURNS while the editor lives (the loops end at task
+    /// cancellation) — sequence nothing after it; that is `arrive`'s job.
     func start() async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.observeHeader() }
@@ -568,6 +635,13 @@ final class MobileEditorViewModel {
     /// when a paste lands there.
     func shouldChangeText(in range: NSRange, replacement: String?, isPaste: Bool = false) -> Bool {
         guard !suppressEditProcessing else { return true }
+        // The liveness belt (S3 ladder BLOCKER): a stood-down surface is
+        // read-tier — resigned and uneditable already; this refusal is the
+        // third guard for whatever slips past both (PROVISIONAL wording).
+        if !isLive {
+            refuse("This note is live in your other tab.")
+            return false
+        }
         if header?.locked == true {
             refuse("This note is locked — unlock it on the Mac to edit.")
             return false

@@ -47,16 +47,22 @@ struct MobileWriteScreen: View {
     /// stored preference read at init governs.
     private let router: MobileShellRouter?
     private let beginEditing: Bool
+    /// The OWNING tab stack (S3 ladder BLOCKER): liveness registration
+    /// carries the stack's identity, passed by the shell's per-stack
+    /// destination builder — never read from the visible-tab state.
+    private let tab: MobileTab
     private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
 
     init(
         session: AppSession, postID: String,
-        router: MobileShellRouter? = nil, beginEditing: Bool = false
+        router: MobileShellRouter? = nil, beginEditing: Bool = false,
+        tab: MobileTab = .shelf
     ) {
         _model = State(initialValue: MobileEditorViewModel(session: session, postID: postID))
         self.router = router
         self.beginEditing = beginEditing
+        self.tab = tab
         // The live phone voice governs from the first materialization —
         // set BEFORE the surface exists (makeUIView runs later). With a
         // router the value is already authoritative (idempotent).
@@ -78,19 +84,25 @@ struct MobileWriteScreen: View {
             .background(tokens.room.ignoresSafeArea())
             .safeAreaInset(edge: .top) { masthead }
             .task {
-                router?.activeEditor = model
-                await model.start()
-                if beginEditing {
-                    // Today's invitation: typing starts the moment the
-                    // entry opens (a sealed note's gate still refuses and
-                    // speaks — raising focus never bypasses the police).
-                    model.textView?.becomeFirstResponder()
+                // Wiring COMPLETES before the infinite observation loops
+                // (S3 ladder, MAJOR 2 — `start()` never returns while the
+                // editor lives, so nothing may be sequenced after it):
+                // liveness registration first (the authority flushes any
+                // same-post sibling's pending text), then the arrival
+                // routine (authoritative first load + the Today door's
+                // focus raise — a sealed note's gate still refuses and
+                // speaks; raising focus never bypasses the police), then
+                // the loops, last, forever.
+                if let router {
+                    await router.editors.register(model, tab: tab)
                 }
+                await model.arrive(focus: beginEditing)
+                await model.start()
             }
             .onDisappear {
                 let model = model
-                if router?.activeEditor === model { router?.activeEditor = nil }
-                Task { await model.finish() }
+                router?.editors.deregister(model)
+                Task { await model.teardown() }
             }
     }
 
