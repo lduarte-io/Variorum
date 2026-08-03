@@ -386,6 +386,131 @@ struct MobileStructuralTests {
         }
     }
 
+    // MARK: The post-flush re-verify (S4 ladder MINOR 2)
+
+    /// S4 ladder MINOR 2's red-on-old pin, divide door: the caret's entry
+    /// is resolved BEFORE the flush await, and main-actor work landing
+    /// INSIDE that window can re-tile the index — the pre-fix door then
+    /// trusted the stale position, so a cut snapped in one block's text
+    /// was applied to another block's ID (a legal-but-wrong divide). The
+    /// deterministic drive: a projection ingest fired synchronously from
+    /// the autosave's own settle notification, which runs at the end of
+    /// `flushNow()` BEFORE the structural door's await resumes — the
+    /// mechanization of a deferred delivery applying mid-suspension.
+    @Test func divideReVerifiesTheCaretsBlockAfterTheFlushWindow() async throws {
+        try await withEditorWorld { session, db in
+            // Three blocks; the LEAD is long, so its remote death shifts
+            // every later surface position by more than a block.
+            let seed = try await seedProsePost(
+                session,
+                first: "This lead block is quite long and it is going away soon.",
+                second: "Alpha beta. Gamma delta.")
+            let blockZ = try await session.runner.run { [postID = seed.postID] ops in
+                try ops.newBlock(in: postID, text: "One two go. Four five six seven.", at: .end)
+            }
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Type into the SECOND block — the flush must have real work.
+            let yRange = try #require(model.rangeOfBlock(seed.blockB!))
+            typeEdit(model, storage,
+                     range: NSRange(location: yRange.upperBound, length: 0),
+                     replacement: " Typed.")
+            #expect(model.autosave.isDirty)
+
+            // The lead dies REMOTELY (ops directly — the headless world
+            // runs no live observation, so the surface still shows it)…
+            try await session.runner.run { [blockID = seed.blockA] ops in
+                try ops.deleteBlock(blockID)
+            }
+            // …and its delivery "applies" INSIDE the divide's own flush
+            // window, via the settle seam described above.
+            let freshProjection = try await session.database.read {
+                [postID = seed.postID] db in
+                try Queries.takesProjection(db, post: postID)
+            }
+            var ingested = false
+            let token = model.autosave.observe(onSettled: {
+                guard !ingested else { return }
+                ingested = true
+                model.ingest(freshProjection)
+            })
+
+            // The caret in the second block (intra 12 — the "Gamma" edge).
+            let caret = yRange.location + 12
+            await model.structural.divide(atSurfaceCaret: caret)
+            model.autosave.stopObserving(token)
+            #expect(ingested)
+
+            // RED-ON-OLD: the pre-fix door snapped the cut in the
+            // re-tiled entry-1's text (block Z's) and divided the
+            // pre-flush block at it — store changed, no refusal. The
+            // fixed door refuses on drift, store byte-untouched past
+            // the flush itself.
+            #expect(model.statusMessage
+                == "This block's takes changed — try the divide again.")
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["Alpha beta. Gamma delta. Typed.",
+                    "One two go. Four five six seven."])
+            #expect(try await livePlacementBlockIDs(db, postID: seed.postID)
+                == [seed.blockB!, blockZ.block.id])
+        }
+    }
+
+    /// The merge door's twin: a block minted remotely BETWEEN the pair
+    /// inside the flush window — the pre-fix door merged the pre-flush
+    /// pair anyway, silently skipping the block now sitting between
+    /// them; the fixed door re-verifies both neighbors and refuses.
+    @Test func mergeReVerifiesBothNeighborsAfterTheFlushWindow() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedProsePost(
+                session, first: "First half.", second: "Second half goes here.")
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            let yRange = try #require(model.rangeOfBlock(seed.blockB!))
+            typeEdit(model, storage,
+                     range: NSRange(location: yRange.upperBound, length: 0),
+                     replacement: " Typed.")
+            #expect(model.autosave.isDirty)
+
+            // A new block lands remotely BETWEEN the pair…
+            let between = try await session.runner.run {
+                [postID = seed.postID, a = seed.blockA] ops in
+                try ops.newBlock(
+                    in: postID, text: "A whole block that arrived between them.",
+                    at: .after(a))
+            }
+            // …and its delivery applies inside the merge's flush window.
+            let freshProjection = try await session.database.read {
+                [postID = seed.postID] db in
+                try Queries.takesProjection(db, post: postID)
+            }
+            var ingested = false
+            let token = model.autosave.observe(onSettled: {
+                guard !ingested else { return }
+                ingested = true
+                model.ingest(freshProjection)
+            })
+
+            await model.structural.mergeWithPrevious(atSurfaceCaret: yRange.location + 3)
+            model.autosave.stopObserving(token)
+            #expect(ingested)
+
+            // RED-ON-OLD: the pre-fix door merged (First + Second),
+            // stranding the between-block after the pair. The fixed door
+            // refuses; all three blocks stand, the typed bytes flushed.
+            #expect(model.statusMessage
+                == "This block's takes changed — try the merge again.")
+            #expect(try await liveBlockTexts(db, postID: seed.postID)
+                == ["First half.",
+                    "A whole block that arrived between them.",
+                    "Second half goes here. Typed."])
+            #expect(try await livePlacementBlockIDs(db, postID: seed.postID)
+                == [seed.blockA, between.block.id, seed.blockB!])
+        }
+    }
+
     // MARK: The S3 round-2 NIT's pin
 
     @Test func aCancelledLoadOnceNeverLandsAsAnError() async throws {

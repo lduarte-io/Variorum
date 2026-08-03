@@ -89,9 +89,21 @@ final class MobileStructuralController {
         // Flush FIRST: the op validates against the store, and the cut
         // snaps against what she SEES — after the flush those agree.
         guard await flushPendingText() else { return }
+        // The flush SUSPENDS, and main-actor work landing in that window
+        // can re-index the entries (S4 ladder MINOR 2 — the R2-10 class,
+        // hardened here because the guard is one line): re-resolve
+        // against the caret and refuse on drift, rather than trusting
+        // the pre-flush index into a re-tiled surface.
+        guard let (j, freshIntra) = entryTouching(caret: caret),
+              model.index.entries[j].blockID == entry.blockID
+        else {
+            model.report("This block's takes changed — try the divide again.")
+            return
+        }
+        let fresh = model.index.entries[j]
 
-        let text = model.viewText(model.index.range(ofEntryAt: i))
-        guard let cut = StructuralGesturePlanner.snapToInteriorBoundary(intra, in: text)
+        let text = model.viewText(model.index.range(ofEntryAt: j))
+        guard let cut = StructuralGesturePlanner.snapToInteriorBoundary(freshIntra, in: text)
         else {
             model.report("No legal cut spot for that here — cuts land between words, "
                 + "at sentence ends, and at line breaks.")
@@ -99,7 +111,7 @@ final class MobileStructuralController {
         }
 
         // THE FORK IS READ FROM THE STORE (the 13d ruled discipline).
-        let blockID = entry.blockID
+        let blockID = fresh.blockID
         let fan: [Variant]
         do {
             fan = try await session.database.read { db in
@@ -112,7 +124,7 @@ final class MobileStructuralController {
         let active = fan.filter { $0.deletedAt == nil && $0.status == .active }
 
         if active.count <= 1 {
-            guard entry.editable else {
+            guard fresh.editable else {
                 model.report("This take is locked — branch it or unlock it on the Mac to edit.")
                 return
             }
@@ -125,7 +137,7 @@ final class MobileStructuralController {
         // The fanned path: the displayed take must still BE in the live
         // fan (the Takes board's F-3 guard — a fallback would divide a
         // take she was never in).
-        guard let displayedID = entry.variantID,
+        guard let displayedID = fresh.variantID,
               let rendered = active.first(where: { $0.id == displayedID })
         else {
             model.report("This block's takes changed — try the divide again.")
@@ -214,6 +226,16 @@ final class MobileStructuralController {
         }
 
         guard await flushPendingText() else { return }
+        // The post-flush re-verify (S4 ladder MINOR 2 — divide's twin):
+        // both neighbors must still be the pair the caret named before
+        // the flush's suspension, or the act is refused.
+        guard let (j, _) = entryTouching(caret: caret), j > 0,
+              model.index.entries[j].blockID == trailing.blockID,
+              model.index.entries[j - 1].blockID == leading.blockID
+        else {
+            model.report("This block's takes changed — try the merge again.")
+            return
+        }
 
         // The ceremony threshold reads the STORE (the 13d discipline):
         // ANY fan on either side is the Mac's pairing ceremony — the
@@ -238,7 +260,7 @@ final class MobileStructuralController {
             return
         }
 
-        let leadingLength = model.index.entries[i - 1].length
+        let leadingLength = model.index.entries[j - 1].length
         do {
             let result = try await session.runner.run { ops in
                 try ops.merge(leadingID, trailingID)
