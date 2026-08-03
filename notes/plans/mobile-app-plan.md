@@ -4189,6 +4189,20 @@ the adjudication's letter and recorded here, not silently.
 
 ---
 
+## Stage 3 fix pass — ACCEPTED by the architect (2026-08-03); round 2 spawns on this record
+
+Verified: scope inspected (zero core/server lines; exactly THREE
+Shared/Mac-side files, each adjudication-sanctioned — the shared policy
+fix, the hoisted per-post door, the Mac VM's loop marking), the fix-pass
+record read, push confirmed, and **mobile 140/19 re-confirmed by the
+architect's own run**. MAJOR 3's SHARED routing is accepted on the fix
+session's recorded Mac trace + its executable revert (5 Mac issues);
+**round 2 carries an EXPLICIT duty to independently re-verify the Mac
+suite** (a shared-policy fix deserves a second pair of hands on that
+count — expect 1193/208 with the one tripwire red by identity).
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
