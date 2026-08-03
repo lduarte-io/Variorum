@@ -422,7 +422,7 @@ gates (the autonomy calibration); author-only calls remain hard stops.
 
 | # | Item | Status |
 |---|---|---|
-| L1 | TK2-on-iOS spike + decision memo | **spawned 2026-08-03** |
+| L1 | TK2-on-iOS spike + decision memo | **DONE 2026-08-03** — ADOPT ×6 ruled at the Stage 0 gate (the gate record below); the spike KEPT as the executable §5 form (the recorded deviation) |
 | L2 | Editor core (identity, autosave, markdown render, keyboard bar) | pending (S1) |
 | L3 | Takes surface (badge, swipe-peek, ✓, browser, four verbs) | pending (S2) |
 | L4 | Shelf home + Today + Library/search + nav; capture views retire | pending (S3) |
@@ -464,9 +464,13 @@ gates (the autonomy calibration); author-only calls remain hard stops.
 - NEVER add a custom build configuration (the 4G trap — SPM deps build
   Release under any configuration not named exactly "Debug", silently
   stripping DEBUG-gated oracles).
-- Spike code is throwaway: it lands under
-  `App/Variorum/VariorumMobile/Spike/`, DEBUG-gated, and is deleted at
-  Stage 0's close (recorded in the ledger).
+- Spike code lives under `App/Variorum/VariorumMobile/Spike/`,
+  DEBUG-gated, its UITest half behind the separate `TK2SpikeUITests`
+  scheme — **KEPT as the executable TEXTKIT2 §5 form for iOS point
+  releases** (the Stage 0 gate record's recorded deviation; this bullet
+  originally said deleted-at-stage-close). Re-run it after every iOS
+  update before trusting an editor milestone. It never rides the
+  baseline suite.
 
 ## Stage 0 batch brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
 
@@ -513,6 +517,108 @@ section above binds; commit as you go with the standing trailer and push
 `origin mobile` at bout end. Lookup exception: at most ONE Sonnet lookup
 subagent at a time, EXTERNAL facts only (Apple docs, API signatures) —
 never delegate repo reading, never web-search directly yourself.
+
+## Stage 0 — CLOSED (the gate record; the architect's ruling, 2026-08-03)
+
+**Verification before ruling (verify-don't-trust):** three commits
+(`eecb4f5` · `0fd69cc` · `d0b49d3`, interleaved cleanly with the
+look-round commit), diff scope confirmed by the architect's own
+inspection — spike files + the DEBUG door + the UITest half + the memo,
+**zero `Sources/VariorumCore` lines, zero schema, zero Mac-side files**;
+the memo (`notes/plans/mobile-tk2-spike-memo.md`) read IN FULL; the
+mobile suite re-verified by the architect's own run (**14/4 green** — the
+throwaway UITest half rides its own `TK2SpikeUITests` scheme and never
+touches the baseline).
+
+**RULING: ADOPT on all six items — the Stage 0 gate PASSES.** The memo's
+evidence is measured, carries its caveats honestly (Debug, simulator,
+single point release), and includes the positive control a poll canary
+needs (the deliberate `.layoutManager` downgrade, detected). **The memo's
+seven Stage 1 obligations are BINDING plan content** — the Stage 1 brief
+below folds them in. The headline (item 3: iOS strips custom attributes
+on EVERY insertion path) changes an implementation mechanism, not a
+capability: block-ID attributes become a derived projection re-stamped
+from `BlockRangeIndex` after every edit (~0.04 ms/paragraph, measured),
+with a DEBUG no-MISSING-runs audit. **No red flags for the author** —
+the headline is reported to her for transparency, not as a gate.
+
+**One recorded deviation from this plan's own earlier note (reason
+stated, never silent):** the spike is **KEPT, not deleted** — the memo's
+obligation 7 makes its auto-run the executable TEXTKIT2 §5 form for iOS
+point releases, exactly as the Mac's Phase 6 spike survives as the §5
+matrix's executable form (AppSpec §15). It stays DEBUG-gated under
+`Spike/`, its UITest half behind the separate `TK2SpikeUITests` scheme;
+the baseline suite never carries it. The environment-traps deletion
+bullet is superseded by this record.
+
+---
+
+## Stage 1, batch 1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, IN FULL:** `CLAUDE.md` · this file (the run record M1–M14 +
+LK1–LK5, the settled shape, the constitution, the environment traps, the
+Stage 0 gate record above) · `notes/plans/mobile-tk2-spike-memo.md` (its
+seven obligations BIND you) · `notes/TEXTKIT2_NOTES.md` · AppSpec §4 and
+§9 (the ops this surface calls — `autosave`, `commit`; §7's `setting`
+for type-time crystallization) · the Mac editor's pure identity brain —
+locate and read `BlockRangeIndex`, `EditorDocument`, the
+crystallization/reconciler path, `SegmentationRules`, `BoundarySnapping`
+(App-side Editor feature + `VariorumCore/Domain`). You REUSE this brain;
+you never fork it.
+
+**Objective:** the continuous Write-true editor core on the phone (M1) —
+one TK2 `UITextView` over a whole note, block identity live, autosave
+flowing, the canary installed. This batch is the foundation; takes,
+gestures, markdown, and the app shape are LATER batches.
+
+**Scope, batch 1:**
+1. **The pure-brain availability move:** make the shared identity brain
+   compile into the mobile target (folder/target membership or a
+   `Shared/` move — the 3C parity pattern: every pre-move name kept as
+   forwards, ZERO test edits, the Mac suite untouched by your own run).
+   No AppKit types may smuggle into the pure layer (the Phase 15
+   brief's standing line — it is why this project is cheap).
+2. **`MobileEditorTextView`:** a TK2-explicit `UITextView` wrapper + the
+   checkpoint canary (obligation 2: assert-after-mutation + idle tick;
+   debug asserts, release os_log + a visible diagnostic) +
+   `keyboardLayoutGuide` avoidance + an `inputAccessoryView` bar shell
+   (the M11 toolbar's home — its acts land in a later batch).
+3. **Identity as projection (obligation 1):** render a post into the
+   attributed document (block IDs as attributes via the shared mapping);
+   edits report exact deltas; block-ID attributes RE-STAMPED from
+   `BlockRangeIndex` after every edit; a DEBUG audit asserts no MISSING
+   runs after reconciliation.
+4. **Autosave/churn:** per-variant routing from block identity through
+   the shared `AutosaveCoordinator`; `charDelta` from block-scoped
+   deltas (retiring the Phase 8 whole-buffer `EditCost` NIT for the new
+   surface).
+5. **Crystallization at the tail** (type-time, §7's rule) + bulk entry
+   on paste — through the shared segmentation brain.
+6. **The L9 pin:** a red-on-old test proving the new editor never
+   accrues trailing blank lines by accident while MEANINGFUL stored
+   spacing (the 2026-07-12 rule) round-trips untouched.
+7. **`MobileWalkTests` is BORN** (the acceptance spine): open note →
+   type → autosave lands → identity intact → canary silent. It grows
+   every stage and rides every batch run from now on.
+
+**Explicitly NOT batch 1:** takes UI, the swipe/peek, markdown
+render/typing behaviors (batch 2 — its brief is authored at this batch's
+close), the app shape, Read flow, comments/callouts, retiring the Phase 8
+capture views (they keep working untouched until S3 replaces them).
+
+**Discipline:** tests with every step (VM/state-transition style — the
+Phase 8 mobile tests are the house pattern); the environment traps bind
+(iPhone 17 / most recent runtime, LK1); mobile suite + `MobileWalkTests`
+green at bout end by your own runs — AND core `swift test` + the Mac
+suite + the spine by your own runs IF you touched anything shared
+(record exact counts; 13k baselines: core 1034/114 · Mac 1191/208 with
+the recorded tripwire · spine 51/7); commit as you go with the standing
+trailer; push `origin mobile` at bout end; **append your batch record to
+this file** (what shipped, counts, interpretations for the reviewer,
+PROVISIONALs). Lookup exception: ONE Sonnet lookup subagent at a time,
+external facts only. The review ladder runs at STAGE end, not per batch.
+
+---
 
 ---
 
