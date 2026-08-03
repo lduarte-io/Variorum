@@ -2432,6 +2432,293 @@ revert-verified pins; round 2 re-reviews fresh; hard cap three).
 
 ---
 
+## Stage 2 review — round 1 findings (cold reviewer, 2026-08-03)
+
+**Scope of this review, done in-session:** `notes/REVIEW_PROMPT.md` run
+verbatim; the FULL combined diff `c8174ed..40256ca` read file-by-file
+(all five new Takes sources + the seam file in full; the VM / bar /
+style / text-view hunks; all four test files in full; the record
+commits), plus the shared code the new code leans on read in the core
+(`TakesQueries.takesProjection`/`activeFans`, `Operations+Deletion`,
+`EditorProjectionEngine`, `AutosaveCoordinator`); anchors = this file's
+S2 batch records + the eight recorded ladder-attention flags, each
+dispositioned below. **Counts re-verified by this reviewer's OWN runs:**
+core `swift test` **1039/114 GREEN**; mobile (iPhone 17 Pro / iOS 26.2)
+**123/20 GREEN** (single run). The Mac suite deliberately NOT run: this
+reviewer's own `git diff --stat` read confirms the stage diff carries
+zero `Sources/VariorumCore`, zero `Shared/`, zero Mac-side, zero pbxproj
+lines — no trace implicates shared code. Read-only per the prompt; no
+fixes made. No "Review foci" section exists for this project; the eight
+flags served that role.
+
+### Findings
+
+**[BLOCKER] · `Features/Takes/MobileTakesController.swift:162,166`
+(`flip`'s original capture/restore) · flip-back restores the CHOSEN take
+from the stale `slots` photograph, ledger-blind — typed-but-unflushed
+text on the flipped block visibly reverts, and typing on the reverted
+base permanently clobbers the edit.** Mechanism, traced end to end:
+(1) type into a block's displayed chosen take — `storageDidEdit`
+(`MobileEditorViewModel.swift:606-658`) records the edit in the ledger +
+autosave but `slots` is never refreshed (the only writer of `slots[i]`
+is `displaySlot`, VM:545), so the photograph lags the surface — the VM's
+own `displaySlot` comment names slot texts "stale photographs" while
+dirty. (2) Flip-on inside the dirty window: `let original =
+originals[blockID] ?? current` (line 162) captures the STALE slot;
+nothing heals it before a post-flush echo delivery (deferred deliveries
+never adopt `slots`, and `overlay` refreshes `originals` only for
+blocks ALREADY peeked — flip-on is the un-refreshed moment). (3) Flip
+back before that delivery: `displaySlot(original)` (line 166) replaces
+the surface text with the stale bytes AND `ledger.recordEdit(chosen,
+staleText)` (VM:534-566) overwrites the surface's own truth record.
+(4) Two arms: **(a)** no further typing — the pending autosave entry
+(text captured at record time, `AutosaveCoordinator.swift:106-116`)
+still flushes the edited bytes and the settle differential restores
+them: a visible revert-then-reappear glitch, self-healing; **(b)** the
+user types into the reverted block first (exactly what a revert
+invites) — `recordAutosave` reads the stale-based surface and
+`autosave.record` REPLACES the pending entry (or the next flush
+overwrites the already-flushed store text): the earlier typing is
+PERMANENTLY lost from `working_text`, no commit anywhere. The window is
+the debounce+delivery gap (≥500 ms; extended indefinitely by continued
+typing since `record` reschedules) — type-swipe-swipe with real fingers
+reaches it. The asymmetry is the tell: the PEEKED direction resolves
+ledger-first by design (`peekedSlot`, line 248 —
+`surfaceKnownText(variantID:) ?? take.workingText`, pinned by
+`anEditedPeekSurvivesFlippingAwayAndBack`); the CHOSEN direction got no
+such consult, and the existing pin edits only the peeked take (whose
+chosen-side photograph happens fresh), so it cannot see this. Proposed
+fix: resolve the restore ledger-first symmetrically — rebuild the
+original slot's text as `surfaceKnownText(original.variantID) ??
+original.text` at capture and/or restore (one helper mirroring
+`peekedSlot`). Red-on-old pin: type into the chosen take with the
+debounce held open (the injected sleep), flip away, flip back — assert
+surface AND ledger hold the edited bytes (red on old at both), then
+flush and assert the store does.
+
+**[MAJOR] · `Features/Takes/MobileTakesBrowser.swift:205-212 + 223-237`
+(`branchDisplayed`/`mint`) · "branch this one" copies `working_text`
+past a dirty buffer — the op runs BEFORE any flush; the 13f R1-4 class
+on a NEW door.** Mechanism: `mint` calls `runner.run {
+ops.branchVariant(...) }` (line 228), which copies the source variant's
+text from the STORE; the flush inside `refreshTakesFromStore` runs only
+AFTER the mint (line 230). Typed-but-unflushed text on the displayed
+take — in-page typing, or a card edit routed via `recordTakeEdit`
+(VM:521) — is missing from the copy, and VISIBLY so: cards render
+ledger-first (`cards()`, line 102), so the source card shows the edited
+bytes while the just-minted "branch of this one" shows older bytes.
+Recoverable (the original's flush still lands; loss is the copy's
+completeness) — exactly the KnownIssues "copy doors read the store past
+a dirty buffer" class, but that row deliberately covers the OLD Mac
+doors; the 13f ladder's R1-4 ruling made NEW doors flush first (the
+`AppSession.divergeForBook` precedent), and this door is new in this
+diff. Batch-2 interpretation #7 defends the ✓ door correctly
+(`chooseVariant` reads no text) but does not cover branch, which does.
+Proposed fix: flush before the mint in `branchDisplayed` (blank copies
+no text and needs nothing). Red-on-old pin: record an unflushed edit on
+the displayed take, `branchDisplayed()`, assert `mint.workingText`
+equals the edited bytes.
+
+**[MINOR] · `MobileTakesBrowser.swift:269-280` (`cardGateAllows`) · the
+per-keystroke belt checks the SEAL only — its own doc comment claims
+"the sealed/locked belt re-checked per keystroke," and the locked half
+is not in the code.** Mechanism: `beginEditing` refuses a locked take
+at the door (line 251), but a take that becomes locked WHILE its card
+is live (a remote lock arriving by sync — the phone has no lock door)
+keeps its editor (`projectionDidChange` resigns only when the take
+VANISHES, lines 169-172) and `cardGateAllows` admits every keystroke
+(only `model.isSealed`, line 275). The flush then refuses
+(`lockedVariant` — store safe, `onError` speaks raw), and the
+typed-after-lock text never lands; Done → `refreshTakesFromStore`
+re-reads the store and drops it. The PAGE gate refuses this same state
+per keystroke (index entries carry `variantLocked` → `editable`), so
+the gap is one surface wide. Narrow race. Proposed fix: consult the
+live card's `isLocked` in the belt (and/or resign the editor when the
+card turns locked at `projectionDidChange`) with the standing copy;
+red-on-old pin: lock the variant via ops mid-edit, deliver, assert the
+next `cardGateAllows` refuses.
+
+**[MINOR] · `MobileTakesBrowserView.swift:283-293` (`attachCardEditor`)
++ `MobileTakesBrowser.swift:244-259` (`beginEditing`) · no
+`becomeFirstResponder` anywhere in the chain — "the minted card goes
+LIVE for editing so she is typing instantly" holds structurally
+(editor attached, editable) but focus never rises.** Evidence: a grep
+over the shipped mobile sources finds `becomeFirstResponder` only in
+the Spike; the beginEditing → render → attach chain never calls it. On
+device, tapping a card body (or minting) seats the editor without
+raising the keyboard — a second tap is needed, which is exactly the
+friction the record's "typing instantly" claim denies. Honest caveat:
+keyboard focus is weakly pinnable headless (first-responder needs a
+window), so this is a fix-plus-feel-round item, not a red-on-old class.
+Proposed fix: one `becomeFirstResponder()` after attach, judged at the
+S2 feel round; note the interplay with flag 5 (once focus rises, the
+missing keyboard-guide constraint bites more often).
+
+**[MINOR] · `MobileEditorTextView.swift:139-144` (`layoutSubviews` →
+`takesChrome.refresh()`) + `MobileTakesChrome.swift:81-168, 279-318` ·
+the per-scroll-tick chrome refresh enumerates fragments with
+`.ensuresLayout` for EVERY fanned block in the post, on-screen or
+not.** Mechanism (the cost SHAPE is concrete; the magnitude is
+unmeasured — that half honestly SPECULATIVE): UIScrollView lays out on
+every content-offset tick; each `refresh()` walks `model.slots where
+slot.hasFan` (line 93) and per fanned block resolves a document
+location and forces its first fragment's layout (`.ensuresLayout`,
+line 286), plus `blockRectsUnion` over every peeked block's whole
+range. Cost per tick ∝ the post's fanned+peeked blocks, not the
+viewport — and forcing layout of far-off-screen fragments works
+against TK2's viewport laziness (TEXTKIT2 §2) at 60–120 Hz while
+scrolling. The file header records "cost ∝ the post's fanned blocks
+(opt-in and rare)" as the accepted call — the per-tick multiplication
+is the unrecorded half. Fine at real fan counts; a fan-heavy long note
+may jank. Proposed: measure at the device round; if real, gate the
+badge walk by viewport intersection or cache first-line geometry keyed
+on a layout generation. No pin owed unless it proves a perf defect.
+
+**[NIT] · `MobileTakesController.swift:183-197` (`chooseDisplayed`) ·
+the pill's ✓ never clears a prior refusal on success.** The browser
+verbs adopted the Mac `run()` clearing posture (`report(nil)`); the
+batch-1 door was left un-aligned. Concrete: a sealed refusal spoke via
+the pill → she unseals on the Mac → delivery → pill ✓ succeeds →
+`statusMessage` still shows the stale locked-note copy. One
+`model?.report(nil)` on the success path aligns it (the `String?`
+widening exists for exactly this).
+
+**[NIT] · `MobileTakesController.swift:101-110` (`adoptFans` prune) +
+`MobileEditorViewModel.swift:206-213` (`ingest`'s unconditional chrome
+refresh) · a DEFERRED delivery that prunes a peek removes the marker
+while the pruned take's text stays on the surface.** Mechanism: peek
+block A; be dirty elsewhere; the peeked take is archived remotely; the
+delivery's `adoptFans` prunes the peek and `ingest`'s trailing
+`takesChrome.refresh()` removes the marker — but the slot apply DEFERS
+(`deferUntilClean`), so until the settle lands, A displays non-chosen
+text wearing no marker (M6's chosen-vs-peeked unambiguity, briefly
+false). Sub-second, self-healing, store never wrong; the batch record's
+"the display heals through the accompanying slot apply" describes only
+the non-deferred case. Record the corner, or defer the prune's chrome
+effect to the apply.
+
+No other findings at any severity; every severity level above carries
+at least one entry (nothing at BLOCKER/MAJOR beyond the two named).
+
+### The eight ladder-attention flags, dispositioned
+
+1. **The guard-order finding — CONFIRMED, the mirror is exact.** My own
+   core read (`Operations+Deletion.swift`): delete = locked (:89) →
+   placement seal (:92) → chosen-slot COUNT guard (:93-99) →
+   `ensureNotLastActive` (:100); archive (:33-52) has NO chosen guard
+   and hits `ensureNotLastActive` (:43). So delete-on-a-last-and-chosen
+   take truly speaks chosen-slot first, I10 through delete is reachable
+   exactly when the pointer targets no live take, and the archive door
+   speaks I10 directly — precisely what the pins hear
+   (`theLastActiveTakeRefusesArchiveAndDelete_I10` reaches I10 through
+   delete only after archiving the chosen; the walk hears
+   chosen-slot-first). Overriding the order in copy would have invented
+   behavior; mirroring was right.
+2. **The stand-down superset (P22) — SOUND.** Verified in `render()`
+   (`isEditable = false` at open, restored at close, pinned both
+   transitions). Zero live panes while the sheet is open with no live
+   card is the read-mode state, not a P3 violation (the rule is
+   only-the-focused-unit-is-live); the superset also kills the
+   live-but-covered ambiguity the record names. The brief's letter is
+   exceeded, never violated. P22 to the gate as recorded.
+3. **Overlay-not-modal (P20) — ACCEPTABLE interpretation.** The
+   ratified mockup's literal geometry is honored (dim + sheet over the
+   page, page visible behind); harness-drivability is real (the pixel
+   suite and walk 6 drive it headlessly). The trade is honestly
+   recorded: no system detents/physics, and flag 5's keyboard-guide
+   absence is a consequence of not riding the system sheet. Hers at the
+   gate/feel round.
+4. **The two pin flips — VERIFIED SANCTIONED, waved through.** The
+   six-act pin's pre-flip comment named ⑂'s S2 arrival ("they arrive
+   WITH their surfaces in S2" — my own read of the old hunk); its
+   seven-act form now pins ORDER over laid-out items, stronger than the
+   old split. The badge pin's interim form (my own read of `ba6b2d9`)
+   pinned P15's door with "the tap is a look," and P15's record named
+   the batch-2 repoint in advance; the flipped forms pin the new truth
+   plus nothing-peeked/nothing-written.
+5. **The keyboard-avoidance absence — STANDS as a device item**, with
+   one rider: it compounds with the missing `becomeFirstResponder`
+   (MINOR above) — today focus never rises headless, so the exposure
+   is partly latent; fixing focus makes the missing constraint bite.
+   Weigh the two together at the feel round.
+6. **VM growth +71, all routing — P-9 HONORED.** Enumerated by my own
+   hunk read: composition + wiring, the ONE projection door (`ingest`),
+   pure lookups, browser doors, `refreshTakesFromStore`,
+   `recordTakeEdit`, the `report` widening, and `displaySlot`.
+   `displaySlot` is the one arguable entry and it is surface-apply
+   machinery (index/storage/ledger) — the VM's own concern — not a
+   takes decision; the decisions live in the sibling files.
+7. **`report(String?)` — SAFE.** `statusMessage` is already `String?`
+   (VM:65); every pre-existing caller passes non-optional and no reader
+   depends on non-nil (writes are VM-internal; the face renders the
+   optional). The widening adds behavior only where `nil` is now
+   passed. Adjacent: NIT 1 above — the batch-1 pill door was left
+   outside the clearing posture the widening was built for.
+8. **The S2 feel round — STANDS**, with this review's riders: the
+   marker's behind-canvas z-order (machine-pinned at subview index 0;
+   eyes still owed), the second-tap focus gap (MINOR above), the
+   scroll-cost question on a fan-heavy note (MINOR above), and the
+   badge's tap target (≈26 pt × line height — under the 44 pt HIG
+   floor; look-track material).
+
+### Clean bill (load-bearing things specifically checked, found solid)
+
+- **Counts:** core 1039/114 and mobile 123/20 reproduced exactly by my
+  own runs; the recorded figures are real.
+- **Boundaries:** zero `Sources/VariorumCore`, `Shared/`, Mac-side,
+  pbxproj, schema, or `Sync/` lines in the stage diff (my own stat
+  read); no new dependencies; `renderedText`/export bodies/the bridge
+  untouched by construction.
+- **The zero-store-write peek:** pinned three ways INCLUDING the
+  `sync_outbox` row count; `displaySlot`'s path traced — no autosave,
+  no DB, no ledger-dirty writes (the ledger's `recordEdit` is
+  bookkeeping, not dirtiness — verified in `EditorSurfaceLedger`).
+- **The one projection door:** every store delivery routes ingest →
+  adoptFans → overlay → policy. The raw-slots-bypass hazard I chased
+  does not exist: post-attach, `pendingProjection` is a MARKER only —
+  `applyPendingIfClean` discards the held value and re-reads fresh
+  through `ingest` (VM:415-429); the only raw apply is the pre-attach
+  seam, where no peek can exist.
+- **✓ the only choosing act:** `chooseVariant` through ops on both
+  doors; the sealed refusal pinned verbatim; the peek survives the
+  refusal; minting never chooses (R90, pinned); the browser ✓ ending
+  any peek (interpretation #4) is M6's unambiguity read coherently.
+- **Refusals are the ops' own:** I10 / chosen-slot / locked / sealed
+  heard through `OperationError`, phone words for the everyday cases
+  only, `String(describing:)` for the rest — no invented behavior.
+- **P3 in the sheet:** ONE reused card editor moving between cards
+  (identity pinned); the page stood down and restored (pinned both
+  transitions); card edits route through the ONE ledger + coordinator
+  (`recordTakeEdit`) so sheet and page cannot disagree on bytes —
+  pinned pre- and post-flush.
+- **The seam file:** the one documented delegate method on the ONE gate
+  delegate; no second `UIEditMenuInteraction`; the item offered exactly
+  where a block resolves (pinned both ways); mechanism + item + method
+  all in the one file per the iOS-27 note.
+- **The bar:** seven acts in LK8's order, order-pinned over laid-out
+  items; ⑂'s caret resolution boundary-tolerant including the separator
+  seat (pinned); the tail refusal speaks (P-2); the fan-birth door on
+  fanless blocks real (`takesProjection` provides fans for every
+  non-gap block — verified in core — so a single-take block's browser
+  shows its one card).
+- **LK10's gutter:** pinned by real wrap geometry WITH the fanless
+  discrimination twin; exclusion count exact; the refresh loop-safety
+  traced (equality gates make the steady state write-free, so the
+  `layoutSubviews` hook cannot oscillate).
+- **M6/M9 mechanics:** flip-onto-chosen ends the peek; remote choose
+  fulfills; remote archive prunes; sticky across deliveries with the
+  echo pinned (`fullRenderCount` unchanged).
+- **The walks:** store-byte checks at every step, teardown byte-exact,
+  identity audit 0, desync 0, canary silent — green in my own runs.
+- **Voice discipline:** every color/font in all five new files resolves
+  from `MobileEditorStyle.face`/tokens (the S1 flag-6 duty); terminal
+  lowercasing through one `chromeCase`; the chrome voice-flip test's
+  window is await-free (consistent with the S1 round-2 posture).
+- **Wiring/memory:** the chrome/browser/VM triangle carries weak
+  back-references throughout — no retain cycle.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
