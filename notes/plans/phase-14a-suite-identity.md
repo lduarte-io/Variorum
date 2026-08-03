@@ -343,7 +343,14 @@ does not gate the spike (project refs are random; display names rename freely).
     *[removed for publication]*
     *[removed for publication]*
     *[removed for publication]*
-  - **RULING:** *pending — the round-0c question.*
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    (issuer-in-Variorum, signups deferred) recorded as the road NOT taken; variant
+    iii (hardening + signups on) recommended against and not taken. Consequences:
+    the 9c corpus guard survives byte-untouched; 14b's surgery and the suite's
+    login never share a project; provisioning stays a 14a deliverable on the
+    neutral project.
 
 ## Ledger
 
