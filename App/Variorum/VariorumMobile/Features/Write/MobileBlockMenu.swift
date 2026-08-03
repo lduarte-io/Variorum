@@ -12,8 +12,9 @@
 //  Every row performs a STANDING act or delivers the ops' real refusal
 //  (P-2): Takes/Comments open their sheets; Callout rides the mirrored
 //  `MobileCallout` transform through `updateBlockPresentation`; Name is
-//  `setBlockName`; Divide/Merge are `MobileStructuralController`'s doors
-//  (M10); Delete is `deleteBlock` — the deleted-blocks TRAY stays
+//  `setBlockName`; Divide/Merge/Delete are `MobileStructuralController`'s
+//  doors (M10; Delete joined at the S4 ladder — MAJOR 1's latch +
+//  flush-guard contract) — the deleted-blocks TRAY stays
 //  Mac-side in v1 (the refusal-free recovery road, named in the note).
 //  "Archive Block" is a recorded DELIBERATE ABSENCE: no such operation
 //  exists (blocks archive nowhere — only containers and takes do), the
@@ -215,20 +216,13 @@ final class MobileBlockMenuController {
         }
     }
 
+    /// The act itself rides the STRUCTURAL controller's contract (S4
+    /// ladder MAJOR 1): `deleteBlock` is a structural op, so it takes the
+    /// one-flight latch + the flush-guard its siblings carry — a refused
+    /// flush refuses the delete, which is what makes the tray-copy
+    /// promise true. This door keeps only the confirm seam.
     func delete(blockID: String) async {
-        guard let model else { return }
-        // Flush first: the pending text lands before the tombstone, so
-        // the tray's copy of the block holds every typed byte.
-        await model.autosave.flushNow()
-        do {
-            try await session.runner.run { ops in
-                try ops.deleteBlock(blockID)
-            }
-            model.report("Block deleted — it waits in this note's deleted-blocks tray on the Mac.")
-            await model.refreshTakesFromStore()
-        } catch {
-            model.report(Self.refusalMessage(error, act: "delete the block"))
-        }
+        await model?.structural.deleteBlock(blockID: blockID)
     }
 
     // MARK: - Refusal copy

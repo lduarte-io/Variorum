@@ -257,6 +257,39 @@ final class MobileStructuralController {
         }
     }
 
+    // MARK: - Delete block (the ⋯ menu's destructive act — S4 ladder MAJOR 1)
+
+    /// Deletes a block through the SAME structural-act contract as
+    /// divide/merge — the one-flight latch, then flush-FIRST with the
+    /// post-flush dirty re-check. `deleteBlock` IS a structural op (it
+    /// registers structural undo and rides `runStructural` on the Mac),
+    /// and the contract's second half is what makes the tray-copy promise
+    /// TRUE: a refused flush keeps its text pending (`isDirty` stays
+    /// true), and a tombstone landed past it would strand the typed bytes
+    /// outside both the surface and the tray's copy — the text-loss class
+    /// the flush-first contract exists to kill (the `.none` door does not
+    /// refuse a locked take, so the op itself is no belt here).
+    func deleteBlock(blockID: String) async {
+        guard let model else { return }
+        guard !structuralInFlight else {
+            model.report("Another structural change is still landing.")
+            return
+        }
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+
+        guard await flushPendingText() else { return }
+        do {
+            try await session.runner.run { ops in
+                try ops.deleteBlock(blockID)
+            }
+            model.report("Block deleted — it waits in this note's deleted-blocks tray on the Mac.")
+            await model.refreshTakesFromStore()
+        } catch {
+            model.report(Self.refusalMessage(error, act: "delete the block"))
+        }
+    }
+
     // MARK: - Shared pieces
 
     /// The Takes board's pending-text contract, verbatim (one declared

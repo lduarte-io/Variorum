@@ -238,6 +238,52 @@ struct MobileBlockMenuTests {
             #expect(model.index.entries.map(\.blockID) == [seed.blockB])
         }
     }
+
+    /// S4 ladder MAJOR 1's red-on-old pin: the Delete Block door carries
+    /// the structural-act contract's SECOND half — the post-flush dirty
+    /// re-check. A refused flush keeps its text pending (`isDirty` stays
+    /// true; the coordinator's pinned posture), and `deleteBlock`'s
+    /// `.none` door does NOT refuse a locked take — so the pre-fix door
+    /// tombstoned the block here, stranding the typed bytes outside both
+    /// the surface and the tray's copy (the text-loss class).
+    @Test func deleteRefusesWhenTheFlushItselfRefuses() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // Type into A's take, then lock that take REMOTELY (through
+            // ops directly — the lock lands while the typing sits
+            // unflushed; the headless world runs no live observation, so
+            // the surface deliberately does not know).
+            let range = try #require(model.rangeOfBlock(seed.blockA))
+            typeEdit(model, storage,
+                     range: NSRange(location: range.upperBound, length: 0),
+                     replacement: " Typed.")
+            #expect(model.autosave.isDirty)
+            try await session.runner.run { [a1 = seed.a1] ops in
+                try ops.lockVariant(a1)
+            }
+
+            await model.blockMenu.delete(blockID: seed.blockA)
+
+            // The flush refused (`lockedVariant`), so the DELETE refuses —
+            // the contract's copy, the block live, the bytes still pending.
+            #expect(model.statusMessage
+                == "Unsaved changes couldn't be written — resolve that first, then retry.")
+            let deletedAt = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT deleted_at FROM block WHERE id = ?",
+                    arguments: [seed.blockA])
+            }
+            #expect(deletedAt == nil)
+            #expect(model.autosave.isDirty)
+            // The stored take never gained the unflushed bytes (the store
+            // still disagrees with the surface — exactly why acting was
+            // forbidden).
+            #expect(try await storedText(db, variantID: seed.a1) == "First block here.")
+        }
+    }
 }
 
 // MARK: - Comments (M12)
