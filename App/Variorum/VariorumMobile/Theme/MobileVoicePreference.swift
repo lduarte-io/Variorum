@@ -14,8 +14,11 @@
 //  (R1's letter; `VoiceTokens.fallback` leads with it too). PROVISIONAL
 //  like every look default: her feel round may re-rule it.
 //
-//  PROVISIONAL placement (recorded per the batch brief): the switch DOOR
-//  currently rides the Write masthead; its real Settings home is S3's.
+//  Placement (P11's placement LANDED at S3 batch 1; this note corrected
+//  at the S3 ladder, NIT 1): the switch DOOR lives in Settings off the
+//  shelf (`MobileSettingsView`); the S1 masthead door retired with that
+//  batch. `MobileShellRouter.setVoice` is the one flip, reaching every
+//  registered editor through the liveness authority.
 //
 
 import Foundation

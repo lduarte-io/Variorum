@@ -3314,7 +3314,13 @@ anything the stage ladder must weigh.
    `setVoice` reaches the stored preference + `MobileEditorStyle` + any
    OPEN surface (`applyVoiceChange`); `MobileWriteScreen`'s chrome reads
    `router.voice` (observable), so an editor open in the OTHER tab
-   follows a Settings flip — surface and masthead both.
+   follows a Settings flip — surface and masthead both. *(Amended at the
+   S3 ladder round 1, MINOR 2 — this claim as shipped was OVERBROAD: the
+   flip reached only the single registered `activeEditor`'s STORAGE, so
+   a second open editor kept the old voice's fonts under a new-voice
+   masthead. True since the fix pass: `setVoice` routes through the
+   liveness authority to EVERY registered editor, pinned against TWO
+   editors — `aVoiceFlipReachesEveryRegisteredEditor`.)*
 7. **Walk 7** (`walk7_shelfTodayLibraryColdLaunch`) — cold launch → the
    shelf observes and renders → **LK5 faces BYTE-CHECKED in the live
    voice** ("essays" / "2 notes · #goals" · "poems ✓" · "smart ·

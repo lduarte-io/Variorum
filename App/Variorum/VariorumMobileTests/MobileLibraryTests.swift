@@ -43,6 +43,35 @@ struct MobileLibraryTests {
         }
     }
 
+    /// S3 ladder, MINOR 1: a CANCELLED in-flight search — `.task(id:)`
+    /// cancels on every keystroke and on the root's disappearance; GRDB's
+    /// async read throws `CancellationError` for it — never lands as a
+    /// persistent red error line, and a landed search clears any earlier
+    /// error.
+    @Test func aCancelledSearchNeverLandsAsAnError() async throws {
+        try await withEditorWorld { session, _ in
+            _ = try await session.runner.run { ops in
+                try ops.createPost(title: "Moonrise essay")
+            }
+            let model = MobileLibraryViewModel(session: session)
+
+            // The keystroke's cancellation: the wrapping task dies before
+            // the read lands (Task.isCancelled is set before the read
+            // schedules, so GRDB throws CancellationError deterministically).
+            let inFlight = Task { await model.search("moon") }
+            inFlight.cancel()
+            await inFlight.value
+            #expect(model.lastError == nil,
+                    "a cancelled search is never an error to show")
+
+            // The next search lands normally — and would clear any earlier
+            // error (the Mac catalog catch's success-clear).
+            await model.search("moon")
+            #expect((model.hits ?? []).isEmpty == false)
+            #expect(model.lastError == nil)
+        }
+    }
+
     /// Search covers the standing catalog scope: titles, entry dates, and
     /// book names — and an empty query clears back to the resting listing.
     @Test func searchFindsTheStandingCatalogScope() async throws {

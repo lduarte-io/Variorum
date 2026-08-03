@@ -55,8 +55,14 @@ nonisolated enum MobileShelfFaces {
 
     /// The row's NAME text — the stored name plus the finished STATE
     /// (" ✓", the Mac grammar; the view adds accent ink and voice casing).
+    /// THE one finished-state grammar (S3 ladder, NIT 2): every surface
+    /// naming a book calls this — the book header respelled it once.
+    static func name(for reading: Reading) -> String {
+        reading.name + (reading.locked ? " ✓" : "")
+    }
+
     static func name(for book: Queries.ShelfBook) -> String {
-        book.reading.name + (book.reading.locked ? " ✓" : "")
+        name(for: book.reading)
     }
 
     /// The row's meta line, LK5-ordered: count · tags · daily. The count

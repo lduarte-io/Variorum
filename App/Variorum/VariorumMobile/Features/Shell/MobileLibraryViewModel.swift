@@ -108,7 +108,18 @@ final class MobileLibraryViewModel {
             hits = found.filter { hit in
                 hit.kind != .block || (hit.homeContainerID != nil && !hit.homeIsPool)
             }
+            // A landed search clears any earlier error (the Mac catalog
+            // catch's own success-clear — S3 ladder, MINOR 1).
+            lastError = nil
+        } catch is CancellationError {
+            // `.task(id:)` cancels the in-flight search on every keystroke
+            // and on the root's disappearance; GRDB's async read throws
+            // CancellationError for it — never an error to show (the
+            // sibling observation loops' own filter; S3 ladder, MINOR 1).
         } catch {
+            // A superseded search's error never lands either (the Mac
+            // catch's staleness guard).
+            guard activeQuery == trimmed else { return }
             lastError = String(describing: error)
         }
     }

@@ -65,7 +65,9 @@ struct MobileBookView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 2) {
             if let reading = model.reading {
-                Text(tokens.chromeLabel(reading.name) + (reading.locked ? " ✓" : ""))
+                // ONE finished-state grammar (S3 ladder, NIT 2): the name
+                // brain speaks; this header stops respelling it.
+                Text(tokens.chromeLabel(MobileShelfFaces.name(for: reading)))
                     .font(tokens.title)
                     .foregroundStyle(reading.locked ? tokens.accent : tokens.ink)
             }
