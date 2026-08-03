@@ -4455,6 +4455,106 @@ Round 3 is not forced by this pass.**
 
 ---
 
+## STAGE 3 — CLOSED (the architect's closeout, 2026-08-03; the ladder closed at round 2)
+
+**Round 2: all seven dispositions HOLD; Mac/core/mobile independently
+re-verified by the reviewer's own runs (Mac 1193/208 — the one tripwire
+red BY IDENTITY from the xcresult; core 1039/114; mobile 140/19); zero
+new BLOCKER/MAJOR — closed at round 2.** The stage's headline: the S3
+ladder found and killed a text-loss BLOCKER in the new shell AND a
+latent SHARED clean-instant stale-delivery class the Mac itself carried
+(five Mac failures on the executable revert; fixed at the one policy,
+pinned both platforms — the Mac suite grew 1191→1193).
+
+**The round-2 residuals, adjudicated:**
+- **New MINOR — AGREED, two parts.** (1) The fix-pass record's
+  "restored for both platforms" claim is amended here by scope: the
+  restoration covers the two EDITOR surfaces' delivery paths through
+  the shared policy; the Mac TAKES BOARD (`TakesViewModel`) adopts
+  deliveries directly OUTSIDE the policy — pre-existing, untouched,
+  outside this ladder's adjudicated scope. (2) That board's
+  policy-routing question gets an OWNER per the no-blank-owner
+  doctrine: a KnownIssues row, owner **13e** (the Mac takes home; the
+  same stale/flush family as its existing copy-doors row).
+- **New NIT — fix owed, FOLDED into S4 batch 1** (the `loadOnce`
+  cancellation stringification — the MINOR-1 filter's adjacent site;
+  S4 touches the editor anyway).
+
+**Ledger:** L4 sealed with the stage. **Final counts at S3 close:**
+mobile **140/19** · core **1039/114** · Mac **1193/208** (tripwire
+only) · spine **51/7**. **Stage 4 — the LAST build stage — opens
+below.**
+
+---
+
+## Stage 4, batch 1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, IN FULL:** `CLAUDE.md` · this file (the rulings M1–M14 +
+LK1–LK11, the constitution + application notes, the environment traps,
+ALL stage records/ladders/closeouts — the liveness authority, the
+projection policy's delivery arm, and the sibling-types law are your
+ground) · `App/Variorum/Shared/Theme/VoiceTokens.swift`
+(`ReadingPageTokens` — the voice-independent paper) ·
+`Spikes/MobileMockups/mobile-look-v1.html` §4 + LK9 (the ratified Read
+page: chapter caption + centered page meta) · the Mac's Read mode +
+comments + callout + divide/merge door semantics in code (mirror
+semantics, never port chrome) · the M10/M12 rulings and the S2-recorded
+divide/merge refusal shapes.
+
+**Objective (the v1 build's last stage):** the Read flow (M8), comments
+& callouts (M12), the divide/merge doors (M10), and the ⋯ block menu —
+then the whole app stands for her gate.
+
+**Scope, batch 1:**
+1. **The Read flow (M8/LK9):** a book opens into the calm continuous
+   column — `ReadingPageTokens` paper (voice-independent; the room
+   follows the voice), chapter caption + centered page meta per LK9,
+   chapters honored, virtualized per P3 (read-cheap tiers, NEVER a live
+   editor in Read); tap into a note → Write. Dark per the token layer.
+2. **Comments (M12):** the block-menu "Comments…" sheet — list, add,
+   edit, delete through the standing ops (refusals speak; deleted
+   comments visible per the never-skimpy rule ONLY if the Mac's
+   recovery surface semantics port cheaply — else recorded absence);
+   a commented block wears the small marker (the mockup's ●n form).
+3. **Callouts (M12):** frames render on the page (13k's one-frame
+   rule, an overlay never rendering attributes); the block menu's
+   Callout door (kind/color/emoji per the Mac's vocabulary; theme-token
+   colors only).
+4. **The ⋯ block menu arrives** (the S2-deferred door): on the caret
+   block via the bar's ⋯ and the extended edit menu — Takes… ·
+   Comments… · Callout ▸ · Name… · Archive/Delete block (ops' refusals
+   speak; the deleted-blocks tray stays Mac-side, recorded).
+5. **The divide/merge doors (M10):** divide at the caret via the block
+   menu — auto-proceeds through shared `CutPropagation`/`BoundarySnapping`
+   exactly where the Mac needs no ceremony; refuses naming the Mac
+   where the W would open. Merge-with-previous via the block menu —
+   instant when fanless both sides; refuses to the Mac's pairing
+   ceremony when a fan exists. Both through the standing ops; structural
+   UNDO stays Mac-side v1 (recorded deliberate absence — divide/merge
+   here are reversible via the Mac; the phone offers no structural-undo
+   stack).
+6. **The round-2 NIT fix** (`loadOnce` cancellation filter — the
+   MINOR-1 class, adjacent site).
+7. **The walk grows:** open a book → Read renders (chapters, paper) →
+   tap into a note → add a comment (marker appears) → set a callout
+   (frame renders) → divide the block (store rows checked) → merge back
+   → bytes byte-checked → identity audit clean, canary silent.
+
+**Explicitly NOT batch 1:** the W/pairing ceremonies (Mac-only by M10),
+structural undo on the phone, reorder, book creation/editing, lenses
+(M9's direction), 13e vocabulary (L12), recovery surfaces beyond the
+recorded scope.
+
+**Discipline:** the standing set verbatim (tests with every step; traps
+bind; sibling types; mobile + walks green by own runs; core/Mac/spine
+ONLY if shared moves — the Read tiers must compose EXISTING shared
+brains, a genuine shared need = stop and report; NO schema; NO `Sync/`;
+red-on-old for bug-class fixes; commit with the trailer; push at bout
+end; append your batch record; ONE Sonnet lookup at a time). Batch 1
+closes the v1 BUILD — flag everything the final ladder must weigh.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
