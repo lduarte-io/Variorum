@@ -1848,6 +1848,214 @@ bug-class fixes; commit as you go with the standing trailer; push at
 bout end; **append your batch record to this file**; ONE Sonnet lookup
 at a time, external facts only. The S2 ladder runs at stage end.
 
+## Stage 2, batch 1 — BATCH RECORD (implementer, 2026-08-03; commits `ba6b2d9` + the record commit)
+
+**All six scope items shipped.** Per item:
+
+1. **The fan badge (LK3/LK10)** — fanned blocks wear **⑂ alone**
+   (`MobileTakesChromeController.badgeGlyph`, the Mac glyph, count-free)
+   as an OVERLAY view at the block's first fragment's trailing corner
+   (P-8), with **LK10's gutter as an exclusion rect** at that corner:
+   the first line ends short of the badge, pinned by REAL WRAP GEOMETRY
+   (an unbroken 200-char run: the fanned block's first line measured
+   ≤ containerWidth − 30, the fanless twin's measured PAST that line —
+   the discrimination that proves the exclusion did it, not the text).
+   Non-fanned blocks carry nothing and reserve nothing (exclusion count
+   pinned at exactly the fanned block's one). The badge TAP reveals the
+   pill (counts appear once open — LK3's letter; PROVISIONAL P15: batch
+   2 repoints the tap at the takes browser). Convergence note: the
+   gutter's Y is the fragment's own minY and its height the first
+   line's — both unchanged by the exclusion itself — and the write is
+   equality-gated, so the layoutSubviews→refresh hook cannot loop.
+2. **The swipe-peek (M5/M6/M9)** — `MobileTakesPanRouter`: the spike's
+   PROVEN configuration verbatim (delegate-gated horizontal
+   `UIPanGestureRecognizer`, 1.5× horizontal-dominance gate at
+   shouldBegin, `shouldRecognizeSimultaneouslyWith` = false, 30 pt flip
+   threshold, marked-text bail), scoped by fragment HIT-TEST → surface
+   offset → the index authority (`blockID(atSurfaceOffset:)` — zero-
+   length entries match at their location); non-fanned blocks never
+   begin the gesture (pinned). **The peek itself is a PROJECTION
+   OVERLAY, not a cover view** (the one structural interpretation for
+   the reviewer, #1 below): `MobileTakesController.overlay(_:)` maps
+   every ingested projection — a peeked slot's variantID/text/lock
+   become the PEEKED take's before the policy/ledger/index see it — and
+   `flip` applies a surgical single-slot display swap
+   (`MobileEditorViewModel.displaySlot`). ZERO store writes pinned
+   THREE ways: stored texts byte-unchanged, `chosen_variant_id`
+   unmoved, **`sync_outbox` row count unchanged** across flips. Sticky
+   while open (M9): peek state lives in the controller whose lifetime
+   is the open note; pinned sticky across a flush + fresh delivery
+   (which lands as an ECHO — `fullRenderCount` unchanged). The MARKER:
+   the ratified v1 mockup's `.peeked` grammar — the `takeTint` wash
+   behind the text (subview index 0, pinned) with a 2.5 pt `takeLine`
+   edge bar — visible exactly while peeked; flipping ONTO the chosen
+   take ENDS the peek (displaying truth is not a peek — M6's
+   unambiguity rule made mechanical; the fulfilled-peek rule does the
+   same when the STORE catches up, e.g. the Mac choosing the peeked
+   take — pinned both ways).
+3. **The pill (LK6, shape A)** — under the block on any flip: ‹ take
+   k/n · label › with **✓ while peeked**; displaying chosen truth
+   renders the "✓ chosen" STATE and no ✓ door (P-2 — pinned both
+   states). Fades after a beat (2.4 s timer, alpha animation; back on
+   any flip); ‹ › are tap-flip doors (the same act the swipe performs —
+   PROVISIONAL P16). ✓ = `chooseDisplayed` → `Operations.chooseVariant`
+   (I3's setter, the Mac's own door); on success the peek ends and the
+   delivery confirms as an echo; **refusals speak** — the sealed post
+   pinned verbatim ("This note is locked — unlock it on the Mac to
+   choose a take."), the chosen pointer unmoved, and the PEEK SURVIVES
+   the refusal (reading is free under seal).
+4. **Editing a peeked block edits the PEEKED take** — free BY
+   CONSTRUCTION from the overlay: the index entry's variantID IS the
+   displayed take, so the standing gate/autosave route there with no
+   second mechanism. Pinned: typing into the peeked block flushes to
+   the peeked `working_text`, the chosen take's text AND the pointer
+   untouched; a LOCKED peeked take refuses with the standing
+   lockedVariant copy; a SEALED note refuses typing at the standing
+   gate while the peek itself (display-only) still works. Text
+   resolution is LEDGER-FIRST (`surfaceKnownText`): flipping away from
+   a just-edited take and back shows the EDITED bytes pre-flush
+   (pinned). No product ambiguity surfaced in the wild — nothing to
+   PROVISIONAL on this item beyond the recorded remote-edit consequence
+   (interpretation #4).
+5. **NIT-3 honored (binding)** — the machinery is TWO SIBLING types
+   plus pixels: `Features/Takes/MobileTakesController.swift` (state +
+   overlay + flip + choose + pill content, ~230 lines) and
+   `Features/Takes/MobileTakesChrome.swift` (chrome controller + pill
+   view + pan router, ~430 lines). The VM gained ONLY routing: the
+   `ingest` door (observation switched to the STANDING
+   `AppDatabase.observeTakes` — slots + fans in ONE coherent read, the
+   Mac Takes board's own observation, cost ∝ post), the dirty-safe
+   `displaySlot`, and five one-liner helpers (slot lookup, ledger read,
+   status voice, marked-text probe, block-at-offset). VM 974 → 1104
+   lines, all of it routing/plumbing per the advisory's letter.
+6. **The walk grew (walk 5)** — fanned block wears ⑂ + the one gutter →
+   flip peeks (STORE BYTES checked: texts + chosen pointer unmoved) →
+   the marker shows → typing edits the peeked take (store-byte checked
+   on BOTH variants) → ✓ chooses (`chosen_variant_id` moves to the
+   take; the Mac would follow) → marker ends → identity audit 0, desync
+   0, canary silent, no refusal spoke → teardown lands exactly the
+   walk's bytes.
+
+**Counts, all by this implementer's own runs (iPhone 17 Pro / iOS
+26.2):** **mobile 97 tests / 18 suites GREEN** (single run, zero
+relaunches; S1's 76/16 intact within — the L9 pin and identity audit
+ran green in every suite run of the bout). New: `MobileTakesTests` (12)
+· `MobileTakesChromeTests` (7) · walk 5. **Core / Mac / spine
+deliberately NOT run:** the bout's diff touches ONLY mobile-target
+files (`git diff --stat` at commit: 2 new Takes sources + 3 Write-
+feature files + 3 test files — zero `Sources/VariorumCore`, zero
+`Shared/`, zero Mac-side, zero pbxproj), so the brief's only-if-shared
+condition never fired.
+
+**Discrimination evidence (no bug-class fixes this batch, so no
+red-on-old pins were owed; the 13k hollow-pin currency applied to the
+NEW pins instead — five deliberate mutations, each run against the
+targeted suites, each caught, the tree byte-restored after (final
+`git diff` EMPTY against the batch commit; final full suite 97/18
+green):**
+- **A — overlay routes edits to the CHOSEN take** (peekedSlot keeps
+  `slot.variantID`): `typingIntoAPeekedBlockEditsThePeekedTake` red
+  (a1 edited, a2 not) + walk 5 red at both store checks + 2 collateral.
+- **B — the gutter dropped** (exclusion never appended):
+  `textNeverRunsUnderTheBadge` red with measured evidence (first-line
+  width 380.8 > reserved 364) + the exclusion-count pin red.
+- **C — fan-cache-first text resolution** (ledger consult removed):
+  `anEditedPeekSurvivesFlippingAwayAndBack` red exactly (the flip-back
+  showed the stale photograph).
+- **D — the marker never draws:** both chrome marker pins red + walk 5
+  red at the marker line.
+- **E — ✓ decorative** (the ops call removed; peek clears anyway):
+  `chooseCommitsThePeekThroughOperations` red (pointer unmoved) +
+  `chooseUnderASealedNote…` red (no refusal spoke AND the peek wrongly
+  ended) + walk 5 red at the choose + teardown checks.
+
+**Interpretations for the cold reviewer:**
+1. **"Zero storage writes" read as zero STORE writes** (DB + outbox,
+   pinned) — the `NSTextStorage` necessarily changes: scope item 4
+   requires the peeked text to be EDITABLE, which an opaque cover view
+   (the spike's throwaway proof shape) cannot host, and the brief's own
+   words rule the render path ("display-swap through the render path;
+   the identity audit stays clean"). The spike's `storageUntouched=YES`
+   measured the display PRIMITIVE; the shipped peek is the projection
+   overlay that primitive de-risked.
+2. **The VM's observation moved `observePost` → `observeTakes`** (the
+   standing Phase 11 A3 read): slots + fans arrive from ONE transaction,
+   so the overlay can never see a fan/slot mismatch. Cost ∝ the post
+   (the Mac board's own observation); the phone pays it per delivery.
+3. **`displaySlot` is deliberately SURGICAL** — one entry rebuilt in
+   place, `ledger.recordEdit` for the displayed variant only, never a
+   whole-index rebuild from `slots` and never `ledger.adopt`: other
+   blocks may be DIRTY mid-flip, and their slot texts are stale
+   photographs — a wholesale rebuild would desync entry lengths from
+   the surface and regress the ledger's dirty texts. (Deliveries can't
+   hit this because the policy defers while busy; the flip runs any
+   time.)
+4. **Ledger-first resolution's recorded consequence:** a REMOTE edit of
+   the very take being peeked stays invisible until the peek ends (the
+   surface's own record self-perpetuates); true concurrent edits of one
+   variant are S5's conflict-as-variant, exactly as on the Mac's live
+   surface. Chosen-side remote edits DO land (originals refresh each
+   delivery) and show the moment the peek ends.
+5. **The two-take carousel is chosen→take→chosen** — flipping onto the
+   chosen take ends the peek rather than "peeking the chosen" (M6's
+   chosen-vs-peeked unambiguity; also why ✓ is never offered there,
+   P-2).
+6. **✓ does NOT flush the pending buffer first:** `chooseVariant`
+   repoints and reads no text, so the R1-4 flush-first class (doors
+   that COPY text at a dirty moment) does not apply; the pending edit
+   flushes on its own clock to the same variant either way. Noted
+   against the KnownIssues copy-doors row so the parallel is on record.
+7. **Gesture-feel evidence split, per the spike memo:** the dominance
+   gate/simultaneity config and flip threshold are the spike's
+   real-touch-PROVEN values; this batch's tests pin the SCOPING BRAIN
+   (hit-test → fanned) and the installed configuration (one pan, the
+   router its delegate). Live-touch dominance, loupe/caret-drag
+   coexistence, and the badge's finger-feel are the memo's obligation-6
+   DEVICE items — they ride the S2 feel round, not the simulator suite.
+8. **Peeking a SEALED note is allowed** (the flip is reading; the seal
+   freezes authoring — the S5-outranks-the-seal doctrine's reading),
+   while typing and ✓ under it refuse with the standing copy. Pinned.
+
+**PROVISIONALs (P15–P19, for the stage-gate bundle):**
+- **P15:** the badge tap's interim door = reveal the pill; batch 2
+  repoints it at the takes browser (LK3's "the tap is the door").
+- **P16:** the pill's ‹ › render as real tap-flip doors (the swipe's
+  own act, no new semantics) — the mockup drew them as glyphs.
+- **P17:** the peek marker's exact form — `takeTint` wash behind the
+  text + 2.5 pt `takeLine` edge bar, BOTH voices (the ratified study
+  mockup's edge bar was the SEAM color; shipped one-token takeLine —
+  one line to change at a look round).
+- **P18:** flip grammar — swipe LEFT = next take, wrapping carousel
+  (the spike's convention); 30 pt threshold, 1.5× dominance.
+- **P19:** visual constants — 30 pt gutter, chrome-12 badge/pill type,
+  28 pt pill, 2.4 s fade; all look-track material (P-8 discipline held:
+  every color/font resolves from `MobileEditorStyle.face`/tokens).
+
+**Deliberate absences (scope, not holes):** the takes BROWSER + the
+four verbs, the bar's ⑂, the edit-menu "Block Takes" door, and ⋯ (ALL
+batch 2 by the brief — the M4 vocabulary lands there); the app shape
+(S3); Read flow (S4); no capability-registry rows (the standing S1
+posture — the pinned chrome tests are the interim); no pill/marker
+VISUAL inspection beyond machine-verified attributes (the 13b class —
+the S2 feel round is the instrument, where the marker's behind-canvas
+z-order and the fade also get eyes); an EMPTY-rendering fanned block's
+badge geometry is untested (rare corner; the browser is its real door);
+RTL layout unconsidered (gutter assumes trailing = right); the caret
+may clamp when flipping the very block being edited (programmatic-
+replace posture, recorded); text undo clears on flip (the
+differential's own removeAllActions posture).
+
+**Environment note (echoes the S1 spine lesson):** a PER-TEST
+`-only-testing:` selector (`…/MobileWalkTests/walk5_…`) silently
+selects ZERO Swift Testing tests; SUITE-level selectors work. The
+mutation-D run was repeated at suite level when the 7-test count
+exposed it.
+
+**NO `Sources/VariorumCore` lines; NO schema; NO `Sync/` lines; NO
+Mac-side or `Shared/` touches** (the whole diff is mobile-target).
+Commits: `ba6b2d9` (the takes surface + suites) · the record commit;
+pushed to `origin mobile` at bout end.
+
 ---
 
 ## Orientation
