@@ -251,7 +251,41 @@ does not gate the spike (project refs are random; display names rename freely).
   an upgrade, not a death). Her die-and-re-add latitude is recorded as headroom the
   plan holds but does not currently spend.
 
-**Field notes (the spike record — appended live, the 9c Step-0 form):** *in progress.*
+**Field notes (the spike record — appended live, the 9c Step-0 form):**
+
+*[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
 
 ## Ledger
 
