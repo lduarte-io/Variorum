@@ -73,12 +73,22 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   Release install stays on the Phase 8 surface until S3). Nothing in it
   gates S2's build; fold her answers into the owning batches as they
   arrive.
-- **STAGE 2 IS RUNNING — batch 1 spawned** (brief in the plan: ⑂ badge
-  + LK10 gutter · swipe-peek sticky with marker + pill · ✓-chooses ·
-  peeked-take editing · NIT-3 sibling-types BINDING · walk growth).
-  Batch 2 (the browser + four verbs + the ⑂/⋯ bar acts + the edit-menu
-  door) is authored at batch 1's acceptance; the S2 ladder at stage
-  end.
+- **STAGE 2 BUILD COMPLETE — both batches SHIPPED + ACCEPTED** (batch 1
+  `ba6b2d9`/`4f610a6` — badge + gutter, swipe-peek, ✓, peeked-take
+  editing, mobile 97/18; batch 2 `005dec2`/`40256ca` — the LK4 browser,
+  the four verbs, the bar's ⑂, the one-seam edit-menu door, mobile
+  **123/20**, both re-confirmed by the architect's own runs). Sibling
+  types held both batches; the `deleteVariant` guard-order finding
+  mirrored, never changed. **THE S2 LADDER IS RUNNING — round 1
+  spawned** (target `c8174ed..40256ca`; findings repo-first; same-model
+  flow; eight recorded flags are the reviewer's anchor).
+- **After the S2 ladder closes:** the stage gate to the author (the
+  bundle is now P1–P26 + LK5's rider + the missing-acts note; the feel
+  round covers BOTH stages' device items — live autocorrect/dictation,
+  loupe-under-pan, the sheet's keyboard constraint); then S3 (the app
+  shape: shelf home + Today + Library/search + nav; the Phase 8 capture
+  views retire there, which is also when the KnownIssues
+  trailing-newlines row resolves) per the stage table.
 - **The stage-gate author bundle so far:** batch 1's P1–P4 + LK5's
   ✓-finished-as-state PROVISIONAL; the device feel round (live
   autocorrect/dictation, loupe-under-pan — the memo's obligation 6);
