@@ -239,6 +239,41 @@ plan-author inherits" list are **SUPERSEDED** by the sitting + this plan
 1→M1/M5/M6/M9 · 2→M4 · 3→M7/M8 · 4→the built-ahead-of-13e statement below ·
 5→ledger row L9).
 
+### Look sitting round 1 (2026-08-03, her flick over mockups v1 — rulings verbatim-faithful)
+
+Her message, verbatim: *"def only go for the iPhone 17 most recent iOS
+simulators. some rulings from the mockup: keep both with its own switch.
+the badge - copy the same icon we use for takes and don't show 2/3, just
+show the little icon and users have to click on it. the sheet over the
+page looks good. i think # of notes or tags matter most for the library
+for books."*
+
+- **LK1 — Simulators: iPhone 17 family on the MOST RECENT iOS runtime,
+  always.** The environment trap hardens accordingly: when a newer
+  runtime lands, move to it and re-verify (the TEXTKIT2 §5 discipline's
+  simulator twin).
+- **LK2 — The voice: the phone keeps BOTH voices with its OWN switch**
+  (judging item 1) — a phone-local voice preference, deliberately NOT
+  following the Mac's setting.
+- **LK3 — The badge: the Mac takes icon, COUNT-FREE.** The phone's fan
+  badge renders **⑂ alone** (the Mac fan badge's glyph — which on the Mac
+  shows `⑂N`; her phone ruling drops the count): no k/n at rest, the tap
+  is the door; counts appear once open (pill/browser). Mockups' ⧉ stand-in
+  retired.
+- **LK4 — The takes sheet-over-page RATIFIED** (*"the sheet over the page
+  looks good"*).
+- **LK5 — Book-row faces: NOTE COUNT and TAGS lead** (her words: *"# of
+  notes or tags matter most for the library for books"*) — shelf/Library
+  book rows lead with the number of notes and the book's tags; the other
+  mocked faces (word progress, daily marker) rank behind. PROVISIONAL
+  riding it: **✓ finished stays visible as a STATE, not a stat** (a
+  finished book reads finished) — one line to drop if she rules
+  otherwise.
+- **Still open from the judging list (the next look round collects
+  them):** item 2 (the peek pill's shape/position), item 4 (the tab bar's
+  register), item 5 (the keyboard bar's act set), item 7 (the Read page's
+  chrome).
+
 ---
 
 ## The settled shape (the sitting's synthesis — BINDING; built from M1–M14)
@@ -403,10 +438,13 @@ gates (the autonomy calibration); author-only calls remain hard stops.
 
 ## Environment traps (mobile — carried verbatim into every batch brief)
 
-- Simulator destination: **iPhone 17 Pro / OS 26.2**
-  (`-destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'`).
-  The iPhone 16 sims on this machine are iOS 18.3 — BELOW the deployment
-  target; they resolve to nothing (the sitting's own trap).
+- Simulator destination: **iPhone 17 family on the MOST RECENT iOS
+  runtime — her standing rule (LK1: "def only go for the iPhone 17 most
+  recent iOS simulators")**. Today that is
+  `-destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'`;
+  when a newer runtime lands, move to it and re-verify. The iPhone 16
+  sims on this machine are iOS 18.3 — BELOW the deployment target; they
+  resolve to nothing (the sitting's own trap).
 - Mobile tests: `xcodebuild test -project App/Variorum/Variorum.xcodeproj
   -scheme VariorumMobile -destination …` from the repo root; confirm the
   "Test run with N tests" line; zsh `pipestatus`.
