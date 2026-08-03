@@ -2920,6 +2920,216 @@ timer; judged the honest reading of "off-band chrome untouched".
 
 ---
 
+## Stage 2 review — round 2 (fresh cold reviewer, 2026-08-03)
+
+**Scope, done in-session (a REAL pass, not a rubber-stamp):**
+`notes/REVIEW_PROMPT.md` read first and followed; the FULL fix diff
+`4652e01..e2f6550` read hunk-by-hunk; every touched file read IN FULL
+(`MobileTakesController` · `MobileTakesBrowser` · `MobileTakesBrowserView`
+· `MobileTakesChrome` · `MobileEditorTextView` + all three test files),
+plus the shared machinery the fixes lean on read in full
+(`MobileEditorViewModel`, `AutosaveCoordinator`,
+`EditorSurfaceLedger`/`EditorProjectionPolicy`, the mobile test harness);
+anchors = the round-1 findings, the ADJUDICATION, and the FIX-PASS
+RECORD above. **Counts by this reviewer's OWN runs:** full mobile suite
+on HEAD (iPhone 17 Pro / iOS 26.2) — **130 tests / 20 suites GREEN**
+(single run; the recorded figure reproduced exactly).
+**Independent red-on-old verification against the ACTUAL pre-fix tree:**
+a scratch git worktree at `4652e01` (outside this checkout; removed
+after) with the post-fix `MobileTakesTests.swift` +
+`MobileTakesBrowserTests.swift` overlaid (standing APIs only) — **38
+passed / 6 failed, and the six failures are EXACTLY the six
+standing-API pins**, each failure text matching this reviewer's own
+traced mechanism: the surface reverted to the stale photograph
+(`anEditedChosenTakeSurvivesFlippingAwayAndBack`); the store LOST the
+earlier edit — the forbidden outcome
+(`typingAfterAFlipRoundTripNeverLosesTheEarlierEdit`); the mint carried
+the store's older bytes (`branchDisplayedCarriesUnflushedEditsIntoTheCopy`);
+the seal-only belt admitted the post-lock keystroke
+(`aRemoteLockMidCardEditRefusesTheNextKeystrokeAndKeepsPendingText`);
+focus never rose (`beginEditingRaisesKeyboardFocusOnTheCardEditor`);
+the stale refusal survived success (`aSuccessfulChooseClearsThePriorRefusal`).
+Every sibling test stayed green — the pins discriminate. The MINOR-3
+pin could not ride the overlay (it references the fix's new
+`refresh(scope:)`/`lastGeometryResolvedBlockIDs` API, which does not
+exist pre-fix); its verification rests on this reviewer's own call-shape
+trace plus the fix session's recorded band-neutralization revert.
+**The mobile-target-only claim VERIFIED by my own stat read:** 8 files,
++464/−24, all under `App/Variorum/VariorumMobile{,Tests}` — zero
+`Sources/VariorumCore`, zero `Shared/`, zero Mac-side, zero pbxproj,
+zero schema, zero `Sync/`; core/Mac/spine deliberately NOT run (the
+only-if-shared condition never fired). Read-only in this checkout
+throughout; no fixes made.
+
+### Verdicts per round-1 disposition
+
+**BLOCKER (flip capture/restore ledger-first) — HOLDS.** My own trace:
+`flip` line 166 (`originals[blockID] ?? resolvedOriginal(current)`) and
+line 170 (`displaySlot(resolvedOriginal(original))`) consult the ledger
+at BOTH points; `resolvedOriginal` is `peekedSlot`'s exact twin
+(identity fields copied intact — blockID/placement/position/counts/
+lock; text `surfaceKnownText ?? photograph`). The freshness argument
+closes: `ledger.adopt` runs ONLY at clean adoption points
+(`EditorProjectionPolicy` defers every delivery while
+`autosave.isDirty`), so a dirty variant's ledger record survives until
+its flush lands — and the `?? photograph` fallback is reachable only
+post-flush, when the photograph a delivery parked carries store truth.
+The fix session's note (1) verified by my own trace: `overlay` line 133
+still parks a possibly-stale raw slot in `originals` under a DEFERRED
+delivery, and the restore-side consult is exactly what makes that
+harmless (re-resolved at the only consumption point). **The
+stale-photograph sweep found no other text consumer:** `cards()` and
+`peekedSlot` are ledger-first; `chosenVariantID` reads IDs only;
+`renderFull`/`applyDifferential` are store-truth applications gated by
+the deferral; `branchDisplayed` post-fix flushes; the chrome reads
+geometry only. Red-on-old reproduced on the pre-fix tree by my own run,
+both pins, arm (b)'s store loss included.
+
+**MAJOR (`branchDisplayed` flushes before the mint) — HOLDS.**
+`flushNow` sits before `mint`; `displayed` is captured BEFORE the flush
+suspension — the honest reading (she branches what she was looking at
+even if a delivery lands mid-flush). **Blank untouched IS sound:**
+`newBlankVariant` reads no text from anywhere — a dirty buffer cannot
+shape it. **✓ untouched IS sound:** `chooseVariant` repoints
+`chosen_variant_id` and reads no text; the previously-displayed take's
+pending autosave entry still flushes to its own row, so no loss shape
+exists on that door (batch-1 interpretation 6 confirmed against the
+op). Red-on-old reproduced. One residual corner recorded as NEW NIT 1
+below — outside the adjudication's letter, nothing lost.
+
+**MINOR 1 (the card gate's locked belt) — HOLDS.** The belt consults
+the live card's `isLocked` with the standing copy; my trace confirms
+the mechanism the comment claims: fans adopt UNCONDITIONALLY in
+`ingest` (before the slot apply can defer), so the belt sees a remote
+lock the moment the delivery lands; keystrokes and deliveries serialize
+on the main actor, and `projectionDidChange` resigns on VANISH before
+any next keystroke, so the `?.isLocked == true` nil-arm (vanished take)
+has no admitting window. Keep-pending verified in
+`AutosaveCoordinator.flushNow` (a refused entry re-enters `pending`;
+newer text wins the merge) — and the fix record's honesty checks out:
+the keep-pending assertions passed on old too (my run confirms the old
+tree failed ONLY the gate half), the coordinator's posture was never
+the defect. Cost class: the belt's `cards()` read is ∝ the open block's
+fan — the recorded per-render family. Red-on-old reproduced.
+
+**MINOR 2 (first responder on card activation) — HOLDS.**
+`becomeFirstResponder()` fires on the ATTACH TRANSITION only
+(`superview !== card`); my trace confirms no focus churn: card views
+are REUSED by variantID across renders (a delivery re-render never
+re-attaches, never resets `cardEditor.text`, never re-raises focus),
+attach is unreachable while the browser is closed, and activation is
+always user- or mint-initiated (the page editor already stood down).
+Windowless it is a no-op. The window-hosted pin red-on-old reproduced
+by my own run. The flag-5 rider STANDS for the feel round: the sheet
+fills the keyboard-avoiding host but carries no keyboard-guide
+constraint of its own, so the footer row sits where the keyboard now
+actually rises.
+
+**MINOR 3 (near-viewport per-tick scope) — HOLDS as the adjudicated
+shape fix.** My own trace of the call shape: the band is the queryable
+`viewportRange` padded ONE viewport (min 512 chars) each side;
+`.document` remains the default so every content/geometry input axis
+(edits via `storageDidEdit`, projections via `ingest`, flips via
+`displaySlot`, voice, load) still resolves everything — the ONLY
+behavioral change is the `layoutSubviews` tick, exactly as recorded.
+**The stale-geometry question interrogated axis-by-axis:** content
+edits → `.document`; projections/flips/voice → `.document`; width →
+the escalation (`containerWidth != lastFullPassWidth` forces a full
+pass and re-records — rotation/reflow covered; the first-ever tick
+escalates too since the sentinel starts at −1); TK2
+estimate-refinement drift mid-scroll is the ONE uncovered axis, and it
+is bounded by construction — **a VISIBLE block is always in-band**
+(`viewportRange` IS the laid-out character region; the band is a
+character superset of anything on screen), so on-screen chrome is
+always freshly resolved and only off-screen chrome can drift, healing
+with a full viewport of lead as its block approaches. The
+cache-lifecycle trap checked: `exclusionByBlock` moves in lockstep with
+`badges` (the cleanup loop removes both; a fanned-but-uncached off-band
+block falls through to a ONE-TIME heal resolve, never a per-tick
+repeat); the pill arm's new early `return` is covered by the
+`refreshing` defer; `near()`'s overlap math handles zero-length
+entries; the equality gates are unchanged so the steady state stays
+write-free. The call-shape pin is real on HEAD (green within my 130).
+**Rider for the DEVICE round (the adjudication's magnitude half):** the
+one drift shape that could show wrong pixels is a badge/gutter whose
+cached Y drifts INTO the visible region while its block stays off-band —
+it requires estimate error exceeding the one-viewport pad and repairs
+only at band entry or the next `.document` pass. If the device round
+ever sees a ⑂ floating without its block on a very long fan-heavy note,
+the remedies are a larger pad or keying the cache on a layout
+generation; mechanism named here so the round knows what it is looking
+at (magnitude honestly unmeasured, per the adjudication).
+
+**NIT 1 (the pill's ✓ clears the prior refusal) — HOLDS.**
+`report(nil)` on `chooseDisplayed`'s success path — the browser verbs'
+own posture; red-on-old reproduced by my own run.
+
+**NIT 2 (deferred-prune marker gap) — HOLDS as adjudicated
+(recorded-only).** My own diff read confirms `adoptFans`/`ingest` carry
+zero fix-pass lines; the transient stays exactly as round 1 recorded
+it.
+
+### New findings
+
+**NEW BLOCKER: none. NEW MAJOR: none. NEW MINOR: none.**
+
+**[NIT] · `MobileTakesBrowser.swift:205-221` (`branchDisplayed`) · the
+flush-first fix cannot carry bytes a REFUSED flush keeps pending — the
+branch then mints older text on the very road the refusal copy
+recommends.** Mechanism, traced: bytes typed on a take's card BEFORE a
+remote lock arrives stay pending (MINOR 1's keep-pending — the belt
+refuses only keystrokes AFTER the delivery); `branchDisplayed`'s
+`flushNow` retries the refused entry and is refused again
+(`lockedVariant`, keep-pending, error spoken raw via `onError`); the
+mint proceeds and `branchVariant` copies the STORE's locked bytes — so
+the fresh branch shows older text than the source card (which renders
+the pending bytes ledger-first), and "branch it or unlock it on the
+Mac to edit" is precisely the road the copy sends her down. Nothing is
+lost (the entry stays pending and visible; the store is byte-safe) and
+the window is narrow; pinnable (type on a card → remote-lock → deliver
+→ branch → mint text == store ≠ pending), but the FIX direction is a
+product call — seeding the mint from the ledger would carry refused
+bytes past the lock's insure-what-it-protects semantics, while refusing
+the branch door under a refused flush would close the recommended road.
+Record as the documented corner, or route to `notes/QUESTIONS.md` at
+the architect's discretion; deliberately NOT fixed by this round.
+
+### Counts
+
+Mobile **130/20 GREEN** on HEAD (my own run). Pre-fix overlay run: 38
+passed / 6 failed — exactly the six standing-API pins, siblings all
+green. Core / Mac / spine not run: the fix diff carries zero shared
+lines (verified by my own stat read), so the only-if-shared condition
+never fired.
+
+### Clean bill (load-bearing things specifically checked, found solid)
+
+- The fix-pass diff's boundary claim (8 files, +464/−24,
+  mobile-target-only) — my own stat + hunk read.
+- `resolvedOriginal` copies every identity field intact (blockID,
+  placementID, position, both counts, comment count, lock) — no
+  projection drift rides the text substitution; the `known != slot.text`
+  no-op arm returns the slot unchanged.
+- The ledger-freshness invariant the BLOCKER fix rests on
+  (`adopt` only at clean adoption points; deferral while dirty) —
+  traced through `EditorProjectionPolicy.decide` and both adopt sites.
+- The MAJOR pin also asserts the SOURCE row flushed (`storedText(a1) ==
+  edited`) — the fix's flush is proven, not just the copy's bytes.
+- MINOR 1's belt admits no vanished-take window (main-actor
+  serialization + resign-on-vanish traced).
+- MINOR 2: card views reused by variantID — re-renders never re-attach,
+  reset text, or re-raise focus; `detachCardEditor` resigns and clears.
+- MINOR 3: every pre-existing `refresh()` call site is byte-identical
+  in behavior (`.document` default); the `layoutSubviews` hook is the
+  one change; escalation covers the first-ever tick (sentinel −1).
+- The harness's debounce hold is real (injected sleep throws
+  `CancellationError` — dirty state holds until an explicit flush), so
+  the pins' "inside the debounce window" framing is genuine, not
+  timing-dependent.
+- Worktree state: clean at `5342aaa`, up to date with `origin/mobile`
+  at review start; the scratch pre-fix worktree was created outside
+  this checkout and removed after the run.
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
