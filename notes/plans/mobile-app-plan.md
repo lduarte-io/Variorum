@@ -5663,6 +5663,58 @@ record's rule.
 
 ---
 
+## Stage 4 round 2 — ADJUDICATED; THE FINAL LADDER CLOSES · STAGE 4 CLOSED · **THE v1 BUILD IS COMPLETE** (architect, 2026-08-03)
+
+**Round 2: all five dispositions HOLD; ONE new MINOR (a test-comment
+mis-description of the merge pin's red-on-old) — AGREED, comment-only,
+FIXED by the architect at adjudication (both sites corrected to the
+revert's own recorded facts; the 13k R2-3 precedent). Zero new
+BLOCKER/MAJOR — the ladder closes at round 2.** Suite re-verified after
+the comment fix by the round's own count (comments compile-neutral;
+mobile 172/24).
+
+**THE v1 BUILD, WHOLE — final counts:** mobile **172/24** · core
+**1039/114** · Mac **1193/208** (the one recorded environment-gated
+tripwire, by identity) · spine **51/7**. Four stages, four ladders (S1
+closed round 2 clean; S2 caught+killed a flip-back text-loss BLOCKER;
+S3 caught+killed a two-live-editors BLOCKER AND a latent SHARED
+clean-instant class the Mac itself carried; S4 caught+killed the delete
+door's flush gap). NO schema anywhere; zero `Sync/` lines; the shared
+spine grew only by sanctioned parity moves + the two adjudicated law
+fixes (trim-law K8 alignment; the clean-instant policy) — both
+Mac-verified. Every ledger row L1–L13 is dispositioned (L10 device
+round + L11 look rounds = the GATE's own acts; L12 deferred by design).
+
+**THE PROJECT GATE — everything for the author, one sitting (nothing
+below blocks anything; the build is at rest until her word on what's
+next):**
+1. **The feel round** — the complete app on her phone: Xcode → run the
+   `VariorumMobile` scheme to her device (Debug = dev store, the right
+   fence for a feel round; the Release/real-store install decision
+   comes AFTER her acceptance). Judge: the shelf + Today + Library ·
+   Write's typing/autocorrect/dictation · swipe-peek + ✓ + the browser
+   · Read · comments/callouts · divide/merge · both voices + dark ·
+   the recorded device riders (loupe-under-pan, badge target, marker
+   z-order, sheet keyboard, Write→Read freshness, decor perf).
+2. **Q-M1** (branch-under-refused-flush: seed-from-ledger (a,
+   spec-truer) vs refuse-the-door (b)).
+3. **Q-M2** (the fanned-divide cross-platform asymmetry her M10 + #10
+   rulings jointly created: (a) keep both as built · (b) align the
+   Mac's divide door to auto-proceed on unique match · (c) the phone
+   defers to a ceremony-style choice).
+4. **P1–P44** (the PROVISIONAL ledger across all batch records —
+   wordings, sizes, placements; silence leaves them as shipped) + LK5's
+   ✓-finished-as-state rider + the missing-bar-acts note
+   (strikethrough/code/link have no LK8 buttons) + the delete-confirm
+   shape + the smart-book true-count deferral (beside P36).
+
+**After her gate:** merge `mobile` → `main` at her word (the milestone
+the worktree rules name); the design/beauty rounds (L11) iterate with
+her; S5's sync soak rides real use; TestFlight when she calls the app
+stable (M14).
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a

@@ -458,9 +458,12 @@ struct MobileStructuralTests {
     }
 
     /// The merge door's twin: a block minted remotely BETWEEN the pair
-    /// inside the flush window — the pre-fix door merged the pre-flush
-    /// pair anyway, silently skipping the block now sitting between
-    /// them; the fixed door re-verifies both neighbors and refuses.
+    /// inside the flush window. Honest scope (the round-2 correction):
+    /// the pre-fix door did NOT merge — the op's own adjacency belt
+    /// refused, surfacing the RAW `blocksNotAdjacent(...)` string (the
+    /// revert's recorded 1 issue; store untouched). What this pins is
+    /// the DOOR-LEVEL re-verify: the fixed door refuses with its own
+    /// spoken message before the op is ever asked.
     @Test func mergeReVerifiesBothNeighborsAfterTheFlushWindow() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedProsePost(
@@ -497,9 +500,11 @@ struct MobileStructuralTests {
             model.autosave.stopObserving(token)
             #expect(ingested)
 
-            // RED-ON-OLD: the pre-fix door merged (First + Second),
-            // stranding the between-block after the pair. The fixed door
-            // refuses; all three blocks stand, the typed bytes flushed.
+            // RED-ON-OLD (corrected at S4 round 2): the pre-fix door
+            // reached the op, whose adjacency belt refused with the raw
+            // `blocksNotAdjacent` string (1 issue; store untouched) —
+            // the fixed door refuses at the door with its own message;
+            // all three blocks stand, the typed bytes flushed.
             #expect(model.statusMessage
                 == "This block's takes changed — try the merge again.")
             #expect(try await liveBlockTexts(db, postID: seed.postID)
