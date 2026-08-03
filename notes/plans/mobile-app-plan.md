@@ -457,14 +457,14 @@ gates (the autonomy calibration); author-only calls remain hard stops.
 | # | Item | Status |
 |---|---|---|
 | L1 | TK2-on-iOS spike + decision memo | **DONE 2026-08-03** — ADOPT ×6 ruled at the Stage 0 gate (the gate record below); the spike KEPT as the executable §5 form (the recorded deviation) |
-| L2 | Editor core (identity, autosave, markdown render, keyboard bar) | pending (S1) |
+| L2 | Editor core (identity, autosave, markdown render, keyboard bar) | **DONE** (S1, batches 1–3; ladder CLOSED at round 2) |
 | L3 | Takes surface (badge, swipe-peek, ✓, browser, four verbs) | pending (S2) |
 | L4 | Shelf home + Today + Library/search + nav; capture views retire | pending (S3) |
 | L5 | Read flow | pending (S4) |
 | L6 | Comments & callouts, view + edit | pending (S4) |
 | L7 | Divide/merge doors + ceremony refusals | pending (S4) |
-| L8 | Formatting typing behaviors + toolbar (split across S1/S4 at batch briefs) | pending |
-| L9 | iOS trailing-blank-lines defect — pinned dead in the new editor (accidental accrual vs the 2026-07-12 MEANINGFUL stored spacing — never a blanket trim; this row OWNS the KnownIssues entry) | pending (S1) |
+| L8 | Formatting typing behaviors + toolbar (split across S1/S4 at batch briefs) | **S1 half DONE** (render + behaviors + the six live acts; ⑂/⋯ join in S2; strikethrough/code/link ACTS recorded for the gate — LK8's eight has no such buttons) |
+| L9 | iOS trailing-blank-lines defect — pinned dead in the new editor (accidental accrual vs the 2026-07-12 MEANINGFUL stored spacing — never a blanket trim; this row OWNS the KnownIssues entry) | **DONE in the new editor** (the L9 pin, revert-verified both directions; the KnownIssues row STAYS until S3 retires the capture surface — its resolution note belongs to that closeout) |
 | L10 | Device round + sync soak (incl. Phase 8's pending device items) | pending (S5) |
 | L11 | Design/beauty rounds with her | pending (post-S5, iterative) |
 | L12 | 13e-vocabulary adoption (reorder/move/copy-all, takes-aware F&R) | deferred BY DESIGN — after 13e lands |
@@ -1731,6 +1731,122 @@ code as it stands.
 **Round-2 verdict: every round-1 disposition HOLDS; ZERO new findings;
 nothing forces round 3 from this pass.** Adjudication is the
 architect's.
+
+## STAGE 1 — CLOSED (the architect's closeout, 2026-08-03; the ladder closed at round 2)
+
+**What shipped (batches 1–3, every batch accepted after verify-don't-trust):**
+the continuous Write-true editor core — the shared identity brain in
+`Shared/EditorBrain/` (parity, zero test edits), the TK2-explicit view +
+checkpoint canary, identity-as-projection re-stamped per edit with the
+DEBUG audit, block-scoped autosave/churn, the crystallization family, the
+full markdown vocabulary through ONE brain (render display==stored,
+⏎/Tab/⇧Tab behaviors, checkbox tap, the six-act bar), the trim-law fix
+per the adjudication (the Mac inherits; superseded-pin sweep empty), the
+look canon applied (both voices, the LK2 phone-local switch, R51 black
+pinned), the L9 trailing-newlines pin, and `MobileWalkTests` (4 walks)
+riding every run. **The ladder: round 1 = 0 BLOCKER / 0 MAJOR / 2 MINOR
+/ 3 NIT, all dispositioned + fixed at adjudication; round 2 (fresh
+reviewer) = all five dispositions HOLD, ZERO new findings, counts
+re-verified by its own runs. Closed at round 2 per the ladder's rule.**
+
+**Final Stage 1 counts (verified by three independent sessions' own
+runs):** core **1039/114** · mobile **76/16** · Mac **1191/208** (the one
+recorded environment-gated tripwire, by identity) · spine **51/7**. NO
+schema; NO `Sources/VariorumCore/Sync/` lines; the core diff = the two
+adjudicated Domain files; no new dependencies (two in-range transitive
+bumps, enumerated).
+
+**THE STAGE GATE — the author's bundle (answer whenever; NOTHING gates
+S2's build):**
+1. **P1–P14** (the PROVISIONAL list across the three batch records:
+   cross-block refusal wording · paragraph-gap size · the DEBUG Write
+   door · placeholder status chrome · #-cycle H1→H2→H3→clear · ⇥
+   long-press = outdent · the deferred undo story · hardware ⇧⏎
+   continues lists · marked-text bails · typography sizes · switch-door
+   form/default · accent caret tint · bar chrome mapping · masthead
+   status coloring).
+2. **LK5's rider:** ✓ finished stays visible as a STATE on book rows.
+3. **The missing bar acts note:** strikethrough/code/link have no LK8
+   buttons — vocabulary types by hand; acts wait for her word.
+4. **THE FEEL ROUND (the gate's instrument — the styled surface has
+   never been visually inspected):** the S1 Write surface lives behind a
+   DEBUG door (P3 — the app shape is S3's), so the feel round is a
+   TETHERED DEBUG RUN to her phone (Xcode → run to device; the A4 fence
+   gives it the dev store — right for a feel round; her real-store
+   Release install stays on the Phase 8 surface until S3). What to
+   judge: typing feel, the markdown behaviors under the real keyboard,
+   live autocorrect/dictation (the memo's obligation-6 device items),
+   both voices, dark, the paragraph gap, typography sizes (P10).
+
+**Stage 2 OPENS (takes) — its batch 1 brief below;** the NIT-3 advisory
+BINDS it (sibling types beside the VM, never VM growth).
+
+---
+
+## Stage 2, batch 1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, IN FULL:** `CLAUDE.md` · this file (the run record M1–M14
++ LK1–LK11, the constitution + application notes, the environment traps,
+the Stage 0 gate record, EVERY S1 batch brief/record/acceptance, the
+ladder rounds 1–2 + dispositions, the Stage 1 closeout above) ·
+`notes/plans/mobile-tk2-spike-memo.md` (items 4/5 are this batch's
+ground: the fragment-rect pan + peek overlay, the edit-menu extension
+with its iOS-27 seam note) · the Mac's takes vocabulary in code — the
+v2 card grammar and choose/branch/blank/archive/delete door shapes
+(`App/Variorum/Variorum/Features/Takes/`, read to mirror semantics,
+never port AppKit).
+
+**Objective:** takes arrive on the phone (M4/M5/M6/M9 + LK3/LK6/LK10) —
+the badge, the swipe-peek, and ✓. (The full browser with the four verbs
+is batch 2; this batch is the in-page experience.)
+
+**Scope, batch 1:**
+1. **The fan badge (LK3):** fanned blocks wear **⑂ alone** — count-free,
+   an OVERLAY at the block's first fragment's trailing corner (P-8), with
+   **LK10's reserved gutter**: an exclusion rect so the first line's text
+   NEVER runs under the badge; non-fanned blocks carry nothing and
+   reserve nothing.
+2. **The swipe-peek (M5/M6/M9, LK6):** a delegate-gated horizontal
+   `UIPanGestureRecognizer` scoped by the fanned block's fragment rects
+   (the spike's proven shape — horizontal-dominance gate,
+   never-simultaneous-with-scroll): swipe flips which take DISPLAYS in
+   place as a **PEEK** — zero storage writes (display-swap through the
+   render path; the identity audit stays clean); **sticky while the note
+   is open** (M9), reverting on close; a visible per-block peeking
+   marker keeps chosen-vs-peeked unambiguous; non-fanned blocks don't
+   respond.
+3. **The pill (LK6):** the under-block pill during flips — ‹ take k of
+   n · label › with **✓** — fading after a beat, back on any flip; ✓ is
+   the ONLY act that chooses (`chooseVariant` through the ops; refusals
+   speak — sealed posts etc.).
+4. **Editing a peeked block:** typing into a block whose display is
+   peeked edits THE PEEKED TAKE's `working_text` (everything visible in
+   an editing surface is editable — R8/R23's letter; route autosave to
+   the displayed variant), never silently the chosen one. If this
+   surfaces a genuine product ambiguity in the wild, PROVISIONAL it and
+   record.
+5. **Structure per NIT 3 (BINDING):** the take machinery lands as
+   sibling types (e.g. a peek controller / fan projection provider)
+   beside `MobileEditorViewModel` — composition, never VM growth; the
+   VM gains only thin routing.
+6. **The walk grows:** a fanned block → swipe flips the peek (bytes in
+   store untouched) → the marker shows → ✓ chooses (the store's
+   chosen_variant changes; the Mac would follow) → identity audit clean,
+   canary silent.
+
+**Explicitly NOT batch 1:** the takes browser + new/edit-any/archive
+verbs (batch 2, with the bar's ⑂ and the edit-menu "Block Takes" door),
+⋯/the block menu, the app shape (S3), Read flow (S4).
+
+**Discipline:** the standing set, verbatim from the S1 briefs — tests
+with every step; the environment traps bind; mobile + walks green at
+bout end by your own runs (+ core/Mac/spine ONLY if anything shared
+moves — none is expected this batch); NO `Sources/VariorumCore` lines
+(fan queries exist — `Queries`/`chooseVariant` are standing vocabulary;
+a genuine core need = stop and report); NO schema; red-on-old for
+bug-class fixes; commit as you go with the standing trailer; push at
+bout end; **append your batch record to this file**; ONE Sonnet lookup
+at a time, external facts only. The S2 ladder runs at stage end.
 
 ---
 
