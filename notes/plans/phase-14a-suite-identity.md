@@ -228,6 +228,28 @@ does not gate the spike (project refs are random; display names rename freely).
   migration road" to one candidate among deliberate options, weighed at the migration
   design step.
 - **R4 — Spike timing: NOW, in-sitting** ("yes, we can run the spike now").
+- **R5 — The custom:fragments pairing may be retired OUTRIGHT; the bridge's latitude,
+  HER WORDS VERBATIM: "yeah, i don't really fully understand what's going on with the
+  custom fragments pairing but I am honestly willing to just get rid of it completely
+  for now (though we should make sure that it's still possible to add back in later).
+  I do care about the bridge long term but if it has to die right now for the E2EE
+  phase and then get added back in, that's fine."** The architect's clarification,
+  recorded with the ruling because the two mechanisms are DISTINCT (and 9c made them
+  independent deliberately): **(a)** the `custom:fragments` pairing is only about
+  SIGN-IN — Variorum's project currently trusts Fragments' project as the identity
+  that proves who she is. Under the ruled shape (A) it retires at THIS phase by
+  design — both apps trust the neutral project instead — so her willingness matches
+  the plan exactly; re-adding any such pairing later is a dashboard configuration
+  (the 9c-proven pattern), never a rebuild. Once Variorum's provider is deleted, the
+  Fragments project's OAuth 2.1 Server (as issuer) and the registered client
+  *[removed for publication]*
+  BRIDGE (the journal co-writer pushing/pulling `journal_entries`) does NOT ride the
+  pairing: its session is shape (c) — her Fragments email+password, direct (ratified
+  #16) — so retiring the pairing leaves the bridge running untouched. Nothing in 14a
+  needs to kill it, and the recorded 14b direction is that the bridge is KEPT AND
+  PROMOTED (public at launch; its journal class gains E2EE under the shared key —
+  an upgrade, not a death). Her die-and-re-add latitude is recorded as headroom the
+  plan holds but does not currently spend.
 
 **Field notes (the spike record — appended live, the 9c Step-0 form):** *in progress.*
 

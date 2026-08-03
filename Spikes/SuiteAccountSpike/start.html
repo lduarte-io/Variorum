@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- 14a spike — flow starter (THROWAWAY). Mints a PKCE pair, stashes the
+     verifier in localStorage for callback.html, and sends the browser into
+     the NEUTRAL project's OAuth 2.1 authorize endpoint as the registered
+     public spike client. -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Suite-account spike — start</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; max-width: 520px; margin: 3rem auto; padding: 0 1rem; }
+  button { font: inherit; padding: 6px 18px; cursor: pointer; }
+  pre { background: #f4f4f4; padding: 10px; white-space: pre-wrap; }
+  .err { color: #b00; }
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<h2>Suite-account spike — start the code flow</h2>
+<div id="out"></div>
+<button onclick="go()">Start authorize (PKCE)</button>
+
+<script>
+function b64url(bytes) {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function go() {
+  if (SUITE_URL.startsWith("PASTE-") || SPIKE_CLIENT_ID.startsWith("PASTE-")) {
+    document.getElementById("out").innerHTML =
+      '<p class="err">Fill config.js first (project URL, publishable key, client id).</p>';
+    return;
+  }
+  const verifierBytes = crypto.getRandomValues(new Uint8Array(32));
+  const verifier = b64url(verifierBytes);
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+  const challenge = b64url(new Uint8Array(digest));
+  const state = b64url(crypto.getRandomValues(new Uint8Array(16)));
+  localStorage.setItem("spike_pkce_verifier", verifier);
+  localStorage.setItem("spike_state", state);
+  const url = SUITE_URL + "/auth/v1/oauth/authorize"
+    + "?client_id=" + encodeURIComponent(SPIKE_CLIENT_ID)
+    + "&redirect_uri=" + encodeURIComponent("http://localhost:3000/callback.html")
+    + "&response_type=code"
+    + "&scope=" + encodeURIComponent("openid email profile")
+    + "&state=" + state
+    + "&code_challenge=" + challenge
+    + "&code_challenge_method=S256";
+  location.href = url;
+}
+</script>
+</body>
+</html>
