@@ -1407,6 +1407,196 @@ repo-first in this file before any fix session sees them; fixes with
 traced mechanisms + revert-verified red-on-old pins; round 2 re-reviews
 fresh; a new BLOCKER/MAJOR forces round 3; hard cap three rounds.
 
+## Stage 1 review — round 1 findings (cold reviewer, 2026-08-03)
+
+**Scope of this review, done in-session:** `notes/REVIEW_PROMPT.md` run
+verbatim; the FULL combined diff `00d2c42..3e4d27e` read file-by-file
+(every new source/test file in full; every modified Mac/core file as a
+diff; the moved files confirmed rename-only); this file's batch records
++ dispositions as anchor; **all three load-bearing suite counts
+re-verified by the reviewer's OWN runs** — core `swift test`
+**1039/114 GREEN**; mobile (iPhone 17 Pro / iOS 26.2) **76/16 GREEN**;
+Mac **1191/208 with EXACTLY one red, BY IDENTITY the recorded tripwire**
+(`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`;
+the spine's seven tutorial suites green within the run). No fixes made —
+read-only per the prompt; adjudication and fixes are the ladder's next
+step. No "Review foci" section exists for this project; the batch-3
+record's seven ladder-attention flags served that role and each is
+dispositioned below.
+
+### Findings
+
+**BLOCKER — none found.** (Stated per the hallucination guard: nothing
+at this severity survived a traced-mechanism test.)
+
+**MAJOR — none found.**
+
+- **[MINOR] · notes/plans/mobile-app-plan.md, batch-3 record ("Rider:
+  …") + `App/…/xcshareddata/swiftpm/Package.resolved` · the recorded
+  Package.resolved rider under-enumerates the re-resolution** · Evidence:
+  the diff bumps TWO pins — `swift-concurrency-extras` 1.4.0 → 1.4.1
+  (recorded) **and `xctest-dynamic-overlay` 1.10.1 → 1.11.0 (a
+  minor-version bump, larger than the recorded one — unrecorded)**. Both
+  are within already-declared ranges (no new dependency; no author-only
+  trigger), and every green run this bout used the new resolution — but
+  the record's enumeration is what the acceptance verified against, and
+  half the delta is missing from it. Proposed fix: amend the batch-3
+  record (and the handoff's echo) to name both bumps — doc-only, the
+  record-accuracy class, no pin applicable.
+
+- **[MINOR] · App/Variorum/VariorumMobile/Features/Write/MobileEditorStyle.swift:48
+  (`storedVoice`) + MobileWalkTests.walk4 / MobileVoiceTests.surfaceWriteValuesFollowTheLiveVoice ·
+  cross-test shared mutable voice can flake attribute assertions under
+  Swift Testing parallelism** · Mechanism, traced: `MobileEditorStyle.voice`
+  is process-global; the two voice-flipping tests set `.study` and
+  restore only at test end (defer), with REAL suspension points inside
+  the flipped window (`await flushNow`, `try await storedBlockTexts`).
+  All editor tests are `@MainActor` — serialized, but INTERLEAVED at
+  awaits — so a concurrently running test that materialized its surface
+  under terminal can resume into its attribute assertions while the
+  global reads study (e.g. a render test's `marker ==
+  …markdownPalette.marker` comparing across the flip). NOT an observed
+  failure (the reviewer's own run was green; every recorded run was) —
+  a flake-hazard class, honestly labeled: byte expectations are immune
+  (display == stored is voice-independent), only attribute expectations
+  race. Proposed fix: `.serialized` on the two voice-flipping suites, or
+  arrange the flipped window to contain no suspension points — test-infra
+  class; a red-on-old pin would mean constructing the race and is not
+  applicable.
+
+- **[NIT] · Sources/VariorumCore/Domain/SegmentationRules.swift:152
+  (`trimmedPiece`) · degenerate corner between the adjudication's two
+  arms** · An indented EMPTY list item (`"  - "`) reads `isListLead ==
+  true` on the raw line, then the (ruled) trailing trim eats the lead's
+  own trailing space — storing `"  -"`: leading indent kept on a piece
+  that no longer reads as a list, and whose TRIMMED form (`"  -"`) is
+  not a list lead either, so it sits between "keeps a list-lead's
+  indent" and "every other piece trims exactly as before". Inherent to
+  composing the ruling's own trailing-trim clause with the
+  tokenizer-mirror reading; input is degenerate (a pasted empty nested
+  item), no rendering or behavior class breaks, and the old law's
+  outcome (`"-"`) was equally degenerate. Record-the-corner (a comment
+  line) or dismiss; not worth a rule change.
+
+- **[NIT] · Sources/VariorumCore/Domain/SegmentationRules.swift:182
+  (`sentences(in:)`, `var characters`) · flag-4 concurred** ·
+  never-mutated `var` (pre-existing Phase 2 code, correctly outside the
+  adjudication's scope); one-word `let` fix whenever a batch is already
+  in the file.
+
+- **[NIT] · App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift
+  (974 lines) · P-9 watch, advisory** · The VM is cohesive TODAY — it is
+  wiring over shared brains (projection policy, ledger, planner,
+  reconciler all live in Shared/EditorBrain and are composed, not
+  reimplemented) — but it already carries projection discipline, edit
+  routing, crystallization, voice switching, and the identity audit, and
+  it is one batch from the `TakesViewModel`-at-890-lines line P-9 names.
+  S2's takes/swipe/peek machinery must land as sibling objects consulting
+  this VM, never as growth inside it. Advisory, not a defect; no
+  degradation exists yet to trace.
+
+### The seven ladder-attention flags, dispositioned
+
+1. **Wrong-core trap:** the fix is verified correct-by-construction —
+   `relativePath` resolves from the `.xcodeproj`'s directory
+   (`App/Variorum`), so `../..` names the repo root in EVERY checkout
+   (worktree and main alike; a no-op at merge), where
+   `../../../variorum` named `~/dev/variorum` absolutely. Today's state
+   is coherent under the reviewer's own three suite runs (all on the
+   corrected path, all matching the records). The batches-1–2
+   counts-stand reasoning rests on the recorded byte-identical core diff
+   AT DISCOVERY — historical, not re-verifiable now; accepted as
+   recorded evidence, consistent with everything re-runnable.
+2. **The tripwire:** reproduced BY IDENTITY in the reviewer's own Mac
+   run — exactly one red, the named test. Covariate-UNKNOWN stands;
+   the owner remains the 13e kickoff sweep, not this project. Correct.
+3. **No visual inspection of the styled surface:** stands as recorded
+   scope — machine-verified attributes only; her device feel round is
+   the gate's instrument. Nothing for a code review to add.
+4. **SourceKit `var characters` warning:** concurred as NIT above.
+5. **The two comment-only Phase-2 pin edits:** verified against the
+   diff — comment lines only, zero assertions changed. Waved through.
+6. **S2 forward-duty (style from `MobileEditorStyle.face`/tokens, never
+   literals):** noted; rides with the P-9 advisory above.
+7. **Organic-vs-deliberate mobile revert evidence: RULED ADEQUATE.**
+   The organic pre-path-fix simulator run IS the two mobile pins
+   failing on byte-identical pre-fix law (main's core == this branch's
+   pre-fix trim), with the exact flattened outputs recorded — that is
+   red-on-old, achieved organically — and the core-side deliberate
+   revert independently discriminates the same law (exactly the three
+   keep-lead pins red, the two boundary pins green). A repeated mobile
+   revert would prove nothing the core revert does not already prove.
+
+### Clean bill (load-bearing things specifically checked, found solid)
+
+- **Counts:** all three suites re-run by the reviewer (above) — every
+  recorded figure reproduced exactly, tripwire by identity.
+- **The trim law:** ONE rule (`trimmedPiece`) at BOTH paragraph-mode
+  doors; the reviewer's own caller sweep confirms the site enumeration
+  (Operations+Import ×2 and CrystallizationPlanner ×3 all route through
+  `bulkSegments`/`crystallizedBoundary`; the only other Domain trims are
+  the sentence-scanner flush, `DisplayTitle`'s absence test, and the ⏎
+  door's content-emptiness check — all correctly out of scope).
+  `isListLead` is an EXACT tokenizer mirror (`leadingWhitespace` is
+  space/tab-only, so NBSP-indented lines conservatively trim, matching
+  the recorded interpretation; the `"- "` requirement matches
+  `leadingSpan` including the checkbox-as-bullet-shape free ride); the
+  manual trailing trim mirrors `.whitespaces` exactly. The five core
+  pins + two mobile adjudication pins are real and discriminating.
+- **Parity moves:** four EditorBrain files + VoiceTokens moved with ZERO
+  content changes (rename-only in the diff); the Mac keeps every
+  pre-move name as a forward with byte-identical algorithm —
+  `MarkdownFaceCore` is line-for-line the Mac's styling algorithm
+  parameterized over base font + palette (checked against the removed
+  Mac code hunk-by-hunk); zero test edits outside the two sanctioned
+  classes; EditorBrain's no-UI-framework charter holds (Foundation +
+  VariorumCore only; the UIKit/AppKit typealiases live in
+  MarkdownFace's own Shared subfolder, as recorded).
+- **Identity-as-projection:** `restampProjection` takes its extent from
+  the index authority (the widen pin's mechanism traced and verified);
+  the DEBUG audit walks the full tiling per edit; gateless system edits
+  route via `fallbackVerdict` against the pre-edit index (pinned with a
+  genuine gate-bypassing storage replacement); display == stored held
+  through render, restyle, programmatic replace, and the voice switch
+  (attribute-only writes; the `.editedCharacters` guard keeps them
+  inert).
+- **The gate:** ONE VM-owned delegate every host shares; sealed /
+  locked-take / cross-block / desync refusals all speak (pinned);
+  acts, ⏎, Tab/⇧Tab, and the checkbox tap all ride the ordinary
+  policed input path (pre-gate idempotent with the keyboard's own
+  consult; consumed keystrokes leave no stray newline; a mid-plan
+  refusal skips without corrupting the rest).
+- **P1 discipline:** line-scoped restyle pinned by `MarkdownScanCount`
+  (< 100 scanned on a 6k-char-neighbor keystroke); block-scoped
+  autosave cost with gate-exact figures (the widened-report wrinkle
+  handled, system paths honestly approximate per SyncSpec §6); the
+  O(entries) integer re-stamp walk is honestly recorded with its
+  bisect upgrade path.
+- **The canary:** TK2-explicit construction through the true designated
+  init (the ObjC-factory SIGSEGV trap documented in-file); the
+  checkpoint poll carries a REAL positive control — a deliberate
+  `.layoutManager` downgrade, detected in-suite.
+- **The L9 family:** both directions covered (accrual refused with
+  `flushCount == 0` on editless cycles; typed/pasted meaningful spacing
+  round-trips byte-exactly; a neighbor's edit never touches stored
+  spacing) — the recorded revert discrimination is consistent with the
+  pin structure.
+- **Rulings honored where built:** LK2 phone-local UNSYNCED voice
+  (UserDefaults, terminal default, the ⌘⇧I precedent); LK8-minus-⑂/⋯ as
+  P-2's application (the bar's act table pinned); R51 fully black dark
+  rooms pinned AT the UIKit derivation with a light-side negative
+  control; K1's DisplayTitle chain on the masthead; K5/K8/K10 and
+  `actKeepsIndent` byte-parity pinned against the shared law; M1's
+  Write-true shape with the constitution's phone reading of P-3 (the
+  full-document editor kind, one live surface, no second liveness
+  mechanism).
+- **Boundaries:** NO schema; NO `Sources/VariorumCore/Sync/` lines; no
+  new dependencies (the resolution bumps are within declared ranges);
+  `renderedText`/export bodies/the bridge's join brain untouched by the
+  diff; the pbxproj change is exactly the wrong-core path fix; the
+  Phase 8 capture views untouched; the spike outside the target as
+  ruled.
+
 ---
 
 ## Orientation
