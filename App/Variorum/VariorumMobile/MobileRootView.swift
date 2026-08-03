@@ -18,8 +18,13 @@ struct MobileRootView: View {
     @State private var model: EntryListViewModel
     @State private var path = NavigationPath()
     #if DEBUG
-    // Stage 0 TK2 spike door (THROWAWAY — deleted at stage close).
+    // Stage 0 TK2 spike door (KEPT as the executable §5 form — the Stage 0
+    // gate record's recorded deviation).
     @State private var spikePresented = SpikeLaunch.autoRunRequested || SpikeLaunch.uiTestBenchRequested
+    // Mobile S1 batch 1: the DEBUG door to the new continuous Write
+    // surface (today's entry), beside the spike's — the app shape is S3's;
+    // this exists so the Stage 1 feel round can open the editor.
+    @State private var writeS1PostID: WriteS1Door?
     #endif
 
     init(session: AppSession, services: AppServices?, captureRouter: CaptureRouter) {
@@ -48,6 +53,15 @@ struct MobileRootView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("TK2 Spike") { spikePresented = true }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Write S1") {
+                        Task {
+                            if let id = await model.openToday() {
+                                writeS1PostID = WriteS1Door(postID: id)
+                            }
+                        }
+                    }
+                }
             }
             #endif
         }
@@ -55,6 +69,25 @@ struct MobileRootView: View {
         .task { await model.startAll() }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
+        .sheet(item: $writeS1PostID) { door in
+            NavigationStack {
+                MobileWriteScreen(session: session, postID: door.postID)
+                    .navigationTitle("Write (S1)")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Done") { writeS1PostID = nil }
+                        }
+                    }
+            }
+        }
         #endif
     }
 }
+
+#if DEBUG
+private struct WriteS1Door: Identifiable {
+    let postID: String
+    var id: String { postID }
+}
+#endif
