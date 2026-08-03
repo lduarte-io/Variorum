@@ -60,17 +60,25 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   `~/dev/variorum`; now `../..` (relative). Counts at S1 build-complete:
   core 1039/114 · mobile 76/16 · Mac 1191/208 (tripwire only) · spine
   51/7.
-- **THE STAGE 1 LADDER IS RUNNING — round 1 spawned** (target
-  `00d2c42..3e4d27e`; REVIEW_PROMPT verbatim; findings land repo-first
-  in the plan file before any fix session). Same-model flow: the
-  architect adjudicates against the spec; fixes go to a FRESH session
-  with traced mechanisms + revert-verified pins; round 2 re-reviews
-  fresh; hard cap three rounds.
-- **The stage gate after the ladder:** the author bundle is P1–P14 +
-  LK5's ✓-finished note + the seven batch-3 ladder flags; the feel
-  round is the gate's instrument for the styled surface (no visual
-  inspection has happened — machine-verified only); the first Release
-  install to her phone rides it (M14).
+- **STAGE 1 CLOSED** (closeout record in the plan, 2026-08-03): the
+  ladder closed at round 2 — round 1 = 0 BLOCKER / 0 MAJOR / 2 MINOR /
+  3 NIT, all dispositioned + fixed at adjudication (`5608810`); round 2
+  = all five HOLD, zero new findings (`1866d42`). Final counts (three
+  independent sessions' own runs): core 1039/114 · mobile 76/16 · Mac
+  1191/208 (tripwire only) · spine 51/7. Ledger L2/L8/L9 dispositioned.
+- **The stage-gate bundle is WITH THE AUTHOR** (presented 2026-08-03;
+  enumerated in the closeout record): P1–P14 · LK5's ✓-finished rider ·
+  the missing-bar-acts note · the FEEL ROUND = a tethered Debug run to
+  her phone (the S1 Write surface is DEBUG-doored; her real-store
+  Release install stays on the Phase 8 surface until S3). Nothing in it
+  gates S2's build; fold her answers into the owning batches as they
+  arrive.
+- **STAGE 2 IS RUNNING — batch 1 spawned** (brief in the plan: ⑂ badge
+  + LK10 gutter · swipe-peek sticky with marker + pill · ✓-chooses ·
+  peeked-take editing · NIT-3 sibling-types BINDING · walk growth).
+  Batch 2 (the browser + four verbs + the ⑂/⋯ bar acts + the edit-menu
+  door) is authored at batch 1's acceptance; the S2 ladder at stage
+  end.
 - **The stage-gate author bundle so far:** batch 1's P1–P4 + LK5's
   ✓-finished-as-state PROVISIONAL; the device feel round (live
   autocorrect/dictation, loupe-under-pan — the memo's obligation 6);
