@@ -421,6 +421,61 @@ does not gate the spike (project refs are random; display names rename freely).
     4.5 MB — prose scale keeps that trivial forever; pull-to-head hardening
     stays Phase 12's.
 
+- **Round 0e (same sitting) — the multi-user completeness sweep + her mental-picture
+  round.** Her instruction, executed same-turn: *"let's update the plan for 14 so that
+  it includes everything needed for multi user variorum"* — the master plan's 14c row
+  now enumerates the full set (the parent-join isolation of the eight tables with the
+  14a allowlist retiring INTO it; **the `setting` table's multi-user redesign** — the
+  sweep's one genuinely new find: one shared keyspace, no owner column, two users'
+  settings would CAS-fight, a §12 lockstep event; the Variorum sign-in door opening;
+  stranger onboarding/first-pull; per-user vault provisioning; two-USER convergence
+  suites; the stranger-sees-zero probe). Also this round:
+  - **Her sequencing word, verbatim: "nobody has a login yet and nobody is going to
+    get a login before the E2EE surgery … I don't have users yet (aside from myself),
+    the E2EE surgery is going to happen before there are other users, and I want
+    things to be well buttoned up before that."** For VARIORUM this confirms the
+    standing order (strangers at 14c, after 14b) and is now stamped on the 14c row.
+    **THE OPEN RULING it creates:** round 0d's goal had Fragments TestFlight testers
+    logging in THIS WEEK — strictly read, "nobody before the E2EE surgery" would
+    push TestFlight past 14b (testers' journals otherwise ride plaintext until the
+    journal-class E2EE lands and migrates them). Two coherent readings presented to
+    her: (i) testers this week, plaintext-until-14b accepted and migrated; (ii) the
+    week ships infrastructure + her migration only, 14b runs next at AI speed, and
+    TestFlight opens on E2EE'd journals ~a couple of weeks out. Her call; the neutral
+    project's signups-ON timing follows the same ruling.
+  - **The internal-guard question, conceded and refined** (her push: "I'm still not
+    seeing 100% the actual issue … I don't have users yet, the E2EE surgery is going
+    to happen before there are other users"): she is RIGHT that her sequencing
+    dissolves the interim-window risk the guard argument leaned on — with no second
+    authenticated user before 14c's isolation, home-inside-Variorum would also have
+    been safe in the interim. What SURVIVES as the separate project's real value,
+    stated honestly: (1) fate-sharing/blast radius (14b's mirror surgery, restores,
+    pauses never share a project with every app's login); (2) issuer permanence —
+    her own future-apps instinct ("it would eventually be a little weird for
+    variorum to hold the keys to all of them"), which is the load-bearing reason;
+    (3) **vault separation** — under the ruled shape the 14b wrapped keys live on
+    the NEUTRAL project while the ciphertext lives on Variorum's, so no single
+    project dump ever holds both; inside-Variorum they would cohabit.
+  - **The bridge at week's end: byte-unchanged.** The bridge is DATA-plane (journal
+    rows between the two APP projects, shape (c) session); the issuer is
+    IDENTITY-plane (who she is). No journal byte ever flows through the neutral
+    project under any shape; retiring custom:fragments touches sign-in only. The
+    with/without-issuer comparison presented in-chat and summarized: without = 
+    Fragments doubles as the suite's de-facto identity host; with = both apps trust
+    the neutral account and the bridge merely swaps HOW its Fragments-project
+    session is eventually obtained (shape (c) today; optionally delegated-via-
+    stargazing later). 14b upgrades its journal class to E2EE — an upgrade, never
+    a death (R5's latitude stays unspent).
+  - **The AI-age structuring answer, recorded:** the 14a→14b→14c order is
+    DEPENDENCY-forced (vault on the account → E2EE; E2EE before users → isolation
+    before signups), not calendar-forced — so the structure stands and the CALENDAR
+    compresses (days-per-phase, not weeks). The one deliberate slow step: 14b's
+    key-design sitting (derivation, recovery, enrollment are one-way doors baked
+    into ciphertext — build fast, decide carefully).
+  - The Fragments-side ask list drafted in-chat this round; it formalizes into
+    `notes/fragments-bridge-contract.md` once she rules TestFlight timing and the
+    neutral project exists (its issuer URL is the missing coordinate).
+
 ## Ledger
 
 | # | Item | Status |
