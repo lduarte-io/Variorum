@@ -5472,6 +5472,197 @@ ladder.
 
 ---
 
+## Stage 4 review — round 2 (fresh cold reviewer, 2026-08-03)
+
+**Isolation statement:** a brand-new reviewer, zero implementation
+context; `REVIEW_PROMPT.md` followed verbatim. This round's picture was
+built from the round-1 findings + ADJUDICATION + FIX-PASS RECORD (the
+anchors), the fix diff `731f414..43b17a3` read in full, every touched
+file read in full (`MobileStructural.swift` · `MobileBlockMenu.swift` ·
+`MobileReadPage.swift` · `MobileReadView.swift` + the three test
+files), the contract sources the fixes lean on read directly
+(`AutosaveCoordinator.flushNow`/`notifySettled` ·
+`MobileEditorViewModel`'s settle registration, `ingest`,
+`applyPendingIfClean`/`refetchFresh` · `Operations+Deletion.swift`'s
+`performDeleteBlock` + `enforce` · `Queries.blockTOC` ·
+`MobileBookViewModel`'s window/probe/truncated · the Mac's
+`DivideWCeremony` seeding and `propagatedCuts`), and the mobile suite
+re-run by this reviewer's own hands. A REAL pass, not a rubber-stamp:
+every disposition below carries this reviewer's own trace.
+
+**Counts (own run, iPhone 17 Pro / iOS 26.2): mobile 172 tests / 24
+suites GREEN** (`** TEST SUCCEEDED **`; all 24 suite lines pass-marked,
+the run's own summary "172 tests in 24 suites passed"). **Core / Mac /
+spine NOT RUN, justified by own verification:** `git diff --name-only
+731f414..43b17a3` is exactly seven mobile-target/test files + this plan
+— zero `Sources/VariorumCore`, zero `Shared/`, zero Mac-side, zero
+pbxproj, zero schema, zero `Sync/` lines — and no trace below
+implicates shared code, so the only-if-shared condition never fired
+(the S2/S3 precedent).
+
+### Verdicts per round-1 disposition
+
+- **MAJOR 1 (the Delete Block door's missing flush-guard + latch) —
+  HOLDS; the relocation truly closes the traced loss.** Own trace of
+  the premise at the sources: `AutosaveCoordinator.flushNow` puts a
+  refused entry BACK into `pending` (lines 154–173 — `isDirty` stays
+  true), and `performDeleteBlock`'s only belt under `.none` is
+  `ensurePlacementUnlocked` (Operations+Deletion.swift:192) — a locked
+  take does NOT refuse, so the flush guard is genuinely the only
+  protection on the loss path. The fix: the act now lives on
+  `MobileStructuralController.deleteBlock(blockID:)` behind the
+  one-flight latch + `flushPendingText()`'s post-flush `isDirty`
+  re-check — byte-for-byte its siblings' discipline — and the menu
+  keeps ONLY the confirm seam (`confirmDelete` → seam or headless
+  fallthrough → `delete` → `structural.deleteBlock`). **The
+  confirm-seam split leaves NO unguarded path**, verified by sweep:
+  every route to the act passes the structural door; the only other
+  `ops.deleteBlock` caller in the mobile target is the crystallization
+  reconciler's compensating deletions
+  (MobileEditorViewModel.swift:1028) — internal bookkeeping on blocks
+  the mint itself created moments earlier, a different class,
+  pre-existing and cleared by earlier ladders, not an author door.
+  **The menu's byte-unmodified pins still assert what they claim:**
+  the tray-note string travels identically, and the one refusal class
+  `deleteBlock` can actually throw at the door (`lockedPost`) renders
+  the identical string from either `refusalMessage` ("This note is
+  locked — unlock it on the Mac to delete the block."); the structural
+  version's extra `.lockedVariant`/`.invalidCut` arms are unreachable
+  through delete. The sealed arm and the happy-path arm of
+  `deleteBlockTombstonesAndSpeaksTheTrayNote` now transit the moved
+  act and pass green in my run. The pin
+  (`deleteRefusesWhenTheFlushItselfRefuses`) discriminates: my own
+  trace of the pre-fix door reproduces the recorded 2-issue red (the
+  tombstone lands; the status line ends as the stranded retry's face),
+  and the fixed door refuses with the block live, the bytes still
+  pending, the stored take byte-unchanged. Honest note, no finding:
+  the LATCH half carries no dedicated pin — but neither do divide's or
+  merge's latches anywhere in the suite (grep empty), so the fix
+  matches its siblings' pinned surface exactly, and the adjudication's
+  pin requirement covered the loss class, which is pinned. The delete
+  door's belt-only seal posture (no `isSealed` pre-gate) is
+  pre-fix-identical and pinned through the op.
+
+- **MINOR 1 (the record correction) — HOLDS.** Both load-bearing facts
+  re-verified at the Mac sources by this reviewer's own read:
+  `DivideWCeremony.swift:207` seeds `marked: variant.id == seedTake.id`
+  (an untouched confirm IS a one-take W), and `propagatedCuts`
+  (EditorSurfaceController.swift:960–988) is the true line-for-line
+  mirror of the phone's mapping (same store fan read, same
+  displayed-take guard, same all-takes unique-match loop). The
+  amendment is IN PLACE and visible: flag 3's wrong sentence struck
+  with strikethrough + attribution + the traced facts, interpretation
+  4 carrying the pointer note. Accurate on both ends.
+
+- **MINOR 2 (the post-flush re-verify in BOTH doors) — HOLDS; the
+  drive is honest.** The window is real at the sources:
+  `notifySettled()` fires synchronously at `flushNow`'s tail BEFORE
+  the door's await resumes, and the VM's own settle registration
+  (`applyPendingIfClean`, MobileEditorViewModel.swift:167–173) is
+  production main-actor work that applies deferred projections at
+  exactly this suspension class (a delivery is a signal —
+  `refetchFresh`'s async fresh read). The divide door re-resolves
+  `(j, freshIntra)` against the caret and refuses on blockID drift
+  with everything downstream (text, snap, editable, displayedID)
+  reading the FRESH entry; merge re-verifies both neighbors and reads
+  `leadingLength` fresh. Everyday paths are unaffected (no delivery →
+  identical resolution → no new refusals — the sibling pins pass green
+  in my run). Both pins discriminate: my own trace of the pre-fix
+  drives reproduces the recorded revert evidence exactly — divide
+  ACTED (the cut snapped in the re-tiled entry's text, applied to the
+  pre-flush blockID: the legal-but-wrong divide, 3 issues), merge was
+  caught by the op's adjacency belt and surfaced the raw
+  `blocksNotAdjacent(...)` string (1 issue, store untouched). **The
+  test-observer drive does not weaken the pins:** the settle-seam
+  ingest is a fair mechanization of the deferred-delivery application,
+  its recorded artifact (the synthetic ingest paints pre-flush store
+  bytes; a real delivery refetches fresh and cannot) is correctly
+  answered by store-only assertions, and the two settle observers'
+  dictionary-order nondeterminism is outcome-neutral (the VM's arm
+  finds `pendingProjection` nil in either order). Residual, correctly
+  recorded as the R2-10 class: the guard closes the mis-ADDRESS class
+  (wrong block); a store-side text change to the SAME block between
+  the flush and the op remains the read-then-act window every door
+  carries, op-belt-validated — consistent with the honest-rarity
+  statement.
+
+- **NIT 1 (the rename seed through `Queries`) — HOLDS.**
+  `Queries.blockTOC(db, post:)` verified at TakesQueries.swift:268 —
+  the standing name-carrying, post-scoped read (cost ∝ the post); the
+  GRDB import is gone and the feature layer's only raw SQL with it.
+  The seed path remains behaviorally untested, exactly as the record
+  states.
+
+- **NIT 2 (the truncated-floor meta) — HOLDS.** Model semantics
+  verified at `MobileBookViewModel`: window 300, probe `window + 1`,
+  `truncated = count > window`, entries trimmed to the window — so an
+  EXACT-window book never reads a false floor, and a truncated book
+  renders "note n of 300+" (both arms pinned; the two pre-existing
+  3-arg pins byte-unmodified over the defaulted parameter, per the
+  diff). The true-count deferral's premise verified:
+  `bookshelf.postCount` counts curated `reading_post` rows only
+  (ShelfQueries.swift:33) — a smart book's derived membership has no
+  standing corpus-flat read, so the honest floor was the right-sized
+  fix and the gate-bundle routing beside P36 is correct.
+
+### New findings
+
+- **[MINOR] · `MobileStructuralTests.swift` (the merge re-verify pin's
+  red-on-old comment, ~line 505) · the pin's own self-description
+  misstates its demonstrated pre-fix degradation.** The comment reads
+  "RED-ON-OLD: the pre-fix door merged (First + Second), stranding the
+  between-block after the pair." Traced by this reviewer: it did NOT —
+  the pre-fix door bound `leadingID`/`trailingID` pre-flush (A and B),
+  the store held [A, between, B], and `ops.merge(A, B)`'s adjacency
+  belt REFUSED, so the pre-fix degradation was the raw
+  `blocksNotAdjacent(...)` string with the store untouched — exactly
+  what the fix-pass record itself says ("a silently-wrong merge is
+  nearly unreachable past that belt, recorded honestly") and what its
+  own revert evidence proves (the merge pin failed with ONE issue, the
+  status string; the store assertions PASSED on old). The shipped test
+  comment contradicts both. This is round-1 MINOR 1's exact class — a
+  wrong justification sentence that will mislead a future reader about
+  what the pin pins — this time in the shipped test's own doc comment.
+  Fix: a comment correction; no code change, no pin (doc-class,
+  justified per the hallucination guard).
+
+- **No new BLOCKER or MAJOR findings.** Stated explicitly: every
+  mechanism this round traced either confirms a round-1 disposition or
+  lands as the one doc-class MINOR above.
+
+### Clean bill (load-bearing things specifically checked, found solid)
+
+- **The fix diff's scope walls, by own name-list:** exactly seven
+  mobile-target/test files + this plan across `731f414..43b17a3`;
+  zero core/Shared/Mac/pbxproj/schema/`Sync/` lines.
+- **The structural-act contract's uniformity:** all three doors
+  (divide · merge · delete) now carry the identical latch +
+  flush-guard three lines; `flushPendingText`'s copy matches the
+  MAJOR-1 pin's expectation byte-for-byte.
+- **The everyday paths through the re-verified doors:** with no
+  mid-flush delivery the re-verify resolves identically to the
+  pre-flush read (the flush itself never re-tiles the surface), so no
+  new refusal class was introduced — the full sibling set passes in
+  my run.
+- **The MAJOR-1 pin's world honesty:** the remote lock lands through
+  ops with no live observation running (the headless world's stated
+  posture), so the surface's ignorance is the tested reality, not an
+  artifact.
+- **The 172/24 composition:** the 169/24 round-1 baseline + exactly
+  this pass's three pins (the delete guard · the divide and merge
+  re-verifies), all present and green in my own run; walks 1–8, the
+  L9 pin, and the identity audit green in the same run.
+- **The plan-record amendments:** both in place, visible, attributed,
+  and factually accurate against the Mac sources.
+
+**Verdict for the ladder:** all five round-1 dispositions HOLD under
+this reviewer's own traces; ONE new finding, MINOR, doc-class (a test
+comment correction — the architect adjudicates; nothing here forces
+round 3). The FINAL ladder closes at round 2 per the acceptance
+record's rule.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
