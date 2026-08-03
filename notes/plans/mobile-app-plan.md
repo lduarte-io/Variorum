@@ -3130,6 +3130,109 @@ never fired.
   at review start; the scratch pre-fix worktree was created outside
   this checkout and removed after the run.
 
+## STAGE 2 — CLOSED (the architect's closeout, 2026-08-03; the ladder closed at round 2)
+
+**What shipped (batches 1–2 + the ladder's fix pass, every step accepted
+after verify-don't-trust):** takes on the phone whole — the count-free ⑂
+badge with LK10's reserved gutter · the sticky swipe-peek with marker +
+under-block pill · ✓ as the only choosing act · peeked-take editing ·
+the LK4 sheet-over-page browser with all four M4 verbs through the
+standing ops (refusals speaking, I10 heard) · the bar's ⑂ · the one-seam
+edit-menu door — all as sibling types per NIT 3. **The ladder: round 1 =
+1 BLOCKER (the flip-back stale-photograph text-loss class — caught
+before any device ever saw it) + 1 MAJOR (flush-before-mint) + 3 MINOR +
+2 NIT; all adjudicated and fixed with revert-verified pins; round 2
+(fresh reviewer) = all seven dispositions HOLD with red-on-old
+INDEPENDENTLY reproduced on the pre-fix tree (6/6 pins discriminate),
+zero new BLOCKER/MAJOR/MINOR, one new NIT. Closed at round 2.**
+
+**Final counts:** mobile **130/20 GREEN** (three sessions' own runs) ·
+core/Mac/spine stand at the S1 finals (this stage's diff verified
+mobile-target-only by three independent reads). NO schema; NO core
+lines; NO new dependencies.
+
+**The round-2 NIT — PRODUCT-FLAVORED, routed to the author (the gate
+bundle's question Q-M1):** `branchDisplayed` under a REFUSED flush (you
+typed into a take that a remote lock then froze; the refusal recommends
+branching — but the branch mints the store's locked bytes, not your
+pending ones, while the card still shows the pending bytes). Nothing is
+lost; the window is narrow. Two shapes, hers to pick: **(a)
+seed-from-ledger** — the branch copies what the card SHOWS (your pending
+bytes become the new take's text; the recommended road just works), or
+**(b) refuse-the-door** — branching refuses while a flush is pending on
+a locked take, naming the state. (a) reads as the spec-truer shape (the
+door's whole point is carrying your work out from under the lock);
+neither is built until she rules.
+
+**Ledger:** L3 **DONE** (S2 whole). **The stage-gate bundle is
+COMPLETE:** P1–P26 · LK5's ✓-finished rider · the missing-bar-acts note
+· Q-M1 above · the feel round (BOTH stages' device items: live
+autocorrect/dictation, loupe-under-pan, the sheet's keyboard constraint,
+marker z-order, the ~26 pt badge target, the ⑂-drift rider, second-tap
+focus). **Stage 3 (the app shape) opens below.**
+
+---
+
+## Stage 3, batch 1 brief (self-contained — the implementer is briefed by THIS section plus the sections it names)
+
+**Read first, IN FULL:** `CLAUDE.md` · this file (the rulings M1–M14 +
+LK1–LK11, the constitution + application notes, the environment traps,
+the S1/S2 records + ladders + closeouts) · the Mac's shelf/library
+vocabulary in code (`App/Variorum/Variorum/Features/Library/` — mirror
+semantics: `DisplayTitle`, the daily-book door `shelveInDailyJournalBook`
+/ `createOrOpenJournalEntry`, `Queries.searchCatalog`, `observeLibrary`;
+never port AppKit/SwiftUI-Mac chrome) · `Spikes/MobileMockups/
+mobile-look-v1.html` §1 (the RATIFIED shelf shape) + the LK5/LK7
+rulings.
+
+**Objective (M7):** the phone gets its real shape — shelf-first home,
+Today a button, tabs Shelf · Library — and the Phase 8 capture views
+RETIRE.
+
+**Scope, batch 1:**
+1. **The shelf home:** books in the live voice (terminal › marker /
+   lowercase idioms; study normal — the canon), **LK5 faces: note count
+   + tags lead, ✓ finished as a STATE**; pinned books first (the Mac's
+   shelf order vocabulary); tapping a book → its note list (chapters
+   honored; the Read flow itself is S4's); tapping a note → THE editor
+   (S1/S2's Write surface becomes the app's editor — the DEBUG "Write
+   S1" door retires with P3).
+2. **Today's Entry button** — create-or-open (`createOrOpenJournalEntry`)
+   + the shared daily-book shelving door, opening straight into the
+   editor (cold launch → typing in two taps).
+3. **The tab bar (LK7):** text-only, Shelf · Library, voice-cased.
+4. **Library:** everything, newest-first per the standing sort
+   vocabulary; search over `searchCatalog`'s existing scope (titles/
+   names/scrap prefixes — body search is the future roadmap row, NOT
+   invented here); the bookless filter (the Pool's phone home, M7).
+5. **The Phase 8 capture views RETIRE** (EntryList/EntryEditor/
+   CaptureRouter replaced by the new shape; `SyncSetupView`/status and
+   the bootstrap/session shells carry over) — **and the KnownIssues
+   iOS-trailing-blank-lines row RESOLVES at this batch's record** (the
+   defective surface is gone; the L9 pin guards its replacement; write
+   the resolution note for the row per the KnownIssues rule).
+6. **The voice switch's real home:** a minimal Settings surface off the
+   shelf (P11's placement lands; the masthead door retires or stays at
+   the implementer's judgment, recorded).
+7. **The walk grows:** cold launch → shelf renders (LK5 faces
+   byte-checked) → Today → type → the entry lands + shelves into the
+   daily book → Library search finds it → back → the note reopens in
+   the editor.
+
+**Explicitly NOT batch 1:** the Read flow (S4), comments/callouts (S4),
+divide/merge doors (S4), ⋯/the block menu (S4), reorder within books,
+book creation/editing surfaces (Mac-side for v1 — recorded).
+
+**Discipline:** the standing set verbatim (tests with every step; traps
+bind; mobile + walks green by own runs + core/Mac/spine only if shared
+moves — none expected; NO schema; NO `Sync/` lines; red-on-old for
+bug-class fixes; sibling types per the P-9 watch; commit with the
+trailer; push at bout end; append your batch record to this file; ONE
+Sonnet lookup at a time). Batch 1 closes S3's planned scope — flag
+anything the stage ladder must weigh.
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
