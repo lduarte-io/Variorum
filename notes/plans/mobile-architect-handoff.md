@@ -81,7 +81,16 @@ Swift machinery. Work in the `~/dev/variorum-mobile` worktree, branch
   types held both batches; the `deleteVariant` guard-order finding
   mirrored, never changed. **THE S2 LADDER IS RUNNING — round 1
   spawned** (target `c8174ed..40256ca`; findings repo-first; same-model
-  flow; eight recorded flags are the reviewer's anchor).
+  flow; eight recorded flags are the reviewer's anchor). **Round 1
+  RETURNED (findings `408900e`): 1 BLOCKER (flip-back restores the
+  chosen take ledger-blind — the stale-projection text-loss class) ·
+  1 MAJOR (branchDisplayed copies past a dirty buffer — the 13f R1-4
+  flush-first class) · 3 MINOR · 2 NIT; all ADJUDICATED (`5b7cc0e` —
+  every disposition in the plan) and the FIX SESSION IS RUNNING
+  (fresh session; red-on-old by behavioral revert per finding; NIT 2
+  recorded-only). Round 2 re-reviews the fixes when they land; the
+  BLOCKER/MAJOR being round-1 findings does NOT force round 3 — only
+  a NEW BLOCKER/MAJOR in round 2 does.**
 - **After the S2 ladder closes:** the stage gate to the author (the
   bundle is now P1–P26 + LK5's rider + the missing-acts note; the feel
   round covers BOTH stages' device items — live autocorrect/dictation,
