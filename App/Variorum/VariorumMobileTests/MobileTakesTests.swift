@@ -332,6 +332,31 @@ struct MobileTakesTests {
         }
     }
 
+    @Test func aSuccessfulChooseClearsThePriorRefusal() async throws {
+        // The S2 ladder round-1 NIT-1 pin: the pill's ✓ adopts the
+        // clearing posture the browser verbs already have. A sealed
+        // refusal spoke; she unseals on the Mac; the delivery lands; the
+        // ✓ succeeds — the stale locked-note copy must clear (the old
+        // door left it showing).
+        try await withEditorWorld { session, db in
+            let seed = try await seedFannedPost(session)
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.takes.flip(blockID: seed.blockA, forward: true)
+
+            try await session.runner.run { ops in try ops.lockPost(seed.postID) }
+            await model.takes.chooseDisplayed(blockID: seed.blockA)
+            #expect(model.statusMessage
+                    == "This note is locked — unlock it on the Mac to choose a take.")
+
+            try await session.runner.run { ops in try ops.unlockPost(seed.postID) }
+            await model.takes.chooseDisplayed(blockID: seed.blockA)
+
+            #expect(model.statusMessage == nil, "success clears the prior refusal")
+            #expect(try await chosenVariantID(db, blockID: seed.blockA) == seed.a2)
+        }
+    }
+
     @Test func peekingASealedNoteIsAllowedButEditingItRefuses() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedFannedPost(session)

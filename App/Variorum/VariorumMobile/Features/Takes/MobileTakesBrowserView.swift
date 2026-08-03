@@ -285,6 +285,14 @@ final class MobileTakesBrowserView: UIView {
             cardEditor.removeFromSuperview()
             card.hostEditor(cardEditor)
             cardEditor.text = text
+            // Activation RAISES FOCUS (S2 ladder round 1, MINOR 2): "the
+            // minted card goes live so she is typing instantly" needs the
+            // keyboard, not just an editable editor — without this a
+            // second tap was owed. Fires only on the attach transition
+            // (this branch), never on the per-render restyle below.
+            // Windowless (headless harness) it is a no-op returning
+            // false — harmless.
+            cardEditor.becomeFirstResponder()
         }
         cardEditor.font = face.body
         cardEditor.textColor = face.ink

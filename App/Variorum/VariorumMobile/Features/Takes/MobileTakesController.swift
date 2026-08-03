@@ -190,6 +190,9 @@ final class MobileTakesController {
             try await runner.run { ops in
                 try ops.chooseVariant(blockID, variantID: peek)
             }
+            // Success clears the prior refusal (S2 ladder round 1, NIT 1 —
+            // the browser verbs' own clearing posture, the Mac `run()`'s).
+            model?.report(nil)
             peeks[blockID] = nil
             originals[blockID] = nil
             onPeekChanged?(blockID)
