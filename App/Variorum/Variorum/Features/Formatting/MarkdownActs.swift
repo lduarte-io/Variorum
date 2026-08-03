@@ -181,21 +181,15 @@ enum MarkdownActs {
     @discardableResult
     static func apply(_ act: MarkdownEditing.Act, to textView: NSTextView) -> Bool {
         guard textView.isEditable else { return false }
-        let string = textView.string as NSString
-        let selection = textView.selectedRange()
-        guard selection.location != NSNotFound,
-              selection.upperBound <= string.length
-        else { return false }
-
         // Whole lines in, shifted results out — the `MarkdownStyling.restyle`
         // shape, and the whole of the P1 claim: the cost is the lines the
-        // selection touches, never the note.
-        let lines = string.lineRange(for: selection)
-        let low = selection.location - lines.location
-        let high = selection.upperBound - lines.location
-        let plan = MarkdownEditing.plan(
-            act, inLines: string.substring(with: lines), selection: low..<high)
-        guard !plan.isEmpty else { return false }
+        // selection touches, never the note. The lookup + rebase live in the
+        // SHARED door (`MarkdownSurfaceDoors`, the mobile batch-2 parity
+        // move) so both platforms run one computation; nil = an empty plan.
+        guard let plan = MarkdownSurfaceDoors.plan(
+            act, document: textView.string as NSString,
+            selection: textView.selectedRange())
+        else { return false }
 
         let undoManager = textView.undoManager
         undoManager?.beginUndoGrouping()
@@ -203,19 +197,14 @@ enum MarkdownActs {
 
         var applied = 0
         for edit in plan.edits.reversed() {
-            let range = NSRange(
-                location: lines.location + edit.range.lowerBound,
-                length: edit.range.count)
-            guard textView.shouldChangeText(in: range, replacementString: edit.replacement)
+            guard textView.shouldChangeText(in: edit.range, replacementString: edit.replacement)
             else { continue }
-            textView.replaceCharacters(in: range, with: edit.replacement)
+            textView.replaceCharacters(in: edit.range, with: edit.replacement)
             textView.didChangeText()
             applied += 1
         }
         guard applied == plan.edits.count else { return applied > 0 }
-        textView.setSelectedRange(NSRange(
-            location: lines.location + plan.selection.lowerBound,
-            length: plan.selection.count))
+        textView.setSelectedRange(plan.selection)
         return true
     }
 
@@ -243,24 +232,19 @@ enum MarkdownActs {
         let string = textView.string as NSString
         guard string.length > 0 else { return false }
         let index = textView.characterIndexForInsertion(at: point)
-        guard index >= 0, index <= string.length else { return false }
-
-        let lines = string.lineRange(for: NSRange(location: index, length: 0))
-        guard let edit = MarkdownEditing.checkboxToggle(
-            inLines: string.substring(with: lines),
-            insertionIndex: index - lines.location)
+        guard index >= 0, index <= string.length,
+              let edit = MarkdownSurfaceDoors.checkboxToggleEdit(
+                  document: string, insertionIndex: index)
         else { return false }
 
-        let range = NSRange(
-            location: lines.location + edit.range.lowerBound, length: edit.range.count)
         let selection = textView.selectedRange()
         textView.window?.makeFirstResponder(textView)
         // A refusal (a sealed note reached by a race, a locked take) has
         // already spoken through the delegate; the click is still consumed,
         // because it landed on a box and moving the caret there instead would
         // be answering a different gesture.
-        if textView.shouldChangeText(in: range, replacementString: edit.replacement) {
-            textView.replaceCharacters(in: range, with: edit.replacement)
+        if textView.shouldChangeText(in: edit.range, replacementString: edit.replacement) {
+            textView.replaceCharacters(in: edit.range, with: edit.replacement)
             textView.didChangeText()
             // The replacement is the same length as what it replaces, so the
             // caret can simply go back where it was.
@@ -376,22 +360,11 @@ enum MarkdownActs {
         guard selection.length == 0, selection.location != NSNotFound,
               selection.location <= string.length
         else { return .ordinary }
-        let lines = string.lineRange(for: selection)
-        let verdict = MarkdownEditing.returnKey(
-            inLines: string.substring(with: lines),
-            at: selection.location - lines.location)
-        // The Domain answers in the LINE's offsets; the surface acts in the
-        // note's (the `apply`/`toggleCheckbox` rebasing, same shape).
-        switch verdict {
-        case .exitList(let lead):
-            return .exitList(
-                lead: (lines.location + lead.lowerBound)..<(lines.location + lead.upperBound))
-        case .outdentItem(let unit):
-            return .outdentItem(
-                unit: (lines.location + unit.lowerBound)..<(lines.location + unit.upperBound))
-        case .ordinary, .continueList:
-            return verdict
-        }
+        // The Domain answers in the LINE's offsets; the SHARED door rebases
+        // into the note's (the `apply`/`toggleCheckbox` rebasing, one
+        // computation for both platforms since the mobile batch-2 move).
+        return MarkdownSurfaceDoors.returnVerdict(
+            document: string, caret: selection.location)
     }
 
     // MARK: - L10: the ⌘-click that opens a link
@@ -423,9 +396,7 @@ enum MarkdownActs {
         guard string.length > 0 else { return nil }
         let index = textView.characterIndexForInsertion(at: point)
         guard index >= 0, index <= string.length else { return nil }
-        let lines = string.lineRange(for: NSRange(location: index, length: 0))
-        return MarkdownEditing.link(
-            inLines: string.substring(with: lines), at: index - lines.location)
+        return MarkdownSurfaceDoors.linkAddress(document: string, at: index)
     }
 
     /// Was this click the link gesture? ⌘ alone, one click — kept here so
