@@ -51,8 +51,11 @@
   (project/target creation via the Xcode GUI is hers per CLAUDE.md).
 - **Merge discipline:** merge `main` → `mobile` regularly (pick up
   Mac-side core changes early, while they're small); merge `mobile` →
-  `main` at milestones, at the author's word — never push to origin
-  without her. **`Sources/VariorumCore` is the shared spine:** keep
+  `main` at milestones, at the author's word. Push `origin mobile`
+  after committing, at regular intervals (her 2026-08-03 rule change,
+  superseding this section's original never-push line — plain pushing
+  is delegated to sessions; history rewrites and force-pushes stay
+  hers). **`Sources/VariorumCore` is the shared spine:** keep
   core-touching changes small and deliberate, and the standing rider
   holds — anything in `Sources/VariorumCore/Sync/` is Fable work.
 - **The worktree isolates FILES, never the schema:** any schema change is

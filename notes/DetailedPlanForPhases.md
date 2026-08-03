@@ -40,6 +40,8 @@ post-crash). Her walk: #49–#52 answered at the kickoff sitting;
 at her word, zero-instance verified. The closeout log below has
 the paragraph; 13e's closeout authors the next plan.
 
+*(2026-08-03, the author's redirect — recorded against the pointer above, which otherwise stands: **Phase 14a kicks off NOW, before 13e.** Her call, verbatim: "i think i'll probably just run phase 14 right now instead of 13e then - more sync engine surgery, seems better for this current token burning era." 14a has no pre-written plan — the 2026-07-30 split fixed scope boundaries only — so its kickoff opens with the author-attended design sitting and authors `notes/plans/phase-14a-suite-identity.md` just-in-time; **14b follows as its OWN kickoff at 14a's gate** (her cast lean for it is on the 14b row). The mobile project's design sitting opens in parallel in its worktree (`~/dev/variorum-mobile`). 13e stays paste-ready and follows at her word; its closeout-authors-the-next-plan duty is unchanged.)*
+
 *(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
 
 ---

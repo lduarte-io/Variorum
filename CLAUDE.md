@@ -97,7 +97,7 @@ The author can delegate phase execution to a coordinator session via the `/run-p
   - adding any new third-party dependency (license vetting is hers);
   - anything requiring her accounts, credentials, or machine-side GUI steps (Supabase setup, Xcode project creation, signing, TCC prompts);
   - adjudicating a Phase 6-class gate (the TK2 viability decision memo is hers to accept);
-  - deleting or overwriting anything she created; pushing to origin; any history rewrite.
+  - deleting or overwriting anything she created; any history REWRITE or force-push. *(Plain `git push` is NO LONGER author-only — author rule change 2026-08-03, see the push rule in Environment notes. This line previously read "pushing to origin"; that reservation is superseded.)*
 
 ## Testing expectations
 
@@ -164,6 +164,7 @@ xcodebuild clean -scheme Variorum
 
 ## Environment notes
 
+- **Push after committing (author rule change, 2026-08-03 — "we've been leaving pushing for me to do, but i want you to start doing it at regular intervals"):** sessions push `origin` at regular intervals — at minimum at the end of each working bout, and always after a closeout commit — on whichever branch they work (`main` here; `mobile` in the `~/dev/variorum-mobile` worktree). History rewrites and force-pushes remain author-only; never rewrite what has been pushed.
 - **The repo lives at `~/dev/variorum` — outside iCloud sync, permanently** (2026-07-06 emergency move: iCloud Desktop sync choking on `.build`'s tiny files froze the whole machine). `~/Desktop/variorum` is only a convenience symlink. Never relocate the repo, or write build artifacts, into an iCloud-synced folder (Desktop/Documents).
 - **Dev machine (this one): the author's M3 Mac on macOS Tahoe 26.x with Xcode 26 — development and acceptance are one machine.** The Intel Air era ended 2026-07-06 (transition executed ahead of the planned before-Phase-6 date); all Air-era constraints (dev/acceptance machine split, Air-motivated deployment target, Xcode-26-on-Intel) are permanently moot.
 - **Deployment targets: macOS 26 / iOS 26** (author decision 2026-07-06: no older-OS support). Build SDK and runtime OS now match, so no availability-gating for Tahoe APIs.
