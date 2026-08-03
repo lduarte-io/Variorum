@@ -352,6 +352,75 @@ does not gate the spike (project refs are random; display names rename freely).
     login never share a project; provisioning stays a 14a deliverable on the
     neutral project.
 
+- **Round 0d (same sitting, a fresh session — her return with rulings after a
+  requested re-litigation):** she asked for the absolute pros/cons of
+  home-inside-Variorum once more ("ignore the flag that this shouldn't be
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  anchors kept:
+  *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+    *[removed for publication]*
+  - **RULED — NO Fragments-native tester accounts** ("I don't want to have
+    fragments native accounts"). SUPERSEDES the contract file's 14a-horizon
+    frame (ship TestFlight on native auth, re-link later): TestFlight now WAITS
+    on the neutral issuer — her stated window is THIS WEEK — and testers are
+    stargazing accounts from day one, so the re-link debt never starts.
+    Consequence: the consent/sign-in pages + Fragments' provider re-point are
+    the week's critical path (the pages are the long pole — the 9c production
+    page never shipped).
+  - **R5's headroom is now SPENT, not just held** ("I also am not sure I want to
+    even keep what we have on 9c … I don't want the variorum account to be a
+    fragments account anymore"): the custom:fragments pairing retires this phase
+    exactly as shape (A) intended; her account migrates to the neutral issuer at
+    the migration design step (R3's deliberate-remap latitude; the A1 rail
+    binds). The 9c client/RLS/RPC machinery is re-pointed, never discarded; the
+    bridge (shape (c) session) is untouched by the pairing's death — how
+    Fragments handles HER account under stargazing sign-in joins the
+    Fragments-side ask list.
+  - **HER GOAL, verbatim: "My goal is that by the end of this week, I want other
+    people to be able to log in and use both variorum AND fragments."** The
+    architect's split, presented with the function bodies re-read this round
+    (02/04 verified): Fragments YES this week — full use under suite accounts
+    (per-user isolation inside the Fragments project is its own affair; a
+    confirm rides the ask list). Variorum sign-in for strangers NO — sync_pull
+    owner-filters ONLY the five owner tables, so the eight non-owner tables
+    (variant + commit_point = the whole prose corpus; `setting` = one shared
+    keyspace) are served to and accepted from ANY authenticated caller of the
+    project: a second authenticated user means mutual prose disclosure and
+    commingled rows, not isolation. That is 14c's parent-join work, behind 14b
+    per her own E2EE-from-birth ruling; the Variorum project's signups stay OFF
+    (the standing scope line). What strangers CAN do now: the signed-out local
+    app — fully functional by design (the v1 posture: signed-out reads as
+    normal, never degraded).
+  - **Recommended as a this-week 14a deliverable regardless (her go pending):
+    the RPC allowlist hardening** — sync_push/sync_pull additionally refuse any
+    caller whose uid is not hers; a few lines in a committed artifact under §12
+    discipline (announced, executed verbatim, her go-ahead). It answers her "it
+    seems very bad that right now new users could access my variorum tables??"
+    structurally: today NOBODY can (signups off; Gate 4's probed 403; the bare
+    key mints nothing) — but her instinct that one toggle is thin protection
+    for the corpus is right, and the allowlist retires that thinness.
+  - Her fundamentals, answered in-chat and kept for the record: **auth.users is
+    indeed a small table** — the impact of its home is the PROJECT, not the rows
+    (issuer-URL permanence; every account holder becomes an authenticated
+    principal inside the same walls as the corpus; operational fate-sharing
+    with 14b's surgery). And **the phone holds the full replica by design**
+    (state-based row sync, every client a whole store); her store measures
+    4.5 MB — prose scale keeps that trivial forever; pull-to-head hardening
+    stays Phase 12's.
+
 ## Ledger
 
 | # | Item | Status |
