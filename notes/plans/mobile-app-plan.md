@@ -2717,6 +2717,53 @@ at least one entry (nothing at BLOCKER/MAJOR beyond the two named).
 - **Wiring/memory:** the chrome/browser/VM triangle carries weak
   back-references throughout — no retain cycle.
 
+## Stage 2 review — round 1 ADJUDICATION (architect, 2026-08-03; the fix session spawns on this record)
+
+Every finding adjudicated against the spec; the BLOCKER/MAJOR fixes go
+to a FRESH fix session per the same-model ladder flow (bug-class fixes
+need traced mechanisms + red-on-old pins verified by behavioral revert —
+not architect-at-adjudication work):
+
+- **BLOCKER — AGREED; fix owed.** The mechanism is concrete and is the
+  known stale-projection class (the Phase 8 review's MAJOR family; the
+  forbidden outcome — "nothing typed is ever lost" — outranks
+  everything). The peeked direction was ledger-first BY DESIGN; the
+  chosen direction must be SYMMETRIC: ledger-first resolution at both
+  flip-capture and flip-restore. Red-on-old pin per the reviewer's
+  specification (type into the chosen take → flip away and back inside
+  the debounce window → the typed bytes survive on surface, in the
+  ledger, and in the store).
+- **MAJOR — AGREED; fix owed.** `branchDisplayed` copies past a dirty
+  buffer — the 13f R1-4 class (a door offered at a possibly-dirty
+  moment flushes FIRST; the copy must carry the keystrokes that
+  summoned it). Flush before the mint; red-on-old pin per the
+  specification.
+- **MINOR 1 — AGREED; fix owed.** The card gate's claimed sealed/locked
+  belt must be real: extend to the locked-take state with keep-pending
+  on refusal (a remote lock mid-card-edit must never lose typed text —
+  the Phase 7/8 keep-pending posture). Pin the keep-pending half.
+- **MINOR 2 — AGREED; fix owed.** The card editor takes first responder
+  on activation (one tap, not two); walk-assert where drivable; the
+  on-device feel rider stands.
+- **MINOR 3 — AGREED AS SHAPE; fix the SHAPE, measure the magnitude.**
+  A per-scroll-tick refresh forcing layout for EVERY fanned block in
+  the post violates the invalidation-∝-realized-rows law (P-8)
+  structurally, whatever the measured cost. Scope the per-tick chrome
+  refresh to the near-viewport range (the TK2 viewport is queryable);
+  pin the call-shape if drivable, else record honestly; the device
+  round measures.
+- **NIT 1 — AGREED; fix owed** (one line: the pill's ✓ clears the prior
+  refusal on success — `report(nil)`, the browser verbs' own pattern).
+- **NIT 2 — RECORDED, no change** (the pruned-peek marker gap is a
+  self-healing transient of a background prune racing a display; the
+  M6-unambiguity cost is momentary and the next delivery repairs it —
+  a fix would need the prune to synchronously re-enter display code it
+  deliberately stays out of).
+
+All eight flag verdicts ACCEPTED as returned (the guard-order mirror
+confirmed against the real op order; both pin flips verified
+sanctioned; the four feel-round riders join the gate bundle).
+
 ---
 
 ## Orientation
