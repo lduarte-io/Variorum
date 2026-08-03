@@ -4203,6 +4203,258 @@ count — expect 1193/208 with the one tripwire red by identity).
 
 ---
 
+## Stage 3 review — round 2 (fresh cold reviewer, 2026-08-03)
+
+**Scope of this pass, done in-session:** `notes/REVIEW_PROMPT.md` run
+verbatim; the FULL fix diff `10f0b13..7aa80ac` read hunk-by-hunk (commits
+`2c06e63` · `8552436` · `7aa80ac`; `cb7d4f5`/`9642898` verified
+plan-file-only by their own diffstats); every touched file read IN FULL
+(`AppSession` · `EditorProjectionEngine` · the Mac `EditorViewModel`, all
+2567 lines · `MobileEditorViewModel` · `MobileLivenessAuthority` ·
+`MobileShellRouter`/`View` · `MobileWriteView` · `VariorumMobileApp` ·
+`MobileLibraryViewModel` · `MobileBookView` · `MobileShelfFaces` ·
+`MobileVoicePreference` · all six touched test files); the load-bearing
+neighbors read at the source (`AutosaveCoordinator`'s multicast +
+settle-after-commit ordering · `MobileTakesBrowser`'s
+`isOpen`/close/capture-restore · the test harness's `makeEditor`
+never-firing clock · every `EditorProjectionPolicy.decide` caller and
+every `observePost`/`observeTakes` loop in both app targets, grepped and
+read). Every round-1 disposition re-verified under MY OWN trace, not the
+fix session's. Read-only; no fixes made.
+
+**Counts, all by this reviewer's own runs (final tree `9642898`):**
+- **Mac (the EXPLICIT independent duty): 1193 tests / 208 suites,
+  EXACTLY ONE red — BY IDENTITY the recorded environment-gated tripwire**
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+  (identity extracted from the xcresult, not inferred from counts; the
+  run's single failure means the spine's seven tutorial suites are green
+  within it).
+- **Core `swift test`: 1039 / 114 GREEN.**
+- **Mobile (iPhone 17 Pro / iOS 26.2): 140 tests / 19 suites GREEN**
+  (walks 1–7, the L9 pin, and the identity audit green within the run).
+
+### Verdicts per round-1 disposition
+
+**BLOCKER (the one per-post coordinator + the phone liveness authority) —
+HOLDS.** My trace: `AppSession.autosave(forPost:)` sits OUTSIDE
+`#if os(macOS)` with the Mac riders (quit-door registration, the W22
+first-edit hook) inside the one door; the defaulted clock parameters
+equal the old mint's exactly, so Mac behavior is byte-identical. The
+mobile VM adopts the session door (`MobileEditorViewModel.swift:142`) and
+the sharing is structural (session cache; `b.autosave === a.autosave`
+pinned) — one pending entry per variant makes newest-text-win
+independent of any UI geometry. The multicast observers are real (read at
+`AutosaveCoordinator.observe`/`stopObserving`; the single-owner closures
+survive untouched for other callers) and `teardown()` detaches them after
+`finish()` — the Mac's exact posture. The authority enforces the law at
+EVERY door: `register` stands down all others → flushes the taker's
+(possibly shared) coordinator → grants, with `loadOnce` sequenced after
+it in the `.task`, so the newcomer's first read post-dates the sibling's
+flush; `tabDidBecomeVisible` crowns the entering tab's heir WITH the
+refresh (`flushNow` → `refreshTakesFromStore`'s flush+fresh-read+ingest →
+only then `noteLivenessGranted`) or, with no heir, stands down EVERYONE
+(at most one is the law); `deregister` crowns nobody. Stand-down truly
+resigns (`endEditing(true)`), refuses (`isEditable = false`), and speaks
+(the `!isLive` belt sits FIRST in `shouldChangeText`, before the seal
+check — a stood-down surface names the real reason, never a misleading
+lock message). No reachable window leaves a dirty editor outside the
+flush set: registration precedes typing; a popped editor's own
+`teardown()` covers its pending (the standing S1 posture); everyone else
+stays in `registered`; weak entries prune at every door. The
+browser-open grant corner heals as the fix-pass note claims (the sheet's
+own capture/restore at `MobileTakesBrowserView.swift:151–155` + the belt
+underneath). *One calibration, recorded as an observation, not a
+defect:* in the shipped geometry the tab bar renders on tab ROOTS only,
+so a stack cannot be LEFT while an editor is pushed — today's doors
+reach the two-alive-editors state only through the pop-then-switch race,
+which the shared coordinator alone already closes (the pop's teardown
+flush and the newcomer's registration flush both land through one
+pending set). The fix is still the right shape: the authority makes
+one-live-editor structural law rather than a geometric accident, so no
+future door (deep link, restoration, a new push site) can silently
+reopen the class — and the pins drive the authority directly, which is
+exactly what makes that law testable.
+
+**MAJOR 1 (the background flush covers every registered editor) —
+HOLDS.** The single slot is fully retired (grep: one comment mention
+remains, no code); `performBackgroundFlush(editors:)` targets
+`registered` — the authority's own bookkeeping, one mechanism — and the
+scene-phase handler is re-pointed. Both traced arms pinned in one test
+over two posts. I additionally traced the corner the fix-pass did not
+spell out: `flushAll`'s `finish()` on a STOOD-DOWN same-post editor
+cannot clobber the live sibling — `finish` records nothing from the
+surface (recording happens at edit time; the ledger and coordinator
+already hold whatever was typed), it only mints its own un-minted tail
+and flushes the SHARED pending set, where one entry per variant means
+the newest text wins. The revert evidence's discrimination claim (the
+old single-editor pin stayed green on the slot revert) is exactly the
+round-1 finding made executable.
+
+**MAJOR 2 (arrival before the infinite loops) — HOLDS.** `arrive(focus:)`
+is the extracted, pinnable routine (`loadOnce` → `becomeFirstResponder`);
+the `.task` order is register → arrive → start, and `start()`'s doc now
+states NEVER-RETURNS so the dead-code shape cannot silently recur. The
+window-hosted pin bounds its wait so the pre-fix ordering fails red
+instead of hanging (REVERT-C's 1 issue is that mechanism, verified
+coherent). The honest residue stands exactly at the bar round 1 set: the
+three-line `.task` body is policy-free, and makeUIView-before-`.task` is
+framework ordering the harness cannot drive — the device round's
+keyboard-rise check remains the instrument, recorded.
+
+**MAJOR 3 (clean-instant stale adoption — the SHARED policy fix) —
+HOLDS, independently re-verified end to end.** (a) The Mac-half trace is
+genuine, re-traced first-hand: pre-fix `observeSlots` applied deliveries
+directly through the shared policy with no freshness input anywhere in
+the Mac composition — `applyPendingIfClean`'s fresh read covered the
+DEFERRED path only; SHARED routing was the only honest call, and it
+correctly fired the full verification duty (my own three runs above).
+(b) The policy arm is right: precedence not-loaded ▸ busy ▸
+forced[→refetch under a delivery, flag kept armed] ▸ echo ▸
+delivery-refetch ▸ same-sequence ▸ full; a delivery can never take a
+rewrite arm; echo adoption stays legal (matching means byte-identical);
+`.initialRender` stays delivery-legal (nothing local exists to
+regress). The `delivery=false` default is the load-bearing half — every
+direct/fresh drive keeps synchronous semantics, and the diff confirms
+the whole pre-existing pin population passed byte-unmodified (the only
+test edits are the three sanctioned ones + the plan amendment, all
+verified in the diff). (c) **The starvation/echo analysis I was charged
+with — no new class on either platform:** `.refetchFresh` schedules
+exactly ONE fresh read; the fresh value re-enters as non-delivery and
+takes a render arm, so the hop count is one, never a loop; a
+non-matching delivery costs one bounded re-read (external changes only —
+echoes short-circuit at `.adoptEcho` with no read, so steady-state
+keystroke cost is unchanged); a read that straddles a settle re-signals
+through the `storeWriteGeneration` fence and converges the moment the
+store goes quiet, while continuous typing parks everything behind the
+standing busy/deferral machinery. The fence's ordering is sound at the
+source: `AutosaveCoordinator.flushNow` notifies settle AFTER its writes
+commit and after `flushesInFlight` decrements, so a generation-passing
+read cannot predate its own settle's writes, and any flush still
+pending/in-flight at the Task's re-check trips `isDirty` and re-stashes.
+Deliveries can never settle stale: both re-stash arms
+(`pendingProjection = fresh…`) hold only a SIGNAL — the next settle
+re-reads fresh. One recorded non-hole traced and worth keeping visible:
+`finishMint`'s compensating deletions write through the quiet Operations
+with no bump and no dirt, so a straddling fresh read can transiently
+adopt pre-deletion state — healed one delivery later through the refetch
+path itself (display-only convergence, no typed-byte class). Mobile fans
+adopting unconditionally at `ingest` is the recorded S2 posture and
+touches no surface bytes. The three pins (mobile deterministic drive +
+stale-EMPTY analog · the Mac VM pin · the six-arm policy pin) all read;
+the Mac count is mine.
+
+**MINOR 1 (the Library search catch) — HOLDS.** The `CancellationError`
+arm, the error arm's `activeQuery == trimmed` staleness guard, and the
+success-clear are all in place — and the success-clear sits AFTER the
+pre-existing success staleness guard, so a superseded search neither
+lands hits nor clears a newer error (the Mac catalog posture exactly).
+The pin's determinism claim holds (`Task.isCancelled` set before the
+read schedules).
+
+**MINOR 2 (the voice flip through the authority) — HOLDS.**
+`setVoice` → `applyVoiceChangeEverywhere()` over `registered`,
+stood-down editors included; pinned against TWO editors on real storage
+fonts with an await-free flip window; the batch-1 record's overbroad
+claim is amended IN PLACE at its item 6, visibly, exactly as
+adjudicated.
+
+**NIT 1 — HOLDS** (the header now names the Settings home and the
+authority-routed flip; read in full). **NIT 2 — HOLDS** (the `Reading`
+base is the one finished-state grammar, the `ShelfBook` overload
+forwards, the book header calls it; byte-identity by construction —
+`chromeLabel` never cases " ✓").
+
+### New findings
+
+**[MINOR] · the fix-pass record's restoration sentence + 
+`TakesViewModel.swift:265–278/:56–65/:282–296` · the "restored for both
+platforms … the shared policy's law" claim is OVERBROAD: the guarantee
+now binds only surfaces that CONSULT the policy, and the Mac Takes
+board — the third editable surface — does not.** Mechanism, traced (the
+hallucination guard): the board's observation loop adopts a
+clean-instant delivery DIRECTLY (`adopt(value)` when `!autosave.isDirty`)
+and its settle observer adopts the DEFERRED photograph directly
+(`self.adopt(deferred)` — no fresh read, no generation fence, no policy
+consult); `adopt` then runs `authority.settle(isPending:)`, which clears
+every buffer with no pending record — so a stale pre-flush photograph
+consumed at a clean instant (or held as the last deferred value at
+settle) regresses projection AND pane display to pre-flush bytes for one
+observation cycle, and a keystroke inside that window records
+stale-based pane text whose flush clobbers the newer store text with no
+conflict variant — the same forbidden composition round 1's MAJOR 3
+named, on this surface. Calibration, stated honestly: this is
+PRE-EXISTING code, untouched by the fix diff, outside the round-1
+finding's letter and the adjudication's scope, and it carries its OWN
+recorded disposition from an earlier ladder (the in-code "accepted
+residual" note) — so it is NOT a regression and does NOT force round 3
+from me. What makes it a finding now: (a) the fix-pass record claims
+platform-wide restoration the fix does not deliver, and (b) the
+residual's recorded framing ("a stale pre-flush emission … can flicker
+one observation cycle") understates the keystroke-in-window loss
+composition that this very ladder just ruled fix-worthy on the two
+sibling surfaces — a premise the architect may judge falsified.
+Proposed fix: amend the restoration sentence to its true scope; then
+either route the board's two adoption points through the policy in a
+future round/phase (a `refetchFresh`-shaped change; a red-on-old pin is
+trivially constructible — drive `adopt(stalePhotograph)` post-flush) or
+re-record the residual with the loss composition stated and an owner
+named per the KnownIssues rule. The architect adjudicates.
+
+**[NIT] · `MobileEditorViewModel.swift:268` (`loadOnce`'s catch) · a
+push-then-immediate-pop can land "CancellationError()" in the status
+line.** Mechanism: MAJOR 2's fix moved `loadOnce` under the screen's
+cancellable `.task` (pre-fix the screen never called it); a pop cancels
+the task mid-read, GRDB throws `CancellationError`, and `loadOnce`'s
+catch — unlike the observation loops one screen over — stringifies it
+into `statusMessage`. Consequence bounded to a dying surface (the VM is
+being torn down); one-line filter whenever the file is next touched.
+
+**No other new findings — explicitly: NO new BLOCKER, NO new MAJOR.
+Round 3 is not forced by this pass.**
+
+### Clean bill (load-bearing things specifically checked, found solid)
+
+- **The Mac suite independently re-verified per the explicit duty** —
+  1193/208 with exactly one red whose IDENTITY I extracted from the
+  xcresult (the tripwire, not a look-alike); core and mobile by my own
+  runs, matching the fix-pass finals exactly.
+- **Scope discipline** — zero `Sources/VariorumCore` lines, zero
+  `Sync/`, zero schema; the Shared/Mac diff is exactly the three
+  adjudication-sanctioned files; the two record commits are
+  plan-file-only; the `activeEditor` slot survives only as a comment.
+- **The policy precedence pin passed UNMODIFIED** beside the new six-arm
+  delivery pin — the `false` default's design intent, demonstrated.
+- **The sanctioned test edits are exactly the enumerated three** (+ the
+  plan amendment): two shell-test re-points and the comment-only
+  `deliver` helper; every other pre-existing pin byte-unmodified in the
+  diff.
+- **The belt ordering** — `!isLive` refuses BEFORE the seal check, so a
+  stood-down surface speaks the true reason.
+- **The re-entry refresh's internal order** — flush → fresh read →
+  ingest → only then the grant, so the pen can never land on a stale
+  photograph (pinned, and re-traced through `refreshTakesFromStore`).
+- **`flushAll` via `finish()` cannot clobber a same-post sibling**
+  (recording is edit-time; the shared pending set holds one entry per
+  variant).
+- **The harness clock's cache interplay** — `makeEditor`'s never-firing
+  sleep mints the world's coordinator first, and the session cache means
+  both same-post editors share it, which is precisely what the BLOCKER
+  pin's determinism rides on; production callers pass defaults.
+- **The read tier (`ReadPostViewModel`) adopting deliveries directly is
+  fine** — read-only surface, no typed bytes to lose, converges on the
+  next emission (checked because the delivery-marking sweep had to be
+  complete; the Takes board is the one editable exception, the MINOR
+  above).
+- **The fix-pass's six round-2 notes** each checked against code: the
+  PROVISIONAL belt wording, the browser-open grant corner (heals via the
+  sheet's capture/restore + re-entry), weak pruning at every door,
+  `finish()`-as-flushAll semantics, the two delivery-legality pins, and
+  the fence's deliberate structural-flight exclusion (the Mac busy arm
+  carries `structuralInFlight`, and the flight exits through the
+  now-fenced `applyPendingIfClean` — the recorded corner is honest).
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
