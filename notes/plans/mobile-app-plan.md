@@ -434,7 +434,7 @@ gates (the autonomy calibration); author-only calls remain hard stops.
 | L10 | Device round + sync soak (incl. Phase 8's pending device items) | pending (S5) |
 | L11 | Design/beauty rounds with her | pending (post-S5, iterative) |
 | L12 | 13e-vocabulary adoption (reorder/move/copy-all, takes-aware F&R) | deferred BY DESIGN — after 13e lands |
-| L13 | The look track: HTML mockups of the four key surfaces (shelf home · Write page with fanned block + peek pill · takes browser · Read flow) → her look sittings → the mobile styling canon S1–S4 build toward | **v1 DELIVERED** (`Spikes/MobileMockups/mobile-look-v1.html` — real VoiceTokens hexes, both voices + dark + the voice-independent Read page; the 8-item judging list at the file's foot) — her flick pending |
+| L13 | The look track: HTML mockups of the four key surfaces (shelf home · Write page with fanned block + peek pill · takes browser · Read flow) → her look sittings → the mobile styling canon S1–S4 build toward | **v1 FLICKED (LK1–LK5 ruled) · v2 DELIVERED** (`Spikes/MobileMockups/mobile-look-v2.html` — rulings applied; the four open items as lettered options: pill A/B/C · tabs A/B/C · keyboard bar A/B/C · Read A/B, plus the applied-rulings confirm frames) — her v2 flick pending |
 
 ## Environment traps (mobile — carried verbatim into every batch brief)
 

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variorum for iPhone — look mockups v2 (options round)</title>
+<style>
+  /* v2 — LK1–LK5 applied; the four OPEN items as labeled options.
+     All colors remain the real VoiceTokens hexes. Frames are cropped
+     regions, not full phones — judge the element, not the page. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#ECECE6; color:#23272B; font:14px/1.5 -apple-system, system-ui, sans-serif; padding:32px 24px 80px; }
+  .intro { max-width:760px; margin:0 auto 36px; }
+  .intro h1 { font-size:21px; margin-bottom:8px; }
+  .intro p { margin-bottom:8px; color:#444; }
+  .intro .ruled { background:#F6F6F1; border:1px solid #E4E4DC; border-radius:8px; padding:12px 16px; margin-top:10px; font-size:13px; }
+  section { max-width:960px; margin:0 auto 48px; }
+  section > h2 { font-size:16px; margin-bottom:4px; }
+  section > p.cap { color:#666; font-size:13px; margin-bottom:16px; max-width:740px; }
+  .row { display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; }
+  .opt { display:flex; flex-direction:column; gap:7px; }
+  .opt > .lbl { font-size:12.5px; font-weight:600; }
+  .opt > .sub { font-size:11.5px; color:#888; max-width:300px; }
+  .crop { width:300px; border-radius:18px; border:1px solid #C9C9C0; box-shadow:0 4px 14px rgba(0,0,0,.08); overflow:hidden; }
+  .t { background:#F6F6F1; color:#23272B; font-family:ui-monospace, "SF Mono", Menlo, monospace; font-size:13px; line-height:1.6; }
+  .t .chrome { color:#8B9088; }
+  .pad { padding:16px 18px; }
+  .block { position:relative; margin-bottom:12px; }
+  .badge { position:absolute; right:-4px; top:-2px; font-size:11px; padding:1px 6px; border-radius:8px; background:#F2F4EE; border:1px solid #D6DCD0; color:#2F7D5F; }
+  .peeked { border-radius:6px; padding:6px 8px; margin:0 -8px; background:#F2F4EE; box-shadow:inset 2.5px 0 0 #D6DCD0; }
+  .pill { display:inline-flex; align-items:center; gap:8px; margin-top:7px; padding:4px 10px; border-radius:999px; font-size:10.5px; background:#FDFDFA; border:1px solid #D6DCD0; color:#8B9088; }
+  .pill .choose { color:#2F7D5F; font-weight:700; }
+  .toptab { position:absolute; right:-4px; top:-24px; display:inline-flex; gap:8px; padding:3px 9px; border-radius:8px 8px 0 0; font-size:10.5px; background:#FDFDFA; border:1px solid #D6DCD0; border-bottom:none; color:#8B9088; }
+  .toptab .choose { color:#2F7D5F; font-weight:700; }
+  .badgepill { position:absolute; right:-4px; top:-2px; display:inline-flex; gap:7px; font-size:10.5px; padding:2px 8px; border-radius:9px; background:#FDFDFA; border:1px solid #2F7D5F; color:#8B9088; }
+  .badgepill .choose { color:#2F7D5F; font-weight:700; }
+  .tabbar { display:flex; justify-content:center; gap:34px; padding:11px 0 16px; border-top:1px solid #E4E4DC; font-size:12.5px; color:#B3B6AE; }
+  .tabbar .on { color:#23272B; }
+  .tabbar.icons { gap:44px; text-align:center; font-size:10px; }
+  .tabbar.icons .ic { display:block; font-size:17px; margin-bottom:2px; }
+  .kbar { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:#FBFBF7; border-top:1px solid #E4E4DC; color:#8B9088; font-size:14px; }
+  .kbar span { padding:2px 5px; }
+  .kbar .acc { color:#2F7D5F; }
+  .readpage { background:#FFFDF6; color:#2A2620; font-family:"Iowan Old Style", "New York", Georgia, serif; padding:20px 20px 14px; }
+  .readpage .chap { color:#A49681; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; font-family:-apple-system, system-ui, sans-serif; margin-bottom:10px; }
+  .readpage h3 { font-size:18px; font-weight:600; margin-bottom:9px; }
+  .readpage p { font-size:14px; line-height:1.66; margin-bottom:9px; }
+  .readpage .pmeta { color:#C2BCB0; font-size:10.5px; text-align:center; margin-top:10px; font-family:-apple-system, system-ui, sans-serif; }
+  .bookrow { display:flex; align-items:baseline; gap:8px; padding:10px 12px; font-size:13.5px; }
+  .bookrow .meta { margin-left:auto; font-size:10.5px; color:#8B9088; }
+  .bookrow .tags { font-size:10.5px; color:#2F7D5F; }
+  .sel { background:#EEF0EA; border-radius:8px; }
+  .marker { color:#2F7D5F; }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Look mockups v2 — the options round</h1>
+  <p>Round-1 rulings are APPLIED here: the badge is the Mac takes glyph <b>⑂, count-free</b> (LK3);
+  book rows lead with <b># of notes + tags</b> (LK5); both voices ship with a phone-local switch (LK2 —
+  frames below show terminal; everything applies in both voices). The four OPEN items follow as
+  lettered options — ruling can be as short as <i>"pill B, tabs A, bar C, read A"</i>.</p>
+</div>
+
+<section>
+  <h2>1 · The peek pill — where does the flip's readout live?</h2>
+  <p class="cap">You swipe a fanned block and take 2 shows (tinted + edge-marked). Where does
+  "take 2 of 3 · colder ✓" sit while peeking?</p>
+  <div class="row">
+    <div class="opt">
+      <div class="lbl">A — pill under the block (v1's shape)</div>
+      <div class="sub">Floats beneath the peeked text; fades after a beat, back on any flip.</div>
+      <div class="crop t"><div class="pad">
+        <div class="block">The rain kept on through the night, and by morning the yard had gone to mud.</div>
+        <div class="block">
+          <span class="badge">⑂</span>
+          <div class="peeked">I keep circling the letter. It isn't the words that stay with me.</div>
+          <div class="pill">‹ &nbsp;take 2 of 3 · colder&nbsp; › &nbsp;<span class="choose">✓ choose</span></div>
+        </div>
+        <div class="block">What I want to write about is the pause before opening it.</div>
+      </div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">B — a tab on the block's top edge</div>
+      <div class="sub">Rides the block's top-right corner like a file tab; nothing below the text moves.</div>
+      <div class="crop t"><div class="pad" style="padding-top:34px">
+        <div class="block">
+          <span class="toptab">‹ 2/3 · colder › &nbsp;<span class="choose">✓</span></span>
+          <div class="peeked">I keep circling the letter. It isn't the words that stay with me.</div>
+        </div>
+        <div class="block">What I want to write about is the pause before opening it.</div>
+      </div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">C — the badge itself expands</div>
+      <div class="sub">⑂ grows into a corner mini-pill while peeking; collapses back to ⑂ at rest. One object, two states.</div>
+      <div class="crop t"><div class="pad">
+        <div class="block">The rain kept on through the night, and by morning the yard had gone to mud.</div>
+        <div class="block">
+          <span class="badgepill">⑂ 2/3 <span class="choose">✓</span></span>
+          <div class="peeked">I keep circling the letter. It isn't the words that stay with me.</div>
+        </div>
+        <div class="block">What I want to write about is the pause before opening it.</div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>2 · The tab bar's register</h2>
+  <div class="row">
+    <div class="opt">
+      <div class="lbl">A — text only (v1's shape)</div>
+      <div class="crop t"><div class="tabbar"><span class="on">shelf</span><span>library</span></div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">B — icons + labels (iOS-native)</div>
+      <div class="crop t"><div class="tabbar icons"><span class="on"><span class="ic">▤</span>shelf</span><span><span class="ic">☰</span>library</span></div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">C — icons only</div>
+      <div class="crop t"><div class="tabbar icons" style="font-size:0"><span class="on"><span class="ic">▤</span></span><span><span class="ic">☰</span></span></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · The keyboard bar's act set</h2>
+  <p class="cap">The strip above the keyboard. ⑂ is the takes door on the caret's block; ⋯ the block menu.</p>
+  <div class="row">
+    <div class="opt">
+      <div class="lbl">A — the eight (v1's set)</div>
+      <div class="crop t"><div class="kbar"><span><b>B</b></span><span><i>I</i></span><span>#</span><span>•–</span><span>☑</span><span>⇥</span><span class="acc">⑂</span><span>⋯</span></div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">B — lean five</div>
+      <div class="sub">Formatting folds under one Aa; block acts under ⋯.</div>
+      <div class="crop t"><div class="kbar"><span>Aa</span><span>•–</span><span>☑</span><span class="acc">⑂</span><span>⋯</span></div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">C — the eight + flip arrows</div>
+      <div class="sub">‹ › flip the caret block's takes without leaving the keyboard.</div>
+      <div class="crop t"><div class="kbar" style="font-size:13px"><span><b>B</b></span><span><i>I</i></span><span>#</span><span>•–</span><span>☑</span><span class="acc">‹</span><span class="acc">⑂</span><span class="acc">›</span><span>⋯</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>4 · The Read page's chrome</h2>
+  <div class="row">
+    <div class="opt">
+      <div class="lbl">A — chapter caption + page meta (v1)</div>
+      <div class="crop"><div class="readpage">
+        <div class="chap">II · The Long Field</div>
+        <h3>What the rain kept</h3>
+        <p>The rain kept on through the night, and by morning the yard had gone to mud.</p>
+        <p>I keep thinking about the letter. Not what it said — what it didn't.</p>
+        <div class="pmeta">note 3 of 9 · ii</div>
+      </div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">B — bare page</div>
+      <div class="sub">No caption, no meta — just the title and the prose; chapter/position live behind a tap.</div>
+      <div class="crop"><div class="readpage">
+        <h3>What the rain kept</h3>
+        <p>The rain kept on through the night, and by morning the yard had gone to mud.</p>
+        <p>I keep thinking about the letter. Not what it said — what it didn't.</p>
+        <p style="margin-bottom:2px">What I want to write about is the pause before opening it.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>5 · Round-1 rulings applied — confirm the reading</h2>
+  <p class="cap">The count-free ⑂ badge at rest (LK3) and the shelf faces led by # of notes + tags (LK5;
+  ✓ finished kept as a STATE — the PROVISIONAL riding LK5, one line to drop).</p>
+  <div class="row">
+    <div class="opt">
+      <div class="lbl">the badge at rest</div>
+      <div class="crop t"><div class="pad">
+        <div class="block">The rain kept on through the night, and by morning the yard had gone to mud.</div>
+        <div class="block"><span class="badge">⑂</span>I keep thinking about the letter. Not what it said — what it didn't.</div>
+        <div class="block">What I want to write about is the pause before opening it.</div>
+      </div></div>
+    </div>
+    <div class="opt">
+      <div class="lbl">shelf rows, LK5 faces</div>
+      <div class="crop t"><div style="padding:10px 8px">
+        <div class="bookrow sel"><span class="marker">›</span> journal <span class="tags">#daily</span><span class="meta">214 notes</span></div>
+        <div class="bookrow">essays 2026 <span class="tags">#essays #public</span><span class="meta">12 notes</span></div>
+        <div class="bookrow">the book <span class="tags">#book</span><span class="meta">61 notes</span></div>
+        <div class="bookrow">finished poems <span class="tags">#poems</span><span class="meta">✓ · 24 notes</span></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
