@@ -4909,6 +4909,32 @@ the record commit; pushed to `origin mobile` at bout end.
 
 ---
 
+## Stage 4, batch 1 — ACCEPTED; THE v1 BUILD IS COMPLETE — the FINAL ladder OPENS (architect, 2026-08-03)
+
+**Acceptance:** verified — scope inspected (zero core/server/schema/
+`Sync/` lines; the one Shared/ touch is the flagged rename-only parity
+move, its four-suite duty run in full by the implementer — the
+deviation's honesty accepted, its adjudication DEFERRED TO THE LADDER
+as flag 1), the batch record read, push confirmed, and **mobile 169/24
+re-confirmed by the architect's own run**. The Archive-Block absence is
+CORRECT (no such op exists; rendering the door would invent product
+behavior — P-2's letter). P35–P44 join the gate bundle (now P1–P44 +
+LK5's rider + the missing-acts note + Q-M1 + the delete-confirm flag).
+Ledger: **L5 · L6 · L7 DONE; L8's S4 half DONE** — every planned v1
+build row is dispositioned.
+
+**THE STAGE 4 (FINAL) REVIEW LADDER — round 1 (fresh cold reviewer,
+spawned at this record):** target = **`117cb88..85d6534`**;
+`REVIEW_PROMPT.md` VERBATIM, zero framing; anchors = the S4 batch
+record + its ELEVEN flags (flag 1 — the parity-move deviation — and
+flag 3 — the Mac-vs-phone fanned-divide difference against M10's
+letter — deserve particular weight). Findings repo-first; the
+same-model flow; hard cap three rounds. **After this ladder closes: the
+project's COMBINED gate goes to the author** (the full bundle + the
+feel round on her device over the complete app).
+
+---
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
