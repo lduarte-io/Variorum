@@ -652,6 +652,153 @@ this file** (what shipped, counts, interpretations for the reviewer,
 PROVISIONALs). Lookup exception: ONE Sonnet lookup subagent at a time,
 external facts only. The review ladder runs at STAGE end, not per batch.
 
+## Stage 1, batch 1 — BATCH RECORD (implementer, 2026-08-03; commits `6264049` + `7316ae9`)
+
+**All seven scope items shipped.** Per item:
+
+1. **The pure-brain availability move (`6264049`)** — `BlockRangeIndex`,
+   `CrystallizationPlanner`, `EditorProjectionEngine` (the surface ledger
+   + projection policy), and `TextMetrics` git-mv'd to
+   `App/Variorum/Shared/EditorBrain/` (both app targets sync the
+   `Shared/` folder — ZERO pbxproj edits); `EditorDocument` SPLIT: the
+   platform-neutral core (`EditorDocumentCore.swift` — attribute key,
+   separator doctrine, `materializeCore(_:tail:base:)` taking
+   caller-supplied base attributes, `blockID(at:in:)`) lives in
+   EditorBrain, and the Mac keeps `baseFont`/`baseParagraphStyle`/
+   `baseAttributes`/`materialize(_:tail:)` as a `nonisolated extension`
+   forwarding to the core + `MarkdownStyling.style` — byte-identical
+   behavior, every pre-move name intact, ZERO test edits.
+   *Interpretation for the reviewer:* the brief named five brain pieces;
+   `EditorProjectionEngine` + `TextMetrics` (its dependency) rode along —
+   they ARE the projection discipline's pure brain and the same parity
+   argument applies; nothing else moved.
+2. **`MobileEditorTextView`** — TK2-explicit, canary, keyboard.
+   **MEASURED TRAP (a batch finding future batches need):**
+   `UITextView(usingTextLayoutManager: true)` is a bridged ObjC FACTORY
+   (`+textViewUsingTextLayoutManager:`); invoked on a Swift SUBCLASS it
+   returned an instance whose Swift stored properties were NEVER
+   initialized — SIGSEGV at first ivar access (crash report
+   `VariorumMobile-2026-08-03-031331.ips`, frame:
+   `MobileEditorTextView.onCanaryFired.setter`). The shipped
+   construction is the TRUE designated `init(frame:textContainer:)` over
+   an explicit TK2 stack (`NSTextContentStorage` + `NSTextLayoutManager`
+   + container, strong refs kept — the back-pointers are weak). The
+   checkpoint canary (memo obligation 2): immediate checkpoint at arm +
+   assert-after-mutation (called from the VM after every processed edit)
+   + a 30 s idle tick; debug = hard assert (the Mac's N2 injectable
+   seam), release = os_log fault + the VM's visible `canaryMessage`.
+   `keyboardLayoutGuide` avoidance via `MobileWriteSurfaceView` (bottom
+   edge pinned — obligation 4); the `inputAccessoryView` 44 pt bar SHELL
+   (M11's acts deliberately later); the `isPasting` bulk hint (the Mac
+   flag's shape).
+3. **Identity as projection (obligation 1)** — `MobileEditorViewModel`
+   materializes through the shared core with phone base attributes;
+   edits report exact ranges via the storage delegate; block-ID
+   attributes are RE-STAMPED from `BlockRangeIndex` over every edited
+   range; a DEBUG audit walks the whole tiling after every edit (no
+   MISSING runs, separators/tail unowned, index length == storage
+   length) with an observable failure counter. **The iOS system-path
+   answer:** gateless edits (autocorrect's `replace(_:withText:)`,
+   dictation, marked-text commits) arrive at the storage delegate with
+   no pending verdict and route via `fallbackVerdict` against the
+   pre-edit index — nothing that lands in storage goes unrouted (tested
+   with a gate-bypassing storage replacement).
+4. **Autosave/churn** — per-variant routing through the SHARED
+   `AutosaveCoordinator` (single-owner closures, the mobile shape);
+   block-scoped `charDelta` retiring Phase 8's whole-buffer `EditCost`
+   for this surface. **Measured iOS wrinkle:** `didProcessEditing` can
+   WIDEN the coalesced `editedRange` under attribute fixing (a 5→6
+   replacement reported length 7 → cost 13 instead of 11), so policed
+   edits carry the EXACT cost captured at the gate
+   (`range.length + replacement UTF-16`); system paths use the
+   report-derived figure (approximate is fine — churn counters are
+   approximate by design, SyncSpec §6).
+5. **Crystallization** — the Mac's paths ported over the shared brain:
+   type-time (the 2026-07-12 completes-when-the-next-begins timing),
+   bulk on paste (`isPaste` through the gate; the k−1 gap rule
+   round-trips), one-block journal semantics (first text mints THE
+   block; Enter is content forever), the idle mint (2 s clock,
+   marked-text skip — iOS multi-stage input makes this guard earn its
+   keep), the leading-run attachment (typed trailing Enters become the
+   preceding block's durable content), and the teardown backstop
+   (`finish()` mints + attaches + flushes).
+6. **The L9 pin** (`MobileTrailingNewlinesTests`, 5 tests) — accidental
+   accrual refused (editless open/render/close cycles are byte-stable
+   and write NOTHING — `flushCount == 0`; typing writes exactly the
+   typed bytes across cycles); meaningful stored spacing round-trips
+   byte-exactly (typed k−1 gaps via the attachment; pasted gaps; a
+   neighbor's spacing under an adjacent edit) — NEVER a blanket trim.
+   **Discrimination REVERT-VERIFIED (the 13k hollow-pin currency):**
+   (a) a blanket-trim mutation at both VM record doors → 4 red issues
+   (`deliberateTrailingEntersPersistAsContentAndNeverTrim` at every
+   checkpoint: flush, teardown, re-open surface, re-store); (b) an
+   accrual mutation (autosave text + "\n") → 6 red issues across
+   `typingWritesExactlyTheTypedBytesAcrossCycles` (×3),
+   `editingANeighborNeverTouchesStoredSpacing`, and walk 1 (×2);
+   (c) removing the re-stamp → the DEBUG identity audit's FATAL STOP on
+   the first stripped insertion ("block-ID attributes disagree with
+   BlockRangeIndex"). All mutations reverted; final suite green.
+   *Honest framing:* the Phase 8 defect's mechanism lives in the SwiftUI
+   `TextEditor` view layer (never traced, not headless-reproducible);
+   that surface is REPLACED, not patched — the pin guards the NEW
+   editor's every store-write door in both directions. The KnownIssues
+   row STAYS until the capture surface retires (S3); its resolution note
+   belongs to that closeout.
+7. **`MobileWalkTests` BORN** (2 walk steps, riding every run from now
+   on): walk 1 — today's entry opened in the REAL TK2 view (explicit
+   stack, canary armed), typed via the view's own `insertText`, autosave
+   lands, ONE block, identity audit clean, desync count 0, canary
+   silent, no refusal spoken, teardown byte-stable; walk 2 — fresh-note
+   type-time crystallization + teardown mint, byte-stable surface.
+
+**Counts, all by this implementer's own runs:**
+- **Mobile: 38 tests / 11 suites GREEN** (single run, zero relaunches;
+  the Phase 8 baseline 14/4 intact within it) — final run after all
+  mutations reverted.
+- **Shared-touch verification (after the parity move): core 1034/114
+  GREEN · Mac 1191/208 with EXACTLY the one recorded environment-gated
+  tripwire red, by identity
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`)
+  · spine 51/7 GREEN.** Commit 2 touched only mobile-target files, so
+  those runs stand.
+- *Spine-command note for future records:* `-only-testing:
+  VariorumTests/TutorialWalkTests` (the FILE name) selects ZERO Swift
+  Testing tests on a plain xcodebuild run — the 51/7 figure comes from
+  filtering the SEVEN suite type names (`TutorialBookShapeTests` ·
+  `TutorialDoorTests` · `TutorialWritingActsTests` ·
+  `TutorialTakesActsTests` · `TutorialStructureActsTests` ·
+  `TutorialLookingActsTests` · `TutorialLibraryActsTests`).
+
+**PROVISIONALs (for the stage-gate bundle):**
+- **P1:** the cross-block refusal copy — *"This edit spans more than one
+  block — edit inside one block for now."* — batch-1 wording; S4's M10
+  doors (divide/merge) and any adopted compounds replace it.
+- **P2:** `MobileEditorStyle`'s uniform paragraph gap (font-derived,
+  0.35×pointSize, per-paragraph per the 2026-07-12 boundary-invisibility
+  rule) — size and everything visual is the look track's (L13/LK2).
+- **P3:** the DEBUG-gated "Write S1" door (a sheet over the capture root
+  opening today's entry in the new editor) — NOT the app shape (S3's);
+  exists so the feel round can reach the surface; capture views
+  byte-untouched.
+- **P4:** `MobileWriteScreen`'s status voice is three caption rows
+  (canary / seal / status) — functional-unstyled placeholder chrome.
+
+**Deliberate absences (recorded so the reviewer reads them as scope, not
+holes):** no scroll anchoring at all this batch (obligation 3 honored by
+having NO px anchoring; caret preserved by TEXT location on full render;
+the hybrid jump primitive arrives when a batch needs restoration), no
+edit-menu door (obligation 5's seam is batch 2+, M2), no soft-newline
+⇧⏎ distinction (hardware-keyboard story, later batch), no markdown
+render/typing behaviors (batch 2 by the brief), takes/badges/swipe
+(S2), structural doors (S4). Device items (obligation 6 — live
+autocorrect/dictation, loupe feel) ride the stage's feel round as the
+memo assigns.
+
+**NO `Sources/VariorumCore` lines; NO schema; NO Mac-side behavior
+change** (the Mac diff is the parity move's mechanical split only).
+Commits: `6264049` (parity move) · `7316ae9` (editor core + tests);
+pushed to `origin mobile` at bout end with this record.
+
 ---
 
 ---
