@@ -3231,6 +3231,300 @@ trailer; push at bout end; append your batch record to this file; ONE
 Sonnet lookup at a time). Batch 1 closes S3's planned scope — flag
 anything the stage ladder must weigh.
 
+## Stage 3, batch 1 — BATCH RECORD (implementer, 2026-08-03; commit `e531f6d` + the record commit)
+
+**All seven scope items shipped.** Per item:
+
+1. **The shelf home** — `Features/Shell/` (a new feature module — eleven
+   files, sibling types throughout; no existing VM grew).
+   `MobileShelfViewModel` mirrors the Mac `ShelfViewModel`'s cost tiers
+   exactly: books + pins + the daily designation ride ONE held
+   observation (author-scale); the tags column is a ONE-SHOT
+   `refreshTags()` on appearance. **LK5's faces live in a PURE brain**
+   (`MobileShelfFaces`, pinned): the meta line is count · tags · daily —
+   note count + tags LEAD, the daily marker ranks behind, and **✓
+   finished is a STATE riding the NAME** (" ✓" suffix + accent ink — the
+   Mac shelf row's own grammar), never a meta stat. Tags display
+   LEAF-ONLY (the 13k K3 doctrine; the Mac shelf shows paths — phone
+   width demanded the ruling's reading). Order mirrors
+   `ShelfViewModel.ordered` SEMANTICS (pins first in pin order, then
+   journal-profile by name, then the rest by name). Book names go
+   through `tokens.chromeLabel` (terminal lowercases them — the Mac's
+   own grammar, the mockup's own look). Tapping a book pushes its note
+   list (`MobileBookViewModel` — ONE held observation delivering the
+   reading row + assembly coherently, window 300 + probe row so an
+   exact-window book never false-positives the truncation marker;
+   **chapters honored by grouping on the assembly's OWN section
+   transitions** — never a re-sort; section labels show leaves). Tapping
+   a note pushes **THE editor** — `MobileWriteScreen` is the app's
+   editor now; **the DEBUG "Write S1" door RETIRED** with the capture
+   root (the Stage 0 spike's auto-run cover + a manual door SURVIVE — the
+   cover at the shell root, the door in Settings — the gate record's
+   KEPT deviation honored).
+2. **Today's Entry** — `MobileTodayDoor`: create-or-open
+   (`createOrOpenJournalEntry`) + the SHARED daily-book shelving door
+   (`shelveInDailyJournalBook`) in ONE runner closure — the Mac
+   `JournalBooks.openToday` composition; the phone's shelving WORDINGS
+   carried byte-for-byte from the retired capture door (every outcome
+   points at the Mac; a clean shelving says nothing). The shelf button
+   pushes the editor with `focus: true` → `becomeFirstResponder()` after
+   `start()` — cold launch → Today → TYPING (interpretation #1).
+3. **The tab bar (LK7, shape A)** — text-only Shelf · Library,
+   voice-cased via `chromeLabel` (terminal lowercase / study normal),
+   hairline top rule, on-ink/off-faint. BOTH tab stacks stay ALIVE
+   (opacity-switched ZStack) so each keeps its navigation state; the bar
+   renders on tab ROOTS only (pushed screens lose it — the mockup's own
+   geometry).
+4. **Library** — `MobileLibraryViewModel`: everything via the STANDING
+   sort (`observeLibrary` last-touched desc, bounded 200); search =
+   `Queries.searchCatalog`'s EXISTING scope, ONE-SHOT per typed query
+   with stale-result dropping — **body search deliberately NOT invented,
+   PINNED** (`searchNeverInventsBodySearch`: prose containing
+   "xylophone" yields zero hits); the bookless filter holds
+   `Queries.poolPosts` (the Pool's phone home — derived smart membership
+   counts as being in a book, the core query's rule). Hit navigation is
+   a pure pinned function: book → book list, post → editor, block → its
+   HOME NOTE; **a pool-home block hit renders NO row** (P-2 — no phone
+   door exists). Plus the stage-row's **"+ new note" minting door** on
+   the Library path line: `createPost(title: nil)` (13g R6-3 — no stored
+   placeholder; the K1 display brain shows its day), opened focused; a
+   bookless mint lands in the Pool filter honestly (interpretation #2).
+5. **The Phase 8 capture views RETIRED** — `Features/Capture/` deleted
+   whole (EntryList/EntryEditor/CaptureRouter + their VMs, and `EditCost`
+   with them), `MobileRootView` deleted, the app root rewired to
+   `MobileShellView`. `SyncStatusRow` (Shared) carries over — its home
+   is now Settings; the bootstrap/session shells
+   (`AppBootstrap`/`AppServices`/`MobileStoreFailureView`) carry over
+   unchanged. `CaptureRouter` is replaced by **`MobileShellRouter`**
+   (the same weak-active-editor shape re-pointed at
+   `MobileEditorViewModel`, plus the LK2 voice authority);
+   `performBackgroundFlush` keeps its extracted-for-tests shape over the
+   new editor's `finish()`. **The KnownIssues iOS-trailing-blank-lines
+   row RESOLVED and removed** (the resolution note below). **The test
+   surface retired with it:** `VariorumMobileTests.swift`'s 14 tests / 4
+   suites tested the deleted types; the load-bearing pins are
+   RE-POINTED (the mapping in interpretation #5), `SeededGenerator`
+   moved verbatim into `MobileEditorTestSupport.swift`.
+6. **The voice switch's real home** — `MobileSettingsView` off the shelf
+   path line: the two voices (terminal `›` selection marker; study ✓),
+   the sync status row, the DEBUG spike door. **The S1 masthead switch
+   door RETIRED (P11's placement lands; the implementer's judgment,
+   recorded: two doors for one preference was clutter — Settings is the
+   deliberate door).** `MobileShellRouter` is the ONE voice authority:
+   `setVoice` reaches the stored preference + `MobileEditorStyle` + any
+   OPEN surface (`applyVoiceChange`); `MobileWriteScreen`'s chrome reads
+   `router.voice` (observable), so an editor open in the OTHER tab
+   follows a Settings flip — surface and masthead both.
+7. **Walk 7** (`walk7_shelfTodayLibraryColdLaunch`) — cold launch → the
+   shelf observes and renders → **LK5 faces BYTE-CHECKED in the live
+   voice** ("essays" / "2 notes · #goals" · "poems ✓" · "smart ·
+   #books") → Today (day-injected) → the entry shelved into the
+   CREATED-AND-PINNED Journal book (`journalMembers == [todayID]`) →
+   typed in the REAL TK2 editor (walk-1 surface; identity audit 0,
+   desync 0, canary silent) → Library lists it newest-first, search
+   finds it by its day (named by the one display brain), destination
+   routes to the note → the note reopens in a fresh editor byte-exact.
+
+**Counts, all by this implementer's own runs (iPhone 17 Pro / iOS
+26.2):** **full mobile suite 133 tests / 18 suites GREEN** — run green
+TWICE (at the build commit, and again after every mutation was
+reverted; single runs, zero relaunches; the L9 pin and identity audit
+green within every run). Arithmetic against the 130/20 baseline: −14
+(the Phase 8 capture tests, retired WITH their surface) + 17 new
+(`MobileShellTests` 10 · `MobileLibraryTests` 6 · walk 7); suites −4
+(the retired file's) +2. **Core / Mac / spine deliberately NOT run:**
+the bout's diff is mobile-target only (`git diff --stat` at commit: 24
+files, all under `App/Variorum/VariorumMobile{,Tests}` — zero
+`Sources/VariorumCore`, zero `Shared/` sources (the one `Shared/`-named
+touch is the TEST-target support file), zero Mac-side, zero pbxproj —
+the synchronized-folder pattern absorbed every add/delete), so the
+only-if-shared condition never fired.
+
+**Discrimination evidence (no bug-class fixes this batch, so no
+red-on-old was owed; the 13k hollow-pin currency applied to the NEW
+pins — SIX deliberate mutations, each run against targeted suites, each
+caught, the tree byte-restored after each (`git checkout`; final
+`git diff HEAD` EMPTY against the batch commit; final full suite 133/18
+GREEN):**
+- **A — the Today door drops the shelving half** (mint-and-stop, the
+  pre-13c defect): **6 issues** — `theTodayDoorJoinsTheDailyJournalBook`
+  ×2, `theTodayMintIsNeverBlocked…` ×2 (no Journal minted, no
+  membership), walk 7 ×1 (`journalMembers == []`), and
+  `theTodayDoorNeverReShelves…` ×1 (its setup throws
+  `postNotInReading` — nothing was ever shelved to remove; the same
+  honest failure mode the Phase 8 record noted for this pin).
+- **B — LK5 regressed** (tags dropped from the meta + "finished"
+  prepended as a stat): **7 issues** — `lk5FacesLeadWithCountAndTags`
+  ×3, `finishedIsAStateOnTheName…` ×2, walk 7's face byte-checks ×2.
+- **C — the bookless filter reads the whole library** (`poolPosts` →
+  `Queries.library`): **2 issues** — the shelved note listed; the
+  filter never drained. Siblings green.
+- **D — the P-2 pool-home filter dropped from search** (`hits =
+  found`): **1 issue** — the pool-home block hit rendered a door.
+- **E — the background flush drops the editor's `finish()`**: **2
+  issues** — stored text stale AND `isDirty` still true.
+- **F — `setVoice` never reaches the open surface** (`applyVoiceChange`
+  dropped): **1 issue** — the surface kept the terminal mono font under
+  a study flip.
+- **G — shelf ordering ignores pins**: **3 issues** — the pure ordering
+  pin + the observation test's order and (index-shifted) meta checks.
+
+**THE KNOWNISSUES RESOLUTION (the brief's assigned duty — the row
+removed from `notes/KnownIssuesAndTechDebt.md` with this note as the
+recorded resolution):** *iOS capture editor accrues trailing blank
+lines* (9c gate 5, 2026-07-11) is **RESOLVED BY REPLACEMENT, 2026-08-03
+(mobile S3 batch 1, commit `e531f6d`)**. The defective surface — the
+Phase 8 SwiftUI `TextEditor` capture editor whose live-editor
+binding/focus-handoff accrued real stored trailing newlines — **no
+longer exists**: this batch deleted `Features/Capture/` whole, and
+every phone edit now flows through the S1 Write-true editor
+(`MobileEditorViewModel` over the TK2 surface). Its replacement is
+guarded in BOTH directions by **the L9 pin**
+(`MobileTrailingNewlinesTests`, S1 batch 1 — revert-verified there):
+accidental accrual refused (editless open/render/close cycles are
+byte-stable and write NOTHING; typing writes exactly the typed bytes),
+while MEANINGFUL stored spacing (the 2026-07-12 ruling) round-trips
+byte-exactly — never a blanket trim, exactly as the row demanded. The
+row's mechanism was never traced on the retired surface (recorded
+honestly in the S1 batch-1 record: view-layer, not
+headless-reproducible); the resolution is the surface's retirement plus
+the pin on its successor, which is what the row's owner (this project)
+shipped.
+
+**Interpretations for the cold reviewer:**
+1. **"Straight into the editor (cold launch → typing in two taps)"**
+   read as focus-on-arrival: the Today door (and "+ new note") push
+   `MobileRoute.note(id, focus: true)` and the screen calls
+   `becomeFirstResponder()` AFTER `model.start()` — launch → tap Today →
+   typing. Ordinary note opens (lists, search) pass `focus: false` —
+   reading first is those doors' posture. A sealed note's raise is
+   harmless: the gate still refuses and speaks (focus never bypasses
+   the police).
+2. **The stage-row's "new-note minting"** (named on the S3 stage row,
+   not in the brief's seven letters) shipped as the Library "+ New
+   Note" door. It mints BOOKLESS (the Mac ⌘N semantics) — the Pool
+   filter lists it, which is the honest home until she shelves it.
+3. **LK5's exact composition** — count · tags · daily, finished on the
+   name: the ruling ranks faces, not strings; word progress, chapter
+   counts, and caps are DELIBERATELY ABSENT from the phone shelf
+   (each one aggregate away — the corpus-scale `bookWordCounts`
+   deliberately never fetched on the phone's home).
+4. **Count wording** — journal-profile books say "entries" (the
+   ratified mockup's own word), others "notes", both singularized
+   ("1 entry") where the Mac's `metaColumn` says "1 notes"; my face
+   function, my strings, pinned (P31 — one line to change).
+5. **The retired tests' mapping** (14 out, every load-bearing pin
+   re-pointed): the A1-class daily-book trio →
+   `theTodayDoorJoinsTheDailyJournalBook` /
+   `theTodayMintIsNeverBlockedAndCreatesThePinnedJournal` /
+   `theTodayDoorNeverReShelvesAnEntryTheAuthorRemoved` (setups and
+   assertions carried; the door under test is the new shared-composition
+   door); `theListingStaysBounded` → `theListingIsBoundedAndNewestFirst`;
+   `theBackgroundTransitionLandsPendingTextInTheStore` → the same-named
+   pin over `MobileEditorViewModel.finish` through the new router;
+   `observationDeliversOnEntryCreationAndEdit` → the shelf/book/library
+   observation tests + walk 7. The capture-EDITOR tests (first-keystroke
+   mint, edit-then-flush routing, fanned-block-edits-chosen, sealed
+   refusals + keep-pending, the two stale-projection races, `EditCost`)
+   retired WITHOUT re-pointing: their CLASSES are the S1/S2 editor
+   suites' standing coverage (walks 1–2, the gate/seal pins, the
+   projection-policy deferral machinery — the new editor's own
+   stale-photograph discipline was the S2 ladder's BLOCKER work), and
+   `EditCost` was retired for the new surface at S1 batch 1 by design
+   (block-scoped `charDelta`). Flagged for the ladder (flag 1).
+6. **Both tab stacks alive** (opacity + `allowsHitTesting(false)` +
+   `accessibilityHidden`) so each tab keeps its navigation state; an
+   `if`-switch would reset the hidden stack's path.
+7. **The shell router is the ONE voice authority** — `MobileShellView`,
+   `MobileSettingsView`, and `MobileWriteScreen` all derive chrome from
+   `router.voice`; the screen keeps a fallback read for router-less
+   (harness/preview) construction, and its init's
+   `MobileEditorStyle.voice` set is idempotent under a router.
+8. **Mirrored semantics, never Mac chrome** — `ordered()` is
+   `ShelfViewModel.ordered`'s algorithm; the meta's count/smart split is
+   `metaColumn`'s; smart-book tags decode the spec exactly as
+   `tagsColumn` does; book names take `chromeLabel` casing (the Mac
+   shelf's own `chromeLabel(reading.name)`).
+9. **`Reading.fetchOne` by raw SQL** in the book VM (live-row
+   predicate inline) — the same read the shelf query family uses;
+   nothing new invented.
+
+**PROVISIONALs (P27–P34, for the stage-gate bundle; numbering continues
+S2's):**
+- **P27:** Settings' form and placement — the shelf path line's
+  trailing "Settings" door; a voiced sheet holding voice rows + the
+  sync status row + the DEBUG spike door. **Ambient sync visibility
+  retired with the capture root** — the status row's home is Settings
+  now (if she misses it at a glance, the 13l sync-status-face candidate
+  is the natural door back).
+- **P28:** pushed screens keep the SYSTEM navigation back door (inline,
+  title-less on the editor; the book list inline) while tab roots hide
+  the bar entirely — functional nav chrome; its voice is look-track.
+- **P29:** focus-on-arrival rides ONLY the Today and + New Note doors
+  (interpretation #1); every other open reads first.
+- **P30:** the terminal shelf reserves the selection-marker column for
+  alignment but marks NO row at rest (the mockup's `sel` row is a Mac
+  selection concept; phone rows are doors).
+- **P31:** the count wording (entries/notes, singularized) —
+  interpretation #4.
+- **P32:** the book list's window (300 + probe) and the truncation
+  marker's wording ("Showing the first N notes — the full book lives on
+  the Mac").
+- **P33:** "+ New Note" placement (the Library path line) and its
+  bookless-mint consequence.
+- **P34:** the empty-shelf line ("No books yet — Today's Entry starts
+  your journal.") and the library's "Nothing found." empty state.
+
+**Deliberate absences (scope, not holes):** the Read flow ·
+comments/callouts · divide/merge doors · ⋯/the block menu (ALL S4 by
+the brief); reorder within books; book creation/editing/management
+surfaces — pin, finish, extents, designation, conversion, drag-into —
+stay Mac-side in v1 (the shelf RENDERS their states; recorded per the
+brief's "Explicitly NOT"); minting inside a book (Today covers the
+daily case; a book's "+ new entry" is unruled for the phone); word
+progress on shelf rows (LK5-demoted — interpretation #3); ambient
+sync-status chrome (P27); **no SwiftUI-hosting test drives
+`MobileWriteScreen`'s `.task` wiring** (router registration,
+focus-on-arrival, onDisappear finish) — the router+flush BRAIN is
+pinned headless and the wiring is three lines of screen code; the house
+harness drives VMs and UIKit views, not hosted SwiftUI (the 13b
+machine-verified class; her device round sees the keyboard rise); no
+visual inspection of any new surface (the look round over real
+screenshots is the instrument); no capability-registry rows (the
+standing S1 posture); RTL unconsidered (the standing S2 note's class);
+the `.task(id:)` search runs a bounded one-shot per keystroke (the Mac
+⌘K discipline) — unmeasured, flagged.
+
+**LADDER-ATTENTION FLAGS (batch 1 closes Stage 3's planned scope — the
+stage ladder opens on the S3 diff):**
+1. **The retired-tests mapping** (interpretation #5): the ladder should
+   weigh whether any retired capture-test CLASS lacks a standing
+   equivalent over the new editor — the stale-projection races are the
+   sharpest candidates (the S1/S2 deferral machinery + the S2 BLOCKER
+   pins are the claimed coverage).
+2. **The walk-7 byte-checks encode P31's wording** — a gate re-rule on
+   the count words flips the walk's literals (one place).
+3. **The screen-wiring absence** (deliberate-absences note): if the
+   ladder wants it driven, a UIWindow-hosted UIHostingController
+   harness is the shape — weigh cost against the three lines.
+4. **The ZStack-alive tab shape** (interpretation #6): two live root
+   views at all times — P3-clean (no live editor exists on either
+   root), but the ladder should confirm no held-observation
+   double-cost concern (both roots' observations run while the app is
+   open; all are bounded author-scale).
+5. **The Settings sync-row relocation** (P27) — product-flavored if
+   she misses ambient visibility; nothing gates on it.
+6. **The KnownIssues removal** — verify the resolution note above
+   satisfies the rule's letter (resolution recorded at the closing
+   batch; the L9 pin + the retirement cited; no sweep, no trim
+   anywhere).
+
+**NO `Sources/VariorumCore` lines; NO `Shared/` source lines; NO
+Mac-side lines; NO pbxproj lines; NO schema; NO `Sync/` lines** (the
+whole diff is mobile-target + this file + the KnownIssues row).
+Commits: `e531f6d` (the app shape + retirement + suites) · the record
+commit; pushed to `origin mobile` at bout end.
+
 ---
 
 ## Orientation
