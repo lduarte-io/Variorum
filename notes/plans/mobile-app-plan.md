@@ -3548,6 +3548,336 @@ holds; hard cap three rounds.
 
 ---
 
+## Stage 3 review — round 1 findings (cold reviewer, 2026-08-03)
+
+**Scope of this review, done in-session:** `notes/REVIEW_PROMPT.md` run
+verbatim; the FULL combined diff `2ba90d7..774305e` read file-by-file
+(all eleven new `Shell/` sources; the `MobileWriteView` /
+`VariorumMobileApp` / test-support hunks; the five deleted Capture
+sources AND the deleted `VariorumMobileTests.swift` read whole from the
+old tree — flag 1's audit demanded the retired tests themselves; all
+three new test files in full; the notes hunks), plus the shared code the
+new code leans on read at the source (`ShelfViewModel.ordered` /
+`ShelfView.metaColumn` / `tagsColumn` · `JournalBooks.openToday` ·
+`Queries.searchCatalog`/`poolPosts`/`assembleReading`/`observeLibrary` ·
+`AppDatabase.observe`/`read` · `EditorProjectionEngine.decide` ·
+`AutosaveCoordinator` · `AppSession.autosave(forPost:)` · GRDB 7's
+`DatabaseReader.read` cancellation contract, read in the checkout).
+Anchors = the S3 batch record + its six flags, each dispositioned below.
+**Counts by this reviewer's OWN run (iPhone 17 Pro / iOS 26.2): mobile
+133 tests / 18 suites GREEN** (single run). Core/Mac/spine deliberately
+NOT run: my own `git diff --stat` read confirms the stage diff is
+mobile-target + this file + the sanctioned KnownIssues row — zero
+`Sources/VariorumCore`, zero `Shared/` sources (the one `Shared/`-named
+touch is the TEST-target support file), zero Mac-side, zero pbxproj,
+zero schema, zero `Sync/`. Read-only per the prompt; no fixes made. No
+"Review foci" section exists for this project; the six flags served
+that role.
+
+### Findings
+
+**[BLOCKER] · `MobileShellView.swift:68–90` (both tab stacks alive) +
+`MobileEditorViewModel.swift:134` (a PER-INSTANCE `AutosaveCoordinator`)
+· the S3 shell makes TWO live editors on ONE post reachable, each with
+its own autosave pipeline — the constitution's one-live-editor /
+one-per-post-coordinator law has no enforcement on the phone, and the
+reachable outcome is permanent text loss.** Mechanism, traced: (1) both
+tab stacks stay alive by design (opacity-switched; interpretation #6),
+and each can hold a pushed `.note` — the SAME post is reachable from
+both (Today's entry via the shelf button; the same entry is the Library
+listing's newest row; nothing anywhere deduplicates or arbitrates). A
+hidden stack's pushed `MobileWriteScreen` never fires `onDisappear`
+(opacity is not removal), so its editor stays fully live: TK2 view,
+observations, ledger, coordinator. (2) `MobileEditorViewModel.init`
+mints its OWN `AutosaveCoordinator` instead of the session's per-post
+door — `AppSession.autosave(forPost:)` (`AppSession.swift:86`) exists
+precisely because "TWO debounced pipelines could run over one post at
+once … and flush a stale buffer OVER a newer one — the ordering was
+luck" (N3, 13b 1a), and this plan's own constitution carries the phone
+reading: *"both kinds consult the ONE authority and the ONE per-post
+autosave coordinator"* and *"ONE live editor per the P3 invariant — the
+phone gets no second liveness mechanism"* (Binding principles, P-3
+application). (3) The loss: open post X in the shelf tab (editor A) and
+in the Library tab (editor B). Type into A; switch tabs within A's
+debounce (500 ms — or while its flush is in flight) and type into B. B's
+surface never saw A's text (it lives only in A's coordinator), so B
+records the whole-block text from its own pre-A base; A's flush lands
+W_A, then B's flush overwrites it with a text that never contained A's
+edit — A's typing is PERMANENTLY gone from `working_text`, no commit, no
+conflict variant, and the user was looking at B the whole time.
+Type-swipe-type with real fingers reaches this (the S2 BLOCKER's own
+reachability standard). Note honestly: the init line PREDATES this diff
+(S1 batch 1) — at S1/S2 exactly one editor could exist, so the shape was
+harmless; THIS diff's shell is what makes two simultaneous editors
+reachable, which is why it lands here. Note also that adopting
+`autosave(forPost:)` alone is NOT sufficient: with one coordinator, B's
+whole-buffer record still replaces A's pending entry from a stale
+surface base — the real fix is the Mac's OTHER half too, one live
+editor per post (a registry/authority that prevents or hands off the
+second live surface; teardown-or-refresh on tab re-entry is the cheapest
+honest shape). Red-on-old pin: two VMs on one post headless, type in
+both within the debounce, flush both, assert the store holds the later
+surface's base INCLUDING the earlier edit — red on old.
+
+**[MAJOR] · `MobileShellRouter.swift:33` (single-slot `activeEditor`) +
+`MobileWriteView.swift:81,92` (register-once/deregister-on-pop wiring) ·
+the background flush covers only the most recently REGISTERED editor —
+the exact Phase 8 review-round-2 protected class ("a background kill
+lost it silently") resurfaces for any second open editor.** Mechanism,
+traced: `.task` sets `activeEditor = model` once per screen lifetime
+(never re-fires on tab re-entry — the view never disappears), and
+`onDisappear` nils it only when the popping screen IS the registered
+one. Two arms: **(a)** editor A open on the shelf stack, editor B opened
+later on the Library stack ⇒ `activeEditor == B` forever after; switch
+back to the shelf, type into A, press home within A's debounce —
+`performBackgroundFlush(editor: B)` flushes a clean B and A's pending
+burst dies with the suspension. **(b)** open A, open B, pop B ⇒
+`activeEditor == nil` while A sits open and dirty — the flush covers
+nothing at all. The re-pointed pin
+(`theBackgroundTransitionLandsPendingTextInTheStore`) drives ONE editor
+and cannot see either arm. Same root as the BLOCKER: the router's
+single slot doesn't model two alive stacks. Proposed fix: registration
+becomes a SET (register on appear, deregister on disappear, flush ALL —
+or fall out of the BLOCKER's one-live-editor authority, which collapses
+the set to one by construction). Red-on-old pin: two registered-then-
+one-popped sequences at the router level, assert both stores after
+`performBackgroundFlush` — red on old in both arms.
+
+**[MAJOR] · `MobileWriteView.swift:82–88` · focus-on-arrival is DEAD
+CODE — `await model.start()` never returns while the editor lives, so
+the Today door's "straight into typing" (brief scope item 2's letter:
+"cold launch → typing in two taps") does not function; the keyboard
+never rises.** Mechanism, traced: `MobileEditorViewModel.start()`
+(`MobileEditorViewModel.swift:178–183`) is `withTaskGroup` over TWO
+infinite observation loops (`observeHeader` / `observeTakesProjection` —
+`for try await` over held observations that end only at cancellation),
+and `withTaskGroup` returns only when all children finish — so
+`if beginEditing { model.textView?.becomeFirstResponder() }` is
+unreachable until the `.task` is CANCELLED, i.e. it runs (as a no-op) at
+view teardown. The S1 screen had nothing after the await; this diff
+added the focus call behind it. The batch record's interpretation #1
+describes the intended behavior as shipped; it is machine-unverified by
+the recorded screen-wiring absence (flag 3) and does not work. Proposed
+fix: run `start()` unstructured (`Task { await model.start() }` owned by
+the screen, cancelled in `onDisappear`) or as its own `.task`, and raise
+focus after `loadOnce()`/first render settles; extract the arrival
+routine so it is pinnable. Red-on-old pin: a UIWindow-hosted screen (or
+the extracted arrival function over a windowed view — the
+`beginEditingRaisesKeyboardFocusOnTheCardEditor` harness pattern),
+assert first-responder after arrival — red on old.
+
+**[MAJOR] · flag 1's audit — `EditorProjectionEngine.decide`
+(`Shared/EditorBrain/EditorProjectionEngine.swift:129–141`) +
+`MobileEditorViewModel.applyProjection/applyDifferential` · the retired
+`StaleProjectionTests` guaranteed more than the standing coverage does:
+the Phase 8 surface NEVER adopted a delivered value ("every delivery is
+only a signal; the authoritative application is a FRESH read stamped
+with `readGeneration`" — the deleted VM's own header), while the new
+editor adopts a CLEAN-INSTANT delivery directly — a stale photograph
+consumed after a newer flush regresses the surface AND the ledger, and a
+keystroke in that window flushes stale-based text over the newer store
+text (the retired text-loss pin's forbidden class).** Mechanism, traced:
+a delivery fetched before flush W2 can be CONSUMED after `flushNow()`
+returns and `isDirty` clears (the observation loop's continuation and
+the flush continuation are unordered on the MainActor; GRDB orders
+deliveries only against each other). At that instant
+`EditorProjectionPolicy.decide(busy: false, matchesSurface: false —
+the ledger holds W2's text, sameSequence: true)` → `.differential` →
+`applyDifferential` rewrites the block's surface text to the stale bytes
+AND `ledger.adopt(new)` overwrites the surface's truth record; a
+keystroke before the healing delivery builds on the stale base and its
+flush clobbers W2 (then `applyPendingIfClean`'s fresh read faithfully
+adopts the damage). The stale-EMPTY analog: `sameSequence` false →
+`.fullRender([])` blanks the just-minted surface; typing in the gap
+re-mints — the retired double-mint pin's class in the new shape. The
+standing pins cover the BUSY path only
+(`aDeliveryWhileDirtyDefersUntilSettleThenAppliesFresh`,
+`anAutosaveEchoNeverRewritesTheSurface`); no pin drives a stale
+non-matching delivery at a clean instant. Two honest calibrations: the
+window is delivery-latency-sized (ms, scheduler-dependent — narrower
+than the S2 BLOCKER's user-extendable window), and the Mac editor
+shares this policy shape, so the exposure is plausibly shared — which
+argues for a policy-level treatment (a freshness/generation guard on
+clean-instant adoption, the retired VM's own pattern), not a mobile-only
+patch; that routing is adjudication's (a `Shared/` change fires the
+core/Mac verification duty). Red-on-old pin, deterministic regardless
+of scheduler: capture `model.slots` pre-edit, edit + `flushNow`, then
+drive `applyProjection(stalePhotograph)` directly (the retired pins' own
+drive shape) and assert surface AND ledger keep the flushed bytes — red
+on old.
+
+**[MINOR] · `MobileLibraryViewModel.swift:100–113` (`search`'s catch) ·
+a cancelled in-flight search surfaces as a PERSISTENT red error line —
+the catch lacks the `CancellationError` filter its own siblings have,
+lacks the staleness guard the Mac's search catch has, and `lastError` is
+never cleared on success.** Mechanism, traced: `.task(id: query)`
+(`MobileLibraryView.swift:50`) cancels the in-flight search on every
+keystroke and on the root's disappearance (a pushed route covers it);
+GRDB 7's async `read` throws `CancellationError` when the task is
+cancelled (`DatabaseReader.swift:216`, read in the checkout); `search`'s
+`catch` sets `lastError = String(describing: error)` with no
+`catch is CancellationError {}` arm (compare `startAll`/`startBookless`
+lines 67/83 in the SAME file) and no `activeQuery` guard (the Mac's
+`LibraryCatalogView.swift:68–71` guards its catch by generation AND sets
+`lastError = nil` on success); nothing ever clears it, so the red line
+sits under the Library until another error overwrites it. Proposed fix:
+the sibling filter + guard the catch on `activeQuery == trimmed` + clear
+on success. Red-on-old pin: cancel a wrapping task before `search`
+lands, assert `lastError == nil` — red on old.
+
+**[MINOR] · `MobileShellRouter.swift:53` (`setVoice` →
+`activeEditor?.applyVoiceChange()`) · the voice flip restyles only the
+REGISTERED editor's storage — a second open editor keeps the old voice's
+fonts/ink under a new-voice masthead until reopened.** Mechanism: same
+single-slot root as the MAJOR above — with editors open on both stacks,
+only `activeEditor` gets `applyVoiceChange()`; the other's chrome
+follows `router.voice` (observable) while its TK2 storage attributes
+stay in the old voice — a mixed-voice surface the record's claim ("an
+editor open in the OTHER tab follows a Settings flip — surface and
+masthead both") does not cover; the pin drives one editor. Collapses
+with the registration-set (or one-live-editor) fix; recorded so the fix
+is verified against TWO editors.
+
+**[NIT] · `Theme/MobileVoicePreference.swift:17–18` · the header's
+PROVISIONAL-placement note is now stale** — it still says the switch
+door "currently rides the Write masthead; its real Settings home is
+S3's", and this batch executed exactly that move. One comment edit.
+
+**[NIT] · `MobileBookView.swift:68` vs `MobileShelfFaces.name` · one
+face, two spellings** — the book header renders
+`chromeLabel(reading.name) + (locked ? " ✓" : "")` while the shelf
+renders `chromeLabel(name + " ✓")`; identical bytes today (casing never
+touches "✓"), but the finished-state grammar lives in `MobileShelfFaces.
+name(for:)` and the header should call it rather than respell it.
+
+### The six ladder-attention flags, dispositioned
+
+1. **The retired-tests mapping — PARTIAL; one class-gap found (the
+   MAJOR above).** Audited test-by-test against the deleted file read
+   whole: the A1-class daily-book trio re-pointed faithfully (setups and
+   assertions compared side-by-side — carried, with the #37(iii)
+   wording-checks extended by `.wrongKind`); the bounded listing →
+   `theListingIsBoundedAndNewestFirst` (faithful, adds newest-first);
+   the background-flush pin → same-named over `finish()` (faithful for
+   ONE editor; see the MAJOR for what it cannot see); the observation
+   test → shelf/book/library observation tests + walk 7 (covered);
+   first-keystroke-mint/no-double-mint → walk 2 +
+   `typingPastAParagraphCrystallizes…` +
+   `aJournalEntryMintsExactlyOneBlock…` (covered);
+   edit-then-flush-right-variant →
+   `aBlockEditAutosavesExactlyItsVariant…` (covered); fanned-block-
+   edits-chosen → the S2 suites
+   (`typingIntoAPeekedBlockEditsThePeekedTake`,
+   `cardEditsRouteToTheEditedTakeOnly`, walk 5) (covered); the sealed
+   pair → `aSealedNoteRefusesEveryEdit` (gate) + the shared
+   coordinator's Mac pins (`oneRefusalNeverDropsASiblingsSave`,
+   `newerTypingSupersedesAFailedEntry`) + S2's
+   `aRemoteLockMidCardEditRefusesTheNextKeystrokeAndKeepsPendingText`
+   (covered piecewise; the exact remote-SEAL-mid-typing composition is
+   unpinned mobile-side but every mechanism in it is); `EditCost`
+   retired by design at S1 (recorded, accepted). **The gap: the two
+   `StaleProjectionTests` — their CLEAN-INSTANT guarantee (deliveries
+   are signals, adoption only from generation-checked fresh reads) is
+   not carried by the new editor or its pins**; the claimed standing
+   equivalent covers the busy path only. The mapping's claim is
+   therefore overbroad by exactly this class.
+2. **Walk-7 byte-checks encode P31 — confirmed, acceptable.** The
+   wording lives in ONE brain (`MobileShelfFaces.meta`) + the walk's
+   literals; a gate re-rule flips one function and a handful of test
+   strings. No action.
+3. **The screen-wiring absence — NOT acceptable as-is.** The "three
+   lines of screen code" now carry real policy (who is the active
+   editor; when focus rises), and TWO of this round's findings (the
+   registration MAJOR, the dead-focus MAJOR) plus the BLOCKER's
+   reachability live exactly in that unverified wiring. Verdict: the
+   fixes should pull the policy into a testable brain (a registration
+   set / arrival routine), after which the wiring is genuinely thin and
+   the absence is honest again.
+4. **The ZStack-alive tab shape — fetch cost fine; the flag's framing
+   missed the real hazard.** The double-observation cost is bounded and
+   author-scale (shelf: tiny held snapshot; library: the documented
+   bounded top-200 — worst case one bounded re-fetch per autosave
+   flush while hidden; `AppDatabase.observe`'s "on-screen projections
+   only" letter is technically deviated, at recorded author-scale). But
+   "no live editor exists on either ROOT" was the wrong question:
+   pushed screens stay alive too, and that is the BLOCKER's mechanism.
+   Verdict: cost accepted; the liveness consequence goes to the
+   BLOCKER's fix.
+5. **The Settings sync-row relocation (P27) — product-flavored, nothing
+   gates.** Correctly PROVISIONAL in the gate bundle; the 13l
+   sync-status-face candidate is the recorded door back if she misses
+   ambient visibility. No action.
+6. **The KnownIssues removal — the rule's letter is satisfied and the
+   resolution is honest.** Exactly one row removed (verified in the
+   diff); the owner was this project (re-owned 2026-07-25); the
+   resolution note is recorded at the closing batch's record with the
+   mechanism-never-traced admission kept rather than papered over; the
+   L9 pin covers BOTH directions against the successor editor (all five
+   `MobileTrailingNewlinesTests` read: accrual refused byte-stable,
+   meaningful spacing round-trips, neighbor edits never touch stored
+   spacing — never a blanket trim). Accepted.
+
+### Counts (this reviewer's own runs)
+
+- **Mobile: 133 tests / 18 suites GREEN** (iPhone 17 Pro / iOS 26.2,
+  single run, zero relaunches — matches the batch record and the
+  architect's acceptance run). The −14/+17 arithmetic re-verified
+  against the deleted file (6+5+2+1 out; 10 shell + 6 library + walk 7
+  in; suites −4 +2 = 18).
+- Core / Mac / spine: deliberately not run (mobile-target-only diff,
+  verified by my own diffstat read; no finding required a shared-code
+  run to trace — the `EditorProjectionEngine` reading implicates shared
+  DESIGN but the diff carries zero shared lines).
+
+### Clean bill (load-bearing things specifically checked, found solid)
+
+- **The Today door's composition** — both halves in ONE runner closure
+  (`MobileTodayDoor.open`), byte-mirroring `JournalBooks.openToday`
+  including the round-2 designation-read-inside-the-runner discipline;
+  the shelving wordings carried byte-for-byte from the retired door
+  (diffed by eye against the old tree) with every reportable outcome
+  speaking and the clean path silent.
+- **`MobileShelfFaces.ordered`** — line-compared against
+  `ShelfViewModel.ordered`: byte-equivalent semantics (pins in pin
+  order, journals by name, rest by name).
+- **LK5's faces** — count · tags · daily with finished-on-the-name
+  matches the ruling and its rider; the count/smart split matches the
+  Mac `metaColumn`'s (smart books never show a derived count); tags
+  leaf-only per 13k K3; word progress/chapters/caps deliberately absent
+  (interpretation #3, coherent with LK5's ranking).
+- **Search scope not widened** — `searchCatalog` untouched; the
+  never-invent-body-search pin is real (prose "xylophone" yields zero);
+  the P-2 pool-home filter is enforced twice (VM filter + pure
+  `destination`), both pinned.
+- **The bookless filter** — `Queries.poolPosts` exactly (derived smart
+  membership counts as in-a-book; empty-spec rule rides free); the
+  drain-on-shelve path pinned live.
+- **The book list** — ONE held observation delivering reading row +
+  assembly coherently; window 300 + probe row (the Phase 10 discipline,
+  no exact-window false positive); chapters grouped on the assembly's
+  OWN section transitions (pure, pinned) — never a re-sort; section
+  labels leaf-only; row names through the ONE display brain (13k K1),
+  pinned for the nameless-date case.
+- **The re-pointed pins** — setups and assertions carried faithfully
+  (the Today trio, the bounded listing, the background flush for the
+  single-editor case).
+- **Walk 7** — drives the REAL TK2 surface (identity audit 0, desync 0,
+  canary silent), byte-checks LK5 faces in the live voice, verifies the
+  created-and-pinned Journal shelving, search-by-day through the one
+  display brain, and byte-exact reopen.
+- **The voice authority's single-editor path** — `setVoice` is
+  MainActor-atomic end-to-end; preference + `MobileEditorStyle` + open
+  surface verified against real storage fonts in the pin; the screen's
+  router-less fallback is init-idempotent under a router.
+- **`.post` search hits can never route a POOL into the editor** —
+  `searchCatalog`'s post arm is `kind = 'post'` only (read at the
+  source); pools reach the phone only as filtered-out block homes.
+- **Scope discipline** — zero core/Shared-source/Mac/pbxproj/schema/
+  `Sync/` lines in the diff (own diffstat read); the synchronized-folder
+  pattern absorbed every add/delete; `SeededGenerator` moved verbatim.
+- **The KnownIssues resolution** (flag 6 above) and the L9 pin's
+  bidirectional coverage.
+
 ## Orientation
 
 **Status:** the author's standing inputs for a mobile app that is *"a
