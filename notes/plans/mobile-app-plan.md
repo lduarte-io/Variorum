@@ -1383,6 +1383,30 @@ token file + the pbxproj path fix.** Commits: `96a7f8b` (environment) ·
 `a43aef4` (trim law + pins) · `57d7492` (token move) · `4678778` (the
 look canon) · the record commit; pushed to `origin mobile` at bout end.
 
+## Stage 1, batch 3 — ACCEPTED; STAGE 1 BUILD COMPLETE — the ladder OPENS (architect, 2026-08-03)
+
+**Acceptance:** verified — diff scope inspected (core touch = exactly the
+two adjudicated `Domain` files + their tests, a dedicated commit; zero
+`Sync/`, zero schema; the pbxproj change is the wrong-core path fix, the
+`Package.resolved` rider recorded), push state confirmed
+(`origin/mobile` at `3e4d27e`, tree clean), the batch record read, and
+**mobile 76/16 re-confirmed by the architect's own run**. The wrong-core
+environment trap joins the machinery lessons (the handoff carries it);
+P10–P14 join the stage-gate bundle (now P1–P14 + LK5's ✓-finished note).
+The implementer's seven ladder-attention flags stand recorded in its
+batch record for the reviewer's anchor.
+
+**THE STAGE 1 REVIEW LADDER — round 1 (fresh cold reviewer, spawned at
+this record):** review target = the stage's combined diff,
+**`00d2c42..3e4d27e`** (batches 1–3 + the architect's brief/acceptance
+records; Stage 0's spike was ruled at its own gate and is context, not
+target). The reviewer runs `notes/REVIEW_PROMPT.md` VERBATIM with zero
+framing from the architect; its anchors are this file's batch records +
+dispositions (recorded for exactly this purpose). Findings land
+repo-first in this file before any fix session sees them; fixes with
+traced mechanisms + revert-verified red-on-old pins; round 2 re-reviews
+fresh; a new BLOCKER/MAJOR forces round 3; hard cap three rounds.
+
 ---
 
 ## Orientation
