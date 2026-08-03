@@ -119,6 +119,41 @@ whatever take UI this project ships.
   (reorder/move/copy-all) are adoptable afterwards; the execution plan states
   which parts are deliberately built ahead of 13e.
 
+*(Baseline update, post-batch-1: **mobile 14/4 VERIFIED** — the destination
+that works is iPhone 17 Pro / iOS 26.2, the Phase 8 record's own; the iPhone
+16 simulators on this machine carry iOS 18.3, below the deployment target,
+and resolve to nothing. Both project-relevant baselines now confirmed by this
+session's own runs.)*
+
+### Sitting batch 2 — swipe grammar, flip semantics, app shape, reading (2026-08-03; rulings verbatim-faithful)
+
+- **M5 — Swipe FLIPS TAKES, ruled.** On a fanned block, horizontal swipe
+  flips which take shows, in place — the fan as a horizontal carousel under
+  the paragraph (the Mac R24 short-block horizontal strip made physical);
+  non-fanned blocks don't respond. Menus keep two doors regardless: the
+  long-press/extended-edit menu (M2) + the focused block's ⋯. This resolves
+  M2's reopened conflict in favor of her second float — swipe belongs to
+  takes; the menu's quick doors are long-press and ⋯.
+- **M6 — Flip PEEKS; ✓ CHOOSES.** Her pick AGAINST the recommended
+  canvas-rule reading (flip = chooseVariant), deliberately: flipping on the
+  phone only previews; an explicit ✓ commits the choice. Consequence
+  recorded with the ruling: the phone gains view-local display state the Mac
+  pattern deliberately avoided — the peek must be visibly transient (which
+  take is CHOSEN stays unambiguous), and the transiency rule (revert on
+  leaving the block vs. sticky per session) is batch 3's confirm. The Mac
+  canvas ‹›-chooses ruling is untouched; this is the PHONE's rule.
+- **M7 — App shape: SHELF-FIRST, Today a button.** The phone opens on
+  Books/the shelf (Journal pinned, her books, finish/extent faces); a
+  prominent "Today's Entry" button rides the shelf (the Mac quick-entry-bar
+  parallel; create-or-open, the notebook rule). Tab bar: **Shelf · Library**
+  (Library = everything + search; bookless notes as a filter there — the
+  Pool's phone home). The Today+tabs and Mac-mirror shapes were offered and
+  declined.
+- **M8 — READ FLOW SHIPS IN v1.** Opening a book offers the calm continuous
+  reading column (the Mac Read mode's phone cousin — chapters, virtualized
+  per P3); tapping into a note edits it in Write. The phone is the
+  reading-in-bed surface; "real and robust" includes it.
+
 ---
 
 ## Orientation
