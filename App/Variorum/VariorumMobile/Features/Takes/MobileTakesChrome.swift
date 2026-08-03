@@ -33,8 +33,18 @@
 //  exclusion rects only write when they moved), so the steady state is
 //  write-free and the layoutSubviews hook cannot loop. Fragment lookups
 //  ride `enumerateTextLayoutFragments(.ensuresLayout)` per FANNED block —
-//  cost ∝ the post's fanned blocks (opt-in and rare by the model's own
-//  doctrine), the spike's measured 0.03 ms/rect class, never ∝ document.
+//  the spike's measured 0.03 ms/rect class. SCOPES (S2 ladder round 1,
+//  MINOR 3 — the P-8 shape fix): content/geometry input axes (edits,
+//  projections, flips, voice, width) run `.document` — cost ∝ the post's
+//  fanned blocks (opt-in and rare by the model's own doctrine); the
+//  per-scroll-tick layoutSubviews hook runs `.nearViewport` — geometry is
+//  forced ONLY for blocks intersecting the padded TK2 viewport (the
+//  queryable `viewportRange`), so a tick's cost ∝ realized rows, never
+//  the post, and far-off-screen fragments are never layout-forced at
+//  scroll rate against TK2's own laziness (TEXTKIT2 §2). Off-band chrome
+//  keeps its last resolved geometry — every overlay is a content-anchored
+//  subview, so scrolling itself never moves it — and heals the moment its
+//  block scrolls near. The device round measures the magnitude.
 //
 
 import UIKit
@@ -59,6 +69,16 @@ final class MobileTakesChromeController {
     private(set) var pillBlockID: String?
     private var fadeTimer: Timer?
     private var currentExclusions: [CGRect] = []
+    /// blockID → its last resolved gutter rect — what a `.nearViewport`
+    /// pass keeps for off-band blocks (dropping an off-band exclusion
+    /// would reflow the whole document per tick).
+    private var exclusionByBlock: [String: CGRect] = [:]
+    /// The container width of the last `.document` pass — a width change
+    /// moves every rect, so a tick under a new width escalates to full.
+    private var lastFullPassWidth: CGFloat = -1
+    /// Test seam (the MINOR-3 call-shape pin): the blocks whose geometry
+    /// the most recent refresh actually resolved (fragment layout forced).
+    private(set) var lastGeometryResolvedBlockIDs: Set<String> = []
     private var refreshing = false
 
     /// The pill's fade-out delay ("fades after a beat" — LK6). Test seam.
@@ -78,7 +98,14 @@ final class MobileTakesChromeController {
 
     // MARK: The refresh (all input axes land here; equality-gated)
 
-    func refresh() {
+    /// The refresh's cost scope (S2 ladder round 1, MINOR 3): `.document`
+    /// for content/geometry input axes; `.nearViewport` for the
+    /// per-scroll-tick hook — geometry forced only inside the padded TK2
+    /// viewport, off-band chrome untouched (content-anchored; scrolling
+    /// never moves it).
+    enum RefreshScope { case document, nearViewport }
+
+    func refresh(scope: RefreshScope = .document) {
         guard !refreshing, let textView, let model,
               textView.bounds.width > 0 else { return }
         refreshing = true
@@ -87,20 +114,50 @@ final class MobileTakesChromeController {
         let inset = textView.textContainerInset
         let containerWidth = textView.textContainer.size.width
 
+        // The near band. A tick under a changed width escalates to a full
+        // pass (every rect moved); an unavailable viewport reads as
+        // everything-near (honest fallback — never a silently skipped
+        // block). nil band = full pass.
+        var band: NSRange?
+        if scope == .nearViewport, containerWidth == lastFullPassWidth {
+            band = nearViewportCharacterRange()
+        } else {
+            lastFullPassWidth = containerWidth
+        }
+        lastGeometryResolvedBlockIDs = []
+        func near(_ range: NSRange) -> Bool {
+            guard let band else { return true }
+            return range.location < band.location + band.length
+                && band.location < range.location + max(range.length, 1)
+        }
+
         // 1 — badges + gutters for FANNED blocks (LK3/LK10).
         var exclusions: [CGRect] = []
         var seen: Set<String> = []
         for slot in model.slots where slot.hasFan {
-            guard let range = model.rangeOfBlock(slot.blockID),
-                  let line = firstLineGeometry(atOffset: range.location)
+            guard let range = model.rangeOfBlock(slot.blockID) else { continue }
+            if !near(range), let cached = exclusionByBlock[slot.blockID],
+               badges[slot.blockID] != nil {
+                // Off the band: last resolved geometry stands — the
+                // exclusion MUST stay in the assembled set (dropping it
+                // would reflow the document), the badge frame is
+                // content-anchored, and styling belongs to the full pass.
+                seen.insert(slot.blockID)
+                exclusions.append(cached)
+                continue
+            }
+            guard let line = firstLineGeometry(atOffset: range.location)
             else { continue }
+            lastGeometryResolvedBlockIDs.insert(slot.blockID)
             seen.insert(slot.blockID)
             // The gutter: text-container coordinates (exclusion space).
-            exclusions.append(CGRect(
+            let gutter = CGRect(
                 x: containerWidth - Self.gutterWidth,
                 y: line.fragmentMinY,
                 width: Self.gutterWidth,
-                height: line.firstLineHeight))
+                height: line.firstLineHeight)
+            exclusionByBlock[slot.blockID] = gutter
+            exclusions.append(gutter)
             // The badge: view (content) coordinates, inside the gutter.
             let badge = badges[slot.blockID] ?? makeBadge(blockID: slot.blockID)
             let frame = CGRect(
@@ -115,6 +172,7 @@ final class MobileTakesChromeController {
         for (blockID, badge) in badges where !seen.contains(blockID) {
             badge.removeFromSuperview()
             badges[blockID] = nil
+            exclusionByBlock[blockID] = nil
         }
         exclusions.sort { ($0.minY, $0.minX) < ($1.minY, $1.minX) }
         if !rectsMatch(exclusions, currentExclusions) {
@@ -125,9 +183,15 @@ final class MobileTakesChromeController {
         // 2 — peek markers (M9: sticky, visible, per-block).
         var peeked: Set<String> = []
         for blockID in model.takes.peeks.keys {
-            guard let range = model.rangeOfBlock(blockID),
-                  let union = blockRectsUnion(range: range)
-            else { continue }
+            guard let range = model.rangeOfBlock(blockID) else { continue }
+            if !near(range), markers[blockID] != nil {
+                // Off the band: the marker keeps its content-anchored
+                // frame; it heals when the block scrolls near.
+                peeked.insert(blockID)
+                continue
+            }
+            guard let union = blockRectsUnion(range: range) else { continue }
+            lastGeometryResolvedBlockIDs.insert(blockID)
             peeked.insert(blockID)
             let marker = markers[blockID] ?? makeMarker(blockID: blockID)
             let frame = CGRect(
@@ -153,18 +217,44 @@ final class MobileTakesChromeController {
         if let pillBlockID {
             if let pill, seen.contains(pillBlockID),
                let content = model.takes.pillContent(blockID: pillBlockID),
-               let range = model.rangeOfBlock(pillBlockID),
-               let union = blockRectsUnion(range: range) {
-                pill.apply(content: content, face: face)
-                pill.sizeToFitContent()
-                let origin = CGPoint(
-                    x: inset.left + union.minX,
-                    y: inset.top + union.maxY + 6)
-                if pill.frame.origin != origin { pill.frame.origin = origin }
+               let range = model.rangeOfBlock(pillBlockID) {
+                if near(range) {
+                    guard let union = blockRectsUnion(range: range) else {
+                        hidePill()
+                        return
+                    }
+                    lastGeometryResolvedBlockIDs.insert(pillBlockID)
+                    pill.apply(content: content, face: face)
+                    pill.sizeToFitContent()
+                    let origin = CGPoint(
+                        x: inset.left + union.minX,
+                        y: inset.top + union.maxY + 6)
+                    if pill.frame.origin != origin { pill.frame.origin = origin }
+                }
+                // Off the band: untouched this tick (content-anchored;
+                // it fades on its own timer).
             } else {
                 hidePill()
             }
         }
+    }
+
+    /// The current TK2 viewport as a character range, padded by one
+    /// viewport length each side — the `.nearViewport` band (the
+    /// adjudicated MINOR-3 scope; "the TK2 viewport is queryable"). nil ⇒
+    /// unavailable, and the caller treats everything as near.
+    private func nearViewportCharacterRange() -> NSRange? {
+        guard let textView,
+              let tlm = textView.textLayoutManager,
+              let cm = tlm.textContentManager,
+              let viewport = tlm.textViewportLayoutController.viewportRange
+        else { return nil }
+        let start = cm.offset(from: tlm.documentRange.location, to: viewport.location)
+        let end = cm.offset(from: tlm.documentRange.location, to: viewport.endLocation)
+        guard start >= 0, end >= start else { return nil }
+        let pad = max(end - start, 512)
+        let lower = max(start - pad, 0)
+        return NSRange(location: lower, length: (end + pad) - lower)
     }
 
     // MARK: Peek events (the controller's hook)

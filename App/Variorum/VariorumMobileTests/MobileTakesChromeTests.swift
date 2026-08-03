@@ -286,6 +286,66 @@ struct MobileTakesChromeTests {
         }
     }
 
+    @Test func perTickRefreshResolvesOnlyNearViewportGeometry() async throws {
+        // The S2 ladder round-1 MINOR-3 call-shape pin (P-8: per-tick
+        // cost ∝ realized rows, never the post). A long post with a
+        // fanned block at the top (in the viewport) and one far below:
+        // a `.nearViewport` pass — the layoutSubviews tick's scope —
+        // forces geometry ONLY for the near block, while the far block's
+        // gutter exclusion survives from its cached rect (dropping it
+        // would reflow the document); a `.document` pass resolves both.
+        // On the old code every fanned block was layout-forced per tick.
+        try await withEditorWorld { session, db in
+            let seed = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "long", profile: .blog)
+                let near = try ops.newBlock(in: post.id, text: "The near fanned block.", at: .end)
+                let filler = String(
+                    repeating: "A steady filler paragraph that wraps across the "
+                        + "surface a few times to build real height. ",
+                    count: 5)
+                for _ in 0..<60 {
+                    _ = try ops.newBlock(in: post.id, text: filler, at: .end)
+                }
+                let far = try ops.newBlock(in: post.id, text: "The far fanned block.", at: .end)
+                let nearTake = try ops.branchVariant(near.block.id, from: near.variant.id)
+                try ops.autosave(nearTake.id, text: "Near, the other way.", charDelta: 5)
+                let farTake = try ops.branchVariant(far.block.id, from: far.variant.id)
+                try ops.autosave(farTake.id, text: "Far, the other way.", charDelta: 5)
+                return (postID: post.id, near: near.block.id, far: far.block.id)
+            }
+            let (model, surface) = await makeSurface(session, postID: seed.postID)
+            let view = surface.textView
+            guard let chrome = view.takesChrome else {
+                Issue.record("takes chrome not installed")
+                return
+            }
+            // Both fanned blocks carry badges and gutters (full passes ran
+            // at load); the far one sits far outside the 700 pt viewport.
+            #expect(chrome.badgeView(for: seed.near) != nil)
+            #expect(chrome.badgeView(for: seed.far) != nil)
+            #expect(view.textContainer.exclusionPaths.count == 2)
+            #expect(view.contentSize.height > 2_000, "the post must dwarf the viewport")
+
+            // The per-tick scope: the near block resolves, the FAR one is
+            // never layout-forced — yet its exclusion survives (cached).
+            chrome.refresh(scope: .nearViewport)
+            #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.near))
+            #expect(!chrome.lastGeometryResolvedBlockIDs.contains(seed.far),
+                    "a scroll tick must not force layout of far-off-screen fragments (P-8; TEXTKIT2 §2)")
+            #expect(chrome.badgeView(for: seed.far) != nil)
+            #expect(view.textContainer.exclusionPaths.count == 2,
+                    "the off-band gutter survives from its cached rect")
+
+            // The full pass (every content/geometry input axis) resolves
+            // both — the scope discriminates, the vocabulary doesn't shrink.
+            chrome.refresh(scope: .document)
+            #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.near))
+            #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.far))
+            #expect(model.identityAuditFailures == 0)
+            #expect(!view.canaryFired)
+        }
+    }
+
     @Test func theChromeRestylesWithTheVoice() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedWrappingFannedPost(session)

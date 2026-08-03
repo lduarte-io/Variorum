@@ -135,10 +135,13 @@ final class MobileEditorTextView: UITextView {
     /// Scrolling and width changes both land here (UIScrollView lays out
     /// on every content-offset tick) — the chrome re-anchors its overlays;
     /// equality gates inside keep the steady state write-free, so this
-    /// cannot loop layout.
+    /// cannot loop layout. NEAR-VIEWPORT scope (S2 ladder round 1, MINOR
+    /// 3 — P-8): a tick forces geometry only for blocks near the TK2
+    /// viewport, never the whole post; a width change escalates to a full
+    /// pass inside the refresh itself.
     override func layoutSubviews() {
         super.layoutSubviews()
-        takesChrome?.refresh()
+        takesChrome?.refresh(scope: .nearViewport)
     }
 
     /// The bulk-entry hint (the Mac EditorTextView's exact shape): bulk
