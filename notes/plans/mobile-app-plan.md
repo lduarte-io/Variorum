@@ -1644,6 +1644,94 @@ SegmentationRules **23/1 GREEN** (the `let` fix's suite) · mobile
 **76/16 GREEN** (walk 4's reordered flush included). **Round 2 spawns on
 the fixes and what they touched.**
 
+## Stage 1 review — round 2 (fresh cold reviewer, 2026-08-03)
+
+**Scope, done in-session per the ladder's round-2 rule (a real pass over
+the fixes and what they touched, never a rubber stamp):** the fix commit
+`1e3c441..5608810` read in full; the three touched files read WHOLE
+(`MobileWalkTests.swift`, `SegmentationRules.swift`, this file's round-1
+findings + dispositions sections); every round-1 disposition re-traced
+by this reviewer's own mechanism walk — including the two ruled without
+code change; counts re-verified by this reviewer's OWN runs — core
+`swift test` **1039/114 GREEN**, mobile (iPhone 17 Pro / iOS 26.2)
+**76/16 GREEN**. The Mac suite was NOT run, deliberately: the fix's only
+shared-code line is the `var`→`let` (compiler-proven behavior-neutral —
+the binding is read-only through the scanner — and the full core suite,
+every SegmentationRules pin included, is green over it); no trace
+implicates shared behavior beyond what the core run covers.
+
+### Verdicts on the round-1 dispositions
+
+- **MINOR 1 (the Package.resolved rider) — HOLDS.** The stage-1
+  `Package.resolved` delta verified by this reviewer's own diff read:
+  EXACTLY two pin bumps (`swift-concurrency-extras` 1.4.0 → 1.4.1 and
+  `xctest-dynamic-overlay` 1.10.1 → 1.11.0) plus the originHash — the
+  amended rider now enumerates both, byte-accurate, no new dependency
+  identity anywhere in the delta. Round 1's proposed "(and the
+  handoff's echo)" clause is VACUOUS, verified: no handoff or other doc
+  echoes the rider (a grep over `notes/` hits only this file and the
+  unrelated Phase 7 plan), so the plan-file amendment IS the complete
+  fix, not a partial one.
+- **MINOR 2 (the voice-flip interleave hazard) — HOLDS, both halves.**
+  The narrowing's premise, verified: `surfaceWriteValuesFollowTheLiveVoice`
+  is a synchronous (non-async) test in a `@MainActor` suite — a sync
+  body on the main actor cannot suspend, so its flip window was already
+  atomic and no change was the correct change. The fix, traced: walk
+  4's `.study` window (set line 258 → restore line 276) now contains
+  only synchronous work — `applyVoiceChange()` is a non-async func
+  (compiler-enforced await-free, its defer chain included), and
+  attribute reads/`#expect`s suspend nothing — so the window is
+  MainActor-atomic. The roster premise checked suite-by-suite: **all 16
+  mobile suites are `@MainActor`**, and the test target's only
+  voice-write sites are walk 4, the sync voice test, and the harness's
+  per-world terminal pin (`withEditorWorld`). Discrimination preserved,
+  traced through `AutosaveCoordinator`: a character-mutating restyle
+  fails the SYNCHRONOUS byte check at the flip in either version
+  (before any flush could matter), and store-bound damage lands in
+  `pending` via `record` so the MOVED flush still writes it and fails
+  the stored-bytes check against the pre-switch snapshot. The no-pin
+  justification is sound — the only deterministic red-on-old would be
+  constructing the race itself, and the hazard was never observed.
+- **NIT 1 (the `"  - "` degenerate) — HOLDS.** Re-traced independently:
+  `isListLead("  - ")` is true (`leadingWhitespace` = two spaces,
+  remainder `"- "`), so the kept-lead arm's trailing trim stores
+  `"  -"` — which re-reads as plain text: the lawful composition of the
+  two ruled arms, exactly as recorded. Reachable only through a
+  segmentation door (the live editor's ⏎-on-an-empty-item is consumed
+  by the K5 exit first — walk 3 pins it). Record-only is the right
+  disposition.
+- **NIT 2 (`var` → `let`) — HOLDS.** `characters` is read-only through
+  the sentence scanner (indexed reads and `.count`); the genuinely
+  mutated bindings (`results`, `current`, `index`, `lookahead`) remain
+  `var`. Zero behavior; the core suite is green over it.
+- **NIT 3 (the S2 sibling-types advisory) — HOLDS as recorded.** The
+  binding advisory sits in the dispositions section for the S2 brief to
+  carry; nothing further is verifiable until that brief exists.
+
+### New findings
+
+**NONE at any severity — no BLOCKER, no MAJOR, no MINOR, no NIT.**
+(Stated per the hallucination guard: nothing with a concrete traceable
+mechanism surfaced in the fix commit or the files it touched.) One
+forward NOTE, deliberately not a finding: the MINOR-2 fix's atomicity
+rests on the all-`@MainActor` roster — a future non-MainActor suite
+reading voice-dependent attributes would reopen the hazard class;
+`MobileEditorStyle`'s header already states the main-thread contract,
+and the harness pins terminal per world, so the guard exists in the
+code as it stands.
+
+### Counts (this reviewer's own runs)
+
+- Core `swift test`: **1039 tests / 114 suites — ALL GREEN.**
+- Mobile (iPhone 17 Pro, iOS 26.2): **76 tests / 16 suites — ALL
+  GREEN** (walk 4's reordered flush in the run).
+- Mac: not run — justified above (no shared-behavior trace beyond the
+  core-covered `let`).
+
+**Round-2 verdict: every round-1 disposition HOLDS; ZERO new findings;
+nothing forces round 3 from this pass.** Adjudication is the
+architect's.
+
 ---
 
 ## Orientation
