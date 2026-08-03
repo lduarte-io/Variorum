@@ -17,6 +17,10 @@ struct MobileRootView: View {
     let captureRouter: CaptureRouter
     @State private var model: EntryListViewModel
     @State private var path = NavigationPath()
+    #if DEBUG
+    // Stage 0 TK2 spike door (THROWAWAY — deleted at stage close).
+    @State private var spikePresented = SpikeLaunch.autoRunRequested || SpikeLaunch.uiTestBenchRequested
+    #endif
 
     init(session: AppSession, services: AppServices?, captureRouter: CaptureRouter) {
         self.session = session
@@ -39,8 +43,18 @@ struct MobileRootView: View {
                     SyncStatusRow(services: services)
                 }
             }
+            #if DEBUG
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("TK2 Spike") { spikePresented = true }
+                }
+            }
+            #endif
         }
         .task { await model.startJournal() }
         .task { await model.startAll() }
+        #if DEBUG
+        .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
+        #endif
     }
 }
