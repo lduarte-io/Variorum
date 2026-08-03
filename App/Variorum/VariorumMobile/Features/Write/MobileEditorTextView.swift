@@ -102,10 +102,15 @@ final class MobileEditorTextView: UITextView {
     /// the VM at attach; headless storage-only attaches never create them.
     private(set) var takesChrome: MobileTakesChromeController?
     private(set) var takesPanRouter: MobileTakesPanRouter?
+    /// The takes BROWSER's pixels (S2 batch 2 — the LK4 sheet-over-page)
+    /// and the model back-reference the keyboard bar's ⑂ routes through.
+    private(set) var takesBrowserView: MobileTakesBrowserView?
+    private(set) weak var editorModel: MobileEditorViewModel?
 
     /// Wires the takes surface onto this view (called from
     /// `MobileEditorViewModel.attach(textView:)`).
     func installTakes(model: MobileEditorViewModel) {
+        editorModel = model
         let chrome = MobileTakesChromeController(textView: self, model: model)
         takesChrome = chrome
         let router = MobileTakesPanRouter(textView: self, model: model)
@@ -118,6 +123,13 @@ final class MobileEditorTextView: UITextView {
             chrome?.peekDidChange(blockID)
         }
         chrome.refresh()
+        // S2 batch 2: the browser sheet (attaches itself over the page at
+        // first open; the controller's onChanged drives every render).
+        let browserView = MobileTakesBrowserView(textView: self, model: model)
+        takesBrowserView = browserView
+        model.takesBrowser.onChanged = { [weak browserView] in
+            browserView?.render()
+        }
     }
 
     /// Scrolling and width changes both land here (UIScrollView lays out

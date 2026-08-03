@@ -9,9 +9,9 @@
 //
 //  - THE BADGE (LK3): fanned blocks wear ⑂ ALONE — count-free, an OVERLAY
 //    at the block's first fragment's trailing corner (P-8: overlays, never
-//    rendering attributes). Tapping it reveals the pill (counts appear
-//    once open — LK3's letter; the takes BROWSER becomes the tap's full
-//    door in batch 2, PROVISIONAL until then).
+//    rendering attributes). Tapping it opens the TAKES BROWSER (S2 batch
+//    2 — LK3's "the tap is the door"; counts appear once open. Batch 1's
+//    interim pill reveal, P15, is RETIRED as its own record planned).
 //  - THE GUTTER (LK10, her ruling: "text shouldn't go under the take
 //    icon … maybe just reserve some space for it?"): an exclusion rect at
 //    the block's first fragment's trailing corner, so the first line ends
@@ -174,10 +174,12 @@ final class MobileTakesChromeController {
         showPill(anchoredTo: blockID)
     }
 
-    /// The badge's tap: reveal the pill (counts appear once open — LK3).
-    /// PROVISIONAL interim door: batch 2 points this at the takes browser.
+    /// The badge's tap: THE takes browser's door (LK3's "the tap is the
+    /// door" — counts appear once open). S2 batch 2 repointed this from
+    /// batch 1's interim pill reveal (P15 RETIRES as recorded); the pill
+    /// remains the in-page FLIP's face (`peekDidChange` shows it).
     func badgeTapped(_ blockID: String) {
-        showPill(anchoredTo: blockID)
+        model?.openTakesBrowser(blockID: blockID)
     }
 
     func showPill(anchoredTo blockID: String) {

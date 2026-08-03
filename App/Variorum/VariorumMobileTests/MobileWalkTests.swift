@@ -391,4 +391,145 @@ struct MobileWalkTests {
                     == ["The braver opening. Braver still.", "A fanless second block."])
         }
     }
+
+    /// Walk step 6 (S2 batch 2 — the brief's scope item 6): the takes
+    /// BROWSER. Badge → the sheet opens over the dimmed page → a blank
+    /// take minted → edited in the sheet → ✓ chosen → the OLD takes
+    /// archived → store rows byte-checked at every step → the I10 refusal
+    /// on the last live take SPEAKS → Done → the page shows the new
+    /// chosen text → identity audit clean, canary silent.
+    @Test func walk6_takesBrowserFourVerbs() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "walk browser", profile: .blog)
+                let a = try ops.newBlock(in: post.id, text: "The first way.", at: .end)
+                _ = try ops.newBlock(in: post.id, text: "A steady second block.", at: .end)
+                let take = try ops.branchVariant(a.block.id, from: a.variant.id)
+                try ops.autosave(take.id, text: "The second way.", charDelta: 4)
+                return (postID: post.id, blockA: a.block.id, a1: a.variant.id, a2: take.id)
+            }
+            let model = MobileEditorViewModel(
+                session: session, postID: seed.postID,
+                sleep: { _ in throw CancellationError() })
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            let surface = MobileWriteSurfaceView()
+            surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+            model.attach(textView: surface.textView)
+            await model.loadOnce()
+            surface.layoutIfNeeded()
+            let view = surface.textView
+            guard let chrome = view.takesChrome,
+                  let browserView = view.takesBrowserView
+            else {
+                Issue.record("takes chrome/browser not installed")
+                return
+            }
+
+            // BADGE → the browser opens: the sheet over the page, the
+            // in-page editor stands down, both cards render, nothing in
+            // the store moved.
+            chrome.badgeTapped(seed.blockA)
+            #expect(model.takesBrowser.openBlockID == seed.blockA)
+            #expect(!browserView.isHidden)
+            #expect(!view.isEditable)
+            #expect(browserView.cardViews.count == 2)
+            #expect(try await storedBlockTexts(db, postID: seed.postID)
+                    == ["The first way.", "A steady second block."])
+
+            // BLANK TAKE MINTED — at the fan's end, chosen untouched
+            // (minting never chooses), the minted card LIVE for editing.
+            let mint = await model.takesBrowser.newBlank()
+            guard let mint else {
+                Issue.record("the blank mint failed")
+                return
+            }
+            #expect(model.takesBrowser.editingVariantID == mint.id)
+            #expect(try await storedText(db, variantID: mint.id) == "")
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT chosen_variant_id FROM container_block
+                        WHERE block_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [seed.blockA])
+            } == seed.a1)
+
+            // EDITED IN THE SHEET — through the one card editor's own
+            // input path; the edit routes to the MINTED take only.
+            let editor = browserView.cardEditor
+            #expect(editor.superview === browserView.cardViews[mint.id])
+            editor.insertText("A third way.")
+            browserView.textViewDidChange(editor)
+            await model.autosave.flushNow()
+            #expect(try await storedText(db, variantID: mint.id) == "A third way.")
+            #expect(try await storedText(db, variantID: seed.a1) == "The first way.")
+            #expect(try await storedText(db, variantID: seed.a2) == "The second way.")
+
+            // ✓ CHOSEN — the store's pointer moves to the mint (the Mac
+            // would follow).
+            await model.takesBrowser.choose(variantID: mint.id)
+            #expect(try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT chosen_variant_id FROM container_block
+                        WHERE block_id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [seed.blockA])
+            } == mint.id)
+            #expect(model.statusMessage == nil)
+
+            // THE OLD TAKES ARCHIVED — out of the fan, kept in history.
+            await model.takesBrowser.archive(variantID: seed.a1)
+            await model.takesBrowser.archive(variantID: seed.a2)
+            #expect(model.statusMessage == nil)
+            let statuses = try await db.read { db in
+                try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT id, status FROM variant
+                        WHERE block_id = ? AND deleted_at IS NULL ORDER BY id
+                        """,
+                    arguments: [seed.blockA]
+                ).reduce(into: [String: String]()) { $0[$1["id"]] = $1["status"] }
+            }
+            #expect(statuses[seed.a1] == "archived")
+            #expect(statuses[seed.a2] == "archived")
+            #expect(statuses[mint.id] == "active")
+            #expect(model.takesBrowser.cards().map(\.variantID) == [mint.id])
+
+            // THE I10 REFUSAL on the last live take SPEAKS — through the
+            // op's own guard; the take stays. (Delete on a last take that
+            // is ALSO the chosen one speaks the ops' chosen-slot guard
+            // instead — it runs FIRST in `deleteVariant`, the op's real
+            // order, heard here too.)
+            let i10Copy = "This is the block's only take — a block always keeps one. "
+                + "Deleting the whole block is a Mac gesture for now."
+            await model.takesBrowser.archive(variantID: mint.id)
+            #expect(model.statusMessage == i10Copy)
+            model.report(nil)
+            await model.takesBrowser.delete(variantID: mint.id)
+            #expect(model.statusMessage
+                    == "This take is what the note shows — choose another take first, "
+                    + "then delete this one.")
+            #expect(try await storedText(db, variantID: mint.id) == "A third way.")
+
+            // DONE — the sheet closes, the page editor returns, and the
+            // page shows the NEW CHOSEN text.
+            await model.takesBrowser.close()
+            #expect(browserView.isHidden)
+            #expect(view.isEditable)
+            #expect(view.textStorage.string == "A third way.\nA steady second block.")
+
+            // Identity intact, canary silent; teardown lands the walk's
+            // bytes exactly.
+            #expect(model.identityAuditFailures == 0)
+            #expect(model.desyncRecoveryCount == 0)
+            #expect(!view.canaryFired)
+            await model.finish()
+            #expect(try await storedBlockTexts(db, postID: seed.postID)
+                    == ["A third way.", "A steady second block."])
+        }
+    }
 }

@@ -2,14 +2,16 @@
 //  MobileKeyboardBar.swift
 //  VariorumMobile
 //
-//  Mobile Stage 1, batch 2 (scope item 5) — the keyboard bar's SIX live
-//  formatting acts: **B · I · # · • · ☑ · ⇥** (LK8's ruled eight MINUS ⑂
-//  and ⋯, which arrive WITH their surfaces in S2 — a door that can never
-//  act in its context isn't rendered, P-2; recorded as the application of
-//  LK8, not a deviation). Extracted from the batch-1 shell in
+//  Mobile Stage 1, batch 2 (scope item 5) — the keyboard bar's live acts:
+//  **B · I · # · • · ☑ · ⇥ · ⑂** (LK8's ruled eight MINUS ⋯, whose block
+//  menu is S4's — a door that can never act in its context isn't
+//  rendered, P-2; recorded as the application of LK8, not a deviation).
+//  ⑂ JOINED as the seventh act at S2 batch 2, WITH its surface (the takes
+//  browser): it opens the browser on the caret's block, refusing honestly
+//  in the open tail. Extracted from the batch-1 shell in
 //  `MobileEditorTextView.swift`; the bar itself is still the measured
-//  `inputAccessoryView` home (spike item 6), functional-unstyled — the
-//  look canon (L13) restyles it.
+//  `inputAccessoryView` home (spike item 6) — the look canon (L13)
+//  restyles it.
 //
 //  Every act fires `MobileMarkdownActs` — the ordinary policed input path,
 //  never a second brain (P-1: the acts' law is the shared
@@ -29,10 +31,13 @@ import VariorumCore
 final class MobileKeyboardBarController: NSObject {
     private weak var textView: MobileEditorTextView?
 
-    /// The six acts, in bar order — one table so the bar and any test walk
-    /// read the same truth (the registry-walk spirit; the real capability
-    /// registry is a later-stage move).
-    static let actLabels = ["Bold", "Italic", "Heading", "Bullet List", "Checklist", "Indent"]
+    /// The seven acts, in bar order — one table so the bar and any test
+    /// walk read the same truth (the registry-walk spirit; the real
+    /// capability registry is a later-stage move). ⑂ = Takes (S2 batch 2,
+    /// LK8's seventh; ⋯ stays out until its block menu exists — P-2).
+    static let actLabels = [
+        "Bold", "Italic", "Heading", "Bullet List", "Checklist", "Indent", "Takes",
+    ]
 
     init(textView: MobileEditorTextView) {
         self.textView = textView
@@ -84,6 +89,8 @@ final class MobileKeyboardBarController: NSObject {
             .flexibleSpace(),
         ]
         items.append(indentItem(face: face))
+        items.append(.flexibleSpace())
+        items.append(act("⑂", "Takes", #selector(fireTakes)))
         bar.items = items
         return bar
     }
@@ -128,6 +135,13 @@ final class MobileKeyboardBarController: NSObject {
     @objc func fireOutdent(_ recognizer: UILongPressGestureRecognizer) {
         guard recognizer.state == .began else { return }
         fire(.outdent)
+    }
+
+    /// ⑂ — the takes browser on the caret's block (S2 batch 2; LK8's
+    /// seventh act). The VM routes: a caret outside any block (the open
+    /// tail) hears the honest refusal instead of a silent door (P-2).
+    @objc func fireTakes() {
+        textView?.editorModel?.openTakesBrowserAtCaret()
     }
 
     private func fire(_ act: MarkdownEditing.Act) {

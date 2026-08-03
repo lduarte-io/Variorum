@@ -1,0 +1,471 @@
+//
+//  MobileTakesBrowserView.swift
+//  VariorumMobile
+//
+//  Mobile Stage 2, batch 2 — the takes browser's PIXELS: the RATIFIED
+//  sheet-over-page (LK4, mockup v1 §3's literal geometry — the sheet
+//  rides over the dimmed page in the SAME screen, never a separate one;
+//  an overlay view, not a modal presentation, so the page stays visibly
+//  behind and the house harness drives it headlessly. The presentation
+//  MECHANISM is an interpretation recorded for the ladder; the drawn
+//  shape is hers).
+//
+//  The grammar, from the mockup: dim over the page → the sheet from
+//  ~120 pt down, rounded top corners → the shead ("takes · block k of n"
+//  · done) → take cards in fan order (meta row: ✓ chosen state / peeking
+//  / take N · label · ✓ door · ⋯ menu; body text below) → the footer
+//  new-take row (+ new take · branch this one ⧉ · blank ○). Terminal
+//  lowercases its chrome; study keeps case (the voice rule) — every
+//  color/font resolves from `MobileEditorStyle.face` (P-8, the S1 flag-6
+//  duty).
+//
+//  P3 IN THE SHEET: cards render read-cheap (labels); a tapped card
+//  upgrades to THE one live editor — a single reused `UITextView`
+//  (`cardEditor`) that moves between cards. While the browser is open the
+//  in-page editor STANDS DOWN (isEditable = false, first responder
+//  resigned) — the stricter reading of "the in-page editor stands down
+//  while a card is live": the sheet covers the page, and a live-but-
+//  covered page editor would be a second liveness ambiguity (recorded).
+//
+//  The card editor is a PLAIN UITextView, deliberately: one take's text,
+//  no block index, no separators — the page's TK2-explicit construction
+//  and canary guard the CONTINUOUS surface (P1's mechanism); a one-take
+//  card is the pane class (recorded for the ladder).
+//
+
+import UIKit
+import VariorumCore
+
+@MainActor
+final class MobileTakesBrowserView: UIView {
+    private weak var pageTextView: MobileEditorTextView?
+    private weak var model: MobileEditorViewModel?
+
+    /// The sheet's top edge (the mockup's 120 px) — PROVISIONAL visual
+    /// constant like every other; the look rounds rule.
+    static let sheetTop: CGFloat = 120
+
+    private let dimView = UIView()
+    private let sheetView = UIView()
+    private let headerLabel = UILabel()
+    private let doneButton = UIButton(type: .custom)
+    private let cardsScroll = UIScrollView()
+    private let footerLabel = UILabel()
+    private let branchButton = UIButton(type: .custom)
+    private let blankButton = UIButton(type: .custom)
+
+    /// THE one live card editor (P3): a single instance that moves onto
+    /// whichever card is being edited.
+    let cardEditor = UITextView()
+
+    /// Whether the page editor was editable before the sheet stood it
+    /// down (restored at close).
+    private var pageWasEditable = true
+    private(set) var cardViews: [String: MobileTakesCardView] = [:]
+
+    init(textView: MobileEditorTextView, model: MobileEditorViewModel) {
+        self.pageTextView = textView
+        self.model = model
+        super.init(frame: .zero)
+        isHidden = true
+        accessibilityIdentifier = "takes.browser"
+
+        dimView.accessibilityIdentifier = "takes.browser.dim"
+        addSubview(dimView)
+
+        sheetView.layer.cornerRadius = 22
+        sheetView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        sheetView.accessibilityIdentifier = "takes.browser.sheet"
+        addSubview(sheetView)
+
+        headerLabel.accessibilityIdentifier = "takes.browser.header"
+        sheetView.addSubview(headerLabel)
+
+        doneButton.accessibilityIdentifier = "takes.browser.done"
+        doneButton.accessibilityLabel = "Done"
+        doneButton.addAction(
+            UIAction { [weak self] _ in
+                guard let self, let model = self.model else { return }
+                Task { await model.takesBrowser.close() }
+            }, for: .touchUpInside)
+        sheetView.addSubview(doneButton)
+
+        sheetView.addSubview(cardsScroll)
+
+        footerLabel.accessibilityIdentifier = "takes.browser.newtake"
+        branchButton.accessibilityIdentifier = "takes.browser.branch"
+        branchButton.accessibilityLabel = "Branch this one"
+        branchButton.addAction(
+            UIAction { [weak self] _ in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.branchDisplayed() }
+            }, for: .touchUpInside)
+        blankButton.accessibilityIdentifier = "takes.browser.blank"
+        blankButton.accessibilityLabel = "Blank take"
+        blankButton.addAction(
+            UIAction { [weak self] _ in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.newBlank() }
+            }, for: .touchUpInside)
+        for view in [footerLabel, branchButton, blankButton] { sheetView.addSubview(view) }
+
+        cardEditor.accessibilityIdentifier = "takes.browser.cardEditor"
+        cardEditor.delegate = self
+        cardEditor.isScrollEnabled = true
+
+        // A tap on the dimmed page margin closes too (the sheet-over-page
+        // convention); the sheet itself swallows its touches.
+        let dimTap = UITapGestureRecognizer(target: self, action: #selector(dimTapped))
+        dimView.addGestureRecognizer(dimTap)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("not used") }
+
+    @objc private func dimTapped() {
+        guard let model else { return }
+        Task { await model.takesBrowser.close() }
+    }
+
+    // MARK: - Render (the controller's onChanged hook)
+
+    func render() {
+        guard let model else { return }
+        let browser = model.takesBrowser
+        let wasHidden = isHidden
+        let open = browser.isOpen
+
+        if open, superview == nil, let host = pageTextView?.superview {
+            // Installed lazily over the page (the host is the keyboard-
+            // avoiding surface container; the sheet covers it whole).
+            frame = host.bounds
+            autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            host.addSubview(self)
+        }
+        isHidden = !open
+
+        // The page editor stands down while the sheet is up; restored at
+        // close (the P3 one-live-pane rule).
+        if let page = pageTextView {
+            if open, wasHidden {
+                pageWasEditable = page.isEditable
+                page.isEditable = false
+                _ = page.resignFirstResponder()
+            } else if !open, !wasHidden {
+                page.isEditable = pageWasEditable
+            }
+        }
+        guard open else {
+            detachCardEditor()
+            for (_, card) in cardViews { card.removeFromSuperview() }
+            cardViews = [:]
+            return
+        }
+
+        layoutChrome()
+        renderCards(browser)
+    }
+
+    private func layoutChrome() {
+        let face = MobileEditorStyle.face
+        guard let model else { return }
+        let browser = model.takesBrowser
+
+        dimView.frame = bounds
+        dimView.backgroundColor = face.ink.withAlphaComponent(0.25)
+        sheetView.frame = CGRect(
+            x: 0, y: Self.sheetTop,
+            width: bounds.width, height: max(bounds.height - Self.sheetTop, 0))
+        sheetView.backgroundColor = face.surface
+
+        let chrome = face.chrome.withSize(13)
+        if let (k, n) = browser.headerOrdinal() {
+            headerLabel.text = chromeCase("Takes · block \(k) of \(n)")
+        } else {
+            headerLabel.text = chromeCase("Takes")
+        }
+        headerLabel.font = chrome
+        headerLabel.textColor = face.muted
+        headerLabel.sizeToFit()
+        headerLabel.frame.origin = CGPoint(x: 20, y: 14)
+
+        doneButton.setTitle(chromeCase("Done"), for: .normal)
+        doneButton.setTitleColor(face.accent, for: .normal)
+        doneButton.titleLabel?.font = face.chrome.withSize(12.5)
+        doneButton.sizeToFit()
+        doneButton.frame = CGRect(
+            x: sheetView.bounds.width - doneButton.bounds.width - 20, y: 10,
+            width: doneButton.bounds.width, height: 24)
+
+        footerLabel.text = chromeCase("+ New take")
+        footerLabel.font = chrome
+        footerLabel.textColor = face.muted
+        footerLabel.sizeToFit()
+        branchButton.setTitle(chromeCase("Branch this one ⧉"), for: .normal)
+        blankButton.setTitle(chromeCase("Blank ○"), for: .normal)
+        for button in [branchButton, blankButton] {
+            button.setTitleColor(face.accent, for: .normal)
+            button.titleLabel?.font = chrome
+            button.sizeToFit()
+        }
+        let footerY = sheetView.bounds.height - 44
+        footerLabel.frame.origin = CGPoint(x: 20, y: footerY + 6)
+        branchButton.frame = CGRect(
+            x: footerLabel.frame.maxX + 14, y: footerY,
+            width: branchButton.bounds.width, height: 32)
+        blankButton.frame = CGRect(
+            x: branchButton.frame.maxX + 14, y: footerY,
+            width: blankButton.bounds.width, height: 32)
+
+        cardsScroll.frame = CGRect(
+            x: 16, y: 44,
+            width: sheetView.bounds.width - 32,
+            height: max(footerY - 52, 0))
+    }
+
+    private func renderCards(_ browser: MobileTakesBrowserController) {
+        let face = MobileEditorStyle.face
+        let cards = browser.cards()
+        var seen: Set<String> = []
+        var y: CGFloat = 0
+        let width = cardsScroll.bounds.width
+
+        for card in cards {
+            seen.insert(card.variantID)
+            let view = cardViews[card.variantID] ?? makeCard(variantID: card.variantID)
+            let isLive = browser.editingVariantID == card.variantID
+            view.apply(
+                card: card, face: face, live: isLive,
+                chromeCase: chromeCase(_:))
+            if isLive {
+                attachCardEditor(to: view, text: card.text, face: face)
+            }
+            let height = view.preferredHeight(width: width, live: isLive)
+            view.frame = CGRect(x: 0, y: y, width: width, height: height)
+            view.layoutContent()
+            y += height + 10
+        }
+        for (variantID, view) in cardViews where !seen.contains(variantID) {
+            if cardEditor.superview === view { detachCardEditor() }
+            view.removeFromSuperview()
+            cardViews[variantID] = nil
+        }
+        if let editing = browser.editingVariantID, !seen.contains(editing) {
+            detachCardEditor()
+        }
+        if browser.editingVariantID == nil { detachCardEditor() }
+        cardsScroll.contentSize = CGSize(width: width, height: y)
+    }
+
+    private func makeCard(variantID: String) -> MobileTakesCardView {
+        let view = MobileTakesCardView(
+            variantID: variantID,
+            onEdit: { [weak self] in self?.model?.takesBrowser.beginEditing(variantID: variantID) },
+            onChoose: { [weak self] in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.choose(variantID: variantID) }
+            },
+            onArchive: { [weak self] in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.archive(variantID: variantID) }
+            },
+            onDelete: { [weak self] in
+                guard let model = self?.model else { return }
+                Task { await model.takesBrowser.delete(variantID: variantID) }
+            })
+        cardsScroll.addSubview(view)
+        cardViews[variantID] = view
+        return view
+    }
+
+    // MARK: - The one card editor
+
+    private func attachCardEditor(to card: MobileTakesCardView, text: String, face: MobileEditorStyle.Face) {
+        if cardEditor.superview !== card {
+            cardEditor.removeFromSuperview()
+            card.hostEditor(cardEditor)
+            cardEditor.text = text
+        }
+        cardEditor.font = face.body
+        cardEditor.textColor = face.ink
+        cardEditor.backgroundColor = .clear
+        cardEditor.tintColor = face.accent
+    }
+
+    private func detachCardEditor() {
+        guard cardEditor.superview != nil else { return }
+        _ = cardEditor.resignFirstResponder()
+        cardEditor.removeFromSuperview()
+        cardEditor.text = ""
+    }
+
+    // MARK: - Voice casing (the terminal-lowercase chrome rule)
+
+    private func chromeCase(_ text: String) -> String {
+        MobileEditorStyle.voice == .terminal ? text.lowercased() : text
+    }
+}
+
+// MARK: - The card editor's delegate (routes to the controller's gate)
+
+extension MobileTakesBrowserView: UITextViewDelegate {
+    func textView(
+        _ textView: UITextView,
+        shouldChangeTextIn range: NSRange,
+        replacementText text: String
+    ) -> Bool {
+        guard let model else { return false }
+        return model.takesBrowser.cardGateAllows(range: range, replacement: text)
+    }
+
+    func textViewDidChange(_ textView: UITextView) {
+        model?.takesBrowser.cardTextDidChange(textView.text ?? "")
+    }
+}
+
+// MARK: - One take card (the v2 card grammar's phone cousin)
+
+@MainActor
+final class MobileTakesCardView: UIView {
+    let variantID: String
+    private let stateLabel = UILabel()
+    private let takeLabel = UILabel()
+    private let chooseButton = UIButton(type: .custom)
+    private let menuButton = UIButton(type: .custom)
+    private let bodyLabel = UILabel()
+    private let edgeBar = UIView()
+    private var editorHost: UIView?
+    private let onEdit: () -> Void
+
+    /// The live editor's card height (functional; the look rounds rule).
+    static let editorHeight: CGFloat = 120
+
+    init(
+        variantID: String,
+        onEdit: @escaping () -> Void,
+        onChoose: @escaping () -> Void,
+        onArchive: @escaping () -> Void,
+        onDelete: @escaping () -> Void
+    ) {
+        self.variantID = variantID
+        self.onEdit = onEdit
+        super.init(frame: .zero)
+        accessibilityIdentifier = "takes.card.\(variantID)"
+        layer.cornerRadius = 10
+        layer.borderWidth = 1
+
+        edgeBar.isUserInteractionEnabled = false
+        addSubview(edgeBar)
+
+        stateLabel.accessibilityIdentifier = "takes.card.state"
+        takeLabel.accessibilityIdentifier = "takes.card.label"
+        bodyLabel.accessibilityIdentifier = "takes.card.body"
+        bodyLabel.numberOfLines = 0
+
+        chooseButton.setTitle("✓", for: .normal)
+        chooseButton.accessibilityIdentifier = "takes.card.choose"
+        chooseButton.accessibilityLabel = "Choose this take"
+        chooseButton.addAction(UIAction { _ in onChoose() }, for: .touchUpInside)
+
+        menuButton.setTitle("⋯", for: .normal)
+        menuButton.accessibilityIdentifier = "takes.card.menu"
+        menuButton.accessibilityLabel = "Take actions"
+        menuButton.showsMenuAsPrimaryAction = true
+        menuButton.menu = UIMenu(children: [
+            UIAction(title: "Archive Take") { _ in onArchive() },
+            UIAction(title: "Delete Take", attributes: .destructive) { _ in onDelete() },
+        ])
+
+        for view in [stateLabel, takeLabel, chooseButton, menuButton, bodyLabel] {
+            addSubview(view)
+        }
+
+        // Tapping the card's BODY upgrades it to the live editor (edit
+        // any take — R8/R23); the meta row's doors keep their own acts.
+        let tap = UITapGestureRecognizer(target: self, action: #selector(bodyTapped))
+        bodyLabel.isUserInteractionEnabled = true
+        bodyLabel.addGestureRecognizer(tap)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("not used") }
+
+    @objc private func bodyTapped() { onEdit() }
+
+    func apply(
+        card: MobileTakesBrowserController.Card,
+        face: MobileEditorStyle.Face,
+        live: Bool,
+        chromeCase: (String) -> String
+    ) {
+        backgroundColor = card.isPeeked ? face.takeTint : face.card
+        layer.borderColor = (card.isChosen ? face.chosenMark : face.line)
+            .resolvedColor(with: traitCollection).cgColor
+        edgeBar.backgroundColor = card.isPeeked ? face.takeLine : .clear
+
+        let chrome = face.chrome.withSize(12)
+        let state: String
+        if card.isChosen {
+            state = chromeCase("✓ Chosen")
+        } else if card.isPeeked {
+            state = chromeCase("Peeking")
+        } else {
+            state = chromeCase(
+                card.isLocked ? "Take \(card.ordinal) · locked" : "Take \(card.ordinal)")
+        }
+        stateLabel.text = state
+        stateLabel.font = chrome
+        stateLabel.textColor = card.isChosen ? face.chosenMark : face.muted
+
+        takeLabel.text = card.label
+        takeLabel.font = chrome
+        takeLabel.textColor = face.muted
+        takeLabel.isHidden = (card.label ?? "").isEmpty
+
+        // ✓ is a DOOR only where it can act (P-2): the chosen card wears
+        // the state, never an inert button.
+        chooseButton.isHidden = card.isChosen
+        chooseButton.setTitleColor(face.chosenMark, for: .normal)
+        chooseButton.titleLabel?.font = chrome
+
+        menuButton.setTitleColor(face.muted, for: .normal)
+        menuButton.titleLabel?.font = face.chrome.withSize(14)
+
+        bodyLabel.text = card.text.isEmpty ? chromeCase("(Empty take)") : card.text
+        bodyLabel.font = face.body
+        bodyLabel.textColor = card.text.isEmpty ? face.muted : face.ink
+        bodyLabel.isHidden = live
+    }
+
+    func hostEditor(_ editor: UITextView) {
+        editorHost = editor
+        addSubview(editor)
+    }
+
+    func preferredHeight(width: CGFloat, live: Bool) -> CGFloat {
+        if live { return Self.editorHeight + 34 }
+        let bodyWidth = width - 24
+        let size = bodyLabel.sizeThatFits(
+            CGSize(width: bodyWidth, height: .greatestFiniteMagnitude))
+        return max(size.height, 18) + 42
+    }
+
+    func layoutContent() {
+        edgeBar.frame = CGRect(x: 0, y: 0, width: 2.5, height: bounds.height)
+        stateLabel.sizeToFit()
+        stateLabel.frame.origin = CGPoint(x: 12, y: 8)
+        takeLabel.sizeToFit()
+        takeLabel.frame.origin = CGPoint(x: stateLabel.frame.maxX + 10, y: 8)
+        menuButton.frame = CGRect(x: bounds.width - 36, y: 2, width: 30, height: 26)
+        chooseButton.frame = CGRect(x: menuButton.frame.minX - 32, y: 2, width: 28, height: 26)
+        let bodyTop: CGFloat = 30
+        if let editor = editorHost, editor.superview === self {
+            editor.frame = CGRect(
+                x: 8, y: bodyTop, width: bounds.width - 16,
+                height: bounds.height - bodyTop - 4)
+        }
+        bodyLabel.frame = CGRect(
+            x: 12, y: bodyTop, width: bounds.width - 24,
+            height: max(bounds.height - bodyTop - 12, 0))
+    }
+}

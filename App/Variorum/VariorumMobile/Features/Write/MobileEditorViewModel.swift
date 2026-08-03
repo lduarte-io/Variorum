@@ -54,6 +54,9 @@ final class MobileEditorViewModel {
     /// ladder's binding NIT-3: the VM only routes (overlay at ingest, the
     /// targeted display apply below); every takes decision lives there.
     @ObservationIgnored let takes: MobileTakesController
+    /// The takes BROWSER's brain (S2 batch 2) — the second sibling: the
+    /// sheet's state + the four M4 verbs live there; the VM only routes.
+    @ObservationIgnored let takesBrowser: MobileTakesBrowserController
 
     // MARK: - Observable UI state
 
@@ -130,7 +133,9 @@ final class MobileEditorViewModel {
         self.postID = postID
         self.autosave = AutosaveCoordinator(runner: session.runner, debounce: debounce, sleep: sleep)
         self.takes = MobileTakesController(runner: session.runner)
+        self.takesBrowser = MobileTakesBrowserController(runner: session.runner)
         takes.model = self
+        takesBrowser.model = self
         autosave.onError = { [weak self] error in
             self?.statusMessage = String(describing: error)
         }
@@ -202,6 +207,9 @@ final class MobileEditorViewModel {
         takes.adoptFans(projection.fans)
         applyProjection(takes.overlay(projection.slots))
         textView?.takesChrome?.refresh()
+        // S2 batch 2: an open browser re-renders its cards from the fresh
+        // fan state (and closes if its block left the surface).
+        takesBrowser.projectionDidChange()
     }
 
     /// Teardown backstop: pending tail text mints (the idle plan — typed
@@ -272,8 +280,10 @@ final class MobileEditorViewModel {
         defer {
             textView?.applyVoiceChrome()
             textView?.canaryCheckpointAfterMutation()
-            // S2: the takes chrome restyles from the new voice's face.
+            // S2: the takes chrome restyles from the new voice's face —
+            // and an open browser sheet re-renders in the new voice too.
             textView?.takesChrome?.refresh()
+            textView?.takesBrowserView?.render()
         }
         guard let storage, storage.length > 0 else { return }
         let full = NSRange(location: 0, length: storage.length)
@@ -433,8 +443,10 @@ final class MobileEditorViewModel {
         ledger.textByVariant[variantID]
     }
 
-    /// The status voice for sibling objects' refusals (the takes ✓ door).
-    func report(_ message: String) {
+    /// The status voice for sibling objects' refusals (the takes ✓ door;
+    /// S2 batch 2 widened it to optional so a verb's SUCCESS clears the
+    /// previous refusal — the Mac `run()`'s clearing posture).
+    func report(_ message: String?) {
         statusMessage = message
     }
 
@@ -461,6 +473,54 @@ final class MobileEditorViewModel {
         guard let i = index.entries.firstIndex(where: { $0.blockID == blockID })
         else { return nil }
         return index.range(ofEntryAt: i)
+    }
+
+    // MARK: - Takes browser routing (S2 batch 2 — thin; the brain is `takesBrowser`)
+
+    /// The block "at" a caret or menu location, boundary-tolerant: a caret
+    /// sitting at a block's very END rests ON the separator position, so
+    /// the exact-offset read comes back empty there — the position one to
+    /// the left answers for it. The open tail and true gaps stay nil
+    /// (takes live on blocks).
+    func blockIDNearOffset(_ offset: Int) -> String? {
+        if let hit = blockID(atSurfaceOffset: offset) { return hit }
+        guard offset > 0 else { return nil }
+        return blockID(atSurfaceOffset: offset - 1)
+    }
+
+    /// The browser's doors (badge tap, the bar's ⑂, the edit-menu item).
+    func openTakesBrowser(blockID: String) {
+        takesBrowser.open(blockID: blockID)
+    }
+
+    /// The bar's ⑂: the caret's block, or an honest refusal — the open
+    /// tail is not yet a block (PROVISIONAL wording, recorded).
+    func openTakesBrowserAtCaret() {
+        let caret = textView?.selectedRange.location ?? 0
+        guard let blockID = blockIDNearOffset(caret) else {
+            report("Tap into a block first — takes live on blocks.")
+            return
+        }
+        takesBrowser.open(blockID: blockID)
+    }
+
+    /// One fresh coherent read through the one projection door — the
+    /// browser's verbs settle through this (flush first so the delivery
+    /// adopts cleanly instead of deferring against a dirty buffer).
+    func refreshTakesFromStore() async {
+        await autosave.flushNow()
+        guard let fresh = try? await session.database.read({ [postID] in
+            try Queries.takesProjection($0, post: postID)
+        }) else { return }
+        ingest(fresh)
+    }
+
+    /// A browser-card edit lands in the ONE ledger + autosave the page
+    /// uses (batch 1's variant-routed pattern) — the sheet and the page
+    /// can never disagree about a take's bytes.
+    func recordTakeEdit(variantID: String, text: String, charDelta: Int) {
+        ledger.recordEdit(variantID: variantID, text: text)
+        autosave.record(variantID: variantID, text: text, charDelta: charDelta)
     }
 
     /// THE TARGETED DISPLAY APPLY (the flip's surface half): swap ONE
@@ -1042,7 +1102,10 @@ final class MobileEditorViewModel {
 /// host shares (the SwiftUI face carries no gate of its own since batch 2).
 @MainActor
 final class MobileEditorGateDelegate: NSObject, UITextViewDelegate {
-    private weak var model: MobileEditorViewModel?
+    /// Internal (not private) since S2 batch 2: the edit-menu seam file
+    /// (`MobileEditMenuSeam.swift`) extends this delegate with the ONE
+    /// deprecated-annotated menu method and needs the model to route.
+    private(set) weak var model: MobileEditorViewModel?
 
     init(model: MobileEditorViewModel) {
         self.model = model

@@ -71,6 +71,26 @@ final class MobileTakesController {
 
     func isPeeking(_ blockID: String) -> Bool { peeks[blockID] != nil }
 
+    /// The STORE's chosen truth for a block, peek-aware: while a peek
+    /// covers the slot the raw (chosen-truth) slot lives in `originals`;
+    /// otherwise the displayed slot IS the truth. The browser's ✓-ring
+    /// reads this (S2 batch 2).
+    func chosenVariantID(_ blockID: String) -> String? {
+        originals[blockID]?.variantID ?? model?.slot(for: blockID)?.variantID
+    }
+
+    /// Ends a block's peek WITHOUT restoring the display (S2 batch 2 —
+    /// the browser's ✓ door): the explicit choose decides what the page
+    /// shows, so the caller follows with a fresh store refresh whose
+    /// delivery lands the new truth through the ordinary projection door.
+    /// A no-op where no peek exists.
+    func endPeek(_ blockID: String) {
+        guard peeks[blockID] != nil else { return }
+        peeks[blockID] = nil
+        originals[blockID] = nil
+        onPeekChanged?(blockID)
+    }
+
     // MARK: - Projection ingestion
 
     /// Adopts a delivery's fan state and PRUNES peeks the new state can no

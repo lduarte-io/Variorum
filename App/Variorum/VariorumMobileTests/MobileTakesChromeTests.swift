@@ -263,7 +263,7 @@ struct MobileTakesChromeTests {
         }
     }
 
-    @Test func theBadgeTapRevealsThePillWithoutFlipping() async throws {
+    @Test func theBadgeTapOpensTheBrowserNotThePill_P15Retired() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedWrappingFannedPost(session)
             let (model, surface) = await makeSurface(session, postID: seed.postID)
@@ -275,12 +275,14 @@ struct MobileTakesChromeTests {
 
             chrome.badgeTapped(seed.blockA)
 
-            // Counts appear once open (LK3) — and nothing peeked: the tap
-            // is a look, not a flip.
-            #expect(chrome.pillIsShowing)
+            // S2 batch 2: the tap is the BROWSER's door (LK3's letter —
+            // batch 1's interim pill reveal, P15, retired exactly as its
+            // own record planned). The pill remains the in-page FLIP's
+            // face (`aFlipShowsTheMarkerAndThePill` pins it); a tap
+            // peeks nothing and writes nothing.
+            #expect(!chrome.pillIsShowing)
+            #expect(model.takesBrowser.openBlockID == seed.blockA)
             #expect(!model.takes.isPeeking(seed.blockA))
-            #expect((pillSubview(chrome, id: "takes.pill.choose") as? UIButton)?.isHidden == true)
-            #expect(pillSubview(chrome, id: "takes.pill.chosenState")?.isHidden == false)
         }
     }
 
