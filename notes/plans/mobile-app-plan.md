@@ -272,7 +272,41 @@ for books."*
 - **Still open from the judging list (the next look round collects
   them):** item 2 (the peek pill's shape/position), item 4 (the tab bar's
   register), item 5 (the keyboard bar's act set), item 7 (the Read page's
-  chrome).
+  chrome). *(→ ALL RULED at round 2, below.)*
+
+### Look sitting round 2 (2026-08-03, her flick over mockups v2 — rulings verbatim-faithful)
+
+Her message, verbatim: *"choices: 1A  2A  3A 4A. 5 looks good but text
+shouldn't go under the take icon - it looks a litle annoying. maybe just
+reserve some space for it? also ues - definitely keep both spikes that
+were created and commit them as well - they matter."*
+
+- **LK6 — The peek pill: A** — the under-block pill (v1's shape; fades
+  after a beat, back on any flip).
+- **LK7 — The tab bar: A** — text-only (terminal lowercase / study
+  normal-case; no icons).
+- **LK8 — The keyboard bar: A** — the eight acts
+  (B · I · # · lists · ☑ · ⇥ · ⑂ · ⋯).
+- **LK9 — The Read page: A** — chapter caption + centered page meta.
+- **LK10 — The badge RESERVES SPACE** (her words: *"text shouldn't go
+  under the take icon … maybe just reserve some space for it?"*): on a
+  fanned block, text never runs under ⑂ — the first line ends short of a
+  reserved badge gutter. Implementation note for the owning batch (S2
+  takes; the editor hosting is S1's): an exclusion rect at the block's
+  first fragment's trailing corner, badge drawn as an OVERLAY (P-8:
+  overlays, never rendering attributes).
+- **LK11 — Both spike halves KEPT AND COMMITTED, her ratification**
+  (*"definitely keep both spikes that were created and commit them as
+  well - they matter"*): the in-process bench (`Spike/`) AND the
+  real-touch UITest half (`TK2SpikeUITests`) — both already committed
+  and pushed (`eecb4f5` · `0fd69cc`). The Stage 0 gate record's
+  keep-the-spike deviation no longer rides the architect's reasoning
+  alone; it is HER ruling now.
+
+**The look canon is SETTLED for the v1 build** — mockups v1+v2 plus
+LK1–LK11 are the styling canon S1–S4 build toward. Further look rounds
+happen over REAL screenshots at stage gates (and at her word), not more
+HTML.
 
 ---
 
