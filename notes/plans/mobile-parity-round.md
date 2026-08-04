@@ -237,6 +237,37 @@ build refuses marker 5 by design."*
   generation rather than dangling a half-written vault. Copy is
   copied WITH care from the Mac's flow, not invented fresh (the
   wording rides the 14b GATE RATIFY block).
+- **THE NEXT ROUND — EXECUTED (2026-08-04 morning, her "you can pull
+  main" + the 14b flow-notes work order):** final main merged in TWO
+  pulls (the copy/flow + crossover rounds, then nothing new at her
+  "main is final" — the morning merge already carried the cold-pass
+  tip c86a2e5). The pre-Stage-A door fixes RESOLVED to main's CF-14
+  shape (tabs absorb the doorless states structurally; the conflict
+  taken theirs, nothing forked). The adaptation shipped: **(1)** the
+  lifecycle care verified by inspection — the mobile shell touches
+  nothing on scenePhase but flush+sync, every layer of the sheet
+  chain is plain preserved @State, so background→foreground is the
+  same step with the same words, and the kill case resumes step 4 by
+  state (the notes' traced architecture, untouched); **(2)** the
+  app-switcher SNAPSHOT COVER — weighed and BUILT, PROVISIONAL for
+  her walk: `SnapshotPrivacy.redactionReasons` at the shell root +
+  `privacySensitive` on exactly the numbered words display and the
+  three phrase entry fields (shared-file marking, inert on the Mac by
+  construction — no redaction reasons are ever applied there); two
+  rule pins in `MobileSnapshotPrivacyTests`; **(3)** BIP-39 entry
+  ergonomics — the three phrase fields share one `phraseEntryField`
+  helper: autocorrect off (carried) + auto-capitals off on the phone
+  (validation folds case, but a capitalized first word READS wrong);
+  **(4)** the terminology pin holds (no forbidden word anywhere,
+  comments included). Mobile suite **175/26 green** (173/25 + the two
+  pins, exactly accounted). NOT walked visually: the full-setup
+  first-run (.noVault) path — no safe live subject exists until a
+  non-her account (14c); its gates are pure pinned functions, its
+  layout carries no fixed widths, and step 4's screen is safely
+  viewable on her phone via Regenerate-then-Cancel (the words display
+  + cover + field ergonomics all exercise there). Her drill covers
+  the rest live: forget → CF-16 replaced state → re-enroll → the
+  phrase road with her NEW 12 words.
 - **Install DIRECTLY at build-ready (her ~3:50am blessing — this
   supersedes the earlier hold-for-her-go):** her words: "go ahead and
   automatically install to my phone if you're able to in the morning

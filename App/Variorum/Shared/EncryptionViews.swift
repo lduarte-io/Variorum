@@ -334,6 +334,27 @@ struct EncryptionView: View {
         }
     }
 
+    // MARK: - The 12-words entry field (one shape, three arms)
+
+    /// The phrase entry field shared by the confirm, enrollment, and
+    /// change-passphrase arms: autocorrect off, and on the phone
+    /// auto-capitals off too — BIP-39 words are lowercase; validation
+    /// folds case, but a capitalized first word READS as a wrong entry
+    /// (the AuthViews emailField precedent). privacySensitive: typed
+    /// words are the same secret as the displayed phrase, so the mobile
+    /// shell's snapshot cover redacts them alike.
+    private func phraseEntryField(_ label: String, text: Binding<String>) -> some View {
+        let field = TextField(label, text: text, axis: .vertical)
+            .lineLimit(3, reservesSpace: true)
+            .autocorrectionDisabled()
+            .privacySensitive()
+        #if os(iOS)
+        return field.textInputAutocapitalization(.never)
+        #else
+        return field
+        #endif
+    }
+
     // MARK: - The phrase display + confirm-by-re-entry (Round 5 item 3; CF-4)
 
     @ViewBuilder
@@ -347,15 +368,18 @@ struct EncryptionView: View {
             .font(.body.monospaced())
             .textSelection(.enabled)
             .fixedSize(horizontal: false, vertical: true)
+            // The one place the 12 words render. privacySensitive is inert
+            // until a shell applies a .privacy redaction — the mobile
+            // shell does, for the app-switcher snapshot (SnapshotPrivacy);
+            // the Mac applies none and is byte-identical in behavior.
+            .privacySensitive()
         Text("1. Write the 12 words down — on paper, or in a password manager.")
             .font(.caption)
             .foregroundStyle(.secondary)
         Text("2. Type them back, in order, to confirm:")
             .font(.caption)
             .foregroundStyle(.secondary)
-        TextField("The 12 words, separated by spaces", text: $confirmEntry, axis: .vertical)
-            .lineLimit(3, reservesSpace: true)
-            .autocorrectionDisabled()
+        phraseEntryField("The 12 words, separated by spaces", text: $confirmEntry)
         if confirmMismatch {
             Text("That doesn't match the phrase above — check what you wrote down.")
                 .font(.caption)
@@ -459,9 +483,7 @@ struct EncryptionView: View {
                     .buttonStyle(.bordered)
             }
         } else {
-            TextField("The 12 recovery words, separated by spaces", text: $phraseEntry, axis: .vertical)
-                .lineLimit(3, reservesSpace: true)
-                .autocorrectionDisabled()
+            phraseEntryField("The 12 recovery words, separated by spaces", text: $phraseEntry)
             Button("Unlock with Recovery Phrase") {
                 let entry = phraseEntry
                 phraseEntry = ""
@@ -636,10 +658,7 @@ struct EncryptionView: View {
             }
             .buttonStyle(.bordered)
         } else {
-            TextField("The 12 recovery words, separated by spaces",
-                      text: $changeRecoveryEntry, axis: .vertical)
-                .lineLimit(3, reservesSpace: true)
-                .autocorrectionDisabled()
+            phraseEntryField("The 12 recovery words, separated by spaces", text: $changeRecoveryEntry)
             Button("Back to current-passphrase entry") { changeUseRecovery = false }
                 .buttonStyle(.bordered)
         }

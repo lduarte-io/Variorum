@@ -38,6 +38,13 @@ struct VariorumMobileApp: App {
             case .ready(let session):
                 MobileShellView(
                     session: session, services: services, router: shellRouter)
+                    // The app-switcher snapshot cover (SnapshotPrivacy —
+                    // PROVISIONAL, pre-Stage-A): redacts exactly the
+                    // privacySensitive spans (the 12 words, phrase entries)
+                    // while the scene is not active. Environment reaches
+                    // presented sheets, so the words are covered wherever
+                    // they render.
+                    .redacted(reason: SnapshotPrivacy.redactionReasons(for: scenePhase))
                     .task {
                         guard services == nil else { return }
                         let fresh = AppServices(
