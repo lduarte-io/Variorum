@@ -5777,6 +5777,47 @@ successor block to its unplaced original (the divide-W/merge released
 originals), beside the existing global Library → Archived & Deleted →
 Unplaced blocks list. Recorded on the master plan's 13j row.
 
+**FEEL ROUND — first on-device report (2026-08-03, the correct build
+running on her phone):** *"i have it running and it's looking pretty
+good!"* · overall verdict: *"It looks like an amazing first pass
+though, from nothing to this is already excellent."* Findings and
+directions, verbatim-faithful:
+
+1. **Spacing:** *"the spacing needs to be fixed"* (her screenshot: the
+   note-open Write surface, Terminal voice light — generous gaps
+   around the back button / date title / first line). Polish class.
+2. **Missing capabilities, named:** *"the ability to move something
+   between books, tags, create a new book, etc."* — all deliberately
+   ABSENT from the M-scoped v1 (the scope section above: shelf ·
+   Library · Read · Write · takes' four verbs · divide/merge; no book
+   CRUD, no tags UI, no membership management; L12 defers the 13e
+   vocabulary by design). No prior plan existed for the full
+   capability fill-out — her direction below creates it.
+3. **DEFECT — takes surface scroll:** *"it seems that you can't
+   actually scroll when the app has takes open, so i could make a new
+   take but i couldn't scroll down through the list of takes to edit
+   it better."* Surface (browser sheet vs. peeked Write) to be pinned
+   down at reproduction on the simulator; fix-batch candidate when the
+   round opens, defect class, red-on-old.
+4. **Her direction — the tutorial-book spine, the 13b precedent
+   applied to the phone:** *"I think that the same approach that
+   served variorum well will help here - making a tutorial book and
+   filling it out will prove a lot of the functionality, and it can
+   all be tested on the simulator with scrolling down, clicks,
+   visually moving things around, etc."*
+5. **Her pacing ruling — nothing builds from this sitting:** *"I think
+   that we don't have to jump to action here in this phase - though
+   these issues should be noted, I just think that the app needs more
+   step by step work to really polish it, fix spacing, add and test
+   all capabilities, etc."* Consequence: the gate's fix-batch duty
+   WIDENS into a planned follow-on round — **the polish &
+   capabilities round** (tutorial-book acceptance spine ·
+   simulator-drivable · the capability fill-out vs. the Mac registry
+   · the spacing/design pass · this sitting's defects and rulings,
+   Q-M2's core+phone build included). The architect authors that
+   round's plan for her ratification; it opens at her word, after her
+   sitting wraps.
+
 ---
 
 ## Orientation
