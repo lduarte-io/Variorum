@@ -8,41 +8,31 @@ This is the master build plan. It holds: the phase table, the **current phase po
 
 ## Current phase
 
-**→ PHASE 14A CLOSED 2026-08-04 — the next kickoff is the AUTHOR'S:
-Phase 14b (Suite E2EE), kickoff draft paste-ready at
-`notes/plans/phase-14b-suite-e2ee.md` (it opens with HER design
-sitting — the five pinned questions: device enrollment designed with
-the phone included from the start (first-class, never a
-phone-must-lead requirement — her 2026-08-04 clarification) ·
-Fragments-insights-vs-journal-E2EE · wipe-and-repush vs in-place
-mirror migration · the KDF/recovery/enrollment one-way doors · the
-vault-home free re-open; cast decided there, her recorded lean
-all-Fable).** 14a ran 2026-08-03/04 under `/architect-phase`
-(all-Fable, R1) with the author IN the sitting (rounds 0d–0z in
-`notes/plans/phase-14a-suite-identity.md`): the account home RULED
-the VARIORUM PROJECT ITSELF (0h — "stargazing" is the brand and the
-pages' front; the four guardrails bind); the OAuth 2.1 Server
-enabled; the spike answered BOTH load-bearing unknowns in the good
-direction (P-ii: OAuth-issued tokens are ordinary authenticated
-PostgREST users — the 14b vault viable as ruled; signup refusal 422
-with the server LIVE); the stargazing.tech pages shipped and proven
-end-to-end in production; Fragments' OAuth client registered,
-touchpoint #1 fully concrete (executed at the ONE batched handoff,
-14c's end); batch 1 shipped the DIRECT email+password sign-in
-through the one shared seam (Mac + the pre-merged mobile) and
-retired custom:fragments from the code (SignInFlow deleted); the
-cold-review ladder closed at round 2 (zero HIGH findings); the gate
-deleted her custom:fragments identity + the provider row + the
-spike client (every after-state verified; the Fragments project
-untouched) and tore down both auth spikes. Final counts **core
-1039/114 · Mac 1196/208** (the tripwire red by identity) **· mobile
-172/24 · spine 51/7**; NO schema (marker 4); zero `Sync/` lines; no
-AppSpec §14 delta. **Her Variorum-usage PAUSE holds until the 14
-family completes (round 0v).** ALSO UNBLOCKED: the mobile parity
-round's Stage A (its trigger was 14a's shared-seam landing —
-MobileSoul §7; PL-5 updated). 13e stays paste-ready behind the 14
-family at her word. The closeout log below has the paragraph; 14b's
-closeout authors 14c's kickoff.
+**→ PHASE 14B OPEN 2026-08-04 — the kickoff sitting RAN (author-attended,
+same day as 14a's close; ALL FIVE pinned questions RULED, R-1…R-8 recorded
+verbatim-faithful in `notes/plans/phase-14b-suite-e2ee.md`, now the plan
+file):** vault on the VARIORUM project (the free re-open SPENT) ·
+WIPE-AND-REPUSH for her mirror · the insights question CLOSED factually
+(nothing server-side reads journal bodies — her answer as Fragments' owner)
+· PASSPHRASE-ONLY enrollment, both form factors, QR a future door ·
+12-word BIP-39 recovery · enrollment-only unlock (the biometric-per-launch
+door answered OPEN for later) · ARGON2ID via the vendored PHC reference
+(her license approval recorded; no fee, CC0/Apache-2.0) · MASTER +
+PER-CLASS keys (Variorum corpus · journal-bridge — Fragments only ever
+touches the latter at touchpoint #2). **Cast ALL-FABLE by her invocation.**
+Execution: batch 1 (crypto substrate) → batch 2 (the `SyncSchema`
+classification + serializer seam — the `Sync/` surgery; convergence suites
+green OVER CIPHERTEXT; marker 4→5 authored) → batch 3 (vault client ·
+shared setup/enrollment UX · `resyncReinitialize` · bridge journal-class
+capability, rounds paused) → ONE combined-diff ladder → THE GATE (deploy ·
+her vault setup · the wipe at her go · repush + live dump verification ·
+phone enrollment = the restore drill's device half · the recovery-phrase
+drill · the two ratifies). **Her Round-4 overnight directive (2026-08-04,
+verbatim in the plan file): batches + ladder run overnight; the refresh is
+pre-authorized (after the deploy, per the strand rule); the WIPE waits for
+her morning vault setup — her passphrase cannot be chosen in absentia; her
+morning checklist is Round 4's item 5.** The pause holds until the family
+completes; 14b's closeout authors 14c's kickoff.
 
 *(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
 
@@ -88,7 +78,7 @@ closeout authors 14c's kickoff.
 | — | **More export options** (author, 2026-07-30 at the 13f kickoff: *"and more export options in the future"*) | The export family grows | Beyond 11b's `.md`/basic-PDF/bulk tiers; composes with the Phase 14 typographic-PDF and variorum-edition rows rather than duplicating them; scope at its kickoff | Exports stay one-way projections on `renderedText` semantics | pending — **unslotted by her design** |
 | 14 | ~~**Accounts & multi-tenant**~~ — **SPLIT 2026-07-30 into 14a–14d** (author, the release-strategy conversation's fifth round: *"14 is definitely going to have to split… go ahead and split it into coherent phases now"* — with her caveat that "some design choices will have to be assessed and done in that moment": each successor opens with its own design sitting; the split fixes scope boundaries, never designs) | — | The row's material distributes: suite identity → 14a · suite E2EE → 14b · multi-tenant + the paid tier → 14c · the exports → 14d. `notes/plans/phase-14-brief.md` survives as history | — | **split** |
 | 14a | **Suite identity — the neutral account** (split from 14; the identity fork RULED NEUTRAL the same round — her words: *"i have other apps in the works and a single login makes sense"*; the brand is PROVISIONAL, uncertainty preserved: *"i'll have to think about if stargazing is the brand I want but it's what I'll go with for now"*) | One login for the whole suite — both apps trust a neutral account | The neutral OIDC issuer (the 9c delegated pattern re-pointed at the suite account); non-author provisioning (signups deliberately re-enabled); the consent/sign-in pages productized on stargazing.tech (retiring the 9c LAN-interim residual); her own account's migration; **the Fragments-side conversation OPENS HERE** (her explicit instruction: "a part of phase 14 needs to be talking to fragments about what needs to happen there" — Fragments must trust the same issuer; asks ride `notes/fragments-bridge-contract.md`, carried by her; the Fragments repo stays hands-off). **Her 2026-07-30 snapshot makes this phase the SUITE LAUNCH'S CRITICAL PATH: Fragments is "pretty ready" and its remaining launch items — "the login page / the stargazing login decisions, privacy policy, etc." — largely coincide with this phase's scope**, so 14a unblocks both apps at once. *(AMENDED 2026-08-03 at the kickoff sitting, rounds 0g–0h — her ruling after the architect's flipped recommendation: **the account HOME is the VARIORUM PROJECT ITSELF** — no new org, no Pro purchase now; the sitting's earlier separate-project ruling superseded. "Neutral"/stargazing survives as the BRAND and the pages' front, with a custom domain fronting the issuer before the first non-author signup. Her migration collapses to adding a direct sign-in to her existing user — owner_id untouched by construction; non-author provisioning (signups ON) DEFERS to 14c per her nobody-before-the-family sequencing; the guardrails and full record: `notes/plans/phase-14a-suite-identity.md` rounds 0d–0h. Round 0m addition, her word: **the MOBILE-project update message is a 14a-gate deliverable** — the mobile app carries the shared Phase 8/9c auth shells, so when this phase's auth-seam code lands, a self-contained update message goes to that project (direct sign-in adoption, `custom:fragments` retirement) so she can sign in from her phone.)* | Both apps sign in against the ONE suite account; the bare key still grants nothing; her existing data untouched; the Variorum project's signup door still refuses | **done** (closed 2026-08-04 — the closeout log below; Fragments' half of "both apps" rides touchpoint #1 at the 14c-end batch by her 0t/0u execution-model ruling; her `owner_id` untouched by construction; the signup door re-probed 422 with the OAuth server live) |
-| 14b | **Suite E2EE** (split from 14; direction RULED 2026-07-30 — `notes/release-and-v1-strategy.md` §4; **wrap secret RULED 2026-08-03: a SEPARATE encryption passphrase, never the account password** — §4's dated addendum has the four grounds; **cast lean recorded 2026-08-02, hers:** "seems like the sort of thing i might want to run with an all fable cast" — coherent with the standing Sync/ rider, which routes the engine surgery to Fable regardless; decided at kickoff as always) | The tier ships unable to read your writing | Variorum sync E2EE from birth (the payload-serializer seam, text-bearing columns; the account-level key vault + recovery phrase; device-linking enrollment; one honest setup warning; her own mirror's migration); the bridge's journal class E2EE on BOTH ends under the shared key — **Fragments' journal class ONLY, RULED (fifth round): the rest of Fragments stays server-readable BY DESIGN** (its insights are the product) — *consistency note (2026-08-04, the one-batch ruling): the Fragments END is DESIGNED here and EXECUTED in the one batched handoff at 14c's end; the bridge pauses from this phase until that batch (R5's latitude, spent as designed)*; **her mirror's migration has a named best-answer candidate for the sitting (the 14a sweep, R3 applied): WIPE-AND-REPUSH instead of in-place migration** — local SQLite is truth and the mirror is a peer, her pause leaves one active device, so re-initializing the mirror through the new encrypted serializer may beat migration machinery entirely (server_seq/cursor reset implications weighed at the sitting); the Fragments-side asks (trim + empty-body-as-deletion relocated client-side or made metadata) ride the contract file; **device enrollment includes the PHONE from the design start** (the mobile agent's flag, relayed by the author 2026-08-04 — the phone is a first-class daily-driver device; enrollment/unwrap/recovery UX designed for both form factors, never Mac-first-phone-later); **a named sitting question from the 14a final sweep: does anything server-side read the bridge's `journal_entries` (Fragments insights)?** — if yes, journal-class E2EE trades those insights away, and the sitting rules client-side computation vs the accepted trade | Convergence suites green over ciphertext; a total mirror dump reads as structure, never words; a recovery-phrase restore drill (phone enrolled in the drill) | pending — after 14a (the vault lives on the account) |
+| 14b | **Suite E2EE** (split from 14; direction RULED 2026-07-30 — `notes/release-and-v1-strategy.md` §4; **wrap secret RULED 2026-08-03: a SEPARATE encryption passphrase, never the account password** — §4's dated addendum has the four grounds; **cast lean recorded 2026-08-02, hers:** "seems like the sort of thing i might want to run with an all fable cast" — coherent with the standing Sync/ rider, which routes the engine surgery to Fable regardless; decided at kickoff as always) | The tier ships unable to read your writing | Variorum sync E2EE from birth (the payload-serializer seam, text-bearing columns; the account-level key vault + recovery phrase; device-linking enrollment; one honest setup warning; her own mirror's migration); the bridge's journal class E2EE on BOTH ends under the shared key — **Fragments' journal class ONLY, RULED (fifth round): the rest of Fragments stays server-readable BY DESIGN** (its insights are the product) — *consistency note (2026-08-04, the one-batch ruling): the Fragments END is DESIGNED here and EXECUTED in the one batched handoff at 14c's end; the bridge pauses from this phase until that batch (R5's latitude, spent as designed)*; **her mirror's migration has a named best-answer candidate for the sitting (the 14a sweep, R3 applied): WIPE-AND-REPUSH instead of in-place migration** — local SQLite is truth and the mirror is a peer, her pause leaves one active device, so re-initializing the mirror through the new encrypted serializer may beat migration machinery entirely (server_seq/cursor reset implications weighed at the sitting); the Fragments-side asks (trim + empty-body-as-deletion relocated client-side or made metadata) ride the contract file; **device enrollment includes the PHONE from the design start** (the mobile agent's flag, relayed by the author 2026-08-04 — the phone is a first-class daily-driver device; enrollment/unwrap/recovery UX designed for both form factors, never Mac-first-phone-later); **a named sitting question from the 14a final sweep: does anything server-side read the bridge's `journal_entries` (Fragments insights)?** — if yes, journal-class E2EE trades those insights away, and the sitting rules client-side computation vs the accepted trade *(ANSWERED at the 14b sitting, R-3: nothing server-side reads it — closed factually by the author)* | Convergence suites green over ciphertext; a total mirror dump reads as structure, never words; a recovery-phrase restore drill (phone enrolled in the drill) | **open** (2026-08-04 — the sitting ruled R-1…R-8; the overnight run is under way per her Round-4 directive; the plan file governs) |
 *[removed for publication]*
 | ~~14d~~ | ~~**The variorum edition — shareable format & typographic PDF**~~ — **RENUMBERED 13m** (author, 2026-08-03 at the 14a sitting round 0q: *"that seems random compared to everything else that's in phase 14"* — it sat in the 14 family purely by inheritance from old row 14, where the export/PDF debt rows had been parked in the accounts era; always severable, zero accounts dependency. The material moves to row 13m unchanged) | — | — | — | **renumbered** |
 | 15 | ~~**iOS full surface**~~ — **SUPERSEDED 2026-07-25** by the standalone mobile row below (author ruling: mobile gets "its own plan, decided separately", not a numbered slot) | — | The row's material moves to `notes/plans/mobile-app-plan.md`; `phase-15-brief.md` survives as history, its "no fan gestures" framing superseded | — | **superseded** |

@@ -10,6 +10,44 @@
 
 *(Moved verbatim from the master plan's "Current phase" section, in the order they sat there — newest first, per that section's convention, back through Phase 13b, then the standing Phase 12 deferral paragraphs and the early out-of-band records. The ACTIVE pointer always lives in `notes/DetailedPlanForPhases.md`.)*
 
+*(Superseded pointer, kept for the thread — the ACTIVE pointer from 14a's close to 14b's opening, 2026-08-04, superseded the same day when the 14b kickoff sitting ran:)*
+
+**→ PHASE 14A CLOSED 2026-08-04 — the next kickoff is the AUTHOR'S:
+Phase 14b (Suite E2EE), kickoff draft paste-ready at
+`notes/plans/phase-14b-suite-e2ee.md` (it opens with HER design
+sitting — the five pinned questions: device enrollment designed with
+the phone included from the start (first-class, never a
+phone-must-lead requirement — her 2026-08-04 clarification) ·
+Fragments-insights-vs-journal-E2EE · wipe-and-repush vs in-place
+mirror migration · the KDF/recovery/enrollment one-way doors · the
+vault-home free re-open; cast decided there, her recorded lean
+all-Fable).** 14a ran 2026-08-03/04 under `/architect-phase`
+(all-Fable, R1) with the author IN the sitting (rounds 0d–0z in
+`notes/plans/phase-14a-suite-identity.md`): the account home RULED
+the VARIORUM PROJECT ITSELF (0h — "stargazing" is the brand and the
+pages' front; the four guardrails bind); the OAuth 2.1 Server
+enabled; the spike answered BOTH load-bearing unknowns in the good
+direction (P-ii: OAuth-issued tokens are ordinary authenticated
+PostgREST users — the 14b vault viable as ruled; signup refusal 422
+with the server LIVE); the stargazing.tech pages shipped and proven
+end-to-end in production; Fragments' OAuth client registered,
+touchpoint #1 fully concrete (executed at the ONE batched handoff,
+14c's end); batch 1 shipped the DIRECT email+password sign-in
+through the one shared seam (Mac + the pre-merged mobile) and
+retired custom:fragments from the code (SignInFlow deleted); the
+cold-review ladder closed at round 2 (zero HIGH findings); the gate
+deleted her custom:fragments identity + the provider row + the
+spike client (every after-state verified; the Fragments project
+untouched) and tore down both auth spikes. Final counts **core
+1039/114 · Mac 1196/208** (the tripwire red by identity) **· mobile
+172/24 · spine 51/7**; NO schema (marker 4); zero `Sync/` lines; no
+AppSpec §14 delta. **Her Variorum-usage PAUSE holds until the 14
+family completes (round 0v).** ALSO UNBLOCKED: the mobile parity
+round's Stage A (its trigger was 14a's shared-seam landing —
+MobileSoul §7; PL-5 updated). 13e stays paste-ready behind the 14
+family at her word. The closeout log below has the paragraph; 14b's
+closeout authors 14c's kickoff.
+
 *(Superseded pointer, kept for the thread — the ACTIVE pointer from 13k's close through 14a's run, 2026-08-02 → 2026-08-04, with the 2026-08-03 redirect note that opened 14a recorded against it:)*
 
 **→ PHASE 13K CLOSED 2026-08-02 — the next kickoff is the AUTHOR'S:
