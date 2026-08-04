@@ -86,6 +86,11 @@ create table key_vault (
   -- discarded words).
   revision                             integer not null default 1,
   created_at                           timestamptz not null default now(),
+  -- INSERT-TIME-ONLY by design (ladder R2-1): no trigger maintains this and
+  -- the client wire row deliberately omits timestamps, so it records vault
+  -- CREATION time. The `revision` column above is the change-bookkeeping
+  -- token; a client-written updated_at is a recorded 14c candidate for the
+  -- vault-generalization work, not a promise this column currently keeps.
   updated_at                           timestamptz not null default now()
 );
 

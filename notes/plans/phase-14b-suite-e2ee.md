@@ -932,11 +932,14 @@ carry PENDING below for the architect's unlocked window.
 **PROVISIONALs / deviations (recorded reasons):**
 - **PROVISIONAL (bridge):** the legacy-plaintext land rule (above — the
   most spec-defensible reading; the refuse alternative jams the cursor on
-  the handoff's own transition). One residual corner recorded: a
-  pre-handoff plaintext body that ITSELF starts with a literal `e1:<valid
-  base64>` (a user typing that exact shape into the Day screen during the
-  pause) would refuse as tamper at resumption — visible, not silent, and
-  fixed by editing the entry; vanishingly narrow.
+  the handoff's own transition). One residual corner recorded *(restated
+  at ladder R2-2 to match shipped post-R1-4 behavior)*: a pre-handoff
+  plaintext body beginning with ANY `e<digits>:` prefix — a literal
+  `e1:<valid base64>` shape refuses as tamper, and e.g. a Day entry
+  starting "e2: second draft…" refuses as `unsupportedVersion` — refuses
+  the round at resumption, cursor held: visible, not silent, nothing lost,
+  fixed by editing the entry; narrow, and the refuse direction is the
+  R1-4 disposition's own choice.
 - **PROVISIONAL (small):** `EncryptionSession.isKeysLockedError` matches
   the refusal description EXACTLY (equality, not substring) — a wrapped or
   translated error would fall back to the generic error face, never hide.
@@ -1362,6 +1365,36 @@ closeout sweep rather than exceeding the findings' scope. R1-5/R1-9 ride
 the closeout list per the route. No `Vendor/`, no deploy/dashboard
 contact, no `.env*` reads, no push (the architect pushes after
 verification).
+
+### Cold-review ladder — ROUND 2 (2026-08-05 overnight; fresh Fable
+### reviewer anchored on round 1's recorded findings + dispositions + the
+### fix record)
+
+**Verdict: EVERY ROUND-1 DISPOSITION HOLDS — ZERO NEW BLOCKER/MAJOR. THE
+LADDER CLOSES AT ROUND 2** (round 3 is owed only on new HIGH findings).
+The reviewer re-derived every mechanism itself: ran its OWN behavioral
+reverts on all three behavior fixes (R1-2 — the filter dropped, the
+regenerate-race pin failed on the finding's exact worst arm, the written
+phrase dead; R1-4 — the pre-fix guard restored, the `e2:AAAA` body landed,
+rendered, and advanced the cursor; R1-1 — the artifact-absent probe failed
+the pin), re-ran the full core suite (1153/124, reproducing the fix
+record's line), mobile (173/25), and confirmed the phase-wide inland
+zero-diff with its own git evidence. All four standing PROVISIONALs
+independently ACCEPTED. New findings, both NIT + one wording note, all
+dispositioned by the architect at the close:
+
+| # | Sev | Finding | Disposition |
+|---|-----|---------|-------------|
+| R2-1 | NIT | `key_vault.updated_at` is never maintained after insert (no trigger; the wire row omits timestamps) — a column whose name promises bookkeeping nothing writes. No consumer reads it. | CONFIRMED — fixed by the architect pre-deploy at the reviewer's offered docs option: 08 now states the column is INSERT-TIME-ONLY by design; the client-write one-liner is recorded on the closeout list as a 14c vault-generalization candidate (post-ladder code churn declined at 5 a.m. discipline). |
+| R2-2 | NIT | The batch-3 PROVISIONAL note understates the post-R1-4 refusing set: ANY legacy plaintext body beginning `e<digits>:` refuses at resumption (visible, cursor held, fixed by editing the entry) — not just the literal-`e1:` corner. | CONFIRMED — the note corrected in place by the architect (the record now matches shipped behavior); the closeout restates the corner in the phase summary. |
+| R2-3 | note | `BridgeEngine.swift:723`'s receipt-half comment says "an unopenable `e1:` body" where R1-4 widened the class to any `e<n>:` — wording one revision behind; behavior correct (catch-all preserve-verbatim). | Folded into the closeout hygiene sweep (a comment-only touch, batched there). |
+
+**THE LADDER IS CLOSED. The Round-4/5 condition ("attempted ONLY if the
+ladder closes clean") is SATISFIED — the overnight production tail may
+proceed in its recorded order: A1 backup + mirror export → the 08 deploy →
+after-state verification. The wipe · repush · refresh · everything
+her-facing still rides the morning (the Mac suite + spine at the unlocked
+window remain the wipe's precondition).**
 
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
