@@ -3,7 +3,11 @@
 > **SPENT — the phase CLOSED 2026-08-04.** The fresh architect ran the full
 > remainder from this file (ladder → gate → closeout); kept as history. The
 > author-facing record is `notes/handoffs/phase-14a-handoff.md`; the phase
-> record is the plan file.
+> record is the plan file. One correction against this file's letter (her
+> word, 2026-08-04): "device enrollment phone-first" below is a WRONG
+> shorthand — the mobile flag is the phone as a FIRST-CLASS device included
+> in the design from the start, never a phone-must-lead requirement; the
+> 14b draft carries the corrected wording.
 
 ## The cutover shape (her ruling, round 0z — with the architect's one refinement, accepted)
 
