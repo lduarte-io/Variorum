@@ -702,6 +702,33 @@ passphrase with the recovery words if needed?"
    widens to carry both; the restore drill (gate step 6) exercises the
    phrase-unwrap mechanics this rides on.
 
+### Round 8 — her goodnight confirmation (2026-08-04, the sitting's close)
+
+Her message, verbatim: *"ok great - i've put in my passphrase, you have my
+permission for everything that should be needed overnight (and I'll see if
+something does block it anyway), we added something valuable to the scope
+that's standard and should be there anyway, and in the morning i'll
+hopefully be ready to save my 12 recovery words, test them out, and try out
+the passphrase on teh phone build! goodnight and I can't wait to see what's
+been built tomorrow."*
+
+Recorded: the passphrase file VERIFIED PRESENT (existence + `600` perms +
+gitignore only — contents untouched, the arrangement's discipline); her
+BLANKET OVERNIGHT PERMISSION is explicit and covers the Round-5 conditional
+production tail (still gated on the ladder closing clean, and every
+production step still logs its before/after states); the morning remains:
+recovery words (generate → write → confirm) → the phrase drill → the phone
+build (the mobile project's morning merge, Round 6 item 3) → the two
+ratifies → the passphrase file's announced deletion.
+
+**Batch-1 verification (the architect's own, post-record):** commits
+`ad7bbc7`/`ed30c3a`/`48f365a` spot-checked against their claims; the
+`Sync/`+`App/`+`Server/` scope diff EMPTY; the four suites re-run green
+(55/4, own run; KDF 0.573s median); the implementer's advisory flag
+RESOLVED — Mac AND mobile Xcode builds of the app against the new package
+target both BUILD SUCCEEDED (the C target + resource bundle wire correctly
+at the app level). Batch 2 spawned.
+
 ### Round 6 — three morning-adjacent clarifications (mid-sitting, 2026-08-04)
 
 1. **Passphrase policy (her question: "just has to be 12 characters long at
