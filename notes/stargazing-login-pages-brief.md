@@ -104,10 +104,19 @@ Site URL with `#access_token=…&type=recovery` in the URL fragment.
 
 ## After deploy (the author's dashboard flip — recorded here for completeness)
 
-Supabase dashboard → Authentication → OAuth Server: **Site URL** =
-`https://stargazing.tech`, **Authorization Path** = the consent page's path
-(e.g. `/oauth/consent`). The dashboard has silently discarded values before —
-save, reload, verify.
+Supabase dashboard, **THREE values** (the third was this brief's one gap — the
+site agent's correct catch, 2026-08-03: reset requests send
+`redirect_to=…/oauth/reset`, and Supabase only honors allow-listed redirect
+URLs; without the allowlist entry, recovery links would land on the homepage,
+which catches nothing):
+
+1. **Site URL** = `https://stargazing.tech`
+2. **Authorization Path** = `/oauth/consent` (Cloudflare's trailing-slash
+   redirect preserves the query string — this form is fine)
+3. **Redirect URLs**: add `https://stargazing.tech/oauth/reset`
+
+The dashboard has silently discarded values before — save, reload, verify all
+three actually stuck.
 
 ## Non-goals
 

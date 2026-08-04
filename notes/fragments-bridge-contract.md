@@ -469,6 +469,29 @@ with them):
    (nobody-before-the-family, her sequencing ruling).
 4. `journal_entries` shape/keys stay frozen (standing ask #3, unchanged).
 
+**Coordinates DELIVERED (2026-08-04Z — the registration ran through the admin
+door; nothing further is needed from the Variorum side for this touchpoint):**
+*[removed for publication]*
+  works; endpoints live under it: `/oauth/authorize`, `/oauth/token`,
+  `/.well-known/jwks.json`).
+*[removed for publication]*
+  `client_secret_post` · registered redirect
+  *[removed for publication]*
+  GoTrue callback).
+- **client_secret:** in the author's untracked
+  `~/dev/variorum/.env.fragments-oauth.local` (`SUITE_FRAGMENTS_CLIENT_*`) —
+  she carries it into Fragments' provider config by hand; it appears in no
+  repo and no chat.
+- **THE FIRST-SIGN-IN RULE (load-bearing):** on her FIRST delegated sign-in
+  into Fragments via the new provider, VERIFY the minted session's uid equals
+  *[removed for publication]*
+  email to the existing user when it can). If a NEW uid appears instead, STOP —
+  do not use that account — and link deliberately via the admin API before
+  proceeding: every `journal_entries` row keys on the old uid. Also check the
+  interaction with Fragments' own signups toggle deliberately — a first
+  delegated sign-in rides the create-account path there, exactly as on the
+  Variorum side.
+
 **TOUCHPOINT #2 — at 14b (suite E2EE):** the journal class goes ciphertext under
 the shared account key — Fragments' client gains encrypt/decrypt for that class
 (setup UX includes the account's encryption passphrase; the vault lives on the

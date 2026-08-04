@@ -933,6 +933,58 @@ does not gate the spike (project refs are random; display names rename freely).
   touchpoint-1 handoff · the mobile update message at the gate · her
   bootstrap-password change once `/oauth/reset` is live.
 
+- **Round 0s (same sitting) — the site pages green-lit; Fragments' client
+  registered and touchpoint #1 goes fully concrete; her identity question
+  answered with evidence; the mobile-merge order settled.**
+  - **P-ii explained to her** (her ask): the label for probe ii of the spike's
+    two load-bearing unknowns — whether an OAuth-server-issued token is
+    accepted by the SAME project's PostgREST as an ordinary authenticated user
+    (`auth.uid()` resolves, RLS applies). Flagged unverified since 9c; the 14b
+    vault + 14c entitlement designs ride on it; her run verified it.
+  - **The stargazing agent's report REVIEWED — GREEN-LIT to push.** Quality
+    noted: both 9c traps handled, the consent-race re-fetch, the sign-up door
+    carrying `authorization_id` through, the reset page keeping supabase-js
+    OUT of its bundle, 12 headless checks incl. 3 live backend round-trips.
+    **Its one catch on the brief is CORRECT and adopted** — the reset flow
+    needs `redirect_to` allow-listed, so the dashboard flip is THREE values
+    (Site URL · Authorization Path `/oauth/consent` · Redirect URLs +
+    `/oauth/reset`); the brief's After-deploy section corrected in this
+    commit. Post-deploy verification sequence handed to her: bare
+    `/oauth/consent` visit (calm error expected) → the spike re-run END TO END
+    through the PRODUCTION pages (the spike client's localhost callback makes
+    this legal) → then her bootstrap-password change at `/oauth/reset`.
+  - **Fragments' OAuth client REGISTERED via the admin door** (no open
+    *[removed for publication]*
+    `client_secret_post`, redirect = Fragments' GoTrue callback; the secret
+    written ONLY to her untracked `.env.fragments-oauth.local`. The contract's
+    touchpoint #1 now carries the full coordinates plus **THE FIRST-SIGN-IN
+    *[removed for publication]*
+    link deliberately — the journals key on the old uid) and the
+    Fragments-signups-toggle interaction check. **She can carry touchpoint #1
+    to the Fragments agent NOW.**
+  - **Her custom:fragments identity — answered with EVIDENCE, removal
+    DEFERRED:** the admin read shows her user's ONLY identity row is
+    *[removed for publication]*
+    mint an email identity.** Removing it tonight would leave a
+    zero-identity user on the account that owns her whole corpus — an
+    unverified GoTrue state gambled on production auth for zero functional
+    gain, since password sign-in provably bypasses identities (the 0p test).
+    The badge is INERT. The removal lands with the code batch's provider
+    retirement, state verified before/after (the hallucination-guard posture
+    applied to auth surgery).
+  - **The mobile-merge order settled (her ask): merging `mobile` → `main`
+    BEFORE the 14a code batches is the BETTER order** — the auth seam
+    (AuthSession/SignInFlow/ProjectConfig) is SHARED code, so one batch then
+    updates both surfaces at once and the "mobile update message" deliverable
+    mostly dissolves into ordinary shared-seam work. From 14a's side main is
+    ready; the mobile project's own gate (the feel round + Q-M1/Q-M2 + P1–P44)
+    remains hers to declare, and the merge is the mobile session's act.
+  - **Her Fragments-project question sequenced:** nothing manual to do with
+    her Fragments user — the link happens at the first delegated sign-in
+    under the first-sign-in rule; the provider config + app flow are the
+    Fragments agent's work from the contract asks; the uid check is the one
+    deliberate moment.
+
 ## Ledger
 
 | # | Item | Status |
