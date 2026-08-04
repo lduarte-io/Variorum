@@ -884,6 +884,25 @@ does not gate the spike (project refs are random; display names rename freely).
   → the spike run (`start.html` → consent sign-in with the new password →
   approve → callback probes P-ii + the signup-refusal).
 
+- **Round 0q (same sitting) — `vault_probe` created by the architect's hand at
+  her word; 14d renumbered 13m at her word.** Her instruction ("don't you have
+  the PAT to run that SQL command yourself? go ahead and do that") executed via
+  the stored-PAT arrangement: the scratch table is live on the project —
+  verified `relrowsecurity = true`, exactly one policy (own-rows) — and gets
+  DROPPED after the probe. **The renumber:** her challenge ("wait why is 14d
+  even the severable export/PDF phase? that seems random compared to
+  everything else that's in phase 14. maybe that should become a 13m or
+  something?") is historically explained — the export/PDF debt rows were
+  parked on OLD row 14 in the accounts era (commercial-trust/data-portability
+  adjacency), and the 2026-07-30 split preserved scope boundaries without
+  re-homing — and CORRECT: the material has zero accounts dependency.
+  **RENUMBERED 14d → 13m** across the master plan (struck row + the new 13m
+  row in the 13 family + the headline mention), both KnownIssues owner cells,
+  and the release-strategy split record. The 14 family is now purely the
+  accounts arc: 14a identity · 14b E2EE · 14c multi-user + tier. Next: her
+  spike run (`start.html` → consent → the new password → approve → the
+  callback's P-ii + signup-refusal summary).
+
 ## Ledger
 
 | # | Item | Status |
