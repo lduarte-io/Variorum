@@ -1130,9 +1130,15 @@ identity/provider cleanup is the gate's, after verification).
    (`Auth/UserSession.swift` was built to be re-pointed — use that seam, no
    sibling implementation). Keychain persistence, single-flight refresh, and
    sign-out-is-terminal semantics carry over unchanged.
-2. **Session continuity:** her EXISTING persisted session (minted via
-   custom:fragments) is an ordinary Variorum-project session — the new build
-   must keep honoring it (no forced re-sign-in). Pin this.
+2. **Session continuity — DEMOTED at her word (round 0w; the R3 best-answer
+   posture applied to sessions):** the existing persisted session MAY break —
+   she is fine signing in once with the new password ("it is okay if I need
+   to resign in - didn't we explicitly say to not shape the code to what
+   already exists?"). If continuity survives for free, fine — but write NO
+   compatibility shims and NO legacy-session tests; let the cleanest seam
+   design win. A one-time re-sign-in is the accepted cost (the bridge's
+   Fragments password session is likewise re-mintable). Sessions are not
+   data — nothing about her rows is touched either way.
 3. **The bridge's delegated swap, DORMANT:** implement the Fragments-project
    session acquisition via the suite issuer (ASWebAuthenticationSession →
    authorize → Fragments' GoTrue mints its native session) behind the
@@ -1156,10 +1162,24 @@ LIVE — this batch touches NO server config; commit + push at bout ends;
 schema: NONE (marker stays 4).
 
 **Acceptance:** she can sign OUT and back IN with email+password on the Mac
-app (and the mobile sign-in surface compiles/tests to the same seam); her
-existing session survived the update; the dormant road is provably inert
-(test: with the flag off, no delegated call is reachable); suites green;
-red-on-old pins verified both directions.
+app (and the mobile sign-in surface compiles/tests to the same seam) — a
+one-time re-sign-in after the update is acceptable, per scope item 2 as
+amended; the dormant road is provably inert (test: with the flag off, no
+delegated call is reachable); suites green; red-on-old pins verified both
+directions.
+
+- **Round 0w (same sitting, mid-batch-1) — her R3 catch: session continuity
+  DEMOTED.** Her words: "it is okay if I need to resign in - didn't we
+  explicitly say to not shape the code to what already exists? that
+  contortions are unneeded since the only user inconvenienced is me?" —
+  CORRECT, and the architect's continuity pin was exactly the contortion
+  class R3 bans (it could have forced compatibility shims around the legacy
+  session's shape instead of the cleanest seam). Batch 1's scope item 2 and
+  acceptance amended in place (no shims, no legacy-session tests, one-time
+  re-sign-in accepted; sessions are not data); **the amendment was ALSO sent
+  to the running implementer via SendMessage AND mirrored here same-turn**
+  (the verify-subagent-message-delivery rule — the repo record is the
+  authority if the message drops).
 
 ## Ledger
 
