@@ -720,9 +720,11 @@ public struct BridgeEngine: Sendable {
                     // body is a landed body — opened BEFORE discrimination
                     // (the rules compare plaintext hashes/containment, and
                     // a rescue must land words, never ciphertext). Legacy
-                    // plaintext passes; an unopenable `e1:` body must NOT
-                    // throw (the receipt doctrine: it is the only copy) —
-                    // it preserves durably, verbatim, and speaks.
+                    // plaintext passes; an unopenable `e<n>:` body of ANY
+                    // version must NOT throw (the receipt doctrine: it is
+                    // the only copy) — it preserves durably, verbatim, and
+                    // speaks. (Wording widened at the 14b closeout sweep,
+                    // R2-3 — behavior was already R1-4's.)
                     let openedPrevious: String
                     do {
                         openedPrevious = try BridgeCrypto.openLanded(

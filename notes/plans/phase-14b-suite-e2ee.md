@@ -1475,7 +1475,14 @@ window remain the wipe's precondition).**
   sense to me and it should go on the plan for later... for now we just
   say, keep track of this!" Owner: 14c's operationalia (the machinery IS
   R-2's own shape — resyncReinitialize + a fresh vault — made user-facing;
-  composes with account deletion and the tier).
+  composes with account deletion and the tier). **14c CONSTRAINT (cold
+  pass C-3, mechanism traced):** the truncate→repush window admits a
+  stale-device poison push — an unattended second device's pull sees an
+  empty window, its push rejects `current: nil` → rebase-to-0 → old-key
+  ciphertext ACCEPTED onto the wiped mirror, wedging every pull at
+  `payloadCryptoFailure`. Safe this phase only procedurally (her pause;
+  one active writer). **The user-facing re-key MUST fence stale writers
+  (vault-revision- or marker-class) BEFORE the truncate.**
 - **CF-9 (storage-recommendation copy):** recommend paper or a password
   manager; "two copies of the passphrase and two copies of the recovery
   key, stored separately."
@@ -1895,25 +1902,11 @@ list):**
 - **Terminology pin walks comments too** — stricter than the brief's "UI
   strings"; deliberate (recorded above; it already caught one).
 
-**The crossover handoff (what the fresh orchestrator needs):**
-- The round's diff is `969ff83` + the record commits after it. The brief
-  is the section above this record; the CF ledger is "Her validation
-  walk" + "The validation tail".
-- Still owed AFTER adjudication, per the brief: ONE cold review pass over
-  the round's diff; then HER WALK + the proper phone drill (forget →
-  re-enroll via phrase — CF-11's door now exists for it) as the round's
-  human acceptance; the `/Applications` refresh (pre-authorized, at a
-  zero-instance window) and the mobile project's `main` → `mobile` merge
-  for the phone build carrying this round; the L16 closeout parity line.
-- The phone-drill note for her walk: on the phone, the drill is Settings
-  → the sync row's Encryption door → Forget Encryption Keys (confirm) →
-  the sync face shows the locked line → Unlock… → "Use my recovery
-  phrase instead" → her 12 written words. Both doors ride the shared
-  seam, so the flow is identical on the Mac.
-- Environment notes for whoever runs the Mac suite next: this session's
-  runs were all from the `App/Variorum` project invocation; no GM-1
-  preparing-timeout occurred in any of them; the standing tripwire is
-  the one allowed red.
+*(A "crossover handoff" subsection — what-remains list, phone-drill
+note, environment notes for the incoming seat — stood here during the
+mid-phase cutover and was REMOVED at the closeout per the author's
+trim ruling, 2026-08-04: cutover-only scaffolding does not persist once
+its reader exists and the work it listed is done. Git history holds it.)*
 
 **Acceptance (the round's full set — own runs, all waited synchronously,
 verbatim lines; FINALIZED post-record per the repo-first rule):**
@@ -2543,6 +2536,92 @@ in 7 suites passed". **The post-cold-pass tree is the phase's FINAL
 code** (her drill + closeout remain; the closeout's doc deltas touch no
 code).
 
+### HER ACCEPTANCE — THE FULL RE-KEY DRILL, EXECUTED AND PASSED
+### (2026-08-04, live, every step announced, her go per step — the runbook
+### she ruled in at the cutover, run with ONE deliberate reorder: the
+### phone's stale custody SURVIVED until after the re-key, because CF-16's
+### replaced state requires surviving mismatched keys — a forget-first
+### phone would have made the validation impossible)
+
+1. **The A1 rail:** WAL-safe backup `variorum-backup-2026-08-04-213910.sqlite`
+   (UTC name, `PRAGMA integrity_check` = ok, 5,959,680 bytes) + the mirror
+   export (19 files — 18 data tables + sync_meta — 4.2 MB, every request
+   clean, **7,274 rows**: the morning's 7,265 + 9 walk-era rows).
+2. **The phone build:** the mobile session's Release install cut from
+   final `main` (its morning merge already held the cold-pass tip;
+   verified empty diff). Mobile suite 175/26 at its push (`9674395`).
+*[removed for publication]*
+   **revision 5** — setup + generate + her regenerate + the phrase-drill
+   passphrase change), DELETE with RETURNING confirming exactly that row,
+   after-read ZERO rows.
+4. **Her Mac walk — the stepped setup, live, and the COPY RATIFY:** the
+   full flow walked as a first-run user; the stale-custody-overwrite arm
+   (the step-0 pin) validated LIVE (`.noVault` over stale custody → setup
+   → wholesale overwrite); NEW passphrase + NEW 12 words written and
+   confirmed. **Her ratify, verbatim: "I think the copy of everything
+   looks pretty solid and this flow makes sense to me."** The disclosure
+   copy and warning are RATIFIED; the two held row wordings (the locked
+   line's "passphrase" under a biometric gate; the replaced row's line)
+   are RATIFIED-BY-WALK — she saw the replaced row live in step 7 and
+   called everything solid.
+5. **The truncate:** the committed artifact VERBATIM; before-counts
+   summing exactly 7,274; after: all 18 data tables ZERO, `key_vault` = 1
+   (her NEW vault), marker still 5, sequence never reset.
+6. **The repush:** her passphrase file recreated by the confirm-twice
+   script — **with a process correction recorded honestly: the first
+   script handed to her was bash syntax and her shell is zsh** (`read -p`
+   = coprocess read there), so both reads failed empty and the
+   empty-empty compare WROTE AN EMPTY FILE (harmless — the runner's
+   non-empty floor would have refused; the corrected zsh script adds a
+   non-empty guard so an empty-empty match can never write again). The
+   short-lived session minted against her SUITE email
+   *[removed for publication]*
+   (top-level user shape in this GoTrue's generate_link response — the
+   first parse's `user` read failed CLOSED, exactly as a guard should);
+   *[removed for publication]*
+   no stray. Dry-run clean (unwrap arm, 7,274 rows, writes nothing).
+   The real run: KDF 0.596 s → `resyncReinitialize` (7,274 enqueued) →
+   **drained in 16 rounds with GM-3's transient-drop absorption live**
+   (the gateway killed bursts exactly as recorded; progress reset the
+   bound every round). One cosmetic quirk recorded: the runner's summary
+   line reported the LAST round's 674 accepts as the total — the mirror
+   proof below is the truth; a one-line accumulator fix is 14c-era
+   runner-touch material, not worth churn now.
+7. **The phone — CF-16 VALIDATED LIVE, then the roads:** her report:
+   the sync row's "Sync paused" + the Re-enroll door SEEN (the replaced
+   state, both faces) → re-enroll with the NEW passphrase (the overwrite
+   arm, no forget needed) → corpus reading → **forget** (CF-11's door) →
+   **the recovery-phrase road with her NEW 12 words** → enrolled again.
+   The disaster road is proven end-to-end under the new secrets. She
+   also verified the mobile snapshot cover live (Regenerate → app
+   switcher → words REDACTED → back → same words → completed) — **the
+   mobile PROVISIONAL is ACCEPTED by her walk.**
+8. **The live dump proof (the phase's headline, re-proven under the NEW
+   key):** mirror row counts EXACT per table (total 7,274 == local
+   7,274) · **ZERO plaintext across all eighteen encrypted columns** ·
+   the random sample pure `e1:` ciphertext. Structure visible, words
+   never — under keys only she holds.
+
+**Secrets hygiene at the drill's close:** the passphrase file and the
+session token DELETED (announced); the vault's revision history read
+1→2→3 (setup · the step-4 wrap · her LANDED regenerate during the
+switcher test) — **the LIVE phrase is the regenerate's set, confirmed
+written down**; the two dead sets (the pre-drill original and the
+drill's step-4 words) are hers to destroy, advised and underway.
+
+**The `/Applications` refresh** was executed earlier the same day at a
+verified zero-instance window (Release, signed, universal), **with one
+process slip recorded honestly:** the architect's post-copy verification
+line accidentally launched the app from its binary and the command
+timeout SIGTERM'd it after ~2 idle minutes — WAL makes the kill safe by
+design, and the drill's step-1 `integrity_check` (ok) closed the
+question with evidence.
+
+**One honest residual, an invitation not a gate:** the biometric
+require-setting (CF-12) ships fully pinned through the scripted seam but
+was not toggled live in the drill (her roads were passphrase + phrase).
+Her live Face ID/Touch ID try is welcome any day; nothing waits on it.
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
@@ -2561,14 +2640,14 @@ code).
 | L12 | Phone KDF latency measured (R-7's condition) | **done — batch 3** (SIMULATOR 0.686 s, recorded as NOT the device number; the flow surfaces its own on-device number for the gate's step 5) |
 | L13 | Disclosure list + warning wording for her ratify | **done — batch 3 → gate** (the GATE RATIFY block above the ladder section) |
 | L14 | The ladder (combined diff) | **done — CLOSED at round 2** (R1: 1 MAJOR + 3 MINOR + 5 NIT all fixed revert-verified; R2: every disposition holds, zero new HIGH) |
-| L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | steps 1–6 **done** (A1+export · 08 deployed marker 5 · her vault · wipe+repush+live dump proof · phone enrolled 0.16 s · phrase drill light road); step 7 refresh + step 8 ratifies ride the crossover tail (L21) |
+| L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | **done in full** (steps 1–6 at the morning gate; step 7's refresh + step 8's ratifies closed by the crossover tail — the refresh at a verified zero-instance window, the ratifies at her drill walk; the drill record above) |
 | L16 | MobileSoul PL-6 updated at design time (done this sitting) + closeout parity line | PL-6 written; closeout line owed |
 | L17 | The copy/flow round (CF-1…CF-13 + biometric) | **done** (`969ff83`+`a9b00fd`; 8+1 pins, five behavioral reverts; verified + adjudicated by the crossover architect — the adjudication section above) |
 | L18 | The crossover round (CF-14 · CF-15 · CF-16) | **done** (`910d30d`+`2f8249b`; 7 pins, four behavioral reverts; verified + adjudicated by the architect — the verification/dispositions section above; Mac 1218/213 tripwire-only reproduced by both seats) |
 | L19 | The mobile flow notes file (her coordination deliverable) | **done** (`4eb5eee` — `notes/plans/phase-14b-mobile-flow-notes.md`; PL-6 points at it; the cold pass verified its claims against the shipped code; her handover prompt delivered) |
 | L20 | ONE cold pass over the copy/flow + crossover diffs (REVIEW_PROMPT verbatim) | **done** (NO BLOCKER/MAJOR — 3 MINOR + 4 NIT, the section above; C-4/C-5/C-6/C-7 fixed at the architect's hand revert-verified, C-1 routed to 13e's row, C-2/C-3 on the closeout manifest) |
-| L21 | HER ACCEPTANCE: the full re-key drill (runbook in the architect handoff; step 0 PINNED green) + the disclosure ratify + the `/Applications` refresh | pending — her go per step |
-| L22 | Closeout ritual in full (incl. the 14c kickoff draft) | pending |
+| L21 | HER ACCEPTANCE: the full re-key drill (step 0 PINNED green) + the disclosure ratify + the `/Applications` refresh | **done — PASSED in full** (the drill record above: CF-16 validated live on the phone · the phrase road proven with the new words · both ratifies landed · the refresh executed; the mobile snapshot-cover PROVISIONAL accepted at the same walk) |
+| L22 | Closeout ritual in full (incl. the 14c kickoff draft) | **done** (this closeout: master plan + archives + AppSpec §14 delta + SyncSpec seam delta and BOTH §12 entries + KnownIssues E2EE row resolved + PL-6 parity line + the handoff + the 14c kickoff draft; the cutover scaffolding trimmed per her ruling) |
 
 ## Environment traps (carried into every batch brief, per the skill)
 
