@@ -1213,6 +1213,37 @@ not compiling).
    enrollment UX arrives through the shared seam (batch 3; PL-6). Relayed
    to her as a paste-ready addition to her mobile-session message.
 
+### Cold-review ladder — ROUND 1 (2026-08-05 overnight; fresh Fable
+### reviewer, REVIEW_PROMPT verbatim, zero implementation context)
+
+**Verdict: NO BLOCKER — 1 MAJOR + 3 MINOR + 5 NIT.** The reviewer's own
+runs: core 1146/124 green, mobile 173/25 green (Mac suite + spine honored
+the recorded environment hold). All four standing PROVISIONALs dispositioned
+ACCEPTED by the reviewer (keys-before-§12 order; the engine's defaulted
+refusing provider resolved at the app seam; the bridge legacy-plaintext
+land rule — with R1-4 below as its needed refinement; the exact-match
+locked classifier). Findings + architect dispositions (adjudicated against
+the spec docs; the implementer sessions are dead, so dispositions are
+architect-direct):
+
+| # | Sev | Finding (condensed — the reviewer's full mechanism is the record) | Disposition |
+|---|-----|-------------------------------------------------------------------|-------------|
+| R1-1 | MAJOR | The committed mirror-truncate artifact DOES NOT EXIST (THE DESIGN promises it; gate step 4 names it; `Server/supabase/` holds only 01–08) and THE DESIGN says "sixteen data tables" — the registry has EIGHTEEN. A table skipped at truncate keeps plaintext rows the decrypt seam then refuses on every pull — a permanent cursor wedge (the run-too-early class made durable). Unowned gap — the no-blank-owner smell. | CONFIRMED — fix: author `Server/supabase/maintenance/14b-mirror-truncate.sql` (one TRUNCATE of exactly the 18 registry tables; NEVER `key_vault`/`sync_meta`/`auth.*`; header states it is the R-2 one-time gate act, not schema choreography — the numbered chain stays schema-only); pin its table list EQUAL to `SyncSchema.tables` in `AuthRLSDDLTests` (the DDL-pin shape — the artifact-class red-on-old); correct "sixteen"→"eighteen" in THE DESIGN. |
+| R1-2 | MINOR | `key_vault` read-modify-write is last-writer-wins (no version token): a cross-device race can silently revert a vault change — worst arm: a freshly REGENERATED recovery phrase reverted to the discarded words (the written phrase stops working, the discarded one works). First-generation arm accidentally protected by Codable nil-omission. | CONFIRMED — and fixed NOW while 08 is UNDEPLOYED (zero-cost moment; 14c provisions strangers on this table): 08 gains `revision integer not null default 1`; the client PATCHes with a `revision=eq.<fetched>` filter + sets `revision+1`, zero-rows-updated ⇒ typed conflict refusal (refetch, never blind-retry) — the house CAS shape. Red-on-old via the ScriptedVault interleaving; the nil-omission subtlety stated in the fix's tests. |
+| R1-3 | MINOR | `SupabaseIntegrationTests` post-deploy becomes a production sync-wedge foot-gun: env-gated run pushes TEST-KEY-sealed rows to the real mirror; her devices' next pull jams permanently at `payloadCryptoFailure` (park/heal deliberately Phase 12). | CONFIRMED — fix: the test additionally requires an explicit `VARIORUM_INTEGRATION_ALLOW_TEST_KEYS=1` opt-in (skip otherwise, message naming why); the gate's live dump verification is the sanctioned real-server pass. |
+| R1-4 | MINOR | The bridge lands FUTURE-version ciphertext (`e2:…`) verbatim as journal text (the `isEncrypted` exact-`e1:` guard bypasses `PayloadCipher.open`'s `unsupportedVersion` arm the sync seam honors) — ciphertext soup becomes the day's text. | CONFIRMED — fix: route landed bodies through `PayloadCipher.open`; pass through ONLY on `.notEncrypted`; `unsupportedVersion` refuses the round, cursor held. Red-on-old: the `"e2:AAAA"` pin (lands today, refuses after). |
+| R1-5 | NIT | THE DESIGN's "new `sync_state` keys carry enrollment state/key ids" was never built — custody went wholesale to the Keychain (the better shape), deviation unrecorded. | CONFIRMED — a closeout deviation note (no code change). |
+| R1-6 | NIT | `VaultEnrollment.material(from:)` throws `unknownClassKey(.corpus)` even when journal-bridge is the missing key — the refusal misnames the offender. | CONFIRMED — fix with the trivial arm. |
+| R1-7 | NIT | `SyncSchema.swift:75` header comment still says "The 13 synced tables" above the 18-table array. | CONFIRMED — fix the comment. |
+| R1-8 | NIT | The runner's access token rides argv (`ps`-visible). Architect-run + short-lived. | CONFIRMED — add `--access-token-file` (argv form retained; the gate uses the file form). |
+| R1-9 | NIT | The disclosure list's `setting`-values promise is column-fenced, not row-fenced — a future prose-valued setting KEY would travel plaintext with no tripwire. | CONFIRMED — one sentence in AppSpec §7's setting conventions AT CLOSEOUT (canonical-doc changes ride the ritual), noted on the closeout list. |
+
+**Route: R1-1–R1-4 + R1-6/R1-7/R1-8 → ONE fresh fix implementer session;
+R1-5/R1-9 → the closeout list. ROUND 2 re-reviews the fixes with a fresh
+reviewer. The 08 deploy HOLDS until round 2 closes (R1-2 amends 08
+itself — deploying pre-fix would turn a free column into a ninth lockstep
+file).**
+
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
 attempted overnight if the ladder closes clean):**
