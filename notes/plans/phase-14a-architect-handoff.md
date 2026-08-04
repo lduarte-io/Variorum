@@ -117,7 +117,11 @@ file's rounds 0d–0y ARE the record (the repo-first discipline held all night).
    APP once direct sign-in ships, but the shutdown is the Fragments batch's
    act, not this gate's); refresh `/Applications` per CLAUDE.md (pause makes
    timing flexible; instance traps still bind); the author signs out/in once
-   with email+password as the live acceptance.
+   with email+password as the live acceptance — **and ratifies (or adjusts)
+   the R1-1 PROVISIONAL refusal wording "Wrong email or password." at the
+   same sitting** (the ladder's round-2 R2-1 catch: the ratify must ride a
+   checklist, not just the ladder table). The phone half of the walk also
+   verifies R1-2 (the un-clipped sign-in sheet) live.
 4. **The CLOSEOUT ritual, in full** (CLAUDE.md): plan file results + complete
    mark · master plan table/pointer · archives roll (pointer, closeout
    paragraph, AppSpec §14 delta — note: 14a shipped NO schema and NO AppSpec

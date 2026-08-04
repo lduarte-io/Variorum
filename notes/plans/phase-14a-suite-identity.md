@@ -1381,6 +1381,30 @@ family, out of the findings' scope, and its established-session guidance is
 correct there); `AuthSessionTests`' refusal tests still assert the typed
 throw (correct — classification is the presentation layer's).
 
+### Cold-review ladder — ROUND 2 (2026-08-04; fresh Fable reviewer, anchored on
+### round 1's recorded findings + dispositions + fix record)
+
+**Verdict: EVERY ROUND-1 DISPOSITION HOLDS — zero new BLOCKER/MAJOR. THE
+LADDER CLOSES AT ROUND 2** (round 3 is owed only on new HIGH findings). The
+reviewer re-derived every mechanism itself: the R1-1 pin's red-on-old
+re-verified by ITS OWN behavioral revert (raw dump surfaced verbatim on the
+reverted catch; green restored; tree byte-clean at exit); both suites re-run
+(24 tests / 2 suites passed); VariorumMobile rebuilt green; scope compliance
+re-swept across all three commits (zero `Sync/`, no schema, no server config,
+bridge byte-untouched); the retired-token sweep found only two benign
+residuals (a provenance comment in CommitBar; the bridge's pre-existing
+CryptoKit content hashing — unrelated to auth); continuity-for-free re-proven;
+the 9c machinery and the production wiring chain (`AppBootstrap` installs
+`OwnerIdentity` over the same Keychain service — her `owner_id` survives by
+construction) confirmed.
+
+Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
+
+| # | Sev | Finding | Disposition |
+|---|-----|---------|-------------|
+| R2-1 | MINOR | The R1-1 PROVISIONAL wording ratify ("Wrong email or password.") is promised to "ride the gate checklist" but no gate checklist or QUESTIONS.md entry carries it — the drop-at-the-gate risk is the exact failure class the PROVISIONAL rule exists to prevent | CONFIRMED — fixed by the architect same-commit: the ratify line added to the handoff's gate step 3; it also rides the closeout handoff's author checklist. Docs-only. |
+| R2-2 | NIT | The R1-1 pin scripts only the legacy GoTrue refusal dialect (`{"error":"invalid_grant"…}`); the mapper also covers the modern `error_code: "invalid_credentials"` dialect but no test asserts that arm — which dialect her live project speaks is verified only at the gate's live walk | CONFIRMED — one extra scripted-body arm asserting the same mapped line; routed to the round-1 fix implementer session (test-only, no red-on-old owed). |
+
 ## Ledger
 
 | # | Item | Status |
