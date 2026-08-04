@@ -241,7 +241,7 @@ public enum KeyVaultClientError: Error, Equatable, Sendable {
 /// DDL exactly; key material is base64 TEXT. `created_at`/`updated_at` are
 /// server-defaulted and read-only here (never sync ordering — display
 /// bookkeeping only).
-struct KeyVaultWireRow: Codable {
+struct KeyVaultWireRow: Codable, Equatable {
     var userID: String
     var formatVersion: Int
     var kdfAlgorithm: String

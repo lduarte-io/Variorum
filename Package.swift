@@ -43,6 +43,16 @@ let package = Package(
                 .copy("Resources/bip39-english.txt")
             ]
         ),
+        // Phase 14b (L10): the headless wipe-and-repush executor — the
+        // resyncReinitialize door, NEVER linked into any app (the apps link
+        // VariorumCore; this CLI shell exists only for the architect's gate
+        // act). Its brain is Crypto/VaultBootstrap.swift, tested in
+        // VariorumCoreTests.
+        .executableTarget(
+            name: "vault-bootstrap",
+            dependencies: ["VariorumCore"],
+            path: "Tools/VaultBootstrap"
+        ),
         .testTarget(
             name: "VariorumCoreTests",
             // CArgon2 direct: the RFC 9106 full-context vector calls
