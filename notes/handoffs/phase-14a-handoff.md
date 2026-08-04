@@ -9,10 +9,12 @@
    the standing wrap-secret ruling.)
 2. **Open 14b at your word:** paste the kickoff message from
    `notes/plans/phase-14b-suite-e2ee.md`. It opens with YOUR design sitting —
-   the five pinned questions (phone-first device enrollment ·
-   Fragments-insights-vs-journal-E2EE · wipe-and-repush vs in-place mirror
-   migration · the KDF/recovery/enrollment one-way doors · the vault-home
-   free re-open). Cast decided there; your recorded lean is all-Fable.
+   the five pinned questions (device enrollment designed with the phone
+   included from the start — first-class, never a phone-must-lead
+   requirement, per your clarification · Fragments-insights-vs-journal-E2EE ·
+   wipe-and-repush vs in-place mirror migration · the KDF/recovery/enrollment
+   one-way doors · the vault-home free re-open). Cast decided there; your
+   recorded lean is all-Fable.
 3. **Nothing to carry to Fragments yet.** The ONE batched handoff (all three
    touchpoints) executes at 14c's end, per your own ruling.
    `notes/fragments-bridge-contract.md` is the brief you'll carry;

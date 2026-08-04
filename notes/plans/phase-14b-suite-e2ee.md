@@ -66,12 +66,17 @@ then author the execution plan from them.
 ## The design sitting's PINNED QUESTIONS (accumulated 14a → here; each needs
 ## her ruling before the plan is authored)
 
-1. **Device enrollment PHONE-FIRST** (the mobile agent's flag, relayed by the
-   author 2026-08-04; parity ledger PL-6 is this class — mobile is IN the
-   design sitting, not informed after): the phone is a first-class
-   daily-driver device from the design start. Enrollment, key unwrap, and
-   recovery-phrase entry UX designed for BOTH form factors simultaneously;
-   the recovery-phrase restore drill ENROLLS THE PHONE as part of the drill.
+1. **Device enrollment INCLUDES THE PHONE from the design start** (the
+   mobile agent's flag, relayed by the author 2026-08-04; parity ledger
+   PL-6 is this class — mobile is IN the design sitting, not informed
+   after). *Her 2026-08-04 clarification, correcting an earlier
+   "phone-first" shorthand: the phone is a FIRST-CLASS device — that is the
+   whole flag. It is NOT a requirement that the phone enroll first or lead
+   the design.* Enrollment, key unwrap, and recovery-phrase entry UX are
+   designed for BOTH form factors together (never Mac-first-phone-later);
+   the recovery-phrase restore drill enrolls the phone as part of the
+   drill. How enrollment actually works — including which device
+   typically enrolls first — is this sitting's design question, open.
 2. **Fragments insights vs journal-class E2EE** (the round-0v sweep's finding
    3, pinned on the 14b row): does anything server-side read the bridge's
    `journal_entries` (Fragments insights)? If yes, journal-class E2EE trades

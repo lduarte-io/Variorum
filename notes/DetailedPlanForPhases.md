@@ -11,7 +11,9 @@ This is the master build plan. It holds: the phase table, the **current phase po
 **→ PHASE 14A CLOSED 2026-08-04 — the next kickoff is the AUTHOR'S:
 Phase 14b (Suite E2EE), kickoff draft paste-ready at
 `notes/plans/phase-14b-suite-e2ee.md` (it opens with HER design
-sitting — the five pinned questions: phone-first device enrollment ·
+sitting — the five pinned questions: device enrollment designed with
+the phone included from the start (first-class, never a
+phone-must-lead requirement — her 2026-08-04 clarification) ·
 Fragments-insights-vs-journal-E2EE · wipe-and-repush vs in-place
 mirror migration · the KDF/recovery/enrollment one-way doors · the
 vault-home free re-open; cast decided there, her recorded lean
