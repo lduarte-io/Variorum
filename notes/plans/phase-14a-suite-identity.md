@@ -1405,6 +1405,23 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
 | R2-1 | MINOR | The R1-1 PROVISIONAL wording ratify ("Wrong email or password.") is promised to "ride the gate checklist" but no gate checklist or QUESTIONS.md entry carries it — the drop-at-the-gate risk is the exact failure class the PROVISIONAL rule exists to prevent | CONFIRMED — fixed by the architect same-commit: the ratify line added to the handoff's gate step 3; it also rides the closeout handoff's author checklist. Docs-only. |
 | R2-2 | NIT | The R1-1 pin scripts only the legacy GoTrue refusal dialect (`{"error":"invalid_grant"…}`); the mapper also covers the modern `error_code: "invalid_credentials"` dialect but no test asserts that arm — which dialect her live project speaks is verified only at the gate's live walk | CONFIRMED — one extra scripted-body arm asserting the same mapped line; routed to the round-1 fix implementer session (test-only, no red-on-old owed). **DONE — commit `81eca37`** (verified test-only, 19 insertions): sibling test `aModernDialectRefusalSpeaksTheSameHumanLine` scripting the modern body (`error_code: "invalid_credentials"`, no `invalid_grant` anywhere) through the same door, asserting the same mapped line + nothing-signed-in; wiring suite 14 tests green. |
 
+### Phase-final acceptance (2026-08-04, post-ladder — the architect's own runs)
+
+- **Mac: 1196 tests in 208 suites — the ONE issue is the standing
+  `TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`
+  tripwire, BY IDENTITY** (the recorded environment-gated red; 1193 baseline
+  + the ladder's 3 new tests = 1196, exact).
+- **Mobile: 172 tests in 24 suites PASSED** (iPhone 17 Pro sim) — at
+  baseline, with the ladder's shared-seam `AuthViews`/`ErrorPresentation`
+  changes compiled in.
+- **Spine: 51 tests in 7 suites PASSED** (the seven Tutorial suites, run
+  dedicated).
+- **Core: 1039/114 stands from the batch-1 acceptance run** — provably
+  untouched since: `git diff 5082a51..HEAD -- Sources/ Tests/ Package.swift`
+  is EMPTY (every post-batch commit touches `App/` + `notes/` only). Zero
+  `Sync/` lines phase-wide; no schema (marker stays 4); no server config
+  from any code session.
+
 ## Ledger
 
 | # | Item | Status |
