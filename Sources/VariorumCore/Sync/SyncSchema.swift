@@ -348,6 +348,22 @@ public enum SyncError: Error, Equatable, Sendable {
     /// every client). Stalling is safe by design; guessing is the one
     /// forbidden move.
     case schemaLockstepMismatch(client: Int, server: Int)
+    /// Phase 14b: the device's encryption keys are absent or locked (not
+    /// enrolled, or the Keychain item is unavailable). The round refuses
+    /// BEFORE any network contact — outbox intact, cursor unmoved — in the
+    /// §12 refusal grammar. Post-14b there is NO plaintext mode.
+    case encryptionKeysUnavailable
+    /// Phase 14b policy: a value arrived WITHOUT the `e1:` ciphertext
+    /// format in an encrypted-classified column. Wipe-and-repush (R-2)
+    /// guarantees this never fires in practice — firing signals a real
+    /// fault (a pre-14b writer, or corruption), so the round refuses with
+    /// the row named rather than passing unverified bytes through.
+    case unencryptedValueInEncryptedColumn(table: String, rowID: String, column: String)
+    /// Phase 14b: sealing or opening a payload value failed (wrong key,
+    /// tampered/truncated ciphertext, a foreign format version, a non-text
+    /// value in an encrypted-classified column). Nothing unauthenticated
+    /// is ever applied; the round refuses with the row named.
+    case payloadCryptoFailure(table: String, rowID: String, column: String, detail: String)
 }
 
 extension SyncError: CustomStringConvertible {
@@ -365,6 +381,17 @@ extension SyncError: CustomStringConvertible {
             return "Sync paused: the app and the server are on different schema versions "
                 + "(app \(client), server \(server)). Finish the schema update on the lagging "
                 + "side; nothing is lost while paused (SyncSpec §12)."
+        case .encryptionKeysUnavailable:
+            return "Sync paused: this device's encryption keys are locked or not enrolled. "
+                + "Enter your encryption passphrase to unlock sync; nothing is lost while paused."
+        case .unencryptedValueInEncryptedColumn(let table, let rowID, let column):
+            return "Sync refused: '\(table)' row '\(rowID)' arrived with an unencrypted value "
+                + "in encrypted column '\(column)'. End-to-end encryption is mandatory — the "
+                + "round is refused so nothing unverified lands; outbox and cursor are untouched."
+        case .payloadCryptoFailure(let table, let rowID, let column, let detail):
+            return "Sync refused: '\(table)' row '\(rowID)' column '\(column)' failed to "
+                + "encrypt/decrypt (\(detail)). Nothing unverified lands; outbox and cursor "
+                + "are untouched."
         }
     }
 }

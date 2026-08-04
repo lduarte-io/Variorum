@@ -1,0 +1,168 @@
+import CryptoKit
+import Foundation
+
+/// Phase 14b — the E2EE payload seam's key side (rulings R-6/R-8, THE
+/// DESIGN's "Sync gating"). The engine takes a `SyncKeyProviding` and asks
+/// it once per round half; everything the engine pushes or applies flows
+/// through `SyncPayloadCrypto` built from the answer.
+///
+/// **Post-14b there is NO plaintext mode**: E2EE is mandatory from birth
+/// (release-strategy §4). Keys absent or locked is not an error state to
+/// work around — the round REFUSES visibly (outbox intact, cursor unmoved,
+/// `SyncError.encryptionKeysUnavailable` naming the fix), exactly the
+/// SyncSpec §12 lockstep-refusal grammar. Stalling is free; guessing —
+/// pushing plaintext, or applying unverified bytes — is the one forbidden
+/// move.
+
+/// The key material one sync round seals/opens with. v1 carries the CORPUS
+/// class key only (R-8): every synced table's encrypted columns are corpus
+/// class; the journal-bridge key is the bridge's (batch 3) and never
+/// enters the row-sync engine.
+public struct SyncEncryptionKeys: Sendable {
+    /// The corpus-class key (unwrapped, from the device Keychain at batch
+    /// 3; a fixed test key in the harness).
+    public let corpusKey: SymmetricKey
+    /// The corpus key's vault key id — bound into every ciphertext's AAD
+    /// (`PayloadCipher.Binding`), so a value can never be silently
+    /// re-attributed to a different key.
+    public let corpusKeyID: String
+
+    public init(corpusKey: SymmetricKey, corpusKeyID: String) {
+        self.corpusKey = corpusKey
+        self.corpusKeyID = corpusKeyID
+    }
+}
+
+/// The engine's key seam. Batch 3 wires the Keychain-backed provider
+/// (enrollment-only cadence, R-6 — the keys persist per device after the
+/// one-time passphrase unwrap); tests bind a fixed provider so the whole
+/// convergence suite runs over ciphertext.
+public protocol SyncKeyProviding: Sendable {
+    /// The round's key material. Throw ANYTHING to signal absent/locked —
+    /// the engine maps every throw to `SyncError.encryptionKeysUnavailable`
+    /// and refuses the round before any network contact.
+    func currentKeys() throws -> SyncEncryptionKeys
+}
+
+/// The post-14b default: a device with no enrollment wired refuses every
+/// round. This is the DESIGNED behavior, not a stub — the app target keeps
+/// compiling through the defaulted engine parameter, and its rounds refuse
+/// visibly until batch 3's enrollment flow installs a real provider.
+public struct UnenrolledKeyProvider: SyncKeyProviding {
+    public init() {}
+    public func currentKeys() throws -> SyncEncryptionKeys {
+        throw SyncKeyProviderError.notEnrolled
+    }
+}
+
+public enum SyncKeyProviderError: Error, Equatable, Sendable {
+    /// No key material is available on this device (never enrolled, or the
+    /// Keychain item is inaccessible/locked).
+    case notEnrolled
+}
+
+/// THE SEAM (Phase 14b, THE DESIGN's "What encrypts, where"): rows leave
+/// the store as plaintext (local SQLite IS plaintext — FileVault guards the
+/// device; the E2EE boundary is the network/server), are SEALED here on
+/// the way to the transport, and are OPENED here the moment they arrive —
+/// the pull window AND the push-reject's `current` row alike — so the
+/// engine inland (`Merge.swift`, `Repairs.swift`, CAS bookkeeping, FK
+/// checks) operates on plaintext and stays byte-untouched.
+///
+/// Which columns seal is the registry's truth (`SyncTable.encryptedColumns`
+/// — the completeness walk forces every column to take a side). NULL passes
+/// (presence/absence is disclosed structure); a non-text value in an
+/// encrypted-classified column is impossible through Operations and
+/// refuses loudly rather than inventing an encoding.
+struct SyncPayloadCrypto: Sendable {
+    let keys: SyncEncryptionKeys
+
+    /// Plaintext local row → wire payload: every encrypted-classified text
+    /// value sealed under the corpus key, AAD-bound to
+    /// `table:rowID:column:keyID`.
+    func encryptForWire(_ row: SyncRow) throws -> SyncRow {
+        guard let table = SyncSchema.table(named: row.table) else {
+            throw SyncError.unknownTable(row.table)
+        }
+        guard !table.encryptedColumns.isEmpty else { return row }
+        var sealed = row
+        for column in table.encryptedColumns {
+            guard let value = row.columns[column] else { continue }
+            switch value {
+            case .null:
+                continue
+            case .text(let plaintext):
+                do {
+                    sealed.columns[column] = .text(try PayloadCipher.seal(
+                        plaintext, key: keys.corpusKey,
+                        binding: binding(row, column: column)))
+                } catch {
+                    throw SyncError.payloadCryptoFailure(
+                        table: row.table, rowID: row.rowID, column: column,
+                        detail: String(describing: error))
+                }
+            case .integer, .real:
+                // SQLite's flexible typing could smuggle a number into a
+                // TEXT column; no Operation writes one, and an encrypted-
+                // classified value has no non-text form — refuse, never
+                // invent an encoding (the blobInPayload doctrine).
+                throw SyncError.payloadCryptoFailure(
+                    table: row.table, rowID: row.rowID, column: column,
+                    detail: "non-text value in an encrypted-classified column")
+            }
+        }
+        return sealed
+    }
+
+    /// Wire payload → plaintext row, BEFORE any inland logic sees it.
+    /// The policy (post-14b, no plaintext mode): a non-`e1:` value arriving
+    /// in an encrypted-classified column refuses the whole round with a
+    /// typed error naming table/row — wipe-and-repush (R-2) guarantees this
+    /// never fires in practice, so firing signals a real fault: fail
+    /// visible, never pass through silently. Wrong-key/tamper/foreign-
+    /// version failures refuse the same way (nothing unauthenticated is
+    /// ever applied).
+    func decryptFromWire(_ row: SyncRow) throws -> SyncRow {
+        guard let table = SyncSchema.table(named: row.table) else {
+            throw SyncError.unknownTable(row.table)
+        }
+        guard !table.encryptedColumns.isEmpty else { return row }
+        var opened = row
+        for column in table.encryptedColumns {
+            guard let value = row.columns[column] else { continue }
+            switch value {
+            case .null:
+                continue
+            case .text(let encoded):
+                do {
+                    opened.columns[column] = .text(try PayloadCipher.open(
+                        encoded, key: keys.corpusKey,
+                        binding: binding(row, column: column)))
+                } catch PayloadCipherError.notEncrypted {
+                    throw SyncError.unencryptedValueInEncryptedColumn(
+                        table: row.table, rowID: row.rowID, column: column)
+                } catch {
+                    throw SyncError.payloadCryptoFailure(
+                        table: row.table, rowID: row.rowID, column: column,
+                        detail: String(describing: error))
+                }
+            case .integer, .real:
+                // A number where ciphertext must stand is the same policy
+                // class as bare plaintext: an unencrypted value.
+                throw SyncError.unencryptedValueInEncryptedColumn(
+                    table: row.table, rowID: row.rowID, column: column)
+            }
+        }
+        return opened
+    }
+
+    func decryptFromWire(_ pulled: SyncPulledRow) throws -> SyncPulledRow {
+        SyncPulledRow(row: try decryptFromWire(pulled.row), serverSeq: pulled.serverSeq)
+    }
+
+    private func binding(_ row: SyncRow, column: String) -> PayloadCipher.Binding {
+        PayloadCipher.Binding(
+            table: row.table, rowID: row.rowID, column: column,
+            keyID: keys.corpusKeyID)
+    }
+}

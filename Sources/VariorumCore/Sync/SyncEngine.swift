@@ -20,6 +20,13 @@ public struct SyncEngine: Sendable {
     @Dependency(\.uuid) var uuid
 
     public let transport: any SyncTransport
+    /// The E2EE key seam (Phase 14b): each round half asks the provider
+    /// once and seals/opens every payload with the answer. The default is
+    /// the UNENROLLED provider — post-14b there is no plaintext mode, so an
+    /// engine nobody wired keys into refuses every round visibly (the
+    /// designed pre-enrollment state; batch 3's enrollment flow installs
+    /// the Keychain-backed provider).
+    public let keyProvider: any SyncKeyProviding
     /// Rows per push batch / pull window (transport granularity; the pull
     /// APPLY transaction always covers everything fetched, so window size
     /// never affects convergence — the soak randomizes it to prove that).
@@ -29,10 +36,27 @@ public struct SyncEngine: Sendable {
     /// call. Bounded by design — retry/backoff hardening is Phase 12.
     public var maxPushIterations: Int
 
-    public init(transport: any SyncTransport, batchSize: Int = 200, maxPushIterations: Int = 5) {
+    public init(
+        transport: any SyncTransport, batchSize: Int = 200, maxPushIterations: Int = 5,
+        keyProvider: any SyncKeyProviding = UnenrolledKeyProvider()
+    ) {
         self.transport = transport
         self.batchSize = batchSize
         self.maxPushIterations = maxPushIterations
+        self.keyProvider = keyProvider
+    }
+
+    /// The round's crypto seam, or the visible refusal (Phase 14b): ANY
+    /// provider throw maps to `SyncError.encryptionKeysUnavailable` — a
+    /// self-explaining status naming the fix, pinned exactly like the §12
+    /// lockstep-skew refusal. Called BEFORE any network contact, so a
+    /// locked device refuses for free.
+    private func roundCrypto() throws -> SyncPayloadCrypto {
+        do {
+            return SyncPayloadCrypto(keys: try keyProvider.currentKeys())
+        } catch {
+            throw SyncError.encryptionKeysUnavailable
+        }
     }
 
     // MARK: - Push (SyncSpec §4)
@@ -58,6 +82,9 @@ public struct SyncEngine: Sendable {
     @discardableResult
     public func push() async throws -> PushReport {
         try ensureDeviceID()
+        // Keys first (Phase 14b): absent/locked keys refuse the round
+        // before any network contact — outbox intact, cursor unmoved.
+        let crypto = try roundCrypto()
         try await verifySchemaLockstep()
         var report = PushReport()
         for _ in 0..<maxPushIterations {
@@ -82,7 +109,21 @@ public struct SyncEngine: Sendable {
             for chunk in stride(from: 0, to: batch.count, by: batchSize).map({
                 Array(batch[$0..<min($0 + batchSize, batch.count)])
             }) {
-                let outcomes = try await transport.push(chunk)
+                // THE SEAM, push half (Phase 14b): the wire carries sealed
+                // payloads; `chunk` itself stays PLAINTEXT — it is what the
+                // accept bookkeeping compares against the live row
+                // (clear-vs-re-dirty) and what the reject path merges from.
+                let wireChunk = try chunk.map(crypto.encryptForWire)
+                let rawOutcomes = try await transport.push(wireChunk)
+                // THE SEAM, reject-merge half: a reject's `current` row is
+                // opened HERE, before the FK check and the merge — inland
+                // logic sees plaintext only.
+                let outcomes = try rawOutcomes.map { outcome -> SyncPushOutcome in
+                    guard case .rejected(let current) = outcome, let current else {
+                        return outcome
+                    }
+                    return .rejected(current: try crypto.decryptFromWire(current))
+                }
                 let processed: ChunkResult = try await applyingRemoteWithDeferredFKs { db in
                     var result = ChunkResult()
                     var touched = TouchedRows()
@@ -181,6 +222,9 @@ public struct SyncEngine: Sendable {
     @discardableResult
     public func pull() async throws -> PullReport {
         try ensureDeviceID()
+        // Keys first (Phase 14b): absent/locked keys refuse the round
+        // before any network contact — outbox intact, cursor unmoved.
+        let crypto = try roundCrypto()
         try await verifySchemaLockstep()
         let since = try await database.read { try cursor($0) }
         var pulled: [SyncPulledRow] = []
@@ -188,7 +232,13 @@ public struct SyncEngine: Sendable {
         while true {
             let window = try await transport.pull(since: fetchCursor, limit: batchSize)
             guard !window.isEmpty else { break }
-            pulled.append(contentsOf: window)
+            // THE SEAM, pull half (Phase 14b): every arriving row is opened
+            // BEFORE the apply transaction exists — a decrypt refusal
+            // (plaintext-in-encrypted-column, tamper, wrong key) throws
+            // here, with the cursor unmoved and nothing written. Everything
+            // downstream (straggler guard, merge, repairs, apply) is
+            // plaintext-only and byte-untouched.
+            pulled.append(contentsOf: try window.map(crypto.decryptFromWire))
             fetchCursor = window.last!.serverSeq
         }
         var emptyReport = PullReport()

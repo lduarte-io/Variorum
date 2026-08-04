@@ -140,8 +140,9 @@ struct SyncPullTests {
         // And the next push lands it cleanly on top of the same version.
         try await a.push()
         #expect(try a.outboxCount() == 0)
-        let serverText = await server.currentRow(table: "variant", rowID: variantID)?.workingText
-        #expect(serverText == "newer text, still typing")
+        let serverRow = await server.currentRow(table: "variant", rowID: variantID)
+        #expect(try SyncTestKeys.openedText(serverRow, column: "working_text")
+                == "newer text, still typing")
     }
 
     /// The straggler guard runs to a FIXPOINT (Phase 5 review MAJOR): a
@@ -154,7 +155,7 @@ struct SyncPullTests {
             // variant the server has never seen.
             SyncPulledRow(row: TestRows.block(id: "b1", defaultVariant: "v1"), serverSeq: 1),
             SyncPulledRow(row: TestRows.block(id: "b2", defaultVariant: "v-never-pushed"), serverSeq: 2),
-            SyncPulledRow(row: TestRows.variant(id: "v1", block: "b1", text: "hi"), serverSeq: 3),
+            SyncPulledRow(row: try TestRows.variant(id: "v1", block: "b1", text: "hi"), serverSeq: 3),
         ])
         let b = try SyncClient(name: "B", prefix: "BB", transport: scripted)
         let first = try await b.pull()  // must not throw
@@ -167,7 +168,7 @@ struct SyncPullTests {
         // The owing device finally ships the missing variant: everything
         // applies in one healed batch.
         await scripted.append([
-            SyncPulledRow(row: TestRows.variant(id: "v-never-pushed", block: "b2", text: "late"), serverSeq: 4)
+            SyncPulledRow(row: try TestRows.variant(id: "v-never-pushed", block: "b2", text: "late"), serverSeq: 4)
         ])
         let second = try await b.pull()
         #expect(second.stalled == false)
@@ -199,11 +200,14 @@ struct SyncPullTests {
         let bogusRow = SyncRow(
             table: "container", rowID: "c-bogus", columns: bogus.columns, syncVersion: 1)
 
+        // Each crafted wire row seals under its OWN rowID (the AAD binds
+        // per-row) — the failure under test must stay the CHECK violation
+        // at apply, never a decrypt refusal.
         let scripted = ScriptedTransport(rows: [
-            SyncPulledRow(row: retitle, serverSeq: 1),
-            SyncPulledRow(row: bogusRow, serverSeq: 2),
+            SyncPulledRow(row: try SyncTestKeys.sealedForWire(retitle), serverSeq: 1),
+            SyncPulledRow(row: try SyncTestKeys.sealedForWire(bogusRow), serverSeq: 2),
         ])
-        let engine = SyncEngine(transport: scripted)
+        let engine = SyncEngine(transport: scripted, keyProvider: FixedSyncKeyProvider())
         await #expect(throws: (any Error).self) {
             try await withDependenciesForTest(db: b.db) {
                 try await engine.pull()
@@ -223,12 +227,14 @@ struct SyncPullTests {
         // Craft a world where the variant (child) carries a LOWER seq than
         // its block (parent), and the block a lower seq than its container.
         let scripted = ScriptedTransport(rows: [
-            SyncPulledRow(row: TestRows.variant(id: "v1", block: "b1", text: "hi"), serverSeq: 1),
+            SyncPulledRow(row: try TestRows.variant(id: "v1", block: "b1", text: "hi"), serverSeq: 1),
             SyncPulledRow(row: TestRows.block(id: "b1", defaultVariant: "v1"), serverSeq: 2),
             SyncPulledRow(row: TestRows.placement(id: "p1", container: "c1", block: "b1", chosen: "v1"), serverSeq: 3),
-            SyncPulledRow(row: TestRows.container(id: "c1", title: "post"), serverSeq: 4),
+            SyncPulledRow(row: try TestRows.container(id: "c1", title: "post"), serverSeq: 4),
         ])
-        let engine = SyncEngine(transport: scripted, batchSize: 1)  // one row per window
+        let engine = SyncEngine(
+            transport: scripted, batchSize: 1,  // one row per window
+            keyProvider: FixedSyncKeyProvider())
         let report = try await withDependenciesForTest(db: b.db) {
             try await engine.pull()
         }
@@ -261,7 +267,10 @@ struct SyncPullTests {
         }
         blockTombstone.columns["deleted_at"] = .text(stamp)
         blockTombstone.syncVersion = 2
-        await scripted.append([SyncPulledRow(row: blockTombstone, serverSeq: 1)])
+        // Local fetches are plaintext; the wire carries sealed rows.
+        await scripted.append([
+            SyncPulledRow(row: try SyncTestKeys.sealedForWire(blockTombstone), serverSeq: 1)
+        ])
         try await b.pull()
 
         // The local cascade fired with the block's exact stamp…
@@ -288,8 +297,8 @@ struct SyncPullTests {
         }
         placementTombstone.syncVersion = 2
         await scripted.append([
-            SyncPulledRow(row: variantTombstone, serverSeq: 2),
-            SyncPulledRow(row: placementTombstone, serverSeq: 3),
+            SyncPulledRow(row: try SyncTestKeys.sealedForWire(variantTombstone), serverSeq: 2),
+            SyncPulledRow(row: try SyncTestKeys.sealedForWire(placementTombstone), serverSeq: 3),
         ])
         try await b.pull()
 
@@ -308,9 +317,9 @@ struct SyncPullTests {
     /// when the referent lands.
     @Test func stragglerStallsTheCursorThenSelfHeals() async throws {
         let scripted = ScriptedTransport(rows: [
-            SyncPulledRow(row: TestRows.container(id: "c1", title: "post"), serverSeq: 1),
+            SyncPulledRow(row: try TestRows.container(id: "c1", title: "post"), serverSeq: 1),
             // A variant whose block is missing from server AND batch.
-            SyncPulledRow(row: TestRows.variant(id: "v1", block: "b-late", text: "hi"), serverSeq: 2),
+            SyncPulledRow(row: try TestRows.variant(id: "v1", block: "b-late", text: "hi"), serverSeq: 2),
         ])
         let b = try SyncClient(name: "B", prefix: "BB", transport: scripted)
         let first = try await b.pull()
@@ -368,8 +377,11 @@ actor ScriptedTransport: SyncTransport {
 enum TestRows {
     static let now = Fixture.now
 
-    static func container(id: String, title: String, deletedAt: String? = nil) -> SyncRow {
-        SyncRow(
+    /// Crafted rows model WIRE payloads (Phase 14b): the text-bearing
+    /// builders seal their encrypted-classified values with the suite key,
+    /// exactly as a real device's seam would before pushing.
+    static func container(id: String, title: String, deletedAt: String? = nil) throws -> SyncRow {
+        try SyncTestKeys.sealedForWire(SyncRow(
             table: "container", rowID: id,
             columns: [
                 "id": .text(id), "owner_id": .null, "kind": .text("post"),
@@ -381,7 +393,7 @@ enum TestRows {
                 "updated_at": .text(now), "archived_at": .null,
                 "deleted_at": deletedAt.map(SyncValue.text) ?? .null,
             ],
-            syncVersion: 1)
+            syncVersion: 1))
     }
 
     static func block(id: String, defaultVariant: String?, deletedAt: String? = nil) -> SyncRow {
@@ -401,8 +413,8 @@ enum TestRows {
         id: String, block: String, text: String,
         status: String = "active", label: String? = nil,
         fanPosition: String = "V", deletedAt: String? = nil
-    ) -> SyncRow {
-        SyncRow(
+    ) throws -> SyncRow {
+        try SyncTestKeys.sealedForWire(SyncRow(
             table: "variant", rowID: id,
             columns: [
                 "id": .text(id), "block_id": .text(block), "parent_variant_id": .null,
@@ -412,7 +424,7 @@ enum TestRows {
                 "updated_at": .text(now),
                 "deleted_at": deletedAt.map(SyncValue.text) ?? .null,
             ],
-            syncVersion: 1)
+            syncVersion: 1))
     }
 
     static func placement(

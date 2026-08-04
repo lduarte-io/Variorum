@@ -67,7 +67,7 @@ struct SchemaLockstepTests {
         let server = FakeSyncServer()
         await server.setDeployedLockstepVersion(1)
         let client = try SyncClient(name: "A", prefix: "AA", transport: server)
-        let scheduler = SyncScheduler(engine: SyncEngine(transport: server))
+        let scheduler = SyncScheduler(engine: SyncEngine(transport: server, keyProvider: FixedSyncKeyProvider()))
 
         try await client.withAsync { _ in await scheduler.trigger() }
         await scheduler.awaitIdle()
