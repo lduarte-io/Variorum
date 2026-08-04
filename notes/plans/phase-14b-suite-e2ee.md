@@ -2282,6 +2282,185 @@ nothing beyond the three items. Acceptance: core + full Mac suite
 (tripwire-only) + mobile + spine, own runs, synchronous waits, repo-first
 record before long runs.
 
+### Crossover round — record (implementer session, 2026-08-04)
+
+**Commit: `910d30d`** — implementation + pins as ONE coherent diff
+(589 insertions / 170 deletions), five files, ALL App-side:
+`App/Variorum/Shared/EncryptionSession.swift` · `EncryptionViews.swift` ·
+`AuthViews.swift` · `SyncStatusViews.swift` ·
+`App/Variorum/VariorumTests/EncryptionFlowTests.swift`. **Scope proof:**
+zero `Sources/VariorumCore/` lines (the brief's additive-with-reasons
+carve was never needed — the key ids the comparison reads are already on
+`DeviceKeyMaterial` and `KeyVaultFormat.classKey(for:)`, both public);
+zero `Sync/`, zero schema/server, no production or dashboard contact, no
+`.env*` reads, no new dependencies, the bridge untouched. No push (the
+architect pushes after verification).
+
+**The three items:**
+
+1. **CF-16 (built FIRST, per the brief — her drill validates it).**
+   - `EncryptionSession.VaultState` gains **`.keysReplaced(hasRecoveryWrap:)`**;
+     `refresh()` now decides the custody arm by
+     `custodyMatchesVault(custody, vault.format)` — a nonisolated pure
+     static comparing custody's `corpusKeyID`/`journalBridgeKeyID`
+     against the fetched vault's class-key ids (a vault missing either
+     class entry counts as mismatch). Match ⇒ `.enrolled`; mismatch ⇒
+     the honest REPLACED state. The projection itself touches nothing —
+     custody is replaced only by the re-enroll save.
+   - The surface renders the state with the RULED copy byte-exact
+     (`EncryptionView.keysReplacedExplanation` = "This account's
+     encryption keys were replaced. Enter your passphrase to
+     re-enroll."), one caption in the standing refusal grammar ("The
+     keys this device holds were replaced after it enrolled — sync stays
+     paused until you re-enroll; nothing is lost while paused."), and the
+     ORDINARY unlock roads (the shared `unlockRoads` — passphrase +
+     the phrase reveal when the new vault carries a wrap). The enroll
+     save overwrites custody wholesale — verified myself on the arm:
+     `enroll(passphrase:)` → `adopt` → `store.save`, which is
+     `SecItemUpdate` on the plain item / `saveGated` under a gate; the
+     step-0 pin's proven class, now re-pinned from the replaced state.
+   - **The classifier arm (App-layer only):**
+     `EncryptionSession.isPayloadCryptoError(_:)` — true for the
+     engine's `payloadCryptoFailure` refusal as the scheduler surfaces
+     it. Its description carries row coordinates, so unlike the
+     exact-match `isKeysLockedError` it anchors on the description's two
+     invariant segments (`"Sync refused: '"` prefix + `"failed to
+     encrypt/decrypt ("`), a conjunction that excludes the other
+     "Sync refused:" case (`unencryptedValueInEncryptedColumn`, never a
+     stale-key state). The row presents the classified refusal as
+     `SyncStatusRow.keysReplacedLabel` ("Sync paused — this account's
+     encryption keys were replaced") with a "Re-enroll…" door opening
+     the Encryption tab directly.
+   - **Documented boundary (not a gap):** a biometric-gated launch that
+     hasn't unlocked cannot be compared (custody is unreadable), so it
+     stays `.enrolledLocked`; the mismatch surfaces at the first
+     post-unlock refresh, and the row's classifier names the refusal
+     meanwhile. Stated in the refresh() comment.
+
+2. **CF-14.** `AccountView` gains TABS — **Account · Encryption** — as a
+   plain segmented control, both form factors through the one shared
+   seam (`AccountTab` is top-level + nonisolated so the row's pure face
+   model names a door's target tab as data;
+   `init(services:initialTab:)` defaults to `.account`, so RootView's
+   existing site compiles unchanged). `EncryptionView` becomes the
+   Encryption TAB'S CONTENT — its own chrome (header row, Close,
+   ScrollView, padding, macOS frame) moves to the sheet level; its
+   `.task { refresh() }` rides the tab so selecting it projects fresh
+   state. The sync row's separate "Encryption…" button RETIRES; the
+   LOCKED state's "Unlock…" stays in place and opens the Encryption tab
+   in ONE act (`openAccount(.encryption)` — the refusal's own
+   affordance). The row's two sheets collapse to one
+   `sheet(item: $accountSheetTab)`.
+
+3. **CF-15.** The row is rebuilt to render from **`SyncRowFace`** — a
+   nonisolated pure model (kind + doors) the pins assert at the state
+   level; the view mints NO doors of its own, so the pinned shapes and
+   the shipped row cannot diverge (the P-1 doors-as-data shape, applied
+   at the row's scale). The `isSyncing` branch now returns kind
+   `.syncing` with **"Sync now" present-but-disabled + "Account…"
+   present**; the progress indicator rides beside the "Syncing…" label.
+   All other faces keep their previous doors and wording verbatim
+   (devStore/signedOut/syncOff/offline/locked/error/idle); the
+   `ErrorCauseNote` renders exactly for the `.error` kind, as before
+   (locked and replaced carry their own lines — the cause IS the line).
+   Both platforms fix at once (MobileSettingsView embeds the same
+   shared row; the mobile test bundle builds green against the diff).
+
+**The hallucination guard — FOUR behavioral reverts, each run against
+the pins, each red on its finding's exact mechanism, each restored (the
+5-suite encryption family re-run green after restoration — 22 tests):**
+
+1. *CF-16a* (refresh()'s custody arm reverted to the pre-fix
+   custody-exists-alone `.enrolled`): both CF-16 pins failed —
+   `session.state → .enrolled(hasRecoveryWrap: false)` where
+   `.keysReplaced` is required — the false-enrolled blindness verbatim.
+2. *CF-16c* (`isPayloadCryptoError` → constant false, the pre-round
+   state): the classifier pin failed on both positive arms AND the row
+   pin showed the refusal falling to the generic error face
+   (`face.kind → .error`, doors Retry/Account…) — exactly the
+   fails-generically shape the classifier closes.
+3. *CF-15* (the face's `isSyncing` branch reverted to the old
+   replace-the-content shape, `doors: []`): the pin failed all three
+   assertions — `syncNow → nil`, no Account… — the vanishing buttons.
+4. *CF-14* (the locked door's target reverted to `.openAccount(.account)`
+   — Encryption buried behind a second act): the one-act pin failed on
+   the doors equality, naming the buried target in the failure output.
+
+**Test accounting:** 7 new tests in 1 new suite
+(`CrossoverRoundTests`, in `EncryptionFlowTests.swift`): the CF-16a
+projection pin · the CF-16b re-enroll-overwrites pin · the CF-16c
+classifier pin · the replaced-row face + ruled-copy byte pin · the
+CF-15 syncing-stability pin · the CF-14 one-act pin · the CF-14
+retirement sweep (idle doors exact + no face anywhere mints an
+"Encryption…" door + every encryption-targeted door belongs to
+locked/replaced). Expected full-suite lines: Mac **1211 + 7 = 1218 /
+213 suites** (the standing TakePane tripwire the ONE allowed red) ·
+core **1156/124 unchanged** (zero core lines) · mobile **173/25
+unchanged** (shared files recompile; no new mobile tests) · spine
+**51/7**.
+
+**PROVISIONALs / deviations (each with reasons):**
+
+- **PROVISIONAL (the sheet's one dismissal):** the tabbed Account sheet
+  keeps ONE borderless "Close" in the header row (the CF-1 grammar) and
+  the old bottom "Done" with `.keyboardShortcut(.defaultAction)` is
+  RETIRED. Reason: a defaultAction "Done" on the combined sheet would
+  sit beside the Encryption tab's acts — CF-1's exact ambiguity
+  re-created — and two dismissal controls with two words on one sheet is
+  the incoherence class CF-2 was about. Options: (a) Close-only (built);
+  (b) keep Done on the Account tab alone (two grammars, one sheet);
+  (c) Done everywhere (re-opens CF-1). Hers to reverse at the walk.
+- **PROVISIONAL (the replaced ROW wording):** `keysReplacedLabel`
+  ("Sync paused — this account's encryption keys were replaced") and the
+  door label "Re-enroll…" are derived from CF-16's ruled surface copy —
+  the ruling specified the SURFACE sentence, not the row's. Same class
+  as the held locked-line wording (the adjudication's stays-held item);
+  one line each if her walk wants different words.
+- **PROVISIONAL (the replaced caption):** one secondary line under the
+  ruled headline, composed from the standing refusal grammar ("nothing
+  is lost while paused"). Reason: the honest state should say WHY (the
+  re-key happened after this device enrolled) without inventing new
+  vocabulary.
+- **Deviation (the macOS sheet floor):** the Account sheet's Mac minimum
+  is now 460×340 (the pre-tabs EncryptionView floor) superseding
+  AccountView's 440 — the sheet must fit its wider tab. The iPhone
+  no-forced-width rule (R1-2) is preserved.
+- **Deviation (`isKeysLockedError` marked nonisolated):** required so
+  the nonisolated face model can consult it; call-compatible from every
+  existing site (MainActor callers included), zero behavior change.
+- **Held, unchanged:** the locked line's "passphrase" wording under a
+  biometric gate (the adjudication's stays-held item) — untouched, still
+  hers at the walk.
+
+**Environment notes:** her real-store instance
+(`/Applications/Variorum.app`, PID observed at session start) ran
+throughout — never touched; no Release build, no `/Applications`
+refresh. All runs from the `App/Variorum` `-project` invocation; no
+GM-1 preparing-timeout occurred in any run this session.
+
+**Acceptance (own runs, all waited synchronously, verbatim lines —
+FINALIZED post-record per the repo-first rule):**
+- Core `swift test` (repo root): **"✔ Test run with 1156 tests in 124
+  suites passed after 32.523 seconds."** — baseline exact (zero core
+  lines this round).
+- Full Mac suite (`-project` invocation): **"✘ Test run with 1218 tests
+  in 213 suites failed after 156.909 seconds with 1 issue."** — the one
+  issue is the standing tripwire BY IDENTITY
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  its own known assertion at TakePaneMeasureTests.swift:612), nothing
+  else red; 1211 + this round's 7 in 1 new suite = 1218/213, exactly
+  accounted.
+- Mobile (iPhone 17 Pro sim): **"✔ Test run with 173 tests in 25 suites
+  passed after 4.803 seconds."** + ** TEST EXECUTE SUCCEEDED **
+  (test-without-building's success line) — baseline exact.
+- The spine (the seven Tutorial suites, dedicated run): **"✔ Test run
+  with 51 tests in 7 suites passed after 14.692 seconds."**
+- Already run before this record: the 5-suite encryption family
+  (Encryption/CopyFlow/Crossover/Terminology/LockedFace) — "✔ Test run
+  with 22 tests in 5 suites passed"; Mac `build-for-testing` ** TEST
+  BUILD SUCCEEDED **; mobile `build-for-testing` against the shared
+  changes ** TEST BUILD SUCCEEDED **.
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
