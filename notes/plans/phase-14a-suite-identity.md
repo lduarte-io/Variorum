@@ -1081,6 +1081,86 @@ does not gate the spike (project refs are random; display names rename freely).
   custom:fragments retirement in app + identity/provider cleanup · the 9c
   auth tests updated).
 
+- **Round 0v (same sitting) — THE PAUSE RULING; the final sweep; the code gate
+  EXERCISED.**
+  - **OFFICIAL, her word: ALL Variorum activity PAUSES until Phase 14 is
+    done** — app usage, the Fragments journal bridge, Variorum Mobile
+    development AND usage — "so that we don't have to worry about any data
+    changes or loss during these delicate parts of the process." Operational
+    consequences the batches inherit: no live-store contention (instance
+    traps still followed, but the daily-drive pressure is off);
+    `/Applications` refresh timing is flexible; the bridge can be stopped
+    without ceremony; the store is quiescent for 14b's migration.
+  - **Her last-chance review ("is there anything you think I have not
+    considered?") answered with a genuine sweep — THREE findings, none
+    blocking 14a, all pinned same-commit:** (1) **custom-domain TIMING
+    refinement** — attach BEFORE the one-batch Fragments handoff so provider
+    configs are written once against the final issuer URL, with the
+    iss-claim verification at attachment (14c row); (2) **in-app ACCOUNT
+    DELETION** — App Store 5.1.1(v) requires it wherever account creation
+    exists; server-side removal intersects the tombstone-GC design (14c row;
+    the 4.8 check rides beside it, likely N/A for a first-party account
+    system); (3) **Fragments insights vs journal-class E2EE** — IF anything
+    server-side reads `journal_entries`, encryption trades those insights
+    away; a NAMED 14b sitting question now on that row. **The mobile agent's
+    device-enrollment flag ADDED to the 14b row at her relay** (the phone is
+    a first-class device from the design start; the restore drill enrolls
+    it). With those pinned: **fully confident — GO.**
+  - Standard procedures acknowledged for the batches and the closeout: test
+    counts per suite at acceptance (baseline post-merge: core 1039/114 ·
+    Mac 1193/208 tripwire-only · mobile 172/24 · spine 51/7 — never re-run at
+    session start), the ladder, red-on-old, and the NEW mobile closeout rules
+    (the MobileSoul parity-ledger line is REQUIRED at this phase's closeout —
+    here it records that mobile ships the same sign-in change simultaneously
+    through the shared seam, not a parity debt).
+
+## Batch 1 — the direct sign-in & the auth-seam rework (spawned 2026-08-04)
+
+**Goal:** the Variorum app (Mac AND mobile — merged, one shared seam) signs in
+DIRECTLY to its own project with the suite email+password; the delegated
+`custom:fragments` road retires from the app's sign-in; the bridge gains its
+delegated session acquisition DORMANT. No dashboard changes in this batch (the
+identity/provider cleanup is the gate's, after verification).
+
+**Scope, exactly:**
+1. **The sign-in surface goes direct:** replace the Variorum sign-in's
+   delegated browser flow with an in-app email+password form driving the
+   password grant against the Variorum project (round 0h: "the 9c AuthSession
+   password grant, re-aimed"). One seam serves Mac and mobile
+   (`Auth/UserSession.swift` was built to be re-pointed — use that seam, no
+   sibling implementation). Keychain persistence, single-flight refresh, and
+   sign-out-is-terminal semantics carry over unchanged.
+2. **Session continuity:** her EXISTING persisted session (minted via
+   custom:fragments) is an ordinary Variorum-project session — the new build
+   must keep honoring it (no forced re-sign-in). Pin this.
+3. **The bridge's delegated swap, DORMANT:** implement the Fragments-project
+   session acquisition via the suite issuer (ASWebAuthenticationSession →
+   authorize → Fragments' GoTrue mints its native session) behind the
+   existing bridge-session seam, gated OFF by configuration until the
+   Fragments batch (the provider does not exist yet — the code must be
+   inert). The bridge KEEPS the password-grant shape (c) road as the active
+   path. Nothing in the bridge ENGINE (push/pull/journal semantics) changes.
+4. **custom:fragments retires from the CODE:** the Variorum sign-in no longer
+   references the provider; the ASWebAuthenticationSession machinery survives
+   only for item 3's dormant road. `ProjectConfig` keeps both projects'
+   coordinates (the bridge still needs Fragments').
+5. **Tests:** the 9c auth suites updated to the direct shape; red-on-old pins
+   for each behavior change; ALL suites green at acceptance (baselines
+   above). Zero `Sync/` lines expected — any need to touch
+   `Sources/VariorumCore/Sync/` is a stop-and-report.
+
+**Environment traps (the plan's standing list binds):** instance checks by
+bundle id/PID; Mac tests via the cwd-independent `-project` invocation,
+suite-level `-only-testing`; no custom build configurations; the mirror is
+LIVE — this batch touches NO server config; commit + push at bout ends;
+schema: NONE (marker stays 4).
+
+**Acceptance:** she can sign OUT and back IN with email+password on the Mac
+app (and the mobile sign-in surface compiles/tests to the same seam); her
+existing session survived the update; the dormant road is provably inert
+(test: with the flag off, no delegated call is reachable); suites green;
+red-on-old pins verified both directions.
+
 ## Ledger
 
 | # | Item | Status |
