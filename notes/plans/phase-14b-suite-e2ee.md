@@ -890,6 +890,23 @@ RESOLVED — Mac AND mobile Xcode builds of the app against the new package
 target both BUILD SUCCEEDED (the C target + resource bundle wire correctly
 at the app level). Batch 2 spawned.
 
+**Batch-2 verification (the architect's own, post-record):** tree clean;
+the six commits match their claims; the inland scope diff
+(Merge/Repairs/Transports/Scheduler + App + Bridge + Crypto + Vendor)
+EMPTY as promised; **full core suite re-run by the architect: 1108 tests
+in 120 suites PASSED** (a burst of stale SourceKit diagnostics against the
+new registry members was refuted by the CLI run — the committed tree is
+consistent); `08_phase14b_lockstep.sql` spot-read approved (nullable
+recovery wrap per Round 5, owner-only RLS on auth.uid(), NO delete door —
+vault removal is an account-deletion-scale act, 14c's; the marker bump
+deliberately the file's last statement; deploy remains the architect's
+gate act). The implementer's two PROVISIONALs stand for the ladder
+(keys-before-lockstep probe order; the defaulted refusing key provider —
+batch 3 wires the real provider at the app's construction site). Mac +
+mobile app builds against the new engine init running as the architect's
+background check; batch 3 spawned in parallel (its first act is reading,
+not compiling).
+
 ### Round 6 — three morning-adjacent clarifications (mid-sitting, 2026-08-04)
 
 1. **Passphrase policy (her question: "just has to be 12 characters long at
