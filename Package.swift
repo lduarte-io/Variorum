@@ -45,7 +45,10 @@ let package = Package(
         ),
         .testTarget(
             name: "VariorumCoreTests",
-            dependencies: ["VariorumCore"]
+            // CArgon2 direct: the RFC 9106 full-context vector calls
+            // argon2_ctx (secret + ad), which PassphraseKDF deliberately
+            // does not expose.
+            dependencies: ["VariorumCore", "CArgon2"]
         ),
     ]
 )
