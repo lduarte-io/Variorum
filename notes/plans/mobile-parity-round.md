@@ -199,9 +199,18 @@ build refuses marker 5 by design."*
   'generic/platform=iOS' build` — **Release, never Debug** (Debug is
   the dev-store fence and must never touch her corpus); commit and
   push `mobile` only — **never push main** (active 14b development).
-- **HOLD the install** until she says the 14b gate is ready (the
-  mirror gets wiped and re-pushed encrypted at her go). Mechanics
-  scouted 2026-08-04: scheme `VariorumMobile`, automatic signing under
-  her team (<apple-team-id>), her iPhone 17 Pro paired and reachable by
-  `devicectl` (UDID <device-udid>) — install at
-  her go via `devicectl` or her Xcode, her presence assumed.
+- **Install DIRECTLY at build-ready (her ~3:50am blessing — this
+  supersedes the earlier hold-for-her-go):** her words: "go ahead and
+  automatically install to my phone if you're able to in the morning
+  when the new item is built … you have my blessing to install it
+  directly if you wake up at 7, complete the phase, and have a new
+  build ready for me." Install via `xcrun devicectl device install
+  *[removed for publication]*
+  Build/Products/Release-iphoneos/VariorumMobile.app` (scheme
+  *[removed for publication]*
+  `-allowProvisioningUpdates` to the build). She acknowledged a
+  locked phone may refuse the install — on failure, report BUILD
+  READY + install pending and retry at her word; never loop retries.
+  Installing ahead of the mirror wipe is safe by construction: a
+  fresh install sits signed out, and nothing syncs until she signs in
+  and enrolls with her passphrase — the E2EE gate IS her passphrase.
