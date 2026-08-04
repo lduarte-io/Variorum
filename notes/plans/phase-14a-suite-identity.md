@@ -903,6 +903,36 @@ does not gate the spike (project refs are random; display names rename freely).
   spike run (`start.html` → consent → the new password → approve → the
   callback's P-ii + signup-refusal summary).
 
+- **Round 0r (same sitting) — THE SPIKE COMPLETES: every load-bearing unknown
+  answered, all in the good direction.** Her run, end to end: the consent
+  *[removed for publication]*
+  trap-field present and correctly NOT navigated — the 9c traps held), her
+  password sign-in, approve, PKCE code exchange **ok** — `iss` = the suite
+  issuer on the Variorum project, `sub` = her uid, refresh + id tokens
+  present, `amr` = `oauth_provider/authorization_code`. **The first suite
+  sign-in ever taken through her own OAuth server.** Then:
+  - **P-ii VERIFIED (the unknown flagged since 9c), verdict verbatim:**
+    *"OAuth-issued token IS an authenticated PostgREST user; bare key
+    refused/empty"* — insert 201 with `owner_id` = `auth.uid()` resolved to
+    her uid; select 200/1 row; bare key 200/0 rows. **The 14b vault design is
+    CONFIRMED viable as ruled** (RLS'd tables keyed on plain `auth.uid()`, no
+    claim gymnastics) — and the 14c entitlement reads the same way.
+  - **The signup-refusal probe (round 0j's load-bearing check) PASSED:**
+    `HTTP 422 signup_disabled — "Signups not allowed for this instance"` with
+    the OAuth server LIVE. Verified, never assumed. *(Code drift noted for
+    the record: 9c's Gate 4 saw 403; today's refusal is 422/`signup_disabled`
+    — same door, different number; do not trip on it.)* The
+    first-delegated-sign-in half rides the same toggle through the shared
+    create-account path (the 04-verified mechanism).
+  - **`vault_probe` DROPPED** (0 remaining) — the scratch-table promise kept.
+  **STATUS: the sitting's dashboard + spike work is COMPLETE.** Remaining 14a,
+  all queued: the CODE batches (the direct sign-in surface · the bridge's
+  delegated swap · `custom:fragments` retirement — fresh implementer + ladder
+  per the discipline) · the Site URL flip at pages-deploy (the stargazing
+  agent is building) · the Fragments client registration (admin door) +
+  touchpoint-1 handoff · the mobile update message at the gate · her
+  bootstrap-password change once `/oauth/reset` is live.
+
 ## Ledger
 
 | # | Item | Status |
