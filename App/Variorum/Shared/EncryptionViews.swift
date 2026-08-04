@@ -21,6 +21,9 @@ struct EncryptionView: View {
     let services: AppServices
     @Environment(\.dismiss) private var dismiss
 
+    /// The account surface, reachable from the signed-out and
+    /// failed-check arms — a message naming sign-in carries its door.
+    @State private var showingAccount = false
     @State private var setupPassphrase = ""
     @State private var setupConfirm = ""
     @State private var enrollPassphrase = ""
@@ -64,12 +67,24 @@ struct EncryptionView: View {
 
             switch encryption.state {
             case .unknown:
-                ProgressView().controlSize(.small)
-                Text("Checking this account's encryption state…")
-                    .foregroundStyle(.secondary)
+                if encryption.lastError == nil {
+                    ProgressView().controlSize(.small)
+                    Text("Checking this account's encryption state…")
+                        .foregroundStyle(.secondary)
+                } else {
+                    // The check FAILED (a dead or stale session is the live
+                    // cause — the vault fetch refused, so the state never
+                    // resolved): a spinner here would claim still-trying
+                    // forever. The error line below says why; this is the
+                    // road.
+                    Text("Couldn't check this account's encryption state.")
+                        .foregroundStyle(.secondary)
+                    Button("Account…") { showingAccount = true }
+                }
             case .signedOut:
                 Text("Sign in first — your encryption vault lives on your account.")
                     .foregroundStyle(.secondary)
+                Button("Sign in…") { showingAccount = true }
             case .newerFormat:
                 Text("This account's encryption was set up by a newer version of Variorum. Update the app to unlock sync.")
                     .foregroundStyle(.orange)
@@ -103,6 +118,14 @@ struct EncryptionView: View {
         .frame(minWidth: 460, minHeight: 320)
         #endif
         .task { await encryption.refresh() }
+        .sheet(isPresented: $showingAccount) {
+            AccountView(services: services)
+        }
+        .onChange(of: showingAccount) { _, showing in
+            // A sign-in (or sign-out) behind the account sheet changes what
+            // this sheet's state MEANS — re-resolve on its dismissal.
+            if !showing { Task { await encryption.refresh() } }
+        }
     }
 
     // MARK: - Setup (first device)

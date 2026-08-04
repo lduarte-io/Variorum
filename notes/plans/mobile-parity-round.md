@@ -199,6 +199,26 @@ build refuses marker 5 by design."*
   'generic/platform=iOS' build` — **Release, never Debug** (Debug is
   the dev-store fence and must never touch her corpus); commit and
   push `mobile` only — **never push main** (active 14b development).
+- **EXECUTED 2026-08-04 ~7:00am** — landed signal confirmed (marker 5,
+  ladder closed round 2), merged clean (code byte-identical to main's
+  ladder-verified tree outside `notes/`), mobile 173/25 green, Release
+  built + installed over the Wi-Fi tunnel (the locked phone took it).
+  **Her first-look finding, fixed same hour: the DOORLESS sign-in
+  states.** She saw "Checking this account's encryption state…" with
+  no way to log in — a stale Keychain session (only `signOut()`
+  clears, the 9c contract) reads as signed in, its dead token fails
+  the vault fetch, and the keys check's designed zero-transport-contact
+  refusal hides the auth problem behind the locked face. THREE doors
+  added on the SHARED surface (the Mac inherits at the next
+  mobile→main merge — the 14b Mac session should know):
+  `SyncStatusRow`'s keys-locked arm gains "Account…" beside "Unlock…";
+  `EncryptionView`'s `.signedOut` arm gains "Sign in…" and its
+  `.unknown`-with-error arm becomes an honest failed-check face with
+  "Account…" (spinner dropped — it claimed still-trying forever);
+  the account sheet's dismissal re-resolves the encryption state.
+  The 13b doctrine applied, not new behavior: a message naming an act
+  offers the act's door. Mobile suite re-run green; rebuilt,
+  reinstalled.
 - **Install DIRECTLY at build-ready (her ~3:50am blessing — this
   supersedes the earlier hold-for-her-go):** her words: "go ahead and
   automatically install to my phone if you're able to in the morning

@@ -69,6 +69,12 @@ struct SyncStatusRow: View {
                         .foregroundStyle(.orange)
                         .help(error)
                     Button("Unlock…") { showingEncryption = true }
+                    // The keys check precedes any transport contact, so a
+                    // dead/stale session sits BEHIND the locked face and no
+                    // auth error ever surfaces — the Account door must stay
+                    // reachable here (pre-Stage-A, 2026-08-04: her phone's
+                    // exact state).
+                    Button("Account…") { showingAccount = true }
                 } else {
                     Text("Sync error")
                         .foregroundStyle(.red)
