@@ -1422,6 +1422,31 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
   `Sync/` lines phase-wide; no schema (marker stays 4); no server config
   from any code session.
 
+### THE GATE (2026-08-04 — announced steps, her explicit go per step)
+
+- **Step 1 — `/Applications` refresh: DONE at her go.** Instance check clean
+  (pgrep, twice); Release build from `main` @ `1cff66a` (isolated
+  DerivedData, BUILD SUCCEEDED); the product replaced
+  `/Applications/Variorum.app` (installed 01:58, signed,
+  `io.lduarte.Variorum`).
+- **Step 2 — her live acceptance: PASSED.** Her words: "signing in works and
+  the wrong email popup works as well" — sign-out → suite email+password
+  sign-in on the refreshed build, plus the wrong-password arm seen live.
+  **R1-1's PROVISIONAL wording "Wrong email or password." treated as
+  RATIFIED on that report** (her word invited if she wants different text).
+  Mid-step observations, both dispositioned in-chat: the AccountView's
+  Fragments-journal row SURVIVING is correct per 0t/0x (the bridge's
+  machinery is Variorum-side and stays; only its session-minting swaps to
+  delegated at the 14c-end batch era, when the two-form surface collapses
+  into one flow per 0i); and her bridge DISCONNECT was her own click
+  (confirmed, her words: "i clicked disconnect myself"), not a sign-out
+  coupling — independently verified in code before her confirmation:
+  `signOutVariorum` touches only the Variorum session
+  (`AppServices.swift:235`), `disconnectFragmentsJournal` is its own door
+  (`:307`), distinct Keychain services. Nothing lost (a session credential
+  only; reconnect = one password entry until the batch era, delegated
+  after).
+
 ## Ledger
 
 | # | Item | Status |
