@@ -636,6 +636,34 @@ does not gate the spike (project refs are random; display names rename freely).
   identity (14a), payloads encrypted (14b), no identity or credential of its
   own.**
 
+- **Round 0j (same sitting) — the allowlist STANDS DOWN at her word; three
+  confirmations.** Her ruling, verbatim: "honestly, if we're doing the real thing
+  in 14c I don't see a big point in doing that now - 14c will happen soon enough.
+  my corpus doesn't need that much protecting right now." SUPERSEDES round 0i's
+  lands-NOW disposition (and 0d's promotion): NO interim allowlist is written or
+  deployed; the signups-off toggle remains the SOLE guard on the eight non-owner
+  tables until 14c's parent-join isolation retires the single-user premise
+  outright. **The compensating check rides the spike (already planned, now
+  load-bearing):** after the OAuth 2.1 Server is enabled on the Variorum project,
+  re-probe that `POST /auth/v1/signup` AND a first delegated sign-in from a NEW
+  identity both still refuse — the 04 header's claim re-VERIFIED under the new
+  configuration, never assumed. The master-plan 14c row and the session memory
+  are corrected in this same commit (the allowlist-retires-INTO-isolation clause
+  comes out). Her confirmations, all affirmed: **(1)** Fragments' sign-in just
+  shows the journal because the bridge does all the comparing/pushing/pulling
+  from Variorum's side — exactly right. **(2)** Holding a Fragments-project
+  session is "easy" in the precise sense that NO second credential exists — the
+  one-time browser hop per device is the handshake that turns her suite identity
+  into Fragments' own native session (self-refreshing thereafter, project-local);
+  controlling the suite identity doesn't skip the handshake, it makes the
+  handshake credential-free. **(3)** The active sync loop is 100% Variorum-side;
+  Fragments-the-app has no awareness of the bridge today and at 14a. The honest
+  edges recorded with the yes: Fragments' SERVER is the passive door (its RPC
+  endpoints serve the bridge like any client); the trim / empty-body-as-deletion
+  behaviors are small standing interactions; and at 14b Fragments' client DOES
+  gain journal-class crypto — the one real involvement, scheduled as
+  touchpoint #2.
+
 ## Ledger
 
 | # | Item | Status |
