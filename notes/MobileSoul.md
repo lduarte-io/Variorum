@@ -122,8 +122,9 @@ PROVISIONAL.
 6. **Dynamic Type and VoiceOver are phone-native expectations** —
    the token layer should scale with the user's text size where it
    can, and the custom surfaces (badge, peek strip, seams) need
-   accessibility labels; audited at the parity round's polish stage,
-   owed before TestFlight strangers.
+   accessibility labels; audited at the parity round's Stage E
+   (TestFlight & store readiness — her 2026-08-04 directive), owed
+   before TestFlight strangers.
 7. **The sandbox**: no folder bridges, no bulk import; share-sheet
    is the export grammar (FUTURE LIST). 8. **The A4 fence**: Debug =
    dev store, never her corpus; Release installs are the real app
@@ -131,12 +132,34 @@ PROVISIONAL.
 
 ## 6. THE PARITY LEDGER (the mechanism that keeps mobile whole)
 
-**The protocol (author-invited, 2026-08-04, recorded in CLAUDE.md's
-closeout ritual):** every Mac phase closeout MUST add a row here
-naming what the phase shipped that mobile owes a version of — or
-state "nothing mobile-visible" in its closeout paragraph. Mobile
-stages burn rows down and mark them. A phase that skips this line has
-an incomplete closeout. This replaces hope with bookkeeping.
+**The protocol (author-invited, 2026-08-04; direction refined at the
+gate's close the same day — two duties with distinct jobs, plus one
+escalation):**
+
+- **Mac phases RECORD (cheap, context-hot):** every Mac phase
+  closeout adds a row here naming what shipped that mobile owes a
+  version of — or states "nothing mobile-visible" in its closeout
+  paragraph (the CLAUDE.md ritual line; a closeout without it is
+  incomplete). The closing session knows exactly what it shipped;
+  a mobile session months later re-deriving it from diffs would be
+  expensive and lossy. Recording is the whole duty — Mac phases do
+  NOT design mobile shapes.
+- **Mobile phases ACT (judgment lives here, with this document):**
+  every mobile stage/phase kickoff reads this ledger AND sweeps the
+  closeouts since the last mobile phase (belt and braces — a missed
+  line must not become a lost capability), then turns open rows into
+  scope with the soul test and decision grammar applied. Mobile owns
+  the judgment of what parity means per row.
+- **CROSS-PLATFORM phases design TOGETHER (the escalation):** where a
+  capability is inherently both-platform — anything in core or
+  `Shared/`, sync semantics, 14b's E2EE device enrollment — mobile is
+  IN the design sitting, not informed at the closeout: the ledger row
+  is written at DESIGN time naming mobile's deliverable inside that
+  phase (PL-5/PL-6 are this class). The test: if mobile's half could
+  not be bolted on afterward without redesign, it is this class.
+
+Mobile stages burn rows down and mark them. This replaces hope with
+bookkeeping.
 
 | # | From | What mobile owes | Status |
 |---|------|------------------|--------|

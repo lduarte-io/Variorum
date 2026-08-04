@@ -5962,6 +5962,27 @@ no-redirect principle.**
    merges** (at the Phase 14 pause per the standing timing). The plan:
    `notes/plans/mobile-parity-round.md`.
 
+**GATE CLOSE — the 2026-08-04 refinements (her message at the soul
+document's landing):** **STAGE E created at her directive** (the
+Fragments-precedent shape): Dynamic Type + VoiceOver move there from
+D, joined by the privacy policy, store screenshots/listing, privacy
+manifest + encryption-export declaration, external-TestFlight setup,
+*[removed for publication]*
+TestFlight (*"super basic… for just me and whoever I add"*) right
+after Stage D completes; Stage E carries what broader exposure needs.
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+discussion:** Mac phases RECORD (context-hot, one line), mobile
+phases ACT (kickoff reads the ledger + sweeps closeouts; judgment
+lives with the soul document), cross-platform phases DESIGN TOGETHER
+(the 14b class — the row written at design time; the test: if
+mobile's half can't bolt on afterward, it's this class) — the
+protocol in `notes/MobileSoul.md` §6 amended. **Her involvement level
+confirmed:** *"I'm around for major doubts and product decisions and
+will chip in with the provisionals where I can."*
+
 **GATE CLOSE-OUT ACTS (2026-08-03, her final directives):** the MERGE
 GO — her word plus the 14a session's own: *"The mobile merge — yes,
 and before the code batches is the better order. The sign-in machinery
