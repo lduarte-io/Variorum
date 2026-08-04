@@ -5935,6 +5935,33 @@ are findable when wanted):**
   to the phone."* Bulk IMPORT on iPhone: never (*"definitely no bulk
   import on an iphone"*).
 
+**FEEL ROUND — fourth report (same sitting): Q-M1 RULED + the
+no-redirect principle.**
+
+1. **Q-M1 — RULED (a), seed-from-ledger:** *"I think that's fine for
+   it to say as A"* — branching a take under a refused flush copies
+   what the card SHOWS (the pending bytes ride into the new take).
+   Builds in the parity round with a red-on-old pin.
+2. **Note lock/unlock ON mobile — RULED:** *"i do think that you
+   should be able to unlock a note and lock it on mobile."* The
+   shipped sealed-note refusal ("unlock it on the Mac") gains a real
+   door instead of a redirect.
+3. **THE NO-REDIRECT PRINCIPLE (binding for the round, beside
+   see-your-data):** *"in general, redirecting you to the mac to
+   accomplish something is a bit of a red flag (except for the
+   complexities of take choosing during merge and delete, and even
+   then SOMEHOW you should be able to get to the state you want)."*
+   Every "do it on the Mac" refusal in the mobile app is a parity
+   finding to dissolve — the named ceremony-adjacent exceptions may
+   keep a simpler road, but a road must exist.
+4. **Her plan directive (same message):** author the round's plan now
+   — up-to-date plan file, master-plan row/pointer, everything decided
+   this session copied into notes (the padding/spacing direction
+   included), regular commit+push written INTO the plan — and once
+   notes are complete and the plan is launchable, **`mobile` → `main`
+   merges** (at the Phase 14 pause per the standing timing). The plan:
+   `notes/plans/mobile-parity-round.md`.
+
 ---
 
 ## Orientation

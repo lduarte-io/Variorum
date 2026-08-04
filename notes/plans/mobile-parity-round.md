@@ -1,0 +1,124 @@
+# Variorum for iPhone — THE PARITY & POLISH ROUND
+### From great start to a great, faithful execution of the Mac app
+
+*Authored 2026-08-03 at the author's directive, during the v1 gate
+sitting (the sitting's full record: `notes/plans/mobile-app-plan.md`,
+"GATE SITTING — RUN RECORD"). This plan is self-contained for a fresh
+session and is the launchable unit the author asked for.*
+
+---
+
+## KICKOFF MESSAGE (paste-ready for the session that runs this)
+
+> You are the architect/orchestrator for the Variorum for iPhone
+> **parity & polish round**, under `/architect-phase` (the shape this
+> project has run since its design sitting — M13's all-Fable cast is
+> the standing default; the author may re-cast at kickoff). Read, in
+> order, IN FULL: `.claude/skills/architect-phase/SKILL.md` ·
+> `CLAUDE.md` · `notes/plans/mobile-app-plan.md`'s RUN RECORD (rulings
+> M1–M14, LK1–LK11, the stage records, and especially the **GATE
+> SITTING record** — every ruling this plan builds is recorded there
+> verbatim) · this plan · `notes/plans/mobile-architect-handoff.md`
+> (machinery lessons). Work in `~/dev/variorum-mobile`, branch
+> `mobile` (if the merge to `main` has happened, verify with the
+> author whether work continues on `main` or a fresh branch).
+> Verify repo state (`git log --oneline -10`, `git status`) and
+> spot-check the latest records before relying on them. Then run the
+> stages below in order, one batch at a time, with the standing
+> discipline: fresh implementer session per batch, a stage-end
+> review ladder with fresh cold reviewers, red-on-old pins absolute,
+> PROVISIONAL-and-continue for non-gating ambiguity, author-only
+> calls as hard stops, **commit and push `origin` after every batch
+> record, every fix pass, and every ruling recorded — never let the
+> tree sit unpushed at a stopping point.**
+
+## The mandate (what the author ruled this round INTO existence for)
+
+All quotes and full context live in the gate-sitting record; the
+binding headlines:
+
+1. **THE PARITY RULING** (CoreDescription pillar 8, second ratified
+   supersession): mobile is *"a complete, comprehensive app and
+   solution… basically just as capable as the mac app"* — her
+   daily-driver complement (*"like apple notes on the phone v.
+   computer… it can't be a very lobotomized version"*).
+2. **THE SEE-YOUR-DATA PRINCIPLE:** if it exists on the Mac and is
+   her information, mobile shows that it exists — an editor or
+   dedicated viewer is not owed.
+3. **THE NO-REDIRECT PRINCIPLE:** a refusal that says "do it on the
+   Mac" is a red flag; every such refusal is a parity finding to
+   dissolve. Ceremony-adjacent complexity may keep a simpler road,
+   but a road must exist.
+4. **Her pacing:** step-by-step batches, the tutorial book proving
+   functionality, everything simulator-testable.
+
+**Explicitly NOT owed (her exclusions, verbatim in the record):**
+Compare · the Snippets/scraps drag-into-note door (view + maybe-add
+IS owed) · sticky-note-style editing (canvas) · workspace/windowing
+(*"workflow and editor options, not a fundamentally different
+capability"*) · two-pane Outline (retired into Compare on the Mac
+anyway) · expand-all-fans · the reference side-by-side panel (the
+"More info" list IS owed) · the ceremonies (simpler defaults stand
+in) · **iPad, permanently** (portrait-locked iPhone; declaring iPad
+capability forbids portrait-only — never declare it). **The FUTURE
+LIST** (quick-capture widget · whole-data download link) stays
+future; bulk import never.
+
+## Stage table
+
+| Stage | Scope | Gate |
+|---|---|---|
+| **A — The floor: defects & ruled fixes** | 1. The takes-peek scroll defect (Write surface, peek chrome — reproduce on simulator, red-on-old, fix). 2. `TARGETED_DEVICE_FAMILY` → `1`, portrait-only orientations, all mobile targets. 3. **Q-M1 (a)**: branch-under-refused-flush seeds from the card's shown bytes (pin). 4. **Q-M2 core+phone**: the duplicate-shape default divide (displayed take cut, every other take duplicated whole onto BOTH successors; shared core op — the Mac door change stays 13j's; A released to lineage unchanged; refusals for start/end cuts unchanged). 5. Note seal lock/unlock on mobile (the ruled door; refusal copy loses its redirect). 6. The spacing/padding FLOOR: a first systematic pass over the v1 surfaces (her finding: "the spacing needs to be fixed" — more padding generally; LK canon binds; screenshots to her at the stage gate). | Ladder; her screenshot look |
+| **B — The tutorial book spine** | The mobile tutorial book (the 13b tutorial-as-spec precedent, phone-native): seeded content that exercises every shipped capability; simulator-drivable UI walks (scroll, tap, move) that fill it out and assert; it becomes the round's permanent acceptance spine — every later batch keeps it green. Reuse the Mac `TutorialSeeder` shape, never its Mac-specific copy. | Spine green; her walkthrough |
+| **C — Capability parity, by family** | The registry-driven audit: walk the Mac capability registry (P-1) against the phone; produce the PARITY MATRIX (owed / compromised-shape / not-owed-per-ruling, each row citing its ruling); then batches per family, matrix-ordered: **books & membership** (create book, move/add note between books, membership chip parity) · **tags** (browse, apply, create; leaf-chip grammar) · **locks** (take lock/unlock joins the note seal) · **references** ("More info" list: see, add, open) · **scraps/Snippets** (view, maybe add) · **comments/callouts gaps** · **lenses, compromised shape** (her sketch: top-bar lens switching, save-current — design at the batch) · **remaining refusal-copy sweep** (no-redirect: every "on the Mac" string dissolves or names its sanctioned exception). Each batch: brief → fresh implementer → record → tests; the spine green every batch. | Per-family ladder rounds |
+| **D — Polish & the look round** | The whole-app spacing/design pass against the LK canon with her screenshot rounds (the L11 design/beauty ledger row realized); remaining P1–P44 flips as she makes them; device feel-round riders (loupe, badge target, marker z-order, sheet keyboard, Write→Read freshness). | Her acceptance — the round's exit |
+
+**Not this round's:** the Mac-side 13j build (divide default door +
+keybind, restoration-doors sitting, the lens loud-fallback door) —
+recorded on the 13j row, runs as a Mac phase after Phase 14. S5's
+sync soak rides real use. TestFlight at stability (M14).
+
+## Discipline (standing, restated so the plan is self-contained)
+
+- **Cast:** `/architect-phase`; all-Fable default (M13); the author
+  may re-cast at kickoff. Fresh implementer per batch; fresh cold
+  reviewer per ladder round; strictly sequential.
+- **Tests with every step; red-on-old absolute** (the hallucination
+  guard: trace the mechanism before fixing; a pin passing on both
+  sides exposes a hollow finding). The tutorial spine green from
+  Stage B on. Simulator: iPhone 17 family, newest iOS runtime (LK1).
+- **Commit + push `origin` regularly — part of the plan by her
+  explicit instruction:** after every batch record, fix pass,
+  adjudication, and recorded ruling; never end a working bout
+  unpushed.
+- **PROVISIONAL-and-continue** for non-gating ambiguity, bundled to
+  her at stage gates; author-only calls (product invention, invariant
+  changes, dependencies, schema) are hard stops. **NO schema** (a
+  need = SyncSpec §12 lockstep event — stop, mirror-first, her go).
+  **`Sources/VariorumCore/Sync/` untouched** (Fable-only rider moot
+  under an all-Fable cast, but the boundary stands).
+- **Core changes are legal where a ruling demands them** (Q-M2's op)
+  — four-suite duty every time (mobile · core · Mac · spine), zero
+  Mac behavior change beyond what a ruling ordered.
+- **Repo-first records:** every batch brief/record in THIS file or
+  the run record it points to; her rulings verbatim, same turn.
+- **Machinery lessons bind** (`mobile-architect-handoff.md`): the
+  wrong-core pbxproj trap · `UITextView(usingTextLayoutManager:)`
+  factory trap · attribute re-stamping on every insertion path · the
+  spine's seven suite-type names · her interleaved rulings recorded
+  same-turn.
+
+## State at authoring (2026-08-03)
+
+- v1 gate sitting RAN on-device; the build verified compiling +
+  signing for a physical iPhone. Q-M1 ruled (a); Q-M2 ruled (her
+  duplicate shape); the parity/see-your-data/no-redirect principles
+  recorded; the exclusions and FUTURE LIST recorded; P1–P44 stand
+  silent-as-shipped except any flip she makes in Stage D.
+- **Merge `mobile` → `main` PRECEDES the round's kickoff** (her
+  directive: notes complete + plan launchable → merge, at a Phase 14
+  pause). The merge carries the Q-M2 core shape and every record to
+  the Mac codebase before any 13 phase builds on them.
+- The 14a suite-identity work runs in the main worktree in parallel;
+  nothing in this round touches auth (the suite-account change lands
+  on the phone through the shared shells when 14a ships it).
