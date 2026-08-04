@@ -8,6 +8,13 @@
 //  Keychain), the refusal wording, and the sync status face's locked-state
 //  classification with its keys-first no-network pin.
 //
+//  Phase 14b COPY/FLOW ROUND — the CF pins: the forget door (CF-11), the
+//  biometric gate's arms + the passphrase fallback (CF-12's ruling, all
+//  through the scripted in-memory backing — no real biometrics in tests),
+//  the passphrase-authorized regenerate (CF-2), the setup flow's gates +
+//  her exact checkbox sentence (CF-1/5/7), the CF-6/CF-13 copy pins, and
+//  the terminology walk (nothing is ever called Passkey).
+//
 
 import CryptoKit
 import Dependencies
@@ -162,6 +169,224 @@ struct EncryptionFlowTests {
         await session.refresh()
         #expect(session.state == .signedOut,
                 "the vault lives on the account — flows start with sign-in")
+    }
+}
+
+// MARK: - The copy/flow round (Phase 14b — CF-1…CF-13 + the CF-12 ruling)
+
+@MainActor
+@Suite("The copy/flow round (Phase 14b — CF pins)")
+struct CopyFlowRoundTests {
+    private let passphrase = "orchard-lantern-13"
+
+    /// CF-11's pin: forget ⇒ ZERO keys in custody, and the engine's key
+    /// seam refuses again — the same `SyncKeyProviderError.notEnrolled`
+    /// throw the locked-face pin proves surfaces as the visible locked
+    /// line with zero transport contact. The account vault is untouched:
+    /// the state returns to ENROLLMENT, never to setup.
+    @Test func forgettingKeysClearsCustodyAndTheEngineSeamRefusesAgain() async throws {
+        let backing = InMemoryKeyBacking()
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+        #expect(session.lastError == nil)
+        #expect(store.load() != nil)
+        let provider = DeviceKeySyncProvider(store: store)
+        #expect(throws: Never.self) { try provider.currentKeys() }
+
+        var healed = 0
+        session.onKeysChanged = { healed += 1 }
+        await session.forgetDeviceKeys()
+
+        #expect(store.load() == nil, "CF-11: forget ⇒ zero keys in custody")
+        #expect(throws: SyncKeyProviderError.notEnrolled) {
+            try provider.currentKeys()
+        }
+        #expect(session.state == .notEnrolled(hasRecoveryWrap: false),
+                "the vault survives — this device just isn't enrolled anymore")
+        #expect(healed == 1,
+                "the hook fires so the next round surfaces the locked line NOW, not at the next cadence")
+    }
+
+    /// CF-12's gated arm: the toggle re-persists custody behind the gate;
+    /// the SAME launch stays unlocked; a FRESH launch is locked — sync's
+    /// key seam refuses — until the biometric unlock fills the launch.
+    @Test func theBiometricGateLocksCustodyAcrossALaunchUntilUnlocked() async throws {
+        let backing = InMemoryKeyBacking(
+            biometryAvailable: true, biometricUnlockSucceeds: true)
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+
+        session.setBiometricRequirement(true)
+        #expect(session.lastError == nil)
+        #expect(session.biometricRequired)
+        #expect(store.load() != nil,
+                "the toggle itself never locks the launch that flipped it")
+
+        backing.simulateRelaunch()
+        #expect(store.load() == nil,
+                "a fresh launch is locked until an unlock")
+        let provider = DeviceKeySyncProvider(store: store)
+        #expect(throws: SyncKeyProviderError.notEnrolled) {
+            try provider.currentKeys()
+        }
+        await session.refresh()
+        #expect(session.state == .enrolledLocked(hasRecoveryWrap: false),
+                "the surface offers the unlock, not re-enrollment")
+
+        var healed = 0
+        session.onKeysChanged = { healed += 1 }
+        await session.unlockWithBiometrics()
+        #expect(session.lastError == nil)
+        #expect(store.load() != nil, "unlocked for the rest of the launch")
+        #expect(session.state == .enrolled(hasRecoveryWrap: false))
+        #expect(throws: Never.self) { try provider.currentKeys() }
+        #expect(healed == 1, "the unlock heals sync immediately")
+    }
+
+    /// CF-12's fallback arm — her ruling's second half: biometric failure
+    /// is never a dead end; the PASSPHRASE road unlocks the launch, and
+    /// the gate policy SURVIVES it (turning it off is a deliberate act).
+    @Test func aBiometricFailureFallsBackToThePassphraseRoadAndTheGateSurvives() async throws {
+        let backing = InMemoryKeyBacking(
+            biometryAvailable: true, biometricUnlockSucceeds: false)
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+        session.setBiometricRequirement(true)
+        backing.simulateRelaunch()
+
+        await session.unlockWithBiometrics()
+        #expect(session.lastError == EncryptionSession.biometricUnlockFailedMessage,
+                "the failure speaks and names the fallback")
+        #expect(store.load() == nil, "a failed unlock lands nothing")
+
+        await session.enroll(passphrase: passphrase)
+        #expect(session.lastError == nil)
+        #expect(store.load() != nil,
+                "the passphrase road re-derives from the vault and unlocks this launch")
+        #expect(store.isBiometricGateOn(),
+                "the gate survives the fallback — the policy is hers to turn off, never a side effect")
+        #expect(session.state == .enrolled(hasRecoveryWrap: false))
+    }
+
+    /// CF-12's ungated arm: turning the gate OFF re-persists plain custody
+    /// that reads across launches with no unlock at all (R-6's
+    /// enrollment-only cadence, restored).
+    @Test func turningTheGateOffRestoresUngatedCustodyAcrossLaunches() async throws {
+        let backing = InMemoryKeyBacking(
+            biometryAvailable: true, biometricUnlockSucceeds: true)
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+        session.setBiometricRequirement(true)
+        session.setBiometricRequirement(false)
+        #expect(!session.biometricRequired)
+        #expect(!store.isBiometricGateOn())
+
+        backing.simulateRelaunch()
+        #expect(store.load() != nil,
+                "ungated custody reads across launches with no unlock")
+        let provider = DeviceKeySyncProvider(store: store)
+        #expect(throws: Never.self) { try provider.currentKeys() }
+    }
+
+    /// CF-2's pin: REGENERATING the phrase is authorized by the passphrase
+    /// — a wrong passphrase refuses (verified against the vault by a real
+    /// unwrap, never a local compare) and mints nothing; the right one
+    /// mints 12 words whose confirm still lands through the replace road.
+    @Test func regeneratingThePhraseIsAuthorizedByThePassphrase() async throws {
+        let store = DeviceKeyStore.inMemory()
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: passphrase)
+        let first = try #require(session.generatePhrase())
+        await session.landRecoveryWrap(confirmedWords: first, allowReplace: false)
+        #expect(session.state == .enrolled(hasRecoveryWrap: true))
+
+        let refused = await session.generatePhraseAuthorized(passphrase: "not-the-passphrase")
+        #expect(refused == nil, "a wrong passphrase mints nothing")
+        #expect(session.lastError == "Wrong encryption passphrase.")
+
+        let minted = await session.generatePhraseAuthorized(passphrase: passphrase)
+        #expect(minted?.count == 12)
+        #expect(session.lastError == nil)
+
+        await session.landRecoveryWrap(
+            confirmedWords: try #require(minted), allowReplace: true)
+        #expect(session.lastError == nil)
+        #expect(session.state == .enrolled(hasRecoveryWrap: true))
+    }
+
+    /// CF-1/5/7: the stepped setup flow's gates — the passphrase step
+    /// requires a matched non-empty entry, the warning step refuses to
+    /// advance without HER checkbox, and the checkbox's label is her exact
+    /// sentence.
+    @Test func theSetupStepsRefuseToAdvanceWithoutTheirGates() {
+        #expect(!EncryptionSetupRules.canLeavePassphraseStep(passphrase: "", confirm: ""))
+        #expect(!EncryptionSetupRules.canLeavePassphraseStep(passphrase: "a", confirm: "b"))
+        #expect(EncryptionSetupRules.canLeavePassphraseStep(passphrase: "a", confirm: "a"))
+
+        #expect(!EncryptionSetupRules.canLeaveWarningStep(acknowledged: false),
+                "CF-7: the warning step refuses to advance without the checkbox")
+        #expect(EncryptionSetupRules.canLeaveWarningStep(acknowledged: true))
+
+        #expect(EncryptionView.understandingCheckbox
+                == "I understand that if I lose my recovery phrase and my passphrase, "
+                + "that I will not be able to recover anything from sync or add new devices",
+                "her exact sentence IS the checkbox copy")
+    }
+
+    /// CF-6's pin: the warning says the LOCAL copy survives (her find: "it
+    /// seems like your local copy will be destroyed with the current
+    /// phrasing") — while keeping the honest unrecoverable-by-design core.
+    @Test func theWarningCopyCarriesTheLocalCopyClarification() {
+        #expect(EncryptionView.setupWarning.contains(
+            "the writing already on your devices stays readable"))
+        #expect(EncryptionView.setupWarning.contains("Variorum cannot reset it"),
+                "the honest core survives the clarification")
+        #expect(EncryptionView.wholePhraseIsTheSecret.contains("no single word is a password"),
+                "CF-13: the whole phrase is the secret")
+    }
+}
+
+/// Her ruling, made durable: "let's not call anything Passkey to not
+/// confuse users" — the word (any case) appears in NO shipped app source.
+/// The walk is DEEP (the R1-3 precedent) over all three shipped source
+/// roots; test sources are exempt (this file is the pin).
+@Suite("Terminology (Phase 14b — her ruling)")
+struct TerminologyPinTests {
+    /// Composed so the pin's own source never trips a future widening of
+    /// the walk.
+    private var forbidden: String { "pass" + "key" }
+
+    @Test func nothingShippedIsEverCalledPasskey() throws {
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+        var walked = 0
+        var offenders: [String] = []
+        for root in ["Shared", "Variorum", "VariorumMobile"] {
+            let dir = appRoot.appendingPathComponent(root, isDirectory: true)
+            guard let walk = FileManager.default.enumerator(
+                at: dir, includingPropertiesForKeys: nil)
+            else { continue }
+            for case let url as URL in walk where url.pathExtension == "swift" {
+                walked += 1
+                let text = try String(contentsOf: url, encoding: .utf8)
+                if text.lowercased().contains(forbidden) {
+                    offenders.append(url.lastPathComponent)
+                }
+            }
+        }
+        #expect(walked > 100, "the walk must actually reach the shipped sources")
+        #expect(offenders.isEmpty,
+                "her ruling: nothing is ever called Passkey — found in \(offenders)")
     }
 }
 
