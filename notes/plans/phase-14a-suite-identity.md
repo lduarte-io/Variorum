@@ -1,6 +1,16 @@
 # Phase 14a — Suite identity: the neutral account — execution plan
 
-> **Status: OPEN — the kickoff design sitting is IN PROGRESS (2026-08-03, author-attended).**
+> **Status: CLOSED 2026-08-04.** The phase ran 2026-08-03/04 under
+> `/architect-phase` (all-Fable, R1): the author-attended kickoff sitting
+> (rounds 0d–0z) executed the dashboard + spike + pages work in-sitting; ONE
+> code batch shipped the direct sign-in through the shared seam; the
+> cold-review ladder closed at round 2 (zero HIGH findings, all fixes
+> pinned); the gate ran at her explicit go per step (identity + provider +
+> spike client deleted with before/after verification). Final counts and the
+> closeout paragraph: the master plan's closeout log. 14b's kickoff draft:
+> `notes/plans/phase-14b-suite-e2ee.md`.
+>
+> *(Original opening banner, kept as history:)*
 > Opened at the author's redirect recorded on the master plan pointer ("i think i'll
 > probably just run phase 14 right now instead of 13e then - more sync engine surgery,
 > seems better for this current token burning era"). Runs under `/architect-phase` (the
@@ -1254,51 +1264,31 @@ suites); red-on-old pins verified both directions.
   because it is the sitting's truth: "It's been a genuinely useful sitting -
   we've made huge progress in just a few hours this evening."
 
-### Batch 1 — implementer report (ARCHITECT-RECORDED: the implementer session
-### died after its implementation commit, before writing this section)
+### Batch 1 — record
 
-- **Implementation: COMPLETE and pushed — commit `5082a51`** (plus the
-  SignInFlow.swift deletion that rode docs commit `0fd1314`, confirmed
-  intentional). The implementer's final status, verbatim substance: both 9c
-  auth suites green (22 tests); the retirement-walk pin verified BOTH
-  directions (red-on-old: **10 issues on the pre-batch tree**, green after).
-- **What shipped** (from the commit + diff): `AuthSession` slims to the
-  direct core — `AuthConfiguration` = projectURL+apiKey; the PKCE/authorize/
-  exchange doors and the captured provider-token pair retired WHOLESALE
-  (they return at the Fragments batch, built against the live provider);
-  `SignInFlow` deleted (the implementer's judgment under amended scope item
-  4); `AppServices.signInWithVariorum` replaces `signInWithFragments`;
-  `AccountView`'s Variorum section is the email+password form (Return-key
-  doors, iOS email-field hygiene — the merged mobile surface rides the same
-  seam); the bridge's shape-(c) password road byte-untouched. NEW tests: the
-  retirement walk, the direct-sign-in wiring pin (account/adoption/sync
-  chain), password-grant coverage incl. refusal and no-user-id arms.
-- **Files:** AppServices, AuthSession, AuthViews, ProjectConfig,
-  AuthSessionTests, Phase9cAuthWiringTests (+ SignInFlow deleted) — net
-  −25 lines. Zero `Sync/` lines; no schema; no server config; no bridge
-  engine files.
+*(Condensed at the closeout per her mid-ladder hygiene ruling — the
+handoff-only implementer-report and pre-cutover-adjudication sections this
+replaced existed only because of the ~500k context cutover; the typical
+record follows.)*
 
-### Batch 1 — architect adjudication (2026-08-04, pre-cutover)
-
-- **Acceptance runs — THE ARCHITECT'S OWN, all four suites, ALL AT BASELINE:**
-  core **1039/114 PASSED** · Mac **1193/208, 1 issue = the standing
-  TakePaneMeasureTests tripwire CONFIRMED BY IDENTITY** (re-run in isolation:
-  `aStrandedRenderTierIsRebuiltByAConvergenceOccasion`, the recorded
-  environment-gated red) · mobile **172/24 PASSED** (iPhone 17 Pro sim) ·
-  spine **51/7 PASSED** (the seven Tutorial suite TYPE names).
-- **Scope compliance verified against the diff's file list:** every changed
-  file in the app auth layer + its tests; the amended scope held (no dormant
-  road built; bridge untouched; continuity shims absent by design).
-- **DISPOSITION: batch 1 ACCEPTED at the architect level** — subject to the
-  cold-review ladder, which is the fresh architect session's first act. Items
-  the ladder should weigh with fresh eyes: the AuthSession slimming's
-  completeness (does anything still reference the retired doors);
-  AccountView's refusal wording under the registry discipline; whether the
-  retirement walk's 10 red-on-old issues span the meaningful surface or
-  cluster; the wiring pin's chain coverage. NOTE for the gate: whether her
-  live session survived the seam rework is UNKNOWN and IRRELEVANT by round
-  0w — the gate's acceptance is her signing out and in once with
-  email+password on the refreshed build.
+**Shipped — commit `5082a51`** (+ the `SignInFlow.swift` deletion on
+`0fd1314`, intentional): `AuthSession` slims to the direct core
+(`AuthConfiguration` = projectURL+apiKey; PKCE/authorize/exchange doors and
+the provider-token pair retired wholesale — they return at the Fragments
+batch, built against the live provider); `AppServices.signInWithVariorum`
+replaces `signInWithFragments`; `AccountView`'s Variorum section is the
+email+password form serving Mac AND mobile through the one shared seam; the
+bridge's shape-(c) road byte-untouched. Tests: both 9c suites updated; the
+retirement walk (red-on-old verified: 10 issues on the pre-batch tree,
+spanning all five auth files); the wiring pin (account → `owner_id` adoption
+→ sync chain); password-grant coverage incl. refusal + no-user-id arms. Net
+−25 lines; zero `Sync/`; no schema; no server config. **Batch acceptance
+(architect's own runs): all four suites at baseline** — core 1039/114 · Mac
+1193/208 (tripwire by identity) · mobile 172/24 · spine 51/7. Accepted at
+the architect level, then laddered (below). *(Process note kept: the
+implementer session died to the background-wait failure mode after its
+implementation commit — named in the architect handoff and the session
+memory so spawned sessions run acceptance synchronously.)*
 
 ## The fresh-architect session (2026-08-04 — post-cutover: ladder → gate → closeout)
 
@@ -1446,12 +1436,67 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
   (`:307`), distinct Keychain services. Nothing lost (a session credential
   only; reconnect = one password entry until the batch era, delegated
   after).
+- **Steps 3+4+5 given ONE go at her word** ("they can all be done... and then
+  close out the batch completely"), AuthPairingSpike's teardown added to
+  step 5 at the same word.
+- **Step 3 — the `custom:fragments` IDENTITY deleted: DONE, by her hand.**
+  The permission layer routed the production-auth mutations to her (the
+  round-0n pattern) — commands announced verbatim, run via `!` in-session so
+  every result landed in-conversation for immediate verification. Mechanism
+  note for the record: this GoTrue's admin API has NO per-identity DELETE
+  route (404 — attempted first, identity untouched); the executed road was
+  SQL via the Management API. Before-read: exactly one identity
+  *[removed for publication]*
+  matching the 0s read). The DELETE's RETURNING confirmed that single row;
+  `raw_app_meta_data` recomputed to the password-user convention
+  (`provider: "email"` — mirroring what GoTrue's own unlink recomputes,
+  never left as a stale badge). After-read: **0 identities, email intact,
+  `has_password` TRUE.** The zero-identity state is safe by the 0p evidence
+  (password grant provably never consulted identities — proven when her
+  ONLY identity was `custom:fragments` and password sign-in worked) plus
+  her step-2 live sign-in; her next ordinary sign-out/in is the standing
+  re-proof, nothing further owed.
+- **Step 4 — the `custom:fragments` PROVIDER deleted: DONE, by her hand**
+  (same road). Discovery recorded: the provider lives as a ROW in
+  `auth.custom_oauth_providers` (id `1b8eda60-…`, issuer = Fragments'
+  project, created 2026-07-10), NOT in the config API's `external_*`
+  fields; the config-level `custom_oauth_enabled` read `false` throughout
+  today while the provider demonstrably worked through 2026-08-03 — noted
+  as odd, moot on deletion, not investigated further. After-read: **0
+  custom provider rows.** The 9c trust arrow now exists in NEITHER
+  direction.
+*[removed for publication]*
+  deleted by her hand via the admin door (HTTP 204; soft-deleted per the
+  *[removed for publication]*
+  touchpoint #1's real coordinates). `Spikes/SuiteAccountSpike/` AND
+  `Spikes/AuthPairingSpike/` (her word: "we don't need that dead
+  machinery") removed — commit `cb70b61`.
+- **Step 6 — the Fragments project: UNTOUCHED, phase-wide.** Zero reads or
+  *[removed for publication]*
+  old issuer stays ON until the one-batch handoff (the contract's item-5
+  guard — now moot for the APP since direct sign-in shipped, but the
+  shutdown remains the Fragments batch's act).
+- **The signups toggle: untouched by every gate act** (none of today's
+  deletions is in its path); the 0r probe evidence (422 `signup_disabled`
+  with the OAuth server live) stands as the corpus guard's verification.
 
-## Ledger
+## Ledger (final — every deliverable dispositioned at the closeout)
 
 | # | Item | Status |
 |---|------|--------|
-| — | *(minted from the sitting's rulings)* | — |
+| L1 | OAuth 2.1 Server ON — the Variorum project IS the suite issuer (0h) | done (0l; save verified; consent path live) |
+| L2 | The spike: P-ii (OAuth token = authenticated PostgREST user) + the signup-refusal re-probe | done (0r, both in the good direction; re-proven end-to-end through the PRODUCTION pages at 0u) |
+*[removed for publication]*
+| L4 | The stargazing.tech pages (sign-in+consent · sign-up built-and-wired · `/oauth/reset`) | done (the site agent, from `notes/stargazing-login-pages-brief.md`; 0s green-light; 0u production run — "it looks so cute!!") |
+| L5 | The three-value dashboard flip (Site URL · Authorization Path · Redirect URLs) | done (0t her hand; 0u verified on reload) |
+| L6 | Fragments' OAuth client registered; touchpoint #1 fully concrete in the contract | done (0s; secret in her untracked `.env.fragments-oauth.local`; carried at the ONE batch, 14c's end) |
+| L7 | The 9c LAN-interim residual retired | done (0n process kill; both spike dirs removed at the gate, `cb70b61`) |
+| L8 | `mobile` → `main` merge BEFORE the code batch (the shared-seam order, 0s) | done (0u, her act) |
+| L9 | Batch 1 — the direct sign-in; `custom:fragments` out of the code; `SignInFlow` deleted | done (`5082a51` + `0fd1314`; record above) |
+| L10 | The cold-review ladder | done — CLOSED at round 2 (R1: 3 MINOR + 2 NIT, all fixed `35062b2`; R2: all HOLD, residuals `81eca37` + the handoff line) |
+| L11 | The gate (refresh · her live acceptance + wording ratify · identity/provider/spike-client deletions · teardown · Fragments untouched) | done (the gate record above; every server after-state verified) |
+| L12 | The 14b kickoff draft with the pinned sitting questions | done (`notes/plans/phase-14b-suite-e2ee.md`) |
+| L13 | The mobile update-message deliverable (0m) | dissolved into the shared seam by the L8 merge order (0s), exactly as recorded; PL-5 updated in `notes/MobileSoul.md`; the author handoff carries a self-contained "for the mobile project" block |
 
 ## Environment traps (carried into every batch brief, per the skill)
 
