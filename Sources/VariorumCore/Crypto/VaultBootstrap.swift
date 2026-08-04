@@ -34,17 +34,33 @@ public struct VaultBootstrap: Sendable {
     /// spin.
     public var maxRounds: Int
 
+    /// GM-3: how the drain sleeps between transient-transport retries.
+    /// Defaults to a real backoff sleep; tests inject a no-op so the
+    /// retry arms run instantly.
+    public var transportRetrySleep: @Sendable (Int) async throws -> Void
+    /// GM-3's bound: this many transient drops WITHOUT PROGRESS abort the
+    /// run (typed, outbox intact). Progress resets the count — a burst-
+    /// killing gateway can drop every round of a large drain while the
+    /// outbox still converges.
+    public var maxConsecutiveTransportFailures: Int
+
     public init(
         client: KeyVaultClient,
         transport: any SyncTransport,
         database: AppDatabase,
         maxRounds: Int = 50,
+        maxConsecutiveTransportFailures: Int = 8,
+        transportRetrySleep: @escaping @Sendable (Int) async throws -> Void = { seconds in
+            try await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000)
+        },
         log: @escaping @Sendable (String) -> Void
     ) {
         self.client = client
         self.transport = transport
         self.database = database
         self.maxRounds = maxRounds
+        self.maxConsecutiveTransportFailures = maxConsecutiveTransportFailures
+        self.transportRetrySleep = transportRetrySleep
         self.log = log
     }
 
@@ -119,15 +135,51 @@ public struct VaultBootstrap: Sendable {
             log("resyncReinitialize: sync_version → 0 everywhere, sync_row_seq + pull cursor cleared, \(outboxAfterReset) rows enqueued for the repush.")
 
             var report = Report(arm: arm)
+            // GM-3: transient transport drops (the -1005 class — the live
+            // gateway kills rapid-fire chunk bursts) RETRY IN-PROCESS with
+            // backoff instead of aborting the run: the outbox is durable
+            // and resyncReinitialize ran ONCE above, so the next round
+            // resumes exactly where the drop left off — no re-zeroing, no
+            // reject-settling churn. Consecutive drops are bounded so a
+            // genuinely dead network still fails visibly.
+            var consecutiveTransportFailures = 0
+            var remainingAtLastFailure: Int?
             for round in 1...max(maxRounds, 1) {
                 report.roundsRun = round
-                _ = try await engine.pull()
-                let pushReport = try await engine.push()
-                report.pushedAccepted += pushReport.accepted
-                let (_, remaining) = try await storeCounts()
-                report.remainingOutbox = remaining
-                log("Round \(round): pushed \(pushReport.accepted) accepted (\(pushReport.rejected) rejected, \(pushReport.deferred) deferred); outbox \(remaining) remaining.")
-                if remaining == 0 { break }
+                do {
+                    _ = try await engine.pull()
+                    let pushReport = try await engine.push()
+                    consecutiveTransportFailures = 0
+                    remainingAtLastFailure = nil
+                    report.pushedAccepted += pushReport.accepted
+                    let (_, remaining) = try await storeCounts()
+                    report.remainingOutbox = remaining
+                    log("Round \(round): pushed \(pushReport.accepted) accepted (\(pushReport.rejected) rejected, \(pushReport.deferred) deferred); outbox \(remaining) remaining.")
+                    if remaining == 0 { break }
+                } catch let error where Self.isTransientTransport(error) {
+                    let (_, remaining) = try await storeCounts()
+                    report.remainingOutbox = remaining
+                    // "Consecutive" means WITHOUT PROGRESS: a round that
+                    // pushed chunks before its drop is converging, not
+                    // stuck — the gateway kills bursts (GM-3), so on a
+                    // large drain EVERY round may end in a drop while the
+                    // outbox still marches down. Only a drop with no
+                    // movement since the last one counts against the bound.
+                    if let last = remainingAtLastFailure, remaining < last {
+                        consecutiveTransportFailures = 1
+                    } else {
+                        consecutiveTransportFailures += 1
+                    }
+                    remainingAtLastFailure = remaining
+                    guard consecutiveTransportFailures < maxConsecutiveTransportFailures else {
+                        throw VaultBootstrapError.transportRepeatedlyFailed(
+                            consecutiveFailures: consecutiveTransportFailures,
+                            lastError: String(describing: error))
+                    }
+                    let delaySeconds = min(1 << (consecutiveTransportFailures - 1), 8)
+                    log("Round \(round): transient transport drop (\(consecutiveTransportFailures)/\(maxConsecutiveTransportFailures)) — outbox \(remaining) remaining; retrying in \(delaySeconds)s.")
+                    try await transportRetrySleep(delaySeconds)
+                }
             }
             guard report.remainingOutbox == 0 else {
                 throw VaultBootstrapError.outboxNeverDrained(
@@ -135,6 +187,22 @@ public struct VaultBootstrap: Sendable {
             }
             log("Outbox drained in \(report.roundsRun) round(s); \(report.pushedAccepted) rows accepted by the mirror. Keys die with this process — the app enrolls from the vault.")
             return report
+        }
+    }
+
+    /// GM-3's transient class: URL-loading transport drops that the app's
+    /// scheduler absorbs by retrying rounds. Deliberately tight — anything
+    /// else (auth refusals, CAS storms, crypto refusals) still aborts.
+    static func isTransientTransport(_ error: any Error) -> Bool {
+        let nsError = error as NSError
+        guard nsError.domain == NSURLErrorDomain else { return false }
+        switch nsError.code {
+        case NSURLErrorNetworkConnectionLost, NSURLErrorTimedOut,
+             NSURLErrorCannotConnectToHost, NSURLErrorNotConnectedToInternet,
+             NSURLErrorDNSLookupFailed:
+            return true
+        default:
+            return false
         }
     }
 
@@ -232,4 +300,10 @@ public enum VaultBootstrapError: Error, Equatable, Sendable {
     /// rejecting or deferring; nothing is lost (the outbox keeps
     /// everything), the run just refuses to claim success.
     case outboxNeverDrained(remaining: Int, rounds: Int)
+    /// Too many CONSECUTIVE transient transport drops (gate finding GM-3:
+    /// the live gateway kills rapid-fire chunk bursts with
+    /// NSURLError -1005; the app's scheduler absorbs this class by
+    /// retrying rounds, so the runner's drain must too). Nothing is lost —
+    /// the outbox keeps everything; re-running resumes.
+    case transportRepeatedlyFailed(consecutiveFailures: Int, lastError: String)
 }

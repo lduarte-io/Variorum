@@ -13,6 +13,12 @@
 //  one-time unwrap persists in the device Keychain and day-to-day sync
 //  never touches this type.
 //
+//  Phase 14b COPY/FLOW ROUND: the forget door (CF-11 — clear custody, the
+//  engine refuses visibly again), the biometric unlock policy (CF-12's
+//  ruling — biometric or the passphrase, never the passcode; once per
+//  launch; the `enrolledLocked` state), and the passphrase-authorized
+//  phrase regenerate (CF-2 — the surface's rules made coherent).
+//
 
 import Foundation
 import Observation
@@ -35,6 +41,17 @@ final class EncryptionSession {
         case notEnrolled(hasRecoveryWrap: Bool)
         /// This device holds the unwrapped keys (Keychain custody).
         case enrolled(hasRecoveryWrap: Bool)
+        /// CF-12: custody exists behind the biometric gate and this launch
+        /// has not unlocked yet — sync waits; the surface offers the
+        /// biometric unlock with the passphrase road beside it.
+        case enrolledLocked(hasRecoveryWrap: Bool)
+        /// CF-16 (crossover round): custody exists but holds keys the
+        /// account no longer uses — the vault was RE-KEYED (deleted and set
+        /// up fresh) after this device enrolled. Without this state the
+        /// device reads "enrolled" while every round fails generically. The
+        /// road is ordinary re-enrollment: the enroll save overwrites
+        /// custody wholesale (the step-0 pin's proven class).
+        case keysReplaced(hasRecoveryWrap: Bool)
         /// The vault was written by a newer build — refuse by version.
         case newerFormat(Int)
     }
@@ -46,9 +63,16 @@ final class EncryptionSession {
     /// DEVICE — surfaced on the flow (and os_log) so the gate reads the
     /// on-device number straight off the enrollment/setup surface.
     private(set) var lastKDFSeconds: Double?
+    /// CF-12: the device-local unlock policy, projected for the toggle.
+    /// Seeded at `refresh()` — deliberately NOT at init: a Keychain probe
+    /// at construction is the GM-1 stall class (synchronous securityd wait
+    /// inside `AppServices.init`), and every reader renders post-refresh.
+    private(set) var biometricRequired = false
 
-    /// Fired after key material lands or changes on this device — the app
-    /// triggers a sync round so the engine's keys-refusal heals immediately.
+    /// Fired after key material lands, changes, or is FORGOTTEN on this
+    /// device — the app triggers a sync round so the engine's keys-refusal
+    /// heals immediately (or, after forget, surfaces the locked line
+    /// immediately instead of a stale reading).
     var onKeysChanged: (() -> Void)?
 
     private let store: DeviceKeyStore
@@ -68,7 +92,8 @@ final class EncryptionSession {
         self.signedIn = signedIn
     }
 
-    var isEnrolled: Bool { store.load() != nil }
+    /// CF-12: whether the biometric toggle is even offerable here.
+    var biometryAvailable: Bool { store.biometryAvailable() }
 
     // MARK: - State refresh
 
@@ -76,21 +101,38 @@ final class EncryptionSession {
     /// here and in the flows — never at construction.
     func refresh() async {
         guard let client else { return }
+        biometricRequired = store.isBiometricGateOn()
         guard await signedIn() else {
             state = .signedOut
             return
         }
         do {
             let vault = try await client.fetchVault()
-            let enrolledLocally = store.load() != nil
+            let custody = store.load()
             switch vault {
             case nil:
                 state = .noVault
             case let vault?:
                 let hasRecovery = vault.format.masterWrappedByRecovery != nil
-                state = enrolledLocally
-                    ? .enrolled(hasRecoveryWrap: hasRecovery)
-                    : .notEnrolled(hasRecoveryWrap: hasRecovery)
+                if let custody {
+                    // CF-16 (the re-key blindness, closed): "enrolled" is no
+                    // longer custody-exists alone — the custody must hold
+                    // THIS vault's class keys. A device that slept through a
+                    // re-key projects the honest REPLACED state instead of a
+                    // false "enrolled" whose rounds fail generically. (A
+                    // biometric-gated launch that hasn't unlocked cannot be
+                    // compared — custody is unreadable — so it stays
+                    // `enrolledLocked`; the mismatch surfaces at the first
+                    // post-unlock refresh, and the sync row's classifier
+                    // names the refusal meanwhile.)
+                    state = Self.custodyMatchesVault(custody, vault.format)
+                        ? .enrolled(hasRecoveryWrap: hasRecovery)
+                        : .keysReplaced(hasRecoveryWrap: hasRecovery)
+                } else if biometricRequired {
+                    state = .enrolledLocked(hasRecoveryWrap: hasRecovery)
+                } else {
+                    state = .notEnrolled(hasRecoveryWrap: hasRecovery)
+                }
             }
         } catch KeyVaultClientError.unsupportedFormatVersion(let version) {
             state = .newerFormat(version)
@@ -102,8 +144,9 @@ final class EncryptionSession {
     // MARK: - The flows (each hands custody to the Keychain, then heals sync)
 
     /// SETUP (first device): create the vault — passphrase wrap ONLY
-    /// (Round 5); the recovery phrase rides the (RE)GENERATE surface that
-    /// the resulting `enrolled(hasRecoveryWrap: false)` state offers next.
+    /// (Round 5); the recovery phrase is the flow's own MANDATORY next step
+    /// (CF-5): the resulting `enrolled(hasRecoveryWrap: false)` state IS
+    /// step 4, and the surface cannot complete setup without landing it.
     func setUp(passphrase: String) async {
         await runFlow { enrollment in
             let material = try await enrollment.setUp(passphrase: passphrase)
@@ -112,7 +155,9 @@ final class EncryptionSession {
         }
     }
 
-    /// ENROLLMENT (new device, R-4): passphrase → unwrap → Keychain.
+    /// ENROLLMENT (new device, R-4): passphrase → unwrap → Keychain. Under
+    /// the biometric gate this is also the fallback road (CF-12): the save
+    /// keeps the gate on and unlocks the launch.
     func enroll(passphrase: String) async {
         await runFlow { enrollment in
             let material = try await enrollment.enroll(passphrase: passphrase)
@@ -134,6 +179,9 @@ final class EncryptionSession {
 
     /// Mint 12 fresh words (pure — nothing lands until the CONFIRMED
     /// re-entry passes through `landRecoveryWrap`; Round 5 item 3's order).
+    /// This ungated form serves the MANDATORY first generation only (the
+    /// setup flow's step 4 — CF-5); REPLACING an existing phrase goes
+    /// through `generatePhraseAuthorized` (CF-2).
     func generatePhrase() -> [String]? {
         do {
             return try RecoveryPhrase.generate()
@@ -143,9 +191,23 @@ final class EncryptionSession {
         }
     }
 
+    /// CF-2: REGENERATING the phrase is authorized by the passphrase — the
+    /// same deliberateness class as changing it (an enrolled device already
+    /// holds the keys, so the gate is about deliberateness, and the
+    /// surface's rules read coherent only if replacing the disaster secret
+    /// costs the same proof as the other vault-changing doors). Verifies by
+    /// actually unwrapping master from the vault — never a local compare.
+    func generatePhraseAuthorized(passphrase: String) async -> [String]? {
+        await runFlow { enrollment in
+            _ = try await enrollment.enroll(passphrase: passphrase)
+            return try RecoveryPhrase.generate()
+        }
+    }
+
     /// Land the CONFIRMED words as the vault's recovery wrap. `allowReplace`
-    /// is passed true only behind the UI's explicit replace confirm
-    /// (Round 7: replacing the disaster road is a deliberate ceremony).
+    /// is passed true only from the regenerate flow, which sits behind the
+    /// CF-2 passphrase gate (Round 7: replacing the disaster road is a
+    /// deliberate ceremony).
     func landRecoveryWrap(confirmedWords: [String], allowReplace: Bool) async {
         guard let material = store.load() else {
             lastError = "This device holds no keys — unlock with your passphrase first."
@@ -172,12 +234,73 @@ final class EncryptionSession {
         }
     }
 
+    // MARK: - Device custody doors (CF-11 · CF-12)
+
+    /// CF-11's act (behind the surface's confirmed destructive door):
+    /// custody, the launch cache, and the biometric gate all go — the
+    /// account vault is untouched, so re-enrolling by passphrase or
+    /// recovery phrase restores this device. Fires the keys hook so the
+    /// engine's next round refuses VISIBLY right away: the sync face
+    /// returns to its locked line, never a stale "synced" reading.
+    func forgetDeviceKeys() async {
+        store.clear()
+        biometricRequired = false
+        onKeysChanged?()
+        await refresh()
+    }
+
+    /// CF-12: the once-per-launch biometric unlock. Failure is never a dead
+    /// end — the surface offers the passphrase road beside this door.
+    func unlockWithBiometrics() async {
+        guard !busy else { return }
+        busy = true
+        lastError = nil
+        defer { busy = false }
+        guard await store.unlockWithBiometrics() != nil else {
+            lastError = Self.biometricUnlockFailedMessage
+            return
+        }
+        if case .enrolledLocked(let hasRecovery) = state {
+            state = .enrolled(hasRecoveryWrap: hasRecovery)
+        }
+        onKeysChanged?()
+    }
+
+    /// CF-12: the device-local policy toggle's act. Needs the unlocked
+    /// material (the toggle lives on the enrolled surface); re-persists
+    /// custody under the new policy. Never touches the vault, the format,
+    /// or the protocol — R-6's device-local promise, kept.
+    func setBiometricRequirement(_ required: Bool) {
+        guard let material = store.load() else {
+            lastError = "Unlock this device's keys first."
+            return
+        }
+        guard store.setBiometricGate(required, material) else {
+            lastError = "The device Keychain refused the change — nothing was altered."
+            return
+        }
+        biometricRequired = required
+    }
+
     // MARK: - Plumbing
 
     /// Split a typed-in phrase on any whitespace (the entry surface is one
     /// field; `RecoveryPhrase.validate` does the trimming/casefolding).
     static func words(from text: String) -> [String] {
         text.split(whereSeparator: \.isWhitespace).map(String.init)
+    }
+
+    /// CF-16: does this device's custody hold the FETCHED vault's class
+    /// keys? A re-key (delete the vault, set up fresh) mints new key ids
+    /// for both classes, so stale custody mismatches on the plaintext ids
+    /// alone — no unwrap, no network beyond the fetch the caller already
+    /// made. A vault missing either class entry counts as a mismatch too
+    /// (custody claims keys the vault doesn't carry).
+    nonisolated static func custodyMatchesVault(
+        _ custody: DeviceKeyMaterial, _ vault: KeyVaultFormat
+    ) -> Bool {
+        vault.classKey(for: .corpus)?.keyID == custody.corpusKeyID
+            && vault.classKey(for: .journalBridge)?.keyID == custody.journalBridgeKeyID
     }
 
     private func adopt(_ material: DeviceKeyMaterial) {
@@ -189,12 +312,13 @@ final class EncryptionSession {
         onKeysChanged?()
     }
 
-    private func runFlow(_ body: (VaultEnrollment) async throws -> Void) async {
+    @discardableResult
+    private func runFlow<T>(_ body: (VaultEnrollment) async throws -> T) async -> T? {
         guard let client else {
             lastError = "Project keys not configured (ProjectConfig.swift)"
-            return
+            return nil
         }
-        guard !busy else { return }  // the account form's double-tap belt
+        guard !busy else { return nil }  // the account form's double-tap belt
         busy = true
         lastError = nil
         defer { busy = false }
@@ -205,13 +329,19 @@ final class EncryptionSession {
             }
         })
         do {
-            try await body(enrollment)
+            return try await body(enrollment)
         } catch {
             lastError = Self.message(for: error)
+            return nil
         }
     }
 
     // MARK: - Wording (every refusal speaks — the R94 doctrine)
+
+    /// CF-12: the biometric-failed line — names the fallback, which the
+    /// surface offers right beneath it.
+    static let biometricUnlockFailedMessage =
+        "Biometric unlock didn't go through — enter your encryption passphrase instead."
 
     static func message(for error: any Error) -> String {
         switch error {
@@ -248,7 +378,23 @@ final class EncryptionSession {
     /// The sync status row's locked-state classifier: true exactly for the
     /// engine's keys-refusal (`SyncError.encryptionKeysUnavailable`, which
     /// the scheduler surfaces verbatim via `String(describing:)`).
-    static func isKeysLockedError(_ text: String) -> Bool {
+    /// (Nonisolated so the row's pure face model consults it directly.)
+    nonisolated static func isKeysLockedError(_ text: String) -> Bool {
         text == SyncError.encryptionKeysUnavailable.description
+    }
+
+    /// CF-16's classifier arm (App-layer only — the engine is untouched):
+    /// true for the engine's payload-crypto refusal
+    /// (`SyncError.payloadCryptoFailure`) as the scheduler surfaces it —
+    /// after a re-key, a stale device's rounds fail exactly here, so the
+    /// row names the Encryption surface instead of a generic "Sync error".
+    /// The case's description carries row coordinates (table/row/column/
+    /// detail), so unlike `isKeysLockedError` this anchors on the
+    /// description's two invariant segments; the conjunction excludes the
+    /// other "Sync refused:"-family case (`unencryptedValueInEncryptedColumn`),
+    /// which never means stale keys.
+    nonisolated static func isPayloadCryptoError(_ text: String) -> Bool {
+        text.hasPrefix("Sync refused: '")
+            && text.contains("failed to encrypt/decrypt (")
     }
 }

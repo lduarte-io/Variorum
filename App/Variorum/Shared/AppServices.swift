@@ -85,6 +85,15 @@ final class AppServices {
     /// inject fixed/locked providers so wiring pins never touch the real
     /// Keychain.
     private let makeSyncKeyProvider: () -> any SyncKeyProviding
+    /// The BRIDGE's journal-class key seam (Phase 14b, gate-morning GM-2).
+    /// Production stays nil — BridgeEngine then takes its refusing default
+    /// (`UnenrolledBridgeKeyProvider`), which IS the phase's RULED pause:
+    /// the app wires no real bridge key provider until the one-batch
+    /// Fragments handoff at 14c's end. The wiring tests inject a fixed
+    /// provider here so the cadence/interleaving/pause-status machinery
+    /// they pin stays pinned THROUGH the pause era (it guards the 14c-era
+    /// resumption); the pause itself stays pinned against the default.
+    private let makeBridgeKeyProvider: (() -> any BridgeKeyProviding)?
 
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
@@ -94,9 +103,11 @@ final class AppServices {
         bridgeMinimumRoundInterval: Duration = .seconds(60),
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
         makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil,
-        makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil
+        makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
+        makeBridgeKeyProvider: (() -> any BridgeKeyProviding)? = nil
     ) {
         self.session = session
+        self.makeBridgeKeyProvider = makeBridgeKeyProvider
         self.makeSyncTransport = makeSyncTransport ?? { provider in
             SupabaseTransport(
                 configuration: ProjectConfig.variorumTransport,
@@ -359,7 +370,10 @@ final class AppServices {
         guard bridge.allowsBridge else { return }
         let engine = BridgeEngine(
             transport: makeBridgeTransport(fragmentsAuth, fragmentsUserID),
-            configuration: FragmentsBridgeConfiguration(userID: fragmentsUserID))
+            configuration: FragmentsBridgeConfiguration(userID: fragmentsUserID),
+            // nil ⇒ the engine's refusing default — the RULED pause,
+            // byte-identical to the pre-seam composition (GM-2).
+            keyProvider: makeBridgeKeyProvider?() ?? UnenrolledBridgeKeyProvider())
         await bridge.configure(engine: engine)
         bridge.trigger(manual: true)
     }

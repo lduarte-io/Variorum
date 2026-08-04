@@ -244,4 +244,116 @@ struct VaultBootstrapTests {
             _ = try VaultBootstrap.subject(ofAccessToken: "a.b.c")
         }
     }
+
+    // MARK: - GM-3: transient transport drops retry in-process
+
+    /// Wraps the fake server; throws the -1005 class on scripted push-call
+    /// ordinals (1-based), delegating everything else. Models the live
+    /// gateway killing rapid-fire chunk bursts (the gate's finding).
+    private struct FlakyTransport: SyncTransport {
+        let wrapped: FakeSyncServer
+        let dropPushCalls: Set<Int>
+        let pushCalls = LockIsolated(0)
+
+        func push(_ batch: [SyncRow]) async throws -> [SyncPushOutcome] {
+            let call = pushCalls.withValue { value -> Int in
+                value += 1
+                return value
+            }
+            if dropPushCalls.contains(call) {
+                throw URLError(.networkConnectionLost)
+            }
+            return try await wrapped.push(batch)
+        }
+
+        func pull(since: Int64, limit: Int) async throws -> [SyncPulledRow] {
+            try await wrapped.pull(since: since, limit: limit)
+        }
+
+        func schemaVersion() async throws -> Int {
+            try await wrapped.schemaVersion()
+        }
+    }
+
+    /// GM-3's red-on-old pin: pre-fix, the first -1005 aborted the whole
+    /// run (revert the drain loop's transient catch to see it); post-fix
+    /// the drain retries IN-PROCESS — no re-zeroing, no reject churn —
+    /// and completes.
+    @Test func aTransientTransportDropRetriesInProcessAndTheDrainCompletes() async throws {
+        try await withRunnerWorld { _, db, server, vaultWorld, _ in
+            let flaky = FlakyTransport(wrapped: server, dropPushCalls: [1, 2])
+            let logLines = LockIsolated<[String]>([])
+            let bootstrap = VaultBootstrap(
+                client: vaultWorld.client,
+                transport: flaky,
+                database: db,
+                transportRetrySleep: { _ in },
+                log: { line in logLines.withValue { $0.append(line) } })
+
+            let report = try await bootstrap.run(
+                passphrase: "orchard-lantern-13", dryRun: false)
+            #expect(report.remainingOutbox == 0, "the drain completes THROUGH the drops")
+            #expect(report.pushedAccepted > 0)
+            #expect(logLines.value.contains { $0.contains("transient transport drop") },
+                    "the drops are logged, never silent")
+            #expect(logLines.value.contains { $0.contains("Outbox drained") })
+        }
+    }
+
+    /// GM-3's second half (found at the LIVE repush, revert-verified): a
+    /// drop with PROGRESS since the last drop resets the consecutive
+    /// count — the live gateway kills every burst, so a large drain's
+    /// every round can end in a drop while the outbox still converges.
+    /// Pre-fix (revert the reset arm), progress-making rounds counted
+    /// against the bound and a converging drain aborted at max.
+    @Test func dropsWithProgressNeverExhaustTheBoundAndTheDrainCompletes() async throws {
+        try await withRunnerWorld { _, db, server, vaultWorld, _ in
+            // Seed enough rows for several 200-row chunks.
+            let ops = Operations()
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-08-05").container
+            for i in 0..<450 {
+                _ = try ops.newBlock(in: entry.id, text: "burst row \(i)", at: .end)
+            }
+            // Drop every SECOND push call: every round makes progress
+            // (one chunk lands) then drops. With the bound at 2, only
+            // the progress-reset lets this converge.
+            let flaky = FlakyTransport(
+                wrapped: server, dropPushCalls: Set(stride(from: 2, through: 100, by: 2)))
+            let bootstrap = VaultBootstrap(
+                client: vaultWorld.client,
+                transport: flaky,
+                database: db,
+                maxConsecutiveTransportFailures: 2,
+                transportRetrySleep: { _ in },
+                log: { _ in })
+
+            let report = try await bootstrap.run(
+                passphrase: "orchard-lantern-13", dryRun: false)
+            #expect(report.remainingOutbox == 0,
+                    "progress resets the bound — the converging drain completes")
+        }
+    }
+
+    /// The bound: a genuinely dead network still fails VISIBLY (typed,
+    /// outbox intact) — retry never becomes an infinite spin.
+    @Test func aPersistentTransportFailureStillFailsVisiblyWithTheOutboxIntact() async throws {
+        try await withRunnerWorld { _, db, server, vaultWorld, _ in
+            let dead = FlakyTransport(
+                wrapped: server, dropPushCalls: Set(1...100))
+            let bootstrap = VaultBootstrap(
+                client: vaultWorld.client,
+                transport: dead,
+                database: db,
+                transportRetrySleep: { _ in },
+                log: { _ in })
+
+            await #expect(throws: VaultBootstrapError.self) {
+                _ = try await bootstrap.run(
+                    passphrase: "orchard-lantern-13", dryRun: false)
+            }
+            let outbox = try #require(
+                try db.fetchString("SELECT COUNT(*) FROM sync_outbox"))
+            #expect(Int(outbox) ?? 0 > 0, "nothing is lost — the outbox keeps everything")
+        }
+    }
 }

@@ -89,6 +89,29 @@ struct VaultEnrollmentTests {
         #expect(measurements.value.allSatisfy { $0 > 0 })
     }
 
+    /// Cold-pass NIT-3's tripwire: the 0.16–0.6 s Argon2id derivation runs
+    /// OFF the caller's actor today only because this package compiles
+    /// WITHOUT `NonisolatedNonsendingByDefault` (nonisolated async offloads
+    /// to the global executor). A future hygiene commit adopting the App
+    /// target's concurrency flags in Package.swift would silently move the
+    /// derivation onto the caller's MainActor with no failing test — THIS
+    /// test is that failing test: it drives an enrollment from the main
+    /// actor and asserts the derivation's thread was never main. If it ever
+    /// fires, the fix is `@concurrent` on the KDF-bearing flow functions,
+    /// not deleting the pin.
+    @MainActor
+    @Test func theKDFDerivationRunsOffTheCallersMainActor() async throws {
+        let world = VaultTestWorld()
+        let sawMainThread = LockIsolated<[Bool]>([])
+        var enrollment = world.enrollment
+        enrollment.kdfMeasurement = { _ in
+            sawMainThread.withValue { $0.append(Thread.isMainThread) }
+        }
+        _ = try await enrollment.setUp(passphrase: "orchard-lantern-13")
+        #expect(sawMainThread.value == [false],
+                "the KDF must never derive on the caller's main actor")
+    }
+
     // MARK: The recovery wrap ((RE)GENERATE — Rounds 5 + 7)
 
     @Test func landingTheRecoveryWrapEnablesThePhraseRoad() async throws {

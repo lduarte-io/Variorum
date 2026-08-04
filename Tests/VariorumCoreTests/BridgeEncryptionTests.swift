@@ -121,6 +121,27 @@ struct BridgeEncryptionTests {
         }
     }
 
+    /// Cold-pass NIT-1's red-on-old: a legacy plaintext body whose first
+    /// character run is a NON-ASCII numeral ("e²: …") is NOT a version
+    /// prefix — it must land as legacy plaintext, not refuse as
+    /// `unsupportedVersion("e²:")`. Pre-fix, `foreignVersionPrefix` scanned
+    /// with bare `Character.isNumber` (true for superscripts/fractions/
+    /// non-ASCII numerals), so this body refused the round — this test RED
+    /// on that code; post-fix the scan is ASCII-only and the body rides the
+    /// `.notEncrypted` legacy arm.
+    @Test func aNonASCIINumeralBodyLandsAsLegacyPlaintextNotAVersionRefusal() async throws {
+        try await withBridge { bridge in
+            _ = try await bridge.server.fragmentsAppWrites(
+                userID: "user-author", day: "2026-07-08",
+                body: "e²: second draft, plain on the wire.",
+                updatedAt: bridge.fragmentsStamp(1))
+            let report = try await bridge.engine.pullAndLand()
+            #expect(report.created == 1)
+            #expect(try bridge.rendered(day: "2026-07-08")
+                == "e²: second draft, plain on the wire.")
+        }
+    }
+
     /// R1-4's red-on-old: a FUTURE-version ciphertext body (`e2:…`) must
     /// never land verbatim as the day's journal text. Pre-fix, `openLanded`
     /// guarded on the exact-`e1:` `isEncrypted` check, so an `e2:` value

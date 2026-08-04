@@ -9,112 +9,214 @@
 //  out, not credential-less. Views render state and send actions only;
 //  functional and unstyled (Phase 13 owns beauty).
 //
+//  Phase 14b CROSSOVER ROUND (CF-14/15/16): the row's doors are now PURE
+//  DATA (`SyncRowFace`) and the view renders exactly what the face says —
+//  so the pins assert door presence, enablement, and targets at the state
+//  level, and none of the ruled shapes can drift from what ships:
+//   - CF-15 (her ruling: "the sync row's buttons must not move"): the
+//     syncing state KEEPS "Sync now" (disabled) and "Account…" in place;
+//     the progress indicator rides beside the label — the old
+//     replace-the-content branch is retired.
+//   - CF-14: the separate "Encryption…" door retires into the Account
+//     sheet's Encryption tab; the LOCKED state's "Unlock…" stays in place
+//     and opens that tab DIRECTLY (one act — the refusal's own
+//     affordance).
+//   - CF-16 (the classifier arm): the engine's payload-crypto refusal —
+//     stale keys after a re-key are its everyday cause — presents as the
+//     replaced-keys line naming its fix, with the same one-act door.
+//
 
 import SwiftUI
 import VariorumCore
+
+/// CF-14/15/16: the sync row's face as pure data — which state family the
+/// row is in, and exactly which doors it offers. The view renders FROM
+/// this (doors are never minted view-side), so the state-level pins and
+/// the shipped row cannot diverge.
+nonisolated struct SyncRowFace: Equatable {
+    enum Kind: Equatable {
+        case devStore, signedOut, syncOff, syncing, offline
+        case keysLocked, keysReplaced, error, idle
+    }
+
+    struct Door: Equatable, Identifiable {
+        enum Act: Equatable {
+            /// Trigger a round (serves "Sync now" and "Retry" alike).
+            case syncNow
+            /// Open the tabbed Account sheet at the named tab (CF-14).
+            case openAccount(AccountTab)
+        }
+        var label: String
+        var act: Act
+        var enabled: Bool = true
+        var id: String { label }
+    }
+
+    var kind: Kind
+    var doors: [Door]
+
+    static func face(
+        allowsSync: Bool,
+        isConfigured: Bool,
+        signedIn: Bool,
+        isSyncing: Bool,
+        lastError: String?,
+        lastErrorIsOffline: Bool
+    ) -> SyncRowFace {
+        // The A4 fence: a dev-store session never syncs — no sign-in door
+        // either (the one mirror belongs to the real store; signing in
+        // belongs to real-store sessions).
+        guard allowsSync else { return SyncRowFace(kind: .devStore, doors: []) }
+        guard isConfigured else {
+            return SyncRowFace(
+                kind: signedIn ? .syncOff : .signedOut,
+                doors: [Door(label: "Sign in…", act: .openAccount(.account))])
+        }
+        if isSyncing {
+            // CF-15 (her ruling): the doors DO NOT move while a round runs
+            // — "Sync now" stays present and merely disables.
+            return SyncRowFace(kind: .syncing, doors: [
+                Door(label: "Sync now", act: .syncNow, enabled: false),
+                Door(label: "Account…", act: .openAccount(.account)),
+            ])
+        }
+        if let error = lastError {
+            if lastErrorIsOffline {
+                // Phase 11, Step A0: offline is a designed-for state
+                // (outbox kept, next trigger retries) — waiting, never an
+                // error face.
+                return SyncRowFace(kind: .offline, doors: [
+                    Door(label: "Sync now", act: .syncNow),
+                ])
+            }
+            if EncryptionSession.isKeysLockedError(error) {
+                // Phase 14b (L9): the keys-refusal presents as a paused
+                // state naming its fix; CF-14 keeps its door IN PLACE,
+                // opening the Encryption tab directly.
+                return SyncRowFace(kind: .keysLocked, doors: [
+                    Door(label: "Unlock…", act: .openAccount(.encryption)),
+                ])
+            }
+            if EncryptionSession.isPayloadCryptoError(error) {
+                // CF-16: after a re-key, a stale device's rounds fail as
+                // payload-crypto refusals — name the real fix instead of a
+                // generic error face.
+                return SyncRowFace(kind: .keysReplaced, doors: [
+                    Door(label: "Re-enroll…", act: .openAccount(.encryption)),
+                ])
+            }
+            return SyncRowFace(kind: .error, doors: [
+                Door(label: "Retry", act: .syncNow),
+                Door(label: "Account…", act: .openAccount(.account)),
+            ])
+        }
+        return SyncRowFace(kind: .idle, doors: [
+            Door(label: "Sync now", act: .syncNow),
+            Door(label: "Account…", act: .openAccount(.account)),
+        ])
+    }
+}
 
 /// One row: signed-in + configured → last sync / pending / error;
 /// signed out → the sign-in door.
 struct SyncStatusRow: View {
     let services: AppServices
-    @State private var showingAccount = false
-    @State private var showingEncryption = false
+    /// CF-14: the ONE sheet, opened at the tab the pressed door names
+    /// (nil = not presented).
+    @State private var accountSheetTab: AccountTab?
 
     private var sync: SyncSession { services.sync }
 
-    /// Phase 14b (L9): the engine's keys-refusal, classified — the row
-    /// names the fix and offers the door to it.
-    private var keysLocked: Bool {
-        guard let error = sync.status.lastError else { return false }
-        return EncryptionSession.isKeysLockedError(error)
+    private var face: SyncRowFace {
+        SyncRowFace.face(
+            allowsSync: sync.allowsSync,
+            isConfigured: sync.isConfigured,
+            signedIn: services.account.variorum != nil,
+            isSyncing: sync.status.isSyncing,
+            lastError: sync.status.lastError,
+            lastErrorIsOffline: sync.status.lastErrorIsOffline)
     }
 
     var body: some View {
+        let face = self.face
         VStack(alignment: .leading, spacing: 2) {
-        HStack(spacing: 6) {
-            if !sync.allowsSync {
-                // The A4 fence: a dev-store session never syncs — no
-                // sign-in door either (the one mirror belongs to the real
-                // store; signing in belongs to real-store sessions).
-                Text("Sync off (dev store)")
-                    .foregroundStyle(.secondary)
-            } else if !sync.isConfigured {
-                Text(services.account.variorum == nil ? "Signed out" : "Sync is off")
-                    .foregroundStyle(.secondary)
-                Button("Sign in…") { showingAccount = true }
-            } else if sync.status.isSyncing {
-                ProgressView().controlSize(.small)
-                Text("Syncing…")
-            } else if let error = sync.status.lastError {
-                // Phase 11, Step A0 (KnownIssues row, re-owned from 10 with
-                // author approval 2026-07-12): offline is a designed-for
-                // state (A3 — outbox kept, next trigger retries), so it
-                // presents as waiting/pending, never as "Sync error". Real
-                // refusals keep the error face.
-                if sync.status.lastErrorIsOffline {
-                    Text(Self.offlineLabel)
-                        .foregroundStyle(.secondary)
-                        .help(error)
-                    if sync.status.pendingPushCount > 0 {
-                        Text("· \(sync.status.pendingPushCount) pending")
-                            .foregroundStyle(.secondary)
-                    }
-                    Button("Sync now") { sync.triggerSync() }
-                } else if keysLocked {
-                    // Phase 14b (L9): the locked-state line — the engine's
-                    // keys-refusal presents as a paused state naming its
-                    // fix, never a generic "Sync error" (nothing is lost
-                    // while paused; the outbox keeps everything).
-                    Text(Self.lockedLabel)
-                        .foregroundStyle(.orange)
-                        .help(error)
-                    Button("Unlock…") { showingEncryption = true }
-                    // The keys check precedes any transport contact, so a
-                    // dead/stale session sits BEHIND the locked face and no
-                    // auth error ever surfaces — the Account door must stay
-                    // reachable here (pre-Stage-A, 2026-08-04: her phone's
-                    // exact state).
-                    Button("Account…") { showingAccount = true }
-                } else {
-                    Text("Sync error")
-                        .foregroundStyle(.red)
-                    Button("Retry") { sync.triggerSync() }
-                    Button("Account…") { showingAccount = true }
+            HStack(spacing: 6) {
+                rowLabel(for: face.kind)
+                ForEach(face.doors) { door in
+                    Button(door.label) { perform(door.act) }
+                        .disabled(!door.enabled)
                 }
-            } else {
-                Text(lastSyncLabel)
-                    .foregroundStyle(.secondary)
-                if sync.status.pendingPushCount > 0 {
-                    Text("· \(sync.status.pendingPushCount) pending")
-                        .foregroundStyle(.secondary)
-                }
-                Button("Sync now") { sync.triggerSync() }
-                Button("Account…") { showingAccount = true }
             }
-        }
-        // Phase 14b: the E2EE settings door (the Settings/sync sheet family
-        // — Round 6 item 2: the recovery phrase is generated HERE). Shown
-        // whenever a signed-in real-store session exists; the sheet itself
-        // projects the exact state (setup / enroll / enrolled doors).
-        if sync.allowsSync, services.account.variorum != nil, !keysLocked {
-            Button("Encryption…") { showingEncryption = true }
-        }
-        // Sitting 9 (R94): the cause inline, classified — an auth-shaped
-        // failure names its fix and the Account door is right there. The
-        // keys-locked state carries its own line above instead (the cause
-        // IS the line).
-        if let error = sync.status.lastError, !sync.status.lastErrorIsOffline,
-           !sync.status.isSyncing, !keysLocked {
-            ErrorCauseNote(error: error)
-        }
+            // Sitting 9 (R94): the cause inline, classified — an auth-shaped
+            // failure names its fix and the Account door is right there. The
+            // keys-locked and keys-replaced states carry their own lines
+            // above instead (the cause IS the line).
+            if face.kind == .error, let error = sync.status.lastError {
+                ErrorCauseNote(error: error)
+            }
         }
         .font(.caption)
         .padding(6)
-        .sheet(isPresented: $showingAccount) {
-            AccountView(services: services)
+        .sheet(item: $accountSheetTab) { tab in
+            AccountView(services: services, initialTab: tab)
         }
-        .sheet(isPresented: $showingEncryption) {
-            EncryptionView(services: services)
+    }
+
+    @ViewBuilder
+    private func rowLabel(for kind: SyncRowFace.Kind) -> some View {
+        switch kind {
+        case .devStore:
+            Text("Sync off (dev store)")
+                .foregroundStyle(.secondary)
+        case .signedOut:
+            Text("Signed out")
+                .foregroundStyle(.secondary)
+        case .syncOff:
+            Text("Sync is off")
+                .foregroundStyle(.secondary)
+        case .syncing:
+            // CF-15: the indicator rides BESIDE the label; the doors stay.
+            ProgressView().controlSize(.small)
+            Text("Syncing…")
+        case .offline:
+            Text(Self.offlineLabel)
+                .foregroundStyle(.secondary)
+                .help(sync.status.lastError ?? "")
+            pendingNote
+        case .keysLocked:
+            // Phase 14b (L9): nothing is lost while paused; the outbox
+            // keeps everything.
+            Text(Self.lockedLabel)
+                .foregroundStyle(.orange)
+                .help(sync.status.lastError ?? "")
+        case .keysReplaced:
+            Text(Self.keysReplacedLabel)
+                .foregroundStyle(.orange)
+                .help(sync.status.lastError ?? "")
+        case .error:
+            Text("Sync error")
+                .foregroundStyle(.red)
+        case .idle:
+            Text(lastSyncLabel)
+                .foregroundStyle(.secondary)
+            pendingNote
+        }
+    }
+
+    @ViewBuilder
+    private var pendingNote: some View {
+        if sync.status.pendingPushCount > 0 {
+            Text("· \(sync.status.pendingPushCount) pending")
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func perform(_ act: SyncRowFace.Door.Act) {
+        switch act {
+        case .syncNow:
+            sync.triggerSync()
+        case .openAccount(let tab):
+            accountSheetTab = tab
         }
     }
 
@@ -122,6 +224,12 @@ struct SyncStatusRow: View {
     /// §12-grammar presentation of `SyncError.encryptionKeysUnavailable`),
     /// exposed for the presented-state pin like `offlineLabel`.
     static let lockedLabel = "Sync locked — enter your encryption passphrase"
+
+    /// CF-16's row line: the replaced-keys presentation of the engine's
+    /// payload-crypto refusal (wording derived from the ruled surface
+    /// copy; the door beside it opens the Encryption tab, whose headline
+    /// IS the ruled sentence).
+    static let keysReplacedLabel = "Sync paused — this account's encryption keys were replaced"
 
     private var lastSyncLabel: String {
         guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }

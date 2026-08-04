@@ -1396,9 +1396,657 @@ after-state verification. The wipe · repush · refresh · everything
 her-facing still rides the morning (the Mac suite + spine at the unlocked
 window remain the wipe's precondition).**
 
+### The overnight tail — EXECUTED (2026-08-04 ~06:55–07:05 local; post-ladder,
+### per the Round-4/5 authorization and the recorded narrowing)
+
+- **Gate step 1 — the A1 rail: DONE.** Instance check clean (pgrep, path-
+  discriminated); WAL-safe backup `variorum-backup-2026-08-04-125511.sqlite`
+  (UTC name, `PRAGMA integrity_check` = ok, 4,907,008 bytes) in the store's
+  `Backups/` home. **Mirror export DONE beside it**
+  (`Backups/mirror-export-2026-08-04-125511/`): all 18 data tables +
+  `sync_meta` as JSON via the stored-PAT Management-API road, 19 files,
+  3,954,986 bytes total (variant.json 1.4 MB — the corpus's shape as
+  expected).
+- **Gate step 2 — the 08 deploy: DONE.** Pre-state read first:
+  `lockstep_version = "4"`. The committed
+  `Server/supabase/08_phase14b_lockstep.sql` executed VERBATIM (body-file +
+  curl; one road note: python-urllib's default user agent is
+  Cloudflare-blocked on the Management API — 403 code 1010 — curl is the
+  proven client). **After-state verified, every check:**
+  `lockstep_version = "5"` · `key_vault` present with all 17 columns
+  including `revision` · `relrowsecurity = true` · exactly the three owner
+  policies (select/insert/update — NO delete, by design) · `key_vault`
+  rows = 0. The installed marker-4 build now visibly refuses to sync BY
+  DESIGN (outbox intact, cursor unmoved) — the accepted §12 consequence;
+  her pause means no round was running; the refresh (pre-authorized)
+  follows the morning's Mac-suite green.
+- **THE OVERNIGHT RUN STOPS HERE, deliberately** (the recorded narrowing):
+  the vault setup, wipe, repush, refresh, and every her-facing act ride
+  the morning — the Mac suite + spine at the unlocked window are the
+  wipe's precondition, and the runner's session token is minted at the
+  gate, announced, not at 5 a.m.
+
+### Her validation walk — findings + rulings (2026-08-04, at the gate; the
+### COPY/FLOW ROUND's ledger — her announcement: "we'll get through
+### validation and then ill give comments and we'll do a short copy / flow /
+### etc. round"; the round runs IN-PHASE, after the gate, before closeout)
+
+- **CF-1 (setup sheet):** "Done" (sheet dismiss) beside "Create Encrypted
+  Vault" (the act) reads ambiguous — her report verbatim: "am I supposed to
+  hit done or create encrypted vault? I think that's a little bit unclear."
+- **CF-2 (the regenerate/change coherence question), her words:** "it's
+  easy to regenerate your recovery phrase but changing your passphrase
+  requires the recovery phrase, but you can just regenerate that instantly.
+  i'm not sure what the actual goal is." The model's honest answer
+  (explained in-sitting, to be made LEGIBLE at the round): an ENROLLED
+  device already holds the master key — its gates are about deliberateness,
+  not security against someone at the unlocked machine; the phrase's real
+  job is the new-device/forgot-passphrase road. Round candidate: gate
+  Regenerate behind the passphrase too, so the surface's story is coherent.
+- **CF-3 (recovery-phrase entry discoverability):** her question "do you
+  put in the recovery phrase, separated by spaces, instead of your
+  passphrase?" — the ANSWER: no; "Forgot it? Authorize with the recovery
+  phrase" is a BUTTON that reveals a dedicated 12-words field (spaces
+  between words), but it renders like static hint text — the R94-family
+  legibility miss; same pattern exists (correctly, with a visible button)
+  on the enrollment screen.
+- **CF-4 (the phrase-confirm box):** behavior verified GOOD by her (only
+  the exact 12 words confirm; anything else rejects) but the STATE is
+  unclear — "from the user perspective it looks like you can just exit if
+  you want."
+- **CF-5 — RULING: the recovery phrase becomes MANDATORY AT SETUP.** Her
+  words: "It also seemed very optional to make a recovery passphrase - I
+  think it should be mandatory and the setup shouldn't work if you don't."
+  (The optional wrap-addition arm existed for the overnight road, which
+  went unused; setup walks straight into generate→write→confirm.)
+- **CF-6 — RULING (the warning wording — her ratify became an EDIT):**
+  clarify that the LOCAL copy survives — what's lost is the synced/remote
+  copy and new-device enrollment; her words: "it seems like your local
+  copy will be destroyed with the current phrasing."
+- **CF-7 — RULING: a real step FLOW with an understanding CHECKBOX.** Her
+  words: "this text is too easy to skip over... they should have to check
+  a checkbox that's like 'I understand that if I lose my recovery phrase
+  and my passphrase, that I will not be able to recover anything from sync
+  or add new devices'."
+- **CF-8 — FUTURE (recorded, not built; her explicit deferral):**
+  remote-reset for users who lose sync access but hold the local corpus —
+  "are we going to allow them to delete their remote account /
+  subscription and reupload with a whole new key? that seems like it makes
+  sense to me and it should go on the plan for later... for now we just
+  say, keep track of this!" Owner: 14c's operationalia (the machinery IS
+  R-2's own shape — resyncReinitialize + a fresh vault — made user-facing;
+  composes with account deletion and the tier).
+- **CF-9 (storage-recommendation copy):** recommend paper or a password
+  manager; "two copies of the passphrase and two copies of the recovery
+  key, stored separately."
+- **CF-10 (the round's framing principle), her words:** "i think this will
+  be some people's first experience with true end to end encryption that
+  isn't like an 'apple manages this for you' deal, and we need the flow to
+  make more sense for them."
+- **Hygiene note:** the phrase set shown in her screenshot was REGENERATED
+  immediately after (her own act) — the exposed words are dead; the live
+  set is the post-regenerate one she confirmed. Her Keychain-prompt
+  side-report (Always Allow not sticking across prompts — the known macOS
+  dev-signing behavior) recorded with GM-1's family.
+- **Pre-wipe vault state read (the architect):** one `key_vault` row on
+  *[removed for publication]*
+  the CAS token moving as designed), `has_recovery_wrap` TRUE, KDF 65536
+  KiB / t=3. Her Mac is ENROLLED; the setup half of the gate is DONE.
+- **CF-11 — RULED IN (post-repush): a "Forget encryption keys on this
+  device" door.** Surfaced answering her phone-drill question: sign-out
+  deliberately does not clear custody, and iOS keychain items persist
+  across reinstall — so the phrase road on an enrolled phone has NO path
+  without this door, and device-handoff/switching genuinely needs it. Her
+  word: "yeah, forget encryption keys would be good to do." Ships in the
+  copy/flow round; the round's acceptance re-runs the drill on the phone
+  properly (forget → re-enroll via the phrase).
+- **CF-12 — her lift question (2026-08-04): QR enrollment + the biometric
+  setting, "the copy round might be a good time for it to ride after
+  we've validated the core flow."** The architect's honest shapes,
+  relayed: the BIOMETRIC require-at-launch setting (R-6's answered-open
+  door) is a REAL MINI-BATCH, rideable in the round (SecAccessControl on
+  the key item + LocalAuthentication unlock-once-per-launch + a
+  device-local toggle + both form factors + pins; sync waits for first
+  unlock while ON — the known cost). QR DEVICE-LINKING is NOT round
+  material: a genuine key-delivery protocol (ephemeral-key QR exchange, a
+  delivery channel — likely a server mailbox table = another §12 lockstep
+  event — camera plumbing, two-device UX both directions) — it stays the
+  recorded R-4 future door with its own design sitting when she wants it.
+  TERMINOLOGY note relayed: what she's seeing called "passkey" elsewhere
+  is WebAuthn SIGN-IN credentials (an account-password replacement — a
+  14c-era issuer consideration), unrelated to the encryption
+  passphrase/keys; what we'd build is biometric-GATED KEYCHAIN access.
+- **The phone status (hers, same message):** the installed mobile build
+  "didn't add an account login option" — the phone's encryption test
+  WAITS on the mobile session adding the sign-in door (that face is the
+  mobile project's scope; she is working with that session directly).
+  PL-6's phone half rides that + CF-11's door.
+
+### The validation tail — PASSED (2026-08-04, her reports; the gate's
+### remaining her-facing steps)
+
+- **GATE STEP 5 — THE PHONE: PASSED.** Her words: "phone test is done and
+  I successfully logged in and decrypted... and all of my work is
+  available on my phone! it all showed up :)" (the mobile session added
+  the login door on its side first). **L12 SATISFIED — the DEVICE KDF
+  number: 0.16 s on the phone** (the app's own surfaced measurement; the
+  Mac app shows the same 0.16 s class — the earlier 0.57–0.62 s numbers
+  were DEBUG builds of the harness/runner, the apps are Release-optimized;
+  both numbers recorded with that explanation). The enrolled state reads
+  correctly on the phone ("a recovery phrase is on file for this
+  account").
+- **GATE STEP 6 — THE PHRASE DRILL (light road): PASSED.** Her words: "i
+  also changed my passphrase on my mac using the recovery phrase (it
+  really is very unclear that it's a button)" — the words→unwrap→re-wrap
+  road proven end-to-end with her paper copy; CF-3's legibility finding
+  re-confirmed in the same breath. **The cross-device invariant CONFIRMED
+  LIVE: her phone stayed enrolled and reading through the passphrase
+  change** (class keys in device custody are untouched by a master
+  re-wrap — exactly the R-8 hierarchy's promise). The proper phone drill
+  (forget → re-enroll via phrase) rides the round's acceptance through
+  CF-11's door as recorded.
+- **The passphrase FILE deleted** (announced; its purpose spent at the
+  repush, and her passphrase change made it stale — the live passphrase
+  now exists nowhere but her head, exactly the end state the design
+  wants).
+- **CF-12 RESOLVED BY HER RULING: QR DEFERRED ("we'll defer QR device
+  linking"), the BIOMETRIC require-setting IS IN the copy round.** Her
+  design ask on it, RULED IN: **biometric OR the encryption passphrase
+  ONLY — never the device passcode** ("can we make it such that it only
+  accepts biometric or the passphrase? not your phone passcode? I feel
+  like this is more of a 'no one can read my diary' step"). Technically
+  clean: the key item gates on `.biometryCurrentSet` alone (no
+  `.devicePasscode` fallback); biometric failure/unavailability falls
+  back to TYPING THE PASSPHRASE (re-derive → unwrap from the vault) — and
+  biometry re-enrollment invalidating the item is a FEATURE under this
+  threat model (a newly added fingerprint grants nothing; the passphrase
+  road recovers). Honest boundary stated to her and accepted: the local
+  store stays plaintext by design (the E2EE boundary is the server);
+  OS-level protections (iOS file protection, FileVault) carry the
+  at-rest story, and the raw-file caveat is real but obscure.
+- **CF-13 (copy):** make it unmistakable that the WHOLE phrase is the
+  secret — her words: "i could see someone thinking that any of the words
+  would be a password."
+- **TERMINOLOGY RULING: nothing is ever called "Passkey"** ("let's not
+  call anything Passkey to not confuse users").
+- Her closing read: "so things are looking pretty damn good!"
+
+### THE COPY/FLOW ROUND — the batch brief (authored post-validation; a
+### fresh Fable implementer; ONE cold review pass over the round's diff
+### follows it, then her walk + the proper phone drill as acceptance)
+
+Scope — CF-1…CF-13 + the CF-12 biometric ruling, exactly:
+1. **THE SETUP FLOW becomes a real STEPPED flow** (CF-1/5/6/7/9/10/13):
+   step 1 choose passphrase (recommendation copy + CF-9's two-copies
+   advice: paper or a password manager, two copies of each secret, stored
+   separately); step 2 the WARNING as its own step with the MANDATORY
+   CHECKBOX — her exact words: "I understand that if I lose my recovery
+   phrase and my passphrase, that I will not be able to recover anything
+   from sync or add new devices" — and the CF-6 clarification (the
+   writing on YOUR devices survives no matter what; what's lost is the
+   synced copy and new-device enrollment); step 3 create; step 4 the
+   recovery phrase MANDATORY (CF-5 — generate → display with CF-13's
+   whole-phrase-is-the-secret copy → write down → confirm by re-entry;
+   the flow cannot complete without it; no ambient "Done" that reads as
+   an action — CF-1). First-experience framing (CF-10) governs the copy.
+2. **CF-2:** Regenerate Recovery Phrase gates behind the passphrase (the
+   surface's rules become coherent).
+3. **CF-3:** "Forgot it? Authorize with the recovery phrase" LOOKS like a
+   button, both places it appears.
+4. **CF-4:** the phrase-display/confirm states read as required steps,
+   never optional-looking (largely falls out of the flow restructure;
+   apply to the regenerate surface too).
+5. **CF-11:** "Forget Encryption Keys on This Device" — confirmed
+   destructive door; clears custody; the surface returns to the
+   enrollment state and the sync face to its locked line; pin (forget ⇒
+   zero keys in custody + the engine refuses visibly again).
+6. **The BIOMETRIC require-setting (CF-12's ruling):** a device-local
+   toggle ("Require Face ID / Touch ID to unlock sync" — per-platform
+   naming, NEVER "Passkey"); custody item gated `.biometryCurrentSet`
+   ONLY (no `.devicePasscode` fallback — her ruling: biometric or the
+   PASSPHRASE, never the phone passcode); biometric failure/unavailable
+   ⇒ the passphrase road (re-derive → unwrap); unlock once per launch,
+   sync waits until it happens (the known cost, stated in the toggle's
+   own copy); biometry-re-enrollment invalidates the item BY DESIGN (the
+   passphrase recovers — a one-line note in the toggle copy); both form
+   factors through the shared seam; pins for the gated/ungated arms and
+   the fallback (scripted LAContext seam — no real biometrics in tests).
+7. **Terminology pin:** a test asserting no shipped UI string contains
+   "passkey" (case-insensitive) — the ruling made durable.
+8. The GATE RATIFY block's disclosure list gets its final user-facing
+   copy staged for her walk (still awaiting her one look).
+Boundaries: zero `Sources/VariorumCore/Sync/` lines; core additive-only
+if genuinely needed (record why); no schema, no server, no production
+contact; the bridge untouched; nothing beyond the CF items. Acceptance:
+core + full Mac suite (tripwire-only) + mobile + spine, own runs; then
+HER walk + the phone drill (forget → re-enroll via phrase) as the
+round's human acceptance.
+
+### Copy/flow round — record (implementer session, 2026-08-04; written
+### EXTRA-COMPLETE at the author's mid-round instruction — a fresh Fable
+### orchestrator adjudicates this round after a mid-phase crossover, so this
+### record is self-contained: what shipped per CF item, every design call
+### with its reason, the revert evidence, the copy verbatim for her walk,
+### and the exact acceptance accounting)
+
+**Commit: `969ff83` (implementation + pins, one coherent diff — four files,
+ALL App-side: `App/Variorum/Shared/EncryptionKeychain.swift` ·
+`EncryptionSession.swift` · `EncryptionViews.swift` ·
+`App/Variorum/VariorumTests/EncryptionFlowTests.swift`). The record
+finalization is its own commit after the long runs.**
+
+**Scope proof (for the adjudicator's own re-derivation):** `git show
+--stat 969ff83` = exactly those four files. Zero
+`Sources/VariorumCore/Sync/` lines; zero `Sources/VariorumCore/` lines at
+all — `VaultEnrollment.swift` is UNTOUCHED (the brief's additive-with-
+reasons carve was never needed: `enroll(passphrase:)` already IS the
+honest verification CF-2 wanted, and the forget/biometric doors are pure
+custody policy, which was always the App layer's). No schema, no server
+artifacts, no production or dashboard contact, no `.env*` reads, no new
+dependencies. The bridge untouched. No push (the architect pushes after
+verification).
+
+**The eight brief items, one by one:**
+
+1. **The stepped setup flow (CF-1/5/6/7/9/10/13) — BUILT.** `.noVault`
+   renders a 3-step view-local flow; the mandatory phrase is step 4 BY
+   CONSTRUCTION: it renders from `.enrolled(hasRecoveryWrap: false)`
+   itself, so an interruption (close, crash, relaunch — including her real
+   overnight-era shape, and a new device enrolling into a wrap-less vault)
+   RESUMES at the required step; it cannot be skipped because it is a
+   state, not a screen. Step 1: passphrase + repeat + the CF-10 intro
+   (what E2EE is, before any secret is chosen) + the standing
+   recommendation + short-passphrase caution. Step 2: the CF-6-amended
+   warning + the CF-9 storage advice + HER EXACT SENTENCE as a mandatory
+   checkbox (macOS `.checkbox` toggle style; iOS the native switch —
+   platform-native rendering of "checkbox", recorded below). Step 3: the
+   one act ("Create Encrypted Vault") with a back road. Step 4: the words
+   auto-generate on appear (no optional-looking "Generate" offer to
+   decline — CF-5), CF-13's whole-phrase copy, numbered display, the
+   write-down/type-back two-liner (CF-4's required framing), confirm by
+   full re-entry, NO cancel on the mandatory arm. The advance gates are
+   pure functions (`EncryptionSetupRules`) so tests pin them. CF-1's
+   "Done" ambiguity: the sheet's dismissal is now a borderless "Close" in
+   the header row — no `defaultAction`, never beside an act.
+2. **CF-2 — BUILT.** "Regenerate Recovery Phrase…" reveals a passphrase
+   gate; `EncryptionSession.generatePhraseAuthorized(passphrase:)`
+   verifies by a REAL vault unwrap (`VaultEnrollment.enroll` — never a
+   local compare), and only then mints. Wrong passphrase refuses in the
+   standing wording and mints nothing (pinned).
+3. **CF-3 — BUILT.** "Forgot it? Authorize with the recovery phrase" is a
+   `.bordered` button (her live find quoted at the site); the same
+   treatment on every reveal-toggle of the family — "Use my recovery
+   phrase instead" and both "Back to…" counterparts — so no reveal
+   anywhere renders as static hint text.
+4. **CF-4 — BUILT** (largely fell out of the restructure, as the brief
+   predicted): the display/confirm section reads as numbered required
+   steps; the REGENERATE arm shares the identical section (with a Cancel,
+   legitimate there — the old wrap stays valid until confirm) plus the
+   "old phrase keeps working until this confirm lands — then it stops,
+   everywhere" line.
+5. **CF-11 — BUILT.** "Forget Encryption Keys on This Device…" — a
+   destructive-role button behind a `confirmationDialog`; the act clears
+   custody + the launch cache + the biometric gate, fires `onKeysChanged`
+   (so the engine's next round refuses VISIBLY at once — the sync face
+   returns to its locked line, never a stale reading), and the surface
+   returns to the ENROLLMENT state (the vault survives). Pinned: forget ⇒
+   zero keys in custody + `DeviceKeySyncProvider` throws
+   `SyncKeyProviderError.notEnrolled` — the exact seam the locked-face pin
+   (batch 3) already proves surfaces as the visible refusal with zero
+   transport contact — + state `.notEnrolled` + the hook fired once.
+6. **The biometric require-setting (CF-12's ruling) — BUILT.**
+   - **The mechanism:** with the toggle ON, custody moves to a SECOND
+     Keychain item (`device-keys-biometric` under the same service) behind
+     `SecAccessControlCreateWithFlags(kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+     .biometryCurrentSet)` — `.biometryCurrentSet` ALONE, no
+     `.devicePasscode`, no `.or` escape (her ruling in flags); which
+     account holds the item IS the policy of record (no side flag to
+     drift). Unlock is ONCE PER LAUNCH: a successful
+     `LAContext.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics)`
+     (biometrics-only policy; the system prompt's fallback button
+     suppressed — falling back is OUR passphrase road, never a system
+     credential) reads the item under the evaluated context and fills a
+     process-lifetime cache; until then `DeviceKeyStore.load()` returns
+     nil and the engine refuses its rounds in its own standing grammar —
+     sync waits, exactly the stated cost, spoken in the toggle's own copy.
+   - **The fallback:** biometric failure/unavailability/invalidation ⇒
+     the passphrase road (`enroll(passphrase:)` re-derives + re-unwraps
+     from the vault); the save under an ON gate re-persists GATED and
+     unlocks the launch — the gate SURVIVES the fallback (policy is hers
+     to turn off, never a side effect; pinned). Biometry re-enrollment
+     invalidates the item BY DESIGN (a new fingerprint/face grants
+     nothing; one line in the toggle copy says the passphrase still gets
+     you in).
+   - **The seam (the brief's LAContext-behind-a-seam mandate):**
+     `DeviceKeyStore` (the file's standing struct-of-closures seam, the
+     AuthTokensStore pattern) gained the policy surface —
+     `biometryAvailable` / `isBiometricGateOn` / `setBiometricGate` /
+     `unlockWithBiometrics` — and ALL LAContext/SecAccessControl code
+     lives inside the `.keychain()` closures alone. Tests script custody
+     AND biometric outcomes through the new `InMemoryKeyBacking`
+     (persisted item + gate flag + launch cache + scripted availability/
+     outcome, `simulateRelaunch()` as the once-per-launch lever) — no
+     test touches the real Keychain or LocalAuthentication.
+   - **The projection:** new session state `.enrolledLocked(hasRecoveryWrap:)`
+     (custody exists, launch locked) renders the locked section — the
+     biometric door first, the passphrase road and (when a wrap exists)
+     the phrase road beneath, and the never-the-passcode line. The toggle
+     lives in the enrolled management area with per-platform naming
+     ("Touch ID" / "Face ID or Touch ID" — the forbidden word nowhere),
+     disabled for turning ON when biometry is unavailable (turning OFF
+     always allowed). `biometricRequired` is a tracked property seeded at
+     `refresh()` — deliberately NOT at init: a Keychain probe at
+     construction is the GM-1 stall class (`AppServices.init` →
+     synchronous securityd wait), noted in code.
+7. **The terminology pin — BUILT, and it BIT on its first run:** a deep
+   file walk (the R1-3 deep-walk precedent) over all three shipped source
+   roots (`Shared/`, `Variorum/`, `VariorumMobile/` — 188 files) asserts
+   the forbidden credential word (composed in the test, never written)
+   appears NOWHERE, case-insensitive, comments included (stricter than
+   "UI strings" — recorded as deliberate: a comment is where the word
+   would creep back in from). Its first run FAILED on this very round's
+   own fresh comment in EncryptionViews.swift ("NEVER \"P…\""), which was
+   reworded — the pin proved non-vacuous live, on real code, before it
+   ever went green.
+8. **The disclosure list's user-facing copy — STAGED** (verbatim below):
+   shipped as a `DisclosureGroup("What the server can and can't see")` in
+   the enrolled management area; the technical 18-column list in the GATE
+   RATIFY block is unchanged and stays the engineering record.
+
+**The copy, VERBATIM (for her walk's ratify — all of it lives as statics
+on `EncryptionView`, so the walk and the code cannot drift):**
+
+- *Setup intro (CF-10):* "End-to-end encryption means your writing is
+  sealed on this device before it syncs — the server only ever stores
+  sealed text it cannot read. Two secrets can unseal it: the passphrase
+  you choose now, and a 12-word recovery phrase you'll write down in a
+  moment. Variorum holds neither."
+- *The warning (CF-6-amended):* "This passphrase is not your account
+  password, and it is never sent anywhere. Variorum cannot reset it and
+  cannot read your writing without it — there is no “forgot passphrase”
+  email, by design. If you lose both the passphrase and your 12-word
+  recovery phrase, the synced copy is unreadable forever and no new
+  device can be added — the writing already on your devices stays
+  readable and stays yours."
+- *The checkbox (CF-7, HER SENTENCE BYTE-EXACT, pinned):* "I understand
+  that if I lose my recovery phrase and my passphrase, that I will not be
+  able to recover anything from sync or add new devices"
+- *Storage advice (CF-9):* "Store them like they matter: on paper or in a
+  password manager. Keep two copies of the passphrase and two copies of
+  the recovery phrase, stored separately." *(Her words said "recovery
+  key" — rendered "recovery phrase" for the surface's one-term
+  consistency; flagged for her walk.)*
+- *Whole-phrase (CF-13):* "All 12 words together, in order, are the
+  secret — no single word is a password. Anyone with the whole phrase can
+  unlock your synced writing; anyone with less has nothing."
+- *Step 4 heading + line:* "Step 4 of 4 — Your recovery phrase (required)"
+  / "If you ever forget the passphrase, these 12 words are the only other
+  way into your synced writing. Setup isn't finished until you've written
+  them down and confirmed them — closing now just leaves this step
+  waiting."
+- *The forget confirm (CF-11):* "Sync on this device stops until you
+  unlock again with your encryption passphrase or recovery phrase.
+  Nothing is deleted from this device or your account." (+ the caption:
+  "For handing a device off, or testing your recovery phrase. Your
+  writing on this device and the account vault are untouched.")
+- *The biometric toggle (CF-12; macOS arm):* "Require Touch ID to unlock
+  sync" / "While this is on, sync waits each launch until you unlock —
+  with Touch ID, or by typing your encryption passphrase. Your device
+  passcode never unlocks it. If Touch ID is re-enrolled, the stored keys
+  are invalidated by design — the passphrase still gets you in." (iOS
+  arm says "Face ID or Touch ID" / "…If biometrics are re-enrolled…".)
+- *The locked section:* "Sync is locked on this device." / "Touch ID — or
+  your encryption passphrase — unlocks it. Your device passcode never
+  does." / button "Unlock with Touch ID"; failure speaks "Biometric
+  unlock didn't go through — enter your encryption passphrase instead."
+- *The disclosure copy (item 8):* "Everything you write is sealed on your
+  devices before it syncs: your text and takes, titles, book and chapter
+  names, tags, comments, commit messages, and reference names and links.
+  The server can never read any of it. // What the server still sees is
+  the shape, not the words: that an entry exists on a day, how items are
+  ordered and connected, their sizes, when you sync, and settings
+  switches. Sealed words plus visible shape is what lets sync work
+  without trusting the server."
+
+**The hallucination guard — FIVE behavioral reverts, each run against the
+pins, each red on its finding's exact mechanism, each restored (the suite
+re-run green after restoration — the 14-test targeted set):**
+
+1. *Forget door* (`store.clear()` removed from `forgetDeviceKeys`): the
+   CF-11 pin failed 3 ways — custody remained, the provider RETURNED KEYS
+   (sync would keep pushing after "forget" — the disaster), state stayed
+   `.enrolled`.
+2. *Gate flip* (`setBiometricGate` call removed — the toggle flips only
+   the projection): both gate pins failed — a "fresh launch" still read
+   custody and the provider returned keys while the toggle claimed ON
+   (the user believes their diary is biometric-locked; it is not), and
+   the fallback test's locked precondition never held.
+3. *Unlock guess* (`store.unlockWithBiometrics()` skipped — the flow
+   claims success): the unlock pin failed — state said `.enrolled` while
+   `load()` was nil and the provider STILL refused (a "successful" unlock
+   after which sync stays dead); the failure arm's spoken fallback never
+   fired.
+4. *CF-2 gate* (the vault unwrap skipped in `generatePhraseAuthorized`):
+   the pin failed — the WRONG passphrase minted 12 words (anyone at the
+   unlocked machine could replace the disaster secret with no proof; the
+   exact incoherence CF-2 exists to close).
+5. *The checkbox gate* (`canLeaveWarningStep` softened to true): the
+   CF-7 pin failed on its first assertion.
+
+**Test accounting:** 8 new tests in 2 new suites, all in
+`EncryptionFlowTests.swift` — `CopyFlowRoundTests` (7: the forget pin ·
+the gate-locks-until-unlocked arm · the failure-falls-back-and-gate-
+survives arm · the gate-off arm · the CF-2 authorization pin · the setup
+gates + her-sentence byte-pin · the CF-6/CF-13 copy pins) +
+`TerminologyPinTests` (1: the deep walk, with a `walked > 100` floor so
+the walk can never quietly go vacuous — 188 shipped sources today).
+Expected full-suite lines: Mac **1202 + 8 = 1210 / 212 suites** (the
+standing TakePane tripwire the ONE allowed red) · core **1155/124
+unchanged** (zero core lines) · mobile **173/25 unchanged** (shared files
+recompile; no new mobile tests) · spine **51/7**.
+
+**PROVISIONALs / deviations (each with its reason — the adjudicator's
+list):**
+
+- **PROVISIONAL (CF-2's dialog):** the regenerate `confirmationDialog` is
+  RETIRED — the passphrase gate replaces it as the deliberateness
+  ceremony, the button is labeled "Verify and Generate New Phrase", and
+  the destructive information ("keeps working until the new one is
+  confirmed — then it stops, everywhere") moved into the gate's and the
+  confirm section's own copy. Reason: two stacked ceremonies for one act
+  is the friction doctrine's over-gating shape; CF-2's complaint was the
+  MISSING gate, not a missing second dialog. One tap more honest, one
+  dialog fewer. Hers to reverse at the walk.
+- **PROVISIONAL (forget clears the gate preference):** forgetting keys
+  wipes the biometric gate with custody (the gated item IS the policy
+  record). A re-enrolled device comes back with the toggle OFF. Reason:
+  custody-total wipe is the door's honest meaning; a surviving orphan
+  policy flag would be the drift class the account-as-record design
+  exists to kill.
+- **PROVISIONAL (the locked section's roads):** `.enrolledLocked` offers
+  the FULL unlock roads (passphrase + the phrase reveal when a wrap
+  exists) beneath the biometric door, sharing the enrollment section's
+  `unlockRoads` view. Reason: her ruling's letter — "biometric or the
+  passphrase" — plus never stranding a forgot-passphrase user behind a
+  gate their phrase could open.
+- **PROVISIONAL (auto-generate at step 4):** the mandatory step generates
+  its words on appear rather than behind a button — CF-5's
+  "shouldn't work if you don't" read as: the step IS the phrase, no
+  declinable offer exists. The no-trap boundary is stated in copy
+  (closing leaves the step waiting; the state resumes it).
+- **Deviation (failed-create keeps the entry):** the setup passphrase now
+  clears from view state only on SUCCESSFUL create (before: cleared at
+  press, so a network-failed create forced Back-and-retype). Same
+  secret-hygiene class (it lived in @State through steps 2–3 regardless).
+  The same keep-on-failure rule now protects the generated WORDS: a
+  failed `landRecoveryWrap` no longer clears the display, so the words
+  she wrote down stay the words on screen (the old optimistic clear
+  would have re-generated a DIFFERENT phrase after e.g. a network blip —
+  a real wrote-down-the-wrong-phrase trap, found while restructuring).
+- **Deviation (iOS checkbox):** her word was "checkbox"; iOS has no
+  native checkbox toggle style — the switch is the platform's same
+  control. macOS renders the literal checkbox.
+- **Considered and HELD (for the walk, not built):** the sync status
+  row's locked line still reads "Sync locked — enter your encryption
+  passphrase" even when the lock is the biometric gate (the row is
+  outside the CF items; its Unlock… door opens this surface, which
+  offers the biometric unlock first). A per-state row label is a one-line
+  follow-up if her walk wants it.
+- **Terminology pin walks comments too** — stricter than the brief's "UI
+  strings"; deliberate (recorded above; it already caught one).
+
+**The crossover handoff (what the fresh orchestrator needs):**
+- The round's diff is `969ff83` + the record commits after it. The brief
+  is the section above this record; the CF ledger is "Her validation
+  walk" + "The validation tail".
+- Still owed AFTER adjudication, per the brief: ONE cold review pass over
+  the round's diff; then HER WALK + the proper phone drill (forget →
+  re-enroll via phrase — CF-11's door now exists for it) as the round's
+  human acceptance; the `/Applications` refresh (pre-authorized, at a
+  zero-instance window) and the mobile project's `main` → `mobile` merge
+  for the phone build carrying this round; the L16 closeout parity line.
+- The phone-drill note for her walk: on the phone, the drill is Settings
+  → the sync row's Encryption door → Forget Encryption Keys (confirm) →
+  the sync face shows the locked line → Unlock… → "Use my recovery
+  phrase instead" → her 12 written words. Both doors ride the shared
+  seam, so the flow is identical on the Mac.
+- Environment notes for whoever runs the Mac suite next: this session's
+  runs were all from the `App/Variorum` project invocation; no GM-1
+  preparing-timeout occurred in any of them; the standing tripwire is
+  the one allowed red.
+
+**Acceptance (the round's full set — own runs, all waited synchronously,
+verbatim lines; FINALIZED post-record per the repo-first rule):**
+- Core `swift test` (repo root): **"✔ Test run with 1156 tests in 124
+  suites passed after 32.236 seconds."** — ONE more than the kickoff's
+  1155/124 baseline with ZERO core tests added this round; traced, not
+  shrugged at: the GM-3 fix landed in TWO commits (`2b3a03c` runner 11/1 →
+  `29cfd94` + `dropsWithProgressNeverExhaustTheBound`, runner 12/1), and
+  the wipe-section prose recorded the core total at the FIRST half
+  (1155) without refreshing it for the second pin. Verified: the runner
+  suite runs 12/1 today, `git log af32293..969ff83 -- Tests/ Sources/
+  Tools/` is EMPTY, so 1156 IS the inherited tree's true count.
+- Full Mac suite (cwd-independent `-project` invocation): **"✘ Test run
+  with 1211 tests in 212 suites failed after 153.651 seconds with 1
+  issue."** — the one issue is the standing tripwire BY IDENTITY
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`),
+  nothing else red; 1202 + this round's 8 in 2 new suites + the step-0
+  addendum pin below, exactly accounted. (An earlier full run before the
+  addendum: "1210 tests in 212 suites … 1 issue", same tripwire. No GM-1
+  preparing-timeout in any run this session.)
+- Mobile (iPhone 17 Pro sim): **"✔ Test run with 173 tests in 25 suites
+  passed after 4.657 seconds."** + ** TEST SUCCEEDED ** — baseline exact.
+- The spine (the seven Tutorial suites, dedicated run): **"✔ Test run
+  with 51 tests in 7 suites passed after 14.327 seconds."**
+- Also run before the record: the 4-suite targeted set
+  (Encryption/CopyFlow/Terminology/LockedFace) — "Test run with 14 tests
+  in 4 suites passed"; Mac `build-for-testing` ** TEST BUILD SUCCEEDED **;
+  the MOBILE APP BUILD against the shared changes ** BUILD SUCCEEDED **.
+
+**ADDENDUM (post-acceptance, same session — responding to the architect's
+mid-run handoff update `c374680`, which landed between this record's two
+commits): THE RE-KEY DRILL's STEP-0 PRE-VERIFICATION IS PINNED GREEN.**
+The handoff's step 0 names an unexercised state gating her live drill — a
+vault DELETED while local custody still EXISTS — and asks for it to be
+confirmed and pinned BEFORE the drill. Done now, while the code was in
+context (P-7; one test, no behavior change):
+`CopyFlowRoundTests.aDeletedVaultWithStaleCustodyOffersSetupAndOverwritesCleanly`
+proves the CURRENT behavior is the clean arm: `refresh()` reads the
+missing vault as `.noVault` even with stale custody (documented in the
+pin), the stepped setup flow proceeds, `setUp()` OVERWRITES the stale
+custody wholesale (fresh material, fresh corpus key id), the sync provider
+serves the NEW key — never the orphaned one — and the mandatory phrase
+step follows exactly as for any fresh vault. The handoff's alternative
+shape ("make the flow forget-then-set-up") therefore stays a TASTE choice,
+not a safety need — the adjudicator can still take it, but nothing wedges
+without it. Under a BIOMETRIC gate the same save path re-persists gated
+and unlocks the launch (the save-under-gate arm already pinned). CF-14/
+15/16 (defined only in the architect handoff, never in this session's
+brief) are DELIBERATELY NOT built here — the handoff already routes them
+to the crossover's own implementer, and building them from a secondhand
+summary would be exactly the drift the brief's "nothing beyond the CF
+items" boundary exists to prevent.
+
+### THE WIPE AND REPUSH — EXECUTED (2026-08-04, her explicit go: "go ahead!
+### this is the moment where supabase stops seeing all my innermost
+### thoughts haha")
+
+- **The wipe:** the committed truncate artifact executed VERBATIM at her
+  go; after-state verified — all 18 data tables at ZERO, `key_vault` = 1.
+- **The near-miss the dry-run caught (recorded so the class is known):**
+  the runner's first minted session belonged to a STRAY user — the
+  architect minted the admin link against her GIT email
+  *[removed for publication]*
+  DIFFERENT address (the 9c-era identity), and admin `generate_link`
+  CREATED a user for the unknown address despite signups-off (admin
+  bypasses the toggle — worth knowing for 14c). The dry-run surfaced it
+  (wrong uid + "vault absent" through RLS) BEFORE any write; the stray was
+  deleted (RETURNING-verified, zero data), the token re-minted against her
+  real address, the re-dry-run showed her uid + the unwrap arm. Dry-run
+  earned its existence.
+- **Finding GM-3 (fixed at the architect's hand mid-gate, both halves
+  revert-verified; commits `2b3a03c` + `29cfd94`):** the live gateway
+  KILLS rapid-fire push-chunk bursts (deterministic -1005 after ~2–4
+  200-row chunks; the app's scheduler absorbs this class by retrying
+  rounds, so production never saw it) — the runner's drain now retries
+  transient transport drops IN-PROCESS with bounded backoff, and
+  "consecutive" means WITHOUT PROGRESS (the second half, found live: every
+  round of a large drain can end in a drop while the outbox converges —
+  progress resets the bound). A genuinely dead network still fails typed
+  with the outbox intact. Runner suite 12/1; core 1155/124; both pins RED
+  under behavioral revert. 14c note: stranger-scale initial pushes meet
+  this same gateway behavior — the burst/pacing question joins the
+  pull-to-head windowing family.
+- **THE REPUSH: DRAINED.** 11 rounds, 7,265 rows accepted, keys died with
+  the process. **THE LIVE DUMP VERIFICATION — the phase's headline proof,
+  PASSED:** zero plaintext across ALL 18 encrypted columns (every stored
+  value bears `e1:`), mirror rows 7,265 == local 7,265 exact, the sampled
+  journal row reading `e1:ZHwJJAD2…` — structure visible, words never.
+  The runner's session token deleted after use.
+
+### Gate-morning findings (2026-08-04 — the architect's, at first Mac-suite
+### execution; recorded before the fix session)
+
+**FINDING GM-1 (the windowless-launch CAPTURE — the KnownIssues row now
+carries it in full):** the Mac suite's "timed out while preparing" cluster
+was NOT lock-state environment — a live specimen launch was caught
+windowless and sampled per the row's own protocol: the main thread blocks
+at construction in `AppServices.init` → `AuthSession.init`
+(AuthSession.swift:201) → SYNCHRONOUS `SecItemCopyMatching` →
+securityd `mach_msg` wait (ACL/authorization-interaction class; a freshly
+rebuilt binary the plausible trigger). Self-released after ~40 s; the
+runner then worked instantly. The 13b "environment class" attribution and
+the 13k lock-covariate refutation both now have their mechanism. Fix
+(lazy/off-main token load) stays owned by 13e per the row; TODAY's
+operational note: a first launch of any freshly built binary may sit
+windowless up to ~a minute — wait or click the Dock; approve any Keychain
+prompt with Always Allow.
+
+**FINDING GM-2 (first execution of the six batch-3 Mac-only pins + the
+suite): Mac 1202/210 ran fully — 12 issues = the allowed tripwire + TWO
+classes:** (a) NINE issues across "Fragments bridge wiring (9b)" ×3 tests
+and "Auth wiring (9c)" ×3 tests — all asserting the PRE-PAUSE bridge world
+(`pullCalls`/`calls > 0`, pausedDays reaching status) through the app
+composition, which now deliberately wires NO bridge key provider (the
+RULED pause; every round refuses before transport contact — the pause's
+own app-side zero-contact pin PASSES). The cadence/interleaving machinery
+those tests pin must stay pinned through the pause era (it guards the
+14c-era resumption) — fix: `AppServices` gains an injectable
+`makeBridgeKeyProvider` (production default unchanged: none → the
+refusing default), the six tests inject fixed bridge keys to keep their
+machinery pins, and the pause pin continues to assert the default
+composition refuses. (b) batch-3's OWN `aLockedProviderRefusesVisibly…`
+pin fails with dependency-context issues (`AppDatabase+Dependency.swift:95`,
+`UUID.swift:67`) — a test-authoring bug on first execution (never
+executable under the batch-3 hold); fix its dependency bootstrapping to
+the file's sibling-test pattern. The SPINE is GREEN (51/7). No product
+misbehavior in evidence; the wipe's green-but-tripwire precondition
+STANDS until these land.
+
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
-attempted overnight if the ladder closes clean):**
+attempted overnight if the ladder closes clean — steps 1–2 EXECUTED
+overnight, the record above):**
 1. A1 backup of her real store + a mirror export (belt-and-braces).
 2. Deploy `08_phase14b_lockstep.sql` (vault table + marker 5) — her go; the
    committed artifact verbatim; after-state verified (`sync_schema_version()`
@@ -1422,6 +2070,479 @@ attempted overnight if the ladder closes clean):**
 8. Disclosure list + warning wording ratified; her passphrase/phrase custody
    confirmed; the pause's END remains HER call (14c still ahead).
 
+### Gate-morning fix record (2026-08-04 — the GM-2 fix session; one commit)
+
+**Scope held to GM-2 exactly: five files, zero `Sources/VariorumCore/`
+lines (verified on the diff), production composition byte-unchanged except
+the added defaulted parameter.**
+
+- **Fix 1 — the bridge-pause test seam.** `AppServices.init` gains
+  `makeBridgeKeyProvider: (() -> any BridgeKeyProviding)? = nil` (the
+  `makeSyncKeyProvider` pattern); `connectBridgeIfAllowed` passes
+  `makeBridgeKeyProvider?() ?? UnenrolledBridgeKeyProvider()` — nil (every
+  production caller) composes byte-identically to the pre-seam default:
+  the engine's refusing provider, the RULED pause. App-test side:
+  `AppTestBridgeKeyProvider` (Phase8ServicesTests.swift, beside
+  `AppTestKeyProvider` — the core `BridgeTestKeys` world is not visible in
+  the Mac target). The six tests, per-test:
+  - `bridgeRoundsFollowSyncRoundsNeverInterleaving` — engine construction
+    gains the fixed provider; the ordering pin observes real rounds again.
+  - `cadenceTriggersAreThrottledToTheMinimumInterval` — same injection;
+    the throttle counts rounds that reach the transport.
+  - `pausedDaysReachTheSessionStatus` — same injection; the pause refuses
+    BEFORE the day sweep, so without keys no pausedDays ever surfaced.
+  - `fragmentsSignInConfiguresTheBridgeAndDisconnectStopsIt` /
+    `theLifecycleCadenceReachesTheBridgeWhenSyncIsOff` /
+    `theLifecycleCadenceStillNeverInterleavesWhenSyncIsOn` — the 9c
+    `withWiredServices` helper passes
+    `makeBridgeKeyProvider: { AppTestBridgeKeyProvider() }` through the new
+    seam; the fence pins in the same file (`devStoreSessionsStayFenced…`,
+    `theBridgeStaysDownWhereItIsNotEnabled`) still assert zero contact and
+    still pass (the fence refuses configure before keys matter).
+  None of the six inspects payloads — call accounting only, so the fixed
+  keys are all they needed. The pause's own zero-contact pin
+  (`theDefaultProviderRefusesEveryRoundBeforeAnyTransportContact`,
+  core-side, against the engine's default) is untouched and still guards
+  the default composition.
+- **Fix 2 — the locked-face pin's dependency bootstrapping.**
+  `aLockedProviderRefusesVisiblyBeforeAnyTransportContact` wraps its body
+  in the wiring suites' standard `withDependencies` bootstrap
+  (`$0.database` / `$0.uuid` / `$0.date` — the Phase 8/9b pattern; the
+  round runs through SyncScheduler/SyncEngine, whose `@Dependency`
+  reads were the recorded `AppDatabase+Dependency.swift:95` /
+  `UUID.swift:67` issues). Assertion content unchanged: locked provider ⇒
+  classified visible refusal + zero transport contact.
+
+**Acceptance (all waited on synchronously, this session):**
+- Mac (full, `-project` invocation): **"✘ Test run with 1202 tests in 210
+  suites failed after 148.224 seconds with 1 issue."** — the one issue is
+  the standing tripwire BY IDENTITY
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`),
+  nothing else red. (No GM-1 preparing-timeout this run.)
+- Spine: **"✔ Test run with 51 tests in 7 suites passed after 13.942
+  seconds."**
+- Core (`swift test`, untouched-core proof): **"✔ Test run with 1153 tests
+  in 124 suites passed after 31.433 seconds."**
+
+**Deliberately not touched:** `fencedSessionsNeverConfigureTheBridge` (9b)
+keeps the engine default — it was never failing and its zero-calls
+assertion rides the session-level configure refusal, not the keys gate;
+noted for the architect only because its engine now models the paused
+composition. **The wipe's green-but-tripwire precondition is now MET.**
+
+### The crossover adjudication (the FRESH architect, 2026-08-04 — the
+### incoming seat's verification of the landed round, the re-verify
+### mandate's verdicts, the PROVISIONAL dispositions, and the folded
+### CF-14/15/16 rows; the architect handoff file is the cutover's entry
+### point, THIS file remains the one running record)
+
+**The landed round, verified (verify-don't-trust, own evidence):**
+- Tree clean at `a9b00fd`, pushed; the four commits (`969ff83` ·
+  `6233274` · `6522abe` · `a9b00fd`) match their messages.
+- **Scope re-proven on the diff:** `git diff af32293..a9b00fd` = exactly
+  the four App-side files + the two notes files; `-- Sources/` EMPTY
+  (zero core, zero `Sync/`), `-- Server/ Vendor/` EMPTY.
+- **All three shipped files read in full** against the eight brief items —
+  every item present as recorded; the copy statics byte-match the record's
+  verbatim block; the failed-create/failed-land keep-the-entry deviations
+  verified at their sites (`EncryptionViews.swift` clears only on
+  `lastError == nil`).
+- **Suites re-run by this seat:** core **1156/124 PASSED** (the corrected
+  baseline confirmed — GM-3's second commit accounts for the +1) · Mac
+  **1211/212, the standing TakePane tripwire the ONE red, BY IDENTITY**
+  · mobile **173/25 PASSED** + TEST SUCCEEDED · spine **51/7 PASSED**.
+  (Run lines in this seat's session; the implementer's claims all held.)
+- The test accounting re-derived: 8 `CopyFlowRoundTests` (7 round pins +
+  the step-0 addendum) + 1 `TerminologyPinTests` = 1202 → 1211 exact.
+
+**HER RE-VERIFY MANDATE — the four cutover answers re-derived from the
+code by this seat (file:line evidence; verdicts as she asked):**
+- **Q1 — CONFIRMED.** `EncryptionSession.refresh()`
+  (EncryptionSession.swift:96–124): a missing vault maps to `.noVault`
+  regardless of custody (:107); vault + custody → `.enrolled`; vault +
+  no custody → `.notEnrolled` (or `.enrolledLocked` under the biometric
+  gate — the round's addition). So CF-11's forget door reaches
+  ENROLLMENT, never SETUP; walking the stepped setup live requires the
+  vault row gone — exactly the re-key drill. The A4-fence half also
+  confirmed: a dev-store session renders "Sync off (dev store)" with no
+  sign-in door (SyncStatusViews.swift:35–40) and the Encryption door is
+  gated on `sync.allowsSync` (:93) — no scratch-account walk without
+  weakening the fence.
+- **Q2 — CONFIRMED.** The drill IS CF-8's machinery rehearsed: the vault
+  row delete (admin road) + the committed truncate artifact
+  (`Server/supabase/maintenance/14b-mirror-truncate.sql`, on disk,
+  registry-pinned) + `resyncReinitialize`/`vault-bootstrap` (L10). What
+  14c owes is the in-app door + guard rails, as recorded.
+- **Q3 — CONFIRMED, both halves.** Forget-on-Mac-only leaves the phone
+  untouched (the vault is unread by it; her passphrase change already
+  proved the cross-device independence live). A full RE-KEY leaves the
+  phone's ACCOUNT session intact (auth custody and key custody are
+  separate Keychain services by design — EncryptionKeychain.swift's
+  header states it; 9c's pattern) but its class keys STALE: custody
+  pins `corpusKeyID` (DeviceKeyMaterial, VaultEnrollment.swift:17) and
+  `PayloadCipher`'s AAD binds the key id, so new-key ciphertext fails
+  `authenticationFailed` → the round refuses `payloadCryptoFailure`.
+  And the CF-16 gap is REAL: refresh() decides "enrolled" by
+  `store.load() != nil` ALONE (EncryptionSession.swift:105) — no key-id
+  comparison against the fetched vault exists anywhere in the file. A
+  re-keyed account's stale device reports "This device holds your
+  encryption keys" while its rounds fail generically.
+- **Q4 — CONFIRMED, with the round's update.** After a re-key the phone
+  needs forget → re-enroll with the new passphrase; before this round NO
+  path existed (sign-out keeps custody by design; iOS Keychain survives
+  reinstall). CF-11's door NOW SHIPS on both form factors through the
+  shared seam — the round built exactly the missing path.
+- **One precision (not a correction):** the substitute seat's CF-15 line
+  numbers verify exactly (`SyncStatusViews.swift:45–47` isSyncing branch
+  vs :78–87 idle branch; the Encryption door's independent `if` at :93).
+
+**Architect dispositions — the round's PROVISIONALs/deviations (adjudicated
+against the spec docs + the friction doctrine; her walk may overrule any):**
+- *CF-2's retired confirmation dialog* — **ACCEPTED.** The passphrase gate
+  IS the deliberateness ceremony; stacking a second dialog on it is P-5's
+  over-gating shape. CF-2's complaint was the missing gate, not a missing
+  dialog. Hers to reverse at the walk.
+- *Forget clears the biometric gate with custody* — **ACCEPTED.** The
+  gated item IS the policy record; a surviving orphan flag after a
+  custody-total wipe is exactly the drift class the design kills.
+- *The locked section offers the full unlock roads* — **ACCEPTED.** Her
+  ruling's letter ("biometric or the passphrase"), and a forgot-passphrase
+  user must never be stranded behind a gate their written phrase opens.
+- *Step 4 auto-generates on appear* — **ACCEPTED.** CF-5's "the setup
+  shouldn't work if you don't" reads as: the step IS the phrase; a
+  declinable Generate button would re-open the optional look she ruled out.
+- *Failed-create keeps the entry / failed-land keeps the words* —
+  **ACCEPTED, the second commended:** the words-survive-a-failed-land rule
+  closes a real wrote-down-the-wrong-phrase trap (a network blip between
+  display and land would have silently re-minted different words).
+- *iOS renders the checkbox as the native switch* — **ACCEPTED** (macOS
+  keeps the literal checkbox; "checkbox" is platform-idiomatic, not
+  byte-literal).
+- *The terminology pin walks comments too* — **ACCEPTED** (it caught its
+  own first offender live; a comment is where the word creeps back in).
+- *The held item (the sync row's locked line says "passphrase" even when
+  the lock is the biometric gate)* — **STAYS HELD for her walk.** CF-15's
+  ruling covers button stability, not this wording; minting new copy for
+  it unasked would be inventing product behavior. One line if she wants it.
+- *The step-0 addendum pin* — **ACCEPTED; the drill is step-0-safe.** The
+  forget-then-set-up alternative is NOT taken: the pinned wholesale
+  overwrite is clean, and the drill's own step 2 clears custody through
+  the forget door anyway.
+
+**THE CF-14/15/16 ROWS — folded from the architect handoff into this
+ledger (they were recorded there to avoid a write race with the then-
+running implementer; the handoff's fuller prose remains the provenance):**
+- **CF-14 — RULED (her UI call): the Encryption surface folds UNDER the
+  Account button as a TAB**, not a sibling door ("account will one day
+  show payment"). Both form factors through the shared seam; the sync
+  row's separate "Encryption…" button retires into it; the LOCKED state's
+  "Unlock…" door stays reachable in place (the fix-naming refusal's own
+  affordance — never buried).
+- **CF-15 — RULED: the sync row's buttons must not move.** The
+  `isSyncing` branch replaces the row's content, so "Sync now"/"Account…"
+  vanish and reappear every round (mechanism confirmed at
+  SyncStatusViews.swift:45–47 vs :78–87). "Sync now" merely DISABLES
+  while a round runs (the progress indicator may show beside the label);
+  both platforms fix at once (MobileSettingsView embeds the same shared
+  row). Pin: a syncing-state assertion that both buttons are present and
+  "Sync now" is disabled.
+- **CF-16 — the stale-key blindness, CONFIRMED above (Q3): ships in the
+  crossover round, BEFORE her drill (her sequencing — the drill's step 3
+  creates exactly this state on the phone and thereby VALIDATES it).**
+  `refresh()` compares custody's `corpusKeyID`/`journalBridgeKeyID`
+  against the fetched vault's class-key ids; a mismatch projects a
+  distinct REPLACED state (copy shape: "This account's encryption keys
+  were replaced. Enter your passphrase to re-enroll.") whose road is
+  ordinary re-enrollment (the enroll save overwrites custody wholesale —
+  the step-0 pin's proven class). The app-side classifier may also name
+  the engine's `payloadCryptoFailure` refusal toward the same door
+  (App-layer only — ZERO `Sync/` lines).
+
+### THE CROSSOVER ROUND — brief (CF-14/15/16; a fresh Fable implementer;
+### the cold pass covers this diff + the landed copy/flow diff together)
+
+1. **CF-16 FIRST** (the drill validates it): the key-id comparison in
+   `refresh()`, the replaced-state projection + copy, the re-enroll road,
+   and the app-side classifier line for the crypto-failure refusal.
+   Pins: replaced-state projection red-on-old (a vault with fresh key ids
+   over stale custody currently reads `.enrolled` — that is the old
+   behavior to pin against); the re-enroll-overwrites arm; the classifier
+   arm.
+2. **CF-14**: the Account sheet gains tabs (Account · Encryption — the
+   shared-seam AccountView/EncryptionView composition); the sync row's
+   "Encryption…" button retires; "Unlock…" under the locked state stays
+   in place and opens the Encryption tab directly. Both form factors.
+   Pin: the locked state still reaches the unlock surface in one act.
+3. **CF-15**: the sync row's syncing state keeps "Sync now" (disabled) +
+   "Account…" in place; the progress indicator rides beside the label.
+   Pin: syncing-state presence + disabled assertions (the ruled shape).
+Boundaries: zero `Sources/VariorumCore/Sync/` lines; zero schema/server/
+production contact; core additive-only if genuinely needed (record why);
+nothing beyond the three items. Acceptance: core + full Mac suite
+(tripwire-only) + mobile + spine, own runs, synchronous waits, repo-first
+record before long runs.
+
+### Crossover round — record (implementer session, 2026-08-04)
+
+**Commit: `910d30d`** — implementation + pins as ONE coherent diff
+(589 insertions / 170 deletions), five files, ALL App-side:
+`App/Variorum/Shared/EncryptionSession.swift` · `EncryptionViews.swift` ·
+`AuthViews.swift` · `SyncStatusViews.swift` ·
+`App/Variorum/VariorumTests/EncryptionFlowTests.swift`. **Scope proof:**
+zero `Sources/VariorumCore/` lines (the brief's additive-with-reasons
+carve was never needed — the key ids the comparison reads are already on
+`DeviceKeyMaterial` and `KeyVaultFormat.classKey(for:)`, both public);
+zero `Sync/`, zero schema/server, no production or dashboard contact, no
+`.env*` reads, no new dependencies, the bridge untouched. No push (the
+architect pushes after verification).
+
+**The three items:**
+
+1. **CF-16 (built FIRST, per the brief — her drill validates it).**
+   - `EncryptionSession.VaultState` gains **`.keysReplaced(hasRecoveryWrap:)`**;
+     `refresh()` now decides the custody arm by
+     `custodyMatchesVault(custody, vault.format)` — a nonisolated pure
+     static comparing custody's `corpusKeyID`/`journalBridgeKeyID`
+     against the fetched vault's class-key ids (a vault missing either
+     class entry counts as mismatch). Match ⇒ `.enrolled`; mismatch ⇒
+     the honest REPLACED state. The projection itself touches nothing —
+     custody is replaced only by the re-enroll save.
+   - The surface renders the state with the RULED copy byte-exact
+     (`EncryptionView.keysReplacedExplanation` = "This account's
+     encryption keys were replaced. Enter your passphrase to
+     re-enroll."), one caption in the standing refusal grammar ("The
+     keys this device holds were replaced after it enrolled — sync stays
+     paused until you re-enroll; nothing is lost while paused."), and the
+     ORDINARY unlock roads (the shared `unlockRoads` — passphrase +
+     the phrase reveal when the new vault carries a wrap). The enroll
+     save overwrites custody wholesale — verified myself on the arm:
+     `enroll(passphrase:)` → `adopt` → `store.save`, which is
+     `SecItemUpdate` on the plain item / `saveGated` under a gate; the
+     step-0 pin's proven class, now re-pinned from the replaced state.
+   - **The classifier arm (App-layer only):**
+     `EncryptionSession.isPayloadCryptoError(_:)` — true for the
+     engine's `payloadCryptoFailure` refusal as the scheduler surfaces
+     it. Its description carries row coordinates, so unlike the
+     exact-match `isKeysLockedError` it anchors on the description's two
+     invariant segments (`"Sync refused: '"` prefix + `"failed to
+     encrypt/decrypt ("`), a conjunction that excludes the other
+     "Sync refused:" case (`unencryptedValueInEncryptedColumn`, never a
+     stale-key state). The row presents the classified refusal as
+     `SyncStatusRow.keysReplacedLabel` ("Sync paused — this account's
+     encryption keys were replaced") with a "Re-enroll…" door opening
+     the Encryption tab directly.
+   - **Documented boundary (not a gap):** a biometric-gated launch that
+     hasn't unlocked cannot be compared (custody is unreadable), so it
+     stays `.enrolledLocked`; the mismatch surfaces at the first
+     post-unlock refresh, and the row's classifier names the refusal
+     meanwhile. Stated in the refresh() comment.
+
+2. **CF-14.** `AccountView` gains TABS — **Account · Encryption** — as a
+   plain segmented control, both form factors through the one shared
+   seam (`AccountTab` is top-level + nonisolated so the row's pure face
+   model names a door's target tab as data;
+   `init(services:initialTab:)` defaults to `.account`, so RootView's
+   existing site compiles unchanged). `EncryptionView` becomes the
+   Encryption TAB'S CONTENT — its own chrome (header row, Close,
+   ScrollView, padding, macOS frame) moves to the sheet level; its
+   `.task { refresh() }` rides the tab so selecting it projects fresh
+   state. The sync row's separate "Encryption…" button RETIRES; the
+   LOCKED state's "Unlock…" stays in place and opens the Encryption tab
+   in ONE act (`openAccount(.encryption)` — the refusal's own
+   affordance). The row's two sheets collapse to one
+   `sheet(item: $accountSheetTab)`.
+
+3. **CF-15.** The row is rebuilt to render from **`SyncRowFace`** — a
+   nonisolated pure model (kind + doors) the pins assert at the state
+   level; the view mints NO doors of its own, so the pinned shapes and
+   the shipped row cannot diverge (the P-1 doors-as-data shape, applied
+   at the row's scale). The `isSyncing` branch now returns kind
+   `.syncing` with **"Sync now" present-but-disabled + "Account…"
+   present**; the progress indicator rides beside the "Syncing…" label.
+   All other faces keep their previous doors and wording verbatim
+   (devStore/signedOut/syncOff/offline/locked/error/idle); the
+   `ErrorCauseNote` renders exactly for the `.error` kind, as before
+   (locked and replaced carry their own lines — the cause IS the line).
+   Both platforms fix at once (MobileSettingsView embeds the same
+   shared row; the mobile test bundle builds green against the diff).
+
+**The hallucination guard — FOUR behavioral reverts, each run against
+the pins, each red on its finding's exact mechanism, each restored (the
+5-suite encryption family re-run green after restoration — 22 tests):**
+
+1. *CF-16a* (refresh()'s custody arm reverted to the pre-fix
+   custody-exists-alone `.enrolled`): both CF-16 pins failed —
+   `session.state → .enrolled(hasRecoveryWrap: false)` where
+   `.keysReplaced` is required — the false-enrolled blindness verbatim.
+2. *CF-16c* (`isPayloadCryptoError` → constant false, the pre-round
+   state): the classifier pin failed on both positive arms AND the row
+   pin showed the refusal falling to the generic error face
+   (`face.kind → .error`, doors Retry/Account…) — exactly the
+   fails-generically shape the classifier closes.
+3. *CF-15* (the face's `isSyncing` branch reverted to the old
+   replace-the-content shape, `doors: []`): the pin failed all three
+   assertions — `syncNow → nil`, no Account… — the vanishing buttons.
+4. *CF-14* (the locked door's target reverted to `.openAccount(.account)`
+   — Encryption buried behind a second act): the one-act pin failed on
+   the doors equality, naming the buried target in the failure output.
+
+**Test accounting:** 7 new tests in 1 new suite
+(`CrossoverRoundTests`, in `EncryptionFlowTests.swift`): the CF-16a
+projection pin · the CF-16b re-enroll-overwrites pin · the CF-16c
+classifier pin · the replaced-row face + ruled-copy byte pin · the
+CF-15 syncing-stability pin · the CF-14 one-act pin · the CF-14
+retirement sweep (idle doors exact + no face anywhere mints an
+"Encryption…" door + every encryption-targeted door belongs to
+locked/replaced). Expected full-suite lines: Mac **1211 + 7 = 1218 /
+213 suites** (the standing TakePane tripwire the ONE allowed red) ·
+core **1156/124 unchanged** (zero core lines) · mobile **173/25
+unchanged** (shared files recompile; no new mobile tests) · spine
+**51/7**.
+
+**PROVISIONALs / deviations (each with reasons):**
+
+- **PROVISIONAL (the sheet's one dismissal):** the tabbed Account sheet
+  keeps ONE borderless "Close" in the header row (the CF-1 grammar) and
+  the old bottom "Done" with `.keyboardShortcut(.defaultAction)` is
+  RETIRED. Reason: a defaultAction "Done" on the combined sheet would
+  sit beside the Encryption tab's acts — CF-1's exact ambiguity
+  re-created — and two dismissal controls with two words on one sheet is
+  the incoherence class CF-2 was about. Options: (a) Close-only (built);
+  (b) keep Done on the Account tab alone (two grammars, one sheet);
+  (c) Done everywhere (re-opens CF-1). Hers to reverse at the walk.
+- **PROVISIONAL (the replaced ROW wording):** `keysReplacedLabel`
+  ("Sync paused — this account's encryption keys were replaced") and the
+  door label "Re-enroll…" are derived from CF-16's ruled surface copy —
+  the ruling specified the SURFACE sentence, not the row's. Same class
+  as the held locked-line wording (the adjudication's stays-held item);
+  one line each if her walk wants different words.
+- **PROVISIONAL (the replaced caption):** one secondary line under the
+  ruled headline, composed from the standing refusal grammar ("nothing
+  is lost while paused"). Reason: the honest state should say WHY (the
+  re-key happened after this device enrolled) without inventing new
+  vocabulary.
+- **Deviation (the macOS sheet floor):** the Account sheet's Mac minimum
+  is now 460×340 (the pre-tabs EncryptionView floor) superseding
+  AccountView's 440 — the sheet must fit its wider tab. The iPhone
+  no-forced-width rule (R1-2) is preserved.
+- **Deviation (`isKeysLockedError` marked nonisolated):** required so
+  the nonisolated face model can consult it; call-compatible from every
+  existing site (MainActor callers included), zero behavior change.
+- **Held, unchanged:** the locked line's "passphrase" wording under a
+  biometric gate (the adjudication's stays-held item) — untouched, still
+  hers at the walk.
+
+**Environment notes:** her real-store instance
+(`/Applications/Variorum.app`, PID observed at session start) ran
+throughout — never touched; no Release build, no `/Applications`
+refresh. All runs from the `App/Variorum` `-project` invocation; no
+GM-1 preparing-timeout occurred in any run this session.
+
+**Acceptance (own runs, all waited synchronously, verbatim lines —
+FINALIZED post-record per the repo-first rule):**
+- Core `swift test` (repo root): **"✔ Test run with 1156 tests in 124
+  suites passed after 32.523 seconds."** — baseline exact (zero core
+  lines this round).
+- Full Mac suite (`-project` invocation): **"✘ Test run with 1218 tests
+  in 213 suites failed after 156.909 seconds with 1 issue."** — the one
+  issue is the standing tripwire BY IDENTITY
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`,
+  its own known assertion at TakePaneMeasureTests.swift:612), nothing
+  else red; 1211 + this round's 7 in 1 new suite = 1218/213, exactly
+  accounted.
+- Mobile (iPhone 17 Pro sim): **"✔ Test run with 173 tests in 25 suites
+  passed after 4.803 seconds."** + ** TEST EXECUTE SUCCEEDED **
+  (test-without-building's success line) — baseline exact.
+- The spine (the seven Tutorial suites, dedicated run): **"✔ Test run
+  with 51 tests in 7 suites passed after 14.692 seconds."**
+- Already run before this record: the 5-suite encryption family
+  (Encryption/CopyFlow/Crossover/Terminology/LockedFace) — "✔ Test run
+  with 22 tests in 5 suites passed"; Mac `build-for-testing` ** TEST
+  BUILD SUCCEEDED **; mobile `build-for-testing` against the shared
+  changes ** TEST BUILD SUCCEEDED **.
+
+### Crossover round — the architect's verification + dispositions (2026-08-04)
+
+**Verified (own evidence):** tree clean, the two commits match their
+claims; `git diff 4eb5eee..HEAD -- Sources/ Server/ Vendor/` EMPTY (zero
+core, zero `Sync/`, zero schema/server — the brief's boundaries held);
+all four touched shipped files READ IN FULL by this seat against the
+three items — the CF-16 comparison, the classifier's two invariant
+segments checked against `SyncError`'s actual description strings (the
+conjunction excludes `unencryptedValueInEncryptedColumn` exactly as
+claimed), the rebuilt row's faces checked door-for-door and
+word-for-word against the pre-round branches (all preserved), the
+`.task { refresh() }` confirmed surviving on the tab content. **Suites
+re-run by this seat (the verification pass), all four reproducing the
+implementer's lines exactly:** core "✔ 1156 tests in 124 suites passed"
+· Mac "✘ 1218 tests in 213 suites … 1 issue" with the one red confirmed
+BY IDENTITY from the result bundle
+(`aStrandedRenderTierIsRebuiltByAConvergenceOccasion` — the standing
+tripwire, nothing else) · mobile "✔ 173 tests in 25 suites passed" +
+TEST SUCCEEDED · spine "✔ 51 tests in 7 suites passed".
+
+**Dispositions (each PROVISIONAL adjudicated; her walk may overrule):**
+- *The sheet's one borderless Close (Done retired)* — **ACCEPTED,
+  option (a).** CF-1's grammar applied whole; a defaultAction beside the
+  Encryption tab's acts re-creates CF-1's exact ambiguity, and two
+  dismissal grammars on one sheet is the incoherence class. Hers at the
+  walk.
+- *The replaced ROW wording + "Re-enroll…" door label* — **ACCEPTED as
+  most spec-defensible** (the ruling specified the surface sentence, not
+  the row's). Joins the held locked-line wording as ONE walk item: the
+  sync row's two E2EE line wordings, presented to her together.
+- *The replaced caption* — **ACCEPTED** (standing refusal grammar,
+  states the why, invents no vocabulary).
+- *The macOS sheet floor 460×340* — **ACCEPTED** (mechanical: the sheet
+  fits its widest tab; the iPhone no-forced-width rule preserved).
+- *`isKeysLockedError` nonisolated* — **ACCEPTED** (call-compatible,
+  zero behavior).
+- *The biometric-locked comparison boundary* — **ACCEPTED as a
+  documented boundary, and the only correct shape:** gated custody is
+  unreadable without a prompt, and `refresh()` must never prompt (the
+  GM-1 stall class; prompting at sync cadence is the recorded
+  anti-pattern). The mismatch surfaces at first post-unlock refresh and
+  the classifier names the refusal meanwhile — honest at every moment.
+
+### THE COLD PASS (L20 — 2026-08-04; fresh Fable reviewer, REVIEW_PROMPT
+### verbatim, zero framing; findings + architect dispositions + the fix
+### evidence; NO BLOCKER, NO MAJOR ⇒ the single pass closes with its fixes —
+### no re-review round owed under the ladder rule)
+
+**Verdict: 3 MINOR + 4 NIT, extensive clean bill.** The reviewer
+reproduced the suites itself (core 1156/124; the 22-test encryption
+family), re-proved the inland zero-diff on its own git evidence
+(Merge/Repairs/transports/Scheduler + Operations/Domain/Queries/
+Persistence/Models all EMPTY across the phase), verified the crypto
+anchors (RFC 9106 KAT, BIP-39 vectors, RFC 3394 refusals, the AAD
+joiner's unambiguity), and checked the mobile flow notes' claims against
+the shipped code (accurate). Findings + dispositions:
+
+| # | Sev | Finding (condensed) | Disposition |
+|---|-----|---------------------|-------------|
+| C-1 | MINOR | Synchronous Keychain I/O on the MainActor at settings-surface cadence (`EncryptionSession` refresh/adopt/forget/toggle → sync `SecItem*`) — the GM-1 securityd-stall family with new call sites; impact bounded (beachballs the open sheet if securityd stalls; never launch, engine reads off-main unaffected) | CONFIRMED — **routed to the standing 13e windowless/GM-1 KnownIssues row** (same securityd family; one fix shape covers `AuthSession.init`'s launch-time load AND these settings-cadence hops; the reviewer's Thread-recording pin shape noted on the row). Post-cold-pass churn in the exact surface her drill walks, for a bounded stall, loses to batching with 13e's identical fix. |
+| C-2 | MINOR | SyncSpec describes a plaintext wire that no longer exists; §12's running record is TWO lockstep events behind (13b's 3→4 was never recorded; 14b's 4→5 absent); AppSpec §14 has no 14b delta yet | CONFIRMED — a **must-not-miss closeout manifest** (canonical-doc deltas ride the ritual): the SyncSpec E2EE-seam delta + BOTH missing §12 entries (3→4 v1_12 · 4→5 key_vault) + the AppSpec §14 delta + R1-9's §7 sentence + R1-5's deviation note + R2-3's comment sweep. The 3→4 catch is the reviewer's own — nothing on the prior closeout list named it. |
+| C-3 | MINOR | The truncate→repush window admits a stale-device poison push (pull sees empty window → push rejects `current: nil` → rebase-to-0 → old-key ciphertext ACCEPTED onto the wiped mirror → wedges every pull) — safe under this phase's attended gate (her pause = one device; forget-first ordering), unrecorded as a 14c constraint | CONFIRMED — doc-class: the CF-8 record and the 14c kickoff draft both gain the fence sentence (a user-facing re-key must fence stale writers — vault-revision- or marker-class — BEFORE the truncate). No pin owed. |
+| C-4 | NIT | `PayloadCipher.foreignVersionPrefix` scanned with bare `Character.isNumber` — true for superscripts/fractions/non-ASCII numerals — silently widening the refusing class past the documented `e<digits>:`; load-bearing on the bridge (legacy pass-through rides `.notEncrypted` alone): a pre-handoff body starting "e²:" would refuse the round | CONFIRMED — **FIXED at the architect's hand** (the GM-3/R2-1 small-fix precedent): the scan is ASCII-only. **Red-on-old verified live:** the new bridge pin (`aNonASCIINumeralBodyLandsAsLegacyPlaintextNotAVersionRefusal`) RED under the bare-`isNumber` behavioral revert ("✘ 1 test … 1 issue"), green restored. Core-line change recorded with reasons (the round boundary's additive-with-reasons carve, spent here). |
+| C-5 | NIT | `EncryptionSession.isEnrolled` dead code (declared, zero references) | CONFIRMED — removed (grep-verified: one hit, its own declaration). |
+| C-6 | NIT | The KDF's off-main guarantee rests on VariorumCore NOT adopting the App target's concurrency flags — a future Package.swift hygiene commit would silently move the 0.16–0.6 s derivation onto the caller's MainActor with no failing test | CONFIRMED — **the tripwire built**: `theKDFDerivationRunsOffTheCallersMainActor` (a `@MainActor` test driving `setUp` and asserting the derivation thread was never main; its comment names `@concurrent` as the fix if it ever fires, not deleting the pin). |
+| C-7 | NIT | Ledger row L19 stale ("pending" after the mobile notes file landed) | CONFIRMED — row corrected below. |
+
+**The fix pass (architect-direct — the tiny-scope precedent; every
+behavior fix traced + revert-verified):** PayloadCipher ASCII-only scan ·
+the bridge red-on-old pin · `isEnrolled` removed · the KDF thread
+tripwire · the KnownIssues 13e-row append (C-1) · the ledger rows.
+Test accounting: core +2 (the bridge pin · the KDF tripwire) ⇒ expected
+**1158/124**; Mac unchanged in count (a dead declaration removed) ⇒
+**1218/213 tripwire-only**; mobile/spine baselines exact.
+**Acceptance LANDED (all four, own runs):** core "✔ 1158 tests in 124
+suites passed" · Mac "✘ 1218 tests in 213 suites … 1 issue" — the one
+red confirmed BY IDENTITY from the result bundle as the standing
+tripwire · mobile "✔ 173 tests in 25 suites passed" · spine "✔ 51 tests
+in 7 suites passed". **The post-cold-pass tree is the phase's FINAL
+code** (her drill + closeout remain; the closeout's doc deltas touch no
+code).
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
@@ -1439,9 +2560,15 @@ attempted overnight if the ladder closes clean):**
 | L11 | Bridge journal-class capability (paused) + touchpoint #2 concrete facts | **done — batch 3** (`80a6e5e`; the STRUCTURAL pause via the refusing default provider; AAD = journal_entries:<date>:body:<key_id>; the legacy-plaintext land rule PROVISIONAL; 105/9 bridge suites green over ciphertext + 7 pins, four arms revert-verified; contract block additive) |
 | L12 | Phone KDF latency measured (R-7's condition) | **done — batch 3** (SIMULATOR 0.686 s, recorded as NOT the device number; the flow surfaces its own on-device number for the gate's step 5) |
 | L13 | Disclosure list + warning wording for her ratify | **done — batch 3 → gate** (the GATE RATIFY block above the ladder section) |
-| L14 | The ladder (combined diff) | pending |
-| L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | pending — her go per step |
+| L14 | The ladder (combined diff) | **done — CLOSED at round 2** (R1: 1 MAJOR + 3 MINOR + 5 NIT all fixed revert-verified; R2: every disposition holds, zero new HIGH) |
+| L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | steps 1–6 **done** (A1+export · 08 deployed marker 5 · her vault · wipe+repush+live dump proof · phone enrolled 0.16 s · phrase drill light road); step 7 refresh + step 8 ratifies ride the crossover tail (L21) |
 | L16 | MobileSoul PL-6 updated at design time (done this sitting) + closeout parity line | PL-6 written; closeout line owed |
+| L17 | The copy/flow round (CF-1…CF-13 + biometric) | **done** (`969ff83`+`a9b00fd`; 8+1 pins, five behavioral reverts; verified + adjudicated by the crossover architect — the adjudication section above) |
+| L18 | The crossover round (CF-14 · CF-15 · CF-16) | **done** (`910d30d`+`2f8249b`; 7 pins, four behavioral reverts; verified + adjudicated by the architect — the verification/dispositions section above; Mac 1218/213 tripwire-only reproduced by both seats) |
+| L19 | The mobile flow notes file (her coordination deliverable) | **done** (`4eb5eee` — `notes/plans/phase-14b-mobile-flow-notes.md`; PL-6 points at it; the cold pass verified its claims against the shipped code; her handover prompt delivered) |
+| L20 | ONE cold pass over the copy/flow + crossover diffs (REVIEW_PROMPT verbatim) | **done** (NO BLOCKER/MAJOR — 3 MINOR + 4 NIT, the section above; C-4/C-5/C-6/C-7 fixed at the architect's hand revert-verified, C-1 routed to 13e's row, C-2/C-3 on the closeout manifest) |
+| L21 | HER ACCEPTANCE: the full re-key drill (runbook in the architect handoff; step 0 PINNED green) + the disclosure ratify + the `/Applications` refresh | pending — her go per step |
+| L22 | Closeout ritual in full (incl. the 14c kickoff draft) | pending |
 
 ## Environment traps (carried into every batch brief, per the skill)
 
