@@ -38,13 +38,55 @@ What remains is the copy/flow round, one cold pass, her walk, and closeout.
 - **Her passphrase file is DELETED** (spent + stale). The live passphrase
   exists only in her head. **No secret material is available to any
   session — every future runner invocation needs her to supply it.**
-- **Counts at cutover:** core 1155/124 · Mac 1202/210 (the standing
+- **Counts at cutover:** core **1156**/124 (corrected — see the UPDATE
+  block above) · Mac 1202/210 pre-round, **1211/212 after it** (the standing
   `TakePaneMeasureTests` tripwire the ONE allowed red) · mobile 173/25 ·
   spine 51/7. **Never re-run at session start.**
-- **HEAD at cutover:** `af32293`, pushed. Working tree carries the running
-  implementer's UNCOMMITTED copy/flow-round edits (see below).
+- **HEAD:** `a9b00fd`, pushed, tree clean (the round landed — see the
+  UPDATE block above).
 
-## THE RUNNING IMPLEMENTER (handle FIRST) — ALIVE, AUTHOR-DIRECTED
+## ⚑ UPDATE (2026-08-04, after this file's first draft): THE ROUND LANDED
+
+The copy/flow implementer **finished, committed, and wrote its extra-complete
+record** exactly as she directed — then the retiring seat verified its scope
+and **pushed** (it deliberately left the push to the architect). HEAD is now
+**`a9b00fd`**, tree clean, pushed.
+
+- **Its four commits:** `969ff83` the CF build + 8 pins in 2 new suites ·
+  `6233274` the repo-first record · `6522abe` acceptance finalized ·
+  `a9b00fd` the step-0 drill pin + addendum. Its full record is
+  `### Copy/flow round — record` in the plan file — read that, not this
+  summary.
+- **Retiring seat's own checks (not a substitute for yours):** tree clean;
+  `git diff af32293..HEAD -- Sources/` **EMPTY** (core untouched, zero
+  `Sync/` lines as required); its commits are real and match their messages.
+- **A baseline correction it caught, and it is RIGHT:** this file's "core
+  1155" is stale by one. GM-3 landed in two commits; the retiring seat
+  recorded the count after the first (`2b3a03c`) and never re-ran after the
+  second (`29cfd94`) added `dropsWithProgressNeverExhaustTheBound`. **The
+  true inherited core baseline is 1156/124**, with zero core tests from the
+  round. Verified by the retiring seat: that commit does add exactly one
+  test. Use 1156.
+- **Its acceptance lines:** core 1156/124 · **Mac 1211/212 with the standing
+  TakePane tripwire as the only issue** · mobile 173/25 · spine 51/7.
+  **Verify these yourself before relying on them** (verify-don't-trust).
+- **It answered the drill's step 0 for you:** it pinned that a vault deleted
+  while custody survives reads as `.noVault`, the stepped setup proceeds, and
+  `setUp()` **overwrites stale custody wholesale** (fresh material, fresh
+  corpus key id, the provider serving the new key). **The drill is
+  step-0-safe**; the handoff's forget-then-set-up alternative is now a taste
+  choice, not a safety requirement.
+- **It did NOT build CF-14/15/16** (never in its brief — this file's rows
+  post-date it). Those, the mobile flow notes, the cold pass, her drill, and
+  closeout are yours.
+- **Its PROVISIONALs and deviations are listed in its record** and need your
+  dispositions — notably: the retired regenerate confirmation dialog, forget
+  clearing the biometric gate with custody, step 4 auto-generating, a failed
+  create keeping the entry, and (a genuinely good catch) a failed *land*
+  keeping the displayed words so nobody writes down a phrase that never
+  became real.
+
+## THE RUNNING IMPLEMENTER — the instruction as issued (now historical)
 
 A copy/flow-round implementer was spawned from the retired session with the
 plan file's round brief. **It is STILL RUNNING** — the author can see it
@@ -219,8 +261,9 @@ it over whole, and record the row in `notes/MobileSoul.md`'s ledger (PL-6).
 
 ## REMAINING WORK, IN ORDER
 
-1. **Verify what the running implementer landed** (verify-don't-trust; the
-   section above), and finish anything its round left open.
+1. **Verify what the implementer landed** (verify-don't-trust; the UPDATE
+   block above), and **disposition its PROVISIONALs and deviations** from
+   its record.
 2. **Finish the COPY/FLOW ROUND** — the plan file's round brief (CF-1…CF-13
    + the biometric mini-batch) PLUS CF-14/15/16 above (which the running
    implementer never received). Her governing principle is CF-10 (first real
