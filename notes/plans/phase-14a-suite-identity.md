@@ -1237,6 +1237,23 @@ suites); red-on-old pins verified both directions.
   pointer so the Fragments agent lands on the operative EXECUTION MODEL
   blocks, never the superseded TestFlight-era layers above them.
 
+- **Round 0z (same sitting) — the cutover RULED and staged.** Her word: the
+  cutover happens after batch 1's implementer returns to THIS session — the
+  sitting architect adjudicates and records, then a fresh architect continues
+  from the handoff. Her floated shape (rulings handed to a new implementing
+  session that verifies-and-rechecks, then continues as implementer) accepted
+  WITH one refinement, offered and taken: the verify-and-recheck role is the
+  COLD REVIEWER per the standing ladder (independence is what makes the
+  recheck worth anything); a fresh IMPLEMENTER applies confirmed fixes. **The
+  paste-ready kickoff message for the fresh session is written INTO the
+  handoff file** (`notes/plans/phase-14a-architect-handoff.md` — repo-first,
+  so the message survives this chat) and delivered to her in-chat verbatim.
+  Remaining for THIS session: receive batch 1's report → adjudicate → record
+  the adjudication under the batch section → update the handoff's live-state
+  if anything shifted → hand her the go-to-paste word. Her close, recorded
+  because it is the sitting's truth: "It's been a genuinely useful sitting -
+  we've made huge progress in just a few hours this evening."
+
 ## Ledger
 
 | # | Item | Status |
