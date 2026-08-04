@@ -909,18 +909,24 @@ everything and reach "Testing started"), both app targets BUILD SUCCEEDED
 executed green). The Mac suite + the spine (which rides the Mac host)
 carry PENDING below for the architect's unlocked window.
 
-**Acceptance (the full pre-ladder set — claims PENDING until the runs
-land):**
-- Core `swift test` from the repo root: **PENDING** (expected baseline
-  1108/120 + 23/2 vault + 8/1 runner + 7/1 bridge = 1146/124).
-- Mac suite: **PENDING — BLOCKED by the locked-session runner hang**
-  (expected 1196/208 + 4 EncryptionFlowTests + 2 SyncLockedFaceTests in 2
-  new suites = 1202/210, the standing TakePane tripwire the one allowed
-  red). Bundle compiles; app builds.
-- Mobile suite: **PENDING** (expected 172/24 + 1/1 = 173/25; the KDF suite
-  already ran green in isolation).
-- The spine (7 Tutorial suites, 51/7): **PENDING — rides the Mac host,
-  same block.**
+**Acceptance (the full pre-ladder set — finalized):**
+- Core `swift test` from the repo root: **“Test run with 1146 tests in 124
+  suites passed after 30.814 seconds.”** — baseline 1108/120 + 23/2 vault
+  + 8/1 runner + 7/1 bridge, EXACTLY accounted; zero pre-existing tests
+  deleted (the updated bridge assertions listed in the L11 commit).
+- Mac suite: **BLOCKED — the locked-session runner hang** (the environment
+  finding above; a FOURTH control probe failed identically after the other
+  suites ran). What stands in its place, explicit:
+  **“** TEST BUILD SUCCEEDED **”** (`build-for-testing`, the whole app +
+  VariorumTests bundle) and the app build's **“** BUILD SUCCEEDED **”**.
+  Expected at the unlocked window: 1196/208 + 4 EncryptionFlowTests + 2
+  SyncLockedFaceTests in 2 new suites = **1202/210**, the standing TakePane
+  tripwire the one allowed red.
+- Mobile suite (iPhone 17 Pro sim): **“Test run with 173 tests in 25
+  suites passed after 4.871 seconds.”** — baseline 172/24 + the KDF
+  latency suite, exactly accounted.
+- The spine (7 Tutorial suites, 51/7): **BLOCKED — rides the Mac host,
+  same finding, same window.**
 
 **PROVISIONALs / deviations (recorded reasons):**
 - **PROVISIONAL (bridge):** the legacy-plaintext land rule (above — the
