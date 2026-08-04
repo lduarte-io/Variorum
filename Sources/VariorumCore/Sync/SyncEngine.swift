@@ -311,6 +311,47 @@ public struct SyncEngine: Sendable {
         }
     }
 
+    // MARK: - Wipe-and-repush re-initialization (Phase 14b, ruling R-2)
+
+    /// The CLIENT half of wipe-and-repush — core semantics only (batch 3
+    /// productizes the door behind an explicit, announced act; this is the
+    /// harness-proven function the gate runs after the mirror's data-table
+    /// truncate). No in-place migration machinery exists: local SQLite is
+    /// truth, the mirror is a peer, so the mirror re-initializes by
+    /// truncate + a full re-push through the (now encrypting) serializer.
+    ///
+    /// One plain write transaction — deliberately NOT apply mode: the
+    /// `sync_version = 0` sweeps fire the outbox triggers, which is the
+    /// goal, and the explicit outbox INSERTs guarantee totality regardless
+    /// (tombstoned rows, `commit_point`, `setting` — EVERY row of EVERY
+    /// synced table re-pushes; tombstones must reach the fresh mirror or a
+    /// later device would resurrect the dead).
+    ///
+    ///  - every synced row's `sync_version` → 0 (the CAS base for a fresh
+    ///    insert against an empty mirror);
+    ///  - `sync_row_seq` cleared (no row has a server seq anymore — repair
+    ///    ranking starts over, SyncSpec §3);
+    ///  - the pull cursor cleared (the next pull reads from 0; the global
+    ///    `server_seq` itself is NEVER reset — SyncSpec §9);
+    ///  - EVERY row enqueued into the outbox.
+    ///
+    /// `device_id` survives: device identity is not sync bookkeeping.
+    public func resyncReinitialize() async throws {
+        try await database.write { db in
+            for table in SyncSchema.tables {
+                try db.execute(sql: "UPDATE \(table.name) SET sync_version = 0")
+                try db.execute(sql: """
+                    INSERT OR REPLACE INTO sync_outbox (table_name, row_id, queued_at)
+                    SELECT '\(table.name)', \(table.primaryKey),
+                           strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+                    FROM \(table.name)
+                    """)
+            }
+            try db.execute(sql: "DELETE FROM sync_row_seq")
+            try db.execute(sql: "DELETE FROM sync_state WHERE key = 'last_server_seq'")
+        }
+    }
+
     // MARK: - The §12 version check (Phase 11, Step A1)
 
     /// SyncSpec §12's version-check mechanism, shipped with the first
