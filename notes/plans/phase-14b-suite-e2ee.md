@@ -1426,6 +1426,45 @@ window remain the wipe's precondition).**
   wipe's precondition, and the runner's session token is minted at the
   gate, announced, not at 5 a.m.
 
+### Gate-morning findings (2026-08-04 — the architect's, at first Mac-suite
+### execution; recorded before the fix session)
+
+**FINDING GM-1 (the windowless-launch CAPTURE — the KnownIssues row now
+carries it in full):** the Mac suite's "timed out while preparing" cluster
+was NOT lock-state environment — a live specimen launch was caught
+windowless and sampled per the row's own protocol: the main thread blocks
+at construction in `AppServices.init` → `AuthSession.init`
+(AuthSession.swift:201) → SYNCHRONOUS `SecItemCopyMatching` →
+securityd `mach_msg` wait (ACL/authorization-interaction class; a freshly
+rebuilt binary the plausible trigger). Self-released after ~40 s; the
+runner then worked instantly. The 13b "environment class" attribution and
+the 13k lock-covariate refutation both now have their mechanism. Fix
+(lazy/off-main token load) stays owned by 13e per the row; TODAY's
+operational note: a first launch of any freshly built binary may sit
+windowless up to ~a minute — wait or click the Dock; approve any Keychain
+prompt with Always Allow.
+
+**FINDING GM-2 (first execution of the six batch-3 Mac-only pins + the
+suite): Mac 1202/210 ran fully — 12 issues = the allowed tripwire + TWO
+classes:** (a) NINE issues across "Fragments bridge wiring (9b)" ×3 tests
+and "Auth wiring (9c)" ×3 tests — all asserting the PRE-PAUSE bridge world
+(`pullCalls`/`calls > 0`, pausedDays reaching status) through the app
+composition, which now deliberately wires NO bridge key provider (the
+RULED pause; every round refuses before transport contact — the pause's
+own app-side zero-contact pin PASSES). The cadence/interleaving machinery
+those tests pin must stay pinned through the pause era (it guards the
+14c-era resumption) — fix: `AppServices` gains an injectable
+`makeBridgeKeyProvider` (production default unchanged: none → the
+refusing default), the six tests inject fixed bridge keys to keep their
+machinery pins, and the pause pin continues to assert the default
+composition refuses. (b) batch-3's OWN `aLockedProviderRefusesVisibly…`
+pin fails with dependency-context issues (`AppDatabase+Dependency.swift:95`,
+`UUID.swift:67`) — a test-authoring bug on first execution (never
+executable under the batch-3 hold); fix its dependency bootstrapping to
+the file's sibling-test pattern. The SPINE is GREEN (51/7). No product
+misbehavior in evidence; the wipe's green-but-tripwire precondition
+STANDS until these land.
+
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
 attempted overnight if the ladder closes clean — steps 1–2 EXECUTED
