@@ -442,7 +442,11 @@ runbook.**
 2. The shared setup + enrollment flows (Mac AND phone through the one seam,
    the 14a `AccountView` precedent): passphrase choose + the ONE honest
    warning (wording drafted for her gate ratify) + phrase display/confirm;
-   enrollment passphrase-unwrap; the sync status face's locked-state line.
+   enrollment passphrase-unwrap; the sync status face's locked-state line;
+   **CHANGE PASSPHRASE** (authorized by the current passphrase OR the
+   recovery phrase — re-wrap master, vault row update, recovery words
+   untouched) and the phrase surface built as **(RE)GENERATE** (first
+   generation and future regenerate are one flow; the Round-7 addition).
 3. `resyncReinitialize` as a real client operation (the harness-proven
    semantics from batch 2, productized behind an explicit announced door —
    never reachable casually).
@@ -549,6 +553,35 @@ The arrangement, accepted with the honesty caveat stated to her plainly:
    drill (phrase-only unwrap), the two ratifies, and anything the
    permission layer held.
 
+### Round 7 — passphrase confirmation + the change-passphrase scope addition
+### (mid-sitting, 2026-08-04; recorded before Round 6 chronologically-adjacent)
+
+Her message, in substance: she made her passphrase but could only enter it
+once with no verification — asked for a confirm-twice script; asked whether
+a mistyped passphrase is disastrous given the recovery words; and asked
+"will we be adding something this phase to be able to change your
+passphrase with the recovery words if needed?"
+
+1. **Confirm-twice script given** (her own Terminal, `read -s` twice,
+   compare, only a match writes the file — overwrites her single-entry
+   version).
+2. **A typo would NOT be disastrous — the mechanism, recorded:** the
+   overnight setup wraps master with whatever the file holds, and the Mac
+   keeps master in its KEYCHAIN — so the morning phrase generation works
+   regardless, and a suspected typo is fixed by a cheap re-wrap (set a new
+   passphrase while master is held) with nothing lost. Local plaintext
+   truth is never at risk in any arm. The confirm-twice script exists so
+   this road is never needed.
+3. **SCOPE ADDITION at her ask (binding on batch 3): CHANGE PASSPHRASE
+   ships THIS PHASE** — authorized by EITHER the current passphrase OR the
+   recovery phrase (the forgot-passphrase road: phrase-unwrap master →
+   new passphrase wrap; recovery words UNCHANGED by a passphrase change —
+   independent wraps). The morning phrase-add flow is built as
+   (RE)GENERATE RECOVERY PHRASE — the same surface serves first-generation
+   and a future regenerate (old recovery wrap replaced). Ledger row L9
+   widens to carry both; the restore drill (gate step 6) exercises the
+   phrase-unwrap mechanics this rides on.
+
 ### Round 6 — three morning-adjacent clarifications (mid-sitting, 2026-08-04)
 
 1. **Passphrase policy (her question: "just has to be 12 characters long at
@@ -617,7 +650,7 @@ attempted overnight if the ladder closes clean):**
 | L6 | Convergence suites GREEN over ciphertext + mirror-dump assertion + re-init harness scenario | pending — batch 2 |
 | L7 | `08_phase14b_lockstep.sql` + `lockstepVersion` 5 (same commit; deploy at gate) | pending — batch 2 |
 | L8 | Vault client + Keychain custody | pending — batch 3 |
-| L9 | Setup/enrollment flows, BOTH form factors (PL-6) | pending — batch 3 |
+| L9 | Setup/enrollment flows, BOTH form factors (PL-6) + CHANGE PASSPHRASE (current-passphrase OR recovery-phrase authorized — her Round-7 scope addition) + the (re)generate-recovery-phrase surface | pending — batch 3 |
 | L10 | `resyncReinitialize` productized | pending — batch 3 |
 | L11 | Bridge journal-class capability (paused) + touchpoint #2 concrete facts | pending — batch 3 |
 | L12 | Phone KDF latency measured (R-7's condition) | pending — batch 3 |
