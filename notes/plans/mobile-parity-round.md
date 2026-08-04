@@ -13,9 +13,18 @@ session and is the launchable unit the author asked for.*
 > You are the architect/orchestrator for the Variorum for iPhone
 > **parity & polish round**, under `/architect-phase` (the shape this
 > project has run since its design sitting — M13's all-Fable cast is
-> the standing default; the author may re-cast at kickoff). Read, in
+> the standing default; the author may re-cast at kickoff). **She
+> invokes each stage NAMING MOBILE explicitly (e.g. `/architect-phase
+> mobile parity stage A`) from the `~/dev/variorum-mobile` worktree —
+> a bare invocation resolves to the MAC master-plan pointer and is
+> always wrong here.** Read, in
 > order, IN FULL: `.claude/skills/architect-phase/SKILL.md` ·
-> `CLAUDE.md` · `notes/plans/mobile-app-plan.md`'s RUN RECORD (rulings
+> `CLAUDE.md` · **`notes/MobileSoul.md` — the SOUL DOCUMENT: the
+> author's stand-in where she isn't guiding; its bar (100k words,
+> memory included), architecture rule (brains in core/Shared, faces
+> per platform), decision grammar, platform truths, and parity ledger
+> BIND every batch and every PROVISIONAL judgment this round makes**
+> · `notes/plans/mobile-app-plan.md`'s RUN RECORD (rulings
 > M1–M14, LK1–LK11, the stage records, and especially the **GATE
 > SITTING record** — every ruling this plan builds is recorded there
 > verbatim) · this plan · `notes/plans/mobile-architect-handoff.md`
@@ -76,9 +85,9 @@ future; bulk import never.
 | Stage | Scope | Gate |
 |---|---|---|
 | **A — The floor: defects & ruled fixes** | 1. The takes-peek scroll defect (Write surface, peek chrome — reproduce on simulator, red-on-old, fix). 2. `TARGETED_DEVICE_FAMILY` → `1`, portrait-only orientations, all mobile targets. 3. **Q-M1 (a)**: branch-under-refused-flush seeds from the card's shown bytes (pin). 4. **Q-M2 core+phone**: the duplicate-shape default divide (displayed take cut, every other take duplicated whole onto BOTH successors; shared core op — the Mac door change stays 13j's; A released to lineage unchanged; refusals for start/end cuts unchanged). 5. Note seal lock/unlock on mobile (the ruled door; refusal copy loses its redirect). 6. The spacing/padding FLOOR: a first systematic pass over the v1 surfaces (her finding: "the spacing needs to be fixed" — more padding generally; LK canon binds; screenshots to her at the stage gate). | Ladder; her screenshot look |
-| **B — The tutorial book spine** | The mobile tutorial book (the 13b tutorial-as-spec precedent, phone-native): seeded content that exercises every shipped capability; simulator-drivable UI walks (scroll, tap, move) that fill it out and assert; it becomes the round's permanent acceptance spine — every later batch keeps it green. Reuse the Mac `TutorialSeeder` shape, never its Mac-specific copy. | Spine green; her walkthrough |
-| **C — Capability parity, by family** | The registry-driven audit: walk the Mac capability registry (P-1) against the phone; produce the PARITY MATRIX (owed / compromised-shape / not-owed-per-ruling, each row citing its ruling); then batches per family, matrix-ordered: **books & membership** (create book, move/add note between books, membership chip parity) · **tags** (browse, apply, create; leaf-chip grammar) · **locks** (take lock/unlock joins the note seal) · **references** ("More info" list: see, add, open) · **scraps/Snippets** (view, maybe add) · **comments/callouts gaps** · **lenses, compromised shape** (her sketch: top-bar lens switching, save-current — design at the batch) · **remaining refusal-copy sweep** (no-redirect: every "on the Mac" string dissolves or names its sanctioned exception). Each batch: brief → fresh implementer → record → tests; the spine green every batch. | Per-family ladder rounds |
-| **D — Polish & the look round** | The whole-app spacing/design pass against the LK canon with her screenshot rounds (the L11 design/beauty ledger row realized); remaining P1–P44 flips as she makes them; device feel-round riders (loupe, badge target, marker z-order, sheet keyboard, Write→Read freshness). | Her acceptance — the round's exit |
+| **B — The tutorial book spine** | The mobile tutorial book (the 13b tutorial-as-spec precedent, phone-native): seeded content that exercises every shipped capability; simulator-drivable UI walks (scroll, tap, move) that fill it out and assert; it becomes the round's permanent acceptance spine — every later batch keeps it green. Reuse the Mac `TutorialSeeder` shape, never its Mac-specific copy. **Plus THE PERFORMANCE FIXTURE (the soul document's bar made executable): a seeded ~100k-word post + large corpus in the dev store, with a scripted measurement walk (open-time, typing latency, scroll, PEAK MEMORY) — from this stage on, every ladder includes its spot-check, corpus-flat.** | Spine green; perf fixture measured; her walkthrough |
+| **C — Capability parity, by family** | The registry-driven audit: walk the Mac capability registry (P-1) against the phone; produce the PARITY MATRIX (owed / compromised-shape / not-owed-per-ruling, each row citing its ruling); then batches per family, matrix-ordered: **books & membership** (create book, move/add note between books, membership chip parity) · **tags** (browse, apply, create; leaf-chip grammar) · **locks** (take lock/unlock joins the note seal) · **references** ("More info" list: see, add, open) · **scraps/Snippets** (view, maybe add) · **comments/callouts gaps** · **lenses, compromised shape** (her sketch: top-bar lens switching, save-current — design at the batch) · **the S5 conflict surface** (offline is the phone's normal — a conflict variant landing on the phone must be DISCOVERABLE there, the takes badge its natural face; verify + pin) · **remaining refusal-copy sweep** (no-redirect: every "on the Mac" string dissolves or names its sanctioned exception). Each batch: brief → fresh implementer → record → tests; the spine green every batch. | Per-family ladder rounds |
+| **D — Polish & the look round** | The whole-app spacing/design pass against the LK canon with her screenshot rounds (the L11 design/beauty ledger row realized); remaining P1–P44 flips as she makes them; device feel-round riders (loupe, badge target, marker z-order, sheet keyboard, Write→Read freshness); **the Dynamic Type + VoiceOver audit over the custom surfaces** (phone-native expectations — the soul document's platform truth 6; owed before TestFlight strangers); **the exit gate runs the 100k performance fixture ON DEVICE** (latency AND peak memory — her explicit bar). | Her acceptance + the on-device 100k run — the round's exit |
 
 **Not this round's:** the Mac-side 13j build (divide default door +
 keybind, restoration-doors sitting, the lens loud-fallback door) —
