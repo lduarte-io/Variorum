@@ -1915,13 +1915,28 @@ list):**
   preparing-timeout occurred in any of them; the standing tripwire is
   the one allowed red.
 
-**Acceptance (the full pre-ladder set — own runs, verbatim lines):**
-- Core `swift test` (repo root): **PENDING**
-- Full Mac suite (`-project` invocation): **PENDING** (expected 1210/212,
-  tripwire-only)
-- Mobile (iPhone 17 Pro sim): **PENDING** (expected 173/25)
-- The spine (7 Tutorial suites, dedicated run): **PENDING** (expected 51/7)
-- Already run and green before the record: the 4-suite targeted set
+**Acceptance (the round's full set — own runs, all waited synchronously,
+verbatim lines; FINALIZED post-record per the repo-first rule):**
+- Core `swift test` (repo root): **"✔ Test run with 1156 tests in 124
+  suites passed after 32.236 seconds."** — ONE more than the kickoff's
+  1155/124 baseline with ZERO core tests added this round; traced, not
+  shrugged at: the GM-3 fix landed in TWO commits (`2b3a03c` runner 11/1 →
+  `29cfd94` + `dropsWithProgressNeverExhaustTheBound`, runner 12/1), and
+  the wipe-section prose recorded the core total at the FIRST half
+  (1155) without refreshing it for the second pin. Verified: the runner
+  suite runs 12/1 today, `git log af32293..969ff83 -- Tests/ Sources/
+  Tools/` is EMPTY, so 1156 IS the inherited tree's true count.
+- Full Mac suite (cwd-independent `-project` invocation): **"✘ Test run
+  with 1210 tests in 212 suites failed after 151.411 seconds with 1
+  issue."** — the one issue is the standing tripwire BY IDENTITY
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`),
+  nothing else red; 1202 + this round's 8 in 2 new suites, exactly
+  accounted. (No GM-1 preparing-timeout in any run this session.)
+- Mobile (iPhone 17 Pro sim): **"✔ Test run with 173 tests in 25 suites
+  passed after 4.657 seconds."** + ** TEST SUCCEEDED ** — baseline exact.
+- The spine (the seven Tutorial suites, dedicated run): **"✔ Test run
+  with 51 tests in 7 suites passed after 14.327 seconds."**
+- Also run before the record: the 4-suite targeted set
   (Encryption/CopyFlow/Terminology/LockedFace) — "Test run with 14 tests
   in 4 suites passed"; Mac `build-for-testing` ** TEST BUILD SUCCEEDED **;
   the MOBILE APP BUILD against the shared changes ** BUILD SUCCEEDED **.
