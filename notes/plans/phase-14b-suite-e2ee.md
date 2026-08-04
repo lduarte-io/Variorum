@@ -679,8 +679,12 @@ three reverts restored; the suite re-run green.
   (pre-crown; the crown suite adds 3 more:
   `Test run with 3 tests in 1 suite passed after 0.155 seconds.`)
 - Registry/DDL walks: `Test run with 31 tests in 3 suites passed`.
-- Full core suite: **PENDING — run after this record lands (the
-  repo-first rule); expected 1094 + 14 new = 1108 tests / 120 suites.**
+- Full core suite (run after this record landed, per the repo-first
+  rule): `swift test` → **“Test run with 1108 tests in 120 suites passed
+  after 29.384 seconds.”** — baseline 1094/118 + exactly the 14 new tests
+  (3 SyncSchemaTests walks · 2 AuthRLSDDLTests vault pins · 6
+  SyncEncryptionTests · 3 SyncMirrorDumpAndResyncTests) in 2 new suites;
+  zero pre-existing tests deleted, the updated ones listed above.
 
 **PROVISIONALs / deviations (recorded reasons):**
 - `plainColumns` added beside the brief's `encryptedColumns` — reason
