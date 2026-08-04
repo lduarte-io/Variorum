@@ -508,6 +508,47 @@ Dispositions (recorded before the run starts):
    verified present (`.env.supabase.local`, `.env.fragments-oauth.local`);
    the phone is a morning item by nature.
 
+### Round 5 — her passphrase-file offer (mid-sitting, 2026-08-04; amends
+### Round 4's item 3)
+
+Her message, verbatim: *"can i choose a passphrase now and put it into an
+environment file in a way where you can't read it? that might be able to
+work for overnight - correct?"*
+
+The arrangement, accepted with the honesty caveat stated to her plainly:
+1. **The honesty caveat (recorded because the phase's soul demands it):**
+   nothing on this machine is truly unreadable to the agent layer — sessions
+   run as her user. The guarantee is DESIGN + DISCIPLINE, the stored-PAT
+   pattern applied to one more secret: the file (`.env.e2ee-passphrase.local`,
+   gitignored BEFORE creation, `chmod 600`) is consumed directly by the
+   setup tool, never printed, never logged, never echoed into any
+   transcript; she creates it in HER OWN Terminal (never via `!`, whose
+   output lands in-conversation) via `read -s` so it also never touches her
+   shell history or screen. And by R-7's soft-door fact the passphrase is
+   CHANGEABLE later (a master re-wrap, cheap by design) if she ever wants a
+   clean break from this arrangement.
+2. **What it unblocks — the CONDITIONAL production tail:** IF the ladder
+   closes clean overnight, the run may continue past it at her standing
+   pre-approvals: deploy `08`/marker 5 → her vault setup from the file
+   (**passphrase wrap ONLY** — see 3) → the A1 rail + mirror export → the
+   WIPE (her Round-4 pre-approval + this arrangement) → the repush → the
+   live dump verification → the `/Applications` refresh. If ANYTHING in the
+   ladder wobbles, every production act waits for morning exactly as Round
+   4 sequenced.
+3. **The recovery phrase is generated in her PRESENCE regardless** — its
+   entire point is being seen once and written down, so persisting it to
+   disk overnight would put the disaster secret in plaintext exactly where
+   it must never live. The overnight vault carries the passphrase wrap
+   alone; the MORNING adds the recovery wrap (unwrap master via Keychain →
+   generate the 12 words → she writes them → confirm re-entry → the wrap
+   lands). `KeyVaultFormat` must support wrap-addition — batch 1/3 note.
+4. **File hygiene:** the file's bytes ARE the passphrase (a single trailing
+   newline is stripped, forgiving); the file is DELETED at the morning
+   gate's end as an announced checklist act (added to Round 4 item 5 as ⑧).
+5. The morning checklist otherwise stands: phone enrollment, the recovery
+   drill (phrase-only unwrap), the two ratifies, and anything the
+   permission layer held.
+
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
 attempted overnight if the ladder closes clean):**
