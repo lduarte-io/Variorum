@@ -60,4 +60,36 @@ enum ErrorPresentation {
     static let authGuidance =
         "This looks like a sign-in problem — Account… → sign out and back in usually clears it "
         + "(server-side auth changes can strand the old session)."
+
+    /// Phase 14a review round 1 (R1-1) — the SIGN-IN FORM's classify-and-
+    /// speak: the account form's failures surface as human lines, never a
+    /// raw enum dump (`String(describing:)` of `endpointFailure` was the
+    /// pre-fix face of a wrong password — the direct form's COMMON refusal).
+    ///
+    /// The credentials class (the password grant's HTTP 400 / `invalid_grant`
+    /// refusal) gets the ruled wording — "Wrong email or password."
+    /// (PROVISIONAL, riding the gate checklist). Deliberately NOT routed
+    /// through `ErrorCauseNote`: its "sign out and back in" guidance is for
+    /// ESTABLISHED sessions and is exactly wrong on the sign-in form itself.
+    static func signInFailureMessage(_ error: any Error) -> String {
+        if let authError = error as? AuthSessionError {
+            switch authError {
+            case .endpointFailure(let status, let body):
+                let lowered = body.lowercased()
+                if status == 400,
+                   lowered.contains("invalid_grant")
+                       || lowered.contains("invalid_credentials")
+                       || lowered.contains("invalid login credentials") {
+                    return "Wrong email or password."
+                }
+                return "Sign-in failed — the server refused (HTTP \(status)). Try again in a moment."
+            case .notHTTP, .malformedResponse:
+                return "Sign-in failed — the server's response couldn't be read. Try again in a moment."
+            }
+        }
+        if error is URLError || (error as NSError).domain == NSURLErrorDomain {
+            return "Couldn't reach the server — check your connection and try again."
+        }
+        return "Sign-in failed: \(error.localizedDescription)"
+    }
 }

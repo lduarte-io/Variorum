@@ -225,7 +225,10 @@ final class AppServices {
         do {
             try await auth.signInWithPassword(email: email, password: password)
         } catch {
-            account.lastError = String(describing: error)
+            // The R94 doctrine at the sign-in door (review round 1, R1-1):
+            // classify and speak — a wrong password says so in words, never
+            // as a raw enum dump.
+            account.lastError = ErrorPresentation.signInFailureMessage(error)
         }
     }
 
@@ -295,7 +298,9 @@ final class AppServices {
         do {
             try await fragmentsAuth.signInWithPassword(email: email, password: password)
         } catch {
-            account.lastError = String(describing: error)
+            // Same door class, same R94 treatment (R1-1): this form's
+            // wrong-password refusal is the identical 400/invalid_grant.
+            account.lastError = ErrorPresentation.signInFailureMessage(error)
         }
     }
 

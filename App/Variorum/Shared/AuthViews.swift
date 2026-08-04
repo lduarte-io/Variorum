@@ -85,6 +85,7 @@ struct AccountView: View {
                     .focused($focus, equals: .variorumEmail)
                     .onSubmit { focus = .variorumPassword }
                 SecureField("Password", text: $variorumPassword)
+                    .textContentType(.password)  // AutoFill (R1-5)
                     .focused($focus, equals: .variorumPassword)
                     .onSubmit { signInVariorum() }
                 Button("Sign In") { signInVariorum() }
@@ -111,6 +112,7 @@ struct AccountView: View {
                     .focused($focus, equals: .bridgeEmail)
                     .onSubmit { focus = .bridgePassword }
                 SecureField("Fragments password", text: $fragmentsPassword)
+                    .textContentType(.password)  // AutoFill (R1-5)
                     .focused($focus, equals: .bridgePassword)
                     .onSubmit { connectBridge() }
                 Button("Connect") { connectBridge() }
@@ -134,14 +136,24 @@ struct AccountView: View {
             }
         }
         .padding(20)
+        // Mac-only floor (review round 1, R1-2): an iPhone sheet proposes
+        // ~393 pt — a forced 440 clips the form on the phase's own phone
+        // door. macOS keeps the 9c-era minimum.
+        #if os(macOS)
         .frame(minWidth: 440)
+        #endif
     }
 
     /// An email entry field: autocorrect and (on the phone) auto-capitals
     /// off — a capitalized first letter breaks the address silently.
+    /// `.textContentType(.username)` (review round 1, R1-5) marks the
+    /// login form's account field so AutoFill offers saved credentials —
+    /// the platform type resolves per OS (UITextContentType /
+    /// NSTextContentType), so no gate is needed.
     private func emailField(_ label: String, text: Binding<String>) -> some View {
         let field = TextField(label, text: text)
             .autocorrectionDisabled()
+            .textContentType(.username)
         #if os(iOS)
         return field
             .textInputAutocapitalization(.never)
