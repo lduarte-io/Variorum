@@ -92,7 +92,6 @@ final class EncryptionSession {
         self.signedIn = signedIn
     }
 
-    var isEnrolled: Bool { store.load() != nil }
     /// CF-12: whether the biometric toggle is even offerable here.
     var biometryAvailable: Bool { store.biometryAvailable() }
 

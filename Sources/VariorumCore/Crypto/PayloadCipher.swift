@@ -127,9 +127,15 @@ public enum PayloadCipher {
 
     /// Matches `e<digits>:` prefixes other than ours, so a future format's
     /// value refuses as "unsupported version" rather than "not encrypted".
+    /// ASCII digits ONLY (cold pass, 2026-08-04): `Character.isNumber` alone
+    /// is true for superscripts/fractions/non-ASCII numerals ("e²:", "e٢:"),
+    /// which silently widened the refusing class past the documented
+    /// `e<digits>:` — load-bearing on the bridge, whose legacy pass-through
+    /// rides `.notEncrypted` alone. A version prefix we mint is only ever
+    /// ASCII.
     private static func foreignVersionPrefix(of value: String) -> String? {
         guard value.first == "e" else { return nil }
-        let digits = value.dropFirst().prefix(while: \.isNumber)
+        let digits = value.dropFirst().prefix(while: { $0.isASCII && $0.isNumber })
         guard !digits.isEmpty,
             value.dropFirst(1 + digits.count).first == ":"
         else { return nil }

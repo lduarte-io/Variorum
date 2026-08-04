@@ -2504,6 +2504,45 @@ TEST SUCCEEDED · spine "✔ 51 tests in 7 suites passed".
   anti-pattern). The mismatch surfaces at first post-unlock refresh and
   the classifier names the refusal meanwhile — honest at every moment.
 
+### THE COLD PASS (L20 — 2026-08-04; fresh Fable reviewer, REVIEW_PROMPT
+### verbatim, zero framing; findings + architect dispositions + the fix
+### evidence; NO BLOCKER, NO MAJOR ⇒ the single pass closes with its fixes —
+### no re-review round owed under the ladder rule)
+
+**Verdict: 3 MINOR + 4 NIT, extensive clean bill.** The reviewer
+reproduced the suites itself (core 1156/124; the 22-test encryption
+family), re-proved the inland zero-diff on its own git evidence
+(Merge/Repairs/transports/Scheduler + Operations/Domain/Queries/
+Persistence/Models all EMPTY across the phase), verified the crypto
+anchors (RFC 9106 KAT, BIP-39 vectors, RFC 3394 refusals, the AAD
+joiner's unambiguity), and checked the mobile flow notes' claims against
+the shipped code (accurate). Findings + dispositions:
+
+| # | Sev | Finding (condensed) | Disposition |
+|---|-----|---------------------|-------------|
+| C-1 | MINOR | Synchronous Keychain I/O on the MainActor at settings-surface cadence (`EncryptionSession` refresh/adopt/forget/toggle → sync `SecItem*`) — the GM-1 securityd-stall family with new call sites; impact bounded (beachballs the open sheet if securityd stalls; never launch, engine reads off-main unaffected) | CONFIRMED — **routed to the standing 13e windowless/GM-1 KnownIssues row** (same securityd family; one fix shape covers `AuthSession.init`'s launch-time load AND these settings-cadence hops; the reviewer's Thread-recording pin shape noted on the row). Post-cold-pass churn in the exact surface her drill walks, for a bounded stall, loses to batching with 13e's identical fix. |
+| C-2 | MINOR | SyncSpec describes a plaintext wire that no longer exists; §12's running record is TWO lockstep events behind (13b's 3→4 was never recorded; 14b's 4→5 absent); AppSpec §14 has no 14b delta yet | CONFIRMED — a **must-not-miss closeout manifest** (canonical-doc deltas ride the ritual): the SyncSpec E2EE-seam delta + BOTH missing §12 entries (3→4 v1_12 · 4→5 key_vault) + the AppSpec §14 delta + R1-9's §7 sentence + R1-5's deviation note + R2-3's comment sweep. The 3→4 catch is the reviewer's own — nothing on the prior closeout list named it. |
+| C-3 | MINOR | The truncate→repush window admits a stale-device poison push (pull sees empty window → push rejects `current: nil` → rebase-to-0 → old-key ciphertext ACCEPTED onto the wiped mirror → wedges every pull) — safe under this phase's attended gate (her pause = one device; forget-first ordering), unrecorded as a 14c constraint | CONFIRMED — doc-class: the CF-8 record and the 14c kickoff draft both gain the fence sentence (a user-facing re-key must fence stale writers — vault-revision- or marker-class — BEFORE the truncate). No pin owed. |
+| C-4 | NIT | `PayloadCipher.foreignVersionPrefix` scanned with bare `Character.isNumber` — true for superscripts/fractions/non-ASCII numerals — silently widening the refusing class past the documented `e<digits>:`; load-bearing on the bridge (legacy pass-through rides `.notEncrypted` alone): a pre-handoff body starting "e²:" would refuse the round | CONFIRMED — **FIXED at the architect's hand** (the GM-3/R2-1 small-fix precedent): the scan is ASCII-only. **Red-on-old verified live:** the new bridge pin (`aNonASCIINumeralBodyLandsAsLegacyPlaintextNotAVersionRefusal`) RED under the bare-`isNumber` behavioral revert ("✘ 1 test … 1 issue"), green restored. Core-line change recorded with reasons (the round boundary's additive-with-reasons carve, spent here). |
+| C-5 | NIT | `EncryptionSession.isEnrolled` dead code (declared, zero references) | CONFIRMED — removed (grep-verified: one hit, its own declaration). |
+| C-6 | NIT | The KDF's off-main guarantee rests on VariorumCore NOT adopting the App target's concurrency flags — a future Package.swift hygiene commit would silently move the 0.16–0.6 s derivation onto the caller's MainActor with no failing test | CONFIRMED — **the tripwire built**: `theKDFDerivationRunsOffTheCallersMainActor` (a `@MainActor` test driving `setUp` and asserting the derivation thread was never main; its comment names `@concurrent` as the fix if it ever fires, not deleting the pin). |
+| C-7 | NIT | Ledger row L19 stale ("pending" after the mobile notes file landed) | CONFIRMED — row corrected below. |
+
+**The fix pass (architect-direct — the tiny-scope precedent; every
+behavior fix traced + revert-verified):** PayloadCipher ASCII-only scan ·
+the bridge red-on-old pin · `isEnrolled` removed · the KDF thread
+tripwire · the KnownIssues 13e-row append (C-1) · the ledger rows.
+Test accounting: core +2 (the bridge pin · the KDF tripwire) ⇒ expected
+**1158/124**; Mac unchanged in count (a dead declaration removed) ⇒
+**1218/213 tripwire-only**; mobile/spine baselines exact.
+**Acceptance LANDED (all four, own runs):** core "✔ 1158 tests in 124
+suites passed" · Mac "✘ 1218 tests in 213 suites … 1 issue" — the one
+red confirmed BY IDENTITY from the result bundle as the standing
+tripwire · mobile "✔ 173 tests in 25 suites passed" · spine "✔ 51 tests
+in 7 suites passed". **The post-cold-pass tree is the phase's FINAL
+code** (her drill + closeout remain; the closeout's doc deltas touch no
+code).
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
@@ -2526,8 +2565,8 @@ TEST SUCCEEDED · spine "✔ 51 tests in 7 suites passed".
 | L16 | MobileSoul PL-6 updated at design time (done this sitting) + closeout parity line | PL-6 written; closeout line owed |
 | L17 | The copy/flow round (CF-1…CF-13 + biometric) | **done** (`969ff83`+`a9b00fd`; 8+1 pins, five behavioral reverts; verified + adjudicated by the crossover architect — the adjudication section above) |
 | L18 | The crossover round (CF-14 · CF-15 · CF-16) | **done** (`910d30d`+`2f8249b`; 7 pins, four behavioral reverts; verified + adjudicated by the architect — the verification/dispositions section above; Mac 1218/213 tripwire-only reproduced by both seats) |
-| L19 | The mobile flow notes file (her coordination deliverable) | pending — `notes/plans/phase-14b-mobile-flow-notes.md` |
-| L20 | ONE cold pass over the copy/flow + crossover diffs (REVIEW_PROMPT verbatim) | pending |
+| L19 | The mobile flow notes file (her coordination deliverable) | **done** (`4eb5eee` — `notes/plans/phase-14b-mobile-flow-notes.md`; PL-6 points at it; the cold pass verified its claims against the shipped code; her handover prompt delivered) |
+| L20 | ONE cold pass over the copy/flow + crossover diffs (REVIEW_PROMPT verbatim) | **done** (NO BLOCKER/MAJOR — 3 MINOR + 4 NIT, the section above; C-4/C-5/C-6/C-7 fixed at the architect's hand revert-verified, C-1 routed to 13e's row, C-2/C-3 on the closeout manifest) |
 | L21 | HER ACCEPTANCE: the full re-key drill (runbook in the architect handoff; step 0 PINNED green) + the disclosure ratify + the `/Applications` refresh | pending — her go per step |
 | L22 | Closeout ritual in full (incl. the 14c kickoff draft) | pending |
 
