@@ -549,6 +549,36 @@ The arrangement, accepted with the honesty caveat stated to her plainly:
    drill (phrase-only unwrap), the two ratifies, and anything the
    permission layer held.
 
+### Round 6 — three morning-adjacent clarifications (mid-sitting, 2026-08-04)
+
+1. **Passphrase policy (her question: "just has to be 12 characters long at
+   least, right? no other requirements?"):** NO hard requirement exists in
+   any ruling — the honest answer given: the passphrase is the dump's only
+   brute-force barrier (R-1's accepted tradeoff; Argon2id multiplies each
+   guess's cost but LENGTH is the real defense), so the recommendation is a
+   4+-random-word phrase or 16+ mixed characters; 12 characters is an
+   acceptable floor if it is no dictionary word and no reused password;
+   NEVER the account password (the standing ruling) and never a password
+   used anywhere else. The headless setup tool enforces only non-empty +
+   a recorded warning under 12 characters — her choice is hers.
+2. **Where the recovery phrase gets generated (her question):** in the
+   VARIORUM MAC APP's E2EE settings surface (the batch-3 shared flow —
+   the Settings/sync sheet family): the app, holding master via Keychain
+   from the overnight setup, generates the 12 words, displays them ONCE,
+   she writes them down, confirms by re-entry, and the recovery wrap lands
+   in the vault. A UI act, not a terminal act.
+3. **THE PHONE-BUILD TIMING CONSTRAINT (surfaced reviewing her draft
+   message to the mobile project; binds gate step 5):** the morning phone
+   verification needs a phone build carrying the 14B code (marker-5
+   lockstep + the decrypt seam + enrollment) — a pre-14b phone build
+   against the post-gate mirror REFUSES to sync by design (marker 4 ≠ 5),
+   and could not read ciphertext anyway. So the mobile project must merge
+   `main` → `mobile` IN THE MORNING (after the overnight batches land),
+   never from tonight's main; the phone install must be a RELEASE build
+   (the A4 fence — Debug is the dev store, never her corpus); the
+   enrollment UX arrives through the shared seam (batch 3; PL-6). Relayed
+   to her as a paste-ready addition to her mobile-session message.
+
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
 attempted overnight if the ladder closes clean):**
