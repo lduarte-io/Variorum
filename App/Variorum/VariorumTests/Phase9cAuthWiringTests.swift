@@ -222,6 +222,25 @@ struct Phase9cAuthWiringTests {
         }
     }
 
+    /// ROUND 2, R2-2 — the pin's SECOND credentials dialect: modern GoTrue
+    /// refuses with `error_code: "invalid_credentials"` (no `invalid_grant`
+    /// anywhere in the body). The mapper covers both dialects; which one her
+    /// live project speaks is verified only at the gate's live walk, so BOTH
+    /// arms are pinned here. Same mapped line, same door.
+    @Test func aModernDialectRefusalSpeaksTheSameHumanLine() async throws {
+        let refusal: @Sendable (URLRequest) async throws -> (Data, URLResponse) = { request in
+            (Data(#"{"code":400,"error_code":"invalid_credentials","msg":"Invalid login credentials"}"#.utf8),
+             HTTPURLResponse(url: request.url!, statusCode: 400,
+                             httpVersion: nil, headerFields: nil)!)
+        }
+        try await withWiredServices(authHTTP: refusal) { services, _, _, _, _, _ in
+            await services.signInWithVariorum(email: "her@example.com", password: "wrong")
+            #expect(services.account.lastError == "Wrong email or password.")
+            #expect(services.account.variorum == nil, "a refused sign-in signs nothing in")
+            #expect(!services.sync.isConfigured)
+        }
+    }
+
     /// R1-1's other classes: every sign-in failure surfaces as a readable
     /// human line — offline/transport names the connection, an unexpected
     /// status names the refusal — never a raw `String(describing:)` dump.
