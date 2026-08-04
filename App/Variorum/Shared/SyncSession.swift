@@ -76,7 +76,15 @@ final class SyncSession {
     /// MINOR). Refused wholesale for dev-store sessions (the fence): the
     /// one production mirror pairs with the real store only, whatever
     /// transport a caller composes.
-    func configure(transport: any SyncTransport) async {
+    ///
+    /// `keyProvider` (Phase 14b batch 3 — batch 2's PROVISIONAL 2 resolved):
+    /// the engine's E2EE key seam, REQUIRED at this seam so every
+    /// composition site decides — the production caller passes the
+    /// Keychain-backed `DeviceKeySyncProvider`; tests pass fixed or locked
+    /// providers. There is no plaintext mode: a refusing provider means
+    /// every round refuses visibly, which is the designed pre-enrollment
+    /// state, never a wiring accident.
+    func configure(transport: any SyncTransport, keyProvider: any SyncKeyProviding) async {
         guard allowsSync else { return }
         let old = scheduler
         stopObservations()
@@ -91,7 +99,8 @@ final class SyncSession {
             await old.awaitIdle()
         }
 
-        let scheduler = SyncScheduler(engine: SyncEngine(transport: transport))
+        let scheduler = SyncScheduler(
+            engine: SyncEngine(transport: transport, keyProvider: keyProvider))
         self.scheduler = scheduler
 
         // Status → the observable surface (+ the round-completion hook:

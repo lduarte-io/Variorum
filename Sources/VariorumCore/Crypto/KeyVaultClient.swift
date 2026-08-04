@@ -61,7 +61,11 @@ public actor KeyVaultClient {
             load: { try await urlSession.data(for: $0) })
     }
 
-    init(
+    /// The seam-injectable form — PUBLIC deliberately (unlike the sync
+    /// transport's internal seam): the App-layer flow tests script vault
+    /// responses without a network and without visibility into core
+    /// internals. Production never passes `load`.
+    public init(
         configuration: Configuration,
         sessionProvider: any UserSessionProviding,
         load: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)

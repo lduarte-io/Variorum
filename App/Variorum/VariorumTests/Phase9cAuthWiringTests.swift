@@ -142,7 +142,10 @@ struct Phase9cAuthWiringTests {
                 auth: auth, fragmentsAuth: fragmentsAuth,
                 bridgeMinimumRoundInterval: bridgeMinimumRoundInterval,
                 makeSyncTransport: { _ in syncTransport },
-                makeBridgeTransport: { _, _ in bridgeTransport })
+                makeBridgeTransport: { _, _ in bridgeTransport },
+                // Phase 14b: a working fixed key world so wiring rounds
+                // reach the transports (never the real Keychain in tests).
+                makeSyncKeyProvider: { AppTestKeyProvider() })
             await services.start()
             try await body(services, auth, fragmentsAuth, db, syncTransport, bridgeTransport)
             services.stop()

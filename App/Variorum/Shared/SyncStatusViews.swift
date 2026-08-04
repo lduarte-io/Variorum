@@ -18,8 +18,16 @@ import VariorumCore
 struct SyncStatusRow: View {
     let services: AppServices
     @State private var showingAccount = false
+    @State private var showingEncryption = false
 
     private var sync: SyncSession { services.sync }
+
+    /// Phase 14b (L9): the engine's keys-refusal, classified — the row
+    /// names the fix and offers the door to it.
+    private var keysLocked: Bool {
+        guard let error = sync.status.lastError else { return false }
+        return EncryptionSession.isKeysLockedError(error)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -52,6 +60,15 @@ struct SyncStatusRow: View {
                             .foregroundStyle(.secondary)
                     }
                     Button("Sync now") { sync.triggerSync() }
+                } else if keysLocked {
+                    // Phase 14b (L9): the locked-state line — the engine's
+                    // keys-refusal presents as a paused state naming its
+                    // fix, never a generic "Sync error" (nothing is lost
+                    // while paused; the outbox keeps everything).
+                    Text(Self.lockedLabel)
+                        .foregroundStyle(.orange)
+                        .help(error)
+                    Button("Unlock…") { showingEncryption = true }
                 } else {
                     Text("Sync error")
                         .foregroundStyle(.red)
@@ -69,10 +86,19 @@ struct SyncStatusRow: View {
                 Button("Account…") { showingAccount = true }
             }
         }
+        // Phase 14b: the E2EE settings door (the Settings/sync sheet family
+        // — Round 6 item 2: the recovery phrase is generated HERE). Shown
+        // whenever a signed-in real-store session exists; the sheet itself
+        // projects the exact state (setup / enroll / enrolled doors).
+        if sync.allowsSync, services.account.variorum != nil, !keysLocked {
+            Button("Encryption…") { showingEncryption = true }
+        }
         // Sitting 9 (R94): the cause inline, classified — an auth-shaped
-        // failure names its fix and the Account door is right there.
+        // failure names its fix and the Account door is right there. The
+        // keys-locked state carries its own line above instead (the cause
+        // IS the line).
         if let error = sync.status.lastError, !sync.status.lastErrorIsOffline,
-           !sync.status.isSyncing {
+           !sync.status.isSyncing, !keysLocked {
             ErrorCauseNote(error: error)
         }
         }
@@ -81,7 +107,15 @@ struct SyncStatusRow: View {
         .sheet(isPresented: $showingAccount) {
             AccountView(services: services)
         }
+        .sheet(isPresented: $showingEncryption) {
+            EncryptionView(services: services)
+        }
     }
+
+    /// The locked-state line's one string (Phase 14b, L9 — the SyncSpec
+    /// §12-grammar presentation of `SyncError.encryptionKeysUnavailable`),
+    /// exposed for the presented-state pin like `offlineLabel`.
+    static let lockedLabel = "Sync locked — enter your encryption passphrase"
 
     private var lastSyncLabel: String {
         guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }

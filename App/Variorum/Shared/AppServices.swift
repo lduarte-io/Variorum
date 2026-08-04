@@ -61,6 +61,9 @@ final class AppServices {
     let auth: AuthSession
     /// The bridge's Fragments-project session (QUESTIONS #16, shape (c)).
     let fragmentsAuth: AuthSession
+    /// The E2EE flows' state + doors (Phase 14b batch 3, L9) — one seam for
+    /// Mac and phone, exactly like the account surface.
+    let encryption: EncryptionSession
     let account = AccountState()
 
     /// The app session (store + runner) the services compose over —
@@ -76,14 +79,22 @@ final class AppServices {
     private let makeSyncTransport: (any UserSessionProviding) -> any SyncTransport
     private let makeBridgeTransport:
         (any UserSessionProviding, _ expectedUserID: String) -> any FragmentsBridgeTransport
+    /// The engine's E2EE key seam (Phase 14b batch 3 — batch 2's
+    /// PROVISIONAL 2 resolved at THIS construction site): production is the
+    /// Keychain-backed provider (enrollment-only cadence, R-6); tests
+    /// inject fixed/locked providers so wiring pins never touch the real
+    /// Keychain.
+    private let makeSyncKeyProvider: () -> any SyncKeyProviding
 
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
         backupEnabled: Bool, bridgeEnabled: Bool = false,
         auth: AuthSession? = nil, fragmentsAuth: AuthSession? = nil,
+        encryption: EncryptionSession? = nil,
         bridgeMinimumRoundInterval: Duration = .seconds(60),
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
-        makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil
+        makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil,
+        makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil
     ) {
         self.session = session
         self.makeSyncTransport = makeSyncTransport ?? { provider in
@@ -91,6 +102,7 @@ final class AppServices {
                 configuration: ProjectConfig.variorumTransport,
                 sessionProvider: provider)
         }
+        self.makeSyncKeyProvider = makeSyncKeyProvider ?? { DeviceKeySyncProvider() }
         self.makeBridgeTransport = makeBridgeTransport ?? { provider, expectedUserID in
             FragmentsRPCTransport(
                 configuration: FragmentsRPCTransport.Configuration(
@@ -115,6 +127,19 @@ final class AppServices {
         self.fragmentsAuth = fragmentsAuth ?? AuthSession(
             configuration: ProjectConfig.fragmentsAuth,
             store: .keychain(service: KeychainAuthStorage.fragmentsService))
+        // The E2EE flows compose over the SAME auth session the sync
+        // transport rides — the vault lives on the account (R-1).
+        let authSession = self.auth
+        self.encryption = encryption ?? EncryptionSession(
+            store: .keychain(),
+            client: ProjectConfig.variorumConfigured
+                ? KeyVaultClient(
+                    configuration: KeyVaultClient.Configuration(
+                        projectURL: ProjectConfig.variorumProjectURL,
+                        apiKey: ProjectConfig.variorumPublishableKey),
+                    sessionProvider: authSession)
+                : nil,
+            signedIn: { await authSession.currentUserID != nil })
         // Bridge rounds ride the sync cadence: AFTER each sync round, never
         // interleaved with one (a landing sees the store the mirror sync
         // just settled). Unconfigured sessions no-op.
@@ -143,6 +168,11 @@ final class AppServices {
     /// sync + bridge, run the idempotent owner adoption when signed in,
     /// then the sweep and the backup clock.
     func start() async {
+        // Enrollment/setup landing keys heals the engine's keys-refusal
+        // immediately (Phase 14b): one round, through the ordinary trigger.
+        encryption.onKeysChanged = { [weak self] in
+            self?.sync.triggerSync()
+        }
         await auth.setOnChange { [weak self] tokens in
             Task { @MainActor [weak self] in
                 await self?.variorumSignInChanged(tokens)
@@ -261,7 +291,8 @@ final class AppServices {
     private func connectSyncIfAllowed() async {
         guard sync.allowsSync else { return }
         guard await runOwnerAdoption() else { return }
-        await sync.configure(transport: makeSyncTransport(auth))
+        await sync.configure(
+            transport: makeSyncTransport(auth), keyProvider: makeSyncKeyProvider())
         sync.triggerSync()
     }
 
