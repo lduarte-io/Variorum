@@ -409,6 +409,126 @@ adjust with recorded reasons; the gate presents the final list.
    derivation on the Mac (the phone measurement rides batch 3's device
    work — BOTH recorded before the gate, R-7's condition).
 
+### Batch 1 — record (implementer session, 2026-08-04)
+
+**What shipped (commits `ad7bbc7` vendored material · `ed30c3a` Crypto/ +
+tests):**
+
+- **L1 — vendored material, its own commit.** `Vendor/CArgon2/`: the PHC
+  reference implementation's minimal Argon2id set at pinned upstream
+  `f57e61e19229e23c4445b85494dbf7c07de721cb` — `include/argon2.h`,
+  `src/{argon2,core,encoding,ref}.c` + headers, `src/thread.h` (header
+  only), `src/blake2/{blake2b.c,blake2.h,blake2-impl.h,blamka-round-ref.h}`
+  — byte-verbatim, LICENSE (dual CC0-1.0/Apache-2.0) preserved, README
+  records pin + file-set rationale (NOT vendored: `opt.c` SIMD x86 path,
+  `thread.c` — excluded by `ARGON2_NO_THREADS` — bench/genkat/run/test).
+  Wired as the `CArgon2` C target (`publicHeadersPath: include`,
+  `-DARGON2_NO_THREADS`); `VariorumCore` depends on it; the test target
+  additionally depends on it directly (the RFC full-context vector calls
+  `argon2_ctx`, which `PassphraseKDF` deliberately does not expose).
+  BIP-39 English wordlist: `Sources/VariorumCore/Resources/bip39-english.txt`
+  (bundled `.copy` resource; it must live in the target dir, so the
+  provenance README sits at `Vendor/BIP39/README.md`) — bitcoin/bips pinned
+  `e7263a4cfe500c89e4269889244606953691ca33`, SHA-256 =
+  `2f5eed53…24dbda`, matching the canonical published hash (independently
+  recomputed by the lookup agent from a fresh fetch — two-source
+  confirmation).
+- **L2 — `Sources/VariorumCore/Crypto/`, four pure components:**
+  - `PassphraseKDF`: Argon2id via `argon2id_hash_raw`; parameters VERSIONED
+    in `Descriptor` (algorithm · argon2Version · m/t/p · salt · output
+    length) stored beside the wrap — unwrap re-derives from the vault's
+    descriptor, never app defaults (R-7's soft door). v1 default: **m=64
+    MiB, t=3, p=1, 32-byte output, 16-byte salt** (OWASP floor 19 MiB/t=2
+    exceeded; RFC 9106's second recommendation with lanes held at 1 for the
+    single-threaded build). Passphrase NFKD-normalized before hashing
+    (cross-device composition invariance; test-pinned).
+  - `RecoveryPhrase`: 12-word BIP-39 (R-5; other word counts deliberately
+    refused — the vault only mints 12), generate/validate/derive, typed
+    errors incl. `checksumMismatch` and `unknownWord(_:)`; standard BIP-39
+    seed (PBKDF2-HMAC-SHA512 ×2048 via CommonCrypto) → HKDF-SHA256 (salt
+    `variorum.suite.e2ee.v1`, info `recovery-wrap-key`) → 256-bit recovery
+    wrap key; both stages drift-pinned.
+  - `KeyVaultFormat`: versioned payload (v1), master wrapped by
+    passphrase-KDF key AND recovery key, class keys `corpus` ·
+    `journal_bridge` (each with plaintext `keyID`) wrapped by master, all
+    `AES.KeyWrap` (RFC 3394). **Round 5's wrap-addition built in:**
+    `masterWrappedByRecovery` is optional; `addingRecoveryWrap` adds it
+    later and VERIFIES the caller's master against a class key first
+    (`masterKeyMismatch` — a wrong master can never become the phrase's
+    target); refuses when already present (replacing the disaster road is a
+    deliberate future ceremony, not a silent overwrite). Stable sorted-keys
+    JSON `encoded()`/`init(decoding:)`; every op refuses a non-v1
+    `formatVersion` typed.
+  - `PayloadCipher`: AES-256-GCM, per-value random 96-bit CryptoKit nonce,
+    AAD `table:rowID:column:keyID`, `e1:` + base64(nonce‖ct‖tag) in TEXT
+    columns; `isEncrypted(_:)` for the seam/mirror-dump assertions; typed
+    refusal arms (`notEncrypted` / `unsupportedVersion` — a foreign `e<n>:`
+    speaks as such / `malformedEncoding` / `malformedCiphertext` /
+    `authenticationFailed` / `invalidPlaintext`), nothing crashes, nothing
+    unauthenticated is ever returned.
+- **The batch-1 design call THE DESIGN delegated (recorded in the
+  PayloadCipher format doc-comment):** per-class keys used DIRECTLY — **no
+  HKDF per-table subkeys in v1.** Grounds: NIST SP 800-38D's random-nonce
+  bound (2^32 per key) sits orders of magnitude above personal-corpus write
+  volume; subkeys would spread key-custody logic across the seam/Keychain
+  story for marginal benefit; the `e1:` prefix + vault `format_version`
+  leave an `e2:` subkey format addable with zero ambiguity.
+
+**Test vectors used (stated per the brief):** RFC 9106 §5.3's Argon2id
+full-context vector (password 32×01, salt 16×02, secret 8×03, ad 12×04,
+t=3/m=32/p=4 → tag `0d640df5…01e659`) — verified byte-identical to the
+pinned upstream's own `kats/argon2id` KAT and to the RFC text (Sonnet
+lookup, rfc-editor.org) — via `argon2_ctx`; PLUS the pinned upstream
+`src/test.c` argon2id raw-API vectors (8 parameter sets incl. p=2 and
+m=256 MiB) run through `PassphraseKDF.deriveKey` itself. BIP-39: all
+EIGHT 128-bit vectors from the canonical Trezor `vectors.json` referenced
+by BIP-0039 (passphrase TREZOR), fetched verbatim by the lookup agent;
+the empty-passphrase seed pin doubles as the well-known BIP-32 reference
+seed (independent cross-check of the PBKDF2 path).
+
+**Own test-run counts:** the four new suites — `swift test --filter
+"PassphraseKDFTests|RecoveryPhraseTests|KeyVaultFormatTests|PayloadCipherTests"`
+→ **“Test run with 55 tests in 4 suites passed”** (two first-run test-side
+expectation bugs fixed in-session: the `e1:` empty-body arm is
+`malformedCiphertext` not `malformedEncoding` — empty string is valid
+base64 — and a repeat-count landing exactly AT 3,000,000 bytes).
+**KDF latency, Mac (R-7's condition, the Mac half):** v1 descriptor
+(m=64MiB t=3 p=1) — samples 0.661/0.583/0.582 s, **median 0.583 s** — in
+R-7's stated 0.5–1 s class. The PHONE half rides batch 3's device work,
+as the plan assigns (L12).
+**Full core suite (run after this record was written, per the repo-first
+rule): `swift test` → “Test run with 1094 tests in 118 suites passed” —
+baseline 1039/114 + the 55/4 this batch, exactly accounted; zero
+pre-existing tests touched.**
+
+**Deviations / notes:**
+- Key-material randomness (`randomSalt`, `generate`, and callers' future
+  master minting) deliberately does NOT flow through the seedable
+  `@Dependency(\.withRandomNumberGenerator)`: a test-seedable generator in
+  key-material paths is a footgun, the brief blesses CryptoKit-standard
+  randomness, and the pure encoding/derivation paths are what the spec
+  vectors test. Recorded, not PROVISIONAL (the brief's own carve-out).
+- Two SELF-GENERATED drift pins (the v1-KDF envelope; the recovery HKDF
+  stage) are implementation-generated-then-pinned — they pin against
+  silent drift that would orphan vaults, not correctness (which the
+  RFC/spec vectors carry); stated honestly in their comments.
+- `validate` accepts ONLY 12 words (R-5 fixed the format; 15/18/21/24-word
+  real BIP-39 phrases refuse as `invalidWordCount`). Design fact from the
+  ruling, not PROVISIONAL.
+- PROVISIONAL (small): `addingRecoveryWrap` refuses when a recovery wrap
+  already exists — replace-the-phrase is left to a future deliberate
+  ceremony (regenerate-phrase UX), which batch 3/the ladder can widen if
+  the morning flow wants idempotent re-adds.
+- The pre-existing `nonisolated(unsafe)` DateFormatter warning in
+  `Models/VariorumRecord.swift` and a `if let error { throw error }`
+  warning-repeat in an existing test file predate this batch; untouched.
+
+**Recorded-not-done (owed onward):** the phone KDF latency measurement
+(L12, batch 3); Keychain custody, vault PostgREST client, setup/enrollment
+flows (batch 3); every `Sync/` line (batch 2 — zero `Sync/` contact this
+batch, per the boundary); `08_phase14b_lockstep.sql` (batch 2); no
+push — the architect pushes after verification.
+
 **Batch 2 — the serializer seam + engine gating (THE `Sync/` surgery; the
 postmortem + SyncSpec are mandatory pre-reading; every change convergence-
 tested).**
@@ -642,8 +762,8 @@ attempted overnight if the ladder closes clean):**
 
 | # | Item | Status |
 |---|------|--------|
-| L1 | Vendored CArgon2 + wordlist (own commit; R-7 approval recorded) | pending — batch 1 |
-| L2 | `Crypto/` module: KDF · RecoveryPhrase · KeyVaultFormat · PayloadCipher, vectors + tamper arms | pending — batch 1 |
+| L1 | Vendored CArgon2 + wordlist (own commit; R-7 approval recorded) | **done — batch 1** (`ad7bbc7`; pins f57e61e1 / e7263a4c, batch record above) |
+| L2 | `Crypto/` module: KDF · RecoveryPhrase · KeyVaultFormat · PayloadCipher, vectors + tamper arms | **done — batch 1** (`ed30c3a`; 55 tests/4 suites; full core 1094/118 green; Mac KDF latency 0.583 s median; Round-5 wrap-addition included) |
 | L3 | `SyncSchema` classification + completeness walk | pending — batch 2 |
 | L4 | The serializer seam (encrypt-out/decrypt-in incl. reject-merge) | pending — batch 2 |
 | L5 | Key-provider gating + visible refusal | pending — batch 2 |
