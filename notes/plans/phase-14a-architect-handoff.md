@@ -1,5 +1,10 @@
 # Phase 14a — architect handoff (written 2026-08-04 at ~500k, the author's context-window rule)
 
+> **SPENT — the phase CLOSED 2026-08-04.** The fresh architect ran the full
+> remainder from this file (ladder → gate → closeout); kept as history. The
+> author-facing record is `notes/handoffs/phase-14a-handoff.md`; the phase
+> record is the plan file.
+
 ## The cutover shape (her ruling, round 0z — with the architect's one refinement, accepted)
 
 The sitting session receives batch 1's report, ADJUDICATES it, and records the
