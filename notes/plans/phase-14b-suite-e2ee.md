@@ -2130,6 +2130,158 @@ assertion rides the session-level configure refusal, not the keys gate;
 noted for the architect only because its engine now models the paused
 composition. **The wipe's green-but-tripwire precondition is now MET.**
 
+### The crossover adjudication (the FRESH architect, 2026-08-04 — the
+### incoming seat's verification of the landed round, the re-verify
+### mandate's verdicts, the PROVISIONAL dispositions, and the folded
+### CF-14/15/16 rows; the architect handoff file is the cutover's entry
+### point, THIS file remains the one running record)
+
+**The landed round, verified (verify-don't-trust, own evidence):**
+- Tree clean at `a9b00fd`, pushed; the four commits (`969ff83` ·
+  `6233274` · `6522abe` · `a9b00fd`) match their messages.
+- **Scope re-proven on the diff:** `git diff af32293..a9b00fd` = exactly
+  the four App-side files + the two notes files; `-- Sources/` EMPTY
+  (zero core, zero `Sync/`), `-- Server/ Vendor/` EMPTY.
+- **All three shipped files read in full** against the eight brief items —
+  every item present as recorded; the copy statics byte-match the record's
+  verbatim block; the failed-create/failed-land keep-the-entry deviations
+  verified at their sites (`EncryptionViews.swift` clears only on
+  `lastError == nil`).
+- **Suites re-run by this seat:** core **1156/124 PASSED** (the corrected
+  baseline confirmed — GM-3's second commit accounts for the +1) · Mac
+  **1211/212, the standing TakePane tripwire the ONE red, BY IDENTITY**
+  · mobile **173/25 PASSED** + TEST SUCCEEDED · spine **51/7 PASSED**.
+  (Run lines in this seat's session; the implementer's claims all held.)
+- The test accounting re-derived: 8 `CopyFlowRoundTests` (7 round pins +
+  the step-0 addendum) + 1 `TerminologyPinTests` = 1202 → 1211 exact.
+
+**HER RE-VERIFY MANDATE — the four cutover answers re-derived from the
+code by this seat (file:line evidence; verdicts as she asked):**
+- **Q1 — CONFIRMED.** `EncryptionSession.refresh()`
+  (EncryptionSession.swift:96–124): a missing vault maps to `.noVault`
+  regardless of custody (:107); vault + custody → `.enrolled`; vault +
+  no custody → `.notEnrolled` (or `.enrolledLocked` under the biometric
+  gate — the round's addition). So CF-11's forget door reaches
+  ENROLLMENT, never SETUP; walking the stepped setup live requires the
+  vault row gone — exactly the re-key drill. The A4-fence half also
+  confirmed: a dev-store session renders "Sync off (dev store)" with no
+  sign-in door (SyncStatusViews.swift:35–40) and the Encryption door is
+  gated on `sync.allowsSync` (:93) — no scratch-account walk without
+  weakening the fence.
+- **Q2 — CONFIRMED.** The drill IS CF-8's machinery rehearsed: the vault
+  row delete (admin road) + the committed truncate artifact
+  (`Server/supabase/maintenance/14b-mirror-truncate.sql`, on disk,
+  registry-pinned) + `resyncReinitialize`/`vault-bootstrap` (L10). What
+  14c owes is the in-app door + guard rails, as recorded.
+- **Q3 — CONFIRMED, both halves.** Forget-on-Mac-only leaves the phone
+  untouched (the vault is unread by it; her passphrase change already
+  proved the cross-device independence live). A full RE-KEY leaves the
+  phone's ACCOUNT session intact (auth custody and key custody are
+  separate Keychain services by design — EncryptionKeychain.swift's
+  header states it; 9c's pattern) but its class keys STALE: custody
+  pins `corpusKeyID` (DeviceKeyMaterial, VaultEnrollment.swift:17) and
+  `PayloadCipher`'s AAD binds the key id, so new-key ciphertext fails
+  `authenticationFailed` → the round refuses `payloadCryptoFailure`.
+  And the CF-16 gap is REAL: refresh() decides "enrolled" by
+  `store.load() != nil` ALONE (EncryptionSession.swift:105) — no key-id
+  comparison against the fetched vault exists anywhere in the file. A
+  re-keyed account's stale device reports "This device holds your
+  encryption keys" while its rounds fail generically.
+- **Q4 — CONFIRMED, with the round's update.** After a re-key the phone
+  needs forget → re-enroll with the new passphrase; before this round NO
+  path existed (sign-out keeps custody by design; iOS Keychain survives
+  reinstall). CF-11's door NOW SHIPS on both form factors through the
+  shared seam — the round built exactly the missing path.
+- **One precision (not a correction):** the substitute seat's CF-15 line
+  numbers verify exactly (`SyncStatusViews.swift:45–47` isSyncing branch
+  vs :78–87 idle branch; the Encryption door's independent `if` at :93).
+
+**Architect dispositions — the round's PROVISIONALs/deviations (adjudicated
+against the spec docs + the friction doctrine; her walk may overrule any):**
+- *CF-2's retired confirmation dialog* — **ACCEPTED.** The passphrase gate
+  IS the deliberateness ceremony; stacking a second dialog on it is P-5's
+  over-gating shape. CF-2's complaint was the missing gate, not a missing
+  dialog. Hers to reverse at the walk.
+- *Forget clears the biometric gate with custody* — **ACCEPTED.** The
+  gated item IS the policy record; a surviving orphan flag after a
+  custody-total wipe is exactly the drift class the design kills.
+- *The locked section offers the full unlock roads* — **ACCEPTED.** Her
+  ruling's letter ("biometric or the passphrase"), and a forgot-passphrase
+  user must never be stranded behind a gate their written phrase opens.
+- *Step 4 auto-generates on appear* — **ACCEPTED.** CF-5's "the setup
+  shouldn't work if you don't" reads as: the step IS the phrase; a
+  declinable Generate button would re-open the optional look she ruled out.
+- *Failed-create keeps the entry / failed-land keeps the words* —
+  **ACCEPTED, the second commended:** the words-survive-a-failed-land rule
+  closes a real wrote-down-the-wrong-phrase trap (a network blip between
+  display and land would have silently re-minted different words).
+- *iOS renders the checkbox as the native switch* — **ACCEPTED** (macOS
+  keeps the literal checkbox; "checkbox" is platform-idiomatic, not
+  byte-literal).
+- *The terminology pin walks comments too* — **ACCEPTED** (it caught its
+  own first offender live; a comment is where the word creeps back in).
+- *The held item (the sync row's locked line says "passphrase" even when
+  the lock is the biometric gate)* — **STAYS HELD for her walk.** CF-15's
+  ruling covers button stability, not this wording; minting new copy for
+  it unasked would be inventing product behavior. One line if she wants it.
+- *The step-0 addendum pin* — **ACCEPTED; the drill is step-0-safe.** The
+  forget-then-set-up alternative is NOT taken: the pinned wholesale
+  overwrite is clean, and the drill's own step 2 clears custody through
+  the forget door anyway.
+
+**THE CF-14/15/16 ROWS — folded from the architect handoff into this
+ledger (they were recorded there to avoid a write race with the then-
+running implementer; the handoff's fuller prose remains the provenance):**
+- **CF-14 — RULED (her UI call): the Encryption surface folds UNDER the
+  Account button as a TAB**, not a sibling door ("account will one day
+  show payment"). Both form factors through the shared seam; the sync
+  row's separate "Encryption…" button retires into it; the LOCKED state's
+  "Unlock…" door stays reachable in place (the fix-naming refusal's own
+  affordance — never buried).
+- **CF-15 — RULED: the sync row's buttons must not move.** The
+  `isSyncing` branch replaces the row's content, so "Sync now"/"Account…"
+  vanish and reappear every round (mechanism confirmed at
+  SyncStatusViews.swift:45–47 vs :78–87). "Sync now" merely DISABLES
+  while a round runs (the progress indicator may show beside the label);
+  both platforms fix at once (MobileSettingsView embeds the same shared
+  row). Pin: a syncing-state assertion that both buttons are present and
+  "Sync now" is disabled.
+- **CF-16 — the stale-key blindness, CONFIRMED above (Q3): ships in the
+  crossover round, BEFORE her drill (her sequencing — the drill's step 3
+  creates exactly this state on the phone and thereby VALIDATES it).**
+  `refresh()` compares custody's `corpusKeyID`/`journalBridgeKeyID`
+  against the fetched vault's class-key ids; a mismatch projects a
+  distinct REPLACED state (copy shape: "This account's encryption keys
+  were replaced. Enter your passphrase to re-enroll.") whose road is
+  ordinary re-enrollment (the enroll save overwrites custody wholesale —
+  the step-0 pin's proven class). The app-side classifier may also name
+  the engine's `payloadCryptoFailure` refusal toward the same door
+  (App-layer only — ZERO `Sync/` lines).
+
+### THE CROSSOVER ROUND — brief (CF-14/15/16; a fresh Fable implementer;
+### the cold pass covers this diff + the landed copy/flow diff together)
+
+1. **CF-16 FIRST** (the drill validates it): the key-id comparison in
+   `refresh()`, the replaced-state projection + copy, the re-enroll road,
+   and the app-side classifier line for the crypto-failure refusal.
+   Pins: replaced-state projection red-on-old (a vault with fresh key ids
+   over stale custody currently reads `.enrolled` — that is the old
+   behavior to pin against); the re-enroll-overwrites arm; the classifier
+   arm.
+2. **CF-14**: the Account sheet gains tabs (Account · Encryption — the
+   shared-seam AccountView/EncryptionView composition); the sync row's
+   "Encryption…" button retires; "Unlock…" under the locked state stays
+   in place and opens the Encryption tab directly. Both form factors.
+   Pin: the locked state still reaches the unlock surface in one act.
+3. **CF-15**: the sync row's syncing state keeps "Sync now" (disabled) +
+   "Account…" in place; the progress indicator rides beside the label.
+   Pin: syncing-state presence + disabled assertions (the ruled shape).
+Boundaries: zero `Sources/VariorumCore/Sync/` lines; zero schema/server/
+production contact; core additive-only if genuinely needed (record why);
+nothing beyond the three items. Acceptance: core + full Mac suite
+(tripwire-only) + mobile + spine, own runs, synchronous waits, repo-first
+record before long runs.
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |
@@ -2147,9 +2299,15 @@ composition. **The wipe's green-but-tripwire precondition is now MET.**
 | L11 | Bridge journal-class capability (paused) + touchpoint #2 concrete facts | **done — batch 3** (`80a6e5e`; the STRUCTURAL pause via the refusing default provider; AAD = journal_entries:<date>:body:<key_id>; the legacy-plaintext land rule PROVISIONAL; 105/9 bridge suites green over ciphertext + 7 pins, four arms revert-verified; contract block additive) |
 | L12 | Phone KDF latency measured (R-7's condition) | **done — batch 3** (SIMULATOR 0.686 s, recorded as NOT the device number; the flow surfaces its own on-device number for the gate's step 5) |
 | L13 | Disclosure list + warning wording for her ratify | **done — batch 3 → gate** (the GATE RATIFY block above the ladder section) |
-| L14 | The ladder (combined diff) | pending |
-| L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | pending — her go per step |
+| L14 | The ladder (combined diff) | **done — CLOSED at round 2** (R1: 1 MAJOR + 3 MINOR + 5 NIT all fixed revert-verified; R2: every disposition holds, zero new HIGH) |
+| L15 | The gate steps 1–8 (deploy · setup · wipe-repush · phone enroll · recovery drill · refresh · ratifies) | steps 1–6 **done** (A1+export · 08 deployed marker 5 · her vault · wipe+repush+live dump proof · phone enrolled 0.16 s · phrase drill light road); step 7 refresh + step 8 ratifies ride the crossover tail (L21) |
 | L16 | MobileSoul PL-6 updated at design time (done this sitting) + closeout parity line | PL-6 written; closeout line owed |
+| L17 | The copy/flow round (CF-1…CF-13 + biometric) | **done** (`969ff83`+`a9b00fd`; 8+1 pins, five behavioral reverts; verified + adjudicated by the crossover architect — the adjudication section above) |
+| L18 | The crossover round (CF-14 · CF-15 · CF-16) | pending — brief above; CF-16 before her drill |
+| L19 | The mobile flow notes file (her coordination deliverable) | pending — `notes/plans/phase-14b-mobile-flow-notes.md` |
+| L20 | ONE cold pass over the copy/flow + crossover diffs (REVIEW_PROMPT verbatim) | pending |
+| L21 | HER ACCEPTANCE: the full re-key drill (runbook in the architect handoff; step 0 PINNED green) + the disclosure ratify + the `/Applications` refresh | pending — her go per step |
+| L22 | Closeout ritual in full (incl. the 14c kickoff draft) | pending |
 
 ## Environment traps (carried into every batch brief, per the skill)
 
