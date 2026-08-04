@@ -1245,6 +1245,124 @@ reviewer. The 08 deploy HOLDS until round 2 closes (R1-2 amends 08
 itself — deploying pre-fix would turn a free column into a ninth lockstep
 file).**
 
+### Ladder fix record (round 1 → 2) — fix implementer session, 2026-08-04
+
+**Commits:** `be33974` (schema artifacts — the R1-1 truncate artifact +
+R1-2's 08 amendment, one commit per the route's allowance) · `1c0b9d2`
+(the code fixes + pins + THE DESIGN's sixteen→eighteen correction).
+
+**Per finding — what changed, and the revert verification:**
+
+- **R1-1 (MAJOR) — FIXED, artifact-class red verified.**
+  `Server/supabase/maintenance/14b-mirror-truncate.sql` authored: ONE
+  `truncate table` statement over EXACTLY the eighteen registry tables
+  (`SyncSchema.tables`), deliberately OUTSIDE the numbered chain (header
+  states the R-2 one-time gate-act posture — no marker, not schema
+  choreography, A1 rail + mirror export + her go; no `restart identity`,
+  SyncSpec §9). Pin: `AuthRLSDDLTests.theMirrorTruncateArtifactMatches
+  TheRegistryExactly` — a pure `truncateProblems` check (missing/extra/
+  forbidden/statement-count) asserted empty against the parsed artifact,
+  order-insensitive vs the registry, provably free of
+  `key_vault`/`sync_meta`/`auth.*`, single-statement, no marker.
+  **Red-on-old:** (a) artifact-absent — the pre-fix state — pin run with
+  the file moved aside: FAILED (`NSCocoaErrorDomain 260`, no such file);
+  restored: passes. (b) the doctored-fixture proof
+  (`aDoctoredTruncateListIsFlaggedByTheCheck`) pins that the check bites
+  on a skipped registry table AND on a forbidden `key_vault` entry —
+  the two R1-1 failure classes, never a vacuous pass. THE DESIGN's
+  "sixteen data tables" corrected to "eighteen" with a pointer to the
+  artifact.
+- **R1-2 (MINOR) — FIXED, revert-verified BOTH assertions.** 08 (still
+  UNDEPLOYED — the sanctioned moment) gains `revision integer not null
+  default 1`, marker still the last statement; the DDL pin gains the
+  column + its default. Client CAS, the house shape:
+  `KeyVaultClient.fetchVault` now returns `FetchedVault` (format + the
+  revision token — they travel together so an update derived from a
+  fetch carries THAT fetch's token); `updateVault(_:expectedRevision:)`
+  PATCHes behind `revision=eq.<fetched>` and writes fetched+1; zero rows
+  disambiguates by re-read into `vaultAbsent` vs the NEW typed
+  `vaultRevisionConflict` (doc + app wording both say refetch-and-
+  re-derive, never blind-retry). Wired through `VaultEnrollment`
+  (`landRecoveryWrap`, `changePassphrase` — the two update doors) and the
+  app seam; the bootstrap brain performs NO updates (create-or-unwrap
+  only), verified, so nothing to wire there. The wire row's `revision`
+  decodes-if-present with default 1 (the server column default; encoding
+  stays synthesized so the recovery wrap's NIL-OMISSION is preserved).
+  `ScriptedVaultServer` models the filter AND PostgREST's
+  keys-present-only PATCH merge (an absent filter matches any revision —
+  exactly PostgREST, which is what lets the behavioral revert reproduce
+  the pre-fix arm). **Red-on-old (behavioral revert — the
+  `revision=eq.` filter dropped from `updateVault`, run, restored):**
+  `aStaleFetchUpdateAfterARegenerateRefusesInsteadOfRevertingThePhrase`
+  FAILED both ways the finding predicted — no conflict thrown AND
+  `wrongRecoveryPhrase` on the freshly WRITTEN phrase (the discarded
+  words had silently won); `aStaleRevisionUpdateRefusesTypedWithout
+  Writing` failed beside it. Restored: both pass. **The nil-omission
+  subtlety pinned as knowledge**
+  (`codableNilOmissionIsWhyTheFirstGenerationArmWasAccidentallySafe`):
+  the stale no-wrap row's PATCH body carries NO
+  `master_wrapped_by_recovery` key at all, which is why only the
+  regenerate arm could ever clobber.
+- **R1-3 (MINOR) — FIXED, test-only (no red-on-old owed).**
+  `SupabaseIntegrationTests` now additionally requires
+  `VARIORUM_INTEGRATION_ALLOW_TEST_KEYS=1`; the skip message names the
+  test-key production-wedge mechanism (`payloadCryptoFailure`, park/heal
+  Phase 12) and the gate's live dump verification as the sanctioned
+  real-server pass.
+- **R1-4 (MINOR) — FIXED, revert-verified.** `BridgeCrypto.openLanded`
+  routes every landed body through `PayloadCipher.open`; the legacy
+  pass-through rides ONLY the `.notEncrypted` arm — `unsupportedVersion`
+  (and every other crypto failure) now refuses the round with the cursor
+  held; the receipt half inherits the same behavior through its existing
+  preserve-verbatim catch (an `e2:` receipt body now preserves durably
+  instead of passing to discrimination as text). **Red-on-old
+  (behavioral revert — the old exact-`e1:` guard restored, run,
+  re-fixed):** `aFutureVersionCiphertextBodyRefusesTheRoundInsteadOf
+  Landing` FAILED on all three assertions — the `e2:AAAA` body LANDED
+  (created: 1), rendered as the day's text, cursor advanced. Restored:
+  passes.
+- **R1-6 (NIT) — FIXED.** `VaultEnrollment.material(from:)` splits the
+  joint guard; each arm names the class it is actually missing
+  (`.corpus` / `.journalBridge`). Trivial-arm per the disposition; no
+  pin owed (the client's wire row makes the state unreachable through
+  every live path).
+- **R1-7 (NIT) — FIXED.** The `SyncSchema.tables` header comment now
+  reads "The synced tables, in FK-dependency-friendly apply order" — no
+  literal count to drift. The ONE `Sync/` line of this session
+  (`git diff` on `Sources/VariorumCore/Sync/`: 1 insertion, 1 deletion,
+  that comment).
+- **R1-8 (NIT) — FIXED.** `vault-bootstrap` gains `--access-token-file`
+  (bytes = token, ONE trailing newline stripped at the byte level via the
+  shared helper, never printed/logged); `--access-token` retained;
+  EXACTLY ONE of the two required (usage says so; violating it exits 2).
+  The byte contract lives in the brain as
+  `VaultBootstrap.accessToken(fromFileBytes:)` with typed refusals,
+  tested beside the passphrase-file contract.
+
+**Acceptance (all waits synchronous):**
+- Core, full suite from the repo root: **“Test run with 1153 tests in 124
+  suites passed after 30.752 seconds.”** — baseline 1146/124 + exactly
+  the 7 new pins (2 truncate-artifact · 3 CAS · 1 bridge e2: · 1
+  token-file), zero suites added, zero pre-existing tests deleted (the
+  updated call sites: fetchVault's `.format` accessors + the two
+  `updateVault(_:expectedRevision:)` signatures in the vault tests).
+- Mobile (iPhone 17 Pro sim): **“Test run with 173 tests in 25 suites
+  passed after 4.663 seconds.”** + ** TEST SUCCEEDED ** — baseline exact.
+- Mac suite + spine: NOT attempted (the recorded locked-session hold —
+  the architect's unlocked window). In their place, the sanctioned
+  stand-in: **** TEST BUILD SUCCEEDED **** (`build-for-testing`, Mac app +
+  VariorumTests bundle — the touched shared `EncryptionSession` compiles
+  for both form factors).
+
+**Deliberately not touched (recorded):** `BridgeEngine`'s receipt-half
+comment still says "an unopenable `e1:` body" where R1-4 widened the
+class to any `e<n>:` — behavior is correct (the catch preserves
+verbatim), wording one revision behind; left for the round-2 reviewer or
+closeout sweep rather than exceeding the findings' scope. R1-5/R1-9 ride
+the closeout list per the route. No `Vendor/`, no deploy/dashboard
+contact, no `.env*` reads, no push (the architect pushes after
+verification).
+
 **THE GATE (announced steps, her explicit go per step — amended by Round 4:
 refresh pre-authorized; wipe pre-approved and sequenced at step 4; deploy
 attempted overnight if the ladder closes clean):**
