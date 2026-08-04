@@ -23,14 +23,21 @@ session and is the launchable unit the author asked for.*
 > `mobile` (if the merge to `main` has happened, verify with the
 > author whether work continues on `main` or a fresh branch).
 > Verify repo state (`git log --oneline -10`, `git status`) and
-> spot-check the latest records before relying on them. Then run the
-> stages below in order, one batch at a time, with the standing
-> discipline: fresh implementer session per batch, a stage-end
-> review ladder with fresh cold reviewers, red-on-old pins absolute,
-> PROVISIONAL-and-continue for non-gating ambiguity, author-only
-> calls as hard stops, **commit and push `origin` after every batch
-> record, every fix pass, and every ruling recorded — never let the
-> tree sit unpushed at a stopping point.**
+> spot-check the latest records before relying on them. **ONE
+> INVOCATION = ONE STAGE (her restructure, 2026-08-03: "A-D seems
+> like a lot for one phase" — each stage below runs as its OWN
+> phase):** implement the stage's batches → ladder → closeout → her
+> gate → HARD STOP; she kicks off the next stage herself. Standing
+> discipline throughout: fresh implementer session per batch, a
+> stage-end review ladder with fresh cold reviewers, red-on-old pins
+> absolute, PROVISIONAL-and-continue for non-gating ambiguity,
+> author-only calls as hard stops, **commit and push `origin` after
+> every batch record, every fix pass, and every ruling recorded —
+> never let the tree sit unpushed at a stopping point.** Update the
+> CURRENT-STAGE pointer below at every stage close.
+
+**CURRENT STAGE → A (the floor) — not yet kicked off; the `mobile` →
+`main` v1 merge landed 2026-08-03 (see Branch & merge discipline).**
 
 ## The mandate (what the author ruled this round INTO existence for)
 
@@ -107,6 +114,31 @@ sync soak rides real use. TestFlight at stability (M14).
   factory trap · attribute re-stamping on every insertion path · the
   spine's seven suite-type names · her interleaved rulings recorded
   same-turn.
+
+## Branch & merge discipline (added 2026-08-03 at her merge-go; BINDING for every stage)
+
+Nothing about branch synchronization is automatic — it is THIS
+discipline, executed by sessions, that keeps the two lines healthy:
+
+- **The layout:** mobile work continues in the `~/dev/variorum-mobile`
+  worktree on branch `mobile`; the Mac phases (14a now) work `main` in
+  `~/dev/variorum`. The v1 gate merge (`mobile` → `main`, 2026-08-03)
+  carried the whole mobile build + every gate ruling to `main`.
+- **PULL `main` IN at every good moment:** `git fetch && git merge
+  origin/main` into `mobile` at EVERY stage kickoff and EVERY batch
+  boundary (and before any ladder round). **14a is actively changing
+  shared code — the sign-in machinery (`App/Variorum/Shared/` auth
+  shells, and the mirror-side expectations) is shared between Mac and
+  mobile, and 14a's batches will update BOTH surfaces through it.**
+  A stale `mobile` branch working on pre-14a auth shells is the
+  failure this rule exists to prevent. Conflicts resolve in the
+  mobile worktree, never in the Mac's.
+- **MERGE `mobile` BACK at stage ends, with her prompt:** every stage
+  closeout ends by ASKING the author whether this is a good moment to
+  merge `mobile` → `main` (14's state decides; plain merge, never a
+  rewrite). Never auto-merge outward without her word; never end a
+  stage without asking.
+- Both directions push `origin` immediately after merging.
 
 ## State at authoring (2026-08-03)
 

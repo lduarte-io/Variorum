@@ -5962,6 +5962,19 @@ no-redirect principle.**
    merges** (at the Phase 14 pause per the standing timing). The plan:
    `notes/plans/mobile-parity-round.md`.
 
+**GATE CLOSE-OUT ACTS (2026-08-03, her final directives):** the MERGE
+GO — her word plus the 14a session's own: *"The mobile merge — yes,
+and before the code batches is the better order. The sign-in machinery
+is shared code between Mac and mobile, so merging first means one 14a
+batch updates both surfaces at once… From this phase's side, main is
+ready for it… the merge is that session's act."* Executed by this
+session (the merge commit is the record). Her restructure: **stages
+A–D run as SEPARATE phases** (one invocation = one stage, hard stop +
+her word between — the plan's kickoff amended). The plan gains the
+**Branch & merge discipline** section (pull `main` at stage kickoffs +
+batch boundaries — 14a is changing the shared sign-in code; prompt her
+for `mobile` → `main` at every stage end; nothing is automatic).
+
 ---
 
 ## Orientation
