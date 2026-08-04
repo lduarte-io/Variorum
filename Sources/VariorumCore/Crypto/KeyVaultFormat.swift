@@ -143,6 +143,33 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         return updated
     }
 
+    /// REPLACE an existing recovery wrap — the deliberate ceremony batch 1's
+    /// `addingRecoveryWrap` refusal predicted, made real by the author's
+    /// Round-7 ruling (batch 3): (RE)GENERATE RECOVERY PHRASE is ONE
+    /// surface serving first-generation and regeneration, and replacement
+    /// is a deliberate confirm in the UI. Additive to the batch-1 format
+    /// logic (recorded reason: the Round-7 scope addition; `addingRecoveryWrap`
+    /// keeps its strict add-only semantics and its pin). Verifies the
+    /// caller's master exactly as the add door does; also serves the
+    /// wrap-absent case (replacing nothing is adding), so the enrollment
+    /// flow has one landing door behind its own allow-replace gate.
+    public func replacingRecoveryWrap(
+        masterKey: SymmetricKey, recoveryKey: SymmetricKey
+    ) throws -> KeyVaultFormat {
+        try requireCurrentFormat()
+        guard let probe = classKeys.first else { throw KeyVaultError.noClassKeys }
+        guard (try? AES.KeyWrap.unwrap(probe.wrappedByMaster, using: masterKey)) != nil else {
+            throw KeyVaultError.masterKeyMismatch
+        }
+        var updated = self
+        do {
+            updated.masterWrappedByRecovery = try AES.KeyWrap.wrap(masterKey, using: recoveryKey)
+        } catch {
+            throw KeyVaultError.wrapFailed
+        }
+        return updated
+    }
+
     // MARK: - Unwrap
 
     /// Unwrap master with the passphrase-derived key. A wrong passphrase
