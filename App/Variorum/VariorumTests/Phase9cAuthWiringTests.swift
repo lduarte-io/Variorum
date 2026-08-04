@@ -145,7 +145,12 @@ struct Phase9cAuthWiringTests {
                 makeBridgeTransport: { _, _ in bridgeTransport },
                 // Phase 14b: a working fixed key world so wiring rounds
                 // reach the transports (never the real Keychain in tests).
-                makeSyncKeyProvider: { AppTestKeyProvider() })
+                // GM-2: the bridge twin rides the new AppServices seam —
+                // production passes nil (the refusing default, the RULED
+                // pause); these wiring pins guard the cadence machinery the
+                // 14c-era resumption needs.
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                makeBridgeKeyProvider: { AppTestBridgeKeyProvider() })
             await services.start()
             try await body(services, auth, fragmentsAuth, db, syncTransport, bridgeTransport)
             services.stop()

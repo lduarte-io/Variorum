@@ -1492,6 +1492,66 @@ overnight, the record above):**
 8. Disclosure list + warning wording ratified; her passphrase/phrase custody
    confirmed; the pause's END remains HER call (14c still ahead).
 
+### Gate-morning fix record (2026-08-04 — the GM-2 fix session; one commit)
+
+**Scope held to GM-2 exactly: five files, zero `Sources/VariorumCore/`
+lines (verified on the diff), production composition byte-unchanged except
+the added defaulted parameter.**
+
+- **Fix 1 — the bridge-pause test seam.** `AppServices.init` gains
+  `makeBridgeKeyProvider: (() -> any BridgeKeyProviding)? = nil` (the
+  `makeSyncKeyProvider` pattern); `connectBridgeIfAllowed` passes
+  `makeBridgeKeyProvider?() ?? UnenrolledBridgeKeyProvider()` — nil (every
+  production caller) composes byte-identically to the pre-seam default:
+  the engine's refusing provider, the RULED pause. App-test side:
+  `AppTestBridgeKeyProvider` (Phase8ServicesTests.swift, beside
+  `AppTestKeyProvider` — the core `BridgeTestKeys` world is not visible in
+  the Mac target). The six tests, per-test:
+  - `bridgeRoundsFollowSyncRoundsNeverInterleaving` — engine construction
+    gains the fixed provider; the ordering pin observes real rounds again.
+  - `cadenceTriggersAreThrottledToTheMinimumInterval` — same injection;
+    the throttle counts rounds that reach the transport.
+  - `pausedDaysReachTheSessionStatus` — same injection; the pause refuses
+    BEFORE the day sweep, so without keys no pausedDays ever surfaced.
+  - `fragmentsSignInConfiguresTheBridgeAndDisconnectStopsIt` /
+    `theLifecycleCadenceReachesTheBridgeWhenSyncIsOff` /
+    `theLifecycleCadenceStillNeverInterleavesWhenSyncIsOn` — the 9c
+    `withWiredServices` helper passes
+    `makeBridgeKeyProvider: { AppTestBridgeKeyProvider() }` through the new
+    seam; the fence pins in the same file (`devStoreSessionsStayFenced…`,
+    `theBridgeStaysDownWhereItIsNotEnabled`) still assert zero contact and
+    still pass (the fence refuses configure before keys matter).
+  None of the six inspects payloads — call accounting only, so the fixed
+  keys are all they needed. The pause's own zero-contact pin
+  (`theDefaultProviderRefusesEveryRoundBeforeAnyTransportContact`,
+  core-side, against the engine's default) is untouched and still guards
+  the default composition.
+- **Fix 2 — the locked-face pin's dependency bootstrapping.**
+  `aLockedProviderRefusesVisiblyBeforeAnyTransportContact` wraps its body
+  in the wiring suites' standard `withDependencies` bootstrap
+  (`$0.database` / `$0.uuid` / `$0.date` — the Phase 8/9b pattern; the
+  round runs through SyncScheduler/SyncEngine, whose `@Dependency`
+  reads were the recorded `AppDatabase+Dependency.swift:95` /
+  `UUID.swift:67` issues). Assertion content unchanged: locked provider ⇒
+  classified visible refusal + zero transport contact.
+
+**Acceptance (all waited on synchronously, this session):**
+- Mac (full, `-project` invocation): **"✘ Test run with 1202 tests in 210
+  suites failed after 148.224 seconds with 1 issue."** — the one issue is
+  the standing tripwire BY IDENTITY
+  (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`),
+  nothing else red. (No GM-1 preparing-timeout this run.)
+- Spine: **"✔ Test run with 51 tests in 7 suites passed after 13.942
+  seconds."**
+- Core (`swift test`, untouched-core proof): **"✔ Test run with 1153 tests
+  in 124 suites passed after 31.433 seconds."**
+
+**Deliberately not touched:** `fencedSessionsNeverConfigureTheBridge` (9b)
+keeps the engine default — it was never failing and its zero-calls
+assertion rides the session-level configure refusal, not the keys gate;
+noted for the architect only because its engine now models the paused
+composition. **The wipe's green-but-tripwire precondition is now MET.**
+
 ## Ledger (running; every row owned)
 
 | # | Item | Status |

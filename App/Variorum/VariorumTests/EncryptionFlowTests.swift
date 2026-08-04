@@ -10,6 +10,7 @@
 //
 
 import CryptoKit
+import Dependencies
 import Foundation
 import Testing
 import VariorumCore
@@ -206,21 +207,32 @@ struct SyncLockedFaceTests {
     /// intact, the row's locked face reachable.
     @Test func aLockedProviderRefusesVisiblyBeforeAnyTransportContact() async throws {
         let db = try AppDatabase.inMemory()
-        let session = SyncSession(database: db, allowsSync: true)
-        let transport = CountingTransport()
-        await session.configure(transport: transport, keyProvider: LockedProvider())
-        session.triggerSync()
-        // Settle until the round reports.
-        for _ in 0..<400 {
-            if session.status.roundsCompleted > 0 { break }
-            await Task.yield()
-            try? await Task.sleep(for: .milliseconds(5))
+        // GM-2 fix: the round runs through SyncScheduler/SyncEngine, which
+        // read `@Dependency(\.database/.date/.uuid)` — the wiring suites'
+        // standard bootstrap (the Phase 8/9b pattern) provides them; the
+        // bare test context reports unimplemented-dependency issues instead
+        // of running the round. Assertions unchanged.
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            let session = SyncSession(database: db, allowsSync: true)
+            let transport = CountingTransport()
+            await session.configure(transport: transport, keyProvider: LockedProvider())
+            session.triggerSync()
+            // Settle until the round reports.
+            for _ in 0..<400 {
+                if session.status.roundsCompleted > 0 { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(session.status.roundsCompleted > 0)
+            #expect(session.status.lastError.map(EncryptionSession.isKeysLockedError) == true,
+                    "the keys-refusal surfaces classified — the locked face's trigger")
+            #expect(await transport.calls == 0,
+                    "keys are checked FIRST: a locked device refuses with zero network contact")
+            session.stop()
         }
-        #expect(session.status.roundsCompleted > 0)
-        #expect(session.status.lastError.map(EncryptionSession.isKeysLockedError) == true,
-                "the keys-refusal surfaces classified — the locked face's trigger")
-        #expect(await transport.calls == 0,
-                "keys are checked FIRST: a locked device refuses with zero network contact")
-        session.stop()
     }
 }

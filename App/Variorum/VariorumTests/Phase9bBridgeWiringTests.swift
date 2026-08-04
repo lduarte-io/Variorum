@@ -128,8 +128,12 @@ struct Phase9bBridgeWiringTests {
 
             let bridgeTransport = RecordingBridgeTransport()
             let bridge = BridgeSession(allowsBridge: true)
+            // GM-2: fixed journal keys, so the ordering machinery this pin
+            // guards stays observable through the 14b pause era.
             await bridge.configure(
-                engine: BridgeEngine(transport: bridgeTransport, configuration: testConfiguration()))
+                engine: BridgeEngine(
+                    transport: bridgeTransport, configuration: testConfiguration(),
+                    keyProvider: AppTestBridgeKeyProvider()))
             // The AppServices wiring, verbatim.
             syncSession.onRoundCompleted = { [weak bridge] in bridge?.trigger() }
 
@@ -179,8 +183,12 @@ struct Phase9bBridgeWiringTests {
             let transport = RecordingBridgeTransport()
             let bridge = BridgeSession(
                 allowsBridge: true, minimumRoundInterval: .milliseconds(150))
+            // GM-2: fixed journal keys — the throttle pin counts rounds
+            // that actually reach the transport.
             await bridge.configure(
-                engine: BridgeEngine(transport: transport, configuration: testConfiguration()))
+                engine: BridgeEngine(
+                    transport: transport, configuration: testConfiguration(),
+                    keyProvider: AppTestBridgeKeyProvider()))
 
             // A settle-rate burst.
             for _ in 0..<6 { bridge.trigger() }
@@ -260,10 +268,13 @@ struct Phase9bBridgeWiringTests {
             _ = try ops.newBlock(in: second.id, text: "B", at: .end)
 
             let bridge = BridgeSession(allowsBridge: true)
+            // GM-2: fixed journal keys — the pause refuses BEFORE the day
+            // sweep, so without them no pausedDays ever reach the status.
             await bridge.configure(
                 engine: BridgeEngine(
                     transport: RecordingBridgeTransport(),
-                    configuration: testConfiguration()))
+                    configuration: testConfiguration(),
+                    keyProvider: AppTestBridgeKeyProvider()))
             bridge.trigger()
             for _ in 0..<2000 {
                 if !bridge.status.pausedDays.isEmpty { break }
