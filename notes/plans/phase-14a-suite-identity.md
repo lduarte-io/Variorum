@@ -1212,6 +1212,31 @@ suites); red-on-old pins verified both directions.
   cleaner: direct sign-in · continuity-may-break · provider out of the
   sign-in code · tests.
 
+- **Round 0y (same sitting) — the context-window plan + the ideal-final-shape
+  sweep.** Her flag: the session is at ~500k (her standing cutover rule).
+  **The honest answer, recorded: this is a MAJOR phase — the ladder + gate +
+  closeout + the 14b draft do not confidently fit in ~150k.** The cutover is
+  made near-free NOW: **`notes/plans/phase-14a-architect-handoff.md`
+  written** (read-first list, live state, the remaining work in order, gate
+  steps, standing cautions), and the running implementer instructed to write
+  its report INTO the plan file committed+pushed (so a fresh architect can
+  receive it even if the message channel is lost). Plan: this session
+  receives and adjudicates batch 1's report if it lands within budget; the
+  ladder + gate + closeout run in a fresh architect session from the handoff
+  at the natural seam. **The sweep of 14b/14c/contract/strategy/KnownIssues
+  for allowances-to-what-exists:** mostly already ideal-shape (the 14c row's
+  enumeration, the guardrails, the contract's execution model, the
+  release-strategy records — all confirmed clean). TWO real findings, fixed
+  same-commit: **(1)** the 14b row now carries the consistency note (the
+  Fragments END of journal E2EE is DESIGNED at 14b, EXECUTED in the one
+  batch) **and the wipe-and-repush candidate** — R3 applied to her mirror's
+  migration: local SQLite is truth, the mirror is a peer, one active device —
+  re-initializing through the new encrypted serializer may beat migration
+  machinery entirely (the 14b sitting rules it, server_seq/cursor
+  implications weighed); **(2)** the contract gained a READ-THIS-FIRST
+  pointer so the Fragments agent lands on the operative EXECUTION MODEL
+  blocks, never the superseded TestFlight-era layers above them.
+
 ## Ledger
 
 | # | Item | Status |

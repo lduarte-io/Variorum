@@ -379,6 +379,13 @@ baseline, final.**
 
 ## The 14a horizon — suite-identity heads-up (added 2026-08-02, the evening Fragments goes to TestFlight)
 
+> **READ THIS FIRST (2026-08-04):** this section accumulated in layers as rulings
+> evolved. THE OPERATIVE PARTS for the Fragments agent are the **EXECUTION MODEL**
+> block and the three **TOUCHPOINT** blocks below (one batched handoff at 14c's
+> end). Everything above them in this section — the TestFlight-ships-tonight
+> framing, the ship-native-then-relink caveat — is superseded history, kept for
+> the record.
+
 **Why this section exists:** the author is finishing Fragments for TestFlight and asked
 what the suite-identity (Phase 14a) questions are, so tonight's build doesn't foreclose
 them. The recorded rulings this rests on (Variorum master plan rows 14a–14c +
