@@ -62,11 +62,17 @@ public enum SyncSchema {
     /// per-post extent target, S4-28.1/N36; mirror DDL
     /// 07_phase13b_lockstep.sql — deploy pre-authorized by the 13b EOL
     /// addendum, executed by the orchestrator at the consolidated
-    /// post-ladder window). **Bump this
+    /// post-ladder window); version 5 = the Phase 14b suite-E2EE event
+    /// (the `key_vault` account table + the client's encrypted payload
+    /// serializer — the eighteen encrypted-classified columns now travel
+    /// as `e1:` ciphertext, so pre-14b clients and the post-wipe encrypted
+    /// mirror corpus are mutually unreadable and MUST refuse each other;
+    /// mirror DDL 08_phase14b_lockstep.sql — deploy is the architect's
+    /// gate act, Rounds 4/5). **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 4
+    public static let lockstepVersion = 5
     /// The 13 synced tables in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs

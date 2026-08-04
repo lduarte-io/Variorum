@@ -144,8 +144,10 @@ struct SerializerCompletenessTests {
 
     /// TABLES that exist only on the server (never a mirror of a client
     /// table, never in a payload): `sync_meta` carries the SyncSpec §12
-    /// lockstep marker (05_phase11_lockstep.sql), read via its own RPC.
-    private static let serverOnlyTables: Set<String> = ["sync_meta"]
+    /// lockstep marker (05_phase11_lockstep.sql), read via its own RPC;
+    /// `key_vault` (08_phase14b_lockstep.sql) is ACCOUNT data reached via
+    /// plain authenticated PostgREST — the sync engine never touches it.
+    private static let serverOnlyTables: Set<String> = ["sync_meta", "key_vault"]
 
     @Test func mirrorDDLCoversEverySyncedColumn() throws {
         let mirror = try Self.mirrorColumnsFromDDL()

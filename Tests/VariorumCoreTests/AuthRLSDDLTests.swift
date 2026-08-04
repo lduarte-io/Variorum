@@ -35,6 +35,7 @@ struct AuthRLSDDLTests {
         "05_phase11_lockstep.sql",
         "06_phase13_lockstep.sql",
         "07_phase13b_lockstep.sql",
+        "08_phase14b_lockstep.sql",
     ]
 
     /// The RLS/grant surface: 04 (the auth flip) + the lockstep events
@@ -296,6 +297,79 @@ struct AuthRLSDDLTests {
         #expect(sql07.contains("MIRROR → MAC only"))
         #expect(sql07.contains("NO RPC REWORK RIDES THIS EVENT"))
         #expect(sql07.contains("ORCHESTRATOR"))
+        // 08 (Phase 14b): the vault event. Deploy is the ARCHITECT's gate
+        // act (conditionally pre-authorized, Rounds 4/5 — ladder-clean
+        // overnight or the morning checklist), never a batch implementer's;
+        // no RPC rework (key_vault is account data, never a mirror table);
+        // the marker bump is what fences pre-14b builds off the encrypted
+        // corpus (wipe-and-repush, R-2).
+        let sql08 = try Self.sqlFile("08_phase14b_lockstep.sql")
+        #expect(sql08.contains("THE CHOREOGRAPHY"))
+        #expect(sql08.contains("this file runs on the mirror FIRST"))
+        #expect(sql08.contains("SyncSpec §12"))
+        #expect(sql08.contains("ARCHITECT"))
+        #expect(sql08.contains("never a batch implementer"))
+        #expect(sql08.contains("NO RPC REWORK RIDES THIS EVENT"))
+        #expect(sql08.contains("A1 rail"))
+        #expect(sql08.contains("wipe-and-repush"))
+    }
+
+    // MARK: - The key_vault pins (Phase 14b — the vault is ACCOUNT data on
+    // owner-only RLS, reached via plain authenticated PostgREST; it must
+    // never look like a sync-mirror table)
+
+    @Test func theVaultTableIsOwnerOnlyRLSWithRealPolicies() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("08_phase14b_lockstep.sql"))
+        #expect(sql.contains("create table key_vault ("))
+        #expect(sql.contains("alter table key_vault enable row level security;"))
+        // Every policy binds to auth.uid() — the P-ii-verified pattern.
+        for policy in ["key_vault_owner_select", "key_vault_owner_insert",
+                       "key_vault_owner_update"] {
+            #expect(sql.contains("create policy \(policy) on key_vault"),
+                    "\(policy) missing")
+        }
+        #expect(sql.contains("using (auth.uid() = user_id)"))
+        #expect(sql.contains("with check (auth.uid() = user_id)"))
+        // The bare key stays demoted; authenticated reaches the vault ONLY
+        // through RLS. And deliberately NO delete policy/grant: losing the
+        // vault orphans the whole ciphertext corpus.
+        #expect(sql.contains("revoke all on key_vault from anon;"))
+        #expect(sql.contains("grant select, insert, update on key_vault to authenticated;"))
+        #expect(!sql.contains("for delete"), "no casual delete door on the vault")
+        #expect(!sql.contains("delete on key_vault"), "no delete grant on the vault")
+    }
+
+    /// The vault row's columns carry the client's KeyVaultFormat exactly:
+    /// the twice-wrapped master (recovery wrap NULLABLE — the Round-5
+    /// overnight state), both v1 class keys WITH their key ids (R-8; the
+    /// AAD binds ciphertexts to a key id), and the versioned KDF
+    /// descriptor (R-7's soft door).
+    @Test func theVaultColumnsCarryTheFormatFieldsExactly() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("08_phase14b_lockstep.sql"))
+        for column in [
+            "user_id", "format_version",
+            "kdf_algorithm", "kdf_argon2_version", "kdf_memory_kib",
+            "kdf_iterations", "kdf_parallelism", "kdf_salt", "kdf_output_bytes",
+            "master_wrapped_by_passphrase", "master_wrapped_by_recovery",
+            "corpus_key_id", "corpus_key_wrapped_by_master",
+            "journal_bridge_key_id", "journal_bridge_key_wrapped_by_master",
+            "created_at", "updated_at",
+        ] {
+            #expect(sql.contains(column), "key_vault lacks column \(column)")
+        }
+        #expect(sql.range(
+            of: #"master_wrapped_by_recovery\s+text,"#,
+            options: .regularExpression) != nil,
+            "the recovery wrap must be NULLABLE (the Round-5 overnight state)")
+        #expect(sql.range(
+            of: #"master_wrapped_by_passphrase\s+text not null"#,
+            options: .regularExpression) != nil)
+        // Never in the sync allowlists: the deployed RPC bodies must not
+        // mention the vault (it is not a mirror table).
+        for function in ["sync_push", "sync_pull"] {
+            #expect(!(try Self.finalBody(of: function)).contains("key_vault"),
+                    "\(function) must never touch key_vault")
+        }
     }
 
     @Test func theHeaderCarriesTheSignupsOffPrecondition() throws {
