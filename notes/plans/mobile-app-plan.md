@@ -5983,6 +5983,58 @@ protocol in `notes/MobileSoul.md` §6 amended. **Her involvement level
 confirmed:** *"I'm around for major doubts and product decisions and
 will chip in with the provisionals where I can."*
 
+**THE P-ROUND (2026-08-04) — P1–P44 + riders ALL DISPOSITIONED in 11
+question batches at her word ("silence leaves them as shipped" is
+retired: every item now has her explicit answer).** Also ruled batch 1:
+**the round absorbs 13-phase results CONTINUOUSLY** (every stage
+kickoff sweeps the ledger; **Stage E hard-gates on the ledger empty or
+consciously deferred**; a re-runnable ledger round exists for pile-ups)
+— her pick over a fixed absorption stage.
+
+*Kept as shipped:* P1 · P2 · P4 · P6 · P7 (act-undo review stays
+deferred) · P9 · P10 (current sizes — her on-device call) · P11
+(terminal default) · P12 · P13 · P14 · P16 · P17 (takeLine both
+voices) · P18 · P19 · P20 (custom overlay) · P21 · P22 · P25 · P27 ·
+P28 · P29 · P30 · P31 · P34 · P36 · P37 · P39 · P40 (the delete
+confirm STAYS while the phone lacks structural undo) · P41 · P42 ·
+P44. *Moot:* P3 (S3 dissolved the debug door) · P15 (S2 batch 2
+superseded). *Rider stands:* P8 (a future soft-newline story gains the
+⇧⏎ exclusion).
+
+*FLIPS and new work (all Stage A unless noted):*
+- **P5:** # tap still cycles; LONG-PRESS opens a direct H1/H2/H3/clear
+  picker.
+- **P23:** the stale I10 line rewords (the phone HAS a delete door
+  since S4; the "Mac gesture" tail violates no-redirect); the rest
+  waits for Stage C's sweep.
+- **P24 → NEW REQUIREMENT (her words):** *"make sure i can still have
+  whitespace at the bottom of the note - a nicety from the mac i want
+  preserved"* — the typewriter-room bottom inset is owed on the phone;
+  verify/build at Stage A.
+- **P26 + P43:** the phone's menus VOICE-CASE (the ⋯ takes menu, the
+  edit menu's "Takes…", the structural rows) — one register, hers.
+- **P32:** the truncation marker rewords neutrally (no "lives on the
+  Mac"); load-more stays deferred with the Mac's bounded-window family.
+- **P33:** the SHELF gains its own + New Note door (bookless mint,
+  Library's twin).
+- **P35:** book-tap INVERTS — contents list first; Read is the door.
+- **P38:** placement stands; Stage A fixes the one-line
+  fanned+commented crowding corner.
+- **The bar REDESIGN (her words, supersedes the missing-bar-acts
+  note):** *"I'd condense things down to a formatting Aa icon that has
+  all the formatting options, rather than having eight in the bottom
+  bar"* — the keyboard bar's formatting acts collapse into ONE Aa
+  door; design at Stage A.
+- **LK5's rider → EXPANSION RULING (her words, Stage C's books/tags
+  families confirmed and widened):** *"i think that finishing /
+  unfinishing should be a v1 phone capability - there should be some
+  way to get to book details from the contents of a book and you can
+  change tags there too. people also need to be able to create books
+  based on tags and tag posts - again, full app functionality"* — so
+  Stage C owes: the BOOK DETAILS surface off a book's contents
+  (finish/unfinish, tag editing), smart-book creation from tags, and
+  post tagging. The shelf's ✓ stays as state meanwhile.
+
 **GATE CLOSE-OUT ACTS (2026-08-03, her final directives):** the MERGE
 GO — her word plus the 14a session's own: *"The mobile merge — yes,
 and before the code batches is the better order. The sign-in machinery
