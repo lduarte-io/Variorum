@@ -1493,6 +1493,43 @@ window remain the wipe's precondition).**
   the CAS token moving as designed), `has_recovery_wrap` TRUE, KDF 65536
   KiB / t=3. Her Mac is ENROLLED; the setup half of the gate is DONE.
 
+### THE WIPE AND REPUSH — EXECUTED (2026-08-04, her explicit go: "go ahead!
+### this is the moment where supabase stops seeing all my innermost
+### thoughts haha")
+
+- **The wipe:** the committed truncate artifact executed VERBATIM at her
+  go; after-state verified — all 18 data tables at ZERO, `key_vault` = 1.
+- **The near-miss the dry-run caught (recorded so the class is known):**
+  the runner's first minted session belonged to a STRAY user — the
+  architect minted the admin link against her GIT email
+  *[removed for publication]*
+  DIFFERENT address (the 9c-era identity), and admin `generate_link`
+  CREATED a user for the unknown address despite signups-off (admin
+  bypasses the toggle — worth knowing for 14c). The dry-run surfaced it
+  (wrong uid + "vault absent" through RLS) BEFORE any write; the stray was
+  deleted (RETURNING-verified, zero data), the token re-minted against her
+  real address, the re-dry-run showed her uid + the unwrap arm. Dry-run
+  earned its existence.
+- **Finding GM-3 (fixed at the architect's hand mid-gate, both halves
+  revert-verified; commits `2b3a03c` + `29cfd94`):** the live gateway
+  KILLS rapid-fire push-chunk bursts (deterministic -1005 after ~2–4
+  200-row chunks; the app's scheduler absorbs this class by retrying
+  rounds, so production never saw it) — the runner's drain now retries
+  transient transport drops IN-PROCESS with bounded backoff, and
+  "consecutive" means WITHOUT PROGRESS (the second half, found live: every
+  round of a large drain can end in a drop while the outbox converges —
+  progress resets the bound). A genuinely dead network still fails typed
+  with the outbox intact. Runner suite 12/1; core 1155/124; both pins RED
+  under behavioral revert. 14c note: stranger-scale initial pushes meet
+  this same gateway behavior — the burst/pacing question joins the
+  pull-to-head windowing family.
+- **THE REPUSH: DRAINED.** 11 rounds, 7,265 rows accepted, keys died with
+  the process. **THE LIVE DUMP VERIFICATION — the phase's headline proof,
+  PASSED:** zero plaintext across ALL 18 encrypted columns (every stored
+  value bears `e1:`), mirror rows 7,265 == local 7,265 exact, the sampled
+  journal row reading `e1:ZHwJJAD2…` — structure visible, words never.
+  The runner's session token deleted after use.
+
 ### Gate-morning findings (2026-08-04 — the architect's, at first Mac-suite
 ### execution; recorded before the fix session)
 
