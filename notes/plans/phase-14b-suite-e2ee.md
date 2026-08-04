@@ -1927,11 +1927,13 @@ verbatim lines; FINALIZED post-record per the repo-first rule):**
   suite runs 12/1 today, `git log af32293..969ff83 -- Tests/ Sources/
   Tools/` is EMPTY, so 1156 IS the inherited tree's true count.
 - Full Mac suite (cwd-independent `-project` invocation): **"✘ Test run
-  with 1210 tests in 212 suites failed after 151.411 seconds with 1
+  with 1211 tests in 212 suites failed after 153.651 seconds with 1
   issue."** — the one issue is the standing tripwire BY IDENTITY
   (`TakePaneMeasureTests.aStrandedRenderTierIsRebuiltByAConvergenceOccasion`),
-  nothing else red; 1202 + this round's 8 in 2 new suites, exactly
-  accounted. (No GM-1 preparing-timeout in any run this session.)
+  nothing else red; 1202 + this round's 8 in 2 new suites + the step-0
+  addendum pin below, exactly accounted. (An earlier full run before the
+  addendum: "1210 tests in 212 suites … 1 issue", same tripwire. No GM-1
+  preparing-timeout in any run this session.)
 - Mobile (iPhone 17 Pro sim): **"✔ Test run with 173 tests in 25 suites
   passed after 4.657 seconds."** + ** TEST SUCCEEDED ** — baseline exact.
 - The spine (the seven Tutorial suites, dedicated run): **"✔ Test run
@@ -1940,6 +1942,30 @@ verbatim lines; FINALIZED post-record per the repo-first rule):**
   (Encryption/CopyFlow/Terminology/LockedFace) — "Test run with 14 tests
   in 4 suites passed"; Mac `build-for-testing` ** TEST BUILD SUCCEEDED **;
   the MOBILE APP BUILD against the shared changes ** BUILD SUCCEEDED **.
+
+**ADDENDUM (post-acceptance, same session — responding to the architect's
+mid-run handoff update `c374680`, which landed between this record's two
+commits): THE RE-KEY DRILL's STEP-0 PRE-VERIFICATION IS PINNED GREEN.**
+The handoff's step 0 names an unexercised state gating her live drill — a
+vault DELETED while local custody still EXISTS — and asks for it to be
+confirmed and pinned BEFORE the drill. Done now, while the code was in
+context (P-7; one test, no behavior change):
+`CopyFlowRoundTests.aDeletedVaultWithStaleCustodyOffersSetupAndOverwritesCleanly`
+proves the CURRENT behavior is the clean arm: `refresh()` reads the
+missing vault as `.noVault` even with stale custody (documented in the
+pin), the stepped setup flow proceeds, `setUp()` OVERWRITES the stale
+custody wholesale (fresh material, fresh corpus key id), the sync provider
+serves the NEW key — never the orphaned one — and the mandatory phrase
+step follows exactly as for any fresh vault. The handoff's alternative
+shape ("make the flow forget-then-set-up") therefore stays a TASTE choice,
+not a safety need — the adjudicator can still take it, but nothing wedges
+without it. Under a BIOMETRIC gate the same save path re-persists gated
+and unlocks the launch (the save-under-gate arm already pinned). CF-14/
+15/16 (defined only in the architect handoff, never in this session's
+brief) are DELIBERATELY NOT built here — the handoff already routes them
+to the crossover's own implementer, and building them from a secondhand
+summary would be exactly the drift the brief's "nothing beyond the CF
+items" boundary exists to prevent.
 
 ### THE WIPE AND REPUSH — EXECUTED (2026-08-04, her explicit go: "go ahead!
 ### this is the moment where supabase stops seeing all my innermost

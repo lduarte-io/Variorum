@@ -323,6 +323,41 @@ struct CopyFlowRoundTests {
         #expect(session.state == .enrolled(hasRecoveryWrap: true))
     }
 
+    /// THE RE-KEY DRILL's step-0 pre-verification (the architect's mid-run
+    /// handoff, 2026-08-04 — pinned BEFORE her live drill): a vault DELETED
+    /// while local custody still EXISTS. `refresh()` maps the missing vault
+    /// to `.noVault` regardless of custody (documented here), the setup
+    /// flow proceeds, and `setUp()` OVERWRITES the stale custody cleanly —
+    /// the provider serves the NEW corpus key, never the orphaned one, and
+    /// the mandatory phrase step follows as for any fresh vault.
+    @Test func aDeletedVaultWithStaleCustodyOffersSetupAndOverwritesCleanly() async throws {
+        // Old world: a vault + enrolled custody.
+        let backing = InMemoryKeyBacking()
+        let store = DeviceKeyStore.inMemory(backing: backing)
+        let oldVault = ScriptedVault()
+        let oldSession = makeEncryptionSession(store: store, vault: oldVault)
+        await oldSession.setUp(passphrase: "the-old-passphrase")
+        let stale = try #require(store.load())
+
+        // The vault is deleted (the drill's step 3) — custody survives.
+        let freshVault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: freshVault)
+        await session.refresh()
+        #expect(session.state == .noVault,
+                "a missing vault reads as no-vault even with stale custody — the setup flow is the offer")
+
+        await session.setUp(passphrase: passphrase)
+        #expect(session.lastError == nil)
+        let fresh = try #require(store.load())
+        #expect(fresh != stale, "setUp overwrites the stale custody wholesale")
+        #expect(fresh.corpusKeyID != stale.corpusKeyID)
+        let provider = DeviceKeySyncProvider(store: store)
+        #expect(try provider.currentKeys().corpusKeyID == fresh.corpusKeyID,
+                "sync serves the NEW key, never the orphaned one")
+        #expect(session.state == .enrolled(hasRecoveryWrap: false),
+                "the mandatory phrase step follows, exactly as for any fresh vault")
+    }
+
     /// CF-1/5/7: the stepped setup flow's gates — the passphrase step
     /// requires a matched non-empty entry, the warning step refuses to
     /// advance without HER checkbox, and the checkbox's label is her exact
