@@ -30,7 +30,7 @@ struct BridgeSoakTests {
 
             _ = try await bridge.engine.run()
 
-            #expect(await bridge.fragmentsBody(day: "2026-07-01") == "Mac-side entry.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-01") == "Mac-side entry.")
             #expect(try bridge.rendered(day: "2026-07-02") == "Phone-side entry.")
 
             // Quiescent: a second round moves nothing anywhere.
@@ -189,7 +189,7 @@ struct BridgeSoakTests {
             // Convergence: every day agrees byte-equal across the surfaces.
             for day in days {
                 let rendered = try bridge.rendered(day: day)
-                let fragments = await bridge.fragmentsBody(day: day)
+                let fragments = try await bridge.fragmentsBody(day: day)
                 if let fragments {
                     #expect(fragments == (rendered ?? ""),
                             "day \(day): Fragments body must equal Variorum's rendered text")
@@ -246,7 +246,9 @@ struct BridgeSoakTests {
         let config = FragmentsBridgeConfiguration(userID: "user-author")
         let fragmentsServer = FakeFragmentsServer(
             localUserID: "9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8")
-        let bridgeEngine = BridgeEngine(transport: fragmentsServer, configuration: config)
+        let bridgeEngine = BridgeEngine(
+            transport: fragmentsServer, configuration: config,
+            keyProvider: FixedBridgeKeyProvider())
 
         // Mac authors one journal day; the phone captures another (through
         // the mirror); Fragments writes a third.
@@ -292,9 +294,11 @@ struct BridgeSoakTests {
 
         // And Fragments holds both Variorum-authored days (the phone's via
         // the mirror → Mac → bridge).
-        #expect(await fragmentsServer.liveEntry(userID: config.userID, date: "2026-07-01")?.body
-                == "Mac morning entry.")
-        #expect(await fragmentsServer.liveEntry(userID: config.userID, date: "2026-07-02")?.body
-                == "Phone capture entry.")
+        #expect(try BridgeTestKeys.opened(
+            await fragmentsServer.liveEntry(userID: config.userID, date: "2026-07-01")?.body,
+            day: "2026-07-01") == "Mac morning entry.")
+        #expect(try BridgeTestKeys.opened(
+            await fragmentsServer.liveEntry(userID: config.userID, date: "2026-07-02")?.body,
+            day: "2026-07-02") == "Phone capture entry.")
     }
 }

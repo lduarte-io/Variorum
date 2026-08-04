@@ -53,7 +53,7 @@ struct BridgePushTests {
                     == ["Written in Variorum.", "Written in Fragments, never pulled."])
             #expect(variants.map(\.label) == [nil, "fragments"])
             #expect(try bridge.rendered(day: "2026-07-09") == "Written in Variorum.")
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Written in Variorum.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Written in Variorum.")
         }
     }
 
@@ -107,7 +107,7 @@ struct BridgePushTests {
             #expect(report.pushed == 1)
             #expect(report.rescuedReceipts == 0)
             #expect(try bridge.liveVariants(blockID: blockID).count == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Edited in Variorum after.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Edited in Variorum after.")
         }
     }
 
@@ -126,7 +126,7 @@ struct BridgePushTests {
             _ = try await bridge.server.fragmentsAppWrites(
                 userID: "user-author", day: "2026-07-09",
                 body: unseen, updatedAt: stampAfterFirst)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == unseen)
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == unseen)
             // The author empties the day: the empty re-projection is
             // DESIGNED behavior — and it destroys the unseen save with NO
             // slot left to carry a rescue take (cold review, MAJOR 2: this
@@ -139,7 +139,7 @@ struct BridgePushTests {
             #expect(report.pushed == 1)
             #expect(report.rescuedReceipts == 0)
             #expect(report.notes.contains { $0.contains(unseen) })
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "")
         }
     }
 
@@ -198,7 +198,10 @@ struct BridgePushTests {
             #expect(report.pausedDays.isEmpty)
             let entry = await bridge.server.currentEntry(
                 id: bridge.entryID(day: "2026-07-09"))
-            #expect(entry?.body == "Dear diary, day one.")
+            // Phase 14b: the wire carries ciphertext; the words open back.
+            #expect(entry.map { PayloadCipher.isEncrypted($0.body) } == true)
+            #expect(try BridgeTestKeys.opened(entry?.body, day: "2026-07-09")
+                    == "Dear diary, day one.")
             #expect(entry?.date == "2026-07-09")
             #expect(entry?.userID == "user-author")
             // The agreed hash recorded on accept.
@@ -233,7 +236,7 @@ struct BridgePushTests {
             try bridge.ops.autosave(variantID, text: "Draft two.", charDelta: 2)
             let report = try await bridge.engine.push()
             #expect(report.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Draft two.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Draft two.")
         }
     }
 
@@ -252,8 +255,8 @@ struct BridgePushTests {
             // The paused day pushed NOTHING; the ordinary day flowed.
             #expect(report.pausedDays == ["2026-07-09"])
             #expect(report.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == nil)
-            #expect(await bridge.fragmentsBody(day: "2026-07-10") == "An ordinary day.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == nil)
+            #expect(try await bridge.fragmentsBody(day: "2026-07-10") == "An ordinary day.")
 
             // Hand-merge: the author deletes one duplicate → the pause
             // releases and the day pushes.
@@ -261,7 +264,7 @@ struct BridgePushTests {
             let after = try await bridge.engine.push()
             #expect(after.pausedDays.isEmpty)
             #expect(after.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "First take on the day.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "First take on the day.")
         }
     }
 
@@ -276,7 +279,7 @@ struct BridgePushTests {
             #expect(report.pushed == 1)
             // The projection is the rendered text — the graduated policy's
             // push-only direction.
-            #expect(await bridge.fragmentsBody(day: "2026-07-09")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09")
                     == "Morning paragraph.\n\nEvening paragraph.")
         }
     }
@@ -301,7 +304,7 @@ struct BridgePushTests {
             try bridge.ops.autosave(variantID, text: "", charDelta: 10)
             let report = try await bridge.engine.push()
             #expect(report.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "")
         }
     }
 
@@ -336,7 +339,7 @@ struct BridgePushTests {
             try bridge.ops.autosave(variantID, text: "Edited while archived.", charDelta: 6)
             let report = try await bridge.engine.push()
             #expect(report.pushed == 1, "archive is kept-out-of-view, not a projection freeze")
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Edited while archived.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Edited while archived.")
         }
     }
 
@@ -388,7 +391,7 @@ struct BridgePushTests {
             let report = try await bridge.engine.push()
             #expect(report.pushed == 0, "a partial rendering must never project")
             #expect(report.notes.contains { $0.contains("gap") })
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Full agreed text.",
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Full agreed text.",
                     "pre-fix the gap day pushed its PARTIAL (here: empty) rendering")
         }
     }
@@ -420,7 +423,7 @@ struct BridgePushTests {
             // REJECTED — visibly, in the round's notes.
             #expect(round.push.rejected == 1)
             #expect(round.push.notes.contains { $0.contains("clock_ahead") })
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Phone-ahead save.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Phone-ahead save.")
         }
     }
 
@@ -441,11 +444,13 @@ struct BridgePushTests {
             await bridge.server.setLocalUserID("9f1c2b3a-4d5e-6f70-8192-a3b4c5d6e7f8")
             let flowing = try await bridge.engine.push()
             #expect(flowing.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Waiting to project.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Waiting to project.")
             // Under the DERIVED id for the server's own canonical user —
             // the id Fragments itself would derive (the join key's trick).
-            #expect(await bridge.server.currentEntry(id: bridge.entryID(day: "2026-07-09"))?.body
-                    == "Waiting to project.")
+            #expect(try BridgeTestKeys.opened(
+                await bridge.server.currentEntry(
+                    id: bridge.entryID(day: "2026-07-09"))?.body,
+                day: "2026-07-09") == "Waiting to project.")
         }
     }
 
@@ -469,7 +474,8 @@ struct BridgePushTests {
             let report = try await bridge.engine.push()
             #expect(report.pushed == 1)
             let after = await bridge.server.currentEntry(id: bridge.entryID(day: "2026-07-09"))
-            #expect(after?.body == "Edited on the Mac.")
+            #expect(try BridgeTestKeys.opened(after?.body, day: "2026-07-09")
+                    == "Edited on the Mac.")
             #expect(after?.createdAt == original,
                     "the winning push carries created_at — echoing preserves the original instant")
         }
@@ -488,7 +494,7 @@ struct BridgePushTests {
             #expect(report.stale == 1)
             // No agreed state was invented; their body untouched.
             #expect(try bridge.dayState("2026-07-09") == nil)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Fragments text, newer.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Fragments text, newer.")
         }
     }
 }

@@ -76,7 +76,9 @@ struct BridgeSchedulerTests {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "text")
             let gate = GatedBridgeTransport(server: bridge.server)
-            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let engine = BridgeEngine(
+                transport: gate, configuration: bridge.config,
+                keyProvider: FixedBridgeKeyProvider())
             let scheduler = BridgeScheduler(engine: engine)
 
             await gate.closeGate()
@@ -102,7 +104,9 @@ struct BridgeSchedulerTests {
                 userID: bridge.config.userID, day: "2026-07-09",
                 body: "Landed.", updatedAt: bridge.fragmentsStamp(0))
             let gate = GatedBridgeTransport(server: bridge.server)
-            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let engine = BridgeEngine(
+                transport: gate, configuration: bridge.config,
+                keyProvider: FixedBridgeKeyProvider())
             let scheduler = BridgeScheduler(engine: engine)
             await scheduler.trigger()
             await scheduler.awaitIdle()
@@ -133,7 +137,9 @@ struct BridgeSchedulerTests {
     @Test func aRetiredSchedulerNeverRoundsAgain() async throws {
         try await withBridge { bridge in
             let gate = GatedBridgeTransport(server: bridge.server)
-            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let engine = BridgeEngine(
+                transport: gate, configuration: bridge.config,
+                keyProvider: FixedBridgeKeyProvider())
             let scheduler = BridgeScheduler(engine: engine)
             await scheduler.trigger()
             await scheduler.awaitIdle()
@@ -211,7 +217,9 @@ struct BridgeSchedulerTests {
         try await withBridge { bridge in
             try bridge.makeEntry(day: "2026-07-09", text: "to push")
             let gate = GatedBridgeTransport(server: bridge.server)
-            let engine = BridgeEngine(transport: gate, configuration: bridge.config)
+            let engine = BridgeEngine(
+                transport: gate, configuration: bridge.config,
+                keyProvider: FixedBridgeKeyProvider())
             let scheduler = BridgeScheduler(engine: engine)
             await scheduler.trigger()
             await scheduler.awaitIdle()

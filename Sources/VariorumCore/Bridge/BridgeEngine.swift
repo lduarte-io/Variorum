@@ -47,6 +47,15 @@ public struct BridgeEngine: Sendable {
 
     public let transport: any FragmentsBridgeTransport
     public let configuration: FragmentsBridgeConfiguration
+    /// The journal-class E2EE key seam (Phase 14b batch 3, L11). The
+    /// default REFUSES every round — which IS the phase's designed pause
+    /// (capability shipped, rounds not running until the one-batch
+    /// Fragments handoff wires a real provider) and the post-handoff
+    /// pre-enrollment state alike. Bodies seal on push and open on land
+    /// through this seam; everything inland (hashes, day state, the
+    /// discrimination rules) stays plaintext, exactly the sync engine's
+    /// wire-boundary design.
+    public let keyProvider: any BridgeKeyProviding
     /// Pull window size (keyset pages; Fragments' own convention is 500,
     /// paging while a page comes back full).
     public var pullLimit: Int
@@ -54,11 +63,24 @@ public struct BridgeEngine: Sendable {
     public init(
         transport: any FragmentsBridgeTransport,
         configuration: FragmentsBridgeConfiguration,
+        keyProvider: any BridgeKeyProviding = UnenrolledBridgeKeyProvider(),
         pullLimit: Int = 500
     ) {
         self.transport = transport
         self.configuration = configuration
+        self.keyProvider = keyProvider
         self.pullLimit = pullLimit
+    }
+
+    /// The round's key material, or the visible refusal — checked FIRST in
+    /// each half, before any network contact (the sync engine's keys-first
+    /// posture; a paused/locked bridge refuses for free).
+    private func roundKeys() throws -> BridgeEncryptionKeys {
+        do {
+            return try keyProvider.currentKeys()
+        } catch {
+            throw BridgeEncryptionError.keysUnavailable
+        }
     }
 
     // MARK: - Reports
@@ -123,13 +145,33 @@ public struct BridgeEngine: Sendable {
 
     @discardableResult
     public func pullAndLand() async throws -> LandingReport {
+        // Keys first (Phase 14b, L11): a paused/locked bridge refuses the
+        // round before any network contact — cursor and day hashes intact.
+        let keys = try roundKeys()
         var report = LandingReport()
         fetchLoop: while true {
             let cursor = try await database.read { try Self.cursor($0) }
             let window = try await transport.pull(after: cursor, limit: pullLimit)
             guard !window.isEmpty else { break }
             let fullPage = window.count == pullLimit
-            for entry in window {
+            for rawEntry in window {
+                // THE SEAM, land half (Phase 14b): the body opens BEFORE
+                // any classification logic sees it — inland stays
+                // plaintext. Legacy plaintext passes (journal_entries is
+                // never wiped — see BridgeCrypto.openLanded); a tampered
+                // `e1:` body THROWS here, refusing the round with the
+                // cursor held before this row and every earlier row's
+                // landing committed. A tombstone's body is never read
+                // (effectiveBody is ""), so it is left verbatim.
+                let entry: FragmentsEntry
+                if rawEntry.isTombstoned {
+                    entry = rawEntry
+                } else {
+                    var opened = rawEntry
+                    opened.body = try BridgeCrypto.openLanded(
+                        opened.body, day: opened.date, keys: keys)
+                    entry = opened
+                }
                 guard let serverStamp = entry.serverUpdatedAt else {
                     // A pulled row without a keyset stamp cannot advance the
                     // cursor — refuse the round rather than loop or guess.
@@ -477,6 +519,8 @@ public struct BridgeEngine: Sendable {
 
     @discardableResult
     public func push() async throws -> PushReport {
+        // Keys first (Phase 14b, L11): refuse before any network contact.
+        let keys = try roundKeys()
         var report = PushReport()
         // Durably-preserved unrescued bodies re-surface EVERY round until
         // cleared by hand (review round 2, MAJOR — the poison-note posture:
@@ -619,6 +663,12 @@ public struct BridgeEngine: Sendable {
                 continue
             }
             let stamp = Self.pushStamp(now: now, outranking: candidate.remoteStamp)
+            // THE SEAM, push half (Phase 14b): the wire carries the sealed
+            // body; everything inland — the day hash, recordDay, the
+            // receipt discrimination's pushedBody — stays the PLAINTEXT
+            // candidate.body. The empty body seals too (the server can no
+            // longer see emptiness; the deletion semantic is client-side,
+            // touchpoint #2).
             let entry = FragmentsEntry(
                 id: FragmentsContract.entryID(
                     namespace: configuration.idNamespace,
@@ -626,7 +676,7 @@ public struct BridgeEngine: Sendable {
                     dayKey: candidate.day)!,  // day validity checked in the scan
                 userID: configuration.userID,
                 date: candidate.day,
-                body: candidate.body,
+                body: try BridgeCrypto.seal(candidate.body, day: candidate.day, keys: keys),
                 // Echo the pulled created_at; our own creation instant only
                 // for a row we have never seen (ask 12 ANSWERED —
                 // created_at follows the WINNING push, so echoing is what
@@ -657,13 +707,35 @@ public struct BridgeEngine: Sendable {
                         // NIT — this belt was the one arm round 2's fix
                         // missed; in the drifting-server world it exists
                         // for, this body may be someone's only copy too).
+                        // Preserved VERBATIM (Phase 14b note: a foreign
+                        // row's body may be ciphertext under a day binding
+                        // we cannot know — raw preservation is the honest
+                        // form; the never-throw doctrine holds).
                         report.notes.append(await preserveUnrescuedBody(
                             day: candidate.day,
                             note: "push of \(candidate.day): the server returned a receipt for a row we did not push (\(receipt.id)) — not consumed (server drift?); its body, preserved: \(receipt.previousBody)"))
                         continue
                     }
+                    // THE SEAM, receipt half (Phase 14b): the destroyed
+                    // body is a landed body — opened BEFORE discrimination
+                    // (the rules compare plaintext hashes/containment, and
+                    // a rescue must land words, never ciphertext). Legacy
+                    // plaintext passes; an unopenable `e1:` body must NOT
+                    // throw (the receipt doctrine: it is the only copy) —
+                    // it preserves durably, verbatim, and speaks.
+                    let openedPrevious: String
+                    do {
+                        openedPrevious = try BridgeCrypto.openLanded(
+                            receipt.previousBody, day: candidate.day, keys: keys)
+                    } catch {
+                        report.notes.append(await preserveUnrescuedBody(
+                            day: candidate.day,
+                            note: "push of \(candidate.day): a replaced-body receipt could not be decrypted (\(error)) — preserved verbatim (ciphertext); the only copy:\n\(receipt.previousBody)"))
+                        continue
+                    }
                     let outcome = await consumeReplacedReceipt(
-                        receipt, day: candidate.day, pushedBody: candidate.body,
+                        receipt, previousBody: openedPrevious, day: candidate.day,
+                        pushedBody: candidate.body,
                         agreedHashBeforePush: candidate.agreedHash)
                     if outcome.rescued { report.rescuedReceipts += 1 }
                     if let note = outcome.note { report.notes.append(note) }
@@ -742,18 +814,20 @@ public struct BridgeEngine: Sendable {
     /// day hash already matches; an identical re-push draws no receipt).
     /// Every failure arm returns a note carrying the FULL body instead.
     private func consumeReplacedReceipt(
-        _ receipt: FragmentsReplacedReceipt, day: String,
+        _ receipt: FragmentsReplacedReceipt, previousBody: String, day: String,
         pushedBody: String, agreedHashBeforePush: String?
     ) async -> (rescued: Bool, note: String?) {
-        // Never emitted for an empty prior body (their SQL: prev_body <> '');
-        // belt against a server that drifts.
-        guard !receipt.previousBody.isEmpty else { return (false, nil) }
+        // `previousBody` is the receipt's destroyed body OPENED at the seam
+        // (Phase 14b): the rules below compare plaintext, and a rescue must
+        // land words. Never emitted for an empty prior body (their SQL:
+        // prev_body <> ''); belt against a server that drifts.
+        guard !previousBody.isEmpty else { return (false, nil) }
         // (i) — a knowing replacement of the body we already hold.
-        if BridgeHash.body(receipt.previousBody) == agreedHashBeforePush {
+        if BridgeHash.body(previousBody) == agreedHashBeforePush {
             return (false, nil)
         }
         // (ii) — the destroyed body rode along inside what we pushed.
-        if pushedBody.contains(receipt.previousBody) {
+        if pushedBody.contains(previousBody) {
             return (false, nil)
         }
         // (iii) — rescue.
@@ -771,14 +845,14 @@ public struct BridgeEngine: Sendable {
                 // NOT made (option (b) in the review; hers if ever wanted).
                 // The body is durably preserved instead (round 2, MAJOR).
                 return (false, await preserveUnrescuedBody(
-                    day: day, note: Self.unrescuedBodyNote(day: day, body: receipt.previousBody)))
+                    day: day, note: Self.unrescuedBodyNote(day: day, body: previousBody)))
             }
-            if try await hasLiveVariant(blockID: firstSlot.blockID, text: receipt.previousBody) {
+            if try await hasLiveVariant(blockID: firstSlot.blockID, text: previousBody) {
                 return (false, nil)  // replay dedupe — a prior round already rescued it
             }
             let ops = Operations()
             _ = try ops.resolveSyncConflict(
-                firstVariantID, losingText: receipt.previousBody, label: "fragments")
+                firstVariantID, losingText: previousBody, label: "fragments")
             return (true,
                 "push of \(day) replaced an unseen Fragments body — rescued as a 'fragments' take")
         } catch {
@@ -787,7 +861,7 @@ public struct BridgeEngine: Sendable {
             // same posture — the body outlives the failure, durably.
             return (false, await preserveUnrescuedBody(
                 day: day,
-                note: Self.unrescuedBodyNote(day: day, body: receipt.previousBody, error: error)))
+                note: Self.unrescuedBodyNote(day: day, body: previousBody, error: error)))
         }
     }
 

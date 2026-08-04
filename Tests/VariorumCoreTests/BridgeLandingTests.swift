@@ -142,7 +142,7 @@ struct BridgeLandingTests {
                 variantID, text: "Typed in the Mac editor.", charDelta: 24)
             // …and the next push projects the editor text to Fragments.
             _ = try await bridge.engine.push()
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Typed in the Mac editor.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Typed in the Mac editor.")
 
             // The phone-typed body must still be ONE RESTORE AWAY.
             #expect(try bridge.commitTexts(variantID: variantID)
@@ -196,7 +196,7 @@ struct BridgeLandingTests {
             #expect(raceRound.landing.created == 0 && raceRound.landing.updated == 0)
             #expect(raceRound.push.pushed == 0, "an unseen save must never be overwritten")
             #expect(raceRound.push.stale == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "F typed on the phone.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "F typed on the phone.")
 
             // The save ages past the horizon: it lands as a conflict card
             // and truth re-projects — the overwrite became a rescue.
@@ -207,7 +207,7 @@ struct BridgeLandingTests {
             #expect(try bridge.liveVariants(blockID: block).map(\.text)
                     .contains("F typed on the phone."))
             #expect(rescueRound.push.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "T1 Variorum edit.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "T1 Variorum edit.")
         }
     }
 
@@ -257,7 +257,7 @@ struct BridgeLandingTests {
             // behind" — the brief's edit-war asymmetry).
             let push = try await bridge.engine.push()
             #expect(push.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Variorum rewrite.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Variorum rewrite.")
         }
     }
 
@@ -303,7 +303,7 @@ struct BridgeLandingTests {
             // surviving edit (strictly-newer un-tombstone, contract fact 4).
             let push = try await bridge.engine.push()
             #expect(push.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Newer Variorum edit.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Newer Variorum edit.")
         }
     }
 
@@ -334,7 +334,7 @@ struct BridgeLandingTests {
             // ahead stamp), not wedge .stale.
             #expect(round.push.pushed == 1)
             #expect(round.push.stale == 0)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Local Variorum text.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Local Variorum text.")
         }
     }
 
@@ -364,7 +364,7 @@ struct BridgeLandingTests {
             // Push-only: truth re-projects the rendered text.
             let push = try await bridge.engine.push()
             #expect(push.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09")
                     == "First paragraph.\n\nSecond paragraph.")
         }
     }
@@ -431,7 +431,7 @@ struct BridgeLandingTests {
             #expect(try await bridge.db.read { try BridgeEngine.cursor($0) } == nil)
             // …and the push half never blanks the Fragments body.
             #expect(round.push.pushed == 0)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09")
                     == "Phone text against a sealed empty day.")
 
             // Unseal → the held row re-serves and lands as THE block.
@@ -482,7 +482,7 @@ struct BridgeLandingTests {
                     "the phone save must never be lost everywhere")
             // …and truth re-projects over it.
             #expect(round.push.pushed == 1)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09") == "Typed after unsealing.")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09") == "Typed after unsealing.")
         }
     }
 
@@ -511,7 +511,7 @@ struct BridgeLandingTests {
             // …while the push half held the day.
             #expect(round.push.pausedDays == ["2026-07-09"])
             #expect(round.push.pushed == 0)
-            #expect(await bridge.fragmentsBody(day: "2026-07-09")
+            #expect(try await bridge.fragmentsBody(day: "2026-07-09")
                     == "Phone text for the doubled day.")
         }
     }

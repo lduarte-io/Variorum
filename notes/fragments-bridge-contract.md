@@ -537,6 +537,68 @@ rows itself). **Verification that closes the batch's bridge half:** a full
 bridge round-trip completes over ciphertext on both ends — that round-trip is
 also the bridge's RESUMPTION from its 14b pause.
 
+**TOUCHPOINT #2 — THE CONCRETE FORMAT FACTS (added at 14b batch 3, 2026-08-04 —
+the design half executed Variorum-side; what follows is everything a Fragments
+implementer needs to build the client end at the one-batch handoff. The
+Variorum bridge's capability is SHIPPED and PAUSED behind its key seam):**
+
+1. **AEAD: AES-256-GCM**, per-value random **96-bit nonce**, 128-bit tag.
+   (Apple CryptoKit `AES.GCM` on the Variorum side; any standard AES-GCM
+   implementation interoperates.)
+2. **Encoding:** the `journal_entries.body` column carries
+   `e1:` + base64(nonce ‖ ciphertext ‖ tag) — one TEXT value, no schema
+   change (the frozen satellite shape holds, ask #3 untouched). `e1:` is the
+   suite's version prefix; any future format bumps the digit, so match the
+   prefix exactly, never "starts with e".
+3. **The AAD convention (reproduce it byte-exactly or nothing decrypts):**
+   `AAD = UTF-8("journal_entries:<date>:body:<key_id>")` — where `<date>` is
+   the row's own `date` column (the `yyyy-MM-dd` day key, the join key of
+   this whole contract) and `<key_id>` is the vault's `journal_bridge_key_id`
+   string. Binding the DAY means a ciphertext can never be moved between
+   days undetected. (This is the suite's standard
+   `table:rowID:column:keyID` grammar with the day standing in the rowID
+   slot — deliberate: the deterministic UUID derives FROM the day, and both
+   sides always know the day.)
+4. **The key + where it comes from:** the `journal_bridge` class key — 32
+   bytes, held wrapped in the suite vault; Fragments' client only ever
+   touches THIS class key, never the corpus key (R-8). Vault access: plain
+   authenticated PostgREST on the suite (Variorum) project's `key_vault`
+   table (owner-only RLS on `auth.uid()`; one row per account). The unwrap
+   chain, client-side: the user's **encryption passphrase** → Argon2id with
+   the parameters stored IN the row (`kdf_*` columns + `kdf_salt`, base64 —
+   never app defaults) → unwrap `master_wrapped_by_passphrase` (RFC 3394
+   AES-KeyWrap) → unwrap `journal_bridge_key_wrapped_by_master` (RFC 3394)
+   → hold per-device (Keychain), enrollment-only cadence. `journal_bridge_key_id`
+   is a plaintext column on the same row. (The recovery-phrase road exists
+   too — `master_wrapped_by_recovery`, BIP-39 12 words → PBKDF2-HMAC-SHA512
+   ×2048 salt "mnemonic" → HKDF-SHA256 salt `variorum.suite.e2ee.v1` info
+   `recovery-wrap-key` — but the Fragments client only needs the passphrase
+   road.)
+5. **Legacy plaintext:** `journal_entries` is never wiped, so pre-E2EE rows
+   (and any interim writes) stay plaintext on the server. The Variorum
+   bridge LANDS a non-`e1:` body as legacy plaintext rather than refusing —
+   mirror that posture; a tampered/unopenable `e1:` body must never be
+   displayed or silently dropped. Variorum's historical bodies re-arrive
+   ENCRYPTED via the bridge's re-push from truth (as staged above); your
+   side never migrates rows.
+6. **`entry_date`/`date` stays PLAINTEXT metadata, disclosed** (which days
+   carry entries is visible to the server; the words never are). Stamps,
+   ids, tombstones — all unchanged and plaintext; LWW semantics are
+   untouched (the ciphertext is just the body's bytes).
+7. **The two standing relocations, now forced by ciphertext (as drafted
+   above):** the TRIM behavior and the EMPTY-BODY-AS-DELETION detection move
+   CLIENT-SIDE (server-side versions cannot operate on ciphertext) — the
+   bridge now encrypts even the empty body, so "the body is empty" is a
+   fact only a key-holding client can see; detect it after decrypt.
+   Trimming likewise happens before encrypt / after decrypt.
+8. **One behavioral note for your `replaced` receipts (ask 13):** under
+   E2EE, re-pushing the same plaintext produces DIFFERENT bytes (random
+   nonce), so byte-identity predicates fire receipts more often than in the
+   plaintext era. Variorum's consumer already discriminates by decrypted
+   content (rule (i)) — if your client consumes its own receipts, decrypt
+   `previous_body` before classifying, and treat an unopenable receipt body
+   as an only-copy to preserve, never to drop.
+
 **TOUCHPOINT #3 — at 14c (multi-user + the tier):** check the one-payment suite
 entitlement from the Fragments side (entitlement rows live on the suite account;
 both apps read the same answer). TestFlight opens only after the family
