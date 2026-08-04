@@ -111,10 +111,31 @@ conforms with an honest record of what is incomplete; (4) spawn a FRESH
 implementer for whatever remains, including CF-14/15/16 below, which it
 never received.
 
-## HER QUESTIONS AT CUTOVER — ANSWERED FROM THE CODE (she is waiting on these)
+## HER PRODUCT QUESTIONS AT THE CUTOVER — ANSWERED, AND OWED A RE-VERIFICATION
 
-**Q1 — "How am I going to be able to walk [the new setup flow] again on the
-Mac, since I already have my keys?"** Three states exist
+**Framing, deliberately explicit** (her instruction, and the mitigation for
+the reroute that caused this cutover): these are the AUTHOR's questions about
+HER OWN app's onboarding — what a Variorum user sees in the encryption
+settings she is designing for them, and what her own two devices do when she
+exercises those paths herself. She raised them precisely because she is
+trying to keep her users' writing safe. Keep this framing when you restate
+them anywhere.
+
+**★ HER INSTRUCTION TO YOU (2026-08-04): RE-VERIFY THESE ANSWERS YOURSELF.**
+They were derived at the cutover by the substitute seat (a different model),
+from the code, but she wants them re-derived by the Fable seat she chose for
+this work before anything is built on them — her questions, the answers, and
+her responses to the answers are all material to the round. Treat every claim
+below as a HYPOTHESIS with a file reference: read `EncryptionSession.swift`,
+`EncryptionKeychain.swift`, `SyncStatusViews.swift`, and the round
+implementer's landed diff yourself, confirm or correct each, and record your
+verdicts in the plan file's CF ledger. Where you correct one, say so plainly —
+she would rather have a correction than an inherited assumption.
+
+**Q1 — reviewing her own product's first-run experience: how can she see the
+new encryption SETUP screens again on her Mac, when her Mac is already set
+up?** (Her words: "How am I going to be able to walk it again on the mac?
+since I already have my keys?") Three states exist
 (`EncryptionSession.refresh`): vault + local custody ⇒ `.enrolled` (the
 enrolled surface); vault + NO custody ⇒ `.notEnrolled` (the ENROLLMENT
 surface); NO vault ⇒ `.noVault` (the SETUP flow). So **CF-11's forget-keys
@@ -166,14 +187,18 @@ at her explicit go, every step announced):**
   it** — step 3 creates exactly the stale-key state CF-16 exists to make
   legible on the phone.
 
-**Q2 — "is that resting on the 'delete remote store, re-encrypt and reupload'
-pass?"** Yes — option (c) is exactly CF-8, which is recorded as owned by
+**Q2 — is that the same road as the product capability she asked to keep on
+the roadmap: a user resetting their own synced copy and re-uploading it under
+fresh keys?** (Her words: "is that resting on the 'delete remote store,
+re-encrypt and reupload' pass?") Yes — option (c) is exactly CF-8, which is recorded as owned by
 14c's operationalia. The MACHINERY already exists (vault row delete + the
 committed truncate artifact + `resyncReinitialize`/the runner); what 14c
 owes is the in-app door and its guard rails.
 
-**Q3 — "what impact will that have on the phone's logged in session — will
-the phone be aware?"**
+**Q3 — if she takes that road, what does her iPhone experience: does its
+account session survive, and does the app TELL her what happened?** (Her
+words: "what impact will that have on the phone's logged in session - will
+the phone be aware of what has happened?")
   - **Forget-keys on the Mac ONLY: the phone is unaffected** (the vault is
     untouched; her passphrase change already demonstrated this live).
   - **A full re-key: the phone's ACCOUNT SESSION is unaffected** (auth and
@@ -188,8 +213,9 @@ the phone be aware?"**
     holds your encryption keys" while the sync row shows a generic crypto
     failure.
 
-**Q4 — "do I need to change anything on the phone to re-prompt encryption
-verification?"** After a re-key: yes — forget keys, then re-enroll with the
+**Q4 — does she need to do anything on the phone for the app to ask her to
+set encryption up again there?** (Her words: "do I need to change anything on
+the phone to re-prompt encryption verification?") After a re-key: yes — forget keys, then re-enroll with the
 new passphrase. **Until CF-11's door ships there is NO path on the phone**
 (sign-out deliberately keeps custody, and iOS Keychain items survive app
 deletion). This is why the proper phone drill is the round's acceptance.
@@ -221,6 +247,32 @@ deletion). This is why the proper phone drill is the round's acceptance.
   to that same state. **Cheap now, and it is the honesty half of CF-8's
   road** (a re-key must not leave other devices silently broken). Recommend
   building it in the round with CF-11/CF-14; defer only if she prefers.
+
+## HER RESPONSES TO THOSE ANSWERS (the feedback trail — all binding)
+
+Recorded so the incoming seat has her reactions, not just the analysis:
+
+1. **On Q1's options — she chose the hardest one, deliberately:** the full
+   live re-walk (delete the vault, re-key, re-upload), because *"it's worth
+   making sure i've gone through the whole thing myself."* The preview walk
+   demotes to a nice-to-have. Her drill IS the round's human acceptance.
+2. **On Q3/Q4's finding (the phone would not know its keys went stale):**
+   she took the gap seriously enough that it became **CF-16**, and the
+   sequencing follows from her choice — ship CF-16 first and her own drill
+   validates it.
+3. **On the surfaces themselves, while answering:** she added **CF-14** (the
+   encryption surface folds under Account as a tab — "account will one day
+   show payment") and **CF-15** (the sync-row buttons must stop
+   disappearing during rounds — "Sync now" merely disables; it reads as
+   flickering because rounds are frequent, and it happens on mobile too).
+4. **On the earlier answers she had already received** (the biometric/QR
+   lift question): QR device-linking DEFERRED; the biometric setting IN the
+   round, with her ruling that it accepts biometrics or the encryption
+   passphrase and NEVER the device passcode; and nothing in the product is
+   ever called "Passkey."
+5. **On process:** she wants this seat's answers re-verified by Fable (the
+   mandate above), and she is coordinating the mobile session herself — it
+   waits for the Mac work to land before pulling.
 
 ## THE MOBILE COORDINATION DELIVERABLE (her instruction at the cutover)
 
