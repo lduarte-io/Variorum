@@ -240,7 +240,10 @@ struct SerializerCompletenessTests {
         // silently dropping it from reference payloads — exactly the drift
         // class A6 exists to catch.
         let doctored = SyncTable(
-            "reference", excludedColumns: ["file_bookmark", "url"])
+            "reference",
+            plain: SyncSchema.table(named: "reference")!.plainColumns,
+            encrypted: SyncSchema.table(named: "reference")!.encryptedColumns,
+            excludedColumns: ["file_bookmark", "url"])
         try db.read { database in
             let schemaColumns = Set(
                 try Row.fetchAll(database, sql: "PRAGMA table_info(reference)")

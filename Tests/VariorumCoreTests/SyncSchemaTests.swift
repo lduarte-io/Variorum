@@ -48,6 +48,99 @@ struct SyncSchemaTests {
         }
     }
 
+    // MARK: - The E2EE classification completeness walk (Phase 14b, L3 —
+    // the postmortem-#4 serializer-drift lesson applied to encryption)
+
+    /// Columns the live schema carries that the registry has NOT classified
+    /// (plain / encrypted / excluded), and phantom classifications naming
+    /// columns that do not exist. Pure, so the doctored-double proof below
+    /// can exercise the walk against a deliberately-broken registration.
+    static func classificationProblems(
+        liveColumns: Set<String>, table: SyncTable
+    ) -> (unclassified: Set<String>, phantom: Set<String>, overlapping: Set<String>) {
+        let classified = table.plainColumns
+            .union(table.encryptedColumns)
+            .union(table.excludedColumns)
+        let overlapping = table.plainColumns.intersection(table.encryptedColumns)
+            .union(table.plainColumns.intersection(table.excludedColumns))
+            .union(table.encryptedColumns.intersection(table.excludedColumns))
+        return (
+            // `sync_version` is machinery riding separately (the CAS base),
+            // never a classified payload column.
+            unclassified: liveColumns.subtracting(classified).subtracting(["sync_version"]),
+            phantom: classified.subtracting(liveColumns),
+            overlapping: overlapping)
+    }
+
+    /// EVERY column of EVERY synced table is classified EXACTLY ONE of
+    /// plain / encrypted / excluded. A future migration that adds a column
+    /// without taking a side fails the build here — a new text column can
+    /// never silently leak to the mirror in the clear, and a typo'd
+    /// classification can never silently classify nothing.
+    @Test func everyColumnOfEverySyncedTableIsClassifiedExactlyOnce() throws {
+        let db = try AppDatabase.inMemory()
+        try db.read { database in
+            for table in SyncSchema.tables {
+                let live = Set(
+                    try Row.fetchAll(database, sql: "PRAGMA table_info(\(table.name))")
+                        .map { $0["name"] as String })
+                let problems = Self.classificationProblems(liveColumns: live, table: table)
+                #expect(problems.unclassified.isEmpty,
+                        "\(table.name): unclassified column(s) \(problems.unclassified.sorted()) — every column must take a side: plain (disclosed structure) or encrypted (user-authored text) or excluded (local-only)")
+                #expect(problems.phantom.isEmpty,
+                        "\(table.name): classification names column(s) that do not exist: \(problems.phantom.sorted())")
+                #expect(problems.overlapping.isEmpty,
+                        "\(table.name): column(s) classified more than once: \(problems.overlapping.sorted())")
+                // The PK is structure by definition — it rides every AAD
+                // binding in plaintext, so an encrypted PK is incoherent.
+                #expect(table.plainColumns.contains(table.primaryKey),
+                        "\(table.name): the primary key must be classified plain")
+            }
+        }
+    }
+
+    /// The walk's red-on-old proof (the SerializerCompletenessTests
+    /// precedent): a doctored registration that forgets to classify a
+    /// column — exactly what a future migration would produce — is flagged.
+    @Test func anUnclassifiedColumnFailsTheWalk() throws {
+        let real = SyncSchema.table(named: "container")!
+        let doctored = SyncTable(
+            "container",
+            plain: real.plainColumns,
+            encrypted: real.encryptedColumns.subtracting(["floating_notes"]))
+        let db = try AppDatabase.inMemory()
+        try db.read { database in
+            let live = Set(
+                try Row.fetchAll(database, sql: "PRAGMA table_info(container)")
+                    .map { $0["name"] as String })
+            let problems = Self.classificationProblems(liveColumns: live, table: doctored)
+            #expect(problems.unclassified == ["floating_notes"],
+                    "the walk failed to flag the unclassified column (got \(problems.unclassified.sorted()))")
+        }
+    }
+
+    /// The classification ships THE DESIGN's disclosure list exactly —
+    /// pinned as a flat set so any future adjustment is a visible,
+    /// deliberate diff (batch 2 may adjust only with recorded reasons).
+    @Test func theEncryptedSetMatchesTheDisclosureListExactly() {
+        var shipped: Set<String> = []
+        for table in SyncSchema.tables {
+            shipped.formUnion(table.encryptedColumns.map { "\(table.name).\($0)" })
+        }
+        #expect(shipped == [
+            "variant.working_text", "variant.label",
+            "commit_point.text", "commit_point.message",
+            "block.name", "block.presentation",
+            "container.title", "container.floating_notes",
+            "reading.name", "reading.query_spec",
+            "reading_section.name",
+            "tag.name", "tag.path",
+            "block_comment.text",
+            "reference.name", "reference.url", "reference.view_state",
+            "lens.name",
+        ])
+    }
+
     /// Apply order is FK-friendly: every FK target precedes its referencing
     /// table in registry order, except inside the deliberately-circular
     /// container⇄block⇄variant trio (deferred FKs own that case).
