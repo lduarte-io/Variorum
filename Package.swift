@@ -16,11 +16,31 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.9.0"),
     ],
     targets: [
+        // Vendored PHC Argon2 reference implementation (Phase 14b, R-7) —
+        // pinned upstream commit + file-set rationale in Vendor/CArgon2/README.md.
+        // ARGON2_NO_THREADS: single-threaded fill, no pthreads, thread.c not vendored.
+        .target(
+            name: "CArgon2",
+            path: "Vendor/CArgon2",
+            sources: ["src"],
+            publicHeadersPath: "include",
+            cSettings: [
+                .define("ARGON2_NO_THREADS"),
+                .headerSearchPath("src"),
+                .headerSearchPath("include"),
+            ]
+        ),
         .target(
             name: "VariorumCore",
             dependencies: [
+                "CArgon2",
                 .product(name: "GRDB", package: "GRDB.swift"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
+            ],
+            resources: [
+                // BIP-39 English wordlist (Phase 14b, R-5) — provenance pin
+                // in Vendor/BIP39/README.md.
+                .copy("Resources/bip39-english.txt")
             ]
         ),
         .testTarget(
