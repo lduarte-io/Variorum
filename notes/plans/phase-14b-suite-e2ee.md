@@ -1426,6 +1426,73 @@ window remain the wipe's precondition).**
   wipe's precondition, and the runner's session token is minted at the
   gate, announced, not at 5 a.m.
 
+### Her validation walk — findings + rulings (2026-08-04, at the gate; the
+### COPY/FLOW ROUND's ledger — her announcement: "we'll get through
+### validation and then ill give comments and we'll do a short copy / flow /
+### etc. round"; the round runs IN-PHASE, after the gate, before closeout)
+
+- **CF-1 (setup sheet):** "Done" (sheet dismiss) beside "Create Encrypted
+  Vault" (the act) reads ambiguous — her report verbatim: "am I supposed to
+  hit done or create encrypted vault? I think that's a little bit unclear."
+- **CF-2 (the regenerate/change coherence question), her words:** "it's
+  easy to regenerate your recovery phrase but changing your passphrase
+  requires the recovery phrase, but you can just regenerate that instantly.
+  i'm not sure what the actual goal is." The model's honest answer
+  (explained in-sitting, to be made LEGIBLE at the round): an ENROLLED
+  device already holds the master key — its gates are about deliberateness,
+  not security against someone at the unlocked machine; the phrase's real
+  job is the new-device/forgot-passphrase road. Round candidate: gate
+  Regenerate behind the passphrase too, so the surface's story is coherent.
+- **CF-3 (recovery-phrase entry discoverability):** her question "do you
+  put in the recovery phrase, separated by spaces, instead of your
+  passphrase?" — the ANSWER: no; "Forgot it? Authorize with the recovery
+  phrase" is a BUTTON that reveals a dedicated 12-words field (spaces
+  between words), but it renders like static hint text — the R94-family
+  legibility miss; same pattern exists (correctly, with a visible button)
+  on the enrollment screen.
+- **CF-4 (the phrase-confirm box):** behavior verified GOOD by her (only
+  the exact 12 words confirm; anything else rejects) but the STATE is
+  unclear — "from the user perspective it looks like you can just exit if
+  you want."
+- **CF-5 — RULING: the recovery phrase becomes MANDATORY AT SETUP.** Her
+  words: "It also seemed very optional to make a recovery passphrase - I
+  think it should be mandatory and the setup shouldn't work if you don't."
+  (The optional wrap-addition arm existed for the overnight road, which
+  went unused; setup walks straight into generate→write→confirm.)
+- **CF-6 — RULING (the warning wording — her ratify became an EDIT):**
+  clarify that the LOCAL copy survives — what's lost is the synced/remote
+  copy and new-device enrollment; her words: "it seems like your local
+  copy will be destroyed with the current phrasing."
+- **CF-7 — RULING: a real step FLOW with an understanding CHECKBOX.** Her
+  words: "this text is too easy to skip over... they should have to check
+  a checkbox that's like 'I understand that if I lose my recovery phrase
+  and my passphrase, that I will not be able to recover anything from sync
+  or add new devices'."
+- **CF-8 — FUTURE (recorded, not built; her explicit deferral):**
+  remote-reset for users who lose sync access but hold the local corpus —
+  "are we going to allow them to delete their remote account /
+  subscription and reupload with a whole new key? that seems like it makes
+  sense to me and it should go on the plan for later... for now we just
+  say, keep track of this!" Owner: 14c's operationalia (the machinery IS
+  R-2's own shape — resyncReinitialize + a fresh vault — made user-facing;
+  composes with account deletion and the tier).
+- **CF-9 (storage-recommendation copy):** recommend paper or a password
+  manager; "two copies of the passphrase and two copies of the recovery
+  key, stored separately."
+- **CF-10 (the round's framing principle), her words:** "i think this will
+  be some people's first experience with true end to end encryption that
+  isn't like an 'apple manages this for you' deal, and we need the flow to
+  make more sense for them."
+- **Hygiene note:** the phrase set shown in her screenshot was REGENERATED
+  immediately after (her own act) — the exposed words are dead; the live
+  set is the post-regenerate one she confirmed. Her Keychain-prompt
+  side-report (Always Allow not sticking across prompts — the known macOS
+  dev-signing behavior) recorded with GM-1's family.
+- **Pre-wipe vault state read (the architect):** one `key_vault` row on
+  *[removed for publication]*
+  the CAS token moving as designed), `has_recovery_wrap` TRUE, KDF 65536
+  KiB / t=3. Her Mac is ENROLLED; the setup half of the gate is DONE.
+
 ### Gate-morning findings (2026-08-04 — the architect's, at first Mac-suite
 ### execution; recorded before the fix session)
 
