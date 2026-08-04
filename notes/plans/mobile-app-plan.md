@@ -5835,8 +5835,9 @@ superseded. Precisions, hers, same message:
 
 - **Not replicated at all:** *"compare, snippets (I can't think of how
   to easily do this on mobile without it being a mess), and the sticky
-  note style of editing."* (One clarification pending: which surface
-  "snippets" names — asked in-sitting, answer to be recorded here.)
+  note style of editing."* (Clarified in the third report below:
+  "Snippets" is the Mac UI's name for the sidebar scraps area — the
+  docs' Blocks/scraps surface.)
 - **Ceremonies:** open to NO merge ceremony on mobile — the
   workaround-first doctrine, her words: *"there is probably a
   workaround there the same way I chose a workaround for divide and
@@ -5872,6 +5873,67 @@ rewritten, so restoring the take revives the pick for free; the raw
 show what the lens SAYS even when a pick dangles. Whether the Mac's
 Lenses tab visibly marks a dangling pick is unverified — a candidate
 check for the round.
+
+**FEEL ROUND — third report (same sitting). Parity precisions, each
+verbatim-anchored:**
+
+1. **"Snippets" clarified — the UI/docs naming gap grounded in code:**
+   the Mac sidebar's scraps area (the docs' Blocks surface —
+   `WorkspaceNavigation`'s `.blocks` case, `ScrapsPanel`, the
+   dashed-box scrap minting) is titled **"Snippets"** in the UI; the
+   sidebar's **"Pool"** is bookless notes (R29), *"this is why the
+   naming was changed."* Her mobile ruling for scraps: *"you should be
+   able to view your pool of scraps if you want on mobile and maybe
+   add to it"* — the drag-scraps-into-a-note door is NOT owed
+   (*"it's hard to imagine how you would add items from there to a
+   post / note on mobile"*). The Pool (bookless notes) is already on
+   mobile and stays.
+2. **THE SEE-YOUR-DATA PRINCIPLE (binding for the round's design):**
+   *"in general, my thoughts are that if it exists on the mac app and
+   is your information you should be able to see that it exists, but
+   we don't have to provide an editor for it or a dedicated viewer."*
+3. **References on mobile:** the note's reference list visible via a
+   "More info"-style surface, maybe add + open one; **no side-by-side
+   view ever** on the phone.
+4. **Workspace/windowing — not owed, with her distinction recorded:**
+   *"I want the core capabilities to be the same, but a lot of the
+   different workspace / windowing thing is just like workflow and
+   editor options, not a fundamentally different capability (like
+   compare, which doesn't make sense on a small phone)."*
+5. **PLATFORM RULING — iPhone only, portrait-locked, NO iPad:**
+   *"I'm just choosing to not worry about ipads - computer or phone is
+   what I'm using… apple also isn't very friendly towards iphone /
+   ipad differences, and I want to lock the app in one orientation, so
+   we CANNOT declare ipad capability or it doesn't let your app be
+   portrait only."* **Audit finding riding it (fix-batch item):** the
+   mobile targets currently declare `TARGETED_DEVICE_FAMILY = "1,2"`
+   (iPad included) and landscape iPhone orientations — flip to
+   iPhone-only (`1`), portrait-only, at the round's first batch.
+6. **Outline / expand-all-fans — not owed;** and the Mac fact
+   restated: Outline and Compare are the same pane since 13b (the
+   retired-Outline record; no two-pane outline exists to replicate).
+   The block-TOC-style list remains the phone-friendly navigation
+   candidate.
+7. **Lens dangling-pick UX — RULED, recorded on the 13j row:** the Mac
+   must *"say loudly if that take was archived and this is a fallback
+   WITH a button for quick restore."* And wider, her instruction: 13j's
+   design sitting must cover **restoration of archived/deleted things
+   generally — where the doors live** — with the lens-fallback door
+   *"for sure one of the doors that should exist."*
+
+**THE FUTURE LIST — eventual phone nice-to-haves (author, 2026-08-03;
+explicitly NOT initial mobile/Mac-parity concerns; kept here so they
+are findable when wanted):**
+
+- **A quick-capture widget** (lock-screen/home-screen) — W26's
+  phone-shaped cousin; *"go ahead and add a quick widget to the
+  'future list' of phone improvements, not in the current phases plan
+  but it would be nice eventually."*
+- **Whole-data export via download link** rather than on-phone bulk
+  export — *"it might be easier to eventually provide users with a
+  link where they can download their whole data than actually add it
+  to the phone."* Bulk IMPORT on iPhone: never (*"definitely no bulk
+  import on an iphone"*).
 
 ---
 
