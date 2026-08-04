@@ -861,6 +861,29 @@ does not gate the spike (project refs are random; display names rename freely).
   stargazing.tech agent is STARTED on the pages brief** — the Site URL flip
   (localhost → stargazing.tech + `/oauth/consent`) queues behind its deploy.
 
+- **Round 0p (same sitting) — THE MILESTONE: her suite account stands on its
+  own.** Out of built-in email quota (her report: "they really mean two per
+  hour on the free tier, LOL"), she authorized the architect to set a
+  BOOTSTRAP password in-chat ("can I just tell you what to make my password
+  and then I'll change my password later?"). Executed via the STORED-PAT
+  arrangement (the 9c precedent, `.env.supabase.local`; the service key
+  fetched into a shell variable and never printed): admin
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  `custom:fragments` is now REDUNDANT for her sign-in (retirement still waits
+  for the app's direct sign-in code, as ordered). The password is
+  transcript-known BY HER CHOICE — treated as bootstrap; she changes it at
+  the deployed `/oauth/reset` page (or another admin call by her own hand);
+  14b's encryption passphrase is a separate, stronger secret regardless.
+  **The email-provider item ADDED at her word** — to the 14c row, not her
+  floated 14d (correction explained: 14d is the severable export phase; 14c
+  is where signups open and operationalia lives; her overrule welcome) —
+  with her by-end-of-14 TestFlight-readiness goal recorded verbatim on the
+  row. Next: the `vault_probe` scratch table (her SQL-editor paste, announced)
+  → the spike run (`start.html` → consent sign-in with the new password →
+  approve → callback probes P-ii + the signup-refusal).
+
 ## Ledger
 
 | # | Item | Status |
