@@ -452,7 +452,17 @@ ruling; "stargazing" stays the brand and the pages' front — plus an eventual
 custom domain — never a separate project). Consequence: **the issuer URL is known
 *[removed for publication]*
 custom domain before any non-author signup. The Fragments-side asks, STAGED
-by touchpoint (what to do and when — her request that each stage be unambiguous):
+by touchpoint (what belongs to what — her request that each stage be unambiguous):
+
+**EXECUTION MODEL (her ruling, 2026-08-04): ALL THREE touchpoints execute as ONE
+batched handoff at the END of 14c** — one conversation with the Fragments agent
+covering everything below, in order (#1's provider/identity work, then #2's
+E2EE, then #3's entitlement). Fragments may be broken in the interim — her
+words: *"it's okay if fragments is broken while the 14 phases happen - that's
+the beauty of taking care of this while i'm the only user"* — and the bridge
+PAUSES from 14b's encryption until this batch completes (the R5 die-and-return
+latitude, spent as designed). Neither she nor the bridge depends on Fragments
+meanwhile; her phone journaling rides Variorum Mobile.
 
 **TOUCHPOINT #1 — at 14a, NOW** (ready to carry once the OAuth 2.1 Server is
 enabled and Fragments is registered as a client; client id + page URLs delivered
@@ -468,6 +478,20 @@ with them):
    on — and suite signups stay OFF until Variorum's 14c isolation is built
    (nobody-before-the-family, her sequencing ruling).
 4. `journal_entries` shape/keys stay frozen (standing ask #3, unchanged).
+5. **Switch OFF Fragments' own OAuth 2.1 Server** (its 9c role as Variorum's
+   *[removed for publication]*
+   this point (Variorum's 14a code batch will long since have shipped the
+   direct sign-in; until that batch, the old issuer must STAY ON — it is the
+   Variorum app's only sign-in road).
+6. **The signups-toggle nuance:** retire the native email SIGN-UP SURFACE (and
+   optionally the email provider), but the Fragments project's global "Allow
+   new users to sign up" toggle must be ON when suite users arrive — a FIRST
+   delegated sign-in rides the create-account path (the same mechanism the
+   Variorum side's 04 header documents).
+7. **Config hygiene:** remove any stargazing.tech URLs added to the Fragments
+   project's own auth configuration — none are needed there (the suite pages
+   talk to the SUITE project's API; Fragments' project only ever needs the
+   provider entry from item 1).
 
 **Coordinates DELIVERED (2026-08-04Z — the registration ran through the admin
 door; nothing further is needed from the Variorum side for this touchpoint):**
@@ -492,13 +516,19 @@ door; nothing further is needed from the Variorum side for this touchpoint):**
   delegated sign-in rides the create-account path there, exactly as on the
   Variorum side.
 
-**TOUCHPOINT #2 — at 14b (suite E2EE):** the journal class goes ciphertext under
-the shared account key — Fragments' client gains encrypt/decrypt for that class
-(setup UX includes the account's encryption passphrase; the vault lives on the
-suite account) — and the two standing audit flags land: the TRIM behavior and the
-EMPTY-BODY-AS-DELETION detection move client-side or become metadata flags
-(server-side versions cannot operate on ciphertext). `entry_date` stays plaintext
-metadata, disclosed.
+**TOUCHPOINT #2 — designed at 14b, executed in the one batch:** the journal
+class goes ciphertext under the shared account key — Fragments' client gains
+encrypt/decrypt for that class (setup UX includes the account's encryption
+passphrase; the vault lives on the suite account) — and the two standing audit
+flags land: the TRIM behavior and the EMPTY-BODY-AS-DELETION detection move
+client-side or become metadata flags (server-side versions cannot operate on
+ciphertext). `entry_date` stays plaintext metadata, disclosed. **Existing-rows
+migration:** her historical `journal_entries` bodies re-arrive ENCRYPTED via the
+bridge re-pushing every day from Variorum truth (Variorum is the journal's
+home/truth — Fragments-side needs only to read ciphertext, never to migrate
+rows itself). **Verification that closes the batch's bridge half:** a full
+bridge round-trip completes over ciphertext on both ends — that round-trip is
+also the bridge's RESUMPTION from its 14b pause.
 
 **TOUCHPOINT #3 — at 14c (multi-user + the tier):** check the one-payment suite
 entitlement from the Fragments side (entitlement rows live on the suite account;
