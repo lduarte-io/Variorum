@@ -5818,6 +5818,61 @@ directions, verbatim-faithful:
    round's plan for her ratification; it opens at her word, after her
    sitting wraps.
 
+**FEEL ROUND — second report (same sitting). The takes-scroll defect's
+surface pinned by her:** *"it was the peeked takes on the write surface
+(from clicking the takes button)"* — the S2 peek chrome on the Write
+editor, not the LK4 browser sheet. Recorded on finding 3 above.
+
+**THE PARITY RULING (same sitting) — the project's scope re-aimed;
+recorded as CoreDescription pillar 8's second ratified supersession:**
+*"perhaps I didn't make it clear enough to the original section, but
+the variorum mobile app should be a complete, comprehensive app and
+solution. it should feel basically just as capable as the mac app"* ·
+*"this will be my daily driver complimentary app (like apple notes on
+the phone v. computer) so it can't be a very lobotomized version
+without me missing functionality."* The "smaller than the Mac" rule is
+superseded. Precisions, hers, same message:
+
+- **Not replicated at all:** *"compare, snippets (I can't think of how
+  to easily do this on mobile without it being a mess), and the sticky
+  note style of editing."* (One clarification pending: which surface
+  "snippets" names — asked in-sitting, answer to be recorded here.)
+- **Ceremonies:** open to NO merge ceremony on mobile — the
+  workaround-first doctrine, her words: *"there is probably a
+  workaround there the same way I chose a workaround for divide and
+  then realized that it should be the normal default setting for mac -
+  if it's too complicated for mobile, there should probably be an
+  easier way of doing it, even if it's a bit of a workaround."* The
+  divide ceremony is NOT offered on mobile; on the Mac it *"should
+  stay available (though not default!)"* — with a deliberate door AND
+  keybind (recorded on the 13j row at her explicit ask).
+- **Lenses:** compromises in SHAPE acceptable, capability kept — her
+  floated sketch: *"maybe you can choose between lenses on the top bar
+  and switch to a different active lens but can save the one you're
+  in, etc."* The round's design work.
+
+**Merge timing (same sitting):** `mobile` → `main` lands soon, at a
+pause in Phase 14 (the Mac's current work); no 13-phase runs until 14
+is done, so the divide shape and these records reach `main` before any
+13 phase builds on them — her requirement satisfied by ordering.
+
+**Her lens question — ANSWERED from the core (recorded so the answer
+survives the session):** *"what happens to a saved lens when a
+particular take was deleted but it was chosen in that lens?"* Handled,
+in shared core (both platforms): `deleteVariant` refuses only while a
+live SLOT (`container_block.chosen_variant_id`) shows the take — a
+lens pick deliberately does NOT block deletion. At read time
+`LensQueries.effectiveLensSelection` joins picks against live+active
+variants: a dangling pick is DROPPED and that block falls through to
+the post's ordinary chosen/default resolution (the AppSpec §7
+dangle-reads-as-absent fallback class — same family as dangling
+`chosen_variant_id`/`section_id`). The `lens_choice` row is never
+rewritten, so restoring the take revives the pick for free; the raw
+`lensChoices` query exists precisely so an editing surface can still
+show what the lens SAYS even when a pick dangles. Whether the Mac's
+Lenses tab visibly marks a dangling pick is unverified — a candidate
+check for the round.
+
 ---
 
 ## Orientation
