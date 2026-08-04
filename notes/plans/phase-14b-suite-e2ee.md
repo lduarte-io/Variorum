@@ -1522,6 +1522,106 @@ window remain the wipe's precondition).**
   mobile project's scope; she is working with that session directly).
   PL-6's phone half rides that + CF-11's door.
 
+### The validation tail — PASSED (2026-08-04, her reports; the gate's
+### remaining her-facing steps)
+
+- **GATE STEP 5 — THE PHONE: PASSED.** Her words: "phone test is done and
+  I successfully logged in and decrypted... and all of my work is
+  available on my phone! it all showed up :)" (the mobile session added
+  the login door on its side first). **L12 SATISFIED — the DEVICE KDF
+  number: 0.16 s on the phone** (the app's own surfaced measurement; the
+  Mac app shows the same 0.16 s class — the earlier 0.57–0.62 s numbers
+  were DEBUG builds of the harness/runner, the apps are Release-optimized;
+  both numbers recorded with that explanation). The enrolled state reads
+  correctly on the phone ("a recovery phrase is on file for this
+  account").
+- **GATE STEP 6 — THE PHRASE DRILL (light road): PASSED.** Her words: "i
+  also changed my passphrase on my mac using the recovery phrase (it
+  really is very unclear that it's a button)" — the words→unwrap→re-wrap
+  road proven end-to-end with her paper copy; CF-3's legibility finding
+  re-confirmed in the same breath. **The cross-device invariant CONFIRMED
+  LIVE: her phone stayed enrolled and reading through the passphrase
+  change** (class keys in device custody are untouched by a master
+  re-wrap — exactly the R-8 hierarchy's promise). The proper phone drill
+  (forget → re-enroll via phrase) rides the round's acceptance through
+  CF-11's door as recorded.
+- **The passphrase FILE deleted** (announced; its purpose spent at the
+  repush, and her passphrase change made it stale — the live passphrase
+  now exists nowhere but her head, exactly the end state the design
+  wants).
+- **CF-12 RESOLVED BY HER RULING: QR DEFERRED ("we'll defer QR device
+  linking"), the BIOMETRIC require-setting IS IN the copy round.** Her
+  design ask on it, RULED IN: **biometric OR the encryption passphrase
+  ONLY — never the device passcode** ("can we make it such that it only
+  accepts biometric or the passphrase? not your phone passcode? I feel
+  like this is more of a 'no one can read my diary' step"). Technically
+  clean: the key item gates on `.biometryCurrentSet` alone (no
+  `.devicePasscode` fallback); biometric failure/unavailability falls
+  back to TYPING THE PASSPHRASE (re-derive → unwrap from the vault) — and
+  biometry re-enrollment invalidating the item is a FEATURE under this
+  threat model (a newly added fingerprint grants nothing; the passphrase
+  road recovers). Honest boundary stated to her and accepted: the local
+  store stays plaintext by design (the E2EE boundary is the server);
+  OS-level protections (iOS file protection, FileVault) carry the
+  at-rest story, and the raw-file caveat is real but obscure.
+- **CF-13 (copy):** make it unmistakable that the WHOLE phrase is the
+  secret — her words: "i could see someone thinking that any of the words
+  would be a password."
+- **TERMINOLOGY RULING: nothing is ever called "Passkey"** ("let's not
+  call anything Passkey to not confuse users").
+- Her closing read: "so things are looking pretty damn good!"
+
+### THE COPY/FLOW ROUND — the batch brief (authored post-validation; a
+### fresh Fable implementer; ONE cold review pass over the round's diff
+### follows it, then her walk + the proper phone drill as acceptance)
+
+Scope — CF-1…CF-13 + the CF-12 biometric ruling, exactly:
+1. **THE SETUP FLOW becomes a real STEPPED flow** (CF-1/5/6/7/9/10/13):
+   step 1 choose passphrase (recommendation copy + CF-9's two-copies
+   advice: paper or a password manager, two copies of each secret, stored
+   separately); step 2 the WARNING as its own step with the MANDATORY
+   CHECKBOX — her exact words: "I understand that if I lose my recovery
+   phrase and my passphrase, that I will not be able to recover anything
+   from sync or add new devices" — and the CF-6 clarification (the
+   writing on YOUR devices survives no matter what; what's lost is the
+   synced copy and new-device enrollment); step 3 create; step 4 the
+   recovery phrase MANDATORY (CF-5 — generate → display with CF-13's
+   whole-phrase-is-the-secret copy → write down → confirm by re-entry;
+   the flow cannot complete without it; no ambient "Done" that reads as
+   an action — CF-1). First-experience framing (CF-10) governs the copy.
+2. **CF-2:** Regenerate Recovery Phrase gates behind the passphrase (the
+   surface's rules become coherent).
+3. **CF-3:** "Forgot it? Authorize with the recovery phrase" LOOKS like a
+   button, both places it appears.
+4. **CF-4:** the phrase-display/confirm states read as required steps,
+   never optional-looking (largely falls out of the flow restructure;
+   apply to the regenerate surface too).
+5. **CF-11:** "Forget Encryption Keys on This Device" — confirmed
+   destructive door; clears custody; the surface returns to the
+   enrollment state and the sync face to its locked line; pin (forget ⇒
+   zero keys in custody + the engine refuses visibly again).
+6. **The BIOMETRIC require-setting (CF-12's ruling):** a device-local
+   toggle ("Require Face ID / Touch ID to unlock sync" — per-platform
+   naming, NEVER "Passkey"); custody item gated `.biometryCurrentSet`
+   ONLY (no `.devicePasscode` fallback — her ruling: biometric or the
+   PASSPHRASE, never the phone passcode); biometric failure/unavailable
+   ⇒ the passphrase road (re-derive → unwrap); unlock once per launch,
+   sync waits until it happens (the known cost, stated in the toggle's
+   own copy); biometry-re-enrollment invalidates the item BY DESIGN (the
+   passphrase recovers — a one-line note in the toggle copy); both form
+   factors through the shared seam; pins for the gated/ungated arms and
+   the fallback (scripted LAContext seam — no real biometrics in tests).
+7. **Terminology pin:** a test asserting no shipped UI string contains
+   "passkey" (case-insensitive) — the ruling made durable.
+8. The GATE RATIFY block's disclosure list gets its final user-facing
+   copy staged for her walk (still awaiting her one look).
+Boundaries: zero `Sources/VariorumCore/Sync/` lines; core additive-only
+if genuinely needed (record why); no schema, no server, no production
+contact; the bridge untouched; nothing beyond the CF items. Acceptance:
+core + full Mac suite (tripwire-only) + mobile + spine, own runs; then
+HER walk + the phone drill (forget → re-enroll via phrase) as the
+round's human acceptance.
+
 ### THE WIPE AND REPUSH — EXECUTED (2026-08-04, her explicit go: "go ahead!
 ### this is the moment where supabase stops seeing all my innermost
 ### thoughts haha")
